@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.statistikk.producer.KafkaProducer
 import no.nav.familie.kontrakter.felles.tilbakekreving.Faktainfo
+import no.nav.familie.kontrakter.felles.tilbakekreving.HentFagsystemsbehandling
 import no.nav.familie.kontrakter.felles.tilbakekreving.HentFagsystemsbehandlingRequest
 import no.nav.familie.kontrakter.felles.tilbakekreving.HentFagsystemsbehandlingRespons
 import org.slf4j.LoggerFactory
@@ -31,8 +32,10 @@ class FagsystemsbehandlingService(private val behandlingService: BehandlingServi
         return lagRespons(request, behandling)
     }
 
-    fun sendFagsystemsbehandling(respons: HentFagsystemsbehandlingRespons, key: String) {
-        kafkaProducer.sendFagsystemsbehandlingResponsForTopicTilbakekreving(respons, key)
+    fun sendFagsystemsbehandling(respons: HentFagsystemsbehandlingRespons,
+                                 key: String,
+                                 behandlingId: String) {
+        kafkaProducer.sendFagsystemsbehandlingResponsForTopicTilbakekreving(respons, key, behandlingId)
     }
 
     private fun lagRespons(request: HentFagsystemsbehandlingRequest,
@@ -47,15 +50,17 @@ class FagsystemsbehandlingService(private val behandlingService: BehandlingServi
                                   revurderingsresultat = behandling.resultat.displayName,
                                   tilbakekrevingsvalg = tilbakekrevingService.hentTilbakekrevingsvalg(behandlingId))
 
-        return HentFagsystemsbehandlingRespons(eksternFagsakId = request.eksternFagsakId,
-                                               eksternId = request.eksternId,
-                                               ytelsestype = request.ytelsestype,
-                                               personIdent = behandling.fagsak.hentAktivIdent().ident,
-                                               språkkode = persongrunnlag.søker.målform.tilSpråkkode(),
-                                               enhetId = arbeidsfordeling.behandlendeEnhetId,
-                                               enhetsnavn = arbeidsfordeling.behandlendeEnhetNavn,
-                                               revurderingsvedtaksdato = aktivVedtak.vedtaksdato!!.toLocalDate(),
-                                               faktainfo = faktainfo)
+        val hentFagsystemsbehandling = HentFagsystemsbehandling(eksternFagsakId = request.eksternFagsakId,
+                                                                eksternId = request.eksternId,
+                                                                ytelsestype = request.ytelsestype,
+                                                                personIdent = behandling.fagsak.hentAktivIdent().ident,
+                                                                språkkode = persongrunnlag.søker.målform.tilSpråkkode(),
+                                                                enhetId = arbeidsfordeling.behandlendeEnhetId,
+                                                                enhetsnavn = arbeidsfordeling.behandlendeEnhetNavn,
+                                                                revurderingsvedtaksdato = aktivVedtak.vedtaksdato!!.toLocalDate(),
+                                                                faktainfo = faktainfo)
+
+        return HentFagsystemsbehandlingRespons(hentFagsystemsbehandling = hentFagsystemsbehandling)
     }
 
 }

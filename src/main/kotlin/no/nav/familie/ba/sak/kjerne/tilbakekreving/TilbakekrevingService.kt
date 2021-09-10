@@ -61,8 +61,8 @@ class TilbakekrevingService(
         return tilbakekrevingRepository.save(tilbakekreving)
     }
 
-    fun hentTilbakekrevingsvalg(behandlingId: Long): Tilbakekrevingsvalg {
-        return tilbakekrevingRepository.findByBehandlingId(behandlingId)?.valg ?: Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING
+    fun hentTilbakekrevingsvalg(behandlingId: Long): Tilbakekrevingsvalg? {
+        return tilbakekrevingRepository.findByBehandlingId(behandlingId)?.valg
     }
 
     fun slettTilbakekrevingPåBehandling(behandlingId: Long) =
