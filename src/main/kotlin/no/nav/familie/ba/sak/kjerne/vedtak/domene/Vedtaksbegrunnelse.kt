@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.common.StringListConverter
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
-import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
@@ -13,7 +12,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifi
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon.Companion.tilBrevTekst
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.hentMånedOgÅrForBegrunnelse
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
-import java.time.YearMonth
 import javax.persistence.Column
 import javax.persistence.Convert
 import javax.persistence.Entity
@@ -80,29 +78,13 @@ data class BegrunnelseData(
 data class BegrunnelseFraBaSak(val begrunnelse: String) : Begrunnelse
 
 fun Vedtaksbegrunnelse.tilBrevBegrunnelse(
-        personerIPersongrunnlag: List<Person>,
+        personerPåBegrunnelse: List<Person>,
         målform: Målform,
         brukBegrunnelserFraSanity: Boolean,
 ): Begrunnelse {
-    val barna = personerIPersongrunnlag.filter { it.type == PersonType.BARN }
+    val barnasFødselsdatoer = personerPåBegrunnelse.filter { it.type == PersonType.BARN }.map { it.fødselsdato }
 
-    val relevanteBarnsFødselsDatoer =
-            if (this.vedtakBegrunnelseSpesifikasjon == VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR) {
-                // Denne må behandles spesielt da begrunnelse for autobrev ved 18 år på barn innebærer at barn som ikke lenger inngår
-                // i vedtaket skal inkluderes i begrunnelsen.
-
-                if (this.vedtaksperiodeMedBegrunnelser.fom == null)
-                    error("Fom må være satt for vedtaksbegrunnelse ${VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR}")
-
-                val fødselsMånedOgÅrForAlder18 = YearMonth.from(this.vedtaksperiodeMedBegrunnelser.fom).minusYears(18)
-                personerIPersongrunnlag.filter {
-                    it.fødselsdato.toYearMonth().equals(fødselsMånedOgÅrForAlder18) ||
-                    it.fødselsdato.toYearMonth().equals(fødselsMånedOgÅrForAlder18.plusMonths(1))
-                }.map { it.fødselsdato }
-            } else {
-                barna.map { barn -> barn.fødselsdato }
-            }
-    val gjelderSøker = personerIPersongrunnlag.any { it.type == PersonType.SØKER }
+    val gjelderSøker = personerPåBegrunnelse.any { it.type == PersonType.SØKER }
     val månedOgÅrBegrunnelsenGjelderFor =
             if (this.vedtaksperiodeMedBegrunnelser.fom == null) null
             else this.vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType.hentMånedOgÅrForBegrunnelse(
@@ -112,8 +94,8 @@ fun Vedtaksbegrunnelse.tilBrevBegrunnelse(
     return if (brukBegrunnelserFraSanity)
         BegrunnelseData(
                 gjelderSoker = gjelderSøker,
-                barnasFodselsdatoer = relevanteBarnsFødselsDatoer.tilBrevTekst(),
-                antallBarn = relevanteBarnsFødselsDatoer.size,
+                barnasFodselsdatoer = barnasFødselsdatoer.tilBrevTekst(),
+                antallBarn = barnasFødselsdatoer.size,
                 maanedOgAarBegrunnelsenGjelderFor = månedOgÅrBegrunnelsenGjelderFor,
                 maalform = målform.tilSanityFormat(),
                 apiNavn = this.vedtakBegrunnelseSpesifikasjon.sanityApiNavn,
@@ -121,7 +103,7 @@ fun Vedtaksbegrunnelse.tilBrevBegrunnelse(
     else
         BegrunnelseFraBaSak(this.vedtakBegrunnelseSpesifikasjon.hentBeskrivelse(
                 gjelderSøker = gjelderSøker,
-                barnasFødselsdatoer = relevanteBarnsFødselsDatoer,
+                barnasFødselsdatoer = barnasFødselsdatoer,
                 månedOgÅrBegrunnelsenGjelderFor = månedOgÅrBegrunnelsenGjelderFor ?: "",
                 målform = målform
         ))
