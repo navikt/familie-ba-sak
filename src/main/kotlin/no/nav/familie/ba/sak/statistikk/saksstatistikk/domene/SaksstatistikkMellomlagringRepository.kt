@@ -11,9 +11,4 @@ interface SaksstatistikkMellomlagringRepository : JpaRepository<SaksstatistikkMe
     fun finnMeldingerKlarForSending(): List<SaksstatistikkMellomlagring>
 
     fun findByTypeAndTypeId(type: SaksstatistikkMellomlagringType, typeId: Long): List<SaksstatistikkMellomlagring>
-
-    fun findByOffsetVerdiAndType(offsetVerdi: Long, type: SaksstatistikkMellomlagringType): SaksstatistikkMellomlagring?
-
-    @Query(value = "SELECT s FROM SaksstatistikkMellomlagring s WHERE s.konvertertTidspunkt IS NULL AND s.type = :type ORDER BY s.offsetVerdi")
-    fun finnAlleSomIkkeErResendt(type: SaksstatistikkMellomlagringType): List<SaksstatistikkMellomlagring>
 }
