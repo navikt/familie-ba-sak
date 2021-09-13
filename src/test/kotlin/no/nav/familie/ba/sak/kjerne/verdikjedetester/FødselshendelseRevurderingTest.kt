@@ -57,7 +57,7 @@ class FødselshendelseRevurderingTest(
         behandleFødselshendelse(
                 nyBehandlingHendelse = NyBehandlingHendelse(
                         morsIdent = scenario.søker.ident!!,
-                        barnasIdenter = listOf(scenario.barna.first().ident!!)
+                        barnasIdenter = listOf(scenario.barna.minByOrNull { it.fødselsdato }!!.ident!!)
                 ),
                 behandleFødselshendelseTask = behandleFødselshendelseTask,
                 fagsakService = fagsakService,
