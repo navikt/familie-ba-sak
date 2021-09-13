@@ -42,8 +42,9 @@ fun hentVedtaksbrevmal(behandling: Behandling): Brevmal {
         throw Feil("Kan ikke opprette brev. Behandlingen er ikke vurdert.")
     }
 
-    val brevmal = if (behandling.skalBehandlesAutomatisk)
-
+    val brevmal = if (behandling.opprettetÅrsak == BehandlingÅrsak.KORREKSJON_VEDTAKSBREV) {
+        Brevmal.VEDTAK_KORREKSJON_VEDTAKSBREV
+    } else if (behandling.skalBehandlesAutomatisk)
         hentAutomatiskVedtaksbrevtype(behandling.opprettetÅrsak, behandling.fagsak.status)
     else {
         hentManuellVedtaksbrevtype(behandling.type, behandling.resultat)
