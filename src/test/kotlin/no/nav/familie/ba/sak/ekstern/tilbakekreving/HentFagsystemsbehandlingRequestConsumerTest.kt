@@ -27,6 +27,7 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
@@ -54,6 +55,7 @@ internal class HentFagsystemsbehandlingRequestConsumerTest {
     private val requestSlot = slot<HentFagsystemsbehandlingRequest>()
     private val responsSlot = slot<HentFagsystemsbehandlingRespons>()
     private val keySlot = slot<String>()
+    private val behandlingIdSlot = slot<String>()
 
 
     val behandling = lagBehandling(årsak = BehandlingÅrsak.FØDSELSHENDELSE, automatiskOpprettelse = true).also {
@@ -86,11 +88,11 @@ internal class HentFagsystemsbehandlingRequestConsumerTest {
         )
         every { vedtakService.hentAktivForBehandlingThrows(any()) } returns lagVedtak(behandling)
         every { tilbakekrevingService.hentTilbakekrevingsvalg(any()) } returns Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING
-        every { kafkaProducer.sendFagsystemsbehandlingResponsForTopicTilbakekreving(any(), any()) } returns Unit
+        every { kafkaProducer.sendFagsystemsbehandlingResponsForTopicTilbakekreving(any(), any(), any()) } returns Unit
     }
 
     @Test
-    fun `skal lytte request og opprette hentFagsystemsbehandlingRespons`() {
+    fun `listen skal lytte request og opprette hentFagsystemsbehandlingRespons`() {
         val consumerRecord = ConsumerRecord("testtopic", 1, 1, "1", lagRequest())
         hentFagsystemsbehandlingRequestConsumer.listen(consumerRecord, acknowledgment)
 
@@ -101,21 +103,29 @@ internal class HentFagsystemsbehandlingRequestConsumerTest {
         assertEquals(behandling.id.toString(), request.eksternId)
         assertEquals(Ytelsestype.BARNETRYGD, request.ytelsestype)
 
-        verify { fagsystemsbehandlingService.sendFagsystemsbehandling(capture(responsSlot), capture(keySlot)) }
+        verify {
+            fagsystemsbehandlingService.sendFagsystemsbehandling(capture(responsSlot),
+                                                                 capture(keySlot),
+                                                                 capture(behandlingIdSlot))
+        }
 
         val respons = responsSlot.captured
-        assertEquals(behandling.fagsak.id.toString(), respons.eksternFagsakId)
-        assertEquals(behandling.id.toString(), respons.eksternId)
-        assertEquals(Ytelsestype.BARNETRYGD, respons.ytelsestype)
-        assertEquals("4820", respons.enhetId)
-        assertEquals("Nav", respons.enhetsnavn)
-        assertEquals(Målform.NB.tilSpråkkode(), respons.språkkode)
-        assertEquals(LocalDate.now(), respons.revurderingsvedtaksdato)
-        assertEquals(behandling.resultat.displayName, respons.faktainfo.revurderingsresultat)
-        assertEquals(behandling.opprettetÅrsak.visningsnavn, respons.faktainfo.revurderingsårsak)
-        assertEquals(Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING, respons.faktainfo.tilbakekrevingsvalg)
-        assertTrue(respons.faktainfo.konsekvensForYtelser.isEmpty())
-        assertNull(respons.verge)
+        assertNull(respons.feilMelding)
+
+        val fagsystemsbehandling = respons.hentFagsystemsbehandling
+        assertNotNull(fagsystemsbehandling)
+        assertEquals(behandling.fagsak.id.toString(), fagsystemsbehandling!!.eksternFagsakId)
+        assertEquals(behandling.id.toString(), fagsystemsbehandling.eksternId)
+        assertEquals(Ytelsestype.BARNETRYGD, fagsystemsbehandling.ytelsestype)
+        assertEquals("4820", fagsystemsbehandling.enhetId)
+        assertEquals("Nav", fagsystemsbehandling.enhetsnavn)
+        assertEquals(Målform.NB.tilSpråkkode(), fagsystemsbehandling.språkkode)
+        assertEquals(LocalDate.now(), fagsystemsbehandling.revurderingsvedtaksdato)
+        assertEquals(behandling.resultat.displayName, fagsystemsbehandling.faktainfo.revurderingsresultat)
+        assertEquals(behandling.opprettetÅrsak.visningsnavn, fagsystemsbehandling.faktainfo.revurderingsårsak)
+        assertEquals(Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING, fagsystemsbehandling.faktainfo.tilbakekrevingsvalg)
+        assertTrue(fagsystemsbehandling.faktainfo.konsekvensForYtelser.isEmpty())
+        assertNull(fagsystemsbehandling.verge)
     }
 
     private fun lagRequest(): String {

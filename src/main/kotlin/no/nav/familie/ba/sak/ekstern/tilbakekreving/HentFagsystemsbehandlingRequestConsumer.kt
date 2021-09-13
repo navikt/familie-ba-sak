@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.ekstern.tilbakekreving
 
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.tilbakekreving.HentFagsystemsbehandlingRequest
+import no.nav.familie.kontrakter.felles.tilbakekreving.HentFagsystemsbehandlingRespons
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.slf4j.LoggerFactory
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
@@ -27,7 +28,7 @@ class HentFagsystemsbehandlingRequestConsumer(private val fagsystemsbehandlingSe
     @KafkaListener(id = "familie-ba-sak",
                    topics = ["teamfamilie.privat-tbk-hentfagsystemsbehandling-request-topic"],
                    containerFactory = "concurrentKafkaListenerContainerFactory")
-    fun listen(consumerRecord: ConsumerRecord<String, String>, ack:Acknowledgment) {
+    fun listen(consumerRecord: ConsumerRecord<String, String>, ack: Acknowledgment) {
         logger.info("HentFagsystemsbehandlingRequest er mottatt i kafka $consumerRecord")
         secureLogger.info("HentFagsystemsbehandlingRequest er mottatt i kafka $consumerRecord")
 
@@ -35,8 +36,14 @@ class HentFagsystemsbehandlingRequestConsumer(private val fagsystemsbehandlingSe
         val key: String = consumerRecord.key()
         val request: HentFagsystemsbehandlingRequest = objectMapper.readValue(data, HentFagsystemsbehandlingRequest::class.java)
 
-        val fagsystemsbehandling = fagsystemsbehandlingService.hentFagsystemsbehandling(request)
-        fagsystemsbehandlingService.sendFagsystemsbehandling(fagsystemsbehandling, key)
+        val fagsystemsbehandling = try {
+            fagsystemsbehandlingService.hentFagsystemsbehandling(request)
+        } catch (e: Exception) {
+            logger.warn("Noe gikk galt mens sender HentFagsystemsbehandlingRespons for behandling=${request.eksternId}. " +
+                        "Feiler med ${e.message}")
+            HentFagsystemsbehandlingRespons(feilMelding = e.message)
+        }
+        fagsystemsbehandlingService.sendFagsystemsbehandling(fagsystemsbehandling, key, request.eksternId)
         latch.countDown()
         ack.acknowledge()
     }

@@ -1,11 +1,12 @@
 package no.nav.familie.ba.sak.kjerne.fødselshendelse.vilkårsvurdering
 
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
+import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
+import no.nav.familie.ba.sak.common.isBetween
 import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.isSameOrBefore
-import no.nav.familie.ba.sak.common.slåSammenOverlappendePerioder
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Evaluering
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.vilkårsvurdering.utfall.VilkårIkkeOppfyltÅrsak
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.vilkårsvurdering.utfall.VilkårKanskjeOppfyltÅrsak
@@ -266,25 +267,55 @@ fun morHarJobbetINorgeSiste5År(person: Person): Boolean {
 private fun hentMaxAvstandAvDagerMellomPerioder(perioder: List<DatoIntervallEntitet>,
                                                 fom: LocalDate,
                                                 tom: LocalDate): Long {
-    val mutablePerioder = perioder.toMutableList().apply {
-        addAll(listOf(
-                DatoIntervallEntitet(
-                        fom.minusDays(1),
-                        fom.minusDays(1)),
-                DatoIntervallEntitet(
-                        tom.plusDays(1),
-                        tom.plusDays(1))))
-    }
+    val perioderMedTilkobletTom =
+            perioder.sortedBy { it.fom }
+                    .fold(mutableListOf()) { acc: MutableList<DatoIntervallEntitet>, datoIntervallEntitet: DatoIntervallEntitet ->
+                        if (acc.isNotEmpty() && acc.last().tom == null) {
+                            val sisteDatoIntervall = acc.last().copy(
+                                    tom = datoIntervallEntitet.fom?.minusDays(1)
+                            )
 
-    val sammenslåttePerioder = slåSammenOverlappendePerioder(mutablePerioder).sortedBy { it.fom }
+                            acc.removeLast()
+                            acc.add(sisteDatoIntervall)
+                        }
 
-    return sammenslåttePerioder.zipWithNext().fold(0L) { maksimumAvstand, pairs ->
-        val avstand =
-                Duration.between(pairs.first.tom!!.atStartOfDay().plusDays(1), pairs.second.fom!!.atStartOfDay()).toDays()
-        if (avstand > maksimumAvstand) {
-            avstand
-        } else {
-            maksimumAvstand
-        }
-    }
+                        acc.add(datoIntervallEntitet)
+                        acc.sortBy { it.fom }
+                        acc
+                    }
+                    .toList()
+
+    val perioderInnenAngittTidsrom =
+            perioderMedTilkobletTom.filter {
+                it.tom == null ||
+                fom.isBetween(Periode(
+                        fom = it.fom!!,
+                        tom = it.tom
+                )) ||
+                tom.isBetween(Periode(
+                        fom = it.fom,
+                        tom = it.tom
+                )) ||
+                it.fom >= fom && it.tom <= tom
+            }
+
+    if (perioderInnenAngittTidsrom.isEmpty()) return Duration.between(fom.atStartOfDay(), tom.atStartOfDay()).toDays()
+
+    val defaultAvstand = if (perioderInnenAngittTidsrom.first().fom!!.isAfter(fom))
+        Duration.between(fom.atStartOfDay(),
+                         perioderInnenAngittTidsrom.first().fom!!.atStartOfDay())
+                .toDays()
+    else if (perioderInnenAngittTidsrom.last().tom != null && perioderInnenAngittTidsrom.last().tom!!.isBefore(tom))
+        Duration.between(
+                perioderInnenAngittTidsrom.last().tom!!.atStartOfDay(),
+                tom.atStartOfDay()).toDays()
+    else 0L
+
+    return perioderInnenAngittTidsrom
+            .zipWithNext()
+            .fold(defaultAvstand) { maksimumAvstand, pairs ->
+                val avstand =
+                        Duration.between(pairs.first.tom!!.atStartOfDay().plusDays(1), pairs.second.fom!!.atStartOfDay()).toDays()
+               maxOf(avstand, maksimumAvstand)
+            }
 }
