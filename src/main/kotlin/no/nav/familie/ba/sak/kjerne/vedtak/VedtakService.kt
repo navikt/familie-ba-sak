@@ -7,6 +7,8 @@ import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.BRUK_BEGRUNNELSE_TRIGGES_AV_FRA_SANITY
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestAvslagBegrunnelser
 import no.nav.familie.ba.sak.ekstern.restDomene.RestDeleteVedtakBegrunnelser
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPostFritekstVedtakBegrunnelser
@@ -16,12 +18,12 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService
+import no.nav.familie.ba.sak.kjerne.dokument.BrevKlient
 import no.nav.familie.ba.sak.kjerne.dokument.DokumentService
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
@@ -31,13 +33,15 @@ import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakUtils.hentPersonerForAlleUtgjørendeVilkår
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.erTilknyttetVilkår
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.hentMånedOgÅrForBegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilTriggesAv
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.vedtakBegrunnelserIkkeTilknyttetVilkår
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.toVedtakFritekstBegrunnelseSpesifikasjon
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurderingType
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import org.slf4j.LoggerFactory
@@ -58,8 +62,9 @@ class VedtakService(
         private val totrinnskontrollService: TotrinnskontrollService,
         private val vedtakBegrunnelseRepository: VedtakBegrunnelseRepository,
         private val tilbakekrevingService: TilbakekrevingService,
-
-        ) {
+        private val featureToggleService: FeatureToggleService,
+        private val brevKlient: BrevKlient,
+) {
 
     fun opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(behandling: Behandling): Vedtak {
         totrinnskontrollService.opprettAutomatiskTotrinnskontroll(behandling)
@@ -110,16 +115,22 @@ class VedtakService(
         val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(vedtak.behandling.id)
                                ?: throw Feil("Finner ikke vilkårsvurdering ved fastsetting av begrunnelse")
 
+        val triggesAv =
+                if (featureToggleService.isEnabled(BRUK_BEGRUNNELSE_TRIGGES_AV_FRA_SANITY)) {
+                    vedtakBegrunnelse.tilSanityBegrunnelse(brevKlient.hentSanityBegrunnelse()).tilTriggesAv()
+                } else
+                    vedtakBegrunnelse.triggesAv
+
         val personerMedUtgjørendeVilkårForUtbetalingsperiode =
                 when {
-                    vedtakBegrunnelse.triggesAv.barnMedSeksårsdag ->
+                    triggesAv.barnMedSeksårsdag ->
                         personopplysningGrunnlagRepository.findByBehandlingAndAktiv(vilkårsvurdering.behandling.id)
                                 ?.personer
                                 ?.filter {
                                     it.hentSeksårsdag().toYearMonth() == restPostVedtakBegrunnelse.fom.toYearMonth()
                                 } ?: listOf()
 
-                    vedtakBegrunnelse.triggesAv.personerManglerOpplysninger ->
+                    triggesAv.personerManglerOpplysninger ->
                         if (harPersonerManglerOpplysninger(vilkårsvurdering)) emptyList()
                         else error("Legg til opplysningsplikt ikke oppfylt begrunnelse men det er ikke person med det resultat")
 
@@ -131,10 +142,10 @@ class VedtakService(
                                         tom = restPostVedtakBegrunnelse.tom ?: TIDENES_ENDE
                                 ),
                                 oppdatertBegrunnelseType = vedtakBegrunnelseType,
-                                utgjørendeVilkår = vedtakBegrunnelse.triggesAv.vilkår,
+                                utgjørendeVilkår = triggesAv.vilkår,
                                 aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList(),
-                                deltBosted = vedtakBegrunnelse.triggesAv.deltbosted,
-                                vurderingAnnetGrunnlag = vedtakBegrunnelse.triggesAv.vurderingAnnetGrunnlag,
+                                deltBosted = triggesAv.deltbosted,
+                                vurderingAnnetGrunnlag = triggesAv.vurderingAnnetGrunnlag,
                         )
                 }
 
@@ -143,7 +154,12 @@ class VedtakService(
                     person.type == PersonType.BARN
                 }
 
-        return if (vedtakBegrunnelserIkkeTilknyttetVilkår.contains(vedtakBegrunnelse)) {
+        val vedtakBegrunnelseErTilknyttetVilkår: Boolean =
+                if (featureToggleService.isEnabled(BRUK_BEGRUNNELSE_TRIGGES_AV_FRA_SANITY))
+                    vedtakBegrunnelse.erTilknyttetVilkår(brevKlient.hentSanityBegrunnelse())
+                else !vedtakBegrunnelserIkkeTilknyttetVilkår.contains(vedtakBegrunnelse)
+
+        return if (!vedtakBegrunnelseErTilknyttetVilkår) {
             if (vedtakBegrunnelse == VedtakBegrunnelseSpesifikasjon.INNVILGET_SATSENDRING
                 && SatsService.finnSatsendring(restPostVedtakBegrunnelse.fom).isEmpty()) {
                 throw FunksjonellFeil(melding = "Begrunnelsen stemmer ikke med satsendring.",
@@ -247,8 +263,17 @@ class VedtakService(
     fun oppdaterAvslagBegrunnelserForVilkår(vilkårResultat: VilkårResultat,
                                             begrunnelser: List<VedtakBegrunnelseSpesifikasjon>,
                                             behandlingId: Long): List<VedtakBegrunnelseSpesifikasjon> {
+        if (begrunnelser.any {
 
-        if (begrunnelser.any { it.triggesAv.vilkår?.contains(vilkårResultat.vilkårType) != true }) error("Avslagbegrunnelser som oppdateres må tilhøre samme vilkår")
+                    val triggesAv =
+                            if (featureToggleService.isEnabled(BRUK_BEGRUNNELSE_TRIGGES_AV_FRA_SANITY)) {
+                                it.tilSanityBegrunnelse(brevKlient.hentSanityBegrunnelse())
+                                        .tilTriggesAv()
+                            } else
+                                it.triggesAv
+
+                    triggesAv.vilkår?.contains(vilkårResultat.vilkårType) != true
+                }) error("Avslagbegrunnelser som oppdateres må tilhøre samme vilkår")
 
         val vedtak = hentAktivForBehandling(behandlingId)
                      ?: throw Feil(message = "Finner ikke aktivt vedtak på behandling ved oppdatering av avslagbegrunnelser")

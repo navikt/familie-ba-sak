@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.dokument
 
-import no.nav.familie.ba.sak.kjerne.dokument.domene.NavnTilNedtrekksmeny
+import no.nav.familie.ba.sak.kjerne.dokument.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Brev
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
@@ -27,14 +27,14 @@ class BrevKlient(
     }
 
     @Cacheable("begrunnelsestekster-for-nedtreksmeny")
-    fun hentNavnTilNedtrekksmeny(): List<NavnTilNedtrekksmeny> {
+    fun hentSanityBegrunnelse(): List<SanityBegrunnelse> {
         val url = URI.create("$familieBrevUri/ba-sak/begrunnelser")
         logger.info("Henter begrunnelser fra sanity")
         val response = restTemplate.exchange(
                 url,
                 HttpMethod.GET,
                 null,
-                object : ParameterizedTypeReference<List<NavnTilNedtrekksmeny>>() {},
+                object : ParameterizedTypeReference<List<SanityBegrunnelse>>() {},
         )
         return response.body ?: error("Klarte ikke hente begrunnelsene fra familie-brev.")
     }
