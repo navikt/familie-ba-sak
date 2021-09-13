@@ -102,5 +102,6 @@ class TilbakekrevingUtilTest {
                                                                                  forfallsdato = LocalDate.now(),
                                                                                  nyttBeløp = BigDecimal.ZERO,
                                                                                  tidligereUtbetalt = BigDecimal.ZERO,
-                                                                                 resultat = BigDecimal.ZERO)
+                                                                                 resultat = BigDecimal.ZERO,
+                                                                                 etterbetaling = BigDecimal.ZERO)
 }

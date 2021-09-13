@@ -23,4 +23,5 @@ data class SimuleringsPeriode(
         val tidligereUtbetalt: BigDecimal,
         val resultat: BigDecimal,
         val feilutbetaling: BigDecimal,
+        val etterbetaling: BigDecimal
 )
