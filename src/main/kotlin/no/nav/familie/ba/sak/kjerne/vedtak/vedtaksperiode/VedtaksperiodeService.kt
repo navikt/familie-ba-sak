@@ -26,7 +26,6 @@ import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.dokument.hentVedtaksbrevmal
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
@@ -375,11 +374,24 @@ class VedtaksperiodeService(
         val fortsattInnvilgetPeriode: VedtaksperiodeMedBegrunnelser =
                 vedtaksperioder.singleOrNull() ?: throw Feil("Finner ingen eller flere vedtaksperioder ved fortsatt innvilget")
 
+        val personidenter = if (vedtakBegrunnelseSpesifikasjon == VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR) {
+            val fødselsMånedOgÅrForAlder18 = YearMonth.from(LocalDate.now()).minusYears(18)
+            val persongrunnlag = persongrunnlagRepository.findByBehandlingAndAktiv(vedtak.behandling.id)
+                                 ?: error("Fant ikke persongrunnlag for behandling ${vedtak.behandling.id}")
+
+            persongrunnlag.barna.filter { barn ->
+                barn.fødselsdato.toYearMonth().equals(fødselsMånedOgÅrForAlder18) ||
+                barn.fødselsdato.toYearMonth().equals(fødselsMånedOgÅrForAlder18.plusMonths(1))
+            }.map { it.personIdent.ident }
+        } else {
+            hentPersonIdenterFraUtbetalingsperiode(hentUtbetalingsperioder(vedtak.behandling))
+        }
+
         fortsattInnvilgetPeriode.settBegrunnelser(listOf(
                 Vedtaksbegrunnelse(
                         vedtaksperiodeMedBegrunnelser = fortsattInnvilgetPeriode,
                         vedtakBegrunnelseSpesifikasjon = vedtakBegrunnelseSpesifikasjon,
-                        personIdenter = hentPersonIdenterFraUtbetalingsperiode(hentUtbetalingsperioder(vedtak.behandling))
+                        personIdenter = personidenter
                 )
         ))
 
