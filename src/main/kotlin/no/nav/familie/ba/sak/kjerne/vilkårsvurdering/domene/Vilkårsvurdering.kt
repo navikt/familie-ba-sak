@@ -46,7 +46,7 @@ data class Vilkårsvurdering(
         )
         var personResultater: Set<PersonResultat> = setOf(),
 
-        @Column(name = "ytelsePersoner", columnDefinition = "text")
+        @Column(name = "ytelse_personer", columnDefinition = "text")
         var ytelsePersoner: String? = null,
 
 
