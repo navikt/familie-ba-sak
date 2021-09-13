@@ -241,9 +241,6 @@ class VedtakUtilsTest {
         val annenFødselsDatoForAlder6 = fødselsDatoForAlder6.plusDays(10)
         val fødselsDatoForAlder18 = LocalDate.now().minusYears(18)
         val fødselsdatoer = listOf(
-                LocalDate.of(1997, 12, 30),
-                LocalDate.of(1998, 12, 30),
-                LocalDate.of(1999, 12, 30),
                 fødselsDatoForAlder6,
                 annenFødselsDatoForAlder6,
                 fødselsDatoForAlder18,
@@ -255,7 +252,7 @@ class VedtakUtilsTest {
         assertTrue(beskrivelseBarn6år.equals("Barnetrygden reduseres fordi barn født $datoerIBrev er 6 år."))
 
         val beskrivelseBarn18år = VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR.hentBeskrivelse(
-                barnasFødselsdatoer = fødselsdatoer, målform = Målform.NN
+                barnasFødselsdatoer = listOf(fødselsDatoForAlder18), målform = Målform.NN
         )
         val datoIBrev = listOf(fødselsDatoForAlder18).tilBrevTekst()
         assertTrue(beskrivelseBarn18år.equals("Barnetrygda er redusert fordi barn fødd $datoIBrev er 18 år."))
