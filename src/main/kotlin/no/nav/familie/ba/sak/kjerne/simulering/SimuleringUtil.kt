@@ -104,11 +104,11 @@ fun hentResultatIPeriode(periode: List<ØkonomiSimuleringPostering>) =
             periode.sumOf { it.beløp }
 
 fun hentEtterbetalingIPeriode(periode: List<ØkonomiSimuleringPostering>): BigDecimal {
-    val perodeHarPositivFeilutbetaling =
+    val periodeHarPositivFeilutbetaling =
             periode.any { it.posteringType == PosteringType.FEILUTBETALING && it.beløp > BigDecimal.ZERO }
     val sumYtelser = periode.filter { it.posteringType == PosteringType.YTELSE }.sumOf { it.beløp }
     return when {
-        perodeHarPositivFeilutbetaling ->
+        periodeHarPositivFeilutbetaling ->
             BigDecimal.ZERO
         else ->
             if (sumYtelser < BigDecimal.ZERO) BigDecimal.ZERO
