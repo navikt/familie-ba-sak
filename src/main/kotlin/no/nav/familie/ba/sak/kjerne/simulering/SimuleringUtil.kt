@@ -37,7 +37,8 @@ fun vedtakSimuleringMottakereTilRestSimulering(økonomiSimuleringMottakere: List
             perioder = vedtakSimuleringMottakereTilSimuleringPerioder(økonomiSimuleringMottakere),
             fomDatoNestePeriode = nestePeriode?.fom,
             etterbetaling = hentTotalEtterbetaling(perioder, nestePeriode?.fom),
-            feilutbetaling = hentTotalFeilutbetaling(perioder, nestePeriode?.fom),
+            feilutbetaling = hentTotalFeilutbetaling(perioder, nestePeriode?.fom)
+                    .let { if (it < BigDecimal.ZERO) BigDecimal.ZERO else it },
             fom = perioder.minOfOrNull { it.fom },
             tomDatoNestePeriode = nestePeriode?.tom,
             forfallsdatoNestePeriode = nestePeriode?.forfallsdato,
@@ -68,6 +69,7 @@ fun vedtakSimuleringMottakereTilSimuleringPerioder(
                 tidligereUtbetalt = hentTidligereUtbetaltIPeriode(posteringListe),
                 resultat = hentResultatIPeriode(posteringListe),
                 feilutbetaling = hentFeilbetalingIPeriode(posteringListe),
+                etterbetaling = hentEtterbetalingIPeriode(posteringListe)
         )
     }
 }
@@ -101,14 +103,30 @@ fun hentResultatIPeriode(periode: List<ØkonomiSimuleringPostering>) =
         } else
             periode.sumOf { it.beløp }
 
-fun hentTotalEtterbetaling(simuleringPerioder: List<SimuleringsPeriode>, fomDatoNestePeriode: LocalDate?) =
-        simuleringPerioder.filter {
-            it.resultat > BigDecimal.ZERO && (fomDatoNestePeriode == null || it.fom < fomDatoNestePeriode)
-        }.sumOf { it.resultat }
+fun hentEtterbetalingIPeriode(periode: List<ØkonomiSimuleringPostering>): BigDecimal {
+    val periodeHarPositivFeilutbetaling =
+            periode.any { it.posteringType == PosteringType.FEILUTBETALING && it.beløp > BigDecimal.ZERO }
+    val sumYtelser = periode.filter { it.posteringType == PosteringType.YTELSE }.sumOf { it.beløp }
+    return when {
+        periodeHarPositivFeilutbetaling ->
+            BigDecimal.ZERO
+        else ->
+            if (sumYtelser < BigDecimal.ZERO) BigDecimal.ZERO
+            else sumYtelser
+    }
+}
 
+fun hentTotalEtterbetaling(simuleringPerioder: List<SimuleringsPeriode>, fomDatoNestePeriode: LocalDate?): BigDecimal {
+    return simuleringPerioder.filter {
+        (fomDatoNestePeriode == null || it.fom < fomDatoNestePeriode)
+    }.sumOf { it.etterbetaling }.takeIf { it > BigDecimal.ZERO } ?: BigDecimal.ZERO
+}
 
-fun hentTotalFeilutbetaling(simuleringPerioder: List<SimuleringsPeriode>, fomDatoNestePeriode: LocalDate?) =
-        simuleringPerioder.filter { fomDatoNestePeriode == null || it.fom < fomDatoNestePeriode }.sumOf { it.feilutbetaling }
+fun hentTotalFeilutbetaling(simuleringPerioder: List<SimuleringsPeriode>, fomDatoNestePeriode: LocalDate?): BigDecimal {
+    return simuleringPerioder
+            .filter { fomDatoNestePeriode == null || it.fom < fomDatoNestePeriode }
+            .sumOf { it.feilutbetaling }
+}
 
 
 fun SimuleringMottaker.tilBehandlingSimuleringMottaker(behandling: Behandling): ØkonomiSimuleringMottaker {
