@@ -6,10 +6,10 @@ import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -34,6 +34,29 @@ internal class TilkjentYtelseUtilsEndretUtbetalingAndelTest {
 
     @Test
     fun `teste nye andeler tilkjent ytelse for to barn med endrete utbetalingsandeler`() {
+
+        /**
+         * Tidslinjer barn 1:
+         * -------------[############]-----------[#########]---------- AndelTilkjentYtelse
+         *            0118        0418         1018      0821
+         * ---[################]-------------------------------------- EndretUtbetalingYtelse
+         *  0115             0318
+         *
+         * -------------[######][##]-------------[#########]---------- Nye AndelTilkjentYtelse
+         *
+         * Periodene for nye AndelTilkjentYtelse: 0118-0318, 0418-0418, 1018-0821
+         *
+         *
+         * Tidslinjer barn 2:
+         * --------------[###################]--------[###########]------------ AndelTilkjentYtelse
+         *              0218               0818     1118        0921
+         * ---------------------[####]----[#######################]---[####]--- EndretUtbetalingYtelse
+         *                    0418 0518  0718                   0921 1121-1221
+         *
+         * --------------[#####][####][##][##]--------[###########]------------ Nye AndelTilkjentYtelse
+         *
+         * Periodene for nye AndelTilkjentYtelse: 0218-0318, 0418-0518, 0618-0618, 0718-0818, 1118-0921
+         */
 
         val andelTilkjentytelseForBarn1 = listOf(
             MånedPeriode(YearMonth.of(2018, 1), YearMonth.of(2018, 4)),
@@ -141,6 +164,71 @@ internal class TilkjentYtelseUtilsEndretUtbetalingAndelTest {
             YearMonth.of(2021, 9)
         )
     }
+
+    @Test
+    fun `En gitt MånedPeriode skal gi tilbake perioder med og uten overlapp den har mot en eller flere andre perioder`() {
+        val periode = MånedPeriode(YearMonth.of(2018, 1 ), YearMonth.of(2018, 12))
+
+        var perioder = periode.perioderMedOgUtenOverlapp(emptyList())
+        var perioderMedOverlapp = perioder.first
+        var perioderUtenOverlapp = perioder.second
+        assertEquals(0, perioderMedOverlapp.size)
+        assertEquals(1, perioderUtenOverlapp.size)
+        assertEquals(periode, perioderUtenOverlapp[0])
+
+        perioder = periode.perioderMedOgUtenOverlapp(listOf(
+                MånedPeriode(YearMonth.of(2015, 1 ), YearMonth.of(2016, 3))
+        ))
+        perioderMedOverlapp = perioder.first
+        perioderUtenOverlapp = perioder.second
+        assertEquals(0, perioderMedOverlapp.size)
+        assertEquals(1, perioderUtenOverlapp.size)
+        assertEquals(periode, perioderUtenOverlapp[0])
+
+        perioder = periode.perioderMedOgUtenOverlapp(listOf(
+                periode
+        ))
+        perioderMedOverlapp = perioder.first
+        perioderUtenOverlapp = perioder.second
+        assertEquals(1, perioderMedOverlapp.size)
+        assertEquals(periode, perioderMedOverlapp[0])
+        assertEquals(0, perioderUtenOverlapp.size)
+
+        perioder = periode.perioderMedOgUtenOverlapp(listOf(
+                MånedPeriode(YearMonth.of(2015, 1 ), YearMonth.of(2018, 3))
+        ))
+        perioderMedOverlapp = perioder.first
+        perioderUtenOverlapp = perioder.second
+        assertEquals(1, perioderMedOverlapp.size)
+        assertEquals(MånedPeriode(YearMonth.of(2018, 1 ), YearMonth.of(2018, 3)), perioderMedOverlapp[0])
+        assertEquals(1, perioderUtenOverlapp.size)
+        assertEquals(MånedPeriode(YearMonth.of(2018, 4 ), YearMonth.of(2018, 12)), perioderUtenOverlapp[0])
+
+        perioder = periode.perioderMedOgUtenOverlapp(listOf(
+                MånedPeriode(YearMonth.of(2015, 1 ), YearMonth.of(2018, 3)),
+                MånedPeriode(YearMonth.of(2018, 6 ), YearMonth.of(2018, 6))
+        ))
+        perioderMedOverlapp = perioder.first
+        perioderUtenOverlapp = perioder.second
+        assertEquals(2, perioderMedOverlapp.size)
+        assertEquals(MånedPeriode(YearMonth.of(2018, 1 ), YearMonth.of(2018, 3)), perioderMedOverlapp[0])
+        assertEquals(MånedPeriode(YearMonth.of(2018, 6 ), YearMonth.of(2018, 6)), perioderMedOverlapp[1])
+        assertEquals(2, perioderUtenOverlapp.size)
+        assertEquals(MånedPeriode(YearMonth.of(2018, 4 ), YearMonth.of(2018, 5)), perioderUtenOverlapp[0])
+        assertEquals(MånedPeriode(YearMonth.of(2018, 7 ), YearMonth.of(2018, 12)), perioderUtenOverlapp[1])
+
+        perioder = periode.perioderMedOgUtenOverlapp(listOf(
+                MånedPeriode(YearMonth.of(2018, 2 ), YearMonth.of(2018, 11))
+        ))
+        perioderMedOverlapp = perioder.first
+        perioderUtenOverlapp = perioder.second
+        assertEquals(1, perioderMedOverlapp.size)
+        assertEquals(MånedPeriode(YearMonth.of(2018, 2 ), YearMonth.of(2018, 11)), perioderMedOverlapp[0])
+        assertEquals(2, perioderUtenOverlapp.size)
+        assertEquals(MånedPeriode(YearMonth.of(2018, 1 ), YearMonth.of(2018, 1)), perioderUtenOverlapp[0])
+        assertEquals(MånedPeriode(YearMonth.of(2018, 12 ), YearMonth.of(2018, 12)), perioderUtenOverlapp[1])
+    }
+
 
     private fun verifiserAndelTilkjentYtelse(
         andelTilkjentYtelse: AndelTilkjentYtelse,

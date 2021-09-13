@@ -116,11 +116,11 @@ data class AndelTilkjentYtelse(
                this.stønadTom >= andelFraAnnenBehandling.stønadFom
     }
 
-    fun overlapperMed(periode: MånedPeriode) = this.stønadFom <= periode.fom && this.stønadTom >= periode.tom
-
     fun erLøpende(): Boolean {
         return this.stønadTom >= inneværendeMåned().nesteMåned()
     }
+
+    fun stønadsPeriode() = MånedPeriode(this.stønadFom, this.stønadTom)
 
     companion object {
 
@@ -146,7 +146,6 @@ data class AndelTilkjentYtelse(
         }
     }
 }
-
 
 fun LocalDateSegment<AndelTilkjentYtelse>.erLøpende() = this.tom > inneværendeMåned().sisteDagIInneværendeMåned()
 

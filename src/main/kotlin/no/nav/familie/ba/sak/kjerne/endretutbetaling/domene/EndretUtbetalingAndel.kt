@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.endretutbetaling.domene
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.YearMonthConverter
+import no.nav.familie.ba.sak.common.overlapperHeltEllerDelvisMed
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.math.BigDecimal
@@ -59,9 +60,10 @@ data class EndretUtbetalingAndel(
     var begrunnelse: String
 
 ) : BaseEntitet() {
-    fun overlapperMed(periode: MånedPeriode) = this.fom <= periode.fom && this.tom >= periode.tom
-}
+    fun overlapperMed(periode: MånedPeriode) = periode.overlapperHeltEllerDelvisMed(this.periode())
 
+    fun periode() = MånedPeriode(this.fom, this.tom)
+}
 
 enum class Årsak(val klassifisering: String) {
     DELT_BOSTED("Delt bosted"),
