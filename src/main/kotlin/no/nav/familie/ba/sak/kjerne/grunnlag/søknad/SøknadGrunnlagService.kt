@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.grunnlag.søknad
 
+import no.nav.familie.ba.sak.common.Feil
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -26,4 +27,10 @@ class SøknadGrunnlagService(
     fun hentAktiv(behandlingId: Long): SøknadGrunnlag? {
         return søknadGrunnlagRepository.hentAktiv(behandlingId)
     }
+
+    fun hentAktivThrows(behandlingId: Long): SøknadGrunnlag {
+        return søknadGrunnlagRepository.hentAktiv(behandlingId)
+               ?: throw Feil("Fant ikke søknadsgrunnlag på behandling ${behandlingId}")
+    }
 }
+

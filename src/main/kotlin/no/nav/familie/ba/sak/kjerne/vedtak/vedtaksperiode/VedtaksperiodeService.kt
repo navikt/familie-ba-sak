@@ -28,6 +28,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
+import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakBegrunnelseRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakUtils.hentPersonerForAlleUtgjørendeVilkår
@@ -57,6 +58,7 @@ class VedtaksperiodeService(
         private val vedtaksperiodeRepository: VedtaksperiodeRepository,
         private val vilkårsvurderingRepository: VilkårsvurderingRepository,
         private val featureToggleService: FeatureToggleService,
+        private val søknadGrunnlagService: SøknadGrunnlagService
 ) {
 
     fun lagre(vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser): VedtaksperiodeMedBegrunnelser {
@@ -509,12 +511,15 @@ class VedtaksperiodeService(
         val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId = vedtak.behandling.id)
                                ?: throw Feil("Fant ikke vilkårsvurdering for behandling ${vedtak.behandling.id} ved generering av avslagsperioder")
 
+        val uregistrerteBarn = søknadGrunnlagService.hentAktivThrows(behandlingId = vedtak.behandling.id).hentUregistrerteBarn()
+
+
         val periodegrupperteAvslagsvilkår: Map<NullablePeriode, List<VilkårResultat>> =
                 vilkårsvurdering.personResultater.flatMap { it.vilkårResultater }
                         .filter { it.erEksplisittAvslagPåSøknad == true }
                         .groupBy { NullablePeriode(it.periodeFom, it.periodeTom) }
 
-        return periodegrupperteAvslagsvilkår.map { (fellesPeriode, vilkårResultater) ->
+        val avslagsperioder = periodegrupperteAvslagsvilkår.map { (fellesPeriode, vilkårResultater) ->
 
             val begrunnelserMedIdenter: Map<VedtakBegrunnelseSpesifikasjon, List<String>> =
                     begrunnelserMedIdentgrupper(vilkårResultater)
@@ -532,6 +537,13 @@ class VedtaksperiodeService(
                         })
                     }
         }
+
+        return if (avslagsperioder.none { it.fom == null && it.tom == null } && uregistrerteBarn.isNotEmpty()) {
+            avslagsperioder + VedtaksperiodeMedBegrunnelser(vedtak = vedtak,
+                                                            fom = null,
+                                                            tom = null,
+                                                            type = Vedtaksperiodetype.AVSLAG)
+        } else avslagsperioder
     }
 
     private fun begrunnelserMedIdentgrupper(vilkårResultater: List<VilkårResultat>): Map<VedtakBegrunnelseSpesifikasjon, List<String>> {

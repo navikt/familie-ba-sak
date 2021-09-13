@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import org.slf4j.Logger
@@ -25,7 +26,7 @@ class BehandlingsresultatService(
         private val vilkårsvurderingService: VilkårsvurderingService,
 ) {
 
-    fun utledBehandlingsresultat(behandlingId: Long): BehandlingResultat {
+    fun utledBehandlingsresultat(behandlingId: Long, søknadGrunnlag: SøknadGrunnlag): BehandlingResultat {
         val behandling = behandlingService.hent(behandlingId = behandlingId)
         val forrigeBehandling = behandlingService.hentForrigeBehandlingSomErIverksatt(behandling)
 
