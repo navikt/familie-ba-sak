@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAnde
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class EndretUtbetalingAndelService(
@@ -16,6 +17,7 @@ class EndretUtbetalingAndelService(
     private val beregningService: BeregningService,
 ) {
 
+    @Transactional
     fun oppdaterEndretUtbetalingAndelOgOppdaterTilkjentYtelse(
             behandling: Behandling,
             endretUtbetalingAndelId: Long,
@@ -36,6 +38,7 @@ class EndretUtbetalingAndelService(
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
     }
 
+    @Transactional
     fun fjernEndretUtbetalingAndelOgOppdaterTilkjentYtelse(
             behandling: Behandling,
             endretUtbetalingAndelId: Long,
@@ -48,6 +51,7 @@ class EndretUtbetalingAndelService(
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
     }
 
+    @Transactional
     fun opprettEndretUtbetalingAndelOgOppdaterTilkjentYtelse(
         behandling: Behandling,
         restEndretUtbetalingAndel: RestEndretUtbetalingAndel
