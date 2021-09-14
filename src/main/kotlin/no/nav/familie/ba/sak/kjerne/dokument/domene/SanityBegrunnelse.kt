@@ -16,13 +16,13 @@ data class SanityBegrunnelse(
         val apiNavn: String?,
         val navnISystem: String?,
         val begrunnelsetype: SanityBegrunnelseType? = null,
-        val vilkaar: List<SanityVilkår>? = null,
+        val vilkaar: List<SanityVilkår>? = SanityVilkår.values().toList(),
         val rolle: List<VilkårRolle>? = null,
-        val lovligOppholdTriggere: List<VilkårTriggere>? = null,
-        val bosattIRiketTriggere: List<VilkårTriggere>? = null,
-        val giftPartnerskapTriggere: List<VilkårTriggere>? = null,
-        val borMedSokerTriggere: List<VilkårTriggere>? = null,
-        val ovrigeTriggere: List<VilkårTriggere>? = null,
+        val lovligOppholdTriggere: List<VilkårTriggere>? = VilkårTriggere.values().toList(),
+        val bosattIRiketTriggere: List<VilkårTriggere>? = VilkårTriggere.values().toList(),
+        val giftPartnerskapTriggere: List<VilkårTriggere>? = VilkårTriggere.values().toList(),
+        val borMedSokerTriggere: List<VilkårTriggere>? = VilkårTriggere.values().toList(),
+        val ovrigeTriggere: List<VilkårTriggere>? = VilkårTriggere.values().toList(),
 )
 
 enum class SanityVilkår {
