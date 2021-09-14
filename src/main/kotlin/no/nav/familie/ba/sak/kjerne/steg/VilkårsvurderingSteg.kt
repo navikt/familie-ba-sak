@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import no.nav.familie.ba.sak.common.toPeriode
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -40,9 +39,6 @@ class VilkårsvurderingSteg(
                                       data: String): StegType {
         val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandling.id)
                                        ?: throw Feil("Fant ikke personopplysninggrunnlag på behandling ${behandling.id}")
-
-        if (personopplysningGrunnlag.barna.isEmpty()) throw FunksjonellFeil(melding = "Ingen barn i personopplysningsgrunnlag ved validering av vilkårsvurdering på behandling ${behandling.id}",
-                                                                            frontendFeilmelding = "Barn må legges til for å gjennomføre vilkårsvurdering.")
 
         if (behandling.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE) {
             vilkårService.initierVilkårsvurderingForBehandling(behandling = behandling,

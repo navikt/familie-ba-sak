@@ -22,6 +22,8 @@ import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Etterbetaling
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.ForsattInnvilget
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Førstegangsvedtak
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Hjemmeltekst
+import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.KorreksjonVedtaksbrev
+import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.KorreksjonVedtaksbrevData
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.OpphørMedEndring
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Opphørt
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.SignaturVedtak
@@ -30,6 +32,7 @@ import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.VedtakFellesfelter
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Vedtaksbrev
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
@@ -47,6 +50,7 @@ class BrevService(
         private val simuleringService: SimuleringService,
         private val vedtaksperiodeService: VedtaksperiodeService,
         private val featureToggleService: FeatureToggleService,
+        private val søknadGrunnlagService: SøknadGrunnlagService
 ) {
 
     fun hentVedtaksbrevData(vedtak: Vedtak): Vedtaksbrev {
@@ -130,6 +134,21 @@ class BrevService(
                 )
             }
 
+    fun hentKorreksjonbrevData(vedtak: Vedtak): Brev =
+            hentGrunnlagOgSignaturData(vedtak).let { data ->
+                KorreksjonVedtaksbrev(
+                        data = KorreksjonVedtaksbrevData(
+                                delmalData = KorreksjonVedtaksbrevData.DelmalData(
+                                        signaturVedtak = SignaturVedtak(enhet = data.enhet,
+                                                                        saksbehandler = data.saksbehandler,
+                                                                        beslutter = data.beslutter)),
+                                flettefelter = KorreksjonVedtaksbrevData.Flettefelter(
+                                        navn = data.grunnlag.søker.navn,
+                                        fodselsnummer = data.grunnlag.søker.personIdent.ident
+                                ))
+                )
+            }
+
     private fun verifiserVedtakHarBegrunnelse(vedtak: Vedtak) {
         if (vedtak.vedtakBegrunnelser.size == 0) {
             throw FunksjonellFeil(melding = "Vedtaket har ingen begrunnelser",
@@ -176,6 +195,8 @@ class BrevService(
                     utbetalingsperioder = utbetalingsperioder,
                     målform = målform,
                     brukBegrunnelserFraSanity = featureToggleService.isEnabled(FeatureToggleConfig.BRUK_BEGRUNNELSE_FRA_SANITY_BACKEND),
+                    uregistrerteBarn = søknadGrunnlagService.hentAktiv(behandlingId = vedtak.behandling.id)
+                                               ?.hentUregistrerteBarn() ?: emptyList()
             )
         }
         return VedtakFellesfelter(

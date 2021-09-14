@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toLocalDate
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.erLøpende
@@ -82,11 +83,13 @@ object YtelsePersonUtils {
      * @param [ytelsePersoner] Personer framstilt krav for nå og/eller tidligere
      * @param [forrigeAndelerTilkjentYtelse] Eventuelle tilstand etter forrige behandling
      * @param [andelerTilkjentYtelse] Tilstand etter nåværende behandling
+     * @param [uregistrerteBarn] Barn det er søkt for som ikke er folkeregistrert
      * @return Personer populert med utfall (resultater) etter denne behandlingen
      */
     fun populerYtelsePersonerMedResultat(ytelsePersoner: List<YtelsePerson>,
                                          forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>,
-                                         andelerTilkjentYtelse: List<AndelTilkjentYtelse>): List<YtelsePerson> {
+                                         andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
+                                         uregistrerteBarn: List<BarnMedOpplysninger> = emptyList()): List<YtelsePerson> {
         return ytelsePersoner.map { ytelsePerson: YtelsePerson ->
             val andeler = andelerTilkjentYtelse.filter { andel -> andel.personIdent == ytelsePerson.personIdent }
             val forrigeAndeler =
@@ -150,6 +153,14 @@ object YtelsePersonUtils {
             ytelsePerson.copy(
                     resultater = resultater.toSet(),
                     ytelseSlutt = ytelseSlutt
+            )
+        } + uregistrerteBarn.map {
+            YtelsePerson(
+                    personIdent = "",
+                    ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                    kravOpprinnelse = listOf(KravOpprinnelse.INNEVÆRENDE),
+                    resultater = setOf(YtelsePersonResultat.AVSLÅTT),
+                    ytelseSlutt = YearMonth.now()
             )
         }
     }
