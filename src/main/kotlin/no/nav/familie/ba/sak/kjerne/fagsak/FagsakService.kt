@@ -35,12 +35,9 @@ import no.nav.familie.ba.sak.kjerne.tilbakekreving.domene.TilbakekrevingReposito
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.filterAvslag
-import no.nav.familie.ba.sak.kjerne.vedtak.filterIkkeAvslagFritekstOgUregistrertBarn
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.sikkerhet.validering.FagsaktilgangConstraint
@@ -203,18 +200,6 @@ class FagsakService(
         val totrinnskontroll =
                 totrinnskontrollRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
 
-        fun vilkårResultaterMedVedtakBegrunnelse(vilkårResultater: MutableSet<VilkårResultat>):
-                List<Pair<Long, VedtakBegrunnelseSpesifikasjon>> {
-            return vilkårResultater.flatMap { vilkårResultat ->
-                vilkårResultat.vedtakBegrunnelseSpesifikasjoner.map {
-                    Pair(
-                        vilkårResultat.id,
-                        it
-                    )
-                }
-            }
-        }
-
         val tilbakekreving = tilbakekrevingRepository.findByBehandlingId(behandling.id)
 
         return RestUtvidetBehandling(
@@ -234,9 +219,7 @@ class FagsakService(
                 arbeidsfordelingPåBehandling = arbeidsfordeling.tilRestArbeidsfordelingPåBehandling(),
                 søknadsgrunnlag = søknadsgrunnlag?.hentSøknadDto(),
                 personer = personer?.map { persongrunnlagService.mapTilRestPersonMedStatsborgerskapLand(it) } ?: emptyList(),
-                personResultater = personResultater?.map {
-                    it.tilRestPersonResultat(vilkårResultaterMedVedtakBegrunnelse(it.vilkårResultater))
-                } ?: emptyList(),
+                personResultater = personResultater?.map { it.tilRestPersonResultat() } ?: emptyList(),
                 fødselshendelsefiltreringResultater = fødselshendelsefiltreringResultatRepository.finnFødselshendelsefiltreringResultater(
                         behandlingId = behandling.id).map { it.tilRestFødselshendelsefiltreringResultat() },
                 utbetalingsperioder = vedtaksperiodeService.hentUtbetalingsperioder(behandling),
