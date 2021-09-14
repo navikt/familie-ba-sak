@@ -511,7 +511,8 @@ class VedtaksperiodeService(
         val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId = vedtak.behandling.id)
                                ?: throw Feil("Fant ikke vilkårsvurdering for behandling ${vedtak.behandling.id} ved generering av avslagsperioder")
 
-        val uregistrerteBarn = søknadGrunnlagService.hentAktivThrows(behandlingId = vedtak.behandling.id).hentUregistrerteBarn()
+        val uregistrerteBarn =
+                søknadGrunnlagService.hentAktiv(behandlingId = vedtak.behandling.id)?.hentUregistrerteBarn() ?: emptyList()
 
 
         val periodegrupperteAvslagsvilkår: Map<NullablePeriode, List<VilkårResultat>> =

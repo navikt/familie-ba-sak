@@ -41,7 +41,7 @@ class BehandlingsresultatService(
         if (barna.isEmpty() && (søknadGrunnlag?.hentUregistrerteBarn() ?: emptyList()).isEmpty()) throw FunksjonellFeil(
                 melding = "Ingen barn i personopplysningsgrunnlag ved validering av vilkårsvurdering på behandling ${behandling.id}",
                 frontendFeilmelding = "Barn må legges til for å gjennomføre vilkårsvurdering.")
-        
+
         val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandlingId)
 
         val ytelsePersoner: List<YtelsePerson> =
@@ -71,7 +71,8 @@ class BehandlingsresultatService(
         val ytelsePersonerMedResultat = YtelsePersonUtils.populerYtelsePersonerMedResultat(
                 ytelsePersoner = ytelsePersoner,
                 andelerTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelse.toList(),
-                forrigeAndelerTilkjentYtelse = forrigeTilkjentYtelse?.andelerTilkjentYtelse?.toList() ?: emptyList())
+                forrigeAndelerTilkjentYtelse = forrigeTilkjentYtelse?.andelerTilkjentYtelse?.toList() ?: emptyList(),
+                uregistrerteBarn = søknadGrunnlag?.hentUregistrerteBarn() ?: emptyList())
 
         vilkårsvurdering?.let {
             vilkårsvurderingService.oppdater(vilkårsvurdering)

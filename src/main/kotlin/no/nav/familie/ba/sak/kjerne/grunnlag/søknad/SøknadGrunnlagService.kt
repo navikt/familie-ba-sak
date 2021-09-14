@@ -27,10 +27,5 @@ class SøknadGrunnlagService(
     fun hentAktiv(behandlingId: Long): SøknadGrunnlag? {
         return søknadGrunnlagRepository.hentAktiv(behandlingId)
     }
-
-    fun hentAktivThrows(behandlingId: Long): SøknadGrunnlag {
-        return søknadGrunnlagRepository.hentAktiv(behandlingId)
-               ?: throw Feil("Fant ikke søknadsgrunnlag på behandling ${behandlingId}")
-    }
 }
 
