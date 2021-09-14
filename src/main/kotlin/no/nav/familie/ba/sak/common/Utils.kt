@@ -9,6 +9,7 @@ import java.io.FileReader
 import java.io.InputStreamReader
 import java.text.NumberFormat
 import java.util.*
+import kotlin.reflect.typeOf
 
 val nbLocale = Locale("nb", "Norway")
 
@@ -39,6 +40,11 @@ object Utils {
     fun String.storForbokstav() = this.lowercase().replaceFirstChar { it.uppercase() }
     fun String.storForbokstavIHvertOrd() = this.split(" ").joinToString(" ") { it.storForbokstav() }.trimEnd()
     fun Any?.nullableTilString() = this?.toString() ?: ""
+
+    inline fun <reified T : Enum<T>> konverterEnumsTilString(liste: List<T>) = liste.joinToString(separator = ";'")
+
+    inline fun <reified T : Enum<T>> konverterStringTilEnums(string: String?): List<T> =
+            if (string.isNullOrBlank()) emptyList() else string.split(";").map { enumValueOf<T>(it) }
 }
 
 fun Any.convertDataClassToJson(): String {

@@ -1,12 +1,15 @@
 package no.nav.familie.ba.sak.kjerne.beregning.domene
 
 import no.nav.familie.ba.sak.common.BaseEntitet
+import no.nav.familie.ba.sak.common.Utils.konverterEnumsTilString
+import no.nav.familie.ba.sak.common.Utils.konverterStringTilEnums
 import no.nav.familie.ba.sak.common.YearMonthConverter
 import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.fpsak.tidsserie.LocalDateSegment
+import java.math.BigDecimal
 import java.time.YearMonth
 import java.util.Objects
 import javax.persistence.*
@@ -46,6 +49,17 @@ data class AndelTilkjentYtelse(
         @Enumerated(EnumType.STRING)
         @Column(name = "type", nullable = false)
         val type: YtelseType,
+
+        @Column(name = "sats", nullable = false)
+        val sats: Int,
+
+        // TODO: Bør dette hete gradering? I så fall rename og migrer i endringstabell også
+        @Column(name = "prosent", nullable = false)
+        val prosent: BigDecimal,
+
+        @Column(name = "endring_typer")
+        @Convert(converter = AndelEndringTypeListConverter::class)
+        var endringTyper: List<AndelEndringType> = emptyList(),
 
         // kildeBehandlingId, periodeOffset og forrigePeriodeOffset trengs kun i forbindelse med
         // iverksetting/konsistensavstemming, og settes først ved generering av selve oppdraget mot økonomi.
@@ -88,6 +102,14 @@ data class AndelTilkjentYtelse(
         return "AndelTilkjentYtelse(id = $id, behandling = $behandlingId, " +
                "beløp = $beløp, stønadFom = $stønadFom, stønadTom = $stønadTom, periodeOffset = $periodeOffset)"
     }
+
+    /**
+     * TODO: Her ser vi for oss at man kan sammenligne vårt beløp med beløpet som beregnet ut i fra valutakurs og sats fra annet land
+     * F.eks:
+     * diff = (sats * beløp) - (beregnet barnetrygd fra annet land)
+     * maxOf(0, diff)
+     */
+    fun beløp(): BigDecimal = this.sats.toBigDecimal() * this.prosent / BigDecimal(100)
 
     fun erTilsvarendeForUtbetaling(other: AndelTilkjentYtelse): Boolean {
         return (this.personIdent == other.personIdent
@@ -132,6 +154,13 @@ data class AndelTilkjentYtelse(
     }
 }
 
+@Converter
+class AndelEndringTypeListConverter : AttributeConverter<List<AndelEndringType>, String> {
+
+    override fun convertToDatabaseColumn(endringer: List<AndelEndringType>) = konverterEnumsTilString(endringer)
+    override fun convertToEntityAttribute(string: String?): List<AndelEndringType> = konverterStringTilEnums(string)
+}
+
 fun LocalDateSegment<AndelTilkjentYtelse>.erLøpende() = this.tom > inneværendeMåned().sisteDagIInneværendeMåned()
 
 fun List<AndelTilkjentYtelse>.slåSammenBack2BackAndelsperioderMedSammeBeløp(): List<AndelTilkjentYtelse> {
@@ -164,4 +193,10 @@ enum class YtelseType(val klassifisering: String) {
     SMÅBARNSTILLEGG("BATRSMA"),
     EØS("BATR"),
     MANUELL_VURDERING("BATR")
+}
+
+enum class AndelEndringType(val beskrivelse: String) {
+    DELT_BOSTED("Overstyres pga delt bosted"),
+    TRE_ÅR("Mer enn tre år tilbake i tid"),
+    EØS_SEKUNDÆRLAND("Barnetrygd utbetales til annet land"),
 }
