@@ -8,6 +8,10 @@ import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.FerdigstillOppgave
@@ -27,7 +31,8 @@ class BeslutteVedtak(
         private val behandlingService: BehandlingService,
         private val taskRepository: TaskRepository,
         private val loggService: LoggService,
-        private val vilkårsvurderingService: VilkårsvurderingService
+        private val vilkårsvurderingService: VilkårsvurderingService,
+        private val featureToggleService: FeatureToggleService,
 ) : BehandlingSteg<RestBeslutningPåVedtak> {
 
     override fun utførStegOgAngiNeste(behandling: Behandling,
@@ -36,7 +41,10 @@ class BeslutteVedtak(
             error("Behandlingen er allerede sendt til oppdrag og venter på kvittering")
         } else if (behandling.status == BehandlingStatus.AVSLUTTET) {
             error("Behandlingen er allerede avsluttet")
-        }
+        } else if (behandling.opprettetÅrsak == BehandlingÅrsak.KORREKSJON_VEDTAKSBREV &&
+                   !featureToggleService.isEnabled(FeatureToggleConfig.KAN_MANUELT_KORRIGERE_MED_VEDTAKSBREV))
+            throw FunksjonellFeil(melding = "Årsak ${BehandlingÅrsak.KORREKSJON_VEDTAKSBREV.visningsnavn} og toggle ${FeatureToggleConfig.KAN_MANUELT_KORRIGERE_MED_VEDTAKSBREV} false",
+                                  frontendFeilmelding = "Du har ikke tilgang til å beslutte for denne behandlingen. Ta kontakt med teamet dersom dette ikke stemmer.")
 
         val totrinnskontroll = totrinnskontrollService.besluttTotrinnskontroll(behandling = behandling,
                                                                                beslutter = SikkerhetContext.hentSaksbehandlerNavn(),
