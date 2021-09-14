@@ -45,21 +45,21 @@ enum class SanityBegrunnelseType {
     INNVILGELSE,
     REDUKSJON,
     AVSLAG,
-    OPPHOR,
+    OPPHØR,
     FORTSATT_INNVILGET,
 }
 
 fun SanityBegrunnelse.hentVedtakBegrunnelseType() =
-        if (this.begrunnelsetype == null)
-            throw Feil("Fikk ikke begrunnelsetype med begrunnelse ${this.navnISystem}")
-        else
+        if (this.begrunnelsetype == null) {
+            throw Feil("Fikk ikke begrunnelsetype for begrunnelse ${this.navnISystem}")
+        } else
             this.begrunnelsetype.tilVedtakBegrunnelseType()
 
 private fun SanityBegrunnelseType.tilVedtakBegrunnelseType() = when (this) {
     SanityBegrunnelseType.INNVILGELSE -> VedtakBegrunnelseType.INNVILGELSE
     SanityBegrunnelseType.REDUKSJON -> VedtakBegrunnelseType.REDUKSJON
     SanityBegrunnelseType.AVSLAG -> VedtakBegrunnelseType.AVSLAG
-    SanityBegrunnelseType.OPPHOR -> VedtakBegrunnelseType.OPPHØR
+    SanityBegrunnelseType.OPPHØR -> VedtakBegrunnelseType.OPPHØR
     SanityBegrunnelseType.FORTSATT_INNVILGET -> VedtakBegrunnelseType.FORTSATT_INNVILGET
 }
 
