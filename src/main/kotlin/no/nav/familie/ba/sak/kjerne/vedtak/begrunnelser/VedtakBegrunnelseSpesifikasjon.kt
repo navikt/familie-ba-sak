@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService
 import no.nav.familie.ba.sak.kjerne.dokument.domene.SanityBegrunnelse
+import no.nav.familie.ba.sak.kjerne.dokument.domene.SanityVilkår
 import no.nav.familie.ba.sak.kjerne.dokument.domene.VilkårTriggere
 import no.nav.familie.ba.sak.kjerne.dokument.domene.tilPersonType
 import no.nav.familie.ba.sak.kjerne.dokument.domene.tilVilkår
@@ -32,12 +33,10 @@ import javax.persistence.Converter
 interface IVedtakBegrunnelse {
 
     val sanityApiNavn: String
+    val vedtakBegrunnelseType: VedtakBegrunnelseType
 
     @Deprecated("Skal hentes fra Sanity, se SanityBegrunnelse.tilTriggesAv()")
     val triggesAv: TriggesAv
-
-    @Deprecated("Skal hentes fra Sanity")
-    val vedtakBegrunnelseType: VedtakBegrunnelseType
 
     @Deprecated("Skal hentes fra Sanity")
     fun hentHjemler(): SortedSet<Int>
@@ -1511,18 +1510,26 @@ val hjemlerTilhørendeFritekst = setOf(2, 4, 11)
 @Deprecated("Bruk VedtakBegrunnelseSpesifikasjon.erTilknyttetVilkår")
 val vedtakBegrunnelserIkkeTilknyttetVilkår = VedtakBegrunnelseSpesifikasjon.values().filter { it.triggesAv.vilkår == null }
 
-fun VedtakBegrunnelseSpesifikasjon.tilSanityBegrunnelse(sanityBegrunnelser: List<SanityBegrunnelse>) =
-        sanityBegrunnelser.find { it.apiNavn == this.sanityApiNavn }
-        ?: throw Feil("Fant ikke begrunnelse med apiNavn=${this.sanityApiNavn} i Sanity.")
+fun VedtakBegrunnelseSpesifikasjon.tilSanityBegrunnelse(sanityBegrunnelser: List<SanityBegrunnelse>): SanityBegrunnelse =
+        if (this.erTilgjengeligFrontend) {
+            sanityBegrunnelser.find { it.apiNavn == this.sanityApiNavn }
+            ?: throw Feil("Fant ikke begrunnelse med apiNavn=${this.sanityApiNavn} for ${this.tittel} i Sanity.")
+        } else error("Begrunnelse ${this.name} er ikke tilgjengelig frontend.")
 
 fun VedtakBegrunnelseSpesifikasjon.erTilknyttetVilkår(sanityBegrunnelser: List<SanityBegrunnelse>) =
-        !this.tilSanityBegrunnelse(sanityBegrunnelser).vilkaar.isNullOrEmpty()
+        !this.tilSanityBegrunnelse(sanityBegrunnelser)?.vilkaar.isNullOrEmpty()
 
 fun SanityBegrunnelse.tilTriggesAv(): TriggesAv {
 
     return TriggesAv(
             vilkår = this.vilkaar?.map { it.tilVilkår() }?.toSet(),
-            personTyper = this.rolle?.map { it.tilPersonType() }?.toSet() ?: emptySet(),
+            personTyper = this.rolle?.map { it.tilPersonType() }?.toSet()
+                          ?: when {
+                              this.vilkaar?.contains(SanityVilkår.GIFT_PARTNERSKAP) ?: false -> setOf(PersonType.BARN)
+                              this.vilkaar?.contains(SanityVilkår.UNDER_18_ÅR) ?: false -> setOf(PersonType.BARN)
+                              this.vilkaar?.contains(SanityVilkår.BOR_MED_SOKER) ?: false -> setOf(PersonType.BARN)
+                              else -> setOf(PersonType.BARN, PersonType.SØKER)
+                          },
             personerManglerOpplysninger = this.ovrigeTriggere?.contains(VilkårTriggere.MANGLER_OPPLYSNINGER) ?: false,
             satsendring = this.ovrigeTriggere?.contains(VilkårTriggere.SATSENDRING) ?: false,
             barnMedSeksårsdag = this.ovrigeTriggere?.contains(VilkårTriggere.BARN_MED_6_ÅRS_DAG) ?: false,
