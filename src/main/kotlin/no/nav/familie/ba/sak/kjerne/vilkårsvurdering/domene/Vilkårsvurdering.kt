@@ -46,6 +46,10 @@ data class Vilkårsvurdering(
         )
         var personResultater: Set<PersonResultat> = setOf(),
 
+        @Column(name = "ytelse_personer", columnDefinition = "text")
+        var ytelsePersoner: String? = null,
+
+
         ) : BaseEntitet() {
 
     override fun toString(): String {
