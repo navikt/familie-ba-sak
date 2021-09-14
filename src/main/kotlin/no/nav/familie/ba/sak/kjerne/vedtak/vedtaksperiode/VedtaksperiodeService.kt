@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.BRUK_VEDTAKSTYPE_MED_BEGRUNNELSER
 import no.nav.familie.ba.sak.config.FeatureToggleService
+import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedBegrunnelse
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedFritekster
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedStandardbegrunnelser
@@ -281,19 +282,23 @@ class VedtaksperiodeService(
                     type = Vedtaksperiodetype.FORTSATT_INNVILGET
             ))
         } else if (featureToggleService.isEnabled(BRUK_VEDTAKSTYPE_MED_BEGRUNNELSER)) {
-            val utbetalingOgOpphørsperioder =
-                    (hentUtbetalingsperioder(vedtak.behandling) + hentOpphørsperioder(vedtak.behandling)).map {
-                        VedtaksperiodeMedBegrunnelser(
-                                fom = it.periodeFom,
-                                tom = it.periodeTom,
-                                vedtak = vedtak,
-                                type = it.vedtaksperiodetype
-                        )
-                    }
-            val avslagsperioder = hentAvslagsperioderMedBegrunnelser(vedtak)
-
-            lagre(utbetalingOgOpphørsperioder + avslagsperioder)
+            lagre(genererVedtaksperioderMedBegrunnelser(vedtak))
         }
+    }
+
+    fun genererVedtaksperioderMedBegrunnelser(vedtak: Vedtak): List<VedtaksperiodeMedBegrunnelser> {
+        val utbetalingOgOpphørsperioder =
+                (hentUtbetalingsperioder(vedtak.behandling) + hentOpphørsperioder(vedtak.behandling)).map {
+                    VedtaksperiodeMedBegrunnelser(
+                            fom = it.periodeFom,
+                            tom = it.periodeTom,
+                            vedtak = vedtak,
+                            type = it.vedtaksperiodetype
+                    )
+                }
+        val avslagsperioder = hentAvslagsperioderMedBegrunnelser(vedtak)
+
+        return utbetalingOgOpphørsperioder + avslagsperioder
     }
 
     fun kopierOverVedtaksperioder(deaktivertVedtak: Vedtak, aktivtVedtak: Vedtak) {
@@ -405,11 +410,15 @@ class VedtaksperiodeService(
         val behandlingId = vedtaksperiode.vedtak.behandling.id
         val persongrunnlag = persongrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandlingId)
                              ?: throw Feil("Finner ikke persongrunnlag for behandling $behandlingId")
+        val uregistrerteBarn =
+                søknadGrunnlagService.hentAktiv(behandlingId = behandlingId)?.hentUregistrerteBarn() ?: emptyList()
+
         return byggBegrunnelserOgFriteksterForVedtaksperiode(
                 vedtaksperiode = vedtaksperiode,
                 personerIPersongrunnlag = persongrunnlag.personer.toList(),
                 målform = persongrunnlag.søker.målform,
                 brukBegrunnelserFraSanity = false,
+                uregistrerteBarn = uregistrerteBarn
         )
     }
 
@@ -511,10 +520,6 @@ class VedtaksperiodeService(
         val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId = vedtak.behandling.id)
                                ?: throw Feil("Fant ikke vilkårsvurdering for behandling ${vedtak.behandling.id} ved generering av avslagsperioder")
 
-        val uregistrerteBarn =
-                søknadGrunnlagService.hentAktiv(behandlingId = vedtak.behandling.id)?.hentUregistrerteBarn() ?: emptyList()
-
-
         val periodegrupperteAvslagsvilkår: Map<NullablePeriode, List<VilkårResultat>> =
                 vilkårsvurdering.personResultater.flatMap { it.vilkårResultater }
                         .filter { it.erEksplisittAvslagPåSøknad == true }
@@ -537,14 +542,39 @@ class VedtaksperiodeService(
                             )
                         })
                     }
-        }
+        }.toMutableList()
 
-        return if (avslagsperioder.none { it.fom == null && it.tom == null } && uregistrerteBarn.isNotEmpty()) {
-            avslagsperioder + VedtaksperiodeMedBegrunnelser(vedtak = vedtak,
-                                                            fom = null,
-                                                            tom = null,
-                                                            type = Vedtaksperiodetype.AVSLAG)
+        val uregistrerteBarn =
+                søknadGrunnlagService.hentAktiv(behandlingId = vedtak.behandling.id)?.hentUregistrerteBarn() ?: emptyList()
+
+        return if (uregistrerteBarn.isNotEmpty()) {
+            leggTilAvslagsbegrunnelseForUregistrertBarn(avslagsperioder = avslagsperioder,
+                                                        vedtak = vedtak,
+                                                        uregistrerteBarn = uregistrerteBarn)
         } else avslagsperioder
+    }
+
+    private fun leggTilAvslagsbegrunnelseForUregistrertBarn(avslagsperioder: List<VedtaksperiodeMedBegrunnelser>,
+                                                            vedtak: Vedtak,
+                                                            uregistrerteBarn: List<BarnMedOpplysninger>): List<VedtaksperiodeMedBegrunnelser> {
+        val avslagsperioderMedTomPeriode =
+                if (avslagsperioder.none { it.fom == null && it.tom == null }) {
+                    avslagsperioder + VedtaksperiodeMedBegrunnelser(vedtak = vedtak,
+                                                                    fom = null,
+                                                                    tom = null,
+                                                                    type = Vedtaksperiodetype.AVSLAG)
+                } else avslagsperioder
+
+        return avslagsperioderMedTomPeriode.map {
+            if (it.fom == null && it.tom == null && uregistrerteBarn.isNotEmpty()) {
+                it.apply {
+                    begrunnelser.add(Vedtaksbegrunnelse(
+                            vedtaksperiodeMedBegrunnelser = this,
+                            vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.AVSLAG_UREGISTRERT_BARN,
+                    ))
+                }
+            } else it
+        }.toList()
     }
 
     private fun begrunnelserMedIdentgrupper(vilkårResultater: List<VilkårResultat>): Map<VedtakBegrunnelseSpesifikasjon, List<String>> {
