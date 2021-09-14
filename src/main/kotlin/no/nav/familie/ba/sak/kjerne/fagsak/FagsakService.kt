@@ -205,15 +205,14 @@ class FagsakService(
 
         fun vilkårResultaterMedVedtakBegrunnelse(vilkårResultater: MutableSet<VilkårResultat>):
                 List<Pair<Long, VedtakBegrunnelseSpesifikasjon>> {
-            val vilkårResultaterIder = vilkårResultater.map { it.id }
-            val avslagBegrunnelser =
-                    vedtak.flatMap { it.vedtakBegrunnelser }
-                            .filterAvslag()
-                            .filterIkkeAvslagFritekstOgUregistrertBarn()
-
-            return if (avslagBegrunnelser.any { it.vilkårResultat == null }) error("Avslagbegrunnelse mangler 'vilkårResultat'")
-            else avslagBegrunnelser.filter { vilkårResultaterIder.contains(it.vilkårResultat!!.id) }
-                    .map { Pair(it.vilkårResultat!!.id, it.begrunnelse) }
+            return vilkårResultater.flatMap { vilkårResultat ->
+                vilkårResultat.vedtakBegrunnelseSpesifikasjoner.map {
+                    Pair(
+                        vilkårResultat.id,
+                        it
+                    )
+                }
+            }
         }
 
         val tilbakekreving = tilbakekrevingRepository.findByBehandlingId(behandling.id)
