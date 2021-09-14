@@ -59,6 +59,8 @@ class VilkårService(
                              ?: throw Feil(message = "Fant ikke vilkårsvurdering for person",
                                            frontendFeilmelding = "Fant ikke vilkårsvurdering for person med ident '${restPersonResultat.personIdent}")
 
+        muterPersonVilkårResultaterPut(personResultat, restVilkårResultat)
+        
         val vilkårResultat = personResultat.vilkårResultater.singleOrNull { it.id == vilkårId }
                              ?: error("Finner ikke vilkår med vilkårId $vilkårId på personResultat ${personResultat.id}")
 
