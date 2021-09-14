@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.erSenereEnnInneværendeMåned
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
+import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.AvslagBrevPeriode
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.AvslagUtenPeriodeBrevPeriode
@@ -113,12 +114,14 @@ fun VedtaksperiodeMedBegrunnelser.tilBrevPeriode(
         utbetalingsperioder: List<Utbetalingsperiode>,
         målform: Målform,
         brukBegrunnelserFraSanity: Boolean = false,
+        uregistrerteBarn: List<BarnMedOpplysninger> = emptyList()
 ): BrevPeriode? {
     val begrunnelserOgFritekster = byggBegrunnelserOgFriteksterForVedtaksperiode(
             vedtaksperiode = this,
             personerIPersongrunnlag = personerIPersongrunnlag,
-            målform,
-            brukBegrunnelserFraSanity,
+            målform = målform,
+            brukBegrunnelserFraSanity = brukBegrunnelserFraSanity,
+            uregistrerteBarn = uregistrerteBarn
     )
 
     val tomDato =
@@ -178,6 +181,7 @@ fun byggBegrunnelserOgFriteksterForVedtaksperiode(
         personerIPersongrunnlag: List<Person>,
         målform: Målform,
         brukBegrunnelserFraSanity: Boolean = false,
+        uregistrerteBarn: List<BarnMedOpplysninger> = emptyList(),
 ): List<Begrunnelse> {
     val fritekster = vedtaksperiode.fritekster.sortedBy { it.id }.map { BegrunnelseFraBaSak(it.fritekst) }
     val begrunnelser =
@@ -186,6 +190,7 @@ fun byggBegrunnelserOgFriteksterForVedtaksperiode(
                         personerPåBegrunnelse = personerIPersongrunnlag.filter { person -> it.personIdenter.contains(person.personIdent.ident) },
                         målform = målform,
                         brukBegrunnelserFraSanity = brukBegrunnelserFraSanity,
+                        uregistrerteBarn = uregistrerteBarn
                 )
             }
 

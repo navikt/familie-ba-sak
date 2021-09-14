@@ -45,6 +45,6 @@ data class SøknadGrunnlag(
     }
 
     fun hentUregistrerteBarn(): List<BarnMedOpplysninger> {
-        return hentSøknadDto().barnaMedOpplysninger.filter { !it.erFolkeregistrert }
+        return hentSøknadDto().barnaMedOpplysninger.filter { !it.erFolkeregistrert && it.inkludertISøknaden }
     }
 }
