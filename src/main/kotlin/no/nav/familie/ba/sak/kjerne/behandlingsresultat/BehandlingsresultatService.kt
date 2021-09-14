@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -35,6 +36,12 @@ class BehandlingsresultatService(
         val forrigeTilkjentYtelse: TilkjentYtelse? =
                 forrigeBehandling?.let { beregningService.hentOptionalTilkjentYtelseForBehandling(behandlingId = it.id) }
 
+        val barna = persongrunnlagService.hentBarna(behandling)
+        val søknadGrunnlag = søknadGrunnlagService.hentAktiv(behandlingId = behandling.id)
+        if (barna.isEmpty() && (søknadGrunnlag?.hentUregistrerteBarn() ?: emptyList()).isEmpty()) throw FunksjonellFeil(
+                melding = "Ingen barn i personopplysningsgrunnlag ved validering av vilkårsvurdering på behandling ${behandling.id}",
+                frontendFeilmelding = "Barn må legges til for å gjennomføre vilkårsvurdering.")
+
         val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandlingId)
 
         val ytelsePersoner: List<YtelsePerson> =
@@ -43,13 +50,15 @@ class BehandlingsresultatService(
                             vilkårsvurdering?.personResultater?.filter { it.vilkårResultater.any { vilkårResultat -> vilkårResultat.behandlingId == behandlingId } }
                                     ?.map { it.personIdent } ?: emptyList()
 
-                    val barn = persongrunnlagService.hentBarna(behandling)
+                    val barn = barna
                             .filter { parterSomErVurdertIInneværendeBehandling.contains(it.personIdent.ident) }
                             .map { it.personIdent.ident }
                     YtelsePersonUtils.utledKravForFødselshendelseFGB(barn)
                 } else {
                     val personIdenter =
-                            hentPersonerFramstiltKravFor(behandling = behandling, forrigeBehandling = forrigeBehandling)
+                            hentPersonerFramstiltKravFor(behandling = behandling,
+                                                         søknadDTO = søknadGrunnlag?.hentSøknadDto(),
+                                                         forrigeBehandling = forrigeBehandling)
 
                     YtelsePersonUtils.utledKrav(
                             personerMedKrav = persongrunnlagService.hentPersonerPåBehandling(identer = personIdenter,
@@ -62,7 +71,8 @@ class BehandlingsresultatService(
         val ytelsePersonerMedResultat = YtelsePersonUtils.populerYtelsePersonerMedResultat(
                 ytelsePersoner = ytelsePersoner,
                 andelerTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelse.toList(),
-                forrigeAndelerTilkjentYtelse = forrigeTilkjentYtelse?.andelerTilkjentYtelse?.toList() ?: emptyList())
+                forrigeAndelerTilkjentYtelse = forrigeTilkjentYtelse?.andelerTilkjentYtelse?.toList() ?: emptyList(),
+                uregistrerteBarn = søknadGrunnlag?.hentUregistrerteBarn() ?: emptyList())
 
         vilkårsvurdering?.let {
             vilkårsvurderingService.oppdater(vilkårsvurdering)
@@ -84,14 +94,15 @@ class BehandlingsresultatService(
         if (ytelsePersoner.any { it.ytelseType == YtelseType.ORDINÆR_BARNETRYGD && it.personIdent == søkerIdent }) throw Feil("Søker kan ikke ha ytelsetype ordinær")
     }
 
-    private fun hentPersonerFramstiltKravFor(behandling: Behandling, forrigeBehandling: Behandling?): List<String> {
-        val søknad = søknadGrunnlagService.hentAktiv(behandlingId = behandling.id)?.hentSøknadDto()
-        val barnFraSøknad = søknad?.barnaMedOpplysninger
+    private fun hentPersonerFramstiltKravFor(behandling: Behandling,
+                                             søknadDTO: SøknadDTO? = null,
+                                             forrigeBehandling: Behandling?): List<String> {
+        val barnFraSøknad = søknadDTO?.barnaMedOpplysninger
                                     ?.filter { it.inkludertISøknaden }
                                     ?.map { it.ident }
                             ?: emptyList()
         val utvidetBarnetrygdSøker =
-                if (søknad?.underkategori == BehandlingUnderkategori.UTVIDET) listOf(søknad.søkerMedOpplysninger.ident) else emptyList()
+                if (søknadDTO?.underkategori == BehandlingUnderkategori.UTVIDET) listOf(søknadDTO.søkerMedOpplysninger.ident) else emptyList()
 
         val nyeBarn = persongrunnlagService.finnNyeBarn(forrigeBehandling = forrigeBehandling, behandling = behandling)
                 .map { it.personIdent.ident }
