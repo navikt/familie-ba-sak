@@ -102,7 +102,7 @@ fun MånedPeriode.inkluderer(yearMonth: YearMonth) = yearMonth >= this.fom && ye
 
 fun MånedPeriode.overlapperHeltEllerDelvisMed(annenPeriode: MånedPeriode) =
         this.inkluderer(annenPeriode.fom) ||
-        this.inkluderer(annenPeriode.fom) ||
+        this.inkluderer(annenPeriode.tom) ||
         annenPeriode.inkluderer(this.fom) ||
         annenPeriode.inkluderer(this.tom)
 
