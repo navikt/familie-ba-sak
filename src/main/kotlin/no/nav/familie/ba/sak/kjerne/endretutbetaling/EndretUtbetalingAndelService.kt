@@ -4,47 +4,45 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.ekstern.restDomene.RestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import org.springframework.stereotype.Service
 
 @Service
 class EndretUtbetalingAndelService(
     private val endretUtbetalingAndelRepository: EndretUtbetalingAndelRepository,
     private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
-    private val persongrunnlagService: PersongrunnlagService,
     private val beregningService: BeregningService,
 ) {
 
     fun oppdaterEndretUtbetalingAndelOgOppdaterTilkjentYtelse(
-        behandling: Behandling,
-        overstyrtbetalingId: Long,
-        restEndretUtbetalingAndel: RestEndretUtbetalingAndel
+            behandling: Behandling,
+            endretUtbetalingAndelId: Long,
+            restEndretUtbetalingAndel: RestEndretUtbetalingAndel
     ) {
-       val overstyrtUtbetaling = endretUtbetalingAndelRepository.findById(overstyrtbetalingId)
+       val endretUtbetalingAndel = endretUtbetalingAndelRepository.findById(endretUtbetalingAndelId)
 
-        endretUtbetalingAndelRepository.save(overstyrtUtbetaling.get().copy(
+        endretUtbetalingAndelRepository.save(endretUtbetalingAndel.get().copy(
             fom = restEndretUtbetalingAndel.fom,
             tom = restEndretUtbetalingAndel.tom,
             prosent = restEndretUtbetalingAndel.prosent,
             årsak = restEndretUtbetalingAndel.årsak,
         ))
 
-        val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandling.id)
+        val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
             ?: throw Feil("Fant ikke personopplysninggrunnlag på behandling ${behandling.id}")
 
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
     }
 
     fun fjernEndretUtbetalingAndelOgOppdaterTilkjentYtelse(
-        behandling: Behandling,
-        overstyrtbetalingId: Long,
+            behandling: Behandling,
+            endretUtbetalingAndelId: Long,
     ) {
-       endretUtbetalingAndelRepository.deleteById(overstyrtbetalingId)
+       endretUtbetalingAndelRepository.deleteById(endretUtbetalingAndelId)
 
-        val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandling.id)
+        val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
             ?: throw Feil("Fant ikke personopplysninggrunnlag på behandling ${behandling.id}")
 
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
@@ -60,7 +58,7 @@ class EndretUtbetalingAndelService(
         val barn =
             personOpplysninger.barna.single { b -> b.personIdent.ident == restEndretUtbetalingAndel.personIdent }
 
-        val overstyrtUtbetaling = EndretUtbetalingAndel(
+        val endretUtbetalingAndel = EndretUtbetalingAndel(
             behandlingId = behandling.id,
             person = barn,
             prosent = restEndretUtbetalingAndel.prosent,
@@ -70,11 +68,7 @@ class EndretUtbetalingAndelService(
             begrunnelse = restEndretUtbetalingAndel.begrunnelse,
         )
 
-        endretUtbetalingAndelRepository.save(overstyrtUtbetaling)
-
-        val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandling.id)
-            ?: throw Feil("Fant ikke personopplysninggrunnlag på behandling ${behandling.id}")
-
-        beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
+        endretUtbetalingAndelRepository.save(endretUtbetalingAndel)
+        beregningService.oppdaterBehandlingMedBeregning(behandling, personOpplysninger)
     }
 }

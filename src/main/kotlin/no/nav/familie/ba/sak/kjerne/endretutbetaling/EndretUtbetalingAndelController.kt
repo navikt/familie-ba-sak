@@ -20,64 +20,64 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping("/api/overstyrtutbetaling")
+@RequestMapping("/api/endretutbetalingandel")
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
-class OverstyrtUtbetalingController(
+class EndretUtbetalingAndelController(
     private val endretUtbetalingAndelService: EndretUtbetalingAndelService,
     private val tilgangService: TilgangService,
     private val behandlingService: BehandlingService,
     private val fagsakService: FagsakService,
 ) {
 
-    @PutMapping(path = ["{behandlingId}/{overstyrtbetalingId}"])
-    fun oppdaterOverstyrtUtbetalingOgOppdaterTilkjentYtelse(
-        @PathVariable(name = "behandlingId") behandlingId: Long,
-        @PathVariable(name = "behandlingId") overstyrtbetalingId: Long,
+    @PutMapping(path = ["{behandlingId}/{endretUtbetalingAndelId}"])
+    fun oppdaterEndretUtbetalingAndelOgOppdaterTilkjentYtelse(
+        @PathVariable behandlingId: Long,
+        @PathVariable endretUtbetalingAndelId: Long,
         @RequestBody restEndretUtbetalingAndel: RestEndretUtbetalingAndel
     ): ResponseEntity<Ressurs<RestFagsak>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-            handling = "Oppdater overstyrtbetaling"
+            handling = "Oppdater endretutbetalingandel"
         )
 
         val behandling = behandlingService.hent(behandlingId)
 
         endretUtbetalingAndelService.oppdaterEndretUtbetalingAndelOgOppdaterTilkjentYtelse(
             behandling,
-            overstyrtbetalingId,
+            endretUtbetalingAndelId,
             restEndretUtbetalingAndel
         )
 
         return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = behandling.fagsak.id))
     }
 
-    @DeleteMapping(path = ["{behandlingId}/{overstyrtbetalingId}"])
-    fun fjernOverstyrtUtbetalingOgOppdaterTilkjentYtelse(
-        @PathVariable(name = "behandlingId") behandlingId: Long,
-        @PathVariable(name = "overstyrtbetalingId") overstyrtbetalingId: Long,
+    @DeleteMapping(path = ["{behandlingId}/{endretUtbetalingAndelId}"])
+    fun fjernEndretUtbetalingAndelOgOppdaterTilkjentYtelse(
+        @PathVariable behandlingId: Long,
+        @PathVariable endretUtbetalingAndelId: Long,
     ): ResponseEntity<Ressurs<RestFagsak>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-            handling = "Oppdater overstyrtbetaling"
+            handling = "Oppdater endretutbetalingandel"
         )
 
         val behandling = behandlingService.hent(behandlingId)
 
-        endretUtbetalingAndelService.fjernEndretUtbetalingAndelOgOppdaterTilkjentYtelse(behandling, overstyrtbetalingId)
+        endretUtbetalingAndelService.fjernEndretUtbetalingAndelOgOppdaterTilkjentYtelse(behandling, endretUtbetalingAndelId)
 
         return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = behandling.fagsak.id))
     }
 
     @Transactional
     @PostMapping(path = ["/{behandlingId}"])
-    fun lagreOverstyrtUtbetalingOgOppdaterTilkjentYtelse(
+    fun lagreEndretUtbetalingAndelOgOppdaterTilkjentYtelse(
         @PathVariable behandlingId: Long,
         @RequestBody restEndretUtbetalingAndel: RestEndretUtbetalingAndel
     ): ResponseEntity<Ressurs<RestFagsak>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-            handling = "Opprett overstyrtbetaling"
+            handling = "Opprett endretutbetalingandel"
         )
 
         val behandling = behandlingService.hent(behandlingId)
