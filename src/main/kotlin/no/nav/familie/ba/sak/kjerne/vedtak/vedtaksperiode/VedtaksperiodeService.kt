@@ -34,6 +34,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Personopplysning
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakBegrunnelseRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakUtils.hentPersonerForAlleUtgjørendeVilkår
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.erTilknyttetVilkår
@@ -422,15 +423,21 @@ class VedtaksperiodeService(
                             .forEach {
                                 val triggesAv =
                                         if (featureToggleService.isEnabled(BRUK_BEGRUNNELSE_TRIGGES_AV_FRA_SANITY)) {
-                                            it.tilSanityBegrunnelse(brevKlient.hentSanityBegrunnelse())
-                                                    .tilTriggesAv()
+                                            if (it.erTilgjengeligFrontend) {
+                                                it.tilSanityBegrunnelse(brevKlient.hentSanityBegrunnelse())
+                                                        .tilTriggesAv()
+                                            } else
+                                                TriggesAv(valgbar = false)
                                         } else
                                             it.triggesAv
                                 val vedtakBegrunnelseType =
                                         if (featureToggleService.isEnabled(BRUK_BEGRUNNELSE_TRIGGES_AV_FRA_SANITY)) {
-                                            it
-                                                    .tilSanityBegrunnelse(brevKlient.hentSanityBegrunnelse())
-                                                    .hentVedtakBegrunnelseType()
+                                            if (it.erTilgjengeligFrontend) {
+                                                it
+                                                        .tilSanityBegrunnelse(brevKlient.hentSanityBegrunnelse())
+                                                        .hentVedtakBegrunnelseType()
+                                            } else
+                                                it.vedtakBegrunnelseType
                                         } else
                                             it.vedtakBegrunnelseType
 
