@@ -22,6 +22,8 @@ import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Etterbetaling
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.ForsattInnvilget
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Førstegangsvedtak
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Hjemmeltekst
+import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.KorreksjonVedtaksbrev
+import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.KorreksjonVedtaksbrevData
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.OpphørMedEndring
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Opphørt
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.SignaturVedtak
@@ -128,6 +130,21 @@ class BrevService(
                                                                      .maxByOrNull { it.periodeTom }?.periodeTom?.nesteMåned()
                                                                      ?.tilMånedÅr()
                                                              ?: throw Feil("Fant ikke opphørdato ved generering av dødsfallbrev")
+                                ))
+                )
+            }
+
+    fun hentKorreksjonbrevData(vedtak: Vedtak): Brev =
+            hentGrunnlagOgSignaturData(vedtak).let { data ->
+                KorreksjonVedtaksbrev(
+                        data = KorreksjonVedtaksbrevData(
+                                delmalData = KorreksjonVedtaksbrevData.DelmalData(
+                                        signaturVedtak = SignaturVedtak(enhet = data.enhet,
+                                                                        saksbehandler = data.saksbehandler,
+                                                                        beslutter = data.beslutter)),
+                                flettefelter = KorreksjonVedtaksbrevData.Flettefelter(
+                                        navn = data.grunnlag.søker.navn,
+                                        fodselsnummer = data.grunnlag.søker.personIdent.ident
                                 ))
                 )
             }
