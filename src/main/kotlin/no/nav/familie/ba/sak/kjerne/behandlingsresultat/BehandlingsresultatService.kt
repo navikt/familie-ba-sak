@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
+import no.nav.familie.kontrakter.felles.objectMapper
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -40,10 +41,11 @@ class BehandlingsresultatService(
         if (barna.isEmpty() && (søknadGrunnlag?.hentUregistrerteBarn() ?: emptyList()).isEmpty()) throw FunksjonellFeil(
                 melding = "Ingen barn i personopplysningsgrunnlag ved validering av vilkårsvurdering på behandling ${behandling.id}",
                 frontendFeilmelding = "Barn må legges til for å gjennomføre vilkårsvurdering.")
+        
+        val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandlingId)
 
         val ytelsePersoner: List<YtelsePerson> =
                 if (behandling.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE) {
-                    val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandlingId)
                     val parterSomErVurdertIInneværendeBehandling =
                             vilkårsvurdering?.personResultater?.filter { it.vilkårResultater.any { vilkårResultat -> vilkårResultat.behandlingId == behandlingId } }
                                     ?.map { it.personIdent } ?: emptyList()
@@ -70,6 +72,11 @@ class BehandlingsresultatService(
                 ytelsePersoner = ytelsePersoner,
                 andelerTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelse.toList(),
                 forrigeAndelerTilkjentYtelse = forrigeTilkjentYtelse?.andelerTilkjentYtelse?.toList() ?: emptyList())
+
+        vilkårsvurdering?.let {
+            vilkårsvurderingService.oppdater(vilkårsvurdering)
+                    .also { it.ytelsePersoner = ytelsePersonerMedResultat.writeValueAsString() }
+        }
 
         val behandlingsresultat =
                 BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(ytelsePersonerMedResultat)
@@ -107,6 +114,8 @@ class BehandlingsresultatService(
                 + utvidetBarnetrygdSøker
                 + nyeBarn).distinct()
     }
+
+    private fun List<YtelsePerson>.writeValueAsString(): String = objectMapper.writeValueAsString(this)
 
     companion object {
 
