@@ -44,16 +44,6 @@ class RegistrereSøknad(
 
         val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = behandling.id)
 
-        if (data.søknad.barnaMedOpplysninger.any { !it.erFolkeregistrert }
-            && vedtak.vedtakBegrunnelser.none { it.begrunnelse == VedtakBegrunnelseSpesifikasjon.AVSLAG_UREGISTRERT_BARN }) {
-            vedtak.leggTilBegrunnelse(VedtakBegrunnelse(
-                    fom = null,
-                    tom = null,
-                    vedtak = vedtak,
-                    begrunnelse = VedtakBegrunnelseSpesifikasjon.AVSLAG_UREGISTRERT_BARN
-            ))
-        }
-
         vedtakService.oppdater(vedtak)
 
         return hentNesteStegForNormalFlyt(behandling)
