@@ -1521,7 +1521,7 @@ fun VedtakBegrunnelseSpesifikasjon.tilSanityBegrunnelse(sanityBegrunnelser: List
         if (this.erTilgjengeligFrontend) {
             sanityBegrunnelser.find { it.apiNavn == this.sanityApiNavn }
             ?: throw Feil("Fant ikke begrunnelse med apiNavn=${this.sanityApiNavn} for ${this.tittel} i Sanity.")
-        } else error("Begrunnelse ${this.name} er ikke tilgjengelig frontend.")
+        } else throw Feil("Begrunnelse ${this.name} er ikke tilgjengelig frontend.")
 
 fun VedtakBegrunnelseSpesifikasjon.erTilknyttetVilkår(sanityBegrunnelser: List<SanityBegrunnelse>) =
         !this.tilSanityBegrunnelse(sanityBegrunnelser)?.vilkaar.isNullOrEmpty()
