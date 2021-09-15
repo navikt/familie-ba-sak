@@ -8,7 +8,6 @@ import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.innheholderVilkårtype
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
@@ -117,7 +116,7 @@ object VedtakUtils {
 
 fun validerAvslagsbegrunnelse(triggesAv: TriggesAv,
                               vilkårResultat: VilkårResultat) {
-    if (triggesAv.innheholderVilkårtype(vilkårResultat.vilkårType)) {
+    if (triggesAv.vilkår?.contains(vilkårResultat.vilkårType) != true) {
         error("Avslagbegrunnelser som oppdateres må tilhøre samme vilkår")
     }
 }
