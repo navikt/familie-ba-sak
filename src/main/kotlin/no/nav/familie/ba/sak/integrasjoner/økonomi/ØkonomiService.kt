@@ -20,6 +20,7 @@ import no.nav.familie.kontrakter.felles.oppdrag.OppdragStatus
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.math.BigDecimal
 import java.time.YearMonth
 
 @Service
@@ -63,6 +64,7 @@ class ØkonomiService(
     ): Utbetalingsoppdrag {
         val oppdatertBehandling = vedtak.behandling
         val oppdatertTilstand = beregningService.hentAndelerTilkjentYtelseForBehandling(oppdatertBehandling.id)
+                .filter { andel -> andel.beløp() !== BigDecimal.ZERO || andel.endringTyper.any { it.kanGiNullutbetaling() } }
         val oppdaterteKjeder = kjedeinndelteAndeler(oppdatertTilstand)
 
         val erFørsteIverksatteBehandlingPåFagsak =
@@ -115,15 +117,15 @@ class ØkonomiService(
     }
 
     fun hentSisteOffsetPåFagsak(behandling: Behandling): Int? =
-        behandlingService.hentForrigeBehandlingSomErIverksatt(behandling = behandling)?.let { forrigeIverksattBehandling ->
+            behandlingService.hentForrigeBehandlingSomErIverksatt(behandling = behandling)?.let { forrigeIverksattBehandling ->
 
-            beregningService.hentAndelerTilkjentYtelseForBehandling(forrigeIverksattBehandling.id)
-                .takeIf { it.isNotEmpty() }
-                ?.let { andelerTilkjentYtelse ->
-                    andelerTilkjentYtelse.maxByOrNull { it.periodeOffset!! }?.periodeOffset?.toInt()
-                }
+                beregningService.hentAndelerTilkjentYtelseForBehandling(forrigeIverksattBehandling.id)
+                        .takeIf { it.isNotEmpty() }
+                        ?.let { andelerTilkjentYtelse ->
+                            andelerTilkjentYtelse.maxByOrNull { it.periodeOffset!! }?.periodeOffset?.toInt()
+                        }
                 ?: hentSisteOffsetPåFagsak(forrigeIverksattBehandling)
-        }
+            }
 
     private fun validerOpphørsoppdrag(utbetalingsoppdrag: Utbetalingsoppdrag) {
         val (opphørsperioder, annet) = utbetalingsoppdrag.utbetalingsperiode.partition { it.opphør != null }

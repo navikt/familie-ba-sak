@@ -198,5 +198,8 @@ enum class YtelseType(val klassifisering: String) {
 enum class AndelEndringType(val beskrivelse: String) {
     DELT_BOSTED("Overstyres pga delt bosted"),
     TRE_ÅR("Mer enn tre år tilbake i tid"),
-    EØS_SEKUNDÆRLAND("Barnetrygd utbetales til annet land"),
+    EØS_SEKUNDÆRLAND("Barnetrygd utbetales til annet land");
+
+    // TODO: Oppdater enumverdier
+    fun kanGiNullutbetaling() = this == EØS_SEKUNDÆRLAND
 }
