@@ -63,12 +63,15 @@ class VilkårServiceTest(
     private val vilkårService: VilkårService,
 
     @Autowired
-    private val databaseCleanupService: DatabaseCleanupService
-):AbstractTestWithJdbcTables() {
+    private val databaseCleanupService: DatabaseCleanupService,
+
+    @Autowired
+    private val dataSource: DataSource
+
+):AbstractTestWithJdbcTables(dataSource) {
 
     @BeforeAll
-    fun init(@Autowired dataSource: DataSource) {
-        initJdbcTables(dataSource)
+    fun init() {
         databaseCleanupService.truncate()
     }
 
