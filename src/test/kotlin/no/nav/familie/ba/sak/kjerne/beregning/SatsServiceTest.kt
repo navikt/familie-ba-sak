@@ -176,8 +176,8 @@ class SatsServiceTest {
         Assertions.assertEquals(0, beløpperioder.size)
     }
 
-    private fun assertSatsperioder(forventet: TestKrPeriode, faktisk: SatsService.BeløpPeriode) {
-        Assertions.assertEquals(forventet.beløp, faktisk.beløp, "Forskjell i beløp")
+    private fun assertSatsperioder(forventet: TestKrPeriode, faktisk: SatsService.SatsPeriode) {
+        Assertions.assertEquals(forventet.beløp, faktisk.sats, "Forskjell i beløp")
         Assertions.assertEquals(forventet.fom?.let { årMnd(it) }, faktisk.fraOgMed, "Forskjell i fra-og-med")
         Assertions.assertEquals(forventet.tom?.let { årMnd(it) }, faktisk.tilOgMed, "Forskjell i til-og-med")
     }

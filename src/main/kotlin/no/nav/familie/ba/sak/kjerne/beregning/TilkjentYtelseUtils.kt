@@ -1,20 +1,27 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.erDagenFør
 import no.nav.familie.ba.sak.common.maksimum
 import no.nav.familie.ba.sak.common.minimum
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
-import no.nav.familie.ba.sak.kjerne.beregning.SatsService.BeløpPeriode
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
+import no.nav.familie.ba.sak.kjerne.beregning.SatsService.SatsPeriode
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService.splittPeriodePå6Årsdag
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.kjerne.overstyring.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -22,6 +29,8 @@ object TilkjentYtelseUtils {
 
     fun beregnTilkjentYtelse(vilkårsvurdering: Vilkårsvurdering,
                              personopplysningGrunnlag: PersonopplysningGrunnlag,
+                             behandling: Behandling,
+                             andelsEndringer: List<EndretUtbetalingAndel>? = emptyList(),
                              featureToggleService: FeatureToggleService): TilkjentYtelse {
         val identBarnMap = personopplysningGrunnlag.barna
                 .associateBy { it.personIdent.ident }
@@ -101,7 +110,7 @@ object TilkjentYtelseUtils {
                                 val (periodeUnder6År, periodeOver6år) = splittPeriodePå6Årsdag(person.hentSeksårsdag(),
                                                                                                oppfyltFom,
                                                                                                oppfyltTom)
-                                val beløpsperioderFørFylte6År =
+                                val satsperioderFørFylte6År =
                                         if (featureToggleService.isEnabled(FeatureToggleConfig.BRUK_ER_DELT_BOSTED)) {
 
                                             if (periodeUnder6År != null) SatsService.hentGyldigSatsFor(
@@ -151,7 +160,7 @@ object TilkjentYtelseUtils {
                                         }
 
                                 val beløpsperioder =
-                                        listOf(beløpsperioderFørFylte6År, beløpsperioderEtterFylte6År).flatten()
+                                        listOf(satsperioderFørFylte6År, beløpsperioderEtterFylte6År).flatten()
                                                 .sortedBy { it.fraOgMed }
                                                 .fold(mutableListOf(), ::slåSammenEtterfølgendePerioderMedSammeBeløp)
 
@@ -162,19 +171,48 @@ object TilkjentYtelseUtils {
                                             personIdent = person.personIdent.ident,
                                             stønadFom = beløpsperiode.fraOgMed,
                                             stønadTom = beløpsperiode.tilOgMed,
-                                            beløp = beløpsperiode.beløp,
-                                            type = YtelseType.ORDINÆR_BARNETRYGD
+                                            beløp = beløpsperiode.sats,
+                                            type = finnYtelseType(behandling.kategori, behandling.underkategori, person.type),
+                                            sats = beløpsperiode.sats,
+                                            prosent = finnProsentForAndel(fom = beløpsperiode.fraOgMed,
+                                                                          tom = beløpsperiode.tilOgMed,
+                                                                          endringerForPerson = andelsEndringer?.filter { it.person.personIdent.ident == person.personIdent.ident })
                                     )
                                 }
                             }
                 }
-
         tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerTilkjentYtelse)
 
         return tilkjentYtelse
     }
 
-    private fun settRiktigStønadFom(skalStarteSammeMåned: Boolean = false, fraOgMed: LocalDate): YearMonth =
+    private fun finnProsentForAndel(fom: YearMonth,
+                                    tom: YearMonth,
+                                    endringerForPerson: List<EndretUtbetalingAndel>?): BigDecimal {
+        return if (endringerForPerson.isNullOrEmpty()) {
+            BigDecimal(100)
+        } else {
+            //TODO: Midlertidig 100. Her må vi iterere og ev finne delt bosted i endringsliste. Da trenger vi nok ikke spesialhåndtere delt bosted i beregningsfunksjonen heller.
+            // TODO: Vi antakeligvis også oppdatere overordna mapping i beregning til å ta hensyn til søker med utvidet
+            BigDecimal(100)
+        }
+    }
+
+    private fun finnYtelseType(kategori: BehandlingKategori,
+                               underkategori: BehandlingUnderkategori,
+                               personType: PersonType): YtelseType {
+        return if (personType == PersonType.SØKER && underkategori == BehandlingUnderkategori.UTVIDET) {
+            YtelseType.UTVIDET_BARNETRYGD
+        } else if (personType == PersonType.BARN && kategori == BehandlingKategori.NASJONAL) {
+            YtelseType.ORDINÆR_BARNETRYGD
+        } else {
+            throw Feil("Ikke støttet. Klarte ikke utlede YtelseType for kategori $kategori, underkategori $underkategori og persontype $personType.")
+        }
+    }
+
+    private
+
+    fun settRiktigStønadFom(skalStarteSammeMåned: Boolean = false, fraOgMed: LocalDate): YearMonth =
             if (skalStarteSammeMåned)
                 YearMonth.from(fraOgMed.withDayOfMonth(1))
             else
@@ -187,10 +225,10 @@ object TilkjentYtelseUtils {
                 YearMonth.from(tilOgMed.sisteDagIMåned())
 }
 
-private fun slåSammenEtterfølgendePerioderMedSammeBeløp(sammenlagt: MutableList<BeløpPeriode>,
-                                                        neste: BeløpPeriode): MutableList<BeløpPeriode> {
-    if (sammenlagt.isNotEmpty() && sammenlagt.last().beløp == neste.beløp) {
-        val forrigeOgNeste = BeløpPeriode(neste.beløp, sammenlagt.last().fraOgMed, neste.tilOgMed)
+private fun slåSammenEtterfølgendePerioderMedSammeBeløp(sammenlagt: MutableList<SatsPeriode>,
+                                                        neste: SatsPeriode): MutableList<SatsPeriode> {
+    if (sammenlagt.isNotEmpty() && sammenlagt.last().sats == neste.sats) {
+        val forrigeOgNeste = SatsPeriode(neste.sats, sammenlagt.last().fraOgMed, neste.tilOgMed)
         sammenlagt.removeLast()
         sammenlagt.add(forrigeOgNeste)
     } else {

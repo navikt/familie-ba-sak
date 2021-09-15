@@ -209,6 +209,17 @@ fun lagAndelTilkjentYtelse(fom: String,
     )
 }
 
+/**
+ *
+sats = SatsService.hentGyldigSatsFor(satstype = SatsType.ORBA,
+deltUtbetaling = false,
+stønadFraOgMed = beløpsperiode.fraOgMed,
+stønadTilOgMed = beløpsperiode.tilOgMed,
+maxSatsGyldigFraOgMed = YearMonth.now())
+.singleOrNull()!!.beløp,
+prosent = BigDecimal(100)
+ */
+
 fun lagAndelTilkjentYtelseUtvidet(fom: String,
                                   tom: String,
                                   ytelseType: YtelseType,

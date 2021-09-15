@@ -45,14 +45,14 @@ object SatsService {
                           deltUtbetaling: Boolean,
                           stønadFraOgMed: YearMonth,
                           stønadTilOgMed: YearMonth,
-                          maxSatsGyldigFraOgMed: YearMonth = YearMonth.now()): List<BeløpPeriode> {
+                          maxSatsGyldigFraOgMed: YearMonth = YearMonth.now()): List<SatsPeriode> {
 
         val delBeløp = if (deltUtbetaling) 2 else 1
 
         return finnAlleSatserFor(satstype)
-                .map { BeløpPeriode(it.beløp / delBeløp, it.gyldigFom.toYearMonth(), it.gyldigTom.toYearMonth()) }
+                .map { SatsPeriode(it.beløp / delBeløp, it.gyldigFom.toYearMonth(), it.gyldigTom.toYearMonth()) }
                 .filter { it.fraOgMed <= maxSatsGyldigFraOgMed }
-                .map { BeløpPeriode(it.beløp, maxOf(it.fraOgMed, stønadFraOgMed), minOf(it.tilOgMed, stønadTilOgMed)) }
+                .map { SatsPeriode(it.sats, maxOf(it.fraOgMed, stønadFraOgMed), minOf(it.tilOgMed, stønadTilOgMed)) }
                 .filter { it.fraOgMed <= it.tilOgMed }
     }
 
@@ -60,19 +60,19 @@ object SatsService {
     fun hentGyldigSatsFor(satstype: SatsType,
                           stønadFraOgMed: YearMonth,
                           stønadTilOgMed: YearMonth,
-                          maxSatsGyldigFraOgMed: YearMonth = YearMonth.now()): List<BeløpPeriode> {
+                          maxSatsGyldigFraOgMed: YearMonth = YearMonth.now()): List<SatsPeriode> {
 
         return finnAlleSatserFor(satstype)
-                .map { BeløpPeriode(it.beløp, it.gyldigFom.toYearMonth(), it.gyldigTom.toYearMonth()) }
+                .map { SatsPeriode(it.beløp, it.gyldigFom.toYearMonth(), it.gyldigTom.toYearMonth()) }
                 .filter { it.fraOgMed <= maxSatsGyldigFraOgMed }
-                .map { BeløpPeriode(it.beløp, maxOf(it.fraOgMed, stønadFraOgMed), minOf(it.tilOgMed, stønadTilOgMed)) }
+                .map { SatsPeriode(it.sats, maxOf(it.fraOgMed, stønadFraOgMed), minOf(it.tilOgMed, stønadTilOgMed)) }
                 .filter { it.fraOgMed <= it.tilOgMed }
     }
 
     private fun finnAlleSatserFor(type: SatsType): List<Sats> = satser.filter { it.type == type }
 
-    data class BeløpPeriode(
-            val beløp: Int,
+    data class SatsPeriode(
+            val sats: Int,
             val fraOgMed: YearMonth,
             val tilOgMed: YearMonth
     )

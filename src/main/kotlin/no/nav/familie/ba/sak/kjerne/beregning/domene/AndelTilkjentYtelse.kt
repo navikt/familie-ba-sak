@@ -35,6 +35,7 @@ data class AndelTilkjentYtelse(
         @Column(name = "person_ident", nullable = false, updatable = false)
         val personIdent: String,
 
+        @Deprecated("Erstattes av kolonner sats og prosent, og funksjon beløp()")
         @Column(name = "belop", nullable = false)
         val beløp: Int,
 

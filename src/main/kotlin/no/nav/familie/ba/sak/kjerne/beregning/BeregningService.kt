@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.beregning
 
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.FeatureToggleService
-import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsak
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
@@ -16,13 +15,11 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Personopplysning
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
-import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
-import java.time.YearMonth
 
 @Service
 class BeregningService(
@@ -100,7 +97,11 @@ class BeregningService(
                                ?: throw IllegalStateException("Kunne ikke hente vilkårsvurdering for behandling med id ${behandling.id}")
 
         val tilkjentYtelse = TilkjentYtelseUtils
-                .beregnTilkjentYtelse(vilkårsvurdering, personopplysningGrunnlag, featureToggleService)
+                .beregnTilkjentYtelse(vilkårsvurdering = vilkårsvurdering,
+                                      personopplysningGrunnlag = personopplysningGrunnlag,
+                                      behandling = behandling,
+                                      andelsEndringer = emptyList(),
+                                      featureToggleService = featureToggleService)
 
         return tilkjentYtelseRepository.save(tilkjentYtelse)
     }
