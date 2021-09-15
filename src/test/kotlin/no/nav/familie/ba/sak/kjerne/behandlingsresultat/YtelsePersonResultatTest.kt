@@ -1,12 +1,13 @@
 package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
-import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.common.forrigeMåned
 import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
+import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -276,6 +277,26 @@ class YtelsePersonResultatTest {
     }
 
     @Test
+    fun `Skal utelede AVSLÅTT første gang krav for uregistrert barn fremstilles`() {
+        val ytelsePersoner = emptyList<YtelsePerson>()
+
+        val ytelsePersonerMedResultat = YtelsePersonUtils.populerYtelsePersonerMedResultat(
+                ytelsePersoner = ytelsePersoner,
+                forrigeAndelerTilkjentYtelse = emptyList(),
+                andelerTilkjentYtelse = emptyList(),
+                uregistrerteBarn = listOf(BarnMedOpplysninger(
+                        ident = "",
+                        navn = "Mock",
+                        erFolkeregistrert = false,
+                        inkludertISøknaden = true
+                ))
+        )
+
+        assertEquals(setOf(YtelsePersonResultat.AVSLÅTT),
+                     ytelsePersonerMedResultat.find { it.personIdent == "" }?.resultater)
+    }
+
+    @Test
     fun `Skal utlede AVSLÅTT på søknad for nytt barn i revurdering`() {
         val forrigeAndelBarn1 = lagAndelTilkjentYtelse(inneværendeMåned().minusYears(4).toString(),
                                                        inneværendeMåned().plusMonths(12).toString(),
@@ -308,6 +329,32 @@ class YtelsePersonResultatTest {
                      ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater)
         assertEquals(setOf(YtelsePersonResultat.AVSLÅTT),
                      ytelsePersonerMedResultat.find { it.personIdent == barn2.personIdent.ident }?.resultater)
+    }
+
+    @Test
+    fun `Skal utelede AVSLÅTT i revurdering hvor uregistrert barn fremstilles`() {
+        val forrigeAndelBarn1 = lagAndelTilkjentYtelse(inneværendeMåned().minusYears(4).toString(),
+                                                       inneværendeMåned().plusMonths(12).toString(),
+                                                       YtelseType.ORDINÆR_BARNETRYGD,
+                                                       1054,
+                                                       person = barn1)
+
+        val ytelsePersoner = emptyList<YtelsePerson>()
+
+        val ytelsePersonerMedResultat = YtelsePersonUtils.populerYtelsePersonerMedResultat(
+                ytelsePersoner = ytelsePersoner,
+                forrigeAndelerTilkjentYtelse = listOf(forrigeAndelBarn1),
+                andelerTilkjentYtelse = listOf(forrigeAndelBarn1),
+                uregistrerteBarn = listOf(BarnMedOpplysninger(
+                        ident = "",
+                        navn = "Mock",
+                        erFolkeregistrert = false,
+                        inkludertISøknaden = true
+                ))
+        )
+
+        assertEquals(setOf(YtelsePersonResultat.AVSLÅTT),
+                     ytelsePersonerMedResultat.find { it.personIdent == "" }?.resultater)
     }
 
     /**

@@ -219,6 +219,7 @@ enum class BehandlingÅrsak(val visningsnavn: String) {
     NYE_OPPLYSNINGER("Nye opplysninger"),
     KLAGE("Klage"),
     TEKNISK_OPPHØR("Teknisk opphør"), // Kan være tilbakeføring til infotrygd, feilutbetaling
+    KORREKSJON_VEDTAKSBREV("Korrigere vedtak med egen brevmal"),
     OMREGNING_6ÅR("Omregning 6 år"),
     OMREGNING_18ÅR("Omregning 18 år"),
     SATSENDRING("Satsendring"),

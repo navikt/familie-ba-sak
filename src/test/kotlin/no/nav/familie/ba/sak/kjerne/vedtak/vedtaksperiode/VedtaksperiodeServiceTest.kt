@@ -11,9 +11,14 @@ import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
+import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedStandardbegrunnelser
+import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
+import no.nav.familie.ba.sak.ekstern.restDomene.SøkerMedOpplysninger
+import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
@@ -90,6 +95,50 @@ class VedtaksperiodeServiceTest(
                 stegService = stegService,
                 tilbakekrevingService = tilbakekrevingService
         )
+    }
+
+    @Test
+    fun `Skal lage og populere avslagsperiode for uregistrert barn`() {
+        val søkerFnr = randomFnr()
+        val behandling = kjørStegprosessForFGB(
+                tilSteg = StegType.REGISTRERE_SØKNAD,
+                søkerFnr = søkerFnr,
+                barnasIdenter = listOf(randomFnr()),
+                fagsakService = fagsakService,
+                vedtakService = vedtakService,
+                persongrunnlagService = persongrunnlagService,
+                vilkårsvurderingService = vilkårsvurderingService,
+                stegService = stegService,
+                vedtaksperiodeService = vedtaksperiodeService,
+        )
+
+        val behandlingEtterNySøknadsregistrering = stegService.håndterSøknad(
+                behandling = behandling,
+                restRegistrerSøknad = RestRegistrerSøknad(
+                        søknad = SøknadDTO(
+                                underkategori = BehandlingUnderkategori.ORDINÆR,
+                                søkerMedOpplysninger = SøkerMedOpplysninger(
+                                        ident = søkerFnr
+                                ),
+                                barnaMedOpplysninger = listOf(
+                                        BarnMedOpplysninger(
+                                                ident = "",
+                                                erFolkeregistrert = false,
+                                                inkludertISøknaden = true
+                                        )
+                                ),
+                                endringAvOpplysningerBegrunnelse = ""
+                        ),
+                        bekreftEndringerViaFrontend = true))
+
+        val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = behandlingEtterNySøknadsregistrering.id)
+
+        val vedtaksperioder = vedtaksperiodeService.genererVedtaksperioderMedBegrunnelser(vedtak)
+
+        assertEquals(1, vedtaksperioder.size)
+        assertEquals(1, vedtaksperioder.flatMap { it.begrunnelser }.size)
+        assertEquals(VedtakBegrunnelseSpesifikasjon.AVSLAG_UREGISTRERT_BARN,
+                     vedtaksperioder.flatMap { it.begrunnelser }.first().vedtakBegrunnelseSpesifikasjon)
     }
 
     @Test
