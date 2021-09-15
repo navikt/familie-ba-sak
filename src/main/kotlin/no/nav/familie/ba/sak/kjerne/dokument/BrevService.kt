@@ -55,12 +55,7 @@ class BrevService(
 
     fun hentVedtaksbrevData(vedtak: Vedtak): Vedtaksbrev {
         val brevmal = hentVedtaksbrevmal(vedtak.behandling)
-        val vedtakFellesfelter =
-                if (vedtak.behandling.resultat == BehandlingResultat.FORTSATT_INNVILGET ||
-                    (featureToggleService.isEnabled(FeatureToggleConfig.BRUK_VEDTAKSTYPE_MED_BEGRUNNELSER)))
-                    lagVedtaksbrevFellesfelter(vedtak)
-                else
-                    lagVedtaksbrevFellesfelterDeprecated(vedtak)
+        val vedtakFellesfelter = lagVedtaksbrevFellesfelter(vedtak)
         validerBrevdata(brevmal, vedtakFellesfelter)
 
         return when (brevmal) {

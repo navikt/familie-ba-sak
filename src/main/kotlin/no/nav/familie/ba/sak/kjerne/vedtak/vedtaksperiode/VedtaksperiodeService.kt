@@ -9,7 +9,6 @@ import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.BRUK_VEDTAKSTYPE_MED_BEGRUNNELSER
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedBegrunnelse
@@ -281,7 +280,7 @@ class VedtaksperiodeService(
                     vedtak = vedtak,
                     type = Vedtaksperiodetype.FORTSATT_INNVILGET
             ))
-        } else if (featureToggleService.isEnabled(BRUK_VEDTAKSTYPE_MED_BEGRUNNELSER)) {
+        } else  {
             lagre(genererVedtaksperioderMedBegrunnelser(vedtak))
         }
     }

@@ -112,21 +112,8 @@ class BehandlingService(
         )
 
         if (kopierVedtakBegrunnelser && deaktivertVedtak != null) {
-            if (featureToggleService.isEnabled(FeatureToggleConfig.BRUK_VEDTAKSTYPE_MED_BEGRUNNELSER)) { // TODO: Ved nytt vedtak vil man måtte resette begrunnelser
-                vedtaksperiodeService.kopierOverVedtaksperioder(deaktivertVedtak = deaktivertVedtak,
-                                                                aktivtVedtak = nyttVedtak)
-            } else {
-                nyttVedtak.settBegrunnelser(deaktivertVedtak.vedtakBegrunnelser.map { original ->
-                    VedtakBegrunnelse(
-                            begrunnelse = original.begrunnelse,
-                            brevBegrunnelse = original.brevBegrunnelse,
-                            fom = original.fom,
-                            tom = original.tom,
-                            vilkårResultat = begrunnelseVilkårPekere.find { it.first == original.vilkårResultat }?.second,
-                            vedtak = nyttVedtak,
-                    )
-                }.toSet())
-            }
+            vedtaksperiodeService.kopierOverVedtaksperioder(deaktivertVedtak = deaktivertVedtak,
+                                                            aktivtVedtak = nyttVedtak)
         }
 
         vedtakRepository.save(nyttVedtak)
