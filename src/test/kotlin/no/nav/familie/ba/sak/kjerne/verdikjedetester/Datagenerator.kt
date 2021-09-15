@@ -5,7 +5,12 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestJournalføring
 import no.nav.familie.ba.sak.ekstern.restDomene.RestJournalpostDokument
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.kontrakter.ba.infotrygd.Barn
+import no.nav.familie.kontrakter.ba.infotrygd.Delytelse
+import no.nav.familie.kontrakter.ba.infotrygd.Sak
+import no.nav.familie.kontrakter.ba.infotrygd.Stønad
 import no.nav.familie.kontrakter.felles.journalpost.LogiskVedlegg
+import java.time.LocalDate
 import java.time.LocalDateTime
 
 
@@ -34,3 +39,26 @@ fun lagMockRestJournalføring(bruker: NavnOgIdent): RestJournalføring = RestJou
         nyBehandlingstype = BehandlingType.FØRSTEGANGSBEHANDLING,
         nyBehandlingsårsak = BehandlingÅrsak.SØKNAD
 )
+
+fun lagInfotrygdSak(beløp: Double, identBarn: String, valg: String? = "OR", undervalg: String? = "OS"): Sak {
+    return Sak(
+            stønad = Stønad(
+                    barn = listOf(
+                            Barn(identBarn, barnetrygdTom = "000000")
+                    ),
+                    delytelse = listOf(
+                            Delytelse(
+                                    fom = LocalDate.now(),
+                                    tom = null,
+                                    beløp = beløp,
+                                    typeDelytelse = "MS",
+                                    typeUtbetaling = "J",
+                            )
+                    ),
+                    opphørsgrunn = "0"
+            ),
+            status = "FB",
+            valg = valg,
+            undervalg = undervalg
+    )
+}

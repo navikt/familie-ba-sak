@@ -19,7 +19,6 @@ val MOCK_SERVER_IMAGE = "ghcr.io/navikt/familie-mock-server/familie-mock-server:
         "mock-brev-klient",
         "mock-økonomi",
         "mock-infotrygd-feed",
-        "mock-infotrygd-barnetrygd",
         "mock-rest-template-config",
         "mock-task-repository",
         "mock-task-service"
