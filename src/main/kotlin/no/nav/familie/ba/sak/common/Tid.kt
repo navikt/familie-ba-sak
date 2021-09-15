@@ -4,10 +4,10 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import java.time.LocalDate
 import java.time.LocalDate.now
-import java.time.LocalDateTime
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
-import java.util.*
+import java.util.NavigableMap
+import java.util.TreeMap
 
 val TIDENES_MORGEN = LocalDate.MIN
 val TIDENES_ENDE = LocalDate.MAX
@@ -98,6 +98,14 @@ fun LocalDate.isBetween(toCompare: Periode): Boolean {
     return this.isAfter(toCompare.fom) && this.isBefore(toCompare.tom)
 }
 
+fun MånedPeriode.inkluderer(yearMonth: YearMonth) = yearMonth >= this.fom && yearMonth <= this.tom
+
+fun MånedPeriode.overlapperHeltEllerDelvisMed(annenPeriode: MånedPeriode) =
+        this.inkluderer(annenPeriode.fom) ||
+        this.inkluderer(annenPeriode.tom) ||
+        annenPeriode.inkluderer(this.fom) ||
+        annenPeriode.inkluderer(this.tom)
+
 fun Periode.kanErstatte(other: Periode): Boolean {
     return this.fom.isSameOrBefore(other.fom) && this.tom.isSameOrAfter(other.tom)
 }
@@ -117,7 +125,6 @@ fun Periode.kanFlytteTom(other: Periode): Boolean {
 data class Periode(val fom: LocalDate, val tom: LocalDate)
 data class MånedPeriode(val fom: YearMonth, val tom: YearMonth)
 data class NullablePeriode(val fom: LocalDate?, val tom: LocalDate?)
-
 
 fun VilkårResultat.erEtterfølgendePeriode(other: VilkårResultat): Boolean {
     return (other.toPeriode().fom.monthValue - this.toPeriode().tom.monthValue <= 1) &&
