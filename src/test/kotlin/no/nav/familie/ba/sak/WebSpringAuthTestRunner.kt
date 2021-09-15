@@ -98,11 +98,11 @@ abstract class WebSpringAuthTestRunner {
                 issuerId,
                 clientId,
                 DefaultOAuth2TokenCallback(
-                        issuerId,
-                        subject,
-                        listOf(audience),
-                        claims,
-                        3600
+                        issuerId = issuerId,
+                        subject = subject,
+                        audience = listOf(audience),
+                        claims = claims,
+                        expiry = 3600
                 )
         ).serialize()
     }
