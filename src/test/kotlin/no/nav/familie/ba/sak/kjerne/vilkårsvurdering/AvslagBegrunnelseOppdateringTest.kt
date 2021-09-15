@@ -40,7 +40,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 
@@ -297,15 +296,6 @@ class AvslagBegrunnelseOppdateringTest(
                                                                                   periodeTom = LocalDate.of(2010, 7, 15),
                                                                                   avslagsbegrunnelser = emptyList()))))
         assertTrue(vedtakService.hentAktivForBehandling(behandlingId = behandling.id)!!.vedtakBegrunnelser.isEmpty())
-    }
-
-    @Test
-    fun `Oppdatering av avslagbegrunnelse som ikke samsvarer med vilkår kaster feil`() {
-        assertThrows<IllegalStateException> {
-            vedtakService.oppdaterAvslagBegrunnelserForVilkår(behandlingId = behandling.id,
-                                                              vilkårResultat = vilkårResultatAvslag,
-                                                              begrunnelser = listOf(VedtakBegrunnelseSpesifikasjon.AVSLAG_LOVLIG_OPPHOLD_EØS_BORGER))
-        }
     }
 
     @Test

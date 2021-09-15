@@ -6,8 +6,11 @@ import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.innheholderVilkårtype
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import java.util.*
 
@@ -109,5 +112,12 @@ object VedtakUtils {
             acc
         }
 
+    }
+}
+
+fun validerAvslagsbegrunnelse(triggesAv: TriggesAv,
+                              vilkårResultat: VilkårResultat) {
+    if (triggesAv.innheholderVilkårtype(vilkårResultat.vilkårType)) {
+        error("Avslagbegrunnelser som oppdateres må tilhøre samme vilkår")
     }
 }

@@ -264,17 +264,16 @@ class VedtakService(
     fun oppdaterAvslagBegrunnelserForVilkår(vilkårResultat: VilkårResultat,
                                             begrunnelser: List<VedtakBegrunnelseSpesifikasjon>,
                                             behandlingId: Long): List<VedtakBegrunnelseSpesifikasjon> {
-        if (begrunnelser.any {
-
-                    val triggesAv =
-                            if (featureToggleService.isEnabled(BRUK_BEGRUNNELSE_TRIGGES_AV_FRA_SANITY)) {
-                                it.tilSanityBegrunnelse(brevKlient.hentSanityBegrunnelse())
-                                        .tilTriggesAv()
-                            } else
-                                it.triggesAv
-
-                    triggesAv.vilkår?.contains(vilkårResultat.vilkårType) != true
-                }) error("Avslagbegrunnelser som oppdateres må tilhøre samme vilkår")
+        begrunnelser.forEach {
+            val triggesAv =
+                    if (featureToggleService.isEnabled(BRUK_BEGRUNNELSE_TRIGGES_AV_FRA_SANITY)) {
+                        it.tilSanityBegrunnelse(brevKlient.hentSanityBegrunnelse())
+                                .tilTriggesAv()
+                    } else
+                        it.triggesAv
+            
+            validerAvslagsbegrunnelse(triggesAv, vilkårResultat)
+        }
 
         val vedtak = hentAktivForBehandling(behandlingId)
                      ?: throw Feil(message = "Finner ikke aktivt vedtak på behandling ved oppdatering av avslagbegrunnelser")
