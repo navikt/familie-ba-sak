@@ -190,22 +190,25 @@ object TilkjentYtelseUtils {
             val endringerForPerson = endretUtbetalingAndeler.filter { it.person.personIdent.ident == barnMedAndeler.personIdent }
 
             andelerForPerson.forEach { andelForPerson ->
+                // Deler opp hver enkelt andel i perioder som hhv blir berørt av endringene og de som ikke berøres av de.
                 val (perioderMedEndring, perioderUtenEndring) = andelForPerson.stønadsPeriode().perioderMedOgUtenOverlapp(
                         endringerForPerson.map { endringerForPerson -> endringerForPerson.periode() }
                 )
+                // Legger til nye AndelTilkjentYtelse for perioder som er berørt av endringer.
                 nyeAndelTilkjentYtelse.addAll(perioderMedEndring.map { månedPeriodeEndret ->
                     val endretUtbetalingAndel = endringerForPerson.single { it.overlapperMed(månedPeriodeEndret) }
                     andelForPerson.copy(
                             stønadFom = månedPeriodeEndret.fom,
                             stønadTom = månedPeriodeEndret.tom,
                             beløp = andelForPerson.beløp * endretUtbetalingAndel.prosent.toInt() / 100)
-                }
-                )
+                })
+                // Legger til nye AndelTilkjentYtelse for perioder som ikke berøres av endringer.
                 nyeAndelTilkjentYtelse.addAll(perioderUtenEndring.map { månedPeriodeUendret ->
                     andelForPerson.copy(stønadFom = månedPeriodeUendret.fom, stønadTom = månedPeriodeUendret.tom)
                 })
             }
         }
+        // Sorterer primært av hensyn til måten testene er implementert og kan muligens fjernes dersom dette skrives om.
         nyeAndelTilkjentYtelse.sortWith(compareBy ( {it.personIdent}, {it.stønadFom}))
         return nyeAndelTilkjentYtelse.toMutableSet()
     }

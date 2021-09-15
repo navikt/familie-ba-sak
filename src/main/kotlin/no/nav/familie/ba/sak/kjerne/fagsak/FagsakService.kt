@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsakDeltager
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestBehandlingStegTilstand
+import no.nav.familie.ba.sak.ekstern.restDomene.tilRestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestFødselshendelsefiltreringResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonResultat
@@ -24,6 +25,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -77,7 +79,8 @@ class FagsakService(
         private val søknadGrunnlagService: SøknadGrunnlagService,
         private val tilbakekrevingRepository: TilbakekrevingRepository,
         private val tilbakekrevingsbehandlingService: TilbakekrevingsbehandlingService,
-        private val fødselshendelsefiltreringResultatRepository: FødselshendelsefiltreringResultatRepository
+        private val fødselshendelsefiltreringResultatRepository: FødselshendelsefiltreringResultatRepository,
+        private val endretUtbetalingAndelRepository: EndretUtbetalingAndelRepository,
 ) {
 
 
@@ -243,6 +246,7 @@ class FagsakService(
                 utbetalingsperioder = vedtaksperiodeService.hentUtbetalingsperioder(behandling),
                 personerMedAndelerTilkjentYtelse = personopplysningGrunnlag?.tilRestPersonerMedAndeler(andelerTilkjentYtelse)
                                                    ?: emptyList(),
+                endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(behandling.id).map { it.tilRestEndretUtbetalingAndel() },
                 tilbakekreving = tilbakekreving?.tilRestTilbakekreving(),
                 vedtakForBehandling = vedtak.filter { it.aktiv }.map {
                     val sammenslåtteAvslagBegrunnelser =
