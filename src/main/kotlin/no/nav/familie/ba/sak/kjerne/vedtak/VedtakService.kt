@@ -21,8 +21,8 @@ import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingService
@@ -32,11 +32,10 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifi
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.hentMånedOgÅrForBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.vedtakBegrunnelserIkkeTilknyttetVilkår
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.toVedtakFritekstBegrunnelseSpesifikasjon
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurderingType
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import org.slf4j.LoggerFactory
@@ -50,14 +49,13 @@ import java.time.LocalDateTime
 class VedtakService(
         private val behandlingService: BehandlingService,
         private val vilkårsvurderingService: VilkårsvurderingService,
-        private val persongrunnlagService: PersongrunnlagService,
+        private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
         private val loggService: LoggService,
         private val vedtakRepository: VedtakRepository,
         private val dokumentService: DokumentService,
         private val totrinnskontrollService: TotrinnskontrollService,
         private val vedtakBegrunnelseRepository: VedtakBegrunnelseRepository,
         private val tilbakekrevingService: TilbakekrevingService,
-        private val vedtaksperiodeService: VedtaksperiodeService,
 
         ) {
 
@@ -74,7 +72,7 @@ class VedtakService(
     fun leggTilVedtakBegrunnelse(restPostVedtakBegrunnelse: RestPostVedtakBegrunnelse, fagsakId: Long): List<VedtakBegrunnelse> {
 
         val vedtak = hentVedtakForAktivBehandling(fagsakId)
-        val personopplysningGrunnlag = persongrunnlagService.hentAktiv(vedtak.behandling.id)
+        val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(vedtak.behandling.id)
                                        ?: throw Feil("Finner ikke personopplysninggrunnlag ved fastsetting av begrunnelse")
 
         val brevBegrunnelse =
@@ -113,7 +111,7 @@ class VedtakService(
         val personerMedUtgjørendeVilkårForUtbetalingsperiode =
                 when {
                     vedtakBegrunnelse.triggesAv.barnMedSeksårsdag ->
-                        persongrunnlagService.hentAktiv(vilkårsvurdering.behandling.id)
+                        personopplysningGrunnlagRepository.findByBehandlingAndAktiv(vilkårsvurdering.behandling.id)
                                 ?.personer
                                 ?.filter {
                                     it.hentSeksårsdag().toYearMonth() == restPostVedtakBegrunnelse.fom.toYearMonth()
@@ -253,7 +251,7 @@ class VedtakService(
         val vedtak = hentAktivForBehandling(behandlingId)
                      ?: throw Feil(message = "Finner ikke aktivt vedtak på behandling ved oppdatering av avslagbegrunnelser")
 
-        val personopplysningGrunnlag = persongrunnlagService.hentAktiv(vedtak.behandling.id)
+        val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(vedtak.behandling.id)
                                        ?: throw Feil("Finner ikke personopplysninggrunnlag ved oppdatering av avslagbegrunnelser")
 
 

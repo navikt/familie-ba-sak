@@ -91,15 +91,16 @@ class FeatureToggleConfig(private val enabled: Boolean,
     }
 
     companion object {
+
         const val TILBAKEKREVING = "familie-ba-sak.behandling.tilbakekreving"
         const val MIGRERING_NYTT_REVURDERINGSDATO = "familie-ba-sak.behandling.migrerings-nytt-revurderingsdato"
         const val BRUK_VEDTAKSTYPE_MED_BEGRUNNELSER = "familie-ba-sak.behandling.vedtakstype-med-begrunnelser"
         const val AUTOMATISK_FØDSELSHENDELSE = "familie-ba-sak.behandling.automatisk-fodselshendelse"
         const val BRUK_ER_DELT_BOSTED = "familie-ba-sak.behandling.delt_bosted"
         const val MIGRER_VEDTAK_BEGRUNNELSES_MODEL_UTREDNING = "familie-ba-sak.behandling.migrering.behandlingsmodel.utredning"
-        const val KJØR_SATSENDRING_SCHEDULER = "familie-ba-sak.satsendring-scheduler"
         const val BRUK_BEGRUNNELSE_FRA_SANITY_NEDTREKKSMENY = "familie-ba-sak.behandling.begrunnelse-fra-sanity-nedtrekksmeny"
         const val BRUK_BEGRUNNELSE_FRA_SANITY_BACKEND = "familie-ba-sak.behandling.begrunnelse-fra-sanity-backend"
+        const val KAN_MANUELT_KORRIGERE_MED_VEDTAKSBREV = "familie-ba-sak.behandling.korreksjon-vedtaksbrev"
 
         private val logger = LoggerFactory.getLogger(FeatureToggleConfig::class.java)
     }

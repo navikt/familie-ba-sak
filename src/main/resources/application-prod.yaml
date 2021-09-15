@@ -105,17 +105,6 @@ no.nav.security.jwt:
           client-id: ${BA_SAK_CLIENT_ID}
           client-secret: ${CLIENT_SECRET}
           client-auth-method: client_secret_basic
-      familie-statistikk-clientcredentials:
-        resource-url: ${FAMILIE_STATISTIKK_URL}
-        token-endpoint-url: https://login.microsoftonline.com/navno.onmicrosoft.com/oauth2/v2.0/token
-        grant-type: client_credentials
-        scope: ${FAMILIE_STATISTIKK_API_URL_SCOPE}
-        authentication:
-          client-id: ${BA_SAK_CLIENT_ID}
-          client-secret: ${CLIENT_SECRET}
-          client-auth-method: client_secret_basic
-
-ACCEPTED_CLIENTS: ${BA_SAK_FRONTEND_CLIENT_ID}, ${BA_MOTTAK_CLIENT_ID}, ${FAMILIE_PROSESSERING_CLIENT_ID}
 
 VEILEDER_ROLLE: "199c2b39-e535-4ae8-ac59-8ccbee7991ae"
 SAKSBEHANDLER_ROLLE: "847e3d72-9dc1-41c3-80ff-f5d4acdd5d46"

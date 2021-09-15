@@ -46,8 +46,8 @@ fun ManueltBrevRequest.byggMottakerdata(behandling: Behandling,
                                         persongrunnlagService: PersongrunnlagService,
                                         arbeidsfordelingService: ArbeidsfordelingService): ManueltBrevRequest {
     val mottaker =
-            persongrunnlagService.hentPersonPåBehandling(PersonIdent(this.mottakerIdent), behandling)
-            ?: error("Finner ikke mottaker på behandlingen")
+            persongrunnlagService.hentPersonerPåBehandling(listOf(this.mottakerIdent), behandling).singleOrNull()
+            ?: error("Fant en eller ingen mottakere på behandling")
 
     val arbeidsfordelingPåBehandling = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandling.id)
     return this.copy(

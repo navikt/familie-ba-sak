@@ -1,6 +1,17 @@
 package no.nav.familie.ba.sak.kjerne.fagsak
 
 import io.mockk.every
+import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
+import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
+import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
+import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsakDeltager
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
+import no.nav.familie.ba.sak.integrasjoner.pdl.internal.ForelderBarnRelasjon
+import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PersonInfo
+import no.nav.familie.ba.sak.integrasjoner.pdl.internal.Personident
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
@@ -9,24 +20,19 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.steg.RegistrerPersongrunnlagDTO
 import no.nav.familie.ba.sak.kjerne.steg.StegService
-import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
-import no.nav.familie.ba.sak.common.randomFnr
-import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
-import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
-import no.nav.familie.ba.sak.integrasjoner.pdl.internal.ForelderBarnRelasjon
-import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PersonInfo
-import no.nav.familie.ba.sak.integrasjoner.pdl.internal.Personident
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMellomlagringRepository
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMellomlagringType.SAK
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
-import org.junit.jupiter.api.*
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.HttpStatus
+import org.springframework.web.client.HttpServerErrorException
 import java.time.LocalDate
 
 class FagsakServiceTest(
@@ -49,7 +55,11 @@ class FagsakServiceTest(
         private val databaseCleanupService: DatabaseCleanupService,
 
         @Autowired
-        private val saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository
+        private val saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository,
+
+        @Autowired
+        private val integrasjonClient: IntegrasjonClient
+
 ): AbstractSpringIntegrationTest() {
 
     @BeforeAll
@@ -160,8 +170,7 @@ class FagsakServiceTest(
         stegService.håndterPersongrunnlag(andreBehandling,
                                           RegistrerPersongrunnlagDTO(ident = søker1Fnr,
                                                                      barnasIdenter = listOf(barn1Fnr, barn2Fnr)))
-
-
+        
         val tredjeBehandling = stegService.håndterNyBehandling(NyBehandling(
                 BehandlingKategori.NASJONAL,
                 BehandlingUnderkategori.ORDINÆR,
@@ -201,7 +210,6 @@ class FagsakServiceTest(
                      saksstatistikkMellomlagringRepository.findByTypeAndTypeId(SAK, fagsak.id)
                              .last().jsonToSakDVH().sakStatus
         )
-
     }
 
     @Test
@@ -228,5 +236,15 @@ class FagsakServiceTest(
 
         val fagsaker = fagsakService.hentFagsakerPåPerson(PersonIdent(barnFnr))
         assertEquals(2, fagsaker.size)
+    }
+
+    @Test
+    fun `Søk på fnr som ikke finnes i PDL skal vi tom liste`() {
+        every {
+            integrasjonClient.sjekkTilgangTilPersoner(any())
+        } answers {
+            throw HttpServerErrorException(HttpStatus.NOT_FOUND)
+        }
+        assertEquals(emptyList<RestFagsakDeltager>(), fagsakService.hentFagsakDeltager(randomFnr()))
     }
 }

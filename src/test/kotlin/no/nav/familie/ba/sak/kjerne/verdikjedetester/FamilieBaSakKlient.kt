@@ -10,12 +10,14 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.DEFAULT_JOURNALFØRENDE_ENHET
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.MigreringResponseDto
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
-import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
+import no.nav.familie.ba.sak.kjerne.behandling.RestHenleggBehandlingInfo
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRequest
 import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
+import no.nav.familie.ba.sak.kjerne.logg.Logg
 import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -30,6 +32,14 @@ class FamilieBaSakKlient(
         restOperations: RestOperations,
         private val headers: HttpHeaders
 ) : AbstractRestClient(restOperations, "familie-ba-sak") {
+
+    fun opprettFagsak(søkersIdent: String): Ressurs<RestFagsak> {
+        val uri = URI.create("$baSakUrl/api/fagsaker")
+
+        return postForEntity(uri, FagsakRequest(
+                personIdent = søkersIdent
+        ), headers)
+    }
 
     fun hentFagsak(fagsakId: Long): Ressurs<RestFagsak> {
         val uri = URI.create("$baSakUrl/api/fagsaker/$fagsakId")
@@ -63,14 +73,14 @@ class FamilieBaSakKlient(
         )
     }
 
-    fun triggFødselshendelse(nyBehandlingHendelse: NyBehandlingHendelse): Ressurs<String> {
-        val uri =
-                URI.create("$baSakUrl/api/behandlinger")
-        return putForEntity(
-                uri,
-                nyBehandlingHendelse,
-                headers
-        )
+    fun henleggSøknad(behandlingId: Long, restHenleggBehandlingInfo: RestHenleggBehandlingInfo): Ressurs<RestFagsak> {
+        val uri = URI.create("$baSakUrl/api/behandlinger/${behandlingId}/henlegg")
+        return putForEntity(uri, restHenleggBehandlingInfo, headers)
+    }
+
+    fun hentLogg(behandlingId: Long): Ressurs<List<Logg>> {
+        val uri = URI.create("$baSakUrl/api/logg/${behandlingId}")
+        return getForEntity(uri, headers)
     }
 
     fun opprettBehandling(søkersIdent: String,
@@ -142,7 +152,7 @@ class FamilieBaSakKlient(
     fun migrering(ident: String): Ressurs<MigreringResponseDto> {
         val uri = URI.create("$baSakUrl/api/migrering")
 
-        return postForEntity(uri, PersonIdent(ident), headers)!!
+        return postForEntity(uri, PersonIdent(ident), headers)
     }
 
     fun hentTasker(key: String, value: String): ResponseEntity<List<Task>> {

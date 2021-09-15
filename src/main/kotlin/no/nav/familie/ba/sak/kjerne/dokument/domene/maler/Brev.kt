@@ -23,6 +23,7 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
     VEDTAK_OPPHØR_MED_ENDRING(true, "opphorMedEndring", "Opphør med endring"),
     VEDTAK_AVSLAG(true, "vedtakAvslag", "Avslag"),
     VEDTAK_FORTSATT_INNVILGET(true, "vedtakFortsattInnvilget", "Vedtak fortstatt innvilget"),
+    VEDTAK_KORREKSJON_VEDTAKSBREV(true, "korrigertVedtakEgenBrevmal", "Korrigere vedtak med egen brevmal"),
     AUTOVEDTAK_BARN6_ÅR(true, "autovedtakBarn6År", "Autovedtak - Barn 6 år"),
     AUTOVEDTAK_BARN18_ÅR(true, "autovedtakBarn18År", "Autovedtak - Barn 18 år"),
     AUTOVEDTAK_NYFØDT_FØRSTE_BARN(true, "autovedtakNyfodtForsteBarn", "Autovedtak nyfødt - første barn"),

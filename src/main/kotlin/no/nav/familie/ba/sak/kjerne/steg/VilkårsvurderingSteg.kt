@@ -12,14 +12,13 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatService
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse.Companion.disjunkteAndeler
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -52,16 +51,6 @@ class VilkårsvurderingSteg(
 
         val behandlingMedResultat = if (behandling.erMigrering() && behandling.skalBehandlesAutomatisk) {
             settBehandlingResultat(behandling, BehandlingResultat.INNVILGET)
-        } else if (behandling.opprettetÅrsak == BehandlingÅrsak.SATSENDRING) {
-            // TODO: Når man støtter å utlede behandlingsresultat ENDRET ved ren beløpsendring kan resultat for satsendring settes på samme måte
-            val forrigebehandling = behandlingService.hentForrigeBehandlingSomErIverksatt(behandling = behandling)
-                                    ?: throw Feil("Forsøker å utføre satsendring på fagsak uten iverksatte behandlinger")
-            val forrigeAndeler = beregningService.hentAndelerTilkjentYtelseForBehandling(forrigebehandling.id).toSet()
-            val andeler = beregningService.hentAndelerTilkjentYtelseForBehandling(behandling.id).toSet()
-            if (forrigeAndeler.disjunkteAndeler(andeler).isEmpty())
-                settBehandlingResultat(behandling, BehandlingResultat.FORTSATT_INNVILGET)
-            else
-                settBehandlingResultat(behandling, BehandlingResultat.ENDRET)
         } else {
             val resultat = behandlingsresultatService.utledBehandlingsresultat(behandlingId = behandling.id)
             behandlingService.oppdaterResultatPåBehandling(behandlingId = behandling.id,

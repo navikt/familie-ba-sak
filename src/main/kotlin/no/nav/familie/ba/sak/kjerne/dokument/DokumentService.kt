@@ -41,7 +41,6 @@ import java.util.*
 class DokumentService(
         private val persongrunnlagService: PersongrunnlagService,
         private val integrasjonClient: IntegrasjonClient,
-        private val arbeidsfordelingService: ArbeidsfordelingService,
         private val loggService: LoggService,
         private val journalføringRepository: JournalføringRepository,
         private val taskRepository: TaskRepository,
@@ -77,6 +76,8 @@ class DokumentService(
             val vedtaksbrev =
                     if (vedtak.behandling.opprettetÅrsak == BehandlingÅrsak.DØDSFALL_BRUKER)
                         brevService.hentDødsfallbrevData(vedtak)
+                    else if (vedtak.behandling.opprettetÅrsak == BehandlingÅrsak.KORREKSJON_VEDTAKSBREV)
+                        brevService.hentKorreksjonbrevData(vedtak)
                     else
                         brevService.hentVedtaksbrevData(vedtak)
             return brevKlient.genererBrev(målform.tilSanityFormat(), vedtaksbrev)
@@ -127,7 +128,8 @@ class DokumentService(
 
         val journalpostId = integrasjonClient.journalførManueltBrev(fnr = manueltBrevRequest.mottakerIdent,
                                                                     fagsakId = fagsakId.toString(),
-                                                                    journalførendeEnhet = manueltBrevRequest.enhet?.enhetId ?: DEFAULT_JOURNALFØRENDE_ENHET,
+                                                                    journalførendeEnhet = manueltBrevRequest.enhet?.enhetId
+                                                                                          ?: DEFAULT_JOURNALFØRENDE_ENHET,
                                                                     brev = generertBrev,
                                                                     førsteside = førsteside,
                                                                     dokumenttype = manueltBrevRequest.brevmal.dokumenttype)

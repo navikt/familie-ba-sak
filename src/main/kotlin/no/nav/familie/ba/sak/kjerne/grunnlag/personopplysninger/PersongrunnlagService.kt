@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.Utils.storForbokstav
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPerson
 import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
@@ -13,14 +14,13 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.vilkårsvurdering.finnNåværendeMedlemskap
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.vilkårsvurdering.finnSterkesteMedlemskap
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.opphold.GrOpphold
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.StatsborgerskapService
+import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
@@ -30,13 +30,14 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 class PersongrunnlagService(
-    private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
-    private val statsborgerskapService: StatsborgerskapService,
-    private val arbeidsfordelingService: ArbeidsfordelingService,
-    private val personopplysningerService: PersonopplysningerService,
-    private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
-    private val behandlingRepository: BehandlingRepository,
-    private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
+        private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
+        private val statsborgerskapService: StatsborgerskapService,
+        private val arbeidsfordelingService: ArbeidsfordelingService,
+        private val personopplysningerService: PersonopplysningerService,
+        private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
+        private val behandlingRepository: BehandlingRepository,
+        private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
+        private val loggService: LoggService,
 ) {
 
     fun mapTilRestPersonMedStatsborgerskapLand(person: Person): RestPerson {
@@ -60,17 +61,14 @@ class PersongrunnlagService(
                 .filter { person -> person.type == PersonType.BARN }
     }
 
-    fun hentPersonPåBehandling(personIdent: PersonIdent, behandling: Behandling): Person? {
-        return personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)!!.personer
-                .find { person -> person.personIdent == personIdent }
+    fun hentPersonerPåBehandling(identer: List<String>, behandling: Behandling): List<Person> {
+        val grunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
+                       ?: throw Feil("Finner ikke personopplysningsgrunnlag på behandling ${behandling.id}")
+        return grunnlag.personer.filter { person -> identer.contains(person.personIdent.ident) }
     }
 
     fun hentAktiv(behandlingId: Long): PersonopplysningGrunnlag? {
         return personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId)
-    }
-
-    fun hentAktivThrows(behandlingId: Long): PersonopplysningGrunnlag {
-        return personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId) ?: error("Finner ikke persongrunnlag")
     }
 
     fun oppdaterRegisteropplysninger(behandlingId: Long): PersonopplysningGrunnlag {
@@ -87,6 +85,41 @@ class PersongrunnlagService(
     }
 
     /**
+     * Legger til barn i nytt personopplysningsgrunnlag
+     */
+    @Transactional
+    fun leggTilBarnIPersonopplysningsgrunnlag(nyttBarnIdent: String,
+                                              behandling: Behandling) {
+        val personopplysningGrunnlag =
+                hentAktiv(behandlingId = behandling.id)
+                ?: throw FunksjonellFeil(melding = "Fant ikke personopplysningsgrunnlag på behandling ${behandling.id} ved oppdatering av barn",
+                                         frontendFeilmelding = "En feil oppsto og barn ble ikke lagt til")
+
+        val barnIGrunnlag = personopplysningGrunnlag.barna.map { it.personIdent.ident }
+
+        if (barnIGrunnlag.contains(nyttBarnIdent)) throw FunksjonellFeil(melding = "Forsøker å legge til barn som allerede finnes i personopplysningsgrunnlag ${personopplysningGrunnlag.id}",
+                                                                         frontendFeilmelding = "Barn finnes allerede på behandling og er derfor ikke lagt til.")
+
+        val oppdatertGrunnlag = hentOgLagreSøkerOgBarnINyttGrunnlag(personopplysningGrunnlag.søker.personIdent.ident,
+                                                                    barnIGrunnlag.plus(nyttBarnIdent).toList(),
+                                                                    behandling,
+                                                                    personopplysningGrunnlag.søker.målform)
+
+        val barnLagtTil = oppdatertGrunnlag.barna.singleOrNull { nyttBarnIdent == it.personIdent.ident }
+                          ?: throw Feil("Nytt barn ikke lagt til i personopplysningsgrunnlag ${personopplysningGrunnlag.id}")
+        loggService.opprettBarnLagtTilLogg(behandling, barnLagtTil)
+
+    }
+
+    fun finnNyeBarn(behandling: Behandling, forrigeBehandling: Behandling?): List<Person> {
+        val barnIForrigeGrunnlag = forrigeBehandling?.let { hentAktiv(behandlingId = it.id)?.barna } ?: emptySet()
+        val barnINyttGrunnlag =
+                behandling.let { hentAktiv(behandlingId = it.id)?.barna } ?: throw Feil("Fant ikke personopplysningsgrunnlag")
+
+        return barnINyttGrunnlag.filter { barn -> barnIForrigeGrunnlag.none { barn.personIdent == it.personIdent } }
+    }
+
+    /**
      * Registrerer barn valgt i søknad og barn fra forrige behandling
      */
     fun registrerBarnFraSøknad(søknadDTO: SøknadDTO, behandling: Behandling, forrigeBehandling: Behandling? = null) {
@@ -97,10 +130,12 @@ class PersongrunnlagService(
         if (behandling.type == BehandlingType.REVURDERING && forrigeBehandling != null) {
             val forrigePersongrunnlag = hentAktiv(behandlingId = forrigeBehandling.id)
             val forrigePersongrunnlagBarna = forrigePersongrunnlag?.barna?.map { it.personIdent.ident }
-                ?.filter {
-                    andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(forrigeBehandling.id, it)
-                        .isNotEmpty()
-                } ?: emptyList()
+                                                     ?.filter {
+                                                         andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(
+                                                                 forrigeBehandling.id,
+                                                                 it)
+                                                                 .isNotEmpty()
+                                                     } ?: emptyList()
 
             hentOgLagreSøkerOgBarnINyttGrunnlag(søkerIdent,
                                                 valgteBarnsIdenter.union(forrigePersongrunnlagBarna)
@@ -188,12 +223,6 @@ class PersongrunnlagService(
 
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} oppretter persongrunnlag $personopplysningGrunnlag")
         return personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
-    }
-
-    private fun finnNåværendeSterkesteMedlemskap(statsborgerskap: List<GrStatsborgerskap>?): Medlemskap? {
-        val nåværendeMedlemskap = finnNåværendeMedlemskap(statsborgerskap)
-
-        return finnSterkesteMedlemskap(nåværendeMedlemskap)
     }
 
     fun hentSøkersMålform(behandlingId: Long) =

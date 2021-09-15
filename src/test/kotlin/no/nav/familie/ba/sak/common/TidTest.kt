@@ -1,14 +1,17 @@
 package no.nav.familie.ba.sak.common
 
 import io.mockk.mockk
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import org.assertj.core.api.Assertions
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.time.YearMonth
 
 internal class TidTest {
 
@@ -233,6 +236,31 @@ internal class TidTest {
         assertEquals("311220", dato("2020-12-31").tilddMMyy())
         assertEquals("31.12.20", dato("2020-12-31").tilKortString())
         assertEquals("desember 2020", dato("2020-12-31").tilMånedÅr())
+    }
+
+    @Test
+    fun `sjekk for om to perioder helt eller delvis er overlappende`() {
+        val jan2020_aug2020 = MånedPeriode(YearMonth.of(2020, 1), YearMonth.of(2020, 8))
+        val jul2020_des2020 = MånedPeriode(YearMonth.of(2020, 7), YearMonth.of(2020, 12))
+        val des2019_sep2021 = MånedPeriode(YearMonth.of(2019, 12), YearMonth.of(2020, 9))
+        val jan2020 = MånedPeriode(YearMonth.of(2020, 1), YearMonth.of(2020, 1))
+        val aug2020 = MånedPeriode(YearMonth.of(2020, 8), YearMonth.of(2020, 8))
+        val des2019 = MånedPeriode(YearMonth.of(2019, 12), YearMonth.of(2019, 12))
+        val sep2021 = MånedPeriode(YearMonth.of(2021, 9), YearMonth.of(2021, 9))
+
+
+        assertTrue(jan2020_aug2020.overlapperHeltEllerDelvisMed(jul2020_des2020))
+        assertTrue(jul2020_des2020.overlapperHeltEllerDelvisMed(jan2020_aug2020))
+        assertTrue(jan2020_aug2020.overlapperHeltEllerDelvisMed(des2019_sep2021))
+        assertTrue(des2019_sep2021.overlapperHeltEllerDelvisMed(jan2020_aug2020))
+        assertTrue(jan2020_aug2020.overlapperHeltEllerDelvisMed(jan2020))
+        assertTrue(jan2020.overlapperHeltEllerDelvisMed(jan2020_aug2020))
+        assertTrue(jan2020_aug2020.overlapperHeltEllerDelvisMed(aug2020))
+        assertTrue(aug2020.overlapperHeltEllerDelvisMed(jan2020_aug2020))
+        assertFalse(jan2020_aug2020.overlapperHeltEllerDelvisMed(des2019))
+        assertFalse(des2019.overlapperHeltEllerDelvisMed(jan2020_aug2020))
+        assertFalse(jan2020_aug2020.overlapperHeltEllerDelvisMed(sep2021))
+        assertFalse(sep2021.overlapperHeltEllerDelvisMed(jan2020_aug2020))
     }
 
     private fun dato(s: String): LocalDate {
