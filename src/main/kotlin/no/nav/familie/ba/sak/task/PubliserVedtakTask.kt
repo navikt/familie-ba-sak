@@ -6,15 +6,13 @@ import no.nav.familie.ba.sak.task.PubliserVedtakTask.Companion.TASK_STEP_TYPE
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.prosessering.domene.TaskRepository
 import org.springframework.stereotype.Service
-import java.util.*
+import java.util.Properties
 
 @Service
 @TaskStepBeskrivelse(taskStepType = TASK_STEP_TYPE, beskrivelse = "Publiser vedtak til kafka", maxAntallFeil = 1)
 class PubliserVedtakTask(val kafkaProducer: KafkaProducer,
-                         val stønadsstatistikkService: StønadsstatistikkService,
-                         val taskRepository: TaskRepository
+                         val stønadsstatistikkService: StønadsstatistikkService
 ) : AsyncTaskStep {
 
     override fun doTask(task: Task) {

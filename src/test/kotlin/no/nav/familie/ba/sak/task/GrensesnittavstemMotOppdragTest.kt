@@ -4,11 +4,11 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
-import no.nav.familie.ba.sak.task.dto.GrensesnittavstemmingTaskDTO
+import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.økonomi.AvstemmingService
+import no.nav.familie.ba.sak.task.dto.GrensesnittavstemmingTaskDTO
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.prosessering.domene.TaskRepository
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -17,7 +17,7 @@ import java.time.LocalDate
 class GrensesnittavstemMotOppdragTest {
 
     private lateinit var grensesnittavstemMotOppdrag: GrensesnittavstemMotOppdrag
-    private lateinit var taskRepositoryMock: TaskRepository
+    private lateinit var taskRepositoryMock: TaskRepositoryWrapper
 
     @BeforeEach
     fun setUp() {

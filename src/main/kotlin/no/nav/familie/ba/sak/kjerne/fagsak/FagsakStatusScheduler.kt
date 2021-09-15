@@ -1,15 +1,15 @@
 package no.nav.familie.ba.sak.kjerne.fagsak
 
+import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.task.OppdaterLøpendeFlagg
 import no.nav.familie.leader.LeaderClient
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.prosessering.domene.TaskRepository
 import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 
 @Component
-class FagsakStatusScheduler(val taskRepository: TaskRepository) {
+class FagsakStatusScheduler(val taskRepository: TaskRepositoryWrapper) {
 
     /*
      * Siden barnetrygd er en månedsytelse vil en fagsak alltid løpe ut en måned

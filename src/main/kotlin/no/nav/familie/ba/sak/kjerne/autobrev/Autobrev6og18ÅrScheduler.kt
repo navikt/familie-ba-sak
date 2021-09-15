@@ -1,8 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.autobrev
 
+import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.leader.LeaderClient
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.familie.util.VirkedagerProvider
 import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
@@ -12,7 +12,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 
 @Component
-class Autobrev6og18ÅrScheduler(val taskRepository: TaskRepository) {
+class Autobrev6og18ÅrScheduler(val taskRepository: TaskRepositoryWrapper) {
 
     /*
      * Hver måned skal løpende fagsaker med barn som fyller 6- eller 18 år i løpet av måneden slås opp og tasker for å sjekke om

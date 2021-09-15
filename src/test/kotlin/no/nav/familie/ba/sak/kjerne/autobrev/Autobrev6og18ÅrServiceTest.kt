@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.common.tilfeldigSøker
+import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
@@ -23,7 +24,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.task.dto.Autobrev6og18ÅrDTO
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.prosessering.domene.TaskRepository
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -35,7 +35,7 @@ internal class Autobrev6og18ÅrServiceTest {
     val behandlingService = mockk<BehandlingService>()
     val stegService = mockk<StegService>()
     val vedtakService = mockk<VedtakService>(relaxed = true)
-    val taskRepository = mockk<TaskRepository>(relaxed = true)
+    val taskRepository = mockk<TaskRepositoryWrapper>(relaxed = true)
     val vedtakBegrunnelseRepository = mockk<VedtakBegrunnelseRepository>()
     val vedtaksperiodeService = mockk<VedtaksperiodeService>()
 

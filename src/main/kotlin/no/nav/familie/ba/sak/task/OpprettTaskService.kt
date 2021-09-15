@@ -1,21 +1,21 @@
 package no.nav.familie.ba.sak.task
 
 import no.nav.familie.ba.sak.common.inneværendeMåned
+import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.task.dto.Autobrev6og18ÅrDTO
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.log.IdUtils
 import no.nav.familie.log.mdc.MDCConstants
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.prosessering.domene.TaskRepository
 import org.slf4j.MDC
 import org.springframework.stereotype.Service
 import java.time.LocalDate
-import java.util.*
+import java.util.Properties
 
 @Service
 class OpprettTaskService(
-        val taskRepository: TaskRepository
+        val taskRepository: TaskRepositoryWrapper
 ) {
 
     fun opprettOppgaveTask(behandlingId: Long,

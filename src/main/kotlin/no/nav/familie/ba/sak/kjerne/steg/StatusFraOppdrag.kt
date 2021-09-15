@@ -1,23 +1,20 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
+import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
 import no.nav.familie.ba.sak.task.IverksettMotFamilieTilbakeTask
 import no.nav.familie.ba.sak.task.JournalførVedtaksbrevTask
 import no.nav.familie.ba.sak.task.dto.StatusFraOppdragDTO
-import no.nav.familie.ba.sak.økonomi.ØkonomiService
-import no.nav.familie.ba.sak.task.erKlokkenMellom21Og06
-import no.nav.familie.ba.sak.task.kl06IdagEllerNesteDag
 import no.nav.familie.ba.sak.task.nesteGyldigeTriggertidForBehandlingIHverdager
+import no.nav.familie.ba.sak.økonomi.ØkonomiService
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragStatus
 import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.familie.prosessering.error.RekjørSenereException
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import java.time.LocalDateTime
-import java.util.*
+import java.util.Properties
 
 data class StatusFraOppdragMedTask(
         val statusFraOppdragDTO: StatusFraOppdragDTO,
@@ -27,7 +24,8 @@ data class StatusFraOppdragMedTask(
 @Service
 class StatusFraOppdrag(
         private val økonomiService: ØkonomiService,
-        private val taskRepository: TaskRepository) : BehandlingSteg<StatusFraOppdragMedTask> {
+        private val taskRepository: TaskRepositoryWrapper
+) : BehandlingSteg<StatusFraOppdragMedTask> {
 
     override fun utførStegOgAngiNeste(behandling: Behandling,
                                       data: StatusFraOppdragMedTask): StegType {

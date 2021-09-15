@@ -1,12 +1,12 @@
 package no.nav.familie.ba.sak.integrasjoner.økonomi
 
+import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.task.KonsistensavstemMotOppdrag
 import no.nav.familie.ba.sak.task.dto.KonsistensavstemmingTaskDTO
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.prosessering.domene.TaskRepository
 import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
@@ -18,7 +18,8 @@ import java.time.YearMonth
 class KonsistensavstemmingScheduler(val batchService: BatchService,
                                     val behandlingService: BehandlingService,
                                     val fagsakService: FagsakService,
-                                    val taskRepository: TaskRepository) {
+                                    val taskRepository: TaskRepositoryWrapper
+) {
 
     @Scheduled(cron = "0 0 17 * * *")
     fun utførKonsistensavstemming() {

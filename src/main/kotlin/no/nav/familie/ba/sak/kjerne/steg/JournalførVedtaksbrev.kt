@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
 import no.nav.familie.ba.sak.common.EnvService
+import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -9,9 +10,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.task.DistribuerDokumentDTO
 import no.nav.familie.ba.sak.task.DistribuerDokumentTask
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.prosessering.domene.TaskRepository
 import org.springframework.stereotype.Service
-import java.time.LocalDateTime
 
 data class JournalførVedtaksbrevDTO(
     val vedtakId: Long,
@@ -23,7 +22,7 @@ class JournalførVedtaksbrev(
     private val vedtakService: VedtakService,
     private val integrasjonClient: IntegrasjonClient,
     private val arbeidsfordelingService: ArbeidsfordelingService,
-    private val taskRepository: TaskRepository,
+    private val taskRepository: TaskRepositoryWrapper,
     private val envService: EnvService
 ) : BehandlingSteg<JournalførVedtaksbrevDTO> {
 

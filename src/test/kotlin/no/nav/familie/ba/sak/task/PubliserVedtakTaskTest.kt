@@ -6,11 +6,11 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.slot
 import io.mockk.verify
+import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.statistikk.producer.KafkaProducer
 import no.nav.familie.ba.sak.statistikk.stønadsstatistikk.StønadsstatistikkService
 import no.nav.familie.eksterne.kontrakter.VedtakDVH
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.prosessering.domene.TaskRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -20,7 +20,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 class PubliserVedtakTaskTest {
 
     @MockK(relaxed = true)
-    private lateinit var taskRepositoryMock: TaskRepository
+    private lateinit var taskRepositoryMock: TaskRepositoryWrapper
 
     @MockK(relaxed = true)
     private lateinit var kafkaProducerMock: KafkaProducer
