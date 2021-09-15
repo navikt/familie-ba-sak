@@ -52,6 +52,7 @@ import no.nav.familie.prosessering.domene.Task
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Order
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
@@ -103,6 +104,7 @@ class StegServiceTest(
     }
 
     @Test
+    @Order(8)
     fun `Skal sette default-verdier på gift-vilkår for barn`() {
         val søkerFnr = ClientMocks.søkerFnr[0]
         val barnFnr1 = ClientMocks.barnFnr[0]
@@ -130,6 +132,7 @@ class StegServiceTest(
     }
 
     @Test
+    @Order(10)
     fun `Skal kjøre gjennom alle steg med datageneratoren`() {
         val søkerFnr = randomFnr()
         kjørStegprosessForFGB(
@@ -156,6 +159,7 @@ class StegServiceTest(
     }
 
     @Test
+    @Order(2)
     fun `Skal håndtere steg for frontend ordinær behandling`() {
         val søkerFnr = randomFnr()
         val barnFnr = randomFnr()
@@ -263,6 +267,7 @@ class StegServiceTest(
     }
 
     @Test
+    @Order(5)
     fun `Skal feile når man prøver å håndtere feil steg`() {
         val søkerFnr = randomFnr()
 
@@ -278,6 +283,7 @@ class StegServiceTest(
     }
 
     @Test
+    @Order(4)
     fun `Skal feile når man prøver å endre en avsluttet behandling`() {
         val søkerFnr = randomFnr()
 
@@ -298,6 +304,7 @@ class StegServiceTest(
     }
 
     @Test
+    @Order(9)
     fun `Skal feile når man prøver å noe annet enn å beslutte behandling når den er på dette steget`() {
         val søkerFnr = randomFnr()
 
@@ -317,6 +324,7 @@ class StegServiceTest(
     }
 
     @Test
+    @Order(6)
     fun `Skal feile når man prøver å kalle beslutning-steget med feil status på behandling`() {
         val søkerFnr = randomFnr()
 
@@ -333,6 +341,7 @@ class StegServiceTest(
     }
 
     @Test
+    @Order(7)
     fun `Underkjent beslutning setter steg tilbake til send til beslutter`() {
         val søkerFnr = randomFnr()
         val barnFnr = randomFnr()
@@ -357,6 +366,7 @@ class StegServiceTest(
     }
 
     @Test
+    @Order(1)
     fun `Henlegge før behandling er sendt til beslutter`() {
         val vilkårsvurdertBehandling = kjørGjennomStegInkludertVurderTilbakekreving()
 
@@ -377,6 +387,7 @@ class StegServiceTest(
     }
 
     @Test
+    @Order(3)
     fun `Henlegge etter behandling er sendt til beslutter`() {
         val vilkårsvurdertBehandling = kjørGjennomStegInkludertVurderTilbakekreving()
         stegService.håndterSendTilBeslutter(vilkårsvurdertBehandling, "1234")
