@@ -53,7 +53,8 @@ class BeslutteVedtakTest {
 
         every { taskRepository.save(any()) } returns Task(OpprettOppgaveTask.TASK_STEP_TYPE, "")
         every { toTrinnKontrollService.besluttTotrinnskontroll(any(), any(), any(), any(), any()) } returns Totrinnskontroll(
-                behandling = lagBehandling(), saksbehandler = "Mock Saksbehandler", saksbehandlerId = "Mock.Saksbehandler")
+            behandling = lagBehandling(), saksbehandler = "Mock Saksbehandler", saksbehandlerId = "Mock.Saksbehandler"
+        )
         every { loggService.opprettBeslutningOmVedtakLogg(any(), any(), any()) } just Runs
         every { vedtakService.oppdaterVedtaksdatoOgBrev(any()) } just runs
         every { behandlingService.opprettOgInitierNyttVedtakForBehandling(any(), any(), any()) } just runs
@@ -61,13 +62,15 @@ class BeslutteVedtakTest {
         every { vilkårsvurderingService.lagreNyOgDeaktiverGammel(any()) } returns randomVilkårsvurdering
         every { featureToggleService.isEnabled(any()) } returns false
 
-        beslutteVedtak = BeslutteVedtak(toTrinnKontrollService,
-                                        vedtakService,
-                                        behandlingService,
-                                        taskRepository,
-                                        loggService,
-                                        vilkårsvurderingService,
-                                        featureToggleService)
+        beslutteVedtak = BeslutteVedtak(
+            toTrinnKontrollService,
+            vedtakService,
+            behandlingService,
+            taskRepository,
+            loggService,
+            vilkårsvurderingService,
+            featureToggleService
+        )
     }
 
     @Test
@@ -100,21 +103,25 @@ class BeslutteVedtakTest {
         mockkObject(OpprettOppgaveTask.Companion)
         every { FerdigstillOppgave.opprettTask(any(), any()) } returns Task(FerdigstillOppgave.TASK_STEP_TYPE, "")
         every {
-            OpprettOppgaveTask.opprettTask(any(),
-                                           any(),
-                                           any(),
-                                           any(), any())
+            OpprettOppgaveTask.opprettTask(
+                any(),
+                any(),
+                any(),
+                any(), any()
+            )
         } returns Task(OpprettOppgaveTask.TASK_STEP_TYPE, "")
 
         val nesteSteg = beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak)
 
         verify(exactly = 1) { FerdigstillOppgave.opprettTask(behandling.id, Oppgavetype.GodkjenneVedtak) }
         verify(exactly = 1) {
-            OpprettOppgaveTask.opprettTask(behandling.id,
-                                           Oppgavetype.BehandleUnderkjentVedtak,
-                                           any(),
-                                           any(),
-                                           any())
+            OpprettOppgaveTask.opprettTask(
+                behandling.id,
+                Oppgavetype.BehandleUnderkjentVedtak,
+                any(),
+                any(),
+                any()
+            )
         }
         Assertions.assertEquals(StegType.SEND_TIL_BESLUTTER, nesteSteg)
     }
@@ -146,7 +153,10 @@ class BeslutteVedtakTest {
 
         every { vedtakService.hentAktivForBehandling(any()) } returns lagVedtak(behandling)
         mockkObject(FerdigstillOppgave.Companion)
-        every { FerdigstillOppgave.opprettTask(any(), any()) } returns Task.nyTask(FerdigstillOppgave.TASK_STEP_TYPE, "")
+        every { FerdigstillOppgave.opprettTask(any(), any()) } returns Task(
+            type = FerdigstillOppgave.TASK_STEP_TYPE,
+            payload = ""
+        )
 
         assertThrows<FunksjonellFeil> { beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak) }
     }
