@@ -1,7 +1,7 @@
 package no.nav.familie.ba.skatteetaten.model
 
 import com.fasterxml.jackson.annotation.JsonProperty
-import java.time.OffsetDateTime
+import java.time.LocalDateTime
 import javax.validation.constraints.NotNull
 
 /**
@@ -15,7 +15,7 @@ data class Person(
     @field:JsonProperty("ident") val ident: String,
 
     @get:NotNull
-    @field:JsonProperty("sisteVedtakPaaIdent") val sisteVedtakPaaIdent: OffsetDateTime
+    @field:JsonProperty("sisteVedtakPaaIdent") val sisteVedtakPaaIdent: LocalDateTime
 ) {
 
 }
