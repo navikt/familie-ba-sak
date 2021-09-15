@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.endretutbetaling
 
-import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestEndretUtbetalingAndel
+import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsak
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
@@ -9,7 +9,6 @@ import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.ResponseEntity
-import org.springframework.transaction.annotation.Transactional
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -69,7 +68,6 @@ class EndretUtbetalingAndelController(
         return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = behandling.fagsak.id))
     }
 
-    @Transactional
     @PostMapping(path = ["/{behandlingId}"])
     fun lagreEndretUtbetalingAndelOgOppdaterTilkjentYtelse(
         @PathVariable behandlingId: Long,
