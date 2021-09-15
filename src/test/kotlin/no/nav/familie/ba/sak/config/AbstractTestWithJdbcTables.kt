@@ -5,8 +5,9 @@ import org.springframework.jdbc.datasource.init.ScriptUtils
 import javax.sql.DataSource
 
 abstract class AbstractTestWithJdbcTables {
-    fun initJdbcTables(dataSource: DataSource){
-        dataSource.getConnection().use { conn ->
+
+    fun initJdbcTables(dataSource: DataSource) {
+        dataSource.connection.use { conn ->
             ScriptUtils.executeSqlScript(conn, ClassPathResource("sql/prosessering_jdbc.sql"))
         }
     }

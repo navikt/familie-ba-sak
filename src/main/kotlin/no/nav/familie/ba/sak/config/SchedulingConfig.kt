@@ -5,6 +5,5 @@ import org.springframework.context.annotation.Profile
 import org.springframework.scheduling.annotation.EnableScheduling
 
 @Configuration
-@Profile("prod", "preprod", "e2e")
 @EnableScheduling
 class SchedulingConfig
