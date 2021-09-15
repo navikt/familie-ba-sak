@@ -76,6 +76,8 @@ class DokumentService(
             val vedtaksbrev =
                     if (vedtak.behandling.opprettetÅrsak == BehandlingÅrsak.DØDSFALL_BRUKER)
                         brevService.hentDødsfallbrevData(vedtak)
+                    else if (vedtak.behandling.opprettetÅrsak == BehandlingÅrsak.KORREKSJON_VEDTAKSBREV)
+                        brevService.hentKorreksjonbrevData(vedtak)
                     else
                         brevService.hentVedtaksbrevData(vedtak)
             return brevKlient.genererBrev(målform.tilSanityFormat(), vedtaksbrev)
@@ -126,7 +128,8 @@ class DokumentService(
 
         val journalpostId = integrasjonClient.journalførManueltBrev(fnr = manueltBrevRequest.mottakerIdent,
                                                                     fagsakId = fagsakId.toString(),
-                                                                    journalførendeEnhet = manueltBrevRequest.enhet?.enhetId ?: DEFAULT_JOURNALFØRENDE_ENHET,
+                                                                    journalførendeEnhet = manueltBrevRequest.enhet?.enhetId
+                                                                                          ?: DEFAULT_JOURNALFØRENDE_ENHET,
                                                                     brev = generertBrev,
                                                                     førsteside = førsteside,
                                                                     dokumenttype = manueltBrevRequest.brevmal.dokumenttype)
