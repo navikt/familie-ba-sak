@@ -15,6 +15,7 @@ import javax.sql.DataSource
         "postgres",
         "mock-økonomi",
         "mock-pdl",
+        "mock-scheduling",
         "mock-task-repository",
         "mock-infotrygd-barnetrygd",
         "mock-tilbakekreving-klient",

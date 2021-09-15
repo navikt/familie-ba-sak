@@ -56,7 +56,6 @@ import java.time.format.DateTimeFormatter
 @SpringBootTest
 @ExtendWith(SpringExtension::class)
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
-@ActiveProfiles("postgres")
 class MigreringServiceTest : AbstractSpringIntegrationTest() {
 
     @Autowired
