@@ -1533,6 +1533,8 @@ fun SanityBegrunnelse.tilTriggesAv(): TriggesAv {
             vilkår = this.vilkaar?.map { it.tilVilkår() }?.toSet(),
             personTyper = this.rolle?.map { it.tilPersonType() }?.toSet()
                           ?: when {
+                              this.inneholderVilkår(SanityVilkår.BOSATT_I_RIKET) -> setOf(PersonType.BARN, PersonType.SØKER)
+                              this.inneholderVilkår(SanityVilkår.LOVLIG_OPPHOLD) -> setOf(PersonType.BARN, PersonType.SØKER)
                               this.inneholderVilkår(SanityVilkår.GIFT_PARTNERSKAP) -> setOf(PersonType.BARN)
                               this.inneholderVilkår(SanityVilkår.UNDER_18_ÅR) -> setOf(PersonType.BARN)
                               this.inneholderVilkår(SanityVilkår.BOR_MED_SOKER) -> setOf(PersonType.BARN)
