@@ -12,9 +12,16 @@ import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService
 import no.nav.familie.ba.sak.kjerne.dokument.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.dokument.domene.SanityVilkår
-import no.nav.familie.ba.sak.kjerne.dokument.domene.VilkårTriggere
+import no.nav.familie.ba.sak.kjerne.dokument.domene.VilkårTrigger
+import no.nav.familie.ba.sak.kjerne.dokument.domene.inneholderBorMedSøkerTrigger
+import no.nav.familie.ba.sak.kjerne.dokument.domene.inneholderBosattIRiketTrigger
+import no.nav.familie.ba.sak.kjerne.dokument.domene.inneholderGiftPartnerskapTrigger
+import no.nav.familie.ba.sak.kjerne.dokument.domene.inneholderLovligOppholdTrigger
+import no.nav.familie.ba.sak.kjerne.dokument.domene.inneholderVilkår
+import no.nav.familie.ba.sak.kjerne.dokument.domene.inneholderØvrigTrigger
 import no.nav.familie.ba.sak.kjerne.dokument.domene.tilPersonType
 import no.nav.familie.ba.sak.kjerne.dokument.domene.tilVilkår
+import no.nav.familie.ba.sak.kjerne.dokument.domene.ØvrigTrigger
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
@@ -1519,27 +1526,28 @@ fun VedtakBegrunnelseSpesifikasjon.tilSanityBegrunnelse(sanityBegrunnelser: List
 fun VedtakBegrunnelseSpesifikasjon.erTilknyttetVilkår(sanityBegrunnelser: List<SanityBegrunnelse>) =
         !this.tilSanityBegrunnelse(sanityBegrunnelser)?.vilkaar.isNullOrEmpty()
 
+
 fun SanityBegrunnelse.tilTriggesAv(): TriggesAv {
 
     return TriggesAv(
             vilkår = this.vilkaar?.map { it.tilVilkår() }?.toSet(),
             personTyper = this.rolle?.map { it.tilPersonType() }?.toSet()
                           ?: when {
-                              this.vilkaar?.contains(SanityVilkår.GIFT_PARTNERSKAP) ?: false -> setOf(PersonType.BARN)
-                              this.vilkaar?.contains(SanityVilkår.UNDER_18_ÅR) ?: false -> setOf(PersonType.BARN)
-                              this.vilkaar?.contains(SanityVilkår.BOR_MED_SOKER) ?: false -> setOf(PersonType.BARN)
+                              this.inneholderVilkår(SanityVilkår.GIFT_PARTNERSKAP) -> setOf(PersonType.BARN)
+                              this.inneholderVilkår(SanityVilkår.UNDER_18_ÅR) -> setOf(PersonType.BARN)
+                              this.inneholderVilkår(SanityVilkår.BOR_MED_SOKER) -> setOf(PersonType.BARN)
                               else -> setOf(PersonType.BARN, PersonType.SØKER)
                           },
-            personerManglerOpplysninger = this.ovrigeTriggere?.contains(VilkårTriggere.MANGLER_OPPLYSNINGER) ?: false,
-            satsendring = this.ovrigeTriggere?.contains(VilkårTriggere.SATSENDRING) ?: false,
-            barnMedSeksårsdag = this.ovrigeTriggere?.contains(VilkårTriggere.BARN_MED_6_ÅRS_DAG) ?: false,
-            vurderingAnnetGrunnlag = (this.lovligOppholdTriggere?.contains(VilkårTriggere.VURDERING_ANNET_GRUNNLAG) ?: false
-                                      || this.bosattIRiketTriggere?.contains(VilkårTriggere.VURDERING_ANNET_GRUNNLAG) ?: false
-                                      || this.giftPartnerskapTriggere?.contains(VilkårTriggere.VURDERING_ANNET_GRUNNLAG) ?: false
-                                      || this.borMedSokerTriggere?.contains(VilkårTriggere.VURDERING_ANNET_GRUNNLAG) ?: false
+            personerManglerOpplysninger = this.inneholderØvrigTrigger(ØvrigTrigger.MANGLER_OPPLYSNINGER),
+            satsendring = this.inneholderØvrigTrigger(ØvrigTrigger.SATSENDRING),
+            barnMedSeksårsdag = this.inneholderØvrigTrigger(ØvrigTrigger.BARN_MED_6_ÅRS_DAG),
+            vurderingAnnetGrunnlag = (this.inneholderLovligOppholdTrigger(VilkårTrigger.VURDERING_ANNET_GRUNNLAG)
+                                      || this.inneholderBosattIRiketTrigger(VilkårTrigger.VURDERING_ANNET_GRUNNLAG)
+                                      || this.inneholderGiftPartnerskapTrigger(VilkårTrigger.VURDERING_ANNET_GRUNNLAG)
+                                      || this.inneholderBorMedSøkerTrigger(VilkårTrigger.VURDERING_ANNET_GRUNNLAG)
                                      ),
-            medlemskap = this.bosattIRiketTriggere?.contains(VilkårTriggere.MEDLEMSKAP) ?: false,
-            deltbosted = this.bosattIRiketTriggere?.contains(VilkårTriggere.DELT_BOSTED) ?: false,
+            medlemskap = this.inneholderBosattIRiketTrigger(VilkårTrigger.MEDLEMSKAP),
+            deltbosted = this.inneholderBorMedSøkerTrigger(VilkårTrigger.DELT_BOSTED),
             valgbar = this.apiNavn != null,
     )
 }

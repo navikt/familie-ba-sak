@@ -18,11 +18,11 @@ data class SanityBegrunnelse(
         val begrunnelsetype: SanityBegrunnelseType? = null,
         val vilkaar: List<SanityVilkår>? = SanityVilkår.values().toList(),
         val rolle: List<VilkårRolle>? = null,
-        val lovligOppholdTriggere: List<VilkårTriggere>? = null,
-        val bosattIRiketTriggere: List<VilkårTriggere>? = null,
-        val giftPartnerskapTriggere: List<VilkårTriggere>? = null,
-        val borMedSokerTriggere: List<VilkårTriggere>? = null,
-        val ovrigeTriggere: List<VilkårTriggere>? = null,
+        val lovligOppholdTriggere: List<VilkårTrigger>? = null,
+        val bosattIRiketTriggere: List<VilkårTrigger>? = null,
+        val giftPartnerskapTriggere: List<VilkårTrigger>? = null,
+        val borMedSokerTriggere: List<VilkårTrigger>? = null,
+        val ovrigeTriggere: List<ØvrigTrigger>? = null,
 )
 
 enum class SanityVilkår {
@@ -74,11 +74,33 @@ enum class VilkårRolle {
     BARN,
 }
 
-enum class VilkårTriggere {
+enum class VilkårTrigger {
     VURDERING_ANNET_GRUNNLAG,
     MEDLEMSKAP,
     DELT_BOSTED,
+}
+
+enum class ØvrigTrigger {
     MANGLER_OPPLYSNINGER,
     SATSENDRING,
     BARN_MED_6_ÅRS_DAG,
 }
+
+
+fun SanityBegrunnelse.inneholderVilkår(vilkår: SanityVilkår) =
+        this.vilkaar?.contains(vilkår) ?: false
+
+fun SanityBegrunnelse.inneholderØvrigTrigger(øvrigTrigger: ØvrigTrigger) =
+        this.ovrigeTriggere?.contains(øvrigTrigger) ?: false
+
+fun SanityBegrunnelse.inneholderLovligOppholdTrigger(vilkårTrigger: VilkårTrigger) =
+        this.lovligOppholdTriggere?.contains(vilkårTrigger) ?: false
+
+fun SanityBegrunnelse.inneholderBosattIRiketTrigger(vilkårTrigger: VilkårTrigger) =
+        this.bosattIRiketTriggere?.contains(vilkårTrigger) ?: false
+
+fun SanityBegrunnelse.inneholderGiftPartnerskapTrigger(vilkårTrigger: VilkårTrigger) =
+        this.giftPartnerskapTriggere?.contains(vilkårTrigger) ?: false
+
+fun SanityBegrunnelse.inneholderBorMedSøkerTrigger(vilkårTrigger: VilkårTrigger) =
+        this.borMedSokerTriggere?.contains(vilkårTrigger) ?: false
