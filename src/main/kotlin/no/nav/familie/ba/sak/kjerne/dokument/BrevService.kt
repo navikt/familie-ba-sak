@@ -32,6 +32,7 @@ import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.VedtakFellesfelter
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Vedtaksbrev
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
@@ -49,6 +50,7 @@ class BrevService(
         private val simuleringService: SimuleringService,
         private val vedtaksperiodeService: VedtaksperiodeService,
         private val featureToggleService: FeatureToggleService,
+        private val søknadGrunnlagService: SøknadGrunnlagService
 ) {
 
     fun hentVedtaksbrevData(vedtak: Vedtak): Vedtaksbrev {
@@ -193,6 +195,8 @@ class BrevService(
                     utbetalingsperioder = utbetalingsperioder,
                     målform = målform,
                     brukBegrunnelserFraSanity = featureToggleService.isEnabled(FeatureToggleConfig.BRUK_BEGRUNNELSE_FRA_SANITY_BACKEND),
+                    uregistrerteBarn = søknadGrunnlagService.hentAktiv(behandlingId = vedtak.behandling.id)
+                                               ?.hentUregistrerteBarn() ?: emptyList()
             )
         }
         return VedtakFellesfelter(
