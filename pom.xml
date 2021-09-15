@@ -23,7 +23,7 @@
         <changelist>-SNAPSHOT</changelist>
         <spring.cloud.version>3.0.3</spring.cloud.version>
         <spring.vault.version>2.3.2</spring.vault.version>
-        <felles.version>1.20210818154439_0d43ae9</felles.version>
+        <felles.version>1.20210908141943_5f1405d</felles.version>
         <felles-kontrakter.version>2.0_20210913141853_cde427f</felles-kontrakter.version>
         <familie.kontrakter.saksstatistikk>2.0_20210427132344_d9066f5</familie.kontrakter.saksstatistikk>
         <familie.kontrakter.stønadsstatistikk>2.0_20210914093948_94e43f0</familie.kontrakter.stønadsstatistikk>
