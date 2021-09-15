@@ -31,6 +31,7 @@ import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakUtils.hentPersonerForAlleUtgjørendeVilkår
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.erTilknyttetVilkår
@@ -115,11 +116,16 @@ class VedtakService(
         val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(vedtak.behandling.id)
                                ?: throw Feil("Finner ikke vilkårsvurdering ved fastsetting av begrunnelse")
 
-        val triggesAv =
-                if (featureToggleService.isEnabled(BRUK_BEGRUNNELSE_TRIGGES_AV_FRA_SANITY)) {
-                    vedtakBegrunnelse.tilSanityBegrunnelse(brevKlient.hentSanityBegrunnelse()).tilTriggesAv()
-                } else
-                    vedtakBegrunnelse.triggesAv
+        val triggesAv: TriggesAv
+        val vedtakBegrunnelseErTilknyttetVilkår: Boolean
+        if (featureToggleService.isEnabled(BRUK_BEGRUNNELSE_TRIGGES_AV_FRA_SANITY)) {
+            val sanitybegrunnelser = brevKlient.hentSanityBegrunnelse()
+            vedtakBegrunnelseErTilknyttetVilkår = vedtakBegrunnelse.erTilknyttetVilkår(sanitybegrunnelser)
+            triggesAv = vedtakBegrunnelse.tilSanityBegrunnelse(sanitybegrunnelser).tilTriggesAv()
+        } else {
+            vedtakBegrunnelseErTilknyttetVilkår = !vedtakBegrunnelserIkkeTilknyttetVilkår.contains(vedtakBegrunnelse)
+            triggesAv = vedtakBegrunnelse.triggesAv
+        }
 
         val personerMedUtgjørendeVilkårForUtbetalingsperiode =
                 when {
@@ -153,11 +159,6 @@ class VedtakService(
                 personerMedUtgjørendeVilkårForUtbetalingsperiode.filter { person ->
                     person.type == PersonType.BARN
                 }
-
-        val vedtakBegrunnelseErTilknyttetVilkår: Boolean =
-                if (featureToggleService.isEnabled(BRUK_BEGRUNNELSE_TRIGGES_AV_FRA_SANITY))
-                    vedtakBegrunnelse.erTilknyttetVilkår(brevKlient.hentSanityBegrunnelse())
-                else !vedtakBegrunnelserIkkeTilknyttetVilkår.contains(vedtakBegrunnelse)
 
         return if (!vedtakBegrunnelseErTilknyttetVilkår) {
             if (vedtakBegrunnelse == VedtakBegrunnelseSpesifikasjon.INNVILGET_SATSENDRING
