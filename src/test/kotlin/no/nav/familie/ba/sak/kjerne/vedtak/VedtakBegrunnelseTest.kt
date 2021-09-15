@@ -38,7 +38,6 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Personopplysning
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
-import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon.Companion.tilBrevTekst
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
@@ -253,35 +252,47 @@ class VedtakBegrunnelseTest(
     @Test
     fun `Lagring av reduksjonsbegrunnelse grunnet fylte 18 år skal genere riktig brevtekst`() {
         val søkerFnr = randomFnr()
-        val barnFnr = randomFnr()
+        val barn19ÅrFnr = randomFnr() // Bruker 19 år ettersom begrunnelse for reduksjon 18 år også kan genereres tilbake i tid.
+        val barn3ÅrFnr = randomFnr()
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
-        val fødselsdato = LocalDate.now().minusYears(18).førsteDagIInneværendeMåned().plusDays(24)
+        val fødselsdatoFor19Åring = LocalDate.now().minusYears(19).førsteDagIInneværendeMåned().plusDays(24)
+        val fødselsdatoFor3Åring = LocalDate.now().minusYears(3).førsteDagIInneværendeMåned().plusDays(12)
         val personopplysningGrunnlag =
                 lagTestPersonopplysningGrunnlag(behandling.id,
                                                 søkerFnr,
-                                                listOf(barnFnr),
-                                                barnFødselsdato = fødselsdato)
+                                                listOf(barn19ÅrFnr, barn3ÅrFnr),
+                                                barnFødselsdato = fødselsdatoFor19Åring)
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
         val vilkårsvurdering = Vilkårsvurdering(
                 behandling = behandling
         )
 
-        val barnPersonResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = barnFnr)
+        val barn18ÅrPersonResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = barn19ÅrFnr)
+        val barn3ÅrPersonResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = barn3ÅrFnr)
 
-        barnPersonResultat.setSortedVilkårResultater(setOf(
-                VilkårResultat(personResultat = barnPersonResultat,
+        barn18ÅrPersonResultat.setSortedVilkårResultater(setOf(
+                VilkårResultat(personResultat = barn18ÅrPersonResultat,
                                vilkårType = Vilkår.UNDER_18_ÅR,
                                resultat = Resultat.OPPFYLT,
-                               periodeFom = fødselsdato,
-                               periodeTom = fødselsdato.plusYears(18),
+                               periodeFom = fødselsdatoFor19Åring,
+                               periodeTom = fødselsdatoFor19Åring.plusYears(18),
+                               begrunnelse = "",
+                               behandlingId = vilkårsvurdering.behandling.id)))
+
+        barn3ÅrPersonResultat.setSortedVilkårResultater(setOf(
+                VilkårResultat(personResultat = barn18ÅrPersonResultat,
+                               vilkårType = Vilkår.UNDER_18_ÅR,
+                               resultat = Resultat.OPPFYLT,
+                               periodeFom = fødselsdatoFor3Åring,
+                               periodeTom = fødselsdatoFor3Åring.plusYears(18),
                                begrunnelse = "",
                                behandlingId = vilkårsvurdering.behandling.id)))
 
 
-        vilkårsvurdering.personResultater = setOf(barnPersonResultat)
+        vilkårsvurdering.personResultater = setOf(barn18ÅrPersonResultat, barn3ÅrPersonResultat)
 
         vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering)
 
@@ -289,17 +300,16 @@ class VedtakBegrunnelseTest(
 
         val begrunnelser18år =
                 vedtakService.leggTilVedtakBegrunnelse(restPostVedtakBegrunnelse = RestPostVedtakBegrunnelse(
-                        fom = fødselsdato.plusYears(18).førsteDagIInneværendeMåned(),
+                        fom = fødselsdatoFor19Åring.plusYears(18).førsteDagIInneværendeMåned(),
                         tom = LocalDate.of(2035, 6, 30),
                         vedtakBegrunnelse = VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR
                 ), fagsakId = fagsak.id)
 
         assert(begrunnelser18år.size == 1)
-        val datoerIBrev = listOf(fødselsdato).tilBrevTekst()
+        val datoerIBrev = listOf(fødselsdatoFor19Åring).tilBrevTekst()
         assertEquals(
                 "Barnetrygden reduseres fordi barn født $datoerIBrev er 18 år.",
                 begrunnelser18år.firstOrNull { it.begrunnelse == VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR }!!.brevBegrunnelse)
-
     }
 
     @Test
