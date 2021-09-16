@@ -1,10 +1,13 @@
 package no.nav.familie.ba.sak.ekstern.skatteetaten
 
-import no.nav.familie.ba.skatteetaten.model.Periode
-import no.nav.familie.ba.skatteetaten.model.Perioder
-import no.nav.familie.ba.skatteetaten.model.PerioderRequest
-import no.nav.familie.ba.skatteetaten.model.PerioderResponse
-import no.nav.familie.ba.skatteetaten.model.PersonerResponse
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleService
+import no.nav.familie.eksterne.kontrakter.skatteetaten.SkatteetatenPeriode
+import no.nav.familie.eksterne.kontrakter.skatteetaten.SkatteetatenPerioder
+import no.nav.familie.eksterne.kontrakter.skatteetaten.SkatteetatenPerioderRequest
+import no.nav.familie.eksterne.kontrakter.skatteetaten.SkatteetatenPerioderResponse
+import no.nav.familie.eksterne.kontrakter.skatteetaten.SkatteetatenPerson
+import no.nav.familie.eksterne.kontrakter.skatteetaten.SkatteetatenPersonerResponse
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.slf4j.LoggerFactory
@@ -16,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import java.time.LocalDateTime
 import java.time.OffsetDateTime
 import javax.validation.Valid
 import javax.validation.constraints.NotNull
@@ -23,7 +27,8 @@ import javax.validation.constraints.NotNull
 @RestController
 @RequestMapping("/api/skatt")
 @ProtectedWithClaims(issuer = "azuread")
-class SkatteetatenController(private val skatteetatenService: SkatteetatenService) {
+class SkatteetatenController(private val skatteetatenService: SkatteetatenService,
+                             private val featureToggleService: FeatureToggleService) {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
@@ -34,11 +39,15 @@ class SkatteetatenController(private val skatteetatenService: SkatteetatenServic
         produces = ["application/json;charset=UTF-8"]
     )
     fun finnPersonerMedUtvidetBarnetrygd(
-        @NotNull @RequestParam(value = "aar", required = true) aar: String
-    ): ResponseEntity<Ressurs<PersonerResponse>> {
+        @NotNull @RequestParam(value = "aar", required = true) aar: Int
+    ): ResponseEntity<Ressurs<SkatteetatenPersonerResponse>> {
         logger.info("Treff på finnPersonerMedUtvidetBarnetrygd")
-        val stubbedResponse = skatteetatenService.finnPersonerMedUtvidetBarnetrygd(aar)
-        return ResponseEntity(Ressurs.success(stubbedResponse), HttpStatus.valueOf(200))
+        val respons = if (featureToggleService.isEnabled(FeatureToggleConfig.SKATTEETATEN_API_STUB)) {
+            SkatteetatenPersonerResponse(listOf(SkatteetatenPerson("12345678901", LocalDateTime.now())))
+        } else {
+            skatteetatenService.finnPersonerMedUtvidetBarnetrygd(aar)
+        }
+        return ResponseEntity(Ressurs.success(respons), HttpStatus.valueOf(200))
     }
 
 
@@ -48,12 +57,16 @@ class SkatteetatenController(private val skatteetatenService: SkatteetatenServic
         consumes = ["application/json"]
     )
     fun hentPerioderMedUtvidetBarnetrygd(
-        @Valid @RequestBody perioderRequest: PerioderRequest
-    ): ResponseEntity<Ressurs<PerioderResponse>> {
+        @Valid @RequestBody perioderRequest: SkatteetatenPerioderRequest
+    ): ResponseEntity<Ressurs<SkatteetatenPerioderResponse>> {
         logger.info("Treff på hentPerioderMedUtvidetBarnetrygd")
-        val stubbedResponse =  PerioderResponse(listOf(Perioder("01017000110", OffsetDateTime.now(), perioder = listOf(Periode("2020-02", Periode.MaxDelingsprosent._50, tomMaaned = "2022-12")))))
+        val response = if (featureToggleService.isEnabled(FeatureToggleConfig.SKATTEETATEN_API_STUB)) {
+            SkatteetatenPerioderResponse(listOf(SkatteetatenPerioder("01017000110", OffsetDateTime.now(), perioder = listOf(SkatteetatenPeriode("2020-02", SkatteetatenPeriode.MaxDelingsprosent._50, tomMaaned = "2022-12")))))
+        } else {
+            skatteetatenService.finnPerioderMedUtvidetBarnetrygd(perioderRequest.identer, perioderRequest.aar.toInt())
+        }
         return ResponseEntity(
-            Ressurs.Companion.success(stubbedResponse),
+            Ressurs.Companion.success(response),
             HttpStatus.valueOf(200)
         )
     }
