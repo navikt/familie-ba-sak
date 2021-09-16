@@ -185,5 +185,5 @@ fun hentHjemmeltekst(vedtak: Vedtak, vedtaksperioderMedBegrunnelser: List<Vedtak
 
 fun List<VedtaksperiodeMedBegrunnelser>.sorter(): List<VedtaksperiodeMedBegrunnelser> {
     val (perioderMedFom, perioderUtenFom) = this.partition { it.fom != null }
-    return perioderMedFom.sortedWith(compareBy({ it.type }, { it.fom })) + perioderUtenFom
+    return perioderMedFom.sortedWith(compareBy { it.fom }) + perioderUtenFom
 }
