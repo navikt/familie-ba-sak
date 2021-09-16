@@ -42,10 +42,13 @@ import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.assertj.core.api.Assertions.tuple
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.time.LocalDate
@@ -55,7 +58,21 @@ import java.time.format.DateTimeFormatter
 @SpringBootTest
 @ExtendWith(SpringExtension::class)
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
-class MigreringServiceTest : AbstractSpringIntegrationTest() {
+@ActiveProfiles(
+    "postgres",
+    "mock-økonomi",
+    "mock-pdl",
+    "mock-infotrygd-barnetrygd",
+    "mock-tilbakekreving-klient",
+    "mock-brev-klient",
+    "mock-infotrygd-feed",
+    "mock-oauth",
+    "mock-rest-template-config",
+    "mock-scheduling"
+)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@Tag("integration")
+class MigreringServiceTest{
 
     @Autowired
     lateinit var databaseCleanupService: DatabaseCleanupService
