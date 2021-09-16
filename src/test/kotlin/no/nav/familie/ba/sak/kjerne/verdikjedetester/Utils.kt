@@ -111,7 +111,6 @@ fun behandleFødselshendelse(
 fun håndterIverksettingAvBehandling(
         behandlingEtterVurdering: Behandling,
         søkerFnr: String,
-        skalJournalføre: Boolean = true,
         fagsakStatusEtterIverksetting: FagsakStatus = FagsakStatus.LØPENDE,
         fagsakService: FagsakService,
         vedtakService: VedtakService,
@@ -135,7 +134,7 @@ fun håndterIverksettingAvBehandling(
                     task = Task(type = StatusFraOppdragTask.TASK_STEP_TYPE, payload = "")
             ))
 
-    val behandlingSomSkalFerdigstilles = if (skalJournalføre) {
+    val behandlingSomSkalFerdigstilles = if (behandlingEtterIverksetteVedtak.steg == StegType.JOURNALFØR_VEDTAKSBREV) {
         val behandlingEtterJournalførtVedtak =
                 stegService.håndterJournalførVedtaksbrev(behandlingEtterStatusFraOppdrag, JournalførVedtaksbrevDTO(
                         vedtakId = vedtak.id,
