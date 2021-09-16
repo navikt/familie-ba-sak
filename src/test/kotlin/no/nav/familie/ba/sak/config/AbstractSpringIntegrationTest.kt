@@ -21,8 +21,7 @@ import javax.sql.DataSource
         "mock-brev-klient",
         "mock-infotrygd-feed",
         "mock-oauth",
-        "mock-rest-template-config",
-        "mock-scheduling"
+        "mock-rest-template-config"
 )
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
 @AutoConfigureWireMock(port = 28085)
