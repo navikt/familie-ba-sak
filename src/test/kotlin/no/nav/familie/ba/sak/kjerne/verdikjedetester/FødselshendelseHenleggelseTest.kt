@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.kjerne.verdikjedetester
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.ekstern.restDomene.RestHentFagsakForPerson
-import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
@@ -27,15 +26,13 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 import java.time.LocalDate.now
 
-
 class FødselshendelseHenleggelseTest(
-    @Autowired private val opprettTaskService: OpprettTaskService,
-    @Autowired private val infotrygdService: InfotrygdService,
-    @Autowired private val behandleFødselshendelseTask: BehandleFødselshendelseTask,
-    @Autowired private val fagsakService: FagsakService,
-    @Autowired private val behandlingService: BehandlingService,
-    @Autowired private val vedtakService: VedtakService,
-    @Autowired private val stegService: StegService
+        @Autowired private val opprettTaskService: OpprettTaskService,
+        @Autowired private val behandleFødselshendelseTask: BehandleFødselshendelseTask,
+        @Autowired private val fagsakService: FagsakService,
+        @Autowired private val behandlingService: BehandlingService,
+        @Autowired private val vedtakService: VedtakService,
+        @Autowired private val stegService: StegService
 ) : AbstractVerdikjedetest() {
 
     @Test
