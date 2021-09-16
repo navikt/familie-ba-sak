@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
+import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.MigreringResponseDto
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
@@ -30,7 +31,6 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
 import no.nav.familie.kontrakter.ba.infotrygd.Sak
-import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
@@ -55,7 +55,7 @@ class MigreringService(private val infotrygdBarnetrygdClient: InfotrygdBarnetryg
                        private val behandlingService: BehandlingService,
                        private val stegService: StegService,
                        private val vedtakService: VedtakService,
-                       private val taskRepository: TaskRepository,
+                       private val taskRepository: TaskRepositoryWrapper,
                        private val vilkårService: VilkårService,
                        private val vilkårsvurderingService: VilkårsvurderingService,
                        private val behandlingRepository: BehandlingRepository,

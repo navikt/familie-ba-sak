@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
+import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
@@ -20,7 +21,6 @@ import no.nav.familie.ba.sak.task.JournalførVedtaksbrevTask
 import no.nav.familie.ba.sak.task.OpprettOppgaveTask
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
-import no.nav.familie.prosessering.domene.TaskRepository
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 
@@ -29,7 +29,7 @@ class BeslutteVedtak(
         private val totrinnskontrollService: TotrinnskontrollService,
         private val vedtakService: VedtakService,
         private val behandlingService: BehandlingService,
-        private val taskRepository: TaskRepository,
+        private val taskRepository: TaskRepositoryWrapper,
         private val loggService: LoggService,
         private val vilkårsvurderingService: VilkårsvurderingService,
         private val featureToggleService: FeatureToggleService,

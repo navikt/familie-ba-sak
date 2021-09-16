@@ -15,7 +15,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenario
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenarioPerson
 import no.nav.familie.ba.sak.task.BehandleFødselshendelseTask
-import no.nav.familie.ba.sak.task.TaskService
+import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.ba.sak.task.dto.Autobrev6og18ÅrDTO
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.Matrikkeladresse
@@ -36,7 +36,7 @@ class BehandlingOmgjøringTest(
         @Autowired private val behandlingService: BehandlingService,
         @Autowired private val vedtakService: VedtakService,
         @Autowired private val stegService: StegService,
-        @Autowired private val taskService: TaskService
+        @Autowired private val opprettTaskService: OpprettTaskService
 ) : AbstractVerdikjedetest() {
 
     @Test
@@ -80,12 +80,12 @@ class BehandlingOmgjøringTest(
         )!!
 
         finnAlleBarn6og18ÅrTask.doTask(
-                Task.nyTask(
+                Task(
                         type = FinnAlleBarn6og18ÅrTask.TASK_STEP_TYPE,
                         payload = ""
                 )
         )
-        verify(exactly = 1) { taskService.opprettAutovedtakFor6Og18ÅrBarn(behandling.fagsak.id, 6) }
+        verify(exactly = 1) { opprettTaskService.opprettAutovedtakFor6Og18ÅrBarn(behandling.fagsak.id, 6) }
 
         autobrev6og18ÅrService.opprettOmregningsoppgaveForBarnIBrytingsalder(
                 autobrev6og18ÅrDTO = Autobrev6og18ÅrDTO(

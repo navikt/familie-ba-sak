@@ -43,7 +43,7 @@ class SendFeedTilInfotrygdTask(
                 }
             }
 
-            return Task.nyTask(type = TASK_STEP_TYPE,
+            return Task(type = TASK_STEP_TYPE,
                                payload = objectMapper.writeValueAsString(InfotrygdFødselhendelsesFeedTaskDto(
                                        fnrBarn = fnrBarn)),
                                properties = metadata

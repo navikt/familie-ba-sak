@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.behandling
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.RessursUtils.illegalState
 import no.nav.familie.ba.sak.common.RessursUtils.ok
+import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
@@ -21,7 +22,6 @@ import no.nav.familie.ba.sak.sikkerhet.validering.BehandlingstilgangConstraint
 import no.nav.familie.ba.sak.task.BehandleFødselshendelseTask
 import no.nav.familie.ba.sak.task.dto.BehandleFødselshendelseTaskDTO
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -43,7 +43,7 @@ class BehandlingController(
         private val fagsakService: FagsakService,
         private val stegService: StegService,
         private val behandlingsService: BehandlingService,
-        private val taskRepository: TaskRepository,
+        private val taskRepository: TaskRepositoryWrapper,
         private val tilgangService: TilgangService,
         private val simuleringService: SimuleringService,
 ) {

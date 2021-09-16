@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.integrasjoner.infotrygd
 
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.InfotrygdFødselhendelsesFeedDto
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.InfotrygdVedtakFeedDto
-import no.nav.familie.ba.sak.task.TaskService.Companion.RETRY_BACKOFF_5000MS
+import no.nav.familie.ba.sak.task.OpprettTaskService.Companion.RETRY_BACKOFF_5000MS
 import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.slf4j.Logger

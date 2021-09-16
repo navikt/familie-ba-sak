@@ -1,17 +1,17 @@
 package no.nav.familie.ba.sak.integrasjoner.infotrygd
 
-import no.nav.familie.ba.sak.task.TaskService
+import no.nav.familie.ba.sak.task.OpprettTaskService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import javax.transaction.Transactional
 
 @Service
-class InfotrygdFeedService(val taskService: TaskService) {
+class InfotrygdFeedService(val opprettTaskService: OpprettTaskService) {
 
     @Transactional
     fun sendTilInfotrygdFeed(barnsIdenter: List<String>) {
         logger.info("Send ${barnsIdenter.size} av fødselsmeldinger til Infotrygd.")
-        taskService.opprettSendFeedTilInfotrygdTask(barnsIdenter)
+        opprettTaskService.opprettSendFeedTilInfotrygdTask(barnsIdenter)
     }
 
     companion object {
