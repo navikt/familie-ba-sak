@@ -31,8 +31,6 @@ class BrevKlientMock : BrevKlient(
     }
 }
 
-
-//BARN_MED_6_ÅRS_DAG brukes i datagenerator
 val navnTilNedtrekksmenyMock: List<SanityBegrunnelse> =
         VedtakBegrunnelseSpesifikasjon.values()
                 .map {
@@ -43,27 +41,21 @@ val navnTilNedtrekksmenyMock: List<SanityBegrunnelse> =
                             ovrigeTriggere = when (it) {
                                 VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR -> listOf(ØvrigTrigger.BARN_MED_6_ÅRS_DAG)
                                 VedtakBegrunnelseSpesifikasjon.INNVILGET_SATSENDRING -> listOf(ØvrigTrigger.SATSENDRING)
+                                VedtakBegrunnelseSpesifikasjon.OPPHØR_IKKE_MOTTATT_OPPLYSNINGER -> listOf(ØvrigTrigger.MANGLER_OPPLYSNINGER)
                                 else -> null
                             },
                             vilkaar = when (it) {
-                                VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR -> null
                                 VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET -> listOf(SanityVilkår.BOSATT_I_RIKET)
-                                VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR -> listOf(SanityVilkår.UNDER_18_ÅR)
                                 VedtakBegrunnelseSpesifikasjon.INNVILGET_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE -> listOf(SanityVilkår.LOVLIG_OPPHOLD)
                                 VedtakBegrunnelseSpesifikasjon.INNVILGET_SATSENDRING -> null
-                                VedtakBegrunnelseSpesifikasjon.REDUKSJON_BOSATT_I_RIKTET -> listOf(SanityVilkår.BOSATT_I_RIKET)
-
                                 VedtakBegrunnelseSpesifikasjon.INNVILGET_BOR_HOS_SØKER -> listOf(SanityVilkår.BOR_MED_SOKER)
 
-                                VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_BARN_OG_SØKER_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE -> null
-                                VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_FAST_OMSORG -> null
-                                VedtakBegrunnelseSpesifikasjon.OPPHØR_BARN_FLYTTET_FRA_SØKER -> listOf(SanityVilkår.BOR_MED_SOKER)
-                                VedtakBegrunnelseSpesifikasjon.OPPHØR_BARN_DØD -> listOf(SanityVilkår.BOR_MED_SOKER)
-                                VedtakBegrunnelseSpesifikasjon.OPPHØR_FLERE_BARN_DØD -> listOf(SanityVilkår.BOR_MED_SOKER)
-                                VedtakBegrunnelseSpesifikasjon.OPPHØR_HAR_IKKE_OPPHOLDSTILLATELSE -> listOf(SanityVilkår.LOVLIG_OPPHOLD)
-                                VedtakBegrunnelseSpesifikasjon.OPPHØR_UTVANDRET -> listOf(SanityVilkår.BOSATT_I_RIKET)
-                                VedtakBegrunnelseSpesifikasjon.OPPHØR_UNDER_18_ÅR -> listOf(SanityVilkår.UNDER_18_ÅR)
+                                VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR -> null
+                                VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR -> listOf(SanityVilkår.UNDER_18_ÅR)
+                                VedtakBegrunnelseSpesifikasjon.REDUKSJON_BOSATT_I_RIKTET -> listOf(SanityVilkår.BOSATT_I_RIKET)
 
+                                VedtakBegrunnelseSpesifikasjon.OPPHØR_UTVANDRET -> listOf(SanityVilkår.BOSATT_I_RIKET)
+                                VedtakBegrunnelseSpesifikasjon.OPPHØR_IKKE_MOTTATT_OPPLYSNINGER -> null
 
                                 else -> SanityVilkår.values().toList()
                             },
