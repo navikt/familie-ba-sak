@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.dokument.domene
 
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.kjerne.dokument.domene.SanityVilkår.BOR_MED_SOKER
 import no.nav.familie.ba.sak.kjerne.dokument.domene.SanityVilkår.BOSATT_I_RIKET
 import no.nav.familie.ba.sak.kjerne.dokument.domene.SanityVilkår.GIFT_PARTNERSKAP
@@ -9,13 +8,11 @@ import no.nav.familie.ba.sak.kjerne.dokument.domene.SanityVilkår.UNDER_18_ÅR
 import no.nav.familie.ba.sak.kjerne.dokument.domene.VilkårRolle.BARN
 import no.nav.familie.ba.sak.kjerne.dokument.domene.VilkårRolle.SOKER
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 
 data class SanityBegrunnelse(
         val apiNavn: String?,
         val navnISystem: String?,
-        val begrunnelsetype: SanityBegrunnelseType? = null,
         val vilkaar: List<SanityVilkår>? = SanityVilkår.values().toList(),
         val rolle: List<VilkårRolle>? = null,
         val lovligOppholdTriggere: List<VilkårTrigger>? = null,
@@ -47,20 +44,6 @@ enum class SanityBegrunnelseType {
     AVSLAG,
     OPPHØR,
     FORTSATT_INNVILGET,
-}
-
-fun SanityBegrunnelse.hentVedtakBegrunnelseType() =
-        if (this.begrunnelsetype == null) {
-            throw Feil("Fikk ikke begrunnelsetype for begrunnelse ${this.navnISystem}")
-        } else
-            this.begrunnelsetype.tilVedtakBegrunnelseType()
-
-private fun SanityBegrunnelseType.tilVedtakBegrunnelseType() = when (this) {
-    SanityBegrunnelseType.INNVILGELSE -> VedtakBegrunnelseType.INNVILGELSE
-    SanityBegrunnelseType.REDUKSJON -> VedtakBegrunnelseType.REDUKSJON
-    SanityBegrunnelseType.AVSLAG -> VedtakBegrunnelseType.AVSLAG
-    SanityBegrunnelseType.OPPHØR -> VedtakBegrunnelseType.OPPHØR
-    SanityBegrunnelseType.FORTSATT_INNVILGET -> VedtakBegrunnelseType.FORTSATT_INNVILGET
 }
 
 fun VilkårRolle.tilPersonType() =
