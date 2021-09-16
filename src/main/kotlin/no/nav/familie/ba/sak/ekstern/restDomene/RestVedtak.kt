@@ -12,8 +12,6 @@ data class RestVedtak(
         val aktiv: Boolean,
         val vedtaksdato: LocalDateTime?,
         val vedtaksperioderMedBegrunnelser: List<RestVedtaksperiodeMedBegrunnelser>,
-        val begrunnelser: List<RestVedtakBegrunnelse> = emptyList(),
-        val avslagBegrunnelser: List<RestAvslagBegrunnelser>? = null,
         val id: Long
 )
 

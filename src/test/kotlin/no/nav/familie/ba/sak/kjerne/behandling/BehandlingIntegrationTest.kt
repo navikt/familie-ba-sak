@@ -621,28 +621,12 @@ class BehandlingIntegrationTest(
     }
 
     @Test
-    fun `Skal lagre og sende korrekt sakstatistikk for behandlingresultat og begrunnelser`() {
+    fun `Skal lagre og sende korrekt sakstatistikk for behandlingresultat`() {
         val fnr = "12345678910"
         fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = fnr))
         val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(fnr))
         behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling = behandling)
         val vedtak = vedtakService.hentAktivForBehandling(behandling.id)
-        val fom = LocalDate.now().minusMonths(5)
-        val tom = LocalDate.now().plusMonths(5)
-
-        // TODO: Skriv test som tester med nye modellen vedtaksbegrunnelser
-        /*val vedtaksbegrunnelser = setOf(
-            Vedtaksbegrunnelse(vedt
-                vedtak = vedtak!!,
-                               fom = fom,
-                               tom = tom,
-                               begrunnelse = VedtakBegrunnelseSpesifikasjon.AVSLAG_FRITEKST),
-            VedtakBegrunnelse(vedtak = vedtak,
-                                                         fom = fom,
-                                                         tom = tom,
-                                                         begrunnelse = VedtakBegrunnelseSpesifikasjon.AVSLAG_BOR_HOS_SØKER))
-
-        vedtak.settBegrunnelser(vedtakBegrunnelser)*/
 
         vedtakService.oppdater(vedtak!!)
 
@@ -654,10 +638,5 @@ class BehandlingIntegrationTest(
 
         assertEquals(2, behandlingDvhMeldinger.size)
         assertThat(behandlingDvhMeldinger.last().resultat).isEqualTo("AVSLÅTT")
-        // TODO: Skriv test som tester med nye modellen vedtaksbegrunnelser
-        /*assertThat(behandlingDvhMeldinger.last().resultatBegrunnelser).containsExactlyInAnyOrder(
-                ResultatBegrunnelseDVH(fom, tom, "AVSLAG", VedtakBegrunnelseSpesifikasjon.AVSLAG_FRITEKST.name),
-                ResultatBegrunnelseDVH(fom, tom, "AVSLAG", VedtakBegrunnelseSpesifikasjon.AVSLAG_BOR_HOS_SØKER.name),
-        )*/
     }
 }

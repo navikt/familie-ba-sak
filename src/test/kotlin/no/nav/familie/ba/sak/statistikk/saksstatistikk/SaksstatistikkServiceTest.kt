@@ -176,14 +176,6 @@ internal class SaksstatistikkServiceTest {
         assertThat(behandlingDvh?.avsender).isEqualTo("familie-ba-sak")
         assertThat(behandlingDvh?.versjon).isNotEmpty
         assertThat(behandlingDvh?.resultat).isEqualTo(behandling.resultat.name)
-        // TODO: Skriv test som tester med nye modellen vedtaksbegrunnelser
-        /*assertThat(behandlingDvh?.resultatBegrunnelser).hasSize(2)
-            .extracting("vedtakBegrunnelse")
-            .containsOnly("FORTSATT_INNVILGET_SØKER_OG_BARN_BOSATT_I_RIKET", "INNVILGET_BOSATT_I_RIKTET")
-        assertThat(behandlingDvh?.resultatBegrunnelser)
-            .extracting("type")
-            .containsOnly("FORTSATT_INNVILGET", "INNVILGELSE")*/
-
     }
 
     @Test
@@ -199,9 +191,6 @@ internal class SaksstatistikkServiceTest {
             godkjent = true,
             behandling = behandling
         )
-
-        val vedtakFom = LocalDate.of(2021, 2, 11)
-        val vedtakTom = LocalDate.of(21, 3, 11)
 
         val vedtak = lagVedtak(behandling)
 
@@ -251,19 +240,8 @@ internal class SaksstatistikkServiceTest {
         assertThat(behandlingDvh?.totrinnsbehandling).isTrue
         assertThat(behandlingDvh?.saksbehandler).isEqualTo("saksbehandlerId")
         assertThat(behandlingDvh?.beslutter).isEqualTo("beslutterId")
-        // TODO: Skriv test som tester med nye modellen vedtaksbegrunnelser
-        /*assertThat(behandlingDvh?.resultatBegrunnelser).hasSize(2)
-            .extracting("fom")
-            .containsOnly(vedtaksperiodeFom, vedtakFom)
-        assertThat(behandlingDvh?.resultatBegrunnelser)
-            .extracting("tom")
-            .containsOnly(vedtaksperiodeTom, vedtakTom)
-        assertThat(behandlingDvh?.resultatBegrunnelser)
-            .extracting("type")
-            .containsOnly("FORTSATT_INNVILGET", "OPPHØR")*/
         assertThat(behandlingDvh?.avsender).isEqualTo("familie-ba-sak")
         assertThat(behandlingDvh?.versjon).isNotEmpty
-
     }
 
 
