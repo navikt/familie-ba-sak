@@ -218,38 +218,6 @@ class VedtakServiceTest(
 
     @Test
     @Tag("integration")
-    fun `Legg til opplysningsplikt begrunnelse og vedtak er riktig`() {
-        val fnr = randomFnr()
-        val barnFnr = randomFnr()
-
-        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
-
-        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
-
-        val vilkårsvurdering = lagVilkårsvurdering(fnr, behandling, Resultat.IKKE_OPPFYLT)
-
-        vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering)
-
-        val personopplysningGrunnlag =
-                lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
-        persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
-
-        behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling = behandling)
-
-        vedtakService.leggTilVedtakBegrunnelse(
-                RestPostVedtakBegrunnelse(
-                        fom = LocalDate.now().minusMonths(1),
-                        tom = LocalDate.now().plusYears(2),
-                        vedtakBegrunnelse = VedtakBegrunnelseSpesifikasjon.OPPHØR_IKKE_MOTTATT_OPPLYSNINGER
-                ), fagsak.id
-        )
-
-        val hentetVedtak = vedtakService.hentAktivForBehandling(behandling.id)
-        Assertions.assertTrue(hentetVedtak?.vedtakBegrunnelser?.any { vedtakBegrunnelse -> vedtakBegrunnelse.begrunnelse == VedtakBegrunnelseSpesifikasjon.OPPHØR_IKKE_MOTTATT_OPPLYSNINGER }!!)
-    }
-
-    @Test
-    @Tag("integration")
     fun `Kast feil når det forsøkes å oppdatere et vedtak som ikke er lagret`() {
         val fnr = randomFnr()
 

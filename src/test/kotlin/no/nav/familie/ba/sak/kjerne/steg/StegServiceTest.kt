@@ -182,13 +182,6 @@ class StegServiceTest(
         vurderVilkårsvurderingTilInnvilget(vilkårsvurdering, barn)
         vilkårsvurderingService.oppdater(vilkårsvurdering)
 
-        vedtakService.leggTilVedtakBegrunnelse(
-                RestPostVedtakBegrunnelse(
-                        fom = LocalDate.parse("2020-02-01"),
-                        tom = LocalDate.parse("2025-02-01"),
-                        vedtakBegrunnelse = VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR),
-                fagsakId = fagsak.id)
-
         val behandlingEtterVilkårsvurderingSteg = stegService.håndterVilkårsvurdering(behandlingEtterPersongrunnlagSteg)
         assertEquals(StegType.VURDER_TILBAKEKREVING, behandlingEtterVilkårsvurderingSteg.steg)
 

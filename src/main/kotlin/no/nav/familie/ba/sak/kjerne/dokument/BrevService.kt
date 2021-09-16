@@ -144,29 +144,6 @@ class BrevService(
                 )
             }
 
-    private fun verifiserVedtakHarBegrunnelse(vedtak: Vedtak) {
-        if (vedtak.vedtakBegrunnelser.size == 0) {
-            throw FunksjonellFeil(melding = "Vedtaket har ingen begrunnelser",
-                                  frontendFeilmelding = "Vedtaket har ingen begrunnelser")
-        }
-    }
-
-    @Deprecated("Skal skrives om til å bruke lagVedtaksbrevFellesfelter")
-    fun lagVedtaksbrevFellesfelterDeprecated(vedtak: Vedtak): VedtakFellesfelter {
-        verifiserVedtakHarBegrunnelse(vedtak)
-        val data = hentGrunnlagOgSignaturData(vedtak)
-
-        return VedtakFellesfelter(
-                enhet = data.enhet,
-                saksbehandler = data.saksbehandler,
-                beslutter = data.beslutter,
-                hjemmeltekst = Hjemmeltekst(vedtak.hentHjemmelTekst()),
-                søkerNavn = data.grunnlag.søker.navn,
-                søkerFødselsnummer = data.grunnlag.søker.personIdent.ident,
-                perioder = brevPeriodeService.hentBrevPerioder(vedtak),
-        )
-    }
-
     fun lagVedtaksbrevFellesfelter(vedtak: Vedtak): VedtakFellesfelter {
         val vedtaksperioderMedBegrunnelser = vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak).filter {
             it.begrunnelser.isNotEmpty() || it.fritekster.isNotEmpty()

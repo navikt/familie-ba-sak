@@ -172,64 +172,6 @@ class DokumentServiceTest(
     }
 
     @Test
-    fun `Skal verifisere at brev får riktig signatur ved alle steg i behandling`() {
-        val mockSaksbehandler = "Mock Saksbehandler"
-        val mockSaksbehandlerId = "mock.saksbehandler@nav.no"
-        val mockBeslutter = "Mock Beslutter"
-        val mockBeslutterId = "mock.beslutter@nav.no"
-
-        val behandlingEtterVilkårsvurderingSteg = kjørStegprosessForFGB(
-                tilSteg = StegType.VILKÅRSVURDERING,
-                søkerFnr = ClientMocks.søkerFnr[0],
-                barnasIdenter = listOf(ClientMocks.barnFnr[0]),
-                fagsakService = fagsakService,
-                vedtakService = vedtakService,
-                persongrunnlagService = persongrunnlagService,
-                vilkårsvurderingService = vilkårsvurderingService,
-                stegService = stegService,
-                vedtaksperiodeService = vedtaksperiodeService,
-        )
-        val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandlingEtterVilkårsvurderingSteg.id)!!
-
-        val vedtaksbrevFellesFelter = brevService.lagVedtaksbrevFellesfelterDeprecated(vedtak)
-
-        assertEquals("NAV Familie- og pensjonsytelser Oslo 1", vedtaksbrevFellesFelter.enhet)
-        assertEquals("System", vedtaksbrevFellesFelter.saksbehandler)
-        assertEquals("Beslutter", vedtaksbrevFellesFelter.beslutter)
-
-        totrinnskontrollService.opprettTotrinnskontrollMedSaksbehandler(behandlingEtterVilkårsvurderingSteg,
-                                                                        mockSaksbehandler,
-                                                                        mockSaksbehandlerId)
-        val behandlingEtterSendTilBeslutter =
-                behandlingEtterVilkårsvurderingSteg.leggTilBehandlingStegTilstand(StegType.BESLUTTE_VEDTAK)
-        behandlingService.lagreEllerOppdater(behandlingEtterSendTilBeslutter)
-
-        val vedtakEtterSendTilBeslutter =
-                vedtakService.hentAktivForBehandling(behandlingId = behandlingEtterSendTilBeslutter.id)!!
-
-        val vedtaksbrevFellesFelterEtterSendTilBeslutter =
-                brevService.lagVedtaksbrevFellesfelterDeprecated(vedtakEtterSendTilBeslutter)
-
-        assertEquals(mockSaksbehandler, vedtaksbrevFellesFelterEtterSendTilBeslutter.saksbehandler)
-        assertEquals("System", vedtaksbrevFellesFelterEtterSendTilBeslutter.beslutter)
-
-        totrinnskontrollService.besluttTotrinnskontroll(behandling = behandlingEtterSendTilBeslutter,
-                                                        beslutter = mockBeslutter,
-                                                        beslutterId = mockBeslutterId,
-                                                        beslutning = Beslutning.GODKJENT)
-        val behandlingEtterVedtakBesluttet =
-                behandlingEtterVilkårsvurderingSteg.leggTilBehandlingStegTilstand(StegType.IVERKSETT_MOT_OPPDRAG)
-
-        val vedtakEtterVedtakBesluttet = vedtakService.hentAktivForBehandling(behandlingId = behandlingEtterVedtakBesluttet.id)!!
-
-        val vedtaksbrevFellesFelterEtterVedtakBesluttet =
-                brevService.lagVedtaksbrevFellesfelterDeprecated(vedtakEtterVedtakBesluttet)
-
-        assertEquals(mockSaksbehandler, vedtaksbrevFellesFelterEtterVedtakBesluttet.saksbehandler)
-        assertEquals(mockBeslutter, vedtaksbrevFellesFelterEtterVedtakBesluttet.beslutter)
-    }
-
-    @Test
     fun `Skal verifisere at man ikke får generert brev etter at behandlingen er sendt fra beslutter`() {
         val behandlingEtterVedtakBesluttet = kjørStegprosessForFGB(
                 tilSteg = StegType.BESLUTTE_VEDTAK,

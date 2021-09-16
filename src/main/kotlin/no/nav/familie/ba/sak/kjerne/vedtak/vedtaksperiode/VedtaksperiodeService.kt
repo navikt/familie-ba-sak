@@ -30,7 +30,6 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Personopplysning
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
-import no.nav.familie.ba.sak.kjerne.vedtak.VedtakBegrunnelseRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakUtils.hentPersonerForAlleUtgjørendeVilkår
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
@@ -54,7 +53,6 @@ class VedtaksperiodeService(
         private val behandlingRepository: BehandlingRepository,
         private val persongrunnlagRepository: PersonopplysningGrunnlagRepository,
         private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
-        private val vedtakBegrunnelseRepository: VedtakBegrunnelseRepository,
         private val vedtaksperiodeRepository: VedtaksperiodeRepository,
         private val vilkårsvurderingRepository: VilkårsvurderingRepository,
         private val featureToggleService: FeatureToggleService,
@@ -474,12 +472,7 @@ class VedtaksperiodeService(
                 andelerTilkjentYtelse = andelerTilkjentYtelse
         )
 
-        val avslagsperioder =
-                mapTilAvslagsperioderDeprecated(
-                        vedtakBegrunnelser = vedtakBegrunnelseRepository.finnForAktivtVedtakPåBehandling(behandlingId = behandling.id)
-                )
-
-        return utbetalingsperioder + opphørsperioder + avslagsperioder
+        return utbetalingsperioder + opphørsperioder
     }
 
     fun hentOpphørsperioder(behandling: Behandling): List<Opphørsperiode> {
