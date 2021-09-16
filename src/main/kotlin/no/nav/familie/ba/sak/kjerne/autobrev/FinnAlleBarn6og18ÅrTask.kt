@@ -3,24 +3,15 @@ package no.nav.familie.ba.sak.kjerne.autobrev
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
-import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
-import no.nav.familie.ba.sak.task.SendAutobrev6og18ÅrTask
-import no.nav.familie.ba.sak.task.TaskService
-import no.nav.familie.ba.sak.task.dto.Autobrev6og18ÅrDTO
-import no.nav.familie.kontrakter.felles.objectMapper
-import no.nav.familie.log.IdUtils
-import no.nav.familie.log.mdc.MDCConstants
+import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.prosessering.domene.TaskRepository
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.slf4j.MDC
 import org.springframework.stereotype.Service
 import java.time.LocalDate
-import java.util.*
 
 @Service
 @TaskStepBeskrivelse(taskStepType = FinnAlleBarn6og18ÅrTask.TASK_STEP_TYPE,
@@ -29,14 +20,14 @@ import java.util.*
                      triggerTidVedFeilISekunder = 60 * 60 * 24)
 class FinnAlleBarn6og18ÅrTask(
         private val fagsakRepository: FagsakRepository,
-        private val taskService: TaskService) : AsyncTaskStep {
+        private val opprettTaskService: OpprettTaskService) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
         listOf<Long>(6, 18).forEach { alder ->
             val berørteFagsaker = finnAlleBarnMedFødselsdagInneværendeMåned(alder)
             logger.info("Oppretter tasker for ${berørteFagsaker.size} fagsaker med barn som fyller $alder år inneværende måned.")
             berørteFagsaker.forEach { fagsak ->
-                taskService.opprettAutovedtakFor6Og18ÅrBarn(
+                opprettTaskService.opprettAutovedtakFor6Og18ÅrBarn(
                         fagsakId = fagsak.id,
                         alder = alder.toInt()
                 )

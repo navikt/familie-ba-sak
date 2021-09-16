@@ -132,14 +132,14 @@ fun håndterIverksettingAvBehandling(
                                                               personIdent = søkerFnr,
                                                               behandlingsId = behandlingEtterIverksetteVedtak.id,
                                                               vedtaksId = vedtak.id),
-                    task = Task.nyTask(type = StatusFraOppdragTask.TASK_STEP_TYPE, payload = "")
+                    task = Task(type = StatusFraOppdragTask.TASK_STEP_TYPE, payload = "")
             ))
 
     val behandlingSomSkalFerdigstilles = if (skalJournalføre) {
         val behandlingEtterJournalførtVedtak =
                 stegService.håndterJournalførVedtaksbrev(behandlingEtterStatusFraOppdrag, JournalførVedtaksbrevDTO(
                         vedtakId = vedtak.id,
-                        task = Task.nyTask(type = JournalførVedtaksbrevTask.TASK_STEP_TYPE, payload = "")
+                        task = Task(type = JournalførVedtaksbrevTask.TASK_STEP_TYPE, payload = "")
                 ))
 
         val behandlingEtterDistribuertVedtak =

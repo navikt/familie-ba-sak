@@ -3,12 +3,14 @@ package no.nav.familie.ba.sak.integrasjoner.infotrygd
 
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
-import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTestDev
+import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.ClientMocks
+import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
@@ -36,24 +38,47 @@ import no.nav.familie.kontrakter.ba.infotrygd.InfotrygdSøkResponse
 import no.nav.familie.kontrakter.ba.infotrygd.Sak
 import no.nav.familie.kontrakter.ba.infotrygd.Stønad
 import no.nav.familie.kontrakter.felles.objectMapper
-import no.nav.familie.prosessering.domene.TaskRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.assertj.core.api.Assertions.tuple
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.context.ContextConfiguration
+import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 
-class MigreringServiceTest : AbstractSpringIntegrationTestDev() {
+@SpringBootTest
+@ExtendWith(SpringExtension::class)
+@ContextConfiguration(initializers = [DbContainerInitializer::class])
+@ActiveProfiles(
+    "postgres",
+    "mock-økonomi",
+    "mock-pdl",
+    "mock-infotrygd-barnetrygd",
+    "mock-tilbakekreving-klient",
+    "mock-brev-klient",
+    "mock-infotrygd-feed",
+    "mock-oauth",
+    "mock-rest-template-config",
+    "mock-scheduling"
+)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@Tag("integration")
+class MigreringServiceTest{
 
     @Autowired
     lateinit var databaseCleanupService: DatabaseCleanupService
 
     @Autowired
-    lateinit var taskRepository: TaskRepository
+    lateinit var taskRepository: TaskRepositoryWrapper
 
     @Autowired
     lateinit var fagsakRepository: FagsakRepository
@@ -99,23 +124,23 @@ class MigreringServiceTest : AbstractSpringIntegrationTestDev() {
 
         taskRepository.findAll().also { tasks ->
             assertThat(tasks).hasSize(1)
-            val task = tasks.find { it.taskStepType == IverksettMotOppdragTask.TASK_STEP_TYPE }!!
+            val task = tasks.find { it.type == IverksettMotOppdragTask.TASK_STEP_TYPE }!!
             iverksettMotOppdragTask.doTask(task)
             iverksettMotOppdragTask.onCompletion(task)
         }
         taskRepository.findAll().also { tasks ->
             assertThat(tasks).hasSize(2)
-            val task = tasks.find { it.taskStepType == StatusFraOppdragTask.TASK_STEP_TYPE }!!
+            val task = tasks.find { it.type == StatusFraOppdragTask.TASK_STEP_TYPE }!!
             statusFraOppdragTask.doTask(task)
             statusFraOppdragTask.onCompletion(task)
         }
         taskRepository.findAll().also { tasks ->
             assertThat(tasks).hasSize(4)
-            var task = tasks.find { it.taskStepType == FerdigstillBehandlingTask.TASK_STEP_TYPE }!!
+            var task = tasks.find { it.type == FerdigstillBehandlingTask.TASK_STEP_TYPE }!!
             ferdigstillBehandlingTask.doTask(task)
             ferdigstillBehandlingTask.onCompletion(task)
 
-            task = tasks.find { it.taskStepType == PubliserVedtakTask.TASK_STEP_TYPE }!!
+            task = tasks.find { it.type == PubliserVedtakTask.TASK_STEP_TYPE }!!
             publiserVedtakTask.doTask(task)
             publiserVedtakTask.onCompletion(task)
 

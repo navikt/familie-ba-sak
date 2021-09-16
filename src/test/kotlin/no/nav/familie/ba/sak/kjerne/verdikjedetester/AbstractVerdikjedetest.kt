@@ -22,7 +22,8 @@ val MOCK_SERVER_IMAGE = "ghcr.io/navikt/familie-mock-server/familie-mock-server:
         "mock-infotrygd-barnetrygd",
         "mock-rest-template-config",
         "mock-task-repository",
-        "mock-task-service"
+        "mock-task-service",
+        "mock-scheduling"
 )
 abstract class AbstractVerdikjedetest : WebSpringAuthTestRunner() {
     fun familieBaSakKlient(): FamilieBaSakKlient = FamilieBaSakKlient(

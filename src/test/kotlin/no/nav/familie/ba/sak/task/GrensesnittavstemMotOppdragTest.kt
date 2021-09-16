@@ -4,11 +4,11 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
-import no.nav.familie.ba.sak.task.dto.GrensesnittavstemmingTaskDTO
+import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.økonomi.AvstemmingService
+import no.nav.familie.ba.sak.task.dto.GrensesnittavstemmingTaskDTO
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.prosessering.domene.TaskRepository
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -17,7 +17,7 @@ import java.time.LocalDate
 class GrensesnittavstemMotOppdragTest {
 
     private lateinit var grensesnittavstemMotOppdrag: GrensesnittavstemMotOppdrag
-    private lateinit var taskRepositoryMock: TaskRepository
+    private lateinit var taskRepositoryMock: TaskRepositoryWrapper
 
     @BeforeEach
     fun setUp() {
@@ -79,18 +79,24 @@ class GrensesnittavstemMotOppdragTest {
     @Test
     fun skalLageNyAvstemmingstaskEtterJobb() {
         val iDag = LocalDate.of(2020, 1, 15).atStartOfDay()
-        val testTask = Task.nyTaskMedTriggerTid(GrensesnittavstemMotOppdrag.TASK_STEP_TYPE,
-                                                objectMapper.writeValueAsString(GrensesnittavstemmingTaskDTO(
-                                                        iDag.minusDays(1),
-                                                        iDag)),
-                                                iDag.toLocalDate().atTime(8, 0))
+        val testTask = Task(
+                type = GrensesnittavstemMotOppdrag.TASK_STEP_TYPE,
+                payload = objectMapper.writeValueAsString(
+                        GrensesnittavstemmingTaskDTO(
+                                iDag.minusDays(1),
+                                iDag
+                        )
+                )
+        ).medTriggerTid(
+                iDag.toLocalDate().atTime(8, 0)
+        )
         val slot = slot<Task>()
         every { taskRepositoryMock.save(any()) } returns testTask
 
         grensesnittavstemMotOppdrag.onCompletion(testTask)
 
         verify(exactly = 1) { taskRepositoryMock.save(capture(slot)) }
-        assertEquals(GrensesnittavstemMotOppdrag.TASK_STEP_TYPE, slot.captured.taskStepType)
+        assertEquals(GrensesnittavstemMotOppdrag.TASK_STEP_TYPE, slot.captured.type)
         assertEquals(iDag.plusDays(1).toLocalDate().atTime(8, 0), slot.captured.triggerTid)
         val taskDTO = objectMapper.readValue(slot.captured.payload, GrensesnittavstemmingTaskDTO::class.java)
         assertEquals(taskDTO.fomDato, iDag)

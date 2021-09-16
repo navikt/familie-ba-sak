@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.task
 
+import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.steg.StatusFraOppdragMedTask
 import no.nav.familie.ba.sak.kjerne.steg.StegService
@@ -9,7 +10,6 @@ import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.prosessering.domene.TaskRepository
 import org.springframework.stereotype.Service
 
 /**
@@ -27,7 +27,7 @@ import org.springframework.stereotype.Service
 class StatusFraOppdragTask(
         private val stegService: StegService,
         private val behandlingService: BehandlingService,
-        private val taskRepository: TaskRepository
+        private val taskRepository: TaskRepositoryWrapper
 ) : AsyncTaskStep {
 
     /**

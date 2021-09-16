@@ -8,6 +8,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
+import javax.sql.DataSource
 
 @SpringBootTest
 @ActiveProfiles(
@@ -21,6 +22,7 @@ import org.springframework.test.context.ContextConfiguration
         "mock-infotrygd-feed",
         "mock-oauth",
         "mock-rest-template-config",
+        "mock-scheduling"
 )
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
 @AutoConfigureWireMock(port = 28085)

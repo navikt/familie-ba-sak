@@ -17,7 +17,7 @@ import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScena
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenarioPerson
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.task.BehandleFødselshendelseTask
-import no.nav.familie.ba.sak.task.TaskService
+import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
@@ -28,13 +28,13 @@ import java.time.LocalDate.now
 
 
 class FødselshendelseHenleggelseTest(
-        @Autowired private val taskService: TaskService,
-        @Autowired private val infotrygdService: InfotrygdService,
-        @Autowired private val behandleFødselshendelseTask: BehandleFødselshendelseTask,
-        @Autowired private val fagsakService: FagsakService,
-        @Autowired private val behandlingService: BehandlingService,
-        @Autowired private val vedtakService: VedtakService,
-        @Autowired private val stegService: StegService
+    @Autowired private val opprettTaskService: OpprettTaskService,
+    @Autowired private val infotrygdService: InfotrygdService,
+    @Autowired private val behandleFødselshendelseTask: BehandleFødselshendelseTask,
+    @Autowired private val fagsakService: FagsakService,
+    @Autowired private val behandlingService: BehandlingService,
+    @Autowired private val vedtakService: VedtakService,
+    @Autowired private val stegService: StegService
 ) : AbstractVerdikjedetest() {
 
     @Test
@@ -68,7 +68,7 @@ class FødselshendelseHenleggelseTest(
         assertNull(behandling)
 
         verify(exactly = 1) {
-            taskService.opprettSendFeedTilInfotrygdTask(scenario.barna.map { it.ident!! })
+            opprettTaskService.opprettSendFeedTilInfotrygdTask(scenario.barna.map { it.ident!! })
         }
     }
 
@@ -101,7 +101,7 @@ class FødselshendelseHenleggelseTest(
         assertEquals(StegType.BEHANDLING_AVSLUTTET, behandling?.steg)
 
         verify(exactly = 1) {
-            taskService.opprettOppgaveTask(
+            opprettTaskService.opprettOppgaveTask(
                     behandlingId = behandling!!.id,
                     oppgavetype = Oppgavetype.VurderLivshendelse,
                     beskrivelse = "Mor er under 18 år."
@@ -145,7 +145,7 @@ class FødselshendelseHenleggelseTest(
         assertEquals(StegType.BEHANDLING_AVSLUTTET, behandling?.steg)
 
         verify(exactly = 1) {
-            taskService.opprettOppgaveTask(
+            opprettTaskService.opprettOppgaveTask(
                     behandlingId = behandling!!.id,
                     oppgavetype = Oppgavetype.VurderLivshendelse,
                     beskrivelse = "Barnet (fødselsdato: ${
