@@ -67,8 +67,7 @@ import java.time.format.DateTimeFormatter
     "mock-brev-klient",
     "mock-infotrygd-feed",
     "mock-oauth",
-    "mock-rest-template-config",
-    "mock-scheduling"
+    "mock-rest-template-config"
 )
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Tag("integration")
