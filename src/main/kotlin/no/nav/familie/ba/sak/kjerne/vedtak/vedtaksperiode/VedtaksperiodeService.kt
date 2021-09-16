@@ -25,7 +25,6 @@ import no.nav.familie.ba.sak.kjerne.beregning.SatsService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.dokument.BrevKlient
-import no.nav.familie.ba.sak.kjerne.dokument.domene.hentVedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.dokument.hentVedtaksbrevmal
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
@@ -201,13 +200,7 @@ class VedtaksperiodeService(
                         it.tilSanityBegrunnelse(brevKlient.hentSanityBegrunnelse()).tilTriggesAv()
                     } else
                         it.triggesAv
-            val vedtakBegrunnelseType =
-                    if (featureToggleService.isEnabled(BRUK_BEGRUNNELSE_TRIGGES_AV_FRA_SANITY)) {
-                        it
-                                .tilSanityBegrunnelse(brevKlient.hentSanityBegrunnelse())
-                                .hentVedtakBegrunnelseType()
-                    } else
-                        it.vedtakBegrunnelseType
+            val vedtakBegrunnelseType = it.vedtakBegrunnelseType
 
             val personIdenter = when {
                 triggesAv.barnMedSeksårsdag -> persongrunnlag.personer
@@ -431,16 +424,7 @@ class VedtaksperiodeService(
                                                 TriggesAv(valgbar = false)
                                         } else
                                             it.triggesAv
-                                val vedtakBegrunnelseType =
-                                        if (featureToggleService.isEnabled(BRUK_BEGRUNNELSE_TRIGGES_AV_FRA_SANITY)) {
-                                            if (it.erTilgjengeligFrontend) {
-                                                it
-                                                        .tilSanityBegrunnelse(brevKlient.hentSanityBegrunnelse())
-                                                        .hentVedtakBegrunnelseType()
-                                            } else
-                                                it.vedtakBegrunnelseType
-                                        } else
-                                            it.vedtakBegrunnelseType
+                                val vedtakBegrunnelseType = it.vedtakBegrunnelseType
 
                                 if (it.triggesForPeriode(
                                                 vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
