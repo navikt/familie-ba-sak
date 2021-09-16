@@ -1524,7 +1524,7 @@ fun VedtakBegrunnelseSpesifikasjon.tilSanityBegrunnelse(sanityBegrunnelser: List
         } else throw Feil("Begrunnelse ${this.name} er ikke tilgjengelig frontend.")
 
 fun VedtakBegrunnelseSpesifikasjon.erTilknyttetVilkår(sanityBegrunnelser: List<SanityBegrunnelse>) =
-        !this.tilSanityBegrunnelse(sanityBegrunnelser)?.vilkaar.isNullOrEmpty()
+        !this.tilSanityBegrunnelse(sanityBegrunnelser).vilkaar.isNullOrEmpty()
 
 
 fun SanityBegrunnelse.tilTriggesAv(): TriggesAv {
