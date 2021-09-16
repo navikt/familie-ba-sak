@@ -1,10 +1,12 @@
 package no.nav.familie.ba.sak.ekstern.restDomene
 
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.AvsenderMottaker
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.Bruker
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.OppdaterJournalpostRequest
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.journalpost.DokumentInfo
 import no.nav.familie.kontrakter.felles.journalpost.Dokumentstatus
 import no.nav.familie.kontrakter.felles.journalpost.LogiskVedlegg
@@ -50,5 +52,17 @@ data class RestJournalføring(
                                  logiskeVedlegg = null)
                 },
         )
+    }
+
+    fun hentUnderkategori(): BehandlingUnderkategori {
+        return when {
+            journalpostTittel?.contains("ordinær") == true -> BehandlingUnderkategori.ORDINÆR
+            journalpostTittel?.contains("utvidet") == true -> BehandlingUnderkategori.UTVIDET
+            else -> {
+                throw FunksjonellFeil(melding = "Kan ikke opprette ny behandling ved journalføring av $journalpostTittel",
+                                      frontendFeilmelding = "Kan ikke opprette ny behandling ved journalføring av $journalpostTittel"
+                )
+            }
+        }
     }
 }
