@@ -79,7 +79,7 @@ class FamilieBaSakKlient(
         return putForEntity(uri, restHenleggBehandlingInfo, headers)
     }
 
-    fun hentLogg(behandlingId: Long): Ressurs<List<Logg>> {
+    fun hentBehandlingslogg(behandlingId: Long): Ressurs<List<Logg>> {
         val uri = URI.create("$baSakUrl/api/logg/${behandlingId}")
         return getForEntity(uri, headers)
     }

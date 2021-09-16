@@ -1,26 +1,38 @@
 package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
+import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.beregning.SatsService
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService.nyttTilleggOrdinærSats
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.logg.LoggType
+import no.nav.familie.ba.sak.kjerne.steg.StegService
+import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenario
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenarioPerson
-import no.nav.familie.kontrakter.ba.infotrygd.Barn
-import no.nav.familie.kontrakter.ba.infotrygd.Delytelse
 import no.nav.familie.kontrakter.ba.infotrygd.InfotrygdSøkResponse
-import no.nav.familie.kontrakter.ba.infotrygd.Sak
-import no.nav.familie.kontrakter.ba.infotrygd.Stønad
+import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.getDataOrThrow
 import org.assertj.core.api.Assertions
-import org.awaitility.core.ConditionTimeoutException
-import org.awaitility.kotlin.await
-import org.awaitility.kotlin.withPollInterval
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.slf4j.MDC
-import java.time.Duration
+import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.*
-import java.util.concurrent.TimeUnit
 
-class MigreringVerdikjedeTest : AbstractVerdikjedetest() {
+class MigreringVerdikjedeTest(
+        @Autowired private val behandlingService: BehandlingService,
+        @Autowired private val fagsakService: FagsakService,
+        @Autowired private val stegService: StegService,
+        @Autowired private val vedtakService: VedtakService,
+        @Autowired private val vedtaksperiodeService: VedtaksperiodeService
+) : AbstractVerdikjedetest() {
 
     @Test
     fun `Skal ikke tillatte migrering av sak som ikke er BA OR OS`() {
@@ -61,9 +73,55 @@ class MigreringVerdikjedeTest : AbstractVerdikjedetest() {
         }.hasMessageContaining("Kan kun migrere ordinære saker")
     }
 
+    @Test
+    fun `Skal migrere en bruker som har sak BA OR OS i infotrygd barnetrygd tjenesten`() {
+        val callId = UUID.randomUUID().toString()
+        MDC.put("callId", callId)
+
+        val scenarioMorMedBarn = lagTestScenarioForMigrering()
+
+        println("Skal migrerer ${scenarioMorMedBarn.søker.ident!!}")
+
+        val migreringRessurs = familieBaSakKlient().migrering(scenarioMorMedBarn.søker.ident)
+        println("Kall mot migrering returnerte $migreringRessurs")
+
+        assertEquals("Migrering påbegynt", migreringRessurs.melding)
+
+        val behandlingEtterVurdering = behandlingService.hent(behandlingId = migreringRessurs.data!!.behandlingId)
+        assertEquals(BehandlingÅrsak.MIGRERING, behandlingEtterVurdering.opprettetÅrsak)
+        assertEquals(BehandlingStatus.IVERKSETTER_VEDTAK, behandlingEtterVurdering.status)
+
+        val utbetalingsperioder =
+                vedtaksperiodeService.hentUtbetalingsperioder(behandling =behandlingEtterVurdering)
+        assertEquals(2, utbetalingsperioder.size)
 
 
-    private fun lagTestScenarioForMigrering(valg: String? = "OR", undervalg: String? = "OS"): RestScenario? {
+        val gjeldendeUtbetalingsperiode = utbetalingsperioder.find {
+            it.periodeFom.toYearMonth() >= SatsService.tilleggOrdinærSatsNesteMånedTilTester.gyldigFom.toYearMonth() &&
+            it.periodeFom.toYearMonth() <= SatsService.tilleggOrdinærSatsNesteMånedTilTester.gyldigTom.toYearMonth()
+        }!!
+        assertUtbetalingsperiode(gjeldendeUtbetalingsperiode, 1, SatsService.tilleggOrdinærSatsNesteMånedTilTester.beløp)
+
+        val ferdigstiltBehandling = håndterIverksettingAvBehandling(
+                behandlingEtterVurdering = behandlingEtterVurdering,
+                søkerFnr = scenarioMorMedBarn.søker.ident,
+                fagsakService = fagsakService,
+                vedtakService = vedtakService,
+                stegService = stegService
+        )
+        assertEquals(BehandlingStatus.AVSLUTTET, ferdigstiltBehandling.status)
+
+        val behandlingslogg = familieBaSakKlient().hentBehandlingslogg(migreringRessurs.data!!.behandlingId)
+        println("Validerer sakslogg etter migrering $behandlingslogg")
+        assertEquals(Ressurs.Status.SUKSESS, behandlingslogg.status)
+        assertTrue(behandlingslogg.getDataOrThrow()
+                           .filter { it.type == LoggType.BEHANDLING_OPPRETTET && it.tittel == "Migrering fra infotrygd opprettet" }.size == 1)
+        assertTrue(behandlingslogg.getDataOrThrow().none { it.type == LoggType.DISTRIBUERE_BREV })
+        assertTrue(behandlingslogg.getDataOrThrow().filter { it.type == LoggType.FERDIGSTILLE_BEHANDLING }.size == 1)
+    }
+
+
+    private fun lagTestScenarioForMigrering(valg: String? = "OR", undervalg: String? = "OS"): RestScenario {
         val barn = mockServerKlient().lagScenario(
                 RestScenario(
                         søker = RestScenarioPerson(
@@ -102,29 +160,5 @@ class MigreringVerdikjedeTest : AbstractVerdikjedetest() {
                 )
         )
         return scenarioMorMedBarn
-    }
-
-    protected fun erTaskOpprettetISak(taskStepType: String, callId: String) {
-        try {
-            await.atMost(60, TimeUnit.SECONDS)
-                    .withPollInterval(Duration.ofSeconds(1))
-                    .until {
-                        sjekkOmTaskEksistererISak(taskStepType, callId)
-                    }
-        } catch (e: ConditionTimeoutException) {
-            error("TaskStepType $taskStepType ikke opprettet for callId $callId")
-        }
-    }
-
-    protected fun sjekkOmTaskEksistererISak(taskStepType: String, callId: String): Boolean {
-        val tasker = familieBaSakKlient().hentTasker("callId", callId)
-        try {
-            Assertions.assertThat(tasker.body)
-                    .hasSizeGreaterThan(0)
-                    .extracting("taskStepType").contains(taskStepType)
-        } catch (e: AssertionError) {
-            return false
-        }
-        return true
     }
 }
