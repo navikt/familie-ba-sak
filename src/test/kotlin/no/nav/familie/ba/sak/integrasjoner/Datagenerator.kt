@@ -5,14 +5,7 @@ import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.Sakstype
 import no.nav.familie.ba.sak.task.dto.FAGSYSTEM
 import no.nav.familie.kontrakter.felles.BrukerIdType
 import no.nav.familie.kontrakter.felles.Tema
-import no.nav.familie.kontrakter.felles.journalpost.Bruker
-import no.nav.familie.kontrakter.felles.journalpost.DokumentInfo
-import no.nav.familie.kontrakter.felles.journalpost.Journalpost
-import no.nav.familie.kontrakter.felles.journalpost.Journalposttype
-import no.nav.familie.kontrakter.felles.journalpost.Journalstatus
-import no.nav.familie.kontrakter.felles.journalpost.LogiskVedlegg
-import no.nav.familie.kontrakter.felles.journalpost.RelevantDato
-import no.nav.familie.kontrakter.felles.journalpost.Sak
+import no.nav.familie.kontrakter.felles.journalpost.*
 import no.nav.familie.kontrakter.felles.oppgave.IdentGruppe
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveIdentV2
@@ -31,6 +24,7 @@ fun lagTestJournalpost(personIdent: String, journalpostId: String): Journalpost 
             tema = Tema.BAR.name,
             behandlingstema = "ab00001",
             bruker = Bruker(personIdent, type = BrukerIdType.FNR),
+            avsenderMottaker = AvsenderMottaker(navn ="BLÅØYD HEST", erLikBruker = true, id=personIdent, land="NO", type=AvsenderMottakerIdType.FNR),
             journalforendeEnhet = DEFAULT_JOURNALFØRENDE_ENHET,
             kanal = "NAV_NO",
             dokumenter = listOf(DokumentInfo(tittel = "Søknad om barnetrygd",
@@ -48,7 +42,7 @@ fun lagTestJournalpost(personIdent: String, journalpostId: String): Journalpost 
             sak = Sak(arkivsaksnummer = "",
                       arkivsaksystem = "GSAK",
                       sakstype = Sakstype.FAGSAK.name,
-                      fagsakId = null,
+                      fagsakId = "10695768",
                       fagsaksystem = FAGSYSTEM),
             tittel = "Søknad om ordinær barnetrygd",
             relevanteDatoer = listOf(RelevantDato(LocalDateTime.now(), "DATO_REGISTRERT"))

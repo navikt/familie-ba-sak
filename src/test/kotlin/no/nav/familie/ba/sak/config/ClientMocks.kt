@@ -246,6 +246,12 @@ class ClientMocks {
                                        UUID.randomUUID().toString()))
         }
 
+        every { mockIntegrasjonClient.hentJournalposterForBruker(any()) } answers {
+            success(listOf(lagTestJournalpost(søkerFnr[0],
+                    UUID.randomUUID().toString()), lagTestJournalpost(søkerFnr[0],
+                    UUID.randomUUID().toString())))
+        }
+
         every { mockIntegrasjonClient.finnOppgaveMedId(any()) } returns
                 lagTestOppgaveDTO(1L)
 
@@ -406,7 +412,10 @@ class ClientMocks {
         every {
             mockFeatureToggleService.isEnabled(capture(featureSlot))
         } answers {
-            true
+            when(featureSlot.captured) {
+                FeatureToggleConfig.KAN_BEHANDLE_UTVIDET -> false
+                else -> true
+            }
         }
 
         return mockFeatureToggleService
