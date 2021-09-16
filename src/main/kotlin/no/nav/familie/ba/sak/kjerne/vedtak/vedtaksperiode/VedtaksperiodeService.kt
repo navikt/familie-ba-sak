@@ -98,13 +98,7 @@ class VedtaksperiodeService(
                         it.vedtakBegrunnelseSpesifikasjon.tilSanityBegrunnelse(brevKlient.hentSanityBegrunnelse()).tilTriggesAv()
                     } else
                         it.vedtakBegrunnelseSpesifikasjon.triggesAv
-            val vedtakBegrunnelseType =
-                    if (featureToggleService.isEnabled(BRUK_BEGRUNNELSE_TRIGGES_AV_FRA_SANITY)) {
-                        it.vedtakBegrunnelseSpesifikasjon
-                                .tilSanityBegrunnelse(brevKlient.hentSanityBegrunnelse())
-                                .hentVedtakBegrunnelseType()
-                    } else
-                        it.vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType
+            val vedtakBegrunnelseType = it.vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType
 
             val behandling = vedtaksperiodeMedBegrunnelser.vedtak.behandling
             val personIdenter =
@@ -253,7 +247,7 @@ class VedtaksperiodeService(
             }
             if (featureToggleService.isEnabled(BRUK_BEGRUNNELSE_TRIGGES_AV_FRA_SANITY)) {
                 val sanityBegrunnelser = brevKlient.hentSanityBegrunnelse()
-                if (it.erTilknyttetVilkår(sanityBegrunnelser)) {
+                if (it.erTilknyttetVilkår(sanityBegrunnelser) && personIdenter.isEmpty()) {
                     begrunnelserMedFeil.add(it)
                 }
             } else {
