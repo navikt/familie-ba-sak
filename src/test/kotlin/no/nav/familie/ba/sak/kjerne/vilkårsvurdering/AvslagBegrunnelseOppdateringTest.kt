@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
 import io.mockk.MockKAnnotations
+import no.nav.familie.ba.sak.common.førsteDagINesteMåned
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.randomFnr
@@ -173,10 +174,13 @@ class AvslagBegrunnelseOppdateringTest(
                                                                           vilkårResultater = listOf(vilkårResultatAvslag.tilRestVilkårResultat(
                                                                                   avslagsbegrunnelser = listOf(
                                                                                           VedtakBegrunnelseSpesifikasjon.AVSLAG_BOSATT_I_RIKET)))))
-        val fastsattBegrunnelse =
-                vedtakService.hentAktivForBehandling(behandlingId = behandling.id)?.vedtakBegrunnelser?.singleOrNull()
+
+        val fastsattBegrunnelse = vilkårService.hentVilkårsvurdering(behandlingId = behandling.id)?.personResultater
+            ?.flatMap { it.vilkårResultater }
+            ?.singleOrNull { it.vedtakBegrunnelseSpesifikasjoner.isNotEmpty() }
+
         assertEquals(VedtakBegrunnelseSpesifikasjon.AVSLAG_BOSATT_I_RIKET,
-                     fastsattBegrunnelse?.begrunnelse)
+                     fastsattBegrunnelse?.vedtakBegrunnelseSpesifikasjoner?.firstOrNull())
     }
 
     @Test
@@ -187,8 +191,12 @@ class AvslagBegrunnelseOppdateringTest(
                                                                           vilkårResultater = listOf(vilkårResultatAvslag.tilRestVilkårResultat(
                                                                                   avslagsbegrunnelser = listOf(
                                                                                           VedtakBegrunnelseSpesifikasjon.AVSLAG_BOSATT_I_RIKET)))))
+
         assertEquals(vilkårResultatAvslag.vedtaksperiodeFom,
-                     vedtakService.hentAktivForBehandling(behandlingId = behandling.id)?.vedtakBegrunnelser?.singleOrNull()?.fom)
+                     vilkårService.hentVilkårsvurdering(behandlingId = behandling.id)?.personResultater
+                       ?.flatMap { it.vilkårResultater }
+                       ?.filter { it.vedtakBegrunnelseSpesifikasjoner.isNotEmpty() }
+                         ?.singleOrNull()?.periodeFom?.førsteDagINesteMåned())
 
         val oppdatertTomDato = LocalDate.now().plusMonths(1).sisteDagIMåned()
         vilkårService.endreVilkår(behandlingId = behandling.id,
@@ -198,12 +206,15 @@ class AvslagBegrunnelseOppdateringTest(
                                                                                   periodeTom = oppdatertTomDato,
                                                                                   avslagsbegrunnelser = listOf(
                                                                                           VedtakBegrunnelseSpesifikasjon.AVSLAG_BOSATT_I_RIKET)))))
-        val fastsattBegrunnelse =
-                vedtakService.hentAktivForBehandling(behandlingId = behandling.id)?.vedtakBegrunnelser?.singleOrNull()
+        val fastsattBegrunnelse = vilkårService.hentVilkårsvurdering(behandlingId = behandling.id)?.personResultater
+                ?.flatMap { it.vilkårResultater }
+                ?.filter { it.vedtakBegrunnelseSpesifikasjoner.isNotEmpty() }
+                ?.firstOrNull()
+
         assertEquals(VedtakBegrunnelseSpesifikasjon.AVSLAG_BOSATT_I_RIKET,
-                     fastsattBegrunnelse?.begrunnelse)
+                     fastsattBegrunnelse?.vedtakBegrunnelseSpesifikasjoner?.firstOrNull())
         assertEquals(oppdatertTomDato,
-                     fastsattBegrunnelse?.tom)
+                     fastsattBegrunnelse?.periodeTom)
     }
 
     @Test
@@ -214,7 +225,10 @@ class AvslagBegrunnelseOppdateringTest(
                                                                           vilkårResultater = listOf(vilkårResultatAvslag.tilRestVilkårResultat(
                                                                                   avslagsbegrunnelser = listOf(
                                                                                           VedtakBegrunnelseSpesifikasjon.AVSLAG_BOSATT_I_RIKET)))))
-        assertTrue(vedtakService.hentAktivForBehandling(behandlingId = behandling.id)!!.vedtakBegrunnelser.isNotEmpty())
+        assertTrue(vilkårService.hentVilkårsvurdering(behandlingId = behandling.id)?.personResultater
+            ?.flatMap { it.vilkårResultater }
+            ?.flatMap { it.vedtakBegrunnelseSpesifikasjoner }
+                   !!.isNotEmpty())
 
         vilkårService.endreVilkår(behandlingId = behandling.id,
                                   vilkårId = vilkårResultatAvslag.id,
@@ -232,11 +246,21 @@ class AvslagBegrunnelseOppdateringTest(
                                                                           vilkårResultater = listOf(vilkårResultatAvslag.tilRestVilkårResultat(
                                                                                   avslagsbegrunnelser = listOf(
                                                                                           VedtakBegrunnelseSpesifikasjon.AVSLAG_BOSATT_I_RIKET)))))
-        assertTrue(vedtakService.hentAktivForBehandling(behandlingId = behandling.id)!!.vedtakBegrunnelser.isNotEmpty())
+
+        val vedtakBegrunnelser = vilkårService.hentVilkårsvurdering(behandlingId = behandling.id)?.personResultater
+            ?.flatMap { it.vilkårResultater }
+            ?.flatMap { it.vedtakBegrunnelseSpesifikasjoner }
+
+        assertTrue(vedtakBegrunnelser!!.isNotEmpty())
         vilkårService.deleteVilkår(behandlingId = behandling.id,
                                    vilkårId = vilkårResultatAvslag.id,
                                    personIdent = barnFnr)
-        assertTrue(vedtakService.hentAktivForBehandling(behandlingId = behandling.id)!!.vedtakBegrunnelser.isEmpty())
+
+        val vedtakBegrunnelserEtterSlett = vilkårService.hentVilkårsvurdering(behandlingId = behandling.id)?.personResultater
+            ?.flatMap { it.vilkårResultater }
+            ?.flatMap { it.vedtakBegrunnelseSpesifikasjoner }
+
+        assertTrue(vedtakBegrunnelserEtterSlett!!.isEmpty())
     }
 
     @Test
@@ -276,7 +300,11 @@ class AvslagBegrunnelseOppdateringTest(
 
         vedtakService.settStegSlettVedtakBegrunnelserOgTilbakekreving(behandlingId = behandling.id)
 
-        assertTrue(vedtakService.hentAktivForBehandling(behandlingId = behandling.id)?.vedtakBegrunnelser?.size == 0)
+        val vedtakBegrunnelser = vilkårService.hentVilkårsvurdering(behandlingId = behandling.id)?.personResultater
+            ?.flatMap { it.vilkårResultater }
+            ?.flatMap { it.vedtakBegrunnelseSpesifikasjoner }
+
+        assertTrue(vedtakBegrunnelser!!.isEmpty())
     }
 
     @Test
@@ -287,7 +315,11 @@ class AvslagBegrunnelseOppdateringTest(
                                                                           vilkårResultater = listOf(vilkårResultatAvslag.tilRestVilkårResultat(
                                                                                   avslagsbegrunnelser = listOf(
                                                                                           VedtakBegrunnelseSpesifikasjon.AVSLAG_BOSATT_I_RIKET)))))
-        assertTrue(vedtakService.hentAktivForBehandling(behandlingId = behandling.id)!!.vedtakBegrunnelser.isNotEmpty())
+        val vedtakBegrunnelser = vilkårService.hentVilkårsvurdering(behandlingId = behandling.id)?.personResultater
+            ?.flatMap { it.vilkårResultater }
+            ?.flatMap { it.vedtakBegrunnelseSpesifikasjoner }
+
+        assertTrue(vedtakBegrunnelser!!.isNotEmpty())
 
         vilkårService.endreVilkår(behandlingId = behandling.id,
                                   vilkårId = vilkårResultatInnvilget.id,
@@ -307,11 +339,14 @@ class AvslagBegrunnelseOppdateringTest(
         val restBehandling = fagsakService.hentRestFagsak(fagsakId = fagsak.id).data!!.behandlinger.first()
 
         val restVilkårResultater = restBehandling.personResultater.find { it.personIdent == barnFnr }?.vilkårResultater
+
+
         assertEquals(2, restVilkårResultater?.size)
         assertEquals(emptyList<VedtakBegrunnelseSpesifikasjon>(),
                      restVilkårResultater?.find { it.resultat == Resultat.OPPFYLT }?.avslagBegrunnelser)
-        assertEquals(listOf(VedtakBegrunnelseSpesifikasjon.AVSLAG_MEDLEM_I_FOLKETRYGDEN),
-                     restVilkårResultater?.find { it.resultat == Resultat.IKKE_OPPFYLT }?.avslagBegrunnelser)
+        assertEquals(VedtakBegrunnelseSpesifikasjon.AVSLAG_MEDLEM_I_FOLKETRYGDEN,
+                     restBehandling.vedtakForBehandling.firstOrNull()?.begrunnelser?.firstOrNull()?.begrunnelse
+        )
     }
 
     private fun VilkårResultat.tilRestVilkårResultat(periodeFom: LocalDate? = this.periodeFom,

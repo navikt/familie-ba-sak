@@ -550,7 +550,7 @@ fun kjørStegprosessForFGB(
                                                               personIdent = søkerFnr,
                                                               behandlingsId = behandlingEtterIverksetteVedtak.id,
                                                               vedtaksId = vedtak.id),
-                    task = Task.nyTask(type = StatusFraOppdragTask.TASK_STEP_TYPE, payload = "")
+                    task = Task(type = StatusFraOppdragTask.TASK_STEP_TYPE, payload = "")
             ))
     if (tilSteg == StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI) return behandlingEtterStatusFraOppdrag
 
@@ -561,7 +561,7 @@ fun kjørStegprosessForFGB(
     val behandlingEtterJournalførtVedtak =
             stegService.håndterJournalførVedtaksbrev(behandlingEtterIverksetteMotTilbake, JournalførVedtaksbrevDTO(
                     vedtakId = vedtak.id,
-                    task = Task.nyTask(type = JournalførVedtaksbrevTask.TASK_STEP_TYPE, payload = "")
+                    task = Task(type = JournalførVedtaksbrevTask.TASK_STEP_TYPE, payload = "")
             ))
     if (tilSteg == StegType.JOURNALFØR_VEDTAKSBREV) return behandlingEtterJournalførtVedtak
 
@@ -646,7 +646,7 @@ fun kjørStegprosessForRevurderingÅrligKontroll(
                                                               personIdent = søkerFnr,
                                                               behandlingsId = behandlingEtterIverksetteVedtak.id,
                                                               vedtaksId = vedtak.id),
-                    task = Task.nyTask(type = StatusFraOppdragTask.TASK_STEP_TYPE, payload = "")
+                    task = Task(type = StatusFraOppdragTask.TASK_STEP_TYPE, payload = "")
             ))
     if (tilSteg == StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI) return behandlingEtterStatusFraOppdrag
 
@@ -657,7 +657,7 @@ fun kjørStegprosessForRevurderingÅrligKontroll(
     val behandlingEtterJournalførtVedtak =
             stegService.håndterJournalførVedtaksbrev(behandlingEtterIverksetteMotTilbake, JournalførVedtaksbrevDTO(
                     vedtakId = vedtak.id,
-                    task = Task.nyTask(type = JournalførVedtaksbrevTask.TASK_STEP_TYPE, payload = "")
+                    task = Task(type = JournalførVedtaksbrevTask.TASK_STEP_TYPE, payload = "")
             ))
     if (tilSteg == StegType.JOURNALFØR_VEDTAKSBREV) return behandlingEtterJournalførtVedtak
 

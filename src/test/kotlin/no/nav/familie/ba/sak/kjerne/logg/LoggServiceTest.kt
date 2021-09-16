@@ -2,6 +2,8 @@ package no.nav.familie.ba.sak.kjerne.logg
 
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTestDev
+import no.nav.familie.ba.sak.config.AbstractTestWithJdbcTables
 import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.config.mockHentPersoninfoForMedIdenter
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
@@ -18,6 +20,7 @@ import org.junit.jupiter.api.TestInstance.Lifecycle
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
+import javax.sql.DataSource
 
 @SpringBootTest
 @ActiveProfiles("dev", "mock-pdl", "mock-infotrygd-barnetrygd")
@@ -33,8 +36,12 @@ class LoggServiceTest(
         private val mockPersonopplysningerService: PersonopplysningerService,
 
         @Autowired
-        private val databaseCleanupService: DatabaseCleanupService
-) {
+        private val databaseCleanupService: DatabaseCleanupService,
+
+        @Autowired
+        private val dataSource: DataSource
+
+) : AbstractTestWithJdbcTables(dataSource) {
 
     @BeforeAll
     fun init() {
@@ -87,10 +94,12 @@ class LoggServiceTest(
 
         mockHentPersoninfoForMedIdenter(mockPersonopplysningerService, morsIdent, barnetsIdent)
 
-        val behandling = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(NyBehandlingHendelse(
-                morsIdent = morsIdent,
-                barnasIdenter = listOf(barnetsIdent)
-        ))
+        val behandling = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(
+                NyBehandlingHendelse(
+                        morsIdent = morsIdent,
+                        barnasIdenter = listOf(barnetsIdent)
+                )
+        )
 
         val loggForBehandling = loggService.hentLoggForBehandling(behandlingId = behandling.id)
         Assertions.assertEquals(2, loggForBehandling.size)
@@ -102,9 +111,11 @@ class LoggServiceTest(
     @Test
     fun `Skal lage nye vilkårslogger og endringer`() {
         val behandling = lagBehandling()
-        val vilkårsvurderingLogg = loggService.opprettVilkårsvurderingLogg(behandling = behandling,
-                                                                           forrigeBehandlingResultat = behandling.resultat,
-                                                                           nyttBehandlingResultat = BehandlingResultat.INNVILGET)
+        val vilkårsvurderingLogg = loggService.opprettVilkårsvurderingLogg(
+                behandling = behandling,
+                forrigeBehandlingResultat = behandling.resultat,
+                nyttBehandlingResultat = BehandlingResultat.INNVILGET
+        )
 
         Assertions.assertNotNull(vilkårsvurderingLogg)
         Assertions.assertEquals("Vilkårsvurdering gjennomført", vilkårsvurderingLogg!!.tittel)
@@ -112,9 +123,11 @@ class LoggServiceTest(
 
         behandling.resultat = BehandlingResultat.INNVILGET
         val nyVilkårsvurderingLogg =
-                loggService.opprettVilkårsvurderingLogg(behandling = behandling,
-                                                        forrigeBehandlingResultat = behandling.resultat,
-                                                        nyttBehandlingResultat = BehandlingResultat.AVSLÅTT)
+                loggService.opprettVilkårsvurderingLogg(
+                        behandling = behandling,
+                        forrigeBehandlingResultat = behandling.resultat,
+                        nyttBehandlingResultat = BehandlingResultat.AVSLÅTT
+                )
 
         Assertions.assertNotNull(nyVilkårsvurderingLogg)
         Assertions.assertEquals("Vilkårsvurdering endret", nyVilkårsvurderingLogg!!.tittel)
@@ -125,9 +138,11 @@ class LoggServiceTest(
 
     @Test
     fun `Skal ikke logge ved uforandret behandlingsresultat`() {
-        val vilkårsvurderingLogg = loggService.opprettVilkårsvurderingLogg(behandling = lagBehandling(),
-                                                                           forrigeBehandlingResultat = BehandlingResultat.FORTSATT_INNVILGET,
-                                                                           nyttBehandlingResultat = BehandlingResultat.FORTSATT_INNVILGET)
+        val vilkårsvurderingLogg = loggService.opprettVilkårsvurderingLogg(
+                behandling = lagBehandling(),
+                forrigeBehandlingResultat = BehandlingResultat.FORTSATT_INNVILGET,
+                nyttBehandlingResultat = BehandlingResultat.FORTSATT_INNVILGET
+        )
 
         Assertions.assertNull(vilkårsvurderingLogg)
     }

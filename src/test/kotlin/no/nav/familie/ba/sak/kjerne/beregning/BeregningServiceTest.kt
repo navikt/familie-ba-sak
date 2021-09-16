@@ -1,25 +1,44 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
-import io.mockk.*
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
-import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
+import io.mockk.Runs
+import io.mockk.every
+import io.mockk.just
+import io.mockk.mockk
+import io.mockk.slot
+import io.mockk.verify
+import no.nav.familie.ba.sak.common.defaultFagsak
+import no.nav.familie.ba.sak.common.forrigeMåned
+import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
+import no.nav.familie.ba.sak.common.lagPersonResultat
+import no.nav.familie.ba.sak.common.lagSøknadDTO
+import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
+import no.nav.familie.ba.sak.common.nesteMåned
+import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.common.tilfeldigPerson
+import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestFagsak
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
-import no.nav.familie.ba.sak.common.*
-import no.nav.familie.ba.sak.config.FeatureToggleService
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
+import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -30,6 +49,7 @@ class BeregningServiceTest {
     val behandlingRepository = mockk<BehandlingRepository>()
     val søknadGrunnlagService = mockk<SøknadGrunnlagService>()
     val personopplysningGrunnlagRepository = mockk<PersonopplysningGrunnlagRepository>()
+    val endretUtbetalingAndelRepository = mockk<EndretUtbetalingAndelRepository>()
     val featureToggleService = mockk<FeatureToggleService>()
 
     lateinit var beregningService: BeregningService
@@ -45,13 +65,15 @@ class BeregningServiceTest {
                                             tilkjentYtelseRepository,
                                             behandlingResultatRepository,
                                             behandlingRepository,
-                                            personopplysningGrunnlagRepository)
+                                            personopplysningGrunnlagRepository,
+                                            endretUtbetalingAndelRepository)
 
         every { tilkjentYtelseRepository.slettTilkjentYtelseFor(any()) } just Runs
         every { fagsakService.hentRestFagsak(any()) } answers {
             Ressurs.success(defaultFagsak().tilRestFagsak(emptyList(), emptyList(), emptyList()))
         }
         every { featureToggleService.isEnabled(any()) } answers { true }
+        every { endretUtbetalingAndelRepository.findByBehandlingId(any()) } answers { emptyList() }
     }
 
     @Test
@@ -162,6 +184,66 @@ class BeregningServiceTest {
         Assertions.assertEquals(1054, andelerTilkjentYtelse.last().beløp)
         Assertions.assertEquals(satsPeriode2Start, andelerTilkjentYtelse.last().stønadFom)
         Assertions.assertEquals(periodeTom.toYearMonth(), andelerTilkjentYtelse.last().stønadTom)
+    }
+
+    @Test
+    fun `Skal verifisere at endret utbetaling andel appliseres på en innvilget utbetaling andel`() {
+        val behandling = lagBehandling()
+        val barn = tilfeldigPerson(personType = PersonType.BARN)
+        val søkerFnr = randomFnr()
+        val vilkårsvurdering =
+                Vilkårsvurdering(behandling = behandling)
+
+        val periodeFom = LocalDate.of(2018, 1, 1)
+        val periodeTom = LocalDate.of(2018, 7, 1)
+        val personResultatBarn = lagPersonResultat(vilkårsvurdering = vilkårsvurdering,
+                                                   fnr = barn.personIdent.ident,
+                                                   resultat = Resultat.OPPFYLT,
+                                                   periodeFom = periodeFom,
+                                                   periodeTom = periodeTom,
+                                                   lagFullstendigVilkårResultat = true,
+                                                   personType = PersonType.BARN
+        )
+
+        val personResultatSøker = lagPersonResultat(vilkårsvurdering = vilkårsvurdering,
+                                                    fnr = søkerFnr,
+                                                    resultat = Resultat.OPPFYLT,
+                                                    periodeFom = periodeFom,
+                                                    periodeTom = periodeTom,
+                                                    lagFullstendigVilkårResultat = true,
+                                                    personType = PersonType.SØKER
+        )
+        vilkårsvurdering.personResultater = setOf(personResultatBarn, personResultatSøker)
+
+        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandlingId = behandling.id,
+                                                                       søkerPersonIdent = søkerFnr,
+                                                                       barnasIdenter = listOf(barn.personIdent.ident))
+        val slot = slot<TilkjentYtelse>()
+
+        every { behandlingResultatRepository.findByBehandlingAndAktiv(any()) } answers { vilkårsvurdering }
+        every { tilkjentYtelseRepository.save(any<TilkjentYtelse>()) } returns lagInitiellTilkjentYtelse(behandling)
+        every { søknadGrunnlagService.hentAktiv(any())?.hentSøknadDto() } returns lagSøknadDTO(søkerFnr,
+                                                                                               listOf(barn.personIdent.ident))
+        every { endretUtbetalingAndelRepository.findByBehandlingId(any()) } returns
+                listOf(EndretUtbetalingAndel(behandlingId = behandling.id,
+                                             person = barn, prosent = BigDecimal(50),
+                                             fom = periodeFom.toYearMonth(),
+                                             tom = periodeTom.toYearMonth(),
+                                             årsak = Årsak.DELT_BOSTED,
+                                             begrunnelse = "En begrunnelse"))
+
+        beregningService.oppdaterBehandlingMedBeregning(behandling = behandling,
+                                                        personopplysningGrunnlag = personopplysningGrunnlag)
+
+        verify(exactly = 1) { tilkjentYtelseRepository.save(capture(slot)) }
+
+        Assertions.assertEquals(1, slot.captured.andelerTilkjentYtelse.size)
+
+        val andelerTilkjentYtelse = slot.captured.andelerTilkjentYtelse.sortedBy { it.stønadFom }
+
+        Assertions.assertEquals(970/2, andelerTilkjentYtelse.first().beløp)
+        Assertions.assertEquals(periodeFom.nesteMåned(), andelerTilkjentYtelse.first().stønadFom)
+        Assertions.assertEquals(periodeTom.toYearMonth(), andelerTilkjentYtelse.first().stønadTom)
     }
 
     @Test

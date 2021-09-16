@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsakDeltager
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestBehandlingStegTilstand
+import no.nav.familie.ba.sak.ekstern.restDomene.tilRestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestFødselshendelsefiltreringResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonResultat
@@ -24,6 +25,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -35,12 +37,9 @@ import no.nav.familie.ba.sak.kjerne.tilbakekreving.domene.TilbakekrevingReposito
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.filterAvslag
-import no.nav.familie.ba.sak.kjerne.vedtak.filterIkkeAvslagFritekstOgUregistrertBarn
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.sikkerhet.validering.FagsaktilgangConstraint
@@ -77,7 +76,8 @@ class FagsakService(
         private val søknadGrunnlagService: SøknadGrunnlagService,
         private val tilbakekrevingRepository: TilbakekrevingRepository,
         private val tilbakekrevingsbehandlingService: TilbakekrevingsbehandlingService,
-        private val fødselshendelsefiltreringResultatRepository: FødselshendelsefiltreringResultatRepository
+        private val fødselshendelsefiltreringResultatRepository: FødselshendelsefiltreringResultatRepository,
+        private val endretUtbetalingAndelRepository: EndretUtbetalingAndelRepository,
 ) {
 
 
@@ -203,19 +203,6 @@ class FagsakService(
         val totrinnskontroll =
                 totrinnskontrollRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
 
-        fun vilkårResultaterMedVedtakBegrunnelse(vilkårResultater: MutableSet<VilkårResultat>):
-                List<Pair<Long, VedtakBegrunnelseSpesifikasjon>> {
-            val vilkårResultaterIder = vilkårResultater.map { it.id }
-            val avslagBegrunnelser =
-                    vedtak.flatMap { it.vedtakBegrunnelser }
-                            .filterAvslag()
-                            .filterIkkeAvslagFritekstOgUregistrertBarn()
-
-            return if (avslagBegrunnelser.any { it.vilkårResultat == null }) error("Avslagbegrunnelse mangler 'vilkårResultat'")
-            else avslagBegrunnelser.filter { vilkårResultaterIder.contains(it.vilkårResultat!!.id) }
-                    .map { Pair(it.vilkårResultat!!.id, it.begrunnelse) }
-        }
-
         val tilbakekreving = tilbakekrevingRepository.findByBehandlingId(behandling.id)
 
         return RestUtvidetBehandling(
@@ -235,14 +222,13 @@ class FagsakService(
                 arbeidsfordelingPåBehandling = arbeidsfordeling.tilRestArbeidsfordelingPåBehandling(),
                 søknadsgrunnlag = søknadsgrunnlag?.hentSøknadDto(),
                 personer = personer?.map { persongrunnlagService.mapTilRestPersonMedStatsborgerskapLand(it) } ?: emptyList(),
-                personResultater = personResultater?.map {
-                    it.tilRestPersonResultat(vilkårResultaterMedVedtakBegrunnelse(it.vilkårResultater))
-                } ?: emptyList(),
+                personResultater = personResultater?.map { it.tilRestPersonResultat() } ?: emptyList(),
                 fødselshendelsefiltreringResultater = fødselshendelsefiltreringResultatRepository.finnFødselshendelsefiltreringResultater(
                         behandlingId = behandling.id).map { it.tilRestFødselshendelsefiltreringResultat() },
                 utbetalingsperioder = vedtaksperiodeService.hentUtbetalingsperioder(behandling),
                 personerMedAndelerTilkjentYtelse = personopplysningGrunnlag?.tilRestPersonerMedAndeler(andelerTilkjentYtelse)
                                                    ?: emptyList(),
+                endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(behandling.id).map { it.tilRestEndretUtbetalingAndel() },
                 tilbakekreving = tilbakekreving?.tilRestTilbakekreving(),
                 vedtakForBehandling = vedtak.filter { it.aktiv }.map {
                     val sammenslåtteAvslagBegrunnelser =

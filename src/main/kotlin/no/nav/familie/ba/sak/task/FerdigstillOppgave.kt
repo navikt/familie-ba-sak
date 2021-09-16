@@ -27,7 +27,7 @@ class FerdigstillOppgave(
         const val TASK_STEP_TYPE = "ferdigstillOppgaveTask"
 
         fun opprettTask(behandlingId: Long, oppgavetype: Oppgavetype): Task {
-            return Task.nyTask(type = TASK_STEP_TYPE,
+            return Task(type = TASK_STEP_TYPE,
                                payload = objectMapper.writeValueAsString(FerdigstillOppgaveDTO(behandlingId = behandlingId,
                                                                                                oppgavetype = oppgavetype))
             )

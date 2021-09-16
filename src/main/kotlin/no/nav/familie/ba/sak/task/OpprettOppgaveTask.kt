@@ -7,7 +7,6 @@ import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.prosessering.domene.TaskRepository
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 
@@ -16,8 +15,7 @@ import java.time.LocalDate
                      beskrivelse = "Opprett oppgave i GOSYS for behandling",
                      maxAntallFeil = 3)
 class OpprettOppgaveTask(
-        private val oppgaveService: OppgaveService,
-        private val taskRepository: TaskRepository) : AsyncTaskStep {
+        private val oppgaveService: OppgaveService) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
         val opprettOppgaveTaskDTO = objectMapper.readValue(task.payload, OpprettOppgaveTaskDTO::class.java)
@@ -28,7 +26,6 @@ class OpprettOppgaveTask(
                 tilordnetNavIdent = opprettOppgaveTaskDTO.tilordnetRessurs,
                 beskrivelse = opprettOppgaveTaskDTO.beskrivelse
         )
-        taskRepository.saveAndFlush(task)
     }
 
     companion object {
@@ -42,7 +39,7 @@ class OpprettOppgaveTask(
                 tilordnetRessurs: String? = null,
                 beskrivelse: String? = null,
         ): Task {
-            return Task.nyTask(
+            return Task(
                     type = TASK_STEP_TYPE,
                     payload = objectMapper.writeValueAsString(OpprettOppgaveTaskDTO(behandlingId,
                                                                                     oppgavetype,
