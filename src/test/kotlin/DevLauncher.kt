@@ -13,7 +13,8 @@ object DevLauncher {
                         "mock-infotrygd-feed",
                         "mock-infotrygd-barnetrygd",
                         "mock-pdl",
-                        "mock-tilbakekreving-klient"
+                        "mock-tilbakekreving-klient",
+                        "task-scheduling"
                 )
         app.run(*args)
     }
