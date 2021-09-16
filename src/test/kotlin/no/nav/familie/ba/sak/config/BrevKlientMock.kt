@@ -37,7 +37,6 @@ val navnTilNedtrekksmenyMock: List<SanityBegrunnelse> =
                     SanityBegrunnelse(
                             apiNavn = it.sanityApiNavn,
                             navnISystem = it.name,
-                            begrunnelsetype = it.vedtakBegrunnelseType.tilSanityBegrunnelseType(),
                             ovrigeTriggere = when (it) {
                                 VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR -> listOf(ØvrigTrigger.BARN_MED_6_ÅRS_DAG)
                                 VedtakBegrunnelseSpesifikasjon.INNVILGET_SATSENDRING -> listOf(ØvrigTrigger.SATSENDRING)
