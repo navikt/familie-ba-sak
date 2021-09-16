@@ -38,8 +38,6 @@ import org.springframework.web.client.RestTemplate
             "SAKSBEHANDLER_ROLLE: SAKSBEHANDLER",
             "BESLUTTER_ROLLE: BESLUTTER",
             "ENVIRONMENT_NAME: integrationtest",
-            "PDL_URL: http://localhost:1337/rest/api/pdl",
-            "FAMILIE_BA_INFOTRYGD_BARNETRYGD_API_URL: http://localhost:1337/rest/api/infotrygd/ba"
         ],
 )
 @AutoConfigureWireMock(port = 28085)

@@ -92,7 +92,7 @@ class MigreringVerdikjedeTest(
         assertEquals(BehandlingStatus.IVERKSETTER_VEDTAK, behandlingEtterVurdering.status)
 
         val utbetalingsperioder =
-                vedtaksperiodeService.hentUtbetalingsperioder(behandling =behandlingEtterVurdering)
+                vedtaksperiodeService.hentUtbetalingsperioder(behandling = behandlingEtterVurdering)
         assertEquals(2, utbetalingsperioder.size)
 
 

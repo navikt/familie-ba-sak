@@ -241,8 +241,6 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
 
     @Test
     fun `Skal kaste feil tilgang når bisys kaller tjenste som ikke er bisys-relatert`() {
-        val fnr = randomFnr()
-
         val header = HttpHeaders()
         header.contentType = MediaType.APPLICATION_JSON
         header.setBearerAuth(
