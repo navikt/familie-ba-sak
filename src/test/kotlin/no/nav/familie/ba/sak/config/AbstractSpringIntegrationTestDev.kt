@@ -2,10 +2,12 @@ package no.nav.familie.ba.sak.config
 
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.TestInstance
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
+import javax.sql.DataSource
 
 @SpringBootTest(classes = [ApplicationConfig::class])
 @ActiveProfiles("dev",

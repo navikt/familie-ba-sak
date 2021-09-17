@@ -29,7 +29,7 @@ class IverksettMotFamilieTilbakeTask(
 
         const val TASK_STEP_TYPE = "iverksettMotFamilieTilbake"
         fun opprettTask(behandlingsId: Long, metadata: Properties): Task {
-            return Task.nyTask(type = TASK_STEP_TYPE,
+            return Task(type = TASK_STEP_TYPE,
                                payload = objectMapper.writeValueAsString(IverksettMotFamilieTilbakeDTO(behandlingsId)),
                                properties = metadata.apply {
                                    this["behandlingId"] = behandlingsId.toString()

@@ -1,11 +1,19 @@
 package no.nav.familie.ba.sak.kjerne.grunnlag.søknad
 
+import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.kontrakter.felles.objectMapper
 import java.time.LocalDateTime
-import javax.persistence.*
+import javax.persistence.Column
+import javax.persistence.Entity
+import javax.persistence.EntityListeners
+import javax.persistence.GeneratedValue
+import javax.persistence.GenerationType
+import javax.persistence.Id
+import javax.persistence.SequenceGenerator
+import javax.persistence.Table
 
 @EntityListeners(RollestyringMotDatabase::class)
 @Entity
@@ -34,5 +42,9 @@ data class SøknadGrunnlag(
 
     fun hentSøknadDto(): SøknadDTO {
         return objectMapper.readValue(this.søknad, SøknadDTO::class.java)
+    }
+
+    fun hentUregistrerteBarn(): List<BarnMedOpplysninger> {
+        return hentSøknadDto().barnaMedOpplysninger.filter { !it.erFolkeregistrert && it.inkludertISøknaden }
     }
 }

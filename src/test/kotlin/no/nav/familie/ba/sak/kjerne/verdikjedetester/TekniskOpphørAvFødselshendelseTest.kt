@@ -112,7 +112,6 @@ class TekniskOpphørAvFødselshendelseTest(
         håndterIverksettingAvBehandling(
                 behandlingEtterVurdering = behandlingService.hentAktivForFagsak(fagsakId = restFagsakEtterSendTilBeslutter.data!!.id)!!,
                 søkerFnr = scenario.søker.ident,
-                skalJournalføre = false,
                 fagsakStatusEtterIverksetting = FagsakStatus.AVSLUTTET,
                 fagsakService = fagsakService,
                 vedtakService = vedtakService,

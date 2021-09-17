@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
+import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -13,18 +14,17 @@ import no.nav.familie.ba.sak.kjerne.dokument.domene.byggMottakerdata
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
-import no.nav.familie.prosessering.domene.TaskRepository
 import org.springframework.stereotype.Service
 
 @Service
 class HenleggBehandling(
-        private val behandlingService: BehandlingService,
-        private val taskRepository: TaskRepository,
-        private val loggService: LoggService,
-        private val dokumentService: DokumentService,
-        private val oppgaveService: OppgaveService,
-        private val persongrunnlagService: PersongrunnlagService,
-        private val arbeidsfordelingService: ArbeidsfordelingService
+    private val behandlingService: BehandlingService,
+    private val taskRepository: TaskRepositoryWrapper,
+    private val loggService: LoggService,
+    private val dokumentService: DokumentService,
+    private val oppgaveService: OppgaveService,
+    private val persongrunnlagService: PersongrunnlagService,
+    private val arbeidsfordelingService: ArbeidsfordelingService
 ) : BehandlingSteg<RestHenleggBehandlingInfo> {
 
     override fun utførStegOgAngiNeste(behandling: Behandling, data: RestHenleggBehandlingInfo): StegType {

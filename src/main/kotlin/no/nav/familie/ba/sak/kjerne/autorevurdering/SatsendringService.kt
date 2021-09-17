@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.autorevurdering
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
@@ -13,7 +14,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
-import no.nav.familie.prosessering.domene.TaskRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.YearMonth
@@ -22,7 +22,7 @@ import java.time.YearMonth
 class SatsendringService(
         private val stegService: StegService,
         private val vedtakService: VedtakService,
-        private val taskRepository: TaskRepository,
+        private val taskRepository: TaskRepositoryWrapper,
         private val behandlingRepository: BehandlingRepository,
 ) {
 

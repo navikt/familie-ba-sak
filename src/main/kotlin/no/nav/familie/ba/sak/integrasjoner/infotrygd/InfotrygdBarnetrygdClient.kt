@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.integrasjoner.infotrygd
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.ekstern.bisys.BisysUtvidetBarnetrygdResponse
-import no.nav.familie.ba.sak.task.TaskService.Companion.RETRY_BACKOFF_5000MS
+import no.nav.familie.ba.sak.task.OpprettTaskService.Companion.RETRY_BACKOFF_5000MS
 import no.nav.familie.eksterne.kontrakter.skatteetaten.SkatteetatenPerioder
 import no.nav.familie.eksterne.kontrakter.skatteetaten.SkatteetatenPersonerResponse
 import no.nav.familie.http.client.AbstractRestClient

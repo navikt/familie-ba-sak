@@ -21,7 +21,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate.now
-import java.time.YearMonth
 
 
 class FødselshendelseRevurderingTest(
@@ -53,7 +52,7 @@ class FødselshendelseRevurderingTest(
         behandleFødselshendelse(
                 nyBehandlingHendelse = NyBehandlingHendelse(
                         morsIdent = scenario.søker.ident!!,
-                        barnasIdenter = listOf(scenario.barna.first().ident!!)
+                        barnasIdenter = listOf(scenario.barna.minByOrNull { it.fødselsdato }!!.ident!!)
                 ),
                 behandleFødselshendelseTask = behandleFødselshendelseTask,
                 fagsakService = fagsakService,
@@ -92,7 +91,8 @@ class FødselshendelseRevurderingTest(
 
         val utbetalingsperioder = aktivBehandling.utbetalingsperioder
         val gjeldendeUtbetalingsperiode = utbetalingsperioder.find {
-            it.periodeFom.toYearMonth() == SatsService.tilleggOrdinærSatsNesteMånedTilTester.gyldigFom.toYearMonth() }!!
+            it.periodeFom.toYearMonth() == SatsService.tilleggOrdinærSatsNesteMånedTilTester.gyldigFom.toYearMonth()
+        }!!
 
         assertUtbetalingsperiode(gjeldendeUtbetalingsperiode, 2, SatsService.tilleggOrdinærSatsNesteMånedTilTester.beløp * 2)
     }
