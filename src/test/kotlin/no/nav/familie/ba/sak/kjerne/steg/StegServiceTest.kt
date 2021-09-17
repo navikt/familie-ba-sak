@@ -35,7 +35,6 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagSe
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
@@ -51,7 +50,6 @@ import no.nav.familie.prosessering.domene.Task
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.Order
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
