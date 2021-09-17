@@ -6,6 +6,7 @@ import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.slot
 import no.nav.familie.ba.sak.common.EnvService
+import no.nav.familie.ba.sak.common.guttenBarnesenFødselsdato
 import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.tilddMMyy
@@ -246,6 +247,12 @@ class ClientMocks {
                                        UUID.randomUUID().toString()))
         }
 
+        every { mockIntegrasjonClient.hentJournalposterForBruker(any()) } answers {
+            success(listOf(lagTestJournalpost(søkerFnr[0],
+                    UUID.randomUUID().toString()), lagTestJournalpost(søkerFnr[0],
+                    UUID.randomUUID().toString())))
+        }
+
         every { mockIntegrasjonClient.finnOppgaveMedId(any()) } returns
                 lagTestOppgaveDTO(1L)
 
@@ -406,7 +413,10 @@ class ClientMocks {
         every {
             mockFeatureToggleService.isEnabled(capture(featureSlot))
         } answers {
-            true
+            when(featureSlot.captured) {
+                FeatureToggleConfig.KAN_BEHANDLE_UTVIDET -> false
+                else -> true
+            }
         }
 
         return mockFeatureToggleService
@@ -485,7 +495,7 @@ class ClientMocks {
 
         val søkerFnr = arrayOf("12345678910", "11223344556", "12345678911")
         private val barnFødselsdatoer = arrayOf(
-                LocalDate.now().withDayOfMonth(10).minusYears(6),
+                guttenBarnesenFødselsdato,
                 LocalDate.now().withDayOfMonth(18).minusYears(1)
         )
         val barnFnr = arrayOf(barnFødselsdatoer[0].tilddMMyy() + "00033", barnFødselsdatoer[1].tilddMMyy() + "00033")

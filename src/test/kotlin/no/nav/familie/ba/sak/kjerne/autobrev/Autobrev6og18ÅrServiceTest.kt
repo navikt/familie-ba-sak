@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.common.tilfeldigSøker
+import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
@@ -21,7 +22,7 @@ import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.task.dto.Autobrev6og18ÅrDTO
-import no.nav.familie.prosessering.domene.TaskRepository
+import no.nav.familie.prosessering.domene.Task
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -33,7 +34,7 @@ internal class Autobrev6og18ÅrServiceTest {
     val behandlingService = mockk<BehandlingService>()
     val stegService = mockk<StegService>()
     val vedtakService = mockk<VedtakService>(relaxed = true)
-    val taskRepository = mockk<TaskRepository>(relaxed = true)
+    val taskRepository = mockk<TaskRepositoryWrapper>(relaxed = true)
     val vedtaksperiodeService = mockk<VedtaksperiodeService>()
 
     val autobrev6og18ÅrService = Autobrev6og18ÅrService(personopplysningGrunnlagRepository = personopplysningGrunnlagRepository,
@@ -108,7 +109,7 @@ internal class Autobrev6og18ÅrServiceTest {
         every { stegService.håndterNyBehandling(any()) } returns behandling
         every { persongrunnlagService.hentSøker(any()) } returns tilfeldigSøker()
         every { vedtaksperiodeService.oppdaterFortsattInnvilgetPeriodeMedAutobrevBegrunnelse(any(), any()) } just runs
-
+        every { taskRepository.save(any()) } returns Task(type = "test", payload = "")
         autobrev6og18ÅrService.opprettOmregningsoppgaveForBarnIBrytingsalder(autobrev6og18ÅrDTO)
 
         verify(exactly = 1) { stegService.håndterVilkårsvurdering(any()) }

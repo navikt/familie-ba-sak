@@ -51,6 +51,7 @@ import no.nav.familie.prosessering.domene.Task
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Order
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
@@ -225,7 +226,7 @@ class StegServiceTest(
                                                                   personIdent = søkerFnr,
                                                                   behandlingsId = behandlingEtterIverksetteVedtak.id,
                                                                   vedtaksId = vedtak.id),
-                        task = Task.nyTask(type = StatusFraOppdragTask.TASK_STEP_TYPE, payload = "")
+                        task = Task(type = StatusFraOppdragTask.TASK_STEP_TYPE, payload = "")
                 ))
         assertEquals(StegType.IVERKSETT_MOT_FAMILIE_TILBAKE, behandlingEtterStatusFraOppdrag.steg)
 
@@ -235,7 +236,7 @@ class StegServiceTest(
         val behandlingEtterJournalførtVedtak =
                 stegService.håndterJournalførVedtaksbrev(behandlingEtterIverksetteMotTilbake, JournalførVedtaksbrevDTO(
                         vedtakId = vedtak.id,
-                        task = Task.nyTask(type = JournalførVedtaksbrevTask.TASK_STEP_TYPE, payload = "")
+                        task = Task(type = JournalførVedtaksbrevTask.TASK_STEP_TYPE, payload = "")
                 ))
         assertEquals(StegType.DISTRIBUER_VEDTAKSBREV, behandlingEtterJournalførtVedtak.steg)
 

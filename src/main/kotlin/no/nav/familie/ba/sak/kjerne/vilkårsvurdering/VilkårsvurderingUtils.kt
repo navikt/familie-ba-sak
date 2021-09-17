@@ -11,9 +11,11 @@ import no.nav.familie.ba.sak.common.kanSplitte
 import no.nav.familie.ba.sak.common.toPeriode
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVedtakBegrunnelseTilknyttetVilkår
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVilkårResultat
-import no.nav.familie.ba.sak.kjerne.dokument.domene.NavnTilNedtrekksmeny
+import no.nav.familie.ba.sak.kjerne.dokument.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilTriggesAv
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
@@ -228,7 +230,8 @@ object VilkårsvurderingUtils {
     }
 }
 
-fun vedtakBegrunnelseSpesifikasjonerTilNedtrekksmenytekster(navnTilNedtrekksmeny: List<NavnTilNedtrekksmeny>) =
+fun vedtakBegrunnelseSpesifikasjonerTilNedtrekksmenytekster(navnTilNedtrekksmeny: List<SanityBegrunnelse>,
+                                                            skalBrukeTriggesAvFraSanity: Boolean) =
         VedtakBegrunnelseSpesifikasjon
                 .values()
                 .groupBy { it.vedtakBegrunnelseType }
@@ -237,19 +240,28 @@ fun vedtakBegrunnelseSpesifikasjonerTilNedtrekksmenytekster(navnTilNedtrekksmeny
                             .filter { it.erTilgjengeligFrontend }
                             .flatMap { vedtakBegrunnelse ->
                                 vedtakBegrunnelseTilRestVedtakBegrunnelseTilknyttetVilkår(navnTilNedtrekksmeny,
-                                                                                          vedtakBegrunnelse)
+                                                                                          vedtakBegrunnelse,
+                                                                                          skalBrukeTriggesAvFraSanity)
                             }
                 }
 
 private fun vedtakBegrunnelseTilRestVedtakBegrunnelseTilknyttetVilkår(
-        navnTilNedtrekksmeny: List<NavnTilNedtrekksmeny>,
+        sanityBegrunnelser: List<SanityBegrunnelse>,
         vedtakBegrunnelse: VedtakBegrunnelseSpesifikasjon,
+        skalBrukeTriggesAvFraSanity: Boolean,
 ): List<RestVedtakBegrunnelseTilknyttetVilkår> {
+    val triggesAv =
+            if (skalBrukeTriggesAvFraSanity) {
+                vedtakBegrunnelse.tilSanityBegrunnelse(sanityBegrunnelser)
+                        .tilTriggesAv()
+            } else
+                vedtakBegrunnelse.triggesAv
+
     val visningsnavn =
-            navnTilNedtrekksmeny.find { it.apiNavn == vedtakBegrunnelse.sanityApiNavn }?.navnISystem
+            sanityBegrunnelser.find { it.apiNavn == vedtakBegrunnelse.sanityApiNavn }?.navnISystem
             ?: throw Feil("Fant ikke begrunnelse med apiNavn=${vedtakBegrunnelse.sanityApiNavn} i Sanity.")
 
-    return vedtakBegrunnelse.triggesAv.vilkår?.map {
+    return triggesAv.vilkår?.map {
         RestVedtakBegrunnelseTilknyttetVilkår(id = vedtakBegrunnelse,
                                               navn = visningsnavn,
                                               vilkår = it

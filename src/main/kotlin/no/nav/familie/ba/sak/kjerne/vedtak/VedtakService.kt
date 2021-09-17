@@ -7,7 +7,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.dokument.DokumentService
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingService
@@ -23,15 +22,13 @@ import java.time.LocalDateTime
 
 @Service
 class VedtakService(
-        private val behandlingService: BehandlingService,
-        private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
-        private val loggService: LoggService,
-        private val vedtakRepository: VedtakRepository,
-        private val dokumentService: DokumentService,
-        private val totrinnskontrollService: TotrinnskontrollService,
-        private val tilbakekrevingService: TilbakekrevingService,
-
-        ) {
+    private val behandlingService: BehandlingService,
+    private val loggService: LoggService,
+    private val vedtakRepository: VedtakRepository,
+    private val dokumentService: DokumentService,
+    private val totrinnskontrollService: TotrinnskontrollService,
+    private val tilbakekrevingService: TilbakekrevingService,
+) {
 
     fun opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(behandling: Behandling): Vedtak {
         totrinnskontrollService.opprettAutomatiskTotrinnskontroll(behandling)

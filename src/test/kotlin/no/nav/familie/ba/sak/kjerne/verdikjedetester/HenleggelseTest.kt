@@ -58,10 +58,10 @@ class HenleggelseTest(
         assertThat(!ferdigstiltBehandling.aktiv)
         assertThat(ferdigstiltBehandling.resultat == BehandlingResultat.HENLAGT_FEILAKTIG_OPPRETTET)
 
-        val logger = familieBaSakKlient().hentLogg(responseHenlagtSøknad.data!!.id)
-        assertEquals(Ressurs.Status.SUKSESS, logger.status)
-        assertThat(logger.data?.filter { it.type == LoggType.HENLEGG_BEHANDLING }?.size == 1)
-        assertThat(logger.data?.filter { it.type == LoggType.DISTRIBUERE_BREV }?.size == 0)
+        val behandlingslogg = familieBaSakKlient().hentBehandlingslogg(responseHenlagtSøknad.data!!.id)
+        assertEquals(Ressurs.Status.SUKSESS, behandlingslogg.status)
+        assertThat(behandlingslogg.data?.filter { it.type == LoggType.HENLEGG_BEHANDLING }?.size == 1)
+        assertThat(behandlingslogg.data?.filter { it.type == LoggType.DISTRIBUERE_BREV }?.size == 0)
 
         val andreBehandling = opprettBehandlingOgRegistrerSøknad(scenario)
         assertThat(andreBehandling.aktiv).isTrue
@@ -98,10 +98,10 @@ class HenleggelseTest(
         assertThat(!ferdigstiltBehandling.aktiv)
         assertThat(ferdigstiltBehandling.resultat == BehandlingResultat.HENLAGT_SØKNAD_TRUKKET)
 
-        val logger = familieBaSakKlient().hentLogg(responseHenlagtSøknad.data!!.id)
-        assertEquals(Ressurs.Status.SUKSESS, logger.status)
-        assertThat(logger.data?.filter { it.type == LoggType.HENLEGG_BEHANDLING }?.size == 1)
-        assertThat(logger.data?.filter { it.type == LoggType.DISTRIBUERE_BREV }?.size == 1)
+        val behandlingslogg = familieBaSakKlient().hentBehandlingslogg(responseHenlagtSøknad.data!!.id)
+        assertEquals(Ressurs.Status.SUKSESS, behandlingslogg.status)
+        assertThat(behandlingslogg.data?.filter { it.type == LoggType.HENLEGG_BEHANDLING }?.size == 1)
+        assertThat(behandlingslogg.data?.filter { it.type == LoggType.DISTRIBUERE_BREV }?.size == 1)
     }
 
     private fun opprettBehandlingOgRegistrerSøknad(scenario: RestScenario): RestUtvidetBehandling {

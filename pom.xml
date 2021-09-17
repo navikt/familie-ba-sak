@@ -23,8 +23,9 @@
         <changelist>-SNAPSHOT</changelist>
         <spring.cloud.version>3.0.3</spring.cloud.version>
         <spring.vault.version>2.3.2</spring.vault.version>
-        <felles.version>1.20210818154439_0d43ae9</felles.version>
-        <felles-kontrakter.version>2.0_20210906145033_49d4128</felles-kontrakter.version>
+        <prosessering.version>1.20210803164024_dfccf33</prosessering.version>
+        <felles.version>1.20210908141943_5f1405d</felles.version>
+        <felles-kontrakter.version>2.0_20210913141853_cde427f</felles-kontrakter.version>
         <familie.kontrakter.saksstatistikk>2.0_20210427132344_d9066f5</familie.kontrakter.saksstatistikk>
         <familie.kontrakter.stønadsstatistikk>2.0_20210914093948_94e43f0</familie.kontrakter.stønadsstatistikk>
         <mockk.version>1.12.0</mockk.version>
@@ -32,7 +33,7 @@
 
         <!-- Må settes for å kunne kjøre opp mock-oauth2-server i unit-tester -->
         <okhttp3.version>4.9.0</okhttp3.version>
-        <mock-oauth2-server.version>0.3.3</mock-oauth2-server.version>
+        <mock-oauth2-server.version>0.3.5</mock-oauth2-server.version>
         <!-- Må settes for å kunne kjøre opp mock-oauth2-server i unit-tester -->
 
         <!--suppress UnresolvedMavenProperty  Ligger som secret i github-->
@@ -209,15 +210,21 @@
             <version>${felles.version}</version>
         </dependency>
         <dependency>
-            <groupId>no.nav.familie.felles</groupId>
-            <artifactId>prosessering</artifactId>
-            <version>${felles.version}</version>
+            <groupId>no.nav.familie</groupId>
+            <artifactId>prosessering-jdbc</artifactId>
+            <version>${prosessering.version}</version>
         </dependency>
         <dependency>
             <groupId>no.nav.familie.felles</groupId>
             <artifactId>log</artifactId>
             <version>${felles.version}</version>
         </dependency>
+        <dependency>
+            <groupId>no.nav.familie.felles</groupId>
+            <artifactId>leader</artifactId>
+            <version>${felles.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>no.nav.familie.felles</groupId>
             <artifactId>http-client</artifactId>

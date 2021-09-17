@@ -32,7 +32,7 @@ class JournalførVedtaksbrevTask(
                                              behandlingId: Long,
                                              vedtakId: Long,
                                              gammelTask: Task? = null): Task {
-            return Task.nyTask(TASK_STEP_TYPE,
+            return Task(TASK_STEP_TYPE,
                                "$vedtakId",
                                gammelTask?.metadata ?: Properties().apply {
                                    this["personIdent"] = personIdent

@@ -1,8 +1,8 @@
 package no.nav.familie.ba.sak.config.e2e
 
+import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.prosessering.domene.TaskRepository
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.context.annotation.Profile
 import org.springframework.http.ResponseEntity
@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController
 @Profile("e2e")
 class E2EController(
         private val databaseCleanupService: DatabaseCleanupService,
-        private val taskRepository: TaskRepository
+        private val taskRepository: TaskRepositoryWrapper
 ) {
 
     @GetMapping(path = ["/truncate"])
