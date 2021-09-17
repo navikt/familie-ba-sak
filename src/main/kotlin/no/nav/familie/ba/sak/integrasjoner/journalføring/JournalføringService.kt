@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.integrasjoner.journalføring
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestJournalføring
 import no.nav.familie.ba.sak.ekstern.restDomene.RestOppdaterJournalpost
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
@@ -36,7 +38,6 @@ import no.nav.familie.kontrakter.felles.journalpost.Sak
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import java.lang.Integer.MAX_VALUE
 import java.time.LocalDate
 import javax.transaction.Transactional
 
@@ -49,7 +50,8 @@ class JournalføringService(
         private val journalføringRepository: JournalføringRepository,
         private val loggService: LoggService,
         private val stegService: StegService,
-        private val journalføringMetrikk: JournalføringMetrikk
+        private val journalføringMetrikk: JournalføringMetrikk,
+        private val featureToggleService: FeatureToggleService
 ) {
 
     fun hentDokument(journalpostId: String, dokumentInfoId: String): Ressurs<ByteArray> {
@@ -117,13 +119,14 @@ class JournalføringService(
             personIdent: String,
             navIdent: String,
             type: BehandlingType,
-            årsak: BehandlingÅrsak
+            årsak: BehandlingÅrsak,
+            underkategori: BehandlingUnderkategori
     ): Behandling {
         fagsakService.hentEllerOpprettFagsak(PersonIdent(personIdent))
         return stegService.håndterNyBehandling(
                 NyBehandling(
                         kategori = BehandlingKategori.NASJONAL,
-                        underkategori = BehandlingUnderkategori.ORDINÆR,
+                        underkategori = underkategori,
                         søkersIdent = personIdent,
                         behandlingType = type,
                         behandlingÅrsak = årsak,
@@ -143,12 +146,21 @@ class JournalføringService(
         val tilknyttedeBehandlingIder: MutableList<String> = request.tilknyttedeBehandlingIder.toMutableList()
 
         val nyBehandling: Behandling? = if (request.opprettOgKnyttTilNyBehandling) {
+            val underkategori = request.hentUnderkategori()
+            if (underkategori == BehandlingUnderkategori.UTVIDET && !featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_UTVIDET)) {
+                throw FunksjonellFeil(
+                        melding = "Utvidet er ikke påskrudd",
+                        frontendFeilmelding = "Det er ikke støtte for å behandle utvidet søknad og du må fjerne tilknytningen til behandling."
+                )
+            }
+
             val nyBehandling =
                     opprettBehandlingOgEvtFagsakForJournalføring(
                             personIdent = request.bruker.id,
                             navIdent = request.navIdent,
                             type = request.nyBehandlingstype,
-                            årsak = request.nyBehandlingsårsak
+                            årsak = request.nyBehandlingsårsak,
+                            underkategori = underkategori
                     )
             tilknyttedeBehandlingIder.add(nyBehandling.id.toString())
             nyBehandling

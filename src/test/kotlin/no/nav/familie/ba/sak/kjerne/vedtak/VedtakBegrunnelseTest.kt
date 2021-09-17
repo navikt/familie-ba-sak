@@ -44,11 +44,11 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.vedtakBegrunnelserIkkeTilknyttetVilkår
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
 import org.junit.jupiter.api.Assertions
@@ -618,87 +618,6 @@ class VedtakBegrunnelseTest(
             }
         }
         assertEquals(1, restVedtaksperioderMedBegrunnelser.size)
-    }
-
-    @Test
-    fun `Skal sjekke at kun valgbare opphørs- og innvilgelsesbegrunnelser returneres`() {
-        val behandlingEtterVilkårsvurderingSteg = kjørStegprosessForFGB(
-                tilSteg = StegType.VILKÅRSVURDERING,
-                søkerFnr = randomFnr(),
-                barnasIdenter = listOf(ClientMocks.barnFnr[0]),
-                fagsakService = fagsakService,
-                vedtakService = vedtakService,
-                persongrunnlagService = persongrunnlagService,
-                vilkårsvurderingService = vilkårsvurderingService,
-                stegService = stegService,
-                vedtaksperiodeService = vedtaksperiodeService,
-        )
-        val vilkårsvurdering =
-                vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandlingEtterVilkårsvurderingSteg.id)!!
-        vilkårsvurdering.personResultater.forEach { personResultat ->
-            personResultat.vilkårResultater.filter { it.vilkårType != Vilkår.UNDER_18_ÅR }
-                    .forEach { vilkårUtenomUnder18År ->
-                        vilkårService.endreVilkår(behandlingId = behandlingEtterVilkårsvurderingSteg.id,
-                                                  vilkårId = vilkårUtenomUnder18År.id,
-                                                  restPersonResultat = RestPersonResultat(
-                                                          personIdent = personResultat.personIdent,
-                                                          vilkårResultater = listOf(RestVilkårResultat(
-                                                                  periodeFom = LocalDate.now().minusMonths(4),
-                                                                  periodeTom = LocalDate.now().minusMonths(1),
-                                                                  resultat = Resultat.OPPFYLT,
-                                                                  begrunnelse = "",
-                                                                  behandlingId = behandlingEtterVilkårsvurderingSteg.id,
-                                                                  endretAv = "",
-                                                                  endretTidspunkt = LocalDateTime.now(),
-                                                                  id = vilkårUtenomUnder18År.id,
-                                                                  vilkårType = vilkårUtenomUnder18År.vilkårType
-                                                          ))
-                                                  ))
-                    }
-        }
-
-
-        val behandlingEtterVilkårsvurderingStegGang2 =
-                stegService.håndterVilkårsvurdering(behandlingEtterVilkårsvurderingSteg)
-
-        val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = behandlingEtterVilkårsvurderingStegGang2.id)
-
-        val restVedtaksperioderMedBegrunnelser = vedtaksperiodeService.hentRestVedtaksperiodeMedBegrunnelser(vedtak)
-
-        assertEquals(1, restVedtaksperioderMedBegrunnelser.filter { it.type == Vedtaksperiodetype.UTBETALING }.size)
-        assertEquals(1, restVedtaksperioderMedBegrunnelser.filter { it.type == Vedtaksperiodetype.OPPHØR }.size)
-        assertEquals(0,
-                     restVedtaksperioderMedBegrunnelser.filter { it.type != Vedtaksperiodetype.UTBETALING && it.type != Vedtaksperiodetype.OPPHØR }.size)
-
-        val gyldigeOpphørsbegrunnelser = VedtakBegrunnelseSpesifikasjon.values()
-                .filter {
-                    it.vedtakBegrunnelseType == VedtakBegrunnelseType.OPPHØR &&
-                    it != VedtakBegrunnelseSpesifikasjon.OPPHØR_UNDER_18_ÅR &&
-                    !it.erFritekstBegrunnelse() && it.erTilgjengeligFrontend &&
-                    !it.triggesAv.vurderingAnnetGrunnlag &&
-                    !it.triggesAv.deltbosted &&
-                    !it.triggesAv.personerManglerOpplysninger &&
-                    it.triggesAv.valgbar
-                }
-
-        assertEquals(gyldigeOpphørsbegrunnelser.size,
-                     restVedtaksperioderMedBegrunnelser.find { it.type == Vedtaksperiodetype.OPPHØR }?.gyldigeBegrunnelser?.size)
-
-        val gyldigeUtbetalingsbegrunnelser = VedtakBegrunnelseSpesifikasjon.values()
-                .filter {
-                    it.vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGELSE &&
-                    !it.erFritekstBegrunnelse() && it.erTilgjengeligFrontend &&
-                    !it.triggesAv.vurderingAnnetGrunnlag &&
-                    !it.triggesAv.deltbosted &&
-                    !it.triggesAv.personerManglerOpplysninger &&
-                    !it.triggesAv.satsendring &&
-                    it.triggesAv.vilkår?.contains(Vilkår.UNDER_18_ÅR) != true &&
-                    it.triggesAv.valgbar
-                }
-
-        assertEquals(gyldigeUtbetalingsbegrunnelser.size,
-                     restVedtaksperioderMedBegrunnelser.find { it.type == Vedtaksperiodetype.UTBETALING }?.gyldigeBegrunnelser?.size)
-
     }
 
     @Test

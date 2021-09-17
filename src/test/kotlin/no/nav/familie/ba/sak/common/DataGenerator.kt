@@ -60,12 +60,12 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Utbetalingsperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtbetalingsperiodeDetalj
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurderingType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.task.DistribuerDokumentDTO
 import no.nav.familie.ba.sak.task.JournalførVedtaksbrevTask
@@ -316,6 +316,14 @@ fun nyOrdinærBehandling(søkersIdent: String, årsak: BehandlingÅrsak = Behand
         behandlingÅrsak = årsak
 )
 
+fun nyUtvidetBehandling(søkersIdent: String, årsak: BehandlingÅrsak = BehandlingÅrsak.SØKNAD): NyBehandling = NyBehandling(
+        søkersIdent = søkersIdent,
+        behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+        kategori = BehandlingKategori.NASJONAL,
+        underkategori = BehandlingUnderkategori.UTVIDET,
+        behandlingÅrsak = årsak
+)
+
 fun nyRevurdering(søkersIdent: String): NyBehandling = NyBehandling(
         søkersIdent = søkersIdent,
         behandlingType = BehandlingType.REVURDERING,
@@ -521,8 +529,8 @@ fun kjørStegprosessForFGB(
 
     vedtakService.leggTilVedtakBegrunnelse(
             RestPostVedtakBegrunnelse(
-                    fom = LocalDate.parse("2020-02-01"),
-                    tom = LocalDate.parse("2025-02-01"),
+                    fom = guttenBarnesenFødselsdato.plusYears(6),
+                    tom = null,
                     vedtakBegrunnelse = VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR),
             fagsakId = fagsak.id)
     if (tilSteg == StegType.VILKÅRSVURDERING) return behandlingEtterVilkårsvurderingSteg
@@ -795,3 +803,21 @@ fun leggTilBegrunnelsePåVedtaksperiodeIBehandling(
                             vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET,
                     ))))
 }
+
+fun lagVilkårResultat(personResultat: PersonResultat,
+                      vilkårType: Vilkår = Vilkår.BOSATT_I_RIKET,
+                      resultat: Resultat = Resultat.OPPFYLT,
+                      periodeFom: LocalDate = LocalDate.of(2009, 12, 24),
+                      periodeTom: LocalDate = LocalDate.of(2010, 1, 31),
+                      begrunnelse: String = "",
+                      behandlingId: Long = lagBehandling().id) = VilkårResultat(
+        personResultat = personResultat,
+        vilkårType = vilkårType,
+        resultat = resultat,
+        periodeFom = periodeFom,
+        periodeTom = periodeTom,
+        begrunnelse = begrunnelse,
+        behandlingId = behandlingId,
+)
+
+val guttenBarnesenFødselsdato = LocalDate.now().withDayOfMonth(10).minusYears(6)
