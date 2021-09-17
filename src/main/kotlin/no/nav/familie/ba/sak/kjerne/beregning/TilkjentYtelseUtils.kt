@@ -32,6 +32,9 @@ object TilkjentYtelseUtils {
         val (innvilgetPeriodeResultatSøker, innvilgedePeriodeResultatBarna) = vilkårsvurdering.hentInnvilgedePerioder(
                 personopplysningGrunnlag)
 
+        val relevanteSøkerPerioer = innvilgetPeriodeResultatSøker
+                .filter { søkerPeriode -> innvilgedePeriodeResultatBarna.any { søkerPeriode.overlapper(it) } }
+
         val tilkjentYtelse = TilkjentYtelse(
                 behandling = vilkårsvurdering.behandling,
                 opprettetDato = LocalDate.now(),
@@ -40,8 +43,7 @@ object TilkjentYtelseUtils {
 
         val andelerTilkjentYtelse = innvilgedePeriodeResultatBarna
                 .flatMap { periodeResultatBarn ->
-                    innvilgetPeriodeResultatSøker
-                            .filter { it.overlapper(periodeResultatBarn) }
+                    relevanteSøkerPerioer
                             .flatMap { overlappendePerioderesultatSøker ->
                                 val person = identBarnMap[periodeResultatBarn.personIdent]
                                              ?: error("Finner ikke barn på map over barna i behandlingen")
@@ -181,7 +183,7 @@ object TilkjentYtelseUtils {
             andelTilkjentYtelser: MutableSet<AndelTilkjentYtelse>,
             endretUtbetalingAndeler: List<EndretUtbetalingAndel>): MutableSet<AndelTilkjentYtelse> {
 
-        if(endretUtbetalingAndeler.isEmpty()) return andelTilkjentYtelser.map { it.copy() }.toMutableSet()
+        if (endretUtbetalingAndeler.isEmpty()) return andelTilkjentYtelser.map { it.copy() }.toMutableSet()
 
         val nyeAndelTilkjentYtelse = mutableListOf<AndelTilkjentYtelse>()
 
@@ -209,7 +211,7 @@ object TilkjentYtelseUtils {
             }
         }
         // Sorterer primært av hensyn til måten testene er implementert og kan muligens fjernes dersom dette skrives om.
-        nyeAndelTilkjentYtelse.sortWith(compareBy ( {it.personIdent}, {it.stønadFom}))
+        nyeAndelTilkjentYtelse.sortWith(compareBy({ it.personIdent }, { it.stønadFom }))
         return nyeAndelTilkjentYtelse.toMutableSet()
     }
 
@@ -227,7 +229,7 @@ object TilkjentYtelseUtils {
 }
 
 fun MånedPeriode.perioderMedOgUtenOverlapp(perioder: List<MånedPeriode>): Pair<List<MånedPeriode>, List<MånedPeriode>> {
-    if (perioder.isEmpty()) return Pair(emptyList(), listOf (this))
+    if (perioder.isEmpty()) return Pair(emptyList(), listOf(this))
 
     val alleMånederMedOverlappStatus = mutableMapOf<YearMonth, Boolean>()
     var nesteMåned = this.fom
