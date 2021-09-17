@@ -94,8 +94,6 @@ class VedtaksperiodeService(
                         it.vedtakBegrunnelseSpesifikasjon.tilSanityBegrunnelse(brevKlient.hentSanityBegrunnelse()).tilTriggesAv()
                     } else
                         it.vedtakBegrunnelseSpesifikasjon.triggesAv
-            println("triggesAv")
-            println(triggesAv)
             val vedtakBegrunnelseType = it.vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType
 
             val behandling = vedtaksperiodeMedBegrunnelser.vedtak.behandling
@@ -118,8 +116,6 @@ class VedtaksperiodeService(
                                 vurderingAnnetGrunnlag = triggesAv.vurderingAnnetGrunnlag
                         ).map { person -> person.personIdent.ident }
                     }
-            println("personIdenter")
-            println(personIdenter)
             if (personIdenter.isEmpty()) {
                 begrunnelserMedFeil.add(it.vedtakBegrunnelseSpesifikasjon)
             }

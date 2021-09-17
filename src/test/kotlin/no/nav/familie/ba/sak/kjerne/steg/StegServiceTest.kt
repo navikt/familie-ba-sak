@@ -57,7 +57,6 @@ import org.springframework.test.annotation.DirtiesContext
 import java.time.LocalDate
 import java.util.*
 
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 class StegServiceTest(
         @Autowired
         private val stegService: StegService,
@@ -155,6 +154,7 @@ class StegServiceTest(
     }
 
     @Test
+    @DirtiesContext(methodMode = DirtiesContext.MethodMode.BEFORE_METHOD)
     fun `Skal håndtere steg for frontend ordinær behandling`() {
         val søkerFnr = randomFnr()
         val barnFnr = randomFnr()
@@ -191,7 +191,6 @@ class StegServiceTest(
         )
         assertEquals(StegType.SEND_TIL_BESLUTTER, behandlingEtterVurderTilbakekrevingSteg.steg)
 
-        println("kommer hit")
         leggTilBegrunnelsePåVedtaksperiodeIBehandling(
                 behandling = behandlingEtterVurderTilbakekrevingSteg,
                 vedtakService = vedtakService,
