@@ -4,7 +4,6 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.ekstern.bisys.BisysUtvidetBarnetrygdResponse
 import no.nav.familie.ba.sak.task.OpprettTaskService.Companion.RETRY_BACKOFF_5000MS
 import no.nav.familie.eksterne.kontrakter.skatteetaten.SkatteetatenPerioder
-import no.nav.familie.eksterne.kontrakter.skatteetaten.SkatteetatenPerioderRequest
 import no.nav.familie.eksterne.kontrakter.skatteetaten.SkatteetatenPerioderResponse
 import no.nav.familie.eksterne.kontrakter.skatteetaten.SkatteetatenPersonerResponse
 import no.nav.familie.http.client.AbstractRestClient
@@ -131,7 +130,7 @@ class InfotrygdBarnetrygdClient(
 
     fun hentPerioderMedUtvidetBarnetrygd(ident: String, år: String): SkatteetatenPerioder? {
         val uri = URI.create("$clientUri/infotrygd/barnetrygd/utvidet/skatteetaten")
-        val request = SkatteetatenPerioderRequest(år, listOf(ident))
+        val request = mapOf("personIdent" to ident, "år" to år)
         return try {
             postForEntity<SkatteetatenPerioderResponse>(uri, request).brukere.firstOrNull()
         } catch (ex: Exception) {
