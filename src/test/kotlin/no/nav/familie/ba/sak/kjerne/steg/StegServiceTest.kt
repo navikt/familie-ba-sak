@@ -36,8 +36,8 @@ import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.task.DistribuerDokumentDTO
 import no.nav.familie.ba.sak.task.JournalførVedtaksbrevTask
@@ -190,6 +190,7 @@ class StegServiceTest(
         )
         assertEquals(StegType.SEND_TIL_BESLUTTER, behandlingEtterVurderTilbakekrevingSteg.steg)
 
+        println("kommer hit")
         leggTilBegrunnelsePåVedtaksperiodeIBehandling(
                 behandling = behandlingEtterVurderTilbakekrevingSteg,
                 vedtakService = vedtakService,
