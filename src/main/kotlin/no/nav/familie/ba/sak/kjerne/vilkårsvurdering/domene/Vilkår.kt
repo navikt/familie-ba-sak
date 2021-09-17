@@ -54,7 +54,11 @@ enum class Vilkår(val parterDetteGjelderFor: List<PersonType>,
 
         fun hentVilkårFor(personType: PersonType, ytelseType: YtelseType = YtelseType.ORDINÆR_BARNETRYGD): Set<Vilkår> {
             return values().filter {
-                personType in it.parterDetteGjelderFor && ytelseType == it.ytelseType
+                if (ytelseType == YtelseType.UTVIDET_BARNETRYGD) {
+                    personType in it.parterDetteGjelderFor
+                } else personType in it.parterDetteGjelderFor && ytelseType == it.ytelseType
+
+
             }.toSet()
         }
 
