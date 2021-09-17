@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
 import io.mockk.verify
+import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
 import no.nav.familie.ba.sak.common.kjørStegprosessForRevurderingÅrligKontroll
 import no.nav.familie.ba.sak.common.lagBehandling
@@ -9,7 +10,6 @@ import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.leggTilBegrunnelsePåVedtaksperiodeIBehandling
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.vurderVilkårsvurderingTilInnvilget
-import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.config.mockHentPersoninfoForMedIdenter
@@ -51,12 +51,33 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.test.annotation.DirtiesContext
+import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock
+import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.context.ContextConfiguration
 import java.time.LocalDate
 import java.util.*
 
+@SpringBootTest
+@ActiveProfiles(
+    "postgres",
+    "mock-økonomi",
+    "mock-pdl",
+    "mock-task-repository",
+    "mock-infotrygd-barnetrygd",
+    "mock-tilbakekreving-klient",
+    "mock-brev-klient",
+    "mock-infotrygd-feed",
+    "mock-oauth",
+    "mock-rest-template-config",
+    "mock-test"
+)
+@ContextConfiguration(initializers = [DbContainerInitializer::class])
+@AutoConfigureWireMock(port = 28085)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class StegServiceTest(
         @Autowired
         private val stegService: StegService,
@@ -93,7 +114,7 @@ class StegServiceTest(
 
         @Autowired
         private val vedtaksperiodeService: VedtaksperiodeService,
-) : AbstractSpringIntegrationTest() {
+) {
 
     @BeforeAll
     fun init() {
@@ -154,7 +175,6 @@ class StegServiceTest(
     }
 
     @Test
-    @DirtiesContext(methodMode = DirtiesContext.MethodMode.BEFORE_METHOD)
     fun `Skal håndtere steg for frontend ordinær behandling`() {
         val søkerFnr = randomFnr()
         val barnFnr = randomFnr()
