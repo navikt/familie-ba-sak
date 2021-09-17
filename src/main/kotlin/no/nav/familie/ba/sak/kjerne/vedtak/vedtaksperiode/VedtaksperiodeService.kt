@@ -438,43 +438,6 @@ class VedtaksperiodeService(
         )
     }
 
-    fun hentVedtaksperioder(behandling: Behandling): List<Vedtaksperiode> {
-        if (behandling.resultat == BehandlingResultat.FORTSATT_INNVILGET) return emptyList()
-
-        val iverksatteBehandlinger =
-                behandlingRepository.finnIverksatteBehandlinger(fagsakId = behandling.fagsak.id)
-
-        val forrigeIverksatteBehandling: Behandling? = Behandlingutils.hentForrigeIverksatteBehandling(
-                iverksatteBehandlinger = iverksatteBehandlinger,
-                behandlingFørFølgende = behandling
-        )
-
-        val forrigePersonopplysningGrunnlag: PersonopplysningGrunnlag? =
-                if (forrigeIverksatteBehandling != null)
-                    persongrunnlagRepository.findByBehandlingAndAktiv(behandlingId = forrigeIverksatteBehandling.id) else null
-        val forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse> =
-                if (forrigeIverksatteBehandling != null)
-                    andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(
-                            behandlingId = forrigeIverksatteBehandling.id
-                    ) else emptyList()
-
-        val personopplysningGrunnlag = persongrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
-                                       ?: return emptyList()
-        val andelerTilkjentYtelse =
-                andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = behandling.id)
-
-        val utbetalingsperioder = hentUtbetalingsperioder(behandling)
-
-        val opphørsperioder = mapTilOpphørsperioder(
-                forrigePersonopplysningGrunnlag = forrigePersonopplysningGrunnlag,
-                forrigeAndelerTilkjentYtelse = forrigeAndelerTilkjentYtelse,
-                personopplysningGrunnlag = personopplysningGrunnlag,
-                andelerTilkjentYtelse = andelerTilkjentYtelse
-        )
-
-        return utbetalingsperioder + opphørsperioder
-    }
-
     fun hentOpphørsperioder(behandling: Behandling): List<Opphørsperiode> {
         if (behandling.resultat == BehandlingResultat.FORTSATT_INNVILGET) return emptyList()
 
