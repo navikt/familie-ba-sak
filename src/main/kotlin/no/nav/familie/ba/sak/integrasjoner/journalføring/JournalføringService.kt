@@ -147,7 +147,7 @@ class JournalføringService(
 
         val nyBehandling: Behandling? = if (request.opprettOgKnyttTilNyBehandling) {
             val underkategori = request.hentUnderkategori()
-            if (underkategori == BehandlingUnderkategori.UTVIDET && featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_UTVIDET)) {
+            if (underkategori == BehandlingUnderkategori.UTVIDET && !featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_UTVIDET)) {
                 throw FunksjonellFeil(
                         melding = "Utvidet er ikke påskrudd",
                         frontendFeilmelding = "Det er ikke støtte for å behandle utvidet søknad og du må fjerne tilknytningen til behandling."
