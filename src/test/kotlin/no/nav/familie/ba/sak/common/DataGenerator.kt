@@ -283,6 +283,14 @@ fun nyOrdinærBehandling(søkersIdent: String, årsak: BehandlingÅrsak = Behand
         behandlingÅrsak = årsak
 )
 
+fun nyUtvidetBehandling(søkersIdent: String, årsak: BehandlingÅrsak = BehandlingÅrsak.SØKNAD): NyBehandling = NyBehandling(
+        søkersIdent = søkersIdent,
+        behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+        kategori = BehandlingKategori.NASJONAL,
+        underkategori = BehandlingUnderkategori.UTVIDET,
+        behandlingÅrsak = årsak
+)
+
 fun nyRevurdering(søkersIdent: String): NyBehandling = NyBehandling(
         søkersIdent = søkersIdent,
         behandlingType = BehandlingType.REVURDERING,
