@@ -58,11 +58,8 @@ data class RestJournalføring(
         return when {
             journalpostTittel?.contains("ordinær") == true -> BehandlingUnderkategori.ORDINÆR
             journalpostTittel?.contains("utvidet") == true -> BehandlingUnderkategori.UTVIDET
-            else -> {
-                throw FunksjonellFeil(melding = "Kan ikke opprette ny behandling ved journalføring av $journalpostTittel",
-                                      frontendFeilmelding = "Kan ikke opprette ny behandling ved journalføring av $journalpostTittel"
-                )
-            }
+            // Defaulter til ordinær inntil videre.
+            else -> BehandlingUnderkategori.ORDINÆR
         }
     }
 }
