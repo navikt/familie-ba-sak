@@ -90,8 +90,10 @@ class VilkårsvurderingService(
 
     fun hentVilkårsbegrunnelser(): Map<VedtakBegrunnelseType, List<RestVedtakBegrunnelseTilknyttetVilkår>> {
         if (featureToggleService.isEnabled(FeatureToggleConfig.BRUK_BEGRUNNELSE_FRA_SANITY_NEDTREKKSMENY)) {
-            val navnTilNedtrekksmeny = brevKlient.hentNavnTilNedtrekksmeny()
-            return vedtakBegrunnelseSpesifikasjonerTilNedtrekksmenytekster(navnTilNedtrekksmeny)
+            val sanityBegrunnelser = brevKlient.hentSanityBegrunnelse()
+            val skalBrukeTriggesAvFraSanity =
+                    featureToggleService.isEnabled(FeatureToggleConfig.BRUK_BEGRUNNELSE_TRIGGES_AV_FRA_SANITY)
+            return vedtakBegrunnelseSpesifikasjonerTilNedtrekksmenytekster(sanityBegrunnelser, skalBrukeTriggesAvFraSanity)
         } else {
             return VedtakBegrunnelseSpesifikasjon.values()
                     .groupBy { it.vedtakBegrunnelseType }
