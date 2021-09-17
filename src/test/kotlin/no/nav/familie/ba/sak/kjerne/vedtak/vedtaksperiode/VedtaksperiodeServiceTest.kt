@@ -250,8 +250,7 @@ class VedtaksperiodeServiceTest(
                     )
             )
         }
-
-        assertTrue(funksjonellFeil.frontendFeilmelding?.contains("Barn har flyttet fra Norge' forventer vurdering på 'Bosatt i riket'") == true)
+        assertTrue(funksjonellFeil.frontendFeilmelding?.contains("REDUKSJON_BOSATT_I_RIKTET' forventer vurdering på 'Bosatt i riket'") == true)
     }
 
     @Test
@@ -279,7 +278,7 @@ class VedtaksperiodeServiceTest(
         val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = revurdering!!.id)
         val vedtaksperioder = vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak)
 
-        val feil = assertThrows<Feil> {
+        assertThrows<Feil> {
             vedtaksperiodeService.oppdaterVedtaksperiodeMedStandardbegrunnelser(
                     vedtaksperiodeId = vedtaksperioder.first().id,
                     restPutVedtaksperiodeMedStandardbegrunnelser = RestPutVedtaksperiodeMedStandardbegrunnelser(
@@ -287,10 +286,5 @@ class VedtaksperiodeServiceTest(
                     )
             )
         }
-
-        assertEquals(
-                "Kan ikke fastsette fritekstbegrunnelse på begrunnelser på vedtaksperioder. Bruk heller fritekster.",
-                feil.message
-        )
     }
 }
