@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.convertDataClassToJson
+import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Evaluering
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.vilkårsvurdering.VurderBarnErBosattMedSøker
@@ -16,23 +18,33 @@ import java.time.LocalDate
 
 
 enum class Vilkår(val parterDetteGjelderFor: List<PersonType>,
+                  val ytelseType: YtelseType,
                   val beskrivelse: String) {
 
     UNDER_18_ÅR(
             parterDetteGjelderFor = listOf(BARN),
+            ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
             beskrivelse = "Er under 18 år"),
     BOR_MED_SØKER(
             parterDetteGjelderFor = listOf(BARN),
+            ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
             beskrivelse = "Bor med søker"),
     GIFT_PARTNERSKAP(
             parterDetteGjelderFor = listOf(BARN),
+            ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
             beskrivelse = "Gift/partnerskap"),
     BOSATT_I_RIKET(
             parterDetteGjelderFor = listOf(SØKER, BARN),
+            ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
             beskrivelse = "Bosatt i riket"),
     LOVLIG_OPPHOLD(
             parterDetteGjelderFor = listOf(SØKER, BARN),
-            beskrivelse = "Lovlig opphold");
+            ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+            beskrivelse = "Lovlig opphold"),
+    UTVIDET_BARNETRYGD(
+            parterDetteGjelderFor = listOf(SØKER),
+            ytelseType = YtelseType.UTVIDET_BARNETRYGD,
+            beskrivelse = "Utvidet barnetrygd");
 
     override fun toString(): String {
         return this.name
@@ -40,9 +52,9 @@ enum class Vilkår(val parterDetteGjelderFor: List<PersonType>,
 
     companion object {
 
-        fun hentVilkårFor(personType: PersonType): Set<Vilkår> {
+        fun hentVilkårFor(personType: PersonType, ytelseType: YtelseType = YtelseType.ORDINÆR_BARNETRYGD): Set<Vilkår> {
             return values().filter {
-                personType in it.parterDetteGjelderFor
+                personType in it.parterDetteGjelderFor && ytelseType == it.ytelseType
             }.toSet()
         }
 
@@ -74,6 +86,7 @@ enum class Vilkår(val parterDetteGjelderFor: List<PersonType>,
                     vurderFra = vurderFra
             )
             LOVLIG_OPPHOLD -> VurderPersonHarLovligOpphold()
+            UTVIDET_BARNETRYGD -> throw Feil("Ikke støtte for å automatisk vurdere vilkåret ${this.beskrivelse}")
         }
 
         return AutomatiskVurdering(
