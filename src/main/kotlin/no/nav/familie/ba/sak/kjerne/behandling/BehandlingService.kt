@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
+import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils.bestemUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
@@ -63,9 +64,7 @@ class BehandlingService(
         val aktivBehandling = hentAktivForFagsak(fagsak.id)
 
         return if (aktivBehandling == null || aktivBehandling.status == AVSLUTTET) {
-            val underkategori = if (nyBehandling.behandlingType == BehandlingType.REVURDERING) {
-                aktivBehandling?.underkategori ?: nyBehandling.underkategori
-            } else nyBehandling.underkategori
+            val underkategori = bestemUnderkategori(nyBehandling, aktivBehandling?.underkategori)
 
             val behandling = Behandling(fagsak = fagsak,
                                         opprettetÅrsak = nyBehandling.behandlingÅrsak,
