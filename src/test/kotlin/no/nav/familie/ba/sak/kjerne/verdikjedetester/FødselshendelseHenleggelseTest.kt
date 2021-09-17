@@ -1,13 +1,12 @@
 package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
-import io.mockk.every
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.ekstern.restDomene.RestHentFagsakForPerson
-import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
+import no.nav.familie.ba.sak.kjerne.beregning.SatsService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.steg.StegService
@@ -18,6 +17,7 @@ import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScena
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.task.BehandleFødselshendelseTask
 import no.nav.familie.ba.sak.task.OpprettTaskService
+import no.nav.familie.kontrakter.ba.infotrygd.InfotrygdSøkResponse
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
@@ -26,21 +26,34 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 import java.time.LocalDate.now
 
-
 class FødselshendelseHenleggelseTest(
-    @Autowired private val opprettTaskService: OpprettTaskService,
-    @Autowired private val infotrygdService: InfotrygdService,
-    @Autowired private val behandleFødselshendelseTask: BehandleFødselshendelseTask,
-    @Autowired private val fagsakService: FagsakService,
-    @Autowired private val behandlingService: BehandlingService,
-    @Autowired private val vedtakService: VedtakService,
-    @Autowired private val stegService: StegService
+        @Autowired private val opprettTaskService: OpprettTaskService,
+        @Autowired private val behandleFødselshendelseTask: BehandleFødselshendelseTask,
+        @Autowired private val fagsakService: FagsakService,
+        @Autowired private val behandlingService: BehandlingService,
+        @Autowired private val vedtakService: VedtakService,
+        @Autowired private val stegService: StegService
 ) : AbstractVerdikjedetest() {
 
     @Test
     fun `Skal ikke starte behandling i ba-sak fordi det finnes saker i infotrygd (velg fagsystem)`() {
         val scenario = mockServerKlient().lagScenario(RestScenario(
-                søker = RestScenarioPerson(fødselsdato = "1982-01-12", fornavn = "Mor", etternavn = "Søker"),
+                søker = RestScenarioPerson(
+                        fødselsdato = "1982-01-12",
+                        fornavn = "Mor",
+                        etternavn = "Søker",
+                        infotrygdSaker = InfotrygdSøkResponse(
+                                bruker = listOf(
+                                        lagInfotrygdSak(
+                                                SatsService.nyttTilleggOrdinærSats.beløp.toDouble(),
+                                                "1234",
+                                                "OR",
+                                                "OS"
+                                        )
+                                ),
+                                barn = emptyList()
+                        )
+                ),
                 barna = listOf(
                         RestScenarioPerson(
                                 fødselsdato = now().minusMonths(2).toString(),
@@ -49,10 +62,6 @@ class FødselshendelseHenleggelseTest(
                         )
                 )
         ))
-        every {
-            infotrygdService.harLøpendeSakIInfotrygd(listOf(scenario.søker.ident!!),
-                                                     scenario.barna.map { it.ident!! })
-        } returns true
 
         val behandling = behandleFødselshendelse(
                 nyBehandlingHendelse = NyBehandlingHendelse(
@@ -75,7 +84,7 @@ class FødselshendelseHenleggelseTest(
     @Test
     fun `Skal henlegge fødselshendelse på grunn av at søker er under 18 (filtreringsregel)`() {
         val scenario = mockServerKlient().lagScenario(RestScenario(
-                søker = RestScenarioPerson(fødselsdato =  now().minusYears(16).toString(), fornavn = "Mor", etternavn = "Søker"),
+                søker = RestScenarioPerson(fødselsdato = now().minusYears(16).toString(), fornavn = "Mor", etternavn = "Søker"),
                 barna = listOf(
                         RestScenarioPerson(
                                 fødselsdato = now().minusMonths(2).toString(),
