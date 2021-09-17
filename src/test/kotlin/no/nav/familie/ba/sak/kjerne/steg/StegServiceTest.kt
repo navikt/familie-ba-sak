@@ -73,8 +73,14 @@ import java.util.*
     "mock-infotrygd-feed",
     "mock-oauth",
     "mock-rest-template-config",
+    // profil mock-test er dummy profile satt inn for å tvinge Spring til å spinne opp ny context.
     "mock-test"
 )
+/*
+ * Forklaring på hvorfor AbstractSpringIntegrationTest ikke blir extended i denne test klassen:
+ * Vet kjøring av alle tester feiler testen `Skal håndtere steg for frontend ordinær behandling`
+ * i denne klassen, vi fant ikke hvorfor men det virker når eget context blir spunnet opp for klassen.
+ */
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
 @AutoConfigureWireMock(port = 28085)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
