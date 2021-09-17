@@ -38,7 +38,7 @@ class SkatteetatenController(private val skatteetatenService: SkatteetatenServic
         produces = ["application/json;charset=UTF-8"]
     )
     fun finnPersonerMedUtvidetBarnetrygd(
-        @NotNull @RequestParam(value = "aar", required = true) aar: Int
+        @NotNull @RequestParam(value = "aar", required = true) aar: String
     ): ResponseEntity<Ressurs<SkatteetatenPersonerResponse>> {
         logger.info("Treff på finnPersonerMedUtvidetBarnetrygd")
         val respons = if (featureToggleService.isEnabled(FeatureToggleConfig.SKATTEETATEN_API_STUB)) {
@@ -62,7 +62,7 @@ class SkatteetatenController(private val skatteetatenService: SkatteetatenServic
         val response = if (featureToggleService.isEnabled(FeatureToggleConfig.SKATTEETATEN_API_STUB)) {
             SkatteetatenPerioderResponse(listOf(SkatteetatenPerioder("01017000110", LocalDateTime.now(), perioder = listOf(SkatteetatenPeriode("2020-02", SkatteetatenPeriode.MaxDelingsprosent._50, tomMaaned = "2022-12")))))
         } else {
-            skatteetatenService.finnPerioderMedUtvidetBarnetrygd(perioderRequest.identer, perioderRequest.aar.toInt())
+            skatteetatenService.finnPerioderMedUtvidetBarnetrygd(perioderRequest.identer, perioderRequest.aar)
         }
         return ResponseEntity(
             Ressurs.Companion.success(response),
