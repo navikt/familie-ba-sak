@@ -97,7 +97,7 @@ class StegServiceTest(
 
     @BeforeAll
     fun init() {
-        //databaseCleanupService.truncate()
+        databaseCleanupService.truncate()
     }
 
     @Test
