@@ -59,23 +59,11 @@ class VilkårService(
                              ?: throw Feil(message = "Fant ikke vilkårsvurdering for person",
                                            frontendFeilmelding = "Fant ikke vilkårsvurdering for person med ident '${restPersonResultat.personIdent}")
 
-        val (før, etter) = muterPersonVilkårResultaterPut(personResultat, restVilkårResultat)
-        val fjernedeVilkår = før.filterNot { førVilkår -> etter.map { it.id }.contains(førVilkår.id) }
-
+        muterPersonVilkårResultaterPut(personResultat, restVilkårResultat)
+        
         val vilkårResultat = personResultat.vilkårResultater.singleOrNull { it.id == vilkårId }
                              ?: error("Finner ikke vilkår med vilkårId $vilkårId på personResultat ${personResultat.id}")
 
-        // Gammel løsning start
-        fjernedeVilkår.forEach {
-            vedtakService.slettAvslagBegrunnelserForVilkår(vilkårResultatId = it.id, behandlingId = behandlingId)
-        }
-        vedtakService.oppdaterAvslagBegrunnelserForVilkår(
-                vilkårResultat = vilkårResultat,
-                begrunnelser = restVilkårResultat.avslagBegrunnelser ?: emptyList(),
-                behandlingId = vilkårsvurdering.behandling.id)
-        // Gammel løsning slutt
-
-        // Ny løsning
         vilkårResultat.also { it.vedtakBegrunnelseSpesifikasjoner = restVilkårResultat.avslagBegrunnelser ?: emptyList() }
 
         return vilkårsvurderingService.oppdater(vilkårsvurdering).personResultater.map { it.tilRestPersonResultat() }

@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvFileSource
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -75,6 +76,7 @@ class VilkårTilTilkjentYtelseTest {
         val faktiskTilkjentYtelse = TilkjentYtelseUtils.beregnTilkjentYtelse(
                 vilkårsvurdering = vilkårsvurdering,
                 personopplysningGrunnlag = personopplysningGrunnlag,
+                behandling = lagBehandling(),
                 featureToggleService = featureToggleService
         )
 
@@ -135,6 +137,7 @@ class VilkårTilTilkjentYtelseTest {
         val faktiskTilkjentYtelse = TilkjentYtelseUtils.beregnTilkjentYtelse(
                 vilkårsvurdering = vilkårsvurdering,
                 personopplysningGrunnlag = personopplysningGrunnlag,
+                behandling = lagBehandling(),
                 featureToggleService = featureToggleService
         )
 
@@ -207,7 +210,9 @@ class TestTilkjentYtelseBuilder(val behandling: Behandling) {
                         stønadFom = stønadPeriode.fraOgMed.toYearMonth(),
                         stønadTom = stønadPeriode.tilOgMed!!.toYearMonth(),
                         beløp = beløp.toInt(),
-                        type = YtelseType.valueOf(type)
+                        type = YtelseType.valueOf(type),
+                        sats = beløp.toInt(),
+                        prosent = BigDecimal(100)
                 )
         )
 

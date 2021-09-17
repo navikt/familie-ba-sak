@@ -1,12 +1,12 @@
 package no.nav.familie.ba.sak.task
 
-import no.nav.familie.ba.sak.task.dto.GrensesnittavstemmingTaskDTO
+import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.økonomi.AvstemmingService
+import no.nav.familie.ba.sak.task.dto.GrensesnittavstemmingTaskDTO
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.prosessering.domene.TaskRepository
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -15,10 +15,12 @@ import java.time.LocalDate
 import java.time.MonthDay
 
 @Service
-@TaskStepBeskrivelse(taskStepType = GrensesnittavstemMotOppdrag.TASK_STEP_TYPE,
-                     beskrivelse = "Grensesnittavstemming mot oppdrag",
-                     maxAntallFeil = 3)
-class GrensesnittavstemMotOppdrag(val avstemmingService: AvstemmingService, val taskRepository: TaskRepository) : AsyncTaskStep {
+@TaskStepBeskrivelse(
+        taskStepType = GrensesnittavstemMotOppdrag.TASK_STEP_TYPE,
+        beskrivelse = "Grensesnittavstemming mot oppdrag",
+        maxAntallFeil = 3
+)
+class GrensesnittavstemMotOppdrag(val avstemmingService: AvstemmingService, val taskRepository: TaskRepositoryWrapper) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
         val avstemmingTask = objectMapper.readValue(task.payload, GrensesnittavstemmingTaskDTO::class.java)
@@ -30,9 +32,10 @@ class GrensesnittavstemMotOppdrag(val avstemmingService: AvstemmingService, val 
     override fun onCompletion(task: Task) {
         val nesteAvstemmingTaskDTO = nesteAvstemmingDTO(task.triggerTid!!.toLocalDate().plusDays(1), 1)
 
-        val nesteAvstemmingTask = Task.nyTaskMedTriggerTid(
-                TASK_STEP_TYPE,
-                objectMapper.writeValueAsString(nesteAvstemmingTaskDTO),
+        val nesteAvstemmingTask = Task(
+                type = TASK_STEP_TYPE,
+                payload = objectMapper.writeValueAsString(nesteAvstemmingTaskDTO)
+        ).medTriggerTid(
                 nesteAvstemmingTaskDTO.tomDato.toLocalDate().atTime(8, 0)
         )
 
@@ -41,8 +44,10 @@ class GrensesnittavstemMotOppdrag(val avstemmingService: AvstemmingService, val 
 
     fun nesteAvstemmingDTO(nesteDag: LocalDate, antallDager: Int): GrensesnittavstemmingTaskDTO {
         return if (erHelgEllerHelligdag(nesteDag)) nesteAvstemmingDTO(nesteDag.plusDays(1), antallDager + 1)
-        else GrensesnittavstemmingTaskDTO(nesteDag.minusDays(antallDager.toLong()).atStartOfDay(),
-                                          nesteDag.atStartOfDay())
+        else GrensesnittavstemmingTaskDTO(
+                nesteDag.minusDays(antallDager.toLong()).atStartOfDay(),
+                nesteDag.atStartOfDay()
+        )
     }
 
     private fun erHelgEllerHelligdag(dato: LocalDate): Boolean {
@@ -52,6 +57,7 @@ class GrensesnittavstemMotOppdrag(val avstemmingService: AvstemmingService, val 
     }
 
     companion object {
+
         const val TASK_STEP_TYPE = "avstemMotOppdrag"
         val FASTE_HELLIGDAGER = setOf(
                 MonthDay.of(1, 1),

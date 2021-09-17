@@ -19,6 +19,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import java.math.BigDecimal
 import java.time.LocalDate
 
 class FagsakStatusOppdatererIntegrasjonTest : AbstractSpringIntegrationTest() {
@@ -124,6 +125,8 @@ class FagsakStatusOppdatererIntegrasjonTest : AbstractSpringIntegrationTest() {
                                                                                          .toYearMonth(),
                                                                                  type = YtelseType.ORDINÆR_BARNETRYGD,
                                                                                  periodeOffset = periodeOffset,
-                                                                                 forrigePeriodeOffset = null
+                                                                                 forrigePeriodeOffset = null,
+                                                                                 sats = 1054,
+                                                                                 prosent = BigDecimal(100)
     )
 }

@@ -67,6 +67,7 @@ internal class TilkjentYtelseUtilsTest {
 
         val tilkjentYtelse = TilkjentYtelseUtils.beregnTilkjentYtelse(vilkårsvurdering = vilkårsvurdering,
                                                                       personopplysningGrunnlag = personopplysningGrunnlag,
+                                                                      behandling = lagBehandling(),
                                                                       featureToggleService = featureToggleService)
 
         assertEquals(1, tilkjentYtelse.andelerTilkjentYtelse.size)
@@ -91,6 +92,7 @@ internal class TilkjentYtelseUtilsTest {
 
         val tilkjentYtelse = TilkjentYtelseUtils.beregnTilkjentYtelse(vilkårsvurdering = vilkårsvurdering,
                                                                       personopplysningGrunnlag = personopplysningGrunnlag,
+                                                                      behandling = lagBehandling(),
                                                                       featureToggleService = featureToggleService)
 
         assertEquals(2, tilkjentYtelse.andelerTilkjentYtelse.size)
@@ -117,6 +119,7 @@ internal class TilkjentYtelseUtilsTest {
 
         val andeler = TilkjentYtelseUtils.beregnTilkjentYtelse(vilkårsvurdering = vilkårsvurdering,
                                                                personopplysningGrunnlag = personopplysningGrunnlag,
+                                                               behandling = lagBehandling(),
                                                                featureToggleService = featureToggleService)
                 .andelerTilkjentYtelse
                 .toList()
@@ -153,6 +156,7 @@ internal class TilkjentYtelseUtilsTest {
 
         val andeler = TilkjentYtelseUtils.beregnTilkjentYtelse(vilkårsvurdering = vilkårsvurdering,
                                                                personopplysningGrunnlag = personopplysningGrunnlag,
+                                                               behandling = lagBehandling(),
                                                                featureToggleService = featureToggleService)
                 .andelerTilkjentYtelse.toList()
                 .sortedBy { it.stønadFom }

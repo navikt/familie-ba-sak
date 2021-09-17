@@ -30,6 +30,11 @@ object SatsService {
                 it.type == SatsType.TILLEGG_ORBA && it.gyldigFom <= LocalDate.now().plusDays(1)
             }!!
 
+    val nyttTilleggOrdinærSats: Sats =
+            satser.find {
+                it.type == SatsType.TILLEGG_ORBA && it.gyldigTom == LocalDate.MAX
+            }!!
+
     val tilleggOrdinærSatsNesteMånedTilTester: Sats =
             satser.findLast {
                 it.type == SatsType.TILLEGG_ORBA && it.gyldigFom.toYearMonth() <= LocalDate.now()

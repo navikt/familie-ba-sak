@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.beregning.domene
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.Utils.konverterEnumsTilString
 import no.nav.familie.ba.sak.common.Utils.konverterStringTilEnums
+import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.YearMonthConverter
 import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.nesteMåned
@@ -12,7 +13,21 @@ import no.nav.fpsak.tidsserie.LocalDateSegment
 import java.math.BigDecimal
 import java.time.YearMonth
 import java.util.Objects
-import javax.persistence.*
+import javax.persistence.AttributeConverter
+import javax.persistence.Column
+import javax.persistence.Convert
+import javax.persistence.Converter
+import javax.persistence.Entity
+import javax.persistence.EntityListeners
+import javax.persistence.EnumType
+import javax.persistence.Enumerated
+import javax.persistence.GeneratedValue
+import javax.persistence.GenerationType
+import javax.persistence.Id
+import javax.persistence.JoinColumn
+import javax.persistence.ManyToOne
+import javax.persistence.SequenceGenerator
+import javax.persistence.Table
 
 @EntityListeners(RollestyringMotDatabase::class)
 @Entity(name = "AndelTilkjentYtelse")
@@ -129,6 +144,8 @@ data class AndelTilkjentYtelse(
     fun erLøpende(): Boolean {
         return this.stønadTom >= inneværendeMåned().nesteMåned()
     }
+
+    fun stønadsPeriode() = MånedPeriode(this.stønadFom, this.stønadTom)
 
     companion object {
 

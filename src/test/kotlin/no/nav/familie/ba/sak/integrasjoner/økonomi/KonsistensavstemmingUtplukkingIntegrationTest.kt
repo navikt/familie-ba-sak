@@ -24,6 +24,7 @@ import org.junit.jupiter.api.MethodOrderer
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestMethodOrder
 import org.springframework.beans.factory.annotation.Autowired
+import java.math.BigDecimal
 import java.time.LocalDate
 
 
@@ -230,7 +231,9 @@ class KonsistensavstemmingUtplukkingIntegrationTest : AbstractSpringIntegrationT
                                                                                  type = YtelseType.ORDINÆR_BARNETRYGD,
                                                                                  kildeBehandlingId = kildeBehandlingId,
                                                                                  periodeOffset = periodeOffset,
-                                                                                 forrigePeriodeOffset = null
+                                                                                 forrigePeriodeOffset = null,
+                                                                                 sats = 1054,
+                                                                                 prosent = BigDecimal(100)
     )
 }
 

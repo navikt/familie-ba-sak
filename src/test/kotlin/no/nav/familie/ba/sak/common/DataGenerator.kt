@@ -76,6 +76,7 @@ import no.nav.familie.ba.sak.task.dto.StatusFraOppdragDTO
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import no.nav.familie.prosessering.domene.Task
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -205,7 +206,9 @@ fun lagAndelTilkjentYtelse(fom: String,
             stønadTom = årMnd(tom),
             type = ytelseType,
             periodeOffset = periodeIdOffset,
-            forrigePeriodeOffset = forrigeperiodeIdOffset
+            forrigePeriodeOffset = forrigeperiodeIdOffset,
+            sats = beløp,
+            prosent = BigDecimal(100)
     )
 }
 
@@ -239,7 +242,9 @@ fun lagAndelTilkjentYtelseUtvidet(fom: String,
             stønadTom = årMnd(tom),
             type = ytelseType,
             periodeOffset = periodeIdOffset,
-            forrigePeriodeOffset = forrigeperiodeIdOffset
+            forrigePeriodeOffset = forrigeperiodeIdOffset,
+            sats = beløp,
+            prosent = BigDecimal(100)
     )
 }
 
@@ -561,7 +566,7 @@ fun kjørStegprosessForFGB(
                                                               personIdent = søkerFnr,
                                                               behandlingsId = behandlingEtterIverksetteVedtak.id,
                                                               vedtaksId = vedtak.id),
-                    task = Task.nyTask(type = StatusFraOppdragTask.TASK_STEP_TYPE, payload = "")
+                    task = Task(type = StatusFraOppdragTask.TASK_STEP_TYPE, payload = "")
             ))
     if (tilSteg == StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI) return behandlingEtterStatusFraOppdrag
 
@@ -572,7 +577,7 @@ fun kjørStegprosessForFGB(
     val behandlingEtterJournalførtVedtak =
             stegService.håndterJournalførVedtaksbrev(behandlingEtterIverksetteMotTilbake, JournalførVedtaksbrevDTO(
                     vedtakId = vedtak.id,
-                    task = Task.nyTask(type = JournalførVedtaksbrevTask.TASK_STEP_TYPE, payload = "")
+                    task = Task(type = JournalførVedtaksbrevTask.TASK_STEP_TYPE, payload = "")
             ))
     if (tilSteg == StegType.JOURNALFØR_VEDTAKSBREV) return behandlingEtterJournalførtVedtak
 
@@ -657,7 +662,7 @@ fun kjørStegprosessForRevurderingÅrligKontroll(
                                                               personIdent = søkerFnr,
                                                               behandlingsId = behandlingEtterIverksetteVedtak.id,
                                                               vedtaksId = vedtak.id),
-                    task = Task.nyTask(type = StatusFraOppdragTask.TASK_STEP_TYPE, payload = "")
+                    task = Task(type = StatusFraOppdragTask.TASK_STEP_TYPE, payload = "")
             ))
     if (tilSteg == StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI) return behandlingEtterStatusFraOppdrag
 
@@ -668,7 +673,7 @@ fun kjørStegprosessForRevurderingÅrligKontroll(
     val behandlingEtterJournalførtVedtak =
             stegService.håndterJournalførVedtaksbrev(behandlingEtterIverksetteMotTilbake, JournalførVedtaksbrevDTO(
                     vedtakId = vedtak.id,
-                    task = Task.nyTask(type = JournalførVedtaksbrevTask.TASK_STEP_TYPE, payload = "")
+                    task = Task(type = JournalførVedtaksbrevTask.TASK_STEP_TYPE, payload = "")
             ))
     if (tilSteg == StegType.JOURNALFØR_VEDTAKSBREV) return behandlingEtterJournalførtVedtak
 
