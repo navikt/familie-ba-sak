@@ -1,9 +1,16 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
+import io.mockk.mockk
+import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.common.lagVilkårResultat
+import no.nav.familie.ba.sak.common.lagVilkårsvurdering
+import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVilkårResultat
-import no.nav.familie.ba.sak.common.*
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
+import no.nav.familie.ba.sak.kjerne.vedtak.validerAvslagsbegrunnelse
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import org.junit.jupiter.api.Test
@@ -15,6 +22,10 @@ import java.time.LocalDateTime
 class VilkårsvurderingUtilsTest {
 
     private val uvesentligVilkårsvurdering = lagVilkårsvurdering(randomFnr(), lagBehandling(), Resultat.IKKE_VURDERT)
+
+    private val vilkårResultatAvslag = lagVilkårResultat(
+            personResultat = mockk(),
+            vilkårType = Vilkår.BOSATT_I_RIKET)
 
     @Test
     fun `feil kastes når det finnes løpende oppfylt ved forsøk på å legge til avslag uten periode`() {
@@ -100,6 +111,13 @@ class VilkårsvurderingUtilsTest {
         assertDoesNotThrow {
             VilkårsvurderingUtils.validerAvslagUtenPeriodeMedLøpende(personSomEndres = personResultat,
                                                                      vilkårSomEndres = løpendeOppfylt)
+        }
+    }
+
+    @Test
+    fun `Oppdatering av avslagbegrunnelse som ikke samsvarer med vilkår kaster feil`() {
+        assertThrows<IllegalStateException> {
+            validerAvslagsbegrunnelse(triggesAv = TriggesAv(vilkår = setOf(Vilkår.LOVLIG_OPPHOLD)), vilkårResultatAvslag)
         }
     }
 }
