@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.ekstern.restDomene
 
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
@@ -25,25 +24,6 @@ data class RestVedtakBegrunnelse(
         val opprettetTidspunkt: LocalDateTime
 )
 
-data class RestPostVedtakBegrunnelse(
-        val fom: LocalDate,
-        val tom: LocalDate?,
-        val vedtakBegrunnelse: VedtakBegrunnelseSpesifikasjon
-)
-
-data class RestPostFritekstVedtakBegrunnelser(
-        val fom: LocalDate?,
-        val tom: LocalDate?,
-        val fritekster: List<String>,
-        val vedtaksperiodetype: Vedtaksperiodetype
-)
-
-data class RestDeleteVedtakBegrunnelser(
-        val fom: LocalDate,
-        val tom: LocalDate?,
-        val vedtakbegrunnelseTyper: List<VedtakBegrunnelseType>
-)
-
 data class RestVedtakBegrunnelseTilknyttetVilkår(
         val id: VedtakBegrunnelseSpesifikasjon,
         val navn: String,
@@ -58,6 +38,3 @@ fun Vedtak.tilRestVedtak(vedtaksperioderMedBegrunnelser: List<RestVedtaksperiode
                 vedtaksperioderMedBegrunnelser = vedtaksperioderMedBegrunnelser,
         )
 
-data class RestAvslagBegrunnelser(val fom: LocalDate?,
-                                  val tom: LocalDate?,
-                                  val brevBegrunnelser: List<String>)

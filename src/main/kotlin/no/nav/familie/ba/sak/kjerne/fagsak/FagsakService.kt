@@ -235,7 +235,6 @@ class FagsakService(
                     )
                 },
                 totrinnskontroll = totrinnskontroll?.tilRestTotrinnskontroll(),
-                vedtaksperioder = vedtaksperioder,
         )
     }
 
