@@ -1,6 +1,6 @@
 name: Kjør StegServiceTest
 on:
-  push
+  workflow_dispatch:
 
 env:
   IMAGE: ghcr.io/navikt/familie-ba-sak:${{ github.sha }}
