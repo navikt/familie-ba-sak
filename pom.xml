@@ -28,7 +28,7 @@
         <felles-kontrakter.version>2.0_20210916154133_46d83f3</felles-kontrakter.version>
         <familie.kontrakter.saksstatistikk>2.0_20210427132344_d9066f5</familie.kontrakter.saksstatistikk>
         <familie.kontrakter.stønadsstatistikk>2.0_20210914093948_94e43f0</familie.kontrakter.stønadsstatistikk>
-        <familie.kontrakter.skatteetaten>2.0_20210916164514_9f2518b</familie.kontrakter.skatteetaten>
+        <familie.kontrakter.skatteetaten>2.0_20210920094114_9c74239</familie.kontrakter.skatteetaten>
         <mockk.version>1.12.0</mockk.version>
         <token-validation-spring.version>1.3.8</token-validation-spring.version>
 
