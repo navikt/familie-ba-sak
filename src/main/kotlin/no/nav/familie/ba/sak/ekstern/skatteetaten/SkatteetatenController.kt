@@ -41,7 +41,7 @@ class SkatteetatenController(private val skatteetatenService: SkatteetatenServic
         @NotNull @RequestParam(value = "aar", required = true) aar: String
     ): ResponseEntity<Ressurs<SkatteetatenPersonerResponse>> {
         logger.info("Treff på finnPersonerMedUtvidetBarnetrygd")
-        val respons = if (featureToggleService.isEnabled(FeatureToggleConfig.SKATTEETATEN_API_STUB)) {
+        val respons = if (featureToggleService.isEnabled(FeatureToggleConfig.SKATTEETATEN_API_STUB, true)) {
             SkatteetatenPersonerResponse(listOf(SkatteetatenPerson("12345678901", LocalDateTime.now())))
         } else {
             skatteetatenService.finnPersonerMedUtvidetBarnetrygd(aar)
@@ -59,7 +59,7 @@ class SkatteetatenController(private val skatteetatenService: SkatteetatenServic
         @Valid @RequestBody perioderRequest: SkatteetatenPerioderRequest
     ): ResponseEntity<Ressurs<SkatteetatenPerioderResponse>> {
         logger.info("Treff på hentPerioderMedUtvidetBarnetrygd")
-        val response = if (featureToggleService.isEnabled(FeatureToggleConfig.SKATTEETATEN_API_STUB)) {
+        val response = if (featureToggleService.isEnabled(FeatureToggleConfig.SKATTEETATEN_API_STUB, true)) {
             SkatteetatenPerioderResponse(listOf(SkatteetatenPerioder("01017000110", LocalDateTime.now(), perioder = listOf(SkatteetatenPeriode("2020-02", SkatteetatenPeriode.MaxDelingsprosent._50, tomMaaned = "2022-12")))))
         } else {
             skatteetatenService.finnPerioderMedUtvidetBarnetrygd(perioderRequest.identer, perioderRequest.aar)
