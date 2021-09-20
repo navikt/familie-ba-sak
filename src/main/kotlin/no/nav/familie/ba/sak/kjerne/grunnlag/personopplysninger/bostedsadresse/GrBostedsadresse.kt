@@ -40,6 +40,8 @@ abstract class GrBostedsadresse(
                                                              tom = this.periode?.tom,
                                                              verdi = this.tilFrontendString())
 
+    fun harGyldigFom() = this.periode?.fom != null && this.periode?.fom != fregManglendeFlytteDato
+
     companion object {
 
         // Når flyttedato er satt til 0001-01-01, så mangler den egentlig.
