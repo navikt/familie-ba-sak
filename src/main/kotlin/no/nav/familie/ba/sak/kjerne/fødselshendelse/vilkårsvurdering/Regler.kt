@@ -36,8 +36,12 @@ data class VurderPersonErBosattIRiket(
 
     override fun vurder(): Evaluering {
         if (adresser.any { !it.harGyldigFom() }) {
+            val person = adresser.first().person
             logger.error("Har ugyldige adresser, sjekk secureLogger.")
-            secureLogger.info("Har ugyldige adresser: ${adresser.filter { !it.harGyldigFom() }.map { it.toSecureString() }}")
+            secureLogger.info("Har ugyldige adresser på person (${person?.personIdent}, ${person?.type}): ${
+                adresser.filter { !it.harGyldigFom() }
+                        .map { it.toSecureString() }
+            }")
         }
 
         val adresserMedGyldigFom = adresser.filter { it.harGyldigFom() }
