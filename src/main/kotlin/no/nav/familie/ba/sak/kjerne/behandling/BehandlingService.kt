@@ -67,7 +67,7 @@ class BehandlingService(
             val underkategori =
                     bestemUnderkategori(nyUnderkategori = nyBehandling.underkategori,
                                         nyBehandlingType = nyBehandling.behandlingType,
-                                        forrigeBehandlingUnderkategori = aktivBehandling?.underkategori)
+                                        forrigeBehandlingUnderkategori = hentForrigeUnderkategori(fagsakId = fagsak.id))
 
             val behandling = Behandling(fagsak = fagsak,
                                         opprettetÅrsak = nyBehandling.behandlingÅrsak,
@@ -103,11 +103,10 @@ class BehandlingService(
     }
 
     fun oppdaterBehandlingUnderkategori(behandling: Behandling, nyBehandlingUnderkategori: BehandlingUnderkategori): Behandling {
-        val forrigeIverksatteBehandling = hentForrigeBehandlingSomErIverksatt(behandling)
         return lagreEllerOppdater(behandling.apply {
             underkategori = bestemUnderkategori(nyUnderkategori = nyBehandlingUnderkategori,
                                                 nyBehandlingType = behandling.type,
-                                                forrigeBehandlingUnderkategori = forrigeIverksatteBehandling?.underkategori)
+                                                forrigeBehandlingUnderkategori = hentForrigeUnderkategori(fagsakId = fagsak.id))
         })
     }
 
@@ -279,6 +278,15 @@ class BehandlingService(
         behandling.leggTilBehandlingStegTilstand(steg)
 
         return lagreEllerOppdater(behandling)
+    }
+
+    private fun hentForrigeUnderkategori(fagsakId: Long): BehandlingUnderkategori? {
+        val forrigeIverksattBehandling = hentSisteBehandlingSomErIverksatt(fagsakId = fagsakId) ?: return null
+
+        val forrigeAndeler =
+                andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = forrigeIverksattBehandling.id)
+
+        return if (forrigeAndeler.any { it.erUtvidet() }) BehandlingUnderkategori.UTVIDET else BehandlingUnderkategori.ORDINÆR
     }
 
     companion object {
