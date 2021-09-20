@@ -7,8 +7,8 @@ import no.nav.familie.ba.sak.kjerne.fødselshendelse.Evaluering
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.vilkårsvurdering.VurderBarnErBosattMedSøker
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.vilkårsvurdering.VurderBarnErUgift
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.vilkårsvurdering.VurderPersonErBosattIRiket
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.vilkårsvurdering.VurderBarnErUnder18
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.vilkårsvurdering.VurderPersonErBosattIRiket
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.vilkårsvurdering.VurderPersonHarLovligOpphold
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
