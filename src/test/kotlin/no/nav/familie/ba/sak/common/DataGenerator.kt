@@ -759,7 +759,7 @@ fun lagVedtaksperiodeMedBegrunnelser(
         tom: LocalDate = LocalDate.now().let { it.withDayOfMonth(it.lengthOfMonth()) },
         type: Vedtaksperiodetype = Vedtaksperiodetype.FORTSATT_INNVILGET,
         begrunnelser: MutableSet<Vedtaksbegrunnelse> = mutableSetOf(lagVedtaksbegrunnelse()),
-        fritekster: MutableSet<VedtaksbegrunnelseFritekst> = mutableSetOf(),
+        fritekster: MutableList<VedtaksbegrunnelseFritekst> = mutableListOf(),
 ) = VedtaksperiodeMedBegrunnelser(
         vedtak = vedtak,
         fom = fom,
