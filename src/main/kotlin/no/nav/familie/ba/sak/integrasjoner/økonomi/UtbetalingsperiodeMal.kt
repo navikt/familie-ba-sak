@@ -45,7 +45,7 @@ data class UtbetalingsperiodeMal(
                     forrigePeriodeId = forrigePeriodeIdOffset?.let { forrigePeriodeIdOffset.toLong() },
                     periodeId = periodeIdOffset.toLong(),
                     datoForVedtak = vedtak.vedtaksdato?.toLocalDate() ?: now(),
-                    klassifisering = andel.type.klassifisering,
+                    klassifisering = andel.type.klassifisering, // TODO: Oppdater klassifisering til samme som ordinær, enten ved å kun bruke økonomi sin eller oppdatere enum til egen klassifisering for økonomi
                     vedtakdatoFom = andel.stønadFom.førsteDagIInneværendeMåned(),
                     vedtakdatoTom = andel.stønadTom.sisteDagIInneværendeMåned(),
                     sats = BigDecimal(andel.beløp),

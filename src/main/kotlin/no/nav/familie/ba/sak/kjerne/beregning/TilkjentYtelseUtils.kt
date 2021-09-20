@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService.BeløpPeriode
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService.splittPeriodePå6Årsdag
+import no.nav.familie.ba.sak.kjerne.beregning.UtvidetBarnetrygdGenerator.utledUtvida
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
@@ -41,7 +42,7 @@ object TilkjentYtelseUtils {
                 endretDato = LocalDate.now()
         )
 
-        val andelerTilkjentYtelse = innvilgedePeriodeResultatBarna
+        val andelerTilkjentYtelseBarna = innvilgedePeriodeResultatBarna
                 .flatMap { periodeResultatBarn ->
                     relevanteSøkerPerioer
                             .flatMap { overlappendePerioderesultatSøker ->
@@ -174,7 +175,12 @@ object TilkjentYtelseUtils {
                             }
                 }
 
-        tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerTilkjentYtelse)
+        val utvidetBarnetrygdAndeler = utledUtvida(relevanteSøkerPerioder = relevanteSøkerPerioer,
+                                                   andelerBarna = andelerTilkjentYtelseBarna,
+                                                   behandlingId = vilkårsvurdering.behandling.id,
+                                                   pekerTilTilkjentYtelse = tilkjentYtelse)
+
+        tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerTilkjentYtelseBarna + utvidetBarnetrygdAndeler)
 
         return tilkjentYtelse
     }
