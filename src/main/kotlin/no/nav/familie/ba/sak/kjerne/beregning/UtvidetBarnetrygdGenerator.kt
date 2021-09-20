@@ -7,18 +7,16 @@ import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagINesteMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
-import no.nav.familie.ba.sak.kjerne.beregning.domene.PeriodeResultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
 import no.nav.fpsak.tidsserie.StandardCombinators
 
 object UtvidetBarnetrygdGenerator {
-    // TODO: flytt dette og tidslinjestuff ut i egen utvida-util. Skriv tester.
     private data class PeriodeData(val ident: String, val rolle: PersonType, val beløp: Int = 0)
 
     private fun finnSnitt(sammenlagtTidslinje: LocalDateTimeline<List<PeriodeData>>,
@@ -38,23 +36,22 @@ object UtvidetBarnetrygdGenerator {
     }
 
 
-    fun utledUtvida(relevanteSøkerPerioder: List<PeriodeResultat>,
+    fun utledUtvida(utvidetVilkår: List<VilkårResultat>,
                     andelerBarna: List<AndelTilkjentYtelse>,
                     behandlingId: Long,
                     pekerTilTilkjentYtelse: TilkjentYtelse): List<AndelTilkjentYtelse> {
 
 
-        val søkerIdent = relevanteSøkerPerioder.firstOrNull()?.personIdent ?: return emptyList()
+        val søkerIdent = utvidetVilkår.firstOrNull()?.personResultat?.personIdent ?: return emptyList()
 
         val utvidaTidslinje = LocalDateTimeline(
-                relevanteSøkerPerioder
-                        .filter { periode ->
-                            periode.vilkårResultater.any { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD && it.resultat == Resultat.OPPFYLT }
-                        }.map {
+                utvidetVilkår
+                        .filter { it.resultat == Resultat.OPPFYLT }
+                        .map {
                             if (it.periodeFom == null || it.periodeTom == null) throw Feil("Fom og tom må være satt på søkers periode ved utvida barnetrygd")
                             LocalDateSegment(
-                                    it.periodeFom.førsteDagINesteMåned(),
-                                    it.periodeTom.sisteDagINesteMåned(),
+                                    it.periodeFom!!.førsteDagINesteMåned(),
+                                    it.periodeTom!!.sisteDagINesteMåned(),
                                     listOf(PeriodeData(ident = søkerIdent, rolle = PersonType.SØKER))
                             )
                         })

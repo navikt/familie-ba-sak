@@ -175,10 +175,12 @@ object TilkjentYtelseUtils {
                             }
                 }
 
-        val utvidetBarnetrygdAndeler = utledUtvida(relevanteSøkerPerioder = relevanteSøkerPerioer,
-                                                   andelerBarna = andelerTilkjentYtelseBarna,
-                                                   behandlingId = vilkårsvurdering.behandling.id,
-                                                   pekerTilTilkjentYtelse = tilkjentYtelse)
+        val utvidetBarnetrygdAndeler =
+                utledUtvida(utvidetVilkår = vilkårsvurdering.personResultater.flatMap { it.vilkårResultater }
+                        .filter { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD },
+                            andelerBarna = andelerTilkjentYtelseBarna,
+                            behandlingId = vilkårsvurdering.behandling.id,
+                            pekerTilTilkjentYtelse = tilkjentYtelse)
 
         tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerTilkjentYtelseBarna + utvidetBarnetrygdAndeler)
 
