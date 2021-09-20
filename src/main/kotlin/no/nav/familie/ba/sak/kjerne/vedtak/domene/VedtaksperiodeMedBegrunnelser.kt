@@ -71,12 +71,13 @@ data class VedtaksperiodeMedBegrunnelser(
         )
         val begrunnelser: MutableSet<Vedtaksbegrunnelse> = mutableSetOf(),
 
+        // Bruker list for å bevare rekkefølgen som settes frontend.
         @OneToMany(fetch = FetchType.EAGER,
                    mappedBy = "vedtaksperiodeMedBegrunnelser",
                    cascade = [CascadeType.ALL],
                    orphanRemoval = true
         )
-        val fritekster: MutableSet<VedtaksbegrunnelseFritekst> = mutableSetOf()
+        val fritekster: MutableList<VedtaksbegrunnelseFritekst> = mutableListOf()
 
 ) : BaseEntitet() {
 
@@ -105,7 +106,7 @@ fun VedtaksperiodeMedBegrunnelser.tilRestVedtaksperiodeMedBegrunnelser(gyldigeBe
         tom = this.tom,
         type = this.type,
         begrunnelser = this.begrunnelser.map { it.tilRestVedtaksbegrunnelse() },
-        fritekster = this.fritekster.map { it.fritekst },
+        fritekster = this.fritekster.sortedBy { it.id }.map { it.fritekst },
         gyldigeBegrunnelser = gyldigeBegrunnelser
 )
 
