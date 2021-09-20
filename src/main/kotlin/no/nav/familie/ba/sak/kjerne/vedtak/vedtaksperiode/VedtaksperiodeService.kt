@@ -364,12 +364,14 @@ class VedtaksperiodeService(
                     type = vedtaksperiodeMedBegrunnelser.type,
             ))
 
-            lagre(nyVedtaksperiodeMedBegrunnelser.copy(
-                    begrunnelser = vedtaksperiodeMedBegrunnelser.begrunnelser.map { it.kopier(nyVedtaksperiodeMedBegrunnelser) }
-                            .toMutableSet(),
-                    fritekster = vedtaksperiodeMedBegrunnelser.fritekster.map { it.kopier(nyVedtaksperiodeMedBegrunnelser) }
-                            .toMutableSet()
-            ))
+            nyVedtaksperiodeMedBegrunnelser.settBegrunnelser(vedtaksperiodeMedBegrunnelser.begrunnelser.map {
+                it.kopier(nyVedtaksperiodeMedBegrunnelser)
+            })
+            nyVedtaksperiodeMedBegrunnelser.settFritekster(vedtaksperiodeMedBegrunnelser.fritekster.map {
+                it.kopier(nyVedtaksperiodeMedBegrunnelser)
+            })
+
+            lagre(nyVedtaksperiodeMedBegrunnelser)
         }
     }
 

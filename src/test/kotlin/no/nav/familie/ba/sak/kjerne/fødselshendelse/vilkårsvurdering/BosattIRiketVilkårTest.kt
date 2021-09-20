@@ -193,5 +193,33 @@ class BosattIRiketVilkårTest {
 
         assertEquals(Resultat.IKKE_OPPFYLT, evaluering.resultat)
     }
+
+    @Test
+    fun `Skal sjekke at person bor i riket selv om hen har ekstra adresse uten fom`() {
+        val søker = tilfeldigPerson(personType = PersonType.BARN)
+
+
+        søker.apply {
+            bostedsadresser = mutableListOf(
+                    GrBostedsadresse.fraBostedsadresse(
+                            defaultAdresse.copy(
+                                    angittFlyttedato = null,
+                            ),
+                            søker),
+                    GrBostedsadresse.fraBostedsadresse(
+                            defaultAdresse.copy(
+                                    angittFlyttedato = LocalDate.now().minusMonths(7),
+                            ),
+                            søker),
+            )
+        }
+
+        val evaluering = VurderPersonErBosattIRiket(
+                adresser = søker.bostedsadresser,
+                vurderFra = LocalDate.now().minusMonths(4)
+        ).vurder()
+
+        assertEquals(Resultat.OPPFYLT, evaluering.resultat)
+    }
 }
 

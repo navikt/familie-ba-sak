@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.behandling.domene
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
+import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.steg.BehandlingStegStatus
 import no.nav.familie.ba.sak.kjerne.steg.FØRSTE_STEG
@@ -157,6 +158,11 @@ data class Behandling(
     fun erKlage(): Boolean = this.opprettetÅrsak == BehandlingÅrsak.KLAGE
 
     fun erMigrering() = type == BehandlingType.MIGRERING_FRA_INFOTRYGD || type == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT
+
+    fun hentYtelseTypeTilVilkår(): YtelseType = when (underkategori) {
+        BehandlingUnderkategori.UTVIDET -> YtelseType.UTVIDET_BARNETRYGD
+        else -> YtelseType.ORDINÆR_BARNETRYGD
+    }
 
     companion object {
 
