@@ -11,7 +11,7 @@ import org.springframework.data.jdbc.repository.config.EnableJdbcRepositories
 
 @Configuration
 @EnableJdbcAuditing
-@EnableJdbcRepositories("no.nav.familie")
+@EnableJdbcRepositories("no.nav.familie.prosessering")
 class DatabaseConfig : AbstractJdbcConfiguration() {
     @Bean
     override fun jdbcCustomConversions(): JdbcCustomConversions {
