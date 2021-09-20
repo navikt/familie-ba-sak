@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.leggTilBegrunnelsePåVedtaksperiodeIBehandling
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.vurderVilkårsvurderingTilInnvilget
+import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.config.mockHentPersoninfoForMedIdenter
@@ -50,6 +51,7 @@ import no.nav.familie.prosessering.domene.Task
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertThrows
@@ -61,29 +63,6 @@ import org.springframework.test.context.ContextConfiguration
 import java.time.LocalDate
 import java.util.*
 
-@SpringBootTest
-@ActiveProfiles(
-    "postgres",
-    "mock-økonomi",
-    "mock-pdl",
-    "mock-task-repository",
-    "mock-infotrygd-barnetrygd",
-    "mock-tilbakekreving-klient",
-    "mock-brev-klient",
-    "mock-infotrygd-feed",
-    "mock-oauth",
-    "mock-rest-template-config",
-    // profil mock-test er dummy profile satt inn for å tvinge Spring til å spinne opp ny context.
-    "mock-test"
-)
-/*
- * Forklaring på hvorfor AbstractSpringIntegrationTest ikke blir extended i denne test klassen:
- * Vet kjøring av alle tester feiler testen `Skal håndtere steg for frontend ordinær behandling`
- * i denne klassen, vi fant ikke hvorfor men det virker når eget context blir spunnet opp for klassen.
- */
-@ContextConfiguration(initializers = [DbContainerInitializer::class])
-@AutoConfigureWireMock(port = 28085)
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class StegServiceTest(
         @Autowired
         private val stegService: StegService,
@@ -120,9 +99,9 @@ class StegServiceTest(
 
         @Autowired
         private val vedtaksperiodeService: VedtaksperiodeService,
-) {
+) : AbstractSpringIntegrationTest() {
 
-    @BeforeAll
+    @BeforeEach
     fun init() {
         databaseCleanupService.truncate()
     }
