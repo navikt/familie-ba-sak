@@ -21,9 +21,15 @@ object Behandlingutils {
                 .findLast { !it.erTekniskOpphør() && it.steg == StegType.BEHANDLING_AVSLUTTET }
     }
 
-    fun bestemUnderkategori(nyBehandling: NyBehandling, aktivBehandlingUnderkategori: BehandlingUnderkategori?): BehandlingUnderkategori {
-        return if (nyBehandling.behandlingType == BehandlingType.REVURDERING) {
-            aktivBehandlingUnderkategori ?: nyBehandling.underkategori
-        } else nyBehandling.underkategori
+    fun bestemUnderkategori(nyBehandling: NyBehandling,
+                            aktivBehandlingUnderkategori: BehandlingUnderkategori?): BehandlingUnderkategori {
+        return when {
+            nyBehandling.underkategori == BehandlingUnderkategori.UTVIDET -> nyBehandling.underkategori
+
+            nyBehandling.behandlingType == BehandlingType.REVURDERING -> aktivBehandlingUnderkategori
+                                                                         ?: nyBehandling.underkategori
+
+            else -> nyBehandling.underkategori
+        }
     }
 }

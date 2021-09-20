@@ -315,9 +315,9 @@ fun nyRevurdering(søkersIdent: String): NyBehandling = NyBehandling(
         underkategori = BehandlingUnderkategori.ORDINÆR
 )
 
-fun lagSøknadDTO(søkerIdent: String, barnasIdenter: List<String>): SøknadDTO {
+fun lagSøknadDTO(søkerIdent: String, barnasIdenter: List<String>, underkategori: BehandlingUnderkategori = BehandlingUnderkategori.ORDINÆR): SøknadDTO {
     return SøknadDTO(
-            underkategori = BehandlingUnderkategori.ORDINÆR,
+            underkategori = underkategori,
             søkerMedOpplysninger = SøkerMedOpplysninger(
                     ident = søkerIdent
             ),
