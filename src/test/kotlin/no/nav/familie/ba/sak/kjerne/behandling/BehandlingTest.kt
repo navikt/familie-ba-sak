@@ -77,4 +77,16 @@ class BehandlingTest {
                 aktivBehandlingUnderkategori = BehandlingUnderkategori.ORDINÆR
         ))
     }
+
+    @Test
+    fun `Skal velge utvidet ved RV når FGB er ordinær`() {
+        val søkerFnr = randomFnr()
+        assertEquals(BehandlingUnderkategori.UTVIDET, Behandlingutils.bestemUnderkategori(
+                nyBehandling = nyRevurdering(søkerFnr).copy(
+                        behandlingÅrsak = BehandlingÅrsak.ÅRLIG_KONTROLL,
+                        underkategori = BehandlingUnderkategori.UTVIDET
+                ),
+                aktivBehandlingUnderkategori = BehandlingUnderkategori.ORDINÆR
+        ))
+    }
 }

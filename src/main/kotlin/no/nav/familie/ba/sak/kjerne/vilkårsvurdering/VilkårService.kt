@@ -60,7 +60,7 @@ class VilkårService(
                                            frontendFeilmelding = "Fant ikke vilkårsvurdering for person med ident '${restPersonResultat.personIdent}")
 
         muterPersonVilkårResultaterPut(personResultat, restVilkårResultat)
-        
+
         val vilkårResultat = personResultat.vilkårResultater.singleOrNull { it.id == vilkårId }
                              ?: error("Finner ikke vilkår med vilkårId $vilkårId på personResultat ${personResultat.id}")
 
@@ -227,7 +227,8 @@ class VilkårService(
             val personResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering,
                                                 personIdent = person.personIdent.ident)
 
-            val vilkårForPerson = Vilkår.hentVilkårFor(person.type)
+            val vilkårForPerson = Vilkår.hentVilkårFor(personType = person.type,
+                                                       ytelseType = vilkårsvurdering.behandling.hentYtelseTypeTilVilkår())
 
             val vilkårResultater = vilkårForPerson.map { vilkår ->
                 val fom = if (vilkår.gjelderAlltidFraBarnetsFødselsdato()) person.fødselsdato else null
