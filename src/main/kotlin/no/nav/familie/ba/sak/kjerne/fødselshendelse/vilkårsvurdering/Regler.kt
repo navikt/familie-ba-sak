@@ -40,7 +40,7 @@ data class VurderPersonErBosattIRiket(
             logger.error("Har ugyldige adresser, sjekk secureLogger.")
             secureLogger.info("Har ugyldige adresser på person (${person?.personIdent}, ${person?.type}): ${
                 adresser.filter { !it.harGyldigFom() }
-                        .map { it.toSecureString() }
+                        .map { "(${it.periode?.fom}, ${it.periode?.tom}): ${it.toSecureString()}" }
             }")
         }
 
