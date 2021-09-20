@@ -60,7 +60,7 @@ class SkatteetatenController(private val skatteetatenService: SkatteetatenServic
     ): ResponseEntity<Ressurs<SkatteetatenPerioderResponse>> {
         logger.info("Treff på hentPerioderMedUtvidetBarnetrygd")
         val response = if (featureToggleService.isEnabled(FeatureToggleConfig.SKATTEETATEN_API_STUB, true)) {
-            SkatteetatenPerioderResponse(listOf(SkatteetatenPerioder("01017000110", LocalDateTime.now(), perioder = listOf(SkatteetatenPeriode("2020-02", SkatteetatenPeriode.MaxDelingsprosent._50, tomMaaned = "2022-12")))))
+            SkatteetatenPerioderResponse(listOf(SkatteetatenPerioder("01017000110", LocalDateTime.now(), perioder = listOf(SkatteetatenPeriode("2020-02", SkatteetatenPeriode.Delingsprosent._50, tomMaaned = "2022-12")))))
         } else {
             skatteetatenService.finnPerioderMedUtvidetBarnetrygd(perioderRequest.identer, perioderRequest.aar)
         }
