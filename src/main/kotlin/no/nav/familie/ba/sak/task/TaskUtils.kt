@@ -18,7 +18,7 @@ fun nesteGyldigeTriggertidForBehandlingIHverdager(minutesToAdd: Long = 0): Local
     date = if (erKlokkenMellom21Og06(date.toLocalTime()) && date.erHverdag(1)) {
         kl06IdagEllerNesteDag()
     } else if (erKlokkenMellom21Og06(date.toLocalTime()) || !date.erHverdag(0)) {
-        date.with(TemporalAdjusters.next(DayOfWeek.MONDAY)).withHour(6).withMinute(0)
+        date.with(TemporalAdjusters.next(DayOfWeek.MONDAY)).withHour(6)
     } else date
 
     when {
@@ -52,8 +52,8 @@ fun erKlokkenMellom21Og06(localTime: LocalTime = LocalTime.now()): Boolean {
 fun kl06IdagEllerNesteDag(): LocalDateTime {
     val now = LocalDateTime.now()
     return if (now.toLocalTime().isBefore(LocalTime.of(6, 0))) {
-        now.toLocalDate().atTime(6, 0)
+        now.withHour(6)
     } else {
-        now.toLocalDate().plusDays(1).atTime(6, 0)
+        now.plusDays(1).withHour(6)
     }
 }
