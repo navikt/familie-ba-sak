@@ -16,33 +16,18 @@ import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
 import no.nav.fpsak.tidsserie.StandardCombinators
 
-object UtvidetBarnetrygdGenerator {
-    private data class PeriodeData(val ident: String, val rolle: PersonType, val beløp: Int = 0)
+data class UtvidetBarnetrygdGenerator(
+        val behandlingId: Long,
+        val tilkjentYtelse: TilkjentYtelse
+) {
 
-    private fun finnSnitt(sammenlagtTidslinje: LocalDateTimeline<List<PeriodeData>>,
-                          tidslinje: LocalDateTimeline<List<PeriodeData>>): LocalDateTimeline<List<PeriodeData>> {
-        val sammenlagt =
-                sammenlagtTidslinje.combine(tidslinje,
-                                            StandardCombinators::bothValues,
-                                            LocalDateTimeline.JoinStyle.CROSS_JOIN) as LocalDateTimeline<List<List<PeriodeData>>>
+    // TODO: Beløp her må erstattes med prosent
 
-        return LocalDateTimeline(sammenlagt.toSegments().map {
-            LocalDateSegment(
-                    it.fom,
-                    it.tom,
-                    it.value.flatten()
-            )
-        })
-    }
+    fun lagUtvidetBarnetrygdAndeler(utvidetVilkår: List<VilkårResultat>,
+                                    andelerBarna: List<AndelTilkjentYtelse>): List<AndelTilkjentYtelse> {
+        if (utvidetVilkår.isEmpty() || andelerBarna.isEmpty()) return emptyList()
 
-
-    fun utledUtvida(utvidetVilkår: List<VilkårResultat>,
-                    andelerBarna: List<AndelTilkjentYtelse>,
-                    behandlingId: Long,
-                    pekerTilTilkjentYtelse: TilkjentYtelse): List<AndelTilkjentYtelse> {
-
-
-        val søkerIdent = utvidetVilkår.firstOrNull()?.personResultat?.personIdent ?: return emptyList()
+        val søkerIdent = utvidetVilkår.first().personResultat?.personIdent ?: error("Vilkår mangler PersonResultat")
 
         val utvidaTidslinje = LocalDateTimeline(
                 utvidetVilkår
@@ -58,26 +43,26 @@ object UtvidetBarnetrygdGenerator {
 
         val barnasTidslinjer = andelerBarna
                 .groupBy { it.personIdent }
-                .map { identmedandeler ->
-                    LocalDateTimeline(identmedandeler.value.map {
+                .map { identMedAndeler ->
+                    LocalDateTimeline(identMedAndeler.value.map {
                         LocalDateSegment(
                                 it.stønadFom.førsteDagIInneværendeMåned(),
                                 it.stønadTom.sisteDagIInneværendeMåned(),
-                                listOf(PeriodeData(ident = identmedandeler.key,
-                                                   rolle = PersonType.BARN,
-                                                   beløp = it.beløp)) // TODO: Mulig man bør sjekke på prosent i stedet for beløp
+                                listOf(PeriodeData(ident = identMedAndeler.key, rolle = PersonType.BARN, beløp = it.beløp))
                         )
                     })
                 }
 
-        val sammenslåttTidslinje = barnasTidslinjer.fold(utvidaTidslinje) { sammenlagt, neste -> (finnSnitt(sammenlagt, neste)) }
+        val sammenslåttTidslinje = barnasTidslinjer.fold(utvidaTidslinje) { sammenlagt, neste ->
+            (kombinerTidslinjer(sammenlagt, neste))
+        }
 
         return sammenslåttTidslinje.toSegments()
                 .filter { segement -> segement.value.any { it.rolle == PersonType.BARN } && segement.value.any { it.rolle == PersonType.SØKER } }
                 .map {
                     AndelTilkjentYtelse(
                             behandlingId = behandlingId,
-                            tilkjentYtelse = pekerTilTilkjentYtelse,
+                            tilkjentYtelse = tilkjentYtelse,
                             personIdent = søkerIdent,
                             stønadFom = it.fom.toYearMonth(),
                             stønadTom = it.tom.toYearMonth(),
@@ -85,5 +70,19 @@ object UtvidetBarnetrygdGenerator {
                             type = YtelseType.UTVIDET_BARNETRYGD
                     )
                 }
+    }
+
+    private data class PeriodeData(val ident: String, val rolle: PersonType, val beløp: Int = 0)
+
+    private fun kombinerTidslinjer(sammenlagtTidslinje: LocalDateTimeline<List<PeriodeData>>,
+                                   tidslinje: LocalDateTimeline<List<PeriodeData>>): LocalDateTimeline<List<PeriodeData>> {
+        val sammenlagt =
+                sammenlagtTidslinje.combine(tidslinje,
+                                            StandardCombinators::bothValues,
+                                            LocalDateTimeline.JoinStyle.CROSS_JOIN) as LocalDateTimeline<List<List<PeriodeData>>>
+
+        return LocalDateTimeline(sammenlagt.toSegments().map {
+            LocalDateSegment(it.fom, it.tom, it.value.flatten())
+        })
     }
 }

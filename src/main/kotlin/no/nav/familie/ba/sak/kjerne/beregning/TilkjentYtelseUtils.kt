@@ -10,12 +10,12 @@ import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService.BeløpPeriode
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService.splittPeriodePå6Årsdag
-import no.nav.familie.ba.sak.kjerne.beregning.UtvidetBarnetrygdGenerator.utledUtvida
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
@@ -175,12 +175,13 @@ object TilkjentYtelseUtils {
                             }
                 }
 
-        val utvidetBarnetrygdAndeler =
-                utledUtvida(utvidetVilkår = vilkårsvurdering.personResultater.flatMap { it.vilkårResultater }
-                        .filter { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD },
-                            andelerBarna = andelerTilkjentYtelseBarna,
-                            behandlingId = vilkårsvurdering.behandling.id,
-                            pekerTilTilkjentYtelse = tilkjentYtelse)
+        val utvidetBarnetrygdAndeler = UtvidetBarnetrygdGenerator(behandlingId = vilkårsvurdering.behandling.id,
+                                                                  tilkjentYtelse = tilkjentYtelse)
+                .lagUtvidetBarnetrygdAndeler(
+                        utvidetVilkår = vilkårsvurdering.personResultater
+                                .flatMap { it.vilkårResultater }
+                                .filter { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD && it.resultat == Resultat.OPPFYLT },
+                        andelerBarna = andelerTilkjentYtelseBarna)
 
         tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerTilkjentYtelseBarna + utvidetBarnetrygdAndeler)
 

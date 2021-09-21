@@ -40,7 +40,7 @@ internal class UtvidetBarnetrygdTest {
     }
 
     @Test
-    fun `Velger høyeste beløp i periode med utvidet barnetrygd`() {
+    fun `Utvidet andeler får høyeste beløp når det utbetales til flere barn med ulike beløp`() {
 
         val søker =
                 OppfyltPeriode(fom = LocalDate.of(2019, 4, 1), tom = LocalDate.of(2020, 6, 15))
@@ -115,7 +115,7 @@ internal class UtvidetBarnetrygdTest {
     }
 
     @Test
-    fun `Lager kun andeler for barna hvis ikke utvidet-vilkår er innfridd`() {
+    fun `Utvidet andeler lages kun når vilkåret er innfridd`() {
         val søkerOrdinær =
                 OppfyltPeriode(fom = LocalDate.of(2019, 4, 1), tom = LocalDate.of(2020, 6, 15))
         val søkerUtvidet =
@@ -168,13 +168,13 @@ internal class UtvidetBarnetrygdTest {
         assertEquals(barnOppfylt.fom.nesteMåned(), andelBarn.stønadFom)
         assertEquals(barnOppfylt.tom.toYearMonth(), andelBarn.stønadTom)
 
-        assertEquals(søkerOrdinær.ident, andelUtvidet.personIdent)
+        assertEquals(søkerUtvidet.ident, andelUtvidet.personIdent)
         assertEquals(søkerUtvidet.fom.nesteMåned(), andelUtvidet.stønadFom)
         assertEquals(søkerUtvidet.tom.toYearMonth(), andelUtvidet.stønadTom)
     }
 
     @Test
-    fun `Lager kun andeler for periodene hvor barn også har andeler`() {
+    fun `Utvidet andeler lages kun når det finnes andel for barn`() {
         val søkerOrdinær =
                 OppfyltPeriode(fom = LocalDate.of(2019, 4, 1), tom = LocalDate.of(2020, 6, 15))
         val søkerUtvidet =
@@ -233,7 +233,7 @@ internal class UtvidetBarnetrygdTest {
     }
 
     @Test
-    fun `Utvida opphører måneden etter vilkår ikke er innfridd, ikke inneværende slik som vanlige vilkår`() {
+    fun `Utvidet andeler slutter måneden etter vilkår ikke er innfridd lenger, ikke samme slik som ellers`() {
 
         val søkerOrdinær =
                 OppfyltPeriode(fom = LocalDate.of(2019, 4, 1), tom = LocalDate.of(2020, 6, 15))
