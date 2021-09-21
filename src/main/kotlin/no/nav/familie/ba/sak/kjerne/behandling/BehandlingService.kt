@@ -13,7 +13,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus.AVSLUTTET
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus.FATTER_VEDTAK
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.initStatus
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatUtils
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
@@ -63,7 +63,10 @@ class BehandlingService(
         val aktivBehandling = hentAktivForFagsak(fagsak.id)
 
         return if (aktivBehandling == null || aktivBehandling.status == AVSLUTTET) {
-            val underkategori = bestemUnderkategori(nyBehandling, aktivBehandling?.underkategori)
+            val underkategori =
+                    bestemUnderkategori(nyUnderkategori = nyBehandling.underkategori,
+                                        nyBehandlingType = nyBehandling.behandlingType,
+                                        forrigeBehandlingUnderkategori = hentForrigeUnderkategori(fagsakId = fagsak.id))
 
             val behandling = Behandling(fagsak = fagsak,
                                         opprettetÅrsak = nyBehandling.behandlingÅrsak,
@@ -98,6 +101,14 @@ class BehandlingService(
         }
     }
 
+    fun oppdaterBehandlingUnderkategori(behandling: Behandling, nyBehandlingUnderkategori: BehandlingUnderkategori): Behandling {
+        return lagreEllerOppdater(behandling.apply {
+            underkategori = bestemUnderkategori(nyUnderkategori = nyBehandlingUnderkategori,
+                                                nyBehandlingType = behandling.type,
+                                                forrigeBehandlingUnderkategori = hentForrigeUnderkategori(fagsakId = fagsak.id))
+        })
+    }
+
     @Transactional
     fun opprettOgInitierNyttVedtakForBehandling(behandling: Behandling,
                                                 kopierVedtakBegrunnelser: Boolean = false,
@@ -105,8 +116,9 @@ class BehandlingService(
         behandling.steg.takeUnless { it !== StegType.BESLUTTE_VEDTAK && it !== StegType.REGISTRERE_PERSONGRUNNLAG }
         ?: throw error("Forsøker å initiere vedtak på steg ${behandling.steg}")
 
-        val deaktivertVedtak = vedtakRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
-                ?.let { vedtakRepository.saveAndFlush(it.also { it.aktiv = false }) }
+        val deaktivertVedtak =
+                vedtakRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
+                        ?.let { vedtakRepository.saveAndFlush(it.also { it.aktiv = false }) }
 
 
         val nyttVedtak = Vedtak(
@@ -149,7 +161,9 @@ class BehandlingService(
     }
 
     fun hentSisteBehandlingSomIkkeErHenlagt(fagsakId: Long): Behandling? {
-        return behandlingRepository.finnBehandlinger(fagsakId).filter { !it.erHenlagt() }.maxByOrNull { it.opprettetTidspunkt }
+        return behandlingRepository.finnBehandlinger(fagsakId)
+                .filter { !it.erHenlagt() }
+                .maxByOrNull { it.opprettetTidspunkt }
     }
 
     /**
@@ -166,7 +180,9 @@ class BehandlingService(
     fun finnBarnFraBehandlingMedTilkjentYtsele(behandlingId: Long): List<String> =
             personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId)?.barna?.map { it.personIdent.ident }
                     ?.filter {
-                        andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(behandlingId, it)
+                        andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(
+                                behandlingId,
+                                it)
                                 .isNotEmpty()
                     } ?: emptyList()
 
@@ -242,11 +258,21 @@ class BehandlingService(
         return lagreEllerOppdater(behandling)
     }
 
-    fun leggTilStegPåBehandlingOgSettTidligereStegSomUtført(behandlingId: Long, steg: StegType): Behandling {
+    fun leggTilStegPåBehandlingOgSettTidligereStegSomUtført(behandlingId: Long,
+                                                            steg: StegType): Behandling {
         val behandling = hent(behandlingId)
         behandling.leggTilBehandlingStegTilstand(steg)
 
         return lagreEllerOppdater(behandling)
+    }
+
+    private fun hentForrigeUnderkategori(fagsakId: Long): BehandlingUnderkategori? {
+        val forrigeIverksattBehandling = hentSisteBehandlingSomErIverksatt(fagsakId = fagsakId) ?: return null
+
+        val forrigeAndeler =
+                andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = forrigeIverksattBehandling.id)
+
+        return if (forrigeAndeler.any { it.erUtvidet() }) BehandlingUnderkategori.UTVIDET else BehandlingUnderkategori.ORDINÆR
     }
 
     companion object {
