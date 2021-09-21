@@ -52,6 +52,7 @@ import no.nav.familie.prosessering.domene.Task
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Order
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -98,7 +99,7 @@ class StegServiceTest(
         private val vedtaksperiodeService: VedtaksperiodeService,
 ) : AbstractSpringIntegrationTest() {
 
-    @BeforeAll
+    @BeforeEach
     fun init() {
         databaseCleanupService.truncate()
     }
