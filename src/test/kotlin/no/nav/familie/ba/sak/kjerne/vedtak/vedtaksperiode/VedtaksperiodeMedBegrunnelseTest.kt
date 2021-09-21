@@ -47,7 +47,7 @@ class VedtaksperiodeMedBegrunnelseTest {
                                 vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_BOR_MED_SØKER,
                         ),
                 ),
-                fritekster = mutableSetOf(),
+                fritekster = mutableListOf(),
         )
         val begrunnelserOgFritekster = byggBegrunnelserOgFriteksterForVedtaksperiode(
                 vedtaksperiode = vedtaksperiode,
@@ -64,7 +64,7 @@ class VedtaksperiodeMedBegrunnelseTest {
                 type = Vedtaksperiodetype.FORTSATT_INNVILGET,
                 begrunnelser = mutableSetOf(
                 ),
-                fritekster = mutableSetOf(VedtaksbegrunnelseFritekst(
+                fritekster = mutableListOf(VedtaksbegrunnelseFritekst(
                         id = 1,
                         fritekst = "Fritekst1",
                         vedtaksperiodeMedBegrunnelser = mockk(),
@@ -193,7 +193,7 @@ class VedtaksperiodeMedBegrunnelseTest {
         val opphørsperiode = lagVedtaksperiodeMedBegrunnelser(
                 type = Vedtaksperiodetype.UTBETALING,
                 begrunnelser = mutableSetOf(),
-                fritekster = mutableSetOf(),
+                fritekster = mutableListOf(),
         )
 
         Assertions.assertTrue(

@@ -137,6 +137,8 @@ data class AndelTilkjentYtelse(
 
     fun stønadsPeriode() = MånedPeriode(this.stønadFom, this.stønadTom)
 
+    fun erUtvidet() = this.type == YtelseType.UTVIDET_BARNETRYGD
+
     companion object {
 
         /**

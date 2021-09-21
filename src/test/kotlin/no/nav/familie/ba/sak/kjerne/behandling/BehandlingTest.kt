@@ -1,11 +1,9 @@
 package no.nav.familie.ba.sak.kjerne.behandling
 
-import no.nav.familie.ba.sak.kjerne.behandling.domene.*
 import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.nyOrdinærBehandling
-import no.nav.familie.ba.sak.common.nyRevurdering
-import no.nav.familie.ba.sak.common.nyUtvidetBehandling
-import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -40,41 +38,46 @@ class BehandlingTest {
 
     @Test
     fun `Skal velge ordinær ved FGB`() {
-        val søkerFnr = randomFnr()
         assertEquals(BehandlingUnderkategori.ORDINÆR, Behandlingutils.bestemUnderkategori(
-                nyBehandling = nyOrdinærBehandling(søkerFnr),
-                aktivBehandlingUnderkategori = null
+                nyUnderkategori = BehandlingUnderkategori.ORDINÆR,
+                nyBehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                forrigeBehandlingUnderkategori = null
         ))
     }
 
     @Test
     fun `Skal velge utvidet ved FGB`() {
-        val søkerFnr = randomFnr()
         assertEquals(BehandlingUnderkategori.UTVIDET, Behandlingutils.bestemUnderkategori(
-                nyBehandling = nyUtvidetBehandling(søkerFnr),
-                aktivBehandlingUnderkategori = null
+                nyUnderkategori = BehandlingUnderkategori.UTVIDET,
+                nyBehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                forrigeBehandlingUnderkategori = null
         ))
     }
 
     @Test
     fun `Skal velge utvidet ved RV når FGB er utvidet`() {
-        val søkerFnr = randomFnr()
         assertEquals(BehandlingUnderkategori.UTVIDET, Behandlingutils.bestemUnderkategori(
-                nyBehandling = nyRevurdering(søkerFnr).copy(
-                        behandlingÅrsak = BehandlingÅrsak.ÅRLIG_KONTROLL
-                ),
-                aktivBehandlingUnderkategori = BehandlingUnderkategori.UTVIDET
+                nyUnderkategori = BehandlingUnderkategori.ORDINÆR,
+                nyBehandlingType = BehandlingType.REVURDERING,
+                forrigeBehandlingUnderkategori = BehandlingUnderkategori.UTVIDET
         ))
     }
 
     @Test
-    fun `Skal velge ordinær ved RV når FGB er utvidet`() {
-        val søkerFnr = randomFnr()
+    fun `Skal velge ordinær ved RV når FGB er ordinær`() {
         assertEquals(BehandlingUnderkategori.ORDINÆR, Behandlingutils.bestemUnderkategori(
-                nyBehandling = nyRevurdering(søkerFnr).copy(
-                        behandlingÅrsak = BehandlingÅrsak.ÅRLIG_KONTROLL
-                ),
-                aktivBehandlingUnderkategori = BehandlingUnderkategori.ORDINÆR
+                nyUnderkategori = BehandlingUnderkategori.ORDINÆR,
+                nyBehandlingType = BehandlingType.REVURDERING,
+                forrigeBehandlingUnderkategori = BehandlingUnderkategori.ORDINÆR
+        ))
+    }
+
+    @Test
+    fun `Skal velge utvidet ved RV når FGB er ordinær`() {
+        assertEquals(BehandlingUnderkategori.UTVIDET, Behandlingutils.bestemUnderkategori(
+                nyUnderkategori = BehandlingUnderkategori.UTVIDET,
+                nyBehandlingType = BehandlingType.REVURDERING,
+                forrigeBehandlingUnderkategori = BehandlingUnderkategori.ORDINÆR
         ))
     }
 }

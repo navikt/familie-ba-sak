@@ -102,6 +102,7 @@ class FeatureToggleConfig(private val enabled: Boolean,
         const val BRUK_BEGRUNNELSE_TRIGGES_AV_FRA_SANITY = "familie-ba-sak.behandling.begrunnelse-trigges-av"
         const val KAN_MANUELT_KORRIGERE_MED_VEDTAKSBREV = "familie-ba-sak.behandling.korreksjon-vedtaksbrev"
         const val KAN_BEHANDLE_UTVIDET = "familie-ba-sak.behandling.utvidet"
+        const val SKATTEETATEN_API_STUB = "familie-ba-sak.skatteetaten-api-mocked-respons"
 
         private val logger = LoggerFactory.getLogger(FeatureToggleConfig::class.java)
     }

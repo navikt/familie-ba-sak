@@ -320,9 +320,9 @@ fun nyRevurdering(søkersIdent: String): NyBehandling = NyBehandling(
         underkategori = BehandlingUnderkategori.ORDINÆR
 )
 
-fun lagSøknadDTO(søkerIdent: String, barnasIdenter: List<String>): SøknadDTO {
+fun lagSøknadDTO(søkerIdent: String, barnasIdenter: List<String>, underkategori: BehandlingUnderkategori = BehandlingUnderkategori.ORDINÆR): SøknadDTO {
     return SøknadDTO(
-            underkategori = BehandlingUnderkategori.ORDINÆR,
+            underkategori = underkategori,
             søkerMedOpplysninger = SøkerMedOpplysninger(
                     ident = søkerIdent
             ),
@@ -764,7 +764,7 @@ fun lagVedtaksperiodeMedBegrunnelser(
         tom: LocalDate = LocalDate.now().let { it.withDayOfMonth(it.lengthOfMonth()) },
         type: Vedtaksperiodetype = Vedtaksperiodetype.FORTSATT_INNVILGET,
         begrunnelser: MutableSet<Vedtaksbegrunnelse> = mutableSetOf(lagVedtaksbegrunnelse()),
-        fritekster: MutableSet<VedtaksbegrunnelseFritekst> = mutableSetOf(),
+        fritekster: MutableList<VedtaksbegrunnelseFritekst> = mutableListOf(),
 ) = VedtaksperiodeMedBegrunnelser(
         vedtak = vedtak,
         fom = fom,
