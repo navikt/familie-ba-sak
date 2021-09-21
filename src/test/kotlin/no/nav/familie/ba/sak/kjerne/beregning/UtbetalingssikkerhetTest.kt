@@ -4,6 +4,8 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.common.*
+import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
@@ -252,5 +254,18 @@ class UtbetalingssikkerhetTest {
                                                                                        listOf(Pair(barn, listOf(tilkjentYtelse))),
                                                                                        personopplysningGrunnlag2)
         }
+    }
+
+    /**
+     * Kontroller og eventuelt oppdater TilkjentYtelseValidering.maksBeløp() dersom nye satstyper legges til
+     */
+    @Test
+    fun `Alle satstyper er tatt hensyn til`() {
+        val støttedeSatstyper = setOf(SatsType.SMA,
+                                      SatsType.TILLEGG_ORBA,
+                                      SatsType.FINN_SVAL,
+                                      SatsType.ORBA)
+        assertTrue(støttedeSatstyper.containsAll(SatsType.values().toSet()))
+        assertEquals(støttedeSatstyper.size, SatsType.values().size)
     }
 }
