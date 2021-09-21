@@ -21,7 +21,7 @@ data class UtvidetBarnetrygdGenerator(
         val tilkjentYtelse: TilkjentYtelse
 ) {
 
-    // TODO: Beløp her må erstattes med prosent
+    // TODO: Her må man også ta hensyn til basesats og prosent
 
     fun lagUtvidetBarnetrygdAndeler(utvidetVilkår: List<VilkårResultat>,
                                     andelerBarna: List<AndelTilkjentYtelse>): List<AndelTilkjentYtelse> {
