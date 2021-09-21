@@ -54,6 +54,6 @@ fun kl06IdagEllerNesteDag(): LocalDateTime {
     return if (now.toLocalTime().isBefore(LocalTime.of(6, 0))) {
         now.withHour(6)
     } else {
-        now.withHour(6).plusDays(1)
+        now.plusDays(1).withHour(6)
     }
 }
