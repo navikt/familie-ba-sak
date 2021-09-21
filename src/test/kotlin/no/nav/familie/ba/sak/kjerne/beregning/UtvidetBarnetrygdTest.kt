@@ -304,8 +304,7 @@ internal class UtvidetBarnetrygdTest {
                                   erUtvidet: Boolean = false,
                                   erDeltBosted: Boolean = false): Set<VilkårResultat> {
         val vilkårSomSkalVurderes = if (erUtvidet)
-            Vilkår.hentVilkårFor(personType = PersonType.SØKER,
-                                 ytelseType = YtelseType.UTVIDET_BARNETRYGD)
+            listOf(Vilkår.UTVIDET_BARNETRYGD)
         else
             Vilkår.hentVilkårFor(personType = personType)
 
