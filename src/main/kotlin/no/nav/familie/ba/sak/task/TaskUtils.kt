@@ -52,8 +52,8 @@ fun erKlokkenMellom21Og06(localTime: LocalTime = LocalTime.now()): Boolean {
 fun kl06IdagEllerNesteDag(): LocalDateTime {
     val now = LocalDateTime.now()
     return if (now.toLocalTime().isBefore(LocalTime.of(6, 0))) {
-        now.toLocalDate().atTime(6, 0)
+        now.withHour(6)
     } else {
-        now.toLocalDate().plusDays(1).atTime(6, 0)
+        now.withHour(6).plusDays(1)
     }
 }
