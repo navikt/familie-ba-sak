@@ -18,7 +18,7 @@ fun nesteGyldigeTriggertidForBehandlingIHverdager(minutesToAdd: Long = 0): Local
     date = if (erKlokkenMellom21Og06(date.toLocalTime()) && date.erHverdag(1)) {
         kl06IdagEllerNesteDag()
     } else if (erKlokkenMellom21Og06(date.toLocalTime()) || !date.erHverdag(0)) {
-        date.with(TemporalAdjusters.next(DayOfWeek.MONDAY)).withHour(6).withMinute(0)
+        date.with(TemporalAdjusters.next(DayOfWeek.MONDAY)).withHour(6)
     } else date
 
     when {
