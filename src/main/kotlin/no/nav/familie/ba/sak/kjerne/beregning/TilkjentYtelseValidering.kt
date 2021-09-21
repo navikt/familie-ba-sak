@@ -101,7 +101,7 @@ private fun validerAtBeløpForPartStemmerMedSatser(person: Person,
                                       frontendFeilmelding = "Det har skjedd en systemfeil, og beløpene stemmer ikke overens med dagens satser. Kontakt teamet for hjelp")
     }
 
-    val totalbeløp = andeler.map { it.beløp }
+    val totalbeløp = andeler.map { it.kalkulertUtbetalingsbeløp }
             .fold(0) { sum, beløp -> sum + beløp }
     if (totalbeløp > maksTotalBeløp) {
         throw UtbetalingsikkerhetFeil(melding = "Validering av andeler for ${person.type} i perioden (${andeler.first().stønadFom} - ${andeler.first().stønadTom}) feilet: Tillatt totalbeløp = ${maksTotalBeløp}, faktiske totalbeløp = ${totalbeløp}.",

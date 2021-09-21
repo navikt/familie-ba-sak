@@ -19,6 +19,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
@@ -32,7 +33,7 @@ object TilkjentYtelseUtils {
     fun beregnTilkjentYtelse(vilkårsvurdering: Vilkårsvurdering,
                              personopplysningGrunnlag: PersonopplysningGrunnlag,
                              behandling: Behandling,
-                             andelsEndringer: List<EndretUtbetalingAndel>? = emptyList(),
+                             endredeUtbetalingsandeler: List<EndretUtbetalingAndel>? = emptyList(),
                              featureToggleService: FeatureToggleService): TilkjentYtelse {
         val identBarnMap = personopplysningGrunnlag.barna
                 .associateBy { it.personIdent.ident }
@@ -167,18 +168,22 @@ object TilkjentYtelseUtils {
                                                 .fold(mutableListOf(), ::slåSammenEtterfølgendePerioderMedSammeBeløp)
 
                                 beløpsperioder.map { beløpsperiode ->
+                                    val prosent = finnProsentForAndel(fom = beløpsperiode.fraOgMed,
+                                                                      tom = beløpsperiode.tilOgMed,
+                                                                      endringerForPerson = endredeUtbetalingsandeler?.filter { it.person.personIdent.ident == person.personIdent.ident })
                                     AndelTilkjentYtelse(
                                             behandlingId = vilkårsvurdering.behandling.id,
                                             tilkjentYtelse = tilkjentYtelse,
                                             personIdent = person.personIdent.ident,
                                             stønadFom = beløpsperiode.fraOgMed,
                                             stønadTom = beløpsperiode.tilOgMed,
-                                            beløp = beløpsperiode.sats,
+                                            kalkulertUtbetalingsbeløp = beløpsperiode.sats.toBigDecimal()
+                                                    .times(prosent)
+                                                    .divide(100.toBigDecimal())
+                                                    .toInt(),
                                             type = finnYtelseType(behandling.kategori, behandling.underkategori, person.type),
                                             sats = beløpsperiode.sats,
-                                            prosent = finnProsentForAndel(fom = beløpsperiode.fraOgMed,
-                                                                          tom = beløpsperiode.tilOgMed,
-                                                                          endringerForPerson = andelsEndringer?.filter { it.person.personIdent.ident == person.personIdent.ident })
+                                            prosent = prosent,
                                     )
                                 }
                             }
@@ -192,7 +197,7 @@ object TilkjentYtelseUtils {
             andelTilkjentYtelser: MutableSet<AndelTilkjentYtelse>,
             endretUtbetalingAndeler: List<EndretUtbetalingAndel>): MutableSet<AndelTilkjentYtelse> {
 
-        if(endretUtbetalingAndeler.isEmpty()) return andelTilkjentYtelser.map { it.copy() }.toMutableSet()
+        if (endretUtbetalingAndeler.isEmpty()) return andelTilkjentYtelser.map { it.copy() }.toMutableSet()
 
         val nyeAndelTilkjentYtelse = mutableListOf<AndelTilkjentYtelse>()
 
@@ -211,7 +216,7 @@ object TilkjentYtelseUtils {
                     andelForPerson.copy(
                             stønadFom = månedPeriodeEndret.fom,
                             stønadTom = månedPeriodeEndret.tom,
-                            beløp = andelForPerson.beløp * endretUtbetalingAndel.prosent.toInt() / 100)
+                            kalkulertUtbetalingsbeløp = andelForPerson.kalkulertUtbetalingsbeløp * endretUtbetalingAndel.prosent.toInt() / 100)
                 })
                 // Legger til nye AndelTilkjentYtelse for perioder som ikke berøres av endringer.
                 nyeAndelTilkjentYtelse.addAll(perioderUtenEndring.map { månedPeriodeUendret ->
@@ -220,7 +225,7 @@ object TilkjentYtelseUtils {
             }
         }
         // Sorterer primært av hensyn til måten testene er implementert og kan muligens fjernes dersom dette skrives om.
-        nyeAndelTilkjentYtelse.sortWith(compareBy ( {it.personIdent}, {it.stønadFom}))
+        nyeAndelTilkjentYtelse.sortWith(compareBy({ it.personIdent }, { it.stønadFom }))
         return nyeAndelTilkjentYtelse.toMutableSet()
     }
 
@@ -229,9 +234,11 @@ object TilkjentYtelseUtils {
                                     endringerForPerson: List<EndretUtbetalingAndel>?): BigDecimal {
         return if (endringerForPerson.isNullOrEmpty()) {
             BigDecimal(100)
+        } else if (endringerForPerson.any { it.årsak == Årsak.DELT_BOSTED }) {
+            BigDecimal(50)
         } else {
             //TODO: Midlertidig 100. Her må vi iterere og ev finne delt bosted i endringsliste. Da trenger vi nok ikke spesialhåndtere delt bosted i beregningsfunksjonen heller.
-            // TODO: Vi antakeligvis også oppdatere overordna mapping i beregning til å ta hensyn til søker med utvidet
+            // TODO: Vil antakeligvis også oppdatere overordna mapping i beregning til å ta hensyn til søker med utvidet
             BigDecimal(100)
         }
     }
@@ -262,7 +269,7 @@ object TilkjentYtelseUtils {
 }
 
 fun MånedPeriode.perioderMedOgUtenOverlapp(perioder: List<MånedPeriode>): Pair<List<MånedPeriode>, List<MånedPeriode>> {
-    if (perioder.isEmpty()) return Pair(emptyList(), listOf (this))
+    if (perioder.isEmpty()) return Pair(emptyList(), listOf(this))
 
     val alleMånederMedOverlappStatus = mutableMapOf<YearMonth, Boolean>()
     var nesteMåned = this.fom

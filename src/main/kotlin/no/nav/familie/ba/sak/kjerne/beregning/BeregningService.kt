@@ -2,8 +2,6 @@ package no.nav.familie.ba.sak.kjerne.beregning
 
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.FeatureToggleService
-import no.nav.familie.ba.sak.ekstern.restDomene.RestEndretUtbetalingAndel
-import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsak
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
@@ -108,7 +106,7 @@ class BeregningService(
                 .beregnTilkjentYtelse(vilkårsvurdering = vilkårsvurdering,
                                       personopplysningGrunnlag = personopplysningGrunnlag,
                                       behandling = behandling,
-                                      andelsEndringer = emptyList(),
+                                      endredeUtbetalingsandeler = emptyList(),
                                       featureToggleService = featureToggleService)
 
         val endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(behandling.id)

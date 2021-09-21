@@ -201,7 +201,7 @@ fun lagAndelTilkjentYtelse(fom: String,
             personIdent = person.personIdent.ident,
             behandlingId = behandling.id,
             tilkjentYtelse = tilkjentYtelse ?: lagInitiellTilkjentYtelse(behandling),
-            beløp = beløp,
+            kalkulertUtbetalingsbeløp = beløp,
             stønadFom = årMnd(fom),
             stønadTom = årMnd(tom),
             type = ytelseType,
@@ -211,17 +211,6 @@ fun lagAndelTilkjentYtelse(fom: String,
             prosent = BigDecimal(100)
     )
 }
-
-/**
- *
-sats = SatsService.hentGyldigSatsFor(satstype = SatsType.ORBA,
-deltUtbetaling = false,
-stønadFraOgMed = beløpsperiode.fraOgMed,
-stønadTilOgMed = beløpsperiode.tilOgMed,
-maxSatsGyldigFraOgMed = YearMonth.now())
-.singleOrNull()!!.beløp,
-prosent = BigDecimal(100)
- */
 
 fun lagAndelTilkjentYtelseUtvidet(fom: String,
                                   tom: String,
@@ -237,7 +226,7 @@ fun lagAndelTilkjentYtelseUtvidet(fom: String,
             personIdent = person.personIdent.ident,
             behandlingId = behandling.id,
             tilkjentYtelse = tilkjentYtelse ?: lagInitiellTilkjentYtelse(behandling),
-            beløp = beløp,
+            kalkulertUtbetalingsbeløp = beløp,
             stønadFom = årMnd(fom),
             stønadTom = årMnd(tom),
             type = ytelseType,

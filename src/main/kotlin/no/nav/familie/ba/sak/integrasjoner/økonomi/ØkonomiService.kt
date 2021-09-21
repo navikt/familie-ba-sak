@@ -64,7 +64,8 @@ class ØkonomiService(
     ): Utbetalingsoppdrag {
         val oppdatertBehandling = vedtak.behandling
         val oppdatertTilstand = beregningService.hentAndelerTilkjentYtelseForBehandling(oppdatertBehandling.id)
-                .filter { andel -> andel.beløp() !== BigDecimal.ZERO || andel.endringTyper.any { it.kanGiNullutbetaling() } }
+                .filter { andel -> andel.kalkulertUtbetalingsbeløp != 0
+                                   || andel.andelTilEndretAndel.any { it.endretUtbetalingAndel.årsak.kanGiNullutbetaling() } }
         val oppdaterteKjeder = kjedeinndelteAndeler(oppdatertTilstand)
 
         val erFørsteIverksatteBehandlingPåFagsak =

@@ -209,7 +209,7 @@ class TestTilkjentYtelseBuilder(val behandling: Behandling) {
                         personIdent = person.personIdent.ident,
                         stønadFom = stønadPeriode.fraOgMed.toYearMonth(),
                         stønadTom = stønadPeriode.tilOgMed!!.toYearMonth(),
-                        beløp = beløp.toInt(),
+                        kalkulertUtbetalingsbeløp = beløp.toInt(),
                         type = YtelseType.valueOf(type),
                         sats = beløp.toInt(),
                         prosent = BigDecimal(100)

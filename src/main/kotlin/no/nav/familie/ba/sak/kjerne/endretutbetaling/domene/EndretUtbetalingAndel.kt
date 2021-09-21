@@ -19,6 +19,7 @@ import javax.persistence.GenerationType
 import javax.persistence.Id
 import javax.persistence.JoinColumn
 import javax.persistence.ManyToOne
+import javax.persistence.OneToMany
 import javax.persistence.SequenceGenerator
 import javax.persistence.Table
 
@@ -57,14 +58,22 @@ data class EndretUtbetalingAndel(
     val årsak: Årsak,
 
     @Column(name = "begrunnelse", nullable = false)
-    var begrunnelse: String
+    var begrunnelse: String,
+
+    @OneToMany(mappedBy = "andelTilkjentYtelse")
+    val andelTilEndretAndel: List<AndelTilEndretAndel> = emptyList(),
 
 ) : BaseEntitet() {
     fun overlapperMed(periode: MånedPeriode) = periode.overlapperHeltEllerDelvisMed(this.periode())
 
     fun periode() = MånedPeriode(this.fom, this.tom)
+
+    fun andelTilkjentYtelser() = this.andelTilEndretAndel.map { it.andelTilkjentYtelse }
 }
 
 enum class Årsak(val klassifisering: String) {
     DELT_BOSTED("Delt bosted"),
+    EØS_SEKUNDÆRLAND("Eøs sekundærland");
+
+    fun kanGiNullutbetaling() = this == Årsak.EØS_SEKUNDÆRLAND
 }

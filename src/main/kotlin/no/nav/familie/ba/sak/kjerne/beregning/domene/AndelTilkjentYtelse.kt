@@ -1,22 +1,19 @@
 package no.nav.familie.ba.sak.kjerne.beregning.domene
 
 import no.nav.familie.ba.sak.common.BaseEntitet
-import no.nav.familie.ba.sak.common.Utils.konverterEnumsTilString
-import no.nav.familie.ba.sak.common.Utils.konverterStringTilEnums
 import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.YearMonthConverter
 import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.AndelTilEndretAndel
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import java.math.BigDecimal
 import java.time.YearMonth
 import java.util.Objects
-import javax.persistence.AttributeConverter
 import javax.persistence.Column
 import javax.persistence.Convert
-import javax.persistence.Converter
 import javax.persistence.Entity
 import javax.persistence.EntityListeners
 import javax.persistence.EnumType
@@ -26,6 +23,7 @@ import javax.persistence.GenerationType
 import javax.persistence.Id
 import javax.persistence.JoinColumn
 import javax.persistence.ManyToOne
+import javax.persistence.OneToMany
 import javax.persistence.SequenceGenerator
 import javax.persistence.Table
 
@@ -50,9 +48,8 @@ data class AndelTilkjentYtelse(
         @Column(name = "person_ident", nullable = false, updatable = false)
         val personIdent: String,
 
-        @Deprecated("Erstattes av kolonner sats og prosent, og funksjon beløp()")
-        @Column(name = "belop", nullable = false)
-        val beløp: Int,
+        @Column(name = "kalkulert_utbetalingsbelop", nullable = false)
+        val kalkulertUtbetalingsbeløp: Int,
 
         @Column(name = "stonad_fom", nullable = false, columnDefinition = "DATE")
         @Convert(converter = YearMonthConverter::class)
@@ -73,9 +70,8 @@ data class AndelTilkjentYtelse(
         @Column(name = "prosent", nullable = false)
         val prosent: BigDecimal,
 
-        @Column(name = "endring_typer")
-        @Convert(converter = AndelEndringTypeListConverter::class)
-        var endringTyper: List<AndelEndringType> = emptyList(),
+        @OneToMany(mappedBy = "endretUtbetalingAndel")
+        val andelTilEndretAndel: List<AndelTilEndretAndel> = emptyList(),
 
         // kildeBehandlingId, periodeOffset og forrigePeriodeOffset trengs kun i forbindelse med
         // iverksetting/konsistensavstemming, og settes først ved generering av selve oppdraget mot økonomi.
@@ -104,34 +100,28 @@ data class AndelTilkjentYtelse(
         val annen = other as AndelTilkjentYtelse
         return Objects.equals(behandlingId, annen.behandlingId)
                && Objects.equals(type, annen.type)
-               && Objects.equals(beløp, annen.beløp)
+               && Objects.equals(kalkulertUtbetalingsbeløp, annen.kalkulertUtbetalingsbeløp)
                && Objects.equals(stønadFom, annen.stønadFom)
                && Objects.equals(stønadTom, annen.stønadTom)
                && Objects.equals(personIdent, annen.personIdent)
     }
 
     override fun hashCode(): Int {
-        return Objects.hash(id, behandlingId, type, beløp, stønadFom, stønadTom, personIdent)
+        return Objects.hash(id, behandlingId, type, kalkulertUtbetalingsbeløp, stønadFom, stønadTom, personIdent)
     }
 
     override fun toString(): String {
         return "AndelTilkjentYtelse(id = $id, behandling = $behandlingId, " +
-               "beløp = $beløp, stønadFom = $stønadFom, stønadTom = $stønadTom, periodeOffset = $periodeOffset)"
+               "beløp = $kalkulertUtbetalingsbeløp, stønadFom = $stønadFom, stønadTom = $stønadTom, periodeOffset = $periodeOffset)"
     }
 
-    /**
-     * TODO: Her ser vi for oss at man kan sammenligne vårt beløp med beløpet som beregnet ut i fra valutakurs og sats fra annet land
-     * F.eks:
-     * diff = (sats * beløp) - (beregnet barnetrygd fra annet land)
-     * maxOf(0, diff)
-     */
-    fun beløp(): BigDecimal = this.sats.toBigDecimal() * this.prosent / BigDecimal(100)
+    fun endretUtbetalingAndeler() = this.andelTilEndretAndel.map { it.endretUtbetalingAndel }
 
     fun erTilsvarendeForUtbetaling(other: AndelTilkjentYtelse): Boolean {
         return (this.personIdent == other.personIdent
                 && this.stønadFom == other.stønadFom
                 && this.stønadTom == other.stønadTom
-                && this.beløp == other.beløp
+                && this.kalkulertUtbetalingsbeløp == other.kalkulertUtbetalingsbeløp
                 && this.type == other.type)
     }
 
@@ -172,13 +162,6 @@ data class AndelTilkjentYtelse(
     }
 }
 
-@Converter
-class AndelEndringTypeListConverter : AttributeConverter<List<AndelEndringType>, String> {
-
-    override fun convertToDatabaseColumn(endringer: List<AndelEndringType>) = konverterEnumsTilString(endringer)
-    override fun convertToEntityAttribute(string: String?): List<AndelEndringType> = konverterStringTilEnums(string)
-}
-
 fun LocalDateSegment<AndelTilkjentYtelse>.erLøpende() = this.tom > inneværendeMåned().sisteDagIInneværendeMåned()
 
 fun List<AndelTilkjentYtelse>.slåSammenBack2BackAndelsperioderMedSammeBeløp(): List<AndelTilkjentYtelse> {
@@ -191,7 +174,7 @@ fun List<AndelTilkjentYtelse>.slåSammenBack2BackAndelsperioderMedSammeBeløp():
         val back2BackAndelsperiodeMedSammeBeløp = this.singleOrNull {
             andel!!.stønadTom.plusMonths(1).equals(it.stønadFom) &&
             andel!!.personIdent == it.personIdent &&
-            andel!!.beløp == it.beløp
+            andel!!.kalkulertUtbetalingsbeløp == it.kalkulertUtbetalingsbeløp
         }
         andel = if (back2BackAndelsperiodeMedSammeBeløp != null) {
             andel!!.copy(stønadTom = back2BackAndelsperiodeMedSammeBeløp.stønadTom)
@@ -211,13 +194,4 @@ enum class YtelseType(val klassifisering: String) {
     SMÅBARNSTILLEGG("BATRSMA"),
     EØS("BATR"),
     MANUELL_VURDERING("BATR")
-}
-
-enum class AndelEndringType(val beskrivelse: String) {
-    DELT_BOSTED("Overstyres pga delt bosted"),
-    TRE_ÅR("Mer enn tre år tilbake i tid"),
-    EØS_SEKUNDÆRLAND("Barnetrygd utbetales til annet land");
-
-    // TODO: Oppdater enumverdier
-    fun kanGiNullutbetaling() = this == EØS_SEKUNDÆRLAND
 }

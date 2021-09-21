@@ -116,7 +116,7 @@ class FagsakStatusOppdatererIntegrasjonTest : AbstractSpringIntegrationTest() {
                                       periodeOffset: Long) = AndelTilkjentYtelse(personIdent = randomFnr(),
                                                                                  behandlingId = tilkjentYtelse.behandling.id,
                                                                                  tilkjentYtelse = tilkjentYtelse,
-                                                                                 beløp = 1054,
+                                                                                 kalkulertUtbetalingsbeløp = 1054,
                                                                                  stønadFom = LocalDate.now()
                                                                                          .minusMonths(12)
                                                                                          .toYearMonth(),

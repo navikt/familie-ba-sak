@@ -100,12 +100,12 @@ internal class TilkjentYtelseUtilsTest {
         val andelTilkjentYtelseFør6År = tilkjentYtelse.andelerTilkjentYtelse.first()
         assertEquals(MånedPeriode(vilkårOppfyltFom.nesteMåned(), barnSeksårsdag.forrigeMåned()),
                      MånedPeriode(andelTilkjentYtelseFør6År.stønadFom, andelTilkjentYtelseFør6År.stønadTom))
-        assertEquals(1654, andelTilkjentYtelseFør6År.beløp)
+        assertEquals(1654, andelTilkjentYtelseFør6År.kalkulertUtbetalingsbeløp)
 
         val andelTilkjentYtelseEtter6År = tilkjentYtelse.andelerTilkjentYtelse.last()
         assertEquals(MånedPeriode(barnSeksårsdag.toYearMonth(), barnSeksårsdag.toYearMonth()),
                      MånedPeriode(andelTilkjentYtelseEtter6År.stønadFom, andelTilkjentYtelseEtter6År.stønadTom))
-        assertEquals(1054, andelTilkjentYtelseEtter6År.beløp)
+        assertEquals(1054, andelTilkjentYtelseEtter6År.kalkulertUtbetalingsbeløp)
     }
 
     @Test
@@ -131,18 +131,18 @@ internal class TilkjentYtelseUtilsTest {
         assertEquals(MånedPeriode(barnFødselsdato.nesteMåned(), YearMonth.of(2021, 8)),
                      MånedPeriode(andelTilkjentYtelseFør6ÅrSeptember2020.stønadFom,
                                   andelTilkjentYtelseFør6ÅrSeptember2020.stønadTom))
-        assertEquals(1354, andelTilkjentYtelseFør6ÅrSeptember2020.beløp)
+        assertEquals(1354, andelTilkjentYtelseFør6ÅrSeptember2020.kalkulertUtbetalingsbeløp)
 
         val andelTilkjentYtelseFør6ÅrSeptember2021 = andeler[1]
         assertEquals(MånedPeriode(YearMonth.of(2021, 9), barnSeksårsdag.forrigeMåned()),
                      MånedPeriode(andelTilkjentYtelseFør6ÅrSeptember2021.stønadFom,
                                   andelTilkjentYtelseFør6ÅrSeptember2021.stønadTom))
-        assertEquals(1654, andelTilkjentYtelseFør6ÅrSeptember2021.beløp)
+        assertEquals(1654, andelTilkjentYtelseFør6ÅrSeptember2021.kalkulertUtbetalingsbeløp)
 
         val andelTilkjentYtelseEtter6År = andeler[2]
         assertEquals(MånedPeriode(barnSeksårsdag.toYearMonth(), barnFødselsdato.plusYears(18).forrigeMåned()),
                      MånedPeriode(andelTilkjentYtelseEtter6År.stønadFom, andelTilkjentYtelseEtter6År.stønadTom))
-        assertEquals(1054, andelTilkjentYtelseEtter6År.beløp)
+        assertEquals(1054, andelTilkjentYtelseEtter6År.kalkulertUtbetalingsbeløp)
     }
 
    @Test
@@ -162,13 +162,13 @@ internal class TilkjentYtelseUtilsTest {
                 .sortedBy { it.stønadFom }
 
         val andelTilkjentYtelseFør6ÅrSeptember2020 = andeler[0]
-        assertEquals(677, andelTilkjentYtelseFør6ÅrSeptember2020.beløp)
+        assertEquals(677, andelTilkjentYtelseFør6ÅrSeptember2020.kalkulertUtbetalingsbeløp)
 
         val andelTilkjentYtelseFør6ÅrSeptember2021 = andeler[1]
-        assertEquals(827, andelTilkjentYtelseFør6ÅrSeptember2021.beløp)
+        assertEquals(827, andelTilkjentYtelseFør6ÅrSeptember2021.kalkulertUtbetalingsbeløp)
 
         val andelTilkjentYtelseEtter6År = andeler[2]
-        assertEquals(527, andelTilkjentYtelseEtter6År.beløp)
+        assertEquals(527, andelTilkjentYtelseEtter6År.kalkulertUtbetalingsbeløp)
 
     }
 

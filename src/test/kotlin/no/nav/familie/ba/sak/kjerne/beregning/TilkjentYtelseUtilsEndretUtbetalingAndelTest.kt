@@ -238,21 +238,21 @@ internal class TilkjentYtelseUtilsEndretUtbetalingAndelTest {
         forventetStønadTom: YearMonth
     ) {
         assertEquals(forventetBarnIdent, andelTilkjentYtelse.personIdent)
-        assertEquals(forventetBeløp, BigDecimal(andelTilkjentYtelse.beløp))
+        assertEquals(forventetBeløp, BigDecimal(andelTilkjentYtelse.kalkulertUtbetalingsbeløp))
         assertEquals(forventetStønadFom, andelTilkjentYtelse.stønadFom)
         assertEquals(forventetStønadTom, andelTilkjentYtelse.stønadTom)
     }
 
     private fun lagAndelTilkjentYtelse(barn: Person, fom: YearMonth, tom: YearMonth) = AndelTilkjentYtelse(
-        behandlingId = behandling.id,
-        tilkjentYtelse = tilkjentYtelse,
-        personIdent = barn.personIdent.ident,
-        beløp = beløp.toInt(),
-        stønadFom = fom,
-        stønadTom = tom,
-        type = YtelseType.ORDINÆR_BARNETRYGD,
-        sats = beløp.toInt(),
-        prosent = BigDecimal(100)
+            behandlingId = behandling.id,
+            tilkjentYtelse = tilkjentYtelse,
+            personIdent = barn.personIdent.ident,
+            kalkulertUtbetalingsbeløp = beløp.toInt(),
+            stønadFom = fom,
+            stønadTom = tom,
+            type = YtelseType.ORDINÆR_BARNETRYGD,
+            sats = beløp.toInt(),
+            prosent = BigDecimal(100)
     )
 
     private fun lagEndretUtbetalingAndel(barn: Person, fom: YearMonth, tom: YearMonth, prosent: Int) = EndretUtbetalingAndel(

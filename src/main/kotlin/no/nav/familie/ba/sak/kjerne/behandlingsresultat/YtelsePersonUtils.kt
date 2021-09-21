@@ -118,7 +118,7 @@ object YtelsePersonUtils {
              * endret.
              */
             val beløpEndretIUforandretTidslinje = (segmenterLagtTil + segmenterFjernet).isEmpty()
-                                                  && andeler.sumOf { it.beløp } != forrigeAndeler.sumOf { it.beløp }
+                                                  && andeler.sumOf { it.kalkulertUtbetalingsbeløp } != forrigeAndeler.sumOf { it.kalkulertUtbetalingsbeløp }
 
             val resultater = ytelsePerson.resultater.toMutableSet()
             if (avslagPåNyPerson(personSomSjekkes = ytelsePerson,

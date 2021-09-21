@@ -35,11 +35,11 @@ fun PersonopplysningGrunnlag.tilRestPersonerMedAndeler(andelerKnyttetTilPersoner
 
                     RestPersonMedAndeler(
                             personIdent = this.personer.find { person -> person.personIdent.ident == personId }?.personIdent?.ident,
-                            beløp = sammenslåtteAndeler.map { it.beløp }.sum(),
+                            beløp = sammenslåtteAndeler.map { it.kalkulertUtbetalingsbeløp }.sum(),
                             stønadFom = sammenslåtteAndeler.map { it.stønadFom }.minOrNull() ?: LocalDate.MIN.toYearMonth(),
                             stønadTom = sammenslåtteAndeler.map { it.stønadTom }.maxOrNull() ?: LocalDate.MAX.toYearMonth(),
                             ytelsePerioder = sammenslåtteAndeler.map { it1 ->
-                                RestYtelsePeriode(it1.beløp,
+                                RestYtelsePeriode(it1.kalkulertUtbetalingsbeløp,
                                                   it1.stønadFom,
                                                   it1.stønadTom,
                                                   it1.type)
