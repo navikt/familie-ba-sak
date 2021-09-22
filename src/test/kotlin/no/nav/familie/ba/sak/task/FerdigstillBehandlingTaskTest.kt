@@ -4,6 +4,7 @@ import io.mockk.every
 import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
+import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
@@ -79,7 +80,7 @@ class FerdigstillBehandlingTaskTest : AbstractSpringIntegrationTest() {
     }
 
     private fun kjørSteg(resultat: Resultat): Behandling {
-        val fnr = ClientMocks.søkerFnr[0]
+        val fnr = randomFnr()
         val fnrBarn = ClientMocks.barnFnr[0]
 
         val behandling = kjørStegprosessForFGB(

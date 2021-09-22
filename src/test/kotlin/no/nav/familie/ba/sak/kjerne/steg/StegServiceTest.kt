@@ -106,7 +106,7 @@ class StegServiceTest(
 
     @Test
     fun `Skal sette default-verdier på gift-vilkår for barn`() {
-        val søkerFnr = ClientMocks.søkerFnr[0]
+        val søkerFnr = randomFnr()
         val barnFnr1 = ClientMocks.barnFnr[0]
         val barnFnr2 = ClientMocks.barnFnr[1]
 

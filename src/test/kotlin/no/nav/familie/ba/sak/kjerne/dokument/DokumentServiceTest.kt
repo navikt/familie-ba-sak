@@ -116,7 +116,7 @@ class DokumentServiceTest(
     fun `Hent vedtaksbrev`() {
         val behandlingEtterVilkårsvurderingSteg = kjørStegprosessForFGB(
                 tilSteg = StegType.VURDER_TILBAKEKREVING,
-                søkerFnr = ClientMocks.søkerFnr[0],
+                søkerFnr = randomFnr(),
                 barnasIdenter = listOf(ClientMocks.barnFnr[0]),
                 fagsakService = fagsakService,
                 vedtakService = vedtakService,
@@ -146,7 +146,7 @@ class DokumentServiceTest(
     fun `Skal generere vedtaksbrev`() {
         val behandlingEtterVilkårsvurderingSteg = kjørStegprosessForFGB(
                 tilSteg = StegType.VURDER_TILBAKEKREVING,
-                søkerFnr = ClientMocks.søkerFnr[0],
+                søkerFnr = randomFnr(),
                 barnasIdenter = listOf(ClientMocks.barnFnr[0]),
                 fagsakService = fagsakService,
                 vedtakService = vedtakService,
@@ -180,7 +180,7 @@ class DokumentServiceTest(
 
         val behandlingEtterVilkårsvurderingSteg = kjørStegprosessForFGB(
                 tilSteg = StegType.VILKÅRSVURDERING,
-                søkerFnr = ClientMocks.søkerFnr[0],
+                søkerFnr = randomFnr(),
                 barnasIdenter = listOf(ClientMocks.barnFnr[0]),
                 fagsakService = fagsakService,
                 vedtakService = vedtakService,
@@ -233,7 +233,7 @@ class DokumentServiceTest(
     fun `Skal verifisere at man ikke får generert brev etter at behandlingen er sendt fra beslutter`() {
         val behandlingEtterVedtakBesluttet = kjørStegprosessForFGB(
                 tilSteg = StegType.BESLUTTE_VEDTAK,
-                søkerFnr = ClientMocks.søkerFnr[0],
+                søkerFnr = randomFnr(),
                 barnasIdenter = listOf(ClientMocks.barnFnr[0]),
                 fagsakService = fagsakService,
                 vedtakService = vedtakService,

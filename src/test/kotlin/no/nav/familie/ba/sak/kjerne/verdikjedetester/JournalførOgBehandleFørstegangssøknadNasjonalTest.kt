@@ -242,7 +242,7 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
                 familieBaSakKlient().validerVilkårsvurdering(
                         behandlingId = aktivBehandlingEtterRegistrertSøknad.behandlingId
                 )
-        val behandlingEtterVilkårsvurdering = hentAktivBehandling(restFagsak = restFagsakEtterVilkårsvurdering.data!!)!!
+        //val behandlingEtterVilkårsvurdering = hentAktivBehandling(restFagsak = restFagsakEtterVilkårsvurdering.data!!)!!
 
         // TODO: fortsette her etter beregning er utført
         /*assertEquals(tilleggOrdinærSatsTilTester.beløp,

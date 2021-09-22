@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.lagTidslinjeMedOverlappende
 import no.nav.familie.ba.sak.common.defaultFagsak
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.kjerne.beregning.domene.personResultaterTilPeriodeResultater
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
@@ -127,7 +128,7 @@ class PeriodeMapperTest {
                 ))
         )
         vilkårsvurdering.personResultater = setOf(personResultat1, personResultat2)
-        val periodeResultater = vilkårsvurdering.periodeResultater(true).toList()
+        val periodeResultater = vilkårsvurdering.personResultaterTilPeriodeResultater(true).toList()
 
         /*
         Person 1 med tre overlappende perioder som skal splittes til fem
@@ -198,7 +199,7 @@ class PeriodeMapperTest {
                 ))
         )
         vilkårsvurdering.personResultater = setOf(personResultat)
-        val periodeResultat = vilkårsvurdering.periodeResultater(true).toList()[0]
+        val periodeResultat = vilkårsvurdering.personResultaterTilPeriodeResultater(true).toList()[0]
         assert(periodeResultat.periodeFom!! == LocalDate.of(2020, 5, 1))
         assert(periodeResultat.periodeTom!! == LocalDate.of(2020, 6, 30))
     }
@@ -255,7 +256,7 @@ class PeriodeMapperTest {
         )
 
         vilkårsvurdering.personResultater = setOf(personResultat)
-        val periodeResultater = vilkårsvurdering.periodeResultater(true).sortedBy { periodeFom }
+        val periodeResultater = vilkårsvurdering.personResultaterTilPeriodeResultater(true).sortedBy { periodeFom }
 
         Assertions.assertEquals(3, periodeResultater.size)
 
