@@ -539,23 +539,23 @@ class ClientMocks {
                                                                                    gyldigTilOgMed = null))),
                 søkerFnr[1] to PersonInfo(fødselsdato = LocalDate.of(1995, 2, 19),
                                           bostedsadresser = mutableListOf(),
-                                          sivilstander = listOf(Sivilstand(type = SIVILSTAND.GIFT)),
+                                          sivilstander = listOf(Sivilstand(type = SIVILSTAND.GIFT, gyldigFraOgMed = LocalDate.now().minusMonths(8))),
                                           kjønn = Kjønn.MANN,
                                           navn = "Far Faresen"),
                 søkerFnr[2] to PersonInfo(fødselsdato = LocalDate.of(1985, 7, 10),
                                           bostedsadresser = mutableListOf(),
-                                          sivilstander = listOf(Sivilstand(type = SIVILSTAND.GIFT)),
+                                          sivilstander = listOf(Sivilstand(type = SIVILSTAND.GIFT, gyldigFraOgMed = LocalDate.now().minusMonths(8))),
                                           kjønn = Kjønn.KVINNE,
                                           navn = "Moder Jord",
                                           adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT),
                 barnFnr[0] to PersonInfo(fødselsdato = barnFødselsdatoer[0],
                                          bostedsadresser = mutableListOf(bostedsadresse),
-                                         sivilstander = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT)),
+                                         sivilstander = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT, gyldigFraOgMed = LocalDate.now().minusMonths(8))),
                                          kjønn = Kjønn.MANN,
                                          navn = "Gutten Barnesen"),
                 barnFnr[1] to PersonInfo(fødselsdato = barnFødselsdatoer[1],
                                          bostedsadresser = mutableListOf(bostedsadresse),
-                                         sivilstander = listOf(Sivilstand(type = SIVILSTAND.GIFT)),
+                                         sivilstander = listOf(Sivilstand(type = SIVILSTAND.GIFT, gyldigFraOgMed = LocalDate.now().minusMonths(8))),
                                          kjønn = Kjønn.KVINNE,
                                          navn = "Jenta Barnesen",
                                          adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.FORTROLIG),
@@ -572,7 +572,7 @@ class ClientMocks {
                 ),
                 BARN_DET_IKKE_GIS_TILGANG_TIL_FNR to PersonInfo(fødselsdato = LocalDate.of(2019, 6, 22),
                                                                 bostedsadresser = mutableListOf(bostedsadresse),
-                                                                sivilstander = listOf(Sivilstand(type = SIVILSTAND.UGIFT)),
+                                                                sivilstander = listOf(Sivilstand(type = SIVILSTAND.UGIFT, gyldigFraOgMed = LocalDate.now().minusMonths(8))),
                                                                 kjønn = Kjønn.KVINNE,
                                                                 navn = "Maskert Banditt",
                                                                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG)
@@ -587,7 +587,7 @@ fun mockHentPersoninfoForMedIdenter(mockPersonopplysningerService: Personopplysn
     } returns PersonInfo(fødselsdato = LocalDate.of(2018, 5, 1),
                          kjønn = Kjønn.KVINNE,
                          navn = "Barn Barnesen",
-                         sivilstander = listOf(Sivilstand(type = SIVILSTAND.GIFT)))
+                         sivilstander = listOf(Sivilstand(type = SIVILSTAND.GIFT, gyldigFraOgMed = LocalDate.now().minusMonths(8))))
 
     every {
         mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(eq(søkerFnr))
