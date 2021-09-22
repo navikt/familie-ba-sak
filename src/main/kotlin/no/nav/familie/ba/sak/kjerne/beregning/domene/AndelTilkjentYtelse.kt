@@ -177,7 +177,7 @@ fun List<AndelTilkjentYtelse>.slåSammenBack2BackAndelsperioderMedSammeBeløp():
 
 enum class YtelseType(val klassifisering: String) {
     ORDINÆR_BARNETRYGD("BATR"),
-    UTVIDET_BARNETRYGD("BATR"), // TODO: Avventer svar på om de fortsatt trenger en egen for statistikk
+    UTVIDET_BARNETRYGD("BATR"),
     SMÅBARNSTILLEGG("BATRSMA"),
     EØS("BATR"),
     MANUELL_VURDERING("BATR")
