@@ -179,7 +179,7 @@ class DokumentServiceTest(
         val mockBeslutterId = "mock.beslutter@nav.no"
 
         val behandlingEtterVilkårsvurderingSteg = kjørStegprosessForFGB(
-                tilSteg = StegType.VILKÅRSVURDERING,
+                tilSteg = StegType.VURDER_TILBAKEKREVING,
                 søkerFnr = randomFnr(),
                 barnasIdenter = listOf(ClientMocks.barnFnr[0]),
                 fagsakService = fagsakService,
