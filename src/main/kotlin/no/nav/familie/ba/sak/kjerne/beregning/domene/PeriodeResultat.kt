@@ -43,7 +43,7 @@ data class PeriodeResultat(
     }
 
     fun erDeltBosted() = vilkårResultater.firstOrNull { it.vilkårType == Vilkår.BOR_MED_SØKER }?.erDeltBosted ?: false
- }
+}
 
 data class PeriodeVilkår(
         val vilkårType: Vilkår,
@@ -78,12 +78,14 @@ fun lagTidslinjeMedOverlappendePerioder(tidslinjer: List<LocalDateTimeline<Vilk�
     return resterende.fold(initiellSammenlagt) { sammenlagt, neste -> (kombinerVerdier(sammenlagt, neste)) }
 }
 
-fun PersonResultat.tilPeriodeResultater(brukMåned: Boolean): List<PeriodeResultat> {
-    val tidslinjer = this.vilkårResultater.map { vilkårResultat ->
-        LocalDateTimeline(listOf(LocalDateSegment(if (brukMåned) vilkårResultat.periodeFom?.withDayOfMonth(1) else vilkårResultat.periodeFom,
-                                                  if (brukMåned) vilkårResultat.periodeTom?.sisteDagIMåned() else vilkårResultat.periodeTom,
-                                                  vilkårResultat)))
-    }
+fun PersonResultat.tilPeriodeResultater(brukMåned: Boolean, inkluderUtvidet: Boolean = false): List<PeriodeResultat> {
+    val tidslinjer = this.vilkårResultater
+            .filter { it.vilkårType !== Vilkår.UTVIDET_BARNETRYGD || inkluderUtvidet }
+            .map { vilkårResultat ->
+                LocalDateTimeline(listOf(LocalDateSegment(if (brukMåned) vilkårResultat.periodeFom?.withDayOfMonth(1) else vilkårResultat.periodeFom,
+                                                          if (brukMåned) vilkårResultat.periodeTom?.sisteDagIMåned() else vilkårResultat.periodeTom,
+                                                          vilkårResultat)))
+            }
     val kombinertTidslinje = lagTidslinjeMedOverlappendePerioder(tidslinjer)
     return kombinertTidslinje.toSegments().map { segment ->
         PeriodeResultat(
