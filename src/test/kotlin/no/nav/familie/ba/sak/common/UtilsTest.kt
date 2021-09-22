@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.common
 
+import no.nav.familie.ba.sak.common.Utils.avrundetHeltallAvProsent
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrVegadresse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon.Companion.tilBrevTekst
 import no.nav.familie.ba.sak.common.Utils.hentPropertyFraMaven
@@ -7,9 +8,18 @@ import no.nav.familie.ba.sak.common.Utils.storForbokstavIHvertOrd
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import java.math.BigDecimal
 import java.time.LocalDate
 
 internal class UtilsTest {
+
+    @Test
+    fun `skal regne ut prosent og gi heltall med riktig avrunding`() {
+        assertEquals(200, 200.toBigDecimal().avrundetHeltallAvProsent(100.toBigDecimal()))
+        assertEquals(100, 200.toBigDecimal().avrundetHeltallAvProsent(50.toBigDecimal()))
+        assertEquals(201, BigDecimal(201.4).avrundetHeltallAvProsent(100.toBigDecimal()))
+        assertEquals(202, BigDecimal(201.5).avrundetHeltallAvProsent(100.toBigDecimal()))
+    }
 
     @Test
     fun `Navn i uppercase blir formatert korrekt`() =

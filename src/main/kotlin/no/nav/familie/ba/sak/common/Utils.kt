@@ -7,6 +7,8 @@ import org.springframework.core.io.ClassPathResource
 import java.io.File
 import java.io.FileReader
 import java.io.InputStreamReader
+import java.math.BigDecimal
+import java.math.RoundingMode
 import java.text.NumberFormat
 import java.util.*
 import kotlin.reflect.typeOf
@@ -36,6 +38,10 @@ object Utils {
 
         return model.properties[key]?.toString()
     }
+
+    fun BigDecimal.avrundetHeltallAvProsent(prosent: BigDecimal): Int = this.times(prosent)
+            .divide(100.toBigDecimal()).setScale(0, RoundingMode.HALF_UP)
+            .toInt()
 
     fun String.storForbokstav() = this.lowercase().replaceFirstChar { it.uppercase() }
     fun String.storForbokstavIHvertOrd() = this.split(" ").joinToString(" ") { it.storForbokstav() }.trimEnd()

@@ -1,7 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
-import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.MånedPeriode
+import no.nav.familie.ba.sak.common.Utils.avrundetHeltallAvProsent
 import no.nav.familie.ba.sak.common.erDagenFør
 import no.nav.familie.ba.sak.common.inkluderer
 import no.nav.familie.ba.sak.common.maksimum
@@ -15,17 +16,17 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService.SatsPeriode
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService.splittPeriodePå6Årsdag
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
-import no.nav.familie.ba.sak.kjerne.beregning.domene.PeriodeVilkår
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import java.math.BigDecimal
+import java.math.RoundingMode
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -41,16 +42,18 @@ object TilkjentYtelseUtils {
         val (innvilgetPeriodeResultatSøker, innvilgedePeriodeResultatBarna) = vilkårsvurdering.hentInnvilgedePerioder(
                 personopplysningGrunnlag)
 
+        val relevanteSøkerPerioer = innvilgetPeriodeResultatSøker
+                .filter { søkerPeriode -> innvilgedePeriodeResultatBarna.any { søkerPeriode.overlapper(it) } }
+
         val tilkjentYtelse = TilkjentYtelse(
                 behandling = vilkårsvurdering.behandling,
                 opprettetDato = LocalDate.now(),
                 endretDato = LocalDate.now()
         )
 
-        val andelerTilkjentYtelse = innvilgedePeriodeResultatBarna
+        val andelerTilkjentYtelseBarna = innvilgedePeriodeResultatBarna
                 .flatMap { periodeResultatBarn ->
-                    innvilgetPeriodeResultatSøker
-                            .filter { it.overlapper(periodeResultatBarn) }
+                    relevanteSøkerPerioer
                             .flatMap { overlappendePerioderesultatSøker ->
                                 val person = identBarnMap[periodeResultatBarn.personIdent]
                                              ?: error("Finner ikke barn på map over barna i behandlingen")
@@ -173,10 +176,7 @@ object TilkjentYtelseUtils {
                                             personIdent = person.personIdent.ident,
                                             stønadFom = beløpsperiode.fraOgMed,
                                             stønadTom = beløpsperiode.tilOgMed,
-                                            kalkulertUtbetalingsbeløp = beløpsperiode.sats.toBigDecimal()
-                                                    .times(prosent)
-                                                    .divide(100.toBigDecimal())
-                                                    .toInt(),
+                                            kalkulertUtbetalingsbeløp = beløpsperiode.sats.toBigDecimal().avrundetHeltallAvProsent(prosent),
                                             type = finnYtelseType(behandling.kategori, behandling.underkategori, person.type),
                                             sats = beløpsperiode.sats,
                                             prosent = prosent
@@ -184,7 +184,16 @@ object TilkjentYtelseUtils {
                                 }
                             }
                 }
-        tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerTilkjentYtelse)
+
+        val andelerTilkjentYtelseSøker = UtvidetBarnetrygdGenerator(behandlingId = vilkårsvurdering.behandling.id,
+                                                                    tilkjentYtelse = tilkjentYtelse)
+                .lagUtvidetBarnetrygdAndeler(
+                        utvidetVilkår = vilkårsvurdering.personResultater
+                                .flatMap { it.vilkårResultater }
+                                .filter { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD && it.resultat == Resultat.OPPFYLT },
+                        andelerBarna = andelerTilkjentYtelseBarna)
+
+        tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerTilkjentYtelseBarna + andelerTilkjentYtelseSøker)
 
         return tilkjentYtelse
     }
@@ -212,7 +221,7 @@ object TilkjentYtelseUtils {
                     andelForPerson.copy(
                             stønadFom = månedPeriodeEndret.fom,
                             stønadTom = månedPeriodeEndret.tom,
-                            kalkulertUtbetalingsbeløp = andelForPerson.kalkulertUtbetalingsbeløp * endretUtbetalingAndel.prosent.toInt() / 100)
+                            kalkulertUtbetalingsbeløp = andelForPerson.kalkulertUtbetalingsbeløp.toBigDecimal().avrundetHeltallAvProsent(endretUtbetalingAndel.prosent))
                 })
                 // Legger til nye AndelTilkjentYtelse for perioder som ikke berøres av endringer.
                 nyeAndelTilkjentYtelse.addAll(perioderUtenEndring.map { månedPeriodeUendret ->

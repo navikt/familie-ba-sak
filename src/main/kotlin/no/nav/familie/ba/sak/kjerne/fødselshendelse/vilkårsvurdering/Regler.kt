@@ -105,10 +105,12 @@ data class VurderBarnErUgift(
 ) : Vilkårsregel {
 
     override fun vurder(): Evaluering {
+        val sivilstanderMedGyldigFom = sivilstander.filter { it.harGyldigFom() }
+
         return when {
-            sivilstander.singleOrNull { it.type == SIVILSTAND.UOPPGITT } != null ->
+            sivilstanderMedGyldigFom.singleOrNull { it.type == SIVILSTAND.UOPPGITT } != null ->
                 Evaluering.oppfylt(VilkårOppfyltÅrsak.BARN_MANGLER_SIVILSTAND)
-            sivilstander.any { it.type == SIVILSTAND.GIFT || it.type == SIVILSTAND.REGISTRERT_PARTNER } ->
+            sivilstanderMedGyldigFom.any { it.type == SIVILSTAND.GIFT || it.type == SIVILSTAND.REGISTRERT_PARTNER } ->
                 Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.BARN_ER_GIFT_ELLER_HAR_PARTNERSKAP)
             else -> Evaluering.oppfylt(VilkårOppfyltÅrsak.BARN_ER_IKKE_GIFT_ELLER_HAR_PARTNERSKAP)
         }

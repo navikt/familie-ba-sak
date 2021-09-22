@@ -463,7 +463,7 @@ class UtbetalingsoppdragIntegrasjonTest(
         assertEquals(3, utbetalingsoppdrag.utbetalingsperiode.size)
 
         val utbetalingsperioderPerKlasse = utbetalingsoppdrag.utbetalingsperiode.groupBy { it.klassifisering }
-        assertUtbetalingsperiode(utbetalingsperioderPerKlasse.getValue("BAUT")[0], 0, null, 1054, "2019-03-01", "2037-02-28")
+        assertUtbetalingsperiode(utbetalingsperioderPerKlasse.getValue("BATR")[0], 0, null, 1054, "2019-03-01", "2037-02-28")
         assertUtbetalingsperiode(utbetalingsperioderPerKlasse.getValue("BATRSMA")[0], 1, null, 660, "2019-04-01", "2023-03-31")
         assertUtbetalingsperiode(utbetalingsperioderPerKlasse.getValue("BATRSMA")[1], 2, 1, 660, "2026-05-01", "2027-06-30")
     }

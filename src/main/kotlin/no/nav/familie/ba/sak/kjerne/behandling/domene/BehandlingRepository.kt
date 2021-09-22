@@ -49,7 +49,7 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
     @Query("SELECT count(*) FROM Behandling b WHERE NOT b.status = 'AVSLUTTET'")
     fun finnAntallBehandlingerIkkeAvsluttet(): Long
 
-    @Query("SELECT DISTINCT aty.behandlingId FROM AndelTilkjentYtelse aty WHERE aty.behandlingId in :iverksatteLøpende AND aty.kalkulertUtbetalingsbeløp = :gammelSats AND aty.stønadTom >= :månedÅrForEndring")
+    @Query("SELECT DISTINCT aty.behandlingId FROM AndelTilkjentYtelse aty WHERE aty.behandlingId in :iverksatteLøpende AND aty.sats = :gammelSats AND aty.stønadTom >= :månedÅrForEndring")
     fun finnBehadlingerForSatsendring(iverksatteLøpende: List<Long>, gammelSats: Long, månedÅrForEndring: YearMonth): List<Long>
 
     @Query("SELECT b FROM Behandling b WHERE b.opprettetÅrsak = 'FØDSELSHENDELSE' AND b.opprettetTidspunkt >= current_date")
