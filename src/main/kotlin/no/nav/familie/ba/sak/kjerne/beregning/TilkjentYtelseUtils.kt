@@ -15,6 +15,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
@@ -32,16 +33,18 @@ object TilkjentYtelseUtils {
         val (innvilgetPeriodeResultatSøker, innvilgedePeriodeResultatBarna) = vilkårsvurdering.hentInnvilgedePerioder(
                 personopplysningGrunnlag)
 
+        val relevanteSøkerPerioer = innvilgetPeriodeResultatSøker
+                .filter { søkerPeriode -> innvilgedePeriodeResultatBarna.any { søkerPeriode.overlapper(it) } }
+
         val tilkjentYtelse = TilkjentYtelse(
                 behandling = vilkårsvurdering.behandling,
                 opprettetDato = LocalDate.now(),
                 endretDato = LocalDate.now()
         )
 
-        val andelerTilkjentYtelse = innvilgedePeriodeResultatBarna
+        val andelerTilkjentYtelseBarna = innvilgedePeriodeResultatBarna
                 .flatMap { periodeResultatBarn ->
-                    innvilgetPeriodeResultatSøker
-                            .filter { it.overlapper(periodeResultatBarn) }
+                    relevanteSøkerPerioer
                             .flatMap { overlappendePerioderesultatSøker ->
                                 val person = identBarnMap[periodeResultatBarn.personIdent]
                                              ?: error("Finner ikke barn på map over barna i behandlingen")
@@ -172,7 +175,15 @@ object TilkjentYtelseUtils {
                             }
                 }
 
-        tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerTilkjentYtelse)
+        val andelerTilkjentYtelseSøker = UtvidetBarnetrygdGenerator(behandlingId = vilkårsvurdering.behandling.id,
+                                                                    tilkjentYtelse = tilkjentYtelse)
+                .lagUtvidetBarnetrygdAndeler(
+                        utvidetVilkår = vilkårsvurdering.personResultater
+                                .flatMap { it.vilkårResultater }
+                                .filter { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD && it.resultat == Resultat.OPPFYLT },
+                        andelerBarna = andelerTilkjentYtelseBarna)
+
+        tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerTilkjentYtelseBarna + andelerTilkjentYtelseSøker)
 
         return tilkjentYtelse
     }
@@ -181,7 +192,7 @@ object TilkjentYtelseUtils {
             andelTilkjentYtelser: MutableSet<AndelTilkjentYtelse>,
             endretUtbetalingAndeler: List<EndretUtbetalingAndel>): MutableSet<AndelTilkjentYtelse> {
 
-        if(endretUtbetalingAndeler.isEmpty()) return andelTilkjentYtelser.map { it.copy() }.toMutableSet()
+        if (endretUtbetalingAndeler.isEmpty()) return andelTilkjentYtelser.map { it.copy() }.toMutableSet()
 
         val nyeAndelTilkjentYtelse = mutableListOf<AndelTilkjentYtelse>()
 
@@ -209,7 +220,7 @@ object TilkjentYtelseUtils {
             }
         }
         // Sorterer primært av hensyn til måten testene er implementert og kan muligens fjernes dersom dette skrives om.
-        nyeAndelTilkjentYtelse.sortWith(compareBy ( {it.personIdent}, {it.stønadFom}))
+        nyeAndelTilkjentYtelse.sortWith(compareBy({ it.personIdent }, { it.stønadFom }))
         return nyeAndelTilkjentYtelse.toMutableSet()
     }
 
@@ -227,7 +238,7 @@ object TilkjentYtelseUtils {
 }
 
 fun MånedPeriode.perioderMedOgUtenOverlapp(perioder: List<MånedPeriode>): Pair<List<MånedPeriode>, List<MånedPeriode>> {
-    if (perioder.isEmpty()) return Pair(emptyList(), listOf (this))
+    if (perioder.isEmpty()) return Pair(emptyList(), listOf(this))
 
     val alleMånederMedOverlappStatus = mutableMapOf<YearMonth, Boolean>()
     var nesteMåned = this.fom
