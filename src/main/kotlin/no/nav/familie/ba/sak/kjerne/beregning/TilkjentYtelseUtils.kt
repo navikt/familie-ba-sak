@@ -15,6 +15,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService.SatsPeriode
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService.splittPeriodePå6Årsdag
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.PeriodeVilkår
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
@@ -33,7 +34,6 @@ object TilkjentYtelseUtils {
     fun beregnTilkjentYtelse(vilkårsvurdering: Vilkårsvurdering,
                              personopplysningGrunnlag: PersonopplysningGrunnlag,
                              behandling: Behandling,
-                             endredeUtbetalingsandeler: List<EndretUtbetalingAndel>? = emptyList(),
                              featureToggleService: FeatureToggleService): TilkjentYtelse {
         val identBarnMap = personopplysningGrunnlag.barna
                 .associateBy { it.personIdent.ident }
@@ -118,7 +118,6 @@ object TilkjentYtelseUtils {
 
                                             if (periodeUnder6År != null) SatsService.hentGyldigSatsFor(
                                                     satstype = SatsType.TILLEGG_ORBA,
-                                                    deltUtbetaling = periodeResultatBarn.erDeltBosted(),
                                                     stønadFraOgMed = settRiktigStønadFom(skalStarteSammeMåned = skalStarteSammeMåned,
                                                                                          fraOgMed = periodeUnder6År.fom),
                                                     stønadTilOgMed = settRiktigStønadTom(tilOgMed = periodeUnder6År.tom),
@@ -136,11 +135,10 @@ object TilkjentYtelseUtils {
                                             ) else emptyList()
                                         }
 
-                                val beløpsperioderEtterFylte6År =
+                                val satsperioderEtterFylte6År =
                                         if (featureToggleService.isEnabled(FeatureToggleConfig.BRUK_ER_DELT_BOSTED)) {
                                             if (periodeOver6år != null) SatsService.hentGyldigSatsFor(
                                                     satstype = SatsType.ORBA,
-                                                    deltUtbetaling = periodeResultatBarn.erDeltBosted(),
                                                     stønadFraOgMed = settRiktigStønadFom(skalStarteSammeMåned =
                                                                                          (periodeUnder6År != null || skalStarteSammeMåned),
                                                                                          fraOgMed = periodeOver6år.fom),
@@ -163,14 +161,12 @@ object TilkjentYtelseUtils {
                                         }
 
                                 val beløpsperioder =
-                                        listOf(satsperioderFørFylte6År, beløpsperioderEtterFylte6År).flatten()
+                                        listOf(satsperioderFørFylte6År, satsperioderEtterFylte6År).flatten()
                                                 .sortedBy { it.fraOgMed }
                                                 .fold(mutableListOf(), ::slåSammenEtterfølgendePerioderMedSammeBeløp)
 
                                 beløpsperioder.map { beløpsperiode ->
-                                    val prosent = finnProsentForAndel(fom = beløpsperiode.fraOgMed,
-                                                                      tom = beløpsperiode.tilOgMed,
-                                                                      endringerForPerson = endredeUtbetalingsandeler?.filter { it.person.personIdent.ident == person.personIdent.ident })
+                                    val prosent = if (periodeResultatBarn.erDeltBosted()) BigDecimal(50) else BigDecimal(100)
                                     AndelTilkjentYtelse(
                                             behandlingId = vilkårsvurdering.behandling.id,
                                             tilkjentYtelse = tilkjentYtelse,
@@ -183,7 +179,7 @@ object TilkjentYtelseUtils {
                                                     .toInt(),
                                             type = finnYtelseType(behandling.kategori, behandling.underkategori, person.type),
                                             sats = beløpsperiode.sats,
-                                            prosent = prosent,
+                                            prosent = prosent
                                     )
                                 }
                             }
@@ -227,20 +223,6 @@ object TilkjentYtelseUtils {
         // Sorterer primært av hensyn til måten testene er implementert og kan muligens fjernes dersom dette skrives om.
         nyeAndelTilkjentYtelse.sortWith(compareBy({ it.personIdent }, { it.stønadFom }))
         return nyeAndelTilkjentYtelse.toMutableSet()
-    }
-
-    private fun finnProsentForAndel(fom: YearMonth,
-                                    tom: YearMonth,
-                                    endringerForPerson: List<EndretUtbetalingAndel>?): BigDecimal {
-        return if (endringerForPerson.isNullOrEmpty()) {
-            BigDecimal(100)
-        } else if (endringerForPerson.any { it.årsak == Årsak.DELT_BOSTED }) {
-            BigDecimal(50)
-        } else {
-            //TODO: Midlertidig 100. Her må vi iterere og ev finne delt bosted i endringsliste. Da trenger vi nok ikke spesialhåndtere delt bosted i beregningsfunksjonen heller.
-            // TODO: Vil antakeligvis også oppdatere overordna mapping i beregning til å ta hensyn til søker med utvidet
-            BigDecimal(100)
-        }
     }
 
     private fun finnYtelseType(kategori: BehandlingKategori,

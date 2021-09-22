@@ -106,7 +106,6 @@ class BeregningService(
                 .beregnTilkjentYtelse(vilkårsvurdering = vilkårsvurdering,
                                       personopplysningGrunnlag = personopplysningGrunnlag,
                                       behandling = behandling,
-                                      endredeUtbetalingsandeler = emptyList(),
                                       featureToggleService = featureToggleService)
 
         val endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(behandling.id)
