@@ -8,7 +8,8 @@ ALTER TABLE andel_tilkjent_ytelse
 
 ALTER TABLE andel_tilkjent_ytelse
     ADD COLUMN sats BIGINT;
-UPDATE andel_tilkjent_ytelse SET sats = andel_tilkjent_ytelse.belop;
+UPDATE andel_tilkjent_ytelse SET sats = belop * 2 where belop in (677,527,485,827);
+UPDATE andel_tilkjent_ytelse SET sats = belop where sats is null;
 ALTER TABLE andel_tilkjent_ytelse
     ALTER COLUMN sats SET NOT NULL;
 

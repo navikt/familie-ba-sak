@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.YearMonthConverter
 import no.nav.familie.ba.sak.common.overlapperHeltEllerDelvisMed
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.math.BigDecimal
@@ -18,8 +19,9 @@ import javax.persistence.GeneratedValue
 import javax.persistence.GenerationType
 import javax.persistence.Id
 import javax.persistence.JoinColumn
+import javax.persistence.JoinTable
+import javax.persistence.ManyToMany
 import javax.persistence.ManyToOne
-import javax.persistence.OneToMany
 import javax.persistence.SequenceGenerator
 import javax.persistence.Table
 
@@ -60,15 +62,18 @@ data class EndretUtbetalingAndel(
     @Column(name = "begrunnelse", nullable = false)
     var begrunnelse: String,
 
-    @OneToMany(mappedBy = "andelTilkjentYtelse")
-    val andelTilEndretAndel: List<AndelTilEndretAndel> = emptyList(),
+    @ManyToMany
+    @JoinTable(
+            name = "ANDEL_TIL_ENDRET_ANDEL",
+            joinColumns = [JoinColumn(name = "fk_endret_utbetaling_andel_id")] ,
+            inverseJoinColumns = [JoinColumn(name = "fk_andel_tilkjent_ytelse_id")]
+    )
+    val andelTilkjentYtelser: List<AndelTilkjentYtelse> = emptyList(),
 
 ) : BaseEntitet() {
     fun overlapperMed(periode: MånedPeriode) = periode.overlapperHeltEllerDelvisMed(this.periode())
 
     fun periode() = MånedPeriode(this.fom, this.tom)
-
-    fun andelTilkjentYtelser() = this.andelTilEndretAndel.map { it.andelTilkjentYtelse }
 }
 
 enum class Årsak(val klassifisering: String) {

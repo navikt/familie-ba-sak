@@ -6,7 +6,7 @@ import no.nav.familie.ba.sak.common.YearMonthConverter
 import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.AndelTilEndretAndel
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import java.math.BigDecimal
@@ -22,8 +22,8 @@ import javax.persistence.GeneratedValue
 import javax.persistence.GenerationType
 import javax.persistence.Id
 import javax.persistence.JoinColumn
+import javax.persistence.ManyToMany
 import javax.persistence.ManyToOne
-import javax.persistence.OneToMany
 import javax.persistence.SequenceGenerator
 import javax.persistence.Table
 
@@ -70,8 +70,8 @@ data class AndelTilkjentYtelse(
         @Column(name = "prosent", nullable = false)
         val prosent: BigDecimal,
 
-        @OneToMany(mappedBy = "endretUtbetalingAndel")
-        val andelTilEndretAndel: List<AndelTilEndretAndel> = emptyList(),
+        @ManyToMany(mappedBy = "andelTilkjentYtelser")
+        val endretUtbetalingAndeler: List<EndretUtbetalingAndel> = emptyList(),
 
         // kildeBehandlingId, periodeOffset og forrigePeriodeOffset trengs kun i forbindelse med
         // iverksetting/konsistensavstemming, og settes først ved generering av selve oppdraget mot økonomi.
@@ -114,8 +114,6 @@ data class AndelTilkjentYtelse(
         return "AndelTilkjentYtelse(id = $id, behandling = $behandlingId, " +
                "beløp = $kalkulertUtbetalingsbeløp, stønadFom = $stønadFom, stønadTom = $stønadTom, periodeOffset = $periodeOffset)"
     }
-
-    fun endretUtbetalingAndeler() = this.andelTilEndretAndel.map { it.endretUtbetalingAndel }
 
     fun erTilsvarendeForUtbetaling(other: AndelTilkjentYtelse): Boolean {
         return (this.personIdent == other.personIdent
