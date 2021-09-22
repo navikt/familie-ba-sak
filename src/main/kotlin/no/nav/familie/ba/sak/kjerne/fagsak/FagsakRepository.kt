@@ -24,7 +24,7 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
     fun finnFagsak(fagsakId: Long): Fagsak?
 
     @Lock(LockModeType.NONE)
-    @Query(value = "SELECT f FROM Fagsak f, FagsakPerson fp WHERE f.id = fp.fagsak.id and fp.personIdent = :personIdent")
+    @Query(value = "SELECT f FROM Fagsak f, FagsakPerson fp WHERE f.id = fp.fagsak.id and fp.personIdent = :personIdent and f.arkivert = false")
     fun finnFagsakForPersonIdent(personIdent: PersonIdent): Fagsak?
 
     @Lock(LockModeType.NONE)

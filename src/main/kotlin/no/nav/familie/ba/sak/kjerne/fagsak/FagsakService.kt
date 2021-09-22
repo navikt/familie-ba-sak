@@ -301,7 +301,7 @@ class FagsakService(
         personRepository.findByPersonIdent(PersonIdent(personIdent)).forEach { person: Person ->
             if (person.personopplysningGrunnlag.aktiv) {
                 val behandling = behandlingRepository.finnBehandling(person.personopplysningGrunnlag.behandlingId)
-                if (behandling.aktiv && !assosierteFagsakDeltagerMap.containsKey(behandling.fagsak.id)) {
+                if (behandling.aktiv && !behandling.fagsak.arkivert && !assosierteFagsakDeltagerMap.containsKey(behandling.fagsak.id)) {
                     //get applicant info from PDL. we assume that the applicant is always a person whose info is stored in PDL.
                     if (behandling.fagsak.hentAktivIdent().ident == personIdent) {
                         assosierteFagsakDeltagerMap[behandling.fagsak.id] = RestFagsakDeltager(
