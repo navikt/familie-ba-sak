@@ -65,8 +65,8 @@ data class Behandling(
         val kategori: BehandlingKategori,
 
         @Enumerated(EnumType.STRING)
-        @Column(name = "underkategori", nullable = false)
-        val underkategori: BehandlingUnderkategori,
+        @Column(name = "underkategori", nullable = false, updatable = true)
+        var underkategori: BehandlingUnderkategori,
 
         @Column(name = "aktiv", nullable = false)
         var aktiv: Boolean = true,
