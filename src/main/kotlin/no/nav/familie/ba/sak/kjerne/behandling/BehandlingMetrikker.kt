@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.kjerne.behandling
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.DistributionSummary
 import io.micrometer.core.instrument.Metrics
-import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.BRUK_VEDTAKSTYPE_MED_BEGRUNNELSER
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
@@ -84,15 +83,10 @@ class BehandlingMetrikker(
             val vedtak = vedtakRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
                          ?: error("Finner ikke aktivt vedtak på behandling ${behandling.id}")
 
-            if (featureToggleService.isEnabled(BRUK_VEDTAKSTYPE_MED_BEGRUNNELSER)) {
-                val vedtaksperiodeMedBegrunnelser = vedtaksperiodeRepository.finnVedtaksperioderFor(vedtakId = vedtak.id)
+            val vedtaksperiodeMedBegrunnelser = vedtaksperiodeRepository.finnVedtaksperioderFor(vedtakId = vedtak.id)
 
-                vedtaksperiodeMedBegrunnelser.forEach {
-                    it.begrunnelser.forEach { vedtaksbegrunnelse: Vedtaksbegrunnelse -> antallBrevBegrunnelseSpesifikasjon[vedtaksbegrunnelse.vedtakBegrunnelseSpesifikasjon]?.increment() }
-                }
-            } else {
-                vedtak.vedtakBegrunnelser.mapNotNull { it.begrunnelse }
-                        .forEach { brevbegrunelse: VedtakBegrunnelseSpesifikasjon -> antallBrevBegrunnelseSpesifikasjon[brevbegrunelse]?.increment() }
+            vedtaksperiodeMedBegrunnelser.forEach {
+                it.begrunnelser.forEach { vedtaksbegrunnelse: Vedtaksbegrunnelse -> antallBrevBegrunnelseSpesifikasjon[vedtaksbegrunnelse.vedtakBegrunnelseSpesifikasjon]?.increment() }
             }
         }
     }

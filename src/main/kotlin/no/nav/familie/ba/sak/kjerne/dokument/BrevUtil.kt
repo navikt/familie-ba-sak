@@ -175,8 +175,8 @@ fun hjemlerTilHjemmeltekst(hjemler: List<String>): String {
 }
 
 fun hentHjemmeltekst(vedtak: Vedtak, vedtaksperioderMedBegrunnelser: List<VedtaksperiodeMedBegrunnelser>): String {
-    val hjemler = (vedtak.hentHjemler() + hentHjemlerIVedtaksperioder(vedtaksperioderMedBegrunnelser))
-            .toMutableSet()
+    val hjemler = hentHjemlerIVedtaksperioder(vedtaksperioderMedBegrunnelser).toMutableSet()
+
     if (vedtaksperioderMedBegrunnelser.flatMap { it.fritekster }.isNotEmpty()) {
         hjemler.addAll(hjemlerTilhørendeFritekst)
     }

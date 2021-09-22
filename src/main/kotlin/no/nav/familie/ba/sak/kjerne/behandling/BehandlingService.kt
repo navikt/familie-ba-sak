@@ -24,7 +24,6 @@ import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.steg.FØRSTE_STEG
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
-import no.nav.familie.ba.sak.kjerne.vedtak.VedtakBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
@@ -128,21 +127,8 @@ class BehandlingService(
         )
 
         if (kopierVedtakBegrunnelser && deaktivertVedtak != null) {
-            if (featureToggleService.isEnabled(FeatureToggleConfig.BRUK_VEDTAKSTYPE_MED_BEGRUNNELSER)) { // TODO: Ved nytt vedtak vil man måtte resette begrunnelser
-                vedtaksperiodeService.kopierOverVedtaksperioder(deaktivertVedtak = deaktivertVedtak,
-                                                                aktivtVedtak = nyttVedtak)
-            } else {
-                nyttVedtak.settBegrunnelser(deaktivertVedtak.vedtakBegrunnelser.map { original ->
-                    VedtakBegrunnelse(
-                            begrunnelse = original.begrunnelse,
-                            brevBegrunnelse = original.brevBegrunnelse,
-                            fom = original.fom,
-                            tom = original.tom,
-                            vilkårResultat = begrunnelseVilkårPekere.find { it.first == original.vilkårResultat }?.second,
-                            vedtak = nyttVedtak,
-                    )
-                }.toSet())
-            }
+            vedtaksperiodeService.kopierOverVedtaksperioder(deaktivertVedtak = deaktivertVedtak,
+                                                            aktivtVedtak = nyttVedtak)
         }
 
         vedtakRepository.save(nyttVedtak)
