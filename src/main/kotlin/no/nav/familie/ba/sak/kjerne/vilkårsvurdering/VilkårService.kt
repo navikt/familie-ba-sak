@@ -136,7 +136,8 @@ class VilkårService(
             if (aktivVilkårsvurdering != null) {
                 val (initieltSomErOppdatert, aktivtSomErRedusert) = flyttResultaterTilInitielt(
                         initiellVilkårsvurdering = initiellVilkårsvurdering,
-                        aktivVilkårsvurdering = aktivVilkårsvurdering
+                        aktivVilkårsvurdering = aktivVilkårsvurdering,
+                        løpendeUnderkategori = behandlingService.hentLøpendeUnderkategori(initiellVilkårsvurdering.behandling.fagsak.id),
                 )
 
                 if (aktivtSomErRedusert.personResultater.isNotEmpty() && !bekreftEndringerViaFrontend) {
@@ -161,8 +162,11 @@ class VilkårService(
 
         if (annenBehandlingErHenlagt)
             throw Feil(message = "vilkårsvurdering skal ikke kopieres fra henlagt behandling.")
-        val (oppdatert) = flyttResultaterTilInitielt(aktivVilkårsvurdering = annenVilkårsvurdering,
-                                                     initiellVilkårsvurdering = initiellVilkårsvurdering)
+        val (oppdatert) = flyttResultaterTilInitielt(
+                aktivVilkårsvurdering = annenVilkårsvurdering,
+                initiellVilkårsvurdering = initiellVilkårsvurdering,
+                løpendeUnderkategori = behandlingService.hentLøpendeUnderkategori(initiellVilkårsvurdering.behandling.fagsak.id)
+        )
         return oppdatert
     }
 

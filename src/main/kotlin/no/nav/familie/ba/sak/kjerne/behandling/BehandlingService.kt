@@ -67,7 +67,7 @@ class BehandlingService(
             val underkategori =
                     bestemUnderkategori(nyUnderkategori = nyBehandling.underkategori,
                                         nyBehandlingType = nyBehandling.behandlingType,
-                                        forrigeBehandlingUnderkategori = hentForrigeUnderkategori(fagsakId = fagsak.id))
+                                        forrigeBehandlingUnderkategori = hentLøpendeUnderkategori(fagsakId = fagsak.id))
 
             val behandling = Behandling(fagsak = fagsak,
                                         opprettetÅrsak = nyBehandling.behandlingÅrsak,
@@ -106,7 +106,7 @@ class BehandlingService(
         return lagreEllerOppdater(behandling.apply {
             underkategori = bestemUnderkategori(nyUnderkategori = nyBehandlingUnderkategori,
                                                 nyBehandlingType = behandling.type,
-                                                forrigeBehandlingUnderkategori = hentForrigeUnderkategori(fagsakId = fagsak.id))
+                                                forrigeBehandlingUnderkategori = hentLøpendeUnderkategori(fagsakId = fagsak.id))
         })
     }
 
@@ -280,7 +280,7 @@ class BehandlingService(
         return lagreEllerOppdater(behandling)
     }
 
-    private fun hentForrigeUnderkategori(fagsakId: Long): BehandlingUnderkategori? {
+    fun hentLøpendeUnderkategori(fagsakId: Long): BehandlingUnderkategori? {
         val forrigeIverksattBehandling = hentSisteBehandlingSomErIverksatt(fagsakId = fagsakId) ?: return null
 
         val forrigeAndeler =
