@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
@@ -33,10 +34,10 @@ data class UtvidetBarnetrygdGenerator(
                 utvidetVilkår
                         .filter { it.resultat == Resultat.OPPFYLT }
                         .map {
-                            if (it.periodeFom == null || it.periodeTom == null) throw Feil("Fom og tom må være satt på søkers periode ved utvida barnetrygd")
+                            if (it.periodeFom == null) throw Feil("Fom må være satt på søkers periode ved utvida barnetrygd")
                             LocalDateSegment(
                                     it.periodeFom!!.førsteDagINesteMåned(),
-                                    it.periodeTom!!.sisteDagINesteMåned(),
+                                    it.periodeTom?.sisteDagINesteMåned() ?: TIDENES_ENDE,
                                     listOf(PeriodeData(ident = søkerIdent, rolle = PersonType.SØKER))
                             )
                         })

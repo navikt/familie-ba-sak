@@ -175,15 +175,15 @@ object TilkjentYtelseUtils {
                             }
                 }
 
-        val utvidetBarnetrygdAndeler = UtvidetBarnetrygdGenerator(behandlingId = vilkårsvurdering.behandling.id,
-                                                                  tilkjentYtelse = tilkjentYtelse)
+        val andelerTilkjentYtelseSøker = UtvidetBarnetrygdGenerator(behandlingId = vilkårsvurdering.behandling.id,
+                                                                    tilkjentYtelse = tilkjentYtelse)
                 .lagUtvidetBarnetrygdAndeler(
                         utvidetVilkår = vilkårsvurdering.personResultater
                                 .flatMap { it.vilkårResultater }
                                 .filter { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD && it.resultat == Resultat.OPPFYLT },
                         andelerBarna = andelerTilkjentYtelseBarna)
 
-        tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerTilkjentYtelseBarna + utvidetBarnetrygdAndeler)
+        tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerTilkjentYtelseBarna + andelerTilkjentYtelseSøker)
 
         return tilkjentYtelse
     }
