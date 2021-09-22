@@ -8,9 +8,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagSe
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
-import no.nav.familie.ba.sak.kjerne.vedtak.VedtakBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import org.springframework.stereotype.Service
 
 @Service
@@ -29,24 +27,27 @@ class RegistrereSøknad(
         val søknadDTO = data.søknad
         val innsendtSøknad = søknadDTO.writeValueAsString()
 
+        behandlingService.oppdaterBehandlingUnderkategori(behandling = behandlingService.hent(behandlingId = behandling.id),
+                                                          nyBehandlingUnderkategori = søknadDTO.underkategori)
+
         loggService.opprettRegistrertSøknadLogg(behandling, aktivSøknadGrunnlagFinnes)
         søknadGrunnlagService.lagreOgDeaktiverGammel(søknadGrunnlag = SøknadGrunnlag(behandlingId = behandling.id,
                                                                                      søknad = innsendtSøknad))
 
 
         val forrigeBehandlingSomErIverksatt = behandlingService.hentSisteBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id)
-        persongrunnlagService.registrerBarnFraSøknad(behandling = behandling,
+        persongrunnlagService.registrerBarnFraSøknad(behandling = behandlingService.hent(behandlingId = behandling.id),
                                                      forrigeBehandling = forrigeBehandlingSomErIverksatt,
                                                      søknadDTO = søknadDTO)
 
-        tilbakestillBehandlingService.initierOgSettBehandlingTilVilårsvurdering(behandling = behandling,
+        tilbakestillBehandlingService.initierOgSettBehandlingTilVilårsvurdering(behandling = behandlingService.hent(behandlingId = behandling.id),
                                                                                 bekreftEndringerViaFrontend = data.bekreftEndringerViaFrontend)
 
         val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = behandling.id)
 
         vedtakService.oppdater(vedtak)
 
-        return hentNesteStegForNormalFlyt(behandling)
+        return hentNesteStegForNormalFlyt(behandling = behandlingService.hent(behandlingId = behandling.id))
     }
 
     override fun stegType(): StegType {
