@@ -6,7 +6,6 @@ import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVedtakBegrunnelseTilknyttetVilkår
 import no.nav.familie.ba.sak.kjerne.dokument.BrevKlient
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurderingType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
@@ -89,29 +88,10 @@ class VilkårsvurderingService(
     }
 
     fun hentVilkårsbegrunnelser(): Map<VedtakBegrunnelseType, List<RestVedtakBegrunnelseTilknyttetVilkår>> {
-        if (featureToggleService.isEnabled(FeatureToggleConfig.BRUK_BEGRUNNELSE_FRA_SANITY_NEDTREKKSMENY)) {
             val sanityBegrunnelser = brevKlient.hentSanityBegrunnelse()
             val skalBrukeTriggesAvFraSanity =
                     featureToggleService.isEnabled(FeatureToggleConfig.BRUK_BEGRUNNELSE_TRIGGES_AV_FRA_SANITY)
             return vedtakBegrunnelseSpesifikasjonerTilNedtrekksmenytekster(sanityBegrunnelser, skalBrukeTriggesAvFraSanity)
-        } else {
-            return VedtakBegrunnelseSpesifikasjon.values()
-                    .groupBy { it.vedtakBegrunnelseType }
-                    .mapValues { begrunnelseGruppe ->
-                        begrunnelseGruppe.value
-                                .filter { it.erTilgjengeligFrontend }
-                                .flatMap { vedtakBegrunnelse ->
-                                    vedtakBegrunnelse.triggesAv.vilkår?.map {
-                                        RestVedtakBegrunnelseTilknyttetVilkår(id = vedtakBegrunnelse,
-                                                                              navn = vedtakBegrunnelse.tittel,
-                                                                              vilkår = it
-                                        )
-                                    } ?: listOf(RestVedtakBegrunnelseTilknyttetVilkår(id = vedtakBegrunnelse,
-                                                                                      navn = vedtakBegrunnelse.tittel,
-                                                                                      vilkår = null))
-                                }
-                    }
-        }
     }
 
     companion object {

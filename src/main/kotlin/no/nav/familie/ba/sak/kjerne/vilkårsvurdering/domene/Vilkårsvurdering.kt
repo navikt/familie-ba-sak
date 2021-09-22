@@ -56,10 +56,8 @@ data class Vilkårsvurdering(
         return "Vilkårsvurdering(id=$id, behandling=${behandling.id})"
     }
 
-    fun periodeResultater(brukMåned: Boolean): Set<PeriodeResultat> = this.personResultaterTilPeriodeResultater(brukMåned)
-
     fun hentInnvilgedePerioder(personopplysningGrunnlag: PersonopplysningGrunnlag): Pair<List<PeriodeResultat>, List<PeriodeResultat>> {
-        val periodeResultater = periodeResultater(false)
+        val periodeResultater = this.personResultaterTilPeriodeResultater(false)
 
         val identBarnMap = personopplysningGrunnlag.barna
                 .associateBy { it.personIdent.ident }
