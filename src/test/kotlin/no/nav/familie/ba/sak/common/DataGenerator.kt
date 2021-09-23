@@ -74,6 +74,7 @@ import no.nav.familie.ba.sak.task.dto.StatusFraOppdragDTO
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import no.nav.familie.prosessering.domene.Task
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -183,12 +184,14 @@ fun lagAndelTilkjentYtelse(fom: String,
             personIdent = person.personIdent.ident,
             behandlingId = behandling.id,
             tilkjentYtelse = tilkjentYtelse ?: lagInitiellTilkjentYtelse(behandling),
-            beløp = beløp,
+            kalkulertUtbetalingsbeløp = beløp,
             stønadFom = årMnd(fom),
             stønadTom = årMnd(tom),
             type = ytelseType,
             periodeOffset = periodeIdOffset,
-            forrigePeriodeOffset = forrigeperiodeIdOffset
+            forrigePeriodeOffset = forrigeperiodeIdOffset,
+            sats = beløp,
+            prosent = BigDecimal(100)
     )
 }
 
@@ -206,12 +209,14 @@ fun lagAndelTilkjentYtelseUtvidet(fom: String,
             personIdent = person.personIdent.ident,
             behandlingId = behandling.id,
             tilkjentYtelse = tilkjentYtelse ?: lagInitiellTilkjentYtelse(behandling),
-            beløp = beløp,
+            kalkulertUtbetalingsbeløp = beløp,
             stønadFom = årMnd(fom),
             stønadTom = årMnd(tom),
             type = ytelseType,
             periodeOffset = periodeIdOffset,
-            forrigePeriodeOffset = forrigeperiodeIdOffset
+            forrigePeriodeOffset = forrigeperiodeIdOffset,
+            sats = beløp,
+            prosent = BigDecimal(100)
     )
 }
 

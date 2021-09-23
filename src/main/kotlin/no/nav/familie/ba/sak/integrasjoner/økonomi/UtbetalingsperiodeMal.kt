@@ -48,7 +48,7 @@ data class UtbetalingsperiodeMal(
                     klassifisering = andel.type.klassifisering,
                     vedtakdatoFom = andel.stønadFom.førsteDagIInneværendeMåned(),
                     vedtakdatoTom = andel.stønadTom.sisteDagIInneværendeMåned(),
-                    sats = BigDecimal(andel.beløp),
+                    sats = BigDecimal(andel.kalkulertUtbetalingsbeløp),
                     satsType = Utbetalingsperiode.SatsType.MND,
                     utbetalesTil = vedtak.behandling.fagsak.hentAktivIdent().ident,
                     behandlingId = vedtak.behandling.id

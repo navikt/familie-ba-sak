@@ -6,8 +6,10 @@ import no.nav.familie.ba.sak.common.YearMonthConverter
 import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.fpsak.tidsserie.LocalDateSegment
+import java.math.BigDecimal
 import java.time.YearMonth
 import java.util.Objects
 import javax.persistence.Column
@@ -20,6 +22,7 @@ import javax.persistence.GeneratedValue
 import javax.persistence.GenerationType
 import javax.persistence.Id
 import javax.persistence.JoinColumn
+import javax.persistence.ManyToMany
 import javax.persistence.ManyToOne
 import javax.persistence.SequenceGenerator
 import javax.persistence.Table
@@ -45,8 +48,8 @@ data class AndelTilkjentYtelse(
         @Column(name = "person_ident", nullable = false, updatable = false)
         val personIdent: String,
 
-        @Column(name = "belop", nullable = false)
-        val beløp: Int,
+        @Column(name = "kalkulert_utbetalingsbelop", nullable = false)
+        val kalkulertUtbetalingsbeløp: Int,
 
         @Column(name = "stonad_fom", nullable = false, columnDefinition = "DATE")
         @Convert(converter = YearMonthConverter::class)
@@ -59,6 +62,16 @@ data class AndelTilkjentYtelse(
         @Enumerated(EnumType.STRING)
         @Column(name = "type", nullable = false)
         val type: YtelseType,
+
+        @Column(name = "sats", nullable = false)
+        val sats: Int,
+
+        // TODO: Bør dette hete gradering? I så fall rename og migrer i endringstabell også
+        @Column(name = "prosent", nullable = false)
+        val prosent: BigDecimal,
+
+        @ManyToMany(mappedBy = "andelTilkjentYtelser")
+        val endretUtbetalingAndeler: List<EndretUtbetalingAndel> = emptyList(),
 
         // kildeBehandlingId, periodeOffset og forrigePeriodeOffset trengs kun i forbindelse med
         // iverksetting/konsistensavstemming, og settes først ved generering av selve oppdraget mot økonomi.
@@ -87,26 +100,26 @@ data class AndelTilkjentYtelse(
         val annen = other as AndelTilkjentYtelse
         return Objects.equals(behandlingId, annen.behandlingId)
                && Objects.equals(type, annen.type)
-               && Objects.equals(beløp, annen.beløp)
+               && Objects.equals(kalkulertUtbetalingsbeløp, annen.kalkulertUtbetalingsbeløp)
                && Objects.equals(stønadFom, annen.stønadFom)
                && Objects.equals(stønadTom, annen.stønadTom)
                && Objects.equals(personIdent, annen.personIdent)
     }
 
     override fun hashCode(): Int {
-        return Objects.hash(id, behandlingId, type, beløp, stønadFom, stønadTom, personIdent)
+        return Objects.hash(id, behandlingId, type, kalkulertUtbetalingsbeløp, stønadFom, stønadTom, personIdent)
     }
 
     override fun toString(): String {
         return "AndelTilkjentYtelse(id = $id, behandling = $behandlingId, " +
-               "beløp = $beløp, stønadFom = $stønadFom, stønadTom = $stønadTom, periodeOffset = $periodeOffset)"
+               "beløp = $kalkulertUtbetalingsbeløp, stønadFom = $stønadFom, stønadTom = $stønadTom, periodeOffset = $periodeOffset)"
     }
 
     fun erTilsvarendeForUtbetaling(other: AndelTilkjentYtelse): Boolean {
         return (this.personIdent == other.personIdent
                 && this.stønadFom == other.stønadFom
                 && this.stønadTom == other.stønadTom
-                && this.beløp == other.beløp
+                && this.kalkulertUtbetalingsbeløp == other.kalkulertUtbetalingsbeløp
                 && this.type == other.type)
     }
 
@@ -161,7 +174,7 @@ fun List<AndelTilkjentYtelse>.slåSammenBack2BackAndelsperioderMedSammeBeløp():
         val back2BackAndelsperiodeMedSammeBeløp = this.singleOrNull {
             andel!!.stønadTom.plusMonths(1).equals(it.stønadFom) &&
             andel!!.personIdent == it.personIdent &&
-            andel!!.beløp == it.beløp
+            andel!!.kalkulertUtbetalingsbeløp == it.kalkulertUtbetalingsbeløp
         }
         andel = if (back2BackAndelsperiodeMedSammeBeløp != null) {
             andel!!.copy(stønadTom = back2BackAndelsperiodeMedSammeBeløp.stønadTom)

@@ -61,7 +61,6 @@ class BeregningServiceTest {
 
         beregningService = BeregningService(andelTilkjentYtelseRepository,
                                             fagsakService,
-                                            featureToggleService,
                                             tilkjentYtelseRepository,
                                             behandlingResultatRepository,
                                             behandlingRepository,
@@ -122,7 +121,7 @@ class BeregningServiceTest {
         verify(exactly = 1) { tilkjentYtelseRepository.save(capture(slot)) }
 
         Assertions.assertEquals(1, slot.captured.andelerTilkjentYtelse.size)
-        Assertions.assertEquals(1054, slot.captured.andelerTilkjentYtelse.first().beløp)
+        Assertions.assertEquals(1054, slot.captured.andelerTilkjentYtelse.first().kalkulertUtbetalingsbeløp)
         Assertions.assertEquals(periodeFom.nesteMåned(), slot.captured.andelerTilkjentYtelse.first().stønadFom)
         Assertions.assertEquals(periodeTom.forrigeMåned(), slot.captured.andelerTilkjentYtelse.first().stønadTom)
     }
@@ -177,11 +176,11 @@ class BeregningServiceTest {
         val satsPeriode1Slutt = YearMonth.of(2019, 2)
         val satsPeriode2Start = YearMonth.of(2019, 3)
 
-        Assertions.assertEquals(970, andelerTilkjentYtelse.first().beløp)
+        Assertions.assertEquals(970, andelerTilkjentYtelse.first().kalkulertUtbetalingsbeløp)
         Assertions.assertEquals(periodeFom.nesteMåned(), andelerTilkjentYtelse.first().stønadFom)
         Assertions.assertEquals(satsPeriode1Slutt, andelerTilkjentYtelse.first().stønadTom)
 
-        Assertions.assertEquals(1054, andelerTilkjentYtelse.last().beløp)
+        Assertions.assertEquals(1054, andelerTilkjentYtelse.last().kalkulertUtbetalingsbeløp)
         Assertions.assertEquals(satsPeriode2Start, andelerTilkjentYtelse.last().stønadFom)
         Assertions.assertEquals(periodeTom.toYearMonth(), andelerTilkjentYtelse.last().stønadTom)
     }
@@ -241,7 +240,7 @@ class BeregningServiceTest {
 
         val andelerTilkjentYtelse = slot.captured.andelerTilkjentYtelse.sortedBy { it.stønadFom }
 
-        Assertions.assertEquals(970/2, andelerTilkjentYtelse.first().beløp)
+        Assertions.assertEquals(970/2, andelerTilkjentYtelse.first().kalkulertUtbetalingsbeløp)
         Assertions.assertEquals(periodeFom.nesteMåned(), andelerTilkjentYtelse.first().stønadFom)
         Assertions.assertEquals(periodeTom.toYearMonth(), andelerTilkjentYtelse.first().stønadTom)
     }
@@ -386,27 +385,27 @@ class BeregningServiceTest {
         // Barn 1 - første periode (før satsendring)
         Assertions.assertEquals(periode1Fom.nesteMåned(), andelerBarn1[0].stønadFom)
         Assertions.assertEquals(tilleggFom!!.forrigeMåned(), andelerBarn1[0].stønadTom)
-        Assertions.assertEquals(1054, andelerBarn1[0].beløp)
+        Assertions.assertEquals(1054, andelerBarn1[0].kalkulertUtbetalingsbeløp)
 
         // Barn 1 - første periode (etter sept 2020 satsendring, før fylte 6 år)
         Assertions.assertEquals(tilleggFom.toYearMonth(), andelerBarn1[1].stønadFom)
         Assertions.assertEquals(periode1Tom.toYearMonth(), andelerBarn1[1].stønadTom)
-        Assertions.assertEquals(1354, andelerBarn1[1].beløp)
+        Assertions.assertEquals(1354, andelerBarn1[1].kalkulertUtbetalingsbeløp)
 
         // Barn 1 - andre periode (etter sept 2021 satsendring, før fylte 6 år)
         Assertions.assertEquals(periode3Fom.nesteMåned(), andelerBarn1[2].stønadFom)
         Assertions.assertEquals(barnFødselsdato.plusYears(6).forrigeMåned(), andelerBarn1[2].stønadTom)
-        Assertions.assertEquals(1654, andelerBarn1[2].beløp)
+        Assertions.assertEquals(1654, andelerBarn1[2].kalkulertUtbetalingsbeløp)
 
         // Barn 1 - andre periode (etter fylte 6 år)
         Assertions.assertEquals(barnFødselsdato.plusYears(6).toYearMonth(), andelerBarn1[3].stønadFom)
         Assertions.assertEquals(periode3Tom.toYearMonth(), andelerBarn1[3].stønadTom)
-        Assertions.assertEquals(1054, andelerBarn1[3].beløp)
+        Assertions.assertEquals(1054, andelerBarn1[3].kalkulertUtbetalingsbeløp)
 
         // Barn 2 sin eneste periode (etter siste satsendring)
         Assertions.assertEquals(periode3Fom.nesteMåned(), andelerBarn2[0].stønadFom)
         Assertions.assertEquals(periode3Midt.toYearMonth(), andelerBarn2[0].stønadTom)
-        Assertions.assertEquals(1654, andelerBarn2[0].beløp)
+        Assertions.assertEquals(1654, andelerBarn2[0].kalkulertUtbetalingsbeløp)
 
     }
 
@@ -548,22 +547,22 @@ class BeregningServiceTest {
         // Første periode (før satsendring)
         Assertions.assertEquals(førstePeriodeFomForBarnet.nesteMåned(), andelerTilkjentYtelse[0].stønadFom)
         Assertions.assertEquals(førsteSatsendringFom.forrigeMåned(), andelerTilkjentYtelse[0].stønadTom)
-        Assertions.assertEquals(if (deltBostedForFørstePeriode) 527 else 1054, andelerTilkjentYtelse[0].beløp)
+        Assertions.assertEquals(if (deltBostedForFørstePeriode) 527 else 1054, andelerTilkjentYtelse[0].kalkulertUtbetalingsbeløp)
 
         // Andre periode (fra første satsendring til slutt av første godkjente perioderesultat for barnet)
         Assertions.assertEquals(førsteSatsendringFom.toYearMonth(), andelerTilkjentYtelse[1].stønadFom)
         Assertions.assertEquals(forventetSluttForFørsteAndelsperiode, andelerTilkjentYtelse[1].stønadTom)
-        Assertions.assertEquals(if (deltBostedForFørstePeriode) 677 else 1354, andelerTilkjentYtelse[1].beløp)
+        Assertions.assertEquals(if (deltBostedForFørstePeriode) 677 else 1354, andelerTilkjentYtelse[1].kalkulertUtbetalingsbeløp)
 
         // Tredje periode (fra start av andre godkjente perioderesultat for barnet til neste satsendring).
         // At denne perioden følger back2back med tom for forrige periode er primært det som testes her.
         Assertions.assertEquals(forventetStartForAndreAndelsperiode, andelerTilkjentYtelse[2].stønadFom)
         Assertions.assertEquals(andreSatsendringFom.forrigeMåned(), andelerTilkjentYtelse[2].stønadTom)
-        Assertions.assertEquals(if (deltBostedForAndrePeriode) 677 else 1354, andelerTilkjentYtelse[2].beløp)
+        Assertions.assertEquals(if (deltBostedForAndrePeriode) 677 else 1354, andelerTilkjentYtelse[2].kalkulertUtbetalingsbeløp)
 
         // Fjerde periode (fra siste satsendring til slutt av endre godkjente perioderesultat for barnet)
         Assertions.assertEquals(andreSatsendringFom.toYearMonth(), andelerTilkjentYtelse[3].stønadFom)
         Assertions.assertEquals(andrePeriodeTomForBarnet.toYearMonth(), andelerTilkjentYtelse[3].stønadTom)
-        Assertions.assertEquals(if (deltBostedForAndrePeriode) 827 else 1654, andelerTilkjentYtelse[3].beløp)
+        Assertions.assertEquals(if (deltBostedForAndrePeriode) 827 else 1654, andelerTilkjentYtelse[3].kalkulertUtbetalingsbeløp)
     }
 }
