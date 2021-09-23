@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
@@ -8,6 +9,9 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjeMedAndeler
 import no.nav.familie.ba.sak.common.UtbetalingsikkerhetFeil
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering.maksBeløp
+import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import java.time.LocalDateTime
 
 // 3 år (krav i loven) og 2 måneder (på grunn av behandlingstid)
@@ -90,18 +94,34 @@ object TilkjentYtelseValidering {
             }
         }
     }
+
+    fun maksBeløp(personType: PersonType): Int {
+        val satser = SatsService.hentAllesatser()
+        val småbarnsTillegg = satser.filter { it.type == SatsType.SMA }
+        val ordinærMedTillegg = satser.filter { it.type == SatsType.TILLEGG_ORBA }
+        val ordinær = satser.filter { it.type == SatsType.ORBA }
+        if (småbarnsTillegg.isEmpty() || ordinærMedTillegg.isEmpty() || ordinær.isEmpty()) error("Fant ikke satser ved validering")
+        val maksSmåbarnstillegg = småbarnsTillegg.maxByOrNull { it.beløp }!!.beløp
+        val maksOrdinærMedTillegg = ordinærMedTillegg.maxByOrNull { it.beløp }!!.beløp
+        val maksOrdinær = ordinær.maxByOrNull { it.beløp }!!.beløp
+        return when (personType) {
+            PersonType.BARN -> maksOrdinærMedTillegg
+            PersonType.SØKER -> maksOrdinær + maksSmåbarnstillegg
+            else -> throw Feil("Ikke støtte for å utbetale til persontype ${personType.name}")
+        }
+    }
 }
 
 private fun validerAtBeløpForPartStemmerMedSatser(person: Person,
                                                   andeler: List<AndelTilkjentYtelse>,
-                                                  maksAntallAndeler: Int = 2,
-                                                  maksTotalBeløp: Int = 2500) {
+                                                  maksAntallAndeler: Int = if (person.type == PersonType.BARN) 1 else 2,
+                                                  maksTotalBeløp: Int = maksBeløp(person.type)) {
     if (andeler.size > maksAntallAndeler) {
         throw UtbetalingsikkerhetFeil(melding = "Validering av andeler for ${person.type} i perioden (${andeler.first().stønadFom} - ${andeler.first().stønadTom}) feilet: Tillatte andeler = ${maksAntallAndeler}, faktiske andeler = ${andeler.size}.",
                                       frontendFeilmelding = "Det har skjedd en systemfeil, og beløpene stemmer ikke overens med dagens satser. Kontakt teamet for hjelp")
     }
 
-    val totalbeløp = andeler.map { it.beløp }
+    val totalbeløp = andeler.map { it.kalkulertUtbetalingsbeløp }
             .fold(0) { sum, beløp -> sum + beløp }
     if (totalbeløp > maksTotalBeløp) {
         throw UtbetalingsikkerhetFeil(melding = "Validering av andeler for ${person.type} i perioden (${andeler.first().stønadFom} - ${andeler.first().stønadTom}) feilet: Tillatt totalbeløp = ${maksTotalBeløp}, faktiske totalbeløp = ${totalbeløp}.",

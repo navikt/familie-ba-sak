@@ -5,6 +5,8 @@ import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.Utils
+import no.nav.familie.ba.sak.common.Utils.konverterEnumsTilString
+import no.nav.familie.ba.sak.common.Utils.konverterStringTilEnums
 import no.nav.familie.ba.sak.common.forrigeMåned
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.common.tilMånedÅr
@@ -1602,15 +1604,8 @@ fun VedtakBegrunnelseType.hentMånedOgÅrForBegrunnelse(periode: Periode) = when
 @Converter
 class VedtakBegrunnelseSpesifikasjonListConverter : AttributeConverter<List<VedtakBegrunnelseSpesifikasjon>, String> {
 
-    override fun convertToDatabaseColumn(vedtakBegrunnelseSpesifikasjonList: List<VedtakBegrunnelseSpesifikasjon>): String =
-            vedtakBegrunnelseSpesifikasjonList.joinToString(separator = SPLIT_CHAR)
+    override fun convertToDatabaseColumn(vedtakBegrunnelseSpesifikasjoner: List<VedtakBegrunnelseSpesifikasjon>) =
+            konverterEnumsTilString(vedtakBegrunnelseSpesifikasjoner)
 
-    override fun convertToEntityAttribute(string: String?): List<VedtakBegrunnelseSpesifikasjon> =
-            if (string.isNullOrBlank()) emptyList() else string.split(SPLIT_CHAR)
-                    .map { VedtakBegrunnelseSpesifikasjon.valueOf(it) }
-
-    companion object {
-
-        private const val SPLIT_CHAR = ";"
-    }
+    override fun convertToEntityAttribute(string: String?): List<VedtakBegrunnelseSpesifikasjon> = konverterStringTilEnums(string)
 }
