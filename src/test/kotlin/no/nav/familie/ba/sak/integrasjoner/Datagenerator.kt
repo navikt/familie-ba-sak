@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.integrasjoner
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.DEFAULT_JOURNALFØRENDE_ENHET
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.Sakstype
 import no.nav.familie.ba.sak.task.dto.FAGSYSTEM
+import no.nav.familie.kontrakter.felles.Behandlingstema
 import no.nav.familie.kontrakter.felles.BrukerIdType
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.journalpost.*
@@ -74,6 +75,7 @@ fun lagTestOppgaveDTO(oppgaveId: Long,
                    beskrivelse = "Beskrivelse for oppgave",
                    tema = Tema.BAR,
                    oppgavetype = oppgavetype.value,
+                   behandlingstema = Behandlingstema.OrdinærBarnetrygd.value,
                    opprettetTidspunkt = LocalDate.of(
                            2020,
                            1,

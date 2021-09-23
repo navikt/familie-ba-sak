@@ -81,8 +81,8 @@ class BehandlingsresultatService(
 
         val behandlingsresultat =
                 BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(ytelsePersonerMedResultat)
-        secureLogger.info("Resultater fra vilkårsvurdering på behandling ${behandling.id}: $ytelsePersonerMedResultat")
-        logger.info("Resultat fra vilkårsvurdering på behandling ${behandling.id}: $behandlingsresultat")
+        secureLogger.info("Resultater fra vilkårsvurdering på behandling $behandling: $ytelsePersonerMedResultat")
+        logger.info("Resultat fra vilkårsvurdering på behandling $behandling: $behandlingsresultat")
 
         return behandlingsresultat
     }
