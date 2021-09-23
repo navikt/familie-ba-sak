@@ -106,7 +106,6 @@ no.nav.security.jwt:
           client-auth-method: client_secret_basic
 
 prosessering.fixedDelayString.in.milliseconds: 2000
-ACCEPTED_CLIENTS: ${BA_SAK_FRONTEND_CLIENT_ID}, ${BA_MOTTAK_CLIENT_ID}, ${FAMILIE_PROSESSERING_CLIENT_ID}
 
 credential:
   username: "srv-ks-sak"
