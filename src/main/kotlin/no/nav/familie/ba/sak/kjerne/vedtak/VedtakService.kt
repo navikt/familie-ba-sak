@@ -40,7 +40,7 @@ class VedtakService(
     }
 
     fun hent(vedtakId: Long): Vedtak {
-        return vedtakRepository.getOne(vedtakId)
+        return vedtakRepository.getById(vedtakId)
     }
 
     fun hentAktivForBehandling(behandlingId: Long): Vedtak? {
