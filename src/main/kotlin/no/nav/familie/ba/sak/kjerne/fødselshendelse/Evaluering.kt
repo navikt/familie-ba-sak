@@ -1,7 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.fødselshendelse
 
-import no.nav.familie.kontrakter.felles.objectMapper
-
 
 interface EvalueringÅrsak {
 
@@ -18,9 +16,6 @@ data class Evaluering(
         val begrunnelse: String,
         val beskrivelse: String = "",
         val identifikator: String = "") {
-
-    fun toJson(): String =
-            objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(this)
 
     companion object {
 
