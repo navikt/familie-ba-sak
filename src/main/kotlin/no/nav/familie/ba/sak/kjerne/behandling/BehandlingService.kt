@@ -1,8 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.behandling
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
@@ -50,8 +48,7 @@ class BehandlingService(
         private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
         private val oppgaveService: OppgaveService,
         private val infotrygdService: InfotrygdService,
-        private val vedtaksperiodeService: VedtaksperiodeService,
-        private val featureToggleService: FeatureToggleService
+        private val vedtaksperiodeService: VedtaksperiodeService
 ) {
 
     @Transactional
@@ -106,7 +103,13 @@ class BehandlingService(
             underkategori = bestemUnderkategori(nyUnderkategori = nyBehandlingUnderkategori,
                                                 nyBehandlingType = behandling.type,
                                                 løpendeUnderkategori = hentLøpendeUnderkategori(fagsakId = fagsak.id))
-        })
+        }).also { behandling ->
+            oppgaveService.patchOppgaverForBehandling(behandling) {
+                it.copy(
+                        behandlingstema = behandling.underkategori.tilBehandlingstema().value
+                )
+            }
+        }
     }
 
     @Transactional
