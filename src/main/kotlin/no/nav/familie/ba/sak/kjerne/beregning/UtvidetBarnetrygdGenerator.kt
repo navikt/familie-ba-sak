@@ -50,7 +50,9 @@ data class UtvidetBarnetrygdGenerator(
                         LocalDateSegment(
                                 it.stønadFom.førsteDagIInneværendeMåned(),
                                 it.stønadTom.sisteDagIInneværendeMåned(),
-                                listOf(PeriodeData(ident = identMedAndeler.key, rolle = PersonType.BARN, beløp = it.kalkulertUtbetalingsbeløp))
+                                listOf(PeriodeData(ident = identMedAndeler.key,
+                                                   rolle = PersonType.BARN,
+                                                   prosent = it.prosent))
                         )
                     })
                 }
@@ -62,21 +64,23 @@ data class UtvidetBarnetrygdGenerator(
         return sammenslåttTidslinje.toSegments()
                 .filter { segement -> segement.value.any { it.rolle == PersonType.BARN } && segement.value.any { it.rolle == PersonType.SØKER } }
                 .map {
+                    val ordinærSatsForPeriode = 1054 // TODO: Erstatt med henting av ordinærsats for måned. Feil kan kastes hvis flere
+                    val prosentForPeriode = it.value.maxByOrNull { data -> data.prosent }?.prosent ?: error("Finner ikke prosent")
                     AndelTilkjentYtelse(
                             behandlingId = behandlingId,
                             tilkjentYtelse = tilkjentYtelse,
                             personIdent = søkerIdent,
                             stønadFom = it.fom.toYearMonth(),
                             stønadTom = it.tom.toYearMonth(),
-                            kalkulertUtbetalingsbeløp = it.value.maxByOrNull { data -> data.beløp }?.beløp ?: error("Finner ikke beløp"),
+                            kalkulertUtbetalingsbeløp = (BigDecimal(ordinærSatsForPeriode) * prosentForPeriode / BigDecimal(100)).toInt(),
                             type = YtelseType.UTVIDET_BARNETRYGD,
-                            sats = 0, // TODO: Sette reel verdi
-                            prosent = BigDecimal(0) // TODO: Sette reel verdi
+                            sats = ordinærSatsForPeriode,
+                            prosent = prosentForPeriode
                     )
                 }
     }
 
-    private data class PeriodeData(val ident: String, val rolle: PersonType, val beløp: Int = 0)
+    private data class PeriodeData(val ident: String, val rolle: PersonType, val prosent: BigDecimal = BigDecimal.ZERO)
 
     private fun kombinerTidslinjer(sammenlagtTidslinje: LocalDateTimeline<List<PeriodeData>>,
                                    tidslinje: LocalDateTimeline<List<PeriodeData>>): LocalDateTimeline<List<PeriodeData>> {

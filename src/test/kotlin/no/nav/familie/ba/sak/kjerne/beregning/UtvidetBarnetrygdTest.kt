@@ -28,8 +28,6 @@ import java.time.LocalDate
 
 internal class UtvidetBarnetrygdTest {
 
-    // TODO: Stedene i testen som ser på beløp, må starte å se på prosent
-
     private val featureToggleService = mockk<FeatureToggleService>()
 
     private val fødselsdato = LocalDate.of(2014, 1, 1)
