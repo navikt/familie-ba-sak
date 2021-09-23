@@ -213,26 +213,26 @@ class FagsakServiceTest(
     }
 
     @Test
-    fun `test at arkiverte fagsaker med behandling ikke blir funnet ved søk`() {
+    fun `Skal teste at arkiverte fagsaker med behandling ikke blir funnet ved søk`() {
         val søker1Fnr = randomFnr()
 
         every {
             personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(eq(søker1Fnr))
-        } returns PersonInfo(fødselsdato = LocalDate.of(1990, 2, 19), kjønn = Kjønn.KVINNE, navn = "søker1")
+        } returns PersonInfo(fødselsdato = LocalDate.of(1991, 2, 19), kjønn = Kjønn.KVINNE, navn = "søker1")
 
         every {
             personopplysningerService.hentPersoninfoEnkel(eq(søker1Fnr))
-        } returns PersonInfo(fødselsdato = LocalDate.of(1990, 2, 19), kjønn = Kjønn.KVINNE, navn = "søker1")
+        } returns PersonInfo(fødselsdato = LocalDate.of(1991, 2, 19), kjønn = Kjønn.KVINNE, navn = "søker1")
 
         fagsakService.hentEllerOpprettFagsak(FagsakRequest(
-                søker1Fnr
+            søker1Fnr
         ))
 
         stegService.håndterNyBehandling(NyBehandling(
-                BehandlingKategori.NASJONAL,
-                BehandlingUnderkategori.ORDINÆR,
-                søker1Fnr,
-                BehandlingType.FØRSTEGANGSBEHANDLING
+            BehandlingKategori.NASJONAL,
+            BehandlingUnderkategori.ORDINÆR,
+            søker1Fnr,
+            BehandlingType.FØRSTEGANGSBEHANDLING
         ))
 
         fagsakService.lagre(fagsakService.hentFagsakPåPerson(setOf(PersonIdent(søker1Fnr))).also { it?.arkivert = true }!!)
@@ -244,19 +244,19 @@ class FagsakServiceTest(
     }
 
     @Test
-    fun `test at arkiverte fagsaker uten behandling ikke blir funnet ved søk`() {
+    fun `Skal teste at arkiverte fagsaker uten behandling ikke blir funnet ved søk`() {
         val søker1Fnr = randomFnr()
 
         every {
             personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(eq(søker1Fnr))
-        } returns PersonInfo(fødselsdato = LocalDate.of(1990, 2, 19), kjønn = Kjønn.KVINNE, navn = "søker1")
+        } returns PersonInfo(fødselsdato = LocalDate.of(1992, 2, 19), kjønn = Kjønn.KVINNE, navn = "søker1")
 
         every {
             personopplysningerService.hentPersoninfoEnkel(eq(søker1Fnr))
-        } returns PersonInfo(fødselsdato = LocalDate.of(1990, 2, 19), kjønn = Kjønn.KVINNE, navn = "søker1")
+        } returns PersonInfo(fødselsdato = LocalDate.of(1992, 2, 19), kjønn = Kjønn.KVINNE, navn = "søker1")
 
         fagsakService.hentEllerOpprettFagsak(FagsakRequest(
-                søker1Fnr
+            søker1Fnr
         ))
 
         fagsakService.lagre(fagsakService.hentFagsakPåPerson(setOf(PersonIdent(søker1Fnr))).also { it?.arkivert = true }!!)
@@ -294,7 +294,8 @@ class FagsakServiceTest(
     }
 
     @Test
-    fun `Søk på fnr som ikke finnes i PDL skal vi tom liste`() {
+    // Satte XX for at dette testet skal kjøre sist.
+    fun `XX Søk på fnr som ikke finnes i PDL skal vi tom liste`() {
         every {
             integrasjonClient.sjekkTilgangTilPersoner(any())
         } answers {
