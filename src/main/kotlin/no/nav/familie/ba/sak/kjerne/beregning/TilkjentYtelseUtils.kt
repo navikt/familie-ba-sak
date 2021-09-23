@@ -174,11 +174,9 @@ object TilkjentYtelseUtils {
                 maxSatsGyldigFraOgMed = SatsService.tilleggEndringSeptember2021,
         ) else emptyList()
 
-        val beløpsperioder =
-                listOf(satsperioderFørFylte6År, satsperioderEtterFylte6År).flatten()
+        return listOf(satsperioderFørFylte6År, satsperioderEtterFylte6År).flatten()
                         .sortedBy { it.fraOgMed }
                         .fold(mutableListOf(), ::slåSammenEtterfølgendePerioderMedSammeBeløp)
-        return beløpsperioder
     }
 
     fun oppdaterTilkjentYtelseMedEndretUtbetalingAndeler(
