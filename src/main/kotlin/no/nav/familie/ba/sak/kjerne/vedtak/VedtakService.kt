@@ -52,15 +52,6 @@ class VedtakService(
                ?: throw Feil("Finner ikke aktivt vedtak på behandling $behandlingId")
     }
 
-    private fun hentVedtakForAktivBehandling(fagsakId: Long): Vedtak {
-        val behandling: Behandling = behandlingService.hentAktivForFagsak(fagsakId)
-                                     ?: throw Feil(message = "Finner ikke aktiv behandling på fagsak")
-
-        return hentAktivForBehandling(behandlingId = behandling.id)
-               ?: throw Feil(message = "Finner ikke aktiv vedtak på behandling")
-
-    }
-
     fun oppdater(vedtak: Vedtak): Vedtak {
 
         return if (vedtakRepository.findByIdOrNull(vedtak.id) != null) {
