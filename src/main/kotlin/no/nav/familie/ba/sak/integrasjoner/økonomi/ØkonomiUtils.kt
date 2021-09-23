@@ -64,7 +64,7 @@ object ØkonomiUtils {
      */
     fun sisteAndelPerKjede(forrigeKjeder: Map<String, List<AndelTilkjentYtelse>>,
                            oppdaterteKjeder: Map<String, List<AndelTilkjentYtelse>>): Map<String, AndelTilkjentYtelse?> =
-            forrigeKjeder.keys.union(oppdaterteKjeder.keys).associateWith { kjedeIdentifikator -> null }
+            forrigeKjeder.keys.union(oppdaterteKjeder.keys).associateWith { null }
 
     private fun beståendeAndelerIKjede(forrigeKjede: List<AndelTilkjentYtelse>?,
                                        oppdatertKjede: List<AndelTilkjentYtelse>?): List<AndelTilkjentYtelse>? {
