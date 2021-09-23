@@ -248,8 +248,8 @@ enum class BehandlingKategori {
 
     fun tilBehandlingstype(): Behandlingstype {
         return when(this) {
-            EØS -> Behandlingstype.Utland
-            NASJONAL -> Behandlingstype.Utland
+            EØS -> Behandlingstype.EØS
+            NASJONAL -> Behandlingstype.NASJONAL
         }
     }
 }
