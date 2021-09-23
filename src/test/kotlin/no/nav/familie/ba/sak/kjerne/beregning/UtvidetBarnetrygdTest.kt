@@ -2,13 +2,13 @@ package no.nav.familie.ba.sak.kjerne.beregning
 
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.FeatureToggleService
-import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
@@ -30,7 +30,8 @@ internal class UtvidetBarnetrygdTest {
 
     private val featureToggleService = mockk<FeatureToggleService>()
 
-    private val fødselsdato = LocalDate.of(2014, 1, 1)
+    private val fødselsdatoOver6År = LocalDate.of(2014, 1, 1)
+    private val fødselsdatoUnder6År = LocalDate.of(2021,1,15)
 
     @BeforeEach
     fun setUp() {
@@ -112,6 +113,68 @@ internal class UtvidetBarnetrygdTest {
         assertEquals(søker.tom.toYearMonth(), andelUtvidetB.stønadTom)
         assertEquals(andelBarnA.kalkulertUtbetalingsbeløp, andelUtvidetB.kalkulertUtbetalingsbeløp)
     }
+
+    @Test
+    fun `Utvidet andeler får høyeste ordinærsats når søker har tillegg for barn under 6 år`() {
+
+        val søker =
+                OppfyltPeriode(fom = fødselsdatoUnder6År, tom = LocalDate.of(2021,6,15))
+        val oppfyltBarn =
+                OppfyltPeriode(fom = fødselsdatoUnder6År, tom = LocalDate.of(2021,6,15), rolle = PersonType.BARN)
+
+        val behandling = lagBehandling()
+        val vilkårsvurdering = Vilkårsvurdering(behandling = behandling)
+
+        val søkerResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = søker.ident)
+                .apply {
+                    vilkårResultater.addAll(oppfylteVilkårFor(personResultat = this,
+                                                              vilkårOppfyltFom = søker.fom,
+                                                              vilkårOppfyltTom = søker.tom,
+                                                              personType = PersonType.SØKER))
+                    vilkårResultater.addAll(oppfylteVilkårFor(personResultat = this,
+                                                              vilkårOppfyltFom = søker.fom,
+                                                              vilkårOppfyltTom = søker.tom,
+                                                              personType = PersonType.SØKER,
+                                                              erUtvidet = true))
+                }
+        val barnResultater = PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = oppfyltBarn.ident)
+                    .apply {
+                        vilkårResultater.addAll(oppfylteVilkårFor(personResultat = this,
+                                                                  vilkårOppfyltFom = oppfyltBarn.fom,
+                                                                  vilkårOppfyltTom = oppfyltBarn.tom,
+                                                                  personType = PersonType.BARN,
+                                                                  fødselsdato = fødselsdatoUnder6År))
+                    }
+
+        vilkårsvurdering.apply { personResultater = (listOf(søkerResultat) + barnResultater).toSet() }
+
+        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandling.id)
+                .apply {
+                    personer.addAll(listOf(søker, oppfyltBarn).lagGrunnlagPersoner(this, fødselsdatoUnder6År))
+                }
+
+        val andeler = TilkjentYtelseUtils.beregnTilkjentYtelse(vilkårsvurdering = vilkårsvurdering,
+                                                               personopplysningGrunnlag = personopplysningGrunnlag,
+                                                               behandling = behandling,
+                                                               featureToggleService = featureToggleService)
+                .andelerTilkjentYtelse.toList().sortedWith(compareBy({ it.stønadFom }, { it.type }, { it.kalkulertUtbetalingsbeløp }))
+
+        assertEquals(2, andeler.size)
+
+        val andelBarn = andeler[0]
+        val andelUtvidet = andeler[1]
+
+        assertEquals(oppfyltBarn.ident, andelBarn.personIdent)
+        assertEquals(oppfyltBarn.fom.nesteMåned(), andelBarn.stønadFom)
+        assertEquals(oppfyltBarn.tom.toYearMonth(), andelBarn.stønadTom)
+        assertEquals(1354, andelBarn.kalkulertUtbetalingsbeløp)
+
+        assertEquals(søker.ident, andelUtvidet.personIdent)
+        assertEquals(søker.fom.nesteMåned(), andelUtvidet.stønadFom)
+        assertEquals(søker.tom.toYearMonth(), andelUtvidet.stønadTom)
+        assertEquals(1054, andelUtvidet.kalkulertUtbetalingsbeløp)
+    }
+
 
     @Test
     fun `Utvidet andeler lages kun når vilkåret er innfridd`() {
@@ -304,7 +367,8 @@ internal class UtvidetBarnetrygdTest {
                                   vilkårOppfyltTom: LocalDate?,
                                   personType: PersonType,
                                   erUtvidet: Boolean = false,
-                                  erDeltBosted: Boolean = false): Set<VilkårResultat> {
+                                  erDeltBosted: Boolean = false,
+                                  fødselsdato: LocalDate = fødselsdatoOver6År): Set<VilkårResultat> {
         val vilkårSomSkalVurderes = if (erUtvidet)
             listOf(Vilkår.UTVIDET_BARNETRYGD)
         else
@@ -322,7 +386,7 @@ internal class UtvidetBarnetrygdTest {
         }.toSet()
     }
 
-    private fun List<OppfyltPeriode>.lagGrunnlagPersoner(personopplysningGrunnlag: PersonopplysningGrunnlag): List<Person> = this.map {
+    private fun List<OppfyltPeriode>.lagGrunnlagPersoner(personopplysningGrunnlag: PersonopplysningGrunnlag, fødselsdato: LocalDate = fødselsdatoOver6År): List<Person> = this.map {
         Person(aktørId = randomAktørId(),
                personIdent = PersonIdent(it.ident),
                type = it.rolle,

@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagINesteMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
@@ -22,8 +23,6 @@ data class UtvidetBarnetrygdGenerator(
         val behandlingId: Long,
         val tilkjentYtelse: TilkjentYtelse
 ) {
-
-    // TODO: Her må man også ta hensyn til basesats og prosent
 
     fun lagUtvidetBarnetrygdAndeler(utvidetVilkår: List<VilkårResultat>,
                                     andelerBarna: List<AndelTilkjentYtelse>): List<AndelTilkjentYtelse> {
@@ -64,7 +63,11 @@ data class UtvidetBarnetrygdGenerator(
         return sammenslåttTidslinje.toSegments()
                 .filter { segement -> segement.value.any { it.rolle == PersonType.BARN } && segement.value.any { it.rolle == PersonType.SØKER } }
                 .map {
-                    val ordinærSatsForPeriode = 1054 // TODO: Erstatt med henting av ordinærsats for måned. Feil kan kastes hvis flere
+                    val ordinærSatsForPeriode = SatsService.hentGyldigSatsFor(satstype = SatsType.ORBA,
+                                                                              stønadFraOgMed = it.fom.toYearMonth(),
+                                                                              stønadTilOgMed = it.tom.toYearMonth())
+                                                        .singleOrNull()?.sats
+                                                ?: error("Skal finnes én ordinær sats for gitt segment oppdelt basert på andeler")
                     val prosentForPeriode = it.value.maxByOrNull { data -> data.prosent }?.prosent ?: error("Finner ikke prosent")
                     AndelTilkjentYtelse(
                             behandlingId = behandlingId,
