@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.beregning
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
+import no.nav.familie.ba.sak.common.Utils.avrundetHeltallAvProsent
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
@@ -75,7 +76,7 @@ data class UtvidetBarnetrygdGenerator(
                             personIdent = søkerIdent,
                             stønadFom = it.fom.toYearMonth(),
                             stønadTom = it.tom.toYearMonth(),
-                            kalkulertUtbetalingsbeløp = (BigDecimal(ordinærSatsForPeriode) * prosentForPeriode / BigDecimal(100)).toInt(),
+                            kalkulertUtbetalingsbeløp = ordinærSatsForPeriode.avrundetHeltallAvProsent(prosentForPeriode),
                             type = YtelseType.UTVIDET_BARNETRYGD,
                             sats = ordinærSatsForPeriode,
                             prosent = prosentForPeriode

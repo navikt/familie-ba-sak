@@ -143,8 +143,7 @@ object TilkjentYtelseUtils {
                                             personIdent = person.personIdent.ident,
                                             stønadFom = beløpsperiode.fraOgMed,
                                             stønadTom = beløpsperiode.tilOgMed,
-                                            kalkulertUtbetalingsbeløp = beløpsperiode.sats.toBigDecimal()
-                                                    .avrundetHeltallAvProsent(prosent),
+                                            kalkulertUtbetalingsbeløp = beløpsperiode.sats.avrundetHeltallAvProsent(prosent),
                                             type = finnYtelseType(behandling.kategori, behandling.underkategori, person.type),
                                             sats = beløpsperiode.sats,
                                             prosent = prosent
@@ -189,7 +188,7 @@ object TilkjentYtelseUtils {
                     andelForPerson.copy(
                             stønadFom = månedPeriodeEndret.fom,
                             stønadTom = månedPeriodeEndret.tom,
-                            kalkulertUtbetalingsbeløp = andelForPerson.kalkulertUtbetalingsbeløp.toBigDecimal()
+                            kalkulertUtbetalingsbeløp = andelForPerson.kalkulertUtbetalingsbeløp
                                     .avrundetHeltallAvProsent(endretUtbetalingAndel.prosent))
                 })
                 // Legger til nye AndelTilkjentYtelse for perioder som ikke berøres av endringer.

@@ -39,9 +39,11 @@ object Utils {
         return model.properties[key]?.toString()
     }
 
-    fun BigDecimal.avrundetHeltallAvProsent(prosent: BigDecimal): Int = this.times(prosent)
+    fun BigDecimal.avrundetHeltallAvProsent(prosent: BigDecimal) = this.times(prosent)
             .divide(100.toBigDecimal()).setScale(0, RoundingMode.HALF_UP)
             .toInt()
+
+    fun Int.avrundetHeltallAvProsent(prosent: BigDecimal) = this.toBigDecimal().avrundetHeltallAvProsent(prosent)
 
     fun String.storForbokstav() = this.lowercase().replaceFirstChar { it.uppercase() }
     fun String.storForbokstavIHvertOrd() = this.split(" ").joinToString(" ") { it.storForbokstav() }.trimEnd()
