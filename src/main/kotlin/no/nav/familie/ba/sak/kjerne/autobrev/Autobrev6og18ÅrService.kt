@@ -18,7 +18,6 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.steg.StegService
-import no.nav.familie.ba.sak.kjerne.vedtak.VedtakBegrunnelseRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
@@ -38,7 +37,6 @@ class Autobrev6og18ÅrService(
         private val vedtakService: VedtakService,
         private val taskRepository: TaskRepositoryWrapper,
         private val vedtaksperiodeService: VedtaksperiodeService,
-        private val vedtakBegrunnelseRepository: VedtakBegrunnelseRepository
 ) {
 
     @Transactional
@@ -108,8 +106,8 @@ class Autobrev6og18ÅrService(
                 else -> throw Feil("Alder må være oppgitt til enten 6 eller 18 år.")
             }
 
-    private fun brevAlleredeSendt(autobrev6og18ÅrDTO: Autobrev6og18ÅrDTO): Boolean {
-        val brevSendtMedNyModell = behandlingService.hentBehandlinger(fagsakId = autobrev6og18ÅrDTO.fagsakId)
+    private fun brevAlleredeSendt(autobrev6og18ÅrDTO: Autobrev6og18ÅrDTO): Boolean =
+        behandlingService.hentBehandlinger(fagsakId = autobrev6og18ÅrDTO.fagsakId)
                 .filter { it.status == BehandlingStatus.AVSLUTTET }
                 .any { behandling ->
                     val vedtak = vedtakService.hentAktivForBehandlingThrows(behandling.id)
@@ -120,15 +118,6 @@ class Autobrev6og18ÅrService(
                                 .contains(finnVedtakbegrunnelseForAlder(autobrev6og18ÅrDTO.alder))
                     }
                 }
-
-        val brevSendtMedGammelModell = vedtakBegrunnelseRepository.finnForFagsakMedBegrunnelseGyldigFom(
-                fagsakId = autobrev6og18ÅrDTO.fagsakId,
-                vedtakBegrunnelse = finnVedtakbegrunnelseForAlder(autobrev6og18ÅrDTO.alder),
-                fom = autobrev6og18ÅrDTO.årMåned.toLocalDate()
-        ).isNotEmpty()
-
-        return brevSendtMedNyModell || brevSendtMedGammelModell
-    }
 
     private fun barnMedAngittAlderInneværendeMånedEksisterer(behandlingId: Long, alder: Int): Boolean =
             barnMedAngittAlderInneværendeMåned(behandlingId, alder).isNotEmpty()

@@ -4,7 +4,6 @@ import io.mockk.mockk
 import no.nav.commons.foedselsnummer.testutils.FoedselsnummerGenerator
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPerson
-import no.nav.familie.ba.sak.ekstern.restDomene.RestPostVedtakBegrunnelse
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksbegrunnelse
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedBegrunnelse
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
@@ -50,7 +49,6 @@ import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
-import no.nav.familie.ba.sak.kjerne.vedtak.VedtakBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
@@ -166,25 +164,10 @@ fun tilfeldigSøker(
                kjønn = kjønn,
                målform = Målform.NB).apply { sivilstander = listOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this)) }
 
-fun lagVedtakBegrunnesle(
-        vedtak: Vedtak = lagVedtak(),
-        fom: LocalDate = LocalDate.now(),
-        tom: LocalDate = LocalDate.now(),
-        vedtakBegrunnelse: VedtakBegrunnelseSpesifikasjon,
-        brevBegrunnelse: String? = null): VedtakBegrunnelse = VedtakBegrunnelse(id = nesteVedtakBegrunnelseId(),
-                                                                                vedtak = vedtak,
-                                                                                fom = fom,
-                                                                                tom = tom,
-                                                                                begrunnelse = vedtakBegrunnelse,
-                                                                                brevBegrunnelse = brevBegrunnelse)
-
-
-fun lagVedtak(behandling: Behandling = lagBehandling(),
-              vedtakBegrunnelser: MutableSet<VedtakBegrunnelse> = mutableSetOf()) =
+fun lagVedtak(behandling: Behandling = lagBehandling()) =
         Vedtak(id = nesteVedtakId(),
                behandling = behandling,
-               vedtaksdato = LocalDateTime.now(),
-               vedtakBegrunnelser = vedtakBegrunnelser)
+               vedtaksdato = LocalDateTime.now())
 
 fun lagAndelTilkjentYtelse(fom: String,
                            tom: String,
@@ -511,12 +494,6 @@ fun kjørStegprosessForFGB(
 
     val behandlingEtterVilkårsvurderingSteg = stegService.håndterVilkårsvurdering(behandlingEtterPersongrunnlagSteg)
 
-    vedtakService.leggTilVedtakBegrunnelse(
-            RestPostVedtakBegrunnelse(
-                    fom = guttenBarnesenFødselsdato.plusYears(6),
-                    tom = null,
-                    vedtakBegrunnelse = VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR),
-            fagsakId = fagsak.id)
     if (tilSteg == StegType.VILKÅRSVURDERING) return behandlingEtterVilkårsvurderingSteg
 
     val behandlingEtterVurderTilbakekrevingSteg = stegService.håndterVurderTilbakekreving(
@@ -610,12 +587,7 @@ fun kjørStegprosessForRevurderingÅrligKontroll(
     ))
 
     val behandlingEtterVilkårsvurderingSteg = stegService.håndterVilkårsvurdering(behandling)
-    vedtakService.leggTilVedtakBegrunnelse(
-            RestPostVedtakBegrunnelse(
-                    fom = LocalDate.parse("2020-02-01"),
-                    tom = LocalDate.parse("2025-02-01"),
-                    vedtakBegrunnelse = VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR),
-            fagsakId = behandling.fagsak.id)
+
     if (tilSteg == StegType.VILKÅRSVURDERING) return behandlingEtterVilkårsvurderingSteg
 
     val behandlingEtterSimuleringSteg = stegService.håndterVurderTilbakekreving(

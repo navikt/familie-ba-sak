@@ -175,10 +175,7 @@ class SøknadGrunnlagTest(
 
         val tilkjentYtelse =
                 beregningService.hentTilkjentYtelseForBehandling(behandlingId = behandlingEtterVilkårsvurderingSteg.id)
-        val vedtaksperioder =
-                vedtaksperiodeService.hentVedtaksperioder(behandling = behandlingEtterVilkårsvurderingSteg)
         val steg = behandlingEtterVilkårsvurderingSteg.behandlingStegTilstand.map { it.behandlingSteg }.toSet()
-        assertTrue(vedtaksperioder.isNotEmpty())
         assertEquals(setOf(StegType.REGISTRERE_SØKNAD,
                            StegType.REGISTRERE_PERSONGRUNNLAG,
                            StegType.VILKÅRSVURDERING,
@@ -214,11 +211,8 @@ class SøknadGrunnlagTest(
 
         val error =
                 assertThrows<IllegalStateException> { beregningService.hentTilkjentYtelseForBehandling(behandlingId = behandlingEtterNyRegistrering.id) }
-        val vedtaksperioderEtterNyRegistrering =
-                vedtaksperiodeService.hentVedtaksperioder(behandling = behandlingEtterNyRegistrering)
         val stegEtterNyRegistrering = behandlingEtterNyRegistrering.behandlingStegTilstand.map { it.behandlingSteg }.toSet()
         assertEquals("Fant ikke tilkjent ytelse for behandling ${behandlingEtterNyRegistrering.id}", error.message)
-        assertTrue(vedtaksperioderEtterNyRegistrering.isEmpty())
         assertEquals(setOf(StegType.REGISTRERE_SØKNAD, StegType.REGISTRERE_PERSONGRUNNLAG, StegType.VILKÅRSVURDERING),
                      stegEtterNyRegistrering)
     }
