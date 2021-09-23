@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.common.kanSplitte
 import no.nav.familie.ba.sak.common.toPeriode
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVedtakBegrunnelseTilknyttetVilkår
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVilkårResultat
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.dokument.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
@@ -160,8 +161,8 @@ object VilkårsvurderingUtils {
      * aktivtResultat med hvilke vilkår som ikke skal benyttes videre
      */
     fun flyttResultaterTilInitielt(initiellVilkårsvurdering: Vilkårsvurdering,
-                                   aktivVilkårsvurdering: Vilkårsvurdering): Pair<Vilkårsvurdering, Vilkårsvurdering> {
-
+                                   aktivVilkårsvurdering: Vilkårsvurdering,
+                                   løpendeUnderkategori: BehandlingUnderkategori? = null): Pair<Vilkårsvurdering, Vilkårsvurdering> {
         // Identifiserer hvilke vilkår som skal legges til og hvilke som kan fjernes
         val personResultaterAktivt = aktivVilkårsvurdering.personResultater.toMutableSet()
         val personResultaterOppdatert = mutableSetOf<PersonResultat>()
@@ -199,6 +200,14 @@ object VilkårsvurderingUtils {
                         personsVilkårAktivt.removeAll(vilkårSomFinnes)
                     }
                 }
+                if (løpendeUnderkategori == BehandlingUnderkategori.UTVIDET && personsVilkårOppdatert.none { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD }) {
+                    val utvidetVilkår =
+                            personenSomFinnes.vilkårResultater.filter { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
+
+                    personsVilkårOppdatert.addAll(utvidetVilkår.map { it.kopierMedParent(personTilOppdatert) })
+                    personsVilkårAktivt.removeAll(utvidetVilkår);
+                }
+
                 personTilOppdatert.setSortedVilkårResultater(personsVilkårOppdatert.toSet())
 
                 // Fjern person fra aktivt dersom alle vilkår er fjernet, ellers oppdater
