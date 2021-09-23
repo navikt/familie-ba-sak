@@ -111,6 +111,17 @@ class BehandlingController(
         return ResponseEntity.ok(Ressurs.success(restSimulering))
     }
 
+    @PutMapping(path = ["/{behandlingId}/underkategori"], produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun endreBehandlingUnderkategori(@PathVariable behandlingId: Long,
+                                     @RequestBody
+                                     endreBehandling: RestEndreBehandlingUnderkategori): ResponseEntity<Ressurs<RestFagsak>> {
+        val behandling = behandlingsService.oppdaterBehandlingUnderkategori(behandling = behandlingsService.hent(behandlingId),
+                                                                            nyBehandlingUnderkategori = endreBehandling.behandlingUnderkategori)
+        val restFagsak = fagsakService.hentRestFagsak(fagsakId = behandling.fagsak.id)
+
+        return ResponseEntity.ok(restFagsak)
+    }
+
     @Transactional
     @PostMapping(path = ["/{behandlingId}/tilbakekreving"])
     fun lagreTilbakekrevingOgGåVidereTilNesteSteg(
@@ -144,6 +155,8 @@ class RestHenleggBehandlingInfo(
         val årsak: HenleggÅrsak,
         val begrunnelse: String
 )
+
+class RestEndreBehandlingUnderkategori(val behandlingUnderkategori: BehandlingUnderkategori)
 
 enum class HenleggÅrsak(val beskrivelse: String) {
     SØKNAD_TRUKKET("Søknad trukket"),
