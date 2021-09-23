@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.behandling.domene
 
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Lock
 import org.springframework.data.jpa.repository.Query
@@ -50,7 +49,7 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
     @Query("SELECT count(*) FROM Behandling b WHERE NOT b.status = 'AVSLUTTET'")
     fun finnAntallBehandlingerIkkeAvsluttet(): Long
 
-    @Query("SELECT DISTINCT aty.behandlingId FROM AndelTilkjentYtelse aty WHERE aty.behandlingId in :iverksatteLøpende AND aty.beløp = :gammelSats AND aty.stønadTom >= :månedÅrForEndring")
+    @Query("SELECT DISTINCT aty.behandlingId FROM AndelTilkjentYtelse aty WHERE aty.behandlingId in :iverksatteLøpende AND aty.sats = :gammelSats AND aty.stønadTom >= :månedÅrForEndring")
     fun finnBehadlingerForSatsendring(iverksatteLøpende: List<Long>, gammelSats: Long, månedÅrForEndring: YearMonth): List<Long>
 
     @Query("SELECT b FROM Behandling b WHERE b.opprettetÅrsak = 'FØDSELSHENDELSE' AND b.opprettetTidspunkt >= current_date")

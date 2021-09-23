@@ -2,12 +2,14 @@ package no.nav.familie.ba.sak.kjerne.beregning
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
+import no.nav.familie.ba.sak.common.Utils.avrundetHeltallAvProsent
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagINesteMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
@@ -16,13 +18,12 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
 import no.nav.fpsak.tidsserie.StandardCombinators
+import java.math.BigDecimal
 
 data class UtvidetBarnetrygdGenerator(
         val behandlingId: Long,
         val tilkjentYtelse: TilkjentYtelse
 ) {
-
-    // TODO: Her må man også ta hensyn til basesats og prosent
 
     fun lagUtvidetBarnetrygdAndeler(utvidetVilkår: List<VilkårResultat>,
                                     andelerBarna: List<AndelTilkjentYtelse>): List<AndelTilkjentYtelse> {
@@ -49,7 +50,9 @@ data class UtvidetBarnetrygdGenerator(
                         LocalDateSegment(
                                 it.stønadFom.førsteDagIInneværendeMåned(),
                                 it.stønadTom.sisteDagIInneværendeMåned(),
-                                listOf(PeriodeData(ident = identMedAndeler.key, rolle = PersonType.BARN, beløp = it.beløp))
+                                listOf(PeriodeData(ident = identMedAndeler.key,
+                                                   rolle = PersonType.BARN,
+                                                   prosent = it.prosent))
                         )
                     })
                 }
@@ -61,19 +64,27 @@ data class UtvidetBarnetrygdGenerator(
         return sammenslåttTidslinje.toSegments()
                 .filter { segement -> segement.value.any { it.rolle == PersonType.BARN } && segement.value.any { it.rolle == PersonType.SØKER } }
                 .map {
+                    val ordinærSatsForPeriode = SatsService.hentGyldigSatsFor(satstype = SatsType.ORBA,
+                                                                              stønadFraOgMed = it.fom.toYearMonth(),
+                                                                              stønadTilOgMed = it.tom.toYearMonth())
+                                                        .singleOrNull()?.sats
+                                                ?: error("Skal finnes én ordinær sats for gitt segment oppdelt basert på andeler")
+                    val prosentForPeriode = it.value.maxByOrNull { data -> data.prosent }?.prosent ?: error("Finner ikke prosent")
                     AndelTilkjentYtelse(
                             behandlingId = behandlingId,
                             tilkjentYtelse = tilkjentYtelse,
                             personIdent = søkerIdent,
                             stønadFom = it.fom.toYearMonth(),
                             stønadTom = it.tom.toYearMonth(),
-                            beløp = it.value.maxByOrNull { data -> data.beløp }?.beløp ?: error("Finner ikke beløp"),
-                            type = YtelseType.UTVIDET_BARNETRYGD
+                            kalkulertUtbetalingsbeløp = ordinærSatsForPeriode.avrundetHeltallAvProsent(prosentForPeriode),
+                            type = YtelseType.UTVIDET_BARNETRYGD,
+                            sats = ordinærSatsForPeriode,
+                            prosent = prosentForPeriode
                     )
                 }
     }
 
-    private data class PeriodeData(val ident: String, val rolle: PersonType, val beløp: Int = 0)
+    private data class PeriodeData(val ident: String, val rolle: PersonType, val prosent: BigDecimal = BigDecimal.ZERO)
 
     private fun kombinerTidslinjer(sammenlagtTidslinje: LocalDateTimeline<List<PeriodeData>>,
                                    tidslinje: LocalDateTimeline<List<PeriodeData>>): LocalDateTimeline<List<PeriodeData>> {

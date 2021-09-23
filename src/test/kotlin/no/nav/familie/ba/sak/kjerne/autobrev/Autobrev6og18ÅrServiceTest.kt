@@ -19,7 +19,6 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagSe
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.steg.StegService
-import no.nav.familie.ba.sak.kjerne.vedtak.VedtakBegrunnelseRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.task.dto.Autobrev6og18ÅrDTO
@@ -36,7 +35,6 @@ internal class Autobrev6og18ÅrServiceTest {
     val stegService = mockk<StegService>()
     val vedtakService = mockk<VedtakService>(relaxed = true)
     val taskRepository = mockk<TaskRepositoryWrapper>(relaxed = true)
-    val vedtakBegrunnelseRepository = mockk<VedtakBegrunnelseRepository>()
     val vedtaksperiodeService = mockk<VedtaksperiodeService>()
 
     val autobrev6og18ÅrService = Autobrev6og18ÅrService(personopplysningGrunnlagRepository = personopplysningGrunnlagRepository,
@@ -44,8 +42,7 @@ internal class Autobrev6og18ÅrServiceTest {
                                                         stegService = stegService,
                                                         vedtakService = vedtakService,
                                                         taskRepository = taskRepository,
-                                                        vedtaksperiodeService = vedtaksperiodeService,
-                                                        vedtakBegrunnelseRepository = vedtakBegrunnelseRepository)
+                                                        vedtaksperiodeService = vedtaksperiodeService,)
 
     @Test
     fun `Verifiser at løpende fagsak med avsluttede behandlinger og barn på 18 ikke oppretter en behandling for omregning`() {
@@ -136,7 +133,6 @@ internal class Autobrev6og18ÅrServiceTest {
         every { behandlingService.opprettBehandling(any()) } returns behandling
         every { behandlingService.hentBehandlinger(any()) } returns emptyList()
         every { personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling.id) } returns personopplysningGrunnlag
-        every { vedtakBegrunnelseRepository.finnForFagsakMedBegrunnelseGyldigFom(any(), any(), any()) } returns emptyList()
         return behandling
     }
 
