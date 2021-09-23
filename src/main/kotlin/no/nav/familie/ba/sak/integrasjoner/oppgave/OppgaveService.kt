@@ -96,10 +96,14 @@ class OppgaveService(private val integrasjonClient: IntegrasjonClient,
         return integrasjonClient.patchOppgave(patchOppgave)
     }
 
-    fun patchOppgaverForBehandling(behandling: Behandling, copyOppgave: (oppgave: Oppgave) -> Oppgave) {
+    fun patchOppgaverForBehandling(behandling: Behandling, copyOppgave: (oppgave: Oppgave) -> Oppgave?) {
         hentOppgaverSomIkkeErFerdigstilt(behandling).forEach { dbOppgave ->
             val oppgave = hentOppgave(dbOppgave.gsakId.toLong())
-            patchOppgave(copyOppgave(oppgave))
+            val patchetOppgave = copyOppgave(oppgave)
+
+            if (patchetOppgave != null) {
+                patchOppgave(patchetOppgave)
+            }
         }
     }
 

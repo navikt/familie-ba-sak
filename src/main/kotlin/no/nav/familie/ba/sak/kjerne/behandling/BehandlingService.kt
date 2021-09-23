@@ -105,9 +105,11 @@ class BehandlingService(
                                                 løpendeUnderkategori = hentLøpendeUnderkategori(fagsakId = fagsak.id))
         }).also { behandling ->
             oppgaveService.patchOppgaverForBehandling(behandling) {
-                it.copy(
-                        behandlingstema = behandling.underkategori.tilBehandlingstema().value
-                )
+                if (it.behandlingstema != behandling.underkategori.tilBehandlingstema().value) {
+                    it.copy(
+                            behandlingstema = behandling.underkategori.tilBehandlingstema().value
+                    )
+                } else null
             }
         }
     }
