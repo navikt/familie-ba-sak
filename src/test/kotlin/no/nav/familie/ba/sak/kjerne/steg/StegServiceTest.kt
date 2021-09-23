@@ -1,23 +1,15 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
-import io.mockk.verify
-import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
 import no.nav.familie.ba.sak.common.kjørStegprosessForRevurderingÅrligKontroll
 import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.lagSøknadDTO
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
-import no.nav.familie.ba.sak.common.leggTilBegrunnelsePåVedtaksperiodeIBehandling
 import no.nav.familie.ba.sak.common.randomFnr
-import no.nav.familie.ba.sak.common.vurderVilkårsvurderingTilInnvilget
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.config.mockHentPersoninfoForMedIdenter
-import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
-import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedClient
-import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.InfotrygdVedtakFeedDto
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.HenleggÅrsak
@@ -25,13 +17,10 @@ import no.nav.familie.ba.sak.kjerne.behandling.RestHenleggBehandlingInfo
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
-import no.nav.familie.ba.sak.kjerne.dokument.hentBrevtype
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
@@ -40,28 +29,12 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
-import no.nav.familie.ba.sak.task.DistribuerDokumentDTO
-import no.nav.familie.ba.sak.task.JournalførVedtaksbrevTask
-import no.nav.familie.ba.sak.task.StatusFraOppdragTask
-import no.nav.familie.ba.sak.task.dto.FAGSYSTEM
-import no.nav.familie.ba.sak.task.dto.IverksettingTaskDTO
-import no.nav.familie.ba.sak.task.dto.StatusFraOppdragDTO
-import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
-import no.nav.familie.prosessering.domene.Task
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Order
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock
-import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.context.ContextConfiguration
-import java.time.LocalDate
-import java.util.*
 
 class StegServiceTest(
         @Autowired
@@ -157,106 +130,6 @@ class StegServiceTest(
                 stegService = stegService,
                 tilbakekrevingService = tilbakekrevingService
         )
-    }
-
-    @Test
-    fun `Skal håndtere steg for frontend ordinær behandling`() {
-        val søkerFnr = randomFnr()
-        val barnFnr = randomFnr()
-
-        mockHentPersoninfoForMedIdenter(mockPersonopplysningerService, søkerFnr, barnFnr)
-
-        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
-        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
-        behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling)
-        assertEquals(FØRSTE_STEG, behandling.steg)
-
-        val behandlingEtterPersongrunnlagSteg = stegService.håndterSøknad(behandling = behandling,
-                                                                          restRegistrerSøknad = RestRegistrerSøknad(
-                                                                                  søknad = lagSøknadDTO(søkerIdent = søkerFnr,
-                                                                                                        barnasIdenter = listOf(
-                                                                                                                barnFnr)),
-                                                                                  bekreftEndringerViaFrontend = true))
-
-        assertEquals(StegType.VILKÅRSVURDERING, behandlingEtterPersongrunnlagSteg.steg)
-
-        val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)!!
-        val barn: Person =
-                persongrunnlagService.hentAktiv(behandlingId = behandling.id)!!.barna.find { it.personIdent.ident == barnFnr }!!
-        vurderVilkårsvurderingTilInnvilget(vilkårsvurdering, barn)
-        vilkårsvurderingService.oppdater(vilkårsvurdering)
-
-        val behandlingEtterVilkårsvurderingSteg = stegService.håndterVilkårsvurdering(behandlingEtterPersongrunnlagSteg)
-        assertEquals(StegType.VURDER_TILBAKEKREVING, behandlingEtterVilkårsvurderingSteg.steg)
-
-        val behandlingEtterVurderTilbakekrevingSteg = stegService.håndterVurderTilbakekreving(
-                behandlingEtterVilkårsvurderingSteg,
-                RestTilbakekreving(valg = Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING,
-                                   begrunnelse = "Begrunnelse")
-        )
-        assertEquals(StegType.SEND_TIL_BESLUTTER, behandlingEtterVurderTilbakekrevingSteg.steg)
-
-        leggTilBegrunnelsePåVedtaksperiodeIBehandling(
-                behandling = behandlingEtterVurderTilbakekrevingSteg,
-                vedtakService = vedtakService,
-                vedtaksperiodeService = vedtaksperiodeService,
-        )
-
-        val behandlingEtterSendTilBeslutter = stegService.håndterSendTilBeslutter(behandlingEtterVurderTilbakekrevingSteg, "1234")
-        assertEquals(StegType.BESLUTTE_VEDTAK, behandlingEtterSendTilBeslutter.steg)
-
-        val behandlingEtterBeslutteVedtak = stegService.håndterBeslutningForVedtak(behandlingEtterSendTilBeslutter,
-                                                                                   RestBeslutningPåVedtak(beslutning = Beslutning.GODKJENT))
-        assertEquals(StegType.IVERKSETT_MOT_OPPDRAG, behandlingEtterBeslutteVedtak.steg)
-
-        val vedtak = vedtakService.hentAktivForBehandling(behandlingEtterBeslutteVedtak.id)
-        val behandlingEtterIverksetteVedtak =
-                stegService.håndterIverksettMotØkonomi(behandlingEtterBeslutteVedtak, IverksettingTaskDTO(
-                        behandlingsId = behandlingEtterBeslutteVedtak.id,
-                        vedtaksId = vedtak!!.id,
-                        saksbehandlerId = "System",
-                        personIdent = søkerFnr
-                ))
-        assertEquals(StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI, behandlingEtterIverksetteVedtak.steg)
-
-        verify(exactly = 1) {
-            infotrygdFeedClient.sendVedtakFeedTilInfotrygd(InfotrygdVedtakFeedDto(søkerFnr, LocalDate.now()))
-        }
-
-
-        val behandlingEtterStatusFraOppdrag =
-                stegService.håndterStatusFraØkonomi(behandlingEtterIverksetteVedtak, StatusFraOppdragMedTask(
-                        statusFraOppdragDTO = StatusFraOppdragDTO(fagsystem = FAGSYSTEM,
-                                                                  personIdent = søkerFnr,
-                                                                  behandlingsId = behandlingEtterIverksetteVedtak.id,
-                                                                  vedtaksId = vedtak.id),
-                        task = Task(type = StatusFraOppdragTask.TASK_STEP_TYPE, payload = "")
-                ))
-        assertEquals(StegType.IVERKSETT_MOT_FAMILIE_TILBAKE, behandlingEtterStatusFraOppdrag.steg)
-
-        val behandlingEtterIverksetteMotTilbake = stegService.håndterIverksettMotFamilieTilbake(behandling, Properties())
-        assertEquals(StegType.JOURNALFØR_VEDTAKSBREV, behandlingEtterIverksetteMotTilbake.steg)
-
-        val behandlingEtterJournalførtVedtak =
-                stegService.håndterJournalførVedtaksbrev(behandlingEtterIverksetteMotTilbake, JournalførVedtaksbrevDTO(
-                        vedtakId = vedtak.id,
-                        task = Task(type = JournalførVedtaksbrevTask.TASK_STEP_TYPE, payload = "")
-                ))
-        assertEquals(StegType.DISTRIBUER_VEDTAKSBREV, behandlingEtterJournalførtVedtak.steg)
-
-        val behandlingEtterDistribuertVedtak = stegService.håndterDistribuerVedtaksbrev(behandlingEtterJournalførtVedtak,
-                                                                                        DistribuerDokumentDTO(behandlingId = behandlingEtterJournalførtVedtak.id,
-                                                                                                              journalpostId = "1234",
-                                                                                                              personIdent = søkerFnr,
-                                                                                                              brevmal = hentBrevtype(
-                                                                                                                      behandlingEtterJournalførtVedtak),
-                                                                                                              erManueltSendt = false))
-        assertEquals(StegType.FERDIGSTILLE_BEHANDLING, behandlingEtterDistribuertVedtak.steg)
-
-        val behandlingEtterFerdigstiltBehandling = stegService.håndterFerdigstillBehandling(behandlingEtterDistribuertVedtak)
-        assertEquals(StegType.BEHANDLING_AVSLUTTET, behandlingEtterFerdigstiltBehandling.steg)
-        assertEquals(BehandlingStatus.AVSLUTTET, behandlingEtterFerdigstiltBehandling.status)
-        assertEquals(FagsakStatus.LØPENDE, behandlingEtterFerdigstiltBehandling.fagsak.status)
     }
 
     @Test
