@@ -16,7 +16,6 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand.Companion.sisteSivilstand
-import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingUtils.flyttResultaterTilInitielt
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingUtils.lagFjernAdvarsel
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingUtils.muterPersonResultatDelete
@@ -38,7 +37,6 @@ class VilkårService(
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
         private val vilkårsvurderingMetrics: VilkårsvurderingMetrics,
         private val behandlingService: BehandlingService,
-        private val vedtakService: VedtakService,
         private val featureToggleService: FeatureToggleService,
 ) {
 
@@ -78,12 +76,6 @@ class VilkårService(
         val personResultat = vilkårsvurdering.personResultater.find { it.personIdent == personIdent }
                              ?: throw Feil(message = "Fant ikke vilkårsvurdering for person",
                                            frontendFeilmelding = "Fant ikke vilkårsvurdering for person med ident '${personIdent}")
-
-        vedtakService.oppdaterAvslagBegrunnelserForVilkår(
-                vilkårResultat = personResultat.vilkårResultater.find { it.id == vilkårId }
-                                 ?: error("Finner ikke vilkår med vilkårId $vilkårId på personResultat ${personResultat.id}"),
-                begrunnelser = emptyList(),
-                behandlingId = vilkårsvurdering.behandling.id)
 
         muterPersonResultatDelete(personResultat, vilkårId)
 
