@@ -60,7 +60,7 @@ class EndretUtbetalingAndelService(
             ?: error("Finner ikke persongrunnlag")
 
         val barn =
-            personOpplysninger.barna.single { b -> b.personIdent.ident == restEndretUtbetalingAndel.personIdent }
+            personOpplysninger.barna.singleOrNull { b -> b.personIdent.ident == restEndretUtbetalingAndel.personIdent }
 
         val endretUtbetalingAndel = EndretUtbetalingAndel(
             behandlingId = behandling.id,
@@ -73,6 +73,5 @@ class EndretUtbetalingAndelService(
         )
 
         endretUtbetalingAndelRepository.save(endretUtbetalingAndel)
-        beregningService.oppdaterBehandlingMedBeregning(behandling, personOpplysninger)
     }
 }

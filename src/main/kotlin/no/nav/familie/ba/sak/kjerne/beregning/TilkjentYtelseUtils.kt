@@ -175,7 +175,7 @@ object TilkjentYtelseUtils {
 
         andelTilkjentYtelser.distinctBy { it.personIdent }.forEach { barnMedAndeler ->
             val andelerForPerson = andelTilkjentYtelser.filter { it.personIdent == barnMedAndeler.personIdent }
-            val endringerForPerson = endretUtbetalingAndeler.filter { it.person.personIdent.ident == barnMedAndeler.personIdent }
+            val endringerForPerson = endretUtbetalingAndeler.filter { it.person?.personIdent?.ident == barnMedAndeler.personIdent }
 
             andelerForPerson.forEach { andelForPerson ->
                 // Deler opp hver enkelt andel i perioder som hhv blir berørt av endringene og de som ikke berøres av de.
@@ -189,7 +189,7 @@ object TilkjentYtelseUtils {
                             stønadFom = månedPeriodeEndret.fom,
                             stønadTom = månedPeriodeEndret.tom,
                             kalkulertUtbetalingsbeløp = andelForPerson.kalkulertUtbetalingsbeløp
-                                    .avrundetHeltallAvProsent(endretUtbetalingAndel.prosent))
+                                    .avrundetHeltallAvProsent(endretUtbetalingAndel.prosent!!))
                 })
                 // Legger til nye AndelTilkjentYtelse for perioder som ikke berøres av endringer.
                 nyeAndelTilkjentYtelse.addAll(perioderUtenEndring.map { månedPeriodeUendret ->

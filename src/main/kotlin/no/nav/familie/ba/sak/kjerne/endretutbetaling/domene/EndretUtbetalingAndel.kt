@@ -38,29 +38,29 @@ data class EndretUtbetalingAndel(
     )
     val id: Long = 0,
 
-    @Column(name = "fk_behandling_id", nullable = false, updatable = false)
+    @Column(name = "fk_behandling_id", updatable = false, nullable = false)
     val behandlingId: Long,
 
     @ManyToOne @JoinColumn(name = "fk_po_person_id", nullable = false)
-    val person: Person,
+    val person: Person?,
 
-    @Column(name = "prosent", nullable = false)
-    val prosent: BigDecimal,
+    @Column(name = "prosent")
+    val prosent: BigDecimal?,
 
-    @Column(name = "fom", nullable = false, columnDefinition = "DATE")
+    @Column(name = "fom", columnDefinition = "DATE")
     @Convert(converter = YearMonthConverter::class)
-    val fom: YearMonth,
+    val fom: YearMonth?,
 
-    @Column(name = "tom", nullable = false, columnDefinition = "DATE")
+    @Column(name = "tom", columnDefinition = "DATE")
     @Convert(converter = YearMonthConverter::class)
-    val tom: YearMonth,
+    val tom: YearMonth?,
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "aarsak", nullable = false)
-    val årsak: Årsak,
+    @Column(name = "aarsak")
+    val årsak: Årsak?,
 
-    @Column(name = "begrunnelse", nullable = false)
-    var begrunnelse: String,
+    @Column(name = "begrunnelse")
+    var begrunnelse: String?,
 
     @ManyToMany
     @JoinTable(
@@ -73,7 +73,7 @@ data class EndretUtbetalingAndel(
 ) : BaseEntitet() {
     fun overlapperMed(periode: MånedPeriode) = periode.overlapperHeltEllerDelvisMed(this.periode())
 
-    fun periode() = MånedPeriode(this.fom, this.tom)
+    fun periode() = MånedPeriode(this.fom!!, this.tom!!)
 }
 
 enum class Årsak(val klassifisering: String) {
