@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjeMedAndeler
 import no.nav.familie.ba.sak.common.UtbetalingsikkerhetFeil
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering.maksBeløp
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import java.time.LocalDateTime
@@ -93,6 +94,22 @@ object TilkjentYtelseValidering {
             }
         }
     }
+
+    fun maksBeløp(personType: PersonType): Int {
+        val satser = SatsService.hentAllesatser()
+        val småbarnsTillegg = satser.filter { it.type == SatsType.SMA }
+        val ordinærMedTillegg = satser.filter { it.type == SatsType.TILLEGG_ORBA }
+        val ordinær = satser.filter { it.type == SatsType.ORBA }
+        if (småbarnsTillegg.isEmpty() || ordinærMedTillegg.isEmpty() || ordinær.isEmpty()) error("Fant ikke satser ved validering")
+        val maksSmåbarnstillegg = småbarnsTillegg.maxByOrNull { it.beløp }!!.beløp
+        val maksOrdinærMedTillegg = ordinærMedTillegg.maxByOrNull { it.beløp }!!.beløp
+        val maksOrdinær = ordinær.maxByOrNull { it.beløp }!!.beløp
+        return when (personType) {
+            PersonType.BARN -> maksOrdinærMedTillegg
+            PersonType.SØKER -> maksOrdinær + maksSmåbarnstillegg
+            else -> throw Feil("Ikke støtte for å utbetale til persontype ${personType.name}")
+        }
+    }
 }
 
 private fun validerAtBeløpForPartStemmerMedSatser(person: Person,
@@ -109,17 +126,5 @@ private fun validerAtBeløpForPartStemmerMedSatser(person: Person,
     if (totalbeløp > maksTotalBeløp) {
         throw UtbetalingsikkerhetFeil(melding = "Validering av andeler for ${person.type} i perioden (${andeler.first().stønadFom} - ${andeler.first().stønadTom}) feilet: Tillatt totalbeløp = ${maksTotalBeløp}, faktiske totalbeløp = ${totalbeløp}.",
                                       frontendFeilmelding = "Det har skjedd en systemfeil, og beløpene stemmer ikke overens med dagens satser. Kontakt teamet for hjelp")
-    }
-}
-
-private fun maksBeløp(personType: PersonType): Int {
-    val (småbarnsTillegg, resterende) = SatsService.hentAllesatser().partition { it.type == SatsType.SMA }
-    if (småbarnsTillegg.isEmpty() || resterende.isEmpty()) error("Fant ikke satser ved validering")
-    val maksSmåbarnstillegg = småbarnsTillegg.maxByOrNull { it.beløp }!!.beløp
-    val maksResterende = resterende.maxByOrNull { it.beløp }!!.beløp
-    return when (personType) {
-        PersonType.BARN -> maksResterende
-        PersonType.SØKER -> maksResterende + maksSmåbarnstillegg
-        else -> throw Feil("Ikke støtte for å utbetale til persontype ${personType.name}")
     }
 }
