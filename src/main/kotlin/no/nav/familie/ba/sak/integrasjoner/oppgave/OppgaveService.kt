@@ -10,7 +10,6 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
-import no.nav.familie.kontrakter.felles.Behandlingstema
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
@@ -69,7 +68,8 @@ class OppgaveService(private val integrasjonClient: IntegrasjonClient,
                     fristFerdigstillelse = fristForFerdigstillelse,
                     beskrivelse = lagOppgaveTekst(fagsakId, beskrivelse),
                     enhetsnummer = arbeidsfordelingsenhet?.behandlendeEnhetId,
-                    behandlingstema = Behandlingstema.OrdinærBarnetrygd.value,
+                    behandlingstema = behandling.underkategori.tilBehandlingstema().value,
+                    behandlingstype = behandling.kategori.tilBehandlingstype().value,
                     tilordnetRessurs = tilordnetNavIdent
             )
             val opprettetOppgaveId = integrasjonClient.opprettOppgave(opprettOppgave)
@@ -94,6 +94,13 @@ class OppgaveService(private val integrasjonClient: IntegrasjonClient,
 
     fun patchOppgave(patchOppgave: Oppgave): OppgaveResponse {
         return integrasjonClient.patchOppgave(patchOppgave)
+    }
+
+    fun patchOppgaverForBehandling(behandling: Behandling, copyOppgave: (oppgave: Oppgave) -> Oppgave?) {
+        hentOppgaverSomIkkeErFerdigstilt(behandling).forEach { dbOppgave ->
+            val oppgave = hentOppgave(dbOppgave.gsakId.toLong())
+            copyOppgave(oppgave)?.also { patchOppgave(it) }
+        }
     }
 
     fun fordelOppgave(oppgaveId: Long, saksbehandler: String, overstyrFordeling: Boolean = false): String {
