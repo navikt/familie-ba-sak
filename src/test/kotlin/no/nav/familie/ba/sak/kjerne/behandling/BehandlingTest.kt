@@ -41,7 +41,7 @@ class BehandlingTest {
         assertEquals(BehandlingUnderkategori.ORDINÆR, Behandlingutils.bestemUnderkategori(
                 nyUnderkategori = BehandlingUnderkategori.ORDINÆR,
                 nyBehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-                forrigeBehandlingUnderkategori = null
+                løpendeUnderkategori = null
         ))
     }
 
@@ -50,7 +50,7 @@ class BehandlingTest {
         assertEquals(BehandlingUnderkategori.UTVIDET, Behandlingutils.bestemUnderkategori(
                 nyUnderkategori = BehandlingUnderkategori.UTVIDET,
                 nyBehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-                forrigeBehandlingUnderkategori = null
+                løpendeUnderkategori = null
         ))
     }
 
@@ -59,7 +59,7 @@ class BehandlingTest {
         assertEquals(BehandlingUnderkategori.UTVIDET, Behandlingutils.bestemUnderkategori(
                 nyUnderkategori = BehandlingUnderkategori.ORDINÆR,
                 nyBehandlingType = BehandlingType.REVURDERING,
-                forrigeBehandlingUnderkategori = BehandlingUnderkategori.UTVIDET
+                løpendeUnderkategori = BehandlingUnderkategori.UTVIDET
         ))
     }
 
@@ -68,7 +68,7 @@ class BehandlingTest {
         assertEquals(BehandlingUnderkategori.ORDINÆR, Behandlingutils.bestemUnderkategori(
                 nyUnderkategori = BehandlingUnderkategori.ORDINÆR,
                 nyBehandlingType = BehandlingType.REVURDERING,
-                forrigeBehandlingUnderkategori = BehandlingUnderkategori.ORDINÆR
+                løpendeUnderkategori = BehandlingUnderkategori.ORDINÆR
         ))
     }
 
@@ -77,7 +77,7 @@ class BehandlingTest {
         assertEquals(BehandlingUnderkategori.UTVIDET, Behandlingutils.bestemUnderkategori(
                 nyUnderkategori = BehandlingUnderkategori.UTVIDET,
                 nyBehandlingType = BehandlingType.REVURDERING,
-                forrigeBehandlingUnderkategori = BehandlingUnderkategori.ORDINÆR
+                løpendeUnderkategori = BehandlingUnderkategori.ORDINÆR
         ))
     }
 }

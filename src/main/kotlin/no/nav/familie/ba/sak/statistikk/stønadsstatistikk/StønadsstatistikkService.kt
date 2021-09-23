@@ -151,7 +151,7 @@ class StønadsstatistikkService(
                                                                            personForAndel,
                                                                            segment.fom)),
                             klassekode = andel.type.klassifisering,
-                            utbetaltPrMnd = andel.beløp,
+                            utbetaltPrMnd = andel.kalkulertUtbetalingsbeløp,
                             delytelseId = behandling.fagsak.id.toString() + andel.periodeOffset
                     )
                 }

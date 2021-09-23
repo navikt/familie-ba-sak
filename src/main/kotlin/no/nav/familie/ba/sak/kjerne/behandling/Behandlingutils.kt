@@ -23,11 +23,11 @@ object Behandlingutils {
 
     fun bestemUnderkategori(nyUnderkategori: BehandlingUnderkategori,
                             nyBehandlingType: BehandlingType,
-                            forrigeBehandlingUnderkategori: BehandlingUnderkategori?): BehandlingUnderkategori {
+                            løpendeUnderkategori: BehandlingUnderkategori?): BehandlingUnderkategori {
         return when {
             nyUnderkategori == BehandlingUnderkategori.UTVIDET -> nyUnderkategori
 
-            nyBehandlingType == BehandlingType.REVURDERING -> forrigeBehandlingUnderkategori
+            nyBehandlingType == BehandlingType.REVURDERING -> løpendeUnderkategori
                                                               ?: nyUnderkategori
 
             else -> nyUnderkategori
