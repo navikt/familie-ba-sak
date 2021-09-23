@@ -1,8 +1,7 @@
-ALTER TABLE fagsak_person
-    ADD COLUMN arkivert     BOOLEAN      DEFAULT FALSE       NOT NULL;
+UPDATE fagsak_person
+SET arkivert = TRUE
+WHERE fk_fagsak_id = 1078652;
 
-ALTER TABLE fagsak
-    ADD COLUMN arkivert     BOOLEAN      DEFAULT FALSE       NOT NULL;
-
-CREATE UNIQUE INDEX uidx_fagsak_person_ident_ikke_arkivert ON fagsak_person(ident)
-    WHERE arkivert = false;
+UPDATE fagsak
+SET arkivert = TRUE
+WHERE id = 1078652;
