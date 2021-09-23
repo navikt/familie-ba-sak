@@ -58,6 +58,8 @@ object SatsService {
                 .filter { it.fraOgMed <= it.tilOgMed }
     }
 
+    internal fun hentAllesatser() = satser
+
     private fun finnAlleSatserFor(type: SatsType): List<Sats> = satser.filter { it.type == type }
 
     data class SatsPeriode(
