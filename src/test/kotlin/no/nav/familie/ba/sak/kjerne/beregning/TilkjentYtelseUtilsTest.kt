@@ -1,35 +1,34 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
-import io.mockk.every
-import io.mockk.mockk
+import no.nav.familie.ba.sak.common.MånedPeriode
+import no.nav.familie.ba.sak.common.Periode
+import no.nav.familie.ba.sak.common.forrigeMåned
+import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.common.lagVilkårsvurdering
+import no.nav.familie.ba.sak.common.nesteMåned
+import no.nav.familie.ba.sak.common.randomAktørId
+import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.common.sisteDagIForrigeMåned
+import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
-import no.nav.familie.ba.sak.common.*
-import no.nav.familie.ba.sak.config.FeatureToggleService
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.YearMonth
 
 internal class TilkjentYtelseUtilsTest {
 
-    private val featureToggleService = mockk<FeatureToggleService>()
-
-    @BeforeEach
-    fun setUp() {
-        every { featureToggleService.isEnabled(any()) } answers { true }
-    }
 
     @Test
     fun `Barn som er under 6 år hele perioden får tillegg hele perioden`() {
@@ -67,8 +66,7 @@ internal class TilkjentYtelseUtilsTest {
 
         val tilkjentYtelse = TilkjentYtelseUtils.beregnTilkjentYtelse(vilkårsvurdering = vilkårsvurdering,
                                                                       personopplysningGrunnlag = personopplysningGrunnlag,
-                                                                      behandling = lagBehandling(),
-                                                                      featureToggleService = featureToggleService)
+                                                                      behandling = lagBehandling())
 
         assertEquals(1, tilkjentYtelse.andelerTilkjentYtelse.size)
 
@@ -92,8 +90,7 @@ internal class TilkjentYtelseUtilsTest {
 
         val tilkjentYtelse = TilkjentYtelseUtils.beregnTilkjentYtelse(vilkårsvurdering = vilkårsvurdering,
                                                                       personopplysningGrunnlag = personopplysningGrunnlag,
-                                                                      behandling = lagBehandling(),
-                                                                      featureToggleService = featureToggleService)
+                                                                      behandling = lagBehandling())
 
         assertEquals(2, tilkjentYtelse.andelerTilkjentYtelse.size)
 
@@ -119,8 +116,7 @@ internal class TilkjentYtelseUtilsTest {
 
         val andeler = TilkjentYtelseUtils.beregnTilkjentYtelse(vilkårsvurdering = vilkårsvurdering,
                                                                personopplysningGrunnlag = personopplysningGrunnlag,
-                                                               behandling = lagBehandling(),
-                                                               featureToggleService = featureToggleService)
+                                                               behandling = lagBehandling())
                 .andelerTilkjentYtelse
                 .toList()
                 .sortedBy { it.stønadFom }
@@ -156,8 +152,7 @@ internal class TilkjentYtelseUtilsTest {
 
         val andeler = TilkjentYtelseUtils.beregnTilkjentYtelse(vilkårsvurdering = vilkårsvurdering,
                                                                personopplysningGrunnlag = personopplysningGrunnlag,
-                                                               behandling = lagBehandling(),
-                                                               featureToggleService = featureToggleService)
+                                                               behandling = lagBehandling())
                 .andelerTilkjentYtelse.toList()
                 .sortedBy { it.stønadFom }
 

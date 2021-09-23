@@ -1,14 +1,10 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
-import io.mockk.every
-import io.mockk.mockk
-import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
@@ -22,21 +18,13 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 internal class UtvidetBarnetrygdTest {
 
-    private val featureToggleService = mockk<FeatureToggleService>()
-
     private val fødselsdatoOver6År = LocalDate.of(2014, 1, 1)
     private val fødselsdatoUnder6År = LocalDate.of(2021,1,15)
-
-    @BeforeEach
-    fun setUp() {
-        every { featureToggleService.isEnabled(any()) } answers { true }
-    }
 
     @Test
     fun `Utvidet andeler får høyeste beløp når det utbetales til flere barn med ulike beløp`() {
@@ -82,8 +70,7 @@ internal class UtvidetBarnetrygdTest {
 
         val andeler = TilkjentYtelseUtils.beregnTilkjentYtelse(vilkårsvurdering = vilkårsvurdering,
                                                                personopplysningGrunnlag = personopplysningGrunnlag,
-                                                               behandling = behandling,
-                                                               featureToggleService = featureToggleService)
+                                                               behandling = behandling)
                 .andelerTilkjentYtelse.toList().sortedWith(compareBy({ it.stønadFom }, { it.type }, { it.kalkulertUtbetalingsbeløp }))
 
         assertEquals(4, andeler.size)
@@ -155,8 +142,7 @@ internal class UtvidetBarnetrygdTest {
 
         val andeler = TilkjentYtelseUtils.beregnTilkjentYtelse(vilkårsvurdering = vilkårsvurdering,
                                                                personopplysningGrunnlag = personopplysningGrunnlag,
-                                                               behandling = behandling,
-                                                               featureToggleService = featureToggleService)
+                                                               behandling = behandling)
                 .andelerTilkjentYtelse.toList().sortedWith(compareBy({ it.stønadFom }, { it.type }, { it.kalkulertUtbetalingsbeløp }))
 
         assertEquals(2, andeler.size)
@@ -218,8 +204,7 @@ internal class UtvidetBarnetrygdTest {
 
         val andeler = TilkjentYtelseUtils.beregnTilkjentYtelse(vilkårsvurdering = vilkårsvurdering,
                                                                personopplysningGrunnlag = personopplysningGrunnlag,
-                                                               behandling = behandling,
-                                                               featureToggleService = featureToggleService)
+                                                               behandling = behandling)
                 .andelerTilkjentYtelse.toList().sortedBy { it.type }
 
         assertEquals(2, andeler.size)
@@ -278,8 +263,7 @@ internal class UtvidetBarnetrygdTest {
 
         val andeler = TilkjentYtelseUtils.beregnTilkjentYtelse(vilkårsvurdering = vilkårsvurdering,
                                                                personopplysningGrunnlag = personopplysningGrunnlag,
-                                                               behandling = behandling,
-                                                               featureToggleService = featureToggleService)
+                                                               behandling = behandling)
                 .andelerTilkjentYtelse.toList().sortedBy { it.type }
 
         assertEquals(2, andeler.size)
@@ -339,8 +323,7 @@ internal class UtvidetBarnetrygdTest {
 
         val andeler = TilkjentYtelseUtils.beregnTilkjentYtelse(vilkårsvurdering = vilkårsvurdering,
                                                                personopplysningGrunnlag = personopplysningGrunnlag,
-                                                               behandling = behandling,
-                                                               featureToggleService = featureToggleService)
+                                                               behandling = behandling)
                 .andelerTilkjentYtelse.toList().sortedBy { it.type }
 
         assertEquals(2, andeler.size)

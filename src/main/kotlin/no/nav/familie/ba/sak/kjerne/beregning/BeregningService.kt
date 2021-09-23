@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
@@ -26,7 +25,6 @@ import java.time.LocalDate
 class BeregningService(
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val fagsakService: FagsakService,
-    private val featureToggleService: FeatureToggleService,
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
     private val vilkårsvurderingRepository: VilkårsvurderingRepository,
     private val behandlingRepository: BehandlingRepository,
@@ -105,8 +103,7 @@ class BeregningService(
         val tilkjentYtelse = TilkjentYtelseUtils
                 .beregnTilkjentYtelse(vilkårsvurdering = vilkårsvurdering,
                                       personopplysningGrunnlag = personopplysningGrunnlag,
-                                      behandling = behandling,
-                                      featureToggleService = featureToggleService)
+                                      behandling = behandling)
 
         val endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(behandling.id)
         val andelerTilkjentYtelse = TilkjentYtelseUtils.oppdaterTilkjentYtelseMedEndretUtbetalingAndeler(

@@ -1,12 +1,9 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
-import io.mockk.every
-import io.mockk.mockk
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
@@ -15,12 +12,11 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvFileSource
 import java.math.BigDecimal
@@ -28,12 +24,6 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 class VilkårTilTilkjentYtelseTest {
-    private val featureToggleService = mockk<FeatureToggleService>()
-
-    @BeforeEach
-    fun setUp() {
-        every { featureToggleService.isEnabled(any()) } answers { true }
-    }
 
     @ParameterizedTest
     @CsvFileSource(resources = ["/beregning/vilkår_til_tilkjent_ytelse/søker_med_ett_barn_inntil_to_perioder.csv"],
@@ -76,8 +66,7 @@ class VilkårTilTilkjentYtelseTest {
         val faktiskTilkjentYtelse = TilkjentYtelseUtils.beregnTilkjentYtelse(
                 vilkårsvurdering = vilkårsvurdering,
                 personopplysningGrunnlag = personopplysningGrunnlag,
-                behandling = lagBehandling(),
-                featureToggleService = featureToggleService
+                behandling = lagBehandling()
         )
 
         Assertions.assertEquals(forventetTilkjentYtelse.andelerTilkjentYtelse,
@@ -137,8 +126,7 @@ class VilkårTilTilkjentYtelseTest {
         val faktiskTilkjentYtelse = TilkjentYtelseUtils.beregnTilkjentYtelse(
                 vilkårsvurdering = vilkårsvurdering,
                 personopplysningGrunnlag = personopplysningGrunnlag,
-                behandling = lagBehandling(),
-                featureToggleService = featureToggleService
+                behandling = lagBehandling()
         )
 
         Assertions.assertEquals(forventetTilkjentYtelse.andelerTilkjentYtelse,

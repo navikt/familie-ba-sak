@@ -61,7 +61,6 @@ class BeregningServiceTest {
 
         beregningService = BeregningService(andelTilkjentYtelseRepository,
                                             fagsakService,
-                                            featureToggleService,
                                             tilkjentYtelseRepository,
                                             behandlingResultatRepository,
                                             behandlingRepository,

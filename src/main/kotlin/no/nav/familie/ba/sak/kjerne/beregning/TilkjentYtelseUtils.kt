@@ -8,8 +8,6 @@ import no.nav.familie.ba.sak.common.inkluderer
 import no.nav.familie.ba.sak.common.maksimum
 import no.nav.familie.ba.sak.common.minimum
 import no.nav.familie.ba.sak.common.sisteDagIMåned
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
@@ -33,8 +31,7 @@ object TilkjentYtelseUtils {
 
     fun beregnTilkjentYtelse(vilkårsvurdering: Vilkårsvurdering,
                              personopplysningGrunnlag: PersonopplysningGrunnlag,
-                             behandling: Behandling,
-                             featureToggleService: FeatureToggleService): TilkjentYtelse {
+                             behandling: Behandling): TilkjentYtelse {
         val identBarnMap = personopplysningGrunnlag.barna
                 .associateBy { it.personIdent.ident }
 
@@ -115,52 +112,23 @@ object TilkjentYtelseUtils {
                                 val (periodeUnder6År, periodeOver6år) = splittPeriodePå6Årsdag(person.hentSeksårsdag(),
                                                                                                oppfyltFom,
                                                                                                oppfyltTom)
-                                val satsperioderFørFylte6År =
-                                        if (featureToggleService.isEnabled(FeatureToggleConfig.BRUK_ER_DELT_BOSTED)) {
+                                val satsperioderFørFylte6År = if (periodeUnder6År != null) SatsService.hentGyldigSatsFor(
+                                        satstype = SatsType.TILLEGG_ORBA,
+                                        stønadFraOgMed = settRiktigStønadFom(skalStarteSammeMåned = skalStarteSammeMåned,
+                                                                             fraOgMed = periodeUnder6År.fom),
+                                        stønadTilOgMed = settRiktigStønadTom(tilOgMed = periodeUnder6År.tom),
+                                        maxSatsGyldigFraOgMed = SatsService.tilleggEndringSeptember2021,
+                                ) else emptyList()
 
-                                            if (periodeUnder6År != null) SatsService.hentGyldigSatsFor(
-                                                    satstype = SatsType.TILLEGG_ORBA,
-                                                    stønadFraOgMed = settRiktigStønadFom(skalStarteSammeMåned = skalStarteSammeMåned,
-                                                                                         fraOgMed = periodeUnder6År.fom),
-                                                    stønadTilOgMed = settRiktigStønadTom(tilOgMed = periodeUnder6År.tom),
-                                                    maxSatsGyldigFraOgMed = SatsService.tilleggEndringSeptember2021,
-                                            ) else emptyList()
-                                        } else {
-
-                                            // Skal fjernes sammen med fjerning av toggle familie-ba-sak.behandling.delt_bosted
-                                            if (periodeUnder6År != null) SatsService.hentGyldigSatsFor(
-                                                    satstype = SatsType.TILLEGG_ORBA,
-                                                    stønadFraOgMed = settRiktigStønadFom(skalStarteSammeMåned = skalStarteSammeMåned,
-                                                                                         fraOgMed = periodeUnder6År.fom),
-                                                    stønadTilOgMed = settRiktigStønadTom(tilOgMed = periodeUnder6År.tom),
-                                                    maxSatsGyldigFraOgMed = SatsService.tilleggEndringSeptember2021,
-                                            ) else emptyList()
-                                        }
-
-                                val satsperioderEtterFylte6År =
-                                        if (featureToggleService.isEnabled(FeatureToggleConfig.BRUK_ER_DELT_BOSTED)) {
-                                            if (periodeOver6år != null) SatsService.hentGyldigSatsFor(
-                                                    satstype = SatsType.ORBA,
-                                                    stønadFraOgMed = settRiktigStønadFom(skalStarteSammeMåned =
-                                                                                         (periodeUnder6År != null || skalStarteSammeMåned),
-                                                                                         fraOgMed = periodeOver6år.fom),
-                                                    stønadTilOgMed = settRiktigStønadTom(skalAvsluttesMånedenFør = oppfyltTomKommerFra18ÅrsVilkår,
-                                                                                         tilOgMed = periodeOver6år.tom),
-                                                    maxSatsGyldigFraOgMed = SatsService.tilleggEndringSeptember2021,
-                                            ) else emptyList()
-                                        } else {
-
-                                            // Skal fjernes sammen med fjerning av toggle familie-ba-sak.behandling.delt_bosted
-                                            if (periodeOver6år != null) SatsService.hentGyldigSatsFor(
-                                                    satstype = SatsType.ORBA,
-                                                    stønadFraOgMed = settRiktigStønadFom(skalStarteSammeMåned =
-                                                                                         (periodeUnder6År != null || skalStarteSammeMåned),
-                                                                                         fraOgMed = periodeOver6år.fom),
-                                                    stønadTilOgMed = settRiktigStønadTom(skalAvsluttesMånedenFør = oppfyltTomKommerFra18ÅrsVilkår,
-                                                                                         tilOgMed = periodeOver6år.tom),
-                                                    maxSatsGyldigFraOgMed = SatsService.tilleggEndringSeptember2021,
-                                            ) else emptyList()
-                                        }
+                                val satsperioderEtterFylte6År = if (periodeOver6år != null) SatsService.hentGyldigSatsFor(
+                                        satstype = SatsType.ORBA,
+                                        stønadFraOgMed = settRiktigStønadFom(skalStarteSammeMåned =
+                                                                             (periodeUnder6År != null || skalStarteSammeMåned),
+                                                                             fraOgMed = periodeOver6år.fom),
+                                        stønadTilOgMed = settRiktigStønadTom(skalAvsluttesMånedenFør = oppfyltTomKommerFra18ÅrsVilkår,
+                                                                             tilOgMed = periodeOver6år.tom),
+                                        maxSatsGyldigFraOgMed = SatsService.tilleggEndringSeptember2021,
+                                ) else emptyList()
 
                                 val beløpsperioder =
                                         listOf(satsperioderFørFylte6År, satsperioderEtterFylte6År).flatten()
@@ -175,7 +143,8 @@ object TilkjentYtelseUtils {
                                             personIdent = person.personIdent.ident,
                                             stønadFom = beløpsperiode.fraOgMed,
                                             stønadTom = beløpsperiode.tilOgMed,
-                                            kalkulertUtbetalingsbeløp = beløpsperiode.sats.toBigDecimal().avrundetHeltallAvProsent(prosent),
+                                            kalkulertUtbetalingsbeløp = beløpsperiode.sats.toBigDecimal()
+                                                    .avrundetHeltallAvProsent(prosent),
                                             type = finnYtelseType(behandling.kategori, behandling.underkategori, person.type),
                                             sats = beløpsperiode.sats,
                                             prosent = prosent
@@ -220,7 +189,8 @@ object TilkjentYtelseUtils {
                     andelForPerson.copy(
                             stønadFom = månedPeriodeEndret.fom,
                             stønadTom = månedPeriodeEndret.tom,
-                            kalkulertUtbetalingsbeløp = andelForPerson.kalkulertUtbetalingsbeløp.toBigDecimal().avrundetHeltallAvProsent(endretUtbetalingAndel.prosent))
+                            kalkulertUtbetalingsbeløp = andelForPerson.kalkulertUtbetalingsbeløp.toBigDecimal()
+                                    .avrundetHeltallAvProsent(endretUtbetalingAndel.prosent))
                 })
                 // Legger til nye AndelTilkjentYtelse for perioder som ikke berøres av endringer.
                 nyeAndelTilkjentYtelse.addAll(perioderUtenEndring.map { månedPeriodeUendret ->
