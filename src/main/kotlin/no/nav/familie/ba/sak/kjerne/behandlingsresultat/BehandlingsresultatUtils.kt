@@ -42,7 +42,7 @@ object BehandlingsresultatUtils {
         val erEndringEllerOpphørPåPersoner = erEndring || erNoeSomOpphører
 
         return if (framstiltNå.isNotEmpty()) {
-            val alleHarNoeInnvilget = alleHarNoeInnvilget(framstiltNå)
+            val alleHarNoeInnvilget = allePersonerSøktForHarNoeInnvilget(framstiltNå)
             val resultaterPåSøknad = framstiltNå.flatMap { it.resultater }
             val erAvslått = erAvslått(resultaterPåSøknad)
             val erDelvisInnvilget = erDelvisInnvilget(resultaterPåSøknad)
@@ -141,7 +141,7 @@ private fun erDelvisInnvilget(resultaterPåSøknad: List<YtelsePersonResultat>) 
 private fun erAvslått(resultaterPåSøknad: List<YtelsePersonResultat>) =
         resultaterPåSøknad.isNotEmpty() && resultaterPåSøknad.all { it == YtelsePersonResultat.AVSLÅTT }
 
-private fun alleHarNoeInnvilget(framstiltNå: List<YtelsePerson>) =
+private fun allePersonerSøktForHarNoeInnvilget(framstiltNå: List<YtelsePerson>) =
         framstiltNå.all { personSøktFor ->
             personSøktFor.resultater.contains(YtelsePersonResultat.INNVILGET) &&
             !personSøktFor.resultater.contains(YtelsePersonResultat.AVSLÅTT)
