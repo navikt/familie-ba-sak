@@ -213,6 +213,61 @@ class FagsakServiceTest(
     }
 
     @Test
+    fun `test at arkiverte fagsaker med behandling ikke blir funnet ved søk`() {
+        val søker1Fnr = randomFnr()
+
+        every {
+            personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(eq(søker1Fnr))
+        } returns PersonInfo(fødselsdato = LocalDate.of(1990, 2, 19), kjønn = Kjønn.KVINNE, navn = "søker1")
+
+        every {
+            personopplysningerService.hentPersoninfoEnkel(eq(søker1Fnr))
+        } returns PersonInfo(fødselsdato = LocalDate.of(1990, 2, 19), kjønn = Kjønn.KVINNE, navn = "søker1")
+
+        fagsakService.hentEllerOpprettFagsak(FagsakRequest(
+                søker1Fnr
+        ))
+
+        stegService.håndterNyBehandling(NyBehandling(
+                BehandlingKategori.NASJONAL,
+                BehandlingUnderkategori.ORDINÆR,
+                søker1Fnr,
+                BehandlingType.FØRSTEGANGSBEHANDLING
+        ))
+
+        fagsakService.lagre(fagsakService.hentFagsakPåPerson(setOf(PersonIdent(søker1Fnr))).also { it?.arkivert = true }!!)
+
+        val søkeresultat1 = fagsakService.hentFagsakDeltager(søker1Fnr)
+
+        assertEquals(1, søkeresultat1.size)
+        assertNull(søkeresultat1.first().fagsakId)
+    }
+
+    @Test
+    fun `test at arkiverte fagsaker uten behandling ikke blir funnet ved søk`() {
+        val søker1Fnr = randomFnr()
+
+        every {
+            personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(eq(søker1Fnr))
+        } returns PersonInfo(fødselsdato = LocalDate.of(1990, 2, 19), kjønn = Kjønn.KVINNE, navn = "søker1")
+
+        every {
+            personopplysningerService.hentPersoninfoEnkel(eq(søker1Fnr))
+        } returns PersonInfo(fødselsdato = LocalDate.of(1990, 2, 19), kjønn = Kjønn.KVINNE, navn = "søker1")
+
+        fagsakService.hentEllerOpprettFagsak(FagsakRequest(
+                søker1Fnr
+        ))
+
+        fagsakService.lagre(fagsakService.hentFagsakPåPerson(setOf(PersonIdent(søker1Fnr))).also { it?.arkivert = true }!!)
+
+        val søkeresultat1 = fagsakService.hentFagsakDeltager(søker1Fnr)
+
+        assertEquals(1, søkeresultat1.size)
+        assertNull(søkeresultat1.first().fagsakId)
+    }
+
+    @Test
     fun `Skal teste at man henter alle fagsakene til barnet`() {
         val mor = randomFnr()
         val barnFnr = randomFnr()
