@@ -36,8 +36,6 @@ import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingsbehandlingServ
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.domene.TilbakekrevingRepository
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
-import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
-import no.nav.familie.ba.sak.kjerne.vedtak.filterAvslag
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
@@ -198,8 +196,6 @@ class FagsakService(
 
         val andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(listOf(behandling.id))
 
-        val vedtaksperioder = vedtaksperiodeService.hentVedtaksperioder(behandling)
-
         val totrinnskontroll =
                 totrinnskontrollRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
 
@@ -231,17 +227,11 @@ class FagsakService(
                 endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(behandling.id).map { it.tilRestEndretUtbetalingAndel() },
                 tilbakekreving = tilbakekreving?.tilRestTilbakekreving(),
                 vedtakForBehandling = vedtak.filter { it.aktiv }.map {
-                    val sammenslåtteAvslagBegrunnelser =
-                            if (it.aktiv && personopplysningGrunnlag != null) VedtakService.mapTilRestAvslagBegrunnelser(
-                                    avslagBegrunnelser = it.vedtakBegrunnelser.toList()
-                                            .filterAvslag(),
-                                    personopplysningGrunnlag = personopplysningGrunnlag) else emptyList()
-                    val vedtaksperioderMedBegrunnelser = vedtaksperiodeService.hentRestVedtaksperiodeMedBegrunnelser(vedtak = it)
-
-                    it.tilRestVedtak(sammenslåtteAvslagBegrunnelser, vedtaksperioderMedBegrunnelser)
+                    it.tilRestVedtak(
+                        vedtaksperiodeService.hentRestVedtaksperiodeMedBegrunnelser(vedtak = it)
+                    )
                 },
                 totrinnskontroll = totrinnskontroll?.tilRestTotrinnskontroll(),
-                vedtaksperioder = vedtaksperioder,
         )
     }
 

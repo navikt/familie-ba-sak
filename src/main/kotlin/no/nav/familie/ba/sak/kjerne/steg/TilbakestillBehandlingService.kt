@@ -35,8 +35,6 @@ class TilbakestillBehandlingService(
 
         beregningService.slettTilkjentYtelseForBehandling(behandlingId = behandling.id)
         vedtaksperiodeService.slettVedtaksperioderFor(vedtak = vedtak)
-        vedtak.settBegrunnelser(emptySet())
-
 
         behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(behandlingId = behandling.id,
                                                                               steg = StegType.VILKÅRSVURDERING)

@@ -116,7 +116,7 @@ class DokumentServiceTest(
     fun `Hent vedtaksbrev`() {
         val behandlingEtterVilkårsvurderingSteg = kjørStegprosessForFGB(
                 tilSteg = StegType.VURDER_TILBAKEKREVING,
-                søkerFnr = ClientMocks.søkerFnr[0],
+                søkerFnr = randomFnr(),
                 barnasIdenter = listOf(ClientMocks.barnFnr[0]),
                 fagsakService = fagsakService,
                 vedtakService = vedtakService,
@@ -146,7 +146,7 @@ class DokumentServiceTest(
     fun `Skal generere vedtaksbrev`() {
         val behandlingEtterVilkårsvurderingSteg = kjørStegprosessForFGB(
                 tilSteg = StegType.VURDER_TILBAKEKREVING,
-                søkerFnr = ClientMocks.søkerFnr[0],
+                søkerFnr = randomFnr(),
                 barnasIdenter = listOf(ClientMocks.barnFnr[0]),
                 fagsakService = fagsakService,
                 vedtakService = vedtakService,
@@ -179,8 +179,8 @@ class DokumentServiceTest(
         val mockBeslutterId = "mock.beslutter@nav.no"
 
         val behandlingEtterVilkårsvurderingSteg = kjørStegprosessForFGB(
-                tilSteg = StegType.VILKÅRSVURDERING,
-                søkerFnr = ClientMocks.søkerFnr[0],
+                tilSteg = StegType.VURDER_TILBAKEKREVING,
+                søkerFnr = randomFnr(),
                 barnasIdenter = listOf(ClientMocks.barnFnr[0]),
                 fagsakService = fagsakService,
                 vedtakService = vedtakService,
@@ -191,7 +191,7 @@ class DokumentServiceTest(
         )
         val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandlingEtterVilkårsvurderingSteg.id)!!
 
-        val vedtaksbrevFellesFelter = brevService.lagVedtaksbrevFellesfelterDeprecated(vedtak)
+        val vedtaksbrevFellesFelter = brevService.lagVedtaksbrevFellesfelter(vedtak)
 
         assertEquals("NAV Familie- og pensjonsytelser Oslo 1", vedtaksbrevFellesFelter.enhet)
         assertEquals("System", vedtaksbrevFellesFelter.saksbehandler)
@@ -201,14 +201,14 @@ class DokumentServiceTest(
                                                                         mockSaksbehandler,
                                                                         mockSaksbehandlerId)
         val behandlingEtterSendTilBeslutter =
-                behandlingEtterVilkårsvurderingSteg.leggTilBehandlingStegTilstand(StegType.BESLUTTE_VEDTAK)
+            behandlingEtterVilkårsvurderingSteg.leggTilBehandlingStegTilstand(StegType.BESLUTTE_VEDTAK)
         behandlingService.lagreEllerOppdater(behandlingEtterSendTilBeslutter)
 
         val vedtakEtterSendTilBeslutter =
-                vedtakService.hentAktivForBehandling(behandlingId = behandlingEtterSendTilBeslutter.id)!!
+            vedtakService.hentAktivForBehandling(behandlingId = behandlingEtterSendTilBeslutter.id)!!
 
         val vedtaksbrevFellesFelterEtterSendTilBeslutter =
-                brevService.lagVedtaksbrevFellesfelterDeprecated(vedtakEtterSendTilBeslutter)
+            brevService.lagVedtaksbrevFellesfelter(vedtakEtterSendTilBeslutter)
 
         assertEquals(mockSaksbehandler, vedtaksbrevFellesFelterEtterSendTilBeslutter.saksbehandler)
         assertEquals("System", vedtaksbrevFellesFelterEtterSendTilBeslutter.beslutter)
@@ -218,12 +218,12 @@ class DokumentServiceTest(
                                                         beslutterId = mockBeslutterId,
                                                         beslutning = Beslutning.GODKJENT)
         val behandlingEtterVedtakBesluttet =
-                behandlingEtterVilkårsvurderingSteg.leggTilBehandlingStegTilstand(StegType.IVERKSETT_MOT_OPPDRAG)
+            behandlingEtterVilkårsvurderingSteg.leggTilBehandlingStegTilstand(StegType.IVERKSETT_MOT_OPPDRAG)
 
         val vedtakEtterVedtakBesluttet = vedtakService.hentAktivForBehandling(behandlingId = behandlingEtterVedtakBesluttet.id)!!
 
         val vedtaksbrevFellesFelterEtterVedtakBesluttet =
-                brevService.lagVedtaksbrevFellesfelterDeprecated(vedtakEtterVedtakBesluttet)
+            brevService.lagVedtaksbrevFellesfelter(vedtakEtterVedtakBesluttet)
 
         assertEquals(mockSaksbehandler, vedtaksbrevFellesFelterEtterVedtakBesluttet.saksbehandler)
         assertEquals(mockBeslutter, vedtaksbrevFellesFelterEtterVedtakBesluttet.beslutter)
@@ -233,7 +233,7 @@ class DokumentServiceTest(
     fun `Skal verifisere at man ikke får generert brev etter at behandlingen er sendt fra beslutter`() {
         val behandlingEtterVedtakBesluttet = kjørStegprosessForFGB(
                 tilSteg = StegType.BESLUTTE_VEDTAK,
-                søkerFnr = ClientMocks.søkerFnr[0],
+                søkerFnr = randomFnr(),
                 barnasIdenter = listOf(ClientMocks.barnFnr[0]),
                 fagsakService = fagsakService,
                 vedtakService = vedtakService,

@@ -175,9 +175,8 @@ class SaksstatistikkService(
     private fun Behandling.resultatBegrunnelser(): List<ResultatBegrunnelseDVH> {
         return when (resultat) {
             HENLAGT_SØKNAD_TRUKKET, HENLAGT_FEILAKTIG_OPPRETTET -> emptyList()
-            else -> vedtakService.hentAktivForBehandling(behandlingId = id)?.let {
-                it.hentResultatBegrunnelserFraVedtaksbegrunnelser() + it.hentResultatBegrunnelserFraVedtakBegrunnelser()
-            } ?: emptyList()
+            else -> vedtakService.hentAktivForBehandling(behandlingId = id)?.hentResultatBegrunnelserFraVedtaksbegrunnelser()
+            ?: emptyList()
 
         }
     }
@@ -193,18 +192,6 @@ class SaksstatistikkService(
                                 vedtakBegrunnelse = it.vedtakBegrunnelseSpesifikasjon.name,
                         )
                     }
-        }
-    }
-
-    @Deprecated("Hører til gammel periodeløsning. Bruk Vedtak.hentResultatBegrunnelserFraVedtaksbegrunnelser i stedet.")
-    private fun Vedtak.hentResultatBegrunnelserFraVedtakBegrunnelser(): List<ResultatBegrunnelseDVH> {
-        return this.vedtakBegrunnelser.map {
-            ResultatBegrunnelseDVH(
-                    fom = it.fom,
-                    tom = it.tom,
-                    type = it.begrunnelse.vedtakBegrunnelseType.name,
-                    vedtakBegrunnelse = it.begrunnelse.name
-            )
         }
     }
 

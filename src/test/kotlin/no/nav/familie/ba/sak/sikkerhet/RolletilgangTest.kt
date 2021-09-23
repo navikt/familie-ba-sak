@@ -23,7 +23,18 @@ import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.postForEntity
 
 
-@ActiveProfiles("postgres", "mock-pdl", "mock-infotrygd-barnetrygd", "mock-scheduling")
+@ActiveProfiles(
+        "postgres",
+        "mock-pdl",
+        "mock-infotrygd-barnetrygd",
+        "mock-tilbakekreving-klient",
+        "mock-brev-klient",
+        "mock-økonomi",
+        "mock-infotrygd-feed",
+        "mock-rest-template-config",
+        "mock-task-repository",
+        "mock-task-service"
+)
 class RolletilgangTest(
         @Autowired
         private val fagsakService: FagsakService
