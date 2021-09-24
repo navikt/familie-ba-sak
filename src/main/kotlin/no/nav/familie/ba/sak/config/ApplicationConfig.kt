@@ -11,17 +11,13 @@ import org.springframework.boot.web.servlet.FilterRegistrationBean
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.ComponentScan
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories
 import org.springframework.retry.annotation.EnableRetry
-import org.springframework.scheduling.annotation.EnableScheduling
 
 @SpringBootConfiguration
-@EnableJpaAuditing
-@EnableJpaRepositories("no.nav.familie.prosessering", ApplicationConfig.PAKKENAVN)
 @EntityScan("no.nav.familie.prosessering", ApplicationConfig.PAKKENAVN)
 @ComponentScan("no.nav.familie.prosessering", ApplicationConfig.PAKKENAVN)
-@ConfigurationPropertiesScan
 @EnableRetry
+@ConfigurationPropertiesScan
 @EnableJwtTokenValidation(ignore = ["springfox.documentation.swagger"])
 @EnableOAuth2Client(cacheEnabled = true)
 class ApplicationConfig {
@@ -36,6 +32,7 @@ class ApplicationConfig {
     }
 
     companion object {
+
         private val log = LoggerFactory.getLogger(ApplicationConfig::class.java)
         const val PAKKENAVN = "no.nav.familie.ba.sak"
     }

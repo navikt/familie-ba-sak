@@ -11,11 +11,13 @@ import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Evaluering
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.erOppfylt
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.filtreringsregler.domene.FødselshendelsefiltreringResultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 
@@ -89,6 +91,11 @@ class FiltreringsreglerService(
         val evalueringer = evaluerFiltreringsregler(fakta)
         oppdaterMetrikker(evalueringer)
 
+        logger.info("Resultater fra filtreringsregler på behandling $behandling: ${evalueringer.map { "${it.identifikator}: ${it.resultat}" }}")
+        if (!evalueringer.erOppfylt()) {
+            logger.info("Resultater fra filtreringsregler på behandling $behandling: (Fakta: ${fakta.convertDataClassToJson()}): ${evalueringer.map { "${it.identifikator}: ${it.resultat}" }}")
+        }
+
         return lagreFiltreringsregler(
                 evalueringer = evalueringer,
                 behandlingId = behandling.id,
@@ -118,6 +125,12 @@ class FiltreringsreglerService(
             filtreringsreglerMetrics["${it.identifikator}_${it.resultat.name}"]!!.increment()
             førsteutfall = økTellereForFørsteUtfall(it, førsteutfall)
         }
+    }
+
+    companion object {
+
+        val logger = LoggerFactory.getLogger(FiltreringsreglerService::class.java)
+        val secureLogger = LoggerFactory.getLogger("secureLogger")
     }
 }
 

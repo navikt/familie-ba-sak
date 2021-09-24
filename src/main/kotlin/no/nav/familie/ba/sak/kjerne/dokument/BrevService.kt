@@ -10,7 +10,6 @@ import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.AutovedtakNyfødtBarnFraFør
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.AutovedtakNyfødtFørsteBarn
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Avslag
@@ -157,7 +156,7 @@ class BrevService(
 
         val utbetalingsperioder = vedtaksperiodeService.hentUtbetalingsperioder(vedtak.behandling)
 
-        val hjemler = hentHjemmeltekst(vedtak, vedtaksperioderMedBegrunnelser)
+        val hjemler = hentHjemmeltekst(vedtaksperioderMedBegrunnelser)
 
         val målform = persongrunnlagService.hentSøkersMålform(vedtak.behandling.id)
 
