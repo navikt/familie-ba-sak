@@ -114,14 +114,12 @@ fun VedtaksperiodeMedBegrunnelser.tilBrevPeriode(
         personerIPersongrunnlag: List<Person>,
         utbetalingsperioder: List<Utbetalingsperiode>,
         målform: Målform,
-        brukBegrunnelserFraSanity: Boolean = false,
         uregistrerteBarn: List<BarnMedOpplysninger> = emptyList()
 ): BrevPeriode? {
     val begrunnelserOgFritekster = byggBegrunnelserOgFriteksterForVedtaksperiode(
             vedtaksperiode = this,
             personerIPersongrunnlag = personerIPersongrunnlag,
             målform = målform,
-            brukBegrunnelserFraSanity = brukBegrunnelserFraSanity,
             uregistrerteBarn = uregistrerteBarn
     )
 
@@ -181,7 +179,6 @@ fun byggBegrunnelserOgFriteksterForVedtaksperiode(
         vedtaksperiode: VedtaksperiodeMedBegrunnelser,
         personerIPersongrunnlag: List<Person>,
         målform: Målform,
-        brukBegrunnelserFraSanity: Boolean = false,
         uregistrerteBarn: List<BarnMedOpplysninger> = emptyList(),
 ): List<Begrunnelse> {
     val fritekster = vedtaksperiode.fritekster.sortedBy { it.id }.map { BegrunnelseFraBaSak(it.fritekst) }
@@ -190,7 +187,6 @@ fun byggBegrunnelserOgFriteksterForVedtaksperiode(
                 it.tilBrevBegrunnelse(
                         personerPåBegrunnelse = personerIPersongrunnlag.filter { person -> it.personIdenter.contains(person.personIdent.ident) },
                         målform = målform,
-                        brukBegrunnelserFraSanity = brukBegrunnelserFraSanity,
                         uregistrerteBarn = uregistrerteBarn
                 )
             }
