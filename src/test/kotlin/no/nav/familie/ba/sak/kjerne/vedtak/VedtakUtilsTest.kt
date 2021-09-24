@@ -12,10 +12,6 @@ import java.time.LocalDate
 
 class VedtakUtilsTest {
 
-    fun <T : Comparable<T>> erSortertMinstTilStørst(liste: Collection<T>): Boolean {
-        return liste.asSequence().zipWithNext { a, b -> a <= b }.all { it }
-    }
-
     /**
      * Korrekt rekkefølge:
      * 1. Utbetalings-, opphørs- og avslagsperioder sortert på fom-dato
