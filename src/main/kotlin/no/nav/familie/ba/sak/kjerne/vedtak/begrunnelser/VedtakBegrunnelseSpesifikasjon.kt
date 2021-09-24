@@ -521,7 +521,7 @@ enum class VedtakBegrunnelseSpesifikasjon(
         override val sanityApiNavn = "fortsattInnvilgetFastOmsorg"
         override val triggesAv = TriggesAv()
     },
-    FORTSATT_INNVILGET_LOVLIG_OPPHOLD_EØS() {
+    FORTSATT_INNVILGET_LOVLIG_OPPHOLD_EØS("EØS-borger: Søker har oppholdsrett") {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4, 11)
