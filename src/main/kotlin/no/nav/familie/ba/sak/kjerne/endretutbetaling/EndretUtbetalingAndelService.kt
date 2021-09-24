@@ -23,9 +23,9 @@ class EndretUtbetalingAndelService(
             endretUtbetalingAndelId: Long,
             restEndretUtbetalingAndel: RestEndretUtbetalingAndel
     ) {
-       val endretUtbetalingAndel = endretUtbetalingAndelRepository.findById(endretUtbetalingAndelId)
+       val endretUtbetalingAndel = endretUtbetalingAndelRepository.getById(endretUtbetalingAndelId)
 
-        endretUtbetalingAndelRepository.save(endretUtbetalingAndel.get().copy(
+        endretUtbetalingAndelRepository.save(endretUtbetalingAndel.copy(
             fom = restEndretUtbetalingAndel.fom,
             tom = restEndretUtbetalingAndel.tom,
             prosent = restEndretUtbetalingAndel.prosent,
