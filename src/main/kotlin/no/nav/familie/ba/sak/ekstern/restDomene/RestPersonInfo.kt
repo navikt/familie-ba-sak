@@ -17,7 +17,7 @@ data class RestPersonInfo(
         var harTilgang: Boolean = true,
         val forelderBarnRelasjon: List<RestForelderBarnRelasjon> = emptyList(),
         val forelderBarnRelasjonMaskert: List<RestForelderBarnRelasjonnMaskert> = emptyList(),
-        val kommunenummer: String? = null,
+        val kommunenummer: String = "ukjent",
 )
 
 data class RestForelderBarnRelasjon(
