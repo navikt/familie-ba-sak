@@ -48,14 +48,14 @@ private fun ForelderBarnRelasjon.tilRestForelderBarnRelasjon() = RestForelderBar
 )
 
 fun PersonInfo.tilRestPersonInfo(personIdent: String): RestPersonInfo {
-    val bostedsadresse = this.bostedsadresser.firstOrNull()
-    val kommunenummer = when {
-        bostedsadresse == null -> "ukjent"
-        bostedsadresse.vegadresse != null -> bostedsadresse.vegadresse?.kommunenummer
-        bostedsadresse.matrikkeladresse != null -> bostedsadresse.matrikkeladresse?.kommunenummer
-        bostedsadresse.ukjentBosted != null -> "ukjent"
-        else -> "ukjent"
-    }
+    val bostedsadresse = this.bostedsadresser.filter { it.angittFlyttedato != null }.maxByOrNull { it.angittFlyttedato!! }
+    val kommunenummer: String = when {
+                                    bostedsadresse == null -> null
+                                    bostedsadresse.vegadresse != null -> bostedsadresse.vegadresse?.kommunenummer
+                                    bostedsadresse.matrikkeladresse != null -> bostedsadresse.matrikkeladresse?.kommunenummer
+                                    bostedsadresse.ukjentBosted != null -> null
+                                    else -> null
+                                } ?: "ukjent"
 
     return RestPersonInfo(
             personIdent = personIdent,
