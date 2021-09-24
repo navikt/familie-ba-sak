@@ -1,9 +1,9 @@
 package no.nav.familie.ba.sak.ekstern.restDomene
 
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.ForelderBarnRelasjonMaskert
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PersonInfo
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import java.time.LocalDate
@@ -17,6 +17,7 @@ data class RestPersonInfo(
         var harTilgang: Boolean = true,
         val forelderBarnRelasjon: List<RestForelderBarnRelasjon> = emptyList(),
         val forelderBarnRelasjonMaskert: List<RestForelderBarnRelasjonnMaskert> = emptyList(),
+        val kommunenummer: String? = null,
 )
 
 data class RestForelderBarnRelasjon(
@@ -46,12 +47,24 @@ private fun ForelderBarnRelasjon.tilRestForelderBarnRelasjon() = RestForelderBar
 
 )
 
-fun PersonInfo.tilRestPersonInfo(personIdent: String) = RestPersonInfo(
-        personIdent = personIdent,
-        fødselsdato = this.fødselsdato,
-        navn = this.navn,
-        kjønn = this.kjønn,
-        adressebeskyttelseGradering = this.adressebeskyttelseGradering,
-        forelderBarnRelasjon = this.forelderBarnRelasjon.map { it.tilRestForelderBarnRelasjon() },
-        forelderBarnRelasjonMaskert = this.forelderBarnRelasjonMaskert.map { it.tilRestForelderBarnRelasjonMaskert() },
-)
+fun PersonInfo.tilRestPersonInfo(personIdent: String): RestPersonInfo {
+    val bostedsadresse = this.bostedsadresser.firstOrNull()
+    val kommunenummer = when {
+        bostedsadresse == null -> "ukjent"
+        bostedsadresse.vegadresse != null -> bostedsadresse.vegadresse?.kommunenummer
+        bostedsadresse.matrikkeladresse != null -> bostedsadresse.matrikkeladresse?.kommunenummer
+        bostedsadresse.ukjentBosted != null -> "ukjent"
+        else -> "ukjent"
+    }
+
+    return RestPersonInfo(
+            personIdent = personIdent,
+            fødselsdato = this.fødselsdato,
+            navn = this.navn,
+            kjønn = this.kjønn,
+            adressebeskyttelseGradering = this.adressebeskyttelseGradering,
+            forelderBarnRelasjon = this.forelderBarnRelasjon.map { it.tilRestForelderBarnRelasjon() },
+            forelderBarnRelasjonMaskert = this.forelderBarnRelasjonMaskert.map { it.tilRestForelderBarnRelasjonMaskert() },
+            kommunenummer = kommunenummer
+    )
+}
