@@ -20,6 +20,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSiv
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
 import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
+import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.time.LocalDate
 
@@ -34,12 +35,22 @@ data class VurderPersonErBosattIRiket(
 ) : Vilkårsregel {
 
     override fun vurder(): Evaluering {
+        if (adresser.any { !it.harGyldigFom() }) {
+            val person = adresser.first().person
+            secureLogger.info("Har ugyldige adresser på person (${person?.personIdent?.ident}, ${person?.type}): ${
+                adresser.filter { !it.harGyldigFom() }
+                        .map { "(${it.periode?.fom}, ${it.periode?.tom}): ${it.toSecureString()}" }
+            }")
+        }
+
+        val adresserMedGyldigFom = adresser.filter { it.harGyldigFom() }
+
         /**
          * En person med registrert bostedsadresse er bosatt i Norge.
          * En person som mangler registrert bostedsadresse er utflyttet.
          * See: https://navikt.github.io/pdl/#_utflytting
          */
-        return if (adresser.isNotEmpty() && erPersonBosattFraVurderingstidspunktet(adresser, vurderFra))
+        return if (adresserMedGyldigFom.isNotEmpty() && erPersonBosattFraVurderingstidspunktet(adresserMedGyldigFom, vurderFra))
             Evaluering.oppfylt(VilkårOppfyltÅrsak.BOR_I_RIKET)
         else Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.BOR_IKKE_I_RIKET)
     }
@@ -49,6 +60,12 @@ data class VurderPersonErBosattIRiket(
             hentMaxAvstandAvDagerMellomPerioder(adresser.mapNotNull { it.periode },
                                                 vurderFra,
                                                 LocalDate.now()) == 0L
+
+    companion object {
+
+        private val logger = LoggerFactory.getLogger(VurderPersonErBosattIRiket::class.java)
+        private val secureLogger = LoggerFactory.getLogger("secureLogger")
+    }
 }
 
 data class VurderBarnErUnder18(
@@ -88,10 +105,12 @@ data class VurderBarnErUgift(
 ) : Vilkårsregel {
 
     override fun vurder(): Evaluering {
+        val sivilstanderMedGyldigFom = sivilstander.filter { it.harGyldigFom() }
+
         return when {
-            sivilstander.singleOrNull { it.type == SIVILSTAND.UOPPGITT } != null ->
+            sivilstanderMedGyldigFom.singleOrNull { it.type == SIVILSTAND.UOPPGITT } != null ->
                 Evaluering.oppfylt(VilkårOppfyltÅrsak.BARN_MANGLER_SIVILSTAND)
-            sivilstander.any { it.type == SIVILSTAND.GIFT || it.type == SIVILSTAND.REGISTRERT_PARTNER } ->
+            sivilstanderMedGyldigFom.any { it.type == SIVILSTAND.GIFT || it.type == SIVILSTAND.REGISTRERT_PARTNER } ->
                 Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.BARN_ER_GIFT_ELLER_HAR_PARTNERSKAP)
             else -> Evaluering.oppfylt(VilkårOppfyltÅrsak.BARN_ER_IKKE_GIFT_ELLER_HAR_PARTNERSKAP)
         }
@@ -316,6 +335,6 @@ private fun hentMaxAvstandAvDagerMellomPerioder(perioder: List<DatoIntervallEnti
             .fold(defaultAvstand) { maksimumAvstand, pairs ->
                 val avstand =
                         Duration.between(pairs.first.tom!!.atStartOfDay().plusDays(1), pairs.second.fom!!.atStartOfDay()).toDays()
-               maxOf(avstand, maksimumAvstand)
+                maxOf(avstand, maksimumAvstand)
             }
 }

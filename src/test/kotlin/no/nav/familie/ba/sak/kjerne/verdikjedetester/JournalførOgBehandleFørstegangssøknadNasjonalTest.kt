@@ -1,6 +1,9 @@
 package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
+import io.mockk.every
 import no.nav.familie.ba.sak.common.lagSøknadDTO
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.NavnOgIdent
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
@@ -8,6 +11,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedStandard
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService.tilleggOrdinærSatsTilTester
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -33,7 +37,8 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
         @Autowired private val fagsakService: FagsakService,
         @Autowired private val behandlingService: BehandlingService,
         @Autowired private val vedtakService: VedtakService,
-        @Autowired private val stegService: StegService
+        @Autowired private val stegService: StegService,
+        @Autowired private val featureToggleService: FeatureToggleService
 ) : AbstractVerdikjedetest() {
 
     @Test
@@ -159,5 +164,91 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
                 vedtakService = vedtakService,
                 stegService = stegService
         )
+    }
+
+    @Test
+    fun `Skal journalføre og behandle utvidet nasjonal sak`() {
+        every { featureToggleService.isEnabled(any())} returns true
+
+        val scenario = mockServerKlient().lagScenario(RestScenario(
+                søker = RestScenarioPerson(fødselsdato = "1996-01-12", fornavn = "Mor", etternavn = "Søker"),
+                barna = listOf(
+                        RestScenarioPerson(fødselsdato = LocalDate.now().minusMonths(6).toString(),
+                                           fornavn = "Barn",
+                                           etternavn = "Barnesen",
+                                           bostedsadresser = emptyList()
+                        )
+                )
+        ))
+
+        val fagsakId: Ressurs<String> = familieBaSakKlient().journalfør(
+                journalpostId = "1234",
+                oppgaveId = "5678",
+                journalførendeEnhet = "4833",
+                restJournalføring = lagMockRestJournalføring(bruker = NavnOgIdent(
+                        navn = scenario.søker.navn,
+                        id = scenario.søker.ident!!
+                )).copy(
+                        journalpostTittel = "Søknad om utvidet barnetrygd"
+                )
+        )
+
+        assertEquals(Ressurs.Status.SUKSESS, fagsakId.status)
+
+        val restFagsakEtterJournalføring = familieBaSakKlient().hentFagsak(fagsakId = fagsakId.data?.toLong()!!)
+        generellAssertFagsak(restFagsak = restFagsakEtterJournalføring,
+                             fagsakStatus = FagsakStatus.OPPRETTET,
+                             behandlingStegType = StegType.REGISTRERE_SØKNAD)
+
+        val aktivBehandling = hentAktivBehandling(restFagsak = restFagsakEtterJournalføring.data!!)
+
+        assertEquals(BehandlingUnderkategori.UTVIDET, aktivBehandling?.underkategori)
+
+        val restRegistrerSøknad =
+                RestRegistrerSøknad(søknad = lagSøknadDTO(søkerIdent = scenario.søker.ident,
+                                                          barnasIdenter = scenario.barna.map { it.ident!! },
+                                                          underkategori = BehandlingUnderkategori.UTVIDET),
+                                    bekreftEndringerViaFrontend = false)
+        val restFagsakEtterRegistrertSøknad: Ressurs<RestFagsak> =
+                familieBaSakKlient().registrererSøknad(
+                        behandlingId = aktivBehandling!!.behandlingId,
+                        restRegistrerSøknad = restRegistrerSøknad
+                )
+        generellAssertFagsak(restFagsak = restFagsakEtterRegistrertSøknad,
+                             fagsakStatus = FagsakStatus.OPPRETTET,
+                             behandlingStegType = StegType.VILKÅRSVURDERING)
+
+        // Godkjenner alle vilkår på førstegangsbehandling.
+        val aktivBehandlingEtterRegistrertSøknad = hentAktivBehandling(restFagsakEtterRegistrertSøknad.data!!)!!
+
+        assertEquals(3, aktivBehandlingEtterRegistrertSøknad.personResultater.find { it.personIdent == scenario.søker.ident }?.vilkårResultater?.size)
+
+        aktivBehandlingEtterRegistrertSøknad.personResultater.forEach { restPersonResultat ->
+            restPersonResultat.vilkårResultater.filter { it.resultat == Resultat.IKKE_VURDERT }.forEach {
+
+                familieBaSakKlient().putVilkår(
+                        behandlingId = aktivBehandlingEtterRegistrertSøknad.behandlingId,
+                        vilkårId = it.id,
+                        restPersonResultat =
+                        RestPersonResultat(personIdent = restPersonResultat.personIdent,
+                                           vilkårResultater = listOf(it.copy(
+                                                   resultat = Resultat.OPPFYLT,
+                                                   periodeFom = LocalDate.now().minusMonths(2)
+                                           ))))
+            }
+        }
+
+        val restFagsakEtterVilkårsvurdering =
+                familieBaSakKlient().validerVilkårsvurdering(
+                        behandlingId = aktivBehandlingEtterRegistrertSøknad.behandlingId
+                )
+        //val behandlingEtterVilkårsvurdering = hentAktivBehandling(restFagsak = restFagsakEtterVilkårsvurdering.data!!)!!
+
+        // TODO: fortsette her etter beregning er utført
+        /*assertEquals(tilleggOrdinærSatsTilTester.beløp,
+                     hentNåværendeEllerNesteMånedsUtbetaling(
+                             behandling = behandlingEtterVilkårsvurdering
+                     )
+        )*/
     }
 }

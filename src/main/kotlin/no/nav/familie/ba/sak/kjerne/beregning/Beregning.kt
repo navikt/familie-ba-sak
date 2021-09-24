@@ -16,7 +16,7 @@ fun beregnUtbetalingsperioderUtenKlassifisering(andelerTilkjentYtelse: Set<Andel
 private fun personTilTimeline(it: AndelTilkjentYtelse) =
         LocalDateTimeline(listOf(LocalDateSegment(it.stønadFom.førsteDagIInneværendeMåned(),
                                                   it.stønadTom.sisteDagIInneværendeMåned(),
-                                                  it.beløp)))
+                                                  it.kalkulertUtbetalingsbeløp)))
 
 private fun reducer(sammenlagtTidslinje: LocalDateTimeline<Int>, tidslinje: LocalDateTimeline<Int>): LocalDateTimeline<Int> {
     sammenlagtTidslinje.disjoint(tidslinje)

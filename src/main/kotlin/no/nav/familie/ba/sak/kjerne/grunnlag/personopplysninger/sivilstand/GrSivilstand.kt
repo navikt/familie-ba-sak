@@ -55,11 +55,13 @@ data class GrSivilstand(
                                                                      .replace("_", " ")
                                                                      .storForbokstav())
 
+    fun harGyldigFom() = this.fom != null
+
     companion object {
 
         fun List<GrSivilstand>.sisteSivilstand(): GrSivilstand? {
-            if (this.filter { it.fom == null }.size > 1) throw Feil("Finnes flere sivilstander uten fom-dato")
-            return this.sortedBy { it.fom }.lastOrNull()
+            val sivilstandMedFom = this.filter { it.harGyldigFom() }
+            return sivilstandMedFom.maxByOrNull { it.fom!! }
         }
 
         fun fraSivilstand(sivilstand: Sivilstand, person: Person) =

@@ -10,7 +10,6 @@ import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.BRUK_BEGRUNNELSE_TRIGGES_AV_FRA_SANITY
-import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.BRUK_VEDTAKSTYPE_MED_BEGRUNNELSER
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedBegrunnelse
@@ -33,7 +32,6 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Personopplysning
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
-import no.nav.familie.ba.sak.kjerne.vedtak.VedtakBegrunnelseRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakUtils.hentPersonerForAlleUtgjørendeVilkår
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
@@ -61,7 +59,6 @@ class VedtaksperiodeService(
         private val behandlingRepository: BehandlingRepository,
         private val persongrunnlagRepository: PersonopplysningGrunnlagRepository,
         private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
-        private val vedtakBegrunnelseRepository: VedtakBegrunnelseRepository,
         private val vedtaksperiodeRepository: VedtaksperiodeRepository,
         private val vilkårsvurderingRepository: VilkårsvurderingRepository,
         private val featureToggleService: FeatureToggleService,
@@ -119,7 +116,6 @@ class VedtaksperiodeService(
                                 vurderingAnnetGrunnlag = triggesAv.vurderingAnnetGrunnlag
                         ).map { person -> person.personIdent.ident }
                     }
-
             if (personIdenter.isEmpty()) {
                 begrunnelserMedFeil.add(it.vedtakBegrunnelseSpesifikasjon)
             }
@@ -337,7 +333,7 @@ class VedtaksperiodeService(
                     vedtak = vedtak,
                     type = Vedtaksperiodetype.FORTSATT_INNVILGET
             ))
-        } else if (featureToggleService.isEnabled(BRUK_VEDTAKSTYPE_MED_BEGRUNNELSER)) {
+        } else  {
             lagre(genererVedtaksperioderMedBegrunnelser(vedtak))
         }
     }
@@ -368,12 +364,14 @@ class VedtaksperiodeService(
                     type = vedtaksperiodeMedBegrunnelser.type,
             ))
 
-            lagre(nyVedtaksperiodeMedBegrunnelser.copy(
-                    begrunnelser = vedtaksperiodeMedBegrunnelser.begrunnelser.map { it.kopier(nyVedtaksperiodeMedBegrunnelser) }
-                            .toMutableSet(),
-                    fritekster = vedtaksperiodeMedBegrunnelser.fritekster.map { it.kopier(nyVedtaksperiodeMedBegrunnelser) }
-                            .toMutableSet()
-            ))
+            nyVedtaksperiodeMedBegrunnelser.settBegrunnelser(vedtaksperiodeMedBegrunnelser.begrunnelser.map {
+                it.kopier(nyVedtaksperiodeMedBegrunnelser)
+            })
+            nyVedtaksperiodeMedBegrunnelser.settFritekster(vedtaksperiodeMedBegrunnelser.fritekster.map {
+                it.kopier(nyVedtaksperiodeMedBegrunnelser)
+            })
+
+            lagre(nyVedtaksperiodeMedBegrunnelser)
         }
     }
 
@@ -510,48 +508,6 @@ class VedtaksperiodeService(
                 andelerTilkjentYtelse = andelerTilkjentYtelse,
                 personopplysningGrunnlag = personopplysningGrunnlag
         )
-    }
-
-    fun hentVedtaksperioder(behandling: Behandling): List<Vedtaksperiode> {
-        if (behandling.resultat == BehandlingResultat.FORTSATT_INNVILGET) return emptyList()
-
-        val iverksatteBehandlinger =
-                behandlingRepository.finnIverksatteBehandlinger(fagsakId = behandling.fagsak.id)
-
-        val forrigeIverksatteBehandling: Behandling? = Behandlingutils.hentForrigeIverksatteBehandling(
-                iverksatteBehandlinger = iverksatteBehandlinger,
-                behandlingFørFølgende = behandling
-        )
-
-        val forrigePersonopplysningGrunnlag: PersonopplysningGrunnlag? =
-                if (forrigeIverksatteBehandling != null)
-                    persongrunnlagRepository.findByBehandlingAndAktiv(behandlingId = forrigeIverksatteBehandling.id) else null
-        val forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse> =
-                if (forrigeIverksatteBehandling != null)
-                    andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(
-                            behandlingId = forrigeIverksatteBehandling.id
-                    ) else emptyList()
-
-        val personopplysningGrunnlag = persongrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
-                                       ?: return emptyList()
-        val andelerTilkjentYtelse =
-                andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = behandling.id)
-
-        val utbetalingsperioder = hentUtbetalingsperioder(behandling)
-
-        val opphørsperioder = mapTilOpphørsperioder(
-                forrigePersonopplysningGrunnlag = forrigePersonopplysningGrunnlag,
-                forrigeAndelerTilkjentYtelse = forrigeAndelerTilkjentYtelse,
-                personopplysningGrunnlag = personopplysningGrunnlag,
-                andelerTilkjentYtelse = andelerTilkjentYtelse
-        )
-
-        val avslagsperioder =
-                mapTilAvslagsperioderDeprecated(
-                        vedtakBegrunnelser = vedtakBegrunnelseRepository.finnForAktivtVedtakPåBehandling(behandlingId = behandling.id)
-                )
-
-        return utbetalingsperioder + opphørsperioder + avslagsperioder
     }
 
     fun hentOpphørsperioder(behandling: Behandling): List<Opphørsperiode> {

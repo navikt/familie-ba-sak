@@ -24,6 +24,7 @@ import org.junit.jupiter.api.MethodOrderer
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestMethodOrder
 import org.springframework.beans.factory.annotation.Autowired
+import java.math.BigDecimal
 import java.time.LocalDate
 
 
@@ -220,7 +221,7 @@ class KonsistensavstemmingUtplukkingIntegrationTest : AbstractSpringIntegrationT
                                       periodeOffset: Long) = AndelTilkjentYtelse(personIdent = randomFnr(),
                                                                                  behandlingId = tilkjentYtelse.behandling.id,
                                                                                  tilkjentYtelse = tilkjentYtelse,
-                                                                                 beløp = 1054,
+                                                                                 kalkulertUtbetalingsbeløp = 1054,
                                                                                  stønadFom = LocalDate.now()
                                                                                          .minusMonths(12)
                                                                                          .toYearMonth(),
@@ -230,7 +231,9 @@ class KonsistensavstemmingUtplukkingIntegrationTest : AbstractSpringIntegrationT
                                                                                  type = YtelseType.ORDINÆR_BARNETRYGD,
                                                                                  kildeBehandlingId = kildeBehandlingId,
                                                                                  periodeOffset = periodeOffset,
-                                                                                 forrigePeriodeOffset = null
+                                                                                 forrigePeriodeOffset = null,
+                                                                                 sats = 1054,
+                                                                                 prosent = BigDecimal(100)
     )
 }
 

@@ -104,15 +104,9 @@ class ArbeidsfordelingService(private val arbeidsfordelingPåBehandlingRepositor
                                                       manuellOppdatering = manuellOppdatering,
                                                       begrunnelse = begrunnelse)
 
-            oppgaveService.hentOppgaverSomIkkeErFerdigstilt(behandling).forEach { dbOppgave ->
-                val oppgave = oppgaveService.hentOppgave(dbOppgave.gsakId.toLong())
-
-                if (oppgave.tildeltEnhetsnr != oppdatertArbeidsfordelingPåBehandling.behandlendeEnhetId) {
-                    logger.info("Oppdaterer enhet fra ${oppgave.tildeltEnhetsnr} til ${oppdatertArbeidsfordelingPåBehandling.behandlendeEnhetId} på oppgave ${oppgave.id}")
-                    oppgaveService.patchOppgave(oppgave.copy(
-                            tildeltEnhetsnr = oppdatertArbeidsfordelingPåBehandling.behandlendeEnhetId
-                    ))
-                }
+            oppgaveService.patchOppgaverForBehandling(behandling) {
+                logger.info("Oppdaterer enhet fra ${it.tildeltEnhetsnr} til ${oppdatertArbeidsfordelingPåBehandling.behandlendeEnhetId} på oppgave ${it.id}")
+                it.copy(tildeltEnhetsnr = oppdatertArbeidsfordelingPåBehandling.behandlendeEnhetId)
             }
         }
     }

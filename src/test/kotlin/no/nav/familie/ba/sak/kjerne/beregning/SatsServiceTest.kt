@@ -31,18 +31,6 @@ class SatsServiceTest {
     }
 
     @Test
-    fun `Delt utbetaling skal gi halv beløp`() {
-        stubSatsRepo(SatsType.ORBA,
-                     TestKrPeriode(1054, "2018-04-01", null)
-        )
-
-        val beløpperioder =
-                satsService.hentGyldigSatsFor(SatsType.ORBA, true, årMnd("2020-04"), årMnd("2038-03"), MAX_GYLDIG_FRA_OG_MED)
-
-        assertSatsperioder(TestKrPeriode(527, "2020-04", "2038-03"), beløpperioder[0])
-    }
-
-    @Test
     fun `Skal ikke rgi beløpsperioder utenfor`() {
         stubSatsRepo(SatsType.ORBA,
                      TestKrPeriode(1054, "2018-04-01", null)
@@ -176,8 +164,8 @@ class SatsServiceTest {
         Assertions.assertEquals(0, beløpperioder.size)
     }
 
-    private fun assertSatsperioder(forventet: TestKrPeriode, faktisk: SatsService.BeløpPeriode) {
-        Assertions.assertEquals(forventet.beløp, faktisk.beløp, "Forskjell i beløp")
+    private fun assertSatsperioder(forventet: TestKrPeriode, faktisk: SatsService.SatsPeriode) {
+        Assertions.assertEquals(forventet.beløp, faktisk.sats, "Forskjell i beløp")
         Assertions.assertEquals(forventet.fom?.let { årMnd(it) }, faktisk.fraOgMed, "Forskjell i fra-og-med")
         Assertions.assertEquals(forventet.tom?.let { årMnd(it) }, faktisk.tilOgMed, "Forskjell i til-og-med")
     }

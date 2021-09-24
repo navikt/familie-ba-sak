@@ -93,15 +93,14 @@ class FeatureToggleConfig(private val enabled: Boolean,
     companion object {
         const val TILBAKEKREVING = "familie-ba-sak.behandling.tilbakekreving"
         const val MIGRERING_NYTT_REVURDERINGSDATO = "familie-ba-sak.behandling.migrerings-nytt-revurderingsdato"
-        const val BRUK_VEDTAKSTYPE_MED_BEGRUNNELSER = "familie-ba-sak.behandling.vedtakstype-med-begrunnelser"
         const val AUTOMATISK_FØDSELSHENDELSE = "familie-ba-sak.behandling.automatisk-fodselshendelse"
         const val BRUK_ER_DELT_BOSTED = "familie-ba-sak.behandling.delt_bosted"
         const val MIGRER_VEDTAK_BEGRUNNELSES_MODEL_UTREDNING = "familie-ba-sak.behandling.migrering.behandlingsmodel.utredning"
-        const val BRUK_BEGRUNNELSE_FRA_SANITY_NEDTREKKSMENY = "familie-ba-sak.behandling.begrunnelse-fra-sanity-nedtrekksmeny"
         const val BRUK_BEGRUNNELSE_FRA_SANITY_BACKEND = "familie-ba-sak.behandling.begrunnelse-fra-sanity-backend"
         const val BRUK_BEGRUNNELSE_TRIGGES_AV_FRA_SANITY = "familie-ba-sak.behandling.begrunnelse-trigges-av"
         const val KAN_MANUELT_KORRIGERE_MED_VEDTAKSBREV = "familie-ba-sak.behandling.korreksjon-vedtaksbrev"
         const val KAN_BEHANDLE_UTVIDET = "familie-ba-sak.behandling.utvidet"
+        const val SKATTEETATEN_API_STUB = "familie-ba-sak.skatteetaten-api-mocked-respons"
 
         private val logger = LoggerFactory.getLogger(FeatureToggleConfig::class.java)
     }

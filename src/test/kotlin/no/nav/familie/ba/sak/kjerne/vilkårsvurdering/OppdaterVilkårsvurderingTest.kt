@@ -6,7 +6,9 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingUtils.flyttResultaterTilInitielt
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingUtils.lagFjernAdvarsel
 import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.common.lagVilkårResultat
 import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
@@ -91,6 +93,57 @@ class OppdaterVilkårsvurderingTest {
                                 fnr1 + ":\n" +
                                 "   - " + fjernedeVilkår[0].vilkårType.beskrivelse + "\n" +
                                 "   - " + fjernedeVilkår[1].vilkårType.beskrivelse + "\n", generertAdvarsel)
+    }
+
+    @Test
+    fun `Skal beholde vilkår om utvidet barnetrygd når det eksisterer løpende sak med utvidet`() {
+        val søkerFnr = randomFnr();
+        val behandling = lagBehandling();
+
+        val initUtenUtvidetVilkår = lagVilkårsvurderingMedForskjelligeTyperVilkår(søkerFnr, behandling, listOf())
+        val aktivMedUtvidetVilkår =
+                lagVilkårsvurderingMedForskjelligeTyperVilkår(søkerFnr, behandling, listOf(Vilkår.UTVIDET_BARNETRYGD))
+
+        val (nyInit, nyAktiv) = flyttResultaterTilInitielt(initiellVilkårsvurdering = initUtenUtvidetVilkår,
+                                                           aktivVilkårsvurdering = aktivMedUtvidetVilkår,
+                                                           løpendeUnderkategori = BehandlingUnderkategori.UTVIDET)
+
+        val nyInitInnholderUtvidetVilkår =
+                nyInit.personResultater.first().vilkårResultater.any { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
+
+        Assertions.assertTrue(nyInitInnholderUtvidetVilkår)
+        Assertions.assertTrue(nyAktiv.personResultater.isEmpty())
+    }
+
+    @Test
+    fun `Skal fjerne vilkår om utvidet barnetrygd når det ikke eksisterer løpende sak med utvidet`() {
+        val søkerFnr = randomFnr();
+        val behandling = lagBehandling();
+
+        val initUtenUtvidetVilkår = lagVilkårsvurderingMedForskjelligeTyperVilkår(søkerFnr, behandling, listOf())
+        val aktivMedUtvidetVilkår =
+                lagVilkårsvurderingMedForskjelligeTyperVilkår(søkerFnr, behandling, listOf(Vilkår.UTVIDET_BARNETRYGD))
+
+        val (nyInit, nyAktiv) = flyttResultaterTilInitielt(initiellVilkårsvurdering = initUtenUtvidetVilkår,
+                                                           aktivVilkårsvurdering = aktivMedUtvidetVilkår,
+                                                           løpendeUnderkategori = BehandlingUnderkategori.ORDINÆR)
+        val nyInitInnholderIkkeUtvidetVilkår =
+                nyInit.personResultater.first().vilkårResultater.none { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
+        val nyAktivInneholderUtvidetVilkår =
+                nyAktiv.personResultater.first().vilkårResultater.any { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
+
+        Assertions.assertTrue(nyInitInnholderIkkeUtvidetVilkår)
+        Assertions.assertTrue(nyAktivInneholderUtvidetVilkår)
+    }
+
+    fun lagVilkårsvurderingMedForskjelligeTyperVilkår(søkerFnr: String,
+                                                      behandling: Behandling, vilkår: List<Vilkår>): Vilkårsvurdering {
+        val vilkårsvurdering = Vilkårsvurdering(behandling = behandling);
+        val personResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = søkerFnr)
+        val vilkårResultater = vilkår.map { lagVilkårResultat(vilkårType = it, personResultat = personResultat) }.toSet()
+        personResultat.setSortedVilkårResultater(vilkårResultater);
+        vilkårsvurdering.personResultater = setOf(personResultat);
+        return vilkårsvurdering;
     }
 
     fun lagBehandlingResultat(fnr: List<String>, behandling: Behandling): Vilkårsvurdering {

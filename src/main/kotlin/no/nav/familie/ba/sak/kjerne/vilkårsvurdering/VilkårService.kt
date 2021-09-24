@@ -16,7 +16,6 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand.Companion.sisteSivilstand
-import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingUtils.flyttResultaterTilInitielt
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingUtils.lagFjernAdvarsel
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingUtils.muterPersonResultatDelete
@@ -38,7 +37,6 @@ class VilkårService(
         private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
         private val vilkårsvurderingMetrics: VilkårsvurderingMetrics,
         private val behandlingService: BehandlingService,
-        private val vedtakService: VedtakService,
         private val featureToggleService: FeatureToggleService,
 ) {
 
@@ -60,7 +58,7 @@ class VilkårService(
                                            frontendFeilmelding = "Fant ikke vilkårsvurdering for person med ident '${restPersonResultat.personIdent}")
 
         muterPersonVilkårResultaterPut(personResultat, restVilkårResultat)
-        
+
         val vilkårResultat = personResultat.vilkårResultater.singleOrNull { it.id == vilkårId }
                              ?: error("Finner ikke vilkår med vilkårId $vilkårId på personResultat ${personResultat.id}")
 
@@ -78,12 +76,6 @@ class VilkårService(
         val personResultat = vilkårsvurdering.personResultater.find { it.personIdent == personIdent }
                              ?: throw Feil(message = "Fant ikke vilkårsvurdering for person",
                                            frontendFeilmelding = "Fant ikke vilkårsvurdering for person med ident '${personIdent}")
-
-        vedtakService.oppdaterAvslagBegrunnelserForVilkår(
-                vilkårResultat = personResultat.vilkårResultater.find { it.id == vilkårId }
-                                 ?: error("Finner ikke vilkår med vilkårId $vilkårId på personResultat ${personResultat.id}"),
-                begrunnelser = emptyList(),
-                behandlingId = vilkårsvurdering.behandling.id)
 
         muterPersonResultatDelete(personResultat, vilkårId)
 
@@ -136,7 +128,8 @@ class VilkårService(
             if (aktivVilkårsvurdering != null) {
                 val (initieltSomErOppdatert, aktivtSomErRedusert) = flyttResultaterTilInitielt(
                         initiellVilkårsvurdering = initiellVilkårsvurdering,
-                        aktivVilkårsvurdering = aktivVilkårsvurdering
+                        aktivVilkårsvurdering = aktivVilkårsvurdering,
+                        løpendeUnderkategori = behandlingService.hentLøpendeUnderkategori(initiellVilkårsvurdering.behandling.fagsak.id),
                 )
 
                 if (aktivtSomErRedusert.personResultater.isNotEmpty() && !bekreftEndringerViaFrontend) {
@@ -161,8 +154,11 @@ class VilkårService(
 
         if (annenBehandlingErHenlagt)
             throw Feil(message = "vilkårsvurdering skal ikke kopieres fra henlagt behandling.")
-        val (oppdatert) = flyttResultaterTilInitielt(aktivVilkårsvurdering = annenVilkårsvurdering,
-                                                     initiellVilkårsvurdering = initiellVilkårsvurdering)
+        val (oppdatert) = flyttResultaterTilInitielt(
+                aktivVilkårsvurdering = annenVilkårsvurdering,
+                initiellVilkårsvurdering = initiellVilkårsvurdering,
+                løpendeUnderkategori = behandlingService.hentLøpendeUnderkategori(initiellVilkårsvurdering.behandling.fagsak.id)
+        )
         return oppdatert
     }
 
@@ -227,7 +223,8 @@ class VilkårService(
             val personResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering,
                                                 personIdent = person.personIdent.ident)
 
-            val vilkårForPerson = Vilkår.hentVilkårFor(person.type)
+            val vilkårForPerson = Vilkår.hentVilkårFor(personType = person.type,
+                                                       ytelseType = vilkårsvurdering.behandling.hentYtelseTypeTilVilkår())
 
             val vilkårResultater = vilkårForPerson.map { vilkår ->
                 val fom = if (vilkår.gjelderAlltidFraBarnetsFødselsdato()) person.fødselsdato else null

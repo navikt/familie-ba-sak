@@ -1,8 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.behandling
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
@@ -13,7 +11,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus.AVSLUTTET
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus.FATTER_VEDTAK
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.initStatus
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatUtils
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
@@ -24,7 +22,6 @@ import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.steg.FØRSTE_STEG
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
-import no.nav.familie.ba.sak.kjerne.vedtak.VedtakBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
@@ -51,8 +48,7 @@ class BehandlingService(
         private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
         private val oppgaveService: OppgaveService,
         private val infotrygdService: InfotrygdService,
-        private val vedtaksperiodeService: VedtaksperiodeService,
-        private val featureToggleService: FeatureToggleService
+        private val vedtaksperiodeService: VedtaksperiodeService
 ) {
 
     @Transactional
@@ -64,7 +60,10 @@ class BehandlingService(
         val aktivBehandling = hentAktivForFagsak(fagsak.id)
 
         return if (aktivBehandling == null || aktivBehandling.status == AVSLUTTET) {
-            val underkategori = bestemUnderkategori(nyBehandling, aktivBehandling?.underkategori)
+            val underkategori =
+                    bestemUnderkategori(nyUnderkategori = nyBehandling.underkategori,
+                                        nyBehandlingType = nyBehandling.behandlingType,
+                                        løpendeUnderkategori = hentLøpendeUnderkategori(fagsakId = fagsak.id))
 
             val behandling = Behandling(fagsak = fagsak,
                                         opprettetÅrsak = nyBehandling.behandlingÅrsak,
@@ -99,6 +98,22 @@ class BehandlingService(
         }
     }
 
+    fun oppdaterBehandlingUnderkategori(behandling: Behandling, nyBehandlingUnderkategori: BehandlingUnderkategori): Behandling {
+        return lagreEllerOppdater(behandling.apply {
+            underkategori = bestemUnderkategori(nyUnderkategori = nyBehandlingUnderkategori,
+                                                nyBehandlingType = behandling.type,
+                                                løpendeUnderkategori = hentLøpendeUnderkategori(fagsakId = fagsak.id))
+        }).also { behandling ->
+            oppgaveService.patchOppgaverForBehandling(behandling) {
+                if (it.behandlingstema != behandling.underkategori.tilBehandlingstema().value) {
+                    it.copy(
+                            behandlingstema = behandling.underkategori.tilBehandlingstema().value
+                    )
+                } else null
+            }
+        }
+    }
+
     @Transactional
     fun opprettOgInitierNyttVedtakForBehandling(behandling: Behandling,
                                                 kopierVedtakBegrunnelser: Boolean = false,
@@ -106,8 +121,9 @@ class BehandlingService(
         behandling.steg.takeUnless { it !== StegType.BESLUTTE_VEDTAK && it !== StegType.REGISTRERE_PERSONGRUNNLAG }
         ?: throw error("Forsøker å initiere vedtak på steg ${behandling.steg}")
 
-        val deaktivertVedtak = vedtakRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
-                ?.let { vedtakRepository.saveAndFlush(it.also { it.aktiv = false }) }
+        val deaktivertVedtak =
+                vedtakRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
+                        ?.let { vedtakRepository.saveAndFlush(it.also { it.aktiv = false }) }
 
 
         val nyttVedtak = Vedtak(
@@ -116,21 +132,8 @@ class BehandlingService(
         )
 
         if (kopierVedtakBegrunnelser && deaktivertVedtak != null) {
-            if (featureToggleService.isEnabled(FeatureToggleConfig.BRUK_VEDTAKSTYPE_MED_BEGRUNNELSER)) { // TODO: Ved nytt vedtak vil man måtte resette begrunnelser
-                vedtaksperiodeService.kopierOverVedtaksperioder(deaktivertVedtak = deaktivertVedtak,
-                                                                aktivtVedtak = nyttVedtak)
-            } else {
-                nyttVedtak.settBegrunnelser(deaktivertVedtak.vedtakBegrunnelser.map { original ->
-                    VedtakBegrunnelse(
-                            begrunnelse = original.begrunnelse,
-                            brevBegrunnelse = original.brevBegrunnelse,
-                            fom = original.fom,
-                            tom = original.tom,
-                            vilkårResultat = begrunnelseVilkårPekere.find { it.first == original.vilkårResultat }?.second,
-                            vedtak = nyttVedtak,
-                    )
-                }.toSet())
-            }
+            vedtaksperiodeService.kopierOverVedtaksperioder(deaktivertVedtak = deaktivertVedtak,
+                                                            aktivtVedtak = nyttVedtak)
         }
 
         vedtakRepository.save(nyttVedtak)
@@ -163,7 +166,9 @@ class BehandlingService(
     }
 
     fun hentSisteBehandlingSomIkkeErHenlagt(fagsakId: Long): Behandling? {
-        return behandlingRepository.finnBehandlinger(fagsakId).filter { !it.erHenlagt() }.maxByOrNull { it.opprettetTidspunkt }
+        return behandlingRepository.finnBehandlinger(fagsakId)
+                .filter { !it.erHenlagt() }
+                .maxByOrNull { it.opprettetTidspunkt }
     }
 
     /**
@@ -180,7 +185,9 @@ class BehandlingService(
     fun finnBarnFraBehandlingMedTilkjentYtsele(behandlingId: Long): List<String> =
             personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId)?.barna?.map { it.personIdent.ident }
                     ?.filter {
-                        andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(behandlingId, it)
+                        andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(
+                                behandlingId,
+                                it)
                                 .isNotEmpty()
                     } ?: emptyList()
 
@@ -256,11 +263,21 @@ class BehandlingService(
         return lagreEllerOppdater(behandling)
     }
 
-    fun leggTilStegPåBehandlingOgSettTidligereStegSomUtført(behandlingId: Long, steg: StegType): Behandling {
+    fun leggTilStegPåBehandlingOgSettTidligereStegSomUtført(behandlingId: Long,
+                                                            steg: StegType): Behandling {
         val behandling = hent(behandlingId)
         behandling.leggTilBehandlingStegTilstand(steg)
 
         return lagreEllerOppdater(behandling)
+    }
+
+    fun hentLøpendeUnderkategori(fagsakId: Long): BehandlingUnderkategori? {
+        val forrigeIverksattBehandling = hentSisteBehandlingSomErIverksatt(fagsakId = fagsakId) ?: return null
+
+        val forrigeAndeler =
+                andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = forrigeIverksattBehandling.id)
+
+        return if (forrigeAndeler.any { it.erUtvidet() }) BehandlingUnderkategori.UTVIDET else BehandlingUnderkategori.ORDINÆR
     }
 
     companion object {

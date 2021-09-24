@@ -15,14 +15,6 @@ import java.util.*
 
 object VedtakUtils {
 
-    fun hentHjemlerBruktIVedtak(vedtak: Vedtak): SortedSet<Int> {
-        val hjemler = mutableSetOf<Int>()
-        vedtak.vedtakBegrunnelser.forEach {
-            hjemler.addAll(it.begrunnelse.hentHjemler().toSet())
-        }
-        return hjemler.toSortedSet()
-    }
-
     /**
      * Funksjonen henter personer som trigger den gitte vedtaksperioden ved å hente vilkårResultater
      * basert på de attributter som definerer om en vedtaksbegrunnelse er trigget for en periode.
