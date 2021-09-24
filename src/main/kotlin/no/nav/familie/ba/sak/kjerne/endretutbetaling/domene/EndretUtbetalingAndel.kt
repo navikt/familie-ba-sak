@@ -76,9 +76,9 @@ data class EndretUtbetalingAndel(
     fun periode() = MånedPeriode(this.fom, this.tom)
 }
 
-enum class Årsak(val klassifisering: String) {
+enum class Årsak(val visningsnavn: String) {
     DELT_BOSTED("Delt bosted"),
     EØS_SEKUNDÆRLAND("Eøs sekundærland");
 
-    fun kanGiNullutbetaling() = this == Årsak.EØS_SEKUNDÆRLAND
+    fun kanGiNullutbetaling() = this == EØS_SEKUNDÆRLAND
 }
