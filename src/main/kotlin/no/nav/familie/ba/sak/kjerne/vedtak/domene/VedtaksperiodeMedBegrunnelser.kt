@@ -114,6 +114,7 @@ fun VedtaksperiodeMedBegrunnelser.tilBrevPeriode(
         personerIPersongrunnlag: List<Person>,
         utbetalingsperioder: List<Utbetalingsperiode>,
         målform: Målform,
+        brukBegrunnelserFraSanity: Boolean = false,
         uregistrerteBarn: List<BarnMedOpplysninger> = emptyList()
 ): BrevPeriode? {
     val begrunnelserOgFritekster = byggBegrunnelserOgFriteksterForVedtaksperiode(
