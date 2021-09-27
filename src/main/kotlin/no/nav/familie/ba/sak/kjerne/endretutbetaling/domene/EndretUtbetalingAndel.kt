@@ -42,25 +42,25 @@ data class EndretUtbetalingAndel(
     val behandlingId: Long,
 
     @ManyToOne @JoinColumn(name = "fk_po_person_id")
-    var person: Person?,
+    var person: Person? = null,
 
     @Column(name = "prosent")
-    var prosent: BigDecimal?,
+    var prosent: BigDecimal? = null,
 
     @Column(name = "fom", columnDefinition = "DATE")
     @Convert(converter = YearMonthConverter::class)
-    var fom: YearMonth?,
+    var fom: YearMonth? = null,
 
     @Column(name = "tom", columnDefinition = "DATE")
     @Convert(converter = YearMonthConverter::class)
-    var tom: YearMonth?,
+    var tom: YearMonth? = null,
 
     @Enumerated(EnumType.STRING)
     @Column(name = "aarsak")
-    var årsak: Årsak?,
+    var årsak: Årsak? = null,
 
     @Column(name = "begrunnelse")
-    var begrunnelse: String?,
+    var begrunnelse: String? = null,
 
     @ManyToMany
     @JoinTable(

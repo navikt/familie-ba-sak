@@ -19,11 +19,11 @@ class EndretUtbetalingAndelService(
 
     @Transactional
     fun oppdaterEndretUtbetalingAndelOgOppdaterTilkjentYtelse(
-            behandling: Behandling,
-            endretUtbetalingAndelId: Long,
-            restEndretUtbetalingAndel: RestEndretUtbetalingAndel
+        behandling: Behandling,
+        endretUtbetalingAndelId: Long,
+        restEndretUtbetalingAndel: RestEndretUtbetalingAndel
     ) {
-       val endretUtbetalingAndel = endretUtbetalingAndelRepository.getById(endretUtbetalingAndelId)
+        val endretUtbetalingAndel = endretUtbetalingAndelRepository.getById(endretUtbetalingAndelId)
 
         endretUtbetalingAndel.fom = restEndretUtbetalingAndel.fom
         endretUtbetalingAndel.tom = restEndretUtbetalingAndel.tom
@@ -40,10 +40,10 @@ class EndretUtbetalingAndelService(
 
     @Transactional
     fun fjernEndretUtbetalingAndelOgOppdaterTilkjentYtelse(
-            behandling: Behandling,
-            endretUtbetalingAndelId: Long,
+        behandling: Behandling,
+        endretUtbetalingAndelId: Long,
     ) {
-       endretUtbetalingAndelRepository.deleteById(endretUtbetalingAndelId)
+        endretUtbetalingAndelRepository.deleteById(endretUtbetalingAndelId)
 
         val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
             ?: throw Feil("Fant ikke personopplysninggrunnlag på behandling ${behandling.id}")
@@ -52,26 +52,12 @@ class EndretUtbetalingAndelService(
     }
 
     @Transactional
-    fun opprettEndretUtbetalingAndelOgOppdaterTilkjentYtelse(
-        behandling: Behandling,
-        restEndretUtbetalingAndel: RestEndretUtbetalingAndel
-    ) {
-        val personOpplysninger = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
-            ?: error("Finner ikke persongrunnlag")
-
-        val barn =
-            personOpplysninger.barna.singleOrNull { b -> b.personIdent.ident == restEndretUtbetalingAndel.personIdent }
-
-        val endretUtbetalingAndel = EndretUtbetalingAndel(
-            behandlingId = behandling.id,
-            person = barn,
-            prosent = restEndretUtbetalingAndel.prosent,
-            fom = restEndretUtbetalingAndel.fom,
-            tom = restEndretUtbetalingAndel.tom,
-            årsak = restEndretUtbetalingAndel.årsak,
-            begrunnelse = restEndretUtbetalingAndel.begrunnelse,
+    fun opprettTomEndretUtbetalingAndelOgOppdaterTilkjentYtelse(
+        behandling: Behandling
+    ) =
+        endretUtbetalingAndelRepository.save(
+            EndretUtbetalingAndel(
+                behandlingId = behandling.id,
+            )
         )
-
-        endretUtbetalingAndelRepository.save(endretUtbetalingAndel)
-    }
 }
