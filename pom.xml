@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.5.4</version>
+        <version>2.5.5</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
@@ -25,7 +25,7 @@
         <spring.vault.version>2.3.2</spring.vault.version>
         <prosessering.version>1.20210803164024_dfccf33</prosessering.version>
         <felles.version>1.20210908141943_5f1405d</felles.version>
-        <felles-kontrakter.version>2.0_20210922093219_d7d29df</felles-kontrakter.version>
+        <felles-kontrakter.version>2.0_20210923132448_f729fd7</felles-kontrakter.version>
         <familie.kontrakter.saksstatistikk>2.0_20210427132344_d9066f5</familie.kontrakter.saksstatistikk>
         <familie.kontrakter.stønadsstatistikk>2.0_20210914093948_94e43f0</familie.kontrakter.stønadsstatistikk>
         <familie.kontrakter.skatteetaten>2.0_20210920094114_9c74239</familie.kontrakter.skatteetaten>

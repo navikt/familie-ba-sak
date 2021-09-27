@@ -10,6 +10,8 @@ import no.nav.familie.ba.sak.kjerne.steg.FØRSTE_STEG
 import no.nav.familie.ba.sak.kjerne.steg.SISTE_STEG
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
+import no.nav.familie.kontrakter.felles.Behandlingstema
+import no.nav.familie.kontrakter.felles.oppgave.Behandlingstype
 import org.hibernate.annotations.SortComparator
 import javax.persistence.CascadeType
 import javax.persistence.Column
@@ -102,8 +104,6 @@ data class Behandling(
             resultat == BehandlingResultat.HENLAGT_FEILAKTIG_OPPRETTET
             || resultat == BehandlingResultat.HENLAGT_SØKNAD_TRUKKET
             || resultat == BehandlingResultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE
-
-    fun erOmregningsbehandling() = opprettetÅrsak == BehandlingÅrsak.OMREGNING_6ÅR || opprettetÅrsak == BehandlingÅrsak.OMREGNING_18ÅR
 
     fun leggTilBehandlingStegTilstand(nesteSteg: StegType): Behandling {
         if (nesteSteg != StegType.HENLEGG_BEHANDLING) {
@@ -242,12 +242,26 @@ enum class BehandlingType(val visningsnavn: String) {
 
 enum class BehandlingKategori {
     EØS,
-    NASJONAL
+    NASJONAL;
+
+    fun tilBehandlingstype(): Behandlingstype {
+        return when(this) {
+            EØS -> Behandlingstype.EØS
+            NASJONAL -> Behandlingstype.NASJONAL
+        }
+    }
 }
 
 enum class BehandlingUnderkategori {
     UTVIDET,
-    ORDINÆR
+    ORDINÆR;
+
+    fun tilBehandlingstema(): Behandlingstema {
+        return when(this) {
+            UTVIDET -> Behandlingstema.UtvidetBarnetrygd
+            ORDINÆR -> Behandlingstema.OrdinærBarnetrygd
+        }
+    }
 }
 
 fun initStatus(): BehandlingStatus {
