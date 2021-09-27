@@ -6,6 +6,8 @@ import no.nav.familie.ba.sak.common.YearMonthConverter
 import no.nav.familie.ba.sak.common.overlapperHeltEllerDelvisMed
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjonListConverter
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.math.BigDecimal
 import java.time.YearMonth
@@ -69,6 +71,10 @@ data class EndretUtbetalingAndel(
                 inverseJoinColumns = [JoinColumn(name = "fk_andel_tilkjent_ytelse_id")]
         )
         val andelTilkjentYtelser: List<AndelTilkjentYtelse> = emptyList(),
+
+        @Column(name = "vedtak_begrunnelse_spesifikasjoner")
+        @Convert(converter = VedtakBegrunnelseSpesifikasjonListConverter::class)
+        var vedtakBegrunnelseSpesifikasjoner: List<VedtakBegrunnelseSpesifikasjon> = emptyList(),
 
         ) : BaseEntitet() {
 
