@@ -173,10 +173,10 @@ internal class TilkjentYtelseUtilsTest {
 
         val (vilkårsvurdering, personopplysningGrunnlag) =
                 genererBehandlingResultatOgPersonopplysningGrunnlag(barnFødselsdato = barnFødselsdato,
-                                      vilkårOppfyltFom = barnFødselsdato,
-                                      erDeltBosted = true,
-                                      backToBackTom = LocalDate.of(2019, 8, 17),
-                                      backToBackFom = LocalDate.of(2019, 8, 18))
+                                                                    vilkårOppfyltFom = barnFødselsdato,
+                                                                    erDeltBosted = true,
+                                                                    backToBackTom = LocalDate.of(2019, 8, 17),
+                                                                    backToBackFom = LocalDate.of(2019, 8, 18))
 
         val andeler = TilkjentYtelseUtils.beregnTilkjentYtelse(vilkårsvurdering = vilkårsvurdering,
                                                                personopplysningGrunnlag = personopplysningGrunnlag,
