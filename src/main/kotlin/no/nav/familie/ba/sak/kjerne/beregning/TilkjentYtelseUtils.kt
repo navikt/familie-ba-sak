@@ -101,20 +101,20 @@ object TilkjentYtelseUtils {
         val oppfyltFom =
                 maksimum(overlappendePerioderesultatSøker.periodeFom, periodeResultatBarn.periodeFom)
 
-                                val skalVidereføresEnMånedEkstra =
-                                        innvilgedePeriodeResultatBarna.any { periodeResultat ->
-                                            innvilgetPeriodeResultatSøker.any { periodeResultatSøker ->
-                                                periodeResultatSøker.overlapper(periodeResultat)
-                                            } &&
-                                            periodeResultatBarn.periodeTom?.erDagenFør(periodeResultat.periodeFom) == true &&
-                                            periodeResultatBarn.periodeTom?.toYearMonth() != periodeResultat.periodeFom?.toYearMonth() &&
-                                            periodeResultatBarn.personIdent.equals(periodeResultat.personIdent)
-                                        }
+        val skalVidereføresEnMånedEkstra =
+                innvilgedePeriodeResultatBarna.any { periodeResultat ->
+                    innvilgetPeriodeResultatSøker.any { periodeResultatSøker ->
+                        periodeResultatSøker.overlapper(periodeResultat)
+                    } &&
+                    periodeResultatBarn.periodeTom?.erDagenFør(periodeResultat.periodeFom) == true &&
+                    periodeResultatBarn.periodeTom?.toYearMonth() != periodeResultat.periodeFom?.toYearMonth() &&
+                    periodeResultatBarn.personIdent.equals(periodeResultat.personIdent)
+                }
 
-                                val minsteTom =
-                                        minimum(overlappendePerioderesultatSøker.periodeTom, periodeResultatBarn.periodeTom)
+        val minsteTom =
+                minimum(overlappendePerioderesultatSøker.periodeTom, periodeResultatBarn.periodeTom)
 
-                                val oppfyltTom = if (skalVidereføresEnMånedEkstra) minsteTom.plusMonths(1) else minsteTom
+        val oppfyltTom = if (skalVidereføresEnMånedEkstra) minsteTom.plusMonths(1) else minsteTom
 
         val oppfyltTomKommerFra18ÅrsVilkår =
                 oppfyltTom == periodeResultatBarn.vilkårResultater.find {
@@ -122,30 +122,30 @@ object TilkjentYtelseUtils {
                 }?.periodeTom
 
 
-                                val (periodeUnder6År, periodeOver6år) = splittPeriodePå6Årsdag(person.hentSeksårsdag(),
-                                                                                               oppfyltFom,
-                                                                                               oppfyltTom)
-                                val satsperioderFørFylte6År = if (periodeUnder6År != null) SatsService.hentGyldigSatsFor(
-                                        satstype = SatsType.TILLEGG_ORBA,
-                                        stønadFraOgMed = settRiktigStønadFom(
-                                                fraOgMed = periodeUnder6År.fom),
-                                        stønadTilOgMed = settRiktigStønadTom(tilOgMed = periodeUnder6År.tom),
-                                        maxSatsGyldigFraOgMed = SatsService.tilleggEndringSeptember2021,
-                                ) else emptyList()
+        val (periodeUnder6År, periodeOver6år) = splittPeriodePå6Årsdag(person.hentSeksårsdag(),
+                                                                       oppfyltFom,
+                                                                       oppfyltTom)
+        val satsperioderFørFylte6År = if (periodeUnder6År != null) SatsService.hentGyldigSatsFor(
+                satstype = SatsType.TILLEGG_ORBA,
+                stønadFraOgMed = settRiktigStønadFom(
+                        fraOgMed = periodeUnder6År.fom),
+                stønadTilOgMed = settRiktigStønadTom(tilOgMed = periodeUnder6År.tom),
+                maxSatsGyldigFraOgMed = SatsService.tilleggEndringSeptember2021,
+        ) else emptyList()
 
-                                val satsperioderEtterFylte6År = if (periodeOver6år != null) SatsService.hentGyldigSatsFor(
-                                        satstype = SatsType.ORBA,
-                                        stønadFraOgMed = settRiktigStønadFom(skalStarteSammeMåned =
-                                                                             periodeUnder6År != null,
-                                                                             fraOgMed = periodeOver6år.fom),
-                                        stønadTilOgMed = settRiktigStønadTom(skalAvsluttesMånedenFør = oppfyltTomKommerFra18ÅrsVilkår,
-                                                                             tilOgMed = periodeOver6år.tom),
-                                        maxSatsGyldigFraOgMed = SatsService.tilleggEndringSeptember2021,
-                                ) else emptyList()
+        val satsperioderEtterFylte6År = if (periodeOver6år != null) SatsService.hentGyldigSatsFor(
+                satstype = SatsType.ORBA,
+                stønadFraOgMed = settRiktigStønadFom(skalStarteSammeMåned =
+                                                     periodeUnder6År != null,
+                                                     fraOgMed = periodeOver6år.fom),
+                stønadTilOgMed = settRiktigStønadTom(skalAvsluttesMånedenFør = oppfyltTomKommerFra18ÅrsVilkår,
+                                                     tilOgMed = periodeOver6år.tom),
+                maxSatsGyldigFraOgMed = SatsService.tilleggEndringSeptember2021,
+        ) else emptyList()
 
         return listOf(satsperioderFørFylte6År, satsperioderEtterFylte6År).flatten()
-                        .sortedBy { it.fraOgMed }
-                        .fold(mutableListOf(), ::slåSammenEtterfølgendePerioderMedSammeBeløp)
+                .sortedBy { it.fraOgMed }
+                .fold(mutableListOf(), ::slåSammenEtterfølgendePerioderMedSammeBeløp)
     }
 
     fun oppdaterTilkjentYtelseMedEndretUtbetalingAndeler(
