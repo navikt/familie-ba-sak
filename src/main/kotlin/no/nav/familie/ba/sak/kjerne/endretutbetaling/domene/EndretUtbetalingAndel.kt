@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.YearMonthConverter
 import no.nav.familie.ba.sak.common.overlapperHeltEllerDelvisMed
+import no.nav.familie.ba.sak.ekstern.restDomene.RestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
@@ -64,13 +65,14 @@ data class EndretUtbetalingAndel(
 
     @ManyToMany
     @JoinTable(
-            name = "ANDEL_TIL_ENDRET_ANDEL",
-            joinColumns = [JoinColumn(name = "fk_endret_utbetaling_andel_id")] ,
-            inverseJoinColumns = [JoinColumn(name = "fk_andel_tilkjent_ytelse_id")]
+        name = "ANDEL_TIL_ENDRET_ANDEL",
+        joinColumns = [JoinColumn(name = "fk_endret_utbetaling_andel_id")],
+        inverseJoinColumns = [JoinColumn(name = "fk_andel_tilkjent_ytelse_id")]
     )
     val andelTilkjentYtelser: List<AndelTilkjentYtelse> = emptyList(),
 
-) : BaseEntitet() {
+    ) : BaseEntitet() {
+
     fun overlapperMed(periode: MånedPeriode) = periode.overlapperHeltEllerDelvisMed(this.periode())
 
     fun periode() = MånedPeriode(this.fom!!, this.tom!!)
@@ -81,4 +83,24 @@ enum class Årsak(val klassifisering: String) {
     EØS_SEKUNDÆRLAND("Eøs sekundærland");
 
     fun kanGiNullutbetaling() = this == Årsak.EØS_SEKUNDÆRLAND
+}
+
+fun EndretUtbetalingAndel.tilRestEndretUtbetalingAndel() = RestEndretUtbetalingAndel(
+    id = this.id,
+    personIdent = this.person?.personIdent?.ident,
+    prosent = this.prosent,
+    fom = this.fom,
+    tom = this.tom,
+    årsak = this.årsak,
+    begrunnelse = this.begrunnelse
+)
+
+fun EndretUtbetalingAndel.fraRestEndretUtbetalingAndel(restEndretUtbetalingAndel: RestEndretUtbetalingAndel, person: Person) {
+    this.fom = restEndretUtbetalingAndel.fom
+    this.tom = restEndretUtbetalingAndel.tom
+    this.prosent = restEndretUtbetalingAndel.prosent
+    this.årsak = restEndretUtbetalingAndel.årsak
+    this.begrunnelse = restEndretUtbetalingAndel.begrunnelse
+    this.person = person
+
 }
