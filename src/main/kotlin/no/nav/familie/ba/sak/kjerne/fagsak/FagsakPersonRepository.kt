@@ -11,7 +11,6 @@ import javax.persistence.LockModeType
 interface FagsakPersonRepository : JpaRepository<FagsakPerson, Long> {
 
     @Lock(LockModeType.NONE)
-    @Query(value = "SELECT DISTINCT(f.fagsak) FROM FagsakPerson f WHERE f.personIdent in :personIdenter")
+    @Query(value = "SELECT DISTINCT(f.fagsak) FROM FagsakPerson f WHERE f.personIdent in :personIdenter AND f.fagsak.arkivert = false")
     fun finnFagsak(personIdenter: Set<PersonIdent>): Fagsak?
-
 }
