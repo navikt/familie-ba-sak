@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.common.inkluderer
 import no.nav.familie.ba.sak.common.maksimum
 import no.nav.familie.ba.sak.common.minimum
 import no.nav.familie.ba.sak.common.sisteDagIMåned
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
@@ -74,6 +75,16 @@ object TilkjentYtelseUtils {
                                             periodeResultatBarn.personIdent.equals(periodeResultat.personIdent)
                                         }
 
+                                val foregåendeBack2BackPeriodeSomOverlapperMedSøkerperiodeInnenforSammeMåned =
+                                        innvilgedePeriodeResultatBarna.singleOrNull { periodeResultat ->
+                                            innvilgetPeriodeResultatSøker.any { periodeResultatSøker ->
+                                                periodeResultatSøker.overlapper(periodeResultat)
+                                            } &&
+                                            periodeResultat.periodeTom?.erDagenFør(periodeResultatBarn.periodeFom) == true &&
+                                            periodeResultat.periodeTom?.toYearMonth() == periodeResultatBarn.periodeFom?.toYearMonth() &&
+                                            periodeResultatBarn.personIdent.equals(periodeResultat.personIdent)
+                                        }
+
                                 val deltBostedEndresForPåfølgendeBack2BackPeriode =
                                         påfølgendeBack2BackPeriodeSomOverlapperMedSøkerperiode != null &&
                                         periodeResultatBarn.vilkårResultater.single {
@@ -94,6 +105,7 @@ object TilkjentYtelseUtils {
 
                                 val skalStarteSammeMåned =
                                         foregåendeBack2BackPeriodeSomOverlapperMedSøkerperiode != null && !deltBostedEndretFraForrigeBack2BackPeriode
+                                        //&& foregåendeBack2BackPeriodeSomOverlapperMedSøkerperiodeInnenforSammeMåned == null
 
                                 val skalVidereføresEnMånedEkstra =
                                         påfølgendeBack2BackPeriodeSomOverlapperMedSøkerperiode != null && deltBostedEndresForPåfølgendeBack2BackPeriode
