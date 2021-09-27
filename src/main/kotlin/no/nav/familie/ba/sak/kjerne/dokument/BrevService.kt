@@ -7,8 +7,6 @@ import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.Utils.storForbokstavIHvertOrd
 import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.tilMånedÅr
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.AutovedtakNyfødtBarnFraFør
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.AutovedtakNyfødtFørsteBarn
@@ -45,10 +43,8 @@ class BrevService(
         private val totrinnskontrollService: TotrinnskontrollService,
         private val persongrunnlagService: PersongrunnlagService,
         private val arbeidsfordelingService: ArbeidsfordelingService,
-        private val brevPeriodeService: BrevPeriodeService,
         private val simuleringService: SimuleringService,
         private val vedtaksperiodeService: VedtaksperiodeService,
-        private val featureToggleService: FeatureToggleService,
         private val søknadGrunnlagService: SøknadGrunnlagService
 ) {
 
@@ -165,7 +161,6 @@ class BrevService(
                     personerIPersongrunnlag = grunnlagOgSignaturData.grunnlag.personer.toList(),
                     utbetalingsperioder = utbetalingsperioder,
                     målform = målform,
-                    brukBegrunnelserFraSanity = featureToggleService.isEnabled(FeatureToggleConfig.BRUK_BEGRUNNELSE_FRA_SANITY_BACKEND),
                     uregistrerteBarn = søknadGrunnlagService.hentAktiv(behandlingId = vedtak.behandling.id)
                                                ?.hentUregistrerteBarn() ?: emptyList()
             )
