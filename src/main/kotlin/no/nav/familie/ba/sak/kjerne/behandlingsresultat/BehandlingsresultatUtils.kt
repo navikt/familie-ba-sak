@@ -8,12 +8,50 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 
 object BehandlingsresultatUtils {
 
     private val ikkeStøttetFeil =
             Feil(frontendFeilmelding = "Behandlingsresultatet du har fått på behandlingen er ikke støttet i løsningen enda. Ta kontakt med Team familie om du er uenig i resultatet.",
                  message = "Behandlingsresultatet er ikke støttet i løsningen, se securelogger for resultatene som ble utledet.")
+
+    fun utledBehandlingsresultatDataForPerson(person: Person,
+                                              personerFremstiltKravFor: List<String>,
+                                              vilkårResultater: List<VilkårResultat>,
+                                              forrigeTilkjentYtelse: TilkjentYtelse?,
+                                              tilkjentYtelse: TilkjentYtelse): BehandlingsresultatPerson {
+
+        val personIdent = person.personIdent.ident
+        return BehandlingsresultatPerson(
+                personIdent = personIdent,
+                personType = person.type,
+                søktForPerson = personerFremstiltKravFor.contains(personIdent),
+                forrigeAndeler = forrigeTilkjentYtelse?.andelerTilkjentYtelse?.filter { it.personIdent == personIdent }
+                                         ?.map { andelTilkjentYtelse ->
+                                             BehandlingsresultatAndelTilkjentYtelse(
+                                                     stønadFom = andelTilkjentYtelse.stønadFom,
+                                                     stønadTom = andelTilkjentYtelse.stønadTom,
+                                                     kalkulertUtbetalingsbeløp = andelTilkjentYtelse.kalkulertUtbetalingsbeløp,
+                                                     personIdent = personIdent,
+                                                     type = person.type.ytelseType()
+                                             )
+                                         } ?: emptyList(),
+                andeler = tilkjentYtelse.andelerTilkjentYtelse.filter { it.personIdent == personIdent }
+                        .map { andelTilkjentYtelse ->
+                            BehandlingsresultatAndelTilkjentYtelse(
+                                    stønadFom = andelTilkjentYtelse.stønadFom,
+                                    stønadTom = andelTilkjentYtelse.stønadTom,
+                                    kalkulertUtbetalingsbeløp = andelTilkjentYtelse.kalkulertUtbetalingsbeløp,
+                                    personIdent = personIdent,
+                                    type = person.type.ytelseType()
+                            )
+                        }
+        )
+    }
+
 
     fun utledBehandlingsresultatBasertPåYtelsePersoner(ytelsePersoner: List<YtelsePerson>): BehandlingResultat {
         validerYtelsePersoner(ytelsePersoner)

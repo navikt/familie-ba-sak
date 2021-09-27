@@ -7,7 +7,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
@@ -18,6 +17,7 @@ import no.nav.familie.kontrakter.felles.objectMapper
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+
 
 @Service
 class BehandlingsresultatService(
@@ -43,38 +43,44 @@ class BehandlingsresultatService(
                 frontendFeilmelding = "Barn må legges til for å gjennomføre vilkårsvurdering.")
 
         val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandlingId)
+                               ?: throw Feil("Finner ikke aktiv vilkårsvurdering")
 
-        val ytelsePersoner: List<YtelsePerson> =
-                if (behandling.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE) {
-                    val parterSomErVurdertIInneværendeBehandling =
-                            vilkårsvurdering?.personResultater?.filter { it.vilkårResultater.any { vilkårResultat -> vilkårResultat.behandlingId == behandlingId } }
-                                    ?.map { it.personIdent } ?: emptyList()
+        val personerFremstiltKravFor =
+                hentPersonerFramstiltKravFor(behandling = behandling,
+                                             søknadDTO = søknadGrunnlag?.hentSøknadDto(),
+                                             forrigeBehandling = forrigeBehandling)
 
-                    val barn = barna
-                            .filter { parterSomErVurdertIInneværendeBehandling.contains(it.personIdent.ident) }
-                            .map { it.personIdent.ident }
-                    YtelsePersonUtils.utledKravForFødselshendelseFGB(barn)
-                } else {
-                    val personIdenter =
-                            hentPersonerFramstiltKravFor(behandling = behandling,
-                                                         søknadDTO = søknadGrunnlag?.hentSøknadDto(),
-                                                         forrigeBehandling = forrigeBehandling)
+        val parterSomErVurdertIInneværendeBehandling =
+                vilkårsvurdering.personResultater
+                        .filter { it.vilkårResultater.any { vilkårResultat -> vilkårResultat.behandlingId == behandlingId } }
+                        .map { it.personIdent }
 
-                    YtelsePersonUtils.utledKrav(
-                            personerMedKrav = persongrunnlagService.hentPersonerPåBehandling(identer = personIdenter,
-                                                                                             behandling = behandling),
-                            forrigeAndelerTilkjentYtelse = forrigeTilkjentYtelse?.andelerTilkjentYtelse?.toList() ?: emptyList())
-                }
+        val personerVurdertIDenneBehandlingen = persongrunnlagService.hentAktiv(behandling.id)?.personer?.filter {
+            parterSomErVurdertIInneværendeBehandling.contains(it.personIdent.ident)
+        }
 
-        validerYtelsePersoner(behandlingId = behandling.id, ytelsePersoner = ytelsePersoner)
+        val behandlingsresultatPersoner = personerVurdertIDenneBehandlingen?.map {
+            BehandlingsresultatUtils.utledBehandlingsresultatDataForPerson(it,
+                                                                           personerFremstiltKravFor,
+                                                                           vilkårsvurdering.personResultater.find { it.personIdent == it.personIdent }?.vilkårResultater?.toList()
+                                                                           ?: emptyList(),
+                                                                           forrigeTilkjentYtelse,
+                                                                           tilkjentYtelse)
+        } ?: emptyList()
 
-        val ytelsePersonerMedResultat = YtelsePersonUtils.populerYtelsePersonerMedResultat(
+        val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(behandlingsresultatPersoner)
+
+
+        validerYtelsePersoner(behandlingId = behandling.id, ytelsePersoner = ytelsePersonerMedResultat)
+
+        /*val ytelsePersonerMedResultat = YtelsePersonUtils.populerYtelsePersonerMedResultat(
                 ytelsePersoner = ytelsePersoner,
                 andelerTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelse.toList(),
                 forrigeAndelerTilkjentYtelse = forrigeTilkjentYtelse?.andelerTilkjentYtelse?.toList() ?: emptyList(),
                 uregistrerteBarn = søknadGrunnlag?.hentUregistrerteBarn() ?: emptyList())
+        */
 
-        vilkårsvurdering?.let {
+        vilkårsvurdering.let {
             vilkårsvurderingService.oppdater(vilkårsvurdering)
                     .also { it.ytelsePersoner = ytelsePersonerMedResultat.writeValueAsString() }
         }
