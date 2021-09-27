@@ -41,7 +41,7 @@ data class EndretUtbetalingAndel(
     @Column(name = "fk_behandling_id", updatable = false, nullable = false)
     val behandlingId: Long,
 
-    @ManyToOne @JoinColumn(name = "fk_po_person_id", nullable = false)
+    @ManyToOne @JoinColumn(name = "fk_po_person_id", nullable = true)
     val person: Person?,
 
     @Column(name = "prosent")
