@@ -1,11 +1,11 @@
 package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger
 
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonInfo
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonInfo
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.sikkerhet.validering.PersontilgangConstraint
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -29,7 +29,8 @@ class PersonController(private val personopplysningerService: Personopplysninger
     @GetMapping
     fun hentPerson(@RequestHeader personIdent: String): ResponseEntity<Ressurs<RestPersonInfo>> {
         val personinfo = integrasjonClient.hentMaskertPersonInfoVedManglendeTilgang(personIdent)
-                         ?: personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(personIdent).tilRestPersonInfo(personIdent)
+                         ?: personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(personIdent)
+                                 .tilRestPersonInfo(personIdent)
         return ResponseEntity.ok(Ressurs.success(personinfo))
     }
 
