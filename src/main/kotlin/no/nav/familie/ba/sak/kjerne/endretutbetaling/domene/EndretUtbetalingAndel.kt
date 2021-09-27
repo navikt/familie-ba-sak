@@ -41,23 +41,23 @@ data class EndretUtbetalingAndel(
     @Column(name = "fk_behandling_id", updatable = false, nullable = false)
     val behandlingId: Long,
 
-    @ManyToOne @JoinColumn(name = "fk_po_person_id", nullable = true)
-    val person: Person?,
+    @ManyToOne @JoinColumn(name = "fk_po_person_id")
+    var person: Person?,
 
     @Column(name = "prosent")
-    val prosent: BigDecimal?,
+    var prosent: BigDecimal?,
 
     @Column(name = "fom", columnDefinition = "DATE")
     @Convert(converter = YearMonthConverter::class)
-    val fom: YearMonth?,
+    var fom: YearMonth?,
 
     @Column(name = "tom", columnDefinition = "DATE")
     @Convert(converter = YearMonthConverter::class)
-    val tom: YearMonth?,
+    var tom: YearMonth?,
 
     @Enumerated(EnumType.STRING)
     @Column(name = "aarsak")
-    val årsak: Årsak?,
+    var årsak: Årsak?,
 
     @Column(name = "begrunnelse")
     var begrunnelse: String?,

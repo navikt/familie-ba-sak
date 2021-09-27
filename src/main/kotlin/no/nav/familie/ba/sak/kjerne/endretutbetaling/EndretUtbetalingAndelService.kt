@@ -25,12 +25,12 @@ class EndretUtbetalingAndelService(
     ) {
        val endretUtbetalingAndel = endretUtbetalingAndelRepository.getById(endretUtbetalingAndelId)
 
-        endretUtbetalingAndelRepository.save(endretUtbetalingAndel.copy(
-            fom = restEndretUtbetalingAndel.fom,
-            tom = restEndretUtbetalingAndel.tom,
-            prosent = restEndretUtbetalingAndel.prosent,
-            årsak = restEndretUtbetalingAndel.årsak,
-        ))
+        endretUtbetalingAndel.fom = restEndretUtbetalingAndel.fom
+        endretUtbetalingAndel.tom = restEndretUtbetalingAndel.tom
+        endretUtbetalingAndel.prosent = restEndretUtbetalingAndel.prosent
+        endretUtbetalingAndel.årsak = restEndretUtbetalingAndel.årsak
+
+        endretUtbetalingAndelRepository.save(endretUtbetalingAndel)
 
         val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
             ?: throw Feil("Fant ikke personopplysninggrunnlag på behandling ${behandling.id}")
