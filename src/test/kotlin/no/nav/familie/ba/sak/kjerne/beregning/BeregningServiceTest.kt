@@ -415,8 +415,8 @@ class BeregningServiceTest {
         kjørScenarioForBack2Backtester(
                 førstePeriodeTomForBarnet = førstePeriodeTomForBarnet,
                 andrePeriodeFomForBarnet = førstePeriodeTomForBarnet.plusDays(1),
-                forventetSluttForFørsteAndelsperiode = førstePeriodeTomForBarnet.toYearMonth(),
-                forventetStartForAndreAndelsperiode = førstePeriodeTomForBarnet.plusMonths(1).toYearMonth()
+                forventetSluttForFørsteAndelsperiode = førstePeriodeTomForBarnet.plusMonths(1).toYearMonth(),
+                forventetStartForAndreAndelsperiode = førstePeriodeTomForBarnet.plusMonths(2).toYearMonth()
         )
     }
 
@@ -461,8 +461,8 @@ class BeregningServiceTest {
         kjørScenarioForBack2Backtester(
                 førstePeriodeTomForBarnet = førstePeriodeTomForBarnet,
                 andrePeriodeFomForBarnet = førstePeriodeTomForBarnet.plusDays(1),
-                forventetSluttForFørsteAndelsperiode = førstePeriodeTomForBarnet.toYearMonth(),
-                forventetStartForAndreAndelsperiode = førstePeriodeTomForBarnet.plusMonths(1).toYearMonth(),
+                forventetSluttForFørsteAndelsperiode = førstePeriodeTomForBarnet.plusMonths(1).toYearMonth(),
+                forventetStartForAndreAndelsperiode = førstePeriodeTomForBarnet.plusMonths(2).toYearMonth(),
                 deltBostedForFørstePeriode = true,
                 deltBostedForAndrePeriode = true
         )
