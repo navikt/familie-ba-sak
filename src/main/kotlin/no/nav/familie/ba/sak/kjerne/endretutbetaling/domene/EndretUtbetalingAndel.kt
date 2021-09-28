@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.endretutbetaling.domene
 
 import no.nav.familie.ba.sak.common.BaseEntitet
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.YearMonthConverter
 import no.nav.familie.ba.sak.common.overlapperHeltEllerDelvisMed
