@@ -11,13 +11,13 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
     @Query(value = "SELECT b FROM Behandling b WHERE b.id = :behandlingId")
     fun finnBehandling(behandlingId: Long): Behandling
 
-    @Query(value = "SELECT b FROM Behandling b JOIN b.fagsak f WHERE f.id = :fagsakId")
+    @Query(value = "SELECT b FROM Behandling b JOIN b.fagsak f WHERE f.id = :fagsakId AND f.arkivert = false")
     fun finnBehandlinger(fagsakId: Long): List<Behandling>
 
-    @Query("SELECT b FROM Behandling b JOIN b.fagsak f WHERE f.id = :fagsakId AND b.aktiv = true")
+    @Query("SELECT b FROM Behandling b JOIN b.fagsak f WHERE f.id = :fagsakId AND b.aktiv = true AND f.arkivert = false")
     fun findByFagsakAndAktiv(fagsakId: Long): Behandling?
 
-    @Query("SELECT b FROM Behandling b JOIN b.fagsak f WHERE f.id = :fagsakId AND b.aktiv = true AND b.status <> 'AVSLUTTET'")
+    @Query("SELECT b FROM Behandling b JOIN b.fagsak f WHERE f.id = :fagsakId AND b.aktiv = true AND b.status <> 'AVSLUTTET' AND f.arkivert = false")
     fun findByFagsakAndAktivAndOpen(fagsakId: Long): Behandling?
 
     /* Denne henter først siste iverksatte behandling på en løpende fagsak.
@@ -31,6 +31,7 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
                                    INNER JOIN tilkjent_ytelse ty ON b.id = ty.fk_behandling_id
                             WHERE f.status = 'LØPENDE'
                               AND ty.utbetalingsoppdrag IS NOT NULL
+                              AND f.arkivert = false
                             GROUP BY fagsakid)
                         
                         SELECT behandlingid FROM sisteiverksattebehandlingfraløpendefagsak""",
@@ -42,7 +43,7 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
                         where b.fagsak.id = :fagsakId AND ty.utbetalingsoppdrag IS NOT NULL""")
     fun finnIverksatteBehandlinger(fagsakId: Long): List<Behandling>
 
-    @Query("SELECT b FROM Behandling b JOIN b.fagsak f WHERE f.id = :fagsakId AND b.status = 'AVSLUTTET'")
+    @Query("SELECT b FROM Behandling b JOIN b.fagsak f WHERE f.id = :fagsakId AND b.status = 'AVSLUTTET' AND f.arkivert = false")
     fun findByFagsakAndAvsluttet(fagsakId: Long): List<Behandling>
 
     @Lock(LockModeType.NONE)

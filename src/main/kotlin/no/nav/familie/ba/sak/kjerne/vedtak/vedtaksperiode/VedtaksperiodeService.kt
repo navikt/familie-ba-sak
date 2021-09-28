@@ -486,7 +486,6 @@ class VedtaksperiodeService(
                 vedtaksperiode = vedtaksperiode,
                 personerIPersongrunnlag = persongrunnlag.personer.toList(),
                 målform = persongrunnlag.søker.målform,
-                brukBegrunnelserFraSanity = false,
                 uregistrerteBarn = uregistrerteBarn
         )
     }

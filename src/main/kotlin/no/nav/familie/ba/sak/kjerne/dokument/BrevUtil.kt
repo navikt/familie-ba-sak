@@ -28,7 +28,6 @@ import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.domene.Totrinnskontroll
-import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.hjemlerTilhørendeFritekst
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
@@ -174,7 +173,7 @@ fun hjemlerTilHjemmeltekst(hjemler: List<String>): String {
     }
 }
 
-fun hentHjemmeltekst(vedtak: Vedtak, vedtaksperioderMedBegrunnelser: List<VedtaksperiodeMedBegrunnelser>): String {
+fun hentHjemmeltekst(vedtaksperioderMedBegrunnelser: List<VedtaksperiodeMedBegrunnelser>): String {
     val hjemler = hentHjemlerIVedtaksperioder(vedtaksperioderMedBegrunnelser).toMutableSet()
 
     if (vedtaksperioderMedBegrunnelser.flatMap { it.fritekster }.isNotEmpty()) {
