@@ -128,8 +128,7 @@ class VedtakServiceTest(
                 saksstatistikkEventPublisher,
                 oppgaveService,
                 infotrygdService,
-                vedtaksperiodeService,
-                featureToggleService
+                vedtaksperiodeService
         )
 
         stubFor(

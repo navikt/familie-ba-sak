@@ -289,20 +289,20 @@ class StegService(
                                                                                           steg = nesteSteg)
 
             if (nesteSteg == SISTE_STEG) {
-                logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} er ferdig med stegprosess på behandling ${behandling.id}")
+                logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} er ferdig med stegprosess på behandling $behandling")
             } else {
-                logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} har håndtert ${behandlingSteg.stegType()} på behandling ${behandling.id}. Neste steg er $nesteSteg")
+                logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} har håndtert ${behandlingSteg.stegType()} på behandling $behandling. Neste steg er $nesteSteg")
             }
             return returBehandling
         } catch (exception: Exception) {
 
             if (exception is FunksjonellFeil) {
                 stegFunksjonellFeilMetrics[behandlingSteg.stegType()]?.increment()
-                logger.info("Håndtering av stegtype '${behandlingSteg.stegType()}' feilet på grunn av funksjonell feil på behandling ${behandling.id}. Melding: ${exception.melding}")
+                logger.info("Håndtering av stegtype '${behandlingSteg.stegType()}' feilet på grunn av funksjonell feil på behandling $behandling. Melding: ${exception.melding}")
             } else {
                 stegFeiletMetrics[behandlingSteg.stegType()]?.increment()
-                logger.error("Håndtering av stegtype '${behandlingSteg.stegType()}' feilet på behandling ${behandling.id}.")
-                secureLogger.error("Håndtering av stegtype '${behandlingSteg.stegType()}' feilet.", exception)
+                logger.error("Håndtering av stegtype '${behandlingSteg.stegType()}' feilet på behandling $behandling.")
+                secureLogger.error("Håndtering av stegtype '${behandlingSteg.stegType()}' feilet på behandling $behandling.", exception)
             }
 
             throw exception

@@ -60,7 +60,7 @@ class FødselshendelseService(
 
         val behandling = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling)
 
-        logger.info("Behandler fødselshendelse. Fagsak(${behandling.fagsak.id}), Behandling(id=${behandling.id}, type=${behandling.type})")
+        logger.info("Behandler fødselshendelse på behandling $behandling")
 
         val behandlingEtterFiltrering = stegService.håndterFiltreringsreglerForFødselshendelser(behandling, nyBehandling)
 
@@ -111,8 +111,8 @@ class FødselshendelseService(
             begrunnelse
         }
 
-        logger.info("Henlegger behandling ${behandling.id} automatisk på grunn av ugyldig resultat")
-        secureLogger.info("Henlegger behandling ${behandling.id} automatisk på grunn av ugyldig resultat. Begrunnelse: $begrunnelse")
+        logger.info("Henlegger behandling $behandling automatisk på grunn av ugyldig resultat")
+        secureLogger.info("Henlegger behandling $behandling automatisk på grunn av ugyldig resultat. Begrunnelse: $begrunnelse")
 
         stegService.håndterHenleggBehandling(behandling = behandling, henleggBehandlingInfo = RestHenleggBehandlingInfo(
                 årsak = HenleggÅrsak.FØDSELSHENDELSE_UGYLDIG_UTFALL,

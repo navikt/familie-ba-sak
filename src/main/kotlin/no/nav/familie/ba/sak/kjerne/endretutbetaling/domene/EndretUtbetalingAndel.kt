@@ -1,13 +1,14 @@
 package no.nav.familie.ba.sak.kjerne.endretutbetaling.domene
 
 import no.nav.familie.ba.sak.common.BaseEntitet
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.YearMonthConverter
 import no.nav.familie.ba.sak.common.overlapperHeltEllerDelvisMed
 import no.nav.familie.ba.sak.ekstern.restDomene.RestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjonListConverter
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.math.BigDecimal
 import java.time.YearMonth
@@ -31,14 +32,14 @@ import javax.persistence.Table
 @Entity(name = "EndretUtbetalingAndel")
 @Table(name = "ENDRET_UTBETALING_ANDEL")
 data class EndretUtbetalingAndel(
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "endret_utbetaling_andel_seq_generator")
-    @SequenceGenerator(
-        name = "endret_utbetaling_andel_seq_generator",
-        sequenceName = "endret_utbetaling_andel_seq",
-        allocationSize = 50
-    )
-    val id: Long = 0,
+        @Id
+        @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "endret_utbetaling_andel_seq_generator")
+        @SequenceGenerator(
+                name = "endret_utbetaling_andel_seq_generator",
+                sequenceName = "endret_utbetaling_andel_seq",
+                allocationSize = 50
+        )
+        val id: Long = 0,
 
     @Column(name = "fk_behandling_id", updatable = false, nullable = false)
     val behandlingId: Long,
@@ -72,7 +73,11 @@ data class EndretUtbetalingAndel(
     )
     val andelTilkjentYtelser: List<AndelTilkjentYtelse> = emptyList(),
 
-    ) : BaseEntitet() {
+        @Column(name = "vedtak_begrunnelse_spesifikasjoner")
+        @Convert(converter = VedtakBegrunnelseSpesifikasjonListConverter::class)
+        var vedtakBegrunnelseSpesifikasjoner: List<VedtakBegrunnelseSpesifikasjon> = emptyList(),
+
+        ) : BaseEntitet() {
 
     fun overlapperMed(periode: MånedPeriode) = periode.overlapperHeltEllerDelvisMed(this.periode())
 
@@ -92,11 +97,11 @@ data class EndretUtbetalingAndel(
 }
 
 
-enum class Årsak(val klassifisering: String) {
+enum class Årsak(val visningsnavn: String) {
     DELT_BOSTED("Delt bosted"),
     EØS_SEKUNDÆRLAND("Eøs sekundærland");
 
-    fun kanGiNullutbetaling() = this == Årsak.EØS_SEKUNDÆRLAND
+    fun kanGiNullutbetaling() = this == EØS_SEKUNDÆRLAND
 }
 
 fun EndretUtbetalingAndel.tilRestEndretUtbetalingAndel() = RestEndretUtbetalingAndel(
