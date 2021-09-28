@@ -209,6 +209,48 @@ internal class TilkjentYtelseUtilsTest {
         assertEquals(YearMonth.of(2019, 10), andeler[2].stønadFom)
     }
 
+    @Test
+    fun `Skal opprette riktig tilkjent ytelse-perioder for perioder som ikke er back-to-back over månedskiftet`(){
+        val barnFødselsdato = LocalDate.of(2016, 2, 5);
+
+        val (vilkårsvurdering, personopplysningGrunnlag) =
+                genererBehandlingResultatOgPersonopplysningGrunnlag(barnFødselsdato = barnFødselsdato,
+                                                                    vilkårOppfyltFom = barnFødselsdato,
+                                                                    erDeltBosted = true,
+                                                                    backToBackTom = LocalDate.of(2019, 8, 31),
+                                                                    backToBackFom = LocalDate.of(2019, 9, 2))
+
+        val andeler = TilkjentYtelseUtils.beregnTilkjentYtelse(vilkårsvurdering = vilkårsvurdering,
+                                                               personopplysningGrunnlag = personopplysningGrunnlag,
+                                                               behandling = lagBehandling())
+                .andelerTilkjentYtelse.toList()
+                .sortedBy { it.stønadFom }
+
+        assertEquals(YearMonth.of(2019, 8), andeler[1].stønadTom)
+        assertEquals(YearMonth.of(2019, 10), andeler[2].stønadFom)
+    }
+
+    @Test
+    fun `Skal opprette riktig tilkjent ytelse-perioder for perioder som slutter og starter første og siste dag i mnd`() {
+        val barnFødselsdato = LocalDate.of(2016, 2, 5);
+
+        val (vilkårsvurdering, personopplysningGrunnlag) =
+                genererBehandlingResultatOgPersonopplysningGrunnlag(barnFødselsdato = barnFødselsdato,
+                                                                    vilkårOppfyltFom = barnFødselsdato,
+                                                                    erDeltBosted = true,
+                                                                    backToBackTom = LocalDate.of(2019, 8, 1),
+                                                                    backToBackFom = LocalDate.of(2019, 8, 31))
+
+        val andeler = TilkjentYtelseUtils.beregnTilkjentYtelse(vilkårsvurdering = vilkårsvurdering,
+                                                               personopplysningGrunnlag = personopplysningGrunnlag,
+                                                               behandling = lagBehandling())
+                .andelerTilkjentYtelse.toList()
+                .sortedBy { it.stønadFom }
+
+        assertEquals(YearMonth.of(2019, 8), andeler[1].stønadTom)
+        assertEquals(YearMonth.of(2019, 9), andeler[2].stønadFom)
+    }
+
     private fun genererBehandlingResultatOgPersonopplysningGrunnlag(barnFødselsdato: LocalDate,
                                                                     vilkårOppfyltFom: LocalDate,
                                                                     vilkårOppfyltTom: LocalDate? = barnFødselsdato.plusYears(18),
