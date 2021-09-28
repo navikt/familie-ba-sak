@@ -34,9 +34,7 @@ object BehandlingsresultatUtils {
                                              BehandlingsresultatAndelTilkjentYtelse(
                                                      stønadFom = andelTilkjentYtelse.stønadFom,
                                                      stønadTom = andelTilkjentYtelse.stønadTom,
-                                                     kalkulertUtbetalingsbeløp = andelTilkjentYtelse.kalkulertUtbetalingsbeløp,
-                                                     personIdent = personIdent,
-                                                     type = person.type.ytelseType()
+                                                     kalkulertUtbetalingsbeløp = andelTilkjentYtelse.kalkulertUtbetalingsbeløp
                                              )
                                          } ?: emptyList(),
                 andeler = tilkjentYtelse.andelerTilkjentYtelse.filter { it.personIdent == personIdent }
@@ -44,9 +42,7 @@ object BehandlingsresultatUtils {
                             BehandlingsresultatAndelTilkjentYtelse(
                                     stønadFom = andelTilkjentYtelse.stønadFom,
                                     stønadTom = andelTilkjentYtelse.stønadTom,
-                                    kalkulertUtbetalingsbeløp = andelTilkjentYtelse.kalkulertUtbetalingsbeløp,
-                                    personIdent = personIdent,
-                                    type = person.type.ytelseType()
+                                    kalkulertUtbetalingsbeløp = andelTilkjentYtelse.kalkulertUtbetalingsbeløp
                             )
                         }
         )

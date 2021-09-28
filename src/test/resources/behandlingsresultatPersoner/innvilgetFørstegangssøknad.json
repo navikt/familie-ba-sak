@@ -3,6 +3,7 @@
     {
       "personType": "BARN",
       "søktForPerson": true,
+      "eksplisittAvslag": false,
       "forrigeAndeler": [],
       "andeler": [
         {
@@ -13,5 +14,6 @@
       ]
     }
   ],
+  "beskrivelse": "",
   "forventetResultat": "INNVILGET"
 }

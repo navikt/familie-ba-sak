@@ -41,7 +41,6 @@ class YtelsePersonUtilsTest {
                         fom = inneværendeMåned().minusYears(3).toString(),
                         tom = "2020-01",
                         kalkulertUtbetalingsbeløp = 1054,
-                        personIdent = barn1.personIdent.ident,
                 )),
                 andeler = emptyList()
         )).map { it.utledYtelsePerson() }
@@ -62,8 +61,8 @@ class YtelsePersonUtilsTest {
                         forrigeAndeler = listOf(
                                 lagBehandlingsresultatAndelTilkjentYtelse(inneværendeMåned().minusYears(3).toString(),
                                                                           "2020-01",
-                                                                          1054,
-                                                                          barn1.personIdent.ident)
+                                                                          1054
+                                )
                         ),
                         andeler = emptyList()
                 ),
@@ -75,9 +74,8 @@ class YtelsePersonUtilsTest {
                                 lagBehandlingsresultatAndelTilkjentYtelse(inneværendeMåned().minusYears(3)
                                                                                   .toString(),
                                                                           "2020-01",
-                                                                          1054,
-                                                                          søker.personIdent.ident,
-                                                                          YtelseType.UTVIDET_BARNETRYGD)
+                                                                          1054
+                                )
                         ),
                         andeler = emptyList()
                 )).map { it.utledYtelsePerson() }
@@ -97,8 +95,8 @@ class YtelsePersonUtilsTest {
                         forrigeAndeler = listOf(
                                 lagBehandlingsresultatAndelTilkjentYtelse(inneværendeMåned().minusYears(3).toString(),
                                                                           "2020-01",
-                                                                          1054,
-                                                                          barn1.personIdent.ident)
+                                                                          1054
+                                )
                         ),
                         andeler = emptyList()
                 ),
@@ -109,9 +107,8 @@ class YtelsePersonUtilsTest {
                         forrigeAndeler = listOf(
                                 lagBehandlingsresultatAndelTilkjentYtelse(inneværendeMåned().minusYears(3).toString(),
                                                                           "2020-01",
-                                                                          1054,
-                                                                          søker.personIdent.ident,
-                                                                          YtelseType.UTVIDET_BARNETRYGD)
+                                                                          1054
+                                )
                         ),
                         andeler = emptyList()
                 )).map { it.utledYtelsePerson() }
@@ -138,8 +135,8 @@ class YtelsePersonUtilsTest {
                         forrigeAndeler = listOf(
                                 lagBehandlingsresultatAndelTilkjentYtelse(inneværendeMåned().minusYears(3).toString(),
                                                                           "2020-01",
-                                                                          1054,
-                                                                          barn1.personIdent.ident)
+                                                                          1054
+                                )
                         ),
                         andeler = emptyList()
                 )).map { it.utledYtelsePerson() }

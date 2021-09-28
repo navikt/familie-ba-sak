@@ -53,8 +53,6 @@ data class BehandlingsresultatPerson(
 }
 
 data class BehandlingsresultatAndelTilkjentYtelse(
-        val personIdent: String,
-        val type: YtelseType,
         val stønadFom: YearMonth,
         val stønadTom: YearMonth,
         val kalkulertUtbetalingsbeløp: Int,
@@ -69,15 +67,11 @@ fun LocalDateSegment<BehandlingsresultatAndelTilkjentYtelse>.erLøpende() = this
 
 fun lagBehandlingsresultatAndelTilkjentYtelse(fom: String,
                                               tom: String,
-                                              kalkulertUtbetalingsbeløp: Int,
-                                              personIdent: String,
-                                              type: YtelseType = YtelseType.ORDINÆR_BARNETRYGD): BehandlingsresultatAndelTilkjentYtelse {
+                                              kalkulertUtbetalingsbeløp: Int): BehandlingsresultatAndelTilkjentYtelse {
 
     return BehandlingsresultatAndelTilkjentYtelse(
-            personIdent = personIdent,
             stønadFom = YearMonth.parse(fom),
             stønadTom = YearMonth.parse(tom),
-            kalkulertUtbetalingsbeløp = kalkulertUtbetalingsbeløp,
-            type = type
+            kalkulertUtbetalingsbeløp = kalkulertUtbetalingsbeløp
     )
 }

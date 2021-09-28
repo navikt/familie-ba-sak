@@ -78,7 +78,19 @@ object YtelsePersonUtils {
                 behandlingsresultatPerson.andeler.maxByOrNull { it.stønadTom }?.stønadTom
                 ?: throw Feil("Finnes andel uten tom-dato") else TIDENES_MORGEN.toYearMonth()
 
-            if (behandlingsresultatPerson.andeler.isNotEmpty()
+            if (beløpEndretIUforandretTidslinje || (!behandlingsresultatPerson.søktForPerson && !segmenterFjernet.isEmpty && !segmenterLagtTil.isEmpty)) {
+                resultater.add(YtelsePersonResultat.ENDRET)
+            }
+
+            if (behandlingsresultatPerson.søktForPerson) {
+                val beløpRedusert = if ((segmenterLagtTil + segmenterFjernet).isEmpty())
+                    behandlingsresultatPerson.forrigeAndeler.sumOf { it.kalkulertUtbetalingsbeløp } - behandlingsresultatPerson.andeler.sumOf { it.kalkulertUtbetalingsbeløp } else 0
+
+                if (beløpEndretIUforandretTidslinje || (!segmenterFjernet.isEmpty && !segmenterLagtTil.isEmpty)) {
+                    resultater.add(YtelsePersonResultat.ENDRET)
+                }
+            }
+            /*if (behandlingsresultatPerson.andeler.isNotEmpty()
                 && (beløpEndretIUforandretTidslinje
                     || finnesEndringTilbakeITid(personSomSjekkes = ytelsePerson,
                                                 segmenterLagtTil = segmenterLagtTil,
@@ -89,7 +101,7 @@ object YtelsePersonUtils {
                                                         segmenterFjernet = segmenterFjernet,
                                                         sisteAndelPåPerson = behandlingsresultatPerson.andeler.maxByOrNull { it.stønadFom })) {
                 resultater.add(YtelsePersonResultat.ENDRET)
-            }
+            }*/
 
             ytelsePerson.copy(
                     resultater = resultater.toSet(),
