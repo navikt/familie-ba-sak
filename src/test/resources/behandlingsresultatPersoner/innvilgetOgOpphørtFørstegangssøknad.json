@@ -1,4 +1,6 @@
 {
+  "beskrivelse": "",
+  "inneværendeMåned": "2021-05",
   "personer": [
     {
       "personType": "BARN",
@@ -47,6 +49,5 @@
       ]
     }
   ],
-  "beskrivelse": "",
   "forventetResultat": "INNVILGET_OG_OPPHØRT"
 }

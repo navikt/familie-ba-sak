@@ -31,7 +31,7 @@ object YtelsePersonUtils {
      * @param [behandlingsresultatPersoner] Personer som er vurdert i behandlingen med metadata
      * @return Personer populert med utfall (resultater) etter denne behandlingen
      */
-    fun utledYtelsePersonerMedResultat(behandlingsresultatPersoner: List<BehandlingsresultatPerson>): List<YtelsePerson> {
+    fun utledYtelsePersonerMedResultat(behandlingsresultatPersoner: List<BehandlingsresultatPerson>, inneværendeMåned: YearMonth = YearMonth.now()): List<YtelsePerson> {
         return behandlingsresultatPersoner.map { behandlingsresultatPerson ->
             val forrigeAndelerTidslinje = LocalDateTimeline(behandlingsresultatPerson.forrigeAndeler.map {
                 LocalDateSegment(
@@ -66,7 +66,7 @@ object YtelsePersonUtils {
                                                      segmenterLagtTil = segmenterLagtTil)) {
                 resultater.add(YtelsePersonResultat.AVSLÅTT)
             }
-            if (erYtelsenOpphørt(andeler = behandlingsresultatPerson.andeler) && (segmenterFjernet + segmenterLagtTil).isNotEmpty()) {
+            if (erYtelsenOpphørt(andeler = behandlingsresultatPerson.andeler, inneværendeMåned = inneværendeMåned) && (segmenterFjernet + segmenterLagtTil).isNotEmpty()) {
                 resultater.add(YtelsePersonResultat.OPPHØRT)
             }
 
@@ -78,15 +78,11 @@ object YtelsePersonUtils {
                 behandlingsresultatPerson.andeler.maxByOrNull { it.stønadTom }?.stønadTom
                 ?: throw Feil("Finnes andel uten tom-dato") else TIDENES_MORGEN.toYearMonth()
 
-            if (beløpEndretIUforandretTidslinje || (!behandlingsresultatPerson.søktForPerson && !segmenterFjernet.isEmpty && !segmenterLagtTil.isEmpty)) {
-                resultater.add(YtelsePersonResultat.ENDRET)
-            }
-
             if (behandlingsresultatPerson.søktForPerson) {
-                val beløpRedusert = if ((segmenterLagtTil + segmenterFjernet).isEmpty())
-                    behandlingsresultatPerson.forrigeAndeler.sumOf { it.kalkulertUtbetalingsbeløp } - behandlingsresultatPerson.andeler.sumOf { it.kalkulertUtbetalingsbeløp } else 0
+                val beløpRedusert = (segmenterLagtTil + segmenterFjernet).isEmpty() &&
+                                    (behandlingsresultatPerson.forrigeAndeler.sumOf { it.kalkulertUtbetalingsbeløp } - behandlingsresultatPerson.andeler.sumOf { it.kalkulertUtbetalingsbeløp }) > 0
 
-                if (beløpEndretIUforandretTidslinje || (!segmenterFjernet.isEmpty && !segmenterLagtTil.isEmpty)) {
+                if (beløpRedusert || (!segmenterFjernet.isEmpty && !segmenterLagtTil.isEmpty)) {
                     resultater.add(YtelsePersonResultat.ENDRET)
                 }
             }
@@ -118,7 +114,7 @@ object YtelsePersonUtils {
                                 segmenterLagtTil: LocalDateTimeline<BehandlingsresultatAndelTilkjentYtelse>) =
             personSomSjekkes.erFramstiltKravForIInneværendeBehandling() && !segmenterLagtTil.isEmpty
 
-    private fun erYtelsenOpphørt(andeler: List<BehandlingsresultatAndelTilkjentYtelse>) = andeler.none { it.erLøpende() }
+    private fun erYtelsenOpphørt(andeler: List<BehandlingsresultatAndelTilkjentYtelse>, inneværendeMåned: YearMonth) = andeler.none { it.erLøpende(inneværendeMåned) }
 
     private fun finnesEndringTilbakeITid(personSomSjekkes: YtelsePerson,
                                          segmenterLagtTil: LocalDateTimeline<BehandlingsresultatAndelTilkjentYtelse>,
@@ -132,8 +128,9 @@ object YtelsePersonUtils {
     }
 
     private fun harGåttFraOpphørtTilLøpende(forrigeTilstandForPerson: List<BehandlingsresultatAndelTilkjentYtelse>,
-                                            oppdatertTilstandForPerson: List<BehandlingsresultatAndelTilkjentYtelse>) =
-            forrigeTilstandForPerson.isNotEmpty() && forrigeTilstandForPerson.none { it.erLøpende() } && oppdatertTilstandForPerson.any { it.erLøpende() }
+                                            oppdatertTilstandForPerson: List<BehandlingsresultatAndelTilkjentYtelse>,
+                                            inneværendeMåned: YearMonth) =
+            forrigeTilstandForPerson.isNotEmpty() && forrigeTilstandForPerson.none { it.erLøpende(inneværendeMåned) } && oppdatertTilstandForPerson.any { it.erLøpende(inneværendeMåned) }
 
     private fun enesteEndringErTidligereStønadslutt(segmenterLagtTil: LocalDateTimeline<BehandlingsresultatAndelTilkjentYtelse>,
                                                     segmenterFjernet: LocalDateTimeline<BehandlingsresultatAndelTilkjentYtelse>,

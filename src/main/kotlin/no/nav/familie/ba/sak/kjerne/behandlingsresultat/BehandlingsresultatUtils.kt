@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.inneværendeMåned
-import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
@@ -52,15 +51,55 @@ object BehandlingsresultatUtils {
     fun utledBehandlingsresultatBasertPåYtelsePersoner(ytelsePersoner: List<YtelsePerson>): BehandlingResultat {
         validerYtelsePersoner(ytelsePersoner)
 
-        val (framstiltNå, framstiltTidligere) = ytelsePersoner.partition { it.erFramstiltKravForIInneværendeBehandling() }
+        val samledeResultater = ytelsePersoner.flatMap { it.resultater }.toMutableSet()
+
+        return when {
+            samledeResultater.isEmpty() -> BehandlingResultat.FORTSATT_INNVILGET
+            samledeResultater == setOf(YtelsePersonResultat.ENDRET) -> BehandlingResultat.ENDRET
+            samledeResultater == setOf(YtelsePersonResultat.ENDRET,
+                                       YtelsePersonResultat.OPPHØRT) -> BehandlingResultat.ENDRET_OG_OPPHØRT
+            samledeResultater == setOf(YtelsePersonResultat.OPPHØRT) -> BehandlingResultat.OPPHØRT
+            samledeResultater == setOf(YtelsePersonResultat.INNVILGET) -> BehandlingResultat.INNVILGET
+            samledeResultater == setOf(YtelsePersonResultat.INNVILGET,
+                                       YtelsePersonResultat.OPPHØRT) -> BehandlingResultat.INNVILGET_OG_OPPHØRT
+            samledeResultater == setOf(YtelsePersonResultat.INNVILGET,
+                                       YtelsePersonResultat.ENDRET) -> BehandlingResultat.INNVILGET_OG_ENDRET
+            samledeResultater == setOf(YtelsePersonResultat.INNVILGET,
+                                       YtelsePersonResultat.ENDRET,
+                                       YtelsePersonResultat.OPPHØRT) -> BehandlingResultat.INNVILGET_ENDRET_OG_OPPHØRT
+            samledeResultater == setOf(YtelsePersonResultat.INNVILGET,
+                                       YtelsePersonResultat.AVSLÅTT) -> BehandlingResultat.DELVIS_INNVILGET
+            samledeResultater == setOf(YtelsePersonResultat.INNVILGET,
+                                       YtelsePersonResultat.AVSLÅTT,
+                                       YtelsePersonResultat.OPPHØRT) -> BehandlingResultat.DELVIS_INNVILGET_OG_OPPHØRT
+            samledeResultater == setOf(YtelsePersonResultat.INNVILGET,
+                                       YtelsePersonResultat.AVSLÅTT,
+                                       YtelsePersonResultat.ENDRET) -> BehandlingResultat.DELVIS_INNVILGET_OG_ENDRET
+            samledeResultater == setOf(YtelsePersonResultat.INNVILGET,
+                                       YtelsePersonResultat.AVSLÅTT,
+                                       YtelsePersonResultat.ENDRET,
+                                       YtelsePersonResultat.OPPHØRT) -> BehandlingResultat.DELVIS_INNVILGET_ENDRET_OG_OPPHØRT
+            samledeResultater == setOf(YtelsePersonResultat.AVSLÅTT) -> BehandlingResultat.AVSLÅTT
+            samledeResultater == setOf(YtelsePersonResultat.AVSLÅTT,
+                                       YtelsePersonResultat.OPPHØRT) -> BehandlingResultat.AVSLÅTT_OG_OPPHØRT
+            samledeResultater == setOf(YtelsePersonResultat.AVSLÅTT,
+                                       YtelsePersonResultat.ENDRET) -> BehandlingResultat.AVSLÅTT_OG_ENDRET
+            samledeResultater == setOf(YtelsePersonResultat.AVSLÅTT,
+                                       YtelsePersonResultat.ENDRET,
+                                       YtelsePersonResultat.OPPHØRT) -> BehandlingResultat.AVSLÅTT_ENDRET_OG_OPPHØRT
+            else -> throw ikkeStøttetFeil
+        }
+
+        /*val (framstiltNå, framstiltTidligere) = ytelsePersoner.partition { it.erFramstiltKravForIInneværendeBehandling() }
 
         val ytelsePersonerUtenKunAvslag =
                 ytelsePersoner.filter { !it.resultater.all { resultat -> resultat == YtelsePersonResultat.AVSLÅTT } }
 
         val erRentOpphør = erRentOpphør(ytelsePersonerUtenKunAvslag)
 
-        val erOpphørPåFlereDatoer = ytelsePersonerUtenKunAvslag.filter { it.resultater.contains(YtelsePersonResultat.OPPHØRT) }
-                                            .groupBy { it.ytelseSlutt }.size > 1
+        val erOpphørPåFlereDatoer = ytelsePersonerUtenKunAvslag.filter {
+            !it.kravOpprinnelse.contains(KravOpprinnelse.INNEVÆRENDE) && it.resultater.contains(YtelsePersonResultat.OPPHØRT)
+        }.groupBy { it.ytelseSlutt }.size > 1
 
         val erNoeSomOpphører = ytelsePersoner.flatMap { it.resultater }.any { it == YtelsePersonResultat.OPPHØRT }
 
@@ -124,7 +163,7 @@ object BehandlingsresultatUtils {
                 else ->
                     throw ikkeStøttetFeil
             }
-        }
+        }*/
     }
 
     fun validerBehandlingsresultat(behandling: Behandling, resultat: BehandlingResultat) {

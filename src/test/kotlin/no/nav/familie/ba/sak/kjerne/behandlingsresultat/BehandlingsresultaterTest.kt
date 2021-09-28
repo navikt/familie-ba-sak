@@ -3,20 +3,20 @@ package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.kontrakter.felles.objectMapper
-import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestReporter
 import java.io.File
+import java.time.YearMonth
 
 
 data class BehandlingsresultatPersonTestConfig(
         val personer: List<BehandlingsresultatPerson>,
         val beskrivelse: String,
-        val forventetResultat: BehandlingResultat
+        val forventetResultat: BehandlingResultat,
+        val inneværendeMåned: String,
 )
 
 
-@Nested
 class BehandlingsresultaterTest {
 
     @Test
@@ -29,7 +29,10 @@ class BehandlingsresultaterTest {
                     objectMapper.readValue<BehandlingsresultatPersonTestConfig>(fil.readText())
 
             val ytelsePersonerMedResultat =
-                    YtelsePersonUtils.utledYtelsePersonerMedResultat(behandlingsresultatPersonTestConfig.personer)
+                    YtelsePersonUtils.utledYtelsePersonerMedResultat(
+                            behandlingsresultatPersoner = behandlingsresultatPersonTestConfig.personer,
+                            inneværendeMåned = YearMonth.parse(behandlingsresultatPersonTestConfig.inneværendeMåned))
+
             val behandlingsresultat =
                     BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(ytelsePersonerMedResultat)
 

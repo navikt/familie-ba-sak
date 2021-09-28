@@ -58,8 +58,8 @@ data class BehandlingsresultatAndelTilkjentYtelse(
         val kalkulertUtbetalingsbeløp: Int,
 ) {
 
-    fun erLøpende(): Boolean {
-        return this.stønadTom >= inneværendeMåned().nesteMåned()
+    fun erLøpende(inneværendeMåned: YearMonth): Boolean {
+        return this.stønadTom >= inneværendeMåned
     }
 }
 
