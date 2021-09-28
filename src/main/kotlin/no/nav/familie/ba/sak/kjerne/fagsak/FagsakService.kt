@@ -259,10 +259,12 @@ class FagsakService(
 
     fun hentFagsakDeltager(personIdent: String): List<RestFagsakDeltager> {
         val sjekkStatuskodeOgHåndterFeil: (Throwable) -> List<RestFagsakDeltager> = {
+            secureLogger.info("Håndterer feil ved tilgangssjekk mot person. $it")
             val clientError = it as? HttpStatusCodeException?
             if (clientError != null && clientError.statusCode == HttpStatus.NOT_FOUND) {
                 emptyList()
             } else {
+                secureLogger.info("Kaster feil videre..")
                 throw IllegalStateException("Feil ved henting av person fra PDL", it)
             }
         }
@@ -271,7 +273,10 @@ class FagsakService(
             hentMaskertFagsakdeltakerVedManglendeTilgang(personIdent)
         }.fold(
                 onSuccess = { it },
-                onFailure = { return sjekkStatuskodeOgHåndterFeil(it) }
+                onFailure = {
+                    secureLogger.info("Fikk feil ved tilgangssjekk mot person. $it")
+                    return sjekkStatuskodeOgHåndterFeil(it)
+                }
         )
 
         if (maskertDeltaker != null) {
@@ -424,6 +429,7 @@ class FagsakService(
 
     companion object {
 
+        private val secureLogger = LoggerFactory.getLogger("secureLogger")
         private val logger = LoggerFactory.getLogger(FagsakService::class.java)
     }
 
