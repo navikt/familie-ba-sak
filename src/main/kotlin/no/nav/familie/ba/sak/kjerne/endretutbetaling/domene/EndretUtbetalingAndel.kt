@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.endretutbetaling.domene
 
 import no.nav.familie.ba.sak.common.BaseEntitet
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.YearMonthConverter
 import no.nav.familie.ba.sak.common.overlapperHeltEllerDelvisMed
@@ -75,8 +76,21 @@ data class EndretUtbetalingAndel(
 
     fun overlapperMed(periode: MånedPeriode) = periode.overlapperHeltEllerDelvisMed(this.periode())
 
-    fun periode() = MånedPeriode(this.fom!!, this.tom!!)
+    fun periode():MånedPeriode {
+        validerUtfyltEndring()
+        return MånedPeriode(this.fom!!, this.tom!!)
+    }
+
+    fun validerUtfyltEndring() {
+        if (person == null ||
+            prosent == null ||
+            fom == null ||
+            tom == null ||
+            årsak == null)
+                throw Feil("Person, prosent, fom, tom, årsak skal være utfylt: $this.tostring()")
+    }
 }
+
 
 enum class Årsak(val klassifisering: String) {
     DELT_BOSTED("Delt bosted"),
