@@ -11,15 +11,15 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 
 data class SanityBegrunnelse(
-        val apiNavn: String?,
-        val navnISystem: String?,
-        val vilkaar: List<SanityVilkår>? = SanityVilkår.values().toList(),
-        val rolle: List<VilkårRolle>? = null,
-        val lovligOppholdTriggere: List<VilkårTrigger>? = null,
-        val bosattIRiketTriggere: List<VilkårTrigger>? = null,
-        val giftPartnerskapTriggere: List<VilkårTrigger>? = null,
-        val borMedSokerTriggere: List<VilkårTrigger>? = null,
-        val ovrigeTriggere: List<ØvrigTrigger>? = null,
+    val apiNavn: String?,
+    val navnISystem: String?,
+    val vilkaar: List<SanityVilkår>? = emptyList(),
+    val rolle: List<VilkårRolle>? = null,
+    val lovligOppholdTriggere: List<VilkårTrigger>? = null,
+    val bosattIRiketTriggere: List<VilkårTrigger>? = null,
+    val giftPartnerskapTriggere: List<VilkårTrigger>? = null,
+    val borMedSokerTriggere: List<VilkårTrigger>? = null,
+    val ovrigeTriggere: List<ØvrigTrigger>? = null,
 )
 
 enum class SanityVilkår {
