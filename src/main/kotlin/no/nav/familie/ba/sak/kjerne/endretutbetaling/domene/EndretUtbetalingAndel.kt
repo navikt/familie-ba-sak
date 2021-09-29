@@ -1,9 +1,11 @@
 package no.nav.familie.ba.sak.kjerne.endretutbetaling.domene
 
 import no.nav.familie.ba.sak.common.BaseEntitet
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.YearMonthConverter
 import no.nav.familie.ba.sak.common.overlapperHeltEllerDelvisMed
+import no.nav.familie.ba.sak.ekstern.restDomene.RestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
@@ -40,37 +42,37 @@ data class EndretUtbetalingAndel(
         )
         val id: Long = 0,
 
-        @Column(name = "fk_behandling_id", nullable = false, updatable = false)
-        val behandlingId: Long,
+    @Column(name = "fk_behandling_id", updatable = false, nullable = false)
+    val behandlingId: Long,
 
-        @ManyToOne @JoinColumn(name = "fk_po_person_id", nullable = false)
-        val person: Person,
+    @ManyToOne @JoinColumn(name = "fk_po_person_id")
+    var person: Person? = null,
 
-        @Column(name = "prosent", nullable = false)
-        val prosent: BigDecimal,
+    @Column(name = "prosent")
+    var prosent: BigDecimal? = null,
 
-        @Column(name = "fom", nullable = false, columnDefinition = "DATE")
-        @Convert(converter = YearMonthConverter::class)
-        val fom: YearMonth,
+    @Column(name = "fom", columnDefinition = "DATE")
+    @Convert(converter = YearMonthConverter::class)
+    var fom: YearMonth? = null,
 
-        @Column(name = "tom", nullable = false, columnDefinition = "DATE")
-        @Convert(converter = YearMonthConverter::class)
-        val tom: YearMonth,
+    @Column(name = "tom", columnDefinition = "DATE")
+    @Convert(converter = YearMonthConverter::class)
+    var tom: YearMonth? = null,
 
-        @Enumerated(EnumType.STRING)
-        @Column(name = "aarsak", nullable = false)
-        val årsak: Årsak,
+    @Enumerated(EnumType.STRING)
+    @Column(name = "aarsak")
+    var årsak: Årsak? = null,
 
-        @Column(name = "begrunnelse", nullable = false)
-        var begrunnelse: String,
+    @Column(name = "begrunnelse")
+    var begrunnelse: String? = null,
 
-        @ManyToMany
-        @JoinTable(
-                name = "ANDEL_TIL_ENDRET_ANDEL",
-                joinColumns = [JoinColumn(name = "fk_endret_utbetaling_andel_id")],
-                inverseJoinColumns = [JoinColumn(name = "fk_andel_tilkjent_ytelse_id")]
-        )
-        val andelTilkjentYtelser: List<AndelTilkjentYtelse> = emptyList(),
+    @ManyToMany
+    @JoinTable(
+        name = "ANDEL_TIL_ENDRET_ANDEL",
+        joinColumns = [JoinColumn(name = "fk_endret_utbetaling_andel_id")],
+        inverseJoinColumns = [JoinColumn(name = "fk_andel_tilkjent_ytelse_id")]
+    )
+    val andelTilkjentYtelser: List<AndelTilkjentYtelse> = emptyList(),
 
         @Column(name = "vedtak_begrunnelse_spesifikasjoner")
         @Convert(converter = VedtakBegrunnelseSpesifikasjonListConverter::class)
@@ -80,12 +82,45 @@ data class EndretUtbetalingAndel(
 
     fun overlapperMed(periode: MånedPeriode) = periode.overlapperHeltEllerDelvisMed(this.periode())
 
-    fun periode() = MånedPeriode(this.fom, this.tom)
+    fun periode():MånedPeriode {
+        validerUtfyltEndring()
+        return MånedPeriode(this.fom!!, this.tom!!)
+    }
+
+    fun validerUtfyltEndring() {
+        if (person == null ||
+            prosent == null ||
+            fom == null ||
+            tom == null ||
+            årsak == null)
+                throw Feil("Person, prosent, fom, tom, årsak skal være utfylt: $this.tostring()")
+    }
 }
+
 
 enum class Årsak(val visningsnavn: String) {
     DELT_BOSTED("Delt bosted"),
     EØS_SEKUNDÆRLAND("Eøs sekundærland");
 
     fun kanGiNullutbetaling() = this == EØS_SEKUNDÆRLAND
+}
+
+fun EndretUtbetalingAndel.tilRestEndretUtbetalingAndel() = RestEndretUtbetalingAndel(
+    id = this.id,
+    personIdent = this.person?.personIdent?.ident,
+    prosent = this.prosent,
+    fom = this.fom,
+    tom = this.tom,
+    årsak = this.årsak,
+    begrunnelse = this.begrunnelse
+)
+
+fun EndretUtbetalingAndel.fraRestEndretUtbetalingAndel(restEndretUtbetalingAndel: RestEndretUtbetalingAndel, person: Person) {
+    this.fom = restEndretUtbetalingAndel.fom
+    this.tom = restEndretUtbetalingAndel.tom
+    this.prosent = restEndretUtbetalingAndel.prosent
+    this.årsak = restEndretUtbetalingAndel.årsak
+    this.begrunnelse = restEndretUtbetalingAndel.begrunnelse
+    this.person = person
+
 }
