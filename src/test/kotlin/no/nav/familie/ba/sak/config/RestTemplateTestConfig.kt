@@ -60,6 +60,16 @@ class RestTemplateTestConfig {
                 .build()
     }
 
+    @Bean("jwtBearerMedLangTimeout")
+    fun restTemplateJwtBearer(consumerIdClientInterceptor: ConsumerIdClientInterceptor,
+                              mdcValuesPropagatingClientInterceptor: MdcValuesPropagatingClientInterceptor)
+            : RestOperations {
+        return RestTemplateBuilder()
+                .additionalInterceptors(consumerIdClientInterceptor, mdcValuesPropagatingClientInterceptor)
+                .additionalMessageConverters(MappingJackson2HttpMessageConverter(objectMapper))
+                .build()
+    }
+
     @Bean
     fun restTemplateBuilderMedProxy(consumerIdClientInterceptor: ConsumerIdClientInterceptor,
                                     mdcValuesPropagatingClientInterceptor: MdcValuesPropagatingClientInterceptor)
