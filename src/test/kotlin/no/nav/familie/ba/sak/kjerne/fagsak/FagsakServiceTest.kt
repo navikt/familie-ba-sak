@@ -299,7 +299,7 @@ class FagsakServiceTest(
         every {
             integrasjonClient.sjekkTilgangTilPersoner(any())
         } answers {
-            throw HttpServerErrorException(HttpStatus.NOT_FOUND)
+            throw HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR, "[PdlRestClient][Feil ved oppslag på person: Fant ikke person]")
         }
         assertEquals(emptyList<RestFagsakDeltager>(), fagsakService.hentFagsakDeltager(randomFnr()))
     }
