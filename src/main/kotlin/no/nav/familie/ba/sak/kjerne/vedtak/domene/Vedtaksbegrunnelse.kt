@@ -13,7 +13,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifi
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon.Companion.tilBrevTekst
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.hentMånedOgÅrForBegrunnelse
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
-import java.time.LocalDate.now
 import javax.persistence.Column
 import javax.persistence.Convert
 import javax.persistence.Entity
@@ -82,17 +81,15 @@ data class BegrunnelseFraBaSak(val begrunnelse: String) : Begrunnelse
 fun Vedtaksbegrunnelse.tilBrevBegrunnelse(
         personerPåBegrunnelse: List<Person>,
         målform: Målform,
-        brukBegrunnelserFraSanity: Boolean,
         uregistrerteBarn: List<BarnMedOpplysninger>
 ): Begrunnelse {
-    val barnasFødselsdatoer = if (this.vedtakBegrunnelseSpesifikasjon == VedtakBegrunnelseSpesifikasjon.AVSLAG_UREGISTRERT_BARN) {
-        uregistrerteBarn.map {
-            // TODO fjern denne now() håndteringen når man fjerner begrunnelser i ba-sak. Kan bruke antallBarn i stedet.
-            it.fødselsdato ?: now()
-        }
-    } else personerPåBegrunnelse.filter { it.type == PersonType.BARN }
-            .map { it.fødselsdato }
+    val barnasFødselsdatoer = personerPåBegrunnelse.filter { it.type == PersonType.BARN }.map { it.fødselsdato }
 
+    val antallBarn =
+            if (this.vedtakBegrunnelseSpesifikasjon == VedtakBegrunnelseSpesifikasjon.AVSLAG_UREGISTRERT_BARN)
+                uregistrerteBarn.size
+            else
+                barnasFødselsdatoer.size
 
     val gjelderSøker = personerPåBegrunnelse.any { it.type == PersonType.SØKER }
     val månedOgÅrBegrunnelsenGjelderFor =
@@ -101,20 +98,12 @@ fun Vedtaksbegrunnelse.tilBrevBegrunnelse(
                     periode = Periode(fom = this.vedtaksperiodeMedBegrunnelser.fom,
                                       tom = this.vedtaksperiodeMedBegrunnelser.tom ?: TIDENES_ENDE))
 
-    return if (brukBegrunnelserFraSanity) {
-        BegrunnelseData(
-                gjelderSoker = gjelderSøker,
-                barnasFodselsdatoer = barnasFødselsdatoer.tilBrevTekst(),
-                antallBarn = barnasFødselsdatoer.size,
-                maanedOgAarBegrunnelsenGjelderFor = månedOgÅrBegrunnelsenGjelderFor,
-                maalform = målform.tilSanityFormat(),
-                apiNavn = this.vedtakBegrunnelseSpesifikasjon.sanityApiNavn,
-        )
-    } else
-        BegrunnelseFraBaSak(this.vedtakBegrunnelseSpesifikasjon.hentBeskrivelse(
-                gjelderSøker = gjelderSøker,
-                barnasFødselsdatoer = barnasFødselsdatoer,
-                månedOgÅrBegrunnelsenGjelderFor = månedOgÅrBegrunnelsenGjelderFor ?: "",
-                målform = målform
-        ))
+    return BegrunnelseData(
+            gjelderSoker = gjelderSøker,
+            barnasFodselsdatoer = barnasFødselsdatoer.tilBrevTekst(),
+            antallBarn = antallBarn,
+            maanedOgAarBegrunnelsenGjelderFor = månedOgÅrBegrunnelsenGjelderFor,
+            maalform = målform.tilSanityFormat(),
+            apiNavn = this.vedtakBegrunnelseSpesifikasjon.sanityApiNavn,
+    )
 }

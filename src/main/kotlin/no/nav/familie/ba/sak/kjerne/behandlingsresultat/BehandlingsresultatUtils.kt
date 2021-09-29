@@ -1,12 +1,12 @@
 package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 
-import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.isSameOrBefore
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 
 object BehandlingsresultatUtils {
@@ -16,23 +16,14 @@ object BehandlingsresultatUtils {
                  message = "Behandlingsresultatet er ikke støttet i løsningen, se securelogger for resultatene som ble utledet.")
 
     fun utledBehandlingsresultatBasertPåYtelsePersoner(ytelsePersoner: List<YtelsePerson>): BehandlingResultat {
-        if (ytelsePersoner.flatMap { it.resultater }.any { it == YtelsePersonResultat.IKKE_VURDERT })
-            throw Feil(message = "Minst én ytelseperson er ikke vurdert")
-
-        if (ytelsePersoner.any { it.ytelseSlutt == null })
-            throw Feil(message = "YtelseSlutt ikke satt ved utledning av BehandlingResultat")
-
-        if (ytelsePersoner.any { it.resultater.contains(YtelsePersonResultat.OPPHØRT) && it.ytelseSlutt?.isAfter(inneværendeMåned()) == true })
-            throw Feil(message = "Minst én ytelseperson har fått opphør som resultat og ytelseSlutt etter inneværende måned")
+        validerYtelsePersoner(ytelsePersoner)
 
         val (framstiltNå, framstiltTidligere) = ytelsePersoner.partition { it.erFramstiltKravForIInneværendeBehandling() }
 
         val ytelsePersonerUtenKunAvslag =
                 ytelsePersoner.filter { !it.resultater.all { resultat -> resultat == YtelsePersonResultat.AVSLÅTT } }
 
-        val erRentOpphør =
-                ytelsePersonerUtenKunAvslag.all { it.resultater.contains(YtelsePersonResultat.OPPHØRT) } &&
-                ytelsePersonerUtenKunAvslag.groupBy { it.ytelseSlutt }.size == 1
+        val erRentOpphør = erRentOpphør(ytelsePersonerUtenKunAvslag)
 
         val erOpphørPåFlereDatoer = ytelsePersonerUtenKunAvslag.filter { it.resultater.contains(YtelsePersonResultat.OPPHØRT) }
                                             .groupBy { it.ytelseSlutt }.size > 1
@@ -51,15 +42,10 @@ object BehandlingsresultatUtils {
         val erEndringEllerOpphørPåPersoner = erEndring || erNoeSomOpphører
 
         return if (framstiltNå.isNotEmpty()) {
-            val alleHarNoeInnvilget = framstiltNå.all { personSøktFor ->
-                personSøktFor.resultater.contains(YtelsePersonResultat.INNVILGET) &&
-                !personSøktFor.resultater.contains(YtelsePersonResultat.AVSLÅTT)
-            }
+            val alleHarNoeInnvilget = allePersonerSøktForHarNoeInnvilget(framstiltNå)
             val resultaterPåSøknad = framstiltNå.flatMap { it.resultater }
-            val erAvslått = resultaterPåSøknad.isNotEmpty() && resultaterPåSøknad.all { it == YtelsePersonResultat.AVSLÅTT }
-            val erDelvisInnvilget =
-                    (resultaterPåSøknad.any { it == YtelsePersonResultat.AVSLÅTT }) && resultaterPåSøknad.any { it == YtelsePersonResultat.INNVILGET }
-
+            val erAvslått = erAvslått(resultaterPåSøknad)
+            val erDelvisInnvilget = erDelvisInnvilget(resultaterPåSøknad)
 
             when {
                 alleHarNoeInnvilget && !erEndring && !erNoeFraTidligereBehandlingerSomOpphører && !alleOpphørt ->
@@ -132,3 +118,31 @@ object BehandlingsresultatUtils {
         }
     }
 }
+
+private fun validerYtelsePersoner(ytelsePersoner: List<YtelsePerson>) {
+    if (ytelsePersoner.flatMap { it.resultater }.any { it == YtelsePersonResultat.IKKE_VURDERT })
+        throw Feil(message = "Minst én ytelseperson er ikke vurdert")
+
+    if (ytelsePersoner.any { it.ytelseSlutt == null })
+        throw Feil(message = "YtelseSlutt ikke satt ved utledning av BehandlingResultat")
+
+    if (ytelsePersoner.any { it.resultater.contains(YtelsePersonResultat.OPPHØRT) && it.ytelseSlutt?.isAfter(inneværendeMåned()) == true })
+        throw Feil(message = "Minst én ytelseperson har fått opphør som resultat og ytelseSlutt etter inneværende måned")
+}
+
+
+private fun erRentOpphør(ytelsePersonerUtenKunAvslag: List<YtelsePerson>) =
+        ytelsePersonerUtenKunAvslag.all { it.resultater.contains(YtelsePersonResultat.OPPHØRT) } &&
+        ytelsePersonerUtenKunAvslag.groupBy { it.ytelseSlutt }.size == 1
+
+private fun erDelvisInnvilget(resultaterPåSøknad: List<YtelsePersonResultat>) =
+        (resultaterPåSøknad.any { it == YtelsePersonResultat.AVSLÅTT }) && resultaterPåSøknad.any { it == YtelsePersonResultat.INNVILGET }
+
+private fun erAvslått(resultaterPåSøknad: List<YtelsePersonResultat>) =
+        resultaterPåSøknad.isNotEmpty() && resultaterPåSøknad.all { it == YtelsePersonResultat.AVSLÅTT }
+
+private fun allePersonerSøktForHarNoeInnvilget(framstiltNå: List<YtelsePerson>) =
+        framstiltNå.all { personSøktFor ->
+            personSøktFor.resultater.contains(YtelsePersonResultat.INNVILGET) &&
+            !personSøktFor.resultater.contains(YtelsePersonResultat.AVSLÅTT)
+        }

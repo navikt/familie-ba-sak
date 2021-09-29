@@ -41,10 +41,10 @@ class SkatteetatenController(private val skatteetatenService: SkatteetatenServic
         @NotNull @RequestParam(value = "aar", required = true) aar: String
     ): ResponseEntity<Ressurs<SkatteetatenPersonerResponse>> {
         logger.info("Treff på finnPersonerMedUtvidetBarnetrygd")
-        val respons = if (featureToggleService.isEnabled(FeatureToggleConfig.SKATTEETATEN_API_STUB, true)) {
-            SkatteetatenPersonerResponse(listOf(SkatteetatenPerson("12345678901", LocalDateTime.now())))
-        } else {
+        val respons = if (featureToggleService.isEnabled(FeatureToggleConfig.SKATTEETATEN_API_EKTE_DATA)) {
             skatteetatenService.finnPersonerMedUtvidetBarnetrygd(aar)
+        } else {
+            SkatteetatenPersonerResponse(listOf(SkatteetatenPerson("12345678901", LocalDateTime.now())))
         }
         return ResponseEntity(Ressurs.success(respons), HttpStatus.valueOf(200))
     }
@@ -59,10 +59,10 @@ class SkatteetatenController(private val skatteetatenService: SkatteetatenServic
         @Valid @RequestBody perioderRequest: SkatteetatenPerioderRequest
     ): ResponseEntity<Ressurs<SkatteetatenPerioderResponse>> {
         logger.info("Treff på hentPerioderMedUtvidetBarnetrygd")
-        val response = if (featureToggleService.isEnabled(FeatureToggleConfig.SKATTEETATEN_API_STUB, true)) {
-            SkatteetatenPerioderResponse(listOf(SkatteetatenPerioder("01017000110", LocalDateTime.now(), perioder = listOf(SkatteetatenPeriode("2020-02", SkatteetatenPeriode.Delingsprosent._50, tomMaaned = "2022-12")))))
-        } else {
+        val response = if (featureToggleService.isEnabled(FeatureToggleConfig.SKATTEETATEN_API_EKTE_DATA)) {
             skatteetatenService.finnPerioderMedUtvidetBarnetrygd(perioderRequest.identer, perioderRequest.aar)
+        } else {
+            SkatteetatenPerioderResponse(listOf(SkatteetatenPerioder("01017000110", LocalDateTime.now(), perioder = listOf(SkatteetatenPeriode("2020-02", SkatteetatenPeriode.Delingsprosent._50, tomMaaned = "2022-12")))))
         }
         return ResponseEntity(
             Ressurs.Companion.success(response),
