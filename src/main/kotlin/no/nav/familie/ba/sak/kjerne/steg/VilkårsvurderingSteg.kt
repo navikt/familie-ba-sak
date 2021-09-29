@@ -60,17 +60,6 @@ class VilkårsvurderingSteg(
                                                            resultat = resultat)
         }
 
-        if (behandlingMedResultat.opprettetÅrsak != BehandlingÅrsak.SATSENDRING) {
-            vedtaksperiodeService.oppdaterVedtakMedVedtaksperioder(vedtak = vedtakService.hentAktivForBehandlingThrows(
-                    behandlingId = behandling.id))
-        }
-
-        if (behandlingMedResultat.skalBehandlesAutomatisk && behandlingMedResultat.resultat != BehandlingResultat.AVSLÅTT) {
-            behandlingService.oppdaterStatusPåBehandling(behandlingMedResultat.id, BehandlingStatus.IVERKSETTER_VEDTAK)
-        } else {
-            simuleringService.oppdaterSimuleringPåBehandling(behandlingMedResultat)
-        }
-
         return hentNesteStegForNormalFlyt(behandlingMedResultat)
     }
 

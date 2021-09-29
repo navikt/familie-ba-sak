@@ -62,7 +62,8 @@ class StegService(
                                   ?: behandlingService.hentSisteBehandlingSomIkkeErHenlagt(behandling.fagsak.id)
                                   ?: throw Feil("Forsøker å opprette en revurdering eller teknisk opphør, men kan ikke finne tidligere behandling på fagsak ${behandling.fagsak.id}")
 
-            val barnFraSisteBehandlingMedUtbetalinger = behandlingService.finnBarnFraBehandlingMedTilkjentYtsele(sisteBehandling.id)
+            val barnFraSisteBehandlingMedUtbetalinger =
+                    behandlingService.finnBarnFraBehandlingMedTilkjentYtsele(sisteBehandling.id)
 
             håndterPersongrunnlag(behandling,
                                   RegistrerPersongrunnlagDTO(ident = nyBehandling.søkersIdent,
@@ -140,6 +141,18 @@ class StegService(
     fun håndterVilkårsvurdering(behandling: Behandling): Behandling {
         val behandlingSteg: VilkårsvurderingSteg =
                 hentBehandlingSteg(StegType.VILKÅRSVURDERING) as VilkårsvurderingSteg
+
+        return håndterSteg(behandling, behandlingSteg) {
+            behandlingSteg.utførStegOgAngiNeste(behandling, "")
+        }
+    }
+
+    // Lag en håndterBehandlingresultat funksjon
+    // data = ""
+    // Lag et endepunkt som kaller denne funksjonen
+    @Transactional
+    fun håndterBehandlingresultat(behandling: Behandling): Behandling {
+        val behandlingSteg: BehandlingresultatSteg = hentBehandlingSteg(StegType.BEHANDLINGSRESULTAT) as BehandlingresultatSteg
 
         return håndterSteg(behandling, behandlingSteg) {
             behandlingSteg.utførStegOgAngiNeste(behandling, "")
@@ -302,7 +315,8 @@ class StegService(
             } else {
                 stegFeiletMetrics[behandlingSteg.stegType()]?.increment()
                 logger.error("Håndtering av stegtype '${behandlingSteg.stegType()}' feilet på behandling $behandling.")
-                secureLogger.error("Håndtering av stegtype '${behandlingSteg.stegType()}' feilet på behandling $behandling.", exception)
+                secureLogger.error("Håndtering av stegtype '${behandlingSteg.stegType()}' feilet på behandling $behandling.",
+                                   exception)
             }
 
             throw exception
