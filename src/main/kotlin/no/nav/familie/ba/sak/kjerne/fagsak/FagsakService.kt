@@ -50,7 +50,6 @@ import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import org.springframework.web.client.HttpStatusCodeException
 import java.time.LocalDate
 import java.time.Period
 
@@ -332,7 +331,6 @@ class FagsakService(
     }
 
     private fun sjekkStatuskodeOgHåndterFeil(throwable: Throwable): List<RestFagsakDeltager> {
-        secureLogger.info("it.message=${throwable.message}, it.cause?.message=${throwable.cause?.message}")
         return if (throwable.message?.contains("Fant ikke person") == true) {
             emptyList()
         } else {
@@ -430,7 +428,6 @@ class FagsakService(
 
     companion object {
 
-        private val secureLogger = LoggerFactory.getLogger("secureLogger")
         private val logger = LoggerFactory.getLogger(FagsakService::class.java)
     }
 
