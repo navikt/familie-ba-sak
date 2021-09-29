@@ -61,7 +61,7 @@ class RestTemplateTestConfig {
     }
 
     @Bean("jwtBearerMedLangTimeout")
-    fun restTemplateJwtBearer(consumerIdClientInterceptor: ConsumerIdClientInterceptor,
+    fun restTemplateJwtBearerMedLangTimeout(consumerIdClientInterceptor: ConsumerIdClientInterceptor,
                               mdcValuesPropagatingClientInterceptor: MdcValuesPropagatingClientInterceptor)
             : RestOperations {
         return RestTemplateBuilder()
