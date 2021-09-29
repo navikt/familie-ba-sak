@@ -50,6 +50,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.web.client.HttpStatusCodeException
 import java.time.LocalDate
 import java.time.Period
 
@@ -331,10 +332,12 @@ class FagsakService(
     }
 
     private fun sjekkStatuskodeOgHåndterFeil(throwable: Throwable): List<RestFagsakDeltager> {
-        return if (throwable.message?.contains("Fant ikke person") == true) {
+        val clientError = throwable as? HttpStatusCodeException?
+        return if ((clientError != null && clientError.statusCode == HttpStatus.NOT_FOUND) ||
+                   throwable.message?.contains("Fant ikke person") == true) {
             emptyList()
         } else {
-            throw IllegalStateException("Feil ved henting av person fra PDL", throwable)
+            throw throwable
         }
     }
 
