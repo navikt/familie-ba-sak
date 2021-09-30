@@ -152,7 +152,7 @@ class StegService(
     // Lag et endepunkt som kaller denne funksjonen
     @Transactional
     fun håndterBehandlingresultat(behandling: Behandling): Behandling {
-        val behandlingSteg: BehandlingresultatSteg = hentBehandlingSteg(StegType.BEHANDLINGSRESULTAT) as BehandlingresultatSteg
+        val behandlingSteg: BehandlingresultatSteg = hentBehandlingSteg(StegType.BEHANDLINGRESULTAT) as BehandlingresultatSteg
 
         return håndterSteg(behandling, behandlingSteg) {
             behandlingSteg.utførStegOgAngiNeste(behandling, "")

@@ -123,7 +123,6 @@ class BehandlingController(
         return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = behandling.fagsak.id))
     }
 
-    @Transactional
     @PostMapping(path = ["/{behandlingId}/behandlingresultat"])
     fun utledBehandlingresultat(@PathVariable behandlingId: Long): ResponseEntity<Ressurs<RestFagsak>> {
         val behandling = behandlingsService.hent(behandlingId)

@@ -47,7 +47,7 @@ class BehandlingresultatSteg(
     }
 
     override fun stegType(): StegType {
-        return StegType.BEHANDLINGSRESULTAT
+        return StegType.BEHANDLINGRESULTAT
     }
 
     private fun settBehandlingResultat(behandling: Behandling, resultat: BehandlingResultat): Behandling {
