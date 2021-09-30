@@ -28,7 +28,7 @@ import java.time.YearMonth
 @Component
 class InfotrygdBarnetrygdClient(
     @Value("\${FAMILIE_BA_INFOTRYGD_BARNETRYGD_API_URL}") private val clientUri: URI,
-    @Qualifier("jwtBearer") restOperations: RestOperations,
+    @Qualifier("jwtBearerMedLangTimeout") restOperations: RestOperations,
     private val environment: Environment
 ) : AbstractRestClient(restOperations, "infotrygd_barnetrygd") {
 

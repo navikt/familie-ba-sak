@@ -13,7 +13,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 data class SanityBegrunnelse(
         val apiNavn: String?,
         val navnISystem: String?,
-        val vilkaar: List<SanityVilkår>? = SanityVilkår.values().toList(),
+        val vilkaar: List<SanityVilkår>? = null,
         val rolle: List<VilkårRolle>? = null,
         val lovligOppholdTriggere: List<VilkårTrigger>? = null,
         val bosattIRiketTriggere: List<VilkårTrigger>? = null,

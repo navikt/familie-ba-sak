@@ -17,6 +17,9 @@ data class Fagsak(
         @Column(name = "status", nullable = false)
         var status: FagsakStatus = FagsakStatus.OPPRETTET,
 
+        @Column(name = "arkivert", nullable = false)
+        var arkivert: Boolean = false,
+
         @OneToMany(fetch = FetchType.EAGER,
                    mappedBy = "fagsak",
                    cascade = [CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE],
