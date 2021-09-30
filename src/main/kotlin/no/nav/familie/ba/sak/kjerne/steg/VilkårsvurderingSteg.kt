@@ -52,15 +52,7 @@ class VilkårsvurderingSteg(
         endretUtbetalingAndelRepository.deleteByBehandlingId(behandlingId = behandling.id)
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
 
-        val behandlingMedResultat = if (behandling.erMigrering() && behandling.skalBehandlesAutomatisk) {
-            settBehandlingResultat(behandling, BehandlingResultat.INNVILGET)
-        } else {
-            val resultat = behandlingsresultatService.utledBehandlingsresultat(behandlingId = behandling.id)
-            behandlingService.oppdaterResultatPåBehandling(behandlingId = behandling.id,
-                                                           resultat = resultat)
-        }
-
-        return hentNesteStegForNormalFlyt(behandlingMedResultat)
+        return hentNesteStegForNormalFlyt(behandling)
     }
 
     override fun stegType(): StegType {
