@@ -122,6 +122,13 @@ class BehandlingController(
 
         return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = behandling.fagsak.id))
     }
+
+    @PostMapping(path = ["/{behandlingId}/behandlingresultat"])
+    fun utledBehandlingresultat(@PathVariable behandlingId: Long): ResponseEntity<Ressurs<RestFagsak>> {
+        val behandling = behandlingsService.hent(behandlingId)
+
+        return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = behandling.fagsak.id))
+    }
 }
 
 data class NyBehandling(
