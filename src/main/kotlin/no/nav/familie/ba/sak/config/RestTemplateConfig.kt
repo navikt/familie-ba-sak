@@ -58,6 +58,23 @@ class RestTemplateConfig(
                 .build()
     }
 
+    @Bean("jwtBearerMedLangTimeout")
+    fun restTemplateJwtBearerMedLangTimeout(consumerIdClientInterceptor: ConsumerIdClientInterceptor,
+                              bearerTokenClientInterceptor: BearerTokenClientInterceptor): RestOperations {
+        return RestTemplateBuilder()
+            .setReadTimeout(Duration.ofMinutes(5L))
+            .setConnectTimeout(Duration.ofMinutes(5L))
+            .interceptors(consumerIdClientInterceptor,
+                          bearerTokenClientInterceptor,
+                          MdcValuesPropagatingClientInterceptor())
+            .additionalMessageConverters(ByteArrayHttpMessageConverter(), MappingJackson2HttpMessageConverter(objectMapper))
+            .also {
+                if (trengerProxy()) it.additionalCustomizers(NaisProxyCustomizer())
+            }
+            .build()
+    }
+
+
     @Bean
     fun restTemplate(): RestTemplate {
         return RestTemplate(listOf(StringHttpMessageConverter(StandardCharsets.UTF_8),
