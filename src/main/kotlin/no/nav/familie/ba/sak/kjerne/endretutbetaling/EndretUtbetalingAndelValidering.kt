@@ -1,8 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.endretutbetaling
 
-import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.UtbetalingsikkerhetFeil
-import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandling
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 
 object EndretUtbetalingAndelValidering {
@@ -10,21 +9,39 @@ object EndretUtbetalingAndelValidering {
     fun validerIngenOverlappendeEndring(endretUtbetalingAndel: EndretUtbetalingAndel,
                                         eksisterendeEndringerPåBehandling: List<EndretUtbetalingAndel>) {
 
+        endretUtbetalingAndel.validerUtfyltEndring()
         if (eksisterendeEndringerPåBehandling.any {
-                    it.overlapperMed(MånedPeriode(endretUtbetalingAndel.fom, endretUtbetalingAndel.tom)) &&
+                    it.overlapperMed(endretUtbetalingAndel.periode()) &&
                     it.person == endretUtbetalingAndel.person &&
                     it.årsak == endretUtbetalingAndel.årsak
-        }) {
-            throw UtbetalingsikkerhetFeil(melding = "Perioden som forsøkes lagt til overlapper med eksisterende periode gjeldende samme årsak og person.")
+                }) {
+            throw UtbetalingsikkerhetFeil(melding = "Perioden som forsøkes lagt til overlapper med eksisterende periode gjeldende samme årsak og person.",
+                                          frontendFeilmelding = "Perioden som forsøkes lagt til overlapper med eksisterende periode gjeldende samme årsak og person.")
+        }
+    }
+
+    fun validerPeriodeInnenforTilkjentytelse(endretUtbetalingAndel: EndretUtbetalingAndel,
+                                             andelTilkjentYtelser: List<AndelTilkjentYtelse>) {
+
+        endretUtbetalingAndel.validerUtfyltEndring()
+        val minsteDatoForTilkjentYtelse = andelTilkjentYtelser.filter {
+            it.personIdent == endretUtbetalingAndel.person!!.personIdent.ident
+        }.minByOrNull { it.stønadFom }?.stønadFom
+
+        val størsteDatoForTilkjentYtelse = andelTilkjentYtelser.filter {
+            it.personIdent == endretUtbetalingAndel.person!!.personIdent.ident
+        }.maxByOrNull { it.stønadTom }?.stønadTom
+
+        if (minsteDatoForTilkjentYtelse == null || størsteDatoForTilkjentYtelse == null) {
+            throw UtbetalingsikkerhetFeil(melding = "Det er ingen tilkjent ytelse for personen det legges til en endret periode for.",
+                                          frontendFeilmelding = "Det er ingen tilkjent ytelse for personen det legges til en endret periode for.")
         }
 
-    }
+        if (endretUtbetalingAndel.fom!!.isBefore(minsteDatoForTilkjentYtelse) ||
+            endretUtbetalingAndel.tom!!.isAfter(størsteDatoForTilkjentYtelse)) {
+            throw UtbetalingsikkerhetFeil(melding = "Perioden som forsøkes lagt til er utenfor ytterpunktene for tilkjent ytelse.",
+                                          frontendFeilmelding = "Perioden som forsøkes lagt til er utenfor ytterpunktene for tilkjent ytelse.")
+        }
 
-    fun validerPeriodeInnenforTilkjentytelse() {
-
-    }
-
-    fun validerAtDetIkkeUtbetalesForMyePåBarn() {
-        // TODO: Vurdere om TilkjentYtelseValidering.validerAtBarnIkkeFårFlereUtbetalingerSammePeriode kan brukes.
     }
 }
