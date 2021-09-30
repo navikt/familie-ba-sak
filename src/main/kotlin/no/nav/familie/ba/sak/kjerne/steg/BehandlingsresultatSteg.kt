@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
-class BehandlingresultatSteg(
+class BehandlingsresultatSteg(
         private val behandlingService: BehandlingService,
         private val simuleringService: SimuleringService,
         private val vedtakService: VedtakService,
@@ -47,7 +47,7 @@ class BehandlingresultatSteg(
     }
 
     override fun stegType(): StegType {
-        return StegType.BEHANDLINGRESULTAT
+        return StegType.BEHANDLINGSRESULTAT
     }
 
     private fun settBehandlingResultat(behandling: Behandling, resultat: BehandlingResultat): Behandling {

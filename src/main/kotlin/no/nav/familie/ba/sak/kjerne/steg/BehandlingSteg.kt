@@ -20,7 +20,7 @@ import no.nav.familie.ba.sak.kjerne.steg.StegType.SEND_TIL_BESLUTTER
 import no.nav.familie.ba.sak.kjerne.steg.StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI
 import no.nav.familie.ba.sak.kjerne.steg.StegType.VILKÅRSVURDERING
 import no.nav.familie.ba.sak.kjerne.steg.StegType.VURDER_TILBAKEKREVING
-import no.nav.familie.ba.sak.kjerne.steg.StegType.BEHANDLINGRESULTAT
+import no.nav.familie.ba.sak.kjerne.steg.StegType.BEHANDLINGSRESULTAT
 
 interface BehandlingSteg<T> {
 
@@ -71,7 +71,7 @@ enum class StegType(val rekkefølge: Int,
             tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES)
     ),
-    BEHANDLINGRESULTAT(
+    BEHANDLINGSRESULTAT(
             rekkefølge = 4,
             tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES)),
@@ -150,8 +150,8 @@ fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType): StegTyp
         || behandlingType == BehandlingType.MIGRERING_FRA_INFOTRYGD) {
         return when (utførendeStegType) {
             REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
-            VILKÅRSVURDERING -> BEHANDLINGRESULTAT
-            BEHANDLINGRESULTAT -> IVERKSETT_MOT_OPPDRAG
+            VILKÅRSVURDERING -> BEHANDLINGSRESULTAT
+            BEHANDLINGSRESULTAT -> IVERKSETT_MOT_OPPDRAG
             IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
             VENTE_PÅ_STATUS_FRA_ØKONOMI -> FERDIGSTILLE_BEHANDLING
             FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET
@@ -164,8 +164,8 @@ fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType): StegTyp
         BehandlingÅrsak.TEKNISK_OPPHØR -> {
             when (utførendeStegType) {
                 REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
-                VILKÅRSVURDERING -> BEHANDLINGRESULTAT
-                BEHANDLINGRESULTAT -> SEND_TIL_BESLUTTER
+                VILKÅRSVURDERING -> BEHANDLINGSRESULTAT
+                BEHANDLINGSRESULTAT -> SEND_TIL_BESLUTTER
                 SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
                 BESLUTTE_VEDTAK -> IVERKSETT_MOT_OPPDRAG
                 IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
@@ -179,8 +179,8 @@ fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType): StegTyp
             when (utførendeStegType) {
                 REGISTRERE_PERSONGRUNNLAG -> FILTRERING_FØDSELSHENDELSER
                 FILTRERING_FØDSELSHENDELSER -> VILKÅRSVURDERING
-                VILKÅRSVURDERING -> BEHANDLINGRESULTAT
-                BEHANDLINGRESULTAT -> if (behandling.resultat == BehandlingResultat.INNVILGET) IVERKSETT_MOT_OPPDRAG else HENLEGG_BEHANDLING
+                VILKÅRSVURDERING -> BEHANDLINGSRESULTAT
+                BEHANDLINGSRESULTAT -> if (behandling.resultat == BehandlingResultat.INNVILGET) IVERKSETT_MOT_OPPDRAG else HENLEGG_BEHANDLING
                 IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
                 VENTE_PÅ_STATUS_FRA_ØKONOMI -> JOURNALFØR_VEDTAKSBREV
                 JOURNALFØR_VEDTAKSBREV -> DISTRIBUER_VEDTAKSBREV
@@ -194,8 +194,8 @@ fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType): StegTyp
             when (utførendeStegType) {
                 REGISTRERE_PERSONGRUNNLAG -> REGISTRERE_SØKNAD
                 REGISTRERE_SØKNAD -> VILKÅRSVURDERING
-                VILKÅRSVURDERING -> BEHANDLINGRESULTAT
-                BEHANDLINGRESULTAT -> VURDER_TILBAKEKREVING
+                VILKÅRSVURDERING -> BEHANDLINGSRESULTAT
+                BEHANDLINGSRESULTAT -> VURDER_TILBAKEKREVING
                 VURDER_TILBAKEKREVING -> SEND_TIL_BESLUTTER
                 SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
                 BESLUTTE_VEDTAK -> hentNesteStegTypeBasertPåBehandlingsresultat(behandling.resultat)
@@ -212,8 +212,8 @@ fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType): StegTyp
         BehandlingÅrsak.OMREGNING_18ÅR, BehandlingÅrsak.OMREGNING_6ÅR -> {
             when (utførendeStegType) {
                 REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
-                VILKÅRSVURDERING -> BEHANDLINGRESULTAT
-                BEHANDLINGRESULTAT -> JOURNALFØR_VEDTAKSBREV
+                VILKÅRSVURDERING -> BEHANDLINGSRESULTAT
+                BEHANDLINGSRESULTAT -> JOURNALFØR_VEDTAKSBREV
                 JOURNALFØR_VEDTAKSBREV -> DISTRIBUER_VEDTAKSBREV
                 DISTRIBUER_VEDTAKSBREV -> FERDIGSTILLE_BEHANDLING
                 FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET
@@ -224,8 +224,8 @@ fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType): StegTyp
         BehandlingÅrsak.SATSENDRING -> {
             when (utførendeStegType) {
                 REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
-                VILKÅRSVURDERING -> BEHANDLINGRESULTAT
-                BEHANDLINGRESULTAT -> if (behandling.resultat == BehandlingResultat.ENDRET) IVERKSETT_MOT_OPPDRAG else FERDIGSTILLE_BEHANDLING
+                VILKÅRSVURDERING -> BEHANDLINGSRESULTAT
+                BEHANDLINGSRESULTAT -> if (behandling.resultat == BehandlingResultat.ENDRET) IVERKSETT_MOT_OPPDRAG else FERDIGSTILLE_BEHANDLING
                 IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
                 VENTE_PÅ_STATUS_FRA_ØKONOMI -> FERDIGSTILLE_BEHANDLING
                 FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET
@@ -236,8 +236,8 @@ fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType): StegTyp
         else -> {
             when (utførendeStegType) {
                 REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
-                VILKÅRSVURDERING -> BEHANDLINGRESULTAT
-                BEHANDLINGRESULTAT -> VURDER_TILBAKEKREVING
+                VILKÅRSVURDERING -> BEHANDLINGSRESULTAT
+                BEHANDLINGSRESULTAT -> VURDER_TILBAKEKREVING
                 VURDER_TILBAKEKREVING -> SEND_TIL_BESLUTTER
                 SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
                 BESLUTTE_VEDTAK -> hentNesteStegTypeBasertPåBehandlingsresultat(behandling.resultat)

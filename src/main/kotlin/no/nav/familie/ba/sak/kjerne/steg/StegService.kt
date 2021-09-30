@@ -147,12 +147,9 @@ class StegService(
         }
     }
 
-    // Lag en håndterBehandlingresultat funksjon
-    // data = ""
-    // Lag et endepunkt som kaller denne funksjonen
     @Transactional
-    fun håndterBehandlingresultat(behandling: Behandling): Behandling {
-        val behandlingSteg: BehandlingresultatSteg = hentBehandlingSteg(StegType.BEHANDLINGRESULTAT) as BehandlingresultatSteg
+    fun håndterBehandlingsresultat(behandling: Behandling): Behandling {
+        val behandlingSteg: BehandlingsresultatSteg = hentBehandlingSteg(StegType.BEHANDLINGSRESULTAT) as BehandlingsresultatSteg
 
         return håndterSteg(behandling, behandlingSteg) {
             behandlingSteg.utførStegOgAngiNeste(behandling, "")
