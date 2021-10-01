@@ -1,4 +1,4 @@
-name: Build-Deploy-Preprod-Skip-E2E
+name: Build-Deploy-Preprod
 on:
   workflow_dispatch:
 
