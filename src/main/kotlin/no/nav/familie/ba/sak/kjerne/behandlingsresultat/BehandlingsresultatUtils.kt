@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.inneværendeMåned
+import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
@@ -52,6 +53,41 @@ object BehandlingsresultatUtils {
         validerYtelsePersoner(ytelsePersoner)
 
         val samledeResultater = ytelsePersoner.flatMap { it.resultater }.toMutableSet()
+        val erKunFremstilKravIDenneBehandling =
+                ytelsePersoner.all { it.kravOpprinnelse == listOf(KravOpprinnelse.INNEVÆRENDE) }
+
+        /**
+         * 1. Om alt opphører så skal listen inneholde opphørt
+         * 2. Om alt opphører, men på forskjellig tidspunkt så skal opphørt->endret
+         * 3. Om kun enkeltpersoner opphører så skal resultatet inkludere endret, men kun om det ikke er søkt for vedkommende
+         */
+
+
+        val altOpphører = ytelsePersoner.all { it.ytelseSlutt!!.isSameOrBefore(inneværendeMåned()) }
+        val erAvslått = ytelsePersoner.all { it.resultater == setOf(YtelsePersonResultat.AVSLÅTT) }
+        val opphørPåSammeTid = altOpphører &&
+                               (ytelsePersoner.filter { it.resultater != setOf(YtelsePersonResultat.AVSLÅTT) }
+                                        .groupBy { it.ytelseSlutt }.size == 1 || erAvslått)
+        val noeOpphører = ytelsePersoner.any { it.resultater.contains(YtelsePersonResultat.OPPHØRT) }
+
+        val (framstiltNå, framstiltTidligere) = ytelsePersoner.partition { it.erFramstiltKravForIInneværendeBehandling() }
+        val erEndring = (framstiltTidligere + framstiltNå)
+                .flatMap { it.resultater }
+                .any { it == YtelsePersonResultat.ENDRET }
+
+        val erEndringEllerOpphørPåPersoner = erEndring || noeOpphører
+
+        if (altOpphører && !opphørPåSammeTid && !erEndringEllerOpphørPåPersoner) {
+            samledeResultater.remove(YtelsePersonResultat.OPPHØRT)
+            samledeResultater.add(YtelsePersonResultat.ENDRET)
+        } else if (!altOpphører) {
+            samledeResultater.remove(YtelsePersonResultat.OPPHØRT)
+        }
+
+        if (erEndringEllerOpphørPåPersoner) {
+            samledeResultater.add(YtelsePersonResultat.ENDRET)
+        }
+
 
         return when {
             samledeResultater.isEmpty() -> BehandlingResultat.FORTSATT_INNVILGET
