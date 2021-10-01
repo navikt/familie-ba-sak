@@ -33,7 +33,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import java.time.LocalDate
-import java.util.*
+import java.util.SortedSet
 import javax.persistence.AttributeConverter
 import javax.persistence.Converter
 
@@ -204,7 +204,7 @@ enum class VedtakBegrunnelseSpesifikasjon(
         override val sanityApiNavn = "reduksjonFlyttetBarn"
         override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOR_MED_SØKER))
     },
-    REDUKSJON_BARN_DØD(tittel = "Barn død") {
+    REDUKSJON_BARN_DØD("Barn død") {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 11)
@@ -218,7 +218,7 @@ enum class VedtakBegrunnelseSpesifikasjon(
         override val sanityApiNavn = "reduksjonFastOmsorgForBarn"
         override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOR_MED_SØKER), vurderingAnnetGrunnlag = true)
     },
-    REDUKSJON_MANGLENDE_OPPLYSNINGER(tittel = "Ikke mottatt opplysninger") {
+    REDUKSJON_MANGLENDE_OPPLYSNINGER("Ikke mottatt opplysninger") {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(17, 18)
@@ -394,14 +394,14 @@ enum class VedtakBegrunnelseSpesifikasjon(
         override val sanityApiNavn = "opphorFlyttetFraNorge"
         override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOSATT_I_RIKET))
     },
-    OPPHØR_BARN_DØD(tittel = "Et barn er dødt") {
+    OPPHØR_BARN_DØD("Et barn er dødt") {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 11)
         override val sanityApiNavn = "opphorEtBarnErDodt"
         override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOR_MED_SØKER))
     },
-    OPPHØR_FLERE_BARN_DØD(tittel = "Flere barn er døde") {
+    OPPHØR_FLERE_BARN_DØD("Flere barn er døde") {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 11)
@@ -423,7 +423,7 @@ enum class VedtakBegrunnelseSpesifikasjon(
         override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.LOVLIG_OPPHOLD))
 
     },
-    OPPHØR_IKKE_MOTTATT_OPPLYSNINGER(tittel = "Ikke mottatt opplysninger") {
+    OPPHØR_IKKE_MOTTATT_OPPLYSNINGER("Ikke mottatt opplysninger") {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(17, 18)
@@ -721,6 +721,10 @@ fun VedtakBegrunnelseType.hentMånedOgÅrForBegrunnelse(periode: Periode) = when
     else ->
         if (periode.fom == TIDENES_MORGEN) throw Feil("Prøver å finne fom-dato for begrunnelse, men fikk \"TIDENES_MORGEN\".")
         else periode.fom.forrigeMåned().tilMånedÅr()
+}
+
+fun VedtakBegrunnelseSpesifikasjon.hentHjemlerFraSanity(sanityBegrunnelser: List<SanityBegrunnelse>): List<String> {
+    return this.tilSanityBegrunnelse(sanityBegrunnelser).hjemler
 }
 
 @Converter

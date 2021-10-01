@@ -20,6 +20,7 @@ data class SanityBegrunnelse(
         val giftPartnerskapTriggere: List<VilkårTrigger>? = null,
         val borMedSokerTriggere: List<VilkårTrigger>? = null,
         val ovrigeTriggere: List<ØvrigTrigger>? = null,
+        val hjemler: List<String> = emptyList(),
 )
 
 enum class SanityVilkår {
