@@ -32,16 +32,11 @@ object EndretUtbetalingAndelValidering {
             it.personIdent == endretUtbetalingAndel.person!!.personIdent.ident
         }.maxByOrNull { it.stønadTom }?.stønadTom
 
-        if (minsteDatoForTilkjentYtelse == null || størsteDatoForTilkjentYtelse == null) {
+        if ((minsteDatoForTilkjentYtelse == null || størsteDatoForTilkjentYtelse == null) ||
+            (endretUtbetalingAndel.fom!!.isBefore(minsteDatoForTilkjentYtelse) ||
+             endretUtbetalingAndel.tom!!.isAfter(størsteDatoForTilkjentYtelse))) {
             throw UtbetalingsikkerhetFeil(melding = "Det er ingen tilkjent ytelse for personen det legges til en endret periode for.",
                                           frontendFeilmelding = "Det er ingen tilkjent ytelse for personen det legges til en endret periode for.")
         }
-
-        if (endretUtbetalingAndel.fom!!.isBefore(minsteDatoForTilkjentYtelse) ||
-            endretUtbetalingAndel.tom!!.isAfter(størsteDatoForTilkjentYtelse)) {
-            throw UtbetalingsikkerhetFeil(melding = "Perioden som forsøkes lagt til er utenfor ytterpunktene for tilkjent ytelse.",
-                                          frontendFeilmelding = "Perioden som forsøkes lagt til er utenfor ytterpunktene for tilkjent ytelse.")
-        }
-
     }
 }

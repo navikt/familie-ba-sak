@@ -94,7 +94,7 @@ class EndretUtbetalingAndelValideringTest {
             feil = assertThrows<UtbetalingsikkerhetFeil> {
                 validerPeriodeInnenforTilkjentytelse(it, andelTilkjentYtelser)
             }
-            assertEquals("Perioden som forsøkes lagt til er utenfor ytterpunktene for tilkjent ytelse.", feil.melding)
+            assertEquals("Det er ingen tilkjent ytelse for personen det legges til en endret periode for.", feil.melding)
         }
 
         val endretUtbetalingAndelerSomValiderer = listOf(
