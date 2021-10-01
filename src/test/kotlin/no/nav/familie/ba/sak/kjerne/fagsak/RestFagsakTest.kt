@@ -68,7 +68,7 @@ class RestFagsakTest(
         )
 
         kjørStegprosessForRevurderingÅrligKontroll(
-                tilSteg = StegType.VILKÅRSVURDERING,
+                tilSteg = StegType.BEHANDLINGSRESULTAT,
                 søkerFnr = søkerFnr,
                 barnasIdenter = listOf(barnFnr),
                 vedtakService = vedtakService,
