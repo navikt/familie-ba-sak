@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifi
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjonListConverter
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.math.BigDecimal
+import java.time.LocalDate
 import java.time.YearMonth
 import javax.persistence.Column
 import javax.persistence.Convert
@@ -33,14 +34,14 @@ import javax.persistence.Table
 @Entity(name = "EndretUtbetalingAndel")
 @Table(name = "ENDRET_UTBETALING_ANDEL")
 data class EndretUtbetalingAndel(
-        @Id
-        @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "endret_utbetaling_andel_seq_generator")
-        @SequenceGenerator(
-                name = "endret_utbetaling_andel_seq_generator",
-                sequenceName = "endret_utbetaling_andel_seq",
-                allocationSize = 50
-        )
-        val id: Long = 0,
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "endret_utbetaling_andel_seq_generator")
+    @SequenceGenerator(
+            name = "endret_utbetaling_andel_seq_generator",
+            sequenceName = "endret_utbetaling_andel_seq",
+            allocationSize = 50
+    )
+    val id: Long = 0,
 
     @Column(name = "fk_behandling_id", updatable = false, nullable = false)
     val behandlingId: Long,
@@ -64,10 +65,10 @@ data class EndretUtbetalingAndel(
     var årsak: Årsak? = null,
 
     @Column(name = "avtaletidspunkt")
-    var avtaletidspunkt: YearMonth? = null,
+    var avtaletidspunkt: LocalDate? = null,
 
     @Column(name = "soknadstidspunkt")
-    var søknadstidspunkt: YearMonth? = null,
+    var søknadstidspunkt: LocalDate? = null,
 
     @Column(name = "begrunnelse")
     var begrunnelse: String? = null,
@@ -80,11 +81,11 @@ data class EndretUtbetalingAndel(
     )
     val andelTilkjentYtelser: List<AndelTilkjentYtelse> = emptyList(),
 
-        @Column(name = "vedtak_begrunnelse_spesifikasjoner")
-        @Convert(converter = VedtakBegrunnelseSpesifikasjonListConverter::class)
-        var vedtakBegrunnelseSpesifikasjoner: List<VedtakBegrunnelseSpesifikasjon> = emptyList(),
+    @Column(name = "vedtak_begrunnelse_spesifikasjoner")
+    @Convert(converter = VedtakBegrunnelseSpesifikasjonListConverter::class)
+    var vedtakBegrunnelseSpesifikasjoner: List<VedtakBegrunnelseSpesifikasjon> = emptyList(),
 
-        ) : BaseEntitet() {
+    ) : BaseEntitet() {
 
     fun overlapperMed(periode: MånedPeriode) = periode.overlapperHeltEllerDelvisMed(this.periode())
 

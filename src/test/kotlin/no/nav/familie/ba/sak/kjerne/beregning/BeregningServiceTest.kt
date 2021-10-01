@@ -230,8 +230,8 @@ class BeregningServiceTest {
                                              person = barn, prosent = BigDecimal(50),
                                              fom = periodeFom.toYearMonth(),
                                              tom = periodeTom.toYearMonth(),
-                                             avtaletidspunkt = avtaletidspunkt.toYearMonth(),
-                                             søknadstidspunkt = søkandtidspunkt.toYearMonth(),
+                                             avtaletidspunkt = avtaletidspunkt,
+                                             søknadstidspunkt = søkandtidspunkt,
                                              årsak = Årsak.DELT_BOSTED,
                                              begrunnelse = "En begrunnelse"))
 
