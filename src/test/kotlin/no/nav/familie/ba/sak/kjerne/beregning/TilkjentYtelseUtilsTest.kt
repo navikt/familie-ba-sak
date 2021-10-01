@@ -210,7 +210,7 @@ internal class TilkjentYtelseUtilsTest {
     }
 
     @Test
-    fun `Skal opprette riktig tilkjent ytelse-perioder for perioder som ikke er back-to-back over månedskiftet`(){
+    fun `Skal opprette riktig tilkjent ytelse-perioder for perioder som ikke er back-to-back over månedskiftet`() {
         val barnFødselsdato = LocalDate.of(2016, 2, 5);
 
         val (vilkårsvurdering, personopplysningGrunnlag) =
@@ -309,14 +309,44 @@ internal class TilkjentYtelseUtilsTest {
                                behandlingId = behandling.id)
         ))
         if (backToBackFom != null) {
-            barnResultat.addVilkårResultat(VilkårResultat(personResultat = barnResultat,
+            /*barnResultat.addVilkårResultat(VilkårResultat(personResultat = barnResultat,
                                                           vilkårType = Vilkår.BOR_MED_SØKER,
                                                           resultat = Resultat.OPPFYLT,
                                                           periodeFom = backToBackFom,
                                                           periodeTom = null,
                                                           begrunnelse = "",
                                                           erDeltBosted = erDeltBosted,
-                                                          behandlingId = behandling.id))
+                                                          behandlingId = behandling.id))*/
+            vilkårsvurdering.personResultater.find { it.personIdent == søkerFnr }.also {
+                it?.setSortedVilkårResultater(
+                        setOf(VilkårResultat(
+                                personResultat = it,
+                                vilkårType = Vilkår.BOSATT_I_RIKET,
+                                resultat = Resultat.OPPFYLT,
+                                periodeFom = barnFødselsdato,
+                                periodeTom = backToBackTom,
+                                begrunnelse = "",
+                                behandlingId = behandling.id
+                        ), VilkårResultat(
+                                personResultat = it,
+                                vilkårType = Vilkår.BOSATT_I_RIKET,
+                                resultat = Resultat.OPPFYLT,
+                                periodeFom = backToBackFom,
+                                periodeTom = null,
+                                begrunnelse = "",
+                                behandlingId = behandling.id
+                        ),
+                              VilkårResultat(
+                                      personResultat = it,
+                                      vilkårType = Vilkår.LOVLIG_OPPHOLD,
+                                      resultat = Resultat.OPPFYLT,
+                                      periodeFom = barnFødselsdato,
+                                      periodeTom = null,
+                                      begrunnelse = "",
+                                      behandlingId = behandling.id
+                              ))
+                )
+            }
         }
 
         vilkårsvurdering.personResultater = setOf(vilkårsvurdering.personResultater.first(), barnResultat)
