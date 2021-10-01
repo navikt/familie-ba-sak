@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
 import io.mockk.every
 import no.nav.familie.ba.sak.common.lagSøknadDTO
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.NavnOgIdent
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsak
@@ -103,24 +102,27 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
             }
         }
 
-        val restFagsakEtterVilkårsvurdering =
-                familieBaSakKlient().validerVilkårsvurdering(
+        familieBaSakKlient().validerVilkårsvurdering(
+                behandlingId = aktivBehandlingEtterRegistrertSøknad.behandlingId
+        )
+        val restFagsakEtterBehandlingsresultat =
+                familieBaSakKlient().behandlingsresultatStegOgGåVidereTilNesteSteg(
                         behandlingId = aktivBehandlingEtterRegistrertSøknad.behandlingId
                 )
-        val behandlingEtterVilkårsvurdering = hentAktivBehandling(restFagsak = restFagsakEtterVilkårsvurdering.data!!)!!
+        val behandlingEtterBehandlingsresultat = hentAktivBehandling(restFagsak = restFagsakEtterBehandlingsresultat.data!!)!!
 
         assertEquals(tilleggOrdinærSatsTilTester.beløp,
                      hentNåværendeEllerNesteMånedsUtbetaling(
-                             behandling = behandlingEtterVilkårsvurdering
+                             behandling = behandlingEtterBehandlingsresultat
                      )
         )
 
-        generellAssertFagsak(restFagsak = restFagsakEtterVilkårsvurdering,
+        generellAssertFagsak(restFagsak = restFagsakEtterBehandlingsresultat,
                              fagsakStatus = FagsakStatus.OPPRETTET,
                              behandlingStegType = StegType.VURDER_TILBAKEKREVING)
 
         val restFagsakEtterVurderTilbakekreving = familieBaSakKlient().lagreTilbakekrevingOgGåVidereTilNesteSteg(
-                behandlingEtterVilkårsvurdering.behandlingId,
+                behandlingEtterBehandlingsresultat.behandlingId,
                 RestTilbakekreving(Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING, begrunnelse = "begrunnelse"))
         generellAssertFagsak(restFagsak = restFagsakEtterVurderTilbakekreving,
                              fagsakStatus = FagsakStatus.OPPRETTET,
@@ -168,7 +170,7 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
 
     @Test
     fun `Skal journalføre og behandle utvidet nasjonal sak`() {
-        every { featureToggleService.isEnabled(any())} returns true
+        every { featureToggleService.isEnabled(any()) } returns true
 
         val scenario = mockServerKlient().lagScenario(RestScenario(
                 søker = RestScenarioPerson(fødselsdato = "1996-01-12", fornavn = "Mor", etternavn = "Søker"),
@@ -221,7 +223,8 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
         // Godkjenner alle vilkår på førstegangsbehandling.
         val aktivBehandlingEtterRegistrertSøknad = hentAktivBehandling(restFagsakEtterRegistrertSøknad.data!!)!!
 
-        assertEquals(3, aktivBehandlingEtterRegistrertSøknad.personResultater.find { it.personIdent == scenario.søker.ident }?.vilkårResultater?.size)
+        assertEquals(3,
+                     aktivBehandlingEtterRegistrertSøknad.personResultater.find { it.personIdent == scenario.søker.ident }?.vilkårResultater?.size)
 
         aktivBehandlingEtterRegistrertSøknad.personResultater.forEach { restPersonResultat ->
             restPersonResultat.vilkårResultater.filter { it.resultat == Resultat.IKKE_VURDERT }.forEach {

@@ -29,16 +29,16 @@ import org.springframework.stereotype.Service
 
 @Service
 class FødselshendelseService(
-    private val filtreringsreglerService: FiltreringsreglerService,
-    private val taskRepository: TaskRepository,
-    private val opprettTaskService: OpprettTaskService,
-    private val fagsakService: FagsakService,
-    private val behandlingService: BehandlingService,
-    private val vilkårsvurderingRepository: VilkårsvurderingRepository,
-    private val persongrunnlagService: PersongrunnlagService,
-    private val stegService: StegService,
-    private val vedtakService: VedtakService,
-    private val vedtaksperiodeService: VedtaksperiodeService
+        private val filtreringsreglerService: FiltreringsreglerService,
+        private val taskRepository: TaskRepository,
+        private val opprettTaskService: OpprettTaskService,
+        private val fagsakService: FagsakService,
+        private val behandlingService: BehandlingService,
+        private val vilkårsvurderingRepository: VilkårsvurderingRepository,
+        private val persongrunnlagService: PersongrunnlagService,
+        private val stegService: StegService,
+        private val vedtakService: VedtakService,
+        private val vedtaksperiodeService: VedtaksperiodeService
 ) {
 
     val stansetIAutomatiskFiltreringCounter =
@@ -76,20 +76,21 @@ class FødselshendelseService(
     }
 
     private fun vurderVilkår(behandling: Behandling, barnaSomVurderes: List<String>) {
-        val behandlingEtterVilkårsVurdering = stegService.håndterVilkårsvurdering(behandling = behandling)
-        if (behandlingEtterVilkårsVurdering.resultat == BehandlingResultat.INNVILGET) {
+        val behandlingEtterVilkårsvurdering = stegService.håndterVilkårsvurdering(behandling = behandling)
+
+        if (behandlingEtterVilkårsvurdering.resultat == BehandlingResultat.INNVILGET) {
             val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = behandling.id)
             vedtaksperiodeService.oppdaterVedtaksperioderForBarnVurdertIFødselshendelse(vedtak, barnaSomVurderes)
 
             val vedtakEtterToTrinn =
-                    vedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(behandling = behandlingEtterVilkårsVurdering)
+                    vedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(behandling = behandlingEtterVilkårsvurdering)
 
             val task = IverksettMotOppdragTask.opprettTask(behandling, vedtakEtterToTrinn, SikkerhetContext.hentSaksbehandler())
             taskRepository.save(task)
 
             passertFiltreringOgVilkårsvurderingCounter.increment()
         } else {
-            henleggBehandlingOgOpprettManuellOppgave(behandling = behandlingEtterVilkårsVurdering)
+            henleggBehandlingOgOpprettManuellOppgave(behandling = behandlingEtterVilkårsvurdering)
 
             stansetIAutomatiskVilkårsvurderingCounter
         }

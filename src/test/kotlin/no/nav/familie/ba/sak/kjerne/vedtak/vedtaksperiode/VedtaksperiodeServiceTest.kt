@@ -88,7 +88,7 @@ class VedtaksperiodeServiceTest(
         )
 
         revurdering = kjørStegprosessForRevurderingÅrligKontroll(
-                tilSteg = StegType.VILKÅRSVURDERING,
+                tilSteg = StegType.BEHANDLINGSRESULTAT,
                 søkerFnr = søkerFnr,
                 barnasIdenter = listOf(barnFnr),
                 vedtakService = vedtakService,
@@ -228,7 +228,7 @@ class VedtaksperiodeServiceTest(
     @Test
     fun `Skal kaste feil når begrunnelser som ikke samsvarer med vilkårsvurdering blir valgt`() {
         val behandling = kjørStegprosessForFGB(
-                tilSteg = StegType.VILKÅRSVURDERING,
+                tilSteg = StegType.BEHANDLINGSRESULTAT,
                 søkerFnr = randomFnr(),
                 barnasIdenter = listOf(barn2Fnr),
                 fagsakService = fagsakService,
