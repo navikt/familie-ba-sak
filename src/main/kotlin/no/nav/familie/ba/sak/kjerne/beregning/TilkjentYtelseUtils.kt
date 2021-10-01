@@ -93,6 +93,44 @@ object TilkjentYtelseUtils {
         return tilkjentYtelse
     }
 
+    fun oppdaterTilkjentYtelseMedEndretUtbetalingAndeler(
+            andelTilkjentYtelser: MutableSet<AndelTilkjentYtelse>,
+            endretUtbetalingAndeler: List<EndretUtbetalingAndel>): MutableSet<AndelTilkjentYtelse> {
+
+        if (endretUtbetalingAndeler.isEmpty()) return andelTilkjentYtelser.map { it.copy() }.toMutableSet()
+
+        val nyeAndelTilkjentYtelse = mutableListOf<AndelTilkjentYtelse>()
+
+        andelTilkjentYtelser.distinctBy { it.personIdent }.forEach { barnMedAndeler ->
+            val andelerForPerson = andelTilkjentYtelser.filter { it.personIdent == barnMedAndeler.personIdent }
+            val endringerForPerson =
+                    endretUtbetalingAndeler.filter { it.person?.personIdent?.ident == barnMedAndeler.personIdent }
+
+            andelerForPerson.forEach { andelForPerson ->
+                // Deler opp hver enkelt andel i perioder som hhv blir berørt av endringene og de som ikke berøres av de.
+                val (perioderMedEndring, perioderUtenEndring) = andelForPerson.stønadsPeriode().perioderMedOgUtenOverlapp(
+                        endringerForPerson.map { endringerForPerson -> endringerForPerson.periode() }
+                )
+                // Legger til nye AndelTilkjentYtelse for perioder som er berørt av endringer.
+                nyeAndelTilkjentYtelse.addAll(perioderMedEndring.map { månedPeriodeEndret ->
+                    val endretUtbetalingAndel = endringerForPerson.single { it.overlapperMed(månedPeriodeEndret) }
+                    andelForPerson.copy(
+                            stønadFom = månedPeriodeEndret.fom,
+                            stønadTom = månedPeriodeEndret.tom,
+                            kalkulertUtbetalingsbeløp = andelForPerson.kalkulertUtbetalingsbeløp
+                                    .avrundetHeltallAvProsent(endretUtbetalingAndel.prosent!!))
+                })
+                // Legger til nye AndelTilkjentYtelse for perioder som ikke berøres av endringer.
+                nyeAndelTilkjentYtelse.addAll(perioderUtenEndring.map { månedPeriodeUendret ->
+                    andelForPerson.copy(stønadFom = månedPeriodeUendret.fom, stønadTom = månedPeriodeUendret.tom)
+                })
+            }
+        }
+        // Sorterer primært av hensyn til måten testene er implementert og kan muligens fjernes dersom dette skrives om.
+        nyeAndelTilkjentYtelse.sortWith(compareBy({ it.personIdent }, { it.stønadFom }))
+        return nyeAndelTilkjentYtelse.toMutableSet()
+    }
+
     private fun beregnBeløpsperioder(overlappendePerioderesultatSøker: PeriodeResultat,
                                      periodeResultatBarn: PeriodeResultat,
                                      innvilgedePeriodeResultatBarna: List<PeriodeResultat>,
@@ -101,18 +139,25 @@ object TilkjentYtelseUtils {
         val oppfyltFom =
                 maksimum(overlappendePerioderesultatSøker.periodeFom, periodeResultatBarn.periodeFom)
 
+        val minsteTom =
+                minimum(overlappendePerioderesultatSøker.periodeTom, periodeResultatBarn.periodeTom)
+
+        val barnetsPeriodeLøperVidere =
+                if (periodeResultatBarn.periodeTom == null) true else periodeResultatBarn.periodeTom.toYearMonth() > minsteTom.toYearMonth()
+
         val skalVidereføresEnMånedEkstra =
                 innvilgedePeriodeResultatBarna.any { periodeResultat ->
                     innvilgetPeriodeResultatSøker.any { periodeResultatSøker ->
                         periodeResultatSøker.overlapper(periodeResultat)
                     } &&
-                    periodeResultatBarn.periodeTom?.erDagenFør(periodeResultat.periodeFom) == true &&
-                    periodeResultatBarn.periodeTom?.toYearMonth() != periodeResultat.periodeFom?.toYearMonth() &&
-                    periodeResultatBarn.personIdent.equals(periodeResultat.personIdent)
+                    (erBack2BackIMånedsskifte(periodeResultatBarn.periodeTom, periodeResultat.periodeFom) ||
+                     søkerHarInnvilgetPeriodeEtterBarnsPeriode(
+                             innvilgetPeriodeResultatSøker = innvilgetPeriodeResultatSøker,
+                             tilOgMed = minsteTom,
+                             barnetsPeriodeLøperVidere = barnetsPeriodeLøperVidere
+                     )) &&
+                    periodeResultatBarn.personIdent == periodeResultat.personIdent
                 }
-
-        val minsteTom =
-                minimum(overlappendePerioderesultatSøker.periodeTom, periodeResultatBarn.periodeTom)
 
         val oppfyltTom = if (skalVidereføresEnMånedEkstra) minsteTom.plusMonths(1) else minsteTom
 
@@ -148,41 +193,17 @@ object TilkjentYtelseUtils {
                 .fold(mutableListOf(), ::slåSammenEtterfølgendePerioderMedSammeBeløp)
     }
 
-    fun oppdaterTilkjentYtelseMedEndretUtbetalingAndeler(
-            andelTilkjentYtelser: MutableSet<AndelTilkjentYtelse>,
-            endretUtbetalingAndeler: List<EndretUtbetalingAndel>): MutableSet<AndelTilkjentYtelse> {
+    private fun erBack2BackIMånedsskifte(tilOgMed: LocalDate?, fraOgMed: LocalDate?): Boolean {
+        return tilOgMed?.erDagenFør(fraOgMed) == true &&
+               tilOgMed.toYearMonth() != fraOgMed?.toYearMonth()
+    }
 
-        if (endretUtbetalingAndeler.isEmpty()) return andelTilkjentYtelser.map { it.copy() }.toMutableSet()
-
-        val nyeAndelTilkjentYtelse = mutableListOf<AndelTilkjentYtelse>()
-
-        andelTilkjentYtelser.distinctBy { it.personIdent }.forEach { barnMedAndeler ->
-            val andelerForPerson = andelTilkjentYtelser.filter { it.personIdent == barnMedAndeler.personIdent }
-            val endringerForPerson = endretUtbetalingAndeler.filter { it.person?.personIdent?.ident == barnMedAndeler.personIdent }
-
-            andelerForPerson.forEach { andelForPerson ->
-                // Deler opp hver enkelt andel i perioder som hhv blir berørt av endringene og de som ikke berøres av de.
-                val (perioderMedEndring, perioderUtenEndring) = andelForPerson.stønadsPeriode().perioderMedOgUtenOverlapp(
-                        endringerForPerson.map { endringerForPerson -> endringerForPerson.periode() }
-                )
-                // Legger til nye AndelTilkjentYtelse for perioder som er berørt av endringer.
-                nyeAndelTilkjentYtelse.addAll(perioderMedEndring.map { månedPeriodeEndret ->
-                    val endretUtbetalingAndel = endringerForPerson.single { it.overlapperMed(månedPeriodeEndret) }
-                    andelForPerson.copy(
-                            stønadFom = månedPeriodeEndret.fom,
-                            stønadTom = månedPeriodeEndret.tom,
-                            kalkulertUtbetalingsbeløp = andelForPerson.kalkulertUtbetalingsbeløp
-                                    .avrundetHeltallAvProsent(endretUtbetalingAndel.prosent!!))
-                })
-                // Legger til nye AndelTilkjentYtelse for perioder som ikke berøres av endringer.
-                nyeAndelTilkjentYtelse.addAll(perioderUtenEndring.map { månedPeriodeUendret ->
-                    andelForPerson.copy(stønadFom = månedPeriodeUendret.fom, stønadTom = månedPeriodeUendret.tom)
-                })
-            }
-        }
-        // Sorterer primært av hensyn til måten testene er implementert og kan muligens fjernes dersom dette skrives om.
-        nyeAndelTilkjentYtelse.sortWith(compareBy({ it.personIdent }, { it.stønadFom }))
-        return nyeAndelTilkjentYtelse.toMutableSet()
+    private fun søkerHarInnvilgetPeriodeEtterBarnsPeriode(innvilgetPeriodeResultatSøker: List<PeriodeResultat>,
+                                                          tilOgMed: LocalDate?,
+                                                          barnetsPeriodeLøperVidere: Boolean): Boolean {
+        return innvilgetPeriodeResultatSøker.any {
+            erBack2BackIMånedsskifte(tilOgMed, it.periodeFom)
+        } && barnetsPeriodeLøperVidere
     }
 
     private fun finnYtelseType(kategori: BehandlingKategori,
