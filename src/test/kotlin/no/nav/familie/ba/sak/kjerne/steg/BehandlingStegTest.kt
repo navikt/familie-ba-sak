@@ -21,6 +21,7 @@ class BehandlingStegTest {
                 StegType.REGISTRERE_PERSONGRUNNLAG,
                 StegType.REGISTRERE_SØKNAD,
                 StegType.VILKÅRSVURDERING,
+                StegType.BEHANDLINGSRESULTAT,
                 StegType.VURDER_TILBAKEKREVING,
                 StegType.SEND_TIL_BESLUTTER,
                 StegType.BESLUTTE_VEDTAK,
@@ -52,6 +53,7 @@ class BehandlingStegTest {
                 StegType.REGISTRERE_PERSONGRUNNLAG,
                 StegType.REGISTRERE_SØKNAD,
                 StegType.VILKÅRSVURDERING,
+                StegType.BEHANDLINGSRESULTAT,
                 StegType.VURDER_TILBAKEKREVING,
                 StegType.SEND_TIL_BESLUTTER,
                 StegType.BESLUTTE_VEDTAK,
@@ -80,6 +82,7 @@ class BehandlingStegTest {
                 StegType.REGISTRERE_PERSONGRUNNLAG,
                 StegType.FILTRERING_FØDSELSHENDELSER,
                 StegType.VILKÅRSVURDERING,
+                StegType.BEHANDLINGSRESULTAT,
                 StegType.IVERKSETT_MOT_OPPDRAG,
                 StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI,
                 StegType.JOURNALFØR_VEDTAKSBREV,
@@ -106,6 +109,7 @@ class BehandlingStegTest {
                 StegType.REGISTRERE_PERSONGRUNNLAG,
                 StegType.FILTRERING_FØDSELSHENDELSER,
                 StegType.VILKÅRSVURDERING,
+                StegType.BEHANDLINGSRESULTAT,
                 StegType.HENLEGG_BEHANDLING,
         ).forEach {
             assertEquals(steg, it)
@@ -126,6 +130,7 @@ class BehandlingStegTest {
         listOf(
                 StegType.REGISTRERE_PERSONGRUNNLAG,
                 StegType.VILKÅRSVURDERING,
+                StegType.BEHANDLINGSRESULTAT,
                 StegType.IVERKSETT_MOT_OPPDRAG,
                 StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI,
                 StegType.FERDIGSTILLE_BEHANDLING,
@@ -150,6 +155,7 @@ class BehandlingStegTest {
         listOf(
                 StegType.REGISTRERE_PERSONGRUNNLAG,
                 StegType.VILKÅRSVURDERING,
+                StegType.BEHANDLINGSRESULTAT,
                 StegType.IVERKSETT_MOT_OPPDRAG,
                 StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI,
                 StegType.FERDIGSTILLE_BEHANDLING,
@@ -174,6 +180,7 @@ class BehandlingStegTest {
         listOf(
                 StegType.REGISTRERE_PERSONGRUNNLAG,
                 StegType.VILKÅRSVURDERING,
+                StegType.BEHANDLINGSRESULTAT,
                 StegType.SEND_TIL_BESLUTTER,
                 StegType.BESLUTTE_VEDTAK,
                 StegType.IVERKSETT_MOT_OPPDRAG,

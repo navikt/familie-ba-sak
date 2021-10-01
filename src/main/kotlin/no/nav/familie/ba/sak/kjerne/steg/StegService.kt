@@ -62,7 +62,8 @@ class StegService(
                                   ?: behandlingService.hentSisteBehandlingSomIkkeErHenlagt(behandling.fagsak.id)
                                   ?: throw Feil("Forsøker å opprette en revurdering eller teknisk opphør, men kan ikke finne tidligere behandling på fagsak ${behandling.fagsak.id}")
 
-            val barnFraSisteBehandlingMedUtbetalinger = behandlingService.finnBarnFraBehandlingMedTilkjentYtsele(sisteBehandling.id)
+            val barnFraSisteBehandlingMedUtbetalinger =
+                    behandlingService.finnBarnFraBehandlingMedTilkjentYtsele(sisteBehandling.id)
 
             håndterPersongrunnlag(behandling,
                                   RegistrerPersongrunnlagDTO(ident = nyBehandling.søkersIdent,
@@ -140,6 +141,19 @@ class StegService(
     fun håndterVilkårsvurdering(behandling: Behandling): Behandling {
         val behandlingSteg: VilkårsvurderingSteg =
                 hentBehandlingSteg(StegType.VILKÅRSVURDERING) as VilkårsvurderingSteg
+
+        val behandlingEtterVilkårsvurdering = håndterSteg(behandling, behandlingSteg) {
+            behandlingSteg.utførStegOgAngiNeste(behandling, "")
+        }
+
+        return if (behandlingEtterVilkårsvurdering.skalBehandlesAutomatisk) {
+            håndterBehandlingsresultat(behandlingEtterVilkårsvurdering)
+        } else behandlingEtterVilkårsvurdering
+    }
+
+    @Transactional
+    fun håndterBehandlingsresultat(behandling: Behandling): Behandling {
+        val behandlingSteg: BehandlingsresultatSteg = hentBehandlingSteg(StegType.BEHANDLINGSRESULTAT) as BehandlingsresultatSteg
 
         return håndterSteg(behandling, behandlingSteg) {
             behandlingSteg.utførStegOgAngiNeste(behandling, "")
@@ -302,7 +316,8 @@ class StegService(
             } else {
                 stegFeiletMetrics[behandlingSteg.stegType()]?.increment()
                 logger.error("Håndtering av stegtype '${behandlingSteg.stegType()}' feilet på behandling $behandling.")
-                secureLogger.error("Håndtering av stegtype '${behandlingSteg.stegType()}' feilet på behandling $behandling.", exception)
+                secureLogger.error("Håndtering av stegtype '${behandlingSteg.stegType()}' feilet på behandling $behandling.",
+                                   exception)
             }
 
             throw exception

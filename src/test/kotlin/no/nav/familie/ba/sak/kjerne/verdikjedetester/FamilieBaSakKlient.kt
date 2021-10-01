@@ -74,6 +74,12 @@ class FamilieBaSakKlient(
         )
     }
 
+    fun behandlingsresultatStegOgGåVidereTilNesteSteg(behandlingId: Long): Ressurs<RestFagsak> {
+        val uri = URI.create("$baSakUrl/api/behandlinger/$behandlingId/steg/behandlingsresultat")
+
+        return postForEntity(uri, "", headers)
+    }
+
     fun henleggSøknad(behandlingId: Long, restHenleggBehandlingInfo: RestHenleggBehandlingInfo): Ressurs<RestFagsak> {
         val uri = URI.create("$baSakUrl/api/behandlinger/${behandlingId}/henlegg")
         return putForEntity(uri, restHenleggBehandlingInfo, headers)

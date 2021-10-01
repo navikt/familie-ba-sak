@@ -89,13 +89,13 @@ class MigreringService(private val infotrygdBarnetrygdClient: InfotrygdBarnetryg
             vilkårsvurderingService.oppdater(this)
         } ?: error("Fant ikke vilkårsvurdering.")
 
-        stegService.håndterVilkårsvurdering(behandling)
+        val behandlingEtterVilkårsvurdering = stegService.håndterVilkårsvurdering(behandling)
 
-        sammenlignTilkjentYtelseMedBeløpFraInfotrygd(behandling, løpendeSak)
+        sammenlignTilkjentYtelseMedBeløpFraInfotrygd(behandlingEtterVilkårsvurdering, løpendeSak)
 
-        iverksett(behandling)
+        iverksett(behandlingEtterVilkårsvurdering)
 
-        return MigreringResponseDto(behandling.fagsak.id, behandling.id)
+        return MigreringResponseDto(behandlingEtterVilkårsvurdering.fagsak.id, behandlingEtterVilkårsvurdering.id)
     }
 
     private fun kastFeilDersomAlleredeMigrert(fagsak: Fagsak) {
