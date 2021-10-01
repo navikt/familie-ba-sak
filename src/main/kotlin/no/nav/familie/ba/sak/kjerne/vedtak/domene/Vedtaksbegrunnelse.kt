@@ -83,7 +83,11 @@ fun Vedtaksbegrunnelse.tilBrevBegrunnelse(
         målform: Målform,
         uregistrerteBarn: List<BarnMedOpplysninger>
 ): Begrunnelse {
-    val barnasFødselsdatoer = personerPåBegrunnelse.filter { it.type == PersonType.BARN }.map { it.fødselsdato }
+    val barnasFødselsdatoer =
+            if (this.vedtakBegrunnelseSpesifikasjon == VedtakBegrunnelseSpesifikasjon.AVSLAG_UREGISTRERT_BARN)
+                uregistrerteBarn.mapNotNull { it.fødselsdato }
+            else
+                personerPåBegrunnelse.filter { it.type == PersonType.BARN }.map { it.fødselsdato }
 
     val antallBarn =
             if (this.vedtakBegrunnelseSpesifikasjon == VedtakBegrunnelseSpesifikasjon.AVSLAG_UREGISTRERT_BARN)
