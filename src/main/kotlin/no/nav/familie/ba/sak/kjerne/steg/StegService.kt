@@ -142,9 +142,13 @@ class StegService(
         val behandlingSteg: VilkårsvurderingSteg =
                 hentBehandlingSteg(StegType.VILKÅRSVURDERING) as VilkårsvurderingSteg
 
-        return håndterSteg(behandling, behandlingSteg) {
+        val behandlingEtterVilkårsvurdering = håndterSteg(behandling, behandlingSteg) {
             behandlingSteg.utførStegOgAngiNeste(behandling, "")
         }
+
+        return if (behandlingEtterVilkårsvurdering.skalBehandlesAutomatisk) {
+            håndterBehandlingsresultat(behandlingEtterVilkårsvurdering)
+        } else behandlingEtterVilkårsvurdering
     }
 
     @Transactional

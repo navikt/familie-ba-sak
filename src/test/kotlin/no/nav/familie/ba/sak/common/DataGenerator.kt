@@ -471,7 +471,7 @@ fun kjørStegprosessForFGB(
         stegService: StegService,
         vedtaksperiodeService: VedtaksperiodeService,
 ): Behandling {
-    val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
+    fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
     val behandling = stegService.håndterNyBehandling(NyBehandling(
             kategori = BehandlingKategori.NASJONAL,
             underkategori = BehandlingUnderkategori.ORDINÆR,
@@ -501,8 +501,12 @@ fun kjørStegprosessForFGB(
 
     if (tilSteg == StegType.VILKÅRSVURDERING) return behandlingEtterVilkårsvurderingSteg
 
+    val behandlingEtterbehandlingsresultat = stegService.håndterBehandlingsresultat(behandlingEtterVilkårsvurderingSteg)
+
+    if (tilSteg == StegType.BEHANDLINGSRESULTAT) return behandlingEtterbehandlingsresultat
+
     val behandlingEtterVurderTilbakekrevingSteg = stegService.håndterVurderTilbakekreving(
-            behandlingEtterVilkårsvurderingSteg,
+            behandlingEtterbehandlingsresultat,
             RestTilbakekreving(valg = Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING,
                                begrunnelse = "Begrunnelse")
     )
@@ -595,8 +599,12 @@ fun kjørStegprosessForRevurderingÅrligKontroll(
 
     if (tilSteg == StegType.VILKÅRSVURDERING) return behandlingEtterVilkårsvurderingSteg
 
+    val behandlingEtterbehandlingsresultat = stegService.håndterBehandlingsresultat(behandlingEtterVilkårsvurderingSteg)
+
+    if (tilSteg == StegType.BEHANDLINGSRESULTAT) return behandlingEtterbehandlingsresultat
+
     val behandlingEtterSimuleringSteg = stegService.håndterVurderTilbakekreving(
-            behandlingEtterVilkårsvurderingSteg,
+            behandlingEtterbehandlingsresultat,
             RestTilbakekreving(valg = Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING,
                                begrunnelse = "Begrunnelse")
     )
@@ -665,34 +673,6 @@ fun opprettRestTilbakekreving(): RestTilbakekreving = RestTilbakekreving(
         varsel = "Varsel",
         begrunnelse = "Begrunnelse",
 )
-
-/**
- * Dette er en funksjon for å få en automatisk førstegangsbehandling til en ønsket tilstand ved test.
- * Man sender inn steg man ønsker å komme til (tilSteg), personer på behandlingen (søkerFnr og barnasIdenter),
- * og serviceinstanser som brukes i testen.
- */
-fun kjørStegprosessForAutomatiskFGB(
-        tilSteg: StegType,
-        søkerFnr: String,
-        barnasIdenter: List<String>,
-        stegService: StegService
-): Behandling {
-    val nyBehandling = NyBehandlingHendelse(
-            morsIdent = søkerFnr,
-            barnasIdenter = barnasIdenter
-    )
-    val behandling = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling)
-
-    if (tilSteg == StegType.REGISTRERE_PERSONGRUNNLAG) return behandling
-
-    val behandlingEtterFiltrering = stegService.håndterFiltreringsreglerForFødselshendelser(behandling, nyBehandling)
-    if (tilSteg == StegType.FILTRERING_FØDSELSHENDELSER || behandlingEtterFiltrering.erHenlagt()) return behandlingEtterFiltrering
-
-    val behandlingEtterVilkårsvurdering = stegService.håndterVilkårsvurdering(behandlingEtterFiltrering)
-
-    // TODO implementer resten av flyt
-    return behandlingEtterVilkårsvurdering
-}
 
 fun lagUtbetalingsperiode(
         periodeFom: LocalDate = LocalDate.now().withDayOfMonth(1),
