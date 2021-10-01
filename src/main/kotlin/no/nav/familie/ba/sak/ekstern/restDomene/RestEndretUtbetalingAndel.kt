@@ -11,5 +11,7 @@ class RestEndretUtbetalingAndel(
     val fom: YearMonth?,
     val tom: YearMonth?,
     val årsak: Årsak?,
+    val avtaletidspunkt: YearMonth?,
+    val søknadstidspunkt: YearMonth?,
     val begrunnelse: String?,
 )

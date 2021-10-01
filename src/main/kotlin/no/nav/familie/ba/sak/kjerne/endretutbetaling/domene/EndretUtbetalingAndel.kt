@@ -63,6 +63,12 @@ data class EndretUtbetalingAndel(
     @Column(name = "aarsak")
     var årsak: Årsak? = null,
 
+    @Column(name = "avtaletidspunkt")
+    var avtaletidspunkt: YearMonth? = null,
+
+    @Column(name = "soknadstidspunkt")
+    var søknadstidspunkt: YearMonth? = null,
+
     @Column(name = "begrunnelse")
     var begrunnelse: String? = null,
 
@@ -112,6 +118,8 @@ fun EndretUtbetalingAndel.tilRestEndretUtbetalingAndel() = RestEndretUtbetalingA
     fom = this.fom,
     tom = this.tom,
     årsak = this.årsak,
+    avtaletidspunkt = this.avtaletidspunkt,
+    søknadstidspunkt = this.søknadstidspunkt,
     begrunnelse = this.begrunnelse
 )
 
@@ -120,6 +128,8 @@ fun EndretUtbetalingAndel.fraRestEndretUtbetalingAndel(restEndretUtbetalingAndel
     this.tom = restEndretUtbetalingAndel.tom
     this.prosent = restEndretUtbetalingAndel.prosent
     this.årsak = restEndretUtbetalingAndel.årsak
+    this.avtaletidspunkt = restEndretUtbetalingAndel.avtaletidspunkt
+    this.søknadstidspunkt = restEndretUtbetalingAndel.søknadstidspunkt
     this.begrunnelse = restEndretUtbetalingAndel.begrunnelse
     this.person = person
 

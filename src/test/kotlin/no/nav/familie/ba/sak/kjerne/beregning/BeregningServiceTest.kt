@@ -195,6 +195,8 @@ class BeregningServiceTest {
 
         val periodeFom = LocalDate.of(2018, 1, 1)
         val periodeTom = LocalDate.of(2018, 7, 1)
+        val avtaletidspunkt = LocalDate.of(2018, 7, 1)
+        val søkandtidspunkt = LocalDate.of(2018, 9, 1)
         val personResultatBarn = lagPersonResultat(vilkårsvurdering = vilkårsvurdering,
                                                    fnr = barn.personIdent.ident,
                                                    resultat = Resultat.OPPFYLT,
@@ -228,6 +230,8 @@ class BeregningServiceTest {
                                              person = barn, prosent = BigDecimal(50),
                                              fom = periodeFom.toYearMonth(),
                                              tom = periodeTom.toYearMonth(),
+                                             avtaletidspunkt = avtaletidspunkt.toYearMonth(),
+                                             søknadstidspunkt = søkandtidspunkt.toYearMonth(),
                                              årsak = Årsak.DELT_BOSTED,
                                              begrunnelse = "En begrunnelse"))
 
