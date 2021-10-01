@@ -333,10 +333,11 @@ class FagsakService(
 
     private fun sjekkStatuskodeOgHåndterFeil(throwable: Throwable): List<RestFagsakDeltager> {
         val clientError = throwable as? HttpStatusCodeException?
-        return if (clientError != null && clientError.statusCode == HttpStatus.NOT_FOUND) {
+        return if ((clientError != null && clientError.statusCode == HttpStatus.NOT_FOUND) ||
+                   throwable.message?.contains("Fant ikke person") == true) {
             emptyList()
         } else {
-            throw IllegalStateException("Feil ved henting av person fra PDL", throwable)
+            throw throwable
         }
     }
 

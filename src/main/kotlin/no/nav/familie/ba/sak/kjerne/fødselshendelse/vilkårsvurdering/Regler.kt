@@ -181,29 +181,10 @@ private fun sjekkLovligOppholdForEØSBorger(person: Person): Evaluering {
     } else {
         if (annenForelderRegistrert(person)) {
             if (annenForelderBorMedMor(person)) {
-                with(statsborgerskapAnnenForelder(person)) {
-                    when {
-                        contains(Medlemskap.NORDEN) -> Evaluering.oppfylt(VilkårOppfyltÅrsak.ANNEN_FORELDER_NORDISK)
-                        contains(Medlemskap.EØS) -> {
-                            if (personHarLøpendeArbeidsforhold(hentAnnenForelder(person))) {
-                                Evaluering.oppfylt(VilkårOppfyltÅrsak.ANNEN_FORELDER_EØS_MEN_MED_LØPENDE_ARBEIDSFORHOLD)
-                            } else {
-                                sjekkMorsHistoriskeBostedsadresseOgArbeidsforhold(person,
-                                                                                  VilkårIkkeOppfyltÅrsak.EØS_MEDFORELDER_IKKE_I_ARBEID_OG_MOR_IKKE_INNFRIDD_ARBEIDSMENGDE,
-                                                                                  VilkårIkkeOppfyltÅrsak.EØS_MEDFORELDER_IKKE_I_ARBEID_OG_MOR_IKKE_INNFRIDD_BOTIDSKRAV)
-                            }
-                        }
-                        contains(Medlemskap.TREDJELANDSBORGER) -> {
-                            Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.EØS_MEDFORELDER_TREDJELANDSBORGER)
-                        }
-                        contains(Medlemskap.UKJENT) -> {
-                            Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.EØS_MEDFORELDER_STATSLØS)
-                        }
-                        else -> {
-                            Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.STATSBORGERSKAP_ANNEN_FORELDER_UKLART)
-                        }
-                    }
-                }
+                val annenForelderSterkerteStatsborgerskap =
+                        finnSterkesteMedlemskap(statsborgerskapAnnenForelder(person))
+                        ?: throw error("Ukjent medlemskap annen forelder")
+                sjekkLovligOppholdForEØSBorgerSomBorMedPartner(annenForelderSterkerteStatsborgerskap, person)
             } else {
                 sjekkMorsHistoriskeBostedsadresseOgArbeidsforhold(person,
                                                                   VilkårIkkeOppfyltÅrsak.EØS_BOR_IKKE_SAMMEN_MED_MEDFORELDER_OG_MOR_IKKE_INNFRIDD_ARBEIDSMENGDE,
@@ -217,6 +198,36 @@ private fun sjekkLovligOppholdForEØSBorger(person: Person): Evaluering {
         }
     }
 }
+
+private fun sjekkLovligOppholdForEØSBorgerSomBorMedPartner(annenForelderSterkesteStatsborgerskap: Medlemskap,
+                                                           person: Person) =
+        when (annenForelderSterkesteStatsborgerskap) {
+            Medlemskap.NORDEN -> Evaluering.oppfylt(VilkårOppfyltÅrsak.ANNEN_FORELDER_NORDISK)
+            Medlemskap.EØS -> {
+                if (personHarLøpendeArbeidsforhold(hentAnnenForelder(person))) {
+                    Evaluering.oppfylt(VilkårOppfyltÅrsak.ANNEN_FORELDER_EØS_MEN_MED_LØPENDE_ARBEIDSFORHOLD)
+                } else {
+                    sjekkMorsHistoriskeBostedsadresseOgArbeidsforhold(person,
+                                                                      VilkårIkkeOppfyltÅrsak.EØS_MEDFORELDER_IKKE_I_ARBEID_OG_MOR_IKKE_INNFRIDD_ARBEIDSMENGDE,
+                                                                      VilkårIkkeOppfyltÅrsak.EØS_MEDFORELDER_IKKE_I_ARBEID_OG_MOR_IKKE_INNFRIDD_BOTIDSKRAV)
+                }
+            }
+            Medlemskap.TREDJELANDSBORGER -> {
+                sjekkMorsHistoriskeBostedsadresseOgArbeidsforhold(person,
+                                                                  VilkårIkkeOppfyltÅrsak.EØS_MEDFORELDER_TREDJELANDSBORGER,
+                                                                  VilkårIkkeOppfyltÅrsak.EØS_MEDFORELDER_TREDJELANDSBORGER)
+            }
+            Medlemskap.STATSLØS -> {
+                sjekkMorsHistoriskeBostedsadresseOgArbeidsforhold(person,
+                                                                  VilkårIkkeOppfyltÅrsak.EØS_MEDFORELDER_STATSLØS,
+                                                                  VilkårIkkeOppfyltÅrsak.EØS_MEDFORELDER_STATSLØS)
+            }
+            Medlemskap.UKJENT -> {
+                sjekkMorsHistoriskeBostedsadresseOgArbeidsforhold(person,
+                                                                  VilkårIkkeOppfyltÅrsak.STATSBORGERSKAP_ANNEN_FORELDER_UKLART,
+                                                                  VilkårIkkeOppfyltÅrsak.STATSBORGERSKAP_ANNEN_FORELDER_UKLART)
+            }
+        }
 
 private fun sjekkMorsHistoriskeBostedsadresseOgArbeidsforhold(person: Person,
                                                               arbeidsforholdAvslag: VilkårIkkeOppfyltÅrsak,

@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.fagsak
 
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsakDeltager
 import no.nav.familie.ba.sak.ekstern.restDomene.RestSøkParam
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonException
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Tag
@@ -27,7 +28,7 @@ class SøkFagsakNegativeTest {
     fun `test å søke fagsak deltager med ugyldig fnr`() {
         val feilId = "41235678910"
 
-        assertThrows<IllegalStateException> {
+        assertThrows<IntegrasjonException> {
             fagsakService.hentFagsakDeltager(feilId)
         }
     }
@@ -43,7 +44,7 @@ class SøkFagsakNegativeTest {
         assertThat(Ressurs.Status.SUKSESS).isEqualTo(ress.status)
         assertThat(ress.data).isEqualTo(emptyList<RestFagsakDeltager>())
 
-        assertThrows<IllegalStateException> {
+        assertThrows<IntegrasjonException> {
             fagsakController.søkFagsak(RestSøkParam(feilId))
         }
     }
