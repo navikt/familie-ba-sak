@@ -76,7 +76,7 @@ data class BegrunnelseData(
         val apiNavn: String,
 ) : Begrunnelse
 
-data class BegrunnelseFraBaSak(val begrunnelse: String) : Begrunnelse
+data class FritekstBegrunnelse(val fritekst: String) : Begrunnelse
 
 fun Vedtaksbegrunnelse.tilBrevBegrunnelse(
         personerPåBegrunnelse: List<Person>,
