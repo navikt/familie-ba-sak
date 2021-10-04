@@ -7,7 +7,7 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAnde
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.math.BigDecimal
 import java.time.YearMonth
-import java.util.*
+import java.util.Objects
 import javax.persistence.Column
 import javax.persistence.Convert
 import javax.persistence.Entity

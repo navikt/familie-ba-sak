@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.inneværendeMåned
-import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -10,12 +9,12 @@ import no.nav.fpsak.tidsserie.LocalDateSegment
 import java.time.YearMonth
 
 data class BehandlingsresultatPerson(
-        val personIdent: String = "",
-        val personType: PersonType,
-        val søktForPerson: Boolean,
-        val eksplisittAvslag: Boolean = false,
-        val forrigeAndeler: List<BehandlingsresultatAndelTilkjentYtelse> = emptyList(),
-        val andeler: List<BehandlingsresultatAndelTilkjentYtelse>,
+    val personIdent: String = "",
+    val personType: PersonType,
+    val søktForPerson: Boolean,
+    val eksplisittAvslag: Boolean = false,
+    val forrigeAndeler: List<BehandlingsresultatAndelTilkjentYtelse> = emptyList(),
+    val andeler: List<BehandlingsresultatAndelTilkjentYtelse>,
 ) {
 
     /**
@@ -27,9 +26,9 @@ data class BehandlingsresultatPerson(
      */
     fun utledYtelsePerson(): YtelsePerson {
         return YtelsePerson(
-                personIdent = personIdent,
-                ytelseType = utledYtelseType(),
-                kravOpprinnelse = utledKravOpprinnelser(),
+            personIdent = personIdent,
+            ytelseType = utledYtelseType(),
+            kravOpprinnelse = utledKravOpprinnelser(),
         )
     }
 
@@ -45,17 +44,18 @@ data class BehandlingsresultatPerson(
         return when {
             forrigeAndeler.isNotEmpty() && !søktForPerson -> listOf(KravOpprinnelse.TIDLIGERE)
             forrigeAndeler.isNotEmpty() && søktForPerson -> listOf(
-                    KravOpprinnelse.TIDLIGERE,
-                    KravOpprinnelse.INNEVÆRENDE)
+                KravOpprinnelse.TIDLIGERE,
+                KravOpprinnelse.INNEVÆRENDE
+            )
             else -> listOf(KravOpprinnelse.INNEVÆRENDE)
         }
     }
 }
 
 data class BehandlingsresultatAndelTilkjentYtelse(
-        val stønadFom: YearMonth,
-        val stønadTom: YearMonth,
-        val kalkulertUtbetalingsbeløp: Int,
+    val stønadFom: YearMonth,
+    val stønadTom: YearMonth,
+    val kalkulertUtbetalingsbeløp: Int,
 ) {
 
     fun erLøpende(inneværendeMåned: YearMonth): Boolean {
@@ -65,13 +65,15 @@ data class BehandlingsresultatAndelTilkjentYtelse(
 
 fun LocalDateSegment<BehandlingsresultatAndelTilkjentYtelse>.erLøpende() = this.tom > inneværendeMåned().sisteDagIInneværendeMåned()
 
-fun lagBehandlingsresultatAndelTilkjentYtelse(fom: String,
-                                              tom: String,
-                                              kalkulertUtbetalingsbeløp: Int): BehandlingsresultatAndelTilkjentYtelse {
+fun lagBehandlingsresultatAndelTilkjentYtelse(
+    fom: String,
+    tom: String,
+    kalkulertUtbetalingsbeløp: Int
+): BehandlingsresultatAndelTilkjentYtelse {
 
     return BehandlingsresultatAndelTilkjentYtelse(
-            stønadFom = YearMonth.parse(fom),
-            stønadTom = YearMonth.parse(tom),
-            kalkulertUtbetalingsbeløp = kalkulertUtbetalingsbeløp
+        stønadFom = YearMonth.parse(fom),
+        stønadTom = YearMonth.parse(tom),
+        kalkulertUtbetalingsbeløp = kalkulertUtbetalingsbeløp
     )
 }
