@@ -69,6 +69,7 @@ val navnTilNedtrekksmenyMock: List<SanityBegrunnelse> =
                                                                                                  VilkårRolle.SOKER)
                                 else -> null
                             },
+                            hjemler = listOf("98", "99", "100")
                     )
 
                 }
