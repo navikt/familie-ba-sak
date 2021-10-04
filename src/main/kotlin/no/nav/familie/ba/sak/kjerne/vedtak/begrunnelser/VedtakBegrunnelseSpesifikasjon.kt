@@ -33,7 +33,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import java.time.LocalDate
-import java.util.*
+import java.util.SortedSet
 import javax.persistence.AttributeConverter
 import javax.persistence.Converter
 
@@ -324,7 +324,7 @@ enum class VedtakBegrunnelseSpesifikasjon(
         override val sanityApiNavn = "avslagMedlemIFolketrygden"
         override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOSATT_I_RIKET), medlemskap = true)
     },
-    AVSLAG_FORELDRENE_BOR_SAMMEN("Foreldrene bor sammen", erTilgjengeligFrontend = false) {
+    AVSLAG_FORELDRENE_BOR_SAMMEN("Foreldrene bor sammen") {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 12)
@@ -338,14 +338,14 @@ enum class VedtakBegrunnelseSpesifikasjon(
         override val sanityApiNavn = "avslagUnder18Aar"
         override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.UNDER_18_ÅR))
     },
-    AVSLAG_UGYLDIG_AVTALE_OM_DELT_BOSTED("Ugyldig avtale om delt bosted", erTilgjengeligFrontend = false) {
+    AVSLAG_UGYLDIG_AVTALE_OM_DELT_BOSTED("Ugyldig avtale om delt bosted") {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2)
         override val sanityApiNavn = "avslagUgyldigAvtaleOmDeltBosted "
         override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOR_MED_SØKER), deltbosted = true)
     },
-    AVSLAG_IKKE_AVTALE_OM_DELT_BOSTED("Ikke avtale om delt bosted", erTilgjengeligFrontend = false) {
+    AVSLAG_IKKE_AVTALE_OM_DELT_BOSTED("Ikke avtale om delt bosted") {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2)
@@ -366,7 +366,7 @@ enum class VedtakBegrunnelseSpesifikasjon(
         override val sanityApiNavn = "avslagSaerkullsbarn"
         override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOR_MED_SØKER), vurderingAnnetGrunnlag = true)
     },
-    AVSLAG_UREGISTRERT_BARN("Barn uten fødselsnummer", erTilgjengeligFrontend = false) {
+    AVSLAG_UREGISTRERT_BARN("Barn uten fødselsnummer") {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4)
