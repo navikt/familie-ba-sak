@@ -159,6 +159,8 @@ data class Behandling(
 
     fun erMigrering() = type == BehandlingType.MIGRERING_FRA_INFOTRYGD || type == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT
 
+    fun erOmregning(): Boolean = this.opprettetÅrsak == BehandlingÅrsak.OMREGNING_6ÅR || this.opprettetÅrsak == BehandlingÅrsak.OMREGNING_18ÅR
+
     fun hentYtelseTypeTilVilkår(): YtelseType = when (underkategori) {
         BehandlingUnderkategori.UTVIDET -> YtelseType.UTVIDET_BARNETRYGD
         else -> YtelseType.ORDINÆR_BARNETRYGD
