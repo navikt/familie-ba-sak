@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired
 class SanityKlientTest(@Autowired private val sanityKlient: SanityKlient) : AbstractSpringIntegrationTest() {
 
     @Test
-    fun `Hent begrunnelser`() {
-        Assertions.assertTrue(sanityKlient.hentSanityBegrunnelser().size >= 118)
+    fun `Skal teste at vi klarer å hente begrunnelser fra sanity-apiet`() {
+        Assertions.assertTrue(sanityKlient.hentSanityBegrunnelser().isNotEmpty())
     }
 }
