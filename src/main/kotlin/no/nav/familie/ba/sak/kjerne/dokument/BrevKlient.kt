@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.dokument
 
 import no.nav.familie.ba.sak.kjerne.dokument.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Brev
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.BegrunnelseData
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.cache.annotation.Cacheable
@@ -37,6 +38,15 @@ class BrevKlient(
                 object : ParameterizedTypeReference<List<SanityBegrunnelse>>() {},
         )
         return response.body ?: error("Klarte ikke hente begrunnelsene fra familie-brev.")
+    }
+
+    @Cacheable("begrunnelsestekst")
+    fun hentBegrunnelsestekst(begrunnelseData: BegrunnelseData): String {
+        val url = URI.create("$familieBrevUri/ba-sak/begrunnelser/${begrunnelseData.apiNavn}/tekst/")
+        secureLogger.info("Kaller familie brev($url) med data ${begrunnelseData}")
+        logger.info("Kaller familie brev med url: $url}")
+        val response = restTemplate.postForEntity<String>(url, begrunnelseData)
+        return response.body ?: error("Klarte ikke å hente begrunnelsestekst fra familie-brev.")
     }
 
     companion object {

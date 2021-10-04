@@ -182,7 +182,7 @@ fun byggBegrunnelserOgFriteksterForVedtaksperiode(
         målform: Målform,
         uregistrerteBarn: List<BarnMedOpplysninger> = emptyList(),
 ): List<Begrunnelse> {
-    val fritekster = vedtaksperiode.fritekster.sortedBy { it.id }.map { BegrunnelseFraBaSak(it.fritekst) }
+    val fritekster = vedtaksperiode.fritekster.sortedBy { it.id }.map { FritekstBegrunnelse(it.fritekst) }
     val begrunnelser =
             vedtaksperiode.begrunnelser.map {
                 it.tilBrevBegrunnelse(
