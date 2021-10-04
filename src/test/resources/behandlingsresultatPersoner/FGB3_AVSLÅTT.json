@@ -1,0 +1,14 @@
+{
+  "beskrivelse": "FGB: Søknad for 1 barn der vi avslår",
+  "inneværendeMåned": "2021-09",
+  "personer": [
+    {
+      "personType": "BARN",
+      "søktForPerson": true,
+      "eksplisittAvslått": true,
+      "forrigeAndeler": [],
+      "andeler": []
+    }
+  ],
+  "forventetResultat": "AVSLÅTT"
+}
