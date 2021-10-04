@@ -1,0 +1,31 @@
+{
+  "beskrivelse": "RV: Vi har motatt ny søknad for 1 barn. Vi øker og reduserer for barnet.",
+  "inneværendeMåned": "2021-09",
+  "personer": [
+    {
+      "personType": "BARN",
+      "søktForPerson": true,
+      "eksplisittAvslått": false,
+      "forrigeAndeler": [
+        {
+          "stønadFom": "2020-01",
+          "stønadTom": "2020-05",
+          "kalkulertUtbetalingsbeløp": 1054
+        },
+        {
+          "stønadFom": "2020-12",
+          "stønadTom": "2030-01",
+          "kalkulertUtbetalingsbeløp": 1054
+        }
+      ],
+      "andeler": [
+        {
+          "stønadFom": "2020-03",
+          "stønadTom": "2030-01",
+          "kalkulertUtbetalingsbeløp": 1054
+        }
+      ]
+    }
+  ],
+  "forventetResultat": "INNVILGET_OG_ENDRET"
+}

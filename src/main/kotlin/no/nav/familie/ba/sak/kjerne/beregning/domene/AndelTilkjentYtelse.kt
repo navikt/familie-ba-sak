@@ -3,15 +3,11 @@ package no.nav.familie.ba.sak.kjerne.beregning.domene
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.YearMonthConverter
-import no.nav.familie.ba.sak.common.inneværendeMåned
-import no.nav.familie.ba.sak.common.nesteMåned
-import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
-import no.nav.fpsak.tidsserie.LocalDateSegment
 import java.math.BigDecimal
 import java.time.YearMonth
-import java.util.Objects
+import java.util.*
 import javax.persistence.Column
 import javax.persistence.Convert
 import javax.persistence.Entity
@@ -133,13 +129,11 @@ data class AndelTilkjentYtelse(
             this.stønadTom >= andelFraAnnenBehandling.stønadFom
     }
 
-    fun erLøpende(): Boolean {
-        return this.stønadTom >= inneværendeMåned().nesteMåned()
-    }
-
     fun stønadsPeriode() = MånedPeriode(this.stønadFom, this.stønadTom)
 
     fun erUtvidet() = this.type == YtelseType.UTVIDET_BARNETRYGD
+
+    fun erLøpende(): Boolean = this.stønadTom > YearMonth.now()
 
     companion object {
 
@@ -165,8 +159,6 @@ data class AndelTilkjentYtelse(
         }
     }
 }
-
-fun LocalDateSegment<AndelTilkjentYtelse>.erLøpende() = this.tom > inneværendeMåned().sisteDagIInneværendeMåned()
 
 fun List<AndelTilkjentYtelse>.slåSammenBack2BackAndelsperioderMedSammeBeløp(): List<AndelTilkjentYtelse> {
     if (this.size <= 1) return this

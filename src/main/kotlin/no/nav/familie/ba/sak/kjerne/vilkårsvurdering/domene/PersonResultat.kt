@@ -8,7 +8,7 @@ import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat.Companion.VilkårResultatComparator
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.time.LocalDate
-import java.util.SortedSet
+import java.util.*
 import javax.persistence.CascadeType
 import javax.persistence.Column
 import javax.persistence.Entity
@@ -27,37 +27,33 @@ import javax.persistence.Table
 @Entity(name = "PersonResultat")
 @Table(name = "PERSON_RESULTAT")
 class PersonResultat(
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "periode_resultat_seq_generator")
-    @SequenceGenerator(
-        name = "periode_resultat_seq_generator",
-        sequenceName = "periode_resultat_seq",
-        allocationSize = 50
-    )
-    val id: Long = 0,
+        @Id
+        @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "periode_resultat_seq_generator")
+        @SequenceGenerator(name = "periode_resultat_seq_generator",
+                           sequenceName = "periode_resultat_seq",
+                           allocationSize = 50)
+        val id: Long = 0,
 
-    @JsonIgnore
-    @ManyToOne @JoinColumn(name = "fk_vilkaarsvurdering_id", nullable = false, updatable = false)
-    var vilkårsvurdering: Vilkårsvurdering,
+        @JsonIgnore
+        @ManyToOne @JoinColumn(name = "fk_vilkaarsvurdering_id", nullable = false, updatable = false)
+        var vilkårsvurdering: Vilkårsvurdering,
 
-    @Column(name = "person_ident", nullable = false, updatable = false)
-    val personIdent: String,
+        @Column(name = "person_ident", nullable = false, updatable = false)
+        val personIdent: String,
 
-    @OneToMany(
-        fetch = FetchType.EAGER,
-        mappedBy = "personResultat",
-        cascade = [CascadeType.ALL],
-        orphanRemoval = true
-    )
-    val vilkårResultater: MutableSet<VilkårResultat> = sortedSetOf(VilkårResultatComparator),
+        @OneToMany(fetch = FetchType.EAGER,
+                   mappedBy = "personResultat",
+                   cascade = [CascadeType.ALL],
+                   orphanRemoval = true
+        )
+        val vilkårResultater: MutableSet<VilkårResultat> = sortedSetOf(VilkårResultatComparator),
 
-    @OneToMany(
-        fetch = FetchType.EAGER,
-        mappedBy = "personResultat",
-        cascade = [CascadeType.ALL],
-        orphanRemoval = true
-    )
-    val andreVurderinger: MutableSet<AnnenVurdering> = mutableSetOf()
+        @OneToMany(fetch = FetchType.EAGER,
+                   mappedBy = "personResultat",
+                   cascade = [CascadeType.ALL],
+                   orphanRemoval = true
+        )
+        val andreVurderinger: MutableSet<AnnenVurdering> = mutableSetOf()
 
 ) : BaseEntitet() {
 
@@ -88,13 +84,11 @@ class PersonResultat(
 
     fun slettEllerNullstill(vilkårResultatId: Long) {
         val vilkårResultat = vilkårResultater.find { it.id == vilkårResultatId }
-            ?: throw Feil(
-                message = "Prøver å slette et vilkår som ikke finnes",
-                frontendFeilmelding = "Vilkåret du prøver å slette finnes ikke i systemet."
-            )
+                             ?: throw Feil(message = "Prøver å slette et vilkår som ikke finnes",
+                                           frontendFeilmelding = "Vilkåret du prøver å slette finnes ikke i systemet.")
 
         val perioderMedSammeVilkårType = vilkårResultater
-            .filter { it.vilkårType == vilkårResultat.vilkårType && it.id != vilkårResultat.id }
+                .filter { it.vilkårType == vilkårResultat.vilkårType && it.id != vilkårResultat.id }
 
         if (perioderMedSammeVilkårType.isEmpty()) {
             vilkårResultat.nullstill()
@@ -103,21 +97,19 @@ class PersonResultat(
         }
     }
 
-    fun kopierMedParent(
-        vilkårsvurdering: Vilkårsvurdering,
-        inkluderAndreVurderinger: Boolean = false
-    ): PersonResultat {
+    fun kopierMedParent(vilkårsvurdering: Vilkårsvurdering,
+                        inkluderAndreVurderinger: Boolean = false): PersonResultat {
         val nyttPersonResultat = PersonResultat(
-            vilkårsvurdering = vilkårsvurdering,
-            personIdent = personIdent
+                vilkårsvurdering = vilkårsvurdering,
+                personIdent = personIdent
         )
         val kopierteVilkårResultater: SortedSet<VilkårResultat> =
-            vilkårResultater.map { it.kopierMedParent(nyttPersonResultat) }.toSortedSet(VilkårResultatComparator)
+                vilkårResultater.map { it.kopierMedParent(nyttPersonResultat) }.toSortedSet(VilkårResultatComparator)
         nyttPersonResultat.setSortedVilkårResultater(kopierteVilkårResultater)
 
         if (inkluderAndreVurderinger) {
             val kopierteAndreVurderinger: MutableSet<AnnenVurdering> =
-                andreVurderinger.map { it.kopierMedParent(nyttPersonResultat) }.toMutableSet()
+                    andreVurderinger.map { it.kopierMedParent(nyttPersonResultat) }.toMutableSet()
 
             nyttPersonResultat.setAndreVurderinger(kopierteAndreVurderinger)
         }
@@ -127,10 +119,12 @@ class PersonResultat(
     fun erSøkersResultater() = vilkårResultater.none { it.vilkårType == Vilkår.UNDER_18_ÅR }
 
     fun erDeltBosted(segmentFom: LocalDate): Boolean =
-        vilkårResultater
-            .filter { it.vilkårType == Vilkår.BOR_MED_SØKER }
-            .filter {
-                (it.periodeFom == null || it.periodeFom!!.isSameOrBefore(segmentFom)) &&
-                    (it.periodeTom == null || it.periodeTom!!.isSameOrAfter(segmentFom))
-            }.any { it.erDeltBosted }
+            vilkårResultater
+                    .filter { it.vilkårType == Vilkår.BOR_MED_SØKER }
+                    .filter {
+                        (it.periodeFom == null || it.periodeFom!!.isSameOrBefore(segmentFom)) &&
+                        (it.periodeTom == null || it.periodeTom!!.isSameOrAfter(segmentFom))
+                    }.any { it.erDeltBosted }
+
+    fun harEksplisittAvslag() = vilkårResultater.any { it.erEksplisittAvslagPåSøknad == true }
 }

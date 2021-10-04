@@ -156,7 +156,7 @@ class BehandlingResultatMedKravTest {
                 )
             )
         )
-        assertEquals(BehandlingResultat.INNVILGET_OG_ENDRET, behandlingsresultat)
+        assertEquals(BehandlingResultat.INNVILGET_ENDRET_OG_OPPHØRT, behandlingsresultat)
     }
 
     @Test
@@ -356,7 +356,7 @@ class BehandlingResultatMedKravTest {
             )
         )
 
-        assertEquals(BehandlingResultat.DELVIS_INNVILGET_ENDRET_OG_OPPHØRT, behandlingsresultat)
+        assertEquals(BehandlingResultat.DELVIS_INNVILGET_OG_OPPHØRT, behandlingsresultat)
     }
 
     // Avslått
