@@ -10,13 +10,17 @@ import org.springframework.stereotype.Service
 import java.time.YearMonth
 
 @Service
-class SkatteetatenService(private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
-                          private val fagsakRepository: FagsakRepository) {
+class SkatteetatenService(
+    private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
+    private val fagsakRepository: FagsakRepository
+) {
 
     fun finnPersonerMedUtvidetBarnetrygd(år: String): SkatteetatenPersonerResponse {
         val personerFraInfotrygd = infotrygdBarnetrygdClient.hentPersonerMedUtvidetBarnetrygd(år)
         val personerFraBaSak = hentPersonerMedUtvidetBarnetrygd(år)
-        val kombinertListe = personerFraInfotrygd.brukere + personerFraBaSak
+        val personIdentSet = personerFraBaSak.map { it.ident }.toSet()
+
+        val kombinertListe = personerFraBaSak + personerFraInfotrygd.brukere.filter { !personIdentSet.contains(it.ident) }
 
         return SkatteetatenPersonerResponse(kombinertListe)
     }
@@ -28,8 +32,10 @@ class SkatteetatenService(private val infotrygdBarnetrygdClient: InfotrygdBarnet
     }
 
     private fun hentPersonerMedUtvidetBarnetrygd(år: String): List<SkatteetatenPerson> {
-        return fagsakRepository.finnFagsakerMedUtvidetBarnetrygdInnenfor(fom = YearMonth.of(år.toInt(), 1),
-                                                                         tom = YearMonth.of(år.toInt(), 12))
+        return fagsakRepository.finnFagsakerMedUtvidetBarnetrygdInnenfor(
+            fom = YearMonth.of(år.toInt(), 1),
+            tom = YearMonth.of(år.toInt(), 12)
+        )
             .map { SkatteetatenPerson(it.first.hentAktivIdent().ident, it.second.atStartOfDay()) }
     }
 }
