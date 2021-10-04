@@ -7,7 +7,8 @@ import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
 import java.time.LocalDate
-import java.util.*
+import java.time.YearMonth
+import java.util.Optional
 import javax.persistence.LockModeType
 
 @Repository
@@ -72,4 +73,28 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
     @Lock(LockModeType.NONE)
     @Query(value = "SELECT count(*) from Fagsak f where f.status='LØPENDE'")
     fun finnAntallFagsakerLøpende(): Long
+
+    @Lock(LockModeType.NONE)
+    @Query(value = """
+        SELECT new kotlin.Pair(f , MAX(ty.opprettetDato))
+        FROM Behandling b
+               INNER JOIN Fagsak f ON f.id = b.fagsak.id
+               INNER JOIN TilkjentYtelse ty ON b.id = ty.behandling.id
+        WHERE ty.utbetalingsoppdrag IS NOT NULL
+        AND f.status <> 'OPPRETTET' 
+        AND EXISTS(
+            SELECT aty.type FROM AndelTilkjentYtelse aty
+            WHERE aty.tilkjentYtelse.id = ty.id
+            AND aty.type = 'UTVIDET_BARNETRYGD'
+            AND aty.stønadFom <= :tom
+            AND aty.stønadTom >= :fom
+        )
+        GROUP BY f.id
+    """)
+    fun finnFagsakerMedUtvidetBarnetrygdInnenfor(fom: YearMonth, tom: YearMonth): List<Pair<Fagsak, LocalDate>>
 }
+
+data class Foo(
+    val fagsak: Fagsak,
+    val sisteVedtakPåIdent: LocalDate
+)
