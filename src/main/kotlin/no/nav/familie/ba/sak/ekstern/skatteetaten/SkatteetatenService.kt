@@ -16,7 +16,9 @@ class SkatteetatenService(private val infotrygdBarnetrygdClient: InfotrygdBarnet
     fun finnPersonerMedUtvidetBarnetrygd(år: String): SkatteetatenPersonerResponse {
         val personerFraInfotrygd = infotrygdBarnetrygdClient.hentPersonerMedUtvidetBarnetrygd(år)
         val personerFraBaSak = hentPersonerMedUtvidetBarnetrygd(år)
-        return SkatteetatenPersonerResponse(personerFraInfotrygd.brukere + personerFraBaSak)
+        val kombinertListe = personerFraInfotrygd.brukere + personerFraBaSak
+
+        return SkatteetatenPersonerResponse(kombinertListe)
     }
 
     fun finnPerioderMedUtvidetBarnetrygd(personer: List<String>, år: String): SkatteetatenPerioderResponse {
