@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfo
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
@@ -66,6 +67,16 @@ class LoggService(
                 tittel = tittel,
                 rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(rolleConfig, BehandlerRolle.SAKSBEHANDLER),
                 tekst = ""
+        ))
+    }
+
+    fun opprettEndretBehandlingstype(behandling: Behandling, forrigeBehandlingstype: BehandlingUnderkategori, nyBehandlingstype: BehandlingUnderkategori) {
+        lagre(Logg(
+                behandlingId = behandling.id,
+                type = LoggType.BEHANDLINGSTYPE_ENDRET,
+                tittel = "Endret behandlingstype",
+                rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(rolleConfig, BehandlerRolle.SAKSBEHANDLER),
+                tekst = "Behandlingstype er manuelt endret fra $forrigeBehandlingstype til $nyBehandlingstype"
         ))
     }
 

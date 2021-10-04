@@ -100,6 +100,7 @@ class BehandlingService(
     }
 
     fun oppdaterBehandlingUnderkategori(behandling: Behandling, nyBehandlingUnderkategori: BehandlingUnderkategori): Behandling {
+        val forrigeBehandlingUnderkategori = behandling.underkategori
         return lagreEllerOppdater(behandling.apply {
             underkategori = bestemUnderkategori(nyUnderkategori = nyBehandlingUnderkategori,
                                                 nyBehandlingType = behandling.type,
@@ -112,6 +113,7 @@ class BehandlingService(
                     )
                 } else null
             }
+            loggService.opprettEndretBehandlingstype(behandling = behandling, forrigeBehandlingstype = forrigeBehandlingUnderkategori, nyBehandlingstype = nyBehandlingUnderkategori)
         }
     }
 
