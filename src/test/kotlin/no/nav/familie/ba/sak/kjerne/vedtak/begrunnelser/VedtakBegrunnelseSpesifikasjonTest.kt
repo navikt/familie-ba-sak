@@ -39,15 +39,6 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
     }
 
     @Test
-    fun `Ikke valgbar skal gi false`() {
-        assertFalse(VedtakBegrunnelseSpesifikasjon.REDUKSJON_FRITEKST
-                            .triggesForPeriode(vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
-                                               vilkårsvurdering = vilkårsvurdering,
-                                               persongrunnlag = personopplysningGrunnlag,
-                                               identerMedUtbetaling = identerMedUtbetaling))
-    }
-
-    @Test
     fun `Annen periode type skal gi false`() {
         assertFalse(VedtakBegrunnelseSpesifikasjon.OPPHØR_UTVANDRET
                             .triggesForPeriode(vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
