@@ -62,8 +62,6 @@ class BehandlingsresultatService(
         val behandlingsresultatPersoner = personerVurdertIDenneBehandlingen?.map {
             BehandlingsresultatUtils.utledBehandlingsresultatDataForPerson(it,
                                                                            personerFremstiltKravFor,
-                                                                           vilkårsvurdering.personResultater.find { it.personIdent == it.personIdent }?.vilkårResultater?.toList()
-                                                                           ?: emptyList(),
                                                                            forrigeTilkjentYtelse,
                                                                            tilkjentYtelse)
         } ?: emptyList()

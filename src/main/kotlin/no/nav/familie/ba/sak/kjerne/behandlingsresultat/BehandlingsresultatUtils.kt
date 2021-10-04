@@ -20,7 +20,6 @@ object BehandlingsresultatUtils {
 
     fun utledBehandlingsresultatDataForPerson(person: Person,
                                               personerFremstiltKravFor: List<String>,
-                                              vilkårResultater: List<VilkårResultat>,
                                               forrigeTilkjentYtelse: TilkjentYtelse?,
                                               tilkjentYtelse: TilkjentYtelse): BehandlingsresultatPerson {
 
@@ -56,38 +55,27 @@ object BehandlingsresultatUtils {
         val erKunFremstilKravIDenneBehandling =
                 ytelsePersoner.all { it.kravOpprinnelse == listOf(KravOpprinnelse.INNEVÆRENDE) }
 
-        /**
-         * 1. Om alt opphører så skal listen inneholde opphørt
-         * 2. Om alt opphører, men på forskjellig tidspunkt så skal opphørt->endret
-         * 3. Om kun enkeltpersoner opphører så skal resultatet inkludere endret, men kun om det ikke er søkt for vedkommende
-         */
-
-
         val altOpphører = ytelsePersoner.all { it.ytelseSlutt!!.isSameOrBefore(inneværendeMåned()) }
         val erAvslått = ytelsePersoner.all { it.resultater == setOf(YtelsePersonResultat.AVSLÅTT) }
         val opphørPåSammeTid = altOpphører &&
                                (ytelsePersoner.filter { it.resultater != setOf(YtelsePersonResultat.AVSLÅTT) }
                                         .groupBy { it.ytelseSlutt }.size == 1 || erAvslått)
-        val noeOpphører = ytelsePersoner.any { it.resultater.contains(YtelsePersonResultat.OPPHØRT) }
-
-        val (framstiltNå, framstiltTidligere) = ytelsePersoner.partition { it.erFramstiltKravForIInneværendeBehandling() }
-        val erEndring = (framstiltTidligere + framstiltNå)
-                .flatMap { it.resultater }
-                .any { it == YtelsePersonResultat.ENDRET }
-
-        val erEndringEllerOpphørPåPersoner = erEndring || noeOpphører
-
-        if (altOpphører && !opphørPåSammeTid && !erEndringEllerOpphørPåPersoner) {
-            samledeResultater.remove(YtelsePersonResultat.OPPHØRT)
-            samledeResultater.add(YtelsePersonResultat.ENDRET)
-        } else if (!altOpphører) {
-            samledeResultater.remove(YtelsePersonResultat.OPPHØRT)
+        val noeOpphørerPåTidligereBarn = ytelsePersoner.any {
+            it.resultater.contains(YtelsePersonResultat.OPPHØRT) && !it.kravOpprinnelse.contains(KravOpprinnelse.INNEVÆRENDE)
         }
 
-        if (erEndringEllerOpphørPåPersoner) {
+        if (noeOpphørerPåTidligereBarn && !altOpphører) {
             samledeResultater.add(YtelsePersonResultat.ENDRET)
         }
 
+        val opphørSomFørerTilEndring = altOpphører && !opphørPåSammeTid && !erKunFremstilKravIDenneBehandling
+        if (opphørSomFørerTilEndring) {
+            samledeResultater.add(YtelsePersonResultat.ENDRET)
+        }
+
+        if (!altOpphører) {
+            samledeResultater.remove(YtelsePersonResultat.OPPHØRT)
+        }
 
         return when {
             samledeResultater.isEmpty() -> BehandlingResultat.FORTSATT_INNVILGET
@@ -125,81 +113,6 @@ object BehandlingsresultatUtils {
                                        YtelsePersonResultat.OPPHØRT) -> BehandlingResultat.AVSLÅTT_ENDRET_OG_OPPHØRT
             else -> throw ikkeStøttetFeil
         }
-
-        /*val (framstiltNå, framstiltTidligere) = ytelsePersoner.partition { it.erFramstiltKravForIInneværendeBehandling() }
-
-        val ytelsePersonerUtenKunAvslag =
-                ytelsePersoner.filter { !it.resultater.all { resultat -> resultat == YtelsePersonResultat.AVSLÅTT } }
-
-        val erRentOpphør = erRentOpphør(ytelsePersonerUtenKunAvslag)
-
-        val erOpphørPåFlereDatoer = ytelsePersonerUtenKunAvslag.filter {
-            !it.kravOpprinnelse.contains(KravOpprinnelse.INNEVÆRENDE) && it.resultater.contains(YtelsePersonResultat.OPPHØRT)
-        }.groupBy { it.ytelseSlutt }.size > 1
-
-        val erNoeSomOpphører = ytelsePersoner.flatMap { it.resultater }.any { it == YtelsePersonResultat.OPPHØRT }
-
-        val erNoeFraTidligereBehandlingerSomOpphører =
-                framstiltTidligere.flatMap { it.resultater }.any { it == YtelsePersonResultat.OPPHØRT }
-
-        val alleOpphørt = ytelsePersoner.all { it.ytelseSlutt!!.isSameOrBefore(inneværendeMåned()) }
-
-        val erEndring = (framstiltTidligere + framstiltNå)
-                .flatMap { it.resultater }
-                .any { it == YtelsePersonResultat.ENDRET }
-
-        val erEndringEllerOpphørPåPersoner = erEndring || erNoeSomOpphører
-
-        return if (framstiltNå.isNotEmpty()) {
-            val alleHarNoeInnvilget = allePersonerSøktForHarNoeInnvilget(framstiltNå)
-            val resultaterPåSøknad = framstiltNå.flatMap { it.resultater }
-            val erAvslått = erAvslått(resultaterPåSøknad)
-            val erDelvisInnvilget = erDelvisInnvilget(resultaterPåSøknad)
-
-            when {
-                alleHarNoeInnvilget && !erEndring && !erNoeFraTidligereBehandlingerSomOpphører && !alleOpphørt ->
-                    BehandlingResultat.INNVILGET
-                alleHarNoeInnvilget && !erEndring && erRentOpphør ->
-                    BehandlingResultat.INNVILGET_OG_OPPHØRT
-                alleHarNoeInnvilget && erEndringEllerOpphørPåPersoner && (!alleOpphørt || erOpphørPåFlereDatoer) ->
-                    BehandlingResultat.INNVILGET_OG_ENDRET
-                alleHarNoeInnvilget && erEndring && alleOpphørt ->
-                    BehandlingResultat.INNVILGET_ENDRET_OG_OPPHØRT
-                erDelvisInnvilget && !erEndring && !erNoeFraTidligereBehandlingerSomOpphører && !alleOpphørt ->
-                    BehandlingResultat.DELVIS_INNVILGET
-                erDelvisInnvilget && !erEndring && erRentOpphør ->
-                    BehandlingResultat.DELVIS_INNVILGET_OG_OPPHØRT
-                erDelvisInnvilget && erEndringEllerOpphørPåPersoner && !alleOpphørt ->
-                    BehandlingResultat.DELVIS_INNVILGET_OG_ENDRET
-                erDelvisInnvilget && erEndringEllerOpphørPåPersoner && alleOpphørt ->
-                    BehandlingResultat.DELVIS_INNVILGET_ENDRET_OG_OPPHØRT
-                erAvslått && !erEndring && !erNoeFraTidligereBehandlingerSomOpphører ->
-                    BehandlingResultat.AVSLÅTT
-                erAvslått && !erEndring && erRentOpphør && alleOpphørt ->
-                    BehandlingResultat.AVSLÅTT_OG_OPPHØRT
-                erAvslått && erEndringEllerOpphørPåPersoner && !alleOpphørt ->
-                    BehandlingResultat.AVSLÅTT_OG_ENDRET
-                erAvslått && erEndring && alleOpphørt ->
-                    BehandlingResultat.AVSLÅTT_ENDRET_OG_OPPHØRT
-                !erEndringEllerOpphørPåPersoner && !erAvslått ->
-                    BehandlingResultat.FORTSATT_INNVILGET
-                else ->
-                    throw ikkeStøttetFeil
-            }
-        } else {
-            when {
-                !erEndringEllerOpphørPåPersoner ->
-                    BehandlingResultat.FORTSATT_INNVILGET
-                !erEndring && erRentOpphør && alleOpphørt ->
-                    BehandlingResultat.OPPHØRT
-                erEndringEllerOpphørPåPersoner && !alleOpphørt ->
-                    BehandlingResultat.ENDRET
-                (erEndring || erOpphørPåFlereDatoer) && alleOpphørt ->
-                    BehandlingResultat.ENDRET_OG_OPPHØRT
-                else ->
-                    throw ikkeStøttetFeil
-            }
-        }*/
     }
 
     fun validerBehandlingsresultat(behandling: Behandling, resultat: BehandlingResultat) {
@@ -238,20 +151,3 @@ private fun validerYtelsePersoner(ytelsePersoner: List<YtelsePerson>) {
     if (ytelsePersoner.any { it.resultater.contains(YtelsePersonResultat.OPPHØRT) && it.ytelseSlutt?.isAfter(inneværendeMåned()) == true })
         throw Feil(message = "Minst én ytelseperson har fått opphør som resultat og ytelseSlutt etter inneværende måned")
 }
-
-
-private fun erRentOpphør(ytelsePersonerUtenKunAvslag: List<YtelsePerson>) =
-        ytelsePersonerUtenKunAvslag.all { it.resultater.contains(YtelsePersonResultat.OPPHØRT) } &&
-        ytelsePersonerUtenKunAvslag.groupBy { it.ytelseSlutt }.size == 1
-
-private fun erDelvisInnvilget(resultaterPåSøknad: List<YtelsePersonResultat>) =
-        (resultaterPåSøknad.any { it == YtelsePersonResultat.AVSLÅTT }) && resultaterPåSøknad.any { it == YtelsePersonResultat.INNVILGET }
-
-private fun erAvslått(resultaterPåSøknad: List<YtelsePersonResultat>) =
-        resultaterPåSøknad.isNotEmpty() && resultaterPåSøknad.all { it == YtelsePersonResultat.AVSLÅTT }
-
-private fun allePersonerSøktForHarNoeInnvilget(framstiltNå: List<YtelsePerson>) =
-        framstiltNå.all { personSøktFor ->
-            personSøktFor.resultater.contains(YtelsePersonResultat.INNVILGET) &&
-            !personSøktFor.resultater.contains(YtelsePersonResultat.AVSLÅTT)
-        }

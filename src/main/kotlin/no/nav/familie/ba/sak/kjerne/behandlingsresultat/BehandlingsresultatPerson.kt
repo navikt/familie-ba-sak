@@ -59,7 +59,7 @@ data class BehandlingsresultatAndelTilkjentYtelse(
 ) {
 
     fun erLøpende(inneværendeMåned: YearMonth): Boolean {
-        return this.stønadTom >= inneværendeMåned
+        return this.stønadTom > inneværendeMåned
     }
 }
 

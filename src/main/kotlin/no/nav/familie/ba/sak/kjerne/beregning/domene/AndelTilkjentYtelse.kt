@@ -129,10 +129,6 @@ data class AndelTilkjentYtelse(
                this.stønadTom >= andelFraAnnenBehandling.stønadFom
     }
 
-    fun erLøpende(): Boolean {
-        return this.stønadTom >= inneværendeMåned().nesteMåned()
-    }
-
     fun stønadsPeriode() = MånedPeriode(this.stønadFom, this.stønadTom)
 
     fun erUtvidet() = this.type == YtelseType.UTVIDET_BARNETRYGD
@@ -161,8 +157,6 @@ data class AndelTilkjentYtelse(
         }
     }
 }
-
-fun LocalDateSegment<AndelTilkjentYtelse>.erLøpende() = this.tom > inneværendeMåned().sisteDagIInneværendeMåned()
 
 fun List<AndelTilkjentYtelse>.slåSammenBack2BackAndelsperioderMedSammeBeløp(): List<AndelTilkjentYtelse> {
     if (this.size <= 1) return this

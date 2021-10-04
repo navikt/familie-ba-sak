@@ -152,7 +152,7 @@ class BehandlingResultatMedKravTest {
                         )
                 )
         )
-        assertEquals(BehandlingResultat.INNVILGET_OG_ENDRET, behandlingsresultat)
+        assertEquals(BehandlingResultat.INNVILGET_ENDRET_OG_OPPHØRT, behandlingsresultat)
     }
 
     @Test
