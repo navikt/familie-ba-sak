@@ -94,13 +94,19 @@ data class EndretUtbetalingAndel(
         return MånedPeriode(this.fom!!, this.tom!!)
     }
 
-    fun validerUtfyltEndring() {
+    fun validerUtfyltEndring():Boolean {
         if (person == null ||
             prosent == null ||
             fom == null ||
             tom == null ||
-            årsak == null)
-                throw Feil("Person, prosent, fom, tom, årsak skal være utfylt: $this.tostring()")
+            årsak == null ||
+            søknadstidspunkt == null)
+                throw Feil("Person, prosent, fom, tom, årsak og søknadstidspunkt skal være utfylt: $this.tostring()")
+
+        if(årsak == Årsak.DELT_BOSTED && avtaletidspunkt == null)
+            throw Feil("Avtaletidspunkt skal være utfylt når årsak er delt bosted: $this.tostring()")
+
+        return true
     }
 }
 
