@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.fagsak
 
+import io.micrometer.core.annotation.Timed
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Lock
@@ -91,6 +92,7 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
         )
         GROUP BY f.id
     """)
+    @Timed
     fun finnFagsakerMedUtvidetBarnetrygdInnenfor(fom: YearMonth, tom: YearMonth): List<Pair<Fagsak, LocalDate>>
 }
 
