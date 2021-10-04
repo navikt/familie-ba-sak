@@ -71,12 +71,6 @@ class BehandlingsresultatService(
 
         validerYtelsePersoner(behandlingId = behandling.id, ytelsePersoner = ytelsePersonerMedResultat)
 
-        /*val ytelsePersonerMedResultat = YtelsePersonUtils.populerYtelsePersonerMedResultat(
-                ytelsePersoner = ytelsePersoner,
-                andelerTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelse.toList(),
-                forrigeAndelerTilkjentYtelse = forrigeTilkjentYtelse?.andelerTilkjentYtelse?.toList() ?: emptyList(),
-                uregistrerteBarn = søknadGrunnlag?.hentUregistrerteBarn() ?: emptyList())
-        */
 
         vilkårsvurdering.let {
             vilkårsvurderingService.oppdater(vilkårsvurdering)
