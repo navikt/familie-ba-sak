@@ -262,6 +262,8 @@ internal class TilkjentYtelseUtilsEndretUtbetalingAndelTest {
         fom = fom,
         tom = tom,
         årsak = Årsak.DELT_BOSTED,
-        begrunnelse = "Begrunnelse for endring"
+        begrunnelse = "Begrunnelse for endring",
+        søknadstidspunkt = LocalDate.now(),
+        avtaletidspunktDeltBosted = LocalDate.now()
     )
 }
