@@ -272,19 +272,4 @@ class VedtaksperiodeServiceTest(
                 feil.message
         )
     }
-
-    @Test
-    fun `Skal kaste feil når fritekst blir brukt feil`() {
-        val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = revurdering!!.id)
-        val vedtaksperioder = vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak)
-
-        assertThrows<Feil> {
-            vedtaksperiodeService.oppdaterVedtaksperiodeMedStandardbegrunnelser(
-                    vedtaksperiodeId = vedtaksperioder.first().id,
-                    restPutVedtaksperiodeMedStandardbegrunnelser = RestPutVedtaksperiodeMedStandardbegrunnelser(
-                            standardbegrunnelser = listOf(VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_FRITEKST),
-                    )
-            )
-        }
-    }
 }
