@@ -179,7 +179,7 @@ class SøknadGrunnlagTest(
         assertEquals(setOf(StegType.REGISTRERE_SØKNAD,
                            StegType.REGISTRERE_PERSONGRUNNLAG,
                            StegType.VILKÅRSVURDERING,
-                           StegType.VURDER_TILBAKEKREVING),
+                           StegType.BEHANDLINGSRESULTAT),
                      steg)
         assertNotNull(tilkjentYtelse)
         assertTrue(tilkjentYtelse.andelerTilkjentYtelse.size > 0)

@@ -20,6 +20,7 @@ import no.nav.familie.ba.sak.kjerne.steg.StegType.SEND_TIL_BESLUTTER
 import no.nav.familie.ba.sak.kjerne.steg.StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI
 import no.nav.familie.ba.sak.kjerne.steg.StegType.VILKÅRSVURDERING
 import no.nav.familie.ba.sak.kjerne.steg.StegType.VURDER_TILBAKEKREVING
+import no.nav.familie.ba.sak.kjerne.steg.StegType.BEHANDLINGSRESULTAT
 
 interface BehandlingSteg<T> {
 
@@ -68,50 +69,55 @@ enum class StegType(val rekkefølge: Int,
     VILKÅRSVURDERING(
             rekkefølge = 3,
             tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
-            gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES)),
-    VURDER_TILBAKEKREVING(
+            gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES)
+    ),
+    BEHANDLINGSRESULTAT(
             rekkefølge = 4,
             tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES)),
-    SEND_TIL_BESLUTTER(
+    VURDER_TILBAKEKREVING(
             rekkefølge = 5,
             tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES)),
-    BESLUTTE_VEDTAK(
+    SEND_TIL_BESLUTTER(
             rekkefølge = 6,
+            tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
+            gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES)),
+    BESLUTTE_VEDTAK(
+            rekkefølge = 7,
             tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.BESLUTTER),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.FATTER_VEDTAK)),
     IVERKSETT_MOT_OPPDRAG(
-            rekkefølge = 7,
-            tillattFor = listOf(BehandlerRolle.SYSTEM),
-            gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSETTER_VEDTAK)
-    ),
-    VENTE_PÅ_STATUS_FRA_ØKONOMI(
             rekkefølge = 8,
             tillattFor = listOf(BehandlerRolle.SYSTEM),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSETTER_VEDTAK)
     ),
-    IVERKSETT_MOT_FAMILIE_TILBAKE(
+    VENTE_PÅ_STATUS_FRA_ØKONOMI(
             rekkefølge = 9,
             tillattFor = listOf(BehandlerRolle.SYSTEM),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSETTER_VEDTAK)
     ),
-    JOURNALFØR_VEDTAKSBREV(
+    IVERKSETT_MOT_FAMILIE_TILBAKE(
             rekkefølge = 10,
             tillattFor = listOf(BehandlerRolle.SYSTEM),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSETTER_VEDTAK)
     ),
-    DISTRIBUER_VEDTAKSBREV(
+    JOURNALFØR_VEDTAKSBREV(
             rekkefølge = 11,
             tillattFor = listOf(BehandlerRolle.SYSTEM),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSETTER_VEDTAK)
     ),
-    FERDIGSTILLE_BEHANDLING(
+    DISTRIBUER_VEDTAKSBREV(
             rekkefølge = 12,
+            tillattFor = listOf(BehandlerRolle.SYSTEM),
+            gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSETTER_VEDTAK)
+    ),
+    FERDIGSTILLE_BEHANDLING(
+            rekkefølge = 13,
             tillattFor = listOf(BehandlerRolle.SYSTEM),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSETTER_VEDTAK, BehandlingStatus.UTREDES)),
     BEHANDLING_AVSLUTTET(
-            rekkefølge = 13,
+            rekkefølge = 14,
             tillattFor = emptyList(),
             gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.AVSLUTTET, BehandlingStatus.UTREDES));
 
@@ -144,7 +150,8 @@ fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType): StegTyp
         || behandlingType == BehandlingType.MIGRERING_FRA_INFOTRYGD) {
         return when (utførendeStegType) {
             REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
-            VILKÅRSVURDERING -> IVERKSETT_MOT_OPPDRAG
+            VILKÅRSVURDERING -> BEHANDLINGSRESULTAT
+            BEHANDLINGSRESULTAT -> IVERKSETT_MOT_OPPDRAG
             IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
             VENTE_PÅ_STATUS_FRA_ØKONOMI -> FERDIGSTILLE_BEHANDLING
             FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET
@@ -157,7 +164,8 @@ fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType): StegTyp
         BehandlingÅrsak.TEKNISK_OPPHØR -> {
             when (utførendeStegType) {
                 REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
-                VILKÅRSVURDERING -> SEND_TIL_BESLUTTER
+                VILKÅRSVURDERING -> BEHANDLINGSRESULTAT
+                BEHANDLINGSRESULTAT -> SEND_TIL_BESLUTTER
                 SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
                 BESLUTTE_VEDTAK -> IVERKSETT_MOT_OPPDRAG
                 IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
@@ -171,7 +179,8 @@ fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType): StegTyp
             when (utførendeStegType) {
                 REGISTRERE_PERSONGRUNNLAG -> FILTRERING_FØDSELSHENDELSER
                 FILTRERING_FØDSELSHENDELSER -> VILKÅRSVURDERING
-                VILKÅRSVURDERING -> if (behandling.resultat == BehandlingResultat.INNVILGET) IVERKSETT_MOT_OPPDRAG else HENLEGG_BEHANDLING
+                VILKÅRSVURDERING -> BEHANDLINGSRESULTAT
+                BEHANDLINGSRESULTAT -> if (behandling.resultat == BehandlingResultat.INNVILGET) IVERKSETT_MOT_OPPDRAG else HENLEGG_BEHANDLING
                 IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
                 VENTE_PÅ_STATUS_FRA_ØKONOMI -> JOURNALFØR_VEDTAKSBREV
                 JOURNALFØR_VEDTAKSBREV -> DISTRIBUER_VEDTAKSBREV
@@ -185,7 +194,8 @@ fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType): StegTyp
             when (utførendeStegType) {
                 REGISTRERE_PERSONGRUNNLAG -> REGISTRERE_SØKNAD
                 REGISTRERE_SØKNAD -> VILKÅRSVURDERING
-                VILKÅRSVURDERING -> VURDER_TILBAKEKREVING
+                VILKÅRSVURDERING -> BEHANDLINGSRESULTAT
+                BEHANDLINGSRESULTAT -> VURDER_TILBAKEKREVING
                 VURDER_TILBAKEKREVING -> SEND_TIL_BESLUTTER
                 SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
                 BESLUTTE_VEDTAK -> hentNesteStegTypeBasertPåBehandlingsresultat(behandling.resultat)
@@ -202,7 +212,8 @@ fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType): StegTyp
         BehandlingÅrsak.OMREGNING_18ÅR, BehandlingÅrsak.OMREGNING_6ÅR -> {
             when (utførendeStegType) {
                 REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
-                VILKÅRSVURDERING -> JOURNALFØR_VEDTAKSBREV
+                VILKÅRSVURDERING -> BEHANDLINGSRESULTAT
+                BEHANDLINGSRESULTAT -> JOURNALFØR_VEDTAKSBREV
                 JOURNALFØR_VEDTAKSBREV -> DISTRIBUER_VEDTAKSBREV
                 DISTRIBUER_VEDTAKSBREV -> FERDIGSTILLE_BEHANDLING
                 FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET
@@ -213,7 +224,8 @@ fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType): StegTyp
         BehandlingÅrsak.SATSENDRING -> {
             when (utførendeStegType) {
                 REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
-                VILKÅRSVURDERING -> if (behandling.resultat == BehandlingResultat.ENDRET) IVERKSETT_MOT_OPPDRAG else FERDIGSTILLE_BEHANDLING
+                VILKÅRSVURDERING -> BEHANDLINGSRESULTAT
+                BEHANDLINGSRESULTAT -> if (behandling.resultat == BehandlingResultat.ENDRET) IVERKSETT_MOT_OPPDRAG else FERDIGSTILLE_BEHANDLING
                 IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
                 VENTE_PÅ_STATUS_FRA_ØKONOMI -> FERDIGSTILLE_BEHANDLING
                 FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET
@@ -224,7 +236,8 @@ fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType): StegTyp
         else -> {
             when (utførendeStegType) {
                 REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
-                VILKÅRSVURDERING -> VURDER_TILBAKEKREVING
+                VILKÅRSVURDERING -> BEHANDLINGSRESULTAT
+                BEHANDLINGSRESULTAT -> VURDER_TILBAKEKREVING
                 VURDER_TILBAKEKREVING -> SEND_TIL_BESLUTTER
                 SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
                 BESLUTTE_VEDTAK -> hentNesteStegTypeBasertPåBehandlingsresultat(behandling.resultat)
