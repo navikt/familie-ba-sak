@@ -64,7 +64,7 @@ internal class EndretUtbetalingAndelTest {
         endretUtbetalingAndel.tom = YearMonth.of(2020, 10)
         endretUtbetalingAndel.årsak = Årsak.DELT_BOSTED
         endretUtbetalingAndel.søknadstidspunkt = LocalDate.now()
-        endretUtbetalingAndel.avtaletidspunkt = LocalDate.now()
+        endretUtbetalingAndel.avtaletidspunktDeltBosted = LocalDate.now()
 
         assertTrue(endretUtbetalingAndel.validerUtfyltEndring())
     }

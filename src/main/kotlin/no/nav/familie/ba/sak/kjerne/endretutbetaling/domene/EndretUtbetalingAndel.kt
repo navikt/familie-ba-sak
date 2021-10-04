@@ -64,8 +64,8 @@ data class EndretUtbetalingAndel(
     @Column(name = "aarsak")
     var årsak: Årsak? = null,
 
-    @Column(name = "avtaletidspunkt")
-    var avtaletidspunkt: LocalDate? = null,
+    @Column(name = "avtaletidspunkt_delt_bosted")
+    var avtaletidspunktDeltBosted: LocalDate? = null,
 
     @Column(name = "soknadstidspunkt")
     var søknadstidspunkt: LocalDate? = null,
@@ -103,7 +103,7 @@ data class EndretUtbetalingAndel(
             søknadstidspunkt == null)
                 throw Feil("Person, prosent, fom, tom, årsak og søknadstidspunkt skal være utfylt: $this.tostring()")
 
-        if(årsak == Årsak.DELT_BOSTED && avtaletidspunkt == null)
+        if(årsak == Årsak.DELT_BOSTED && avtaletidspunktDeltBosted == null)
             throw Feil("Avtaletidspunkt skal være utfylt når årsak er delt bosted: $this.tostring()")
 
         return true
@@ -125,7 +125,7 @@ fun EndretUtbetalingAndel.tilRestEndretUtbetalingAndel() = RestEndretUtbetalingA
     fom = this.fom,
     tom = this.tom,
     årsak = this.årsak,
-    avtaletidspunkt = this.avtaletidspunkt,
+    avtaletidspunktDeltBosted = this.avtaletidspunktDeltBosted,
     søknadstidspunkt = this.søknadstidspunkt,
     begrunnelse = this.begrunnelse
 )
@@ -135,7 +135,7 @@ fun EndretUtbetalingAndel.fraRestEndretUtbetalingAndel(restEndretUtbetalingAndel
     this.tom = restEndretUtbetalingAndel.tom
     this.prosent = restEndretUtbetalingAndel.prosent
     this.årsak = restEndretUtbetalingAndel.årsak
-    this.avtaletidspunkt = restEndretUtbetalingAndel.avtaletidspunkt
+    this.avtaletidspunktDeltBosted = restEndretUtbetalingAndel.avtaletidspunktDeltBosted
     this.søknadstidspunkt = restEndretUtbetalingAndel.søknadstidspunkt
     this.begrunnelse = restEndretUtbetalingAndel.begrunnelse
     this.person = person
