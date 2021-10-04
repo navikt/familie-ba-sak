@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Brev
 import no.nav.familie.ba.sak.kjerne.dokument.domene.ØvrigTrigger
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.BegrunnelseData
 import org.springframework.context.annotation.Primary
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Service
@@ -28,6 +29,10 @@ class BrevKlientMock : BrevKlient(
 
     override fun hentSanityBegrunnelse(): List<SanityBegrunnelse> {
         return navnTilNedtrekksmenyMock
+    }
+
+    override fun hentBegrunnelsestekst(begrunnelseData: BegrunnelseData): String {
+        return "Dummytekst for ${begrunnelseData.apiNavn}"
     }
 }
 

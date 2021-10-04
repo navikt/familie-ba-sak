@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.kjerne.dokument.domene.maler
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.BrevPeriode.Companion.BEGRUNNELSE_ERROR_MSG
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Begrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.BegrunnelseData
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.BegrunnelseFraBaSak
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.FritekstBegrunnelse
 
 interface BrevPeriode {
 
@@ -46,7 +46,7 @@ data class InnvilgelseBrevPeriode(
             barnasFodselsdager = flettefelt(barnasFodselsdager),
             begrunnelser = begrunnelser.map {
                 when (it) {
-                    is BegrunnelseFraBaSak -> it.begrunnelse
+                    is FritekstBegrunnelse -> it.fritekst
                     is BegrunnelseData -> it
                     else -> error(BEGRUNNELSE_ERROR_MSG)
                 }
@@ -77,7 +77,7 @@ data class OpphørBrevPeriode(
             barnasFodselsdager = flettefelt(null),
             begrunnelser = begrunnelser.map {
                 when (it) {
-                    is BegrunnelseFraBaSak -> it.begrunnelse
+                    is FritekstBegrunnelse -> it.fritekst
                     is BegrunnelseData -> it
                     else -> error(BEGRUNNELSE_ERROR_MSG)
                 }
@@ -108,7 +108,7 @@ data class AvslagBrevPeriode(
             barnasFodselsdager = flettefelt(null),
             begrunnelser = begrunnelser.map {
                 when (it) {
-                    is BegrunnelseFraBaSak -> it.begrunnelse
+                    is FritekstBegrunnelse -> it.fritekst
                     is BegrunnelseData -> it
                     else -> error(BEGRUNNELSE_ERROR_MSG)
                 }
@@ -135,7 +135,7 @@ data class AvslagUtenPeriodeBrevPeriode(
             barnasFodselsdager = flettefelt(null),
             begrunnelser = begrunnelser.map {
                 when (it) {
-                    is BegrunnelseFraBaSak -> it.begrunnelse
+                    is FritekstBegrunnelse -> it.fritekst
                     is BegrunnelseData -> it
                     else -> error(BEGRUNNELSE_ERROR_MSG)
                 }
@@ -169,7 +169,7 @@ data class FortsattInnvilgetBrevPeriode(
             barnasFodselsdager = flettefelt(barnasFodselsdager),
             begrunnelser = begrunnelser.map {
                 when (it) {
-                    is BegrunnelseFraBaSak -> it.begrunnelse
+                    is FritekstBegrunnelse -> it.fritekst
                     is BegrunnelseData -> it
                     else -> error(BEGRUNNELSE_ERROR_MSG)
                 }
