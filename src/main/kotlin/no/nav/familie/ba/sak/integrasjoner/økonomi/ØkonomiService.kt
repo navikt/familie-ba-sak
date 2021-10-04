@@ -5,32 +5,31 @@ import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsoppdragGenerator
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
-import no.nav.familie.ba.sak.økonomi.ØkonomiUtils.kjedeinndelteAndeler
-import no.nav.familie.ba.sak.økonomi.ØkonomiUtils.oppdaterBeståendeAndelerMedOffset
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
-import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
+import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
+import no.nav.familie.ba.sak.økonomi.ØkonomiUtils.kjedeinndelteAndeler
+import no.nav.familie.ba.sak.økonomi.ØkonomiUtils.oppdaterBeståendeAndelerMedOffset
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragId
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragStatus
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.math.BigDecimal
 import java.time.YearMonth
 
 @Service
 class ØkonomiService(
-        private val økonomiKlient: ØkonomiKlient,
-        private val beregningService: BeregningService,
-        private val utbetalingsoppdragGenerator: UtbetalingsoppdragGenerator,
-        private val behandlingService: BehandlingService,
-        private val vilkårsvurderingRepository: VilkårsvurderingRepository,
-        private val featureToggleService: FeatureToggleService,
+    private val økonomiKlient: ØkonomiKlient,
+    private val beregningService: BeregningService,
+    private val utbetalingsoppdragGenerator: UtbetalingsoppdragGenerator,
+    private val behandlingService: BehandlingService,
+    private val vilkårsvurderingRepository: VilkårsvurderingRepository,
+    private val featureToggleService: FeatureToggleService,
 ) {
 
     fun oppdaterTilkjentYtelseOgIverksettVedtak(vedtak: Vedtak, saksbehandlerId: String) {
@@ -50,39 +49,40 @@ class ØkonomiService(
     }
 
     fun hentStatus(oppdragId: OppdragId): OppdragStatus =
-            Result.runCatching { økonomiKlient.hentStatus(oppdragId) }
-                    .fold(
-                            onSuccess = { return it.data!! },
-                            onFailure = { throw Exception("Henting av status mot oppdrag feilet", it) }
-                    )
+        Result.runCatching { økonomiKlient.hentStatus(oppdragId) }
+            .fold(
+                onSuccess = { return it.data!! },
+                onFailure = { throw Exception("Henting av status mot oppdrag feilet", it) }
+            )
 
     @Transactional
     fun genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
-            vedtak: Vedtak,
-            saksbehandlerId: String,
-            erSimulering: Boolean = false,
+        vedtak: Vedtak,
+        saksbehandlerId: String,
+        erSimulering: Boolean = false,
     ): Utbetalingsoppdrag {
         val oppdatertBehandling = vedtak.behandling
         val oppdatertTilstand = beregningService.hentAndelerTilkjentYtelseForBehandling(oppdatertBehandling.id)
-                .filter { andel -> andel.kalkulertUtbetalingsbeløp != 0
-                                   || andel.endretUtbetalingAndeler.any { it.årsak!!.kanGiNullutbetaling() } }
+            .filter { andel ->
+                andel.kalkulertUtbetalingsbeløp != 0 ||
+                    andel.endretUtbetalingAndeler.any { it.årsak!!.kanGiNullutbetaling() }
+            }
         val oppdaterteKjeder = kjedeinndelteAndeler(oppdatertTilstand)
 
         val erFørsteIverksatteBehandlingPåFagsak =
-                beregningService.hentTilkjentYtelseForBehandlingerIverksattMotØkonomi(oppdatertBehandling.fagsak.id).isEmpty()
-
+            beregningService.hentTilkjentYtelseForBehandlingerIverksattMotØkonomi(oppdatertBehandling.fagsak.id).isEmpty()
 
         return if (erFørsteIverksatteBehandlingPåFagsak) {
             utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOpptaderTilkjentYtelse(
-                    saksbehandlerId = saksbehandlerId,
-                    vedtak = vedtak,
-                    erFørsteBehandlingPåFagsak = erFørsteIverksatteBehandlingPåFagsak,
-                    oppdaterteKjeder = oppdaterteKjeder,
-                    erSimulering = erSimulering,
+                saksbehandlerId = saksbehandlerId,
+                vedtak = vedtak,
+                erFørsteBehandlingPåFagsak = erFørsteIverksatteBehandlingPåFagsak,
+                oppdaterteKjeder = oppdaterteKjeder,
+                erSimulering = erSimulering,
             )
         } else {
             val forrigeBehandling = behandlingService.hentForrigeBehandlingSomErIverksatt(behandling = oppdatertBehandling)
-                                    ?: error("Finner ikke forrige behandling ved oppdatering av tilkjent ytelse og iverksetting av vedtak")
+                ?: error("Finner ikke forrige behandling ved oppdatering av tilkjent ytelse og iverksetting av vedtak")
 
             val forrigeTilstand = beregningService.hentAndelerTilkjentYtelseForBehandling(forrigeBehandling.id)
             // TODO: Her bør det legges til sjekk om personident er endret. Hvis endret bør dette mappes i forrigeTilstand som benyttes videre.
@@ -97,20 +97,25 @@ class ØkonomiService(
             }
 
             val utbetalingsoppdrag = utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOpptaderTilkjentYtelse(
-                    saksbehandlerId = saksbehandlerId,
-                    vedtak = vedtak,
-                    erFørsteBehandlingPåFagsak = erFørsteIverksatteBehandlingPåFagsak,
-                    forrigeKjeder = forrigeKjeder,
-                    sisteOffsetPåFagsak = sisteOffsetPåFagsak,
-                    oppdaterteKjeder = oppdaterteKjeder,
-                    erSimulering = erSimulering,
-                    endretMigreringsDato = beregnOmMigreringsDatoErEndret(vedtak.behandling,
-                                                                          forrigeTilstand.minByOrNull { it.stønadFom }?.stønadFom),
+                saksbehandlerId = saksbehandlerId,
+                vedtak = vedtak,
+                erFørsteBehandlingPåFagsak = erFørsteIverksatteBehandlingPåFagsak,
+                forrigeKjeder = forrigeKjeder,
+                sisteOffsetPåFagsak = sisteOffsetPåFagsak,
+                oppdaterteKjeder = oppdaterteKjeder,
+                erSimulering = erSimulering,
+                endretMigreringsDato = beregnOmMigreringsDatoErEndret(
+                    vedtak.behandling,
+                    forrigeTilstand.minByOrNull { it.stønadFom }?.stønadFom
+                ),
             )
 
-            if (!erSimulering && (oppdatertBehandling.erTekniskOpphør()
-                                  || oppdatertBehandling.type == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT
-                                  || behandlingService.hent(oppdatertBehandling.id).resultat == BehandlingResultat.OPPHØRT))
+            if (!erSimulering && (
+                oppdatertBehandling.erTekniskOpphør() ||
+                    oppdatertBehandling.type == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT ||
+                    behandlingService.hent(oppdatertBehandling.id).resultat == BehandlingResultat.OPPHØRT
+                )
+            )
                 validerOpphørsoppdrag(utbetalingsoppdrag)
 
             return utbetalingsoppdrag
@@ -118,15 +123,15 @@ class ØkonomiService(
     }
 
     fun hentSisteOffsetPåFagsak(behandling: Behandling): Int? =
-            behandlingService.hentForrigeBehandlingSomErIverksatt(behandling = behandling)?.let { forrigeIverksattBehandling ->
+        behandlingService.hentForrigeBehandlingSomErIverksatt(behandling = behandling)?.let { forrigeIverksattBehandling ->
 
-                beregningService.hentAndelerTilkjentYtelseForBehandling(forrigeIverksattBehandling.id)
-                        .takeIf { it.isNotEmpty() }
-                        ?.let { andelerTilkjentYtelse ->
-                            andelerTilkjentYtelse.maxByOrNull { it.periodeOffset!! }?.periodeOffset?.toInt()
-                        }
+            beregningService.hentAndelerTilkjentYtelseForBehandling(forrigeIverksattBehandling.id)
+                .takeIf { it.isNotEmpty() }
+                ?.let { andelerTilkjentYtelse ->
+                    andelerTilkjentYtelse.maxByOrNull { it.periodeOffset!! }?.periodeOffset?.toInt()
+                }
                 ?: hentSisteOffsetPåFagsak(forrigeIverksattBehandling)
-            }
+        }
 
     private fun validerOpphørsoppdrag(utbetalingsoppdrag: Utbetalingsoppdrag) {
         val (opphørsperioder, annet) = utbetalingsoppdrag.utbetalingsperiode.partition { it.opphør != null }
@@ -142,22 +147,22 @@ class ØkonomiService(
         }
 
         val erMigrertSak =
-                behandlingService.hentBehandlinger(behandling.fagsak.id).any { it.type == BehandlingType.MIGRERING_FRA_INFOTRYGD }
+            behandlingService.hentBehandlinger(behandling.fagsak.id).any { it.type == BehandlingType.MIGRERING_FRA_INFOTRYGD }
 
         if (!erMigrertSak) {
             return null
         }
 
         val nyttTilstandFraDato = vilkårsvurderingRepository
-                .findByBehandlingAndAktiv(behandling.id)
-                ?.personResultater
-                ?.flatMap { it.vilkårResultater }
-                ?.filter { it.periodeFom != null }
-                ?.filter { it.vilkårType != Vilkår.UNDER_18_ÅR && it.vilkårType != Vilkår.GIFT_PARTNERSKAP }
-                ?.minByOrNull { it.periodeFom!! }
-                ?.periodeFom
-                ?.toYearMonth()
-                ?.plusMonths(1)
+            .findByBehandlingAndAktiv(behandling.id)
+            ?.personResultater
+            ?.flatMap { it.vilkårResultater }
+            ?.filter { it.periodeFom != null }
+            ?.filter { it.vilkårType != Vilkår.UNDER_18_ÅR && it.vilkårType != Vilkår.GIFT_PARTNERSKAP }
+            ?.minByOrNull { it.periodeFom!! }
+            ?.periodeFom
+            ?.toYearMonth()
+            ?.plusMonths(1)
 
         return if (forrigeTilstandFraDato != null && forrigeTilstandFraDato.isAfter(nyttTilstandFraDato)) {
             nyttTilstandFraDato
@@ -166,4 +171,3 @@ class ØkonomiService(
         }
     }
 }
-

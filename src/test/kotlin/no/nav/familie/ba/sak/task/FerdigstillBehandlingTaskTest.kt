@@ -29,7 +29,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
-
 class FerdigstillBehandlingTaskTest : AbstractSpringIntegrationTest() {
 
     @Autowired
@@ -84,15 +83,15 @@ class FerdigstillBehandlingTaskTest : AbstractSpringIntegrationTest() {
         val fnrBarn = ClientMocks.barnFnr[0]
 
         val behandling = kjørStegprosessForFGB(
-                tilSteg = if (resultat == Resultat.OPPFYLT) StegType.DISTRIBUER_VEDTAKSBREV else StegType.REGISTRERE_SØKNAD,
-                søkerFnr = fnr,
-                barnasIdenter = listOf(fnrBarn),
-                fagsakService = fagsakService,
-                vedtakService = vedtakService,
-                persongrunnlagService = persongrunnlagService,
-                vilkårsvurderingService = vilkårsvurderingService,
-                stegService = stegService,
-                vedtaksperiodeService = vedtaksperiodeService,
+            tilSteg = if (resultat == Resultat.OPPFYLT) StegType.DISTRIBUER_VEDTAKSBREV else StegType.REGISTRERE_SØKNAD,
+            søkerFnr = fnr,
+            barnasIdenter = listOf(fnrBarn),
+            fagsakService = fagsakService,
+            vedtakService = vedtakService,
+            persongrunnlagService = persongrunnlagService,
+            vilkårsvurderingService = vilkårsvurderingService,
+            stegService = stegService,
+            vedtaksperiodeService = vedtaksperiodeService,
         )
 
         return if (resultat == Resultat.IKKE_OPPFYLT) {
@@ -101,7 +100,6 @@ class FerdigstillBehandlingTaskTest : AbstractSpringIntegrationTest() {
             vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering)
             val behandlingEtterVilkårsvurdering = stegService.håndterVilkårsvurdering(behandling)
 
-
             behandlingService.oppdaterStatusPåBehandling(behandlingEtterVilkårsvurdering.id, BehandlingStatus.IVERKSETTER_VEDTAK)
             behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(
                 behandlingId = behandlingEtterVilkårsvurdering.id,
@@ -109,7 +107,6 @@ class FerdigstillBehandlingTaskTest : AbstractSpringIntegrationTest() {
             )
         } else behandling
     }
-
 
     @Test
     fun `Skal ferdigstille behandling og fagsak blir til løpende`() {

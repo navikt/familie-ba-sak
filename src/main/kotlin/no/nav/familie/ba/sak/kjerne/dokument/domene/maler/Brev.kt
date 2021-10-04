@@ -45,19 +45,21 @@ interface FlettefelterForDokument {
 }
 
 data class FlettefelterForDokumentImpl(
-        override val navn: Flettefelt,
-        override val fodselsnummer: Flettefelt,
-        override val brevOpprettetDato: Flettefelt = flettefelt(LocalDate.now().tilDagMånedÅr()),
+    override val navn: Flettefelt,
+    override val fodselsnummer: Flettefelt,
+    override val brevOpprettetDato: Flettefelt = flettefelt(LocalDate.now().tilDagMånedÅr()),
 ) : FlettefelterForDokument {
 
-    constructor(navn: String,
-                fodselsnummer: String) : this(navn = flettefelt(navn),
-                                              fodselsnummer = flettefelt(fodselsnummer))
+    constructor(
+        navn: String,
+        fodselsnummer: String
+    ) : this(
+        navn = flettefelt(navn),
+        fodselsnummer = flettefelt(fodselsnummer)
+    )
 }
 
 typealias Flettefelt = List<String>?
 
 fun flettefelt(flettefeltData: String?): Flettefelt = if (flettefeltData != null) listOf(flettefeltData) else null
 fun flettefelt(flettefeltData: List<String>): Flettefelt = flettefeltData
-
-

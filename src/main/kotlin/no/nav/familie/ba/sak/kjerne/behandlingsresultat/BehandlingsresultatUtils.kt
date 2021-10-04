@@ -12,8 +12,10 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 object BehandlingsresultatUtils {
 
     private val ikkeStøttetFeil =
-            Feil(frontendFeilmelding = "Behandlingsresultatet du har fått på behandlingen er ikke støttet i løsningen enda. Ta kontakt med Team familie om du er uenig i resultatet.",
-                 message = "Behandlingsresultatet er ikke støttet i løsningen, se securelogger for resultatene som ble utledet.")
+        Feil(
+            frontendFeilmelding = "Behandlingsresultatet du har fått på behandlingen er ikke støttet i løsningen enda. Ta kontakt med Team familie om du er uenig i resultatet.",
+            message = "Behandlingsresultatet er ikke støttet i løsningen, se securelogger for resultatene som ble utledet."
+        )
 
     fun utledBehandlingsresultatBasertPåYtelsePersoner(ytelsePersoner: List<YtelsePerson>): BehandlingResultat {
         validerYtelsePersoner(ytelsePersoner)
@@ -21,23 +23,23 @@ object BehandlingsresultatUtils {
         val (framstiltNå, framstiltTidligere) = ytelsePersoner.partition { it.erFramstiltKravForIInneværendeBehandling() }
 
         val ytelsePersonerUtenKunAvslag =
-                ytelsePersoner.filter { !it.resultater.all { resultat -> resultat == YtelsePersonResultat.AVSLÅTT } }
+            ytelsePersoner.filter { !it.resultater.all { resultat -> resultat == YtelsePersonResultat.AVSLÅTT } }
 
         val erRentOpphør = erRentOpphør(ytelsePersonerUtenKunAvslag)
 
         val erOpphørPåFlereDatoer = ytelsePersonerUtenKunAvslag.filter { it.resultater.contains(YtelsePersonResultat.OPPHØRT) }
-                                            .groupBy { it.ytelseSlutt }.size > 1
+            .groupBy { it.ytelseSlutt }.size > 1
 
         val erNoeSomOpphører = ytelsePersoner.flatMap { it.resultater }.any { it == YtelsePersonResultat.OPPHØRT }
 
         val erNoeFraTidligereBehandlingerSomOpphører =
-                framstiltTidligere.flatMap { it.resultater }.any { it == YtelsePersonResultat.OPPHØRT }
+            framstiltTidligere.flatMap { it.resultater }.any { it == YtelsePersonResultat.OPPHØRT }
 
         val alleOpphørt = ytelsePersoner.all { it.ytelseSlutt!!.isSameOrBefore(inneværendeMåned()) }
 
         val erEndring = (framstiltTidligere + framstiltNå)
-                .flatMap { it.resultater }
-                .any { it == YtelsePersonResultat.ENDRET }
+            .flatMap { it.resultater }
+            .any { it == YtelsePersonResultat.ENDRET }
 
         val erEndringEllerOpphørPåPersoner = erEndring || erNoeSomOpphører
 
@@ -94,26 +96,32 @@ object BehandlingsresultatUtils {
     }
 
     fun validerBehandlingsresultat(behandling: Behandling, resultat: BehandlingResultat) {
-        if ((behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING && setOf(
-                        BehandlingResultat.AVSLÅTT_OG_OPPHØRT,
-                        BehandlingResultat.ENDRET,
-                        BehandlingResultat.ENDRET_OG_OPPHØRT,
-                        BehandlingResultat.OPPHØRT,
-                        BehandlingResultat.FORTSATT_INNVILGET,
-                        BehandlingResultat.IKKE_VURDERT).contains(resultat)) ||
-            (behandling.type == BehandlingType.REVURDERING && resultat == BehandlingResultat.IKKE_VURDERT)) {
+        if ((
+            behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING && setOf(
+                    BehandlingResultat.AVSLÅTT_OG_OPPHØRT,
+                    BehandlingResultat.ENDRET,
+                    BehandlingResultat.ENDRET_OG_OPPHØRT,
+                    BehandlingResultat.OPPHØRT,
+                    BehandlingResultat.FORTSATT_INNVILGET,
+                    BehandlingResultat.IKKE_VURDERT
+                ).contains(resultat)
+            ) ||
+            (behandling.type == BehandlingType.REVURDERING && resultat == BehandlingResultat.IKKE_VURDERT)
+        ) {
 
             val feilmelding = "Behandlingsresultatet ${resultat.displayName.lowercase()} " +
-                              "er ugyldig i kombinasjon med behandlingstype '${behandling.type.visningsnavn}'."
+                "er ugyldig i kombinasjon med behandlingstype '${behandling.type.visningsnavn}'."
             throw FunksjonellFeil(frontendFeilmelding = feilmelding, melding = feilmelding)
         }
         if (behandling.opprettetÅrsak == BehandlingÅrsak.KLAGE && setOf(
-                        BehandlingResultat.AVSLÅTT_OG_OPPHØRT,
-                        BehandlingResultat.AVSLÅTT_ENDRET_OG_OPPHØRT,
-                        BehandlingResultat.AVSLÅTT_OG_ENDRET,
-                        BehandlingResultat.AVSLÅTT).contains(resultat)) {
+                BehandlingResultat.AVSLÅTT_OG_OPPHØRT,
+                BehandlingResultat.AVSLÅTT_ENDRET_OG_OPPHØRT,
+                BehandlingResultat.AVSLÅTT_OG_ENDRET,
+                BehandlingResultat.AVSLÅTT
+            ).contains(resultat)
+        ) {
             val feilmelding = "Behandlingsårsak ${behandling.opprettetÅrsak.visningsnavn.lowercase()} " +
-                              "er ugyldig i kombinasjon med resultat '${resultat.displayName.lowercase()}'."
+                "er ugyldig i kombinasjon med resultat '${resultat.displayName.lowercase()}'."
             throw FunksjonellFeil(frontendFeilmelding = feilmelding, melding = feilmelding)
         }
     }
@@ -130,19 +138,18 @@ private fun validerYtelsePersoner(ytelsePersoner: List<YtelsePerson>) {
         throw Feil(message = "Minst én ytelseperson har fått opphør som resultat og ytelseSlutt etter inneværende måned")
 }
 
-
 private fun erRentOpphør(ytelsePersonerUtenKunAvslag: List<YtelsePerson>) =
-        ytelsePersonerUtenKunAvslag.all { it.resultater.contains(YtelsePersonResultat.OPPHØRT) } &&
+    ytelsePersonerUtenKunAvslag.all { it.resultater.contains(YtelsePersonResultat.OPPHØRT) } &&
         ytelsePersonerUtenKunAvslag.groupBy { it.ytelseSlutt }.size == 1
 
 private fun erDelvisInnvilget(resultaterPåSøknad: List<YtelsePersonResultat>) =
-        (resultaterPåSøknad.any { it == YtelsePersonResultat.AVSLÅTT }) && resultaterPåSøknad.any { it == YtelsePersonResultat.INNVILGET }
+    (resultaterPåSøknad.any { it == YtelsePersonResultat.AVSLÅTT }) && resultaterPåSøknad.any { it == YtelsePersonResultat.INNVILGET }
 
 private fun erAvslått(resultaterPåSøknad: List<YtelsePersonResultat>) =
-        resultaterPåSøknad.isNotEmpty() && resultaterPåSøknad.all { it == YtelsePersonResultat.AVSLÅTT }
+    resultaterPåSøknad.isNotEmpty() && resultaterPåSøknad.all { it == YtelsePersonResultat.AVSLÅTT }
 
 private fun allePersonerSøktForHarNoeInnvilget(framstiltNå: List<YtelsePerson>) =
-        framstiltNå.all { personSøktFor ->
-            personSøktFor.resultater.contains(YtelsePersonResultat.INNVILGET) &&
+    framstiltNå.all { personSøktFor ->
+        personSøktFor.resultater.contains(YtelsePersonResultat.INNVILGET) &&
             !personSøktFor.resultater.contains(YtelsePersonResultat.AVSLÅTT)
-        }
+    }

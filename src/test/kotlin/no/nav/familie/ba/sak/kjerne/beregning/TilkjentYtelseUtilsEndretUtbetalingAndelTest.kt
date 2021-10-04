@@ -167,7 +167,7 @@ internal class TilkjentYtelseUtilsEndretUtbetalingAndelTest {
 
     @Test
     fun `En gitt MånedPeriode skal gi tilbake perioder med og uten overlapp den har mot en eller flere andre perioder`() {
-        val periode = MånedPeriode(YearMonth.of(2018, 1 ), YearMonth.of(2018, 12))
+        val periode = MånedPeriode(YearMonth.of(2018, 1), YearMonth.of(2018, 12))
 
         var perioder = periode.perioderMedOgUtenOverlapp(emptyList())
         var perioderMedOverlapp = perioder.first
@@ -176,59 +176,68 @@ internal class TilkjentYtelseUtilsEndretUtbetalingAndelTest {
         assertEquals(1, perioderUtenOverlapp.size)
         assertEquals(periode, perioderUtenOverlapp[0])
 
-        perioder = periode.perioderMedOgUtenOverlapp(listOf(
-                MånedPeriode(YearMonth.of(2015, 1 ), YearMonth.of(2016, 3))
-        ))
+        perioder = periode.perioderMedOgUtenOverlapp(
+            listOf(
+                MånedPeriode(YearMonth.of(2015, 1), YearMonth.of(2016, 3))
+            )
+        )
         perioderMedOverlapp = perioder.first
         perioderUtenOverlapp = perioder.second
         assertEquals(0, perioderMedOverlapp.size)
         assertEquals(1, perioderUtenOverlapp.size)
         assertEquals(periode, perioderUtenOverlapp[0])
 
-        perioder = periode.perioderMedOgUtenOverlapp(listOf(
+        perioder = periode.perioderMedOgUtenOverlapp(
+            listOf(
                 periode
-        ))
+            )
+        )
         perioderMedOverlapp = perioder.first
         perioderUtenOverlapp = perioder.second
         assertEquals(1, perioderMedOverlapp.size)
         assertEquals(periode, perioderMedOverlapp[0])
         assertEquals(0, perioderUtenOverlapp.size)
 
-        perioder = periode.perioderMedOgUtenOverlapp(listOf(
-                MånedPeriode(YearMonth.of(2015, 1 ), YearMonth.of(2018, 3))
-        ))
+        perioder = periode.perioderMedOgUtenOverlapp(
+            listOf(
+                MånedPeriode(YearMonth.of(2015, 1), YearMonth.of(2018, 3))
+            )
+        )
         perioderMedOverlapp = perioder.first
         perioderUtenOverlapp = perioder.second
         assertEquals(1, perioderMedOverlapp.size)
-        assertEquals(MånedPeriode(YearMonth.of(2018, 1 ), YearMonth.of(2018, 3)), perioderMedOverlapp[0])
+        assertEquals(MånedPeriode(YearMonth.of(2018, 1), YearMonth.of(2018, 3)), perioderMedOverlapp[0])
         assertEquals(1, perioderUtenOverlapp.size)
-        assertEquals(MånedPeriode(YearMonth.of(2018, 4 ), YearMonth.of(2018, 12)), perioderUtenOverlapp[0])
+        assertEquals(MånedPeriode(YearMonth.of(2018, 4), YearMonth.of(2018, 12)), perioderUtenOverlapp[0])
 
-        perioder = periode.perioderMedOgUtenOverlapp(listOf(
-                MånedPeriode(YearMonth.of(2015, 1 ), YearMonth.of(2018, 3)),
-                MånedPeriode(YearMonth.of(2018, 6 ), YearMonth.of(2018, 6))
-        ))
+        perioder = periode.perioderMedOgUtenOverlapp(
+            listOf(
+                MånedPeriode(YearMonth.of(2015, 1), YearMonth.of(2018, 3)),
+                MånedPeriode(YearMonth.of(2018, 6), YearMonth.of(2018, 6))
+            )
+        )
         perioderMedOverlapp = perioder.first
         perioderUtenOverlapp = perioder.second
         assertEquals(2, perioderMedOverlapp.size)
-        assertEquals(MånedPeriode(YearMonth.of(2018, 1 ), YearMonth.of(2018, 3)), perioderMedOverlapp[0])
-        assertEquals(MånedPeriode(YearMonth.of(2018, 6 ), YearMonth.of(2018, 6)), perioderMedOverlapp[1])
+        assertEquals(MånedPeriode(YearMonth.of(2018, 1), YearMonth.of(2018, 3)), perioderMedOverlapp[0])
+        assertEquals(MånedPeriode(YearMonth.of(2018, 6), YearMonth.of(2018, 6)), perioderMedOverlapp[1])
         assertEquals(2, perioderUtenOverlapp.size)
-        assertEquals(MånedPeriode(YearMonth.of(2018, 4 ), YearMonth.of(2018, 5)), perioderUtenOverlapp[0])
-        assertEquals(MånedPeriode(YearMonth.of(2018, 7 ), YearMonth.of(2018, 12)), perioderUtenOverlapp[1])
+        assertEquals(MånedPeriode(YearMonth.of(2018, 4), YearMonth.of(2018, 5)), perioderUtenOverlapp[0])
+        assertEquals(MånedPeriode(YearMonth.of(2018, 7), YearMonth.of(2018, 12)), perioderUtenOverlapp[1])
 
-        perioder = periode.perioderMedOgUtenOverlapp(listOf(
-                MånedPeriode(YearMonth.of(2018, 2 ), YearMonth.of(2018, 11))
-        ))
+        perioder = periode.perioderMedOgUtenOverlapp(
+            listOf(
+                MånedPeriode(YearMonth.of(2018, 2), YearMonth.of(2018, 11))
+            )
+        )
         perioderMedOverlapp = perioder.first
         perioderUtenOverlapp = perioder.second
         assertEquals(1, perioderMedOverlapp.size)
-        assertEquals(MånedPeriode(YearMonth.of(2018, 2 ), YearMonth.of(2018, 11)), perioderMedOverlapp[0])
+        assertEquals(MånedPeriode(YearMonth.of(2018, 2), YearMonth.of(2018, 11)), perioderMedOverlapp[0])
         assertEquals(2, perioderUtenOverlapp.size)
-        assertEquals(MånedPeriode(YearMonth.of(2018, 1 ), YearMonth.of(2018, 1)), perioderUtenOverlapp[0])
-        assertEquals(MånedPeriode(YearMonth.of(2018, 12 ), YearMonth.of(2018, 12)), perioderUtenOverlapp[1])
+        assertEquals(MånedPeriode(YearMonth.of(2018, 1), YearMonth.of(2018, 1)), perioderUtenOverlapp[0])
+        assertEquals(MånedPeriode(YearMonth.of(2018, 12), YearMonth.of(2018, 12)), perioderUtenOverlapp[1])
     }
-
 
     private fun verifiserAndelTilkjentYtelse(
         andelTilkjentYtelse: AndelTilkjentYtelse,
@@ -244,15 +253,15 @@ internal class TilkjentYtelseUtilsEndretUtbetalingAndelTest {
     }
 
     private fun lagAndelTilkjentYtelse(barn: Person, fom: YearMonth, tom: YearMonth) = AndelTilkjentYtelse(
-            behandlingId = behandling.id,
-            tilkjentYtelse = tilkjentYtelse,
-            personIdent = barn.personIdent.ident,
-            kalkulertUtbetalingsbeløp = beløp.toInt(),
-            stønadFom = fom,
-            stønadTom = tom,
-            type = YtelseType.ORDINÆR_BARNETRYGD,
-            sats = beløp.toInt(),
-            prosent = BigDecimal(100)
+        behandlingId = behandling.id,
+        tilkjentYtelse = tilkjentYtelse,
+        personIdent = barn.personIdent.ident,
+        kalkulertUtbetalingsbeløp = beløp.toInt(),
+        stønadFom = fom,
+        stønadTom = tom,
+        type = YtelseType.ORDINÆR_BARNETRYGD,
+        sats = beløp.toInt(),
+        prosent = BigDecimal(100)
     )
 
     private fun lagEndretUtbetalingAndel(barn: Person, fom: YearMonth, tom: YearMonth, prosent: Int) = EndretUtbetalingAndel(

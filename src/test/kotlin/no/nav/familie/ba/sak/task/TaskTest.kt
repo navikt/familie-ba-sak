@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.annotation.AnnotationUtils
 import java.util.stream.Collectors
 
-
 @Tag("integration")
 class TaskTest : AbstractSpringIntegrationTest() {
 
@@ -24,30 +23,38 @@ class TaskTest : AbstractSpringIntegrationTest() {
             .map { task: AsyncTaskStep ->
                 finnAnnotasjon(task)
             }
-                .map { it?.taskStepType }
-                .collect(
-                        Collectors.toList<String>())
-
+            .map { it?.taskStepType }
+            .collect(
+                Collectors.toList<String>()
+            )
 
         Assertions.assertEquals(tasker.size, taskTyper.distinct().size)
     }
 
     @Test
     fun `Tasker skal ha annotasjon`() {
-        Assertions.assertEquals(false, tasker.stream().anyMatch {
-            harIkkePåkrevdAnnotasjon(
-                    it!!)
-        })
+        Assertions.assertEquals(
+            false,
+            tasker.stream().anyMatch {
+                harIkkePåkrevdAnnotasjon(
+                    it!!
+                )
+            }
+        )
     }
 
     private fun harIkkePåkrevdAnnotasjon(it: AsyncTaskStep): Boolean {
-        return !AnnotationUtils.isAnnotationDeclaredLocally(TaskStepBeskrivelse::class.java,
-                                                            it.javaClass)
+        return !AnnotationUtils.isAnnotationDeclaredLocally(
+            TaskStepBeskrivelse::class.java,
+            it.javaClass
+        )
     }
 
     private fun finnAnnotasjon(task: AsyncTaskStep): TaskStepBeskrivelse? {
         val aClass = AopProxyUtils.ultimateTargetClass(task)
-        return AnnotationUtils.findAnnotation(aClass,
-                                              TaskStepBeskrivelse::class.java)
+        return AnnotationUtils.findAnnotation(
+            aClass,
+            TaskStepBeskrivelse::class.java
+        )
     }
 }

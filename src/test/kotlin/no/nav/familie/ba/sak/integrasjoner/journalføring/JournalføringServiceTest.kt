@@ -16,17 +16,17 @@ import org.springframework.beans.factory.annotation.Autowired
 
 class JournalføringServiceTest(
 
-        @Autowired
-        private val behandlingService: BehandlingService,
+    @Autowired
+    private val behandlingService: BehandlingService,
 
-        @Autowired
-        private val fagsakService: FagsakService,
+    @Autowired
+    private val fagsakService: FagsakService,
 
-        @Autowired
-        private val journalføringService: JournalføringService,
+    @Autowired
+    private val journalføringService: JournalføringService,
 
-        @Autowired
-        private val journalføringRepository: JournalføringRepository
+    @Autowired
+    private val journalføringRepository: JournalføringRepository
 
 ) : AbstractSpringIntegrationTest() {
 
@@ -38,7 +38,7 @@ class JournalføringServiceTest(
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
 
         val (sak, behandlinger) = journalføringService
-                .lagreJournalpostOgKnyttFagsakTilJournalpost(listOf(behandling.id.toString()), "12345")
+            .lagreJournalpostOgKnyttFagsakTilJournalpost(listOf(behandling.id.toString()), "12345")
 
         val journalposter = journalføringRepository.findByBehandlingId(behandlingId = behandling.id)
 
@@ -46,7 +46,6 @@ class JournalføringServiceTest(
         assertEquals(DbJournalpostType.I, journalposter.first().type)
         assertEquals(fagsak.id.toString(), sak.fagsakId)
         assertEquals(1, behandlinger.size)
-
     }
 
     @Test
@@ -56,12 +55,10 @@ class JournalføringServiceTest(
         behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
 
         val (sak, behandlinger) = journalføringService
-                .lagreJournalpostOgKnyttFagsakTilJournalpost(listOf(), "12345")
+            .lagreJournalpostOgKnyttFagsakTilJournalpost(listOf(), "12345")
 
         assertNull(sak.fagsakId)
         assertEquals(Sakstype.GENERELL_SAK.type, sak.sakstype)
         assertEquals(0, behandlinger.size)
-
     }
-
 }

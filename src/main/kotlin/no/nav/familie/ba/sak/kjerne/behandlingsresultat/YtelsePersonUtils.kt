@@ -27,40 +27,43 @@ object YtelsePersonUtils {
      * @param [forrigeAndelerTilkjentYtelse] Eventuelle andeler fra forrige behandling
      * @return Liste med informasjon om hvordan hver enkelt person påvirkes i behandlingen (se YtelsePerson-doc)
      */
-    fun utledKrav(personerMedKrav: List<Person> = emptyList(),
-                  forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>): List<YtelsePerson> {
+    fun utledKrav(
+        personerMedKrav: List<Person> = emptyList(),
+        forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>
+    ): List<YtelsePerson> {
 
         val framstiltKravForNå =
-                personerMedKrav.map { person ->
-                    YtelsePerson(
-                            personIdent = person.personIdent.ident,
-                            ytelseType = when (person.type) {
-                                PersonType.BARN -> YtelseType.ORDINÆR_BARNETRYGD
-                                PersonType.SØKER -> YtelseType.UTVIDET_BARNETRYGD
-                                PersonType.ANNENPART -> throw Feil("Kan ikke utlede krav for annen part")
-                            },
-                            kravOpprinnelse =
-                            if (forrigeAndelerTilkjentYtelse.any { it.personIdent == person.personIdent.ident }) listOf(
-                                    KravOpprinnelse.TIDLIGERE,
-                                    KravOpprinnelse.INNEVÆRENDE)
-                            else listOf(KravOpprinnelse.INNEVÆRENDE),
+            personerMedKrav.map { person ->
+                YtelsePerson(
+                    personIdent = person.personIdent.ident,
+                    ytelseType = when (person.type) {
+                        PersonType.BARN -> YtelseType.ORDINÆR_BARNETRYGD
+                        PersonType.SØKER -> YtelseType.UTVIDET_BARNETRYGD
+                        PersonType.ANNENPART -> throw Feil("Kan ikke utlede krav for annen part")
+                    },
+                    kravOpprinnelse =
+                    if (forrigeAndelerTilkjentYtelse.any { it.personIdent == person.personIdent.ident }) listOf(
+                        KravOpprinnelse.TIDLIGERE,
+                        KravOpprinnelse.INNEVÆRENDE
                     )
-                }
+                    else listOf(KravOpprinnelse.INNEVÆRENDE),
+                )
+            }
 
         val kunFramstiltKravForTidligere: List<YtelsePerson> =
-                forrigeAndelerTilkjentYtelse
-                        .filter { andel ->
-                            framstiltKravForNå.none {
-                                andel.personIdent == it.personIdent
-                            }
-                        }
-                        .map {
-                            YtelsePerson(
-                                    personIdent = it.personIdent,
-                                    ytelseType = it.type,
-                                    kravOpprinnelse = listOf(KravOpprinnelse.TIDLIGERE),
-                            )
-                        }
+            forrigeAndelerTilkjentYtelse
+                .filter { andel ->
+                    framstiltKravForNå.none {
+                        andel.personIdent == it.personIdent
+                    }
+                }
+                .map {
+                    YtelsePerson(
+                        personIdent = it.personIdent,
+                        ytelseType = it.type,
+                        kravOpprinnelse = listOf(KravOpprinnelse.TIDLIGERE),
+                    )
+                }
 
         return (framstiltKravForNå + kunFramstiltKravForTidligere).distinct()
     }
@@ -69,13 +72,13 @@ object YtelsePersonUtils {
      * Kun støttet for førstegangsbehandlinger som er fødselshendelse og ordinær barnetrygd
      */
     fun utledKravForFødselshendelseFGB(barnIdenterFraFødselshendelse: List<String>): List<YtelsePerson> =
-            barnIdenterFraFødselshendelse.map {
-                YtelsePerson(
-                        personIdent = it,
-                        ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        kravOpprinnelse = listOf(KravOpprinnelse.INNEVÆRENDE),
-                )
-            }
+        barnIdenterFraFødselshendelse.map {
+            YtelsePerson(
+                personIdent = it,
+                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                kravOpprinnelse = listOf(KravOpprinnelse.INNEVÆRENDE),
+            )
+        }
 
     /**
      * Utleder hvilke konsekvenser _denne_ behandlingen har for personen og populerer "resultater" med utfallet.
@@ -86,29 +89,35 @@ object YtelsePersonUtils {
      * @param [uregistrerteBarn] Barn det er søkt for som ikke er folkeregistrert
      * @return Personer populert med utfall (resultater) etter denne behandlingen
      */
-    fun populerYtelsePersonerMedResultat(ytelsePersoner: List<YtelsePerson>,
-                                         forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>,
-                                         andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
-                                         uregistrerteBarn: List<BarnMedOpplysninger> = emptyList()): List<YtelsePerson> {
+    fun populerYtelsePersonerMedResultat(
+        ytelsePersoner: List<YtelsePerson>,
+        forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>,
+        andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
+        uregistrerteBarn: List<BarnMedOpplysninger> = emptyList()
+    ): List<YtelsePerson> {
         return ytelsePersoner.map { ytelsePerson: YtelsePerson ->
             val andeler = andelerTilkjentYtelse.filter { andel -> andel.personIdent == ytelsePerson.personIdent }
             val forrigeAndeler =
-                    forrigeAndelerTilkjentYtelse.filter { andel -> andel.personIdent == ytelsePerson.personIdent }
+                forrigeAndelerTilkjentYtelse.filter { andel -> andel.personIdent == ytelsePerson.personIdent }
 
-            val forrigeAndelerTidslinje = LocalDateTimeline(forrigeAndeler.map {
-                LocalDateSegment(
+            val forrigeAndelerTidslinje = LocalDateTimeline(
+                forrigeAndeler.map {
+                    LocalDateSegment(
                         it.stønadFom.førsteDagIInneværendeMåned(),
                         it.stønadTom.sisteDagIInneværendeMåned(),
                         it
-                )
-            })
-            val andelerTidslinje = LocalDateTimeline(andeler.map {
-                LocalDateSegment(
+                    )
+                }
+            )
+            val andelerTidslinje = LocalDateTimeline(
+                andeler.map {
+                    LocalDateSegment(
                         it.stønadFom.førsteDagIInneværendeMåned(),
                         it.stønadTom.sisteDagIInneværendeMåned(),
                         it
-                )
-            })
+                    )
+                }
+            )
 
             val segmenterLagtTil = andelerTidslinje.disjoint(forrigeAndelerTidslinje)
             val segmenterFjernet = forrigeAndelerTidslinje.disjoint(andelerTidslinje)
@@ -117,12 +126,15 @@ object YtelsePersonUtils {
              * En temporær løsning for å håndtere use caset med delt bosted, hvor beløpet men ikke innvilget periode er
              * endret.
              */
-            val beløpEndretIUforandretTidslinje = (segmenterLagtTil + segmenterFjernet).isEmpty()
-                                                  && andeler.sumOf { it.kalkulertUtbetalingsbeløp } != forrigeAndeler.sumOf { it.kalkulertUtbetalingsbeløp }
+            val beløpEndretIUforandretTidslinje = (segmenterLagtTil + segmenterFjernet).isEmpty() &&
+                andeler.sumOf { it.kalkulertUtbetalingsbeløp } != forrigeAndeler.sumOf { it.kalkulertUtbetalingsbeløp }
 
             val resultater = ytelsePerson.resultater.toMutableSet()
-            if (avslagPåNyPerson(personSomSjekkes = ytelsePerson,
-                                 segmenterLagtTil = segmenterLagtTil)) {
+            if (avslagPåNyPerson(
+                    personSomSjekkes = ytelsePerson,
+                    segmenterLagtTil = segmenterLagtTil
+                )
+            ) {
                 resultater.add(YtelsePersonResultat.AVSLÅTT)
             }
             if (erYtelsenOpphørt(andeler = andeler) && (segmenterFjernet + segmenterLagtTil).isNotEmpty()) {
@@ -135,62 +147,76 @@ object YtelsePersonUtils {
 
             val ytelseSlutt: YearMonth? = if (andeler.isNotEmpty())
                 andeler.maxByOrNull { it.stønadTom }?.stønadTom
-                ?: throw Feil("Finnes andel uten tom-dato") else TIDENES_MORGEN.toYearMonth()
+                    ?: throw Feil("Finnes andel uten tom-dato") else TIDENES_MORGEN.toYearMonth()
 
-            if (andeler.isNotEmpty()
-                && (beløpEndretIUforandretTidslinje
-                    || finnesEndringTilbakeITid(personSomSjekkes = ytelsePerson,
-                                                segmenterLagtTil = segmenterLagtTil,
-                                                segmenterFjernet = segmenterFjernet)
-                    || harGåttFraOpphørtTilLøpende(forrigeTilstandForPerson = forrigeAndeler,
-                                                   oppdatertTilstandForPerson = andeler))
-                && !enesteEndringErTidligereStønadslutt(segmenterLagtTil = segmenterLagtTil,
-                                                        segmenterFjernet = segmenterFjernet,
-                                                        sisteAndelPåPerson = andeler.maxByOrNull { it.stønadFom })) {
+            if (andeler.isNotEmpty() &&
+                (
+                    beløpEndretIUforandretTidslinje ||
+                        finnesEndringTilbakeITid(
+                                personSomSjekkes = ytelsePerson,
+                                segmenterLagtTil = segmenterLagtTil,
+                                segmenterFjernet = segmenterFjernet
+                            ) ||
+                        harGåttFraOpphørtTilLøpende(
+                                forrigeTilstandForPerson = forrigeAndeler,
+                                oppdatertTilstandForPerson = andeler
+                            )
+                    ) &&
+                !enesteEndringErTidligereStønadslutt(
+                        segmenterLagtTil = segmenterLagtTil,
+                        segmenterFjernet = segmenterFjernet,
+                        sisteAndelPåPerson = andeler.maxByOrNull { it.stønadFom }
+                    )
+            ) {
                 resultater.add(YtelsePersonResultat.ENDRET)
             }
 
             ytelsePerson.copy(
-                    resultater = resultater.toSet(),
-                    ytelseSlutt = ytelseSlutt
+                resultater = resultater.toSet(),
+                ytelseSlutt = ytelseSlutt
             )
         } + uregistrerteBarn.map {
             YtelsePerson(
-                    personIdent = "",
-                    ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                    kravOpprinnelse = listOf(KravOpprinnelse.INNEVÆRENDE),
-                    resultater = setOf(YtelsePersonResultat.AVSLÅTT),
-                    ytelseSlutt = YearMonth.now()
+                personIdent = "",
+                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                kravOpprinnelse = listOf(KravOpprinnelse.INNEVÆRENDE),
+                resultater = setOf(YtelsePersonResultat.AVSLÅTT),
+                ytelseSlutt = YearMonth.now()
             )
         }
     }
 
     private fun avslagPåNyPerson(personSomSjekkes: YtelsePerson, segmenterLagtTil: LocalDateTimeline<AndelTilkjentYtelse>) =
-            personSomSjekkes.kravOpprinnelse == listOf(KravOpprinnelse.INNEVÆRENDE) && segmenterLagtTil.isEmpty
+        personSomSjekkes.kravOpprinnelse == listOf(KravOpprinnelse.INNEVÆRENDE) && segmenterLagtTil.isEmpty
 
     private fun finnesInnvilget(personSomSjekkes: YtelsePerson, segmenterLagtTil: LocalDateTimeline<AndelTilkjentYtelse>) =
-            personSomSjekkes.erFramstiltKravForIInneværendeBehandling() && !segmenterLagtTil.isEmpty
+        personSomSjekkes.erFramstiltKravForIInneværendeBehandling() && !segmenterLagtTil.isEmpty
 
     private fun erYtelsenOpphørt(andeler: List<AndelTilkjentYtelse>) = andeler.none { it.erLøpende() }
 
-    private fun finnesEndringTilbakeITid(personSomSjekkes: YtelsePerson,
-                                         segmenterLagtTil: LocalDateTimeline<AndelTilkjentYtelse>,
-                                         segmenterFjernet: LocalDateTimeline<AndelTilkjentYtelse>): Boolean {
+    private fun finnesEndringTilbakeITid(
+        personSomSjekkes: YtelsePerson,
+        segmenterLagtTil: LocalDateTimeline<AndelTilkjentYtelse>,
+        segmenterFjernet: LocalDateTimeline<AndelTilkjentYtelse>
+    ): Boolean {
         fun finnesEndretSegmentTilbakeITid(segmenter: LocalDateTimeline<AndelTilkjentYtelse>) =
-                !segmenter.isEmpty && segmenter.any { !it.erLøpende() }
+            !segmenter.isEmpty && segmenter.any { !it.erLøpende() }
 
         return personSomSjekkes.erFramstiltKravForITidligereBehandling() &&
-               (finnesEndretSegmentTilbakeITid(segmenterLagtTil) || finnesEndretSegmentTilbakeITid(segmenterFjernet))
-
+            (finnesEndretSegmentTilbakeITid(segmenterLagtTil) || finnesEndretSegmentTilbakeITid(segmenterFjernet))
     }
 
-    private fun harGåttFraOpphørtTilLøpende(forrigeTilstandForPerson: List<AndelTilkjentYtelse>,
-                                            oppdatertTilstandForPerson: List<AndelTilkjentYtelse>) =
-            forrigeTilstandForPerson.isNotEmpty() && forrigeTilstandForPerson.none { it.erLøpende() } && oppdatertTilstandForPerson.any { it.erLøpende() }
+    private fun harGåttFraOpphørtTilLøpende(
+        forrigeTilstandForPerson: List<AndelTilkjentYtelse>,
+        oppdatertTilstandForPerson: List<AndelTilkjentYtelse>
+    ) =
+        forrigeTilstandForPerson.isNotEmpty() && forrigeTilstandForPerson.none { it.erLøpende() } && oppdatertTilstandForPerson.any { it.erLøpende() }
 
-    private fun enesteEndringErTidligereStønadslutt(segmenterLagtTil: LocalDateTimeline<AndelTilkjentYtelse>,
-                                                    segmenterFjernet: LocalDateTimeline<AndelTilkjentYtelse>,
-                                                    sisteAndelPåPerson: AndelTilkjentYtelse?): Boolean {
+    private fun enesteEndringErTidligereStønadslutt(
+        segmenterLagtTil: LocalDateTimeline<AndelTilkjentYtelse>,
+        segmenterFjernet: LocalDateTimeline<AndelTilkjentYtelse>,
+        sisteAndelPåPerson: AndelTilkjentYtelse?
+    ): Boolean {
         return if (sisteAndelPåPerson != null && segmenterLagtTil.isEmpty && !segmenterFjernet.isEmpty) {
             val stønadSlutt = sisteAndelPåPerson.stønadTom
             val opphører = stønadSlutt.isBefore(YearMonth.now().plusMonths(1))

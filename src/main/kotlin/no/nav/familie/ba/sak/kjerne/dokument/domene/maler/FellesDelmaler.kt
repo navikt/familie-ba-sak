@@ -3,49 +3,49 @@ package no.nav.familie.ba.sak.kjerne.dokument.domene.maler
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 
 data class SignaturDelmal(
-        val enhet: Flettefelt,
-        val saksbehandler: Flettefelt = flettefelt(SikkerhetContext.hentSaksbehandlerNavn()),
+    val enhet: Flettefelt,
+    val saksbehandler: Flettefelt = flettefelt(SikkerhetContext.hentSaksbehandlerNavn()),
 ) {
 
     constructor(enhet: String) : this(flettefelt(enhet))
 }
 
 data class SignaturVedtak(
-        val enhet: Flettefelt,
-        val saksbehandler: Flettefelt,
-        val beslutter: Flettefelt,
+    val enhet: Flettefelt,
+    val saksbehandler: Flettefelt,
+    val beslutter: Flettefelt,
 ) {
 
     constructor(enhet: String, saksbehandler: String, beslutter: String) : this(
-            flettefelt(enhet),
-            flettefelt(saksbehandler),
-            flettefelt(beslutter)
+        flettefelt(enhet),
+        flettefelt(saksbehandler),
+        flettefelt(beslutter)
     )
 }
 
 data class Etterbetaling(
-        val etterbetalingsbelop: Flettefelt,
+    val etterbetalingsbelop: Flettefelt,
 ) {
 
     constructor(etterbetalingsbeløp: String) : this(
-            flettefelt(etterbetalingsbeløp),
+        flettefelt(etterbetalingsbeløp),
     )
 }
 
 data class Hjemmeltekst(
-        val hjemler: Flettefelt,
+    val hjemler: Flettefelt,
 ) {
 
     constructor(hjemler: String) : this(
-            flettefelt(hjemler),
+        flettefelt(hjemler),
     )
 }
 
 data class MedVennilgHilsen(
-        val enhet: Flettefelt,
+    val enhet: Flettefelt,
 ) {
 
     constructor(hjemler: String) : this(
-            flettefelt(hjemler),
+        flettefelt(hjemler),
     )
 }

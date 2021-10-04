@@ -25,5 +25,8 @@ hs_err_pid*
 # Dev files
 *.iml
 target/
-.idea
+/.idea/*
+!.idea/saveactions_settings.xml
+!.idea/codeStyles/*
+!.idea/inspectionProfiles/*
 .DS_Store

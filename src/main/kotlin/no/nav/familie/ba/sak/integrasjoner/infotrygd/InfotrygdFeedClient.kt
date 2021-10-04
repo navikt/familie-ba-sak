@@ -19,10 +19,12 @@ import java.io.IOException
 import java.net.URI
 
 @Component
-class InfotrygdFeedClient(@Value("\${FAMILIE_BA_INFOTRYGD_FEED_API_URL}") private val clientUri: URI,
-                          @Qualifier("jwtBearer") restOperations: RestOperations,
-                          private val environment: Environment)
-    : AbstractRestClient(restOperations, "infotrygd_feed") {
+class InfotrygdFeedClient(
+    @Value("\${FAMILIE_BA_INFOTRYGD_FEED_API_URL}") private val clientUri: URI,
+    @Qualifier("jwtBearer") restOperations: RestOperations,
+    private val environment: Environment
+) :
+    AbstractRestClient(restOperations, "infotrygd_feed") {
 
     fun sendFødselhendelsesFeedTilInfotrygd(infotrygdFødselhendelsesFeedDto: InfotrygdFødselhendelsesFeedDto) {
         return try {
@@ -50,11 +52,10 @@ class InfotrygdFeedClient(@Value("\${FAMILIE_BA_INFOTRYGD_FEED_API_URL}") privat
         throw e
     }
 
-
     @Retryable(
-            value = [IOException::class],
-            maxAttempts = 3,
-            backoff = Backoff(delayExpression = RETRY_BACKOFF_5000MS),
+        value = [IOException::class],
+        maxAttempts = 3,
+        backoff = Backoff(delayExpression = RETRY_BACKOFF_5000MS),
     )
     private fun sendFeedTilInfotrygd(endpoint: URI, feed: Any) {
         if (environment.activeProfiles.contains("e2e")) {

@@ -19,31 +19,31 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
 class RestFagsakTest(
-        @Autowired
-        private val stegService: StegService,
+    @Autowired
+    private val stegService: StegService,
 
-        @Autowired
-        private val vedtakService: VedtakService,
+    @Autowired
+    private val vedtakService: VedtakService,
 
-        @Autowired
-        private val persongrunnlagService: PersongrunnlagService,
+    @Autowired
+    private val persongrunnlagService: PersongrunnlagService,
 
-        @Autowired
-        private val fagsakService: FagsakService,
+    @Autowired
+    private val fagsakService: FagsakService,
 
-        @Autowired
-        private val vilkårsvurderingService: VilkårsvurderingService,
+    @Autowired
+    private val vilkårsvurderingService: VilkårsvurderingService,
 
-        @Autowired
-        private val databaseCleanupService: DatabaseCleanupService,
+    @Autowired
+    private val databaseCleanupService: DatabaseCleanupService,
 
-        @Autowired
-        private val tilbakekrevingService: TilbakekrevingService,
+    @Autowired
+    private val tilbakekrevingService: TilbakekrevingService,
 
-        @Autowired
-        private val vedtaksperiodeService: VedtaksperiodeService,
+    @Autowired
+    private val vedtaksperiodeService: VedtaksperiodeService,
 
-        ) : AbstractSpringIntegrationTest() {
+) : AbstractSpringIntegrationTest() {
 
     @BeforeAll
     fun init() {
@@ -56,24 +56,24 @@ class RestFagsakTest(
         val barnFnr = ClientMocks.barnFnr[0]
 
         val førstegangsbehandling = kjørStegprosessForFGB(
-                tilSteg = StegType.BEHANDLING_AVSLUTTET,
-                søkerFnr = søkerFnr,
-                barnasIdenter = listOf(barnFnr),
-                fagsakService = fagsakService,
-                vedtakService = vedtakService,
-                persongrunnlagService = persongrunnlagService,
-                vilkårsvurderingService = vilkårsvurderingService,
-                stegService = stegService,
-                vedtaksperiodeService,
+            tilSteg = StegType.BEHANDLING_AVSLUTTET,
+            søkerFnr = søkerFnr,
+            barnasIdenter = listOf(barnFnr),
+            fagsakService = fagsakService,
+            vedtakService = vedtakService,
+            persongrunnlagService = persongrunnlagService,
+            vilkårsvurderingService = vilkårsvurderingService,
+            stegService = stegService,
+            vedtaksperiodeService,
         )
 
         kjørStegprosessForRevurderingÅrligKontroll(
-                tilSteg = StegType.BEHANDLINGSRESULTAT,
-                søkerFnr = søkerFnr,
-                barnasIdenter = listOf(barnFnr),
-                vedtakService = vedtakService,
-                stegService = stegService,
-                tilbakekrevingService = tilbakekrevingService
+            tilSteg = StegType.BEHANDLINGSRESULTAT,
+            søkerFnr = søkerFnr,
+            barnasIdenter = listOf(barnFnr),
+            vedtakService = vedtakService,
+            stegService = stegService,
+            tilbakekrevingService = tilbakekrevingService
         )
 
         val restfagsak = fagsakService.hentRestFagsak(fagsakId = førstegangsbehandling.fagsak.id)

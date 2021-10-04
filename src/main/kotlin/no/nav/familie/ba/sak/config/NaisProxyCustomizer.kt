@@ -15,16 +15,19 @@ class NaisProxyCustomizer : RestTemplateCustomizer {
     override fun customize(restTemplate: RestTemplate) {
         val proxy = HttpHost("webproxy-nais.nav.no", 8088)
         val client: HttpClient = HttpClientBuilder.create()
-                .setRoutePlanner(object : DefaultProxyRoutePlanner(proxy) {
-                    @Throws(HttpException::class)
-                    public override fun determineProxy(target: HttpHost,
-                                                       request: HttpRequest, context: HttpContext): HttpHost? {
-                        return if (target.hostName.contains("microsoft")) {
-                            super.determineProxy(target, request, context)
-                        } else null
-                    }
-                })
-                .build()
+            .setRoutePlanner(object : DefaultProxyRoutePlanner(proxy) {
+                @Throws(HttpException::class)
+                public override fun determineProxy(
+                    target: HttpHost,
+                    request: HttpRequest,
+                    context: HttpContext
+                ): HttpHost? {
+                    return if (target.hostName.contains("microsoft")) {
+                        super.determineProxy(target, request, context)
+                    } else null
+                }
+            })
+            .build()
         restTemplate.requestFactory = HttpComponentsClientHttpRequestFactory(client)
     }
 }

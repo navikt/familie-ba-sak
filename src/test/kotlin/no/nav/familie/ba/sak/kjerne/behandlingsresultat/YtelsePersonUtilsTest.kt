@@ -18,8 +18,8 @@ class YtelsePersonUtilsTest {
     @Test
     fun `Skal kun finne personer framstilt krav for`() {
         val ytelsePersoner = YtelsePersonUtils.utledKrav(
-                personerMedKrav = listOf(barn1),
-                forrigeAndelerTilkjentYtelse = emptyList()
+            personerMedKrav = listOf(barn1),
+            forrigeAndelerTilkjentYtelse = emptyList()
         )
 
         assertEquals(1, ytelsePersoner.size)
@@ -30,15 +30,17 @@ class YtelsePersonUtilsTest {
 
     @Test
     fun `Skal kun finne endringsytelsePersoner`() {
-        val forrigeAndelBarn1 = lagAndelTilkjentYtelse(inneværendeMåned().minusYears(3).toString(),
-                                                       "2020-01",
-                                                       YtelseType.ORDINÆR_BARNETRYGD,
-                                                       1054,
-                                                       person = barn1)
+        val forrigeAndelBarn1 = lagAndelTilkjentYtelse(
+            inneværendeMåned().minusYears(3).toString(),
+            "2020-01",
+            YtelseType.ORDINÆR_BARNETRYGD,
+            1054,
+            person = barn1
+        )
 
         val ytelsePersoner = YtelsePersonUtils.utledKrav(
-                personerMedKrav = emptyList(),
-                forrigeAndelerTilkjentYtelse = listOf(forrigeAndelBarn1)
+            personerMedKrav = emptyList(),
+            forrigeAndelerTilkjentYtelse = listOf(forrigeAndelBarn1)
         )
 
         assertEquals(1, ytelsePersoner.size)
@@ -49,21 +51,25 @@ class YtelsePersonUtilsTest {
 
     @Test
     fun `Skal finne 2 endringsytelsePersoner på samme barn`() {
-        val forrigeAndelBarn1Ordinær = lagAndelTilkjentYtelse(inneværendeMåned().minusYears(3).toString(),
-                                                              "2020-01",
-                                                              YtelseType.ORDINÆR_BARNETRYGD,
-                                                              1054,
-                                                              person = barn1)
+        val forrigeAndelBarn1Ordinær = lagAndelTilkjentYtelse(
+            inneværendeMåned().minusYears(3).toString(),
+            "2020-01",
+            YtelseType.ORDINÆR_BARNETRYGD,
+            1054,
+            person = barn1
+        )
 
-        val forrigeAndelBarn1Utvidet = lagAndelTilkjentYtelse(inneværendeMåned().minusYears(3).toString(),
-                                                              "2020-01",
-                                                              YtelseType.UTVIDET_BARNETRYGD,
-                                                              1054,
-                                                              person = barn1)
+        val forrigeAndelBarn1Utvidet = lagAndelTilkjentYtelse(
+            inneværendeMåned().minusYears(3).toString(),
+            "2020-01",
+            YtelseType.UTVIDET_BARNETRYGD,
+            1054,
+            person = barn1
+        )
 
         val ytelsePersoner = YtelsePersonUtils.utledKrav(
-                personerMedKrav = emptyList(),
-                forrigeAndelerTilkjentYtelse = listOf(forrigeAndelBarn1Ordinær, forrigeAndelBarn1Utvidet)
+            personerMedKrav = emptyList(),
+            forrigeAndelerTilkjentYtelse = listOf(forrigeAndelBarn1Ordinær, forrigeAndelBarn1Utvidet)
         )
 
         assertEquals(2, ytelsePersoner.size)
@@ -74,21 +80,25 @@ class YtelsePersonUtilsTest {
     @Test
     fun `Skal finne 1 av 2 endringsytelsePersoner og 1 søknadsytelsePersoner`() {
 
-        val forrigeAndelBarn1Ordinær = lagAndelTilkjentYtelse(inneværendeMåned().minusYears(3).toString(),
-                                                              "2020-01",
-                                                              YtelseType.ORDINÆR_BARNETRYGD,
-                                                              1054,
-                                                              person = barn1)
+        val forrigeAndelBarn1Ordinær = lagAndelTilkjentYtelse(
+            inneværendeMåned().minusYears(3).toString(),
+            "2020-01",
+            YtelseType.ORDINÆR_BARNETRYGD,
+            1054,
+            person = barn1
+        )
 
-        val forrigeAndelBarn1Utvidet = lagAndelTilkjentYtelse(inneværendeMåned().minusYears(3).toString(),
-                                                              "2020-01",
-                                                              YtelseType.UTVIDET_BARNETRYGD,
-                                                              1054,
-                                                              person = søker)
+        val forrigeAndelBarn1Utvidet = lagAndelTilkjentYtelse(
+            inneværendeMåned().minusYears(3).toString(),
+            "2020-01",
+            YtelseType.UTVIDET_BARNETRYGD,
+            1054,
+            person = søker
+        )
 
         val ytelsePersoner = YtelsePersonUtils.utledKrav(
-                personerMedKrav = listOf(barn1),
-                forrigeAndelerTilkjentYtelse = listOf(forrigeAndelBarn1Ordinær, forrigeAndelBarn1Utvidet)
+            personerMedKrav = listOf(barn1),
+            forrigeAndelerTilkjentYtelse = listOf(forrigeAndelBarn1Ordinær, forrigeAndelBarn1Utvidet)
         )
 
         assertEquals(2, ytelsePersoner.size)
@@ -98,15 +108,17 @@ class YtelsePersonUtilsTest {
 
     @Test
     fun `Skal utlede krav for person som ikke finnes i søknad, men har andeler fra tidligere`() {
-        val forrigeAndelBarn1 = lagAndelTilkjentYtelse(inneværendeMåned().minusYears(3).toString(),
-                                                       "2020-01",
-                                                       YtelseType.ORDINÆR_BARNETRYGD,
-                                                       1054,
-                                                       person = barn1)
+        val forrigeAndelBarn1 = lagAndelTilkjentYtelse(
+            inneværendeMåned().minusYears(3).toString(),
+            "2020-01",
+            YtelseType.ORDINÆR_BARNETRYGD,
+            1054,
+            person = barn1
+        )
 
         val ytelsePersoner = YtelsePersonUtils.utledKrav(
-                personerMedKrav = listOf(barn2),
-                forrigeAndelerTilkjentYtelse = listOf(forrigeAndelBarn1),
+            personerMedKrav = listOf(barn2),
+            forrigeAndelerTilkjentYtelse = listOf(forrigeAndelBarn1),
         )
 
         assertEquals(2, ytelsePersoner.size)

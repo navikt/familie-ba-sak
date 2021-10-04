@@ -31,11 +31,12 @@ import no.nav.familie.prosessering.domene.Task
 import org.junit.jupiter.api.Assertions.assertEquals
 import java.time.LocalDate
 
-
-fun generellAssertFagsak(restFagsak: Ressurs<RestFagsak>,
-                         fagsakStatus: FagsakStatus,
-                         behandlingStegType: StegType? = null,
-                         behandlingResultat: BehandlingResultat? = null) {
+fun generellAssertFagsak(
+    restFagsak: Ressurs<RestFagsak>,
+    fagsakStatus: FagsakStatus,
+    behandlingStegType: StegType? = null,
+    behandlingResultat: BehandlingResultat? = null
+) {
     if (restFagsak.status != Ressurs.Status.SUKSESS) throw IllegalStateException("generellAssertFagsak feilet. status: ${restFagsak.status.name},  melding: ${restFagsak.melding}")
     assertEquals(fagsakStatus, restFagsak.data?.status)
     if (behandlingStegType != null) {
@@ -53,9 +54,9 @@ fun assertUtbetalingsperiode(utbetalingsperiode: Utbetalingsperiode, antallBarn:
 
 fun hentNåværendeEllerNesteMånedsUtbetaling(behandling: RestUtvidetBehandling): Int {
     val utbetalingsperioder =
-            behandling.utbetalingsperioder.sortedBy { it.periodeFom }
+        behandling.utbetalingsperioder.sortedBy { it.periodeFom }
     val nåværendeUtbetalingsperiode = utbetalingsperioder
-            .firstOrNull { it.periodeFom.isSameOrBefore(LocalDate.now()) && it.periodeTom.isAfter(LocalDate.now()) }
+        .firstOrNull { it.periodeFom.isSameOrBefore(LocalDate.now()) && it.periodeTom.isAfter(LocalDate.now()) }
 
     val nesteUtbetalingsperiode = utbetalingsperioder.firstOrNull { it.periodeFom.isAfter(LocalDate.now()) }
 
@@ -71,19 +72,23 @@ fun hentAktivtVedtak(restFagsak: RestFagsak): RestVedtak? {
 }
 
 fun behandleFødselshendelse(
-        nyBehandlingHendelse: NyBehandlingHendelse,
-        fagsakStatusEtterVurdering: FagsakStatus = FagsakStatus.OPPRETTET,
-        behandleFødselshendelseTask: BehandleFødselshendelseTask,
-        fagsakService: FagsakService,
-        behandlingService: BehandlingService,
-        vedtakService: VedtakService,
-        stegService: StegService,
+    nyBehandlingHendelse: NyBehandlingHendelse,
+    fagsakStatusEtterVurdering: FagsakStatus = FagsakStatus.OPPRETTET,
+    behandleFødselshendelseTask: BehandleFødselshendelseTask,
+    fagsakService: FagsakService,
+    behandlingService: BehandlingService,
+    vedtakService: VedtakService,
+    stegService: StegService,
 ): Behandling? {
     val søkerFnr = nyBehandlingHendelse.morsIdent
 
-    behandleFødselshendelseTask.doTask(BehandleFødselshendelseTask.opprettTask(BehandleFødselshendelseTaskDTO(
-            nyBehandling = nyBehandlingHendelse
-    )))
+    behandleFødselshendelseTask.doTask(
+        BehandleFødselshendelseTask.opprettTask(
+            BehandleFødselshendelseTaskDTO(
+                nyBehandling = nyBehandlingHendelse
+            )
+        )
+    )
 
     val restFagsakEtterVurdering = fagsakService.hentRestFagsakForPerson(personIdent = PersonIdent(søkerFnr))
     if (restFagsakEtterVurdering.status != Ressurs.Status.SUKSESS) {
@@ -95,70 +100,90 @@ fun behandleFødselshendelse(
         return stegService.håndterFerdigstillBehandling(behandlingEtterVurdering)
     }
 
-    generellAssertFagsak(restFagsak = restFagsakEtterVurdering,
-                         fagsakStatus = fagsakStatusEtterVurdering,
-                         behandlingStegType = StegType.IVERKSETT_MOT_OPPDRAG)
+    generellAssertFagsak(
+        restFagsak = restFagsakEtterVurdering,
+        fagsakStatus = fagsakStatusEtterVurdering,
+        behandlingStegType = StegType.IVERKSETT_MOT_OPPDRAG
+    )
 
     return håndterIverksettingAvBehandling(
-            behandlingEtterVurdering = behandlingEtterVurdering,
-            søkerFnr = søkerFnr,
-            fagsakService = fagsakService,
-            vedtakService = vedtakService,
-            stegService = stegService
+        behandlingEtterVurdering = behandlingEtterVurdering,
+        søkerFnr = søkerFnr,
+        fagsakService = fagsakService,
+        vedtakService = vedtakService,
+        stegService = stegService
     )
 }
 
 fun håndterIverksettingAvBehandling(
-        behandlingEtterVurdering: Behandling,
-        søkerFnr: String,
-        fagsakStatusEtterIverksetting: FagsakStatus = FagsakStatus.LØPENDE,
-        fagsakService: FagsakService,
-        vedtakService: VedtakService,
-        stegService: StegService): Behandling {
+    behandlingEtterVurdering: Behandling,
+    søkerFnr: String,
+    fagsakStatusEtterIverksetting: FagsakStatus = FagsakStatus.LØPENDE,
+    fagsakService: FagsakService,
+    vedtakService: VedtakService,
+    stegService: StegService
+): Behandling {
 
     val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = behandlingEtterVurdering.id)
     val behandlingEtterIverksetteVedtak =
-            stegService.håndterIverksettMotØkonomi(behandlingEtterVurdering, IverksettingTaskDTO(
-                    behandlingsId = behandlingEtterVurdering.id,
-                    vedtaksId = vedtak.id,
-                    saksbehandlerId = "System",
-                    personIdent = søkerFnr
-            ))
+        stegService.håndterIverksettMotØkonomi(
+            behandlingEtterVurdering,
+            IverksettingTaskDTO(
+                behandlingsId = behandlingEtterVurdering.id,
+                vedtaksId = vedtak.id,
+                saksbehandlerId = "System",
+                personIdent = søkerFnr
+            )
+        )
 
     val behandlingEtterStatusFraOppdrag =
-            stegService.håndterStatusFraØkonomi(behandlingEtterIverksetteVedtak, StatusFraOppdragMedTask(
-                    statusFraOppdragDTO = StatusFraOppdragDTO(fagsystem = FAGSYSTEM,
-                                                              personIdent = søkerFnr,
-                                                              behandlingsId = behandlingEtterIverksetteVedtak.id,
-                                                              vedtaksId = vedtak.id),
-                    task = Task(type = StatusFraOppdragTask.TASK_STEP_TYPE, payload = "")
-            ))
+        stegService.håndterStatusFraØkonomi(
+            behandlingEtterIverksetteVedtak,
+            StatusFraOppdragMedTask(
+                statusFraOppdragDTO = StatusFraOppdragDTO(
+                    fagsystem = FAGSYSTEM,
+                    personIdent = søkerFnr,
+                    behandlingsId = behandlingEtterIverksetteVedtak.id,
+                    vedtaksId = vedtak.id
+                ),
+                task = Task(type = StatusFraOppdragTask.TASK_STEP_TYPE, payload = "")
+            )
+        )
 
     val behandlingSomSkalFerdigstilles = if (behandlingEtterIverksetteVedtak.steg == StegType.JOURNALFØR_VEDTAKSBREV) {
         val behandlingEtterJournalførtVedtak =
-                stegService.håndterJournalførVedtaksbrev(behandlingEtterStatusFraOppdrag, JournalførVedtaksbrevDTO(
-                        vedtakId = vedtak.id,
-                        task = Task(type = JournalførVedtaksbrevTask.TASK_STEP_TYPE, payload = "")
-                ))
+            stegService.håndterJournalførVedtaksbrev(
+                behandlingEtterStatusFraOppdrag,
+                JournalførVedtaksbrevDTO(
+                    vedtakId = vedtak.id,
+                    task = Task(type = JournalførVedtaksbrevTask.TASK_STEP_TYPE, payload = "")
+                )
+            )
 
         val behandlingEtterDistribuertVedtak =
-                stegService.håndterDistribuerVedtaksbrev(behandlingEtterJournalførtVedtak,
-                                                         DistribuerDokumentDTO(behandlingId = behandlingEtterJournalførtVedtak.id,
-                                                                               journalpostId = "1234",
-                                                                               personIdent = søkerFnr,
-                                                                               brevmal = hentBrevtype(
-                                                                                       behandlingEtterJournalførtVedtak),
-                                                                               erManueltSendt = false))
+            stegService.håndterDistribuerVedtaksbrev(
+                behandlingEtterJournalførtVedtak,
+                DistribuerDokumentDTO(
+                    behandlingId = behandlingEtterJournalførtVedtak.id,
+                    journalpostId = "1234",
+                    personIdent = søkerFnr,
+                    brevmal = hentBrevtype(
+                        behandlingEtterJournalførtVedtak
+                    ),
+                    erManueltSendt = false
+                )
+            )
         behandlingEtterDistribuertVedtak
     } else behandlingEtterStatusFraOppdrag
-
 
     val ferdigstiltBehandling = stegService.håndterFerdigstillBehandling(behandlingSomSkalFerdigstilles)
 
     val restFagsakEtterAvsluttetBehandling = fagsakService.hentRestFagsakForPerson(personIdent = PersonIdent(søkerFnr))
-    generellAssertFagsak(restFagsak = restFagsakEtterAvsluttetBehandling,
-                         fagsakStatus = fagsakStatusEtterIverksetting,
-                         behandlingStegType = StegType.BEHANDLING_AVSLUTTET)
+    generellAssertFagsak(
+        restFagsak = restFagsakEtterAvsluttetBehandling,
+        fagsakStatus = fagsakStatusEtterIverksetting,
+        behandlingStegType = StegType.BEHANDLING_AVSLUTTET
+    )
 
     return ferdigstiltBehandling
 }

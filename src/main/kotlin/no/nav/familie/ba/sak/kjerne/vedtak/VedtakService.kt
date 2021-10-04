@@ -35,7 +35,7 @@ class VedtakService(
         loggService.opprettBeslutningOmVedtakLogg(behandling, Beslutning.GODKJENT)
 
         val vedtak = hentAktivForBehandling(behandlingId = behandling.id)
-                     ?: error("Fant ikke aktivt vedtak på behandling ${behandling.id}")
+            ?: error("Fant ikke aktivt vedtak på behandling ${behandling.id}")
         return oppdaterVedtakMedStønadsbrev(vedtak = vedtak)
     }
 
@@ -49,7 +49,7 @@ class VedtakService(
 
     fun hentAktivForBehandlingThrows(behandlingId: Long): Vedtak {
         return vedtakRepository.findByBehandlingAndAktiv(behandlingId)
-               ?: throw Feil("Finner ikke aktivt vedtak på behandling $behandlingId")
+            ?: throw Feil("Finner ikke aktivt vedtak på behandling $behandlingId")
     }
 
     fun oppdater(vedtak: Vedtak): Vedtak {
@@ -63,8 +63,8 @@ class VedtakService(
 
     fun oppdaterVedtakMedStønadsbrev(vedtak: Vedtak): Vedtak {
         val skalSendesBrev =
-                !vedtak.behandling.erTekniskOpphør()
-                && vedtak.behandling.opprettetÅrsak != BehandlingÅrsak.SATSENDRING
+            !vedtak.behandling.erTekniskOpphør() &&
+                vedtak.behandling.opprettetÅrsak != BehandlingÅrsak.SATSENDRING
         return if (skalSendesBrev) {
             val brev = dokumentService.genererBrevForVedtak(vedtak)
             vedtakRepository.save(vedtak.also { it.stønadBrevPdF = brev })
@@ -88,8 +88,10 @@ class VedtakService(
      */
     @Transactional
     fun settStegSlettTilbakekreving(behandlingId: Long) {
-        behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(behandlingId = behandlingId,
-                                                                              steg = StegType.VILKÅRSVURDERING)
+        behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(
+            behandlingId = behandlingId,
+            steg = StegType.VILKÅRSVURDERING
+        )
         tilbakekrevingService.slettTilbakekrevingPåBehandling(behandlingId)
     }
 
@@ -98,13 +100,16 @@ class VedtakService(
         private val logger = LoggerFactory.getLogger(VedtakService::class.java)
 
         data class BrevtekstParametre(
-                val gjelderSøker: Boolean = false,
-                val barnasFødselsdatoer: List<LocalDate> = emptyList(),
-                val månedOgÅrBegrunnelsenGjelderFor: String = "",
-                val målform: Målform)
+            val gjelderSøker: Boolean = false,
+            val barnasFødselsdatoer: List<LocalDate> = emptyList(),
+            val månedOgÅrBegrunnelsenGjelderFor: String = "",
+            val målform: Målform
+        )
 
         val BrevParameterComparator =
-                compareBy<Map.Entry<VedtakBegrunnelseSpesifikasjon, BrevtekstParametre>>({ !it.value.gjelderSøker },
-                                                                                         { it.value.barnasFødselsdatoer.isNotEmpty() })
+            compareBy<Map.Entry<VedtakBegrunnelseSpesifikasjon, BrevtekstParametre>>(
+                { !it.value.gjelderSøker },
+                { it.value.barnasFødselsdatoer.isNotEmpty() }
+            )
     }
 }

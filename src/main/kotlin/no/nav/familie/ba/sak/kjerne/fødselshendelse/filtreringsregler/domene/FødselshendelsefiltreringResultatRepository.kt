@@ -1,6 +1,5 @@
-package no.nav.familie.ba.sak.kjerne.automatiskvurdering.filtreringsregler.domene
+package no.nav.familie.ba.sak.kjerne.fødselshendelse.filtreringsregler.domene
 
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.filtreringsregler.domene.FødselshendelsefiltreringResultat
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 

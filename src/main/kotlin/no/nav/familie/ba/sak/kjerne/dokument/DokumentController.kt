@@ -29,20 +29,22 @@ import org.springframework.web.bind.annotation.RestController
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class DokumentController(
-        private val dokumentService: DokumentService,
-        private val vedtakService: VedtakService,
-        private val behandlingService: BehandlingService,
-        private val fagsakService: FagsakService,
-        private val tilgangService: TilgangService,
-        private val persongrunnlagService: PersongrunnlagService,
-        private val arbeidsfordelingService: ArbeidsfordelingService
+    private val dokumentService: DokumentService,
+    private val vedtakService: VedtakService,
+    private val behandlingService: BehandlingService,
+    private val fagsakService: FagsakService,
+    private val tilgangService: TilgangService,
+    private val persongrunnlagService: PersongrunnlagService,
+    private val arbeidsfordelingService: ArbeidsfordelingService
 ) {
 
     @PostMapping(path = ["vedtaksbrev/{vedtakId}"])
     fun genererVedtaksbrev(@PathVariable @VedtaktilgangConstraint vedtakId: Long): Ressurs<ByteArray> {
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} generer vedtaksbrev")
-        tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-                                                      handling = "generere vedtaksbrev")
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
+            handling = "generere vedtaksbrev"
+        )
 
         val vedtak = vedtakService.hent(vedtakId)
 
@@ -56,8 +58,10 @@ class DokumentController(
     @GetMapping(path = ["vedtaksbrev/{vedtakId}"])
     fun hentVedtaksbrev(@PathVariable @VedtaktilgangConstraint vedtakId: Long): Ressurs<ByteArray> {
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} henter vedtaksbrev")
-        tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.VEILEDER,
-                                                      handling = "hente vedtaksbrev")
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.VEILEDER,
+            handling = "hente vedtaksbrev"
+        )
 
         val vedtak = vedtakService.hent(vedtakId)
 
@@ -66,66 +70,84 @@ class DokumentController(
 
     @PostMapping(path = ["forhaandsvis-brev/{behandlingId}"])
     fun hentForhåndsvisning(
-            @PathVariable behandlingId: Long,
-            @RequestBody manueltBrevRequest: ManueltBrevRequest)
-            : Ressurs<ByteArray> {
+        @PathVariable behandlingId: Long,
+        @RequestBody manueltBrevRequest: ManueltBrevRequest
+    ): Ressurs<ByteArray> {
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} henter forhåndsvisning av brev for mal: ${manueltBrevRequest.brevmal}")
-        tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-                                                      handling = "hente forhåndsvisning brev")
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
+            handling = "hente forhåndsvisning brev"
+        )
 
         val behandling = behandlingService.hent(behandlingId)
 
-        return dokumentService.genererManueltBrev(manueltBrevRequest = manueltBrevRequest.byggMottakerdata(behandling,
-                                                                                                           persongrunnlagService,
-                                                                                                           arbeidsfordelingService),
-                                                  erForhåndsvisning = true).let { Ressurs.success(it) }
+        return dokumentService.genererManueltBrev(
+            manueltBrevRequest = manueltBrevRequest.byggMottakerdata(
+                behandling,
+                persongrunnlagService,
+                arbeidsfordelingService
+            ),
+            erForhåndsvisning = true
+        ).let { Ressurs.success(it) }
     }
-
 
     @PostMapping(path = ["send-brev/{behandlingId}"])
     fun sendBrev(
-            @PathVariable behandlingId: Long,
-            @RequestBody manueltBrevRequest: ManueltBrevRequest)
-            : Ressurs<RestFagsak> {
+        @PathVariable behandlingId: Long,
+        @RequestBody manueltBrevRequest: ManueltBrevRequest
+    ): Ressurs<RestFagsak> {
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} genererer og sender brev: ${manueltBrevRequest.brevmal}")
-        tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-                                                      handling = "sende brev")
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
+            handling = "sende brev"
+        )
 
         val behandling = behandlingService.hent(behandlingId)
 
-        dokumentService.sendManueltBrev(manueltBrevRequest = manueltBrevRequest.byggMottakerdata(behandling,
-                                                                                                 persongrunnlagService,
-                                                                                                 arbeidsfordelingService),
-                                        behandling = behandling,
-                                        fagsakId = behandling.fagsak.id)
+        dokumentService.sendManueltBrev(
+            manueltBrevRequest = manueltBrevRequest.byggMottakerdata(
+                behandling,
+                persongrunnlagService,
+                arbeidsfordelingService
+            ),
+            behandling = behandling,
+            fagsakId = behandling.fagsak.id
+        )
         return fagsakService.hentRestFagsak(fagsakId = behandling.fagsak.id)
     }
 
     @PostMapping(path = ["/fagsak/{fagsakId}/forhaandsvis-brev"])
     fun hentForhåndsvisningPåFagsak(
-            @PathVariable fagsakId: Long,
-            @RequestBody manueltBrevRequest: ManueltBrevRequest)
-            : Ressurs<ByteArray> {
+        @PathVariable fagsakId: Long,
+        @RequestBody manueltBrevRequest: ManueltBrevRequest
+    ): Ressurs<ByteArray> {
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} henter forhåndsvisning av brev på fagsak $fagsakId for mal: ${manueltBrevRequest.brevmal}")
-        tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-                                                      handling = "hente forhåndsvisning brev")
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
+            handling = "hente forhåndsvisning brev"
+        )
 
-        return dokumentService.genererManueltBrev(manueltBrevRequest = manueltBrevRequest.leggTilEnhet(arbeidsfordelingService),
-                                                  erForhåndsvisning = true).let { Ressurs.success(it) }
+        return dokumentService.genererManueltBrev(
+            manueltBrevRequest = manueltBrevRequest.leggTilEnhet(arbeidsfordelingService),
+            erForhåndsvisning = true
+        ).let { Ressurs.success(it) }
     }
-
 
     @PostMapping(path = ["/fagsak/{fagsakId}/send-brev"])
     fun sendBrevPåFagsak(
-            @PathVariable fagsakId: Long,
-            @RequestBody manueltBrevRequest: ManueltBrevRequest)
-            : Ressurs<RestFagsak> {
+        @PathVariable fagsakId: Long,
+        @RequestBody manueltBrevRequest: ManueltBrevRequest
+    ): Ressurs<RestFagsak> {
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} genererer og sender brev på fagsak $fagsakId: ${manueltBrevRequest.brevmal}")
-        tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-                                                      handling = "sende brev")
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
+            handling = "sende brev"
+        )
 
-        dokumentService.sendManueltBrev(manueltBrevRequest = manueltBrevRequest.leggTilEnhet(arbeidsfordelingService),
-                                        fagsakId = fagsakId)
+        dokumentService.sendManueltBrev(
+            manueltBrevRequest = manueltBrevRequest.leggTilEnhet(arbeidsfordelingService),
+            fagsakId = fagsakId
+        )
         return fagsakService.hentRestFagsak(fagsakId = fagsakId)
     }
 

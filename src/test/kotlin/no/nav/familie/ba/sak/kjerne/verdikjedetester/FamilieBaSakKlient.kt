@@ -29,25 +29,29 @@ import org.springframework.web.client.RestOperations
 import java.net.URI
 
 class FamilieBaSakKlient(
-        private val baSakUrl: String,
-        restOperations: RestOperations,
-        private val headers: HttpHeaders
+    private val baSakUrl: String,
+    restOperations: RestOperations,
+    private val headers: HttpHeaders
 ) : AbstractRestClient(restOperations, "familie-ba-sak") {
 
     fun opprettFagsak(søkersIdent: String): Ressurs<RestFagsak> {
         val uri = URI.create("$baSakUrl/api/fagsaker")
 
-        return postForEntity(uri, FagsakRequest(
+        return postForEntity(
+            uri,
+            FagsakRequest(
                 personIdent = søkersIdent
-        ), headers)
+            ),
+            headers
+        )
     }
 
     fun hentFagsak(fagsakId: Long): Ressurs<RestFagsak> {
         val uri = URI.create("$baSakUrl/api/fagsaker/$fagsakId")
 
         return getForEntity(
-                uri,
-                headers,
+            uri,
+            headers,
         )
     }
 
@@ -55,22 +59,24 @@ class FamilieBaSakKlient(
         val uri = URI.create("$baSakUrl/api/fagsaker/hent-fagsak-paa-person")
 
         return postForEntity(
-                uri,
-                restHentFagsakForPerson,
-                headers,
+            uri,
+            restHentFagsakForPerson,
+            headers,
         )
     }
 
-    fun journalfør(journalpostId: String,
-                   oppgaveId: String,
-                   journalførendeEnhet: String,
-                   restJournalføring: RestJournalføring): Ressurs<String> {
+    fun journalfør(
+        journalpostId: String,
+        oppgaveId: String,
+        journalførendeEnhet: String,
+        restJournalføring: RestJournalføring
+    ): Ressurs<String> {
         val uri =
-                URI.create("$baSakUrl/api/journalpost/$journalpostId/journalfør/$oppgaveId?journalfoerendeEnhet=$journalførendeEnhet")
+            URI.create("$baSakUrl/api/journalpost/$journalpostId/journalfør/$oppgaveId?journalfoerendeEnhet=$journalførendeEnhet")
         return postForEntity(
-                uri,
-                restJournalføring,
-                headers
+            uri,
+            restJournalføring,
+            headers
         )
     }
 
@@ -81,30 +87,32 @@ class FamilieBaSakKlient(
     }
 
     fun henleggSøknad(behandlingId: Long, restHenleggBehandlingInfo: RestHenleggBehandlingInfo): Ressurs<RestFagsak> {
-        val uri = URI.create("$baSakUrl/api/behandlinger/${behandlingId}/henlegg")
+        val uri = URI.create("$baSakUrl/api/behandlinger/$behandlingId/henlegg")
         return putForEntity(uri, restHenleggBehandlingInfo, headers)
     }
 
     fun hentBehandlingslogg(behandlingId: Long): Ressurs<List<Logg>> {
-        val uri = URI.create("$baSakUrl/api/logg/${behandlingId}")
+        val uri = URI.create("$baSakUrl/api/logg/$behandlingId")
         return getForEntity(uri, headers)
     }
 
-    fun opprettBehandling(søkersIdent: String,
-                          behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-                          behandlingÅrsak: BehandlingÅrsak = BehandlingÅrsak.SØKNAD): Ressurs<RestFagsak> {
+    fun opprettBehandling(
+        søkersIdent: String,
+        behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+        behandlingÅrsak: BehandlingÅrsak = BehandlingÅrsak.SØKNAD
+    ): Ressurs<RestFagsak> {
         val uri = URI.create("$baSakUrl/api/behandlinger")
 
         return postForEntity(
-                uri,
-                NyBehandling(
-                        kategori = BehandlingKategori.NASJONAL,
-                        underkategori = BehandlingUnderkategori.ORDINÆR,
-                        søkersIdent = søkersIdent,
-                        behandlingType = behandlingType,
-                        behandlingÅrsak = behandlingÅrsak
-                ),
-                headers
+            uri,
+            NyBehandling(
+                kategori = BehandlingKategori.NASJONAL,
+                underkategori = BehandlingUnderkategori.ORDINÆR,
+                søkersIdent = søkersIdent,
+                behandlingType = behandlingType,
+                behandlingÅrsak = behandlingÅrsak
+            ),
+            headers
         )
     }
 
@@ -126,21 +134,23 @@ class FamilieBaSakKlient(
         return postForEntity(uri, "", headers)
     }
 
-    fun lagreTilbakekrevingOgGåVidereTilNesteSteg(behandlingId: Long,
-                                                  restTilbakekreving: RestTilbakekreving): Ressurs<RestFagsak> {
+    fun lagreTilbakekrevingOgGåVidereTilNesteSteg(
+        behandlingId: Long,
+        restTilbakekreving: RestTilbakekreving
+    ): Ressurs<RestFagsak> {
         val uri = URI.create("$baSakUrl/api/behandlinger/$behandlingId/tilbakekreving")
 
         return postForEntity(uri, restTilbakekreving, headers)
     }
 
-
-    fun oppdaterVedtaksperiodeMedStandardbegrunnelser(vedtaksperiodeId: Long,
-                                                      restPutVedtaksperiodeMedStandardbegrunnelser: RestPutVedtaksperiodeMedStandardbegrunnelser): Ressurs<RestFagsak> {
+    fun oppdaterVedtaksperiodeMedStandardbegrunnelser(
+        vedtaksperiodeId: Long,
+        restPutVedtaksperiodeMedStandardbegrunnelser: RestPutVedtaksperiodeMedStandardbegrunnelser
+    ): Ressurs<RestFagsak> {
         val uri = URI.create("$baSakUrl/api/vedtaksperioder/standardbegrunnelser/$vedtaksperiodeId")
 
         return putForEntity(uri, restPutVedtaksperiodeMedStandardbegrunnelser, headers)
     }
-
 
     fun sendTilBeslutter(fagsakId: Long): Ressurs<RestFagsak> {
         val uri = URI.create("$baSakUrl/api/fagsaker/$fagsakId/send-til-beslutter?behandlendeEnhet=$DEFAULT_JOURNALFØRENDE_ENHET")
@@ -148,9 +158,11 @@ class FamilieBaSakKlient(
         return postForEntity(uri, "", headers)
     }
 
-    fun iverksettVedtak(fagsakId: Long,
-                        restBeslutningPåVedtak: RestBeslutningPåVedtak,
-                        beslutterHeaders: HttpHeaders): Ressurs<RestFagsak> {
+    fun iverksettVedtak(
+        fagsakId: Long,
+        restBeslutningPåVedtak: RestBeslutningPåVedtak,
+        beslutterHeaders: HttpHeaders
+    ): Ressurs<RestFagsak> {
         val uri = URI.create("$baSakUrl/api/fagsaker/$fagsakId/iverksett-vedtak")
 
         return postForEntity(uri, restBeslutningPåVedtak, beslutterHeaders)
@@ -169,7 +181,7 @@ class FamilieBaSakKlient(
     }
 
     fun forhaandsvisHenleggelseBrev(behandlingId: Long, manueltBrevRequest: ManueltBrevRequest): Ressurs<ByteArray>? {
-        val uri = URI.create("$baSakUrl/api/dokument/forhaandsvis-brev/${behandlingId}")
+        val uri = URI.create("$baSakUrl/api/dokument/forhaandsvis-brev/$behandlingId")
         return postForEntity(uri, manueltBrevRequest, headers)
     }
 }
