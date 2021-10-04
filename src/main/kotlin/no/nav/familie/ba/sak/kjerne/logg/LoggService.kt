@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.config.RolleConfig
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
@@ -70,13 +71,24 @@ class LoggService(
         ))
     }
 
-    fun opprettEndretBehandlingstype(behandling: Behandling, forrigeBehandlingstype: BehandlingUnderkategori, nyBehandlingstype: BehandlingUnderkategori) {
+    private fun tilBehandlingstema(underkategori: BehandlingUnderkategori, kategori: BehandlingKategori): String {
+        return kategori.visningsnavn + " " + underkategori.visningsnavn.lowercase()
+    }
+
+    fun opprettEndretBehandlingstema(behandling: Behandling,
+                                     forrigeUnderkategori: BehandlingUnderkategori,
+                                     forrigeKategori: BehandlingKategori,
+                                     nyUnderkategori: BehandlingUnderkategori,
+                                     nyKategori: BehandlingKategori) {
         lagre(Logg(
                 behandlingId = behandling.id,
                 type = LoggType.BEHANDLINGSTYPE_ENDRET,
-                tittel = "Endret behandlingstype",
+                tittel = "Endret behandlingstema",
                 rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(rolleConfig, BehandlerRolle.SAKSBEHANDLER),
-                tekst = "Behandlingstype er manuelt endret fra $forrigeBehandlingstype til $nyBehandlingstype"
+                tekst = "Behandlingstema er manuelt endret fra ${
+                    tilBehandlingstema(underkategori = forrigeUnderkategori,
+                                       kategori = forrigeKategori)
+                } til ${tilBehandlingstema(underkategori = nyUnderkategori, kategori = nyKategori)}"
         ))
     }
 

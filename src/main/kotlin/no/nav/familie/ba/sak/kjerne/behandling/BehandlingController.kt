@@ -111,12 +111,15 @@ class BehandlingController(
         return ResponseEntity.ok(Ressurs.success(restSimulering))
     }
 
-    @PutMapping(path = ["/{behandlingId}/underkategori"], produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun endreBehandlingUnderkategori(@PathVariable behandlingId: Long,
-                                     @RequestBody
-                                     endreBehandling: RestEndreBehandlingUnderkategori): ResponseEntity<Ressurs<RestFagsak>> {
-        val behandling = behandlingsService.oppdaterBehandlingUnderkategori(behandling = behandlingsService.hent(behandlingId),
-                                                                            nyBehandlingUnderkategori = endreBehandling.behandlingUnderkategori)
+    @PutMapping(path = ["/{behandlingId}/behandlingstema"], produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun endreBehandlingstema(@PathVariable behandlingId: Long,
+                             @RequestBody
+                             endreBehandling: RestEndreBehandlingstema): ResponseEntity<Ressurs<RestFagsak>> {
+        val behandling = behandlingsService.oppdaterBehandlingtema(behandling = behandlingsService.hent(behandlingId),
+                                                                   nyBehandlingUnderkategori = endreBehandling.behandlingUnderkategori,
+                                                                   nyBehandlingKategori = endreBehandling.behandlingKategori,
+                                                                   manueltOppdatert = true)
+
         val restFagsak = fagsakService.hentRestFagsak(fagsakId = behandling.fagsak.id)
 
         return ResponseEntity.ok(restFagsak)
@@ -164,7 +167,7 @@ class RestHenleggBehandlingInfo(
         val begrunnelse: String
 )
 
-class RestEndreBehandlingUnderkategori(val behandlingUnderkategori: BehandlingUnderkategori)
+class RestEndreBehandlingstema(val behandlingUnderkategori: BehandlingUnderkategori, val behandlingKategori: BehandlingKategori)
 
 enum class HenleggÅrsak(val beskrivelse: String) {
     SØKNAD_TRUKKET("Søknad trukket"),

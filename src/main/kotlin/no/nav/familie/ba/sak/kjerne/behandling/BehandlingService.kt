@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils.bestemUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils.utledLøpendeUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
@@ -99,21 +100,47 @@ class BehandlingService(
         }
     }
 
-    fun oppdaterBehandlingUnderkategori(behandling: Behandling, nyBehandlingUnderkategori: BehandlingUnderkategori): Behandling {
+    fun oppdaterBehandlingtema(behandling: Behandling,
+                               nyBehandlingUnderkategori: BehandlingUnderkategori? = null,
+                               nyBehandlingKategori: BehandlingKategori? = null,
+                               manueltOppdatert: Boolean = false): Behandling {
+        val nyUnderkategori =
+                if (manueltOppdatert) nyBehandlingUnderkategori
+                else if (nyBehandlingUnderkategori != null) bestemUnderkategori(
+                        nyUnderkategori = nyBehandlingUnderkategori,
+                        nyBehandlingType = behandling.type,
+                        løpendeUnderkategori = hentLøpendeUnderkategori(
+                                fagsakId = behandling.fagsak.id))
+                else null
         val forrigeBehandlingUnderkategori = behandling.underkategori
-        return lagreEllerOppdater(behandling.apply {
-            underkategori = bestemUnderkategori(nyUnderkategori = nyBehandlingUnderkategori,
-                                                nyBehandlingType = behandling.type,
-                                                løpendeUnderkategori = hentLøpendeUnderkategori(fagsakId = fagsak.id))
-        }).also { behandling ->
+        val forrigeBehandlingKategori = behandling.kategori
+        val eksistererEndringSomSkalLogges =
+                nyBehandlingKategori != forrigeBehandlingKategori || nyBehandlingUnderkategori != forrigeBehandlingUnderkategori
+
+        if (nyBehandlingKategori != null && nyBehandlingKategori != forrigeBehandlingKategori) {
+            behandling.apply { kategori = nyBehandlingKategori }
+        }
+        if (nyUnderkategori != null && nyUnderkategori != forrigeBehandlingUnderkategori) {
+            behandling.apply { underkategori = nyUnderkategori }
+        }
+
+        return lagreEllerOppdater(behandling).also { behandling ->
             oppgaveService.patchOppgaverForBehandling(behandling) {
-                if (it.behandlingstema != behandling.underkategori.tilBehandlingstema().value) {
+                if (it.behandlingstema != behandling.underkategori.tilBehandlingstema().value || it.behandlingstype != behandling.kategori.tilBehandlingstype().value) {
                     it.copy(
-                            behandlingstema = behandling.underkategori.tilBehandlingstema().value
+                            behandlingstema = behandling.underkategori.tilBehandlingstema().value,
+                            behandlingstype = behandling.kategori.tilBehandlingstype().value
                     )
                 } else null
             }
-            loggService.opprettEndretBehandlingstype(behandling = behandling, forrigeBehandlingstype = forrigeBehandlingUnderkategori, nyBehandlingstype = nyBehandlingUnderkategori)
+
+            if (manueltOppdatert && eksistererEndringSomSkalLogges && nyBehandlingKategori != null && nyUnderkategori != null) {
+                loggService.opprettEndretBehandlingstema(behandling = behandling,
+                                                         forrigeKategori = forrigeBehandlingKategori,
+                                                         forrigeUnderkategori = forrigeBehandlingUnderkategori,
+                                                         nyKategori = nyBehandlingKategori,
+                                                         nyUnderkategori = nyUnderkategori)
+            }
         }
     }
 
