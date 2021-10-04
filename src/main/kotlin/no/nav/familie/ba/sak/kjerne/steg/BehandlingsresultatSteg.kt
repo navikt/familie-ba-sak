@@ -37,8 +37,12 @@ class BehandlingsresultatSteg(
                     behandlingId = behandling.id))
         }
 
-        if (behandlingMedResultat.skalBehandlesAutomatisk && behandlingMedResultat.resultat == BehandlingResultat.INNVILGET) {
-            behandlingService.oppdaterStatusPåBehandling(behandlingMedResultat.id, BehandlingStatus.IVERKSETTER_VEDTAK)
+        if (behandlingMedResultat.skalBehandlesAutomatisk) {
+            if (behandlingMedResultat.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE && behandlingMedResultat.resultat == BehandlingResultat.INNVILGET) {
+                behandlingService.oppdaterStatusPåBehandling(behandlingMedResultat.id, BehandlingStatus.IVERKSETTER_VEDTAK)
+            } else if (behandlingMedResultat.erOmregning() && behandlingMedResultat.resultat == BehandlingResultat.FORTSATT_INNVILGET) {
+                behandlingService.oppdaterStatusPåBehandling(behandlingMedResultat.id, BehandlingStatus.IVERKSETTER_VEDTAK)
+            }
         } else {
             simuleringService.oppdaterSimuleringPåBehandling(behandlingMedResultat)
         }
