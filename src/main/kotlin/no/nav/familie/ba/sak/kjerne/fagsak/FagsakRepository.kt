@@ -22,15 +22,15 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
     override fun findById(id: Long): Optional<Fagsak>
 
     @Lock(LockModeType.NONE)
-    @Query(value = "SELECT f FROM Fagsak f WHERE f.id = :fagsakId")
+    @Query(value = "SELECT f FROM Fagsak f WHERE f.id = :fagsakId AND f.arkivert = false")
     fun finnFagsak(fagsakId: Long): Fagsak?
 
     @Lock(LockModeType.NONE)
-    @Query(value = "SELECT f FROM Fagsak f, FagsakPerson fp WHERE f.id = fp.fagsak.id and fp.personIdent = :personIdent")
+    @Query(value = "SELECT f FROM Fagsak f, FagsakPerson fp WHERE f.id = fp.fagsak.id and fp.personIdent = :personIdent and f.arkivert = false")
     fun finnFagsakForPersonIdent(personIdent: PersonIdent): Fagsak?
 
     @Lock(LockModeType.NONE)
-    @Query(value = "SELECT f from Fagsak f WHERE f.status = 'LØPENDE'")
+    @Query(value = "SELECT f from Fagsak f WHERE f.status = 'LØPENDE'  AND f.arkivert = false")
     fun finnLøpendeFagsaker(): List<Fagsak>
 
     @Modifying
@@ -43,6 +43,7 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
                                          inner join fagsak f on f.id = b.fk_fagsak_id
                                 where ty.utbetalingsoppdrag IS NOT NULL
                                   and f.status = 'LØPENDE'
+                                  and f.arkivert = false
                                 group by b.id)
                             select sisteIverksatte.fagsakId
                             from sisteIverksatte
@@ -53,7 +54,7 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
 
     @Query(value = """
         SELECT f FROM Fagsak f
-        WHERE f.status = 'LØPENDE' AND f IN ( 
+        WHERE f.arkivert = false AND f.status = 'LØPENDE' AND f IN ( 
             SELECT b.fagsak FROM Behandling b 
             WHERE b.aktiv=true AND b.id IN (
                 SELECT pg.behandlingId FROM PersonopplysningGrunnlag pg
@@ -68,11 +69,11 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
     fun finnLøpendeFagsakMedBarnMedFødselsdatoInnenfor(fom: LocalDate, tom: LocalDate): Set<Fagsak>
 
     @Lock(LockModeType.NONE)
-    @Query(value = "SELECT count(*) from Fagsak")
+    @Query(value = "SELECT count(*) from Fagsak where arkivert = false")
     fun finnAntallFagsakerTotalt(): Long
 
     @Lock(LockModeType.NONE)
-    @Query(value = "SELECT count(*) from Fagsak f where f.status='LØPENDE'")
+    @Query(value = "SELECT count(*) from Fagsak f where f.status='LØPENDE' and f.arkivert = false")
     fun finnAntallFagsakerLøpende(): Long
 
     @Lock(LockModeType.NONE)

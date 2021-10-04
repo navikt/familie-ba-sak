@@ -71,7 +71,6 @@ class EndretUtbetalingAndelController(
     @PostMapping(path = ["/{behandlingId}"])
     fun lagreEndretUtbetalingAndelOgOppdaterTilkjentYtelse(
         @PathVariable behandlingId: Long,
-        @RequestBody restEndretUtbetalingAndel: RestEndretUtbetalingAndel
     ): ResponseEntity<Ressurs<RestFagsak>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
@@ -79,7 +78,7 @@ class EndretUtbetalingAndelController(
         )
 
         val behandling = behandlingService.hent(behandlingId)
-        endretUtbetalingAndelService.opprettEndretUtbetalingAndelOgOppdaterTilkjentYtelse(behandling, restEndretUtbetalingAndel)
+        endretUtbetalingAndelService.opprettTomEndretUtbetalingAndelOgOppdaterTilkjentYtelse(behandling)
 
         return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = behandling.fagsak.id))
     }

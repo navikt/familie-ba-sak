@@ -4,9 +4,11 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedBegrunnelse
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedFritekster
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedStandardbegrunnelser
+import no.nav.familie.ba.sak.kjerne.dokument.BrevKlient
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.BegrunnelseFraBaSak
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.BegrunnelseData
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.FritekstBegrunnelse
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -26,7 +28,8 @@ import org.springframework.web.bind.annotation.RestController
 class VedtaksperiodeMedBegrunnelserController(
         private val fagsakService: FagsakService,
         private val vedtaksperiodeService: VedtaksperiodeService,
-        private val tilgangService: TilgangService
+        private val tilgangService: TilgangService,
+        private val brevKlient: BrevKlient,
 ) {
 
     @Deprecated("Fjernes når frontend støtter put på fritekster og standardbegrunnelser")
@@ -84,8 +87,11 @@ class VedtaksperiodeMedBegrunnelserController(
                                                       handling = OPPDATERE_BEGRUNNELSER_HANDLING)
 
         val begrunnelser = vedtaksperiodeService.genererBrevBegrunnelserForPeriode(vedtaksperiodeId).map {
-            if (it is BegrunnelseFraBaSak) it.begrunnelse
-            else error("genererBrevBegrunnelserForPeriode skal bare bruke begrunnelsene i ba-sak")
+            when (it) {
+                is FritekstBegrunnelse -> it.fritekst
+                is BegrunnelseData -> brevKlient.hentBegrunnelsestekst(it)
+                else -> error("Ukjent begrunnelsestype")
+            }
         }
 
         return ResponseEntity.ok(Ressurs.Companion.success(begrunnelser))
