@@ -342,7 +342,7 @@ enum class VedtakBegrunnelseSpesifikasjon(
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2)
-        override val sanityApiNavn = "avslagUgyldigAvtaleOmDeltBosted "
+        override val sanityApiNavn = "avslagUgyldigAvtaleOmDeltBosted"
         override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOR_MED_SØKER), deltbosted = true)
     },
     AVSLAG_IKKE_AVTALE_OM_DELT_BOSTED("Ikke avtale om delt bosted") {
