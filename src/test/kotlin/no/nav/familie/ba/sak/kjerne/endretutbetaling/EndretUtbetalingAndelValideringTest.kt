@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.math.BigDecimal
+import java.time.LocalDate
 import java.time.YearMonth
 
 class EndretUtbetalingAndelValideringTest {
@@ -27,7 +28,9 @@ class EndretUtbetalingAndelValideringTest {
                 tom = YearMonth.of(2020, 6),
                 årsak = Årsak.DELT_BOSTED,
                 begrunnelse = "",
-                prosent = BigDecimal(100))
+                prosent = BigDecimal(100),
+                søknadstidspunkt = LocalDate.now(),
+                avtaletidspunktDeltBosted = LocalDate.now())
 
         val feil = assertThrows<UtbetalingsikkerhetFeil> {
             validerIngenOverlappendeEndring(endretUtbetalingAndel,
@@ -77,7 +80,9 @@ class EndretUtbetalingAndelValideringTest {
                 tom = YearMonth.of(2020, 6),
                 årsak = Årsak.DELT_BOSTED,
                 begrunnelse = "",
-                prosent = BigDecimal(100))
+                prosent = BigDecimal(100),
+                søknadstidspunkt = LocalDate.now(),
+                avtaletidspunktDeltBosted = LocalDate.now())
 
         var feil = assertThrows<UtbetalingsikkerhetFeil> {
             validerPeriodeInnenforTilkjentytelse(endretUtbetalingAndel, emptyList())
