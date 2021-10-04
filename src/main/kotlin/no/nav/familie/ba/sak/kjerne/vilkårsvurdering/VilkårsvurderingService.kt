@@ -4,7 +4,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVedtakBegrunnelseTilknyttetVilkår
-import no.nav.familie.ba.sak.kjerne.dokument.BrevKlient
+import no.nav.familie.ba.sak.kjerne.dokument.SanityKlient
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurderingType
@@ -21,7 +21,7 @@ import java.time.LocalDate
 class VilkårsvurderingService(
         private val vilkårsvurderingRepository: VilkårsvurderingRepository,
         private val featureToggleService: FeatureToggleService,
-        private val brevKlient: BrevKlient,
+        private val sanityKlient: SanityKlient,
 ) {
 
     fun hentAktivForBehandling(behandlingId: Long): Vilkårsvurdering? {
@@ -88,9 +88,9 @@ class VilkårsvurderingService(
     }
 
     fun hentVilkårsbegrunnelser(): Map<VedtakBegrunnelseType, List<RestVedtakBegrunnelseTilknyttetVilkår>> {
-            val sanityBegrunnelser = brevKlient.hentSanityBegrunnelse()
-            val skalBrukeTriggesAvFraSanity =
-                    featureToggleService.isEnabled(FeatureToggleConfig.BRUK_BEGRUNNELSE_TRIGGES_AV_FRA_SANITY)
+        val sanityBegrunnelser = sanityKlient.hentSanityBegrunnelse()
+        val skalBrukeTriggesAvFraSanity =
+                featureToggleService.isEnabled(FeatureToggleConfig.BRUK_BEGRUNNELSE_TRIGGES_AV_FRA_SANITY)
             return vedtakBegrunnelseSpesifikasjonerTilNedtrekksmenytekster(sanityBegrunnelser, skalBrukeTriggesAvFraSanity)
     }
 
