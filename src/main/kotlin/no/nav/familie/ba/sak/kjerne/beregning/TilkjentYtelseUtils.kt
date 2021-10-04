@@ -8,17 +8,20 @@ import no.nav.familie.ba.sak.common.inkluderer
 import no.nav.familie.ba.sak.common.maksimum
 import no.nav.familie.ba.sak.common.minimum
 import no.nav.familie.ba.sak.common.sisteDagIMåned
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService.SatsPeriode
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService.splittPeriodePå6Årsdag
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.PeriodeResultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
@@ -38,7 +41,7 @@ object TilkjentYtelseUtils {
         val (innvilgetPeriodeResultatSøker, innvilgedePeriodeResultatBarna) = vilkårsvurdering.hentInnvilgedePerioder(
                 personopplysningGrunnlag)
 
-        val relevanteSøkerPerioer = innvilgetPeriodeResultatSøker
+        val relevanteSøkerPerioder = innvilgetPeriodeResultatSøker
                 .filter { søkerPeriode -> innvilgedePeriodeResultatBarna.any { søkerPeriode.overlapper(it) } }
 
         val tilkjentYtelse = TilkjentYtelse(
@@ -49,91 +52,16 @@ object TilkjentYtelseUtils {
 
         val andelerTilkjentYtelseBarna = innvilgedePeriodeResultatBarna
                 .flatMap { periodeResultatBarn ->
-                    relevanteSøkerPerioer
+                    relevanteSøkerPerioder
                             .flatMap { overlappendePerioderesultatSøker ->
                                 val person = identBarnMap[periodeResultatBarn.personIdent]
                                              ?: error("Finner ikke barn på map over barna i behandlingen")
-                                val oppfyltFom =
-                                        maksimum(overlappendePerioderesultatSøker.periodeFom, periodeResultatBarn.periodeFom)
-
-                                val påfølgendeBack2BackPeriodeSomOverlapperMedSøkerperiode =
-                                        innvilgedePeriodeResultatBarna.singleOrNull { periodeResultat ->
-                                            innvilgetPeriodeResultatSøker.any { periodeResultatSøker ->
-                                                periodeResultatSøker.overlapper(periodeResultat)
-                                            } &&
-                                            periodeResultatBarn.periodeTom?.erDagenFør(periodeResultat.periodeFom) == true &&
-                                            periodeResultatBarn.personIdent.equals(periodeResultat.personIdent)
-                                        }
-
-                                val foregåendeBack2BackPeriodeSomOverlapperMedSøkerperiode =
-                                        innvilgedePeriodeResultatBarna.singleOrNull { periodeResultat ->
-                                            innvilgetPeriodeResultatSøker.any { periodeResultatSøker ->
-                                                periodeResultatSøker.overlapper(periodeResultat)
-                                            } &&
-                                            periodeResultat.periodeTom?.erDagenFør(periodeResultatBarn.periodeFom) == true &&
-                                            periodeResultatBarn.personIdent.equals(periodeResultat.personIdent)
-                                        }
-
-                                val deltBostedEndresForPåfølgendeBack2BackPeriode =
-                                        påfølgendeBack2BackPeriodeSomOverlapperMedSøkerperiode != null &&
-                                        periodeResultatBarn.vilkårResultater.single {
-                                            it.vilkårType == Vilkår.BOR_MED_SØKER
-                                        }.erDeltBosted !=
-                                        påfølgendeBack2BackPeriodeSomOverlapperMedSøkerperiode.vilkårResultater.single {
-                                            it.vilkårType == Vilkår.BOR_MED_SØKER
-                                        }.erDeltBosted
-
-                                val deltBostedEndretFraForrigeBack2BackPeriode =
-                                        foregåendeBack2BackPeriodeSomOverlapperMedSøkerperiode != null &&
-                                        periodeResultatBarn.vilkårResultater.single {
-                                            it.vilkårType == Vilkår.BOR_MED_SØKER
-                                        }.erDeltBosted !=
-                                        foregåendeBack2BackPeriodeSomOverlapperMedSøkerperiode.vilkårResultater.single {
-                                            it.vilkårType == Vilkår.BOR_MED_SØKER
-                                        }.erDeltBosted
-
-                                val skalStarteSammeMåned =
-                                        foregåendeBack2BackPeriodeSomOverlapperMedSøkerperiode != null && !deltBostedEndretFraForrigeBack2BackPeriode
-
-                                val skalVidereføresEnMånedEkstra =
-                                        påfølgendeBack2BackPeriodeSomOverlapperMedSøkerperiode != null && deltBostedEndresForPåfølgendeBack2BackPeriode
-
-                                val minsteTom =
-                                        minimum(overlappendePerioderesultatSøker.periodeTom, periodeResultatBarn.periodeTom)
-
-                                val oppfyltTom = if (skalVidereføresEnMånedEkstra) minsteTom.plusMonths(1) else minsteTom
-
-                                val oppfyltTomKommerFra18ÅrsVilkår =
-                                        oppfyltTom == periodeResultatBarn.vilkårResultater.find {
-                                            it.vilkårType == Vilkår.UNDER_18_ÅR
-                                        }?.periodeTom
-
-
-                                val (periodeUnder6År, periodeOver6år) = splittPeriodePå6Årsdag(person.hentSeksårsdag(),
-                                                                                               oppfyltFom,
-                                                                                               oppfyltTom)
-                                val satsperioderFørFylte6År = if (periodeUnder6År != null) SatsService.hentGyldigSatsFor(
-                                        satstype = SatsType.TILLEGG_ORBA,
-                                        stønadFraOgMed = settRiktigStønadFom(skalStarteSammeMåned = skalStarteSammeMåned,
-                                                                             fraOgMed = periodeUnder6År.fom),
-                                        stønadTilOgMed = settRiktigStønadTom(tilOgMed = periodeUnder6År.tom),
-                                        maxSatsGyldigFraOgMed = SatsService.tilleggEndringSeptember2021,
-                                ) else emptyList()
-
-                                val satsperioderEtterFylte6År = if (periodeOver6år != null) SatsService.hentGyldigSatsFor(
-                                        satstype = SatsType.ORBA,
-                                        stønadFraOgMed = settRiktigStønadFom(skalStarteSammeMåned =
-                                                                             (periodeUnder6År != null || skalStarteSammeMåned),
-                                                                             fraOgMed = periodeOver6år.fom),
-                                        stønadTilOgMed = settRiktigStønadTom(skalAvsluttesMånedenFør = oppfyltTomKommerFra18ÅrsVilkår,
-                                                                             tilOgMed = periodeOver6år.tom),
-                                        maxSatsGyldigFraOgMed = SatsService.tilleggEndringSeptember2021,
-                                ) else emptyList()
-
                                 val beløpsperioder =
-                                        listOf(satsperioderFørFylte6År, satsperioderEtterFylte6År).flatten()
-                                                .sortedBy { it.fraOgMed }
-                                                .fold(mutableListOf(), ::slåSammenEtterfølgendePerioderMedSammeBeløp)
+                                        beregnBeløpsperioder(overlappendePerioderesultatSøker,
+                                                             periodeResultatBarn,
+                                                             innvilgedePeriodeResultatBarna,
+                                                             innvilgetPeriodeResultatSøker,
+                                                             person)
 
                                 beløpsperioder.map { beløpsperiode ->
                                     val prosent = if (periodeResultatBarn.erDeltBosted()) BigDecimal(50) else BigDecimal(100)
@@ -175,7 +103,8 @@ object TilkjentYtelseUtils {
 
         andelTilkjentYtelser.distinctBy { it.personIdent }.forEach { barnMedAndeler ->
             val andelerForPerson = andelTilkjentYtelser.filter { it.personIdent == barnMedAndeler.personIdent }
-            val endringerForPerson = endretUtbetalingAndeler.filter { it.person.personIdent.ident == barnMedAndeler.personIdent }
+            val endringerForPerson =
+                    endretUtbetalingAndeler.filter { it.person?.personIdent?.ident == barnMedAndeler.personIdent }
 
             andelerForPerson.forEach { andelForPerson ->
                 // Deler opp hver enkelt andel i perioder som hhv blir berørt av endringene og de som ikke berøres av de.
@@ -189,7 +118,7 @@ object TilkjentYtelseUtils {
                             stønadFom = månedPeriodeEndret.fom,
                             stønadTom = månedPeriodeEndret.tom,
                             kalkulertUtbetalingsbeløp = andelForPerson.kalkulertUtbetalingsbeløp
-                                    .avrundetHeltallAvProsent(endretUtbetalingAndel.prosent))
+                                    .avrundetHeltallAvProsent(endretUtbetalingAndel.prosent!!))
                 })
                 // Legger til nye AndelTilkjentYtelse for perioder som ikke berøres av endringer.
                 nyeAndelTilkjentYtelse.addAll(perioderUtenEndring.map { månedPeriodeUendret ->
@@ -200,6 +129,81 @@ object TilkjentYtelseUtils {
         // Sorterer primært av hensyn til måten testene er implementert og kan muligens fjernes dersom dette skrives om.
         nyeAndelTilkjentYtelse.sortWith(compareBy({ it.personIdent }, { it.stønadFom }))
         return nyeAndelTilkjentYtelse.toMutableSet()
+    }
+
+    private fun beregnBeløpsperioder(overlappendePerioderesultatSøker: PeriodeResultat,
+                                     periodeResultatBarn: PeriodeResultat,
+                                     innvilgedePeriodeResultatBarna: List<PeriodeResultat>,
+                                     innvilgetPeriodeResultatSøker: List<PeriodeResultat>,
+                                     person: Person): MutableList<SatsPeriode> {
+        val oppfyltFom =
+                maksimum(overlappendePerioderesultatSøker.periodeFom, periodeResultatBarn.periodeFom)
+
+        val minsteTom =
+                minimum(overlappendePerioderesultatSøker.periodeTom, periodeResultatBarn.periodeTom)
+
+        val barnetsPeriodeLøperVidere =
+                if (periodeResultatBarn.periodeTom == null) true else periodeResultatBarn.periodeTom.toYearMonth() > minsteTom.toYearMonth()
+
+        val skalVidereføresEnMånedEkstra =
+                innvilgedePeriodeResultatBarna.any { periodeResultat ->
+                    innvilgetPeriodeResultatSøker.any { periodeResultatSøker ->
+                        periodeResultatSøker.overlapper(periodeResultat)
+                    } &&
+                    (erBack2BackIMånedsskifte(periodeResultatBarn.periodeTom, periodeResultat.periodeFom) ||
+                     søkerHarInnvilgetPeriodeEtterBarnsPeriode(
+                             innvilgetPeriodeResultatSøker = innvilgetPeriodeResultatSøker,
+                             tilOgMed = minsteTom,
+                             barnetsPeriodeLøperVidere = barnetsPeriodeLøperVidere
+                     )) &&
+                    periodeResultatBarn.personIdent == periodeResultat.personIdent
+                }
+
+        val oppfyltTom = if (skalVidereføresEnMånedEkstra) minsteTom.plusMonths(1) else minsteTom
+
+        val oppfyltTomKommerFra18ÅrsVilkår =
+                oppfyltTom == periodeResultatBarn.vilkårResultater.find {
+                    it.vilkårType == Vilkår.UNDER_18_ÅR
+                }?.periodeTom
+
+
+        val (periodeUnder6År, periodeOver6år) = splittPeriodePå6Årsdag(person.hentSeksårsdag(),
+                                                                       oppfyltFom,
+                                                                       oppfyltTom)
+        val satsperioderFørFylte6År = if (periodeUnder6År != null) SatsService.hentGyldigSatsFor(
+                satstype = SatsType.TILLEGG_ORBA,
+                stønadFraOgMed = settRiktigStønadFom(
+                        fraOgMed = periodeUnder6År.fom),
+                stønadTilOgMed = settRiktigStønadTom(tilOgMed = periodeUnder6År.tom),
+                maxSatsGyldigFraOgMed = SatsService.tilleggEndringSeptember2021,
+        ) else emptyList()
+
+        val satsperioderEtterFylte6År = if (periodeOver6år != null) SatsService.hentGyldigSatsFor(
+                satstype = SatsType.ORBA,
+                stønadFraOgMed = settRiktigStønadFom(skalStarteSammeMåned =
+                                                     periodeUnder6År != null,
+                                                     fraOgMed = periodeOver6år.fom),
+                stønadTilOgMed = settRiktigStønadTom(skalAvsluttesMånedenFør = oppfyltTomKommerFra18ÅrsVilkår,
+                                                     tilOgMed = periodeOver6år.tom),
+                maxSatsGyldigFraOgMed = SatsService.tilleggEndringSeptember2021,
+        ) else emptyList()
+
+        return listOf(satsperioderFørFylte6År, satsperioderEtterFylte6År).flatten()
+                .sortedBy { it.fraOgMed }
+                .fold(mutableListOf(), ::slåSammenEtterfølgendePerioderMedSammeBeløp)
+    }
+
+    private fun erBack2BackIMånedsskifte(tilOgMed: LocalDate?, fraOgMed: LocalDate?): Boolean {
+        return tilOgMed?.erDagenFør(fraOgMed) == true &&
+               tilOgMed.toYearMonth() != fraOgMed?.toYearMonth()
+    }
+
+    private fun søkerHarInnvilgetPeriodeEtterBarnsPeriode(innvilgetPeriodeResultatSøker: List<PeriodeResultat>,
+                                                          tilOgMed: LocalDate?,
+                                                          barnetsPeriodeLøperVidere: Boolean): Boolean {
+        return innvilgetPeriodeResultatSøker.any {
+            erBack2BackIMånedsskifte(tilOgMed, it.periodeFom)
+        } && barnetsPeriodeLøperVidere
     }
 
     private fun finnYtelseType(kategori: BehandlingKategori,

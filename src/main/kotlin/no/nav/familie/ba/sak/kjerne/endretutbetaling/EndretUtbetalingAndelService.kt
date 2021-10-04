@@ -4,17 +4,26 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.ekstern.restDomene.RestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
+import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering
+import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering.validerAtBarnIkkeFårFlereUtbetalingerSammePeriode
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerIngenOverlappendeEndring
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerPeriodeInnenforTilkjentytelse
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.fraRestEndretUtbetalingAndel
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
 class EndretUtbetalingAndelService(
-    private val endretUtbetalingAndelRepository: EndretUtbetalingAndelRepository,
-    private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
-    private val beregningService: BeregningService,
+        private val endretUtbetalingAndelRepository: EndretUtbetalingAndelRepository,
+        private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
+        private val beregningService: BeregningService,
+        private val persongrunnlagService: PersongrunnlagService,
+        private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
 ) {
 
     @Transactional
@@ -23,19 +32,30 @@ class EndretUtbetalingAndelService(
             endretUtbetalingAndelId: Long,
             restEndretUtbetalingAndel: RestEndretUtbetalingAndel
     ) {
-       val endretUtbetalingAndel = endretUtbetalingAndelRepository.findById(endretUtbetalingAndelId)
+        val endretUtbetalingAndel = endretUtbetalingAndelRepository.getById(endretUtbetalingAndelId)
+        val person =
+                persongrunnlagService.hentPersonerPåBehandling(listOf(restEndretUtbetalingAndel.personIdent!!), behandling)
+                        .first()
 
-        endretUtbetalingAndelRepository.save(endretUtbetalingAndel.get().copy(
-            fom = restEndretUtbetalingAndel.fom,
-            tom = restEndretUtbetalingAndel.tom,
-            prosent = restEndretUtbetalingAndel.prosent,
-            årsak = restEndretUtbetalingAndel.årsak,
-        ))
+        endretUtbetalingAndel.fraRestEndretUtbetalingAndel(restEndretUtbetalingAndel, person)
+
+        validerIngenOverlappendeEndring(
+                endretUtbetalingAndel,
+                endretUtbetalingAndelRepository.findByBehandlingId(behandling.id).filter { it.id != endretUtbetalingAndelId })
+        validerPeriodeInnenforTilkjentytelse(
+                endretUtbetalingAndel,
+                andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id))
 
         val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
-            ?: throw Feil("Fant ikke personopplysninggrunnlag på behandling ${behandling.id}")
+                                       ?: throw Feil("Fant ikke personopplysninggrunnlag på behandling ${behandling.id}")
 
-        beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
+        val tilkjentYtelse = beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
+        val andreBehandlingerPåBarna = personopplysningGrunnlag.barna.map { barn ->
+            Pair(barn, beregningService.hentIverksattTilkjentYtelseForBarn(barn.personIdent, behandling))
+        }
+        validerAtBarnIkkeFårFlereUtbetalingerSammePeriode(behandlendeBehandlingTilkjentYtelse = tilkjentYtelse,
+                                                          barnMedAndreTilkjentYtelse = andreBehandlingerPåBarna,
+                                                          personopplysningGrunnlag = personopplysningGrunnlag)
     }
 
     @Transactional
@@ -43,36 +63,21 @@ class EndretUtbetalingAndelService(
             behandling: Behandling,
             endretUtbetalingAndelId: Long,
     ) {
-       endretUtbetalingAndelRepository.deleteById(endretUtbetalingAndelId)
+        endretUtbetalingAndelRepository.deleteById(endretUtbetalingAndelId)
 
         val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
-            ?: throw Feil("Fant ikke personopplysninggrunnlag på behandling ${behandling.id}")
+                                       ?: throw Feil("Fant ikke personopplysninggrunnlag på behandling ${behandling.id}")
 
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
     }
 
     @Transactional
-    fun opprettEndretUtbetalingAndelOgOppdaterTilkjentYtelse(
-        behandling: Behandling,
-        restEndretUtbetalingAndel: RestEndretUtbetalingAndel
-    ) {
-        val personOpplysninger = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
-            ?: error("Finner ikke persongrunnlag")
-
-        val barn =
-            personOpplysninger.barna.single { b -> b.personIdent.ident == restEndretUtbetalingAndel.personIdent }
-
-        val endretUtbetalingAndel = EndretUtbetalingAndel(
-            behandlingId = behandling.id,
-            person = barn,
-            prosent = restEndretUtbetalingAndel.prosent,
-            fom = restEndretUtbetalingAndel.fom,
-            tom = restEndretUtbetalingAndel.tom,
-            årsak = restEndretUtbetalingAndel.årsak,
-            begrunnelse = restEndretUtbetalingAndel.begrunnelse,
-        )
-
-        endretUtbetalingAndelRepository.save(endretUtbetalingAndel)
-        beregningService.oppdaterBehandlingMedBeregning(behandling, personOpplysninger)
-    }
+    fun opprettTomEndretUtbetalingAndelOgOppdaterTilkjentYtelse(
+            behandling: Behandling
+    ) =
+            endretUtbetalingAndelRepository.save(
+                    EndretUtbetalingAndel(
+                            behandlingId = behandling.id,
+                    )
+            )
 }

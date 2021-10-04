@@ -77,23 +77,26 @@ class TekniskOpphørAvFødselshendelseTest(
             }
         }
 
-        val restFagsakEtterVilkårsvurdering =
-                familieBaSakKlient().validerVilkårsvurdering(
+        familieBaSakKlient().validerVilkårsvurdering(
+                behandlingId = aktivBehandling.behandlingId
+        )
+        val restFagsakEtterBehandlingsresultat =
+                familieBaSakKlient().behandlingsresultatStegOgGåVidereTilNesteSteg(
                         behandlingId = aktivBehandling.behandlingId
                 )
-        generellAssertFagsak(restFagsak = restFagsakEtterVilkårsvurdering,
+        generellAssertFagsak(restFagsak = restFagsakEtterBehandlingsresultat,
                              fagsakStatus = FagsakStatus.LØPENDE,
                              behandlingStegType = StegType.SEND_TIL_BESLUTTER,
                              behandlingResultat = BehandlingResultat.OPPHØRT)
 
         val restFagsakEtterSendTilBeslutter =
-                familieBaSakKlient().sendTilBeslutter(fagsakId = restFagsakEtterVilkårsvurdering.data!!.id)
+                familieBaSakKlient().sendTilBeslutter(fagsakId = restFagsakEtterBehandlingsresultat.data!!.id)
         generellAssertFagsak(restFagsak = restFagsakEtterSendTilBeslutter,
                              fagsakStatus = FagsakStatus.LØPENDE,
                              behandlingStegType = StegType.BESLUTTE_VEDTAK)
 
         val restFagsakEtterIverksetting =
-                familieBaSakKlient().iverksettVedtak(fagsakId = restFagsakEtterVilkårsvurdering.data!!.id,
+                familieBaSakKlient().iverksettVedtak(fagsakId = restFagsakEtterSendTilBeslutter.data!!.id,
                                                      restBeslutningPåVedtak = RestBeslutningPåVedtak(
                                                              Beslutning.GODKJENT),
                                                      beslutterHeaders = HttpHeaders().apply {

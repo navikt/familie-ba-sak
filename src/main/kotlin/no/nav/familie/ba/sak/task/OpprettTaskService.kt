@@ -41,9 +41,7 @@ class OpprettTaskService(
                                                                    årMåned = inneværendeMåned())),
                                         properties = Properties().apply {
                                             this["fagsak"] = fagsakId.toString()
-                                            if (!MDC.get(MDCConstants.MDC_CALL_ID).isNullOrEmpty()) {
-                                                this["callId"] = MDC.get(MDCConstants.MDC_CALL_ID) ?: IdUtils.generateId()
-                                            }
+                                            this["callId"] = IdUtils.generateId()
                                         }
         ))
     }

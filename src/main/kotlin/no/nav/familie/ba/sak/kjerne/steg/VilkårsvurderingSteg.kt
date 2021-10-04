@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatService
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
@@ -31,7 +32,8 @@ class VilkårsvurderingSteg(
         private val behandlingsresultatService: BehandlingsresultatService,
         private val behandlingService: BehandlingService,
         private val simuleringService: SimuleringService,
-        private val vedtakService: VedtakService
+        private val vedtakService: VedtakService,
+        private val endretUtbetalingAndelRepository: EndretUtbetalingAndelRepository
 ) : BehandlingSteg<String> {
 
     @Transactional
@@ -47,28 +49,10 @@ class VilkårsvurderingSteg(
                                                                        behandling))
         }
 
+        endretUtbetalingAndelRepository.deleteByBehandlingId(behandlingId = behandling.id)
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
 
-        val behandlingMedResultat = if (behandling.erMigrering() && behandling.skalBehandlesAutomatisk) {
-            settBehandlingResultat(behandling, BehandlingResultat.INNVILGET)
-        } else {
-            val resultat = behandlingsresultatService.utledBehandlingsresultat(behandlingId = behandling.id)
-            behandlingService.oppdaterResultatPåBehandling(behandlingId = behandling.id,
-                                                           resultat = resultat)
-        }
-
-        if (behandlingMedResultat.opprettetÅrsak != BehandlingÅrsak.SATSENDRING) {
-            vedtaksperiodeService.oppdaterVedtakMedVedtaksperioder(vedtak = vedtakService.hentAktivForBehandlingThrows(
-                    behandlingId = behandling.id))
-        }
-
-        if (behandlingMedResultat.skalBehandlesAutomatisk && behandlingMedResultat.resultat != BehandlingResultat.AVSLÅTT) {
-            behandlingService.oppdaterStatusPåBehandling(behandlingMedResultat.id, BehandlingStatus.IVERKSETTER_VEDTAK)
-        } else {
-            simuleringService.oppdaterSimuleringPåBehandling(behandlingMedResultat)
-        }
-
-        return hentNesteStegForNormalFlyt(behandlingMedResultat)
+        return hentNesteStegForNormalFlyt(behandling)
     }
 
     override fun stegType(): StegType {

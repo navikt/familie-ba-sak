@@ -13,7 +13,6 @@ import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPerson
 import no.nav.familie.ba.sak.integrasjoner.økonomi.sats
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
-import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
@@ -471,7 +470,7 @@ fun kjørStegprosessForFGB(
         stegService: StegService,
         vedtaksperiodeService: VedtaksperiodeService,
 ): Behandling {
-    val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
+    fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
     val behandling = stegService.håndterNyBehandling(NyBehandling(
             kategori = BehandlingKategori.NASJONAL,
             underkategori = BehandlingUnderkategori.ORDINÆR,
@@ -501,8 +500,12 @@ fun kjørStegprosessForFGB(
 
     if (tilSteg == StegType.VILKÅRSVURDERING) return behandlingEtterVilkårsvurderingSteg
 
+    val behandlingEtterBehandlingsresultat = stegService.håndterBehandlingsresultat(behandlingEtterVilkårsvurderingSteg)
+
+    if (tilSteg == StegType.BEHANDLINGSRESULTAT) return behandlingEtterBehandlingsresultat
+
     val behandlingEtterVurderTilbakekrevingSteg = stegService.håndterVurderTilbakekreving(
-            behandlingEtterVilkårsvurderingSteg,
+            behandlingEtterBehandlingsresultat,
             RestTilbakekreving(valg = Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING,
                                begrunnelse = "Begrunnelse")
     )
@@ -595,8 +598,12 @@ fun kjørStegprosessForRevurderingÅrligKontroll(
 
     if (tilSteg == StegType.VILKÅRSVURDERING) return behandlingEtterVilkårsvurderingSteg
 
+    val behandlingEtterBehandlingsresultat = stegService.håndterBehandlingsresultat(behandlingEtterVilkårsvurderingSteg)
+
+    if (tilSteg == StegType.BEHANDLINGSRESULTAT) return behandlingEtterBehandlingsresultat
+
     val behandlingEtterSimuleringSteg = stegService.håndterVurderTilbakekreving(
-            behandlingEtterVilkårsvurderingSteg,
+            behandlingEtterBehandlingsresultat,
             RestTilbakekreving(valg = Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING,
                                begrunnelse = "Begrunnelse")
     )
@@ -666,34 +673,6 @@ fun opprettRestTilbakekreving(): RestTilbakekreving = RestTilbakekreving(
         begrunnelse = "Begrunnelse",
 )
 
-/**
- * Dette er en funksjon for å få en automatisk førstegangsbehandling til en ønsket tilstand ved test.
- * Man sender inn steg man ønsker å komme til (tilSteg), personer på behandlingen (søkerFnr og barnasIdenter),
- * og serviceinstanser som brukes i testen.
- */
-fun kjørStegprosessForAutomatiskFGB(
-        tilSteg: StegType,
-        søkerFnr: String,
-        barnasIdenter: List<String>,
-        stegService: StegService
-): Behandling {
-    val nyBehandling = NyBehandlingHendelse(
-            morsIdent = søkerFnr,
-            barnasIdenter = barnasIdenter
-    )
-    val behandling = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling)
-
-    if (tilSteg == StegType.REGISTRERE_PERSONGRUNNLAG) return behandling
-
-    val behandlingEtterFiltrering = stegService.håndterFiltreringsreglerForFødselshendelser(behandling, nyBehandling)
-    if (tilSteg == StegType.FILTRERING_FØDSELSHENDELSER || behandlingEtterFiltrering.erHenlagt()) return behandlingEtterFiltrering
-
-    val behandlingEtterVilkårsvurdering = stegService.håndterVilkårsvurdering(behandlingEtterFiltrering)
-
-    // TODO implementer resten av flyt
-    return behandlingEtterVilkårsvurdering
-}
-
 fun lagUtbetalingsperiode(
         periodeFom: LocalDate = LocalDate.now().withDayOfMonth(1),
         periodeTom: LocalDate = LocalDate.now().let { it.withDayOfMonth(it.lengthOfMonth()) },
@@ -732,8 +711,8 @@ fun lagVedtaksbegrunnelse(
 
 fun lagVedtaksperiodeMedBegrunnelser(
         vedtak: Vedtak = lagVedtak(),
-        fom: LocalDate = LocalDate.now().withDayOfMonth(1),
-        tom: LocalDate = LocalDate.now().let { it.withDayOfMonth(it.lengthOfMonth()) },
+        fom: LocalDate? = LocalDate.now().withDayOfMonth(1),
+        tom: LocalDate? = LocalDate.now().let { it.withDayOfMonth(it.lengthOfMonth()) },
         type: Vedtaksperiodetype = Vedtaksperiodetype.FORTSATT_INNVILGET,
         begrunnelser: MutableSet<Vedtaksbegrunnelse> = mutableSetOf(lagVedtaksbegrunnelse()),
         fritekster: MutableList<VedtaksbegrunnelseFritekst> = mutableListOf(),
