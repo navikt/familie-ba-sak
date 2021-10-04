@@ -10,9 +10,11 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -50,20 +52,29 @@ class BehandlingsresultatService(
                                              søknadDTO = søknadGrunnlag?.hentSøknadDto(),
                                              forrigeBehandling = forrigeBehandling)
 
-        val parterSomErVurdertIInneværendeBehandling =
-                vilkårsvurdering.personResultater
-                        .filter { it.vilkårResultater.any { vilkårResultat -> vilkårResultat.behandlingId == behandlingId } }
-                        .map { it.personIdent }
-
         val personerVurdertIDenneBehandlingen = persongrunnlagService.hentAktiv(behandling.id)?.personer?.filter {
-            parterSomErVurdertIInneværendeBehandling.contains(it.personIdent.ident)
+            val vilkårResultater =
+                    vilkårsvurdering.personResultater.find { personResultat -> personResultat.personIdent == it.personIdent.ident }?.vilkårResultater
+                    ?: emptyList()
+
+            val vilkårVurdertIDenneBehandlingen =
+                    vilkårResultater.filter { vilkårResultat -> vilkårResultat.behandlingId == behandlingId }
+
+            when (it.type) {
+                PersonType.BARN -> vilkårVurdertIDenneBehandlingen.isNotEmpty()
+                PersonType.SØKER -> vilkårVurdertIDenneBehandlingen.any { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
+                else -> false
+            }
         }
 
         val behandlingsresultatPersoner = personerVurdertIDenneBehandlingen?.map {
-            BehandlingsresultatUtils.utledBehandlingsresultatDataForPerson(it,
-                                                                           personerFremstiltKravFor,
-                                                                           forrigeTilkjentYtelse,
-                                                                           tilkjentYtelse)
+            BehandlingsresultatUtils.utledBehandlingsresultatDataForPerson(person = it,
+                                                                           personerFremstiltKravFor = personerFremstiltKravFor,
+                                                                           forrigeTilkjentYtelse = forrigeTilkjentYtelse,
+                                                                           tilkjentYtelse = tilkjentYtelse,
+                                                                           erEksplisittAvslag = vilkårsvurdering.personResultater.find { personResultat -> personResultat.personIdent == it.personIdent.ident }
+                                                                                                        ?.harEksplisittAvslag()
+                                                                                                ?: false)
         } ?: emptyList()
 
         val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(behandlingsresultatPersoner)

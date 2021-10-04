@@ -10,7 +10,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 
 object BehandlingsresultatUtils {
 
@@ -21,7 +20,8 @@ object BehandlingsresultatUtils {
     fun utledBehandlingsresultatDataForPerson(person: Person,
                                               personerFremstiltKravFor: List<String>,
                                               forrigeTilkjentYtelse: TilkjentYtelse?,
-                                              tilkjentYtelse: TilkjentYtelse): BehandlingsresultatPerson {
+                                              tilkjentYtelse: TilkjentYtelse,
+                                              erEksplisittAvslag: Boolean): BehandlingsresultatPerson {
 
         val personIdent = person.personIdent.ident
         return BehandlingsresultatPerson(
@@ -43,7 +43,8 @@ object BehandlingsresultatUtils {
                                     stønadTom = andelTilkjentYtelse.stønadTom,
                                     kalkulertUtbetalingsbeløp = andelTilkjentYtelse.kalkulertUtbetalingsbeløp
                             )
-                        }
+                        },
+                eksplisittAvslag = erEksplisittAvslag,
         )
     }
 
