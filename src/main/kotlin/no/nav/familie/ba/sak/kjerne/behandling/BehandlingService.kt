@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils.bestemUnderkategori
+import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils.utledLøpendeUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
@@ -277,7 +278,7 @@ class BehandlingService(
         val forrigeAndeler =
                 andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = forrigeIverksattBehandling.id)
 
-        return if (forrigeAndeler.any { it.erUtvidet() }) BehandlingUnderkategori.UTVIDET else BehandlingUnderkategori.ORDINÆR
+        return utledLøpendeUnderkategori(forrigeAndeler)
     }
 
     companion object {
