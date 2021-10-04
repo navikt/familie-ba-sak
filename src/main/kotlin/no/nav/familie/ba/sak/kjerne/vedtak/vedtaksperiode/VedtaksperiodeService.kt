@@ -16,6 +16,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedBegrunne
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedFritekster
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedStandardbegrunnelser
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVedtaksperiodeMedBegrunnelser
+import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
 import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
@@ -23,7 +24,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
-import no.nav.familie.ba.sak.kjerne.dokument.SanityKlient
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.dokument.hentVedtaksbrevmal
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
@@ -62,7 +62,7 @@ class VedtaksperiodeService(
         private val vedtaksperiodeRepository: VedtaksperiodeRepository,
         private val vilkårsvurderingRepository: VilkårsvurderingRepository,
         private val featureToggleService: FeatureToggleService,
-        private val sanityKlient: SanityKlient,
+        private val sanityService: SanityService,
         private val søknadGrunnlagService: SøknadGrunnlagService
 ) {
 
@@ -91,7 +91,7 @@ class VedtaksperiodeService(
         vedtaksperiodeMedBegrunnelser.settBegrunnelser(restPutVedtaksperiodeMedBegrunnelse.begrunnelser.map {
             val triggesAv =
                     if (featureToggleService.isEnabled(BRUK_BEGRUNNELSE_TRIGGES_AV_FRA_SANITY)) {
-                        it.vedtakBegrunnelseSpesifikasjon.tilSanityBegrunnelse(sanityKlient.hentSanityBegrunnelse())
+                        it.vedtakBegrunnelseSpesifikasjon.tilSanityBegrunnelse(sanityService.hentSanityBegrunnelser())
                                 .tilTriggesAv()
                     } else
                         it.vedtakBegrunnelseSpesifikasjon.triggesAv
@@ -131,14 +131,14 @@ class VedtaksperiodeService(
                                           begrunnelserMedFeil.fold("") { acc, vedtakBegrunnelseSpesifikasjon ->
                                               val triggesAv =
                                                       if (featureToggleService.isEnabled(BRUK_BEGRUNNELSE_TRIGGES_AV_FRA_SANITY)) {
-                                                          vedtakBegrunnelseSpesifikasjon.tilSanityBegrunnelse(sanityKlient.hentSanityBegrunnelse())
+                                                          vedtakBegrunnelseSpesifikasjon.tilSanityBegrunnelse(sanityService.hentSanityBegrunnelser())
                                                                   .tilTriggesAv()
                                                       } else
                                                           vedtakBegrunnelseSpesifikasjon.triggesAv
                                               val tittel =
                                                       if (featureToggleService.isEnabled(BRUK_BEGRUNNELSE_TRIGGES_AV_FRA_SANITY)) {
                                                           vedtakBegrunnelseSpesifikasjon
-                                                                  .tilSanityBegrunnelse(sanityKlient.hentSanityBegrunnelse())
+                                                                  .tilSanityBegrunnelse(sanityService.hentSanityBegrunnelser())
                                                                   .navnISystem
                                                       } else
                                                           vedtakBegrunnelseSpesifikasjon.tittel
@@ -194,7 +194,7 @@ class VedtaksperiodeService(
 
             val triggesAv =
                     if (featureToggleService.isEnabled(BRUK_BEGRUNNELSE_TRIGGES_AV_FRA_SANITY)) {
-                        it.tilSanityBegrunnelse(sanityKlient.hentSanityBegrunnelse()).tilTriggesAv()
+                        it.tilSanityBegrunnelse(sanityService.hentSanityBegrunnelser()).tilTriggesAv()
                     } else
                         it.triggesAv
             val vedtakBegrunnelseType = it.vedtakBegrunnelseType
@@ -236,7 +236,7 @@ class VedtaksperiodeService(
                                       frontendFeilmelding = "Begrunnelsen stemmer ikke med satsendring. Vennligst velg en annen begrunnelse.")
             }
             if (featureToggleService.isEnabled(BRUK_BEGRUNNELSE_TRIGGES_AV_FRA_SANITY)) {
-                val sanityBegrunnelser = sanityKlient.hentSanityBegrunnelse()
+                val sanityBegrunnelser = sanityService.hentSanityBegrunnelser()
                 if (it.erTilknyttetVilkår(sanityBegrunnelser) && personIdenter.isEmpty()) {
                     begrunnelserMedFeil.add(it)
                 }
@@ -257,14 +257,14 @@ class VedtaksperiodeService(
 
                                               val triggesAv =
                                                       if (featureToggleService.isEnabled(BRUK_BEGRUNNELSE_TRIGGES_AV_FRA_SANITY)) {
-                                                          vedtakBegrunnelseSpesifikasjon.tilSanityBegrunnelse(sanityKlient.hentSanityBegrunnelse())
+                                                          vedtakBegrunnelseSpesifikasjon.tilSanityBegrunnelse(sanityService.hentSanityBegrunnelser())
                                                                   .tilTriggesAv()
                                                       } else
                                                           vedtakBegrunnelseSpesifikasjon.triggesAv
                                               val tittel =
                                                       if (featureToggleService.isEnabled(BRUK_BEGRUNNELSE_TRIGGES_AV_FRA_SANITY)) {
                                                           vedtakBegrunnelseSpesifikasjon
-                                                                  .tilSanityBegrunnelse(sanityKlient.hentSanityBegrunnelse())
+                                                                  .tilSanityBegrunnelse(sanityService.hentSanityBegrunnelser())
                                                                   .navnISystem
                                                       } else
                                                           vedtakBegrunnelseSpesifikasjon.tittel
@@ -417,7 +417,7 @@ class VedtaksperiodeService(
                                 val triggesAv =
                                         if (featureToggleService.isEnabled(BRUK_BEGRUNNELSE_TRIGGES_AV_FRA_SANITY)) {
                                             if (it.erTilgjengeligFrontend) {
-                                                it.tilSanityBegrunnelse(sanityKlient.hentSanityBegrunnelse())
+                                                it.tilSanityBegrunnelse(sanityService.hentSanityBegrunnelser())
                                                         .tilTriggesAv()
                                             } else
                                                 TriggesAv(valgbar = false)
