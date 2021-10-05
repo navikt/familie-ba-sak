@@ -128,13 +128,17 @@ class BehandlingController(
     }
 
     @PutMapping(path = ["/{behandlingId}/behandlingstema"], produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun endreBehandlingstema(@PathVariable behandlingId: Long,
-                             @RequestBody
-                             endreBehandling: RestEndreBehandlingstema): ResponseEntity<Ressurs<RestFagsak>> {
-        val behandling = behandlingsService.oppdaterBehandlingstema(behandling = behandlingsService.hent(behandlingId),
-                                                                    nyBehandlingUnderkategori = endreBehandling.behandlingUnderkategori,
-                                                                    nyBehandlingKategori = endreBehandling.behandlingKategori,
-                                                                    manueltOppdatert = true)
+    fun endreBehandlingstema(
+        @PathVariable behandlingId: Long,
+        @RequestBody
+        endreBehandling: RestEndreBehandlingstema
+    ): ResponseEntity<Ressurs<RestFagsak>> {
+        val behandling = behandlingsService.oppdaterBehandlingstema(
+            behandling = behandlingsService.hent(behandlingId),
+            nyBehandlingUnderkategori = endreBehandling.behandlingUnderkategori,
+            nyBehandlingKategori = endreBehandling.behandlingKategori,
+            manueltOppdatert = true
+        )
 
         val restFagsak = fagsakService.hentRestFagsak(fagsakId = behandling.fagsak.id)
 
