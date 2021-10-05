@@ -8,13 +8,13 @@ import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import org.springframework.stereotype.Service
-import java.util.*
+import java.util.Properties
 
 @Service
 @TaskStepBeskrivelse(taskStepType = TASK_STEP_TYPE, beskrivelse = "Journalfør brev i Joark", maxAntallFeil = 3)
 class JournalførVedtaksbrevTask(
-        private val vedtakService: VedtakService,
-        private val stegService: StegService
+    private val vedtakService: VedtakService,
+    private val stegService: StegService
 ) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
@@ -28,17 +28,21 @@ class JournalførVedtaksbrevTask(
 
         const val TASK_STEP_TYPE = "journalførTilJoark"
 
-        fun opprettTaskJournalførVedtaksbrev(personIdent: String,
-                                             behandlingId: Long,
-                                             vedtakId: Long,
-                                             gammelTask: Task? = null): Task {
-            return Task(TASK_STEP_TYPE,
-                               "$vedtakId",
-                               gammelTask?.metadata ?: Properties().apply {
-                                   this["personIdent"] = personIdent
-                                   this["behandlingsId"] = behandlingId.toString()
-                                   this["vedtakId"] = vedtakId.toString()
-                               })
+        fun opprettTaskJournalførVedtaksbrev(
+            personIdent: String,
+            behandlingId: Long,
+            vedtakId: Long,
+            gammelTask: Task? = null
+        ): Task {
+            return Task(
+                TASK_STEP_TYPE,
+                "$vedtakId",
+                gammelTask?.metadata ?: Properties().apply {
+                    this["personIdent"] = personIdent
+                    this["behandlingsId"] = behandlingId.toString()
+                    this["vedtakId"] = vedtakId.toString()
+                }
+            )
         }
     }
 }

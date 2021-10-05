@@ -21,7 +21,6 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
-
 @Service
 class BehandlingsresultatService(
         private val behandlingService: BehandlingService,
@@ -43,15 +42,19 @@ class BehandlingsresultatService(
         val søknadGrunnlag = søknadGrunnlagService.hentAktiv(behandlingId = behandling.id)
         if (barna.isEmpty() && (søknadGrunnlag?.hentUregistrerteBarn() ?: emptyList()).isEmpty()) throw FunksjonellFeil(
                 melding = "Ingen barn i personopplysningsgrunnlag ved validering av vilkårsvurdering på behandling ${behandling.id}",
-                frontendFeilmelding = "Barn må legges til for å gjennomføre vilkårsvurdering.")
+                frontendFeilmelding = "Barn må legges til for å gjennomføre vilkårsvurdering."
+        )
 
         val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandlingId)
+
                 ?: throw Feil("Finner ikke aktiv vilkårsvurdering")
 
         val personerFremstiltKravFor =
-                hentPersonerFramstiltKravFor(behandling = behandling,
+                hentPersonerFramstiltKravFor(
+                        behandling = behandling,
                         søknadDTO = søknadGrunnlag?.hentSøknadDto(),
-                        forrigeBehandling = forrigeBehandling)
+                        forrigeBehandling = forrigeBehandling
+                )
 
         val personerVurdertIDenneBehandlingen = persongrunnlagService.hentAktiv(behandling.id)?.personer?.filter {
             val vilkårResultater =
@@ -69,19 +72,20 @@ class BehandlingsresultatService(
         }
 
         val behandlingsresultatPersoner = personerVurdertIDenneBehandlingen?.map {
-            BehandlingsresultatUtils.utledBehandlingsresultatDataForPerson(person = it,
+            BehandlingsresultatUtils.utledBehandlingsresultatDataForPerson(
+                    person = it,
                     personerFremstiltKravFor = personerFremstiltKravFor,
                     forrigeTilkjentYtelse = forrigeTilkjentYtelse,
                     tilkjentYtelse = tilkjentYtelse,
                     erEksplisittAvslag = vilkårsvurdering.personResultater.find { personResultat -> personResultat.personIdent == it.personIdent.ident }
                             ?.harEksplisittAvslag()
-                            ?: false)
+                            ?: false
+            )
         } ?: emptyList()
 
         secureLogger.info("Behandlingsresultatpersoner: ${behandlingsresultatPersoner.convertDataClassToJson()}")
 
         val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(behandlingsresultatPersoner)
-
 
         validerYtelsePersoner(behandlingId = behandling.id, ytelsePersoner = ytelsePersonerMedResultat)
 
@@ -105,9 +109,11 @@ class BehandlingsresultatService(
         if (ytelsePersoner.any { it.ytelseType == YtelseType.ORDINÆR_BARNETRYGD && it.personIdent == søkerIdent }) throw Feil("Søker kan ikke ha ytelsetype ordinær")
     }
 
-    private fun hentPersonerFramstiltKravFor(behandling: Behandling,
-                                             søknadDTO: SøknadDTO? = null,
-                                             forrigeBehandling: Behandling?): List<String> {
+    private fun hentPersonerFramstiltKravFor(
+            behandling: Behandling,
+            søknadDTO: SøknadDTO? = null,
+            forrigeBehandling: Behandling?
+    ): List<String> {
         val barnFraSøknad = søknadDTO?.barnaMedOpplysninger
                 ?.filter { it.inkludertISøknaden }
                 ?.map { it.ident }
@@ -121,10 +127,12 @@ class BehandlingsresultatService(
         val barnMedEksplisitteAvslag =
                 vilkårsvurderingService.finnBarnMedEksplisittAvslagPåBehandling(behandlingId = behandling.id)
 
-        return (barnFraSøknad
-                + barnMedEksplisitteAvslag
-                + utvidetBarnetrygdSøker
-                + nyeBarn).distinct()
+        return (
+                barnFraSøknad +
+                        barnMedEksplisitteAvslag +
+                        utvidetBarnetrygdSøker +
+                        nyeBarn
+                ).distinct()
     }
 
     private fun List<YtelsePerson>.writeValueAsString(): String = objectMapper.writeValueAsString(this)
@@ -135,7 +143,3 @@ class BehandlingsresultatService(
         private val secureLogger: Logger = LoggerFactory.getLogger("secureLogger")
     }
 }
-
-
-
-

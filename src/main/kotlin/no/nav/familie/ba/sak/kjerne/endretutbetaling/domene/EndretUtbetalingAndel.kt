@@ -37,9 +37,9 @@ data class EndretUtbetalingAndel(
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "endret_utbetaling_andel_seq_generator")
     @SequenceGenerator(
-            name = "endret_utbetaling_andel_seq_generator",
-            sequenceName = "endret_utbetaling_andel_seq",
-            allocationSize = 50
+        name = "endret_utbetaling_andel_seq_generator",
+        sequenceName = "endret_utbetaling_andel_seq",
+        allocationSize = 50
     )
     val id: Long = 0,
 
@@ -85,31 +85,31 @@ data class EndretUtbetalingAndel(
     @Convert(converter = VedtakBegrunnelseSpesifikasjonListConverter::class)
     var vedtakBegrunnelseSpesifikasjoner: List<VedtakBegrunnelseSpesifikasjon> = emptyList(),
 
-    ) : BaseEntitet() {
+) : BaseEntitet() {
 
     fun overlapperMed(periode: MånedPeriode) = periode.overlapperHeltEllerDelvisMed(this.periode())
 
-    fun periode():MånedPeriode {
+    fun periode(): MånedPeriode {
         validerUtfyltEndring()
         return MånedPeriode(this.fom!!, this.tom!!)
     }
 
-    fun validerUtfyltEndring():Boolean {
+    fun validerUtfyltEndring(): Boolean {
         if (person == null ||
             prosent == null ||
             fom == null ||
             tom == null ||
             årsak == null ||
-            søknadstidspunkt == null)
-                throw Feil("Person, prosent, fom, tom, årsak og søknadstidspunkt skal være utfylt: $this.tostring()")
+            søknadstidspunkt == null
+        )
+            throw Feil("Person, prosent, fom, tom, årsak og søknadstidspunkt skal være utfylt: $this.tostring()")
 
-        if(årsak == Årsak.DELT_BOSTED && avtaletidspunktDeltBosted == null)
+        if (årsak == Årsak.DELT_BOSTED && avtaletidspunktDeltBosted == null)
             throw Feil("Avtaletidspunkt skal være utfylt når årsak er delt bosted: $this.tostring()")
 
         return true
     }
 }
-
 
 enum class Årsak(val visningsnavn: String) {
     DELT_BOSTED("Delt bosted"),

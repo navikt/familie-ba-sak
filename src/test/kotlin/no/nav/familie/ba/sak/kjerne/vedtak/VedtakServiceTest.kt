@@ -27,13 +27,12 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagSe
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat.Companion.VilkårResultatComparator
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -48,59 +47,59 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 
 class VedtakServiceTest(
-        @Autowired
-        private val behandlingRepository: BehandlingRepository,
+    @Autowired
+    private val behandlingRepository: BehandlingRepository,
 
-        @Autowired
-        private val vedtakRepository: VedtakRepository,
+    @Autowired
+    private val vedtakRepository: VedtakRepository,
 
-        @Autowired
-        private val behandlingMetrikker: BehandlingMetrikker,
+    @Autowired
+    private val behandlingMetrikker: BehandlingMetrikker,
 
-        @Autowired
-        private val vilkårsvurderingService: VilkårsvurderingService,
+    @Autowired
+    private val vilkårsvurderingService: VilkårsvurderingService,
 
-        @Autowired
-        private val arbeidsfordelingService: ArbeidsfordelingService,
+    @Autowired
+    private val arbeidsfordelingService: ArbeidsfordelingService,
 
-        @Autowired
-        private val vedtakService: VedtakService,
+    @Autowired
+    private val vedtakService: VedtakService,
 
-        @Autowired
-        private val vedtaksperiodeService: VedtaksperiodeService,
+    @Autowired
+    private val vedtaksperiodeService: VedtaksperiodeService,
 
-        @Autowired
-        private val persongrunnlagService: PersongrunnlagService,
+    @Autowired
+    private val persongrunnlagService: PersongrunnlagService,
 
-        @Autowired
-        private val fagsakService: FagsakService,
+    @Autowired
+    private val fagsakService: FagsakService,
 
-        @Autowired
-        private val fagsakPersonRepository: FagsakPersonRepository,
+    @Autowired
+    private val fagsakPersonRepository: FagsakPersonRepository,
 
-        @Autowired
-        private val totrinnskontrollService: TotrinnskontrollService,
+    @Autowired
+    private val totrinnskontrollService: TotrinnskontrollService,
 
-        @Autowired
-        private val loggService: LoggService,
+    @Autowired
+    private val loggService: LoggService,
 
-        @Autowired
-        private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
+    @Autowired
+    private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
 
-        @Autowired
-        private val oppgaveService: OppgaveService,
+    @Autowired
+    private val oppgaveService: OppgaveService,
 
-        @Autowired
-        private val infotrygdService: InfotrygdService,
+    @Autowired
+    private val infotrygdService: InfotrygdService,
 
-        @Autowired
-        private val featureToggleService: FeatureToggleService,
+    @Autowired
+    private val featureToggleService: FeatureToggleService,
 
-        @Autowired
-        private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
+    @Autowired
+    private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
 
-        @Autowired
-        private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
+    @Autowired
+    private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
 ) : AbstractSpringIntegrationTest() {
 
     lateinit var behandlingService: BehandlingService
@@ -117,27 +116,27 @@ class VedtakServiceTest(
     fun setup() {
         MockKAnnotations.init(this)
         behandlingService = BehandlingService(
-                behandlingRepository,
-                personopplysningGrunnlagRepository,
-                andelTilkjentYtelseRepository,
-                behandlingMetrikker,
-                fagsakPersonRepository,
-                vedtakRepository,
-                loggService,
-                arbeidsfordelingService,
-                saksstatistikkEventPublisher,
-                oppgaveService,
-                infotrygdService,
-                vedtaksperiodeService
+            behandlingRepository,
+            personopplysningGrunnlagRepository,
+            andelTilkjentYtelseRepository,
+            behandlingMetrikker,
+            fagsakPersonRepository,
+            vedtakRepository,
+            loggService,
+            arbeidsfordelingService,
+            saksstatistikkEventPublisher,
+            oppgaveService,
+            infotrygdService,
+            vedtaksperiodeService
         )
 
         stubFor(
-                get(urlEqualTo("/api/aktoer/v1"))
-                        .willReturn(
-                                aResponse()
-                                        .withHeader("Content-Type", "application/json")
-                                        .withBody(objectMapper.writeValueAsString(Ressurs.success(mapOf("aktørId" to "1"))))
-                        )
+            get(urlEqualTo("/api/aktoer/v1"))
+                .willReturn(
+                    aResponse()
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(objectMapper.writeValueAsString(Ressurs.success(mapOf("aktørId" to "1"))))
+                )
         )
 
         val personIdent = randomFnr()
@@ -150,31 +149,31 @@ class VedtakServiceTest(
         vilkårsvurdering = lagVilkårsvurdering(personIdent, behandling, resultat)
 
         personResultat = PersonResultat(
-                vilkårsvurdering = vilkårsvurdering,
-                personIdent = personIdent
+            vilkårsvurdering = vilkårsvurdering,
+            personIdent = personIdent
         )
 
         vilkårResultat1 = VilkårResultat(
-                1, personResultat, vilkår, resultat,
-                LocalDate.of(2010, 1, 1), LocalDate.of(2010, 6, 1),
-                "", vilkårsvurdering.behandling.id
+            1, personResultat, vilkår, resultat,
+            LocalDate.of(2010, 1, 1), LocalDate.of(2010, 6, 1),
+            "", vilkårsvurdering.behandling.id
         )
         vilkårResultat2 = VilkårResultat(
-                2, personResultat, vilkår, resultat,
-                LocalDate.of(2010, 6, 2), LocalDate.of(2010, 8, 1),
-                "", vilkårsvurdering.behandling.id,
+            2, personResultat, vilkår, resultat,
+            LocalDate.of(2010, 6, 2), LocalDate.of(2010, 8, 1),
+            "", vilkårsvurdering.behandling.id,
         )
         vilkårResultat3 = VilkårResultat(
-                3, personResultat, vilkår, resultat,
-                LocalDate.of(2010, 8, 2), LocalDate.of(2010, 12, 1),
-                "", vilkårsvurdering.behandling.id
+            3, personResultat, vilkår, resultat,
+            LocalDate.of(2010, 8, 2), LocalDate.of(2010, 12, 1),
+            "", vilkårsvurdering.behandling.id
         )
         personResultat.setSortedVilkårResultater(
-                setOf(
-                        vilkårResultat1,
-                        vilkårResultat2,
-                        vilkårResultat3
-                ).toSortedSet(VilkårResultatComparator)
+            setOf(
+                vilkårResultat1,
+                vilkårResultat2,
+                vilkårResultat3
+            ).toSortedSet(VilkårResultatComparator)
         )
     }
 
@@ -193,7 +192,7 @@ class VedtakServiceTest(
         vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering)
 
         val personopplysningGrunnlag =
-                lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
+            lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
         behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling = behandling)
@@ -224,10 +223,10 @@ class VedtakServiceTest(
 
         assertThrows<IllegalStateException> {
             vedtakService.oppdater(
-                    Vedtak(
-                            behandling = behandling,
-                            vedtaksdato = LocalDateTime.now()
-                    )
+                Vedtak(
+                    behandling = behandling,
+                    vedtaksdato = LocalDateTime.now()
+                )
             )
         }
     }

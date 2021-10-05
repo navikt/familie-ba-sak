@@ -43,41 +43,45 @@ import javax.persistence.Table
 @Entity(name = "Vedtaksperiode")
 @Table(name = "VEDTAKSPERIODE")
 data class VedtaksperiodeMedBegrunnelser(
-        @Id
-        @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "vedtaksperiode_seq_generator")
-        @SequenceGenerator(name = "vedtaksperiode_seq_generator",
-                           sequenceName = "vedtaksperiode_seq",
-                           allocationSize = 50)
-        val id: Long = 0,
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "vedtaksperiode_seq_generator")
+    @SequenceGenerator(
+        name = "vedtaksperiode_seq_generator",
+        sequenceName = "vedtaksperiode_seq",
+        allocationSize = 50
+    )
+    val id: Long = 0,
 
-        @JsonIgnore
-        @ManyToOne @JoinColumn(name = "fk_vedtak_id")
-        val vedtak: Vedtak,
+    @JsonIgnore
+    @ManyToOne @JoinColumn(name = "fk_vedtak_id")
+    val vedtak: Vedtak,
 
-        @Column(name = "fom", updatable = false)
-        val fom: LocalDate? = null,
+    @Column(name = "fom", updatable = false)
+    val fom: LocalDate? = null,
 
-        @Column(name = "tom", updatable = false)
-        val tom: LocalDate? = null,
+    @Column(name = "tom", updatable = false)
+    val tom: LocalDate? = null,
 
-        @Column(name = "type", updatable = false)
-        @Enumerated(EnumType.STRING)
-        val type: Vedtaksperiodetype,
+    @Column(name = "type", updatable = false)
+    @Enumerated(EnumType.STRING)
+    val type: Vedtaksperiodetype,
 
-        @OneToMany(fetch = FetchType.EAGER,
-                   mappedBy = "vedtaksperiodeMedBegrunnelser",
-                   cascade = [CascadeType.ALL],
-                   orphanRemoval = true
-        )
-        val begrunnelser: MutableSet<Vedtaksbegrunnelse> = mutableSetOf(),
+    @OneToMany(
+        fetch = FetchType.EAGER,
+        mappedBy = "vedtaksperiodeMedBegrunnelser",
+        cascade = [CascadeType.ALL],
+        orphanRemoval = true
+    )
+    val begrunnelser: MutableSet<Vedtaksbegrunnelse> = mutableSetOf(),
 
-        // Bruker list for å bevare rekkefølgen som settes frontend.
-        @OneToMany(fetch = FetchType.EAGER,
-                   mappedBy = "vedtaksperiodeMedBegrunnelser",
-                   cascade = [CascadeType.ALL],
-                   orphanRemoval = true
-        )
-        val fritekster: MutableList<VedtaksbegrunnelseFritekst> = mutableListOf()
+    // Bruker list for å bevare rekkefølgen som settes frontend.
+    @OneToMany(
+        fetch = FetchType.EAGER,
+        mappedBy = "vedtaksperiodeMedBegrunnelser",
+        cascade = [CascadeType.ALL],
+        orphanRemoval = true
+    )
+    val fritekster: MutableList<VedtaksbegrunnelseFritekst> = mutableListOf()
 
 ) : BaseEntitet() {
 
@@ -101,32 +105,32 @@ data class VedtaksperiodeMedBegrunnelser(
 }
 
 fun VedtaksperiodeMedBegrunnelser.tilRestVedtaksperiodeMedBegrunnelser(gyldigeBegrunnelser: List<VedtakBegrunnelseSpesifikasjon>) = RestVedtaksperiodeMedBegrunnelser(
-        id = this.id,
-        fom = this.fom,
-        tom = this.tom,
-        type = this.type,
-        begrunnelser = this.begrunnelser.map { it.tilRestVedtaksbegrunnelse() },
-        fritekster = this.fritekster.sortedBy { it.id }.map { it.fritekst },
-        gyldigeBegrunnelser = gyldigeBegrunnelser
+    id = this.id,
+    fom = this.fom,
+    tom = this.tom,
+    type = this.type,
+    begrunnelser = this.begrunnelser.map { it.tilRestVedtaksbegrunnelse() },
+    fritekster = this.fritekster.sortedBy { it.id }.map { it.fritekst },
+    gyldigeBegrunnelser = gyldigeBegrunnelser
 )
 
 fun VedtaksperiodeMedBegrunnelser.tilBrevPeriode(
-        personerIPersongrunnlag: List<Person>,
-        utbetalingsperioder: List<Utbetalingsperiode>,
-        målform: Målform,
-        brukBegrunnelserFraSanity: Boolean = false,
-        uregistrerteBarn: List<BarnMedOpplysninger> = emptyList()
+    personerIPersongrunnlag: List<Person>,
+    utbetalingsperioder: List<Utbetalingsperiode>,
+    målform: Målform,
+    brukBegrunnelserFraSanity: Boolean = false,
+    uregistrerteBarn: List<BarnMedOpplysninger> = emptyList()
 ): BrevPeriode? {
     val begrunnelserOgFritekster = byggBegrunnelserOgFriteksterForVedtaksperiode(
-            vedtaksperiode = this,
-            personerIPersongrunnlag = personerIPersongrunnlag,
-            målform = målform,
-            uregistrerteBarn = uregistrerteBarn
+        vedtaksperiode = this,
+        personerIPersongrunnlag = personerIPersongrunnlag,
+        målform = målform,
+        uregistrerteBarn = uregistrerteBarn
     )
 
     val tomDato =
-            if (this.tom?.erSenereEnnInneværendeMåned() == false) this.tom.tilDagMånedÅr()
-            else null
+        if (this.tom?.erSenereEnnInneværendeMåned() == false) this.tom.tilDagMånedÅr()
+        else null
 
     if (begrunnelserOgFritekster.isEmpty()) return null
 
@@ -134,7 +138,7 @@ fun VedtaksperiodeMedBegrunnelser.tilBrevPeriode(
         Vedtaksperiodetype.FORTSATT_INNVILGET -> {
             val erAutobrev = this.begrunnelser.any { vedtaksbegrunnelse ->
                 vedtaksbegrunnelse.vedtakBegrunnelseSpesifikasjon == VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR ||
-                vedtaksbegrunnelse.vedtakBegrunnelseSpesifikasjon == VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR
+                    vedtaksbegrunnelse.vedtakBegrunnelseSpesifikasjon == VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR
             }
             val fom = if (erAutobrev && this.fom != null) {
                 val fra = if (målform == Målform.NB) "Fra" else "Frå"
@@ -142,55 +146,58 @@ fun VedtaksperiodeMedBegrunnelser.tilBrevPeriode(
             } else null
             val utbetalingsperiode = hentUtbetalingsperiodeForVedtaksperiode(utbetalingsperioder, this.fom)
             FortsattInnvilgetBrevPeriode(
-                    fom = fom ?: "Du får:",
-                    belop = Utils.formaterBeløp(utbetalingsperiode.utbetaltPerMnd),
-                    antallBarn = utbetalingsperiode.antallBarn.toString(),
-                    barnasFodselsdager = finnAlleBarnsFødselsDatoerIUtbetalingsperiode(utbetalingsperiode),
-                    begrunnelser = begrunnelserOgFritekster)
+                fom = fom ?: "Du får:",
+                belop = Utils.formaterBeløp(utbetalingsperiode.utbetaltPerMnd),
+                antallBarn = utbetalingsperiode.antallBarn.toString(),
+                barnasFodselsdager = finnAlleBarnsFødselsDatoerIUtbetalingsperiode(utbetalingsperiode),
+                begrunnelser = begrunnelserOgFritekster
+            )
         }
 
         Vedtaksperiodetype.UTBETALING -> {
             val utbetalingsperiode = hentUtbetalingsperiodeForVedtaksperiode(utbetalingsperioder, this.fom)
             InnvilgelseBrevPeriode(
-                    fom = this.fom!!.tilDagMånedÅr(),
-                    tom = tomDato,
-                    belop = Utils.formaterBeløp(utbetalingsperiode.utbetaltPerMnd),
-                    antallBarn = utbetalingsperiode.antallBarn.toString(),
-                    barnasFodselsdager = finnAlleBarnsFødselsDatoerIUtbetalingsperiode(utbetalingsperiode),
-                    begrunnelser = begrunnelserOgFritekster)
+                fom = this.fom!!.tilDagMånedÅr(),
+                tom = tomDato,
+                belop = Utils.formaterBeløp(utbetalingsperiode.utbetaltPerMnd),
+                antallBarn = utbetalingsperiode.antallBarn.toString(),
+                barnasFodselsdager = finnAlleBarnsFødselsDatoerIUtbetalingsperiode(utbetalingsperiode),
+                begrunnelser = begrunnelserOgFritekster
+            )
         }
 
         Vedtaksperiodetype.AVSLAG ->
             if (this.fom != null)
                 AvslagBrevPeriode(
-                        fom = this.fom.tilDagMånedÅr(),
-                        tom = tomDato,
-                        begrunnelser = begrunnelserOgFritekster)
+                    fom = this.fom.tilDagMånedÅr(),
+                    tom = tomDato,
+                    begrunnelser = begrunnelserOgFritekster
+                )
             else AvslagUtenPeriodeBrevPeriode(begrunnelser = begrunnelserOgFritekster)
 
         Vedtaksperiodetype.OPPHØR -> OpphørBrevPeriode(
-                fom = this.fom!!.tilDagMånedÅr(),
-                tom = tomDato,
-                begrunnelser = begrunnelserOgFritekster)
-
+            fom = this.fom!!.tilDagMånedÅr(),
+            tom = tomDato,
+            begrunnelser = begrunnelserOgFritekster
+        )
     }
 }
 
 fun byggBegrunnelserOgFriteksterForVedtaksperiode(
-        vedtaksperiode: VedtaksperiodeMedBegrunnelser,
-        personerIPersongrunnlag: List<Person>,
-        målform: Målform,
-        uregistrerteBarn: List<BarnMedOpplysninger> = emptyList(),
+    vedtaksperiode: VedtaksperiodeMedBegrunnelser,
+    personerIPersongrunnlag: List<Person>,
+    målform: Målform,
+    uregistrerteBarn: List<BarnMedOpplysninger> = emptyList(),
 ): List<Begrunnelse> {
     val fritekster = vedtaksperiode.fritekster.sortedBy { it.id }.map { FritekstBegrunnelse(it.fritekst) }
     val begrunnelser =
-            vedtaksperiode.begrunnelser.map {
-                it.tilBrevBegrunnelse(
-                        personerPåBegrunnelse = personerIPersongrunnlag.filter { person -> it.personIdenter.contains(person.personIdent.ident) },
-                        målform = målform,
-                        uregistrerteBarn = uregistrerteBarn
-                )
-            }
+        vedtaksperiode.begrunnelser.map {
+            it.tilBrevBegrunnelse(
+                personerPåBegrunnelse = personerIPersongrunnlag.filter { person -> it.personIdenter.contains(person.personIdent.ident) },
+                målform = målform,
+                uregistrerteBarn = uregistrerteBarn
+            )
+        }
 
     return begrunnelser + fritekster
 }

@@ -11,8 +11,9 @@ import java.util.Properties
 
 @Service
 @TaskStepBeskrivelse(taskStepType = TASK_STEP_TYPE, beskrivelse = "Publiser vedtak til kafka", maxAntallFeil = 1)
-class PubliserVedtakTask(val kafkaProducer: KafkaProducer,
-                         val stønadsstatistikkService: StønadsstatistikkService
+class PubliserVedtakTask(
+    val kafkaProducer: KafkaProducer,
+    val stønadsstatistikkService: StønadsstatistikkService
 ) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
@@ -25,12 +26,13 @@ class PubliserVedtakTask(val kafkaProducer: KafkaProducer,
         const val TASK_STEP_TYPE = "publiserVedtakTask"
 
         fun opprettTask(personIdent: String, behandlingsId: Long): Task {
-            return Task(type = TASK_STEP_TYPE,
-                               payload = behandlingsId.toString(),
-                               properties = Properties().apply {
-                                   this["personIdent"] = personIdent
-                                   this["behandlingsId"] = behandlingsId.toString()
-                               }
+            return Task(
+                type = TASK_STEP_TYPE,
+                payload = behandlingsId.toString(),
+                properties = Properties().apply {
+                    this["personIdent"] = personIdent
+                    this["behandlingsId"] = behandlingsId.toString()
+                }
             )
         }
     }

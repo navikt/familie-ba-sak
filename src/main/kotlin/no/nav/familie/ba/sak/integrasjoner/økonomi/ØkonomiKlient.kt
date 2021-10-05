@@ -21,48 +21,57 @@ import java.time.LocalDateTime
 
 @Service
 class ØkonomiKlient(
-        @Value("\${FAMILIE_OPPDRAG_API_URL}")
-        private val familieOppdragUri: String,
-        @Qualifier("jwtBearer") restOperations: RestOperations
+    @Value("\${FAMILIE_OPPDRAG_API_URL}")
+    private val familieOppdragUri: String,
+    @Qualifier("jwtBearer") restOperations: RestOperations
 ) : AbstractRestClient(restOperations, "økonomi_barnetrygd") {
 
     fun iverksettOppdrag(utbetalingsoppdrag: Utbetalingsoppdrag): Ressurs<String> =
-            postForEntity<Ressurs<String>>(uri = URI.create("$familieOppdragUri/oppdrag"), utbetalingsoppdrag)
-                    .also { assertGenerelleSuksessKriterier(it) }
+        postForEntity<Ressurs<String>>(uri = URI.create("$familieOppdragUri/oppdrag"), utbetalingsoppdrag)
+            .also { assertGenerelleSuksessKriterier(it) }
 
     fun hentSimulering(utbetalingsoppdrag: Utbetalingsoppdrag): Ressurs<DetaljertSimuleringResultat>? =
-            postForEntity(uri = URI.create("$familieOppdragUri/simulering/v1"),
-                          utbetalingsoppdrag)
+        postForEntity(
+            uri = URI.create("$familieOppdragUri/simulering/v1"),
+            utbetalingsoppdrag
+        )
 
     fun hentEtterbetalingsbeløp(utbetalingsoppdrag: Utbetalingsoppdrag): Ressurs<RestSimulerResultat> =
-            postForEntity<Ressurs<RestSimulerResultat>>(
-                    uri = URI.create("$familieOppdragUri/simulering/etterbetalingsbelop"),
-                    utbetalingsoppdrag)
-                    .also { assertGenerelleSuksessKriterier(it) }
-
+        postForEntity<Ressurs<RestSimulerResultat>>(
+            uri = URI.create("$familieOppdragUri/simulering/etterbetalingsbelop"),
+            utbetalingsoppdrag
+        )
+            .also { assertGenerelleSuksessKriterier(it) }
 
     fun hentStatus(oppdragId: OppdragId): Ressurs<OppdragStatus> =
-            postForEntity<Ressurs<OppdragStatus>>(
-                    uri = URI.create("$familieOppdragUri/status"),
-                    oppdragId)
-                    .also { assertGenerelleSuksessKriterier(it) }
+        postForEntity<Ressurs<OppdragStatus>>(
+            uri = URI.create("$familieOppdragUri/status"),
+            oppdragId
+        )
+            .also { assertGenerelleSuksessKriterier(it) }
 
     fun grensesnittavstemOppdrag(fraDato: LocalDateTime, tilDato: LocalDateTime): Ressurs<String> =
-            postForEntity<Ressurs<String>>(
-                    uri = URI.create("$familieOppdragUri/grensesnittavstemming"),
-                    GrensesnittavstemmingRequest(
-                            fagsystem = FAGSYSTEM,
-                            fra = fraDato,
-                            til = tilDato
-                    ))
-                    .also { assertGenerelleSuksessKriterier(it) }
+        postForEntity<Ressurs<String>>(
+            uri = URI.create("$familieOppdragUri/grensesnittavstemming"),
+            GrensesnittavstemmingRequest(
+                fagsystem = FAGSYSTEM,
+                fra = fraDato,
+                til = tilDato
+            )
+        )
+            .also { assertGenerelleSuksessKriterier(it) }
 
-    fun konsistensavstemOppdrag(avstemmingsdato: LocalDateTime,
-                                perioderTilAvstemming: List<PerioderForBehandling>): Ressurs<String> =
-            postForEntity<Ressurs<String>>(
-                    uri = URI.create("$familieOppdragUri/v2/konsistensavstemming"),
-                    KonsistensavstemmingRequestV2(fagsystem = FAGSYSTEM,
-                                                  avstemmingstidspunkt = avstemmingsdato,
-                                                  perioderForBehandlinger = perioderTilAvstemming))
-                    .also { assertGenerelleSuksessKriterier(it) }
+    fun konsistensavstemOppdrag(
+        avstemmingsdato: LocalDateTime,
+        perioderTilAvstemming: List<PerioderForBehandling>
+    ): Ressurs<String> =
+        postForEntity<Ressurs<String>>(
+            uri = URI.create("$familieOppdragUri/v2/konsistensavstemming"),
+            KonsistensavstemmingRequestV2(
+                fagsystem = FAGSYSTEM,
+                avstemmingstidspunkt = avstemmingsdato,
+                perioderForBehandlinger = perioderTilAvstemming
+            )
+        )
+            .also { assertGenerelleSuksessKriterier(it) }
 }

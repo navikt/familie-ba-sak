@@ -8,8 +8,8 @@ import org.springframework.web.client.getForObject
 import org.springframework.web.client.postForEntity
 
 class MockserverKlient(
-        private val mockServerUrl: String,
-        private val restOperations: RestOperations,
+    private val mockServerUrl: String,
+    private val restOperations: RestOperations,
 ) {
 
     fun hentOppgaveOpprettetMedCallid(callId: String): String {
@@ -26,7 +26,7 @@ class MockserverKlient(
 
     fun lagScenario(restScenario: RestScenario): RestScenario {
         val scenario = restOperations.postForEntity<RestScenario>("$mockServerUrl/rest/scenario", restScenario).body
-                       ?: error("Klarte ikke lage scenario med data $restScenario")
+            ?: error("Klarte ikke lage scenario med data $restScenario")
         logger.info("Laget scenario: ${scenario.convertDataClassToJson()}")
 
         return scenario

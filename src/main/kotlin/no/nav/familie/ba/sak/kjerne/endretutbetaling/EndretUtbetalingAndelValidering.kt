@@ -6,22 +6,29 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAnde
 
 object EndretUtbetalingAndelValidering {
 
-    fun validerIngenOverlappendeEndring(endretUtbetalingAndel: EndretUtbetalingAndel,
-                                        eksisterendeEndringerPåBehandling: List<EndretUtbetalingAndel>) {
+    fun validerIngenOverlappendeEndring(
+        endretUtbetalingAndel: EndretUtbetalingAndel,
+        eksisterendeEndringerPåBehandling: List<EndretUtbetalingAndel>
+    ) {
 
         endretUtbetalingAndel.validerUtfyltEndring()
         if (eksisterendeEndringerPåBehandling.any {
-                    it.overlapperMed(endretUtbetalingAndel.periode()) &&
-                    it.person == endretUtbetalingAndel.person &&
-                    it.årsak == endretUtbetalingAndel.årsak
-                }) {
-            throw UtbetalingsikkerhetFeil(melding = "Perioden som forsøkes lagt til overlapper med eksisterende periode gjeldende samme årsak og person.",
-                                          frontendFeilmelding = "Perioden som forsøkes lagt til overlapper med eksisterende periode gjeldende samme årsak og person.")
+            it.overlapperMed(endretUtbetalingAndel.periode()) &&
+                it.person == endretUtbetalingAndel.person &&
+                it.årsak == endretUtbetalingAndel.årsak
+        }
+        ) {
+            throw UtbetalingsikkerhetFeil(
+                melding = "Perioden som forsøkes lagt til overlapper med eksisterende periode gjeldende samme årsak og person.",
+                frontendFeilmelding = "Perioden som forsøkes lagt til overlapper med eksisterende periode gjeldende samme årsak og person."
+            )
         }
     }
 
-    fun validerPeriodeInnenforTilkjentytelse(endretUtbetalingAndel: EndretUtbetalingAndel,
-                                             andelTilkjentYtelser: List<AndelTilkjentYtelse>) {
+    fun validerPeriodeInnenforTilkjentytelse(
+        endretUtbetalingAndel: EndretUtbetalingAndel,
+        andelTilkjentYtelser: List<AndelTilkjentYtelse>
+    ) {
 
         endretUtbetalingAndel.validerUtfyltEndring()
         val minsteDatoForTilkjentYtelse = andelTilkjentYtelser.filter {
@@ -33,10 +40,15 @@ object EndretUtbetalingAndelValidering {
         }.maxByOrNull { it.stønadTom }?.stønadTom
 
         if ((minsteDatoForTilkjentYtelse == null || størsteDatoForTilkjentYtelse == null) ||
-            (endretUtbetalingAndel.fom!!.isBefore(minsteDatoForTilkjentYtelse) ||
-             endretUtbetalingAndel.tom!!.isAfter(størsteDatoForTilkjentYtelse))) {
-            throw UtbetalingsikkerhetFeil(melding = "Det er ingen tilkjent ytelse for personen det legges til en endret periode for.",
-                                          frontendFeilmelding = "Det er ingen tilkjent ytelse for personen det legges til en endret periode for.")
+            (
+                endretUtbetalingAndel.fom!!.isBefore(minsteDatoForTilkjentYtelse) ||
+                    endretUtbetalingAndel.tom!!.isAfter(størsteDatoForTilkjentYtelse)
+                )
+        ) {
+            throw UtbetalingsikkerhetFeil(
+                melding = "Det er ingen tilkjent ytelse for personen det legges til en endret periode for.",
+                frontendFeilmelding = "Det er ingen tilkjent ytelse for personen det legges til en endret periode for."
+            )
         }
     }
 }

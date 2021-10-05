@@ -12,26 +12,28 @@ class JournalføringUtilsTest {
     @Test
     fun `Skal utlede ordinær når søknad om ordinær journalføres`() {
         val søkerFnr = randomFnr()
-        assertEquals(BehandlingUnderkategori.ORDINÆR,
-                     lagMockRestJournalføring(
-                             bruker = NavnOgIdent("Mock", søkerFnr)
-                     ).copy(
-                             journalpostTittel = "Søknad om ordinær barnetrygd",
-                             opprettOgKnyttTilNyBehandling = true
-                     ).hentUnderkategori()
+        assertEquals(
+            BehandlingUnderkategori.ORDINÆR,
+            lagMockRestJournalføring(
+                bruker = NavnOgIdent("Mock", søkerFnr)
+            ).copy(
+                journalpostTittel = "Søknad om ordinær barnetrygd",
+                opprettOgKnyttTilNyBehandling = true
+            ).hentUnderkategori()
         )
     }
 
     @Test
     fun `Skal utlede utvidet når søknad om utvidet journalføres`() {
         val søkerFnr = randomFnr()
-        assertEquals(BehandlingUnderkategori.UTVIDET,
-                     lagMockRestJournalføring(
-                             bruker = NavnOgIdent("Mock", søkerFnr)
-                     ).copy(
-                             journalpostTittel = "Søknad om utvidet barnetrygd",
-                             opprettOgKnyttTilNyBehandling = true
-                     ).hentUnderkategori()
+        assertEquals(
+            BehandlingUnderkategori.UTVIDET,
+            lagMockRestJournalføring(
+                bruker = NavnOgIdent("Mock", søkerFnr)
+            ).copy(
+                journalpostTittel = "Søknad om utvidet barnetrygd",
+                opprettOgKnyttTilNyBehandling = true
+            ).hentUnderkategori()
         )
     }
 }

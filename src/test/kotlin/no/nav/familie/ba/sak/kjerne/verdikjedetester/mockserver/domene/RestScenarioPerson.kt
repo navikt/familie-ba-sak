@@ -9,20 +9,22 @@ import java.time.LocalDate
 import java.time.Period
 
 data class RestScenarioPerson(
-        val ident: String? = null, // Settes av mock-server
-        val aktørId: String? = null, // Settes av mock-server
-        val forelderBarnRelasjon: List<ForelderBarnRelasjon>? = emptyList(), // Settes av mock-server
-        val fødselsdato: String, //yyyy-mm-dd
-        val fornavn: String,
-        val etternavn: String,
-        val infotrygdSaker: InfotrygdSøkResponse<Sak>? = null,
-        val statsborgerskap: List<Statsborgerskap> = listOf(Statsborgerskap(
-                land = "NOR",
-                gyldigFraOgMed = LocalDate.parse(fødselsdato),
-                bekreftelsesdato = LocalDate.parse(fødselsdato),
-                gyldigTilOgMed = null
-        )),
-        val bostedsadresser: List<Bostedsadresse> = defaultBostedsadresseHistorikk
+    val ident: String? = null, // Settes av mock-server
+    val aktørId: String? = null, // Settes av mock-server
+    val forelderBarnRelasjon: List<ForelderBarnRelasjon>? = emptyList(), // Settes av mock-server
+    val fødselsdato: String, // yyyy-mm-dd
+    val fornavn: String,
+    val etternavn: String,
+    val infotrygdSaker: InfotrygdSøkResponse<Sak>? = null,
+    val statsborgerskap: List<Statsborgerskap> = listOf(
+        Statsborgerskap(
+            land = "NOR",
+            gyldigFraOgMed = LocalDate.parse(fødselsdato),
+            bekreftelsesdato = LocalDate.parse(fødselsdato),
+            gyldigTilOgMed = null
+        )
+    ),
+    val bostedsadresser: List<Bostedsadresse> = defaultBostedsadresseHistorikk
 ) {
 
     val navn = "$fornavn $etternavn"
@@ -30,26 +32,32 @@ data class RestScenarioPerson(
     val alder = Period.between(LocalDate.parse(fødselsdato), LocalDate.now()).years
 }
 
-
 val defaultBostedsadresseHistorikk = mutableListOf(
-        Bostedsadresse(angittFlyttedato = LocalDate.now().minusDays(15),
-                       gyldigTilOgMed = null,
-                       matrikkeladresse = Matrikkeladresse(matrikkelId = 123L,
-                                                           bruksenhetsnummer = "H301",
-                                                           tilleggsnavn = "navn",
-                                                           postnummer = "0202",
-                                                           kommunenummer = "2231")),
-        Bostedsadresse(angittFlyttedato = LocalDate.now().minusYears(1),
-                       gyldigTilOgMed = null,
-                       matrikkeladresse = Matrikkeladresse(matrikkelId = 123L,
-                                                           bruksenhetsnummer = "H301",
-                                                           tilleggsnavn = "navn",
-                                                           postnummer = "0202",
-                                                           kommunenummer = "2231"))
+    Bostedsadresse(
+        angittFlyttedato = LocalDate.now().minusDays(15),
+        gyldigTilOgMed = null,
+        matrikkeladresse = Matrikkeladresse(
+            matrikkelId = 123L,
+            bruksenhetsnummer = "H301",
+            tilleggsnavn = "navn",
+            postnummer = "0202",
+            kommunenummer = "2231"
+        )
+    ),
+    Bostedsadresse(
+        angittFlyttedato = LocalDate.now().minusYears(1),
+        gyldigTilOgMed = null,
+        matrikkeladresse = Matrikkeladresse(
+            matrikkelId = 123L,
+            bruksenhetsnummer = "H301",
+            tilleggsnavn = "navn",
+            postnummer = "0202",
+            kommunenummer = "2231"
+        )
+    )
 )
 
 data class ForelderBarnRelasjon(
     val relatertPersonsIdent: String,
     val relatertPersonsRolle: String
 )
-

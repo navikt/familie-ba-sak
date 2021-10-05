@@ -35,7 +35,6 @@ class BeregningService(
     fun slettTilkjentYtelseForBehandling(behandlingId: Long) = tilkjentYtelseRepository.findByBehandling(behandlingId)
         ?.let { tilkjentYtelseRepository.delete(it) }
 
-
     fun hentLøpendeAndelerTilkjentYtelseForBehandlinger(behandlingIder: List<Long>): List<AndelTilkjentYtelse> =
         andelTilkjentYtelseRepository.finnLøpendeAndelerTilkjentYtelseForBehandlinger(behandlingIder)
 
@@ -101,9 +100,11 @@ class BeregningService(
             ?: throw IllegalStateException("Kunne ikke hente vilkårsvurdering for behandling med id ${behandling.id}")
 
         val tilkjentYtelse = TilkjentYtelseUtils
-                .beregnTilkjentYtelse(vilkårsvurdering = vilkårsvurdering,
-                                      personopplysningGrunnlag = personopplysningGrunnlag,
-                                      behandling = behandling)
+            .beregnTilkjentYtelse(
+                vilkårsvurdering = vilkårsvurdering,
+                personopplysningGrunnlag = personopplysningGrunnlag,
+                behandling = behandling
+            )
 
         val endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(behandling.id)
         val andelerTilkjentYtelse = TilkjentYtelseUtils.oppdaterTilkjentYtelseMedEndretUtbetalingAndeler(
@@ -156,4 +157,3 @@ class BeregningService(
         }
     }
 }
-

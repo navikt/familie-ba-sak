@@ -16,8 +16,8 @@ import org.springframework.web.bind.annotation.RestController
 @ProtectedWithClaims(issuer = "azuread")
 @Profile("e2e")
 class E2EController(
-        private val databaseCleanupService: DatabaseCleanupService,
-        private val taskRepository: TaskRepositoryWrapper
+    private val databaseCleanupService: DatabaseCleanupService,
+    private val taskRepository: TaskRepositoryWrapper
 ) {
 
     @GetMapping(path = ["/truncate"])
@@ -28,8 +28,10 @@ class E2EController(
     }
 
     @GetMapping(path = ["/task/{key}/{value}"])
-    fun hentTaskMedProperty(@PathVariable(name = "key", required = true) key: String,
-                            @PathVariable(name = "value", required = true) value: String): List<Task> {
+    fun hentTaskMedProperty(
+        @PathVariable(name = "key", required = true) key: String,
+        @PathVariable(name = "value", required = true) value: String
+    ): List<Task> {
         return taskRepository.findAll().filter { it.metadata[key] == value }
     }
 }

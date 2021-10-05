@@ -22,14 +22,13 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate.now
 
-
 class FødselshendelseRevurderingTest(
-        @Autowired private val mockLocalDateService: LocalDateService,
-        @Autowired private val behandleFødselshendelseTask: BehandleFødselshendelseTask,
-        @Autowired private val fagsakService: FagsakService,
-        @Autowired private val behandlingService: BehandlingService,
-        @Autowired private val vedtakService: VedtakService,
-        @Autowired private val stegService: StegService
+    @Autowired private val mockLocalDateService: LocalDateService,
+    @Autowired private val behandleFødselshendelseTask: BehandleFødselshendelseTask,
+    @Autowired private val fagsakService: FagsakService,
+    @Autowired private val behandlingService: BehandlingService,
+    @Autowired private val vedtakService: VedtakService,
+    @Autowired private val stegService: StegService
 ) : AbstractVerdikjedetest() {
 
     @Test
@@ -37,54 +36,62 @@ class FødselshendelseRevurderingTest(
         every { mockLocalDateService.now() } returns now().minusMonths(12) andThen now()
 
         val revurderingsbarnSinFødselsdato = now().minusMonths(3)
-        val scenario = mockServerKlient().lagScenario(RestScenario(
+        val scenario = mockServerKlient().lagScenario(
+            RestScenario(
                 søker = RestScenarioPerson(fødselsdato = "1993-01-12", fornavn = "Mor", etternavn = "Søker"),
                 barna = listOf(
-                        RestScenarioPerson(fødselsdato = now().minusMonths(12).toString(),
-                                           fornavn = "Barn",
-                                           etternavn = "Barnesen"),
-                        RestScenarioPerson(fødselsdato = revurderingsbarnSinFødselsdato.toString(),
-                                           fornavn = "Barn2",
-                                           etternavn = "Barnesen2")
+                    RestScenarioPerson(
+                        fødselsdato = now().minusMonths(12).toString(),
+                        fornavn = "Barn",
+                        etternavn = "Barnesen"
+                    ),
+                    RestScenarioPerson(
+                        fødselsdato = revurderingsbarnSinFødselsdato.toString(),
+                        fornavn = "Barn2",
+                        etternavn = "Barnesen2"
+                    )
                 )
-        ))
+            )
+        )
 
         behandleFødselshendelse(
-                nyBehandlingHendelse = NyBehandlingHendelse(
-                        morsIdent = scenario.søker.ident!!,
-                        barnasIdenter = listOf(scenario.barna.minByOrNull { it.fødselsdato }!!.ident!!)
-                ),
-                behandleFødselshendelseTask = behandleFødselshendelseTask,
-                fagsakService = fagsakService,
-                behandlingService = behandlingService,
-                vedtakService = vedtakService,
-                stegService = stegService
+            nyBehandlingHendelse = NyBehandlingHendelse(
+                morsIdent = scenario.søker.ident!!,
+                barnasIdenter = listOf(scenario.barna.minByOrNull { it.fødselsdato }!!.ident!!)
+            ),
+            behandleFødselshendelseTask = behandleFødselshendelseTask,
+            fagsakService = fagsakService,
+            behandlingService = behandlingService,
+            vedtakService = vedtakService,
+            stegService = stegService
         )
 
         val søkerIdent = scenario.søker.ident
         val vurdertBarn = scenario.barna.maxByOrNull { it.fødselsdato }!!.ident!!
         behandleFødselshendelse(
-                nyBehandlingHendelse = NyBehandlingHendelse(
-                        morsIdent = søkerIdent,
-                        barnasIdenter = listOf(vurdertBarn)
-                ),
-                fagsakStatusEtterVurdering = FagsakStatus.LØPENDE,
-                behandleFødselshendelseTask = behandleFødselshendelseTask,
-                fagsakService = fagsakService,
-                behandlingService = behandlingService,
-                vedtakService = vedtakService,
-                stegService = stegService
+            nyBehandlingHendelse = NyBehandlingHendelse(
+                morsIdent = søkerIdent,
+                barnasIdenter = listOf(vurdertBarn)
+            ),
+            fagsakStatusEtterVurdering = FagsakStatus.LØPENDE,
+            behandleFødselshendelseTask = behandleFødselshendelseTask,
+            fagsakService = fagsakService,
+            behandlingService = behandlingService,
+            vedtakService = vedtakService,
+            stegService = stegService
         )
 
         val restFagsakEtterBehandlingAvsluttet =
-                familieBaSakKlient().hentFagsak(restHentFagsakForPerson = RestHentFagsakForPerson(personIdent = søkerIdent))
-        generellAssertFagsak(restFagsak = restFagsakEtterBehandlingAvsluttet,
-                             fagsakStatus = FagsakStatus.LØPENDE,
-                             behandlingStegType = StegType.BEHANDLING_AVSLUTTET)
+            familieBaSakKlient().hentFagsak(restHentFagsakForPerson = RestHentFagsakForPerson(personIdent = søkerIdent))
+        generellAssertFagsak(
+            restFagsak = restFagsakEtterBehandlingAvsluttet,
+            fagsakStatus = FagsakStatus.LØPENDE,
+            behandlingStegType = StegType.BEHANDLING_AVSLUTTET
+        )
 
         val aktivBehandling = restFagsakEtterBehandlingAvsluttet.getDataOrThrow().behandlinger.first { it.aktiv }
         val vurderteVilkårIDenneBehandlingen = aktivBehandling.personResultater.flatMap { it.vilkårResultater }
-                .filter { it.behandlingId == aktivBehandling.behandlingId }
+            .filter { it.behandlingId == aktivBehandling.behandlingId }
         assertEquals(BehandlingResultat.INNVILGET, aktivBehandling.resultat)
         assertEquals(5, vurderteVilkårIDenneBehandlingen.size)
         vurderteVilkårIDenneBehandlingen.forEach { assertEquals(revurderingsbarnSinFødselsdato, it.periodeFom) }

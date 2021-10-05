@@ -37,41 +37,41 @@ import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 
 class StegServiceTest(
-        @Autowired
-        private val stegService: StegService,
+    @Autowired
+    private val stegService: StegService,
 
-        @Autowired
-        private val vedtakService: VedtakService,
+    @Autowired
+    private val vedtakService: VedtakService,
 
-        @Autowired
-        private val behandlingService: BehandlingService,
+    @Autowired
+    private val behandlingService: BehandlingService,
 
-        @Autowired
-        private val persongrunnlagService: PersongrunnlagService,
+    @Autowired
+    private val persongrunnlagService: PersongrunnlagService,
 
-        @Autowired
-        private val fagsakService: FagsakService,
+    @Autowired
+    private val fagsakService: FagsakService,
 
-        @Autowired
-        private val mockPersonopplysningerService: PersonopplysningerService,
+    @Autowired
+    private val mockPersonopplysningerService: PersonopplysningerService,
 
-        @Autowired
-        private val vilkårsvurderingService: VilkårsvurderingService,
+    @Autowired
+    private val vilkårsvurderingService: VilkårsvurderingService,
 
-        @Autowired
-        private val databaseCleanupService: DatabaseCleanupService,
+    @Autowired
+    private val databaseCleanupService: DatabaseCleanupService,
 
-        @Autowired
-        private val totrinnskontrollService: TotrinnskontrollService,
+    @Autowired
+    private val totrinnskontrollService: TotrinnskontrollService,
 
-        @Autowired
-        private val infotrygdFeedClient: InfotrygdFeedClient,
+    @Autowired
+    private val infotrygdFeedClient: InfotrygdFeedClient,
 
-        @Autowired
-        private val tilbakekrevingService: TilbakekrevingService,
+    @Autowired
+    private val tilbakekrevingService: TilbakekrevingService,
 
-        @Autowired
-        private val vedtaksperiodeService: VedtaksperiodeService,
+    @Autowired
+    private val vedtaksperiodeService: VedtaksperiodeService,
 ) : AbstractSpringIntegrationTest() {
 
     @BeforeEach
@@ -86,49 +86,53 @@ class StegServiceTest(
         val barnFnr2 = ClientMocks.barnFnr[1]
 
         val behandling = kjørStegprosessForFGB(
-                tilSteg = StegType.REGISTRERE_SØKNAD,
-                søkerFnr = søkerFnr,
-                barnasIdenter = listOf(barnFnr1, barnFnr2),
-                fagsakService = fagsakService,
-                vedtakService = vedtakService,
-                persongrunnlagService = persongrunnlagService,
-                vilkårsvurderingService = vilkårsvurderingService,
-                stegService = stegService,
-                vedtaksperiodeService = vedtaksperiodeService,
+            tilSteg = StegType.REGISTRERE_SØKNAD,
+            søkerFnr = søkerFnr,
+            barnasIdenter = listOf(barnFnr1, barnFnr2),
+            fagsakService = fagsakService,
+            vedtakService = vedtakService,
+            persongrunnlagService = persongrunnlagService,
+            vilkårsvurderingService = vilkårsvurderingService,
+            stegService = stegService,
+            vedtaksperiodeService = vedtaksperiodeService,
         )
 
         val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)!!
-        assertEquals(Resultat.OPPFYLT,
-                     vilkårsvurdering.personResultater.first { it.personIdent == barnFnr1 }.vilkårResultater
-                             .single { it.vilkårType == Vilkår.GIFT_PARTNERSKAP }.resultat)
-        assertEquals(Resultat.IKKE_VURDERT,
-                     vilkårsvurdering.personResultater.first { it.personIdent == barnFnr2 }.vilkårResultater
-                             .single { it.vilkårType == Vilkår.GIFT_PARTNERSKAP }.resultat)
+        assertEquals(
+            Resultat.OPPFYLT,
+            vilkårsvurdering.personResultater.first { it.personIdent == barnFnr1 }.vilkårResultater
+                .single { it.vilkårType == Vilkår.GIFT_PARTNERSKAP }.resultat
+        )
+        assertEquals(
+            Resultat.IKKE_VURDERT,
+            vilkårsvurdering.personResultater.first { it.personIdent == barnFnr2 }.vilkårResultater
+                .single { it.vilkårType == Vilkår.GIFT_PARTNERSKAP }.resultat
+        )
     }
 
     @Test
     fun `Skal kjøre gjennom alle steg med datageneratoren`() {
         val søkerFnr = randomFnr()
         kjørStegprosessForFGB(
-                tilSteg = StegType.BEHANDLING_AVSLUTTET,
-                søkerFnr = søkerFnr,
-                barnasIdenter = listOf(ClientMocks.barnFnr[0]),
-                fagsakService = fagsakService,
-                vedtakService = vedtakService,
-                persongrunnlagService = persongrunnlagService,
-                vilkårsvurderingService = vilkårsvurderingService,
-                stegService = stegService,
-                vedtaksperiodeService = vedtaksperiodeService,
+            tilSteg = StegType.BEHANDLING_AVSLUTTET,
+            søkerFnr = søkerFnr,
+            barnasIdenter = listOf(ClientMocks.barnFnr[0]),
+            fagsakService = fagsakService,
+            vedtakService = vedtakService,
+            persongrunnlagService = persongrunnlagService,
+            vilkårsvurderingService = vilkårsvurderingService,
+            stegService = stegService,
+            vedtaksperiodeService = vedtaksperiodeService,
         )
 
         // Venter med å kjøre gjennom til avsluttet til brev er støttet for fortsatt innvilget.
         kjørStegprosessForRevurderingÅrligKontroll(
-                tilSteg = StegType.SEND_TIL_BESLUTTER,
-                søkerFnr = søkerFnr,
-                barnasIdenter = listOf(ClientMocks.barnFnr[0]),
-                vedtakService = vedtakService,
-                stegService = stegService,
-                tilbakekrevingService = tilbakekrevingService
+            tilSteg = StegType.SEND_TIL_BESLUTTER,
+            søkerFnr = søkerFnr,
+            barnasIdenter = listOf(ClientMocks.barnFnr[0]),
+            vedtakService = vedtakService,
+            stegService = stegService,
+            tilbakekrevingService = tilbakekrevingService
         )
     }
 
@@ -197,8 +201,10 @@ class StegServiceTest(
         behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BESLUTTE_VEDTAK))
         behandling.status = BehandlingStatus.IVERKSETTER_VEDTAK
         assertThrows<IllegalStateException> {
-            stegService.håndterBeslutningForVedtak(behandling,
-                                                   RestBeslutningPåVedtak(beslutning = Beslutning.GODKJENT, begrunnelse = null))
+            stegService.håndterBeslutningForVedtak(
+                behandling,
+                RestBeslutningPåVedtak(beslutning = Beslutning.GODKJENT, begrunnelse = null)
+            )
         }
     }
 
@@ -219,8 +225,10 @@ class StegServiceTest(
         behandling.behandlingStegTilstand.forEach { it.behandlingStegStatus = BehandlingStegStatus.UTFØRT }
         behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BESLUTTE_VEDTAK))
         behandling.status = BehandlingStatus.FATTER_VEDTAK
-        stegService.håndterBeslutningForVedtak(behandling,
-                                               RestBeslutningPåVedtak(beslutning = Beslutning.UNDERKJENT, begrunnelse = "Feil"))
+        stegService.håndterBeslutningForVedtak(
+            behandling,
+            RestBeslutningPåVedtak(beslutning = Beslutning.UNDERKJENT, begrunnelse = "Feil")
+        )
 
         val behandlingEtterPersongrunnlagSteg = behandlingService.hent(behandlingId = behandling.id)
         assertEquals(StegType.SEND_TIL_BESLUTTER, behandlingEtterPersongrunnlagSteg.steg)
@@ -231,14 +239,22 @@ class StegServiceTest(
         val vilkårsvurdertBehandling = kjørGjennomStegInkludertVurderTilbakekreving()
 
         val henlagtBehandling = stegService.håndterHenleggBehandling(
-                vilkårsvurdertBehandling, RestHenleggBehandlingInfo(årsak = HenleggÅrsak.FEILAKTIG_OPPRETTET,
-                                                                    begrunnelse = ""))
-        assertTrue(henlagtBehandling.behandlingStegTilstand.firstOrNull {
-            it.behandlingSteg == StegType.HENLEGG_BEHANDLING && it.behandlingStegStatus == BehandlingStegStatus.UTFØRT
-        } != null)
-        assertTrue(henlagtBehandling.behandlingStegTilstand.firstOrNull {
-            it.behandlingSteg == StegType.FERDIGSTILLE_BEHANDLING && it.behandlingStegStatus == BehandlingStegStatus.IKKE_UTFØRT
-        } != null)
+            vilkårsvurdertBehandling,
+            RestHenleggBehandlingInfo(
+                årsak = HenleggÅrsak.FEILAKTIG_OPPRETTET,
+                begrunnelse = ""
+            )
+        )
+        assertTrue(
+            henlagtBehandling.behandlingStegTilstand.firstOrNull {
+                it.behandlingSteg == StegType.HENLEGG_BEHANDLING && it.behandlingStegStatus == BehandlingStegStatus.UTFØRT
+            } != null
+        )
+        assertTrue(
+            henlagtBehandling.behandlingStegTilstand.firstOrNull {
+                it.behandlingSteg == StegType.FERDIGSTILLE_BEHANDLING && it.behandlingStegStatus == BehandlingStegStatus.IKKE_UTFØRT
+            } != null
+        )
 
         stegService.håndterFerdigstillBehandling(henlagtBehandling)
 
@@ -254,9 +270,13 @@ class StegServiceTest(
         val behandlingEtterSendTilBeslutter = behandlingService.hent(behandlingId = vilkårsvurdertBehandling.id)
 
         assertThrows<IllegalStateException> {
-            stegService.håndterHenleggBehandling(behandlingEtterSendTilBeslutter,
-                                                 RestHenleggBehandlingInfo(årsak = HenleggÅrsak.FEILAKTIG_OPPRETTET,
-                                                                           begrunnelse = ""))
+            stegService.håndterHenleggBehandling(
+                behandlingEtterSendTilBeslutter,
+                RestHenleggBehandlingInfo(
+                    årsak = HenleggÅrsak.FEILAKTIG_OPPRETTET,
+                    begrunnelse = ""
+                )
+            )
         }
     }
 
@@ -265,15 +285,15 @@ class StegServiceTest(
         val barnFnr = ClientMocks.barnFnr[0]
 
         return kjørStegprosessForFGB(
-                tilSteg = StegType.VURDER_TILBAKEKREVING,
-                søkerFnr = søkerFnr,
-                barnasIdenter = listOf(barnFnr),
-                fagsakService = fagsakService,
-                vedtakService = vedtakService,
-                persongrunnlagService = persongrunnlagService,
-                vilkårsvurderingService = vilkårsvurderingService,
-                stegService = stegService,
-                vedtaksperiodeService = vedtaksperiodeService,
+            tilSteg = StegType.VURDER_TILBAKEKREVING,
+            søkerFnr = søkerFnr,
+            barnasIdenter = listOf(barnFnr),
+            fagsakService = fagsakService,
+            vedtakService = vedtakService,
+            persongrunnlagService = persongrunnlagService,
+            vilkårsvurderingService = vilkårsvurderingService,
+            stegService = stegService,
+            vedtaksperiodeService = vedtaksperiodeService,
         )
     }
 }

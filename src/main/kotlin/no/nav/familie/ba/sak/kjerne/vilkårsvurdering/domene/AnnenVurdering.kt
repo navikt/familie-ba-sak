@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
-import java.util.*
+import java.util.Objects
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.EntityListeners
@@ -21,32 +21,36 @@ import javax.persistence.Table
 @Entity(name = "AnnenVurdering")
 @Table(name = "ANNEN_VURDERING")
 data class AnnenVurdering(
-        @Id
-        @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "annen_vurdering_seq_generator")
-        @SequenceGenerator(name = "annen_vurdering_seq_generator", sequenceName = "annen_vurdering_seq", allocationSize = 50)
-        val id: Long = 0,
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "annen_vurdering_seq_generator")
+    @SequenceGenerator(
+        name = "annen_vurdering_seq_generator",
+        sequenceName = "annen_vurdering_seq",
+        allocationSize = 50
+    )
+    val id: Long = 0,
 
-        @ManyToOne @JoinColumn(name = "fk_person_resultat_id")
-        var personResultat: PersonResultat,
+    @ManyToOne @JoinColumn(name = "fk_person_resultat_id")
+    var personResultat: PersonResultat,
 
-        @Enumerated(EnumType.STRING)
-        @Column(name = "resultat")
-        var resultat: Resultat = Resultat.IKKE_VURDERT,
+    @Enumerated(EnumType.STRING)
+    @Column(name = "resultat")
+    var resultat: Resultat = Resultat.IKKE_VURDERT,
 
-        @Enumerated(EnumType.STRING)
-        @Column(name = "type")
-        var type: AnnenVurderingType,
+    @Enumerated(EnumType.STRING)
+    @Column(name = "type")
+    var type: AnnenVurderingType,
 
-        @Column(name = "begrunnelse")
-        var begrunnelse: String? = null
+    @Column(name = "begrunnelse")
+    var begrunnelse: String? = null
 ) : BaseEntitet() {
 
     fun kopierMedParent(nyPersonResultat: PersonResultat? = null): AnnenVurdering {
         return AnnenVurdering(
-                personResultat = nyPersonResultat ?: personResultat,
-                type = type,
-                resultat = resultat,
-                begrunnelse = begrunnelse,
+            personResultat = nyPersonResultat ?: personResultat,
+            type = type,
+            resultat = resultat,
+            begrunnelse = begrunnelse,
         )
     }
 
@@ -64,10 +68,9 @@ data class AnnenVurdering(
     }
 
     override fun toString(): String {
-        return "AnnenVurdering(id=$id, type=${type}, personident=${personResultat.personIdent})"
+        return "AnnenVurdering(id=$id, type=$type, personident=${personResultat.personIdent})"
     }
 }
-
 
 enum class AnnenVurderingType {
     OPPLYSNINGSPLIKT
