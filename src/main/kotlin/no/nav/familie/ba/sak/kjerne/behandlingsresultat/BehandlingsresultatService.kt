@@ -11,9 +11,11 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -53,7 +55,15 @@ class BehandlingsresultatService(
                 forrigeBehandling = forrigeBehandling
             )
 
-        val behandlingsresultatPersoner = persongrunnlagService.hentAktiv(behandling.id)?.personer?.map {
+        val behandlingsresultatPersoner = persongrunnlagService.hentAktiv(behandling.id)?.personer?.filter {
+            when (it.type) {
+                PersonType.SØKER ->
+                    vilkårsvurdering.personResultater
+                        .flatMap { personResultat -> personResultat.vilkårResultater }
+                        .any { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
+                else -> true
+            }
+        }?.map {
             BehandlingsresultatUtils.utledBehandlingsresultatDataForPerson(
                 person = it,
                 personerFremstiltKravFor = personerFremstiltKravFor,
