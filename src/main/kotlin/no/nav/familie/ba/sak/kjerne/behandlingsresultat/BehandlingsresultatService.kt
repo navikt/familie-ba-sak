@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.convertDataClassToJson
 import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -45,17 +46,17 @@ class BehandlingsresultatService(
                 frontendFeilmelding = "Barn må legges til for å gjennomføre vilkårsvurdering.")
 
         val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandlingId)
-                               ?: throw Feil("Finner ikke aktiv vilkårsvurdering")
+                ?: throw Feil("Finner ikke aktiv vilkårsvurdering")
 
         val personerFremstiltKravFor =
                 hentPersonerFramstiltKravFor(behandling = behandling,
-                                             søknadDTO = søknadGrunnlag?.hentSøknadDto(),
-                                             forrigeBehandling = forrigeBehandling)
+                        søknadDTO = søknadGrunnlag?.hentSøknadDto(),
+                        forrigeBehandling = forrigeBehandling)
 
         val personerVurdertIDenneBehandlingen = persongrunnlagService.hentAktiv(behandling.id)?.personer?.filter {
             val vilkårResultater =
                     vilkårsvurdering.personResultater.find { personResultat -> personResultat.personIdent == it.personIdent.ident }?.vilkårResultater
-                    ?: emptyList()
+                            ?: emptyList()
 
             val vilkårVurdertIDenneBehandlingen =
                     vilkårResultater.filter { vilkårResultat -> vilkårResultat.behandlingId == behandlingId }
@@ -69,19 +70,20 @@ class BehandlingsresultatService(
 
         val behandlingsresultatPersoner = personerVurdertIDenneBehandlingen?.map {
             BehandlingsresultatUtils.utledBehandlingsresultatDataForPerson(person = it,
-                                                                           personerFremstiltKravFor = personerFremstiltKravFor,
-                                                                           forrigeTilkjentYtelse = forrigeTilkjentYtelse,
-                                                                           tilkjentYtelse = tilkjentYtelse,
-                                                                           erEksplisittAvslag = vilkårsvurdering.personResultater.find { personResultat -> personResultat.personIdent == it.personIdent.ident }
-                                                                                                        ?.harEksplisittAvslag()
-                                                                                                ?: false)
+                    personerFremstiltKravFor = personerFremstiltKravFor,
+                    forrigeTilkjentYtelse = forrigeTilkjentYtelse,
+                    tilkjentYtelse = tilkjentYtelse,
+                    erEksplisittAvslag = vilkårsvurdering.personResultater.find { personResultat -> personResultat.personIdent == it.personIdent.ident }
+                            ?.harEksplisittAvslag()
+                            ?: false)
         } ?: emptyList()
+
+        secureLogger.info("Behandlingsresultatpersoner: ${behandlingsresultatPersoner.convertDataClassToJson()}")
 
         val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(behandlingsresultatPersoner)
 
 
         validerYtelsePersoner(behandlingId = behandling.id, ytelsePersoner = ytelsePersonerMedResultat)
-
 
         vilkårsvurdering.let {
             vilkårsvurderingService.oppdater(vilkårsvurdering)
@@ -98,7 +100,7 @@ class BehandlingsresultatService(
 
     private fun validerYtelsePersoner(behandlingId: Long, ytelsePersoner: List<YtelsePerson>) {
         val søkerIdent = persongrunnlagService.hentSøker(behandlingId)?.personIdent?.ident
-                         ?: throw Feil("Fant ikke søker på behandling")
+                ?: throw Feil("Fant ikke søker på behandling")
         if (ytelsePersoner.any { it.ytelseType == YtelseType.UTVIDET_BARNETRYGD && it.personIdent != søkerIdent }) throw Feil("Barn kan ikke ha ytelsetype utvidet")
         if (ytelsePersoner.any { it.ytelseType == YtelseType.ORDINÆR_BARNETRYGD && it.personIdent == søkerIdent }) throw Feil("Søker kan ikke ha ytelsetype ordinær")
     }
@@ -107,9 +109,9 @@ class BehandlingsresultatService(
                                              søknadDTO: SøknadDTO? = null,
                                              forrigeBehandling: Behandling?): List<String> {
         val barnFraSøknad = søknadDTO?.barnaMedOpplysninger
-                                    ?.filter { it.inkludertISøknaden }
-                                    ?.map { it.ident }
-                            ?: emptyList()
+                ?.filter { it.inkludertISøknaden }
+                ?.map { it.ident }
+                ?: emptyList()
         val utvidetBarnetrygdSøker =
                 if (søknadDTO?.underkategori == BehandlingUnderkategori.UTVIDET) listOf(søknadDTO.søkerMedOpplysninger.ident) else emptyList()
 
