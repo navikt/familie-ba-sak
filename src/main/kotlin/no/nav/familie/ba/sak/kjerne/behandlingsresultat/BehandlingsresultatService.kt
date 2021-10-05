@@ -7,17 +7,19 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+
 
 @Service
 class BehandlingsresultatService(
@@ -43,38 +45,45 @@ class BehandlingsresultatService(
                 frontendFeilmelding = "Barn må legges til for å gjennomføre vilkårsvurdering.")
 
         val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandlingId)
+                               ?: throw Feil("Finner ikke aktiv vilkårsvurdering")
 
-        val ytelsePersoner: List<YtelsePerson> =
-                if (behandling.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE) {
-                    val parterSomErVurdertIInneværendeBehandling =
-                            vilkårsvurdering?.personResultater?.filter { it.vilkårResultater.any { vilkårResultat -> vilkårResultat.behandlingId == behandlingId } }
-                                    ?.map { it.personIdent } ?: emptyList()
+        val personerFremstiltKravFor =
+                hentPersonerFramstiltKravFor(behandling = behandling,
+                                             søknadDTO = søknadGrunnlag?.hentSøknadDto(),
+                                             forrigeBehandling = forrigeBehandling)
 
-                    val barn = barna
-                            .filter { parterSomErVurdertIInneværendeBehandling.contains(it.personIdent.ident) }
-                            .map { it.personIdent.ident }
-                    YtelsePersonUtils.utledKravForFødselshendelseFGB(barn)
-                } else {
-                    val personIdenter =
-                            hentPersonerFramstiltKravFor(behandling = behandling,
-                                                         søknadDTO = søknadGrunnlag?.hentSøknadDto(),
-                                                         forrigeBehandling = forrigeBehandling)
+        val personerVurdertIDenneBehandlingen = persongrunnlagService.hentAktiv(behandling.id)?.personer?.filter {
+            val vilkårResultater =
+                    vilkårsvurdering.personResultater.find { personResultat -> personResultat.personIdent == it.personIdent.ident }?.vilkårResultater
+                    ?: emptyList()
 
-                    YtelsePersonUtils.utledKrav(
-                            personerMedKrav = persongrunnlagService.hentPersonerPåBehandling(identer = personIdenter,
-                                                                                             behandling = behandling),
-                            forrigeAndelerTilkjentYtelse = forrigeTilkjentYtelse?.andelerTilkjentYtelse?.toList() ?: emptyList())
-                }
+            val vilkårVurdertIDenneBehandlingen =
+                    vilkårResultater.filter { vilkårResultat -> vilkårResultat.behandlingId == behandlingId }
 
-        validerYtelsePersoner(behandlingId = behandling.id, ytelsePersoner = ytelsePersoner)
+            when (it.type) {
+                PersonType.BARN -> vilkårVurdertIDenneBehandlingen.isNotEmpty()
+                PersonType.SØKER -> vilkårVurdertIDenneBehandlingen.any { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
+                else -> false
+            }
+        }
 
-        val ytelsePersonerMedResultat = YtelsePersonUtils.populerYtelsePersonerMedResultat(
-                ytelsePersoner = ytelsePersoner,
-                andelerTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelse.toList(),
-                forrigeAndelerTilkjentYtelse = forrigeTilkjentYtelse?.andelerTilkjentYtelse?.toList() ?: emptyList(),
-                uregistrerteBarn = søknadGrunnlag?.hentUregistrerteBarn() ?: emptyList())
+        val behandlingsresultatPersoner = personerVurdertIDenneBehandlingen?.map {
+            BehandlingsresultatUtils.utledBehandlingsresultatDataForPerson(person = it,
+                                                                           personerFremstiltKravFor = personerFremstiltKravFor,
+                                                                           forrigeTilkjentYtelse = forrigeTilkjentYtelse,
+                                                                           tilkjentYtelse = tilkjentYtelse,
+                                                                           erEksplisittAvslag = vilkårsvurdering.personResultater.find { personResultat -> personResultat.personIdent == it.personIdent.ident }
+                                                                                                        ?.harEksplisittAvslag()
+                                                                                                ?: false)
+        } ?: emptyList()
 
-        vilkårsvurdering?.let {
+        val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(behandlingsresultatPersoner)
+
+
+        validerYtelsePersoner(behandlingId = behandling.id, ytelsePersoner = ytelsePersonerMedResultat)
+
+
+        vilkårsvurdering.let {
             vilkårsvurderingService.oppdater(vilkårsvurdering)
                     .also { it.ytelsePersoner = ytelsePersonerMedResultat.writeValueAsString() }
         }

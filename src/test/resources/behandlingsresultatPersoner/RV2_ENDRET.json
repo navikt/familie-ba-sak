@@ -1,0 +1,31 @@
+{
+  "beskrivelse": "RV: Vi har mottatt en søknad, men reduserer kun en tidligere periode",
+  "inneværendeMåned": "2021-09",
+  "personer": [
+    {
+      "personType": "BARN",
+      "søktForPerson": true,
+      "eksplisittAvslått": false,
+      "forrigeAndeler": [
+        {
+          "stønadFom": "2021-01",
+          "stønadTom": "2030-01",
+          "kalkulertUtbetalingsbeløp": 1054
+        }
+      ],
+      "andeler": [
+        {
+          "stønadFom": "2021-01",
+          "stønadTom": "2021-05",
+          "kalkulertUtbetalingsbeløp": 1054
+        },
+        {
+          "stønadFom": "2021-07",
+          "stønadTom": "2030-01",
+          "kalkulertUtbetalingsbeløp": 1054
+        }
+      ]
+    }
+  ],
+  "forventetResultat": "ENDRET"
+}
