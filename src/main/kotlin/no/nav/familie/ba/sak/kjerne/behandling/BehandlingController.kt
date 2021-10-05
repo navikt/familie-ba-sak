@@ -115,10 +115,10 @@ class BehandlingController(
     fun endreBehandlingstema(@PathVariable behandlingId: Long,
                              @RequestBody
                              endreBehandling: RestEndreBehandlingstema): ResponseEntity<Ressurs<RestFagsak>> {
-        val behandling = behandlingsService.oppdaterBehandlingtema(behandling = behandlingsService.hent(behandlingId),
-                                                                   nyBehandlingUnderkategori = endreBehandling.behandlingUnderkategori,
-                                                                   nyBehandlingKategori = endreBehandling.behandlingKategori,
-                                                                   manueltOppdatert = true)
+        val behandling = behandlingsService.oppdaterBehandlingstema(behandling = behandlingsService.hent(behandlingId),
+                                                                    nyBehandlingUnderkategori = endreBehandling.behandlingUnderkategori,
+                                                                    nyBehandlingKategori = endreBehandling.behandlingKategori,
+                                                                    manueltOppdatert = true)
 
         val restFagsak = fagsakService.hentRestFagsak(fagsakId = behandling.fagsak.id)
 

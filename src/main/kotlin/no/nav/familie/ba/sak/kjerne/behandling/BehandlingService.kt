@@ -100,27 +100,27 @@ class BehandlingService(
         }
     }
 
-    fun oppdaterBehandlingtema(behandling: Behandling,
-                               nyBehandlingUnderkategori: BehandlingUnderkategori? = null,
-                               nyBehandlingKategori: BehandlingKategori? = null,
-                               manueltOppdatert: Boolean = false): Behandling {
+    fun oppdaterBehandlingstema(behandling: Behandling,
+                                nyBehandlingUnderkategori: BehandlingUnderkategori = BehandlingUnderkategori.ORDINÆR,
+                                nyBehandlingKategori: BehandlingKategori = BehandlingKategori.NASJONAL,
+                                manueltOppdatert: Boolean = false): Behandling {
         val nyUnderkategori =
                 if (manueltOppdatert) nyBehandlingUnderkategori
-                else if (nyBehandlingUnderkategori != null) bestemUnderkategori(
+                else bestemUnderkategori(
                         nyUnderkategori = nyBehandlingUnderkategori,
                         nyBehandlingType = behandling.type,
                         løpendeUnderkategori = hentLøpendeUnderkategori(
                                 fagsakId = behandling.fagsak.id))
-                else null
+
         val forrigeBehandlingUnderkategori = behandling.underkategori
         val forrigeBehandlingKategori = behandling.kategori
-        val eksistererEndringSomSkalLogges =
-                nyBehandlingKategori != forrigeBehandlingKategori || nyBehandlingUnderkategori != forrigeBehandlingUnderkategori
+        val skalOppdatereKategori = nyBehandlingKategori != forrigeBehandlingKategori
+        val skalOppdatereUnderkategori = nyUnderkategori != forrigeBehandlingUnderkategori
 
-        if (nyBehandlingKategori != null && nyBehandlingKategori != forrigeBehandlingKategori) {
+        if (skalOppdatereKategori) {
             behandling.apply { kategori = nyBehandlingKategori }
         }
-        if (nyUnderkategori != null && nyUnderkategori != forrigeBehandlingUnderkategori) {
+        if (skalOppdatereUnderkategori) {
             behandling.apply { underkategori = nyUnderkategori }
         }
 
@@ -134,7 +134,7 @@ class BehandlingService(
                 } else null
             }
 
-            if (manueltOppdatert && eksistererEndringSomSkalLogges && nyBehandlingKategori != null && nyUnderkategori != null) {
+            if (manueltOppdatert && (skalOppdatereKategori || skalOppdatereUnderkategori)) {
                 loggService.opprettEndretBehandlingstema(behandling = behandling,
                                                          forrigeKategori = forrigeBehandlingKategori,
                                                          forrigeUnderkategori = forrigeBehandlingUnderkategori,
