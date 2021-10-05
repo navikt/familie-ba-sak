@@ -11,11 +11,9 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -46,7 +44,6 @@ class BehandlingsresultatService(
         )
 
         val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandlingId)
-
             ?: throw Feil("Finner ikke aktiv vilkårsvurdering")
 
         val personerFremstiltKravFor =
@@ -56,22 +53,7 @@ class BehandlingsresultatService(
                 forrigeBehandling = forrigeBehandling
             )
 
-        val personerVurdertIDenneBehandlingen = persongrunnlagService.hentAktiv(behandling.id)?.personer?.filter {
-            val vilkårResultater =
-                vilkårsvurdering.personResultater.find { personResultat -> personResultat.personIdent == it.personIdent.ident }?.vilkårResultater
-                    ?: emptyList()
-
-            val vilkårVurdertIDenneBehandlingen =
-                vilkårResultater.filter { vilkårResultat -> vilkårResultat.behandlingId == behandlingId }
-
-            when (it.type) {
-                PersonType.BARN -> vilkårVurdertIDenneBehandlingen.isNotEmpty()
-                PersonType.SØKER -> vilkårVurdertIDenneBehandlingen.any { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
-                else -> false
-            }
-        }
-
-        val behandlingsresultatPersoner = personerVurdertIDenneBehandlingen?.map {
+        val behandlingsresultatPersoner = persongrunnlagService.hentAktiv(behandling.id)?.personer?.map {
             BehandlingsresultatUtils.utledBehandlingsresultatDataForPerson(
                 person = it,
                 personerFremstiltKravFor = personerFremstiltKravFor,
@@ -118,6 +100,7 @@ class BehandlingsresultatService(
             ?.filter { it.inkludertISøknaden }
             ?.map { it.ident }
             ?: emptyList()
+
         val utvidetBarnetrygdSøker =
             if (søknadDTO?.underkategori == BehandlingUnderkategori.UTVIDET) listOf(søknadDTO.søkerMedOpplysninger.ident) else emptyList()
 
