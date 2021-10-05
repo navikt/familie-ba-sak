@@ -58,7 +58,7 @@ class KonsistensavstemmingSchedulerTest {
     fun setUp() {
         MockKAnnotations.init(this)
         konsistensavstemmingScheduler =
-                KonsistensavstemmingScheduler(batchService, behandlingService, fagsakService, taskRepository)
+            KonsistensavstemmingScheduler(batchService, behandlingService, fagsakService, taskRepository)
         taskRepository = spyk(taskRepository)
     }
 

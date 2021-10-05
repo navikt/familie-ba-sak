@@ -6,8 +6,10 @@ import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import org.springframework.stereotype.Service
 
 @Service
-class SkyggesakService(private val integrasjonClient: IntegrasjonClient,
-                       private val personopplysningerService: PersonopplysningerService) {
+class SkyggesakService(
+    private val integrasjonClient: IntegrasjonClient,
+    private val personopplysningerService: PersonopplysningerService
+) {
 
     fun opprettSkyggesak(ident: String, fagsakId: Long) {
         val aktørId = personopplysningerService.hentAktivAktørId(Ident(ident))

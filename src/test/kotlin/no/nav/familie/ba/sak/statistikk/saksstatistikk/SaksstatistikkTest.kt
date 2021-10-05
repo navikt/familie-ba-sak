@@ -29,22 +29,22 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.repository.findByIdOrNull
 
 class SaksstatistikkTest(
-        @Autowired
-        private val fagsakService: FagsakService,
+    @Autowired
+    private val fagsakService: FagsakService,
 
-        @Autowired
-        private val fagsakController: FagsakController,
+    @Autowired
+    private val fagsakController: FagsakController,
 
-        @Autowired
-        private val mockPersonopplysningerService: PersonopplysningerService,
+    @Autowired
+    private val mockPersonopplysningerService: PersonopplysningerService,
 
-        @Autowired
-        private val behandlingService: BehandlingService,
+    @Autowired
+    private val behandlingService: BehandlingService,
 
-        @Autowired
-        private val databaseCleanupService: DatabaseCleanupService,
-        @Autowired
-        private val saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository,
+    @Autowired
+    private val databaseCleanupService: DatabaseCleanupService,
+    @Autowired
+    private val saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository,
 ) : AbstractSpringIntegrationTest() {
 
     private lateinit var saksstatistikkScheduler: SaksstatistikkScheduler
@@ -65,7 +65,6 @@ class SaksstatistikkTest(
             mockPersonopplysningerService.hentIdenter(Ident(fnr))
         } returns listOf(IdentInformasjon(ident = fnr, historisk = true, gruppe = "FOLKEREGISTERIDENT"))
 
-
         val fagsakId = fagsakController.hentEllerOpprettFagsak(FagsakRequest(personIdent = fnr)).body!!.data!!.id
 
         val mellomlagredeStatistikkHendelser = saksstatistikkMellomlagringRepository.findByTypeAndTypeId(SAK, fagsakId)
@@ -77,13 +76,12 @@ class SaksstatistikkTest(
         assertThat(mellomlagredeStatistikkHendelser.first().sendtTidspunkt).isNull()
         assertThat(mellomlagredeStatistikkHendelser.first().kontraktVersjon).isEqualTo(hentPropertyFraMaven("familie.kontrakter.saksstatistikk"))
 
-
         val lagretJsonSomSakDVH: SakDVH =
-                sakstatistikkObjectMapper.readValue(mellomlagredeStatistikkHendelser.first().json, SakDVH::class.java)
+            sakstatistikkObjectMapper.readValue(mellomlagredeStatistikkHendelser.first().json, SakDVH::class.java)
 
         saksstatistikkScheduler.sendSaksstatistikk()
         val oppdatertMellomlagretSaksstatistikkHendelse =
-                saksstatistikkMellomlagringRepository.findByIdOrNull(mellomlagredeStatistikkHendelser.first().id)
+            saksstatistikkMellomlagringRepository.findByIdOrNull(mellomlagredeStatistikkHendelser.first().id)
 
         assertThat(oppdatertMellomlagretSaksstatistikkHendelse!!.sendtTidspunkt).isNotNull
         assertThat(sendteMeldinger["sak-$fagsakId"] as SakDVH).isEqualTo(lagretJsonSomSakDVH)
@@ -97,7 +95,6 @@ class SaksstatistikkTest(
         every {
             mockPersonopplysningerService.hentIdenter(Ident(fnr))
         } throws RuntimeException("Testen skal feile")
-
 
         assertThatThrownBy {
             fagsakController.hentEllerOpprettFagsak(FagsakRequest(personIdent = fnr))
@@ -117,12 +114,11 @@ class SaksstatistikkTest(
             mockPersonopplysningerService.hentIdenter(Ident(fnr))
         } returns listOf(IdentInformasjon(ident = fnr, historisk = true, gruppe = "FOLKEREGISTERIDENT"))
 
-
         fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr, false)
         val behandling = behandlingService.opprettBehandling(
-                nyOrdinærBehandling(
-                        fnr
-                )
+            nyOrdinærBehandling(
+                fnr
+            )
         )
 
         behandlingService.oppdaterStatusPåBehandling(behandlingId = behandling.id, BehandlingStatus.AVSLUTTET)
@@ -136,15 +132,13 @@ class SaksstatistikkTest(
         assertThat(mellomlagretBehandling.last().jsonToBehandlingDVH().behandlingStatus).isEqualTo("AVSLUTTET")
 
         val lagretJsonSomSakDVH: BehandlingDVH =
-                sakstatistikkObjectMapper.readValue(mellomlagretBehandling.last().json, BehandlingDVH::class.java)
+            sakstatistikkObjectMapper.readValue(mellomlagretBehandling.last().json, BehandlingDVH::class.java)
 
         saksstatistikkScheduler.sendSaksstatistikk()
         val oppdatertMellomlagretSaksstatistikkHendelse =
-                saksstatistikkMellomlagringRepository.findByIdOrNull(mellomlagretBehandling.first().id)
+            saksstatistikkMellomlagringRepository.findByIdOrNull(mellomlagretBehandling.first().id)
 
         assertThat(oppdatertMellomlagretSaksstatistikkHendelse!!.sendtTidspunkt).isNotNull
         assertThat(sendteMeldinger["behandling-${behandling.id}"] as BehandlingDVH).isEqualTo(lagretJsonSomSakDVH)
     }
-
-
 }

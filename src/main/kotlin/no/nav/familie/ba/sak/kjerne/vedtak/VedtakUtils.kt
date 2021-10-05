@@ -11,7 +11,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
-import java.util.*
 
 object VedtakUtils {
 
@@ -27,25 +26,27 @@ object VedtakUtils {
      * @param skjønnsmessigVurdert -  Om skjønnsmessig vurdering må være valgt for å trigger en vedtaksbegrynnelse.
      * @return List med personene det trigges endring på
      */
-    fun hentPersonerForAlleUtgjørendeVilkår(vilkårsvurdering: Vilkårsvurdering,
-            vedtaksperiode: Periode,
-            oppdatertBegrunnelseType: VedtakBegrunnelseType,
-            utgjørendeVilkår: Set<Vilkår>?,
-            aktuellePersonerForVedtaksperiode: List<Person>,
-            deltBosted: Boolean = false,
-            vurderingAnnetGrunnlag: Boolean = false): Set<Person> {
+    fun hentPersonerForAlleUtgjørendeVilkår(
+        vilkårsvurdering: Vilkårsvurdering,
+        vedtaksperiode: Periode,
+        oppdatertBegrunnelseType: VedtakBegrunnelseType,
+        utgjørendeVilkår: Set<Vilkår>?,
+        aktuellePersonerForVedtaksperiode: List<Person>,
+        deltBosted: Boolean = false,
+        vurderingAnnetGrunnlag: Boolean = false
+    ): Set<Person> {
 
         var personerSomOppfyllerTriggerVilkår: MutableSet<Person>? = null
 
         utgjørendeVilkår?.forEach { vilkår ->
             val personerMedVilkårForPeriode = hentPersonerMedUtgjørendeVilkår(
-                    vilkårsvurdering = vilkårsvurdering,
-                    vedtaksperiode = vedtaksperiode,
-                    oppdatertBegrunnelseType = oppdatertBegrunnelseType,
-                    utgjørendeVilkår = vilkår,
-                    aktuellePersonerForVedtaksperiode = aktuellePersonerForVedtaksperiode,
-                    deltBosted = deltBosted,
-                    vurderingAnnetGrunnlag = vurderingAnnetGrunnlag
+                vilkårsvurdering = vilkårsvurdering,
+                vedtaksperiode = vedtaksperiode,
+                oppdatertBegrunnelseType = oppdatertBegrunnelseType,
+                utgjørendeVilkår = vilkår,
+                aktuellePersonerForVedtaksperiode = aktuellePersonerForVedtaksperiode,
+                deltBosted = deltBosted,
+                vurderingAnnetGrunnlag = vurderingAnnetGrunnlag
             )
             personerSomOppfyllerTriggerVilkår = if (personerSomOppfyllerTriggerVilkår == null) {
                 personerMedVilkårForPeriode.toMutableSet()
@@ -56,39 +57,43 @@ object VedtakUtils {
         return personerSomOppfyllerTriggerVilkår ?: emptySet()
     }
 
-    private fun hentPersonerMedUtgjørendeVilkår(vilkårsvurdering: Vilkårsvurdering,
-                                        vedtaksperiode: Periode,
-                                        oppdatertBegrunnelseType: VedtakBegrunnelseType,
-                                        utgjørendeVilkår: Vilkår?,
-                                        aktuellePersonerForVedtaksperiode: List<Person>,
-                                        deltBosted: Boolean = false,
-                                        vurderingAnnetGrunnlag: Boolean = false): List<Person> {
+    private fun hentPersonerMedUtgjørendeVilkår(
+        vilkårsvurdering: Vilkårsvurdering,
+        vedtaksperiode: Periode,
+        oppdatertBegrunnelseType: VedtakBegrunnelseType,
+        utgjørendeVilkår: Vilkår?,
+        aktuellePersonerForVedtaksperiode: List<Person>,
+        deltBosted: Boolean = false,
+        vurderingAnnetGrunnlag: Boolean = false
+    ): List<Person> {
 
         return vilkårsvurdering.personResultater.fold(mutableListOf()) { acc, personResultat ->
             val utgjørendeVilkårResultat = personResultat.vilkårResultater.firstOrNull { vilkårResultat ->
 
                 val oppfyltTomMånedEtter =
-                        if (vilkårResultat.vilkårType == Vilkår.UNDER_18_ÅR
-                            && vilkårResultat.periodeTom != vilkårResultat.periodeTom?.sisteDagIMåned()) 0L
-                        else 1L
+                    if (vilkårResultat.vilkårType == Vilkår.UNDER_18_ÅR &&
+                        vilkårResultat.periodeTom != vilkårResultat.periodeTom?.sisteDagIMåned()
+                    ) 0L
+                    else 1L
                 when {
                     vilkårResultat.vilkårType != utgjørendeVilkår -> false
                     vilkårResultat.periodeFom == null -> false
                     oppdatertBegrunnelseType == VedtakBegrunnelseType.INNVILGELSE -> {
                         (!deltBosted || vilkårResultat.erDeltBosted) &&
-                        (!vurderingAnnetGrunnlag || vilkårResultat.erSkjønnsmessigVurdert) &&
-                        vilkårResultat.periodeFom!!.toYearMonth() == vedtaksperiode.fom.minusMonths(1).toYearMonth() &&
-                        vilkårResultat.resultat == Resultat.OPPFYLT
+                            (!vurderingAnnetGrunnlag || vilkårResultat.erSkjønnsmessigVurdert) &&
+                            vilkårResultat.periodeFom!!.toYearMonth() == vedtaksperiode.fom.minusMonths(1)
+                            .toYearMonth() &&
+                            vilkårResultat.resultat == Resultat.OPPFYLT
                     }
 
                     oppdatertBegrunnelseType == VedtakBegrunnelseType.REDUKSJON ||
-                    oppdatertBegrunnelseType == VedtakBegrunnelseType.OPPHØR -> {
+                        oppdatertBegrunnelseType == VedtakBegrunnelseType.OPPHØR -> {
                         (!deltBosted || vilkårResultat.erDeltBosted) &&
-                        (!vurderingAnnetGrunnlag || vilkårResultat.erSkjønnsmessigVurdert) &&
-                        vilkårResultat.periodeTom != null &&
-                        vilkårResultat.resultat == Resultat.OPPFYLT &&
-                        vilkårResultat.periodeTom!!.toYearMonth() ==
-                        vedtaksperiode.fom.minusMonths(oppfyltTomMånedEtter).toYearMonth()
+                            (!vurderingAnnetGrunnlag || vilkårResultat.erSkjønnsmessigVurdert) &&
+                            vilkårResultat.periodeTom != null &&
+                            vilkårResultat.resultat == Resultat.OPPFYLT &&
+                            vilkårResultat.periodeTom!!.toYearMonth() ==
+                            vedtaksperiode.fom.minusMonths(oppfyltTomMånedEtter).toYearMonth()
                     }
                     else -> throw Feil("Henting av personer med utgjørende vilkår when: Ikke implementert")
                 }
@@ -102,12 +107,13 @@ object VedtakUtils {
             }
             acc
         }
-
     }
 }
 
-fun validerAvslagsbegrunnelse(triggesAv: TriggesAv,
-                              vilkårResultat: VilkårResultat) {
+fun validerAvslagsbegrunnelse(
+    triggesAv: TriggesAv,
+    vilkårResultat: VilkårResultat
+) {
     if (triggesAv.vilkår?.contains(vilkårResultat.vilkårType) != true) {
         error("Avslagbegrunnelser som oppdateres må tilhøre samme vilkår")
     }

@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.fødselshendelse
 
-
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
@@ -28,12 +27,12 @@ import org.springframework.stereotype.Service
 
 @Service
 class VelgFagSystemService(
-        private val fagsakService: FagsakService,
-        private val infotrygdService: InfotrygdService,
-        private val behandlingService: BehandlingService,
-        private val personopplysningerService: PersonopplysningerService,
-        private val featureToggleService: FeatureToggleService,
-        @Value("\${DAGLIG_KVOTE_FØDSELSHENDELSER}") val dagligKvote: Long = 0
+    private val fagsakService: FagsakService,
+    private val infotrygdService: InfotrygdService,
+    private val behandlingService: BehandlingService,
+    private val personopplysningerService: PersonopplysningerService,
+    private val featureToggleService: FeatureToggleService,
+    @Value("\${DAGLIG_KVOTE_FØDSELSHENDELSER}") val dagligKvote: Long = 0
 ) {
 
     val utfallForValgAvFagsystem = mutableMapOf<FagsystemUtfall, Counter>()
@@ -41,16 +40,20 @@ class VelgFagSystemService(
 
     init {
         values().forEach {
-            utfallForValgAvFagsystem[it] = Metrics.counter("familie.ba.sak.velgfagsystem",
-                                                           "navn",
-                                                           it.name,
-                                                           "beskrivelse",
-                                                           it.beskrivelse)
-            foreslåttUtfallForValgAvFagsystem[it] = Metrics.counter("familie.ba.sak.foreslaatt.velgfagsystem",
-                                                                    "navn",
-                                                                    it.name,
-                                                                    "beskrivelse",
-                                                                    it.beskrivelse)
+            utfallForValgAvFagsystem[it] = Metrics.counter(
+                "familie.ba.sak.velgfagsystem",
+                "navn",
+                it.name,
+                "beskrivelse",
+                it.beskrivelse
+            )
+            foreslåttUtfallForValgAvFagsystem[it] = Metrics.counter(
+                "familie.ba.sak.foreslaatt.velgfagsystem",
+                "navn",
+                it.name,
+                "beskrivelse",
+                it.beskrivelse
+            )
         }
     }
 
@@ -60,20 +63,20 @@ class VelgFagSystemService(
         else behandlingService.hentSisteBehandlingSomErIverksatt(fagsakId = fagsak.id) != null
     }
 
-
     internal fun morHarSakerMenIkkeLøpendeIInfotrygd(morsIdent: String): Boolean {
         return infotrygdService.harÅpenSakIInfotrygd(mutableListOf(morsIdent)) && !infotrygdService.harLøpendeSakIInfotrygd(
-                mutableListOf(morsIdent))
+            mutableListOf(morsIdent)
+        )
     }
 
     internal fun morEllerBarnHarLøpendeSakIInfotrygd(morsIdent: String, barnasIdenter: List<String>): Boolean {
         val morsIdenter = personopplysningerService.hentIdenter(Ident(morsIdent))
-                .filter { it.gruppe == "FOLKEREGISTERIDENT" }
-                .map { it.ident }
+            .filter { it.gruppe == "FOLKEREGISTERIDENT" }
+            .map { it.ident }
         val alleBarnasIdenter = barnasIdenter.flatMap {
             personopplysningerService.hentIdenter(Ident(it))
-                    .filter { identinfo -> identinfo.gruppe == "FOLKEREGISTERIDENT" }
-                    .map { identinfo -> identinfo.ident }
+                .filter { identinfo -> identinfo.gruppe == "FOLKEREGISTERIDENT" }
+                .map { identinfo -> identinfo.ident }
         }
 
         return infotrygdService.harLøpendeSakIInfotrygd(morsIdenter, alleBarnasIdenter)
@@ -88,7 +91,6 @@ class VelgFagSystemService(
         return gjeldendeStatsborgerskap.land == "NOR"
     }
 
-
     fun velgFagsystem(nyBehandlingHendelse: NyBehandlingHendelse): FagsystemRegelVurdering {
         val behandlingIBaSakErPåskrudd = featureToggleService.isEnabled(FeatureToggleConfig.AUTOMATISK_FØDSELSHENDELSE)
 
@@ -96,20 +98,26 @@ class VelgFagSystemService(
         val fagsak = fagsakService.hent(morsPersonIdent)
 
         val (fagsystemUtfall: FagsystemUtfall, fagsystem: FagsystemRegelVurdering) = when {
-            morHarLøpendeEllerTidligereUtbetalinger(fagsak) -> Pair(IVERKSATTE_BEHANDLINGER_I_BA_SAK,
-                                                                    FagsystemRegelVurdering.SEND_TIL_BA)
+            morHarLøpendeEllerTidligereUtbetalinger(fagsak) -> Pair(
+                IVERKSATTE_BEHANDLINGER_I_BA_SAK,
+                FagsystemRegelVurdering.SEND_TIL_BA
+            )
             morEllerBarnHarLøpendeSakIInfotrygd(nyBehandlingHendelse.morsIdent, nyBehandlingHendelse.barnasIdenter) -> Pair(
-                    LØPENDE_SAK_I_INFOTRYGD,
-                    FagsystemRegelVurdering.SEND_TIL_INFOTRYGD)
+                LØPENDE_SAK_I_INFOTRYGD,
+                FagsystemRegelVurdering.SEND_TIL_INFOTRYGD
+            )
             fagsak != null -> Pair(
-                    FAGSAK_UTEN_IVERKSATTE_BEHANDLINGER_I_BA_SAK,
-                    FagsystemRegelVurdering.SEND_TIL_BA)
+                FAGSAK_UTEN_IVERKSATTE_BEHANDLINGER_I_BA_SAK,
+                FagsystemRegelVurdering.SEND_TIL_BA
+            )
             morHarSakerMenIkkeLøpendeIInfotrygd(nyBehandlingHendelse.morsIdent) -> Pair(
-                    SAKER_I_INFOTRYGD_MEN_IKKE_LØPENDE_UTBETALINGER,
-                    FagsystemRegelVurdering.SEND_TIL_INFOTRYGD)
+                SAKER_I_INFOTRYGD_MEN_IKKE_LØPENDE_UTBETALINGER,
+                FagsystemRegelVurdering.SEND_TIL_INFOTRYGD
+            )
             erUnderDagligKvote() && harMorGyldigNorskstatsborger(Ident(morsPersonIdent.ident)) -> Pair(
-                    DAGLIG_KVOTE_OG_NORSK_STATSBORGER,
-                    FagsystemRegelVurdering.SEND_TIL_BA)
+                DAGLIG_KVOTE_OG_NORSK_STATSBORGER,
+                FagsystemRegelVurdering.SEND_TIL_BA
+            )
 
             else -> Pair(STANDARDUTFALL_INFOTRYGD, FagsystemRegelVurdering.SEND_TIL_INFOTRYGD)
         }

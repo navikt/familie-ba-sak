@@ -20,7 +20,6 @@ import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
-
 @Tag("integration")
 class SimuleringServiceTest(
     @Autowired private val fagsakService: FagsakService,
@@ -42,24 +41,28 @@ class SimuleringServiceTest(
     @Test
     fun `Skal verifisere at simulering blir lagert og oppdatert`() {
         val behandlingEtterVilkårsvurderingSteg = kjørStegprosessForFGB(
-                tilSteg = StegType.VURDER_TILBAKEKREVING,
-                søkerFnr = randomFnr(),
-                barnasIdenter = listOf(ClientMocks.barnFnr[0]),
-                fagsakService = fagsakService,
-                vedtakService = vedtakService,
-                persongrunnlagService = persongrunnlagService,
-                vilkårsvurderingService = vilkårsvurderingService,
-                stegService = stegService,
-                vedtaksperiodeService = vedtaksperiodeService,
+            tilSteg = StegType.VURDER_TILBAKEKREVING,
+            søkerFnr = randomFnr(),
+            barnasIdenter = listOf(ClientMocks.barnFnr[0]),
+            fagsakService = fagsakService,
+            vedtakService = vedtakService,
+            persongrunnlagService = persongrunnlagService,
+            vilkårsvurderingService = vilkårsvurderingService,
+            stegService = stegService,
+            vedtaksperiodeService = vedtaksperiodeService,
         )
 
         val vedtakSimuleringMottakerMock =
-                simuleringMottakerMock.map { it.tilBehandlingSimuleringMottaker(behandlingEtterVilkårsvurderingSteg) }
+            simuleringMottakerMock.map { it.tilBehandlingSimuleringMottaker(behandlingEtterVilkårsvurderingSteg) }
 
-        assertEquals(vedtakSimuleringMottakerMock.size,
-                     simuleringService.oppdaterSimuleringPåBehandlingVedBehov(behandlingEtterVilkårsvurderingSteg.id).size)
+        assertEquals(
+            vedtakSimuleringMottakerMock.size,
+            simuleringService.oppdaterSimuleringPåBehandlingVedBehov(behandlingEtterVilkårsvurderingSteg.id).size
+        )
 
-        assertEquals(vedtakSimuleringMottakerMock.size,
-                     simuleringService.oppdaterSimuleringPåBehandling(behandlingEtterVilkårsvurderingSteg).size)
+        assertEquals(
+            vedtakSimuleringMottakerMock.size,
+            simuleringService.oppdaterSimuleringPåBehandling(behandlingEtterVilkårsvurderingSteg).size
+        )
     }
 }

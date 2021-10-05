@@ -15,28 +15,36 @@ import org.springframework.web.client.RestOperations
 import java.net.URI
 
 @Service
-class SystemOnlyPdlRestClient(@Value("\${PDL_URL}") pdlBaseUrl: URI,
-                              @Qualifier("jwtBearerClientCredentials") override val restTemplate: RestOperations,
-                              val featureToggleService: FeatureToggleService)
-    : PdlRestClient(pdlBaseUrl, restTemplate) {
+class SystemOnlyPdlRestClient(
+    @Value("\${PDL_URL}") pdlBaseUrl: URI,
+    @Qualifier("jwtBearerClientCredentials") override val restTemplate: RestOperations,
+    val featureToggleService: FeatureToggleService
+) :
+    PdlRestClient(pdlBaseUrl, restTemplate) {
 
     fun hentAdressebeskyttelse(personIdent: String): List<Adressebeskyttelse> {
-        val pdlPersonRequest = PdlPersonRequest(variables = PdlPersonRequestVariables(personIdent),
-                                                query = hentGraphqlQuery("hent-adressebeskyttelse"))
+        val pdlPersonRequest = PdlPersonRequest(
+            variables = PdlPersonRequestVariables(personIdent),
+            query = hentGraphqlQuery("hent-adressebeskyttelse")
+        )
 
         val response = try {
             postForEntity<PdlAdressebeskyttelseResponse>(pdlUri, pdlPersonRequest, httpHeaders())
         } catch (e: Exception) {
-            throw Feil(message = "Feil ved oppslag på person. Gav feil: ${e.message}",
-                       frontendFeilmelding = "Feil oppsto ved oppslag på person $personIdent",
-                       httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
-                       throwable = e)
+            throw Feil(
+                message = "Feil ved oppslag på person. Gav feil: ${e.message}",
+                frontendFeilmelding = "Feil oppsto ved oppslag på person $personIdent",
+                httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
+                throwable = e
+            )
         }
 
         if (!response.harFeil()) return response.data.person!!.adressebeskyttelse
-        throw Feil(message = "Fant ikke data på person: ${response.errorMessages()}",
-                   frontendFeilmelding = "Fant ikke data for person $personIdent: ${response.errorMessages()}",
-                   httpStatus = HttpStatus.NOT_FOUND)
+        throw Feil(
+            message = "Fant ikke data på person: ${response.errorMessages()}",
+            frontendFeilmelding = "Fant ikke data for person $personIdent: ${response.errorMessages()}",
+            httpStatus = HttpStatus.NOT_FOUND
+        )
     }
 }
 

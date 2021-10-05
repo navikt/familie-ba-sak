@@ -10,45 +10,45 @@ import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.support.TestPropertySourceUtils
 import org.testcontainers.containers.FixedHostPortGenericContainer
 
-
 val MOCK_SERVER_IMAGE = "ghcr.io/navikt/familie-mock-server/familie-mock-server:latest"
 
 class VerdikjedetesterPropertyOverrideContextInitializer : ApplicationContextInitializer<ConfigurableApplicationContext?> {
 
     override fun initialize(configurableApplicationContext: ConfigurableApplicationContext) {
         TestPropertySourceUtils.addInlinedPropertiesToEnvironment(
-                configurableApplicationContext,
-                "FAMILIE_BA_INFOTRYGD_BARNETRYGD_API_URL: http://localhost:1337/rest/api/infotrygd/ba",
-                "PDL_URL: http://localhost:1337/rest/api/pdl")
+            configurableApplicationContext,
+            "FAMILIE_BA_INFOTRYGD_BARNETRYGD_API_URL: http://localhost:1337/rest/api/infotrygd/ba",
+            "PDL_URL: http://localhost:1337/rest/api/pdl"
+        )
     }
 }
 
 @ActiveProfiles(
-        "postgres",
-        "mock-oauth",
-        "mock-localdate-service",
-        "mock-tilbakekreving-klient",
-        "mock-brev-klient",
-        "mock-økonomi",
-        "mock-infotrygd-feed",
-        "mock-rest-template-config",
-        "mock-task-repository",
-        "mock-task-service"
+    "postgres",
+    "mock-oauth",
+    "mock-localdate-service",
+    "mock-tilbakekreving-klient",
+    "mock-brev-klient",
+    "mock-økonomi",
+    "mock-infotrygd-feed",
+    "mock-rest-template-config",
+    "mock-task-repository",
+    "mock-task-service"
 )
 @ContextConfiguration(
-        initializers = [VerdikjedetesterPropertyOverrideContextInitializer::class]
+    initializers = [VerdikjedetesterPropertyOverrideContextInitializer::class]
 )
 abstract class AbstractVerdikjedetest : WebSpringAuthTestRunner() {
 
     fun familieBaSakKlient(): FamilieBaSakKlient = FamilieBaSakKlient(
-            baSakUrl = hentUrl(""),
-            restOperations = restOperations,
-            headers = hentHeadersForSystembruker()
+        baSakUrl = hentUrl(""),
+        restOperations = restOperations,
+        headers = hentHeadersForSystembruker()
     )
 
     fun mockServerKlient(): MockserverKlient = MockserverKlient(
-            mockServerUrl = "http://localhost:1337",
-            restOperations = restOperations,
+        mockServerUrl = "http://localhost:1337",
+        restOperations = restOperations,
     )
 
     init {

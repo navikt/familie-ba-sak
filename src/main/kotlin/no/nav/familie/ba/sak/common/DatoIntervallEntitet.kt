@@ -6,9 +6,9 @@ import javax.persistence.Embeddable
 
 @Embeddable
 data class DatoIntervallEntitet(
-        @Column(name = "fom")
-        val fom: LocalDate? = null,
+    @Column(name = "fom")
+    val fom: LocalDate? = null,
 
-        @Column(name = "tom")
-        val tom: LocalDate? = null
+    @Column(name = "tom")
+    val tom: LocalDate? = null
 )

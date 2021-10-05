@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene
 
 import com.fasterxml.jackson.annotation.JsonProperty
-import java.util.*
+import java.util.Objects
 import javax.persistence.Column
 import javax.persistence.Embeddable
 
@@ -18,9 +18,9 @@ import javax.persistence.Embeddable
  */
 @Embeddable
 class PersonIdent(
-        @JsonProperty("id")
-        @Column(name = "person_ident", updatable = false, length = 50)
-        val ident: String
+    @JsonProperty("id")
+    @Column(name = "person_ident", updatable = false, length = 50)
+    val ident: String
 ) : Comparable<PersonIdent> {
 
     override fun compareTo(other: PersonIdent): Int {

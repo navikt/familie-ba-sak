@@ -30,12 +30,12 @@ class HenleggBehandling(
     override fun utførStegOgAngiNeste(behandling: Behandling, data: RestHenleggBehandlingInfo): StegType {
         if (data.årsak == HenleggÅrsak.SØKNAD_TRUKKET) {
             dokumentService.sendManueltBrev(
-                    behandling = behandling,
-                    fagsakId = behandling.fagsak.id,
-                    manueltBrevRequest = ManueltBrevRequest(
-                            mottakerIdent = behandling.fagsak.hentAktivIdent().ident,
-                            brevmal = BrevType.HENLEGGE_TRUKKET_SØKNAD,
-                    ).byggMottakerdata(behandling, persongrunnlagService, arbeidsfordelingService)
+                behandling = behandling,
+                fagsakId = behandling.fagsak.id,
+                manueltBrevRequest = ManueltBrevRequest(
+                    mottakerIdent = behandling.fagsak.hentAktivIdent().ident,
+                    brevmal = BrevType.HENLEGGE_TRUKKET_SØKNAD,
+                ).byggMottakerdata(behandling, persongrunnlagService, arbeidsfordelingService)
             )
         }
 
@@ -61,7 +61,7 @@ class HenleggBehandling(
 
     private fun opprettFerdigstillBehandling(behandlingsId: Long, personIdent: String) {
         val ferdigstillBehandling =
-                FerdigstillBehandlingTask.opprettTask(behandlingsId = behandlingsId, personIdent = personIdent)
+            FerdigstillBehandlingTask.opprettTask(behandlingsId = behandlingsId, personIdent = personIdent)
         taskRepository.save(ferdigstillBehandling)
     }
 }

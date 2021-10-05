@@ -26,121 +26,133 @@ import java.time.YearMonth
 class VilkårTilTilkjentYtelseTest {
 
     @ParameterizedTest
-    @CsvFileSource(resources = ["/beregning/vilkår_til_tilkjent_ytelse/søker_med_ett_barn_inntil_to_perioder.csv"],
-                   numLinesToSkip = 1,
-                   delimiter = ';')
+    @CsvFileSource(
+        resources = ["/beregning/vilkår_til_tilkjent_ytelse/søker_med_ett_barn_inntil_to_perioder.csv"],
+        numLinesToSkip = 1,
+        delimiter = ';'
+    )
     fun `test søker med ett barn, inntil to perioder`(
-            sakType: String,
-            søkerPeriode1: String?,
-            søkerVilkår1: String?,
-            søkerPeriode2: String?,
-            søkerVilkår2: String?,
-            barn1Periode1: String?,
-            barn1Vilkår1: String?,
-            barn1Andel1Beløp: Int?,
-            barn1Andel1Periode: String?,
-            barn1Andel1Type: String?,
-            barn1Andel2Beløp: Int?,
-            barn1Andel2Periode: String?,
-            barn1Andel2Type: String?,
-            erDeltBosted: Boolean?) {
+        sakType: String,
+        søkerPeriode1: String?,
+        søkerVilkår1: String?,
+        søkerPeriode2: String?,
+        søkerVilkår2: String?,
+        barn1Periode1: String?,
+        barn1Vilkår1: String?,
+        barn1Andel1Beløp: Int?,
+        barn1Andel1Periode: String?,
+        barn1Andel1Type: String?,
+        barn1Andel2Beløp: Int?,
+        barn1Andel2Periode: String?,
+        barn1Andel2Type: String?,
+        erDeltBosted: Boolean?
+    ) {
 
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
         val barn1 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = LocalDate.of(2021, 9, 1))
 
         val vilkårsvurdering = TestVilkårsvurderingBuilder(sakType)
-                .medPersonVilkårPeriode(søker, søkerVilkår1, søkerPeriode1, erDeltBosted)
-                .medPersonVilkårPeriode(søker, søkerVilkår2, søkerPeriode2, erDeltBosted)
-                .medPersonVilkårPeriode(barn1, barn1Vilkår1, barn1Periode1, erDeltBosted)
-                .bygg()
+            .medPersonVilkårPeriode(søker, søkerVilkår1, søkerPeriode1, erDeltBosted)
+            .medPersonVilkårPeriode(søker, søkerVilkår2, søkerPeriode2, erDeltBosted)
+            .medPersonVilkårPeriode(barn1, barn1Vilkår1, barn1Periode1, erDeltBosted)
+            .bygg()
 
-        val delBeløp = if(erDeltBosted != null && erDeltBosted) 2 else 1
+        val delBeløp = if (erDeltBosted != null && erDeltBosted) 2 else 1
 
         val forventetTilkjentYtelse = TestTilkjentYtelseBuilder(vilkårsvurdering.behandling)
-                .medAndelTilkjentYtelse(barn1, barn1Andel1Beløp?.div(delBeløp), barn1Andel1Periode, barn1Andel1Type)
-                .medAndelTilkjentYtelse(barn1, barn1Andel2Beløp?.div(delBeløp), barn1Andel2Periode, barn1Andel2Type)
-                .bygg()
+            .medAndelTilkjentYtelse(barn1, barn1Andel1Beløp?.div(delBeløp), barn1Andel1Periode, barn1Andel1Type)
+            .medAndelTilkjentYtelse(barn1, barn1Andel2Beløp?.div(delBeløp), barn1Andel2Periode, barn1Andel2Type)
+            .bygg()
 
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(vilkårsvurdering.behandling.id, søker, barn1)
 
         val faktiskTilkjentYtelse = TilkjentYtelseUtils.beregnTilkjentYtelse(
-                vilkårsvurdering = vilkårsvurdering,
-                personopplysningGrunnlag = personopplysningGrunnlag,
-                behandling = lagBehandling()
+            vilkårsvurdering = vilkårsvurdering,
+            personopplysningGrunnlag = personopplysningGrunnlag,
+            behandling = lagBehandling()
         )
 
-        Assertions.assertEquals(forventetTilkjentYtelse.andelerTilkjentYtelse,
-                                faktiskTilkjentYtelse.andelerTilkjentYtelse)
+        Assertions.assertEquals(
+            forventetTilkjentYtelse.andelerTilkjentYtelse,
+            faktiskTilkjentYtelse.andelerTilkjentYtelse
+        )
     }
 
     @ParameterizedTest
-    @CsvFileSource(resources = ["/beregning/vilkår_til_tilkjent_ytelse/søker_med_to_barn_inntil_to_perioder.csv"],
-                   numLinesToSkip = 1,
-                   delimiter = ';')
+    @CsvFileSource(
+        resources = ["/beregning/vilkår_til_tilkjent_ytelse/søker_med_to_barn_inntil_to_perioder.csv"],
+        numLinesToSkip = 1,
+        delimiter = ';'
+    )
     fun `test søker med to barn, inntil to perioder`(
-            søkerPeriode1: String?,
-            søkerVilkår1: String?,
-            søkerPeriode2: String?,
-            søkerVilkår2: String?,
-            barn1Periode1: String?,
-            barn1Vilkår1: String?,
-            barn2Periode1: String?,
-            barn2Vilkår1: String?,
-            barn1Andel1Beløp: Int?,
-            barn1Andel1Periode: String?,
-            barn1Andel1Type: String?,
-            barn1Andel2Beløp: Int?,
-            barn1Andel2Periode: String?,
-            barn1Andel2Type: String?,
-            barn1Andel3Beløp: Int?,
-            barn1Andel3Periode: String?,
-            barn1Andel3Type: String?,
-            barn2Andel1Beløp: Int?,
-            barn2Andel1Periode: String?,
-            barn2Andel1Type: String?,
-            barn2Andel2Beløp: Int?,
-            barn2Andel2Periode: String?,
-            barn2Andel2Type: String?) {
+        søkerPeriode1: String?,
+        søkerVilkår1: String?,
+        søkerPeriode2: String?,
+        søkerVilkår2: String?,
+        barn1Periode1: String?,
+        barn1Vilkår1: String?,
+        barn2Periode1: String?,
+        barn2Vilkår1: String?,
+        barn1Andel1Beløp: Int?,
+        barn1Andel1Periode: String?,
+        barn1Andel1Type: String?,
+        barn1Andel2Beløp: Int?,
+        barn1Andel2Periode: String?,
+        barn1Andel2Type: String?,
+        barn1Andel3Beløp: Int?,
+        barn1Andel3Periode: String?,
+        barn1Andel3Type: String?,
+        barn2Andel1Beløp: Int?,
+        barn2Andel1Periode: String?,
+        barn2Andel1Type: String?,
+        barn2Andel2Beløp: Int?,
+        barn2Andel2Periode: String?,
+        barn2Andel2Type: String?
+    ) {
 
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
         val barn1 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = LocalDate.of(2020, 2, 1))
         val barn2 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = LocalDate.of(2022, 4, 1))
 
         val vilkårsvurdering = TestVilkårsvurderingBuilder("NASJONAL")
-                .medPersonVilkårPeriode(søker, søkerVilkår1, søkerPeriode1)
-                .medPersonVilkårPeriode(søker, søkerVilkår2, søkerPeriode2)
-                .medPersonVilkårPeriode(barn1, barn1Vilkår1, barn1Periode1)
-                .medPersonVilkårPeriode(barn2, barn2Vilkår1, barn2Periode1)
-                .bygg()
+            .medPersonVilkårPeriode(søker, søkerVilkår1, søkerPeriode1)
+            .medPersonVilkårPeriode(søker, søkerVilkår2, søkerPeriode2)
+            .medPersonVilkårPeriode(barn1, barn1Vilkår1, barn1Periode1)
+            .medPersonVilkårPeriode(barn2, barn2Vilkår1, barn2Periode1)
+            .bygg()
 
         val forventetTilkjentYtelse = TestTilkjentYtelseBuilder(vilkårsvurdering.behandling)
-                .medAndelTilkjentYtelse(barn1, barn1Andel1Beløp, barn1Andel1Periode, barn1Andel1Type)
-                .medAndelTilkjentYtelse(barn1, barn1Andel2Beløp, barn1Andel2Periode, barn1Andel2Type)
-                .medAndelTilkjentYtelse(barn1, barn1Andel3Beløp, barn1Andel3Periode, barn1Andel3Type)
-                .medAndelTilkjentYtelse(barn2, barn2Andel1Beløp, barn2Andel1Periode, barn2Andel1Type)
-                .medAndelTilkjentYtelse(barn2, barn2Andel2Beløp, barn2Andel2Periode, barn2Andel2Type)
-                .bygg()
+            .medAndelTilkjentYtelse(barn1, barn1Andel1Beløp, barn1Andel1Periode, barn1Andel1Type)
+            .medAndelTilkjentYtelse(barn1, barn1Andel2Beløp, barn1Andel2Periode, barn1Andel2Type)
+            .medAndelTilkjentYtelse(barn1, barn1Andel3Beløp, barn1Andel3Periode, barn1Andel3Type)
+            .medAndelTilkjentYtelse(barn2, barn2Andel1Beløp, barn2Andel1Periode, barn2Andel1Type)
+            .medAndelTilkjentYtelse(barn2, barn2Andel2Beløp, barn2Andel2Periode, barn2Andel2Type)
+            .bygg()
 
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(vilkårsvurdering.behandling.id, søker, barn1, barn2)
 
         val faktiskTilkjentYtelse = TilkjentYtelseUtils.beregnTilkjentYtelse(
-                vilkårsvurdering = vilkårsvurdering,
-                personopplysningGrunnlag = personopplysningGrunnlag,
-                behandling = lagBehandling()
+            vilkårsvurdering = vilkårsvurdering,
+            personopplysningGrunnlag = personopplysningGrunnlag,
+            behandling = lagBehandling()
         )
 
-        Assertions.assertEquals(forventetTilkjentYtelse.andelerTilkjentYtelse,
-                                faktiskTilkjentYtelse.andelerTilkjentYtelse)
+        Assertions.assertEquals(
+            forventetTilkjentYtelse.andelerTilkjentYtelse,
+            faktiskTilkjentYtelse.andelerTilkjentYtelse
+        )
     }
-
 }
 
 class TestVilkårsvurderingBuilder(sakType: String) {
 
     private val identPersonResultatMap = mutableMapOf<String, PersonResultat>()
     private val vilkårsvurdering =
-            Vilkårsvurdering(behandling = lagBehandling(
-                    behandlingKategori = BehandlingKategori.valueOf(sakType)))
+        Vilkårsvurdering(
+            behandling = lagBehandling(
+                behandlingKategori = BehandlingKategori.valueOf(sakType)
+            )
+        )
 
     fun medPersonVilkårPeriode(person: Person, vilkår: String?, periode: String?, erDeltBoste: Boolean? = null): TestVilkårsvurderingBuilder {
 
@@ -154,18 +166,21 @@ class TestVilkårsvurderingBuilder(sakType: String) {
 
         val vilkårsresultater = TestVilkårParser.parse(vilkår).map {
             VilkårResultat(
-                    erDeltBosted = erDeltBoste ?: false,
-                    personResultat = personResultat,
-                    vilkårType = it,
-                    resultat = Resultat.OPPFYLT,
-                    periodeFom = testperiode.fraOgMed,
-                    periodeTom = testperiode.tilOgMed,
-                    begrunnelse = "",
-                    behandlingId = vilkårsvurdering.behandling.id)
+                erDeltBosted = erDeltBoste ?: false,
+                personResultat = personResultat,
+                vilkårType = it,
+                resultat = Resultat.OPPFYLT,
+                periodeFom = testperiode.fraOgMed,
+                periodeTom = testperiode.tilOgMed,
+                begrunnelse = "",
+                behandlingId = vilkårsvurdering.behandling.id
+            )
         }.toSet()
 
-        personResultat.setSortedVilkårResultater(personResultat.vilkårResultater.plus(vilkårsresultater)
-                                                         .toSet())
+        personResultat.setSortedVilkårResultater(
+            personResultat.vilkårResultater.plus(vilkårsresultater)
+                .toSet()
+        )
 
         return this
     }
@@ -180,9 +195,10 @@ class TestVilkårsvurderingBuilder(sakType: String) {
 class TestTilkjentYtelseBuilder(val behandling: Behandling) {
 
     private val tilkjentYtelse = TilkjentYtelse(
-            behandling = behandling,
-            opprettetDato = LocalDate.now(),
-            endretDato = LocalDate.now())
+        behandling = behandling,
+        opprettetDato = LocalDate.now(),
+        endretDato = LocalDate.now()
+    )
 
     fun medAndelTilkjentYtelse(person: Person, beløp: Int?, periode: String?, type: String?): TestTilkjentYtelseBuilder {
         if (beløp == null || periode.isNullOrEmpty() || type.isNullOrEmpty())
@@ -191,17 +207,17 @@ class TestTilkjentYtelseBuilder(val behandling: Behandling) {
         val stønadPeriode = TestPeriode.parse(periode)
 
         tilkjentYtelse.andelerTilkjentYtelse.add(
-                AndelTilkjentYtelse(
-                        behandlingId = behandling.id,
-                        tilkjentYtelse = tilkjentYtelse,
-                        personIdent = person.personIdent.ident,
-                        stønadFom = stønadPeriode.fraOgMed.toYearMonth(),
-                        stønadTom = stønadPeriode.tilOgMed!!.toYearMonth(),
-                        kalkulertUtbetalingsbeløp = beløp.toInt(),
-                        type = YtelseType.valueOf(type),
-                        sats = beløp.toInt(),
-                        prosent = BigDecimal(100)
-                )
+            AndelTilkjentYtelse(
+                behandlingId = behandling.id,
+                tilkjentYtelse = tilkjentYtelse,
+                personIdent = person.personIdent.ident,
+                stønadFom = stønadPeriode.fraOgMed.toYearMonth(),
+                stønadTom = stønadPeriode.tilOgMed!!.toYearMonth(),
+                kalkulertUtbetalingsbeløp = beløp.toInt(),
+                type = YtelseType.valueOf(type),
+                sats = beløp.toInt(),
+                prosent = BigDecimal(100)
+            )
         )
 
         return this
@@ -241,7 +257,7 @@ data class TestPeriode(val fraOgMed: LocalDate, val tilOgMed: LocalDate?) {
             if (yearMonthMatch != null && yearMonthMatch.groupValues.size == 3) {
                 val fom = yearMonthMatch.groupValues[1].let { YearMonth.parse(it) }
                 val tom =
-                        yearMonthMatch.groupValues[2].let { if (it.length == 7) YearMonth.parse(it) else YearMonth.from(LocalDate.MAX) }
+                    yearMonthMatch.groupValues[2].let { if (it.length == 7) YearMonth.parse(it) else YearMonth.from(LocalDate.MAX) }
 
                 return TestPeriode(fom!!.atDay(1), tom?.atEndOfMonth())
             }
@@ -255,19 +271,19 @@ object TestVilkårParser {
     fun parse(s: String): List<Vilkår> {
 
         return s.split(',')
-                .map {
-                    when (it.replace("""\s*""".toRegex(), "").lowercase()) {
-                        "opphold" -> Vilkår.LOVLIG_OPPHOLD
-                        "<18" -> Vilkår.UNDER_18_ÅR
-                        "<18år" -> Vilkår.UNDER_18_ÅR
-                        "under18" -> Vilkår.UNDER_18_ÅR
-                        "under18år" -> Vilkår.UNDER_18_ÅR
-                        "bosatt" -> Vilkår.BOSATT_I_RIKET
-                        "bormedsøker" -> Vilkår.BOR_MED_SØKER
-                        "gift" -> Vilkår.GIFT_PARTNERSKAP
-                        "partnerskap" -> Vilkår.GIFT_PARTNERSKAP
-                        else -> throw IllegalArgumentException("Ukjent vilkår: $s")
-                    }
-                }.toList()
+            .map {
+                when (it.replace("""\s*""".toRegex(), "").lowercase()) {
+                    "opphold" -> Vilkår.LOVLIG_OPPHOLD
+                    "<18" -> Vilkår.UNDER_18_ÅR
+                    "<18år" -> Vilkår.UNDER_18_ÅR
+                    "under18" -> Vilkår.UNDER_18_ÅR
+                    "under18år" -> Vilkår.UNDER_18_ÅR
+                    "bosatt" -> Vilkår.BOSATT_I_RIKET
+                    "bormedsøker" -> Vilkår.BOR_MED_SØKER
+                    "gift" -> Vilkår.GIFT_PARTNERSKAP
+                    "partnerskap" -> Vilkår.GIFT_PARTNERSKAP
+                    else -> throw IllegalArgumentException("Ukjent vilkår: $s")
+                }
+            }.toList()
     }
 }

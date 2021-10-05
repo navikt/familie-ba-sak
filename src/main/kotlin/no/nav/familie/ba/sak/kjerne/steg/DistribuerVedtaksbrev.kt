@@ -10,22 +10,27 @@ import org.springframework.stereotype.Service
 
 @Service
 class DistribuerVedtaksbrev(
-        private val dokumentService: DokumentService,
-        private val taskRepository: TaskRepositoryWrapper,
+    private val dokumentService: DokumentService,
+    private val taskRepository: TaskRepositoryWrapper,
 ) : BehandlingSteg<DistribuerDokumentDTO> {
 
-    override fun utførStegOgAngiNeste(behandling: Behandling,
-                                      data: DistribuerDokumentDTO): StegType {
+    override fun utførStegOgAngiNeste(
+        behandling: Behandling,
+        data: DistribuerDokumentDTO
+    ): StegType {
         logger.info("Iverksetter distribusjon av vedtaksbrev med journalpostId ${data.journalpostId}")
 
-        dokumentService.distribuerBrevOgLoggHendelse(journalpostId = data.journalpostId,
-                                                     behandlingId = data.behandlingId,
-                                                     loggBehandlerRolle = BehandlerRolle.SYSTEM,
-                                                     brevMal = data.brevmal)
+        dokumentService.distribuerBrevOgLoggHendelse(
+            journalpostId = data.journalpostId,
+            behandlingId = data.behandlingId,
+            loggBehandlerRolle = BehandlerRolle.SYSTEM,
+            brevMal = data.brevmal
+        )
 
         val ferdigstillBehandlingTask = FerdigstillBehandlingTask.opprettTask(
-                personIdent = data.personIdent,
-                behandlingsId = data.behandlingId!!)
+            personIdent = data.personIdent,
+            behandlingsId = data.behandlingId!!
+        )
         taskRepository.save(ferdigstillBehandlingTask)
 
         return hentNesteStegForNormalFlyt(behandling)

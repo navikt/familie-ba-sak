@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.integrasjoner.infotrygd
 
-
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.DbContainerInitializer
@@ -8,7 +7,6 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
-import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
@@ -71,7 +69,7 @@ import java.time.format.DateTimeFormatter
 )
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Tag("integration")
-class MigreringServiceTest{
+class MigreringServiceTest {
 
     @Autowired
     lateinit var databaseCleanupService: DatabaseCleanupService
@@ -145,7 +143,7 @@ class MigreringServiceTest{
 
             val now = LocalDate.now()
             val forventetUtbetalingFom: LocalDate =
-                    if (infotrygdKjøredato().isAfter(now)) now.førsteDagIInneværendeMåned() else now.førsteDagINesteMåned()
+                if (infotrygdKjøredato().isAfter(now)) now.førsteDagIInneværendeMåned() else now.førsteDagINesteMåned()
 
             val vedtakDVH = MockKafkaProducer.sendteMeldinger.values.first() as VedtakDVH
             assertThat(vedtakDVH.utbetalingsperioder.first().stønadFom).isEqualTo(forventetUtbetalingFom)
@@ -163,8 +161,8 @@ class MigreringServiceTest{
         val barnasFødselsdatoer = ClientMocks.barnFnr.map { LocalDate.parse(it.subSequence(0, 6), DateTimeFormatter.ofPattern("ddMMyy")) }
         val vilkårResultater = vilkårService.hentVilkårsvurdering(behandlingId = responseDto.behandlingId)!!.personResultater.flatMap { it.vilkårResultater }
         assertThat(vilkårResultater.filter { it.vilkårType.gjelderAlltidFraBarnetsFødselsdato() })
-                .extracting("periodeFom")
-                .hasSameElementsAs(barnasFødselsdatoer)
+            .extracting("periodeFom")
+            .hasSameElementsAs(barnasFødselsdatoer)
     }
 
     @Test
@@ -187,7 +185,7 @@ class MigreringServiceTest{
         assertThatThrownBy {
             migreringService.migrer(ClientMocks.søkerFnr[0])
         }.hasFieldOrProperty("frontendFeilmelding")
-                .hasMessageContaining("allerede migrert")
+            .hasMessageContaining("allerede migrert")
     }
 
     @Test
@@ -202,49 +200,49 @@ class MigreringServiceTest{
         assertThatThrownBy {
             migreringService.migrer(ClientMocks.søkerFnr[0])
         }.hasFieldOrProperty("frontendFeilmelding")
-                .hasMessageContaining("sak i Infotrygd")
+            .hasMessageContaining("sak i Infotrygd")
     }
 
     @Test
     fun `migrering skal feile hvis beregnet beløp ikke er lik beløp fra infotrygd`() {
         every { infotrygdBarnetrygdClient.hentSaker(any(), any()) } returns
-                InfotrygdSøkResponse(listOf(opprettSakMedBeløp(1354.0)), emptyList())
+            InfotrygdSøkResponse(listOf(opprettSakMedBeløp(1354.0)), emptyList())
         assertThatThrownBy { migreringService.migrer(ClientMocks.søkerFnr[0]) }.isInstanceOf(Feil::class.java)
-                .hasMessageContaining("beløp")
+            .hasMessageContaining("beløp")
     }
 
     @Test
     fun `migrering skal feile hvis saken fra Infotrygd inneholder mer enn ett beløp`() {
         every { infotrygdBarnetrygdClient.hentSaker(any(), any()) } returns
-                InfotrygdSøkResponse(listOf(opprettSakMedBeløp(2708.0, 660.0)), emptyList())
+            InfotrygdSøkResponse(listOf(opprettSakMedBeløp(2708.0, 660.0)), emptyList())
         assertThatThrownBy { migreringService.migrer(ClientMocks.søkerFnr[0]) }.isInstanceOf(FunksjonellFeil::class.java)
-                .hasMessageContaining("Fant 2")
+            .hasMessageContaining("Fant 2")
     }
 
     @Test
     fun `migrering skal feile hvis saken fra Infotrygd ikke er ordinær`() {
         every { infotrygdBarnetrygdClient.hentSaker(any(), any()) } returns
-                InfotrygdSøkResponse(listOf(opprettSakMedBeløp(2708.0).copy(valg = "UT")), emptyList())
+            InfotrygdSøkResponse(listOf(opprettSakMedBeløp(2708.0).copy(valg = "UT")), emptyList())
         assertThatThrownBy { migreringService.migrer(ClientMocks.søkerFnr[0]) }.isInstanceOf(FunksjonellFeil::class.java)
-                .hasMessageContaining("ordinær")
+            .hasMessageContaining("ordinær")
     }
-
 
     @Test
     fun `migrering skal feile på, og dagen etter, kjøredato i Infotrygd`() {
         val virkningsdatoUtleder = MigreringService::class.java.getDeclaredMethod("virkningsdatoFra", LocalDate::class.java)
         virkningsdatoUtleder.trySetAccessible()
 
-        val migreringServiceMock = MigreringService(mockk(), mockk(), mockk(), mockk(), mockk(), mockk(), mockk(), mockk(), mockk(), mockk(), mockk(),
-                                                    env = mockk(relaxed = true))  // => env.erDev() = env.erE2E() = false
+        val migreringServiceMock = MigreringService(
+            mockk(), mockk(), mockk(), mockk(), mockk(), mockk(), mockk(), mockk(), mockk(), mockk(), mockk(),
+            env = mockk(relaxed = true)
+        ) // => env.erDev() = env.erE2E() = false
 
         listOf<Long>(0, 1).forEach { antallDagerEtterKjøredato ->
             val kjøredato = LocalDate.now().minusDays(antallDagerEtterKjøredato)
             assertThatThrownBy { virkningsdatoUtleder.invoke(migreringServiceMock, kjøredato) }.cause
-                    .hasMessageContaining("midlertidig deaktivert")
+                .hasMessageContaining("midlertidig deaktivert")
         }
     }
-
 
     @Test
     fun `virkningsdatoFra skal returnere første dag i inneværende måned - minus en måned - når den kalles før kjøredato i Infotrygd`() {
@@ -273,25 +271,25 @@ class MigreringServiceTest{
     @Test
     fun `fagsak og saksstatistikk mellomlagring skal rulles tilbake når migrering feiler`() {
         every { infotrygdBarnetrygdClient.hentSaker(any(), any()) } returns
-                InfotrygdSøkResponse(listOf(opprettSakMedBeløp(2708.0)), emptyList())
+            InfotrygdSøkResponse(listOf(opprettSakMedBeløp(2708.0)), emptyList())
 
         val antallStatistikkEventsFørVelykketMigrering = saksstatistikkMellomlagringRepository.count()
         migreringService.migrer(ClientMocks.søkerFnr[0])
 
         every { infotrygdBarnetrygdClient.hentSaker(any(), any()) } returns
-                InfotrygdSøkResponse(listOf(opprettSakMedBeløp(1354.0)), emptyList())
+            InfotrygdSøkResponse(listOf(opprettSakMedBeløp(1354.0)), emptyList())
 
         val antallFagsakerEtterSisteVelykkedeMigrering = fagsakRepository.finnAntallFagsakerTotalt()
         val antallStatistikkEventsEtterSisteVelykkedeMigrering = saksstatistikkMellomlagringRepository.count()
-                .also { assertThat(it > antallStatistikkEventsFørVelykketMigrering) }
+            .also { assertThat(it > antallStatistikkEventsFørVelykketMigrering) }
 
         runCatching { migreringService.migrer(ClientMocks.søkerFnr[1]) }
-                .onSuccess { throw IllegalStateException("Testen forutsetter at migrer(...) kaster exception") }
-                .onFailure {
-                    val antallNyeStatistikkEvents = saksstatistikkMellomlagringRepository.count() - antallStatistikkEventsEtterSisteVelykkedeMigrering
-                    assertThat(antallNyeStatistikkEvents).isZero
-                    assertThat(fagsakRepository.finnAntallFagsakerTotalt()).isEqualTo(antallFagsakerEtterSisteVelykkedeMigrering)
-                }
+            .onSuccess { throw IllegalStateException("Testen forutsetter at migrer(...) kaster exception") }
+            .onFailure {
+                val antallNyeStatistikkEvents = saksstatistikkMellomlagringRepository.count() - antallStatistikkEventsEtterSisteVelykkedeMigrering
+                assertThat(antallNyeStatistikkEvents).isZero
+                assertThat(fagsakRepository.finnAntallFagsakerTotalt()).isEqualTo(antallFagsakerEtterSisteVelykkedeMigrering)
+            }
     }
 
     @Test
@@ -299,10 +297,10 @@ class MigreringServiceTest{
         run { `migrering happy case`() }
 
         val (sakDvhMeldinger, behandlingDvhMeldinger) = saksstatistikkMellomlagringRepository.finnMeldingerKlarForSending()
-                .partition { it.type == SaksstatistikkMellomlagringType.SAK }.let {
-                    it.first.map { objectMapper.readValue(it.json, SakDVH::class.java) } to
-                            it.second.map { sakstatistikkObjectMapper.readValue(it.json, BehandlingDVH::class.java) }
-                }
+            .partition { it.type == SaksstatistikkMellomlagringType.SAK }.let {
+                it.first.map { objectMapper.readValue(it.json, SakDVH::class.java) } to
+                    it.second.map { sakstatistikkObjectMapper.readValue(it.json, BehandlingDVH::class.java) }
+            }
 
         assertThat(sakDvhMeldinger).extracting("sakStatus").contains(FagsakStatus.OPPRETTET.name, FagsakStatus.LØPENDE.name)
 
@@ -314,18 +312,27 @@ class MigreringServiceTest{
         assertThat(behandlingDvhMeldinger).extracting("saksbehandler", "beslutter").containsOnly(tuple(SYSTEM_FORKORTELSE, SYSTEM_FORKORTELSE), tuple(null, null))
     }
 
-
-    private fun opprettSakMedBeløp(vararg beløp: Double) = Sak(stønad = Stønad(barn = listOf(Barn(ClientMocks.barnFnr[0], barnetrygdTom = "000000"),
-                                                                                             Barn(ClientMocks.barnFnr[1], barnetrygdTom = "000000")),
-                                                                               delytelse = beløp.map { Delytelse(fom = LocalDate.now(),
-                                                                                                                 tom = null,
-                                                                                                                 beløp = it,
-                                                                                                                 typeDelytelse = "MS",
-                                                                                                                 typeUtbetaling = "J",) },
-    opphørsgrunn = "0"),
-                                                               status = "FB",
-                                                               valg = "OR",
-                                                               undervalg = "OS")
+    private fun opprettSakMedBeløp(vararg beløp: Double) = Sak(
+        stønad = Stønad(
+            barn = listOf(
+                Barn(ClientMocks.barnFnr[0], barnetrygdTom = "000000"),
+                Barn(ClientMocks.barnFnr[1], barnetrygdTom = "000000")
+            ),
+            delytelse = beløp.map {
+                Delytelse(
+                    fom = LocalDate.now(),
+                    tom = null,
+                    beløp = it,
+                    typeDelytelse = "MS",
+                    typeUtbetaling = "J",
+                )
+            },
+            opphørsgrunn = "0"
+        ),
+        status = "FB",
+        valg = "OR",
+        undervalg = "OS"
+    )
 
     private fun infotrygdKjøredato(): LocalDate {
         return MigreringService::class.java.getDeclaredMethod("infotrygdKjøredato", YearMonth::class.java).run {

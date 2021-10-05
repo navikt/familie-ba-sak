@@ -13,17 +13,17 @@ internal class EndretUtbetalingAndelTest {
 
     @Test
     fun `Sjekk validering med tome felt`() {
-        val behandling = lagBehandling();
+        val behandling = lagBehandling()
         val endretUtbetalingAndel = EndretUtbetalingAndel(behandlingId = behandling.id)
 
         org.junit.jupiter.api.assertThrows<Feil> {
-            endretUtbetalingAndel.validerUtfyltEndring();
+            endretUtbetalingAndel.validerUtfyltEndring()
         }
     }
 
     @Test
     fun `Sjekk validering med ikke tome felt`() {
-        val behandling = lagBehandling();
+        val behandling = lagBehandling()
         val endretUtbetalingAndel = EndretUtbetalingAndel(behandlingId = behandling.id)
 
         endretUtbetalingAndel.person = tilfeldigPerson()
@@ -38,7 +38,7 @@ internal class EndretUtbetalingAndelTest {
 
     @Test
     fun `Sjekk validering for delt bosted med tomt felt avtaletidpunkt`() {
-        val behandling = lagBehandling();
+        val behandling = lagBehandling()
         val endretUtbetalingAndel = EndretUtbetalingAndel(behandlingId = behandling.id)
 
         endretUtbetalingAndel.person = tilfeldigPerson()
@@ -49,13 +49,13 @@ internal class EndretUtbetalingAndelTest {
         endretUtbetalingAndel.søknadstidspunkt = LocalDate.now()
 
         org.junit.jupiter.api.assertThrows<Feil> {
-            endretUtbetalingAndel.validerUtfyltEndring();
+            endretUtbetalingAndel.validerUtfyltEndring()
         }
     }
 
     @Test
     fun `Sjekk validering for delt bosted med ikke tomt felt avtaletidpunkt`() {
-        val behandling = lagBehandling();
+        val behandling = lagBehandling()
         val endretUtbetalingAndel = EndretUtbetalingAndel(behandlingId = behandling.id)
 
         endretUtbetalingAndel.person = tilfeldigPerson()

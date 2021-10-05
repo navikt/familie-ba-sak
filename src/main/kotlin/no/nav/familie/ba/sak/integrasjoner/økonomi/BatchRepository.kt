@@ -5,7 +5,7 @@ import org.springframework.data.jpa.repository.Lock
 import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
 import java.time.LocalDate
-import java.util.*
+import java.util.Optional
 import javax.persistence.LockModeType
 
 @Repository

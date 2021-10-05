@@ -1,12 +1,11 @@
 package no.nav.familie.ba.sak.kjerne.grunnlag.søknad
 
-import no.nav.familie.ba.sak.common.Feil
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
 class SøknadGrunnlagService(
-        private val søknadGrunnlagRepository: SøknadGrunnlagRepository
+    private val søknadGrunnlagRepository: SøknadGrunnlagRepository
 ) {
 
     @Transactional
@@ -28,4 +27,3 @@ class SøknadGrunnlagService(
         return søknadGrunnlagRepository.hentAktiv(behandlingId)
     }
 }
-

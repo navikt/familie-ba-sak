@@ -17,18 +17,20 @@ import org.springframework.stereotype.Service
 import java.util.Properties
 
 data class StatusFraOppdragMedTask(
-        val statusFraOppdragDTO: StatusFraOppdragDTO,
-        val task: Task
+    val statusFraOppdragDTO: StatusFraOppdragDTO,
+    val task: Task
 )
 
 @Service
 class StatusFraOppdrag(
-        private val økonomiService: ØkonomiService,
-        private val taskRepository: TaskRepositoryWrapper
+    private val økonomiService: ØkonomiService,
+    private val taskRepository: TaskRepositoryWrapper
 ) : BehandlingSteg<StatusFraOppdragMedTask> {
 
-    override fun utførStegOgAngiNeste(behandling: Behandling,
-                                      data: StatusFraOppdragMedTask): StegType {
+    override fun utførStegOgAngiNeste(
+        behandling: Behandling,
+        data: StatusFraOppdragMedTask
+    ): StegType {
         val statusFraOppdragDTO = data.statusFraOppdragDTO
         val task = data.task
 
@@ -36,8 +38,10 @@ class StatusFraOppdrag(
         logger.debug("Mottok status '$oppdragStatus' fra oppdrag")
         if (oppdragStatus != OppdragStatus.KVITTERT_OK) {
             if (oppdragStatus == OppdragStatus.LAGT_PÅ_KØ) {
-                throw RekjørSenereException(årsak = "Mottok lagt på kø kvittering fra oppdrag.",
-                                            triggerTid = nesteGyldigeTriggertidForBehandlingIHverdager(minutesToAdd = 15))
+                throw RekjørSenereException(
+                    årsak = "Mottok lagt på kø kvittering fra oppdrag.",
+                    triggerTid = nesteGyldigeTriggertidForBehandlingIHverdager(minutesToAdd = 15)
+                )
             } else {
                 taskRepository.save(task.copy(status = Status.MANUELL_OPPFØLGING))
             }
@@ -45,11 +49,14 @@ class StatusFraOppdrag(
             error("Mottok status '$oppdragStatus' fra oppdrag")
         } else {
             when (hentNesteStegForNormalFlyt(behandling)) {
-                StegType.JOURNALFØR_VEDTAKSBREV -> opprettTaskJournalførVedtaksbrev(statusFraOppdragDTO.vedtaksId,
-                                                                                    task)
+                StegType.JOURNALFØR_VEDTAKSBREV -> opprettTaskJournalførVedtaksbrev(
+                    statusFraOppdragDTO.vedtaksId,
+                    task
+                )
                 StegType.IVERKSETT_MOT_FAMILIE_TILBAKE -> opprettTaskIverksettMotTilbake(
-                        statusFraOppdragDTO.behandlingsId,
-                        task.metadata)
+                    statusFraOppdragDTO.behandlingsId,
+                    task.metadata
+                )
                 StegType.FERDIGSTILLE_BEHANDLING -> opprettFerdigstillBehandling(statusFraOppdragDTO)
                 else -> error("Neste task er ikke implementert.")
             }
@@ -59,23 +66,26 @@ class StatusFraOppdrag(
     }
 
     private fun opprettFerdigstillBehandling(statusFraOppdragDTO: StatusFraOppdragDTO) {
-        val ferdigstillBehandling = FerdigstillBehandlingTask.opprettTask(personIdent = statusFraOppdragDTO.personIdent,
-                                                                          behandlingsId = statusFraOppdragDTO.behandlingsId)
+        val ferdigstillBehandling = FerdigstillBehandlingTask.opprettTask(
+            personIdent = statusFraOppdragDTO.personIdent,
+            behandlingsId = statusFraOppdragDTO.behandlingsId
+        )
         taskRepository.save(ferdigstillBehandling)
     }
 
     private fun opprettTaskIverksettMotTilbake(behandlingsId: Long, metadata: Properties) {
         val ferdigstillBehandling = IverksettMotFamilieTilbakeTask.opprettTask(
-                behandlingsId, metadata
+            behandlingsId, metadata
         )
         taskRepository.save(ferdigstillBehandling)
     }
 
     private fun opprettTaskJournalførVedtaksbrev(vedtakId: Long, gammelTask: Task) {
         val task = Task(
-                type = JournalførVedtaksbrevTask.TASK_STEP_TYPE,
-                payload = "$vedtakId",
-                properties = gammelTask.metadata)
+            type = JournalførVedtaksbrevTask.TASK_STEP_TYPE,
+            payload = "$vedtakId",
+            properties = gammelTask.metadata
+        )
         taskRepository.save(task)
     }
 

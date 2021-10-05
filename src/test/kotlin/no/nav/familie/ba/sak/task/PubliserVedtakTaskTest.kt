@@ -15,7 +15,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 
-
 @ExtendWith(MockKExtension::class)
 class PubliserVedtakTaskTest {
 
@@ -39,7 +38,6 @@ class PubliserVedtakTaskTest {
         assertThat(task.metadata["personIdent"]).isEqualTo("ident")
         assertThat(task.type).isEqualTo("publiserVedtakTask")
     }
-
 
     @Test
     fun `skal kjøre task`() {

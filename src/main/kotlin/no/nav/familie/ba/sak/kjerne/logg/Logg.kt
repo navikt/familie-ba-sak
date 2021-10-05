@@ -4,42 +4,51 @@ import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import java.time.LocalDateTime
-import javax.persistence.*
+import javax.persistence.Column
+import javax.persistence.Entity
+import javax.persistence.EntityListeners
+import javax.persistence.EnumType
+import javax.persistence.Enumerated
+import javax.persistence.GeneratedValue
+import javax.persistence.GenerationType
+import javax.persistence.Id
+import javax.persistence.SequenceGenerator
+import javax.persistence.Table
 
 @EntityListeners(RollestyringMotDatabase::class)
 @Entity(name = "Logg")
 @Table(name = "logg")
 data class Logg(
-        @Id
-        @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "logg_seq_generator")
-        @SequenceGenerator(name = "logg_seq_generator", sequenceName = "logg_seq", allocationSize = 50)
-        val id: Long = 0,
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "logg_seq_generator")
+    @SequenceGenerator(name = "logg_seq_generator", sequenceName = "logg_seq", allocationSize = 50)
+    val id: Long = 0,
 
-        @Column(name = "opprettet_av", nullable = false, updatable = false)
-        val opprettetAv: String = SikkerhetContext.hentSaksbehandlerNavn(),
+    @Column(name = "opprettet_av", nullable = false, updatable = false)
+    val opprettetAv: String = SikkerhetContext.hentSaksbehandlerNavn(),
 
-        @Column(name = "opprettet_tid", nullable = false, updatable = false)
-        val opprettetTidspunkt: LocalDateTime = LocalDateTime.now(),
+    @Column(name = "opprettet_tid", nullable = false, updatable = false)
+    val opprettetTidspunkt: LocalDateTime = LocalDateTime.now(),
 
-        @Column(name = "fk_behandling_id")
-        val behandlingId: Long,
+    @Column(name = "fk_behandling_id")
+    val behandlingId: Long,
 
-        @Enumerated(EnumType.STRING)
-        @Column(name = "type")
-        val type: LoggType,
+    @Enumerated(EnumType.STRING)
+    @Column(name = "type")
+    val type: LoggType,
 
-        @Column(name = "tittel")
-        val tittel: String,
+    @Column(name = "tittel")
+    val tittel: String,
 
-        @Enumerated(EnumType.STRING)
-        @Column(name = "rolle")
-        val rolle: BehandlerRolle,
+    @Enumerated(EnumType.STRING)
+    @Column(name = "rolle")
+    val rolle: BehandlerRolle,
 
-        /**
-         * Feltet støtter markdown frontend.
-         */
-        @Column(name = "tekst")
-        val tekst: String
+    /**
+     * Feltet støtter markdown frontend.
+     */
+    @Column(name = "tekst")
+    val tekst: String
 )
 
 enum class LoggType(val visningsnavn: String) {
