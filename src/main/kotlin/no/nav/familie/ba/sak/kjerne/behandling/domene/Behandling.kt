@@ -63,8 +63,8 @@ data class Behandling(
         val skalBehandlesAutomatisk: Boolean = false,
 
         @Enumerated(EnumType.STRING)
-        @Column(name = "kategori", nullable = false)
-        val kategori: BehandlingKategori,
+        @Column(name = "kategori", nullable = false, updatable = true)
+        var kategori: BehandlingKategori,
 
         @Enumerated(EnumType.STRING)
         @Column(name = "underkategori", nullable = false, updatable = true)
@@ -242,24 +242,24 @@ enum class BehandlingType(val visningsnavn: String) {
     TEKNISK_OPPHØR("Teknisk opphør")
 }
 
-enum class BehandlingKategori {
-    EØS,
-    NASJONAL;
+enum class BehandlingKategori(val visningsnavn: String) {
+    EØS("EØS"),
+    NASJONAL("Nasjonal");
 
     fun tilBehandlingstype(): Behandlingstype {
-        return when(this) {
+        return when (this) {
             EØS -> Behandlingstype.EØS
             NASJONAL -> Behandlingstype.NASJONAL
         }
     }
 }
 
-enum class BehandlingUnderkategori {
-    UTVIDET,
-    ORDINÆR;
+enum class BehandlingUnderkategori(val visningsnavn: String) {
+    UTVIDET("Utvidet"),
+    ORDINÆR("Ordinær");
 
     fun tilBehandlingstema(): Behandlingstema {
-        return when(this) {
+        return when (this) {
             UTVIDET -> Behandlingstema.UtvidetBarnetrygd
             ORDINÆR -> Behandlingstema.OrdinærBarnetrygd
         }

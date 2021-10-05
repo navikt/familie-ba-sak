@@ -27,8 +27,8 @@ class RegistrereSøknad(
         val søknadDTO = data.søknad
         val innsendtSøknad = søknadDTO.writeValueAsString()
 
-        behandlingService.oppdaterBehandlingUnderkategori(behandling = behandlingService.hent(behandlingId = behandling.id),
-                                                          nyBehandlingUnderkategori = søknadDTO.underkategori)
+        behandlingService.oppdaterBehandlingstema(behandling = behandlingService.hent(behandlingId = behandling.id),
+                                                  nyBehandlingUnderkategori = søknadDTO.underkategori)
 
         loggService.opprettRegistrertSøknadLogg(behandling, aktivSøknadGrunnlagFinnes)
         søknadGrunnlagService.lagreOgDeaktiverGammel(søknadGrunnlag = SøknadGrunnlag(behandlingId = behandling.id,
