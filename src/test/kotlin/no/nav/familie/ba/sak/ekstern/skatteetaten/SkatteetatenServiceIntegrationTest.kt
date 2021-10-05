@@ -2,21 +2,15 @@ package no.nav.familie.ba.sak.ekstern.skatteetaten
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.ba.sak.common.defaultFagsak
-import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.randomFnr
-import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStegTilstandTest
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
-import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
@@ -64,7 +58,7 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
 
     data class PerioderTestData(
         val fnr: String,
-        val opprettetDato: LocalDateTime,
+        val endretDato: LocalDateTime,
         val perioder: List<Triple<LocalDateTime, LocalDateTime, SkatteetatenPeriode.Delingsprosent>>
     )
 
@@ -75,9 +69,10 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
 
         //Result from ba-sak
         val testDataBaSak = arrayOf(
+            //Excluded because of the vedtak is older
             PerioderTestData(
                 fnr = duplicatedFnr,
-                opprettetDato = LocalDateTime.of(2020, 11, 5, 12, 0),
+                endretDato = LocalDateTime.of(2020, 11, 5, 12, 0),
                 perioder = listOf(
                     Triple(
                         LocalDateTime.of(2020, 9, 1, 12, 0),
@@ -86,9 +81,10 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
                     )
                 )
             ),
+            //Included
             PerioderTestData(
                 fnr = duplicatedFnr,
-                opprettetDato = LocalDateTime.of(2020, 11, 6, 12, 0),
+                endretDato = LocalDateTime.of(2020, 11, 6, 12, 0),
                 perioder = listOf(
                     Triple(
                         LocalDateTime.of(2019, 9, 1, 12, 0),
@@ -102,9 +98,10 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
                     )
                 )
             ),
+            //Excluded because the stonad period is earlier than the specified year
             PerioderTestData(
                 fnr = "00000000002",
-                opprettetDato = LocalDateTime.of(2020, 8, 5, 12, 0),
+                endretDato = LocalDateTime.of(2020, 8, 5, 12, 0),
                 perioder = listOf(
                     Triple(
                         LocalDateTime.of(2019, 3, 1, 12, 0),
@@ -113,9 +110,10 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
                     )
                 )
             ),
+            //Excluded because the stonad period is later than the specified year
             PerioderTestData(
                 fnr = "00000000003",
-                opprettetDato = LocalDateTime.of(2020, 8, 5, 12, 0),
+                endretDato = LocalDateTime.of(2020, 8, 5, 12, 0),
                 perioder = listOf(
                     Triple(
                         LocalDateTime.of(2021, 1, 1, 1, 0),
@@ -124,9 +122,10 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
                     )
                 )
             ),
+            //Excluded because the person ident is not in the provided list
             PerioderTestData(
                 fnr = excludedFnr,
-                opprettetDato = LocalDateTime.of(2020, 8, 5, 12, 0),
+                endretDato = LocalDateTime.of(2020, 8, 5, 12, 0),
                 perioder = listOf(
                     Triple(
                         LocalDateTime.of(2020, 1, 1, 1, 0),
@@ -139,9 +138,10 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
 
         //result from Infotrygd
         val testDataInfotrygd = arrayOf(
+            //Excluded because the person ident can be found in ba-sak
             PerioderTestData(
                 fnr = duplicatedFnr,
-                opprettetDato = LocalDateTime.of(2020, 9, 5, 12, 0),
+                endretDato = LocalDateTime.of(2020, 9, 5, 12, 0),
                 perioder = listOf(
                     Triple(
                         LocalDateTime.of(2020, 1, 1, 12, 0),
@@ -150,10 +150,10 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
                     )
                 )
             ),
-
+            //Included
             PerioderTestData(
                 fnr = "00000000010",
-                opprettetDato = LocalDateTime.of(2020, 8, 5, 12, 0),
+                endretDato = LocalDateTime.of(2020, 8, 5, 12, 0),
                 perioder = listOf(
                     Triple(
                         LocalDateTime.of(2020, 3, 1, 12, 0),
@@ -182,7 +182,7 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
                     any()
                 )
             } returns SkatteetatenPerioder(
-                it.fnr, it.opprettetDato, it.perioder.map { p ->
+                it.fnr, it.endretDato, it.perioder.map { p ->
                     SkatteetatenPeriode(
                         fraMaaned = p.first.tilMaaned(),
                         tomMaaned = p.second.tilMaaned(),
@@ -228,8 +228,8 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
 
         val ty = TilkjentYtelse(
             behandling = behandling,
-            opprettetDato = tilkjentYtelse.opprettetDato.toLocalDate(),
-            endretDato = tilkjentYtelse.opprettetDato.toLocalDate(),
+            opprettetDato = tilkjentYtelse.endretDato.toLocalDate(),
+            endretDato = tilkjentYtelse.endretDato.toLocalDate(),
             utbetalingsoppdrag = "utbetalt",
         ).also {
             it.andelerTilkjentYtelse.addAll(tilkjentYtelse.perioder.map { p ->

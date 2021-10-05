@@ -110,34 +110,38 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
     @Query(value = """WITH qualified AS (
     SELECT *
     FROM ((
-              SELECT aty.person_ident ident,
-                     aty.stonad_fom   fom,
-                     aty.stonad_tom   tom,
-                     aty.prosent      prosent,
+              SELECT aty.person_ident       ident,
+                     aty.stonad_fom         fom,
+                     aty.stonad_tom         tom,
+                     aty.prosent            prosent,
                      aty.tilkjent_ytelse_id aty_tyid,
                      aty.id
               FROM andel_tilkjent_ytelse aty
               WHERE aty.type = 'UTVIDET_BARNETRYGD'
-              AND aty.person_ident IN :personIdenter
-              AND aty.stonad_fom <= :tom
-              AND aty.stonad_tom >= :fom
+                AND aty.person_ident IN :personIdenter
+                AND aty.stonad_fom <= :tom
+                AND aty.stonad_tom >= :fom
           ) AS qualified_aty
              INNER JOIN (
-        SELECT ty.id tyid, ty.opprettet_dato opprettet_dato
+        SELECT ty.id tyid, ty.endret_dato endret_dato
         FROM tilkjent_ytelse ty
         WHERE ty.utbetalingsoppdrag IS NOT NULL
     ) AS qualified_ty
                         ON qualified_aty.aty_tyid = qualified_ty.tyid)
 )
 
-SELECT qualified.id AS id, qualified.ident AS ident, qualified.prosent AS prosent, 
-        qualified.opprettet_dato AS opprettetDato, qualified.fom AS fom, qualified.tom AS tom
-FROM (SELECT ident, MAX(opprettet_dato) dato
+SELECT qualified.id             AS id,
+       qualified.ident          AS ident,
+       qualified.prosent        AS prosent,
+       qualified.endret_dato AS endretDato,
+       qualified.fom            AS fom,
+       qualified.tom            AS tom
+FROM (SELECT ident, MAX(endret_dato) dato
       FROM qualified
       GROUP BY ident
      ) AS latest
          INNER JOIN qualified
-                    ON qualified.ident = latest.ident AND qualified.opprettet_dato = latest.dato
+                    ON qualified.ident = latest.ident AND qualified.endret_dato = latest.dato
 """, nativeQuery = true)
     @Timed
     fun finnStonadPeriodMedUtvidetBarnetrygdForPersoner(

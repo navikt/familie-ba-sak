@@ -1,9 +1,6 @@
 package no.nav.familie.ba.sak.ekstern.skatteetaten
 
 import java.time.LocalDateTime
-import javax.persistence.Column
-import javax.persistence.Entity
-import javax.persistence.Id
 
 interface AndelTilkjentYtelsePeriode {
 
@@ -17,5 +14,5 @@ interface AndelTilkjentYtelsePeriode {
 
     fun getProsent(): String
 
-    fun getOpprettetDato(): LocalDateTime
+    fun getEndretDato(): LocalDateTime
 }
