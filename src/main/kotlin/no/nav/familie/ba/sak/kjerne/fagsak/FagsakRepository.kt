@@ -1,13 +1,18 @@
 package no.nav.familie.ba.sak.kjerne.fagsak
 
 import io.micrometer.core.annotation.Timed
+import no.nav.familie.ba.sak.common.Periode
+import no.nav.familie.ba.sak.ekstern.skatteetaten.AndelTilkjentYtelsePeriode
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Lock
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
+import org.springframework.data.repository.query.Param
 import org.springframework.stereotype.Repository
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.Optional
 import javax.persistence.LockModeType
@@ -34,7 +39,8 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
     fun finnLøpendeFagsaker(): List<Fagsak>
 
     @Modifying
-    @Query(value = """select id from fagsak
+    @Query(
+        value = """select id from fagsak
                         where fagsak.id in (
                             with sisteIverksatte as (
                                 select b.fk_fagsak_id as fagsakId, max(b.id) as behandlingId
@@ -49,10 +55,12 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
                             from sisteIverksatte
                                      inner join tilkjent_ytelse ty on sisteIverksatte.behandlingId = ty.fk_behandling_id
                             where ty.stonad_tom < now())""",
-           nativeQuery = true)
+        nativeQuery = true
+    )
     fun finnFagsakerSomSkalAvsluttes(): List<Long>
 
-    @Query(value = """
+    @Query(
+        value = """
         SELECT f FROM Fagsak f
         WHERE f.arkivert = false AND f.status = 'LØPENDE' AND f IN ( 
             SELECT b.fagsak FROM Behandling b 
@@ -65,7 +73,8 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
                 )
             )
         )
-        """)
+        """
+    )
     fun finnLøpendeFagsakMedBarnMedFødselsdatoInnenfor(fom: LocalDate, tom: LocalDate): Set<Fagsak>
 
     @Lock(LockModeType.NONE)
@@ -77,7 +86,8 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
     fun finnAntallFagsakerLøpende(): Long
 
     @Lock(LockModeType.NONE)
-    @Query(value = """
+    @Query(
+        value = """
         SELECT new kotlin.Pair(f , MAX(ty.opprettetDato))
         FROM Behandling b
                INNER JOIN Fagsak f ON f.id = b.fagsak.id
@@ -92,7 +102,51 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
             AND aty.stønadTom >= :fom
         )
         GROUP BY f.id
-    """)
+    """
+    )
     @Timed
     fun finnFagsakerMedUtvidetBarnetrygdInnenfor(fom: YearMonth, tom: YearMonth): List<Pair<Fagsak, LocalDate>>
+
+    @Query(value = """WITH qualified AS (
+    SELECT *
+    FROM ((
+              SELECT aty.person_ident ident,
+                     aty.stonad_fom   fom,
+                     aty.stonad_tom   tom,
+                     aty.prosent      prosent,
+                     aty.tilkjent_ytelse_id aty_tyid,
+                     aty.id
+              FROM andel_tilkjent_ytelse aty
+              WHERE aty.type = 'UTVIDET_BARNETRYGD'
+              AND aty.person_ident IN :personIdenter
+              AND aty.stonad_fom <= :tom
+              AND aty.stonad_tom >= :fom
+          ) AS qualified_aty
+             INNER JOIN (
+        SELECT ty.id tyid, ty.opprettet_dato opprettet_dato
+        FROM tilkjent_ytelse ty
+        WHERE ty.utbetalingsoppdrag IS NOT NULL
+    ) AS qualified_ty
+                        ON qualified_aty.aty_tyid = qualified_ty.tyid)
+)
+
+SELECT qualified.id AS id, qualified.ident AS ident, qualified.prosent AS prosent, 
+        qualified.opprettet_dato AS opprettetDato, qualified.fom AS fom, qualified.tom AS tom
+FROM (SELECT ident, MAX(opprettet_dato) dato
+      FROM qualified
+      GROUP BY ident
+     ) AS latest
+         INNER JOIN qualified
+                    ON qualified.ident = latest.ident AND qualified.opprettet_dato = latest.dato
+""", nativeQuery = true)
+    @Timed
+    fun finnStonadPeriodMedUtvidetBarnetrygdForPersoner(
+        personIdenter: List<String>,
+        fom: LocalDateTime,
+        tom: LocalDateTime
+    ): List<AndelTilkjentYtelsePeriode>
+
+
+    @Query(value = """SELECT aty FROM AndelTilkjentYtelse aty""")
+    fun finnAlleAndelTilkjentYtelser(): List<AndelTilkjentYtelse>
 }
