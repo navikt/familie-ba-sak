@@ -2,30 +2,42 @@ package no.nav.familie.ba.sak.kjerne.fagsak
 
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
-import java.util.*
-import javax.persistence.*
+import java.util.Objects
+import javax.persistence.CascadeType
+import javax.persistence.Column
+import javax.persistence.Entity
+import javax.persistence.EnumType
+import javax.persistence.Enumerated
+import javax.persistence.FetchType
+import javax.persistence.GeneratedValue
+import javax.persistence.GenerationType
+import javax.persistence.Id
+import javax.persistence.OneToMany
+import javax.persistence.SequenceGenerator
+import javax.persistence.Table
 
 @Entity(name = "Fagsak")
 @Table(name = "FAGSAK")
 data class Fagsak(
-        @Id
-        @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "fagsak_seq_generator")
-        @SequenceGenerator(name = "fagsak_seq_generator", sequenceName = "fagsak_seq", allocationSize = 50)
-        val id: Long = 0,
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "fagsak_seq_generator")
+    @SequenceGenerator(name = "fagsak_seq_generator", sequenceName = "fagsak_seq", allocationSize = 50)
+    val id: Long = 0,
 
-        @Enumerated(EnumType.STRING)
-        @Column(name = "status", nullable = false)
-        var status: FagsakStatus = FagsakStatus.OPPRETTET,
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    var status: FagsakStatus = FagsakStatus.OPPRETTET,
 
-        @Column(name = "arkivert", nullable = false)
-        var arkivert: Boolean = false,
+    @Column(name = "arkivert", nullable = false)
+    var arkivert: Boolean = false,
 
-        @OneToMany(fetch = FetchType.EAGER,
-                   mappedBy = "fagsak",
-                   cascade = [CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE],
-                   orphanRemoval = false
-        )
-        var søkerIdenter: Set<FagsakPerson> = setOf()
+    @OneToMany(
+        fetch = FetchType.EAGER,
+        mappedBy = "fagsak",
+        cascade = [CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE],
+        orphanRemoval = false
+    )
+    var søkerIdenter: Set<FagsakPerson> = setOf()
 ) : BaseEntitet() {
 
     override fun hashCode(): Int {
@@ -37,12 +49,13 @@ data class Fagsak(
     }
 
     fun hentAktivIdent(): PersonIdent {
-        return søkerIdenter.maxByOrNull { it.opprettetTidspunkt }?.personIdent ?: error("Fant ingen ident på fagsak $id")
+        return søkerIdenter.maxByOrNull { it.opprettetTidspunkt }?.personIdent
+            ?: error("Fant ingen ident på fagsak $id")
     }
 }
 
 enum class FagsakStatus {
-    OPPRETTET, 
+    OPPRETTET,
     LØPENDE, // Har minst én behandling gjeldende for fremtidig utbetaling
     AVSLUTTET
 }

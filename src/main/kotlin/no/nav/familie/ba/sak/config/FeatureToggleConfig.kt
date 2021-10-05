@@ -14,46 +14,53 @@ import java.net.URI
 
 @ConfigurationProperties("funksjonsbrytere")
 @ConstructorBinding
-class FeatureToggleConfig(private val enabled: Boolean,
-                          val unleash: Unleash) {
+class FeatureToggleConfig(
+    private val enabled: Boolean,
+    val unleash: Unleash
+) {
 
     @ConstructorBinding
-    data class Unleash(val uri: URI,
-                       val cluster: String,
-                       val applicationName: String)
+    data class Unleash(
+        val uri: URI,
+        val cluster: String,
+        val applicationName: String
+    )
 
     @Bean
     fun featureToggle(): FeatureToggleService =
-            if (enabled)
-                lagUnleashFeatureToggleService()
-            else {
-                logger.warn("Funksjonsbryter-funksjonalitet er skrudd AV. " +
-                            "Gir standardoppførsel for alle funksjonsbrytere, dvs 'false'")
-                lagDummyFeatureToggleService()
-            }
+        if (enabled)
+            lagUnleashFeatureToggleService()
+        else {
+            logger.warn(
+                "Funksjonsbryter-funksjonalitet er skrudd AV. " +
+                    "Gir standardoppførsel for alle funksjonsbrytere, dvs 'false'"
+            )
+            lagDummyFeatureToggleService()
+        }
 
     private fun lagUnleashFeatureToggleService(): FeatureToggleService {
-        val defaultUnleash = DefaultUnleash(UnleashConfig.builder()
-                                                    .appName(unleash.applicationName)
-                                                    .unleashAPI(unleash.uri)
-                                                    .unleashContextProvider(lagUnleashContextProvider())
-                                                    .build(),
-                                            ByClusterStrategy(unleash.cluster),
-                                            ByAnsvarligSaksbehandler())
+        val defaultUnleash = DefaultUnleash(
+            UnleashConfig.builder()
+                .appName(unleash.applicationName)
+                .unleashAPI(unleash.uri)
+                .unleashContextProvider(lagUnleashContextProvider())
+                .build(),
+            ByClusterStrategy(unleash.cluster),
+            ByAnsvarligSaksbehandler()
+        )
 
         return object : FeatureToggleService {
             override fun isEnabled(toggleId: String, defaultValue: Boolean): Boolean {
                 return defaultUnleash.isEnabled(toggleId, defaultValue)
             }
         }
-
     }
 
     private fun lagUnleashContextProvider(): UnleashContextProvider {
         return UnleashContextProvider {
             UnleashContext.builder()
-                    .appName(unleash.applicationName)
-                    .build()
+                .appName(unleash.applicationName)
+                .build()
         }
     }
 
@@ -113,4 +120,3 @@ interface FeatureToggleService {
 
     fun isEnabled(toggleId: String, defaultValue: Boolean): Boolean
 }
-

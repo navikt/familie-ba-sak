@@ -9,6 +9,8 @@ import kotlin.reflect.KClass
 @Constraint(validatedBy = [Fagsaktilgang::class])
 @Target(AnnotationTarget.FUNCTION, AnnotationTarget.VALUE_PARAMETER)
 @Retention(AnnotationRetention.RUNTIME)
-annotation class FagsaktilgangConstraint(val message: String = "Ikke tilgang til sak",
-                                         val groups: Array<KClass<*>> = [],
-                                         val payload: Array<KClass<out Payload>> = [])
+annotation class FagsaktilgangConstraint(
+    val message: String = "Ikke tilgang til sak",
+    val groups: Array<KClass<*>> = [],
+    val payload: Array<KClass<out Payload>> = []
+)

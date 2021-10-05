@@ -69,7 +69,6 @@ import org.springframework.test.context.ActiveProfiles
 import java.time.LocalDate
 import kotlin.random.Random
 
-
 @SpringBootTest(classes = [ApplicationConfig::class], properties = ["FAMILIE_INTEGRASJONER_API_URL=http://localhost:28085/api"])
 @ActiveProfiles(
         "dev",
@@ -92,46 +91,59 @@ class IntergrasjonTjenesteTest {
         resetAllRequests()
     }
 
-
     @Test
     @Tag("integration")
     fun `Opprett oppgave skal returnere oppgave id`() {
         MDC.put("callId", "opprettOppgave")
-        stubFor(post("/api/oppgave/opprett").willReturn(
-                okJson(objectMapper.writeValueAsString(success(OppgaveResponse(oppgaveId = 1234))))))
+        stubFor(
+            post("/api/oppgave/opprett").willReturn(
+                okJson(objectMapper.writeValueAsString(success(OppgaveResponse(oppgaveId = 1234))))
+            )
+        )
 
         val request = lagTestOppgave()
 
         val opprettOppgaveResponse = integrasjonClient.opprettOppgave(request)
 
         assertThat(opprettOppgaveResponse).isEqualTo("1234")
-        verify(anyRequestedFor(anyUrl())
-                       .withHeader(NavHttpHeaders.NAV_CALL_ID.asString(), equalTo("opprettOppgave"))
-                       .withHeader(NavHttpHeaders.NAV_CONSUMER_ID.asString(), equalTo("familie-ba-sak"))
-                       .withRequestBody(equalToJson(objectMapper.writeValueAsString(request))))
+        verify(
+            anyRequestedFor(anyUrl())
+                .withHeader(NavHttpHeaders.NAV_CALL_ID.asString(), equalTo("opprettOppgave"))
+                .withHeader(NavHttpHeaders.NAV_CONSUMER_ID.asString(), equalTo("familie-ba-sak"))
+                .withRequestBody(equalToJson(objectMapper.writeValueAsString(request)))
+        )
     }
 
     @Test
     @Tag("integration")
     fun `Opprett oppgave skal kaste feil hvis response er ugyldig`() {
-        stubFor(post("/api/oppgave/opprett").willReturn(aResponse()
-                                                                .withStatus(500)
-                                                                .withBody(objectMapper.writeValueAsString(failure<String>("test")))))
+        stubFor(
+            post("/api/oppgave/opprett").willReturn(
+                aResponse()
+                    .withStatus(500)
+                    .withBody(objectMapper.writeValueAsString(failure<String>("test")))
+            )
+        )
 
         assertThatThrownBy {
             integrasjonClient.opprettOppgave(lagTestOppgave())
         }.isInstanceOf(IntegrasjonException::class.java)
-                .hasMessageContaining("Kall mot integrasjon feilet ved opprett oppgave")
-
-
+            .hasMessageContaining("Kall mot integrasjon feilet ved opprett oppgave")
     }
 
     @Test
     @Tag("integration")
     fun `hentOppgaver skal returnere en liste av oppgaver og antallet oppgaver`() {
         val oppgave = Oppgave()
-        stubFor(post("/api/oppgave/v4").willReturn(okJson(objectMapper.writeValueAsString(
-                success(FinnOppgaveResponseDto(1, listOf(oppgave)))))))
+        stubFor(
+            post("/api/oppgave/v4").willReturn(
+                okJson(
+                    objectMapper.writeValueAsString(
+                        success(FinnOppgaveResponseDto(1, listOf(oppgave)))
+                    )
+                )
+            )
+        )
 
         val oppgaverOgAntall = integrasjonClient.hentOppgaver(FinnOppgaveRequest(tema = Tema.BAR))
         assertThat(oppgaverOgAntall.oppgaver).hasSize(1)
@@ -141,12 +153,16 @@ class IntergrasjonTjenesteTest {
     @Tag("integration")
     fun `Journalfør vedtaksbrev skal journalføre dokument, returnere 201 og journalpostId`() {
         MDC.put("callId", "journalfør")
-        stubFor(post("/api/arkiv/v4")
-                        .withHeader("Accept", containing("json"))
-                        .willReturn(aResponse()
-                                            .withStatus(201)
-                                            .withHeader("Content-Type", "application/json")
-                                            .withBody(objectMapper.writeValueAsString(journalpostOkResponse()))))
+        stubFor(
+            post("/api/arkiv/v4")
+                .withHeader("Accept", containing("json"))
+                .willReturn(
+                    aResponse()
+                        .withStatus(201)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(objectMapper.writeValueAsString(journalpostOkResponse()))
+                )
+        )
 
         val vedtak = lagVedtak(lagBehandling())
         vedtak.stønadBrevPdF = mockPdf
@@ -154,38 +170,47 @@ class IntergrasjonTjenesteTest {
         val journalPostId = integrasjonClient.journalførVedtaksbrev(MOCK_FNR, MOCK_FAGSAK_ID, vedtak, "1")
 
         assertThat(journalPostId).isEqualTo(MOCK_JOURNALPOST_FOR_VEDTAK_ID)
-        verify(anyRequestedFor(anyUrl())
-                       .withHeader(NavHttpHeaders.NAV_CALL_ID.asString(), equalTo("journalfør"))
-                       .withHeader(NavHttpHeaders.NAV_CONSUMER_ID.asString(), equalTo("familie-ba-sak"))
-                       .withRequestBody(equalToJson(objectMapper.writeValueAsString(forventetRequestArkiverDokument()))))
+        verify(
+            anyRequestedFor(anyUrl())
+                .withHeader(NavHttpHeaders.NAV_CALL_ID.asString(), equalTo("journalfør"))
+                .withHeader(NavHttpHeaders.NAV_CONSUMER_ID.asString(), equalTo("familie-ba-sak"))
+                .withRequestBody(equalToJson(objectMapper.writeValueAsString(forventetRequestArkiverDokument())))
+        )
     }
-
 
     @Test
     @Tag("integration")
     fun `distribuerVedtaksbrev returnerer normalt ved vellykket integrasjonskall`() {
         MDC.put("callId", "distribuerVedtaksbrev")
-        stubFor(post("/api/dist/v1")
-                        .withHeader("Accept", containing("json"))
-                        .willReturn(okJson(objectMapper.writeValueAsString(success("1234567")))))
-
-
+        stubFor(
+            post("/api/dist/v1")
+                .withHeader("Accept", containing("json"))
+                .willReturn(okJson(objectMapper.writeValueAsString(success("1234567"))))
+        )
 
         assertDoesNotThrow { integrasjonClient.distribuerBrev("123456789") }
-        verify(postRequestedFor(anyUrl())
-                       .withHeader(NavHttpHeaders.NAV_CALL_ID.asString(), equalTo("distribuerVedtaksbrev"))
-                       .withHeader(NavHttpHeaders.NAV_CONSUMER_ID.asString(), equalTo("familie-ba-sak"))
-                       .withRequestBody(equalToJson("{\"journalpostId\":\"123456789\"," +
-                                                    "\"bestillendeFagsystem\":\"BA\"," +
-                                                    "\"dokumentProdApp\":\"FAMILIE_BA_SAK\"}")))
+        verify(
+            postRequestedFor(anyUrl())
+                .withHeader(NavHttpHeaders.NAV_CALL_ID.asString(), equalTo("distribuerVedtaksbrev"))
+                .withHeader(NavHttpHeaders.NAV_CONSUMER_ID.asString(), equalTo("familie-ba-sak"))
+                .withRequestBody(
+                    equalToJson(
+                        "{\"journalpostId\":\"123456789\"," +
+                            "\"bestillendeFagsystem\":\"BA\"," +
+                            "\"dokumentProdApp\":\"FAMILIE_BA_SAK\"}"
+                    )
+                )
+        )
     }
 
     @Test
     @Tag("integration")
     fun `distribuerVedtaksbrev kaster exception hvis integrasjoner gir blank response`() {
-        stubFor(post("/api/dist/v1")
-                        .withHeader("Accept", containing("json"))
-                        .willReturn(okJson(objectMapper.writeValueAsString(success("")))))
+        stubFor(
+            post("/api/dist/v1")
+                .withHeader("Accept", containing("json"))
+                .willReturn(okJson(objectMapper.writeValueAsString(success(""))))
+        )
 
         assertThrows<IllegalStateException> { integrasjonClient.distribuerBrev("123456789") }
     }
@@ -193,9 +218,11 @@ class IntergrasjonTjenesteTest {
     @Test
     @Tag("integration")
     fun `distribuerVedtaksbrev kaster exception hvis integrasjoner gir failure response`() {
-        stubFor(post("/api/dist/v1")
-                        .withHeader("Accept", containing("json"))
-                        .willReturn(okJson(objectMapper.writeValueAsString(failure<Any>("")))))
+        stubFor(
+            post("/api/dist/v1")
+                .withHeader("Accept", containing("json"))
+                .willReturn(okJson(objectMapper.writeValueAsString(failure<Any>(""))))
+        )
 
         assertThrows<IllegalStateException> { integrasjonClient.distribuerBrev("123456789") }
     }
@@ -203,57 +230,77 @@ class IntergrasjonTjenesteTest {
     @Test
     @Tag("integration")
     fun `distribuerVedtaksbrev kaster exception hvis responsekoden ikke er 2xx`() {
-        stubFor(post("/api/dist/v1")
-                        .withHeader("Accept", containing("json"))
-                        .willReturn(aResponse()
-                                            .withStatus(400)
-                                            .withHeader("Content-Type", "application/json")))
+        stubFor(
+            post("/api/dist/v1")
+                .withHeader("Accept", containing("json"))
+                .willReturn(
+                    aResponse()
+                        .withStatus(400)
+                        .withHeader("Content-Type", "application/json")
+                )
+        )
 
         assertThrows<IntegrasjonException> { integrasjonClient.distribuerBrev("123456789") }
     }
-
 
     @Test
     @Tag("integration")
     fun `Ferdigstill oppgave returnerer OK`() {
         MDC.put("callId", "ferdigstillOppgave")
-        stubFor(patch(urlEqualTo("/api/oppgave/123/ferdigstill"))
-                        .withHeader("Accept", containing("json"))
-                        .willReturn(okJson(objectMapper.writeValueAsString(success(OppgaveResponse(1))))))
+        stubFor(
+            patch(urlEqualTo("/api/oppgave/123/ferdigstill"))
+                .withHeader("Accept", containing("json"))
+                .willReturn(okJson(objectMapper.writeValueAsString(success(OppgaveResponse(1)))))
+        )
 
         integrasjonClient.ferdigstillOppgave(123)
 
-        verify(patchRequestedFor(urlEqualTo("/api/oppgave/123/ferdigstill"))
-                       .withHeader(NavHttpHeaders.NAV_CALL_ID.asString(), equalTo("ferdigstillOppgave"))
-                       .withHeader(NavHttpHeaders.NAV_CONSUMER_ID.asString(), equalTo("familie-ba-sak")))
+        verify(
+            patchRequestedFor(urlEqualTo("/api/oppgave/123/ferdigstill"))
+                .withHeader(NavHttpHeaders.NAV_CALL_ID.asString(), equalTo("ferdigstillOppgave"))
+                .withHeader(NavHttpHeaders.NAV_CONSUMER_ID.asString(), equalTo("familie-ba-sak"))
+        )
     }
 
     @Test
     @Tag("integration")
     fun `Ferdigstill oppgave returnerer feil `() {
         MDC.put("callId", "ferdigstillOppgave")
-        stubFor(patch(urlEqualTo("/api/oppgave/123/ferdigstill"))
-                        .withHeader("Accept", containing("json"))
-                        .willReturn(aResponse()
-                                            .withStatus(400)
-                                            .withHeader("Content-Type", "application/json")
-                                            .withBody(objectMapper.writeValueAsString(failure<String>("test")))))
-
-
+        stubFor(
+            patch(urlEqualTo("/api/oppgave/123/ferdigstill"))
+                .withHeader("Accept", containing("json"))
+                .willReturn(
+                    aResponse()
+                        .withStatus(400)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(objectMapper.writeValueAsString(failure<String>("test")))
+                )
+        )
 
         assertThatThrownBy {
             integrasjonClient.ferdigstillOppgave(123)
         }.isInstanceOf(IntegrasjonException::class.java)
-                .hasMessageContaining("Kan ikke ferdigstille 123")
+            .hasMessageContaining("Kan ikke ferdigstille 123")
     }
 
     @Test
     @Tag("integration")
     fun `hentBehandlendeEnhet returnerer OK`() {
-        stubFor(post("/api/arbeidsfordeling/enhet/BAR")
-                        .withHeader("Accept", containing("json"))
-                        .willReturn(okJson(objectMapper.writeValueAsString(success(listOf(
-                                Arbeidsfordelingsenhet("2", "foo")))))))
+        stubFor(
+            post("/api/arbeidsfordeling/enhet/BAR")
+                .withHeader("Accept", containing("json"))
+                .willReturn(
+                    okJson(
+                        objectMapper.writeValueAsString(
+                            success(
+                                listOf(
+                                    Arbeidsfordelingsenhet("2", "foo")
+                                )
+                            )
+                        )
+                    )
+                )
+        )
 
         val enhet = integrasjonClient.hentBehandlendeEnhet("1")
         assertThat(enhet).isNotEmpty
@@ -268,16 +315,29 @@ class IntergrasjonTjenesteTest {
         val personIdent = integrasjonClient.hentPersonIdent("12")
         assertThat(personIdent?.ident).isEqualTo("1")
 
-        verify(getRequestedFor(urlEqualTo("/api/aktoer/v1/fraaktorid"))
-                       .withHeader("Nav-Aktorid", equalTo("12")))
+        verify(
+            getRequestedFor(urlEqualTo("/api/aktoer/v1/fraaktorid"))
+                .withHeader("Nav-Aktorid", equalTo("12"))
+        )
     }
 
     @Test
     @Tag("integration")
     fun `finnOppgaveMedId returnerer OK`() {
         val oppgaveId = 1234L
-        stubFor(get("/api/oppgave/$oppgaveId").willReturn(okJson(objectMapper.writeValueAsString(success(lagTestOppgaveDTO(
-                oppgaveId))))))
+        stubFor(
+            get("/api/oppgave/$oppgaveId").willReturn(
+                okJson(
+                    objectMapper.writeValueAsString(
+                        success(
+                            lagTestOppgaveDTO(
+                                oppgaveId
+                            )
+                        )
+                    )
+                )
+            )
+        )
 
         val oppgave = integrasjonClient.finnOppgaveMedId(oppgaveId)
         assertThat(oppgave.id).isEqualTo(oppgaveId)
@@ -290,8 +350,17 @@ class IntergrasjonTjenesteTest {
     fun `hentJournalpost returnerer OK`() {
         val journalpostId = "1234"
         val fnr = randomFnr()
-        stubFor(get("/api/journalpost?journalpostId=$journalpostId").willReturn(okJson(objectMapper.writeValueAsString(success(
-                lagTestJournalpost(fnr, journalpostId))))))
+        stubFor(
+            get("/api/journalpost?journalpostId=$journalpostId").willReturn(
+                okJson(
+                    objectMapper.writeValueAsString(
+                        success(
+                            lagTestJournalpost(fnr, journalpostId)
+                        )
+                    )
+                )
+            )
+        )
 
         val oppgave = integrasjonClient.hentJournalpost(journalpostId)
         assertThat(oppgave.data).isNotNull
@@ -306,12 +375,14 @@ class IntergrasjonTjenesteTest {
     fun `skal hente arbeidsforhold for person`() {
         val fnr = randomFnr()
 
-        val arbeidsforhold = listOf(Arbeidsforhold(
+        val arbeidsforhold = listOf(
+            Arbeidsforhold(
                 navArbeidsforholdId = Random.nextLong(),
                 arbeidstaker = Arbeidstaker("Person", fnr),
                 arbeidsgiver = Arbeidsgiver(ArbeidsgiverType.Organisasjon, "998877665"),
                 ansettelsesperiode = Ansettelsesperiode(Periode(fom = LocalDate.now().minusYears(1)))
-        ))
+            )
+        )
 
         stubFor(post("/api/aareg/arbeidsforhold").willReturn(okJson(objectMapper.writeValueAsString(success(arbeidsforhold)))))
 
@@ -333,9 +404,8 @@ class IntergrasjonTjenesteTest {
         assertThatThrownBy {
             integrasjonClient.hentArbeidsforhold(fnr, LocalDate.now())
         }.isInstanceOf(IntegrasjonException::class.java)
-                .hasMessageContaining("Kall mot integrasjon feilet ved henting av arbeidsforhold.")
+            .hasMessageContaining("Kall mot integrasjon feilet ved henting av arbeidsforhold.")
     }
-
 
     @Test
     @Tag("integration")
@@ -346,11 +416,21 @@ class IntergrasjonTjenesteTest {
 
         integrasjonClient.opprettSkyggesak(aktørId, MOCK_FAGSAK_ID.toLong())
 
-        verify(postRequestedFor(urlEqualTo("/api/skyggesak/v1"))
-                       .withRequestBody(equalToJson(objectMapper.writeValueAsString(Skyggesak(aktoerId = aktørId.id,
-                                                                                              MOCK_FAGSAK_ID,
-                                                                                              "BAR",
-                                                                                              "BA")))))
+        verify(
+            postRequestedFor(urlEqualTo("/api/skyggesak/v1"))
+                .withRequestBody(
+                    equalToJson(
+                        objectMapper.writeValueAsString(
+                            Skyggesak(
+                                aktoerId = aktørId.id,
+                                MOCK_FAGSAK_ID,
+                                "BAR",
+                                "BA"
+                            )
+                        )
+                    )
+                )
+        )
     }
 
     @Test
@@ -360,14 +440,11 @@ class IntergrasjonTjenesteTest {
 
         stubFor(post("/api/skyggesak/v1").willReturn(status(500)))
 
-
-
         assertThatThrownBy {
             integrasjonClient.opprettSkyggesak(aktørId, MOCK_FAGSAK_ID.toLong())
         }.isInstanceOf(IntegrasjonException::class.java)
-                .hasMessageContaining("Kall mot integrasjon feilet ved oppretting av skyggesak i Sak for fagsak=${MOCK_FAGSAK_ID}")
+            .hasMessageContaining("Kall mot integrasjon feilet ved oppretting av skyggesak i Sak for fagsak=$MOCK_FAGSAK_ID")
     }
-
 
     private fun journalpostOkResponse(): Ressurs<ArkiverDokumentResponse> {
         return success(ArkiverDokumentResponse(MOCK_JOURNALPOST_FOR_VEDTAK_ID, true))
@@ -375,20 +452,29 @@ class IntergrasjonTjenesteTest {
 
     private fun forventetRequestArkiverDokument(): ArkiverDokumentRequest {
         val vedleggPdf = hentVedlegg(VEDTAK_VEDLEGG_FILNAVN)
-        val brev = listOf(Dokument(dokument = mockPdf,
-                                   filtype = Filtype.PDFA,
-                                   dokumenttype = Dokumenttype.BARNETRYGD_VEDTAK_INNVILGELSE))
-        val vedlegg = listOf(Dokument(dokument = vedleggPdf!!,
-                                      filtype = Filtype.PDFA,
-                                      dokumenttype = Dokumenttype.BARNETRYGD_VEDLEGG,
-                                      tittel = VEDTAK_VEDLEGG_TITTEL))
+        val brev = listOf(
+            Dokument(
+                dokument = mockPdf,
+                filtype = Filtype.PDFA,
+                dokumenttype = Dokumenttype.BARNETRYGD_VEDTAK_INNVILGELSE
+            )
+        )
+        val vedlegg = listOf(
+            Dokument(
+                dokument = vedleggPdf!!,
+                filtype = Filtype.PDFA,
+                dokumenttype = Dokumenttype.BARNETRYGD_VEDLEGG,
+                tittel = VEDTAK_VEDLEGG_TITTEL
+            )
+        )
 
-        return ArkiverDokumentRequest(fnr = MOCK_FNR,
-                                      forsøkFerdigstill = true,
-                                      fagsakId = MOCK_FAGSAK_ID,
-                                      journalførendeEnhet = "1",
-                                      hoveddokumentvarianter = brev,
-                                      vedleggsdokumenter = vedlegg
+        return ArkiverDokumentRequest(
+            fnr = MOCK_FNR,
+            forsøkFerdigstill = true,
+            fagsakId = MOCK_FAGSAK_ID,
+            journalførendeEnhet = "1",
+            hoveddokumentvarianter = brev,
+            vedleggsdokumenter = vedlegg
         )
     }
 
@@ -399,5 +485,4 @@ class IntergrasjonTjenesteTest {
         val mockPdf = "mock data".toByteArray()
         const val MOCK_FAGSAK_ID = "140258931"
     }
-
 }

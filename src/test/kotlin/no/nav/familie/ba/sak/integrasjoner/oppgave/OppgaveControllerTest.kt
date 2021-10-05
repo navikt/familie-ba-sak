@@ -6,12 +6,11 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.just
 import io.mockk.runs
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonException
-import no.nav.familie.ba.sak.integrasjoner.lagTestOppgave
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.RestFinnOppgaveRequest
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
@@ -46,7 +45,6 @@ class OppgaveControllerTest {
     @InjectMockKs
     lateinit var oppgaveController: OppgaveController
 
-
     @BeforeAll
     fun init() {
         every { tilgangService.verifiserHarTilgangTilHandling(any(), any()) } just runs
@@ -67,7 +65,7 @@ class OppgaveControllerTest {
     @Test
     fun `Tilbakestilling av tildeling på oppgave skal returnere OK og sende med Oppgave i respons`() {
         val oppgave = Oppgave(
-                id = 1234,
+            id = 1234,
         )
         every { oppgaveService.tilbakestillFordelingPåOppgave(oppgave.id!!) } returns oppgave
 
@@ -82,8 +80,10 @@ class OppgaveControllerTest {
         val OPPGAVE_ID = "1234"
         val SAKSBEHANDLER_ID = "Z999998"
         every {
-            oppgaveService.fordelOppgave(any(),
-                                         any())
+            oppgaveService.fordelOppgave(
+                any(),
+                any()
+            )
         } throws IntegrasjonException("Kall mot integrasjon feilet ved fordel oppgave")
 
         val exception = assertThrows<IntegrasjonException> { oppgaveController.fordelOppgave(OPPGAVE_ID.toLong(), SAKSBEHANDLER_ID) }

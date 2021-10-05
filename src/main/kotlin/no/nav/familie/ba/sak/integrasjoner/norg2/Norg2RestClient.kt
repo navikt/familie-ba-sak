@@ -9,9 +9,11 @@ import org.springframework.web.util.UriComponentsBuilder
 import java.net.URI
 
 @Component
-class Norg2RestClient(@Value("\${NORG2_BASE_URL}") private val norg2BaseUrl: URI,
-                      restTemplate: RestOperations)
-    : AbstractRestClient(restTemplate, "norg2") {
+class Norg2RestClient(
+    @Value("\${NORG2_BASE_URL}") private val norg2BaseUrl: URI,
+    restTemplate: RestOperations
+) :
+    AbstractRestClient(restTemplate, "norg2") {
 
     fun hentEnhet(enhet: String?): Enhet {
         val uri = UriComponentsBuilder.fromUri(norg2BaseUrl).pathSegment(PATH_HENT_ENHET, enhet).build().toUri()
@@ -30,6 +32,6 @@ class Norg2RestClient(@Value("\${NORG2_BASE_URL}") private val norg2BaseUrl: URI
 
 @JsonInclude
 data class Enhet(
-        val enhetId: Long,
-        val navn: String
+    val enhetId: Long,
+    val navn: String
 )

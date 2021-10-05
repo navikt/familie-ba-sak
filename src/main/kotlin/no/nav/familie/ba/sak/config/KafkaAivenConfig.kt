@@ -14,9 +14,12 @@ import org.springframework.core.env.Environment
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory
 import org.springframework.kafka.config.KafkaListenerConfigUtils
 import org.springframework.kafka.config.KafkaListenerEndpointRegistry
-import org.springframework.kafka.core.*
+import org.springframework.kafka.core.ConsumerFactory
+import org.springframework.kafka.core.DefaultKafkaConsumerFactory
+import org.springframework.kafka.core.DefaultKafkaProducerFactory
+import org.springframework.kafka.core.KafkaTemplate
+import org.springframework.kafka.core.ProducerFactory
 import org.springframework.kafka.listener.ContainerProperties
-
 
 @Configuration
 @Profile("!e2e")
@@ -46,7 +49,6 @@ class KafkaAivenConfig(val environment: Environment) {
         return factory
     }
 
-
     @Bean(name = [KafkaListenerConfigUtils.KAFKA_LISTENER_ENDPOINT_REGISTRY_BEAN_NAME])
     fun kafkaListenerEndpointRegistry(): KafkaListenerEndpointRegistry? {
         return KafkaListenerEndpointRegistry()
@@ -54,12 +56,14 @@ class KafkaAivenConfig(val environment: Environment) {
 
     private fun producerConfigs(): Map<String, Any> {
         val kafkaBrokers = System.getenv("KAFKA_BROKERS") ?: "http://localhost:9092"
-        val producerConfigs = mutableMapOf(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG to kafkaBrokers,
-                                           ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG to StringSerializer::class.java,
-                                           ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG to StringSerializer::class.java,
-                                           ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG to true, // Den sikrer rekkefølge
-                                           ProducerConfig.ACKS_CONFIG to "all", // Den sikrer at data ikke mistes
-                                           ProducerConfig.CLIENT_ID_CONFIG to Applikasjon.FAMILIE_BA_SAK.name)
+        val producerConfigs = mutableMapOf(
+            ProducerConfig.BOOTSTRAP_SERVERS_CONFIG to kafkaBrokers,
+            ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG to StringSerializer::class.java,
+            ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG to StringSerializer::class.java,
+            ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG to true, // Den sikrer rekkefølge
+            ProducerConfig.ACKS_CONFIG to "all", // Den sikrer at data ikke mistes
+            ProducerConfig.CLIENT_ID_CONFIG to Applikasjon.FAMILIE_BA_SAK.name
+        )
         if (environment.activeProfiles.none { it.contains("dev") || it.contains("postgres") }) {
             return producerConfigs + securityConfig()
         }
@@ -68,14 +72,16 @@ class KafkaAivenConfig(val environment: Environment) {
 
     fun consumerConfigs(): Map<String, Any> {
         val kafkaBrokers = System.getenv("KAFKA_BROKERS") ?: "http://localhost:9092"
-        val consumerConfigs = mutableMapOf(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG to kafkaBrokers,
-                                           ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG to StringDeserializer::class.java,
-                                           ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG to StringDeserializer::class.java,
-                                           ConsumerConfig.GROUP_ID_CONFIG to "familie-ba-sak",
-                                           ConsumerConfig.CLIENT_ID_CONFIG to "consumer-familie-ba-sak-1",
-                                           ConsumerConfig.AUTO_OFFSET_RESET_CONFIG to "latest",
-                                           CommonClientConfigs.RETRIES_CONFIG to 10,
-                                           CommonClientConfigs.RETRY_BACKOFF_MS_CONFIG to 100)
+        val consumerConfigs = mutableMapOf(
+            ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG to kafkaBrokers,
+            ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG to StringDeserializer::class.java,
+            ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG to StringDeserializer::class.java,
+            ConsumerConfig.GROUP_ID_CONFIG to "familie-ba-sak",
+            ConsumerConfig.CLIENT_ID_CONFIG to "consumer-familie-ba-sak-1",
+            ConsumerConfig.AUTO_OFFSET_RESET_CONFIG to "latest",
+            CommonClientConfigs.RETRIES_CONFIG to 10,
+            CommonClientConfigs.RETRY_BACKOFF_MS_CONFIG to 100
+        )
         if (environment.activeProfiles.none { it.contains("dev") || it.contains("postgres") }) {
             return consumerConfigs + securityConfig()
         }
@@ -86,15 +92,16 @@ class KafkaAivenConfig(val environment: Environment) {
         val kafkaTruststorePath = System.getenv("KAFKA_TRUSTSTORE_PATH")
         val kafkaCredstorePassword = System.getenv("KAFKA_CREDSTORE_PASSWORD")
         val kafkaKeystorePath = System.getenv("KAFKA_KEYSTORE_PATH")
-        return mapOf(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG to "SSL",
-                     SslConfigs.SSL_ENDPOINT_IDENTIFICATION_ALGORITHM_CONFIG to "", // Disable server host name verification
-                     SslConfigs.SSL_TRUSTSTORE_TYPE_CONFIG to "JKS",
-                     SslConfigs.SSL_KEYSTORE_TYPE_CONFIG to "PKCS12",
-                     SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG to kafkaTruststorePath,
-                     SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG to kafkaCredstorePassword,
-                     SslConfigs.SSL_KEYSTORE_LOCATION_CONFIG to kafkaKeystorePath,
-                     SslConfigs.SSL_KEYSTORE_PASSWORD_CONFIG to kafkaCredstorePassword,
-                     SslConfigs.SSL_KEY_PASSWORD_CONFIG to kafkaCredstorePassword)
+        return mapOf(
+            CommonClientConfigs.SECURITY_PROTOCOL_CONFIG to "SSL",
+            SslConfigs.SSL_ENDPOINT_IDENTIFICATION_ALGORITHM_CONFIG to "", // Disable server host name verification
+            SslConfigs.SSL_TRUSTSTORE_TYPE_CONFIG to "JKS",
+            SslConfigs.SSL_KEYSTORE_TYPE_CONFIG to "PKCS12",
+            SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG to kafkaTruststorePath,
+            SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG to kafkaCredstorePassword,
+            SslConfigs.SSL_KEYSTORE_LOCATION_CONFIG to kafkaKeystorePath,
+            SslConfigs.SSL_KEYSTORE_PASSWORD_CONFIG to kafkaCredstorePassword,
+            SslConfigs.SSL_KEY_PASSWORD_CONFIG to kafkaCredstorePassword
+        )
     }
-
 }

@@ -12,12 +12,11 @@ import org.springframework.test.context.ActiveProfiles
         "dev",
         "mock-rest-template-config",
         "mock-oauth",
-        "mock-brev-klient",
         "mock-pdl",
         "mock-infotrygd-barnetrygd",
         "mock-infotrygd-feed",
         "mock-økonomi",
-        "mock-brev-klient",
+        "mock-brev-klient"
 )
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @AutoConfigureWireMock(port = 0)

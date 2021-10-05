@@ -27,29 +27,36 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 @Service
-class OppgaveService(private val integrasjonClient: IntegrasjonClient,
-                     private val personopplysningerService: PersonopplysningerService,
-                     private val behandlingRepository: BehandlingRepository,
-                     private val oppgaveRepository: OppgaveRepository,
-                     private val arbeidsfordelingPåBehandlingRepository: ArbeidsfordelingPåBehandlingRepository) {
+class OppgaveService(
+    private val integrasjonClient: IntegrasjonClient,
+    private val personopplysningerService: PersonopplysningerService,
+    private val behandlingRepository: BehandlingRepository,
+    private val oppgaveRepository: OppgaveRepository,
+    private val arbeidsfordelingPåBehandlingRepository: ArbeidsfordelingPåBehandlingRepository
+) {
 
     private val antallOppgaveTyper: MutableMap<Oppgavetype, Counter> = mutableMapOf()
 
-    fun opprettOppgave(behandlingId: Long,
-                       oppgavetype: Oppgavetype,
-                       fristForFerdigstillelse: LocalDate,
-                       tilordnetNavIdent: String? = null,
-                       beskrivelse: String? = null): String {
+    fun opprettOppgave(
+        behandlingId: Long,
+        oppgavetype: Oppgavetype,
+        fristForFerdigstillelse: LocalDate,
+        tilordnetNavIdent: String? = null,
+        beskrivelse: String? = null
+    ): String {
 
         val behandling = behandlingRepository.finnBehandling(behandlingId)
         val fagsakId = behandling.fagsak.id
 
         val eksisterendeOppgave = oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(oppgavetype, behandling)
 
-        return if (eksisterendeOppgave != null
-                   && oppgavetype != Oppgavetype.Journalføring) {
-            logger.warn("Fant eksisterende oppgave med samme oppgavetype som ikke er ferdigstilt ved opprettelse av ny oppgave ${eksisterendeOppgave}. " +
-                        "Vi oppretter ikke ny oppgave, men gjenbruker eksisterende.")
+        return if (eksisterendeOppgave != null &&
+            oppgavetype != Oppgavetype.Journalføring
+        ) {
+            logger.warn(
+                "Fant eksisterende oppgave med samme oppgavetype som ikke er ferdigstilt ved opprettelse av ny oppgave $eksisterendeOppgave. " +
+                    "Vi oppretter ikke ny oppgave, men gjenbruker eksisterende."
+            )
 
             eksisterendeOppgave.gsakId
         } else {
@@ -61,19 +68,18 @@ class OppgaveService(private val integrasjonClient: IntegrasjonClient,
 
             val aktorId = personopplysningerService.hentAktivAktørId(Ident(behandling.fagsak.hentAktivIdent().ident)).id
             val opprettOppgave = OpprettOppgaveRequest(
-                    ident = OppgaveIdentV2(ident = aktorId, gruppe = IdentGruppe.AKTOERID),
-                    saksId = fagsakId.toString(),
-                    tema = Tema.BAR,
-                    oppgavetype = oppgavetype,
-                    fristFerdigstillelse = fristForFerdigstillelse,
-                    beskrivelse = lagOppgaveTekst(fagsakId, beskrivelse),
-                    enhetsnummer = arbeidsfordelingsenhet?.behandlendeEnhetId,
-                    behandlingstema = behandling.underkategori.tilBehandlingstema().value,
-                    behandlingstype = behandling.kategori.tilBehandlingstype().value,
-                    tilordnetRessurs = tilordnetNavIdent
+                ident = OppgaveIdentV2(ident = aktorId, gruppe = IdentGruppe.AKTOERID),
+                saksId = fagsakId.toString(),
+                tema = Tema.BAR,
+                oppgavetype = oppgavetype,
+                fristFerdigstillelse = fristForFerdigstillelse,
+                beskrivelse = lagOppgaveTekst(fagsakId, beskrivelse),
+                enhetsnummer = arbeidsfordelingsenhet?.behandlendeEnhetId,
+                behandlingstema = behandling.underkategori.tilBehandlingstema().value,
+                behandlingstype = behandling.kategori.tilBehandlingstype().value,
+                tilordnetRessurs = tilordnetNavIdent
             )
             val opprettetOppgaveId = integrasjonClient.opprettOppgave(opprettOppgave)
-
 
             val oppgave = DbOppgave(gsakId = opprettetOppgaveId, behandling = behandling, type = oppgavetype)
             oppgaveRepository.save(oppgave)
@@ -107,8 +113,10 @@ class OppgaveService(private val integrasjonClient: IntegrasjonClient,
         if (!overstyrFordeling) {
             val oppgave = integrasjonClient.finnOppgaveMedId(oppgaveId)
             if (oppgave.tilordnetRessurs != null) {
-                throw FunksjonellFeil(melding = "Oppgaven er allerede fordelt",
-                                      frontendFeilmelding = "Oppgaven er allerede fordelt til ${oppgave.tilordnetRessurs}")
+                throw FunksjonellFeil(
+                    melding = "Oppgaven er allerede fordelt",
+                    frontendFeilmelding = "Oppgaven er allerede fordelt til ${oppgave.tilordnetRessurs}"
+                )
             }
         }
 
@@ -133,9 +141,12 @@ class OppgaveService(private val integrasjonClient: IntegrasjonClient,
     }
 
     fun ferdigstillOppgave(behandlingId: Long, oppgavetype: Oppgavetype) {
-        val oppgave = oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(oppgavetype,
-                                                                                         behandlingRepository.finnBehandling(
-                                                                                                 behandlingId))
+        val oppgave = oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(
+            oppgavetype,
+            behandlingRepository.finnBehandling(
+                behandlingId
+            )
+        )
 
         if (oppgave == null) {
             logger.info("Finner ingen oppgaver av type $oppgavetype på behandling $behandlingId som kan ferdigstilles")
@@ -153,8 +164,8 @@ class OppgaveService(private val integrasjonClient: IntegrasjonClient,
         } else {
             ""
         } +
-               "----- Opprettet av familie-ba-sak ${LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME)} --- \n" +
-               "https://barnetrygd.nais.adeo.no/fagsak/${fagsakId}"
+            "----- Opprettet av familie-ba-sak ${LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME)} --- \n" +
+            "https://barnetrygd.nais.adeo.no/fagsak/$fagsakId"
     }
 
     fun hentOppgaver(finnOppgaveRequest: FinnOppgaveRequest): FinnOppgaveResponseDto {

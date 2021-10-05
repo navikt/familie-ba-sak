@@ -20,10 +20,10 @@ import java.time.YearMonth
 
 @Service
 class SatsendringService(
-        private val stegService: StegService,
-        private val vedtakService: VedtakService,
-        private val taskRepository: TaskRepositoryWrapper,
-        private val behandlingRepository: BehandlingRepository,
+    private val stegService: StegService,
+    private val vedtakService: VedtakService,
+    private val taskRepository: TaskRepositoryWrapper,
+    private val behandlingRepository: BehandlingRepository,
 ) {
 
     /**
@@ -35,12 +35,15 @@ class SatsendringService(
      * behovet for revurdering i ettertid har blitt fjernet. Dersom man ønsker å filtrere bort disse må
      * man sjekke om den inaktive behandlingen blir etterfulgt av revurdering som fjerner behovet.
      */
-    fun finnBehandlingerForSatsendring(gammelSats: Long,
-                                       satsendringMåned: YearMonth): List<Long> =
-            behandlingRepository.finnBehadlingerForSatsendring(
-                    iverksatteLøpende = behandlingRepository.finnSisteIverksatteBehandlingFraLøpendeFagsaker(),
-                    gammelSats = gammelSats,
-                    månedÅrForEndring = satsendringMåned)
+    fun finnBehandlingerForSatsendring(
+        gammelSats: Long,
+        satsendringMåned: YearMonth
+    ): List<Long> =
+        behandlingRepository.finnBehadlingerForSatsendring(
+            iverksatteLøpende = behandlingRepository.finnSisteIverksatteBehandlingFraLøpendeFagsaker(),
+            gammelSats = gammelSats,
+            månedÅrForEndring = satsendringMåned
+        )
 
     /**
      * Gjennomfører og commiter revurderingsbehandling
@@ -58,28 +61,33 @@ class SatsendringService(
         if (behandling.fagsak.status != FagsakStatus.LØPENDE) throw Feil("Forsøker å utføre satsendring på ikke løpende fagsak ${behandling.fagsak.id}")
         if (behandling.status != BehandlingStatus.AVSLUTTET) throw Feil("Forsøker å utføre satsendring på behandling ${behandling.id} som ikke er avsluttet")
 
-        val opprettetBehandling = stegService.håndterNyBehandling(NyBehandling(
+        val opprettetBehandling = stegService.håndterNyBehandling(
+            NyBehandling(
                 søkersIdent = søkerIdent,
                 behandlingType = BehandlingType.REVURDERING,
                 kategori = behandling.kategori,
                 underkategori = behandling.underkategori,
                 behandlingÅrsak = BehandlingÅrsak.SATSENDRING,
                 skalBehandlesAutomatisk = true,
-        ))
+            )
+        )
 
         stegService.håndterVilkårsvurdering(behandling = opprettetBehandling)
 
         val opprettetVedtak = vedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(opprettetBehandling)
 
         val task = if (opprettetBehandling.resultat == BehandlingResultat.ENDRET) {
-            IverksettMotOppdragTask.opprettTask(opprettetBehandling,
-                                                opprettetVedtak,
-                                                SikkerhetContext.hentSaksbehandler())
+            IverksettMotOppdragTask.opprettTask(
+                opprettetBehandling,
+                opprettetVedtak,
+                SikkerhetContext.hentSaksbehandler()
+            )
         } else {
-            FerdigstillBehandlingTask.opprettTask(personIdent = søkerIdent,
-                                                  behandlingsId = opprettetBehandling.id)
+            FerdigstillBehandlingTask.opprettTask(
+                personIdent = søkerIdent,
+                behandlingsId = opprettetBehandling.id
+            )
         }
         taskRepository.save(task)
-
     }
 }

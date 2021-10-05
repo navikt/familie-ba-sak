@@ -31,10 +31,8 @@ class BeregningService(
     private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
     private val endretUtbetalingAndelRepository: EndretUtbetalingAndelRepository,
 ) {
-
     fun slettTilkjentYtelseForBehandling(behandlingId: Long) = tilkjentYtelseRepository.findByBehandling(behandlingId)
         ?.let { tilkjentYtelseRepository.delete(it) }
-
 
     fun hentLøpendeAndelerTilkjentYtelseForBehandlinger(behandlingIder: List<Long>): List<AndelTilkjentYtelse> =
         andelTilkjentYtelseRepository.finnLøpendeAndelerTilkjentYtelseForBehandlinger(behandlingIder)
@@ -42,7 +40,8 @@ class BeregningService(
     fun hentAndelerTilkjentYtelseForBehandling(behandlingId: Long): List<AndelTilkjentYtelse> =
         andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(listOf(behandlingId))
 
-    fun lagreTilkjentYtelseMedOppdaterteAndeler(tilkjentYtelse: TilkjentYtelse) = tilkjentYtelseRepository.save(tilkjentYtelse)
+    fun lagreTilkjentYtelseMedOppdaterteAndeler(tilkjentYtelse: TilkjentYtelse) =
+        tilkjentYtelseRepository.save(tilkjentYtelse)
 
     fun hentTilkjentYtelseForBehandling(behandlingId: Long) =
         tilkjentYtelseRepository.findByBehandling(behandlingId)
@@ -101,9 +100,11 @@ class BeregningService(
             ?: throw IllegalStateException("Kunne ikke hente vilkårsvurdering for behandling med id ${behandling.id}")
 
         val tilkjentYtelse = TilkjentYtelseUtils
-                .beregnTilkjentYtelse(vilkårsvurdering = vilkårsvurdering,
-                                      personopplysningGrunnlag = personopplysningGrunnlag,
-                                      behandling = behandling)
+            .beregnTilkjentYtelse(
+                vilkårsvurdering = vilkårsvurdering,
+                personopplysningGrunnlag = personopplysningGrunnlag,
+                behandling = behandling
+            )
 
         val endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(behandling.id)
         val andelerTilkjentYtelse = TilkjentYtelseUtils.oppdaterTilkjentYtelseMedEndretUtbetalingAndeler(
@@ -147,7 +148,8 @@ class BeregningService(
                 ?: error("Fant ikke tilkjent ytelse for behandling ${behandling.id}")
         return tilkjentYtelse.apply {
             this.utbetalingsoppdrag = objectMapper.writeValueAsString(utbetalingsoppdrag)
-            this.stønadTom = utbetalingsoppdrag.utbetalingsperiode.maxByOrNull { it.vedtakdatoTom }!!.vedtakdatoTom.toYearMonth()
+            this.stønadTom =
+                utbetalingsoppdrag.utbetalingsperiode.maxByOrNull { it.vedtakdatoTom }!!.vedtakdatoTom.toYearMonth()
             this.stønadFom = if (erRentOpphør) null else utbetalingsoppdrag.utbetalingsperiode
                 .filter { !it.erEndringPåEksisterendePeriode }
                 .minByOrNull { it.vedtakdatoFom }!!.vedtakdatoFom.toYearMonth()
@@ -156,4 +158,3 @@ class BeregningService(
         }
     }
 }
-

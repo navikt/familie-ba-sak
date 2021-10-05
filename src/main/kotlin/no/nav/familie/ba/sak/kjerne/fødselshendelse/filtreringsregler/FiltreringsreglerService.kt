@@ -6,13 +6,13 @@ import no.nav.familie.ba.sak.common.LocalDateService
 import no.nav.familie.ba.sak.common.convertDataClassToJson
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PersonInfo
-import no.nav.familie.ba.sak.kjerne.automatiskvurdering.filtreringsregler.domene.FødselshendelsefiltreringResultatRepository
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Evaluering
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.erOppfylt
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.filtreringsregler.domene.FødselshendelsefiltreringResultat
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.filtreringsregler.domene.FødselshendelsefiltreringResultatRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
@@ -20,13 +20,12 @@ import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
-
 @Service
 class FiltreringsreglerService(
-        private val personopplysningerService: PersonopplysningerService,
-        private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
-        private val localDateService: LocalDateService,
-        private val fødselshendelsefiltreringResultatRepository: FødselshendelsefiltreringResultatRepository,
+    private val personopplysningerService: PersonopplysningerService,
+    private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
+    private val localDateService: LocalDateService,
+    private val fødselshendelsefiltreringResultatRepository: FødselshendelsefiltreringResultatRepository,
 ) {
 
     val filtreringsreglerMetrics = mutableMapOf<String, Counter>()
@@ -36,57 +35,66 @@ class FiltreringsreglerService(
         Filtreringsregel.values().map {
             Resultat.values().forEach { resultat ->
                 filtreringsreglerMetrics["${it.name}_${resultat.name}"] =
-                        Metrics.counter("familie.ba.sak.filtreringsregler.utfall",
-                                        "beskrivelse",
-                                        it.name,
-                                        "resultat",
-                                        resultat.name)
+                    Metrics.counter(
+                        "familie.ba.sak.filtreringsregler.utfall",
+                        "beskrivelse",
+                        it.name,
+                        "resultat",
+                        resultat.name
+                    )
 
                 filtreringsreglerFørsteUtfallMetrics[it.name] =
-                        Metrics.counter("familie.ba.sak.filtreringsregler.foersteutfall",
-                                        "beskrivelse",
-                                        it.name)
-
+                    Metrics.counter(
+                        "familie.ba.sak.filtreringsregler.foersteutfall",
+                        "beskrivelse",
+                        it.name
+                    )
             }
         }
     }
 
-    fun lagreFiltreringsregler(evalueringer: List<Evaluering>,
-                               behandlingId: Long,
-                               fakta: FiltreringsreglerFakta): List<FødselshendelsefiltreringResultat> {
-        return fødselshendelsefiltreringResultatRepository.saveAll(evalueringer.map {
-            FødselshendelsefiltreringResultat(
+    fun lagreFiltreringsregler(
+        evalueringer: List<Evaluering>,
+        behandlingId: Long,
+        fakta: FiltreringsreglerFakta
+    ): List<FødselshendelsefiltreringResultat> {
+        return fødselshendelsefiltreringResultatRepository.saveAll(
+            evalueringer.map {
+                FødselshendelsefiltreringResultat(
                     behandlingId = behandlingId,
                     filtreringsregel = Filtreringsregel.valueOf(it.identifikator),
                     resultat = it.resultat,
                     begrunnelse = it.begrunnelse,
                     evalueringsårsaker = it.evalueringÅrsaker.map { evalueringÅrsak -> evalueringÅrsak.toString() },
                     regelInput = fakta.convertDataClassToJson()
-            )
-        })
+                )
+            }
+        )
     }
 
     fun hentFødselshendelsefiltreringResultater(behandlingId: Long): List<FødselshendelsefiltreringResultat> {
         return fødselshendelsefiltreringResultatRepository.finnFødselshendelsefiltreringResultater(behandlingId = behandlingId)
     }
 
-    fun kjørFiltreringsregler(nyBehandlingHendelse: NyBehandlingHendelse,
-                              behandling: Behandling): List<FødselshendelsefiltreringResultat> {
+    fun kjørFiltreringsregler(
+        nyBehandlingHendelse: NyBehandlingHendelse,
+        behandling: Behandling
+    ): List<FødselshendelsefiltreringResultat> {
         val morsIdent = nyBehandlingHendelse.morsIdent
         val barnasIdenter = nyBehandlingHendelse.barnasIdenter
 
         val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
-                                       ?: throw IllegalStateException("Fant ikke personopplysninggrunnlag for behandling ${behandling.id}")
+            ?: throw IllegalStateException("Fant ikke personopplysninggrunnlag for behandling ${behandling.id}")
         val barnaFraHendelse = personopplysningGrunnlag.barna.filter { barnasIdenter.contains(it.personIdent.ident) }
 
         val fakta = FiltreringsreglerFakta(
-                mor = personopplysningGrunnlag.søker,
-                barnaFraHendelse = barnaFraHendelse,
-                restenAvBarna = finnRestenAvBarnasPersonInfo(morsIdent, barnaFraHendelse),
-                morLever = !personopplysningerService.hentDødsfall(Ident(morsIdent)).erDød,
-                barnaLever = barnasIdenter.none { personopplysningerService.hentDødsfall(Ident(it)).erDød },
-                morHarVerge = personopplysningerService.harVerge(morsIdent).harVerge,
-                dagensDato = localDateService.now()
+            mor = personopplysningGrunnlag.søker,
+            barnaFraHendelse = barnaFraHendelse,
+            restenAvBarna = finnRestenAvBarnasPersonInfo(morsIdent, barnaFraHendelse),
+            morLever = !personopplysningerService.hentDødsfall(Ident(morsIdent)).erDød,
+            barnaLever = barnasIdenter.none { personopplysningerService.hentDødsfall(Ident(it)).erDød },
+            morHarVerge = personopplysningerService.harVerge(morsIdent).harVerge,
+            dagensDato = localDateService.now()
         )
         val evalueringer = evaluerFiltreringsregler(fakta)
         oppdaterMetrikker(evalueringer)
@@ -97,9 +105,9 @@ class FiltreringsreglerService(
         }
 
         return lagreFiltreringsregler(
-                evalueringer = evalueringer,
-                behandlingId = behandling.id,
-                fakta = fakta
+            evalueringer = evalueringer,
+            behandlingId = behandling.id,
+            fakta = fakta
         )
     }
 
@@ -133,4 +141,3 @@ class FiltreringsreglerService(
         val secureLogger = LoggerFactory.getLogger("secureLogger")
     }
 }
-

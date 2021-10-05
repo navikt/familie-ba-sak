@@ -48,10 +48,10 @@ enum class SanityBegrunnelseType {
 }
 
 fun VilkårRolle.tilPersonType() =
-        when (this) {
-            SOKER -> PersonType.SØKER
-            BARN -> PersonType.BARN
-        }
+    when (this) {
+        SOKER -> PersonType.SØKER
+        BARN -> PersonType.BARN
+    }
 
 enum class VilkårRolle {
     SOKER,
@@ -68,23 +68,23 @@ enum class ØvrigTrigger {
     MANGLER_OPPLYSNINGER,
     SATSENDRING,
     BARN_MED_6_ÅRS_DAG,
+    ALLTID_AUTOMATISK
 }
 
-
 fun SanityBegrunnelse.inneholderVilkår(vilkår: SanityVilkår) =
-        this.vilkaar?.contains(vilkår) ?: false
+    this.vilkaar?.contains(vilkår) ?: false
 
 fun SanityBegrunnelse.inneholderØvrigTrigger(øvrigTrigger: ØvrigTrigger) =
-        this.ovrigeTriggere?.contains(øvrigTrigger) ?: false
+    this.ovrigeTriggere?.contains(øvrigTrigger) ?: false
 
 fun SanityBegrunnelse.inneholderLovligOppholdTrigger(vilkårTrigger: VilkårTrigger) =
-        this.lovligOppholdTriggere?.contains(vilkårTrigger) ?: false
+    this.lovligOppholdTriggere?.contains(vilkårTrigger) ?: false
 
 fun SanityBegrunnelse.inneholderBosattIRiketTrigger(vilkårTrigger: VilkårTrigger) =
-        this.bosattIRiketTriggere?.contains(vilkårTrigger) ?: false
+    this.bosattIRiketTriggere?.contains(vilkårTrigger) ?: false
 
 fun SanityBegrunnelse.inneholderGiftPartnerskapTrigger(vilkårTrigger: VilkårTrigger) =
-        this.giftPartnerskapTriggere?.contains(vilkårTrigger) ?: false
+    this.giftPartnerskapTriggere?.contains(vilkårTrigger) ?: false
 
 fun SanityBegrunnelse.inneholderBorMedSøkerTrigger(vilkårTrigger: VilkårTrigger) =
-        this.borMedSokerTriggere?.contains(vilkårTrigger) ?: false
+    this.borMedSokerTriggere?.contains(vilkårTrigger) ?: false

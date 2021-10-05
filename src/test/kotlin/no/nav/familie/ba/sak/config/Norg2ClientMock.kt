@@ -19,8 +19,10 @@ class Norg2ClientMock {
 
         val hentEnhetSlot = slot<String>()
         every { norg2RestClient.hentEnhet(capture(hentEnhetSlot)) } answers {
-            Enhet(enhetId = hentEnhetSlot.captured.toLong(),
-                  navn = "${hentEnhetSlot.captured}, NAV Familie- og pensjonsytelser Oslo 1")
+            Enhet(
+                enhetId = hentEnhetSlot.captured.toLong(),
+                navn = "${hentEnhetSlot.captured}, NAV Familie- og pensjonsytelser Oslo 1"
+            )
         }
 
         return norg2RestClient

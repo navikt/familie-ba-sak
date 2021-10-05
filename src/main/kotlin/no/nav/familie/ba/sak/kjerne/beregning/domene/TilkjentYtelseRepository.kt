@@ -5,7 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 
-interface TilkjentYtelseRepository: JpaRepository<TilkjentYtelse, Long> {
+interface TilkjentYtelseRepository : JpaRepository<TilkjentYtelse, Long> {
     @Modifying
     @Query("DELETE FROM TilkjentYtelse ty WHERE ty.behandling = :behandling")
     fun slettTilkjentYtelseFor(behandling: Behandling)

@@ -31,28 +31,28 @@ class VedtaksperiodeMedBegrunnelseTest {
     @Test
     fun `Skal gi riktig antall brevbegrunnelser med riktig tekst`() {
         val vedtaksperiodeMedBegrunnelser = lagVedtaksperiodeMedBegrunnelser(
-                type = Vedtaksperiodetype.FORTSATT_INNVILGET,
+            type = Vedtaksperiodetype.FORTSATT_INNVILGET,
         )
         val vedtaksperiode = vedtaksperiodeMedBegrunnelser.copy(
-                begrunnelser = mutableSetOf(
-                        lagVedtaksbegrunnelse(
-                                vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
-                                personIdenter = listOf(barn1.personIdent.ident),
-                                vedtakBegrunnelseSpesifikasjon =
-                                VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_SØKER_OG_BARN_BOSATT_I_RIKET,
-                        ),
-                        lagVedtaksbegrunnelse(
-                                vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
-                                personIdenter = listOf(barn2.personIdent.ident),
-                                vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_BOR_MED_SØKER,
-                        ),
+            begrunnelser = mutableSetOf(
+                lagVedtaksbegrunnelse(
+                    vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
+                    personIdenter = listOf(barn1.personIdent.ident),
+                    vedtakBegrunnelseSpesifikasjon =
+                    VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_SØKER_OG_BARN_BOSATT_I_RIKET,
                 ),
-                fritekster = mutableListOf(),
+                lagVedtaksbegrunnelse(
+                    vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
+                    personIdenter = listOf(barn2.personIdent.ident),
+                    vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_BOR_MED_SØKER,
+                ),
+            ),
+            fritekster = mutableListOf(),
         )
         val begrunnelserOgFritekster = byggBegrunnelserOgFriteksterForVedtaksperiode(
-                vedtaksperiode = vedtaksperiode,
-                personerIPersongrunnlag = personerIPersongrunnlag,
-                målform = Målform.NB,
+            vedtaksperiode = vedtaksperiode,
+            personerIPersongrunnlag = personerIPersongrunnlag,
+            målform = Målform.NB,
         )
 
         Assertions.assertEquals(2, begrunnelserOgFritekster.size)
@@ -61,23 +61,25 @@ class VedtaksperiodeMedBegrunnelseTest {
     @Test
     fun `Skal med riktig rekkefølge og tekst på fritekstene`() {
         val vedtaksperiode = lagVedtaksperiodeMedBegrunnelser(
-                type = Vedtaksperiodetype.FORTSATT_INNVILGET,
-                begrunnelser = mutableSetOf(
+            type = Vedtaksperiodetype.FORTSATT_INNVILGET,
+            begrunnelser = mutableSetOf(),
+            fritekster = mutableListOf(
+                VedtaksbegrunnelseFritekst(
+                    id = 1,
+                    fritekst = "Fritekst1",
+                    vedtaksperiodeMedBegrunnelser = mockk(),
                 ),
-                fritekster = mutableListOf(VedtaksbegrunnelseFritekst(
-                        id = 1,
-                        fritekst = "Fritekst1",
-                        vedtaksperiodeMedBegrunnelser = mockk(),
-                ), VedtaksbegrunnelseFritekst(
-                        id = 2,
-                        fritekst = "Fritekst2",
-                        vedtaksperiodeMedBegrunnelser = mockk(),
-                )),
+                VedtaksbegrunnelseFritekst(
+                    id = 2,
+                    fritekst = "Fritekst2",
+                    vedtaksperiodeMedBegrunnelser = mockk(),
+                )
+            ),
         )
         val begrunnelserOgFritekster = byggBegrunnelserOgFriteksterForVedtaksperiode(
-                vedtaksperiode = vedtaksperiode,
-                personerIPersongrunnlag = personerIPersongrunnlag,
-                målform = Målform.NB,
+            vedtaksperiode = vedtaksperiode,
+            personerIPersongrunnlag = personerIPersongrunnlag,
+            målform = Målform.NB,
         )
 
         Assertions.assertEquals("Fritekst1", (begrunnelserOgFritekster[0] as FritekstBegrunnelse).fritekst)
@@ -87,122 +89,125 @@ class VedtaksperiodeMedBegrunnelseTest {
     @Test
     fun `Skal gi fortsatt innvilget-brevperiode`() {
         val vedtaksperiodeMedBegrunnelser = lagVedtaksperiodeMedBegrunnelser(
-                type = Vedtaksperiodetype.FORTSATT_INNVILGET,
+            type = Vedtaksperiodetype.FORTSATT_INNVILGET,
         )
         val fortsatInnvilgetPeriode = vedtaksperiodeMedBegrunnelser.copy(
-                begrunnelser = mutableSetOf(
-                        lagVedtaksbegrunnelse(
-                                vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
-                                personIdenter = listOf(barn1.personIdent.ident),
-                                vedtakBegrunnelseSpesifikasjon =
-                                VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_SØKER_OG_BARN_BOSATT_I_RIKET,
-                        ),
+            begrunnelser = mutableSetOf(
+                lagVedtaksbegrunnelse(
+                    vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
+                    personIdenter = listOf(barn1.personIdent.ident),
+                    vedtakBegrunnelseSpesifikasjon =
+                    VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_SØKER_OG_BARN_BOSATT_I_RIKET,
                 ),
+            ),
         )
 
         Assertions.assertTrue(
-                fortsatInnvilgetPeriode.tilBrevPeriode(
-                        personerIPersongrunnlag = personerIPersongrunnlag,
-                        utbetalingsperioder = listOf(lagUtbetalingsperiode(
-                                utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj())
-                        )),
-                        målform = Målform.NB,
-                ) is FortsattInnvilgetBrevPeriode
+            fortsatInnvilgetPeriode.tilBrevPeriode(
+                personerIPersongrunnlag = personerIPersongrunnlag,
+                utbetalingsperioder = listOf(
+                    lagUtbetalingsperiode(
+                        utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj())
+                    )
+                ),
+                målform = Målform.NB,
+            ) is FortsattInnvilgetBrevPeriode
         )
     }
 
     @Test
     fun `Skal gi innvilget-brevperiode`() {
         val vedtaksperiodeMedBegrunnelser = lagVedtaksperiodeMedBegrunnelser(
-                type = Vedtaksperiodetype.UTBETALING
+            type = Vedtaksperiodetype.UTBETALING
         )
         val utbetalingsperiode = vedtaksperiodeMedBegrunnelser.copy(
-                begrunnelser = mutableSetOf(
-                        lagVedtaksbegrunnelse(
-                                vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
-                                personIdenter = listOf(barn1.personIdent.ident),
-                                vedtakBegrunnelseSpesifikasjon =
-                                VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET,
-                        ),
+            begrunnelser = mutableSetOf(
+                lagVedtaksbegrunnelse(
+                    vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
+                    personIdenter = listOf(barn1.personIdent.ident),
+                    vedtakBegrunnelseSpesifikasjon =
+                    VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET,
                 ),
+            ),
         )
 
         Assertions.assertTrue(
-                utbetalingsperiode.tilBrevPeriode(
-                        personerIPersongrunnlag = personerIPersongrunnlag,
-                        utbetalingsperioder = listOf(lagUtbetalingsperiode(
-                                utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj())
-                        )),
-                        målform = Målform.NB,
-                ) is InnvilgelseBrevPeriode
+            utbetalingsperiode.tilBrevPeriode(
+                personerIPersongrunnlag = personerIPersongrunnlag,
+                utbetalingsperioder = listOf(
+                    lagUtbetalingsperiode(
+                        utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj())
+                    )
+                ),
+                målform = Målform.NB,
+            ) is InnvilgelseBrevPeriode
         )
     }
 
     @Test
     fun `Skal gi avslagbrevperiode`() {
         val vedtaksperiodeMedBegrunnelser = lagVedtaksperiodeMedBegrunnelser(
-                type = Vedtaksperiodetype.AVSLAG,
+            type = Vedtaksperiodetype.AVSLAG,
         )
         val avslagsperiode = vedtaksperiodeMedBegrunnelser.copy(
-                begrunnelser = mutableSetOf(
-                        lagVedtaksbegrunnelse(
-                                vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
-                                personIdenter = listOf(barn1.personIdent.ident),
-                                vedtakBegrunnelseSpesifikasjon =
-                                VedtakBegrunnelseSpesifikasjon.AVSLAG_BOR_HOS_SØKER,
-                        ),
+            begrunnelser = mutableSetOf(
+                lagVedtaksbegrunnelse(
+                    vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
+                    personIdenter = listOf(barn1.personIdent.ident),
+                    vedtakBegrunnelseSpesifikasjon =
+                    VedtakBegrunnelseSpesifikasjon.AVSLAG_BOR_HOS_SØKER,
                 ),
+            ),
         )
 
         Assertions.assertTrue(
-                avslagsperiode.tilBrevPeriode(
-                        personerIPersongrunnlag = personerIPersongrunnlag,
-                        utbetalingsperioder = listOf(),
-                        målform = Målform.NB,
-                ) is AvslagBrevPeriode
+            avslagsperiode.tilBrevPeriode(
+                personerIPersongrunnlag = personerIPersongrunnlag,
+                utbetalingsperioder = listOf(),
+                målform = Målform.NB,
+            ) is AvslagBrevPeriode
         )
     }
 
     @Test
     fun `Skal gi opphørbrevperiode`() {
         val vedtaksperiodeMedBegrunnelser = lagVedtaksperiodeMedBegrunnelser(
-                type = Vedtaksperiodetype.OPPHØR,
+            type = Vedtaksperiodetype.OPPHØR,
         )
         val opphørsperiode = vedtaksperiodeMedBegrunnelser.copy(
-                begrunnelser = mutableSetOf(
-                        lagVedtaksbegrunnelse(
-                                vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
-                                personIdenter = listOf(barn1.personIdent.ident),
-                                vedtakBegrunnelseSpesifikasjon =
-                                VedtakBegrunnelseSpesifikasjon.OPPHØR_BARN_FLYTTET_FRA_SØKER,
-                        ),
+            begrunnelser = mutableSetOf(
+                lagVedtaksbegrunnelse(
+                    vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
+                    personIdenter = listOf(barn1.personIdent.ident),
+                    vedtakBegrunnelseSpesifikasjon =
+                    VedtakBegrunnelseSpesifikasjon.OPPHØR_BARN_FLYTTET_FRA_SØKER,
                 ),
+            ),
         )
 
         Assertions.assertTrue(
-                opphørsperiode.tilBrevPeriode(
-                        personerIPersongrunnlag = personerIPersongrunnlag,
-                        utbetalingsperioder = listOf(),
-                        målform = Målform.NB,
-                ) is OpphørBrevPeriode
+            opphørsperiode.tilBrevPeriode(
+                personerIPersongrunnlag = personerIPersongrunnlag,
+                utbetalingsperioder = listOf(),
+                målform = Målform.NB,
+            ) is OpphørBrevPeriode
         )
     }
 
     @Test
     fun `Skal gi null ved ingen begrunnelser eller fritekster`() {
         val opphørsperiode = lagVedtaksperiodeMedBegrunnelser(
-                type = Vedtaksperiodetype.UTBETALING,
-                begrunnelser = mutableSetOf(),
-                fritekster = mutableListOf(),
+            type = Vedtaksperiodetype.UTBETALING,
+            begrunnelser = mutableSetOf(),
+            fritekster = mutableListOf(),
         )
 
         Assertions.assertTrue(
-                opphørsperiode.tilBrevPeriode(
-                        personerIPersongrunnlag = personerIPersongrunnlag,
-                        utbetalingsperioder = listOf(),
-                        målform = Målform.NB,
-                ) == null
+            opphørsperiode.tilBrevPeriode(
+                personerIPersongrunnlag = personerIPersongrunnlag,
+                utbetalingsperioder = listOf(),
+                målform = Målform.NB,
+            ) == null
         )
     }
-
 }

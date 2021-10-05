@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.fødselshendelse
 
-
 interface EvalueringÅrsak {
 
     fun hentBeskrivelse(): String
@@ -11,25 +10,32 @@ interface EvalueringÅrsak {
 }
 
 data class Evaluering(
-        val resultat: Resultat,
-        val evalueringÅrsaker: List<EvalueringÅrsak>,
-        val begrunnelse: String,
-        val beskrivelse: String = "",
-        val identifikator: String = "") {
+    val resultat: Resultat,
+    val evalueringÅrsaker: List<EvalueringÅrsak>,
+    val begrunnelse: String,
+    val beskrivelse: String = "",
+    val identifikator: String = ""
+) {
 
     companion object {
 
-        fun oppfylt(evalueringÅrsak: EvalueringÅrsak) = Evaluering(Resultat.OPPFYLT,
-                                                                   listOf(evalueringÅrsak),
-                                                                   evalueringÅrsak.hentBeskrivelse())
+        fun oppfylt(evalueringÅrsak: EvalueringÅrsak) = Evaluering(
+            Resultat.OPPFYLT,
+            listOf(evalueringÅrsak),
+            evalueringÅrsak.hentBeskrivelse()
+        )
 
-        fun ikkeOppfylt(evalueringÅrsak: EvalueringÅrsak) = Evaluering(Resultat.IKKE_OPPFYLT,
-                                                                       listOf(evalueringÅrsak),
-                                                                       evalueringÅrsak.hentBeskrivelse())
+        fun ikkeOppfylt(evalueringÅrsak: EvalueringÅrsak) = Evaluering(
+            Resultat.IKKE_OPPFYLT,
+            listOf(evalueringÅrsak),
+            evalueringÅrsak.hentBeskrivelse()
+        )
 
-        fun ikkeVurdert(evalueringÅrsak: EvalueringÅrsak) = Evaluering(Resultat.IKKE_VURDERT,
-                                                                       listOf(evalueringÅrsak),
-                                                                       evalueringÅrsak.hentBeskrivelse())
+        fun ikkeVurdert(evalueringÅrsak: EvalueringÅrsak) = Evaluering(
+            Resultat.IKKE_VURDERT,
+            listOf(evalueringÅrsak),
+            evalueringÅrsak.hentBeskrivelse()
+        )
     }
 }
 

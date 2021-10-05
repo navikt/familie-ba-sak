@@ -13,7 +13,6 @@ import javax.transaction.Transactional
 import kotlin.reflect.full.findAnnotation
 import org.springframework.data.relational.core.mapping.Table as JdbcTable
 
-
 /**
  * Test utility service that allows to truncate all tables in the test database.
  * Inspired by: http://www.greggbolinger.com/truncate-all-tables-in-spring-boot-jpa-app/
@@ -25,7 +24,7 @@ class DatabaseCleanupService(
     private val entityManager: EntityManager,
     private val environment: Environment,
     private val relationalMappingContext: RelationalMappingContext
-){
+) {
 
     private val logger = LoggerFactory.getLogger(DatabaseCleanupService::class.java)
 
@@ -46,7 +45,7 @@ class DatabaseCleanupService(
                         val tableAnnotation: Table? = it.javaType.kotlin.findAnnotation()
                         val jdbcTableAnnotation: JdbcTable? = it.javaType.kotlin.findAnnotation()
                         tableAnnotation?.name ?: jdbcTableAnnotation?.value
-                        ?: throw IllegalStateException("should never get here")
+                            ?: throw IllegalStateException("should never get here")
                     } + getJdbcTableNames()
             }
             return field
