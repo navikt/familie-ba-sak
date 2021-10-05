@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils.bestemUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils.utledLøpendeUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
@@ -99,18 +100,46 @@ class BehandlingService(
         }
     }
 
-    fun oppdaterBehandlingUnderkategori(behandling: Behandling, nyBehandlingUnderkategori: BehandlingUnderkategori): Behandling {
-        return lagreEllerOppdater(behandling.apply {
-            underkategori = bestemUnderkategori(nyUnderkategori = nyBehandlingUnderkategori,
-                                                nyBehandlingType = behandling.type,
-                                                løpendeUnderkategori = hentLøpendeUnderkategori(fagsakId = fagsak.id))
-        }).also { behandling ->
+    fun oppdaterBehandlingstema(behandling: Behandling,
+                                nyBehandlingUnderkategori: BehandlingUnderkategori = BehandlingUnderkategori.ORDINÆR,
+                                nyBehandlingKategori: BehandlingKategori = BehandlingKategori.NASJONAL,
+                                manueltOppdatert: Boolean = false): Behandling {
+        val nyUnderkategori =
+                if (manueltOppdatert) nyBehandlingUnderkategori
+                else bestemUnderkategori(
+                        nyUnderkategori = nyBehandlingUnderkategori,
+                        nyBehandlingType = behandling.type,
+                        løpendeUnderkategori = hentLøpendeUnderkategori(
+                                fagsakId = behandling.fagsak.id))
+
+        val forrigeBehandlingUnderkategori = behandling.underkategori
+        val forrigeBehandlingKategori = behandling.kategori
+        val skalOppdatereKategori = nyBehandlingKategori != forrigeBehandlingKategori
+        val skalOppdatereUnderkategori = nyUnderkategori != forrigeBehandlingUnderkategori
+
+        if (skalOppdatereKategori) {
+            behandling.apply { kategori = nyBehandlingKategori }
+        }
+        if (skalOppdatereUnderkategori) {
+            behandling.apply { underkategori = nyUnderkategori }
+        }
+
+        return lagreEllerOppdater(behandling).also { behandling ->
             oppgaveService.patchOppgaverForBehandling(behandling) {
-                if (it.behandlingstema != behandling.underkategori.tilBehandlingstema().value) {
+                if (it.behandlingstema != behandling.underkategori.tilBehandlingstema().value || it.behandlingstype != behandling.kategori.tilBehandlingstype().value) {
                     it.copy(
-                            behandlingstema = behandling.underkategori.tilBehandlingstema().value
+                            behandlingstema = behandling.underkategori.tilBehandlingstema().value,
+                            behandlingstype = behandling.kategori.tilBehandlingstype().value
                     )
                 } else null
+            }
+
+            if (manueltOppdatert && (skalOppdatereKategori || skalOppdatereUnderkategori)) {
+                loggService.opprettEndretBehandlingstema(behandling = behandling,
+                                                         forrigeKategori = forrigeBehandlingKategori,
+                                                         forrigeUnderkategori = forrigeBehandlingUnderkategori,
+                                                         nyKategori = nyBehandlingKategori,
+                                                         nyUnderkategori = nyUnderkategori)
             }
         }
     }
