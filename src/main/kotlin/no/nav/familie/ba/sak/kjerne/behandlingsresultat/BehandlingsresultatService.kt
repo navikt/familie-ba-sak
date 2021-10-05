@@ -46,7 +46,6 @@ class BehandlingsresultatService(
         )
 
         val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandlingId)
-
             ?: throw Feil("Finner ikke aktiv vilkårsvurdering")
 
         val personerFremstiltKravFor =
@@ -56,22 +55,15 @@ class BehandlingsresultatService(
                 forrigeBehandling = forrigeBehandling
             )
 
-        val personerVurdertIDenneBehandlingen = persongrunnlagService.hentAktiv(behandling.id)?.personer?.filter {
-            val vilkårResultater =
-                vilkårsvurdering.personResultater.find { personResultat -> personResultat.personIdent == it.personIdent.ident }?.vilkårResultater
-                    ?: emptyList()
-
-            val vilkårVurdertIDenneBehandlingen =
-                vilkårResultater.filter { vilkårResultat -> vilkårResultat.behandlingId == behandlingId }
-
+        val behandlingsresultatPersoner = persongrunnlagService.hentAktiv(behandling.id)?.personer?.filter {
             when (it.type) {
-                PersonType.BARN -> vilkårVurdertIDenneBehandlingen.isNotEmpty()
-                PersonType.SØKER -> vilkårVurdertIDenneBehandlingen.any { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
-                else -> false
+                PersonType.SØKER ->
+                    vilkårsvurdering.personResultater
+                        .flatMap { personResultat -> personResultat.vilkårResultater }
+                        .any { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
+                else -> true
             }
-        }
-
-        val behandlingsresultatPersoner = personerVurdertIDenneBehandlingen?.map {
+        }?.map {
             BehandlingsresultatUtils.utledBehandlingsresultatDataForPerson(
                 person = it,
                 personerFremstiltKravFor = personerFremstiltKravFor,
@@ -118,6 +110,7 @@ class BehandlingsresultatService(
             ?.filter { it.inkludertISøknaden }
             ?.map { it.ident }
             ?: emptyList()
+
         val utvidetBarnetrygdSøker =
             if (søknadDTO?.underkategori == BehandlingUnderkategori.UTVIDET) listOf(søknadDTO.søkerMedOpplysninger.ident) else emptyList()
 
