@@ -55,6 +55,7 @@ enum class LoggType(val visningsnavn: String) {
     FØDSELSHENDELSE("Fødselshendelse"),
     BEHANDLENDE_ENHET_ENDRET("Behandlende enhet endret"),
     BEHANDLING_OPPRETTET("Behandling opprettet"),
+    BEHANDLINGSTYPE_ENDRET("Endret behandlingstype"),
     BARN_LAGT_TIL("Barn lagt til på behandling"),
     DOKUMENT_MOTTATT("Dokument ble mottatt"),
     SØKNAD_REGISTRERT("Søknaden ble registrert"),

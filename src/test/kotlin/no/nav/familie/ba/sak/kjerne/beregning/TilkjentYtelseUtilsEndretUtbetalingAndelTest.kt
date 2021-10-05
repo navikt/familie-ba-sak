@@ -75,7 +75,8 @@ internal class TilkjentYtelseUtilsEndretUtbetalingAndelTest {
             }
 
         val endretUtbetalingerForBarn1 = listOf(
-            MånedPeriode(YearMonth.of(2015, 1), YearMonth.of(2018, 3))
+            MånedPeriode(YearMonth.of(2015, 1), YearMonth.of(2018, 3)),
+            MånedPeriode(YearMonth.of(2018, 4), YearMonth.of(2018, 4))
         )
             .map {
                 lagEndretUtbetalingAndel(barn1, it.fom, it.tom, 50)
@@ -111,7 +112,7 @@ internal class TilkjentYtelseUtilsEndretUtbetalingAndelTest {
         verifiserAndelTilkjentYtelse(
             andelerTilkjentYtelserEtterEUAList[1],
             barn1.personIdent.ident,
-            beløp,
+            beløp / BigDecimal(2),
             YearMonth.of(2018, 4),
             YearMonth.of(2018, 4)
         )
