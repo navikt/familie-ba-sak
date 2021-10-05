@@ -21,15 +21,15 @@ class EndretUtbetalingAndelValideringTest {
         val barn1 = tilfeldigPerson()
         val barn2 = tilfeldigPerson()
         val endretUtbetalingAndel = EndretUtbetalingAndel(
-                behandlingId = 1,
-                person = barn1,
-                fom = YearMonth.of(2020, 2),
-                tom = YearMonth.of(2020, 6),
-                årsak = Årsak.DELT_BOSTED,
-                begrunnelse = "begrunnelse",
-                prosent = BigDecimal(100),
-                søknadstidspunkt = LocalDate.now(),
-                avtaletidspunktDeltBosted = LocalDate.now()
+            behandlingId = 1,
+            person = barn1,
+            fom = YearMonth.of(2020, 2),
+            tom = YearMonth.of(2020, 6),
+            årsak = Årsak.DELT_BOSTED,
+            begrunnelse = "begrunnelse",
+            prosent = BigDecimal(100),
+            søknadstidspunkt = LocalDate.now(),
+            avtaletidspunktDeltBosted = LocalDate.now()
         )
 
         val feil = assertThrows<UtbetalingsikkerhetFeil> {
@@ -48,7 +48,7 @@ class EndretUtbetalingAndelValideringTest {
             )
         }
         assertEquals(
-            "Perioden som forsøkes lagt til overlapper med eksisterende periode gjeldende samme årsak og person.",
+            "Perioden som blir forsøkt lagt til overlapper med eksisterende periode på person.",
             feil.melding
         )
 
@@ -96,21 +96,24 @@ class EndretUtbetalingAndelValideringTest {
         )
 
         val endretUtbetalingAndel = EndretUtbetalingAndel(
-                behandlingId = 1,
-                person = barn1,
-                fom = YearMonth.of(2020, 2),
-                tom = YearMonth.of(2020, 6),
-                årsak = Årsak.DELT_BOSTED,
-                begrunnelse = "begrunnelse",
-                prosent = BigDecimal(100),
-                søknadstidspunkt = LocalDate.now(),
-                avtaletidspunktDeltBosted = LocalDate.now()
+            behandlingId = 1,
+            person = barn1,
+            fom = YearMonth.of(2020, 2),
+            tom = YearMonth.of(2020, 6),
+            årsak = Årsak.DELT_BOSTED,
+            begrunnelse = "begrunnelse",
+            prosent = BigDecimal(100),
+            søknadstidspunkt = LocalDate.now(),
+            avtaletidspunktDeltBosted = LocalDate.now()
         )
 
         var feil = assertThrows<UtbetalingsikkerhetFeil> {
             validerPeriodeInnenforTilkjentytelse(endretUtbetalingAndel, emptyList())
         }
-        assertEquals("Det er ingen tilkjent ytelse for personen det legges til en endret periode for.", feil.melding)
+        assertEquals(
+            "Det er ingen tilkjent ytelse for personen det blir forsøkt lagt til en endret periode for.",
+            feil.melding
+        )
 
         val endretUtbetalingAndelerSomIkkeValiderer = listOf(
             endretUtbetalingAndel.copy(fom = YearMonth.of(2020, 1), tom = YearMonth.of(2020, 11)),
@@ -122,7 +125,10 @@ class EndretUtbetalingAndelValideringTest {
             feil = assertThrows<UtbetalingsikkerhetFeil> {
                 validerPeriodeInnenforTilkjentytelse(it, andelTilkjentYtelser)
             }
-            assertEquals("Det er ingen tilkjent ytelse for personen det legges til en endret periode for.", feil.melding)
+            assertEquals(
+                "Det er ingen tilkjent ytelse for personen det blir forsøkt lagt til en endret periode for.",
+                feil.melding
+            )
         }
 
         val endretUtbetalingAndelerSomValiderer = listOf(
