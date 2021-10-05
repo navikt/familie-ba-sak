@@ -149,8 +149,4 @@ FROM (SELECT ident, MAX(endret_dato) dato
         fom: LocalDateTime,
         tom: LocalDateTime
     ): List<AndelTilkjentYtelsePeriode>
-
-
-    @Query(value = """SELECT aty FROM AndelTilkjentYtelse aty""")
-    fun finnAlleAndelTilkjentYtelser(): List<AndelTilkjentYtelse>
 }
