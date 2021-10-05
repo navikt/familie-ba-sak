@@ -7,6 +7,7 @@ import no.nav.familie.kontrakter.felles.Behandlingstema
 import no.nav.familie.kontrakter.felles.BrukerIdType
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.journalpost.*
+import no.nav.familie.kontrakter.felles.oppgave.Behandlingstype
 import no.nav.familie.kontrakter.felles.oppgave.IdentGruppe
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveIdentV2
@@ -76,6 +77,7 @@ fun lagTestOppgaveDTO(oppgaveId: Long,
                    tema = Tema.BAR,
                    oppgavetype = oppgavetype.value,
                    behandlingstema = Behandlingstema.OrdinærBarnetrygd.value,
+                   behandlingstype = Behandlingstype.NASJONAL.value,
                    opprettetTidspunkt = LocalDate.of(
                            2020,
                            1,
