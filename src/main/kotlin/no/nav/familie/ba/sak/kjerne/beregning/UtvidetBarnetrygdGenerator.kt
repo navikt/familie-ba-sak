@@ -6,7 +6,7 @@ import no.nav.familie.ba.sak.common.Utils.avrundetHeltallAvProsent
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
-import no.nav.familie.ba.sak.common.sisteDagINesteMåned
+import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
@@ -38,7 +38,7 @@ data class UtvidetBarnetrygdGenerator(
                             if (it.periodeFom == null) throw Feil("Fom må være satt på søkers periode ved utvida barnetrygd")
                             LocalDateSegment(
                                     it.periodeFom!!.førsteDagINesteMåned(),
-                                    it.periodeTom?.sisteDagINesteMåned() ?: TIDENES_ENDE,
+                                    it.periodeTom?.sisteDagIMåned() ?: TIDENES_ENDE,
                                     listOf(PeriodeData(ident = søkerIdent, rolle = PersonType.SØKER))
                             )
                         })
