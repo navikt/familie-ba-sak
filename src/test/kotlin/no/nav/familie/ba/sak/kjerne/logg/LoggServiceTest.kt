@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.logg
 
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.randomFnr
-import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTestDev
 import no.nav.familie.ba.sak.config.AbstractTestWithJdbcTables
 import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.config.mockHentPersoninfoForMedIdenter
@@ -23,7 +22,7 @@ import org.springframework.test.context.ActiveProfiles
 import javax.sql.DataSource
 
 @SpringBootTest
-@ActiveProfiles("dev", "mock-pdl", "mock-infotrygd-barnetrygd")
+@ActiveProfiles("dev", "mock-pdl", "mock-infotrygd-barnetrygd", "mock-brev-klient")
 @TestInstance(Lifecycle.PER_CLASS)
 class LoggServiceTest(
         @Autowired

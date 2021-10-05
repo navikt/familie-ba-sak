@@ -14,17 +14,14 @@ import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.within
-import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock
 import org.springframework.core.io.ClassPathResource
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.context.TestPropertySource
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.HttpServerErrorException
 import org.springframework.web.client.postForEntity
@@ -36,7 +33,7 @@ import java.time.YearMonth
 import java.time.temporal.ChronoUnit
 
 
-@ActiveProfiles("postgres", "mock-pdl", "mock-oauth")
+@ActiveProfiles("postgres", "mock-pdl", "mock-oauth", "mock-brev-klient")
 class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
 
 
