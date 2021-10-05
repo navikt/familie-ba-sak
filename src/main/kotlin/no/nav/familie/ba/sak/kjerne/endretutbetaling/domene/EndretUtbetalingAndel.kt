@@ -100,8 +100,9 @@ data class EndretUtbetalingAndel(
             fom == null ||
             tom == null ||
             årsak == null ||
-            søknadstidspunkt == null)
-                throw Feil("Person, prosent, fom, tom, årsak og søknadstidspunkt skal være utfylt: $this.tostring()")
+            søknadstidspunkt == null ||
+            (begrunnelse == null || begrunnelse!!.isEmpty()))
+                throw Feil("Person, prosent, fom, tom, årsak, begrunnese og søknadstidspunkt skal være utfylt: $this.tostring()")
 
         if(årsak == Årsak.DELT_BOSTED && avtaletidspunktDeltBosted == null)
             throw Feil("Avtaletidspunkt skal være utfylt når årsak er delt bosted: $this.tostring()")

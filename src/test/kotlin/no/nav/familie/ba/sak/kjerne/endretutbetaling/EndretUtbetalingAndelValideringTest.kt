@@ -27,7 +27,7 @@ class EndretUtbetalingAndelValideringTest {
                 fom = YearMonth.of(2020, 2),
                 tom = YearMonth.of(2020, 6),
                 årsak = Årsak.DELT_BOSTED,
-                begrunnelse = "",
+                begrunnelse = "begrunnelse",
                 prosent = BigDecimal(100),
                 søknadstidspunkt = LocalDate.now(),
                 avtaletidspunktDeltBosted = LocalDate.now())
@@ -79,7 +79,7 @@ class EndretUtbetalingAndelValideringTest {
                 fom = YearMonth.of(2020, 2),
                 tom = YearMonth.of(2020, 6),
                 årsak = Årsak.DELT_BOSTED,
-                begrunnelse = "",
+                begrunnelse = "begrunnelse",
                 prosent = BigDecimal(100),
                 søknadstidspunkt = LocalDate.now(),
                 avtaletidspunktDeltBosted = LocalDate.now())

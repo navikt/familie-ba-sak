@@ -12,9 +12,10 @@ import java.time.YearMonth
 internal class EndretUtbetalingAndelTest {
 
     @Test
-    fun `Sjekk validering med tome felt`() {
+    fun `Sjekk validering med tomme felt`() {
         val behandling = lagBehandling();
         val endretUtbetalingAndel = EndretUtbetalingAndel(behandlingId = behandling.id)
+        endretUtbetalingAndel.begrunnelse = ""
 
         org.junit.jupiter.api.assertThrows<Feil> {
             endretUtbetalingAndel.validerUtfyltEndring();
@@ -22,7 +23,7 @@ internal class EndretUtbetalingAndelTest {
     }
 
     @Test
-    fun `Sjekk validering med ikke tome felt`() {
+    fun `Sjekk validering med ikke tomme felt`() {
         val behandling = lagBehandling();
         val endretUtbetalingAndel = EndretUtbetalingAndel(behandlingId = behandling.id)
 
@@ -32,6 +33,7 @@ internal class EndretUtbetalingAndelTest {
         endretUtbetalingAndel.tom = YearMonth.of(2020, 10)
         endretUtbetalingAndel.årsak = Årsak.EØS_SEKUNDÆRLAND
         endretUtbetalingAndel.søknadstidspunkt = LocalDate.now()
+        endretUtbetalingAndel.begrunnelse = "begrunnelse"
 
         assertTrue(endretUtbetalingAndel.validerUtfyltEndring())
     }
@@ -47,6 +49,7 @@ internal class EndretUtbetalingAndelTest {
         endretUtbetalingAndel.tom = YearMonth.of(2020, 10)
         endretUtbetalingAndel.årsak = Årsak.DELT_BOSTED
         endretUtbetalingAndel.søknadstidspunkt = LocalDate.now()
+        endretUtbetalingAndel.begrunnelse = "begrunnelse"
 
         org.junit.jupiter.api.assertThrows<Feil> {
             endretUtbetalingAndel.validerUtfyltEndring();
@@ -65,6 +68,7 @@ internal class EndretUtbetalingAndelTest {
         endretUtbetalingAndel.årsak = Årsak.DELT_BOSTED
         endretUtbetalingAndel.søknadstidspunkt = LocalDate.now()
         endretUtbetalingAndel.avtaletidspunktDeltBosted = LocalDate.now()
+        endretUtbetalingAndel.begrunnelse = "begrunnelse"
 
         assertTrue(endretUtbetalingAndel.validerUtfyltEndring())
     }

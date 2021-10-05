@@ -117,7 +117,7 @@ object TilkjentYtelseUtils {
                     andelForPerson.copy(
                             stønadFom = månedPeriodeEndret.fom,
                             stønadTom = månedPeriodeEndret.tom,
-                            kalkulertUtbetalingsbeløp = andelForPerson.kalkulertUtbetalingsbeløp
+                            kalkulertUtbetalingsbeløp = andelForPerson.sats
                                     .avrundetHeltallAvProsent(endretUtbetalingAndel.prosent!!))
                 })
                 // Legger til nye AndelTilkjentYtelse for perioder som ikke berøres av endringer.
