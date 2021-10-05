@@ -234,10 +234,10 @@ object TilkjentYtelseUtils {
 fun MånedPeriode.perioderMedOgUtenOverlapp(perioder: List<MånedPeriode>): Pair<List<MånedPeriode>, List<MånedPeriode>> {
     if (perioder.isEmpty()) return Pair(emptyList(), listOf(this))
 
-    val alleMånederMedOverlappStatus = mutableMapOf<YearMonth, Boolean>()
+    val alleMånederMedOverlappstatus = mutableMapOf<YearMonth, Boolean>()
     var nesteMåned = this.fom
     while (nesteMåned <= this.tom) {
-        alleMånederMedOverlappStatus.put(nesteMåned, perioder.any { månedPeriode -> månedPeriode.inkluderer(nesteMåned) })
+        alleMånederMedOverlappstatus.put(nesteMåned, perioder.any { månedPeriode -> månedPeriode.inkluderer(nesteMåned) })
         nesteMåned = nesteMåned.plusMonths(1)
     }
 
@@ -246,17 +246,29 @@ fun MånedPeriode.perioderMedOgUtenOverlapp(perioder: List<MånedPeriode>): Pair
     val perioderMedOverlapp = mutableListOf<MånedPeriode>()
     val perioderUtenOverlapp = mutableListOf<MånedPeriode>()
     while (periodeStart != null) {
-        var periodeMedOverlapp = alleMånederMedOverlappStatus.get(periodeStart)!!
-        val periodeSlutt = alleMånederMedOverlappStatus
-                                   .filter { it.key > periodeStart && it.value != periodeMedOverlapp }
-                                   .minByOrNull { it.key }
-                                   ?.key?.minusMonths(1) ?: this.tom
+        var periodeMedOverlapp = alleMånederMedOverlappstatus.get(periodeStart)!!
+
+        val nesteMånedMedNyOverlappstatus = alleMånederMedOverlappstatus
+                                                    .filter { it.key > periodeStart && it.value != periodeMedOverlapp }
+                                                    .minByOrNull { it.key }
+                                                    ?.key?.minusMonths(1) ?: this.tom
+
+        // Når tom skal utledes for en periode det eksisterer en endret periode for må den minste av følgende to datoer velges:
+        // 1. tom for den aktuelle endrete perioden
+        // 2. neste måned uten overlappende endret periode, eller hvis null, tom for this (som representerer en AndelTilkjentYtelse).
+        // Dersom tom gjelder periode uberørt av endringer så vil alltid alt.2 være korrekt.
+        val periodeSlutt = if (periodeMedOverlapp) {
+            val nesteMånedUtenOverlapp = perioder.single { it.inkluderer(periodeStart!!) }.tom
+            minOf(nesteMånedUtenOverlapp, nesteMånedMedNyOverlappstatus)
+        } else {
+            nesteMånedMedNyOverlappstatus
+        }
 
         if (periodeMedOverlapp)
             perioderMedOverlapp.add(MånedPeriode(periodeStart, periodeSlutt))
         else perioderUtenOverlapp.add(MånedPeriode(periodeStart, periodeSlutt))
 
-        periodeStart = alleMånederMedOverlappStatus
+        periodeStart = alleMånederMedOverlappstatus
                 .filter { it.key > periodeSlutt }
                 .minByOrNull { it.key }?.key
     }
