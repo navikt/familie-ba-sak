@@ -31,7 +31,6 @@ class BeregningService(
     private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
     private val endretUtbetalingAndelRepository: EndretUtbetalingAndelRepository,
 ) {
-
     fun slettTilkjentYtelseForBehandling(behandlingId: Long) = tilkjentYtelseRepository.findByBehandling(behandlingId)
         ?.let { tilkjentYtelseRepository.delete(it) }
 
@@ -41,7 +40,8 @@ class BeregningService(
     fun hentAndelerTilkjentYtelseForBehandling(behandlingId: Long): List<AndelTilkjentYtelse> =
         andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(listOf(behandlingId))
 
-    fun lagreTilkjentYtelseMedOppdaterteAndeler(tilkjentYtelse: TilkjentYtelse) = tilkjentYtelseRepository.save(tilkjentYtelse)
+    fun lagreTilkjentYtelseMedOppdaterteAndeler(tilkjentYtelse: TilkjentYtelse) =
+        tilkjentYtelseRepository.save(tilkjentYtelse)
 
     fun hentTilkjentYtelseForBehandling(behandlingId: Long) =
         tilkjentYtelseRepository.findByBehandling(behandlingId)
@@ -148,7 +148,8 @@ class BeregningService(
                 ?: error("Fant ikke tilkjent ytelse for behandling ${behandling.id}")
         return tilkjentYtelse.apply {
             this.utbetalingsoppdrag = objectMapper.writeValueAsString(utbetalingsoppdrag)
-            this.stønadTom = utbetalingsoppdrag.utbetalingsperiode.maxByOrNull { it.vedtakdatoTom }!!.vedtakdatoTom.toYearMonth()
+            this.stønadTom =
+                utbetalingsoppdrag.utbetalingsperiode.maxByOrNull { it.vedtakdatoTom }!!.vedtakdatoTom.toYearMonth()
             this.stønadFom = if (erRentOpphør) null else utbetalingsoppdrag.utbetalingsperiode
                 .filter { !it.erEndringPåEksisterendePeriode }
                 .minByOrNull { it.vedtakdatoFom }!!.vedtakdatoFom.toYearMonth()
