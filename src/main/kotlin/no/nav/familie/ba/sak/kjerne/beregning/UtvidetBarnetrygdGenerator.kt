@@ -46,7 +46,7 @@ data class UtvidetBarnetrygdGenerator(
                 }
         )
 
-        val barnasTidslinjer = andelerBarna
+        val barnasTidslinjer: List<LocalDateTimeline<List<PeriodeData>>> = andelerBarna
             .groupBy { it.personIdent }
             .map { identMedAndeler ->
                 LocalDateTimeline(
@@ -80,7 +80,8 @@ data class UtvidetBarnetrygdGenerator(
                 )
                     .singleOrNull()?.sats
                     ?: error("Skal finnes én ordinær sats for gitt segment oppdelt basert på andeler")
-                val prosentForPeriode = it.value.maxByOrNull { data -> data.prosent }?.prosent ?: error("Finner ikke prosent")
+                val prosentForPeriode =
+                    it.value.maxByOrNull { data -> data.prosent }?.prosent ?: error("Finner ikke prosent")
                 AndelTilkjentYtelse(
                     behandlingId = behandlingId,
                     tilkjentYtelse = tilkjentYtelse,
