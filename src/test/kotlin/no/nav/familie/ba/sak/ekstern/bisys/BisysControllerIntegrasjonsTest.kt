@@ -32,7 +32,7 @@ import java.time.LocalDateTime
 import java.time.YearMonth
 import java.time.temporal.ChronoUnit
 
-@ActiveProfiles("postgres", "mock-pdl", "mock-oauth")
+@ActiveProfiles("postgres", "mock-pdl", "mock-oauth", "mock-brev-klient")
 class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
 
     @Test

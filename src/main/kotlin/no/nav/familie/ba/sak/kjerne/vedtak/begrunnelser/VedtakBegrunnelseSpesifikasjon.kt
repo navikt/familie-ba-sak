@@ -23,7 +23,6 @@ import no.nav.familie.ba.sak.kjerne.dokument.domene.inneholderØvrigTrigger
 import no.nav.familie.ba.sak.kjerne.dokument.domene.tilPersonType
 import no.nav.familie.ba.sak.kjerne.dokument.domene.tilVilkår
 import no.nav.familie.ba.sak.kjerne.dokument.domene.ØvrigTrigger
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakUtils.hentPersonerForAlleUtgjørendeVilkår
@@ -209,7 +208,7 @@ enum class VedtakBegrunnelseSpesifikasjon(
         override val sanityApiNavn = "reduksjonFlyttetBarn"
         override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOR_MED_SØKER))
     },
-    REDUKSJON_BARN_DØD(tittel = "Barn død") {
+    REDUKSJON_BARN_DØD("Barn død") {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 11)
@@ -223,7 +222,7 @@ enum class VedtakBegrunnelseSpesifikasjon(
         override val sanityApiNavn = "reduksjonFastOmsorgForBarn"
         override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOR_MED_SØKER), vurderingAnnetGrunnlag = true)
     },
-    REDUKSJON_MANGLENDE_OPPLYSNINGER(tittel = "Ikke mottatt opplysninger") {
+    REDUKSJON_MANGLENDE_OPPLYSNINGER("Ikke mottatt opplysninger") {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(17, 18)
@@ -264,13 +263,6 @@ enum class VedtakBegrunnelseSpesifikasjon(
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 12)
         override val sanityApiNavn = "reduksjonEndretMottaker"
         override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOR_MED_SØKER), vurderingAnnetGrunnlag = true)
-    },
-    REDUKSJON_FRITEKST("Fritekst", erTilgjengeligFrontend = false) {
-
-        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf()
-        override val sanityApiNavn = ""
-        override val triggesAv = TriggesAv(valgbar = false)
     },
     INNVILGET_SATSENDRING("Satsendring") {
 
@@ -371,18 +363,11 @@ enum class VedtakBegrunnelseSpesifikasjon(
         override val sanityApiNavn = "avslagSaerkullsbarn"
         override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOR_MED_SØKER), vurderingAnnetGrunnlag = true)
     },
-    AVSLAG_UREGISTRERT_BARN("Barn uten fødselsnummer", erTilgjengeligFrontend = false) {
+    AVSLAG_UREGISTRERT_BARN("Barn uten fødselsnummer") {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4)
         override val sanityApiNavn = "avslagUregistrertBarn"
-        override val triggesAv = TriggesAv(valgbar = false)
-    },
-    AVSLAG_FRITEKST("Fritekst", erTilgjengeligFrontend = false) {
-
-        override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf()
-        override val sanityApiNavn = ""
         override val triggesAv = TriggesAv(valgbar = false)
     },
     OPPHØR_BARN_FLYTTET_FRA_SØKER("Barn bor ikke med søker") {
@@ -399,14 +384,14 @@ enum class VedtakBegrunnelseSpesifikasjon(
         override val sanityApiNavn = "opphorFlyttetFraNorge"
         override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOSATT_I_RIKET))
     },
-    OPPHØR_BARN_DØD(tittel = "Et barn er dødt") {
+    OPPHØR_BARN_DØD("Et barn er dødt") {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 11)
         override val sanityApiNavn = "opphorEtBarnErDodt"
         override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOR_MED_SØKER))
     },
-    OPPHØR_FLERE_BARN_DØD(tittel = "Flere barn er døde") {
+    OPPHØR_FLERE_BARN_DØD("Flere barn er døde") {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 11)
@@ -427,7 +412,7 @@ enum class VedtakBegrunnelseSpesifikasjon(
         override val sanityApiNavn = "opphorHarIkkeOppholdstillatelse"
         override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.LOVLIG_OPPHOLD))
     },
-    OPPHØR_IKKE_MOTTATT_OPPLYSNINGER(tittel = "Ikke mottatt opplysninger") {
+    OPPHØR_IKKE_MOTTATT_OPPLYSNINGER("Ikke mottatt opplysninger") {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(17, 18)
@@ -454,13 +439,6 @@ enum class VedtakBegrunnelseSpesifikasjon(
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 11)
         override val sanityApiNavn = "opphorUnder18Aar"
         override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.UNDER_18_ÅR))
-    },
-    OPPHØR_FRITEKST("Fritekst", erTilgjengeligFrontend = false) {
-
-        override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf()
-        override val sanityApiNavn = ""
-        override val triggesAv = TriggesAv(valgbar = false)
     },
     OPPHØR_ENDRET_MOTTAKER("Foreldrene bor sammen, endret mottaker") {
 
@@ -545,21 +523,7 @@ enum class VedtakBegrunnelseSpesifikasjon(
         override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4, 11)
         override val sanityApiNavn = "fortsattInnvilgetUendretTrygd"
         override val triggesAv = TriggesAv()
-    },
-    FORTSATT_INNVILGET_FRITEKST("Fortsatt innvilget fritekst", erTilgjengeligFrontend = false) {
-
-        override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf()
-        override val sanityApiNavn = ""
-        override val triggesAv = TriggesAv()
     };
-
-    fun erFritekstBegrunnelse() = listOf(
-        REDUKSJON_FRITEKST,
-        OPPHØR_FRITEKST,
-        AVSLAG_FRITEKST,
-        FORTSATT_INNVILGET_FRITEKST
-    ).contains(this)
 
     fun triggesForPeriode(
         vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser,
@@ -603,48 +567,6 @@ enum class VedtakBegrunnelseSpesifikasjon(
     companion object {
 
         fun List<LocalDate>.tilBrevTekst(): String = Utils.slåSammen(this.sorted().map { it.tilKortString() })
-        fun List<LocalDate>.barnetBarnaFormulering(): String = if (this.size > 1) "barna" else if (this.size == 1) "barnet" else ""
-        fun List<LocalDate>.barnetBarnaDineDittFormulering(): String = if (this.size > 1) "barna dine" else if (this.size == 1) "barnet ditt" else ""
-
-        fun duOgEllerBarnaFødtFormulering(gjelderSøker: Boolean, barnasFødselsdatoer: List<LocalDate>, målform: Målform): String {
-            val duFormulering =
-                if (gjelderSøker && barnasFødselsdatoer.isNotEmpty()) " du og " else if (gjelderSøker) " du " else " "
-            return when (målform) {
-                Målform.NB -> duFormulering + if (barnasFødselsdatoer.isNotEmpty()) "barn født ${barnasFødselsdatoer.tilBrevTekst()} " else ""
-                Målform.NN -> duFormulering + if (barnasFødselsdatoer.isNotEmpty()) "barn fødd ${barnasFødselsdatoer.tilBrevTekst()} " else ""
-            }
-        }
-
-        fun duOgEllerBarnetBarnaFormulering(gjelderSøker: Boolean, barnasFødselsdatoer: List<LocalDate>) =
-            "${if (gjelderSøker && barnasFødselsdatoer.isNotEmpty()) " du og " else if (gjelderSøker) " du " else " "}${barnasFødselsdatoer.barnetBarnaFormulering()}"
-
-        fun innvilgetFormulering(gjelderSøker: Boolean, barnasFødselsdatoer: List<LocalDate>, målform: Målform) =
-            when (målform) {
-                Målform.NB ->
-                    "Du får barnetrygd${
-                    if (barnasFødselsdatoer.isNotEmpty()) " for barn født ${barnasFødselsdatoer.tilBrevTekst()} " else " "
-                    }fordi ${
-                    duOgEllerBarnetBarnaFormulering(
-                        gjelderSøker,
-                        barnasFødselsdatoer
-                    ).trim()
-                    } "
-                Målform.NN ->
-                    "Du får barnetrygd${
-                    if (barnasFødselsdatoer.isNotEmpty()) " for barn fødd ${barnasFødselsdatoer.tilBrevTekst()} " else " "
-                    }fordi ${
-                    duOgEllerBarnetBarnaFormulering(
-                        gjelderSøker,
-                        barnasFødselsdatoer
-                    ).trim()
-                    } "
-            }
-
-        fun fraOgTilFormulering(månedOgÅrBegrunnelsenGjelderFor: String, målform: Målform) =
-            when (målform) {
-                Målform.NB -> if (månedOgÅrBegrunnelsenGjelderFor.isNotBlank()) " fra $månedOgÅrBegrunnelsenGjelderFor" else ""
-                Målform.NN -> if (månedOgÅrBegrunnelsenGjelderFor.isNotBlank()) " frå $månedOgÅrBegrunnelsenGjelderFor" else ""
-            }
     }
 }
 
@@ -654,10 +576,9 @@ val hjemlerTilhørendeFritekst = setOf(2, 4, 11)
 val vedtakBegrunnelserIkkeTilknyttetVilkår = VedtakBegrunnelseSpesifikasjon.values().filter { it.triggesAv.vilkår == null }
 
 fun VedtakBegrunnelseSpesifikasjon.tilSanityBegrunnelse(sanityBegrunnelser: List<SanityBegrunnelse>): SanityBegrunnelse =
-    if (this.erTilgjengeligFrontend) {
         sanityBegrunnelser.find { it.apiNavn == this.sanityApiNavn }
             ?: throw Feil("Fant ikke begrunnelse med apiNavn=${this.sanityApiNavn} for ${this.name} i Sanity.")
-    } else throw Feil("Begrunnelse ${this.name} er ikke tilgjengelig frontend.")
+
 
 fun VedtakBegrunnelseSpesifikasjon.erTilknyttetVilkår(sanityBegrunnelser: List<SanityBegrunnelse>) =
     !this.tilSanityBegrunnelse(sanityBegrunnelser).vilkaar.isNullOrEmpty()
@@ -702,10 +623,6 @@ fun VedtakBegrunnelseSpesifikasjon.tilVedtaksbegrunnelse(
     vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser,
     personIdenter: List<String>
 ): Vedtaksbegrunnelse {
-    if (this.erFritekstBegrunnelse()) {
-        throw Feil("Kan ikke fastsette fritekstbegrunnelse på begrunnelser på vedtaksperioder. Bruk heller fritekster.")
-    }
-
     if (this.vedtakBegrunnelseType.tilVedtaksperiodeType() != vedtaksperiodeMedBegrunnelser.type) {
         throw Feil(
             "Begrunnelsestype ${this.vedtakBegrunnelseType} passer ikke med " +
@@ -735,6 +652,10 @@ fun VedtakBegrunnelseType.hentMånedOgÅrForBegrunnelse(periode: Periode) = when
     else ->
         if (periode.fom == TIDENES_MORGEN) throw Feil("Prøver å finne fom-dato for begrunnelse, men fikk \"TIDENES_MORGEN\".")
         else periode.fom.forrigeMåned().tilMånedÅr()
+}
+
+fun VedtakBegrunnelseSpesifikasjon.hentHjemlerFraSanity(sanityBegrunnelser: List<SanityBegrunnelse>): List<String> {
+    return this.tilSanityBegrunnelse(sanityBegrunnelser).hjemler
 }
 
 @Converter

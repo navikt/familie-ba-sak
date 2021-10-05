@@ -2,10 +2,8 @@ package no.nav.familie.ba.sak.kjerne.vedtak
 
 import no.nav.familie.ba.sak.common.lagVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.dokument.sorter
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
@@ -66,12 +64,5 @@ class VedtakUtilsTest {
 
         // Avslag uten datoer legger seg til slutt
         Assertions.assertEquals(avslagUtenDatoer, sorterteVedtaksperioder[4])
-    }
-
-    @Test
-    fun `Valider at alle begrunnelser som ikke er fritekst har hjemler`() {
-        val begrunnelser = VedtakBegrunnelseSpesifikasjon.values()
-            .filterNot { it.erFritekstBegrunnelse() }
-        assertTrue(begrunnelser.none { it.hentHjemler().isEmpty() })
     }
 }
