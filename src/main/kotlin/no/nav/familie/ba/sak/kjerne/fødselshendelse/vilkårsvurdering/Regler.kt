@@ -30,17 +30,19 @@ interface Vilkårsregel {
 }
 
 data class VurderPersonErBosattIRiket(
-        val adresser: List<GrBostedsadresse>,
-        val vurderFra: LocalDate
+    val adresser: List<GrBostedsadresse>,
+    val vurderFra: LocalDate
 ) : Vilkårsregel {
 
     override fun vurder(): Evaluering {
         if (adresser.any { !it.harGyldigFom() }) {
             val person = adresser.first().person
-            secureLogger.info("Har ugyldige adresser på person (${person?.personIdent?.ident}, ${person?.type}): ${
+            secureLogger.info(
+                "Har ugyldige adresser på person (${person?.personIdent?.ident}, ${person?.type}): ${
                 adresser.filter { !it.harGyldigFom() }
-                        .map { "(${it.periode?.fom}, ${it.periode?.tom}): ${it.toSecureString()}" }
-            }")
+                    .map { "(${it.periode?.fom}, ${it.periode?.tom}): ${it.toSecureString()}" }
+                }"
+            )
         }
 
         val adresserMedGyldigFom = adresser.filter { it.harGyldigFom() }
@@ -55,11 +57,12 @@ data class VurderPersonErBosattIRiket(
         else Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.BOR_IKKE_I_RIKET)
     }
 
-
     private fun erPersonBosattFraVurderingstidspunktet(adresser: List<GrBostedsadresse>, vurderFra: LocalDate) =
-            hentMaxAvstandAvDagerMellomPerioder(adresser.mapNotNull { it.periode },
-                                                vurderFra,
-                                                LocalDate.now()) == 0L
+        hentMaxAvstandAvDagerMellomPerioder(
+            adresser.mapNotNull { it.periode },
+            vurderFra,
+            LocalDate.now()
+        ) == 0L
 
     companion object {
 
@@ -69,39 +72,40 @@ data class VurderPersonErBosattIRiket(
 }
 
 data class VurderBarnErUnder18(
-        val alder: Int
+    val alder: Int
 ) : Vilkårsregel {
 
     override fun vurder(): Evaluering =
-            if (alder < 18) Evaluering.oppfylt(VilkårOppfyltÅrsak.ER_UNDER_18_ÅR)
-            else Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.ER_IKKE_UNDER_18_ÅR)
+        if (alder < 18) Evaluering.oppfylt(VilkårOppfyltÅrsak.ER_UNDER_18_ÅR)
+        else Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.ER_IKKE_UNDER_18_ÅR)
 }
 
 data class VurderBarnErBosattMedSøker(
-        val søkerAdresser: List<GrBostedsadresse>,
-        val barnAdresser: List<GrBostedsadresse>
+    val søkerAdresser: List<GrBostedsadresse>,
+    val barnAdresser: List<GrBostedsadresse>
 ) : Vilkårsregel {
 
     override fun vurder(): Evaluering {
         return if (barnAdresser.isNotEmpty() && barnAdresser.all {
-                    søkerAdresser.any { søkerAdresse ->
-                        val søkerAdresseFom = søkerAdresse.periode?.fom ?: TIDENES_MORGEN
-                        val søkerAdresseTom = søkerAdresse.periode?.tom ?: TIDENES_ENDE
+            søkerAdresser.any { søkerAdresse ->
+                val søkerAdresseFom = søkerAdresse.periode?.fom ?: TIDENES_MORGEN
+                val søkerAdresseTom = søkerAdresse.periode?.tom ?: TIDENES_ENDE
 
-                        val barnAdresseFom = it.periode?.fom ?: TIDENES_MORGEN
-                        val barnAdresseTom = it.periode?.tom ?: TIDENES_ENDE
+                val barnAdresseFom = it.periode?.fom ?: TIDENES_MORGEN
+                val barnAdresseTom = it.periode?.tom ?: TIDENES_ENDE
 
-                        søkerAdresseFom.isSameOrBefore(barnAdresseFom) &&
-                        søkerAdresseTom.isSameOrAfter(barnAdresseTom) &&
-                        GrBostedsadresse.erSammeAdresse(søkerAdresse, it)
-                    }
-                }) Evaluering.oppfylt(VilkårOppfyltÅrsak.BARNET_BOR_MED_MOR)
+                søkerAdresseFom.isSameOrBefore(barnAdresseFom) &&
+                    søkerAdresseTom.isSameOrAfter(barnAdresseTom) &&
+                    GrBostedsadresse.erSammeAdresse(søkerAdresse, it)
+            }
+        }
+        ) Evaluering.oppfylt(VilkårOppfyltÅrsak.BARNET_BOR_MED_MOR)
         else Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.BARNET_BOR_IKKE_MED_MOR)
     }
 }
 
 data class VurderBarnErUgift(
-        val sivilstander: List<GrSivilstand>
+    val sivilstander: List<GrSivilstand>
 ) : Vilkårsregel {
 
     override fun vurder(): Evaluering {
@@ -118,12 +122,11 @@ data class VurderBarnErUgift(
 }
 
 data class VurderPersonHarLovligOpphold(
-        val fakta: String = "Alltid oppfylt inntil videre"
+    val fakta: String = "Alltid oppfylt inntil videre"
 ) : Vilkårsregel {
 
     override fun vurder(): Evaluering = Evaluering.oppfylt(VilkårOppfyltÅrsak.NORDISK_STATSBORGER)
 }
-
 
 // Fra gammel implementasjon
 internal fun lovligOpphold(person: Person): Evaluering {
@@ -155,11 +158,11 @@ internal fun lovligOpphold(person: Person): Evaluering {
 }
 
 fun finnNåværendeMedlemskap(statsborgerskap: List<GrStatsborgerskap>?): List<Medlemskap> =
-        statsborgerskap?.filter {
-            it.gyldigPeriode?.fom?.isBefore(LocalDate.now()) ?: true &&
+    statsborgerskap?.filter {
+        it.gyldigPeriode?.fom?.isBefore(LocalDate.now()) ?: true &&
             it.gyldigPeriode?.tom?.isAfter(LocalDate.now()) ?: true
-        }
-                ?.map { it.medlemskap } ?: emptyList()
+    }
+        ?.map { it.medlemskap } ?: emptyList()
 
 fun finnSterkesteMedlemskap(medlemskap: List<Medlemskap>): Medlemskap? {
     return with(medlemskap) {
@@ -174,7 +177,6 @@ fun finnSterkesteMedlemskap(medlemskap: List<Medlemskap>): Medlemskap? {
     }
 }
 
-
 private fun sjekkLovligOppholdForEØSBorger(person: Person): Evaluering {
     return if (personHarLøpendeArbeidsforhold(person)) {
         Evaluering.oppfylt(VilkårOppfyltÅrsak.EØS_MED_LØPENDE_ARBEIDSFORHOLD)
@@ -182,57 +184,71 @@ private fun sjekkLovligOppholdForEØSBorger(person: Person): Evaluering {
         if (annenForelderRegistrert(person)) {
             if (annenForelderBorMedMor(person)) {
                 val annenForelderSterkerteStatsborgerskap =
-                        finnSterkesteMedlemskap(statsborgerskapAnnenForelder(person))
+                    finnSterkesteMedlemskap(statsborgerskapAnnenForelder(person))
                         ?: throw error("Ukjent medlemskap annen forelder")
                 sjekkLovligOppholdForEØSBorgerSomBorMedPartner(annenForelderSterkerteStatsborgerskap, person)
             } else {
-                sjekkMorsHistoriskeBostedsadresseOgArbeidsforhold(person,
-                                                                  VilkårIkkeOppfyltÅrsak.EØS_BOR_IKKE_SAMMEN_MED_MEDFORELDER_OG_MOR_IKKE_INNFRIDD_ARBEIDSMENGDE,
-                                                                  VilkårIkkeOppfyltÅrsak.EØS_BOR_IKKE_SAMMEN_MED_MEDFORELDER_OG_MOR_IKKE_INNFRIDD_BOTIDSKRAV)
+                sjekkMorsHistoriskeBostedsadresseOgArbeidsforhold(
+                    person,
+                    VilkårIkkeOppfyltÅrsak.EØS_BOR_IKKE_SAMMEN_MED_MEDFORELDER_OG_MOR_IKKE_INNFRIDD_ARBEIDSMENGDE,
+                    VilkårIkkeOppfyltÅrsak.EØS_BOR_IKKE_SAMMEN_MED_MEDFORELDER_OG_MOR_IKKE_INNFRIDD_BOTIDSKRAV
+                )
             }
         } else {
-            sjekkMorsHistoriskeBostedsadresseOgArbeidsforhold(person,
-                                                              VilkårIkkeOppfyltÅrsak.EØS_IKKE_REGISTRERT_MEDFORELDER_OG_MOR_IKKE_INNFRIDD_ARBEIDSMENGDE,
-                                                              VilkårIkkeOppfyltÅrsak.EØS_IKKE_REGISTRERT_MEDFORELDER_OG_MOR_IKKE_INNFRIDD_BOTIDSKRAV
+            sjekkMorsHistoriskeBostedsadresseOgArbeidsforhold(
+                person,
+                VilkårIkkeOppfyltÅrsak.EØS_IKKE_REGISTRERT_MEDFORELDER_OG_MOR_IKKE_INNFRIDD_ARBEIDSMENGDE,
+                VilkårIkkeOppfyltÅrsak.EØS_IKKE_REGISTRERT_MEDFORELDER_OG_MOR_IKKE_INNFRIDD_BOTIDSKRAV
             )
         }
     }
 }
 
-private fun sjekkLovligOppholdForEØSBorgerSomBorMedPartner(annenForelderSterkesteStatsborgerskap: Medlemskap,
-                                                           person: Person) =
-        when (annenForelderSterkesteStatsborgerskap) {
-            Medlemskap.NORDEN -> Evaluering.oppfylt(VilkårOppfyltÅrsak.ANNEN_FORELDER_NORDISK)
-            Medlemskap.EØS -> {
-                if (personHarLøpendeArbeidsforhold(hentAnnenForelder(person))) {
-                    Evaluering.oppfylt(VilkårOppfyltÅrsak.ANNEN_FORELDER_EØS_MEN_MED_LØPENDE_ARBEIDSFORHOLD)
-                } else {
-                    sjekkMorsHistoriskeBostedsadresseOgArbeidsforhold(person,
-                                                                      VilkårIkkeOppfyltÅrsak.EØS_MEDFORELDER_IKKE_I_ARBEID_OG_MOR_IKKE_INNFRIDD_ARBEIDSMENGDE,
-                                                                      VilkårIkkeOppfyltÅrsak.EØS_MEDFORELDER_IKKE_I_ARBEID_OG_MOR_IKKE_INNFRIDD_BOTIDSKRAV)
-                }
-            }
-            Medlemskap.TREDJELANDSBORGER -> {
-                sjekkMorsHistoriskeBostedsadresseOgArbeidsforhold(person,
-                                                                  VilkårIkkeOppfyltÅrsak.EØS_MEDFORELDER_TREDJELANDSBORGER,
-                                                                  VilkårIkkeOppfyltÅrsak.EØS_MEDFORELDER_TREDJELANDSBORGER)
-            }
-            Medlemskap.STATSLØS -> {
-                sjekkMorsHistoriskeBostedsadresseOgArbeidsforhold(person,
-                                                                  VilkårIkkeOppfyltÅrsak.EØS_MEDFORELDER_STATSLØS,
-                                                                  VilkårIkkeOppfyltÅrsak.EØS_MEDFORELDER_STATSLØS)
-            }
-            Medlemskap.UKJENT -> {
-                sjekkMorsHistoriskeBostedsadresseOgArbeidsforhold(person,
-                                                                  VilkårIkkeOppfyltÅrsak.STATSBORGERSKAP_ANNEN_FORELDER_UKLART,
-                                                                  VilkårIkkeOppfyltÅrsak.STATSBORGERSKAP_ANNEN_FORELDER_UKLART)
+private fun sjekkLovligOppholdForEØSBorgerSomBorMedPartner(
+    annenForelderSterkesteStatsborgerskap: Medlemskap,
+    person: Person
+) =
+    when (annenForelderSterkesteStatsborgerskap) {
+        Medlemskap.NORDEN -> Evaluering.oppfylt(VilkårOppfyltÅrsak.ANNEN_FORELDER_NORDISK)
+        Medlemskap.EØS -> {
+            if (personHarLøpendeArbeidsforhold(hentAnnenForelder(person))) {
+                Evaluering.oppfylt(VilkårOppfyltÅrsak.ANNEN_FORELDER_EØS_MEN_MED_LØPENDE_ARBEIDSFORHOLD)
+            } else {
+                sjekkMorsHistoriskeBostedsadresseOgArbeidsforhold(
+                    person,
+                    VilkårIkkeOppfyltÅrsak.EØS_MEDFORELDER_IKKE_I_ARBEID_OG_MOR_IKKE_INNFRIDD_ARBEIDSMENGDE,
+                    VilkårIkkeOppfyltÅrsak.EØS_MEDFORELDER_IKKE_I_ARBEID_OG_MOR_IKKE_INNFRIDD_BOTIDSKRAV
+                )
             }
         }
+        Medlemskap.TREDJELANDSBORGER -> {
+            sjekkMorsHistoriskeBostedsadresseOgArbeidsforhold(
+                person,
+                VilkårIkkeOppfyltÅrsak.EØS_MEDFORELDER_TREDJELANDSBORGER,
+                VilkårIkkeOppfyltÅrsak.EØS_MEDFORELDER_TREDJELANDSBORGER
+            )
+        }
+        Medlemskap.STATSLØS -> {
+            sjekkMorsHistoriskeBostedsadresseOgArbeidsforhold(
+                person,
+                VilkårIkkeOppfyltÅrsak.EØS_MEDFORELDER_STATSLØS,
+                VilkårIkkeOppfyltÅrsak.EØS_MEDFORELDER_STATSLØS
+            )
+        }
+        Medlemskap.UKJENT -> {
+            sjekkMorsHistoriskeBostedsadresseOgArbeidsforhold(
+                person,
+                VilkårIkkeOppfyltÅrsak.STATSBORGERSKAP_ANNEN_FORELDER_UKLART,
+                VilkårIkkeOppfyltÅrsak.STATSBORGERSKAP_ANNEN_FORELDER_UKLART
+            )
+        }
+    }
 
-private fun sjekkMorsHistoriskeBostedsadresseOgArbeidsforhold(person: Person,
-                                                              arbeidsforholdAvslag: VilkårIkkeOppfyltÅrsak,
-                                                              bosettelseAvslag: VilkårIkkeOppfyltÅrsak)
-        : Evaluering {
+private fun sjekkMorsHistoriskeBostedsadresseOgArbeidsforhold(
+    person: Person,
+    arbeidsforholdAvslag: VilkårIkkeOppfyltÅrsak,
+    bosettelseAvslag: VilkårIkkeOppfyltÅrsak
+): Evaluering {
     return if (morHarBoddINorgeSiste5År(person)) {
         if (morHarJobbetINorgeSiste5År(person)) {
             Evaluering.oppfylt(VilkårOppfyltÅrsak.MOR_BODD_OG_JOBBET_I_NORGE_SISTE_5_ÅR)
@@ -255,19 +271,21 @@ fun annenForelderRegistrert(person: Person): Boolean {
 
 fun annenForelderBorMedMor(person: Person): Boolean {
     val annenForelder = hentAnnenForelder(person)
-    return GrBostedsadresse.erSammeAdresse(person.bostedsadresser.sisteAdresse(),
-                                           annenForelder.bostedsadresser.sisteAdresse())
+    return GrBostedsadresse.erSammeAdresse(
+        person.bostedsadresser.sisteAdresse(),
+        annenForelder.bostedsadresser.sisteAdresse()
+    )
 }
 
 fun statsborgerskapAnnenForelder(person: Person): List<Medlemskap> {
     val annenForelder =
-            hentAnnenForelder(person)
+        hentAnnenForelder(person)
     return finnNåværendeMedlemskap(annenForelder.statsborgerskap)
 }
 
 private fun hentAnnenForelder(person: Person): Person {
     return person.personopplysningGrunnlag.annenForelder
-           ?: error("Persongrunnlag mangler annen forelder")
+        ?: error("Persongrunnlag mangler annen forelder")
 }
 
 fun morHarBoddINorgeSiste5År(person: Person): Boolean {
@@ -294,58 +312,67 @@ fun morHarJobbetINorgeSiste5År(person: Person): Boolean {
     return hentMaxAvstandAvDagerMellomPerioder(perioder, LocalDate.now().minusYears(5), LocalDate.now()) <= 90
 }
 
-private fun hentMaxAvstandAvDagerMellomPerioder(perioder: List<DatoIntervallEntitet>,
-                                                fom: LocalDate,
-                                                tom: LocalDate): Long {
+private fun hentMaxAvstandAvDagerMellomPerioder(
+    perioder: List<DatoIntervallEntitet>,
+    fom: LocalDate,
+    tom: LocalDate
+): Long {
     val perioderMedTilkobletTom =
-            perioder.sortedBy { it.fom }
-                    .fold(mutableListOf()) { acc: MutableList<DatoIntervallEntitet>, datoIntervallEntitet: DatoIntervallEntitet ->
-                        if (acc.isNotEmpty() && acc.last().tom == null) {
-                            val sisteDatoIntervall = acc.last().copy(
-                                    tom = datoIntervallEntitet.fom?.minusDays(1)
-                            )
+        perioder.sortedBy { it.fom }
+            .fold(mutableListOf()) { acc: MutableList<DatoIntervallEntitet>, datoIntervallEntitet: DatoIntervallEntitet ->
+                if (acc.isNotEmpty() && acc.last().tom == null) {
+                    val sisteDatoIntervall = acc.last().copy(
+                        tom = datoIntervallEntitet.fom?.minusDays(1)
+                    )
 
-                            acc.removeLast()
-                            acc.add(sisteDatoIntervall)
-                        }
+                    acc.removeLast()
+                    acc.add(sisteDatoIntervall)
+                }
 
-                        acc.add(datoIntervallEntitet)
-                        acc.sortBy { it.fom }
-                        acc
-                    }
-                    .toList()
+                acc.add(datoIntervallEntitet)
+                acc.sortBy { it.fom }
+                acc
+            }
+            .toList()
 
     val perioderInnenAngittTidsrom =
-            perioderMedTilkobletTom.filter {
-                it.tom == null ||
-                fom.isBetween(Periode(
+        perioderMedTilkobletTom.filter {
+            it.tom == null ||
+                fom.isBetween(
+                    Periode(
                         fom = it.fom!!,
                         tom = it.tom
-                )) ||
-                tom.isBetween(Periode(
+                    )
+                ) ||
+                tom.isBetween(
+                    Periode(
                         fom = it.fom,
                         tom = it.tom
-                )) ||
+                    )
+                ) ||
                 it.fom >= fom && it.tom <= tom
-            }
+        }
 
     if (perioderInnenAngittTidsrom.isEmpty()) return Duration.between(fom.atStartOfDay(), tom.atStartOfDay()).toDays()
 
     val defaultAvstand = if (perioderInnenAngittTidsrom.first().fom!!.isAfter(fom))
-        Duration.between(fom.atStartOfDay(),
-                         perioderInnenAngittTidsrom.first().fom!!.atStartOfDay())
-                .toDays()
+        Duration.between(
+            fom.atStartOfDay(),
+            perioderInnenAngittTidsrom.first().fom!!.atStartOfDay()
+        )
+            .toDays()
     else if (perioderInnenAngittTidsrom.last().tom != null && perioderInnenAngittTidsrom.last().tom!!.isBefore(tom))
         Duration.between(
-                perioderInnenAngittTidsrom.last().tom!!.atStartOfDay(),
-                tom.atStartOfDay()).toDays()
+            perioderInnenAngittTidsrom.last().tom!!.atStartOfDay(),
+            tom.atStartOfDay()
+        ).toDays()
     else 0L
 
     return perioderInnenAngittTidsrom
-            .zipWithNext()
-            .fold(defaultAvstand) { maksimumAvstand, pairs ->
-                val avstand =
-                        Duration.between(pairs.first.tom!!.atStartOfDay().plusDays(1), pairs.second.fom!!.atStartOfDay()).toDays()
-                maxOf(avstand, maksimumAvstand)
-            }
+        .zipWithNext()
+        .fold(defaultAvstand) { maksimumAvstand, pairs ->
+            val avstand =
+                Duration.between(pairs.first.tom!!.atStartOfDay().plusDays(1), pairs.second.fom!!.atStartOfDay()).toDays()
+            maxOf(avstand, maksimumAvstand)
+        }
 }

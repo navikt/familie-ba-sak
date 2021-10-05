@@ -3,7 +3,11 @@ package no.nav.familie.ba.sak.common
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import java.io.Serializable
 import java.time.LocalDateTime
-import javax.persistence.*
+import javax.persistence.Column
+import javax.persistence.Entity
+import javax.persistence.MappedSuperclass
+import javax.persistence.PreUpdate
+import javax.persistence.Version
 
 /**
  * En basis [Entity] klasse som håndtere felles standarder for utformign av tabeller (eks. sporing av hvem som har
@@ -12,9 +16,9 @@ import javax.persistence.*
 @MappedSuperclass
 abstract class BaseEntitet : Serializable {
 
-    //The properties have to be open because when a subclass is lazy class, hibernate needs to override the accessor
-    //to intercept its behavior. If they are final, hibernate will complain and it also can cause potential bug.
-    //See: https://stackoverflow.com/questions/55958667/kotlin-inheritance-and-jpa
+    // The properties have to be open because when a subclass is lazy class, hibernate needs to override the accessor
+    // to intercept its behavior. If they are final, hibernate will complain and it also can cause potential bug.
+    // See: https://stackoverflow.com/questions/55958667/kotlin-inheritance-and-jpa
     @Column(name = "opprettet_av", nullable = false, updatable = false)
     open val opprettetAv: String = SikkerhetContext.hentSaksbehandler()
 

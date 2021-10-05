@@ -77,7 +77,7 @@ import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
-import java.util.*
+import java.util.Properties
 import kotlin.math.abs
 import kotlin.random.Random
 
@@ -114,164 +114,204 @@ fun nestePersonId(): Long {
 
 fun defaultFagsak() = Fagsak(1).also {
     it.søkerIdenter =
-            setOf(FagsakPerson(fagsak = it, personIdent = PersonIdent(randomFnr()), opprettetTidspunkt = LocalDateTime.now()))
+        setOf(
+            FagsakPerson(
+                fagsak = it,
+                personIdent = PersonIdent(randomFnr()),
+                opprettetTidspunkt = LocalDateTime.now()
+            )
+        )
 }
 
-fun lagBehandling(fagsak: Fagsak = defaultFagsak(),
-                  behandlingKategori: BehandlingKategori = BehandlingKategori.NASJONAL,
-                  behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-                  årsak: BehandlingÅrsak = BehandlingÅrsak.SØKNAD,
-                  automatiskOpprettelse: Boolean = false,
-                  førsteSteg: StegType = FØRSTE_STEG) =
-        Behandling(id = nesteBehandlingId(),
-                   fagsak = fagsak,
-                   skalBehandlesAutomatisk = automatiskOpprettelse,
-                   type = behandlingType,
-                   kategori = behandlingKategori,
-                   underkategori = BehandlingUnderkategori.ORDINÆR,
-                   opprettetÅrsak = årsak).also {
-            it.behandlingStegTilstand.add(BehandlingStegTilstand(0, it, førsteSteg))
-        }
+fun lagBehandling(
+    fagsak: Fagsak = defaultFagsak(),
+    behandlingKategori: BehandlingKategori = BehandlingKategori.NASJONAL,
+    behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+    årsak: BehandlingÅrsak = BehandlingÅrsak.SØKNAD,
+    automatiskOpprettelse: Boolean = false,
+    førsteSteg: StegType = FØRSTE_STEG
+) =
+    Behandling(
+        id = nesteBehandlingId(),
+        fagsak = fagsak,
+        skalBehandlesAutomatisk = automatiskOpprettelse,
+        type = behandlingType,
+        kategori = behandlingKategori,
+        underkategori = BehandlingUnderkategori.ORDINÆR,
+        opprettetÅrsak = årsak
+    ).also {
+        it.behandlingStegTilstand.add(BehandlingStegTilstand(0, it, førsteSteg))
+    }
 
 fun tilfeldigPerson(
-        fødselsdato: LocalDate = LocalDate.now(),
-        personType: PersonType = PersonType.BARN,
-        kjønn: Kjønn = Kjønn.MANN,
-        personIdent: PersonIdent = PersonIdent(randomFnr())) =
-        Person(id = nestePersonId(),
-               aktørId = randomAktørId(),
-               personIdent = personIdent,
-               fødselsdato = fødselsdato,
-               type = personType,
-               personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 0),
-               navn = "",
-               kjønn = kjønn,
-               målform = Målform.NB).apply { sivilstander = listOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this)) }
-
+    fødselsdato: LocalDate = LocalDate.now(),
+    personType: PersonType = PersonType.BARN,
+    kjønn: Kjønn = Kjønn.MANN,
+    personIdent: PersonIdent = PersonIdent(randomFnr())
+) =
+    Person(
+        id = nestePersonId(),
+        aktørId = randomAktørId(),
+        personIdent = personIdent,
+        fødselsdato = fødselsdato,
+        type = personType,
+        personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 0),
+        navn = "",
+        kjønn = kjønn,
+        målform = Målform.NB
+    ).apply { sivilstander = listOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this)) }
 
 fun tilfeldigSøker(
-        fødselsdato: LocalDate = LocalDate.now(),
-        personType: PersonType = PersonType.SØKER,
-        kjønn: Kjønn = Kjønn.MANN,
-        personIdent: PersonIdent = PersonIdent(randomFnr())) =
-        Person(id = nestePersonId(),
-               aktørId = randomAktørId(),
-               personIdent = personIdent,
-               fødselsdato = fødselsdato,
-               type = personType,
-               personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 0),
-               navn = "",
-               kjønn = kjønn,
-               målform = Målform.NB).apply { sivilstander = listOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this)) }
+    fødselsdato: LocalDate = LocalDate.now(),
+    personType: PersonType = PersonType.SØKER,
+    kjønn: Kjønn = Kjønn.MANN,
+    personIdent: PersonIdent = PersonIdent(randomFnr())
+) =
+    Person(
+        id = nestePersonId(),
+        aktørId = randomAktørId(),
+        personIdent = personIdent,
+        fødselsdato = fødselsdato,
+        type = personType,
+        personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 0),
+        navn = "",
+        kjønn = kjønn,
+        målform = Målform.NB
+    ).apply { sivilstander = listOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this)) }
 
 fun lagVedtak(behandling: Behandling = lagBehandling()) =
-        Vedtak(id = nesteVedtakId(),
-               behandling = behandling,
-               vedtaksdato = LocalDateTime.now())
+    Vedtak(
+        id = nesteVedtakId(),
+        behandling = behandling,
+        vedtaksdato = LocalDateTime.now()
+    )
 
-fun lagAndelTilkjentYtelse(fom: String,
-                           tom: String,
-                           ytelseType: YtelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                           beløp: Int = sats(ytelseType),
-                           behandling: Behandling = lagBehandling(),
-                           person: Person = tilfeldigPerson(),
-                           periodeIdOffset: Long? = null,
-                           forrigeperiodeIdOffset: Long? = null,
-                           tilkjentYtelse: TilkjentYtelse? = null): AndelTilkjentYtelse {
+fun lagAndelTilkjentYtelse(
+    fom: String,
+    tom: String,
+    ytelseType: YtelseType = YtelseType.ORDINÆR_BARNETRYGD,
+    beløp: Int = sats(ytelseType),
+    behandling: Behandling = lagBehandling(),
+    person: Person = tilfeldigPerson(),
+    periodeIdOffset: Long? = null,
+    forrigeperiodeIdOffset: Long? = null,
+    tilkjentYtelse: TilkjentYtelse? = null
+): AndelTilkjentYtelse {
 
     return AndelTilkjentYtelse(
-            personIdent = person.personIdent.ident,
-            behandlingId = behandling.id,
-            tilkjentYtelse = tilkjentYtelse ?: lagInitiellTilkjentYtelse(behandling),
-            kalkulertUtbetalingsbeløp = beløp,
-            stønadFom = årMnd(fom),
-            stønadTom = årMnd(tom),
-            type = ytelseType,
-            periodeOffset = periodeIdOffset,
-            forrigePeriodeOffset = forrigeperiodeIdOffset,
-            sats = beløp,
-            prosent = BigDecimal(100)
+        personIdent = person.personIdent.ident,
+        behandlingId = behandling.id,
+        tilkjentYtelse = tilkjentYtelse ?: lagInitiellTilkjentYtelse(behandling),
+        kalkulertUtbetalingsbeløp = beløp,
+        stønadFom = årMnd(fom),
+        stønadTom = årMnd(tom),
+        type = ytelseType,
+        periodeOffset = periodeIdOffset,
+        forrigePeriodeOffset = forrigeperiodeIdOffset,
+        sats = beløp,
+        prosent = BigDecimal(100)
     )
 }
 
-fun lagAndelTilkjentYtelseUtvidet(fom: String,
-                                  tom: String,
-                                  ytelseType: YtelseType,
-                                  beløp: Int = sats(ytelseType),
-                                  behandling: Behandling = lagBehandling(),
-                                  person: Person = tilfeldigSøker(),
-                                  periodeIdOffset: Long? = null,
-                                  forrigeperiodeIdOffset: Long? = null,
-                                  tilkjentYtelse: TilkjentYtelse? = null): AndelTilkjentYtelse {
+fun lagAndelTilkjentYtelseUtvidet(
+    fom: String,
+    tom: String,
+    ytelseType: YtelseType,
+    beløp: Int = sats(ytelseType),
+    behandling: Behandling = lagBehandling(),
+    person: Person = tilfeldigSøker(),
+    periodeIdOffset: Long? = null,
+    forrigeperiodeIdOffset: Long? = null,
+    tilkjentYtelse: TilkjentYtelse? = null
+): AndelTilkjentYtelse {
 
     return AndelTilkjentYtelse(
-            personIdent = person.personIdent.ident,
-            behandlingId = behandling.id,
-            tilkjentYtelse = tilkjentYtelse ?: lagInitiellTilkjentYtelse(behandling),
-            kalkulertUtbetalingsbeløp = beløp,
-            stønadFom = årMnd(fom),
-            stønadTom = årMnd(tom),
-            type = ytelseType,
-            periodeOffset = periodeIdOffset,
-            forrigePeriodeOffset = forrigeperiodeIdOffset,
-            sats = beløp,
-            prosent = BigDecimal(100)
+        personIdent = person.personIdent.ident,
+        behandlingId = behandling.id,
+        tilkjentYtelse = tilkjentYtelse ?: lagInitiellTilkjentYtelse(behandling),
+        kalkulertUtbetalingsbeløp = beløp,
+        stønadFom = årMnd(fom),
+        stønadTom = årMnd(tom),
+        type = ytelseType,
+        periodeOffset = periodeIdOffset,
+        forrigePeriodeOffset = forrigeperiodeIdOffset,
+        sats = beløp,
+        prosent = BigDecimal(100)
     )
 }
-
 
 fun lagInitiellTilkjentYtelse(behandling: Behandling = lagBehandling()): TilkjentYtelse {
     return TilkjentYtelse(behandling = behandling, opprettetDato = LocalDate.now(), endretDato = LocalDate.now())
 }
 
-fun lagTestPersonopplysningGrunnlag(behandlingId: Long,
-                                    vararg personer: Person): PersonopplysningGrunnlag {
+fun lagTestPersonopplysningGrunnlag(
+    behandlingId: Long,
+    vararg personer: Person
+): PersonopplysningGrunnlag {
 
     val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandlingId)
 
     personopplysningGrunnlag.personer.addAll(
-            personer.map { it.copy(personopplysningGrunnlag = personopplysningGrunnlag) }
+        personer.map { it.copy(personopplysningGrunnlag = personopplysningGrunnlag) }
     )
     return personopplysningGrunnlag
 }
 
-fun lagTestPersonopplysningGrunnlag(behandlingId: Long,
-                                    søkerPersonIdent: String,
-                                    barnasIdenter: List<String>,
-                                    barnFødselsdato: LocalDate = LocalDate.of(2019, 1, 1)): PersonopplysningGrunnlag {
+fun lagTestPersonopplysningGrunnlag(
+    behandlingId: Long,
+    søkerPersonIdent: String,
+    barnasIdenter: List<String>,
+    barnFødselsdato: LocalDate = LocalDate.of(2019, 1, 1)
+): PersonopplysningGrunnlag {
     val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandlingId)
-    val bostedsadresse = GrMatrikkeladresse(matrikkelId = null, bruksenhetsnummer = "H301", tilleggsnavn = "navn",
-                                            postnummer = "0202", kommunenummer = "2231")
+    val bostedsadresse = GrMatrikkeladresse(
+        matrikkelId = null, bruksenhetsnummer = "H301", tilleggsnavn = "navn",
+        postnummer = "0202", kommunenummer = "2231"
+    )
 
     val søker = Person(
-            aktørId = randomAktørId(),
-            personIdent = PersonIdent(søkerPersonIdent),
-            type = PersonType.SØKER,
-            personopplysningGrunnlag = personopplysningGrunnlag,
-            fødselsdato = LocalDate.of(2019, 1, 1),
-            navn = "",
-            kjønn = Kjønn.KVINNE,
+        aktørId = randomAktørId(),
+        personIdent = PersonIdent(søkerPersonIdent),
+        type = PersonType.SØKER,
+        personopplysningGrunnlag = personopplysningGrunnlag,
+        fødselsdato = LocalDate.of(2019, 1, 1),
+        navn = "",
+        kjønn = Kjønn.KVINNE,
     ).also { søker ->
-        søker.statsborgerskap = listOf(GrStatsborgerskap(landkode = "NOR", medlemskap = Medlemskap.NORDEN, person = søker))
+        søker.statsborgerskap =
+            listOf(GrStatsborgerskap(landkode = "NOR", medlemskap = Medlemskap.NORDEN, person = søker))
         søker.bostedsadresser = mutableListOf(bostedsadresse.apply { person = søker })
-        søker.sivilstander = listOf(GrSivilstand(type = SIVILSTAND.GIFT,
-                                                 person = søker))
+        søker.sivilstander = listOf(
+            GrSivilstand(
+                type = SIVILSTAND.GIFT,
+                person = søker
+            )
+        )
     }
     personopplysningGrunnlag.personer.add(søker)
 
     barnasIdenter.map {
-        personopplysningGrunnlag.personer.add(Person(aktørId = randomAktørId(),
-                                                     personIdent = PersonIdent(it),
-                                                     type = PersonType.BARN,
-                                                     personopplysningGrunnlag = personopplysningGrunnlag,
-                                                     fødselsdato = barnFødselsdato,
-                                                     navn = "",
-                                                     kjønn = Kjønn.MANN).also { barn ->
-            barn.statsborgerskap = listOf(GrStatsborgerskap(landkode = "NOR", medlemskap = Medlemskap.NORDEN, person = barn))
-            barn.bostedsadresser = mutableListOf(bostedsadresse.apply { person = barn })
-            barn.sivilstander = listOf(GrSivilstand(type = SIVILSTAND.UGIFT,
-                                                    person = barn))
-        })
+        personopplysningGrunnlag.personer.add(
+            Person(
+                aktørId = randomAktørId(),
+                personIdent = PersonIdent(it),
+                type = PersonType.BARN,
+                personopplysningGrunnlag = personopplysningGrunnlag,
+                fødselsdato = barnFødselsdato,
+                navn = "",
+                kjønn = Kjønn.MANN
+            ).also { barn ->
+                barn.statsborgerskap =
+                    listOf(GrStatsborgerskap(landkode = "NOR", medlemskap = Medlemskap.NORDEN, person = barn))
+                barn.bostedsadresser = mutableListOf(bostedsadresse.apply { person = barn })
+                barn.sivilstander = listOf(
+                    GrSivilstand(
+                        type = SIVILSTAND.UGIFT,
+                        person = barn
+                    )
+                )
+            }
+        )
     }
     return personopplysningGrunnlag
 }
@@ -279,119 +319,136 @@ fun lagTestPersonopplysningGrunnlag(behandlingId: Long,
 fun dato(s: String) = LocalDate.parse(s)
 fun årMnd(s: String) = YearMonth.parse(s)
 
-fun nyOrdinærBehandling(søkersIdent: String, årsak: BehandlingÅrsak = BehandlingÅrsak.SØKNAD): NyBehandling = NyBehandling(
+fun nyOrdinærBehandling(søkersIdent: String, årsak: BehandlingÅrsak = BehandlingÅrsak.SØKNAD): NyBehandling =
+    NyBehandling(
         søkersIdent = søkersIdent,
         behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
         kategori = BehandlingKategori.NASJONAL,
         underkategori = BehandlingUnderkategori.ORDINÆR,
         behandlingÅrsak = årsak
-)
+    )
 
-fun nyUtvidetBehandling(søkersIdent: String, årsak: BehandlingÅrsak = BehandlingÅrsak.SØKNAD): NyBehandling = NyBehandling(
+fun nyUtvidetBehandling(søkersIdent: String, årsak: BehandlingÅrsak = BehandlingÅrsak.SØKNAD): NyBehandling =
+    NyBehandling(
         søkersIdent = søkersIdent,
         behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
         kategori = BehandlingKategori.NASJONAL,
         underkategori = BehandlingUnderkategori.UTVIDET,
         behandlingÅrsak = årsak
-)
+    )
 
 fun nyRevurdering(søkersIdent: String): NyBehandling = NyBehandling(
-        søkersIdent = søkersIdent,
-        behandlingType = BehandlingType.REVURDERING,
-        kategori = BehandlingKategori.NASJONAL,
-        underkategori = BehandlingUnderkategori.ORDINÆR
+    søkersIdent = søkersIdent,
+    behandlingType = BehandlingType.REVURDERING,
+    kategori = BehandlingKategori.NASJONAL,
+    underkategori = BehandlingUnderkategori.ORDINÆR
 )
 
-fun lagSøknadDTO(søkerIdent: String, barnasIdenter: List<String>, underkategori: BehandlingUnderkategori = BehandlingUnderkategori.ORDINÆR): SøknadDTO {
+fun lagSøknadDTO(
+    søkerIdent: String,
+    barnasIdenter: List<String>,
+    underkategori: BehandlingUnderkategori = BehandlingUnderkategori.ORDINÆR
+): SøknadDTO {
     return SøknadDTO(
-            underkategori = underkategori,
-            søkerMedOpplysninger = SøkerMedOpplysninger(
-                    ident = søkerIdent
-            ),
-            barnaMedOpplysninger = barnasIdenter.map {
-                BarnMedOpplysninger(
-                        ident = it
-                )
-            },
-            endringAvOpplysningerBegrunnelse = ""
-    )
-}
-
-fun lagPersonResultaterForSøkerOgToBarn(vilkårsvurdering: Vilkårsvurdering,
-                                        søkerFnr: String,
-                                        barn1Fnr: String,
-                                        barn2Fnr: String,
-                                        stønadFom: LocalDate,
-                                        stønadTom: LocalDate,
-                                        erDeltBosted: Boolean = false): Set<PersonResultat> {
-    return setOf(
-            lagPersonResultat(vilkårsvurdering = vilkårsvurdering,
-                              fnr = søkerFnr,
-                              resultat = Resultat.OPPFYLT,
-                              periodeFom = stønadFom,
-                              periodeTom = stønadTom,
-                              lagFullstendigVilkårResultat = true,
-                              personType = PersonType.SØKER
-            ),
-            lagPersonResultat(vilkårsvurdering = vilkårsvurdering,
-                              fnr = barn1Fnr,
-                              resultat = Resultat.OPPFYLT,
-                              periodeFom = stønadFom,
-                              periodeTom = stønadTom,
-                              lagFullstendigVilkårResultat = true,
-                              personType = PersonType.BARN,
-                              erDeltBosted = erDeltBosted
-            ),
-            lagPersonResultat(vilkårsvurdering = vilkårsvurdering,
-                              fnr = barn2Fnr,
-                              resultat = Resultat.OPPFYLT,
-                              periodeFom = stønadFom,
-                              periodeTom = stønadTom,
-                              lagFullstendigVilkårResultat = true,
-                              personType = PersonType.BARN,
-                              erDeltBosted = erDeltBosted
+        underkategori = underkategori,
+        søkerMedOpplysninger = SøkerMedOpplysninger(
+            ident = søkerIdent
+        ),
+        barnaMedOpplysninger = barnasIdenter.map {
+            BarnMedOpplysninger(
+                ident = it
             )
+        },
+        endringAvOpplysningerBegrunnelse = ""
     )
 }
 
-fun lagPersonResultat(vilkårsvurdering: Vilkårsvurdering,
-                      fnr: String,
-                      resultat: Resultat,
-                      periodeFom: LocalDate?,
-                      periodeTom: LocalDate?,
-                      lagFullstendigVilkårResultat: Boolean = false,
-                      personType: PersonType = PersonType.BARN,
-                      vilkårType: Vilkår = Vilkår.BOSATT_I_RIKET,
-                      erDeltBosted: Boolean = false): PersonResultat {
-    val personResultat = PersonResultat(
+fun lagPersonResultaterForSøkerOgToBarn(
+    vilkårsvurdering: Vilkårsvurdering,
+    søkerFnr: String,
+    barn1Fnr: String,
+    barn2Fnr: String,
+    stønadFom: LocalDate,
+    stønadTom: LocalDate,
+    erDeltBosted: Boolean = false
+): Set<PersonResultat> {
+    return setOf(
+        lagPersonResultat(
             vilkårsvurdering = vilkårsvurdering,
-            personIdent = fnr)
+            fnr = søkerFnr,
+            resultat = Resultat.OPPFYLT,
+            periodeFom = stønadFom,
+            periodeTom = stønadTom,
+            lagFullstendigVilkårResultat = true,
+            personType = PersonType.SØKER
+        ),
+        lagPersonResultat(
+            vilkårsvurdering = vilkårsvurdering,
+            fnr = barn1Fnr,
+            resultat = Resultat.OPPFYLT,
+            periodeFom = stønadFom,
+            periodeTom = stønadTom,
+            lagFullstendigVilkårResultat = true,
+            personType = PersonType.BARN,
+            erDeltBosted = erDeltBosted
+        ),
+        lagPersonResultat(
+            vilkårsvurdering = vilkårsvurdering,
+            fnr = barn2Fnr,
+            resultat = Resultat.OPPFYLT,
+            periodeFom = stønadFom,
+            periodeTom = stønadTom,
+            lagFullstendigVilkårResultat = true,
+            personType = PersonType.BARN,
+            erDeltBosted = erDeltBosted
+        )
+    )
+}
+
+fun lagPersonResultat(
+    vilkårsvurdering: Vilkårsvurdering,
+    fnr: String,
+    resultat: Resultat,
+    periodeFom: LocalDate?,
+    periodeTom: LocalDate?,
+    lagFullstendigVilkårResultat: Boolean = false,
+    personType: PersonType = PersonType.BARN,
+    vilkårType: Vilkår = Vilkår.BOSATT_I_RIKET,
+    erDeltBosted: Boolean = false
+): PersonResultat {
+    val personResultat = PersonResultat(
+        vilkårsvurdering = vilkårsvurdering,
+        personIdent = fnr
+    )
 
     if (lagFullstendigVilkårResultat) {
         personResultat.setSortedVilkårResultater(
-                Vilkår.hentVilkårFor(personType).map {
-                    VilkårResultat(personResultat = personResultat,
-                                   periodeFom = periodeFom,
-                                   periodeTom = periodeTom,
-                                   vilkårType = it,
-                                   resultat = resultat,
-                                   begrunnelse = "",
-                                   behandlingId = vilkårsvurdering.behandling.id,
-                                   erDeltBosted = erDeltBosted && it == Vilkår.BOR_MED_SØKER)
-                }.toSet())
+            Vilkår.hentVilkårFor(personType).map {
+                VilkårResultat(
+                    personResultat = personResultat,
+                    periodeFom = periodeFom,
+                    periodeTom = periodeTom,
+                    vilkårType = it,
+                    resultat = resultat,
+                    begrunnelse = "",
+                    behandlingId = vilkårsvurdering.behandling.id,
+                    erDeltBosted = erDeltBosted && it == Vilkår.BOR_MED_SØKER
+                )
+            }.toSet()
+        )
     } else {
         personResultat.setSortedVilkårResultater(
-                setOf(
-                        VilkårResultat(
-                                personResultat = personResultat,
-                                periodeFom = periodeFom,
-                                periodeTom = periodeTom,
-                                vilkårType = vilkårType,
-                                resultat = resultat,
-                                begrunnelse = "",
-                                behandlingId = vilkårsvurdering.behandling.id
-                        )
+            setOf(
+                VilkårResultat(
+                    personResultat = personResultat,
+                    periodeFom = periodeFom,
+                    periodeTom = periodeTom,
+                    vilkårType = vilkårType,
+                    resultat = resultat,
+                    begrunnelse = "",
+                    behandlingId = vilkårsvurdering.behandling.id
                 )
+            )
         )
     }
     return personResultat
@@ -412,43 +469,50 @@ fun vurderVilkårsvurderingTilInnvilget(vilkårsvurdering: Vilkårsvurdering, ba
     }
 }
 
-fun lagVilkårsvurdering(søkerFnr: String,
-                        behandling: Behandling,
-                        resultat: Resultat,
-                        søkerPeriodeFom: LocalDate? = LocalDate.now().minusMonths(1),
-                        søkerPeriodeTom: LocalDate? = LocalDate.now().plusYears(2)): Vilkårsvurdering {
+fun lagVilkårsvurdering(
+    søkerFnr: String,
+    behandling: Behandling,
+    resultat: Resultat,
+    søkerPeriodeFom: LocalDate? = LocalDate.now().minusMonths(1),
+    søkerPeriodeTom: LocalDate? = LocalDate.now().plusYears(2)
+): Vilkårsvurdering {
     val vilkårsvurdering = Vilkårsvurdering(
-            behandling = behandling
+        behandling = behandling
     )
     val personResultat = PersonResultat(
-            vilkårsvurdering = vilkårsvurdering,
-            personIdent = søkerFnr)
-    personResultat.setSortedVilkårResultater(
-            setOf(
-                    VilkårResultat(
-                            personResultat = personResultat,
-                            vilkårType = Vilkår.BOSATT_I_RIKET,
-                            resultat = resultat,
-                            periodeFom = søkerPeriodeFom,
-                            periodeTom = søkerPeriodeTom,
-                            begrunnelse = "",
-                            behandlingId = behandling.id
-                    ),
-                    VilkårResultat(
-                            personResultat = personResultat,
-                            vilkårType = Vilkår.LOVLIG_OPPHOLD,
-                            resultat = resultat,
-                            periodeFom = søkerPeriodeFom,
-                            periodeTom = søkerPeriodeTom,
-                            begrunnelse = "",
-                            behandlingId = behandling.id
-                    )
-            )
+        vilkårsvurdering = vilkårsvurdering,
+        personIdent = søkerFnr
     )
-    personResultat.andreVurderinger.add(AnnenVurdering(personResultat = personResultat,
-                                                       resultat = resultat,
-                                                       type = AnnenVurderingType.OPPLYSNINGSPLIKT,
-                                                       begrunnelse = null))
+    personResultat.setSortedVilkårResultater(
+        setOf(
+            VilkårResultat(
+                personResultat = personResultat,
+                vilkårType = Vilkår.BOSATT_I_RIKET,
+                resultat = resultat,
+                periodeFom = søkerPeriodeFom,
+                periodeTom = søkerPeriodeTom,
+                begrunnelse = "",
+                behandlingId = behandling.id
+            ),
+            VilkårResultat(
+                personResultat = personResultat,
+                vilkårType = Vilkår.LOVLIG_OPPHOLD,
+                resultat = resultat,
+                periodeFom = søkerPeriodeFom,
+                periodeTom = søkerPeriodeTom,
+                begrunnelse = "",
+                behandlingId = behandling.id
+            )
+        )
+    )
+    personResultat.andreVurderinger.add(
+        AnnenVurdering(
+            personResultat = personResultat,
+            resultat = resultat,
+            type = AnnenVurderingType.OPPLYSNINGSPLIKT,
+            begrunnelse = null
+        )
+    )
 
     vilkårsvurdering.personResultater = setOf(personResultat)
     return vilkårsvurdering
@@ -460,32 +524,39 @@ fun lagVilkårsvurdering(søkerFnr: String,
  * og serviceinstanser som brukes i testen.
  */
 fun kjørStegprosessForFGB(
-        tilSteg: StegType,
-        søkerFnr: String,
-        barnasIdenter: List<String>,
-        fagsakService: FagsakService,
-        vedtakService: VedtakService,
-        persongrunnlagService: PersongrunnlagService,
-        vilkårsvurderingService: VilkårsvurderingService,
-        stegService: StegService,
-        vedtaksperiodeService: VedtaksperiodeService,
+    tilSteg: StegType,
+    søkerFnr: String,
+    barnasIdenter: List<String>,
+    fagsakService: FagsakService,
+    vedtakService: VedtakService,
+    persongrunnlagService: PersongrunnlagService,
+    vilkårsvurderingService: VilkårsvurderingService,
+    stegService: StegService,
+    vedtaksperiodeService: VedtaksperiodeService,
 ): Behandling {
     fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
-    val behandling = stegService.håndterNyBehandling(NyBehandling(
+    val behandling = stegService.håndterNyBehandling(
+        NyBehandling(
             kategori = BehandlingKategori.NASJONAL,
             underkategori = BehandlingUnderkategori.ORDINÆR,
             behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
             behandlingÅrsak = BehandlingÅrsak.SØKNAD,
             søkersIdent = søkerFnr,
             barnasIdenter = barnasIdenter,
-    ))
+        )
+    )
 
     val behandlingEtterPersongrunnlagSteg =
-            stegService.håndterSøknad(behandling = behandling,
-                                      restRegistrerSøknad = RestRegistrerSøknad(
-                                              søknad = lagSøknadDTO(søkerIdent = søkerFnr,
-                                                                    barnasIdenter = barnasIdenter),
-                                              bekreftEndringerViaFrontend = true))
+        stegService.håndterSøknad(
+            behandling = behandling,
+            restRegistrerSøknad = RestRegistrerSøknad(
+                søknad = lagSøknadDTO(
+                    søkerIdent = søkerFnr,
+                    barnasIdenter = barnasIdenter
+                ),
+                bekreftEndringerViaFrontend = true
+            )
+        )
 
     if (tilSteg == StegType.REGISTRERE_PERSONGRUNNLAG || tilSteg == StegType.REGISTRERE_SØKNAD)
         return behandlingEtterPersongrunnlagSteg
@@ -505,68 +576,87 @@ fun kjørStegprosessForFGB(
     if (tilSteg == StegType.BEHANDLINGSRESULTAT) return behandlingEtterBehandlingsresultat
 
     val behandlingEtterVurderTilbakekrevingSteg = stegService.håndterVurderTilbakekreving(
-            behandlingEtterBehandlingsresultat,
-            RestTilbakekreving(valg = Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING,
-                               begrunnelse = "Begrunnelse")
+        behandlingEtterBehandlingsresultat,
+        RestTilbakekreving(
+            valg = Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING,
+            begrunnelse = "Begrunnelse"
+        )
     )
 
     leggTilBegrunnelsePåVedtaksperiodeIBehandling(
-            behandling = behandlingEtterVurderTilbakekrevingSteg,
-            vedtakService = vedtakService,
-            vedtaksperiodeService = vedtaksperiodeService,
+        behandling = behandlingEtterVurderTilbakekrevingSteg,
+        vedtakService = vedtakService,
+        vedtaksperiodeService = vedtaksperiodeService,
     )
 
     if (tilSteg == StegType.VURDER_TILBAKEKREVING) return behandlingEtterVurderTilbakekrevingSteg
 
-    val behandlingEtterSendTilBeslutter = stegService.håndterSendTilBeslutter(behandlingEtterVurderTilbakekrevingSteg, "1234")
+    val behandlingEtterSendTilBeslutter =
+        stegService.håndterSendTilBeslutter(behandlingEtterVurderTilbakekrevingSteg, "1234")
     if (tilSteg == StegType.SEND_TIL_BESLUTTER) return behandlingEtterSendTilBeslutter
 
     val behandlingEtterBeslutteVedtak =
-            stegService.håndterBeslutningForVedtak(behandlingEtterSendTilBeslutter,
-                                                   RestBeslutningPåVedtak(beslutning = Beslutning.GODKJENT))
+        stegService.håndterBeslutningForVedtak(
+            behandlingEtterSendTilBeslutter,
+            RestBeslutningPåVedtak(beslutning = Beslutning.GODKJENT)
+        )
     if (tilSteg == StegType.BESLUTTE_VEDTAK) return behandlingEtterBeslutteVedtak
-
 
     val vedtak = vedtakService.hentAktivForBehandling(behandlingEtterBeslutteVedtak.id)
     val behandlingEtterIverksetteVedtak =
-            stegService.håndterIverksettMotØkonomi(behandlingEtterBeslutteVedtak, IverksettingTaskDTO(
-                    behandlingsId = behandlingEtterBeslutteVedtak.id,
-                    vedtaksId = vedtak!!.id,
-                    saksbehandlerId = "System",
-                    personIdent = søkerFnr
-            ))
+        stegService.håndterIverksettMotØkonomi(
+            behandlingEtterBeslutteVedtak,
+            IverksettingTaskDTO(
+                behandlingsId = behandlingEtterBeslutteVedtak.id,
+                vedtaksId = vedtak!!.id,
+                saksbehandlerId = "System",
+                personIdent = søkerFnr
+            )
+        )
     if (tilSteg == StegType.IVERKSETT_MOT_OPPDRAG) return behandlingEtterIverksetteVedtak
 
     val behandlingEtterStatusFraOppdrag =
-            stegService.håndterStatusFraØkonomi(behandlingEtterIverksetteVedtak, StatusFraOppdragMedTask(
-                    statusFraOppdragDTO = StatusFraOppdragDTO(fagsystem = FAGSYSTEM,
-                                                              personIdent = søkerFnr,
-                                                              behandlingsId = behandlingEtterIverksetteVedtak.id,
-                                                              vedtaksId = vedtak.id),
-                    task = Task(type = StatusFraOppdragTask.TASK_STEP_TYPE, payload = "")
-            ))
+        stegService.håndterStatusFraØkonomi(
+            behandlingEtterIverksetteVedtak,
+            StatusFraOppdragMedTask(
+                statusFraOppdragDTO = StatusFraOppdragDTO(
+                    fagsystem = FAGSYSTEM,
+                    personIdent = søkerFnr,
+                    behandlingsId = behandlingEtterIverksetteVedtak.id,
+                    vedtaksId = vedtak.id
+                ),
+                task = Task(type = StatusFraOppdragTask.TASK_STEP_TYPE, payload = "")
+            )
+        )
     if (tilSteg == StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI) return behandlingEtterStatusFraOppdrag
 
     val behandlingEtterIverksetteMotTilbake =
-            stegService.håndterIverksettMotFamilieTilbake(behandlingEtterStatusFraOppdrag, Properties())
+        stegService.håndterIverksettMotFamilieTilbake(behandlingEtterStatusFraOppdrag, Properties())
     if (tilSteg == StegType.IVERKSETT_MOT_FAMILIE_TILBAKE) return behandlingEtterIverksetteMotTilbake
 
     val behandlingEtterJournalførtVedtak =
-            stegService.håndterJournalførVedtaksbrev(behandlingEtterIverksetteMotTilbake, JournalførVedtaksbrevDTO(
-                    vedtakId = vedtak.id,
-                    task = Task(type = JournalførVedtaksbrevTask.TASK_STEP_TYPE, payload = "")
-            ))
+        stegService.håndterJournalførVedtaksbrev(
+            behandlingEtterIverksetteMotTilbake,
+            JournalførVedtaksbrevDTO(
+                vedtakId = vedtak.id,
+                task = Task(type = JournalførVedtaksbrevTask.TASK_STEP_TYPE, payload = "")
+            )
+        )
     if (tilSteg == StegType.JOURNALFØR_VEDTAKSBREV) return behandlingEtterJournalførtVedtak
 
-
     val behandlingEtterDistribuertVedtak =
-            stegService.håndterDistribuerVedtaksbrev(behandlingEtterJournalførtVedtak,
-                                                     DistribuerDokumentDTO(behandlingId = behandlingEtterJournalførtVedtak.id,
-                                                                           journalpostId = "1234",
-                                                                           personIdent = søkerFnr,
-                                                                           brevmal = hentBrevtype(
-                                                                                   behandlingEtterJournalførtVedtak),
-                                                                           erManueltSendt = false))
+        stegService.håndterDistribuerVedtaksbrev(
+            behandlingEtterJournalførtVedtak,
+            DistribuerDokumentDTO(
+                behandlingId = behandlingEtterJournalførtVedtak.id,
+                journalpostId = "1234",
+                personIdent = søkerFnr,
+                brevmal = hentBrevtype(
+                    behandlingEtterJournalførtVedtak
+                ),
+                erManueltSendt = false
+            )
+        )
     if (tilSteg == StegType.DISTRIBUER_VEDTAKSBREV) return behandlingEtterDistribuertVedtak
 
     return stegService.håndterFerdigstillBehandling(behandlingEtterDistribuertVedtak)
@@ -578,21 +668,23 @@ fun kjørStegprosessForFGB(
  * og serviceinstanser som brukes i testen.
  */
 fun kjørStegprosessForRevurderingÅrligKontroll(
-        tilSteg: StegType,
-        søkerFnr: String,
-        barnasIdenter: List<String>,
-        vedtakService: VedtakService,
-        stegService: StegService,
-        tilbakekrevingService: TilbakekrevingService
+    tilSteg: StegType,
+    søkerFnr: String,
+    barnasIdenter: List<String>,
+    vedtakService: VedtakService,
+    stegService: StegService,
+    tilbakekrevingService: TilbakekrevingService
 ): Behandling {
-    val behandling = stegService.håndterNyBehandling(NyBehandling(
+    val behandling = stegService.håndterNyBehandling(
+        NyBehandling(
             kategori = BehandlingKategori.NASJONAL,
             underkategori = BehandlingUnderkategori.ORDINÆR,
             behandlingType = BehandlingType.REVURDERING,
             behandlingÅrsak = BehandlingÅrsak.ÅRLIG_KONTROLL,
             søkersIdent = søkerFnr,
             barnasIdenter = barnasIdenter,
-    ))
+        )
+    )
 
     val behandlingEtterVilkårsvurderingSteg = stegService.håndterVilkårsvurdering(behandling)
 
@@ -603,9 +695,11 @@ fun kjørStegprosessForRevurderingÅrligKontroll(
     if (tilSteg == StegType.BEHANDLINGSRESULTAT) return behandlingEtterBehandlingsresultat
 
     val behandlingEtterSimuleringSteg = stegService.håndterVurderTilbakekreving(
-            behandlingEtterBehandlingsresultat,
-            RestTilbakekreving(valg = Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING,
-                               begrunnelse = "Begrunnelse")
+        behandlingEtterBehandlingsresultat,
+        RestTilbakekreving(
+            valg = Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING,
+            begrunnelse = "Begrunnelse"
+        )
     )
     if (tilSteg == StegType.VURDER_TILBAKEKREVING) return behandlingEtterSimuleringSteg
 
@@ -617,147 +711,167 @@ fun kjørStegprosessForRevurderingÅrligKontroll(
     if (tilSteg == StegType.SEND_TIL_BESLUTTER) return behandlingEtterSendTilBeslutter
 
     val behandlingEtterBeslutteVedtak =
-            stegService.håndterBeslutningForVedtak(behandlingEtterSendTilBeslutter,
-                                                   RestBeslutningPåVedtak(beslutning = Beslutning.GODKJENT))
+        stegService.håndterBeslutningForVedtak(
+            behandlingEtterSendTilBeslutter,
+            RestBeslutningPåVedtak(beslutning = Beslutning.GODKJENT)
+        )
     if (tilSteg == StegType.BESLUTTE_VEDTAK) return behandlingEtterBeslutteVedtak
-
 
     val vedtak = vedtakService.hentAktivForBehandling(behandlingEtterBeslutteVedtak.id)
     val behandlingEtterIverksetteVedtak =
-            stegService.håndterIverksettMotØkonomi(behandlingEtterBeslutteVedtak, IverksettingTaskDTO(
-                    behandlingsId = behandlingEtterBeslutteVedtak.id,
-                    vedtaksId = vedtak!!.id,
-                    saksbehandlerId = "System",
-                    personIdent = søkerFnr
-            ))
+        stegService.håndterIverksettMotØkonomi(
+            behandlingEtterBeslutteVedtak,
+            IverksettingTaskDTO(
+                behandlingsId = behandlingEtterBeslutteVedtak.id,
+                vedtaksId = vedtak!!.id,
+                saksbehandlerId = "System",
+                personIdent = søkerFnr
+            )
+        )
     if (tilSteg == StegType.IVERKSETT_MOT_OPPDRAG) return behandlingEtterIverksetteVedtak
 
     val behandlingEtterStatusFraOppdrag =
-            stegService.håndterStatusFraØkonomi(behandlingEtterIverksetteVedtak, StatusFraOppdragMedTask(
-                    statusFraOppdragDTO = StatusFraOppdragDTO(fagsystem = FAGSYSTEM,
-                                                              personIdent = søkerFnr,
-                                                              behandlingsId = behandlingEtterIverksetteVedtak.id,
-                                                              vedtaksId = vedtak.id),
-                    task = Task(type = StatusFraOppdragTask.TASK_STEP_TYPE, payload = "")
-            ))
+        stegService.håndterStatusFraØkonomi(
+            behandlingEtterIverksetteVedtak,
+            StatusFraOppdragMedTask(
+                statusFraOppdragDTO = StatusFraOppdragDTO(
+                    fagsystem = FAGSYSTEM,
+                    personIdent = søkerFnr,
+                    behandlingsId = behandlingEtterIverksetteVedtak.id,
+                    vedtaksId = vedtak.id
+                ),
+                task = Task(type = StatusFraOppdragTask.TASK_STEP_TYPE, payload = "")
+            )
+        )
     if (tilSteg == StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI) return behandlingEtterStatusFraOppdrag
 
     val behandlingEtterIverksetteMotTilbake =
-            stegService.håndterIverksettMotFamilieTilbake(behandlingEtterStatusFraOppdrag, Properties())
+        stegService.håndterIverksettMotFamilieTilbake(behandlingEtterStatusFraOppdrag, Properties())
     if (tilSteg == StegType.IVERKSETT_MOT_FAMILIE_TILBAKE) return behandlingEtterIverksetteMotTilbake
 
     val behandlingEtterJournalførtVedtak =
-            stegService.håndterJournalførVedtaksbrev(behandlingEtterIverksetteMotTilbake, JournalførVedtaksbrevDTO(
-                    vedtakId = vedtak.id,
-                    task = Task(type = JournalførVedtaksbrevTask.TASK_STEP_TYPE, payload = "")
-            ))
+        stegService.håndterJournalførVedtaksbrev(
+            behandlingEtterIverksetteMotTilbake,
+            JournalførVedtaksbrevDTO(
+                vedtakId = vedtak.id,
+                task = Task(type = JournalførVedtaksbrevTask.TASK_STEP_TYPE, payload = "")
+            )
+        )
     if (tilSteg == StegType.JOURNALFØR_VEDTAKSBREV) return behandlingEtterJournalførtVedtak
 
-
     val behandlingEtterDistribuertVedtak =
-            stegService.håndterDistribuerVedtaksbrev(behandlingEtterJournalførtVedtak,
-                                                     DistribuerDokumentDTO(behandlingId = behandling.id,
-                                                                           journalpostId = "1234",
-                                                                           personIdent = søkerFnr,
-                                                                           brevmal = hentBrevtype(behandling),
-                                                                           erManueltSendt = false))
+        stegService.håndterDistribuerVedtaksbrev(
+            behandlingEtterJournalførtVedtak,
+            DistribuerDokumentDTO(
+                behandlingId = behandling.id,
+                journalpostId = "1234",
+                personIdent = søkerFnr,
+                brevmal = hentBrevtype(behandling),
+                erManueltSendt = false
+            )
+        )
     if (tilSteg == StegType.DISTRIBUER_VEDTAKSBREV) return behandlingEtterDistribuertVedtak
 
     return stegService.håndterFerdigstillBehandling(behandlingEtterDistribuertVedtak)
-
 }
 
 fun opprettRestTilbakekreving(): RestTilbakekreving = RestTilbakekreving(
-        valg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
-        varsel = "Varsel",
-        begrunnelse = "Begrunnelse",
+    valg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
+    varsel = "Varsel",
+    begrunnelse = "Begrunnelse",
 )
 
 fun lagUtbetalingsperiode(
-        periodeFom: LocalDate = LocalDate.now().withDayOfMonth(1),
-        periodeTom: LocalDate = LocalDate.now().let { it.withDayOfMonth(it.lengthOfMonth()) },
-        vedtaksperiodetype: Vedtaksperiodetype = Vedtaksperiodetype.UTBETALING,
-        utbetalingsperiodeDetaljer: List<UtbetalingsperiodeDetalj>,
-        ytelseTyper: List<YtelseType> = listOf(YtelseType.ORDINÆR_BARNETRYGD),
-        antallBarn: Int = 1,
-        utbetaltPerMnd: Int = sats(YtelseType.ORDINÆR_BARNETRYGD),
+    periodeFom: LocalDate = LocalDate.now().withDayOfMonth(1),
+    periodeTom: LocalDate = LocalDate.now().let { it.withDayOfMonth(it.lengthOfMonth()) },
+    vedtaksperiodetype: Vedtaksperiodetype = Vedtaksperiodetype.UTBETALING,
+    utbetalingsperiodeDetaljer: List<UtbetalingsperiodeDetalj>,
+    ytelseTyper: List<YtelseType> = listOf(YtelseType.ORDINÆR_BARNETRYGD),
+    antallBarn: Int = 1,
+    utbetaltPerMnd: Int = sats(YtelseType.ORDINÆR_BARNETRYGD),
 ) = Utbetalingsperiode(
-        periodeFom,
-        periodeTom,
-        vedtaksperiodetype,
-        utbetalingsperiodeDetaljer,
-        ytelseTyper,
-        antallBarn,
-        utbetaltPerMnd,
+    periodeFom,
+    periodeTom,
+    vedtaksperiodetype,
+    utbetalingsperiodeDetaljer,
+    ytelseTyper,
+    antallBarn,
+    utbetaltPerMnd,
 )
 
 fun lagUtbetalingsperiodeDetalj(
-        person: RestPerson = tilfeldigSøker().tilRestPerson(),
-        ytelseType: YtelseType = YtelseType.ORDINÆR_BARNETRYGD,
-        utbetaltPerMnd: Int = sats(YtelseType.ORDINÆR_BARNETRYGD),
+    person: RestPerson = tilfeldigSøker().tilRestPerson(),
+    ytelseType: YtelseType = YtelseType.ORDINÆR_BARNETRYGD,
+    utbetaltPerMnd: Int = sats(YtelseType.ORDINÆR_BARNETRYGD),
 ) =
-        UtbetalingsperiodeDetalj(person, ytelseType, utbetaltPerMnd)
+    UtbetalingsperiodeDetalj(person, ytelseType, utbetaltPerMnd)
 
 fun lagVedtaksbegrunnelse(
-        vedtakBegrunnelseSpesifikasjon: VedtakBegrunnelseSpesifikasjon =
-                VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_SØKER_OG_BARN_BOSATT_I_RIKET,
-        personIdenter: List<String> = listOf(tilfeldigPerson().personIdent.ident),
-        vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser = mockk()
+    vedtakBegrunnelseSpesifikasjon: VedtakBegrunnelseSpesifikasjon =
+        VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_SØKER_OG_BARN_BOSATT_I_RIKET,
+    personIdenter: List<String> = listOf(tilfeldigPerson().personIdent.ident),
+    vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser = mockk()
 ) = Vedtaksbegrunnelse(
-        vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
-        vedtakBegrunnelseSpesifikasjon = vedtakBegrunnelseSpesifikasjon,
-        personIdenter = personIdenter,
+    vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
+    vedtakBegrunnelseSpesifikasjon = vedtakBegrunnelseSpesifikasjon,
+    personIdenter = personIdenter,
 )
 
 fun lagVedtaksperiodeMedBegrunnelser(
-        vedtak: Vedtak = lagVedtak(),
-        fom: LocalDate? = LocalDate.now().withDayOfMonth(1),
-        tom: LocalDate? = LocalDate.now().let { it.withDayOfMonth(it.lengthOfMonth()) },
-        type: Vedtaksperiodetype = Vedtaksperiodetype.FORTSATT_INNVILGET,
-        begrunnelser: MutableSet<Vedtaksbegrunnelse> = mutableSetOf(lagVedtaksbegrunnelse()),
-        fritekster: MutableList<VedtaksbegrunnelseFritekst> = mutableListOf(),
+    vedtak: Vedtak = lagVedtak(),
+    fom: LocalDate? = LocalDate.now().withDayOfMonth(1),
+    tom: LocalDate? = LocalDate.now().let { it.withDayOfMonth(it.lengthOfMonth()) },
+    type: Vedtaksperiodetype = Vedtaksperiodetype.FORTSATT_INNVILGET,
+    begrunnelser: MutableSet<Vedtaksbegrunnelse> = mutableSetOf(lagVedtaksbegrunnelse()),
+    fritekster: MutableList<VedtaksbegrunnelseFritekst> = mutableListOf(),
 ) = VedtaksperiodeMedBegrunnelser(
-        vedtak = vedtak,
-        fom = fom,
-        tom = tom,
-        type = type,
-        begrunnelser = begrunnelser,
-        fritekster = fritekster,
+    vedtak = vedtak,
+    fom = fom,
+    tom = tom,
+    type = type,
+    begrunnelser = begrunnelser,
+    fritekster = fritekster,
 )
 
 fun leggTilBegrunnelsePåVedtaksperiodeIBehandling(
-        behandling: Behandling,
-        vedtakService: VedtakService,
-        vedtaksperiodeService: VedtaksperiodeService,
+    behandling: Behandling,
+    vedtakService: VedtakService,
+    vedtaksperiodeService: VedtaksperiodeService,
 ) {
     val aktivtVedtak = vedtakService.hentAktivForBehandling(behandling.id)!!
 
     val perisisterteVedtaksperioder =
-            vedtaksperiodeService.hentPersisterteVedtaksperioder(aktivtVedtak)
+        vedtaksperiodeService.hentPersisterteVedtaksperioder(aktivtVedtak)
 
     vedtaksperiodeService.oppdaterVedtaksperiodeMedBegrunnelser(
-            vedtaksperiodeId = perisisterteVedtaksperioder.first().id,
-            restPutVedtaksperiodeMedBegrunnelse =
-            RestPutVedtaksperiodeMedBegrunnelse(begrunnelser = listOf(
-                    RestPutVedtaksbegrunnelse(
-                            vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET,
-                    ))))
+        vedtaksperiodeId = perisisterteVedtaksperioder.first().id,
+        restPutVedtaksperiodeMedBegrunnelse =
+        RestPutVedtaksperiodeMedBegrunnelse(
+            begrunnelser = listOf(
+                RestPutVedtaksbegrunnelse(
+                    vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET,
+                )
+            )
+        )
+    )
 }
 
-fun lagVilkårResultat(personResultat: PersonResultat,
-                      vilkårType: Vilkår = Vilkår.BOSATT_I_RIKET,
-                      resultat: Resultat = Resultat.OPPFYLT,
-                      periodeFom: LocalDate = LocalDate.of(2009, 12, 24),
-                      periodeTom: LocalDate = LocalDate.of(2010, 1, 31),
-                      begrunnelse: String = "",
-                      behandlingId: Long = lagBehandling().id) = VilkårResultat(
-        personResultat = personResultat,
-        vilkårType = vilkårType,
-        resultat = resultat,
-        periodeFom = periodeFom,
-        periodeTom = periodeTom,
-        begrunnelse = begrunnelse,
-        behandlingId = behandlingId,
+fun lagVilkårResultat(
+    personResultat: PersonResultat,
+    vilkårType: Vilkår = Vilkår.BOSATT_I_RIKET,
+    resultat: Resultat = Resultat.OPPFYLT,
+    periodeFom: LocalDate = LocalDate.of(2009, 12, 24),
+    periodeTom: LocalDate = LocalDate.of(2010, 1, 31),
+    begrunnelse: String = "",
+    behandlingId: Long = lagBehandling().id
+) = VilkårResultat(
+    personResultat = personResultat,
+    vilkårType = vilkårType,
+    resultat = resultat,
+    periodeFom = periodeFom,
+    periodeTom = periodeTom,
+    begrunnelse = begrunnelse,
+    behandlingId = behandlingId,
 )
 
 val guttenBarnesenFødselsdato = LocalDate.now().withDayOfMonth(10).minusYears(6)

@@ -10,6 +10,8 @@ import kotlin.reflect.KClass
 @Retention(RetentionPolicy.RUNTIME)
 @Constraint(validatedBy = [VilkårResultatValidator::class])
 @Documented
-annotation class VilkårResultatConstraint(val message: String = "Kombinasjonen av valgt utdypetvurdering og vilkårstyper er ikke lovlig",
-                                          val groups: Array<KClass<*>> = [],
-                                          val payload: Array<KClass<out Any>> = [])
+annotation class VilkårResultatConstraint(
+    val message: String = "Kombinasjonen av valgt utdypetvurdering og vilkårstyper er ikke lovlig",
+    val groups: Array<KClass<*>> = [],
+    val payload: Array<KClass<out Any>> = []
+)

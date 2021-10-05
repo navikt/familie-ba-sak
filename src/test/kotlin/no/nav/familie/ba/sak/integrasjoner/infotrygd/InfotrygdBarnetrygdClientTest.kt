@@ -47,21 +47,41 @@ class InfotrygdBarnetrygdClientTest : AbstractSpringIntegrationTestDev() {
     fun setUp() {
         resetAllRequests()
         client = InfotrygdBarnetrygdClient(
-                URI.create("http://localhost:${environment["wiremock.server.port"]}/api"),
-                restOperations,
-                environment
+            URI.create("http://localhost:${environment["wiremock.server.port"]}/api"),
+            restOperations,
+            environment
         )
     }
 
-
     @Test
     fun `Skal lage InfotrygdBarnetrygdRequest basert på lister med fnr og barns fødselsnummer`() {
-        stubFor(post(løpendeBarnetrygdURL).willReturn(okJson(objectMapper.writeValueAsString(
-                InfotrygdLøpendeBarnetrygdResponse(false)))))
-        stubFor(post(sakerURL).willReturn(okJson(objectMapper.writeValueAsString(
-                InfotrygdSøkResponse(listOf(Sak(status = "IP")), emptyList())))))
-        stubFor(post(stønaderURL).willReturn(okJson(objectMapper.writeValueAsString(
-                InfotrygdSøkResponse(listOf(Stønad()), emptyList())))))
+        stubFor(
+            post(løpendeBarnetrygdURL).willReturn(
+                okJson(
+                    objectMapper.writeValueAsString(
+                        InfotrygdLøpendeBarnetrygdResponse(false)
+                    )
+                )
+            )
+        )
+        stubFor(
+            post(sakerURL).willReturn(
+                okJson(
+                    objectMapper.writeValueAsString(
+                        InfotrygdSøkResponse(listOf(Sak(status = "IP")), emptyList())
+                    )
+                )
+            )
+        )
+        stubFor(
+            post(stønaderURL).willReturn(
+                okJson(
+                    objectMapper.writeValueAsString(
+                        InfotrygdSøkResponse(listOf(Stønad()), emptyList())
+                    )
+                )
+            )
+        )
 
         val søkersIdenter = ClientMocks.søkerFnr.toList()
         val barnasIdenter = ClientMocks.barnFnr.toList()
@@ -71,30 +91,64 @@ class InfotrygdBarnetrygdClientTest : AbstractSpringIntegrationTestDev() {
         val hentsakerResponse = client.hentSaker(søkersIdenter, barnasIdenter)
         val hentstønaderResponse = client.hentStønader(søkersIdenter, barnasIdenter)
 
-        verify(anyRequestedFor(urlEqualTo(løpendeBarnetrygdURL)).withRequestBody(equalToJson(objectMapper.writeValueAsString(
-                infotrygdSøkRequest))))
-        verify(anyRequestedFor(urlEqualTo(sakerURL)).withRequestBody(equalToJson(objectMapper.writeValueAsString(
-                infotrygdSøkRequest))))
-        verify(anyRequestedFor(urlEqualTo(stønaderURL)).withRequestBody(equalToJson(objectMapper.writeValueAsString(
-                infotrygdSøkRequest))))
+        verify(
+            anyRequestedFor(urlEqualTo(løpendeBarnetrygdURL)).withRequestBody(
+                equalToJson(
+                    objectMapper.writeValueAsString(
+                        infotrygdSøkRequest
+                    )
+                )
+            )
+        )
+        verify(
+            anyRequestedFor(urlEqualTo(sakerURL)).withRequestBody(
+                equalToJson(
+                    objectMapper.writeValueAsString(
+                        infotrygdSøkRequest
+                    )
+                )
+            )
+        )
+        verify(
+            anyRequestedFor(urlEqualTo(stønaderURL)).withRequestBody(
+                equalToJson(
+                    objectMapper.writeValueAsString(
+                        infotrygdSøkRequest
+                    )
+                )
+            )
+        )
         Assertions.assertEquals(false, finnesIkkeHosInfotrygd)
         Assertions.assertEquals(hentsakerResponse.bruker[0].status, "IP")
         Assertions.assertEquals(hentstønaderResponse.bruker.size, 1)
     }
 
-
     @Test
     fun `Skal lage InfotrygdBarnetrygdRequest basert på lister med fnr`() {
-        stubFor(post(løpendeBarnetrygdURL).willReturn(okJson(objectMapper.writeValueAsString(
-                InfotrygdLøpendeBarnetrygdResponse(false)))))
+        stubFor(
+            post(løpendeBarnetrygdURL).willReturn(
+                okJson(
+                    objectMapper.writeValueAsString(
+                        InfotrygdLøpendeBarnetrygdResponse(false)
+                    )
+                )
+            )
+        )
 
         val søkersIdenter = ClientMocks.søkerFnr.toList()
         val infotrygdSøkRequest = InfotrygdSøkRequest(søkersIdenter, emptyList())
 
         val finnesIkkeHosInfotrygd = client.harLøpendeSakIInfotrygd(søkersIdenter, emptyList())
 
-        verify(anyRequestedFor(urlEqualTo(løpendeBarnetrygdURL)).withRequestBody(equalToJson(objectMapper.writeValueAsString(
-                infotrygdSøkRequest))))
+        verify(
+            anyRequestedFor(urlEqualTo(løpendeBarnetrygdURL)).withRequestBody(
+                equalToJson(
+                    objectMapper.writeValueAsString(
+                        infotrygdSøkRequest
+                    )
+                )
+            )
+        )
         Assertions.assertEquals(false, finnesIkkeHosInfotrygd)
     }
 

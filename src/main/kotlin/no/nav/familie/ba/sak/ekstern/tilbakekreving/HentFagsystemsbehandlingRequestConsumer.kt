@@ -15,9 +15,10 @@ import java.util.concurrent.CountDownLatch
 @Service
 @Profile("!e2e")
 @ConditionalOnProperty(
-        value = ["funksjonsbrytere.kafka.producer.enabled"],
-        havingValue = "true",
-        matchIfMissing = false)
+    value = ["funksjonsbrytere.kafka.producer.enabled"],
+    havingValue = "true",
+    matchIfMissing = false
+)
 class HentFagsystemsbehandlingRequestConsumer(private val fagsystemsbehandlingService: FagsystemsbehandlingService) {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -25,9 +26,11 @@ class HentFagsystemsbehandlingRequestConsumer(private val fagsystemsbehandlingSe
 
     var latch: CountDownLatch = CountDownLatch(1)
 
-    @KafkaListener(id = "familie-ba-sak",
-                   topics = ["teamfamilie.privat-tbk-hentfagsystemsbehandling-request-topic"],
-                   containerFactory = "concurrentKafkaListenerContainerFactory")
+    @KafkaListener(
+        id = "familie-ba-sak",
+        topics = ["teamfamilie.privat-tbk-hentfagsystemsbehandling-request-topic"],
+        containerFactory = "concurrentKafkaListenerContainerFactory"
+    )
     fun listen(consumerRecord: ConsumerRecord<String, String>, ack: Acknowledgment) {
         logger.info("HentFagsystemsbehandlingRequest er mottatt i kafka $consumerRecord")
         secureLogger.info("HentFagsystemsbehandlingRequest er mottatt i kafka $consumerRecord")
@@ -39,8 +42,10 @@ class HentFagsystemsbehandlingRequestConsumer(private val fagsystemsbehandlingSe
         val fagsystemsbehandling = try {
             fagsystemsbehandlingService.hentFagsystemsbehandling(request)
         } catch (e: Exception) {
-            logger.warn("Noe gikk galt mens sender HentFagsystemsbehandlingRespons for behandling=${request.eksternId}. " +
-                        "Feiler med ${e.message}")
+            logger.warn(
+                "Noe gikk galt mens sender HentFagsystemsbehandlingRespons for behandling=${request.eksternId}. " +
+                    "Feiler med ${e.message}"
+            )
             HentFagsystemsbehandlingRespons(feilMelding = e.message)
         }
         fagsystemsbehandlingService.sendFagsystemsbehandling(fagsystemsbehandling, key, request.eksternId)

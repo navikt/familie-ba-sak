@@ -24,12 +24,12 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 
-class AutomatiskVilkårsvurderingTest(
-        @Autowired val stegService: StegService,
-        @Autowired val personopplysningerService: PersonopplysningerService,
-        @Autowired val persongrunnlagService: PersongrunnlagService,
-        @Autowired val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
-        @Autowired val databaseCleanupService: DatabaseCleanupService,
+class AutomatiskVilkårsvurderingIntegrasjonTest(
+    @Autowired val stegService: StegService,
+    @Autowired val personopplysningerService: PersonopplysningerService,
+    @Autowired val persongrunnlagService: PersongrunnlagService,
+    @Autowired val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
+    @Autowired val databaseCleanupService: DatabaseCleanupService,
 ) : AbstractSpringIntegrationTest() {
 
     @AfterEach
@@ -49,7 +49,7 @@ class AutomatiskVilkårsvurderingTest(
         val nyBehandling = NyBehandlingHendelse(søkerFnr, listOf(barnFnr))
         val behandlingFørVilkår = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling)
         val behandlingEtterVilkår =
-                stegService.håndterVilkårsvurdering(behandlingFørVilkår.leggTilBehandlingStegTilstand(StegType.VILKÅRSVURDERING))
+            stegService.håndterVilkårsvurdering(behandlingFørVilkår.leggTilBehandlingStegTilstand(StegType.VILKÅRSVURDERING))
         Assertions.assertEquals(BehandlingResultat.AVSLÅTT, behandlingEtterVilkår.resultat)
     }
 
@@ -65,7 +65,7 @@ class AutomatiskVilkårsvurderingTest(
         val nyBehandling = NyBehandlingHendelse(søkerFnr, listOf(barnFnr))
         val behandlingFørVilkår = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling)
         val behandlingEtterVilkår =
-                stegService.håndterVilkårsvurdering(behandlingFørVilkår.leggTilBehandlingStegTilstand(StegType.VILKÅRSVURDERING))
+            stegService.håndterVilkårsvurdering(behandlingFørVilkår.leggTilBehandlingStegTilstand(StegType.VILKÅRSVURDERING))
         Assertions.assertEquals(BehandlingResultat.AVSLÅTT, behandlingEtterVilkår.resultat)
     }
 
@@ -75,14 +75,14 @@ class AutomatiskVilkårsvurderingTest(
         val barnFnr = randomFnr()
         val barn = genererAutomatiskTestperson(LocalDate.parse("1999-10-10"), emptySet(), emptyList())
         val søker = genererAutomatiskTestperson(
-                LocalDate.parse("1998-10-10"),
-                setOf(
-                        ForelderBarnRelasjon(
-                                Personident(barnFnr),
-                                FORELDERBARNRELASJONROLLE.BARN
-                        )
-                ),
-                emptyList()
+            LocalDate.parse("1998-10-10"),
+            setOf(
+                ForelderBarnRelasjon(
+                    Personident(barnFnr),
+                    FORELDERBARNRELASJONROLLE.BARN
+                )
+            ),
+            emptyList()
         )
         every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(barnFnr) } returns barn
         every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(søkerFnr) } returns søker
@@ -90,7 +90,7 @@ class AutomatiskVilkårsvurderingTest(
         val nyBehandling = NyBehandlingHendelse(søkerFnr, listOf(barnFnr))
         val behandlingFørVilkår = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling)
         val behandlingEtterVilkår =
-                stegService.håndterVilkårsvurdering(behandlingFørVilkår.leggTilBehandlingStegTilstand(StegType.VILKÅRSVURDERING))
+            stegService.håndterVilkårsvurdering(behandlingFørVilkår.leggTilBehandlingStegTilstand(StegType.VILKÅRSVURDERING))
         Assertions.assertEquals(BehandlingResultat.AVSLÅTT, behandlingEtterVilkår.resultat)
     }
 
@@ -100,32 +100,32 @@ class AutomatiskVilkårsvurderingTest(
         val barnFnr = randomFnr()
         val barn = genererAutomatiskTestperson(LocalDate.now(), emptySet(), emptyList())
         val søker = genererAutomatiskTestperson(
-                LocalDate.parse("1998-10-10"),
-                setOf(
-                        ForelderBarnRelasjon(
-                                Personident(barnFnr),
-                                FORELDERBARNRELASJONROLLE.BARN
-                        )
-                ),
-                emptyList(),
-                bostedsadresser = listOf(
-                        Bostedsadresse(
-                                gyldigFraOgMed = null,
-                                gyldigTilOgMed = null,
-                                vegadresse = Vegadresse(
-                                        matrikkelId = 1111111111,
-                                        husnummer = "36",
-                                        husbokstav = "D",
-                                        bruksenhetsnummer = null,
-                                        adressenavn = "IkkeSamme -veien",
-                                        kommunenummer = "5423",
-                                        tilleggsnavn = null,
-                                        postnummer = "9050"
-                                ),
-                                matrikkeladresse = null,
-                                ukjentBosted = null,
-                        )
+            LocalDate.parse("1998-10-10"),
+            setOf(
+                ForelderBarnRelasjon(
+                    Personident(barnFnr),
+                    FORELDERBARNRELASJONROLLE.BARN
                 )
+            ),
+            emptyList(),
+            bostedsadresser = listOf(
+                Bostedsadresse(
+                    gyldigFraOgMed = null,
+                    gyldigTilOgMed = null,
+                    vegadresse = Vegadresse(
+                        matrikkelId = 1111111111,
+                        husnummer = "36",
+                        husbokstav = "D",
+                        bruksenhetsnummer = null,
+                        adressenavn = "IkkeSamme -veien",
+                        kommunenummer = "5423",
+                        tilleggsnavn = null,
+                        postnummer = "9050"
+                    ),
+                    matrikkeladresse = null,
+                    ukjentBosted = null,
+                )
+            )
         )
 
         every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(barnFnr) } returns barn
@@ -134,7 +134,7 @@ class AutomatiskVilkårsvurderingTest(
         val nyBehandling = NyBehandlingHendelse(søkerFnr, listOf(barnFnr))
         val behandlingFørVilkår = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling)
         val behandlingEtterVilkår =
-                stegService.håndterVilkårsvurdering(behandlingFørVilkår.leggTilBehandlingStegTilstand(StegType.VILKÅRSVURDERING))
+            stegService.håndterVilkårsvurdering(behandlingFørVilkår.leggTilBehandlingStegTilstand(StegType.VILKÅRSVURDERING))
         Assertions.assertEquals(BehandlingResultat.AVSLÅTT, behandlingEtterVilkår.resultat)
     }
 }

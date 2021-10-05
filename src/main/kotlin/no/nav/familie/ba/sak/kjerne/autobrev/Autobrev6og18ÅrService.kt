@@ -5,7 +5,6 @@ import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.common.sisteDagIMåned
-import no.nav.familie.ba.sak.common.toLocalDate
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
@@ -31,12 +30,12 @@ import java.time.LocalDate.now
 
 @Service
 class Autobrev6og18ÅrService(
-        private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
-        private val behandlingService: BehandlingService,
-        private val stegService: StegService,
-        private val vedtakService: VedtakService,
-        private val taskRepository: TaskRepositoryWrapper,
-        private val vedtaksperiodeService: VedtaksperiodeService,
+    private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
+    private val behandlingService: BehandlingService,
+    private val stegService: StegService,
+    private val vedtakService: VedtakService,
+    private val taskRepository: TaskRepositoryWrapper,
+    private val vedtaksperiodeService: VedtaksperiodeService,
 ) {
 
     @Transactional
@@ -71,15 +70,20 @@ class Autobrev6og18ÅrService(
         }
 
         val opprettetBehandling =
-                stegService.håndterNyBehandling(nyBehandling = opprettNyOmregningBehandling(behandling = behandling,
-                                                                                            behandlingÅrsak = finnBehandlingÅrsakForAlder(
-                                                                                                    autobrev6og18ÅrDTO.alder)))
+            stegService.håndterNyBehandling(
+                nyBehandling = opprettNyOmregningBehandling(
+                    behandling = behandling,
+                    behandlingÅrsak = finnBehandlingÅrsakForAlder(
+                        autobrev6og18ÅrDTO.alder
+                    )
+                )
+            )
 
         stegService.håndterVilkårsvurdering(behandling = opprettetBehandling)
 
         vedtaksperiodeService.oppdaterFortsattInnvilgetPeriodeMedAutobrevBegrunnelse(
-                vedtak = vedtakService.hentAktivForBehandlingThrows(opprettetBehandling.id),
-                vedtakBegrunnelseSpesifikasjon = finnVedtakbegrunnelseForAlder(autobrev6og18ÅrDTO.alder)
+            vedtak = vedtakService.hentAktivForBehandlingThrows(opprettetBehandling.id),
+            vedtakBegrunnelseSpesifikasjon = finnVedtakbegrunnelseForAlder(autobrev6og18ÅrDTO.alder)
         )
 
         val opprettetVedtak = vedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(opprettetBehandling)
@@ -87,68 +91,72 @@ class Autobrev6og18ÅrService(
         opprettTaskJournalførVedtaksbrev(vedtakId = opprettetVedtak.id)
     }
 
-    private fun barnetrygdOpphører(autobrev6og18ÅrDTO: Autobrev6og18ÅrDTO,
-                                   behandling: Behandling) =
-            autobrev6og18ÅrDTO.alder == Alder.atten.år &&
+    private fun barnetrygdOpphører(
+        autobrev6og18ÅrDTO: Autobrev6og18ÅrDTO,
+        behandling: Behandling
+    ) =
+        autobrev6og18ÅrDTO.alder == Alder.atten.år &&
             !barnUnder18årInneværendeMånedEksisterer(behandlingId = behandling.id)
 
     private fun finnBehandlingÅrsakForAlder(alder: Int): BehandlingÅrsak =
-            when (alder) {
-                Alder.seks.år -> BehandlingÅrsak.OMREGNING_6ÅR
-                Alder.atten.år -> BehandlingÅrsak.OMREGNING_18ÅR
-                else -> throw Feil("Alder må være oppgitt til enten 6 eller 18 år.")
-            }
+        when (alder) {
+            Alder.seks.år -> BehandlingÅrsak.OMREGNING_6ÅR
+            Alder.atten.år -> BehandlingÅrsak.OMREGNING_18ÅR
+            else -> throw Feil("Alder må være oppgitt til enten 6 eller 18 år.")
+        }
 
     private fun finnVedtakbegrunnelseForAlder(alder: Int): VedtakBegrunnelseSpesifikasjon =
-            when (alder) {
-                Alder.seks.år -> VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR
-                Alder.atten.år -> VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR
-                else -> throw Feil("Alder må være oppgitt til enten 6 eller 18 år.")
-            }
+        when (alder) {
+            Alder.seks.år -> VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR
+            Alder.atten.år -> VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR
+            else -> throw Feil("Alder må være oppgitt til enten 6 eller 18 år.")
+        }
 
     private fun brevAlleredeSendt(autobrev6og18ÅrDTO: Autobrev6og18ÅrDTO): Boolean =
         behandlingService.hentBehandlinger(fagsakId = autobrev6og18ÅrDTO.fagsakId)
-                .filter { it.status == BehandlingStatus.AVSLUTTET }
-                .any { behandling ->
-                    val vedtak = vedtakService.hentAktivForBehandlingThrows(behandling.id)
-                    val vedtaksperioderMedBegrunnelser = vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak)
+            .filter { it.status == BehandlingStatus.AVSLUTTET }
+            .any { behandling ->
+                val vedtak = vedtakService.hentAktivForBehandlingThrows(behandling.id)
+                val vedtaksperioderMedBegrunnelser = vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak)
 
-                    vedtaksperioderMedBegrunnelser.any { vedtaksperiodeMedBegrunnelser ->
-                        vedtaksperiodeMedBegrunnelser.begrunnelser.map { it.vedtakBegrunnelseSpesifikasjon }
-                                .contains(finnVedtakbegrunnelseForAlder(autobrev6og18ÅrDTO.alder))
-                    }
+                vedtaksperioderMedBegrunnelser.any { vedtaksperiodeMedBegrunnelser ->
+                    vedtaksperiodeMedBegrunnelser.begrunnelser.map { it.vedtakBegrunnelseSpesifikasjon }
+                        .contains(finnVedtakbegrunnelseForAlder(autobrev6og18ÅrDTO.alder))
                 }
+            }
 
     private fun barnMedAngittAlderInneværendeMånedEksisterer(behandlingId: Long, alder: Int): Boolean =
-            barnMedAngittAlderInneværendeMåned(behandlingId, alder).isNotEmpty()
+        barnMedAngittAlderInneværendeMåned(behandlingId, alder).isNotEmpty()
 
     private fun barnMedAngittAlderInneværendeMåned(behandlingId: Long, alder: Int): List<Person> =
-            personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandlingId)?.personer
-                    ?.filter { it.type == PersonType.BARN && it.fyllerAntallÅrInneværendeMåned(alder) }?.toList() ?: listOf()
+        personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandlingId)?.personer
+            ?.filter { it.type == PersonType.BARN && it.fyllerAntallÅrInneværendeMåned(alder) }?.toList() ?: listOf()
 
     private fun barnUnder18årInneværendeMånedEksisterer(behandlingId: Long): Boolean =
-            personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandlingId)?.personer
-                    ?.any { it.type == PersonType.BARN && it.erYngreEnnInneværendeMåned(Alder.atten.år) } ?: false
+        personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandlingId)?.personer
+            ?.any { it.type == PersonType.BARN && it.erYngreEnnInneværendeMåned(Alder.atten.år) } ?: false
 
     private fun opprettNyOmregningBehandling(behandling: Behandling, behandlingÅrsak: BehandlingÅrsak): NyBehandling =
-            NyBehandling(søkersIdent = behandling.fagsak.hentAktivIdent().ident,
-                         behandlingType = BehandlingType.REVURDERING,
-                         kategori = behandling.kategori,
-                         underkategori = behandling.underkategori,
-                         behandlingÅrsak = behandlingÅrsak,
-                         skalBehandlesAutomatisk = true
-            )
-
+        NyBehandling(
+            søkersIdent = behandling.fagsak.hentAktivIdent().ident,
+            behandlingType = BehandlingType.REVURDERING,
+            kategori = behandling.kategori,
+            underkategori = behandling.underkategori,
+            behandlingÅrsak = behandlingÅrsak,
+            skalBehandlesAutomatisk = true
+        )
 
     private fun opprettTaskJournalførVedtaksbrev(vedtakId: Long) {
-        val task = Task(JournalførVedtaksbrevTask.TASK_STEP_TYPE,
-                               "$vedtakId")
+        val task = Task(
+            JournalførVedtaksbrevTask.TASK_STEP_TYPE,
+            "$vedtakId"
+        )
         taskRepository.save(task)
     }
 
     fun Person.fyllerAntallÅrInneværendeMåned(år: Int): Boolean {
         return this.fødselsdato.isSameOrAfter(now().minusYears(år.toLong()).førsteDagIInneværendeMåned()) &&
-               this.fødselsdato.isSameOrBefore(now().minusYears(år.toLong()).sisteDagIMåned())
+            this.fødselsdato.isSameOrBefore(now().minusYears(år.toLong()).sisteDagIMåned())
     }
 
     fun Person.erYngreEnnInneværendeMåned(år: Int): Boolean {

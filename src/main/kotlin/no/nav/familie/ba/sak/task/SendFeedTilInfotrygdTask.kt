@@ -12,13 +12,16 @@ import no.nav.familie.prosessering.domene.Task
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
 import org.springframework.stereotype.Service
-import java.util.*
+import java.util.Properties
 
 @Service
-@TaskStepBeskrivelse(taskStepType = SendFeedTilInfotrygdTask.TASK_STEP_TYPE,
-                     beskrivelse = "Send fødselshendelse til Infotrygd feed.")
+@TaskStepBeskrivelse(
+    taskStepType = SendFeedTilInfotrygdTask.TASK_STEP_TYPE,
+    beskrivelse = "Send fødselshendelse til Infotrygd feed."
+)
 class SendFeedTilInfotrygdTask(
-        private val infotrygdFeedClient: InfotrygdFeedClient) : AsyncTaskStep {
+    private val infotrygdFeedClient: InfotrygdFeedClient
+) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
         val infotrygdFeedTaskDto = objectMapper.readValue(task.payload, InfotrygdFødselhendelsesFeedTaskDto::class.java)
@@ -43,10 +46,14 @@ class SendFeedTilInfotrygdTask(
                 }
             }
 
-            return Task(type = TASK_STEP_TYPE,
-                               payload = objectMapper.writeValueAsString(InfotrygdFødselhendelsesFeedTaskDto(
-                                       fnrBarn = fnrBarn)),
-                               properties = metadata
+            return Task(
+                type = TASK_STEP_TYPE,
+                payload = objectMapper.writeValueAsString(
+                    InfotrygdFødselhendelsesFeedTaskDto(
+                        fnrBarn = fnrBarn
+                    )
+                ),
+                properties = metadata
             )
         }
     }

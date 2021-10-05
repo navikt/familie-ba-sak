@@ -6,13 +6,15 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Utbetalingsperiode
 
 fun finnAlleBarnsFødselsDatoerIUtbetalingsperiode(utbetalingsperiode: Utbetalingsperiode): String =
-        Utils.slåSammen(utbetalingsperiode.utbetalingsperiodeDetaljer
-                                .filter { utbetalingsperiodeDetalj ->
-                                    utbetalingsperiodeDetalj.person.type == PersonType.BARN
-                                }
-                                .sortedBy { utbetalingsperiodeDetalj ->
-                                    utbetalingsperiodeDetalj.person.fødselsdato
-                                }
-                                .map { utbetalingsperiodeDetalj ->
-                                    utbetalingsperiodeDetalj.person.fødselsdato?.tilKortString() ?: ""
-                                })
+    Utils.slåSammen(
+        utbetalingsperiode.utbetalingsperiodeDetaljer
+            .filter { utbetalingsperiodeDetalj ->
+                utbetalingsperiodeDetalj.person.type == PersonType.BARN
+            }
+            .sortedBy { utbetalingsperiodeDetalj ->
+                utbetalingsperiodeDetalj.person.fødselsdato
+            }
+            .map { utbetalingsperiodeDetalj ->
+                utbetalingsperiodeDetalj.person.fødselsdato?.tilKortString() ?: ""
+            }
+    )

@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
-
 class VedtakUtilsTest {
 
     /**
@@ -21,43 +20,43 @@ class VedtakUtilsTest {
     fun `vedtaksperioder sorteres korrekt til brev`() {
 
         val avslagMedTomDatoInneværendeMåned = lagVedtaksperiodeMedBegrunnelser(
-                type = Vedtaksperiodetype.AVSLAG,
-                fom = LocalDate.now().minusMonths(6),
-                tom = LocalDate.now(),
+            type = Vedtaksperiodetype.AVSLAG,
+            fom = LocalDate.now().minusMonths(6),
+            tom = LocalDate.now(),
 
-                )
+        )
         val avslagUtenTomDato =
-                lagVedtaksperiodeMedBegrunnelser(
-                        fom = LocalDate.now().minusMonths(5),
-                        tom = null,
-                        type = Vedtaksperiodetype.AVSLAG
-                )
+            lagVedtaksperiodeMedBegrunnelser(
+                fom = LocalDate.now().minusMonths(5),
+                tom = null,
+                type = Vedtaksperiodetype.AVSLAG
+            )
         val opphørsperiode = lagVedtaksperiodeMedBegrunnelser(
-                fom = LocalDate.now().minusMonths(4),
-                tom = LocalDate.now().minusMonths(1),
-                type = Vedtaksperiodetype.OPPHØR
+            fom = LocalDate.now().minusMonths(4),
+            tom = LocalDate.now().minusMonths(1),
+            type = Vedtaksperiodetype.OPPHØR
         )
 
         val utbetalingsperiode = lagVedtaksperiodeMedBegrunnelser(
-                fom = LocalDate.now().minusMonths(3),
-                tom = LocalDate.now().minusMonths(1),
-                type = Vedtaksperiodetype.UTBETALING,
+            fom = LocalDate.now().minusMonths(3),
+            tom = LocalDate.now().minusMonths(1),
+            type = Vedtaksperiodetype.UTBETALING,
         )
 
         val avslagUtenDatoer = lagVedtaksperiodeMedBegrunnelser(
-                fom = null,
-                tom = null,
-                type = Vedtaksperiodetype.AVSLAG,
+            fom = null,
+            tom = null,
+            type = Vedtaksperiodetype.AVSLAG,
         )
 
         val sorterteVedtaksperioder =
-                listOf(
-                        utbetalingsperiode,
-                        opphørsperiode,
-                        avslagMedTomDatoInneværendeMåned,
-                        avslagUtenDatoer,
-                        avslagUtenTomDato
-                ).shuffled().sorter()
+            listOf(
+                utbetalingsperiode,
+                opphørsperiode,
+                avslagMedTomDatoInneværendeMåned,
+                avslagUtenDatoer,
+                avslagUtenTomDato
+            ).shuffled().sorter()
 
         // Utbetalingsperiode, opphørspersiode og avslagsperiode med fom-dato sorteres kronologisk
         Assertions.assertEquals(avslagMedTomDatoInneværendeMåned, sorterteVedtaksperioder[0])
@@ -72,7 +71,7 @@ class VedtakUtilsTest {
     @Test
     fun `Valider at alle begrunnelser som ikke er fritekst har hjemler`() {
         val begrunnelser = VedtakBegrunnelseSpesifikasjon.values()
-                .filterNot { it.erFritekstBegrunnelse() }
+            .filterNot { it.erFritekstBegrunnelse() }
         assertTrue(begrunnelser.none { it.hentHjemler().isEmpty() })
     }
 }

@@ -48,57 +48,57 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 @ExtendWith(SpringExtension::class)
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
 @ActiveProfiles(
-        "postgres",
-        "mock-brev-klient",
-        "mock-økonomi",
-        "mock-oauth",
-        "mock-pdl",
-        "mock-task-repository",
-        "mock-tilbakekreving-klient",
-        "mock-infotrygd-barnetrygd",
+    "postgres",
+    "mock-brev-klient",
+    "mock-økonomi",
+    "mock-oauth",
+    "mock-pdl",
+    "mock-task-repository",
+    "mock-tilbakekreving-klient",
+    "mock-infotrygd-barnetrygd",
 
 )
 @Tag("integration")
 @AutoConfigureWireMock(port = 28085)
 class DokumentServiceTest(
-        @Autowired
-        private val fagsakService: FagsakService,
+    @Autowired
+    private val fagsakService: FagsakService,
 
-        @Autowired
-        private val behandlingService: BehandlingService,
+    @Autowired
+    private val behandlingService: BehandlingService,
 
-        @Autowired
-        private val vilkårsvurderingService: VilkårsvurderingService,
+    @Autowired
+    private val vilkårsvurderingService: VilkårsvurderingService,
 
-        @Autowired
-        private val persongrunnlagService: PersongrunnlagService,
+    @Autowired
+    private val persongrunnlagService: PersongrunnlagService,
 
-        @Autowired
-        private val vedtakService: VedtakService,
+    @Autowired
+    private val vedtakService: VedtakService,
 
-        @Autowired
-        private val dokumentService: DokumentService,
+    @Autowired
+    private val dokumentService: DokumentService,
 
-        @Autowired
-        private val totrinnskontrollService: TotrinnskontrollService,
+    @Autowired
+    private val totrinnskontrollService: TotrinnskontrollService,
 
-        @Autowired
-        private val stegService: StegService,
+    @Autowired
+    private val stegService: StegService,
 
-        @Autowired
-        private val brevService: BrevService,
+    @Autowired
+    private val brevService: BrevService,
 
-        @Autowired
-        private val databaseCleanupService: DatabaseCleanupService,
+    @Autowired
+    private val databaseCleanupService: DatabaseCleanupService,
 
-        @Autowired
-        private val integrasjonClient: IntegrasjonClient,
+    @Autowired
+    private val integrasjonClient: IntegrasjonClient,
 
-        @Autowired
-        private val arbeidsfordelingService: ArbeidsfordelingService,
+    @Autowired
+    private val arbeidsfordelingService: ArbeidsfordelingService,
 
-        @Autowired
-        private val vedtaksperiodeService: VedtaksperiodeService,
+    @Autowired
+    private val vedtaksperiodeService: VedtaksperiodeService,
 ) {
 
     @BeforeEach
@@ -106,33 +106,41 @@ class DokumentServiceTest(
         databaseCleanupService.truncate()
         MockKAnnotations.init(this)
 
-        stubFor(get(urlEqualTo("/api/aktoer/v1"))
-                        .willReturn(aResponse()
-                                            .withHeader("Content-Type", "application/json")
-                                            .withBody(objectMapper.writeValueAsString(Ressurs.success(mapOf("aktørId" to "1"))))))
+        stubFor(
+            get(urlEqualTo("/api/aktoer/v1"))
+                .willReturn(
+                    aResponse()
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(objectMapper.writeValueAsString(Ressurs.success(mapOf("aktørId" to "1"))))
+                )
+        )
     }
 
     @Test
     fun `Hent vedtaksbrev`() {
         val behandlingEtterVilkårsvurderingSteg = kjørStegprosessForFGB(
-                tilSteg = StegType.VURDER_TILBAKEKREVING,
-                søkerFnr = randomFnr(),
-                barnasIdenter = listOf(ClientMocks.barnFnr[0]),
-                fagsakService = fagsakService,
-                vedtakService = vedtakService,
-                persongrunnlagService = persongrunnlagService,
-                vilkårsvurderingService = vilkårsvurderingService,
-                stegService = stegService,
-                vedtaksperiodeService = vedtaksperiodeService,
+            tilSteg = StegType.VURDER_TILBAKEKREVING,
+            søkerFnr = randomFnr(),
+            barnasIdenter = listOf(ClientMocks.barnFnr[0]),
+            fagsakService = fagsakService,
+            vedtakService = vedtakService,
+            persongrunnlagService = persongrunnlagService,
+            vilkårsvurderingService = vilkårsvurderingService,
+            stegService = stegService,
+            vedtaksperiodeService = vedtaksperiodeService,
         )
 
-        totrinnskontrollService.opprettTotrinnskontrollMedSaksbehandler(behandlingEtterVilkårsvurderingSteg,
-                                                                        "ansvarligSaksbehandler",
-                                                                        "saksbehandlerId")
-        totrinnskontrollService.besluttTotrinnskontroll(behandlingEtterVilkårsvurderingSteg,
-                                                        "ansvarligBeslutter",
-                                                        "beslutterId",
-                                                        Beslutning.GODKJENT)
+        totrinnskontrollService.opprettTotrinnskontrollMedSaksbehandler(
+            behandlingEtterVilkårsvurderingSteg,
+            "ansvarligSaksbehandler",
+            "saksbehandlerId"
+        )
+        totrinnskontrollService.besluttTotrinnskontroll(
+            behandlingEtterVilkårsvurderingSteg,
+            "ansvarligBeslutter",
+            "beslutterId",
+            Beslutning.GODKJENT
+        )
         val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandlingEtterVilkårsvurderingSteg.id)
 
         vedtakService.oppdaterVedtakMedStønadsbrev(vedtak!!)
@@ -145,24 +153,28 @@ class DokumentServiceTest(
     @Test
     fun `Skal generere vedtaksbrev`() {
         val behandlingEtterVilkårsvurderingSteg = kjørStegprosessForFGB(
-                tilSteg = StegType.VURDER_TILBAKEKREVING,
-                søkerFnr = randomFnr(),
-                barnasIdenter = listOf(ClientMocks.barnFnr[0]),
-                fagsakService = fagsakService,
-                vedtakService = vedtakService,
-                persongrunnlagService = persongrunnlagService,
-                vilkårsvurderingService = vilkårsvurderingService,
-                stegService = stegService,
-                vedtaksperiodeService = vedtaksperiodeService,
+            tilSteg = StegType.VURDER_TILBAKEKREVING,
+            søkerFnr = randomFnr(),
+            barnasIdenter = listOf(ClientMocks.barnFnr[0]),
+            fagsakService = fagsakService,
+            vedtakService = vedtakService,
+            persongrunnlagService = persongrunnlagService,
+            vilkårsvurderingService = vilkårsvurderingService,
+            stegService = stegService,
+            vedtaksperiodeService = vedtaksperiodeService,
         )
 
-        totrinnskontrollService.opprettTotrinnskontrollMedSaksbehandler(behandlingEtterVilkårsvurderingSteg,
-                                                                        "ansvarligSaksbehandler",
-                                                                        "saksbehandlerId")
-        totrinnskontrollService.besluttTotrinnskontroll(behandlingEtterVilkårsvurderingSteg,
-                                                        "ansvarligBeslutter",
-                                                        "beslutterId",
-                                                        Beslutning.GODKJENT)
+        totrinnskontrollService.opprettTotrinnskontrollMedSaksbehandler(
+            behandlingEtterVilkårsvurderingSteg,
+            "ansvarligSaksbehandler",
+            "saksbehandlerId"
+        )
+        totrinnskontrollService.besluttTotrinnskontroll(
+            behandlingEtterVilkårsvurderingSteg,
+            "ansvarligBeslutter",
+            "beslutterId",
+            Beslutning.GODKJENT
+        )
 
         val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandlingEtterVilkårsvurderingSteg.id)
         vedtakService.oppdaterVedtakMedStønadsbrev(vedtak!!)
@@ -179,15 +191,15 @@ class DokumentServiceTest(
         val mockBeslutterId = "mock.beslutter@nav.no"
 
         val behandlingEtterVilkårsvurderingSteg = kjørStegprosessForFGB(
-                tilSteg = StegType.VURDER_TILBAKEKREVING,
-                søkerFnr = randomFnr(),
-                barnasIdenter = listOf(ClientMocks.barnFnr[0]),
-                fagsakService = fagsakService,
-                vedtakService = vedtakService,
-                persongrunnlagService = persongrunnlagService,
-                vilkårsvurderingService = vilkårsvurderingService,
-                stegService = stegService,
-                vedtaksperiodeService = vedtaksperiodeService,
+            tilSteg = StegType.VURDER_TILBAKEKREVING,
+            søkerFnr = randomFnr(),
+            barnasIdenter = listOf(ClientMocks.barnFnr[0]),
+            fagsakService = fagsakService,
+            vedtakService = vedtakService,
+            persongrunnlagService = persongrunnlagService,
+            vilkårsvurderingService = vilkårsvurderingService,
+            stegService = stegService,
+            vedtaksperiodeService = vedtaksperiodeService,
         )
         val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandlingEtterVilkårsvurderingSteg.id)!!
 
@@ -197,9 +209,11 @@ class DokumentServiceTest(
         assertEquals("System", vedtaksbrevFellesFelter.saksbehandler)
         assertEquals("Beslutter", vedtaksbrevFellesFelter.beslutter)
 
-        totrinnskontrollService.opprettTotrinnskontrollMedSaksbehandler(behandlingEtterVilkårsvurderingSteg,
-                                                                        mockSaksbehandler,
-                                                                        mockSaksbehandlerId)
+        totrinnskontrollService.opprettTotrinnskontrollMedSaksbehandler(
+            behandlingEtterVilkårsvurderingSteg,
+            mockSaksbehandler,
+            mockSaksbehandlerId
+        )
         val behandlingEtterSendTilBeslutter =
             behandlingEtterVilkårsvurderingSteg.leggTilBehandlingStegTilstand(StegType.BESLUTTE_VEDTAK)
         behandlingService.lagreEllerOppdater(behandlingEtterSendTilBeslutter)
@@ -213,10 +227,12 @@ class DokumentServiceTest(
         assertEquals(mockSaksbehandler, vedtaksbrevFellesFelterEtterSendTilBeslutter.saksbehandler)
         assertEquals("System", vedtaksbrevFellesFelterEtterSendTilBeslutter.beslutter)
 
-        totrinnskontrollService.besluttTotrinnskontroll(behandling = behandlingEtterSendTilBeslutter,
-                                                        beslutter = mockBeslutter,
-                                                        beslutterId = mockBeslutterId,
-                                                        beslutning = Beslutning.GODKJENT)
+        totrinnskontrollService.besluttTotrinnskontroll(
+            behandling = behandlingEtterSendTilBeslutter,
+            beslutter = mockBeslutter,
+            beslutterId = mockBeslutterId,
+            beslutning = Beslutning.GODKJENT
+        )
         val behandlingEtterVedtakBesluttet =
             behandlingEtterVilkårsvurderingSteg.leggTilBehandlingStegTilstand(StegType.IVERKSETT_MOT_OPPDRAG)
 
@@ -232,23 +248,25 @@ class DokumentServiceTest(
     @Test
     fun `Skal verifisere at man ikke får generert brev etter at behandlingen er sendt fra beslutter`() {
         val behandlingEtterVedtakBesluttet = kjørStegprosessForFGB(
-                tilSteg = StegType.BESLUTTE_VEDTAK,
-                søkerFnr = randomFnr(),
-                barnasIdenter = listOf(ClientMocks.barnFnr[0]),
-                fagsakService = fagsakService,
-                vedtakService = vedtakService,
-                persongrunnlagService = persongrunnlagService,
-                vilkårsvurderingService = vilkårsvurderingService,
-                stegService = stegService,
-                vedtaksperiodeService = vedtaksperiodeService,
+            tilSteg = StegType.BESLUTTE_VEDTAK,
+            søkerFnr = randomFnr(),
+            barnasIdenter = listOf(ClientMocks.barnFnr[0]),
+            fagsakService = fagsakService,
+            vedtakService = vedtakService,
+            persongrunnlagService = persongrunnlagService,
+            vilkårsvurderingService = vilkårsvurderingService,
+            stegService = stegService,
+            vedtaksperiodeService = vedtaksperiodeService,
         )
 
         val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandlingEtterVedtakBesluttet.id)!!
         val feil = assertThrows<Feil> {
             dokumentService.genererBrevForVedtak(vedtak)
         }
-        assertEquals("Klarte ikke generere vedtaksbrev: Ikke tillatt å generere brev etter at behandlingen er sendt fra beslutter",
-                     feil.message)
+        assertEquals(
+            "Klarte ikke generere vedtaksbrev: Ikke tillatt å generere brev etter at behandlingen er sendt fra beslutter",
+            feil.message
+        )
     }
 
     @Test
@@ -261,22 +279,28 @@ class DokumentServiceTest(
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
 
         val personopplysningGrunnlag =
-                lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barn1Fnr, barn2Fnr))
+            lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barn1Fnr, barn2Fnr))
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
-        val manueltBrevRequest = ManueltBrevRequest(brevmal = BrevType.HENLEGGE_TRUKKET_SØKNAD,
-                                                    mottakerIdent = fnr).byggMottakerdata(behandling,
-                                                                                          persongrunnlagService,
-                                                                                          arbeidsfordelingService)
+        val manueltBrevRequest = ManueltBrevRequest(
+            brevmal = BrevType.HENLEGGE_TRUKKET_SØKNAD,
+            mottakerIdent = fnr
+        ).byggMottakerdata(
+            behandling,
+            persongrunnlagService,
+            arbeidsfordelingService
+        )
         dokumentService.sendManueltBrev(manueltBrevRequest, behandling, behandling.fagsak.id)
 
         io.mockk.verify(exactly = 1) {
-            integrasjonClient.journalførManueltBrev(fnr = manueltBrevRequest.mottakerIdent,
-                                                    fagsakId = behandling.fagsak.id.toString(),
-                                                    journalførendeEnhet = any(),
-                                                    brev = any(),
-                                                    førsteside = null,
-                                                    dokumenttype = manueltBrevRequest.brevmal.dokumenttype)
+            integrasjonClient.journalførManueltBrev(
+                fnr = manueltBrevRequest.mottakerIdent,
+                fagsakId = behandling.fagsak.id.toString(),
+                journalførendeEnhet = any(),
+                brev = any(),
+                førsteside = null,
+                dokumenttype = manueltBrevRequest.brevmal.dokumenttype
+            )
         }
     }
 }

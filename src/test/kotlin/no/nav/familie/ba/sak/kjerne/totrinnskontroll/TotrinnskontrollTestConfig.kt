@@ -6,14 +6,13 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
-import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.domene.Totrinnskontroll
+import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Primary
 import org.springframework.context.annotation.Profile
-
 
 @TestConfiguration
 class TotrinnskontrollTestConfig {
@@ -32,7 +31,7 @@ class TotrinnskontrollTestConfig {
         every { totrinnskontrollService.besluttTotrinnskontroll(any(), any(), any(), any()) } answers {
             val behandling = firstArg<Behandling>()
             val beslutning = lastArg<Beslutning>()
-            behandlingService.oppdaterStatusPåBehandling(behandling.id, if(beslutning.erGodkjent()) BehandlingStatus.IVERKSETTER_VEDTAK else BehandlingStatus.UTREDES )
+            behandlingService.oppdaterStatusPåBehandling(behandling.id, if (beslutning.erGodkjent()) BehandlingStatus.IVERKSETTER_VEDTAK else BehandlingStatus.UTREDES)
 
             val totrinnskontroll = totrinnskontrollRepository.findByBehandlingAndAktiv(behandling.id)!!
             totrinnskontroll.beslutter = "Beslutter"
@@ -41,7 +40,7 @@ class TotrinnskontrollTestConfig {
             totrinnskontrollService.lagreEllerOppdater(totrinnskontroll)
         }
 
-        every { totrinnskontrollService.lagreOgDeaktiverGammel(any()) } answers  {
+        every { totrinnskontrollService.lagreOgDeaktiverGammel(any()) } answers {
             val totrinnskontroll = firstArg<Totrinnskontroll>()
             val aktivTotrinnskontroll = totrinnskontrollRepository.findByBehandlingAndAktiv(totrinnskontroll.behandling.id)
 
@@ -54,11 +53,13 @@ class TotrinnskontrollTestConfig {
 
         every { totrinnskontrollService.opprettTotrinnskontrollMedSaksbehandler(any(), any()) } answers {
             val behandling = firstArg<Behandling>()
-            totrinnskontrollRepository.save(Totrinnskontroll(
+            totrinnskontrollRepository.save(
+                Totrinnskontroll(
                     behandling = behandling,
                     saksbehandler = SikkerhetContext.hentSaksbehandlerNavn(),
                     saksbehandlerId = SikkerhetContext.hentSaksbehandler()
-            ))
+                )
+            )
         }
 
         every { totrinnskontrollService.hentAktivForBehandling(any()) } answers {

@@ -8,33 +8,32 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 
 data class RestVedtak(
-        val aktiv: Boolean,
-        val vedtaksdato: LocalDateTime?,
-        val vedtaksperioderMedBegrunnelser: List<RestVedtaksperiodeMedBegrunnelser>,
-        val id: Long
+    val aktiv: Boolean,
+    val vedtaksdato: LocalDateTime?,
+    val vedtaksperioderMedBegrunnelser: List<RestVedtaksperiodeMedBegrunnelser>,
+    val id: Long
 )
 
 data class RestVedtakBegrunnelse(
-        val id: Long?,
-        val fom: LocalDate?,
-        val tom: LocalDate?,
-        val begrunnelseType: VedtakBegrunnelseType?,
-        var begrunnelse: VedtakBegrunnelseSpesifikasjon?,
-        val brevBegrunnelse: String?,
-        val opprettetTidspunkt: LocalDateTime
+    val id: Long?,
+    val fom: LocalDate?,
+    val tom: LocalDate?,
+    val begrunnelseType: VedtakBegrunnelseType?,
+    var begrunnelse: VedtakBegrunnelseSpesifikasjon?,
+    val brevBegrunnelse: String?,
+    val opprettetTidspunkt: LocalDateTime
 )
 
 data class RestVedtakBegrunnelseTilknyttetVilkår(
-        val id: VedtakBegrunnelseSpesifikasjon,
-        val navn: String,
-        val vilkår: Vilkår?
+    val id: VedtakBegrunnelseSpesifikasjon,
+    val navn: String,
+    val vilkår: Vilkår?
 )
 
 fun Vedtak.tilRestVedtak(vedtaksperioderMedBegrunnelser: List<RestVedtaksperiodeMedBegrunnelser>) =
-        RestVedtak(
-                aktiv = this.aktiv,
-                vedtaksdato = this.vedtaksdato,
-                id = this.id,
-                vedtaksperioderMedBegrunnelser = vedtaksperioderMedBegrunnelser,
-        )
-
+    RestVedtak(
+        aktiv = this.aktiv,
+        vedtaksdato = this.vedtaksdato,
+        id = this.id,
+        vedtaksperioderMedBegrunnelser = vedtaksperioderMedBegrunnelser,
+    )

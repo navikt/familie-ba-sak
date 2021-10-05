@@ -8,5 +8,4 @@ class ApplicationTests : AbstractSpringIntegrationTest() {
     @Test
     fun contextLoads() {
     }
-
 }

@@ -39,7 +39,7 @@ class ApiExceptionHandler {
         return rolleTilgangResponse(rolleTilgangskontrollFeil)
     }
 
-    //Disse kastes av FagsaktilgangConstraint og persontilgangConstraint
+    // Disse kastes av FagsaktilgangConstraint og persontilgangConstraint
     @ExceptionHandler(ConstraintViolationException::class)
     fun handleThrowable(constraintViolationException: ConstraintViolationException): ResponseEntity<Ressurs<Nothing>> {
         return forbidden("Ikke tilgang")
@@ -62,7 +62,7 @@ class ApiExceptionHandler {
     @ExceptionHandler(Feil::class)
     fun handleFunksjonellFeil(feil: Feil): ResponseEntity<Ressurs<Nothing>> {
         val mostSpecificThrowable =
-                if (feil.throwable != null) NestedExceptionUtils.getMostSpecificCause(feil.throwable!!) else null
+            if (feil.throwable != null) NestedExceptionUtils.getMostSpecificCause(feil.throwable!!) else null
 
         return frontendFeil(feil, mostSpecificThrowable)
     }
@@ -76,7 +76,7 @@ class ApiExceptionHandler {
     fun handleEksternTjenesteFeil(feil: EksternTjenesteFeilException): ResponseEntity<EksternTjenesteFeil> {
         val mostSpecificThrowable =
             if (feil.throwable != null) NestedExceptionUtils.getMostSpecificCause(feil.throwable) else null
-        feil.eksternTjenesteFeil.exception  = if (mostSpecificThrowable != null) "[${mostSpecificThrowable::class.java.name}] " else null
+        feil.eksternTjenesteFeil.exception = if (mostSpecificThrowable != null) "[${mostSpecificThrowable::class.java.name}] " else null
 
         if (mostSpecificThrowable != null) {
             val sw = StringWriter()

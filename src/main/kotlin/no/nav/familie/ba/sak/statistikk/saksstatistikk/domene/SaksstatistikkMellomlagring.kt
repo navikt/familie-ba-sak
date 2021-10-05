@@ -63,13 +63,9 @@ data class SaksstatistikkMellomlagring(
     fun jsonToBehandlingDVH(): BehandlingDVH {
         return sakstatistikkObjectMapper.readValue(json, BehandlingDVH::class.java)
     }
-
 }
-
 
 enum class SaksstatistikkMellomlagringType {
     SAK,
     BEHANDLING
 }
-
-

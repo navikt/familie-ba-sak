@@ -13,18 +13,18 @@ internal class EndretUtbetalingAndelTest {
 
     @Test
     fun `Sjekk validering med tomme felt`() {
-        val behandling = lagBehandling();
+        val behandling = lagBehandling()
         val endretUtbetalingAndel = EndretUtbetalingAndel(behandlingId = behandling.id)
         endretUtbetalingAndel.begrunnelse = ""
 
         org.junit.jupiter.api.assertThrows<Feil> {
-            endretUtbetalingAndel.validerUtfyltEndring();
+            endretUtbetalingAndel.validerUtfyltEndring()
         }
     }
 
     @Test
     fun `Sjekk validering med ikke tomme felt`() {
-        val behandling = lagBehandling();
+        val behandling = lagBehandling()
         val endretUtbetalingAndel = EndretUtbetalingAndel(behandlingId = behandling.id)
 
         endretUtbetalingAndel.person = tilfeldigPerson()
@@ -40,7 +40,7 @@ internal class EndretUtbetalingAndelTest {
 
     @Test
     fun `Sjekk validering for delt bosted med tomt felt avtaletidpunkt`() {
-        val behandling = lagBehandling();
+        val behandling = lagBehandling()
         val endretUtbetalingAndel = EndretUtbetalingAndel(behandlingId = behandling.id)
 
         endretUtbetalingAndel.person = tilfeldigPerson()
@@ -52,13 +52,13 @@ internal class EndretUtbetalingAndelTest {
         endretUtbetalingAndel.begrunnelse = "begrunnelse"
 
         org.junit.jupiter.api.assertThrows<Feil> {
-            endretUtbetalingAndel.validerUtfyltEndring();
+            endretUtbetalingAndel.validerUtfyltEndring()
         }
     }
 
     @Test
     fun `Sjekk validering for delt bosted med ikke tomt felt avtaletidpunkt`() {
-        val behandling = lagBehandling();
+        val behandling = lagBehandling()
         val endretUtbetalingAndel = EndretUtbetalingAndel(behandlingId = behandling.id)
 
         endretUtbetalingAndel.person = tilfeldigPerson()

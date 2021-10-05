@@ -14,11 +14,11 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 class BehandlingsresultatSteg(
-        private val behandlingService: BehandlingService,
-        private val simuleringService: SimuleringService,
-        private val vedtakService: VedtakService,
-        private val vedtaksperiodeService: VedtaksperiodeService,
-        private val behandlingsresultatService: BehandlingsresultatService,
+    private val behandlingService: BehandlingService,
+    private val simuleringService: SimuleringService,
+    private val vedtakService: VedtakService,
+    private val vedtaksperiodeService: VedtaksperiodeService,
+    private val behandlingsresultatService: BehandlingsresultatService,
 ) : BehandlingSteg<String> {
 
     @Transactional
@@ -28,13 +28,18 @@ class BehandlingsresultatSteg(
             settBehandlingResultat(behandling, BehandlingResultat.INNVILGET)
         } else {
             val resultat = behandlingsresultatService.utledBehandlingsresultat(behandlingId = behandling.id)
-            behandlingService.oppdaterResultatPåBehandling(behandlingId = behandling.id,
-                                                           resultat = resultat)
+            behandlingService.oppdaterResultatPåBehandling(
+                behandlingId = behandling.id,
+                resultat = resultat
+            )
         }
 
         if (behandlingMedResultat.opprettetÅrsak != BehandlingÅrsak.SATSENDRING) {
-            vedtaksperiodeService.oppdaterVedtakMedVedtaksperioder(vedtak = vedtakService.hentAktivForBehandlingThrows(
-                    behandlingId = behandling.id))
+            vedtaksperiodeService.oppdaterVedtakMedVedtaksperioder(
+                vedtak = vedtakService.hentAktivForBehandlingThrows(
+                    behandlingId = behandling.id
+                )
+            )
         }
 
         if (behandlingMedResultat.skalBehandlesAutomatisk) {

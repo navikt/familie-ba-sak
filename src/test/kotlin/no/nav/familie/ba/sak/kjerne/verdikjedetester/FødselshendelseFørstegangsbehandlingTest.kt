@@ -21,40 +21,46 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 
 class FødselshendelseFørstegangsbehandlingTest(
-        @Autowired private val behandleFødselshendelseTask: BehandleFødselshendelseTask,
-        @Autowired private val fagsakService: FagsakService,
-        @Autowired private val behandlingService: BehandlingService,
-        @Autowired private val vedtakService: VedtakService,
-        @Autowired private val stegService: StegService
+    @Autowired private val behandleFødselshendelseTask: BehandleFødselshendelseTask,
+    @Autowired private val fagsakService: FagsakService,
+    @Autowired private val behandlingService: BehandlingService,
+    @Autowired private val vedtakService: VedtakService,
+    @Autowired private val stegService: StegService
 ) : AbstractVerdikjedetest() {
 
     @Test
     fun `Skal innvilge fødselshendelse på mor med 1 barn uten utbetalinger`() {
-        val scenario = mockServerKlient().lagScenario(RestScenario(
+        val scenario = mockServerKlient().lagScenario(
+            RestScenario(
                 søker = RestScenarioPerson(fødselsdato = "1996-01-12", fornavn = "Mor", etternavn = "Søker"),
                 barna = listOf(
-                        RestScenarioPerson(fødselsdato = LocalDate.now().minusDays(2).toString(),
-                                           fornavn = "Barn",
-                                           etternavn = "Barnesen")
+                    RestScenarioPerson(
+                        fødselsdato = LocalDate.now().minusDays(2).toString(),
+                        fornavn = "Barn",
+                        etternavn = "Barnesen"
+                    )
                 )
-        ))
+            )
+        )
         behandleFødselshendelse(
-                nyBehandlingHendelse = NyBehandlingHendelse(
-                        morsIdent = scenario.søker.ident!!,
-                        barnasIdenter = listOf(scenario.barna.first().ident!!)
-                ),
-                behandleFødselshendelseTask = behandleFødselshendelseTask,
-                fagsakService = fagsakService,
-                behandlingService = behandlingService,
-                vedtakService = vedtakService,
-                stegService = stegService
+            nyBehandlingHendelse = NyBehandlingHendelse(
+                morsIdent = scenario.søker.ident!!,
+                barnasIdenter = listOf(scenario.barna.first().ident!!)
+            ),
+            behandleFødselshendelseTask = behandleFødselshendelseTask,
+            fagsakService = fagsakService,
+            behandlingService = behandlingService,
+            vedtakService = vedtakService,
+            stegService = stegService
         )
 
         val restFagsakEtterBehandlingAvsluttet =
-                familieBaSakKlient().hentFagsak(restHentFagsakForPerson = RestHentFagsakForPerson(personIdent = scenario.søker.ident))
-        generellAssertFagsak(restFagsak = restFagsakEtterBehandlingAvsluttet,
-                             fagsakStatus = FagsakStatus.LØPENDE,
-                             behandlingStegType = StegType.BEHANDLING_AVSLUTTET)
+            familieBaSakKlient().hentFagsak(restHentFagsakForPerson = RestHentFagsakForPerson(personIdent = scenario.søker.ident))
+        generellAssertFagsak(
+            restFagsak = restFagsakEtterBehandlingAvsluttet,
+            fagsakStatus = FagsakStatus.LØPENDE,
+            behandlingStegType = StegType.BEHANDLING_AVSLUTTET
+        )
 
         val aktivBehandling = restFagsakEtterBehandlingAvsluttet.getDataOrThrow().behandlinger.first { it.aktiv }
         assertEquals(BehandlingResultat.INNVILGET, aktivBehandling.resultat)
@@ -62,8 +68,8 @@ class FødselshendelseFørstegangsbehandlingTest(
         val utbetalingsperioder = aktivBehandling.utbetalingsperioder
 
         val gjeldendeUtbetalingsperiode = utbetalingsperioder.find {
-                    it.periodeFom.toYearMonth() >= SatsService.tilleggOrdinærSatsNesteMånedTilTester.gyldigFom.toYearMonth() &&
-                    it.periodeFom.toYearMonth() <= SatsService.tilleggOrdinærSatsNesteMånedTilTester.gyldigTom.toYearMonth()
+            it.periodeFom.toYearMonth() >= SatsService.tilleggOrdinærSatsNesteMånedTilTester.gyldigFom.toYearMonth() &&
+                it.periodeFom.toYearMonth() <= SatsService.tilleggOrdinærSatsNesteMånedTilTester.gyldigTom.toYearMonth()
         }!!
 
         assertUtbetalingsperiode(gjeldendeUtbetalingsperiode, 1, SatsService.tilleggOrdinærSatsNesteMånedTilTester.beløp * 1)
@@ -71,34 +77,42 @@ class FødselshendelseFørstegangsbehandlingTest(
 
     @Test
     fun `Skal innvilge fødselshendelse på mor med 2 barn uten utbetalinger`() {
-        val scenario = mockServerKlient().lagScenario(RestScenario(
+        val scenario = mockServerKlient().lagScenario(
+            RestScenario(
                 søker = RestScenarioPerson(fødselsdato = "1996-01-12", fornavn = "Mor", etternavn = "Søker"),
                 barna = listOf(
-                        RestScenarioPerson(fødselsdato = LocalDate.now().minusDays(2).toString(),
-                                           fornavn = "Barn",
-                                           etternavn = "Barnesen"),
-                        RestScenarioPerson(fødselsdato = LocalDate.now().minusDays(2).toString(),
-                                           fornavn = "Barn",
-                                           etternavn = "Barnesen 2")
+                    RestScenarioPerson(
+                        fødselsdato = LocalDate.now().minusDays(2).toString(),
+                        fornavn = "Barn",
+                        etternavn = "Barnesen"
+                    ),
+                    RestScenarioPerson(
+                        fødselsdato = LocalDate.now().minusDays(2).toString(),
+                        fornavn = "Barn",
+                        etternavn = "Barnesen 2"
+                    )
                 )
-        ))
+            )
+        )
         behandleFødselshendelse(
-                nyBehandlingHendelse = NyBehandlingHendelse(
-                        morsIdent = scenario.søker.ident!!,
-                        barnasIdenter = scenario.barna.map { it.ident!! }
-                ),
-                behandleFødselshendelseTask = behandleFødselshendelseTask,
-                fagsakService = fagsakService,
-                behandlingService = behandlingService,
-                vedtakService = vedtakService,
-                stegService = stegService
+            nyBehandlingHendelse = NyBehandlingHendelse(
+                morsIdent = scenario.søker.ident!!,
+                barnasIdenter = scenario.barna.map { it.ident!! }
+            ),
+            behandleFødselshendelseTask = behandleFødselshendelseTask,
+            fagsakService = fagsakService,
+            behandlingService = behandlingService,
+            vedtakService = vedtakService,
+            stegService = stegService
         )
 
         val restFagsakEtterBehandlingAvsluttet =
-                familieBaSakKlient().hentFagsak(restHentFagsakForPerson = RestHentFagsakForPerson(personIdent = scenario.søker.ident))
-        generellAssertFagsak(restFagsak = restFagsakEtterBehandlingAvsluttet,
-                             fagsakStatus = FagsakStatus.LØPENDE,
-                             behandlingStegType = StegType.BEHANDLING_AVSLUTTET)
+            familieBaSakKlient().hentFagsak(restHentFagsakForPerson = RestHentFagsakForPerson(personIdent = scenario.søker.ident))
+        generellAssertFagsak(
+            restFagsak = restFagsakEtterBehandlingAvsluttet,
+            fagsakStatus = FagsakStatus.LØPENDE,
+            behandlingStegType = StegType.BEHANDLING_AVSLUTTET
+        )
 
         val aktivBehandling = restFagsakEtterBehandlingAvsluttet.getDataOrThrow().behandlinger.first { it.aktiv }
         assertEquals(BehandlingResultat.INNVILGET, aktivBehandling.resultat)
@@ -106,7 +120,7 @@ class FødselshendelseFørstegangsbehandlingTest(
         val utbetalingsperioder = aktivBehandling.utbetalingsperioder
         val gjeldendeUtbetalingsperiode = utbetalingsperioder.find {
             it.periodeFom.toYearMonth() >= SatsService.tilleggOrdinærSatsNesteMånedTilTester.gyldigFom.toYearMonth() &&
-            it.periodeFom.toYearMonth() <= SatsService.tilleggOrdinærSatsNesteMånedTilTester.gyldigTom.toYearMonth()
+                it.periodeFom.toYearMonth() <= SatsService.tilleggOrdinærSatsNesteMånedTilTester.gyldigTom.toYearMonth()
         }!!
 
         assertUtbetalingsperiode(gjeldendeUtbetalingsperiode, 2, SatsService.tilleggOrdinærSatsNesteMånedTilTester.beløp * 2)

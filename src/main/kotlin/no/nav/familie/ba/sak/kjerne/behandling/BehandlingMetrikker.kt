@@ -13,40 +13,43 @@ import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeRepository
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import org.springframework.stereotype.Component
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 
 @Component
 class BehandlingMetrikker(
-        private val behandlingRepository: BehandlingRepository,
-        private val vedtakRepository: VedtakRepository,
-        private val vedtaksperiodeRepository: VedtaksperiodeRepository,
-        private val featureToggleService: FeatureToggleService
+    private val behandlingRepository: BehandlingRepository,
+    private val vedtakRepository: VedtakRepository,
+    private val vedtaksperiodeRepository: VedtaksperiodeRepository,
+    private val featureToggleService: FeatureToggleService
 ) {
 
     private val antallManuelleBehandlinger: Counter = Metrics.counter("behandling.behandlinger", "saksbehandling", "manuell")
     private val antallAutomatiskeBehandlinger: Counter =
-            Metrics.counter("behandling.behandlinger", "saksbehandling", "automatisk")
+        Metrics.counter("behandling.behandlinger", "saksbehandling", "automatisk")
 
     private val antallManuelleBehandlingerOpprettet: Map<BehandlingType, Counter> = initBehandlingTypeMetrikker("manuell")
     private val antallAutomatiskeBehandlingerOpprettet: Map<BehandlingType, Counter> = initBehandlingTypeMetrikker("automatisk")
     private val behandlingÅrsak: Map<BehandlingÅrsak, Counter> = initBehandlingÅrsakMetrikker()
 
     private val antallBehandlingResultat: Map<BehandlingResultat, Counter> =
-            BehandlingResultat.values().map {
-                it to Metrics.counter("behandling.resultat",
-                                      "type", it.name,
-                                      "beskrivelse", it.displayName)
-            }.toMap()
+        BehandlingResultat.values().map {
+            it to Metrics.counter(
+                "behandling.resultat",
+                "type", it.name,
+                "beskrivelse", it.displayName
+            )
+        }.toMap()
 
     private val antallBrevBegrunnelseSpesifikasjon: Map<VedtakBegrunnelseSpesifikasjon, Counter> =
-            VedtakBegrunnelseSpesifikasjon.values().map {
-                it to Metrics.counter("brevbegrunnelse",
-                                      "type", it.name,
-                                      "beskrivelse", it.tittel)
-            }.toMap()
+        VedtakBegrunnelseSpesifikasjon.values().map {
+            it to Metrics.counter(
+                "brevbegrunnelse",
+                "type", it.name,
+                "beskrivelse", it.tittel
+            )
+        }.toMap()
 
     private val behandlingstid: DistributionSummary = Metrics.summary("behandling.tid")
 
@@ -81,7 +84,7 @@ class BehandlingMetrikker(
     private fun økBegrunnelseMetrikk(behandling: Behandling) {
         if (!behandlingRepository.finnBehandling(behandling.id).erHenlagt()) {
             val vedtak = vedtakRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
-                         ?: error("Finner ikke aktivt vedtak på behandling ${behandling.id}")
+                ?: error("Finner ikke aktivt vedtak på behandling ${behandling.id}")
 
             val vedtaksperiodeMedBegrunnelser = vedtaksperiodeRepository.finnVedtaksperioderFor(vedtakId = vedtak.id)
 
@@ -93,22 +96,26 @@ class BehandlingMetrikker(
 
     private fun initBehandlingTypeMetrikker(type: String): Map<BehandlingType, Counter> {
         return BehandlingType.values().map {
-            it to Metrics.counter("behandling.opprettet", "type",
-                                  it.name,
-                                  "beskrivelse",
-                                  it.visningsnavn,
-                                  "saksbehandling",
-                                  type)
+            it to Metrics.counter(
+                "behandling.opprettet", "type",
+                it.name,
+                "beskrivelse",
+                it.visningsnavn,
+                "saksbehandling",
+                type
+            )
         }.toMap()
     }
 
     private fun initBehandlingÅrsakMetrikker(): Map<BehandlingÅrsak, Counter> {
         return BehandlingÅrsak.values().map {
-            it to Metrics.counter("behandling.aarsak",
-                                  "aarsak",
-                                  it.name,
-                                  "beskrivelse",
-                                  it.visningsnavn)
+            it to Metrics.counter(
+                "behandling.aarsak",
+                "aarsak",
+                it.name,
+                "beskrivelse",
+                it.visningsnavn
+            )
         }.toMap()
     }
 }
