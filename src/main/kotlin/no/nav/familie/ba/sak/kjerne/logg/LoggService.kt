@@ -72,7 +72,7 @@ class LoggService(
     }
 
     private fun tilBehandlingstema(underkategori: BehandlingUnderkategori, kategori: BehandlingKategori): String {
-        return kategori.visningsnavn + " " + underkategori.visningsnavn.lowercase()
+        return "${kategori.visningsnavn}  ${underkategori.visningsnavn.lowercase()}"
     }
 
     fun opprettEndretBehandlingstema(behandling: Behandling,
