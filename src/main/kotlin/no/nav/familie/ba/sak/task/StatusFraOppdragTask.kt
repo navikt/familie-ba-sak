@@ -21,13 +21,15 @@ import org.springframework.stereotype.Service
  * Hvis tasken/steget feiler i denne tida så lager den en ny task og kjører den kl 06
  */
 @Service
-@TaskStepBeskrivelse(taskStepType = TASK_STEP_TYPE,
-                     beskrivelse = "Henter status fra oppdrag",
-                     maxAntallFeil = 100)
+@TaskStepBeskrivelse(
+    taskStepType = TASK_STEP_TYPE,
+    beskrivelse = "Henter status fra oppdrag",
+    maxAntallFeil = 100
+)
 class StatusFraOppdragTask(
-        private val stegService: StegService,
-        private val behandlingService: BehandlingService,
-        private val taskRepository: TaskRepositoryWrapper
+    private val stegService: StegService,
+    private val behandlingService: BehandlingService,
+    private val taskRepository: TaskRepositoryWrapper
 ) : AsyncTaskStep {
 
     /**
@@ -38,8 +40,8 @@ class StatusFraOppdragTask(
         val statusFraOppdragDTO = objectMapper.readValue(task.payload, StatusFraOppdragDTO::class.java)
 
         stegService.håndterStatusFraØkonomi(
-                behandling = behandlingService.hent(behandlingId = statusFraOppdragDTO.behandlingsId),
-                statusFraOppdragMedTask = StatusFraOppdragMedTask(statusFraOppdragDTO = statusFraOppdragDTO, task = task)
+            behandling = behandlingService.hent(behandlingId = statusFraOppdragDTO.behandlingsId),
+            statusFraOppdragMedTask = StatusFraOppdragMedTask(statusFraOppdragDTO = statusFraOppdragDTO, task = task)
         )
     }
 

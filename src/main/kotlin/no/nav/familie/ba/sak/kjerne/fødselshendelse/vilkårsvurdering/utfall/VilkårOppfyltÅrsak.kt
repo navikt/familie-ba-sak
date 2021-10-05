@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.fødselshendelse.vilkårsvurdering.utfall
 
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.EvalueringÅrsak
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 
 enum class VilkårOppfyltÅrsak(val beskrivelse: String, val vilkår: Vilkår) : EvalueringÅrsak {
 
@@ -20,18 +20,23 @@ enum class VilkårOppfyltÅrsak(val beskrivelse: String, val vilkår: Vilkår) :
     BOR_I_RIKET("Er bosatt i riket", Vilkår.BOSATT_I_RIKET),
 
     // Lovlig opphold
-    AUTOMATISK_VURDERING_BARN_LOVLIG_OPPHOLD("Ikke separat oppholdsvurdering for barnet ved automatisk vedtak.",
-                                             Vilkår.LOVLIG_OPPHOLD),
+    AUTOMATISK_VURDERING_BARN_LOVLIG_OPPHOLD(
+        "Ikke separat oppholdsvurdering for barnet ved automatisk vedtak.",
+        Vilkår.LOVLIG_OPPHOLD
+    ),
     NORDISK_STATSBORGER("Er nordisk statsborger.", Vilkår.LOVLIG_OPPHOLD),
     TREDJELANDSBORGER_MED_LOVLIG_OPPHOLD("Er tredjelandsborger med lovlig opphold", Vilkår.LOVLIG_OPPHOLD),
-    UKJENT_STATSBORGERSKAP_MED_LOVLIG_OPPHOLD("Er statsløs eller mangler statsborgerskap med lovlig opphold",
-                                              Vilkår.LOVLIG_OPPHOLD),
+    UKJENT_STATSBORGERSKAP_MED_LOVLIG_OPPHOLD(
+        "Er statsløs eller mangler statsborgerskap med lovlig opphold",
+        Vilkår.LOVLIG_OPPHOLD
+    ),
     EØS_MED_LØPENDE_ARBEIDSFORHOLD("Mor er EØS-borger, men har et løpende arbeidsforhold i Norge.", Vilkår.LOVLIG_OPPHOLD),
     ANNEN_FORELDER_NORDISK("Annen forelder er norsk eller nordisk statsborger.", Vilkår.LOVLIG_OPPHOLD),
-    ANNEN_FORELDER_EØS_MEN_MED_LØPENDE_ARBEIDSFORHOLD("Annen forelder er fra EØS, men har et løpende arbeidsforhold i Norge.",
-                                                      Vilkår.LOVLIG_OPPHOLD),
+    ANNEN_FORELDER_EØS_MEN_MED_LØPENDE_ARBEIDSFORHOLD(
+        "Annen forelder er fra EØS, men har et løpende arbeidsforhold i Norge.",
+        Vilkår.LOVLIG_OPPHOLD
+    ),
     MOR_BODD_OG_JOBBET_I_NORGE_SISTE_5_ÅR("Mor har bodd og jobbet i Norge siste 5 år.", Vilkår.LOVLIG_OPPHOLD);
-
 
     override fun hentBeskrivelse(): String {
         return beskrivelse

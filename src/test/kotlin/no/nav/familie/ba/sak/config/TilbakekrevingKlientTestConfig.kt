@@ -23,7 +23,7 @@ class TilbakekrevingKlientTestConfig {
 
         every { tilbakekrevingKlient.harÅpenTilbakekrevingsbehandling(any()) } returns false
 
-        every { tilbakekrevingKlient.hentTilbakekrevingsbehandlinger(any()) } returns emptyList();
+        every { tilbakekrevingKlient.hentTilbakekrevingsbehandlinger(any()) } returns emptyList()
 
         return tilbakekrevingKlient
     }

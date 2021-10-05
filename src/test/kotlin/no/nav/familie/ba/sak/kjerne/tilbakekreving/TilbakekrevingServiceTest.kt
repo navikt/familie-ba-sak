@@ -20,18 +20,18 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import java.util.*
+import java.util.Properties
 
 class TilbakekrevingServiceTest(
-        @Autowired private val vilkårsvurderingService: VilkårsvurderingService,
-        @Autowired private val vedtakService: VedtakService,
-        @Autowired private val persongrunnlagService: PersongrunnlagService,
-        @Autowired private val fagsakService: FagsakService,
-        @Autowired private val stegService: StegService,
-        @Autowired private val tilbakekrevingService: TilbakekrevingService,
-        @Autowired private val tilbakekrevingRepository: TilbakekrevingRepository,
-        @Autowired private val vedtaksperiodeService: VedtaksperiodeService,
-        @Autowired private val databaseCleanupService: DatabaseCleanupService
+    @Autowired private val vilkårsvurderingService: VilkårsvurderingService,
+    @Autowired private val vedtakService: VedtakService,
+    @Autowired private val persongrunnlagService: PersongrunnlagService,
+    @Autowired private val fagsakService: FagsakService,
+    @Autowired private val stegService: StegService,
+    @Autowired private val tilbakekrevingService: TilbakekrevingService,
+    @Autowired private val tilbakekrevingRepository: TilbakekrevingRepository,
+    @Autowired private val vedtaksperiodeService: VedtaksperiodeService,
+    @Autowired private val databaseCleanupService: DatabaseCleanupService
 ) : AbstractSpringIntegrationTest() {
 
     @BeforeAll
@@ -43,15 +43,15 @@ class TilbakekrevingServiceTest(
     @Tag("integration")
     fun `tilbakekreving skal bli OPPRETT_TILBAKEKREVING_MED_VARSEL når man oppretter tilbakekreving med varsel`() {
         val behandling = kjørStegprosessForFGB(
-                tilSteg = StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI,
-                søkerFnr = randomFnr(),
-                barnasIdenter = listOf(ClientMocks.barnFnr[0]),
-                fagsakService = fagsakService,
-                vedtakService = vedtakService,
-                persongrunnlagService = persongrunnlagService,
-                vilkårsvurderingService = vilkårsvurderingService,
-                stegService = stegService,
-                vedtaksperiodeService = vedtaksperiodeService,
+            tilSteg = StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI,
+            søkerFnr = randomFnr(),
+            barnasIdenter = listOf(ClientMocks.barnFnr[0]),
+            fagsakService = fagsakService,
+            vedtakService = vedtakService,
+            persongrunnlagService = persongrunnlagService,
+            vilkårsvurderingService = vilkårsvurderingService,
+            stegService = stegService,
+            vedtaksperiodeService = vedtaksperiodeService,
         )
 
         val restTilbakekreving = opprettRestTilbakekreving()

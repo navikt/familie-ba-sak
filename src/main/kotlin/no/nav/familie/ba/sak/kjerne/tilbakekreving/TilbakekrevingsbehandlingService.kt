@@ -10,17 +10,23 @@ class TilbakekrevingsbehandlingService(private val tilbakekrevingKlient: Tilbake
     fun hentRestTilbakekrevingsbehandlinger(fagsakId: Long): List<RestTilbakekrevingsbehandling> {
         val behandlinger = tilbakekrevingKlient.hentTilbakekrevingsbehandlinger(fagsakId)
         return behandlinger.map {
-            RestTilbakekrevingsbehandling(behandlingId = it.behandlingId,
-                                          opprettetTidspunkt = it.opprettetTidspunkt,
-                                          aktiv = it.aktiv,
-                                          årsak = it.årsak,
-                                          type = it.type,
-                                          status = it.status,
-                                          resultat = it.resultat,
-                                          vedtakForBehandling = if (it.vedtaksdato != null) {
-                                              listOf(RestTilbakekrevingsVedtak(aktiv = true,
-                                                                               vedtaksdato = it.vedtaksdato!!))
-                                          } else emptyList())
+            RestTilbakekrevingsbehandling(
+                behandlingId = it.behandlingId,
+                opprettetTidspunkt = it.opprettetTidspunkt,
+                aktiv = it.aktiv,
+                årsak = it.årsak,
+                type = it.type,
+                status = it.status,
+                resultat = it.resultat,
+                vedtakForBehandling = if (it.vedtaksdato != null) {
+                    listOf(
+                        RestTilbakekrevingsVedtak(
+                            aktiv = true,
+                            vedtaksdato = it.vedtaksdato!!
+                        )
+                    )
+                } else emptyList()
+            )
         }
     }
 }

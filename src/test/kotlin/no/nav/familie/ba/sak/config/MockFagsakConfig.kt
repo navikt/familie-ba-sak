@@ -17,30 +17,36 @@ import javax.annotation.PostConstruct
 
 @Component
 @Profile("mock-pdl-test-søk")
-class MockFagsakConfig (
-        @Autowired
-        private val fagsakService: FagsakService,
+class MockFagsakConfig(
+    @Autowired
+    private val fagsakService: FagsakService,
 
-        @Autowired
-        private val behandlingService: BehandlingService,
+    @Autowired
+    private val behandlingService: BehandlingService,
 
-        @Autowired
-        private val stegService: StegService
-){
+    @Autowired
+    private val stegService: StegService
+) {
     @PostConstruct
-    fun createMockFagsak(){
-        fagsakService.hentEllerOpprettFagsak(FagsakRequest(
+    fun createMockFagsak() {
+        fagsakService.hentEllerOpprettFagsak(
+            FagsakRequest(
                 "12345678910"
-        ))
+            )
+        )
 
-        val førsteBehandling = stegService.håndterNyBehandling(NyBehandling(
+        val førsteBehandling = stegService.håndterNyBehandling(
+            NyBehandling(
                 BehandlingKategori.NASJONAL,
                 BehandlingUnderkategori.ORDINÆR,
                 "12345678910",
                 BehandlingType.FØRSTEGANGSBEHANDLING
-        ))
-        stegService.håndterPersongrunnlag(førsteBehandling,
-                RegistrerPersongrunnlagDTO(ident = "12345678910", barnasIdenter = listOf("31245678910")))
+            )
+        )
+        stegService.håndterPersongrunnlag(
+            førsteBehandling,
+            RegistrerPersongrunnlagDTO(ident = "12345678910", barnasIdenter = listOf("31245678910"))
+        )
 
         behandlingService.oppdaterStatusPåBehandling(førsteBehandling.id, BehandlingStatus.AVSLUTTET)
     }

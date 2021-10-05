@@ -19,14 +19,18 @@ internal class PersongrunnlagServiceTest {
         val nyttbarn = randomFnr()
 
         val forrigeBehandling = lagBehandling()
-        val forrigeGrunnlag = lagTestPersonopplysningGrunnlag(behandlingId = forrigeBehandling.id,
-                                                              søkerPersonIdent = søker,
-                                                              barnasIdenter = listOf(barn))
+        val forrigeGrunnlag = lagTestPersonopplysningGrunnlag(
+            behandlingId = forrigeBehandling.id,
+            søkerPersonIdent = søker,
+            barnasIdenter = listOf(barn)
+        )
 
         val behandling = lagBehandling()
-        val grunnlag = lagTestPersonopplysningGrunnlag(behandlingId = behandling.id,
-                                                       søkerPersonIdent = søker,
-                                                       barnasIdenter = listOf(barn, nyttbarn))
+        val grunnlag = lagTestPersonopplysningGrunnlag(
+            behandlingId = behandling.id,
+            søkerPersonIdent = søker,
+            barnasIdenter = listOf(barn, nyttbarn)
+        )
 
         every { persongrunnlagService.hentAktiv(forrigeBehandling.id) } returns forrigeGrunnlag
         every { persongrunnlagService.hentAktiv(behandling.id) } returns grunnlag
@@ -35,5 +39,4 @@ internal class PersongrunnlagServiceTest {
         val nye = persongrunnlagService.finnNyeBarn(forrigeBehandling = forrigeBehandling, behandling = behandling)
         assertEquals(nyttbarn, nye.singleOrNull()!!.personIdent.ident)
     }
-
 }

@@ -23,20 +23,20 @@ import java.time.LocalDate
 
 @Tag("integration")
 class BehandlingServiceTest(
-        @Autowired
-        private val fagsakService: FagsakService,
+    @Autowired
+    private val fagsakService: FagsakService,
 
-        @Autowired
-        private val behandlingService: BehandlingService,
+    @Autowired
+    private val behandlingService: BehandlingService,
 
-        @Autowired
-        private val tilkjentYtelseRepository: TilkjentYtelseRepository,
+    @Autowired
+    private val tilkjentYtelseRepository: TilkjentYtelseRepository,
 
-        @Autowired
-        private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
+    @Autowired
+    private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
 
-        @Autowired
-        private val databaseCleanupService: DatabaseCleanupService
+    @Autowired
+    private val databaseCleanupService: DatabaseCleanupService
 ) : AbstractSpringIntegrationTest() {
 
     @BeforeAll
@@ -51,14 +51,20 @@ class BehandlingServiceTest(
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
 
-        tilkjentYtelseRepository.save(lagInitiellTilkjentYtelse(behandling).also {
-            it.utbetalingsoppdrag = "Utbetalingsoppdrag()"
-        })
+        tilkjentYtelseRepository.save(
+            lagInitiellTilkjentYtelse(behandling).also {
+                it.utbetalingsoppdrag = "Utbetalingsoppdrag()"
+            }
+        )
         ferdigstillBehandling(behandling)
 
         val revurderingInnvilgetBehandling =
-                behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak = fagsak,
-                                                                                   behandlingType = BehandlingType.REVURDERING))
+            behandlingService.lagreNyOgDeaktiverGammelBehandling(
+                lagBehandling(
+                    fagsak = fagsak,
+                    behandlingType = BehandlingType.REVURDERING
+                )
+            )
 
         val forrigeBehandling = behandlingService.hentForrigeBehandlingSomErIverksatt(behandling = revurderingInnvilgetBehandling)
         Assertions.assertNotNull(forrigeBehandling)
@@ -73,14 +79,20 @@ class BehandlingServiceTest(
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søker)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
 
-        tilkjentYtelseRepository.save(TilkjentYtelse(behandling = behandling,
-                                                     opprettetDato = LocalDate.now(),
-                                                     endretDato = LocalDate.now(),
-                                                     andelerTilkjentYtelse = mutableSetOf()))
+        tilkjentYtelseRepository.save(
+            TilkjentYtelse(
+                behandling = behandling,
+                opprettetDato = LocalDate.now(),
+                endretDato = LocalDate.now(),
+                andelerTilkjentYtelse = mutableSetOf()
+            )
+        )
 
-        val testPersonopplysningsGrunnlag = lagTestPersonopplysningGrunnlag(behandlingId = behandling.id,
-                                                                            søkerPersonIdent = søker,
-                                                                            barnasIdenter = listOf(barn))
+        val testPersonopplysningsGrunnlag = lagTestPersonopplysningGrunnlag(
+            behandlingId = behandling.id,
+            søkerPersonIdent = søker,
+            barnasIdenter = listOf(barn)
+        )
         personopplysningGrunnlagRepository.save(testPersonopplysningsGrunnlag)
 
         Assertions.assertEquals(0, behandlingService.finnBarnFraBehandlingMedTilkjentYtsele(behandlingId = behandling.id).size)
@@ -91,4 +103,3 @@ class BehandlingServiceTest(
         behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(behandling.id, StegType.BEHANDLING_AVSLUTTET)
     }
 }
-

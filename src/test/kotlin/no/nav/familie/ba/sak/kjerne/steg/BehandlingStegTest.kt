@@ -18,30 +18,31 @@ class BehandlingStegTest {
         var steg = FØRSTE_STEG
 
         listOf(
-                StegType.REGISTRERE_PERSONGRUNNLAG,
-                StegType.REGISTRERE_SØKNAD,
-                StegType.VILKÅRSVURDERING,
-                StegType.BEHANDLINGSRESULTAT,
-                StegType.VURDER_TILBAKEKREVING,
-                StegType.SEND_TIL_BESLUTTER,
-                StegType.BESLUTTE_VEDTAK,
-                StegType.IVERKSETT_MOT_OPPDRAG,
-                StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI,
-                StegType.IVERKSETT_MOT_FAMILIE_TILBAKE,
-                StegType.JOURNALFØR_VEDTAKSBREV,
-                StegType.DISTRIBUER_VEDTAKSBREV,
-                StegType.FERDIGSTILLE_BEHANDLING,
-                StegType.BEHANDLING_AVSLUTTET
+            StegType.REGISTRERE_PERSONGRUNNLAG,
+            StegType.REGISTRERE_SØKNAD,
+            StegType.VILKÅRSVURDERING,
+            StegType.BEHANDLINGSRESULTAT,
+            StegType.VURDER_TILBAKEKREVING,
+            StegType.SEND_TIL_BESLUTTER,
+            StegType.BESLUTTE_VEDTAK,
+            StegType.IVERKSETT_MOT_OPPDRAG,
+            StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI,
+            StegType.IVERKSETT_MOT_FAMILIE_TILBAKE,
+            StegType.JOURNALFØR_VEDTAKSBREV,
+            StegType.DISTRIBUER_VEDTAKSBREV,
+            StegType.FERDIGSTILLE_BEHANDLING,
+            StegType.BEHANDLING_AVSLUTTET
         ).forEach {
             assertEquals(steg, it)
             steg = hentNesteSteg(
-                    behandling = lagBehandling(
-                            behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-                            årsak = BehandlingÅrsak.SØKNAD
-                    ).copy(
-                            resultat = BehandlingResultat.INNVILGET
-                    ),
-                    utførendeStegType = it)
+                behandling = lagBehandling(
+                    behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                    årsak = BehandlingÅrsak.SØKNAD
+                ).copy(
+                    resultat = BehandlingResultat.INNVILGET
+                ),
+                utførendeStegType = it
+            )
         }
     }
 
@@ -50,27 +51,28 @@ class BehandlingStegTest {
         var steg = FØRSTE_STEG
 
         listOf(
-                StegType.REGISTRERE_PERSONGRUNNLAG,
-                StegType.REGISTRERE_SØKNAD,
-                StegType.VILKÅRSVURDERING,
-                StegType.BEHANDLINGSRESULTAT,
-                StegType.VURDER_TILBAKEKREVING,
-                StegType.SEND_TIL_BESLUTTER,
-                StegType.BESLUTTE_VEDTAK,
-                StegType.JOURNALFØR_VEDTAKSBREV,
-                StegType.DISTRIBUER_VEDTAKSBREV,
-                StegType.FERDIGSTILLE_BEHANDLING,
-                StegType.BEHANDLING_AVSLUTTET
+            StegType.REGISTRERE_PERSONGRUNNLAG,
+            StegType.REGISTRERE_SØKNAD,
+            StegType.VILKÅRSVURDERING,
+            StegType.BEHANDLINGSRESULTAT,
+            StegType.VURDER_TILBAKEKREVING,
+            StegType.SEND_TIL_BESLUTTER,
+            StegType.BESLUTTE_VEDTAK,
+            StegType.JOURNALFØR_VEDTAKSBREV,
+            StegType.DISTRIBUER_VEDTAKSBREV,
+            StegType.FERDIGSTILLE_BEHANDLING,
+            StegType.BEHANDLING_AVSLUTTET
         ).forEach {
             assertEquals(steg, it)
             steg = hentNesteSteg(
-                    behandling = lagBehandling(
-                            behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-                            årsak = BehandlingÅrsak.SØKNAD
-                    ).copy(
-                            resultat = BehandlingResultat.AVSLÅTT
-                    ),
-                    utførendeStegType = it)
+                behandling = lagBehandling(
+                    behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                    årsak = BehandlingÅrsak.SØKNAD
+                ).copy(
+                    resultat = BehandlingResultat.AVSLÅTT
+                ),
+                utførendeStegType = it
+            )
         }
     }
 
@@ -79,24 +81,24 @@ class BehandlingStegTest {
         var steg = FØRSTE_STEG
 
         listOf(
-                StegType.REGISTRERE_PERSONGRUNNLAG,
-                StegType.FILTRERING_FØDSELSHENDELSER,
-                StegType.VILKÅRSVURDERING,
-                StegType.BEHANDLINGSRESULTAT,
-                StegType.IVERKSETT_MOT_OPPDRAG,
-                StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI,
-                StegType.JOURNALFØR_VEDTAKSBREV,
-                StegType.DISTRIBUER_VEDTAKSBREV,
-                StegType.FERDIGSTILLE_BEHANDLING,
-                StegType.BEHANDLING_AVSLUTTET
+            StegType.REGISTRERE_PERSONGRUNNLAG,
+            StegType.FILTRERING_FØDSELSHENDELSER,
+            StegType.VILKÅRSVURDERING,
+            StegType.BEHANDLINGSRESULTAT,
+            StegType.IVERKSETT_MOT_OPPDRAG,
+            StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI,
+            StegType.JOURNALFØR_VEDTAKSBREV,
+            StegType.DISTRIBUER_VEDTAKSBREV,
+            StegType.FERDIGSTILLE_BEHANDLING,
+            StegType.BEHANDLING_AVSLUTTET
         ).forEach {
             assertEquals(steg, it)
             steg = hentNesteSteg(
-                    behandling = lagBehandling(
-                            behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-                            årsak = BehandlingÅrsak.FØDSELSHENDELSE,
-                    ).copy(resultat = BehandlingResultat.INNVILGET),
-                    utførendeStegType = it
+                behandling = lagBehandling(
+                    behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                    årsak = BehandlingÅrsak.FØDSELSHENDELSE,
+                ).copy(resultat = BehandlingResultat.INNVILGET),
+                utførendeStegType = it
             )
         }
     }
@@ -106,19 +108,19 @@ class BehandlingStegTest {
         var steg = FØRSTE_STEG
 
         listOf(
-                StegType.REGISTRERE_PERSONGRUNNLAG,
-                StegType.FILTRERING_FØDSELSHENDELSER,
-                StegType.VILKÅRSVURDERING,
-                StegType.BEHANDLINGSRESULTAT,
-                StegType.HENLEGG_BEHANDLING,
+            StegType.REGISTRERE_PERSONGRUNNLAG,
+            StegType.FILTRERING_FØDSELSHENDELSER,
+            StegType.VILKÅRSVURDERING,
+            StegType.BEHANDLINGSRESULTAT,
+            StegType.HENLEGG_BEHANDLING,
         ).forEach {
             assertEquals(steg, it)
             steg = hentNesteSteg(
-                    behandling = lagBehandling(
-                            behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-                            årsak = BehandlingÅrsak.FØDSELSHENDELSE,
-                    ).copy(resultat = BehandlingResultat.AVSLÅTT),
-                    utførendeStegType = it
+                behandling = lagBehandling(
+                    behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                    årsak = BehandlingÅrsak.FØDSELSHENDELSE,
+                ).copy(resultat = BehandlingResultat.AVSLÅTT),
+                utførendeStegType = it
             )
         }
     }
@@ -128,22 +130,22 @@ class BehandlingStegTest {
         var steg = FØRSTE_STEG
 
         listOf(
-                StegType.REGISTRERE_PERSONGRUNNLAG,
-                StegType.VILKÅRSVURDERING,
-                StegType.BEHANDLINGSRESULTAT,
-                StegType.IVERKSETT_MOT_OPPDRAG,
-                StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI,
-                StegType.FERDIGSTILLE_BEHANDLING,
-                StegType.BEHANDLING_AVSLUTTET
+            StegType.REGISTRERE_PERSONGRUNNLAG,
+            StegType.VILKÅRSVURDERING,
+            StegType.BEHANDLINGSRESULTAT,
+            StegType.IVERKSETT_MOT_OPPDRAG,
+            StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI,
+            StegType.FERDIGSTILLE_BEHANDLING,
+            StegType.BEHANDLING_AVSLUTTET
         ).forEach {
             assertEquals(steg, it)
             assertNotEquals(StegType.JOURNALFØR_VEDTAKSBREV, it)
             steg = hentNesteSteg(
-                    behandling = lagBehandling(
-                            behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
-                            årsak = BehandlingÅrsak.TEKNISK_OPPHØR
-                    ),
-                    utførendeStegType = it
+                behandling = lagBehandling(
+                    behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
+                    årsak = BehandlingÅrsak.TEKNISK_OPPHØR
+                ),
+                utførendeStegType = it
             )
         }
     }
@@ -153,22 +155,22 @@ class BehandlingStegTest {
         var steg = FØRSTE_STEG
 
         listOf(
-                StegType.REGISTRERE_PERSONGRUNNLAG,
-                StegType.VILKÅRSVURDERING,
-                StegType.BEHANDLINGSRESULTAT,
-                StegType.IVERKSETT_MOT_OPPDRAG,
-                StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI,
-                StegType.FERDIGSTILLE_BEHANDLING,
-                StegType.BEHANDLING_AVSLUTTET
+            StegType.REGISTRERE_PERSONGRUNNLAG,
+            StegType.VILKÅRSVURDERING,
+            StegType.BEHANDLINGSRESULTAT,
+            StegType.IVERKSETT_MOT_OPPDRAG,
+            StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI,
+            StegType.FERDIGSTILLE_BEHANDLING,
+            StegType.BEHANDLING_AVSLUTTET
         ).forEach {
             assertEquals(steg, it)
             assertNotEquals(StegType.JOURNALFØR_VEDTAKSBREV, it)
             steg = hentNesteSteg(
-                    behandling = lagBehandling(
-                            behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT,
-                            årsak = BehandlingÅrsak.TEKNISK_OPPHØR
-                    ),
-                    utførendeStegType = it
+                behandling = lagBehandling(
+                    behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT,
+                    årsak = BehandlingÅrsak.TEKNISK_OPPHØR
+                ),
+                utførendeStegType = it
             )
         }
     }
@@ -178,24 +180,24 @@ class BehandlingStegTest {
         var steg = FØRSTE_STEG
 
         listOf(
-                StegType.REGISTRERE_PERSONGRUNNLAG,
-                StegType.VILKÅRSVURDERING,
-                StegType.BEHANDLINGSRESULTAT,
-                StegType.SEND_TIL_BESLUTTER,
-                StegType.BESLUTTE_VEDTAK,
-                StegType.IVERKSETT_MOT_OPPDRAG,
-                StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI,
-                StegType.FERDIGSTILLE_BEHANDLING,
-                StegType.BEHANDLING_AVSLUTTET
+            StegType.REGISTRERE_PERSONGRUNNLAG,
+            StegType.VILKÅRSVURDERING,
+            StegType.BEHANDLINGSRESULTAT,
+            StegType.SEND_TIL_BESLUTTER,
+            StegType.BESLUTTE_VEDTAK,
+            StegType.IVERKSETT_MOT_OPPDRAG,
+            StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI,
+            StegType.FERDIGSTILLE_BEHANDLING,
+            StegType.BEHANDLING_AVSLUTTET
         ).forEach {
             assertEquals(steg, it)
             assertNotEquals(StegType.JOURNALFØR_VEDTAKSBREV, it)
             steg = hentNesteSteg(
-                    behandling = lagBehandling(
-                            behandlingType = BehandlingType.TEKNISK_OPPHØR,
-                            årsak = BehandlingÅrsak.TEKNISK_OPPHØR
-                    ),
-                    utførendeStegType = it
+                behandling = lagBehandling(
+                    behandlingType = BehandlingType.TEKNISK_OPPHØR,
+                    årsak = BehandlingÅrsak.TEKNISK_OPPHØR
+                ),
+                utførendeStegType = it
             )
         }
     }

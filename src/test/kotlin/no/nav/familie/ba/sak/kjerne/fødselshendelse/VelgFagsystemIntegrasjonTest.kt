@@ -8,8 +8,6 @@ import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.FagsystemRegelVurdering
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.VelgFagSystemService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.steg.StegService
@@ -20,19 +18,19 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 
 @SpringBootTest(
-        properties = [
-            "DAGLIG_KVOTE_FØDSELSHENDELSER: 0"
-        ],
+    properties = [
+        "DAGLIG_KVOTE_FØDSELSHENDELSER: 0"
+    ],
 )
 class VelgFagsystemIntegrasjonTest(
-        @Autowired val stegService: StegService,
-        @Autowired val personopplysningerService: PersonopplysningerService,
-        @Autowired val persongrunnlagService: PersongrunnlagService,
-        @Autowired val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
-        @Autowired val velgFagSystemService: VelgFagSystemService,
-        @Autowired val fagSakService: FagsakService,
-        @Autowired val infotrygdService: InfotrygdService,
-        @Autowired val databaseCleanupService: DatabaseCleanupService
+    @Autowired val stegService: StegService,
+    @Autowired val personopplysningerService: PersonopplysningerService,
+    @Autowired val persongrunnlagService: PersongrunnlagService,
+    @Autowired val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
+    @Autowired val velgFagSystemService: VelgFagSystemService,
+    @Autowired val fagSakService: FagsakService,
+    @Autowired val infotrygdService: InfotrygdService,
+    @Autowired val databaseCleanupService: DatabaseCleanupService
 ) : AbstractSpringIntegrationTest() {
 
     val søkerFnr = randomFnr()

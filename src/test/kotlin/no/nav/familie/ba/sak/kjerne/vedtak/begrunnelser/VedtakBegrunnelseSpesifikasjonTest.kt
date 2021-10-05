@@ -22,7 +22,7 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
     val søker = tilfeldigPerson(personType = PersonType.SØKER)
     val barn = tilfeldigPerson(personType = PersonType.BARN)
     val vedtaksperiodeMedBegrunnelser = lagVedtaksperiodeMedBegrunnelser(
-            type = Vedtaksperiodetype.UTBETALING,
+        type = Vedtaksperiodetype.UTBETALING,
     )
     val vilkårsvurdering = lagVilkårsvurdering(søker.personIdent.ident, lagBehandling(), Resultat.OPPFYLT)
     val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søker, barn)
@@ -31,40 +31,56 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
 
     @Test
     fun `Oppfyller vilkår skal gi true`() {
-        assertTrue(VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET
-                           .triggesForPeriode(vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
-                                              vilkårsvurdering = vilkårsvurdering,
-                                              persongrunnlag = personopplysningGrunnlag,
-                                              identerMedUtbetaling = identerMedUtbetaling))
+        assertTrue(
+            VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET
+                .triggesForPeriode(
+                    vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
+                    vilkårsvurdering = vilkårsvurdering,
+                    persongrunnlag = personopplysningGrunnlag,
+                    identerMedUtbetaling = identerMedUtbetaling
+                )
+        )
     }
 
     @Test
     fun `Ikke valgbar skal gi false`() {
-        assertFalse(VedtakBegrunnelseSpesifikasjon.REDUKSJON_FRITEKST
-                            .triggesForPeriode(vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
-                                               vilkårsvurdering = vilkårsvurdering,
-                                               persongrunnlag = personopplysningGrunnlag,
-                                               identerMedUtbetaling = identerMedUtbetaling))
+        assertFalse(
+            VedtakBegrunnelseSpesifikasjon.REDUKSJON_FRITEKST
+                .triggesForPeriode(
+                    vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
+                    vilkårsvurdering = vilkårsvurdering,
+                    persongrunnlag = personopplysningGrunnlag,
+                    identerMedUtbetaling = identerMedUtbetaling
+                )
+        )
     }
 
     @Test
     fun `Annen periode type skal gi false`() {
-        assertFalse(VedtakBegrunnelseSpesifikasjon.OPPHØR_UTVANDRET
-                            .triggesForPeriode(vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
-                                               vilkårsvurdering = vilkårsvurdering,
-                                               persongrunnlag = personopplysningGrunnlag,
-                                               identerMedUtbetaling = identerMedUtbetaling))
+        assertFalse(
+            VedtakBegrunnelseSpesifikasjon.OPPHØR_UTVANDRET
+                .triggesForPeriode(
+                    vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
+                    vilkårsvurdering = vilkårsvurdering,
+                    persongrunnlag = personopplysningGrunnlag,
+                    identerMedUtbetaling = identerMedUtbetaling
+                )
+        )
     }
 
     @Test
     fun `Har ikke barn med seksårsdag skal gi false`() {
-        //val persongrunnlag = mockk<PersonopplysningGrunnlag>()
-        //every { persongrunnlag.harBarnMedSeksårsdagPåFom(vedtaksperiodeMedBegrunnelser.fom) } returns true
-        assertFalse(VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR
-                            .triggesForPeriode(vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
-                                               vilkårsvurdering = vilkårsvurdering,
-                                               persongrunnlag = personopplysningGrunnlag,
-                                               identerMedUtbetaling = identerMedUtbetaling))
+        // val persongrunnlag = mockk<PersonopplysningGrunnlag>()
+        // every { persongrunnlag.harBarnMedSeksårsdagPåFom(vedtaksperiodeMedBegrunnelser.fom) } returns true
+        assertFalse(
+            VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR
+                .triggesForPeriode(
+                    vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
+                    vilkårsvurdering = vilkårsvurdering,
+                    persongrunnlag = personopplysningGrunnlag,
+                    identerMedUtbetaling = identerMedUtbetaling
+                )
+        )
     }
 
     @Test
@@ -72,25 +88,33 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
         val persongrunnlag = mockk<PersonopplysningGrunnlag>()
         every { persongrunnlag.harBarnMedSeksårsdagPåFom(vedtaksperiodeMedBegrunnelser.fom) } returns true
 
-        assertTrue(VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR
-                           .triggesForPeriode(vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
-                                              vilkårsvurdering = vilkårsvurdering,
-                                              persongrunnlag = persongrunnlag,
-                                              identerMedUtbetaling = identerMedUtbetaling))
+        assertTrue(
+            VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR
+                .triggesForPeriode(
+                    vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
+                    vilkårsvurdering = vilkårsvurdering,
+                    persongrunnlag = persongrunnlag,
+                    identerMedUtbetaling = identerMedUtbetaling
+                )
+        )
     }
 
     @Test
     fun `Har sats endring skal gi true`() {
         val vedtaksperiodeMedBegrunnelserSatsEndring = lagVedtaksperiodeMedBegrunnelser(
-                fom = LocalDate.of(2021, 9, 1),
-                type = Vedtaksperiodetype.UTBETALING,
+            fom = LocalDate.of(2021, 9, 1),
+            type = Vedtaksperiodetype.UTBETALING,
         )
 
-        assertTrue(VedtakBegrunnelseSpesifikasjon.INNVILGET_SATSENDRING
-                           .triggesForPeriode(vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelserSatsEndring,
-                                              vilkårsvurdering = vilkårsvurdering,
-                                              persongrunnlag = personopplysningGrunnlag,
-                                              identerMedUtbetaling = identerMedUtbetaling))
+        assertTrue(
+            VedtakBegrunnelseSpesifikasjon.INNVILGET_SATSENDRING
+                .triggesForPeriode(
+                    vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelserSatsEndring,
+                    vilkårsvurdering = vilkårsvurdering,
+                    persongrunnlag = personopplysningGrunnlag,
+                    identerMedUtbetaling = identerMedUtbetaling
+                )
+        )
     }
 
     @Test
@@ -100,32 +124,44 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
             type = Vedtaksperiodetype.UTBETALING,
         )
 
-        assertFalse(VedtakBegrunnelseSpesifikasjon.INNVILGET_SATSENDRING
-                       .triggesForPeriode(vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelserSatsEndring,
-                                          vilkårsvurdering = vilkårsvurdering,
-                                          persongrunnlag = personopplysningGrunnlag,
-                                          identerMedUtbetaling = identerMedUtbetaling))
+        assertFalse(
+            VedtakBegrunnelseSpesifikasjon.INNVILGET_SATSENDRING
+                .triggesForPeriode(
+                    vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelserSatsEndring,
+                    vilkårsvurdering = vilkårsvurdering,
+                    persongrunnlag = personopplysningGrunnlag,
+                    identerMedUtbetaling = identerMedUtbetaling
+                )
+        )
     }
 
     @Test
     fun `Oppfyller ikke vilkår for person skal gi false`() {
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, barn)
 
-        assertFalse(VedtakBegrunnelseSpesifikasjon.INNVILGET_LOVLIG_OPPHOLD_EØS_BORGER
-                            .triggesForPeriode(vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
-                                               vilkårsvurdering = vilkårsvurdering,
-                                               persongrunnlag = personopplysningGrunnlag,
-                                               identerMedUtbetaling = identerMedUtbetaling))
+        assertFalse(
+            VedtakBegrunnelseSpesifikasjon.INNVILGET_LOVLIG_OPPHOLD_EØS_BORGER
+                .triggesForPeriode(
+                    vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
+                    vilkårsvurdering = vilkårsvurdering,
+                    persongrunnlag = personopplysningGrunnlag,
+                    identerMedUtbetaling = identerMedUtbetaling
+                )
+        )
     }
 
     @Test
     fun `Oppfyller vilkår for person skal gi true`() {
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søker)
 
-        assertTrue(VedtakBegrunnelseSpesifikasjon.INNVILGET_LOVLIG_OPPHOLD_EØS_BORGER
-                           .triggesForPeriode(vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
-                                              vilkårsvurdering = vilkårsvurdering,
-                                              persongrunnlag = personopplysningGrunnlag,
-                                              identerMedUtbetaling = identerMedUtbetaling))
+        assertTrue(
+            VedtakBegrunnelseSpesifikasjon.INNVILGET_LOVLIG_OPPHOLD_EØS_BORGER
+                .triggesForPeriode(
+                    vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
+                    vilkårsvurdering = vilkårsvurdering,
+                    persongrunnlag = personopplysningGrunnlag,
+                    identerMedUtbetaling = identerMedUtbetaling
+                )
+        )
     }
 }

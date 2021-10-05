@@ -18,5 +18,4 @@ class SendFeedTilInfotrygdTaskTest : AbstractSpringIntegrationTestDev() {
 
         Assertions.assertEquals(listOf(fnrBarn), infotrygdFeedDto.fnrBarn)
     }
-
 }

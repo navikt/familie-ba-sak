@@ -53,8 +53,10 @@ class PdlGraphqlTest {
 
     @Test
     fun testAdressebeskyttelse() {
-        val resp = mapper.readValue(File(getFile("pdl/pdlAdressebeskyttelseResponse.json")),
-                                    PdlAdressebeskyttelseResponse::class.java)
+        val resp = mapper.readValue(
+            File(getFile("pdl/pdlAdressebeskyttelseResponse.json")),
+            PdlAdressebeskyttelseResponse::class.java
+        )
         assertThat(resp.data.person!!.adressebeskyttelse.first().gradering).isEqualTo(ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG)
     }
 
@@ -74,13 +76,12 @@ class PdlGraphqlTest {
     @Test
     fun testFulltNavn() {
         assertThat(PdlNavn(fornavn = "For", mellomnavn = "Mellom", etternavn = "Etter").fulltNavn())
-                .isEqualTo("For Mellom Etter")
+            .isEqualTo("For Mellom Etter")
         assertThat(PdlNavn(fornavn = "For", etternavn = "Etter").fulltNavn())
-                .isEqualTo("For Etter")
+            .isEqualTo("For Etter")
     }
 
     private fun getFile(name: String): String {
         return javaClass.classLoader?.getResource(name)?.file ?: error("Testkonfigurasjon feil")
     }
-
 }

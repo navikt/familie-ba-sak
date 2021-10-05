@@ -12,14 +12,14 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
 class TilgangControllerTest(
-        @Autowired
-        private val tilgangController: TilgangController,
+    @Autowired
+    private val tilgangController: TilgangController,
 
-        @Autowired
-        private val mockPersonopplysningerService: PersonopplysningerService,
+    @Autowired
+    private val mockPersonopplysningerService: PersonopplysningerService,
 
-        @Autowired
-        private val mockIntegrasjonClient: IntegrasjonClient
+    @Autowired
+    private val mockIntegrasjonClient: IntegrasjonClient
 ) : AbstractSpringIntegrationTest() {
 
     @Test

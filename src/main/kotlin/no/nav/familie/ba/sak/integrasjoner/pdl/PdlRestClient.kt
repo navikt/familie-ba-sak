@@ -33,9 +33,11 @@ import java.net.URI
 import java.time.LocalDate
 
 @Service
-class PdlRestClient(@Value("\${PDL_URL}") pdlBaseUrl: URI,
-                    @Qualifier("jwtBearer") val restTemplate: RestOperations)
-    : AbstractRestClient(restTemplate, "pdl.personinfo") {
+class PdlRestClient(
+    @Value("\${PDL_URL}") pdlBaseUrl: URI,
+    @Qualifier("jwtBearer") val restTemplate: RestOperations
+) :
+    AbstractRestClient(restTemplate, "pdl.personinfo") {
 
     protected val pdlUri = UriUtil.uri(pdlBaseUrl, PATH_GRAPHQL)
 
@@ -43,175 +45,226 @@ class PdlRestClient(@Value("\${PDL_URL}") pdlBaseUrl: URI,
 
     fun hentPerson(personIdent: String, personInfoQuery: PersonInfoQuery): PersonInfo {
 
-        val pdlPersonRequest = PdlPersonRequest(variables = PdlPersonRequestVariables(personIdent),
-                                                query = personInfoQuery.graphQL)
+        val pdlPersonRequest = PdlPersonRequest(
+            variables = PdlPersonRequestVariables(personIdent),
+            query = personInfoQuery.graphQL
+        )
         try {
-            val response = postForEntity<PdlHentPersonResponse>(pdlUri,
-                                                                pdlPersonRequest,
-                                                                httpHeaders())
+            val response = postForEntity<PdlHentPersonResponse>(
+                pdlUri,
+                pdlPersonRequest,
+                httpHeaders()
+            )
             if (!response.harFeil()) {
                 return Result.runCatching {
                     val forelderBarnRelasjon: Set<ForelderBarnRelasjon> =
-                            when (personInfoQuery) {
-                                PersonInfoQuery.MED_RELASJONER_OG_REGISTERINFORMASJON -> {
-                                    response.data.person!!.forelderBarnRelasjon.map { relasjon ->
-                                        ForelderBarnRelasjon(personIdent = Personident(id = relasjon.relatertPersonsIdent),
-                                                             relasjonsrolle = relasjon.relatertPersonsRolle)
-                                    }.toSet()
-                                }
-                                else -> emptySet()
+                        when (personInfoQuery) {
+                            PersonInfoQuery.MED_RELASJONER_OG_REGISTERINFORMASJON -> {
+                                response.data.person!!.forelderBarnRelasjon.map { relasjon ->
+                                    ForelderBarnRelasjon(
+                                        personIdent = Personident(id = relasjon.relatertPersonsIdent),
+                                        relasjonsrolle = relasjon.relatertPersonsRolle
+                                    )
+                                }.toSet()
                             }
+                            else -> emptySet()
+                        }
                     response.data.person!!.let {
-                        PersonInfo(fødselsdato = LocalDate.parse(it.foedsel.first().foedselsdato!!),
-                                   navn = it.navn.firstOrNull()?.fulltNavn(),
-                                   kjønn = it.kjoenn.firstOrNull()?.kjoenn,
-                                   forelderBarnRelasjon = forelderBarnRelasjon,
-                                   adressebeskyttelseGradering = it.adressebeskyttelse.firstOrNull()?.gradering,
-                                   bostedsadresser = it.bostedsadresse,
-                                   statsborgerskap = it.statsborgerskap,
-                                   opphold = it.opphold,
-                                   sivilstander = it.sivilstand)
+                        PersonInfo(
+                            fødselsdato = LocalDate.parse(it.foedsel.first().foedselsdato!!),
+                            navn = it.navn.firstOrNull()?.fulltNavn(),
+                            kjønn = it.kjoenn.firstOrNull()?.kjoenn,
+                            forelderBarnRelasjon = forelderBarnRelasjon,
+                            adressebeskyttelseGradering = it.adressebeskyttelse.firstOrNull()?.gradering,
+                            bostedsadresser = it.bostedsadresse,
+                            statsborgerskap = it.statsborgerskap,
+                            opphold = it.opphold,
+                            sivilstander = it.sivilstand
+                        )
                     }
                 }.fold(
-                        onSuccess = { it },
-                        onFailure = {
-                            throw Feil(message = "Fant ikke forespurte data på person.",
-                                       frontendFeilmelding = "Kunne ikke slå opp data for person $personIdent",
-                                       httpStatus = HttpStatus.NOT_FOUND,
-                                       throwable = it)
-                        }
+                    onSuccess = { it },
+                    onFailure = {
+                        throw Feil(
+                            message = "Fant ikke forespurte data på person.",
+                            frontendFeilmelding = "Kunne ikke slå opp data for person $personIdent",
+                            httpStatus = HttpStatus.NOT_FOUND,
+                            throwable = it
+                        )
+                    }
                 )
             } else {
-                throw Feil(message = "Feil ved oppslag på person: ${response.errorMessages()}",
-                           frontendFeilmelding = "Feil ved oppslag på person $personIdent: ${response.errorMessages()}",
-                           httpStatus = HttpStatus.INTERNAL_SERVER_ERROR)
+                throw Feil(
+                    message = "Feil ved oppslag på person: ${response.errorMessages()}",
+                    frontendFeilmelding = "Feil ved oppslag på person $personIdent: ${response.errorMessages()}",
+                    httpStatus = HttpStatus.INTERNAL_SERVER_ERROR
+                )
             }
         } catch (e: Exception) {
             val mostSpecificThrowable = NestedExceptionUtils.getMostSpecificCause(e)
 
             when (e) {
                 is Feil -> throw e
-                else -> throw Feil(message = "Feil ved oppslag på person. Gav feil: ${mostSpecificThrowable.message}.",
-                                   frontendFeilmelding = "Feil oppsto ved oppslag på person $personIdent",
-                                   httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
-                                   throwable = mostSpecificThrowable)
+                else -> throw Feil(
+                    message = "Feil ved oppslag på person. Gav feil: ${mostSpecificThrowable.message}.",
+                    frontendFeilmelding = "Feil oppsto ved oppslag på person $personIdent",
+                    httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
+                    throwable = mostSpecificThrowable
+                )
             }
         }
     }
 
     fun hentIdenter(personIdent: String): PdlHentIdenterResponse {
-        val pdlPersonRequest = PdlPersonRequest(variables = PdlPersonRequestVariables(personIdent),
-                                                query = hentIdenterQuery)
-        val response = postForEntity<PdlHentIdenterResponse>(pdlUri,
-                                                             pdlPersonRequest,
-                                                             httpHeaders())
+        val pdlPersonRequest = PdlPersonRequest(
+            variables = PdlPersonRequestVariables(personIdent),
+            query = hentIdenterQuery
+        )
+        val response = postForEntity<PdlHentIdenterResponse>(
+            pdlUri,
+            pdlPersonRequest,
+            httpHeaders()
+        )
 
         if (!response.harFeil()) return response
-        throw Feil(message = "Fant ikke identer for person: ${response.errorMessages()}",
-                   frontendFeilmelding = "Fant ikke identer for person $personIdent: ${response.errorMessages()}",
-                   httpStatus = HttpStatus.NOT_FOUND)
+        throw Feil(
+            message = "Fant ikke identer for person: ${response.errorMessages()}",
+            frontendFeilmelding = "Fant ikke identer for person $personIdent: ${response.errorMessages()}",
+            httpStatus = HttpStatus.NOT_FOUND
+        )
     }
 
     fun hentDødsfall(personIdent: String): List<Doedsfall> {
-        val pdlPersonRequest = PdlPersonRequest(variables = PdlPersonRequestVariables(personIdent),
-                                                query = hentGraphqlQuery("doedsfall"))
+        val pdlPersonRequest = PdlPersonRequest(
+            variables = PdlPersonRequestVariables(personIdent),
+            query = hentGraphqlQuery("doedsfall")
+        )
         val response = try {
             postForEntity<PdlDødsfallResponse>(pdlUri, pdlPersonRequest, httpHeaders())
         } catch (e: Exception) {
-            throw Feil(message = "Feil ved oppslag på person. Gav feil: ${e.message}",
-                       frontendFeilmelding = "Feil oppsto ved oppslag på person $personIdent",
-                       httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
-                       throwable = e)
+            throw Feil(
+                message = "Feil ved oppslag på person. Gav feil: ${e.message}",
+                frontendFeilmelding = "Feil oppsto ved oppslag på person $personIdent",
+                httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
+                throwable = e
+            )
         }
 
         if (!response.harFeil()) return response.data.person!!.doedsfall
-        throw Feil(message = "Fant ikke data på person: ${response.errorMessages()}",
-                   frontendFeilmelding = "Fant ikke identer for person $personIdent: ${response.errorMessages()}",
-                   httpStatus = HttpStatus.NOT_FOUND)
-
+        throw Feil(
+            message = "Fant ikke data på person: ${response.errorMessages()}",
+            frontendFeilmelding = "Fant ikke identer for person $personIdent: ${response.errorMessages()}",
+            httpStatus = HttpStatus.NOT_FOUND
+        )
     }
 
     fun hentVergemaalEllerFremtidsfullmakt(personIdent: String): List<VergemaalEllerFremtidsfullmakt> {
-        val pdlPersonRequest = PdlPersonRequest(variables = PdlPersonRequestVariables(personIdent),
-                                                query = hentGraphqlQuery("verge"))
+        val pdlPersonRequest = PdlPersonRequest(
+            variables = PdlPersonRequestVariables(personIdent),
+            query = hentGraphqlQuery("verge")
+        )
         val response = try {
             postForEntity<PdlVergeResponse>(pdlUri, pdlPersonRequest, httpHeaders())
         } catch (e: Exception) {
-            throw Feil(message = "Feil ved oppslag på person. Gav feil: ${e.message}",
-                       frontendFeilmelding = "Feil oppsto ved oppslag på person $personIdent",
-                       httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
-                       throwable = e)
+            throw Feil(
+                message = "Feil ved oppslag på person. Gav feil: ${e.message}",
+                frontendFeilmelding = "Feil oppsto ved oppslag på person $personIdent",
+                httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
+                throwable = e
+            )
         }
 
         if (!response.harFeil()) return response.data.person!!.vergemaalEllerFremtidsfullmakt
-        throw Feil(message = "Fant ikke data på person: ${response.errorMessages()}",
-                   frontendFeilmelding = "Fant ikke data på person $personIdent: ${response.errorMessages()}",
-                   httpStatus = HttpStatus.NOT_FOUND)
+        throw Feil(
+            message = "Fant ikke data på person: ${response.errorMessages()}",
+            frontendFeilmelding = "Fant ikke data på person $personIdent: ${response.errorMessages()}",
+            httpStatus = HttpStatus.NOT_FOUND
+        )
     }
 
     fun hentStatsborgerskapUtenHistorikk(ident: String): List<Statsborgerskap> {
 
-        val pdlPersonRequest = PdlPersonRequest(variables = PdlPersonRequestVariables(ident),
-                                                query = hentGraphqlQuery("statsborgerskap-uten-historikk"))
+        val pdlPersonRequest = PdlPersonRequest(
+            variables = PdlPersonRequestVariables(ident),
+            query = hentGraphqlQuery("statsborgerskap-uten-historikk")
+        )
         val response = try {
             postForEntity<PdlStatsborgerskapResponse>(pdlUri, pdlPersonRequest, httpHeaders())
         } catch (e: Exception) {
-            throw Feil(message = "Feil ved oppslag på person. Gav feil: ${e.message}",
-                       frontendFeilmelding = "Feil oppsto ved oppslag på person $ident",
-                       httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
-                       throwable = e)
+            throw Feil(
+                message = "Feil ved oppslag på person. Gav feil: ${e.message}",
+                frontendFeilmelding = "Feil oppsto ved oppslag på person $ident",
+                httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
+                throwable = e
+            )
         }
 
         if (!response.harFeil()) return response.data.person!!.statsborgerskap
-        throw Feil(message = "Fant ikke data på person: ${response.errorMessages()}",
-                   frontendFeilmelding = "Fant ikke identer for person $ident: ${response.errorMessages()}",
-                   httpStatus = HttpStatus.NOT_FOUND)
+        throw Feil(
+            message = "Fant ikke data på person: ${response.errorMessages()}",
+            frontendFeilmelding = "Fant ikke identer for person $ident: ${response.errorMessages()}",
+            httpStatus = HttpStatus.NOT_FOUND
+        )
     }
 
     fun hentOppholdUtenHistorikk(ident: String): List<Opphold> {
-        val pdlPersonRequest = PdlPersonRequest(variables = PdlPersonRequestVariables(ident),
-                                                query = hentGraphqlQuery("opphold-uten-historikk"))
+        val pdlPersonRequest = PdlPersonRequest(
+            variables = PdlPersonRequestVariables(ident),
+            query = hentGraphqlQuery("opphold-uten-historikk")
+        )
         val response = try {
             postForEntity<PdlOppholdResponse>(pdlUri, pdlPersonRequest, httpHeaders())
         } catch (e: Exception) {
-            throw Feil(message = "Feil ved oppslag på person. Gav feil: ${e.message}",
-                       frontendFeilmelding = "Feil oppsto ved oppslag på person $ident",
-                       httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
-                       throwable = e)
+            throw Feil(
+                message = "Feil ved oppslag på person. Gav feil: ${e.message}",
+                frontendFeilmelding = "Feil oppsto ved oppslag på person $ident",
+                httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
+                throwable = e
+            )
         }
 
         if (!response.harFeil()) {
             if (response.data?.person?.opphold == null) {
-                throw Feil(message = "Ugyldig response (null) fra PDL ved henting av opphold.",
-                           frontendFeilmelding = "Feilet ved henting av opphold for person $ident",
-                           httpStatus = HttpStatus.INTERNAL_SERVER_ERROR)
+                throw Feil(
+                    message = "Ugyldig response (null) fra PDL ved henting av opphold.",
+                    frontendFeilmelding = "Feilet ved henting av opphold for person $ident",
+                    httpStatus = HttpStatus.INTERNAL_SERVER_ERROR
+                )
             }
             return response.data.person.opphold
         }
 
-        throw Feil(message = "Fant ikke data på person: ${response.errorMessages()}",
-                   frontendFeilmelding = "Fant ikke opphold for person $ident: ${response.errorMessages()}",
-                   httpStatus = HttpStatus.NOT_FOUND)
+        throw Feil(
+            message = "Fant ikke data på person: ${response.errorMessages()}",
+            frontendFeilmelding = "Fant ikke opphold for person $ident: ${response.errorMessages()}",
+            httpStatus = HttpStatus.NOT_FOUND
+        )
     }
 
     fun hentUtenlandskBostedsadresse(personIdent: String): PdlUtenlandskAdressseResponse.UtenlandskAdresse? {
-        val pdlPersonRequest = PdlPersonRequest(variables = PdlPersonRequestVariables(personIdent),
-                                                query = hentGraphqlQuery("bostedsadresse-utenlandsk"))
+        val pdlPersonRequest = PdlPersonRequest(
+            variables = PdlPersonRequestVariables(personIdent),
+            query = hentGraphqlQuery("bostedsadresse-utenlandsk")
+        )
         val response = try {
             postForEntity<PdlUtenlandskAdressseResponse>(pdlUri, pdlPersonRequest, httpHeaders())
         } catch (e: Exception) {
-            throw Feil(message = "Feil ved oppslag på utenlandsk bostedsadresse. Gav feil: ${
+            throw Feil(
+                message = "Feil ved oppslag på utenlandsk bostedsadresse. Gav feil: ${
                 NestedExceptionUtils.getMostSpecificCause(e).message
-            }",
-                       frontendFeilmelding = "Feil oppsto ved oppslag på utenlandsk bostedsadresse $personIdent",
-                       httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
-                       throwable = e)
+                }",
+                frontendFeilmelding = "Feil oppsto ved oppslag på utenlandsk bostedsadresse $personIdent",
+                httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
+                throwable = e
+            )
         }
 
         if (!response.harFeil()) return response.data?.person?.bostedsadresse?.firstOrNull { it.utenlandskAdresse != null }?.utenlandskAdresse
-        throw Feil(message = "Fant ikke data på person: ${response.errorMessages()}",
-                   frontendFeilmelding = "Fant ikke identer for person $personIdent: ${response.errorMessages()}",
-                   httpStatus = HttpStatus.NOT_FOUND)
+        throw Feil(
+            message = "Fant ikke data på person: ${response.errorMessages()}",
+            frontendFeilmelding = "Fant ikke identer for person $personIdent: ${response.errorMessages()}",
+            httpStatus = HttpStatus.NOT_FOUND
+        )
     }
 
     fun httpHeaders(): HttpHeaders {
@@ -242,4 +295,3 @@ fun hentGraphqlQuery(pdlResource: String): String {
 private fun String.graphqlCompatible(): String {
     return StringUtils.normalizeSpace(this.replace("\n", ""))
 }
-

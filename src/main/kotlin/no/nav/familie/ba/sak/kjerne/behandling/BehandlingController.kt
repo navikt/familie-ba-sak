@@ -40,47 +40,57 @@ import org.springframework.web.bind.annotation.RestController
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class BehandlingController(
-        private val fagsakService: FagsakService,
-        private val stegService: StegService,
-        private val behandlingsService: BehandlingService,
-        private val taskRepository: TaskRepositoryWrapper,
-        private val tilgangService: TilgangService,
-        private val simuleringService: SimuleringService,
+    private val fagsakService: FagsakService,
+    private val stegService: StegService,
+    private val behandlingsService: BehandlingService,
+    private val taskRepository: TaskRepositoryWrapper,
+    private val tilgangService: TilgangService,
+    private val simuleringService: SimuleringService,
 ) {
 
     @PostMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
     fun opprettBehandling(@RequestBody nyBehandling: NyBehandling): ResponseEntity<Ressurs<RestFagsak>> {
-        tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-                                                      handling = "opprette behandling")
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
+            handling = "opprette behandling"
+        )
 
         if (nyBehandling.søkersIdent.isBlank()) {
-            throw Feil(message = "Søkers ident kan ikke være blank",
-                       frontendFeilmelding = "Klarte ikke å opprette behandling. Mangler ident på bruker.")
+            throw Feil(
+                message = "Søkers ident kan ikke være blank",
+                frontendFeilmelding = "Klarte ikke å opprette behandling. Mangler ident på bruker."
+            )
         }
 
         if (nyBehandling.behandlingType == BehandlingType.MIGRERING_FRA_INFOTRYGD && nyBehandling.barnasIdenter.isEmpty()) {
-            throw Feil(message = "Listen med barn er tom ved opprettelse av migreringsbehandling",
-                       frontendFeilmelding = "Klarte ikke å opprette behandling. Mangler barna det gjelder.")
+            throw Feil(
+                message = "Listen med barn er tom ved opprettelse av migreringsbehandling",
+                frontendFeilmelding = "Klarte ikke å opprette behandling. Mangler barna det gjelder."
+            )
         }
 
         return Result.runCatching {
             stegService.håndterNyBehandling(nyBehandling)
         }.fold(
-                onSuccess = {
-                    val restFagsak = ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = it.fagsak.id))
-                    restFagsak
-                },
-                onFailure = {
-                    throw it
-                }
+            onSuccess = {
+                val restFagsak = ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = it.fagsak.id))
+                restFagsak
+            },
+            onFailure = {
+                throw it
+            }
         )
     }
 
     @PutMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun opprettEllerOppdaterBehandlingFraHendelse(@RequestBody
-                                                  nyBehandling: NyBehandlingHendelse): ResponseEntity<Ressurs<String>> {
-        tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SYSTEM,
-                                                      handling = "opprette behandling fra hendelse")
+    fun opprettEllerOppdaterBehandlingFraHendelse(
+        @RequestBody
+        nyBehandling: NyBehandlingHendelse
+    ): ResponseEntity<Ressurs<String>> {
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.SYSTEM,
+            handling = "opprette behandling fra hendelse"
+        )
 
         return try {
             val task = BehandleFødselshendelseTask.opprettTask(BehandleFødselshendelseTaskDTO(nyBehandling))
@@ -92,10 +102,14 @@ class BehandlingController(
     }
 
     @PutMapping(path = ["{behandlingId}/henlegg"], produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun henleggBehandlingOgSendBrev(@PathVariable(name = "behandlingId") behandlingId: Long,
-                                    @RequestBody henleggInfo: RestHenleggBehandlingInfo): ResponseEntity<Ressurs<RestFagsak>> {
-        tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-                                                      handling = "henlegge behandling")
+    fun henleggBehandlingOgSendBrev(
+        @PathVariable(name = "behandlingId") behandlingId: Long,
+        @RequestBody henleggInfo: RestHenleggBehandlingInfo
+    ): ResponseEntity<Ressurs<RestFagsak>> {
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
+            handling = "henlegge behandling"
+        )
 
         val behandling = behandlingsService.hent(behandlingId)
         val response = stegService.håndterHenleggBehandling(behandling, henleggInfo)
@@ -104,18 +118,39 @@ class BehandlingController(
     }
 
     @GetMapping(path = ["/{behandlingId}/simulering"])
-    fun hentSimulering(@PathVariable @BehandlingstilgangConstraint
-                       behandlingId: Long): ResponseEntity<Ressurs<RestSimulering>> {
+    fun hentSimulering(
+        @PathVariable @BehandlingstilgangConstraint
+        behandlingId: Long
+    ): ResponseEntity<Ressurs<RestSimulering>> {
         val vedtakSimuleringMottaker = simuleringService.oppdaterSimuleringPåBehandlingVedBehov(behandlingId)
         val restSimulering = vedtakSimuleringMottakereTilRestSimulering(vedtakSimuleringMottaker)
         return ResponseEntity.ok(Ressurs.success(restSimulering))
     }
 
+    @PutMapping(path = ["/{behandlingId}/behandlingstema"], produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun endreBehandlingstema(
+        @PathVariable behandlingId: Long,
+        @RequestBody
+        endreBehandling: RestEndreBehandlingstema
+    ): ResponseEntity<Ressurs<RestFagsak>> {
+        val behandling = behandlingsService.oppdaterBehandlingstema(
+            behandling = behandlingsService.hent(behandlingId),
+            nyBehandlingUnderkategori = endreBehandling.behandlingUnderkategori,
+            nyBehandlingKategori = endreBehandling.behandlingKategori,
+            manueltOppdatert = true
+        )
+
+        val restFagsak = fagsakService.hentRestFagsak(fagsakId = behandling.fagsak.id)
+
+        return ResponseEntity.ok(restFagsak)
+    }
+
     @Transactional
     @PostMapping(path = ["/{behandlingId}/tilbakekreving"])
     fun lagreTilbakekrevingOgGåVidereTilNesteSteg(
-            @PathVariable behandlingId: Long,
-            @RequestBody restTilbakekreving: RestTilbakekreving?): ResponseEntity<Ressurs<RestFagsak>> {
+        @PathVariable behandlingId: Long,
+        @RequestBody restTilbakekreving: RestTilbakekreving?
+    ): ResponseEntity<Ressurs<RestFagsak>> {
 
         val behandling = behandlingsService.hent(behandlingId)
         stegService.håndterVurderTilbakekreving(behandling, restTilbakekreving)
@@ -133,25 +168,28 @@ class BehandlingController(
 }
 
 data class NyBehandling(
-        val kategori: BehandlingKategori,
-        val underkategori: BehandlingUnderkategori,
-        val søkersIdent: String,
-        val behandlingType: BehandlingType,
-        val journalpostID: String? = null,
-        val behandlingÅrsak: BehandlingÅrsak = BehandlingÅrsak.SØKNAD,
-        val skalBehandlesAutomatisk: Boolean = false,
-        val navIdent: String? = null,
-        val barnasIdenter: List<String> = emptyList())
+    val kategori: BehandlingKategori,
+    val underkategori: BehandlingUnderkategori,
+    val søkersIdent: String,
+    val behandlingType: BehandlingType,
+    val journalpostID: String? = null,
+    val behandlingÅrsak: BehandlingÅrsak = BehandlingÅrsak.SØKNAD,
+    val skalBehandlesAutomatisk: Boolean = false,
+    val navIdent: String? = null,
+    val barnasIdenter: List<String> = emptyList()
+)
 
 class NyBehandlingHendelse(
-        val morsIdent: String,
-        val barnasIdenter: List<String>
+    val morsIdent: String,
+    val barnasIdenter: List<String>
 )
 
 class RestHenleggBehandlingInfo(
-        val årsak: HenleggÅrsak,
-        val begrunnelse: String
+    val årsak: HenleggÅrsak,
+    val begrunnelse: String
 )
+
+class RestEndreBehandlingstema(val behandlingUnderkategori: BehandlingUnderkategori, val behandlingKategori: BehandlingKategori)
 
 enum class HenleggÅrsak(val beskrivelse: String) {
     SØKNAD_TRUKKET("Søknad trukket"),
