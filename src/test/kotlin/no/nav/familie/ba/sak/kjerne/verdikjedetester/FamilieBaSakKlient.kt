@@ -99,7 +99,8 @@ class FamilieBaSakKlient(
     fun opprettBehandling(
         søkersIdent: String,
         behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-        behandlingÅrsak: BehandlingÅrsak = BehandlingÅrsak.SØKNAD
+        behandlingÅrsak: BehandlingÅrsak = BehandlingÅrsak.SØKNAD,
+        behandlingUnderkategori: BehandlingUnderkategori = BehandlingUnderkategori.ORDINÆR
     ): Ressurs<RestFagsak> {
         val uri = URI.create("$baSakUrl/api/behandlinger")
 
@@ -107,7 +108,7 @@ class FamilieBaSakKlient(
             uri,
             NyBehandling(
                 kategori = BehandlingKategori.NASJONAL,
-                underkategori = BehandlingUnderkategori.ORDINÆR,
+                underkategori = behandlingUnderkategori,
                 søkersIdent = søkersIdent,
                 behandlingType = behandlingType,
                 behandlingÅrsak = behandlingÅrsak
@@ -153,7 +154,8 @@ class FamilieBaSakKlient(
     }
 
     fun sendTilBeslutter(fagsakId: Long): Ressurs<RestFagsak> {
-        val uri = URI.create("$baSakUrl/api/fagsaker/$fagsakId/send-til-beslutter?behandlendeEnhet=$DEFAULT_JOURNALFØRENDE_ENHET")
+        val uri =
+            URI.create("$baSakUrl/api/fagsaker/$fagsakId/send-til-beslutter?behandlendeEnhet=$DEFAULT_JOURNALFØRENDE_ENHET")
 
         return postForEntity(uri, "", headers)
     }

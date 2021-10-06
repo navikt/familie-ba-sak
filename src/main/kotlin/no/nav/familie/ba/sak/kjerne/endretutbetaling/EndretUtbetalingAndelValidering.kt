@@ -13,14 +13,14 @@ object EndretUtbetalingAndelValidering {
 
         endretUtbetalingAndel.validerUtfyltEndring()
         if (eksisterendeEndringerPåBehandling.any {
-            it.overlapperMed(endretUtbetalingAndel.periode()) &&
-                it.person == endretUtbetalingAndel.person &&
-                it.årsak == endretUtbetalingAndel.årsak
-        }
+                it.overlapperMed(endretUtbetalingAndel.periode()) &&
+                    it.person == endretUtbetalingAndel.person &&
+                    it.årsak == endretUtbetalingAndel.årsak
+            }
         ) {
             throw UtbetalingsikkerhetFeil(
-                melding = "Perioden som forsøkes lagt til overlapper med eksisterende periode gjeldende samme årsak og person.",
-                frontendFeilmelding = "Perioden som forsøkes lagt til overlapper med eksisterende periode gjeldende samme årsak og person."
+                melding = "Perioden som blir forsøkt lagt til overlapper med eksisterende periode på person.",
+                frontendFeilmelding = "Perioden du forsøker å legge til overlapper med eksisterende periode på personen. Om dette er ønskelig må du først endre den eksisterende perioden."
             )
         }
     }
@@ -46,8 +46,8 @@ object EndretUtbetalingAndelValidering {
                 )
         ) {
             throw UtbetalingsikkerhetFeil(
-                melding = "Det er ingen tilkjent ytelse for personen det legges til en endret periode for.",
-                frontendFeilmelding = "Det er ingen tilkjent ytelse for personen det legges til en endret periode for."
+                melding = "Det er ingen tilkjent ytelse for personen det blir forsøkt lagt til en endret periode for.",
+                frontendFeilmelding = "Du har valgt en periode der det ikke finnes tilkjent ytelse for valgt person i hele eller deler av perioden."
             )
         }
     }

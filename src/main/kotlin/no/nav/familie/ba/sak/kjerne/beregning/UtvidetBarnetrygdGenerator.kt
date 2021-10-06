@@ -6,8 +6,9 @@ import no.nav.familie.ba.sak.common.Utils.avrundetHeltallAvProsent
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
-import no.nav.familie.ba.sak.common.sisteDagINesteMåned
+import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseUtils.erBack2BackIMånedsskifte
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
@@ -19,6 +20,7 @@ import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
 import no.nav.fpsak.tidsserie.StandardCombinators
 import java.math.BigDecimal
+import java.time.LocalDate
 
 data class UtvidetBarnetrygdGenerator(
     val behandlingId: Long,
@@ -40,13 +42,13 @@ data class UtvidetBarnetrygdGenerator(
                     if (it.periodeFom == null) throw Feil("Fom må være satt på søkers periode ved utvida barnetrygd")
                     LocalDateSegment(
                         it.periodeFom!!.førsteDagINesteMåned(),
-                        it.periodeTom?.sisteDagINesteMåned() ?: TIDENES_ENDE,
+                        finnTilOgMedDatoForUtvidetSegment(tilOgMed = it.periodeTom, vilkårResultater = utvidetVilkår),
                         listOf(PeriodeData(ident = søkerIdent, rolle = PersonType.SØKER))
                     )
                 }
         )
 
-        val barnasTidslinjer = andelerBarna
+        val barnasTidslinjer: List<LocalDateTimeline<List<PeriodeData>>> = andelerBarna
             .groupBy { it.personIdent }
             .map { identMedAndeler ->
                 LocalDateTimeline(
@@ -80,7 +82,8 @@ data class UtvidetBarnetrygdGenerator(
                 )
                     .singleOrNull()?.sats
                     ?: error("Skal finnes én ordinær sats for gitt segment oppdelt basert på andeler")
-                val prosentForPeriode = it.value.maxByOrNull { data -> data.prosent }?.prosent ?: error("Finner ikke prosent")
+                val prosentForPeriode =
+                    it.value.maxByOrNull { data -> data.prosent }?.prosent ?: error("Finner ikke prosent")
                 AndelTilkjentYtelse(
                     behandlingId = behandlingId,
                     tilkjentYtelse = tilkjentYtelse,
@@ -113,5 +116,22 @@ data class UtvidetBarnetrygdGenerator(
                 LocalDateSegment(it.fom, it.tom, it.value.flatten())
             }
         )
+    }
+
+    private fun finnTilOgMedDatoForUtvidetSegment(
+        tilOgMed: LocalDate?,
+        vilkårResultater: List<VilkårResultat>
+    ): LocalDate {
+        if (tilOgMed == null) return TIDENES_ENDE
+        val utvidetSkalVidereføresEnMndEkstra = vilkårResultater.any { vilkårResultat ->
+            erBack2BackIMånedsskifte(
+                tilOgMed = tilOgMed,
+                fraOgMed = vilkårResultat.periodeFom
+            )
+        }
+
+        return if (utvidetSkalVidereføresEnMndEkstra) {
+            tilOgMed.plusMonths(1).sisteDagIMåned()
+        } else tilOgMed.sisteDagIMåned()
     }
 }

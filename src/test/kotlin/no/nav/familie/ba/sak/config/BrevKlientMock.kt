@@ -71,6 +71,7 @@ val navnTilNedtrekksmenyMock: List<SanityBegrunnelse> =
                     )
                     else -> null
                 },
+                hjemler = listOf("98", "99", "100")
             )
         }
 

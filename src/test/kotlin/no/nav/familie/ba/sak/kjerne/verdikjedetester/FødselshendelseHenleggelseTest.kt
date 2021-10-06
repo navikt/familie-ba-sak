@@ -46,7 +46,7 @@ class FødselshendelseHenleggelseTest(
                     infotrygdSaker = InfotrygdSøkResponse(
                         bruker = listOf(
                             lagInfotrygdSak(
-                                SatsService.nyttTilleggOrdinærSats.beløp.toDouble(),
+                                SatsService.sisteTilleggOrdinærSats.beløp.toDouble(),
                                 "1234",
                                 "OR",
                                 "OS"
@@ -87,7 +87,11 @@ class FødselshendelseHenleggelseTest(
     fun `Skal henlegge fødselshendelse på grunn av at søker er under 18 (filtreringsregel)`() {
         val scenario = mockServerKlient().lagScenario(
             RestScenario(
-                søker = RestScenarioPerson(fødselsdato = now().minusYears(16).toString(), fornavn = "Mor", etternavn = "Søker"),
+                søker = RestScenarioPerson(
+                    fødselsdato = now().minusYears(16).toString(),
+                    fornavn = "Mor",
+                    etternavn = "Søker"
+                ),
                 barna = listOf(
                     RestScenarioPerson(
                         fødselsdato = now().minusMonths(2).toString(),
@@ -165,8 +169,8 @@ class FødselshendelseHenleggelseTest(
                 behandlingId = behandling!!.id,
                 oppgavetype = Oppgavetype.VurderLivshendelse,
                 beskrivelse = "Barnet (fødselsdato: ${
-                LocalDate.parse(scenario.barna.first().fødselsdato)
-                    .tilKortString()
+                    LocalDate.parse(scenario.barna.first().fødselsdato)
+                        .tilKortString()
                 }) er ikke bosatt med mor."
             )
         }
