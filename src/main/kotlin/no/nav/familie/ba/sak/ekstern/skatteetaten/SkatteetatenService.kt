@@ -70,7 +70,11 @@ class SkatteetatenService(
             val samletPerioder = if (perioderMap.containsKey(ident))
                 perioderMap.get(ident)!!.perioder + nyList
             else nyList
-            perioderMap.put(ident, SkatteetatenPerioder(ident, period.getEndretDato(), samletPerioder))
+            //Slå sammen perioder basert på delingsprosent
+            val sammenslåttePerioderDelingsprosent =
+                samletPerioder.groupBy { it.delingsprosent }.values
+                    .flatMap(::slåSammenSkatteetatenPeriode).toMutableList()
+            perioderMap.put(ident, SkatteetatenPerioder(ident, period.getEndretDato(), sammenslåttePerioderDelingsprosent))
             perioderMap
         }
         LOG.debug(
@@ -92,6 +96,16 @@ class SkatteetatenService(
             yearStart,
             yearEnd
         )
+    }
+
+    private fun slåSammenSkatteetatenPeriode(perioderAvEtGittDelingsprosent: List<SkatteetatenPeriode>): List<SkatteetatenPeriode> {
+        return perioderAvEtGittDelingsprosent.sortedBy { it.fraMaaned }
+            .fold(mutableListOf()) { sammenslåttePerioder, nesteUtbetaling ->
+                val nesteUtbetalingFraaMåned = YearMonth.parse(nesteUtbetaling.fraMaaned)
+                if (sammenslåttePerioder.lastOrNull()?.tomMaaned == nesteUtbetalingFraaMåned.minusMonths(1).toString()) {
+                    sammenslåttePerioder.apply { add(removeLast().copy(tomMaaned = nesteUtbetaling.tomMaaned)) }
+                } else sammenslåttePerioder.apply { add(nesteUtbetaling) }
+            }
     }
 
     companion object {
