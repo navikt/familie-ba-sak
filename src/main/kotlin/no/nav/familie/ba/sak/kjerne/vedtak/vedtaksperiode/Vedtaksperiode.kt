@@ -23,4 +23,3 @@ enum class Vedtaksperiodetype {
     AVSLAG,
     FORTSATT_INNVILGET
 }
-

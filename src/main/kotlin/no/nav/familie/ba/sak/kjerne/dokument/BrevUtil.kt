@@ -172,19 +172,21 @@ fun hentOverstyrtDokumenttittel(behandling: Behandling): String? {
 
 @Deprecated("Bruk hentHjemlerIVedtaksperioderFraSanity når sanity-løsningen er ferdigtestet")
 fun hentHjemlerIVedtaksperioderGammel(vedtaksperioderMedBegrunnelser: List<VedtaksperiodeMedBegrunnelser>): Set<Int> =
-        vedtaksperioderMedBegrunnelser.flatMap { periode ->
-            periode.begrunnelser.flatMap {
-                it.vedtakBegrunnelseSpesifikasjon.hentHjemler()
-            }
-        }.toSortedSet()
-
-fun hentHjemlerIVedtaksperioderFraSanity(vedtaksperioderMedBegrunnelser: List<VedtaksperiodeMedBegrunnelser>,
-                                         sanityBegrunnelser: List<SanityBegrunnelse>): List<String> =
-        vedtaksperioderMedBegrunnelser.flatMap { periode ->
-            periode.begrunnelser.flatMap {
-                it.vedtakBegrunnelseSpesifikasjon.hentHjemlerFraSanity(sanityBegrunnelser)
-            }
+    vedtaksperioderMedBegrunnelser.flatMap { periode ->
+        periode.begrunnelser.flatMap {
+            it.vedtakBegrunnelseSpesifikasjon.hentHjemler()
         }
+    }.toSortedSet()
+
+fun hentHjemlerIVedtaksperioderFraSanity(
+    vedtaksperioderMedBegrunnelser: List<VedtaksperiodeMedBegrunnelser>,
+    sanityBegrunnelser: List<SanityBegrunnelse>
+): List<String> =
+    vedtaksperioderMedBegrunnelser.flatMap { periode ->
+        periode.begrunnelser.flatMap {
+            it.vedtakBegrunnelseSpesifikasjon.hentHjemlerFraSanity(sanityBegrunnelser)
+        }
+    }
 
 fun hjemlerTilHjemmeltekst(hjemler: List<String>): String {
     return when (hjemler.size) {
@@ -204,8 +206,10 @@ fun hentHjemmeltekstGammel(vedtaksperioderMedBegrunnelser: List<VedtaksperiodeMe
     return hjemlerTilHjemmeltekst(hjemler.sorted().map { it.toString() })
 }
 
-fun hentHjemmeltekst(vedtaksperioderMedBegrunnelser: List<VedtaksperiodeMedBegrunnelser>,
-                     sanityBegrunnelser: List<SanityBegrunnelse>): String {
+fun hentHjemmeltekst(
+    vedtaksperioderMedBegrunnelser: List<VedtaksperiodeMedBegrunnelser>,
+    sanityBegrunnelser: List<SanityBegrunnelse>
+): String {
     val hjemler = hentHjemlerIVedtaksperioderFraSanity(vedtaksperioderMedBegrunnelser, sanityBegrunnelser).toMutableSet()
 
     if (vedtaksperioderMedBegrunnelser.flatMap { it.fritekster }.isNotEmpty()) {

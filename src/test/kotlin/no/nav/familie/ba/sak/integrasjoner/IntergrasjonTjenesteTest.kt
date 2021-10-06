@@ -71,11 +71,11 @@ import kotlin.random.Random
 
 @SpringBootTest(classes = [ApplicationConfig::class], properties = ["FAMILIE_INTEGRASJONER_API_URL=http://localhost:28085/api"])
 @ActiveProfiles(
-        "dev",
-        "mock-rest-template-config",
-        "mock-oauth",
-        "mock-pdl",
-        "mock-brev-klient",
+    "dev",
+    "mock-rest-template-config",
+    "mock-oauth",
+    "mock-pdl",
+    "mock-brev-klient",
 )
 @AutoConfigureWireMock(port = 28085)
 @TestInstance(Lifecycle.PER_CLASS)
