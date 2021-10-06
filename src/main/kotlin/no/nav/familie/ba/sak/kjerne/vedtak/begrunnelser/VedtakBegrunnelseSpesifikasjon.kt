@@ -551,7 +551,6 @@ enum class VedtakBegrunnelseSpesifikasjon(
                 tom = vedtaksperiodeMedBegrunnelser.tom ?: TIDENES_ENDE
             ),
             oppdatertBegrunnelseType = vedtakBegrunnelseType,
-            utgjørendeVilkår = triggesAv.vilkår,
             aktuellePersonerForVedtaksperiode = persongrunnlag.personer
                 .filter { person -> triggesAv.personTyper.contains(person.type) }
                 .filter { person ->
@@ -559,8 +558,7 @@ enum class VedtakBegrunnelseSpesifikasjon(
                         identerMedUtbetaling.contains(person.personIdent.ident) || person.type == PersonType.SØKER
                     } else true
                 },
-            deltBosted = triggesAv.deltbosted,
-            vurderingAnnetGrunnlag = triggesAv.vurderingAnnetGrunnlag
+            triggesAv = triggesAv
         ).isNotEmpty()
     }
 
@@ -607,7 +605,7 @@ fun SanityBegrunnelse.tilTriggesAv(): TriggesAv {
             ),
         medlemskap = this.inneholderBosattIRiketTrigger(VilkårTrigger.MEDLEMSKAP),
         deltbosted = this.inneholderBorMedSøkerTrigger(VilkårTrigger.DELT_BOSTED),
-        valgbar = this.apiNavn != null,
+        valgbar = !this.inneholderØvrigTrigger(ØvrigTrigger.ALLTID_AUTOMATISK),
     )
 }
 

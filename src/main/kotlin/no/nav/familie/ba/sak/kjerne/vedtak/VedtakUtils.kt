@@ -30,23 +30,20 @@ object VedtakUtils {
         vilkårsvurdering: Vilkårsvurdering,
         vedtaksperiode: Periode,
         oppdatertBegrunnelseType: VedtakBegrunnelseType,
-        utgjørendeVilkår: Set<Vilkår>?,
         aktuellePersonerForVedtaksperiode: List<Person>,
-        deltBosted: Boolean = false,
-        vurderingAnnetGrunnlag: Boolean = false
+        triggesAv: TriggesAv,
     ): Set<Person> {
 
         var personerSomOppfyllerTriggerVilkår: MutableSet<Person>? = null
 
-        utgjørendeVilkår?.forEach { vilkår ->
+        triggesAv.vilkår?.forEach { vilkår ->
             val personerMedVilkårForPeriode = hentPersonerMedUtgjørendeVilkår(
                 vilkårsvurdering = vilkårsvurdering,
                 vedtaksperiode = vedtaksperiode,
                 oppdatertBegrunnelseType = oppdatertBegrunnelseType,
-                utgjørendeVilkår = vilkår,
                 aktuellePersonerForVedtaksperiode = aktuellePersonerForVedtaksperiode,
-                deltBosted = deltBosted,
-                vurderingAnnetGrunnlag = vurderingAnnetGrunnlag
+                utgjørendeVilkår = vilkår,
+                triggesAv = triggesAv
             )
             personerSomOppfyllerTriggerVilkår = if (personerSomOppfyllerTriggerVilkår == null) {
                 personerMedVilkårForPeriode.toMutableSet()
@@ -63,8 +60,7 @@ object VedtakUtils {
         oppdatertBegrunnelseType: VedtakBegrunnelseType,
         utgjørendeVilkår: Vilkår?,
         aktuellePersonerForVedtaksperiode: List<Person>,
-        deltBosted: Boolean = false,
-        vurderingAnnetGrunnlag: Boolean = false
+        triggesAv: TriggesAv
     ): List<Person> {
 
         return vilkårsvurdering.personResultater.fold(mutableListOf()) { acc, personResultat ->
@@ -79,8 +75,9 @@ object VedtakUtils {
                     vilkårResultat.vilkårType != utgjørendeVilkår -> false
                     vilkårResultat.periodeFom == null -> false
                     oppdatertBegrunnelseType == VedtakBegrunnelseType.INNVILGELSE -> {
-                        (!deltBosted || vilkårResultat.erDeltBosted) &&
-                            (!vurderingAnnetGrunnlag || vilkårResultat.erSkjønnsmessigVurdert) &&
+                        (!triggesAv.deltbosted || vilkårResultat.erDeltBosted) &&
+                            (!triggesAv.medlemskap || vilkårResultat.erMedlemskapVurdert) &&
+                            (!triggesAv.vurderingAnnetGrunnlag || vilkårResultat.erSkjønnsmessigVurdert) &&
                             vilkårResultat.periodeFom!!.toYearMonth() == vedtaksperiode.fom.minusMonths(1)
                             .toYearMonth() &&
                             vilkårResultat.resultat == Resultat.OPPFYLT
@@ -88,8 +85,9 @@ object VedtakUtils {
 
                     oppdatertBegrunnelseType == VedtakBegrunnelseType.REDUKSJON ||
                         oppdatertBegrunnelseType == VedtakBegrunnelseType.OPPHØR -> {
-                        (!deltBosted || vilkårResultat.erDeltBosted) &&
-                            (!vurderingAnnetGrunnlag || vilkårResultat.erSkjønnsmessigVurdert) &&
+                        (!triggesAv.deltbosted || vilkårResultat.erDeltBosted) &&
+                            (!triggesAv.medlemskap || vilkårResultat.erMedlemskapVurdert) &&
+                            (!triggesAv.vurderingAnnetGrunnlag || vilkårResultat.erSkjønnsmessigVurdert) &&
                             vilkårResultat.periodeTom != null &&
                             vilkårResultat.resultat == Resultat.OPPFYLT &&
                             vilkårResultat.periodeTom!!.toYearMonth() ==

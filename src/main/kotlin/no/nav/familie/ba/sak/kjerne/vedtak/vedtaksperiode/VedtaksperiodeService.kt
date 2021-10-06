@@ -114,11 +114,9 @@ class VedtaksperiodeService(
                                 tom = vedtaksperiodeMedBegrunnelser.tom ?: TIDENES_ENDE
                             ),
                             oppdatertBegrunnelseType = vedtakBegrunnelseType,
-                            utgjørendeVilkår = triggesAv.vilkår,
                             aktuellePersonerForVedtaksperiode = persongrunnlagRepository.findByBehandlingAndAktiv(behandling.id)?.personer?.toList()
                                 ?: error("Finner ikke personer på behandling ved begrunning av vedtak"),
-                            deltBosted = triggesAv.deltbosted,
-                            vurderingAnnetGrunnlag = triggesAv.vurderingAnnetGrunnlag
+                            triggesAv = triggesAv
                         ).map { person -> person.personIdent.ident }
                     }
                 if (personIdenter.isEmpty()) {
@@ -236,7 +234,6 @@ class VedtaksperiodeService(
                             tom = vedtaksperiodeMedBegrunnelser.tom ?: TIDENES_ENDE
                         ),
                         oppdatertBegrunnelseType = vedtakBegrunnelseType,
-                        utgjørendeVilkår = triggesAv.vilkår,
                         aktuellePersonerForVedtaksperiode = persongrunnlagRepository.findByBehandlingAndAktiv(behandling.id)?.personer?.filter { person ->
                             if (vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGELSE) {
                                 identerMedUtbetaling.contains(person.personIdent.ident) || person.type == PersonType.SØKER
@@ -244,8 +241,7 @@ class VedtaksperiodeService(
                         }?.toList() ?: error(
                             "Finner ikke personer på behandling ved begrunning av vedtak"
                         ),
-                        deltBosted = triggesAv.deltbosted,
-                        vurderingAnnetGrunnlag = triggesAv.vurderingAnnetGrunnlag,
+                        triggesAv = triggesAv
                     ).map { person -> person.personIdent.ident }
                 }
 

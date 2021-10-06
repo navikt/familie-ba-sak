@@ -6,6 +6,8 @@ import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
@@ -123,7 +125,7 @@ class UtgjørendePersonerTest {
                 tom = LocalDate.of(2010, 6, 1)
             ),
             oppdatertBegrunnelseType = VedtakBegrunnelseSpesifikasjon.INNVILGET_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE.vedtakBegrunnelseType,
-            utgjørendeVilkår = VedtakBegrunnelseSpesifikasjon.INNVILGET_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE.triggesAv.vilkår,
+            triggesAv = TriggesAv(vilkår = setOf(Vilkår.LOVLIG_OPPHOLD)),
             aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList(),
         )
 
@@ -140,7 +142,7 @@ class UtgjørendePersonerTest {
                 tom = LocalDate.of(2010, 6, 1)
             ),
             oppdatertBegrunnelseType = VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET.vedtakBegrunnelseType,
-            utgjørendeVilkår = VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET.triggesAv.vilkår,
+            triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOSATT_I_RIKET)),
             aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList()
         )
 
@@ -208,7 +210,7 @@ class UtgjørendePersonerTest {
                 tom = TIDENES_ENDE
             ),
             oppdatertBegrunnelseType = VedtakBegrunnelseSpesifikasjon.REDUKSJON_BOSATT_I_RIKTET.vedtakBegrunnelseType,
-            utgjørendeVilkår = VedtakBegrunnelseSpesifikasjon.REDUKSJON_BOSATT_I_RIKTET.triggesAv.vilkår,
+            triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOSATT_I_RIKET), personTyper = setOf(PersonType.BARN)),
             aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList()
         )
 
@@ -225,7 +227,7 @@ class UtgjørendePersonerTest {
                 tom = TIDENES_ENDE
             ),
             oppdatertBegrunnelseType = VedtakBegrunnelseSpesifikasjon.OPPHØR_UTVANDRET.vedtakBegrunnelseType,
-            utgjørendeVilkår = VedtakBegrunnelseSpesifikasjon.OPPHØR_UTVANDRET.triggesAv.vilkår,
+            triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOSATT_I_RIKET)),
             aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList() // Husk å fikse dette!
         )
 
