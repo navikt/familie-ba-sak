@@ -40,6 +40,7 @@ import javax.sql.DataSource
     "mock-pdl",
     "mock-økonomi",
     "mock-infotrygd-barnetrygd",
+    "mock-brev-klient",
 )
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class VilkårServiceTest(

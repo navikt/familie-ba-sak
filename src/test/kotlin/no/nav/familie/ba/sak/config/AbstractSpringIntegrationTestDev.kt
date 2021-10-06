@@ -15,7 +15,8 @@ import org.springframework.test.context.ActiveProfiles
     "mock-pdl",
     "mock-infotrygd-barnetrygd",
     "mock-infotrygd-feed",
-    "mock-økonomi"
+    "mock-økonomi",
+    "mock-brev-klient"
 )
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @AutoConfigureWireMock(port = 0)

@@ -41,7 +41,12 @@ import java.time.LocalDate.now
 
 @SpringBootTest
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
-@ActiveProfiles("postgres", "mock-pdl", "mock-infotrygd-barnetrygd")
+@ActiveProfiles(
+    "postgres",
+    "mock-pdl",
+    "mock-infotrygd-barnetrygd",
+    "mock-brev-klient",
+)
 @Tag("integration")
 class ArbeidsfordelingIntegrationTest(
     @Autowired
