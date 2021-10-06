@@ -336,7 +336,7 @@ internal class UtvidetBarnetrygdTest {
     }
 
     @Test
-    fun `Utvidet andeler slutter måneden etter vilkår ikke er innfridd lenger, ikke samme slik som ellers`() {
+    fun `Utvidet andeler slutter siste dag i  måneden vilkår ikke er innfridd lenger`() {
 
         val søkerOrdinær =
             OppfyltPeriode(fom = LocalDate.of(2019, 4, 1), tom = LocalDate.of(2020, 6, 15))
@@ -404,7 +404,7 @@ internal class UtvidetBarnetrygdTest {
         assertEquals(barnOppfylt.tom.toYearMonth(), andelBarn.stønadTom)
 
         assertEquals(søkerUtvidet.ident, andelUtvidet.personIdent)
-        assertEquals(søkerUtvidet.tom.nesteMåned(), andelUtvidet.stønadTom)
+        assertEquals(søkerUtvidet.tom.toYearMonth(), andelUtvidet.stønadTom)
     }
 
     private data class OppfyltPeriode(
