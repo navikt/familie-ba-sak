@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.ekstern.skatteetaten
 
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.eksterne.kontrakter.skatteetaten.SkatteetatenPeriode
 import no.nav.familie.eksterne.kontrakter.skatteetaten.SkatteetatenPerioder
@@ -17,7 +18,8 @@ import java.time.format.DateTimeFormatter
 @Service
 class SkatteetatenService(
     private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
-    private val fagsakRepository: FagsakRepository
+    private val fagsakRepository: FagsakRepository,
+    private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository
 ) {
 
     fun finnPersonerMedUtvidetBarnetrygd(år: String): SkatteetatenPersonerResponse {
@@ -91,7 +93,7 @@ class SkatteetatenService(
             : List<AndelTilkjentYtelsePeriode> {
         val yearStart = LocalDateTime.of(år.toInt(), 1, 1, 0, 0, 0)
         val yearEnd = LocalDateTime.of(år.toInt(), 12, 31, 23, 59, 59)
-        return fagsakRepository.finnStonadPeriodMedUtvidetBarnetrygdForPersoner(
+        return andelTilkjentYtelseRepository.finnStonadPeriodMedUtvidetBarnetrygdForPersoner(
             personIdenter,
             yearStart,
             yearEnd

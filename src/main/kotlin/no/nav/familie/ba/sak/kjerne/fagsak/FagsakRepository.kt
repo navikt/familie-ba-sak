@@ -1,18 +1,13 @@
 package no.nav.familie.ba.sak.kjerne.fagsak
 
 import io.micrometer.core.annotation.Timed
-import no.nav.familie.ba.sak.common.Periode
-import no.nav.familie.ba.sak.ekstern.skatteetaten.AndelTilkjentYtelsePeriode
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Lock
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
-import org.springframework.data.repository.query.Param
 import org.springframework.stereotype.Repository
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.Optional
 import javax.persistence.LockModeType
@@ -93,7 +88,6 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
                INNER JOIN Fagsak f ON f.id = b.fagsak.id
                INNER JOIN TilkjentYtelse ty ON b.id = ty.behandling.id
         WHERE ty.utbetalingsoppdrag IS NOT NULL
-        AND f.status <> 'OPPRETTET' 
         AND EXISTS(
             SELECT aty.type FROM AndelTilkjentYtelse aty
             WHERE aty.tilkjentYtelse.id = ty.id
@@ -107,46 +101,4 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
     @Timed
     fun finnFagsakerMedUtvidetBarnetrygdInnenfor(fom: YearMonth, tom: YearMonth): List<Pair<Fagsak, LocalDate>>
 
-    @Query(value = """WITH qualified AS (
-    SELECT *
-    FROM ((
-              SELECT aty.person_ident       ident,
-                     aty.stonad_fom         fom,
-                     aty.stonad_tom         tom,
-                     aty.prosent            prosent,
-                     aty.tilkjent_ytelse_id aty_tyid,
-                     aty.id
-              FROM andel_tilkjent_ytelse aty
-              WHERE aty.type = 'UTVIDET_BARNETRYGD'
-                AND aty.person_ident IN :personIdenter
-                AND aty.stonad_fom <= :tom
-                AND aty.stonad_tom >= :fom
-          ) AS qualified_aty
-             INNER JOIN (
-        SELECT ty.id tyid, ty.endret_dato endret_dato
-        FROM tilkjent_ytelse ty
-        WHERE ty.utbetalingsoppdrag IS NOT NULL
-    ) AS qualified_ty
-                        ON qualified_aty.aty_tyid = qualified_ty.tyid)
-)
-
-SELECT qualified.id             AS id,
-       qualified.ident          AS ident,
-       qualified.prosent        AS prosent,
-       qualified.endret_dato AS endretDato,
-       qualified.fom            AS fom,
-       qualified.tom            AS tom
-FROM (SELECT ident, MAX(endret_dato) dato
-      FROM qualified
-      GROUP BY ident
-     ) AS latest
-         INNER JOIN qualified
-                    ON qualified.ident = latest.ident AND qualified.endret_dato = latest.dato
-""", nativeQuery = true)
-    @Timed
-    fun finnStonadPeriodMedUtvidetBarnetrygdForPersoner(
-        personIdenter: List<String>,
-        fom: LocalDateTime,
-        tom: LocalDateTime
-    ): List<AndelTilkjentYtelsePeriode>
 }

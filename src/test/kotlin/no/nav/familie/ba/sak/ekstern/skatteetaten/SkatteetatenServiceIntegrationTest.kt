@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
@@ -37,6 +38,9 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
     lateinit var fagsakRepository: FagsakRepository
 
     @Autowired
+    lateinit var andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository
+
+    @Autowired
     lateinit var tilkjentYtelseRepository: TilkjentYtelseRepository
 
     @Autowired
@@ -53,7 +57,7 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
 
     @BeforeAll
     fun init() {
-        skatteetatenService = SkatteetatenService(infotrygdBarnetrygdClientMock, fagsakRepository)
+        skatteetatenService = SkatteetatenService(infotrygdBarnetrygdClientMock, fagsakRepository, andelTilkjentYtelseRepository)
     }
 
     data class PerioderTestData(

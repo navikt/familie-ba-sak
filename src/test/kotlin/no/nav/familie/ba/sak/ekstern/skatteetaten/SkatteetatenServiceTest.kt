@@ -4,6 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.defaultFagsak
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.eksterne.kontrakter.skatteetaten.SkatteetatenPerson
 import no.nav.familie.eksterne.kontrakter.skatteetaten.SkatteetatenPersonerResponse
@@ -15,6 +16,7 @@ internal class SkatteetatenServiceTest {
 
     private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient = mockk()
     private val fagsakRepository: FagsakRepository = mockk()
+    private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository = mockk()
 
     @Test
     fun `finnPersonerMedUtvidetBarnetrygd() skal returnere person fra fagsystem med nyeste vedtaksdato`() {
@@ -32,7 +34,7 @@ internal class SkatteetatenServiceTest {
             )
         )
 
-        val skatteetatenService = SkatteetatenService(infotrygdBarnetrygdClient, fagsakRepository)
+        val skatteetatenService = SkatteetatenService(infotrygdBarnetrygdClient, fagsakRepository, andelTilkjentYtelseRepository)
 
         assertThat(skatteetatenService.finnPersonerMedUtvidetBarnetrygd(nyesteVedtaksdato.year.toString()).brukere).hasSize(2)
 
@@ -63,7 +65,7 @@ internal class SkatteetatenServiceTest {
             fagsak2 to vedtaksdato.plusDays(2)
         )
 
-        val skatteetatenService = SkatteetatenService(infotrygdBarnetrygdClient, fagsakRepository)
+        val skatteetatenService = SkatteetatenService(infotrygdBarnetrygdClient, fagsakRepository, andelTilkjentYtelseRepository)
         val personerMedUtvidetBarnetrygd = skatteetatenService.finnPersonerMedUtvidetBarnetrygd(vedtaksdato.year.toString())
 
         assertThat(personerMedUtvidetBarnetrygd.brukere).hasSize(2)
@@ -99,7 +101,7 @@ internal class SkatteetatenServiceTest {
                     )
                 )
 
-        val skatteetatenService = SkatteetatenService(infotrygdBarnetrygdClient, fagsakRepository)
+        val skatteetatenService = SkatteetatenService(infotrygdBarnetrygdClient, fagsakRepository, andelTilkjentYtelseRepository)
         val personerMedUtvidetBarnetrygd = skatteetatenService.finnPersonerMedUtvidetBarnetrygd(vedtaksdato.year.toString())
 
         assertThat(personerMedUtvidetBarnetrygd.brukere).hasSize(1)
