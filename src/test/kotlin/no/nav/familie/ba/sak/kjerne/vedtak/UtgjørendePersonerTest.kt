@@ -284,7 +284,7 @@ class UtgjørendePersonerTest {
         vilkårsvurdering.personResultater =
             setOf(barn1PersonResultat, barn2PersonResultat)
 
-        val personerMedUtgjørendeVilkårBosattIRiket = VedtakUtils.hentPersonerForAlleUtgjørendeVilkår(
+        val personerMedUtgjørendeVilkårBosattIRiketMedlemskap = VedtakUtils.hentPersonerForAlleUtgjørendeVilkår(
             vilkårsvurdering = vilkårsvurdering,
             vedtaksperiode = Periode(
                 fom = LocalDate.of(2021, 12, 1),
@@ -295,7 +295,7 @@ class UtgjørendePersonerTest {
             aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList()
         )
 
-        val personerMedUtgjørendeVilkårBarnUtvandret = VedtakUtils.hentPersonerForAlleUtgjørendeVilkår(
+        val personerMedUtgjørendeVilkårBosattIRiket = VedtakUtils.hentPersonerForAlleUtgjørendeVilkår(
             vilkårsvurdering = vilkårsvurdering,
             vedtaksperiode = Periode(
                 fom = LocalDate.of(2021, 12, 1),
@@ -306,17 +306,17 @@ class UtgjørendePersonerTest {
             aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList()
         )
 
-        assertEquals(1, personerMedUtgjørendeVilkårBosattIRiket.size)
+        assertEquals(1, personerMedUtgjørendeVilkårBosattIRiketMedlemskap.size)
         assertEquals(
             barn1Fnr,
-            personerMedUtgjørendeVilkårBosattIRiket.first().personIdent.ident
+            personerMedUtgjørendeVilkårBosattIRiketMedlemskap.first().personIdent.ident
         )
 
 
-        assertEquals(1, personerMedUtgjørendeVilkårBarnUtvandret.size)
+        assertEquals(1, personerMedUtgjørendeVilkårBosattIRiket.size)
         assertEquals(
             barn2Fnr,
-            personerMedUtgjørendeVilkårBarnUtvandret.first().personIdent.ident
+            personerMedUtgjørendeVilkårBosattIRiket.first().personIdent.ident
         )
     }
 }
