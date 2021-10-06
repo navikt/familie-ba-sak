@@ -21,9 +21,7 @@ object VedtakUtils {
      * @param vilkårsvurdering - Vilkårsvurderingen man ser på for å sammenligne vilkår
      * @param vedtaksperiode - Perioden det skal sjekkes for
      * @param oppdatertBegrunnelseType - Begrunnelsestype det skal sjekkes for
-     * @param utgjørendeVilkår -  Alle de vilkår som trigger en vedtaksbegrynnelse.
-     * @param deltBosted -  Om delt bosted må være valgt for å trigger en vedtaksbegrynnelse.
-     * @param skjønnsmessigVurdert -  Om skjønnsmessig vurdering må være valgt for å trigger en vedtaksbegrynnelse.
+     * @param triggesAv -  Hva som trigger en vedtaksbegrynnelse.
      * @return List med personene det trigges endring på
      */
     fun hentPersonerForAlleUtgjørendeVilkår(
@@ -75,9 +73,7 @@ object VedtakUtils {
                     vilkårResultat.vilkårType != utgjørendeVilkår -> false
                     vilkårResultat.periodeFom == null -> false
                     oppdatertBegrunnelseType == VedtakBegrunnelseType.INNVILGELSE -> {
-                        (!triggesAv.deltbosted || vilkårResultat.erDeltBosted) &&
-                            (!triggesAv.medlemskap || vilkårResultat.erMedlemskapVurdert) &&
-                            (!triggesAv.vurderingAnnetGrunnlag || vilkårResultat.erSkjønnsmessigVurdert) &&
+                        triggereErOppfylt(triggesAv, vilkårResultat) &&
                             vilkårResultat.periodeFom!!.toYearMonth() == vedtaksperiode.fom.minusMonths(1)
                             .toYearMonth() &&
                             vilkårResultat.resultat == Resultat.OPPFYLT
@@ -85,9 +81,7 @@ object VedtakUtils {
 
                     oppdatertBegrunnelseType == VedtakBegrunnelseType.REDUKSJON ||
                         oppdatertBegrunnelseType == VedtakBegrunnelseType.OPPHØR -> {
-                        (!triggesAv.deltbosted || vilkårResultat.erDeltBosted) &&
-                            (!triggesAv.medlemskap || vilkårResultat.erMedlemskapVurdert) &&
-                            (!triggesAv.vurderingAnnetGrunnlag || vilkårResultat.erSkjønnsmessigVurdert) &&
+                        triggereErOppfylt(triggesAv, vilkårResultat) &&
                             vilkårResultat.periodeTom != null &&
                             vilkårResultat.resultat == Resultat.OPPFYLT &&
                             vilkårResultat.periodeTom!!.toYearMonth() ==
@@ -106,6 +100,14 @@ object VedtakUtils {
             acc
         }
     }
+
+    private fun triggereErOppfylt(
+        triggesAv: TriggesAv,
+        vilkårResultat: VilkårResultat
+    ) = (!triggesAv.deltbosted || vilkårResultat.erDeltBosted) &&
+        ((vilkårResultat.erMedlemskapVurdert && triggesAv.medlemskap) ||
+            (!triggesAv.medlemskap && !vilkårResultat.erMedlemskapVurdert)) &&
+        (!triggesAv.vurderingAnnetGrunnlag || vilkårResultat.erSkjønnsmessigVurdert)
 }
 
 fun validerAvslagsbegrunnelse(
