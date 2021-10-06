@@ -170,7 +170,8 @@ fun List<AndelTilkjentYtelse>.slåSammenBack2BackAndelsperioderMedSammeBeløp():
         val back2BackAndelsperiodeMedSammeBeløp = this.singleOrNull {
             andel!!.stønadTom.plusMonths(1).equals(it.stønadFom) &&
                 andel!!.personIdent == it.personIdent &&
-                andel!!.kalkulertUtbetalingsbeløp == it.kalkulertUtbetalingsbeløp
+                andel!!.kalkulertUtbetalingsbeløp == it.kalkulertUtbetalingsbeløp &&
+                andel!!.type == it.type
         }
         andel = if (back2BackAndelsperiodeMedSammeBeløp != null) {
             andel!!.copy(stønadTom = back2BackAndelsperiodeMedSammeBeløp.stønadTom)

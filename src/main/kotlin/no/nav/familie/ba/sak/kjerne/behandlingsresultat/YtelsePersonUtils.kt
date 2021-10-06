@@ -6,24 +6,11 @@ import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toLocalDate
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
 import java.time.YearMonth
 
 object YtelsePersonUtils {
-
-    /**
-     * Kun støttet for førstegangsbehandlinger som er fødselshendelse og ordinær barnetrygd
-     */
-    fun utledKravForFødselshendelseFGB(barnIdenterFraFødselshendelse: List<String>): List<YtelsePerson> =
-        barnIdenterFraFødselshendelse.map {
-            YtelsePerson(
-                personIdent = it,
-                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                kravOpprinnelse = listOf(KravOpprinnelse.INNEVÆRENDE),
-            )
-        }
 
     /**
      * Utleder hvilke konsekvenser _denne_ behandlingen har for personen og populerer "resultater" med utfallet.

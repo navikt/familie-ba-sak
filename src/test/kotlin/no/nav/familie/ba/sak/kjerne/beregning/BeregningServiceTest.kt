@@ -50,6 +50,7 @@ class BeregningServiceTest {
     val søknadGrunnlagService = mockk<SøknadGrunnlagService>()
     val personopplysningGrunnlagRepository = mockk<PersonopplysningGrunnlagRepository>()
     val endretUtbetalingAndelRepository = mockk<EndretUtbetalingAndelRepository>()
+    val småbarnstilleggService = mockk<SmåbarnstilleggService>()
     val featureToggleService = mockk<FeatureToggleService>()
 
     lateinit var beregningService: BeregningService
@@ -66,7 +67,8 @@ class BeregningServiceTest {
             behandlingResultatRepository,
             behandlingRepository,
             personopplysningGrunnlagRepository,
-            endretUtbetalingAndelRepository
+            endretUtbetalingAndelRepository,
+            småbarnstilleggService
         )
 
         every { tilkjentYtelseRepository.slettTilkjentYtelseFor(any()) } just Runs
@@ -490,6 +492,7 @@ class BeregningServiceTest {
             deltBostedForFørstePeriode = true
         )
     }
+
     @Test
     fun `Dersom barn har flere godkjente perioderesultat back2back og delt bosted kun i andre periode skal det ikke bli glippe i andel ytelser men beløpsendringen skal inntreffe som normalt neste måned`() {
         val førstePeriodeTomForBarnet = LocalDate.of(2020, 11, 30)
@@ -538,8 +541,10 @@ class BeregningServiceTest {
         val periodeFomForSøker = førstePeriodeFomForBarnet
         val periodeTomForSøker = andrePeriodeTomForBarnet.plusMonths(1)
 
-        val førsteSatsendringFom = SatsService.hentDatoForSatsendring(satstype = SatsType.TILLEGG_ORBA, oppdatertBeløp = 1354)!!
-        val andreSatsendringFom = SatsService.hentDatoForSatsendring(satstype = SatsType.TILLEGG_ORBA, oppdatertBeløp = 1654)!!
+        val førsteSatsendringFom =
+            SatsService.hentDatoForSatsendring(satstype = SatsType.TILLEGG_ORBA, oppdatertBeløp = 1354)!!
+        val andreSatsendringFom =
+            SatsService.hentDatoForSatsendring(satstype = SatsType.TILLEGG_ORBA, oppdatertBeløp = 1654)!!
 
         val personResultat = mutableSetOf(
             lagPersonResultat(
@@ -603,22 +608,34 @@ class BeregningServiceTest {
         // Første periode (før satsendring)
         Assertions.assertEquals(førstePeriodeFomForBarnet.nesteMåned(), andelerTilkjentYtelse[0].stønadFom)
         Assertions.assertEquals(førsteSatsendringFom.forrigeMåned(), andelerTilkjentYtelse[0].stønadTom)
-        Assertions.assertEquals(if (deltBostedForFørstePeriode) 527 else 1054, andelerTilkjentYtelse[0].kalkulertUtbetalingsbeløp)
+        Assertions.assertEquals(
+            if (deltBostedForFørstePeriode) 527 else 1054,
+            andelerTilkjentYtelse[0].kalkulertUtbetalingsbeløp
+        )
 
         // Andre periode (fra første satsendring til slutt av første godkjente perioderesultat for barnet)
         Assertions.assertEquals(førsteSatsendringFom.toYearMonth(), andelerTilkjentYtelse[1].stønadFom)
         Assertions.assertEquals(forventetSluttForFørsteAndelsperiode, andelerTilkjentYtelse[1].stønadTom)
-        Assertions.assertEquals(if (deltBostedForFørstePeriode) 677 else 1354, andelerTilkjentYtelse[1].kalkulertUtbetalingsbeløp)
+        Assertions.assertEquals(
+            if (deltBostedForFørstePeriode) 677 else 1354,
+            andelerTilkjentYtelse[1].kalkulertUtbetalingsbeløp
+        )
 
         // Tredje periode (fra start av andre godkjente perioderesultat for barnet til neste satsendring).
         // At denne perioden følger back2back med tom for forrige periode er primært det som testes her.
         Assertions.assertEquals(forventetStartForAndreAndelsperiode, andelerTilkjentYtelse[2].stønadFom)
         Assertions.assertEquals(andreSatsendringFom.forrigeMåned(), andelerTilkjentYtelse[2].stønadTom)
-        Assertions.assertEquals(if (deltBostedForAndrePeriode) 677 else 1354, andelerTilkjentYtelse[2].kalkulertUtbetalingsbeløp)
+        Assertions.assertEquals(
+            if (deltBostedForAndrePeriode) 677 else 1354,
+            andelerTilkjentYtelse[2].kalkulertUtbetalingsbeløp
+        )
 
         // Fjerde periode (fra siste satsendring til slutt av endre godkjente perioderesultat for barnet)
         Assertions.assertEquals(andreSatsendringFom.toYearMonth(), andelerTilkjentYtelse[3].stønadFom)
         Assertions.assertEquals(andrePeriodeTomForBarnet.toYearMonth(), andelerTilkjentYtelse[3].stønadTom)
-        Assertions.assertEquals(if (deltBostedForAndrePeriode) 827 else 1654, andelerTilkjentYtelse[3].kalkulertUtbetalingsbeløp)
+        Assertions.assertEquals(
+            if (deltBostedForAndrePeriode) 827 else 1654,
+            andelerTilkjentYtelse[3].kalkulertUtbetalingsbeløp
+        )
     }
 }
