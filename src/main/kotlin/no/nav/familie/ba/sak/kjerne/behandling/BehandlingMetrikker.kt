@@ -22,11 +22,11 @@ import java.time.temporal.ChronoUnit
 
 @Component
 class BehandlingMetrikker(
-        private val behandlingRepository: BehandlingRepository,
-        private val vedtakRepository: VedtakRepository,
-        private val vedtaksperiodeRepository: VedtaksperiodeRepository,
-        private val featureToggleService: FeatureToggleService,
-        private val brevKlient: BrevKlient
+    private val behandlingRepository: BehandlingRepository,
+    private val vedtakRepository: VedtakRepository,
+    private val vedtaksperiodeRepository: VedtaksperiodeRepository,
+    private val featureToggleService: FeatureToggleService,
+    private val brevKlient: BrevKlient
 ) {
 
     private val antallManuelleBehandlinger: Counter = Metrics.counter("behandling.behandlinger", "saksbehandling", "manuell")
@@ -47,19 +47,21 @@ class BehandlingMetrikker(
         }.toMap()
 
     private val antallBrevBegrunnelseSpesifikasjon: Map<VedtakBegrunnelseSpesifikasjon, Counter> =
-            VedtakBegrunnelseSpesifikasjon.values().map {
-                val tittel =
-                        if (featureToggleService.isEnabled(FeatureToggleConfig.BRUK_BEGRUNNELSE_TRIGGES_AV_FRA_SANITY)) {
-                            it
-                                    .tilSanityBegrunnelse(brevKlient.hentSanityBegrunnelse())
-                                    .navnISystem
-                        } else
-                            it.tittel
+        VedtakBegrunnelseSpesifikasjon.values().map {
+            val tittel =
+                if (featureToggleService.isEnabled(FeatureToggleConfig.BRUK_BEGRUNNELSE_TRIGGES_AV_FRA_SANITY)) {
+                    it
+                        .tilSanityBegrunnelse(brevKlient.hentSanityBegrunnelse())
+                        .navnISystem
+                } else
+                    it.tittel
 
-                it to Metrics.counter("brevbegrunnelse",
-                                      "type", it.name,
-                                      "beskrivelse", tittel)
-            }.toMap()
+            it to Metrics.counter(
+                "brevbegrunnelse",
+                "type", it.name,
+                "beskrivelse", tittel
+            )
+        }.toMap()
 
     private val behandlingstid: DistributionSummary = Metrics.summary("behandling.tid")
 
