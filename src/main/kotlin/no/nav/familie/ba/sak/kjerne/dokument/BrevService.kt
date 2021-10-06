@@ -175,10 +175,10 @@ class BrevService(
 
         val sanityBegrunnelser = brevKlient.hentSanityBegrunnelse()
         val hjemler =
-                if (featureToggleService.isEnabled(FeatureToggleConfig.BRUK_BEGRUNNELSE_TRIGGES_AV_FRA_SANITY))
-                    hentHjemmeltekst(vedtaksperioderMedBegrunnelser, sanityBegrunnelser)
-                else
-                    hentHjemmeltekstGammel(vedtaksperioderMedBegrunnelser)
+            if (featureToggleService.isEnabled(FeatureToggleConfig.BRUK_BEGRUNNELSE_TRIGGES_AV_FRA_SANITY))
+                hentHjemmeltekst(vedtaksperioderMedBegrunnelser, sanityBegrunnelser)
+            else
+                hentHjemmeltekstGammel(vedtaksperioderMedBegrunnelser)
 
         val målform = persongrunnlagService.hentSøkersMålform(vedtak.behandling.id)
 
