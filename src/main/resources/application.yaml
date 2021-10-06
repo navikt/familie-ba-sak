@@ -70,7 +70,7 @@ management:
           autotime:
             enabled: true
 
-FAMILIE_EF_SAK_API_URL_SCOPE: api://dev-fss:teamfamilie:familie-ef-sak/:default
+FAMILIE_EF_SAK_API_URL_SCOPE: api://dev-gcp.teamfamilie.familie-ef-sak/.default
 
 DAGLIG_KVOTE_FØDSELSHENDELSER: 5
 PDL_SCOPE: api://dev-fss.pdl.pdl-api/.default
