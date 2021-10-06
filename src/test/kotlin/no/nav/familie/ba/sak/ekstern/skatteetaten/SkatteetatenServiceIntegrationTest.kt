@@ -57,7 +57,8 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
 
     @BeforeAll
     fun init() {
-        skatteetatenService = SkatteetatenService(infotrygdBarnetrygdClientMock, fagsakRepository, andelTilkjentYtelseRepository)
+        skatteetatenService =
+            SkatteetatenService(infotrygdBarnetrygdClientMock, fagsakRepository, andelTilkjentYtelseRepository)
     }
 
     data class PerioderTestData(
@@ -196,11 +197,12 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
             )
         }
 
-        val samletResultat = skatteetatenService.finnPerioderMedUtvidetBarnetrygd(testDataBaSak.filter { it.fnr != excludedFnr }
-                                                                                      .map { it.fnr }
-                                                                                          + testDataInfotrygd.map { it.fnr },
-                                                                                  "2020"
-        )
+        val samletResultat =
+            skatteetatenService.finnPerioderMedUtvidetBarnetrygd(testDataBaSak.filter { it.fnr != excludedFnr }
+                .map { it.fnr }
+                + testDataInfotrygd.map { it.fnr },
+                "2020"
+            )
 
         assertThat(samletResultat.brukere).hasSize(2)
         assertThat(samletResultat.brukere.find { it.ident == duplicatedFnr }!!.perioder).hasSize(2)
@@ -215,6 +217,97 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
             SkatteetatenPeriode.Delingsprosent._0
         )
         assertThat(samletResultat.brukere.find { it.ident == testDataInfotrygd[1].fnr }!!.perioder).hasSize(1)
+    }
+
+    @Test
+    fun `finnPerioderMedUtvidetBarnetrygd() skal slå sammen perioder basert på prosent`() {
+        val fnr = "00000000001"
+        val excludedFnr = "10000000004"
+
+        //Result from ba-sak
+        val testDataBaSak = arrayOf(
+            PerioderTestData(
+                fnr = fnr,
+                endretDato = LocalDateTime.of(2020, 11, 6, 12, 0),
+                perioder = listOf(
+                    Triple(
+                        LocalDateTime.of(2019, 9, 1, 12, 0),
+                        LocalDateTime.of(2020, 2, 11, 12, 0),
+                        SkatteetatenPeriode.Delingsprosent._0
+                    ),
+                    Triple(
+                        LocalDateTime.of(2020, 3, 1, 12, 0),
+                        LocalDateTime.of(2020, 4, 8, 12, 0),
+                        SkatteetatenPeriode.Delingsprosent._0
+                    ),
+                    Triple(
+                        LocalDateTime.of(2020, 5, 1, 12, 0),
+                        LocalDateTime.of(2020, 6, 8, 12, 0),
+                        SkatteetatenPeriode.Delingsprosent._0
+                    ),
+                    Triple(
+                        LocalDateTime.of(2020, 7, 1, 12, 0),
+                        LocalDateTime.of(2020, 8, 8, 12, 0),
+                        SkatteetatenPeriode.Delingsprosent._50
+                    ),
+                    Triple(
+                        LocalDateTime.of(2020, 9, 1, 12, 0),
+                        LocalDateTime.of(2020, 11, 8, 12, 0),
+                        SkatteetatenPeriode.Delingsprosent._0
+                    )
+                )
+            ),
+        )
+
+        testDataBaSak.forEach {
+            every {
+                infotrygdBarnetrygdClientMock.hentPerioderMedUtvidetBarnetrygd(
+                    eq(it.fnr),
+                    any()
+                )
+            } returns null
+
+            lagerTilkjentYtelse(it)
+        }
+
+        val samletResultat =
+            skatteetatenService.finnPerioderMedUtvidetBarnetrygd(testDataBaSak.filter { it.fnr != excludedFnr }
+                .map { it.fnr },
+                "2020"
+            )
+
+        assertThat(samletResultat.brukere).hasSize(1)
+        assertThat(samletResultat.brukere.find { it.ident == fnr }!!.perioder).hasSize(3)
+        val sortertePerioder= samletResultat.brukere.find { it.ident == fnr }!!.perioder.sortedBy { it.fraMaaned }
+        assertThat(sortertePerioder[0].delingsprosent).isEqualTo(
+            SkatteetatenPeriode.Delingsprosent._0
+        )
+        assertThat(sortertePerioder[0].fraMaaned).isEqualTo(
+            "2019-09"
+        )
+        assertThat(sortertePerioder[0].tomMaaned).isEqualTo(
+            "2020-06"
+        )
+
+        assertThat(sortertePerioder[1].delingsprosent).isEqualTo(
+            SkatteetatenPeriode.Delingsprosent._50
+        )
+        assertThat(sortertePerioder[1].fraMaaned).isEqualTo(
+            "2020-07"
+        )
+        assertThat(sortertePerioder[1].tomMaaned).isEqualTo(
+            "2020-08"
+        )
+
+        assertThat(sortertePerioder[2].delingsprosent).isEqualTo(
+            SkatteetatenPeriode.Delingsprosent._0
+        )
+        assertThat(sortertePerioder[2].fraMaaned).isEqualTo(
+            "2020-09"
+        )
+        assertThat(sortertePerioder[2].tomMaaned).isEqualTo(
+            "2020-11"
+        )
     }
 
     fun lagerTilkjentYtelse(tilkjentYtelse: PerioderTestData) {

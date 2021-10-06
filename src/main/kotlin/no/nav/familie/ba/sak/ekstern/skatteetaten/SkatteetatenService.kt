@@ -72,11 +72,7 @@ class SkatteetatenService(
             val samletPerioder = if (perioderMap.containsKey(ident))
                 perioderMap.get(ident)!!.perioder + nyList
             else nyList
-            //Slå sammen perioder basert på delingsprosent
-            val sammenslåttePerioderDelingsprosent =
-                samletPerioder.groupBy { it.delingsprosent }.values
-                    .flatMap(::slåSammenSkatteetatenPeriode).toMutableList()
-            perioderMap.put(ident, SkatteetatenPerioder(ident, period.getEndretDato(), sammenslåttePerioderDelingsprosent))
+            perioderMap.put(ident, SkatteetatenPerioder(ident, period.getEndretDato(), samletPerioder))
             perioderMap
         }
         LOG.debug(
@@ -85,7 +81,13 @@ class SkatteetatenService(
             skatteetatenPerioderMap.size
         )
         return skatteetatenPerioderMap.toList().map {
-            it.second
+            //Slå sammen perioder basert på delingsprosent
+            SkatteetatenPerioder(
+                ident = it.second.ident,
+                sisteVedtakPaaIdent = it.second.sisteVedtakPaaIdent,
+                perioder = it.second.perioder.groupBy { it.delingsprosent }.values
+                    .flatMap(::slåSammenSkatteetatenPeriode).toMutableList()
+            )
         }
     }
 
