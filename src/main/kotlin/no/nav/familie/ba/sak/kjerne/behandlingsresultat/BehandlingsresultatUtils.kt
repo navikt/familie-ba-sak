@@ -2,14 +2,23 @@ package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.isSameOrBefore
+import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
+import no.nav.fpsak.tidsserie.LocalDateSegment
+import no.nav.fpsak.tidsserie.LocalDateTimeline
+import no.nav.fpsak.tidsserie.StandardCombinators
 
 object BehandlingsresultatUtils {
 
@@ -32,22 +41,29 @@ object BehandlingsresultatUtils {
             personIdent = personIdent,
             personType = person.type,
             søktForPerson = personerFremstiltKravFor.contains(personIdent),
-            forrigeAndeler = forrigeTilkjentYtelse?.andelerTilkjentYtelse?.filter { it.personIdent == personIdent }
-                ?.map { andelTilkjentYtelse ->
-                    BehandlingsresultatAndelTilkjentYtelse(
-                        stønadFom = andelTilkjentYtelse.stønadFom,
-                        stønadTom = andelTilkjentYtelse.stønadTom,
-                        kalkulertUtbetalingsbeløp = andelTilkjentYtelse.kalkulertUtbetalingsbeløp
-                    )
-                } ?: emptyList(),
-            andeler = tilkjentYtelse.andelerTilkjentYtelse.filter { it.personIdent == personIdent }
-                .map { andelTilkjentYtelse ->
-                    BehandlingsresultatAndelTilkjentYtelse(
-                        stønadFom = andelTilkjentYtelse.stønadFom,
-                        stønadTom = andelTilkjentYtelse.stønadTom,
-                        kalkulertUtbetalingsbeløp = andelTilkjentYtelse.kalkulertUtbetalingsbeløp
-                    )
-                },
+            forrigeAndeler = when (person.type) {
+                PersonType.SØKER -> kombinerOverlappendeAndelerForSøker(forrigeTilkjentYtelse?.andelerTilkjentYtelse?.filter { it.personIdent == personIdent }
+                    ?: emptyList())
+                else -> forrigeTilkjentYtelse?.andelerTilkjentYtelse?.filter { it.personIdent == personIdent }
+                    ?.map { andelTilkjentYtelse ->
+                        BehandlingsresultatAndelTilkjentYtelse(
+                            stønadFom = andelTilkjentYtelse.stønadFom,
+                            stønadTom = andelTilkjentYtelse.stønadTom,
+                            kalkulertUtbetalingsbeløp = andelTilkjentYtelse.kalkulertUtbetalingsbeløp
+                        )
+                    } ?: emptyList()
+            },
+            andeler = when (person.type) {
+                PersonType.SØKER -> kombinerOverlappendeAndelerForSøker(tilkjentYtelse.andelerTilkjentYtelse.filter { it.personIdent == personIdent })
+                else -> tilkjentYtelse.andelerTilkjentYtelse.filter { it.personIdent == personIdent }
+                    .map { andelTilkjentYtelse ->
+                        BehandlingsresultatAndelTilkjentYtelse(
+                            stønadFom = andelTilkjentYtelse.stønadFom,
+                            stønadTom = andelTilkjentYtelse.stønadTom,
+                            kalkulertUtbetalingsbeløp = andelTilkjentYtelse.kalkulertUtbetalingsbeløp
+                        )
+                    }
+            },
             eksplisittAvslag = erEksplisittAvslag,
         )
     }
@@ -145,7 +161,7 @@ object BehandlingsresultatUtils {
 
     fun validerBehandlingsresultat(behandling: Behandling, resultat: BehandlingResultat) {
         if ((
-            behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING && setOf(
+                behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING && setOf(
                     BehandlingResultat.AVSLÅTT_OG_OPPHØRT,
                     BehandlingResultat.ENDRET,
                     BehandlingResultat.ENDRET_OG_OPPHØRT,
@@ -153,7 +169,7 @@ object BehandlingsresultatUtils {
                     BehandlingResultat.FORTSATT_INNVILGET,
                     BehandlingResultat.IKKE_VURDERT
                 ).contains(resultat)
-            ) ||
+                ) ||
             (behandling.type == BehandlingType.REVURDERING && resultat == BehandlingResultat.IKKE_VURDERT)
         ) {
 
@@ -182,6 +198,42 @@ private fun validerYtelsePersoner(ytelsePersoner: List<YtelsePerson>) {
     if (ytelsePersoner.any { it.ytelseSlutt == null })
         throw Feil(message = "YtelseSlutt ikke satt ved utledning av BehandlingResultat")
 
-    if (ytelsePersoner.any { it.resultater.contains(YtelsePersonResultat.OPPHØRT) && it.ytelseSlutt?.isAfter(inneværendeMåned()) == true })
+    if (ytelsePersoner.any {
+            it.resultater.contains(YtelsePersonResultat.OPPHØRT) && it.ytelseSlutt?.isAfter(
+                inneværendeMåned()
+            ) == true
+        })
         throw Feil(message = "Minst én ytelseperson har fått opphør som resultat og ytelseSlutt etter inneværende måned")
+}
+
+private fun kombinerOverlappendeAndelerForSøker(andeler: List<AndelTilkjentYtelse>): List<BehandlingsresultatAndelTilkjentYtelse> {
+    val utvidetTidslinje = LocalDateTimeline(andeler.filter { it.type == YtelseType.UTVIDET_BARNETRYGD }
+        .map {
+            LocalDateSegment(
+                it.stønadFom.førsteDagIInneværendeMåned(),
+                it.stønadTom.sisteDagIInneværendeMåned(),
+                it.kalkulertUtbetalingsbeløp
+            )
+        })
+    val småbarnstilleggAndeler = LocalDateTimeline(andeler.filter { it.type == YtelseType.SMÅBARNSTILLEGG }.map {
+        LocalDateSegment(
+            it.stønadFom.førsteDagIInneværendeMåned(),
+            it.stønadTom.sisteDagIInneværendeMåned(),
+            it.kalkulertUtbetalingsbeløp
+        )
+    })
+
+    val kombinerteTidslinje = utvidetTidslinje.combine(
+        småbarnstilleggAndeler,
+        StandardCombinators::sum,
+        LocalDateTimeline.JoinStyle.CROSS_JOIN
+    )
+
+    return kombinerteTidslinje.toSegments().map { andelTilkjentYtelse ->
+        BehandlingsresultatAndelTilkjentYtelse(
+            stønadFom = andelTilkjentYtelse.fom.toYearMonth(),
+            stønadTom = andelTilkjentYtelse.tom.toYearMonth(),
+            kalkulertUtbetalingsbeløp = andelTilkjentYtelse.value
+        )
+    }
 }
