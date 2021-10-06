@@ -54,6 +54,18 @@ class SkatteetatenController(
         return ResponseEntity(Ressurs.success(respons), HttpStatus.valueOf(200))
     }
 
+    @GetMapping(
+        value = ["/personer/test"],
+        produces = ["application/json;charset=UTF-8"]
+    )
+    fun finnPersonerMedUtvidetBarnetrygdTest(
+        @NotNull @RequestParam(value = "aar", required = true) aar: String
+    ): ResponseEntity<Ressurs<SkatteetatenPersonerResponse>> {
+        logger.info("Treff på finnPersonerMedUtvidetBarnetrygdTest")
+        val respons = skatteetatenService.finnPersonerMedUtvidetBarnetrygd(aar);
+        return ResponseEntity(Ressurs.success(respons), HttpStatus.valueOf(200))
+    }
+
     @PostMapping(
         value = ["/perioder"],
         produces = ["application/json;charset=UTF-8"],
@@ -83,7 +95,8 @@ class SkatteetatenController(
         @Valid @RequestBody perioderRequest: SkatteetatenPerioderRequest
     ): ResponseEntity<Ressurs<SkatteetatenPerioderResponse>> {
         logger.info("Treff på hentPerioderMedUtvidetBarnetrygdForMidlertidigTest")
-        val response = skatteetatenService.finnPerioderMedUtvidetBarnetrygd(perioderRequest.identer, perioderRequest.aar)
+        val response =
+            skatteetatenService.finnPerioderMedUtvidetBarnetrygd(perioderRequest.identer, perioderRequest.aar)
 
         return ResponseEntity(
             Ressurs.Companion.success(response),
@@ -150,5 +163,5 @@ class SkatteetatenController(
                 )
             ),
 
-        )
+            )
 }

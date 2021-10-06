@@ -23,12 +23,17 @@ class SkatteetatenService(
 ) {
 
     fun finnPersonerMedUtvidetBarnetrygd(år: String): SkatteetatenPersonerResponse {
+        LOG.debug("enter finnPersonerMedUtvidetBarnetrygd(), år {}", år)
         val personerFraInfotrygd = infotrygdBarnetrygdClient.hentPersonerMedUtvidetBarnetrygd(år)
+        LOG.debug("hent personer fra Infotrygd return {} personer", personerFraInfotrygd.brukere.size)
         val personerFraBaSak = hentPersonerMedUtvidetBarnetrygd(år)
+        LOG.debug("hent personer fra ba-sak return {} personer", personerFraBaSak.size)
+
         val personIdentSet = personerFraBaSak.map { it.ident }.toSet()
 
         //Assumes that vedtak in ba-sak is always newer than that in Infotrygd for the same person ident
         val kombinertListe = personerFraBaSak + personerFraInfotrygd.brukere.filter { !personIdentSet.contains(it.ident) }
+        LOG.debug("kombinert person fra Infotrygd og ba-sak: {} unik personer", kombinertListe.size)
 
         return SkatteetatenPersonerResponse(kombinertListe)
     }
