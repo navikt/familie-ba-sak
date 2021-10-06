@@ -7,6 +7,7 @@ import no.nav.familie.eksterne.kontrakter.skatteetaten.SkatteetatenPerioder
 import no.nav.familie.eksterne.kontrakter.skatteetaten.SkatteetatenPerioderResponse
 import no.nav.familie.eksterne.kontrakter.skatteetaten.SkatteetatenPerson
 import no.nav.familie.eksterne.kontrakter.skatteetaten.SkatteetatenPersonerResponse
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.time.LocalDateTime
@@ -31,9 +32,13 @@ class SkatteetatenService(
     }
 
     fun finnPerioderMedUtvidetBarnetrygd(personer: List<String>, år: String): SkatteetatenPerioderResponse {
+        LOG.debug("enter finnPerioderMedUtvidetBarnetrygd(), {} personer, år {} ", personer.size, år)
         val unikPersoner = personer.toSet().toList()
+        LOG.debug("finnPerioderMedUtvidetBarnetrygd(): {} unikPersoner", unikPersoner.size)
         val perioderFraBaSak = hentPerioderMedUtvidetBarnetrygdFraBaSak(personer, år)
         val perioderFraInfotrygd = unikPersoner.mapNotNull { infotrygdBarnetrygdClient.hentPerioderMedUtvidetBarnetrygd(it, år) }
+        LOG.debug("finnPerioderMedUtvidetBarnetrygd(): found periods for {} personer from Infotrygd", perioderFraInfotrygd.size)
+
         val baSakPersonIdenter = perioderFraBaSak.map { it.ident }.toSet()
 
         //Assumes that vedtak in ba-sak is always newer than that in Infotrygd for the same person ident
@@ -52,7 +57,8 @@ class SkatteetatenService(
 
     private fun hentPerioderMedUtvidetBarnetrygdFraBaSak(personer: List<String>, år: String): List<SkatteetatenPerioder> {
         val stonadPerioder = hentUtdannetStonadPerioderForPersoner(personer, år)
-        val SkatteetatenPerioderMap = stonadPerioder.fold(mutableMapOf<String, SkatteetatenPerioder>()) { perioderMap, period ->
+        LOG.debug("hentPerioderMedUtvidetBarnetrygdFraBaSak(): query to ba-sak returns {} entries", stonadPerioder.size)
+        val skatteetatenPerioderMap = stonadPerioder.fold(mutableMapOf<String, SkatteetatenPerioder>()) { perioderMap, period ->
             val ident = period.getIdent()
             val nyList = listOf(
                 SkatteetatenPeriode(
@@ -67,7 +73,12 @@ class SkatteetatenService(
             perioderMap.put(ident, SkatteetatenPerioder(ident, period.getEndretDato(), samletPerioder))
             perioderMap
         }
-        return SkatteetatenPerioderMap.toList().map {
+        LOG.debug(
+            "hentPerioderMedUtvidetBarnetrygdFraBaSak(): merge {} entries into {} person slots",
+            stonadPerioder.size,
+            skatteetatenPerioderMap.size
+        )
+        return skatteetatenPerioderMap.toList().map {
             it.second
         }
     }
@@ -81,6 +92,10 @@ class SkatteetatenService(
             yearStart,
             yearEnd
         )
+    }
+
+    companion object {
+        val LOG = LoggerFactory.getLogger(SkatteetatenService::class.java)
     }
 }
 
