@@ -128,8 +128,8 @@ object TilkjentYtelseUtils {
                         andelForPerson.copy(
                             stønadFom = månedPeriodeEndret.fom,
                             stønadTom = månedPeriodeEndret.tom,
-                            kalkulertUtbetalingsbeløp = andelForPerson.kalkulertUtbetalingsbeløp
-                                .avrundetHeltallAvProsent(endretUtbetalingAndel.prosent!!)
+                            kalkulertUtbetalingsbeløp = andelForPerson.sats
+                                    .avrundetHeltallAvProsent(endretUtbetalingAndel.prosent!!)
                         )
                     }
                 )
