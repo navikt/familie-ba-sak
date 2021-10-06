@@ -32,7 +32,12 @@ internal class UtvidetBarnetrygdTest {
         val søker =
             OppfyltPeriode(fom = LocalDate.of(2019, 4, 1), tom = LocalDate.of(2020, 6, 15))
         val barnA =
-            OppfyltPeriode(fom = LocalDate.of(2019, 4, 1), tom = LocalDate.of(2020, 6, 15), rolle = PersonType.BARN, erDeltBosted = true)
+            OppfyltPeriode(
+                fom = LocalDate.of(2019, 4, 1),
+                tom = LocalDate.of(2020, 6, 15),
+                rolle = PersonType.BARN,
+                erDeltBosted = true
+            )
         val barnB =
             OppfyltPeriode(fom = LocalDate.of(2019, 4, 1), tom = LocalDate.of(2020, 2, 15), rolle = PersonType.BARN)
 
@@ -85,7 +90,8 @@ internal class UtvidetBarnetrygdTest {
             personopplysningGrunnlag = personopplysningGrunnlag,
             behandling = behandling
         )
-            .andelerTilkjentYtelse.toList().sortedWith(compareBy({ it.stønadFom }, { it.type }, { it.kalkulertUtbetalingsbeløp }))
+            .andelerTilkjentYtelse.toList()
+            .sortedWith(compareBy({ it.stønadFom }, { it.type }, { it.kalkulertUtbetalingsbeløp }))
 
         assertEquals(4, andeler.size)
 
@@ -171,7 +177,8 @@ internal class UtvidetBarnetrygdTest {
             personopplysningGrunnlag = personopplysningGrunnlag,
             behandling = behandling
         )
-            .andelerTilkjentYtelse.toList().sortedWith(compareBy({ it.stønadFom }, { it.type }, { it.kalkulertUtbetalingsbeløp }))
+            .andelerTilkjentYtelse.toList()
+            .sortedWith(compareBy({ it.stønadFom }, { it.type }, { it.kalkulertUtbetalingsbeløp }))
 
         assertEquals(2, andeler.size)
 
@@ -336,7 +343,7 @@ internal class UtvidetBarnetrygdTest {
     }
 
     @Test
-    fun `Utvidet andeler slutter siste dag i  måneden vilkår ikke er innfridd lenger`() {
+    fun `Utvidet andeler slutter siste dag i  måneden som vilkår ikke er innfridd lenger`() {
 
         val søkerOrdinær =
             OppfyltPeriode(fom = LocalDate.of(2019, 4, 1), tom = LocalDate.of(2020, 6, 15))
@@ -407,6 +414,188 @@ internal class UtvidetBarnetrygdTest {
         assertEquals(søkerUtvidet.tom.toYearMonth(), andelUtvidet.stønadTom)
     }
 
+    @Test
+    fun `Utvidet andel blir videreført en måned ekstra hvis det er back2back i månedskifte`() {
+        val søkerOrdinær =
+            OppfyltPeriode(fom = LocalDate.of(2019, 4, 1), tom = LocalDate.of(2020, 10, 15))
+        val barnOppfylt =
+            OppfyltPeriode(fom = søkerOrdinær.fom, tom = søkerOrdinær.tom, rolle = PersonType.BARN)
+
+        val b2bTom = LocalDate.of(2020, 2, 29)
+        val b2bFom = LocalDate.of(2020, 3, 1)
+
+        val behandling = lagBehandling()
+        val vilkårsvurdering = Vilkårsvurdering(behandling = behandling)
+        val søkerResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = søkerOrdinær.ident)
+            .apply {
+                vilkårResultater.addAll(
+                    oppfylteVilkårFor(
+                        personResultat = this,
+                        vilkårOppfyltFom = søkerOrdinær.fom,
+                        vilkårOppfyltTom = søkerOrdinær.tom,
+                        personType = PersonType.SØKER
+                    )
+                )
+                vilkårResultater.addAll(
+                    setOf(
+                        VilkårResultat(
+                            personResultat = this,
+                            vilkårType = Vilkår.UTVIDET_BARNETRYGD,
+                            resultat = Resultat.OPPFYLT,
+                            periodeFom = søkerOrdinær.fom,
+                            periodeTom = b2bTom,
+                            begrunnelse = "",
+                            behandlingId = this.vilkårsvurdering.behandling.id,
+                            erDeltBosted = false
+                        ),
+                        VilkårResultat(
+                            personResultat = this,
+                            vilkårType = Vilkår.UTVIDET_BARNETRYGD,
+                            resultat = Resultat.OPPFYLT,
+                            periodeFom = b2bFom,
+                            periodeTom = null,
+                            begrunnelse = "",
+                            behandlingId = this.vilkårsvurdering.behandling.id,
+                            erDeltBosted = false
+                        )
+                    )
+                )
+            }
+
+        val barnResultater =
+            PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = barnOppfylt.ident)
+                .apply {
+                    vilkårResultater.addAll(
+                        oppfylteVilkårFor(
+                            personResultat = this,
+                            vilkårOppfyltFom = barnOppfylt.fom,
+                            vilkårOppfyltTom = barnOppfylt.tom,
+                            personType = PersonType.BARN,
+                            erDeltBosted = barnOppfylt.erDeltBosted
+                        )
+                    )
+                }
+        vilkårsvurdering.apply { personResultater = listOf(søkerResultat, barnResultater).toSet() }
+
+        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandling.id)
+            .apply {
+                personer.addAll(listOf(søkerOrdinær, barnOppfylt).lagGrunnlagPersoner(this))
+            }
+
+        val andeler = TilkjentYtelseUtils.beregnTilkjentYtelse(
+            vilkårsvurdering = vilkårsvurdering,
+            personopplysningGrunnlag = personopplysningGrunnlag,
+            behandling = behandling
+        )
+            .andelerTilkjentYtelse.toList().sortedBy { it.type }
+
+        assertEquals(3, andeler.size)
+
+        val andelBarn = andeler[0]
+        val andelUtvidet1 = andeler[1]
+        val andelUtvidet2 = andeler[2]
+
+        assertEquals(barnOppfylt.ident, andelBarn.personIdent)
+        assertEquals(barnOppfylt.tom.toYearMonth(), andelBarn.stønadTom)
+
+        assertEquals(søkerOrdinær.ident, andelUtvidet1.personIdent)
+        assertEquals(b2bTom.plusMonths(1).toYearMonth(), andelUtvidet1.stønadTom)
+
+        assertEquals(søkerOrdinær.ident, andelUtvidet2.personIdent)
+        assertEquals(b2bFom.plusMonths(1).toYearMonth(), andelUtvidet2.stønadFom)
+    }
+
+    @Test
+    fun `Utvidet andel starter og opphører riktig når det er to perioder som ikke er back2back`() {
+        val søkerOrdinær =
+            OppfyltPeriode(fom = LocalDate.of(2019, 4, 1), tom = LocalDate.of(2020, 10, 15))
+        val barnOppfylt =
+            OppfyltPeriode(fom = søkerOrdinær.fom, tom = søkerOrdinær.tom, rolle = PersonType.BARN)
+
+        val utvidetFørstePeriodeTom = LocalDate.of(2020, 2, 20)
+        val utvidetAndrePeriodeFom = LocalDate.of(2020, 3, 15)
+
+        val behandling = lagBehandling()
+        val vilkårsvurdering = Vilkårsvurdering(behandling = behandling)
+        val søkerResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = søkerOrdinær.ident)
+            .apply {
+                vilkårResultater.addAll(
+                    oppfylteVilkårFor(
+                        personResultat = this,
+                        vilkårOppfyltFom = søkerOrdinær.fom,
+                        vilkårOppfyltTom = søkerOrdinær.tom,
+                        personType = PersonType.SØKER
+                    )
+                )
+                vilkårResultater.addAll(
+                    setOf(
+                        VilkårResultat(
+                            personResultat = this,
+                            vilkårType = Vilkår.UTVIDET_BARNETRYGD,
+                            resultat = Resultat.OPPFYLT,
+                            periodeFom = søkerOrdinær.fom,
+                            periodeTom = utvidetFørstePeriodeTom,
+                            begrunnelse = "",
+                            behandlingId = this.vilkårsvurdering.behandling.id,
+                            erDeltBosted = false
+                        ),
+                        VilkårResultat(
+                            personResultat = this,
+                            vilkårType = Vilkår.UTVIDET_BARNETRYGD,
+                            resultat = Resultat.OPPFYLT,
+                            periodeFom = utvidetAndrePeriodeFom,
+                            periodeTom = null,
+                            begrunnelse = "",
+                            behandlingId = this.vilkårsvurdering.behandling.id,
+                            erDeltBosted = false
+                        )
+                    )
+                )
+            }
+
+        val barnResultater =
+            PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = barnOppfylt.ident)
+                .apply {
+                    vilkårResultater.addAll(
+                        oppfylteVilkårFor(
+                            personResultat = this,
+                            vilkårOppfyltFom = barnOppfylt.fom,
+                            vilkårOppfyltTom = barnOppfylt.tom,
+                            personType = PersonType.BARN,
+                            erDeltBosted = barnOppfylt.erDeltBosted
+                        )
+                    )
+                }
+        vilkårsvurdering.apply { personResultater = listOf(søkerResultat, barnResultater).toSet() }
+
+        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandling.id)
+            .apply {
+                personer.addAll(listOf(søkerOrdinær, barnOppfylt).lagGrunnlagPersoner(this))
+            }
+
+        val andeler = TilkjentYtelseUtils.beregnTilkjentYtelse(
+            vilkårsvurdering = vilkårsvurdering,
+            personopplysningGrunnlag = personopplysningGrunnlag,
+            behandling = behandling
+        )
+            .andelerTilkjentYtelse.toList().sortedBy { it.type }
+
+        assertEquals(3, andeler.size)
+
+        val andelBarn = andeler[0]
+        val andelUtvidet1 = andeler[1]
+        val andelUtvidet2 = andeler[2]
+
+        assertEquals(barnOppfylt.ident, andelBarn.personIdent)
+        assertEquals(barnOppfylt.tom.toYearMonth(), andelBarn.stønadTom)
+
+        assertEquals(søkerOrdinær.ident, andelUtvidet1.personIdent)
+        assertEquals(utvidetFørstePeriodeTom.toYearMonth(), andelUtvidet1.stønadTom)
+
+        assertEquals(søkerOrdinær.ident, andelUtvidet2.personIdent)
+        assertEquals(utvidetAndrePeriodeFom.plusMonths(1).toYearMonth(), andelUtvidet2.stønadFom)
+    }
+
     private data class OppfyltPeriode(
         val fom: LocalDate,
         val tom: LocalDate,
@@ -444,7 +633,10 @@ internal class UtvidetBarnetrygdTest {
         }.toSet()
     }
 
-    private fun List<OppfyltPeriode>.lagGrunnlagPersoner(personopplysningGrunnlag: PersonopplysningGrunnlag, fødselsdato: LocalDate = fødselsdatoOver6År): List<Person> = this.map {
+    private fun List<OppfyltPeriode>.lagGrunnlagPersoner(
+        personopplysningGrunnlag: PersonopplysningGrunnlag,
+        fødselsdato: LocalDate = fødselsdatoOver6År
+    ): List<Person> = this.map {
         Person(
             aktørId = randomAktørId(),
             personIdent = PersonIdent(it.ident),
