@@ -235,7 +235,7 @@ object TilkjentYtelseUtils {
             .fold(mutableListOf(), ::slåSammenEtterfølgendePerioderMedSammeBeløp)
     }
 
-    private fun erBack2BackIMånedsskifte(tilOgMed: LocalDate?, fraOgMed: LocalDate?): Boolean {
+    fun erBack2BackIMånedsskifte(tilOgMed: LocalDate?, fraOgMed: LocalDate?): Boolean {
         return tilOgMed?.erDagenFør(fraOgMed) == true &&
             tilOgMed.toYearMonth() != fraOgMed?.toYearMonth()
     }
