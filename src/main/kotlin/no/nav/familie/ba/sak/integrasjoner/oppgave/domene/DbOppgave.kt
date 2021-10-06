@@ -4,32 +4,42 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import java.time.LocalDateTime
-import javax.persistence.*
+import javax.persistence.Column
+import javax.persistence.Entity
+import javax.persistence.EntityListeners
+import javax.persistence.EnumType
+import javax.persistence.Enumerated
+import javax.persistence.GeneratedValue
+import javax.persistence.GenerationType
+import javax.persistence.Id
+import javax.persistence.JoinColumn
+import javax.persistence.ManyToOne
+import javax.persistence.SequenceGenerator
+import javax.persistence.Table
 
 @EntityListeners(RollestyringMotDatabase::class)
 @Entity(name = "Oppgave")
 @Table(name = "OPPGAVE")
 data class DbOppgave(
-        @Id
-        @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "oppgave_seq_generator")
-        @SequenceGenerator(name = "oppgave_seq_generator", sequenceName = "oppgave_seq", allocationSize = 50)
-        val id: Long = 0,
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "oppgave_seq_generator")
+    @SequenceGenerator(name = "oppgave_seq_generator", sequenceName = "oppgave_seq", allocationSize = 50)
+    val id: Long = 0,
 
-        @ManyToOne
-        @JoinColumn(name = "fk_behandling_id", nullable = false, updatable = false)
-        val behandling: Behandling,
+    @ManyToOne
+    @JoinColumn(name = "fk_behandling_id", nullable = false, updatable = false)
+    val behandling: Behandling,
 
-        @Column(name = "gsak_id", nullable = false, updatable = false)
-        val gsakId: String,
+    @Column(name = "gsak_id", nullable = false, updatable = false)
+    val gsakId: String,
 
-        @Enumerated(EnumType.STRING)
-        @Column(name = "type", nullable = false, updatable = false)
-        val type: Oppgavetype,
+    @Enumerated(EnumType.STRING)
+    @Column(name = "type", nullable = false, updatable = false)
+    val type: Oppgavetype,
 
-        @Column(name = "opprettet_tid", nullable = false, updatable = false)
-        val opprettetTidspunkt: LocalDateTime = LocalDateTime.now(),
+    @Column(name = "opprettet_tid", nullable = false, updatable = false)
+    val opprettetTidspunkt: LocalDateTime = LocalDateTime.now(),
 
-        @Column(name = "ferdigstilt", nullable = false, updatable = true)
-        var erFerdigstilt: Boolean = false
+    @Column(name = "ferdigstilt", nullable = false, updatable = true)
+    var erFerdigstilt: Boolean = false
 )
-

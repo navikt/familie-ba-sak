@@ -19,9 +19,9 @@ import java.time.LocalDate
 
 @Service
 class VilkårsvurderingService(
-        private val vilkårsvurderingRepository: VilkårsvurderingRepository,
-        private val featureToggleService: FeatureToggleService,
-        private val brevKlient: BrevKlient,
+    private val vilkårsvurderingRepository: VilkårsvurderingRepository,
+    private val featureToggleService: FeatureToggleService,
+    private val brevKlient: BrevKlient,
 ) {
 
     fun hentAktivForBehandling(behandlingId: Long): Vilkårsvurdering? {
@@ -35,17 +35,17 @@ class VilkårsvurderingService(
     fun finnBarnMedEksplisittAvslagPåBehandling(behandlingId: Long): List<String> {
         val eksplisistteAvslagPåBehandling = hentEksplisitteAvslagPåBehandling(behandlingId)
         return eksplisistteAvslagPåBehandling
-                .filterNot {
-                    it.personResultat?.erSøkersResultater() ?: error("VilkårResultat mangler kobling til PersonResultat")
-                }
-                .map { it.personResultat!!.personIdent }
-                .distinct()
+            .filterNot {
+                it.personResultat?.erSøkersResultater() ?: error("VilkårResultat mangler kobling til PersonResultat")
+            }
+            .map { it.personResultat!!.personIdent }
+            .distinct()
     }
 
     private fun hentEksplisitteAvslagPåBehandling(behandlingId: Long): List<VilkårResultat> {
         val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId)
         return vilkårsvurdering?.personResultater?.flatMap { it.vilkårResultater }
-                       ?.filter { it.erEksplisittAvslagPåSøknad ?: false } ?: emptyList()
+            ?.filter { it.erEksplisittAvslagPåSøknad ?: false } ?: emptyList()
     }
 
     fun oppdater(vilkårsvurdering: Vilkårsvurdering): Vilkårsvurdering {
@@ -81,17 +81,17 @@ class VilkårsvurderingService(
 
         if (vilkårVurdering != null) {
             vilkårVurdering.personResultater
-                    .forEach { it.leggTilBlankAnnenVurdering(annenVurderingType = AnnenVurderingType.OPPLYSNINGSPLIKT) }
+                .forEach { it.leggTilBlankAnnenVurdering(annenVurderingType = AnnenVurderingType.OPPLYSNINGSPLIKT) }
 
             oppdater(vilkårVurdering)
         }
     }
 
     fun hentVilkårsbegrunnelser(): Map<VedtakBegrunnelseType, List<RestVedtakBegrunnelseTilknyttetVilkår>> {
-            val sanityBegrunnelser = brevKlient.hentSanityBegrunnelse()
-            val skalBrukeTriggesAvFraSanity =
-                    featureToggleService.isEnabled(FeatureToggleConfig.BRUK_BEGRUNNELSE_TRIGGES_AV_FRA_SANITY)
-            return vedtakBegrunnelseSpesifikasjonerTilNedtrekksmenytekster(sanityBegrunnelser, skalBrukeTriggesAvFraSanity)
+        val sanityBegrunnelser = brevKlient.hentSanityBegrunnelse()
+        val skalBrukeTriggesAvFraSanity =
+            featureToggleService.isEnabled(FeatureToggleConfig.BRUK_BEGRUNNELSE_TRIGGES_AV_FRA_SANITY)
+        return vedtakBegrunnelseSpesifikasjonerTilNedtrekksmenytekster(sanityBegrunnelser, skalBrukeTriggesAvFraSanity)
     }
 
     companion object {
@@ -99,30 +99,32 @@ class VilkårsvurderingService(
         private val logger = LoggerFactory.getLogger(VilkårsvurderingService::class.java)
 
         fun matchVilkårResultater(
-                vilkårsvurdering1: Vilkårsvurdering,
-                vilkårsvurdering2: Vilkårsvurdering
+            vilkårsvurdering1: Vilkårsvurdering,
+            vilkårsvurdering2: Vilkårsvurdering
         ): List<Pair<VilkårResultat?, VilkårResultat?>> {
             val vilkårResultater =
                 (vilkårsvurdering1.personResultater.map { it.vilkårResultater } + vilkårsvurdering2.personResultater.map { it.vilkårResultater }).flatten()
 
             data class Match(
-                    val personIdent: String,
-                    val vilkårType: Vilkår,
-                    val resultat: Resultat,
-                    val periodeFom: LocalDate?,
-                    val periodeTom: LocalDate?,
-                    val begrunnelse: String,
-                    val erEksplisittAvslagPåSøknad: Boolean?
+                val personIdent: String,
+                val vilkårType: Vilkår,
+                val resultat: Resultat,
+                val periodeFom: LocalDate?,
+                val periodeTom: LocalDate?,
+                val begrunnelse: String,
+                val erEksplisittAvslagPåSøknad: Boolean?
             )
 
             val gruppert = vilkårResultater.groupBy {
-                Match(personIdent = it.personResultat?.personIdent ?: error("VilkårResultat mangler PersonResultat"),
-                      vilkårType = it.vilkårType,
-                      resultat = it.resultat,
-                      periodeFom = it.periodeFom,
-                      periodeTom = it.periodeTom,
-                      begrunnelse = it.begrunnelse,
-                      erEksplisittAvslagPåSøknad = it.erEksplisittAvslagPåSøknad)
+                Match(
+                    personIdent = it.personResultat?.personIdent ?: error("VilkårResultat mangler PersonResultat"),
+                    vilkårType = it.vilkårType,
+                    resultat = it.resultat,
+                    periodeFom = it.periodeFom,
+                    periodeTom = it.periodeTom,
+                    begrunnelse = it.begrunnelse,
+                    erEksplisittAvslagPåSøknad = it.erEksplisittAvslagPåSøknad
+                )
             }
             return gruppert.map { (_, gruppe) ->
                 if (gruppe.size > 2) throw Feil("Finnes flere like vilkår i én vilkårsvurdering")

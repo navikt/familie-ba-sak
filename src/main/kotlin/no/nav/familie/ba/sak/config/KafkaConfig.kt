@@ -13,7 +13,6 @@ import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.kafka.core.ProducerFactory
 import org.springframework.kafka.support.serializer.JsonSerializer
 
-
 @Configuration
 @Profile("!e2e")
 class KafkaConfig {
@@ -22,7 +21,6 @@ class KafkaConfig {
     fun kafkaObjectMapper(): ObjectMapper {
         return objectMapper.copy().setSerializationInclusion(JsonInclude.Include.NON_NULL)
     }
-
 
     @Bean
     fun kafkaProducerFactory(properties: KafkaProperties): ProducerFactory<String, Any> {
@@ -36,5 +34,4 @@ class KafkaConfig {
     fun kafkaTemplate(producerFactory: ProducerFactory<String, Any>): KafkaTemplate<String, Any> {
         return KafkaTemplate(producerFactory)
     }
-
 }

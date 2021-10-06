@@ -1,0 +1,32 @@
+{
+  "beskrivelse": "FGB: Søknad for 1 barn der vi innvilger for et barn og avslår for et annet",
+  "inneværendeMåned": "2021-09",
+  "personer": [
+    {
+      "personType": "BARN",
+      "søktForPerson": true,
+      "eksplisittAvslått": true,
+      "forrigeAndeler": [],
+      "andeler": [
+        {
+          "stønadFom": "2019-03",
+          "stønadTom": "2020-08",
+          "kalkulertUtbetalingsbeløp": 1054
+        },
+        {
+          "stønadFom": "2020-09",
+          "stønadTom": "2030-02",
+          "kalkulertUtbetalingsbeløp": 1354
+        }
+      ]
+    },
+    {
+      "personType": "BARN",
+      "søktForPerson": true,
+      "eksplisittAvslått": true,
+      "forrigeAndeler": [],
+      "andeler": []
+    }
+  ],
+  "forventetResultat": "DELVIS_INNVILGET"
+}

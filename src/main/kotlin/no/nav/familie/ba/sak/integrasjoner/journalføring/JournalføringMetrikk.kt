@@ -2,9 +2,9 @@ package no.nav.familie.ba.sak.integrasjoner.journalføring
 
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
+import no.nav.familie.ba.sak.ekstern.restDomene.RestJournalføring
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
-import no.nav.familie.ba.sak.ekstern.restDomene.RestJournalføring
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import org.springframework.stereotype.Component
 
@@ -55,7 +55,7 @@ class JournalføringMetrikk {
 
         val tittelLower = oppdatert.journalpostTittel?.lowercase()
         val kjentTittel = journalpostTittelMap[tittelLower]
-        if (kjentTittel!= null) {
+        if (kjentTittel != null) {
             antallJournalpostTittel[kjentTittel]?.increment()
         } else {
             antallJournalpostTittelFritekst.increment()

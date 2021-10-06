@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import java.time.YearMonth
-import java.util.*
+import java.util.Objects
 
 /**
  * Representer en person det er framstilt krav for nå eller tidligere
@@ -13,11 +13,11 @@ import java.util.*
  * @property ytelseSlutt Tom-dato på personens siste andel etter denne behandlingen (utbetalingsslutt)
  */
 data class YtelsePerson(
-        val personIdent: String,
-        val ytelseType: YtelseType,
-        val kravOpprinnelse: List<KravOpprinnelse>,
-        val resultater: Set<YtelsePersonResultat> = emptySet(),
-        val ytelseSlutt: YearMonth? = null
+    val personIdent: String,
+    val ytelseType: YtelseType,
+    val kravOpprinnelse: List<KravOpprinnelse>,
+    val resultater: Set<YtelsePersonResultat> = emptySet(),
+    val ytelseSlutt: YearMonth? = null
 ) {
 
     override fun equals(other: Any?): Boolean {

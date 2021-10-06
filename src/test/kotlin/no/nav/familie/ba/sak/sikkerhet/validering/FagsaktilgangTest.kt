@@ -2,15 +2,25 @@ package no.nav.familie.ba.sak.sikkerhet.validering
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.ba.sak.kjerne.behandling.domene.*
-import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.*
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
-import no.nav.familie.ba.sak.kjerne.steg.FØRSTE_STEG
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
+import no.nav.familie.ba.sak.kjerne.steg.FØRSTE_STEG
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import no.nav.familie.kontrakter.felles.tilgangskontroll.Tilgang
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -38,22 +48,27 @@ internal class FagsaktilgangTest {
         fagsakRepository = mockk(relaxed = true)
         client = mockk()
         every { behandlingRepository.finnBehandlinger(any()) }
-                .returns(behandlinger)
+            .returns(behandlinger)
         every { personopplysningGrunnlagRepository.findByBehandlingAndAktiv(any()) }
-                .returns(personopplysningsgrunnlag)
-        fagsaktilgang = Fagsaktilgang(behandlingRepository,
-                                      personopplysningGrunnlagRepository,
-                                      client,
-                                      fagsakRepository)
+            .returns(personopplysningsgrunnlag)
+        fagsaktilgang = Fagsaktilgang(
+            behandlingRepository,
+            personopplysningGrunnlagRepository,
+            client,
+            fagsakRepository
+        )
     }
-
 
     @Test
     fun `isValid returnerer true om sjekkTilgangTilPersoner gir true for alle personer knyttet til behandlinger for fagsak`() {
         every { client.sjekkTilgangTilPersoner(personopplysningsgrunnlag.personer.map { it.personIdent.ident }) }
-                .returns(listOf(Tilgang(true),
-                                Tilgang(true),
-                                Tilgang(true)))
+            .returns(
+                listOf(
+                    Tilgang(true),
+                    Tilgang(true),
+                    Tilgang(true)
+                )
+            )
 
         val harTilgang = fagsaktilgang.isValid(1, mockk())
 
@@ -63,9 +78,13 @@ internal class FagsaktilgangTest {
     @Test
     fun `isValid returnerer false om sjekkTilgangTilPersoner gir false for en person knyttet til en behandling for fagsak`() {
         every { client.sjekkTilgangTilPersoner(personopplysningsgrunnlag.personer.map { it.personIdent.ident }) }
-                .returns(listOf(Tilgang(true),
-                                Tilgang(false),
-                                Tilgang(true)))
+            .returns(
+                listOf(
+                    Tilgang(true),
+                    Tilgang(false),
+                    Tilgang(true)
+                )
+            )
 
         val harTilgang = fagsaktilgang.isValid(1, mockk())
 
@@ -73,36 +92,47 @@ internal class FagsaktilgangTest {
     }
 
     private val personopplysningsgrunnlag =
-            PersonopplysningGrunnlag(1,
-                                     1,
-                                     mutableSetOf(Person(
-                                             type = PersonType.SØKER,
-                                             fødselsdato = LocalDate.of(1984, 12, 16),
-                                             navn = "Mock Mockson",
-                                             kjønn = Kjønn.MANN,
-                                             personIdent = PersonIdent(randomFnr()),
-                                             målform = Målform.NB,
-                                             personopplysningGrunnlag = PersonopplysningGrunnlag(1, 1))
-                                                          .apply {
-                                                              sivilstander =
-                                                                      listOf(GrSivilstand(type = SIVILSTAND.GIFT, person = this))
-                                                          }),
-                                     true)
+        PersonopplysningGrunnlag(
+            1,
+            1,
+            mutableSetOf(
+                Person(
+                    type = PersonType.SØKER,
+                    fødselsdato = LocalDate.of(1984, 12, 16),
+                    navn = "Mock Mockson",
+                    kjønn = Kjønn.MANN,
+                    personIdent = PersonIdent(randomFnr()),
+                    målform = Målform.NB,
+                    personopplysningGrunnlag = PersonopplysningGrunnlag(1, 1)
+                )
+                    .apply {
+                        sivilstander =
+                            listOf(GrSivilstand(type = SIVILSTAND.GIFT, person = this))
+                    }
+            ),
+            true
+        )
 
-    private val behandlinger = listOf(Behandling(id = 1,
-                                                 fagsak = mockk(),
-                                                 kategori = BehandlingKategori.NASJONAL,
-                                                 type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                                                 underkategori = BehandlingUnderkategori.ORDINÆR,
-                                                 opprettetÅrsak = BehandlingÅrsak.SØKNAD).also {
-        it.behandlingStegTilstand.add(BehandlingStegTilstand(0, it, FØRSTE_STEG))
-    },
-                                      Behandling(id = 2,
-                                                 fagsak = mockk(),
-                                                 kategori = BehandlingKategori.NASJONAL,
-                                                 type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                                                 underkategori = BehandlingUnderkategori.ORDINÆR,
-                                                 opprettetÅrsak = BehandlingÅrsak.SØKNAD).also {
-                                          it.behandlingStegTilstand.add(BehandlingStegTilstand(0, it, FØRSTE_STEG))
-                                      })
+    private val behandlinger = listOf(
+        Behandling(
+            id = 1,
+            fagsak = mockk(),
+            kategori = BehandlingKategori.NASJONAL,
+            type = BehandlingType.FØRSTEGANGSBEHANDLING,
+            underkategori = BehandlingUnderkategori.ORDINÆR,
+            opprettetÅrsak = BehandlingÅrsak.SØKNAD
+        ).also {
+            it.behandlingStegTilstand.add(BehandlingStegTilstand(0, it, FØRSTE_STEG))
+        },
+        Behandling(
+            id = 2,
+            fagsak = mockk(),
+            kategori = BehandlingKategori.NASJONAL,
+            type = BehandlingType.FØRSTEGANGSBEHANDLING,
+            underkategori = BehandlingUnderkategori.ORDINÆR,
+            opprettetÅrsak = BehandlingÅrsak.SØKNAD
+        ).also {
+            it.behandlingStegTilstand.add(BehandlingStegTilstand(0, it, FØRSTE_STEG))
+        }
+    )
 }

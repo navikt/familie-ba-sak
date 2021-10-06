@@ -29,16 +29,16 @@ import org.springframework.web.client.RestOperations
 import org.springframework.web.client.RestTemplate
 
 @SpringBootTest(
-        classes = [ApplicationConfig::class],
-        webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-        properties = [
-            "no.nav.security.jwt.issuer.azuread.discoveryUrl: http://localhost:1234/azuread/.well-known/openid-configuration",
-            "no.nav.security.jwt.issuer.azuread.accepted_audience: some-audience",
-            "VEILEDER_ROLLE: VEILDER",
-            "SAKSBEHANDLER_ROLLE: SAKSBEHANDLER",
-            "BESLUTTER_ROLLE: BESLUTTER",
-            "ENVIRONMENT_NAME: integrationtest",
-        ],
+    classes = [ApplicationConfig::class],
+    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+    properties = [
+        "no.nav.security.jwt.issuer.azuread.discoveryUrl: http://localhost:1234/azuread/.well-known/openid-configuration",
+        "no.nav.security.jwt.issuer.azuread.accepted_audience: some-audience",
+        "VEILEDER_ROLLE: VEILDER",
+        "SAKSBEHANDLER_ROLLE: SAKSBEHANDLER",
+        "BESLUTTER_ROLLE: BESLUTTER",
+        "ENVIRONMENT_NAME: integrationtest",
+    ],
 )
 @AutoConfigureWireMock(port = 28085)
 @ExtendWith(SpringExtension::class)
@@ -87,44 +87,54 @@ abstract class WebSpringAuthTestRunner {
     fun hentUrl(path: String) = "http://localhost:$port$path"
 
     fun token(
-            claims: Map<String, Any>,
-            subject: String = DEFAULT_SUBJECT,
-            audience: String = DEFAULT_AUDIENCE,
-            issuerId: String = DEFAULT_ISSUER_ID,
-            clientId: String = DEFAULT_CLIENT_ID
+        claims: Map<String, Any>,
+        subject: String = DEFAULT_SUBJECT,
+        audience: String = DEFAULT_AUDIENCE,
+        issuerId: String = DEFAULT_ISSUER_ID,
+        clientId: String = DEFAULT_CLIENT_ID
     ): String {
         return mockOAuth2Server.issueToken(
-                issuerId,
-                clientId,
-                DefaultOAuth2TokenCallback(
-                        issuerId = issuerId,
-                        subject = subject,
-                        audience = listOf(audience),
-                        claims = claims,
-                        expiry = 3600
-                )
+            issuerId,
+            clientId,
+            DefaultOAuth2TokenCallback(
+                issuerId = issuerId,
+                subject = subject,
+                audience = listOf(audience),
+                claims = claims,
+                expiry = 3600
+            )
         ).serialize()
     }
 
     fun hentHeaders(groups: List<String>? = null): HttpHeaders {
         val httpHeaders = HttpHeaders()
         httpHeaders.contentType = MediaType.APPLICATION_JSON
-        httpHeaders.setBearerAuth(token(
-                mapOf("groups" to (groups ?: listOf(BehandlerRolle.SAKSBEHANDLER.name)),
-                      "azp" to "e2e-test",
-                      "name" to "Mock McMockface",
-                      "preferred_username" to "mock.mcmockface@nav.no")))
+        httpHeaders.setBearerAuth(
+            token(
+                mapOf(
+                    "groups" to (groups ?: listOf(BehandlerRolle.SAKSBEHANDLER.name)),
+                    "azp" to "e2e-test",
+                    "name" to "Mock McMockface",
+                    "preferred_username" to "mock.mcmockface@nav.no"
+                )
+            )
+        )
         return httpHeaders
     }
 
     fun hentHeadersForSystembruker(groups: List<String>? = null): HttpHeaders {
         val httpHeaders = HttpHeaders()
         httpHeaders.contentType = MediaType.APPLICATION_JSON
-        httpHeaders.setBearerAuth(token(
-                mapOf("groups" to (groups ?: listOf(BehandlerRolle.SYSTEM.name)),
-                      "azp" to "e2e-test",
-                      "name" to SYSTEM_FORKORTELSE,
-                      "preferred_username" to SYSTEM_FORKORTELSE)))
+        httpHeaders.setBearerAuth(
+            token(
+                mapOf(
+                    "groups" to (groups ?: listOf(BehandlerRolle.SYSTEM.name)),
+                    "azp" to "e2e-test",
+                    "name" to SYSTEM_FORKORTELSE,
+                    "preferred_username" to SYSTEM_FORKORTELSE
+                )
+            )
+        )
         return httpHeaders
     }
 

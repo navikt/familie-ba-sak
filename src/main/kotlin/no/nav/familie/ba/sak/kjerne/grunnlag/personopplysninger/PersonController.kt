@@ -21,16 +21,18 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/api/person")
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
-class PersonController(private val personopplysningerService: PersonopplysningerService,
-                       private val persongrunnlagService: PersongrunnlagService,
-                       private val integrasjonClient: IntegrasjonClient,
-                       private val fagsakService: FagsakService) {
+class PersonController(
+    private val personopplysningerService: PersonopplysningerService,
+    private val persongrunnlagService: PersongrunnlagService,
+    private val integrasjonClient: IntegrasjonClient,
+    private val fagsakService: FagsakService
+) {
 
     @GetMapping
     fun hentPerson(@RequestHeader personIdent: String): ResponseEntity<Ressurs<RestPersonInfo>> {
         val personinfo = integrasjonClient.hentMaskertPersonInfoVedManglendeTilgang(personIdent)
-                         ?: personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(personIdent)
-                                 .tilRestPersonInfo(personIdent)
+            ?: personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(personIdent)
+                .tilRestPersonInfo(personIdent)
         return ResponseEntity.ok(Ressurs.success(personinfo))
     }
 

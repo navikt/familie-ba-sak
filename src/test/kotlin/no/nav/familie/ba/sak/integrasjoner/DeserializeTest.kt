@@ -3,15 +3,15 @@ package no.nav.familie.ba.sak.integrasjoner
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PersonInfo
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 class DeserializeTest {
     private val mapper = ObjectMapper()
-            .registerKotlinModule()
-            .registerModule(JavaTimeModule())
+        .registerKotlinModule()
+        .registerModule(JavaTimeModule())
 
     @Test
     fun testDeserializaPersoninfo() {
@@ -32,5 +32,3 @@ class DeserializeTest {
         return mapper.readValue(json, PersonInfo::class.java)
     }
 }
-
-

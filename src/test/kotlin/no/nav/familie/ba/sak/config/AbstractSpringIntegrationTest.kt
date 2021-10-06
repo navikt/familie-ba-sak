@@ -8,20 +8,19 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
-import javax.sql.DataSource
 
 @SpringBootTest
 @ActiveProfiles(
-        "postgres",
-        "mock-økonomi",
-        "mock-pdl",
-        "mock-task-repository",
-        "mock-infotrygd-barnetrygd",
-        "mock-tilbakekreving-klient",
-        "mock-brev-klient",
-        "mock-infotrygd-feed",
-        "mock-oauth",
-        "mock-rest-template-config"
+    "postgres",
+    "mock-økonomi",
+    "mock-pdl",
+    "mock-task-repository",
+    "mock-infotrygd-barnetrygd",
+    "mock-tilbakekreving-klient",
+    "mock-brev-klient",
+    "mock-infotrygd-feed",
+    "mock-oauth",
+    "mock-rest-template-config"
 )
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
 @AutoConfigureWireMock(port = 28085)

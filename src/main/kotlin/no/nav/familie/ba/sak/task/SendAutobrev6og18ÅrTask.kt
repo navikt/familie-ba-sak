@@ -12,13 +12,15 @@ import org.springframework.stereotype.Service
 import java.time.LocalDate
 
 @Service
-@TaskStepBeskrivelse(taskStepType = SendAutobrev6og18ÅrTask.TASK_STEP_TYPE,
-                     beskrivelse = "Send autobrev for barn som fyller 6 og 18 år til Dokdist",
-                     maxAntallFeil = 3,
-                     triggerTidVedFeilISekunder = 60 * 60 * 24,
-                     settTilManuellOppfølgning = true)
+@TaskStepBeskrivelse(
+    taskStepType = SendAutobrev6og18ÅrTask.TASK_STEP_TYPE,
+    beskrivelse = "Send autobrev for barn som fyller 6 og 18 år til Dokdist",
+    maxAntallFeil = 3,
+    triggerTidVedFeilISekunder = 60 * 60 * 24,
+    settTilManuellOppfølgning = true
+)
 class SendAutobrev6og18ÅrTask(
-        private val autobrev6og18ÅrService: Autobrev6og18ÅrService
+    private val autobrev6og18ÅrService: Autobrev6og18ÅrService
 ) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
@@ -36,4 +38,3 @@ class SendAutobrev6og18ÅrTask(
         const val TASK_STEP_TYPE = "sendAutobrevVed6og18År"
     }
 }
-

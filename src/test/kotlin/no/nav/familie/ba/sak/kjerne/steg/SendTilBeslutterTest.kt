@@ -1,11 +1,11 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
-import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -38,8 +38,12 @@ class SendTilBeslutterTest {
         val behandling = lagBehandling()
         behandling.leggTilBehandlingStegTilstand(StegType.REGISTRERE_SØKNAD)
         behandling.leggTilBehandlingStegTilstand(StegType.VILKÅRSVURDERING)
-        behandling.behandlingStegTilstand.add(BehandlingStegTilstand(behandling = behandling,
-                                                                     behandlingSteg = StegType.VILKÅRSVURDERING))
+        behandling.behandlingStegTilstand.add(
+            BehandlingStegTilstand(
+                behandling = behandling,
+                behandlingSteg = StegType.VILKÅRSVURDERING
+            )
+        )
 
         assertThrows<Feil> {
             behandling.validerRekkefølgeOgUnikhetPåSteg()
@@ -51,8 +55,12 @@ class SendTilBeslutterTest {
         val behandling = lagBehandling()
         behandling.leggTilBehandlingStegTilstand(StegType.REGISTRERE_SØKNAD)
         behandling.leggTilBehandlingStegTilstand(StegType.SEND_TIL_BESLUTTER)
-        behandling.behandlingStegTilstand.add(BehandlingStegTilstand(behandling = behandling,
-                                                                     behandlingSteg = StegType.VILKÅRSVURDERING))
+        behandling.behandlingStegTilstand.add(
+            BehandlingStegTilstand(
+                behandling = behandling,
+                behandlingSteg = StegType.VILKÅRSVURDERING
+            )
+        )
 
         assertThrows<Feil> {
             behandling.validerRekkefølgeOgUnikhetPåSteg()

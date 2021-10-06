@@ -1,0 +1,31 @@
+{
+  "beskrivelse": "RV: Vi har mottatt nye opplysnigner og opphører en periode tilbake i tid",
+  "inneværendeMåned": "2021-09",
+  "personer": [
+    {
+      "personType": "BARN",
+      "søktForPerson": false,
+      "eksplisittAvslått": false,
+      "forrigeAndeler": [
+        {
+          "stønadFom": "2021-01",
+          "stønadTom": "2030-01",
+          "kalkulertUtbetalingsbeløp": 1054
+        }
+      ],
+      "andeler": [
+        {
+          "stønadFom": "2021-01",
+          "stønadTom": "2021-05",
+          "kalkulertUtbetalingsbeløp": 1054
+        },
+        {
+          "stønadFom": "2021-07",
+          "stønadTom": "2030-01",
+          "kalkulertUtbetalingsbeløp": 1054
+        }
+      ]
+    }
+  ],
+  "forventetResultat": "ENDRET"
+}

@@ -55,14 +55,14 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
         opprettTilkjentYtelse(behandling)
         val utbetalingsoppdrag = lagTestUtbetalingsoppdragForFGBMedToBarn(
-                fnr,
-                fagsak.id.toString(),
-                behandling.id,
-                dagensDato,
-                fomBarn1,
-                tomBarn1,
-                fomBarn2,
-                tomBarn2
+            fnr,
+            fagsak.id.toString(),
+            behandling.id,
+            dagensDato,
+            fomBarn1,
+            tomBarn1,
+            fomBarn2,
+            tomBarn2
         )
 
         val tilkjentYtelse = beregningService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(behandling, utbetalingsoppdrag)
@@ -71,7 +71,6 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
         Assertions.assertEquals(fomBarn1.toYearMonth(), tilkjentYtelse.stønadFom)
         Assertions.assertEquals(tomBarn2.toYearMonth(), tilkjentYtelse.stønadTom)
         Assertions.assertNull(tilkjentYtelse.opphørFom)
-
     }
 
     @Test
@@ -89,15 +88,15 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
         opprettTilkjentYtelse(behandling)
         val utbetalingsoppdrag = lagTestUtbetalingsoppdragForOpphørMedToBarn(
-                fnr,
-                fagsak.id.toString(),
-                behandling.id,
-                dagensDato,
-                fomBarn1,
-                tomBarn1,
-                fomBarn2,
-                tomBarn2,
-                opphørsDato
+            fnr,
+            fagsak.id.toString(),
+            behandling.id,
+            dagensDato,
+            fomBarn1,
+            tomBarn1,
+            fomBarn2,
+            tomBarn2,
+            opphørsDato
         )
 
         val tilkjentYtelse = beregningService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(behandling, utbetalingsoppdrag)
@@ -126,22 +125,23 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(
-                lagBehandling(fagsak = fagsak, behandlingType = BehandlingType.REVURDERING))
+            lagBehandling(fagsak = fagsak, behandlingType = BehandlingType.REVURDERING)
+        )
         opprettTilkjentYtelse(behandling)
         val utbetalingsoppdrag = lagTestUtbetalingsoppdragForRevurderingMedToBarn(
-                fnr,
-                fagsak.id.toString(),
-                behandling.id,
-                behandling.id - 1,
-                dagensDato,
-                opphørFomBarn1,
-                revurderingFomBarn1,
-                fomDatoBarn1,
-                tomDatoBarn1,
-                opphørFomBarn2,
-                revurderingFomBarn2,
-                fomDatoBarn2,
-                tomDatoBarn2
+            fnr,
+            fagsak.id.toString(),
+            behandling.id,
+            behandling.id - 1,
+            dagensDato,
+            opphørFomBarn1,
+            revurderingFomBarn1,
+            fomDatoBarn1,
+            tomDatoBarn1,
+            opphørFomBarn2,
+            revurderingFomBarn2,
+            fomDatoBarn2,
+            tomDatoBarn2
         )
 
         val tilkjentYtelse = beregningService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(behandling, utbetalingsoppdrag)
@@ -169,12 +169,14 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
         val barn2Id = personopplysningGrunnlag.barna.find { it.personIdent.ident == barn2Fnr }!!.personIdent.ident
 
         val vilkårsvurdering = Vilkårsvurdering(behandling = behandling)
-        vilkårsvurdering.personResultater = lagPersonResultaterForSøkerOgToBarn(vilkårsvurdering,
-                                                                                søkerFnr,
-                                                                                barn1Fnr,
-                                                                                barn2Fnr,
-                                                                                dato_2021_11_01,
-                                                                                dato_2021_11_01.plusYears(17))
+        vilkårsvurdering.personResultater = lagPersonResultaterForSøkerOgToBarn(
+            vilkårsvurdering,
+            søkerFnr,
+            barn1Fnr,
+            barn2Fnr,
+            dato_2021_11_01,
+            dato_2021_11_01.plusYears(17)
+        )
         vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering)
 
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)

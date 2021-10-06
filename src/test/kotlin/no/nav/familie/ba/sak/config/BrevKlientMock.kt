@@ -19,8 +19,8 @@ import org.springframework.web.client.RestTemplate
 @Profile("mock-brev-klient")
 @Primary
 class BrevKlientMock : BrevKlient(
-        familieBrevUri = "brev_uri_mock",
-        restTemplate = RestTemplate()
+    familieBrevUri = "brev_uri_mock",
+    restTemplate = RestTemplate()
 ) {
 
     override fun genererBrev(målform: String, brev: Brev): ByteArray {
@@ -37,46 +37,48 @@ class BrevKlientMock : BrevKlient(
 }
 
 val navnTilNedtrekksmenyMock: List<SanityBegrunnelse> =
-        VedtakBegrunnelseSpesifikasjon.values()
-                .map {
-                    SanityBegrunnelse(
-                            apiNavn = it.sanityApiNavn,
-                            navnISystem = it.name,
-                            ovrigeTriggere = when (it) {
-                                VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR -> listOf(ØvrigTrigger.BARN_MED_6_ÅRS_DAG)
-                                VedtakBegrunnelseSpesifikasjon.INNVILGET_SATSENDRING -> listOf(ØvrigTrigger.SATSENDRING)
-                                VedtakBegrunnelseSpesifikasjon.OPPHØR_IKKE_MOTTATT_OPPLYSNINGER -> listOf(ØvrigTrigger.MANGLER_OPPLYSNINGER)
-                                else -> null
-                            },
-                            vilkaar = when (it) {
-                                VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET -> listOf(SanityVilkår.BOSATT_I_RIKET)
-                                VedtakBegrunnelseSpesifikasjon.INNVILGET_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE -> listOf(SanityVilkår.LOVLIG_OPPHOLD)
-                                VedtakBegrunnelseSpesifikasjon.INNVILGET_SATSENDRING -> null
-                                VedtakBegrunnelseSpesifikasjon.INNVILGET_BOR_HOS_SØKER -> listOf(SanityVilkår.BOR_MED_SOKER)
+    VedtakBegrunnelseSpesifikasjon.values()
+        .map {
+            SanityBegrunnelse(
+                apiNavn = it.sanityApiNavn,
+                navnISystem = it.name,
+                ovrigeTriggere = when (it) {
+                    VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR -> listOf(ØvrigTrigger.BARN_MED_6_ÅRS_DAG)
+                    VedtakBegrunnelseSpesifikasjon.INNVILGET_SATSENDRING -> listOf(ØvrigTrigger.SATSENDRING)
+                    VedtakBegrunnelseSpesifikasjon.OPPHØR_IKKE_MOTTATT_OPPLYSNINGER -> listOf(ØvrigTrigger.MANGLER_OPPLYSNINGER)
+                    else -> null
+                },
+                vilkaar = when (it) {
+                    VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET -> listOf(SanityVilkår.BOSATT_I_RIKET)
+                    VedtakBegrunnelseSpesifikasjon.INNVILGET_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE -> listOf(SanityVilkår.LOVLIG_OPPHOLD)
+                    VedtakBegrunnelseSpesifikasjon.INNVILGET_SATSENDRING -> null
+                    VedtakBegrunnelseSpesifikasjon.INNVILGET_BOR_HOS_SØKER -> listOf(SanityVilkår.BOR_MED_SOKER)
 
-                                VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR -> null
-                                VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR -> listOf(SanityVilkår.UNDER_18_ÅR)
-                                VedtakBegrunnelseSpesifikasjon.REDUKSJON_BOSATT_I_RIKTET -> listOf(SanityVilkår.BOSATT_I_RIKET)
+                    VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR -> null
+                    VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR -> listOf(SanityVilkår.UNDER_18_ÅR)
+                    VedtakBegrunnelseSpesifikasjon.REDUKSJON_BOSATT_I_RIKTET -> listOf(SanityVilkår.BOSATT_I_RIKET)
 
-                                VedtakBegrunnelseSpesifikasjon.OPPHØR_UTVANDRET -> listOf(SanityVilkår.BOSATT_I_RIKET)
-                                VedtakBegrunnelseSpesifikasjon.OPPHØR_IKKE_MOTTATT_OPPLYSNINGER -> null
+                    VedtakBegrunnelseSpesifikasjon.OPPHØR_UTVANDRET -> listOf(SanityVilkår.BOSATT_I_RIKET)
+                    VedtakBegrunnelseSpesifikasjon.OPPHØR_IKKE_MOTTATT_OPPLYSNINGER -> null
 
-                                else -> SanityVilkår.values().toList()
-                            },
-                            rolle = when (it) {
-                                VedtakBegrunnelseSpesifikasjon.REDUKSJON_BOSATT_I_RIKTET -> listOf(VilkårRolle.BARN)
-                                VedtakBegrunnelseSpesifikasjon.INNVILGET_BOR_HOS_SØKER -> listOf(VilkårRolle.BARN,
-                                                                                                 VilkårRolle.SOKER)
-                                else -> null
-                            },
+                    else -> SanityVilkår.values().toList()
+                },
+                rolle = when (it) {
+                    VedtakBegrunnelseSpesifikasjon.REDUKSJON_BOSATT_I_RIKTET -> listOf(VilkårRolle.BARN)
+                    VedtakBegrunnelseSpesifikasjon.INNVILGET_BOR_HOS_SØKER -> listOf(
+                        VilkårRolle.BARN,
+                        VilkårRolle.SOKER
                     )
-
-                }
+                    else -> null
+                },
+                hjemler = listOf("98", "99", "100")
+            )
+        }
 
 fun VedtakBegrunnelseType.tilSanityBegrunnelseType() = when (this) {
-        VedtakBegrunnelseType.INNVILGELSE -> SanityBegrunnelseType.INNVILGELSE
-        VedtakBegrunnelseType.REDUKSJON -> SanityBegrunnelseType.REDUKSJON
-        VedtakBegrunnelseType.AVSLAG -> SanityBegrunnelseType.AVSLAG
-        VedtakBegrunnelseType.OPPHØR -> SanityBegrunnelseType.OPPHØR
-        VedtakBegrunnelseType.FORTSATT_INNVILGET -> SanityBegrunnelseType.FORTSATT_INNVILGET
+    VedtakBegrunnelseType.INNVILGELSE -> SanityBegrunnelseType.INNVILGELSE
+    VedtakBegrunnelseType.REDUKSJON -> SanityBegrunnelseType.REDUKSJON
+    VedtakBegrunnelseType.AVSLAG -> SanityBegrunnelseType.AVSLAG
+    VedtakBegrunnelseType.OPPHØR -> SanityBegrunnelseType.OPPHØR
+    VedtakBegrunnelseType.FORTSATT_INNVILGET -> SanityBegrunnelseType.FORTSATT_INNVILGET
 }

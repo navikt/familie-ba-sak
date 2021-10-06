@@ -21,36 +21,41 @@ import org.springframework.web.context.annotation.ApplicationScope
 @Service
 @ApplicationScope
 class PersonopplysningerService(
-        val pdlRestClient: PdlRestClient,
-        val systemOnlyPdlRestClient: SystemOnlyPdlRestClient,
-        val integrasjonClient: IntegrasjonClient) {
+    val pdlRestClient: PdlRestClient,
+    val systemOnlyPdlRestClient: SystemOnlyPdlRestClient,
+    val integrasjonClient: IntegrasjonClient
+) {
 
     fun hentPersoninfoMedRelasjonerOgRegisterinformasjon(personIdent: String): PersonInfo {
         val personinfo = hentPersoninfoMedQuery(personIdent, PersonInfoQuery.MED_RELASJONER_OG_REGISTERINFORMASJON)
         val identerMedAdressebeskyttelse = mutableSetOf<Pair<String, FORELDERBARNRELASJONROLLE>>()
         val forelderBarnRelasjon = personinfo.forelderBarnRelasjon.mapNotNull {
             val harTilgang = integrasjonClient.sjekkTilgangTilPersoner(listOf(it.personIdent.id)).firstOrNull()?.harTilgang
-                             ?: error("Fikk ikke svar på tilgang til person.")
+                ?: error("Fikk ikke svar på tilgang til person.")
             if (harTilgang) {
                 val relasjonsinfo = hentPersoninfoEnkel(it.personIdent.id)
-                ForelderBarnRelasjon(personIdent = it.personIdent,
-                                     relasjonsrolle = it.relasjonsrolle,
-                                     fødselsdato = relasjonsinfo.fødselsdato,
-                                     navn = relasjonsinfo.navn,
-                                     adressebeskyttelseGradering = relasjonsinfo.adressebeskyttelseGradering)
+                ForelderBarnRelasjon(
+                    personIdent = it.personIdent,
+                    relasjonsrolle = it.relasjonsrolle,
+                    fødselsdato = relasjonsinfo.fødselsdato,
+                    navn = relasjonsinfo.navn,
+                    adressebeskyttelseGradering = relasjonsinfo.adressebeskyttelseGradering
+                )
             } else {
                 identerMedAdressebeskyttelse.add(Pair(it.personIdent.id, it.relasjonsrolle))
                 null
             }
-
         }.toSet()
         val forelderBarnRelasjonMaskert = identerMedAdressebeskyttelse.map {
-            ForelderBarnRelasjonMaskert(relasjonsrolle = it.second,
-                                        adressebeskyttelseGradering = hentAdressebeskyttelseSomSystembruker(it.first)
+            ForelderBarnRelasjonMaskert(
+                relasjonsrolle = it.second,
+                adressebeskyttelseGradering = hentAdressebeskyttelseSomSystembruker(it.first)
             )
         }.toSet()
-        return personinfo.copy(forelderBarnRelasjon = forelderBarnRelasjon,
-                               forelderBarnRelasjonMaskert = forelderBarnRelasjonMaskert)
+        return personinfo.copy(
+            forelderBarnRelasjon = forelderBarnRelasjon,
+            forelderBarnRelasjonMaskert = forelderBarnRelasjonMaskert
+        )
     }
 
     fun hentPersoninfoEnkel(personIdent: String): PersonInfo {
@@ -94,11 +99,13 @@ class PersonopplysningerService(
 
     fun hentDødsfall(ident: Ident): DødsfallData {
         val doedsfall = pdlRestClient.hentDødsfall(ident.ident)
-        return DødsfallResponse(erDød = doedsfall.isNotEmpty(),
-                                dødsdato = doedsfall.filter { it.doedsdato != null }
-                                        .map { it.doedsdato }
-                                        .firstOrNull())
-                .let { DødsfallData(erDød = it.erDød, dødsdato = it.dødsdato) }
+        return DødsfallResponse(
+            erDød = doedsfall.isNotEmpty(),
+            dødsdato = doedsfall.filter { it.doedsdato != null }
+                .map { it.doedsdato }
+                .firstOrNull()
+        )
+            .let { DødsfallData(erDød = it.erDød, dødsdato = it.dødsdato) }
     }
 
     fun hentVergeData(ident: Ident): VergeData {
@@ -107,19 +114,23 @@ class PersonopplysningerService(
 
     fun harVerge(personIdent: String): VergeResponse {
         val harVerge = pdlRestClient.hentVergemaalEllerFremtidsfullmakt(personIdent)
-                .any { it.type != "stadfestetFremtidsfullmakt" }
+            .any { it.type != "stadfestetFremtidsfullmakt" }
 
         return VergeResponse(harVerge)
     }
 
     fun hentGjeldendeStatsborgerskap(ident: Ident): Statsborgerskap =
-            pdlRestClient.hentStatsborgerskapUtenHistorikk(ident.ident).firstOrNull()
-            ?: throw Feil(message = "Bruker mangler statsborgerskap",
-                          frontendFeilmelding = "Person ($ident) mangler statsborgerskap.")
+        pdlRestClient.hentStatsborgerskapUtenHistorikk(ident.ident).firstOrNull()
+            ?: throw Feil(
+                message = "Bruker mangler statsborgerskap",
+                frontendFeilmelding = "Person ($ident) mangler statsborgerskap."
+            )
 
     fun hentGjeldendeOpphold(ident: String): Opphold = pdlRestClient.hentOppholdUtenHistorikk(ident).firstOrNull()
-                                                       ?: throw Feil(message = "Bruker mangler opphold",
-                                                                     frontendFeilmelding = "Person ($ident) mangler opphold.")
+        ?: throw Feil(
+            message = "Bruker mangler opphold",
+            frontendFeilmelding = "Person ($ident) mangler opphold."
+        )
 
     fun hentLandkodeUtenlandskBostedsadresse(ident: String): String {
         val landkode = pdlRestClient.hentUtenlandskBostedsadresse(ident)?.landkode
@@ -127,7 +138,7 @@ class PersonopplysningerService(
     }
 
     fun hentAdressebeskyttelseSomSystembruker(ident: String): ADRESSEBESKYTTELSEGRADERING =
-            systemOnlyPdlRestClient.hentAdressebeskyttelse(ident).tilAdressebeskyttelse()
+        systemOnlyPdlRestClient.hentAdressebeskyttelse(ident).tilAdressebeskyttelse()
 
     companion object {
 
@@ -135,7 +146,9 @@ class PersonopplysningerService(
     }
 }
 
-data class DødsfallResponse(val erDød: Boolean,
-                            val dødsdato: String?)
+data class DødsfallResponse(
+    val erDød: Boolean,
+    val dødsdato: String?
+)
 
 data class VergeResponse(val harVerge: Boolean)

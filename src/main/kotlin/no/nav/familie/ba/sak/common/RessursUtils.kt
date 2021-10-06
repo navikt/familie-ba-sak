@@ -11,22 +11,23 @@ object RessursUtils {
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
     fun <T> unauthorized(errorMessage: String): ResponseEntity<Ressurs<T>> =
-            ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Ressurs.failure(errorMessage))
+        ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Ressurs.failure(errorMessage))
 
     fun <T> notFound(errorMessage: String): ResponseEntity<Ressurs<T>> =
-            errorResponse(HttpStatus.NOT_FOUND, errorMessage, null)
+        errorResponse(HttpStatus.NOT_FOUND, errorMessage, null)
 
     fun <T> badRequest(errorMessage: String, throwable: Throwable?): ResponseEntity<Ressurs<T>> =
-            errorResponse(HttpStatus.BAD_REQUEST, errorMessage, throwable)
+        errorResponse(HttpStatus.BAD_REQUEST, errorMessage, throwable)
 
     fun <T> forbidden(errorMessage: String): ResponseEntity<Ressurs<T>> =
-            ikkeTilgangResponse(errorMessage, null)
+        ikkeTilgangResponse(errorMessage, null)
 
     fun <T> illegalState(errorMessage: String, throwable: Throwable): ResponseEntity<Ressurs<T>> =
-            errorResponse(HttpStatus.INTERNAL_SERVER_ERROR, errorMessage, throwable)
+        errorResponse(HttpStatus.INTERNAL_SERVER_ERROR, errorMessage, throwable)
 
     fun <T> funksjonellFeil(funksjonellFeil: FunksjonellFeil): ResponseEntity<Ressurs<T>> = funksjonellErrorResponse(
-            funksjonellFeil)
+        funksjonellFeil
+    )
 
     fun <T> frontendFeil(feil: Feil, throwable: Throwable?): ResponseEntity<Ressurs<T>> = frontendErrorResponse(feil, throwable)
 
@@ -35,13 +36,17 @@ object RessursUtils {
     fun <T> rolleTilgangResponse(rolleTilgangskontrollFeil: RolleTilgangskontrollFeil): ResponseEntity<Ressurs<T>> {
         logger.warn(rolleTilgangskontrollFeil.melding)
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                .body(Ressurs.ikkeTilgang<T>(rolleTilgangskontrollFeil.melding)
-                              .copy(frontendFeilmelding = rolleTilgangskontrollFeil.frontendFeilmelding))
+            .body(
+                Ressurs.ikkeTilgang<T>(rolleTilgangskontrollFeil.melding)
+                    .copy(frontendFeilmelding = rolleTilgangskontrollFeil.frontendFeilmelding)
+            )
     }
 
-    private fun <T> errorResponse(httpStatus: HttpStatus,
-                                  errorMessage: String,
-                                  throwable: Throwable?): ResponseEntity<Ressurs<T>> {
+    private fun <T> errorResponse(
+        httpStatus: HttpStatus,
+        errorMessage: String,
+        throwable: Throwable?
+    ): ResponseEntity<Ressurs<T>> {
         val className = if (throwable != null) "[${throwable::class.java.name}] " else ""
 
         secureLogger.error("$className En feil har oppstått: $errorMessage", throwable)
@@ -49,8 +54,10 @@ object RessursUtils {
         return ResponseEntity.status(httpStatus).body(Ressurs.failure(errorMessage))
     }
 
-    private fun <T> ikkeTilgangResponse(errorMessage: String,
-                                        throwable: Throwable?): ResponseEntity<Ressurs<T>> {
+    private fun <T> ikkeTilgangResponse(
+        errorMessage: String,
+        throwable: Throwable?
+    ): ResponseEntity<Ressurs<T>> {
         val className = if (throwable != null) "[${throwable::class.java.name}] " else ""
 
         secureLogger.warn("$className Saksbehandler har ikke tilgang: $errorMessage", throwable)
@@ -58,18 +65,22 @@ object RessursUtils {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Ressurs.ikkeTilgang(errorMessage))
     }
 
-
     private fun <T> frontendErrorResponse(feil: Feil, throwable: Throwable?): ResponseEntity<Ressurs<T>> {
         val className = if (throwable != null) "[${throwable::class.java.name}] " else ""
 
-        secureLogger.error("$className En håndtert feil har oppstått(${feil.httpStatus}): " +
-                           "${feil.frontendFeilmelding}, ${feil.stackTrace}", throwable)
+        secureLogger.error(
+            "$className En håndtert feil har oppstått(${feil.httpStatus}): " +
+                "${feil.frontendFeilmelding}, ${feil.stackTrace}",
+            throwable
+        )
         logger.error("$className En håndtert feil har oppstått(${feil.httpStatus}): ${feil.message} ")
 
-        return ResponseEntity.status(feil.httpStatus).body(Ressurs.failure(
+        return ResponseEntity.status(feil.httpStatus).body(
+            Ressurs.failure(
                 frontendFeilmelding = feil.frontendFeilmelding,
                 errorMessage = feil.message.toString()
-        ))
+            )
+        )
     }
 
     private fun <T> funksjonellErrorResponse(funksjonellFeil: FunksjonellFeil): ResponseEntity<Ressurs<T>> {
@@ -77,17 +88,18 @@ object RessursUtils {
 
         logger.info("$className En funksjonell feil har oppstått(${funksjonellFeil.httpStatus}): ${funksjonellFeil.message} ")
 
-        return ResponseEntity.status(funksjonellFeil.httpStatus).body(Ressurs.funksjonellFeil(
+        return ResponseEntity.status(funksjonellFeil.httpStatus).body(
+            Ressurs.funksjonellFeil(
                 frontendFeilmelding = funksjonellFeil.frontendFeilmelding,
                 melding = funksjonellFeil.melding
-        ))
+            )
+        )
     }
-
 
     fun lagFrontendMelding(tittel: String, feilmeldinger: List<String>): String {
         var melding = tittel
         feilmeldinger.forEach {
-            melding = melding.plus("\n${it}")
+            melding = melding.plus("\n$it")
         }
         return melding
     }

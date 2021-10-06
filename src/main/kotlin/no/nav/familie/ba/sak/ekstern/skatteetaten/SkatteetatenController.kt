@@ -35,7 +35,6 @@ class SkatteetatenController(
     private val logger = LoggerFactory.getLogger(this::class.java)
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
-
     @GetMapping(
         value = ["/personer"],
         produces = ["application/json;charset=UTF-8"]
@@ -55,7 +54,6 @@ class SkatteetatenController(
         return ResponseEntity(Ressurs.success(respons), HttpStatus.valueOf(200))
     }
 
-
     @PostMapping(
         value = ["/perioder"],
         produces = ["application/json;charset=UTF-8"],
@@ -70,6 +68,23 @@ class SkatteetatenController(
         } else {
             SkatteetatenPerioderResponse(listeMedTestdataPerioder().filter { it.sisteVedtakPaaIdent.year == perioderRequest.aar.toInt() && it.ident in perioderRequest.identer })
         }
+        return ResponseEntity(
+            Ressurs.Companion.success(response),
+            HttpStatus.valueOf(200)
+        )
+    }
+
+    @PostMapping(
+        value = ["/perioder/test"],
+        produces = ["application/json;charset=UTF-8"],
+        consumes = ["application/json"]
+    )
+    fun hentPerioderMedUtvidetBarnetrygdForMidlertidigTest(
+        @Valid @RequestBody perioderRequest: SkatteetatenPerioderRequest
+    ): ResponseEntity<Ressurs<SkatteetatenPerioderResponse>> {
+        logger.info("Treff på hentPerioderMedUtvidetBarnetrygdForMidlertidigTest")
+        val response = skatteetatenService.finnPerioderMedUtvidetBarnetrygd(perioderRequest.identer, perioderRequest.aar)
+
         return ResponseEntity(
             Ressurs.Companion.success(response),
             HttpStatus.valueOf(200)
@@ -135,6 +150,5 @@ class SkatteetatenController(
                 )
             ),
 
-            )
-
+        )
 }

@@ -10,16 +10,19 @@ import no.nav.familie.prosessering.domene.Task
 import org.springframework.stereotype.Service
 
 @Service
-@TaskStepBeskrivelse(taskStepType = FerdigstillOppgave.TASK_STEP_TYPE,
-                     beskrivelse = "Ferdigstill oppgave i GOSYS for behandling",
-                     maxAntallFeil = 3)
+@TaskStepBeskrivelse(
+    taskStepType = FerdigstillOppgave.TASK_STEP_TYPE,
+    beskrivelse = "Ferdigstill oppgave i GOSYS for behandling",
+    maxAntallFeil = 3
+)
 class FerdigstillOppgave(
-        private val oppgaveService: OppgaveService) : AsyncTaskStep {
+    private val oppgaveService: OppgaveService
+) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
         val ferdigstillOppgave = objectMapper.readValue(task.payload, FerdigstillOppgaveDTO::class.java)
         oppgaveService.ferdigstillOppgave(
-                behandlingId = ferdigstillOppgave.behandlingId, oppgavetype = ferdigstillOppgave.oppgavetype
+            behandlingId = ferdigstillOppgave.behandlingId, oppgavetype = ferdigstillOppgave.oppgavetype
         )
     }
 
@@ -27,9 +30,14 @@ class FerdigstillOppgave(
         const val TASK_STEP_TYPE = "ferdigstillOppgaveTask"
 
         fun opprettTask(behandlingId: Long, oppgavetype: Oppgavetype): Task {
-            return Task(type = TASK_STEP_TYPE,
-                               payload = objectMapper.writeValueAsString(FerdigstillOppgaveDTO(behandlingId = behandlingId,
-                                                                                               oppgavetype = oppgavetype))
+            return Task(
+                type = TASK_STEP_TYPE,
+                payload = objectMapper.writeValueAsString(
+                    FerdigstillOppgaveDTO(
+                        behandlingId = behandlingId,
+                        oppgavetype = oppgavetype
+                    )
+                )
             )
         }
     }

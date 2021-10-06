@@ -15,12 +15,12 @@ import java.net.URI
 
 @Component
 class BrevKlient(
-        @Value("\${FAMILIE_BREV_API_URL}") private val familieBrevUri: String,
-        private val restTemplate: RestTemplate
+    @Value("\${FAMILIE_BREV_API_URL}") private val familieBrevUri: String,
+    private val restTemplate: RestTemplate
 ) {
 
     fun genererBrev(målform: String, brev: Brev): ByteArray {
-        val url = URI.create("$familieBrevUri/api/ba-brev/dokument/${målform}/${brev.mal.apiNavn}/pdf")
+        val url = URI.create("$familieBrevUri/api/ba-brev/dokument/$målform/${brev.mal.apiNavn}/pdf")
         secureLogger.info("Kaller familie brev($url) med data ${brev.data.toBrevString()}")
         logger.info("Kaller familie brev med url: $url}")
         val response = restTemplate.postForEntity<ByteArray>(url, brev.data)
@@ -32,10 +32,10 @@ class BrevKlient(
         val url = URI.create("$familieBrevUri/ba-sak/begrunnelser")
         logger.info("Henter begrunnelser fra sanity")
         val response = restTemplate.exchange(
-                url,
-                HttpMethod.GET,
-                null,
-                object : ParameterizedTypeReference<List<SanityBegrunnelse>>() {},
+            url,
+            HttpMethod.GET,
+            null,
+            object : ParameterizedTypeReference<List<SanityBegrunnelse>>() {},
         )
         return response.body ?: error("Klarte ikke hente begrunnelsene fra familie-brev.")
     }
@@ -43,7 +43,7 @@ class BrevKlient(
     @Cacheable("begrunnelsestekst")
     fun hentBegrunnelsestekst(begrunnelseData: BegrunnelseData): String {
         val url = URI.create("$familieBrevUri/ba-sak/begrunnelser/${begrunnelseData.apiNavn}/tekst/")
-        secureLogger.info("Kaller familie brev($url) med data ${begrunnelseData}")
+        secureLogger.info("Kaller familie brev($url) med data $begrunnelseData")
         logger.info("Kaller familie brev med url: $url}")
         val response = restTemplate.postForEntity<String>(url, begrunnelseData)
         return response.body ?: error("Klarte ikke å hente begrunnelsestekst fra familie-brev.")

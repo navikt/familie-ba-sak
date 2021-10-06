@@ -18,9 +18,9 @@ object ØkonomiUtils {
      */
     fun kjedeinndelteAndeler(andelerForInndeling: List<AndelTilkjentYtelse>): Map<String, List<AndelTilkjentYtelse>> {
         val (personMedSmåbarnstilleggAndeler, personerMedAndeler) =
-                andelerForInndeling.partition { it.type == YtelseType.SMÅBARNSTILLEGG }.toList().map {
-                    it.groupBy { andel -> andel.personIdent }
-                }
+            andelerForInndeling.partition { it.type == YtelseType.SMÅBARNSTILLEGG }.toList().map {
+                it.groupBy { andel -> andel.personIdent }
+            }
         val andelerForKjeding = mutableMapOf<String, List<AndelTilkjentYtelse>>()
         andelerForKjeding.putAll(personerMedAndeler)
 
@@ -43,14 +43,17 @@ object ØkonomiUtils {
      * @param[oppdaterteKjeder] nåværende tilstand
      * @return map med personident og siste bestående andel. Bestående andel=null dersom alle opphøres eller ny person.
      */
-    fun sisteBeståendeAndelPerKjede(forrigeKjeder: Map<String, List<AndelTilkjentYtelse>>,
-                                    oppdaterteKjeder: Map<String, List<AndelTilkjentYtelse>>): Map<String, AndelTilkjentYtelse?> {
+    fun sisteBeståendeAndelPerKjede(
+        forrigeKjeder: Map<String, List<AndelTilkjentYtelse>>,
+        oppdaterteKjeder: Map<String, List<AndelTilkjentYtelse>>
+    ): Map<String, AndelTilkjentYtelse?> {
         val allePersoner = forrigeKjeder.keys.union(oppdaterteKjeder.keys)
         return allePersoner.associateWith { kjedeIdentifikator ->
             beståendeAndelerIKjede(
-                    forrigeKjede = forrigeKjeder[kjedeIdentifikator],
-                    oppdatertKjede = oppdaterteKjeder[kjedeIdentifikator])
-                    ?.sortedBy { it.periodeOffset }?.lastOrNull()
+                forrigeKjede = forrigeKjeder[kjedeIdentifikator],
+                oppdatertKjede = oppdaterteKjeder[kjedeIdentifikator]
+            )
+                ?.sortedBy { it.periodeOffset }?.lastOrNull()
         }
     }
 
@@ -62,17 +65,21 @@ object ØkonomiUtils {
      * @param[oppdaterteKjeder] nåværende tilstand
      * @return map med personident og andel=null som markerer at alle andeler skal opphøres.
      */
-    fun sisteAndelPerKjede(forrigeKjeder: Map<String, List<AndelTilkjentYtelse>>,
-                           oppdaterteKjeder: Map<String, List<AndelTilkjentYtelse>>): Map<String, AndelTilkjentYtelse?> =
-            forrigeKjeder.keys.union(oppdaterteKjeder.keys).associateWith { null }
+    fun sisteAndelPerKjede(
+        forrigeKjeder: Map<String, List<AndelTilkjentYtelse>>,
+        oppdaterteKjeder: Map<String, List<AndelTilkjentYtelse>>
+    ): Map<String, AndelTilkjentYtelse?> =
+        forrigeKjeder.keys.union(oppdaterteKjeder.keys).associateWith { null }
 
-    private fun beståendeAndelerIKjede(forrigeKjede: List<AndelTilkjentYtelse>?,
-                                       oppdatertKjede: List<AndelTilkjentYtelse>?): List<AndelTilkjentYtelse>? {
+    private fun beståendeAndelerIKjede(
+        forrigeKjede: List<AndelTilkjentYtelse>?,
+        oppdatertKjede: List<AndelTilkjentYtelse>?
+    ): List<AndelTilkjentYtelse>? {
         val forrige = forrigeKjede?.toSet() ?: emptySet()
         val oppdatert = oppdatertKjede?.toSet() ?: emptySet()
         val førsteEndring = forrige.disjunkteAndeler(oppdatert).minByOrNull { it.stønadFom }?.stønadFom
         return if (førsteEndring != null) forrige.snittAndeler(oppdatert)
-                .filter { it.stønadFom.isBefore(førsteEndring) } else forrigeKjede ?: emptyList()
+            .filter { it.stønadFom.isBefore(førsteEndring) } else forrigeKjede ?: emptyList()
     }
 
     /**
@@ -82,23 +89,25 @@ object ØkonomiUtils {
      * @param[oppdaterteKjeder] nåværende tilstand
      * @return map med personident og oppdaterte kjeder
      */
-    fun oppdaterBeståendeAndelerMedOffset(oppdaterteKjeder: Map<String, List<AndelTilkjentYtelse>>,
-                                          forrigeKjeder: Map<String, List<AndelTilkjentYtelse>>): Map<String, List<AndelTilkjentYtelse>> {
+    fun oppdaterBeståendeAndelerMedOffset(
+        oppdaterteKjeder: Map<String, List<AndelTilkjentYtelse>>,
+        forrigeKjeder: Map<String, List<AndelTilkjentYtelse>>
+    ): Map<String, List<AndelTilkjentYtelse>> {
         oppdaterteKjeder
-                .forEach { (kjedeIdentifikator, oppdatertKjede) ->
-                    if (forrigeKjeder.containsKey(kjedeIdentifikator)) {
-                        val forrigeKjede = forrigeKjeder.getValue(kjedeIdentifikator)
-                        val beståendeFraForrige =
-                                beståendeAndelerIKjede(forrigeKjede = forrigeKjede, oppdatertKjede = oppdatertKjede)
-                        beståendeFraForrige?.forEach { bestående ->
-                            val beståendeIOppdatert = oppdatertKjede.find { it.erTilsvarendeForUtbetaling(bestående) }
-                                                      ?: error("Kan ikke finne andel fra utledet bestående andeler i oppdatert tilstand.")
-                            beståendeIOppdatert.periodeOffset = bestående.periodeOffset
-                            beståendeIOppdatert.forrigePeriodeOffset = bestående.forrigePeriodeOffset
-                            beståendeIOppdatert.kildeBehandlingId = bestående.kildeBehandlingId
-                        }
+            .forEach { (kjedeIdentifikator, oppdatertKjede) ->
+                if (forrigeKjeder.containsKey(kjedeIdentifikator)) {
+                    val forrigeKjede = forrigeKjeder.getValue(kjedeIdentifikator)
+                    val beståendeFraForrige =
+                        beståendeAndelerIKjede(forrigeKjede = forrigeKjede, oppdatertKjede = oppdatertKjede)
+                    beståendeFraForrige?.forEach { bestående ->
+                        val beståendeIOppdatert = oppdatertKjede.find { it.erTilsvarendeForUtbetaling(bestående) }
+                            ?: error("Kan ikke finne andel fra utledet bestående andeler i oppdatert tilstand.")
+                        beståendeIOppdatert.periodeOffset = bestående.periodeOffset
+                        beståendeIOppdatert.forrigePeriodeOffset = bestående.forrigePeriodeOffset
+                        beståendeIOppdatert.kildeBehandlingId = bestående.kildeBehandlingId
                     }
                 }
+            }
         return oppdaterteKjeder
     }
 
@@ -109,13 +118,15 @@ object ØkonomiUtils {
      * @param[sisteBeståendeAndelIHverKjede] andeler man må bygge opp etter
      * @return andeler som må bygges fordelt på kjeder
      */
-    fun andelerTilOpprettelse(oppdaterteKjeder: Map<String, List<AndelTilkjentYtelse>>,
-                              sisteBeståendeAndelIHverKjede: Map<String, AndelTilkjentYtelse?>): List<List<AndelTilkjentYtelse>> =
-            oppdaterteKjeder.map { (kjedeIdentifikator, oppdatertKjedeTilstand) ->
-                if (sisteBeståendeAndelIHverKjede[kjedeIdentifikator] != null)
-                    oppdatertKjedeTilstand.filter { it.stønadFom.isAfter(sisteBeståendeAndelIHverKjede[kjedeIdentifikator]!!.stønadTom) }
-                else oppdatertKjedeTilstand
-            }.filter { it.isNotEmpty() }
+    fun andelerTilOpprettelse(
+        oppdaterteKjeder: Map<String, List<AndelTilkjentYtelse>>,
+        sisteBeståendeAndelIHverKjede: Map<String, AndelTilkjentYtelse?>
+    ): List<List<AndelTilkjentYtelse>> =
+        oppdaterteKjeder.map { (kjedeIdentifikator, oppdatertKjedeTilstand) ->
+            if (sisteBeståendeAndelIHverKjede[kjedeIdentifikator] != null)
+                oppdatertKjedeTilstand.filter { it.stønadFom.isAfter(sisteBeståendeAndelIHverKjede[kjedeIdentifikator]!!.stønadTom) }
+            else oppdatertKjedeTilstand
+        }.filter { it.isNotEmpty() }
 
     /**
      * Tar utgangspunkt i forrige tilstand og finner kjeder med andeler til opphør og tilhørende opphørsdato
@@ -125,46 +136,56 @@ object ØkonomiUtils {
      * @param[endretMigreringsDato] Satt betyr at opphørsdato skal settes fra før tidligeste dato i eksisterende kjede.
      * @return map av siste andel og opphørsdato fra kjeder med opphør
      */
-    fun andelerTilOpphørMedDato(forrigeKjeder: Map<String, List<AndelTilkjentYtelse>>,
-                                oppdaterteKjeder: Map<String, List<AndelTilkjentYtelse>>,
-                                sisteBeståendeAndelIHverKjede: Map<String, AndelTilkjentYtelse?>,
-                                endretMigreringsDato: YearMonth? = null): List<Pair<AndelTilkjentYtelse, YearMonth>> =
+    fun andelerTilOpphørMedDato(
+        forrigeKjeder: Map<String, List<AndelTilkjentYtelse>>,
+        oppdaterteKjeder: Map<String, List<AndelTilkjentYtelse>>,
+        sisteBeståendeAndelIHverKjede: Map<String, AndelTilkjentYtelse?>,
+        endretMigreringsDato: YearMonth? = null
+    ): List<Pair<AndelTilkjentYtelse, YearMonth>> =
 
-            if (forrigeKjeder.keys.intersect(oppdaterteKjeder.keys).isEmpty() && oppdaterteKjeder.isNotEmpty()) {
-                // Revurdering med oppdaterte perioder og forrige behandling har ingen personer til felles.
-                // Dermed skal ingen andeler fra forrige behandling opphøres
-                emptyList()
-            } else {
-                forrigeKjeder
-                        .mapValues { (person, forrigeAndeler) ->
-                            forrigeAndeler.filter {
-                                altIKjedeOpphøres(person,
-                                                  sisteBeståendeAndelIHverKjede) || andelOpphøres(person,
-                                                                                                  it,
-                                                                                                  sisteBeståendeAndelIHverKjede)
-                            }
-                        }
-                        .filter { (_, andelerSomOpphøres) -> andelerSomOpphøres.isNotEmpty() }
-                        .mapValues { andelForKjede -> andelForKjede.value.sortedBy { it.stønadFom } }
-                        .map { (_, kjedeEtterFørsteEndring) ->
-                            kjedeEtterFørsteEndring.last() to (endretMigreringsDato ?: kjedeEtterFørsteEndring.first().stønadFom)
-                        }
-            }
+        if (forrigeKjeder.keys.intersect(oppdaterteKjeder.keys).isEmpty() && oppdaterteKjeder.isNotEmpty()) {
+            // Revurdering med oppdaterte perioder og forrige behandling har ingen personer til felles.
+            // Dermed skal ingen andeler fra forrige behandling opphøres
+            emptyList()
+        } else {
+            forrigeKjeder
+                .mapValues { (person, forrigeAndeler) ->
+                    forrigeAndeler.filter {
+                        altIKjedeOpphøres(
+                            person,
+                            sisteBeståendeAndelIHverKjede
+                        ) || andelOpphøres(
+                            person,
+                            it,
+                            sisteBeståendeAndelIHverKjede
+                        )
+                    }
+                }
+                .filter { (_, andelerSomOpphøres) -> andelerSomOpphøres.isNotEmpty() }
+                .mapValues { andelForKjede -> andelForKjede.value.sortedBy { it.stønadFom } }
+                .map { (_, kjedeEtterFørsteEndring) ->
+                    kjedeEtterFørsteEndring.last() to (endretMigreringsDato ?: kjedeEtterFørsteEndring.first().stønadFom)
+                }
+        }
 
-    fun gjeldendeForrigeOffsetForKjede(andelerFraForrigeBehandling: Map<String, List<AndelTilkjentYtelse>>)
-            : Map<String, Int> =
-            andelerFraForrigeBehandling.map { (personIdent, forrigeKjede) ->
-                personIdent to (forrigeKjede.maxByOrNull { andel -> andel.periodeOffset!! }?.periodeOffset?.toInt()
-                                ?: throw IllegalStateException("Andel i kjede skal ha offset"))
-            }.toMap()
+    fun gjeldendeForrigeOffsetForKjede(andelerFraForrigeBehandling: Map<String, List<AndelTilkjentYtelse>>): Map<String, Int> =
+        andelerFraForrigeBehandling.map { (personIdent, forrigeKjede) ->
+            personIdent to (
+                forrigeKjede.maxByOrNull { andel -> andel.periodeOffset!! }?.periodeOffset?.toInt()
+                    ?: throw IllegalStateException("Andel i kjede skal ha offset")
+                )
+        }.toMap()
 
-    private fun altIKjedeOpphøres(kjedeidentifikator: String,
-                                  sisteBeståendeAndelIHverKjede: Map<String, AndelTilkjentYtelse?>): Boolean = sisteBeståendeAndelIHverKjede[kjedeidentifikator] == null
+    private fun altIKjedeOpphøres(
+        kjedeidentifikator: String,
+        sisteBeståendeAndelIHverKjede: Map<String, AndelTilkjentYtelse?>
+    ): Boolean = sisteBeståendeAndelIHverKjede[kjedeidentifikator] == null
 
-    private fun andelOpphøres(kjedeidentifikator: String,
-                              andel: AndelTilkjentYtelse,
-                              sisteBeståendeAndelIHverKjede: Map<String, AndelTilkjentYtelse?>): Boolean = andel.stønadFom > sisteBeståendeAndelIHverKjede[kjedeidentifikator]!!.stønadTom
+    private fun andelOpphøres(
+        kjedeidentifikator: String,
+        andel: AndelTilkjentYtelse,
+        sisteBeståendeAndelIHverKjede: Map<String, AndelTilkjentYtelse?>
+    ): Boolean = andel.stønadFom > sisteBeståendeAndelIHverKjede[kjedeidentifikator]!!.stønadTom
 
     const val SMÅBARNSTILLEGG_SUFFIX = "_SMÅBARNSTILLEGG"
 }
-

@@ -18,13 +18,15 @@ import java.time.LocalDate
 
 fun validerVerdierPåRestTilbakekreving(restTilbakekreving: RestTilbakekreving?, feilutbetaling: BigDecimal) {
     if (feilutbetaling != BigDecimal.ZERO && restTilbakekreving == null) {
-        throw FunksjonellFeil("Simuleringen har en feilutbetaling, men restTilbakekreving var null",
-                              frontendFeilmelding = "Du må velge en tilbakekrevingsstrategi siden det er en feilutbetaling.")
+        throw FunksjonellFeil(
+            "Simuleringen har en feilutbetaling, men restTilbakekreving var null",
+            frontendFeilmelding = "Du må velge en tilbakekrevingsstrategi siden det er en feilutbetaling."
+        )
     }
     if (feilutbetaling == BigDecimal.ZERO && restTilbakekreving != null) {
         throw FunksjonellFeil(
-                "Simuleringen har ikke en feilutbetaling, men restTilbakekreving var ikke null",
-                frontendFeilmelding = "Du kan ikke opprette en tilbakekreving når det ikke er en feilutbetaling."
+            "Simuleringen har ikke en feilutbetaling, men restTilbakekreving var ikke null",
+            frontendFeilmelding = "Du kan ikke opprette en tilbakekreving når det ikke er en feilutbetaling."
         )
     }
 }
@@ -49,23 +51,24 @@ fun slåsammenNærliggendeFeilutbtalingPerioder(simuleringsPerioder: List<Simule
 }
 
 fun hentTilbakekrevingsperioderISimulering(simulering: List<ØkonomiSimuleringMottaker>): List<Periode> =
-        slåsammenNærliggendeFeilutbtalingPerioder(vedtakSimuleringMottakereTilRestSimulering(simulering).perioder)
-
+    slåsammenNærliggendeFeilutbtalingPerioder(vedtakSimuleringMottakereTilRestSimulering(simulering).perioder)
 
 fun opprettVarsel(tilbakekreving: Tilbakekreving?, simulering: List<ØkonomiSimuleringMottaker>): Varsel? =
-        if (tilbakekreving?.valg == Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL) {
-            val varseltekst = tilbakekreving.varsel ?: throw Feil("Varseltekst er ikke satt")
-            val restSimulering = vedtakSimuleringMottakereTilRestSimulering(simulering)
+    if (tilbakekreving?.valg == Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL) {
+        val varseltekst = tilbakekreving.varsel ?: throw Feil("Varseltekst er ikke satt")
+        val restSimulering = vedtakSimuleringMottakereTilRestSimulering(simulering)
 
-            Varsel(varseltekst = varseltekst,
-                   sumFeilutbetaling = restSimulering.feilutbetaling,
-                   perioder = slåsammenNærliggendeFeilutbtalingPerioder(restSimulering.perioder))
-        } else null
+        Varsel(
+            varseltekst = varseltekst,
+            sumFeilutbetaling = restSimulering.feilutbetaling,
+            perioder = slåsammenNærliggendeFeilutbtalingPerioder(restSimulering.perioder)
+        )
+    } else null
 
 fun hentFaktainfoForTilbakekreving(behandling: Behandling, tilbakekreving: Tilbakekreving): Faktainfo =
-        Faktainfo(
-                revurderingsårsak = behandling.opprettetÅrsak.visningsnavn,
-                revurderingsresultat = behandling.resultat.displayName,
-                tilbakekrevingsvalg = tilbakekreving.valg,
-                konsekvensForYtelser = emptySet(),
-        )
+    Faktainfo(
+        revurderingsårsak = behandling.opprettetÅrsak.visningsnavn,
+        revurderingsresultat = behandling.resultat.displayName,
+        tilbakekrevingsvalg = tilbakekreving.valg,
+        konsekvensForYtelser = emptySet(),
+    )

@@ -24,34 +24,30 @@ import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.HttpStatus
-import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.context.junit.jupiter.SpringExtension
 
 class FagsakControllerTest(
-        @Autowired
-        private val fagsakService: FagsakService,
+    @Autowired
+    private val fagsakService: FagsakService,
 
-        @Autowired
-        private val fagsakController: FagsakController,
+    @Autowired
+    private val fagsakController: FagsakController,
 
-        @Autowired
-        private val mockPersonopplysningerService: PersonopplysningerService,
+    @Autowired
+    private val mockPersonopplysningerService: PersonopplysningerService,
 
-        @Autowired
-        private val behandlingService: BehandlingService,
+    @Autowired
+    private val behandlingService: BehandlingService,
 
-        @Autowired
-        private val mockIntegrasjonClient: IntegrasjonClient,
+    @Autowired
+    private val mockIntegrasjonClient: IntegrasjonClient,
 
-        @Autowired
-        private val persongrunnlagService: PersongrunnlagService,
+    @Autowired
+    private val persongrunnlagService: PersongrunnlagService,
 
-        @Autowired
-        private val databaseCleanupService: DatabaseCleanupService,
+    @Autowired
+    private val databaseCleanupService: DatabaseCleanupService,
 
 ) : AbstractSpringIntegrationTest() {
 
@@ -107,14 +103,18 @@ class FagsakControllerTest(
         every {
             mockPersonopplysningerService.hentIdenter(Ident(fnr))
         } returns listOf(
-                IdentInformasjon(ident = fnr, historisk = true, gruppe = "FOLKEREGISTERIDENT"))
+            IdentInformasjon(ident = fnr, historisk = true, gruppe = "FOLKEREGISTERIDENT")
+        )
 
         val nyRestFagsak = fagsakController.hentEllerOpprettFagsak(FagsakRequest(personIdent = fnr))
         assertEquals(Ressurs.Status.SUKSESS, nyRestFagsak.body?.status)
         assertEquals(fnr, fagsakService.hent(PersonIdent(fnr))?.hentAktivIdent()?.ident)
 
-        val eksisterendeRestFagsak = fagsakController.hentEllerOpprettFagsak(FagsakRequest(
-                personIdent = fnr))
+        val eksisterendeRestFagsak = fagsakController.hentEllerOpprettFagsak(
+            FagsakRequest(
+                personIdent = fnr
+            )
+        )
         assertEquals(Ressurs.Status.SUKSESS, eksisterendeRestFagsak.body?.status)
         assertEquals(eksisterendeRestFagsak.body!!.data!!.id, nyRestFagsak.body!!.data!!.id)
     }
@@ -128,7 +128,8 @@ class FagsakControllerTest(
         every {
             mockPersonopplysningerService.hentIdenter(Ident(fnr))
         } returns listOf(
-                IdentInformasjon(ident = fnr, historisk = true, gruppe = "FOLKEREGISTERIDENT"))
+            IdentInformasjon(ident = fnr, historisk = true, gruppe = "FOLKEREGISTERIDENT")
+        )
 
         val nyRestFagsak = fagsakController.hentEllerOpprettFagsak(FagsakRequest(personIdent = fnr))
         assertEquals(Ressurs.Status.SUKSESS, nyRestFagsak.body?.status)
@@ -137,15 +138,18 @@ class FagsakControllerTest(
         every {
             mockPersonopplysningerService.hentIdenter(Ident(nyttFnr))
         } returns listOf(
-                IdentInformasjon(ident = fnr, historisk = true, gruppe = "FOLKEREGISTERIDENT"),
-                IdentInformasjon(ident = nyttFnr, historisk = false, gruppe = "FOLKEREGISTERIDENT"))
+            IdentInformasjon(ident = fnr, historisk = true, gruppe = "FOLKEREGISTERIDENT"),
+            IdentInformasjon(ident = nyttFnr, historisk = false, gruppe = "FOLKEREGISTERIDENT")
+        )
 
-        val eksisterendeRestFagsak = fagsakController.hentEllerOpprettFagsak(FagsakRequest(
-                personIdent = nyttFnr))
+        val eksisterendeRestFagsak = fagsakController.hentEllerOpprettFagsak(
+            FagsakRequest(
+                personIdent = nyttFnr
+            )
+        )
         assertEquals(Ressurs.Status.SUKSESS, eksisterendeRestFagsak.body?.status)
         assertEquals(eksisterendeRestFagsak.body!!.data!!.id, nyRestFagsak.body!!.data!!.id)
         assertEquals(nyttFnr, eksisterendeRestFagsak.body!!.data?.søkerFødselsnummer)
-
     }
 
     @Test
@@ -158,12 +162,15 @@ class FagsakControllerTest(
         } returns PersonIdent("123")
 
         val nyRestFagsak = fagsakController.hentEllerOpprettFagsak(
-                FagsakRequest(personIdent = null, aktørId = aktørId.id)
+            FagsakRequest(personIdent = null, aktørId = aktørId.id)
         )
         assertEquals(Ressurs.Status.SUKSESS, nyRestFagsak.body?.status)
 
-        val eksisterendeRestFagsak = fagsakController.hentEllerOpprettFagsak(FagsakRequest(
-                personIdent = null, aktørId = aktørId.id))
+        val eksisterendeRestFagsak = fagsakController.hentEllerOpprettFagsak(
+            FagsakRequest(
+                personIdent = null, aktørId = aktørId.id
+            )
+        )
         assertEquals(Ressurs.Status.SUKSESS, eksisterendeRestFagsak.body?.status)
         assertEquals(eksisterendeRestFagsak.body!!.data!!.id, nyRestFagsak.body!!.data!!.id)
     }
@@ -173,7 +180,7 @@ class FagsakControllerTest(
         val personIdent = randomFnr()
 
         fagsakService.hentEllerOpprettFagsak(PersonIdent(personIdent))
-                .also { fagsakService.oppdaterStatus(it, FagsakStatus.LØPENDE) }
+            .also { fagsakService.oppdaterStatus(it, FagsakStatus.LØPENDE) }
 
         fagsakController.oppgiFagsakdeltagere(RestSøkParam(personIdent, emptyList())).apply {
             assertEquals(personIdent, body!!.data!!.first().ident)
@@ -188,10 +195,12 @@ class FagsakControllerTest(
         fagsakService.hentEllerOpprettFagsak(PersonIdent(ClientMocks.søkerFnr[0]))
 
         val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(ClientMocks.søkerFnr[0]))
-        persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(personIdent,
-                                                                  ClientMocks.barnFnr.toList().subList(0, 1),
-                                                                  behandling,
-                                                                  Målform.NB)
+        persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(
+            personIdent,
+            ClientMocks.barnFnr.toList().subList(0, 1),
+            behandling,
+            Målform.NB
+        )
 
         fagsakController.oppgiFagsakdeltagere(RestSøkParam(personIdent, ClientMocks.barnFnr.toList())).apply {
             assertEquals(ClientMocks.barnFnr.toList().subList(0, 1), body!!.data!!.map { it.ident })
