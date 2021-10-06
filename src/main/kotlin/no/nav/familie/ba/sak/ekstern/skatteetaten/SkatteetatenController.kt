@@ -76,6 +76,23 @@ class SkatteetatenController(
         )
     }
 
+    @PostMapping(
+        value = ["/perioder/test"],
+        produces = ["application/json;charset=UTF-8"],
+        consumes = ["application/json"]
+    )
+    fun hentPerioderMedUtvidetBarnetrygdForMidlertidigTest(
+        @Valid @RequestBody perioderRequest: SkatteetatenPerioderRequest
+    ): ResponseEntity<Ressurs<SkatteetatenPerioderResponse>> {
+        logger.info("Treff på hentPerioderMedUtvidetBarnetrygdForMidlertidigTest")
+        val response = skatteetatenService.finnPerioderMedUtvidetBarnetrygd(perioderRequest.identer, perioderRequest.aar)
+
+        return ResponseEntity(
+            Ressurs.Companion.success(response),
+            HttpStatus.valueOf(200)
+        )
+    }
+
     private fun listeMedTestdataPerioder() =
         listOf(
             SkatteetatenPerioder(
