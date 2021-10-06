@@ -268,7 +268,8 @@ fun MånedPeriode.perioderMedOgUtenOverlapp(perioder: List<MånedPeriode>): Pair
     while (nesteMåned <= this.tom) {
         alleMånederMedOverlappstatus.put(
             nesteMåned,
-            perioder.any { månedPeriode -> månedPeriode.inkluderer(nesteMåned) })
+            perioder.any { månedPeriode -> månedPeriode.inkluderer(nesteMåned) }
+        )
         nesteMåned = nesteMåned.plusMonths(1)
     }
 
