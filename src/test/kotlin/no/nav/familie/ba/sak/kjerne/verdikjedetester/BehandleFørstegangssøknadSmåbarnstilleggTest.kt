@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
 import io.mockk.every
-import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.lagSøknadDTO
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.FeatureToggleService
@@ -77,7 +76,7 @@ class BehandleFørstegangssøknadSmåbarnstilleggTest(
                 PeriodeOvergangsstønad(
                     personIdent = søkersIdent,
                     fomDato = periodeMedFullOvergangsstønadFom,
-                    tomDato = TIDENES_ENDE,
+                    tomDato = barnFødselsdato.plusYears(18),
                     datakilde = PeriodeOvergangsstønad.Datakilde.EF
                 )
             )

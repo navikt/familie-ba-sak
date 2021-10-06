@@ -15,6 +15,10 @@ import javax.persistence.Id
 import javax.persistence.SequenceGenerator
 import javax.persistence.Table
 
+/**
+ * Periode vi har hentet fra ef-sak som representerer når en person
+ * har hatt full overgangsstønad.
+ */
 @EntityListeners(RollestyringMotDatabase::class)
 @Entity(name = "PeriodeOvergangsstønadGrunnlag")
 @Table(name = "GR_PERIODE_OVERGANGSSTONAD")
@@ -45,7 +49,7 @@ class PeriodeOvergangsstønadGrunnlag(
     val datakilde: PeriodeOvergangsstønad.Datakilde,
 ) : BaseEntitet()
 
-fun PeriodeOvergangsstønad.tilPeriodeOvergangsstønadIntern(behandlingId: Long) = PeriodeOvergangsstønadGrunnlag(
+fun PeriodeOvergangsstønad.tilPeriodeOvergangsstønadGrunnlag(behandlingId: Long) = PeriodeOvergangsstønadGrunnlag(
     behandlingId = behandlingId,
     personIdent = this.personIdent,
     fom = this.fomDato,
