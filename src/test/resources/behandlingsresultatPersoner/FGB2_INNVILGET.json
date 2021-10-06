@@ -11,16 +11,11 @@
       "andeler": [
         {
           "stønadFom": "2019-03",
-          "stønadTom": "2020-08",
+          "stønadTom": "2030-08",
           "kalkulertUtbetalingsbeløp": 1054
-        },
-        {
-          "stønadFom": "2020-09",
-          "stønadTom": "2021-02",
-          "kalkulertUtbetalingsbeløp": 1354
         }
       ]
     }
   ],
-  "forventetResultat": "INNVILGET_OG_OPPHØRT"
+  "forventetResultat": "INNVILGET"
 }
