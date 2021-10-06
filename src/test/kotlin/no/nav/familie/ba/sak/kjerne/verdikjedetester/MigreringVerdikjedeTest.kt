@@ -5,7 +5,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService
-import no.nav.familie.ba.sak.kjerne.beregning.SatsService.nyttTilleggOrdinærSats
+import no.nav.familie.ba.sak.kjerne.beregning.SatsService.sisteTilleggOrdinærSats
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.logg.LoggType
 import no.nav.familie.ba.sak.kjerne.steg.StegService
@@ -146,7 +146,7 @@ class MigreringVerdikjedeTest(
                     infotrygdSaker = InfotrygdSøkResponse(
                         bruker = listOf(
                             lagInfotrygdSak(
-                                nyttTilleggOrdinærSats.beløp.toDouble(),
+                                sisteTilleggOrdinærSats.beløp.toDouble(),
                                 barn.søker.ident!!,
                                 valg,
                                 undervalg

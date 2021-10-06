@@ -26,6 +26,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
+import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
@@ -35,7 +36,8 @@ object TilkjentYtelseUtils {
     fun beregnTilkjentYtelse(
         vilkårsvurdering: Vilkårsvurdering,
         personopplysningGrunnlag: PersonopplysningGrunnlag,
-        behandling: Behandling
+        behandling: Behandling,
+        hentPerioderMedFullOvergangsstønad: (personIdent: String) -> List<PeriodeOvergangsstønad> = { emptyList() }
     ): TilkjentYtelse {
         val identBarnMap = personopplysningGrunnlag.barna
             .associateBy { it.personIdent.ident }
@@ -96,7 +98,22 @@ object TilkjentYtelseUtils {
                 andelerBarna = andelerTilkjentYtelseBarna
             )
 
-        tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerTilkjentYtelseBarna + andelerTilkjentYtelseSøker)
+        val andelerTilkjentYtelseSmåbarnstillegg = if (andelerTilkjentYtelseSøker.isNotEmpty()) {
+            val perioderMedFullOvergangsstønad =
+                hentPerioderMedFullOvergangsstønad(personopplysningGrunnlag.søker.personIdent.ident)
+
+            SmåbarnstilleggBarnetrygdGenerator(
+                behandlingId = vilkårsvurdering.behandling.id,
+                tilkjentYtelse = tilkjentYtelse
+            )
+                .lagSmåbarnstilleggAndeler(
+                    perioderMedFullOvergangsstønad = perioderMedFullOvergangsstønad,
+                    andelerSøker = andelerTilkjentYtelseSøker,
+                    barnasFødselsdatoer = personopplysningGrunnlag.barna.map { it.fødselsdato }
+                )
+        } else emptyList()
+
+        tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerTilkjentYtelseBarna + andelerTilkjentYtelseSøker + andelerTilkjentYtelseSmåbarnstillegg)
 
         return tilkjentYtelse
     }
@@ -117,9 +134,10 @@ object TilkjentYtelseUtils {
 
             andelerForPerson.forEach { andelForPerson ->
                 // Deler opp hver enkelt andel i perioder som hhv blir berørt av endringene og de som ikke berøres av de.
-                val (perioderMedEndring, perioderUtenEndring) = andelForPerson.stønadsPeriode().perioderMedOgUtenOverlapp(
-                    endringerForPerson.map { endringerForPerson -> endringerForPerson.periode() }
-                )
+                val (perioderMedEndring, perioderUtenEndring) = andelForPerson.stønadsPeriode()
+                    .perioderMedOgUtenOverlapp(
+                        endringerForPerson.map { endringerForPerson -> endringerForPerson.periode() }
+                    )
                 // Legger til nye AndelTilkjentYtelse for perioder som er berørt av endringer.
                 nyeAndelTilkjentYtelse.addAll(
                     perioderMedEndring.map { månedPeriodeEndret ->
@@ -127,8 +145,8 @@ object TilkjentYtelseUtils {
                         andelForPerson.copy(
                             stønadFom = månedPeriodeEndret.fom,
                             stønadTom = månedPeriodeEndret.tom,
-                            kalkulertUtbetalingsbeløp = andelForPerson.kalkulertUtbetalingsbeløp
-                                .avrundetHeltallAvProsent(endretUtbetalingAndel.prosent!!)
+                            kalkulertUtbetalingsbeløp = andelForPerson.sats
+                                    .avrundetHeltallAvProsent(endretUtbetalingAndel.prosent!!)
                         )
                     }
                 )
@@ -217,7 +235,7 @@ object TilkjentYtelseUtils {
             .fold(mutableListOf(), ::slåSammenEtterfølgendePerioderMedSammeBeløp)
     }
 
-    private fun erBack2BackIMånedsskifte(tilOgMed: LocalDate?, fraOgMed: LocalDate?): Boolean {
+    fun erBack2BackIMånedsskifte(tilOgMed: LocalDate?, fraOgMed: LocalDate?): Boolean {
         return tilOgMed?.erDagenFør(fraOgMed) == true &&
             tilOgMed.toYearMonth() != fraOgMed?.toYearMonth()
     }
@@ -265,7 +283,10 @@ fun MånedPeriode.perioderMedOgUtenOverlapp(perioder: List<MånedPeriode>): Pair
     val alleMånederMedOverlappstatus = mutableMapOf<YearMonth, Boolean>()
     var nesteMåned = this.fom
     while (nesteMåned <= this.tom) {
-        alleMånederMedOverlappstatus.put(nesteMåned, perioder.any { månedPeriode -> månedPeriode.inkluderer(nesteMåned) })
+        alleMånederMedOverlappstatus.put(
+            nesteMåned,
+            perioder.any { månedPeriode -> månedPeriode.inkluderer(nesteMåned) }
+        )
         nesteMåned = nesteMåned.plusMonths(1)
     }
 
@@ -274,7 +295,7 @@ fun MånedPeriode.perioderMedOgUtenOverlapp(perioder: List<MånedPeriode>): Pair
     val perioderMedOverlapp = mutableListOf<MånedPeriode>()
     val perioderUtenOverlapp = mutableListOf<MånedPeriode>()
     while (periodeStart != null) {
-        var periodeMedOverlapp = alleMånederMedOverlappstatus.get(periodeStart)!!
+        val periodeMedOverlapp = alleMånederMedOverlappstatus[periodeStart]!!
 
         val nesteMånedMedNyOverlappstatus = alleMånederMedOverlappstatus
             .filter { it.key > periodeStart && it.value != periodeMedOverlapp }
