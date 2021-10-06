@@ -170,14 +170,6 @@ fun hentOverstyrtDokumenttittel(behandling: Behandling): String? {
     } else null
 }
 
-@Deprecated("Bruk hentHjemlerIVedtaksperioderFraSanity når sanity-løsningen er ferdigtestet")
-fun hentHjemlerIVedtaksperioderGammel(vedtaksperioderMedBegrunnelser: List<VedtaksperiodeMedBegrunnelser>): Set<Int> =
-    vedtaksperioderMedBegrunnelser.flatMap { periode ->
-        periode.begrunnelser.flatMap {
-            it.vedtakBegrunnelseSpesifikasjon.hentHjemler()
-        }
-    }.toSortedSet()
-
 fun hentHjemlerIVedtaksperioderFraSanity(
     vedtaksperioderMedBegrunnelser: List<VedtaksperiodeMedBegrunnelser>,
     sanityBegrunnelser: List<SanityBegrunnelse>
@@ -194,16 +186,6 @@ fun hjemlerTilHjemmeltekst(hjemler: List<String>): String {
         1 -> "§ ${hjemler[0]}"
         else -> "§§ ${Utils.slåSammen(hjemler)}"
     }
-}
-
-@Deprecated("Bruk hentHjemmeltekst når sanity-løsningen er ferdigtestet")
-fun hentHjemmeltekstGammel(vedtaksperioderMedBegrunnelser: List<VedtaksperiodeMedBegrunnelser>): String {
-    val hjemler = hentHjemlerIVedtaksperioderGammel(vedtaksperioderMedBegrunnelser).toMutableSet()
-
-    if (vedtaksperioderMedBegrunnelser.flatMap { it.fritekster }.isNotEmpty()) {
-        hjemler.addAll(hjemlerTilhørendeFritekst)
-    }
-    return hjemlerTilHjemmeltekst(hjemler.sorted().map { it.toString() })
 }
 
 fun hentHjemmeltekst(

@@ -6,7 +6,6 @@ import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.Utils.storForbokstavIHvertOrd
 import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.tilMånedÅr
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.AutovedtakNyfødtBarnFraFør
@@ -174,11 +173,8 @@ class BrevService(
         val utbetalingsperioder = vedtaksperiodeService.hentUtbetalingsperioder(vedtak.behandling)
 
         val sanityBegrunnelser = brevKlient.hentSanityBegrunnelse()
-        val hjemler =
-            if (featureToggleService.isEnabled(FeatureToggleConfig.BRUK_BEGRUNNELSE_TRIGGES_AV_FRA_SANITY))
-                hentHjemmeltekst(vedtaksperioderMedBegrunnelser, sanityBegrunnelser)
-            else
-                hentHjemmeltekstGammel(vedtaksperioderMedBegrunnelser)
+
+        val hjemler = hentHjemmeltekst(vedtaksperioderMedBegrunnelser, sanityBegrunnelser)
 
         val målform = persongrunnlagService.hentSøkersMålform(vedtak.behandling.id)
 
