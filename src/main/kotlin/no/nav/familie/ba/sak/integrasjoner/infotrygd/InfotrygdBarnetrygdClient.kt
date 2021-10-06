@@ -119,7 +119,7 @@ class InfotrygdBarnetrygdClient(
     }
 
     fun hentPersonerMedUtvidetBarnetrygd(år: String): SkatteetatenPersonerResponse {
-        val uri = URI.create("$clientUri/infotrygd/barnetrygd/utvidet?aar=${år}")
+        val uri = URI.create("$clientUri/infotrygd/barnetrygd/utvidet?aar=$år")
         return try {
             getForEntity(uri)
         } catch (ex: Exception) {
@@ -138,7 +138,6 @@ class InfotrygdBarnetrygdClient(
             throw RuntimeException("Henting av perioder med utvidet barnetrygd feilet. Gav feil: ${ex.message}", ex)
         }
     }
-
 
     private fun loggFeil(ex: Exception, uri: URI) {
         when (ex) {

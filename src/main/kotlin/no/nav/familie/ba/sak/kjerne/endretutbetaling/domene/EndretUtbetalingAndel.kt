@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifi
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjonListConverter
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.math.BigDecimal
+import java.time.LocalDate
 import java.time.YearMonth
 import javax.persistence.Column
 import javax.persistence.Convert
@@ -33,14 +34,14 @@ import javax.persistence.Table
 @Entity(name = "EndretUtbetalingAndel")
 @Table(name = "ENDRET_UTBETALING_ANDEL")
 data class EndretUtbetalingAndel(
-        @Id
-        @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "endret_utbetaling_andel_seq_generator")
-        @SequenceGenerator(
-                name = "endret_utbetaling_andel_seq_generator",
-                sequenceName = "endret_utbetaling_andel_seq",
-                allocationSize = 50
-        )
-        val id: Long = 0,
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "endret_utbetaling_andel_seq_generator")
+    @SequenceGenerator(
+        name = "endret_utbetaling_andel_seq_generator",
+        sequenceName = "endret_utbetaling_andel_seq",
+        allocationSize = 50
+    )
+    val id: Long = 0,
 
     @Column(name = "fk_behandling_id", updatable = false, nullable = false)
     val behandlingId: Long,
@@ -63,6 +64,12 @@ data class EndretUtbetalingAndel(
     @Column(name = "aarsak")
     var årsak: Årsak? = null,
 
+    @Column(name = "avtaletidspunkt_delt_bosted")
+    var avtaletidspunktDeltBosted: LocalDate? = null,
+
+    @Column(name = "soknadstidspunkt")
+    var søknadstidspunkt: LocalDate? = null,
+
     @Column(name = "begrunnelse")
     var begrunnelse: String? = null,
 
@@ -74,29 +81,35 @@ data class EndretUtbetalingAndel(
     )
     val andelTilkjentYtelser: List<AndelTilkjentYtelse> = emptyList(),
 
-        @Column(name = "vedtak_begrunnelse_spesifikasjoner")
-        @Convert(converter = VedtakBegrunnelseSpesifikasjonListConverter::class)
-        var vedtakBegrunnelseSpesifikasjoner: List<VedtakBegrunnelseSpesifikasjon> = emptyList(),
+    @Column(name = "vedtak_begrunnelse_spesifikasjoner")
+    @Convert(converter = VedtakBegrunnelseSpesifikasjonListConverter::class)
+    var vedtakBegrunnelseSpesifikasjoner: List<VedtakBegrunnelseSpesifikasjon> = emptyList(),
 
-        ) : BaseEntitet() {
+) : BaseEntitet() {
 
     fun overlapperMed(periode: MånedPeriode) = periode.overlapperHeltEllerDelvisMed(this.periode())
 
-    fun periode():MånedPeriode {
+    fun periode(): MånedPeriode {
         validerUtfyltEndring()
         return MånedPeriode(this.fom!!, this.tom!!)
     }
 
-    fun validerUtfyltEndring() {
+    fun validerUtfyltEndring(): Boolean {
         if (person == null ||
             prosent == null ||
             fom == null ||
             tom == null ||
-            årsak == null)
-                throw Feil("Person, prosent, fom, tom, årsak skal være utfylt: $this.tostring()")
+            årsak == null ||
+            søknadstidspunkt == null
+        )
+            throw Feil("Person, prosent, fom, tom, årsak og søknadstidspunkt skal være utfylt: $this.tostring()")
+
+        if (årsak == Årsak.DELT_BOSTED && avtaletidspunktDeltBosted == null)
+            throw Feil("Avtaletidspunkt skal være utfylt når årsak er delt bosted: $this.tostring()")
+
+        return true
     }
 }
-
 
 enum class Årsak(val visningsnavn: String) {
     DELT_BOSTED("Delt bosted"),
@@ -112,6 +125,8 @@ fun EndretUtbetalingAndel.tilRestEndretUtbetalingAndel() = RestEndretUtbetalingA
     fom = this.fom,
     tom = this.tom,
     årsak = this.årsak,
+    avtaletidspunktDeltBosted = this.avtaletidspunktDeltBosted,
+    søknadstidspunkt = this.søknadstidspunkt,
     begrunnelse = this.begrunnelse
 )
 
@@ -120,7 +135,8 @@ fun EndretUtbetalingAndel.fraRestEndretUtbetalingAndel(restEndretUtbetalingAndel
     this.tom = restEndretUtbetalingAndel.tom
     this.prosent = restEndretUtbetalingAndel.prosent
     this.årsak = restEndretUtbetalingAndel.årsak
+    this.avtaletidspunktDeltBosted = restEndretUtbetalingAndel.avtaletidspunktDeltBosted
+    this.søknadstidspunkt = restEndretUtbetalingAndel.søknadstidspunkt
     this.begrunnelse = restEndretUtbetalingAndel.begrunnelse
     this.person = person
-
 }

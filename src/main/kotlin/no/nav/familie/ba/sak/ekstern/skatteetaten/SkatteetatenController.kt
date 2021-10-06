@@ -35,7 +35,6 @@ class SkatteetatenController(
     private val logger = LoggerFactory.getLogger(this::class.java)
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
-
     @GetMapping(
         value = ["/personer"],
         produces = ["application/json;charset=UTF-8"]
@@ -54,7 +53,6 @@ class SkatteetatenController(
         }
         return ResponseEntity(Ressurs.success(respons), HttpStatus.valueOf(200))
     }
-
 
     @PostMapping(
         value = ["/perioder"],
@@ -152,6 +150,5 @@ class SkatteetatenController(
                 )
             ),
 
-            )
-
+        )
 }

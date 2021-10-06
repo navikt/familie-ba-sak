@@ -17,26 +17,25 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
-import java.util.*
-
+import java.util.Properties
 
 @Service
 @TaskStepBeskrivelse(
-        taskStepType = BehandleFødselshendelseTask.TASK_STEP_TYPE,
-        beskrivelse = "Setter i gang behandlingsløp for fødselshendelse",
-        maxAntallFeil = 3
+    taskStepType = BehandleFødselshendelseTask.TASK_STEP_TYPE,
+    beskrivelse = "Setter i gang behandlingsløp for fødselshendelse",
+    maxAntallFeil = 3
 )
 class BehandleFødselshendelseTask(
-        private val fødselshendelseService: FødselshendelseService,
-        private val velgFagsystemService: VelgFagSystemService,
-        private val infotrygdFeedService: InfotrygdFeedService
+    private val fødselshendelseService: FødselshendelseService,
+    private val velgFagsystemService: VelgFagSystemService,
+    private val infotrygdFeedService: InfotrygdFeedService
 ) : AsyncTaskStep {
 
     private val dagerSidenBarnBleFødt: DistributionSummary = Metrics.summary("foedselshendelse.dagersidenbarnfoedt")
 
     override fun doTask(task: Task) {
         val behandleFødselshendelseTaskDTO =
-                objectMapper.readValue(task.payload, BehandleFødselshendelseTaskDTO::class.java)
+            objectMapper.readValue(task.payload, BehandleFødselshendelseTaskDTO::class.java)
 
         val nyBehandling = behandleFødselshendelseTaskDTO.nyBehandling
 
@@ -46,8 +45,10 @@ class BehandleFødselshendelseTask(
         nyBehandling.barnasIdenter.forEach {
             // En litt forenklet løsning for å hente fødselsdato uten å kalle PDL. Gir ikke helt riktige data, men godt nok.
             val dagerSidenBarnetBleFødt =
-                    ChronoUnit.DAYS.between(LocalDate.parse(it.substring(0, 6), DateTimeFormatter.ofPattern("ddMMyy")),
-                                            LocalDateTime.now())
+                ChronoUnit.DAYS.between(
+                    LocalDate.parse(it.substring(0, 6), DateTimeFormatter.ofPattern("ddMMyy")),
+                    LocalDateTime.now()
+                )
             dagerSidenBarnBleFødt.record(dagerSidenBarnetBleFødt.toDouble())
         }
 
@@ -67,13 +68,13 @@ class BehandleFødselshendelseTask(
 
         fun opprettTask(behandleFødselshendelseTaskDTO: BehandleFødselshendelseTaskDTO): Task {
             return Task(
-                    type = TASK_STEP_TYPE,
-                    payload = objectMapper.writeValueAsString(behandleFødselshendelseTaskDTO),
-                    properties = Properties().apply {
-                        this["morsIdent"] = behandleFødselshendelseTaskDTO.nyBehandling.morsIdent
-                    }
+                type = TASK_STEP_TYPE,
+                payload = objectMapper.writeValueAsString(behandleFødselshendelseTaskDTO),
+                properties = Properties().apply {
+                    this["morsIdent"] = behandleFødselshendelseTaskDTO.nyBehandling.morsIdent
+                }
             ).copy(
-                    triggerTid = if (erKlokkenMellom21Og06()) kl06IdagEllerNesteDag() else LocalDateTime.now()
+                triggerTid = if (erKlokkenMellom21Og06()) kl06IdagEllerNesteDag() else LocalDateTime.now()
             )
         }
     }

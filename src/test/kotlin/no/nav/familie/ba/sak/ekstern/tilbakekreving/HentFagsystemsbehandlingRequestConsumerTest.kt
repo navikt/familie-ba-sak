@@ -36,7 +36,6 @@ import org.junit.jupiter.api.TestInstance
 import org.springframework.kafka.support.Acknowledgment
 import java.time.LocalDate
 
-
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class HentFagsystemsbehandlingRequestConsumerTest {
 
@@ -57,19 +56,22 @@ internal class HentFagsystemsbehandlingRequestConsumerTest {
     private val keySlot = slot<String>()
     private val behandlingIdSlot = slot<String>()
 
-
     val behandling = lagBehandling(årsak = BehandlingÅrsak.FØDSELSHENDELSE, automatiskOpprettelse = true).also {
         it.resultat = BehandlingResultat.INNVILGET
     }
 
     @BeforeAll
     fun init() {
-        fagsystemsbehandlingService = spyk(FagsystemsbehandlingService(behandlingService,
-                                                                       persongrunnlagService,
-                                                                       arbeidsfordelingService,
-                                                                       vedtakService,
-                                                                       tilbakekrevingService,
-                                                                       kafkaProducer))
+        fagsystemsbehandlingService = spyk(
+            FagsystemsbehandlingService(
+                behandlingService,
+                persongrunnlagService,
+                arbeidsfordelingService,
+                vedtakService,
+                tilbakekrevingService,
+                kafkaProducer
+            )
+        )
         hentFagsystemsbehandlingRequestConsumer = HentFagsystemsbehandlingRequestConsumer(fagsystemsbehandlingService)
 
         acknowledgment = mockk()
@@ -77,14 +79,14 @@ internal class HentFagsystemsbehandlingRequestConsumerTest {
 
         every { behandlingService.hent(any()) } returns behandling
         every { persongrunnlagService.hentAktiv(any()) } returns lagTestPersonopplysningGrunnlag(
-                behandling.id,
-                tilfeldigPerson(personType = PersonType.BARN),
-                tilfeldigPerson(personType = PersonType.SØKER)
+            behandling.id,
+            tilfeldigPerson(personType = PersonType.BARN),
+            tilfeldigPerson(personType = PersonType.SØKER)
         )
         every { arbeidsfordelingService.hentAbeidsfordelingPåBehandling(any()) } returns ArbeidsfordelingPåBehandling(
-                behandlendeEnhetId = "4820",
-                behandlendeEnhetNavn = "Nav",
-                behandlingId = behandling.id
+            behandlendeEnhetId = "4820",
+            behandlendeEnhetNavn = "Nav",
+            behandlingId = behandling.id
         )
         every { vedtakService.hentAktivForBehandlingThrows(any()) } returns lagVedtak(behandling)
         every { tilbakekrevingService.hentTilbakekrevingsvalg(any()) } returns Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING
@@ -104,9 +106,11 @@ internal class HentFagsystemsbehandlingRequestConsumerTest {
         assertEquals(Ytelsestype.BARNETRYGD, request.ytelsestype)
 
         verify {
-            fagsystemsbehandlingService.sendFagsystemsbehandling(capture(responsSlot),
-                                                                 capture(keySlot),
-                                                                 capture(behandlingIdSlot))
+            fagsystemsbehandlingService.sendFagsystemsbehandling(
+                capture(responsSlot),
+                capture(keySlot),
+                capture(behandlingIdSlot)
+            )
         }
 
         val respons = responsSlot.captured
@@ -129,8 +133,12 @@ internal class HentFagsystemsbehandlingRequestConsumerTest {
     }
 
     private fun lagRequest(): String {
-        return objectMapper.writeValueAsString(HentFagsystemsbehandlingRequest(eksternFagsakId = behandling.fagsak.id.toString(),
-                                                                               eksternId = behandling.id.toString(),
-                                                                               ytelsestype = Ytelsestype.BARNETRYGD))
+        return objectMapper.writeValueAsString(
+            HentFagsystemsbehandlingRequest(
+                eksternFagsakId = behandling.fagsak.id.toString(),
+                eksternId = behandling.id.toString(),
+                ytelsestype = Ytelsestype.BARNETRYGD
+            )
+        )
     }
 }

@@ -16,10 +16,10 @@ import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 
 class DokumentControllerTest(
-        @Autowired
-        private val dokumentService: DokumentService,
-        @Autowired
-        private val behandlingService: BehandlingService,
+    @Autowired
+    private val dokumentService: DokumentService,
+    @Autowired
+    private val behandlingService: BehandlingService,
 ) : AbstractSpringIntegrationTestDev() {
 
     final val mockDokumentService: DokumentService = mockk()
@@ -27,7 +27,7 @@ class DokumentControllerTest(
     final val fagsakService: FagsakService = mockk()
     final val tilgangService: TilgangService = mockk(relaxed = true)
     val mockDokumentController =
-            DokumentController(mockDokumentService, vedtakService, behandlingService, fagsakService, tilgangService, mockk(relaxed = true), mockk(relaxed = true))
+        DokumentController(mockDokumentService, vedtakService, behandlingService, fagsakService, tilgangService, mockk(relaxed = true), mockk(relaxed = true))
 
     @Test
     @Tag("integration")

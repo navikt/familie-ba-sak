@@ -13,35 +13,46 @@ import org.springframework.stereotype.Service
 
 @Service
 class RegistrereSøknad(
-        private val søknadGrunnlagService: SøknadGrunnlagService,
-        private val persongrunnlagService: PersongrunnlagService,
-        private val loggService: LoggService,
-        private val behandlingService: BehandlingService,
-        private val vedtakService: VedtakService,
-        private val tilbakestillBehandlingService: TilbakestillBehandlingService,
+    private val søknadGrunnlagService: SøknadGrunnlagService,
+    private val persongrunnlagService: PersongrunnlagService,
+    private val loggService: LoggService,
+    private val behandlingService: BehandlingService,
+    private val vedtakService: VedtakService,
+    private val tilbakestillBehandlingService: TilbakestillBehandlingService,
 ) : BehandlingSteg<RestRegistrerSøknad> {
 
-    override fun utførStegOgAngiNeste(behandling: Behandling,
-                                      data: RestRegistrerSøknad): StegType {
+    override fun utførStegOgAngiNeste(
+        behandling: Behandling,
+        data: RestRegistrerSøknad
+    ): StegType {
         val aktivSøknadGrunnlagFinnes = søknadGrunnlagService.hentAktiv(behandlingId = behandling.id) != null
         val søknadDTO = data.søknad
         val innsendtSøknad = søknadDTO.writeValueAsString()
 
-        behandlingService.oppdaterBehandlingUnderkategori(behandling = behandlingService.hent(behandlingId = behandling.id),
-                                                          nyBehandlingUnderkategori = søknadDTO.underkategori)
+        behandlingService.oppdaterBehandlingstema(
+            behandling = behandlingService.hent(behandlingId = behandling.id),
+            nyBehandlingUnderkategori = søknadDTO.underkategori
+        )
 
         loggService.opprettRegistrertSøknadLogg(behandling, aktivSøknadGrunnlagFinnes)
-        søknadGrunnlagService.lagreOgDeaktiverGammel(søknadGrunnlag = SøknadGrunnlag(behandlingId = behandling.id,
-                                                                                     søknad = innsendtSøknad))
-
+        søknadGrunnlagService.lagreOgDeaktiverGammel(
+            søknadGrunnlag = SøknadGrunnlag(
+                behandlingId = behandling.id,
+                søknad = innsendtSøknad
+            )
+        )
 
         val forrigeBehandlingSomErIverksatt = behandlingService.hentSisteBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id)
-        persongrunnlagService.registrerBarnFraSøknad(behandling = behandlingService.hent(behandlingId = behandling.id),
-                                                     forrigeBehandling = forrigeBehandlingSomErIverksatt,
-                                                     søknadDTO = søknadDTO)
+        persongrunnlagService.registrerBarnFraSøknad(
+            behandling = behandlingService.hent(behandlingId = behandling.id),
+            forrigeBehandling = forrigeBehandlingSomErIverksatt,
+            søknadDTO = søknadDTO
+        )
 
-        tilbakestillBehandlingService.initierOgSettBehandlingTilVilårsvurdering(behandling = behandlingService.hent(behandlingId = behandling.id),
-                                                                                bekreftEndringerViaFrontend = data.bekreftEndringerViaFrontend)
+        tilbakestillBehandlingService.initierOgSettBehandlingTilVilårsvurdering(
+            behandling = behandlingService.hent(behandlingId = behandling.id),
+            bekreftEndringerViaFrontend = data.bekreftEndringerViaFrontend
+        )
 
         val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = behandling.id)
 

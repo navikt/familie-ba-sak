@@ -16,12 +16,14 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
-class FagsystemsbehandlingService(private val behandlingService: BehandlingService,
-                                  private val persongrunnlagService: PersongrunnlagService,
-                                  private val arbeidsfordelingService: ArbeidsfordelingService,
-                                  private val vedtakService: VedtakService,
-                                  private val tilbakekrevingService: TilbakekrevingService,
-                                  private val kafkaProducer: KafkaProducer) {
+class FagsystemsbehandlingService(
+    private val behandlingService: BehandlingService,
+    private val persongrunnlagService: PersongrunnlagService,
+    private val arbeidsfordelingService: ArbeidsfordelingService,
+    private val vedtakService: VedtakService,
+    private val tilbakekrevingService: TilbakekrevingService,
+    private val kafkaProducer: KafkaProducer
+) {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -32,35 +34,42 @@ class FagsystemsbehandlingService(private val behandlingService: BehandlingServi
         return lagRespons(request, behandling)
     }
 
-    fun sendFagsystemsbehandling(respons: HentFagsystemsbehandlingRespons,
-                                 key: String,
-                                 behandlingId: String) {
+    fun sendFagsystemsbehandling(
+        respons: HentFagsystemsbehandlingRespons,
+        key: String,
+        behandlingId: String
+    ) {
         kafkaProducer.sendFagsystemsbehandlingResponsForTopicTilbakekreving(respons, key, behandlingId)
     }
 
-    private fun lagRespons(request: HentFagsystemsbehandlingRequest,
-                           behandling: Behandling): HentFagsystemsbehandlingRespons {
+    private fun lagRespons(
+        request: HentFagsystemsbehandlingRequest,
+        behandling: Behandling
+    ): HentFagsystemsbehandlingRespons {
         val behandlingId = behandling.id
         val persongrunnlag = persongrunnlagService.hentAktiv(behandlingId)
-                             ?: throw Feil("Fant ikke aktivt persongrunnlag for behandlingId=$behandlingId")
+            ?: throw Feil("Fant ikke aktivt persongrunnlag for behandlingId=$behandlingId")
         val arbeidsfordeling = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandlingId)
         val aktivVedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId)
 
-        val faktainfo = Faktainfo(revurderingsårsak = behandling.opprettetÅrsak.visningsnavn,
-                                  revurderingsresultat = behandling.resultat.displayName,
-                                  tilbakekrevingsvalg = tilbakekrevingService.hentTilbakekrevingsvalg(behandlingId))
+        val faktainfo = Faktainfo(
+            revurderingsårsak = behandling.opprettetÅrsak.visningsnavn,
+            revurderingsresultat = behandling.resultat.displayName,
+            tilbakekrevingsvalg = tilbakekrevingService.hentTilbakekrevingsvalg(behandlingId)
+        )
 
-        val hentFagsystemsbehandling = HentFagsystemsbehandling(eksternFagsakId = request.eksternFagsakId,
-                                                                eksternId = request.eksternId,
-                                                                ytelsestype = request.ytelsestype,
-                                                                personIdent = behandling.fagsak.hentAktivIdent().ident,
-                                                                språkkode = persongrunnlag.søker.målform.tilSpråkkode(),
-                                                                enhetId = arbeidsfordeling.behandlendeEnhetId,
-                                                                enhetsnavn = arbeidsfordeling.behandlendeEnhetNavn,
-                                                                revurderingsvedtaksdato = aktivVedtak.vedtaksdato!!.toLocalDate(),
-                                                                faktainfo = faktainfo)
+        val hentFagsystemsbehandling = HentFagsystemsbehandling(
+            eksternFagsakId = request.eksternFagsakId,
+            eksternId = request.eksternId,
+            ytelsestype = request.ytelsestype,
+            personIdent = behandling.fagsak.hentAktivIdent().ident,
+            språkkode = persongrunnlag.søker.målform.tilSpråkkode(),
+            enhetId = arbeidsfordeling.behandlendeEnhetId,
+            enhetsnavn = arbeidsfordeling.behandlendeEnhetNavn,
+            revurderingsvedtaksdato = aktivVedtak.vedtaksdato!!.toLocalDate(),
+            faktainfo = faktainfo
+        )
 
         return HentFagsystemsbehandlingRespons(hentFagsystemsbehandling = hentFagsystemsbehandling)
     }
-
 }

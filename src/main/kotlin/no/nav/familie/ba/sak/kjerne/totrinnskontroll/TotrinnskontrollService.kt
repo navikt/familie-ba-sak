@@ -12,30 +12,38 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
-class TotrinnskontrollService(private val behandlingService: BehandlingService,
-                              private val totrinnskontrollRepository: TotrinnskontrollRepository) {
+class TotrinnskontrollService(
+    private val behandlingService: BehandlingService,
+    private val totrinnskontrollRepository: TotrinnskontrollRepository
+) {
 
     fun hentAktivForBehandling(behandlingId: Long): Totrinnskontroll? {
         return totrinnskontrollRepository.findByBehandlingAndAktiv(behandlingId)
     }
 
-    fun opprettTotrinnskontrollMedSaksbehandler(behandling: Behandling,
-                                                saksbehandler: String = SikkerhetContext.hentSaksbehandlerNavn(),
-                                                saksbehandlerId: String = SikkerhetContext.hentSaksbehandler()): Totrinnskontroll {
-        return lagreOgDeaktiverGammel(Totrinnskontroll(
+    fun opprettTotrinnskontrollMedSaksbehandler(
+        behandling: Behandling,
+        saksbehandler: String = SikkerhetContext.hentSaksbehandlerNavn(),
+        saksbehandlerId: String = SikkerhetContext.hentSaksbehandler()
+    ): Totrinnskontroll {
+        return lagreOgDeaktiverGammel(
+            Totrinnskontroll(
                 behandling = behandling,
                 saksbehandler = saksbehandler,
                 saksbehandlerId = saksbehandlerId,
-        ))
+            )
+        )
     }
 
-    fun besluttTotrinnskontroll(behandling: Behandling,
-                                beslutter: String,
-                                beslutterId: String,
-                                beslutning: Beslutning,
-                                kontrollerteSider: List<String> = emptyList()): Totrinnskontroll {
+    fun besluttTotrinnskontroll(
+        behandling: Behandling,
+        beslutter: String,
+        beslutterId: String,
+        beslutning: Beslutning,
+        kontrollerteSider: List<String> = emptyList()
+    ): Totrinnskontroll {
         val totrinnskontroll = hentAktivForBehandling(behandlingId = behandling.id)
-                               ?: throw Feil(message = "Kan ikke beslutte et vedtak som ikke er sendt til beslutter")
+            ?: throw Feil(message = "Kan ikke beslutte et vedtak som ikke er sendt til beslutter")
 
         totrinnskontroll.beslutter = beslutter
         totrinnskontroll.beslutterId = beslutterId
@@ -43,15 +51,17 @@ class TotrinnskontrollService(private val behandlingService: BehandlingService,
         totrinnskontroll.kontrollerteSider = kontrollerteSider
         if (totrinnskontroll.erUgyldig()) {
             throw FunksjonellFeil(
-                    melding = "Samme saksbehandler kan ikke foreslå og beslutte iverksetting på samme vedtak",
-                    frontendFeilmelding = "Du kan ikke godkjenne ditt eget vedtak")
+                melding = "Samme saksbehandler kan ikke foreslå og beslutte iverksetting på samme vedtak",
+                frontendFeilmelding = "Du kan ikke godkjenne ditt eget vedtak"
+            )
         }
 
         lagreEllerOppdater(totrinnskontroll)
 
         behandlingService.oppdaterStatusPåBehandling(
-                behandlingId = behandling.id,
-                status = if (beslutning.erGodkjent()) BehandlingStatus.IVERKSETTER_VEDTAK else BehandlingStatus.UTREDES)
+            behandlingId = behandling.id,
+            status = if (beslutning.erGodkjent()) BehandlingStatus.IVERKSETTER_VEDTAK else BehandlingStatus.UTREDES
+        )
 
         return totrinnskontroll
     }
@@ -61,14 +71,16 @@ class TotrinnskontrollService(private val behandlingService: BehandlingService,
             throw Feil(message = "Kan ikke opprette automatisk totrinnskontroll ved manuell behandling")
         }
 
-        lagreOgDeaktiverGammel(Totrinnskontroll(
+        lagreOgDeaktiverGammel(
+            Totrinnskontroll(
                 behandling = behandling,
                 godkjent = true,
                 saksbehandler = SikkerhetContext.SYSTEM_NAVN,
                 saksbehandlerId = SikkerhetContext.SYSTEM_FORKORTELSE,
                 beslutter = SikkerhetContext.SYSTEM_NAVN,
                 beslutterId = SikkerhetContext.SYSTEM_FORKORTELSE,
-        ))
+            )
+        )
     }
 
     fun lagreOgDeaktiverGammel(totrinnskontroll: Totrinnskontroll): Totrinnskontroll {
