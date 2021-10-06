@@ -863,7 +863,8 @@ fun lagVilkårResultat(
     periodeFom: LocalDate = LocalDate.of(2009, 12, 24),
     periodeTom: LocalDate = LocalDate.of(2010, 1, 31),
     begrunnelse: String = "",
-    behandlingId: Long = lagBehandling().id
+    behandlingId: Long = lagBehandling().id,
+    erMedlemskapVurdert: Boolean = false,
 ) = VilkårResultat(
     personResultat = personResultat,
     vilkårType = vilkårType,
@@ -872,6 +873,7 @@ fun lagVilkårResultat(
     periodeTom = periodeTom,
     begrunnelse = begrunnelse,
     behandlingId = behandlingId,
+    erMedlemskapVurdert = erMedlemskapVurdert,
 )
 
 val guttenBarnesenFødselsdato = LocalDate.now().withDayOfMonth(10).minusYears(6)
