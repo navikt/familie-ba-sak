@@ -375,6 +375,222 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
         override val sanityApiNavn = "fortsattInnvilgetUendretTrygd"
+    },
+    FORTSATTINNVILGET_OPPHOLD_I_UTLANDET_IKKE_MER_ENN_3_MÅNEDER_SØKER_OG_BARN {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
+        override val sanityApiNavn = "oppholdIUtlandetIkkeMerEnn3ManederSokerOgBarn"
+    },
+    INNVILGELSE_HELE_FAMILIEN_TRYGDEAVTALE {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
+        override val sanityApiNavn = "heleFamilienTrygdeavtale"
+    },
+    INNVILGELSE_HELE_FAMILIEN_PLIKTIG_MEDLEM {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
+        override val sanityApiNavn = "heleFamilienPliktigMedlem"
+    },
+    INNVILGELSE_SØKER_OG_BARN_PLIKTIG_MEDLEM {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
+        override val sanityApiNavn = "sokerOgBarnPliktigMedlem"
+    },
+    AVSLAG_IKKE_MEDLEM {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
+        override val sanityApiNavn = "ikkeMedlem"
+    },
+    AVSLAG_VURDERING_FLERE_KORTE_OPPHOLD_I_UTLANDET_SISTE_ÅRENE {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
+        override val sanityApiNavn = "vurderingFlereKorteOppholdIUtlandetSisteArene"
+    },
+    AVSLAG_VURDERING_ANNEN_FORELDER_IKKE_MEDLEM {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
+        override val sanityApiNavn = "vurderingAnnenForelderIkkeMedlem"
+    },
+    INNVILGELSE_ENIGHET_OM_OPPHØR_AV_AVTALE_OM_DELT_BOSTED {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
+        override val sanityApiNavn = "innvilgelseEnighetOmAtAvtalenOmDeltBostedErOpphort"
+    },
+    FORTSATTINNVILGET_HELE_FAMILIEN_MEDLEM_ETTER_TRYGDEAVTALE {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
+        override val sanityApiNavn = "heleFamilienMedlemEtterTrygdeavtale"
+    },
+    FORTSATTINNVILGET_OPPHOLD_I_UTLANDET_IKKE_MER_ENN_3_MÅNEDER_BARN {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
+        override val sanityApiNavn = "oppholdIUtlandetIkkeMerEnn3ManederBarn"
+    },
+    INNVILGELSE_VURDERING_HELE_FAMILIEN_FRIVILLIG_MEDLEM {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
+        override val sanityApiNavn = "vurderingHeleFamilienFrivilligMedlem"
+    },
+    OPPHØR_ANNEN_FORELDER_IKKE_LENGER_PLIKTIG_MEDLEM {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
+        override val sanityApiNavn = "annenForelderIkkeLengerPliktigMedlem"
+    },
+    AVSLAG_IKKE_FRIVILLIG_MEDLEM {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
+        override val sanityApiNavn = "ikkeFrivilligMedlem"
+    },
+    INNVILGELSE_VURDERING_SØKER_OG_BARN_PLIKTIG_MEDLEM {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
+        override val sanityApiNavn = "vurderingSokerOgBarnPliktigMedlem"
+    },
+    FORTSATTINNVILGET_MEDLEM_I_FOLKETRYGDEN {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
+        override val sanityApiNavn = "fortsattInnvilgetMedlemIFolketrygden"
+    },
+    AVSLAG_IKKE_PLIKTIG_MEDLEM {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
+        override val sanityApiNavn = "ikkePliktigMedlem"
+    },
+    REDUKSJON_ANNEN_FORELDER_IKKE_LENGER_FRIVILLIG_MEDLEM {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "annenForelderIkkeLengerFrivilligMedlem"
+    },
+    AVSLAG_ANNEN_FORELDER_IKKE_MEDLEM_ETTER_TRYGDEAVTALE {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
+        override val sanityApiNavn = "annenForelderIkkeMedlemEtterTrygdeavtale"
+    },
+    OPPHØR_SØKER_OG_BARN_IKKE_LENGER_PLIKTIG_MEDLEM {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
+        override val sanityApiNavn = "sokerOgBarnIkkeLengerPliktigMedlem"
+    },
+    AVSLAG_ANNEN_FORELDER_IKKE_PLIKTIG_MEDLEM {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
+        override val sanityApiNavn = "annenForelderIkkePliktigMedlem"
+    },
+    REDUKSJON_ANNEN_FORELDER_IKKE_MEDLEM {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "annenForelderIkkeMedlem"
+    },
+    REDUKSJON_VURDERING_BARN_FLERE_KORTE_OPPHOLD_I_UTLANDET_SISTE_ÅRENE_ {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "vurderingBarnFlereKorteOppholdIUtlandetSisteArene"
+    },
+    FORTSATTINNVILGET_DELT_BOSTED_PRAKTISERES_FORTSATT {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
+        override val sanityApiNavn = "fortsattInnvilgetDeltBostedPraktiseresFortsatt"
+    },
+    INNVILGELSE_UENIGHET_OM_OPPHØR_AV_AVTALE_OM_DELT_BOSTED {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
+        override val sanityApiNavn = "innvilgelseUenighetOmOpphorAvAvtaleOmDeltBosted"
+    },
+    INNVILGELSE_HELE_FAMILIEN_FRIVILLIG_MEDLEM {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
+        override val sanityApiNavn = "heleFamilienFrivilligMedlem"
+    },
+    INNVILGELSE_VURDERING_HELE_FAMILIEN_PLIKTIG_MEDLEM {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
+        override val sanityApiNavn = "vurderingHeleFamilienPliktigMedlem"
+    },
+    REDUKSJON_ANNEN_FORELDER_IKKE_LENGER_MEDLEM_TRYGDEAVTALE {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "annenForelderIkkeLengerMedlemTrygdeavtale"
+    },
+    OPPHØR_BOSATT_I_NORGE_UNNTATT_MEDLEMSKAP {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
+        override val sanityApiNavn = "bosattINorgeUnntattMedlemskap"
+    },
+    OPPHØR_ANNEN_FORELDER_IKKE_LENGER_MEDLEM_TRYGDEAVTALE {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
+        override val sanityApiNavn = "annenForelderIkkeLengerMedlemTrygdeavtale"
+    },
+    REDUKSJON_ANNEN_FORELDER_IKKE_LENGER_PLIKTIG_MEDLEM {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "annenForelderIkkeLengerPliktigMedlem"
+    },
+    FORTSATTINNVILGET_VURDERING_HELE_FAMILIEN_MEDLEM {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
+        override val sanityApiNavn = "vurderingHeleFamilienMedlem"
+    },
+    FORTSATTINNVILGET_SØKER_OG_BARN_MEDLEM_ETTER_TRYGDEAVTALE {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
+        override val sanityApiNavn = "sokerOgBarnMedlemEtterTrygdeavtale"
+    },
+    AVSLAG_VURDERING_IKKE_MEDLEM {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
+        override val sanityApiNavn = "vurderingIkkeMedlem"
+    },
+    OPPHØR_SØKER_OG_BARN_IKKE_LENGER_MEDLEM_TRYGDEAVTALE {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
+        override val sanityApiNavn = "sokerOgBarnIkkeLengerMedlemTrygdeavtale"
+    },
+    INNVILGELSE_SØKER_OG_BARN_OPPHOLD_I_UTLANDET_IKKE_MER_ENN_3_MÅNEDER {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
+        override val sanityApiNavn = "sokerOgBarnOppholdIUtlandetIkkeMerEnn3Maneder"
+    },
+    REDUKSJON_VURDERING_BARN_FLERE_KORTE_OPPHOLD_I_UTLANDET_SISTE_TO_ÅR_ {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "vurderingBarnFlereKorteOppholdIUtlandetSisteToAr"
+    },
+    OPPHØR_SØKER_OG_BARN_IKKE_LENGER_FRIVILLIG_MEDLEM {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
+        override val sanityApiNavn = "sokerOgBarnIkkeLengerFrivilligMedlem"
+    },
+    OPPHØR_VURDERING_ANNEN_FORELDER_IKKE_MEDLEM {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
+        override val sanityApiNavn = "vurderingAnnenForelderIkkeMedlem"
+    },
+    OPPHØR_VURDERING_FLERE_KORTE_OPPHOLD_I_UTLANDET_SISTE_TO_ÅR {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
+        override val sanityApiNavn = "vurderingFlereKorteOppholdIUtlandetSisteToAr"
+    },
+    AVSLAG_ANNEN_FORELDER_IKKE_FRIVILLIG_MEDLEM {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
+        override val sanityApiNavn = "annenForelderIkkeFrivilligMedlem"
+    },
+    OPPHØR_VURDERING_SØKER_OG_BARN_IKKE_MEDLEM {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
+        override val sanityApiNavn = "vurderingSokerOgBarnIkkeMedlem"
+    },
+    AVSLAG_IKKE_MEDLEM_ETTER_TRYGDEAVTALE {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
+        override val sanityApiNavn = "ikkeMedlemEtterTrygdeavtale"
+    },
+    OPPHØR_SØKER_OG_BARN_IKKE_MEDLEM {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
+        override val sanityApiNavn = "sokerOgBarnIkkeMedlem"
+    },
+    AVSLAG_VURDERING_FLERE_KORTE_OPPHOLD_I_UTLANDET_SISTE_TO_ÅR {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
+        override val sanityApiNavn = "vurderingFlereKorteOppholdIUtlandetSisteToAr"
+    },
+    INNVILGELSE_BARN_OPPHOLD_I_UTLANDET_IKKE_MER_ENN_3_MÅNEDER {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
+        override val sanityApiNavn = "barnOppholdIUtlandetIkkeMerEnn3Maneder"
+    },
+    INNVILGELSE_SØKER_OG_BARN_FRIVILLIG_MEDLEM {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
+        override val sanityApiNavn = "sokerOgBarnFrivilligMedlem"
+    },
+    OPPHØR_VURDERING_FLERE_KORTE_OPPHOLD_I_UTLANDET_SISTE_ÅRENE {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
+        override val sanityApiNavn = "vurderingFlereKorteOppholdIUtlandetSisteArene"
+    },
+    INNVILGELSE_VURDERING_SØKER_OG_BARN_FRIVILLIG_MEDLEM {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
+        override val sanityApiNavn = "vurderingSokerOgBarnFrivilligMedlem"
+    },
+    INNVILGELSE_ETTERBETALING_3_ÅR {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
+        override val sanityApiNavn = "etterbetaling3Aar"
+    },
+    FORTSATTINNVILGET_ANNEN_FORELDER_IKKE_SØKT_OM_DELT_BARNETRYGD {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
+        override val sanityApiNavn = "fortsattInnvilgetAnnenForelderIkkeSokt"
+    },
+    INNVILGELSE_SØKER_OG_BARN_TRYGDEAVTALE {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
+        override val sanityApiNavn = "sokerOgBarnTrygdeavtale"
+    },
+    FORTSATTINNVILGET_VURDERING_SØKER_OG_BARN_MEDLEM {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
+        override val sanityApiNavn = "vurderingSokerOgBarnMedlem"
+    },
+    OPPHØR_ANNEN_FORELDER_IKKE_LENGER_FRIVILLIG_MEDLEM {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
+        override val sanityApiNavn = "annenForelderIkkeLengerFrivilligMedlem"
+    },
+    REDUKSJON_SATSENDRING {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "reduksjonSatsendring"
     };
 
     fun triggesForPeriode(
@@ -502,7 +718,8 @@ fun VedtakBegrunnelseType.hentMånedOgÅrForBegrunnelse(periode: Periode) = when
         else if (periode.tom == TIDENES_ENDE) periode.fom.tilMånedÅr()
         else "${periode.fom.tilMånedÅr()} til ${periode.tom.tilMånedÅr()}"
     else ->
-        if (periode.fom == TIDENES_MORGEN) throw Feil("Prøver å finne fom-dato for begrunnelse, men fikk \"TIDENES_MORGEN\".")
+        if (periode.fom == TIDENES_MORGEN)
+            throw Feil("Prøver å finne fom-dato for begrunnelse, men fikk \"TIDENES_MORGEN\".")
         else periode.fom.forrigeMåned().tilMånedÅr()
 }
 
