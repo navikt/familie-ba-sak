@@ -22,7 +22,7 @@ import org.springframework.test.context.ActiveProfiles
 import javax.sql.DataSource
 
 @SpringBootTest
-@ActiveProfiles("dev", "mock-pdl", "mock-infotrygd-barnetrygd")
+@ActiveProfiles("dev", "mock-pdl", "mock-infotrygd-barnetrygd", "mock-brev-klient")
 @TestInstance(Lifecycle.PER_CLASS)
 class LoggServiceTest(
     @Autowired
