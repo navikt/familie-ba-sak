@@ -141,7 +141,7 @@ fun EndretUtbetalingAndel.fraRestEndretUtbetalingAndel(
 ) {
     this.fom = restEndretUtbetalingAndel.fom
     this.tom = restEndretUtbetalingAndel.tom
-    this.prosent = restEndretUtbetalingAndel.prosent
+    this.prosent = restEndretUtbetalingAndel.prosent ?: BigDecimal(0)
     this.årsak = restEndretUtbetalingAndel.årsak
     this.avtaletidspunktDeltBosted = restEndretUtbetalingAndel.avtaletidspunktDeltBosted
     this.søknadstidspunkt = restEndretUtbetalingAndel.søknadstidspunkt
