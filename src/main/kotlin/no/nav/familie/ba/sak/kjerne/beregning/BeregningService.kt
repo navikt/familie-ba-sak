@@ -105,7 +105,12 @@ class BeregningService(
                 vilkårsvurdering = vilkårsvurdering,
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 behandling = behandling
-            ) { småbarnstilleggService.hentFullOvergangsstønadPerioder(it) }
+            ) {
+                småbarnstilleggService.hentFullOvergangsstønadPerioder(
+                    personIdent = it,
+                    behandlingId = behandling.id
+                )
+            }
 
         val endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(behandling.id)
         val andelerTilkjentYtelse = TilkjentYtelseUtils.oppdaterTilkjentYtelseMedEndretUtbetalingAndeler(
