@@ -484,7 +484,7 @@ class VedtaksperiodeService(
             }
 
             vedtaksperiodeMedBegrunnelser.tilRestVedtaksperiodeMedBegrunnelser(
-                    gyldigeBegrunnelser.filter { it.erTilgjengeligFrontend }.toList()
+                gyldigeBegrunnelser.filter { it.erTilgjengeligFrontend }.toList()
             )
         }
     }
