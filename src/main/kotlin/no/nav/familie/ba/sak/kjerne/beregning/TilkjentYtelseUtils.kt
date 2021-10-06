@@ -117,9 +117,10 @@ object TilkjentYtelseUtils {
 
             andelerForPerson.forEach { andelForPerson ->
                 // Deler opp hver enkelt andel i perioder som hhv blir berørt av endringene og de som ikke berøres av de.
-                val (perioderMedEndring, perioderUtenEndring) = andelForPerson.stønadsPeriode().perioderMedOgUtenOverlapp(
-                    endringerForPerson.map { endringerForPerson -> endringerForPerson.periode() }
-                )
+                val (perioderMedEndring, perioderUtenEndring) = andelForPerson.stønadsPeriode()
+                    .perioderMedOgUtenOverlapp(
+                        endringerForPerson.map { endringerForPerson -> endringerForPerson.periode() }
+                    )
                 // Legger til nye AndelTilkjentYtelse for perioder som er berørt av endringer.
                 nyeAndelTilkjentYtelse.addAll(
                     perioderMedEndring.map { månedPeriodeEndret ->
@@ -217,7 +218,7 @@ object TilkjentYtelseUtils {
             .fold(mutableListOf(), ::slåSammenEtterfølgendePerioderMedSammeBeløp)
     }
 
-    private fun erBack2BackIMånedsskifte(tilOgMed: LocalDate?, fraOgMed: LocalDate?): Boolean {
+    fun erBack2BackIMånedsskifte(tilOgMed: LocalDate?, fraOgMed: LocalDate?): Boolean {
         return tilOgMed?.erDagenFør(fraOgMed) == true &&
             tilOgMed.toYearMonth() != fraOgMed?.toYearMonth()
     }
@@ -265,7 +266,10 @@ fun MånedPeriode.perioderMedOgUtenOverlapp(perioder: List<MånedPeriode>): Pair
     val alleMånederMedOverlappstatus = mutableMapOf<YearMonth, Boolean>()
     var nesteMåned = this.fom
     while (nesteMåned <= this.tom) {
-        alleMånederMedOverlappstatus.put(nesteMåned, perioder.any { månedPeriode -> månedPeriode.inkluderer(nesteMåned) })
+        alleMånederMedOverlappstatus.put(
+            nesteMåned,
+            perioder.any { månedPeriode -> månedPeriode.inkluderer(nesteMåned) }
+        )
         nesteMåned = nesteMåned.plusMonths(1)
     }
 
