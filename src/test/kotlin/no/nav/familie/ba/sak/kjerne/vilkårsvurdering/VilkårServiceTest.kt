@@ -36,11 +36,11 @@ import javax.sql.DataSource
 
 @SpringBootTest
 @ActiveProfiles(
-        "dev",
-        "mock-pdl",
-        "mock-økonomi",
-        "mock-infotrygd-barnetrygd",
-        "mock-brev-klient",
+    "dev",
+    "mock-pdl",
+    "mock-økonomi",
+    "mock-infotrygd-barnetrygd",
+    "mock-brev-klient",
 )
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class VilkårServiceTest(
