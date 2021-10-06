@@ -1,3 +1,6 @@
+FAMILIE_EF_SAK_API_URL_SCOPE: api://prod-gcp.teamfamilie.familie-ef-sak/.default
+FAMILIE_EF_SAK_API_URL: https://familie-ef-sak.intern.nav.no
+
 no.nav.security.jwt:
   issuer.azuread:
     discoveryurl: https://login.microsoftonline.com/navno.onmicrosoft.com/v2.0/.well-known/openid-configuration
@@ -101,6 +104,24 @@ no.nav.security.jwt:
         token-endpoint-url: https://login.microsoftonline.com/navno.onmicrosoft.com/oauth2/v2.0/token
         grant-type: client_credentials
         scope: ${FAMILIE_TILBAKE_API_URL_SCOPE}
+        authentication:
+          client-id: ${BA_SAK_CLIENT_ID}
+          client-secret: ${CLIENT_SECRET}
+          client-auth-method: client_secret_basic
+      familie-ef-sak-onbehalfof:
+        resource-url: ${FAMILIE_EF_SAK_API_URL}
+        token-endpoint-url: https://login.microsoftonline.com/navno.onmicrosoft.com/oauth2/v2.0/token
+        grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
+        scope: ${FAMILIE_EF_SAK_API_URL_SCOPE}
+        authentication:
+          client-id: ${BA_SAK_CLIENT_ID}
+          client-secret: ${CLIENT_SECRET}
+          client-auth-method: client_secret_basic
+      familie-ef-sak-clientcredentials:
+        resource-url: ${FAMILIE_EF_SAK_API_URL}
+        token-endpoint-url: https://login.microsoftonline.com/navno.onmicrosoft.com/oauth2/v2.0/token
+        grant-type: client_credentials
+        scope: ${FAMILIE_EF_SAK_API_URL_SCOPE}
         authentication:
           client-id: ${BA_SAK_CLIENT_ID}
           client-secret: ${CLIENT_SECRET}
