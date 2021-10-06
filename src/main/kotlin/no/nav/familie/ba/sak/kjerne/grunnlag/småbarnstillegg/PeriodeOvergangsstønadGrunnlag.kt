@@ -16,7 +16,7 @@ import javax.persistence.SequenceGenerator
 import javax.persistence.Table
 
 @EntityListeners(RollestyringMotDatabase::class)
-@Entity(name = "PeriodeOvergangsstønadIntern")
+@Entity(name = "PeriodeOvergangsstønadGrunnlag")
 @Table(name = "GR_PERIODE_OVERGANGSSTONAD")
 class PeriodeOvergangsstønadGrunnlag(
     @Id

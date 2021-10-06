@@ -6,10 +6,10 @@ import org.springframework.data.jpa.repository.Query
 
 interface PeriodeOvergangsstønadGrunnlagRepository : JpaRepository<PeriodeOvergangsstønadGrunnlag, Long> {
 
-    @Query("SELECT grpo FROM PeriodeOvergangsstønadGrunnlag grpo WHERE grpo.behandlingId = :behandlingId")
+    @Query("SELECT pog FROM PeriodeOvergangsstønadGrunnlag pog WHERE pog.behandlingId = :behandlingId")
     fun findByBehandlingId(behandlingId: Long): List<PeriodeOvergangsstønadGrunnlag>
 
-    @Query("DELETE FROM PeriodeOvergangsstønadGrunnlag grpo WHERE grpo.behandlingId = :behandlingId")
+    @Query("DELETE FROM PeriodeOvergangsstønadGrunnlag pog WHERE pog.behandlingId = :behandlingId")
     @Modifying
     fun deleteByBehandlingId(behandlingId: Long)
 }
