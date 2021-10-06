@@ -71,6 +71,7 @@ management:
             enabled: true
 
 FAMILIE_EF_SAK_API_URL_SCOPE: api://dev-gcp.teamfamilie.familie-ef-sak/.default
+FAMILIE_EF_SAK_API_URL: https://familie-ef-sak.dev.intern.nav.no
 
 DAGLIG_KVOTE_FØDSELSHENDELSER: 5
 PDL_SCOPE: api://dev-fss.pdl.pdl-api/.default
@@ -87,7 +88,6 @@ FAMILIE_BA_INFOTRYGD_BARNETRYGD_API_URL: http://infotrygd-barnetrygd.infotrygd
 FAMILIE_TILBAKE_API_URL: http://familie-tilbake/api
 PDL_URL: http://pdl-api.default
 FAMILIE_INTEGRASJONER_API_URL: http://familie-integrasjoner/api
-FAMILIE_EF_SAK_API_URL: http://familie-ef-sak/api
 FAMILIE_OPPDRAG_API_URL: http://familie-oppdrag/api
 
 VEILEDER_ROLLE: ""

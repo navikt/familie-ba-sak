@@ -1,4 +1,5 @@
 FAMILIE_EF_SAK_API_URL_SCOPE: api://prod-gcp.teamfamilie.familie-ef-sak/.default
+FAMILIE_EF_SAK_API_URL: https://familie-ef-sak.intern.nav.no
 
 no.nav.security.jwt:
   issuer.azuread:
