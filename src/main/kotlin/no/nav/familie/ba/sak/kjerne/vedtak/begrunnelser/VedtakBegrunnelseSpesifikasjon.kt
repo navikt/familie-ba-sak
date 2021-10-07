@@ -723,10 +723,6 @@ fun VedtakBegrunnelseType.hentMånedOgÅrForBegrunnelse(periode: Periode) = when
         else periode.fom.forrigeMåned().tilMånedÅr()
 }
 
-fun VedtakBegrunnelseSpesifikasjon.hentHjemlerFraSanity(sanityBegrunnelser: List<SanityBegrunnelse>): List<String> {
-    return this.tilSanityBegrunnelse(sanityBegrunnelser).hjemler
-}
-
 @Converter
 class VedtakBegrunnelseSpesifikasjonListConverter : AttributeConverter<List<VedtakBegrunnelseSpesifikasjon>, String> {
 
