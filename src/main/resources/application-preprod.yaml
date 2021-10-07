@@ -130,6 +130,12 @@ spring:
   kafka:
     bootstrap-servers: b27apvl00045.preprod.local:8443,b27apvl00046.preprod.local:8443,b27apvl00047.preprod.local:8443
 
+logging:
+  level:
+    root: INFO
+    no.nav.familie.ba.sak.ekstern.skatteetaten: DEBUG
+
+
 DAGLIG_KVOTE_FØDSELSHENDELSER: 1000
 
 PDL_URL: http://pdl-api-q1.pdl
