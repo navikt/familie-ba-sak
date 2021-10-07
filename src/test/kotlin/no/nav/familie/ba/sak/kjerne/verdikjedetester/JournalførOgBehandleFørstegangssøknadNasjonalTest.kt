@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
+import no.nav.familie.ba.sak.kjerne.beregning.SatsService.sisteUtvidetSatsTilTester
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService.tilleggOrdinærSatsTilTester
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -125,7 +126,8 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
             familieBaSakKlient().behandlingsresultatStegOgGåVidereTilNesteSteg(
                 behandlingId = aktivBehandlingEtterRegistrertSøknad.behandlingId
             )
-        val behandlingEtterBehandlingsresultat = hentAktivBehandling(restFagsak = restFagsakEtterBehandlingsresultat.data!!)!!
+        val behandlingEtterBehandlingsresultat =
+            hentAktivBehandling(restFagsak = restFagsakEtterBehandlingsresultat.data!!)!!
 
         assertEquals(
             tilleggOrdinærSatsTilTester.beløp,
@@ -297,17 +299,92 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
             }
         }
 
-        val restFagsakEtterVilkårsvurdering =
-            familieBaSakKlient().validerVilkårsvurdering(
+
+        familieBaSakKlient().validerVilkårsvurdering(
+            behandlingId = aktivBehandlingEtterRegistrertSøknad.behandlingId
+        )
+
+        val restFagsakEtterBehandlingsresultat =
+            familieBaSakKlient().behandlingsresultatStegOgGåVidereTilNesteSteg(
                 behandlingId = aktivBehandlingEtterRegistrertSøknad.behandlingId
             )
-        // val behandlingEtterVilkårsvurdering = hentAktivBehandling(restFagsak = restFagsakEtterVilkårsvurdering.data!!)!!
+        val behandlingEtterBehandlingsresultat =
+            hentAktivBehandling(restFagsak = restFagsakEtterBehandlingsresultat.data!!)!!
 
-        // TODO: fortsette her etter beregning er utført
-        /*assertEquals(tilleggOrdinærSatsTilTester.beløp,
-                     hentNåværendeEllerNesteMånedsUtbetaling(
-                             behandling = behandlingEtterVilkårsvurdering
-                     )
-        )*/
+        assertEquals(
+            tilleggOrdinærSatsTilTester.beløp + sisteUtvidetSatsTilTester.beløp,
+            hentNåværendeEllerNesteMånedsUtbetaling(
+                behandling = behandlingEtterBehandlingsresultat
+            )
+        )
+
+        generellAssertFagsak(
+            restFagsak = restFagsakEtterBehandlingsresultat,
+            fagsakStatus = FagsakStatus.OPPRETTET,
+            behandlingStegType = StegType.VURDER_TILBAKEKREVING
+        )
+
+        val restFagsakEtterVurderTilbakekreving = familieBaSakKlient().lagreTilbakekrevingOgGåVidereTilNesteSteg(
+            behandlingEtterBehandlingsresultat.behandlingId,
+            RestTilbakekreving(Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING, begrunnelse = "begrunnelse")
+        )
+        generellAssertFagsak(
+            restFagsak = restFagsakEtterVurderTilbakekreving,
+            fagsakStatus = FagsakStatus.OPPRETTET,
+            behandlingStegType = StegType.SEND_TIL_BESLUTTER
+        )
+
+        val vedtaksperiodeId =
+            hentAktivtVedtak(restFagsakEtterVurderTilbakekreving.data!!)!!.vedtaksperioderMedBegrunnelser.first()
+        familieBaSakKlient().oppdaterVedtaksperiodeMedStandardbegrunnelser(
+            vedtaksperiodeId = vedtaksperiodeId.id,
+            restPutVedtaksperiodeMedStandardbegrunnelser = RestPutVedtaksperiodeMedStandardbegrunnelser(
+                standardbegrunnelser = listOf(
+                    VedtakBegrunnelseSpesifikasjon.INNVILGET_BOR_HOS_SØKER
+                )
+            )
+        )
+
+        val restFagsakEtterSendTilBeslutter =
+            familieBaSakKlient().sendTilBeslutter(fagsakId = restFagsakEtterVurderTilbakekreving.data!!.id)
+
+        generellAssertFagsak(
+            restFagsak = restFagsakEtterSendTilBeslutter,
+            fagsakStatus = FagsakStatus.OPPRETTET,
+            behandlingStegType = StegType.BESLUTTE_VEDTAK
+        )
+
+        val restFagsakEtterIverksetting =
+            familieBaSakKlient().iverksettVedtak(
+                fagsakId = restFagsakEtterVurderTilbakekreving.data!!.id,
+                restBeslutningPåVedtak = RestBeslutningPåVedtak(
+                    Beslutning.GODKJENT
+                ),
+                beslutterHeaders = HttpHeaders().apply {
+                    setBearerAuth(
+                        token(
+                            mapOf(
+                                "groups" to listOf("SAKSBEHANDLER", "BESLUTTER"),
+                                "azp" to "e2e-test",
+                                "name" to "Mock McMockface Beslutter",
+                                "preferred_username" to "mock.mcmockface.beslutter@nav.no"
+                            )
+                        )
+                    )
+                }
+            )
+        generellAssertFagsak(
+            restFagsak = restFagsakEtterIverksetting,
+            fagsakStatus = FagsakStatus.OPPRETTET,
+            behandlingStegType = StegType.IVERKSETT_MOT_OPPDRAG
+        )
+
+        håndterIverksettingAvBehandling(
+            behandlingEtterVurdering = behandlingService.hentAktivForFagsak(fagsakId = restFagsakEtterSendTilBeslutter.data!!.id)!!,
+            søkerFnr = scenario.søker.ident,
+            fagsakService = fagsakService,
+            vedtakService = vedtakService,
+            stegService = stegService
+        )
     }
 }

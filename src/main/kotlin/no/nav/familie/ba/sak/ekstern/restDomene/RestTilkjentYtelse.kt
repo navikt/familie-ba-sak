@@ -30,11 +30,12 @@ fun PersonopplysningGrunnlag.tilRestPersonerMedAndeler(andelerKnyttetTilPersoner
             val personId = andelerForPerson.key
             val andeler = andelerForPerson.value
 
-            val sammenslåtteAndeler = andeler.slåSammenBack2BackAndelsperioderMedSammeBeløp()
+            val sammenslåtteAndeler =
+                andeler.groupBy { it.type }.flatMap { it.value.slåSammenBack2BackAndelsperioderMedSammeBeløp() }
 
             RestPersonMedAndeler(
                 personIdent = this.personer.find { person -> person.personIdent.ident == personId }?.personIdent?.ident,
-                beløp = sammenslåtteAndeler.map { it.kalkulertUtbetalingsbeløp }.sum(),
+                beløp = sammenslåtteAndeler.sumOf { it.kalkulertUtbetalingsbeløp },
                 stønadFom = sammenslåtteAndeler.map { it.stønadFom }.minOrNull() ?: LocalDate.MIN.toYearMonth(),
                 stønadTom = sammenslåtteAndeler.map { it.stønadTom }.maxOrNull() ?: LocalDate.MAX.toYearMonth(),
                 ytelsePerioder = sammenslåtteAndeler.map { it1 ->
