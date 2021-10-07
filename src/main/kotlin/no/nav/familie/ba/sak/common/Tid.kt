@@ -111,7 +111,7 @@ fun Periode.kanErstatte(other: Periode): Boolean {
 }
 
 fun Periode.kanSplitte(other: Periode): Boolean {
-    return this.fom.isBetween(other) && this.tom.isBetween(other)
+    return this.fom.isBetween(other) && this.tom.isBetween(other) && (this.tom != TIDENES_ENDE || other.tom != TIDENES_ENDE)
 }
 
 fun Periode.kanFlytteFom(other: Periode): Boolean {

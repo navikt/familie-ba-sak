@@ -378,9 +378,14 @@ class VilkårsvurderingStegUtilsTest {
         val søker = randomFnr()
         val behandling = lagBehandling()
 
-        val initiellVilkårvurdering = lagVilkårsvurderingMedForskelligeResultat(søker, behandling, listOf(Resultat.OPPFYLT))
+        val initiellVilkårvurdering =
+            lagVilkårsvurderingMedForskelligeResultat(søker, behandling, listOf(Resultat.OPPFYLT))
         val aktivVilkårsvurdering =
-            lagVilkårsvurderingMedForskelligeResultat(søker, behandling, listOf(Resultat.IKKE_OPPFYLT, Resultat.OPPFYLT))
+            lagVilkårsvurderingMedForskelligeResultat(
+                søker,
+                behandling,
+                listOf(Resultat.IKKE_OPPFYLT, Resultat.OPPFYLT)
+            )
 
         val (initiell, _) = VilkårsvurderingUtils.flyttResultaterTilInitielt(
             initiellVilkårsvurdering = initiellVilkårvurdering,
@@ -391,7 +396,10 @@ class VilkårsvurderingStegUtilsTest {
             initiell.personResultater.flatMap { it.vilkårResultater }.filter { it.vilkårType == Vilkår.BOSATT_I_RIKET }
 
         assertEquals(2, opprettetBosattIRiket.size)
-        assertEquals(listOf(Resultat.IKKE_OPPFYLT, Resultat.OPPFYLT).sorted(), opprettetBosattIRiket.map { it.resultat }.sorted())
+        assertEquals(
+            listOf(Resultat.IKKE_OPPFYLT, Resultat.OPPFYLT).sorted(),
+            opprettetBosattIRiket.map { it.resultat }.sorted()
+        )
     }
 
     @Test
@@ -400,9 +408,14 @@ class VilkårsvurderingStegUtilsTest {
         val behandling = lagBehandling()
         val behandling2 = lagBehandling()
 
-        val initiellVilkårvurdering = lagVilkårsvurderingMedForskelligeResultat(søker, behandling, listOf(Resultat.OPPFYLT))
+        val initiellVilkårvurdering =
+            lagVilkårsvurderingMedForskelligeResultat(søker, behandling, listOf(Resultat.OPPFYLT))
         val aktivVilkårsvurdering =
-            lagVilkårsvurderingMedForskelligeResultat(søker, behandling2, listOf(Resultat.IKKE_OPPFYLT, Resultat.OPPFYLT))
+            lagVilkårsvurderingMedForskelligeResultat(
+                søker,
+                behandling2,
+                listOf(Resultat.IKKE_OPPFYLT, Resultat.OPPFYLT)
+            )
 
         val (initiell, _) = VilkårsvurderingUtils.flyttResultaterTilInitielt(
             initiellVilkårsvurdering = initiellVilkårvurdering,
@@ -421,9 +434,14 @@ class VilkårsvurderingStegUtilsTest {
         val søker = randomFnr()
         val behandling = lagBehandling()
 
-        val initiellVilkårsvurdering = lagVilkårsvurderingMedForskelligeResultat(søker, behandling, listOf(Resultat.OPPFYLT))
+        val initiellVilkårsvurdering =
+            lagVilkårsvurderingMedForskelligeResultat(søker, behandling, listOf(Resultat.OPPFYLT))
         val activeVilkårvurdering =
-            lagVilkårsvurderingMedForskelligeResultat(søker, behandling, listOf(Resultat.IKKE_OPPFYLT, Resultat.IKKE_OPPFYLT))
+            lagVilkårsvurderingMedForskelligeResultat(
+                søker,
+                behandling,
+                listOf(Resultat.IKKE_OPPFYLT, Resultat.IKKE_OPPFYLT)
+            )
 
         val (initiell, _) = VilkårsvurderingUtils.flyttResultaterTilInitielt(
             initiellVilkårsvurdering = initiellVilkårsvurdering,
