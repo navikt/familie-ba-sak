@@ -48,7 +48,7 @@ data class UtvidetBarnetrygdGenerator(
                 }
         )
 
-        val barnasTidslinjer = andelerBarna
+        val barnasTidslinjer: List<LocalDateTimeline<List<PeriodeData>>> = andelerBarna
             .groupBy { it.personIdent }
             .map { identMedAndeler ->
                 LocalDateTimeline(

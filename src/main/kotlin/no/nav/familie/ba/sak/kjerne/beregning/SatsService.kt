@@ -35,7 +35,12 @@ object SatsService {
             it.type == SatsType.ORBA && it.gyldigTom == LocalDate.MAX
         }!!
 
-    val nyttTilleggOrdinærSats: Sats =
+    val sisteSmåbarnstilleggSatsTilTester: Sats =
+        satser.find {
+            it.type == SatsType.SMA && it.gyldigTom == LocalDate.MAX
+        }!!
+
+    val sisteTilleggOrdinærSats: Sats =
         satser.find {
             it.type == SatsType.TILLEGG_ORBA && it.gyldigTom == LocalDate.MAX
         }!!
