@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.kjerne.dokument.domene.SanityVilkår.BOSATT_I_RIKET
 import no.nav.familie.ba.sak.kjerne.dokument.domene.SanityVilkår.GIFT_PARTNERSKAP
 import no.nav.familie.ba.sak.kjerne.dokument.domene.SanityVilkår.LOVLIG_OPPHOLD
 import no.nav.familie.ba.sak.kjerne.dokument.domene.SanityVilkår.UNDER_18_ÅR
+import no.nav.familie.ba.sak.kjerne.dokument.domene.SanityVilkår.UTVIDET_BARNETRYGD
 import no.nav.familie.ba.sak.kjerne.dokument.domene.VilkårRolle.BARN
 import no.nav.familie.ba.sak.kjerne.dokument.domene.VilkårRolle.SOKER
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -29,6 +30,7 @@ enum class SanityVilkår {
     GIFT_PARTNERSKAP,
     BOSATT_I_RIKET,
     LOVLIG_OPPHOLD,
+    UTVIDET_BARNETRYGD
 }
 
 fun SanityVilkår.tilVilkår() = when (this) {
@@ -37,6 +39,7 @@ fun SanityVilkår.tilVilkår() = when (this) {
     GIFT_PARTNERSKAP -> Vilkår.GIFT_PARTNERSKAP
     BOSATT_I_RIKET -> Vilkår.BOSATT_I_RIKET
     LOVLIG_OPPHOLD -> Vilkår.LOVLIG_OPPHOLD
+    UTVIDET_BARNETRYGD -> Vilkår.UTVIDET_BARNETRYGD
 }
 
 enum class SanityBegrunnelseType {
