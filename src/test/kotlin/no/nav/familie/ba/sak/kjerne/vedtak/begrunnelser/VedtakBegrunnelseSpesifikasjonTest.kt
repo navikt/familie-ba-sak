@@ -165,7 +165,6 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
     @Test
     fun `Alle begrunnelser er unike`() {
         val vedtakBegrunnelser = VedtakBegrunnelseSpesifikasjon.values().groupBy { it.sanityApiNavn }
-        assertEquals(vedtakBegrunnelser.length, VedtakBegrunnelseSpesifikasjon.values().length)
-        }
+        Assertions.assertEquals(vedtakBegrunnelser.size, VedtakBegrunnelseSpesifikasjon.values().size)
     }
 }

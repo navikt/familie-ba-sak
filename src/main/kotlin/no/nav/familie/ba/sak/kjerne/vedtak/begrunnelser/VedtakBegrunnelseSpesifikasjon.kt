@@ -398,11 +398,11 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
     },
     AVSLAG_VURDERING_FLERE_KORTE_OPPHOLD_I_UTLANDET_SISTE_ÅRENE {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
-        override val sanityApiNavn = "vurderingFlereKorteOppholdIUtlandetSisteArene"
+        override val sanityApiNavn = "avslagVurderingFlereKorteOppholdIUtlandetSisteArene"
     },
     AVSLAG_VURDERING_ANNEN_FORELDER_IKKE_MEDLEM {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
-        override val sanityApiNavn = "vurderingAnnenForelderIkkeMedlem"
+        override val sanityApiNavn = "avslagVurderingAnnenForelderIkkeMedlem"
     },
     INNVILGELSE_ENIGHET_OM_OPPHØR_AV_AVTALE_OM_DELT_BOSTED {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
@@ -442,11 +442,11 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
     },
     REDUKSJON_ANNEN_FORELDER_IKKE_LENGER_FRIVILLIG_MEDLEM {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
-        override val sanityApiNavn = "annenForelderIkkeLengerFrivilligMedlem"
+        override val sanityApiNavn = "reduksjonAnnenForelderIkkeLengerFrivilligMedlem"
     },
     AVSLAG_ANNEN_FORELDER_IKKE_MEDLEM_ETTER_TRYGDEAVTALE {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
-        override val sanityApiNavn = "annenForelderIkkeMedlemEtterTrygdeavtale"
+        override val sanityApiNavn = "avslagAnnenForelderIkkeMedlemEtterTrygdeavtale"
     },
     OPPHØR_SØKER_OG_BARN_IKKE_LENGER_PLIKTIG_MEDLEM {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
@@ -482,7 +482,7 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
     },
     REDUKSJON_ANNEN_FORELDER_IKKE_LENGER_MEDLEM_TRYGDEAVTALE {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
-        override val sanityApiNavn = "annenForelderIkkeLengerMedlemTrygdeavtale"
+        override val sanityApiNavn = "reduksjonAnnenForelderIkkeLengerMedlemTrygdeavtale"
     },
     OPPHØR_BOSATT_I_NORGE_UNNTATT_MEDLEMSKAP {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
@@ -494,7 +494,7 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
     },
     REDUKSJON_ANNEN_FORELDER_IKKE_LENGER_PLIKTIG_MEDLEM {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
-        override val sanityApiNavn = "annenForelderIkkeLengerPliktigMedlem"
+        override val sanityApiNavn = "reduksjonAnnenForelderIkkeLengerPliktigMedlem"
     },
     FORTSATT_INNVILGET_VURDERING_HELE_FAMILIEN_MEDLEM {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
@@ -550,7 +550,7 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
     },
     AVSLAG_VURDERING_FLERE_KORTE_OPPHOLD_I_UTLANDET_SISTE_TO_ÅR {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
-        override val sanityApiNavn = "vurderingFlereKorteOppholdIUtlandetSisteToAr"
+        override val sanityApiNavn = "avslagVurderingFlereKorteOppholdIUtlandetSisteToAar"
     },
     INNVILGELSE_BARN_OPPHOLD_I_UTLANDET_IKKE_MER_ENN_3_MÅNEDER {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
