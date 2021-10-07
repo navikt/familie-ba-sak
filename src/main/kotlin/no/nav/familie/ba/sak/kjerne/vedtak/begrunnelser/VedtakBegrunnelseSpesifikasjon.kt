@@ -576,9 +576,8 @@ val hjemlerTilhørendeFritekst = setOf(2, 4, 11)
 val vedtakBegrunnelserIkkeTilknyttetVilkår = VedtakBegrunnelseSpesifikasjon.values().filter { it.triggesAv.vilkår == null }
 
 fun VedtakBegrunnelseSpesifikasjon.tilSanityBegrunnelse(sanityBegrunnelser: List<SanityBegrunnelse>): SanityBegrunnelse =
-        sanityBegrunnelser.find { it.apiNavn == this.sanityApiNavn }
-            ?: throw Feil("Fant ikke begrunnelse med apiNavn=${this.sanityApiNavn} for ${this.name} i Sanity.")
-
+    sanityBegrunnelser.find { it.apiNavn == this.sanityApiNavn }
+        ?: throw Feil("Fant ikke begrunnelse med apiNavn=${this.sanityApiNavn} for ${this.name} i Sanity.")
 
 fun VedtakBegrunnelseSpesifikasjon.erTilknyttetVilkår(sanityBegrunnelser: List<SanityBegrunnelse>) =
     !this.tilSanityBegrunnelse(sanityBegrunnelser).vilkaar.isNullOrEmpty()

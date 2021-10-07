@@ -85,7 +85,7 @@ data class EndretUtbetalingAndel(
     @Convert(converter = VedtakBegrunnelseSpesifikasjonListConverter::class)
     var vedtakBegrunnelseSpesifikasjoner: List<VedtakBegrunnelseSpesifikasjon> = emptyList(),
 
-) : BaseEntitet() {
+    ) : BaseEntitet() {
 
     fun overlapperMed(periode: MånedPeriode) = periode.overlapperHeltEllerDelvisMed(this.periode())
 
@@ -100,9 +100,14 @@ data class EndretUtbetalingAndel(
             fom == null ||
             tom == null ||
             årsak == null ||
-            søknadstidspunkt == null
-        )
-            throw Feil("Person, prosent, fom, tom, årsak og søknadstidspunkt skal være utfylt: $this.tostring()")
+            søknadstidspunkt == null ||
+            (begrunnelse == null || begrunnelse!!.isEmpty())
+        ) {
+            throw Feil("Person, prosent, fom, tom, årsak, begrunnese og søknadstidspunkt skal være utfylt: $this.tostring()")
+        }
+
+        if (fom!! > tom!!)
+            throw Feil("fom må være lik eller komme før tom")
 
         if (årsak == Årsak.DELT_BOSTED && avtaletidspunktDeltBosted == null)
             throw Feil("Avtaletidspunkt skal være utfylt når årsak er delt bosted: $this.tostring()")
@@ -130,10 +135,13 @@ fun EndretUtbetalingAndel.tilRestEndretUtbetalingAndel() = RestEndretUtbetalingA
     begrunnelse = this.begrunnelse
 )
 
-fun EndretUtbetalingAndel.fraRestEndretUtbetalingAndel(restEndretUtbetalingAndel: RestEndretUtbetalingAndel, person: Person) {
+fun EndretUtbetalingAndel.fraRestEndretUtbetalingAndel(
+    restEndretUtbetalingAndel: RestEndretUtbetalingAndel,
+    person: Person
+) {
     this.fom = restEndretUtbetalingAndel.fom
     this.tom = restEndretUtbetalingAndel.tom
-    this.prosent = restEndretUtbetalingAndel.prosent
+    this.prosent = restEndretUtbetalingAndel.prosent ?: BigDecimal(0)
     this.årsak = restEndretUtbetalingAndel.årsak
     this.avtaletidspunktDeltBosted = restEndretUtbetalingAndel.avtaletidspunktDeltBosted
     this.søknadstidspunkt = restEndretUtbetalingAndel.søknadstidspunkt

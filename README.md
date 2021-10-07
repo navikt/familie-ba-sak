@@ -8,8 +8,11 @@ For å kjøre opp appen lokalt kan en kjøre `DevLauncher` med Spring-profilen `
 sette
 `-Dspring.profiles.active=dev` under Edit Configurations -> VM Options. Appen tilgjengeliggjøres da på `localhost:8089`.
 
-Vi bruker ktlint i dette prosjektet og ved å installere Auto Saving kan man også få automatisk formatering ved lagring
-av filer.
+Vi bruker ktlint i dette prosjektet og man kan skru på automatisk reformattering av filer ved å:
+
+1. In the Settings/Preferences dialog ⌘, select Tools | Actions on Save.
+
+2. Enable the Reformat code option.
 
 ## Kafka
 
