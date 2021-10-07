@@ -376,7 +376,7 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
         override val sanityApiNavn = "fortsattInnvilgetUendretTrygd"
     },
-    FORTSATTINNVILGET_OPPHOLD_I_UTLANDET_IKKE_MER_ENN_3_MÅNEDER_SØKER_OG_BARN {
+    FORTSATT_INNVILGET_OPPHOLD_I_UTLANDET_IKKE_MER_ENN_3_MÅNEDER_SØKER_OG_BARN {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
         override val sanityApiNavn = "oppholdIUtlandetIkkeMerEnn3ManederSokerOgBarn"
     },
@@ -408,11 +408,11 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
         override val sanityApiNavn = "innvilgelseEnighetOmAtAvtalenOmDeltBostedErOpphort"
     },
-    FORTSATTINNVILGET_HELE_FAMILIEN_MEDLEM_ETTER_TRYGDEAVTALE {
+    FORTSATT_INNVILGET_HELE_FAMILIEN_MEDLEM_ETTER_TRYGDEAVTALE {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
         override val sanityApiNavn = "heleFamilienMedlemEtterTrygdeavtale"
     },
-    FORTSATTINNVILGET_OPPHOLD_I_UTLANDET_IKKE_MER_ENN_3_MÅNEDER_BARN {
+    FORTSATT_INNVILGET_OPPHOLD_I_UTLANDET_IKKE_MER_ENN_3_MÅNEDER_BARN {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
         override val sanityApiNavn = "oppholdIUtlandetIkkeMerEnn3ManederBarn"
     },
@@ -432,7 +432,7 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
         override val sanityApiNavn = "vurderingSokerOgBarnPliktigMedlem"
     },
-    FORTSATTINNVILGET_MEDLEM_I_FOLKETRYGDEN {
+    FORTSATT_INNVILGET_MEDLEM_I_FOLKETRYGDEN {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
         override val sanityApiNavn = "fortsattInnvilgetMedlemIFolketrygden"
     },
@@ -464,7 +464,7 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
         override val sanityApiNavn = "vurderingBarnFlereKorteOppholdIUtlandetSisteArene"
     },
-    FORTSATTINNVILGET_DELT_BOSTED_PRAKTISERES_FORTSATT {
+    FORTSATT_INNVILGET_DELT_BOSTED_PRAKTISERES_FORTSATT {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
         override val sanityApiNavn = "fortsattInnvilgetDeltBostedPraktiseresFortsatt"
     },
@@ -496,11 +496,11 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
         override val sanityApiNavn = "annenForelderIkkeLengerPliktigMedlem"
     },
-    FORTSATTINNVILGET_VURDERING_HELE_FAMILIEN_MEDLEM {
+    FORTSATT_INNVILGET_VURDERING_HELE_FAMILIEN_MEDLEM {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
         override val sanityApiNavn = "vurderingHeleFamilienMedlem"
     },
-    FORTSATTINNVILGET_SØKER_OG_BARN_MEDLEM_ETTER_TRYGDEAVTALE {
+    FORTSATT_INNVILGET_SØKER_OG_BARN_MEDLEM_ETTER_TRYGDEAVTALE {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
         override val sanityApiNavn = "sokerOgBarnMedlemEtterTrygdeavtale"
     },
@@ -572,7 +572,7 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
         override val sanityApiNavn = "etterbetaling3Aar"
     },
-    FORTSATTINNVILGET_ANNEN_FORELDER_IKKE_SØKT_OM_DELT_BARNETRYGD {
+    FORTSATT_INNVILGET_ANNEN_FORELDER_IKKE_SØKT_OM_DELT_BARNETRYGD {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
         override val sanityApiNavn = "fortsattInnvilgetAnnenForelderIkkeSokt"
     },
@@ -580,7 +580,7 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
         override val sanityApiNavn = "sokerOgBarnTrygdeavtale"
     },
-    FORTSATTINNVILGET_VURDERING_SØKER_OG_BARN_MEDLEM {
+    FORTSATT_INNVILGET_VURDERING_SØKER_OG_BARN_MEDLEM {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
         override val sanityApiNavn = "vurderingSokerOgBarnMedlem"
     },
