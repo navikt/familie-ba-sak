@@ -95,7 +95,7 @@ fun LocalDate.isSameOrAfter(toCompare: LocalDate): Boolean {
 }
 
 fun LocalDate.isBetween(toCompare: Periode): Boolean {
-    return this.isAfter(toCompare.fom) && this.isBefore(toCompare.tom)
+    return this.isSameOrAfter(toCompare.fom) && this.isSameOrBefore(toCompare.tom)
 }
 
 fun MånedPeriode.inkluderer(yearMonth: YearMonth) = yearMonth >= this.fom && yearMonth <= this.tom
