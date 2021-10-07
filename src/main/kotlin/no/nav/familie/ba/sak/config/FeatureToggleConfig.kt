@@ -104,7 +104,6 @@ class FeatureToggleConfig(
         const val BRUK_ER_DELT_BOSTED = "familie-ba-sak.behandling.delt_bosted"
         const val MIGRER_VEDTAK_BEGRUNNELSES_MODEL_UTREDNING =
             "familie-ba-sak.behandling.migrering.behandlingsmodel.utredning"
-        const val BRUK_BEGRUNNELSE_TRIGGES_AV_FRA_SANITY = "familie-ba-sak.behandling.begrunnelse-trigges-av"
         const val KAN_MANUELT_KORRIGERE_MED_VEDTAKSBREV = "familie-ba-sak.behandling.korreksjon-vedtaksbrev"
         const val KAN_BEHANDLE_UTVIDET = "familie-ba-sak.behandling.utvidet"
         const val KAN_BEHANDLE_SMÅBARNSTILLEGG = "familie-ba-sak.behandling.smaabarnstillegg"

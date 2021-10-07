@@ -29,8 +29,8 @@ import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.domene.Totrinnskontroll
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.hentHjemlerFraSanity
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.hjemlerTilhørendeFritekst
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 
@@ -170,21 +170,13 @@ fun hentOverstyrtDokumenttittel(behandling: Behandling): String? {
     } else null
 }
 
-@Deprecated("Bruk hentHjemlerIVedtaksperioderFraSanity når sanity-løsningen er ferdigtestet")
-fun hentHjemlerIVedtaksperioderGammel(vedtaksperioderMedBegrunnelser: List<VedtaksperiodeMedBegrunnelser>): Set<Int> =
-    vedtaksperioderMedBegrunnelser.flatMap { periode ->
-        periode.begrunnelser.flatMap {
-            it.vedtakBegrunnelseSpesifikasjon.hentHjemler()
-        }
-    }.toSortedSet()
-
 fun hentHjemlerIVedtaksperioderFraSanity(
     vedtaksperioderMedBegrunnelser: List<VedtaksperiodeMedBegrunnelser>,
     sanityBegrunnelser: List<SanityBegrunnelse>
 ): List<String> =
     vedtaksperioderMedBegrunnelser.flatMap { periode ->
         periode.begrunnelser.flatMap {
-            it.vedtakBegrunnelseSpesifikasjon.hentHjemlerFraSanity(sanityBegrunnelser)
+            it.vedtakBegrunnelseSpesifikasjon.tilSanityBegrunnelse(sanityBegrunnelser).hjemler
         }
     }
 
@@ -196,26 +188,20 @@ fun hjemlerTilHjemmeltekst(hjemler: List<String>): String {
     }
 }
 
-@Deprecated("Bruk hentHjemmeltekst når sanity-løsningen er ferdigtestet")
-fun hentHjemmeltekstGammel(vedtaksperioderMedBegrunnelser: List<VedtaksperiodeMedBegrunnelser>): String {
-    val hjemler = hentHjemlerIVedtaksperioderGammel(vedtaksperioderMedBegrunnelser).toMutableSet()
-
-    if (vedtaksperioderMedBegrunnelser.flatMap { it.fritekster }.isNotEmpty()) {
-        hjemler.addAll(hjemlerTilhørendeFritekst)
-    }
-    return hjemlerTilHjemmeltekst(hjemler.sorted().map { it.toString() })
-}
-
 fun hentHjemmeltekst(
     vedtaksperioderMedBegrunnelser: List<VedtaksperiodeMedBegrunnelser>,
     sanityBegrunnelser: List<SanityBegrunnelse>
 ): String {
-    val hjemler = hentHjemlerIVedtaksperioderFraSanity(vedtaksperioderMedBegrunnelser, sanityBegrunnelser).toMutableSet()
+    val hjemler =
+        hentHjemlerIVedtaksperioderFraSanity(vedtaksperioderMedBegrunnelser, sanityBegrunnelser).toMutableSet()
 
     if (vedtaksperioderMedBegrunnelser.flatMap { it.fritekster }.isNotEmpty()) {
         hjemler.addAll(hjemlerTilhørendeFritekst.map { it.toString() }.toSet())
     }
-    return hjemlerTilHjemmeltekst(hjemler.toList())
+
+    val sorterteHjemler = hjemler.map { it.toInt() }.sorted().map { it.toString() }
+
+    return hjemlerTilHjemmeltekst(sorterteHjemler)
 }
 
 fun List<VedtaksperiodeMedBegrunnelser>.sorter(): List<VedtaksperiodeMedBegrunnelser> {
