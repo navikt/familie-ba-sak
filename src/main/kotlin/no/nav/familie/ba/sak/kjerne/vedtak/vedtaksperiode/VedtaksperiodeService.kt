@@ -9,7 +9,6 @@ import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.BRUK_BEGRUNNELSE_TRIGGES_AV_FRA_SANITY
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedBegrunnelse
@@ -33,14 +32,12 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Personopplysning
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakUtils.hentPersonerForAlleUtgjørendeVilkår
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.erTilknyttetVilkår
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilTriggesAv
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilVedtaksbegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.vedtakBegrunnelserIkkeTilknyttetVilkår
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Begrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
@@ -95,10 +92,9 @@ class VedtaksperiodeService(
         vedtaksperiodeMedBegrunnelser.settBegrunnelser(
             restPutVedtaksperiodeMedBegrunnelse.begrunnelser.map {
                 val triggesAv =
-                    if (featureToggleService.isEnabled(BRUK_BEGRUNNELSE_TRIGGES_AV_FRA_SANITY)) {
-                        it.vedtakBegrunnelseSpesifikasjon.tilSanityBegrunnelse(brevKlient.hentSanityBegrunnelse()).tilTriggesAv()
-                    } else
-                        it.vedtakBegrunnelseSpesifikasjon.triggesAv
+                    it.vedtakBegrunnelseSpesifikasjon.tilSanityBegrunnelse(brevKlient.hentSanityBegrunnelse())
+                        .tilTriggesAv()
+
                 val vedtakBegrunnelseType = it.vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType
 
                 val behandling = vedtaksperiodeMedBegrunnelser.vedtak.behandling
@@ -115,7 +111,9 @@ class VedtaksperiodeService(
                             ),
                             oppdatertBegrunnelseType = vedtakBegrunnelseType,
                             utgjørendeVilkår = triggesAv.vilkår,
-                            aktuellePersonerForVedtaksperiode = persongrunnlagRepository.findByBehandlingAndAktiv(behandling.id)?.personer?.toList()
+                            aktuellePersonerForVedtaksperiode = persongrunnlagRepository.findByBehandlingAndAktiv(
+                                behandling.id
+                            )?.personer?.toList()
                                 ?: error("Finner ikke personer på behandling ved begrunning av vedtak"),
                             deltBosted = triggesAv.deltbosted,
                             vurderingAnnetGrunnlag = triggesAv.vurderingAnnetGrunnlag
@@ -135,18 +133,11 @@ class VedtaksperiodeService(
                 frontendFeilmelding = "Begrunnelsen passer ikke til vilkårsvurderingen. For å rette opp, gå tilbake til vilkårsvurderingen eller velg en annen begrunnelse.\n" +
                     begrunnelserMedFeil.fold("") { acc, vedtakBegrunnelseSpesifikasjon ->
                         val triggesAv =
-                            if (featureToggleService.isEnabled(BRUK_BEGRUNNELSE_TRIGGES_AV_FRA_SANITY)) {
-                                vedtakBegrunnelseSpesifikasjon.tilSanityBegrunnelse(brevKlient.hentSanityBegrunnelse())
-                                    .tilTriggesAv()
-                            } else
-                                vedtakBegrunnelseSpesifikasjon.triggesAv
-                        val tittel =
-                            if (featureToggleService.isEnabled(BRUK_BEGRUNNELSE_TRIGGES_AV_FRA_SANITY)) {
-                                vedtakBegrunnelseSpesifikasjon
-                                    .tilSanityBegrunnelse(brevKlient.hentSanityBegrunnelse())
-                                    .navnISystem
-                            } else
-                                vedtakBegrunnelseSpesifikasjon.tittel
+                            vedtakBegrunnelseSpesifikasjon.tilSanityBegrunnelse(brevKlient.hentSanityBegrunnelse())
+                                .tilTriggesAv()
+                        val tittel = vedtakBegrunnelseSpesifikasjon
+                            .tilSanityBegrunnelse(brevKlient.hentSanityBegrunnelse())
+                            .navnISystem
 
                         acc + "'$tittel' forventer vurdering på '${triggesAv.vilkår?.first()?.beskrivelse ?: "ukjent vilkår"}'"
                     }
@@ -155,7 +146,10 @@ class VedtaksperiodeService(
 
         vedtaksperiodeMedBegrunnelser.settFritekster(
             restPutVedtaksperiodeMedBegrunnelse.fritekster.map {
-                tilVedtaksbegrunnelseFritekst(vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser, fritekst = it)
+                tilVedtaksbegrunnelseFritekst(
+                    vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
+                    fritekst = it
+                )
             }
         )
 
@@ -172,7 +166,10 @@ class VedtaksperiodeService(
 
         vedtaksperiodeMedBegrunnelser.settFritekster(
             restPutVedtaksperiodeMedFritekster.fritekster.map {
-                tilVedtaksbegrunnelseFritekst(vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser, fritekst = it)
+                tilVedtaksbegrunnelseFritekst(
+                    vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
+                    fritekst = it
+                )
             }
         )
 
@@ -195,7 +192,8 @@ class VedtaksperiodeService(
             restPutVedtaksperiodeMedStandardbegrunnelser.standardbegrunnelser.map {
 
                 val persongrunnlag =
-                    persongrunnlagRepository.findByBehandlingAndAktiv(behandling.id) ?: error("Finner ikke persongrunnlag")
+                    persongrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
+                        ?: error("Finner ikke persongrunnlag")
                 val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id)
                     ?: error("Finner ikke vilkårsvurdering ved begrunning av vedtak")
 
@@ -207,11 +205,7 @@ class VedtaksperiodeService(
                     .utbetalingsperiodeDetaljer
                     .map { utbetalingsperiodeDetalj -> utbetalingsperiodeDetalj.person.personIdent }
 
-                val triggesAv =
-                    if (featureToggleService.isEnabled(BRUK_BEGRUNNELSE_TRIGGES_AV_FRA_SANITY)) {
-                        it.tilSanityBegrunnelse(brevKlient.hentSanityBegrunnelse()).tilTriggesAv()
-                    } else
-                        it.triggesAv
+                val triggesAv = it.tilSanityBegrunnelse(brevKlient.hentSanityBegrunnelse()).tilTriggesAv()
                 val vedtakBegrunnelseType = it.vedtakBegrunnelseType
 
                 val personIdenter = when {
@@ -257,15 +251,10 @@ class VedtaksperiodeService(
                         frontendFeilmelding = "Begrunnelsen stemmer ikke med satsendring. Vennligst velg en annen begrunnelse."
                     )
                 }
-                if (featureToggleService.isEnabled(BRUK_BEGRUNNELSE_TRIGGES_AV_FRA_SANITY)) {
-                    val sanityBegrunnelser = brevKlient.hentSanityBegrunnelse()
-                    if (it.erTilknyttetVilkår(sanityBegrunnelser) && personIdenter.isEmpty()) {
-                        begrunnelserMedFeil.add(it)
-                    }
-                } else {
-                    if (!vedtakBegrunnelserIkkeTilknyttetVilkår.contains(it) && personIdenter.isEmpty()) {
-                        begrunnelserMedFeil.add(it)
-                    }
+
+                val sanityBegrunnelser = brevKlient.hentSanityBegrunnelse()
+                if (it.erTilknyttetVilkår(sanityBegrunnelser) && personIdenter.isEmpty()) {
+                    begrunnelserMedFeil.add(it)
                 }
 
                 it.tilVedtaksbegrunnelse(vedtaksperiodeMedBegrunnelser, personIdenter)
@@ -279,18 +268,13 @@ class VedtaksperiodeService(
                     begrunnelserMedFeil.fold("") { acc, vedtakBegrunnelseSpesifikasjon ->
 
                         val triggesAv =
-                            if (featureToggleService.isEnabled(BRUK_BEGRUNNELSE_TRIGGES_AV_FRA_SANITY)) {
-                                vedtakBegrunnelseSpesifikasjon.tilSanityBegrunnelse(brevKlient.hentSanityBegrunnelse())
-                                    .tilTriggesAv()
-                            } else
-                                vedtakBegrunnelseSpesifikasjon.triggesAv
+                            vedtakBegrunnelseSpesifikasjon
+                                .tilSanityBegrunnelse(brevKlient.hentSanityBegrunnelse())
+                                .tilTriggesAv()
                         val tittel =
-                            if (featureToggleService.isEnabled(BRUK_BEGRUNNELSE_TRIGGES_AV_FRA_SANITY)) {
-                                vedtakBegrunnelseSpesifikasjon
-                                    .tilSanityBegrunnelse(brevKlient.hentSanityBegrunnelse())
-                                    .navnISystem
-                            } else
-                                vedtakBegrunnelseSpesifikasjon.tittel
+                            vedtakBegrunnelseSpesifikasjon
+                                .tilSanityBegrunnelse(brevKlient.hentSanityBegrunnelse())
+                                .navnISystem
 
                         acc + "'$tittel' forventer vurdering på '${triggesAv.vilkår?.first()?.beskrivelse ?: "ukjent vilkår"}'"
                     }
@@ -386,7 +370,8 @@ class VedtaksperiodeService(
     }
 
     fun kopierOverVedtaksperioder(deaktivertVedtak: Vedtak, aktivtVedtak: Vedtak) {
-        val gamleVedtaksperioderMedBegrunnelser = vedtaksperiodeRepository.finnVedtaksperioderFor(vedtakId = deaktivertVedtak.id)
+        val gamleVedtaksperioderMedBegrunnelser =
+            vedtaksperiodeRepository.finnVedtaksperioderFor(vedtakId = deaktivertVedtak.id)
 
         gamleVedtaksperioderMedBegrunnelser.forEach { vedtaksperiodeMedBegrunnelser ->
             val nyVedtaksperiodeMedBegrunnelser = lagre(
@@ -458,14 +443,8 @@ class VedtaksperiodeService(
                     VedtakBegrunnelseSpesifikasjon.values()
                         .forEach {
                             val triggesAv =
-                                if (featureToggleService.isEnabled(BRUK_BEGRUNNELSE_TRIGGES_AV_FRA_SANITY)) {
-                                    if (it.erTilgjengeligFrontend) {
-                                        it.tilSanityBegrunnelse(brevKlient.hentSanityBegrunnelse())
-                                            .tilTriggesAv()
-                                    } else
-                                        TriggesAv(valgbar = false)
-                                } else
-                                    it.triggesAv
+                                it.tilSanityBegrunnelse(brevKlient.hentSanityBegrunnelse())
+                                    .tilTriggesAv()
                             val vedtakBegrunnelseType = it.vedtakBegrunnelseType
 
                             if (it.triggesForPeriode(
@@ -484,7 +463,11 @@ class VedtaksperiodeService(
             }
 
             vedtaksperiodeMedBegrunnelser.tilRestVedtaksperiodeMedBegrunnelser(
-                gyldigeBegrunnelser.filter { it.erTilgjengeligFrontend }.toList()
+                gyldigeBegrunnelser.filter {
+                    it
+                        .tilSanityBegrunnelse(brevKlient.hentSanityBegrunnelse())
+                        .tilTriggesAv().valgbar
+                }.toList()
             )
         }
     }
@@ -496,20 +479,22 @@ class VedtaksperiodeService(
         val vedtaksperioder = hentPersisterteVedtaksperioder(vedtak)
 
         val fortsattInnvilgetPeriode: VedtaksperiodeMedBegrunnelser =
-            vedtaksperioder.singleOrNull() ?: throw Feil("Finner ingen eller flere vedtaksperioder ved fortsatt innvilget")
+            vedtaksperioder.singleOrNull()
+                ?: throw Feil("Finner ingen eller flere vedtaksperioder ved fortsatt innvilget")
 
-        val personidenter = if (vedtakBegrunnelseSpesifikasjon == VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR) {
-            val fødselsMånedOgÅrForAlder18 = YearMonth.from(LocalDate.now()).minusYears(18)
-            val persongrunnlag = persongrunnlagRepository.findByBehandlingAndAktiv(vedtak.behandling.id)
-                ?: error("Fant ikke persongrunnlag for behandling ${vedtak.behandling.id}")
+        val personidenter =
+            if (vedtakBegrunnelseSpesifikasjon == VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR) {
+                val fødselsMånedOgÅrForAlder18 = YearMonth.from(LocalDate.now()).minusYears(18)
+                val persongrunnlag = persongrunnlagRepository.findByBehandlingAndAktiv(vedtak.behandling.id)
+                    ?: error("Fant ikke persongrunnlag for behandling ${vedtak.behandling.id}")
 
-            persongrunnlag.barna.filter { barn ->
-                barn.fødselsdato.toYearMonth().equals(fødselsMånedOgÅrForAlder18) ||
-                    barn.fødselsdato.toYearMonth().equals(fødselsMånedOgÅrForAlder18.plusMonths(1))
-            }.map { it.personIdent.ident }
-        } else {
-            hentPersonIdenterFraUtbetalingsperiode(hentUtbetalingsperioder(vedtak.behandling))
-        }
+                persongrunnlag.barna.filter { barn ->
+                    barn.fødselsdato.toYearMonth().equals(fødselsMånedOgÅrForAlder18) ||
+                        barn.fødselsdato.toYearMonth().equals(fødselsMånedOgÅrForAlder18.plusMonths(1))
+                }.map { it.personIdent.ident }
+            } else {
+                hentPersonIdenterFraUtbetalingsperiode(hentUtbetalingsperioder(vedtak.behandling))
+            }
 
         fortsattInnvilgetPeriode.settBegrunnelser(
             listOf(

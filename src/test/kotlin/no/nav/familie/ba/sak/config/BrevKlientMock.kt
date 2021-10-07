@@ -28,7 +28,7 @@ class BrevKlientMock : BrevKlient(
     }
 
     override fun hentSanityBegrunnelse(): List<SanityBegrunnelse> {
-        return navnTilNedtrekksmenyMock
+        return sanityBegrunnelserMock
     }
 
     override fun hentBegrunnelsestekst(begrunnelseData: BegrunnelseData): String {
@@ -36,7 +36,7 @@ class BrevKlientMock : BrevKlient(
     }
 }
 
-val navnTilNedtrekksmenyMock: List<SanityBegrunnelse> =
+val sanityBegrunnelserMock: List<SanityBegrunnelse> =
     VedtakBegrunnelseSpesifikasjon.values()
         .map {
             SanityBegrunnelse(
@@ -71,7 +71,11 @@ val navnTilNedtrekksmenyMock: List<SanityBegrunnelse> =
                     )
                     else -> null
                 },
-                hjemler = listOf("98", "99", "100")
+                hjemler = when (it) {
+                    VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET -> listOf("2", "4", "11")
+                    VedtakBegrunnelseSpesifikasjon.INNVILGET_SATSENDRING -> listOf("2", "10")
+                    else -> listOf("98", "99", "100")
+                }
             )
         }
 
