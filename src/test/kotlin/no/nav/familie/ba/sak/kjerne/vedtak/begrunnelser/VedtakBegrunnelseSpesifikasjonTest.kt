@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -167,10 +168,7 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
         vedtakBegrunnelser.forEach {
             val likeBegrunnelser =
                 vedtakBegrunnelser.filter { vedtakBegrunnelse -> it.sanityApiNavn == vedtakBegrunnelse.sanityApiNavn }
-            if (likeBegrunnelser.size > 1) {
-                println(likeBegrunnelser)
-            }
-            //Assertions.assertEquals(1, likeBegrunnelser.size)
+            Assertions.assertEquals(1, likeBegrunnelser.size)
         }
     }
 }
