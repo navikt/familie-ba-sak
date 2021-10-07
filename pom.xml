@@ -30,7 +30,7 @@
         <familie.kontrakter.stønadsstatistikk>2.0_20210914093948_94e43f0</familie.kontrakter.stønadsstatistikk>
         <familie.kontrakter.skatteetaten>2.0_20210920094114_9c74239</familie.kontrakter.skatteetaten>
         <mockk.version>1.12.0</mockk.version>
-        <token-validation-spring.version>1.3.8</token-validation-spring.version>
+        <token-validation-spring.version>1.3.9</token-validation-spring.version>
 
         <!-- Må settes for å kunne kjøre opp mock-oauth2-server i unit-tester -->
         <okhttp3.version>4.9.0</okhttp3.version>
