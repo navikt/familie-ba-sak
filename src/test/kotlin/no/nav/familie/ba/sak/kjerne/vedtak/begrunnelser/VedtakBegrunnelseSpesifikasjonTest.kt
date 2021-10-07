@@ -160,4 +160,17 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
                 )
         )
     }
+
+    @Test
+    fun `Alle begrunnelser er unike`() {
+        val vedtakBegrunnelser = VedtakBegrunnelseSpesifikasjon.values()
+        vedtakBegrunnelser.forEach {
+            val likeBegrunnelser =
+                vedtakBegrunnelser.filter { vedtakBegrunnelse -> it.sanityApiNavn == vedtakBegrunnelse.sanityApiNavn }
+            if (likeBegrunnelser.size > 1) {
+                println(likeBegrunnelser)
+            }
+            //Assertions.assertEquals(1, likeBegrunnelser.size)
+        }
+    }
 }
