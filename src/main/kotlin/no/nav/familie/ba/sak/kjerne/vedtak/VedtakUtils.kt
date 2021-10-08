@@ -63,7 +63,6 @@ object VedtakUtils {
     ): List<Person> {
 
         return vilkårsvurdering.personResultater
-            .filter { !it.erSøkersResultater() }
             .fold(mutableListOf()) { acc, personResultat ->
                 val utgjørendeVilkårResultat = personResultat.vilkårResultater.firstOrNull { vilkårResultat ->
 
