@@ -9,7 +9,7 @@ import java.net.InetAddress
 @Service
 class SatsendringSchedulerForOktober21(private val satsendringService: SatsendringService) {
 
-    @Scheduled(cron = "0 15 14 8 10 *")
+    @Scheduled(cron = "0 0 10 11 10 *")
     fun gjennomførSatsendring() {
         when (LeaderClient.isLeader()) {
             true -> {
