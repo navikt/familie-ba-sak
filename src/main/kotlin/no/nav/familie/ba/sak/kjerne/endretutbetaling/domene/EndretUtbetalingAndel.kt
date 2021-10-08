@@ -147,7 +147,7 @@ fun EndretUtbetalingAndel.fraRestEndretUtbetalingAndel(
     this.søknadstidspunkt = restEndretUtbetalingAndel.søknadstidspunkt
     this.begrunnelse = restEndretUtbetalingAndel.begrunnelse
     this.person = person
-    // TODO: bytt ut dette med riktige begrunnelser
+    // TODO: bytt ut dette med riktige begrunnelser når de er klare
     this.vedtakBegrunnelseSpesifikasjoner =
         listOf(VedtakBegrunnelseSpesifikasjon.INNVILGELSE_VURDERING_HELE_FAMILIEN_PLIKTIG_MEDLEM)
 }
