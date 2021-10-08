@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.kjerne.behandling
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.DistributionSummary
 import io.micrometer.core.instrument.Metrics
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
@@ -49,13 +48,9 @@ class BehandlingMetrikker(
     private val antallBrevBegrunnelseSpesifikasjon: Map<VedtakBegrunnelseSpesifikasjon, Counter> =
         VedtakBegrunnelseSpesifikasjon.values().map {
             val tittel =
-                if (featureToggleService.isEnabled(FeatureToggleConfig.BRUK_BEGRUNNELSE_TRIGGES_AV_FRA_SANITY)) {
-                    it
-                        .tilSanityBegrunnelse(brevKlient.hentSanityBegrunnelse())
-                        .navnISystem
-                } else
-                    it.tittel
-
+                it
+                    .tilSanityBegrunnelse(brevKlient.hentSanityBegrunnelse())
+                    .navnISystem
             it to Metrics.counter(
                 "brevbegrunnelse",
                 "type", it.name,

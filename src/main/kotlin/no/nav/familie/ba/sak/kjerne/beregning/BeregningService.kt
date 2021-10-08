@@ -30,6 +30,7 @@ class BeregningService(
     private val behandlingRepository: BehandlingRepository,
     private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
     private val endretUtbetalingAndelRepository: EndretUtbetalingAndelRepository,
+    private val småbarnstilleggService: SmåbarnstilleggService
 ) {
     fun slettTilkjentYtelseForBehandling(behandlingId: Long) = tilkjentYtelseRepository.findByBehandling(behandlingId)
         ?.let { tilkjentYtelseRepository.delete(it) }
@@ -104,7 +105,12 @@ class BeregningService(
                 vilkårsvurdering = vilkårsvurdering,
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 behandling = behandling
-            )
+            ) {
+                småbarnstilleggService.hentPerioderMedFullOvergangsstønad(
+                    personIdent = it,
+                    behandlingId = behandling.id
+                )
+            }
 
         val endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(behandling.id)
         val andelerTilkjentYtelse = TilkjentYtelseUtils.oppdaterTilkjentYtelseMedEndretUtbetalingAndeler(
