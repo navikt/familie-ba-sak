@@ -83,14 +83,27 @@ class VedtakService(
 
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} beslutter vedtak $vedtak")
     }
+
     /**
-     * Når et vilkår vurderes (endres) vil begrunnelsene satt på dette vilkåret resettes
+     * Når et vilkår vurderes (endres) vil vi resette steget og slette data som blir generert senere i løypa
      */
     @Transactional
-    fun settStegSlettTilbakekreving(behandlingId: Long) {
+    fun resettStegVedEndringPåVilkår(behandlingId: Long) {
         behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(
             behandlingId = behandlingId,
             steg = StegType.VILKÅRSVURDERING
+        )
+        tilbakekrevingService.slettTilbakekrevingPåBehandling(behandlingId)
+    }
+
+    /**
+     * Når en andel vurderes (endres) vil vi resette steget og slette data som blir generert senere i løypa
+     */
+    @Transactional
+    fun resettStegVedEndringPåEndredeUtbetalingsperioder(behandlingId: Long) {
+        behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(
+            behandlingId = behandlingId,
+            steg = StegType.BEHANDLINGSRESULTAT
         )
         tilbakekrevingService.slettTilbakekrevingPåBehandling(behandlingId)
     }
