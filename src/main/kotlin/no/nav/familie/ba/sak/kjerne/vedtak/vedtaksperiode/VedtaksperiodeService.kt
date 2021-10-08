@@ -445,6 +445,7 @@ class VedtaksperiodeService(
                             .map { utbetalingsperiodeDetalj -> utbetalingsperiodeDetalj.person.personIdent }
 
                     VedtakBegrunnelseSpesifikasjon.values()
+                        .filter { vedtakBegrunnelseSpesifikasjon -> vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType != VedtakBegrunnelseType.AVSLAG && vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType != VedtakBegrunnelseType.FORTSATT_INNVILGET }
                         .forEach {
                             val triggesAv =
                                 it.tilSanityBegrunnelse(brevKlient.hentSanityBegrunnelse())
@@ -454,7 +455,7 @@ class VedtaksperiodeService(
                             if ((triggesAv.vilkår
                                     ?: emptySet()).contains(Vilkår.UTVIDET_BARNETRYGD) && utbetalingsperiode.ytelseTyper.contains(
                                     YtelseType.UTVIDET_BARNETRYGD
-                                )
+                                ) && vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGELSE
                             ) {
                                 gyldigeBegrunnelser.add(it)
                             } else if (it.triggesForPeriode(
