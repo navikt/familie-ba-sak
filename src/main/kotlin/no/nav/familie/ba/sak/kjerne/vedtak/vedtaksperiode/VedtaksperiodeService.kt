@@ -22,6 +22,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.dokument.BrevKlient
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.dokument.hentVedtaksbrevmal
@@ -45,6 +46,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.byggBegrunnelserOgFriteksterForVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilRestVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilVedtaksbegrunnelseFritekst
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
 import org.springframework.stereotype.Service
@@ -431,12 +433,14 @@ class VedtaksperiodeService(
                     val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id)
                         ?: error("Finner ikke vilkårsvurdering ved begrunning av vedtak")
 
+                    val utbetalingsperiode = hentUtbetalingsperiodeForVedtaksperiode(
+                        utbetalingsperioder = utbetalingsperioder,
+                        fom = vedtaksperiodeMedBegrunnelser.fom
+                    )
+
                     val identerMedUtbetaling =
                         if (vedtaksperiodeMedBegrunnelser.type == Vedtaksperiodetype.OPPHØR) emptyList()
-                        else hentUtbetalingsperiodeForVedtaksperiode(
-                            utbetalingsperioder = utbetalingsperioder,
-                            fom = vedtaksperiodeMedBegrunnelser.fom
-                        )
+                        else utbetalingsperiode
                             .utbetalingsperiodeDetaljer
                             .map { utbetalingsperiodeDetalj -> utbetalingsperiodeDetalj.person.personIdent }
 
@@ -447,7 +451,13 @@ class VedtaksperiodeService(
                                     .tilTriggesAv()
                             val vedtakBegrunnelseType = it.vedtakBegrunnelseType
 
-                            if (it.triggesForPeriode(
+                            if ((triggesAv.vilkår
+                                    ?: emptySet()).contains(Vilkår.UTVIDET_BARNETRYGD) && utbetalingsperiode.ytelseTyper.contains(
+                                    YtelseType.UTVIDET_BARNETRYGD
+                                )
+                            ) {
+                                gyldigeBegrunnelser.add(it)
+                            } else if (it.triggesForPeriode(
                                     vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
                                     vilkårsvurdering = vilkårsvurdering,
                                     persongrunnlag = persongrunnlag,
