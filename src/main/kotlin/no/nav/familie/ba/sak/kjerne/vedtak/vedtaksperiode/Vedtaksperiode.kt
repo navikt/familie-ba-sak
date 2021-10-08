@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import java.time.LocalDate
@@ -41,8 +40,7 @@ fun Vedtaksperiode.tilVedtaksperiodeMedBegrunnelse(
     ).also { vedtaksperiodeMedBegrunnelser ->
         if (this is EndretUtbetalingsperiode)
             vedtaksperiodeMedBegrunnelser.begrunnelser.addAll(
-                // TODO Fjern INNVILGET_SATSENDRING
-                (this.endretUtbetalingAndel.vedtakBegrunnelseSpesifikasjoner + VedtakBegrunnelseSpesifikasjon.INNVILGET_SATSENDRING).map { vedtakBegrunnelseSpesifikasjon ->
+                (this.endretUtbetalingAndel.vedtakBegrunnelseSpesifikasjoner).map { vedtakBegrunnelseSpesifikasjon ->
                     Vedtaksbegrunnelse(
                         vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
                         vedtakBegrunnelseSpesifikasjon = vedtakBegrunnelseSpesifikasjon,
