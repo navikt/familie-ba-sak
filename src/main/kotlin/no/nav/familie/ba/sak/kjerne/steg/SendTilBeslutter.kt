@@ -30,12 +30,12 @@ class SendTilBeslutter(
 
     override fun preValiderSteg(behandling: Behandling, stegService: StegService?) {
 
-        vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)?.validerAtAlleAnndreVurderingerErVurdert()
+        vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)
+            ?.validerAtAlleAnndreVurderingerErVurdert()
 
-        val vilkårsvurderingSteg: VilkårsvurderingSteg =
-            stegService?.hentBehandlingSteg(StegType.VILKÅRSVURDERING) as VilkårsvurderingSteg
-
-        vilkårsvurderingSteg.postValiderSteg(behandling)
+        val behandlingsresultatSteg: BehandlingsresultatSteg =
+            stegService?.hentBehandlingSteg(StegType.BEHANDLINGSRESULTAT) as BehandlingsresultatSteg
+        behandlingsresultatSteg.preValiderSteg(behandling)
 
         behandling.validerRekkefølgeOgUnikhetPåSteg()
         behandling.validerMaksimaltEtStegIkkeUtført()
