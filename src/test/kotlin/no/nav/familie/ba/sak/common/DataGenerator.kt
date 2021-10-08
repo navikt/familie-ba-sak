@@ -53,7 +53,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifi
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksbegrunnelseFritekst
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Utbetalingsperiode
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UendretUtbetalingsperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtbetalingsperiodeDetalj
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
@@ -781,7 +781,7 @@ fun opprettRestTilbakekreving(): RestTilbakekreving = RestTilbakekreving(
     begrunnelse = "Begrunnelse",
 )
 
-fun lagUtbetalingsperiode(
+fun lagUendretUtbetalingsperiode(
     periodeFom: LocalDate = LocalDate.now().withDayOfMonth(1),
     periodeTom: LocalDate = LocalDate.now().let { it.withDayOfMonth(it.lengthOfMonth()) },
     vedtaksperiodetype: Vedtaksperiodetype = Vedtaksperiodetype.UTBETALING,
@@ -789,7 +789,7 @@ fun lagUtbetalingsperiode(
     ytelseTyper: List<YtelseType> = listOf(YtelseType.ORDINÆR_BARNETRYGD),
     antallBarn: Int = 1,
     utbetaltPerMnd: Int = sats(YtelseType.ORDINÆR_BARNETRYGD),
-) = Utbetalingsperiode(
+) = UendretUtbetalingsperiode(
     periodeFom,
     periodeTom,
     vedtaksperiodetype,

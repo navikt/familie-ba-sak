@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
 import io.mockk.mockk
-import no.nav.familie.ba.sak.common.lagUtbetalingsperiode
+import no.nav.familie.ba.sak.common.lagUendretUtbetalingsperiode
 import no.nav.familie.ba.sak.common.lagUtbetalingsperiodeDetalj
 import no.nav.familie.ba.sak.common.lagVedtaksbegrunnelse
 import no.nav.familie.ba.sak.common.lagVedtaksperiodeMedBegrunnelser
@@ -106,7 +106,7 @@ class VedtaksperiodeMedBegrunnelseTest {
             fortsatInnvilgetPeriode.tilBrevPeriode(
                 personerIPersongrunnlag = personerIPersongrunnlag,
                 utbetalingsperioder = listOf(
-                    lagUtbetalingsperiode(
+                    lagUendretUtbetalingsperiode(
                         utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj())
                     )
                 ),
@@ -135,7 +135,7 @@ class VedtaksperiodeMedBegrunnelseTest {
             utbetalingsperiode.tilBrevPeriode(
                 personerIPersongrunnlag = personerIPersongrunnlag,
                 utbetalingsperioder = listOf(
-                    lagUtbetalingsperiode(
+                    lagUendretUtbetalingsperiode(
                         utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj())
                     )
                 ),

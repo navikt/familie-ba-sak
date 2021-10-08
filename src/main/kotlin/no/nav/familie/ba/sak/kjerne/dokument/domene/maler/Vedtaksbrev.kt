@@ -17,6 +17,7 @@ enum class BrevPeriodeType(val apiNavn: String) {
     AVSLAG("avslag"),
     AVSLAG_UTEN_PERIODE("avslagUtenPeriode"),
     FORTSATT_INNVILGET("fortsattInnvilget"),
+    ENDRET_PERIODE("endretPeriode"),
 }
 
 data class VedtakFellesfelter(

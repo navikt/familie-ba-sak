@@ -26,6 +26,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseReposito
 import no.nav.familie.ba.sak.kjerne.dokument.BrevKlient
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.dokument.hentVedtaksbrevmal
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
@@ -63,7 +64,8 @@ class VedtaksperiodeService(
     private val vilkårsvurderingRepository: VilkårsvurderingRepository,
     private val featureToggleService: FeatureToggleService,
     private val brevKlient: BrevKlient,
-    private val søknadGrunnlagService: SøknadGrunnlagService
+    private val søknadGrunnlagService: SøknadGrunnlagService,
+    private val endretUtbetalingAndelRepository: EndretUtbetalingAndelRepository
 ) {
 
     fun lagre(vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser): VedtaksperiodeMedBegrunnelser {
@@ -373,12 +375,7 @@ class VedtaksperiodeService(
     fun genererVedtaksperioderMedBegrunnelser(vedtak: Vedtak): List<VedtaksperiodeMedBegrunnelser> {
         val utbetalingOgOpphørsperioder =
             (hentUtbetalingsperioder(vedtak.behandling) + hentOpphørsperioder(vedtak.behandling)).map {
-                VedtaksperiodeMedBegrunnelser(
-                    fom = it.periodeFom,
-                    tom = it.periodeTom,
-                    vedtak = vedtak,
-                    type = it.vedtaksperiodetype
-                )
+                it.tilVedtaksperiodeMedBegrunnelse(vedtak)
             }
         val avslagsperioder = hentAvslagsperioderMedBegrunnelser(vedtak)
 
@@ -386,7 +383,8 @@ class VedtaksperiodeService(
     }
 
     fun kopierOverVedtaksperioder(deaktivertVedtak: Vedtak, aktivtVedtak: Vedtak) {
-        val gamleVedtaksperioderMedBegrunnelser = vedtaksperiodeRepository.finnVedtaksperioderFor(vedtakId = deaktivertVedtak.id)
+        val gamleVedtaksperioderMedBegrunnelser =
+            vedtaksperiodeRepository.finnVedtaksperioderFor(vedtakId = deaktivertVedtak.id)
 
         gamleVedtaksperioderMedBegrunnelser.forEach { vedtaksperiodeMedBegrunnelser ->
             val nyVedtaksperiodeMedBegrunnelser = lagre(
@@ -552,9 +550,11 @@ class VedtaksperiodeService(
             ?: return emptyList()
         val andelerTilkjentYtelse =
             andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = behandling.id)
+        val endredeUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(behandlingId = behandling.id)
 
         return mapTilUtbetalingsperioder(
             andelerTilkjentYtelse = andelerTilkjentYtelse,
+            endredeUtbetalingAndeler = endredeUtbetalingAndeler,
             personopplysningGrunnlag = personopplysningGrunnlag
         )
     }
@@ -584,11 +584,14 @@ class VedtaksperiodeService(
         val andelerTilkjentYtelse =
             andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = behandling.id)
 
+        val endredeUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(behandlingId = behandling.id)
+
         return mapTilOpphørsperioder(
             forrigePersonopplysningGrunnlag = forrigePersonopplysningGrunnlag,
             forrigeAndelerTilkjentYtelse = forrigeAndelerTilkjentYtelse,
             personopplysningGrunnlag = personopplysningGrunnlag,
-            andelerTilkjentYtelse = andelerTilkjentYtelse
+            andelerTilkjentYtelse = andelerTilkjentYtelse,
+            endredeUtbetalingAndeler = endredeUtbetalingAndeler,
         )
     }
 
