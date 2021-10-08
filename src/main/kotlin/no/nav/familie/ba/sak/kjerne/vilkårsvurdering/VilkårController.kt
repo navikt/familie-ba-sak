@@ -57,7 +57,7 @@ class VilkårController(
             vilkårId = vilkaarId,
             restPersonResultat = restPersonResultat
         )
-        vedtakService.settStegSlettTilbakekreving(behandling.id)
+        vedtakService.resettStegVedEndringPåVilkår(behandling.id)
         return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = behandling.fagsak.id))
     }
 
@@ -99,7 +99,7 @@ class VilkårController(
             personIdent = personIdent
         )
 
-        vedtakService.settStegSlettTilbakekreving(behandling.id)
+        vedtakService.resettStegVedEndringPåVilkår(behandling.id)
         return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = behandling.fagsak.id))
     }
 
@@ -114,7 +114,7 @@ class VilkårController(
         val behandling = behandlingService.hent(behandlingId)
         vilkårService.postVilkår(behandling.id, restNyttVilkår)
 
-        vedtakService.settStegSlettTilbakekreving(behandlingId)
+        vedtakService.resettStegVedEndringPåVilkår(behandlingId)
         return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = behandling.fagsak.id))
     }
 
