@@ -210,9 +210,9 @@ class VedtaksperiodeService(
                 val triggesAv = it.tilSanityBegrunnelse(brevKlient.hentSanityBegrunnelse()).tilTriggesAv()
                 val vedtakBegrunnelseType = it.vedtakBegrunnelseType
 
-                val personIdenter = when {
+                val personerGjeldendeForBegrunnelseIdenter: MutableSet<String> = when {
                     triggesAv.barnMedSeksårsdag ->
-                        persongrunnlag.personer
+                        persongrunnlag.barna
                             .filter { person ->
                                 person.hentSeksårsdag().toYearMonth() == (
                                     vedtaksperiodeMedBegrunnelser.fom?.toYearMonth()
@@ -243,6 +243,10 @@ class VedtaksperiodeService(
                         deltBosted = triggesAv.deltbosted,
                         vurderingAnnetGrunnlag = triggesAv.vurderingAnnetGrunnlag,
                     ).map { person -> person.personIdent.ident }
+                }.toMutableSet()
+
+                if (triggesAv.vilkår?.contains(Vilkår.UTVIDET_BARNETRYGD) == true) {
+                    personerGjeldendeForBegrunnelseIdenter.add(persongrunnlag.søker.personIdent.ident)
                 }
 
                 if (it == VedtakBegrunnelseSpesifikasjon.INNVILGET_SATSENDRING &&
@@ -255,11 +259,11 @@ class VedtaksperiodeService(
                 }
 
                 val sanityBegrunnelser = brevKlient.hentSanityBegrunnelse()
-                if (it.erTilknyttetVilkår(sanityBegrunnelser) && personIdenter.isEmpty()) {
+                if (it.erTilknyttetVilkår(sanityBegrunnelser) && personerGjeldendeForBegrunnelseIdenter.isEmpty()) {
                     begrunnelserMedFeil.add(it)
                 }
 
-                it.tilVedtaksbegrunnelse(vedtaksperiodeMedBegrunnelser, personIdenter)
+                it.tilVedtaksbegrunnelse(vedtaksperiodeMedBegrunnelser, personerGjeldendeForBegrunnelseIdenter.toList())
             }
         )
 

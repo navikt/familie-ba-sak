@@ -35,26 +35,21 @@ object VedtakUtils {
         deltBosted: Boolean = false,
         vurderingAnnetGrunnlag: Boolean = false
     ): Set<Person> {
-
-        var personerSomOppfyllerTriggerVilkår: MutableSet<Person>? = null
-
-        utgjørendeVilkår?.forEach { vilkår ->
-            val personerMedVilkårForPeriode = hentPersonerMedUtgjørendeVilkår(
-                vilkårsvurdering = vilkårsvurdering,
-                vedtaksperiode = vedtaksperiode,
-                oppdatertBegrunnelseType = oppdatertBegrunnelseType,
-                utgjørendeVilkår = vilkår,
-                aktuellePersonerForVedtaksperiode = aktuellePersonerForVedtaksperiode,
-                deltBosted = deltBosted,
-                vurderingAnnetGrunnlag = vurderingAnnetGrunnlag
+        return utgjørendeVilkår?.fold(mutableSetOf()) { acc, vilkår ->
+            acc.addAll(
+                hentPersonerMedUtgjørendeVilkår(
+                    vilkårsvurdering = vilkårsvurdering,
+                    vedtaksperiode = vedtaksperiode,
+                    oppdatertBegrunnelseType = oppdatertBegrunnelseType,
+                    utgjørendeVilkår = vilkår,
+                    aktuellePersonerForVedtaksperiode = aktuellePersonerForVedtaksperiode,
+                    deltBosted = deltBosted,
+                    vurderingAnnetGrunnlag = vurderingAnnetGrunnlag
+                )
             )
-            personerSomOppfyllerTriggerVilkår = if (personerSomOppfyllerTriggerVilkår == null) {
-                personerMedVilkårForPeriode.toMutableSet()
-            } else {
-                personerSomOppfyllerTriggerVilkår!!.intersect(personerMedVilkårForPeriode).toMutableSet()
-            }
-        }
-        return personerSomOppfyllerTriggerVilkår ?: emptySet()
+
+            acc
+        } ?: emptySet()
     }
 
     private fun hentPersonerMedUtgjørendeVilkår(
@@ -67,46 +62,48 @@ object VedtakUtils {
         vurderingAnnetGrunnlag: Boolean = false
     ): List<Person> {
 
-        return vilkårsvurdering.personResultater.fold(mutableListOf()) { acc, personResultat ->
-            val utgjørendeVilkårResultat = personResultat.vilkårResultater.firstOrNull { vilkårResultat ->
+        return vilkårsvurdering.personResultater
+            .filter { !it.erSøkersResultater() }
+            .fold(mutableListOf()) { acc, personResultat ->
+                val utgjørendeVilkårResultat = personResultat.vilkårResultater.firstOrNull { vilkårResultat ->
 
-                val oppfyltTomMånedEtter =
-                    if (vilkårResultat.vilkårType == Vilkår.UNDER_18_ÅR &&
-                        vilkårResultat.periodeTom != vilkårResultat.periodeTom?.sisteDagIMåned()
-                    ) 0L
-                    else 1L
-                when {
-                    vilkårResultat.vilkårType != utgjørendeVilkår -> false
-                    vilkårResultat.periodeFom == null -> false
-                    oppdatertBegrunnelseType == VedtakBegrunnelseType.INNVILGELSE -> {
-                        (!deltBosted || vilkårResultat.erDeltBosted) &&
-                            (!vurderingAnnetGrunnlag || vilkårResultat.erSkjønnsmessigVurdert) &&
-                            vilkårResultat.periodeFom!!.toYearMonth() == vedtaksperiode.fom.minusMonths(1)
-                            .toYearMonth() &&
-                            vilkårResultat.resultat == Resultat.OPPFYLT
-                    }
+                    val oppfyltTomMånedEtter =
+                        if (vilkårResultat.vilkårType == Vilkår.UNDER_18_ÅR &&
+                            vilkårResultat.periodeTom != vilkårResultat.periodeTom?.sisteDagIMåned()
+                        ) 0L
+                        else 1L
+                    when {
+                        vilkårResultat.vilkårType != utgjørendeVilkår -> false
+                        vilkårResultat.periodeFom == null -> false
+                        oppdatertBegrunnelseType == VedtakBegrunnelseType.INNVILGELSE -> {
+                            (!deltBosted || vilkårResultat.erDeltBosted) &&
+                                (!vurderingAnnetGrunnlag || vilkårResultat.erSkjønnsmessigVurdert) &&
+                                vilkårResultat.periodeFom!!.toYearMonth() == vedtaksperiode.fom.minusMonths(1)
+                                .toYearMonth() &&
+                                vilkårResultat.resultat == Resultat.OPPFYLT
+                        }
 
-                    oppdatertBegrunnelseType == VedtakBegrunnelseType.REDUKSJON ||
-                        oppdatertBegrunnelseType == VedtakBegrunnelseType.OPPHØR -> {
-                        (!deltBosted || vilkårResultat.erDeltBosted) &&
-                            (!vurderingAnnetGrunnlag || vilkårResultat.erSkjønnsmessigVurdert) &&
-                            vilkårResultat.periodeTom != null &&
-                            vilkårResultat.resultat == Resultat.OPPFYLT &&
-                            vilkårResultat.periodeTom!!.toYearMonth() ==
-                            vedtaksperiode.fom.minusMonths(oppfyltTomMånedEtter).toYearMonth()
+                        oppdatertBegrunnelseType == VedtakBegrunnelseType.REDUKSJON ||
+                            oppdatertBegrunnelseType == VedtakBegrunnelseType.OPPHØR -> {
+                            (!deltBosted || vilkårResultat.erDeltBosted) &&
+                                (!vurderingAnnetGrunnlag || vilkårResultat.erSkjønnsmessigVurdert) &&
+                                vilkårResultat.periodeTom != null &&
+                                vilkårResultat.resultat == Resultat.OPPFYLT &&
+                                vilkårResultat.periodeTom!!.toYearMonth() ==
+                                vedtaksperiode.fom.minusMonths(oppfyltTomMånedEtter).toYearMonth()
+                        }
+                        else -> throw Feil("Henting av personer med utgjørende vilkår when: Ikke implementert")
                     }
-                    else -> throw Feil("Henting av personer med utgjørende vilkår when: Ikke implementert")
                 }
-            }
 
-            val person = aktuellePersonerForVedtaksperiode.firstOrNull { person ->
-                person.personIdent.ident == personResultat.personIdent
+                val person = aktuellePersonerForVedtaksperiode.firstOrNull { person ->
+                    person.personIdent.ident == personResultat.personIdent
+                }
+                if (utgjørendeVilkårResultat != null && person != null) {
+                    acc.add(person)
+                }
+                acc
             }
-            if (utgjørendeVilkårResultat != null && person != null) {
-                acc.add(person)
-            }
-            acc
-        }
     }
 }
 
