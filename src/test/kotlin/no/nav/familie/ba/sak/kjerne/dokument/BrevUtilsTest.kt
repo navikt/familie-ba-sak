@@ -2,6 +2,9 @@ package no.nav.familie.ba.sak.kjerne.dokument
 
 import no.nav.familie.ba.sak.common.defaultFagsak
 import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.common.lagVedtaksbegrunnelse
+import no.nav.familie.ba.sak.common.lagVedtaksperiodeMedBegrunnelser
+import no.nav.familie.ba.sak.config.sanityBegrunnelserMock
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
@@ -9,6 +12,7 @@ import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.domene.Totrinnskontroll
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import org.junit.Assert.assertEquals
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertNull
@@ -297,5 +301,27 @@ internal class BrevUtilsTest {
             hentOverstyrtDokumenttittel(revurdering.copy(resultat = BehandlingResultat.FORTSATT_INNVILGET))
         )
         assertNull(hentOverstyrtDokumenttittel(revurdering.copy(resultat = BehandlingResultat.OPPHØRT)))
+    }
+
+    @Test
+    fun `hentHjemmeltekst skal returnere sorterte hjemler`() {
+        val vedtaksperioder = listOf(
+            lagVedtaksperiodeMedBegrunnelser(
+                begrunnelser = mutableSetOf(
+                    lagVedtaksbegrunnelse(
+                        vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET
+                    )
+                )
+            ),
+            lagVedtaksperiodeMedBegrunnelser(
+                begrunnelser = mutableSetOf(
+                    lagVedtaksbegrunnelse(
+                        vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.INNVILGET_SATSENDRING
+                    )
+                )
+            )
+        )
+
+        Assertions.assertEquals("§§ 2, 4, 10 og 11", hentHjemmeltekst(vedtaksperioder, sanityBegrunnelserMock))
     }
 }

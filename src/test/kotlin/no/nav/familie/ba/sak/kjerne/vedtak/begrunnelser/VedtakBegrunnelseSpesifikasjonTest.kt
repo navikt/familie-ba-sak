@@ -11,6 +11,8 @@ import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -37,7 +39,8 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
                     vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
                     vilkårsvurdering = vilkårsvurdering,
                     persongrunnlag = personopplysningGrunnlag,
-                    identerMedUtbetaling = identerMedUtbetaling
+                    identerMedUtbetaling = identerMedUtbetaling,
+                    triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOSATT_I_RIKET))
                 )
         )
     }
@@ -50,7 +53,8 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
                     vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
                     vilkårsvurdering = vilkårsvurdering,
                     persongrunnlag = personopplysningGrunnlag,
-                    identerMedUtbetaling = identerMedUtbetaling
+                    identerMedUtbetaling = identerMedUtbetaling,
+                    triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOSATT_I_RIKET))
                 )
         )
     }
@@ -65,7 +69,8 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
                     vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
                     vilkårsvurdering = vilkårsvurdering,
                     persongrunnlag = personopplysningGrunnlag,
-                    identerMedUtbetaling = identerMedUtbetaling
+                    identerMedUtbetaling = identerMedUtbetaling,
+                    triggesAv = TriggesAv(barnMedSeksårsdag = true)
                 )
         )
     }
@@ -81,7 +86,8 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
                     vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
                     vilkårsvurdering = vilkårsvurdering,
                     persongrunnlag = persongrunnlag,
-                    identerMedUtbetaling = identerMedUtbetaling
+                    identerMedUtbetaling = identerMedUtbetaling,
+                    triggesAv = TriggesAv(barnMedSeksårsdag = true)
                 )
         )
     }
@@ -99,7 +105,8 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
                     vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelserSatsEndring,
                     vilkårsvurdering = vilkårsvurdering,
                     persongrunnlag = personopplysningGrunnlag,
-                    identerMedUtbetaling = identerMedUtbetaling
+                    identerMedUtbetaling = identerMedUtbetaling,
+                    triggesAv = TriggesAv(satsendring = true)
                 )
         )
     }
@@ -117,7 +124,8 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
                     vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelserSatsEndring,
                     vilkårsvurdering = vilkårsvurdering,
                     persongrunnlag = personopplysningGrunnlag,
-                    identerMedUtbetaling = identerMedUtbetaling
+                    identerMedUtbetaling = identerMedUtbetaling,
+                    triggesAv = TriggesAv(satsendring = true)
                 )
         )
     }
@@ -132,7 +140,8 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
                     vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
                     vilkårsvurdering = vilkårsvurdering,
                     persongrunnlag = personopplysningGrunnlag,
-                    identerMedUtbetaling = identerMedUtbetaling
+                    identerMedUtbetaling = identerMedUtbetaling,
+                    triggesAv = TriggesAv(vilkår = setOf(Vilkår.LOVLIG_OPPHOLD), personTyper = setOf(PersonType.SØKER))
                 )
         )
     }
@@ -147,8 +156,15 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
                     vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
                     vilkårsvurdering = vilkårsvurdering,
                     persongrunnlag = personopplysningGrunnlag,
-                    identerMedUtbetaling = identerMedUtbetaling
+                    identerMedUtbetaling = identerMedUtbetaling,
+                    triggesAv = TriggesAv(vilkår = setOf(Vilkår.LOVLIG_OPPHOLD), personTyper = setOf(PersonType.SØKER))
                 )
         )
+    }
+
+    @Test
+    fun `Alle begrunnelser er unike`() {
+        val vedtakBegrunnelser = VedtakBegrunnelseSpesifikasjon.values().groupBy { it.sanityApiNavn }
+        Assertions.assertEquals(vedtakBegrunnelser.size, VedtakBegrunnelseSpesifikasjon.values().size)
     }
 }
