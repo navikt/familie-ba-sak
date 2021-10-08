@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsak
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
+import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -27,6 +28,7 @@ class EndretUtbetalingAndelController(
     private val tilgangService: TilgangService,
     private val behandlingService: BehandlingService,
     private val fagsakService: FagsakService,
+    private val vedtakService: VedtakService,
 ) {
 
     @PutMapping(path = ["{behandlingId}/{endretUtbetalingAndelId}"])
@@ -48,6 +50,7 @@ class EndretUtbetalingAndelController(
             restEndretUtbetalingAndel
         )
 
+        vedtakService.resettStegVedEndringPåEndredeUtbetalingsperioder(behandlingId = behandling.id)
         return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = behandling.fagsak.id))
     }
 
@@ -63,8 +66,12 @@ class EndretUtbetalingAndelController(
 
         val behandling = behandlingService.hent(behandlingId)
 
-        endretUtbetalingAndelService.fjernEndretUtbetalingAndelOgOppdaterTilkjentYtelse(behandling, endretUtbetalingAndelId)
+        endretUtbetalingAndelService.fjernEndretUtbetalingAndelOgOppdaterTilkjentYtelse(
+            behandling,
+            endretUtbetalingAndelId
+        )
 
+        vedtakService.resettStegVedEndringPåEndredeUtbetalingsperioder(behandlingId = behandling.id)
         return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = behandling.fagsak.id))
     }
 
@@ -80,6 +87,7 @@ class EndretUtbetalingAndelController(
         val behandling = behandlingService.hent(behandlingId)
         endretUtbetalingAndelService.opprettTomEndretUtbetalingAndelOgOppdaterTilkjentYtelse(behandling)
 
+        vedtakService.resettStegVedEndringPåEndredeUtbetalingsperioder(behandlingId = behandling.id)
         return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = behandling.fagsak.id))
     }
 }
