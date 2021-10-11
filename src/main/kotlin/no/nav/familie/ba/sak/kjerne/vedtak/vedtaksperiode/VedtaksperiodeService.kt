@@ -25,6 +25,8 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.dokument.BrevKlient
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.dokument.hentVedtaksbrevmal
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.tilVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
@@ -61,7 +63,8 @@ class VedtaksperiodeService(
     private val vilkårsvurderingRepository: VilkårsvurderingRepository,
     private val featureToggleService: FeatureToggleService,
     private val brevKlient: BrevKlient,
-    private val søknadGrunnlagService: SøknadGrunnlagService
+    private val søknadGrunnlagService: SøknadGrunnlagService,
+    private val endretUtbetalingAndelRepository: EndretUtbetalingAndelRepository
 ) {
 
     fun lagre(vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser): VedtaksperiodeMedBegrunnelser {
@@ -284,17 +287,16 @@ class VedtaksperiodeService(
 
     fun genererVedtaksperioderMedBegrunnelser(vedtak: Vedtak): List<VedtaksperiodeMedBegrunnelser> {
         val utbetalingOgOpphørsperioder =
-            (hentUtbetalingsperioder(vedtak.behandling) + hentOpphørsperioder(vedtak.behandling)).map {
-                VedtaksperiodeMedBegrunnelser(
-                    fom = it.periodeFom,
-                    tom = it.periodeTom,
-                    vedtak = vedtak,
-                    type = it.vedtaksperiodetype
-                )
-            }
+            (hentUtbetalingsperioder(vedtak.behandling) +
+                hentOpphørsperioder(vedtak.behandling)
+                ).map {
+                    it.tilVedtaksperiodeMedBegrunnelse(vedtak)
+                }
         val avslagsperioder = hentAvslagsperioderMedBegrunnelser(vedtak)
 
-        return utbetalingOgOpphørsperioder + avslagsperioder
+        val endretUtbetalingsperioder = hentEndredeUtbetalingsperioderMedBegrunnelser(vedtak)
+
+        return utbetalingOgOpphørsperioder + avslagsperioder + endretUtbetalingsperioder
     }
 
     fun kopierOverVedtaksperioder(deaktivertVedtak: Vedtak, aktivtVedtak: Vedtak) {
@@ -479,6 +481,11 @@ class VedtaksperiodeService(
         )
     }
 
+    fun hentEndredeUtbetalingsperioderMedBegrunnelser(vedtak: Vedtak): List<VedtaksperiodeMedBegrunnelser> {
+        val endredeUtbetalingsAndeler = endretUtbetalingAndelRepository.findByBehandlingId(vedtak.behandling.id)
+        return endredeUtbetalingsAndeler.map { it.tilVedtaksperiodeMedBegrunnelser(vedtak) }
+    }
+
     fun hentOpphørsperioder(behandling: Behandling): List<Opphørsperiode> {
         if (behandling.resultat == BehandlingResultat.FORTSATT_INNVILGET) return emptyList()
 
@@ -508,7 +515,7 @@ class VedtaksperiodeService(
             forrigePersonopplysningGrunnlag = forrigePersonopplysningGrunnlag,
             forrigeAndelerTilkjentYtelse = forrigeAndelerTilkjentYtelse,
             personopplysningGrunnlag = personopplysningGrunnlag,
-            andelerTilkjentYtelse = andelerTilkjentYtelse
+            andelerTilkjentYtelse = andelerTilkjentYtelse,
         )
     }
 
