@@ -3,13 +3,17 @@ package no.nav.familie.ba.sak.kjerne.beregning
 import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.common.forrigeMåned
+import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.common.lagEndretUtbetalingAndel
+import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.sisteDagIForrigeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseUtils.oppdaterTilkjentYtelseMedEndretUtbetalingAndeler
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
@@ -24,6 +28,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -588,5 +593,42 @@ internal class TilkjentYtelseUtilsTest {
         personopplysningGrunnlag.personer.add(barn)
 
         return Pair(vilkårsvurdering, personopplysningGrunnlag)
+    }
+
+    @Test
+    fun `endret utbetalingsandel skal overstyre andel`() {
+        val person = lagPerson()
+        val behandling = lagBehandling()
+        val fom = YearMonth.of(2018, 1)
+        val tom = YearMonth.of(2019, 1)
+        val utbetalinsandeler = listOf(
+            lagAndelTilkjentYtelse(
+                fom = fom.toString(),
+                tom = tom.toString(),
+                person = person,
+                behandling = behandling
+            )
+        )
+
+        val endretProsent = BigDecimal.ZERO
+
+        val endretUtbetalingAndeler = listOf(
+            lagEndretUtbetalingAndel(
+                person = person,
+                fom = fom,
+                tom = tom,
+                prosent = endretProsent,
+                behandlingId = behandling.id
+            ),
+        )
+
+        val andelerTIlkjentYtelse = oppdaterTilkjentYtelseMedEndretUtbetalingAndeler(
+            utbetalinsandeler.toMutableSet(),
+            endretUtbetalingAndeler
+        )
+
+        assertEquals(1, andelerTIlkjentYtelse.size)
+        assertEquals(endretProsent, andelerTIlkjentYtelse.single().prosent)
+        assertEquals(1, andelerTIlkjentYtelse.single().endretUtbetalingAndeler.size)
     }
 }

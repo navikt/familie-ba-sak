@@ -23,6 +23,8 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.dokument.hentBrevtype
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakPerson
@@ -875,3 +877,42 @@ fun lagVilkårResultat(
 )
 
 val guttenBarnesenFødselsdato = LocalDate.now().withDayOfMonth(10).minusYears(6)
+
+fun lagEndretUtbetalingAndel(
+    behandlingId: Long = 0,
+    person: Person,
+    prosent: BigDecimal = BigDecimal.valueOf(100),
+    fom: YearMonth = YearMonth.now().minusMonths(1),
+    tom: YearMonth = YearMonth.now(),
+    årsak: Årsak = Årsak.DELT_BOSTED,
+    avtaletidspunktDeltBosted: LocalDate = LocalDate.now().minusMonths(1),
+    søknadstidspunkt: LocalDate = LocalDate.now().minusMonths(1),
+) =
+    EndretUtbetalingAndel(
+        behandlingId = behandlingId,
+        person = person,
+        prosent = prosent,
+        fom = fom,
+        tom = tom,
+        årsak = årsak,
+        avtaletidspunktDeltBosted = avtaletidspunktDeltBosted,
+        søknadstidspunkt = søknadstidspunkt,
+        begrunnelse = "Test"
+    )
+
+fun lagPerson(
+    aktørId: AktørId = randomAktørId(),
+    personIdent: PersonIdent = PersonIdent(randomFnr()),
+    type: PersonType = PersonType.SØKER,
+    personopplysningGrunnlag: PersonopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 0),
+    fødselsdato: LocalDate = LocalDate.now().minusYears(19),
+    kjønn: Kjønn = Kjønn.KVINNE
+) = Person(
+    aktørId = aktørId,
+    personIdent = personIdent,
+    type = type,
+    personopplysningGrunnlag = personopplysningGrunnlag,
+    fødselsdato = fødselsdato,
+    navn = type.name,
+    kjønn = kjønn
+)
