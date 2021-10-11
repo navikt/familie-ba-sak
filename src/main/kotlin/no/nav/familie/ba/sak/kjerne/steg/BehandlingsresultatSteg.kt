@@ -43,10 +43,14 @@ class BehandlingsresultatSteg(
         }
 
         if (behandlingMedResultat.skalBehandlesAutomatisk) {
-            if (behandlingMedResultat.resultat == BehandlingResultat.INNVILGET) {
-                behandlingService.oppdaterStatusPåBehandling(behandlingMedResultat.id, BehandlingStatus.IVERKSETTER_VEDTAK)
-            } else if (behandlingMedResultat.erOmregning() && behandlingMedResultat.resultat == BehandlingResultat.FORTSATT_INNVILGET) {
-                behandlingService.oppdaterStatusPåBehandling(behandlingMedResultat.id, BehandlingStatus.IVERKSETTER_VEDTAK)
+            if (behandlingMedResultat.resultat == BehandlingResultat.INNVILGET ||
+                (behandlingMedResultat.erOmregning() && behandlingMedResultat.resultat == BehandlingResultat.FORTSATT_INNVILGET) ||
+                (behandlingMedResultat.erSatsendring() && behandlingMedResultat.resultat == BehandlingResultat.ENDRET)
+            ) {
+                behandlingService.oppdaterStatusPåBehandling(
+                    behandlingMedResultat.id,
+                    BehandlingStatus.IVERKSETTER_VEDTAK
+                )
             }
         } else {
             simuleringService.oppdaterSimuleringPåBehandling(behandlingMedResultat)

@@ -163,11 +163,15 @@ data class Behandling(
         return this
     }
 
-    fun erKlage(): Boolean = this.opprettetÅrsak == BehandlingÅrsak.KLAGE
+    fun erKlage() = this.opprettetÅrsak == BehandlingÅrsak.KLAGE
 
-    fun erMigrering() = type == BehandlingType.MIGRERING_FRA_INFOTRYGD || type == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT
+    fun erMigrering() =
+        type == BehandlingType.MIGRERING_FRA_INFOTRYGD || type == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT
 
-    fun erOmregning(): Boolean = this.opprettetÅrsak == BehandlingÅrsak.OMREGNING_6ÅR || this.opprettetÅrsak == BehandlingÅrsak.OMREGNING_18ÅR
+    fun erOmregning() =
+        this.opprettetÅrsak == BehandlingÅrsak.OMREGNING_6ÅR || this.opprettetÅrsak == BehandlingÅrsak.OMREGNING_18ÅR
+
+    fun erSatsendring() = this.opprettetÅrsak == BehandlingÅrsak.SATSENDRING
 
     fun hentYtelseTypeTilVilkår(): YtelseType = when (underkategori) {
         BehandlingUnderkategori.UTVIDET -> YtelseType.UTVIDET_BARNETRYGD
