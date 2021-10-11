@@ -21,6 +21,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.dokument.BrevKlient
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.dokument.hentVedtaksbrevmal
@@ -44,6 +45,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.byggBegrunnelserOgFriteksterForVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilRestVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilVedtaksbegrunnelseFritekst
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
 import org.springframework.stereotype.Service
@@ -130,9 +132,9 @@ class VedtaksperiodeService(
                 val triggesAv = it.tilSanityBegrunnelse(brevKlient.hentSanityBegrunnelse()).tilTriggesAv()
                 val vedtakBegrunnelseType = it.vedtakBegrunnelseType
 
-                val personIdenter = when {
+                val personerGjeldendeForBegrunnelseIdenter: MutableSet<String> = when {
                     triggesAv.barnMedSeksårsdag ->
-                        persongrunnlag.personer
+                        persongrunnlag.barna
                             .filter { person ->
                                 person.hentSeksårsdag().toYearMonth() == (
                                     vedtaksperiodeMedBegrunnelser.fom?.toYearMonth()
@@ -163,6 +165,10 @@ class VedtaksperiodeService(
                         deltBosted = triggesAv.deltbosted,
                         vurderingAnnetGrunnlag = triggesAv.vurderingAnnetGrunnlag,
                     ).map { person -> person.personIdent.ident }
+                }.toMutableSet()
+
+                if (triggesAv.vilkår?.contains(Vilkår.UTVIDET_BARNETRYGD) == true) {
+                    personerGjeldendeForBegrunnelseIdenter.add(persongrunnlag.søker.personIdent.ident)
                 }
 
                 if (it == VedtakBegrunnelseSpesifikasjon.INNVILGET_SATSENDRING &&
@@ -175,11 +181,11 @@ class VedtaksperiodeService(
                 }
 
                 val sanityBegrunnelser = brevKlient.hentSanityBegrunnelse()
-                if (it.erTilknyttetVilkår(sanityBegrunnelser) && personIdenter.isEmpty()) {
+                if (it.erTilknyttetVilkår(sanityBegrunnelser) && personerGjeldendeForBegrunnelseIdenter.isEmpty()) {
                     begrunnelserMedFeil.add(it)
                 }
 
-                it.tilVedtaksbegrunnelse(vedtaksperiodeMedBegrunnelser, personIdenter)
+                it.tilVedtaksbegrunnelse(vedtaksperiodeMedBegrunnelser, personerGjeldendeForBegrunnelseIdenter.toList())
             }
         )
 
@@ -353,23 +359,30 @@ class VedtaksperiodeService(
                     val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id)
                         ?: error("Finner ikke vilkårsvurdering ved begrunning av vedtak")
 
-                    val identerMedUtbetaling =
-                        if (vedtaksperiodeMedBegrunnelser.type == Vedtaksperiodetype.OPPHØR) emptyList()
-                        else hentUtbetalingsperiodeForVedtaksperiode(
+                    val utbetalingsperiode =
+                        if (vedtaksperiodeMedBegrunnelser.type != Vedtaksperiodetype.OPPHØR) hentUtbetalingsperiodeForVedtaksperiode(
                             utbetalingsperioder = utbetalingsperioder,
                             fom = vedtaksperiodeMedBegrunnelser.fom
-                        )
-                            .utbetalingsperiodeDetaljer
-                            .map { utbetalingsperiodeDetalj -> utbetalingsperiodeDetalj.person.personIdent }
+                        ) else null
+
+                    val identerMedUtbetaling =
+                        utbetalingsperiode?.utbetalingsperiodeDetaljer?.map { utbetalingsperiodeDetalj -> utbetalingsperiodeDetalj.person.personIdent }
+                            ?: emptyList()
 
                     VedtakBegrunnelseSpesifikasjon.values()
+                        .filter { vedtakBegrunnelseSpesifikasjon -> vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType != VedtakBegrunnelseType.AVSLAG && vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType != VedtakBegrunnelseType.FORTSATT_INNVILGET }
                         .forEach {
                             val triggesAv =
                                 it.tilSanityBegrunnelse(brevKlient.hentSanityBegrunnelse())
                                     .tilTriggesAv()
                             val vedtakBegrunnelseType = it.vedtakBegrunnelseType
 
-                            if (it.triggesForPeriode(
+                            if (triggesAv.vilkår.contains(Vilkår.UTVIDET_BARNETRYGD) && (utbetalingsperiode?.ytelseTyper
+                                    ?: emptyList()).contains(YtelseType.UTVIDET_BARNETRYGD)
+                                && vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGELSE
+                            ) {
+                                gyldigeBegrunnelser.add(it)
+                            } else if (it.triggesForPeriode(
                                     vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
                                     vilkårsvurdering = vilkårsvurdering,
                                     persongrunnlag = persongrunnlag,
