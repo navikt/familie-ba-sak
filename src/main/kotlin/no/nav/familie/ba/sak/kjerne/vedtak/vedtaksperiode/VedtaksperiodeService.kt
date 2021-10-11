@@ -455,11 +455,9 @@ class VedtaksperiodeService(
                                     .tilTriggesAv()
                             val vedtakBegrunnelseType = it.vedtakBegrunnelseType
 
-                            if ((triggesAv.vilkår
-                                    ?: emptySet()).contains(Vilkår.UTVIDET_BARNETRYGD) && (utbetalingsperiode?.ytelseTyper
-                                    ?: emptyList()).contains(
-                                    YtelseType.UTVIDET_BARNETRYGD
-                                ) && vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGELSE
+                            if (triggesAv.vilkår.contains(Vilkår.UTVIDET_BARNETRYGD) && (utbetalingsperiode?.ytelseTyper
+                                    ?: emptyList()).contains(YtelseType.UTVIDET_BARNETRYGD)
+                                && vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGELSE
                             ) {
                                 gyldigeBegrunnelser.add(it)
                             } else if (it.triggesForPeriode(
