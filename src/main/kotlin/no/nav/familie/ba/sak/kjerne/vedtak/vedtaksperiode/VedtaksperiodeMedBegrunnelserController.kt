@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsak
-import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedBegrunnelse
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedFritekster
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedStandardbegrunnelser
 import no.nav.familie.ba.sak.kjerne.dokument.BrevKlient
@@ -31,27 +30,6 @@ class VedtaksperiodeMedBegrunnelserController(
     private val tilgangService: TilgangService,
     private val brevKlient: BrevKlient,
 ) {
-
-    @Deprecated("Fjernes når frontend støtter put på fritekster og standardbegrunnelser")
-    @PutMapping("/{vedtaksperiodeId}")
-    fun oppdaterVedtaksperiodeMedBegrunnelser(
-        @PathVariable
-        vedtaksperiodeId: Long,
-        @RequestBody
-        restPutVedtaksperiodeMedBegrunnelse: RestPutVedtaksperiodeMedBegrunnelse
-    ): ResponseEntity<Ressurs<RestFagsak>> {
-        tilgangService.verifiserHarTilgangTilHandling(
-            minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-            handling = OPPDATERE_BEGRUNNELSER_HANDLING
-        )
-
-        val vedtak = vedtaksperiodeService.oppdaterVedtaksperiodeMedBegrunnelser(
-            vedtaksperiodeId,
-            restPutVedtaksperiodeMedBegrunnelse
-        )
-
-        return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = vedtak.behandling.fagsak.id))
-    }
 
     @PutMapping("/standardbegrunnelser/{vedtaksperiodeId}")
     fun oppdaterVedtaksperiodeStandardbegrunnelser(

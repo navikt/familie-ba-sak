@@ -4,8 +4,7 @@ import io.mockk.mockk
 import no.nav.commons.foedselsnummer.testutils.FoedselsnummerGenerator
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPerson
-import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksbegrunnelse
-import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedBegrunnelse
+import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedStandardbegrunnelser
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.ekstern.restDomene.SøkerMedOpplysninger
@@ -845,14 +844,11 @@ fun leggTilBegrunnelsePåVedtaksperiodeIBehandling(
     val perisisterteVedtaksperioder =
         vedtaksperiodeService.hentPersisterteVedtaksperioder(aktivtVedtak)
 
-    vedtaksperiodeService.oppdaterVedtaksperiodeMedBegrunnelser(
+    vedtaksperiodeService.oppdaterVedtaksperiodeMedStandardbegrunnelser(
         vedtaksperiodeId = perisisterteVedtaksperioder.first().id,
-        restPutVedtaksperiodeMedBegrunnelse =
-        RestPutVedtaksperiodeMedBegrunnelse(
-            begrunnelser = listOf(
-                RestPutVedtaksbegrunnelse(
-                    vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET,
-                )
+        restPutVedtaksperiodeMedStandardbegrunnelser = RestPutVedtaksperiodeMedStandardbegrunnelser(
+            standardbegrunnelser = listOf(
+                VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET,
             )
         )
     )
