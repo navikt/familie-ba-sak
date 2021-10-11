@@ -437,16 +437,18 @@ class VedtaksperiodeService(
                     val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id)
                         ?: error("Finner ikke vilkårsvurdering ved begrunning av vedtak")
 
-                    val utbetalingsperiode = hentUtbetalingsperiodeForVedtaksperiode(
-                        utbetalingsperioder = utbetalingsperioder,
-                        fom = vedtaksperiodeMedBegrunnelser.fom
-                    )
+                    val utbetalingsperiode =
+                        if (vedtaksperiodeMedBegrunnelser.type != Vedtaksperiodetype.OPPHØR) hentUtbetalingsperiodeForVedtaksperiode(
+                            utbetalingsperioder = utbetalingsperioder,
+                            fom = vedtaksperiodeMedBegrunnelser.fom
+                        ) else null
 
                     val identerMedUtbetaling =
                         if (vedtaksperiodeMedBegrunnelser.type == Vedtaksperiodetype.OPPHØR) emptyList()
                         else utbetalingsperiode
-                            .utbetalingsperiodeDetaljer
-                            .map { utbetalingsperiodeDetalj -> utbetalingsperiodeDetalj.person.personIdent }
+                            ?.utbetalingsperiodeDetaljer
+                            ?.map { utbetalingsperiodeDetalj -> utbetalingsperiodeDetalj.person.personIdent }
+                            ?: emptyList()
 
                     VedtakBegrunnelseSpesifikasjon.values()
                         .filter { vedtakBegrunnelseSpesifikasjon -> vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType != VedtakBegrunnelseType.AVSLAG && vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType != VedtakBegrunnelseType.FORTSATT_INNVILGET }
@@ -457,7 +459,8 @@ class VedtaksperiodeService(
                             val vedtakBegrunnelseType = it.vedtakBegrunnelseType
 
                             if ((triggesAv.vilkår
-                                    ?: emptySet()).contains(Vilkår.UTVIDET_BARNETRYGD) && utbetalingsperiode.ytelseTyper.contains(
+                                    ?: emptySet()).contains(Vilkår.UTVIDET_BARNETRYGD) && (utbetalingsperiode?.ytelseTyper
+                                    ?: emptyList()).contains(
                                     YtelseType.UTVIDET_BARNETRYGD
                                 ) && vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGELSE
                             ) {
