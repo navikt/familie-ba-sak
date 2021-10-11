@@ -126,6 +126,15 @@ data class Behandling(
         return this
     }
 
+    fun skalRettFraBehandlingsresultatTilIverksetting(): Boolean {
+        return when {
+            skalBehandlesAutomatisk && erOmregning() && resultat == BehandlingResultat.FORTSATT_INNVILGET -> true
+            skalBehandlesAutomatisk && resultat == BehandlingResultat.INNVILGET -> true
+            skalBehandlesAutomatisk && erSatsendring() && resultat == BehandlingResultat.ENDRET -> true
+            else -> false
+        }
+    }
+
     private fun leggTilStegOmDetIkkeFinnesFraFør(steg: StegType) {
         if (behandlingStegTilstand.none { it.behandlingSteg == steg }) {
             behandlingStegTilstand.add(
