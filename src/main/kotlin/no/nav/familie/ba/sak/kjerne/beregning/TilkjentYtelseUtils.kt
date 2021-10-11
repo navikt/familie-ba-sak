@@ -146,7 +146,8 @@ object TilkjentYtelseUtils {
                             stønadFom = månedPeriodeEndret.fom,
                             stønadTom = månedPeriodeEndret.tom,
                             kalkulertUtbetalingsbeløp = andelForPerson.sats
-                                    .avrundetHeltallAvProsent(endretUtbetalingAndel.prosent!!)
+                                .avrundetHeltallAvProsent(endretUtbetalingAndel.prosent!!),
+                            endretUtbetalingAndeler = andelForPerson.endretUtbetalingAndeler + endretUtbetalingAndel
                         )
                     }
                 )
