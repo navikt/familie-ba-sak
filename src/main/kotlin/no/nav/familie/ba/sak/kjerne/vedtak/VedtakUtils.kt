@@ -30,7 +30,7 @@ object VedtakUtils {
         vilkårsvurdering: Vilkårsvurdering,
         vedtaksperiode: Periode,
         oppdatertBegrunnelseType: VedtakBegrunnelseType,
-        utgjørendeVilkår: Set<Vilkår>?,
+        utgjørendeVilkår: Set<Vilkår> = emptySet(),
         aktuellePersonerForVedtaksperiode: List<Person>,
         deltBosted: Boolean = false,
         vurderingAnnetGrunnlag: Boolean = false
@@ -49,7 +49,7 @@ object VedtakUtils {
             )
 
             acc
-        } ?: emptySet()
+        }
     }
 
     private fun hentPersonerMedUtgjørendeVilkår(
