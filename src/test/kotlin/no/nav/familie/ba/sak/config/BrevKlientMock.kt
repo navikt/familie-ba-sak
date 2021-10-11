@@ -60,7 +60,6 @@ val sanityBegrunnelserMock: List<SanityBegrunnelse> =
 
                     VedtakBegrunnelseSpesifikasjon.OPPHØR_UTVANDRET -> listOf(SanityVilkår.BOSATT_I_RIKET)
                     VedtakBegrunnelseSpesifikasjon.OPPHØR_IKKE_MOTTATT_OPPLYSNINGER -> null
-                    VedtakBegrunnelseSpesifikasjon.INNVILGET_UTVIDET -> listOf(SanityVilkår.UTVIDET_BARNETRYGD)
 
                     else -> SanityVilkår.values()
                         .filter { sanityVilkår -> sanityVilkår != SanityVilkår.UTVIDET_BARNETRYGD }.toList()
