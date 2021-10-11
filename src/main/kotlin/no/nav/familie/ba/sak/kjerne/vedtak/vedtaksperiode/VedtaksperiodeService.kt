@@ -444,11 +444,10 @@ class VedtaksperiodeService(
                         ) else null
 
                     val identerMedUtbetaling =
-                        if (vedtaksperiodeMedBegrunnelser.type == Vedtaksperiodetype.OPPHØR) emptyList()
+                        if (vedtaksperiodeMedBegrunnelser.type == Vedtaksperiodetype.OPPHØR || utbetalingsperiode == null) emptyList()
                         else utbetalingsperiode
-                            ?.utbetalingsperiodeDetaljer
-                            ?.map { utbetalingsperiodeDetalj -> utbetalingsperiodeDetalj.person.personIdent }
-                            ?: emptyList()
+                            .utbetalingsperiodeDetaljer
+                            .map { utbetalingsperiodeDetalj -> utbetalingsperiodeDetalj.person.personIdent }
 
                     VedtakBegrunnelseSpesifikasjon.values()
                         .filter { vedtakBegrunnelseSpesifikasjon -> vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType != VedtakBegrunnelseType.AVSLAG && vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType != VedtakBegrunnelseType.FORTSATT_INNVILGET }
