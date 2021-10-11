@@ -67,11 +67,12 @@ data class UtbetalingsperiodeDetalj(
 fun mapTilUtbetalingsperioder(
     personopplysningGrunnlag: PersonopplysningGrunnlag,
     andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
+    filterAndeler: (andelerTilkjentYtelse: List<AndelTilkjentYtelse>) -> List<AndelTilkjentYtelse> = { it }
 ): List<Utbetalingsperiode> {
     return if (andelerTilkjentYtelse.isEmpty()) {
         emptyList()
     } else {
-        val segmenter = utledSegmenterFraAndeler(andelerTilkjentYtelse.toSet())
+        val segmenter = utledSegmenterFraAndeler(filterAndeler(andelerTilkjentYtelse).toSet())
 
         segmenter.map { segment ->
             val andelerForSegment = andelerTilkjentYtelse.filter {

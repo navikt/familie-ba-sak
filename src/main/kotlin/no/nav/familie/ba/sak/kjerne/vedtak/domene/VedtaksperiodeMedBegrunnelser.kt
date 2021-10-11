@@ -105,15 +105,16 @@ data class VedtaksperiodeMedBegrunnelser(
     }
 }
 
-fun VedtaksperiodeMedBegrunnelser.tilRestVedtaksperiodeMedBegrunnelser(gyldigeBegrunnelser: List<VedtakBegrunnelseSpesifikasjon>) = RestVedtaksperiodeMedBegrunnelser(
-    id = this.id,
-    fom = this.fom,
-    tom = this.tom,
-    type = this.type,
-    begrunnelser = this.begrunnelser.map { it.tilRestVedtaksbegrunnelse() },
-    fritekster = this.fritekster.sortedBy { it.id }.map { it.fritekst },
-    gyldigeBegrunnelser = gyldigeBegrunnelser
-)
+fun VedtaksperiodeMedBegrunnelser.tilRestVedtaksperiodeMedBegrunnelser(gyldigeBegrunnelser: List<VedtakBegrunnelseSpesifikasjon>) =
+    RestVedtaksperiodeMedBegrunnelser(
+        id = this.id,
+        fom = this.fom,
+        tom = this.tom,
+        type = this.type,
+        begrunnelser = this.begrunnelser.map { it.tilRestVedtaksbegrunnelse() },
+        fritekster = this.fritekster.sortedBy { it.id }.map { it.fritekst },
+        gyldigeBegrunnelser = gyldigeBegrunnelser
+    )
 
 fun VedtaksperiodeMedBegrunnelser.tilBrevPeriode(
     personerIPersongrunnlag: List<Person>,
@@ -178,8 +179,7 @@ fun VedtaksperiodeMedBegrunnelser.tilBrevPeriode(
             )
         }
 
-        Vedtaksperiodetype.AVSLAG
-        ->
+        Vedtaksperiodetype.AVSLAG -> {
             if (this.fom != null)
                 AvslagBrevPeriode(
                     fom = this.fom.tilDagMånedÅr(),
@@ -187,6 +187,7 @@ fun VedtaksperiodeMedBegrunnelser.tilBrevPeriode(
                     begrunnelser = begrunnelserOgFritekster
                 )
             else AvslagUtenPeriodeBrevPeriode(begrunnelser = begrunnelserOgFritekster)
+        }
 
         Vedtaksperiodetype.OPPHØR -> OpphørBrevPeriode(
             fom = this.fom!!.tilDagMånedÅr(),
