@@ -11,7 +11,6 @@ import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
-import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedBegrunnelse
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedFritekster
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedStandardbegrunnelser
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVedtaksperiodeMedBegrunnelser
@@ -81,83 +80,6 @@ class VedtaksperiodeService(
 
     fun slettVedtaksperioderFor(vedtak: Vedtak) {
         vedtaksperiodeRepository.slettVedtaksperioderFor(vedtak)
-    }
-
-    @Deprecated("Fjernes når frontend støtter put av fritekster og standardbegrunnelser hver for seg.")
-    fun oppdaterVedtaksperiodeMedBegrunnelser(
-        vedtaksperiodeId: Long,
-        restPutVedtaksperiodeMedBegrunnelse: RestPutVedtaksperiodeMedBegrunnelse
-    ): Vedtak {
-        val vedtaksperiodeMedBegrunnelser = vedtaksperiodeRepository.hentVedtaksperiode(vedtaksperiodeId)
-        val begrunnelserMedFeil = mutableListOf<VedtakBegrunnelseSpesifikasjon>()
-
-        vedtaksperiodeMedBegrunnelser.settBegrunnelser(
-            restPutVedtaksperiodeMedBegrunnelse.begrunnelser.map {
-                val triggesAv =
-                    it.vedtakBegrunnelseSpesifikasjon.tilSanityBegrunnelse(brevKlient.hentSanityBegrunnelse())
-                        .tilTriggesAv()
-
-                val vedtakBegrunnelseType = it.vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType
-
-                val behandling = vedtaksperiodeMedBegrunnelser.vedtak.behandling
-                val personIdenter =
-                    if (vedtaksperiodeMedBegrunnelser.type == Vedtaksperiodetype.FORTSATT_INNVILGET) {
-                        hentPersonIdenterFraUtbetalingsperiode(hentUtbetalingsperioder(behandling))
-                    } else {
-                        hentPersonerForAlleUtgjørendeVilkår(
-                            vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id)
-                                ?: error("Finner ikke vilkårsvurdering ved begrunning av vedtak"),
-                            vedtaksperiode = Periode(
-                                fom = vedtaksperiodeMedBegrunnelser.fom ?: TIDENES_MORGEN,
-                                tom = vedtaksperiodeMedBegrunnelser.tom ?: TIDENES_ENDE
-                            ),
-                            oppdatertBegrunnelseType = vedtakBegrunnelseType,
-                            utgjørendeVilkår = triggesAv.vilkår,
-                            aktuellePersonerForVedtaksperiode = persongrunnlagRepository.findByBehandlingAndAktiv(
-                                behandling.id
-                            )?.personer?.toList()
-                                ?: error("Finner ikke personer på behandling ved begrunning av vedtak"),
-                            deltBosted = triggesAv.deltbosted,
-                            vurderingAnnetGrunnlag = triggesAv.vurderingAnnetGrunnlag
-                        ).map { person -> person.personIdent.ident }
-                    }
-                if (personIdenter.isEmpty()) {
-                    begrunnelserMedFeil.add(it.vedtakBegrunnelseSpesifikasjon)
-                }
-
-                it.vedtakBegrunnelseSpesifikasjon.tilVedtaksbegrunnelse(vedtaksperiodeMedBegrunnelser, personIdenter)
-            }
-        )
-
-        if (begrunnelserMedFeil.isNotEmpty()) {
-            throw FunksjonellFeil(
-                melding = "Begrunnelsen passer ikke til vilkårsvurderingen. For å rette opp, gå tilbake til vilkårsvurderingen eller velg en annen begrunnelse.",
-                frontendFeilmelding = "Begrunnelsen passer ikke til vilkårsvurderingen. For å rette opp, gå tilbake til vilkårsvurderingen eller velg en annen begrunnelse.\n" +
-                    begrunnelserMedFeil.fold("") { acc, vedtakBegrunnelseSpesifikasjon ->
-                        val triggesAv =
-                            vedtakBegrunnelseSpesifikasjon.tilSanityBegrunnelse(brevKlient.hentSanityBegrunnelse())
-                                .tilTriggesAv()
-                        val tittel = vedtakBegrunnelseSpesifikasjon
-                            .tilSanityBegrunnelse(brevKlient.hentSanityBegrunnelse())
-                            .navnISystem
-
-                        acc + "'$tittel' forventer vurdering på '${triggesAv.vilkår?.first()?.beskrivelse ?: "ukjent vilkår"}'"
-                    }
-            )
-        }
-
-        vedtaksperiodeMedBegrunnelser.settFritekster(
-            restPutVedtaksperiodeMedBegrunnelse.fritekster.map {
-                tilVedtaksbegrunnelseFritekst(
-                    vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
-                    fritekst = it
-                )
-            }
-        )
-
-        lagre(vedtaksperiodeMedBegrunnelser)
-
-        return vedtaksperiodeMedBegrunnelser.vedtak
     }
 
     fun oppdaterVedtaksperiodeMedFritekster(

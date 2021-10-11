@@ -24,7 +24,6 @@ import javax.persistence.GeneratedValue
 import javax.persistence.GenerationType
 import javax.persistence.Id
 import javax.persistence.JoinColumn
-import javax.persistence.JoinTable
 import javax.persistence.ManyToMany
 import javax.persistence.ManyToOne
 import javax.persistence.SequenceGenerator
@@ -73,12 +72,7 @@ data class EndretUtbetalingAndel(
     @Column(name = "begrunnelse")
     var begrunnelse: String? = null,
 
-    @ManyToMany
-    @JoinTable(
-        name = "ANDEL_TIL_ENDRET_ANDEL",
-        joinColumns = [JoinColumn(name = "fk_endret_utbetaling_andel_id")],
-        inverseJoinColumns = [JoinColumn(name = "fk_andel_tilkjent_ytelse_id")]
-    )
+    @ManyToMany(mappedBy = "endretUtbetalingAndeler")
     val andelTilkjentYtelser: List<AndelTilkjentYtelse> = emptyList(),
 
     @Column(name = "vedtak_begrunnelse_spesifikasjoner")

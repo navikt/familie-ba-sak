@@ -143,10 +143,12 @@ object TilkjentYtelseUtils {
                     perioderMedEndring.map { månedPeriodeEndret ->
                         val endretUtbetalingAndel = endringerForPerson.single { it.overlapperMed(månedPeriodeEndret) }
                         andelForPerson.copy(
+                            prosent = endretUtbetalingAndel.prosent!!,
                             stønadFom = månedPeriodeEndret.fom,
                             stønadTom = månedPeriodeEndret.tom,
                             kalkulertUtbetalingsbeløp = andelForPerson.sats
-                                    .avrundetHeltallAvProsent(endretUtbetalingAndel.prosent!!)
+                                .avrundetHeltallAvProsent(endretUtbetalingAndel.prosent!!),
+                            endretUtbetalingAndeler = andelForPerson.endretUtbetalingAndeler + endretUtbetalingAndel,
                         )
                     }
                 )
