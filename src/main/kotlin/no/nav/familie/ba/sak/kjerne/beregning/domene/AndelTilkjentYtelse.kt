@@ -18,6 +18,7 @@ import javax.persistence.GeneratedValue
 import javax.persistence.GenerationType
 import javax.persistence.Id
 import javax.persistence.JoinColumn
+import javax.persistence.JoinTable
 import javax.persistence.ManyToMany
 import javax.persistence.ManyToOne
 import javax.persistence.SequenceGenerator
@@ -68,7 +69,12 @@ data class AndelTilkjentYtelse(
     @Column(name = "prosent", nullable = false)
     val prosent: BigDecimal,
 
-    @ManyToMany(mappedBy = "andelTilkjentYtelser")
+    @ManyToMany
+    @JoinTable(
+        name = "ANDEL_TIL_ENDRET_ANDEL",
+        joinColumns = [JoinColumn(name = "fk_andel_tilkjent_ytelse_id")],
+        inverseJoinColumns = [JoinColumn(name = "fk_endret_utbetaling_andel_id")]
+    )
     val endretUtbetalingAndeler: List<EndretUtbetalingAndel> = emptyList(),
 
     // kildeBehandlingId, periodeOffset og forrigePeriodeOffset trengs kun i forbindelse med
