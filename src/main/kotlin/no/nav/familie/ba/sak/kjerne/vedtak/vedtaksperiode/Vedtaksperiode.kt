@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import java.time.LocalDate
 
@@ -29,23 +28,14 @@ enum class Vedtaksperiodetype {
 }
 
 fun Vedtaksperiode.tilVedtaksperiodeMedBegrunnelse(
-    vedtak: Vedtak
+    vedtak: Vedtak,
 ): VedtaksperiodeMedBegrunnelser {
+
     return VedtaksperiodeMedBegrunnelser(
         fom = this.periodeFom,
         tom = this.periodeTom,
         vedtak = vedtak,
         type = this.vedtaksperiodetype,
         begrunnelser = mutableSetOf()
-    ).also { vedtaksperiodeMedBegrunnelser ->
-        if (this is EndretUtbetalingsperiode)
-            vedtaksperiodeMedBegrunnelser.begrunnelser.addAll(
-                (this.endretUtbetalingAndel.vedtakBegrunnelseSpesifikasjoner).map { vedtakBegrunnelseSpesifikasjon ->
-                    Vedtaksbegrunnelse(
-                        vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
-                        vedtakBegrunnelseSpesifikasjon = vedtakBegrunnelseSpesifikasjon,
-                        personIdenter = listOf(this.endretUtbetalingAndel.person!!.personIdent.ident)
-                    )
-                })
-    }
+    )
 }

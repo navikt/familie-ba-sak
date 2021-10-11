@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
-import no.nav.familie.ba.sak.common.lagUendretUtbetalingsperiode
+import no.nav.familie.ba.sak.common.lagUtbetalingsperiode
 import no.nav.familie.ba.sak.common.lagUtbetalingsperiodeDetalj
 import no.nav.familie.ba.sak.common.tilfeldigSøker
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPerson
@@ -14,17 +14,17 @@ class UtbetalingsperiodeTest {
     val fomDato1 = LocalDate.now().minusMonths(2).withDayOfMonth(1)
     val fomDato2 = LocalDate.now().minusMonths(1).withDayOfMonth(1)
     val fomDato3 = LocalDate.now().withDayOfMonth(1)
-    val utbetalingsperiode1 = lagUendretUtbetalingsperiode(
+    val utbetalingsperiode1 = lagUtbetalingsperiode(
         periodeFom = fomDato1,
         periodeTom = fomDato1.let { it.withDayOfMonth(it.lengthOfMonth()) },
         utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj(person = søker.tilRestPerson())),
     )
-    val utbetalingsperiode2 = lagUendretUtbetalingsperiode(
+    val utbetalingsperiode2 = lagUtbetalingsperiode(
         periodeFom = fomDato2,
         periodeTom = fomDato2.let { it.withDayOfMonth(it.lengthOfMonth()) },
         utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj(person = søker.tilRestPerson())),
     )
-    val utbetalingsperiode3 = lagUendretUtbetalingsperiode(
+    val utbetalingsperiode3 = lagUtbetalingsperiode(
         periodeFom = fomDato3,
         periodeTom = fomDato3.let { it.withDayOfMonth(it.lengthOfMonth()) },
         utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj(person = søker.tilRestPerson())),

@@ -10,7 +10,6 @@ import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPerson
 import no.nav.familie.ba.sak.kjerne.beregning.beregnUtbetalingsperioderUtenKlassifisering
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.fpsak.tidsserie.LocalDateInterval
 import no.nav.fpsak.tidsserie.LocalDateSegment
@@ -19,35 +18,16 @@ import java.time.LocalDate
 /**
  * Dataklasser som brukes til frontend og backend når man jobber med vertikale utbetalingsperioder
  */
-interface Utbetalingsperiode : Vedtaksperiode {
-    override val periodeFom: LocalDate
-    override val periodeTom: LocalDate
-    val utbetalingsperiodeDetaljer: List<UtbetalingsperiodeDetalj>
-    val ytelseTyper: List<YtelseType>
-    val antallBarn: Int
-    val utbetaltPerMnd: Int
-}
 
-data class UendretUtbetalingsperiode(
+data class Utbetalingsperiode(
     override val periodeFom: LocalDate,
     override val periodeTom: LocalDate,
     override val vedtaksperiodetype: Vedtaksperiodetype = Vedtaksperiodetype.UTBETALING,
-    override val utbetalingsperiodeDetaljer: List<UtbetalingsperiodeDetalj>,
-    override val ytelseTyper: List<YtelseType>,
-    override val antallBarn: Int,
-    override val utbetaltPerMnd: Int,
-) : Utbetalingsperiode
-
-data class EndretUtbetalingsperiode(
-    override val periodeFom: LocalDate,
-    override val periodeTom: LocalDate,
-    override val vedtaksperiodetype: Vedtaksperiodetype = Vedtaksperiodetype.ENDRET_UTBETALING,
-    override val utbetalingsperiodeDetaljer: List<UtbetalingsperiodeDetalj>,
-    override val ytelseTyper: List<YtelseType>,
-    override val antallBarn: Int,
-    override val utbetaltPerMnd: Int,
-    val endretUtbetalingAndel: EndretUtbetalingAndel,
-) : Utbetalingsperiode
+    val utbetalingsperiodeDetaljer: List<UtbetalingsperiodeDetalj>,
+    val ytelseTyper: List<YtelseType>,
+    val antallBarn: Int,
+    val utbetaltPerMnd: Int,
+) : Vedtaksperiode
 
 fun hentUtbetalingsperiodeForVedtaksperiode(
     utbetalingsperioder: List<Utbetalingsperiode>,
@@ -87,7 +67,6 @@ data class UtbetalingsperiodeDetalj(
 fun mapTilUtbetalingsperioder(
     personopplysningGrunnlag: PersonopplysningGrunnlag,
     andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
-    endredeUtbetalingAndeler: List<EndretUtbetalingAndel>,
 ): List<Utbetalingsperiode> {
     return if (andelerTilkjentYtelse.isEmpty()) {
         emptyList()
@@ -104,23 +83,11 @@ fun mapTilUtbetalingsperioder(
                 )
             }
 
-            val endretUtbetalingAndel = endredeUtbetalingAndeler
-                .find { it.fom == segment.fom.toYearMonth() && it.tom == segment.tom.toYearMonth() }
-
-            if (endretUtbetalingAndel == null) {
-                mapTilUtbetalingsperiode(
-                    segment = segment,
-                    andelerForSegment = andelerForSegment,
-                    personopplysningGrunnlag = personopplysningGrunnlag,
-                )
-            } else {
-                mapTilEndretUtbetalingsperiode(
-                    segment = segment,
-                    andelerForSegment = andelerForSegment,
-                    personopplysningGrunnlag = personopplysningGrunnlag,
-                    endretUtbetalingAndel = endretUtbetalingAndel
-                )
-            }
+            mapTilUtbetalingsperiode(
+                segment = segment,
+                andelerForSegment = andelerForSegment,
+                personopplysningGrunnlag = personopplysningGrunnlag,
+            )
         }
     }
 }
@@ -136,19 +103,9 @@ private fun mapTilUtbetalingsperiode(
     andelerForSegment: List<AndelTilkjentYtelse>,
     personopplysningGrunnlag: PersonopplysningGrunnlag
 ): Utbetalingsperiode {
-    val utbetalingsperiodeDetaljer = andelerForSegment.map { andel ->
-        val personForAndel =
-            personopplysningGrunnlag.personer.find { person -> andel.personIdent == person.personIdent.ident }
-                ?: throw IllegalStateException("Fant ikke personopplysningsgrunnlag for andel")
+    val utbetalingsperiodeDetaljer = hentUtbetalinsperiodeDetaljer(andelerForSegment, personopplysningGrunnlag)
 
-        UtbetalingsperiodeDetalj(
-            person = personForAndel.tilRestPerson(),
-            ytelseType = andel.type,
-            utbetaltPerMnd = andel.kalkulertUtbetalingsbeløp
-        )
-    }
-
-    return UendretUtbetalingsperiode(
+    return Utbetalingsperiode(
         periodeFom = segment.fom,
         periodeTom = segment.tom,
         ytelseTyper = andelerForSegment.map(AndelTilkjentYtelse::type),
@@ -160,12 +117,10 @@ private fun mapTilUtbetalingsperiode(
     )
 }
 
-private fun mapTilEndretUtbetalingsperiode(
-    segment: LocalDateSegment<Int>,
+private fun hentUtbetalinsperiodeDetaljer(
     andelerForSegment: List<AndelTilkjentYtelse>,
-    personopplysningGrunnlag: PersonopplysningGrunnlag,
-    endretUtbetalingAndel: EndretUtbetalingAndel,
-): EndretUtbetalingsperiode {
+    personopplysningGrunnlag: PersonopplysningGrunnlag
+): List<UtbetalingsperiodeDetalj> {
     val utbetalingsperiodeDetaljer = andelerForSegment.map { andel ->
         val personForAndel =
             personopplysningGrunnlag.personer.find { person -> andel.personIdent == person.personIdent.ident }
@@ -177,16 +132,5 @@ private fun mapTilEndretUtbetalingsperiode(
             utbetaltPerMnd = andel.kalkulertUtbetalingsbeløp
         )
     }
-
-    return EndretUtbetalingsperiode(
-        periodeFom = segment.fom,
-        periodeTom = segment.tom,
-        endretUtbetalingAndel = endretUtbetalingAndel,
-        ytelseTyper = andelerForSegment.map(AndelTilkjentYtelse::type),
-        utbetaltPerMnd = segment.value,
-        antallBarn = andelerForSegment.count { andel ->
-            personopplysningGrunnlag.barna.any { barn -> barn.personIdent.ident == andel.personIdent }
-        },
-        utbetalingsperiodeDetaljer = utbetalingsperiodeDetaljer,
-    )
+    return utbetalingsperiodeDetaljer
 }

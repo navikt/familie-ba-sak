@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.math.BigDecimal
 import java.time.YearMonth
 import java.util.Objects
+import javax.persistence.CascadeType
 import javax.persistence.Column
 import javax.persistence.Convert
 import javax.persistence.Entity
@@ -69,7 +70,7 @@ data class AndelTilkjentYtelse(
     @Column(name = "prosent", nullable = false)
     val prosent: BigDecimal,
 
-    @ManyToMany
+    @ManyToMany(cascade = [CascadeType.ALL])
     @JoinTable(
         name = "ANDEL_TIL_ENDRET_ANDEL",
         joinColumns = [JoinColumn(name = "fk_andel_tilkjent_ytelse_id")],

@@ -7,7 +7,6 @@ import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
@@ -24,15 +23,13 @@ fun mapTilOpphørsperioder(
     forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse> = emptyList(),
     personopplysningGrunnlag: PersonopplysningGrunnlag,
     andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
-    endredeUtbetalingAndeler: List<EndretUtbetalingAndel>,
 ): List<Opphørsperiode> {
     val forrigeUtbetalingsperioder = if (forrigePersonopplysningGrunnlag != null) mapTilUtbetalingsperioder(
         personopplysningGrunnlag = forrigePersonopplysningGrunnlag,
         andelerTilkjentYtelse = forrigeAndelerTilkjentYtelse,
-        endredeUtbetalingAndeler = endredeUtbetalingAndeler
     ) else emptyList()
     val utbetalingsperioder =
-        mapTilUtbetalingsperioder(personopplysningGrunnlag, andelerTilkjentYtelse, endredeUtbetalingAndeler)
+        mapTilUtbetalingsperioder(personopplysningGrunnlag, andelerTilkjentYtelse)
 
     val alleOpphørsperioder = if (forrigeUtbetalingsperioder.isNotEmpty() && utbetalingsperioder.isEmpty()) {
         listOf(

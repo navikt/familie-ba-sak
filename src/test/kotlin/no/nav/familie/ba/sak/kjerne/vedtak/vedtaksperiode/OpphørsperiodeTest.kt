@@ -57,7 +57,6 @@ class OpphørsperiodeTest {
         val opphørsperioder = mapTilOpphørsperioder(
             andelerTilkjentYtelse = listOf(andelBarn1, andel2Barn1, andel3Barn1),
             personopplysningGrunnlag = personopplysningGrunnlag,
-            endredeUtbetalingAndeler = emptyList(),
         )
 
         assertEquals(2, opphørsperioder.size)
@@ -83,7 +82,6 @@ class OpphørsperiodeTest {
         val opphørsperioder = mapTilOpphørsperioder(
             andelerTilkjentYtelse = listOf(andelBarn1),
             personopplysningGrunnlag = personopplysningGrunnlag,
-            endredeUtbetalingAndeler = emptyList(),
         )
 
         assertEquals(1, opphørsperioder.size)
@@ -106,7 +104,6 @@ class OpphørsperiodeTest {
         val opphørsperioder = mapTilOpphørsperioder(
             andelerTilkjentYtelse = listOf(andelBarn1),
             personopplysningGrunnlag = personopplysningGrunnlag,
-            endredeUtbetalingAndeler = emptyList(),
         )
 
         assertEquals(1, opphørsperioder.size)
@@ -140,7 +137,6 @@ class OpphørsperiodeTest {
             andelerTilkjentYtelse = listOf(andelBarn1),
             personopplysningGrunnlag = personopplysningGrunnlag,
             forrigePersonopplysningGrunnlag = personopplysningGrunnlag,
-            endredeUtbetalingAndeler = emptyList(),
         )
 
         assertEquals(1, opphørsperioder.size)
@@ -183,7 +179,6 @@ class OpphørsperiodeTest {
             andelerTilkjentYtelse = listOf(andelBarn1),
             personopplysningGrunnlag = personopplysningGrunnlag,
             forrigePersonopplysningGrunnlag = personopplysningGrunnlag,
-            endredeUtbetalingAndeler = emptyList(),
         )
 
         assertEquals(1, opphørsperioder.size)
@@ -216,7 +211,6 @@ class OpphørsperiodeTest {
             andelerTilkjentYtelse = listOf(andelBarn1),
             personopplysningGrunnlag = personopplysningGrunnlag,
             forrigePersonopplysningGrunnlag = personopplysningGrunnlag,
-            endredeUtbetalingAndeler = emptyList(),
         )
 
         assertEquals(1, opphørsperioder.size)

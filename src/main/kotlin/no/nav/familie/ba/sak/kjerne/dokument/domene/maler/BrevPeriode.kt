@@ -85,7 +85,7 @@ data class EndretUtbetalingBrevPeriode(
                 else -> error(BEGRUNNELSE_ERROR_MSG)
             }
         },
-        type = flettefelt(BrevPeriodeType.ENDRET_PERIODE.apiNavn),
+        type = flettefelt(BrevPeriodeType.ENDRET_UTBETALINGSPERIODE.apiNavn),
     )
 }
 
