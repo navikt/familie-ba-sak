@@ -136,16 +136,6 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
         override val sanityApiNavn = "innvilgetBarnBorSammenMedMottaker"
     },
-    INNVILGET_UTVIDET {
-
-        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
-        override val sanityApiNavn = "innvilgetUtvidet"
-    },
-    REDUKSJON_UTVIDET {
-
-        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
-        override val sanityApiNavn = "reduksjonUtvidet"
-    },
     REDUKSJON_BOSATT_I_RIKTET {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
@@ -205,11 +195,6 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
         override val sanityApiNavn = "innvilgetSatsendring"
-    },
-    AVSLAG_UTVIDET {
-
-        override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
-        override val sanityApiNavn = "avslagUtvidet"
     },
     AVSLAG_BOSATT_I_RIKET {
 
@@ -281,11 +266,6 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
         override val sanityApiNavn = "avslagUregistrertBarn"
     },
-    OPPHØR_UTVIDET {
-
-        override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
-        override val sanityApiNavn = "opphorUtvidet"
-    },
     OPPHØR_BARN_FLYTTET_FRA_SØKER {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
@@ -340,11 +320,6 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
         override val sanityApiNavn = "opphorEndretMottaker"
-    },
-    FORTSATT_INNVILGET_UTVIDET {
-
-        override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
-        override val sanityApiNavn = "fortsattInnvilgetUtvidet"
     },
     FORTSATT_INNVILGET_SØKER_OG_BARN_BOSATT_I_RIKET {
 
