@@ -631,4 +631,65 @@ internal class TilkjentYtelseUtilsTest {
         assertEquals(endretProsent, andelerTIlkjentYtelse.single().prosent)
         assertEquals(1, andelerTIlkjentYtelse.single().endretUtbetalingAndeler.size)
     }
+
+    @Test
+    fun `endret utbetalingsandel koble endrede andeler til riktig endret utbetalingandel`() {
+        val person = lagPerson()
+        val behandling = lagBehandling()
+        val fom1 = YearMonth.of(2018, 1)
+        val tom1 = YearMonth.of(2018, 11)
+
+        val fom2 = YearMonth.of(2019, 1)
+        val tom2 = YearMonth.of(2019, 11)
+
+        val utbetalinsandeler = listOf(
+            lagAndelTilkjentYtelse(
+                fom = fom1.toString(),
+                tom = tom1.toString(),
+                person = person,
+                behandling = behandling
+            ),
+            lagAndelTilkjentYtelse(
+                fom = fom2.toString(),
+                tom = tom2.toString(),
+                person = person,
+                behandling = behandling
+            ),
+        )
+
+        val endretProsent = BigDecimal.ZERO
+
+        val endretUtbetalingAndel = lagEndretUtbetalingAndel(
+            person = person,
+            fom = fom1,
+            tom = tom2,
+            prosent = endretProsent,
+            behandlingId = behandling.id
+        )
+
+        val endretUtbetalingAndeler = listOf(
+            endretUtbetalingAndel,
+            lagEndretUtbetalingAndel(
+                person = person,
+                fom = tom2.nesteMåned(),
+                prosent = endretProsent,
+                behandlingId = behandling.id
+            ),
+        )
+
+        val andelerTIlkjentYtelse = oppdaterTilkjentYtelseMedEndretUtbetalingAndeler(
+            utbetalinsandeler.toMutableSet(),
+            endretUtbetalingAndeler
+        )
+
+        assertEquals(2, andelerTIlkjentYtelse.size)
+        andelerTIlkjentYtelse.forEach { assertEquals(endretProsent, it.prosent) }
+        andelerTIlkjentYtelse.forEach { assertEquals(1, it.endretUtbetalingAndeler.size) }
+        andelerTIlkjentYtelse.forEach {
+            assertEquals(
+                endretUtbetalingAndel.id,
+                it.endretUtbetalingAndeler.single().id
+            )
+        }
+    }
 }
