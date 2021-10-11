@@ -203,7 +203,8 @@ object VilkårsvurderingUtils {
                 val personsVilkårAktivt = personenSomFinnes.vilkårResultater.toMutableSet()
                 val personsVilkårOppdatert = mutableSetOf<VilkårResultat>()
                 personFraInit.vilkårResultater.forEach { vilkårFraInit ->
-                    val vilkårSomFinnes = personenSomFinnes.vilkårResultater.filter { it.vilkårType == vilkårFraInit.vilkårType }
+                    val vilkårSomFinnes =
+                        personenSomFinnes.vilkårResultater.filter { it.vilkårType == vilkårFraInit.vilkårType }
 
                     if (vilkårSomFinnes.isEmpty()) {
                         // Legg til nytt vilkår på person
@@ -262,20 +263,18 @@ object VilkårsvurderingUtils {
 }
 
 fun vedtakBegrunnelseSpesifikasjonerTilNedtrekksmenytekster(
-    navnTilNedtrekksmeny: List<SanityBegrunnelse>,
-    skalBrukeTriggesAvFraSanity: Boolean
+    sanityBegrunnelser: List<SanityBegrunnelse>
 ) =
     VedtakBegrunnelseSpesifikasjon
         .values()
         .groupBy { it.vedtakBegrunnelseType }
         .mapValues { begrunnelseGruppe ->
             begrunnelseGruppe.value
-                .filter { it.erTilgjengeligFrontend }
+                .filter { it.tilSanityBegrunnelse(sanityBegrunnelser).tilTriggesAv().valgbar }
                 .flatMap { vedtakBegrunnelse ->
                     vedtakBegrunnelseTilRestVedtakBegrunnelseTilknyttetVilkår(
-                        navnTilNedtrekksmeny,
-                        vedtakBegrunnelse,
-                        skalBrukeTriggesAvFraSanity
+                        sanityBegrunnelser,
+                        vedtakBegrunnelse
                     )
                 }
         }
@@ -283,14 +282,8 @@ fun vedtakBegrunnelseSpesifikasjonerTilNedtrekksmenytekster(
 private fun vedtakBegrunnelseTilRestVedtakBegrunnelseTilknyttetVilkår(
     sanityBegrunnelser: List<SanityBegrunnelse>,
     vedtakBegrunnelse: VedtakBegrunnelseSpesifikasjon,
-    skalBrukeTriggesAvFraSanity: Boolean,
 ): List<RestVedtakBegrunnelseTilknyttetVilkår> {
-    val triggesAv =
-        if (skalBrukeTriggesAvFraSanity) {
-            vedtakBegrunnelse.tilSanityBegrunnelse(sanityBegrunnelser)
-                .tilTriggesAv()
-        } else
-            vedtakBegrunnelse.triggesAv
+    val triggesAv = vedtakBegrunnelse.tilSanityBegrunnelse(sanityBegrunnelser).tilTriggesAv()
 
     val visningsnavn =
         sanityBegrunnelser.find { it.apiNavn == vedtakBegrunnelse.sanityApiNavn }?.navnISystem

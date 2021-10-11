@@ -32,7 +32,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import java.time.LocalDate
-import java.util.SortedSet
 import javax.persistence.AttributeConverter
 import javax.persistence.Converter
 
@@ -40,16 +39,10 @@ interface IVedtakBegrunnelse {
 
     val sanityApiNavn: String
     val vedtakBegrunnelseType: VedtakBegrunnelseType
-
-    @Deprecated("Skal hentes fra Sanity, se SanityBegrunnelse.tilTriggesAv()")
-    val triggesAv: TriggesAv
-
-    @Deprecated("Skal hentes fra Sanity")
-    fun hentHjemler(): SortedSet<Int>
 }
 
 data class TriggesAv(
-    val vilkår: Set<Vilkår>? = null,
+    val vilkår: Set<Vilkår> = emptySet(),
     val personTyper: Set<PersonType> = setOf(PersonType.BARN, PersonType.SØKER),
     val personerManglerOpplysninger: Boolean = false,
     val satsendring: Boolean = false,
@@ -60,469 +53,544 @@ data class TriggesAv(
     val valgbar: Boolean = true
 )
 
-enum class VedtakBegrunnelseSpesifikasjon(
-    @Deprecated("Skal hentes fra sanity")
-    val tittel: String,
+enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
 
-    val erTilgjengeligFrontend: Boolean = true,
-) : IVedtakBegrunnelse {
-
-    INNVILGET_BOSATT_I_RIKTET("Norsk, nordisk bosatt i Norge") {
+    INNVILGET_BOSATT_I_RIKTET {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(4, 11, 2)
         override val sanityApiNavn = "innvilgetBosattIRiket"
-        override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOSATT_I_RIKET))
     },
-    INNVILGET_BOSATT_I_RIKTET_LOVLIG_OPPHOLD("Tredjelandsborger med lovlig opphold samtidig som bosatt i Norge") {
+    INNVILGET_BOSATT_I_RIKTET_LOVLIG_OPPHOLD {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(4, 11, 2)
         override val sanityApiNavn = "innvilgetBosattIRiketLovligOpphold"
-        override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOSATT_I_RIKET, Vilkår.LOVLIG_OPPHOLD))
     },
-    INNVILGET_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE("Tredjelandsborger bosatt før lovlig opphold i Norge") {
+    INNVILGET_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4, 11)
         override val sanityApiNavn = "innvilgetLovligOppholdOppholdstillatelse"
-        override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.LOVLIG_OPPHOLD))
     },
-    INNVILGET_LOVLIG_OPPHOLD_EØS_BORGER("EØS-borger: Søker har oppholdsrett") {
+    INNVILGET_LOVLIG_OPPHOLD_EØS_BORGER {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4, 11)
         override val sanityApiNavn = "innvilgetLovligOppholdEOSBorger"
-        override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.LOVLIG_OPPHOLD), personTyper = setOf(PersonType.SØKER))
     },
-    INNVILGET_LOVLIG_OPPHOLD_EØS_BORGER_SKJØNNSMESSIG_VURDERING("EØS-borger: Skjønnsmessig vurdering av oppholdsrett.") {
+    INNVILGET_LOVLIG_OPPHOLD_EØS_BORGER_SKJØNNSMESSIG_VURDERING {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4, 11)
         override val sanityApiNavn = "innvilgetLovligOppholdEOSBorgerSkjonnsmessigVurdering"
-        override val triggesAv = TriggesAv(
-            vilkår = setOf(Vilkår.LOVLIG_OPPHOLD),
-            personTyper = setOf(PersonType.SØKER),
-            vurderingAnnetGrunnlag = true
-        )
     },
-    INNVILGET_LOVLIG_OPPHOLD_SKJØNNSMESSIG_VURDERING_TREDJELANDSBORGER("Skjønnsmessig vurdering tålt opphold tredjelandsborger") {
+    INNVILGET_LOVLIG_OPPHOLD_SKJØNNSMESSIG_VURDERING_TREDJELANDSBORGER {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4, 11)
         override val sanityApiNavn = "innvilgetLovligOppholdSkjonnsmessigVurderingTredjelandsborger"
-        override val triggesAv = TriggesAv(
-            vilkår = setOf(Vilkår.LOVLIG_OPPHOLD),
-            vurderingAnnetGrunnlag = true
-        )
     },
-    INNVILGET_OMSORG_FOR_BARN("Adopsjon, surrogati: Omsorgen for barn") {
+    INNVILGET_OMSORG_FOR_BARN {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4, 11)
         override val sanityApiNavn = "innvilgetOmsorgForBarn"
-        override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOR_MED_SØKER))
     },
-    INNVILGET_BOR_HOS_SØKER("Barn har flyttet til søker (flytting mellom foreldre, andre omsorgspersoner)") {
+    INNVILGET_BOR_HOS_SØKER {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4, 11)
         override val sanityApiNavn = "innvilgetBorHosSoker"
-        override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOR_MED_SØKER))
     },
-    INNVILGET_BOR_HOS_SØKER_SKJØNNSMESSIG("Skjønnsmessig vurdering - Barn har flyttet til søker (flytting mellom foreldre, andre omsorgspersoner)") {
+    INNVILGET_BOR_HOS_SØKER_SKJØNNSMESSIG {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4, 11)
         override val sanityApiNavn = "innvilgetBorHosSokerSkjonnsmessig"
-        override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOR_MED_SØKER), vurderingAnnetGrunnlag = true)
     },
-    INNVILGET_FAST_OMSORG_FOR_BARN("Søker har fast omsorg for barn") {
+    INNVILGET_FAST_OMSORG_FOR_BARN {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4, 11)
         override val sanityApiNavn = "innvilgetFastOmsorgForBarn"
-        override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOR_MED_SØKER), vurderingAnnetGrunnlag = true)
     },
-    INNVILGET_NYFØDT_BARN_FØRSTE("Nyfødt barn - første barn") {
+    INNVILGET_NYFØDT_BARN_FØRSTE {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4, 11)
         override val sanityApiNavn = "innvilgetNyfodtBarnForste"
-        override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.UNDER_18_ÅR))
     },
-    INNVILGET_NYFØDT_BARN("Nyfødt barn - har barn fra før") {
+    INNVILGET_NYFØDT_BARN {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4, 11)
         override val sanityApiNavn = "innvilgetNyfodtBarn"
-        override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.UNDER_18_ÅR))
     },
-    INNVILGET_FØDSELSHENDELSE_NYFØDT_BARN_FØRSTE("Nyfødt barn - første barn") {
+    INNVILGET_FØDSELSHENDELSE_NYFØDT_BARN_FØRSTE {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4, 11, 14)
         override val sanityApiNavn = "innvilgetFodselshendelseNyfodtBarnForste"
-        override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.UNDER_18_ÅR))
     },
-    INNVILGET_FØDSELSHENDELSE_NYFØDT_BARN("Nyfødt barn - har barn fra før") {
+    INNVILGET_FØDSELSHENDELSE_NYFØDT_BARN {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4, 11, 14)
         override val sanityApiNavn = "innvilgetFodselshendelseNyfodtBarn"
-        override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.UNDER_18_ÅR))
     },
 
-    INNVILGET_MEDLEM_I_FOLKETRYGDEN("Medlem i Folketrygden") {
+    INNVILGET_MEDLEM_I_FOLKETRYGDEN {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4, 11)
         override val sanityApiNavn = "innvilgetMedlemIFolketrygden"
-        override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOSATT_I_RIKET), medlemskap = true)
     },
-    INNVILGET_BARN_BOR_SAMMEN_MED_MOTTAKER("Foreldrene bor sammen, endret mottaker") {
+    INNVILGET_BARN_BOR_SAMMEN_MED_MOTTAKER {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4, 11)
         override val sanityApiNavn = "innvilgetBarnBorSammenMedMottaker"
-        override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOR_MED_SØKER), vurderingAnnetGrunnlag = true)
     },
-    REDUKSJON_BOSATT_I_RIKTET("Barn har flyttet fra Norge") {
+    REDUKSJON_BOSATT_I_RIKTET {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4, 11)
         override val sanityApiNavn = "reduksjonBosattIRiket"
-        override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOSATT_I_RIKET), personTyper = setOf(PersonType.BARN))
     },
-    REDUKSJON_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE_BARN("Barn har ikke oppholdstillatelse") {
+    REDUKSJON_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE_BARN {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(4, 11)
         override val sanityApiNavn = "reduksjonLovligOppholdOppholdstillatelseBarn"
-        override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.LOVLIG_OPPHOLD), personTyper = setOf(PersonType.BARN))
     },
-    REDUKSJON_FLYTTET_BARN("Barn har flyttet fra søker (flytting mellom foreldre, andre omsorgspersoner)") {
+    REDUKSJON_FLYTTET_BARN {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 11)
         override val sanityApiNavn = "reduksjonFlyttetBarn"
-        override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOR_MED_SØKER))
     },
-    REDUKSJON_BARN_DØD("Barn død") {
+    REDUKSJON_BARN_DØD {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 11)
         override val sanityApiNavn = "reduksjonBarnDod"
-        override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOR_MED_SØKER))
     },
-    REDUKSJON_FAST_OMSORG_FOR_BARN("Søker har ikke lenger fast omsorg for barn (beredskapshjem, vurdering av fast bosted)") {
+    REDUKSJON_FAST_OMSORG_FOR_BARN {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 11)
         override val sanityApiNavn = "reduksjonFastOmsorgForBarn"
-        override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOR_MED_SØKER), vurderingAnnetGrunnlag = true)
     },
-    REDUKSJON_MANGLENDE_OPPLYSNINGER("Ikke mottatt opplysninger") {
+    REDUKSJON_MANGLENDE_OPPLYSNINGER {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(17, 18)
         override val sanityApiNavn = "reduksjonManglendeOpplysninger"
-        override val triggesAv = TriggesAv(personerManglerOpplysninger = true)
     },
-    REDUKSJON_UNDER_18_ÅR("Under 18") {
+    REDUKSJON_UNDER_18_ÅR {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4, 11)
         override val sanityApiNavn = "reduksjonUnder18Aar"
-        override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.UNDER_18_ÅR))
     },
-    REDUKSJON_UNDER_6_ÅR("Barn 6 år") {
+    REDUKSJON_UNDER_6_ÅR {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(10)
         override val sanityApiNavn = "reduksjonUnder6Aar"
-        override val triggesAv = TriggesAv(barnMedSeksårsdag = true)
     },
-    REDUKSJON_DELT_BOSTED_ENIGHET("Enighet om opphør av avtale om delt bosted") {
+    REDUKSJON_DELT_BOSTED_ENIGHET {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 11)
         override val sanityApiNavn = "reduksjonDeltBostedEnighet"
-        override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOR_MED_SØKER), deltbosted = true)
     },
-    REDUKSJON_DELT_BOSTED_UENIGHET("Uenighet om opphør av avtale om delt bosted") {
+    REDUKSJON_DELT_BOSTED_UENIGHET {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 11)
         override val sanityApiNavn = "reduksjonDeltBostedUenighet"
-        override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOR_MED_SØKER), deltbosted = true)
     },
-    REDUKSJON_ENDRET_MOTTAKER("Foreldrene bor sammen, endret mottaker") {
+    REDUKSJON_ENDRET_MOTTAKER {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 12)
         override val sanityApiNavn = "reduksjonEndretMottaker"
-        override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOR_MED_SØKER), vurderingAnnetGrunnlag = true)
     },
-    INNVILGET_SATSENDRING("Satsendring") {
+    INNVILGET_SATSENDRING {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
-
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 10)
         override val sanityApiNavn = "innvilgetSatsendring"
-        override val triggesAv = TriggesAv(satsendring = true)
     },
-    AVSLAG_BOSATT_I_RIKET("Ikke bosatt i Norge") {
+    AVSLAG_BOSATT_I_RIKET {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4)
         override val sanityApiNavn = "avslagBosattIRiket"
-        override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOSATT_I_RIKET))
     },
-    AVSLAG_LOVLIG_OPPHOLD_TREDJELANDSBORGER("Tredjelandsborger uten lovlig opphold i Norge") {
+    AVSLAG_LOVLIG_OPPHOLD_TREDJELANDSBORGER {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4)
         override val sanityApiNavn = "avslagLovligOppholdTredjelandsborger"
-        override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.LOVLIG_OPPHOLD))
     },
-    AVSLAG_BOR_HOS_SØKER("Barn bor ikke med søker") {
+    AVSLAG_BOR_HOS_SØKER {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4)
         override val sanityApiNavn = "avslagBorHosSoker"
-        override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOR_MED_SØKER))
     },
-    AVSLAG_OMSORG_FOR_BARN("Adopsjon, surrogati, beredskapshjem, vurdering av fast bosted") {
+    AVSLAG_OMSORG_FOR_BARN {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4)
         override val sanityApiNavn = "avslagOmsorgForBarn"
-        override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOR_MED_SØKER), vurderingAnnetGrunnlag = true)
     },
-    AVSLAG_LOVLIG_OPPHOLD_EØS_BORGER("EØS-borger uten oppholdsrett") {
+    AVSLAG_LOVLIG_OPPHOLD_EØS_BORGER {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4)
         override val sanityApiNavn = "avslagLovligOppholdEosBorger"
-        override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.LOVLIG_OPPHOLD))
     },
-    AVSLAG_LOVLIG_OPPHOLD_SKJØNNSMESSIG_VURDERING_TREDJELANDSBORGER("Skjønnsmessig vurdering opphold tredjelandsborger") {
+    AVSLAG_LOVLIG_OPPHOLD_SKJØNNSMESSIG_VURDERING_TREDJELANDSBORGER {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4)
         override val sanityApiNavn = "avslagLovligOppholdSkjonnsmessigVurderingTredjelandsborger"
-        override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.LOVLIG_OPPHOLD), vurderingAnnetGrunnlag = true)
     },
-    AVSLAG_MEDLEM_I_FOLKETRYGDEN("Unntatt medlemskap i Folketrygden") {
+    AVSLAG_MEDLEM_I_FOLKETRYGDEN {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4)
         override val sanityApiNavn = "avslagMedlemIFolketrygden"
-        override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOSATT_I_RIKET), medlemskap = true)
     },
-    AVSLAG_FORELDRENE_BOR_SAMMEN("Foreldrene bor sammen") {
+    AVSLAG_FORELDRENE_BOR_SAMMEN {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 12)
         override val sanityApiNavn = "avslagForeldreneBorSammen"
-        override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOR_MED_SØKER), vurderingAnnetGrunnlag = true)
     },
-    AVSLAG_UNDER_18_ÅR("Barn over 18 år") {
+    AVSLAG_UNDER_18_ÅR {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(11)
         override val sanityApiNavn = "avslagUnder18Aar"
-        override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.UNDER_18_ÅR))
     },
-    AVSLAG_UGYLDIG_AVTALE_OM_DELT_BOSTED("Ugyldig avtale om delt bosted", erTilgjengeligFrontend = false) {
+    AVSLAG_UGYLDIG_AVTALE_OM_DELT_BOSTED {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2)
         override val sanityApiNavn = "avslagUgyldigAvtaleOmDeltBosted"
-        override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOR_MED_SØKER), deltbosted = true)
     },
-    AVSLAG_IKKE_AVTALE_OM_DELT_BOSTED("Ikke avtale om delt bosted", erTilgjengeligFrontend = false) {
+    AVSLAG_IKKE_AVTALE_OM_DELT_BOSTED {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2)
         override val sanityApiNavn = "avslagIkkeAvtaleOmDeltBosted"
-        override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOR_MED_SØKER), deltbosted = true)
     },
-    AVSLAG_OPPLYSNINGSPLIKT("Ikke mottatt opplysninger") {
+    AVSLAG_OPPLYSNINGSPLIKT {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(17, 18)
         override val sanityApiNavn = "avslagOpplysningsplikt"
-        override val triggesAv = TriggesAv(personerManglerOpplysninger = true)
     },
-    AVSLAG_SÆRKULLSBARN("Ektefelle eller samboers særkullsbarn") {
+    AVSLAG_SÆRKULLSBARN {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2)
         override val sanityApiNavn = "avslagSaerkullsbarn"
-        override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOR_MED_SØKER), vurderingAnnetGrunnlag = true)
     },
-    AVSLAG_UREGISTRERT_BARN("Barn uten fødselsnummer") {
+    AVSLAG_UREGISTRERT_BARN {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4)
         override val sanityApiNavn = "avslagUregistrertBarn"
-        override val triggesAv = TriggesAv(valgbar = false)
     },
-    OPPHØR_BARN_FLYTTET_FRA_SØKER("Barn bor ikke med søker") {
+    OPPHØR_BARN_FLYTTET_FRA_SØKER {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 11)
         override val sanityApiNavn = "opphorBarnBorIkkeMedSoker"
-        override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOR_MED_SØKER))
     },
-    OPPHØR_UTVANDRET("Barn og/eller søker har flyttet fra Norge") {
+    OPPHØR_UTVANDRET {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4, 11)
         override val sanityApiNavn = "opphorFlyttetFraNorge"
-        override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOSATT_I_RIKET))
     },
-    OPPHØR_BARN_DØD("Et barn er dødt") {
+    OPPHØR_BARN_DØD {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 11)
         override val sanityApiNavn = "opphorEtBarnErDodt"
-        override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOR_MED_SØKER))
     },
-    OPPHØR_FLERE_BARN_DØD("Flere barn er døde") {
+    OPPHØR_FLERE_BARN_DØD {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 11)
         override val sanityApiNavn = "opphorFlereBarnErDode"
-        override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOR_MED_SØKER))
     },
-    OPPHØR_SØKER_HAR_IKKE_FAST_OMSORG("Søker har ikke lenger fast omsorg for barn (beredskapshjem, vurdering av fast bosted)") {
+    OPPHØR_SØKER_HAR_IKKE_FAST_OMSORG {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 11)
         override val sanityApiNavn = "opphorSokerHarIkkeFastOmsorg"
-        override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOR_MED_SØKER), vurderingAnnetGrunnlag = true)
     },
-    OPPHØR_HAR_IKKE_OPPHOLDSTILLATELSE("Barn og/eller søker har ikke oppholdstillatelse") {
+    OPPHØR_HAR_IKKE_OPPHOLDSTILLATELSE {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(4, 11)
         override val sanityApiNavn = "opphorHarIkkeOppholdstillatelse"
-        override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.LOVLIG_OPPHOLD))
     },
-    OPPHØR_IKKE_MOTTATT_OPPLYSNINGER("Ikke mottatt opplysninger") {
+    OPPHØR_IKKE_MOTTATT_OPPLYSNINGER {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(17, 18)
         override val sanityApiNavn = "opphorIkkeMottattOpplysninger"
-        override val triggesAv = TriggesAv(personerManglerOpplysninger = true)
     },
-    OPPHØR_DELT_BOSTED_OPPHØRT_ENIGHET("Enighet om opphør av avtale om delt bosted") {
+    OPPHØR_DELT_BOSTED_OPPHØRT_ENIGHET {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 11)
         override val sanityApiNavn = "opphorDeltBostedOpphortEnighet"
-        override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOR_MED_SØKER), deltbosted = true)
     },
-    OPPHØR_DELT_BOSTED_OPPHØRT_UENIGHET("Uenighet om opphør av avtale om delt bosted") {
+    OPPHØR_DELT_BOSTED_OPPHØRT_UENIGHET {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 11)
         override val sanityApiNavn = "opphorDeltBostedOpphortUenighet"
-        override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOR_MED_SØKER), deltbosted = true)
     },
-    OPPHØR_UNDER_18_ÅR("Barn 18 år") {
+    OPPHØR_UNDER_18_ÅR {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 11)
         override val sanityApiNavn = "opphorUnder18Aar"
-        override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.UNDER_18_ÅR))
     },
-    OPPHØR_ENDRET_MOTTAKER("Foreldrene bor sammen, endret mottaker") {
+    OPPHØR_ENDRET_MOTTAKER {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 12)
         override val sanityApiNavn = "opphorEndretMottaker"
-        override val triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOR_MED_SØKER), vurderingAnnetGrunnlag = true)
     },
-    FORTSATT_INNVILGET_SØKER_OG_BARN_BOSATT_I_RIKET("Søker og barn oppholder seg i Norge") {
+    FORTSATT_INNVILGET_SØKER_OG_BARN_BOSATT_I_RIKET {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4, 11)
         override val sanityApiNavn = "fortsattInnvilgetSokerOgBarnBosattIRiket"
-        override val triggesAv = TriggesAv()
     },
-    FORTSATT_INNVILGET_SØKER_BOSATT_I_RIKET("Søker oppholder seg i Norge") {
+    FORTSATT_INNVILGET_SØKER_BOSATT_I_RIKET {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4, 11)
         override val sanityApiNavn = "fortsattInnvilgetSokerBosattIRiket"
-        override val triggesAv = TriggesAv()
     },
-    FORTSATT_INNVILGET_BARN_BOSATT_I_RIKET("Barn oppholder seg i Norge") {
+    FORTSATT_INNVILGET_BARN_BOSATT_I_RIKET {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4, 11)
         override val sanityApiNavn = "fortsattInnvilgetBarnBosattIRiket"
-        override val triggesAv = TriggesAv()
     },
-    FORTSATT_INNVILGET_BARN_OG_SØKER_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE("Tredjelandsborger søker og barn fortsatt lovlig opphold i Norge") {
+    FORTSATT_INNVILGET_BARN_OG_SØKER_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4, 11)
         override val sanityApiNavn = "fortsattInnvilgetBarnOgSokerLovligOppholdOppholdstillatelse"
-        override val triggesAv = TriggesAv()
     },
-    FORTSATT_INNVILGET_SØKER_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE("Tredjelandsborger søker fortsatt lovlig opphold i Norge") {
+    FORTSATT_INNVILGET_SØKER_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4, 11)
         override val sanityApiNavn = "fortsattInnvilgetSokerLovligOppholdOppholdstillatelse"
-        override val triggesAv = TriggesAv()
     },
-    FORTSATT_INNVILGET_BARN_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE("Tredjelandsborger barn fortsatt lovlig opphold i Norge") {
+    FORTSATT_INNVILGET_BARN_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4, 11)
         override val sanityApiNavn = "fortsattInnvilgetBarnLovligOppholdOppholdstillatelse"
-        override val triggesAv = TriggesAv()
     },
-    FORTSATT_INNVILGET_BOR_MED_SØKER("Barn bosatt med søker") {
+    FORTSATT_INNVILGET_BOR_MED_SØKER {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4, 11)
         override val sanityApiNavn = "fortsattInnvilgetBorMedSoker"
-        override val triggesAv = TriggesAv()
     },
-    FORTSATT_INNVILGET_FAST_OMSORG("Fortsatt fast omsorg for barn") {
+    FORTSATT_INNVILGET_FAST_OMSORG {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4, 11)
         override val sanityApiNavn = "fortsattInnvilgetFastOmsorg"
-        override val triggesAv = TriggesAv()
     },
-    FORTSATT_INNVILGET_LOVLIG_OPPHOLD_EØS("EØS-borger: Søker har oppholdsrett") {
+    FORTSATT_INNVILGET_LOVLIG_OPPHOLD_EØS {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4, 11)
         override val sanityApiNavn = "fortsattInnvilgetLovligOppholdEOS"
-        override val triggesAv = TriggesAv()
     },
-    FORTSATT_INNVILGET_LOVLIG_OPPHOLD_TREDJELANDSBORGER("Tålt opphold tredjelandsborger") {
+    FORTSATT_INNVILGET_LOVLIG_OPPHOLD_TREDJELANDSBORGER {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4, 11)
         override val sanityApiNavn = "fortsattInnvilgetLovligOppholdTredjelandsborger"
-        override val triggesAv = TriggesAv()
     },
-    FORTSATT_INNVILGET_UENDRET_TRYGD("Har barnetrygden det er søkt om") {
+    FORTSATT_INNVILGET_UENDRET_TRYGD {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
-        override fun hentHjemler(): SortedSet<Int> = sortedSetOf(2, 4, 11)
         override val sanityApiNavn = "fortsattInnvilgetUendretTrygd"
-        override val triggesAv = TriggesAv()
+    },
+    FORTSATT_INNVILGET_OPPHOLD_I_UTLANDET_IKKE_MER_ENN_3_MÅNEDER_SØKER_OG_BARN {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
+        override val sanityApiNavn = "oppholdIUtlandetIkkeMerEnn3ManederSokerOgBarn"
+    },
+    INNVILGELSE_HELE_FAMILIEN_TRYGDEAVTALE {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
+        override val sanityApiNavn = "heleFamilienTrygdeavtale"
+    },
+    INNVILGELSE_HELE_FAMILIEN_PLIKTIG_MEDLEM {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
+        override val sanityApiNavn = "heleFamilienPliktigMedlem"
+    },
+    INNVILGELSE_SØKER_OG_BARN_PLIKTIG_MEDLEM {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
+        override val sanityApiNavn = "sokerOgBarnPliktigMedlem"
+    },
+    AVSLAG_IKKE_MEDLEM {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
+        override val sanityApiNavn = "ikkeMedlem"
+    },
+    AVSLAG_VURDERING_FLERE_KORTE_OPPHOLD_I_UTLANDET_SISTE_ÅRENE {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
+        override val sanityApiNavn = "avslagVurderingFlereKorteOppholdIUtlandetSisteArene"
+    },
+    AVSLAG_VURDERING_ANNEN_FORELDER_IKKE_MEDLEM {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
+        override val sanityApiNavn = "avslagVurderingAnnenForelderIkkeMedlem"
+    },
+    INNVILGELSE_ENIGHET_OM_OPPHØR_AV_AVTALE_OM_DELT_BOSTED {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
+        override val sanityApiNavn = "innvilgelseEnighetOmAtAvtalenOmDeltBostedErOpphort"
+    },
+    FORTSATT_INNVILGET_HELE_FAMILIEN_MEDLEM_ETTER_TRYGDEAVTALE {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
+        override val sanityApiNavn = "heleFamilienMedlemEtterTrygdeavtale"
+    },
+    FORTSATT_INNVILGET_OPPHOLD_I_UTLANDET_IKKE_MER_ENN_3_MÅNEDER_BARN {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
+        override val sanityApiNavn = "oppholdIUtlandetIkkeMerEnn3ManederBarn"
+    },
+    INNVILGELSE_VURDERING_HELE_FAMILIEN_FRIVILLIG_MEDLEM {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
+        override val sanityApiNavn = "vurderingHeleFamilienFrivilligMedlem"
+    },
+    OPPHØR_ANNEN_FORELDER_IKKE_LENGER_PLIKTIG_MEDLEM {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
+        override val sanityApiNavn = "annenForelderIkkeLengerPliktigMedlem"
+    },
+    AVSLAG_IKKE_FRIVILLIG_MEDLEM {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
+        override val sanityApiNavn = "ikkeFrivilligMedlem"
+    },
+    INNVILGELSE_VURDERING_SØKER_OG_BARN_PLIKTIG_MEDLEM {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
+        override val sanityApiNavn = "vurderingSokerOgBarnPliktigMedlem"
+    },
+    FORTSATT_INNVILGET_MEDLEM_I_FOLKETRYGDEN {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
+        override val sanityApiNavn = "fortsattInnvilgetMedlemIFolketrygden"
+    },
+    AVSLAG_IKKE_PLIKTIG_MEDLEM {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
+        override val sanityApiNavn = "ikkePliktigMedlem"
+    },
+    REDUKSJON_ANNEN_FORELDER_IKKE_LENGER_FRIVILLIG_MEDLEM {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "reduksjonAnnenForelderIkkeLengerFrivilligMedlem"
+    },
+    AVSLAG_ANNEN_FORELDER_IKKE_MEDLEM_ETTER_TRYGDEAVTALE {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
+        override val sanityApiNavn = "avslagAnnenForelderIkkeMedlemEtterTrygdeavtale"
+    },
+    OPPHØR_SØKER_OG_BARN_IKKE_LENGER_PLIKTIG_MEDLEM {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
+        override val sanityApiNavn = "sokerOgBarnIkkeLengerPliktigMedlem"
+    },
+    AVSLAG_ANNEN_FORELDER_IKKE_PLIKTIG_MEDLEM {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
+        override val sanityApiNavn = "annenForelderIkkePliktigMedlem"
+    },
+    REDUKSJON_ANNEN_FORELDER_IKKE_MEDLEM {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "annenForelderIkkeMedlem"
+    },
+    REDUKSJON_VURDERING_BARN_FLERE_KORTE_OPPHOLD_I_UTLANDET_SISTE_ÅRENE_ {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "vurderingBarnFlereKorteOppholdIUtlandetSisteArene"
+    },
+    FORTSATT_INNVILGET_DELT_BOSTED_PRAKTISERES_FORTSATT {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
+        override val sanityApiNavn = "fortsattInnvilgetDeltBostedPraktiseresFortsatt"
+    },
+    INNVILGELSE_UENIGHET_OM_OPPHØR_AV_AVTALE_OM_DELT_BOSTED {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
+        override val sanityApiNavn = "innvilgelseUenighetOmOpphorAvAvtaleOmDeltBosted"
+    },
+    INNVILGELSE_HELE_FAMILIEN_FRIVILLIG_MEDLEM {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
+        override val sanityApiNavn = "heleFamilienFrivilligMedlem"
+    },
+    INNVILGELSE_VURDERING_HELE_FAMILIEN_PLIKTIG_MEDLEM {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
+        override val sanityApiNavn = "vurderingHeleFamilienPliktigMedlem"
+    },
+    REDUKSJON_ANNEN_FORELDER_IKKE_LENGER_MEDLEM_TRYGDEAVTALE {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "reduksjonAnnenForelderIkkeLengerMedlemTrygdeavtale"
+    },
+    OPPHØR_BOSATT_I_NORGE_UNNTATT_MEDLEMSKAP {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
+        override val sanityApiNavn = "bosattINorgeUnntattMedlemskap"
+    },
+    OPPHØR_ANNEN_FORELDER_IKKE_LENGER_MEDLEM_TRYGDEAVTALE {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
+        override val sanityApiNavn = "annenForelderIkkeLengerMedlemTrygdeavtale"
+    },
+    REDUKSJON_ANNEN_FORELDER_IKKE_LENGER_PLIKTIG_MEDLEM {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "reduksjonAnnenForelderIkkeLengerPliktigMedlem"
+    },
+    FORTSATT_INNVILGET_VURDERING_HELE_FAMILIEN_MEDLEM {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
+        override val sanityApiNavn = "vurderingHeleFamilienMedlem"
+    },
+    FORTSATT_INNVILGET_SØKER_OG_BARN_MEDLEM_ETTER_TRYGDEAVTALE {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
+        override val sanityApiNavn = "sokerOgBarnMedlemEtterTrygdeavtale"
+    },
+    AVSLAG_VURDERING_IKKE_MEDLEM {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
+        override val sanityApiNavn = "vurderingIkkeMedlem"
+    },
+    OPPHØR_SØKER_OG_BARN_IKKE_LENGER_MEDLEM_TRYGDEAVTALE {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
+        override val sanityApiNavn = "sokerOgBarnIkkeLengerMedlemTrygdeavtale"
+    },
+    INNVILGELSE_SØKER_OG_BARN_OPPHOLD_I_UTLANDET_IKKE_MER_ENN_3_MÅNEDER {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
+        override val sanityApiNavn = "sokerOgBarnOppholdIUtlandetIkkeMerEnn3Maneder"
+    },
+    REDUKSJON_VURDERING_BARN_FLERE_KORTE_OPPHOLD_I_UTLANDET_SISTE_TO_ÅR_ {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "vurderingBarnFlereKorteOppholdIUtlandetSisteToAr"
+    },
+    OPPHØR_SØKER_OG_BARN_IKKE_LENGER_FRIVILLIG_MEDLEM {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
+        override val sanityApiNavn = "sokerOgBarnIkkeLengerFrivilligMedlem"
+    },
+    OPPHØR_VURDERING_ANNEN_FORELDER_IKKE_MEDLEM {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
+        override val sanityApiNavn = "vurderingAnnenForelderIkkeMedlem"
+    },
+    OPPHØR_VURDERING_FLERE_KORTE_OPPHOLD_I_UTLANDET_SISTE_TO_ÅR {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
+        override val sanityApiNavn = "vurderingFlereKorteOppholdIUtlandetSisteToAr"
+    },
+    AVSLAG_ANNEN_FORELDER_IKKE_FRIVILLIG_MEDLEM {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
+        override val sanityApiNavn = "annenForelderIkkeFrivilligMedlem"
+    },
+    OPPHØR_VURDERING_SØKER_OG_BARN_IKKE_MEDLEM {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
+        override val sanityApiNavn = "vurderingSokerOgBarnIkkeMedlem"
+    },
+    AVSLAG_IKKE_MEDLEM_ETTER_TRYGDEAVTALE {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
+        override val sanityApiNavn = "ikkeMedlemEtterTrygdeavtale"
+    },
+    OPPHØR_SØKER_OG_BARN_IKKE_MEDLEM {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
+        override val sanityApiNavn = "sokerOgBarnIkkeMedlem"
+    },
+    AVSLAG_VURDERING_FLERE_KORTE_OPPHOLD_I_UTLANDET_SISTE_TO_ÅR {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
+        override val sanityApiNavn = "avslagVurderingFlereKorteOppholdIUtlandetSisteToAar"
+    },
+    INNVILGELSE_BARN_OPPHOLD_I_UTLANDET_IKKE_MER_ENN_3_MÅNEDER {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
+        override val sanityApiNavn = "barnOppholdIUtlandetIkkeMerEnn3Maneder"
+    },
+    INNVILGELSE_SØKER_OG_BARN_FRIVILLIG_MEDLEM {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
+        override val sanityApiNavn = "sokerOgBarnFrivilligMedlem"
+    },
+    OPPHØR_VURDERING_FLERE_KORTE_OPPHOLD_I_UTLANDET_SISTE_ÅRENE {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
+        override val sanityApiNavn = "vurderingFlereKorteOppholdIUtlandetSisteArene"
+    },
+    INNVILGELSE_VURDERING_SØKER_OG_BARN_FRIVILLIG_MEDLEM {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
+        override val sanityApiNavn = "vurderingSokerOgBarnFrivilligMedlem"
+    },
+    INNVILGELSE_ETTERBETALING_3_ÅR {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
+        override val sanityApiNavn = "etterbetaling3Aar"
+    },
+    FORTSATT_INNVILGET_ANNEN_FORELDER_IKKE_SØKT_OM_DELT_BARNETRYGD {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
+        override val sanityApiNavn = "fortsattInnvilgetAnnenForelderIkkeSokt"
+    },
+    INNVILGELSE_SØKER_OG_BARN_TRYGDEAVTALE {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
+        override val sanityApiNavn = "sokerOgBarnTrygdeavtale"
+    },
+    FORTSATT_INNVILGET_VURDERING_SØKER_OG_BARN_MEDLEM {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
+        override val sanityApiNavn = "vurderingSokerOgBarnMedlem"
+    },
+    OPPHØR_ANNEN_FORELDER_IKKE_LENGER_FRIVILLIG_MEDLEM {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
+        override val sanityApiNavn = "annenForelderIkkeLengerFrivilligMedlem"
+    },
+    REDUKSJON_SATSENDRING {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "reduksjonSatsendring"
     };
 
     fun triggesForPeriode(
@@ -530,7 +598,7 @@ enum class VedtakBegrunnelseSpesifikasjon(
         vilkårsvurdering: Vilkårsvurdering,
         persongrunnlag: PersonopplysningGrunnlag,
         identerMedUtbetaling: List<String>,
-        triggesAv: TriggesAv = this.triggesAv,
+        triggesAv: TriggesAv,
         vedtakBegrunnelseType: VedtakBegrunnelseType = this.vedtakBegrunnelseType,
     ): Boolean {
         if (!triggesAv.valgbar) return false
@@ -539,10 +607,13 @@ enum class VedtakBegrunnelseSpesifikasjon(
 
         if (triggesAv.personerManglerOpplysninger) return vilkårsvurdering.harPersonerManglerOpplysninger()
 
-        if (triggesAv.barnMedSeksårsdag) return persongrunnlag.harBarnMedSeksårsdagPåFom(vedtaksperiodeMedBegrunnelser.fom)
+        if (triggesAv.barnMedSeksårsdag)
+            return persongrunnlag.harBarnMedSeksårsdagPåFom(vedtaksperiodeMedBegrunnelser.fom)
 
         if (triggesAv.satsendring)
-            return SatsService.finnSatsendring(vedtaksperiodeMedBegrunnelser.fom ?: TIDENES_MORGEN).isNotEmpty()
+            return SatsService
+                .finnSatsendring(vedtaksperiodeMedBegrunnelser.fom ?: TIDENES_MORGEN)
+                .isNotEmpty()
 
         return hentPersonerForAlleUtgjørendeVilkår(
             vilkårsvurdering = vilkårsvurdering,
@@ -572,10 +643,8 @@ enum class VedtakBegrunnelseSpesifikasjon(
 
 val hjemlerTilhørendeFritekst = setOf(2, 4, 11)
 
-@Deprecated("Bruk VedtakBegrunnelseSpesifikasjon.erTilknyttetVilkår")
-val vedtakBegrunnelserIkkeTilknyttetVilkår = VedtakBegrunnelseSpesifikasjon.values().filter { it.triggesAv.vilkår == null }
-
-fun VedtakBegrunnelseSpesifikasjon.tilSanityBegrunnelse(sanityBegrunnelser: List<SanityBegrunnelse>): SanityBegrunnelse =
+fun VedtakBegrunnelseSpesifikasjon.tilSanityBegrunnelse(sanityBegrunnelser: List<SanityBegrunnelse>)
+    : SanityBegrunnelse =
     sanityBegrunnelser.find { it.apiNavn == this.sanityApiNavn }
         ?: throw Feil("Fant ikke begrunnelse med apiNavn=${this.sanityApiNavn} for ${this.name} i Sanity.")
 
@@ -585,7 +654,7 @@ fun VedtakBegrunnelseSpesifikasjon.erTilknyttetVilkår(sanityBegrunnelser: List<
 fun SanityBegrunnelse.tilTriggesAv(): TriggesAv {
 
     return TriggesAv(
-        vilkår = this.vilkaar?.map { it.tilVilkår() }?.toSet(),
+        vilkår = this.vilkaar?.map { it.tilVilkår() }?.toSet() ?: emptySet(),
         personTyper = this.rolle?.map { it.tilPersonType() }?.toSet()
             ?: when {
                 this.inneholderVilkår(SanityVilkår.BOSATT_I_RIKET) -> setOf(PersonType.BARN, PersonType.SØKER)
@@ -649,12 +718,9 @@ fun VedtakBegrunnelseType.hentMånedOgÅrForBegrunnelse(periode: Periode) = when
         else if (periode.tom == TIDENES_ENDE) periode.fom.tilMånedÅr()
         else "${periode.fom.tilMånedÅr()} til ${periode.tom.tilMånedÅr()}"
     else ->
-        if (periode.fom == TIDENES_MORGEN) throw Feil("Prøver å finne fom-dato for begrunnelse, men fikk \"TIDENES_MORGEN\".")
+        if (periode.fom == TIDENES_MORGEN)
+            throw Feil("Prøver å finne fom-dato for begrunnelse, men fikk \"TIDENES_MORGEN\".")
         else periode.fom.forrigeMåned().tilMånedÅr()
-}
-
-fun VedtakBegrunnelseSpesifikasjon.hentHjemlerFraSanity(sanityBegrunnelser: List<SanityBegrunnelse>): List<String> {
-    return this.tilSanityBegrunnelse(sanityBegrunnelser).hjemler
 }
 
 @Converter
@@ -663,5 +729,6 @@ class VedtakBegrunnelseSpesifikasjonListConverter : AttributeConverter<List<Vedt
     override fun convertToDatabaseColumn(vedtakBegrunnelseSpesifikasjoner: List<VedtakBegrunnelseSpesifikasjon>) =
         konverterEnumsTilString(vedtakBegrunnelseSpesifikasjoner)
 
-    override fun convertToEntityAttribute(string: String?): List<VedtakBegrunnelseSpesifikasjon> = konverterStringTilEnums(string)
+    override fun convertToEntityAttribute(string: String?): List<VedtakBegrunnelseSpesifikasjon> =
+        konverterStringTilEnums(string)
 }

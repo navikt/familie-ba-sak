@@ -28,7 +28,7 @@ class BrevKlientMock : BrevKlient(
     }
 
     override fun hentSanityBegrunnelse(): List<SanityBegrunnelse> {
-        return navnTilNedtrekksmenyMock
+        return sanityBegrunnelserMock
     }
 
     override fun hentBegrunnelsestekst(begrunnelseData: BegrunnelseData): String {
@@ -36,7 +36,7 @@ class BrevKlientMock : BrevKlient(
     }
 }
 
-val navnTilNedtrekksmenyMock: List<SanityBegrunnelse> =
+val sanityBegrunnelserMock: List<SanityBegrunnelse> =
     VedtakBegrunnelseSpesifikasjon.values()
         .map {
             SanityBegrunnelse(
@@ -61,7 +61,8 @@ val navnTilNedtrekksmenyMock: List<SanityBegrunnelse> =
                     VedtakBegrunnelseSpesifikasjon.OPPHØR_UTVANDRET -> listOf(SanityVilkår.BOSATT_I_RIKET)
                     VedtakBegrunnelseSpesifikasjon.OPPHØR_IKKE_MOTTATT_OPPLYSNINGER -> null
 
-                    else -> SanityVilkår.values().toList()
+                    else -> SanityVilkår.values()
+                        .filter { sanityVilkår -> sanityVilkår != SanityVilkår.UTVIDET_BARNETRYGD }.toList()
                 },
                 rolle = when (it) {
                     VedtakBegrunnelseSpesifikasjon.REDUKSJON_BOSATT_I_RIKTET -> listOf(VilkårRolle.BARN)
@@ -71,7 +72,11 @@ val navnTilNedtrekksmenyMock: List<SanityBegrunnelse> =
                     )
                     else -> null
                 },
-                hjemler = listOf("98", "99", "100")
+                hjemler = when (it) {
+                    VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET -> listOf("2", "4", "11")
+                    VedtakBegrunnelseSpesifikasjon.INNVILGET_SATSENDRING -> listOf("2", "10")
+                    else -> listOf("98", "99", "100")
+                }
             )
         }
 

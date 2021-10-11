@@ -6,18 +6,16 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.dokument.DokumentService
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import org.slf4j.LoggerFactory
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.time.LocalDate
 import java.time.LocalDateTime
 
 @Service
@@ -28,6 +26,7 @@ class VedtakService(
     private val dokumentService: DokumentService,
     private val totrinnskontrollService: TotrinnskontrollService,
     private val tilbakekrevingService: TilbakekrevingService,
+    private val vedtaksperiodeService: VedtaksperiodeService
 ) {
 
     fun opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(behandling: Behandling): Vedtak {
@@ -83,33 +82,35 @@ class VedtakService(
 
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} beslutter vedtak $vedtak")
     }
+
     /**
-     * Når et vilkår vurderes (endres) vil begrunnelsene satt på dette vilkåret resettes
+     * Når et vilkår vurderes (endres) vil vi resette steget og slette data som blir generert senere i løypa
      */
     @Transactional
-    fun settStegSlettTilbakekreving(behandlingId: Long) {
+    fun resettStegVedEndringPåVilkår(behandlingId: Long) {
         behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(
             behandlingId = behandlingId,
             steg = StegType.VILKÅRSVURDERING
         )
+        vedtaksperiodeService.slettVedtaksperioderFor(vedtak = hentAktivForBehandlingThrows(behandlingId))
+        tilbakekrevingService.slettTilbakekrevingPåBehandling(behandlingId)
+    }
+
+    /**
+     * Når en andel vurderes (endres) vil vi resette steget og slette data som blir generert senere i løypa
+     */
+    @Transactional
+    fun resettStegVedEndringPåEndredeUtbetalingsperioder(behandlingId: Long) {
+        behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(
+            behandlingId = behandlingId,
+            steg = StegType.BEHANDLINGSRESULTAT
+        )
+        vedtaksperiodeService.slettVedtaksperioderFor(vedtak = hentAktivForBehandlingThrows(behandlingId))
         tilbakekrevingService.slettTilbakekrevingPåBehandling(behandlingId)
     }
 
     companion object {
 
         private val logger = LoggerFactory.getLogger(VedtakService::class.java)
-
-        data class BrevtekstParametre(
-            val gjelderSøker: Boolean = false,
-            val barnasFødselsdatoer: List<LocalDate> = emptyList(),
-            val månedOgÅrBegrunnelsenGjelderFor: String = "",
-            val målform: Målform
-        )
-
-        val BrevParameterComparator =
-            compareBy<Map.Entry<VedtakBegrunnelseSpesifikasjon, BrevtekstParametre>>(
-                { !it.value.gjelderSøker },
-                { it.value.barnasFødselsdatoer.isNotEmpty() }
-            )
     }
 }

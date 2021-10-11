@@ -54,6 +54,18 @@ class SkatteetatenController(
         return ResponseEntity(Ressurs.success(respons), HttpStatus.valueOf(200))
     }
 
+    @GetMapping(
+        value = ["/personer/test"],
+        produces = ["application/json;charset=UTF-8"]
+    )
+    fun finnPersonerMedUtvidetBarnetrygdTest(
+        @NotNull @RequestParam(value = "aar", required = true) aar: String
+    ): ResponseEntity<Ressurs<SkatteetatenPersonerResponse>> {
+        logger.info("Treff på finnPersonerMedUtvidetBarnetrygdTest")
+        val respons = skatteetatenService.finnPersonerMedUtvidetBarnetrygd(aar);
+        return ResponseEntity(Ressurs.success(respons), HttpStatus.valueOf(200))
+    }
+
     @PostMapping(
         value = ["/perioder"],
         produces = ["application/json;charset=UTF-8"],
@@ -68,6 +80,24 @@ class SkatteetatenController(
         } else {
             SkatteetatenPerioderResponse(listeMedTestdataPerioder().filter { it.sisteVedtakPaaIdent.year == perioderRequest.aar.toInt() && it.ident in perioderRequest.identer })
         }
+        return ResponseEntity(
+            Ressurs.Companion.success(response),
+            HttpStatus.valueOf(200)
+        )
+    }
+
+    @PostMapping(
+        value = ["/perioder/test"],
+        produces = ["application/json;charset=UTF-8"],
+        consumes = ["application/json"]
+    )
+    fun hentPerioderMedUtvidetBarnetrygdForMidlertidigTest(
+        @Valid @RequestBody perioderRequest: SkatteetatenPerioderRequest
+    ): ResponseEntity<Ressurs<SkatteetatenPerioderResponse>> {
+        logger.info("Treff på hentPerioderMedUtvidetBarnetrygdForMidlertidigTest")
+        val response =
+            skatteetatenService.finnPerioderMedUtvidetBarnetrygd(perioderRequest.identer, perioderRequest.aar)
+
         return ResponseEntity(
             Ressurs.Companion.success(response),
             HttpStatus.valueOf(200)
@@ -111,8 +141,8 @@ class SkatteetatenController(
             SkatteetatenPerioder(
                 "27903249671", LocalDateTime.of(2021, 1, 1, 0, 0),
                 perioder = listOf(
-                    SkatteetatenPeriode("2021-01", Delingsprosent._50, tomMaaned = "2020-03"),
-                    SkatteetatenPeriode("2021-04", Delingsprosent._0, tomMaaned = "2020-08"),
+                    SkatteetatenPeriode("2021-01", Delingsprosent._50, tomMaaned = "2021-03"),
+                    SkatteetatenPeriode("2021-04", Delingsprosent._0, tomMaaned = "2021-08"),
                     SkatteetatenPeriode("2021-09", Delingsprosent.usikker, tomMaaned = null)
                 )
             ),
@@ -133,5 +163,5 @@ class SkatteetatenController(
                 )
             ),
 
-        )
+            )
 }

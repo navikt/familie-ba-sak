@@ -61,7 +61,8 @@ class FødselshendelseService(
 
         logger.info("Behandler fødselshendelse på behandling $behandling")
 
-        val behandlingEtterFiltrering = stegService.håndterFiltreringsreglerForFødselshendelser(behandling, nyBehandling)
+        val behandlingEtterFiltrering =
+            stegService.håndterFiltreringsreglerForFødselshendelser(behandling, nyBehandling)
 
         if (behandlingEtterFiltrering.steg == StegType.HENLEGG_BEHANDLING) {
             henleggBehandlingOgOpprettManuellOppgave(
@@ -84,7 +85,11 @@ class FødselshendelseService(
             val vedtakEtterToTrinn =
                 vedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(behandling = behandlingEtterVilkårsvurdering)
 
-            val task = IverksettMotOppdragTask.opprettTask(behandling, vedtakEtterToTrinn, SikkerhetContext.hentSaksbehandler())
+            val task = IverksettMotOppdragTask.opprettTask(
+                behandling,
+                vedtakEtterToTrinn,
+                SikkerhetContext.hentSaksbehandler()
+            )
             taskRepository.save(task)
 
             passertFiltreringOgVilkårsvurderingCounter.increment()
@@ -112,7 +117,6 @@ class FødselshendelseService(
         }
 
         logger.info("Henlegger behandling $behandling automatisk på grunn av ugyldig resultat")
-        secureLogger.info("Henlegger behandling $behandling automatisk på grunn av ugyldig resultat. Begrunnelse: $begrunnelse")
 
         stegService.håndterHenleggBehandling(
             behandling = behandling,
@@ -129,6 +133,8 @@ class FødselshendelseService(
     }
 
     private fun opprettOppgaveForManuellBehandling(behandlingId: Long, begrunnelse: String?) {
+        logger.info("Sender fødselshendelse til manuell behandling, se secureLogger for mer detaljer.")
+        secureLogger.info("Sender fødselshendelse til manuell behandling. Begrunnelse: $begrunnelse")
         opprettTaskService.opprettOppgaveTask(
             behandlingId = behandlingId,
             oppgavetype = Oppgavetype.VurderLivshendelse,
