@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
+import java.math.BigDecimal
 
 class UtbetalingssikkerhetTest {
 
@@ -233,7 +234,8 @@ class UtbetalingssikkerhetTest {
                     barn.fødselsdato.plusYears(18).forrigeMåned().toString(),
                     YtelseType.ORDINÆR_BARNETRYGD,
                     1054,
-                    person = barn
+                    person = barn,
+                    prosent = BigDecimal(100)
                 )
             )
         )
@@ -253,7 +255,8 @@ class UtbetalingssikkerhetTest {
                     barn.fødselsdato.plusYears(18).forrigeMåned().toString(),
                     YtelseType.ORDINÆR_BARNETRYGD,
                     1054,
-                    person = barn
+                    person = barn,
+                    prosent = BigDecimal(100)
                 ),
                 lagAndelTilkjentYtelse(
                     barn.fødselsdato.nesteMåned().toString(),
@@ -274,6 +277,59 @@ class UtbetalingssikkerhetTest {
         }
 
         assertTrue(feil.frontendFeilmelding?.contains("Det utbetales allerede barnetrygd for ${barn.personIdent.ident}")!!)
+    }
+
+    @Test
+    fun `Skal ikke kaste feil når utbetalingsandeler for barn ikke overskrider 100 prosent for ytelsetype`() {
+        val barn = tilfeldigPerson()
+        val tilkjentYtelse = lagInitiellTilkjentYtelse()
+
+        tilkjentYtelse.andelerTilkjentYtelse.addAll(
+            listOf(
+                lagAndelTilkjentYtelse(
+                    barn.fødselsdato.nesteMåned().toString(),
+                    barn.fødselsdato.plusYears(18).forrigeMåned().toString(),
+                    YtelseType.ORDINÆR_BARNETRYGD,
+                    1054,
+                    person = barn,
+                    prosent = BigDecimal(50)
+                )
+            )
+        )
+
+        val far = tilfeldigPerson(personType = PersonType.SØKER)
+        val personopplysningGrunnlag2 = PersonopplysningGrunnlag(
+            behandlingId = 1,
+            personer = mutableSetOf(far, barn)
+        )
+
+        val tilkjentYtelse2 = lagInitiellTilkjentYtelse()
+
+        tilkjentYtelse2.andelerTilkjentYtelse.addAll(
+            listOf(
+                lagAndelTilkjentYtelse(
+                    barn.fødselsdato.nesteMåned().toString(),
+                    barn.fødselsdato.plusYears(18).forrigeMåned().toString(),
+                    YtelseType.ORDINÆR_BARNETRYGD,
+                    1054,
+                    person = barn,
+                    prosent = BigDecimal(50)
+                ),
+                lagAndelTilkjentYtelse(
+                    barn.fødselsdato.nesteMåned().toString(),
+                    barn.fødselsdato.plusYears(18).forrigeMåned().toString(),
+                    YtelseType.SMÅBARNSTILLEGG,
+                    660,
+                    person = barn
+                )
+            )
+        )
+
+        TilkjentYtelseValidering.validerAtBarnIkkeFårFlereUtbetalingerSammePeriode(
+            tilkjentYtelse2,
+            listOf(Pair(barn, listOf(tilkjentYtelse))),
+            personopplysningGrunnlag2
+        )
     }
 
     @Test
