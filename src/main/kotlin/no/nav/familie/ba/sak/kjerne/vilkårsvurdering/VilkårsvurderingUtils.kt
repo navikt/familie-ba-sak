@@ -180,6 +180,7 @@ object VilkårsvurderingUtils {
     fun flyttResultaterTilInitielt(
         initiellVilkårsvurdering: Vilkårsvurdering,
         aktivVilkårsvurdering: Vilkårsvurdering,
+        forrigeBehandlingVilkårsvurdering: Vilkårsvurdering? = null,
         løpendeUnderkategori: BehandlingUnderkategori? = null
     ): Pair<Vilkårsvurdering, Vilkårsvurdering> {
         // Identifiserer hvilke vilkår som skal legges til og hvilke som kan fjernes
@@ -223,7 +224,12 @@ object VilkårsvurderingUtils {
                         personsVilkårAktivt.removeAll(vilkårSomFinnes)
                     }
                 }
-                if (personsVilkårOppdatert.none { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD }) {
+                val eksistererUtvidetVilkårPåForrigeBehandling =
+                    forrigeBehandlingVilkårsvurdering?.personResultater?.firstOrNull { it.personIdent == personFraInit.personIdent }?.vilkårResultater?.filter { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
+                        ?.isNotEmpty() ?: false
+
+                if (personsVilkårOppdatert.none { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
+                    && (eksistererUtvidetVilkårPåForrigeBehandling || løpendeUnderkategori == BehandlingUnderkategori.UTVIDET)) {
                     val utvidetVilkår =
                         personenSomFinnes.vilkårResultater.filter { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
                     if (utvidetVilkår.isNotEmpty()) {
