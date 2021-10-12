@@ -44,6 +44,9 @@ class BehandlingSatsendringTest(
     @Test
     fun `Skal innvilge fødselshendelse på mor med 1 barn med eksisterende utbetalinger`() {
         mockkObject(SatsService)
+        // Grunnen til at denne mockes er egentlig at den indirekte påvirker hva SatsService.hentGyldigSatsFor
+        // returnerer. Det vi ønsker er at den sist tillagte satsendringen ikke kommer med slik at selve
+        // satsendringen som skal kjøres senere faktisk utgjør en endring (slik at behandlingsresultatet blir ENDRET).
         every { SatsService.tilleggEndringSeptember2021 } returns YearMonth.of(2020, 9)
 
         every { mockLocalDateService.now() } returns LocalDate.now().minusYears(6) andThen LocalDate.now()
@@ -102,6 +105,7 @@ class BehandlingSatsendringTest(
             stegService = stegService
         )!!
 
+        // Fjerner mocking slik at den siste satsendringen vi fjernet via mocking nå skal komme med.
         unmockkObject(SatsService)
         satsendringService.utførSatsendring(behandling.id)
 
