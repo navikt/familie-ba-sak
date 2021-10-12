@@ -170,7 +170,7 @@ class VedtaksperiodeService(
                     ).map { person -> person.personIdent.ident }
                 }.toMutableSet()
 
-                if (triggesAv.vilkår?.contains(Vilkår.UTVIDET_BARNETRYGD) == true) {
+                if (triggesAv.vilkår.contains(Vilkår.UTVIDET_BARNETRYGD)) {
                     personerGjeldendeForBegrunnelseIdenter.add(persongrunnlag.søker.personIdent.ident)
                 }
 
@@ -286,8 +286,12 @@ class VedtaksperiodeService(
     }
 
     fun genererVedtaksperioderMedBegrunnelser(vedtak: Vedtak): List<VedtaksperiodeMedBegrunnelser> {
+        val utbetalingsperioderUtenEndringer = hentUtbetalingsperioder(vedtak.behandling) {
+            it.filter { andelTilkjentYtelse -> andelTilkjentYtelse.endretUtbetalingAndeler.isEmpty() }
+        }
+
         val utbetalingOgOpphørsperioder =
-            (hentUtbetalingsperioder(vedtak.behandling) +
+            (utbetalingsperioderUtenEndringer +
                 hentOpphørsperioder(vedtak.behandling)
                 ).map {
                     it.tilVedtaksperiodeMedBegrunnelse(vedtak)
@@ -466,10 +470,12 @@ class VedtaksperiodeService(
         andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(listOf(behandlingId))
             .filter { it.stønadFom <= YearMonth.now() && it.stønadTom >= YearMonth.now() }
             .minByOrNull { it.stønadTom }?.stønadTom?.sisteDagIInneværendeMåned()
-
             ?: error("Fant ikke andel for tilkjent ytelse inneværende måned for behandling $behandlingId.")
 
-    fun hentUtbetalingsperioder(behandling: Behandling): List<Utbetalingsperiode> {
+    fun hentUtbetalingsperioder(
+        behandling: Behandling,
+        filterAndeler: (andelerTilkjentYtelse: List<AndelTilkjentYtelse>) -> List<AndelTilkjentYtelse> = { it }
+    ): List<Utbetalingsperiode> {
         val personopplysningGrunnlag = persongrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
             ?: return emptyList()
         val andelerTilkjentYtelse =
@@ -477,7 +483,8 @@ class VedtaksperiodeService(
 
         return mapTilUtbetalingsperioder(
             andelerTilkjentYtelse = andelerTilkjentYtelse,
-            personopplysningGrunnlag = personopplysningGrunnlag
+            personopplysningGrunnlag = personopplysningGrunnlag,
+            filterAndeler = filterAndeler
         )
     }
 
