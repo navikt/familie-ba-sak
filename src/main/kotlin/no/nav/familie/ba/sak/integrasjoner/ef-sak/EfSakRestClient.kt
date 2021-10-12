@@ -22,7 +22,9 @@ class EfSakRestClient(
 
     fun hentPerioderMedFullOvergangsstønad(personIdent: String): PerioderOvergangsstønadResponse {
         val uri =
-            UriComponentsBuilder.fromUri(efSakBaseUrl).pathSegment("/ekstern/perioder/full-overgangsstonad").build()
+            UriComponentsBuilder.fromUri(efSakBaseUrl)
+                .path("/ekstern/perioder/full-overgangsstonad")
+                .build()
                 .toUri()
 
         try {
