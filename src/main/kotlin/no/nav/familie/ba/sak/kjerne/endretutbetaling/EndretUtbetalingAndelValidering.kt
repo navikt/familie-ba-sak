@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.endretutbetaling
 
 import no.nav.familie.ba.sak.common.UtbetalingsikkerhetFeil
+import no.nav.familie.ba.sak.common.overlapperHeltEllerDelvisMed
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
@@ -54,10 +55,16 @@ object EndretUtbetalingAndelValidering {
         }
     }
 
-    fun validerDeltBosted(endretUtbetalingAndel: EndretUtbetalingAndel) {
+    fun validerDeltBosted(
+        endretUtbetalingAndel: EndretUtbetalingAndel,
+        andelTilkjentYtelser: List<AndelTilkjentYtelse>
+    ) {
         if (endretUtbetalingAndel.årsak != Årsak.DELT_BOSTED) return
 
-        if (!endretUtbetalingAndel.andelTilkjentYtelser.any { it.prosent == BigDecimal(50) }) {
+        if (!andelTilkjentYtelser.filter {
+                it.stønadsPeriode().overlapperHeltEllerDelvisMed(endretUtbetalingAndel.periode())
+            }
+                .any { it.prosent == BigDecimal(50) }) {
             throw UtbetalingsikkerhetFeil(
                 melding = "Det er ingen sats for delt bosted i perioden det opprettes en endring med årsak delt bosted for.",
                 frontendFeilmelding = "Du har valgt årsaken 'delt bosted', denne samstemmer ikke med vurderingene gjort på vilkårsvurderingssiden i perioden du har valgt."

@@ -44,12 +44,12 @@ class EndretUtbetalingAndelService(
             endretUtbetalingAndelRepository.findByBehandlingId(behandling.id)
                 .filter { it.id != endretUtbetalingAndelId }
         )
-        validerPeriodeInnenforTilkjentytelse(
-            endretUtbetalingAndel,
-            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id)
-        )
 
-        validerDeltBosted(endretUtbetalingAndel)
+        val andelTilkjentYtelser = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id)
+
+        validerPeriodeInnenforTilkjentytelse(endretUtbetalingAndel, andelTilkjentYtelser)
+
+        validerDeltBosted(endretUtbetalingAndel, andelTilkjentYtelser)
 
         val personopplysningGrunnlag =
             personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)

@@ -158,20 +158,16 @@ class EndretUtbetalingAndelValideringTest {
             begrunnelse = "begrunnelse",
             prosent = BigDecimal(100),
             søknadstidspunkt = LocalDate.now(),
-            avtaletidspunktDeltBosted = LocalDate.now(),
-            andelTilkjentYtelser = listOf(andelTilkjentYtelse)
+            avtaletidspunktDeltBosted = LocalDate.now()
         )
         val feil = assertThrows<UtbetalingsikkerhetFeil> {
-            validerDeltBosted(endretUtbetalingAndel)
+            validerDeltBosted(endretUtbetalingAndel, listOf(andelTilkjentYtelse))
         }
         assertEquals(
             "Det er ingen sats for delt bosted i perioden det opprettes en endring med årsak delt bosted for.",
             feil.melding
         )
 
-        val gyldigEndretUtbetalingAndel = endretUtbetalingAndel.copy(
-            andelTilkjentYtelser = listOf(andelTilkjentYtelse.copy(prosent = BigDecimal(50)))
-        )
-        validerDeltBosted(gyldigEndretUtbetalingAndel)
+        validerDeltBosted(endretUtbetalingAndel, listOf(andelTilkjentYtelse.copy(prosent = BigDecimal(50))))
     }
 }
