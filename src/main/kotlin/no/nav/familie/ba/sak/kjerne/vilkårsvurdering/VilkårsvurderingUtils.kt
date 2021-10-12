@@ -223,12 +223,13 @@ object VilkårsvurderingUtils {
                         personsVilkårAktivt.removeAll(vilkårSomFinnes)
                     }
                 }
-                if (løpendeUnderkategori == BehandlingUnderkategori.UTVIDET && personsVilkårOppdatert.none { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD }) {
+                if (personsVilkårOppdatert.none { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD }) {
                     val utvidetVilkår =
                         personenSomFinnes.vilkårResultater.filter { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
-
-                    personsVilkårOppdatert.addAll(utvidetVilkår.map { it.kopierMedParent(personTilOppdatert) })
-                    personsVilkårAktivt.removeAll(utvidetVilkår)
+                    if (utvidetVilkår.isNotEmpty()) {
+                        personsVilkårOppdatert.addAll(utvidetVilkår.map { it.kopierMedParent(personTilOppdatert) })
+                        personsVilkårAktivt.removeAll(utvidetVilkår)
+                    }
                 }
 
                 personTilOppdatert.setSortedVilkårResultater(personsVilkårOppdatert.toSet())
@@ -242,10 +243,10 @@ object VilkårsvurderingUtils {
             }
             personResultaterOppdatert.add(personTilOppdatert)
         }
-        aktivVilkårsvurdering.personResultater = personResultaterAktivt
-        initiellVilkårsvurdering.personResultater = personResultaterOppdatert
+        val nyAktivVilkårsvurdering = aktivVilkårsvurdering.copy(personResultater = personResultaterAktivt)
+        val nyInitiellVilkårsvurdering = initiellVilkårsvurdering.copy(personResultater = personResultaterOppdatert)
 
-        return Pair(initiellVilkårsvurdering, aktivVilkårsvurdering)
+        return Pair(nyInitiellVilkårsvurdering, nyAktivVilkårsvurdering)
     }
 
     fun lagFjernAdvarsel(personResultater: Set<PersonResultat>): String {
