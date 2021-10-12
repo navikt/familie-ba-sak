@@ -243,10 +243,10 @@ object VilkårsvurderingUtils {
             }
             personResultaterOppdatert.add(personTilOppdatert)
         }
-        val nyAktivVilkårsvurdering = aktivVilkårsvurdering.copy(personResultater = personResultaterAktivt)
-        val nyInitiellVilkårsvurdering = initiellVilkårsvurdering.copy(personResultater = personResultaterOppdatert)
+        aktivVilkårsvurdering.personResultater = personResultaterAktivt
+        initiellVilkårsvurdering.personResultater = personResultaterOppdatert
 
-        return Pair(nyInitiellVilkårsvurdering, nyAktivVilkårsvurdering)
+        return Pair(initiellVilkårsvurdering, aktivVilkårsvurdering)
     }
 
     fun lagFjernAdvarsel(personResultater: Set<PersonResultat>): String {
