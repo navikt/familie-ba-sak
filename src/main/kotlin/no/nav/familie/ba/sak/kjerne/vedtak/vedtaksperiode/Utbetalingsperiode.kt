@@ -18,6 +18,7 @@ import java.time.LocalDate
 /**
  * Dataklasser som brukes til frontend og backend når man jobber med vertikale utbetalingsperioder
  */
+
 data class Utbetalingsperiode(
     override val periodeFom: LocalDate,
     override val periodeTom: LocalDate,
@@ -65,7 +66,7 @@ data class UtbetalingsperiodeDetalj(
 
 fun mapTilUtbetalingsperioder(
     personopplysningGrunnlag: PersonopplysningGrunnlag,
-    andelerTilkjentYtelse: List<AndelTilkjentYtelse>
+    andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
 ): List<Utbetalingsperiode> {
     return if (andelerTilkjentYtelse.isEmpty()) {
         emptyList()
@@ -81,10 +82,11 @@ fun mapTilUtbetalingsperioder(
                     )
                 )
             }
+
             mapTilUtbetalingsperiode(
                 segment = segment,
                 andelerForSegment = andelerForSegment,
-                personopplysningGrunnlag = personopplysningGrunnlag
+                personopplysningGrunnlag = personopplysningGrunnlag,
             )
         }
     }
@@ -101,17 +103,7 @@ private fun mapTilUtbetalingsperiode(
     andelerForSegment: List<AndelTilkjentYtelse>,
     personopplysningGrunnlag: PersonopplysningGrunnlag
 ): Utbetalingsperiode {
-    val utbetalingsperiodeDetaljer = andelerForSegment.map { andel ->
-        val personForAndel =
-            personopplysningGrunnlag.personer.find { person -> andel.personIdent == person.personIdent.ident }
-                ?: throw IllegalStateException("Fant ikke personopplysningsgrunnlag for andel")
-
-        UtbetalingsperiodeDetalj(
-            person = personForAndel.tilRestPerson(),
-            ytelseType = andel.type,
-            utbetaltPerMnd = andel.kalkulertUtbetalingsbeløp
-        )
-    }
+    val utbetalingsperiodeDetaljer = hentUtbetalinsperiodeDetaljer(andelerForSegment, personopplysningGrunnlag)
 
     return Utbetalingsperiode(
         periodeFom = segment.fom,
@@ -123,4 +115,22 @@ private fun mapTilUtbetalingsperiode(
         },
         utbetalingsperiodeDetaljer = utbetalingsperiodeDetaljer
     )
+}
+
+private fun hentUtbetalinsperiodeDetaljer(
+    andelerForSegment: List<AndelTilkjentYtelse>,
+    personopplysningGrunnlag: PersonopplysningGrunnlag
+): List<UtbetalingsperiodeDetalj> {
+    val utbetalingsperiodeDetaljer = andelerForSegment.map { andel ->
+        val personForAndel =
+            personopplysningGrunnlag.personer.find { person -> andel.personIdent == person.personIdent.ident }
+                ?: throw IllegalStateException("Fant ikke personopplysningsgrunnlag for andel")
+
+        UtbetalingsperiodeDetalj(
+            person = personForAndel.tilRestPerson(),
+            ytelseType = andel.type,
+            utbetaltPerMnd = andel.kalkulertUtbetalingsbeløp
+        )
+    }
+    return utbetalingsperiodeDetaljer
 }
