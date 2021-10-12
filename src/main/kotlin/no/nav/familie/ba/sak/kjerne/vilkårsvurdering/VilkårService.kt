@@ -154,7 +154,10 @@ class VilkårService(
                 val (initieltSomErOppdatert, aktivtSomErRedusert) = flyttResultaterTilInitielt(
                     initiellVilkårsvurdering = initiellVilkårsvurdering,
                     aktivVilkårsvurdering = aktivVilkårsvurdering,
-                    løpendeUnderkategori = behandlingService.hentLøpendeUnderkategori(initiellVilkårsvurdering.behandling.fagsak.id)
+                    løpendeUnderkategori = behandlingService.hentLøpendeUnderkategori(initiellVilkårsvurdering.behandling.fagsak.id),
+                    forrigeBehandlingVilkårsvurdering = if (forrigeBehandling != null) hentVilkårsvurdering(
+                        forrigeBehandling.id
+                    ) else null
                 )
 
                 if (aktivtSomErRedusert.personResultater.isNotEmpty() && !bekreftEndringerViaFrontend) {
