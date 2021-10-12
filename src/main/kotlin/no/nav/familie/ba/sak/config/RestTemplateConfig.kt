@@ -73,8 +73,8 @@ class RestTemplateConfig(
         bearerTokenClientInterceptor: BearerTokenClientInterceptor
     ): RestOperations {
         return RestTemplateBuilder()
-            .setReadTimeout(Duration.ofMinutes(5L))
-            .setConnectTimeout(Duration.ofMinutes(5L))
+            .setReadTimeout(Duration.ofMinutes(12L))
+            .setConnectTimeout(Duration.ofMinutes(12L))
             .interceptors(
                 consumerIdClientInterceptor,
                 bearerTokenClientInterceptor,
