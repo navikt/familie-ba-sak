@@ -70,7 +70,7 @@ data class AndelTilkjentYtelse(
     @Column(name = "prosent", nullable = false)
     val prosent: BigDecimal,
 
-    @ManyToMany(cascade = [CascadeType.ALL])
+    @ManyToMany(cascade = [CascadeType.PERSIST])
     @JoinTable(
         name = "ANDEL_TIL_ENDRET_ANDEL",
         joinColumns = [JoinColumn(name = "fk_andel_tilkjent_ytelse_id")],

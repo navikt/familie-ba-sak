@@ -20,7 +20,6 @@ import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
-import javax.persistence.CascadeType
 import javax.persistence.Column
 import javax.persistence.Convert
 import javax.persistence.Entity
@@ -79,7 +78,7 @@ data class EndretUtbetalingAndel(
     @Column(name = "begrunnelse")
     var begrunnelse: String? = null,
 
-    @ManyToMany(mappedBy = "endretUtbetalingAndeler", cascade = [CascadeType.ALL])
+    @ManyToMany(mappedBy = "endretUtbetalingAndeler")
     val andelTilkjentYtelser: List<AndelTilkjentYtelse> = emptyList(),
 
     @Column(name = "vedtak_begrunnelse_spesifikasjoner")
