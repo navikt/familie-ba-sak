@@ -226,10 +226,10 @@ class VilkårServiceTest(
 
         Assertions.assertEquals(2, behandlingsResultater.size)
         Assertions.assertNotEquals(vilkårsvurdering.id, kopiertBehandlingResultat.id)
-        Assertions.assertEquals(kopiertBehandlingResultat.personResultater.first().andreVurderinger.size, 1)
+        Assertions.assertEquals(1, kopiertBehandlingResultat.personResultater.first().andreVurderinger.size)
         Assertions.assertEquals(
-            kopiertBehandlingResultat.personResultater.first().andreVurderinger.first().type,
-            AnnenVurderingType.OPPLYSNINGSPLIKT
+            AnnenVurderingType.OPPLYSNINGSPLIKT,
+            kopiertBehandlingResultat.personResultater.first().andreVurderinger.first().type
         )
     }
 
@@ -366,7 +366,8 @@ class VilkårServiceTest(
         )
 
         val behandlingResultatEtterEndring = vilkårsvurderingService.oppdater(behandlingResultat2)
-        val personResultatEtterEndring = behandlingResultatEtterEndring.personResultater.find { it.personIdent == barnFnr }!!
+        val personResultatEtterEndring =
+            behandlingResultatEtterEndring.personResultater.find { it.personIdent == barnFnr }!!
         val borMedSøkerVilkårEtterEndring =
             personResultatEtterEndring.vilkårResultater.find { it.vilkårType == Vilkår.BOR_MED_SØKER }!!
         Assertions.assertEquals(behandling2.id, borMedSøkerVilkårEtterEndring.behandlingId)
