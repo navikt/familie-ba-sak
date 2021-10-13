@@ -31,7 +31,7 @@ object VedtakUtils {
         aktuellePersonerForVedtaksperiode: List<Person>,
         triggesAv: TriggesAv,
     ): Set<Person> {
-        return triggesAv.vilkår?.fold(mutableSetOf()) { acc, vilkår ->
+        return triggesAv.vilkår.fold(mutableSetOf()) { acc, vilkår ->
             acc.addAll(
                 hentPersonerMedUtgjørendeVilkår(
                     vilkårsvurdering = vilkårsvurdering,
@@ -39,8 +39,7 @@ object VedtakUtils {
                     oppdatertBegrunnelseType = oppdatertBegrunnelseType,
                     utgjørendeVilkår = vilkår,
                     aktuellePersonerForVedtaksperiode = aktuellePersonerForVedtaksperiode,
-                    deltBosted = deltBosted,
-                    vurderingAnnetGrunnlag = vurderingAnnetGrunnlag
+                    triggesAv = triggesAv
                 )
             )
 
@@ -70,8 +69,7 @@ object VedtakUtils {
                         vilkårResultat.vilkårType != utgjørendeVilkår -> false
                         vilkårResultat.periodeFom == null -> false
                         oppdatertBegrunnelseType == VedtakBegrunnelseType.INNVILGELSE -> {
-                            (!deltBosted || vilkårResultat.erDeltBosted) &&
-                                (!vurderingAnnetGrunnlag || vilkårResultat.erSkjønnsmessigVurdert) &&
+                            triggereErOppfylt(triggesAv, vilkårResultat) &&
                                 vilkårResultat.periodeFom!!.toYearMonth() == vedtaksperiode.fom.minusMonths(1)
                                 .toYearMonth() &&
                                 vilkårResultat.resultat == Resultat.OPPFYLT
@@ -79,8 +77,7 @@ object VedtakUtils {
 
                         oppdatertBegrunnelseType == VedtakBegrunnelseType.REDUKSJON ||
                             oppdatertBegrunnelseType == VedtakBegrunnelseType.OPPHØR -> {
-                            (!deltBosted || vilkårResultat.erDeltBosted) &&
-                                (!vurderingAnnetGrunnlag || vilkårResultat.erSkjønnsmessigVurdert) &&
+                            triggereErOppfylt(triggesAv, vilkårResultat) &&
                                 vilkårResultat.periodeTom != null &&
                                 vilkårResultat.resultat == Resultat.OPPFYLT &&
                                 vilkårResultat.periodeTom!!.toYearMonth() ==
