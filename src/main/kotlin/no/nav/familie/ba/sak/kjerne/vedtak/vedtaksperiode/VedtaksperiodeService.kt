@@ -9,7 +9,6 @@ import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedFritekster
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedStandardbegrunnelser
@@ -61,7 +60,6 @@ class VedtaksperiodeService(
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val vedtaksperiodeRepository: VedtaksperiodeRepository,
     private val vilkårsvurderingRepository: VilkårsvurderingRepository,
-    private val featureToggleService: FeatureToggleService,
     private val brevKlient: BrevKlient,
     private val søknadGrunnlagService: SøknadGrunnlagService,
     private val endretUtbetalingAndelRepository: EndretUtbetalingAndelRepository
@@ -435,7 +433,7 @@ class VedtaksperiodeService(
                         barn.fødselsdato.toYearMonth().equals(fødselsMånedOgÅrForAlder18.plusMonths(1))
                 }.map { it.personIdent.ident }
             } else {
-                hentPersonIdenterFraUtbetalingsperiode(hentUtbetalingsperioder(vedtak.behandling))
+                hentPersonIdenterFraUtbetalingsperioder(hentUtbetalingsperioder(vedtak.behandling))
             }
 
         fortsattInnvilgetPeriode.settBegrunnelser(
