@@ -393,6 +393,9 @@ class VedtaksperiodeService(
                                     identerMedUtbetaling = identerMedUtbetaling,
                                     triggesAv = triggesAv,
                                     vedtakBegrunnelseType = vedtakBegrunnelseType,
+                                    endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(
+                                        behandling.id
+                                    )
                                 )
                             ) {
                                 gyldigeBegrunnelser.add(it)
