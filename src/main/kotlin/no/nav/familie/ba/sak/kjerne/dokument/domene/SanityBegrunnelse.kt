@@ -71,7 +71,8 @@ enum class ØvrigTrigger {
     MANGLER_OPPLYSNINGER,
     SATSENDRING,
     BARN_MED_6_ÅRS_DAG,
-    ALLTID_AUTOMATISK
+    ALLTID_AUTOMATISK,
+    ETTER_ENDRET_UTBETALING
 }
 
 fun SanityBegrunnelse.inneholderVilkår(vilkår: SanityVilkår) =
