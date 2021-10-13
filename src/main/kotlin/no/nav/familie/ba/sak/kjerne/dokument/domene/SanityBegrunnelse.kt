@@ -101,6 +101,7 @@ fun SanityBegrunnelse.tilTriggesAv(): TriggesAv {
         medlemskap = this.inneholderBosattIRiketTrigger(VilkårTrigger.MEDLEMSKAP),
         deltbosted = this.inneholderBorMedSøkerTrigger(VilkårTrigger.DELT_BOSTED),
         valgbar = !this.inneholderØvrigTrigger(ØvrigTrigger.ALLTID_AUTOMATISK),
+        etterEndretAndel = this.inneholderØvrigTrigger(ØvrigTrigger.ETTER_ENDRET_UTBETALING)
     )
 }
 
