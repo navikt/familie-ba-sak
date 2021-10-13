@@ -145,5 +145,6 @@ APPDYNAMICS_AGENT_ACCOUNT_NAME: PROD
 
 NORG2_BASE_URL: https://app.adeo.no/norg2
 FAMILIE_BREV_API_URL: https://familie-brev.intern.nav.no
+FAMILIE_TILBAKE_API_URL: https://familie-tilbake.intern.nav.no/api
 
 ENVIRONMENT_NAME: p
