@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.kjerne.dokument.domene.SanityVilkår.UNDER_18_ÅR
 import no.nav.familie.ba.sak.kjerne.dokument.domene.SanityVilkår.UTVIDET_BARNETRYGD
 import no.nav.familie.ba.sak.kjerne.dokument.domene.VilkårRolle.BARN
 import no.nav.familie.ba.sak.kjerne.dokument.domene.VilkårRolle.SOKER
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
@@ -23,7 +24,7 @@ data class SanityBegrunnelse(
     val borMedSokerTriggere: List<VilkårTrigger>? = null,
     val ovrigeTriggere: List<ØvrigTrigger>? = null,
     val hjemler: List<String> = emptyList(),
-    val endringstyper: List<Endringstype> = emptyList(),
+    val endringsårsaker: List<Årsak> = emptyList(),
 )
 
 enum class SanityVilkår {
@@ -76,10 +77,6 @@ enum class ØvrigTrigger {
     ALLTID_AUTOMATISK,
     ENDRET_UTBETALING,
     ETTER_ENDRET_UTBETALING,
-}
-
-enum class Endringstype {
-    DELT_BOSTED,
 }
 
 fun SanityBegrunnelse.tilTriggesAv(): TriggesAv {
