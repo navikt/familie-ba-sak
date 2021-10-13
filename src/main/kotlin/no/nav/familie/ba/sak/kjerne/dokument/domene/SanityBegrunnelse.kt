@@ -23,6 +23,7 @@ data class SanityBegrunnelse(
     val borMedSokerTriggere: List<VilkårTrigger>? = null,
     val ovrigeTriggere: List<ØvrigTrigger>? = null,
     val hjemler: List<String> = emptyList(),
+    val endringstyper: List<Endringstype> = emptyList(),
 )
 
 enum class SanityVilkår {
@@ -73,7 +74,12 @@ enum class ØvrigTrigger {
     SATSENDRING,
     BARN_MED_6_ÅRS_DAG,
     ALLTID_AUTOMATISK,
-    ETTER_ENDRET_UTBETALING
+    ENDRET_UTBETALING,
+    ETTER_ENDRET_UTBETALING,
+}
+
+enum class Endringstype {
+    DELT_BOSTED,
 }
 
 fun SanityBegrunnelse.tilTriggesAv(): TriggesAv {
