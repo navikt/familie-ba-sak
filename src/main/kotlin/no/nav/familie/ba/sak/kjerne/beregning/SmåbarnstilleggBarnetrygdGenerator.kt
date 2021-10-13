@@ -50,13 +50,15 @@ data class SmåbarnstilleggBarnetrygdGenerator(
             }
         )
 
-        val barns3ÅrsTidslinjer = LocalDateTimeline(barnasFødselsdatoer.map {
-            LocalDateSegment(
-                it.førsteDagIInneværendeMåned(),
-                it.plusYears(3).sisteDagIMåned(),
-                listOf(SmåbarnstilleggKombinator.UNDER_3_ÅR)
-            )
-        })
+        val barns3ÅrsTidslinjer = LocalDateTimeline(
+            barnasFødselsdatoer.map {
+                LocalDateSegment(
+                    it.førsteDagIInneværendeMåned(),
+                    it.plusYears(3).sisteDagIMåned(),
+                    listOf(SmåbarnstilleggKombinator.UNDER_3_ÅR)
+                )
+            }
+        )
 
         val sammenslåttTidslinje: LocalDateTimeline<List<SmåbarnstilleggKombinator>> =
             listOf(

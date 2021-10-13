@@ -299,7 +299,6 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
             }
         }
 
-
         familieBaSakKlient().validerVilkårsvurdering(
             behandlingId = aktivBehandlingEtterRegistrertSøknad.behandlingId
         )

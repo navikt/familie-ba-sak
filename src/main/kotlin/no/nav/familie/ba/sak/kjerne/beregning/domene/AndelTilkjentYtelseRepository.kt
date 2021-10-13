@@ -20,9 +20,10 @@ interface AndelTilkjentYtelseRepository : JpaRepository<AndelTilkjentYtelse, Lon
     @Query(value = "SELECT aty FROM AndelTilkjentYtelse aty WHERE aty.behandlingId IN :behandlingIder AND aty.stønadTom >= DATE_TRUNC('month', CURRENT_TIMESTAMP)")
     fun finnLøpendeAndelerTilkjentYtelseForBehandlinger(behandlingIder: List<Long>): List<AndelTilkjentYtelse>
 
-    //The query only returns the periods that overlap with the given year. Any periods that are
-    //totally out of the year scope will be ignored.
-    @Query(value = """WITH qualified AS (
+    // The query only returns the periods that overlap with the given year. Any periods that are
+    // totally out of the year scope will be ignored.
+    @Query(
+        value = """WITH qualified AS (
     SELECT *
     FROM ((
               SELECT aty.person_ident       ident,
@@ -57,7 +58,9 @@ FROM (SELECT ident, MAX(endret_dato) dato
      ) AS latest
          INNER JOIN qualified
                     ON qualified.ident = latest.ident AND qualified.endret_dato = latest.dato
-""", nativeQuery = true)
+""",
+        nativeQuery = true
+    )
     @Timed
     fun finnStonadPeriodMedUtvidetBarnetrygdForPersoner(
         personIdenter: List<String>,

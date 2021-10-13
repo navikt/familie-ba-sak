@@ -100,5 +100,4 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
     )
     @Timed
     fun finnFagsakerMedUtvidetBarnetrygdInnenfor(fom: YearMonth, tom: YearMonth): List<Pair<Fagsak, LocalDate>>
-
 }

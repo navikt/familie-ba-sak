@@ -22,11 +22,13 @@ class SmåbarnstilleggService(
             ).perioder
 
             periodeOvergangsstønadGrunnlagRepository.deleteByBehandlingId(behandlingId)
-            periodeOvergangsstønadGrunnlagRepository.saveAll(periodeOvergangsstønad.map {
-                it.tilPeriodeOvergangsstønadGrunnlag(
-                    behandlingId
-                )
-            })
+            periodeOvergangsstønadGrunnlagRepository.saveAll(
+                periodeOvergangsstønad.map {
+                    it.tilPeriodeOvergangsstønadGrunnlag(
+                        behandlingId
+                    )
+                }
+            )
 
             periodeOvergangsstønad
         } else emptyList()

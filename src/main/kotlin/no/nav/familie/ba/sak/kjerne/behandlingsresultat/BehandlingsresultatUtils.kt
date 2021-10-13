@@ -42,8 +42,10 @@ object BehandlingsresultatUtils {
             personType = person.type,
             søktForPerson = personerFremstiltKravFor.contains(personIdent),
             forrigeAndeler = when (person.type) {
-                PersonType.SØKER -> kombinerOverlappendeAndelerForSøker(forrigeTilkjentYtelse?.andelerTilkjentYtelse?.filter { it.personIdent == personIdent }
-                    ?: emptyList())
+                PersonType.SØKER -> kombinerOverlappendeAndelerForSøker(
+                    forrigeTilkjentYtelse?.andelerTilkjentYtelse?.filter { it.personIdent == personIdent }
+                        ?: emptyList()
+                )
                 else -> forrigeTilkjentYtelse?.andelerTilkjentYtelse?.filter { it.personIdent == personIdent }
                     ?.map { andelTilkjentYtelse ->
                         BehandlingsresultatAndelTilkjentYtelse(
@@ -161,7 +163,7 @@ object BehandlingsresultatUtils {
 
     fun validerBehandlingsresultat(behandling: Behandling, resultat: BehandlingResultat) {
         if ((
-                behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING && setOf(
+            behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING && setOf(
                     BehandlingResultat.AVSLÅTT_OG_OPPHØRT,
                     BehandlingResultat.ENDRET,
                     BehandlingResultat.ENDRET_OG_OPPHØRT,
@@ -169,7 +171,7 @@ object BehandlingsresultatUtils {
                     BehandlingResultat.FORTSATT_INNVILGET,
                     BehandlingResultat.IKKE_VURDERT
                 ).contains(resultat)
-                ) ||
+            ) ||
             (behandling.type == BehandlingType.REVURDERING && resultat == BehandlingResultat.IKKE_VURDERT)
         ) {
 
@@ -199,29 +201,34 @@ private fun validerYtelsePersoner(ytelsePersoner: List<YtelsePerson>) {
         throw Feil(message = "YtelseSlutt ikke satt ved utledning av BehandlingResultat")
 
     if (ytelsePersoner.any {
-            it.resultater.contains(YtelsePersonResultat.OPPHØRT) && it.ytelseSlutt?.isAfter(
+        it.resultater.contains(YtelsePersonResultat.OPPHØRT) && it.ytelseSlutt?.isAfter(
                 inneværendeMåned()
             ) == true
-        })
+    }
+    )
         throw Feil(message = "Minst én ytelseperson har fått opphør som resultat og ytelseSlutt etter inneværende måned")
 }
 
 private fun kombinerOverlappendeAndelerForSøker(andeler: List<AndelTilkjentYtelse>): List<BehandlingsresultatAndelTilkjentYtelse> {
-    val utvidetTidslinje = LocalDateTimeline(andeler.filter { it.type == YtelseType.UTVIDET_BARNETRYGD }
-        .map {
+    val utvidetTidslinje = LocalDateTimeline(
+        andeler.filter { it.type == YtelseType.UTVIDET_BARNETRYGD }
+            .map {
+                LocalDateSegment(
+                    it.stønadFom.førsteDagIInneværendeMåned(),
+                    it.stønadTom.sisteDagIInneværendeMåned(),
+                    it.kalkulertUtbetalingsbeløp
+                )
+            }
+    )
+    val småbarnstilleggAndeler = LocalDateTimeline(
+        andeler.filter { it.type == YtelseType.SMÅBARNSTILLEGG }.map {
             LocalDateSegment(
                 it.stønadFom.førsteDagIInneværendeMåned(),
                 it.stønadTom.sisteDagIInneværendeMåned(),
                 it.kalkulertUtbetalingsbeløp
             )
-        })
-    val småbarnstilleggAndeler = LocalDateTimeline(andeler.filter { it.type == YtelseType.SMÅBARNSTILLEGG }.map {
-        LocalDateSegment(
-            it.stønadFom.førsteDagIInneværendeMåned(),
-            it.stønadTom.sisteDagIInneværendeMåned(),
-            it.kalkulertUtbetalingsbeløp
-        )
-    })
+        }
+    )
 
     val kombinerteTidslinje = utvidetTidslinje.combine(
         småbarnstilleggAndeler,
