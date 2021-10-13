@@ -4,12 +4,18 @@ import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.YearMonthConverter
+import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.overlapperHeltEllerDelvisMed
+import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.ekstern.restDomene.RestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjonListConverter
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -24,7 +30,6 @@ import javax.persistence.GeneratedValue
 import javax.persistence.GenerationType
 import javax.persistence.Id
 import javax.persistence.JoinColumn
-import javax.persistence.JoinTable
 import javax.persistence.ManyToMany
 import javax.persistence.ManyToOne
 import javax.persistence.SequenceGenerator
@@ -73,12 +78,7 @@ data class EndretUtbetalingAndel(
     @Column(name = "begrunnelse")
     var begrunnelse: String? = null,
 
-    @ManyToMany
-    @JoinTable(
-        name = "ANDEL_TIL_ENDRET_ANDEL",
-        joinColumns = [JoinColumn(name = "fk_endret_utbetaling_andel_id")],
-        inverseJoinColumns = [JoinColumn(name = "fk_andel_tilkjent_ytelse_id")]
-    )
+    @ManyToMany(mappedBy = "endretUtbetalingAndeler")
     val andelTilkjentYtelser: List<AndelTilkjentYtelse> = emptyList(),
 
     @Column(name = "vedtak_begrunnelse_spesifikasjoner")
@@ -147,4 +147,27 @@ fun EndretUtbetalingAndel.fraRestEndretUtbetalingAndel(
     this.søknadstidspunkt = restEndretUtbetalingAndel.søknadstidspunkt
     this.begrunnelse = restEndretUtbetalingAndel.begrunnelse
     this.person = person
+    // TODO: bytt ut dette med riktige begrunnelser når de er klare
+    this.vedtakBegrunnelseSpesifikasjoner =
+        listOf(VedtakBegrunnelseSpesifikasjon.INNVILGELSE_VURDERING_HELE_FAMILIEN_PLIKTIG_MEDLEM)
+}
+
+fun EndretUtbetalingAndel.tilVedtaksperiodeMedBegrunnelser(vedtak: Vedtak): VedtaksperiodeMedBegrunnelser {
+
+    return VedtaksperiodeMedBegrunnelser(
+        fom = this.fom?.førsteDagIInneværendeMåned(),
+        tom = this.tom?.sisteDagIInneværendeMåned(),
+        vedtak = vedtak,
+        type = Vedtaksperiodetype.ENDRET_UTBETALING,
+        begrunnelser = mutableSetOf()
+    ).also {
+        it.begrunnelser.addAll(
+            (this.vedtakBegrunnelseSpesifikasjoner).map { vedtakBegrunnelseSpesifikasjon ->
+                Vedtaksbegrunnelse(
+                    vedtaksperiodeMedBegrunnelser = it,
+                    vedtakBegrunnelseSpesifikasjon = vedtakBegrunnelseSpesifikasjon,
+                    personIdenter = listOf(this.person!!.personIdent.ident)
+                )
+            })
+    }
 }

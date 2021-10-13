@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestVedtaksperiodeMedBegrunnelse
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.AvslagBrevPeriode
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.AvslagUtenPeriodeBrevPeriode
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.BrevPeriode
+import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.EndretUtbetalingBrevPeriode
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.FortsattInnvilgetBrevPeriode
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.InnvilgelseBrevPeriode
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.OpphørBrevPeriode
@@ -104,21 +105,21 @@ data class VedtaksperiodeMedBegrunnelser(
     }
 }
 
-fun VedtaksperiodeMedBegrunnelser.tilRestVedtaksperiodeMedBegrunnelser(gyldigeBegrunnelser: List<VedtakBegrunnelseSpesifikasjon>) = RestVedtaksperiodeMedBegrunnelser(
-    id = this.id,
-    fom = this.fom,
-    tom = this.tom,
-    type = this.type,
-    begrunnelser = this.begrunnelser.map { it.tilRestVedtaksbegrunnelse() },
-    fritekster = this.fritekster.sortedBy { it.id }.map { it.fritekst },
-    gyldigeBegrunnelser = gyldigeBegrunnelser
-)
+fun VedtaksperiodeMedBegrunnelser.tilRestVedtaksperiodeMedBegrunnelser(gyldigeBegrunnelser: List<VedtakBegrunnelseSpesifikasjon>) =
+    RestVedtaksperiodeMedBegrunnelser(
+        id = this.id,
+        fom = this.fom,
+        tom = this.tom,
+        type = this.type,
+        begrunnelser = this.begrunnelser.map { it.tilRestVedtaksbegrunnelse() },
+        fritekster = this.fritekster.sortedBy { it.id }.map { it.fritekst },
+        gyldigeBegrunnelser = gyldigeBegrunnelser
+    )
 
 fun VedtaksperiodeMedBegrunnelser.tilBrevPeriode(
     personerIPersongrunnlag: List<Person>,
     utbetalingsperioder: List<Utbetalingsperiode>,
     målform: Målform,
-    brukBegrunnelserFraSanity: Boolean = false,
     uregistrerteBarn: List<BarnMedOpplysninger> = emptyList()
 ): BrevPeriode? {
     val begrunnelserOgFritekster = byggBegrunnelserOgFriteksterForVedtaksperiode(
@@ -166,7 +167,19 @@ fun VedtaksperiodeMedBegrunnelser.tilBrevPeriode(
             )
         }
 
-        Vedtaksperiodetype.AVSLAG ->
+        Vedtaksperiodetype.ENDRET_UTBETALING -> {
+            val utbetalingsperiode = hentUtbetalingsperiodeForVedtaksperiode(utbetalingsperioder, this.fom)
+            EndretUtbetalingBrevPeriode(
+                fom = this.fom!!.tilDagMånedÅr(),
+                tom = tomDato,
+                belop = Utils.formaterBeløp(utbetalingsperiode.utbetaltPerMnd),
+                antallBarn = utbetalingsperiode.antallBarn.toString(),
+                barnasFodselsdager = finnAlleBarnsFødselsDatoerIUtbetalingsperiode(utbetalingsperiode),
+                begrunnelser = begrunnelserOgFritekster
+            )
+        }
+
+        Vedtaksperiodetype.AVSLAG -> {
             if (this.fom != null)
                 AvslagBrevPeriode(
                     fom = this.fom.tilDagMånedÅr(),
@@ -174,6 +187,7 @@ fun VedtaksperiodeMedBegrunnelser.tilBrevPeriode(
                     begrunnelser = begrunnelserOgFritekster
                 )
             else AvslagUtenPeriodeBrevPeriode(begrunnelser = begrunnelserOgFritekster)
+        }
 
         Vedtaksperiodetype.OPPHØR -> OpphørBrevPeriode(
             fom = this.fom!!.tilDagMånedÅr(),

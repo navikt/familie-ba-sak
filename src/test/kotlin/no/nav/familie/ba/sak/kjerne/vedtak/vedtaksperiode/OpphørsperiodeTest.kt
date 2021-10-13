@@ -56,7 +56,7 @@ class OpphørsperiodeTest {
 
         val opphørsperioder = mapTilOpphørsperioder(
             andelerTilkjentYtelse = listOf(andelBarn1, andel2Barn1, andel3Barn1),
-            personopplysningGrunnlag = personopplysningGrunnlag
+            personopplysningGrunnlag = personopplysningGrunnlag,
         )
 
         assertEquals(2, opphørsperioder.size)
@@ -81,7 +81,7 @@ class OpphørsperiodeTest {
 
         val opphørsperioder = mapTilOpphørsperioder(
             andelerTilkjentYtelse = listOf(andelBarn1),
-            personopplysningGrunnlag = personopplysningGrunnlag
+            personopplysningGrunnlag = personopplysningGrunnlag,
         )
 
         assertEquals(1, opphørsperioder.size)
@@ -103,7 +103,7 @@ class OpphørsperiodeTest {
 
         val opphørsperioder = mapTilOpphørsperioder(
             andelerTilkjentYtelse = listOf(andelBarn1),
-            personopplysningGrunnlag = personopplysningGrunnlag
+            personopplysningGrunnlag = personopplysningGrunnlag,
         )
 
         assertEquals(1, opphørsperioder.size)
@@ -136,7 +136,7 @@ class OpphørsperiodeTest {
             forrigeAndelerTilkjentYtelse = listOf(forrigeAndelBarn1),
             andelerTilkjentYtelse = listOf(andelBarn1),
             personopplysningGrunnlag = personopplysningGrunnlag,
-            forrigePersonopplysningGrunnlag = personopplysningGrunnlag
+            forrigePersonopplysningGrunnlag = personopplysningGrunnlag,
         )
 
         assertEquals(1, opphørsperioder.size)
@@ -178,7 +178,7 @@ class OpphørsperiodeTest {
             forrigeAndelerTilkjentYtelse = listOf(forrigeAndel1Barn1, forrigeAndel2Barn1),
             andelerTilkjentYtelse = listOf(andelBarn1),
             personopplysningGrunnlag = personopplysningGrunnlag,
-            forrigePersonopplysningGrunnlag = personopplysningGrunnlag
+            forrigePersonopplysningGrunnlag = personopplysningGrunnlag,
         )
 
         assertEquals(1, opphørsperioder.size)
@@ -210,7 +210,7 @@ class OpphørsperiodeTest {
             forrigeAndelerTilkjentYtelse = listOf(forrigeAndelBarn1),
             andelerTilkjentYtelse = listOf(andelBarn1),
             personopplysningGrunnlag = personopplysningGrunnlag,
-            forrigePersonopplysningGrunnlag = personopplysningGrunnlag
+            forrigePersonopplysningGrunnlag = personopplysningGrunnlag,
         )
 
         assertEquals(1, opphørsperioder.size)
