@@ -64,7 +64,7 @@ class DokumentService(
             throw FunksjonellFeil("Det finnes ikke noe vedtaksbrev.")
         } else {
             val pdf =
-                vedtak.stønadBrevPdF ?: throw Feil("Klarte ikke finne vedtaksbrevbrev for vetak med id ${vedtak.id}")
+                vedtak.stønadBrevPdF ?: throw Feil("Klarte ikke finne vedtaksbrevbrev for vedtak med id ${vedtak.id}")
             return Ressurs.success(pdf)
         }
     }
