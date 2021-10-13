@@ -70,30 +70,35 @@ fun mapTilUtbetalingsperioder(
     andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
     filterAndeler: (andelerTilkjentYtelse: List<AndelTilkjentYtelse>) -> List<AndelTilkjentYtelse> = { it }
 ): List<Utbetalingsperiode> {
-    return filterAndeler(andelerTilkjentYtelse).utledSegmenter().map { segment ->
-        val andelerForSegment = andelerTilkjentYtelse.filter {
-            segment.localDateInterval.overlaps(
-                LocalDateInterval(
-                    it.stønadFom.førsteDagIInneværendeMåned(),
-                    it.stønadTom.sisteDagIInneværendeMåned()
+    return filterAndeler(andelerTilkjentYtelse)
+        .utledSegmenter()
+        .map { segment ->
+            val andelerForSegment = andelerTilkjentYtelse.filter {
+                segment.localDateInterval.overlaps(
+                    LocalDateInterval(
+                        it.stønadFom.førsteDagIInneværendeMåned(),
+                        it.stønadTom.sisteDagIInneværendeMåned()
+                    )
                 )
+            }
+
+            Utbetalingsperiode(
+                periodeFom = segment.fom,
+                periodeTom = segment.tom,
+                ytelseTyper = andelerForSegment.map(AndelTilkjentYtelse::type),
+                utbetaltPerMnd = segment.value,
+                antallBarn = andelerForSegment.count { andel ->
+                    personopplysningGrunnlag.barna.any { barn -> barn.personIdent.ident == andel.personIdent }
+                },
+                utbetalingsperiodeDetaljer = andelerForSegment.lagUtbetalingsperiodeDetaljer(personopplysningGrunnlag)
             )
         }
-
-        Utbetalingsperiode(
-            periodeFom = segment.fom,
-            periodeTom = segment.tom,
-            ytelseTyper = andelerForSegment.map(AndelTilkjentYtelse::type),
-            utbetaltPerMnd = segment.value,
-            antallBarn = andelerForSegment.count { andel ->
-                personopplysningGrunnlag.barna.any { barn -> barn.personIdent.ident == andel.personIdent }
-            },
-            utbetalingsperiodeDetaljer = andelerForSegment.lagUtbetalingsperiodeDetaljer(personopplysningGrunnlag)
-        )
-    }
 }
 
 private fun List<AndelTilkjentYtelse>.utledSegmenter(): List<LocalDateSegment<Int>> {
+    // Dersom listen er tom så returnerer vi tom liste fordi at reduceren i beregnUtbetalingsperioderUtenKlassifisering ikke takler tomme lister
+    if (this.isEmpty()) return emptyList()
+
     val utbetalingsPerioder = beregnUtbetalingsperioderUtenKlassifisering(this.toSet())
     return utbetalingsPerioder.toSegments()
         .sortedWith(compareBy<LocalDateSegment<Int>>({ it.fom }, { it.value }, { it.tom }))
