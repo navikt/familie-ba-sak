@@ -13,10 +13,10 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestVedtakBegrunnelseTilknyttetV
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.dokument.domene.SanityBegrunnelse
+import no.nav.familie.ba.sak.kjerne.dokument.domene.tilTriggesAv
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilTriggesAv
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
@@ -286,7 +286,7 @@ fun vedtakBegrunnelseSpesifikasjonerTilNedtrekksmenytekster(
                 }
         }
 
-private fun vedtakBegrunnelseTilRestVedtakBegrunnelseTilknyttetVilkår(
+fun vedtakBegrunnelseTilRestVedtakBegrunnelseTilknyttetVilkår(
     sanityBegrunnelser: List<SanityBegrunnelse>,
     vedtakBegrunnelse: VedtakBegrunnelseSpesifikasjon,
 ): List<RestVedtakBegrunnelseTilknyttetVilkår> {
@@ -296,19 +296,23 @@ private fun vedtakBegrunnelseTilRestVedtakBegrunnelseTilknyttetVilkår(
         sanityBegrunnelser.find { it.apiNavn == vedtakBegrunnelse.sanityApiNavn }?.navnISystem
             ?: throw Feil("Fant ikke begrunnelse med apiNavn=${vedtakBegrunnelse.sanityApiNavn} i Sanity.")
 
-    return triggesAv.vilkår?.map {
-        RestVedtakBegrunnelseTilknyttetVilkår(
-            id = vedtakBegrunnelse,
-            navn = visningsnavn,
-            vilkår = it
+    return if (triggesAv.vilkår.isEmpty()) {
+        listOf(
+            RestVedtakBegrunnelseTilknyttetVilkår(
+                id = vedtakBegrunnelse,
+                navn = visningsnavn,
+                vilkår = null
+            )
         )
-    } ?: listOf(
-        RestVedtakBegrunnelseTilknyttetVilkår(
-            id = vedtakBegrunnelse,
-            navn = visningsnavn,
-            vilkår = null
-        )
-    )
+    } else {
+        triggesAv.vilkår.map {
+            RestVedtakBegrunnelseTilknyttetVilkår(
+                id = vedtakBegrunnelse,
+                navn = visningsnavn,
+                vilkår = it
+            )
+        }
+    }
 }
 
 private fun List<VilkårResultat>.filtrerVilkårÅKopiere(kopieringSkjerFraForrigeBehandling: Boolean): List<VilkårResultat> {
