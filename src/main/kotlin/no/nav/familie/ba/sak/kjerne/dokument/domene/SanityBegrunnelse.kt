@@ -24,7 +24,7 @@ data class SanityBegrunnelse(
     val borMedSokerTriggere: List<VilkårTrigger>? = null,
     val ovrigeTriggere: List<ØvrigTrigger>? = null,
     val hjemler: List<String> = emptyList(),
-    val endringsårsaker: List<Årsak> = emptyList(),
+    val endringsaarsaker: List<Årsak> = emptyList(),
 )
 
 enum class SanityVilkår {
