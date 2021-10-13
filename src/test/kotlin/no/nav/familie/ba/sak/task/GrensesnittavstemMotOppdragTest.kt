@@ -28,9 +28,9 @@ class GrensesnittavstemMotOppdragTest {
 
     @Test
     fun skalBeregneNesteAvstemmingForHelg() {
-        val enLørdag = LocalDate.of(2020, 1, 11)
+        val enFredag = LocalDate.of(2020, 1, 10)
 
-        val testDto = grensesnittavstemMotOppdrag.nesteAvstemmingDTO(enLørdag, 1)
+        val testDto = grensesnittavstemMotOppdrag.nesteAvstemmingDTO(enFredag)
 
         assertEquals(LocalDate.of(2020, 1, 13).atStartOfDay(), testDto.tomDato)
         assertEquals(LocalDate.of(2020, 1, 10).atStartOfDay(), testDto.fomDato)
@@ -38,9 +38,9 @@ class GrensesnittavstemMotOppdragTest {
 
     @Test
     fun skalBeregneNesteAvstemmingForSammenhengendeHelligdag() {
-        val førsteJuledag = LocalDate.of(2019, 12, 25)
+        val juledagen = LocalDate.of(2019, 12, 24)
 
-        val testDto = grensesnittavstemMotOppdrag.nesteAvstemmingDTO(førsteJuledag, 1)
+        val testDto = grensesnittavstemMotOppdrag.nesteAvstemmingDTO(juledagen)
 
         assertEquals(LocalDate.of(2019, 12, 27).atStartOfDay(), testDto.tomDato)
         assertEquals(LocalDate.of(2019, 12, 24).atStartOfDay(), testDto.fomDato)
@@ -48,9 +48,9 @@ class GrensesnittavstemMotOppdragTest {
 
     @Test
     fun skalBeregneNesteAvstemmingForEnkeltHelligdag() {
-        val førsteNyttårsdag = LocalDate.of(2020, 1, 1)
+        val nyttårsdag = LocalDate.of(2019, 12, 31)
 
-        val testDto = grensesnittavstemMotOppdrag.nesteAvstemmingDTO(førsteNyttårsdag, 1)
+        val testDto = grensesnittavstemMotOppdrag.nesteAvstemmingDTO(nyttårsdag)
 
         assertEquals(LocalDate.of(2020, 1, 2).atStartOfDay(), testDto.tomDato)
         assertEquals(LocalDate.of(2019, 12, 31).atStartOfDay(), testDto.fomDato)
@@ -58,9 +58,9 @@ class GrensesnittavstemMotOppdragTest {
 
     @Test
     fun skalBeregneNesteAvstemmingForLanghelg() {
-        val fredagFørsteMai = LocalDate.of(2020, 5, 1)
+        val valborg = LocalDate.of(2020, 4, 30)
 
-        val testDto = grensesnittavstemMotOppdrag.nesteAvstemmingDTO(fredagFørsteMai, 1)
+        val testDto = grensesnittavstemMotOppdrag.nesteAvstemmingDTO(valborg)
 
         assertEquals(LocalDate.of(2020, 5, 4).atStartOfDay(), testDto.tomDato)
         assertEquals(LocalDate.of(2020, 4, 30).atStartOfDay(), testDto.fomDato)
@@ -68,9 +68,9 @@ class GrensesnittavstemMotOppdragTest {
 
     @Test
     fun skalBeregneNesteAvstemmingForUkedag() {
-        val enOnsdag = LocalDate.of(2020, 1, 15)
+        val enTirsdag = LocalDate.of(2020, 1, 14)
 
-        val testDto = grensesnittavstemMotOppdrag.nesteAvstemmingDTO(enOnsdag, 1)
+        val testDto = grensesnittavstemMotOppdrag.nesteAvstemmingDTO(enTirsdag)
 
         assertEquals(LocalDate.of(2020, 1, 15).atStartOfDay(), testDto.tomDato)
         assertEquals(LocalDate.of(2020, 1, 14).atStartOfDay(), testDto.fomDato)
