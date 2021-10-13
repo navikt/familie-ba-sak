@@ -12,11 +12,14 @@ import java.time.temporal.TemporalAdjusters
  * Dagtid er nå definert som hverdager mellom 06-21. Faste helligdager er tatt høyde for, men flytende
  * er ikke kodet inn.
  */
-fun nesteGyldigeTriggertidForBehandlingIHverdager(minutesToAdd: Long = 0): LocalDateTime {
-    var date = LocalDateTime.now().plusMinutes(minutesToAdd)
+fun nesteGyldigeTriggertidForBehandlingIHverdager(
+    minutesToAdd: Long = 0,
+    triggerTid: LocalDateTime = LocalDateTime.now()
+): LocalDateTime {
+    var date = triggerTid.plusMinutes(minutesToAdd)
 
     date = if (erKlokkenMellom21Og06(date.toLocalTime()) && date.erHverdag(1)) {
-        kl06IdagEllerNesteDag()
+        kl06IdagEllerNesteDag(date)
     } else if (erKlokkenMellom21Og06(date.toLocalTime()) || !date.erHverdag(0)) {
         date.with(TemporalAdjusters.next(DayOfWeek.MONDAY)).withHour(6)
     } else date
@@ -49,11 +52,10 @@ fun erKlokkenMellom21Og06(localTime: LocalTime = LocalTime.now()): Boolean {
     return localTime.isAfter(LocalTime.of(21, 0)) || localTime.isBefore(LocalTime.of(6, 0))
 }
 
-fun kl06IdagEllerNesteDag(): LocalDateTime {
-    val now = LocalDateTime.now()
-    return if (now.toLocalTime().isBefore(LocalTime.of(6, 0))) {
-        now.withHour(6)
+fun kl06IdagEllerNesteDag(date: LocalDateTime = LocalDateTime.now()): LocalDateTime {
+    return if (date.toLocalTime().isBefore(LocalTime.of(6, 0))) {
+        date.withHour(6)
     } else {
-        now.plusDays(1).withHour(6)
+        date.plusDays(1).withHour(6)
     }
 }
