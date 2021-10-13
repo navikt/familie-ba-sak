@@ -100,10 +100,17 @@ object VedtakUtils {
     private fun triggereErOppfylt(
         triggesAv: TriggesAv,
         vilkårResultat: VilkårResultat
-    ) = (!triggesAv.deltbosted || vilkårResultat.erDeltBosted) &&
-        ((vilkårResultat.erMedlemskapVurdert && triggesAv.medlemskap) ||
-            (!triggesAv.medlemskap && !vilkårResultat.erMedlemskapVurdert)) &&
-        (!triggesAv.vurderingAnnetGrunnlag || vilkårResultat.erSkjønnsmessigVurdert)
+    ): Boolean {
+        val erDeltBostedOppfylt = (!triggesAv.deltbosted || vilkårResultat.erDeltBosted)
+        val erSkjønnsmessigVurderingOppfylt =
+            (!triggesAv.vurderingAnnetGrunnlag || vilkårResultat.erSkjønnsmessigVurdert)
+        val erMedlemskapOppfylt = (
+            (vilkårResultat.erMedlemskapVurdert && triggesAv.medlemskap) ||
+                (!triggesAv.medlemskap && !vilkårResultat.erMedlemskapVurdert)
+            )
+
+        return erDeltBostedOppfylt && erSkjønnsmessigVurderingOppfylt && erMedlemskapOppfylt
+    }
 }
 
 fun validerAvslagsbegrunnelse(
