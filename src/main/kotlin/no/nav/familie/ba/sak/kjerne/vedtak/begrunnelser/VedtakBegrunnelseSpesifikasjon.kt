@@ -12,17 +12,6 @@ import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService
 import no.nav.familie.ba.sak.kjerne.dokument.domene.SanityBegrunnelse
-import no.nav.familie.ba.sak.kjerne.dokument.domene.SanityVilkår
-import no.nav.familie.ba.sak.kjerne.dokument.domene.VilkårTrigger
-import no.nav.familie.ba.sak.kjerne.dokument.domene.inneholderBorMedSøkerTrigger
-import no.nav.familie.ba.sak.kjerne.dokument.domene.inneholderBosattIRiketTrigger
-import no.nav.familie.ba.sak.kjerne.dokument.domene.inneholderGiftPartnerskapTrigger
-import no.nav.familie.ba.sak.kjerne.dokument.domene.inneholderLovligOppholdTrigger
-import no.nav.familie.ba.sak.kjerne.dokument.domene.inneholderVilkår
-import no.nav.familie.ba.sak.kjerne.dokument.domene.inneholderØvrigTrigger
-import no.nav.familie.ba.sak.kjerne.dokument.domene.tilPersonType
-import no.nav.familie.ba.sak.kjerne.dokument.domene.tilVilkår
-import no.nav.familie.ba.sak.kjerne.dokument.domene.ØvrigTrigger
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakUtils.hentPersonerForAlleUtgjørendeVilkår
@@ -622,7 +611,6 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
                 tom = vedtaksperiodeMedBegrunnelser.tom ?: TIDENES_ENDE
             ),
             oppdatertBegrunnelseType = vedtakBegrunnelseType,
-            utgjørendeVilkår = triggesAv.vilkår,
             aktuellePersonerForVedtaksperiode = persongrunnlag.personer
                 .filter { person -> triggesAv.personTyper.contains(person.type) }
                 .filter { person ->
@@ -630,8 +618,7 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
                         identerMedUtbetaling.contains(person.personIdent.ident) || person.type == PersonType.SØKER
                     } else true
                 },
-            deltBosted = triggesAv.deltbosted,
-            vurderingAnnetGrunnlag = triggesAv.vurderingAnnetGrunnlag
+            triggesAv = triggesAv
         ).isNotEmpty()
     }
 
@@ -650,34 +637,6 @@ fun VedtakBegrunnelseSpesifikasjon.tilSanityBegrunnelse(sanityBegrunnelser: List
 
 fun VedtakBegrunnelseSpesifikasjon.erTilknyttetVilkår(sanityBegrunnelser: List<SanityBegrunnelse>) =
     !this.tilSanityBegrunnelse(sanityBegrunnelser).vilkaar.isNullOrEmpty()
-
-fun SanityBegrunnelse.tilTriggesAv(): TriggesAv {
-
-    return TriggesAv(
-        vilkår = this.vilkaar?.map { it.tilVilkår() }?.toSet() ?: emptySet(),
-        personTyper = this.rolle?.map { it.tilPersonType() }?.toSet()
-            ?: when {
-                this.inneholderVilkår(SanityVilkår.BOSATT_I_RIKET) -> setOf(PersonType.BARN, PersonType.SØKER)
-                this.inneholderVilkår(SanityVilkår.LOVLIG_OPPHOLD) -> setOf(PersonType.BARN, PersonType.SØKER)
-                this.inneholderVilkår(SanityVilkår.GIFT_PARTNERSKAP) -> setOf(PersonType.BARN)
-                this.inneholderVilkår(SanityVilkår.UNDER_18_ÅR) -> setOf(PersonType.BARN)
-                this.inneholderVilkår(SanityVilkår.BOR_MED_SOKER) -> setOf(PersonType.BARN)
-                else -> setOf(PersonType.BARN, PersonType.SØKER)
-            },
-        personerManglerOpplysninger = this.inneholderØvrigTrigger(ØvrigTrigger.MANGLER_OPPLYSNINGER),
-        satsendring = this.inneholderØvrigTrigger(ØvrigTrigger.SATSENDRING),
-        barnMedSeksårsdag = this.inneholderØvrigTrigger(ØvrigTrigger.BARN_MED_6_ÅRS_DAG),
-        vurderingAnnetGrunnlag = (
-            this.inneholderLovligOppholdTrigger(VilkårTrigger.VURDERING_ANNET_GRUNNLAG) ||
-                this.inneholderBosattIRiketTrigger(VilkårTrigger.VURDERING_ANNET_GRUNNLAG) ||
-                this.inneholderGiftPartnerskapTrigger(VilkårTrigger.VURDERING_ANNET_GRUNNLAG) ||
-                this.inneholderBorMedSøkerTrigger(VilkårTrigger.VURDERING_ANNET_GRUNNLAG)
-            ),
-        medlemskap = this.inneholderBosattIRiketTrigger(VilkårTrigger.MEDLEMSKAP),
-        deltbosted = this.inneholderBorMedSøkerTrigger(VilkårTrigger.DELT_BOSTED),
-        valgbar = this.apiNavn != null,
-    )
-}
 
 enum class VedtakBegrunnelseType {
     INNVILGELSE,

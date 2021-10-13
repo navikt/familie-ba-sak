@@ -24,6 +24,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseReposito
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.dokument.BrevKlient
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Brevmal
+import no.nav.familie.ba.sak.kjerne.dokument.domene.tilTriggesAv
 import no.nav.familie.ba.sak.kjerne.dokument.hentVedtaksbrevmal
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.tilVedtaksperiodeMedBegrunnelser
@@ -38,7 +39,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifi
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.erTilknyttetVilkår
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilTriggesAv
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilVedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Begrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
@@ -157,7 +157,6 @@ class VedtaksperiodeService(
                             tom = vedtaksperiodeMedBegrunnelser.tom ?: TIDENES_ENDE
                         ),
                         oppdatertBegrunnelseType = vedtakBegrunnelseType,
-                        utgjørendeVilkår = triggesAv.vilkår,
                         aktuellePersonerForVedtaksperiode = persongrunnlagRepository.findByBehandlingAndAktiv(behandling.id)?.personer?.filter { person ->
                             if (vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGELSE) {
                                 identerMedUtbetaling.contains(person.personIdent.ident) || person.type == PersonType.SØKER
@@ -165,8 +164,7 @@ class VedtaksperiodeService(
                         }?.toList() ?: error(
                             "Finner ikke personer på behandling ved begrunning av vedtak"
                         ),
-                        deltBosted = triggesAv.deltbosted,
-                        vurderingAnnetGrunnlag = triggesAv.vurderingAnnetGrunnlag,
+                        triggesAv = triggesAv
                     ).map { person -> person.personIdent.ident }
                 }.toMutableSet()
 

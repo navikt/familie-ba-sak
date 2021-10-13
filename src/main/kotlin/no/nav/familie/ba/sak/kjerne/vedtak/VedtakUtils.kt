@@ -21,21 +21,17 @@ object VedtakUtils {
      * @param vilkårsvurdering - Vilkårsvurderingen man ser på for å sammenligne vilkår
      * @param vedtaksperiode - Perioden det skal sjekkes for
      * @param oppdatertBegrunnelseType - Begrunnelsestype det skal sjekkes for
-     * @param utgjørendeVilkår -  Alle de vilkår som trigger en vedtaksbegrynnelse.
-     * @param deltBosted -  Om delt bosted må være valgt for å trigger en vedtaksbegrynnelse.
-     * @param skjønnsmessigVurdert -  Om skjønnsmessig vurdering må være valgt for å trigger en vedtaksbegrynnelse.
+     * @param triggesAv -  Hva som trigger en vedtaksbegrynnelse.
      * @return List med personene det trigges endring på
      */
     fun hentPersonerForAlleUtgjørendeVilkår(
         vilkårsvurdering: Vilkårsvurdering,
         vedtaksperiode: Periode,
         oppdatertBegrunnelseType: VedtakBegrunnelseType,
-        utgjørendeVilkår: Set<Vilkår> = emptySet(),
         aktuellePersonerForVedtaksperiode: List<Person>,
-        deltBosted: Boolean = false,
-        vurderingAnnetGrunnlag: Boolean = false
+        triggesAv: TriggesAv,
     ): Set<Person> {
-        return utgjørendeVilkår?.fold(mutableSetOf()) { acc, vilkår ->
+        return triggesAv.vilkår.fold(mutableSetOf()) { acc, vilkår ->
             acc.addAll(
                 hentPersonerMedUtgjørendeVilkår(
                     vilkårsvurdering = vilkårsvurdering,
@@ -43,8 +39,7 @@ object VedtakUtils {
                     oppdatertBegrunnelseType = oppdatertBegrunnelseType,
                     utgjørendeVilkår = vilkår,
                     aktuellePersonerForVedtaksperiode = aktuellePersonerForVedtaksperiode,
-                    deltBosted = deltBosted,
-                    vurderingAnnetGrunnlag = vurderingAnnetGrunnlag
+                    triggesAv = triggesAv
                 )
             )
 
@@ -58,8 +53,7 @@ object VedtakUtils {
         oppdatertBegrunnelseType: VedtakBegrunnelseType,
         utgjørendeVilkår: Vilkår?,
         aktuellePersonerForVedtaksperiode: List<Person>,
-        deltBosted: Boolean = false,
-        vurderingAnnetGrunnlag: Boolean = false
+        triggesAv: TriggesAv
     ): List<Person> {
 
         return vilkårsvurdering.personResultater
@@ -75,8 +69,7 @@ object VedtakUtils {
                         vilkårResultat.vilkårType != utgjørendeVilkår -> false
                         vilkårResultat.periodeFom == null -> false
                         oppdatertBegrunnelseType == VedtakBegrunnelseType.INNVILGELSE -> {
-                            (!deltBosted || vilkårResultat.erDeltBosted) &&
-                                (!vurderingAnnetGrunnlag || vilkårResultat.erSkjønnsmessigVurdert) &&
+                            triggereErOppfylt(triggesAv, vilkårResultat) &&
                                 vilkårResultat.periodeFom!!.toYearMonth() == vedtaksperiode.fom.minusMonths(1)
                                 .toYearMonth() &&
                                 vilkårResultat.resultat == Resultat.OPPFYLT
@@ -84,8 +77,7 @@ object VedtakUtils {
 
                         oppdatertBegrunnelseType == VedtakBegrunnelseType.REDUKSJON ||
                             oppdatertBegrunnelseType == VedtakBegrunnelseType.OPPHØR -> {
-                            (!deltBosted || vilkårResultat.erDeltBosted) &&
-                                (!vurderingAnnetGrunnlag || vilkårResultat.erSkjønnsmessigVurdert) &&
+                            triggereErOppfylt(triggesAv, vilkårResultat) &&
                                 vilkårResultat.periodeTom != null &&
                                 vilkårResultat.resultat == Resultat.OPPFYLT &&
                                 vilkårResultat.periodeTom!!.toYearMonth() ==
@@ -104,13 +96,28 @@ object VedtakUtils {
                 acc
             }
     }
+
+    private fun triggereErOppfylt(
+        triggesAv: TriggesAv,
+        vilkårResultat: VilkårResultat
+    ): Boolean {
+        val erDeltBostedOppfylt = (!triggesAv.deltbosted || vilkårResultat.erDeltBosted)
+        val erSkjønnsmessigVurderingOppfylt =
+            (!triggesAv.vurderingAnnetGrunnlag || vilkårResultat.erSkjønnsmessigVurdert)
+        val erMedlemskapOppfylt = (
+            (vilkårResultat.erMedlemskapVurdert && triggesAv.medlemskap) ||
+                (!triggesAv.medlemskap && !vilkårResultat.erMedlemskapVurdert)
+            )
+
+        return erDeltBostedOppfylt && erSkjønnsmessigVurderingOppfylt && erMedlemskapOppfylt
+    }
 }
 
 fun validerAvslagsbegrunnelse(
     triggesAv: TriggesAv,
     vilkårResultat: VilkårResultat
 ) {
-    if (triggesAv.vilkår?.contains(vilkårResultat.vilkårType) != true) {
+    if (triggesAv.vilkår.contains(vilkårResultat.vilkårType) != true) {
         error("Avslagbegrunnelser som oppdateres må tilhøre samme vilkår")
     }
 }

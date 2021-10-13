@@ -40,10 +40,10 @@ class SkatteetatenService(
 
     fun finnPerioderMedUtvidetBarnetrygd(personer: List<String>, år: String): SkatteetatenPerioderResponse {
         LOG.debug("enter finnPerioderMedUtvidetBarnetrygd(), {} personer, år {} ", personer.size, år)
-        val unikPersoner = personer.toSet().toList()
-        LOG.debug("finnPerioderMedUtvidetBarnetrygd(): {} unikPersoner", unikPersoner.size)
-        val perioderFraBaSak = hentPerioderMedUtvidetBarnetrygdFraBaSak(personer, år)
-        val perioderFraInfotrygd = unikPersoner.mapNotNull { infotrygdBarnetrygdClient.hentPerioderMedUtvidetBarnetrygd(it, år) }
+        val unikePersoner = personer.toSet().toList()
+        LOG.debug("finnPerioderMedUtvidetBarnetrygd(): {} unikePersoner", unikePersoner.size)
+        val perioderFraBaSak = hentPerioderMedUtvidetBarnetrygdFraBaSak(unikePersoner, år)
+        val perioderFraInfotrygd = infotrygdBarnetrygdClient.hentPerioderMedUtvidetBarnetrygdForPersoner(unikePersoner.toList(), år)
         LOG.debug("finnPerioderMedUtvidetBarnetrygd(): found periods for {} personer from Infotrygd", perioderFraInfotrygd.size)
 
         val baSakPersonIdenter = perioderFraBaSak.map { it.ident }.toSet()
