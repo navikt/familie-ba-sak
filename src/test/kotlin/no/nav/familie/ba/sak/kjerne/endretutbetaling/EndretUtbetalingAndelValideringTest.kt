@@ -2,7 +2,9 @@ package no.nav.familie.ba.sak.kjerne.endretutbetaling
 
 import no.nav.familie.ba.sak.common.UtbetalingsikkerhetFeil
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
+import no.nav.familie.ba.sak.common.lagEndretUtbetalingAndel
 import no.nav.familie.ba.sak.common.tilfeldigPerson
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerAtAlleOpprettedeEndringerErUtfylt
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerDeltBosted
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerIngenOverlappendeEndring
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerPeriodeInnenforTilkjentytelse
@@ -169,5 +171,25 @@ class EndretUtbetalingAndelValideringTest {
         )
 
         validerDeltBosted(endretUtbetalingAndel, listOf(andelTilkjentYtelse.copy(prosent = BigDecimal(50))))
+    }
+
+    @Test
+    fun `sjekk at alle endrede utbetalingsandeler validerer`() {
+        val endretUtbetalingAndel1 = lagEndretUtbetalingAndel(person = tilfeldigPerson())
+        val endretUtbetalingAndel2 = lagEndretUtbetalingAndel(person = tilfeldigPerson())
+        validerAtAlleOpprettedeEndringerErUtfylt(listOf(endretUtbetalingAndel1, endretUtbetalingAndel2))
+
+        val feil = assertThrows<UtbetalingsikkerhetFeil> {
+            validerAtAlleOpprettedeEndringerErUtfylt(
+                listOf(
+                    endretUtbetalingAndel1,
+                    endretUtbetalingAndel2.copy(fom = null)
+                )
+            )
+        }
+        assertEquals(
+            "Det er opprettet instanser av EndretUtbetalingandel som ikke er fylt ut før navigering til neste sted.",
+            feil.melding
+        )
     }
 }

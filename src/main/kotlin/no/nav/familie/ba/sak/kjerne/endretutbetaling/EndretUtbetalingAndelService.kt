@@ -89,4 +89,6 @@ class EndretUtbetalingAndelService(
                 behandlingId = behandling.id,
             )
         )
+
+    fun hentForBehandling(behandlingId: Long) = endretUtbetalingAndelRepository.findByBehandlingId(behandlingId)
 }
