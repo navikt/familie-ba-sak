@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
+import no.nav.familie.ba.sak.ekstern.restDomene.RestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestHentFagsakForPerson
 import no.nav.familie.ba.sak.ekstern.restDomene.RestJournalføring
@@ -22,9 +23,7 @@ import no.nav.familie.ba.sak.kjerne.logg.Logg
 import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.prosessering.domene.Task
 import org.springframework.http.HttpHeaders
-import org.springframework.http.ResponseEntity
 import org.springframework.web.client.RestOperations
 import java.net.URI
 
@@ -160,6 +159,28 @@ class FamilieBaSakKlient(
         return postForEntity(uri, "", headers)
     }
 
+    fun leggTilEndretUtbetalingAndel(
+        behandlingId: Long,
+        restEndretUtbetalingAndel: RestEndretUtbetalingAndel,
+    ): Ressurs<RestFagsak> {
+        val uriPost = URI.create("$baSakUrl/api/endretutbetalingandel/$behandlingId")
+        val fagsak = postForEntity<Ressurs<RestFagsak>>(uriPost, "", headers)
+
+        val endretUtbetalingAndelId = fagsak.data!!.behandlinger.first().endretUtbetalingAndeler.first().id
+        val uriPut = URI.create("$baSakUrl/api/endretutbetalingandel/$behandlingId/$endretUtbetalingAndelId")
+
+        return putForEntity(uriPut, restEndretUtbetalingAndel, headers)
+    }
+
+    fun fjernEndretUtbetalingAndel(
+        behandlingId: Long,
+        endretUtbetalingAndelId: Long,
+    ): Ressurs<RestFagsak> {
+        val uri = URI.create("$baSakUrl/api/endretutbetalingandel/$behandlingId/$endretUtbetalingAndelId")
+
+        return deleteForEntity(uri, "", headers)
+    }
+
     fun iverksettVedtak(
         fagsakId: Long,
         restBeslutningPåVedtak: RestBeslutningPåVedtak,
@@ -174,12 +195,6 @@ class FamilieBaSakKlient(
         val uri = URI.create("$baSakUrl/api/migrering")
 
         return postForEntity(uri, PersonIdent(ident), headers)
-    }
-
-    fun hentTasker(key: String, value: String): ResponseEntity<List<Task>> {
-        val uri = URI.create("$baSakUrl/api/e2e/task/$key/$value")
-
-        return getForEntity(uri, headers)
     }
 
     fun forhaandsvisHenleggelseBrev(behandlingId: Long, manueltBrevRequest: ManueltBrevRequest): Ressurs<ByteArray>? {
