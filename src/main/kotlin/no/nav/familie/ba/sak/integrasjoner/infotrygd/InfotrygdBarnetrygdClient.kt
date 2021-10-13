@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.ekstern.bisys.BisysUtvidetBarnetrygdResponse
 import no.nav.familie.ba.sak.task.OpprettTaskService.Companion.RETRY_BACKOFF_5000MS
 import no.nav.familie.eksterne.kontrakter.skatteetaten.SkatteetatenPerioder
+import no.nav.familie.eksterne.kontrakter.skatteetaten.SkatteetatenPerioderRequest
 import no.nav.familie.eksterne.kontrakter.skatteetaten.SkatteetatenPerioderResponse
 import no.nav.familie.eksterne.kontrakter.skatteetaten.SkatteetatenPersonerResponse
 import no.nav.familie.http.client.AbstractRestClient
@@ -128,11 +129,12 @@ class InfotrygdBarnetrygdClient(
         }
     }
 
-    fun hentPerioderMedUtvidetBarnetrygd(ident: String, år: String): SkatteetatenPerioder? {
-        val uri = URI.create("$clientUri/infotrygd/barnetrygd/utvidet/skatteetaten")
-        val request = mapOf("personIdent" to ident, "år" to år)
+    fun hentPerioderMedUtvidetBarnetrygdForPersoner(identer: List<String>, år: String): List<SkatteetatenPerioder> {
+        val uri = URI.create("$clientUri/infotrygd/barnetrygd/utvidet/skatteetaten/perioder")
+
+        val request = SkatteetatenPerioderRequest(identer = identer, aar = år)
         return try {
-            postForEntity<SkatteetatenPerioderResponse>(uri, request).brukere.firstOrNull()
+            postForEntity<List<SkatteetatenPerioderResponse>>(uri, request).flatMap { it.brukere }
         } catch (ex: Exception) {
             loggFeil(ex, uri)
             throw RuntimeException("Henting av perioder med utvidet barnetrygd feilet. Gav feil: ${ex.message}", ex)
