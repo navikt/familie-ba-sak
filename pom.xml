@@ -23,8 +23,8 @@
         <changelist>-SNAPSHOT</changelist>
         <spring.cloud.version>3.0.4</spring.cloud.version>
         <spring.vault.version>2.3.2</spring.vault.version>
-        <prosessering.version>1.20210928154334_90dc4ba</prosessering.version>
-        <felles.version>1.20210908141943_5f1405d</felles.version>
+        <prosessering.version>1.20211008151232_caa2dc4</prosessering.version>
+        <felles.version>1.20211008153542_d279663</felles.version>
         <felles-kontrakter.version>2.0_20211005093942_92ea4e7</felles-kontrakter.version>
         <familie.kontrakter.saksstatistikk>2.0_20210427132344_d9066f5</familie.kontrakter.saksstatistikk>
         <familie.kontrakter.stønadsstatistikk>2.0_20210914093948_94e43f0</familie.kontrakter.stønadsstatistikk>
@@ -128,7 +128,7 @@
         <dependency>
             <groupId>io.sentry</groupId>
             <artifactId>sentry-logback</artifactId>
-            <version>5.2.1</version>
+            <version>5.2.2</version>
         </dependency>
 
         <dependency>

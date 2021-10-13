@@ -22,13 +22,14 @@ fun mapTilOpphørsperioder(
     forrigePersonopplysningGrunnlag: PersonopplysningGrunnlag? = null,
     forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse> = emptyList(),
     personopplysningGrunnlag: PersonopplysningGrunnlag,
-    andelerTilkjentYtelse: List<AndelTilkjentYtelse>
+    andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
 ): List<Opphørsperiode> {
     val forrigeUtbetalingsperioder = if (forrigePersonopplysningGrunnlag != null) mapTilUtbetalingsperioder(
-        forrigePersonopplysningGrunnlag,
-        forrigeAndelerTilkjentYtelse
+        personopplysningGrunnlag = forrigePersonopplysningGrunnlag,
+        andelerTilkjentYtelse = forrigeAndelerTilkjentYtelse,
     ) else emptyList()
-    val utbetalingsperioder = mapTilUtbetalingsperioder(personopplysningGrunnlag, andelerTilkjentYtelse)
+    val utbetalingsperioder =
+        mapTilUtbetalingsperioder(personopplysningGrunnlag, andelerTilkjentYtelse)
 
     val alleOpphørsperioder = if (forrigeUtbetalingsperioder.isNotEmpty() && utbetalingsperioder.isEmpty()) {
         listOf(

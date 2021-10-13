@@ -31,25 +31,21 @@ object VedtakUtils {
         aktuellePersonerForVedtaksperiode: List<Person>,
         triggesAv: TriggesAv,
     ): Set<Person> {
-
-        var personerSomOppfyllerTriggerVilkår: MutableSet<Person>? = null
-
-        triggesAv.vilkår?.forEach { vilkår ->
-            val personerMedVilkårForPeriode = hentPersonerMedUtgjørendeVilkår(
-                vilkårsvurdering = vilkårsvurdering,
-                vedtaksperiode = vedtaksperiode,
-                oppdatertBegrunnelseType = oppdatertBegrunnelseType,
-                aktuellePersonerForVedtaksperiode = aktuellePersonerForVedtaksperiode,
-                utgjørendeVilkår = vilkår,
-                triggesAv = triggesAv
+        return triggesAv.vilkår?.fold(mutableSetOf()) { acc, vilkår ->
+            acc.addAll(
+                hentPersonerMedUtgjørendeVilkår(
+                    vilkårsvurdering = vilkårsvurdering,
+                    vedtaksperiode = vedtaksperiode,
+                    oppdatertBegrunnelseType = oppdatertBegrunnelseType,
+                    utgjørendeVilkår = vilkår,
+                    aktuellePersonerForVedtaksperiode = aktuellePersonerForVedtaksperiode,
+                    deltBosted = deltBosted,
+                    vurderingAnnetGrunnlag = vurderingAnnetGrunnlag
+                )
             )
-            personerSomOppfyllerTriggerVilkår = if (personerSomOppfyllerTriggerVilkår == null) {
-                personerMedVilkårForPeriode.toMutableSet()
-            } else {
-                personerSomOppfyllerTriggerVilkår!!.intersect(personerMedVilkårForPeriode).toMutableSet()
-            }
+
+            acc
         }
-        return personerSomOppfyllerTriggerVilkår ?: emptySet()
     }
 
     private fun hentPersonerMedUtgjørendeVilkår(
@@ -61,44 +57,47 @@ object VedtakUtils {
         triggesAv: TriggesAv
     ): List<Person> {
 
-        return vilkårsvurdering.personResultater.fold(mutableListOf()) { acc, personResultat ->
-            val utgjørendeVilkårResultat = personResultat.vilkårResultater.firstOrNull { vilkårResultat ->
+        return vilkårsvurdering.personResultater
+            .fold(mutableListOf()) { acc, personResultat ->
+                val utgjørendeVilkårResultat = personResultat.vilkårResultater.firstOrNull { vilkårResultat ->
 
-                val oppfyltTomMånedEtter =
-                    if (vilkårResultat.vilkårType == Vilkår.UNDER_18_ÅR &&
-                        vilkårResultat.periodeTom != vilkårResultat.periodeTom?.sisteDagIMåned()
-                    ) 0L
-                    else 1L
-                when {
-                    vilkårResultat.vilkårType != utgjørendeVilkår -> false
-                    vilkårResultat.periodeFom == null -> false
-                    oppdatertBegrunnelseType == VedtakBegrunnelseType.INNVILGELSE -> {
-                        triggereErOppfylt(triggesAv, vilkårResultat) &&
-                            vilkårResultat.periodeFom!!.toYearMonth() == vedtaksperiode.fom.minusMonths(1)
-                            .toYearMonth() &&
-                            vilkårResultat.resultat == Resultat.OPPFYLT
-                    }
+                    val oppfyltTomMånedEtter =
+                        if (vilkårResultat.vilkårType == Vilkår.UNDER_18_ÅR &&
+                            vilkårResultat.periodeTom != vilkårResultat.periodeTom?.sisteDagIMåned()
+                        ) 0L
+                        else 1L
+                    when {
+                        vilkårResultat.vilkårType != utgjørendeVilkår -> false
+                        vilkårResultat.periodeFom == null -> false
+                        oppdatertBegrunnelseType == VedtakBegrunnelseType.INNVILGELSE -> {
+                            (!deltBosted || vilkårResultat.erDeltBosted) &&
+                                (!vurderingAnnetGrunnlag || vilkårResultat.erSkjønnsmessigVurdert) &&
+                                vilkårResultat.periodeFom!!.toYearMonth() == vedtaksperiode.fom.minusMonths(1)
+                                .toYearMonth() &&
+                                vilkårResultat.resultat == Resultat.OPPFYLT
+                        }
 
-                    oppdatertBegrunnelseType == VedtakBegrunnelseType.REDUKSJON ||
-                        oppdatertBegrunnelseType == VedtakBegrunnelseType.OPPHØR -> {
-                        triggereErOppfylt(triggesAv, vilkårResultat) &&
-                            vilkårResultat.periodeTom != null &&
-                            vilkårResultat.resultat == Resultat.OPPFYLT &&
-                            vilkårResultat.periodeTom!!.toYearMonth() ==
-                            vedtaksperiode.fom.minusMonths(oppfyltTomMånedEtter).toYearMonth()
+                        oppdatertBegrunnelseType == VedtakBegrunnelseType.REDUKSJON ||
+                            oppdatertBegrunnelseType == VedtakBegrunnelseType.OPPHØR -> {
+                            (!deltBosted || vilkårResultat.erDeltBosted) &&
+                                (!vurderingAnnetGrunnlag || vilkårResultat.erSkjønnsmessigVurdert) &&
+                                vilkårResultat.periodeTom != null &&
+                                vilkårResultat.resultat == Resultat.OPPFYLT &&
+                                vilkårResultat.periodeTom!!.toYearMonth() ==
+                                vedtaksperiode.fom.minusMonths(oppfyltTomMånedEtter).toYearMonth()
+                        }
+                        else -> throw Feil("Henting av personer med utgjørende vilkår when: Ikke implementert")
                     }
-                    else -> throw Feil("Henting av personer med utgjørende vilkår when: Ikke implementert")
                 }
-            }
 
-            val person = aktuellePersonerForVedtaksperiode.firstOrNull { person ->
-                person.personIdent.ident == personResultat.personIdent
+                val person = aktuellePersonerForVedtaksperiode.firstOrNull { person ->
+                    person.personIdent.ident == personResultat.personIdent
+                }
+                if (utgjørendeVilkårResultat != null && person != null) {
+                    acc.add(person)
+                }
+                acc
             }
-            if (utgjørendeVilkårResultat != null && person != null) {
-                acc.add(person)
-            }
-            acc
-        }
     }
 
     private fun triggereErOppfylt(

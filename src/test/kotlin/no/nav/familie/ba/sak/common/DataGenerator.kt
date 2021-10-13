@@ -4,8 +4,7 @@ import io.mockk.mockk
 import no.nav.commons.foedselsnummer.testutils.FoedselsnummerGenerator
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPerson
-import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksbegrunnelse
-import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedBegrunnelse
+import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedStandardbegrunnelser
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.ekstern.restDomene.SøkerMedOpplysninger
@@ -23,6 +22,8 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.dokument.hentBrevtype
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakPerson
@@ -843,14 +844,11 @@ fun leggTilBegrunnelsePåVedtaksperiodeIBehandling(
     val perisisterteVedtaksperioder =
         vedtaksperiodeService.hentPersisterteVedtaksperioder(aktivtVedtak)
 
-    vedtaksperiodeService.oppdaterVedtaksperiodeMedBegrunnelser(
+    vedtaksperiodeService.oppdaterVedtaksperiodeMedStandardbegrunnelser(
         vedtaksperiodeId = perisisterteVedtaksperioder.first().id,
-        restPutVedtaksperiodeMedBegrunnelse =
-        RestPutVedtaksperiodeMedBegrunnelse(
-            begrunnelser = listOf(
-                RestPutVedtaksbegrunnelse(
-                    vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET,
-                )
+        restPutVedtaksperiodeMedStandardbegrunnelser = RestPutVedtaksperiodeMedStandardbegrunnelser(
+            standardbegrunnelser = listOf(
+                VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET,
             )
         )
     )
@@ -877,3 +875,42 @@ fun lagVilkårResultat(
 )
 
 val guttenBarnesenFødselsdato = LocalDate.now().withDayOfMonth(10).minusYears(6)
+
+fun lagEndretUtbetalingAndel(
+    behandlingId: Long = 0,
+    person: Person,
+    prosent: BigDecimal = BigDecimal.valueOf(100),
+    fom: YearMonth = YearMonth.now().minusMonths(1),
+    tom: YearMonth = YearMonth.now(),
+    årsak: Årsak = Årsak.DELT_BOSTED,
+    avtaletidspunktDeltBosted: LocalDate = LocalDate.now().minusMonths(1),
+    søknadstidspunkt: LocalDate = LocalDate.now().minusMonths(1),
+) =
+    EndretUtbetalingAndel(
+        behandlingId = behandlingId,
+        person = person,
+        prosent = prosent,
+        fom = fom,
+        tom = tom,
+        årsak = årsak,
+        avtaletidspunktDeltBosted = avtaletidspunktDeltBosted,
+        søknadstidspunkt = søknadstidspunkt,
+        begrunnelse = "Test"
+    )
+
+fun lagPerson(
+    aktørId: AktørId = randomAktørId(),
+    personIdent: PersonIdent = PersonIdent(randomFnr()),
+    type: PersonType = PersonType.SØKER,
+    personopplysningGrunnlag: PersonopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 0),
+    fødselsdato: LocalDate = LocalDate.now().minusYears(19),
+    kjønn: Kjønn = Kjønn.KVINNE
+) = Person(
+    aktørId = aktørId,
+    personIdent = personIdent,
+    type = type,
+    personopplysningGrunnlag = personopplysningGrunnlag,
+    fødselsdato = fødselsdato,
+    navn = type.name,
+    kjønn = kjønn
+)

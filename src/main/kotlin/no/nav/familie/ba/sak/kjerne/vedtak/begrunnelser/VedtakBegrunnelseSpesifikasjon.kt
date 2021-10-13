@@ -42,7 +42,7 @@ interface IVedtakBegrunnelse {
 }
 
 data class TriggesAv(
-    val vilkår: Set<Vilkår>? = null,
+    val vilkår: Set<Vilkår> = emptySet(),
     val personTyper: Set<PersonType> = setOf(PersonType.BARN, PersonType.SØKER),
     val personerManglerOpplysninger: Boolean = false,
     val satsendring: Boolean = false,
@@ -652,7 +652,7 @@ fun VedtakBegrunnelseSpesifikasjon.erTilknyttetVilkår(sanityBegrunnelser: List<
 fun SanityBegrunnelse.tilTriggesAv(): TriggesAv {
 
     return TriggesAv(
-        vilkår = this.vilkaar?.map { it.tilVilkår() }?.toSet(),
+        vilkår = this.vilkaar?.map { it.tilVilkår() }?.toSet() ?: emptySet(),
         personTyper = this.rolle?.map { it.tilPersonType() }?.toSet()
             ?: when {
                 this.inneholderVilkår(SanityVilkår.BOSATT_I_RIKET) -> setOf(PersonType.BARN, PersonType.SØKER)

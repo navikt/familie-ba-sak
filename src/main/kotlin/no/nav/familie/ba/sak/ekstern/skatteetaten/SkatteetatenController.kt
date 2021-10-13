@@ -141,8 +141,8 @@ class SkatteetatenController(
             SkatteetatenPerioder(
                 "27903249671", LocalDateTime.of(2021, 1, 1, 0, 0),
                 perioder = listOf(
-                    SkatteetatenPeriode("2021-01", Delingsprosent._50, tomMaaned = "2020-03"),
-                    SkatteetatenPeriode("2021-04", Delingsprosent._0, tomMaaned = "2020-08"),
+                    SkatteetatenPeriode("2021-01", Delingsprosent._50, tomMaaned = "2021-03"),
+                    SkatteetatenPeriode("2021-04", Delingsprosent._0, tomMaaned = "2021-08"),
                     SkatteetatenPeriode("2021-09", Delingsprosent.usikker, tomMaaned = null)
                 )
             ),

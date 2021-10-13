@@ -20,8 +20,9 @@ class IverksettMotOppdrag(
 ) : BehandlingSteg<IverksettingTaskDTO> {
 
     override fun preValiderSteg(behandling: Behandling, stegService: StegService?) {
-        val vilkårsvurderingSteg: VilkårsvurderingSteg = stegService?.hentBehandlingSteg(StegType.VILKÅRSVURDERING) as VilkårsvurderingSteg
-        vilkårsvurderingSteg.postValiderSteg(behandling)
+        val behandlingsresultatSteg: BehandlingsresultatSteg =
+            stegService?.hentBehandlingSteg(StegType.BEHANDLINGSRESULTAT) as BehandlingsresultatSteg
+        behandlingsresultatSteg.preValiderSteg(behandling)
 
         val totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(behandlingId = behandling.id)
             ?: throw Feil(
