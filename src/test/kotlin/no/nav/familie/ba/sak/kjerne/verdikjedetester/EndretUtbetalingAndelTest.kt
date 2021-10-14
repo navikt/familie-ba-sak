@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenario
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenarioPerson
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -23,7 +24,7 @@ class EndretUtbetalingAndelTest(
 ) : AbstractVerdikjedetest() {
 
     @Test
-    fun `Skal teste at endret utbetalings andel overskriver eksisterende utbetalingsandel`() {
+    fun `Skal teste at endret utbetalingsandel overskriver eksisterende utbetalingsandel`() {
         val (scenario, restFagsakEtterBehandlingsresultat) = genererBehandlingsresultat()
 
         val behandlingEtterBehandlingsresultat =
@@ -82,7 +83,7 @@ class EndretUtbetalingAndelTest(
     }
 
     @Test
-    fun `Skal teste at fjernet endret utbetalings andel oppretter tideligere eksisterende utbetalingsandel`() {
+    fun `Skal teste at fjernet endret utbetalingsandel oppretter tidligere eksisterende utbetalingsandel`() {
         val (scenario, restFagsakEtterBehandlingsresultat) = genererBehandlingsresultat()
 
         val behandling = hentAktivBehandling(restFagsak = restFagsakEtterBehandlingsresultat.data!!)!!
@@ -182,7 +183,8 @@ class EndretUtbetalingAndelTest(
                         vilkårResultater = listOf(
                             it.copy(
                                 resultat = Resultat.OPPFYLT,
-                                periodeFom = barnFødselsdato
+                                periodeFom = barnFødselsdato,
+                                erDeltBosted = it.vilkårType == Vilkår.BOR_MED_SØKER
                             )
                         )
                     )
