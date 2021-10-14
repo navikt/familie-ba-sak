@@ -159,9 +159,9 @@ class DokumentService(
         }
 
         if ((
-                manueltBrevRequest.brevmal == INNHENTE_OPPLYSNINGER ||
-                    manueltBrevRequest.brevmal == VARSEL_OM_REVURDERING
-                ) && behandling != null
+            manueltBrevRequest.brevmal == INNHENTE_OPPLYSNINGER ||
+                manueltBrevRequest.brevmal == VARSEL_OM_REVURDERING
+            ) && behandling != null
         ) {
             vilkårsvurderingService.opprettOglagreBlankAnnenVurdering(
                 annenVurderingType = AnnenVurderingType.OPPLYSNINGSPLIKT,

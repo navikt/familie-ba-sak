@@ -31,7 +31,7 @@ class SkatteetatenService(
 
         val personIdentSet = personerFraBaSak.map { it.ident }.toSet()
 
-        //Assumes that vedtak in ba-sak is always newer than that in Infotrygd for the same person ident
+        // Assumes that vedtak in ba-sak is always newer than that in Infotrygd for the same person ident
         val kombinertListe = personerFraBaSak + personerFraInfotrygd.brukere.filter { !personIdentSet.contains(it.ident) }
         LOG.debug("kombinert person fra Infotrygd og ba-sak: {} unik personer", kombinertListe.size)
 
@@ -48,10 +48,12 @@ class SkatteetatenService(
 
         val baSakPersonIdenter = perioderFraBaSak.map { it.ident }.toSet()
 
-        //Assumes that vedtak in ba-sak is always newer than that in Infotrygd for the same person ident
-        return SkatteetatenPerioderResponse(perioderFraBaSak + perioderFraInfotrygd.filter {
-            !baSakPersonIdenter.contains(it.ident)
-        })
+        // Assumes that vedtak in ba-sak is always newer than that in Infotrygd for the same person ident
+        return SkatteetatenPerioderResponse(
+            perioderFraBaSak + perioderFraInfotrygd.filter {
+                !baSakPersonIdenter.contains(it.ident)
+            }
+        )
     }
 
     private fun hentPersonerMedUtvidetBarnetrygd(år: String): List<SkatteetatenPerson> {
@@ -86,7 +88,7 @@ class SkatteetatenService(
             skatteetatenPerioderMap.size
         )
         return skatteetatenPerioderMap.toList().map {
-            //Slå sammen perioder basert på delingsprosent
+            // Slå sammen perioder basert på delingsprosent
             SkatteetatenPerioder(
                 ident = it.second.ident,
                 sisteVedtakPaaIdent = it.second.sisteVedtakPaaIdent,
@@ -96,8 +98,7 @@ class SkatteetatenService(
         }
     }
 
-    private fun hentUtdannetStonadPerioderForPersoner(personIdenter: List<String>, år: String)
-            : List<AndelTilkjentYtelsePeriode> {
+    private fun hentUtdannetStonadPerioderForPersoner(personIdenter: List<String>, år: String): List<AndelTilkjentYtelsePeriode> {
         val yearStart = LocalDateTime.of(år.toInt(), 1, 1, 0, 0, 0)
         val yearEnd = LocalDateTime.of(år.toInt(), 12, 31, 23, 59, 59)
         return andelTilkjentYtelseRepository.finnStonadPeriodMedUtvidetBarnetrygdForPersoner(
@@ -127,7 +128,7 @@ fun String.tilDelingsprosent(): SkatteetatenPeriode.Delingsprosent =
         SkatteetatenPeriode.Delingsprosent._50 else SkatteetatenPeriode.Delingsprosent.usikker
 
 fun SkatteetatenPeriode.Delingsprosent.tilBigDecimal(): BigDecimal = when (this) {
-    SkatteetatenPeriode.Delingsprosent._0 -> BigDecimal.valueOf(100);
-    SkatteetatenPeriode.Delingsprosent._50 -> BigDecimal.valueOf(50);
+    SkatteetatenPeriode.Delingsprosent._0 -> BigDecimal.valueOf(100)
+    SkatteetatenPeriode.Delingsprosent._50 -> BigDecimal.valueOf(50)
     else -> BigDecimal.valueOf(0)
 }
