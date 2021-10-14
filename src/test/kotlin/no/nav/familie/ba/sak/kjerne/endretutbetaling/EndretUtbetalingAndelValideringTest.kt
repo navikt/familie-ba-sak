@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.endretutbetaling
 
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.UtbetalingsikkerhetFeil
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagEndretUtbetalingAndel
@@ -179,7 +180,7 @@ class EndretUtbetalingAndelValideringTest {
         val endretUtbetalingAndel2 = lagEndretUtbetalingAndel(person = tilfeldigPerson())
         validerAtAlleOpprettedeEndringerErUtfylt(listOf(endretUtbetalingAndel1, endretUtbetalingAndel2))
 
-        val feil = assertThrows<UtbetalingsikkerhetFeil> {
+        val feil = assertThrows<FunksjonellFeil> {
             validerAtAlleOpprettedeEndringerErUtfylt(
                 listOf(
                     endretUtbetalingAndel1,
@@ -188,7 +189,7 @@ class EndretUtbetalingAndelValideringTest {
             )
         }
         assertEquals(
-            "Det er opprettet instanser av EndretUtbetalingandel som ikke er fylt ut før navigering til neste sted.",
+            "Det er opprettet instanser av EndretUtbetalingandel som ikke er fylt ut før navigering til neste steg.",
             feil.melding
         )
     }

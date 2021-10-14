@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.endretutbetaling
 
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.UtbetalingsikkerhetFeil
 import no.nav.familie.ba.sak.common.overlapperHeltEllerDelvisMed
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
@@ -76,8 +77,8 @@ object EndretUtbetalingAndelValidering {
         runCatching {
             endretUtbetalingAndeler.forEach { it.validerUtfyltEndring() }
         }.onFailure {
-            throw UtbetalingsikkerhetFeil(
-                melding = "Det er opprettet instanser av EndretUtbetalingandel som ikke er fylt ut før navigering til neste sted.",
+            throw FunksjonellFeil(
+                melding = "Det er opprettet instanser av EndretUtbetalingandel som ikke er fylt ut før navigering til neste steg.",
                 frontendFeilmelding = "Du har opprettet en eller flere endrede utbetalingsperioder som er ufullstendig utfylt. Disse må enten fylles ut eller slettes før du kan gå videre."
             )
         }
