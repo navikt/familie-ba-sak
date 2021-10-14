@@ -16,11 +16,12 @@ object EndretUtbetalingAndelValidering {
     ) {
 
         endretUtbetalingAndel.validerUtfyltEndring()
-        if (eksisterendeEndringerPåBehandling.any {
-            it.overlapperMed(endretUtbetalingAndel.periode()) &&
-                it.person == endretUtbetalingAndel.person &&
-                it.årsak == endretUtbetalingAndel.årsak
-        }
+        if (eksisterendeEndringerPåBehandling.any
+            {
+                it.overlapperMed(endretUtbetalingAndel.periode()) &&
+                    it.person == endretUtbetalingAndel.person &&
+                    it.årsak == endretUtbetalingAndel.årsak
+            }
         ) {
             throw UtbetalingsikkerhetFeil(
                 melding = "Perioden som blir forsøkt lagt til overlapper med eksisterende periode på person.",
@@ -62,10 +63,11 @@ object EndretUtbetalingAndelValidering {
     ) {
         if (endretUtbetalingAndel.årsak != Årsak.DELT_BOSTED) return
 
-        if (!andelTilkjentYtelser.filter {
+        if (!andelTilkjentYtelser.filter
+            {
                 it.stønadsPeriode().overlapperHeltEllerDelvisMed(endretUtbetalingAndel.periode())
-            }
-                .any { it.prosent == BigDecimal(50) }) {
+            }.any { it.prosent == BigDecimal(50) }
+        ) {
             throw UtbetalingsikkerhetFeil(
                 melding = "Det er ingen sats for delt bosted i perioden det opprettes en endring med årsak delt bosted for.",
                 frontendFeilmelding = "Du har valgt årsaken 'delt bosted', denne samstemmer ikke med vurderingene gjort på vilkårsvurderingssiden i perioden du har valgt."
