@@ -117,6 +117,3 @@ private fun List<AndelTilkjentYtelse>.lagUtbetalingsperiodeDetaljer(personopplys
             erPåvirketAvEndring = andel.endretUtbetalingAndeler.isNotEmpty()
         )
     }
-
-    return utbetalingsperiodeDetaljer
-}
