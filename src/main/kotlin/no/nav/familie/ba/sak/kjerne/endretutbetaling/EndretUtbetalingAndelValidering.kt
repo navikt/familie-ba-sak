@@ -13,10 +13,10 @@ object EndretUtbetalingAndelValidering {
 
         endretUtbetalingAndel.validerUtfyltEndring()
         if (eksisterendeEndringerPåBehandling.any {
-                it.overlapperMed(endretUtbetalingAndel.periode()) &&
-                    it.person == endretUtbetalingAndel.person &&
-                    it.årsak == endretUtbetalingAndel.årsak
-            }
+            it.overlapperMed(endretUtbetalingAndel.periode()) &&
+                it.person == endretUtbetalingAndel.person &&
+                it.årsak == endretUtbetalingAndel.årsak
+        }
         ) {
             throw UtbetalingsikkerhetFeil(
                 melding = "Perioden som blir forsøkt lagt til overlapper med eksisterende periode på person.",

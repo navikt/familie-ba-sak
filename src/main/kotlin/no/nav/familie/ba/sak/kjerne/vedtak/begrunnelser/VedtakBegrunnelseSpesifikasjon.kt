@@ -652,8 +652,7 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
 
 val hjemlerTilhørendeFritekst = setOf(2, 4, 11)
 
-fun VedtakBegrunnelseSpesifikasjon.tilSanityBegrunnelse(sanityBegrunnelser: List<SanityBegrunnelse>)
-    : SanityBegrunnelse =
+fun VedtakBegrunnelseSpesifikasjon.tilSanityBegrunnelse(sanityBegrunnelser: List<SanityBegrunnelse>): SanityBegrunnelse =
     sanityBegrunnelser.find { it.apiNavn == this.sanityApiNavn }
         ?: throw Feil("Fant ikke begrunnelse med apiNavn=${this.sanityApiNavn} for ${this.name} i Sanity.")
 
