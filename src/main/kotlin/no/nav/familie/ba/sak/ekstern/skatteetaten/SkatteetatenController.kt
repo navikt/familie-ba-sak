@@ -62,7 +62,7 @@ class SkatteetatenController(
         @NotNull @RequestParam(value = "aar", required = true) aar: String
     ): ResponseEntity<Ressurs<SkatteetatenPersonerResponse>> {
         logger.info("Treff på finnPersonerMedUtvidetBarnetrygdTest")
-        val respons = skatteetatenService.finnPersonerMedUtvidetBarnetrygd(aar);
+        val respons = skatteetatenService.finnPersonerMedUtvidetBarnetrygd(aar)
         return ResponseEntity(Ressurs.success(respons), HttpStatus.valueOf(200))
     }
 
@@ -162,6 +162,5 @@ class SkatteetatenController(
 
                 )
             ),
-
-            )
+        )
 }

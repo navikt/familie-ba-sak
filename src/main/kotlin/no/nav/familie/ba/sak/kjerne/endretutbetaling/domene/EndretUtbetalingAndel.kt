@@ -85,7 +85,7 @@ data class EndretUtbetalingAndel(
     @Convert(converter = VedtakBegrunnelseSpesifikasjonListConverter::class)
     var vedtakBegrunnelseSpesifikasjoner: List<VedtakBegrunnelseSpesifikasjon> = emptyList(),
 
-    ) : BaseEntitet() {
+) : BaseEntitet() {
 
     fun overlapperMed(periode: MånedPeriode) = periode.overlapperHeltEllerDelvisMed(this.periode())
 
@@ -168,6 +168,7 @@ fun EndretUtbetalingAndel.tilVedtaksperiodeMedBegrunnelser(vedtak: Vedtak): Vedt
                     vedtakBegrunnelseSpesifikasjon = vedtakBegrunnelseSpesifikasjon,
                     personIdenter = listOf(this.person!!.personIdent.ident)
                 )
-            })
+            }
+        )
     }
 }

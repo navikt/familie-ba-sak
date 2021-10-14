@@ -54,7 +54,7 @@ internal class SkatteetatenServiceTest {
     @Test
     fun `finnPersonerMedUtvidetBarnetrygd() return kun resultat fra ba-sak når ingen treff i infotrygd`() {
         every { infotrygdBarnetrygdClient.hentPersonerMedUtvidetBarnetrygd(any()) } returns
-                SkatteetatenPersonerResponse(brukere = emptyList())
+            SkatteetatenPersonerResponse(brukere = emptyList())
 
         val fagsak = defaultFagsak()
         val fagsak2 = defaultFagsak()
@@ -87,19 +87,18 @@ internal class SkatteetatenServiceTest {
     fun `finnPersonerMedUtvidetBarnetrygd() skal return kun resultat fra infotrygd når ingen treff i ba-sak`() {
         every { fagsakRepository.finnFagsakerMedUtvidetBarnetrygdInnenfor(any(), any()) } returns emptyList()
 
-
         val fagsak = defaultFagsak()
         val vedtaksdato = LocalDate.now()
 
         every { infotrygdBarnetrygdClient.hentPersonerMedUtvidetBarnetrygd(any()) } returns
-                SkatteetatenPersonerResponse(
-                    brukere = listOf(
-                        SkatteetatenPerson(
-                            fagsak.hentAktivIdent().ident,
-                            vedtaksdato.atStartOfDay()
-                        )
+            SkatteetatenPersonerResponse(
+                brukere = listOf(
+                    SkatteetatenPerson(
+                        fagsak.hentAktivIdent().ident,
+                        vedtaksdato.atStartOfDay()
                     )
                 )
+            )
 
         val skatteetatenService = SkatteetatenService(infotrygdBarnetrygdClient, fagsakRepository, andelTilkjentYtelseRepository)
         val personerMedUtvidetBarnetrygd = skatteetatenService.finnPersonerMedUtvidetBarnetrygd(vedtaksdato.year.toString())
