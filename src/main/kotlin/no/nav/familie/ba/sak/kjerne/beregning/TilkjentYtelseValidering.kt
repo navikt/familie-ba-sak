@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjeMedAndeler
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import java.math.BigDecimal
 import java.time.LocalDateTime
 
 // 3 år (krav i loven) og 2 måneder (på grunn av behandlingstid)
@@ -38,10 +39,7 @@ object TilkjentYtelseValidering {
 
     fun validerAtTilkjentYtelseHarGyldigEtterbetalingsperiode(tilkjentYtelse: TilkjentYtelse) {
         val gyldigEtterbetalingFom = hentGyldigEtterbetalingFom(tilkjentYtelse.behandling.opprettetTidspunkt)
-        if (tilkjentYtelse.andelerTilkjentYtelse.any {
-            it.stønadFom < gyldigEtterbetalingFom
-        }
-        ) {
+        if (tilkjentYtelse.andelerTilkjentYtelse.any { it.stønadFom < gyldigEtterbetalingFom }) {
             throw UtbetalingsikkerhetFeil(
                 melding = "Utbetalingsperioder for en eller flere av partene/personene går mer enn 3 år tilbake i tid.",
                 frontendFeilmelding = "Utbetalingsperioder for en eller flere av partene/personene går mer enn 3 år tilbake i tid. Vennligst endre på datoene, eller ta kontakt med teamet for hjelp."
@@ -101,7 +99,12 @@ object TilkjentYtelseValidering {
         barn: Person
     ) {
         andeler.forEach { andelTilkjentYtelse ->
-            if (barnsAndelerFraAndreBehandlinger.any { andelTilkjentYtelse.overlapperMed(it) }) {
+            if (barnsAndelerFraAndreBehandlinger.any
+                {
+                    andelTilkjentYtelse.overlapperMed(it) &&
+                        andelTilkjentYtelse.prosent + it.prosent > BigDecimal(100)
+                }
+            ) {
                 throw UtbetalingsikkerhetFeil(
                     melding = "Vi finner flere utbetalinger for barn på behandling ${behandlendeBehandlingTilkjentYtelse.behandling.id}",
                     frontendFeilmelding = "Det utbetales allerede barnetrygd for ${barn.personIdent.ident} i perioden ${andelTilkjentYtelse.stønadFom.tilKortString()} - ${andelTilkjentYtelse.stønadTom.tilKortString()}."
