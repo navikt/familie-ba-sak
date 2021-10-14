@@ -22,7 +22,8 @@ class VedtaksperiodeServiceUtilsTest {
                     fom = fom,
                     tom = tom,
                     vedtakBegrunnelseSpesifikasjoner = listOf(VedtakBegrunnelseSpesifikasjon.INNVILGELSE_VURDERING_HELE_FAMILIEN_PLIKTIG_MEDLEM),
-                ), lagEndretUtbetalingAndel(
+                ),
+                lagEndretUtbetalingAndel(
                     person = person2,
                     fom = fom,
                     tom = tom,
@@ -54,7 +55,8 @@ class VedtaksperiodeServiceUtilsTest {
                     fom = fom,
                     tom = tom,
                     vedtakBegrunnelseSpesifikasjoner = listOf(VedtakBegrunnelseSpesifikasjon.INNVILGELSE_VURDERING_HELE_FAMILIEN_PLIKTIG_MEDLEM)
-                ), lagEndretUtbetalingAndel(
+                ),
+                lagEndretUtbetalingAndel(
                     person = person2,
                     fom = fom,
                     tom = tom,
@@ -95,7 +97,8 @@ class VedtaksperiodeServiceUtilsTest {
                     fom = fom,
                     tom = tom,
                     vedtakBegrunnelseSpesifikasjoner = listOf(VedtakBegrunnelseSpesifikasjon.INNVILGELSE_VURDERING_HELE_FAMILIEN_PLIKTIG_MEDLEM)
-                ), lagEndretUtbetalingAndel(
+                ),
+                lagEndretUtbetalingAndel(
                     person = person2,
                     fom = fom.minusMonths(2),
                     tom = tom.minusMonths(2),
