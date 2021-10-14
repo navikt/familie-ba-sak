@@ -6,7 +6,6 @@ import no.nav.familie.ba.sak.common.overlapperHeltEllerDelvisMed
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
-import java.math.BigDecimal
 
 object EndretUtbetalingAndelValidering {
 
@@ -63,10 +62,12 @@ object EndretUtbetalingAndelValidering {
     ) {
         if (endretUtbetalingAndel.årsak != Årsak.DELT_BOSTED) return
 
-        if (!andelTilkjentYtelser.filter
-            {
-                it.stønadsPeriode().overlapperHeltEllerDelvisMed(endretUtbetalingAndel.periode())
-            }.any { it.prosent == BigDecimal(50) }
+        if (!andelTilkjentYtelser
+                .filter { it.personIdent == endretUtbetalingAndel.person?.personIdent?.ident!! }
+                .filter
+                {
+                    it.stønadsPeriode().overlapperHeltEllerDelvisMed(endretUtbetalingAndel.periode())
+                }.any { it.erDeltBosted() }
         ) {
             throw UtbetalingsikkerhetFeil(
                 melding = "Det er ingen sats for delt bosted i perioden det opprettes en endring med årsak delt bosted for.",
