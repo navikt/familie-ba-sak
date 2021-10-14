@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.kjerne.dokument.domene.SanityVilkår.UNDER_18_ÅR
 import no.nav.familie.ba.sak.kjerne.dokument.domene.SanityVilkår.UTVIDET_BARNETRYGD
 import no.nav.familie.ba.sak.kjerne.dokument.domene.VilkårRolle.BARN
 import no.nav.familie.ba.sak.kjerne.dokument.domene.VilkårRolle.SOKER
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
@@ -22,6 +23,7 @@ data class SanityBegrunnelse(
     val giftPartnerskapTriggere: List<VilkårTrigger>? = null,
     val borMedSokerTriggere: List<VilkårTrigger>? = null,
     val ovrigeTriggere: List<ØvrigTrigger>? = null,
+    val endringsaarsaker: List<Årsak>? = null,
     val hjemler: List<String> = emptyList(),
 )
 
@@ -73,7 +75,8 @@ enum class ØvrigTrigger {
     SATSENDRING,
     BARN_MED_6_ÅRS_DAG,
     ALLTID_AUTOMATISK,
-    ETTER_ENDRET_UTBETALING
+    ETTER_ENDRET_UTBETALING,
+    ENDRET_UTBETALING
 }
 
 fun SanityBegrunnelse.tilTriggesAv(): TriggesAv {
@@ -101,7 +104,8 @@ fun SanityBegrunnelse.tilTriggesAv(): TriggesAv {
         medlemskap = this.inneholderBosattIRiketTrigger(VilkårTrigger.MEDLEMSKAP),
         deltbosted = this.inneholderBorMedSøkerTrigger(VilkårTrigger.DELT_BOSTED),
         valgbar = !this.inneholderØvrigTrigger(ØvrigTrigger.ALLTID_AUTOMATISK),
-        etterEndretAndel = this.inneholderØvrigTrigger(ØvrigTrigger.ETTER_ENDRET_UTBETALING)
+        etterEndretUtbetaling = this.inneholderØvrigTrigger(ØvrigTrigger.ETTER_ENDRET_UTBETALING),
+        endringsaarsaker = this.endringsaarsaker?.toSet() ?: emptySet(),
     )
 }
 

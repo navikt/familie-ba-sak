@@ -15,6 +15,7 @@ import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService
 import no.nav.familie.ba.sak.kjerne.dokument.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakUtils.hentPersonerForAlleUtgjørendeVilkår
@@ -43,7 +44,8 @@ data class TriggesAv(
     val medlemskap: Boolean = false,
     val deltbosted: Boolean = false,
     val valgbar: Boolean = true,
-    val etterEndretAndel: Boolean = false
+    val endringsaarsaker: Set<Årsak> = emptySet(),
+    val etterEndretUtbetaling: Boolean = false
 )
 
 enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
@@ -621,10 +623,12 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
                 } else true
             }
 
-        if (triggesAv.etterEndretAndel)
+        if (triggesAv.etterEndretUtbetaling)
             return endretUtbetalingAndeler.any { endretUtbetalingAndel ->
                 endretUtbetalingAndel.tom!!.sisteDagIInneværendeMåned()
-                    .erDagenFør(vedtaksperiodeMedBegrunnelser.fom) && aktuellePersoner.any { person -> person.personIdent == endretUtbetalingAndel.person?.personIdent }
+                    .erDagenFør(vedtaksperiodeMedBegrunnelser.fom) &&
+                    aktuellePersoner.any { person -> person.personIdent == endretUtbetalingAndel.person?.personIdent } &&
+                    triggesAv.endringsaarsaker.contains(endretUtbetalingAndel.årsak)
             }
 
 
