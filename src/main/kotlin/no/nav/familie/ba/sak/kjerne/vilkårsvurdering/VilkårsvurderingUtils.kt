@@ -228,8 +228,9 @@ object VilkårsvurderingUtils {
                     forrigeBehandlingVilkårsvurdering?.personResultater?.firstOrNull { it.personIdent == personFraInit.personIdent }?.vilkårResultater?.filter { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
                         ?.isNotEmpty() ?: false
 
-                if (personsVilkårOppdatert.none { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
-                    && (eksistererUtvidetVilkårPåForrigeBehandling || løpendeUnderkategori == BehandlingUnderkategori.UTVIDET)) {
+                if (personsVilkårOppdatert.none { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD } &&
+                    (eksistererUtvidetVilkårPåForrigeBehandling || løpendeUnderkategori == BehandlingUnderkategori.UTVIDET)
+                ) {
                     val utvidetVilkår =
                         personenSomFinnes.vilkårResultater.filter { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
                     if (utvidetVilkår.isNotEmpty()) {

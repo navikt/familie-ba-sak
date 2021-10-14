@@ -196,7 +196,8 @@ fun lagAndelTilkjentYtelse(
     person: Person = tilfeldigPerson(),
     periodeIdOffset: Long? = null,
     forrigeperiodeIdOffset: Long? = null,
-    tilkjentYtelse: TilkjentYtelse? = null
+    tilkjentYtelse: TilkjentYtelse? = null,
+    prosent: BigDecimal = BigDecimal(100)
 ): AndelTilkjentYtelse {
 
     return AndelTilkjentYtelse(
@@ -210,7 +211,7 @@ fun lagAndelTilkjentYtelse(
         periodeOffset = periodeIdOffset,
         forrigePeriodeOffset = forrigeperiodeIdOffset,
         sats = beløp,
-        prosent = BigDecimal(100)
+        prosent = prosent
     )
 }
 

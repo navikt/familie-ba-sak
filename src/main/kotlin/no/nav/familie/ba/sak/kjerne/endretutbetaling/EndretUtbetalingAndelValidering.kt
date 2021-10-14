@@ -1,8 +1,12 @@
 package no.nav.familie.ba.sak.kjerne.endretutbetaling
 
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.UtbetalingsikkerhetFeil
+import no.nav.familie.ba.sak.common.overlapperHeltEllerDelvisMed
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
+import java.math.BigDecimal
 
 object EndretUtbetalingAndelValidering {
 
@@ -12,7 +16,8 @@ object EndretUtbetalingAndelValidering {
     ) {
 
         endretUtbetalingAndel.validerUtfyltEndring()
-        if (eksisterendeEndringerPåBehandling.any {
+        if (eksisterendeEndringerPåBehandling.any
+            {
                 it.overlapperMed(endretUtbetalingAndel.periode()) &&
                     it.person == endretUtbetalingAndel.person &&
                     it.årsak == endretUtbetalingAndel.årsak
@@ -48,6 +53,35 @@ object EndretUtbetalingAndelValidering {
             throw UtbetalingsikkerhetFeil(
                 melding = "Det er ingen tilkjent ytelse for personen det blir forsøkt lagt til en endret periode for.",
                 frontendFeilmelding = "Du har valgt en periode der det ikke finnes tilkjent ytelse for valgt person i hele eller deler av perioden."
+            )
+        }
+    }
+
+    fun validerDeltBosted(
+        endretUtbetalingAndel: EndretUtbetalingAndel,
+        andelTilkjentYtelser: List<AndelTilkjentYtelse>
+    ) {
+        if (endretUtbetalingAndel.årsak != Årsak.DELT_BOSTED) return
+
+        if (!andelTilkjentYtelser.filter
+            {
+                it.stønadsPeriode().overlapperHeltEllerDelvisMed(endretUtbetalingAndel.periode())
+            }.any { it.prosent == BigDecimal(50) }
+        ) {
+            throw UtbetalingsikkerhetFeil(
+                melding = "Det er ingen sats for delt bosted i perioden det opprettes en endring med årsak delt bosted for.",
+                frontendFeilmelding = "Du har valgt årsaken 'delt bosted', denne samstemmer ikke med vurderingene gjort på vilkårsvurderingssiden i perioden du har valgt."
+            )
+        }
+    }
+
+    fun validerAtAlleOpprettedeEndringerErUtfylt(endretUtbetalingAndeler: List<EndretUtbetalingAndel>) {
+        runCatching {
+            endretUtbetalingAndeler.forEach { it.validerUtfyltEndring() }
+        }.onFailure {
+            throw FunksjonellFeil(
+                melding = "Det er opprettet instanser av EndretUtbetalingandel som ikke er fylt ut før navigering til neste steg.",
+                frontendFeilmelding = "Du har opprettet en eller flere endrede utbetalingsperioder som er ufullstendig utfylt. Disse må enten fylles ut eller slettes før du kan gå videre."
             )
         }
     }
