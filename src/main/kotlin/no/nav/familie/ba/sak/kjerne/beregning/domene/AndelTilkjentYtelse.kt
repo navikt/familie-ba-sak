@@ -15,6 +15,7 @@ import javax.persistence.Entity
 import javax.persistence.EntityListeners
 import javax.persistence.EnumType
 import javax.persistence.Enumerated
+import javax.persistence.FetchType
 import javax.persistence.GeneratedValue
 import javax.persistence.GenerationType
 import javax.persistence.Id
@@ -70,7 +71,7 @@ data class AndelTilkjentYtelse(
     @Column(name = "prosent", nullable = false)
     val prosent: BigDecimal,
 
-    @ManyToMany(cascade = [CascadeType.PERSIST])
+    @ManyToMany(cascade = [CascadeType.PERSIST], fetch = FetchType.EAGER)
     @JoinTable(
         name = "ANDEL_TIL_ENDRET_ANDEL",
         joinColumns = [JoinColumn(name = "fk_andel_tilkjent_ytelse_id")],
