@@ -10,9 +10,7 @@ import no.nav.familie.prosessering.domene.Task
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import java.time.DayOfWeek
 import java.time.LocalDate
-import java.time.MonthDay
 
 @Service
 @TaskStepBeskrivelse(

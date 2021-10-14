@@ -7,7 +7,6 @@ import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.lagVilkårResultat
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
@@ -312,7 +311,6 @@ class UtgjørendePersonerTest {
             barn1Fnr,
             personerMedUtgjørendeVilkårBosattIRiketMedlemskap.first().personIdent.ident
         )
-
 
         assertEquals(1, personerMedUtgjørendeVilkårBosattIRiket.size)
         assertEquals(

@@ -72,9 +72,9 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
         val duplicatedFnr = "00000000001"
         val excludedFnr = "10000000004"
 
-        //Result from ba-sak
+        // Result from ba-sak
         val testDataBaSak = arrayOf(
-            //Excluded because of the vedtak is older
+            // Excluded because of the vedtak is older
             PerioderTestData(
                 fnr = duplicatedFnr,
                 endretDato = LocalDateTime.of(2020, 11, 5, 12, 0),
@@ -86,7 +86,7 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
                     )
                 )
             ),
-            //Included
+            // Included
             PerioderTestData(
                 fnr = duplicatedFnr,
                 endretDato = LocalDateTime.of(2020, 11, 6, 12, 0),
@@ -103,7 +103,7 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
                     )
                 )
             ),
-            //Excluded because the stonad period is earlier than the specified year
+            // Excluded because the stonad period is earlier than the specified year
             PerioderTestData(
                 fnr = "00000000002",
                 endretDato = LocalDateTime.of(2020, 8, 5, 12, 0),
@@ -115,7 +115,7 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
                     )
                 )
             ),
-            //Excluded because the stonad period is later than the specified year
+            // Excluded because the stonad period is later than the specified year
             PerioderTestData(
                 fnr = "00000000003",
                 endretDato = LocalDateTime.of(2020, 8, 5, 12, 0),
@@ -127,7 +127,7 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
                     )
                 )
             ),
-            //Excluded because the person ident is not in the provided list
+            // Excluded because the person ident is not in the provided list
             PerioderTestData(
                 fnr = excludedFnr,
                 endretDato = LocalDateTime.of(2020, 8, 5, 12, 0),
@@ -141,9 +141,9 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
             ),
         )
 
-        //result from Infotrygd
+        // result from Infotrygd
         val testDataInfotrygd = arrayOf(
-            //Excluded because the person ident can be found in ba-sak
+            // Excluded because the person ident can be found in ba-sak
             PerioderTestData(
                 fnr = duplicatedFnr,
                 endretDato = LocalDateTime.of(2020, 9, 5, 12, 0),
@@ -155,7 +155,7 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
                     )
                 )
             ),
-            //Included
+            // Included
             PerioderTestData(
                 fnr = "00000000010",
                 endretDato = LocalDateTime.of(2020, 8, 5, 12, 0),
@@ -174,15 +174,18 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
         }
 
         val result = testDataInfotrygd.flatMap {
-            listOf(SkatteetatenPerioder(
-                it.fnr, it.endretDato, it.perioder.map { p ->
-                    SkatteetatenPeriode(
-                        fraMaaned = p.first.tilMaaned(),
-                        tomMaaned = p.second.tilMaaned(),
-                        delingsprosent = p.third
-                    )
-                }
-            ))
+            listOf(
+                SkatteetatenPerioder(
+                    it.fnr, it.endretDato,
+                    it.perioder.map { p ->
+                        SkatteetatenPeriode(
+                            fraMaaned = p.first.tilMaaned(),
+                            tomMaaned = p.second.tilMaaned(),
+                            delingsprosent = p.third
+                        )
+                    }
+                )
+            )
         }
 
         every {
@@ -193,22 +196,27 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
         } returns result
 
         val samletResultat =
-            skatteetatenService.finnPerioderMedUtvidetBarnetrygd(testDataBaSak.filter { it.fnr != excludedFnr }
-                .map { it.fnr }
-                + testDataInfotrygd.map { it.fnr },
+            skatteetatenService.finnPerioderMedUtvidetBarnetrygd(
+                testDataBaSak.filter { it.fnr != excludedFnr }
+                    .map { it.fnr } +
+                    testDataInfotrygd.map { it.fnr },
                 "2020"
             )
 
         assertThat(samletResultat.brukere).hasSize(2)
         assertThat(samletResultat.brukere.find { it.ident == duplicatedFnr }!!.perioder).hasSize(2)
-        assertThat(samletResultat.brukere.find { it.ident == duplicatedFnr }!!.perioder.find {
-            it.fraMaaned == "2020-08"
-        }!!.delingsprosent).isEqualTo(
+        assertThat(
+            samletResultat.brukere.find { it.ident == duplicatedFnr }!!.perioder.find {
+                it.fraMaaned == "2020-08"
+            }!!.delingsprosent
+        ).isEqualTo(
             SkatteetatenPeriode.Delingsprosent._50
         )
-        assertThat(samletResultat.brukere.find { it.ident == duplicatedFnr }!!.perioder.find {
-            it.tomMaaned == "2020-07"
-        }!!.delingsprosent).isEqualTo(
+        assertThat(
+            samletResultat.brukere.find { it.ident == duplicatedFnr }!!.perioder.find {
+                it.tomMaaned == "2020-07"
+            }!!.delingsprosent
+        ).isEqualTo(
             SkatteetatenPeriode.Delingsprosent._0
         )
         assertThat(samletResultat.brukere.find { it.ident == testDataInfotrygd[1].fnr }!!.perioder).hasSize(1)
@@ -219,7 +227,7 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
         val fnr = "00000000001"
         val excludedFnr = "10000000004"
 
-        //Result from ba-sak
+        // Result from ba-sak
         val testDataBaSak = arrayOf(
             PerioderTestData(
                 fnr = fnr,
@@ -266,8 +274,9 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
         }
 
         val samletResultat =
-            skatteetatenService.finnPerioderMedUtvidetBarnetrygd(testDataBaSak.filter { it.fnr != excludedFnr }
-                .map { it.fnr },
+            skatteetatenService.finnPerioderMedUtvidetBarnetrygd(
+                testDataBaSak.filter { it.fnr != excludedFnr }
+                    .map { it.fnr },
                 "2020"
             )
 
@@ -324,19 +333,21 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
             endretDato = tilkjentYtelse.endretDato.toLocalDate(),
             utbetalingsoppdrag = "utbetalt",
         ).also {
-            it.andelerTilkjentYtelse.addAll(tilkjentYtelse.perioder.map { p ->
-                AndelTilkjentYtelse(
-                    behandlingId = it.behandling.id,
-                    tilkjentYtelse = it,
-                    personIdent = tilkjentYtelse.fnr,
-                    kalkulertUtbetalingsbeløp = 1000,
-                    stønadFom = YearMonth.of(p.first.year, p.first.month),
-                    stønadTom = YearMonth.of(p.second.year, p.second.month),
-                    type = YtelseType.UTVIDET_BARNETRYGD,
-                    sats = 1,
-                    prosent = p.third.tilBigDecimal()
-                )
-            }.toMutableSet())
+            it.andelerTilkjentYtelse.addAll(
+                tilkjentYtelse.perioder.map { p ->
+                    AndelTilkjentYtelse(
+                        behandlingId = it.behandling.id,
+                        tilkjentYtelse = it,
+                        personIdent = tilkjentYtelse.fnr,
+                        kalkulertUtbetalingsbeløp = 1000,
+                        stønadFom = YearMonth.of(p.first.year, p.first.month),
+                        stønadTom = YearMonth.of(p.second.year, p.second.month),
+                        type = YtelseType.UTVIDET_BARNETRYGD,
+                        sats = 1,
+                        prosent = p.third.tilBigDecimal()
+                    )
+                }.toMutableSet()
+            )
         }
         tilkjentYtelseRepository.saveAndFlush(ty)
     }
