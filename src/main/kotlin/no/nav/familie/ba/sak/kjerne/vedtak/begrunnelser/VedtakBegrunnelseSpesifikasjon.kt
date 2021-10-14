@@ -16,6 +16,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.SatsService
 import no.nav.familie.ba.sak.kjerne.dokument.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakUtils.hentPersonerForAlleUtgjørendeVilkår
@@ -50,7 +51,7 @@ data class TriggesAv(
 
 enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
 
-    TEST {
+    INNVILGET_ETTER_ENDRET_UTBETALING_DELT_BOSTED {
         override val sanityApiNavn = "testEtterEndretUtbetaling"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
     },
@@ -624,12 +625,12 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
             }
 
         if (triggesAv.etterEndretUtbetaling)
-            return endretUtbetalingAndeler.any { endretUtbetalingAndel ->
-                endretUtbetalingAndel.tom!!.sisteDagIInneværendeMåned()
-                    .erDagenFør(vedtaksperiodeMedBegrunnelser.fom) &&
-                    aktuellePersoner.any { person -> person.personIdent == endretUtbetalingAndel.person?.personIdent } &&
-                    triggesAv.endringsaarsaker.contains(endretUtbetalingAndel.årsak)
-            }
+            return føregåsAvEndretperiodeAvSammeType(
+                endretUtbetalingAndeler,
+                vedtaksperiodeMedBegrunnelser,
+                aktuellePersoner,
+                triggesAv
+            )
 
 
         return hentPersonerForAlleUtgjørendeVilkår(
@@ -642,6 +643,18 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
             aktuellePersonerForVedtaksperiode = aktuellePersoner,
             triggesAv = triggesAv
         ).isNotEmpty()
+    }
+
+    private fun føregåsAvEndretperiodeAvSammeType(
+        endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
+        vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser,
+        aktuellePersoner: List<Person>,
+        triggesAv: TriggesAv
+    ) = endretUtbetalingAndeler.any { endretUtbetalingAndel ->
+        endretUtbetalingAndel.tom!!.sisteDagIInneværendeMåned()
+            .erDagenFør(vedtaksperiodeMedBegrunnelser.fom) &&
+            aktuellePersoner.any { person -> person.personIdent == endretUtbetalingAndel.person?.personIdent } &&
+            triggesAv.endringsaarsaker.contains(endretUtbetalingAndel.årsak)
     }
 
     companion object {
