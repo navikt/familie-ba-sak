@@ -170,23 +170,11 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
         )
 
         testDataBaSak.forEach {
-            every {
-                infotrygdBarnetrygdClientMock.hentPerioderMedUtvidetBarnetrygd(
-                    eq(it.fnr),
-                    any()
-                )
-            } returns null
-
             lagerTilkjentYtelse(it)
         }
 
-        testDataInfotrygd.forEach {
-            every {
-                infotrygdBarnetrygdClientMock.hentPerioderMedUtvidetBarnetrygd(
-                    eq(it.fnr),
-                    any()
-                )
-            } returns SkatteetatenPerioder(
+        val result = testDataInfotrygd.flatMap {
+            listOf(SkatteetatenPerioder(
                 it.fnr, it.endretDato, it.perioder.map { p ->
                     SkatteetatenPeriode(
                         fraMaaned = p.first.tilMaaned(),
@@ -194,8 +182,15 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
                         delingsprosent = p.third
                     )
                 }
-            )
+            ))
         }
+
+        every {
+            infotrygdBarnetrygdClientMock.hentPerioderMedUtvidetBarnetrygdForPersoner(
+                eq(listOf("00000000001", "00000000002", "00000000003", "00000000010")),
+                any()
+            )
+        } returns result
 
         val samletResultat =
             skatteetatenService.finnPerioderMedUtvidetBarnetrygd(testDataBaSak.filter { it.fnr != excludedFnr }
@@ -261,11 +256,11 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
 
         testDataBaSak.forEach {
             every {
-                infotrygdBarnetrygdClientMock.hentPerioderMedUtvidetBarnetrygd(
-                    eq(it.fnr),
+                infotrygdBarnetrygdClientMock.hentPerioderMedUtvidetBarnetrygdForPersoner(
+                    eq(listOf(it.fnr)),
                     any()
                 )
-            } returns null
+            } returns emptyList()
 
             lagerTilkjentYtelse(it)
         }
@@ -278,7 +273,7 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
 
         assertThat(samletResultat.brukere).hasSize(1)
         assertThat(samletResultat.brukere.find { it.ident == fnr }!!.perioder).hasSize(3)
-        val sortertePerioder= samletResultat.brukere.find { it.ident == fnr }!!.perioder.sortedBy { it.fraMaaned }
+        val sortertePerioder = samletResultat.brukere.find { it.ident == fnr }!!.perioder.sortedBy { it.fraMaaned }
         assertThat(sortertePerioder[0].delingsprosent).isEqualTo(
             SkatteetatenPeriode.Delingsprosent._0
         )

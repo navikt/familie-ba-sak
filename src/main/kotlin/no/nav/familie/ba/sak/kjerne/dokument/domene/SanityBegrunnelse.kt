@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.kjerne.dokument.domene.SanityVilkår.UTVIDET_BARNET
 import no.nav.familie.ba.sak.kjerne.dokument.domene.VilkårRolle.BARN
 import no.nav.familie.ba.sak.kjerne.dokument.domene.VilkårRolle.SOKER
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 
 data class SanityBegrunnelse(
@@ -22,6 +23,7 @@ data class SanityBegrunnelse(
     val borMedSokerTriggere: List<VilkårTrigger>? = null,
     val ovrigeTriggere: List<ØvrigTrigger>? = null,
     val hjemler: List<String> = emptyList(),
+    val endringstyper: List<Endringstype> = emptyList(),
 )
 
 enum class SanityVilkår {
@@ -72,7 +74,40 @@ enum class ØvrigTrigger {
     SATSENDRING,
     BARN_MED_6_ÅRS_DAG,
     ALLTID_AUTOMATISK,
-    ETTER_ENDRET_UTBETALING
+    ENDRET_UTBETALING,
+    ETTER_ENDRET_UTBETALING,
+}
+
+enum class Endringstype {
+    DELT_BOSTED,
+}
+
+fun SanityBegrunnelse.tilTriggesAv(): TriggesAv {
+
+    return TriggesAv(
+        vilkår = this.vilkaar?.map { it.tilVilkår() }?.toSet() ?: emptySet(),
+        personTyper = this.rolle?.map { it.tilPersonType() }?.toSet()
+            ?: when {
+                this.inneholderVilkår(BOSATT_I_RIKET) -> setOf(PersonType.BARN, PersonType.SØKER)
+                this.inneholderVilkår(LOVLIG_OPPHOLD) -> setOf(PersonType.BARN, PersonType.SØKER)
+                this.inneholderVilkår(GIFT_PARTNERSKAP) -> setOf(PersonType.BARN)
+                this.inneholderVilkår(UNDER_18_ÅR) -> setOf(PersonType.BARN)
+                this.inneholderVilkår(BOR_MED_SOKER) -> setOf(PersonType.BARN)
+                else -> setOf(PersonType.BARN, PersonType.SØKER)
+            },
+        personerManglerOpplysninger = this.inneholderØvrigTrigger(ØvrigTrigger.MANGLER_OPPLYSNINGER),
+        satsendring = this.inneholderØvrigTrigger(ØvrigTrigger.SATSENDRING),
+        barnMedSeksårsdag = this.inneholderØvrigTrigger(ØvrigTrigger.BARN_MED_6_ÅRS_DAG),
+        vurderingAnnetGrunnlag = (
+            this.inneholderLovligOppholdTrigger(VilkårTrigger.VURDERING_ANNET_GRUNNLAG) ||
+                this.inneholderBosattIRiketTrigger(VilkårTrigger.VURDERING_ANNET_GRUNNLAG) ||
+                this.inneholderGiftPartnerskapTrigger(VilkårTrigger.VURDERING_ANNET_GRUNNLAG) ||
+                this.inneholderBorMedSøkerTrigger(VilkårTrigger.VURDERING_ANNET_GRUNNLAG)
+            ),
+        medlemskap = this.inneholderBosattIRiketTrigger(VilkårTrigger.MEDLEMSKAP),
+        deltbosted = this.inneholderBorMedSøkerTrigger(VilkårTrigger.DELT_BOSTED),
+        valgbar = !this.inneholderØvrigTrigger(ØvrigTrigger.ALLTID_AUTOMATISK),
+    )
 }
 
 fun SanityBegrunnelse.inneholderVilkår(vilkår: SanityVilkår) =
