@@ -63,7 +63,8 @@ class DokumentService(
         if (SikkerhetContext.hentHøyesteRolletilgangForInnloggetBruker(rolleConfig) == BehandlerRolle.VEILEDER && vedtak.stønadBrevPdF == null) {
             throw FunksjonellFeil("Det finnes ikke noe vedtaksbrev.")
         } else {
-            val pdf = vedtak.stønadBrevPdF ?: throw Feil("Klarte ikke finne vedtaksbrevbrev for vetak med id ${vedtak.id}")
+            val pdf =
+                vedtak.stønadBrevPdF ?: throw Feil("Klarte ikke finne vedtaksbrevbrev for vedtak med id ${vedtak.id}")
             return Ressurs.success(pdf)
         }
     }
@@ -77,12 +78,11 @@ class DokumentService(
 
             val målform = persongrunnlagService.hentSøkersMålform(vedtak.behandling.id)
             val vedtaksbrev =
-                if (vedtak.behandling.opprettetÅrsak == BehandlingÅrsak.DØDSFALL_BRUKER)
-                    brevService.hentDødsfallbrevData(vedtak)
-                else if (vedtak.behandling.opprettetÅrsak == BehandlingÅrsak.KORREKSJON_VEDTAKSBREV)
-                    brevService.hentKorreksjonbrevData(vedtak)
-                else
-                    brevService.hentVedtaksbrevData(vedtak)
+                when (vedtak.behandling.opprettetÅrsak) {
+                    BehandlingÅrsak.DØDSFALL_BRUKER -> brevService.hentDødsfallbrevData(vedtak)
+                    BehandlingÅrsak.KORREKSJON_VEDTAKSBREV -> brevService.hentKorreksjonbrevData(vedtak)
+                    else -> brevService.hentVedtaksbrevData(vedtak)
+                }
             return brevKlient.genererBrev(målform.tilSanityFormat(), vedtaksbrev)
         } catch (funksjonellFeil: FunksjonellFeil) {
             throw funksjonellFeil
@@ -159,9 +159,9 @@ class DokumentService(
         }
 
         if ((
-            manueltBrevRequest.brevmal == INNHENTE_OPPLYSNINGER ||
-                manueltBrevRequest.brevmal == VARSEL_OM_REVURDERING
-            ) && behandling != null
+                manueltBrevRequest.brevmal == INNHENTE_OPPLYSNINGER ||
+                    manueltBrevRequest.brevmal == VARSEL_OM_REVURDERING
+                ) && behandling != null
         ) {
             vilkårsvurderingService.opprettOglagreBlankAnnenVurdering(
                 annenVurderingType = AnnenVurderingType.OPPLYSNINGSPLIKT,
