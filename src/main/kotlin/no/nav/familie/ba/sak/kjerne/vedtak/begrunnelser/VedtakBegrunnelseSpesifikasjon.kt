@@ -604,7 +604,7 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
     INNVILGELSE_FORTSATT_INNVILGET_UTVIDET {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
         override val sanityApiNavn = "fortsattInnvilgetUtvidet"
-    }, ;
+    };
 
     fun triggesForPeriode(
         vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser,
@@ -706,7 +706,8 @@ fun VedtakBegrunnelseType.hentMånedOgÅrForBegrunnelse(periode: Periode) = when
 }
 
 @Converter
-class VedtakBegrunnelseSpesifikasjonListConverter : AttributeConverter<List<VedtakBegrunnelseSpesifikasjon>, String> {
+class VedtakBegrunnelseSpesifikasjonListConverter :
+    AttributeConverter<List<VedtakBegrunnelseSpesifikasjon>, String> {
 
     override fun convertToDatabaseColumn(vedtakBegrunnelseSpesifikasjoner: List<VedtakBegrunnelseSpesifikasjon>) =
         konverterEnumsTilString(vedtakBegrunnelseSpesifikasjoner)
