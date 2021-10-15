@@ -9,6 +9,8 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerDeltBosted
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
@@ -93,7 +95,8 @@ class BeregningService(
     @Transactional
     fun oppdaterBehandlingMedBeregning(
         behandling: Behandling,
-        personopplysningGrunnlag: PersonopplysningGrunnlag
+        personopplysningGrunnlag: PersonopplysningGrunnlag,
+        endretUtbetalingAndel: EndretUtbetalingAndel? = null
     ): TilkjentYtelse {
 
         tilkjentYtelseRepository.slettTilkjentYtelseFor(behandling)
@@ -111,6 +114,9 @@ class BeregningService(
                     behandlingId = behandling.id
                 )
             }
+
+        if (endretUtbetalingAndel != null)
+            validerDeltBosted(endretUtbetalingAndel, tilkjentYtelse.andelerTilkjentYtelse.toList())
 
         val endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(behandling.id)
         val andelerTilkjentYtelse = TilkjentYtelseUtils.oppdaterTilkjentYtelseMedEndretUtbetalingAndeler(
