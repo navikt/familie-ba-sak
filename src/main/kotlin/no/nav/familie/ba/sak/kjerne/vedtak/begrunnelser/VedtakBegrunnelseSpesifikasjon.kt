@@ -625,7 +625,7 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
             }
 
         if (triggesAv.etterEndretUtbetaling)
-            return føregåsAvEndretperiodeAvSammeType(
+            return erEtterEndretPeriodeAvSammeÅrsak(
                 endretUtbetalingAndeler,
                 vedtaksperiodeMedBegrunnelser,
                 aktuellePersoner,
@@ -644,22 +644,22 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
         ).isNotEmpty()
     }
 
-    private fun føregåsAvEndretperiodeAvSammeType(
-        endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
-        vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser,
-        aktuellePersoner: List<Person>,
-        triggesAv: TriggesAv
-    ) = endretUtbetalingAndeler.any { endretUtbetalingAndel ->
-        endretUtbetalingAndel.tom!!.sisteDagIInneværendeMåned()
-            .erDagenFør(vedtaksperiodeMedBegrunnelser.fom) &&
-            aktuellePersoner.any { person -> person.personIdent == endretUtbetalingAndel.person?.personIdent } &&
-            triggesAv.endringsaarsaker.contains(endretUtbetalingAndel.årsak)
-    }
-
     companion object {
 
         fun List<LocalDate>.tilBrevTekst(): String = Utils.slåSammen(this.sorted().map { it.tilKortString() })
     }
+}
+
+private fun erEtterEndretPeriodeAvSammeÅrsak(
+    endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
+    vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser,
+    aktuellePersoner: List<Person>,
+    triggesAv: TriggesAv
+) = endretUtbetalingAndeler.any { endretUtbetalingAndel ->
+    endretUtbetalingAndel.tom!!.sisteDagIInneværendeMåned()
+        .erDagenFør(vedtaksperiodeMedBegrunnelser.fom) &&
+        aktuellePersoner.any { person -> person.personIdent == endretUtbetalingAndel.person?.personIdent } &&
+        triggesAv.endringsaarsaker.contains(endretUtbetalingAndel.årsak)
 }
 
 val hjemlerTilhørendeFritekst = setOf(2, 4, 11)
