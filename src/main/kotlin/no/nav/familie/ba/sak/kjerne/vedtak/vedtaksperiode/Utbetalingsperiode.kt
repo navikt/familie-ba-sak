@@ -95,7 +95,7 @@ fun mapTilUtbetalingsperioder(
         }
 }
 
-private fun List<AndelTilkjentYtelse>.utledSegmenter(): List<LocalDateSegment<Int>> {
+internal fun List<AndelTilkjentYtelse>.utledSegmenter(): List<LocalDateSegment<Int>> {
     // Dersom listen er tom så returnerer vi tom liste fordi at reduceren i beregnUtbetalingsperioderUtenKlassifisering ikke takler tomme lister
     if (this.isEmpty()) return emptyList()
 
@@ -104,7 +104,7 @@ private fun List<AndelTilkjentYtelse>.utledSegmenter(): List<LocalDateSegment<In
         .sortedWith(compareBy<LocalDateSegment<Int>>({ it.fom }, { it.value }, { it.tom }))
 }
 
-private fun List<AndelTilkjentYtelse>.lagUtbetalingsperiodeDetaljer(personopplysningGrunnlag: PersonopplysningGrunnlag): List<UtbetalingsperiodeDetalj> =
+internal fun List<AndelTilkjentYtelse>.lagUtbetalingsperiodeDetaljer(personopplysningGrunnlag: PersonopplysningGrunnlag): List<UtbetalingsperiodeDetalj> =
     this.map { andel ->
         val personForAndel =
             personopplysningGrunnlag.personer.find { person -> andel.personIdent == person.personIdent.ident }

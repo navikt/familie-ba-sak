@@ -243,7 +243,7 @@ class FagsakService(
             tilbakekreving = tilbakekreving?.tilRestTilbakekreving(),
             vedtakForBehandling = vedtak.filter { it.aktiv }.map {
                 it.tilRestVedtak(
-                    vedtaksperiodeService.hentRestVedtaksperiodeMedBegrunnelser(vedtak = it)
+                    vedtaksperiodeService.hentUtvidetVedtaksperiodeMedBegrunnelser(vedtak = it)
                 )
             },
             totrinnskontroll = totrinnskontroll?.tilRestTotrinnskontroll(),
@@ -317,8 +317,8 @@ class FagsakService(
                     relasjon.relasjonsrolle == FORELDERBARNRELASJONROLLE.MEDMOR
             }.forEach { relasjon ->
                 if (assosierteFagsakDeltagere.find { fagsakDeltager ->
-                    fagsakDeltager.ident == relasjon.personIdent.id
-                } == null
+                        fagsakDeltager.ident == relasjon.personIdent.id
+                    } == null
                 ) {
 
                     val maskertForelder = hentMaskertFagsakdeltakerVedManglendeTilgang(relasjon.personIdent.id)
