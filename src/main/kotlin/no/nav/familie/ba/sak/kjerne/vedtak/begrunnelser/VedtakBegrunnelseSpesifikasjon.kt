@@ -632,7 +632,6 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
                 triggesAv
             )
 
-
         return hentPersonerForAlleUtgjørendeVilkår(
             vilkårsvurdering = vilkårsvurdering,
             vedtaksperiode = Periode(
