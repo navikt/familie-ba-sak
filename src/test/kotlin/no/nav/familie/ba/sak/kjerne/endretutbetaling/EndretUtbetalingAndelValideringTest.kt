@@ -1,8 +1,12 @@
 package no.nav.familie.ba.sak.kjerne.endretutbetaling
 
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.UtbetalingsikkerhetFeil
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
+import no.nav.familie.ba.sak.common.lagEndretUtbetalingAndel
 import no.nav.familie.ba.sak.common.tilfeldigPerson
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerAtAlleOpprettedeEndringerErUtfylt
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerDeltBosted
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerIngenOverlappendeEndring
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerPeriodeInnenforTilkjentytelse
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
@@ -138,5 +142,55 @@ class EndretUtbetalingAndelValideringTest {
         )
 
         endretUtbetalingAndelerSomValiderer.forEach { validerPeriodeInnenforTilkjentytelse(it, andelTilkjentYtelser) }
+    }
+
+    @Test
+    fun `skal sjekke at det eksisterer delt bostedsats ved opprettelse av endring med årsak delt bosted`() {
+        val barn1 = tilfeldigPerson()
+        val andelTilkjentYtelse = lagAndelTilkjentYtelse(
+            fom = YearMonth.of(2020, 2).toString(),
+            tom = YearMonth.of(2020, 4).toString(),
+            person = barn1
+        )
+        val endretUtbetalingAndel = EndretUtbetalingAndel(
+            behandlingId = 1,
+            person = barn1,
+            fom = YearMonth.of(2020, 2),
+            tom = YearMonth.of(2020, 6),
+            årsak = Årsak.DELT_BOSTED,
+            begrunnelse = "begrunnelse",
+            prosent = BigDecimal(100),
+            søknadstidspunkt = LocalDate.now(),
+            avtaletidspunktDeltBosted = LocalDate.now()
+        )
+        val feil = assertThrows<UtbetalingsikkerhetFeil> {
+            validerDeltBosted(endretUtbetalingAndel, listOf(andelTilkjentYtelse))
+        }
+        assertEquals(
+            "Det er ingen sats for delt bosted i perioden det opprettes en endring med årsak delt bosted for.",
+            feil.melding
+        )
+
+        validerDeltBosted(endretUtbetalingAndel, listOf(andelTilkjentYtelse.copy(prosent = BigDecimal(50))))
+    }
+
+    @Test
+    fun `sjekk at alle endrede utbetalingsandeler validerer`() {
+        val endretUtbetalingAndel1 = lagEndretUtbetalingAndel(person = tilfeldigPerson())
+        val endretUtbetalingAndel2 = lagEndretUtbetalingAndel(person = tilfeldigPerson())
+        validerAtAlleOpprettedeEndringerErUtfylt(listOf(endretUtbetalingAndel1, endretUtbetalingAndel2))
+
+        val feil = assertThrows<FunksjonellFeil> {
+            validerAtAlleOpprettedeEndringerErUtfylt(
+                listOf(
+                    endretUtbetalingAndel1,
+                    endretUtbetalingAndel2.copy(fom = null)
+                )
+            )
+        }
+        assertEquals(
+            "Det er opprettet instanser av EndretUtbetalingandel som ikke er fylt ut før navigering til neste steg.",
+            feil.melding
+        )
     }
 }

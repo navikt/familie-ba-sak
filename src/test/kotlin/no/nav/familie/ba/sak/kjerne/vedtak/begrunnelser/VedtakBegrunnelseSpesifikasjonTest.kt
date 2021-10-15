@@ -7,6 +7,8 @@ import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.lagVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.tilfeldigPerson
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
@@ -17,6 +19,7 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.time.YearMonth
 
 internal class VedtakBegrunnelseSpesifikasjonTest {
 
@@ -158,6 +161,35 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
                     persongrunnlag = personopplysningGrunnlag,
                     identerMedUtbetaling = identerMedUtbetaling,
                     triggesAv = TriggesAv(vilkår = setOf(Vilkår.LOVLIG_OPPHOLD), personTyper = setOf(PersonType.SØKER))
+                )
+        )
+    }
+
+    @Test
+    fun `Oppfyller etter endringsperiode skal gi true`() {
+        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, barn)
+
+        assertTrue(
+            VedtakBegrunnelseSpesifikasjon.INNVILGET_ETTER_ENDRET_UTBETALING_DELT_BOSTED
+                .triggesForPeriode(
+                    persongrunnlag = personopplysningGrunnlag,
+                    vilkårsvurdering = vilkårsvurdering,
+                    identerMedUtbetaling = identerMedUtbetaling,
+                    vedtaksperiodeMedBegrunnelser = lagVedtaksperiodeMedBegrunnelser(
+                        type = Vedtaksperiodetype.UTBETALING,
+                        fom = LocalDate.of(2021, 10, 1),
+                        tom = LocalDate.of(2021, 10, 31)
+                    ),
+                    triggesAv = TriggesAv(etterEndretUtbetaling = true, endringsaarsaker = setOf(Årsak.DELT_BOSTED)),
+                    endretUtbetalingAndeler = listOf(
+                        EndretUtbetalingAndel(
+                            behandlingId = behandling.id,
+                            person = barn,
+                            fom = YearMonth.of(2021, 6),
+                            tom = YearMonth.of(2021, 9),
+                            årsak = Årsak.DELT_BOSTED
+                        )
+                    )
                 )
         )
     }
