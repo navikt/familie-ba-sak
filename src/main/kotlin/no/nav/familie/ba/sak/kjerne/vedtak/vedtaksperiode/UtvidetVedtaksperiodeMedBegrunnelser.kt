@@ -31,7 +31,6 @@ data class RestVedtaksbegrunnelse(
 )
 
 fun VedtaksperiodeMedBegrunnelser.tilUtvidetVedtaksperiodeMedBegrunnelser(
-    gyldigeBegrunnelser: List<VedtakBegrunnelseSpesifikasjon>,
     personopplysningGrunnlag: PersonopplysningGrunnlag,
     andelerTilkjentYtelse: List<AndelTilkjentYtelse>
 ): UtvidetVedtaksperiodeMedBegrunnelser {
@@ -55,7 +54,6 @@ fun VedtaksperiodeMedBegrunnelser.tilUtvidetVedtaksperiodeMedBegrunnelser(
         type = this.type,
         begrunnelser = this.begrunnelser.map { it.tilRestVedtaksbegrunnelse() },
         fritekster = this.fritekster.sortedBy { it.id }.map { it.fritekst },
-        gyldigeBegrunnelser = gyldigeBegrunnelser,
         utbetalingsperiodeDetaljer = utbetalingsperiodeDetaljer
     )
 }
