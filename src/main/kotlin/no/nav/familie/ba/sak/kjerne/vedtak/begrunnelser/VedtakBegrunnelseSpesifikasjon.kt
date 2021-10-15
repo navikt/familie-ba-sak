@@ -50,8 +50,8 @@ data class TriggesAv(
 
 enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
 
-    TEST {
-        override val sanityApiNavn = "testEtterEndretUtbetaling"
+    PERIODE_ETTER_ENDRET_UTBETALING {
+        override val sanityApiNavn = "periodeEtterEndretUtbetaling"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
     },
     INNVILGET_BOSATT_I_RIKTET {
