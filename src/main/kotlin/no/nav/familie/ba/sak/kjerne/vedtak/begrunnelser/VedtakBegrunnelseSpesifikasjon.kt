@@ -125,6 +125,10 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
         override val sanityApiNavn = "innvilgetBarnBorSammenMedMottaker"
     },
+    INNVILGELSE_BEREDSKAPSHJEM {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
+        override val sanityApiNavn = "beredskapshjem"
+    },
     REDUKSJON_BOSATT_I_RIKTET {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
@@ -580,10 +584,6 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
     REDUKSJON_SATSENDRING {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
         override val sanityApiNavn = "reduksjonSatsendring"
-    },
-    INNVILGELSE_BEREDSKAPSHJEM {
-        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
-        override val sanityApiNavn = "beredskapshjem"
     };
 
     fun triggesForPeriode(
