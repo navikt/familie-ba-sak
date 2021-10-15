@@ -4,9 +4,7 @@ import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.YearMonthConverter
-import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.overlapperHeltEllerDelvisMed
-import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.ekstern.restDomene.RestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
@@ -114,6 +112,11 @@ data class EndretUtbetalingAndel(
 
         return true
     }
+
+    fun harVedtakBegrunnelseSpesifikasjon(vedtakBegrunnelseSpesifikasjon: VedtakBegrunnelseSpesifikasjon) =
+        this.vedtakBegrunnelseSpesifikasjoner.contains(
+            vedtakBegrunnelseSpesifikasjon
+        )
 }
 
 enum class Årsak(val visningsnavn: String) {
@@ -152,23 +155,30 @@ fun EndretUtbetalingAndel.fraRestEndretUtbetalingAndel(
         listOf(VedtakBegrunnelseSpesifikasjon.INNVILGELSE_VURDERING_HELE_FAMILIEN_PLIKTIG_MEDLEM)
 }
 
-fun EndretUtbetalingAndel.tilVedtaksperiodeMedBegrunnelser(vedtak: Vedtak): VedtaksperiodeMedBegrunnelser {
+fun List<EndretUtbetalingAndel>.tilVedtaksperiodeMedBegrunnelser(
+    vedtak: Vedtak,
+    fom: LocalDate?,
+    tom: LocalDate?,
+): VedtaksperiodeMedBegrunnelser {
 
     return VedtaksperiodeMedBegrunnelser(
-        fom = this.fom?.førsteDagIInneværendeMåned(),
-        tom = this.tom?.sisteDagIInneværendeMåned(),
+        fom = fom,
+        tom = tom,
         vedtak = vedtak,
         type = Vedtaksperiodetype.ENDRET_UTBETALING,
         begrunnelser = mutableSetOf()
-    ).also {
-        it.begrunnelser.addAll(
-            (this.vedtakBegrunnelseSpesifikasjoner).map { vedtakBegrunnelseSpesifikasjon ->
-                Vedtaksbegrunnelse(
-                    vedtaksperiodeMedBegrunnelser = it,
-                    vedtakBegrunnelseSpesifikasjon = vedtakBegrunnelseSpesifikasjon,
-                    personIdenter = listOf(this.person!!.personIdent.ident)
-                )
-            }
+    ).also { vedtakperiodeMedbegrunnelse ->
+        vedtakperiodeMedbegrunnelse.begrunnelser.addAll(
+            this.flatMap { it.vedtakBegrunnelseSpesifikasjoner }.toSet()
+                .map { vedtakBegrunnelseSpesifikasjon ->
+                    Vedtaksbegrunnelse(
+                        vedtaksperiodeMedBegrunnelser = vedtakperiodeMedbegrunnelse,
+                        vedtakBegrunnelseSpesifikasjon = vedtakBegrunnelseSpesifikasjon,
+                        personIdenter = this.filter {
+                            it.harVedtakBegrunnelseSpesifikasjon(vedtakBegrunnelseSpesifikasjon)
+                        }.mapNotNull { it.person?.personIdent?.ident }
+                    )
+                }
         )
     }
 }

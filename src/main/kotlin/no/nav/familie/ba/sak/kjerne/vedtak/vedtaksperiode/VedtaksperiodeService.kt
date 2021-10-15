@@ -26,7 +26,6 @@ import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.dokument.domene.tilTriggesAv
 import no.nav.familie.ba.sak.kjerne.dokument.hentVedtaksbrevmal
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.tilVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
@@ -295,7 +294,10 @@ class VedtaksperiodeService(
             }
         val avslagsperioder = hentAvslagsperioderMedBegrunnelser(vedtak)
 
-        val endretUtbetalingsperioder = hentEndredeUtbetalingsperioderMedBegrunnelser(vedtak)
+        val endretUtbetalingsperioder = hentEndredeUtbetalingsperioderMedBegrunnelser(
+            vedtak = vedtak,
+            endredeUtbetalingsAndeler = endretUtbetalingAndelRepository.findByBehandlingId(vedtak.behandling.id)
+        )
 
         return utbetalingOgOpphørsperioder + avslagsperioder + endretUtbetalingsperioder
     }
@@ -488,11 +490,6 @@ class VedtaksperiodeService(
             personopplysningGrunnlag = personopplysningGrunnlag,
             filterAndeler = filterAndeler
         )
-    }
-
-    fun hentEndredeUtbetalingsperioderMedBegrunnelser(vedtak: Vedtak): List<VedtaksperiodeMedBegrunnelser> {
-        val endredeUtbetalingsAndeler = endretUtbetalingAndelRepository.findByBehandlingId(vedtak.behandling.id)
-        return endredeUtbetalingsAndeler.map { it.tilVedtaksperiodeMedBegrunnelser(vedtak) }
     }
 
     fun hentOpphørsperioder(behandling: Behandling): List<Opphørsperiode> {

@@ -885,6 +885,7 @@ fun lagEndretUtbetalingAndel(
     årsak: Årsak = Årsak.DELT_BOSTED,
     avtaletidspunktDeltBosted: LocalDate = LocalDate.now().minusMonths(1),
     søknadstidspunkt: LocalDate = LocalDate.now().minusMonths(1),
+    vedtakBegrunnelseSpesifikasjoner: List<VedtakBegrunnelseSpesifikasjon> = emptyList(),
 ) =
     EndretUtbetalingAndel(
         behandlingId = behandlingId,
@@ -895,7 +896,8 @@ fun lagEndretUtbetalingAndel(
         årsak = årsak,
         avtaletidspunktDeltBosted = avtaletidspunktDeltBosted,
         søknadstidspunkt = søknadstidspunkt,
-        begrunnelse = "Test"
+        begrunnelse = "Test",
+        vedtakBegrunnelseSpesifikasjoner = vedtakBegrunnelseSpesifikasjoner,
     )
 
 fun lagPerson(

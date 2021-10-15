@@ -143,6 +143,8 @@ data class AndelTilkjentYtelse(
 
     fun erLøpende(): Boolean = this.stønadTom > YearMonth.now()
 
+    fun erDeltBosted() = this.prosent == BigDecimal(50)
+
     companion object {
 
         /**
