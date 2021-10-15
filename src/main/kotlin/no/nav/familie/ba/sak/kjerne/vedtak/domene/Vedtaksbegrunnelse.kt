@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifi
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon.Companion.tilBrevTekst
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.hentMånedOgÅrForBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.RestVedtaksbegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import javax.persistence.Column
 import javax.persistence.Convert
@@ -79,10 +80,11 @@ data class BegrunnelseData(
 
 data class FritekstBegrunnelse(val fritekst: String) : Begrunnelse
 
-fun Vedtaksbegrunnelse.tilBrevBegrunnelse(
+fun RestVedtaksbegrunnelse.tilBrevBegrunnelse(
+    utvidetVedtaksperiodeMedBegrunnelser: UtvidetVedtaksperiodeMedBegrunnelser,
     personerPåBegrunnelse: List<Person>,
     målform: Målform,
-    uregistrerteBarn: List<BarnMedOpplysninger>
+    uregistrerteBarn: List<BarnMedOpplysninger>,
 ): Begrunnelse {
     val barnasFødselsdatoer =
         if (this.vedtakBegrunnelseSpesifikasjon == VedtakBegrunnelseSpesifikasjon.AVSLAG_UREGISTRERT_BARN)
@@ -98,11 +100,11 @@ fun Vedtaksbegrunnelse.tilBrevBegrunnelse(
 
     val gjelderSøker = personerPåBegrunnelse.any { it.type == PersonType.SØKER }
     val månedOgÅrBegrunnelsenGjelderFor =
-        if (this.vedtaksperiodeMedBegrunnelser.fom == null) null
+        if (utvidetVedtaksperiodeMedBegrunnelser.fom == null) null
         else this.vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType.hentMånedOgÅrForBegrunnelse(
             periode = Periode(
-                fom = this.vedtaksperiodeMedBegrunnelser.fom,
-                tom = this.vedtaksperiodeMedBegrunnelser.tom ?: TIDENES_ENDE
+                fom = utvidetVedtaksperiodeMedBegrunnelser.fom,
+                tom = utvidetVedtaksperiodeMedBegrunnelser.tom ?: TIDENES_ENDE
             )
         )
 

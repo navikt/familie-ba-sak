@@ -6,8 +6,8 @@ import io.mockk.unmockkAll
 import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
+import no.nav.familie.ba.sak.common.lagUtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.common.lagVedtak
-import no.nav.familie.ba.sak.common.lagVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.common.tilfeldigSøker
@@ -91,7 +91,10 @@ internal class SaksstatistikkServiceTest {
             behandlendeEnhetNavn = "Nav",
             behandlingId = 1
         )
-        every { arbeidsfordelingService.hentArbeidsfordelingsenhet(any()) } returns Arbeidsfordelingsenhet("4821", "NAV")
+        every { arbeidsfordelingService.hentArbeidsfordelingsenhet(any()) } returns Arbeidsfordelingsenhet(
+            "4821",
+            "NAV"
+        )
         every { envService.skalIverksetteBehandling() } returns true
     }
 
@@ -124,11 +127,13 @@ internal class SaksstatistikkServiceTest {
         }
 
         val vedtak = lagVedtak(behandling)
-        val vedtaksperiodeMedBegrunnelser = lagVedtaksperiodeMedBegrunnelser(vedtak = vedtak)
+        val utvidetVedtaksperiodeMedBegrunnelser = lagUtvidetVedtaksperiodeMedBegrunnelser()
 
         every { behandlingService.hent(any()) } returns behandling
         every { vedtakService.hentAktivForBehandling(any()) } returns vedtak
-        every { vedtaksperiodeService.hentPersisterteVedtaksperioder(any()) } returns listOf(vedtaksperiodeMedBegrunnelser)
+        every { vedtaksperiodeService.hentUtvidetVedtaksperiodeMedBegrunnelser(any()) } returns listOf(
+            utvidetVedtaksperiodeMedBegrunnelser
+        )
         every { totrinnskontrollService.hentAktivForBehandling(any()) } returns Totrinnskontroll(
             saksbehandler = SYSTEM_NAVN,
             saksbehandlerId = SYSTEM_FORKORTELSE,
@@ -190,8 +195,8 @@ internal class SaksstatistikkServiceTest {
 
         val vedtaksperiodeFom = LocalDate.of(2021, 3, 11)
         val vedtaksperiodeTom = LocalDate.of(21, 4, 11)
-        val vedtaksperiodeMedBegrunnelser =
-            lagVedtaksperiodeMedBegrunnelser(vedtak = vedtak, fom = vedtaksperiodeFom, tom = vedtaksperiodeTom)
+        val utvidetVedtaksperiodeMedBegrunnelser =
+            lagUtvidetVedtaksperiodeMedBegrunnelser(fom = vedtaksperiodeFom, tom = vedtaksperiodeTom)
 
         every { behandlingService.hent(any()) } returns behandling
         every { persongrunnlagService.hentSøker(any()) } returns tilfeldigSøker()
@@ -201,7 +206,9 @@ internal class SaksstatistikkServiceTest {
         )
 
         every { vedtakService.hentAktivForBehandling(any()) } returns vedtak
-        every { vedtaksperiodeService.hentPersisterteVedtaksperioder(any()) } returns listOf(vedtaksperiodeMedBegrunnelser)
+        every { vedtaksperiodeService.hentUtvidetVedtaksperiodeMedBegrunnelser(any()) } returns listOf(
+            utvidetVedtaksperiodeMedBegrunnelser
+        )
         every { journalføringRepository.findByBehandlingId(any()) } returns listOf(
             DbJournalpost(
                 1,
@@ -213,7 +220,14 @@ internal class SaksstatistikkServiceTest {
             )
         )
         val mottattDato = LocalDateTime.of(2019, 12, 20, 10, 0, 0)
-        val jp = lagTestJournalpost("123", "123").copy(relevanteDatoer = listOf(RelevantDato(mottattDato, "DATO_REGISTRERT")))
+        val jp = lagTestJournalpost("123", "123").copy(
+            relevanteDatoer = listOf(
+                RelevantDato(
+                    mottattDato,
+                    "DATO_REGISTRERT"
+                )
+            )
+        )
         every { journalføringService.hentJournalpost(any()) } returns Ressurs.Companion.success(jp)
 
         val behandlingDvh = sakstatistikkService.mapTilBehandlingDVH(2)

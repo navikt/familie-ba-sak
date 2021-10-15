@@ -220,7 +220,7 @@ class VedtaksperiodeService(
     }
 
     fun oppdaterVedtaksperioderForBarnVurdertIFødselshendelse(vedtak: Vedtak, barnaSomVurderes: List<String>) {
-        val vedtaksperioderMedBegrunnelser = hentPersisterteVedtaksperioder(vedtak)
+        val vedtaksperioderMedBegrunnelser = vedtaksperiodeRepository.finnVedtaksperioderFor(vedtakId = vedtak.id)
         val persongrunnlag = persongrunnlagRepository.findByBehandlingAndAktiv(behandlingId = vedtak.behandling.id)
             ?: error("Finner ikke persongrunnlag")
         val vurderteBarnSomPersoner =
@@ -449,14 +449,20 @@ class VedtaksperiodeService(
 
     fun genererBrevBegrunnelserForPeriode(vedtaksperiodeId: Long): List<Begrunnelse> {
         val vedtaksperiode = vedtaksperiodeRepository.hentVedtaksperiode(vedtaksperiodeId)
+
         val behandlingId = vedtaksperiode.vedtak.behandling.id
         val persongrunnlag = persongrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandlingId)
             ?: throw Feil("Finner ikke persongrunnlag for behandling $behandlingId")
         val uregistrerteBarn =
             søknadGrunnlagService.hentAktiv(behandlingId = behandlingId)?.hentUregistrerteBarn() ?: emptyList()
 
+        val utvidetVedtaksperiodeMedBegrunnelse = vedtaksperiode.tilUtvidetVedtaksperiodeMedBegrunnelser(
+            personopplysningGrunnlag = persongrunnlag,
+            andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId)
+        )
+
         return byggBegrunnelserOgFriteksterForVedtaksperiode(
-            vedtaksperiode = vedtaksperiode,
+            utvidetVedtaksperiodeMedBegrunnelser = utvidetVedtaksperiodeMedBegrunnelse,
             personerIPersongrunnlag = persongrunnlag.personer.toList(),
             målform = persongrunnlag.søker.målform,
             uregistrerteBarn = uregistrerteBarn

@@ -4,7 +4,8 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
-import no.nav.familie.ba.sak.common.lagVedtaksperiodeMedBegrunnelser
+import no.nav.familie.ba.sak.common.lagUtbetalingsperiodeDetalj
+import no.nav.familie.ba.sak.common.lagUtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
@@ -23,8 +24,9 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
     val behandling = lagBehandling()
     val søker = tilfeldigPerson(personType = PersonType.SØKER)
     val barn = tilfeldigPerson(personType = PersonType.BARN)
-    val vedtaksperiodeMedBegrunnelser = lagVedtaksperiodeMedBegrunnelser(
+    val utvidetVedtaksperiodeMedBegrunnelser = lagUtvidetVedtaksperiodeMedBegrunnelser(
         type = Vedtaksperiodetype.UTBETALING,
+        utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj()),
     )
     val vilkårsvurdering = lagVilkårsvurdering(søker.personIdent.ident, lagBehandling(), Resultat.OPPFYLT)
     val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søker, barn)
@@ -36,7 +38,7 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
         assertTrue(
             VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET
                 .triggesForPeriode(
-                    vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
+                    vedtaksperiodeMedBegrunnelser = utvidetVedtaksperiodeMedBegrunnelser,
                     vilkårsvurdering = vilkårsvurdering,
                     persongrunnlag = personopplysningGrunnlag,
                     identerMedUtbetaling = identerMedUtbetaling,
@@ -50,7 +52,7 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
         assertFalse(
             VedtakBegrunnelseSpesifikasjon.OPPHØR_UTVANDRET
                 .triggesForPeriode(
-                    vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
+                    vedtaksperiodeMedBegrunnelser = utvidetVedtaksperiodeMedBegrunnelser,
                     vilkårsvurdering = vilkårsvurdering,
                     persongrunnlag = personopplysningGrunnlag,
                     identerMedUtbetaling = identerMedUtbetaling,
@@ -66,7 +68,7 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
         assertFalse(
             VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR
                 .triggesForPeriode(
-                    vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
+                    vedtaksperiodeMedBegrunnelser = utvidetVedtaksperiodeMedBegrunnelser,
                     vilkårsvurdering = vilkårsvurdering,
                     persongrunnlag = personopplysningGrunnlag,
                     identerMedUtbetaling = identerMedUtbetaling,
@@ -78,12 +80,12 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
     @Test
     fun `Har barn med seksårsdag skal gi true`() {
         val persongrunnlag = mockk<PersonopplysningGrunnlag>()
-        every { persongrunnlag.harBarnMedSeksårsdagPåFom(vedtaksperiodeMedBegrunnelser.fom) } returns true
+        every { persongrunnlag.harBarnMedSeksårsdagPåFom(utvidetVedtaksperiodeMedBegrunnelser.fom) } returns true
 
         assertTrue(
             VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR
                 .triggesForPeriode(
-                    vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
+                    vedtaksperiodeMedBegrunnelser = utvidetVedtaksperiodeMedBegrunnelser,
                     vilkårsvurdering = vilkårsvurdering,
                     persongrunnlag = persongrunnlag,
                     identerMedUtbetaling = identerMedUtbetaling,
@@ -94,9 +96,10 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
 
     @Test
     fun `Har sats endring skal gi true`() {
-        val vedtaksperiodeMedBegrunnelserSatsEndring = lagVedtaksperiodeMedBegrunnelser(
+        val vedtaksperiodeMedBegrunnelserSatsEndring = lagUtvidetVedtaksperiodeMedBegrunnelser(
             fom = LocalDate.of(2021, 9, 1),
             type = Vedtaksperiodetype.UTBETALING,
+            utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj()),
         )
 
         assertTrue(
@@ -113,9 +116,10 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
 
     @Test
     fun `Har ikke sats endring skal gi false`() {
-        val vedtaksperiodeMedBegrunnelserSatsEndring = lagVedtaksperiodeMedBegrunnelser(
+        val vedtaksperiodeMedBegrunnelserSatsEndring = lagUtvidetVedtaksperiodeMedBegrunnelser(
             fom = LocalDate.of(2021, 8, 1),
             type = Vedtaksperiodetype.UTBETALING,
+            utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj()),
         )
 
         assertFalse(
@@ -137,7 +141,7 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
         assertFalse(
             VedtakBegrunnelseSpesifikasjon.INNVILGET_LOVLIG_OPPHOLD_EØS_BORGER
                 .triggesForPeriode(
-                    vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
+                    vedtaksperiodeMedBegrunnelser = utvidetVedtaksperiodeMedBegrunnelser,
                     vilkårsvurdering = vilkårsvurdering,
                     persongrunnlag = personopplysningGrunnlag,
                     identerMedUtbetaling = identerMedUtbetaling,
@@ -153,7 +157,7 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
         assertTrue(
             VedtakBegrunnelseSpesifikasjon.INNVILGET_LOVLIG_OPPHOLD_EØS_BORGER
                 .triggesForPeriode(
-                    vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
+                    vedtaksperiodeMedBegrunnelser = utvidetVedtaksperiodeMedBegrunnelser,
                     vilkårsvurdering = vilkårsvurdering,
                     persongrunnlag = personopplysningGrunnlag,
                     identerMedUtbetaling = identerMedUtbetaling,

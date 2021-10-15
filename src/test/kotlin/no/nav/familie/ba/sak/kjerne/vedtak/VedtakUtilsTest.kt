@@ -1,8 +1,9 @@
 package no.nav.familie.ba.sak.kjerne.vedtak
 
-import no.nav.familie.ba.sak.common.lagVedtaksperiodeMedBegrunnelser
-import no.nav.familie.ba.sak.kjerne.dokument.sorter
+import no.nav.familie.ba.sak.common.lagUtbetalingsperiodeDetalj
+import no.nav.familie.ba.sak.common.lagUtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.sorter
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -17,34 +18,39 @@ class VedtakUtilsTest {
     @Test
     fun `vedtaksperioder sorteres korrekt til brev`() {
 
-        val avslagMedTomDatoInneværendeMåned = lagVedtaksperiodeMedBegrunnelser(
-            type = Vedtaksperiodetype.AVSLAG,
+        val avslagMedTomDatoInneværendeMåned = lagUtvidetVedtaksperiodeMedBegrunnelser(
             fom = LocalDate.now().minusMonths(6),
             tom = LocalDate.now(),
+            type = Vedtaksperiodetype.AVSLAG,
+            utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj()),
 
-        )
+            )
         val avslagUtenTomDato =
-            lagVedtaksperiodeMedBegrunnelser(
+            lagUtvidetVedtaksperiodeMedBegrunnelser(
                 fom = LocalDate.now().minusMonths(5),
                 tom = null,
-                type = Vedtaksperiodetype.AVSLAG
+                type = Vedtaksperiodetype.AVSLAG,
+                utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj())
             )
-        val opphørsperiode = lagVedtaksperiodeMedBegrunnelser(
+        val opphørsperiode = lagUtvidetVedtaksperiodeMedBegrunnelser(
             fom = LocalDate.now().minusMonths(4),
             tom = LocalDate.now().minusMonths(1),
-            type = Vedtaksperiodetype.OPPHØR
+            type = Vedtaksperiodetype.OPPHØR,
+            utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj())
         )
 
-        val utbetalingsperiode = lagVedtaksperiodeMedBegrunnelser(
+        val utbetalingsperiode = lagUtvidetVedtaksperiodeMedBegrunnelser(
             fom = LocalDate.now().minusMonths(3),
             tom = LocalDate.now().minusMonths(1),
             type = Vedtaksperiodetype.UTBETALING,
+            utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj()),
         )
 
-        val avslagUtenDatoer = lagVedtaksperiodeMedBegrunnelser(
+        val avslagUtenDatoer = lagUtvidetVedtaksperiodeMedBegrunnelser(
             fom = null,
             tom = null,
             type = Vedtaksperiodetype.AVSLAG,
+            utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj()),
         )
 
         val sorterteVedtaksperioder =

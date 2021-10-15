@@ -21,7 +21,7 @@ data class UtvidetVedtaksperiodeMedBegrunnelser(
     val begrunnelser: List<RestVedtaksbegrunnelse>,
     val fritekster: List<String> = emptyList(),
     val gyldigeBegrunnelser: List<VedtakBegrunnelseSpesifikasjon> = emptyList(),
-    val utbetalingsperiodeDetaljer: List<UtbetalingsperiodeDetalj>,
+    val utbetalingsperiodeDetaljer: List<UtbetalingsperiodeDetalj> = emptyList(),
 )
 
 data class RestVedtaksbegrunnelse(
@@ -29,6 +29,11 @@ data class RestVedtaksbegrunnelse(
     val vedtakBegrunnelseType: VedtakBegrunnelseType,
     val personIdenter: List<String> = emptyList(),
 )
+
+fun List<UtvidetVedtaksperiodeMedBegrunnelser>.sorter(): List<UtvidetVedtaksperiodeMedBegrunnelser> {
+    val (perioderMedFom, perioderUtenFom) = this.partition { it.fom != null }
+    return perioderMedFom.sortedWith(compareBy { it.fom }) + perioderUtenFom
+}
 
 fun VedtaksperiodeMedBegrunnelser.tilUtvidetVedtaksperiodeMedBegrunnelser(
     personopplysningGrunnlag: PersonopplysningGrunnlag,

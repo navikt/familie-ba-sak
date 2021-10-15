@@ -35,6 +35,13 @@ data class Utbetalingsperiode(
     )
 }
 
+data class UtbetalingsperiodeDetalj(
+    val person: RestPerson,
+    val ytelseType: YtelseType,
+    val utbetaltPerMnd: Int,
+    val erPåvirketAvEndring: Boolean,
+)
+
 fun hentUtbetalingsperiodeForVedtaksperiode(
     utbetalingsperioder: List<Utbetalingsperiode>,
     fom: LocalDate?
@@ -57,13 +64,6 @@ fun hentPersonIdenterFraUtbetalingsperioder(utbetalingsperioder: List<Utbetaling
         null
     ).utbetalingsperiodeDetaljer.map { it.person.personIdent }
 }
-
-data class UtbetalingsperiodeDetalj(
-    val person: RestPerson,
-    val ytelseType: YtelseType,
-    val utbetaltPerMnd: Int,
-    val erPåvirketAvEndring: Boolean,
-)
 
 fun mapTilUtbetalingsperioder(
     personopplysningGrunnlag: PersonopplysningGrunnlag,

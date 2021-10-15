@@ -3,6 +3,9 @@ package no.nav.familie.ba.sak.kjerne.dokument
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.Utils
+import no.nav.familie.ba.sak.common.erSenereEnnInneværendeMåned
+import no.nav.familie.ba.sak.common.tilDagMånedÅr
+import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat.AVSLÅTT
@@ -25,13 +28,25 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat.OPPHØR
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.dokument.domene.SanityBegrunnelse
+import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.AvslagBrevPeriode
+import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.AvslagUtenPeriodeBrevPeriode
+import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.BrevPeriode
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Brevmal
+import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.EndretUtbetalingBrevPeriode
+import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.FortsattInnvilgetBrevPeriode
+import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.InnvilgelseBrevPeriode
+import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.OpphørBrevPeriode
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.domene.Totrinnskontroll
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.hjemlerTilhørendeFritekst
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.byggBegrunnelserOgFriteksterForVedtaksperiode
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtvidetVedtaksperiodeMedBegrunnelser
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 
 fun hentBrevtype(behandling: Behandling): Brevmal =
@@ -171,10 +186,10 @@ fun hentOverstyrtDokumenttittel(behandling: Behandling): String? {
 }
 
 fun hentHjemlerIVedtaksperioderFraSanity(
-    vedtaksperioderMedBegrunnelser: List<VedtaksperiodeMedBegrunnelser>,
+    utvidetVedtaksperiodeMedBegrunnelser: List<UtvidetVedtaksperiodeMedBegrunnelser>,
     sanityBegrunnelser: List<SanityBegrunnelse>
 ): List<String> =
-    vedtaksperioderMedBegrunnelser.flatMap { periode ->
+    utvidetVedtaksperiodeMedBegrunnelser.flatMap { periode ->
         periode.begrunnelser.flatMap {
             it.vedtakBegrunnelseSpesifikasjon.tilSanityBegrunnelse(sanityBegrunnelser).hjemler
         }
@@ -189,13 +204,13 @@ fun hjemlerTilHjemmeltekst(hjemler: List<String>): String {
 }
 
 fun hentHjemmeltekst(
-    vedtaksperioderMedBegrunnelser: List<VedtaksperiodeMedBegrunnelser>,
+    utvidetVedtaksperiodeMedBegrunnelser: List<UtvidetVedtaksperiodeMedBegrunnelser>,
     sanityBegrunnelser: List<SanityBegrunnelse>
 ): String {
     val hjemler =
-        hentHjemlerIVedtaksperioderFraSanity(vedtaksperioderMedBegrunnelser, sanityBegrunnelser).toMutableSet()
+        hentHjemlerIVedtaksperioderFraSanity(utvidetVedtaksperiodeMedBegrunnelser, sanityBegrunnelser).toMutableSet()
 
-    if (vedtaksperioderMedBegrunnelser.flatMap { it.fritekster }.isNotEmpty()) {
+    if (utvidetVedtaksperiodeMedBegrunnelser.flatMap { it.fritekster }.isNotEmpty()) {
         hjemler.addAll(hjemlerTilhørendeFritekst.map { it.toString() }.toSet())
     }
 
@@ -204,7 +219,79 @@ fun hentHjemmeltekst(
     return hjemlerTilHjemmeltekst(sorterteHjemler)
 }
 
-fun List<VedtaksperiodeMedBegrunnelser>.sorter(): List<VedtaksperiodeMedBegrunnelser> {
-    val (perioderMedFom, perioderUtenFom) = this.partition { it.fom != null }
-    return perioderMedFom.sortedWith(compareBy { it.fom }) + perioderUtenFom
+fun UtvidetVedtaksperiodeMedBegrunnelser.tilBrevPeriode(
+    personerIPersongrunnlag: List<Person>,
+    målform: Målform,
+    uregistrerteBarn: List<BarnMedOpplysninger> = emptyList()
+): BrevPeriode? {
+    val begrunnelserOgFritekster = byggBegrunnelserOgFriteksterForVedtaksperiode(
+        utvidetVedtaksperiodeMedBegrunnelser = this,
+        personerIPersongrunnlag = personerIPersongrunnlag,
+        målform = målform,
+        uregistrerteBarn = uregistrerteBarn
+    )
+
+    val tomDato =
+        if (this.tom?.erSenereEnnInneværendeMåned() == false) this.tom.tilDagMånedÅr()
+        else null
+
+    if (begrunnelserOgFritekster.isEmpty()) return null
+
+    return when (this.type) {
+        Vedtaksperiodetype.FORTSATT_INNVILGET -> {
+            val erAutobrev = this.begrunnelser.any { vedtaksbegrunnelse ->
+                vedtaksbegrunnelse.vedtakBegrunnelseSpesifikasjon == VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR ||
+                    vedtaksbegrunnelse.vedtakBegrunnelseSpesifikasjon == VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR
+            }
+            val fom = if (erAutobrev && this.fom != null) {
+                val fra = if (målform == Målform.NB) "Fra" else "Frå"
+                "$fra ${this.fom.tilDagMånedÅr()} får du:"
+            } else null
+            FortsattInnvilgetBrevPeriode(
+                fom = fom ?: "Du får:",
+                belop = Utils.formaterBeløp(this.utbetalingsperiodeDetaljer.totaltUtbetalt()),
+                antallBarn = this.utbetalingsperiodeDetaljer.antallBarn().toString(),
+                barnasFodselsdager = this.utbetalingsperiodeDetaljer.tilBarnasFødselsdatoer(),
+                begrunnelser = begrunnelserOgFritekster
+            )
+        }
+
+        Vedtaksperiodetype.UTBETALING -> {
+            InnvilgelseBrevPeriode(
+                fom = this.fom!!.tilDagMånedÅr(),
+                tom = tomDato,
+                belop = Utils.formaterBeløp(this.utbetalingsperiodeDetaljer.totaltUtbetalt()),
+                antallBarn = this.utbetalingsperiodeDetaljer.antallBarn().toString(),
+                barnasFodselsdager = this.utbetalingsperiodeDetaljer.tilBarnasFødselsdatoer(),
+                begrunnelser = begrunnelserOgFritekster
+            )
+        }
+
+        Vedtaksperiodetype.ENDRET_UTBETALING -> {
+            EndretUtbetalingBrevPeriode(
+                fom = this.fom!!.tilDagMånedÅr(),
+                tom = tomDato,
+                belop = Utils.formaterBeløp(this.utbetalingsperiodeDetaljer.totaltUtbetalt()),
+                antallBarn = this.utbetalingsperiodeDetaljer.antallBarn().toString(),
+                barnasFodselsdager = this.utbetalingsperiodeDetaljer.tilBarnasFødselsdatoer(),
+                begrunnelser = begrunnelserOgFritekster
+            )
+        }
+
+        Vedtaksperiodetype.AVSLAG -> {
+            if (this.fom != null)
+                AvslagBrevPeriode(
+                    fom = this.fom.tilDagMånedÅr(),
+                    tom = tomDato,
+                    begrunnelser = begrunnelserOgFritekster
+                )
+            else AvslagUtenPeriodeBrevPeriode(begrunnelser = begrunnelserOgFritekster)
+        }
+
+        Vedtaksperiodetype.OPPHØR -> OpphørBrevPeriode(
+            fom = this.fom!!.tilDagMånedÅr(),
+            tom = tomDato,
+            begrunnelser = begrunnelserOgFritekster
+        )
+    }
 }
