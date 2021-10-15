@@ -44,7 +44,15 @@ fun VedtaksperiodeMedBegrunnelser.tilUtvidetVedtaksperiodeMedBegrunnelser(
         if (this.type == Vedtaksperiodetype.UTBETALING || this.type == Vedtaksperiodetype.ENDRET_UTBETALING) {
             val vertikaltSegmentForVedtaksperiode = hentVertikaltSegmentForVedtaksperiode(andelerTilkjentYtelse)
 
-            val andelerForSegment = hentAndelerForSegment(andelerTilkjentYtelse, vertikaltSegmentForVedtaksperiode)
+            val andelerForSegment =
+                hentAndelerForSegment(andelerTilkjentYtelse, vertikaltSegmentForVedtaksperiode)
+                    .filter {
+                        if (this.type == Vedtaksperiodetype.ENDRET_UTBETALING) {
+                            it.endretUtbetalingAndeler.isNotEmpty()
+                        } else {
+                            it.endretUtbetalingAndeler.isEmpty()
+                        }
+                    }
 
             andelerForSegment.lagUtbetalingsperiodeDetaljer(personopplysningGrunnlag)
         } else {

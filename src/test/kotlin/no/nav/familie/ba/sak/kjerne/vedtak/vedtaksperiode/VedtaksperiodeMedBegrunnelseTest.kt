@@ -174,6 +174,7 @@ class VedtaksperiodeMedBegrunnelseTest {
     fun `Skal gi null ved ingen begrunnelser eller fritekster`() {
         val utvidetVedtaksperiodeMedBegrunnelser = lagUtvidetVedtaksperiodeMedBegrunnelser(
             type = Vedtaksperiodetype.UTBETALING,
+            begrunnelser = emptyList(),
             fritekster = mutableListOf(),
             utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj()),
         )

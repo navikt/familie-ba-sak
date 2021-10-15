@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.common
 
+import io.mockk.mockk
 import no.nav.commons.foedselsnummer.testutils.FoedselsnummerGenerator
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPerson
@@ -51,7 +52,9 @@ import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksbegrunnelseFritekst
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.RestVedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Utbetalingsperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtbetalingsperiodeDetalj
@@ -812,6 +815,33 @@ fun lagUtbetalingsperiodeDetalj(
     ytelseType: YtelseType = YtelseType.ORDINÆR_BARNETRYGD,
     utbetaltPerMnd: Int = sats(YtelseType.ORDINÆR_BARNETRYGD),
 ) = UtbetalingsperiodeDetalj(person, ytelseType, utbetaltPerMnd, false)
+
+fun lagVedtaksbegrunnelse(
+    vedtakBegrunnelseSpesifikasjon: VedtakBegrunnelseSpesifikasjon =
+        VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_SØKER_OG_BARN_BOSATT_I_RIKET,
+    personIdenter: List<String> = listOf(tilfeldigPerson().personIdent.ident),
+    vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser = mockk()
+) = Vedtaksbegrunnelse(
+    vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
+    vedtakBegrunnelseSpesifikasjon = vedtakBegrunnelseSpesifikasjon,
+    personIdenter = personIdenter,
+)
+
+fun lagVedtaksperiodeMedBegrunnelser(
+    vedtak: Vedtak = lagVedtak(),
+    fom: LocalDate? = LocalDate.now().withDayOfMonth(1),
+    tom: LocalDate? = LocalDate.now().let { it.withDayOfMonth(it.lengthOfMonth()) },
+    type: Vedtaksperiodetype = Vedtaksperiodetype.FORTSATT_INNVILGET,
+    begrunnelser: MutableSet<Vedtaksbegrunnelse> = mutableSetOf(lagVedtaksbegrunnelse()),
+    fritekster: MutableList<VedtaksbegrunnelseFritekst> = mutableListOf(),
+) = VedtaksperiodeMedBegrunnelser(
+    vedtak = vedtak,
+    fom = fom,
+    tom = tom,
+    type = type,
+    begrunnelser = begrunnelser,
+    fritekster = fritekster,
+)
 
 fun lagRestVedtaksbegrunnelse(
     vedtakBegrunnelseSpesifikasjon: VedtakBegrunnelseSpesifikasjon =
