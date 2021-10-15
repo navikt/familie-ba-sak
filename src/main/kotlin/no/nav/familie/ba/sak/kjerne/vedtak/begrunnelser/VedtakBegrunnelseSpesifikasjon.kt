@@ -584,26 +584,6 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
     INNVILGELSE_BEREDSKAPSHJEM {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
         override val sanityApiNavn = "beredskapshjem"
-    },
-    INNVILGELSE_AVSLAG_UTVIDET {
-        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
-        override val sanityApiNavn = "avslagUtvidet"
-    },
-    INNVILGELSE_REDUKSJON__UTVIDET {
-        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
-        override val sanityApiNavn = "reduksjonUtvidet"
-    },
-    INNVILGELSE_IKKE_BRUK__ETTER_ENDRET_UTBETALING {
-        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
-        override val sanityApiNavn = "periodeEtterEndretUtbetaling"
-    },
-    INNVILGELSE_OPPHØR_UTVIDET {
-        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
-        override val sanityApiNavn = "opphorUtvidet"
-    },
-    INNVILGELSE_FORTSATT_INNVILGET_UTVIDET {
-        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
-        override val sanityApiNavn = "fortsattInnvilgetUtvidet"
     };
 
     fun triggesForPeriode(
