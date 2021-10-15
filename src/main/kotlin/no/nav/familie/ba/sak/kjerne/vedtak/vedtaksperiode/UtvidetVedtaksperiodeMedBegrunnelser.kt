@@ -59,7 +59,6 @@ fun VedtaksperiodeMedBegrunnelser.tilUtvidetVedtaksperiodeMedBegrunnelser(
             emptyList()
         }
 
-
     return UtvidetVedtaksperiodeMedBegrunnelser(
         id = this.id,
         fom = this.fom,

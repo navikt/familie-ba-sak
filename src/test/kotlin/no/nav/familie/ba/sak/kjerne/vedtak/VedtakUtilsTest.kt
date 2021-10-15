@@ -24,7 +24,7 @@ class VedtakUtilsTest {
             type = Vedtaksperiodetype.AVSLAG,
             utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj()),
 
-            )
+        )
         val avslagUtenTomDato =
             lagUtvidetVedtaksperiodeMedBegrunnelser(
                 fom = LocalDate.now().minusMonths(5),

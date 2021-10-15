@@ -288,8 +288,8 @@ class VedtaksperiodeService(
                 utbetalingsperioderUtenEndringer +
                     hentOpphørsperioder(vedtak.behandling)
                 ).map {
-                    it.tilVedtaksperiodeMedBegrunnelse(vedtak)
-                }
+                it.tilVedtaksperiodeMedBegrunnelse(vedtak)
+            }
         val avslagsperioder = hentAvslagsperioderMedBegrunnelser(vedtak)
 
         val endretUtbetalingsperioder = hentEndredeUtbetalingsperioderMedBegrunnelser(
