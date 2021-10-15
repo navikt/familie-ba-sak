@@ -281,17 +281,15 @@ class VedtaksperiodeService(
     }
 
     fun genererVedtaksperioderMedBegrunnelser(vedtak: Vedtak): List<VedtaksperiodeMedBegrunnelser> {
-        val utbetalingsperioderUtenEndringer = hentUtbetalingsperioder(vedtak.behandling) {
-            it.filter { andelTilkjentYtelse -> andelTilkjentYtelse.endretUtbetalingAndeler.isEmpty() }
-        }
+        val utbetalingsperioderUtenEndringer = hentUtbetalingsperioderUtenEndringer(vedtak.behandling)
 
         val utbetalingOgOpphørsperioder =
             (
                 utbetalingsperioderUtenEndringer +
                     hentOpphørsperioder(vedtak.behandling)
                 ).map {
-                it.tilVedtaksperiodeMedBegrunnelse(vedtak)
-            }
+                    it.tilVedtaksperiodeMedBegrunnelse(vedtak)
+                }
         val avslagsperioder = hentAvslagsperioderMedBegrunnelser(vedtak)
 
         val endretUtbetalingsperioder = hentEndredeUtbetalingsperioderMedBegrunnelser(
@@ -383,9 +381,9 @@ class VedtaksperiodeService(
                             val vedtakBegrunnelseType = it.vedtakBegrunnelseType
 
                             if (triggesAv.vilkår.contains(Vilkår.UTVIDET_BARNETRYGD) && (
-                                utbetalingsperiode?.ytelseTyper
-                                    ?: emptyList()
-                                ).contains(YtelseType.UTVIDET_BARNETRYGD) &&
+                                    utbetalingsperiode?.ytelseTyper
+                                        ?: emptyList()
+                                    ).contains(YtelseType.UTVIDET_BARNETRYGD) &&
                                 vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGELSE
                             ) {
                                 gyldigeBegrunnelser.add(it)
@@ -473,9 +471,8 @@ class VedtaksperiodeService(
             .minByOrNull { it.stønadTom }?.stønadTom?.sisteDagIInneværendeMåned()
             ?: error("Fant ikke andel for tilkjent ytelse inneværende måned for behandling $behandlingId.")
 
-    fun hentUtbetalingsperioder(
+    fun hentUtbetalingsperioderUtenEndringer(
         behandling: Behandling,
-        filterAndeler: (andelerTilkjentYtelse: List<AndelTilkjentYtelse>) -> List<AndelTilkjentYtelse> = { it }
     ): List<Utbetalingsperiode> {
         val personopplysningGrunnlag = persongrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
             ?: return emptyList()
@@ -485,7 +482,25 @@ class VedtaksperiodeService(
         return mapTilUtbetalingsperioder(
             andelerTilkjentYtelse = andelerTilkjentYtelse,
             personopplysningGrunnlag = personopplysningGrunnlag,
-            filterAndeler = filterAndeler
+            filterAndeler = {
+                it.filter { andelTilkjentYtelse ->
+                    andelTilkjentYtelse.endretUtbetalingAndeler.isEmpty()
+                }
+            }
+        )
+    }
+
+    fun hentUtbetalingsperioder(
+        behandling: Behandling,
+    ): List<Utbetalingsperiode> {
+        val personopplysningGrunnlag = persongrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
+            ?: return emptyList()
+        val andelerTilkjentYtelse =
+            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = behandling.id)
+
+        return mapTilUtbetalingsperioder(
+            andelerTilkjentYtelse = andelerTilkjentYtelse,
+            personopplysningGrunnlag = personopplysningGrunnlag,
         )
     }
 

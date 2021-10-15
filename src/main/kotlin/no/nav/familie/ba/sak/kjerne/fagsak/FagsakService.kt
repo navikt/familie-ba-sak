@@ -235,7 +235,7 @@ class FagsakService(
             fødselshendelsefiltreringResultater = fødselshendelsefiltreringResultatRepository.finnFødselshendelsefiltreringResultater(
                 behandlingId = behandling.id
             ).map { it.tilRestFødselshendelsefiltreringResultat() },
-            utbetalingsperioder = vedtaksperiodeService.hentUtbetalingsperioder(behandling),
+            utbetalingsperioder = vedtaksperiodeService.hentUtbetalingsperioderUtenEndringer(behandling),
             personerMedAndelerTilkjentYtelse = personopplysningGrunnlag?.tilRestPersonerMedAndeler(andelerTilkjentYtelse)
                 ?: emptyList(),
             endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(behandling.id)
@@ -317,8 +317,8 @@ class FagsakService(
                     relasjon.relasjonsrolle == FORELDERBARNRELASJONROLLE.MEDMOR
             }.forEach { relasjon ->
                 if (assosierteFagsakDeltagere.find { fagsakDeltager ->
-                    fagsakDeltager.ident == relasjon.personIdent.id
-                } == null
+                        fagsakDeltager.ident == relasjon.personIdent.id
+                    } == null
                 ) {
 
                     val maskertForelder = hentMaskertFagsakdeltakerVedManglendeTilgang(relasjon.personIdent.id)
