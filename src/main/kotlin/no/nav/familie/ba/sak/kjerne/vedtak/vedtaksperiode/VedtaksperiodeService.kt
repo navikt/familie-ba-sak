@@ -25,6 +25,7 @@ import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.dokument.domene.tilTriggesAv
 import no.nav.familie.ba.sak.kjerne.dokument.hentVedtaksbrevmal
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.hentPersonerForEtterEndretUtbetalingsperiode
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
@@ -144,6 +145,14 @@ class VedtaksperiodeService(
                         emptyList() else error("Legg til opplysningsplikt ikke oppfylt begrunnelse men det er ikke person med det resultat")
 
                     vedtaksperiodeMedBegrunnelser.type == Vedtaksperiodetype.FORTSATT_INNVILGET -> identerMedUtbetaling
+
+                    triggesAv.etterEndretUtbetaling -> hentPersonerForEtterEndretUtbetalingsperiode(
+                        endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(
+                            behandling.id
+                        ),
+                        vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
+                        triggesAv = triggesAv
+                    )
 
                     else -> hentPersonerForAlleUtgjørendeVilkår(
                         vilkårsvurdering = vilkårsvurdering,
@@ -390,6 +399,9 @@ class VedtaksperiodeService(
                                     identerMedUtbetaling = identerMedUtbetaling,
                                     triggesAv = triggesAv,
                                     vedtakBegrunnelseType = vedtakBegrunnelseType,
+                                    endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(
+                                            behandling.id
+                                        )
                                 )
                             ) {
                                 acc.add(standardBegrunnelse)

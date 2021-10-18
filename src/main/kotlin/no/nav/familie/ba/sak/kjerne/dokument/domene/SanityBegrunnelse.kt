@@ -23,8 +23,8 @@ data class SanityBegrunnelse(
     val giftPartnerskapTriggere: List<VilkårTrigger>? = null,
     val borMedSokerTriggere: List<VilkårTrigger>? = null,
     val ovrigeTriggere: List<ØvrigTrigger>? = null,
+    val endringsaarsaker: List<Årsak>? = null,
     val hjemler: List<String> = emptyList(),
-    val endringsaarsaker: List<Årsak> = emptyList(),
 )
 
 enum class SanityVilkår {
@@ -75,8 +75,8 @@ enum class ØvrigTrigger {
     SATSENDRING,
     BARN_MED_6_ÅRS_DAG,
     ALLTID_AUTOMATISK,
-    ENDRET_UTBETALING,
     ETTER_ENDRET_UTBETALING,
+    ENDRET_UTBETALING
 }
 
 fun SanityBegrunnelse.tilTriggesAv(): TriggesAv {
@@ -104,6 +104,8 @@ fun SanityBegrunnelse.tilTriggesAv(): TriggesAv {
         medlemskap = this.inneholderBosattIRiketTrigger(VilkårTrigger.MEDLEMSKAP),
         deltbosted = this.inneholderBorMedSøkerTrigger(VilkårTrigger.DELT_BOSTED),
         valgbar = !this.inneholderØvrigTrigger(ØvrigTrigger.ALLTID_AUTOMATISK),
+        etterEndretUtbetaling = this.inneholderØvrigTrigger(ØvrigTrigger.ETTER_ENDRET_UTBETALING),
+        endringsaarsaker = this.endringsaarsaker?.toSet() ?: emptySet(),
     )
 }
 
