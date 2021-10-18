@@ -91,7 +91,10 @@ internal class SaksstatistikkServiceTest {
             behandlendeEnhetNavn = "Nav",
             behandlingId = 1
         )
-        every { arbeidsfordelingService.hentArbeidsfordelingsenhet(any()) } returns Arbeidsfordelingsenhet("4821", "NAV")
+        every { arbeidsfordelingService.hentArbeidsfordelingsenhet(any()) } returns Arbeidsfordelingsenhet(
+            "4821",
+            "NAV"
+        )
         every { envService.skalIverksetteBehandling() } returns true
     }
 
@@ -124,11 +127,14 @@ internal class SaksstatistikkServiceTest {
         }
 
         val vedtak = lagVedtak(behandling)
-        val vedtaksperiodeMedBegrunnelser = lagVedtaksperiodeMedBegrunnelser(vedtak = vedtak)
+        val vedtaksperiodeMedBegrunnelser =
+            lagVedtaksperiodeMedBegrunnelser()
 
         every { behandlingService.hent(any()) } returns behandling
         every { vedtakService.hentAktivForBehandling(any()) } returns vedtak
-        every { vedtaksperiodeService.hentPersisterteVedtaksperioder(any()) } returns listOf(vedtaksperiodeMedBegrunnelser)
+        every { vedtaksperiodeService.hentPersisterteVedtaksperioder(any()) } returns listOf(
+            vedtaksperiodeMedBegrunnelser
+        )
         every { totrinnskontrollService.hentAktivForBehandling(any()) } returns Totrinnskontroll(
             saksbehandler = SYSTEM_NAVN,
             saksbehandlerId = SYSTEM_FORKORTELSE,
@@ -201,7 +207,9 @@ internal class SaksstatistikkServiceTest {
         )
 
         every { vedtakService.hentAktivForBehandling(any()) } returns vedtak
-        every { vedtaksperiodeService.hentPersisterteVedtaksperioder(any()) } returns listOf(vedtaksperiodeMedBegrunnelser)
+        every { vedtaksperiodeService.hentPersisterteVedtaksperioder(any()) } returns listOf(
+            vedtaksperiodeMedBegrunnelser
+        )
         every { journalføringRepository.findByBehandlingId(any()) } returns listOf(
             DbJournalpost(
                 1,
@@ -213,7 +221,14 @@ internal class SaksstatistikkServiceTest {
             )
         )
         val mottattDato = LocalDateTime.of(2019, 12, 20, 10, 0, 0)
-        val jp = lagTestJournalpost("123", "123").copy(relevanteDatoer = listOf(RelevantDato(mottattDato, "DATO_REGISTRERT")))
+        val jp = lagTestJournalpost("123", "123").copy(
+            relevanteDatoer = listOf(
+                RelevantDato(
+                    mottattDato,
+                    "DATO_REGISTRERT"
+                )
+            )
+        )
         every { journalføringService.hentJournalpost(any()) } returns Ressurs.Companion.success(jp)
 
         val behandlingDvh = sakstatistikkService.mapTilBehandlingDVH(2)

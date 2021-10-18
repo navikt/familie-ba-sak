@@ -51,7 +51,8 @@ class SaksstatistikkService(
 
     fun mapTilBehandlingDVH(behandlingId: Long): BehandlingDVH? {
         val behandling = behandlingService.hent(behandlingId)
-        val forrigeBehandlingId = behandlingService.hentForrigeBehandlingSomErIverksatt(behandling).takeIf { erRevurderingEllerTekniskOpphør(behandling) }?.id
+        val forrigeBehandlingId = behandlingService.hentForrigeBehandlingSomErIverksatt(behandling)
+            .takeIf { erRevurderingEllerTekniskOpphør(behandling) }?.id
 
         if (behandling.opprettetÅrsak == FØDSELSHENDELSE && !envService.skalIverksetteBehandling()) return null
 
@@ -68,7 +69,8 @@ class SaksstatistikkService(
             else -> behandling.opprettetTidspunkt
         }
 
-        val behandlendeEnhetsKode = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandlingId).behandlendeEnhetId
+        val behandlendeEnhetsKode =
+            arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandlingId).behandlendeEnhetId
         val ansvarligEnhetKode = arbeidsfordelingService.hentArbeidsfordelingsenhet(behandling).enhetId
 
         val aktivtVedtak = vedtakService.hentAktivForBehandling(behandlingId)
@@ -174,23 +176,25 @@ class SaksstatistikkService(
     private fun Behandling.resultatBegrunnelser(): List<ResultatBegrunnelseDVH> {
         return when (resultat) {
             HENLAGT_SØKNAD_TRUKKET, HENLAGT_FEILAKTIG_OPPRETTET -> emptyList()
-            else -> vedtakService.hentAktivForBehandling(behandlingId = id)?.hentResultatBegrunnelserFraVedtaksbegrunnelser()
+            else -> vedtakService.hentAktivForBehandling(behandlingId = id)
+                ?.hentResultatBegrunnelserFraVedtaksbegrunnelser()
                 ?: emptyList()
         }
     }
 
     private fun Vedtak.hentResultatBegrunnelserFraVedtaksbegrunnelser(): List<ResultatBegrunnelseDVH> {
-        return vedtaksperiodeService.hentPersisterteVedtaksperioder(this).flatMap { vedtaksperiode ->
-            vedtaksperiode.begrunnelser
-                .map {
-                    ResultatBegrunnelseDVH(
-                        fom = vedtaksperiode.fom,
-                        tom = vedtaksperiode.tom,
-                        type = it.vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType.name,
-                        vedtakBegrunnelse = it.vedtakBegrunnelseSpesifikasjon.name,
-                    )
-                }
-        }
+        return vedtaksperiodeService.hentPersisterteVedtaksperioder(this)
+            .flatMap { vedtaksperiode ->
+                vedtaksperiode.begrunnelser
+                    .map {
+                        ResultatBegrunnelseDVH(
+                            fom = vedtaksperiode.fom,
+                            tom = vedtaksperiode.tom,
+                            type = it.vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType.name,
+                            vedtakBegrunnelse = it.vedtakBegrunnelseSpesifikasjon.name,
+                        )
+                    }
+            }
     }
 
     companion object {
