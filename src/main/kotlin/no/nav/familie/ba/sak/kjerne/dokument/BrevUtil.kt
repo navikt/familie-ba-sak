@@ -231,11 +231,11 @@ fun UtvidetVedtaksperiodeMedBegrunnelser.tilBrevPeriode(
         uregistrerteBarn = uregistrerteBarn
     )
 
+    if (begrunnelserOgFritekster.isEmpty()) return null
+
     val tomDato =
         if (this.tom?.erSenereEnnInneværendeMåned() == false) this.tom.tilDagMånedÅr()
         else null
-
-    if (begrunnelserOgFritekster.isEmpty()) return null
 
     return when (this.type) {
         Vedtaksperiodetype.FORTSATT_INNVILGET -> {
