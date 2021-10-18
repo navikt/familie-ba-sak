@@ -393,7 +393,7 @@ class VedtaksperiodeService(
                             ) {
                                 acc.add(standardBegrunnelse)
                             } else if (standardBegrunnelse.triggesForPeriode(
-                                    vedtaksperiodeMedBegrunnelser = utvidetVedtaksperiodeMedBegrunnelser,
+                                    utvidetVedtaksperiodeMedBegrunnelser = utvidetVedtaksperiodeMedBegrunnelser,
                                     vilkårsvurdering = vilkårsvurdering,
                                     persongrunnlag = persongrunnlag,
                                     identerMedUtbetaling = identerMedUtbetaling,

@@ -607,7 +607,7 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
     };
 
     fun triggesForPeriode(
-        vedtaksperiodeMedBegrunnelser: UtvidetVedtaksperiodeMedBegrunnelser,
+        utvidetVedtaksperiodeMedBegrunnelser: UtvidetVedtaksperiodeMedBegrunnelser,
         vilkårsvurdering: Vilkårsvurdering,
         persongrunnlag: PersonopplysningGrunnlag,
         identerMedUtbetaling: List<String>,
@@ -617,16 +617,16 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
     ): Boolean {
         if (!triggesAv.valgbar) return false
 
-        if (vedtaksperiodeMedBegrunnelser.type != vedtakBegrunnelseType.tilVedtaksperiodeType()) return false
+        if (utvidetVedtaksperiodeMedBegrunnelser.type != vedtakBegrunnelseType.tilVedtaksperiodeType()) return false
 
         if (triggesAv.personerManglerOpplysninger) return vilkårsvurdering.harPersonerManglerOpplysninger()
 
         if (triggesAv.barnMedSeksårsdag)
-            return persongrunnlag.harBarnMedSeksårsdagPåFom(vedtaksperiodeMedBegrunnelser.fom)
+            return persongrunnlag.harBarnMedSeksårsdagPåFom(utvidetVedtaksperiodeMedBegrunnelser.fom)
 
         if (triggesAv.satsendring)
             return SatsService
-                .finnSatsendring(vedtaksperiodeMedBegrunnelser.fom ?: TIDENES_MORGEN)
+                .finnSatsendring(utvidetVedtaksperiodeMedBegrunnelser.fom ?: TIDENES_MORGEN)
                 .isNotEmpty()
 
         val aktuellePersoner = persongrunnlag.personer
@@ -640,7 +640,7 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
         if (triggesAv.etterEndretUtbetaling)
             return erEtterEndretPeriodeAvSammeÅrsak(
                 endretUtbetalingAndeler,
-                vedtaksperiodeMedBegrunnelser,
+                utvidetVedtaksperiodeMedBegrunnelser,
                 aktuellePersoner,
                 triggesAv
             )
@@ -648,8 +648,8 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
         return hentPersonerForAlleUtgjørendeVilkår(
             vilkårsvurdering = vilkårsvurdering,
             vedtaksperiode = Periode(
-                fom = vedtaksperiodeMedBegrunnelser.fom ?: TIDENES_MORGEN,
-                tom = vedtaksperiodeMedBegrunnelser.tom ?: TIDENES_ENDE
+                fom = utvidetVedtaksperiodeMedBegrunnelser.fom ?: TIDENES_MORGEN,
+                tom = utvidetVedtaksperiodeMedBegrunnelser.tom ?: TIDENES_ENDE
             ),
             oppdatertBegrunnelseType = vedtakBegrunnelseType,
             aktuellePersonerForVedtaksperiode = aktuellePersoner,
@@ -665,12 +665,12 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
 
 private fun erEtterEndretPeriodeAvSammeÅrsak(
     endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
-    vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser,
+    utvidetVedtaksperiodeMedBegrunnelser: UtvidetVedtaksperiodeMedBegrunnelser,
     aktuellePersoner: List<Person>,
     triggesAv: TriggesAv
 ) = endretUtbetalingAndeler.any { endretUtbetalingAndel ->
     endretUtbetalingAndel.tom!!.sisteDagIInneværendeMåned()
-        .erDagenFør(vedtaksperiodeMedBegrunnelser.fom) &&
+        .erDagenFør(utvidetVedtaksperiodeMedBegrunnelser.fom) &&
         aktuellePersoner.any { person -> person.personIdent == endretUtbetalingAndel.person?.personIdent } &&
         triggesAv.endringsaarsaker.contains(endretUtbetalingAndel.årsak)
 }

@@ -41,7 +41,7 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
         assertTrue(
             VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET
                 .triggesForPeriode(
-                    vedtaksperiodeMedBegrunnelser = utvidetVedtaksperiodeMedBegrunnelser,
+                    utvidetVedtaksperiodeMedBegrunnelser = utvidetVedtaksperiodeMedBegrunnelser,
                     vilkårsvurdering = vilkårsvurdering,
                     persongrunnlag = personopplysningGrunnlag,
                     identerMedUtbetaling = identerMedUtbetaling,
@@ -55,7 +55,7 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
         assertFalse(
             VedtakBegrunnelseSpesifikasjon.OPPHØR_UTVANDRET
                 .triggesForPeriode(
-                    vedtaksperiodeMedBegrunnelser = utvidetVedtaksperiodeMedBegrunnelser,
+                    utvidetVedtaksperiodeMedBegrunnelser = utvidetVedtaksperiodeMedBegrunnelser,
                     vilkårsvurdering = vilkårsvurdering,
                     persongrunnlag = personopplysningGrunnlag,
                     identerMedUtbetaling = identerMedUtbetaling,
@@ -71,7 +71,7 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
         assertFalse(
             VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR
                 .triggesForPeriode(
-                    vedtaksperiodeMedBegrunnelser = utvidetVedtaksperiodeMedBegrunnelser,
+                    utvidetVedtaksperiodeMedBegrunnelser = utvidetVedtaksperiodeMedBegrunnelser,
                     vilkårsvurdering = vilkårsvurdering,
                     persongrunnlag = personopplysningGrunnlag,
                     identerMedUtbetaling = identerMedUtbetaling,
@@ -88,7 +88,7 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
         assertTrue(
             VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR
                 .triggesForPeriode(
-                    vedtaksperiodeMedBegrunnelser = utvidetVedtaksperiodeMedBegrunnelser,
+                    utvidetVedtaksperiodeMedBegrunnelser = utvidetVedtaksperiodeMedBegrunnelser,
                     vilkårsvurdering = vilkårsvurdering,
                     persongrunnlag = persongrunnlag,
                     identerMedUtbetaling = identerMedUtbetaling,
@@ -108,7 +108,7 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
         assertTrue(
             VedtakBegrunnelseSpesifikasjon.INNVILGET_SATSENDRING
                 .triggesForPeriode(
-                    vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelserSatsEndring,
+                    utvidetVedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelserSatsEndring,
                     vilkårsvurdering = vilkårsvurdering,
                     persongrunnlag = personopplysningGrunnlag,
                     identerMedUtbetaling = identerMedUtbetaling,
@@ -128,7 +128,7 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
         assertFalse(
             VedtakBegrunnelseSpesifikasjon.INNVILGET_SATSENDRING
                 .triggesForPeriode(
-                    vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelserSatsEndring,
+                    utvidetVedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelserSatsEndring,
                     vilkårsvurdering = vilkårsvurdering,
                     persongrunnlag = personopplysningGrunnlag,
                     identerMedUtbetaling = identerMedUtbetaling,
@@ -144,7 +144,7 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
         assertFalse(
             VedtakBegrunnelseSpesifikasjon.INNVILGET_LOVLIG_OPPHOLD_EØS_BORGER
                 .triggesForPeriode(
-                    vedtaksperiodeMedBegrunnelser = utvidetVedtaksperiodeMedBegrunnelser,
+                    utvidetVedtaksperiodeMedBegrunnelser = utvidetVedtaksperiodeMedBegrunnelser,
                     vilkårsvurdering = vilkårsvurdering,
                     persongrunnlag = personopplysningGrunnlag,
                     identerMedUtbetaling = identerMedUtbetaling,
@@ -160,7 +160,7 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
         assertTrue(
             VedtakBegrunnelseSpesifikasjon.INNVILGET_LOVLIG_OPPHOLD_EØS_BORGER
                 .triggesForPeriode(
-                    vedtaksperiodeMedBegrunnelser = utvidetVedtaksperiodeMedBegrunnelser,
+                    utvidetVedtaksperiodeMedBegrunnelser = utvidetVedtaksperiodeMedBegrunnelser,
                     vilkårsvurdering = vilkårsvurdering,
                     persongrunnlag = personopplysningGrunnlag,
                     identerMedUtbetaling = identerMedUtbetaling,
@@ -179,7 +179,7 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
                     persongrunnlag = personopplysningGrunnlag,
                     vilkårsvurdering = vilkårsvurdering,
                     identerMedUtbetaling = identerMedUtbetaling,
-                    vedtaksperiodeMedBegrunnelser = lagVedtaksperiodeMedBegrunnelser(
+                    utvidetVedtaksperiodeMedBegrunnelser = lagUtvidetVedtaksperiodeMedBegrunnelser(
                         type = Vedtaksperiodetype.UTBETALING,
                         fom = LocalDate.of(2021, 10, 1),
                         tom = LocalDate.of(2021, 10, 31)
