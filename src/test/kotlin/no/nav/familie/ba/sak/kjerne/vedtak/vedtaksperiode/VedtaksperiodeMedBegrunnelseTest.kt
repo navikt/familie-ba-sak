@@ -4,6 +4,7 @@ import io.mockk.mockk
 import no.nav.familie.ba.sak.common.lagRestVedtaksbegrunnelse
 import no.nav.familie.ba.sak.common.lagUtbetalingsperiodeDetalj
 import no.nav.familie.ba.sak.common.lagUtvidetVedtaksperiodeMedBegrunnelser
+import no.nav.familie.ba.sak.common.lagVedtaksbegrunnelse
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.common.tilfeldigSøker
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.AvslagBrevPeriode
@@ -14,6 +15,7 @@ import no.nav.familie.ba.sak.kjerne.dokument.tilBrevPeriode
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.BegrunnelseComparator
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.FritekstBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksbegrunnelseFritekst
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.byggBegrunnelserOgFriteksterForVedtaksperiode
@@ -185,5 +187,21 @@ class VedtaksperiodeMedBegrunnelseTest {
                 målform = Målform.NB,
             ) == null
         )
+    }
+
+    @Test
+    fun `Skal sortere begrunnelser - type innvilgelse kommer før reduksjon`() {
+
+        val begrunnelseInnvilget =
+            lagVedtaksbegrunnelse(vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.INNVILGELSE_HELE_FAMILIEN_PLIKTIG_MEDLEM)
+        val begrunnelseReduksjon =
+            lagVedtaksbegrunnelse(vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.REDUKSJON_FLYTTET_BARN)
+        val comparator = BegrunnelseComparator()
+
+        val begrunnelser =
+            setOf(begrunnelseReduksjon, begrunnelseInnvilget).toSortedSet(comparator)
+
+        Assertions.assertEquals(begrunnelseInnvilget, begrunnelser.first())
+        Assertions.assertEquals(begrunnelseReduksjon, begrunnelser.last())
     }
 }

@@ -300,8 +300,8 @@ class VedtaksperiodeService(
                 utbetalingsperioderUtenEndringer +
                     hentOpphørsperioder(vedtak.behandling)
                 ).map {
-                    it.tilVedtaksperiodeMedBegrunnelse(vedtak)
-                }
+                it.tilVedtaksperiodeMedBegrunnelse(vedtak)
+            }
         val avslagsperioder = hentAvslagsperioderMedBegrunnelser(vedtak)
 
         val endretUtbetalingsperioder = hentEndredeUtbetalingsperioderMedBegrunnelser(
@@ -403,8 +403,8 @@ class VedtaksperiodeService(
                                     triggesAv = triggesAv,
                                     vedtakBegrunnelseType = vedtakBegrunnelseType,
                                     endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(
-                                        behandling.id
-                                    )
+                                            behandling.id
+                                        )
                                 )
                             ) {
                                 acc.add(standardBegrunnelse)
