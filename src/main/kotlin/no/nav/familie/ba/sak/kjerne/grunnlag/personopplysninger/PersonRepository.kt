@@ -12,7 +12,6 @@ interface PersonRepository : JpaRepository<Person, Long> {
     )
     fun findByPersonIdent(personIdent: PersonIdent): List<Person>
 
-
     @Query(
         "SELECT p FROM Person p WHERE p.personIdent in :personIdenter"
     )

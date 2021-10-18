@@ -149,7 +149,7 @@ class FagsakController(
     }
 
     @PostMapping(path = ["/annullerFoedsel"])
-    fun behandleAnnullertFødsel(@RequestBody barnasIdenter: List<String>): Ressurs<String>{
+    fun behandleAnnullertFødsel(@RequestBody barnasIdenter: List<String>): Ressurs<String> {
         fagsakService.behandleAnnullertFødsel(barnasIdenter)
         return Ressurs.success("Ok", "Ok")
     }

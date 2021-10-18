@@ -39,15 +39,15 @@ class BehandleAnnullertFødselTask(
                 Pageable.unpaged()
             )
                 .filter {
-                    it.callId == tidligereHendelseId
-                        && (it.type == BehandleFødselshendelseTask.TASK_STEP_TYPE)
+                    it.callId == tidligereHendelseId && (it.type == BehandleFødselshendelseTask.TASK_STEP_TYPE)
                 }
         if (tasker.isEmpty()) {
-            if(personRepository.findByPersonIdenter(barnasIdenter).any {
-                behandlingRepository.finnBehandling(it.personopplysningGrunnlag.behandlingId).aktiv
-            }){
+            if (personRepository.findByPersonIdenter(barnasIdenter).any {
+                    behandlingRepository.finnBehandling(it.personopplysningGrunnlag.behandlingId).aktiv
+                }
+            ) {
                 logger.warn("Finnes aktiv behandling(er) for tidligere fødselshendelse av annuller fødselshendelse")
-            }else{
+            } else {
                 logger.info("Finnes ikke åpen task eller aktiv behandling for annullertfødsel")
             }
         } else {

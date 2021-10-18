@@ -320,8 +320,8 @@ class FagsakService(
                     relasjon.relasjonsrolle == FORELDERBARNRELASJONROLLE.MEDMOR
             }.forEach { relasjon ->
                 if (assosierteFagsakDeltagere.find { fagsakDeltager ->
-                    fagsakDeltager.ident == relasjon.personIdent.id
-                } == null
+                        fagsakDeltager.ident == relasjon.personIdent.id
+                    } == null
                 ) {
 
                     val maskertForelder = hentMaskertFagsakdeltakerVedManglendeTilgang(relasjon.personIdent.id)
@@ -467,7 +467,7 @@ class FagsakService(
         return fagsakDeltagere
     }
 
-    fun behandleAnnullertFødsel(barnasIdenter: List<String>){
+    fun behandleAnnullertFødsel(barnasIdenter: List<String>) {
         taskRepository.save(BehandleAnnullertFødselTask.opprettTask(barnasIdenter))
     }
 
