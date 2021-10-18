@@ -109,24 +109,27 @@ class VedtaksperiodeService(
         val begrunnelserMedFeil = mutableListOf<VedtakBegrunnelseSpesifikasjon>()
 
         val behandling = vedtaksperiodeMedBegrunnelser.vedtak.behandling
-        val utbetalingsperioder = hentUtbetalingsperioder(behandling)
+
+        val andelerTilkjentYtelse =
+            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = behandling.id)
+        val persongrunnlag =
+            persongrunnlagRepository.findByBehandlingAndAktiv(behandling.id) ?: error("Finner ikke persongrunnlag")
+
+        val utvidetVedtaksperiodeMedBegrunnelser =
+            vedtaksperiodeMedBegrunnelser.tilUtvidetVedtaksperiodeMedBegrunnelser(
+                andelerTilkjentYtelse = andelerTilkjentYtelse,
+                personopplysningGrunnlag = persongrunnlag
+            )
+
+        val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id)
+            ?: error("Finner ikke vilkårsvurdering ved begrunning av vedtak")
+
+        val identerMedUtbetaling = utvidetVedtaksperiodeMedBegrunnelser
+            .utbetalingsperiodeDetaljer
+            .map { utbetalingsperiodeDetalj -> utbetalingsperiodeDetalj.person.personIdent }
 
         vedtaksperiodeMedBegrunnelser.settBegrunnelser(
             restPutVedtaksperiodeMedStandardbegrunnelser.standardbegrunnelser.map {
-
-                val persongrunnlag =
-                    persongrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
-                        ?: error("Finner ikke persongrunnlag")
-                val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id)
-                    ?: error("Finner ikke vilkårsvurdering ved begrunning av vedtak")
-
-                val identerMedUtbetaling = hentUtbetalingsperiodeForVedtaksperiode(
-                    utbetalingsperioder = utbetalingsperioder,
-                    fom = if (vedtaksperiodeMedBegrunnelser.type == Vedtaksperiodetype.FORTSATT_INNVILGET) null
-                    else vedtaksperiodeMedBegrunnelser.fom
-                )
-                    .utbetalingsperiodeDetaljer
-                    .map { utbetalingsperiodeDetalj -> utbetalingsperiodeDetalj.person.personIdent }
 
                 val triggesAv = it.tilSanityBegrunnelse(brevKlient.hentSanityBegrunnelse()).tilTriggesAv()
                 val vedtakBegrunnelseType = it.vedtakBegrunnelseType
@@ -297,8 +300,8 @@ class VedtaksperiodeService(
                 utbetalingsperioderUtenEndringer +
                     hentOpphørsperioder(vedtak.behandling)
                 ).map {
-                it.tilVedtaksperiodeMedBegrunnelse(vedtak)
-            }
+                    it.tilVedtaksperiodeMedBegrunnelse(vedtak)
+                }
         val avslagsperioder = hentAvslagsperioderMedBegrunnelser(vedtak)
 
         val endretUtbetalingsperioder = hentEndredeUtbetalingsperioderMedBegrunnelser(
@@ -400,8 +403,8 @@ class VedtaksperiodeService(
                                     triggesAv = triggesAv,
                                     vedtakBegrunnelseType = vedtakBegrunnelseType,
                                     endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(
-                                            behandling.id
-                                        )
+                                        behandling.id
+                                    )
                                 )
                             ) {
                                 acc.add(standardBegrunnelse)
