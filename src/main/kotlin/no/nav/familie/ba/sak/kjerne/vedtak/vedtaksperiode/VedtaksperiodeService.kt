@@ -299,8 +299,8 @@ class VedtaksperiodeService(
                 utbetalingsperioderUtenEndringer +
                     hentOpphørsperioder(vedtak.behandling)
                 ).map {
-                    it.tilVedtaksperiodeMedBegrunnelse(vedtak)
-                }
+                it.tilVedtaksperiodeMedBegrunnelse(vedtak)
+            }
         val avslagsperioder = hentAvslagsperioderMedBegrunnelser(vedtak)
 
         val endretUtbetalingsperioder = hentEndredeUtbetalingsperioderMedBegrunnelser(
@@ -392,9 +392,9 @@ class VedtaksperiodeService(
                             val vedtakBegrunnelseType = it.vedtakBegrunnelseType
 
                             if (triggesAv.vilkår.contains(Vilkår.UTVIDET_BARNETRYGD) && (
-                                    utbetalingsperiode?.ytelseTyper
-                                        ?: emptyList()
-                                    ).contains(YtelseType.UTVIDET_BARNETRYGD) &&
+                                utbetalingsperiode?.ytelseTyper
+                                    ?: emptyList()
+                                ).contains(YtelseType.UTVIDET_BARNETRYGD) &&
                                 vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGELSE
                             ) {
                                 gyldigeBegrunnelser.add(it)
@@ -406,8 +406,8 @@ class VedtaksperiodeService(
                                     triggesAv = triggesAv,
                                     vedtakBegrunnelseType = vedtakBegrunnelseType,
                                     endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(
-                                        behandling.id
-                                    )
+                                            behandling.id
+                                        )
                                 )
                             ) {
                                 gyldigeBegrunnelser.add(it)
