@@ -7,11 +7,16 @@ import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.Utils.konverterEnumsTilString
 import no.nav.familie.ba.sak.common.Utils.konverterStringTilEnums
+import no.nav.familie.ba.sak.common.erDagenFør
 import no.nav.familie.ba.sak.common.forrigeMåned
+import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService
 import no.nav.familie.ba.sak.kjerne.dokument.domene.SanityBegrunnelse
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakUtils.hentPersonerForAlleUtgjørendeVilkår
@@ -39,11 +44,25 @@ data class TriggesAv(
     val vurderingAnnetGrunnlag: Boolean = false,
     val medlemskap: Boolean = false,
     val deltbosted: Boolean = false,
-    val valgbar: Boolean = true
+    val valgbar: Boolean = true,
+    val endringsaarsaker: Set<Årsak> = emptySet(),
+    val etterEndretUtbetaling: Boolean = false
 )
 
 enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
 
+    PERIODE_ETTER_ENDRET_UTBETALING_RETTSAVGJØRELSE_DELT_BOSTED {
+        override val sanityApiNavn = "periodeEtterEndretUtbetalingsperiodeRettsavgjorelseDeltBosted"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
+    },
+    PERIODE_ETTER_ENDRET_UTBETALING_AVTALE_DELT_BOSTED_FØLGES {
+        override val sanityApiNavn = "periodeEtterEndretUtbetalingsperiodeAvtaleDeltBostedFolges"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
+    },
+    PERIODE_ETTER_ENDRET_UTBETALING_HAR_AVTALE_DELT_BOSTED {
+        override val sanityApiNavn = "periodeEtterEndringsperiodeHarAvtaleDeltBosted"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
+    },
     INNVILGET_BOSATT_I_RIKTET {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
@@ -593,6 +612,7 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
         identerMedUtbetaling: List<String>,
         triggesAv: TriggesAv,
         vedtakBegrunnelseType: VedtakBegrunnelseType = this.vedtakBegrunnelseType,
+        endretUtbetalingAndeler: List<EndretUtbetalingAndel> = emptyList()
     ): Boolean {
         if (!triggesAv.valgbar) return false
 
@@ -608,6 +628,22 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
                 .finnSatsendring(vedtaksperiodeMedBegrunnelser.fom ?: TIDENES_MORGEN)
                 .isNotEmpty()
 
+        val aktuellePersoner = persongrunnlag.personer
+            .filter { person -> triggesAv.personTyper.contains(person.type) }
+            .filter { person ->
+                if (vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGELSE) {
+                    identerMedUtbetaling.contains(person.personIdent.ident) || person.type == PersonType.SØKER
+                } else true
+            }
+
+        if (triggesAv.etterEndretUtbetaling)
+            return erEtterEndretPeriodeAvSammeÅrsak(
+                endretUtbetalingAndeler,
+                vedtaksperiodeMedBegrunnelser,
+                aktuellePersoner,
+                triggesAv
+            )
+
         return hentPersonerForAlleUtgjørendeVilkår(
             vilkårsvurdering = vilkårsvurdering,
             vedtaksperiode = Periode(
@@ -615,13 +651,7 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
                 tom = vedtaksperiodeMedBegrunnelser.tom ?: TIDENES_ENDE
             ),
             oppdatertBegrunnelseType = vedtakBegrunnelseType,
-            aktuellePersonerForVedtaksperiode = persongrunnlag.personer
-                .filter { person -> triggesAv.personTyper.contains(person.type) }
-                .filter { person ->
-                    if (vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGELSE) {
-                        identerMedUtbetaling.contains(person.personIdent.ident) || person.type == PersonType.SØKER
-                    } else true
-                },
+            aktuellePersonerForVedtaksperiode = aktuellePersoner,
             triggesAv = triggesAv
         ).isNotEmpty()
     }
@@ -630,6 +660,18 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
 
         fun List<LocalDate>.tilBrevTekst(): String = Utils.slåSammen(this.sorted().map { it.tilKortString() })
     }
+}
+
+private fun erEtterEndretPeriodeAvSammeÅrsak(
+    endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
+    vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser,
+    aktuellePersoner: List<Person>,
+    triggesAv: TriggesAv
+) = endretUtbetalingAndeler.any { endretUtbetalingAndel ->
+    endretUtbetalingAndel.tom!!.sisteDagIInneværendeMåned()
+        .erDagenFør(vedtaksperiodeMedBegrunnelser.fom) &&
+        aktuellePersoner.any { person -> person.personIdent == endretUtbetalingAndel.person?.personIdent } &&
+        triggesAv.endringsaarsaker.contains(endretUtbetalingAndel.årsak)
 }
 
 val hjemlerTilhørendeFritekst = setOf(2, 4, 11)
