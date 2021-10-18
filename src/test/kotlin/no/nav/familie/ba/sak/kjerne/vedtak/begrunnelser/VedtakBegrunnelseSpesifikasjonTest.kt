@@ -170,7 +170,7 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, barn)
 
         assertTrue(
-            VedtakBegrunnelseSpesifikasjon.INNVILGET_ETTER_ENDRET_UTBETALING_DELT_BOSTED
+            VedtakBegrunnelseSpesifikasjon.PERIODE_ETTER_ENDRET_UTBETALING_AVTALE_DELT_BOSTED_FØLGES
                 .triggesForPeriode(
                     persongrunnlag = personopplysningGrunnlag,
                     vilkårsvurdering = vilkårsvurdering,

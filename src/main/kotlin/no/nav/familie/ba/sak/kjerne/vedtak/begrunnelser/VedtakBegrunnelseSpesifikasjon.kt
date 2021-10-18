@@ -51,8 +51,16 @@ data class TriggesAv(
 
 enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
 
-    INNVILGET_ETTER_ENDRET_UTBETALING_DELT_BOSTED {
-        override val sanityApiNavn = "periodeEtterEndretUtbetaling"
+    PERIODE_ETTER_ENDRET_UTBETALING_RETTSAVGJØRELSE_DELT_BOSTED {
+        override val sanityApiNavn = "periodeEtterEndretUtbetalingsperiodeRettsavgjorelseDeltBosted"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
+    },
+    PERIODE_ETTER_ENDRET_UTBETALING_AVTALE_DELT_BOSTED_FØLGES {
+        override val sanityApiNavn = "periodeEtterEndretUtbetalingsperiodeAvtaleDeltBostedFolges"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
+    },
+    PERIODE_ETTER_ENDRET_UTBETALING_HAR_AVTALE_DELT_BOSTED {
+        override val sanityApiNavn = "periodeEtterEndringsperiodeHarAvtaleDeltBosted"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
     },
     INNVILGET_BOSATT_I_RIKTET {
