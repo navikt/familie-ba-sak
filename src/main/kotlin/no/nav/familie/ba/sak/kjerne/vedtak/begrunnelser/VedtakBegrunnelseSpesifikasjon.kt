@@ -136,6 +136,10 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
         override val sanityApiNavn = "innvilgetBarnBorSammenMedMottaker"
     },
+    INNVILGELSE_BEREDSKAPSHJEM {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
+        override val sanityApiNavn = "innvilgelseBeredskapshjem"
+    },
     REDUKSJON_BOSATT_I_RIKTET {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
@@ -716,7 +720,8 @@ fun VedtakBegrunnelseType.hentMånedOgÅrForBegrunnelse(periode: Periode) = when
 }
 
 @Converter
-class VedtakBegrunnelseSpesifikasjonListConverter : AttributeConverter<List<VedtakBegrunnelseSpesifikasjon>, String> {
+class VedtakBegrunnelseSpesifikasjonListConverter :
+    AttributeConverter<List<VedtakBegrunnelseSpesifikasjon>, String> {
 
     override fun convertToDatabaseColumn(vedtakBegrunnelseSpesifikasjoner: List<VedtakBegrunnelseSpesifikasjon>) =
         konverterEnumsTilString(vedtakBegrunnelseSpesifikasjoner)
