@@ -148,6 +148,12 @@ class FagsakController(
         return tilbakekrevingService.opprettTilbakekrevingsbehandlingManuelt(fagsakId)
     }
 
+    @PostMapping(path = ["/annullerFoedsel"])
+    fun behandleAnnullertFødsel(@RequestBody barnasIdenter: List<String>): Ressurs<String>{
+        fagsakService.behandleAnnullertFødsel(barnasIdenter)
+        return Ressurs.success("Ok", "Ok")
+    }
+
     companion object {
 
         private val logger: Logger = LoggerFactory.getLogger(FagsakController::class.java)

@@ -11,4 +11,10 @@ interface PersonRepository : JpaRepository<Person, Long> {
             " WHERE p.personIdent = :personIdent"
     )
     fun findByPersonIdent(personIdent: PersonIdent): List<Person>
+
+
+    @Query(
+        "SELECT p FROM Person p WHERE p.personIdent in :personIdenter"
+    )
+    fun findByPersonIdenter(personIdenter: List<PersonIdent>): List<Person>
 }
