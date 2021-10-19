@@ -25,7 +25,11 @@ data class SanityBegrunnelse(
     val ovrigeTriggere: List<ØvrigTrigger>? = null,
     val endringsaarsaker: List<Årsak>? = null,
     val hjemler: List<String> = emptyList(),
-)
+    val endretUtbetalingsperiodeDeltBostedTriggere: List<EndretUtbetalingsperiodeDeltBostedTriggere>? = null,
+    val endretUtbetalingsperiodeTriggere: List<EndretUtbetalingsperiodeTrigger>? = null,
+) {
+    fun erEndring() = !endringsaarsaker.isNullOrEmpty()
+}
 
 enum class SanityVilkår {
     UNDER_18_ÅR,
@@ -77,6 +81,14 @@ enum class ØvrigTrigger {
     ALLTID_AUTOMATISK,
     ETTER_ENDRET_UTBETALING,
     ENDRET_UTBETALING
+}
+
+enum class EndretUtbetalingsperiodeTrigger {
+    ETTER_ENDRET_UTBETALINGSPERIODE,
+}
+
+enum class EndretUtbetalingsperiodeDeltBostedTriggere {
+    SKAL_UTBETALES,
 }
 
 fun SanityBegrunnelse.tilTriggesAv(): TriggesAv {
