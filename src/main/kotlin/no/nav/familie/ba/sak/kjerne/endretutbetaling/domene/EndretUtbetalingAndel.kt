@@ -84,9 +84,8 @@ data class EndretUtbetalingAndel(
 
     @Column(name = "vedtak_begrunnelse_spesifikasjoner")
     @Convert(converter = VedtakBegrunnelseSpesifikasjonListConverter::class)
-    var vedtakBegrunnelseSpesifikasjoner: List<VedtakBegrunnelseSpesifikasjon> = emptyList(),
-
-    ) : BaseEntitet() {
+    var vedtakBegrunnelseSpesifikasjoner: List<VedtakBegrunnelseSpesifikasjon> = emptyList()
+) : BaseEntitet() {
 
     fun overlapperMed(periode: MånedPeriode) = periode.overlapperHeltEllerDelvisMed(this.periode())
 

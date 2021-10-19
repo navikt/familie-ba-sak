@@ -113,7 +113,6 @@ class BeregningService(
                     behandlingId = behandling.id
                 )
             }
-        
         val endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(behandling.id).filter {
             if (nyEndretUtbetalingAndel != null) {
                 it.id == nyEndretUtbetalingAndel.id || it.andelTilkjentYtelser.isNotEmpty()
