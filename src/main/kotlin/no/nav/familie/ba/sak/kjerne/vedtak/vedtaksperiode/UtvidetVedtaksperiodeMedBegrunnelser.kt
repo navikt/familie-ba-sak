@@ -44,21 +44,21 @@ fun VedtaksperiodeMedBegrunnelser.tilUtvidetVedtaksperiodeMedBegrunnelser(
 
     val utbetalingsperiodeDetaljer =
         if (this.type == Vedtaksperiodetype.UTBETALING || this.type == Vedtaksperiodetype.ENDRET_UTBETALING || this.type == Vedtaksperiodetype.FORTSATT_INNVILGET) {
+            val andelerForVedtaksperiodetype = andelerTilkjentYtelse.filter {
+                if (this.type == Vedtaksperiodetype.ENDRET_UTBETALING) {
+                    it.endretUtbetalingAndeler.isNotEmpty()
+                } else {
+                    it.endretUtbetalingAndeler.isEmpty()
+                }
+            }
             val vertikaltSegmentForVedtaksperiode =
                 if (this.type == Vedtaksperiodetype.FORTSATT_INNVILGET)
-                    hentLøpendeAndelForVedtaksperiode(andelerTilkjentYtelse)
+                    hentLøpendeAndelForVedtaksperiode(andelerForVedtaksperiodetype)
                 else
-                    hentVertikaltSegmentForVedtaksperiode(andelerTilkjentYtelse)
+                    hentVertikaltSegmentForVedtaksperiode(andelerForVedtaksperiodetype)
 
             val andelerForSegment =
-                hentAndelerForSegment(andelerTilkjentYtelse, vertikaltSegmentForVedtaksperiode)
-                    .filter {
-                        if (this.type == Vedtaksperiodetype.ENDRET_UTBETALING) {
-                            it.endretUtbetalingAndeler.isNotEmpty()
-                        } else {
-                            it.endretUtbetalingAndeler.isEmpty()
-                        }
-                    }
+                hentAndelerForSegment(andelerForVedtaksperiodetype, vertikaltSegmentForVedtaksperiode)
 
             andelerForSegment.lagUtbetalingsperiodeDetaljer(personopplysningGrunnlag)
         } else {
