@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -31,9 +32,12 @@ data class RestVilkårResultat(
     val erMedlemskapVurdert: Boolean? = false,
     val erDeltBosted: Boolean? = false,
     val avslagBegrunnelser: List<VedtakBegrunnelseSpesifikasjon>? = null,
+    val vurderesEtter: VilkårResultat.VurderesEtter? = null,
 ) {
 
-    fun erAvslagUtenPeriode() = this.erEksplisittAvslagPåSøknad == true && this.periodeFom == null && this.periodeTom == null
+    fun erAvslagUtenPeriode() =
+        this.erEksplisittAvslagPåSøknad == true && this.periodeFom == null && this.periodeTom == null
+
     fun harFremtidigTom() = this.periodeTom == null || this.periodeTom.isAfter(LocalDate.now().sisteDagIMåned())
 }
 
@@ -57,7 +61,8 @@ fun PersonResultat.tilRestPersonResultat() =
                 endretTidspunkt = vilkårResultat.endretTidspunkt,
                 behandlingId = vilkårResultat.behandlingId,
                 erVurdert = vilkårResultat.resultat != Resultat.IKKE_VURDERT || vilkårResultat.versjon > 0,
-                avslagBegrunnelser = vilkårResultat.vedtakBegrunnelseSpesifikasjoner
+                avslagBegrunnelser = vilkårResultat.vedtakBegrunnelseSpesifikasjoner,
+                vurderesEtter = vilkårResultat.vurderesEtter,
             )
         },
         andreVurderinger = this.andreVurderinger.map { annenVurdering ->
