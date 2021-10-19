@@ -268,7 +268,7 @@ private fun UtvidetVedtaksperiodeMedBegrunnelser.hentAvslagBrevPeriode(
         )
     else AvslagUtenPeriodeBrevPeriode(begrunnelser = begrunnelserOgFritekster)
 
-private fun UtvidetVedtaksperiodeMedBegrunnelser.hentEndretUtbetalingBrevPeriode(
+fun UtvidetVedtaksperiodeMedBegrunnelser.hentEndretUtbetalingBrevPeriode(
     tomDato: String?,
     begrunnelserOgFritekster: List<Begrunnelse>
 ) = EndretUtbetalingBrevPeriode(
