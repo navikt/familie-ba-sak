@@ -414,16 +414,9 @@ class VedtaksperiodeService(
                                 acc
                             }
 
-                    if (standardbegrunnelser.isEmpty() ||
-                        erTriggetAvLøpendeUtbetalingVedKunEndretUtbetalingTrigger(
-                            standardbegrunnelser,
-                            utvidetVedtaksperiodeMedBegrunnelser
-                        )
-                    ) {
+                    standardbegrunnelser.ifEmpty {
                         VedtakBegrunnelseSpesifikasjon.values()
                             .filter { it.vedtakBegrunnelseType == VedtakBegrunnelseType.FORTSATT_INNVILGET }
-                    } else {
-                        standardbegrunnelser
                     }
                 }
             }
@@ -437,12 +430,6 @@ class VedtaksperiodeService(
             )
         }
     }
-
-    private fun erTriggetAvLøpendeUtbetalingVedKunEndretUtbetalingTrigger(
-        standardbegrunnelser: MutableSet<VedtakBegrunnelseSpesifikasjon>,
-        utvidetVedtaksperiodeMedBegrunnelser: UtvidetVedtaksperiodeMedBegrunnelser
-    ) =
-        standardbegrunnelser.all { it.vedtakBegrunnelseType == VedtakBegrunnelseType.AVSLAG } && utvidetVedtaksperiodeMedBegrunnelser.utbetalingsperiodeDetaljer.any { !it.erPåvirketAvEndring }
 
     fun oppdaterFortsattInnvilgetPeriodeMedAutobrevBegrunnelse(
         vedtak: Vedtak,
