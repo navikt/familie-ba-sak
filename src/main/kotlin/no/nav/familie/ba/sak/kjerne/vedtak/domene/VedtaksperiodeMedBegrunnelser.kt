@@ -6,9 +6,11 @@ import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
+import org.hibernate.annotations.SortComparator
 import java.time.LocalDate
 import javax.persistence.CascadeType
 import javax.persistence.Column
@@ -59,7 +61,8 @@ data class VedtaksperiodeMedBegrunnelser(
         cascade = [CascadeType.ALL],
         orphanRemoval = true
     )
-    val begrunnelser: MutableSet<Vedtaksbegrunnelse> = mutableSetOf(),
+    @SortComparator(BegrunnelseComparator::class)
+    val begrunnelser: MutableSet<Vedtaksbegrunnelse> = sortedSetOf(comparator),
 
     // Bruker list for å bevare rekkefølgen som settes frontend.
     @OneToMany(
@@ -89,6 +92,10 @@ data class VedtaksperiodeMedBegrunnelser(
     fun harFriteksterOgStandardbegrunnelser(): Boolean {
         return fritekster.isNotEmpty() && begrunnelser.isNotEmpty()
     }
+
+    companion object {
+        val comparator = BegrunnelseComparator()
+    }
 }
 
 fun byggBegrunnelserOgFriteksterForVedtaksperiode(
@@ -100,7 +107,7 @@ fun byggBegrunnelserOgFriteksterForVedtaksperiode(
     val fritekster =
         utvidetVedtaksperiodeMedBegrunnelser.fritekster.map { FritekstBegrunnelse(it) }
     val begrunnelser =
-        utvidetVedtaksperiodeMedBegrunnelser.begrunnelser.map {
+        utvidetVedtaksperiodeMedBegrunnelser.begrunnelser.sortedBy { it.vedtakBegrunnelseType }.map {
             it.tilBrevBegrunnelse(
                 utvidetVedtaksperiodeMedBegrunnelser = utvidetVedtaksperiodeMedBegrunnelser,
                 personerPåBegrunnelse = personerIPersongrunnlag.filter { person -> it.personIdenter.contains(person.personIdent.ident) },
@@ -110,4 +117,13 @@ fun byggBegrunnelserOgFriteksterForVedtaksperiode(
         }
 
     return begrunnelser + fritekster
+}
+
+class BegrunnelseComparator : Comparator<Vedtaksbegrunnelse> {
+
+    override fun compare(o1: Vedtaksbegrunnelse, o2: Vedtaksbegrunnelse): Int {
+        return if (o1.vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGELSE) {
+            -1
+        } else 1
+    }
 }

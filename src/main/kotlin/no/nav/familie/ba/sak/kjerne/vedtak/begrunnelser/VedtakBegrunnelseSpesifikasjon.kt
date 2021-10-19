@@ -23,7 +23,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.VedtakUtils.hentPersonerForAlleUtgjø
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtvidetVedtaksperiodeMedBegrunnelser
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import java.math.BigDecimal
@@ -644,7 +643,7 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
 
         return when {
             !triggesAv.valgbar -> false
-            utvidetVedtaksperiodeMedBegrunnelser.type != vedtakBegrunnelseType.tilVedtaksperiodeType() -> false
+            !utvidetVedtaksperiodeMedBegrunnelser.type.tillatteBegrunnelsestyper.contains(vedtakBegrunnelseType) -> false
             triggesAv.personerManglerOpplysninger -> vilkårsvurdering.harPersonerManglerOpplysninger()
             triggesAv.barnMedSeksårsdag -> persongrunnlag.harBarnMedSeksårsdagPåFom(utvidetVedtaksperiodeMedBegrunnelser.fom)
             triggesAv.satsendring -> SatsService
@@ -746,7 +745,7 @@ fun VedtakBegrunnelseSpesifikasjon.tilVedtaksbegrunnelse(
     vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser,
     personIdenter: List<String>
 ): Vedtaksbegrunnelse {
-    if (this.vedtakBegrunnelseType.tilVedtaksperiodeType() != vedtaksperiodeMedBegrunnelser.type) {
+    if (!vedtaksperiodeMedBegrunnelser.type.tillatteBegrunnelsestyper.contains(this.vedtakBegrunnelseType)) {
         throw Feil(
             "Begrunnelsestype ${this.vedtakBegrunnelseType} passer ikke med " +
                 "typen '${vedtaksperiodeMedBegrunnelser.type}' som er satt på perioden."
@@ -758,14 +757,6 @@ fun VedtakBegrunnelseSpesifikasjon.tilVedtaksbegrunnelse(
         vedtakBegrunnelseSpesifikasjon = this,
         personIdenter = personIdenter
     )
-}
-
-fun VedtakBegrunnelseType.tilVedtaksperiodeType() = when (this) {
-    VedtakBegrunnelseType.INNVILGELSE, VedtakBegrunnelseType.REDUKSJON -> Vedtaksperiodetype.UTBETALING
-    VedtakBegrunnelseType.AVSLAG -> Vedtaksperiodetype.AVSLAG
-    VedtakBegrunnelseType.OPPHØR -> Vedtaksperiodetype.OPPHØR
-    VedtakBegrunnelseType.FORTSATT_INNVILGET -> Vedtaksperiodetype.FORTSATT_INNVILGET
-    VedtakBegrunnelseType.ENDRET_UTBETALINGSPERIODE -> Vedtaksperiodetype.ENDRET_UTBETALING
 }
 
 fun VedtakBegrunnelseType.hentMånedOgÅrForBegrunnelse(periode: Periode) = when (this) {

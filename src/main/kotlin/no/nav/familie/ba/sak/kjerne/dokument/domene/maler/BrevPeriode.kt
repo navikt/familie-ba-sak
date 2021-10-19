@@ -63,6 +63,7 @@ data class EndretUtbetalingBrevPeriode(
     override val barnasFodselsdager: Flettefelt,
     override val begrunnelser: List<Any>,
     override val type: Flettefelt,
+    val typeBarnetrygd: Flettefelt,
 ) : BrevPeriode {
 
     constructor(
@@ -86,6 +87,7 @@ data class EndretUtbetalingBrevPeriode(
             }
         },
         type = flettefelt(BrevPeriodeType.ENDRET_UTBETALINGSPERIODE.apiNavn),
+        typeBarnetrygd = flettefelt("ordinær") // TODO fiks
     )
 }
 
