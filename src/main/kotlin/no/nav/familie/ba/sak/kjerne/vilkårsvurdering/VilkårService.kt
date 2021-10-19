@@ -22,6 +22,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingUtils.mut
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingUtils.muterPersonResultatPost
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingUtils.muterPersonVilkårResultaterPut
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat.Companion.VilkårResultatComparator
@@ -50,6 +51,15 @@ class VilkårService(
         vilkårId: Long,
         restPersonResultat: RestPersonResultat
     ): List<RestPersonResultat> {
+
+        if (!featureToggleService.isEnabled(FeatureToggleConfig.BRUK_EØS)) {
+            if (restPersonResultat.vilkårResultater.any { it.vurderesEtter == Regelverk.EØS_FORORDNINGEN })
+                throw Feil(
+                    message = "EØS er ikke togglet på",
+                    frontendFeilmelding = "Funksjonalitet for EØS skal ikke være lansert"
+                )
+        }
+
         val vilkårsvurdering = hentVilkårsvurdering(behandlingId = behandlingId)
             ?: throw Feil(
                 message = "Fant ikke aktiv vilkårsvurdering ved endring på vilkår",

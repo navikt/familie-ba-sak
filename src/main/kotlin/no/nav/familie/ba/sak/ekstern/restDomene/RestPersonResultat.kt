@@ -4,8 +4,8 @@ import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -32,7 +32,7 @@ data class RestVilkårResultat(
     val erMedlemskapVurdert: Boolean? = false,
     val erDeltBosted: Boolean? = false,
     val avslagBegrunnelser: List<VedtakBegrunnelseSpesifikasjon>? = null,
-    val vurderesEtter: VilkårResultat.VurderesEtter? = null,
+    val vurderesEtter: Regelverk? = null,
 ) {
 
     fun erAvslagUtenPeriode() =

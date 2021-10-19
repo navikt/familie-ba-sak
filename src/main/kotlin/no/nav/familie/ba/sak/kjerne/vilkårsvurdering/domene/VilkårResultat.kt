@@ -99,7 +99,7 @@ class VilkårResultat(
 
     @Enumerated(EnumType.STRING)
     @Column(name = "vurderes_etter")
-    var vurderesEtter: VurderesEtter? = null
+    var vurderesEtter: Regelverk? = vilkårType.defaultRegelverk()
 ) : BaseEntitet() {
 
     override fun toString(): String {
@@ -196,8 +196,8 @@ class VilkårResultat(
 
         val VilkårResultatComparator = compareBy<VilkårResultat>({ it.periodeFom }, { it.resultat }, { it.vilkårType })
     }
+}
 
-    enum class VurderesEtter {
-        NASJONALE_REGLER, EØS_FORORDNINGEN, SEPARASJONSAVTALEN
-    }
+enum class Regelverk {
+    NASJONALE_REGLER, EØS_FORORDNINGEN
 }
