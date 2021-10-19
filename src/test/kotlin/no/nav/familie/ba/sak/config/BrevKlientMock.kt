@@ -2,13 +2,11 @@ package no.nav.familie.ba.sak.config
 
 import no.nav.familie.ba.sak.kjerne.dokument.BrevKlient
 import no.nav.familie.ba.sak.kjerne.dokument.domene.SanityBegrunnelse
-import no.nav.familie.ba.sak.kjerne.dokument.domene.SanityBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.dokument.domene.SanityVilkår
 import no.nav.familie.ba.sak.kjerne.dokument.domene.VilkårRolle
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Brev
 import no.nav.familie.ba.sak.kjerne.dokument.domene.ØvrigTrigger
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.BegrunnelseData
 import org.springframework.context.annotation.Primary
 import org.springframework.context.annotation.Profile
@@ -79,11 +77,3 @@ val sanityBegrunnelserMock: List<SanityBegrunnelse> =
                 }
             )
         }
-
-fun VedtakBegrunnelseType.tilSanityBegrunnelseType() = when (this) {
-    VedtakBegrunnelseType.INNVILGELSE -> SanityBegrunnelseType.INNVILGELSE
-    VedtakBegrunnelseType.REDUKSJON -> SanityBegrunnelseType.REDUKSJON
-    VedtakBegrunnelseType.AVSLAG -> SanityBegrunnelseType.AVSLAG
-    VedtakBegrunnelseType.OPPHØR -> SanityBegrunnelseType.OPPHØR
-    VedtakBegrunnelseType.FORTSATT_INNVILGET -> SanityBegrunnelseType.FORTSATT_INNVILGET
-}
