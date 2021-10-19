@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import java.time.LocalDate
 
@@ -19,12 +20,18 @@ interface Vedtaksperiode {
     val vedtaksperiodetype: Vedtaksperiodetype
 }
 
-enum class Vedtaksperiodetype {
-    UTBETALING,
-    OPPHØR,
-    AVSLAG,
-    FORTSATT_INNVILGET,
-    ENDRET_UTBETALING
+enum class Vedtaksperiodetype(val tillatteBegrunnelsestyper: List<VedtakBegrunnelseType>) {
+    UTBETALING(
+        listOf(
+            VedtakBegrunnelseType.INNVILGELSE,
+            VedtakBegrunnelseType.REDUKSJON,
+            VedtakBegrunnelseType.FORTSATT_INNVILGET
+        )
+    ),
+    OPPHØR(listOf(VedtakBegrunnelseType.OPPHØR)),
+    AVSLAG(listOf(VedtakBegrunnelseType.AVSLAG)),
+    FORTSATT_INNVILGET(listOf(VedtakBegrunnelseType.FORTSATT_INNVILGET)),
+    ENDRET_UTBETALING(emptyList())
 }
 
 fun Vedtaksperiode.tilVedtaksperiodeMedBegrunnelse(
@@ -35,7 +42,6 @@ fun Vedtaksperiode.tilVedtaksperiodeMedBegrunnelse(
         fom = this.periodeFom,
         tom = this.periodeTom,
         vedtak = vedtak,
-        type = this.vedtaksperiodetype,
-        begrunnelser = mutableSetOf()
+        type = this.vedtaksperiodetype
     )
 }

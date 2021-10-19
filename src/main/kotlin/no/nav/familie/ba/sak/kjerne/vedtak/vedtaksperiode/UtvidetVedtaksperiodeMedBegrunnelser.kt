@@ -2,7 +2,9 @@ package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
@@ -41,8 +43,12 @@ fun VedtaksperiodeMedBegrunnelser.tilUtvidetVedtaksperiodeMedBegrunnelser(
 ): UtvidetVedtaksperiodeMedBegrunnelser {
 
     val utbetalingsperiodeDetaljer =
-        if (this.type == Vedtaksperiodetype.UTBETALING || this.type == Vedtaksperiodetype.ENDRET_UTBETALING) {
-            val vertikaltSegmentForVedtaksperiode = hentVertikaltSegmentForVedtaksperiode(andelerTilkjentYtelse)
+        if (this.type == Vedtaksperiodetype.UTBETALING || this.type == Vedtaksperiodetype.ENDRET_UTBETALING || this.type == Vedtaksperiodetype.FORTSATT_INNVILGET) {
+            val vertikaltSegmentForVedtaksperiode =
+                if (this.type == Vedtaksperiodetype.FORTSATT_INNVILGET)
+                    hentLøpendeAndelForVedtaksperiode(andelerTilkjentYtelse)
+                else
+                    hentVertikaltSegmentForVedtaksperiode(andelerTilkjentYtelse)
 
             val andelerForSegment =
                 hentAndelerForSegment(andelerTilkjentYtelse, vertikaltSegmentForVedtaksperiode)
@@ -68,6 +74,13 @@ fun VedtaksperiodeMedBegrunnelser.tilUtvidetVedtaksperiodeMedBegrunnelser(
         fritekster = this.fritekster.sortedBy { it.id }.map { it.fritekst },
         utbetalingsperiodeDetaljer = utbetalingsperiodeDetaljer
     )
+}
+
+private fun VedtaksperiodeMedBegrunnelser.hentLøpendeAndelForVedtaksperiode(andelerTilkjentYtelse: List<AndelTilkjentYtelse>): LocalDateSegment<Int> {
+    val sorterteSegmenter = andelerTilkjentYtelse.utledSegmenter().sortedBy { it.fom }
+    return sorterteSegmenter.lastOrNull { it.fom.toYearMonth() <= inneværendeMåned() }
+        ?: sorterteSegmenter.firstOrNull()
+        ?: throw Feil("Finner ikke gjeldende segment ved fortsatt innvilget")
 }
 
 private fun VedtaksperiodeMedBegrunnelser.hentVertikaltSegmentForVedtaksperiode(

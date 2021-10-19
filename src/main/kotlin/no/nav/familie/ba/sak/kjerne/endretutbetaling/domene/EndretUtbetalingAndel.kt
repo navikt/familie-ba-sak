@@ -167,8 +167,7 @@ fun List<EndretUtbetalingAndel>.tilVedtaksperiodeMedBegrunnelser(
         fom = fom,
         tom = tom,
         vedtak = vedtak,
-        type = Vedtaksperiodetype.ENDRET_UTBETALING,
-        begrunnelser = mutableSetOf()
+        type = Vedtaksperiodetype.ENDRET_UTBETALING
     ).also { vedtakperiodeMedbegrunnelse ->
         vedtakperiodeMedbegrunnelse.begrunnelser.addAll(
             this.flatMap { it.vedtakBegrunnelseSpesifikasjoner }.toSet()
