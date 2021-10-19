@@ -43,9 +43,11 @@ import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.sikkerhet.validering.FagsaktilgangConstraint
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
+import no.nav.familie.ba.sak.task.BehandleAnnullertFødselTask
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
+import no.nav.familie.prosessering.domene.TaskRepository
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
@@ -77,6 +79,7 @@ class FagsakService(
     private val tilbakekrevingsbehandlingService: TilbakekrevingsbehandlingService,
     private val fødselshendelsefiltreringResultatRepository: FødselshendelsefiltreringResultatRepository,
     private val endretUtbetalingAndelRepository: EndretUtbetalingAndelRepository,
+    private val taskRepository: TaskRepository,
 ) {
 
     private val antallFagsakerOpprettetFraManuell =
@@ -320,7 +323,6 @@ class FagsakService(
                     fagsakDeltager.ident == relasjon.personIdent.id
                 } == null
                 ) {
-
                     val maskertForelder = hentMaskertFagsakdeltakerVedManglendeTilgang(relasjon.personIdent.id)
                     if (maskertForelder != null) {
                         assosierteFagsakDeltagere.add(maskertForelder.copy(rolle = FagsakDeltagerRolle.FORELDER))
@@ -462,6 +464,10 @@ class FagsakService(
         }
 
         return fagsakDeltagere
+    }
+
+    fun behandleAnnullertFødsel(barnasIdenter: List<String>) {
+        taskRepository.save(BehandleAnnullertFødselTask.opprettTask(barnasIdenter))
     }
 
     companion object {
