@@ -30,9 +30,12 @@ class BehandleAnnullertFødselTask(
     AsyncTaskStep {
 
     override fun doTask(task: Task) {
+        logger.debug("Run BehandleAnnullertFødselTask")
         val tidligereHendelseId = MDC.get(MDCConstants.MDC_CALL_ID)
+        logger.debug("Tidlegere Id = ${tidligereHendelseId}")
         var barnasIdenter = objectMapper.readValue(task.payload, List::class.java)
             .map { PersonIdent(it.toString()) }
+        logger.debug("barnasIdenter count ${barnasIdenter.size}")
         var tasker =
             taskRepository.findByStatusIn(
                 listOf(Status.KLAR_TIL_PLUKK, Status.UBEHANDLET, Status.FEILET),
@@ -41,6 +44,7 @@ class BehandleAnnullertFødselTask(
                 .filter {
                     it.callId == tidligereHendelseId && (it.type == BehandleFødselshendelseTask.TASK_STEP_TYPE)
                 }
+        logger.debug("Found ${tasker.size} task(er)")
         if (tasker.isEmpty()) {
             logger.info("Finnes ikke åpen task for annullertfødsel tidligere Id = ${tidligereHendelseId}. Forsøker å finne aktiv behandling.")
             if (personRepository.findByPersonIdenter(barnasIdenter).any {

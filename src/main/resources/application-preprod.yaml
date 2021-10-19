@@ -133,7 +133,7 @@ spring:
 logging:
   level:
     root: INFO
-    no.nav.familie.ba.sak.ekstern.skatteetaten: DEBUG
+    no.nav.familie.ba.sak.task.BehandleAnnullertFødselTask: DEBUG
 
 
 DAGLIG_KVOTE_FØDSELSHENDELSER: 1000
