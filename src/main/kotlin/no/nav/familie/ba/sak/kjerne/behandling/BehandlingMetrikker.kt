@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.kjerne.behandling
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.DistributionSummary
 import io.micrometer.core.instrument.Metrics
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
@@ -24,39 +23,42 @@ class BehandlingMetrikker(
     private val behandlingRepository: BehandlingRepository,
     private val vedtakRepository: VedtakRepository,
     private val vedtaksperiodeRepository: VedtaksperiodeRepository,
-    private val featureToggleService: FeatureToggleService,
     private val brevKlient: BrevKlient
 ) {
 
-    private val antallManuelleBehandlinger: Counter = Metrics.counter("behandling.behandlinger", "saksbehandling", "manuell")
+    private val antallManuelleBehandlinger: Counter =
+        Metrics.counter("behandling.behandlinger", "saksbehandling", "manuell")
     private val antallAutomatiskeBehandlinger: Counter =
         Metrics.counter("behandling.behandlinger", "saksbehandling", "automatisk")
 
-    private val antallManuelleBehandlingerOpprettet: Map<BehandlingType, Counter> = initBehandlingTypeMetrikker("manuell")
-    private val antallAutomatiskeBehandlingerOpprettet: Map<BehandlingType, Counter> = initBehandlingTypeMetrikker("automatisk")
+    private val antallManuelleBehandlingerOpprettet: Map<BehandlingType, Counter> =
+        initBehandlingTypeMetrikker("manuell")
+    private val antallAutomatiskeBehandlingerOpprettet: Map<BehandlingType, Counter> =
+        initBehandlingTypeMetrikker("automatisk")
     private val behandlingÅrsak: Map<BehandlingÅrsak, Counter> = initBehandlingÅrsakMetrikker()
 
     private val antallBehandlingResultat: Map<BehandlingResultat, Counter> =
-        BehandlingResultat.values().map {
-            it to Metrics.counter(
+        BehandlingResultat.values().associateWith {
+            Metrics.counter(
                 "behandling.resultat",
                 "type", it.name,
                 "beskrivelse", it.displayName
             )
-        }.toMap()
+        }
 
     private val antallBrevBegrunnelseSpesifikasjon: Map<VedtakBegrunnelseSpesifikasjon, Counter> =
-        VedtakBegrunnelseSpesifikasjon.values().map {
+        VedtakBegrunnelseSpesifikasjon.values().associateWith {
             val tittel =
                 it
                     .tilSanityBegrunnelse(brevKlient.hentSanityBegrunnelse())
                     .navnISystem
-            it to Metrics.counter(
+
+            Metrics.counter(
                 "brevbegrunnelse",
                 "type", it.name,
                 "beskrivelse", tittel
             )
-        }.toMap()
+        }
 
     private val behandlingstid: DistributionSummary = Metrics.summary("behandling.tid")
 
@@ -102,8 +104,8 @@ class BehandlingMetrikker(
     }
 
     private fun initBehandlingTypeMetrikker(type: String): Map<BehandlingType, Counter> {
-        return BehandlingType.values().map {
-            it to Metrics.counter(
+        return BehandlingType.values().associateWith {
+            Metrics.counter(
                 "behandling.opprettet", "type",
                 it.name,
                 "beskrivelse",
@@ -111,18 +113,18 @@ class BehandlingMetrikker(
                 "saksbehandling",
                 type
             )
-        }.toMap()
+        }
     }
 
     private fun initBehandlingÅrsakMetrikker(): Map<BehandlingÅrsak, Counter> {
-        return BehandlingÅrsak.values().map {
-            it to Metrics.counter(
+        return BehandlingÅrsak.values().associateWith {
+            Metrics.counter(
                 "behandling.aarsak",
                 "aarsak",
                 it.name,
                 "beskrivelse",
                 it.visningsnavn
             )
-        }.toMap()
+        }
     }
 }
