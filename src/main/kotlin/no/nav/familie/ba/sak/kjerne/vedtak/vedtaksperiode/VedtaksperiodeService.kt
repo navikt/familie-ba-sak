@@ -147,7 +147,8 @@ class VedtaksperiodeService(
                     triggesAv.personerManglerOpplysninger -> if (vilkårsvurdering.harPersonerManglerOpplysninger())
                         emptyList() else error("Legg til opplysningsplikt ikke oppfylt begrunnelse men det er ikke person med det resultat")
 
-                    vedtakBegrunnelseType == VedtakBegrunnelseType.FORTSATT_INNVILGET -> identerMedUtbetaling
+                    vedtaksperiodeMedBegrunnelser.type == Vedtaksperiodetype.FORTSATT_INNVILGET ||
+                        vedtakBegrunnelseType == VedtakBegrunnelseType.FORTSATT_INNVILGET -> identerMedUtbetaling
 
                     triggesAv.etterEndretUtbetaling -> hentPersonerForEtterEndretUtbetalingsperiode(
                         endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(
