@@ -347,7 +347,7 @@ internal class BrevUtilsTest {
                     )
                 )
             )
-        val utvidetVedtaksperiodMedBegrunnelserDelvisUtbetaling =
+        val utvidetVedtaksperiodMedBegrunnelserForskjelligUtbetaling =
             lagUtvidetVedtaksperiodeMedBegrunnelser(
                 utbetalingsperiodeDetaljer = listOf(
                     lagUtbetalingsperiodeDetalj(
@@ -377,8 +377,9 @@ internal class BrevUtilsTest {
         )
 
         Assertions.assertEquals(
-            flettefelt(EndretUtbetalingBrevPeriodeType.ENDRET_UTBETALINGSPERIODE_DELVIS_UTBETALING.apiNavn),
-            utvidetVedtaksperiodMedBegrunnelserDelvisUtbetaling.hentEndretUtbetalingBrevPeriode("", emptyList()).type
+            flettefelt(EndretUtbetalingBrevPeriodeType.ENDRET_UTBETALINGSPERIODE.apiNavn),
+            utvidetVedtaksperiodMedBegrunnelserForskjelligUtbetaling
+                .hentEndretUtbetalingBrevPeriode("", emptyList()).type
         )
 
         Assertions.assertEquals(

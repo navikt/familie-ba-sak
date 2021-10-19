@@ -277,11 +277,10 @@ fun UtvidetVedtaksperiodeMedBegrunnelser.hentEndretUtbetalingBrevPeriode(
     barnasFodselsdager = this.utbetalingsperiodeDetaljer.tilBarnasFødselsdatoer(),
     begrunnelser = begrunnelserOgFritekster,
     type = when {
-        this.utbetalingsperiodeDetaljer.all { it.prosent == BigDecimal(100) } ->
-            EndretUtbetalingBrevPeriodeType.ENDRET_UTBETALINGSPERIODE
         this.utbetalingsperiodeDetaljer.all { it.prosent == BigDecimal.ZERO } ->
             EndretUtbetalingBrevPeriodeType.ENDRET_UTBETALINGSPERIODE_INGEN_UTBETALING
-        else -> EndretUtbetalingBrevPeriodeType.ENDRET_UTBETALINGSPERIODE_DELVIS_UTBETALING
+        else ->
+            EndretUtbetalingBrevPeriodeType.ENDRET_UTBETALINGSPERIODE
     },
 )
 
