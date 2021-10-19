@@ -321,7 +321,8 @@ class FagsakService(
             }.forEach { relasjon ->
                 if (assosierteFagsakDeltagere.find { fagsakDeltager ->
                     fagsakDeltager.ident == relasjon.personIdent.id
-                } == null ) {
+                } == null
+                ) {
                     val maskertForelder = hentMaskertFagsakdeltakerVedManglendeTilgang(relasjon.personIdent.id)
                     if (maskertForelder != null) {
                         assosierteFagsakDeltagere.add(maskertForelder.copy(rolle = FagsakDeltagerRolle.FORELDER))
