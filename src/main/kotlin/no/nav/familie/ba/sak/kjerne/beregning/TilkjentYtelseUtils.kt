@@ -164,6 +164,8 @@ object TilkjentYtelseUtils {
                 )
             }
 
+            // Slår sammen endringsperioder som ikke skulle ha vært splittet
+            // Feks. 0-endringsperioder som overlapper en satsendring skal ikke splittes
             nyeAndelerForPerson.sortedBy { it.stønadFom }.forEach { andel ->
                 val andelSomSkalSlåsSammen = nyeAndelerForPerson.singleOrNull {
                     andel.stønadTom.sisteDagIInneværendeMåned()
