@@ -4,9 +4,11 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.Utils.avrundetHeltallAvProsent
 import no.nav.familie.ba.sak.common.erDagenFør
+import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.inkluderer
 import no.nav.familie.ba.sak.common.maksimum
 import no.nav.familie.ba.sak.common.minimum
+import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -132,6 +134,8 @@ object TilkjentYtelseUtils {
             val endringerForPerson =
                 endretUtbetalingAndeler.filter { it.person?.personIdent?.ident == barnMedAndeler.personIdent }
 
+            val nyeAndelerForPerson = mutableListOf<AndelTilkjentYtelse>()
+
             andelerForPerson.forEach { andelForPerson ->
                 // Deler opp hver enkelt andel i perioder som hhv blir berørt av endringene og de som ikke berøres av de.
                 val (perioderMedEndring, perioderUtenEndring) = andelForPerson.stønadsPeriode()
@@ -139,7 +143,7 @@ object TilkjentYtelseUtils {
                         endringerForPerson.map { endringerForPerson -> endringerForPerson.periode() }
                     )
                 // Legger til nye AndelTilkjentYtelse for perioder som er berørt av endringer.
-                nyeAndelTilkjentYtelse.addAll(
+                nyeAndelerForPerson.addAll(
                     perioderMedEndring.map { månedPeriodeEndret ->
                         val endretUtbetalingAndel = endringerForPerson.single { it.overlapperMed(månedPeriodeEndret) }
                         andelForPerson.copy(
@@ -153,12 +157,30 @@ object TilkjentYtelseUtils {
                     }
                 )
                 // Legger til nye AndelTilkjentYtelse for perioder som ikke berøres av endringer.
-                nyeAndelTilkjentYtelse.addAll(
+                nyeAndelerForPerson.addAll(
                     perioderUtenEndring.map { månedPeriodeUendret ->
                         andelForPerson.copy(stønadFom = månedPeriodeUendret.fom, stønadTom = månedPeriodeUendret.tom)
                     }
                 )
             }
+
+            nyeAndelerForPerson.sortedBy { it.stønadFom }.forEach { andel ->
+                val andelSomSkalSlåsSammen = nyeAndelerForPerson.singleOrNull {
+                    andel.stønadTom.sisteDagIInneværendeMåned()
+                        .erDagenFør(it.stønadFom.førsteDagIInneværendeMåned())
+                        && andel.kalkulertUtbetalingsbeløp == it.kalkulertUtbetalingsbeløp
+                        && andel.endretUtbetalingAndeler.firstOrNull() == it.endretUtbetalingAndeler.firstOrNull()
+                        && andel.endretUtbetalingAndeler.isNotEmpty()
+                }
+                if (andelSomSkalSlåsSammen != null) {
+                    val nyAndel = andel.copy(stønadTom = andelSomSkalSlåsSammen.stønadTom)
+                    nyeAndelerForPerson.remove(andel)
+                    nyeAndelerForPerson.remove(andelSomSkalSlåsSammen)
+                    nyeAndelerForPerson.add(nyAndel)
+                }
+            }
+
+            nyeAndelTilkjentYtelse.addAll(nyeAndelerForPerson)
         }
         // Sorterer primært av hensyn til måten testene er implementert og kan muligens fjernes dersom dette skrives om.
         nyeAndelTilkjentYtelse.sortWith(compareBy({ it.personIdent }, { it.stønadFom }))
