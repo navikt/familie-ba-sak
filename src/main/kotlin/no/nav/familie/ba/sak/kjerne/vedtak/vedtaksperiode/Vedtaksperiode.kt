@@ -35,7 +35,6 @@ fun Vedtaksperiode.tilVedtaksperiodeMedBegrunnelse(
         fom = this.periodeFom,
         tom = this.periodeTom,
         vedtak = vedtak,
-        type = this.vedtaksperiodetype,
-        begrunnelser = mutableSetOf()
+        type = this.vedtaksperiodetype
     )
 }
