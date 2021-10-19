@@ -77,13 +77,13 @@ data class EndretUtbetalingAndel(
     var begrunnelse: String? = null,
 
     @ManyToMany(mappedBy = "endretUtbetalingAndeler")
-    val andelTilkjentYtelser: List<AndelTilkjentYtelse> = emptyList(),
+    val andelTilkjentYtelser: MutableList<AndelTilkjentYtelse> = mutableListOf(),
 
     @Column(name = "vedtak_begrunnelse_spesifikasjoner")
     @Convert(converter = VedtakBegrunnelseSpesifikasjonListConverter::class)
     var vedtakBegrunnelseSpesifikasjoner: List<VedtakBegrunnelseSpesifikasjon> = emptyList(),
 
-) : BaseEntitet() {
+    ) : BaseEntitet() {
 
     fun overlapperMed(periode: MånedPeriode) = periode.overlapperHeltEllerDelvisMed(this.periode())
 

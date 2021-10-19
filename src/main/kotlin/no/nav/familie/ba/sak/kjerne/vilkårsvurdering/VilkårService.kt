@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType.MIGRERING_FRA_INFOTRYGD
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -38,6 +39,7 @@ class VilkårService(
     private val vilkårsvurderingMetrics: VilkårsvurderingMetrics,
     private val behandlingService: BehandlingService,
     private val featureToggleService: FeatureToggleService,
+    private val endretUtbetalingAndelService: EndretUtbetalingAndelService,
 ) {
 
     fun hentVilkårsvurdering(behandlingId: Long): Vilkårsvurdering? = vilkårsvurderingService.hentAktivForBehandling(
@@ -148,6 +150,9 @@ class VilkårService(
                     initiellVilkårsvurdering = initiellVilkårsvurdering,
                     annenBehandling = forrigeBehandling
                 )
+
+            endretUtbetalingAndelService.kopierEndretUtbetalingAndelFraForrigeBehandling(behandling, forrigeBehandling)
+
             return vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering)
         } else {
             if (aktivVilkårsvurdering != null) {
