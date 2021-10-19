@@ -3,14 +3,12 @@ package no.nav.familie.ba.sak.kjerne.dokument
 import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Utbetalingsperiode
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtbetalingsperiodeDetalj
 
-fun finnAlleBarnsFødselsDatoerIUtbetalingsperiode(utbetalingsperiode: Utbetalingsperiode): String =
+fun List<UtbetalingsperiodeDetalj>.tilBarnasFødselsdatoer(): String =
     Utils.slåSammen(
-        utbetalingsperiode.utbetalingsperiodeDetaljer
-            .filter { utbetalingsperiodeDetalj ->
-                utbetalingsperiodeDetalj.person.type == PersonType.BARN
-            }
+        this
+            .filter { it.person.type == PersonType.BARN }
             .sortedBy { utbetalingsperiodeDetalj ->
                 utbetalingsperiodeDetalj.person.fødselsdato
             }
@@ -18,3 +16,9 @@ fun finnAlleBarnsFødselsDatoerIUtbetalingsperiode(utbetalingsperiode: Utbetalin
                 utbetalingsperiodeDetalj.person.fødselsdato?.tilKortString() ?: ""
             }
     )
+
+fun List<UtbetalingsperiodeDetalj>.antallBarn(): Int =
+    this.filter { it.person.type == PersonType.BARN }.size
+
+fun List<UtbetalingsperiodeDetalj>.totaltUtbetalt(): Int =
+    this.sumOf { it.utbetaltPerMnd }

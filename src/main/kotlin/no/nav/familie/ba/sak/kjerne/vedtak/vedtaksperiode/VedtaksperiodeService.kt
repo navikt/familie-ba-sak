@@ -12,7 +12,6 @@ import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedFritekster
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedStandardbegrunnelser
-import no.nav.familie.ba.sak.ekstern.restDomene.RestVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
@@ -26,6 +25,7 @@ import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.dokument.domene.tilTriggesAv
 import no.nav.familie.ba.sak.kjerne.dokument.hentVedtaksbrevmal
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.hentPersonerForEtterEndretUtbetalingsperiode
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
@@ -43,7 +43,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.byggBegrunnelserOgFriteksterForVedtaksperiode
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilRestVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilVedtaksbegrunnelseFritekst
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
@@ -147,6 +146,14 @@ class VedtaksperiodeService(
 
                     vedtaksperiodeMedBegrunnelser.type == Vedtaksperiodetype.FORTSATT_INNVILGET -> identerMedUtbetaling
 
+                    triggesAv.etterEndretUtbetaling -> hentPersonerForEtterEndretUtbetalingsperiode(
+                        endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(
+                            behandling.id
+                        ),
+                        vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
+                        triggesAv = triggesAv
+                    )
+
                     else -> hentPersonerForAlleUtgjørendeVilkår(
                         vilkårsvurdering = vilkårsvurdering,
                         vedtaksperiode = Periode(
@@ -222,7 +229,7 @@ class VedtaksperiodeService(
     }
 
     fun oppdaterVedtaksperioderForBarnVurdertIFødselshendelse(vedtak: Vedtak, barnaSomVurderes: List<String>) {
-        val vedtaksperioderMedBegrunnelser = hentPersisterteVedtaksperioder(vedtak)
+        val vedtaksperioderMedBegrunnelser = vedtaksperiodeRepository.finnVedtaksperioderFor(vedtakId = vedtak.id)
         val persongrunnlag = persongrunnlagRepository.findByBehandlingAndAktiv(behandlingId = vedtak.behandling.id)
             ?: error("Finner ikke persongrunnlag")
         val vurderteBarnSomPersoner =
@@ -335,77 +342,78 @@ class VedtaksperiodeService(
         return vedtaksperiodeRepository.finnVedtaksperioderFor(vedtakId = vedtak.id)
     }
 
-    fun hentRestVedtaksperiodeMedBegrunnelser(vedtak: Vedtak): List<RestVedtaksperiodeMedBegrunnelser> {
+    fun hentUtvidetVedtaksperiodeMedBegrunnelser(vedtak: Vedtak): List<UtvidetVedtaksperiodeMedBegrunnelser> {
         val vedtaksperioderMedBegrunnelser = hentPersisterteVedtaksperioder(vedtak)
 
         val behandling = vedtak.behandling
-        val utbetalingsperioder = hentUtbetalingsperioder(behandling)
+        val andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(
+            behandlingId = behandling.id
+        )
+
         val persongrunnlag =
             persongrunnlagRepository.findByBehandlingAndAktiv(behandling.id) ?: error("Finner ikke persongrunnlag")
 
-        return vedtaksperioderMedBegrunnelser.map { vedtaksperiodeMedBegrunnelser ->
-            val gyldigeBegrunnelser = mutableSetOf<VedtakBegrunnelseSpesifikasjon>()
-
-            when (vedtaksperiodeMedBegrunnelser.type) {
+        return vedtaksperioderMedBegrunnelser.map {
+            it.tilUtvidetVedtaksperiodeMedBegrunnelser(
+                andelerTilkjentYtelse = andelerTilkjentYtelse,
+                personopplysningGrunnlag = persongrunnlag
+            )
+        }.map { utvidetVedtaksperiodeMedBegrunnelser ->
+            val gyldigeBegrunnelser = when (utvidetVedtaksperiodeMedBegrunnelser.type) {
                 Vedtaksperiodetype.FORTSATT_INNVILGET -> {
-                    gyldigeBegrunnelser.addAll(
-                        VedtakBegrunnelseSpesifikasjon.values()
-                            .filter { it.vedtakBegrunnelseType == VedtakBegrunnelseType.FORTSATT_INNVILGET }
-                    )
+                    VedtakBegrunnelseSpesifikasjon.values()
+                        .filter { it.vedtakBegrunnelseType == VedtakBegrunnelseType.FORTSATT_INNVILGET }
                 }
                 Vedtaksperiodetype.AVSLAG -> {
-                    gyldigeBegrunnelser.addAll(
-                        VedtakBegrunnelseSpesifikasjon.values()
-                            .filter { it.vedtakBegrunnelseType == VedtakBegrunnelseType.AVSLAG }
-                    )
+                    VedtakBegrunnelseSpesifikasjon.values()
+                        .filter { it.vedtakBegrunnelseType == VedtakBegrunnelseType.AVSLAG }
                 }
                 else -> {
-
                     val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id)
                         ?: error("Finner ikke vilkårsvurdering ved begrunning av vedtak")
 
-                    val utbetalingsperiode =
-                        if (vedtaksperiodeMedBegrunnelser.type != Vedtaksperiodetype.OPPHØR) hentUtbetalingsperiodeForVedtaksperiode(
-                            utbetalingsperioder = utbetalingsperioder,
-                            fom = vedtaksperiodeMedBegrunnelser.fom
-                        ) else null
+                    val ytelseTyper =
+                        utvidetVedtaksperiodeMedBegrunnelser.utbetalingsperiodeDetaljer.map { it.ytelseType }
 
                     val identerMedUtbetaling =
-                        utbetalingsperiode?.utbetalingsperiodeDetaljer?.map { utbetalingsperiodeDetalj -> utbetalingsperiodeDetalj.person.personIdent }
-                            ?: emptyList()
+                        utvidetVedtaksperiodeMedBegrunnelser.utbetalingsperiodeDetaljer.map { utbetalingsperiodeDetalj -> utbetalingsperiodeDetalj.person.personIdent }
 
                     VedtakBegrunnelseSpesifikasjon.values()
                         .filter { vedtakBegrunnelseSpesifikasjon -> vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType != VedtakBegrunnelseType.AVSLAG && vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType != VedtakBegrunnelseType.FORTSATT_INNVILGET }
-                        .forEach {
+                        .fold(mutableSetOf()) { acc, standardBegrunnelse ->
                             val triggesAv =
-                                it.tilSanityBegrunnelse(brevKlient.hentSanityBegrunnelse())
+                                standardBegrunnelse.tilSanityBegrunnelse(brevKlient.hentSanityBegrunnelse())
                                     .tilTriggesAv()
-                            val vedtakBegrunnelseType = it.vedtakBegrunnelseType
+                            val vedtakBegrunnelseType = standardBegrunnelse.vedtakBegrunnelseType
 
-                            if (triggesAv.vilkår.contains(Vilkår.UTVIDET_BARNETRYGD) && (
-                                utbetalingsperiode?.ytelseTyper
-                                    ?: emptyList()
-                                ).contains(YtelseType.UTVIDET_BARNETRYGD) &&
+                            if (triggesAv.vilkår.contains(Vilkår.UTVIDET_BARNETRYGD) && ytelseTyper.contains(
+                                    YtelseType.UTVIDET_BARNETRYGD
+                                ) &&
                                 vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGELSE
                             ) {
-                                gyldigeBegrunnelser.add(it)
-                            } else if (it.triggesForPeriode(
-                                    vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
+                                acc.add(standardBegrunnelse)
+                            } else if (standardBegrunnelse.triggesForPeriode(
+                                    utvidetVedtaksperiodeMedBegrunnelser = utvidetVedtaksperiodeMedBegrunnelser,
                                     vilkårsvurdering = vilkårsvurdering,
                                     persongrunnlag = persongrunnlag,
                                     identerMedUtbetaling = identerMedUtbetaling,
                                     triggesAv = triggesAv,
                                     vedtakBegrunnelseType = vedtakBegrunnelseType,
+                                    endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(
+                                            behandling.id
+                                        )
                                 )
                             ) {
-                                gyldigeBegrunnelser.add(it)
+                                acc.add(standardBegrunnelse)
                             }
+
+                            acc
                         }
                 }
             }
 
-            vedtaksperiodeMedBegrunnelser.tilRestVedtaksperiodeMedBegrunnelser(
-                gyldigeBegrunnelser.filter {
+            utvidetVedtaksperiodeMedBegrunnelser.copy(
+                gyldigeBegrunnelser = gyldigeBegrunnelser.filter {
                     it
                         .tilSanityBegrunnelse(brevKlient.hentSanityBegrunnelse())
                         .tilTriggesAv().valgbar
@@ -453,14 +461,20 @@ class VedtaksperiodeService(
 
     fun genererBrevBegrunnelserForPeriode(vedtaksperiodeId: Long): List<Begrunnelse> {
         val vedtaksperiode = vedtaksperiodeRepository.hentVedtaksperiode(vedtaksperiodeId)
+
         val behandlingId = vedtaksperiode.vedtak.behandling.id
         val persongrunnlag = persongrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandlingId)
             ?: throw Feil("Finner ikke persongrunnlag for behandling $behandlingId")
         val uregistrerteBarn =
             søknadGrunnlagService.hentAktiv(behandlingId = behandlingId)?.hentUregistrerteBarn() ?: emptyList()
 
+        val utvidetVedtaksperiodeMedBegrunnelse = vedtaksperiode.tilUtvidetVedtaksperiodeMedBegrunnelser(
+            personopplysningGrunnlag = persongrunnlag,
+            andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId)
+        )
+
         return byggBegrunnelserOgFriteksterForVedtaksperiode(
-            vedtaksperiode = vedtaksperiode,
+            utvidetVedtaksperiodeMedBegrunnelser = utvidetVedtaksperiodeMedBegrunnelse,
             personerIPersongrunnlag = persongrunnlag.personer.toList(),
             målform = persongrunnlag.søker.målform,
             uregistrerteBarn = uregistrerteBarn

@@ -4,11 +4,14 @@ import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.YearMonthConverter
+import no.nav.familie.ba.sak.common.erDagenFør
 import no.nav.familie.ba.sak.common.overlapperHeltEllerDelvisMed
+import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.ekstern.restDomene.RestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjonListConverter
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
@@ -182,3 +185,13 @@ fun List<EndretUtbetalingAndel>.tilVedtaksperiodeMedBegrunnelser(
         )
     }
 }
+
+fun hentPersonerForEtterEndretUtbetalingsperiode(
+    endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
+    vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser,
+    triggesAv: TriggesAv
+) = endretUtbetalingAndeler.filter { endretUtbetalingAndel ->
+    endretUtbetalingAndel.tom!!.sisteDagIInneværendeMåned()
+        .erDagenFør(vedtaksperiodeMedBegrunnelser.fom) &&
+        triggesAv.endringsaarsaker.contains(endretUtbetalingAndel.årsak)
+}.mapNotNull { it.person?.personIdent?.ident }

@@ -243,7 +243,7 @@ class FagsakService(
             tilbakekreving = tilbakekreving?.tilRestTilbakekreving(),
             vedtakForBehandling = vedtak.filter { it.aktiv }.map {
                 it.tilRestVedtak(
-                    vedtaksperiodeService.hentRestVedtaksperiodeMedBegrunnelser(vedtak = it)
+                    vedtaksperiodeService.hentUtvidetVedtaksperiodeMedBegrunnelser(vedtak = it)
                 )
             },
             totrinnskontroll = totrinnskontroll?.tilRestTotrinnskontroll(),

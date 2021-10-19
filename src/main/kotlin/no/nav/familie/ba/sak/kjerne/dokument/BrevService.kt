@@ -33,8 +33,8 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilBrevPeriode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.sorter
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 
@@ -65,18 +65,18 @@ class BrevService(
                 vedtakFellesfelter = vedtakFellesfelter,
                 etterbetaling = hentEtterbetaling(vedtak),
                 erKlage = vedtak.behandling.erKlage(),
-                erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling(vedtak.behandling.id),
+                erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling(behandlingId = vedtak.behandling.id),
             )
 
             Brevmal.VEDTAK_OPPHØRT -> Opphørt(
                 vedtakFellesfelter = vedtakFellesfelter,
-                erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling(vedtak.id)
+                erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling(behandlingId = vedtak.behandling.id)
             )
 
             Brevmal.VEDTAK_OPPHØR_MED_ENDRING -> OpphørMedEndring(
                 vedtakFellesfelter = vedtakFellesfelter,
                 etterbetaling = hentEtterbetaling(vedtak),
-                erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling(vedtak.id),
+                erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling(behandlingId = vedtak.behandling.id),
             )
 
             Brevmal.VEDTAK_AVSLAG -> Avslag(vedtakFellesfelter = vedtakFellesfelter)
@@ -160,28 +160,26 @@ class BrevService(
         }
 
     fun lagVedtaksbrevFellesfelter(vedtak: Vedtak): VedtakFellesfelter {
-        val vedtaksperioderMedBegrunnelser = vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak).filter {
-            it.begrunnelser.isNotEmpty() || it.fritekster.isNotEmpty()
-        }
+        val utvidetVedtaksperioderMedBegrunnelser =
+            vedtaksperiodeService.hentUtvidetVedtaksperiodeMedBegrunnelser(vedtak).filter {
+                it.begrunnelser.isNotEmpty() || it.fritekster.isNotEmpty()
+            }
 
-        if (vedtaksperioderMedBegrunnelser.isEmpty()) {
+        if (utvidetVedtaksperioderMedBegrunnelser.isEmpty()) {
             throw FunksjonellFeil("Vedtaket mangler begrunnelser. Du må legge til begrunnelser for å generere vedtaksbrevet.")
         }
 
         val grunnlagOgSignaturData = hentGrunnlagOgSignaturData(vedtak)
 
-        val utbetalingsperioder = vedtaksperiodeService.hentUtbetalingsperioder(vedtak.behandling)
-
         val sanityBegrunnelser = brevKlient.hentSanityBegrunnelse()
 
-        val hjemler = hentHjemmeltekst(vedtaksperioderMedBegrunnelser, sanityBegrunnelser)
+        val hjemler = hentHjemmeltekst(utvidetVedtaksperioderMedBegrunnelser, sanityBegrunnelser)
 
         val målform = persongrunnlagService.hentSøkersMålform(vedtak.behandling.id)
 
-        val brevperioder = vedtaksperioderMedBegrunnelser.sorter().mapNotNull {
+        val brevperioder = utvidetVedtaksperioderMedBegrunnelser.sorter().mapNotNull {
             it.tilBrevPeriode(
                 personerIPersongrunnlag = grunnlagOgSignaturData.grunnlag.personer.toList(),
-                utbetalingsperioder = utbetalingsperioder,
                 målform = målform,
                 uregistrerteBarn = søknadGrunnlagService.hentAktiv(behandlingId = vedtak.behandling.id)
                     ?.hentUregistrerteBarn() ?: emptyList()

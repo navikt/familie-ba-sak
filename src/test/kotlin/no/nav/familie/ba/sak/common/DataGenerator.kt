@@ -51,11 +51,14 @@ import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksbegrunnelseFritekst
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.RestVedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Utbetalingsperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtbetalingsperiodeDetalj
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
@@ -91,6 +94,7 @@ private var gjeldendeVedtakId: Long = abs(Random.nextLong(10000000))
 private var gjeldendeVedtakBegrunnelseId: Long = abs(Random.nextLong(10000000))
 private var gjeldendeBehandlingId: Long = abs(Random.nextLong(10000000))
 private var gjeldendePersonId: Long = abs(Random.nextLong(10000000))
+private var gjeldendeUtvidetVedtaksperiodeId: Long = abs(Random.nextLong(10000000))
 private const val ID_INKREMENT = 50
 
 fun nesteVedtakId(): Long {
@@ -111,6 +115,11 @@ fun nesteBehandlingId(): Long {
 fun nestePersonId(): Long {
     gjeldendePersonId += ID_INKREMENT
     return gjeldendePersonId
+}
+
+fun nesteUtvidetVedtaksperiodeId(): Long {
+    gjeldendeUtvidetVedtaksperiodeId += ID_INKREMENT
+    return gjeldendeUtvidetVedtaksperiodeId
 }
 
 fun defaultFagsak() = Fagsak(1).also {
@@ -832,6 +841,35 @@ fun lagVedtaksperiodeMedBegrunnelser(
     type = type,
     begrunnelser = begrunnelser,
     fritekster = fritekster,
+)
+
+fun lagRestVedtaksbegrunnelse(
+    vedtakBegrunnelseSpesifikasjon: VedtakBegrunnelseSpesifikasjon =
+        VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_SØKER_OG_BARN_BOSATT_I_RIKET,
+    vedtakBegrunnelseType: VedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET,
+    personIdenter: List<String> = listOf(tilfeldigPerson().personIdent.ident),
+) = RestVedtaksbegrunnelse(
+    vedtakBegrunnelseSpesifikasjon = vedtakBegrunnelseSpesifikasjon,
+    vedtakBegrunnelseType = vedtakBegrunnelseType,
+    personIdenter = personIdenter,
+)
+
+fun lagUtvidetVedtaksperiodeMedBegrunnelser(
+    id: Long = nesteUtvidetVedtaksperiodeId(),
+    fom: LocalDate? = LocalDate.now().withDayOfMonth(1),
+    tom: LocalDate? = LocalDate.now().let { it.withDayOfMonth(it.lengthOfMonth()) },
+    type: Vedtaksperiodetype = Vedtaksperiodetype.FORTSATT_INNVILGET,
+    begrunnelser: List<RestVedtaksbegrunnelse> = listOf(lagRestVedtaksbegrunnelse()),
+    fritekster: MutableList<VedtaksbegrunnelseFritekst> = mutableListOf(),
+    utbetalingsperiodeDetaljer: List<UtbetalingsperiodeDetalj> = emptyList(),
+) = UtvidetVedtaksperiodeMedBegrunnelser(
+    id = id,
+    fom = fom,
+    tom = tom,
+    type = type,
+    begrunnelser = begrunnelser,
+    fritekster = fritekster.map { it.fritekst },
+    utbetalingsperiodeDetaljer = utbetalingsperiodeDetaljer
 )
 
 fun leggTilBegrunnelsePåVedtaksperiodeIBehandling(

@@ -1,23 +1,22 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
 import io.mockk.mockk
-import no.nav.familie.ba.sak.common.lagUtbetalingsperiode
+import no.nav.familie.ba.sak.common.lagRestVedtaksbegrunnelse
 import no.nav.familie.ba.sak.common.lagUtbetalingsperiodeDetalj
-import no.nav.familie.ba.sak.common.lagVedtaksbegrunnelse
-import no.nav.familie.ba.sak.common.lagVedtaksperiodeMedBegrunnelser
+import no.nav.familie.ba.sak.common.lagUtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.common.tilfeldigSøker
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.AvslagBrevPeriode
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.FortsattInnvilgetBrevPeriode
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.InnvilgelseBrevPeriode
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.OpphørBrevPeriode
+import no.nav.familie.ba.sak.kjerne.dokument.tilBrevPeriode
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.FritekstBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksbegrunnelseFritekst
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.byggBegrunnelserOgFriteksterForVedtaksperiode
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilBrevPeriode
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
@@ -30,27 +29,25 @@ class VedtaksperiodeMedBegrunnelseTest {
 
     @Test
     fun `Skal gi riktig antall brevbegrunnelser med riktig tekst`() {
-        val vedtaksperiodeMedBegrunnelser = lagVedtaksperiodeMedBegrunnelser(
+        val utvidetVedtaksperiodeMedBegrunnelser = lagUtvidetVedtaksperiodeMedBegrunnelser(
             type = Vedtaksperiodetype.FORTSATT_INNVILGET,
-        )
-        val vedtaksperiode = vedtaksperiodeMedBegrunnelser.copy(
-            begrunnelser = mutableSetOf(
-                lagVedtaksbegrunnelse(
-                    vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
+            begrunnelser = listOf(
+                lagRestVedtaksbegrunnelse(
                     personIdenter = listOf(barn1.personIdent.ident),
                     vedtakBegrunnelseSpesifikasjon =
                     VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_SØKER_OG_BARN_BOSATT_I_RIKET,
                 ),
-                lagVedtaksbegrunnelse(
-                    vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
+                lagRestVedtaksbegrunnelse(
                     personIdenter = listOf(barn2.personIdent.ident),
                     vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_BOR_MED_SØKER,
                 ),
             ),
             fritekster = mutableListOf(),
+            utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj()),
         )
+
         val begrunnelserOgFritekster = byggBegrunnelserOgFriteksterForVedtaksperiode(
-            vedtaksperiode = vedtaksperiode,
+            utvidetVedtaksperiodeMedBegrunnelser = utvidetVedtaksperiodeMedBegrunnelser,
             personerIPersongrunnlag = personerIPersongrunnlag,
             målform = Målform.NB,
         )
@@ -60,9 +57,9 @@ class VedtaksperiodeMedBegrunnelseTest {
 
     @Test
     fun `Skal med riktig rekkefølge og tekst på fritekstene`() {
-        val vedtaksperiode = lagVedtaksperiodeMedBegrunnelser(
+        val utvidetVedtaksperiodeMedBegrunnelser = lagUtvidetVedtaksperiodeMedBegrunnelser(
             type = Vedtaksperiodetype.FORTSATT_INNVILGET,
-            begrunnelser = mutableSetOf(),
+            begrunnelser = emptyList(),
             fritekster = mutableListOf(
                 VedtaksbegrunnelseFritekst(
                     id = 1,
@@ -75,9 +72,10 @@ class VedtaksperiodeMedBegrunnelseTest {
                     vedtaksperiodeMedBegrunnelser = mockk(),
                 )
             ),
+            utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj()),
         )
         val begrunnelserOgFritekster = byggBegrunnelserOgFriteksterForVedtaksperiode(
-            vedtaksperiode = vedtaksperiode,
+            utvidetVedtaksperiodeMedBegrunnelser = utvidetVedtaksperiodeMedBegrunnelser,
             personerIPersongrunnlag = personerIPersongrunnlag,
             målform = Målform.NB,
         )
@@ -88,28 +86,21 @@ class VedtaksperiodeMedBegrunnelseTest {
 
     @Test
     fun `Skal gi fortsatt innvilget-brevperiode`() {
-        val vedtaksperiodeMedBegrunnelser = lagVedtaksperiodeMedBegrunnelser(
+        val utvidetVedtaksperiodeMedBegrunnelser = lagUtvidetVedtaksperiodeMedBegrunnelser(
             type = Vedtaksperiodetype.FORTSATT_INNVILGET,
-        )
-        val fortsatInnvilgetPeriode = vedtaksperiodeMedBegrunnelser.copy(
-            begrunnelser = mutableSetOf(
-                lagVedtaksbegrunnelse(
-                    vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
+            begrunnelser = listOf(
+                lagRestVedtaksbegrunnelse(
                     personIdenter = listOf(barn1.personIdent.ident),
                     vedtakBegrunnelseSpesifikasjon =
                     VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_SØKER_OG_BARN_BOSATT_I_RIKET,
                 ),
             ),
+            utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj())
         )
 
         Assertions.assertTrue(
-            fortsatInnvilgetPeriode.tilBrevPeriode(
+            utvidetVedtaksperiodeMedBegrunnelser.tilBrevPeriode(
                 personerIPersongrunnlag = personerIPersongrunnlag,
-                utbetalingsperioder = listOf(
-                    lagUtbetalingsperiode(
-                        utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj())
-                    )
-                ),
                 målform = Målform.NB,
             ) is FortsattInnvilgetBrevPeriode
         )
@@ -117,28 +108,21 @@ class VedtaksperiodeMedBegrunnelseTest {
 
     @Test
     fun `Skal gi innvilget-brevperiode`() {
-        val vedtaksperiodeMedBegrunnelser = lagVedtaksperiodeMedBegrunnelser(
-            type = Vedtaksperiodetype.UTBETALING
-        )
-        val utbetalingsperiode = vedtaksperiodeMedBegrunnelser.copy(
-            begrunnelser = mutableSetOf(
-                lagVedtaksbegrunnelse(
-                    vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
+        val utvidetVedtaksperiodeMedBegrunnelser = lagUtvidetVedtaksperiodeMedBegrunnelser(
+            type = Vedtaksperiodetype.UTBETALING,
+            begrunnelser = listOf(
+                lagRestVedtaksbegrunnelse(
                     personIdenter = listOf(barn1.personIdent.ident),
                     vedtakBegrunnelseSpesifikasjon =
                     VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET,
                 ),
             ),
+            utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj())
         )
 
         Assertions.assertTrue(
-            utbetalingsperiode.tilBrevPeriode(
+            utvidetVedtaksperiodeMedBegrunnelser.tilBrevPeriode(
                 personerIPersongrunnlag = personerIPersongrunnlag,
-                utbetalingsperioder = listOf(
-                    lagUtbetalingsperiode(
-                        utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj())
-                    )
-                ),
                 målform = Målform.NB,
             ) is InnvilgelseBrevPeriode
         )
@@ -146,13 +130,10 @@ class VedtaksperiodeMedBegrunnelseTest {
 
     @Test
     fun `Skal gi avslagbrevperiode`() {
-        val vedtaksperiodeMedBegrunnelser = lagVedtaksperiodeMedBegrunnelser(
+        val utvidetVedtaksperiodeMedBegrunnelser = lagUtvidetVedtaksperiodeMedBegrunnelser(
             type = Vedtaksperiodetype.AVSLAG,
-        )
-        val avslagsperiode = vedtaksperiodeMedBegrunnelser.copy(
-            begrunnelser = mutableSetOf(
-                lagVedtaksbegrunnelse(
-                    vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
+            begrunnelser = listOf(
+                lagRestVedtaksbegrunnelse(
                     personIdenter = listOf(barn1.personIdent.ident),
                     vedtakBegrunnelseSpesifikasjon =
                     VedtakBegrunnelseSpesifikasjon.AVSLAG_BOR_HOS_SØKER,
@@ -161,9 +142,8 @@ class VedtaksperiodeMedBegrunnelseTest {
         )
 
         Assertions.assertTrue(
-            avslagsperiode.tilBrevPeriode(
+            utvidetVedtaksperiodeMedBegrunnelser.tilBrevPeriode(
                 personerIPersongrunnlag = personerIPersongrunnlag,
-                utbetalingsperioder = listOf(),
                 målform = Målform.NB,
             ) is AvslagBrevPeriode
         )
@@ -171,13 +151,10 @@ class VedtaksperiodeMedBegrunnelseTest {
 
     @Test
     fun `Skal gi opphørbrevperiode`() {
-        val vedtaksperiodeMedBegrunnelser = lagVedtaksperiodeMedBegrunnelser(
+        val utvidetVedtaksperiodeMedBegrunnelser = lagUtvidetVedtaksperiodeMedBegrunnelser(
             type = Vedtaksperiodetype.OPPHØR,
-        )
-        val opphørsperiode = vedtaksperiodeMedBegrunnelser.copy(
-            begrunnelser = mutableSetOf(
-                lagVedtaksbegrunnelse(
-                    vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
+            begrunnelser = listOf(
+                lagRestVedtaksbegrunnelse(
                     personIdenter = listOf(barn1.personIdent.ident),
                     vedtakBegrunnelseSpesifikasjon =
                     VedtakBegrunnelseSpesifikasjon.OPPHØR_BARN_FLYTTET_FRA_SØKER,
@@ -186,9 +163,8 @@ class VedtaksperiodeMedBegrunnelseTest {
         )
 
         Assertions.assertTrue(
-            opphørsperiode.tilBrevPeriode(
+            utvidetVedtaksperiodeMedBegrunnelser.tilBrevPeriode(
                 personerIPersongrunnlag = personerIPersongrunnlag,
-                utbetalingsperioder = listOf(),
                 målform = Målform.NB,
             ) is OpphørBrevPeriode
         )
@@ -196,16 +172,16 @@ class VedtaksperiodeMedBegrunnelseTest {
 
     @Test
     fun `Skal gi null ved ingen begrunnelser eller fritekster`() {
-        val opphørsperiode = lagVedtaksperiodeMedBegrunnelser(
+        val utvidetVedtaksperiodeMedBegrunnelser = lagUtvidetVedtaksperiodeMedBegrunnelser(
             type = Vedtaksperiodetype.UTBETALING,
-            begrunnelser = mutableSetOf(),
+            begrunnelser = emptyList(),
             fritekster = mutableListOf(),
+            utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj()),
         )
 
         Assertions.assertTrue(
-            opphørsperiode.tilBrevPeriode(
+            utvidetVedtaksperiodeMedBegrunnelser.tilBrevPeriode(
                 personerIPersongrunnlag = personerIPersongrunnlag,
-                utbetalingsperioder = listOf(),
                 målform = Målform.NB,
             ) == null
         )
