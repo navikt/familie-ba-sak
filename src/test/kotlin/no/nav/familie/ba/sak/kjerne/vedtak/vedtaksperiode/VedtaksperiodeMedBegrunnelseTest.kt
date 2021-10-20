@@ -7,10 +7,10 @@ import no.nav.familie.ba.sak.common.lagUtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.common.lagVedtaksbegrunnelse
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.common.tilfeldigSøker
-import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.AvslagBrevPeriode
-import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.FortsattInnvilgetBrevPeriode
-import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.InnvilgelseBrevPeriode
-import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.OpphørBrevPeriode
+import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.brevperioder.AvslagBrevPeriode
+import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.brevperioder.FortsattInnvilgetBrevPeriode
+import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.brevperioder.InnvilgelseBrevPeriode
+import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.brevperioder.OpphørBrevPeriode
 import no.nav.familie.ba.sak.kjerne.dokument.tilBrevPeriode
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -18,7 +18,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifi
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.BegrunnelseComparator
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.FritekstBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksbegrunnelseFritekst
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.byggBegrunnelserOgFriteksterForVedtaksperiode
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.byggBegrunnelserOgFritekster
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
@@ -48,8 +48,7 @@ class VedtaksperiodeMedBegrunnelseTest {
             utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj()),
         )
 
-        val begrunnelserOgFritekster = byggBegrunnelserOgFriteksterForVedtaksperiode(
-            utvidetVedtaksperiodeMedBegrunnelser = utvidetVedtaksperiodeMedBegrunnelser,
+        val begrunnelserOgFritekster = utvidetVedtaksperiodeMedBegrunnelser.byggBegrunnelserOgFritekster(
             personerIPersongrunnlag = personerIPersongrunnlag,
             målform = Målform.NB,
         )
@@ -76,8 +75,7 @@ class VedtaksperiodeMedBegrunnelseTest {
             ),
             utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj()),
         )
-        val begrunnelserOgFritekster = byggBegrunnelserOgFriteksterForVedtaksperiode(
-            utvidetVedtaksperiodeMedBegrunnelser = utvidetVedtaksperiodeMedBegrunnelser,
+        val begrunnelserOgFritekster = utvidetVedtaksperiodeMedBegrunnelser.byggBegrunnelserOgFritekster(
             personerIPersongrunnlag = personerIPersongrunnlag,
             målform = Målform.NB,
         )
