@@ -33,6 +33,7 @@ import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.EndretUtbetalingBrevPe
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.brevperioder.AvslagBrevPeriode
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.brevperioder.AvslagUtenPeriodeBrevPeriode
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.brevperioder.BrevPeriode
+import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.brevperioder.EndretUtbetalingBernetrygtType
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.brevperioder.EndretUtbetalingBrevPeriode
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.brevperioder.FortsattInnvilgetBrevPeriode
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.brevperioder.InnvilgelseBrevPeriode
@@ -282,6 +283,7 @@ fun UtvidetVedtaksperiodeMedBegrunnelser.hentEndretUtbetalingBrevPeriode(
         else ->
             EndretUtbetalingBrevPeriodeType.ENDRET_UTBETALINGSPERIODE
     },
+    typeBarnetrygd = EndretUtbetalingBernetrygtType.DELT
 )
 
 private fun UtvidetVedtaksperiodeMedBegrunnelser.hentInnvilgelseBrevPeriode(

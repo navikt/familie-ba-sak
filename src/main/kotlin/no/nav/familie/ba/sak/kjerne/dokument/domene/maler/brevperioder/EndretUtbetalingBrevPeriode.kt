@@ -24,6 +24,7 @@ data class EndretUtbetalingBrevPeriode(
         barnasFodselsdager: String,
         begrunnelser: List<Begrunnelse>,
         type: EndretUtbetalingBrevPeriodeType,
+        typeBarnetrygd: EndretUtbetalingBernetrygtType,
     ) : this(
         fom = flettefelt(fom),
         tom = flettefelt(if (tom.isNullOrBlank()) "" else "til $tom "),
@@ -38,6 +39,10 @@ data class EndretUtbetalingBrevPeriode(
             }
         },
         type = flettefelt(type.apiNavn),
-        typeBarnetrygd = flettefelt("ordinær") // TODO fiks
+        typeBarnetrygd = flettefelt("${typeBarnetrygd.navn} ")
     )
+}
+
+enum class EndretUtbetalingBernetrygtType(val navn: String) {
+    DELT("delt")
 }
