@@ -18,7 +18,7 @@ class BehandleAnnullerFødselTaskTest : AbstractSpringIntegrationTest() {
     lateinit var databaseCleanupService: DatabaseCleanupService
 
     @Autowired
-    lateinit var taskRepository: TaskRepository;
+    lateinit var taskRepository: TaskRepository
 
     @Autowired
     lateinit var behandleAnnullertFødselTask: BehandleAnnullertFødselTask;
@@ -35,35 +35,51 @@ class BehandleAnnullerFødselTaskTest : AbstractSpringIntegrationTest() {
                 Task(
                     type = DistribuerVedtaksbrevTask.TASK_STEP_TYPE,
                     payload = ""
-                ).copy(metadataWrapper = PropertiesWrapper(Properties().apply {
-                    this["callId"] = "ooo"
-                }))
+                ).copy(
+                    metadataWrapper = PropertiesWrapper(
+                        Properties().apply {
+                            this["callId"] = "ooo"
+                        }
+                    )
+                )
             ),
             taskRepository.save(
                 Task(
                     type = BehandleFødselshendelseTask.TASK_STEP_TYPE,
                     payload = ""
-                ).copy(metadataWrapper = PropertiesWrapper(Properties().apply {
-                    this["callId"] = "xxx"
-                }))
+                ).copy(
+                    metadataWrapper = PropertiesWrapper(
+                        Properties().apply {
+                            this["callId"] = "xxx"
+                        }
+                    )
+                )
             ),
 
             taskRepository.save(
                 Task(
                     type = BehandleFødselshendelseTask.TASK_STEP_TYPE,
                     payload = ""
-                ).copy(metadataWrapper = PropertiesWrapper(Properties().apply {
-                    this["callId"] = "ooo"
-                })).ferdigstill()
+                ).copy(
+                    metadataWrapper = PropertiesWrapper(
+                        Properties().apply {
+                            this["callId"] = "ooo"
+                        }
+                    )
+                ).ferdigstill()
             ),
 
             taskRepository.save(
                 Task(
                     type = BehandleFødselshendelseTask.TASK_STEP_TYPE,
                     payload = ""
-                ).copy(metadataWrapper = PropertiesWrapper(Properties().apply {
-                    this["callId"] = "ooo"
-                }))
+                ).copy(
+                    metadataWrapper = PropertiesWrapper(
+                        Properties().apply {
+                            this["callId"] = "ooo"
+                        }
+                    )
+                )
             ),
         )
 

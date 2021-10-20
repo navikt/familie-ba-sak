@@ -42,8 +42,8 @@ class BehandleAnnullertFødselTask(
         if (tasker.isEmpty()) {
             logger.info("Finnes ikke åpen task for annullertfødsel tidligere Id = ${dto.tidligereHendelseId}. Forsøker å finne aktiv behandling.")
             if (personRepository.findByPersonIdenter(barnasIdenter).any {
-                    behandlingRepository.finnBehandling(it.personopplysningGrunnlag.behandlingId).aktiv
-                }
+                behandlingRepository.finnBehandling(it.personopplysningGrunnlag.behandlingId).aktiv
+            }
             ) {
                 logger.warn("Finnes aktiv behandling(er) for annullert fødselshendelse.")
             } else {
