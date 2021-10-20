@@ -282,6 +282,11 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
         override val sanityApiNavn = "avslagUregistrertBarn"
     },
+    AVSLAG_IKKE_DOKUMENTERT_BOSATT_I_NORGE {
+
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
+        override val sanityApiNavn = "avslagIkkeDokumentertBosattINorge"
+    },
     OPPHØR_BARN_FLYTTET_FRA_SØKER {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
