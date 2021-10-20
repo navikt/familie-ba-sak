@@ -814,7 +814,8 @@ fun lagUtbetalingsperiodeDetalj(
     person: RestPerson = tilfeldigSøker().tilRestPerson(),
     ytelseType: YtelseType = YtelseType.ORDINÆR_BARNETRYGD,
     utbetaltPerMnd: Int = sats(YtelseType.ORDINÆR_BARNETRYGD),
-) = UtbetalingsperiodeDetalj(person, ytelseType, utbetaltPerMnd, false)
+    prosent: BigDecimal = BigDecimal.valueOf(100)
+) = UtbetalingsperiodeDetalj(person, ytelseType, utbetaltPerMnd, false, prosent)
 
 fun lagVedtaksbegrunnelse(
     vedtakBegrunnelseSpesifikasjon: VedtakBegrunnelseSpesifikasjon =

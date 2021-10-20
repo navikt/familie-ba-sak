@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.fpsak.tidsserie.LocalDateInterval
 import no.nav.fpsak.tidsserie.LocalDateSegment
+import java.math.BigDecimal
 import java.time.LocalDate
 
 /**
@@ -40,6 +41,7 @@ data class UtbetalingsperiodeDetalj(
     val ytelseType: YtelseType,
     val utbetaltPerMnd: Int,
     val erPåvirketAvEndring: Boolean,
+    val prosent: BigDecimal,
 )
 
 fun hentUtbetalingsperiodeForVedtaksperiode(
@@ -96,7 +98,8 @@ fun mapTilUtbetalingsperioder(
 }
 
 internal fun List<AndelTilkjentYtelse>.utledSegmenter(): List<LocalDateSegment<Int>> {
-    // Dersom listen er tom så returnerer vi tom liste fordi at reduceren i beregnUtbetalingsperioderUtenKlassifisering ikke takler tomme lister
+    // Dersom listen er tom så returnerer vi tom liste fordi at reduceren i
+    // beregnUtbetalingsperioderUtenKlassifisering ikke takler tomme lister
     if (this.isEmpty()) return emptyList()
 
     val utbetalingsPerioder = beregnUtbetalingsperioderUtenKlassifisering(this.toSet())
@@ -104,7 +107,9 @@ internal fun List<AndelTilkjentYtelse>.utledSegmenter(): List<LocalDateSegment<I
         .sortedWith(compareBy<LocalDateSegment<Int>>({ it.fom }, { it.value }, { it.tom }))
 }
 
-internal fun List<AndelTilkjentYtelse>.lagUtbetalingsperiodeDetaljer(personopplysningGrunnlag: PersonopplysningGrunnlag): List<UtbetalingsperiodeDetalj> =
+internal fun List<AndelTilkjentYtelse>.lagUtbetalingsperiodeDetaljer(
+    personopplysningGrunnlag: PersonopplysningGrunnlag
+): List<UtbetalingsperiodeDetalj> =
     this.map { andel ->
         val personForAndel =
             personopplysningGrunnlag.personer.find { person -> andel.personIdent == person.personIdent.ident }
@@ -114,6 +119,7 @@ internal fun List<AndelTilkjentYtelse>.lagUtbetalingsperiodeDetaljer(personopply
             person = personForAndel.tilRestPerson(),
             ytelseType = andel.type,
             utbetaltPerMnd = andel.kalkulertUtbetalingsbeløp,
-            erPåvirketAvEndring = andel.endretUtbetalingAndeler.isNotEmpty()
+            erPåvirketAvEndring = andel.endretUtbetalingAndeler.isNotEmpty(),
+            prosent = andel.prosent,
         )
     }
