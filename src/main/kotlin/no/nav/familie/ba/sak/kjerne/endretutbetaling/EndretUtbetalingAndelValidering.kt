@@ -62,12 +62,11 @@ object EndretUtbetalingAndelValidering {
     ) {
         if (endretUtbetalingAndel.årsak != Årsak.DELT_BOSTED) return
 
-        if (!andelTilkjentYtelser
+        if (
+            !andelTilkjentYtelser
                 .filter { it.personIdent == endretUtbetalingAndel.person?.personIdent?.ident!! }
-                .filter
-                {
-                    it.stønadsPeriode().overlapperHeltEllerDelvisMed(endretUtbetalingAndel.periode())
-                }.any { it.erDeltBosted() }
+                .filter { it.stønadsPeriode().overlapperHeltEllerDelvisMed(endretUtbetalingAndel.periode()) }
+                .any { it.erDeltBosted() }
         ) {
             throw UtbetalingsikkerhetFeil(
                 melding = "Det er ingen sats for delt bosted i perioden det opprettes en endring med årsak delt bosted for.",
