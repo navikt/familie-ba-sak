@@ -198,11 +198,11 @@ fun hentPersonerForEtterEndretUtbetalingsperiode(
         triggesAv.endringsaarsaker.contains(endretUtbetalingAndel.årsak)
 }.mapNotNull { it.person?.personIdent?.ident }
 
-fun EndretUtbetalingAndel.hentGyldigEndretBegrunnelse(sanityBegrunnelser: List<SanityBegrunnelse>): List<VedtakBegrunnelseSpesifikasjon> {
+fun EndretUtbetalingAndel.hentGyldigEndretBegrunnelser(sanityBegrunnelser: List<SanityBegrunnelse>): List<VedtakBegrunnelseSpesifikasjon> {
 
     return VedtakBegrunnelseSpesifikasjon.values()
         .filter { vedtakBegrunnelseSpesifikasjon ->
-            vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType == VedtakBegrunnelseType.ENDRET_UTBETALINGSPERIODE
+            vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType == VedtakBegrunnelseType.ENDRET_UTBETALING
         }
         .filter { vedtakBegrunnelseSpesifikasjon ->
             val triggesAv = vedtakBegrunnelseSpesifikasjon.tilSanityBegrunnelse(sanityBegrunnelser).tilTriggesAv()

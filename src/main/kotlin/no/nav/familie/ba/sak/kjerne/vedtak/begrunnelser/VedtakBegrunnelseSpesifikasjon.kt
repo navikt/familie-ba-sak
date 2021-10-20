@@ -609,12 +609,12 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
         override val sanityApiNavn = "reduksjonSatsendring"
     },
     ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_FULL_UTBETALING {
-        override val vedtakBegrunnelseType = VedtakBegrunnelseType.ENDRET_UTBETALINGSPERIODE
-        override val sanityApiNavn = "endretUtbetalingsperiodeDeltBostedFullUtbetalingForSoknad"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.ENDRET_UTBETALING
+        override val sanityApiNavn = "endretUtbetalingsperiodeDeltBostedFullUtbetaling"
     },
     ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_INGEN_UTBETALING {
-        override val vedtakBegrunnelseType = VedtakBegrunnelseType.ENDRET_UTBETALINGSPERIODE
-        override val sanityApiNavn = "endretUtbetalingsperiodeDeltBostedIngenUtbetalingForSoknad"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.ENDRET_UTBETALING
+        override val sanityApiNavn = "endretUtbetalingsperiodeDeltBostedIngenUtbetaling"
     };
 
     fun triggesForPeriode(
@@ -650,14 +650,7 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
                 .finnSatsendring(utvidetVedtaksperiodeMedBegrunnelser.fom ?: TIDENES_MORGEN)
                 .isNotEmpty()
 
-            triggesAv.erEndret() ->
-                if (erEtterEndretPeriode)
-                    triggesAv.etterEndretUtbetaling
-                else
-                    triggesAvSkalUtbetales(
-                        endretUtbetalingAndeler = endretUtbetalingAndeler,
-                        triggesAv = triggesAv
-                    )
+            triggesAv.erEndret() -> erEtterEndretPeriode && triggesAv.etterEndretUtbetaling
 
             else -> hentPersonerForAlleUtgjørendeVilkår(
                 vilkårsvurdering = vilkårsvurdering,
@@ -694,23 +687,6 @@ fun triggesAvSkalUtbetales(
     }
 }
 
-fun triggesAvEtterEndretPeriode(
-    endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
-    utvidetVedtaksperiodeMedBegrunnelser: UtvidetVedtaksperiodeMedBegrunnelser,
-    aktuellePersoner: List<Person>,
-    triggesAv: TriggesAv
-): Boolean {
-
-    val erEtterEndretPeriode = erEtterEndretPeriodeAvSammeÅrsak(
-        endretUtbetalingAndeler,
-        utvidetVedtaksperiodeMedBegrunnelser,
-        aktuellePersoner,
-        triggesAv
-    )
-
-    return erEtterEndretPeriode && (erEtterEndretPeriode == triggesAv.etterEndretUtbetaling)
-}
-
 private fun erEtterEndretPeriodeAvSammeÅrsak(
     endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
     utvidetVedtaksperiodeMedBegrunnelser: UtvidetVedtaksperiodeMedBegrunnelser,
@@ -738,7 +714,7 @@ enum class VedtakBegrunnelseType {
     AVSLAG,
     OPPHØR,
     FORTSATT_INNVILGET,
-    ENDRET_UTBETALINGSPERIODE
+    ENDRET_UTBETALING
 }
 
 fun VedtakBegrunnelseSpesifikasjon.tilVedtaksbegrunnelse(

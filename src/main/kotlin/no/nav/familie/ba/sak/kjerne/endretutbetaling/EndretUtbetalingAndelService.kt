@@ -12,7 +12,7 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValide
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.fraRestEndretUtbetalingAndel
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.hentGyldigEndretBegrunnelse
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.hentGyldigEndretBegrunnelser
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import org.springframework.stereotype.Service
@@ -40,7 +40,7 @@ class EndretUtbetalingAndelService(
                 .first()
 
         endretUtbetalingAndel.fraRestEndretUtbetalingAndel(restEndretUtbetalingAndel, person).also {
-            it.vedtakBegrunnelseSpesifikasjoner = it.hentGyldigEndretBegrunnelse(brevKlient.hentSanityBegrunnelse())
+            it.vedtakBegrunnelseSpesifikasjoner = it.hentGyldigEndretBegrunnelser(brevKlient.hentSanityBegrunnelse())
         }
 
         validerIngenOverlappendeEndring(
