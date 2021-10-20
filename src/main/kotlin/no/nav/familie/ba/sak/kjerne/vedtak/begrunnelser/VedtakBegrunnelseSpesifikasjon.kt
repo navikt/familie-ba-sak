@@ -651,9 +651,10 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
             !utvidetVedtaksperiodeMedBegrunnelser.type.tillatteBegrunnelsestyper.contains(vedtakBegrunnelseType) -> false
             triggesAv.personerManglerOpplysninger -> vilkårsvurdering.harPersonerManglerOpplysninger()
             triggesAv.barnMedSeksårsdag -> persongrunnlag.harBarnMedSeksårsdagPåFom(utvidetVedtaksperiodeMedBegrunnelser.fom)
-            triggesAv.satsendring -> SatsService
-                .finnSatsendring(utvidetVedtaksperiodeMedBegrunnelser.fom ?: TIDENES_MORGEN)
-                .isNotEmpty()
+            triggesAv.satsendring ->
+                SatsService
+                    .finnSatsendring(utvidetVedtaksperiodeMedBegrunnelser.fom ?: TIDENES_MORGEN)
+                    .isNotEmpty()
 
             triggesAv.erEndret() -> erEtterEndretPeriode && triggesAv.etterEndretUtbetaling
 
