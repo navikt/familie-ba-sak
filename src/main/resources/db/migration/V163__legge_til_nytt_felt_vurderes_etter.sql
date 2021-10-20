@@ -1,5 +1,5 @@
 ALTER TABLE vilkar_resultat
-    ADD COLUMN vurderes_etter varchar(50);
+    ADD COLUMN vurderes_etter varchar;
 
 UPDATE vilkar_resultat
 SET vurderes_etter = 'NASJONALE_REGLER'
