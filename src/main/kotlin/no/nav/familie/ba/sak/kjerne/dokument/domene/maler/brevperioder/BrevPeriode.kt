@@ -17,4 +17,3 @@ interface BrevPeriode {
         const val BEGRUNNELSE_ERROR_MSG = "Begrunnelse er ikke string eller begrunnelseData"
     }
 }
-

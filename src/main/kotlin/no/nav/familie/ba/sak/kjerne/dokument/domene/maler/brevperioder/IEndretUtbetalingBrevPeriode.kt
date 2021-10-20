@@ -13,4 +13,3 @@ interface IEndretUtbetalingBrevPeriode : BrevPeriode {
     override val type: Flettefelt
     val typeBarnetrygd: Flettefelt
 }
-
