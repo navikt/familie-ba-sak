@@ -13,8 +13,12 @@ sette
 * Vi bruker ktlint i dette prosjektet for å formatere kode.
 * Du kan skru på automatisk reformattering av filer ved å installere en plugin som heter`Ktlint (unofficial)`
   fra `Preferences > Plugins > Marketplace`
-* Gå til `Preferences > Tools > Actions on Save` og huk av for `Reformat code` og `Optimize imports`.
+* Gå til `Preferences > Tools > Actions on Save` og huk av så `Reformat code` og `Optimize imports` er markert.
 * Gå til `Preferences > Tools > ktlint`og pass på at `Enable ktlint` og `Lint after Reformat` er huket av.
+
+#### Manuel kjøring av ktlint
+
+* Kjør `mvn antrun:run@ktlint-format` i terminalen
 
 ## Kafka
 
