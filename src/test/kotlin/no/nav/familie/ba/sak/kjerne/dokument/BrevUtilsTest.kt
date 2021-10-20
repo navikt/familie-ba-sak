@@ -10,6 +10,8 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Brevmal
+import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.EndretUtbetalingBrevPeriodeType
+import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.flettefelt
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.domene.Totrinnskontroll
@@ -19,6 +21,7 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.math.BigDecimal
 
 internal class BrevUtilsTest {
 
@@ -328,6 +331,60 @@ internal class BrevUtilsTest {
         Assertions.assertEquals(
             "§§ 2, 4, 10 og 11",
             hentHjemmeltekst(utvidetVedtaksperioderMedBegrunnelser, sanityBegrunnelserMock)
+        )
+    }
+
+    @Test
+    fun `hentEndretUtbetalingBrevPeriode skal gi riktig periodetype`() {
+        val utvidetVedtaksperiodMedBegrunnelserFullUtbetaling =
+            lagUtvidetVedtaksperiodeMedBegrunnelser(
+                utbetalingsperiodeDetaljer = listOf(
+                    lagUtbetalingsperiodeDetalj(
+                        prosent = BigDecimal.valueOf(100)
+                    ),
+                    lagUtbetalingsperiodeDetalj(
+                        prosent = BigDecimal.valueOf(100)
+                    )
+                )
+            )
+        val utvidetVedtaksperiodMedBegrunnelserForskjelligUtbetaling =
+            lagUtvidetVedtaksperiodeMedBegrunnelser(
+                utbetalingsperiodeDetaljer = listOf(
+                    lagUtbetalingsperiodeDetalj(
+                        prosent = BigDecimal.valueOf(100)
+                    ),
+                    lagUtbetalingsperiodeDetalj(
+                        prosent = BigDecimal.ZERO
+                    )
+                )
+
+            )
+        val utvidetVedtaksperiodMedBegrunnelserIngenUtbetaling =
+            lagUtvidetVedtaksperiodeMedBegrunnelser(
+                utbetalingsperiodeDetaljer = listOf(
+                    lagUtbetalingsperiodeDetalj(
+                        prosent = BigDecimal.ZERO
+                    ),
+                    lagUtbetalingsperiodeDetalj(
+                        prosent = BigDecimal.ZERO
+                    )
+                )
+            )
+
+        Assertions.assertEquals(
+            flettefelt(EndretUtbetalingBrevPeriodeType.ENDRET_UTBETALINGSPERIODE.apiNavn),
+            utvidetVedtaksperiodMedBegrunnelserFullUtbetaling.hentEndretUtbetalingBrevPeriode("", emptyList()).type
+        )
+
+        Assertions.assertEquals(
+            flettefelt(EndretUtbetalingBrevPeriodeType.ENDRET_UTBETALINGSPERIODE.apiNavn),
+            utvidetVedtaksperiodMedBegrunnelserForskjelligUtbetaling
+                .hentEndretUtbetalingBrevPeriode("", emptyList()).type
+        )
+
+        Assertions.assertEquals(
+            flettefelt(EndretUtbetalingBrevPeriodeType.ENDRET_UTBETALINGSPERIODE_INGEN_UTBETALING.apiNavn),
+            utvidetVedtaksperiodMedBegrunnelserIngenUtbetaling.hentEndretUtbetalingBrevPeriode("", emptyList()).type
         )
     }
 }
