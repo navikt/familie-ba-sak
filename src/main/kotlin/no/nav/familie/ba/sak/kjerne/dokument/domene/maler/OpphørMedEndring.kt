@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.dokument.domene.maler
 
+import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.brevperioder.BrevPeriode
+
 data class OpphørMedEndring(
     override val mal: Brevmal = Brevmal.VEDTAK_OPPHØR_MED_ENDRING,
     override val data: OpphørMedEndringData
