@@ -20,6 +20,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.SatsService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.beregning.domene.lagVertikaleSegmenter
 import no.nav.familie.ba.sak.kjerne.dokument.BrevKlient
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.dokument.domene.tilTriggesAv
@@ -292,25 +293,50 @@ class VedtaksperiodeService(
     }
 
     fun genererVedtaksperioderMedBegrunnelser(vedtak: Vedtak): List<VedtaksperiodeMedBegrunnelser> {
-        val utbetalingsperioderUtenEndringer = hentUtbetalingsperioder(vedtak.behandling) {
-            it.filter { andelTilkjentYtelse -> andelTilkjentYtelse.endretUtbetalingAndeler.isEmpty() }
-        }
+        val andelerTilkjentYtelse =
+            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = vedtak.behandling.id)
 
-        val utbetalingOgOpphørsperioder =
-            (
-                utbetalingsperioderUtenEndringer +
-                    hentOpphørsperioder(vedtak.behandling)
-                ).map {
-                it.tilVedtaksperiodeMedBegrunnelse(vedtak)
-            }
+        val utbetalingsperioder =
+            andelerTilkjentYtelse.filter { it.endretUtbetalingAndeler.isEmpty() }.lagVertikaleSegmenter()
+                .map { (segmenter, _) ->
+                    VedtaksperiodeMedBegrunnelser(
+                        fom = segmenter.fom,
+                        tom = segmenter.tom,
+                        vedtak = vedtak,
+                        type = Vedtaksperiodetype.UTBETALING
+                    )
+                }
+
+        val endredeUtbetalingsperioder =
+            andelerTilkjentYtelse.filter { it.endretUtbetalingAndeler.isNotEmpty() }.lagVertikaleSegmenter()
+                .map { (segmenter, andelerForSegment) ->
+                    VedtaksperiodeMedBegrunnelser(
+                        fom = segmenter.fom,
+                        tom = segmenter.tom,
+                        vedtak = vedtak,
+                        type = Vedtaksperiodetype.ENDRET_UTBETALING
+                    ).also { vedtaksperiodeMedBegrunnelse ->
+                        val endretUtbetalingAndeler = andelerForSegment.flatMap { it.endretUtbetalingAndeler }
+                        vedtaksperiodeMedBegrunnelse.begrunnelser.addAll(
+                            endretUtbetalingAndeler
+                                .flatMap { it.vedtakBegrunnelseSpesifikasjoner }.toSet()
+                                .map { vedtakBegrunnelseSpesifikasjon ->
+                                    Vedtaksbegrunnelse(
+                                        vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelse,
+                                        vedtakBegrunnelseSpesifikasjon = vedtakBegrunnelseSpesifikasjon,
+                                        personIdenter = endretUtbetalingAndeler.filter {
+                                            it.harVedtakBegrunnelseSpesifikasjon(vedtakBegrunnelseSpesifikasjon)
+                                        }.mapNotNull { it.person?.personIdent?.ident }
+                                    )
+                                })
+                    }
+                }
+
+        val opphørsperioder = hentOpphørsperioder(vedtak.behandling).map { it.tilVedtaksperiodeMedBegrunnelse(vedtak) }
+
         val avslagsperioder = hentAvslagsperioderMedBegrunnelser(vedtak)
 
-        val endretUtbetalingsperioder = hentEndredeUtbetalingsperioderMedBegrunnelser(
-            vedtak = vedtak,
-            endredeUtbetalingsAndeler = endretUtbetalingAndelRepository.findByBehandlingId(vedtak.behandling.id)
-        )
-
-        return utbetalingOgOpphørsperioder + avslagsperioder + endretUtbetalingsperioder
+        return utbetalingsperioder + endredeUtbetalingsperioder + opphørsperioder + avslagsperioder
     }
 
     fun kopierOverVedtaksperioder(deaktivertVedtak: Vedtak, aktivtVedtak: Vedtak) {
@@ -405,8 +431,8 @@ class VedtaksperiodeService(
                                         triggesAv = triggesAv,
                                         vedtakBegrunnelseType = vedtakBegrunnelseType,
                                         endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(
-                                                behandling.id
-                                            )
+                                            behandling.id
+                                        )
                                     )
                                 ) {
                                     acc.add(standardBegrunnelse)
@@ -414,11 +440,10 @@ class VedtaksperiodeService(
 
                                 acc
                             }
-
-                    standardbegrunnelser.ifEmpty {
+                    if (utvidetVedtaksperiodeMedBegrunnelser.type == Vedtaksperiodetype.UTBETALING && standardbegrunnelser.isEmpty()) {
                         VedtakBegrunnelseSpesifikasjon.values()
                             .filter { it.vedtakBegrunnelseType == VedtakBegrunnelseType.FORTSATT_INNVILGET }
-                    }
+                    } else standardbegrunnelser
                 }
             }
 
@@ -498,7 +523,6 @@ class VedtaksperiodeService(
 
     fun hentUtbetalingsperioder(
         behandling: Behandling,
-        filterAndeler: (andelerTilkjentYtelse: List<AndelTilkjentYtelse>) -> List<AndelTilkjentYtelse> = { it }
     ): List<Utbetalingsperiode> {
         val personopplysningGrunnlag = persongrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
             ?: return emptyList()
@@ -508,7 +532,6 @@ class VedtaksperiodeService(
         return mapTilUtbetalingsperioder(
             andelerTilkjentYtelse = andelerTilkjentYtelse,
             personopplysningGrunnlag = personopplysningGrunnlag,
-            filterAndeler = filterAndeler
         )
     }
 
