@@ -68,8 +68,7 @@ class BisysService(
             return emptyList()
         }
 
-        val allePerioder =
-            tilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(behandling.id)?.andelerTilkjentYtelse
+        return tilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(behandling.id)?.andelerTilkjentYtelse
                 ?.filter { it.erUtvidet() || it.erSmåbarnstillegg() }
                 ?.filter {
                     it.stønadTom.isSameOrAfter(fraDato.toYearMonth())
@@ -83,13 +82,11 @@ class BisysService(
                         manueltBeregnet = false
                     )
                 } ?: emptyList()
-
-        return allePerioder
     }
 
-    private fun slåSammenSammenhengendePerioder(utbetalingerAvEtGittBeløp: List<UtvidetBarnetrygdPeriode>)
+    private fun slåSammenSammenhengendePerioder(utbetalingerAvSammeBeløp: List<UtvidetBarnetrygdPeriode>)
         : List<UtvidetBarnetrygdPeriode> {
-        return utbetalingerAvEtGittBeløp.sortedBy { it.fomMåned }
+        return utbetalingerAvSammeBeløp.sortedBy { it.fomMåned }
             .fold(mutableListOf()) { sammenslåttePerioder, nesteUtbetaling ->
                 if (sammenslåttePerioder.lastOrNull()?.tomMåned == nesteUtbetaling.fomMåned.minusMonths(1)
                     && sammenslåttePerioder.lastOrNull()?.manueltBeregnet == nesteUtbetaling.manueltBeregnet
