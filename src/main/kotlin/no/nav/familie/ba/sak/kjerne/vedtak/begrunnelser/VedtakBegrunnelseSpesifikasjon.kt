@@ -152,6 +152,11 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
         override val sanityApiNavn = "innvilgelseBeredskapshjem"
     },
+    INNVILGELSE_ALENE_FRA_FØDSEL {
+
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE
+        override val sanityApiNavn = "innvilgelseAleneFraFodsel"
+    },
     REDUKSJON_BOSATT_I_RIKTET {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
