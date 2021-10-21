@@ -44,7 +44,8 @@ class BisysService(
             sammenslåttePerioder.sortedWith(
                 compareBy(
                     { it.stønadstype },
-                    { it.fomMåned })
+                    { it.fomMåned }
+                )
             )
         )
     }
@@ -69,27 +70,26 @@ class BisysService(
         }
 
         return tilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(behandling.id)?.andelerTilkjentYtelse
-                ?.filter { it.erUtvidet() || it.erSmåbarnstillegg() }
-                ?.filter {
-                    it.stønadTom.isSameOrAfter(fraDato.toYearMonth())
-                }
-                ?.map {
-                    UtvidetBarnetrygdPeriode(
-                        stønadstype = BisysStønadstype.UTVIDET,
-                        fomMåned = it.stønadFom,
-                        tomMåned = it.stønadTom,
-                        beløp = it.sats.toDouble(),
-                        manueltBeregnet = false
-                    )
-                } ?: emptyList()
+            ?.filter { it.erUtvidet() || it.erSmåbarnstillegg() }
+            ?.filter {
+                it.stønadTom.isSameOrAfter(fraDato.toYearMonth())
+            }
+            ?.map {
+                UtvidetBarnetrygdPeriode(
+                    stønadstype = BisysStønadstype.UTVIDET,
+                    fomMåned = it.stønadFom,
+                    tomMåned = it.stønadTom,
+                    beløp = it.sats.toDouble(),
+                    manueltBeregnet = false
+                )
+            } ?: emptyList()
     }
 
-    private fun slåSammenSammenhengendePerioder(utbetalingerAvSammeBeløp: List<UtvidetBarnetrygdPeriode>)
-        : List<UtvidetBarnetrygdPeriode> {
+    private fun slåSammenSammenhengendePerioder(utbetalingerAvSammeBeløp: List<UtvidetBarnetrygdPeriode>): List<UtvidetBarnetrygdPeriode> {
         return utbetalingerAvSammeBeløp.sortedBy { it.fomMåned }
             .fold(mutableListOf()) { sammenslåttePerioder, nesteUtbetaling ->
-                if (sammenslåttePerioder.lastOrNull()?.tomMåned == nesteUtbetaling.fomMåned.minusMonths(1)
-                    && sammenslåttePerioder.lastOrNull()?.manueltBeregnet == nesteUtbetaling.manueltBeregnet
+                if (sammenslåttePerioder.lastOrNull()?.tomMåned == nesteUtbetaling.fomMåned.minusMonths(1) &&
+                    sammenslåttePerioder.lastOrNull()?.manueltBeregnet == nesteUtbetaling.manueltBeregnet
                 ) {
                     sammenslåttePerioder.apply { add(removeLast().copy(tomMåned = nesteUtbetaling.tomMåned)) }
                 } else sammenslåttePerioder.apply { add(nesteUtbetaling) }
