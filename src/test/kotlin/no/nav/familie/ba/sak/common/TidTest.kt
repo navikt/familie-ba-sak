@@ -94,7 +94,7 @@ internal class TidTest {
         val personIdent = randomFnr()
         val behandling = lagBehandling()
         val resultat: Resultat = mockk()
-        val vilkår: Vilkår = mockk()
+        val vilkår: Vilkår = mockk(relaxed = true)
         val vilkårsvurdering = lagVilkårsvurdering(personIdent, behandling, resultat)
 
         val personResultat = PersonResultat(
