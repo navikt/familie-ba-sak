@@ -170,9 +170,10 @@ object TilkjentYtelseUtils {
                 val andelSomSkalSlåsSammen = nyeAndelerForPerson.singleOrNull {
                     andel.stønadTom.sisteDagIInneværendeMåned()
                         .erDagenFør(it.stønadFom.førsteDagIInneværendeMåned())
-                        && andel.kalkulertUtbetalingsbeløp == it.kalkulertUtbetalingsbeløp
-                        && andel.endretUtbetalingAndeler.firstOrNull() == it.endretUtbetalingAndeler.firstOrNull()
+                        && it.prosent == BigDecimal(0)
+                        && andel.prosent == BigDecimal(0)
                         && andel.endretUtbetalingAndeler.isNotEmpty()
+                        && andel.endretUtbetalingAndeler.singleOrNull() == it.endretUtbetalingAndeler.singleOrNull()
                 }
                 if (andelSomSkalSlåsSammen != null) {
                     val nyAndel = andel.copy(stønadTom = andelSomSkalSlåsSammen.stønadTom)
