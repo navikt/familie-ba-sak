@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.dokument.domene.maler
 
+import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.brevperioder.BrevPeriode
+
 data class AutovedtakNyfødtBarnFraFør(
     override val mal: Brevmal = Brevmal.AUTOVEDTAK_NYFØDT_BARN_FRA_FØR,
     override val data: AutovedtakNyfødtBarnFraFørData

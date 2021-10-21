@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.dokument.domene.maler
 
+import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.brevperioder.BrevPeriode
+
 data class VedtakEndring(
     override val mal: Brevmal = Brevmal.VEDTAK_ENDRING,
     override val data: EndringVedtakData
