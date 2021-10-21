@@ -25,6 +25,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
+import java.math.BigDecimal
 import java.time.LocalDate
 import javax.persistence.AttributeConverter
 import javax.persistence.Converter
@@ -46,8 +47,11 @@ data class TriggesAv(
     val deltbosted: Boolean = false,
     val valgbar: Boolean = true,
     val endringsaarsaker: Set<Årsak> = emptySet(),
-    val etterEndretUtbetaling: Boolean = false
-)
+    val etterEndretUtbetaling: Boolean = false,
+    val endretUtbetaingSkalUtbetales: Boolean = false
+) {
+    fun erEndret() = endringsaarsaker.isNotEmpty()
+}
 
 enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
 
@@ -608,6 +612,14 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
     REDUKSJON_SATSENDRING {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
         override val sanityApiNavn = "reduksjonSatsendring"
+    },
+    ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_FULL_UTBETALING {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.ENDRET_UTBETALING
+        override val sanityApiNavn = "endretUtbetalingsperiodeDeltBostedFullUtbetaling"
+    },
+    ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_INGEN_UTBETALING {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.ENDRET_UTBETALING
+        override val sanityApiNavn = "endretUtbetalingsperiodeDeltBostedIngenUtbetaling"
     };
 
     fun triggesForPeriode(
@@ -619,20 +631,6 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
         vedtakBegrunnelseType: VedtakBegrunnelseType = this.vedtakBegrunnelseType,
         endretUtbetalingAndeler: List<EndretUtbetalingAndel> = emptyList()
     ): Boolean {
-        if (!triggesAv.valgbar) return false
-
-        if (!utvidetVedtaksperiodeMedBegrunnelser.type.tillatteBegrunnelsestyper.contains(vedtakBegrunnelseType)) return false
-
-        if (triggesAv.personerManglerOpplysninger) return vilkårsvurdering.harPersonerManglerOpplysninger()
-
-        if (triggesAv.barnMedSeksårsdag)
-            return persongrunnlag.harBarnMedSeksårsdagPåFom(utvidetVedtaksperiodeMedBegrunnelser.fom)
-
-        if (triggesAv.satsendring)
-            return SatsService
-                .finnSatsendring(utvidetVedtaksperiodeMedBegrunnelser.fom ?: TIDENES_MORGEN)
-                .isNotEmpty()
-
         val aktuellePersoner = persongrunnlag.personer
             .filter { person -> triggesAv.personTyper.contains(person.type) }
             .filter { person ->
@@ -641,29 +639,57 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
                 } else true
             }
 
-        if (triggesAv.etterEndretUtbetaling)
-            return erEtterEndretPeriodeAvSammeÅrsak(
-                endretUtbetalingAndeler,
-                utvidetVedtaksperiodeMedBegrunnelser,
-                aktuellePersoner,
-                triggesAv
-            )
+        val erEtterEndretPeriode = erEtterEndretPeriodeAvSammeÅrsak(
+            endretUtbetalingAndeler,
+            utvidetVedtaksperiodeMedBegrunnelser,
+            aktuellePersoner,
+            triggesAv
+        )
 
-        return hentPersonerForAlleUtgjørendeVilkår(
-            vilkårsvurdering = vilkårsvurdering,
-            vedtaksperiode = Periode(
-                fom = utvidetVedtaksperiodeMedBegrunnelser.fom ?: TIDENES_MORGEN,
-                tom = utvidetVedtaksperiodeMedBegrunnelser.tom ?: TIDENES_ENDE
-            ),
-            oppdatertBegrunnelseType = vedtakBegrunnelseType,
-            aktuellePersonerForVedtaksperiode = aktuellePersoner,
-            triggesAv = triggesAv
-        ).isNotEmpty()
+        return when {
+            !triggesAv.valgbar -> false
+            !utvidetVedtaksperiodeMedBegrunnelser.type.tillatteBegrunnelsestyper.contains(vedtakBegrunnelseType) -> false
+            triggesAv.personerManglerOpplysninger -> vilkårsvurdering.harPersonerManglerOpplysninger()
+            triggesAv.barnMedSeksårsdag -> persongrunnlag.harBarnMedSeksårsdagPåFom(utvidetVedtaksperiodeMedBegrunnelser.fom)
+            triggesAv.satsendring ->
+                SatsService
+                    .finnSatsendring(utvidetVedtaksperiodeMedBegrunnelser.fom ?: TIDENES_MORGEN)
+                    .isNotEmpty()
+
+            triggesAv.erEndret() -> erEtterEndretPeriode && triggesAv.etterEndretUtbetaling
+
+            else -> hentPersonerForAlleUtgjørendeVilkår(
+                vilkårsvurdering = vilkårsvurdering,
+                vedtaksperiode = Periode(
+                    fom = utvidetVedtaksperiodeMedBegrunnelser.fom ?: TIDENES_MORGEN,
+                    tom = utvidetVedtaksperiodeMedBegrunnelser.tom ?: TIDENES_ENDE
+                ),
+                oppdatertBegrunnelseType = vedtakBegrunnelseType,
+                aktuellePersonerForVedtaksperiode = aktuellePersoner,
+                triggesAv = triggesAv
+            ).isNotEmpty()
+        }
     }
 
     companion object {
 
         fun List<LocalDate>.tilBrevTekst(): String = Utils.slåSammen(this.sorted().map { it.tilKortString() })
+    }
+}
+
+fun triggesAvSkalUtbetales(
+    endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
+    triggesAv: TriggesAv
+): Boolean {
+    if (triggesAv.etterEndretUtbetaling) return false
+
+    val inneholderAndelSomSkalUtbetales = endretUtbetalingAndeler.any { it.prosent!! != BigDecimal.ZERO }
+    val inneholderAndelSomIkkeSkalUtbetales = endretUtbetalingAndeler.any { it.prosent!! == BigDecimal.ZERO }
+
+    return if (triggesAv.endretUtbetaingSkalUtbetales) {
+        inneholderAndelSomSkalUtbetales
+    } else {
+        inneholderAndelSomIkkeSkalUtbetales
     }
 }
 
@@ -693,7 +719,8 @@ enum class VedtakBegrunnelseType {
     REDUKSJON,
     AVSLAG,
     OPPHØR,
-    FORTSATT_INNVILGET
+    FORTSATT_INNVILGET,
+    ENDRET_UTBETALING
 }
 
 fun VedtakBegrunnelseSpesifikasjon.tilVedtaksbegrunnelse(
