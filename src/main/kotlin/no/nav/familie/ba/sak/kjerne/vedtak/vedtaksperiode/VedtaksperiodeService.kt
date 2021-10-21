@@ -308,28 +308,31 @@ class VedtaksperiodeService(
                 }
 
         val endredeUtbetalingsperioder =
-            andelerTilkjentYtelse.filter { it.endretUtbetalingAndeler.isNotEmpty() }.lagVertikaleSegmenter()
-                .map { (segmenter, andelerForSegment) ->
-                    VedtaksperiodeMedBegrunnelser(
-                        fom = segmenter.fom,
-                        tom = segmenter.tom,
-                        vedtak = vedtak,
-                        type = Vedtaksperiodetype.ENDRET_UTBETALING
-                    ).also { vedtaksperiodeMedBegrunnelse ->
-                        val endretUtbetalingAndeler = andelerForSegment.flatMap { it.endretUtbetalingAndeler }
-                        vedtaksperiodeMedBegrunnelse.begrunnelser.addAll(
-                            endretUtbetalingAndeler
-                                .flatMap { it.vedtakBegrunnelseSpesifikasjoner }.toSet()
-                                .map { vedtakBegrunnelseSpesifikasjon ->
-                                    Vedtaksbegrunnelse(
-                                        vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelse,
-                                        vedtakBegrunnelseSpesifikasjon = vedtakBegrunnelseSpesifikasjon,
-                                        personIdenter = endretUtbetalingAndeler.filter {
-                                            it.harVedtakBegrunnelseSpesifikasjon(vedtakBegrunnelseSpesifikasjon)
-                                        }.mapNotNull { it.person?.personIdent?.ident }
-                                    )
-                                })
-                    }
+            andelerTilkjentYtelse.filter { it.endretUtbetalingAndeler.isNotEmpty() }.groupBy { it.prosent }
+                .flatMap { (_, andeler) ->
+                    andeler.lagVertikaleSegmenter()
+                        .map { (segmenter, andelerForSegment) ->
+                            VedtaksperiodeMedBegrunnelser(
+                                fom = segmenter.fom,
+                                tom = segmenter.tom,
+                                vedtak = vedtak,
+                                type = Vedtaksperiodetype.ENDRET_UTBETALING
+                            ).also { vedtaksperiodeMedBegrunnelse ->
+                                val endretUtbetalingAndeler = andelerForSegment.flatMap { it.endretUtbetalingAndeler }
+                                vedtaksperiodeMedBegrunnelse.begrunnelser.addAll(
+                                    endretUtbetalingAndeler
+                                        .flatMap { it.vedtakBegrunnelseSpesifikasjoner }.toSet()
+                                        .map { vedtakBegrunnelseSpesifikasjon ->
+                                            Vedtaksbegrunnelse(
+                                                vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelse,
+                                                vedtakBegrunnelseSpesifikasjon = vedtakBegrunnelseSpesifikasjon,
+                                                personIdenter = endretUtbetalingAndeler.filter {
+                                                    it.harVedtakBegrunnelseSpesifikasjon(vedtakBegrunnelseSpesifikasjon)
+                                                }.mapNotNull { it.person?.personIdent?.ident }
+                                            )
+                                        })
+                            }
+                        }
                 }
 
         val opphørsperioder = hentOpphørsperioder(vedtak.behandling).map { it.tilVedtaksperiodeMedBegrunnelse(vedtak) }
