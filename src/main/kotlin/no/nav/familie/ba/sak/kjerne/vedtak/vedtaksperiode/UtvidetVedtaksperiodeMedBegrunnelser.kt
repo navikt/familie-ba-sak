@@ -13,7 +13,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilRestVedtaksbegrunnelse
 import no.nav.fpsak.tidsserie.LocalDateInterval
 import no.nav.fpsak.tidsserie.LocalDateSegment
-import java.math.BigDecimal
 import java.time.LocalDate
 
 data class UtvidetVedtaksperiodeMedBegrunnelser(

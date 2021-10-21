@@ -165,11 +165,12 @@ object TilkjentYtelseUtils {
             }
 
             while (nyeAndelerForPerson.any { andelTilkjentYtelse ->
-                    finnAndelSomSkalSlåsSammen(
+                finnAndelSomSkalSlåsSammen(
                         nyeAndelerForPerson,
                         andelTilkjentYtelse
                     ) != null
-                }) {
+            }
+            ) {
                 // Slår sammen endringsperioder som ikke skulle ha vært splittet
                 // Feks. 0-endringsperioder som overlapper en satsendring skal ikke splittes
                 nyeAndelerForPerson.sortedBy { it.stønadFom }.forEach { andel ->
@@ -189,7 +190,8 @@ object TilkjentYtelseUtils {
         nyeAndelTilkjentYtelse.sortWith(
             compareBy(
                 { it.personIdent },
-                { it.stønadFom })
+                { it.stønadFom }
+            )
         )
         return nyeAndelTilkjentYtelse.toMutableSet()
     }
@@ -198,12 +200,14 @@ object TilkjentYtelseUtils {
         nyeAndelerForPerson: MutableList<AndelTilkjentYtelse>,
         andel: AndelTilkjentYtelse
     ) = nyeAndelerForPerson.singleOrNull {
-        (andel.stønadTom.sisteDagIInneværendeMåned()
-            .erDagenFør(it.stønadFom.førsteDagIInneværendeMåned()) || andel.stønadTom == it.stønadFom)
-            && it.prosent == BigDecimal(0)
-            && andel.prosent == BigDecimal(0)
-            && andel.endretUtbetalingAndeler.isNotEmpty()
-            && andel.endretUtbetalingAndeler.singleOrNull() == it.endretUtbetalingAndeler.singleOrNull()
+        (
+            andel.stønadTom.sisteDagIInneværendeMåned()
+                .erDagenFør(it.stønadFom.førsteDagIInneværendeMåned()) || andel.stønadTom == it.stønadFom
+            ) &&
+            it.prosent == BigDecimal(0) &&
+            andel.prosent == BigDecimal(0) &&
+            andel.endretUtbetalingAndeler.isNotEmpty() &&
+            andel.endretUtbetalingAndeler.singleOrNull() == it.endretUtbetalingAndeler.singleOrNull()
     }
 
     fun beregnBeløpsperioder(

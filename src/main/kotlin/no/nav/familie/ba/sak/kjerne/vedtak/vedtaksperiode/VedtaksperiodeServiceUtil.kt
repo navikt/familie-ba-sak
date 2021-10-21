@@ -31,7 +31,8 @@ fun hentVedtaksperioderMedBegrunnelserForEndredeUtbetalingsperioder(
                                         it.harVedtakBegrunnelseSpesifikasjon(vedtakBegrunnelseSpesifikasjon)
                                     }.mapNotNull { it.person?.personIdent?.ident }
                                 )
-                            })
+                            }
+                    )
                 }
             }
     }
