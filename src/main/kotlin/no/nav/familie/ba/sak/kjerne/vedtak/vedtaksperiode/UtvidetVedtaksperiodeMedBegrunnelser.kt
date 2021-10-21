@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilRestVedtaksbegrunnelse
 import no.nav.fpsak.tidsserie.LocalDateInterval
 import no.nav.fpsak.tidsserie.LocalDateSegment
+import java.math.BigDecimal
 import java.time.LocalDate
 
 data class UtvidetVedtaksperiodeMedBegrunnelser(
@@ -46,7 +47,13 @@ fun VedtaksperiodeMedBegrunnelser.tilUtvidetVedtaksperiodeMedBegrunnelser(
         if (this.type == Vedtaksperiodetype.UTBETALING || this.type == Vedtaksperiodetype.ENDRET_UTBETALING || this.type == Vedtaksperiodetype.FORTSATT_INNVILGET) {
             val andelerForVedtaksperiodetype = andelerTilkjentYtelse.filter {
                 if (this.type == Vedtaksperiodetype.ENDRET_UTBETALING) {
-                    it.endretUtbetalingAndeler.isNotEmpty()
+                    it.endretUtbetalingAndeler.isNotEmpty() && it.endretUtbetalingAndeler.all { endretUtbetalingAndel ->
+                        this.begrunnelser.any { vedtaksbegrunnelse ->
+                            vedtaksbegrunnelse.personIdenter.contains(
+                                endretUtbetalingAndel.person!!.personIdent.ident
+                            )
+                        }
+                    }
                 } else {
                     it.endretUtbetalingAndeler.isEmpty()
                 }
@@ -88,7 +95,7 @@ private fun VedtaksperiodeMedBegrunnelser.hentVertikaltSegmentForVedtaksperiode(
 ) = andelerTilkjentYtelse
     .utledSegmenter()
     .find { localDateSegment ->
-        localDateSegment.fom == this.fom && localDateSegment.tom == this.tom
+        localDateSegment.fom == this.fom || localDateSegment.tom == this.tom
     } ?: throw Feil("Finner ikke segment for vedtaksperiode (${this.fom}, ${this.tom})")
 
 private fun hentAndelerForSegment(
