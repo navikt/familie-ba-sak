@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.common.lagEndretUtbetalingAndel
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.lagUtbetalingsperiodeDetalj
 import no.nav.familie.ba.sak.common.lagUtvidetVedtaksperiodeMedBegrunnelser
@@ -19,6 +20,7 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -82,7 +84,7 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
 
     @Test
     fun `Har barn med seksårsdag skal gi true`() {
-        val persongrunnlag = mockk<PersonopplysningGrunnlag>()
+        val persongrunnlag = mockk<PersonopplysningGrunnlag>(relaxed = true)
         every { persongrunnlag.harBarnMedSeksårsdagPåFom(utvidetVedtaksperiodeMedBegrunnelser.fom) } returns true
 
         assertTrue(
@@ -187,6 +189,7 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
                     triggesAv = TriggesAv(etterEndretUtbetaling = true, endringsaarsaker = setOf(Årsak.DELT_BOSTED)),
                     endretUtbetalingAndeler = listOf(
                         EndretUtbetalingAndel(
+                            prosent = BigDecimal.ZERO,
                             behandlingId = behandling.id,
                             person = barn,
                             fom = YearMonth.of(2021, 6),
@@ -195,6 +198,82 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
                         )
                     )
                 )
+        )
+    }
+
+    @Test
+    fun `Oppfyller ikke etter endringsperiode skal gi false`() {
+        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, barn)
+
+        assertFalse(
+            VedtakBegrunnelseSpesifikasjon.PERIODE_ETTER_ENDRET_UTBETALING_AVTALE_DELT_BOSTED_FØLGES
+                .triggesForPeriode(
+                    persongrunnlag = personopplysningGrunnlag,
+                    vilkårsvurdering = vilkårsvurdering,
+                    identerMedUtbetaling = identerMedUtbetaling,
+                    utvidetVedtaksperiodeMedBegrunnelser = lagUtvidetVedtaksperiodeMedBegrunnelser(
+                        type = Vedtaksperiodetype.UTBETALING,
+                        fom = LocalDate.of(2021, 10, 1),
+                        tom = LocalDate.of(2021, 10, 31)
+                    ),
+                    triggesAv = TriggesAv(
+                        etterEndretUtbetaling = true,
+                        endringsaarsaker = setOf(Årsak.DELT_BOSTED),
+                    ),
+                    endretUtbetalingAndeler = listOf(
+                        EndretUtbetalingAndel(
+                            prosent = BigDecimal.ZERO,
+                            behandlingId = behandling.id,
+                            person = barn,
+                            fom = YearMonth.of(2021, 10),
+                            tom = YearMonth.of(2021, 10),
+                            årsak = Årsak.DELT_BOSTED
+                        )
+                    )
+                )
+        )
+    }
+
+    @Test
+    fun `Oppfyller skal utbetales gir false`() {
+        assertFalse(
+            triggesAvSkalUtbetales(
+                triggesAv = TriggesAv(endretUtbetaingSkalUtbetales = true),
+                endretUtbetalingAndeler = listOf(
+                    lagEndretUtbetalingAndel(prosent = BigDecimal.ZERO, person = barn)
+                ),
+            )
+        )
+
+        assertFalse(
+            triggesAvSkalUtbetales(
+                triggesAv = TriggesAv(endretUtbetaingSkalUtbetales = false),
+                endretUtbetalingAndeler = listOf(
+                    lagEndretUtbetalingAndel(prosent = BigDecimal.valueOf(100), person = barn)
+                ),
+            )
+        )
+    }
+
+    @Test
+    fun `Oppfyller skal utbetales gir true`() {
+        val endretUtbetalingAndeler = listOf(
+            lagEndretUtbetalingAndel(prosent = BigDecimal.ZERO, person = barn),
+            lagEndretUtbetalingAndel(prosent = BigDecimal.valueOf(100), person = barn)
+        )
+
+        assertTrue(
+            triggesAvSkalUtbetales(
+                triggesAv = TriggesAv(endretUtbetaingSkalUtbetales = false),
+                endretUtbetalingAndeler = endretUtbetalingAndeler,
+            )
+        )
+
+        assertTrue(
+            triggesAvSkalUtbetales(
+                triggesAv = TriggesAv(endretUtbetaingSkalUtbetales = true),
+                endretUtbetalingAndeler = endretUtbetalingAndeler,
+            )
         )
     }
 
