@@ -98,18 +98,17 @@ data class VedtaksperiodeMedBegrunnelser(
     }
 }
 
-fun byggBegrunnelserOgFriteksterForVedtaksperiode(
-    utvidetVedtaksperiodeMedBegrunnelser: UtvidetVedtaksperiodeMedBegrunnelser,
+fun UtvidetVedtaksperiodeMedBegrunnelser.byggBegrunnelserOgFritekster(
     personerIPersongrunnlag: List<Person>,
     målform: Målform,
     uregistrerteBarn: List<BarnMedOpplysninger> = emptyList(),
 ): List<Begrunnelse> {
     val fritekster =
-        utvidetVedtaksperiodeMedBegrunnelser.fritekster.map { FritekstBegrunnelse(it) }
+        this.fritekster.map { FritekstBegrunnelse(it) }
     val begrunnelser =
-        utvidetVedtaksperiodeMedBegrunnelser.begrunnelser.sortedBy { it.vedtakBegrunnelseType }.map {
+        this.begrunnelser.sortedBy { it.vedtakBegrunnelseType }.map {
             it.tilBrevBegrunnelse(
-                utvidetVedtaksperiodeMedBegrunnelser = utvidetVedtaksperiodeMedBegrunnelser,
+                utvidetVedtaksperiodeMedBegrunnelser = this,
                 personerPåBegrunnelse = personerIPersongrunnlag.filter { person -> it.personIdenter.contains(person.personIdent.ident) },
                 målform = målform,
                 uregistrerteBarn = uregistrerteBarn
