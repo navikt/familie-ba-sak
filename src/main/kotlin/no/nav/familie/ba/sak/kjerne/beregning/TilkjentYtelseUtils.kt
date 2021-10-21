@@ -164,33 +164,49 @@ object TilkjentYtelseUtils {
                 )
             }
 
-            // Slår sammen endringsperioder som ikke skulle ha vært splittet
-            // Feks. 0-endringsperioder som overlapper en satsendring skal ikke splittes
-            nyeAndelerForPerson.sortedBy { it.stønadFom }.forEach { andel ->
-                val andelSomSkalSlåsSammen = nyeAndelerForPerson.singleOrNull {
-                    andel.stønadTom.sisteDagIInneværendeMåned()
-                        .erDagenFør(it.stønadFom.førsteDagIInneværendeMåned())
-                        && it.prosent == BigDecimal(0)
-                        && andel.prosent == BigDecimal(0)
-                        && andel.endretUtbetalingAndeler.isNotEmpty()
-                        && andel.endretUtbetalingAndeler.singleOrNull() == it.endretUtbetalingAndeler.singleOrNull()
-                }
-                if (andelSomSkalSlåsSammen != null) {
-                    val nyAndel = andel.copy(stønadTom = andelSomSkalSlåsSammen.stønadTom)
-                    nyeAndelerForPerson.remove(andel)
-                    nyeAndelerForPerson.remove(andelSomSkalSlåsSammen)
-                    nyeAndelerForPerson.add(nyAndel)
+            while (nyeAndelerForPerson.any { andelTilkjentYtelse ->
+                    finnAndelSomSkalSlåsSammen(
+                        nyeAndelerForPerson,
+                        andelTilkjentYtelse
+                    ) != null
+                }) {
+                // Slår sammen endringsperioder som ikke skulle ha vært splittet
+                // Feks. 0-endringsperioder som overlapper en satsendring skal ikke splittes
+                nyeAndelerForPerson.sortedBy { it.stønadFom }.forEach { andel ->
+                    val andelSomSkalSlåsSammen = finnAndelSomSkalSlåsSammen(nyeAndelerForPerson, andel)
+                    if (andelSomSkalSlåsSammen != null) {
+                        val nyAndel = andel.copy(stønadTom = andelSomSkalSlåsSammen.stønadTom)
+                        nyeAndelerForPerson.remove(andel)
+                        nyeAndelerForPerson.remove(andelSomSkalSlåsSammen)
+                        nyeAndelerForPerson.add(nyAndel)
+                    }
                 }
             }
 
             nyeAndelTilkjentYtelse.addAll(nyeAndelerForPerson)
         }
         // Sorterer primært av hensyn til måten testene er implementert og kan muligens fjernes dersom dette skrives om.
-        nyeAndelTilkjentYtelse.sortWith(compareBy({ it.personIdent }, { it.stønadFom }))
+        nyeAndelTilkjentYtelse.sortWith(
+            compareBy(
+                { it.personIdent },
+                { it.stønadFom })
+        )
         return nyeAndelTilkjentYtelse.toMutableSet()
     }
 
-    private fun beregnBeløpsperioder(
+    private fun finnAndelSomSkalSlåsSammen(
+        nyeAndelerForPerson: MutableList<AndelTilkjentYtelse>,
+        andel: AndelTilkjentYtelse
+    ) = nyeAndelerForPerson.singleOrNull {
+        (andel.stønadTom.sisteDagIInneværendeMåned()
+            .erDagenFør(it.stønadFom.førsteDagIInneværendeMåned()) || andel.stønadTom == it.stønadFom)
+            && it.prosent == BigDecimal(0)
+            && andel.prosent == BigDecimal(0)
+            && andel.endretUtbetalingAndeler.isNotEmpty()
+            && andel.endretUtbetalingAndeler.singleOrNull() == it.endretUtbetalingAndeler.singleOrNull()
+    }
+
+    fun beregnBeløpsperioder(
         overlappendePerioderesultatSøker: PeriodeResultat,
         periodeResultatBarn: PeriodeResultat,
         innvilgedePeriodeResultatBarna: List<PeriodeResultat>,
