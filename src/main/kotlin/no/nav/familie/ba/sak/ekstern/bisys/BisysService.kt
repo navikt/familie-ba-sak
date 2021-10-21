@@ -30,7 +30,8 @@ class BisysService(
         samledeUtvidetBarnetrygdPerioder.addAll(hentBisysPerioderFraBaSak(folkeregisteridenter, fraDato))
 
         val sammenslåttePerioder =
-            samledeUtvidetBarnetrygdPerioder.filter { it.stønadstype == BisysStønadstype.UTVIDET }.groupBy { it.beløp }.values
+            samledeUtvidetBarnetrygdPerioder.filter { it.stønadstype == BisysStønadstype.UTVIDET }
+                .groupBy { it.beløp }.values
                 .flatMap(::slåSammenSammenhengendePerioder).toMutableList()
 
         sammenslåttePerioder.addAll(
@@ -39,7 +40,13 @@ class BisysService(
                 .flatMap(::slåSammenSammenhengendePerioder)
         )
 
-        return BisysUtvidetBarnetrygdResponse(sammenslåttePerioder.sortedWith(compareBy({ it.stønadstype }, { it.fomMåned })))
+        return BisysUtvidetBarnetrygdResponse(
+            sammenslåttePerioder.sortedWith(
+                compareBy(
+                    { it.stønadstype },
+                    { it.fomMåned })
+            )
+        )
     }
 
     private fun hentBisysPerioderFraInfotrygd(
@@ -51,34 +58,42 @@ class BisysService(
         }
     }
 
-    private fun hentBisysPerioderFraBaSak(personIdenter: List<String>, fraDato: LocalDate): List<UtvidetBarnetrygdPeriode> {
+    private fun hentBisysPerioderFraBaSak(
+        personIdenter: List<String>,
+        fraDato: LocalDate
+    ): List<UtvidetBarnetrygdPeriode> {
         val fagsak = fagsakPersonRepository.finnFagsak(personIdenter.map { PersonIdent(ident = it) }.toSet())
         val behandling = fagsak?.let { behandlingService.hentSisteBehandlingSomErIverksatt(it.id) }
         if (fagsak == null || behandling == null) {
             return emptyList()
         }
 
-        val allePerioder = tilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(behandling.id)?.andelerTilkjentYtelse
-            ?.filter { it.erUtvidet() || it.erSmåbarnstillegg() }
-            ?.filter { it.stønadTom.isSameOrAfter(fraDato.toYearMonth()) }
-            ?.map {
-                UtvidetBarnetrygdPeriode(
-                    stønadstype = BisysStønadstype.UTVIDET,
-                    fomMåned = it.stønadFom,
-                    tomMåned = it.stønadTom,
-                    beløp = it.sats.toDouble(),
-                    manueltBeregnet = false
-                )
-            } ?: emptyList()
+        val allePerioder =
+            tilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(behandling.id)?.andelerTilkjentYtelse
+                ?.filter { it.erUtvidet() || it.erSmåbarnstillegg() }
+                ?.filter {
+                    it.stønadTom.isSameOrAfter(fraDato.toYearMonth())
+                }
+                ?.map {
+                    UtvidetBarnetrygdPeriode(
+                        stønadstype = BisysStønadstype.UTVIDET,
+                        fomMåned = it.stønadFom,
+                        tomMåned = it.stønadTom,
+                        beløp = it.sats.toDouble(),
+                        manueltBeregnet = false
+                    )
+                } ?: emptyList()
 
         return allePerioder
     }
 
     private fun slåSammenSammenhengendePerioder(utbetalingerAvEtGittBeløp: List<UtvidetBarnetrygdPeriode>)
-            : List<UtvidetBarnetrygdPeriode> {
+        : List<UtvidetBarnetrygdPeriode> {
         return utbetalingerAvEtGittBeløp.sortedBy { it.fomMåned }
             .fold(mutableListOf()) { sammenslåttePerioder, nesteUtbetaling ->
-                if (sammenslåttePerioder.lastOrNull()?.tomMåned == nesteUtbetaling.fomMåned.minusMonths(1)) {
+                if (sammenslåttePerioder.lastOrNull()?.tomMåned == nesteUtbetaling.fomMåned.minusMonths(1)
+                    && sammenslåttePerioder.lastOrNull()?.manueltBeregnet == nesteUtbetaling.manueltBeregnet
+                ) {
                     sammenslåttePerioder.apply { add(removeLast().copy(tomMåned = nesteUtbetaling.tomMåned)) }
                 } else sammenslåttePerioder.apply { add(nesteUtbetaling) }
             }
