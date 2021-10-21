@@ -23,6 +23,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.VedtakUtils.hentPersonerForAlleUtgjø
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtvidetVedtaksperiodeMedBegrunnelser
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import java.time.LocalDate
@@ -641,7 +642,7 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
                 } else true
             }
 
-        if (triggesAv.etterEndretUtbetaling)
+        if (triggesAv.etterEndretUtbetaling && utvidetVedtaksperiodeMedBegrunnelser.type != Vedtaksperiodetype.ENDRET_UTBETALING)
             return erEtterEndretPeriodeAvSammeÅrsak(
                 endretUtbetalingAndeler,
                 utvidetVedtaksperiodeMedBegrunnelser,
