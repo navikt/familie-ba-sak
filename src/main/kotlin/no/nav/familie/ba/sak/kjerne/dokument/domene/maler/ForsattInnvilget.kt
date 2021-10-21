@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.dokument.domene.maler
 
+import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.brevperioder.BrevPeriode
+
 data class ForsattInnvilget(
     override val mal: Brevmal = Brevmal.VEDTAK_FORTSATT_INNVILGET,
     override val data: ForsattInnvilgetData

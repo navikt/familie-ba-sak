@@ -23,7 +23,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.VedtakUtils.hentPersonerForAlleUtgjø
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtvidetVedtaksperiodeMedBegrunnelser
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import java.time.LocalDate
@@ -278,6 +277,11 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
 
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
         override val sanityApiNavn = "avslagUregistrertBarn"
+    },
+    AVSLAG_IKKE_DOKUMENTERT_BOSATT_I_NORGE {
+
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
+        override val sanityApiNavn = "avslagIkkeDokumentertBosattINorge"
     },
     OPPHØR_BARN_FLYTTET_FRA_SØKER {
 
@@ -617,7 +621,7 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
     ): Boolean {
         if (!triggesAv.valgbar) return false
 
-        if (utvidetVedtaksperiodeMedBegrunnelser.type != vedtakBegrunnelseType.tilVedtaksperiodeType()) return false
+        if (!utvidetVedtaksperiodeMedBegrunnelser.type.tillatteBegrunnelsestyper.contains(vedtakBegrunnelseType)) return false
 
         if (triggesAv.personerManglerOpplysninger) return vilkårsvurdering.harPersonerManglerOpplysninger()
 
@@ -696,7 +700,7 @@ fun VedtakBegrunnelseSpesifikasjon.tilVedtaksbegrunnelse(
     vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser,
     personIdenter: List<String>
 ): Vedtaksbegrunnelse {
-    if (this.vedtakBegrunnelseType.tilVedtaksperiodeType() != vedtaksperiodeMedBegrunnelser.type) {
+    if (!vedtaksperiodeMedBegrunnelser.type.tillatteBegrunnelsestyper.contains(this.vedtakBegrunnelseType)) {
         throw Feil(
             "Begrunnelsestype ${this.vedtakBegrunnelseType} passer ikke med " +
                 "typen '${vedtaksperiodeMedBegrunnelser.type}' som er satt på perioden."
@@ -708,13 +712,6 @@ fun VedtakBegrunnelseSpesifikasjon.tilVedtaksbegrunnelse(
         vedtakBegrunnelseSpesifikasjon = this,
         personIdenter = personIdenter
     )
-}
-
-fun VedtakBegrunnelseType.tilVedtaksperiodeType() = when (this) {
-    VedtakBegrunnelseType.INNVILGELSE, VedtakBegrunnelseType.REDUKSJON -> Vedtaksperiodetype.UTBETALING
-    VedtakBegrunnelseType.AVSLAG -> Vedtaksperiodetype.AVSLAG
-    VedtakBegrunnelseType.OPPHØR -> Vedtaksperiodetype.OPPHØR
-    VedtakBegrunnelseType.FORTSATT_INNVILGET -> Vedtaksperiodetype.FORTSATT_INNVILGET
 }
 
 fun VedtakBegrunnelseType.hentMånedOgÅrForBegrunnelse(periode: Periode) = when (this) {
