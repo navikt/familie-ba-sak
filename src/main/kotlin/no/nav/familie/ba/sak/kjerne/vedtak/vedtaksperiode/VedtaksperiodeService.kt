@@ -20,7 +20,6 @@ import no.nav.familie.ba.sak.kjerne.beregning.SatsService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
-import no.nav.familie.ba.sak.kjerne.beregning.domene.lagVertikaleSegmenter
 import no.nav.familie.ba.sak.kjerne.dokument.BrevKlient
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.dokument.domene.tilTriggesAv
@@ -297,43 +296,10 @@ class VedtaksperiodeService(
             andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = vedtak.behandling.id)
 
         val utbetalingsperioder =
-            andelerTilkjentYtelse.filter { it.endretUtbetalingAndeler.isEmpty() }.lagVertikaleSegmenter()
-                .map { (segmenter, _) ->
-                    VedtaksperiodeMedBegrunnelser(
-                        fom = segmenter.fom,
-                        tom = segmenter.tom,
-                        vedtak = vedtak,
-                        type = Vedtaksperiodetype.UTBETALING
-                    )
-                }
+            hentVedtaksperioderMedBegrunnelserForUtbetalingsperioder(andelerTilkjentYtelse, vedtak)
 
         val endredeUtbetalingsperioder =
-            andelerTilkjentYtelse.filter { it.endretUtbetalingAndeler.isNotEmpty() }.groupBy { it.prosent }
-                .flatMap { (_, andeler) ->
-                    andeler.lagVertikaleSegmenter()
-                        .map { (segmenter, andelerForSegment) ->
-                            VedtaksperiodeMedBegrunnelser(
-                                fom = segmenter.fom,
-                                tom = segmenter.tom,
-                                vedtak = vedtak,
-                                type = Vedtaksperiodetype.ENDRET_UTBETALING
-                            ).also { vedtaksperiodeMedBegrunnelse ->
-                                val endretUtbetalingAndeler = andelerForSegment.flatMap { it.endretUtbetalingAndeler }
-                                vedtaksperiodeMedBegrunnelse.begrunnelser.addAll(
-                                    endretUtbetalingAndeler
-                                        .flatMap { it.vedtakBegrunnelseSpesifikasjoner }.toSet()
-                                        .map { vedtakBegrunnelseSpesifikasjon ->
-                                            Vedtaksbegrunnelse(
-                                                vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelse,
-                                                vedtakBegrunnelseSpesifikasjon = vedtakBegrunnelseSpesifikasjon,
-                                                personIdenter = endretUtbetalingAndeler.filter {
-                                                    it.harVedtakBegrunnelseSpesifikasjon(vedtakBegrunnelseSpesifikasjon)
-                                                }.mapNotNull { it.person?.personIdent?.ident }
-                                            )
-                                        })
-                            }
-                        }
-                }
+            hentVedtaksperioderMedBegrunnelserForEndredeUtbetalingsperioder(andelerTilkjentYtelse, vedtak)
 
         val opphørsperioder = hentOpphørsperioder(vedtak.behandling).map { it.tilVedtaksperiodeMedBegrunnelse(vedtak) }
 
