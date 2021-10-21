@@ -21,7 +21,7 @@ class BehandleAnnullerFødselTaskTest : AbstractSpringIntegrationTest() {
     lateinit var taskRepository: TaskRepository
 
     @Autowired
-    lateinit var behandleAnnullertFødselTask: BehandleAnnullertFødselTask;
+    lateinit var behandleAnnullertFødselTask: BehandleAnnullertFødselTask
 
     @BeforeEach
     fun init() {
