@@ -36,7 +36,11 @@ import javax.persistence.Table
 class VilkårResultat(
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "vilkar_resultat_seq_generator")
-    @SequenceGenerator(name = "vilkar_resultat_seq_generator", sequenceName = "vilkar_resultat_seq", allocationSize = 50)
+    @SequenceGenerator(
+        name = "vilkar_resultat_seq_generator",
+        sequenceName = "vilkar_resultat_seq",
+        allocationSize = 50
+    )
     val id: Long = 0,
 
     // Denne må være nullable=true slik at man kan slette vilkår fra person resultat
@@ -92,6 +96,10 @@ class VilkårResultat(
     @Column(name = "vedtak_begrunnelse_spesifikasjoner")
     @Convert(converter = VedtakBegrunnelseSpesifikasjonListConverter::class)
     var vedtakBegrunnelseSpesifikasjoner: List<VedtakBegrunnelseSpesifikasjon> = emptyList(),
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "vurderes_etter")
+    var vurderesEtter: Regelverk? = vilkårType.defaultRegelverk()
 ) : BaseEntitet() {
 
     override fun toString(): String {
@@ -123,6 +131,7 @@ class VilkårResultat(
         erDeltBosted = restVilkårResultat.erDeltBosted ?: false
         erMedlemskapVurdert = restVilkårResultat.erMedlemskapVurdert ?: false
         oppdaterPekerTilBehandling()
+        vurderesEtter = restVilkårResultat.vurderesEtter
     }
 
     fun kopierMedParent(nyPersonResultat: PersonResultat? = null): VilkårResultat {
@@ -141,6 +150,7 @@ class VilkårResultat(
             erSkjønnsmessigVurdert = erSkjønnsmessigVurdert,
             erMedlemskapVurdert = erMedlemskapVurdert,
             erDeltBosted = erDeltBosted,
+            vurderesEtter = vurderesEtter,
         )
     }
 
@@ -160,6 +170,7 @@ class VilkårResultat(
             erSkjønnsmessigVurdert = erSkjønnsmessigVurdert,
             erMedlemskapVurdert = erMedlemskapVurdert,
             erDeltBosted = erDeltBosted,
+            vurderesEtter = vurderesEtter,
         )
     }
 
@@ -167,7 +178,9 @@ class VilkårResultat(
         behandlingId = personResultat!!.vilkårsvurdering.behandling.id
     }
 
-    fun erAvslagUtenPeriode() = this.erEksplisittAvslagPåSøknad == true && this.periodeFom == null && this.periodeTom == null
+    fun erAvslagUtenPeriode() =
+        this.erEksplisittAvslagPåSøknad == true && this.periodeFom == null && this.periodeTom == null
+
     fun harFremtidigTom() = this.periodeTom == null || this.periodeTom!!.isAfter(LocalDate.now().sisteDagIMåned())
 
     val vedtaksperiodeFom
@@ -183,4 +196,8 @@ class VilkårResultat(
 
         val VilkårResultatComparator = compareBy<VilkårResultat>({ it.periodeFom }, { it.resultat }, { it.vilkårType })
     }
+}
+
+enum class Regelverk {
+    NASJONALE_REGLER, EØS_FORORDNINGEN
 }
