@@ -78,6 +78,13 @@ enum class Vilkår(
         }
     }
 
+    fun defaultRegelverk(): Regelverk? {
+        return when (this) {
+            BOR_MED_SØKER, BOSATT_I_RIKET, LOVLIG_OPPHOLD, UTVIDET_BARNETRYGD -> Regelverk.NASJONALE_REGLER
+            UNDER_18_ÅR, GIFT_PARTNERSKAP -> null
+        }
+    }
+
     fun vurderVilkår(person: Person, vurderFra: LocalDate = LocalDate.now()): AutomatiskVurdering {
         val vilkårsregel = when (this) {
             UNDER_18_ÅR -> VurderBarnErUnder18(
