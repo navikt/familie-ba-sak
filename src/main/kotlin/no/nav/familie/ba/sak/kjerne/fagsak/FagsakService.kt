@@ -43,6 +43,7 @@ import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.sikkerhet.validering.FagsaktilgangConstraint
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
+import no.nav.familie.ba.sak.task.BehandleAnnullerFødselDto
 import no.nav.familie.ba.sak.task.BehandleAnnullertFødselTask
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
@@ -466,8 +467,8 @@ class FagsakService(
         return fagsakDeltagere
     }
 
-    fun behandleAnnullertFødsel(barnasIdenter: List<String>) {
-        taskRepository.save(BehandleAnnullertFødselTask.opprettTask(barnasIdenter))
+    fun behandleAnnullertFødsel(behandleAnnullerFødselDto: BehandleAnnullerFødselDto) {
+        taskRepository.save(BehandleAnnullertFødselTask.opprettTask(behandleAnnullerFødselDto))
     }
 
     companion object {
