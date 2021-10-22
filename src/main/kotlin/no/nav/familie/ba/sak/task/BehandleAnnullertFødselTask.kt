@@ -32,14 +32,10 @@ class BehandleAnnullertFødselTask(
     AsyncTaskStep {
 
     override fun doTask(task: Task) {
-        logger.debug("Run BehandleAnnullertFødselTask")
         var dto = objectMapper.readValue(task.payload, BehandleAnnullerFødselDto::class.java)
         var barnasIdenter = dto.barnasIdenter.map { PersonIdent(it.toString()) }
-        logger.debug("barnasIdenter count ${barnasIdenter.size}")
-        logger.debug("Tidlegere Id = ${dto.tidligereHendelseId}")
 
         var tasker = taskRepositoryForAnnullertFødsel.hentTaskForTidligereHendelse(dto.tidligereHendelseId)
-        logger.debug("Found ${tasker.size} task(er)")
         if (tasker.isEmpty()) {
             logger.info("Finnes ikke åpen task for annullertfødsel tidligere Id = ${dto.tidligereHendelseId}. Forsøker å finne aktiv behandling.")
             if (personRepository.findByPersonIdenter(barnasIdenter).any {
