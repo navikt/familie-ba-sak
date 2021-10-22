@@ -48,7 +48,7 @@ object Utils {
     fun String.storForbokstavIHvertOrd() = this.split(" ").joinToString(" ") { it.storForbokstav() }.trimEnd()
     fun Any?.nullableTilString() = this?.toString() ?: ""
 
-    inline fun <reified T : Enum<T>> konverterEnumsTilString(liste: List<T>) = liste.joinToString(separator = ";'")
+    inline fun <reified T : Enum<T>> konverterEnumsTilString(liste: List<T>) = liste.joinToString(separator = ";")
 
     inline fun <reified T : Enum<T>> konverterStringTilEnums(string: String?): List<T> =
         if (string.isNullOrBlank()) emptyList() else string.split(";").map { enumValueOf<T>(it) }
