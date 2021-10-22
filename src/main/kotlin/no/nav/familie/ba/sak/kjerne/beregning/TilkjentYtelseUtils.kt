@@ -113,7 +113,7 @@ object TilkjentYtelseUtils {
                 )
         } else emptyList()
 
-        tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerTilkjentYtelseBarna + andelerTilkjentYtelseSøker + andelerTilkjentYtelseSmåbarnstillegg)
+        tilkjentYtelse.andelerTilkjentYtelseTilUtbetaling.addAll(andelerTilkjentYtelseBarna + andelerTilkjentYtelseSøker + andelerTilkjentYtelseSmåbarnstillegg)
 
         return tilkjentYtelse
     }

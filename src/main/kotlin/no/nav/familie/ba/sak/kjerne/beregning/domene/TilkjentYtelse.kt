@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
 import no.nav.fpsak.tidsserie.StandardCombinators
+import org.hibernate.annotations.Where
 import java.time.LocalDate
 import java.time.YearMonth
 import javax.persistence.CascadeType
@@ -68,7 +69,8 @@ data class TilkjentYtelse(
         mappedBy = "tilkjentYtelse",
         cascade = [CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE, CascadeType.REMOVE]
     )
-    val andelerTilkjentYtelse: MutableSet<AndelTilkjentYtelse> = mutableSetOf()
+    @Where(clause = "prosent > 0")
+    val andelerTilkjentYtelseTilUtbetaling: MutableSet<AndelTilkjentYtelse> = mutableSetOf()
 ) {
 
     fun erSendtTilIverksetting(): Boolean = utbetalingsoppdrag != null
@@ -105,7 +107,7 @@ fun lagTidslinjeMedOverlappendePerioderForAndeler(tidslinjer: List<LocalDateTime
 }
 
 fun TilkjentYtelse.tilTidslinjeMedAndeler(): LocalDateTimeline<List<AndelTilkjentYtelse>> {
-    val tidslinjer = this.andelerTilkjentYtelse.map { andelTilkjentYtelse ->
+    val tidslinjer = this.andelerTilkjentYtelseTilUtbetaling.map { andelTilkjentYtelse ->
         LocalDateTimeline(
             listOf(
                 LocalDateSegment(

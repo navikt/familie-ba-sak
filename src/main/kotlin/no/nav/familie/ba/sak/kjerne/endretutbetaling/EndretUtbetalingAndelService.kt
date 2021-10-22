@@ -49,7 +49,8 @@ class EndretUtbetalingAndelService(
                 .filter { it.id != endretUtbetalingAndelId }
         )
 
-        val andelTilkjentYtelser = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id)
+        val andelTilkjentYtelser =
+            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseTilUtbetalingForBehandling(behandling.id)
 
         validerPeriodeInnenforTilkjentytelse(endretUtbetalingAndel, andelTilkjentYtelser)
 

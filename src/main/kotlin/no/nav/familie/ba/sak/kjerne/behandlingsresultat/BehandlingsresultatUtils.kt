@@ -43,10 +43,10 @@ object BehandlingsresultatUtils {
             søktForPerson = personerFremstiltKravFor.contains(personIdent),
             forrigeAndeler = when (person.type) {
                 PersonType.SØKER -> kombinerOverlappendeAndelerForSøker(
-                    forrigeTilkjentYtelse?.andelerTilkjentYtelse?.filter { it.personIdent == personIdent }
+                    forrigeTilkjentYtelse?.andelerTilkjentYtelseTilUtbetaling?.filter { it.personIdent == personIdent }
                         ?: emptyList()
                 )
-                else -> forrigeTilkjentYtelse?.andelerTilkjentYtelse?.filter { it.personIdent == personIdent }
+                else -> forrigeTilkjentYtelse?.andelerTilkjentYtelseTilUtbetaling?.filter { it.personIdent == personIdent }
                     ?.map { andelTilkjentYtelse ->
                         BehandlingsresultatAndelTilkjentYtelse(
                             stønadFom = andelTilkjentYtelse.stønadFom,
@@ -56,8 +56,8 @@ object BehandlingsresultatUtils {
                     } ?: emptyList()
             },
             andeler = when (person.type) {
-                PersonType.SØKER -> kombinerOverlappendeAndelerForSøker(tilkjentYtelse.andelerTilkjentYtelse.filter { it.personIdent == personIdent })
-                else -> tilkjentYtelse.andelerTilkjentYtelse.filter { it.personIdent == personIdent }
+                PersonType.SØKER -> kombinerOverlappendeAndelerForSøker(tilkjentYtelse.andelerTilkjentYtelseTilUtbetaling.filter { it.personIdent == personIdent })
+                else -> tilkjentYtelse.andelerTilkjentYtelseTilUtbetaling.filter { it.personIdent == personIdent }
                     .map { andelTilkjentYtelse ->
                         BehandlingsresultatAndelTilkjentYtelse(
                             stønadFom = andelTilkjentYtelse.stønadFom,
@@ -163,7 +163,7 @@ object BehandlingsresultatUtils {
 
     fun validerBehandlingsresultat(behandling: Behandling, resultat: BehandlingResultat) {
         if ((
-            behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING && setOf(
+                behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING && setOf(
                     BehandlingResultat.AVSLÅTT_OG_OPPHØRT,
                     BehandlingResultat.ENDRET,
                     BehandlingResultat.ENDRET_OG_OPPHØRT,
@@ -171,7 +171,7 @@ object BehandlingsresultatUtils {
                     BehandlingResultat.FORTSATT_INNVILGET,
                     BehandlingResultat.IKKE_VURDERT
                 ).contains(resultat)
-            ) ||
+                ) ||
             (behandling.type == BehandlingType.REVURDERING && resultat == BehandlingResultat.IKKE_VURDERT)
         ) {
 
@@ -201,10 +201,10 @@ private fun validerYtelsePersoner(ytelsePersoner: List<YtelsePerson>) {
         throw Feil(message = "YtelseSlutt ikke satt ved utledning av BehandlingResultat")
 
     if (ytelsePersoner.any {
-        it.resultater.contains(YtelsePersonResultat.OPPHØRT) && it.ytelseSlutt?.isAfter(
+            it.resultater.contains(YtelsePersonResultat.OPPHØRT) && it.ytelseSlutt?.isAfter(
                 inneværendeMåned()
             ) == true
-    }
+        }
     )
         throw Feil(message = "Minst én ytelseperson har fått opphør som resultat og ytelseSlutt etter inneværende måned")
 }

@@ -73,8 +73,8 @@ class VilkårTilTilkjentYtelseTest {
         )
 
         Assertions.assertEquals(
-            forventetTilkjentYtelse.andelerTilkjentYtelse,
-            faktiskTilkjentYtelse.andelerTilkjentYtelse
+            forventetTilkjentYtelse.andelerTilkjentYtelseTilUtbetaling,
+            faktiskTilkjentYtelse.andelerTilkjentYtelseTilUtbetaling
         )
     }
 
@@ -129,7 +129,8 @@ class VilkårTilTilkjentYtelseTest {
             .medAndelTilkjentYtelse(barn2, barn2Andel2Beløp, barn2Andel2Periode, barn2Andel2Type)
             .bygg()
 
-        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(vilkårsvurdering.behandling.id, søker, barn1, barn2)
+        val personopplysningGrunnlag =
+            lagTestPersonopplysningGrunnlag(vilkårsvurdering.behandling.id, søker, barn1, barn2)
 
         val faktiskTilkjentYtelse = TilkjentYtelseUtils.beregnTilkjentYtelse(
             vilkårsvurdering = vilkårsvurdering,
@@ -138,8 +139,8 @@ class VilkårTilTilkjentYtelseTest {
         )
 
         Assertions.assertEquals(
-            forventetTilkjentYtelse.andelerTilkjentYtelse,
-            faktiskTilkjentYtelse.andelerTilkjentYtelse
+            forventetTilkjentYtelse.andelerTilkjentYtelseTilUtbetaling,
+            faktiskTilkjentYtelse.andelerTilkjentYtelseTilUtbetaling
         )
     }
 }
@@ -154,7 +155,12 @@ class TestVilkårsvurderingBuilder(sakType: String) {
             )
         )
 
-    fun medPersonVilkårPeriode(person: Person, vilkår: String?, periode: String?, erDeltBoste: Boolean? = null): TestVilkårsvurderingBuilder {
+    fun medPersonVilkårPeriode(
+        person: Person,
+        vilkår: String?,
+        periode: String?,
+        erDeltBoste: Boolean? = null
+    ): TestVilkårsvurderingBuilder {
 
         if (vilkår.isNullOrEmpty() || periode.isNullOrEmpty())
             return this
@@ -200,13 +206,18 @@ class TestTilkjentYtelseBuilder(val behandling: Behandling) {
         endretDato = LocalDate.now()
     )
 
-    fun medAndelTilkjentYtelse(person: Person, beløp: Int?, periode: String?, type: String?): TestTilkjentYtelseBuilder {
+    fun medAndelTilkjentYtelse(
+        person: Person,
+        beløp: Int?,
+        periode: String?,
+        type: String?
+    ): TestTilkjentYtelseBuilder {
         if (beløp == null || periode.isNullOrEmpty() || type.isNullOrEmpty())
             return this
 
         val stønadPeriode = TestPeriode.parse(periode)
 
-        tilkjentYtelse.andelerTilkjentYtelse.add(
+        tilkjentYtelse.andelerTilkjentYtelseTilUtbetaling.add(
             AndelTilkjentYtelse(
                 behandlingId = behandling.id,
                 tilkjentYtelse = tilkjentYtelse,
@@ -236,7 +247,8 @@ data class TestPeriode(val fraOgMed: LocalDate, val tilOgMed: LocalDate?) {
         val localDateRegex = """^(\d{4}-\d{2}-\d{2}).*?(\d{4}-\d{2}-\d{2})?$""".toRegex()
 
         fun parse(s: String): TestPeriode {
-            return prøvLocalDate(s) ?: prøvYearMonth(s) ?: throw IllegalArgumentException("Kunne ikke parse periode '$s'")
+            return prøvLocalDate(s) ?: prøvYearMonth(s)
+            ?: throw IllegalArgumentException("Kunne ikke parse periode '$s'")
         }
 
         private fun prøvLocalDate(s: String): TestPeriode? {
@@ -244,7 +256,8 @@ data class TestPeriode(val fraOgMed: LocalDate, val tilOgMed: LocalDate?) {
 
             if (localDateMatch != null && localDateMatch.groupValues.size == 3) {
                 val fom = localDateMatch.groupValues[1].let { LocalDate.parse(it) }
-                val tom = localDateMatch.groupValues[2].let { if (it.length == 10) LocalDate.parse(it) else LocalDate.MAX }
+                val tom =
+                    localDateMatch.groupValues[2].let { if (it.length == 10) LocalDate.parse(it) else LocalDate.MAX }
 
                 return TestPeriode(fom!!, tom)
             }
@@ -257,7 +270,11 @@ data class TestPeriode(val fraOgMed: LocalDate, val tilOgMed: LocalDate?) {
             if (yearMonthMatch != null && yearMonthMatch.groupValues.size == 3) {
                 val fom = yearMonthMatch.groupValues[1].let { YearMonth.parse(it) }
                 val tom =
-                    yearMonthMatch.groupValues[2].let { if (it.length == 7) YearMonth.parse(it) else YearMonth.from(LocalDate.MAX) }
+                    yearMonthMatch.groupValues[2].let {
+                        if (it.length == 7) YearMonth.parse(it) else YearMonth.from(
+                            LocalDate.MAX
+                        )
+                    }
 
                 return TestPeriode(fom!!.atDay(1), tom?.atEndOfMonth())
             }

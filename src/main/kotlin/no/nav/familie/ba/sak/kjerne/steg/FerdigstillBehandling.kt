@@ -58,7 +58,7 @@ class FerdigstillBehandling(
 
     private fun oppdaterFagsakStatus(behandling: Behandling) {
         val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandlingId = behandling.id)
-        val erLøpende = tilkjentYtelse.andelerTilkjentYtelse.any { it.stønadTom >= inneværendeMåned() }
+        val erLøpende = tilkjentYtelse.andelerTilkjentYtelseTilUtbetaling.any { it.stønadTom >= inneværendeMåned() }
         if (erLøpende) {
             fagsakService.oppdaterStatus(behandling.fagsak, FagsakStatus.LØPENDE)
         } else {

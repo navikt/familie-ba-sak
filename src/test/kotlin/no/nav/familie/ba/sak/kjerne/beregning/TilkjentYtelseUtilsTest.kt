@@ -78,9 +78,9 @@ internal class TilkjentYtelseUtilsTest {
             behandling = lagBehandling()
         )
 
-        assertEquals(1, tilkjentYtelse.andelerTilkjentYtelse.size)
+        assertEquals(1, tilkjentYtelse.andelerTilkjentYtelseTilUtbetaling.size)
 
-        val andelTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelse.first()
+        val andelTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelseTilUtbetaling.first()
         assertEquals(
             MånedPeriode(
                 barnSeksårsdag.nesteMåned(),
@@ -110,16 +110,16 @@ internal class TilkjentYtelseUtilsTest {
             behandling = lagBehandling()
         )
 
-        assertEquals(2, tilkjentYtelse.andelerTilkjentYtelse.size)
+        assertEquals(2, tilkjentYtelse.andelerTilkjentYtelseTilUtbetaling.size)
 
-        val andelTilkjentYtelseFør6År = tilkjentYtelse.andelerTilkjentYtelse.first()
+        val andelTilkjentYtelseFør6År = tilkjentYtelse.andelerTilkjentYtelseTilUtbetaling.first()
         assertEquals(
             MånedPeriode(vilkårOppfyltFom.nesteMåned(), barnSeksårsdag.forrigeMåned()),
             MånedPeriode(andelTilkjentYtelseFør6År.stønadFom, andelTilkjentYtelseFør6År.stønadTom)
         )
         assertEquals(1654, andelTilkjentYtelseFør6År.kalkulertUtbetalingsbeløp)
 
-        val andelTilkjentYtelseEtter6År = tilkjentYtelse.andelerTilkjentYtelse.last()
+        val andelTilkjentYtelseEtter6År = tilkjentYtelse.andelerTilkjentYtelseTilUtbetaling.last()
         assertEquals(
             MånedPeriode(barnSeksårsdag.toYearMonth(), barnSeksårsdag.toYearMonth()),
             MånedPeriode(andelTilkjentYtelseEtter6År.stønadFom, andelTilkjentYtelseEtter6År.stønadTom)
@@ -143,7 +143,7 @@ internal class TilkjentYtelseUtilsTest {
             personopplysningGrunnlag = personopplysningGrunnlag,
             behandling = lagBehandling()
         )
-            .andelerTilkjentYtelse
+            .andelerTilkjentYtelseTilUtbetaling
             .toList()
             .sortedBy { it.stønadFom }
 
@@ -193,7 +193,7 @@ internal class TilkjentYtelseUtilsTest {
             personopplysningGrunnlag = personopplysningGrunnlag,
             behandling = lagBehandling()
         )
-            .andelerTilkjentYtelse.toList()
+            .andelerTilkjentYtelseTilUtbetaling.toList()
             .sortedBy { it.stønadFom }
 
         val andelTilkjentYtelseFør6ÅrSeptember2020 = andeler[0]
@@ -230,7 +230,7 @@ internal class TilkjentYtelseUtilsTest {
             personopplysningGrunnlag = personopplysningGrunnlag,
             behandling = oppdatertVilkårsvurdering.behandling
         )
-            .andelerTilkjentYtelse.toList()
+            .andelerTilkjentYtelseTilUtbetaling.toList()
             .sortedBy { it.stønadFom }
 
         assertEquals(YearMonth.of(2019, 8), andeler[1].stønadTom)
@@ -261,7 +261,7 @@ internal class TilkjentYtelseUtilsTest {
             personopplysningGrunnlag = personopplysningGrunnlag,
             behandling = oppdatertVilkårsvurdering.behandling
         )
-            .andelerTilkjentYtelse.toList()
+            .andelerTilkjentYtelseTilUtbetaling.toList()
             .sortedBy { it.stønadFom }
 
         assertEquals(YearMonth.of(2019, 8), andeler[1].stønadTom)
@@ -292,7 +292,7 @@ internal class TilkjentYtelseUtilsTest {
             personopplysningGrunnlag = personopplysningGrunnlag,
             behandling = oppdatertVilkårsvurdering.behandling
         )
-            .andelerTilkjentYtelse.toList()
+            .andelerTilkjentYtelseTilUtbetaling.toList()
             .sortedBy { it.stønadFom }
 
         assertEquals(YearMonth.of(2019, 9), andeler[1].stønadTom)
@@ -323,7 +323,7 @@ internal class TilkjentYtelseUtilsTest {
             personopplysningGrunnlag = personopplysningGrunnlag,
             behandling = oppdatertVilkårsvurdering.behandling
         )
-            .andelerTilkjentYtelse.toList()
+            .andelerTilkjentYtelseTilUtbetaling.toList()
             .sortedBy { it.stønadFom }
 
         assertEquals(YearMonth.of(2019, 9), andeler[1].stønadTom)
@@ -354,7 +354,7 @@ internal class TilkjentYtelseUtilsTest {
             personopplysningGrunnlag = personopplysningGrunnlag,
             behandling = oppdatertVilkårsvurdering.behandling
         )
-            .andelerTilkjentYtelse.toList()
+            .andelerTilkjentYtelseTilUtbetaling.toList()
             .sortedBy { it.stønadFom }
 
         assertEquals(YearMonth.of(2019, 8), andeler[1].stønadTom)
@@ -385,7 +385,7 @@ internal class TilkjentYtelseUtilsTest {
             personopplysningGrunnlag = personopplysningGrunnlag,
             behandling = oppdatertVilkårsvurdering.behandling
         )
-            .andelerTilkjentYtelse.toList()
+            .andelerTilkjentYtelseTilUtbetaling.toList()
             .sortedBy { it.stønadFom }
 
         assertEquals(YearMonth.of(2019, 8), andeler[1].stønadTom)
@@ -416,7 +416,7 @@ internal class TilkjentYtelseUtilsTest {
             personopplysningGrunnlag = personopplysningGrunnlag,
             behandling = oppdatertVilkårsvurdering.behandling
         )
-            .andelerTilkjentYtelse.toList()
+            .andelerTilkjentYtelseTilUtbetaling.toList()
             .sortedBy { it.stønadFom }
 
         assertEquals(YearMonth.of(2019, 8), andeler[1].stønadTom)
@@ -447,7 +447,7 @@ internal class TilkjentYtelseUtilsTest {
             personopplysningGrunnlag = personopplysningGrunnlag,
             behandling = oppdatertVilkårsvurdering.behandling
         )
-            .andelerTilkjentYtelse.toList()
+            .andelerTilkjentYtelseTilUtbetaling.toList()
             .sortedBy { it.stønadFom }
 
         assertEquals(YearMonth.of(2019, 8), andeler[1].stønadTom)
@@ -489,8 +489,8 @@ internal class TilkjentYtelseUtilsTest {
 
         vilkårsvurdering.personResultater =
             vilkårsvurdering.personResultater.filter { it.personIdent != personResultat.personIdent }.toSet() + setOf(
-            personResultat
-        )
+                personResultat
+            )
 
         return vilkårsvurdering
     }

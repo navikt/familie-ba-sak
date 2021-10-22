@@ -132,10 +132,19 @@ class BeregningServiceTest {
 
         verify(exactly = 1) { tilkjentYtelseRepository.save(capture(slot)) }
 
-        Assertions.assertEquals(1, slot.captured.andelerTilkjentYtelse.size)
-        Assertions.assertEquals(1054, slot.captured.andelerTilkjentYtelse.first().kalkulertUtbetalingsbeløp)
-        Assertions.assertEquals(periodeFom.nesteMåned(), slot.captured.andelerTilkjentYtelse.first().stønadFom)
-        Assertions.assertEquals(periodeTom.forrigeMåned(), slot.captured.andelerTilkjentYtelse.first().stønadTom)
+        Assertions.assertEquals(1, slot.captured.andelerTilkjentYtelseTilUtbetaling.size)
+        Assertions.assertEquals(
+            1054,
+            slot.captured.andelerTilkjentYtelseTilUtbetaling.first().kalkulertUtbetalingsbeløp
+        )
+        Assertions.assertEquals(
+            periodeFom.nesteMåned(),
+            slot.captured.andelerTilkjentYtelseTilUtbetaling.first().stønadFom
+        )
+        Assertions.assertEquals(
+            periodeTom.forrigeMåned(),
+            slot.captured.andelerTilkjentYtelseTilUtbetaling.first().stønadTom
+        )
     }
 
     @Test
@@ -190,9 +199,9 @@ class BeregningServiceTest {
 
         verify(exactly = 1) { tilkjentYtelseRepository.save(capture(slot)) }
 
-        Assertions.assertEquals(2, slot.captured.andelerTilkjentYtelse.size)
+        Assertions.assertEquals(2, slot.captured.andelerTilkjentYtelseTilUtbetaling.size)
 
-        val andelerTilkjentYtelse = slot.captured.andelerTilkjentYtelse.sortedBy { it.stønadFom }
+        val andelerTilkjentYtelse = slot.captured.andelerTilkjentYtelseTilUtbetaling.sortedBy { it.stønadFom }
         val satsPeriode1Slutt = YearMonth.of(2019, 2)
         val satsPeriode2Start = YearMonth.of(2019, 3)
 
@@ -272,9 +281,9 @@ class BeregningServiceTest {
 
         verify(exactly = 1) { tilkjentYtelseRepository.save(capture(slot)) }
 
-        Assertions.assertEquals(1, slot.captured.andelerTilkjentYtelse.size)
+        Assertions.assertEquals(1, slot.captured.andelerTilkjentYtelseTilUtbetaling.size)
 
-        val andelerTilkjentYtelse = slot.captured.andelerTilkjentYtelse.sortedBy { it.stønadFom }
+        val andelerTilkjentYtelse = slot.captured.andelerTilkjentYtelseTilUtbetaling.sortedBy { it.stønadFom }
 
         Assertions.assertEquals(970 / 2, andelerTilkjentYtelse.first().kalkulertUtbetalingsbeløp)
         Assertions.assertEquals(periodeFom.nesteMåned(), andelerTilkjentYtelse.first().stønadFom)
@@ -329,7 +338,7 @@ class BeregningServiceTest {
 
         verify(exactly = 1) { tilkjentYtelseRepository.save(capture(slot)) }
 
-        Assertions.assertTrue(slot.captured.andelerTilkjentYtelse.isEmpty())
+        Assertions.assertTrue(slot.captured.andelerTilkjentYtelseTilUtbetaling.isEmpty())
     }
 
     @Test
@@ -428,8 +437,8 @@ class BeregningServiceTest {
 
         verify(exactly = 1) { tilkjentYtelseRepository.save(capture(slot)) }
 
-        Assertions.assertEquals(5, slot.captured.andelerTilkjentYtelse.size)
-        val andelerTilkjentYtelse = slot.captured.andelerTilkjentYtelse.sortedBy { it.stønadTom }
+        Assertions.assertEquals(5, slot.captured.andelerTilkjentYtelseTilUtbetaling.size)
+        val andelerTilkjentYtelse = slot.captured.andelerTilkjentYtelseTilUtbetaling.sortedBy { it.stønadTom }
 
         val (andelerBarn1, andelerBarn2) = andelerTilkjentYtelse.partition { it.personIdent == barn1Fnr }
 
@@ -602,8 +611,8 @@ class BeregningServiceTest {
 
         verify(exactly = 1) { tilkjentYtelseRepository.save(capture(slot)) }
 
-        Assertions.assertEquals(4, slot.captured.andelerTilkjentYtelse.size)
-        val andelerTilkjentYtelse = slot.captured.andelerTilkjentYtelse.sortedBy { it.stønadTom }
+        Assertions.assertEquals(4, slot.captured.andelerTilkjentYtelseTilUtbetaling.size)
+        val andelerTilkjentYtelse = slot.captured.andelerTilkjentYtelseTilUtbetaling.sortedBy { it.stønadTom }
 
         // Første periode (før satsendring)
         Assertions.assertEquals(førstePeriodeFomForBarnet.nesteMåned(), andelerTilkjentYtelse[0].stønadFom)

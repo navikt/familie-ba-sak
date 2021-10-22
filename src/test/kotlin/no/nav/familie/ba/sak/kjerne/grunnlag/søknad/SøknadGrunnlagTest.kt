@@ -35,7 +35,14 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
 
 @SpringBootTest
-@ActiveProfiles("dev", "mock-pdl", "mock-infotrygd-barnetrygd", "mock-økonomi", "mock-tilbakekreving-klient", "mock-brev-klient")
+@ActiveProfiles(
+    "dev",
+    "mock-pdl",
+    "mock-infotrygd-barnetrygd",
+    "mock-økonomi",
+    "mock-tilbakekreving-klient",
+    "mock-brev-klient"
+)
 class SøknadGrunnlagTest(
     @Autowired
     private val søknadGrunnlagService: SøknadGrunnlagService,
@@ -64,7 +71,7 @@ class SøknadGrunnlagTest(
     @Autowired
     private val vedtaksperiodeService: VedtaksperiodeService,
 
-) {
+    ) {
 
     @Test
     fun `Skal lagre ned og hente søknadsgrunnlag`() {
@@ -194,7 +201,7 @@ class SøknadGrunnlagTest(
             steg
         )
         assertNotNull(tilkjentYtelse)
-        assertTrue(tilkjentYtelse.andelerTilkjentYtelse.size > 0)
+        assertTrue(tilkjentYtelse.andelerTilkjentYtelseTilUtbetaling.size > 0)
 
         val behandlingEtterNyRegistrering = stegService.håndterSøknad(
             behandling = behandlingEtterVilkårsvurderingSteg,
@@ -222,7 +229,8 @@ class SøknadGrunnlagTest(
 
         val error =
             assertThrows<IllegalStateException> { beregningService.hentTilkjentYtelseForBehandling(behandlingId = behandlingEtterNyRegistrering.id) }
-        val stegEtterNyRegistrering = behandlingEtterNyRegistrering.behandlingStegTilstand.map { it.behandlingSteg }.toSet()
+        val stegEtterNyRegistrering =
+            behandlingEtterNyRegistrering.behandlingStegTilstand.map { it.behandlingSteg }.toSet()
         assertEquals("Fant ikke tilkjent ytelse for behandling ${behandlingEtterNyRegistrering.id}", error.message)
         assertEquals(
             setOf(StegType.REGISTRERE_SØKNAD, StegType.REGISTRERE_PERSONGRUNNLAG, StegType.VILKÅRSVURDERING),

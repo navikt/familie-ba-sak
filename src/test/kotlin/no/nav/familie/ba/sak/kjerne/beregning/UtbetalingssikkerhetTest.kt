@@ -35,7 +35,7 @@ class UtbetalingssikkerhetTest {
             person = person
         )
 
-        tilkjentYtelse.andelerTilkjentYtelse.add(andel)
+        tilkjentYtelse.andelerTilkjentYtelseTilUtbetaling.add(andel)
 
         assertThrows<UtbetalingsikkerhetFeil> {
             TilkjentYtelseValidering.validerAtTilkjentYtelseHarGyldigEtterbetalingsperiode(tilkjentYtelse)
@@ -56,7 +56,7 @@ class UtbetalingssikkerhetTest {
             person = person
         )
 
-        tilkjentYtelse.andelerTilkjentYtelse.add(andel)
+        tilkjentYtelse.andelerTilkjentYtelseTilUtbetaling.add(andel)
 
         assertDoesNotThrow {
             TilkjentYtelseValidering.validerAtTilkjentYtelseHarGyldigEtterbetalingsperiode(tilkjentYtelse)
@@ -73,7 +73,7 @@ class UtbetalingssikkerhetTest {
 
         val tilkjentYtelse = lagInitiellTilkjentYtelse()
 
-        tilkjentYtelse.andelerTilkjentYtelse.addAll(
+        tilkjentYtelse.andelerTilkjentYtelseTilUtbetaling.addAll(
             listOf(
                 lagAndelTilkjentYtelse(
                     inneværendeMåned().minusYears(1).toString(),
@@ -119,7 +119,7 @@ class UtbetalingssikkerhetTest {
 
         val tilkjentYtelse = lagInitiellTilkjentYtelse()
 
-        tilkjentYtelse.andelerTilkjentYtelse.addAll(
+        tilkjentYtelse.andelerTilkjentYtelseTilUtbetaling.addAll(
             listOf(
                 lagAndelTilkjentYtelse(
                     inneværendeMåned().minusYears(1).toString(),
@@ -156,7 +156,7 @@ class UtbetalingssikkerhetTest {
 
         val tilkjentYtelse = lagInitiellTilkjentYtelse()
 
-        tilkjentYtelse.andelerTilkjentYtelse.addAll(
+        tilkjentYtelse.andelerTilkjentYtelseTilUtbetaling.addAll(
             listOf(
                 lagAndelTilkjentYtelse(
                     inneværendeMåned().minusYears(1).toString(),
@@ -195,7 +195,7 @@ class UtbetalingssikkerhetTest {
 
         val tilkjentYtelse = lagInitiellTilkjentYtelse()
 
-        tilkjentYtelse.andelerTilkjentYtelse.addAll(
+        tilkjentYtelse.andelerTilkjentYtelseTilUtbetaling.addAll(
             listOf(
                 lagAndelTilkjentYtelse(
                     inneværendeMåned().minusYears(1).toString(),
@@ -227,7 +227,7 @@ class UtbetalingssikkerhetTest {
         val barn = tilfeldigPerson()
         val tilkjentYtelse = lagInitiellTilkjentYtelse()
 
-        tilkjentYtelse.andelerTilkjentYtelse.addAll(
+        tilkjentYtelse.andelerTilkjentYtelseTilUtbetaling.addAll(
             listOf(
                 lagAndelTilkjentYtelse(
                     barn.fødselsdato.nesteMåned().toString(),
@@ -248,7 +248,7 @@ class UtbetalingssikkerhetTest {
 
         val tilkjentYtelse2 = lagInitiellTilkjentYtelse()
 
-        tilkjentYtelse2.andelerTilkjentYtelse.addAll(
+        tilkjentYtelse2.andelerTilkjentYtelseTilUtbetaling.addAll(
             listOf(
                 lagAndelTilkjentYtelse(
                     barn.fødselsdato.nesteMåned().toString(),
@@ -284,7 +284,7 @@ class UtbetalingssikkerhetTest {
         val barn = tilfeldigPerson()
         val tilkjentYtelse = lagInitiellTilkjentYtelse()
 
-        tilkjentYtelse.andelerTilkjentYtelse.addAll(
+        tilkjentYtelse.andelerTilkjentYtelseTilUtbetaling.addAll(
             listOf(
                 lagAndelTilkjentYtelse(
                     barn.fødselsdato.nesteMåned().toString(),
@@ -305,7 +305,7 @@ class UtbetalingssikkerhetTest {
 
         val tilkjentYtelse2 = lagInitiellTilkjentYtelse()
 
-        tilkjentYtelse2.andelerTilkjentYtelse.addAll(
+        tilkjentYtelse2.andelerTilkjentYtelseTilUtbetaling.addAll(
             listOf(
                 lagAndelTilkjentYtelse(
                     barn.fødselsdato.nesteMåned().toString(),
@@ -337,7 +337,7 @@ class UtbetalingssikkerhetTest {
         val barn = tilfeldigPerson()
         val tilkjentYtelse = lagInitiellTilkjentYtelse()
 
-        tilkjentYtelse.andelerTilkjentYtelse.addAll(
+        tilkjentYtelse.andelerTilkjentYtelseTilUtbetaling.addAll(
             listOf(
                 lagAndelTilkjentYtelse(
                     barn.fødselsdato.nesteMåned().toString(),
@@ -358,7 +358,7 @@ class UtbetalingssikkerhetTest {
 
         val tilkjentYtelse2 = lagInitiellTilkjentYtelse()
 
-        tilkjentYtelse2.andelerTilkjentYtelse.addAll(
+        tilkjentYtelse2.andelerTilkjentYtelseTilUtbetaling.addAll(
             listOf(
                 lagAndelTilkjentYtelse(
                     barn2.fødselsdato.nesteMåned().toString(),

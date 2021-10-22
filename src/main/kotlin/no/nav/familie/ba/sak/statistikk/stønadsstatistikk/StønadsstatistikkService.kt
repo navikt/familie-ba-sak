@@ -95,14 +95,15 @@ class StønadsstatistikkService(
         val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandlingId)
         val persongrunnlag = persongrunnlagService.hentAktiv(behandlingId) ?: error("Fant ikke aktivt persongrunnlag")
 
-        if (tilkjentYtelse.andelerTilkjentYtelse.isEmpty()) return emptyList()
+        if (tilkjentYtelse.andelerTilkjentYtelseTilUtbetaling.isEmpty()) return emptyList()
 
-        val utbetalingsPerioder = beregnUtbetalingsperioderUtenKlassifisering(tilkjentYtelse.andelerTilkjentYtelse)
+        val utbetalingsPerioder =
+            beregnUtbetalingsperioderUtenKlassifisering(tilkjentYtelse.andelerTilkjentYtelseTilUtbetaling)
 
         return utbetalingsPerioder.toSegments()
             .sortedWith(compareBy<LocalDateSegment<Int>>({ it.fom }, { it.value }, { it.tom }))
             .map { segment ->
-                val andelerForSegment = tilkjentYtelse.andelerTilkjentYtelse.filter {
+                val andelerForSegment = tilkjentYtelse.andelerTilkjentYtelseTilUtbetaling.filter {
                     segment.localDateInterval.overlaps(
                         LocalDateInterval(
                             it.stønadFom.førsteDagIInneværendeMåned(),
@@ -122,9 +123,9 @@ class StønadsstatistikkService(
     private fun utledEnsligForsørger(behandlingId: Long): Boolean {
 
         val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandlingId)
-        if (tilkjentYtelse.andelerTilkjentYtelse.isEmpty()) return false
+        if (tilkjentYtelse.andelerTilkjentYtelseTilUtbetaling.isEmpty()) return false
 
-        return tilkjentYtelse.andelerTilkjentYtelse.find { it.type == YtelseType.UTVIDET_BARNETRYGD } != null
+        return tilkjentYtelse.andelerTilkjentYtelseTilUtbetaling.find { it.type == YtelseType.UTVIDET_BARNETRYGD } != null
     }
 
     private fun mapTilUtbetalingsperiode(

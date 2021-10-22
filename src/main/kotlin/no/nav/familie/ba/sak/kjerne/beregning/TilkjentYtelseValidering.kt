@@ -39,7 +39,7 @@ object TilkjentYtelseValidering {
 
     fun validerAtTilkjentYtelseHarGyldigEtterbetalingsperiode(tilkjentYtelse: TilkjentYtelse) {
         val gyldigEtterbetalingFom = hentGyldigEtterbetalingFom(tilkjentYtelse.behandling.opprettetTidspunkt)
-        if (tilkjentYtelse.andelerTilkjentYtelse.any { it.stønadFom < gyldigEtterbetalingFom }) {
+        if (tilkjentYtelse.andelerTilkjentYtelseTilUtbetaling.any { it.stønadFom < gyldigEtterbetalingFom }) {
             throw UtbetalingsikkerhetFeil(
                 melding = "Utbetalingsperioder for en eller flere av partene/personene går mer enn 3 år tilbake i tid.",
                 frontendFeilmelding = "Utbetalingsperioder for en eller flere av partene/personene går mer enn 3 år tilbake i tid. Vennligst endre på datoene, eller ta kontakt med teamet for hjelp."
@@ -75,13 +75,14 @@ object TilkjentYtelseValidering {
     ) {
         val barna = personopplysningGrunnlag.barna.sortedBy { it.fødselsdato }
 
-        val barnasAndeler = hentBarnasAndeler(behandlendeBehandlingTilkjentYtelse.andelerTilkjentYtelse.toList(), barna)
+        val barnasAndeler =
+            hentBarnasAndeler(behandlendeBehandlingTilkjentYtelse.andelerTilkjentYtelseTilUtbetaling.toList(), barna)
 
         barnasAndeler.forEach { (barn, andeler) ->
             val barnsAndelerFraAndreBehandlinger =
                 barnMedAndreTilkjentYtelse.filter { it.first.personIdent.ident == barn.personIdent.ident }
                     .flatMap { it.second }
-                    .flatMap { it.andelerTilkjentYtelse }
+                    .flatMap { it.andelerTilkjentYtelseTilUtbetaling }
 
             validerIngenOverlappAvAndeler(
                 andeler,

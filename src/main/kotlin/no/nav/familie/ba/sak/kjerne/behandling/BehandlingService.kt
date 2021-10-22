@@ -204,7 +204,8 @@ class BehandlingService(
         return behandlingRepository.finnBehandling(behandlingId)
     }
 
-    fun hentSisteIverksatteBehandlingerFraLøpendeFagsaker(): List<Long> = behandlingRepository.finnSisteIverksatteBehandlingFraLøpendeFagsaker()
+    fun hentSisteIverksatteBehandlingerFraLøpendeFagsaker(): List<Long> =
+        behandlingRepository.finnSisteIverksatteBehandlingFraLøpendeFagsaker()
 
     fun hentBehandlinger(fagsakId: Long): List<Behandling> {
         return behandlingRepository.finnBehandlinger(fagsakId)
@@ -234,7 +235,7 @@ class BehandlingService(
     fun finnBarnFraBehandlingMedTilkjentYtsele(behandlingId: Long): List<String> =
         personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId)?.barna?.map { it.personIdent.ident }
             ?.filter {
-                andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(
+                andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseTilUtbetalingForBehandlingOgBarn(
                     behandlingId,
                     it
                 )
@@ -331,7 +332,7 @@ class BehandlingService(
         val forrigeIverksattBehandling = hentSisteBehandlingSomErIverksatt(fagsakId = fagsakId) ?: return null
 
         val forrigeAndeler =
-            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = forrigeIverksattBehandling.id)
+            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseTilUtbetalingForBehandling(behandlingId = forrigeIverksattBehandling.id)
 
         return utledLøpendeUnderkategori(forrigeAndeler)
     }

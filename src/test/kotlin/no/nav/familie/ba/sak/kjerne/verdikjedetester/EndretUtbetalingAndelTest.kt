@@ -31,7 +31,7 @@ class EndretUtbetalingAndelTest(
             hentAktivBehandling(restFagsak = restFagsakEtterBehandlingsresultat.data!!)!!
 
         val andelerTilkjentYtelse =
-            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = behandlingEtterBehandlingsresultat.behandlingId)
+            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseTilUtbetalingForBehandling(behandlingId = behandlingEtterBehandlingsresultat.behandlingId)
 
         val endretFom = andelerTilkjentYtelse.last().stønadFom
         val endretTom = andelerTilkjentYtelse.last().stønadTom.minusMonths(2)
@@ -53,7 +53,7 @@ class EndretUtbetalingAndelTest(
         )
 
         val andelerTilkjentYtelseMedEndretPeriode =
-            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = behandlingEtterBehandlingsresultat.behandlingId)
+            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseTilUtbetalingForBehandling(behandlingId = behandlingEtterBehandlingsresultat.behandlingId)
 
         val endretAndeleTilkjentYtelse =
             andelerTilkjentYtelseMedEndretPeriode.single { it.kalkulertUtbetalingsbeløp === 0 }
@@ -89,7 +89,7 @@ class EndretUtbetalingAndelTest(
         val behandling = hentAktivBehandling(restFagsak = restFagsakEtterBehandlingsresultat.data!!)!!
 
         val andelerTilkjentYtelse =
-            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = behandling.behandlingId)
+            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseTilUtbetalingForBehandling(behandlingId = behandling.behandlingId)
 
         val endretFom = andelerTilkjentYtelse.last().stønadFom
         val endretTom = andelerTilkjentYtelse.last().stønadTom.minusMonths(2)
@@ -117,7 +117,7 @@ class EndretUtbetalingAndelTest(
         familieBaSakKlient().fjernEndretUtbetalingAndel(behandling.behandlingId, endretUtbetalingAndelId!!)
 
         val andelerTilkjentYtelseEtterFjeringAvEndretUtbetaling =
-            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = behandling.behandlingId)
+            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseTilUtbetalingForBehandling(behandlingId = behandling.behandlingId)
 
         Assertions.assertEquals(
             andelerTilkjentYtelseEtterFjeringAvEndretUtbetaling.last().stønadFom,

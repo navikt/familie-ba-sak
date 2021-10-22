@@ -90,7 +90,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                 tilkjentYtelse = tilkjentYtelse
             )
         )
-        tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerTilkjentYtelse)
+        tilkjentYtelse.andelerTilkjentYtelseTilUtbetaling.addAll(andelerTilkjentYtelse)
 
         val utbetalingsoppdrag =
             utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOpptaderTilkjentYtelse(
@@ -247,7 +247,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                 tilkjentYtelse = tilkjentYtelse
             )
         )
-        tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerFørstegangsbehandling)
+        tilkjentYtelse.andelerTilkjentYtelseTilUtbetaling.addAll(andelerFørstegangsbehandling)
         tilkjentYtelse.utbetalingsoppdrag = "Oppdrag"
 
         utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOpptaderTilkjentYtelse(
@@ -294,7 +294,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                 tilkjentYtelse = tilkjentYtelse2
             )
         )
-        tilkjentYtelse2.andelerTilkjentYtelse.addAll(andelerRevurdering)
+        tilkjentYtelse2.andelerTilkjentYtelseTilUtbetaling.addAll(andelerRevurdering)
         val sisteOffsetPåFagsak = økonomiService.hentSisteOffsetPåFagsak(behandling = behandling2)
 
         val utbetalingsoppdrag =
@@ -381,7 +381,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                 tilkjentYtelse = tilkjentYtelse
             )
         )
-        tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerFørstegangsbehandling)
+        tilkjentYtelse.andelerTilkjentYtelseTilUtbetaling.addAll(andelerFørstegangsbehandling)
         tilkjentYtelse.utbetalingsoppdrag = "Oppdrag"
 
         utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOpptaderTilkjentYtelse(
@@ -419,7 +419,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                 tilkjentYtelse = tilkjentYtelse2
             )
         )
-        tilkjentYtelse2.andelerTilkjentYtelse.addAll(andelerRevurdering)
+        tilkjentYtelse2.andelerTilkjentYtelseTilUtbetaling.addAll(andelerRevurdering)
         val sisteOffsetPåFagsak = økonomiService.hentSisteOffsetPåFagsak(behandling = behandling2)
 
         val utbetalingsoppdrag =
@@ -581,7 +581,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                 tilkjentYtelse = tilkjentYtelse
             )
         )
-        tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerFørstegangsbehandling)
+        tilkjentYtelse.andelerTilkjentYtelseTilUtbetaling.addAll(andelerFørstegangsbehandling)
 
         tilkjentYtelse.utbetalingsoppdrag = "Oppdrag"
 
@@ -629,7 +629,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                 tilkjentYtelse = tilkjentYtelse2
             )
         )
-        tilkjentYtelse2.andelerTilkjentYtelse.addAll(andelerRevurdering)
+        tilkjentYtelse2.andelerTilkjentYtelseTilUtbetaling.addAll(andelerRevurdering)
         val sisteOffsetPåFagsak = økonomiService.hentSisteOffsetPåFagsak(behandling = behandling2)
 
         val utbetalingsoppdrag =
@@ -736,7 +736,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                 tilkjentYtelse = tilkjentYtelse
             )
         )
-        tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerFørstegangsbehandling)
+        tilkjentYtelse.andelerTilkjentYtelseTilUtbetaling.addAll(andelerFørstegangsbehandling)
         tilkjentYtelse.utbetalingsoppdrag = "Oppdrag"
 
         utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOpptaderTilkjentYtelse(
@@ -783,7 +783,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                 tilkjentYtelse = tilkjentYtelse2
             )
         )
-        tilkjentYtelse2.andelerTilkjentYtelse.addAll(andelerRevurdering)
+        tilkjentYtelse2.andelerTilkjentYtelseTilUtbetaling.addAll(andelerRevurdering)
 
         val sisteOffsetPåFagsak = økonomiService.hentSisteOffsetPåFagsak(behandling = behandling2)
 
@@ -871,7 +871,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                 tilkjentYtelse = tilkjentYtelse
             )
         )
-        tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerFørstegangsbehandling)
+        tilkjentYtelse.andelerTilkjentYtelseTilUtbetaling.addAll(andelerFørstegangsbehandling)
         tilkjentYtelse.utbetalingsoppdrag = "Oppdrag"
 
         utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOpptaderTilkjentYtelse(
@@ -893,7 +893,7 @@ class UtbetalingsoppdragIntegrasjonTest(
         )
         val tilkjentYtelse2 = lagInitiellTilkjentYtelse(behandling2)
         val andelerRevurdering = emptyList<AndelTilkjentYtelse>()
-        tilkjentYtelse2.andelerTilkjentYtelse.addAll(andelerRevurdering)
+        tilkjentYtelse2.andelerTilkjentYtelseTilUtbetaling.addAll(andelerRevurdering)
         tilkjentYtelse2.utbetalingsoppdrag = "Oppdrag"
 
         utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOpptaderTilkjentYtelse(
@@ -919,7 +919,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                 tilkjentYtelse = tilkjentYtelse
             )
         )
-        tilkjentYtelse3.andelerTilkjentYtelse.addAll(andelerRevurdering2)
+        tilkjentYtelse3.andelerTilkjentYtelseTilUtbetaling.addAll(andelerRevurdering2)
 
         assertEquals(0, økonomiService.hentSisteOffsetPåFagsak(behandling = behandling3))
     }

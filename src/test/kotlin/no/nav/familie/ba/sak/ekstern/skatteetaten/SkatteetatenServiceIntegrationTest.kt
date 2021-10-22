@@ -333,7 +333,7 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
             endretDato = tilkjentYtelse.endretDato.toLocalDate(),
             utbetalingsoppdrag = "utbetalt",
         ).also {
-            it.andelerTilkjentYtelse.addAll(
+            it.andelerTilkjentYtelseTilUtbetaling.addAll(
                 tilkjentYtelse.perioder.map { p ->
                     AndelTilkjentYtelse(
                         behandlingId = it.behandling.id,

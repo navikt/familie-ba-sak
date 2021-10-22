@@ -38,10 +38,10 @@ class BeregningService(
         ?.let { tilkjentYtelseRepository.delete(it) }
 
     fun hentLøpendeAndelerTilkjentYtelseForBehandlinger(behandlingIder: List<Long>): List<AndelTilkjentYtelse> =
-        andelTilkjentYtelseRepository.finnLøpendeAndelerTilkjentYtelseForBehandlinger(behandlingIder)
+        andelTilkjentYtelseRepository.finnLøpendeAndelerTilkjentYtelseTilUtbetalingForBehandlinger(behandlingIder)
 
     fun hentAndelerTilkjentYtelseForBehandling(behandlingId: Long): List<AndelTilkjentYtelse> =
-        andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(listOf(behandlingId))
+        andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseTilUtbetalingForBehandlinger(listOf(behandlingId))
 
     fun lagreTilkjentYtelseMedOppdaterteAndeler(tilkjentYtelse: TilkjentYtelse) =
         tilkjentYtelseRepository.save(tilkjentYtelse)
@@ -116,15 +116,15 @@ class BeregningService(
             }
 
         if (endretUtbetalingAndel != null)
-            validerDeltBosted(endretUtbetalingAndel, tilkjentYtelse.andelerTilkjentYtelse.toList())
+            validerDeltBosted(endretUtbetalingAndel, tilkjentYtelse.andelerTilkjentYtelseTilUtbetaling.toList())
 
         val endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(behandling.id)
         val andelerTilkjentYtelse = TilkjentYtelseUtils.oppdaterTilkjentYtelseMedEndretUtbetalingAndeler(
-            tilkjentYtelse.andelerTilkjentYtelse,
+            tilkjentYtelse.andelerTilkjentYtelseTilUtbetaling,
             endretUtbetalingAndeler
         )
-        tilkjentYtelse.andelerTilkjentYtelse.clear()
-        tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerTilkjentYtelse)
+        tilkjentYtelse.andelerTilkjentYtelseTilUtbetaling.clear()
+        tilkjentYtelse.andelerTilkjentYtelseTilUtbetaling.addAll(andelerTilkjentYtelse)
 
         return tilkjentYtelseRepository.save(tilkjentYtelse)
     }

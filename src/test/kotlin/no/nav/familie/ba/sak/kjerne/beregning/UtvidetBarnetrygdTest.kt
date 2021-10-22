@@ -90,7 +90,7 @@ internal class UtvidetBarnetrygdTest {
             personopplysningGrunnlag = personopplysningGrunnlag,
             behandling = behandling
         )
-            .andelerTilkjentYtelse.toList()
+            .andelerTilkjentYtelseTilUtbetaling.toList()
             .sortedWith(compareBy({ it.stønadFom }, { it.type }, { it.kalkulertUtbetalingsbeløp }))
 
         assertEquals(4, andeler.size)
@@ -177,7 +177,7 @@ internal class UtvidetBarnetrygdTest {
             personopplysningGrunnlag = personopplysningGrunnlag,
             behandling = behandling
         )
-            .andelerTilkjentYtelse.toList()
+            .andelerTilkjentYtelseTilUtbetaling.toList()
             .sortedWith(compareBy({ it.stønadFom }, { it.type }, { it.kalkulertUtbetalingsbeløp }))
 
         assertEquals(2, andeler.size)
@@ -253,7 +253,7 @@ internal class UtvidetBarnetrygdTest {
             personopplysningGrunnlag = personopplysningGrunnlag,
             behandling = behandling
         )
-            .andelerTilkjentYtelse.toList().sortedBy { it.type }
+            .andelerTilkjentYtelseTilUtbetaling.toList().sortedBy { it.type }
 
         assertEquals(2, andeler.size)
 
@@ -326,7 +326,7 @@ internal class UtvidetBarnetrygdTest {
             personopplysningGrunnlag = personopplysningGrunnlag,
             behandling = behandling
         )
-            .andelerTilkjentYtelse.toList().sortedBy { it.type }
+            .andelerTilkjentYtelseTilUtbetaling.toList().sortedBy { it.type }
 
         assertEquals(2, andeler.size)
 
@@ -400,7 +400,7 @@ internal class UtvidetBarnetrygdTest {
             personopplysningGrunnlag = personopplysningGrunnlag,
             behandling = behandling
         )
-            .andelerTilkjentYtelse.toList().sortedBy { it.type }
+            .andelerTilkjentYtelseTilUtbetaling.toList().sortedBy { it.type }
 
         assertEquals(2, andeler.size)
 
@@ -487,7 +487,7 @@ internal class UtvidetBarnetrygdTest {
             personopplysningGrunnlag = personopplysningGrunnlag,
             behandling = behandling
         )
-            .andelerTilkjentYtelse.toList().sortedBy { it.type }
+            .andelerTilkjentYtelseTilUtbetaling.toList().sortedBy { it.type }
 
         assertEquals(3, andeler.size)
 
@@ -578,7 +578,7 @@ internal class UtvidetBarnetrygdTest {
             personopplysningGrunnlag = personopplysningGrunnlag,
             behandling = behandling
         )
-            .andelerTilkjentYtelse.toList().sortedBy { it.type }
+            .andelerTilkjentYtelseTilUtbetaling.toList().sortedBy { it.type }
 
         assertEquals(3, andeler.size)
 

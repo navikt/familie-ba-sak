@@ -11,14 +11,23 @@ interface AndelTilkjentYtelseRepository : JpaRepository<AndelTilkjentYtelse, Lon
     @Query(value = "SELECT aty FROM AndelTilkjentYtelse aty WHERE aty.behandlingId IN :behandlingIder")
     fun finnAndelerTilkjentYtelseForBehandlinger(behandlingIder: List<Long>): List<AndelTilkjentYtelse>
 
+    @Query(value = "SELECT aty FROM AndelTilkjentYtelse aty WHERE aty.behandlingId IN :behandlingIder AND aty.prosent > 0")
+    fun finnAndelerTilkjentYtelseTilUtbetalingForBehandlinger(behandlingIder: List<Long>): List<AndelTilkjentYtelse>
+
+    @Query(value = "SELECT aty FROM AndelTilkjentYtelse aty WHERE aty.behandlingId = :behandlingId AND aty.prosent > 0")
+    fun finnAndelerTilkjentYtelseTilUtbetalingForBehandling(behandlingId: Long): List<AndelTilkjentYtelse>
+
     @Query(value = "SELECT aty FROM AndelTilkjentYtelse aty WHERE aty.behandlingId = :behandlingId")
     fun finnAndelerTilkjentYtelseForBehandling(behandlingId: Long): List<AndelTilkjentYtelse>
 
-    @Query(value = "SELECT aty FROM AndelTilkjentYtelse aty WHERE aty.behandlingId = :behandlingId AND aty.personIdent = :barnIdent")
-    fun finnAndelerTilkjentYtelseForBehandlingOgBarn(behandlingId: Long, barnIdent: String): List<AndelTilkjentYtelse>
+    @Query(value = "SELECT aty FROM AndelTilkjentYtelse aty WHERE aty.behandlingId = :behandlingId AND aty.personIdent = :barnIdent AND aty.prosent > 0")
+    fun finnAndelerTilkjentYtelseTilUtbetalingForBehandlingOgBarn(
+        behandlingId: Long,
+        barnIdent: String
+    ): List<AndelTilkjentYtelse>
 
-    @Query(value = "SELECT aty FROM AndelTilkjentYtelse aty WHERE aty.behandlingId IN :behandlingIder AND aty.stønadTom >= DATE_TRUNC('month', CURRENT_TIMESTAMP)")
-    fun finnLøpendeAndelerTilkjentYtelseForBehandlinger(behandlingIder: List<Long>): List<AndelTilkjentYtelse>
+    @Query(value = "SELECT aty FROM AndelTilkjentYtelse aty WHERE aty.behandlingId IN :behandlingIder AND aty.stønadTom >= DATE_TRUNC('month', CURRENT_TIMESTAMP) AND aty.prosent > 0")
+    fun finnLøpendeAndelerTilkjentYtelseTilUtbetalingForBehandlinger(behandlingIder: List<Long>): List<AndelTilkjentYtelse>
 
     // The query only returns the periods that overlap with the given year. Any periods that are
     // totally out of the year scope will be ignored.
@@ -37,6 +46,7 @@ interface AndelTilkjentYtelseRepository : JpaRepository<AndelTilkjentYtelse, Lon
                 AND aty.person_ident IN :personIdenter
                 AND aty.stonad_fom <= :tom
                 AND aty.stonad_tom >= :fom
+                AND aty.prosent > 0
           ) AS qualified_aty
              INNER JOIN (
         SELECT ty.id tyid, ty.endret_dato endret_dato

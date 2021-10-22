@@ -69,7 +69,9 @@ class KonsistensavstemmingUtplukkingIntegrationTest : AbstractSpringIntegrationT
 
         val iverksattOgLøpendeBehandlinger = behandlingRepository.finnSisteIverksatteBehandlingFraLøpendeFagsaker()
         val behandlingerMedRelevanteAndeler =
-            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(iverksattOgLøpendeBehandlinger)
+            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseTilUtbetalingForBehandlinger(
+                iverksattOgLøpendeBehandlinger
+            )
                 .map { it.kildeBehandlingId }
                 .distinct()
 
@@ -101,7 +103,9 @@ class KonsistensavstemmingUtplukkingIntegrationTest : AbstractSpringIntegrationT
 
         val iverksattOgLøpendeBehandlinger = behandlingRepository.finnSisteIverksatteBehandlingFraLøpendeFagsaker()
         val behandlingerMedRelevanteAndeler =
-            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(iverksattOgLøpendeBehandlinger)
+            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseTilUtbetalingForBehandlinger(
+                iverksattOgLøpendeBehandlinger
+            )
                 .map { it.kildeBehandlingId }
                 .sortedBy { it }
                 .distinct()
@@ -131,7 +135,9 @@ class KonsistensavstemmingUtplukkingIntegrationTest : AbstractSpringIntegrationT
 
         val iverksattOgLøpendeBehandlinger = behandlingRepository.finnSisteIverksatteBehandlingFraLøpendeFagsaker()
         val behandlingerMedRelevanteAndeler =
-            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(iverksattOgLøpendeBehandlinger)
+            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseTilUtbetalingForBehandlinger(
+                iverksattOgLøpendeBehandlinger
+            )
                 .map { it.kildeBehandlingId }
                 .distinct()
 
@@ -159,7 +165,9 @@ class KonsistensavstemmingUtplukkingIntegrationTest : AbstractSpringIntegrationT
 
         val iverksattOgLøpendeBehandlinger = behandlingRepository.finnSisteIverksatteBehandlingFraLøpendeFagsaker()
         val behandlingerMedRelevanteAndeler =
-            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(iverksattOgLøpendeBehandlinger)
+            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseTilUtbetalingForBehandlinger(
+                iverksattOgLøpendeBehandlinger
+            )
                 .map { it.kildeBehandlingId }
                 .distinct()
 
@@ -188,7 +196,9 @@ class KonsistensavstemmingUtplukkingIntegrationTest : AbstractSpringIntegrationT
 
         val iverksattOgLøpendeBehandlinger = behandlingRepository.finnSisteIverksatteBehandlingFraLøpendeFagsaker()
         val behandlingerMedRelevanteAndeler =
-            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(iverksattOgLøpendeBehandlinger)
+            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseTilUtbetalingForBehandlinger(
+                iverksattOgLøpendeBehandlinger
+            )
                 .map { it.kildeBehandlingId }
                 .distinct()
 

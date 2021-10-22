@@ -99,7 +99,7 @@ internal class StønadsstatistikkServiceTest {
         every { behandlingService.hent(any()) } returns behandling
         every { beregningService.hentTilkjentYtelseForBehandling(any()) } returns
             tilkjentYtelse.copy(
-                andelerTilkjentYtelse = mutableSetOf(
+                andelerTilkjentYtelseTilUtbetaling = mutableSetOf(
                     andelTilkjentYtelseBarn1,
                     andelTilkjentYtelseBarn2,
                     andelTilkjentYtelseSøker
@@ -180,9 +180,11 @@ internal class StønadsstatistikkServiceTest {
     @Test
     fun `Skal gi feil hvis det kommer en ny BehandlingÅrsak som det ikke er tatt høyde for mot stønaddstatistkk - Man trenger å oppdatere schema og varsle stønaddstatistikk - Tips i javadoc`() {
         val behandlingsÅrsakIBASak = enumValues<BehandlingÅrsak>().map { it.name }
-        val behandlingsÅrsakFraEksternKontrakt = enumValues<no.nav.familie.eksterne.kontrakter.BehandlingÅrsak>().map { it.name }
+        val behandlingsÅrsakFraEksternKontrakt =
+            enumValues<no.nav.familie.eksterne.kontrakter.BehandlingÅrsak>().map { it.name }
 
-        assertThat(behandlingsÅrsakIBASak).hasSize(behandlingsÅrsakFraEksternKontrakt.size).containsAll(behandlingsÅrsakFraEksternKontrakt)
+        assertThat(behandlingsÅrsakIBASak).hasSize(behandlingsÅrsakFraEksternKontrakt.size)
+            .containsAll(behandlingsÅrsakFraEksternKontrakt)
     }
 
     /**
@@ -197,8 +199,10 @@ internal class StønadsstatistikkServiceTest {
     @Test
     fun `Skal gi feil hvis det kommer en ny BehandlingType som det ikke er tatt høyde for mot stønaddstatistkk - Man trenger å oppdatere schema og varsle stønaddstatistikk`() {
         val behandlingsTypeIBasak = enumValues<BehandlingType>().map { it.name }
-        val behandlingsTypeFraStønadskontrakt = enumValues<no.nav.familie.eksterne.kontrakter.BehandlingType>().map { it.name }
+        val behandlingsTypeFraStønadskontrakt =
+            enumValues<no.nav.familie.eksterne.kontrakter.BehandlingType>().map { it.name }
 
-        assertThat(behandlingsTypeIBasak).hasSize(behandlingsTypeFraStønadskontrakt.size).containsAll(behandlingsTypeFraStønadskontrakt)
+        assertThat(behandlingsTypeIBasak).hasSize(behandlingsTypeFraStønadskontrakt.size)
+            .containsAll(behandlingsTypeFraStønadskontrakt)
     }
 }

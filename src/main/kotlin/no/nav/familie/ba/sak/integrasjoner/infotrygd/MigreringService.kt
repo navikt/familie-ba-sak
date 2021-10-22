@@ -222,7 +222,7 @@ class MigreringService(
         behandling: Behandling,
         løpendeSak: Sak
     ) {
-        tilkjentYtelseRepository.findByBehandlingOptional(behandling.id)?.andelerTilkjentYtelse?.let { andelerTilkjentYtelse: MutableSet<AndelTilkjentYtelse> ->
+        tilkjentYtelseRepository.findByBehandlingOptional(behandling.id)?.andelerTilkjentYtelseTilUtbetaling?.let { andelerTilkjentYtelse: MutableSet<AndelTilkjentYtelse> ->
             if (andelerTilkjentYtelse.isEmpty()) throw Feil(
                 "Migrering feilet: Fant ingen andeler tilkjent ytelse på behandlingen",
                 "Migrering feilet: Fant ingen andeler tilkjent ytelse på behandlingen",

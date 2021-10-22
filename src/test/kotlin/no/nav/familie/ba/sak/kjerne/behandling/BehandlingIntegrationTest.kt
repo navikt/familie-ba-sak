@@ -120,7 +120,7 @@ class BehandlingIntegrationTest(
     @Autowired
     private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
 
-) : AbstractSpringIntegrationTest() {
+    ) : AbstractSpringIntegrationTest() {
 
     @BeforeEach
     fun setup() {
@@ -372,7 +372,7 @@ class BehandlingIntegrationTest(
 
         val tilkjentYtelse = beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
         val restVedtakBarnMap =
-            personopplysningGrunnlag.tilRestPersonerMedAndeler(andelerKnyttetTilPersoner = tilkjentYtelse.andelerTilkjentYtelse.toList())
+            personopplysningGrunnlag.tilRestPersonerMedAndeler(andelerKnyttetTilPersoner = tilkjentYtelse.andelerTilkjentYtelseTilUtbetaling.toList())
                 .associateBy(
                     { it.personIdent },
                     { restPersonMedAndeler -> restPersonMedAndeler.ytelsePerioder.sortedBy { it.stønadFom } }
@@ -464,7 +464,7 @@ class BehandlingIntegrationTest(
 
         val tilkjentYtelse = beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
         val restVedtakBarnMap =
-            personopplysningGrunnlag.tilRestPersonerMedAndeler(andelerKnyttetTilPersoner = tilkjentYtelse.andelerTilkjentYtelse.toList())
+            personopplysningGrunnlag.tilRestPersonerMedAndeler(andelerKnyttetTilPersoner = tilkjentYtelse.andelerTilkjentYtelseTilUtbetaling.toList())
                 .associateBy(
                     { it.personIdent },
                     { restPersonMedAndeler -> restPersonMedAndeler.ytelsePerioder.sortedBy { it.stønadFom } }

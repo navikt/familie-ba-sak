@@ -111,7 +111,7 @@ class VedtaksperiodeService(
         val behandling = vedtaksperiodeMedBegrunnelser.vedtak.behandling
 
         val andelerTilkjentYtelse =
-            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = behandling.id)
+            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseTilUtbetalingForBehandling(behandlingId = behandling.id)
         val persongrunnlag =
             persongrunnlagRepository.findByBehandlingAndAktiv(behandling.id) ?: error("Finner ikke persongrunnlag")
 
@@ -301,8 +301,8 @@ class VedtaksperiodeService(
                 utbetalingsperioderUtenEndringer +
                     hentOpphørsperioder(vedtak.behandling)
                 ).map {
-                it.tilVedtaksperiodeMedBegrunnelse(vedtak)
-            }
+                    it.tilVedtaksperiodeMedBegrunnelse(vedtak)
+                }
         val avslagsperioder = hentAvslagsperioderMedBegrunnelser(vedtak)
 
         val endretUtbetalingsperioder = hentEndredeUtbetalingsperioderMedBegrunnelser(
@@ -405,8 +405,8 @@ class VedtaksperiodeService(
                                         triggesAv = triggesAv,
                                         vedtakBegrunnelseType = vedtakBegrunnelseType,
                                         endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(
-                                                behandling.id
-                                            )
+                                            behandling.id
+                                        )
                                     )
                                 ) {
                                     acc.add(standardBegrunnelse)
@@ -480,7 +480,9 @@ class VedtaksperiodeService(
 
         val utvidetVedtaksperiodeMedBegrunnelse = vedtaksperiode.tilUtvidetVedtaksperiodeMedBegrunnelser(
             personopplysningGrunnlag = persongrunnlag,
-            andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId)
+            andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseTilUtbetalingForBehandling(
+                behandlingId
+            )
         )
 
         return utvidetVedtaksperiodeMedBegrunnelse.byggBegrunnelserOgFritekster(
@@ -491,7 +493,7 @@ class VedtaksperiodeService(
     }
 
     private fun finnTomDatoIFørsteUtbetalingsintervallFraInneværendeMåned(behandlingId: Long): LocalDate =
-        andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(listOf(behandlingId))
+        andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseTilUtbetalingForBehandlinger(listOf(behandlingId))
             .filter { it.stønadFom <= YearMonth.now() && it.stønadTom >= YearMonth.now() }
             .minByOrNull { it.stønadTom }?.stønadTom?.sisteDagIInneværendeMåned()
             ?: error("Fant ikke andel for tilkjent ytelse inneværende måned for behandling $behandlingId.")
@@ -503,7 +505,7 @@ class VedtaksperiodeService(
         val personopplysningGrunnlag = persongrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
             ?: return emptyList()
         val andelerTilkjentYtelse =
-            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = behandling.id)
+            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseTilUtbetalingForBehandling(behandlingId = behandling.id)
 
         return mapTilUtbetalingsperioder(
             andelerTilkjentYtelse = andelerTilkjentYtelse,
@@ -528,14 +530,14 @@ class VedtaksperiodeService(
                 persongrunnlagRepository.findByBehandlingAndAktiv(behandlingId = forrigeIverksatteBehandling.id)
             else null
         val forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse> =
-            if (forrigeIverksatteBehandling != null) andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(
+            if (forrigeIverksatteBehandling != null) andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseTilUtbetalingForBehandling(
                 behandlingId = forrigeIverksatteBehandling.id
             ) else emptyList()
 
         val personopplysningGrunnlag = persongrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
             ?: return emptyList()
         val andelerTilkjentYtelse =
-            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = behandling.id)
+            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseTilUtbetalingForBehandling(behandlingId = behandling.id)
 
         return mapTilOpphørsperioder(
             forrigePersonopplysningGrunnlag = forrigePersonopplysningGrunnlag,
