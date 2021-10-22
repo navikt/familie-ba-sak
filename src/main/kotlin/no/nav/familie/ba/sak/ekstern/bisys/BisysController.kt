@@ -126,6 +126,7 @@ data class UtvidetBarnetrygdPeriode(
     @ApiModelProperty(dataType = JAVA_LANG_STRING, example = "2020-12") val tomMåned: YearMonth?,
     val beløp: Double,
     val manueltBeregnet: Boolean,
+    val deltBosted: Boolean? = null
 )
 
 enum class BisysStønadstype {

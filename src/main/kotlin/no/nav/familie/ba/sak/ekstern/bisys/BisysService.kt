@@ -80,7 +80,8 @@ class BisysService(
                     fomMåned = it.stønadFom,
                     tomMåned = it.stønadTom,
                     beløp = it.sats.toDouble(),
-                    manueltBeregnet = false
+                    manueltBeregnet = false,
+                    deltBosted = it.erDeltBosted()
                 )
             } ?: emptyList()
     }
@@ -89,7 +90,8 @@ class BisysService(
         return utbetalingerAvSammeBeløp.sortedBy { it.fomMåned }
             .fold(mutableListOf()) { sammenslåttePerioder, nesteUtbetaling ->
                 if (sammenslåttePerioder.lastOrNull()?.tomMåned == nesteUtbetaling.fomMåned.minusMonths(1) &&
-                    sammenslåttePerioder.lastOrNull()?.manueltBeregnet == nesteUtbetaling.manueltBeregnet
+                    sammenslåttePerioder.lastOrNull()?.manueltBeregnet == nesteUtbetaling.manueltBeregnet &&
+                    sammenslåttePerioder.lastOrNull()?.deltBosted == nesteUtbetaling.deltBosted
                 ) {
                     sammenslåttePerioder.apply { add(removeLast().copy(tomMåned = nesteUtbetaling.tomMåned)) }
                 } else sammenslåttePerioder.apply { add(nesteUtbetaling) }
