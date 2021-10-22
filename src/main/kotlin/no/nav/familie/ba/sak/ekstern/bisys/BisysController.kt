@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import no.nav.familie.ba.sak.common.EksternTjenesteFeil
 import no.nav.familie.ba.sak.common.EksternTjenesteFeilException
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.ekstern.bisys.BisysController.Companion.JAVA_LANG_STRING
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.HttpStatus
@@ -86,6 +87,18 @@ class BisysController(private val bisysService: BisysService) {
         return try {
             return ResponseEntity.ok(bisysService.hentUtvidetBarnetrygd(request.personIdent, request.fraDato))
         } catch (e: RuntimeException) {
+            if ((e is Feil) && (e.httpStatus == HttpStatus.NOT_FOUND)) {
+                throw EksternTjenesteFeilException(
+                    EksternTjenesteFeil(
+                        "/api/bisys/hent-utvidet-barnetrygd",
+                        HttpStatus.BAD_REQUEST
+                    ),
+                    "Fant ikke personIdent i PDL",
+                    request,
+                    e
+                )
+            }
+
             throw EksternTjenesteFeilException(
                 EksternTjenesteFeil("/api/bisys/hent-utvidet-barnetrygd"),
                 e.message ?: "Ukjent feil ved hent utvidet barnetrygd",
