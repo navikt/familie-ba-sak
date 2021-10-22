@@ -12,6 +12,7 @@ import no.nav.familie.prosessering.domene.TaskRepository
 import org.slf4j.LoggerFactory
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.jdbc.core.RowMapper
+import org.springframework.stereotype.Repository
 import org.springframework.stereotype.Service
 import java.io.StringReader
 import java.util.Properties
@@ -26,7 +27,7 @@ class BehandleAnnullertFødselTask(
     val taskRepository: TaskRepository,
     val behandlingRepository: BehandlingRepository,
     val personRepository: PersonRepository,
-    val jdbcTemplate: JdbcTemplate,
+    val taskRepositoryForAnnullertFødsel: TaskRepositoryForAnnullertFødsel,
 ) :
     AsyncTaskStep {
 
@@ -37,13 +38,13 @@ class BehandleAnnullertFødselTask(
         logger.debug("barnasIdenter count ${barnasIdenter.size}")
         logger.debug("Tidlegere Id = ${dto.tidligereHendelseId}")
 
-        var tasker = hentTaskForTidligereHendelse(dto.tidligereHendelseId)
+        var tasker = taskRepositoryForAnnullertFødsel.hentTaskForTidligereHendelse(dto.tidligereHendelseId)
         logger.debug("Found ${tasker.size} task(er)")
         if (tasker.isEmpty()) {
             logger.info("Finnes ikke åpen task for annullertfødsel tidligere Id = ${dto.tidligereHendelseId}. Forsøker å finne aktiv behandling.")
             if (personRepository.findByPersonIdenter(barnasIdenter).any {
-                behandlingRepository.finnBehandling(it.personopplysningGrunnlag.behandlingId).aktiv
-            }
+                    behandlingRepository.finnBehandling(it.personopplysningGrunnlag.behandlingId).aktiv
+                }
             ) {
                 logger.warn("Finnes aktiv behandling(er) for annullert fødselshendelse.")
             } else {
@@ -57,21 +58,6 @@ class BehandleAnnullertFødselTask(
                         .avvikshåndter(avvikstype = Avvikstype.ANNET, årsak = AVVIKSÅRSAK, endretAv = "VL")
                 )
             }
-        }
-    }
-
-    private fun hentTaskForTidligereHendelse(callID: String): List<Long> {
-        var query = "SELECT id, metadata FROM task t\n" +
-            "WHERE t.status IN ('KLAR_TIL_PLUKK', 'UBEHANDLET', 'FEILET')\n" +
-            "  AND t.type = 'behandleFødselshendelseTask'"
-        var rowMapper = RowMapper { row, index ->
-            Pair(
-                row.getLong("id"),
-                Properties().also { it.load(StringReader((row.getString("metadata")))) }
-            )
-        }
-        return jdbcTemplate.query(query, rowMapper).filter { it.second.getProperty("callId") == callID }.map {
-            it.first
         }
     }
 
@@ -94,3 +80,23 @@ class BehandleAnnullertFødselTask(
 }
 
 data class BehandleAnnullerFødselDto(val barnasIdenter: List<String>, val tidligereHendelseId: String)
+
+@Repository
+class TaskRepositoryForAnnullertFødsel(private val jdbcTemplate: JdbcTemplate) {
+
+    fun hentTaskForTidligereHendelse(tidligereHendelseId: String): List<Long> {
+        var query = "SELECT id, metadata FROM task t\n" +
+            "WHERE t.status IN ('KLAR_TIL_PLUKK', 'UBEHANDLET', 'FEILET')\n" +
+            "  AND t.type = 'behandleFødselshendelseTask'"
+        var rowMapper = RowMapper { row, index ->
+            Pair(
+                row.getLong("id"),
+                Properties().also { it.load(StringReader((row.getString("metadata")))) }
+            )
+        }
+        return jdbcTemplate.query(query, rowMapper).filter { it.second.getProperty("callId") == tidligereHendelseId }
+            .map {
+                it.first
+            }
+    }
+}
