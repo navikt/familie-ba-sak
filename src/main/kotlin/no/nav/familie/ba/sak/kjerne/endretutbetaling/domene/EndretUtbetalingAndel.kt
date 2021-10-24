@@ -142,7 +142,8 @@ fun EndretUtbetalingAndel.tilRestEndretUtbetalingAndel() = RestEndretUtbetalingA
     årsak = this.årsak,
     avtaletidspunktDeltBosted = this.avtaletidspunktDeltBosted,
     søknadstidspunkt = this.søknadstidspunkt,
-    begrunnelse = this.begrunnelse
+    begrunnelse = this.begrunnelse,
+    tilknyttetAndeler = this.andelTilkjentYtelser.isNotEmpty()
 )
 
 fun EndretUtbetalingAndel.fraRestEndretUtbetalingAndel(
