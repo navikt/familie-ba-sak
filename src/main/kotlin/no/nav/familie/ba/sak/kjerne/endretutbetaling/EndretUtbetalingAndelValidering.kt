@@ -90,7 +90,7 @@ object EndretUtbetalingAndelValidering {
         if (endretUtbetalingAndeler.any { it.andelTilkjentYtelser.isEmpty() })
             throw FunksjonellFeil(
                 melding = "Det er opprettet instanser av EndretUtbetalingandel som ikke er tilknyttet noen andeler. De må enten lagres eller slettes av SB.",
-                frontendFeilmelding = "Det finnes en eller flere endrede utbetalingsperioder som enten må lagres på nytt eller fjernes. Dette fordi du har vært inne på vilkårsvurderingen etter at de ble opprettet og potensielt også må korrigere disse."
+                frontendFeilmelding = "Du har endrede utbetalingsperioder. Bekreft, slett eller oppdater periodene i listen."
             )
     }
 }

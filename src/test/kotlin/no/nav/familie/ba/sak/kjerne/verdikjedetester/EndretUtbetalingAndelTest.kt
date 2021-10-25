@@ -45,7 +45,7 @@ class EndretUtbetalingAndelTest(
             årsak = Årsak.DELT_BOSTED, avtaletidspunktDeltBosted = LocalDate.now(),
             søknadstidspunkt = LocalDate.now(),
             begrunnelse = "begrunnelse",
-            tilknyttetAndeler = true,
+            erTilknyttetAndeler = true,
         )
 
         familieBaSakKlient().leggTilEndretUtbetalingAndel(
@@ -105,7 +105,7 @@ class EndretUtbetalingAndelTest(
             avtaletidspunktDeltBosted = LocalDate.now(),
             søknadstidspunkt = LocalDate.now(),
             begrunnelse = "begrunnelse",
-            tilknyttetAndeler = true,
+            erTilknyttetAndeler = true,
         )
 
         val fagSakEtterEndretPeriode = familieBaSakKlient().leggTilEndretUtbetalingAndel(

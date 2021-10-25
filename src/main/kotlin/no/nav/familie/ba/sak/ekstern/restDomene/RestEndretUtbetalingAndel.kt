@@ -15,5 +15,5 @@ class RestEndretUtbetalingAndel(
     val avtaletidspunktDeltBosted: LocalDate?,
     val søknadstidspunkt: LocalDate?,
     val begrunnelse: String?,
-    val tilknyttetAndeler: Boolean?,
+    val erTilknyttetAndeler: Boolean?,
 )
