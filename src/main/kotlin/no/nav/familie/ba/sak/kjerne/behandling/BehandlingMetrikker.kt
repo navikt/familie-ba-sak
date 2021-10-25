@@ -14,6 +14,8 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifi
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeRepository
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
@@ -23,7 +25,7 @@ class BehandlingMetrikker(
     private val behandlingRepository: BehandlingRepository,
     private val vedtakRepository: VedtakRepository,
     private val vedtaksperiodeRepository: VedtaksperiodeRepository,
-    private val brevKlient: BrevKlient
+    brevKlient: BrevKlient
 ) {
 
     private val antallManuelleBehandlinger: Counter =
@@ -46,13 +48,20 @@ class BehandlingMetrikker(
             )
         }
 
+    private val sanityBegrunnelser = brevKlient.hentSanityBegrunnelse()
+
     private val antallBrevBegrunnelseSpesifikasjon: Map<VedtakBegrunnelseSpesifikasjon, Counter> =
         VedtakBegrunnelseSpesifikasjon.values().associateWith {
-            val tittel =
-                it
-                    .tilSanityBegrunnelse(brevKlient.hentSanityBegrunnelse())
-                    .navnISystem
-
+            val tittel = try {
+                it.tilSanityBegrunnelse(sanityBegrunnelser).navnISystem
+            } catch (exception: Exception) {
+                logger.warn("Feil ved henting av begrunnelse med apiNavn '${it.sanityApiNavn}' fra sanity")
+                secureLogger.warn(
+                    "Feil ved henting av begrunnelse med apiNavn '${it.sanityApiNavn}' fra sanity: " +
+                        exception.message
+                )
+                it.name
+            }
             Metrics.counter(
                 "brevbegrunnelse",
                 "type", it.name,
@@ -126,5 +135,10 @@ class BehandlingMetrikker(
                 it.visningsnavn
             )
         }
+    }
+
+    companion object {
+        private val logger = LoggerFactory.getLogger(BehandlingMetrikker::class.java)
+        private val secureLogger: Logger = LoggerFactory.getLogger("secureLogger")
     }
 }
