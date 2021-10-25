@@ -46,13 +46,7 @@ fun VedtaksperiodeMedBegrunnelser.tilUtvidetVedtaksperiodeMedBegrunnelser(
         if (this.type == Vedtaksperiodetype.UTBETALING || this.type == Vedtaksperiodetype.ENDRET_UTBETALING || this.type == Vedtaksperiodetype.FORTSATT_INNVILGET) {
             val andelerForVedtaksperiodetype = andelerTilkjentYtelse.filter {
                 if (this.type == Vedtaksperiodetype.ENDRET_UTBETALING) {
-                    it.endretUtbetalingAndeler.isNotEmpty() && it.endretUtbetalingAndeler.all { endretUtbetalingAndel ->
-                        this.begrunnelser.any { vedtaksbegrunnelse ->
-                            vedtaksbegrunnelse.personIdenter.contains(
-                                endretUtbetalingAndel.person!!.personIdent.ident
-                            )
-                        }
-                    }
+                    endretUtbetalingAndelSkalVæreMed(it)
                 } else {
                     it.endretUtbetalingAndeler.isEmpty()
                 }
@@ -81,6 +75,15 @@ fun VedtaksperiodeMedBegrunnelser.tilUtvidetVedtaksperiodeMedBegrunnelser(
         utbetalingsperiodeDetaljer = utbetalingsperiodeDetaljer
     )
 }
+
+private fun VedtaksperiodeMedBegrunnelser.endretUtbetalingAndelSkalVæreMed(andelTilkjentYtelse: AndelTilkjentYtelse) =
+    andelTilkjentYtelse.endretUtbetalingAndeler.isNotEmpty() && andelTilkjentYtelse.endretUtbetalingAndeler.all { endretUtbetalingAndel ->
+        this.begrunnelser.any { vedtaksbegrunnelse ->
+            vedtaksbegrunnelse.personIdenter.contains(
+                endretUtbetalingAndel.person!!.personIdent.ident
+            )
+        }
+    }
 
 private fun VedtaksperiodeMedBegrunnelser.hentLøpendeAndelForVedtaksperiode(andelerTilkjentYtelse: List<AndelTilkjentYtelse>): LocalDateSegment<Int> {
     val sorterteSegmenter = andelerTilkjentYtelse.utledSegmenter().sortedBy { it.fom }
