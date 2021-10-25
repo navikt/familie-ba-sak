@@ -27,9 +27,7 @@ data class SanityBegrunnelse(
     val hjemler: List<String> = emptyList(),
     val endretUtbetalingsperiodeDeltBostedTriggere: List<EndretUtbetalingsperiodeDeltBostedTriggere>? = null,
     val endretUtbetalingsperiodeTriggere: List<EndretUtbetalingsperiodeTrigger>? = null,
-) {
-    fun erEndring() = !endringsaarsaker.isNullOrEmpty()
-}
+)
 
 enum class SanityVilkår {
     UNDER_18_ÅR,
@@ -47,14 +45,6 @@ fun SanityVilkår.tilVilkår() = when (this) {
     BOSATT_I_RIKET -> Vilkår.BOSATT_I_RIKET
     LOVLIG_OPPHOLD -> Vilkår.LOVLIG_OPPHOLD
     UTVIDET_BARNETRYGD -> Vilkår.UTVIDET_BARNETRYGD
-}
-
-enum class SanityBegrunnelseType {
-    INNVILGELSE,
-    REDUKSJON,
-    AVSLAG,
-    OPPHØR,
-    FORTSATT_INNVILGET,
 }
 
 fun VilkårRolle.tilPersonType() =
