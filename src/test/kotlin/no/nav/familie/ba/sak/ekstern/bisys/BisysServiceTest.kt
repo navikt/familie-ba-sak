@@ -166,7 +166,8 @@ internal class BisysServiceTest() {
             YearMonth.of(2019, 1),
             YearMonth.of(2019, 12),
             660.0,
-            manueltBeregnet = false
+            manueltBeregnet = false,
+            deltBosted = false
         )
         every {
             mockInfotrygdClient.hentUtvidetBarnetrygd(
@@ -220,7 +221,8 @@ internal class BisysServiceTest() {
             YearMonth.of(2019, 1),
             YearMonth.of(2019, 12),
             660.0,
-            manueltBeregnet = true
+            manueltBeregnet = true,
+            deltBosted = false
         )
         every {
             mockInfotrygdClient.hentUtvidetBarnetrygd(
