@@ -164,25 +164,9 @@ object TilkjentYtelseUtils {
                 )
             }
 
-            // Så lenge det finnes andeler som skal slås sammen -> slå de sammen
-            while (nyeAndelerForPerson.any { andelTilkjentYtelse ->
-                finnAndelSomSkalSlåsSammen(
-                        nyeAndelerForPerson,
-                        andelTilkjentYtelse
-                    ) != null
-            }
+            while (detFinnesAndelerSomSkalSlåsSammen(nyeAndelerForPerson)
             ) {
-                // Slår sammen endringsperioder som ikke skulle ha vært splittet
-                // Feks. 0-endringsperioder som overlapper en satsendring skal ikke splittes
-                nyeAndelerForPerson.sortedBy { it.stønadFom }.forEach { andel ->
-                    val andelSomSkalSlåsSammen = finnAndelSomSkalSlåsSammen(nyeAndelerForPerson, andel)
-                    if (andelSomSkalSlåsSammen != null) {
-                        val nyAndel = andel.copy(stønadTom = andelSomSkalSlåsSammen.stønadTom)
-                        nyeAndelerForPerson.remove(andel)
-                        nyeAndelerForPerson.remove(andelSomSkalSlåsSammen)
-                        nyeAndelerForPerson.add(nyAndel)
-                    }
-                }
+                slåSammenPerioderSomIkkeSkulleHaVærtSplittet(nyeAndelerForPerson)
             }
 
             nyeAndelTilkjentYtelse.addAll(nyeAndelerForPerson)
@@ -195,6 +179,26 @@ object TilkjentYtelseUtils {
             )
         )
         return nyeAndelTilkjentYtelse.toMutableSet()
+    }
+
+    private fun detFinnesAndelerSomSkalSlåsSammen(nyeAndelerForPerson: MutableList<AndelTilkjentYtelse>) =
+        nyeAndelerForPerson.any { andelTilkjentYtelse ->
+            finnAndelSomSkalSlåsSammen(
+                nyeAndelerForPerson,
+                andelTilkjentYtelse
+            ) != null
+        }
+
+    private fun slåSammenPerioderSomIkkeSkulleHaVærtSplittet(nyeAndelerForPerson: MutableList<AndelTilkjentYtelse>) {
+        nyeAndelerForPerson.sortedBy { it.stønadFom }.forEach { andel ->
+            val andelSomSkalSlåsSammen = finnAndelSomSkalSlåsSammen(nyeAndelerForPerson, andel)
+            if (andelSomSkalSlåsSammen != null) {
+                val nyAndel = andel.copy(stønadTom = andelSomSkalSlåsSammen.stønadTom)
+                nyeAndelerForPerson.remove(andel)
+                nyeAndelerForPerson.remove(andelSomSkalSlåsSammen)
+                nyeAndelerForPerson.add(nyAndel)
+            }
+        }
     }
 
     private fun finnAndelSomSkalSlåsSammen(
