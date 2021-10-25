@@ -146,6 +146,8 @@ data class AndelTilkjentYtelse(
 
     fun erUtvidet() = this.type == YtelseType.UTVIDET_BARNETRYGD
 
+    fun erSmåbarnstillegg() = this.type == YtelseType.SMÅBARNSTILLEGG
+
     fun erLøpende(): Boolean = this.stønadTom > YearMonth.now()
 
     fun erDeltBosted() = this.prosent == BigDecimal(50)
