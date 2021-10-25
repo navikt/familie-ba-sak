@@ -177,7 +177,8 @@ class VedtaksperiodeServiceTest(
             tom = tom,
             type = type
         )
-        val feil = assertThrows<DataIntegrityViolationException> { vedtaksperiodeRepository.save(vedtaksperiodeMedSammePeriode) }
+        val feil =
+            assertThrows<DataIntegrityViolationException> { vedtaksperiodeRepository.save(vedtaksperiodeMedSammePeriode) }
         assertTrue(feil.message!!.contains("constraint [vedtaksperiode_fk_vedtak_id_fom_tom_type_key]"))
     }
 
@@ -272,7 +273,7 @@ class VedtaksperiodeServiceTest(
         }
 
         assertEquals(
-            "Begrunnelsestype INNVILGELSE passer ikke med typen 'FORTSATT_INNVILGET' som er satt på perioden.",
+            "Begrunnelsestype INNVILGET passer ikke med typen 'FORTSATT_INNVILGET' som er satt på perioden.",
             feil.message
         )
     }
