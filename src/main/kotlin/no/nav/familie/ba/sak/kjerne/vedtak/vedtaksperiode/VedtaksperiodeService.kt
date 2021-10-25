@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedFritekster
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedStandardbegrunnelser
+import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
 import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
@@ -20,7 +21,6 @@ import no.nav.familie.ba.sak.kjerne.beregning.SatsService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
-import no.nav.familie.ba.sak.kjerne.dokument.BrevKlient
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.dokument.domene.tilTriggesAv
 import no.nav.familie.ba.sak.kjerne.dokument.hentVedtaksbrevmal
@@ -58,7 +58,7 @@ class VedtaksperiodeService(
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val vedtaksperiodeRepository: VedtaksperiodeRepository,
     private val vilkårsvurderingRepository: VilkårsvurderingRepository,
-    private val brevKlient: BrevKlient,
+    private val sanityService: SanityService,
     private val søknadGrunnlagService: SøknadGrunnlagService,
     private val endretUtbetalingAndelRepository: EndretUtbetalingAndelRepository
 ) {
@@ -131,7 +131,7 @@ class VedtaksperiodeService(
         vedtaksperiodeMedBegrunnelser.settBegrunnelser(
             restPutVedtaksperiodeMedStandardbegrunnelser.standardbegrunnelser.map {
 
-                val triggesAv = it.tilSanityBegrunnelse(brevKlient.hentSanityBegrunnelse()).tilTriggesAv()
+                val triggesAv = it.tilSanityBegrunnelse(sanityService.hentSanityBegrunnelser()).tilTriggesAv()
                 val vedtakBegrunnelseType = it.vedtakBegrunnelseType
 
                 val personerGjeldendeForBegrunnelseIdenter: MutableSet<String> = when {
@@ -189,7 +189,7 @@ class VedtaksperiodeService(
                     )
                 }
 
-                val sanityBegrunnelser = brevKlient.hentSanityBegrunnelse()
+                val sanityBegrunnelser = sanityService.hentSanityBegrunnelser()
                 if (it.erTilknyttetVilkår(sanityBegrunnelser) && personerGjeldendeForBegrunnelseIdenter.isEmpty()) {
                     begrunnelserMedFeil.add(it)
                 }
@@ -206,11 +206,11 @@ class VedtaksperiodeService(
 
                         val triggesAv =
                             vedtakBegrunnelseSpesifikasjon
-                                .tilSanityBegrunnelse(brevKlient.hentSanityBegrunnelse())
+                                .tilSanityBegrunnelse(sanityService.hentSanityBegrunnelser())
                                 .tilTriggesAv()
                         val tittel =
                             vedtakBegrunnelseSpesifikasjon
-                                .tilSanityBegrunnelse(brevKlient.hentSanityBegrunnelse())
+                                .tilSanityBegrunnelse(sanityService.hentSanityBegrunnelser())
                                 .navnISystem
 
                         acc + "'$tittel' forventer vurdering på '${triggesAv.vilkår.first().beskrivelse}'"
@@ -382,7 +382,7 @@ class VedtaksperiodeService(
                             .filter { vedtakBegrunnelseSpesifikasjon -> vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType != VedtakBegrunnelseType.AVSLAG && vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType != VedtakBegrunnelseType.FORTSATT_INNVILGET }
                             .fold(mutableSetOf()) { acc, standardBegrunnelse ->
                                 val triggesAv =
-                                    standardBegrunnelse.tilSanityBegrunnelse(brevKlient.hentSanityBegrunnelse())
+                                    standardBegrunnelse.tilSanityBegrunnelse(sanityService.hentSanityBegrunnelser())
                                         .tilTriggesAv()
                                 val vedtakBegrunnelseType = standardBegrunnelse.vedtakBegrunnelseType
 
@@ -419,7 +419,7 @@ class VedtaksperiodeService(
             utvidetVedtaksperiodeMedBegrunnelser.copy(
                 gyldigeBegrunnelser = gyldigeBegrunnelser.filter {
                     it
-                        .tilSanityBegrunnelse(brevKlient.hentSanityBegrunnelse())
+                        .tilSanityBegrunnelse(sanityService.hentSanityBegrunnelser())
                         .tilTriggesAv().valgbar
                 }.toList()
             )

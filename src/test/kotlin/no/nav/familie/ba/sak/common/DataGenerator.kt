@@ -21,6 +21,13 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTil
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.dokument.domene.EndretUtbetalingsperiodeDeltBostedTriggere
+import no.nav.familie.ba.sak.kjerne.dokument.domene.EndretUtbetalingsperiodeTrigger
+import no.nav.familie.ba.sak.kjerne.dokument.domene.SanityBegrunnelse
+import no.nav.familie.ba.sak.kjerne.dokument.domene.SanityVilkår
+import no.nav.familie.ba.sak.kjerne.dokument.domene.VilkårRolle
+import no.nav.familie.ba.sak.kjerne.dokument.domene.VilkårTrigger
+import no.nav.familie.ba.sak.kjerne.dokument.domene.ØvrigTrigger
 import no.nav.familie.ba.sak.kjerne.dokument.hentBrevtype
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
@@ -956,4 +963,34 @@ fun lagPerson(
     fødselsdato = fødselsdato,
     navn = type.name,
     kjønn = kjønn
+)
+
+fun lagSanityBegrunnelse(
+    apiNavn: String? = null,
+    navnISystem: String? = null,
+    vilkaar: List<SanityVilkår>? = null,
+    rolle: List<VilkårRolle>? = null,
+    lovligOppholdTriggere: List<VilkårTrigger>? = null,
+    bosattIRiketTriggere: List<VilkårTrigger>? = null,
+    giftPartnerskapTriggere: List<VilkårTrigger>? = null,
+    borMedSokerTriggere: List<VilkårTrigger>? = null,
+    ovrigeTriggere: List<ØvrigTrigger>? = null,
+    endringsaarsaker: List<Årsak>? = null,
+    hjemler: List<String> = emptyList(),
+    endretUtbetalingsperiodeDeltBostedTriggere: List<EndretUtbetalingsperiodeDeltBostedTriggere>? = null,
+    endretUtbetalingsperiodeTriggere: List<EndretUtbetalingsperiodeTrigger>? = null,
+) = SanityBegrunnelse(
+    apiNavn = apiNavn,
+    navnISystem = navnISystem,
+    vilkaar = vilkaar,
+    rolle = rolle,
+    lovligOppholdTriggere = lovligOppholdTriggere,
+    bosattIRiketTriggere = bosattIRiketTriggere,
+    giftPartnerskapTriggere = giftPartnerskapTriggere,
+    borMedSokerTriggere = borMedSokerTriggere,
+    ovrigeTriggere = ovrigeTriggere,
+    endringsaarsaker = endringsaarsaker,
+    hjemler = hjemler,
+    endretUtbetalingsperiodeDeltBostedTriggere = endretUtbetalingsperiodeDeltBostedTriggere,
+    endretUtbetalingsperiodeTriggere = endretUtbetalingsperiodeTriggere,
 )

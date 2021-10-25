@@ -2,11 +2,11 @@ package no.nav.familie.ba.sak.kjerne.endretutbetaling
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.ekstern.restDomene.RestEndretUtbetalingAndel
+import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering.validerAtBarnIkkeFårFlereUtbetalingerSammePeriode
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
-import no.nav.familie.ba.sak.kjerne.dokument.BrevKlient
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerIngenOverlappendeEndring
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerPeriodeInnenforTilkjentytelse
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
@@ -24,7 +24,7 @@ class EndretUtbetalingAndelService(
     private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
     private val beregningService: BeregningService,
     private val persongrunnlagService: PersongrunnlagService,
-    private val brevKlient: BrevKlient,
+    private val sanityService: SanityService,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
 ) {
 
@@ -40,7 +40,8 @@ class EndretUtbetalingAndelService(
                 .first()
 
         endretUtbetalingAndel.fraRestEndretUtbetalingAndel(restEndretUtbetalingAndel, person).also {
-            it.vedtakBegrunnelseSpesifikasjoner = it.hentGyldigEndretBegrunnelser(brevKlient.hentSanityBegrunnelse())
+            it.vedtakBegrunnelseSpesifikasjoner =
+                it.hentGyldigEndretBegrunnelser(sanityService.hentSanityBegrunnelser())
         }
 
         validerIngenOverlappendeEndring(

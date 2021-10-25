@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.common.Utils.storForbokstavIHvertOrd
 import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.config.FeatureToggleService
+import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.AutovedtakNyfødtBarnFraFør
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.AutovedtakNyfødtFørsteBarn
@@ -47,7 +48,7 @@ class BrevService(
     private val vedtaksperiodeService: VedtaksperiodeService,
     private val søknadGrunnlagService: SøknadGrunnlagService,
     private val featureToggleService: FeatureToggleService,
-    private val brevKlient: BrevKlient
+    private val sanityService: SanityService
 ) {
 
     fun hentVedtaksbrevData(vedtak: Vedtak): Vedtaksbrev {
@@ -171,7 +172,7 @@ class BrevService(
 
         val grunnlagOgSignaturData = hentGrunnlagOgSignaturData(vedtak)
 
-        val sanityBegrunnelser = brevKlient.hentSanityBegrunnelse()
+        val sanityBegrunnelser = sanityService.hentSanityBegrunnelser()
 
         val hjemler = hentHjemmeltekst(utvidetVedtaksperioderMedBegrunnelser, sanityBegrunnelser)
 

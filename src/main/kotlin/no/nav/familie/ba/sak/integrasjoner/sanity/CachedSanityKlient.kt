@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component
 
 @Component
 class CachedSanityKlient(
-        private val sanityKlient: SanityKlient
+    private val sanityKlient: SanityKlient
 ) {
 
     @Cacheable("sanitybegrunnelser")

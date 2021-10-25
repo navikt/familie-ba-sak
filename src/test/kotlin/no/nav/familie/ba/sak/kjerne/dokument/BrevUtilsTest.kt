@@ -3,9 +3,9 @@ package no.nav.familie.ba.sak.kjerne.dokument
 import no.nav.familie.ba.sak.common.defaultFagsak
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagRestVedtaksbegrunnelse
+import no.nav.familie.ba.sak.common.lagSanityBegrunnelse
 import no.nav.familie.ba.sak.common.lagUtbetalingsperiodeDetalj
 import no.nav.familie.ba.sak.common.lagUtvidetVedtaksperiodeMedBegrunnelser
-import no.nav.familie.ba.sak.config.sanityBegrunnelserMock
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
@@ -330,7 +330,19 @@ internal class BrevUtilsTest {
 
         Assertions.assertEquals(
             "§§ 2, 4, 10 og 11",
-            hentHjemmeltekst(utvidetVedtaksperioderMedBegrunnelser, sanityBegrunnelserMock)
+            hentHjemmeltekst(
+                utvidetVedtaksperioderMedBegrunnelser,
+                listOf(
+                    lagSanityBegrunnelse(
+                        apiNavn = VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET.sanityApiNavn,
+                        hjemler = listOf("11", "4", "2", "10"),
+                    ),
+                    lagSanityBegrunnelse(
+                        apiNavn = VedtakBegrunnelseSpesifikasjon.INNVILGET_SATSENDRING.sanityApiNavn,
+                        hjemler = listOf("10"),
+                    )
+                )
+            )
         )
     }
 

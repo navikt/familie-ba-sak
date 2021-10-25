@@ -10,30 +10,30 @@ import org.springframework.web.client.RestTemplate
 import java.net.URI
 
 data class SanityRespons<T>(
-        val ms: Int,
-        val query: String,
-        val result: List<T>
+    val ms: Int,
+    val query: String,
+    val result: List<T>
 )
 
 @Component
 class SanityKlient(
-        @Value("\${SANITY_FAMILIE_API_URL}") private val sanityFamilieApi: String,
-        private val restTemplate: RestTemplate) {
+    @Value("\${SANITY_FAMILIE_API_URL}") private val sanityFamilieApi: String,
+    private val restTemplate: RestTemplate
+) {
 
     fun hentSanityBegrunnelser(): List<SanityBegrunnelse> {
         val parameters = java.net.URLEncoder.encode(hentDokumenter, "utf-8")
-        val url = URI.create("$sanityFamilieApi?query=${parameters}")
+        val url = URI.create("$sanityFamilieApi?query=$parameters")
         logger.info("Henter begrunnelser fra sanity")
 
         val response = restTemplate.exchange(
-                url,
-                HttpMethod.GET,
-                null,
-                object : ParameterizedTypeReference<SanityRespons<SanityBegrunnelse>>() {},
+            url,
+            HttpMethod.GET,
+            null,
+            object : ParameterizedTypeReference<SanityRespons<SanityBegrunnelse>>() {},
         )
         return response.body?.result ?: error("Klarte ikke hente begrunnelsene fra sanity.")
     }
-
 
     companion object {
 

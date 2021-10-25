@@ -35,7 +35,8 @@ class VilkårsvurderingService(
         val eksplisistteAvslagPåBehandling = hentEksplisitteAvslagPåBehandling(behandlingId)
         return eksplisistteAvslagPåBehandling
             .filterNot {
-                it.personResultat?.erSøkersResultater() ?: error("VilkårResultat mangler kobling til PersonResultat")
+                it.personResultat?.erSøkersResultater()
+                    ?: error("VilkårResultat mangler kobling til PersonResultat")
             }
             .map { it.personResultat!!.personIdent }
             .distinct()
@@ -87,7 +88,7 @@ class VilkårsvurderingService(
     }
 
     fun hentVilkårsbegrunnelser(): Map<VedtakBegrunnelseType, List<RestVedtakBegrunnelseTilknyttetVilkår>> =
-        vedtakBegrunnelseSpesifikasjonerTilNedtrekksmenytekster(brevKlient.hentSanityBegrunnelse())
+        vedtakBegrunnelseSpesifikasjonerTilNedtrekksmenytekster(sanityService.hentSanityBegrunnelser())
 
     companion object {
 
