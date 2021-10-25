@@ -166,11 +166,11 @@ object TilkjentYtelseUtils {
 
             // Så lenge det finnes andeler som skal slås sammen -> slå de sammen
             while (nyeAndelerForPerson.any { andelTilkjentYtelse ->
-                    finnAndelSomSkalSlåsSammen(
+                finnAndelSomSkalSlåsSammen(
                         nyeAndelerForPerson,
                         andelTilkjentYtelse
                     ) != null
-                }
+            }
             ) {
                 // Slår sammen endringsperioder som ikke skulle ha vært splittet
                 // Feks. 0-endringsperioder som overlapper en satsendring skal ikke splittes
