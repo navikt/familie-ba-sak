@@ -44,21 +44,21 @@ fun VedtaksperiodeMedBegrunnelser.tilUtvidetVedtaksperiodeMedBegrunnelser(
 
     val utbetalingsperiodeDetaljer =
         if (this.type == Vedtaksperiodetype.UTBETALING || this.type == Vedtaksperiodetype.ENDRET_UTBETALING || this.type == Vedtaksperiodetype.FORTSATT_INNVILGET) {
+            val andelerForVedtaksperiodetype = andelerTilkjentYtelse.filter {
+                if (this.type == Vedtaksperiodetype.ENDRET_UTBETALING) {
+                    endretUtbetalingAndelSkalVæreMed(it)
+                } else {
+                    it.endretUtbetalingAndeler.isEmpty()
+                }
+            }
             val vertikaltSegmentForVedtaksperiode =
                 if (this.type == Vedtaksperiodetype.FORTSATT_INNVILGET)
-                    hentLøpendeAndelForVedtaksperiode(andelerTilkjentYtelse)
+                    hentLøpendeAndelForVedtaksperiode(andelerForVedtaksperiodetype)
                 else
-                    hentVertikaltSegmentForVedtaksperiode(andelerTilkjentYtelse)
+                    hentVertikaltSegmentForVedtaksperiode(andelerForVedtaksperiodetype)
 
             val andelerForSegment =
-                hentAndelerForSegment(andelerTilkjentYtelse, vertikaltSegmentForVedtaksperiode)
-                    .filter {
-                        if (this.type == Vedtaksperiodetype.ENDRET_UTBETALING) {
-                            it.endretUtbetalingAndeler.isNotEmpty()
-                        } else {
-                            it.endretUtbetalingAndeler.isEmpty()
-                        }
-                    }
+                hentAndelerForSegment(andelerForVedtaksperiodetype, vertikaltSegmentForVedtaksperiode)
 
             andelerForSegment.lagUtbetalingsperiodeDetaljer(personopplysningGrunnlag)
         } else {
@@ -76,6 +76,15 @@ fun VedtaksperiodeMedBegrunnelser.tilUtvidetVedtaksperiodeMedBegrunnelser(
     )
 }
 
+private fun VedtaksperiodeMedBegrunnelser.endretUtbetalingAndelSkalVæreMed(andelTilkjentYtelse: AndelTilkjentYtelse) =
+    andelTilkjentYtelse.endretUtbetalingAndeler.isNotEmpty() && andelTilkjentYtelse.endretUtbetalingAndeler.all { endretUtbetalingAndel ->
+        this.begrunnelser.any { vedtaksbegrunnelse ->
+            vedtaksbegrunnelse.personIdenter.contains(
+                endretUtbetalingAndel.person!!.personIdent.ident
+            )
+        }
+    }
+
 private fun VedtaksperiodeMedBegrunnelser.hentLøpendeAndelForVedtaksperiode(andelerTilkjentYtelse: List<AndelTilkjentYtelse>): LocalDateSegment<Int> {
     val sorterteSegmenter = andelerTilkjentYtelse.utledSegmenter().sortedBy { it.fom }
     return sorterteSegmenter.lastOrNull { it.fom.toYearMonth() <= inneværendeMåned() }
@@ -88,7 +97,7 @@ private fun VedtaksperiodeMedBegrunnelser.hentVertikaltSegmentForVedtaksperiode(
 ) = andelerTilkjentYtelse
     .utledSegmenter()
     .find { localDateSegment ->
-        localDateSegment.fom == this.fom && localDateSegment.tom == this.tom
+        localDateSegment.fom == this.fom || localDateSegment.tom == this.tom
     } ?: throw Feil("Finner ikke segment for vedtaksperiode (${this.fom}, ${this.tom})")
 
 private fun hentAndelerForSegment(

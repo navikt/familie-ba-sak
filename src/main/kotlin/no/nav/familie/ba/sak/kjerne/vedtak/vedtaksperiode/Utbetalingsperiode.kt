@@ -1,17 +1,15 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.inneværendeMåned
-import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPerson
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPerson
 import no.nav.familie.ba.sak.kjerne.beregning.beregnUtbetalingsperioderUtenKlassifisering
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.beregning.domene.lagVertikaleSegmenter
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
-import no.nav.fpsak.tidsserie.LocalDateInterval
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -70,31 +68,19 @@ fun hentPersonIdenterFraUtbetalingsperioder(utbetalingsperioder: List<Utbetaling
 fun mapTilUtbetalingsperioder(
     personopplysningGrunnlag: PersonopplysningGrunnlag,
     andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
-    filterAndeler: (andelerTilkjentYtelse: List<AndelTilkjentYtelse>) -> List<AndelTilkjentYtelse> = { it }
 ): List<Utbetalingsperiode> {
-    return filterAndeler(andelerTilkjentYtelse)
-        .utledSegmenter()
-        .map { segment ->
-            val andelerForSegment = andelerTilkjentYtelse.filter {
-                segment.localDateInterval.overlaps(
-                    LocalDateInterval(
-                        it.stønadFom.førsteDagIInneværendeMåned(),
-                        it.stønadTom.sisteDagIInneværendeMåned()
-                    )
-                )
-            }
-
-            Utbetalingsperiode(
-                periodeFom = segment.fom,
-                periodeTom = segment.tom,
-                ytelseTyper = andelerForSegment.map(AndelTilkjentYtelse::type),
-                utbetaltPerMnd = segment.value,
-                antallBarn = andelerForSegment.count { andel ->
-                    personopplysningGrunnlag.barna.any { barn -> barn.personIdent.ident == andel.personIdent }
-                },
-                utbetalingsperiodeDetaljer = andelerForSegment.lagUtbetalingsperiodeDetaljer(personopplysningGrunnlag)
-            )
-        }
+    return andelerTilkjentYtelse.lagVertikaleSegmenter().map { (segment, andelerForSegment) ->
+        Utbetalingsperiode(
+            periodeFom = segment.fom,
+            periodeTom = segment.tom,
+            ytelseTyper = andelerForSegment.map(AndelTilkjentYtelse::type),
+            utbetaltPerMnd = segment.value,
+            antallBarn = andelerForSegment.count { andel ->
+                personopplysningGrunnlag.barna.any { barn -> barn.personIdent.ident == andel.personIdent }
+            },
+            utbetalingsperiodeDetaljer = andelerForSegment.lagUtbetalingsperiodeDetaljer(personopplysningGrunnlag)
+        )
+    }
 }
 
 internal fun List<AndelTilkjentYtelse>.utledSegmenter(): List<LocalDateSegment<Int>> {
