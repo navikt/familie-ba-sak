@@ -19,7 +19,6 @@ import org.springframework.context.annotation.Primary
 import org.springframework.context.annotation.Profile
 import java.time.LocalDate
 
-
 @TestConfiguration
 class ØkonomiTestConfig {
 
@@ -30,11 +29,11 @@ class ØkonomiTestConfig {
         val økonomiKlient: ØkonomiKlient = mockk()
 
         val iverksettRespons =
-                Ressurs("Mocksvar fra Økonomi-klient", Ressurs.Status.SUKSESS, "", "", null)
+            Ressurs("Mocksvar fra Økonomi-klient", Ressurs.Status.SUKSESS, "", "", null)
         every { økonomiKlient.iverksettOppdrag(any()) } returns iverksettRespons
 
         val hentStatusRespons =
-                Ressurs(OppdragStatus.KVITTERT_OK, Ressurs.Status.SUKSESS, "", "", null)
+            Ressurs(OppdragStatus.KVITTERT_OK, Ressurs.Status.SUKSESS, "", "", null)
         every { økonomiKlient.hentStatus(any()) } returns hentStatusRespons
 
         every { økonomiKlient.hentEtterbetalingsbeløp(any()) } returns Ressurs.success(RestSimulerResultat(etterbetaling = 1054))
@@ -45,120 +44,123 @@ class ØkonomiTestConfig {
     }
 }
 
-
 val simulertPosteringMock = listOf(
-        SimulertPostering(
-                fagOmrådeKode = FagOmrådeKode.BARNETRYGD,
-                fom = LocalDate.parse("2019-09-01"),
-                tom = LocalDate.parse("2019-09-30"),
-                betalingType = BetalingType.DEBIT,
-                beløp = 50.0.toBigDecimal(),
-                posteringType = PosteringType.YTELSE,
-                forfallsdato = LocalDate.parse("2021-02-23"),
-                utenInntrekk = false,
-        ),
-        SimulertPostering(
-                fagOmrådeKode = FagOmrådeKode.BARNETRYGD,
-                fom = LocalDate.parse("2019-09-01"),
-                tom = LocalDate.parse("2019-09-30"),
-                betalingType = BetalingType.DEBIT,
-                beløp = 1004.0.toBigDecimal(),
-                posteringType = PosteringType.YTELSE,
-                forfallsdato = LocalDate.parse("2021-02-23"),
-                utenInntrekk = false,
-        ),
-        SimulertPostering(
-                fagOmrådeKode = FagOmrådeKode.BARNETRYGD,
-                fom = LocalDate.parse("2019-09-01"),
-                tom = LocalDate.parse("2019-09-30"),
-                betalingType = BetalingType.DEBIT,
-                beløp = 50.0.toBigDecimal(),
-                posteringType = PosteringType.FEILUTBETALING,
-                forfallsdato = LocalDate.parse("2021-02-23"),
-                utenInntrekk = false,
-        ),
-        SimulertPostering(
-                fagOmrådeKode = FagOmrådeKode.BARNETRYGD,
-                fom = LocalDate.parse("2019-09-01"),
-                tom = LocalDate.parse("2019-09-30"),
-                betalingType = BetalingType.KREDIT,
-                beløp = (-50.0).toBigDecimal(),
-                posteringType = PosteringType.MOTP,
-                forfallsdato = LocalDate.parse("2021-02-23"),
-                utenInntrekk = false,
-        ),
-        SimulertPostering(
-                fagOmrådeKode = FagOmrådeKode.BARNETRYGD,
-                fom = LocalDate.parse("2019-09-01"),
-                tom = LocalDate.parse("2019-09-30"),
-                betalingType = BetalingType.KREDIT,
-                beløp = (-1054.0).toBigDecimal(),
-                posteringType = PosteringType.YTELSE,
-                forfallsdato = LocalDate.parse("2021-02-23"),
-                utenInntrekk = false,
-        ),
-        SimulertPostering(
-                fagOmrådeKode = FagOmrådeKode.BARNETRYGD,
-                fom = LocalDate.parse("2019-10-01"),
-                tom = LocalDate.parse("2019-10-31"),
-                betalingType = BetalingType.DEBIT,
-                beløp = 50.0.toBigDecimal(),
-                posteringType = PosteringType.YTELSE,
-                forfallsdato = LocalDate.parse("2021-02-23"),
-                utenInntrekk = false,
-        ),
-        SimulertPostering(
-                fagOmrådeKode = FagOmrådeKode.BARNETRYGD,
-                fom = LocalDate.parse("2019-10-01"),
-                tom = LocalDate.parse("2019-10-31"),
-                betalingType = BetalingType.DEBIT,
-                beløp = 1004.0.toBigDecimal(),
-                posteringType = PosteringType.YTELSE,
-                forfallsdato = LocalDate.parse("2021-02-23"),
-                utenInntrekk = false,
-        ),
-        SimulertPostering(
-                fagOmrådeKode = FagOmrådeKode.BARNETRYGD,
-                fom = LocalDate.parse("2019-10-01"),
-                tom = LocalDate.parse("2019-10-31"),
-                betalingType = BetalingType.DEBIT,
-                beløp = 50.0.toBigDecimal(),
-                posteringType = PosteringType.FEILUTBETALING,
-                forfallsdato = LocalDate.parse("2021-02-23"),
-                utenInntrekk = false,
-        ),
-        SimulertPostering(
-                fagOmrådeKode = FagOmrådeKode.BARNETRYGD,
-                fom = LocalDate.parse("2019-10-01"),
-                tom = LocalDate.parse("2019-10-31"),
-                betalingType = BetalingType.KREDIT,
-                beløp = (-50.0).toBigDecimal(),
-                posteringType = PosteringType.MOTP,
-                forfallsdato = LocalDate.parse("2021-02-23"),
-                utenInntrekk = false,
-        ),
-        SimulertPostering(
-                fagOmrådeKode = FagOmrådeKode.BARNETRYGD,
-                fom = LocalDate.parse("2019-10-01"),
-                tom = LocalDate.parse("2019-10-31"),
-                betalingType = BetalingType.KREDIT,
-                beløp = (-1054.0).toBigDecimal(),
-                posteringType = PosteringType.YTELSE,
-                forfallsdato = LocalDate.parse("2021-02-23"),
-                utenInntrekk = false,
-        ),
-        SimulertPostering(
-                fagOmrådeKode = FagOmrådeKode.BARNETRYGD,
-                fom = LocalDate.parse("2021-04-01"),
-                tom = LocalDate.parse("2021-04-30"),
-                betalingType = BetalingType.DEBIT,
-                beløp = 1054.0.toBigDecimal(),
-                posteringType = PosteringType.YTELSE,
-                forfallsdato = LocalDate.parse("2024-05-10"),
-                utenInntrekk = false,
-        ),
+    SimulertPostering(
+        fagOmrådeKode = FagOmrådeKode.BARNETRYGD,
+        fom = LocalDate.parse("2019-09-01"),
+        tom = LocalDate.parse("2019-09-30"),
+        betalingType = BetalingType.DEBIT,
+        beløp = 50.0.toBigDecimal(),
+        posteringType = PosteringType.YTELSE,
+        forfallsdato = LocalDate.parse("2021-02-23"),
+        utenInntrekk = false,
+    ),
+    SimulertPostering(
+        fagOmrådeKode = FagOmrådeKode.BARNETRYGD,
+        fom = LocalDate.parse("2019-09-01"),
+        tom = LocalDate.parse("2019-09-30"),
+        betalingType = BetalingType.DEBIT,
+        beløp = 1004.0.toBigDecimal(),
+        posteringType = PosteringType.YTELSE,
+        forfallsdato = LocalDate.parse("2021-02-23"),
+        utenInntrekk = false,
+    ),
+    SimulertPostering(
+        fagOmrådeKode = FagOmrådeKode.BARNETRYGD,
+        fom = LocalDate.parse("2019-09-01"),
+        tom = LocalDate.parse("2019-09-30"),
+        betalingType = BetalingType.DEBIT,
+        beløp = 50.0.toBigDecimal(),
+        posteringType = PosteringType.FEILUTBETALING,
+        forfallsdato = LocalDate.parse("2021-02-23"),
+        utenInntrekk = false,
+    ),
+    SimulertPostering(
+        fagOmrådeKode = FagOmrådeKode.BARNETRYGD,
+        fom = LocalDate.parse("2019-09-01"),
+        tom = LocalDate.parse("2019-09-30"),
+        betalingType = BetalingType.KREDIT,
+        beløp = (-50.0).toBigDecimal(),
+        posteringType = PosteringType.MOTP,
+        forfallsdato = LocalDate.parse("2021-02-23"),
+        utenInntrekk = false,
+    ),
+    SimulertPostering(
+        fagOmrådeKode = FagOmrådeKode.BARNETRYGD,
+        fom = LocalDate.parse("2019-09-01"),
+        tom = LocalDate.parse("2019-09-30"),
+        betalingType = BetalingType.KREDIT,
+        beløp = (-1054.0).toBigDecimal(),
+        posteringType = PosteringType.YTELSE,
+        forfallsdato = LocalDate.parse("2021-02-23"),
+        utenInntrekk = false,
+    ),
+    SimulertPostering(
+        fagOmrådeKode = FagOmrådeKode.BARNETRYGD,
+        fom = LocalDate.parse("2019-10-01"),
+        tom = LocalDate.parse("2019-10-31"),
+        betalingType = BetalingType.DEBIT,
+        beløp = 50.0.toBigDecimal(),
+        posteringType = PosteringType.YTELSE,
+        forfallsdato = LocalDate.parse("2021-02-23"),
+        utenInntrekk = false,
+    ),
+    SimulertPostering(
+        fagOmrådeKode = FagOmrådeKode.BARNETRYGD,
+        fom = LocalDate.parse("2019-10-01"),
+        tom = LocalDate.parse("2019-10-31"),
+        betalingType = BetalingType.DEBIT,
+        beløp = 1004.0.toBigDecimal(),
+        posteringType = PosteringType.YTELSE,
+        forfallsdato = LocalDate.parse("2021-02-23"),
+        utenInntrekk = false,
+    ),
+    SimulertPostering(
+        fagOmrådeKode = FagOmrådeKode.BARNETRYGD,
+        fom = LocalDate.parse("2019-10-01"),
+        tom = LocalDate.parse("2019-10-31"),
+        betalingType = BetalingType.DEBIT,
+        beløp = 50.0.toBigDecimal(),
+        posteringType = PosteringType.FEILUTBETALING,
+        forfallsdato = LocalDate.parse("2021-02-23"),
+        utenInntrekk = false,
+    ),
+    SimulertPostering(
+        fagOmrådeKode = FagOmrådeKode.BARNETRYGD,
+        fom = LocalDate.parse("2019-10-01"),
+        tom = LocalDate.parse("2019-10-31"),
+        betalingType = BetalingType.KREDIT,
+        beløp = (-50.0).toBigDecimal(),
+        posteringType = PosteringType.MOTP,
+        forfallsdato = LocalDate.parse("2021-02-23"),
+        utenInntrekk = false,
+    ),
+    SimulertPostering(
+        fagOmrådeKode = FagOmrådeKode.BARNETRYGD,
+        fom = LocalDate.parse("2019-10-01"),
+        tom = LocalDate.parse("2019-10-31"),
+        betalingType = BetalingType.KREDIT,
+        beløp = (-1054.0).toBigDecimal(),
+        posteringType = PosteringType.YTELSE,
+        forfallsdato = LocalDate.parse("2021-02-23"),
+        utenInntrekk = false,
+    ),
+    SimulertPostering(
+        fagOmrådeKode = FagOmrådeKode.BARNETRYGD,
+        fom = LocalDate.parse("2021-04-01"),
+        tom = LocalDate.parse("2021-04-30"),
+        betalingType = BetalingType.DEBIT,
+        beløp = 1054.0.toBigDecimal(),
+        posteringType = PosteringType.YTELSE,
+        forfallsdato = LocalDate.parse("2024-05-10"),
+        utenInntrekk = false,
+    ),
 )
 
-val simuleringMottakerMock = listOf(SimuleringMottaker(simulertPostering = simulertPosteringMock,
-                                                       mottakerType = MottakerType.BRUKER,
-                                                       mottakerNummer = "12345678910"))
+val simuleringMottakerMock = listOf(
+    SimuleringMottaker(
+        simulertPostering = simulertPosteringMock,
+        mottakerType = MottakerType.BRUKER,
+        mottakerNummer = "12345678910"
+    )
+)

@@ -35,7 +35,6 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIde
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.domene.Totrinnskontroll
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext.SYSTEM_FORKORTELSE
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext.SYSTEM_NAVN
@@ -58,7 +57,6 @@ import java.time.temporal.ChronoUnit
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class SaksstatistikkServiceTest {
-
 
     private val behandlingService: BehandlingService = mockk(relaxed = true)
     private val journalføringRepository: JournalføringRepository = mockk()
@@ -86,7 +84,6 @@ internal class SaksstatistikkServiceTest {
         vedtaksperiodeService,
     )
 
-
     @BeforeAll
     fun init() {
         every { arbeidsfordelingService.hentAbeidsfordelingPåBehandling(any()) } returns ArbeidsfordelingPåBehandling(
@@ -94,7 +91,10 @@ internal class SaksstatistikkServiceTest {
             behandlendeEnhetNavn = "Nav",
             behandlingId = 1
         )
-        every { arbeidsfordelingService.hentArbeidsfordelingsenhet(any()) } returns Arbeidsfordelingsenhet("4821", "NAV")
+        every { arbeidsfordelingService.hentArbeidsfordelingsenhet(any()) } returns Arbeidsfordelingsenhet(
+            "4821",
+            "NAV"
+        )
         every { envService.skalIverksetteBehandling() } returns true
     }
 
@@ -102,7 +102,6 @@ internal class SaksstatistikkServiceTest {
     fun tearDown() {
         unmockkAll()
     }
-
 
     @Test
     fun `Skal mappe henleggelsesårsak til behandlingDVH for henlagt behandling`() {
@@ -128,11 +127,14 @@ internal class SaksstatistikkServiceTest {
         }
 
         val vedtak = lagVedtak(behandling)
-        val vedtaksperiodeMedBegrunnelser = lagVedtaksperiodeMedBegrunnelser(vedtak = vedtak)
+        val vedtaksperiodeMedBegrunnelser =
+            lagVedtaksperiodeMedBegrunnelser()
 
         every { behandlingService.hent(any()) } returns behandling
         every { vedtakService.hentAktivForBehandling(any()) } returns vedtak
-        every { vedtaksperiodeService.hentPersisterteVedtaksperioder(any()) } returns listOf(vedtaksperiodeMedBegrunnelser)
+        every { vedtaksperiodeService.hentPersisterteVedtaksperioder(any()) } returns listOf(
+            vedtaksperiodeMedBegrunnelser
+        )
         every { totrinnskontrollService.hentAktivForBehandling(any()) } returns Totrinnskontroll(
             saksbehandler = SYSTEM_NAVN,
             saksbehandlerId = SYSTEM_FORKORTELSE,
@@ -144,7 +146,6 @@ internal class SaksstatistikkServiceTest {
 
         val behandlingDvh = sakstatistikkService.mapTilBehandlingDVH(2)
         println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(behandlingDvh))
-
 
         assertThat(behandlingDvh?.funksjonellTid).isCloseTo(ZonedDateTime.now(), within(1, ChronoUnit.MINUTES))
         assertThat(behandlingDvh?.tekniskTid).isCloseTo(ZonedDateTime.now(), within(1, ChronoUnit.MINUTES))
@@ -182,7 +183,6 @@ internal class SaksstatistikkServiceTest {
     fun `Skal mappe til behandlingDVH for manuell rute`() {
         val behandling = lagBehandling(årsak = BehandlingÅrsak.SØKNAD).also { it.resultat = BehandlingResultat.AVSLÅTT }
 
-
         every { totrinnskontrollService.hentAktivForBehandling(any()) } returns Totrinnskontroll(
             saksbehandler = "Saksbehandler",
             saksbehandlerId = "saksbehandlerId",
@@ -207,7 +207,9 @@ internal class SaksstatistikkServiceTest {
         )
 
         every { vedtakService.hentAktivForBehandling(any()) } returns vedtak
-        every { vedtaksperiodeService.hentPersisterteVedtaksperioder(any()) } returns listOf(vedtaksperiodeMedBegrunnelser)
+        every { vedtaksperiodeService.hentPersisterteVedtaksperioder(any()) } returns listOf(
+            vedtaksperiodeMedBegrunnelser
+        )
         every { journalføringRepository.findByBehandlingId(any()) } returns listOf(
             DbJournalpost(
                 1,
@@ -219,12 +221,18 @@ internal class SaksstatistikkServiceTest {
             )
         )
         val mottattDato = LocalDateTime.of(2019, 12, 20, 10, 0, 0)
-        val jp = lagTestJournalpost("123", "123").copy(relevanteDatoer = listOf(RelevantDato(mottattDato, "DATO_REGISTRERT")))
+        val jp = lagTestJournalpost("123", "123").copy(
+            relevanteDatoer = listOf(
+                RelevantDato(
+                    mottattDato,
+                    "DATO_REGISTRERT"
+                )
+            )
+        )
         every { journalføringService.hentJournalpost(any()) } returns Ressurs.Companion.success(jp)
 
         val behandlingDvh = sakstatistikkService.mapTilBehandlingDVH(2)
         println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(behandlingDvh))
-
 
         assertThat(behandlingDvh?.funksjonellTid).isCloseTo(ZonedDateTime.now(), within(1, ChronoUnit.MINUTES))
         assertThat(behandlingDvh?.tekniskTid).isCloseTo(ZonedDateTime.now(), within(1, ChronoUnit.MINUTES))
@@ -243,7 +251,6 @@ internal class SaksstatistikkServiceTest {
         assertThat(behandlingDvh?.avsender).isEqualTo("familie-ba-sak")
         assertThat(behandlingDvh?.versjon).isNotEmpty
     }
-
 
     @Test
     fun `Skal mappe til sakDVH, ingen aktiv behandling, så kun aktør SØKER, bostedsadresse i Norge`() {
@@ -277,7 +284,6 @@ internal class SaksstatistikkServiceTest {
             )
         )
 
-
         every { behandlingService.hentAktivForFagsak(any()) } returns null
 
         val sakDvh = sakstatistikkService.mapTilSakDvh(1)
@@ -309,7 +315,6 @@ internal class SaksstatistikkServiceTest {
         )
         every { personopplysningerService.hentLandkodeUtenlandskBostedsadresse("12345678910") } returns "SE"
 
-
         every { behandlingService.hentAktivForFagsak(any()) } returns null
 
         val sakDvh = sakstatistikkService.mapTilSakDvh(1)
@@ -339,8 +344,6 @@ internal class SaksstatistikkServiceTest {
             tilfeldigPerson(personType = PersonType.SØKER)
         )
 
-
-
         every { behandlingService.hentAktivForFagsak(any()) } returns lagBehandling()
 
         val sakDvh = sakstatistikkService.mapTilSakDvh(1)
@@ -351,7 +354,5 @@ internal class SaksstatistikkServiceTest {
         assertThat(sakDvh?.sakStatus).isEqualTo(FagsakStatus.OPPRETTET.name)
         assertThat(sakDvh?.avsender).isEqualTo("familie-ba-sak")
         assertThat(sakDvh?.bostedsland).isEqualTo("SE")
-
     }
-
 }

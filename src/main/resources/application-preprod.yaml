@@ -60,20 +60,20 @@ no.nav.security.jwt:
           client-id: ${BA_SAK_CLIENT_ID}
           client-secret: ${CLIENT_SECRET}
           client-auth-method: client_secret_basic
-      familie-ba-infotrygd-barnetrygd-onbehalfof:
-        resource-url: ${FAMILIE_BA_INFOTRYGD_BARNETRYGD_API_URL}
+      familie-ba-infotrygd-onbehalfof:
+        resource-url: ${FAMILIE_BA_INFOTRYGD_API_URL}
         token-endpoint-url: https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/v2.0/token
         grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
-        scope: ${FAMILIE_BA_INFOTRYGD_BARNETRYGD_SCOPE}
+        scope: ${FAMILIE_BA_INFOTRYGD_SCOPE}
         authentication:
           client-id: ${BA_SAK_CLIENT_ID}
           client-secret: ${CLIENT_SECRET}
           client-auth-method: client_secret_basic
-      familie-ba-infotrygd-barnetrygd-clientcredentials:
-        resource-url: ${FAMILIE_BA_INFOTRYGD_BARNETRYGD_API_URL}
+      familie-ba-infotrygd-clientcredentials:
+        resource-url: ${FAMILIE_BA_INFOTRYGD_API_URL}
         token-endpoint-url: https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/v2.0/token
         grant-type: client_credentials
-        scope: ${FAMILIE_BA_INFOTRYGD_BARNETRYGD_SCOPE}
+        scope: ${FAMILIE_BA_INFOTRYGD_SCOPE}
         authentication:
           client-id: ${BA_SAK_CLIENT_ID}
           client-secret: ${CLIENT_SECRET}
@@ -105,12 +105,35 @@ no.nav.security.jwt:
           client-id: ${BA_SAK_CLIENT_ID}
           client-secret: ${CLIENT_SECRET}
           client-auth-method: client_secret_basic
+      familie-ef-sak-onbehalfof:
+        resource-url: ${FAMILIE_EF_SAK_API_URL}
+        token-endpoint-url: https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/v2.0/token
+        grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
+        scope: ${FAMILIE_EF_SAK_API_URL_SCOPE}
+        authentication:
+          client-id: ${BA_SAK_CLIENT_ID}
+          client-secret: ${CLIENT_SECRET}
+          client-auth-method: client_secret_basic
+      familie-ef-sak-clientcredentials:
+        resource-url: ${FAMILIE_EF_SAK_API_URL}
+        token-endpoint-url: https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/v2.0/token
+        grant-type: client_credentials
+        scope: ${FAMILIE_EF_SAK_API_URL_SCOPE}
+        authentication:
+          client-id: ${BA_SAK_CLIENT_ID}
+          client-secret: ${CLIENT_SECRET}
+          client-auth-method: client_secret_basic
 
 spring:
   datasource:
     url: jdbc:postgresql://b27dbvl009.preprod.local:5432/familie-ba-sak
   kafka:
     bootstrap-servers: b27apvl00045.preprod.local:8443,b27apvl00046.preprod.local:8443,b27apvl00047.preprod.local:8443
+
+logging:
+  level:
+    root: INFO
+
 
 DAGLIG_KVOTE_FØDSELSHENDELSER: 1000
 

@@ -29,31 +29,30 @@ import org.springframework.stereotype.Service
 
 @Service
 class FødselshendelseService(
-        private val filtreringsreglerService: FiltreringsreglerService,
-        private val taskRepository: TaskRepository,
-        private val opprettTaskService: OpprettTaskService,
-        private val fagsakService: FagsakService,
-        private val behandlingService: BehandlingService,
-        private val vilkårsvurderingRepository: VilkårsvurderingRepository,
-        private val persongrunnlagService: PersongrunnlagService,
-        private val stegService: StegService,
-        private val vedtakService: VedtakService,
-        private val vedtaksperiodeService: VedtaksperiodeService
+    private val filtreringsreglerService: FiltreringsreglerService,
+    private val taskRepository: TaskRepository,
+    private val opprettTaskService: OpprettTaskService,
+    private val fagsakService: FagsakService,
+    private val behandlingService: BehandlingService,
+    private val vilkårsvurderingRepository: VilkårsvurderingRepository,
+    private val persongrunnlagService: PersongrunnlagService,
+    private val stegService: StegService,
+    private val vedtakService: VedtakService,
+    private val vedtaksperiodeService: VedtaksperiodeService
 ) {
 
     val stansetIAutomatiskFiltreringCounter =
-            Metrics.counter("familie.ba.sak.henvendelse.stanset", "steg", "filtrering")
+        Metrics.counter("familie.ba.sak.henvendelse.stanset", "steg", "filtrering")
     val stansetIAutomatiskVilkårsvurderingCounter =
-            Metrics.counter("familie.ba.sak.henvendelse.stanset", "steg", "vilkaarsvurdering")
+        Metrics.counter("familie.ba.sak.henvendelse.stanset", "steg", "vilkaarsvurdering")
     val passertFiltreringOgVilkårsvurderingCounter = Metrics.counter("familie.ba.sak.henvendelse.passert")
-
 
     fun behandleFødselshendelse(nyBehandling: NyBehandlingHendelse) {
         val morsÅpneBehandling = hentÅpenBehandling(ident = nyBehandling.morsIdent)
         if (morsÅpneBehandling != null) {
             opprettOppgaveForManuellBehandling(
-                    morsÅpneBehandling.id,
-                    "Fødselshendelse: Bruker har åpen behandling"
+                morsÅpneBehandling.id,
+                "Fødselshendelse: Bruker har åpen behandling"
             )
             return
         }
@@ -62,13 +61,14 @@ class FødselshendelseService(
 
         logger.info("Behandler fødselshendelse på behandling $behandling")
 
-        val behandlingEtterFiltrering = stegService.håndterFiltreringsreglerForFødselshendelser(behandling, nyBehandling)
+        val behandlingEtterFiltrering =
+            stegService.håndterFiltreringsreglerForFødselshendelser(behandling, nyBehandling)
 
         if (behandlingEtterFiltrering.steg == StegType.HENLEGG_BEHANDLING) {
             henleggBehandlingOgOpprettManuellOppgave(
-                    behandling = behandlingEtterFiltrering,
-                    begrunnelse = filtreringsreglerService.hentFødselshendelsefiltreringResultater(behandlingId = behandling.id)
-                            .first { it.resultat == Resultat.IKKE_OPPFYLT }.begrunnelse,
+                behandling = behandlingEtterFiltrering,
+                begrunnelse = filtreringsreglerService.hentFødselshendelsefiltreringResultater(behandlingId = behandling.id)
+                    .first { it.resultat == Resultat.IKKE_OPPFYLT }.begrunnelse,
             )
 
             stansetIAutomatiskFiltreringCounter.increment()
@@ -83,9 +83,13 @@ class FødselshendelseService(
             vedtaksperiodeService.oppdaterVedtaksperioderForBarnVurdertIFødselshendelse(vedtak, barnaSomVurderes)
 
             val vedtakEtterToTrinn =
-                    vedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(behandling = behandlingEtterVilkårsvurdering)
+                vedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(behandling = behandlingEtterVilkårsvurdering)
 
-            val task = IverksettMotOppdragTask.opprettTask(behandling, vedtakEtterToTrinn, SikkerhetContext.hentSaksbehandler())
+            val task = IverksettMotOppdragTask.opprettTask(
+                behandling,
+                vedtakEtterToTrinn,
+                SikkerhetContext.hentSaksbehandler()
+            )
             taskRepository.save(task)
 
             passertFiltreringOgVilkårsvurderingCounter.increment()
@@ -103,8 +107,8 @@ class FødselshendelseService(
     }
 
     fun henleggBehandlingOgOpprettManuellOppgave(
-            behandling: Behandling,
-            begrunnelse: String = "",
+        behandling: Behandling,
+        begrunnelse: String = "",
     ) {
         val begrunnelseForManuellOppgave = if (begrunnelse == "") {
             hentBegrunnelseFraVilkårsvurdering(behandlingId = behandling.id)
@@ -113,24 +117,28 @@ class FødselshendelseService(
         }
 
         logger.info("Henlegger behandling $behandling automatisk på grunn av ugyldig resultat")
-        secureLogger.info("Henlegger behandling $behandling automatisk på grunn av ugyldig resultat. Begrunnelse: $begrunnelse")
 
-        stegService.håndterHenleggBehandling(behandling = behandling, henleggBehandlingInfo = RestHenleggBehandlingInfo(
+        stegService.håndterHenleggBehandling(
+            behandling = behandling,
+            henleggBehandlingInfo = RestHenleggBehandlingInfo(
                 årsak = HenleggÅrsak.FØDSELSHENDELSE_UGYLDIG_UTFALL,
                 begrunnelse = begrunnelseForManuellOppgave ?: "Ukjent utfall"
-        ))
+            )
+        )
 
         opprettOppgaveForManuellBehandling(
-                behandlingId = behandling.id,
-                begrunnelse = begrunnelseForManuellOppgave
+            behandlingId = behandling.id,
+            begrunnelse = begrunnelseForManuellOppgave
         )
     }
 
     private fun opprettOppgaveForManuellBehandling(behandlingId: Long, begrunnelse: String?) {
+        logger.info("Sender fødselshendelse til manuell behandling, se secureLogger for mer detaljer.")
+        secureLogger.info("Sender fødselshendelse til manuell behandling. Begrunnelse: $begrunnelse")
         opprettTaskService.opprettOppgaveTask(
-                behandlingId = behandlingId,
-                oppgavetype = Oppgavetype.VurderLivshendelse,
-                beskrivelse = begrunnelse
+            behandlingId = behandlingId,
+            oppgavetype = Oppgavetype.VurderLivshendelse,
+            beskrivelse = begrunnelse
         )
     }
 
@@ -147,7 +155,7 @@ class FødselshendelseService(
 
         persongrunnlagService.hentBarna(behandling).forEach { barn ->
             val vilkårsresultat =
-                    vilkårsvurdering?.personResultater?.find { it.personIdent == barn.personIdent.ident }?.vilkårResultater
+                vilkårsvurdering?.personResultater?.find { it.personIdent == barn.personIdent.ident }?.vilkårResultater
 
             if (vilkårsresultat?.find { it.vilkårType == Vilkår.UNDER_18_ÅR }?.resultat == Resultat.IKKE_OPPFYLT) {
                 return "Barnet (fødselsdato: ${barn.fødselsdato.tilKortString()}) er over 18 år."
@@ -168,7 +176,6 @@ class FødselshendelseService(
 
         return null
     }
-
 
     companion object {
 

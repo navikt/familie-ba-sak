@@ -14,7 +14,7 @@ import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
-import java.util.*
+import java.util.Properties
 
 @Service
 @TaskStepBeskrivelse(taskStepType = TASK_STEP_TYPE, beskrivelse = "Send dokument til Dokdist", maxAntallFeil = 3)
@@ -34,7 +34,6 @@ class DistribuerDokumentTask(
                 loggBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
                 brevMal = distribuerDokumentDTO.brevmal
             )
-
         } else if (!distribuerDokumentDTO.erManueltSendt && distribuerDokumentDTO.brevmal.erVedtaksbrev && distribuerDokumentDTO.behandlingId != null) {
             stegService.håndterDistribuerVedtaksbrev(
                 behandling = behandlingService.hent(distribuerDokumentDTO.behandlingId),

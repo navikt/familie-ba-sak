@@ -10,32 +10,37 @@ object Behandlingutils {
 
     fun hentSisteBehandlingSomErIverksatt(iverksatteBehandlinger: List<Behandling>): Behandling? {
         return iverksatteBehandlinger
-                .sortedBy { it.opprettetTidspunkt }
-                .findLast { !it.erTekniskOpphør() && it.steg == StegType.BEHANDLING_AVSLUTTET }
+            .sortedBy { it.opprettetTidspunkt }
+            .findLast { !it.erTekniskOpphør() && it.steg == StegType.BEHANDLING_AVSLUTTET }
     }
 
-    fun hentForrigeIverksatteBehandling(iverksatteBehandlinger: List<Behandling>,
-                                        behandlingFørFølgende: Behandling): Behandling? {
+    fun hentForrigeIverksatteBehandling(
+        iverksatteBehandlinger: List<Behandling>,
+        behandlingFørFølgende: Behandling
+    ): Behandling? {
         return iverksatteBehandlinger
-                .filter { it.opprettetTidspunkt.isBefore(behandlingFørFølgende.opprettetTidspunkt) }
-                .sortedBy { it.opprettetTidspunkt }
-                .findLast { !it.erTekniskOpphør() && it.steg == StegType.BEHANDLING_AVSLUTTET }
+            .filter { it.opprettetTidspunkt.isBefore(behandlingFørFølgende.opprettetTidspunkt) }
+            .sortedBy { it.opprettetTidspunkt }
+            .findLast { !it.erTekniskOpphør() && it.steg == StegType.BEHANDLING_AVSLUTTET }
     }
 
-    fun bestemUnderkategori(nyUnderkategori: BehandlingUnderkategori,
-                            nyBehandlingType: BehandlingType,
-                            løpendeUnderkategori: BehandlingUnderkategori?): BehandlingUnderkategori {
+    fun bestemUnderkategori(
+        nyUnderkategori: BehandlingUnderkategori,
+        nyBehandlingType: BehandlingType,
+        løpendeUnderkategori: BehandlingUnderkategori?
+    ): BehandlingUnderkategori {
         return when {
             nyUnderkategori == BehandlingUnderkategori.UTVIDET -> nyUnderkategori
 
-            nyBehandlingType == BehandlingType.REVURDERING -> løpendeUnderkategori
-                                                              ?: nyUnderkategori
+            nyBehandlingType == BehandlingType.REVURDERING ->
+                løpendeUnderkategori
+                    ?: nyUnderkategori
 
             else -> nyUnderkategori
         }
     }
 
-    fun utledLøpendeUnderkategori(andeler: List<AndelTilkjentYtelse>) : BehandlingUnderkategori {
+    fun utledLøpendeUnderkategori(andeler: List<AndelTilkjentYtelse>): BehandlingUnderkategori {
         return if (andeler.any { it.erUtvidet() && it.erLøpende() }) BehandlingUnderkategori.UTVIDET else BehandlingUnderkategori.ORDINÆR
     }
 }

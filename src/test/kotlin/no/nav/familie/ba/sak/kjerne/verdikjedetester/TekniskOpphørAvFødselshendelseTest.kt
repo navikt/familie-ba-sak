@@ -24,41 +24,49 @@ import org.springframework.http.HttpHeaders
 import java.time.LocalDate
 
 class TekniskOpphørAvFødselshendelseTest(
-        @Autowired private val behandleFødselshendelseTask: BehandleFødselshendelseTask,
-        @Autowired private val fagsakService: FagsakService,
-        @Autowired private val behandlingService: BehandlingService,
-        @Autowired private val vedtakService: VedtakService,
-        @Autowired private val stegService: StegService
+    @Autowired private val behandleFødselshendelseTask: BehandleFødselshendelseTask,
+    @Autowired private val fagsakService: FagsakService,
+    @Autowired private val behandlingService: BehandlingService,
+    @Autowired private val vedtakService: VedtakService,
+    @Autowired private val stegService: StegService
 ) : AbstractVerdikjedetest() {
 
     @Test
     fun `Skal teknisk opphøre fødselshendelse`() {
-        val scenario = mockServerKlient().lagScenario(RestScenario(
+        val scenario = mockServerKlient().lagScenario(
+            RestScenario(
                 søker = RestScenarioPerson(fødselsdato = "1998-01-12", fornavn = "Mor", etternavn = "Søker"),
                 barna = listOf(
-                        RestScenarioPerson(fødselsdato = LocalDate.now().minusDays(2).toString(),
-                                           fornavn = "Barn",
-                                           etternavn = "Barnesen")
+                    RestScenarioPerson(
+                        fødselsdato = LocalDate.now().minusDays(2).toString(),
+                        fornavn = "Barn",
+                        etternavn = "Barnesen"
+                    )
                 )
-        ))
+            )
+        )
         behandleFødselshendelse(
-                nyBehandlingHendelse = NyBehandlingHendelse(
-                        morsIdent = scenario.søker.ident!!,
-                        barnasIdenter = listOf(scenario.barna.first().ident!!)
-                ),
-                behandleFødselshendelseTask = behandleFødselshendelseTask,
-                fagsakService = fagsakService,
-                behandlingService = behandlingService,
-                vedtakService = vedtakService,
-                stegService = stegService
+            nyBehandlingHendelse = NyBehandlingHendelse(
+                morsIdent = scenario.søker.ident!!,
+                barnasIdenter = listOf(scenario.barna.first().ident!!)
+            ),
+            behandleFødselshendelseTask = behandleFødselshendelseTask,
+            fagsakService = fagsakService,
+            behandlingService = behandlingService,
+            vedtakService = vedtakService,
+            stegService = stegService
         )
 
-        val restFagsakMedBehandling = familieBaSakKlient().opprettBehandling(søkersIdent = scenario.søker.ident,
-                                                                             behandlingType = BehandlingType.TEKNISK_OPPHØR,
-                                                                             behandlingÅrsak = BehandlingÅrsak.TEKNISK_OPPHØR)
-        generellAssertFagsak(restFagsak = restFagsakMedBehandling,
-                             fagsakStatus = FagsakStatus.LØPENDE,
-                             behandlingStegType = StegType.VILKÅRSVURDERING)
+        val restFagsakMedBehandling = familieBaSakKlient().opprettBehandling(
+            søkersIdent = scenario.søker.ident,
+            behandlingType = BehandlingType.TEKNISK_OPPHØR,
+            behandlingÅrsak = BehandlingÅrsak.TEKNISK_OPPHØR
+        )
+        generellAssertFagsak(
+            restFagsak = restFagsakMedBehandling,
+            fagsakStatus = FagsakStatus.LØPENDE,
+            behandlingStegType = StegType.VILKÅRSVURDERING
+        )
         assertEquals(2, restFagsakMedBehandling.data?.behandlinger?.size)
 
         val aktivBehandling = hentAktivBehandling(restFagsak = restFagsakMedBehandling.data!!)!!
@@ -67,58 +75,76 @@ class TekniskOpphørAvFødselshendelseTest(
         aktivBehandling.personResultater.forEach { restPersonResultat ->
             restPersonResultat.vilkårResultater.forEach {
                 familieBaSakKlient().putVilkår(
-                        behandlingId = aktivBehandling.behandlingId,
-                        vilkårId = it.id,
-                        restPersonResultat =
-                        RestPersonResultat(personIdent = restPersonResultat.personIdent,
-                                           vilkårResultater = listOf(it.copy(
-                                                   resultat = Resultat.IKKE_OPPFYLT
-                                           ))))
+                    behandlingId = aktivBehandling.behandlingId,
+                    vilkårId = it.id,
+                    restPersonResultat =
+                    RestPersonResultat(
+                        personIdent = restPersonResultat.personIdent,
+                        vilkårResultater = listOf(
+                            it.copy(
+                                resultat = Resultat.IKKE_OPPFYLT
+                            )
+                        )
+                    )
+                )
             }
         }
 
         familieBaSakKlient().validerVilkårsvurdering(
-                behandlingId = aktivBehandling.behandlingId
+            behandlingId = aktivBehandling.behandlingId
         )
         val restFagsakEtterBehandlingsresultat =
-                familieBaSakKlient().behandlingsresultatStegOgGåVidereTilNesteSteg(
-                        behandlingId = aktivBehandling.behandlingId
-                )
-        generellAssertFagsak(restFagsak = restFagsakEtterBehandlingsresultat,
-                             fagsakStatus = FagsakStatus.LØPENDE,
-                             behandlingStegType = StegType.SEND_TIL_BESLUTTER,
-                             behandlingResultat = BehandlingResultat.OPPHØRT)
+            familieBaSakKlient().behandlingsresultatStegOgGåVidereTilNesteSteg(
+                behandlingId = aktivBehandling.behandlingId
+            )
+        generellAssertFagsak(
+            restFagsak = restFagsakEtterBehandlingsresultat,
+            fagsakStatus = FagsakStatus.LØPENDE,
+            behandlingStegType = StegType.SEND_TIL_BESLUTTER,
+            behandlingResultat = BehandlingResultat.OPPHØRT
+        )
 
         val restFagsakEtterSendTilBeslutter =
-                familieBaSakKlient().sendTilBeslutter(fagsakId = restFagsakEtterBehandlingsresultat.data!!.id)
-        generellAssertFagsak(restFagsak = restFagsakEtterSendTilBeslutter,
-                             fagsakStatus = FagsakStatus.LØPENDE,
-                             behandlingStegType = StegType.BESLUTTE_VEDTAK)
+            familieBaSakKlient().sendTilBeslutter(fagsakId = restFagsakEtterBehandlingsresultat.data!!.id)
+        generellAssertFagsak(
+            restFagsak = restFagsakEtterSendTilBeslutter,
+            fagsakStatus = FagsakStatus.LØPENDE,
+            behandlingStegType = StegType.BESLUTTE_VEDTAK
+        )
 
         val restFagsakEtterIverksetting =
-                familieBaSakKlient().iverksettVedtak(fagsakId = restFagsakEtterSendTilBeslutter.data!!.id,
-                                                     restBeslutningPåVedtak = RestBeslutningPåVedtak(
-                                                             Beslutning.GODKJENT),
-                                                     beslutterHeaders = HttpHeaders().apply {
-                                                         setBearerAuth(token(
-                                                                 mapOf("groups" to listOf("SAKSBEHANDLER", "BESLUTTER"),
-                                                                       "azp" to "e2e-test",
-                                                                       "name" to "Mock McMockface Beslutter",
-                                                                       "preferred_username" to "mock.mcmockface.beslutter@nav.no")
-                                                         ))
-                                                     })
+            familieBaSakKlient().iverksettVedtak(
+                fagsakId = restFagsakEtterSendTilBeslutter.data!!.id,
+                restBeslutningPåVedtak = RestBeslutningPåVedtak(
+                    Beslutning.GODKJENT
+                ),
+                beslutterHeaders = HttpHeaders().apply {
+                    setBearerAuth(
+                        token(
+                            mapOf(
+                                "groups" to listOf("SAKSBEHANDLER", "BESLUTTER"),
+                                "azp" to "e2e-test",
+                                "name" to "Mock McMockface Beslutter",
+                                "preferred_username" to "mock.mcmockface.beslutter@nav.no"
+                            )
+                        )
+                    )
+                }
+            )
 
-        generellAssertFagsak(restFagsak = restFagsakEtterIverksetting,
-                             fagsakStatus = FagsakStatus.LØPENDE,
-                             behandlingStegType = StegType.IVERKSETT_MOT_OPPDRAG)
+        generellAssertFagsak(
+            restFagsak = restFagsakEtterIverksetting,
+            fagsakStatus = FagsakStatus.LØPENDE,
+            behandlingStegType = StegType.IVERKSETT_MOT_OPPDRAG
+        )
 
         håndterIverksettingAvBehandling(
-                behandlingEtterVurdering = behandlingService.hentAktivForFagsak(fagsakId = restFagsakEtterSendTilBeslutter.data!!.id)!!,
-                søkerFnr = scenario.søker.ident,
-                fagsakStatusEtterIverksetting = FagsakStatus.AVSLUTTET,
-                fagsakService = fagsakService,
-                vedtakService = vedtakService,
-                stegService = stegService
+            behandlingEtterVurdering = behandlingService.hentAktivForFagsak(fagsakId = restFagsakEtterSendTilBeslutter.data!!.id)!!,
+            søkerFnr = scenario.søker.ident,
+            fagsakStatusEtterIverksetting = FagsakStatus.AVSLUTTET,
+            fagsakService = fagsakService,
+            vedtakService = vedtakService,
+            stegService = stegService
         )
     }
 }

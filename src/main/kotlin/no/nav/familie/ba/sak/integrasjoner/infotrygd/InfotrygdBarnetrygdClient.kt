@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.ekstern.bisys.BisysUtvidetBarnetrygdResponse
 import no.nav.familie.ba.sak.task.OpprettTaskService.Companion.RETRY_BACKOFF_5000MS
 import no.nav.familie.eksterne.kontrakter.skatteetaten.SkatteetatenPerioder
+import no.nav.familie.eksterne.kontrakter.skatteetaten.SkatteetatenPerioderRequest
 import no.nav.familie.eksterne.kontrakter.skatteetaten.SkatteetatenPerioderResponse
 import no.nav.familie.eksterne.kontrakter.skatteetaten.SkatteetatenPersonerResponse
 import no.nav.familie.http.client.AbstractRestClient
@@ -27,10 +28,10 @@ import java.time.YearMonth
 
 @Component
 class InfotrygdBarnetrygdClient(
-    @Value("\${FAMILIE_BA_INFOTRYGD_BARNETRYGD_API_URL}") private val clientUri: URI,
+    @Value("\${FAMILIE_BA_INFOTRYGD_API_URL}") private val clientUri: URI,
     @Qualifier("jwtBearerMedLangTimeout") restOperations: RestOperations,
     private val environment: Environment
-) : AbstractRestClient(restOperations, "infotrygd_barnetrygd") {
+) : AbstractRestClient(restOperations, "infotrygd") {
 
     fun harLøpendeSakIInfotrygd(søkersIdenter: List<String>, barnasIdenter: List<String> = emptyList()): Boolean {
         if (environment.activeProfiles.contains("e2e")) {
@@ -119,7 +120,7 @@ class InfotrygdBarnetrygdClient(
     }
 
     fun hentPersonerMedUtvidetBarnetrygd(år: String): SkatteetatenPersonerResponse {
-        val uri = URI.create("$clientUri/infotrygd/barnetrygd/utvidet?aar=${år}")
+        val uri = URI.create("$clientUri/infotrygd/barnetrygd/utvidet?aar=$år")
         return try {
             getForEntity(uri)
         } catch (ex: Exception) {
@@ -128,17 +129,17 @@ class InfotrygdBarnetrygdClient(
         }
     }
 
-    fun hentPerioderMedUtvidetBarnetrygd(ident: String, år: String): SkatteetatenPerioder? {
-        val uri = URI.create("$clientUri/infotrygd/barnetrygd/utvidet/skatteetaten")
-        val request = mapOf("personIdent" to ident, "år" to år)
+    fun hentPerioderMedUtvidetBarnetrygdForPersoner(identer: List<String>, år: String): List<SkatteetatenPerioder> {
+        val uri = URI.create("$clientUri/infotrygd/barnetrygd/utvidet/skatteetaten/perioder")
+
+        val request = SkatteetatenPerioderRequest(identer = identer, aar = år)
         return try {
-            postForEntity<SkatteetatenPerioderResponse>(uri, request).brukere.firstOrNull()
+            postForEntity<List<SkatteetatenPerioderResponse>>(uri, request).flatMap { it.brukere }
         } catch (ex: Exception) {
             loggFeil(ex, uri)
             throw RuntimeException("Henting av perioder med utvidet barnetrygd feilet. Gav feil: ${ex.message}", ex)
         }
     }
-
 
     private fun loggFeil(ex: Exception, uri: URI) {
         when (ex) {

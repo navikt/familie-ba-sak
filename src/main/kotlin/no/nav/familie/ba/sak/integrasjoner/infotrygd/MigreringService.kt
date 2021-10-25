@@ -50,18 +50,20 @@ import java.time.YearMonth
 private const val NULLDATO = "000000"
 
 @Service
-class MigreringService(private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
-                       private val fagsakService: FagsakService,
-                       private val behandlingService: BehandlingService,
-                       private val stegService: StegService,
-                       private val vedtakService: VedtakService,
-                       private val taskRepository: TaskRepositoryWrapper,
-                       private val vilkårService: VilkårService,
-                       private val vilkårsvurderingService: VilkårsvurderingService,
-                       private val behandlingRepository: BehandlingRepository,
-                       private val tilkjentYtelseRepository: TilkjentYtelseRepository,
-                       private val totrinnskontrollService: TotrinnskontrollService,
-                       private val env: EnvService) {
+class MigreringService(
+    private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
+    private val fagsakService: FagsakService,
+    private val behandlingService: BehandlingService,
+    private val stegService: StegService,
+    private val vedtakService: VedtakService,
+    private val taskRepository: TaskRepositoryWrapper,
+    private val vilkårService: VilkårService,
+    private val vilkårsvurderingService: VilkårsvurderingService,
+    private val behandlingRepository: BehandlingRepository,
+    private val tilkjentYtelseRepository: TilkjentYtelseRepository,
+    private val totrinnskontrollService: TotrinnskontrollService,
+    private val env: EnvService
+) {
 
     private val alleredeMigrertPersonFeilmelding = "Personen er allerede migrert."
 
@@ -74,15 +76,19 @@ class MigreringService(private val infotrygdBarnetrygdClient: InfotrygdBarnetryg
         val barnasIdenter = finnBarnMedLøpendeStønad(løpendeSak)
 
         fagsakService.hentEllerOpprettFagsakForPersonIdent(personIdent)
-                .also { kastFeilDersomAlleredeMigrert(it) }
+            .also { kastFeilDersomAlleredeMigrert(it) }
 
-        val behandling = stegService.håndterNyBehandling(NyBehandling(søkersIdent = personIdent,
-                                                                      behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
-                                                                      kategori = BehandlingKategori.NASJONAL,
-                                                                      underkategori = BehandlingUnderkategori.ORDINÆR,
-                                                                      behandlingÅrsak = BehandlingÅrsak.MIGRERING,
-                                                                      skalBehandlesAutomatisk = true,
-                                                                      barnasIdenter = barnasIdenter))
+        val behandling = stegService.håndterNyBehandling(
+            NyBehandling(
+                søkersIdent = personIdent,
+                behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
+                kategori = BehandlingKategori.NASJONAL,
+                underkategori = BehandlingUnderkategori.ORDINÆR,
+                behandlingÅrsak = BehandlingÅrsak.MIGRERING,
+                skalBehandlesAutomatisk = true,
+                barnasIdenter = barnasIdenter
+            )
+        )
 
         vilkårService.hentVilkårsvurdering(behandlingId = behandling.id)?.apply {
             forsøkSettPerioderFomTilpassetInfotrygdKjøreplan(this)
@@ -109,7 +115,7 @@ class MigreringService(private val infotrygdBarnetrygdClient: InfotrygdBarnetryg
                     FagsakStatus.LØPENDE -> throw FunksjonellFeil(alleredeMigrertPersonFeilmelding)
                     FagsakStatus.AVSLUTTET -> {
                         behandlinger.find { it.erTekniskOpphør() && it.opprettetTidspunkt.isAfter(this.opprettetTidspunkt) }
-                        ?: throw FunksjonellFeil(alleredeMigrertPersonFeilmelding)
+                            ?: throw FunksjonellFeil(alleredeMigrertPersonFeilmelding)
                     }
                 }
             } ?: throw FunksjonellFeil("Det finnes allerede en aktiv behandling på personen som ikke er migrering.")
@@ -121,40 +127,46 @@ class MigreringService(private val infotrygdBarnetrygdClient: InfotrygdBarnetryg
         if (åpneSaker.isNotEmpty()) throw FunksjonellFeil("Bruker har åpen behandling i Infotrygd")
 
         val ikkeOpphørteSaker = ferdigBehandledeSaker.sortedByDescending { it.iverksattdato }
-                .filter {
-                    it.stønad != null && (it.stønad!!.opphørsgrunn == "0" || it.stønad!!.opphørsgrunn.isNullOrEmpty())
-                }
+            .filter {
+                it.stønad != null && (it.stønad!!.opphørsgrunn == "0" || it.stønad!!.opphørsgrunn.isNullOrEmpty())
+            }
 
         if (ikkeOpphørteSaker.size > 1) {
-            throw FunksjonellFeil(melding = "Fant mer enn én aktiv sak på bruker i infotrygd",
-                                  httpStatus = HttpStatus.INTERNAL_SERVER_ERROR)
+            throw FunksjonellFeil(
+                melding = "Fant mer enn én aktiv sak på bruker i infotrygd",
+                httpStatus = HttpStatus.INTERNAL_SERVER_ERROR
+            )
         }
 
         if (ikkeOpphørteSaker.isEmpty()) {
-            throw FunksjonellFeil(melding = "Personen har ikke løpende sak i infotrygd.",
-                                  httpStatus = HttpStatus.INTERNAL_SERVER_ERROR)
-
+            throw FunksjonellFeil(
+                melding = "Personen har ikke løpende sak i infotrygd.",
+                httpStatus = HttpStatus.INTERNAL_SERVER_ERROR
+            )
         }
         return ikkeOpphørteSaker.first()
     }
 
     private fun kastFeilDersomSakIkkeErOrdinær(sak: Sak) {
         if (!(sak.valg == "OR" && sak.undervalg == "OS")) {
-            throw FunksjonellFeil(melding = "Kan kun migrere ordinære saker (OR, OS)",
-                                  httpStatus = HttpStatus.INTERNAL_SERVER_ERROR)
+            throw FunksjonellFeil(
+                melding = "Kan kun migrere ordinære saker (OR, OS)",
+                httpStatus = HttpStatus.INTERNAL_SERVER_ERROR
+            )
         }
         when (val antallBeløp = sak.stønad!!.delytelse.size) {
             1 -> return
-            else -> throw FunksjonellFeil(melding = "Kan kun migrere ordinære saker med nøyaktig ett utbetalingsbeløp. Fant $antallBeløp.",
-                                          httpStatus = HttpStatus.INTERNAL_SERVER_ERROR)
+            else -> throw FunksjonellFeil(
+                melding = "Kan kun migrere ordinære saker med nøyaktig ett utbetalingsbeløp. Fant $antallBeløp.",
+                httpStatus = HttpStatus.INTERNAL_SERVER_ERROR
+            )
         }
     }
 
-
     private fun finnBarnMedLøpendeStønad(løpendeSak: Sak): List<String> {
         val barnasIdenter = løpendeSak.stønad!!.barn
-                .filter { it.barnetrygdTom == NULLDATO }
-                .map { it.barnFnr!! }
+            .filter { it.barnetrygdTom == NULLDATO }
+            .map { it.barnFnr!! }
 
         if (barnasIdenter.isEmpty())
             throw FunksjonellFeil("Fant ingen barn med løpende stønad på sak ${løpendeSak.saksblokk}${løpendeSak.saksnr} på bruker i Infotrygd.")
@@ -176,17 +188,21 @@ class MigreringService(private val infotrygdBarnetrygdClient: InfotrygdBarnetryg
                 this.isBefore(kjøredato) -> this.førsteDagIInneværendeMåned()
                 this.isAfter(kjøredato.plusDays(1)) -> this.førsteDagINesteMåned()
                 env.erDev() || env.erE2E() || env.erPreprod() -> this.førsteDagINesteMåned()
-                else -> throw FunksjonellFeil("Migrering er midlertidig deaktivert frem til ${kjøredato.plusDays(2)} da det kolliderer med Infotrygds kjøredato",
-                                              "Migrering er midlertidig deaktivert frem til ${kjøredato.plusDays(2)} da det kolliderer med Infotrygds kjøredato")
+                else -> throw FunksjonellFeil(
+                    "Migrering er midlertidig deaktivert frem til ${kjøredato.plusDays(2)} da det kolliderer med Infotrygds kjøredato",
+                    "Migrering er midlertidig deaktivert frem til ${kjøredato.plusDays(2)} da det kolliderer med Infotrygds kjøredato"
+                )
             }.minusMonths(1)
         }
     }
 
     private fun infotrygdKjøredato(yearMonth: YearMonth): LocalDate {
         yearMonth.run {
-            if (this.year != 2021) throw Feil("Migrering feilet: Kopien av Infotrygds kjøreplan er utdatert.",
-                                              "Migrering feilet: Kopien av Infotrygds kjøreplan er utdatert.",
-                                              httpStatus = HttpStatus.INTERNAL_SERVER_ERROR)
+            if (this.year != 2021) throw Feil(
+                "Migrering feilet: Kopien av Infotrygds kjøreplan er utdatert.",
+                "Migrering feilet: Kopien av Infotrygds kjøreplan er utdatert.",
+                httpStatus = HttpStatus.INTERNAL_SERVER_ERROR
+            )
             return when (this.month) {
                 APRIL -> 19
                 MAY -> 14
@@ -202,35 +218,42 @@ class MigreringService(private val infotrygdBarnetrygdClient: InfotrygdBarnetryg
         }
     }
 
-    private fun sammenlignTilkjentYtelseMedBeløpFraInfotrygd(behandling: Behandling,
-                                                             løpendeSak: Sak) {
+    private fun sammenlignTilkjentYtelseMedBeløpFraInfotrygd(
+        behandling: Behandling,
+        løpendeSak: Sak
+    ) {
         tilkjentYtelseRepository.findByBehandlingOptional(behandling.id)?.andelerTilkjentYtelse?.let { andelerTilkjentYtelse: MutableSet<AndelTilkjentYtelse> ->
-            if (andelerTilkjentYtelse.isEmpty()) throw Feil("Migrering feilet: Fant ingen andeler tilkjent ytelse på behandlingen",
-                                                            "Migrering feilet: Fant ingen andeler tilkjent ytelse på behandlingen",
-                                                            HttpStatus.INTERNAL_SERVER_ERROR)
+            if (andelerTilkjentYtelse.isEmpty()) throw Feil(
+                "Migrering feilet: Fant ingen andeler tilkjent ytelse på behandlingen",
+                "Migrering feilet: Fant ingen andeler tilkjent ytelse på behandlingen",
+                HttpStatus.INTERNAL_SERVER_ERROR
+            )
 
             val førsteUtbetalingsperiode = beregnUtbetalingsperioderUtenKlassifisering(andelerTilkjentYtelse)
-                    .sortedWith(compareBy<LocalDateSegment<Int>>({ it.fom }, { it.value }, { it.tom }))
-                    .first()
+                .sortedWith(compareBy<LocalDateSegment<Int>>({ it.fom }, { it.value }, { it.tom }))
+                .first()
             val tilkjentBeløp = førsteUtbetalingsperiode.value
             val beløpFraInfotrygd =
-                    løpendeSak.stønad!!.delytelse.singleOrNull()?.beløp?.toInt() ?: error("Finnes flere delytelser på sak")
+                løpendeSak.stønad!!.delytelse.singleOrNull()?.beløp?.toInt() ?: error("Finnes flere delytelser på sak")
 
-            if (tilkjentBeløp != beløpFraInfotrygd) throw Feil("Migrering feilet: Nytt, beregnet beløp var ulikt beløp fra Infotrygd " +
-                                                               "($tilkjentBeløp =/= $beløpFraInfotrygd)",
-                                                               "Migrering feilet: Nytt, beregnet beløp var ulikt beløp fra Infotrygd " +
-                                                               "($tilkjentBeløp =/= $beløpFraInfotrygd)",
-                                                               HttpStatus.INTERNAL_SERVER_ERROR)
-
-        } ?: throw Feil("Migrering feilet: Tilkjent ytelse er null.",
-                        "Migrering feilet: Tilkjent ytelse er null.",
-                        HttpStatus.INTERNAL_SERVER_ERROR)
+            if (tilkjentBeløp != beløpFraInfotrygd) throw Feil(
+                "Migrering feilet: Nytt, beregnet beløp var ulikt beløp fra Infotrygd " +
+                    "($tilkjentBeløp =/= $beløpFraInfotrygd)",
+                "Migrering feilet: Nytt, beregnet beløp var ulikt beløp fra Infotrygd " +
+                    "($tilkjentBeløp =/= $beløpFraInfotrygd)",
+                HttpStatus.INTERNAL_SERVER_ERROR
+            )
+        } ?: throw Feil(
+            "Migrering feilet: Tilkjent ytelse er null.",
+            "Migrering feilet: Tilkjent ytelse er null.",
+            HttpStatus.INTERNAL_SERVER_ERROR
+        )
     }
 
     private fun iverksett(behandling: Behandling) {
         totrinnskontrollService.opprettAutomatiskTotrinnskontroll(behandling)
         val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
-                     ?: error("Fant ikke aktivt vedtak på behandling ${behandling.id}")
+            ?: error("Fant ikke aktivt vedtak på behandling ${behandling.id}")
         vedtakService.oppdater(vedtak)
         behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.IVERKSETTER_VEDTAK)
         val task = IverksettMotOppdragTask.opprettTask(behandling, vedtak, SikkerhetContext.hentSaksbehandler())

@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.fagsak
 
+import io.micrometer.core.annotation.Timed
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Lock
@@ -7,7 +8,8 @@ import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
 import java.time.LocalDate
-import java.util.*
+import java.time.YearMonth
+import java.util.Optional
 import javax.persistence.LockModeType
 
 @Repository
@@ -32,7 +34,8 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
     fun finnLøpendeFagsaker(): List<Fagsak>
 
     @Modifying
-    @Query(value = """select id from fagsak
+    @Query(
+        value = """select id from fagsak
                         where fagsak.id in (
                             with sisteIverksatte as (
                                 select b.fk_fagsak_id as fagsakId, max(b.id) as behandlingId
@@ -47,10 +50,12 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
                             from sisteIverksatte
                                      inner join tilkjent_ytelse ty on sisteIverksatte.behandlingId = ty.fk_behandling_id
                             where ty.stonad_tom < now())""",
-           nativeQuery = true)
+        nativeQuery = true
+    )
     fun finnFagsakerSomSkalAvsluttes(): List<Long>
 
-    @Query(value = """
+    @Query(
+        value = """
         SELECT f FROM Fagsak f
         WHERE f.arkivert = false AND f.status = 'LØPENDE' AND f IN ( 
             SELECT b.fagsak FROM Behandling b 
@@ -63,7 +68,8 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
                 )
             )
         )
-        """)
+        """
+    )
     fun finnLøpendeFagsakMedBarnMedFødselsdatoInnenfor(fom: LocalDate, tom: LocalDate): Set<Fagsak>
 
     @Lock(LockModeType.NONE)
@@ -73,4 +79,25 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
     @Lock(LockModeType.NONE)
     @Query(value = "SELECT count(*) from Fagsak f where f.status='LØPENDE' and f.arkivert = false")
     fun finnAntallFagsakerLøpende(): Long
+
+    @Lock(LockModeType.NONE)
+    @Query(
+        value = """
+        SELECT new kotlin.Pair(f , MAX(ty.opprettetDato))
+        FROM Behandling b
+               INNER JOIN Fagsak f ON f.id = b.fagsak.id
+               INNER JOIN TilkjentYtelse ty ON b.id = ty.behandling.id
+        WHERE ty.utbetalingsoppdrag IS NOT NULL
+        AND EXISTS(
+            SELECT aty.type FROM AndelTilkjentYtelse aty
+            WHERE aty.tilkjentYtelse.id = ty.id
+            AND aty.type = 'UTVIDET_BARNETRYGD'
+            AND aty.stønadFom <= :tom
+            AND aty.stønadTom >= :fom
+        )
+        GROUP BY f.id
+    """
+    )
+    @Timed
+    fun finnFagsakerMedUtvidetBarnetrygdInnenfor(fom: YearMonth, tom: YearMonth): List<Pair<Fagsak, LocalDate>>
 }

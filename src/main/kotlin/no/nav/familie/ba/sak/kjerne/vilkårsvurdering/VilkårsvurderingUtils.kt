@@ -13,10 +13,10 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestVedtakBegrunnelseTilknyttetV
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.dokument.domene.SanityBegrunnelse
+import no.nav.familie.ba.sak.kjerne.dokument.domene.tilTriggesAv
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilTriggesAv
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
@@ -39,14 +39,18 @@ object VilkårsvurderingUtils {
      * skal det kastes en feil.
      */
     fun muterPersonResultatPost(personResultat: PersonResultat, vilkårType: Vilkår) {
-        val nyttVilkårResultat = VilkårResultat(personResultat = personResultat,
-                                                vilkårType = vilkårType,
-                                                resultat = Resultat.IKKE_VURDERT,
-                                                begrunnelse = "",
-                                                behandlingId = personResultat.vilkårsvurdering.behandling.id)
+        val nyttVilkårResultat = VilkårResultat(
+            personResultat = personResultat,
+            vilkårType = vilkårType,
+            resultat = Resultat.IKKE_VURDERT,
+            begrunnelse = "",
+            behandlingId = personResultat.vilkårsvurdering.behandling.id
+        )
         if (harUvurdertePerioder(personResultat, vilkårType)) {
-            throw FunksjonellFeil(melding = "Det finnes allerede uvurderte vilkår av samme vilkårType",
-                                  frontendFeilmelding = "Du må ferdigstille vilkårsvurderingen på en periode som allerede er påbegynt, før du kan legge til en ny periode")
+            throw FunksjonellFeil(
+                melding = "Det finnes allerede uvurderte vilkår av samme vilkårType",
+                frontendFeilmelding = "Du må ferdigstille vilkårsvurderingen på en periode som allerede er påbegynt, før du kan legge til en ny periode"
+            )
         }
         personResultat.addVilkårResultat(vilkårResultat = nyttVilkårResultat)
     }
@@ -57,56 +61,63 @@ object VilkårsvurderingUtils {
      * @param[restVilkårResultat] Det endrede vilkårresultatet
      * @return VilkårResultater før og etter mutering
      */
-    fun muterPersonVilkårResultaterPut(personResultat: PersonResultat,
-                                       restVilkårResultat: RestVilkårResultat): Pair<List<VilkårResultat>, List<VilkårResultat>> {
-        validerAvslagUtenPeriodeMedLøpende(personSomEndres = personResultat,
-                                           vilkårSomEndres = restVilkårResultat)
+    fun muterPersonVilkårResultaterPut(
+        personResultat: PersonResultat,
+        restVilkårResultat: RestVilkårResultat
+    ): Pair<List<VilkårResultat>, List<VilkårResultat>> {
+        validerAvslagUtenPeriodeMedLøpende(
+            personSomEndres = personResultat,
+            vilkårSomEndres = restVilkårResultat
+        )
         val kopiAvVilkårResultater = personResultat.vilkårResultater.toList()
 
         kopiAvVilkårResultater
-                .filter { !(it.erAvslagUtenPeriode() && it.id != restVilkårResultat.id) }
-                .forEach {
-                    tilpassVilkårForEndretVilkår(
-                            personResultat = personResultat,
-                            vilkårResultat = it,
-                            restVilkårResultat = restVilkårResultat
-                    )
-                }
+            .filter { !(it.erAvslagUtenPeriode() && it.id != restVilkårResultat.id) }
+            .forEach {
+                tilpassVilkårForEndretVilkår(
+                    personResultat = personResultat,
+                    vilkårResultat = it,
+                    restVilkårResultat = restVilkårResultat
+                )
+            }
 
         return Pair(kopiAvVilkårResultater, personResultat.vilkårResultater.toList())
     }
 
     fun validerAvslagUtenPeriodeMedLøpende(personSomEndres: PersonResultat, vilkårSomEndres: RestVilkårResultat) {
         val resultaterPåVilkår =
-                personSomEndres.vilkårResultater.filter { it.vilkårType == vilkårSomEndres.vilkårType && it.id != vilkårSomEndres.id }
+            personSomEndres.vilkårResultater.filter { it.vilkårType == vilkårSomEndres.vilkårType && it.id != vilkårSomEndres.id }
         when {
             vilkårSomEndres.erAvslagUtenPeriode() && resultaterPåVilkår.any { it.resultat == Resultat.OPPFYLT && it.harFremtidigTom() } ->
                 throw FunksjonellFeil(
-                        "Finnes løpende oppfylt ved forsøk på å legge til avslag uten periode ",
-                        "Du kan ikke legge til avslag uten datoer fordi det finnes oppfylt løpende periode på vilkåret.")
+                    "Finnes løpende oppfylt ved forsøk på å legge til avslag uten periode ",
+                    "Du kan ikke legge til avslag uten datoer fordi det finnes oppfylt løpende periode på vilkåret."
+                )
             vilkårSomEndres.harFremtidigTom() && resultaterPåVilkår.any { it.erAvslagUtenPeriode() } ->
                 throw FunksjonellFeil(
-                        "Finnes avslag uten periode ved forsøk på å legge til løpende oppfylt",
-                        "Du kan ikke legge til løpende periode fordi det er vurdert avslag uten datoer på vilkåret.")
+                    "Finnes avslag uten periode ved forsøk på å legge til løpende oppfylt",
+                    "Du kan ikke legge til løpende periode fordi det er vurdert avslag uten datoer på vilkåret."
+                )
         }
     }
 
     private fun harUvurdertePerioder(personResultat: PersonResultat, vilkårType: Vilkår): Boolean {
         val uvurdetePerioderMedSammeVilkårType = personResultat.vilkårResultater
-                .filter { it.vilkårType == vilkårType }
-                .find { it.resultat == Resultat.IKKE_VURDERT }
+            .filter { it.vilkårType == vilkårType }
+            .find { it.resultat == Resultat.IKKE_VURDERT }
         return uvurdetePerioderMedSammeVilkårType != null
     }
-
 
     /**
      * @param [personResultat] person vilkårresultatet tilhører
      * @param [vilkårResultat] vilkårresultat som skal oppdaters på person
      * @param [restVilkårResultat] oppdatert resultat fra frontend
      */
-    fun tilpassVilkårForEndretVilkår(personResultat: PersonResultat,
-                                     vilkårResultat: VilkårResultat,
-                                     restVilkårResultat: RestVilkårResultat) {
+    fun tilpassVilkårForEndretVilkår(
+        personResultat: PersonResultat,
+        vilkårResultat: VilkårResultat,
+        restVilkårResultat: RestVilkårResultat
+    ) {
         val periodePåNyttVilkår: Periode = restVilkårResultat.toPeriode()
 
         if (vilkårResultat.id == restVilkårResultat.id) {
@@ -128,13 +139,19 @@ object VilkårsvurderingUtils {
                 periodePåNyttVilkår.kanSplitte(periode) -> {
                     personResultat.removeVilkårResultat(vilkårResultatId = vilkårResultat.id)
                     personResultat.addVilkårResultat(
-                            vilkårResultat.kopierMedNyPeriode(fom = periode.fom,
-                                                              tom = nyTom,
-                                                              behandlingId = personResultat.vilkårsvurdering.behandling.id))
+                        vilkårResultat.kopierMedNyPeriode(
+                            fom = periode.fom,
+                            tom = nyTom,
+                            behandlingId = personResultat.vilkårsvurdering.behandling.id
+                        )
+                    )
                     personResultat.addVilkårResultat(
-                            vilkårResultat.kopierMedNyPeriode(fom = nyFom,
-                                                              tom = periode.tom,
-                                                              behandlingId = personResultat.vilkårsvurdering.behandling.id))
+                        vilkårResultat.kopierMedNyPeriode(
+                            fom = nyFom,
+                            tom = periode.tom,
+                            behandlingId = personResultat.vilkårsvurdering.behandling.id
+                        )
+                    )
                 }
                 periodePåNyttVilkår.kanFlytteFom(periode) -> {
                     vilkårResultat.periodeFom = nyFom
@@ -160,28 +177,35 @@ object VilkårsvurderingUtils {
      * initieltResultat (neste aktivt) med vilkår som skal benyttes videre
      * aktivtResultat med hvilke vilkår som ikke skal benyttes videre
      */
-    fun flyttResultaterTilInitielt(initiellVilkårsvurdering: Vilkårsvurdering,
-                                   aktivVilkårsvurdering: Vilkårsvurdering,
-                                   løpendeUnderkategori: BehandlingUnderkategori? = null): Pair<Vilkårsvurdering, Vilkårsvurdering> {
+    fun flyttResultaterTilInitielt(
+        initiellVilkårsvurdering: Vilkårsvurdering,
+        aktivVilkårsvurdering: Vilkårsvurdering,
+        forrigeBehandlingVilkårsvurdering: Vilkårsvurdering? = null,
+        løpendeUnderkategori: BehandlingUnderkategori? = null
+    ): Pair<Vilkårsvurdering, Vilkårsvurdering> {
         // Identifiserer hvilke vilkår som skal legges til og hvilke som kan fjernes
         val personResultaterAktivt = aktivVilkårsvurdering.personResultater.toMutableSet()
         val personResultaterOppdatert = mutableSetOf<PersonResultat>()
         initiellVilkårsvurdering.personResultater.forEach { personFraInit ->
-            val personTilOppdatert = PersonResultat(vilkårsvurdering = initiellVilkårsvurdering,
-                                                    personIdent = personFraInit.personIdent)
+            val personTilOppdatert = PersonResultat(
+                vilkårsvurdering = initiellVilkårsvurdering,
+                personIdent = personFraInit.personIdent
+            )
             val personenSomFinnes = personResultaterAktivt.firstOrNull { it.personIdent == personFraInit.personIdent }
 
             if (personenSomFinnes == null) {
                 // Legg til ny person
                 personTilOppdatert.setSortedVilkårResultater(
-                        personFraInit.vilkårResultater.map { it.kopierMedParent(personTilOppdatert) }
-                                .toSet())
+                    personFraInit.vilkårResultater.map { it.kopierMedParent(personTilOppdatert) }
+                        .toSet()
+                )
             } else {
                 // Fyll inn den initierte med person fra aktiv
                 val personsVilkårAktivt = personenSomFinnes.vilkårResultater.toMutableSet()
                 val personsVilkårOppdatert = mutableSetOf<VilkårResultat>()
                 personFraInit.vilkårResultater.forEach { vilkårFraInit ->
-                    val vilkårSomFinnes = personenSomFinnes.vilkårResultater.filter { it.vilkårType == vilkårFraInit.vilkårType }
+                    val vilkårSomFinnes =
+                        personenSomFinnes.vilkårResultater.filter { it.vilkårType == vilkårFraInit.vilkårType }
 
                     if (vilkårSomFinnes.isEmpty()) {
                         // Legg til nytt vilkår på person
@@ -192,20 +216,27 @@ object VilkårsvurderingUtils {
                             periode eksisterer. */
 
                         personsVilkårOppdatert.addAll(
-                                vilkårSomFinnes
-                                        .filtrerVilkårÅKopiere(
-                                                kopieringSkjerFraForrigeBehandling = initiellVilkårsvurdering.behandling.id != aktivVilkårsvurdering.behandling.id
-                                        ).map { it.kopierMedParent(personTilOppdatert) }
+                            vilkårSomFinnes
+                                .filtrerVilkårÅKopiere(
+                                    kopieringSkjerFraForrigeBehandling = initiellVilkårsvurdering.behandling.id != aktivVilkårsvurdering.behandling.id
+                                ).map { it.kopierMedParent(personTilOppdatert) }
                         )
                         personsVilkårAktivt.removeAll(vilkårSomFinnes)
                     }
                 }
-                if (løpendeUnderkategori == BehandlingUnderkategori.UTVIDET && personsVilkårOppdatert.none { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD }) {
-                    val utvidetVilkår =
-                            personenSomFinnes.vilkårResultater.filter { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
+                val eksistererUtvidetVilkårPåForrigeBehandling =
+                    forrigeBehandlingVilkårsvurdering?.personResultater?.firstOrNull { it.personIdent == personFraInit.personIdent }?.vilkårResultater?.filter { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
+                        ?.isNotEmpty() ?: false
 
-                    personsVilkårOppdatert.addAll(utvidetVilkår.map { it.kopierMedParent(personTilOppdatert) })
-                    personsVilkårAktivt.removeAll(utvidetVilkår);
+                if (personsVilkårOppdatert.none { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD } &&
+                    (eksistererUtvidetVilkårPåForrigeBehandling || løpendeUnderkategori == BehandlingUnderkategori.UTVIDET)
+                ) {
+                    val utvidetVilkår =
+                        personenSomFinnes.vilkårResultater.filter { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
+                    if (utvidetVilkår.isNotEmpty()) {
+                        personsVilkårOppdatert.addAll(utvidetVilkår.map { it.kopierMedParent(personTilOppdatert) })
+                        personsVilkårAktivt.removeAll(utvidetVilkår)
+                    }
                 }
 
                 personTilOppdatert.setSortedVilkårResultater(personsVilkårOppdatert.toSet())
@@ -227,7 +258,7 @@ object VilkårsvurderingUtils {
 
     fun lagFjernAdvarsel(personResultater: Set<PersonResultat>): String {
         var advarsel =
-                "Du har gjort endringer i behandlingsgrunnlaget. Dersom du går videre vil vilkår for følgende personer fjernes:"
+            "Du har gjort endringer i behandlingsgrunnlaget. Dersom du går videre vil vilkår for følgende personer fjernes:"
         personResultater.forEach {
             advarsel = advarsel.plus("\n${it.personIdent}:")
             it.vilkårResultater.forEach { vilkårResultat ->
@@ -239,45 +270,50 @@ object VilkårsvurderingUtils {
     }
 }
 
-fun vedtakBegrunnelseSpesifikasjonerTilNedtrekksmenytekster(navnTilNedtrekksmeny: List<SanityBegrunnelse>,
-                                                            skalBrukeTriggesAvFraSanity: Boolean) =
-        VedtakBegrunnelseSpesifikasjon
-                .values()
-                .groupBy { it.vedtakBegrunnelseType }
-                .mapValues { begrunnelseGruppe ->
-                    begrunnelseGruppe.value
-                            .filter { it.erTilgjengeligFrontend }
-                            .flatMap { vedtakBegrunnelse ->
-                                vedtakBegrunnelseTilRestVedtakBegrunnelseTilknyttetVilkår(navnTilNedtrekksmeny,
-                                                                                          vedtakBegrunnelse,
-                                                                                          skalBrukeTriggesAvFraSanity)
-                            }
+fun vedtakBegrunnelseSpesifikasjonerTilNedtrekksmenytekster(
+    sanityBegrunnelser: List<SanityBegrunnelse>
+) =
+    VedtakBegrunnelseSpesifikasjon
+        .values()
+        .groupBy { it.vedtakBegrunnelseType }
+        .mapValues { begrunnelseGruppe ->
+            begrunnelseGruppe.value
+                .filter { it.tilSanityBegrunnelse(sanityBegrunnelser).tilTriggesAv().valgbar }
+                .flatMap { vedtakBegrunnelse ->
+                    vedtakBegrunnelseTilRestVedtakBegrunnelseTilknyttetVilkår(
+                        sanityBegrunnelser,
+                        vedtakBegrunnelse
+                    )
                 }
+        }
 
-private fun vedtakBegrunnelseTilRestVedtakBegrunnelseTilknyttetVilkår(
-        sanityBegrunnelser: List<SanityBegrunnelse>,
-        vedtakBegrunnelse: VedtakBegrunnelseSpesifikasjon,
-        skalBrukeTriggesAvFraSanity: Boolean,
+fun vedtakBegrunnelseTilRestVedtakBegrunnelseTilknyttetVilkår(
+    sanityBegrunnelser: List<SanityBegrunnelse>,
+    vedtakBegrunnelse: VedtakBegrunnelseSpesifikasjon,
 ): List<RestVedtakBegrunnelseTilknyttetVilkår> {
-    val triggesAv =
-            if (skalBrukeTriggesAvFraSanity) {
-                vedtakBegrunnelse.tilSanityBegrunnelse(sanityBegrunnelser)
-                        .tilTriggesAv()
-            } else
-                vedtakBegrunnelse.triggesAv
+    val triggesAv = vedtakBegrunnelse.tilSanityBegrunnelse(sanityBegrunnelser).tilTriggesAv()
 
     val visningsnavn =
-            sanityBegrunnelser.find { it.apiNavn == vedtakBegrunnelse.sanityApiNavn }?.navnISystem
+        sanityBegrunnelser.find { it.apiNavn == vedtakBegrunnelse.sanityApiNavn }?.navnISystem
             ?: throw Feil("Fant ikke begrunnelse med apiNavn=${vedtakBegrunnelse.sanityApiNavn} i Sanity.")
 
-    return triggesAv.vilkår?.map {
-        RestVedtakBegrunnelseTilknyttetVilkår(id = vedtakBegrunnelse,
-                                              navn = visningsnavn,
-                                              vilkår = it
+    return if (triggesAv.vilkår.isEmpty()) {
+        listOf(
+            RestVedtakBegrunnelseTilknyttetVilkår(
+                id = vedtakBegrunnelse,
+                navn = visningsnavn,
+                vilkår = null
+            )
         )
-    } ?: listOf(RestVedtakBegrunnelseTilknyttetVilkår(id = vedtakBegrunnelse,
-                                                      navn = visningsnavn,
-                                                      vilkår = null))
+    } else {
+        triggesAv.vilkår.map {
+            RestVedtakBegrunnelseTilknyttetVilkår(
+                id = vedtakBegrunnelse,
+                navn = visningsnavn,
+                vilkår = it
+            )
+        }
+    }
 }
 
 private fun List<VilkårResultat>.filtrerVilkårÅKopiere(kopieringSkjerFraForrigeBehandling: Boolean): List<VilkårResultat> {

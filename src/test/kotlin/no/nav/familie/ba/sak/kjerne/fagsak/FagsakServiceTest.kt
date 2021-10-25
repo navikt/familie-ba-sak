@@ -36,31 +36,31 @@ import org.springframework.web.client.HttpServerErrorException
 import java.time.LocalDate
 
 class FagsakServiceTest(
-        @Autowired
-        private val fagsakService: FagsakService,
+    @Autowired
+    private val fagsakService: FagsakService,
 
-        @Autowired
-        private val behandlingService: BehandlingService,
+    @Autowired
+    private val behandlingService: BehandlingService,
 
-        @Autowired
-        private val stegService: StegService,
+    @Autowired
+    private val stegService: StegService,
 
-        @Autowired
-        private val personopplysningerService: PersonopplysningerService,
+    @Autowired
+    private val personopplysningerService: PersonopplysningerService,
 
-        @Autowired
-        private val persongrunnlagService: PersongrunnlagService,
+    @Autowired
+    private val persongrunnlagService: PersongrunnlagService,
 
-        @Autowired
-        private val databaseCleanupService: DatabaseCleanupService,
+    @Autowired
+    private val databaseCleanupService: DatabaseCleanupService,
 
-        @Autowired
-        private val saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository,
+    @Autowired
+    private val saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository,
 
-        @Autowired
-        private val integrasjonClient: IntegrasjonClient
+    @Autowired
+    private val integrasjonClient: IntegrasjonClient
 
-): AbstractSpringIntegrationTest() {
+) : AbstractSpringIntegrationTest() {
 
     @BeforeAll
     fun init() {
@@ -101,17 +101,25 @@ class FagsakServiceTest(
 
         every {
             personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(eq(barn2Fnr))
-        } returns PersonInfo(fødselsdato = LocalDate.of(2019, 5, 1),
-                             kjønn = Kjønn.MANN,
-                             navn = "barn2",
-                             forelderBarnRelasjon = setOf(ForelderBarnRelasjon(Personident(søker1Fnr),
-                                                                               FORELDERBARNRELASJONROLLE.MEDMOR,
-                                                                               "søker1",
-                                                                               LocalDate.of(1990, 2, 19)),
-                                                          ForelderBarnRelasjon(Personident(søker3Fnr),
-                                                                               FORELDERBARNRELASJONROLLE.MEDMOR,
-                                                                               "søker3",
-                                                                               LocalDate.of(1990, 1, 10))))
+        } returns PersonInfo(
+            fødselsdato = LocalDate.of(2019, 5, 1),
+            kjønn = Kjønn.MANN,
+            navn = "barn2",
+            forelderBarnRelasjon = setOf(
+                ForelderBarnRelasjon(
+                    Personident(søker1Fnr),
+                    FORELDERBARNRELASJONROLLE.MEDMOR,
+                    "søker1",
+                    LocalDate.of(1990, 2, 19)
+                ),
+                ForelderBarnRelasjon(
+                    Personident(søker3Fnr),
+                    FORELDERBARNRELASJONROLLE.MEDMOR,
+                    "søker3",
+                    LocalDate.of(1990, 1, 10)
+                )
+            )
+        )
 
         every {
             personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(eq(søker1Fnr))
@@ -141,44 +149,61 @@ class FagsakServiceTest(
             personopplysningerService.hentPersoninfoEnkel(eq(søker3Fnr))
         } returns PersonInfo(fødselsdato = LocalDate.of(1990, 1, 10), kjønn = Kjønn.KVINNE, navn = "søker3")
 
-
-        val fagsak0 = fagsakService.hentEllerOpprettFagsak(FagsakRequest(
+        val fagsak0 = fagsakService.hentEllerOpprettFagsak(
+            FagsakRequest(
                 søker1Fnr
-        ))
+            )
+        )
 
-        val fagsak1 = fagsakService.hentEllerOpprettFagsak(FagsakRequest(
+        val fagsak1 = fagsakService.hentEllerOpprettFagsak(
+            FagsakRequest(
                 søker2Fnr
-        ))
+            )
+        )
 
-        val førsteBehandling = stegService.håndterNyBehandling(NyBehandling(
+        val førsteBehandling = stegService.håndterNyBehandling(
+            NyBehandling(
                 BehandlingKategori.NASJONAL,
                 BehandlingUnderkategori.ORDINÆR,
                 søker1Fnr,
                 BehandlingType.FØRSTEGANGSBEHANDLING
-        ))
-        stegService.håndterPersongrunnlag(førsteBehandling,
-                                          RegistrerPersongrunnlagDTO(ident = søker1Fnr, barnasIdenter = listOf(barn1Fnr)))
+            )
+        )
+        stegService.håndterPersongrunnlag(
+            førsteBehandling,
+            RegistrerPersongrunnlagDTO(ident = søker1Fnr, barnasIdenter = listOf(barn1Fnr))
+        )
 
         behandlingService.oppdaterStatusPåBehandling(førsteBehandling.id, BehandlingStatus.AVSLUTTET)
 
-        val andreBehandling = stegService.håndterNyBehandling(NyBehandling(
+        val andreBehandling = stegService.håndterNyBehandling(
+            NyBehandling(
                 BehandlingKategori.NASJONAL,
                 BehandlingUnderkategori.ORDINÆR,
                 søker1Fnr,
                 BehandlingType.FØRSTEGANGSBEHANDLING
-        ))
-        stegService.håndterPersongrunnlag(andreBehandling,
-                                          RegistrerPersongrunnlagDTO(ident = søker1Fnr,
-                                                                     barnasIdenter = listOf(barn1Fnr, barn2Fnr)))
-        
-        val tredjeBehandling = stegService.håndterNyBehandling(NyBehandling(
+            )
+        )
+        stegService.håndterPersongrunnlag(
+            andreBehandling,
+            RegistrerPersongrunnlagDTO(
+                ident = søker1Fnr,
+                barnasIdenter = listOf(barn1Fnr, barn2Fnr)
+            )
+        )
+
+        val tredjeBehandling = stegService.håndterNyBehandling(
+            NyBehandling(
                 BehandlingKategori.NASJONAL,
                 BehandlingUnderkategori.ORDINÆR,
                 søker2Fnr,
                 BehandlingType.FØRSTEGANGSBEHANDLING
-        ))
-        stegService.håndterPersongrunnlag(tredjeBehandling,
-                                          RegistrerPersongrunnlagDTO(ident = søker2Fnr, barnasIdenter = listOf(barn1Fnr)))
+            )
+        )
+        stegService.håndterPersongrunnlag(
+            tredjeBehandling,
+            RegistrerPersongrunnlagDTO(ident = søker2Fnr, barnasIdenter = listOf(barn1Fnr))
+        )
 
         val søkeresultat1 = fagsakService.hentFagsakDeltager(søker1Fnr)
         assertEquals(1, søkeresultat1.size)
@@ -206,9 +231,10 @@ class FagsakServiceTest(
 
         val fagsak = fagsakService.hent(PersonIdent(søker1Fnr))!!
 
-        assertEquals(FagsakStatus.OPPRETTET.name,
-                     saksstatistikkMellomlagringRepository.findByTypeAndTypeId(SAK, fagsak.id)
-                             .last().jsonToSakDVH().sakStatus
+        assertEquals(
+            FagsakStatus.OPPRETTET.name,
+            saksstatistikkMellomlagringRepository.findByTypeAndTypeId(SAK, fagsak.id)
+                .last().jsonToSakDVH().sakStatus
         )
     }
 
@@ -224,16 +250,20 @@ class FagsakServiceTest(
             personopplysningerService.hentPersoninfoEnkel(eq(søker1Fnr))
         } returns PersonInfo(fødselsdato = LocalDate.of(1991, 2, 19), kjønn = Kjønn.KVINNE, navn = "søker1")
 
-        fagsakService.hentEllerOpprettFagsak(FagsakRequest(
-            søker1Fnr
-        ))
+        fagsakService.hentEllerOpprettFagsak(
+            FagsakRequest(
+                søker1Fnr
+            )
+        )
 
-        stegService.håndterNyBehandling(NyBehandling(
-            BehandlingKategori.NASJONAL,
-            BehandlingUnderkategori.ORDINÆR,
-            søker1Fnr,
-            BehandlingType.FØRSTEGANGSBEHANDLING
-        ))
+        stegService.håndterNyBehandling(
+            NyBehandling(
+                BehandlingKategori.NASJONAL,
+                BehandlingUnderkategori.ORDINÆR,
+                søker1Fnr,
+                BehandlingType.FØRSTEGANGSBEHANDLING
+            )
+        )
 
         fagsakService.lagre(fagsakService.hentFagsakPåPerson(setOf(PersonIdent(søker1Fnr))).also { it?.arkivert = true }!!)
 
@@ -255,9 +285,11 @@ class FagsakServiceTest(
             personopplysningerService.hentPersoninfoEnkel(eq(søker1Fnr))
         } returns PersonInfo(fødselsdato = LocalDate.of(1992, 2, 19), kjønn = Kjønn.KVINNE, navn = "søker1")
 
-        fagsakService.hentEllerOpprettFagsak(FagsakRequest(
-            søker1Fnr
-        ))
+        fagsakService.hentEllerOpprettFagsak(
+            FagsakRequest(
+                søker1Fnr
+            )
+        )
 
         fagsakService.lagre(fagsakService.hentFagsakPåPerson(setOf(PersonIdent(søker1Fnr))).also { it?.arkivert = true }!!)
 
@@ -276,9 +308,8 @@ class FagsakServiceTest(
         val behandlingMor = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsakMor))
 
         val personopplysningGrunnlag =
-                lagTestPersonopplysningGrunnlag(behandlingMor.id, mor, listOf(barnFnr))
+            lagTestPersonopplysningGrunnlag(behandlingMor.id, mor, listOf(barnFnr))
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
-
 
         val far = randomFnr()
 
@@ -286,7 +317,7 @@ class FagsakServiceTest(
         val behandlingFar = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsakFar))
 
         val personopplysningGrunnlagFar =
-                lagTestPersonopplysningGrunnlag(behandlingFar.id, far, listOf(barnFnr))
+            lagTestPersonopplysningGrunnlag(behandlingFar.id, far, listOf(barnFnr))
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlagFar)
 
         val fagsaker = fagsakService.hentFagsakerPåPerson(PersonIdent(barnFnr))

@@ -29,53 +29,52 @@ import javax.persistence.OneToMany
 import javax.persistence.SequenceGenerator
 import javax.persistence.Table
 
-
 @EntityListeners(RollestyringMotDatabase::class)
 @Entity(name = "Behandling")
 @Table(name = "BEHANDLING")
 data class Behandling(
-        @Id
-        @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "behandling_seq_generator")
-        @SequenceGenerator(name = "behandling_seq_generator", sequenceName = "behandling_seq", allocationSize = 50)
-        val id: Long = 0,
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "behandling_seq_generator")
+    @SequenceGenerator(name = "behandling_seq_generator", sequenceName = "behandling_seq", allocationSize = 50)
+    val id: Long = 0,
 
-        @ManyToOne(optional = false)
-        @JoinColumn(name = "fk_fagsak_id", nullable = false, updatable = false)
-        val fagsak: Fagsak,
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "fk_fagsak_id", nullable = false, updatable = false)
+    val fagsak: Fagsak,
 
-        @OneToMany(mappedBy = "behandling", cascade = [CascadeType.ALL], fetch = FetchType.EAGER, orphanRemoval = true)
-        @SortComparator(BehandlingStegComparator::class)
-        val behandlingStegTilstand: MutableSet<BehandlingStegTilstand> = sortedSetOf(comparator),
+    @OneToMany(mappedBy = "behandling", cascade = [CascadeType.ALL], fetch = FetchType.EAGER, orphanRemoval = true)
+    @SortComparator(BehandlingStegComparator::class)
+    val behandlingStegTilstand: MutableSet<BehandlingStegTilstand> = sortedSetOf(comparator),
 
-        @Enumerated(EnumType.STRING)
-        @Column(name = "resultat", nullable = false)
-        var resultat: BehandlingResultat = BehandlingResultat.IKKE_VURDERT,
+    @Enumerated(EnumType.STRING)
+    @Column(name = "resultat", nullable = false)
+    var resultat: BehandlingResultat = BehandlingResultat.IKKE_VURDERT,
 
-        @Enumerated(EnumType.STRING)
-        @Column(name = "behandling_type", nullable = false)
-        val type: BehandlingType,
+    @Enumerated(EnumType.STRING)
+    @Column(name = "behandling_type", nullable = false)
+    val type: BehandlingType,
 
-        @Enumerated(EnumType.STRING)
-        @Column(name = "opprettet_aarsak", nullable = false)
-        val opprettetÅrsak: BehandlingÅrsak,
+    @Enumerated(EnumType.STRING)
+    @Column(name = "opprettet_aarsak", nullable = false)
+    val opprettetÅrsak: BehandlingÅrsak,
 
-        @Column(name = "skal_behandles_automatisk", nullable = false, updatable = false)
-        val skalBehandlesAutomatisk: Boolean = false,
+    @Column(name = "skal_behandles_automatisk", nullable = false, updatable = false)
+    val skalBehandlesAutomatisk: Boolean = false,
 
-        @Enumerated(EnumType.STRING)
-        @Column(name = "kategori", nullable = false)
-        val kategori: BehandlingKategori,
+    @Enumerated(EnumType.STRING)
+    @Column(name = "kategori", nullable = false, updatable = true)
+    var kategori: BehandlingKategori,
 
-        @Enumerated(EnumType.STRING)
-        @Column(name = "underkategori", nullable = false, updatable = true)
-        var underkategori: BehandlingUnderkategori,
+    @Enumerated(EnumType.STRING)
+    @Column(name = "underkategori", nullable = false, updatable = true)
+    var underkategori: BehandlingUnderkategori,
 
-        @Column(name = "aktiv", nullable = false)
-        var aktiv: Boolean = true,
+    @Column(name = "aktiv", nullable = false)
+    var aktiv: Boolean = true,
 
-        @Enumerated(EnumType.STRING)
-        @Column(name = "status", nullable = false)
-        var status: BehandlingStatus = initStatus(),
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    var status: BehandlingStatus = initStatus(),
 ) : BaseEntitet() {
 
     val steg: StegType
@@ -90,10 +89,12 @@ data class Behandling(
     }
 
     fun erTekniskOpphør(): Boolean {
-        return if (type == BehandlingType.TEKNISK_OPPHØR
-                   || opprettetÅrsak == BehandlingÅrsak.TEKNISK_OPPHØR) {
-            if (type == BehandlingType.TEKNISK_OPPHØR
-                && opprettetÅrsak == BehandlingÅrsak.TEKNISK_OPPHØR)
+        return if (type == BehandlingType.TEKNISK_OPPHØR ||
+            opprettetÅrsak == BehandlingÅrsak.TEKNISK_OPPHØR
+        ) {
+            if (type == BehandlingType.TEKNISK_OPPHØR &&
+                opprettetÅrsak == BehandlingÅrsak.TEKNISK_OPPHØR
+            )
                 true else throw Feil("Behandling er teknisk opphør, men årsak $opprettetÅrsak og type $type samsvarer ikke.")
         } else {
             false
@@ -101,9 +102,9 @@ data class Behandling(
     }
 
     fun erHenlagt() =
-            resultat == BehandlingResultat.HENLAGT_FEILAKTIG_OPPRETTET
-            || resultat == BehandlingResultat.HENLAGT_SØKNAD_TRUKKET
-            || resultat == BehandlingResultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE
+        resultat == BehandlingResultat.HENLAGT_FEILAKTIG_OPPRETTET ||
+            resultat == BehandlingResultat.HENLAGT_SØKNAD_TRUKKET ||
+            resultat == BehandlingResultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE
 
     fun leggTilBehandlingStegTilstand(nesteSteg: StegType): Behandling {
         if (nesteSteg != StegType.HENLEGG_BEHANDLING) {
@@ -125,11 +126,24 @@ data class Behandling(
         return this
     }
 
+    fun skalRettFraBehandlingsresultatTilIverksetting(): Boolean {
+        return when {
+            skalBehandlesAutomatisk && erOmregning() && resultat == BehandlingResultat.FORTSATT_INNVILGET -> true
+            skalBehandlesAutomatisk && resultat == BehandlingResultat.INNVILGET -> true
+            skalBehandlesAutomatisk && erSatsendring() && resultat == BehandlingResultat.ENDRET -> true
+            else -> false
+        }
+    }
+
     private fun leggTilStegOmDetIkkeFinnesFraFør(steg: StegType) {
         if (behandlingStegTilstand.none { it.behandlingSteg == steg }) {
-            behandlingStegTilstand.add(BehandlingStegTilstand(behandling = this,
-                                                              behandlingSteg = steg,
-                                                              behandlingStegStatus = if (steg == SISTE_STEG) BehandlingStegStatus.UTFØRT else BehandlingStegStatus.IKKE_UTFØRT))
+            behandlingStegTilstand.add(
+                BehandlingStegTilstand(
+                    behandling = this,
+                    behandlingSteg = steg,
+                    behandlingStegStatus = if (steg == SISTE_STEG) BehandlingStegStatus.UTFØRT else BehandlingStegStatus.IKKE_UTFØRT
+                )
+            )
         }
     }
 
@@ -143,23 +157,30 @@ data class Behandling(
 
     private fun fjernAlleSenereSteg(steg: StegType) {
         behandlingStegTilstand.filter { steg.rekkefølge < it.behandlingSteg.rekkefølge }
-                .forEach {
-                    behandlingStegTilstand.remove(it)
-                }
+            .forEach {
+                behandlingStegTilstand.remove(it)
+            }
     }
 
     fun initBehandlingStegTilstand(): Behandling {
-        behandlingStegTilstand.add(BehandlingStegTilstand(
+        behandlingStegTilstand.add(
+            BehandlingStegTilstand(
                 behandling = this,
-                behandlingSteg = FØRSTE_STEG))
+                behandlingSteg = FØRSTE_STEG
+            )
+        )
         return this
     }
 
-    fun erKlage(): Boolean = this.opprettetÅrsak == BehandlingÅrsak.KLAGE
+    fun erKlage() = this.opprettetÅrsak == BehandlingÅrsak.KLAGE
 
-    fun erMigrering() = type == BehandlingType.MIGRERING_FRA_INFOTRYGD || type == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT
+    fun erMigrering() =
+        type == BehandlingType.MIGRERING_FRA_INFOTRYGD || type == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT
 
-    fun erOmregning(): Boolean = this.opprettetÅrsak == BehandlingÅrsak.OMREGNING_6ÅR || this.opprettetÅrsak == BehandlingÅrsak.OMREGNING_18ÅR
+    fun erOmregning() =
+        this.opprettetÅrsak == BehandlingÅrsak.OMREGNING_6ÅR || this.opprettetÅrsak == BehandlingÅrsak.OMREGNING_18ÅR
+
+    fun erSatsendring() = this.opprettetÅrsak == BehandlingÅrsak.SATSENDRING
 
     fun hentYtelseTypeTilVilkår(): YtelseType = when (underkategori) {
         BehandlingUnderkategori.UTVIDET -> YtelseType.UTVIDET_BARNETRYGD
@@ -242,24 +263,24 @@ enum class BehandlingType(val visningsnavn: String) {
     TEKNISK_OPPHØR("Teknisk opphør")
 }
 
-enum class BehandlingKategori {
-    EØS,
-    NASJONAL;
+enum class BehandlingKategori(val visningsnavn: String) {
+    EØS("EØS"),
+    NASJONAL("Nasjonal");
 
     fun tilBehandlingstype(): Behandlingstype {
-        return when(this) {
+        return when (this) {
             EØS -> Behandlingstype.EØS
             NASJONAL -> Behandlingstype.NASJONAL
         }
     }
 }
 
-enum class BehandlingUnderkategori {
-    UTVIDET,
-    ORDINÆR;
+enum class BehandlingUnderkategori(val visningsnavn: String) {
+    UTVIDET("Utvidet"),
+    ORDINÆR("Ordinær");
 
     fun tilBehandlingstema(): Behandlingstema {
-        return when(this) {
+        return when (this) {
             UTVIDET -> Behandlingstema.UtvidetBarnetrygd
             ORDINÆR -> Behandlingstema.OrdinærBarnetrygd
         }

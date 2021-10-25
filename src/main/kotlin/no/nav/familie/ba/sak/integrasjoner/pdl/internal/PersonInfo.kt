@@ -15,41 +15,43 @@ import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import java.time.LocalDate
 
 data class PersonInfo(
-        val fødselsdato: LocalDate,
-        val navn: String? = null,
-        @JsonDeserialize(using = KjonnDeserializer::class)
-        val kjønn: Kjønn? = null,
-        //Observer at ForelderBarnRelasjon og ForelderBarnRelasjonMaskert ikke er en PDL-objekt.
-        val forelderBarnRelasjon: Set<ForelderBarnRelasjon> = emptySet(),
-        val forelderBarnRelasjonMaskert: Set<ForelderBarnRelasjonMaskert> = emptySet(),
-        val adressebeskyttelseGradering: ADRESSEBESKYTTELSEGRADERING? = null,
-        val bostedsadresser: List<Bostedsadresse> = emptyList(),
-        val sivilstander: List<Sivilstand> = emptyList(),
-        val opphold: List<Opphold>? = emptyList(),
-        val statsborgerskap: List<Statsborgerskap>? = emptyList(),
+    val fødselsdato: LocalDate,
+    val navn: String? = null,
+    @JsonDeserialize(using = KjonnDeserializer::class)
+    val kjønn: Kjønn? = null,
+    // Observer at ForelderBarnRelasjon og ForelderBarnRelasjonMaskert ikke er en PDL-objekt.
+    val forelderBarnRelasjon: Set<ForelderBarnRelasjon> = emptySet(),
+    val forelderBarnRelasjonMaskert: Set<ForelderBarnRelasjonMaskert> = emptySet(),
+    val adressebeskyttelseGradering: ADRESSEBESKYTTELSEGRADERING? = null,
+    val bostedsadresser: List<Bostedsadresse> = emptyList(),
+    val sivilstander: List<Sivilstand> = emptyList(),
+    val opphold: List<Opphold>? = emptyList(),
+    val statsborgerskap: List<Statsborgerskap>? = emptyList(),
 )
 
 fun List<Bostedsadresse>.filtrerUtKunNorskeBostedsadresser() = this.filter { it.vegadresse != null || it.matrikkeladresse != null || it.ukjentBosted != null }
 
 data class ForelderBarnRelasjon(
-        val personIdent: Personident,
-        val relasjonsrolle: FORELDERBARNRELASJONROLLE,
-        val navn: String? = null,
-        val fødselsdato: LocalDate? = null,
-        val adressebeskyttelseGradering: ADRESSEBESKYTTELSEGRADERING? = null
+    val personIdent: Personident,
+    val relasjonsrolle: FORELDERBARNRELASJONROLLE,
+    val navn: String? = null,
+    val fødselsdato: LocalDate? = null,
+    val adressebeskyttelseGradering: ADRESSEBESKYTTELSEGRADERING? = null
 )
 
 data class ForelderBarnRelasjonMaskert(
-        val relasjonsrolle: FORELDERBARNRELASJONROLLE,
-        val adressebeskyttelseGradering: ADRESSEBESKYTTELSEGRADERING
+    val relasjonsrolle: FORELDERBARNRELASJONROLLE,
+    val adressebeskyttelseGradering: ADRESSEBESKYTTELSEGRADERING
 )
 
 data class Personident(
-        val id: String
+    val id: String
 )
 
-data class DødsfallData(val erDød: Boolean,
-                        val dødsdato: String?)
+data class DødsfallData(
+    val erDød: Boolean,
+    val dødsdato: String?
+)
 
 data class VergeData(val harVerge: Boolean)
 
@@ -63,4 +65,3 @@ class KjonnDeserializer : StdDeserializer<Kjønn>(Kjønn::class.java) {
         }
     }
 }
-

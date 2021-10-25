@@ -9,9 +9,11 @@ import no.nav.familie.prosessering.domene.Task
 import org.springframework.stereotype.Service
 
 @Service
-@TaskStepBeskrivelse(taskStepType = KonsistensavstemMotOppdrag.TASK_STEP_TYPE,
-                     beskrivelse = "Konsistensavstemming mot oppdrag",
-                     maxAntallFeil = 3)
+@TaskStepBeskrivelse(
+    taskStepType = KonsistensavstemMotOppdrag.TASK_STEP_TYPE,
+    beskrivelse = "Konsistensavstemming mot oppdrag",
+    maxAntallFeil = 3
+)
 class KonsistensavstemMotOppdrag(val avstemmingService: AvstemmingService) : AsyncTaskStep {
 
     override fun doTask(task: Task) {

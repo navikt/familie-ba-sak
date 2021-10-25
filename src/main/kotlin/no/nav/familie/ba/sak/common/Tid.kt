@@ -12,7 +12,6 @@ import java.util.TreeMap
 val TIDENES_MORGEN = LocalDate.MIN
 val TIDENES_ENDE = LocalDate.MAX
 
-
 fun LocalDate.tilddMMyy() = this.format(DateTimeFormatter.ofPattern("ddMMyy", nbLocale))
 fun LocalDate.tilKortString() = this.format(DateTimeFormatter.ofPattern("dd.MM.yy", nbLocale))
 fun YearMonth.tilKortString() = this.format(DateTimeFormatter.ofPattern("MM.yy", nbLocale))
@@ -96,13 +95,13 @@ fun LocalDate.isSameOrAfter(toCompare: LocalDate): Boolean {
 }
 
 fun LocalDate.isBetween(toCompare: Periode): Boolean {
-    return this.isAfter(toCompare.fom) && this.isBefore(toCompare.tom)
+    return this.isSameOrAfter(toCompare.fom) && this.isSameOrBefore(toCompare.tom)
 }
 
 fun MånedPeriode.inkluderer(yearMonth: YearMonth) = yearMonth >= this.fom && yearMonth <= this.tom
 
 fun MånedPeriode.overlapperHeltEllerDelvisMed(annenPeriode: MånedPeriode) =
-        this.inkluderer(annenPeriode.fom) ||
+    this.inkluderer(annenPeriode.fom) ||
         this.inkluderer(annenPeriode.tom) ||
         annenPeriode.inkluderer(this.fom) ||
         annenPeriode.inkluderer(this.tom)
@@ -112,7 +111,7 @@ fun Periode.kanErstatte(other: Periode): Boolean {
 }
 
 fun Periode.kanSplitte(other: Periode): Boolean {
-    return this.fom.isBetween(other) && this.tom.isBetween(other)
+    return this.fom.isBetween(other) && this.tom.isBetween(other) && (this.tom != TIDENES_ENDE || other.tom != TIDENES_ENDE)
 }
 
 fun Periode.kanFlytteFom(other: Periode): Boolean {
@@ -129,20 +128,26 @@ data class NullablePeriode(val fom: LocalDate?, val tom: LocalDate?)
 
 fun VilkårResultat.erEtterfølgendePeriode(other: VilkårResultat): Boolean {
     return (other.toPeriode().fom.monthValue - this.toPeriode().tom.monthValue <= 1) &&
-           this.toPeriode().tom.year == other.toPeriode().fom.year
+        this.toPeriode().tom.year == other.toPeriode().fom.year
 }
 
-private fun lagOgValiderPeriodeFraVilkår(periodeFom: LocalDate?,
-                                         periodeTom: LocalDate?,
-                                         erEksplisittAvslagPåSøknad: Boolean? = null): Periode {
+private fun lagOgValiderPeriodeFraVilkår(
+    periodeFom: LocalDate?,
+    periodeTom: LocalDate?,
+    erEksplisittAvslagPåSøknad: Boolean? = null
+): Periode {
     return when {
         periodeFom !== null -> {
-            Periode(fom = periodeFom,
-                    tom = periodeTom ?: TIDENES_ENDE)
+            Periode(
+                fom = periodeFom,
+                tom = periodeTom ?: TIDENES_ENDE
+            )
         }
         erEksplisittAvslagPåSøknad == true && periodeTom == null -> {
-            Periode(fom = TIDENES_MORGEN,
-                    tom = TIDENES_ENDE)
+            Periode(
+                fom = TIDENES_MORGEN,
+                tom = TIDENES_ENDE
+            )
         }
         else -> {
             throw Feil("Ugyldig periode. Periode må ha t.o.m.-dato eller være et avslag uten datoer.")
@@ -150,13 +155,17 @@ private fun lagOgValiderPeriodeFraVilkår(periodeFom: LocalDate?,
     }
 }
 
-fun RestVilkårResultat.toPeriode(): Periode = lagOgValiderPeriodeFraVilkår(this.periodeFom,
-                                                                           this.periodeTom,
-                                                                           this.erEksplisittAvslagPåSøknad)
+fun RestVilkårResultat.toPeriode(): Periode = lagOgValiderPeriodeFraVilkår(
+    this.periodeFom,
+    this.periodeTom,
+    this.erEksplisittAvslagPåSøknad
+)
 
-fun VilkårResultat.toPeriode(): Periode = lagOgValiderPeriodeFraVilkår(this.periodeFom,
-                                                                       this.periodeTom,
-                                                                       this.erEksplisittAvslagPåSøknad)
+fun VilkårResultat.toPeriode(): Periode = lagOgValiderPeriodeFraVilkår(
+    this.periodeFom,
+    this.periodeTom,
+    this.erEksplisittAvslagPåSøknad
+)
 
 fun DatoIntervallEntitet.erInnenfor(dato: LocalDate): Boolean {
     return when {
@@ -185,10 +194,11 @@ fun minimum(periodeTomSoker: LocalDate?, periodeTomBarn: LocalDate?): LocalDate 
 
 fun slåSammenOverlappendePerioder(input: Collection<DatoIntervallEntitet>): List<DatoIntervallEntitet> {
     val map: NavigableMap<LocalDate, LocalDate?> =
-            TreeMap()
+        TreeMap()
     for (periode in input) {
-        if (periode.fom != null
-            && (!map.containsKey(periode.fom) || periode.tom == null || periode.tom.isAfter(map[periode.fom]))) {
+        if (periode.fom != null &&
+            (!map.containsKey(periode.fom) || periode.tom == null || periode.tom.isAfter(map[periode.fom]))
+        ) {
             map[periode.fom] = periode.tom
         }
     }
@@ -218,5 +228,3 @@ fun slåSammenOverlappendePerioder(input: Collection<DatoIntervallEntitet>): Lis
     }
     return result
 }
-
-

@@ -6,7 +6,14 @@ import org.springframework.data.jpa.repository.Query
 
 interface PersonRepository : JpaRepository<Person, Long> {
 
-    @Query("SELECT p FROM Person p" +
-            " WHERE p.personIdent = :personIdent")
+    @Query(
+        "SELECT p FROM Person p" +
+            " WHERE p.personIdent = :personIdent"
+    )
     fun findByPersonIdent(personIdent: PersonIdent): List<Person>
+
+    @Query(
+        "SELECT p FROM Person p WHERE p.personIdent in :personIdenter"
+    )
+    fun findByPersonIdenter(personIdenter: List<PersonIdent>): List<Person>
 }

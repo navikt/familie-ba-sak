@@ -2,13 +2,17 @@ package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import java.time.LocalDate
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "vedtaksperiodetype")
-@JsonSubTypes(JsonSubTypes.Type(value = Utbetalingsperiode::class, name = "UTBETALING"),
-              JsonSubTypes.Type(value = Avslagsperiode::class, name = "AVSLAG"),
-              JsonSubTypes.Type(value = Opphørsperiode::class, name = "OPPHØR"))
+@JsonSubTypes(
+    JsonSubTypes.Type(value = Utbetalingsperiode::class, name = "UTBETALING"),
+    JsonSubTypes.Type(value = Avslagsperiode::class, name = "AVSLAG"),
+    JsonSubTypes.Type(value = Opphørsperiode::class, name = "OPPHØR")
+)
 interface Vedtaksperiode {
 
     val periodeFom: LocalDate?
@@ -16,17 +20,29 @@ interface Vedtaksperiode {
     val vedtaksperiodetype: Vedtaksperiodetype
 }
 
-enum class Vedtaksperiodetype {
-    UTBETALING,
-    OPPHØR,
-    AVSLAG,
-    FORTSATT_INNVILGET
+enum class Vedtaksperiodetype(val tillatteBegrunnelsestyper: List<VedtakBegrunnelseType>) {
+    UTBETALING(
+        listOf(
+            VedtakBegrunnelseType.INNVILGET,
+            VedtakBegrunnelseType.REDUKSJON,
+            VedtakBegrunnelseType.FORTSATT_INNVILGET,
+            VedtakBegrunnelseType.ETTER_ENDRET_UTBETALING
+        )
+    ),
+    OPPHØR(listOf(VedtakBegrunnelseType.OPPHØR)),
+    AVSLAG(listOf(VedtakBegrunnelseType.AVSLAG)),
+    FORTSATT_INNVILGET(listOf(VedtakBegrunnelseType.FORTSATT_INNVILGET)),
+    ENDRET_UTBETALING(listOf(VedtakBegrunnelseType.INNVILGET, VedtakBegrunnelseType.REDUKSJON))
 }
 
-fun Vedtaksperiodetype.toVedtakFritekstBegrunnelseSpesifikasjon(): VedtakBegrunnelseSpesifikasjon = when (this) {
-    Vedtaksperiodetype.OPPHØR -> VedtakBegrunnelseSpesifikasjon.OPPHØR_FRITEKST
-    Vedtaksperiodetype.AVSLAG -> VedtakBegrunnelseSpesifikasjon.AVSLAG_FRITEKST
-    Vedtaksperiodetype.UTBETALING -> VedtakBegrunnelseSpesifikasjon.REDUKSJON_FRITEKST
-    Vedtaksperiodetype.FORTSATT_INNVILGET -> VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_FRITEKST
-}
+fun Vedtaksperiode.tilVedtaksperiodeMedBegrunnelse(
+    vedtak: Vedtak,
+): VedtaksperiodeMedBegrunnelser {
 
+    return VedtaksperiodeMedBegrunnelser(
+        fom = this.periodeFom,
+        tom = this.periodeTom,
+        vedtak = vedtak,
+        type = this.vedtaksperiodetype
+    )
+}

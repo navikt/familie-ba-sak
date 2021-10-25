@@ -33,43 +33,54 @@ internal class StatsborgerskapServiceTest {
     @Test
     fun `Skal returnere siste statsborgerskap`() {
         val statsborgerskapMedGyldigFom = listOf(
-                Statsborgerskap("POL",
-                                bekreftelsesdato = null,
-                                gyldigFraOgMed = FOM_1990,
-                                gyldigTilOgMed = TOM_2010),
-                Statsborgerskap("DNK",
-                                bekreftelsesdato = null,
-                                gyldigFraOgMed = FOM_2008,
-                                gyldigTilOgMed = null)
+            Statsborgerskap(
+                "POL",
+                bekreftelsesdato = null,
+                gyldigFraOgMed = FOM_1990,
+                gyldigTilOgMed = TOM_2010
+            ),
+            Statsborgerskap(
+                "DNK",
+                bekreftelsesdato = null,
+                gyldigFraOgMed = FOM_2008,
+                gyldigTilOgMed = null
+            )
         )
 
         assertEquals("DNK", statsborgerskapMedGyldigFom.sisteStatsborgerskap()?.land)
 
         val statsborgerskapMedBekreftelsesdato = listOf(
-                Statsborgerskap("POL",
-                                bekreftelsesdato = FOM_1990,
-                                gyldigFraOgMed = null,
-                                gyldigTilOgMed = TOM_2010),
-                Statsborgerskap("DNK",
-                                bekreftelsesdato = FOM_2008,
-                                gyldigFraOgMed = null,
-                                gyldigTilOgMed = null)
+            Statsborgerskap(
+                "POL",
+                bekreftelsesdato = FOM_1990,
+                gyldigFraOgMed = null,
+                gyldigTilOgMed = TOM_2010
+            ),
+            Statsborgerskap(
+                "DNK",
+                bekreftelsesdato = FOM_2008,
+                gyldigFraOgMed = null,
+                gyldigTilOgMed = null
+            )
         )
 
         assertEquals("DNK", statsborgerskapMedBekreftelsesdato.sisteStatsborgerskap()?.land)
 
         val statsborgerskapUtenGyldigFomEllerBekreftelsesdato = listOf(
-                Statsborgerskap("POL",
-                                bekreftelsesdato = null,
-                                gyldigFraOgMed = null,
-                                gyldigTilOgMed = TOM_2010),
-                Statsborgerskap("DNK",
-                                bekreftelsesdato = null,
-                                gyldigFraOgMed = null,
-                                gyldigTilOgMed = null)
+            Statsborgerskap(
+                "POL",
+                bekreftelsesdato = null,
+                gyldigFraOgMed = null,
+                gyldigTilOgMed = TOM_2010
+            ),
+            Statsborgerskap(
+                "DNK",
+                bekreftelsesdato = null,
+                gyldigFraOgMed = null,
+                gyldigTilOgMed = null
+            )
         )
 
         assertThrows<Feil> { statsborgerskapUtenGyldigFomEllerBekreftelsesdato.sisteStatsborgerskap() }
     }
-
 }

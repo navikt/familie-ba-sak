@@ -14,7 +14,7 @@ class VilkårVurderingMatcherTest {
     private val søkerFnr = randomFnr()
 
     private fun likeVilkårResultater(a: VilkårResultat?, b: VilkårResultat?): Boolean =
-            a?.vilkårType == b?.vilkårType &&
+        a?.vilkårType == b?.vilkårType &&
             a?.resultat == b?.resultat &&
             a?.periodeFom == b?.periodeFom &&
             a?.periodeTom == b?.periodeTom &&

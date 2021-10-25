@@ -14,46 +14,53 @@ import java.net.URI
 
 @ConfigurationProperties("funksjonsbrytere")
 @ConstructorBinding
-class FeatureToggleConfig(private val enabled: Boolean,
-                          val unleash: Unleash) {
+class FeatureToggleConfig(
+    private val enabled: Boolean,
+    val unleash: Unleash
+) {
 
     @ConstructorBinding
-    data class Unleash(val uri: URI,
-                       val cluster: String,
-                       val applicationName: String)
+    data class Unleash(
+        val uri: URI,
+        val cluster: String,
+        val applicationName: String
+    )
 
     @Bean
     fun featureToggle(): FeatureToggleService =
-            if (enabled)
-                lagUnleashFeatureToggleService()
-            else {
-                logger.warn("Funksjonsbryter-funksjonalitet er skrudd AV. " +
-                            "Gir standardoppførsel for alle funksjonsbrytere, dvs 'false'")
-                lagDummyFeatureToggleService()
-            }
+        if (enabled)
+            lagUnleashFeatureToggleService()
+        else {
+            logger.warn(
+                "Funksjonsbryter-funksjonalitet er skrudd AV. " +
+                    "Gir standardoppførsel for alle funksjonsbrytere, dvs 'false'"
+            )
+            lagDummyFeatureToggleService()
+        }
 
     private fun lagUnleashFeatureToggleService(): FeatureToggleService {
-        val defaultUnleash = DefaultUnleash(UnleashConfig.builder()
-                                                    .appName(unleash.applicationName)
-                                                    .unleashAPI(unleash.uri)
-                                                    .unleashContextProvider(lagUnleashContextProvider())
-                                                    .build(),
-                                            ByClusterStrategy(unleash.cluster),
-                                            ByAnsvarligSaksbehandler())
+        val defaultUnleash = DefaultUnleash(
+            UnleashConfig.builder()
+                .appName(unleash.applicationName)
+                .unleashAPI(unleash.uri)
+                .unleashContextProvider(lagUnleashContextProvider())
+                .build(),
+            ByClusterStrategy(unleash.cluster),
+            ByAnsvarligSaksbehandler()
+        )
 
         return object : FeatureToggleService {
             override fun isEnabled(toggleId: String, defaultValue: Boolean): Boolean {
                 return defaultUnleash.isEnabled(toggleId, defaultValue)
             }
         }
-
     }
 
     private fun lagUnleashContextProvider(): UnleashContextProvider {
         return UnleashContextProvider {
             UnleashContext.builder()
-                    .appName(unleash.applicationName)
-                    .build()
+                .appName(unleash.applicationName)
+                .build()
         }
     }
 
@@ -95,11 +102,13 @@ class FeatureToggleConfig(private val enabled: Boolean,
         const val MIGRERING_NYTT_REVURDERINGSDATO = "familie-ba-sak.behandling.migrerings-nytt-revurderingsdato"
         const val AUTOMATISK_FØDSELSHENDELSE = "familie-ba-sak.behandling.automatisk-fodselshendelse"
         const val BRUK_ER_DELT_BOSTED = "familie-ba-sak.behandling.delt_bosted"
-        const val MIGRER_VEDTAK_BEGRUNNELSES_MODEL_UTREDNING = "familie-ba-sak.behandling.migrering.behandlingsmodel.utredning"
-        const val BRUK_BEGRUNNELSE_TRIGGES_AV_FRA_SANITY = "familie-ba-sak.behandling.begrunnelse-trigges-av"
+        const val MIGRER_VEDTAK_BEGRUNNELSES_MODEL_UTREDNING =
+            "familie-ba-sak.behandling.migrering.behandlingsmodel.utredning"
         const val KAN_MANUELT_KORRIGERE_MED_VEDTAKSBREV = "familie-ba-sak.behandling.korreksjon-vedtaksbrev"
         const val KAN_BEHANDLE_UTVIDET = "familie-ba-sak.behandling.utvidet"
+        const val KAN_BEHANDLE_SMÅBARNSTILLEGG = "familie-ba-sak.behandling.smaabarnstillegg"
         const val SKATTEETATEN_API_EKTE_DATA = "familie-ba-sak.skatteetaten-api-ekte-data-i-respons"
+        const val KAN_BEHANDLE_EØS = "familie-ba-sak.behandling.eos"
 
         private val logger = LoggerFactory.getLogger(FeatureToggleConfig::class.java)
     }
@@ -113,4 +122,3 @@ interface FeatureToggleService {
 
     fun isEnabled(toggleId: String, defaultValue: Boolean): Boolean
 }
-

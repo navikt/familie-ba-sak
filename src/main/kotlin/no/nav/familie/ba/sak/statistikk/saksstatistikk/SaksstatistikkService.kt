@@ -1,10 +1,17 @@
 package no.nav.familie.ba.sak.statistikk.saksstatistikk
 
+import no.nav.familie.ba.sak.common.EnvService
+import no.nav.familie.ba.sak.common.Utils.hentPropertyFraMaven
+import no.nav.familie.ba.sak.integrasjoner.journalføring.JournalføringService
+import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.DbJournalpostType
+import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.JournalføringRepository
+import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat.HENLAGT_FEILAKTIG_OPPRETTET
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat.HENLAGT_SØKNAD_TRUKKET
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak.FØDSELSHENDELSE
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -12,17 +19,10 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse.Companion.sisteAdresse
+import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
-import no.nav.familie.ba.sak.common.EnvService
-import no.nav.familie.ba.sak.common.Utils.hentPropertyFraMaven
-import no.nav.familie.ba.sak.integrasjoner.journalføring.JournalføringService
-import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.DbJournalpostType
-import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.JournalføringRepository
-import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
-import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.eksterne.kontrakter.saksstatistikk.AktørDVH
 import no.nav.familie.eksterne.kontrakter.saksstatistikk.BehandlingDVH
 import no.nav.familie.eksterne.kontrakter.saksstatistikk.ResultatBegrunnelseDVH
@@ -34,42 +34,43 @@ import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.util.UUID
 
-
 @Service
 class SaksstatistikkService(
-        private val behandlingService: BehandlingService,
-        private val journalføringRepository: JournalføringRepository,
-        private val journalføringService: JournalføringService,
-        private val arbeidsfordelingService: ArbeidsfordelingService,
-        private val totrinnskontrollService: TotrinnskontrollService,
-        private val vedtakService: VedtakService,
-        private val fagsakService: FagsakService,
-        private val personopplysningerService: PersonopplysningerService,
-        private val persongrunnlagService: PersongrunnlagService,
-        private val envService: EnvService,
-        private val vedtaksperiodeService: VedtaksperiodeService,
+    private val behandlingService: BehandlingService,
+    private val journalføringRepository: JournalføringRepository,
+    private val journalføringService: JournalføringService,
+    private val arbeidsfordelingService: ArbeidsfordelingService,
+    private val totrinnskontrollService: TotrinnskontrollService,
+    private val vedtakService: VedtakService,
+    private val fagsakService: FagsakService,
+    private val personopplysningerService: PersonopplysningerService,
+    private val persongrunnlagService: PersongrunnlagService,
+    private val envService: EnvService,
+    private val vedtaksperiodeService: VedtaksperiodeService,
 ) {
 
     fun mapTilBehandlingDVH(behandlingId: Long): BehandlingDVH? {
         val behandling = behandlingService.hent(behandlingId)
-        val forrigeBehandlingId = behandlingService.hentForrigeBehandlingSomErIverksatt(behandling).takeIf { erRevurderingEllerTekniskOpphør(behandling) }?.id
+        val forrigeBehandlingId = behandlingService.hentForrigeBehandlingSomErIverksatt(behandling)
+            .takeIf { erRevurderingEllerTekniskOpphør(behandling) }?.id
 
         if (behandling.opprettetÅrsak == FØDSELSHENDELSE && !envService.skalIverksetteBehandling()) return null
 
         val datoMottatt = when (behandling.opprettetÅrsak) {
             BehandlingÅrsak.SØKNAD -> {
                 val journalpost = journalføringRepository
-                        .findByBehandlingId(behandlingId)
-                        .filter { it.type == DbJournalpostType.I }
+                    .findByBehandlingId(behandlingId)
+                    .filter { it.type == DbJournalpostType.I }
                 journalpost.mapNotNull { journalføringService.hentJournalpost(it.journalpostId).data }
-                        .filter { it.tittel != null && it.tittel!!.contains("søknad", ignoreCase = true) }
-                        .mapNotNull { it.datoMottatt }
-                        .minOrNull() ?: behandling.opprettetTidspunkt
+                    .filter { it.tittel != null && it.tittel!!.contains("søknad", ignoreCase = true) }
+                    .mapNotNull { it.datoMottatt }
+                    .minOrNull() ?: behandling.opprettetTidspunkt
             }
             else -> behandling.opprettetTidspunkt
         }
 
-        val behandlendeEnhetsKode = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandlingId).behandlendeEnhetId
+        val behandlendeEnhetsKode =
+            arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandlingId).behandlendeEnhetId
         val ansvarligEnhetKode = arbeidsfordelingService.hentArbeidsfordelingsenhet(behandling).enhetId
 
         val aktivtVedtak = vedtakService.hentAktivForBehandling(behandlingId)
@@ -116,7 +117,7 @@ class SaksstatistikkService(
         val fagsak = fagsakService.hentPåFagsakId(sakId)
         val søkerIdent = fagsak.hentAktivIdent().ident
         val aktivBehandling = behandlingService.hentAktivForFagsak(fagsakId = fagsak.id)
-        //Skipper saker som er fødselshendelse
+        // Skipper saker som er fødselshendelse
         if (aktivBehandling?.opprettetÅrsak == FØDSELSHENDELSE && !envService.skalIverksetteBehandling()) return null
 
         val søkersAktørId = personopplysningerService.hentAktivAktørId(Ident(søkerIdent))
@@ -175,24 +176,25 @@ class SaksstatistikkService(
     private fun Behandling.resultatBegrunnelser(): List<ResultatBegrunnelseDVH> {
         return when (resultat) {
             HENLAGT_SØKNAD_TRUKKET, HENLAGT_FEILAKTIG_OPPRETTET -> emptyList()
-            else -> vedtakService.hentAktivForBehandling(behandlingId = id)?.hentResultatBegrunnelserFraVedtaksbegrunnelser()
-            ?: emptyList()
-
+            else -> vedtakService.hentAktivForBehandling(behandlingId = id)
+                ?.hentResultatBegrunnelserFraVedtaksbegrunnelser()
+                ?: emptyList()
         }
     }
 
     private fun Vedtak.hentResultatBegrunnelserFraVedtaksbegrunnelser(): List<ResultatBegrunnelseDVH> {
-        return vedtaksperiodeService.hentPersisterteVedtaksperioder(this).flatMap { vedtaksperiode ->
-            vedtaksperiode.begrunnelser
+        return vedtaksperiodeService.hentPersisterteVedtaksperioder(this)
+            .flatMap { vedtaksperiode ->
+                vedtaksperiode.begrunnelser
                     .map {
                         ResultatBegrunnelseDVH(
-                                fom = vedtaksperiode.fom,
-                                tom = vedtaksperiode.tom,
-                                type = it.vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType.name,
-                                vedtakBegrunnelse = it.vedtakBegrunnelseSpesifikasjon.name,
+                            fom = vedtaksperiode.fom,
+                            tom = vedtaksperiode.tom,
+                            type = it.vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType.name,
+                            vedtakBegrunnelse = it.vedtakBegrunnelseSpesifikasjon.name,
                         )
                     }
-        }
+            }
     }
 
     companion object {

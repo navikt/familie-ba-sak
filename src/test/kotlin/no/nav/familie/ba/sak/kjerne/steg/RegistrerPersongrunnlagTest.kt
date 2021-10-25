@@ -22,23 +22,23 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 
 class RegistrerPersongrunnlagTest(
-        @Autowired
-        private val stegService: StegService,
+    @Autowired
+    private val stegService: StegService,
 
-        @Autowired
-        private val fagsakService: FagsakService,
+    @Autowired
+    private val fagsakService: FagsakService,
 
-        @Autowired
-        private val behandlingService: BehandlingService,
+    @Autowired
+    private val behandlingService: BehandlingService,
 
-        @Autowired
-        private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
+    @Autowired
+    private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
 
-        @Autowired
-        private val personopplysningerService: PersonopplysningerService,
+    @Autowired
+    private val personopplysningerService: PersonopplysningerService,
 
-        @Autowired
-        private val databaseCleanupService: DatabaseCleanupService
+    @Autowired
+    private val databaseCleanupService: DatabaseCleanupService
 ) : AbstractSpringIntegrationTest() {
 
     @BeforeAll
@@ -55,20 +55,29 @@ class RegistrerPersongrunnlagTest(
 
         every {
             personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(any())
-        } returns PersonInfo(fødselsdato = LocalDate.of(1990, 2, 19),
-                             kjønn = Kjønn.KVINNE,
-                             navn = "Mor Moresen",
-                             sivilstander = listOf(Sivilstand(SIVILSTAND.GIFT, gyldigFraOgMed = LocalDate.of(2000, 10, 1)),
-                                                   Sivilstand(SIVILSTAND.SKILT,
-                                                              gyldigFraOgMed = LocalDate.of(2005, 10, 1))))
+        } returns PersonInfo(
+            fødselsdato = LocalDate.of(1990, 2, 19),
+            kjønn = Kjønn.KVINNE,
+            navn = "Mor Moresen",
+            sivilstander = listOf(
+                Sivilstand(SIVILSTAND.GIFT, gyldigFraOgMed = LocalDate.of(2000, 10, 1)),
+                Sivilstand(
+                    SIVILSTAND.SKILT,
+                    gyldigFraOgMed = LocalDate.of(2005, 10, 1)
+                )
+            )
+        )
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(morId)
         val behandling1 =
-                behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
-        stegService.håndterPersongrunnlag(behandling = behandling1,
-                                          registrerPersongrunnlagDTO = RegistrerPersongrunnlagDTO(
-                                                  ident = morId,
-                                                  barnasIdenter = listOf(barn1Id, barn2Id)))
+            behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        stegService.håndterPersongrunnlag(
+            behandling = behandling1,
+            registrerPersongrunnlagDTO = RegistrerPersongrunnlagDTO(
+                ident = morId,
+                barnasIdenter = listOf(barn1Id, barn2Id)
+            )
+        )
 
         val grunnlag1 = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling1.id)
 
@@ -94,10 +103,14 @@ class RegistrerPersongrunnlagTest(
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(morId)
         val behandling1 =
-                behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
-        stegService.håndterPersongrunnlag(behandling = behandling1,
-                                          registrerPersongrunnlagDTO = RegistrerPersongrunnlagDTO(ident = morId,
-                                                                                                  barnasIdenter = listOf(barn1Id)))
+            behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        stegService.håndterPersongrunnlag(
+            behandling = behandling1,
+            registrerPersongrunnlagDTO = RegistrerPersongrunnlagDTO(
+                ident = morId,
+                barnasIdenter = listOf(barn1Id)
+            )
+        )
 
         val grunnlag1 = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling1.id)
 
@@ -105,11 +118,16 @@ class RegistrerPersongrunnlagTest(
         Assertions.assertTrue(grunnlag1.personer.any { it.personIdent.ident == morId })
         Assertions.assertTrue(grunnlag1.personer.any { it.personIdent.ident == barn1Id })
 
-
-        stegService.håndterPersongrunnlag(behandling = behandling1,
-                                          registrerPersongrunnlagDTO = RegistrerPersongrunnlagDTO(ident = morId,
-                                                                                                  barnasIdenter = listOf(barn1Id,
-                                                                                                                         barn2Id)))
+        stegService.håndterPersongrunnlag(
+            behandling = behandling1,
+            registrerPersongrunnlagDTO = RegistrerPersongrunnlagDTO(
+                ident = morId,
+                barnasIdenter = listOf(
+                    barn1Id,
+                    barn2Id
+                )
+            )
+        )
         val grunnlag2 = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling1.id)
 
         Assertions.assertEquals(3, grunnlag2!!.personer.size)
@@ -117,12 +135,17 @@ class RegistrerPersongrunnlagTest(
         Assertions.assertTrue(grunnlag2.personer.any { it.personIdent.ident == barn1Id })
         Assertions.assertTrue(grunnlag2.personer.any { it.personIdent.ident == barn2Id })
 
-
         // Skal ikke føre til flere personer på persongrunnlaget
-        stegService.håndterPersongrunnlag(behandling = behandling1,
-                                          registrerPersongrunnlagDTO = RegistrerPersongrunnlagDTO(ident = morId,
-                                                                                                  barnasIdenter = listOf(barn1Id,
-                                                                                                                         barn2Id)))
+        stegService.håndterPersongrunnlag(
+            behandling = behandling1,
+            registrerPersongrunnlagDTO = RegistrerPersongrunnlagDTO(
+                ident = morId,
+                barnasIdenter = listOf(
+                    barn1Id,
+                    barn2Id
+                )
+            )
+        )
 
         val grunnlag3 = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling1.id)
 
@@ -130,6 +153,5 @@ class RegistrerPersongrunnlagTest(
         Assertions.assertTrue(grunnlag3.personer.any { it.personIdent.ident == morId })
         Assertions.assertTrue(grunnlag3.personer.any { it.personIdent.ident == barn1Id })
         Assertions.assertTrue(grunnlag3.personer.any { it.personIdent.ident == barn2Id })
-
     }
 }

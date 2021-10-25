@@ -30,71 +30,91 @@ import org.springframework.web.bind.annotation.RestController
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class VilkårController(
-        private val vilkårService: VilkårService,
-        private val annenVurderingService: AnnenVurderingService,
-        private val behandlingService: BehandlingService,
-        private val vedtakService: VedtakService,
-        private val stegService: StegService,
-        private val fagsakService: FagsakService,
-        private val tilgangService: TilgangService,
-        private val vilkårsvurderingService: VilkårsvurderingService,
+    private val vilkårService: VilkårService,
+    private val annenVurderingService: AnnenVurderingService,
+    private val behandlingService: BehandlingService,
+    private val vedtakService: VedtakService,
+    private val stegService: StegService,
+    private val fagsakService: FagsakService,
+    private val tilgangService: TilgangService,
+    private val vilkårsvurderingService: VilkårsvurderingService,
 ) {
 
     @PutMapping(path = ["/{behandlingId}/{vilkaarId}"])
-    fun endreVilkår(@PathVariable behandlingId: Long,
-                    @PathVariable vilkaarId: Long,
-                    @RequestBody restPersonResultat: RestPersonResultat): ResponseEntity<Ressurs<RestFagsak>> {
-        tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-                                                      handling = "endre vilkår")
+    fun endreVilkår(
+        @PathVariable behandlingId: Long,
+        @PathVariable vilkaarId: Long,
+        @RequestBody restPersonResultat: RestPersonResultat
+    ): ResponseEntity<Ressurs<RestFagsak>> {
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
+            handling = "endre vilkår"
+        )
 
         val behandling = behandlingService.hent(behandlingId)
-        vilkårService.endreVilkår(behandlingId = behandling.id,
-                                  vilkårId = vilkaarId,
-                                  restPersonResultat = restPersonResultat)
-        vedtakService.settStegSlettTilbakekreving(behandling.id)
+        vilkårService.endreVilkår(
+            behandlingId = behandling.id,
+            vilkårId = vilkaarId,
+            restPersonResultat = restPersonResultat
+        )
+        vedtakService.resettStegVedEndringPåVilkår(behandling.id)
         return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = behandling.fagsak.id))
     }
 
     @PutMapping(path = ["/{behandlingId}/annenvurdering/{annenVurderingId}"])
-    fun endreAnnenVurdering(@PathVariable behandlingId: Long,
-                            @PathVariable annenVurderingId: Long,
-                            @RequestBody restAnnenVurdering: RestAnnenVurdering): ResponseEntity<Ressurs<RestFagsak>> {
-        tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-                                                      handling = "Annen vurdering")
+    fun endreAnnenVurdering(
+        @PathVariable behandlingId: Long,
+        @PathVariable annenVurderingId: Long,
+        @RequestBody restAnnenVurdering: RestAnnenVurdering
+    ): ResponseEntity<Ressurs<RestFagsak>> {
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
+            handling = "Annen vurdering"
+        )
 
         val behandling = behandlingService.hent(behandlingId)
-        annenVurderingService.endreAnnenVurdering(annenVurderingId = annenVurderingId,
-                                                  restAnnenVurdering = restAnnenVurdering)
+        annenVurderingService.endreAnnenVurdering(
+            annenVurderingId = annenVurderingId,
+            restAnnenVurdering = restAnnenVurdering
+        )
 
         return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = behandling.fagsak.id))
     }
 
     @DeleteMapping(path = ["/{behandlingId}/{vilkaarId}"])
-    fun slettVilkår(@PathVariable behandlingId: Long,
-                    @PathVariable vilkaarId: Long,
-                    @RequestBody personIdent: String): ResponseEntity<Ressurs<RestFagsak>> {
-        tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-                                                      handling = "slette vilkår")
+    fun slettVilkår(
+        @PathVariable behandlingId: Long,
+        @PathVariable vilkaarId: Long,
+        @RequestBody personIdent: String
+    ): ResponseEntity<Ressurs<RestFagsak>> {
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
+            handling = "slette vilkår"
+        )
 
         val behandling = behandlingService.hent(behandlingId)
-        vilkårService.deleteVilkår(behandlingId = behandling.id,
-                                   vilkårId = vilkaarId,
-                                   personIdent = personIdent)
+        vilkårService.deleteVilkår(
+            behandlingId = behandling.id,
+            vilkårId = vilkaarId,
+            personIdent = personIdent
+        )
 
-        vedtakService.settStegSlettTilbakekreving(behandling.id)
+        vedtakService.resettStegVedEndringPåVilkår(behandling.id)
         return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = behandling.fagsak.id))
     }
 
     @PostMapping(path = ["/{behandlingId}"])
     fun nyttVilkår(@PathVariable behandlingId: Long, @RequestBody restNyttVilkår: RestNyttVilkår):
-            ResponseEntity<Ressurs<RestFagsak>> {
-        tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-                                                      handling = "legge til vilkår")
+        ResponseEntity<Ressurs<RestFagsak>> {
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
+            handling = "legge til vilkår"
+        )
 
         val behandling = behandlingService.hent(behandlingId)
         vilkårService.postVilkår(behandling.id, restNyttVilkår)
 
-        vedtakService.settStegSlettTilbakekreving(behandlingId)
+        vedtakService.resettStegVedEndringPåVilkår(behandlingId)
         return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = behandling.fagsak.id))
     }
 
@@ -111,6 +131,3 @@ class VilkårController(
         return ResponseEntity.ok(Ressurs.success(vilkårsvurderingService.hentVilkårsbegrunnelser()))
     }
 }
-
-
-
