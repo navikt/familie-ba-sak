@@ -100,17 +100,15 @@ object TilkjentYtelseValidering {
         barn: Person
     ) {
         andeler.forEach { andelTilkjentYtelse ->
-            var atyId = 0L
             if (barnsAndelerFraAndreBehandlinger.any
                 {
-                    atyId = it.id
                     andelTilkjentYtelse.overlapperMed(it) &&
                         andelTilkjentYtelse.prosent + it.prosent > BigDecimal(100)
                 }
             ) {
                 throw UtbetalingsikkerhetFeil(
                     melding = "Vi finner flere utbetalinger for barn på behandling ${behandlendeBehandlingTilkjentYtelse.behandling.id}",
-                    frontendFeilmelding = "${atyId} Det utbetales allerede barnetrygd for ${barn.personIdent.ident} i perioden ${andelTilkjentYtelse.stønadFom.tilKortString()} - ${andelTilkjentYtelse.stønadTom.tilKortString()}."
+                    frontendFeilmelding = "Det utbetales allerede barnetrygd for ${barn.personIdent.ident} i perioden ${andelTilkjentYtelse.stønadFom.tilKortString()} - ${andelTilkjentYtelse.stønadTom.tilKortString()}."
                 )
             }
         }
