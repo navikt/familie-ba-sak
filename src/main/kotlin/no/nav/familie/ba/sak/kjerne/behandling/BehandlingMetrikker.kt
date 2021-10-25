@@ -107,7 +107,9 @@ class BehandlingMetrikker(
             val vedtaksperiodeMedBegrunnelser = vedtaksperiodeRepository.finnVedtaksperioderFor(vedtakId = vedtak.id)
 
             vedtaksperiodeMedBegrunnelser.forEach {
-                it.begrunnelser.forEach { vedtaksbegrunnelse: Vedtaksbegrunnelse -> antallBrevBegrunnelseSpesifikasjon[vedtaksbegrunnelse.vedtakBegrunnelseSpesifikasjon]?.increment() }
+                it.begrunnelser.forEach { vedtaksbegrunnelse: Vedtaksbegrunnelse ->
+                    antallBrevBegrunnelseSpesifikasjon[vedtaksbegrunnelse.vedtakBegrunnelseSpesifikasjon]?.increment()
+                }
             }
         }
     }
