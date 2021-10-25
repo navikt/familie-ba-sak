@@ -32,6 +32,7 @@ class JournalføringUtilsTest {
                 bruker = NavnOgIdent("Mock", søkerFnr)
             ).copy(
                 journalpostTittel = "Søknad om utvidet barnetrygd",
+                underkategori = BehandlingUnderkategori.UTVIDET,
                 opprettOgKnyttTilNyBehandling = true
             ).hentUnderkategori()
         )
