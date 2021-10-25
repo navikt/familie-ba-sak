@@ -164,12 +164,10 @@ object TilkjentYtelseUtils {
                 )
             }
 
-            while (detFinnesAndelerSomSkalSlåsSammen(nyeAndelerForPerson)
-            ) {
-                slåSammenPerioderSomIkkeSkulleHaVærtSplittet(nyeAndelerForPerson)
-            }
+            val nyeAndelerForPersonEtterSammenslåing =
+                slåSammenPerioderSomIkkeSkulleHaVærtSplittet(nyeAndelerForPerson = nyeAndelerForPerson)
 
-            nyeAndelTilkjentYtelse.addAll(nyeAndelerForPerson)
+            nyeAndelTilkjentYtelse.addAll(nyeAndelerForPersonEtterSammenslåing)
         }
         // Sorterer primært av hensyn til måten testene er implementert og kan muligens fjernes dersom dette skrives om.
         nyeAndelTilkjentYtelse.sortWith(
@@ -181,39 +179,39 @@ object TilkjentYtelseUtils {
         return nyeAndelTilkjentYtelse.toMutableSet()
     }
 
-    private fun detFinnesAndelerSomSkalSlåsSammen(nyeAndelerForPerson: MutableList<AndelTilkjentYtelse>) =
-        nyeAndelerForPerson.any { andelTilkjentYtelse ->
-            finnAndelSomSkalSlåsSammen(
-                nyeAndelerForPerson,
-                andelTilkjentYtelse
-            ) != null
-        }
+    private fun slåSammenPerioderSomIkkeSkulleHaVærtSplittet(nyeAndelerForPerson: MutableList<AndelTilkjentYtelse>): MutableList<AndelTilkjentYtelse> {
+        val sorterteAndeler = nyeAndelerForPerson.sortedBy { it.stønadFom }.toMutableList()
+        var periodenViSerPå: AndelTilkjentYtelse = sorterteAndeler.first()
+        val oppdatertListeMedAndeler = mutableListOf<AndelTilkjentYtelse>()
 
-    private fun slåSammenPerioderSomIkkeSkulleHaVærtSplittet(nyeAndelerForPerson: MutableList<AndelTilkjentYtelse>) {
-        nyeAndelerForPerson.sortedBy { it.stønadFom }.forEach { andel ->
-            val andelSomSkalSlåsSammen = finnAndelSomSkalSlåsSammen(nyeAndelerForPerson, andel)
-            if (andelSomSkalSlåsSammen != null) {
-                val nyAndel = andel.copy(stønadTom = andelSomSkalSlåsSammen.stønadTom)
-                nyeAndelerForPerson.remove(andel)
-                nyeAndelerForPerson.remove(andelSomSkalSlåsSammen)
-                nyeAndelerForPerson.add(nyAndel)
+        for (index in 0 until sorterteAndeler.size) {
+            val andel = sorterteAndeler[index]
+            val nesteAndel = if (index == sorterteAndeler.size - 1) null else sorterteAndeler[index + 1]
+
+            if (nesteAndel != null) {
+                val andelerSkalSlåsSammen =
+                    skalAndelerSlåsSammen(førsteAndel = andel, nesteAndel = nesteAndel)
+
+                if (andelerSkalSlåsSammen) {
+                    val nyAndel = periodenViSerPå.copy(stønadTom = nesteAndel.stønadTom)
+                    periodenViSerPå = nyAndel
+                } else {
+                    oppdatertListeMedAndeler.add(periodenViSerPå)
+                    periodenViSerPå = sorterteAndeler[index + 1]
+                }
+            } else {
+                oppdatertListeMedAndeler.add(periodenViSerPå)
+                break
             }
         }
+        return oppdatertListeMedAndeler
     }
 
-    private fun finnAndelSomSkalSlåsSammen(
-        nyeAndelerForPerson: MutableList<AndelTilkjentYtelse>,
-        andel: AndelTilkjentYtelse
-    ) = nyeAndelerForPerson.singleOrNull {
-        (
-            andel.stønadTom.sisteDagIInneværendeMåned()
-                .erDagenFør(it.stønadFom.førsteDagIInneværendeMåned()) || andel.stønadTom == it.stønadFom
-            ) &&
-            it.prosent == BigDecimal(0) &&
-            andel.prosent == BigDecimal(0) &&
-            andel.endretUtbetalingAndeler.isNotEmpty() &&
-            andel.endretUtbetalingAndeler.singleOrNull() == it.endretUtbetalingAndeler.singleOrNull()
-    }
+    private fun skalAndelerSlåsSammen(førsteAndel: AndelTilkjentYtelse, nesteAndel: AndelTilkjentYtelse): Boolean =
+        førsteAndel.stønadTom.sisteDagIInneværendeMåned()
+            .erDagenFør(nesteAndel.stønadFom.førsteDagIInneværendeMåned()) && førsteAndel.prosent == BigDecimal(0) && nesteAndel.prosent == BigDecimal(
+            0
+        ) && førsteAndel.endretUtbetalingAndeler.isNotEmpty() && førsteAndel.endretUtbetalingAndeler.singleOrNull() == nesteAndel.endretUtbetalingAndeler.singleOrNull()
 
     fun beregnBeløpsperioder(
         overlappendePerioderesultatSøker: PeriodeResultat,
