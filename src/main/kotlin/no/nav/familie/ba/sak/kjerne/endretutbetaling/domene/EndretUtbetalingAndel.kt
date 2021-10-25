@@ -17,7 +17,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjonListConverter
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.triggesAvSkalUtbetales
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
@@ -205,7 +204,7 @@ fun EndretUtbetalingAndel.hentGyldigEndretBegrunnelser(sanityBegrunnelser: List<
             vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType == VedtakBegrunnelseType.ENDRET_UTBETALING
         }
         .filter { vedtakBegrunnelseSpesifikasjon ->
-            val triggesAv = vedtakBegrunnelseSpesifikasjon.tilSanityBegrunnelse(sanityBegrunnelser).tilTriggesAv()
-            triggesAvSkalUtbetales(listOf(this), triggesAv)
+            val sanityBegrunnelse = vedtakBegrunnelseSpesifikasjon.tilSanityBegrunnelse(sanityBegrunnelser)
+            sanityBegrunnelse != null && triggesAvSkalUtbetales(listOf(this), sanityBegrunnelse.tilTriggesAv())
         }
 }

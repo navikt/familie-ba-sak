@@ -9,13 +9,11 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.dokument.BrevKlient
+import no.nav.familie.ba.sak.kjerne.dokument.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeRepository
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
@@ -27,6 +25,11 @@ class BehandlingMetrikker(
     private val vedtaksperiodeRepository: VedtaksperiodeRepository,
     brevKlient: BrevKlient
 ) {
+    private val sanityBegrunnelser: List<SanityBegrunnelse>
+
+    init {
+        sanityBegrunnelser = brevKlient.hentSanityBegrunnelse()
+    }
 
     private val antallManuelleBehandlinger: Counter =
         Metrics.counter("behandling.behandlinger", "saksbehandling", "manuell")
@@ -48,20 +51,10 @@ class BehandlingMetrikker(
             )
         }
 
-    private val sanityBegrunnelser = brevKlient.hentSanityBegrunnelse()
-
     private val antallBrevBegrunnelseSpesifikasjon: Map<VedtakBegrunnelseSpesifikasjon, Counter> =
         VedtakBegrunnelseSpesifikasjon.values().associateWith {
-            val tittel = try {
-                it.tilSanityBegrunnelse(sanityBegrunnelser).navnISystem
-            } catch (exception: Exception) {
-                logger.warn("Feil ved henting av begrunnelse med apiNavn '${it.sanityApiNavn}' fra sanity")
-                secureLogger.warn(
-                    "Feil ved henting av begrunnelse med apiNavn '${it.sanityApiNavn}' fra sanity: " +
-                        exception.message
-                )
-                it.name
-            }
+            val tittel = it.tilSanityBegrunnelse(sanityBegrunnelser)?.navnISystem ?: it.name
+
             Metrics.counter(
                 "brevbegrunnelse",
                 "type", it.name,
@@ -137,10 +130,5 @@ class BehandlingMetrikker(
                 it.visningsnavn
             )
         }
-    }
-
-    companion object {
-        private val logger = LoggerFactory.getLogger(BehandlingMetrikker::class.java)
-        private val secureLogger: Logger = LoggerFactory.getLogger("secureLogger")
     }
 }
