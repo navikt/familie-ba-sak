@@ -23,6 +23,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.VedtakUtils.hentPersonerForAlleUtgjø
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtvidetVedtaksperiodeMedBegrunnelser
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import java.math.BigDecimal
@@ -661,7 +662,7 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
                     .finnSatsendring(utvidetVedtaksperiodeMedBegrunnelser.fom ?: TIDENES_MORGEN)
                     .isNotEmpty()
 
-            triggesAv.erEndret() -> erEtterEndretPeriode && triggesAv.etterEndretUtbetaling
+            triggesAv.erEndret() -> erEtterEndretPeriode && triggesAv.etterEndretUtbetaling && utvidetVedtaksperiodeMedBegrunnelser.type != Vedtaksperiodetype.ENDRET_UTBETALING
 
             else -> hentPersonerForAlleUtgjørendeVilkår(
                 vilkårsvurdering = vilkårsvurdering,

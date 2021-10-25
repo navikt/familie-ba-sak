@@ -292,25 +292,20 @@ class VedtaksperiodeService(
     }
 
     fun genererVedtaksperioderMedBegrunnelser(vedtak: Vedtak): List<VedtaksperiodeMedBegrunnelser> {
-        val utbetalingsperioderUtenEndringer = hentUtbetalingsperioder(vedtak.behandling) {
-            it.filter { andelTilkjentYtelse -> andelTilkjentYtelse.endretUtbetalingAndeler.isEmpty() }
-        }
+        val andelerTilkjentYtelse =
+            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = vedtak.behandling.id)
 
-        val utbetalingOgOpphørsperioder =
-            (
-                utbetalingsperioderUtenEndringer +
-                    hentOpphørsperioder(vedtak.behandling)
-                ).map {
-                it.tilVedtaksperiodeMedBegrunnelse(vedtak)
-            }
+        val utbetalingsperioder =
+            hentVedtaksperioderMedBegrunnelserForUtbetalingsperioder(andelerTilkjentYtelse, vedtak)
+
+        val endredeUtbetalingsperioder =
+            hentVedtaksperioderMedBegrunnelserForEndredeUtbetalingsperioder(andelerTilkjentYtelse, vedtak)
+
+        val opphørsperioder = hentOpphørsperioder(vedtak.behandling).map { it.tilVedtaksperiodeMedBegrunnelse(vedtak) }
+
         val avslagsperioder = hentAvslagsperioderMedBegrunnelser(vedtak)
 
-        val endretUtbetalingsperioder = hentEndredeUtbetalingsperioderMedBegrunnelser(
-            vedtak = vedtak,
-            endredeUtbetalingsAndeler = endretUtbetalingAndelRepository.findByBehandlingId(vedtak.behandling.id)
-        )
-
-        return utbetalingOgOpphørsperioder + avslagsperioder + endretUtbetalingsperioder
+        return utbetalingsperioder + endredeUtbetalingsperioder + opphørsperioder + avslagsperioder
     }
 
     fun kopierOverVedtaksperioder(deaktivertVedtak: Vedtak, aktivtVedtak: Vedtak) {
@@ -414,11 +409,10 @@ class VedtaksperiodeService(
 
                                 acc
                             }
-
-                    standardbegrunnelser.ifEmpty {
+                    if (utvidetVedtaksperiodeMedBegrunnelser.type == Vedtaksperiodetype.UTBETALING && standardbegrunnelser.isEmpty()) {
                         VedtakBegrunnelseSpesifikasjon.values()
                             .filter { it.vedtakBegrunnelseType == VedtakBegrunnelseType.FORTSATT_INNVILGET }
-                    }
+                    } else standardbegrunnelser
                 }
             }
 
@@ -498,7 +492,6 @@ class VedtaksperiodeService(
 
     fun hentUtbetalingsperioder(
         behandling: Behandling,
-        filterAndeler: (andelerTilkjentYtelse: List<AndelTilkjentYtelse>) -> List<AndelTilkjentYtelse> = { it }
     ): List<Utbetalingsperiode> {
         val personopplysningGrunnlag = persongrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
             ?: return emptyList()
@@ -508,7 +501,6 @@ class VedtaksperiodeService(
         return mapTilUtbetalingsperioder(
             andelerTilkjentYtelse = andelerTilkjentYtelse,
             personopplysningGrunnlag = personopplysningGrunnlag,
-            filterAndeler = filterAndeler
         )
     }
 
