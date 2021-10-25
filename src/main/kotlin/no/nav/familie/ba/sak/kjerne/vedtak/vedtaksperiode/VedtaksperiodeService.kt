@@ -166,7 +166,7 @@ class VedtaksperiodeService(
                         ),
                         oppdatertBegrunnelseType = vedtakBegrunnelseType,
                         aktuellePersonerForVedtaksperiode = persongrunnlagRepository.findByBehandlingAndAktiv(behandling.id)?.personer?.filter { person ->
-                            if (vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGELSE) {
+                            if (vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGET) {
                                 identerMedUtbetaling.contains(person.personIdent.ident) || person.type == PersonType.SØKER
                             } else true
                         }?.toList() ?: error(
@@ -389,7 +389,7 @@ class VedtaksperiodeService(
                                 if (triggesAv.vilkår.contains(Vilkår.UTVIDET_BARNETRYGD) && ytelseTyper.contains(
                                         YtelseType.UTVIDET_BARNETRYGD
                                     ) &&
-                                    vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGELSE
+                                    vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGET
                                 ) {
                                     acc.add(standardBegrunnelse)
                                 } else if (standardBegrunnelse.triggesForPeriode(

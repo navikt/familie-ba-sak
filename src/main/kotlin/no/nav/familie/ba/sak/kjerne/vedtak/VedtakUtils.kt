@@ -68,7 +68,7 @@ object VedtakUtils {
                     when {
                         vilkårResultat.vilkårType != utgjørendeVilkår -> false
                         vilkårResultat.periodeFom == null -> false
-                        oppdatertBegrunnelseType == VedtakBegrunnelseType.INNVILGELSE -> {
+                        oppdatertBegrunnelseType == VedtakBegrunnelseType.INNVILGET -> {
                             triggereErOppfylt(triggesAv, vilkårResultat) &&
                                 vilkårResultat.periodeFom!!.toYearMonth() == vedtaksperiode.fom.minusMonths(1)
                                 .toYearMonth() &&

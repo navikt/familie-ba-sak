@@ -1,0 +1,67 @@
+UPDATE vedtaksbegrunnelse
+SET vedtak_begrunnelse_spesifikasjon = 'INNVILGELSE_BEREDSKAPSHJEM'
+WHERE vedtak_begrunnelse_spesifikasjon like 'INNVILGELSE_BEREDSKAPSHJEM';
+
+UPDATE vedtaksbegrunnelse
+SET vedtak_begrunnelse_spesifikasjon = 'INNVILGELSE_HELE_FAMILIEN_TRYGDEAVTALE'
+WHERE vedtak_begrunnelse_spesifikasjon like 'INNVILGELSE_HELE_FAMILIEN_TRYGDEAVTALE';
+
+UPDATE vedtaksbegrunnelse
+SET vedtak_begrunnelse_spesifikasjon = 'INNVILGELSE_HELE_FAMILIEN_PLIKTIG_MEDLEM'
+WHERE vedtak_begrunnelse_spesifikasjon like 'INNVILGELSE_HELE_FAMILIEN_PLIKTIG_MEDLEM';
+
+UPDATE vedtaksbegrunnelse
+SET vedtak_begrunnelse_spesifikasjon = 'INNVILGELSE_SØKER_OG_BARN_PLIKTIG_MEDLEM'
+WHERE vedtak_begrunnelse_spesifikasjon like 'INNVILGELSE_SØKER_OG_BARN_PLIKTIG_MEDLEM';
+
+UPDATE vedtaksbegrunnelse
+SET vedtak_begrunnelse_spesifikasjon = 'INNVILGELSE_ENIGHET_OM_OPPHØR_AV_AVTALE_OM_DELT_BOSTED'
+WHERE vedtak_begrunnelse_spesifikasjon like 'INNVILGELSE_ENIGHET_OM_OPPHØR_AV_AVTALE_OM_DELT_BOSTED';
+
+UPDATE vedtaksbegrunnelse
+SET vedtak_begrunnelse_spesifikasjon = 'INNVILGELSE_VURDERING_HELE_FAMILIEN_FRIVILLIG_MEDLEM'
+WHERE vedtak_begrunnelse_spesifikasjon like 'INNVILGELSE_VURDERING_HELE_FAMILIEN_FRIVILLIG_MEDLEM';
+
+UPDATE vedtaksbegrunnelse
+SET vedtak_begrunnelse_spesifikasjon = 'INNVILGELSE_UENIGHET_OM_OPPHØR_AV_AVTALE_OM_DELT_BOSTED'
+WHERE vedtak_begrunnelse_spesifikasjon like 'INNVILGELSE_UENIGHET_OM_OPPHØR_AV_AVTALE_OM_DELT_BOSTED';
+
+UPDATE vedtaksbegrunnelse
+SET vedtak_begrunnelse_spesifikasjon = 'INNVILGELSE_HELE_FAMILIEN_FRIVILLIG_MEDLEM'
+WHERE vedtak_begrunnelse_spesifikasjon like 'INNVILGELSE_HELE_FAMILIEN_FRIVILLIG_MEDLEM';
+
+UPDATE vedtaksbegrunnelse
+SET vedtak_begrunnelse_spesifikasjon = 'INNVILGELSE_VURDERING_HELE_FAMILIEN_PLIKTIG_MEDLEM'
+WHERE vedtak_begrunnelse_spesifikasjon like 'INNVILGELSE_VURDERING_HELE_FAMILIEN_PLIKTIG_MEDLEM';
+
+UPDATE vedtaksbegrunnelse
+SET vedtak_begrunnelse_spesifikasjon = 'INNVILGELSE_SØKER_OG_BARN_OPPHOLD_I_UTLANDET_IKKE_MER_ENN_3_MÅNEDER'
+WHERE vedtak_begrunnelse_spesifikasjon like 'INNVILGELSE_SØKER_OG_BARN_OPPHOLD_I_UTLANDET_IKKE_MER_ENN_3_MÅNEDER';
+
+UPDATE vedtaksbegrunnelse
+SET vedtak_begrunnelse_spesifikasjon = 'INNVILGELSE_SØKER_OG_BARN_FRIVILLIG_MEDLEM'
+WHERE vedtak_begrunnelse_spesifikasjon like 'INNVILGELSE_SØKER_OG_BARN_FRIVILLIG_MEDLEM';
+
+UPDATE vedtaksbegrunnelse
+SET vedtak_begrunnelse_spesifikasjon = 'INNVILGELSE_VURDERING_SØKER_OG_BARN_FRIVILLIG_MEDLEM'
+WHERE vedtak_begrunnelse_spesifikasjon like 'INNVILGELSE_VURDERING_SØKER_OG_BARN_FRIVILLIG_MEDLEM';
+
+UPDATE vedtaksbegrunnelse
+SET vedtak_begrunnelse_spesifikasjon = 'INNVILGELSE_ETTERBETALING_3_ÅR'
+WHERE vedtak_begrunnelse_spesifikasjon like 'INNVILGELSE_ETTERBETALING_3_ÅR';
+
+UPDATE vedtaksbegrunnelse
+SET vedtak_begrunnelse_spesifikasjon = 'INNVILGELSE_SØKER_OG_BARN_TRYGDEAVTALE'
+WHERE vedtak_begrunnelse_spesifikasjon like 'INNVILGELSE_SØKER_OG_BARN_TRYGDEAVTALE';
+
+UPDATE vedtaksbegrunnelse
+SET vedtak_begrunnelse_spesifikasjon = 'INNVILGELSE_ALENE_FRA_FØDSEL'
+WHERE vedtak_begrunnelse_spesifikasjon like 'INNVILGELSE_ALENE_FRA_FØDSEL';
+
+UPDATE vedtaksbegrunnelse
+SET vedtak_begrunnelse_spesifikasjon = 'INNVILGELSE_VURDERING_SØKER_OG_BARN_PLIKTIG_MEDLEM'
+WHERE vedtak_begrunnelse_spesifikasjon like 'INNVILGELSE_VURDERING_SØKER_OG_BARN_PLIKTIG_MEDLEM';
+
+UPDATE vedtaksbegrunnelse
+SET vedtak_begrunnelse_spesifikasjon = 'INNVILGELSE_BARN_OPPHOLD_I_UTLANDET_IKKE_MER_ENN_3_MÅNEDER'
+WHERE vedtak_begrunnelse_spesifikasjon like 'INNVILGELSE_BARN_OPPHOLD_I_UTLANDET_IKKE_MER_ENN_3_MÅNEDER';

@@ -191,7 +191,7 @@ class VedtaksperiodeMedBegrunnelseTest {
     fun `Skal sortere begrunnelser - type innvilgelse kommer før reduksjon`() {
 
         val begrunnelseInnvilget =
-            lagVedtaksbegrunnelse(vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.INNVILGELSE_HELE_FAMILIEN_PLIKTIG_MEDLEM)
+            lagVedtaksbegrunnelse(vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.INNVILGET_HELE_FAMILIEN_PLIKTIG_MEDLEM)
         val begrunnelseReduksjon =
             lagVedtaksbegrunnelse(vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.REDUKSJON_FLYTTET_BARN)
         val comparator = BegrunnelseComparator()
