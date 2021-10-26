@@ -37,11 +37,12 @@ class BeregningService(
     fun slettTilkjentYtelseForBehandling(behandlingId: Long) = tilkjentYtelseRepository.findByBehandling(behandlingId)
         ?.let { tilkjentYtelseRepository.delete(it) }
 
-    fun hentLøpendeAndelerTilkjentYtelseForBehandlinger(behandlingIder: List<Long>): List<AndelTilkjentYtelse> =
+    fun hentLøpendeAndelerTilkjentYtelseMedUtbetalingerForBehandlinger(behandlingIder: List<Long>): List<AndelTilkjentYtelse> =
         andelTilkjentYtelseRepository.finnLøpendeAndelerTilkjentYtelseForBehandlinger(behandlingIder)
+            .filter { it.erUtbetaling() }
 
-    fun hentAndelerTilkjentYtelseForBehandling(behandlingId: Long): List<AndelTilkjentYtelse> =
-        andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(listOf(behandlingId))
+    fun hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(behandlingId: Long): List<AndelTilkjentYtelse> =
+        andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId).filter { it.erUtbetaling() }
 
     fun lagreTilkjentYtelseMedOppdaterteAndeler(tilkjentYtelse: TilkjentYtelse) =
         tilkjentYtelseRepository.save(tilkjentYtelse)
@@ -55,7 +56,11 @@ class BeregningService(
 
     fun hentTilkjentYtelseForBehandlingerIverksattMotØkonomi(fagsakId: Long): List<TilkjentYtelse> {
         val iverksatteBehandlinger = behandlingRepository.findByFagsakAndAvsluttet(fagsakId)
-        return iverksatteBehandlinger.mapNotNull { tilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(it.id) }
+        return iverksatteBehandlinger.mapNotNull {
+            tilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(
+                it.id
+            )
+        }
     }
 
     /**
@@ -163,5 +168,12 @@ class BeregningService(
             this.endretDato = LocalDate.now()
             this.opphørFom = opphørsdato?.toYearMonth()
         }
+    }
+
+    private fun AndelTilkjentYtelse.erUtbetaling(): Boolean {
+        return this.kalkulertUtbetalingsbeløp != 0 ||
+            this.endretUtbetalingAndeler.any {
+                it.årsak!!.kanGiNullutbetaling()
+            }
     }
 }
