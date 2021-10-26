@@ -53,7 +53,7 @@ class EndretUtbetalingAndelTest(
         )
 
         val andelerTilkjentYtelseMedEndretPeriode =
-            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseTilUtbetalingForBehandling(behandlingId = behandlingEtterBehandlingsresultat.behandlingId)
+            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = behandlingEtterBehandlingsresultat.behandlingId)
 
         val endretAndeleTilkjentYtelse =
             andelerTilkjentYtelseMedEndretPeriode.single { it.kalkulertUtbetalingsbeløp === 0 }
