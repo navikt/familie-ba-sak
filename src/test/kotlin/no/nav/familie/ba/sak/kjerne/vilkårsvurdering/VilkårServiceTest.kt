@@ -18,7 +18,6 @@ import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurderingType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
@@ -65,9 +64,6 @@ class VilkårServiceTest(
 
     @Autowired
     private val dataSource: DataSource,
-
-    @Autowired
-    private val stegService: StegService,
 
 ) : AbstractTestWithJdbcTables(dataSource) {
 
@@ -275,7 +271,6 @@ class VilkårServiceTest(
                 )
             }
         }
-        stegService.håndterBehandlingsresultat(behandling)
 
         behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BEHANDLING_AVSLUTTET))
         behandlingService.lagreEllerOppdater(behandling)
