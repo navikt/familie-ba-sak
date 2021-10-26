@@ -18,6 +18,7 @@ import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurderingType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
@@ -63,9 +64,12 @@ class VilkårServiceTest(
     private val databaseCleanupService: DatabaseCleanupService,
 
     @Autowired
-    private val dataSource: DataSource
+    private val dataSource: DataSource,
 
-) : AbstractTestWithJdbcTables(dataSource) {
+    @Autowired
+    private val stegService: StegService,
+
+    ) : AbstractTestWithJdbcTables(dataSource) {
 
     @BeforeAll
     fun init() {
@@ -271,6 +275,7 @@ class VilkårServiceTest(
                 )
             }
         }
+        stegService.håndterBehandlingsresultat(behandling)
 
         behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BEHANDLING_AVSLUTTET))
         behandlingService.lagreEllerOppdater(behandling)
@@ -283,15 +288,15 @@ class VilkårServiceTest(
             lagTestPersonopplysningGrunnlag(behandling2.id, fnr, listOf(barnFnr, barnFnr2))
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag2)
 
-        val behandlingResultat2 = vilkårService.initierVilkårsvurderingForBehandling(
+        val vilkårsvurdering2 = vilkårService.initierVilkårsvurderingForBehandling(
             behandling = behandling2,
             bekreftEndringerViaFrontend = true,
             forrigeBehandling = behandling
         )
 
-        Assertions.assertEquals(3, behandlingResultat2.personResultater.size)
+        Assertions.assertEquals(3, vilkårsvurdering2.personResultater.size)
 
-        behandlingResultat2.personResultater.forEach { personResultat ->
+        vilkårsvurdering2.personResultater.forEach { personResultat ->
             personResultat.vilkårResultater.forEach { vilkårResultat ->
                 if (personResultat.personIdent == barnFnr2) {
                     Assertions.assertEquals(behandling2.id, vilkårResultat.behandlingId)
