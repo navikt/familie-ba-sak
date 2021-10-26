@@ -1,12 +1,15 @@
 package no.nav.familie.ba.sak.config
 
 import no.nav.familie.ba.sak.kjerne.dokument.BrevKlient
+import no.nav.familie.ba.sak.kjerne.dokument.domene.EndretUtbetalingsperiodeTrigger
 import no.nav.familie.ba.sak.kjerne.dokument.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.dokument.domene.SanityVilkår
 import no.nav.familie.ba.sak.kjerne.dokument.domene.VilkårRolle
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Brev
 import no.nav.familie.ba.sak.kjerne.dokument.domene.ØvrigTrigger
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.BegrunnelseData
 import org.springframework.context.annotation.Primary
 import org.springframework.context.annotation.Profile
@@ -74,6 +77,15 @@ val sanityBegrunnelserMock: List<SanityBegrunnelse> =
                     VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET -> listOf("2", "4", "11")
                     VedtakBegrunnelseSpesifikasjon.INNVILGET_SATSENDRING -> listOf("2", "10")
                     else -> listOf("98", "99", "100")
+                },
+                endringsaarsaker = when (it.vedtakBegrunnelseType) {
+                    VedtakBegrunnelseType.ETTER_ENDRET_UTBETALING -> listOf(Årsak.DELT_BOSTED)
+                    VedtakBegrunnelseType.ENDRET_UTBETALING -> listOf(Årsak.DELT_BOSTED)
+                    else -> emptyList()
+                },
+                endretUtbetalingsperiodeTriggere = when (it.vedtakBegrunnelseType) {
+                    VedtakBegrunnelseType.ETTER_ENDRET_UTBETALING -> listOf(EndretUtbetalingsperiodeTrigger.ETTER_ENDRET_UTBETALINGSPERIODE)
+                    else -> emptyList()
                 }
             )
         }

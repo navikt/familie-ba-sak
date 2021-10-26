@@ -16,7 +16,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
-import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -176,7 +176,7 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, barn)
 
         assertTrue(
-            VedtakBegrunnelseSpesifikasjon.PERIODE_ETTER_ENDRET_UTBETALING_AVTALE_DELT_BOSTED_FØLGES
+            VedtakBegrunnelseSpesifikasjon.ETTER_ENDRET_UTBETALING_AVTALE_DELT_BOSTED_FØLGES
                 .triggesForPeriode(
                     persongrunnlag = personopplysningGrunnlag,
                     vilkårsvurdering = vilkårsvurdering,
@@ -206,7 +206,7 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, barn)
 
         assertFalse(
-            VedtakBegrunnelseSpesifikasjon.PERIODE_ETTER_ENDRET_UTBETALING_AVTALE_DELT_BOSTED_FØLGES
+            VedtakBegrunnelseSpesifikasjon.ETTER_ENDRET_UTBETALING_AVTALE_DELT_BOSTED_FØLGES
                 .triggesForPeriode(
                     persongrunnlag = personopplysningGrunnlag,
                     vilkårsvurdering = vilkårsvurdering,
@@ -280,6 +280,33 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
     @Test
     fun `Alle begrunnelser er unike`() {
         val vedtakBegrunnelser = VedtakBegrunnelseSpesifikasjon.values().groupBy { it.sanityApiNavn }
-        Assertions.assertEquals(vedtakBegrunnelser.size, VedtakBegrunnelseSpesifikasjon.values().size)
+        assertEquals(vedtakBegrunnelser.size, VedtakBegrunnelseSpesifikasjon.values().size)
+    }
+
+    @Test
+    fun `Alle api-navn inkluderer vedtaksbegrunnelsestypen`() {
+        VedtakBegrunnelseSpesifikasjon.values().groupBy { it.vedtakBegrunnelseType }
+            .forEach { (vedtakBegrunnelseType, standardbegrunnelser) ->
+                standardbegrunnelser.forEach {
+                    val prefix = when (vedtakBegrunnelseType) {
+                        VedtakBegrunnelseType.INNVILGET -> "innvilget"
+                        VedtakBegrunnelseType.REDUKSJON -> "reduksjon"
+                        VedtakBegrunnelseType.AVSLAG -> "avslag"
+                        VedtakBegrunnelseType.OPPHØR -> "opphor"
+                        VedtakBegrunnelseType.FORTSATT_INNVILGET -> "fortsattInnvilget"
+                        VedtakBegrunnelseType.ENDRET_UTBETALING -> "endretUtbetaling"
+                        VedtakBegrunnelseType.ETTER_ENDRET_UTBETALING -> "etterEndretUtbetaling"
+                    }
+                    assertEquals(prefix, it.sanityApiNavn.substring(0, prefix.length), "Forventer $prefix for $it")
+                    assertTrue(
+                        it.sanityApiNavn.substring(prefix.length).startsWithUppercaseLetter(),
+                        "Forventer stor forbokstav etter prefix '$prefix' på $it"
+                    )
+                }
+            }
+    }
+
+    private fun String.startsWithUppercaseLetter(): Boolean {
+        return this.matches(Regex("[A-Z]{1}.*"))
     }
 }

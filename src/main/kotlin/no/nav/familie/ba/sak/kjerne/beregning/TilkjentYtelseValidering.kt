@@ -83,6 +83,7 @@ object TilkjentYtelseValidering {
                 barnMedAndreTilkjentYtelse.filter { it.first.personIdent.ident == barn.personIdent.ident }
                     .flatMap { it.second }
                     .flatMap { it.andelerTilkjentYtelseTilUtbetaling }
+                    .filter { it.personIdent == barn.personIdent.ident }
 
             validerIngenOverlappAvAndeler(
                 andeler,

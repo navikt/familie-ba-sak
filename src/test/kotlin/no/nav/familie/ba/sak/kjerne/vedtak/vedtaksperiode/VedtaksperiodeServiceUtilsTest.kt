@@ -31,7 +31,7 @@ class VedtaksperiodeServiceUtilsTest {
                             person = person1,
                             fom = fom,
                             tom = tom,
-                            vedtakBegrunnelseSpesifikasjoner = listOf(VedtakBegrunnelseSpesifikasjon.INNVILGELSE_VURDERING_HELE_FAMILIEN_PLIKTIG_MEDLEM)
+                            vedtakBegrunnelseSpesifikasjoner = listOf(VedtakBegrunnelseSpesifikasjon.INNVILGET_VURDERING_HELE_FAMILIEN_PLIKTIG_MEDLEM)
                         )
                     )
                 ),
@@ -45,7 +45,7 @@ class VedtaksperiodeServiceUtilsTest {
                             person = person2,
                             fom = fom,
                             tom = tom,
-                            vedtakBegrunnelseSpesifikasjoner = listOf(VedtakBegrunnelseSpesifikasjon.INNVILGELSE_VURDERING_HELE_FAMILIEN_PLIKTIG_MEDLEM)
+                            vedtakBegrunnelseSpesifikasjoner = listOf(VedtakBegrunnelseSpesifikasjon.INNVILGET_VURDERING_HELE_FAMILIEN_PLIKTIG_MEDLEM)
                         )
                     )
                 )
@@ -84,7 +84,7 @@ class VedtaksperiodeServiceUtilsTest {
                             person = person1,
                             fom = fom,
                             tom = tom,
-                            vedtakBegrunnelseSpesifikasjoner = listOf(VedtakBegrunnelseSpesifikasjon.INNVILGELSE_VURDERING_HELE_FAMILIEN_PLIKTIG_MEDLEM)
+                            vedtakBegrunnelseSpesifikasjoner = listOf(VedtakBegrunnelseSpesifikasjon.INNVILGET_VURDERING_HELE_FAMILIEN_PLIKTIG_MEDLEM)
                         )
                     )
                 ),
@@ -98,7 +98,7 @@ class VedtaksperiodeServiceUtilsTest {
                             person = person2,
                             fom = fom,
                             tom = tom,
-                            vedtakBegrunnelseSpesifikasjoner = listOf(VedtakBegrunnelseSpesifikasjon.INNVILGELSE_VURDERING_HELE_FAMILIEN_PLIKTIG_MEDLEM)
+                            vedtakBegrunnelseSpesifikasjoner = listOf(VedtakBegrunnelseSpesifikasjon.INNVILGET_VURDERING_HELE_FAMILIEN_PLIKTIG_MEDLEM)
                         )
                     )
                 )
@@ -132,7 +132,7 @@ class VedtaksperiodeServiceUtilsTest {
                             person = person1,
                             fom = fom,
                             tom = tom,
-                            vedtakBegrunnelseSpesifikasjoner = listOf(VedtakBegrunnelseSpesifikasjon.INNVILGELSE_VURDERING_HELE_FAMILIEN_PLIKTIG_MEDLEM)
+                            vedtakBegrunnelseSpesifikasjoner = listOf(VedtakBegrunnelseSpesifikasjon.INNVILGET_VURDERING_HELE_FAMILIEN_PLIKTIG_MEDLEM)
                         )
                     )
                 ),
@@ -165,7 +165,7 @@ class VedtaksperiodeServiceUtilsTest {
         val begrunnelsePerson1 =
             begrunnelser
                 .find {
-                    it.vedtakBegrunnelseSpesifikasjon == VedtakBegrunnelseSpesifikasjon.INNVILGELSE_VURDERING_HELE_FAMILIEN_PLIKTIG_MEDLEM
+                    it.vedtakBegrunnelseSpesifikasjon == VedtakBegrunnelseSpesifikasjon.INNVILGET_VURDERING_HELE_FAMILIEN_PLIKTIG_MEDLEM
                 }
 
         Assertions.assertEquals(
@@ -193,7 +193,7 @@ class VedtaksperiodeServiceUtilsTest {
                             person = person1,
                             fom = fom,
                             tom = tom,
-                            vedtakBegrunnelseSpesifikasjoner = listOf(VedtakBegrunnelseSpesifikasjon.INNVILGELSE_VURDERING_HELE_FAMILIEN_PLIKTIG_MEDLEM)
+                            vedtakBegrunnelseSpesifikasjoner = listOf(VedtakBegrunnelseSpesifikasjon.INNVILGET_VURDERING_HELE_FAMILIEN_PLIKTIG_MEDLEM)
                         )
                     )
                 ),
@@ -241,7 +241,7 @@ class VedtaksperiodeServiceUtilsTest {
                             person = person1,
                             fom = fom,
                             tom = tom,
-                            vedtakBegrunnelseSpesifikasjoner = listOf(VedtakBegrunnelseSpesifikasjon.INNVILGELSE_VURDERING_HELE_FAMILIEN_PLIKTIG_MEDLEM)
+                            vedtakBegrunnelseSpesifikasjoner = listOf(VedtakBegrunnelseSpesifikasjon.INNVILGET_VURDERING_HELE_FAMILIEN_PLIKTIG_MEDLEM)
                         )
                     )
                 ),
@@ -255,7 +255,7 @@ class VedtaksperiodeServiceUtilsTest {
                             person = person2,
                             fom = fom,
                             tom = tom.plusMonths(2),
-                            vedtakBegrunnelseSpesifikasjoner = listOf(VedtakBegrunnelseSpesifikasjon.INNVILGELSE_VURDERING_HELE_FAMILIEN_PLIKTIG_MEDLEM)
+                            vedtakBegrunnelseSpesifikasjoner = listOf(VedtakBegrunnelseSpesifikasjon.INNVILGET_VURDERING_HELE_FAMILIEN_PLIKTIG_MEDLEM)
                         )
                     )
                 )
