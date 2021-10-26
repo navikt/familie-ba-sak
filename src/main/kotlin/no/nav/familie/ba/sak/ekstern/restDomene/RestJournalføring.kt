@@ -63,7 +63,7 @@ data class RestJournalføring(
     }
 
     fun hentUnderkategori(): BehandlingUnderkategori {
-        if (underkategori != null) return underkategori
+        if (underkategori is BehandlingUnderkategori) return underkategori
         return when {
             journalpostTittel?.contains("ordinær") == true -> BehandlingUnderkategori.ORDINÆR
             journalpostTittel?.contains("utvidet") == true -> BehandlingUnderkategori.UTVIDET
