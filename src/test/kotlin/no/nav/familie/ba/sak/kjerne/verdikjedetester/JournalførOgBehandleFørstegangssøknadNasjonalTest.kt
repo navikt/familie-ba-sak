@@ -335,7 +335,8 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
 
         val vedtaksperiodeId =
             hentAktivtVedtak(restFagsakEtterVurderTilbakekreving.data!!)!!.vedtaksperioderMedBegrunnelser.first()
-        familieBaSakKlient().oppdaterVedtaksperiodeMedStandardbegrunnelser(
+
+        val restFagsakMedOppdaterteVedtaksperioder = familieBaSakKlient().oppdaterVedtaksperiodeMedStandardbegrunnelser(
             vedtaksperiodeId = vedtaksperiodeId.id,
             restPutVedtaksperiodeMedStandardbegrunnelser = RestPutVedtaksperiodeMedStandardbegrunnelser(
                 standardbegrunnelser = listOf(
@@ -345,7 +346,7 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
         )
 
         val restFagsakEtterSendTilBeslutter =
-            familieBaSakKlient().sendTilBeslutter(fagsakId = restFagsakEtterVurderTilbakekreving.data!!.id)
+            familieBaSakKlient().sendTilBeslutter(fagsakId = restFagsakMedOppdaterteVedtaksperioder.data!!.id)
 
         generellAssertFagsak(
             restFagsak = restFagsakEtterSendTilBeslutter,
@@ -355,7 +356,7 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
 
         val restFagsakEtterIverksetting =
             familieBaSakKlient().iverksettVedtak(
-                fagsakId = restFagsakEtterVurderTilbakekreving.data!!.id,
+                fagsakId = restFagsakEtterSendTilBeslutter.data!!.id,
                 restBeslutningPåVedtak = RestBeslutningPåVedtak(
                     Beslutning.GODKJENT
                 ),
