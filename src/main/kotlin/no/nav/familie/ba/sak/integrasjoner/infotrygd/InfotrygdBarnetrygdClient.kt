@@ -28,10 +28,10 @@ import java.time.YearMonth
 
 @Component
 class InfotrygdBarnetrygdClient(
-    @Value("\${FAMILIE_BA_INFOTRYGD_BARNETRYGD_API_URL}") private val clientUri: URI,
+    @Value("\${FAMILIE_BA_INFOTRYGD_API_URL}") private val clientUri: URI,
     @Qualifier("jwtBearerMedLangTimeout") restOperations: RestOperations,
     private val environment: Environment
-) : AbstractRestClient(restOperations, "infotrygd_barnetrygd") {
+) : AbstractRestClient(restOperations, "infotrygd") {
 
     fun harLøpendeSakIInfotrygd(søkersIdenter: List<String>, barnasIdenter: List<String> = emptyList()): Boolean {
         if (environment.activeProfiles.contains("e2e")) {
