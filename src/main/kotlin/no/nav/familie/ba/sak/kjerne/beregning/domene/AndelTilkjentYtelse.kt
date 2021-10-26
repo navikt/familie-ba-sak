@@ -3,8 +3,13 @@ package no.nav.familie.ba.sak.kjerne.beregning.domene
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.YearMonthConverter
+import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.utledSegmenter
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
+import no.nav.fpsak.tidsserie.LocalDateInterval
+import no.nav.fpsak.tidsserie.LocalDateSegment
 import java.math.BigDecimal
 import java.time.YearMonth
 import java.util.Objects
@@ -141,6 +146,8 @@ data class AndelTilkjentYtelse(
 
     fun erUtvidet() = this.type == YtelseType.UTVIDET_BARNETRYGD
 
+    fun erSmåbarnstillegg() = this.type == YtelseType.SMÅBARNSTILLEGG
+
     fun erLøpende(): Boolean = this.stønadTom > YearMonth.now()
 
     fun erDeltBosted() = this.prosent == BigDecimal(50)
@@ -192,6 +199,22 @@ fun List<AndelTilkjentYtelse>.slåSammenBack2BackAndelsperioderMedSammeBeløp():
     }
     if (andel != null) sammenslåtteAndeler.add(andel!!)
     return sammenslåtteAndeler
+}
+
+fun List<AndelTilkjentYtelse>.lagVertikaleSegmenter(): Map<LocalDateSegment<Int>, List<AndelTilkjentYtelse>> {
+    return this.utledSegmenter()
+        .fold(mutableMapOf()) { acc, segment ->
+            val andelerForSegment = this.filter {
+                segment.localDateInterval.overlaps(
+                    LocalDateInterval(
+                        it.stønadFom.førsteDagIInneværendeMåned(),
+                        it.stønadTom.sisteDagIInneværendeMåned()
+                    )
+                )
+            }
+            acc[segment] = andelerForSegment
+            acc
+        }
 }
 
 enum class YtelseType(val klassifisering: String) {
