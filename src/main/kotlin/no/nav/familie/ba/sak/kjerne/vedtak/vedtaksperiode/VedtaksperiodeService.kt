@@ -127,11 +127,12 @@ class VedtaksperiodeService(
             .utbetalingsperiodeDetaljer
             .map { utbetalingsperiodeDetalj -> utbetalingsperiodeDetalj.person.personIdent }
 
+        val sanityBegrunnelser = brevKlient.hentSanityBegrunnelse()
         vedtaksperiodeMedBegrunnelser.settBegrunnelser(
             restPutVedtaksperiodeMedStandardbegrunnelser.standardbegrunnelser.mapNotNull {
 
                 val triggesAv =
-                    it.tilSanityBegrunnelse(brevKlient.hentSanityBegrunnelse())?.tilTriggesAv()
+                    it.tilSanityBegrunnelse(sanityBegrunnelser)?.tilTriggesAv()
                         ?: return@mapNotNull null
 
                 val vedtakBegrunnelseType = it.vedtakBegrunnelseType
@@ -404,8 +405,8 @@ class VedtaksperiodeService(
                                         triggesAv = triggesAv,
                                         vedtakBegrunnelseType = vedtakBegrunnelseType,
                                         endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(
-                                                behandling.id
-                                            )
+                                            behandling.id
+                                        )
                                     )
                                 ) {
                                     acc.add(standardBegrunnelse)

@@ -29,6 +29,36 @@ data class SanityBegrunnelse(
     val endretUtbetalingsperiodeTriggere: List<EndretUtbetalingsperiodeTrigger>? = null,
 )
 
+data class SanityRestBegrunnelse(
+    val apiNavn: String?,
+    val navnISystem: String,
+    val vilkaar: List<String>? = null,
+    val rolle: List<String>? = null,
+    val lovligOppholdTriggere: List<String>? = null,
+    val bosattIRiketTriggere: List<String>? = null,
+    val giftPartnerskapTriggere: List<String>? = null,
+    val borMedSokerTriggere: List<String>? = null,
+    val ovrigeTriggere: List<String>? = null,
+    val endringsaarsaker: List<String>? = null,
+    val hjemler: List<String> = emptyList(),
+    val endretUtbetalingsperiodeDeltBostedTriggere: List<String>? = null,
+    val endretUtbetalingsperiodeTriggere: List<String>? = null,
+) {
+    fun tilSanityBegrunnelse(): SanityBegrunnelse? {
+        SanityBegrunnelse(
+            apiNavn = apiNavn,
+            navnISystem = navnISystem,
+            vilkaar = vilkaar?.mapNotNull {
+                hmm(it, SanityVilkår.values().toList())
+            },
+        )
+    }
+}
+
+fun <T : Enum<T>> hmm(verdi: String, enumverdier: List<T>): T? {
+    return enumverdier.firstOrNull { verdi == it.name }
+}
+
 enum class SanityVilkår {
     UNDER_18_ÅR,
     BOR_MED_SOKER,
