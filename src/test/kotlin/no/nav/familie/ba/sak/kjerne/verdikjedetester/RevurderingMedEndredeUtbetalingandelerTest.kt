@@ -96,7 +96,9 @@ class RevurderingMedEndredeUtbetalingandelerTest(
             }
         }
 
-        behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.VILKÅRSVURDERING))
+        behandling.behandlingStegTilstand.add(
+            BehandlingStegTilstand(behandling = behandling, behandlingSteg = StegType.VILKÅRSVURDERING)
+        )
         stegService.håndterVilkårsvurdering(behandling)
 
         val endretUtbetalingAndel =
@@ -121,14 +123,14 @@ class RevurderingMedEndredeUtbetalingandelerTest(
             restEndretUtbetalingAndel
         )
 
-        behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BEHANDLINGSRESULTAT))
+        behandling.behandlingStegTilstand.add(
+            BehandlingStegTilstand(behandling = behandling, behandlingSteg = StegType.BEHANDLINGSRESULTAT)
+        )
         val behandlingEtterHåndterBehandlingsresultat = stegService.håndterBehandlingsresultat(behandling)
 
         behandlingEtterHåndterBehandlingsresultat.behandlingStegTilstand.add(
             BehandlingStegTilstand(
-                0,
-                behandling,
-                StegType.BEHANDLING_AVSLUTTET
+                behandling = behandling, behandlingSteg = StegType.BEHANDLING_AVSLUTTET
             )
         )
         val iverksattBehandling = behandlingService.lagreEllerOppdater(behandlingEtterHåndterBehandlingsresultat)
