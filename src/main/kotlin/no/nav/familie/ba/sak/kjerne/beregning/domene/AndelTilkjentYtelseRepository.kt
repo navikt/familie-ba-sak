@@ -7,10 +7,7 @@ import org.springframework.data.jpa.repository.Query
 import java.time.LocalDateTime
 
 interface AndelTilkjentYtelseRepository : JpaRepository<AndelTilkjentYtelse, Long> {
-
-    @Query(value = "SELECT aty FROM AndelTilkjentYtelse aty WHERE aty.behandlingId IN :behandlingIder")
-    fun finnAndelerTilkjentYtelseForBehandlinger(behandlingIder: List<Long>): List<AndelTilkjentYtelse>
-
+    
     @Query(value = "SELECT aty FROM AndelTilkjentYtelse aty WHERE aty.behandlingId IN :behandlingIder AND aty.prosent > 0")
     fun finnAndelerTilkjentYtelseTilUtbetalingForBehandlinger(behandlingIder: List<Long>): List<AndelTilkjentYtelse>
 
