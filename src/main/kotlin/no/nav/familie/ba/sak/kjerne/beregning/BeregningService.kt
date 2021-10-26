@@ -1,9 +1,9 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
@@ -70,25 +70,20 @@ class BeregningService(
         val andreFagsaker = fagsakService.hentFagsakerPåPerson(barnIdent)
             .filter { it.id != behandlendeBehandling.fagsak.id }
 
-        return andreFagsaker.map { fagsak ->
-            behandlingRepository.finnBehandlinger(fagsakId = fagsak.id)
-                .asSequence()
-                .filter { it.status == BehandlingStatus.AVSLUTTET }
-                .filter { !it.erHenlagt() }
-                .map { behandling ->
-                    hentTilkjentYtelseForBehandling(behandlingId = behandling.id)
-                }
-                .sortedBy { tilkjentYtelse -> tilkjentYtelse.opprettetDato }
-                .lastOrNull { tilkjentYtelse ->
-                    val barnFinnesIBehandling =
-                        personopplysningGrunnlagRepository
-                            .findByBehandlingAndAktiv(behandlingId = tilkjentYtelse.behandling.id)
-                            ?.barna?.map { it.personIdent }
-                            ?.contains(barnIdent)
-                            ?: false
-
-                    barnFinnesIBehandling && tilkjentYtelse.erSendtTilIverksetting()
-                }
+        return andreFagsaker.mapNotNull { fagsak ->
+            Behandlingutils.hentSisteBehandlingSomErIverksatt(
+                iverksatteBehandlinger = behandlingRepository.finnIverksatteBehandlinger(
+                    fagsakId = fagsak.id
+                )
+            )
+        }.map {
+            hentTilkjentYtelseForBehandling(behandlingId = it.id)
+        }.filter {
+            personopplysningGrunnlagRepository
+                .findByBehandlingAndAktiv(behandlingId = it.behandling.id)
+                ?.barna?.map { it.personIdent }
+                ?.contains(barnIdent)
+                ?: false
         }.mapNotNull { it }
     }
 
