@@ -57,9 +57,8 @@ class EndretUtbetalingAndelService(
             personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
                 ?: throw Feil("Fant ikke personopplysninggrunnlag på behandling ${behandling.id}")
 
-        val tilkjentYtelse = beregningService.oppdaterBehandlingMedBeregning(
-            behandling, personopplysningGrunnlag, endretUtbetalingAndel
-        )
+        val tilkjentYtelse =
+            beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag, endretUtbetalingAndel)
         val andreBehandlingerPåBarna = personopplysningGrunnlag.barna.map { barn ->
             Pair(barn, beregningService.hentIverksattTilkjentYtelseForBarn(barn.personIdent, behandling))
         }
@@ -94,5 +93,25 @@ class EndretUtbetalingAndelService(
             )
         )
 
+    @Transactional
+    fun kopierEndretUtbetalingAndelFraForrigeBehandling(behandling: Behandling, forrigeBehandling: Behandling) {
+        hentForBehandling(forrigeBehandling.id).forEach {
+            endretUtbetalingAndelRepository.save(
+                it.copy(
+                    id = 0,
+                    behandlingId = behandling.id,
+                    andelTilkjentYtelser = mutableListOf()
+                )
+            )
+        }
+    }
+
     fun hentForBehandling(behandlingId: Long) = endretUtbetalingAndelRepository.findByBehandlingId(behandlingId)
+
+    @Transactional
+    fun fjernKnytningTilAndelTilkjentYtelse(behandlingId: Long) {
+        hentForBehandling(behandlingId).filter { it.andelTilkjentYtelser.isNotEmpty() }.forEach {
+            it.andelTilkjentYtelser.clear()
+        }
+    }
 }

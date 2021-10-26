@@ -9,7 +9,6 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerDeltBosted
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -91,7 +90,7 @@ class BeregningService(
     fun oppdaterBehandlingMedBeregning(
         behandling: Behandling,
         personopplysningGrunnlag: PersonopplysningGrunnlag,
-        endretUtbetalingAndel: EndretUtbetalingAndel? = null
+        nyEndretUtbetalingAndel: EndretUtbetalingAndel? = null
     ): TilkjentYtelse {
 
         tilkjentYtelseRepository.slettTilkjentYtelseFor(behandling)
@@ -109,11 +108,13 @@ class BeregningService(
                     behandlingId = behandling.id
                 )
             }
-
-        if (endretUtbetalingAndel != null)
-            validerDeltBosted(endretUtbetalingAndel, tilkjentYtelse.andelerTilkjentYtelse.toList())
-
-        val endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(behandling.id)
+        val endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(behandling.id).filter {
+            if (nyEndretUtbetalingAndel != null) {
+                it.id == nyEndretUtbetalingAndel.id || it.andelTilkjentYtelser.isNotEmpty()
+            } else {
+                it.andelTilkjentYtelser.isNotEmpty()
+            }
+        }
         val andelerTilkjentYtelse = TilkjentYtelseUtils.oppdaterTilkjentYtelseMedEndretUtbetalingAndeler(
             tilkjentYtelse.andelerTilkjentYtelse,
             endretUtbetalingAndeler
