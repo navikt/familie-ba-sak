@@ -1,11 +1,14 @@
 package no.nav.familie.ba.sak.kjerne.endretutbetaling
 
+import io.mockk.mockk
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.UtbetalingsikkerhetFeil
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagEndretUtbetalingAndel
 import no.nav.familie.ba.sak.common.tilfeldigPerson
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerAtAlleOpprettedeEndringerErUtfylt
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerAtEndringerErTilknyttetAndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerDeltBosted
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerIngenOverlappendeEndring
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerPeriodeInnenforTilkjentytelse
@@ -191,6 +194,25 @@ class EndretUtbetalingAndelValideringTest {
         assertEquals(
             "Det er opprettet instanser av EndretUtbetalingandel som ikke er fylt ut før navigering til neste steg.",
             feil.melding
+        )
+    }
+
+    @Test
+    fun `sjekk at alle endrede utbetalingsandeler er tilknyttet andeltilkjentytelser`() {
+        val endretUtbetalingAndel1 = lagEndretUtbetalingAndel(person = tilfeldigPerson())
+        val feil = assertThrows<FunksjonellFeil> {
+            validerAtEndringerErTilknyttetAndelTilkjentYtelse(listOf(endretUtbetalingAndel1))
+        }
+        assertEquals(
+            "Det er opprettet instanser av EndretUtbetalingandel som ikke er tilknyttet noen andeler. De må enten lagres eller slettes av SB.",
+            feil.melding
+        )
+
+        val andelTilkjentYtelse: AndelTilkjentYtelse = mockk()
+        validerAtEndringerErTilknyttetAndelTilkjentYtelse(
+            listOf(
+                endretUtbetalingAndel1.copy(andelTilkjentYtelser = mutableListOf(andelTilkjentYtelse))
+            )
         )
     }
 }

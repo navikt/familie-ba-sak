@@ -84,12 +84,11 @@ data class EndretUtbetalingAndel(
     var begrunnelse: String? = null,
 
     @ManyToMany(mappedBy = "endretUtbetalingAndeler")
-    val andelTilkjentYtelser: List<AndelTilkjentYtelse> = emptyList(),
+    val andelTilkjentYtelser: MutableList<AndelTilkjentYtelse> = mutableListOf(),
 
     @Column(name = "vedtak_begrunnelse_spesifikasjoner")
     @Convert(converter = VedtakBegrunnelseSpesifikasjonListConverter::class)
-    var vedtakBegrunnelseSpesifikasjoner: List<VedtakBegrunnelseSpesifikasjon> = emptyList(),
-
+    var vedtakBegrunnelseSpesifikasjoner: List<VedtakBegrunnelseSpesifikasjon> = emptyList()
 ) : BaseEntitet() {
 
     fun overlapperMed(periode: MånedPeriode) = periode.overlapperHeltEllerDelvisMed(this.periode())
@@ -142,7 +141,8 @@ fun EndretUtbetalingAndel.tilRestEndretUtbetalingAndel() = RestEndretUtbetalingA
     årsak = this.årsak,
     avtaletidspunktDeltBosted = this.avtaletidspunktDeltBosted,
     søknadstidspunkt = this.søknadstidspunkt,
-    begrunnelse = this.begrunnelse
+    begrunnelse = this.begrunnelse,
+    erTilknyttetAndeler = this.andelTilkjentYtelser.isNotEmpty()
 )
 
 fun EndretUtbetalingAndel.fraRestEndretUtbetalingAndel(
