@@ -192,7 +192,6 @@ class VedtaksperiodeService(
                     )
                 }
 
-                val sanityBegrunnelser = brevKlient.hentSanityBegrunnelse()
                 if (it.erTilknyttetVilkår(sanityBegrunnelser) && personerGjeldendeForBegrunnelseIdenter.isEmpty()) {
                     begrunnelserMedFeil.add(it)
                 }
@@ -405,8 +404,8 @@ class VedtaksperiodeService(
                                         triggesAv = triggesAv,
                                         vedtakBegrunnelseType = vedtakBegrunnelseType,
                                         endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(
-                                            behandling.id
-                                        )
+                                                behandling.id
+                                            )
                                     )
                                 ) {
                                     acc.add(standardBegrunnelse)
