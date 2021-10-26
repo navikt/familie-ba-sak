@@ -4,9 +4,11 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.Utils.avrundetHeltallAvProsent
 import no.nav.familie.ba.sak.common.erDagenFør
+import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.inkluderer
 import no.nav.familie.ba.sak.common.maksimum
 import no.nav.familie.ba.sak.common.minimum
+import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -132,6 +134,8 @@ object TilkjentYtelseUtils {
             val endringerForPerson =
                 endretUtbetalingAndeler.filter { it.person?.personIdent?.ident == barnMedAndeler.personIdent }
 
+            val nyeAndelerForPerson = mutableListOf<AndelTilkjentYtelse>()
+
             andelerForPerson.forEach { andelForPerson ->
                 // Deler opp hver enkelt andel i perioder som hhv blir berørt av endringene og de som ikke berøres av de.
                 val (perioderMedEndring, perioderUtenEndring) = andelForPerson.stønadsPeriode()
@@ -139,7 +143,7 @@ object TilkjentYtelseUtils {
                         endringerForPerson.map { endringerForPerson -> endringerForPerson.periode() }
                     )
                 // Legger til nye AndelTilkjentYtelse for perioder som er berørt av endringer.
-                nyeAndelTilkjentYtelse.addAll(
+                nyeAndelerForPerson.addAll(
                     perioderMedEndring.map { månedPeriodeEndret ->
                         val endretUtbetalingAndel = endringerForPerson.single { it.overlapperMed(månedPeriodeEndret) }
                         andelForPerson.copy(
@@ -153,19 +157,63 @@ object TilkjentYtelseUtils {
                     }
                 )
                 // Legger til nye AndelTilkjentYtelse for perioder som ikke berøres av endringer.
-                nyeAndelTilkjentYtelse.addAll(
+                nyeAndelerForPerson.addAll(
                     perioderUtenEndring.map { månedPeriodeUendret ->
                         andelForPerson.copy(stønadFom = månedPeriodeUendret.fom, stønadTom = månedPeriodeUendret.tom)
                     }
                 )
             }
+
+            val nyeAndelerForPersonEtterSammenslåing =
+                slåSammenPerioderSomIkkeSkulleHaVærtSplittet(nyeAndelerForPerson = nyeAndelerForPerson)
+
+            nyeAndelTilkjentYtelse.addAll(nyeAndelerForPersonEtterSammenslåing)
         }
         // Sorterer primært av hensyn til måten testene er implementert og kan muligens fjernes dersom dette skrives om.
-        nyeAndelTilkjentYtelse.sortWith(compareBy({ it.personIdent }, { it.stønadFom }))
+        nyeAndelTilkjentYtelse.sortWith(
+            compareBy(
+                { it.personIdent },
+                { it.stønadFom }
+            )
+        )
         return nyeAndelTilkjentYtelse.toMutableSet()
     }
 
-    private fun beregnBeløpsperioder(
+    private fun slåSammenPerioderSomIkkeSkulleHaVærtSplittet(nyeAndelerForPerson: MutableList<AndelTilkjentYtelse>): MutableList<AndelTilkjentYtelse> {
+        val sorterteAndeler = nyeAndelerForPerson.sortedBy { it.stønadFom }.toMutableList()
+        var periodenViSerPå: AndelTilkjentYtelse = sorterteAndeler.first()
+        val oppdatertListeMedAndeler = mutableListOf<AndelTilkjentYtelse>()
+
+        for (index in 0 until sorterteAndeler.size) {
+            val andel = sorterteAndeler[index]
+            val nesteAndel = if (index == sorterteAndeler.size - 1) null else sorterteAndeler[index + 1]
+
+            if (nesteAndel != null) {
+                val andelerSkalSlåsSammen =
+                    skalAndelerSlåsSammen(førsteAndel = andel, nesteAndel = nesteAndel)
+
+                if (andelerSkalSlåsSammen) {
+                    val nyAndel = periodenViSerPå.copy(stønadTom = nesteAndel.stønadTom)
+                    periodenViSerPå = nyAndel
+                } else {
+                    oppdatertListeMedAndeler.add(periodenViSerPå)
+                    periodenViSerPå = sorterteAndeler[index + 1]
+                }
+            } else {
+                oppdatertListeMedAndeler.add(periodenViSerPå)
+                break
+            }
+        }
+        return oppdatertListeMedAndeler
+    }
+
+    private fun skalAndelerSlåsSammen(førsteAndel: AndelTilkjentYtelse, nesteAndel: AndelTilkjentYtelse): Boolean =
+        førsteAndel.stønadTom.sisteDagIInneværendeMåned()
+            .erDagenFør(nesteAndel.stønadFom.førsteDagIInneværendeMåned()) && førsteAndel.prosent == BigDecimal(0) && nesteAndel.prosent == BigDecimal(
+            0
+        ) && førsteAndel.endretUtbetalingAndeler.isNotEmpty() && førsteAndel.endretUtbetalingAndeler.singleOrNull() == nesteAndel.endretUtbetalingAndeler.singleOrNull()
+
+    fun beregnBeløpsperioder(
         overlappendePerioderesultatSøker: PeriodeResultat,
         periodeResultatBarn: PeriodeResultat,
         innvilgedePeriodeResultatBarna: List<PeriodeResultat>,
