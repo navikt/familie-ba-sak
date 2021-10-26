@@ -160,7 +160,7 @@ class JournalføringService(
                 )
             }
 
-            val underkategori = request.underkategori ?: request.hentUnderkategori()
+            val underkategori = request.hentUnderkategori()
             if (underkategori == BehandlingUnderkategori.UTVIDET && !featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_UTVIDET)) {
                 throw FunksjonellFeil(
                     melding = "Utvidet er ikke påskrudd",
