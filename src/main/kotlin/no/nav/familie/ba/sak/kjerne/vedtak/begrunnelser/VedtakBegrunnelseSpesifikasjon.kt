@@ -26,6 +26,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtvidetVedtaksperiodeM
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
+import org.slf4j.LoggerFactory
 import java.math.BigDecimal
 import java.time.LocalDate
 import javax.persistence.AttributeConverter
@@ -609,7 +610,18 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
         }
     }
 
+    fun tilSanityBegrunnelse(
+        sanityBegrunnelser: List<SanityBegrunnelse>
+    ): SanityBegrunnelse? {
+        val sanityBegrunnelse = sanityBegrunnelser.find { it.apiNavn == this.sanityApiNavn }
+        if (sanityBegrunnelse == null) {
+            logger.warn("Finner ikke begrunnelse med apinavn '${this.sanityApiNavn}' på '${this.name}' i Sanity")
+        }
+        return sanityBegrunnelse
+    }
+
     companion object {
+        private val logger = LoggerFactory.getLogger(VedtakBegrunnelseSpesifikasjon::class.java)
 
         fun List<LocalDate>.tilBrevTekst(): String = Utils.slåSammen(this.sorted().map { it.tilKortString() })
     }
@@ -645,12 +657,8 @@ private fun erEtterEndretPeriodeAvSammeÅrsak(
 
 val hjemlerTilhørendeFritekst = setOf(2, 4, 11)
 
-fun VedtakBegrunnelseSpesifikasjon.tilSanityBegrunnelse(sanityBegrunnelser: List<SanityBegrunnelse>): SanityBegrunnelse =
-    sanityBegrunnelser.find { it.apiNavn == this.sanityApiNavn }
-        ?: throw Feil("Fant ikke begrunnelse med apiNavn=${this.sanityApiNavn} for ${this.name} i Sanity.")
-
-fun VedtakBegrunnelseSpesifikasjon.erTilknyttetVilkår(sanityBegrunnelser: List<SanityBegrunnelse>) =
-    !this.tilSanityBegrunnelse(sanityBegrunnelser).vilkaar.isNullOrEmpty()
+fun VedtakBegrunnelseSpesifikasjon.erTilknyttetVilkår(sanityBegrunnelser: List<SanityBegrunnelse>): Boolean =
+    !this.tilSanityBegrunnelse(sanityBegrunnelser)?.vilkaar.isNullOrEmpty()
 
 enum class VedtakBegrunnelseType {
     INNVILGET,
