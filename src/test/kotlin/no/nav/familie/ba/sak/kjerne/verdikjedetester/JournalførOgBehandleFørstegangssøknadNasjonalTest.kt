@@ -234,7 +234,8 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
                     id = scenario.søker.ident!!
                 )
             ).copy(
-                journalpostTittel = "Søknad om utvidet barnetrygd"
+                journalpostTittel = "Søknad om utvidet barnetrygd",
+                underkategori = BehandlingUnderkategori.UTVIDET
             )
         )
 
