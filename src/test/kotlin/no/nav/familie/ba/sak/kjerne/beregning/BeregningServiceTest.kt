@@ -8,6 +8,7 @@ import io.mockk.slot
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.defaultFagsak
 import no.nav.familie.ba.sak.common.forrigeMåned
+import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagPersonResultat
@@ -251,6 +252,7 @@ class BeregningServiceTest {
             søkerFnr,
             listOf(barn.personIdent.ident)
         )
+
         every { endretUtbetalingAndelRepository.findByBehandlingId(any()) } returns
             listOf(
                 EndretUtbetalingAndel(
@@ -261,7 +263,13 @@ class BeregningServiceTest {
                     avtaletidspunktDeltBosted = avtaletidspunktDeltBosted,
                     søknadstidspunkt = søkandtidspunkt,
                     årsak = Årsak.DELT_BOSTED,
-                    begrunnelse = "En begrunnelse"
+                    begrunnelse = "En begrunnelse",
+                    andelTilkjentYtelser = mutableListOf(
+                        lagAndelTilkjentYtelse(
+                            fom = periodeFom.toYearMonth().toString(),
+                            tom = periodeTom.toYearMonth().toString()
+                        )
+                    )
                 )
             )
 

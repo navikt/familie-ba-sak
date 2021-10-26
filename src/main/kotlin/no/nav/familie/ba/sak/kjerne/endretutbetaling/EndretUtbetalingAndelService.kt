@@ -85,5 +85,25 @@ class EndretUtbetalingAndelService(
             )
         )
 
+    @Transactional
+    fun kopierEndretUtbetalingAndelFraForrigeBehandling(behandling: Behandling, forrigeBehandling: Behandling) {
+        hentForBehandling(forrigeBehandling.id).forEach {
+            endretUtbetalingAndelRepository.save(
+                it.copy(
+                    id = 0,
+                    behandlingId = behandling.id,
+                    andelTilkjentYtelser = mutableListOf()
+                )
+            )
+        }
+    }
+
     fun hentForBehandling(behandlingId: Long) = endretUtbetalingAndelRepository.findByBehandlingId(behandlingId)
+
+    @Transactional
+    fun fjernKnytningTilAndelTilkjentYtelse(behandlingId: Long) {
+        hentForBehandling(behandlingId).filter { it.andelTilkjentYtelser.isNotEmpty() }.forEach {
+            it.andelTilkjentYtelser.clear()
+        }
+    }
 }

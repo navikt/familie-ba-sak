@@ -76,13 +76,13 @@ data class AndelTilkjentYtelse(
     @Column(name = "prosent", nullable = false)
     val prosent: BigDecimal,
 
-    @ManyToMany(cascade = [CascadeType.PERSIST], fetch = FetchType.EAGER)
+    @ManyToMany(cascade = [CascadeType.PERSIST, CascadeType.REMOVE], fetch = FetchType.EAGER)
     @JoinTable(
         name = "ANDEL_TIL_ENDRET_ANDEL",
         joinColumns = [JoinColumn(name = "fk_andel_tilkjent_ytelse_id")],
         inverseJoinColumns = [JoinColumn(name = "fk_endret_utbetaling_andel_id")]
     )
-    val endretUtbetalingAndeler: List<EndretUtbetalingAndel> = emptyList(),
+    val endretUtbetalingAndeler: MutableList<EndretUtbetalingAndel> = mutableListOf(),
 
     // kildeBehandlingId, periodeOffset og forrigePeriodeOffset trengs kun i forbindelse med
     // iverksetting/konsistensavstemming, og settes først ved generering av selve oppdraget mot økonomi.
