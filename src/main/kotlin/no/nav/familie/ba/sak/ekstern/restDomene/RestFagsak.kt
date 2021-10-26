@@ -35,3 +35,30 @@ fun Fagsak.tilRestFagsak(
     gjeldendeUtbetalingsperioder = gjeldendeUtbetalingsperioder,
     tilbakekrevingsbehandlinger = tilbakekrevingsbehandlinger,
 )
+
+data class RestMinimalFagsak(
+    val opprettetTidspunkt: LocalDateTime,
+    val id: Long,
+    val søkerFødselsnummer: String,
+    val status: FagsakStatus,
+    val underBehandling: Boolean,
+    val behandlinger: List<RestVisningBehandling>,
+    val tilbakekrevingsbehandlinger: List<RestTilbakekrevingsbehandling>,
+    val gjeldendeUtbetalingsperioder: List<Utbetalingsperiode>,
+)
+
+fun Fagsak.tilRestMinimalFagsak(
+    underBehandling: Boolean,
+    restVisningBehandlinger: List<RestVisningBehandling>,
+    gjeldendeUtbetalingsperioder: List<Utbetalingsperiode>,
+    tilbakekrevingsbehandlinger: List<RestTilbakekrevingsbehandling>
+) = RestMinimalFagsak(
+    opprettetTidspunkt = this.opprettetTidspunkt,
+    id = this.id,
+    søkerFødselsnummer = this.hentAktivIdent().ident,
+    status = this.status,
+    underBehandling = underBehandling,
+    behandlinger = restVisningBehandlinger,
+    tilbakekrevingsbehandlinger = tilbakekrevingsbehandlinger,
+    gjeldendeUtbetalingsperioder = gjeldendeUtbetalingsperioder
+)

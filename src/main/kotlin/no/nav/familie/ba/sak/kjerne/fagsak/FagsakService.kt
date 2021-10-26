@@ -6,15 +6,18 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.ekstern.restDomene.FagsakDeltagerRolle
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsakDeltager
+import no.nav.familie.ba.sak.ekstern.restDomene.RestMinimalFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestBehandlingStegTilstand
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestFødselshendelsefiltreringResultat
+import no.nav.familie.ba.sak.ekstern.restDomene.tilRestMinimalFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonerMedAndeler
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestTotrinnskontroll
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestVedtak
+import no.nav.familie.ba.sak.ekstern.restDomene.tilRestVisningBehandling
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PersonInfo
@@ -23,6 +26,7 @@ import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.tilRestEndretUtbetalingAndel
@@ -33,6 +37,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagSe
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
+import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingsbehandlingService
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.domene.TilbakekrevingRepository
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollRepository
@@ -165,12 +170,49 @@ class FagsakService(
         lagre(fagsak)
     }
 
+    fun hentRestFagsakForPerson(personIdent: PersonIdent): Ressurs<RestMinimalFagsak> {
+        val fagsak = fagsakRepository.finnFagsakForPersonIdent(personIdent)
+        return if (fagsak != null) Ressurs.success(data = lagRestMinimalFagsak(fagsakId = fagsak.id)) else Ressurs.failure(
+            errorMessage = "Fant ikke fagsak på person"
+        )
+    }
+
     fun hentRestFagsak(fagsakId: Long): Ressurs<RestFagsak> = Ressurs.success(data = lagRestFagsak(fagsakId))
 
-    fun hentRestFagsakForPerson(personIdent: PersonIdent): Ressurs<RestFagsak> {
-        val fagsak = fagsakRepository.finnFagsakForPersonIdent(personIdent)
-        return if (fagsak != null) Ressurs.success(data = lagRestFagsak(fagsakId = fagsak.id)) else Ressurs.failure(
-            errorMessage = "Fant ikke fagsak på person"
+    fun hentRestMinimalFagsak(fagsakId: Long): Ressurs<RestMinimalFagsak> =
+        Ressurs.success(data = lagRestMinimalFagsak(fagsakId))
+
+    fun lagRestMinimalFagsak(@FagsaktilgangConstraint fagsakId: Long): RestMinimalFagsak {
+        val fagsak = fagsakRepository.finnFagsak(fagsakId)
+            ?: throw FunksjonellFeil(
+                melding = "Finner ikke fagsak med id $fagsakId",
+                frontendFeilmelding = "Finner ikke fagsak med id $fagsakId"
+            )
+        val behandlinger = behandlingRepository.finnBehandlinger(fagsakId)
+        val tilbakekrevingsbehandlinger =
+            tilbakekrevingsbehandlingService.hentRestTilbakekrevingsbehandlinger((fagsakId))
+        val visningsbehandlinger = behandlinger.map {
+            it.tilRestVisningBehandling(
+                vedtaksdato = vedtakRepository.findByBehandlingAndAktiv(it.id)?.vedtaksdato
+            )
+        }
+
+        val sistIverksatteBehandling =
+            Behandlingutils.hentSisteBehandlingSomErIverksatt(
+                iverksatteBehandlinger = behandlingRepository.finnIverksatteBehandlinger(
+                    fagsakId = fagsakId
+                )
+            )
+        val gjeldendeUtbetalingsperioder =
+            if (sistIverksatteBehandling != null) vedtaksperiodeService.hentUtbetalingsperioder(behandling = sistIverksatteBehandling) else emptyList()
+
+        return fagsak.tilRestMinimalFagsak(
+            underBehandling = behandlinger.any {
+                it.status == BehandlingStatus.UTREDES || (it.steg >= StegType.BESLUTTE_VEDTAK && it.steg != StegType.BEHANDLING_AVSLUTTET)
+            },
+            restVisningBehandlinger = visningsbehandlinger,
+            tilbakekrevingsbehandlinger = tilbakekrevingsbehandlinger,
+            gjeldendeUtbetalingsperioder = gjeldendeUtbetalingsperioder
         )
     }
 
@@ -321,8 +363,8 @@ class FagsakService(
                     relasjon.relasjonsrolle == FORELDERBARNRELASJONROLLE.MEDMOR
             }.forEach { relasjon ->
                 if (assosierteFagsakDeltagere.find { fagsakDeltager ->
-                    fagsakDeltager.ident == relasjon.personIdent.id
-                } == null
+                        fagsakDeltager.ident == relasjon.personIdent.id
+                    } == null
                 ) {
                     val maskertForelder = hentMaskertFagsakdeltakerVedManglendeTilgang(relasjon.personIdent.id)
                     if (maskertForelder != null) {

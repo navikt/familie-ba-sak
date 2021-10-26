@@ -15,7 +15,10 @@ class RestTilbakekrevingsbehandling(
     val type: Behandlingstype,
     val status: Behandlingsstatus,
     val resultat: Behandlingsresultatstype?,
+    val vedtaksdato: LocalDateTime?,
+    @Deprecated("Bruk vedtaksdato")
     val vedtakForBehandling: List<RestTilbakekrevingsVedtak>
 )
 
+@Deprecated("Bruk vedtaksdato på RestTilbakekrevingsbehandling")
 class RestTilbakekrevingsVedtak(val aktiv: Boolean, val vedtaksdato: LocalDateTime)
