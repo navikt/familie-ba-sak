@@ -121,7 +121,7 @@ fun UtvidetVedtaksperiodeMedBegrunnelser.byggBegrunnelserOgFritekster(
 class BegrunnelseComparator : Comparator<Vedtaksbegrunnelse> {
 
     override fun compare(o1: Vedtaksbegrunnelse, o2: Vedtaksbegrunnelse): Int {
-        return if (o1.vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGELSE) {
+        return if (o1.vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGET) {
             -1
         } else 1
     }

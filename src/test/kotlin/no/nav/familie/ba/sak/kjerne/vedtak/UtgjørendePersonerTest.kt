@@ -125,7 +125,7 @@ class UtgjørendePersonerTest {
                 fom = LocalDate.of(2010, 1, 1),
                 tom = LocalDate.of(2010, 6, 1)
             ),
-            oppdatertBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE,
+            oppdatertBegrunnelseType = VedtakBegrunnelseType.INNVILGET,
             triggesAv = TriggesAv(setOf(Vilkår.LOVLIG_OPPHOLD)),
             aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList(),
         )
@@ -290,7 +290,7 @@ class UtgjørendePersonerTest {
                 fom = LocalDate.of(2021, 12, 1),
                 tom = TIDENES_ENDE
             ),
-            oppdatertBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE,
+            oppdatertBegrunnelseType = VedtakBegrunnelseType.INNVILGET,
             triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOSATT_I_RIKET), medlemskap = true),
             aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList()
         )
@@ -301,7 +301,7 @@ class UtgjørendePersonerTest {
                 fom = LocalDate.of(2021, 12, 1),
                 tom = TIDENES_ENDE
             ),
-            oppdatertBegrunnelseType = VedtakBegrunnelseType.INNVILGELSE,
+            oppdatertBegrunnelseType = VedtakBegrunnelseType.INNVILGET,
             triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOSATT_I_RIKET)),
             aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList()
         )
