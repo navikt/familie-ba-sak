@@ -12,6 +12,8 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 data class SanityBegrunnelse(
     val apiNavn: String?,
@@ -29,7 +31,7 @@ data class SanityBegrunnelse(
     val endretUtbetalingsperiodeTriggere: List<EndretUtbetalingsperiodeTrigger>? = null,
 )
 
-data class SanityRestBegrunnelse(
+data class RestSanityBegrunnelse(
     val apiNavn: String?,
     val navnISystem: String,
     val vilkaar: List<String>? = null,
@@ -44,19 +46,46 @@ data class SanityRestBegrunnelse(
     val endretUtbetalingsperiodeDeltBostedTriggere: List<String>? = null,
     val endretUtbetalingsperiodeTriggere: List<String>? = null,
 ) {
-    fun tilSanityBegrunnelse(): SanityBegrunnelse? {
-        SanityBegrunnelse(
+    fun tilSanityBegrunnelse(): SanityBegrunnelse {
+        return SanityBegrunnelse(
             apiNavn = apiNavn,
             navnISystem = navnISystem,
             vilkaar = vilkaar?.mapNotNull {
-                hmm(it, SanityVilkår.values().toList())
+                finnEnumverdi(it, SanityVilkår.values())
+            },
+            rolle = rolle?.mapNotNull { finnEnumverdi(it, VilkårRolle.values()) },
+            lovligOppholdTriggere = lovligOppholdTriggere?.mapNotNull { finnEnumverdi(it, VilkårTrigger.values()) },
+            bosattIRiketTriggere = bosattIRiketTriggere?.mapNotNull { finnEnumverdi(it, VilkårTrigger.values()) },
+            giftPartnerskapTriggere = giftPartnerskapTriggere?.mapNotNull { finnEnumverdi(it, VilkårTrigger.values()) },
+            borMedSokerTriggere = borMedSokerTriggere?.mapNotNull { finnEnumverdi(it, VilkårTrigger.values()) },
+            ovrigeTriggere = ovrigeTriggere?.mapNotNull { finnEnumverdi(it, ØvrigTrigger.values()) },
+            endringsaarsaker = endringsaarsaker?.mapNotNull { finnEnumverdi(it, Årsak.values()) },
+            hjemler = hjemler,
+            endretUtbetalingsperiodeDeltBostedTriggere = endretUtbetalingsperiodeDeltBostedTriggere?.mapNotNull {
+                finnEnumverdi(
+                    it, EndretUtbetalingsperiodeDeltBostedTriggere.values()
+                )
+            },
+            endretUtbetalingsperiodeTriggere = endretUtbetalingsperiodeTriggere?.mapNotNull {
+                finnEnumverdi(
+                    it,
+                    EndretUtbetalingsperiodeTrigger.values()
+                )
             },
         )
     }
 }
 
-fun <T : Enum<T>> hmm(verdi: String, enumverdier: List<T>): T? {
-    return enumverdier.firstOrNull { verdi == it.name }
+val logger: Logger = LoggerFactory.getLogger(RestSanityBegrunnelse::class.java)
+
+fun <T : Enum<T>> finnEnumverdi(verdi: String, enumverdier: Array<T>): T? {
+    val enumverdi = enumverdier.firstOrNull { verdi == it.name }
+    if (enumverdi == null) {
+        logger.warn(
+            "$verdi er ikke blant verdiene til enumen ${enumverdier.javaClass.simpleName}"
+        )
+    }
+    return enumverdi
 }
 
 enum class SanityVilkår {
@@ -136,8 +165,8 @@ fun SanityBegrunnelse.tilTriggesAv(): TriggesAv {
         medlemskap = this.inneholderBosattIRiketTrigger(VilkårTrigger.MEDLEMSKAP),
         deltbosted = this.inneholderBorMedSøkerTrigger(VilkårTrigger.DELT_BOSTED),
         valgbar = !this.inneholderØvrigTrigger(ØvrigTrigger.ALLTID_AUTOMATISK),
-        etterEndretUtbetaling = this.endretUtbetalingsperiodeTriggere?.contains(EndretUtbetalingsperiodeTrigger.ETTER_ENDRET_UTBETALINGSPERIODE)
-            ?: false,
+        etterEndretUtbetaling = this.endretUtbetalingsperiodeTriggere
+            ?.contains(EndretUtbetalingsperiodeTrigger.ETTER_ENDRET_UTBETALINGSPERIODE) ?: false,
         endretUtbetaingSkalUtbetales = this.endretUtbetalingsperiodeDeltBostedTriggere?.contains(
             EndretUtbetalingsperiodeDeltBostedTriggere.SKAL_UTBETALES
         )
