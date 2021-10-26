@@ -3,12 +3,14 @@ package no.nav.familie.ba.sak.integrasjoner.journalføring
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
+import no.nav.familie.ba.sak.ekstern.restDomene.NavnOgIdent
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.DbJournalpostType
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.JournalføringRepository
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.Sakstype
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.kjerne.verdikjedetester.lagMockRestJournalføring
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
@@ -26,8 +28,7 @@ class JournalføringServiceTest(
     private val journalføringService: JournalføringService,
 
     @Autowired
-    private val journalføringRepository: JournalføringRepository
-
+    private val journalføringRepository: JournalføringRepository,
 ) : AbstractSpringIntegrationTest() {
 
     @Test
@@ -60,5 +61,18 @@ class JournalføringServiceTest(
         assertNull(sak.fagsakId)
         assertEquals(Sakstype.GENERELL_SAK.type, sak.sakstype)
         assertEquals(0, behandlinger.size)
+    }
+
+    @Test
+    fun `kjør journalføring`() {
+        val fagsakId: String = journalføringService.journalfør(
+            request = lagMockRestJournalføring(
+                bruker = NavnOgIdent("Mock", randomFnr())
+            ),
+            journalpostId = "1234",
+            behandlendeEnhet = "1234",
+            oppgaveId = "1234"
+        )
+        assertEquals("999951", fagsakId)
     }
 }
