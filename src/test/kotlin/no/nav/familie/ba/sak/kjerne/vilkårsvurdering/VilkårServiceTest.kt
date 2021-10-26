@@ -69,7 +69,7 @@ class VilkårServiceTest(
     @Autowired
     private val stegService: StegService,
 
-    ) : AbstractTestWithJdbcTables(dataSource) {
+) : AbstractTestWithJdbcTables(dataSource) {
 
     @BeforeAll
     fun init() {
