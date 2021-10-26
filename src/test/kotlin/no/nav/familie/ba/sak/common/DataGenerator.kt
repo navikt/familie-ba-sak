@@ -206,7 +206,8 @@ fun lagAndelTilkjentYtelse(
     periodeIdOffset: Long? = null,
     forrigeperiodeIdOffset: Long? = null,
     tilkjentYtelse: TilkjentYtelse? = null,
-    prosent: BigDecimal = BigDecimal(100)
+    prosent: BigDecimal = BigDecimal(100),
+    endretUtbetalingAndeler: List<EndretUtbetalingAndel> = emptyList()
 ): AndelTilkjentYtelse {
 
     return AndelTilkjentYtelse(
@@ -220,7 +221,8 @@ fun lagAndelTilkjentYtelse(
         periodeOffset = periodeIdOffset,
         forrigePeriodeOffset = forrigeperiodeIdOffset,
         sats = beløp,
-        prosent = prosent
+        prosent = prosent,
+        endretUtbetalingAndeler = endretUtbetalingAndeler
     )
 }
 

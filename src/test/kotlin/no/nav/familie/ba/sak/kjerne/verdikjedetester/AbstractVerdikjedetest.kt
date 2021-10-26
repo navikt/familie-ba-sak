@@ -17,7 +17,7 @@ class VerdikjedetesterPropertyOverrideContextInitializer : ApplicationContextIni
     override fun initialize(configurableApplicationContext: ConfigurableApplicationContext) {
         TestPropertySourceUtils.addInlinedPropertiesToEnvironment(
             configurableApplicationContext,
-            "FAMILIE_BA_INFOTRYGD_BARNETRYGD_API_URL: http://localhost:1337/rest/api/infotrygd/ba",
+            "FAMILIE_BA_INFOTRYGD_API_URL: http://localhost:1337/rest/api/infotrygd/ba",
             "PDL_URL: http://localhost:1337/rest/api/pdl"
         )
     }

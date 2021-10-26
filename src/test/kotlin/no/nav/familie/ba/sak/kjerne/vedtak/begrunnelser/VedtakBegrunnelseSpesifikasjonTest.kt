@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.common.lagEndretUtbetalingAndel
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.lagUtbetalingsperiodeDetalj
 import no.nav.familie.ba.sak.common.lagUtvidetVedtaksperiodeMedBegrunnelser
@@ -15,10 +16,11 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
-import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -82,7 +84,7 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
 
     @Test
     fun `Har barn med seksårsdag skal gi true`() {
-        val persongrunnlag = mockk<PersonopplysningGrunnlag>()
+        val persongrunnlag = mockk<PersonopplysningGrunnlag>(relaxed = true)
         every { persongrunnlag.harBarnMedSeksårsdagPåFom(utvidetVedtaksperiodeMedBegrunnelser.fom) } returns true
 
         assertTrue(
@@ -174,7 +176,7 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, barn)
 
         assertTrue(
-            VedtakBegrunnelseSpesifikasjon.PERIODE_ETTER_ENDRET_UTBETALING_AVTALE_DELT_BOSTED_FØLGES
+            VedtakBegrunnelseSpesifikasjon.ETTER_ENDRET_UTBETALING_AVTALE_DELT_BOSTED_FØLGES
                 .triggesForPeriode(
                     persongrunnlag = personopplysningGrunnlag,
                     vilkårsvurdering = vilkårsvurdering,
@@ -187,6 +189,7 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
                     triggesAv = TriggesAv(etterEndretUtbetaling = true, endringsaarsaker = setOf(Årsak.DELT_BOSTED)),
                     endretUtbetalingAndeler = listOf(
                         EndretUtbetalingAndel(
+                            prosent = BigDecimal.ZERO,
                             behandlingId = behandling.id,
                             person = barn,
                             fom = YearMonth.of(2021, 6),
@@ -199,8 +202,111 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
     }
 
     @Test
+    fun `Oppfyller ikke etter endringsperiode skal gi false`() {
+        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, barn)
+
+        assertFalse(
+            VedtakBegrunnelseSpesifikasjon.ETTER_ENDRET_UTBETALING_AVTALE_DELT_BOSTED_FØLGES
+                .triggesForPeriode(
+                    persongrunnlag = personopplysningGrunnlag,
+                    vilkårsvurdering = vilkårsvurdering,
+                    identerMedUtbetaling = identerMedUtbetaling,
+                    utvidetVedtaksperiodeMedBegrunnelser = lagUtvidetVedtaksperiodeMedBegrunnelser(
+                        type = Vedtaksperiodetype.UTBETALING,
+                        fom = LocalDate.of(2021, 10, 1),
+                        tom = LocalDate.of(2021, 10, 31)
+                    ),
+                    triggesAv = TriggesAv(
+                        etterEndretUtbetaling = true,
+                        endringsaarsaker = setOf(Årsak.DELT_BOSTED),
+                    ),
+                    endretUtbetalingAndeler = listOf(
+                        EndretUtbetalingAndel(
+                            prosent = BigDecimal.ZERO,
+                            behandlingId = behandling.id,
+                            person = barn,
+                            fom = YearMonth.of(2021, 10),
+                            tom = YearMonth.of(2021, 10),
+                            årsak = Årsak.DELT_BOSTED
+                        )
+                    )
+                )
+        )
+    }
+
+    @Test
+    fun `Oppfyller skal utbetales gir false`() {
+        assertFalse(
+            triggesAvSkalUtbetales(
+                triggesAv = TriggesAv(endretUtbetaingSkalUtbetales = true),
+                endretUtbetalingAndeler = listOf(
+                    lagEndretUtbetalingAndel(prosent = BigDecimal.ZERO, person = barn)
+                ),
+            )
+        )
+
+        assertFalse(
+            triggesAvSkalUtbetales(
+                triggesAv = TriggesAv(endretUtbetaingSkalUtbetales = false),
+                endretUtbetalingAndeler = listOf(
+                    lagEndretUtbetalingAndel(prosent = BigDecimal.valueOf(100), person = barn)
+                ),
+            )
+        )
+    }
+
+    @Test
+    fun `Oppfyller skal utbetales gir true`() {
+        val endretUtbetalingAndeler = listOf(
+            lagEndretUtbetalingAndel(prosent = BigDecimal.ZERO, person = barn),
+            lagEndretUtbetalingAndel(prosent = BigDecimal.valueOf(100), person = barn)
+        )
+
+        assertTrue(
+            triggesAvSkalUtbetales(
+                triggesAv = TriggesAv(endretUtbetaingSkalUtbetales = false),
+                endretUtbetalingAndeler = endretUtbetalingAndeler,
+            )
+        )
+
+        assertTrue(
+            triggesAvSkalUtbetales(
+                triggesAv = TriggesAv(endretUtbetaingSkalUtbetales = true),
+                endretUtbetalingAndeler = endretUtbetalingAndeler,
+            )
+        )
+    }
+
+    @Test
     fun `Alle begrunnelser er unike`() {
         val vedtakBegrunnelser = VedtakBegrunnelseSpesifikasjon.values().groupBy { it.sanityApiNavn }
-        Assertions.assertEquals(vedtakBegrunnelser.size, VedtakBegrunnelseSpesifikasjon.values().size)
+        assertEquals(vedtakBegrunnelser.size, VedtakBegrunnelseSpesifikasjon.values().size)
+    }
+
+    @Test
+    fun `Alle api-navn inkluderer vedtaksbegrunnelsestypen`() {
+        VedtakBegrunnelseSpesifikasjon.values().groupBy { it.vedtakBegrunnelseType }
+            .forEach { (vedtakBegrunnelseType, standardbegrunnelser) ->
+                standardbegrunnelser.forEach {
+                    val prefix = when (vedtakBegrunnelseType) {
+                        VedtakBegrunnelseType.INNVILGET -> "innvilget"
+                        VedtakBegrunnelseType.REDUKSJON -> "reduksjon"
+                        VedtakBegrunnelseType.AVSLAG -> "avslag"
+                        VedtakBegrunnelseType.OPPHØR -> "opphor"
+                        VedtakBegrunnelseType.FORTSATT_INNVILGET -> "fortsattInnvilget"
+                        VedtakBegrunnelseType.ENDRET_UTBETALING -> "endretUtbetaling"
+                        VedtakBegrunnelseType.ETTER_ENDRET_UTBETALING -> "etterEndretUtbetaling"
+                    }
+                    assertEquals(prefix, it.sanityApiNavn.substring(0, prefix.length), "Forventer $prefix for $it")
+                    assertTrue(
+                        it.sanityApiNavn.substring(prefix.length).startsWithUppercaseLetter(),
+                        "Forventer stor forbokstav etter prefix '$prefix' på $it"
+                    )
+                }
+            }
+    }
+
+    private fun String.startsWithUppercaseLetter(): Boolean {
+        return this.matches(Regex("[A-Z]{1}.*"))
     }
 }
