@@ -28,7 +28,6 @@ import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
 import java.time.LocalDate
@@ -337,7 +336,6 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
         val vedtaksperiodeId =
             hentAktivtVedtak(restFagsakEtterVurderTilbakekreving.data!!)!!.vedtaksperioderMedBegrunnelser.first()
 
-        // val restFagsakMedOppdaterteVedtaksperioder = 
         familieBaSakKlient().oppdaterVedtaksperiodeMedStandardbegrunnelser(
             vedtaksperiodeId = vedtaksperiodeId.id,
             restPutVedtaksperiodeMedStandardbegrunnelser = RestPutVedtaksperiodeMedStandardbegrunnelser(
@@ -349,8 +347,6 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
 
         val restFagsakEtterSendTilBeslutter =
             familieBaSakKlient().sendTilBeslutter(fagsakId = restFagsakEtterVurderTilbakekreving.data!!.id)
-
-        logger.info("Debug: " + restFagsakEtterVurderTilbakekreving.data!!.behandlinger[0].vedtakForBehandling[0].vedtaksperioderMedBegrunnelser.size)
 
         generellAssertFagsak(
             restFagsak = restFagsakEtterSendTilBeslutter,
@@ -390,10 +386,5 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
             vedtakService = vedtakService,
             stegService = stegService
         )
-    }
-
-    companion object {
-
-        val logger = LoggerFactory.getLogger(JournalførOgBehandleFørstegangssøknadNasjonalTest::class.java)
     }
 }
