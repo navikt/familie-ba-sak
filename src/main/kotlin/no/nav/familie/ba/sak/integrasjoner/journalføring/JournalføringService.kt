@@ -80,7 +80,10 @@ class JournalføringService(
         oppgaveId: String
     ): String {
 
-        val (sak, behandlinger) = lagreJournalpostOgKnyttFagsakTilJournalpost(request.tilknyttedeBehandlingIder, journalpostId)
+        val (sak, behandlinger) = lagreJournalpostOgKnyttFagsakTilJournalpost(
+            request.tilknyttedeBehandlingIder,
+            journalpostId
+        )
 
         håndterLogiskeVedlegg(request, journalpostId)
 
@@ -121,12 +124,13 @@ class JournalføringService(
         navIdent: String,
         type: BehandlingType,
         årsak: BehandlingÅrsak,
+        kategori: BehandlingKategori = BehandlingKategori.NASJONAL,
         underkategori: BehandlingUnderkategori
     ): Behandling {
         fagsakService.hentEllerOpprettFagsak(PersonIdent(personIdent))
         return stegService.håndterNyBehandling(
             NyBehandling(
-                kategori = BehandlingKategori.NASJONAL,
+                kategori = kategori,
                 underkategori = underkategori,
                 søkersIdent = personIdent,
                 behandlingType = type,
@@ -147,6 +151,15 @@ class JournalføringService(
         val tilknyttedeBehandlingIder: MutableList<String> = request.tilknyttedeBehandlingIder.toMutableList()
 
         val nyBehandling: Behandling? = if (request.opprettOgKnyttTilNyBehandling) {
+
+            val kategori = request.kategori ?: BehandlingKategori.NASJONAL
+            if (kategori == BehandlingKategori.EØS && !featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS)) {
+                throw FunksjonellFeil(
+                    melding = "EØS er ikke påskrudd",
+                    frontendFeilmelding = "Det er ikke støtte for å behandle EØS søknad."
+                )
+            }
+
             val underkategori = request.hentUnderkategori()
             if (underkategori == BehandlingUnderkategori.UTVIDET && !featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_UTVIDET)) {
                 throw FunksjonellFeil(
@@ -161,6 +174,7 @@ class JournalføringService(
                     navIdent = request.navIdent,
                     type = request.nyBehandlingstype,
                     årsak = request.nyBehandlingsårsak,
+                    kategori = kategori,
                     underkategori = underkategori
                 )
             tilknyttedeBehandlingIder.add(nyBehandling.id.toString())
@@ -231,7 +245,8 @@ class JournalføringService(
     }
 
     private fun håndterLogiskeVedlegg(request: RestOppdaterJournalpost, journalpostId: String) {
-        val fjernedeVedlegg = request.eksisterendeLogiskeVedlegg.partition { request.logiskeVedlegg.contains(it) }.second
+        val fjernedeVedlegg =
+            request.eksisterendeLogiskeVedlegg.partition { request.logiskeVedlegg.contains(it) }.second
         val nyeVedlegg = request.logiskeVedlegg.partition { request.eksisterendeLogiskeVedlegg.contains(it) }.second
 
         val dokumentInfoId = request.dokumentInfoId.takeIf { it.isNotEmpty() }
@@ -256,7 +271,10 @@ class JournalføringService(
         runCatching {
             integrasjonClient.oppdaterJournalpost(request, journalpostId)
             genererOgOpprettLogg(journalpostId, behandlinger)
-            integrasjonClient.ferdigstillJournalpost(journalpostId = journalpostId, journalførendeEnhet = behandlendeEnhet)
+            integrasjonClient.ferdigstillJournalpost(
+                journalpostId = journalpostId,
+                journalførendeEnhet = behandlendeEnhet
+            )
             integrasjonClient.ferdigstillOppgave(oppgaveId = oppgaveId.toLong())
         }.onFailure {
             hentJournalpost(journalpostId).data?.journalstatus.apply {

@@ -17,7 +17,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjonListConverter
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.triggesAvSkalUtbetales
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
@@ -85,12 +84,11 @@ data class EndretUtbetalingAndel(
     var begrunnelse: String? = null,
 
     @ManyToMany(mappedBy = "endretUtbetalingAndeler")
-    val andelTilkjentYtelser: List<AndelTilkjentYtelse> = emptyList(),
+    val andelTilkjentYtelser: MutableList<AndelTilkjentYtelse> = mutableListOf(),
 
     @Column(name = "vedtak_begrunnelse_spesifikasjoner")
     @Convert(converter = VedtakBegrunnelseSpesifikasjonListConverter::class)
-    var vedtakBegrunnelseSpesifikasjoner: List<VedtakBegrunnelseSpesifikasjon> = emptyList(),
-
+    var vedtakBegrunnelseSpesifikasjoner: List<VedtakBegrunnelseSpesifikasjon> = emptyList()
 ) : BaseEntitet() {
 
     fun overlapperMed(periode: MånedPeriode) = periode.overlapperHeltEllerDelvisMed(this.periode())
@@ -143,7 +141,8 @@ fun EndretUtbetalingAndel.tilRestEndretUtbetalingAndel() = RestEndretUtbetalingA
     årsak = this.årsak,
     avtaletidspunktDeltBosted = this.avtaletidspunktDeltBosted,
     søknadstidspunkt = this.søknadstidspunkt,
-    begrunnelse = this.begrunnelse
+    begrunnelse = this.begrunnelse,
+    erTilknyttetAndeler = this.andelTilkjentYtelser.isNotEmpty()
 )
 
 fun EndretUtbetalingAndel.fraRestEndretUtbetalingAndel(
@@ -205,7 +204,7 @@ fun EndretUtbetalingAndel.hentGyldigEndretBegrunnelser(sanityBegrunnelser: List<
             vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType == VedtakBegrunnelseType.ENDRET_UTBETALING
         }
         .filter { vedtakBegrunnelseSpesifikasjon ->
-            val triggesAv = vedtakBegrunnelseSpesifikasjon.tilSanityBegrunnelse(sanityBegrunnelser).tilTriggesAv()
-            triggesAvSkalUtbetales(listOf(this), triggesAv)
+            val sanityBegrunnelse = vedtakBegrunnelseSpesifikasjon.tilSanityBegrunnelse(sanityBegrunnelser)
+            sanityBegrunnelse != null && triggesAvSkalUtbetales(listOf(this), sanityBegrunnelse.tilTriggesAv())
         }
 }
