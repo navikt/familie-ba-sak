@@ -3,7 +3,9 @@ package no.nav.familie.ba.sak.kjerne.verdikjedetester
 import no.nav.familie.ba.sak.ekstern.restDomene.NavnOgIdent
 import no.nav.familie.ba.sak.ekstern.restDomene.RestJournalføring
 import no.nav.familie.ba.sak.ekstern.restDomene.RestJournalpostDokument
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.kontrakter.ba.infotrygd.Barn
 import no.nav.familie.kontrakter.ba.infotrygd.Delytelse
@@ -18,6 +20,8 @@ fun lagMockRestJournalføring(bruker: NavnOgIdent): RestJournalføring = RestJou
     bruker = bruker,
     datoMottatt = LocalDateTime.now().minusDays(10),
     journalpostTittel = "Søknad om ordinær barnetrygd",
+    kategori = BehandlingKategori.NASJONAL,
+    underkategori = BehandlingUnderkategori.ORDINÆR,
     knyttTilFagsak = true,
     opprettOgKnyttTilNyBehandling = true,
     tilknyttedeBehandlingIder = emptyList(),

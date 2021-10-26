@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.ekstern.restDomene
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.AvsenderMottaker
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.Bruker
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.OppdaterJournalpostRequest
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
@@ -25,6 +26,8 @@ data class RestJournalføring(
     val bruker: NavnOgIdent,
     val datoMottatt: LocalDateTime?,
     val journalpostTittel: String?,
+    val kategori: BehandlingKategori?,
+    val underkategori: BehandlingUnderkategori?,
     val knyttTilFagsak: Boolean,
     val opprettOgKnyttTilNyBehandling: Boolean,
     val tilknyttedeBehandlingIder: List<String>,
@@ -60,6 +63,7 @@ data class RestJournalføring(
     }
 
     fun hentUnderkategori(): BehandlingUnderkategori {
+        if (underkategori is BehandlingUnderkategori) return underkategori
         return when {
             journalpostTittel?.contains("ordinær") == true -> BehandlingUnderkategori.ORDINÆR
             journalpostTittel?.contains("utvidet") == true -> BehandlingUnderkategori.UTVIDET
