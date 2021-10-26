@@ -79,14 +79,11 @@ class BeregningService(
         }.map {
             hentTilkjentYtelseForBehandling(behandlingId = it.id)
         }.filter {
-            val barnFinnesIBehandling =
-                personopplysningGrunnlagRepository
-                    .findByBehandlingAndAktiv(behandlingId = it.behandling.id)
-                    ?.barna?.map { it.personIdent }
-                    ?.contains(barnIdent)
-                    ?: false
-
-            barnFinnesIBehandling && it.erSendtTilIverksetting()
+            personopplysningGrunnlagRepository
+                .findByBehandlingAndAktiv(behandlingId = it.behandling.id)
+                ?.barna?.map { it.personIdent }
+                ?.contains(barnIdent)
+                ?: false
         }.mapNotNull { it }
     }
 
