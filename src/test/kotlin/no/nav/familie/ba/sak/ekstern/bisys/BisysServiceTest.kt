@@ -109,7 +109,7 @@ internal class BisysServiceTest() {
                 tilkjentYtelse = tilkjentYtelse,
                 beløp = 660
             )
-        tilkjentYtelse.andelerTilkjentYtelse.add(andelTilkjentYtelse)
+        tilkjentYtelse.andelerTilkjentYtelseTilUtbetaling.add(andelTilkjentYtelse)
 
         every { mockPersonopplysningerService.hentIdenter(Ident(andelTilkjentYtelse.personIdent)) } returns listOf(
             IdentInformasjon(
@@ -151,7 +151,7 @@ internal class BisysServiceTest() {
                 tilkjentYtelse = tilkjentYtelse,
                 beløp = 660
             )
-        tilkjentYtelse.andelerTilkjentYtelse.add(andelTilkjentYtelse)
+        tilkjentYtelse.andelerTilkjentYtelseTilUtbetaling.add(andelTilkjentYtelse)
 
         every { mockPersonopplysningerService.hentIdenter(Ident(andelTilkjentYtelse.personIdent)) } returns listOf(
             IdentInformasjon(
@@ -206,7 +206,7 @@ internal class BisysServiceTest() {
                 tilkjentYtelse = tilkjentYtelse,
                 beløp = 660
             )
-        tilkjentYtelse.andelerTilkjentYtelse.add(andelTilkjentYtelse)
+        tilkjentYtelse.andelerTilkjentYtelseTilUtbetaling.add(andelTilkjentYtelse)
 
         every { mockPersonopplysningerService.hentIdenter(Ident(andelTilkjentYtelse.personIdent)) } returns listOf(
             IdentInformasjon(
