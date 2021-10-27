@@ -48,7 +48,8 @@ class OppgaveService(
         val behandling = behandlingRepository.finnBehandling(behandlingId)
         val fagsakId = behandling.fagsak.id
 
-        val eksisterendeOppgave = oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(oppgavetype, behandling)
+        val eksisterendeOppgave =
+            oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(oppgavetype, behandling)
 
         return if (eksisterendeOppgave != null &&
             oppgavetype != Oppgavetype.Journalføring
@@ -60,7 +61,8 @@ class OppgaveService(
 
             eksisterendeOppgave.gsakId
         } else {
-            val arbeidsfordelingsenhet = arbeidsfordelingPåBehandlingRepository.finnArbeidsfordelingPåBehandling(behandling.id)
+            val arbeidsfordelingsenhet =
+                arbeidsfordelingPåBehandlingRepository.finnArbeidsfordelingPåBehandling(behandling.id)
 
             if (arbeidsfordelingsenhet == null) {
                 logger.warn("Fant ikke behandlende enhet på behandling ${behandling.id} ved opprettelse av $oppgavetype-oppgave.")

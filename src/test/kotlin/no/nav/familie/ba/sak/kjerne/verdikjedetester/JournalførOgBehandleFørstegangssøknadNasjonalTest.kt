@@ -44,7 +44,7 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
     fun `Skal journalføre og behandle ordinær nasjonal sak`() {
         val scenario = mockServerKlient().lagScenario(
             RestScenario(
-                søker = RestScenarioPerson(fødselsdato = "1996-01-12", fornavn = "Mor", etternavn = "Søker"),
+                søker = RestScenarioPerson(fødselsdato = "1996-11-12", fornavn = "Mor", etternavn = "Søker"),
                 barna = listOf(
                     RestScenarioPerson(
                         fødselsdato = LocalDate.now().minusMonths(6).toString(),
@@ -212,7 +212,7 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
 
         val scenario = mockServerKlient().lagScenario(
             RestScenario(
-                søker = RestScenarioPerson(fødselsdato = "1996-01-12", fornavn = "Mor", etternavn = "Søker"),
+                søker = RestScenarioPerson(fødselsdato = "1996-12-12", fornavn = "Mor", etternavn = "Søker"),
                 barna = listOf(
                     RestScenarioPerson(
                         fødselsdato = LocalDate.now().minusMonths(6).toString(),
@@ -234,7 +234,8 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
                     id = scenario.søker.ident!!
                 )
             ).copy(
-                journalpostTittel = "Søknad om utvidet barnetrygd"
+                journalpostTittel = "Søknad om utvidet barnetrygd",
+                underkategori = BehandlingUnderkategori.UTVIDET
             )
         )
 
@@ -335,6 +336,7 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
 
         val vedtaksperiodeId =
             hentAktivtVedtak(restFagsakEtterVurderTilbakekreving.data!!)!!.vedtaksperioderMedBegrunnelser.first()
+
         familieBaSakKlient().oppdaterVedtaksperiodeMedStandardbegrunnelser(
             vedtaksperiodeId = vedtaksperiodeId.id,
             restPutVedtaksperiodeMedStandardbegrunnelser = RestPutVedtaksperiodeMedStandardbegrunnelser(
