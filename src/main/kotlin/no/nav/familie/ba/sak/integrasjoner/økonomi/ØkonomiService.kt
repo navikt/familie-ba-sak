@@ -62,11 +62,9 @@ class ØkonomiService(
         erSimulering: Boolean = false,
     ): Utbetalingsoppdrag {
         val oppdatertBehandling = vedtak.behandling
-        val oppdatertTilstand = beregningService.hentAndelerTilkjentYtelseForBehandling(oppdatertBehandling.id)
-            .filter { andel ->
-                andel.kalkulertUtbetalingsbeløp != 0 ||
-                    andel.endretUtbetalingAndeler.any { it.årsak!!.kanGiNullutbetaling() }
-            }
+        val oppdatertTilstand =
+            beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(oppdatertBehandling.id)
+
         val oppdaterteKjeder = kjedeinndelteAndeler(oppdatertTilstand)
 
         val erFørsteIverksatteBehandlingPåFagsak =
@@ -86,7 +84,8 @@ class ØkonomiService(
                 behandlingService.hentForrigeBehandlingSomErIverksatt(behandling = oppdatertBehandling)
                     ?: error("Finner ikke forrige behandling ved oppdatering av tilkjent ytelse og iverksetting av vedtak")
 
-            val forrigeTilstand = beregningService.hentAndelerTilkjentYtelseForBehandling(forrigeBehandling.id)
+            val forrigeTilstand =
+                beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(forrigeBehandling.id)
             // TODO: Her bør det legges til sjekk om personident er endret. Hvis endret bør dette mappes i forrigeTilstand som benyttes videre.
             val forrigeKjeder = kjedeinndelteAndeler(forrigeTilstand)
 
@@ -129,7 +128,7 @@ class ØkonomiService(
         behandlingService.hentForrigeBehandlingSomErIverksatt(behandling = behandling)
             ?.let { forrigeIverksattBehandling ->
 
-                beregningService.hentAndelerTilkjentYtelseForBehandling(forrigeIverksattBehandling.id)
+                beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(forrigeIverksattBehandling.id)
                     .takeIf { it.isNotEmpty() }
                     ?.let { andelerTilkjentYtelse ->
                         andelerTilkjentYtelse.maxByOrNull { it.periodeOffset!! }?.periodeOffset?.toInt()
