@@ -39,10 +39,11 @@ class BeregningService(
 
     fun hentLøpendeAndelerTilkjentYtelseMedUtbetalingerForBehandlinger(behandlingIder: List<Long>): List<AndelTilkjentYtelse> =
         andelTilkjentYtelseRepository.finnLøpendeAndelerTilkjentYtelseForBehandlinger(behandlingIder)
-            .filter { it.erUtbetaling() }
+            .filter { it.erAndelSomSkalSendesTilOppdrag() }
 
     fun hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(behandlingId: Long): List<AndelTilkjentYtelse> =
-        andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId).filter { it.erUtbetaling() }
+        andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId)
+            .filter { it.erAndelSomSkalSendesTilOppdrag() }
 
     fun lagreTilkjentYtelseMedOppdaterteAndeler(tilkjentYtelse: TilkjentYtelse) =
         tilkjentYtelseRepository.save(tilkjentYtelse)
@@ -168,12 +169,5 @@ class BeregningService(
             this.endretDato = LocalDate.now()
             this.opphørFom = opphørsdato?.toYearMonth()
         }
-    }
-
-    private fun AndelTilkjentYtelse.erUtbetaling(): Boolean {
-        return this.kalkulertUtbetalingsbeløp != 0 ||
-            this.endretUtbetalingAndeler.any {
-                it.årsak!!.kanGiNullutbetaling()
-            }
     }
 }
