@@ -33,12 +33,11 @@ class BehandleAnnullertFødselTask(
 
     override fun doTask(task: Task) {
         var dto = objectMapper.readValue(task.payload, BehandleAnnullerFødselDto::class.java)
-        var barnasIdenter = dto.barnasIdenter.map { PersonIdent(it.toString()) }
 
         var tasker = taskRepositoryForAnnullertFødsel.hentTaskForTidligereHendelse(dto.tidligereHendelseId)
         if (tasker.isEmpty()) {
             logger.info("Finnes ikke åpen task for annullertfødsel tidligere Id = ${dto.tidligereHendelseId}. Forsøker å finne aktiv behandling.")
-            if (personRepository.findByPersonIdenter(barnasIdenter).any {
+            if (personRepository.findByPersonIdent(PersonIdent(dto.barnasIdent)).any {
                 behandlingRepository.finnBehandling(it.personopplysningGrunnlag.behandlingId).aktiv
             }
             ) {
@@ -75,7 +74,7 @@ class BehandleAnnullertFødselTask(
     }
 }
 
-data class BehandleAnnullerFødselDto(val barnasIdenter: List<String>, val tidligereHendelseId: String)
+data class BehandleAnnullerFødselDto(val barnasIdent: String, val tidligereHendelseId: String)
 
 @Repository
 class TaskRepositoryForAnnullertFødsel(private val jdbcTemplate: JdbcTemplate) {

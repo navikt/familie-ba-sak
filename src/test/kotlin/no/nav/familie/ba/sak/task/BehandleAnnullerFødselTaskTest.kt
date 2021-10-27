@@ -86,7 +86,7 @@ class BehandleAnnullerFødselTaskTest : AbstractSpringIntegrationTest() {
         behandleAnnullertFødselTask.doTask(
             BehandleAnnullertFødselTask.opprettTask(
                 BehandleAnnullerFødselDto(
-                    emptyList(),
+                    "",
                     "ooo"
                 )
             )
