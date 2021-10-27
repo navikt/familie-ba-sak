@@ -20,4 +20,13 @@ class SanityBegrunnelseTest {
             restSanityBegrunnelse.tilSanityBegrunnelse().ovrigeTriggere?.toList()
         )
     }
+
+    @Test
+    fun `skal konverdere string til enumverdi dersom det finnes og null ellers`() {
+        Assertions.assertEquals(null, finnEnumverdi("IKKE_GYLDIG_VERDI", ØvrigTrigger.values()))
+        Assertions.assertEquals(
+            ØvrigTrigger.BARN_MED_6_ÅRS_DAG,
+            finnEnumverdi("BARN_MED_6_ÅRS_DAG", ØvrigTrigger.values())
+        )
+    }
 }
