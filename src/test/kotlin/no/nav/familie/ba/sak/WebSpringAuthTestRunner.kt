@@ -1,6 +1,9 @@
 package no.nav.familie.ba.sak
 
+import com.github.tomakehurst.wiremock.WireMockServer
+import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
 import io.mockk.unmockkAll
+import no.nav.familie.ba.sak.WebSpringAuthTestRunner.Companion.wiremock
 import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.config.ApplicationConfig
 import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
@@ -15,8 +18,11 @@ import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.test.util.TestPropertyValues
 import org.springframework.boot.web.server.LocalServerPort
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock
+import org.springframework.context.ApplicationContextInitializer
+import org.springframework.context.ConfigurableApplicationContext
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.test.context.ContextConfiguration
@@ -39,7 +45,7 @@ import org.springframework.web.client.RestTemplate
 @AutoConfigureWireMock(port = 28085)
 @ExtendWith(SpringExtension::class)
 @EnableMockOAuth2Server(port = 1234)
-@ContextConfiguration(initializers = [DbContainerInitializer::class])
+@ContextConfiguration(initializers = [DbContainerInitializer::class, InfoTrygdConfig::class])
 @Tag("integration")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 abstract class WebSpringAuthTestRunner {
@@ -125,5 +131,17 @@ abstract class WebSpringAuthTestRunner {
         const val DEFAULT_SUBJECT = "subject"
         const val DEFAULT_AUDIENCE = "some-audience"
         const val DEFAULT_CLIENT_ID = "theclientid"
+
+        val wiremock = WireMockServer(wireMockConfig().dynamicPort())
+    }
+}
+
+class InfoTrygdConfig : ApplicationContextInitializer<ConfigurableApplicationContext> {
+
+    override fun initialize(applicationContext: ConfigurableApplicationContext) {
+        wiremock.start()
+        TestPropertyValues.of(
+            "FAMILIE_BA_INFOTRYGD_API_URL=http://localhost:${wiremock.port()}",
+        ).applyTo(applicationContext.environment)
     }
 }

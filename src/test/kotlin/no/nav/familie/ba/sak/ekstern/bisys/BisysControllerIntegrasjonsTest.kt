@@ -5,9 +5,7 @@ import com.github.tomakehurst.wiremock.client.WireMock.aResponse
 import com.github.tomakehurst.wiremock.client.WireMock.equalToJson
 import com.github.tomakehurst.wiremock.client.WireMock.post
 import com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor
-import com.github.tomakehurst.wiremock.client.WireMock.stubFor
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
-import com.github.tomakehurst.wiremock.client.WireMock.verify
 import no.nav.familie.ba.sak.WebSpringAuthTestRunner
 import no.nav.familie.ba.sak.common.EksternTjenesteFeil
 import no.nav.familie.ba.sak.common.randomFnr
@@ -63,7 +61,7 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
     fun `Skal kaste gode feilmeldinger ved feil mot infotrygd-barnetrygd`() {
         val fnr = randomFnr()
 
-        stubFor(
+        wiremock.stubFor(
             post(urlEqualTo("/infotrygd/barnetrygd/utvidet"))
                 .willReturn(
                     aResponse()
@@ -99,7 +97,7 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
     fun `Skal returnere tom periode hvis det ikke er noen utbetalinger i infotrygd-barnetrygd`() {
         val fnr = randomFnr()
 
-        stubFor(
+        wiremock.stubFor(
             post(urlEqualTo("/infotrygd/barnetrygd/utvidet"))
                 .willReturn(
                     aResponse()
@@ -119,7 +117,7 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
             hentUrl("/api/bisys/hent-utvidet-barnetrygd"),
             requestEntity
         )
-        verify(
+        wiremock.verify(
             postRequestedFor(urlEqualTo("/infotrygd/barnetrygd/utvidet"))
                 .withRequestBody(
                     equalToJson(
@@ -140,7 +138,7 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
     fun `Skal returnere perioder hvis det er noen utbetalinger i infotrygd-barnetrygd`() {
         val fnr = randomFnr()
 
-        stubFor(
+        wiremock.stubFor(
             post(urlEqualTo("/infotrygd/barnetrygd/utvidet"))
                 .willReturn(
                     aResponse()
@@ -150,7 +148,7 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
                 )
         )
 
-        stubFor(
+        wiremock.stubFor(
             post(urlEqualTo("/infotrygd/barnetrygd/utvidet"))
                 .withRequestBody(
                     equalToJson(
@@ -200,7 +198,7 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
     fun `Skal også returnere gamle perioder hvis det er noen utbetalinger i infotrygd-barnetrygd`() {
         val fnr = randomFnr()
 
-        stubFor(
+        wiremock.stubFor(
             post(urlEqualTo("/infotrygd/barnetrygd/utvidet"))
                 .willReturn(
                     aResponse()
@@ -210,7 +208,7 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
                 )
         )
 
-        stubFor(
+        wiremock.stubFor(
             post(urlEqualTo("/infotrygd/barnetrygd/utvidet"))
                 .withRequestBody(
                     equalToJson(
