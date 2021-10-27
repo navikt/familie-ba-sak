@@ -138,9 +138,9 @@ class HenleggelseTest(
             bekreftEndringerViaFrontend = false
         )
         val fagsakEtterRegistrerSøknad = familieBaSakKlient().registrererSøknad(
-            behandlingId = aktivBehandling!!.behandlingId,
+            behandlingId = aktivBehandling.behandlingId,
             restRegistrerSøknad = restRegistrerSøknad
         )
-        return hentAktivBehandling(restFagsak = fagsakEtterRegistrerSøknad.data!!)!!
+        return hentAktivBehandling(restFagsak = fagsakEtterRegistrerSøknad.data!!)
     }
 }

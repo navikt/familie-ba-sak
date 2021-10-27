@@ -44,7 +44,7 @@ class MigreringVerdikjedeTest(
                 lagTestScenarioForMigrering(
                     valg = "OR",
                     undervalg = "EU"
-                )!!.søker.ident!!
+                ).søker.ident!!
             )
         }.hasMessageContaining("Kan kun migrere ordinære saker")
         Assertions.assertThatThrownBy {
@@ -52,7 +52,7 @@ class MigreringVerdikjedeTest(
                 lagTestScenarioForMigrering(
                     valg = "OR",
                     undervalg = "IB"
-                )!!.søker.ident!!
+                ).søker.ident!!
             )
         }.hasMessageContaining("Kan kun migrere ordinære saker")
         Assertions.assertThatThrownBy {
@@ -60,7 +60,7 @@ class MigreringVerdikjedeTest(
                 lagTestScenarioForMigrering(
                     valg = "UT",
                     undervalg = "EF"
-                )!!.søker.ident!!
+                ).søker.ident!!
             )
         }.hasMessageContaining("Kan kun migrere ordinære saker")
         Assertions.assertThatThrownBy {
@@ -68,7 +68,7 @@ class MigreringVerdikjedeTest(
                 lagTestScenarioForMigrering(
                     valg = "UT",
                     undervalg = "EU"
-                )!!.søker.ident!!
+                ).søker.ident!!
             )
         }.hasMessageContaining("Kan kun migrere ordinære saker")
     }
