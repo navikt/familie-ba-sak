@@ -100,7 +100,7 @@ class BehandleFørstegangssøknadSmåbarnstilleggTest(
             )
         val restFagsakEtterRegistrertSøknad: Ressurs<RestFagsak> =
             familieBaSakKlient().registrererSøknad(
-                behandlingId = aktivBehandling!!.behandlingId,
+                behandlingId = aktivBehandling.behandlingId,
                 restRegistrerSøknad = restRegistrerSøknad
             )
         generellAssertFagsak(
@@ -110,7 +110,7 @@ class BehandleFørstegangssøknadSmåbarnstilleggTest(
         )
 
         // Godkjenner alle vilkår på førstegangsbehandling.
-        val aktivBehandlingEtterRegistrertSøknad = hentAktivBehandling(restFagsakEtterRegistrertSøknad.data!!)!!
+        val aktivBehandlingEtterRegistrertSøknad = hentAktivBehandling(restFagsakEtterRegistrertSøknad.data!!)
         aktivBehandlingEtterRegistrertSøknad.personResultater.forEach { restPersonResultat ->
             restPersonResultat.vilkårResultater.filter { it.resultat == Resultat.IKKE_VURDERT }.forEach {
                 familieBaSakKlient().putVilkår(
@@ -138,7 +138,7 @@ class BehandleFørstegangssøknadSmåbarnstilleggTest(
                 behandlingId = aktivBehandlingEtterRegistrertSøknad.behandlingId
             )
         val behandlingEtterBehandlingsresultat =
-            hentAktivBehandling(restFagsak = restFagsakEtterBehandlingsresultat.data!!)!!
+            hentAktivBehandling(restFagsak = restFagsakEtterBehandlingsresultat.data!!)
 
         assertEquals(
             tilleggOrdinærSatsTilTester.beløp + sisteUtvidetSatsTilTester.beløp + sisteSmåbarnstilleggSatsTilTester.beløp,

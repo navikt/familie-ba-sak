@@ -30,14 +30,11 @@ import java.time.YearMonth
 
 class BehandlingSatsendringTest(
     @Autowired private val mockLocalDateService: LocalDateService,
-    @Autowired private val autobrev6og18ÅrService: Autobrev6og18ÅrService,
-    @Autowired private val finnAlleBarn6og18ÅrTask: FinnAlleBarn6og18ÅrTask,
     @Autowired private val behandleFødselshendelseTask: BehandleFødselshendelseTask,
     @Autowired private val fagsakService: FagsakService,
     @Autowired private val behandlingService: BehandlingService,
     @Autowired private val vedtakService: VedtakService,
     @Autowired private val stegService: StegService,
-    @Autowired private val opprettTaskService: OpprettTaskService,
     @Autowired private val satsendringService: SatsendringService
 ) : AbstractVerdikjedetest() {
 

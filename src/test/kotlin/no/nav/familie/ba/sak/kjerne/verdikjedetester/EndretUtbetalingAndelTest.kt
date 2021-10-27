@@ -28,7 +28,7 @@ class EndretUtbetalingAndelTest(
         val (scenario, restFagsakEtterBehandlingsresultat) = genererBehandlingsresultat()
 
         val behandlingEtterBehandlingsresultat =
-            hentAktivBehandling(restFagsak = restFagsakEtterBehandlingsresultat.data!!)!!
+            hentAktivBehandling(restFagsak = restFagsakEtterBehandlingsresultat.data!!)
 
         val andelerTilkjentYtelse =
             andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = behandlingEtterBehandlingsresultat.behandlingId)
@@ -87,7 +87,7 @@ class EndretUtbetalingAndelTest(
     fun `Skal teste at fjernet endret utbetalingsandel oppretter tidligere eksisterende utbetalingsandel`() {
         val (scenario, restFagsakEtterBehandlingsresultat) = genererBehandlingsresultat()
 
-        val behandling = hentAktivBehandling(restFagsak = restFagsakEtterBehandlingsresultat.data!!)!!
+        val behandling = hentAktivBehandling(restFagsak = restFagsakEtterBehandlingsresultat.data!!)
 
         val andelerTilkjentYtelse =
             andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = behandling.behandlingId)
@@ -169,11 +169,11 @@ class EndretUtbetalingAndelTest(
             )
         val restFagsakEtterRegistrertSøknad: Ressurs<RestFagsak> =
             familieBaSakKlient().registrererSøknad(
-                behandlingId = aktivBehandling!!.behandlingId,
+                behandlingId = aktivBehandling.behandlingId,
                 restRegistrerSøknad = restRegistrerSøknad
             )
 
-        val aktivBehandlingEtterRegistrertSøknad = hentAktivBehandling(restFagsakEtterRegistrertSøknad.data!!)!!
+        val aktivBehandlingEtterRegistrertSøknad = hentAktivBehandling(restFagsakEtterRegistrertSøknad.data!!)
         aktivBehandlingEtterRegistrertSøknad.personResultater.forEach { restPersonResultat ->
             restPersonResultat.vilkårResultater.filter { it.resultat == Resultat.IKKE_VURDERT }.forEach {
                 familieBaSakKlient().putVilkår(
