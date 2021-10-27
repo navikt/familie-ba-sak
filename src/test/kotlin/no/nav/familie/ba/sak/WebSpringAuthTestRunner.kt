@@ -10,13 +10,13 @@ import no.nav.security.mock.oauth2.MockOAuth2Server
 import no.nav.security.mock.oauth2.token.DefaultOAuth2TokenCallback
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.web.server.LocalServerPort
+import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.test.context.ContextConfiguration
@@ -36,6 +36,7 @@ import org.springframework.web.client.RestTemplate
         "ENVIRONMENT_NAME: integrationtest",
     ],
 )
+@AutoConfigureWireMock(port = 28085)
 @ExtendWith(SpringExtension::class)
 @EnableMockOAuth2Server(port = 1234)
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
@@ -57,11 +58,6 @@ abstract class WebSpringAuthTestRunner {
 
     @LocalServerPort
     private val port = 0
-
-    @BeforeAll
-    fun init() {
-        databaseCleanupService.truncate()
-    }
 
     @AfterAll
     fun tearDown() {
