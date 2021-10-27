@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
 import no.nav.familie.ba.sak.WebSpringAuthTestRunner
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.MockserverKlient
-import org.slf4j.LoggerFactory
 import org.springframework.context.ApplicationContextInitializer
 import org.springframework.context.ConfigurableApplicationContext
 import org.springframework.test.context.ActiveProfiles
@@ -12,7 +11,8 @@ import org.testcontainers.containers.FixedHostPortGenericContainer
 
 val MOCK_SERVER_IMAGE = "ghcr.io/navikt/familie-mock-server/familie-mock-server:latest"
 
-class VerdikjedetesterPropertyOverrideContextInitializer : ApplicationContextInitializer<ConfigurableApplicationContext?> {
+class VerdikjedetesterPropertyOverrideContextInitializer :
+    ApplicationContextInitializer<ConfigurableApplicationContext?> {
 
     override fun initialize(configurableApplicationContext: ConfigurableApplicationContext) {
         TestPropertySourceUtils.addInlinedPropertiesToEnvironment(
@@ -20,6 +20,17 @@ class VerdikjedetesterPropertyOverrideContextInitializer : ApplicationContextIni
             "FAMILIE_BA_INFOTRYGD_API_URL: http://localhost:1337/rest/api/infotrygd/ba",
             "PDL_URL: http://localhost:1337/rest/api/pdl"
         )
+        mockServer.start()
+    }
+
+    companion object {
+        // Lazy because we only want it to be initialized when accessed
+        val mockServer: KMockServerSQLContainer by lazy {
+            val mockServer = KMockServerSQLContainer(MOCK_SERVER_IMAGE)
+            mockServer.withExposedPorts(1337)
+            mockServer.withFixedExposedPort(1337, 1337)
+            mockServer
+        }
     }
 }
 
@@ -50,16 +61,6 @@ abstract class AbstractVerdikjedetest : WebSpringAuthTestRunner() {
         mockServerUrl = "http://localhost:1337",
         restOperations = restOperations,
     )
-
-    init {
-        mockServer.start()
-        logger.info("Startet mock server på port ${mockServer.exposedPorts} på host ${mockServer.firstMappedPort}")
-    }
-
-    companion object {
-
-        val logger = LoggerFactory.getLogger(AbstractVerdikjedetest::class.java)
-    }
 }
 
 /**
