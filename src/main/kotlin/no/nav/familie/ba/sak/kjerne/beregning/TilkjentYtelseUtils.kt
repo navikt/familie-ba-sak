@@ -165,7 +165,10 @@ object TilkjentYtelseUtils {
             }
 
             val nyeAndelerForPersonEtterSammenslåing =
-                slåSammenPerioderSomIkkeSkulleHaVærtSplittet(nyeAndelerForPerson = nyeAndelerForPerson)
+                slåSammenPerioderSomIkkeSkulleHaVærtSplittet(
+                    nyeAndelerForPerson = nyeAndelerForPerson,
+                    skalAndelerSlåsSammen = ::skalEndretAndelerSlåsSammen
+                )
 
             nyeAndelTilkjentYtelse.addAll(nyeAndelerForPersonEtterSammenslåing)
         }
@@ -179,7 +182,10 @@ object TilkjentYtelseUtils {
         return nyeAndelTilkjentYtelse.toMutableSet()
     }
 
-    private fun slåSammenPerioderSomIkkeSkulleHaVærtSplittet(nyeAndelerForPerson: MutableList<AndelTilkjentYtelse>): MutableList<AndelTilkjentYtelse> {
+    fun slåSammenPerioderSomIkkeSkulleHaVærtSplittet(
+        nyeAndelerForPerson: MutableList<AndelTilkjentYtelse>,
+        skalAndelerSlåsSammen: (førsteAndel: AndelTilkjentYtelse, nesteAndel: AndelTilkjentYtelse) -> Boolean
+    ): MutableList<AndelTilkjentYtelse> {
         val sorterteAndeler = nyeAndelerForPerson.sortedBy { it.stønadFom }.toMutableList()
         var periodenViSerPå: AndelTilkjentYtelse = sorterteAndeler.first()
         val oppdatertListeMedAndeler = mutableListOf<AndelTilkjentYtelse>()
@@ -190,7 +196,7 @@ object TilkjentYtelseUtils {
 
             if (nesteAndel != null) {
                 val andelerSkalSlåsSammen =
-                    skalAndelerSlåsSammen(førsteAndel = andel, nesteAndel = nesteAndel)
+                    skalAndelerSlåsSammen(andel, nesteAndel)
 
                 if (andelerSkalSlåsSammen) {
                     val nyAndel = periodenViSerPå.copy(stønadTom = nesteAndel.stønadTom)
@@ -207,7 +213,10 @@ object TilkjentYtelseUtils {
         return oppdatertListeMedAndeler
     }
 
-    private fun skalAndelerSlåsSammen(førsteAndel: AndelTilkjentYtelse, nesteAndel: AndelTilkjentYtelse): Boolean =
+    private fun skalEndretAndelerSlåsSammen(
+        førsteAndel: AndelTilkjentYtelse,
+        nesteAndel: AndelTilkjentYtelse
+    ): Boolean =
         førsteAndel.stønadTom.sisteDagIInneværendeMåned()
             .erDagenFør(nesteAndel.stønadFom.førsteDagIInneværendeMåned()) && førsteAndel.prosent == BigDecimal(0) && nesteAndel.prosent == BigDecimal(
             0

@@ -3,12 +3,14 @@ package no.nav.familie.ba.sak.kjerne.beregning
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.Utils.avrundetHeltallAvProsent
+import no.nav.familie.ba.sak.common.erDagenFør
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseUtils.erBack2BackIMånedsskifte
+import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseUtils.slåSammenPerioderSomIkkeSkulleHaVærtSplittet
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
@@ -72,7 +74,7 @@ data class UtvidetBarnetrygdGenerator(
             (kombinerTidslinjer(sammenlagt, neste))
         }
 
-        return sammenslåttTidslinje.toSegments()
+        val utvidetAndeler = sammenslåttTidslinje.toSegments()
             .filter { segment -> segment.value.any { it.rolle == PersonType.BARN } && segment.value.any { it.rolle == PersonType.SØKER } }
             .map {
                 val ordinærSatsForPeriode = SatsService.hentGyldigSatsFor(
@@ -96,9 +98,24 @@ data class UtvidetBarnetrygdGenerator(
                     prosent = prosentForPeriode
                 )
             }
+
+        val utvidetAndelerEtterSammenslåing = slåSammenPerioderSomIkkeSkulleHaVærtSplittet(
+            nyeAndelerForPerson = utvidetAndeler.toMutableList(),
+            skalAndelerSlåsSammen = ::skalUtvidetAndelerSlåsSammen
+        )
+
+        return utvidetAndelerEtterSammenslåing
     }
 
     private data class PeriodeData(val ident: String, val rolle: PersonType, val prosent: BigDecimal = BigDecimal.ZERO)
+
+    private fun skalUtvidetAndelerSlåsSammen(
+        førsteAndel: AndelTilkjentYtelse,
+        nesteAndel: AndelTilkjentYtelse
+    ): Boolean =
+        førsteAndel.stønadTom.sisteDagIInneværendeMåned()
+            .erDagenFør(nesteAndel.stønadFom.førsteDagIInneværendeMåned()) &&
+            førsteAndel.kalkulertUtbetalingsbeløp == nesteAndel.kalkulertUtbetalingsbeløp
 
     private fun kombinerTidslinjer(
         sammenlagtTidslinje: LocalDateTimeline<List<PeriodeData>>,
