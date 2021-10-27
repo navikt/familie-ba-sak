@@ -21,6 +21,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTil
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.dokument.domene.RestSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.dokument.hentBrevtype
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
@@ -956,4 +957,34 @@ fun lagPerson(
     fødselsdato = fødselsdato,
     navn = type.name,
     kjønn = kjønn
+)
+
+fun lagRestSanityBegrunnelse(
+    apiNavn: String? = "",
+    navnISystem: String = "",
+    vilkaar: List<String>? = emptyList(),
+    rolle: List<String>? = emptyList(),
+    lovligOppholdTriggere: List<String>? = emptyList(),
+    bosattIRiketTriggere: List<String>? = emptyList(),
+    giftPartnerskapTriggere: List<String>? = emptyList(),
+    borMedSokerTriggere: List<String>? = emptyList(),
+    ovrigeTriggere: List<String>? = emptyList(),
+    endringsaarsaker: List<String>? = emptyList(),
+    hjemler: List<String> = emptyList(),
+    endretUtbetalingsperiodeDeltBostedTriggere: List<String>? = emptyList(),
+    endretUtbetalingsperiodeTriggere: List<String>? = emptyList(),
+): RestSanityBegrunnelse = RestSanityBegrunnelse(
+    apiNavn = apiNavn,
+    navnISystem = navnISystem,
+    vilkaar = vilkaar,
+    rolle = rolle,
+    lovligOppholdTriggere = lovligOppholdTriggere,
+    bosattIRiketTriggere = bosattIRiketTriggere,
+    giftPartnerskapTriggere = giftPartnerskapTriggere,
+    borMedSokerTriggere = borMedSokerTriggere,
+    ovrigeTriggere = ovrigeTriggere,
+    endringsaarsaker = endringsaarsaker,
+    hjemler = hjemler,
+    endretUtbetalingsperiodeDeltBostedTriggere = endretUtbetalingsperiodeDeltBostedTriggere,
+    endretUtbetalingsperiodeTriggere = endretUtbetalingsperiodeTriggere,
 )
