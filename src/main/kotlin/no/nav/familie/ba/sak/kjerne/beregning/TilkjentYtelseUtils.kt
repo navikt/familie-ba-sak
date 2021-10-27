@@ -167,7 +167,7 @@ object TilkjentYtelseUtils {
             val nyeAndelerForPersonEtterSammenslåing =
                 slåSammenPerioderSomIkkeSkulleHaVærtSplittet(
                     andelerTilkjentYtelse = nyeAndelerForPerson,
-                    skalAndelerSlåsSammen = ::skalEndretAndelerSlåsSammen
+                    skalAndelerSlåsSammen = ::skalAndelerSlåsSammen
                 )
 
             nyeAndelTilkjentYtelse.addAll(nyeAndelerForPersonEtterSammenslåing)
@@ -213,7 +213,7 @@ object TilkjentYtelseUtils {
         return oppdatertListeMedAndeler
     }
 
-    private fun skalEndretAndelerSlåsSammen(
+    private fun skalAndelerSlåsSammen(
         førsteAndel: AndelTilkjentYtelse,
         nesteAndel: AndelTilkjentYtelse
     ): Boolean =
