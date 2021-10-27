@@ -5,8 +5,6 @@ import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.config.ApplicationConfig
 import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
-import no.nav.familie.ba.sak.kjerne.verdikjedetester.KMockServerSQLContainer
-import no.nav.familie.ba.sak.kjerne.verdikjedetester.MOCK_SERVER_IMAGE
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext.SYSTEM_FORKORTELSE
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import no.nav.security.mock.oauth2.token.DefaultOAuth2TokenCallback
@@ -20,7 +18,6 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.web.server.LocalServerPort
-import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.test.context.ContextConfiguration
@@ -40,7 +37,6 @@ import org.springframework.web.client.RestTemplate
         "ENVIRONMENT_NAME: integrationtest",
     ],
 )
-@AutoConfigureWireMock(port = 28085)
 @ExtendWith(SpringExtension::class)
 @EnableMockOAuth2Server(port = 1234)
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
@@ -63,14 +59,6 @@ abstract class WebSpringAuthTestRunner {
     @LocalServerPort
     private val port = 0
 
-    // Lazy because we only want it to be initialized when accessed
-    val mockServer: KMockServerSQLContainer by lazy {
-        val mockServer = KMockServerSQLContainer(MOCK_SERVER_IMAGE)
-        mockServer.withExposedPorts(1337)
-        mockServer.withFixedExposedPort(1337, 1337)
-        mockServer
-    }
-
     @BeforeAll
     fun init() {
         databaseCleanupService.truncate()
@@ -78,8 +66,6 @@ abstract class WebSpringAuthTestRunner {
 
     @AfterAll
     fun tearDown() {
-        logger.info("Mock server logs: ${mockServer.logs}")
-        mockServer.stop()
         mockOAuth2Server.shutdown()
         unmockkAll()
     }

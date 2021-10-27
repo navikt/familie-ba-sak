@@ -88,7 +88,7 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
             )
         val restFagsakEtterRegistrertSøknad: Ressurs<RestFagsak> =
             familieBaSakKlient().registrererSøknad(
-                behandlingId = aktivBehandling!!.behandlingId,
+                behandlingId = aktivBehandling.behandlingId,
                 restRegistrerSøknad = restRegistrerSøknad
             )
         generellAssertFagsak(
@@ -98,7 +98,7 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
         )
 
         // Godkjenner alle vilkår på førstegangsbehandling.
-        val aktivBehandlingEtterRegistrertSøknad = hentAktivBehandling(restFagsakEtterRegistrertSøknad.data!!)!!
+        val aktivBehandlingEtterRegistrertSøknad = hentAktivBehandling(restFagsakEtterRegistrertSøknad.data!!)
         aktivBehandlingEtterRegistrertSøknad.personResultater.forEach { restPersonResultat ->
             restPersonResultat.vilkårResultater.filter { it.resultat == Resultat.IKKE_VURDERT }.forEach {
 
@@ -127,7 +127,7 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
                 behandlingId = aktivBehandlingEtterRegistrertSøknad.behandlingId
             )
         val behandlingEtterBehandlingsresultat =
-            hentAktivBehandling(restFagsak = restFagsakEtterBehandlingsresultat.data!!)!!
+            hentAktivBehandling(restFagsak = restFagsakEtterBehandlingsresultat.data!!)
 
         assertEquals(
             tilleggOrdinærSatsTilTester.beløp,
@@ -250,7 +250,7 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
 
         val aktivBehandling = hentAktivBehandling(restFagsak = restFagsakEtterJournalføring.data!!)
 
-        assertEquals(BehandlingUnderkategori.UTVIDET, aktivBehandling?.underkategori)
+        assertEquals(BehandlingUnderkategori.UTVIDET, aktivBehandling.underkategori)
 
         val restRegistrerSøknad =
             RestRegistrerSøknad(
@@ -273,7 +273,7 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
         )
 
         // Godkjenner alle vilkår på førstegangsbehandling.
-        val aktivBehandlingEtterRegistrertSøknad = hentAktivBehandling(restFagsakEtterRegistrertSøknad.data!!)!!
+        val aktivBehandlingEtterRegistrertSøknad = hentAktivBehandling(restFagsakEtterRegistrertSøknad.data!!)
 
         assertEquals(
             3,
@@ -309,7 +309,7 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
                 behandlingId = aktivBehandlingEtterRegistrertSøknad.behandlingId
             )
         val behandlingEtterBehandlingsresultat =
-            hentAktivBehandling(restFagsak = restFagsakEtterBehandlingsresultat.data!!)!!
+            hentAktivBehandling(restFagsak = restFagsakEtterBehandlingsresultat.data!!)
 
         assertEquals(
             tilleggOrdinærSatsTilTester.beløp + sisteUtvidetSatsTilTester.beløp,
