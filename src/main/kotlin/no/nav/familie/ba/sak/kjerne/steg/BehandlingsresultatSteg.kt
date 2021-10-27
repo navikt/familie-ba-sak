@@ -11,9 +11,12 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatService
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
-import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering
+import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering.validerAtBarnIkkeFårFlereUtbetalingerSammePeriode
+import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering.validerAtTilkjentYtelseHarFornuftigePerioderOgBeløp
+import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering.validerAtTilkjentYtelseHarGyldigEtterbetalingsperiode
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerAtAlleOpprettedeEndringerErUtfylt
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerAtEndringerErTilknyttetAndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
@@ -74,12 +77,12 @@ class BehandlingsresultatSteg(
             behandlingId = behandling.id
         )!!
 
-        TilkjentYtelseValidering.validerAtTilkjentYtelseHarFornuftigePerioderOgBeløp(
+        validerAtTilkjentYtelseHarFornuftigePerioderOgBeløp(
             tilkjentYtelse = tilkjentYtelse,
             personopplysningGrunnlag = personopplysningGrunnlag
         )
 
-        TilkjentYtelseValidering.validerAtTilkjentYtelseHarGyldigEtterbetalingsperiode(tilkjentYtelse)
+        validerAtTilkjentYtelseHarGyldigEtterbetalingsperiode(tilkjentYtelse)
 
         val andreBehandlingerPåBarna = personopplysningGrunnlag.barna.map {
             Pair(
@@ -88,11 +91,10 @@ class BehandlingsresultatSteg(
             )
         }
 
-        EndretUtbetalingAndelValidering.validerAtAlleOpprettedeEndringerErUtfylt(
-            endretUtbetalingAndelService.hentForBehandling(behandling.id)
-        )
+        validerAtAlleOpprettedeEndringerErUtfylt(endretUtbetalingAndelService.hentForBehandling(behandling.id))
+        validerAtEndringerErTilknyttetAndelTilkjentYtelse(endretUtbetalingAndelService.hentForBehandling(behandling.id))
 
-        TilkjentYtelseValidering.validerAtBarnIkkeFårFlereUtbetalingerSammePeriode(
+        validerAtBarnIkkeFårFlereUtbetalingerSammePeriode(
             behandlendeBehandlingTilkjentYtelse = tilkjentYtelse,
             barnMedAndreTilkjentYtelse = andreBehandlingerPåBarna,
             personopplysningGrunnlag = personopplysningGrunnlag

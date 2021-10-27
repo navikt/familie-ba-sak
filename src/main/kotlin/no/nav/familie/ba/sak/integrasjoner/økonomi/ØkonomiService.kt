@@ -70,7 +70,8 @@ class ØkonomiService(
         val oppdaterteKjeder = kjedeinndelteAndeler(oppdatertTilstand)
 
         val erFørsteIverksatteBehandlingPåFagsak =
-            beregningService.hentTilkjentYtelseForBehandlingerIverksattMotØkonomi(oppdatertBehandling.fagsak.id).isEmpty()
+            beregningService.hentTilkjentYtelseForBehandlingerIverksattMotØkonomi(oppdatertBehandling.fagsak.id)
+                .isEmpty()
 
         return if (erFørsteIverksatteBehandlingPåFagsak) {
             utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOpptaderTilkjentYtelse(
@@ -81,8 +82,9 @@ class ØkonomiService(
                 erSimulering = erSimulering,
             )
         } else {
-            val forrigeBehandling = behandlingService.hentForrigeBehandlingSomErIverksatt(behandling = oppdatertBehandling)
-                ?: error("Finner ikke forrige behandling ved oppdatering av tilkjent ytelse og iverksetting av vedtak")
+            val forrigeBehandling =
+                behandlingService.hentForrigeBehandlingSomErIverksatt(behandling = oppdatertBehandling)
+                    ?: error("Finner ikke forrige behandling ved oppdatering av tilkjent ytelse og iverksetting av vedtak")
 
             val forrigeTilstand = beregningService.hentAndelerTilkjentYtelseForBehandling(forrigeBehandling.id)
             // TODO: Her bør det legges til sjekk om personident er endret. Hvis endret bør dette mappes i forrigeTilstand som benyttes videre.
@@ -112,8 +114,9 @@ class ØkonomiService(
 
             if (!erSimulering && (
                 oppdatertBehandling.erTekniskOpphør() ||
-                    oppdatertBehandling.type == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT ||
-                    behandlingService.hent(oppdatertBehandling.id).resultat == BehandlingResultat.OPPHØRT
+                    oppdatertBehandling.type == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT || behandlingService.hent(
+                        oppdatertBehandling.id
+                    ).resultat == BehandlingResultat.OPPHØRT
                 )
             )
                 validerOpphørsoppdrag(utbetalingsoppdrag)
@@ -123,15 +126,16 @@ class ØkonomiService(
     }
 
     fun hentSisteOffsetPåFagsak(behandling: Behandling): Int? =
-        behandlingService.hentForrigeBehandlingSomErIverksatt(behandling = behandling)?.let { forrigeIverksattBehandling ->
+        behandlingService.hentForrigeBehandlingSomErIverksatt(behandling = behandling)
+            ?.let { forrigeIverksattBehandling ->
 
-            beregningService.hentAndelerTilkjentYtelseForBehandling(forrigeIverksattBehandling.id)
-                .takeIf { it.isNotEmpty() }
-                ?.let { andelerTilkjentYtelse ->
-                    andelerTilkjentYtelse.maxByOrNull { it.periodeOffset!! }?.periodeOffset?.toInt()
-                }
-                ?: hentSisteOffsetPåFagsak(forrigeIverksattBehandling)
-        }
+                beregningService.hentAndelerTilkjentYtelseForBehandling(forrigeIverksattBehandling.id)
+                    .takeIf { it.isNotEmpty() }
+                    ?.let { andelerTilkjentYtelse ->
+                        andelerTilkjentYtelse.maxByOrNull { it.periodeOffset!! }?.periodeOffset?.toInt()
+                    }
+                    ?: hentSisteOffsetPåFagsak(forrigeIverksattBehandling)
+            }
 
     private fun validerOpphørsoppdrag(utbetalingsoppdrag: Utbetalingsoppdrag) {
         val (opphørsperioder, annet) = utbetalingsoppdrag.utbetalingsperiode.partition { it.opphør != null }
@@ -147,7 +151,8 @@ class ØkonomiService(
         }
 
         val erMigrertSak =
-            behandlingService.hentBehandlinger(behandling.fagsak.id).any { it.type == BehandlingType.MIGRERING_FRA_INFOTRYGD }
+            behandlingService.hentBehandlinger(behandling.fagsak.id)
+                .any { it.type == BehandlingType.MIGRERING_FRA_INFOTRYGD }
 
         if (!erMigrertSak) {
             return null
