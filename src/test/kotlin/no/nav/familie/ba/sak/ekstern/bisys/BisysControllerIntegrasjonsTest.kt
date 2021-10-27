@@ -124,7 +124,7 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
                 .withRequestBody(
                     equalToJson(
                         """{"personIdent":"$fnr", "fraDato":"${
-                            YearMonth.now().minusYears(4)
+                        YearMonth.now().minusYears(4)
                         }" }"""
                     )
                 )
@@ -155,7 +155,7 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
                 .withRequestBody(
                     equalToJson(
                         """{"personIdent":"$fnr", "fraDato":"${
-                            YearMonth.now().minusYears(4)
+                        YearMonth.now().minusYears(4)
                         }" }"""
                     )
                 )
@@ -215,7 +215,7 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
                 .withRequestBody(
                     equalToJson(
                         """{"personIdent":"$fnr", "fraDato":"${
-                            YearMonth.now().minusYears(4)
+                        YearMonth.now().minusYears(4)
                         }" }"""
                     )
                 )
