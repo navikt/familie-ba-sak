@@ -88,7 +88,7 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
 
         assertThat(error.statusCode).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
         val errorObject = objectMapper.readValue<EksternTjenesteFeil>(error.responseBodyAsByteArray)
-        assertThat(errorObject.melding).isEqualTo("Henting av utvidet barnetrygd feilet. Gav feil: 500 Server Error: [foobar]")
+        assertThat(errorObject.melding).isEqualTo("Henting av utvidet barnetrygd feilet. Gav feil: 500 Server Error: \"foobar\"")
         assertThat(errorObject.path).isEqualTo("/api/bisys/hent-utvidet-barnetrygd")
         assertThat(errorObject.timestamp).isCloseTo(LocalDateTime.now(), within(10, ChronoUnit.SECONDS))
         assertThat(errorObject.exception).contains("HttpServerErrorException")
@@ -121,7 +121,13 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
         )
         verify(
             postRequestedFor(urlEqualTo("/infotrygd/barnetrygd/utvidet"))
-                .withRequestBody(equalToJson("""{"personIdent":"$fnr", "fraDato":"${YearMonth.now().minusYears(4)}" }"""))
+                .withRequestBody(
+                    equalToJson(
+                        """{"personIdent":"$fnr", "fraDato":"${
+                            YearMonth.now().minusYears(4)
+                        }" }"""
+                    )
+                )
 
         )
 
@@ -146,7 +152,13 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
 
         stubFor(
             post(urlEqualTo("/infotrygd/barnetrygd/utvidet"))
-                .withRequestBody(equalToJson("""{"personIdent":"$fnr", "fraDato":"${YearMonth.now().minusYears(4)}" }"""))
+                .withRequestBody(
+                    equalToJson(
+                        """{"personIdent":"$fnr", "fraDato":"${
+                            YearMonth.now().minusYears(4)
+                        }" }"""
+                    )
+                )
                 .willReturn(
                     aResponse()
                         .withStatus(200)
@@ -171,7 +183,15 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
         assertThat(responseEntity.body!!.perioder)
             .hasSize(2)
         assertThat(responseEntity.body!!.perioder)
-            .contains(UtvidetBarnetrygdPeriode(BisysStønadstype.SMÅBARNSTILLEGG, YearMonth.of(2019, 12), null, 660.0, false))
+            .contains(
+                UtvidetBarnetrygdPeriode(
+                    BisysStønadstype.SMÅBARNSTILLEGG,
+                    YearMonth.of(2019, 12),
+                    null,
+                    660.0,
+                    false
+                )
+            )
         assertThat(responseEntity.body!!.perioder)
             .contains(UtvidetBarnetrygdPeriode(BisysStønadstype.UTVIDET, YearMonth.of(2019, 12), null, 1054.0, false))
     }
@@ -192,7 +212,13 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
 
         stubFor(
             post(urlEqualTo("/infotrygd/barnetrygd/utvidet"))
-                .withRequestBody(equalToJson("""{"personIdent":"$fnr", "fraDato":"${YearMonth.now().minusYears(4)}" }"""))
+                .withRequestBody(
+                    equalToJson(
+                        """{"personIdent":"$fnr", "fraDato":"${
+                            YearMonth.now().minusYears(4)
+                        }" }"""
+                    )
+                )
                 .willReturn(
                     aResponse()
                         .withStatus(200)
@@ -217,7 +243,15 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
         assertThat(responseEntity.body!!.perioder)
             .hasSize(3)
         assertThat(responseEntity.body!!.perioder)
-            .contains(UtvidetBarnetrygdPeriode(BisysStønadstype.SMÅBARNSTILLEGG, YearMonth.of(2019, 12), null, 660.0, false))
+            .contains(
+                UtvidetBarnetrygdPeriode(
+                    BisysStønadstype.SMÅBARNSTILLEGG,
+                    YearMonth.of(2019, 12),
+                    null,
+                    660.0,
+                    false
+                )
+            )
         assertThat(responseEntity.body!!.perioder)
             .contains(UtvidetBarnetrygdPeriode(BisysStønadstype.UTVIDET, YearMonth.of(2019, 12), null, 1054.0, false))
         assertThat(responseEntity.body!!.perioder)
