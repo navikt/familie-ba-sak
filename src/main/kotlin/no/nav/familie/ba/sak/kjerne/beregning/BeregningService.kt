@@ -9,7 +9,6 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerDeltBosted
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -37,11 +36,13 @@ class BeregningService(
     fun slettTilkjentYtelseForBehandling(behandlingId: Long) = tilkjentYtelseRepository.findByBehandling(behandlingId)
         ?.let { tilkjentYtelseRepository.delete(it) }
 
-    fun hentLøpendeAndelerTilkjentYtelseForBehandlinger(behandlingIder: List<Long>): List<AndelTilkjentYtelse> =
+    fun hentLøpendeAndelerTilkjentYtelseMedUtbetalingerForBehandlinger(behandlingIder: List<Long>): List<AndelTilkjentYtelse> =
         andelTilkjentYtelseRepository.finnLøpendeAndelerTilkjentYtelseForBehandlinger(behandlingIder)
+            .filter { it.erAndelSomSkalSendesTilOppdrag() }
 
-    fun hentAndelerTilkjentYtelseForBehandling(behandlingId: Long): List<AndelTilkjentYtelse> =
-        andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(listOf(behandlingId))
+    fun hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(behandlingId: Long): List<AndelTilkjentYtelse> =
+        andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId)
+            .filter { it.erAndelSomSkalSendesTilOppdrag() }
 
     fun lagreTilkjentYtelseMedOppdaterteAndeler(tilkjentYtelse: TilkjentYtelse) =
         tilkjentYtelseRepository.save(tilkjentYtelse)
@@ -55,7 +56,11 @@ class BeregningService(
 
     fun hentTilkjentYtelseForBehandlingerIverksattMotØkonomi(fagsakId: Long): List<TilkjentYtelse> {
         val iverksatteBehandlinger = behandlingRepository.findByFagsakAndAvsluttet(fagsakId)
-        return iverksatteBehandlinger.mapNotNull { tilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(it.id) }
+        return iverksatteBehandlinger.mapNotNull {
+            tilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(
+                it.id
+            )
+        }
     }
 
     /**
@@ -91,7 +96,7 @@ class BeregningService(
     fun oppdaterBehandlingMedBeregning(
         behandling: Behandling,
         personopplysningGrunnlag: PersonopplysningGrunnlag,
-        endretUtbetalingAndel: EndretUtbetalingAndel? = null
+        nyEndretUtbetalingAndel: EndretUtbetalingAndel? = null
     ): TilkjentYtelse {
 
         tilkjentYtelseRepository.slettTilkjentYtelseFor(behandling)
@@ -109,11 +114,13 @@ class BeregningService(
                     behandlingId = behandling.id
                 )
             }
-
-        if (endretUtbetalingAndel != null)
-            validerDeltBosted(endretUtbetalingAndel, tilkjentYtelse.andelerTilkjentYtelse.toList())
-
-        val endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(behandling.id)
+        val endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(behandling.id).filter {
+            if (nyEndretUtbetalingAndel != null) {
+                it.id == nyEndretUtbetalingAndel.id || it.andelTilkjentYtelser.isNotEmpty()
+            } else {
+                it.andelTilkjentYtelser.isNotEmpty()
+            }
+        }
         val andelerTilkjentYtelse = TilkjentYtelseUtils.oppdaterTilkjentYtelseMedEndretUtbetalingAndeler(
             tilkjentYtelse.andelerTilkjentYtelse,
             endretUtbetalingAndeler
