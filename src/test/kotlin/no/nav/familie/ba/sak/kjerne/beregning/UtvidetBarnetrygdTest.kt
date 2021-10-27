@@ -415,7 +415,7 @@ internal class UtvidetBarnetrygdTest {
     }
 
     @Test
-    fun `Utvidet andel blir videreført en måned ekstra hvis det er back2back i månedskifte`() {
+    fun `Utvidet andel blir ikke splittet opp hvis det er back2back i månedskifte`() {
         val søkerOrdinær =
             OppfyltPeriode(fom = LocalDate.of(2019, 4, 1), tom = LocalDate.of(2020, 10, 15))
         val barnOppfylt =
@@ -489,20 +489,17 @@ internal class UtvidetBarnetrygdTest {
         )
             .andelerTilkjentYtelse.toList().sortedBy { it.type }
 
-        assertEquals(3, andeler.size)
+        assertEquals(2, andeler.size)
 
         val andelBarn = andeler[0]
-        val andelUtvidet1 = andeler[1]
-        val andelUtvidet2 = andeler[2]
+        val andelUtvidet = andeler[1]
 
         assertEquals(barnOppfylt.ident, andelBarn.personIdent)
         assertEquals(barnOppfylt.tom.toYearMonth(), andelBarn.stønadTom)
 
-        assertEquals(søkerOrdinær.ident, andelUtvidet1.personIdent)
-        assertEquals(b2bTom.plusMonths(1).toYearMonth(), andelUtvidet1.stønadTom)
-
-        assertEquals(søkerOrdinær.ident, andelUtvidet2.personIdent)
-        assertEquals(b2bFom.plusMonths(1).toYearMonth(), andelUtvidet2.stønadFom)
+        assertEquals(søkerOrdinær.ident, andelUtvidet.personIdent)
+        assertEquals(søkerOrdinær.fom.plusMonths(1).toYearMonth(), andelUtvidet.stønadFom)
+        assertEquals(søkerOrdinær.tom.toYearMonth(), andelUtvidet.stønadTom)
     }
 
     @Test
