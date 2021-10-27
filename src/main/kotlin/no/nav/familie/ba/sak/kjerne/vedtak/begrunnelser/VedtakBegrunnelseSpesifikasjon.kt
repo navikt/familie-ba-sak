@@ -542,22 +542,22 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
     },
     ENDRET_UTBETALING_DELT_BOSTED_FULL_UTBETALING {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.ENDRET_UTBETALING
-        override val sanityApiNavn = "endretUtbetalingDeltBostedFullUtbetaling"
+        override val sanityApiNavn = "endretUtbetalingDeltBostedFullUtbetalingForSoknad"
     },
     ENDRET_UTBETALING_DELT_BOSTED_INGEN_UTBETALING {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.ENDRET_UTBETALING
-        override val sanityApiNavn = "endretUtbetalingDeltBostedIngenUtbetaling"
+        override val sanityApiNavn = "endretUtbetalingDeltBostedIngenUtbetalingForSoknad"
     },
     ETTER_ENDRET_UTBETALING_RETTSAVGJØRELSE_DELT_BOSTED {
         override val sanityApiNavn = "etterEndretUtbetalingRettsavgjorelseDeltBosted"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.ETTER_ENDRET_UTBETALING
     },
     ETTER_ENDRET_UTBETALING_AVTALE_DELT_BOSTED_FØLGES {
-        override val sanityApiNavn = "etterEndretUtbetalingAvtaleDeltBostedFolges"
+        override val sanityApiNavn = "etterEndretUtbetalingVurderingAvtaleDeltBostedFolges"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.ETTER_ENDRET_UTBETALING
     },
     ETTER_ENDRET_UTBETALING_HAR_AVTALE_DELT_BOSTED {
-        override val sanityApiNavn = "etterEndretUtbetalingHarAvtaleDeltBosted"
+        override val sanityApiNavn = "etterEndretUtbetalingAvtaleDeltBosted"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.ETTER_ENDRET_UTBETALING
     };
 
