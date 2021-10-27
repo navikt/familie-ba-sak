@@ -73,7 +73,7 @@ data class UtvidetBarnetrygdGenerator(
         }
 
         return sammenslåttTidslinje.toSegments()
-            .filter { segement -> segement.value.any { it.rolle == PersonType.BARN } && segement.value.any { it.rolle == PersonType.SØKER } }
+            .filter { segment -> segment.value.any { it.rolle == PersonType.BARN } && segment.value.any { it.rolle == PersonType.SØKER } }
             .map {
                 val ordinærSatsForPeriode = SatsService.hentGyldigSatsFor(
                     satstype = SatsType.ORBA,
