@@ -4,7 +4,6 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.ekstern.restDomene.RestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
-import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering.validerAtBarnIkkeFårFlereUtbetalingerSammePeriode
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.dokument.BrevKlient
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerIngenOverlappendeEndring
@@ -57,15 +56,8 @@ class EndretUtbetalingAndelService(
             personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
                 ?: throw Feil("Fant ikke personopplysninggrunnlag på behandling ${behandling.id}")
 
-        val tilkjentYtelse =
-            beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag, endretUtbetalingAndel)
-        val andreBehandlingerPåBarna = personopplysningGrunnlag.barna.map { barn ->
-            Pair(barn, beregningService.hentIverksattTilkjentYtelseForBarn(barn.personIdent, behandling))
-        }
-        validerAtBarnIkkeFårFlereUtbetalingerSammePeriode(
-            behandlendeBehandlingTilkjentYtelse = tilkjentYtelse,
-            barnMedAndreTilkjentYtelse = andreBehandlingerPåBarna,
-            personopplysningGrunnlag = personopplysningGrunnlag
+        beregningService.oppdaterBehandlingMedBeregning(
+            behandling, personopplysningGrunnlag, endretUtbetalingAndel
         )
     }
 
