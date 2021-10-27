@@ -222,7 +222,7 @@ fun lagAndelTilkjentYtelse(
         forrigePeriodeOffset = forrigeperiodeIdOffset,
         sats = beløp,
         prosent = prosent,
-        endretUtbetalingAndeler = endretUtbetalingAndeler
+        endretUtbetalingAndeler = endretUtbetalingAndeler.toMutableList()
     )
 }
 
