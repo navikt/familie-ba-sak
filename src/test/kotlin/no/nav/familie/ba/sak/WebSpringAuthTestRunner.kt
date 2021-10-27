@@ -14,7 +14,6 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
-import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.web.server.LocalServerPort
@@ -125,8 +124,6 @@ abstract class WebSpringAuthTestRunner {
     }
 
     companion object {
-
-        val logger = LoggerFactory.getLogger(WebSpringAuthTestRunner::class.java)
 
         const val DEFAULT_ISSUER_ID = "azuread"
         const val DEFAULT_SUBJECT = "subject"
