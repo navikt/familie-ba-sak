@@ -39,7 +39,7 @@ class EndretUtbetalingAndelService(
                 .first()
 
         endretUtbetalingAndel.fraRestEndretUtbetalingAndel(restEndretUtbetalingAndel, person).also {
-            it.vedtakBegrunnelseSpesifikasjoner = it.hentGyldigEndretBegrunnelser(brevKlient.hentSanityBegrunnelse())
+            it.vedtakBegrunnelseSpesifikasjoner = it.hentGyldigEndretBegrunnelser(brevKlient.hentSanityBegrunnelser())
         }
 
         validerIngenOverlappendeEndring(

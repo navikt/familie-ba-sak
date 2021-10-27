@@ -52,7 +52,7 @@ class AvstemmingService(
         return relevanteBehandlinger
             .chunked(1000)
             .map { chunk ->
-                val relevanteAndeler = beregningService.hentLøpendeAndelerTilkjentYtelseForBehandlinger(
+                val relevanteAndeler = beregningService.hentLøpendeAndelerTilkjentYtelseMedUtbetalingerForBehandlinger(
                     behandlingIder = chunk
                 )
                 relevanteAndeler.groupBy { it.kildeBehandlingId }
