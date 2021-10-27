@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
 import no.nav.familie.ba.sak.ekstern.restDomene.RestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsak
-import no.nav.familie.ba.sak.ekstern.restDomene.RestHentFagsakForPerson
 import no.nav.familie.ba.sak.ekstern.restDomene.RestJournalføring
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedStandardbegrunnelser
@@ -50,16 +49,6 @@ class FamilieBaSakKlient(
 
         return getForEntity(
             uri,
-            headers,
-        )
-    }
-
-    fun hentFagsak(restHentFagsakForPerson: RestHentFagsakForPerson): Ressurs<RestFagsak> {
-        val uri = URI.create("$baSakUrl/api/fagsaker/hent-fagsak-paa-person")
-
-        return postForEntity(
-            uri,
-            restHentFagsakForPerson,
             headers,
         )
     }

@@ -8,16 +8,24 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Utbetalingsperiode
 import no.nav.familie.ba.sak.tilbakekreving.RestTilbakekrevingsbehandling
 import java.time.LocalDateTime
 
+interface RestBaseFagsak {
+    val opprettetTidspunkt: LocalDateTime
+    val id: Long
+    val søkerFødselsnummer: String
+    val status: FagsakStatus
+    val underBehandling: Boolean
+}
+
 data class RestFagsak(
-    val opprettetTidspunkt: LocalDateTime,
-    val id: Long,
-    val søkerFødselsnummer: String,
-    val status: FagsakStatus,
-    val underBehandling: Boolean,
+    override val opprettetTidspunkt: LocalDateTime,
+    override val id: Long,
+    override val søkerFødselsnummer: String,
+    override val status: FagsakStatus,
+    override val underBehandling: Boolean,
     val behandlinger: List<RestUtvidetBehandling>,
     val gjeldendeUtbetalingsperioder: List<Utbetalingsperiode>,
     val tilbakekrevingsbehandlinger: List<RestTilbakekrevingsbehandling>
-)
+) : RestBaseFagsak
 
 fun Fagsak.tilRestFagsak(
     restUtvidetBehandlinger: List<RestUtvidetBehandling>,
@@ -37,15 +45,15 @@ fun Fagsak.tilRestFagsak(
 )
 
 data class RestMinimalFagsak(
-    val opprettetTidspunkt: LocalDateTime,
-    val id: Long,
-    val søkerFødselsnummer: String,
-    val status: FagsakStatus,
-    val underBehandling: Boolean,
+    override val opprettetTidspunkt: LocalDateTime,
+    override val id: Long,
+    override val søkerFødselsnummer: String,
+    override val status: FagsakStatus,
+    override val underBehandling: Boolean,
     val behandlinger: List<RestVisningBehandling>,
     val tilbakekrevingsbehandlinger: List<RestTilbakekrevingsbehandling>,
     val gjeldendeUtbetalingsperioder: List<Utbetalingsperiode>,
-)
+) : RestBaseFagsak
 
 fun Fagsak.tilRestMinimalFagsak(
     underBehandling: Boolean,

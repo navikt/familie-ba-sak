@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.tilKortString
-import no.nav.familie.ba.sak.ekstern.restDomene.RestHentFagsakForPerson
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
@@ -126,7 +125,7 @@ class FødselshendelseHenleggelseTest(
         }
 
         val fagsak =
-            familieBaSakKlient().hentFagsak(restHentFagsakForPerson = RestHentFagsakForPerson(personIdent = scenario.søker.ident)).data
+            familieBaSakKlient().hentFagsak(fagsakId = behandling!!.fagsak.id).data
 
         val automatiskVurdertBehandling = fagsak?.behandlinger?.first { it.skalBehandlesAutomatisk }!!
         assertEquals(0, automatiskVurdertBehandling.personResultater.size)
@@ -169,14 +168,14 @@ class FødselshendelseHenleggelseTest(
                 behandlingId = behandling!!.id,
                 oppgavetype = Oppgavetype.VurderLivshendelse,
                 beskrivelse = "Barnet (fødselsdato: ${
-                LocalDate.parse(scenario.barna.first().fødselsdato)
-                    .tilKortString()
+                    LocalDate.parse(scenario.barna.first().fødselsdato)
+                        .tilKortString()
                 }) er ikke bosatt med mor."
             )
         }
 
         val fagsak =
-            familieBaSakKlient().hentFagsak(restHentFagsakForPerson = RestHentFagsakForPerson(personIdent = scenario.søker.ident)).data
+            familieBaSakKlient().hentFagsak(fagsakId = behandling!!.fagsak.id).data
 
         val automatiskVurdertBehandling = fagsak?.behandlinger?.first { it.skalBehandlesAutomatisk }!!
         val borMedSøkerVikårForbarn =
