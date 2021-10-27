@@ -87,7 +87,7 @@ class VilkårsvurderingService(
     }
 
     fun hentVilkårsbegrunnelser(): Map<VedtakBegrunnelseType, List<RestVedtakBegrunnelseTilknyttetVilkår>> =
-        vedtakBegrunnelseSpesifikasjonerTilNedtrekksmenytekster(brevKlient.hentSanityBegrunnelse())
+        vedtakBegrunnelseSpesifikasjonerTilNedtrekksmenytekster(brevKlient.hentSanityBegrunnelser())
 
     companion object {
 

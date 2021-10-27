@@ -171,7 +171,7 @@ class BrevService(
 
         val grunnlagOgSignaturData = hentGrunnlagOgSignaturData(vedtak)
 
-        val sanityBegrunnelser = brevKlient.hentSanityBegrunnelse()
+        val sanityBegrunnelser = brevKlient.hentSanityBegrunnelser()
 
         val hjemler = hentHjemmeltekst(utvidetVedtaksperioderMedBegrunnelser, sanityBegrunnelser)
 

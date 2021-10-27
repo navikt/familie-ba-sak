@@ -127,7 +127,8 @@ class VedtaksperiodeService(
             .utbetalingsperiodeDetaljer
             .map { utbetalingsperiodeDetalj -> utbetalingsperiodeDetalj.person.personIdent }
 
-        val sanityBegrunnelser = brevKlient.hentSanityBegrunnelse()
+        val sanityBegrunnelser = brevKlient.hentSanityBegrunnelser()
+
         vedtaksperiodeMedBegrunnelser.settBegrunnelser(
             restPutVedtaksperiodeMedStandardbegrunnelser.standardbegrunnelser.mapNotNull {
 
@@ -209,7 +210,7 @@ class VedtaksperiodeService(
                     begrunnelserMedFeil.fold("") { acc, vedtakBegrunnelseSpesifikasjon ->
                         val sanityBegrunnelse =
                             vedtakBegrunnelseSpesifikasjon
-                                .tilSanityBegrunnelse(brevKlient.hentSanityBegrunnelse())
+                                .tilSanityBegrunnelse(sanityBegrunnelser)
                                 ?: return@fold ""
 
                         val vilkårsbeskrivelse =
@@ -356,6 +357,8 @@ class VedtaksperiodeService(
         val persongrunnlag =
             persongrunnlagRepository.findByBehandlingAndAktiv(behandling.id) ?: error("Finner ikke persongrunnlag")
 
+        val sanityBegrunnelser = brevKlient.hentSanityBegrunnelser()
+
         return vedtaksperioderMedBegrunnelser.map {
             it.tilUtvidetVedtaksperiodeMedBegrunnelser(
                 andelerTilkjentYtelse = andelerTilkjentYtelse,
@@ -386,7 +389,7 @@ class VedtaksperiodeService(
                             .filter { vedtakBegrunnelseSpesifikasjon -> vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType != VedtakBegrunnelseType.AVSLAG && vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType != VedtakBegrunnelseType.FORTSATT_INNVILGET }
                             .fold(mutableSetOf()) { acc, standardBegrunnelse ->
                                 val triggesAv =
-                                    standardBegrunnelse.tilSanityBegrunnelse(brevKlient.hentSanityBegrunnelse())
+                                    standardBegrunnelse.tilSanityBegrunnelse(sanityBegrunnelser)
                                         ?.tilTriggesAv() ?: return@fold acc
                                 val vedtakBegrunnelseType = standardBegrunnelse.vedtakBegrunnelseType
 
@@ -422,7 +425,7 @@ class VedtaksperiodeService(
 
             utvidetVedtaksperiodeMedBegrunnelser.copy(
                 gyldigeBegrunnelser = gyldigeBegrunnelser.filter {
-                    val sanityBegrunnelse = it.tilSanityBegrunnelse(brevKlient.hentSanityBegrunnelse())
+                    val sanityBegrunnelse = it.tilSanityBegrunnelse(sanityBegrunnelser)
                     sanityBegrunnelse?.tilTriggesAv()?.valgbar ?: false
                 }.toList()
             )

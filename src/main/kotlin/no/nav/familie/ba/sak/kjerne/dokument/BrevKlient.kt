@@ -29,7 +29,7 @@ class BrevKlient(
     }
 
     @Cacheable("begrunnelsestekster-for-nedtreksmeny")
-    fun hentSanityBegrunnelse(): List<SanityBegrunnelse> {
+    fun hentSanityBegrunnelser(): List<SanityBegrunnelse> {
         val url = URI.create("$familieBrevUri/ba-sak/begrunnelser")
         logger.info("Henter begrunnelser fra sanity")
         val response = restTemplate.exchange(
