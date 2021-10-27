@@ -40,7 +40,7 @@ import org.springframework.web.client.RestTemplate
         "ENVIRONMENT_NAME: integrationtest",
     ],
 )
-@AutoConfigureWireMock(port = 28085)
+@AutoConfigureWireMock(port = 0)
 @ExtendWith(SpringExtension::class)
 @EnableMockOAuth2Server(port = 1234)
 @ContextConfiguration(initializers = [DbContainerInitializer::class])

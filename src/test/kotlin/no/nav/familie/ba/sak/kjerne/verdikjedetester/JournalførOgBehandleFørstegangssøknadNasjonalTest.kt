@@ -27,6 +27,7 @@ import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScena
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
@@ -154,7 +155,7 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
 
         val vedtaksperiodeId =
             hentAktivtVedtak(restFagsakEtterVurderTilbakekreving.data!!)!!.vedtaksperioderMedBegrunnelser.first()
-        familieBaSakKlient().oppdaterVedtaksperiodeMedStandardbegrunnelser(
+        val restfagsakEtterBegrunnelserErSatt = familieBaSakKlient().oppdaterVedtaksperiodeMedStandardbegrunnelser(
             vedtaksperiodeId = vedtaksperiodeId.id,
             restPutVedtaksperiodeMedStandardbegrunnelser = RestPutVedtaksperiodeMedStandardbegrunnelser(
                 standardbegrunnelser = listOf(
@@ -162,6 +163,10 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
                 )
             )
         )
+
+        val antallBegrunnelser =
+            restfagsakEtterBegrunnelserErSatt.data!!.behandlinger[0].vedtakForBehandling[0].vedtaksperioderMedBegrunnelser.size
+        assertTrue(antallBegrunnelser > 0)
 
         val restFagsakEtterSendTilBeslutter =
             familieBaSakKlient().sendTilBeslutter(fagsakId = restFagsakEtterVurderTilbakekreving.data!!.id)
@@ -337,7 +342,7 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
         val vedtaksperiodeId =
             hentAktivtVedtak(restFagsakEtterVurderTilbakekreving.data!!)!!.vedtaksperioderMedBegrunnelser.first()
 
-        familieBaSakKlient().oppdaterVedtaksperiodeMedStandardbegrunnelser(
+        val restfagsakEtterBegrunnelserErSatt = familieBaSakKlient().oppdaterVedtaksperiodeMedStandardbegrunnelser(
             vedtaksperiodeId = vedtaksperiodeId.id,
             restPutVedtaksperiodeMedStandardbegrunnelser = RestPutVedtaksperiodeMedStandardbegrunnelser(
                 standardbegrunnelser = listOf(
@@ -345,6 +350,10 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
                 )
             )
         )
+
+        val antallBegrunnelser =
+            restfagsakEtterBegrunnelserErSatt.data!!.behandlinger[0].vedtakForBehandling[0].vedtaksperioderMedBegrunnelser.size
+        assertTrue(antallBegrunnelser > 0)
 
         val restFagsakEtterSendTilBeslutter =
             familieBaSakKlient().sendTilBeslutter(fagsakId = restFagsakEtterVurderTilbakekreving.data!!.id)
