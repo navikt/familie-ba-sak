@@ -197,7 +197,7 @@ class FamilieBaSakKlient(
         return postForEntity(uri, PersonIdent(ident), headers)
     }
 
-    fun forhaandsvisHenleggelseBrev(behandlingId: Long, manueltBrevRequest: ManueltBrevRequest): Ressurs<ByteArray>? {
+    fun forhaandsvisHenleggelseBrev(behandlingId: Long, manueltBrevRequest: ManueltBrevRequest): Ressurs<ByteArray> {
         val uri = URI.create("$baSakUrl/api/dokument/forhaandsvis-brev/$behandlingId")
         return postForEntity(uri, manueltBrevRequest, headers)
     }
