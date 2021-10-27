@@ -100,7 +100,7 @@ data class UtvidetBarnetrygdGenerator(
             }
 
         val utvidetAndelerEtterSammenslåing = slåSammenPerioderSomIkkeSkulleHaVærtSplittet(
-            nyeAndelerForPerson = utvidetAndeler.toMutableList(),
+            andelerTilkjentYtelse = utvidetAndeler.toMutableList(),
             skalAndelerSlåsSammen = ::skalUtvidetAndelerSlåsSammen
         )
 

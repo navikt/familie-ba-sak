@@ -166,7 +166,7 @@ object TilkjentYtelseUtils {
 
             val nyeAndelerForPersonEtterSammenslåing =
                 slåSammenPerioderSomIkkeSkulleHaVærtSplittet(
-                    nyeAndelerForPerson = nyeAndelerForPerson,
+                    andelerTilkjentYtelse = nyeAndelerForPerson,
                     skalAndelerSlåsSammen = ::skalEndretAndelerSlåsSammen
                 )
 
@@ -183,10 +183,10 @@ object TilkjentYtelseUtils {
     }
 
     fun slåSammenPerioderSomIkkeSkulleHaVærtSplittet(
-        nyeAndelerForPerson: MutableList<AndelTilkjentYtelse>,
+        andelerTilkjentYtelse: MutableList<AndelTilkjentYtelse>,
         skalAndelerSlåsSammen: (førsteAndel: AndelTilkjentYtelse, nesteAndel: AndelTilkjentYtelse) -> Boolean
     ): MutableList<AndelTilkjentYtelse> {
-        val sorterteAndeler = nyeAndelerForPerson.sortedBy { it.stønadFom }.toMutableList()
+        val sorterteAndeler = andelerTilkjentYtelse.sortedBy { it.stønadFom }.toMutableList()
         var periodenViSerPå: AndelTilkjentYtelse = sorterteAndeler.first()
         val oppdatertListeMedAndeler = mutableListOf<AndelTilkjentYtelse>()
 
