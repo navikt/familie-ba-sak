@@ -12,6 +12,8 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 data class SanityBegrunnelse(
     val apiNavn: String?,
@@ -28,6 +30,68 @@ data class SanityBegrunnelse(
     val endretUtbetalingsperiodeDeltBostedTriggere: List<EndretUtbetalingsperiodeDeltBostedTriggere>? = null,
     val endretUtbetalingsperiodeTriggere: List<EndretUtbetalingsperiodeTrigger>? = null,
 )
+
+data class RestSanityBegrunnelse(
+    val apiNavn: String?,
+    val navnISystem: String,
+    val vilkaar: List<String>? = emptyList(),
+    val rolle: List<String>? = emptyList(),
+    val lovligOppholdTriggere: List<String>? = emptyList(),
+    val bosattIRiketTriggere: List<String>? = emptyList(),
+    val giftPartnerskapTriggere: List<String>? = emptyList(),
+    val borMedSokerTriggere: List<String>? = emptyList(),
+    val ovrigeTriggere: List<String>? = emptyList(),
+    val endringsaarsaker: List<String>? = emptyList(),
+    val hjemler: List<String> = emptyList(),
+    val endretUtbetalingsperiodeDeltBostedTriggere: List<String>? = emptyList(),
+    val endretUtbetalingsperiodeTriggere: List<String>? = emptyList(),
+) {
+    fun tilSanityBegrunnelse(): SanityBegrunnelse {
+        return SanityBegrunnelse(
+            apiNavn = apiNavn,
+            navnISystem = navnISystem,
+            vilkaar = vilkaar?.mapNotNull {
+                finnEnumverdi(it, SanityVilkår.values())
+            },
+            rolle = rolle?.mapNotNull { finnEnumverdi(it, VilkårRolle.values()) },
+            lovligOppholdTriggere = lovligOppholdTriggere?.mapNotNull {
+                finnEnumverdi(it, VilkårTrigger.values())
+            },
+            bosattIRiketTriggere = bosattIRiketTriggere?.mapNotNull {
+                finnEnumverdi(it, VilkårTrigger.values())
+            },
+            giftPartnerskapTriggere = giftPartnerskapTriggere?.mapNotNull {
+                finnEnumverdi(it, VilkårTrigger.values())
+            },
+            borMedSokerTriggere = borMedSokerTriggere?.mapNotNull {
+                finnEnumverdi(it, VilkårTrigger.values())
+            },
+            ovrigeTriggere = ovrigeTriggere?.mapNotNull {
+                finnEnumverdi(it, ØvrigTrigger.values())
+            },
+            endringsaarsaker = endringsaarsaker?.mapNotNull {
+                finnEnumverdi(it, Årsak.values())
+            },
+            hjemler = hjemler,
+            endretUtbetalingsperiodeDeltBostedTriggere = endretUtbetalingsperiodeDeltBostedTriggere?.mapNotNull {
+                finnEnumverdi(it, EndretUtbetalingsperiodeDeltBostedTriggere.values())
+            },
+            endretUtbetalingsperiodeTriggere = endretUtbetalingsperiodeTriggere?.mapNotNull {
+                finnEnumverdi(it, EndretUtbetalingsperiodeTrigger.values())
+            },
+        )
+    }
+}
+
+val logger: Logger = LoggerFactory.getLogger(RestSanityBegrunnelse::class.java)
+
+fun <T : Enum<T>> finnEnumverdi(verdi: String, enumverdier: Array<T>): T? {
+    val enumverdi = enumverdier.firstOrNull { verdi == it.name }
+    if (enumverdi == null) {
+        logger.error("$verdi er ikke blant verdiene til enumen ${enumverdier.javaClass.simpleName}")
+    }
+    return enumverdi
+}
 
 enum class SanityVilkår {
     UNDER_18_ÅR,
@@ -106,8 +170,8 @@ fun SanityBegrunnelse.tilTriggesAv(): TriggesAv {
         medlemskap = this.inneholderBosattIRiketTrigger(VilkårTrigger.MEDLEMSKAP),
         deltbosted = this.inneholderBorMedSøkerTrigger(VilkårTrigger.DELT_BOSTED),
         valgbar = !this.inneholderØvrigTrigger(ØvrigTrigger.ALLTID_AUTOMATISK),
-        etterEndretUtbetaling = this.endretUtbetalingsperiodeTriggere?.contains(EndretUtbetalingsperiodeTrigger.ETTER_ENDRET_UTBETALINGSPERIODE)
-            ?: false,
+        etterEndretUtbetaling = this.endretUtbetalingsperiodeTriggere
+            ?.contains(EndretUtbetalingsperiodeTrigger.ETTER_ENDRET_UTBETALINGSPERIODE) ?: false,
         endretUtbetaingSkalUtbetales = this.endretUtbetalingsperiodeDeltBostedTriggere?.contains(
             EndretUtbetalingsperiodeDeltBostedTriggere.SKAL_UTBETALES
         )

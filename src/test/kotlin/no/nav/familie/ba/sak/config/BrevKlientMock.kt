@@ -29,7 +29,7 @@ class BrevKlientMock : BrevKlient(
         return TEST_PDF
     }
 
-    override fun hentSanityBegrunnelse(): List<SanityBegrunnelse> {
+    override fun hentSanityBegrunnelser(): List<SanityBegrunnelse> {
         return sanityBegrunnelserMock
     }
 
@@ -64,7 +64,7 @@ val sanityBegrunnelserMock: List<SanityBegrunnelse> =
                     VedtakBegrunnelseSpesifikasjon.OPPHØR_IKKE_MOTTATT_OPPLYSNINGER -> null
 
                     else -> SanityVilkår.values()
-                        .filter { sanityVilkår -> sanityVilkår != SanityVilkår.UTVIDET_BARNETRYGD }.toList()
+                        /*.filter { sanityVilkår -> sanityVilkår != SanityVilkår.UTVIDET_BARNETRYGD }*/.toList()
                 },
                 rolle = when (it) {
                     VedtakBegrunnelseSpesifikasjon.REDUKSJON_BOSATT_I_RIKTET -> listOf(VilkårRolle.BARN)

@@ -28,7 +28,7 @@ class BehandlingMetrikker(
     private val sanityBegrunnelser: List<SanityBegrunnelse>
 
     init {
-        sanityBegrunnelser = brevKlient.hentSanityBegrunnelse()
+        sanityBegrunnelser = brevKlient.hentSanityBegrunnelser()
     }
 
     private val antallManuelleBehandlinger: Counter =
