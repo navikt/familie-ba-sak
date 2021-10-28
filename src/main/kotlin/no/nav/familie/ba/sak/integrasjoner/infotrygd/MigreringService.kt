@@ -83,7 +83,7 @@ class MigreringService(
         fagsakService.hentEllerOpprettFagsakForPersonIdent(personIdent)
             .also { kastFeilDersomAlleredeMigrert(it) }
 
-        val behandling = stegService.håndterNyBehandling(
+        val behandling = stegService.opprettNyBehandling(
             NyBehandling(
                 søkersIdent = personIdent,
                 behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,

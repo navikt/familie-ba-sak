@@ -61,7 +61,7 @@ class SatsendringService(
         if (behandling.fagsak.status != FagsakStatus.LØPENDE) throw Feil("Forsøker å utføre satsendring på ikke løpende fagsak ${behandling.fagsak.id}")
         if (behandling.status != BehandlingStatus.AVSLUTTET) throw Feil("Forsøker å utføre satsendring på behandling ${behandling.id} som ikke er avsluttet")
 
-        val opprettetBehandling = stegService.håndterNyBehandling(
+        val opprettetBehandling = stegService.opprettNyBehandling(
             NyBehandling(
                 søkersIdent = søkerIdent,
                 behandlingType = BehandlingType.REVURDERING,

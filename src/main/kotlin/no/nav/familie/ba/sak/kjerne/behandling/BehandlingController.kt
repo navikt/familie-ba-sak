@@ -60,7 +60,7 @@ class BehandlingController(
         }
 
         return Result.runCatching {
-            stegService.håndterNyBehandling(nyBehandling)
+            stegService.opprettNyBehandlingOgSendInfotrygdFeed(nyBehandling)
         }.fold(
             onSuccess = {
                 ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = it.id)))

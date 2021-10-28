@@ -7,8 +7,7 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.ekstern.restDomene.writeValueAsString
-import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedClient
-import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.InfotrygdBehandlingFeedDto
+import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedService
 import no.nav.familie.ba.sak.integrasjoner.skyggesak.SkyggesakService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
@@ -38,7 +37,7 @@ class StegService(
     private val søknadGrunnlagService: SøknadGrunnlagService,
     private val skyggesakService: SkyggesakService,
     private val tilgangService: TilgangService,
-    private val infotrygdFeedClient: InfotrygdFeedClient,
+    private val infotrygdFeedService: InfotrygdFeedService,
 ) {
 
     private val stegSuksessMetrics: Map<StegType, Counter> = initStegMetrikker("suksess")
@@ -46,14 +45,13 @@ class StegService(
     private val stegFeiletMetrics: Map<StegType, Counter> = initStegMetrikker("feil")
     private val stegFunksjonellFeilMetrics: Map<StegType, Counter> = initStegMetrikker("funksjonell-feil")
 
-    fun håndterNyBehandling(nyBehandling: NyBehandling): Behandling {
+    fun opprettNyBehandlingOgSendInfotrygdFeed(nyBehandling: NyBehandling): Behandling {
         val behandling = opprettNyBehandling(nyBehandling)
-        infotrygdFeedClient.sendBehandlingFeedTilInfotrygd(
-            InfotrygdBehandlingFeedDto(
+        if (behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING) {
+            infotrygdFeedService.sendStartBehandlingTilInfotrygdFeed(
                 behandling.fagsak.hentAktivIdent().ident,
-                behandling.opprettetTidspunkt.toLocalDate()
             )
-        )
+        }
         return behandling
     }
 
@@ -107,7 +105,7 @@ class StegService(
         val behandlingsType =
             if (fagsak.status == FagsakStatus.LØPENDE) BehandlingType.REVURDERING else BehandlingType.FØRSTEGANGSBEHANDLING
 
-        val behandling = håndterNyBehandling(
+        val behandling = opprettNyBehandlingOgSendInfotrygdFeed(
             NyBehandling(
                 søkersIdent = nyBehandlingHendelse.morsIdent,
                 behandlingType = behandlingsType,
