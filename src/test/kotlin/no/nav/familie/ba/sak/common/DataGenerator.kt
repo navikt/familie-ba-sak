@@ -4,7 +4,6 @@ import io.mockk.mockk
 import no.nav.commons.foedselsnummer.testutils.FoedselsnummerGenerator
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPerson
-import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedStandardbegrunnelser
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.ekstern.restDomene.SøkerMedOpplysninger
@@ -888,10 +887,8 @@ fun leggTilBegrunnelsePåVedtaksperiodeIBehandling(
 
     vedtaksperiodeService.oppdaterVedtaksperiodeMedStandardbegrunnelser(
         vedtaksperiodeId = perisisterteVedtaksperioder.first().id,
-        restPutVedtaksperiodeMedStandardbegrunnelser = RestPutVedtaksperiodeMedStandardbegrunnelser(
-            standardbegrunnelser = listOf(
-                VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET,
-            )
+        standardbegrunnelserFraFrontend = listOf(
+            VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET,
         )
     )
 }
