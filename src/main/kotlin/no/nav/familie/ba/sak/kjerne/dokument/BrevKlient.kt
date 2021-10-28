@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.dokument
 
+import no.nav.familie.ba.sak.kjerne.dokument.domene.RestSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.dokument.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Brev
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.BegrunnelseData
@@ -28,16 +29,17 @@ class BrevKlient(
     }
 
     @Cacheable("begrunnelsestekster-for-nedtreksmeny")
-    fun hentSanityBegrunnelse(): List<SanityBegrunnelse> {
+    fun hentSanityBegrunnelser(): List<SanityBegrunnelse> {
         val url = URI.create("$familieBrevUri/ba-sak/begrunnelser")
         logger.info("Henter begrunnelser fra sanity")
         val response = restTemplate.exchange(
             url,
             HttpMethod.GET,
             null,
-            object : ParameterizedTypeReference<List<SanityBegrunnelse>>() {},
+            object : ParameterizedTypeReference<List<RestSanityBegrunnelse>>() {},
         )
-        return response.body ?: error("Klarte ikke hente begrunnelsene fra familie-brev.")
+        val restSanityBegrunnelser = response.body ?: error("Klarte ikke hente begrunnelsene fra familie-brev.")
+        return restSanityBegrunnelser.map { it.tilSanityBegrunnelse() }
     }
 
     @Cacheable("begrunnelsestekst")

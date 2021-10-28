@@ -152,6 +152,13 @@ data class AndelTilkjentYtelse(
 
     fun erDeltBosted() = this.prosent == BigDecimal(50)
 
+    fun erAndelSomSkalSendesTilOppdrag(): Boolean {
+        return this.kalkulertUtbetalingsbeløp != 0 ||
+            this.endretUtbetalingAndeler.any {
+                it.årsak!!.kanGiNullutbetaling()
+            }
+    }
+
     companion object {
 
         /**
