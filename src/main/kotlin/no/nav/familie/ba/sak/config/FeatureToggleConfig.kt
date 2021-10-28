@@ -109,6 +109,7 @@ class FeatureToggleConfig(
         const val KAN_BEHANDLE_SMÅBARNSTILLEGG = "familie-ba-sak.behandling.smaabarnstillegg"
         const val SKATTEETATEN_API_EKTE_DATA = "familie-ba-sak.skatteetaten-api-ekte-data-i-respons"
         const val KAN_BEHANDLE_EØS = "familie-ba-sak.behandling.eos"
+        const val SEND_START_BEHANDLING_TIL_INFOTRYGD = "familie-ba-sak.start.behandling.infotrygd.feed"
 
         private val logger = LoggerFactory.getLogger(FeatureToggleConfig::class.java)
     }
