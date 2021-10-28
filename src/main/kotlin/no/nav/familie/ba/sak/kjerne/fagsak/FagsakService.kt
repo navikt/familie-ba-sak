@@ -4,6 +4,7 @@ import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.ekstern.restDomene.FagsakDeltagerRolle
+import no.nav.familie.ba.sak.ekstern.restDomene.RestBaseFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsakDeltager
 import no.nav.familie.ba.sak.ekstern.restDomene.RestMinimalFagsak
@@ -170,7 +171,7 @@ class FagsakService(
         lagre(fagsak)
     }
 
-    fun hentRestFagsakForPerson(personIdent: PersonIdent): Ressurs<RestMinimalFagsak> {
+    fun hentMinimalFagsakForPerson(personIdent: PersonIdent): Ressurs<RestMinimalFagsak> {
         val fagsak = fagsakRepository.finnFagsakForPersonIdent(personIdent)
         return if (fagsak != null) Ressurs.success(data = lagRestMinimalFagsak(fagsakId = fagsak.id)) else Ressurs.failure(
             errorMessage = "Fant ikke fagsak på person"
@@ -182,50 +183,40 @@ class FagsakService(
     fun hentRestMinimalFagsak(fagsakId: Long): Ressurs<RestMinimalFagsak> =
         Ressurs.success(data = lagRestMinimalFagsak(fagsakId))
 
-    fun lagRestMinimalFagsak(@FagsaktilgangConstraint fagsakId: Long): RestMinimalFagsak {
-        val fagsak = fagsakRepository.finnFagsak(fagsakId)
-            ?: throw FunksjonellFeil(
-                melding = "Finner ikke fagsak med id $fagsakId",
-                frontendFeilmelding = "Finner ikke fagsak med id $fagsakId"
-            )
-        val behandlinger = behandlingRepository.finnBehandlinger(fagsakId)
+    fun lagRestMinimalFagsak(fagsakId: Long): RestMinimalFagsak {
+        val restBaseFagsak = lagRestBaseFagsak(fagsakId)
+
         val tilbakekrevingsbehandlinger =
             tilbakekrevingsbehandlingService.hentRestTilbakekrevingsbehandlinger((fagsakId))
-        val visningsbehandlinger = behandlinger.map {
+        val visningsbehandlinger = behandlingRepository.finnBehandlinger(fagsakId).map {
             it.tilRestVisningBehandling(
                 vedtaksdato = vedtakRepository.findByBehandlingAndAktiv(it.id)?.vedtaksdato
             )
         }
 
-        val sistIverksatteBehandling =
-            Behandlingutils.hentSisteBehandlingSomErIverksatt(
-                iverksatteBehandlinger = behandlingRepository.finnIverksatteBehandlinger(
-                    fagsakId = fagsakId
-                )
-            )
-        val gjeldendeUtbetalingsperioder =
-            if (sistIverksatteBehandling != null) vedtaksperiodeService.hentUtbetalingsperioder(behandling = sistIverksatteBehandling) else emptyList()
-
-        return fagsak.tilRestMinimalFagsak(
-            underBehandling = behandlinger.any {
-                it.status == BehandlingStatus.UTREDES || (it.steg >= StegType.BESLUTTE_VEDTAK && it.steg != StegType.BEHANDLING_AVSLUTTET)
-            },
+        return restBaseFagsak.tilRestMinimalFagsak(
             restVisningBehandlinger = visningsbehandlinger,
             tilbakekrevingsbehandlinger = tilbakekrevingsbehandlinger,
-            gjeldendeUtbetalingsperioder = gjeldendeUtbetalingsperioder
         )
     }
 
-    private fun lagRestFagsak(@FagsaktilgangConstraint fagsakId: Long): RestFagsak {
+    private fun lagRestFagsak(fagsakId: Long): RestFagsak {
+        val restBaseFagsak = lagRestBaseFagsak(fagsakId)
+
+        val tilbakekrevingsbehandlinger =
+            tilbakekrevingsbehandlingService.hentRestTilbakekrevingsbehandlinger((fagsakId))
+        val utvidedeBehandlinger = behandlingRepository.finnBehandlinger(fagsakId).map { lagRestUtvidetBehandling(it) }
+
+        return restBaseFagsak.tilRestFagsak(utvidedeBehandlinger, tilbakekrevingsbehandlinger)
+    }
+
+    private fun lagRestBaseFagsak(@FagsaktilgangConstraint fagsakId: Long): RestBaseFagsak {
         val fagsak = fagsakRepository.finnFagsak(fagsakId)
             ?: throw FunksjonellFeil(
                 melding = "Finner ikke fagsak med id $fagsakId",
                 frontendFeilmelding = "Finner ikke fagsak med id $fagsakId"
             )
-        val behandlinger = behandlingRepository.finnBehandlinger(fagsakId)
-        val tilbakekrevingsbehandlinger =
-            tilbakekrevingsbehandlingService.hentRestTilbakekrevingsbehandlinger((fagsakId))
-        val utvidedeBehandlinger = behandlinger.map { lagRestUtvidetBehandling(it) }
+        val aktivBehandling = behandlingRepository.findByFagsakAndAktiv(fagsakId)
 
         val sistIverksatteBehandling =
             Behandlingutils.hentSisteBehandlingSomErIverksatt(
@@ -236,7 +227,18 @@ class FagsakService(
         val gjeldendeUtbetalingsperioder =
             if (sistIverksatteBehandling != null) vedtaksperiodeService.hentUtbetalingsperioder(behandling = sistIverksatteBehandling) else emptyList()
 
-        return fagsak.tilRestFagsak(utvidedeBehandlinger, gjeldendeUtbetalingsperioder, tilbakekrevingsbehandlinger)
+        return RestBaseFagsak(
+            opprettetTidspunkt = fagsak.opprettetTidspunkt,
+            id = fagsak.id,
+            søkerFødselsnummer = fagsak.hentAktivIdent().ident,
+            status = fagsak.status,
+            underBehandling =
+            if (aktivBehandling == null)
+                false
+            else
+                aktivBehandling.status == BehandlingStatus.UTREDES || (aktivBehandling.steg >= StegType.BESLUTTE_VEDTAK && aktivBehandling.steg != StegType.BEHANDLING_AVSLUTTET),
+            gjeldendeUtbetalingsperioder = gjeldendeUtbetalingsperioder,
+        )
     }
 
     fun lagRestUtvidetBehandling(behandling: Behandling): RestUtvidetBehandling {
@@ -363,8 +365,8 @@ class FagsakService(
                     relasjon.relasjonsrolle == FORELDERBARNRELASJONROLLE.MEDMOR
             }.forEach { relasjon ->
                 if (assosierteFagsakDeltagere.find { fagsakDeltager ->
-                    fagsakDeltager.ident == relasjon.personIdent.id
-                } == null
+                        fagsakDeltager.ident == relasjon.personIdent.id
+                    } == null
                 ) {
                     val maskertForelder = hentMaskertFagsakdeltakerVedManglendeTilgang(relasjon.personIdent.id)
                     if (maskertForelder != null) {

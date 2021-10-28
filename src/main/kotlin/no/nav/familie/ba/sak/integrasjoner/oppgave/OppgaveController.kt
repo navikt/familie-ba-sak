@@ -96,7 +96,8 @@ class OppgaveController(
         val personIdent = if (oppgave.aktoerId == null) null else {
             integrasjonClient.hentPersonIdent(oppgave.aktoerId) ?: error("Fant ikke personident for aktør id")
         }
-        val minimalFagsak = if (personIdent == null) null else fagsakService.hentRestFagsakForPerson(personIdent).data
+        val minimalFagsak =
+            if (personIdent == null) null else fagsakService.hentMinimalFagsakForPerson(personIdent).data
 
         val dataForManuellJournalføring = DataForManuellJournalføring(
             oppgave = oppgave,

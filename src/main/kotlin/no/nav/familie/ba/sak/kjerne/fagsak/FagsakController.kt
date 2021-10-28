@@ -65,12 +65,23 @@ class FagsakController(
         return ResponseEntity.ok().body(fagsak)
     }
 
-    @GetMapping(path = ["/saksoversikt/{fagsakId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
+    @GetMapping(path = ["/minimal/{fagsakId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun hentMinimalFagsak(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<RestMinimalFagsak>> {
-        logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} henter fagsak med id $fagsakId")
+        logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} henter minimal fagsak med id $fagsakId")
 
         val fagsak = fagsakService.hentRestMinimalFagsak(fagsakId)
         return ResponseEntity.ok().body(fagsak)
+    }
+
+    @PostMapping(path = ["/hent-fagsak-paa-person"], produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun hentMinimalFagsakForPerson(@RequestBody request: RestHentFagsakForPerson): ResponseEntity<Ressurs<RestMinimalFagsak>> {
+
+        return Result.runCatching {
+            fagsakService.hentMinimalFagsakForPerson(PersonIdent(request.personIdent))
+        }.fold(
+            onSuccess = { return ResponseEntity.ok().body(it) },
+            onFailure = { illegalState("Ukjent feil ved henting data for manuell journalføring.", it) }
+        )
     }
 
     @PostMapping(path = ["/sok"])
@@ -104,17 +115,6 @@ class FagsakController(
                         )
                 }
             )
-    }
-
-    @PostMapping(path = ["/hent-fagsak-paa-person"], produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun hentRestFagsak(@RequestBody request: RestHentFagsakForPerson): ResponseEntity<Ressurs<RestMinimalFagsak>> {
-
-        return Result.runCatching {
-            fagsakService.hentRestFagsakForPerson(PersonIdent(request.personIdent))
-        }.fold(
-            onSuccess = { return ResponseEntity.ok().body(it) },
-            onFailure = { illegalState("Ukjent feil ved henting data for manuell journalføring.", it) }
-        )
     }
 
     @PostMapping(path = ["/{fagsakId}/send-til-beslutter"], produces = [MediaType.APPLICATION_JSON_VALUE])

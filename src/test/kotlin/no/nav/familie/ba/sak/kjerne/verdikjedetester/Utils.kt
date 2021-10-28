@@ -90,7 +90,7 @@ fun behandleFødselshendelse(
         )
     )
 
-    val restMinimalFagsakEtterVurdering = fagsakService.hentRestFagsakForPerson(personIdent = PersonIdent(søkerFnr))
+    val restMinimalFagsakEtterVurdering = fagsakService.hentMinimalFagsakForPerson(personIdent = PersonIdent(søkerFnr))
     if (restMinimalFagsakEtterVurdering.status != Ressurs.Status.SUKSESS) {
         return null
     }
@@ -180,7 +180,7 @@ fun håndterIverksettingAvBehandling(
     val ferdigstiltBehandling = stegService.håndterFerdigstillBehandling(behandlingSomSkalFerdigstilles)
 
     val restMinimalFagsakEtterAvsluttetBehandling =
-        fagsakService.hentRestFagsakForPerson(personIdent = PersonIdent(søkerFnr))
+        fagsakService.hentMinimalFagsakForPerson(personIdent = PersonIdent(søkerFnr))
     generellAssertFagsak(
         restFagsak = fagsakService.hentRestFagsak(restMinimalFagsakEtterAvsluttetBehandling.data!!.id),
         fagsakStatus = fagsakStatusEtterIverksetting,
