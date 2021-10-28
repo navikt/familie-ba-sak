@@ -26,7 +26,7 @@ class TilbakekrevingsbehandlingService(private val tilbakekrevingKlient: Tilbake
                         )
                     )
                 } else emptyList(),
-                vedtaksdato = it.vedtaksdato!!
+                vedtaksdato = it.vedtaksdato
             )
         }
     }
