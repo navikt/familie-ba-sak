@@ -194,7 +194,7 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
     },
     INNVILGET_FLYTTET_ETTER_SEPARASJON {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
-        override val sanityApiNavn = "innvilgetflyttetEtterSeparasjon"
+        override val sanityApiNavn = "innvilgetFlyttetEtterSeparasjon"
     },
     INNVILGET_SEPARERT {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
@@ -918,7 +918,7 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
     },
     FORTSATT_INNVILGET_VURDERING_BOR_ALENE_MED_BARN {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
-        override val sanityApiNavn = "forsattInnvilgetVurderingBorAleneMedBarn"
+        override val sanityApiNavn = "fortsattInnvilgetVurderingBorAleneMedBarn"
     },
     FORTSATT_INNVILGET_SEPARERT {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
