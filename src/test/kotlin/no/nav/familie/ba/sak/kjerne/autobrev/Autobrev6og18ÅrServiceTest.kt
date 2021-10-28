@@ -117,14 +117,14 @@ internal class Autobrev6og18ÅrServiceTest {
         )
 
         every { stegService.håndterVilkårsvurdering(any()) } returns behandling
-        every { stegService.håndterNyBehandling(any()) } returns behandling
+        every { stegService.opprettNyBehandling(any()) } returns behandling
         every { persongrunnlagService.hentSøker(any()) } returns tilfeldigSøker()
         every { vedtaksperiodeService.oppdaterFortsattInnvilgetPeriodeMedAutobrevBegrunnelse(any(), any()) } just runs
         every { taskRepository.save(any()) } returns Task(type = "test", payload = "")
         autobrev6og18ÅrService.opprettOmregningsoppgaveForBarnIBrytingsalder(autobrev6og18ÅrDTO)
 
         verify(exactly = 1) { stegService.håndterVilkårsvurdering(any()) }
-        verify(exactly = 1) { stegService.håndterNyBehandling(any()) }
+        verify(exactly = 1) { stegService.opprettNyBehandling(any()) }
         verify(exactly = 1) { vedtaksperiodeService.oppdaterFortsattInnvilgetPeriodeMedAutobrevBegrunnelse(any(), any()) }
         verify(exactly = 1) { vedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(any()) }
         verify(exactly = 1) { taskRepository.save(any()) }

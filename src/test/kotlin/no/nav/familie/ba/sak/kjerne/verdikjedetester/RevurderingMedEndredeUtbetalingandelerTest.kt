@@ -65,7 +65,7 @@ class RevurderingMedEndredeUtbetalingandelerTest(
         val barnFnr = scenario.barna[0].ident!!
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
-        val behandling = stegService.håndterNyBehandling(nyOrdinærBehandling(fnr))
+        val behandling = stegService.opprettNyBehandling(nyOrdinærBehandling(fnr))
 
         persongrunnlagService.lagreOgDeaktiverGammel(
             lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))

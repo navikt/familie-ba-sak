@@ -14,6 +14,12 @@ class InfotrygdFeedService(val opprettTaskService: OpprettTaskService) {
         opprettTaskService.opprettSendFeedTilInfotrygdTask(barnsIdenter)
     }
 
+    @Transactional
+    fun sendStartBehandlingTilInfotrygdFeed(fnrStoenadsmottaker: String) {
+        logger.info("Send startBehandling til Infotrygd.")
+        opprettTaskService.opprettSendStartBehandlingTilInfotrygdTask(fnrStoenadsmottaker)
+    }
+
     companion object {
 
         private val logger = LoggerFactory.getLogger(InfotrygdFeedService::class.java)

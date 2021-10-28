@@ -7,4 +7,4 @@ data class InfotrygdFødselhendelsesFeedTaskDto(val fnrBarn: List<String>)
 data class InfotrygdFødselhendelsesFeedDto(val fnrBarn: String)
 data class InfotrygdVedtakFeedDto(val fnrStoenadsmottaker: String, val datoStartNyBa: LocalDate)
 
-data class InfotrygdBehandlingFeedDto(val fnrStoenadsmottaker: String, val datoStartNyBa: LocalDate)
+data class StartBehandlingDto(val fnrStoenadsmottaker: String)
