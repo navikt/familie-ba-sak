@@ -63,12 +63,12 @@ fun hentNåværendeEllerNesteMånedsUtbetaling(behandling: RestUtvidetBehandling
     return nåværendeUtbetalingsperiode?.utbetaltPerMnd ?: nesteUtbetalingsperiode?.utbetaltPerMnd ?: 0
 }
 
-fun hentAktivBehandling(restFagsak: RestFagsak): RestUtvidetBehandling? {
-    return restFagsak.behandlinger.firstOrNull { it.aktiv }
+fun hentAktivBehandling(restFagsak: RestFagsak): RestUtvidetBehandling {
+    return restFagsak.behandlinger.single { it.aktiv }
 }
 
 fun hentAktivtVedtak(restFagsak: RestFagsak): RestVedtak? {
-    return hentAktivBehandling(restFagsak)?.vedtakForBehandling?.firstOrNull { it.aktiv }
+    return hentAktivBehandling(restFagsak).vedtakForBehandling.single { it.aktiv }
 }
 
 fun behandleFødselshendelse(

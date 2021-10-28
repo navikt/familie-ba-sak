@@ -69,7 +69,7 @@ class TekniskOpphørAvFødselshendelseTest(
         )
         assertEquals(2, restFagsakMedBehandling.data?.behandlinger?.size)
 
-        val aktivBehandling = hentAktivBehandling(restFagsak = restFagsakMedBehandling.data!!)!!
+        val aktivBehandling = hentAktivBehandling(restFagsak = restFagsakMedBehandling.data!!)
 
         // Setter alle vilkår til ikke-oppfylt på løpende førstegangsbehandling
         aktivBehandling.personResultater.forEach { restPersonResultat ->
