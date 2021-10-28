@@ -175,7 +175,7 @@ class ArbeidsfordelingIntegrationTest(
     @Test
     fun `Skal fastsette behandlende enhet ved opprettelse av behandling`() {
         fagsakService.hentEllerOpprettFagsak(PersonIdent(SØKER_FNR))
-        val behandling = stegService.håndterNyBehandling(
+        val behandling = stegService.opprettNyBehandling(
             NyBehandling(
                 BehandlingKategori.NASJONAL,
                 BehandlingUnderkategori.ORDINÆR,
@@ -192,7 +192,7 @@ class ArbeidsfordelingIntegrationTest(
     @Test
     fun `Skal ikke fastsette ny behandlende enhet ved registrering av søknad`() {
         fagsakService.hentEllerOpprettFagsak(PersonIdent(SØKER_FNR))
-        val behandling = stegService.håndterNyBehandling(
+        val behandling = stegService.opprettNyBehandling(
             NyBehandling(
                 BehandlingKategori.NASJONAL,
                 BehandlingUnderkategori.ORDINÆR,
@@ -223,7 +223,7 @@ class ArbeidsfordelingIntegrationTest(
     @Test
     fun `Skal fastsette ny behandlende enhet ved registrering av søknad`() {
         fagsakService.hentEllerOpprettFagsak(PersonIdent(SØKER_FNR))
-        val behandling = stegService.håndterNyBehandling(
+        val behandling = stegService.opprettNyBehandling(
             NyBehandling(
                 BehandlingKategori.NASJONAL,
                 BehandlingUnderkategori.ORDINÆR,
@@ -254,7 +254,7 @@ class ArbeidsfordelingIntegrationTest(
     @Test
     fun `Skal fastsette ny behandlende enhet når man legger til nytt barn ved endring på søknadsgrunnlag`() {
         fagsakService.hentEllerOpprettFagsak(PersonIdent(SØKER_FNR))
-        val behandling = stegService.håndterNyBehandling(
+        val behandling = stegService.opprettNyBehandling(
             NyBehandling(
                 BehandlingKategori.NASJONAL,
                 BehandlingUnderkategori.ORDINÆR,
@@ -306,7 +306,7 @@ class ArbeidsfordelingIntegrationTest(
     @Test
     fun `Skal ikke fastsette ny behandlende enhet ved registrering av søknad når enhet er manuelt satt`() {
         fagsakService.hentEllerOpprettFagsak(PersonIdent(SØKER_FNR))
-        val behandling = stegService.håndterNyBehandling(
+        val behandling = stegService.opprettNyBehandling(
             NyBehandling(
                 BehandlingKategori.NASJONAL,
                 BehandlingUnderkategori.ORDINÆR,
@@ -345,7 +345,7 @@ class ArbeidsfordelingIntegrationTest(
     @Test
     fun `Skal fastsette ny behandlende enhet og oppdatere eksisterende oppgave ved registrering av søknad`() {
         fagsakService.hentEllerOpprettFagsak(PersonIdent(SØKER_FNR))
-        val behandling = stegService.håndterNyBehandling(
+        val behandling = stegService.opprettNyBehandling(
             NyBehandling(
                 BehandlingKategori.NASJONAL,
                 BehandlingUnderkategori.ORDINÆR,
