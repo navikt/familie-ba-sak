@@ -84,7 +84,8 @@ fun hentPersoneidenterGjeldendeForBegrunnelse(
             vedtakBegrunnelseType == VedtakBegrunnelseType.FORTSATT_INNVILGET
 
     return when {
-        triggesAv.vilkår.contains(Vilkår.UTVIDET_BARNETRYGD) -> identerMedUtbetaling
+        triggesAv.vilkår.contains(Vilkår.UTVIDET_BARNETRYGD) ->
+            identerMedUtbetaling + persongrunnlag.søker.personIdent.ident
 
         triggesAv.barnMedSeksårsdag ->
             persongrunnlag.barnMedSeksårsdagPåFom(vedtaksperiodeMedBegrunnelser.fom)
@@ -120,7 +121,7 @@ fun hentPersoneidenterGjeldendeForBegrunnelse(
                 ),
                 triggesAv = triggesAv
             ).map { person -> person.personIdent.ident }
-    }
+    }.toSet().toList()
 }
 
 private fun hentAktuellePersonerForVedtaksperiode(

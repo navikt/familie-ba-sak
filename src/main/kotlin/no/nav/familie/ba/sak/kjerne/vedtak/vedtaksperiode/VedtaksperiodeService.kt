@@ -135,7 +135,7 @@ class VedtaksperiodeService(
                     vedtakBegrunnelseType = vedtakBegrunnelseType,
                     identerMedUtbetaling = identerMedUtbetaling,
                     endredeUtbetalingAndeler = endredeUtbetalingAndeler,
-                ).toSet().toList()
+                )
 
                 if (triggesAv.satsendring) {
                     validerSatsendring(vedtaksperiodeMedBegrunnelser.fom)
