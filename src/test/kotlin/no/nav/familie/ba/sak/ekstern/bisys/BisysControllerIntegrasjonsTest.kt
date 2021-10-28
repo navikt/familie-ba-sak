@@ -1,11 +1,13 @@
 package no.nav.familie.ba.sak.ekstern.bisys
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock.aResponse
 import com.github.tomakehurst.wiremock.client.WireMock.equalToJson
 import com.github.tomakehurst.wiremock.client.WireMock.post
 import com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
+import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import no.nav.familie.ba.sak.WebSpringAuthTestRunner
 import no.nav.familie.ba.sak.common.EksternTjenesteFeil
 import no.nav.familie.ba.sak.common.randomFnr
@@ -14,12 +16,16 @@ import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.within
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.springframework.boot.test.util.TestPropertyValues
+import org.springframework.context.ApplicationContextInitializer
+import org.springframework.context.ConfigurableApplicationContext
 import org.springframework.core.io.ClassPathResource
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.context.ContextConfiguration
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.HttpServerErrorException
 import org.springframework.web.client.postForEntity
@@ -31,6 +37,7 @@ import java.time.YearMonth
 import java.time.temporal.ChronoUnit
 
 @ActiveProfiles("postgres", "mock-pdl", "mock-oauth", "mock-brev-klient")
+@ContextConfiguration(initializers = [BisysControllerIntegrasjonsTest.InfoTrygdConfig::class])
 class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
 
     @Test
@@ -314,5 +321,19 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
             ClassPathResource("ekstern/bisys-$filnavn.json").file.toPath(),
             StandardCharsets.UTF_8
         )
+    }
+
+    companion object {
+        val wiremock = WireMockServer(WireMockConfiguration.wireMockConfig().dynamicPort())
+    }
+
+    internal class InfoTrygdConfig : ApplicationContextInitializer<ConfigurableApplicationContext> {
+
+        override fun initialize(applicationContext: ConfigurableApplicationContext) {
+            wiremock.start()
+            TestPropertyValues.of(
+                "FAMILIE_BA_INFOTRYGD_API_URL=http://localhost:${wiremock.port()}",
+            ).applyTo(applicationContext.environment)
+        }
     }
 }
