@@ -8,7 +8,6 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestVedtakBegrunnelseTilknyttetV
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
-import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
@@ -34,7 +33,6 @@ class VilkårController(
     private val annenVurderingService: AnnenVurderingService,
     private val behandlingService: BehandlingService,
     private val vedtakService: VedtakService,
-    private val stegService: StegService,
     private val fagsakService: FagsakService,
     private val tilgangService: TilgangService,
     private val vilkårsvurderingService: VilkårsvurderingService,
@@ -115,14 +113,6 @@ class VilkårController(
         vilkårService.postVilkår(behandling.id, restNyttVilkår)
 
         vedtakService.resettStegVedEndringPåVilkår(behandlingId)
-        return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = behandling.fagsak.id))
-    }
-
-    @PostMapping(path = ["/{behandlingId}/valider"])
-    fun validerVilkårsvurdering(@PathVariable behandlingId: Long): ResponseEntity<Ressurs<RestFagsak>> {
-        val behandling = behandlingService.hent(behandlingId)
-        stegService.håndterVilkårsvurdering(behandling)
-
         return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = behandling.fagsak.id))
     }
 
