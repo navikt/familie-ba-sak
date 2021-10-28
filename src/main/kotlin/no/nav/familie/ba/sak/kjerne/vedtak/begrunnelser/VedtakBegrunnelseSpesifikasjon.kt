@@ -192,6 +192,134 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
         override val sanityApiNavn = "innvilgetSatsendring"
     },
+    INNVILGET_FLYTTET_ETTER_SEPARASJON {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetflyttetEtterSeparasjon"
+    },
+    INNVILGET_SEPARERT {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetSeparert"
+    },
+    INNVILGET_VARETEKTSFENGSEL_SAMBOER {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetVaretektsfengselSamboer"
+    },
+    INNVILGET_AVTALE_DELT_BOSTED_FÅR_FRA_FLYTTETIDSPUNKT {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetAvtaleDeltBostedFaarFraFlyttetidspunkt"
+    },
+    INNVILGET_TVUNGENT_PSYKISK_HELSEVERN_GIFT {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetTvungentPsykiskHelsevernGift"
+    },
+    INNVILGET_TVUNGENT_PSYKISK_HELSEVERN_SAMBOER {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetTvungentPsykiskHelsevernSamboer"
+    },
+    INNVILGET_FENGSEL_GIFT {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetFengselGift"
+    },
+    INNVILGET_VURDERING_EGEN_HUSHOLDNING {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetVurderingEgenHusholdning"
+    },
+    INNVILGET_FORSVUNNET_SAMBOER {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetForsvunnetSamboer"
+    },
+    INNVILGET_AVTALE_DELT_BOSTED_FÅR_FRA_AVTALETIDSPUNKT {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetAvtaleDeltBostedFaarFraAvtaletidspunkt"
+    },
+    INNVILGET_FORVARING_GIFT {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetForvaringGift"
+    },
+    INNVILGET_MEKLINGSATTEST_OG_VURDERING_EGEN_HUSHOLDNING {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetMeklingsattestOgVurderingEgenHusholdning"
+    },
+    INNVILGET_FENGSEL_SAMBOER {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetFengselSamboer"
+    },
+    INNVILGET_FLYTTING_ETTER_MEKLINGSATTEST {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetFlyttingEtterMeklingsattest"
+    },
+    INNVILGET_FORVARING_SAMBOER {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetForvaringSamboer"
+    },
+    INNVILGET_SEPARERT_OG_VURDERING_EGEN_HUSHOLDNING {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetSeparertOgVurderingEgenHusholdning"
+    },
+    INNVILGET_BARN_16_ÅR {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetBarn16Ar"
+    },
+    INNVILGET_SAMBOER_DØD {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetSamboerDod"
+    },
+    INNVILGET_MEKLINGSATTEST {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetMeklingsattest"
+    },
+    INNVILGET_FLYTTET_ETTER_SKILT {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetFlyttetEtterSkilt"
+    },
+    INNVILGET_ENSLIG_MINDREÅRIG_FLYKTNING {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetEnsligMindrearigFlyktning"
+    },
+    INNVILGET_VARETEKTSFENGSEL_GIFT {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetVaretektsfengselGift"
+    },
+    INNVILGET_SAMBOER_UTEN_FELLES_BARN_OG_VURDERING_EGEN_HUSHOLDNING {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetSamboerUtenFellesBarnOgVurderingEgenHusholdning"
+    },
+    INNVILGET_FORSVUNNET_EKTEFELLE {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetForsvunnetEktefelle"
+    },
+    INNVILGET_FAKTISK_SEPARASJON {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetFaktiskSeparasjon"
+    },
+    INNVILGET_SAMBOER_UTEN_FELLES_BARN {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetSamboerUtenFellesBarn"
+    },
+    INNVILGET_VURDERING_AVTALE_DELT_BOSTED_FØLGES {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetVurderingAvtaleDeltBostedFolges"
+    },
+    INNVILGET_SKILT_OG_VURDERING_EGEN_HUSHOLDNING {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetSkiltOgVurderingEgenHusholdning"
+    },
+    INNVILGET_BOR_ALENE_MED_BARN {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetBorAleneMedBarn"
+    },
+    INNVILGET_SKILT {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetSkilt"
+    },
+    INNVILGET_RETTSAVGJØRELSE_DELT_BOSTED {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetRettsavgjorelseDeltBosted"
+    },
+    INNVILGET_EKTEFELLE_DØD {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetEktefelleDod"
+    },
     REDUKSJON_BOSATT_I_RIKTET {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
         override val sanityApiNavn = "reduksjonBosattIRiket"
@@ -263,6 +391,102 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
     REDUKSJON_SATSENDRING {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
         override val sanityApiNavn = "reduksjonSatsendring"
+    },
+    REDUKSJON_NYFØDT_BARN {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "reduksjonNyfodtBarn"
+    },
+    REDUKSJON_VURDERING_SØKER_GIFTET_SEG {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "reduksjonVurderingSokerGiftetSeg"
+    },
+    REDUKSJON_VURDERING_SAMBOER_MER_ENN_12_MÅNEDER {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "reduksjonVurderingSamboerMerEnn12Maaneder"
+    },
+    REDUKSJON_AVTALE_FAST_BOSTED {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "reduksjonAvtaleFastBosted"
+    },
+    REDUKSJON_EKTEFELLE_IKKE_I_FENGSEL {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "reduksjonEktefelleIkkeIFengsel"
+    },
+    REDUKSJON_SAMBOER_MER_ENN_12_MÅNEDER {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "reduksjonSamboerMerEnn12Maaneder"
+    },
+    REDUKSJON_SAMBOER_IKKE_I_TVUNGENT_PSYKISK_HELSEVERN {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "reduksjonSamboerIkkeITvungentPsykiskHelsevern"
+    },
+    REDUKSJON_SAMBOER_IKKE_EGEN_HUSHOLDNING {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "reduksjonSamboerIkkeEgenHusholdning"
+    },
+    REDUKSJON_SAMBOER_IKKE_I_FENGSEL {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "reduksjonSamboerIkkeIFengsel"
+    },
+    REDUKSJON_VURDERING_FLYTTET_SAMMEN_MED_EKTEFELLE {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "reduksjonVurderingFlyttetSammenMedEktefelle"
+    },
+    REDUKSJON_VURDERING_FORELDRENE_BOR_SAMMEN {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "reduksjonVurderingForeldreneBorSammen"
+    },
+    REDUKSJON_SAMBOER_IKKE_I_FORVARING {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "reduksjonSamboerIkkeIForvaring"
+    },
+    REDUKSJON_EKTEFELLE_IKKE_I_TVUNGENT_PSYKISK_HELSEVERN {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "reduksjonEktefelleIkkeITvungentPsykiskHelsevern"
+    },
+    REDUKSJON_EKTEFELLE_IKKE_I_FORVARING {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "reduksjonEktefelleIkkeIForvaring"
+    },
+    REDUKSJON_FORELDRENE_BOR_SAMMEN {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "reduksjonForeldreneBorSammen"
+    },
+    REDUKSJON_EKTEFELLE_IKKE_LENGER_FORSVUNNET {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "reduksjonEktefelleIkkeLengerForsvunnet"
+    },
+    REDUKSJON_RETTSAVGJØRELSE_FAST_BOSTED {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "reduksjonRettsavgjorelseFastBosted"
+    },
+    REDUKSJON_FLYTTET_SAMMEN_MED_ANNEN_FORELDER {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "reduksjonFlyttetSammenMedAnnenForelder"
+    },
+    REDUKSJON_GIFT_IKKE_EGEN_HUSHOLDNING {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "reduksjonGiftIkkeEgenHusholdning"
+    },
+    REDUKSJON_FLYTTET_SAMMEN_MED_EKTEFELLE {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "reduksjonFlyttetSammenMedEktefelle"
+    },
+    REDUKSJON_IKKE_AVTALE_DELT_BOSTED {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "reduksjonIkkeAvtaleDeltBosted"
+    },
+    REDUKSJON_SØKER_GIFTER_SEG {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "reduksjonSokerGifterSeg"
+    },
+    REDUKSJON_SAMBOER_IKKE_LENGER_FORSVUNNET {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "reduksjonSamboerIkkeLengerForsvunnet"
+    },
+    REDUKSJON_VURDERING_FLYTTET_SAMMEN_MED_ANNEN_FORELDER {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "reduksjonVurderingFlyttetSammenMedAnnenForelder"
     },
     AVSLAG_BOSATT_I_RIKET {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
@@ -368,6 +592,130 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
         override val sanityApiNavn = "avslagVurderingFlereKorteOppholdIUtlandetSisteToAar"
     },
+    AVSLAG_SAMBOER {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
+        override val sanityApiNavn = "avslagSamboer"
+    },
+    AVSLAG_SAMBOER_IKKE_FLYTTET_FRA_HVERANDRE {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
+        override val sanityApiNavn = "avslagSamboerIkkeFlyttetFraHverandre"
+    },
+    AVSLAG_BARN_HAR_FAST_BOSTED {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
+        override val sanityApiNavn = "avslagBarnHarFastBosted"
+    },
+    AVSLAG_IKKE_EGEN_HUSHOLDNING_SAMBOER {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
+        override val sanityApiNavn = "avslagIkkeEgenHusholdningSamboer"
+    },
+    AVSLAG_GIFT_MIDLERTIDIG_ADSKILLELSE {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
+        override val sanityApiNavn = "avslagGiftMidlertidigAdskillelse"
+    },
+    AVSLAG_IKKE_EGEN_HUSHOLDNING_GIFT {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
+        override val sanityApiNavn = "avslagIkkeEgenHusholdningGift"
+    },
+    AVSLAG_MANGLER_AVTALE_DELT_BOSTED {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
+        override val sanityApiNavn = "avslagManglerAvtaleDeltBosted"
+    },
+    AVSLAG_VURDERING_IKKE_FLYTTET_FRA_EKTEFELLE {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
+        override val sanityApiNavn = "avslagVurderingIkkeFlyttetFraEktefelle"
+    },
+    AVSLAG_RETTSAVGJØRELSE_SAMVÆR {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
+        override val sanityApiNavn = "avslagRettsavgjorelseSamver"
+    },
+    AVSLAG_IKKE_SEPARERT {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
+        override val sanityApiNavn = "avslagIkkeSeparert"
+    },
+    AVSLAG_FENGSEL_UNDER_6_MÅNEDER_EKTEFELLE {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
+        override val sanityApiNavn = "avslagFengselUnder6MaanederEktefelle"
+    },
+    AVSLAG_IKKE_DOKUMENTERT_SKILT {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
+        override val sanityApiNavn = "avslagIkkeDokumentertSkilt"
+    },
+    AVSLAG_VURDERING_IKKE_MEKLINGSATTEST {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
+        override val sanityApiNavn = "avslagVurderingIkkeMeklingsattest"
+    },
+    AVSLAG_FORVARING_UNDER_6_MÅNEDER_EKTEFELLE {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
+        override val sanityApiNavn = "avslagForvaringUnder6MaanederEktefelle"
+    },
+    AVSLAG_EKTEFELLE_FORSVUNNET_MINDRE_ENN_6_MÅNEDER {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
+        override val sanityApiNavn = "avslagEktefelleForsvunnetMindreEnn6Maaneder"
+    },
+    AVSLAG_VURDERING_FORELDRENE_BOR_SAMMEN {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
+        override val sanityApiNavn = "avslagVurderingForeldreneBorSammen"
+    },
+    AVSLAG_SAMBOER_MIDLERTIDIG_ADSKILLELSE {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
+        override val sanityApiNavn = "avslagSamboerMidlertidigAdskillelse"
+    },
+    AVSLAG_IKKE_FLYTTET_FRA_EKTEFELLE {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
+        override val sanityApiNavn = "avslagIkkeFlyttetFraEktefelle"
+    },
+    AVSLAG_IKKE_MEKLINGSATTEST {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
+        override val sanityApiNavn = "avslagIkkeMeklingsattest"
+    },
+    AVSLAG_FORVARING_UNDER_6_MÅNEDER_SAMBOER {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
+        override val sanityApiNavn = "avslagForvaringUnder6MaanederSamboer"
+    },
+    AVSLAG_IKKE_DOKUMENTERT_EKTEFELLE_DØD {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
+        override val sanityApiNavn = "avslagIkkeDokumentertEktefelleDod"
+    },
+    AVSLAG_VURDERING_IKKE_TVUNGENT_PSYKISK_HELSEVERN_EKTEFELLE {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
+        override val sanityApiNavn = "avslagVurderingIkkeTvungentPsykiskHelsevernEktefelle"
+    },
+    AVSLAG_VURDERING_IKKE_SEPARERT {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
+        override val sanityApiNavn = "avslagVurderingIkkeSeparert"
+    },
+    AVSLAG_GIFT {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
+        override val sanityApiNavn = "avslagGift"
+    },
+    AVSLAG_SAMBOER_FORSVUNNET_MINDRE_ENN_6_MÅNEDER {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
+        override val sanityApiNavn = "avslagSamboerForsvunnetMindreEnn6Maaneder"
+    },
+    AVSLAG_VURDERING_IKKE_TVUNGENT_PSYKISK_HELSEVERN_SAMBOER {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
+        override val sanityApiNavn = "avslagVurderingIkkeTvungentPsykiskHelsevernSamboer"
+    },
+    AVSLAG_VURDERING_SAMBOER_IKKE_FLYTTET_FRA_HVERANDRE {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
+        override val sanityApiNavn = "avslagVurderingSamboerIkkeFlyttetFraHverandre"
+    },
+    AVSLAG_ENSLIG_MINDREÅRIG_FLYKTNING {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
+        override val sanityApiNavn = "avslagEnsligMindreaarigFlyktning"
+    },
+    AVSLAG_IKKE_DELT_FORELDRENE_BOR_SAMMEN {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
+        override val sanityApiNavn = "avslagIkkeDeltForeldreneBorSammen"
+    },
+    AVSLAG_IKKE_GYLDIG_AVTALE_DELT_BOSTED {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
+        override val sanityApiNavn = "avslagIkkeGyldigAvtaleDeltBosted"
+    },
+    AVSLAG_FENGSEL_UNDER_6_MÅNEDER_SAMBOER {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
+        override val sanityApiNavn = "avslagFengselUnder6MaanederSamboer"
+    },
     OPPHØR_BARN_FLYTTET_FRA_SØKER {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
         override val sanityApiNavn = "opphorBarnBorIkkeMedSoker"
@@ -460,6 +808,26 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
         override val sanityApiNavn = "opphorAnnenForelderIkkeLengerFrivilligMedlem"
     },
+    OPPHØR_FORELDRENE_BOR_SAMMEN {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
+        override val sanityApiNavn = "opphorForeldreneBorSammen"
+    },
+    OPPHØR_AVTALE_OM_FAST_BOSTED {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
+        override val sanityApiNavn = "opphorAvtaleOmFastBosted"
+    },
+    OPPHØR_RETTSAVGJØRELSE_FAST_BOSTED {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
+        override val sanityApiNavn = "opphorRettsavgjorelseFastBosted"
+    },
+    OPPHØR_IKKE_AVTALE_OM_DELT_BOSTED {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
+        override val sanityApiNavn = "opphorIkkeAvtaleOmDeltBosted"
+    },
+    OPPHØR_VURDERING_FORELDRENE_BOR_SAMMEN {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
+        override val sanityApiNavn = "opphorVurderingForeldreneBorSammen"
+    },
     FORTSATT_INNVILGET_SØKER_OG_BARN_BOSATT_I_RIKET {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
         override val sanityApiNavn = "fortsattInnvilgetSokerOgBarnBosattIRiket"
@@ -540,6 +908,66 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
         override val sanityApiNavn = "fortsattInnvilgetMedlemIFolketrygden"
     },
+    FORTSATT_INNVILGET_TVUNGENT_PSYKISK_HELSEVERN_GIFT {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
+        override val sanityApiNavn = "fortsattInnvilgetTvungentPsykiskHelsevernGift"
+    },
+    FORTSATT_INNVILGET_FENGSEL_GIFT {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
+        override val sanityApiNavn = "fortsattInnvilgetFengselGift"
+    },
+    FORTSATT_INNVILGET_VURDERING_BOR_ALENE_MED_BARN {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
+        override val sanityApiNavn = "forsattInnvilgetVurderingBorAleneMedBarn"
+    },
+    FORTSATT_INNVILGET_SEPARERT {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
+        override val sanityApiNavn = "fortsattInnvilgetSeparert"
+    },
+    FORTSATT_INNVILGET_FORTSATT_RETTSAVGJØRELSE_OM_DELT_BOSTED {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
+        override val sanityApiNavn = "fortsattInnvilgetFortsattRettsavgjorelseOmDeltBosted"
+    },
+    FORTSATT_INNVILGET_BOR_ALENE_MED_BARN {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
+        override val sanityApiNavn = "fortsattInnvilgetBorAleneMedBarn"
+    },
+    FORTSATT_INNVILGET_TVUNGENT_PSYKISK_HELSEVERN_SAMBOER {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
+        override val sanityApiNavn = "fortsattInnvilgetTvungentPsykiskHelsevernSamboer"
+    },
+    FORTSATT_INNVILGET_FORVARING_SAMBOER {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
+        override val sanityApiNavn = "fortsattInnvilgetForvaringSamboer"
+    },
+    FORTSATT_INNVILGET_FORTSATT_AVTALE_OM_DELT_BOSTED {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
+        override val sanityApiNavn = "fortsattInnvilgetFortsattAVtaleOmDeltBosted"
+    },
+    FORTSATT_INNVILGET_VARETEKTSFENGSEL_SAMBOER {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
+        override val sanityApiNavn = "fortsattInnvilgetVaretektsfengselSamboer"
+    },
+    FORTSATT_INNVILGET_FENGSEL_SAMBOER {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
+        override val sanityApiNavn = "fortsattInnvilgetFengselSamboer"
+    },
+    FORTSATT_INNVILGET_FORVARING_GIFT {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
+        override val sanityApiNavn = "fortsattInnvilgetForvaringGift"
+    },
+    FORTSATT_INNVILGET_VAREKTEKTSFENGSEL_GIFT {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
+        override val sanityApiNavn = "fortsattInnvilgetVaretektsfengselGift"
+    },
+    FORTSATT_INNVILGET_FORSVUNNET_SAMBOER {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
+        override val sanityApiNavn = "fortsattInnvilgetForsvunnetSamboer"
+    },
+    FORTSATT_INNVILGET_FORSVUNNET_EKTEFELLE {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
+        override val sanityApiNavn = "fortsattInnvilgetForsvunnetEktefelle"
+    },
     ENDRET_UTBETALING_DELT_BOSTED_FULL_UTBETALING {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.ENDRET_UTBETALING
         override val sanityApiNavn = "endretUtbetalingDeltBostedFullUtbetalingForSoknad"
@@ -547,6 +975,14 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
     ENDRET_UTBETALING_DELT_BOSTED_INGEN_UTBETALING {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.ENDRET_UTBETALING
         override val sanityApiNavn = "endretUtbetalingDeltBostedIngenUtbetalingForSoknad"
+    },
+    ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_KUN_ETTERBETALING_UTVIDET {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.ENDRET_UTBETALING
+        override val sanityApiNavn = "endretUtbetalingDeltBostedKunEtterbetalingUtvidet"
+    },
+    ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_FULL_ORDINÆR_OG_ETTERBETALING_UTVIDET {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.ENDRET_UTBETALING
+        override val sanityApiNavn = "endretUtbetalingDeltBostedFullOrdinarOgEtterbetalingUtvidet"
     },
     ETTER_ENDRET_UTBETALING_RETTSAVGJØRELSE_DELT_BOSTED {
         override val sanityApiNavn = "etterEndretUtbetalingRettsavgjorelseDeltBosted"
@@ -589,13 +1025,17 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
             !triggesAv.valgbar -> false
             !utvidetVedtaksperiodeMedBegrunnelser.type.tillatteBegrunnelsestyper.contains(vedtakBegrunnelseType) -> false
             triggesAv.personerManglerOpplysninger -> vilkårsvurdering.harPersonerManglerOpplysninger()
-            triggesAv.barnMedSeksårsdag -> persongrunnlag.harBarnMedSeksårsdagPåFom(utvidetVedtaksperiodeMedBegrunnelser.fom)
+            triggesAv.barnMedSeksårsdag ->
+                persongrunnlag.harBarnMedSeksårsdagPåFom(utvidetVedtaksperiodeMedBegrunnelser.fom)
             triggesAv.satsendring ->
                 SatsService
                     .finnSatsendring(utvidetVedtaksperiodeMedBegrunnelser.fom ?: TIDENES_MORGEN)
                     .isNotEmpty()
 
-            triggesAv.erEndret() -> erEtterEndretPeriode && triggesAv.etterEndretUtbetaling && utvidetVedtaksperiodeMedBegrunnelser.type != Vedtaksperiodetype.ENDRET_UTBETALING
+            triggesAv.erEndret() ->
+                erEtterEndretPeriode &&
+                    triggesAv.etterEndretUtbetaling &&
+                    utvidetVedtaksperiodeMedBegrunnelser.type != Vedtaksperiodetype.ENDRET_UTBETALING
 
             else -> hentPersonerForAlleUtgjørendeVilkår(
                 vilkårsvurdering = vilkårsvurdering,
