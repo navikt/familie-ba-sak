@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.common.RessursUtils.ok
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
+import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
@@ -43,6 +44,7 @@ class BehandlingController(
     private val fagsakService: FagsakService,
     private val stegService: StegService,
     private val behandlingsService: BehandlingService,
+    private val utvidetBehandlingService: UtvidetBehandlingService,
     private val taskRepository: TaskRepositoryWrapper,
     private val tilgangService: TilgangService,
     private val simuleringService: SimuleringService,
@@ -99,6 +101,11 @@ class BehandlingController(
         } catch (ex: Throwable) {
             illegalState("Task kunne ikke opprettes for behandling av fødselshendelse: ${ex.message}", ex)
         }
+    }
+
+    @GetMapping(path = ["{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun hentUtvidetBehandling(@PathVariable behandlingId: Long): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }
 
     @PutMapping(path = ["{behandlingId}/henlegg"], produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -189,7 +196,10 @@ class RestHenleggBehandlingInfo(
     val begrunnelse: String
 )
 
-class RestEndreBehandlingstema(val behandlingUnderkategori: BehandlingUnderkategori, val behandlingKategori: BehandlingKategori)
+class RestEndreBehandlingstema(
+    val behandlingUnderkategori: BehandlingUnderkategori,
+    val behandlingKategori: BehandlingKategori
+)
 
 enum class HenleggÅrsak(val beskrivelse: String) {
     SØKNAD_TRUKKET("Søknad trukket"),
