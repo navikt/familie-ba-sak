@@ -161,7 +161,7 @@ class FagsakServiceTest(
             )
         )
 
-        val førsteBehandling = stegService.håndterNyBehandling(
+        val førsteBehandling = stegService.opprettNyBehandling(
             NyBehandling(
                 BehandlingKategori.NASJONAL,
                 BehandlingUnderkategori.ORDINÆR,
@@ -176,7 +176,7 @@ class FagsakServiceTest(
 
         behandlingService.oppdaterStatusPåBehandling(førsteBehandling.id, BehandlingStatus.AVSLUTTET)
 
-        val andreBehandling = stegService.håndterNyBehandling(
+        val andreBehandling = stegService.opprettNyBehandling(
             NyBehandling(
                 BehandlingKategori.NASJONAL,
                 BehandlingUnderkategori.ORDINÆR,
@@ -192,7 +192,7 @@ class FagsakServiceTest(
             )
         )
 
-        val tredjeBehandling = stegService.håndterNyBehandling(
+        val tredjeBehandling = stegService.opprettNyBehandling(
             NyBehandling(
                 BehandlingKategori.NASJONAL,
                 BehandlingUnderkategori.ORDINÆR,
@@ -256,7 +256,7 @@ class FagsakServiceTest(
             )
         )
 
-        stegService.håndterNyBehandling(
+        stegService.opprettNyBehandling(
             NyBehandling(
                 BehandlingKategori.NASJONAL,
                 BehandlingUnderkategori.ORDINÆR,

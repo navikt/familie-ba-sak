@@ -548,7 +548,7 @@ fun kjørStegprosessForFGB(
     vedtaksperiodeService: VedtaksperiodeService,
 ): Behandling {
     fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
-    val behandling = stegService.håndterNyBehandling(
+    val behandling = stegService.opprettNyBehandling(
         NyBehandling(
             kategori = BehandlingKategori.NASJONAL,
             underkategori = BehandlingUnderkategori.ORDINÆR,
@@ -688,7 +688,7 @@ fun kjørStegprosessForRevurderingÅrligKontroll(
     stegService: StegService,
     tilbakekrevingService: TilbakekrevingService
 ): Behandling {
-    val behandling = stegService.håndterNyBehandling(
+    val behandling = stegService.opprettNyBehandling(
         NyBehandling(
             kategori = BehandlingKategori.NASJONAL,
             underkategori = BehandlingUnderkategori.ORDINÆR,

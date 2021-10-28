@@ -147,7 +147,7 @@ class SøknadGrunnlagTest(
         )
 
         fagsakService.hentEllerOpprettFagsak(PersonIdent(søkerIdent))
-        val behandling = stegService.håndterNyBehandling(
+        val behandling = stegService.opprettNyBehandling(
             NyBehandling(
                 BehandlingKategori.NASJONAL,
                 BehandlingUnderkategori.ORDINÆR,
