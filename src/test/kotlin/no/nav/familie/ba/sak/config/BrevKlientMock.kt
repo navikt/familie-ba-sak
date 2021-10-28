@@ -72,7 +72,7 @@ val sanityBegrunnelserMock: List<SanityBegrunnelse> =
                         VilkårRolle.BARN,
                         VilkårRolle.SOKER
                     )
-                    else -> null
+                    else -> emptyList()
                 },
                 hjemler = when (it) {
                     VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET -> listOf("2", "4", "11")
