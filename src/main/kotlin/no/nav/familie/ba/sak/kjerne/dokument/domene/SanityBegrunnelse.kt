@@ -19,7 +19,7 @@ data class SanityBegrunnelse(
     val apiNavn: String?,
     val navnISystem: String,
     val vilkaar: List<SanityVilkår>? = null,
-    val rolle: List<VilkårRolle>? = null,
+    val rolle: List<VilkårRolle> = emptyList(),
     val lovligOppholdTriggere: List<VilkårTrigger>? = null,
     val bosattIRiketTriggere: List<VilkårTrigger>? = null,
     val giftPartnerskapTriggere: List<VilkårTrigger>? = null,
@@ -53,7 +53,7 @@ data class RestSanityBegrunnelse(
             vilkaar = vilkaar?.mapNotNull {
                 finnEnumverdi(it, SanityVilkår.values())
             },
-            rolle = rolle?.mapNotNull { finnEnumverdi(it, VilkårRolle.values()) },
+            rolle = rolle?.mapNotNull { finnEnumverdi(it, VilkårRolle.values()) } ?: emptyList(),
             lovligOppholdTriggere = lovligOppholdTriggere?.mapNotNull {
                 finnEnumverdi(it, VilkårTrigger.values())
             },
@@ -149,15 +149,18 @@ fun SanityBegrunnelse.tilTriggesAv(): TriggesAv {
 
     return TriggesAv(
         vilkår = this.vilkaar?.map { it.tilVilkår() }?.toSet() ?: emptySet(),
-        personTyper = this.rolle?.map { it.tilPersonType() }?.toSet()
-            ?: when {
+        personTyper = if (this.rolle.isEmpty()) {
+            when {
                 this.inneholderVilkår(BOSATT_I_RIKET) -> setOf(PersonType.BARN, PersonType.SØKER)
                 this.inneholderVilkår(LOVLIG_OPPHOLD) -> setOf(PersonType.BARN, PersonType.SØKER)
                 this.inneholderVilkår(GIFT_PARTNERSKAP) -> setOf(PersonType.BARN)
                 this.inneholderVilkår(UNDER_18_ÅR) -> setOf(PersonType.BARN)
                 this.inneholderVilkår(BOR_MED_SOKER) -> setOf(PersonType.BARN)
                 else -> setOf(PersonType.BARN, PersonType.SØKER)
-            },
+            }
+        } else {
+            this.rolle.map { it.tilPersonType() }.toSet()
+        },
         personerManglerOpplysninger = this.inneholderØvrigTrigger(ØvrigTrigger.MANGLER_OPPLYSNINGER),
         satsendring = this.inneholderØvrigTrigger(ØvrigTrigger.SATSENDRING),
         barnMedSeksårsdag = this.inneholderØvrigTrigger(ØvrigTrigger.BARN_MED_6_ÅRS_DAG),

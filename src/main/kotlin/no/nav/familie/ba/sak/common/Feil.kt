@@ -19,18 +19,6 @@ open class FunksjonellFeil(
     open val throwable: Throwable? = null
 ) : RuntimeException(melding)
 
-class VilkårsvurderingFeil(
-    melding: String,
-    override val frontendFeilmelding: String? = null,
-    override val httpStatus: HttpStatus = HttpStatus.OK,
-    override val throwable: Throwable? = null
-) : FunksjonellFeil(
-    melding,
-    frontendFeilmelding,
-    httpStatus,
-    throwable
-)
-
 class UtbetalingsikkerhetFeil(
     melding: String,
     override val frontendFeilmelding: String? = null,
@@ -56,7 +44,7 @@ class RolleTilgangskontrollFeil(
 )
 
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
-@JsonPropertyOrder(value = ["melding", "path", "timestamp", "status", "exception", "stackTrace" ])
+@JsonPropertyOrder(value = ["melding", "path", "timestamp", "status", "exception", "stackTrace"])
 data class EksternTjenesteFeil(
     val path: String,
     val status: HttpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
