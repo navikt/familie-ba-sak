@@ -2,8 +2,6 @@ package no.nav.familie.ba.sak.statistikk.stønadsstatistikk
 
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -18,7 +16,6 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.G
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
 import no.nav.familie.eksterne.kontrakter.BehandlingOpprinnelse
 import no.nav.familie.eksterne.kontrakter.BehandlingType
 import no.nav.familie.eksterne.kontrakter.BehandlingÅrsak
@@ -33,7 +30,6 @@ import no.nav.fpsak.tidsserie.LocalDateInterval
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import java.time.LocalDate
 import java.time.ZoneId
 import java.util.UUID
 
@@ -44,9 +40,7 @@ class StønadsstatistikkService(
     private val beregningService: BeregningService,
     private val vedtakService: VedtakService,
     private val personopplysningerService: PersonopplysningerService,
-    private val vedtakRepository: VedtakRepository,
-    private val vilkårService: VilkårService,
-    private val featureToggleService: FeatureToggleService,
+    private val vedtakRepository: VedtakRepository
 ) {
 
     fun hentVedtak(behandlingId: Long): VedtakDVH {
@@ -145,11 +139,7 @@ class StønadsstatistikkService(
                 UtbetalingsDetaljDVH(
                     person = lagPersonDVH(
                         personForAndel,
-                        finnDelingsprosentYtelse(
-                            behandling.id,
-                            personForAndel,
-                            segment.fom
-                        )
+                        andel.prosent.intValueExact()
                     ),
                     klassekode = andel.type.klassifisering,
                     utbetaltPrMnd = andel.kalkulertUtbetalingsbeløp,
@@ -157,19 +147,6 @@ class StønadsstatistikkService(
                 )
             }
         )
-    }
-
-    private fun finnDelingsprosentYtelse(behandlingsId: Long, person: Person, fom: LocalDate): Int {
-        if (!featureToggleService.isEnabled(FeatureToggleConfig.BRUK_ER_DELT_BOSTED)) {
-            return 0
-        }
-
-        val deltBostedForPersonOgPeriode = vilkårService.hentVilkårsvurdering(behandlingsId)
-            ?.personResultater
-            ?.filter { it.personIdent == person.personIdent.ident }
-            ?.any { it.erDeltBosted(fom) } ?: false
-
-        return if (deltBostedForPersonOgPeriode) 50 else 0
     }
 
     private fun lagPersonDVH(person: Person, delingsProsentYtelse: Int = 0): PersonDVH {
@@ -180,7 +157,7 @@ class StønadsstatistikkService(
             primærland = "IKKE IMPLMENTERT", // EØS
             sekundærland = "IKKE IMPLEMENTERT", // EØS
             delingsprosentOmsorg = 0, // Kan kanskje fjernes. Diskusjon på slack: Jeg tipper vi ikke trenger å sende den, men at det var noe vi “kladdet ned”, sikkert i en diskusjon om hvorvidt den faktiske delingsprosenten på omsorgen kan være ulik delingsprosenten på ytelsen
-            delingsprosentYtelse = delingsProsentYtelse,
+            delingsprosentYtelse = if (delingsProsentYtelse == 50) delingsProsentYtelse else 0,
             annenpartBostedsland = "Ikke implementert",
             annenpartPersonident = "ikke implementert",
             annenpartStatsborgerskap = "ikke implementert",
