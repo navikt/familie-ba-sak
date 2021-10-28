@@ -19,6 +19,7 @@ import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.FeatureToggleService
+import no.nav.familie.ba.sak.ekstern.restDomene.tilRestBaseFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestFagsak
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
@@ -74,7 +75,9 @@ class BeregningServiceTest {
 
         every { tilkjentYtelseRepository.slettTilkjentYtelseFor(any()) } just Runs
         every { fagsakService.hentRestFagsak(any()) } answers {
-            Ressurs.success(defaultFagsak().tilRestFagsak(emptyList(), emptyList(), emptyList()))
+            Ressurs.success(
+                defaultFagsak().tilRestBaseFagsak(false, emptyList()).tilRestFagsak(emptyList(), emptyList())
+            )
         }
         every { featureToggleService.isEnabled(any()) } answers { true }
         every { endretUtbetalingAndelRepository.findByBehandlingId(any()) } answers { emptyList() }
