@@ -125,6 +125,11 @@ data class EndretUtbetalingAndel(
         this.vedtakBegrunnelseSpesifikasjoner.contains(
             vedtakBegrunnelseSpesifikasjon
         )
+
+    fun erOverlappendeMed(periode: MånedPeriode): Boolean {
+        return this.fom!! <= periode.tom &&
+            this.tom!! >= periode.fom
+    }
 }
 
 enum class Årsak(val visningsnavn: String) {
@@ -210,3 +215,6 @@ fun EndretUtbetalingAndel.hentGyldigEndretBegrunnelser(sanityBegrunnelser: List<
             sanityBegrunnelse != null && triggesAvSkalUtbetales(listOf(this), sanityBegrunnelse.tilTriggesAv())
         }
 }
+
+fun List<EndretUtbetalingAndel>.somOverlapper(månedPeriode: MånedPeriode) =
+    this.filter { it.erOverlappendeMed(månedPeriode) }

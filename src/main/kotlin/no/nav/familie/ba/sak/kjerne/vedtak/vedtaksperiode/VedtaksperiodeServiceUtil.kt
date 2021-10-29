@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.kjerne.dokument.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.dokument.domene.tilTriggesAv
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.hentPersonerForEtterEndretUtbetalingsperiode
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.somOverlapper
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
@@ -85,7 +86,11 @@ fun hentPersoneidenterGjeldendeForBegrunnelse(
 
     return when {
         triggesAv.vilkår.contains(Vilkår.UTVIDET_BARNETRYGD) ->
-            identerMedUtbetaling + persongrunnlag.søker.personIdent.ident
+            identerMedUtbetaling +
+                persongrunnlag.søker.personIdent.ident +
+                endredeUtbetalingAndeler
+                    .somOverlapper(vedtaksperiodeMedBegrunnelser.hentMånedPeriode())
+                    .map { it.person!!.personIdent.ident }
 
         triggesAv.barnMedSeksårsdag ->
             persongrunnlag.barnMedSeksårsdagPåFom(vedtaksperiodeMedBegrunnelser.fom)

@@ -2,6 +2,8 @@ package no.nav.familie.ba.sak.kjerne.vedtak.domene
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import no.nav.familie.ba.sak.common.BaseEntitet
+import no.nav.familie.ba.sak.common.MånedPeriode
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
@@ -92,6 +94,11 @@ data class VedtaksperiodeMedBegrunnelser(
     fun harFriteksterOgStandardbegrunnelser(): Boolean {
         return fritekster.isNotEmpty() && begrunnelser.isNotEmpty()
     }
+
+    fun hentMånedPeriode() = MånedPeriode(
+        fom = this.fom!!.toYearMonth(),
+        tom = this.tom!!.toYearMonth(),
+    )
 
     companion object {
         val comparator = BegrunnelseComparator()
