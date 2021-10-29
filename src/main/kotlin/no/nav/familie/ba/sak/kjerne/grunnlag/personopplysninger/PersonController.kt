@@ -46,6 +46,7 @@ class PersonController(
     @GetMapping(path = ["/oppdater-registeropplysninger/{behandlingId}"])
     fun hentOgOppdaterRegisteropplysninger(@PathVariable behandlingId: Long): ResponseEntity<Ressurs<RestFagsak>> {
         val personopplysningGrunnlag = persongrunnlagService.oppdaterRegisteropplysninger(behandlingId)
-        return ResponseEntity.ok(fagsakService.hentRestFagsakForPerson(personopplysningGrunnlag.søker.personIdent))
+        val fagsak = fagsakService.hent(personopplysningGrunnlag.søker.personIdent) ?: error("Finner ikke fagsak")
+        return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsak.id))
     }
 }

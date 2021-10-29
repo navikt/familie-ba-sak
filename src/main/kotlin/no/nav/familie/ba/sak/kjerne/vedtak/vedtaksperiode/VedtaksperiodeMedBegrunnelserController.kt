@@ -45,7 +45,7 @@ class VedtaksperiodeMedBegrunnelserController(
 
         val vedtak = vedtaksperiodeService.oppdaterVedtaksperiodeMedStandardbegrunnelser(
             vedtaksperiodeId,
-            restPutVedtaksperiodeMedStandardbegrunnelser
+            restPutVedtaksperiodeMedStandardbegrunnelser.standardbegrunnelser
         )
 
         return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = vedtak.behandling.fagsak.id))

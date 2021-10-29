@@ -13,7 +13,6 @@ import no.nav.familie.ba.sak.kjerne.dokument.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.dokument.domene.tilTriggesAv
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjonListConverter
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
@@ -111,7 +110,10 @@ data class EndretUtbetalingAndel(
         }
 
         if (fom!! > tom!!)
-            throw Feil("fom må være lik eller komme før tom")
+            throw Feil(
+                message = "fom må være lik eller komme før tom",
+                frontendFeilmelding = "Du kan ikke sette en f.o.m. dato som er etter t.o.m. dato",
+            )
 
         if (årsak == Årsak.DELT_BOSTED && avtaletidspunktDeltBosted == null)
             throw Feil("Avtaletidspunkt skal være utfylt når årsak er delt bosted: $this.tostring()")
@@ -190,12 +192,12 @@ fun List<EndretUtbetalingAndel>.tilVedtaksperiodeMedBegrunnelser(
 fun hentPersonerForEtterEndretUtbetalingsperiode(
     endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
     vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser,
-    triggesAv: TriggesAv
+    endringsaarsaker: Set<Årsak>
 ) = endretUtbetalingAndeler.filter { endretUtbetalingAndel ->
     endretUtbetalingAndel.tom!!.sisteDagIInneværendeMåned()
         .erDagenFør(vedtaksperiodeMedBegrunnelser.fom) &&
-        triggesAv.endringsaarsaker.contains(endretUtbetalingAndel.årsak)
-}.mapNotNull { it.person?.personIdent?.ident }
+        endringsaarsaker.contains(endretUtbetalingAndel.årsak)
+}.mapNotNull { it.person }
 
 fun EndretUtbetalingAndel.hentGyldigEndretBegrunnelser(sanityBegrunnelser: List<SanityBegrunnelse>): List<VedtakBegrunnelseSpesifikasjon> {
 

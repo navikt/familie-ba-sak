@@ -21,7 +21,8 @@ import org.springframework.web.client.RestTemplate
 @Primary
 class BrevKlientMock : BrevKlient(
     familieBrevUri = "brev_uri_mock",
-    restTemplate = RestTemplate()
+    restTemplate = RestTemplate(),
+    sanityDataset = "",
 ) {
 
     override fun genererBrev(målform: String, brev: Brev): ByteArray {
@@ -71,7 +72,7 @@ val sanityBegrunnelserMock: List<SanityBegrunnelse> =
                         VilkårRolle.BARN,
                         VilkårRolle.SOKER
                     )
-                    else -> null
+                    else -> emptyList()
                 },
                 hjemler = when (it) {
                     VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET -> listOf("2", "4", "11")
