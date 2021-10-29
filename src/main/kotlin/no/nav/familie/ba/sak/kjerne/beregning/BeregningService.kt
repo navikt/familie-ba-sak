@@ -99,6 +99,14 @@ class BeregningService(
         nyEndretUtbetalingAndel: EndretUtbetalingAndel? = null
     ): TilkjentYtelse {
 
+        val endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(behandling.id).filter {
+            if (nyEndretUtbetalingAndel != null) {
+                it.id == nyEndretUtbetalingAndel.id || it.andelTilkjentYtelser.isNotEmpty()
+            } else {
+                it.andelTilkjentYtelser.isNotEmpty()
+            }
+        }
+
         tilkjentYtelseRepository.slettTilkjentYtelseFor(behandling)
         val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id)
             ?: throw IllegalStateException("Kunne ikke hente vilkårsvurdering for behandling med id ${behandling.id}")
@@ -114,13 +122,7 @@ class BeregningService(
                     behandlingId = behandling.id
                 )
             }
-        val endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(behandling.id).filter {
-            if (nyEndretUtbetalingAndel != null) {
-                it.id == nyEndretUtbetalingAndel.id || it.andelTilkjentYtelser.isNotEmpty()
-            } else {
-                it.andelTilkjentYtelser.isNotEmpty()
-            }
-        }
+
         val andelerTilkjentYtelse = TilkjentYtelseUtils.oppdaterTilkjentYtelseMedEndretUtbetalingAndeler(
             tilkjentYtelse.andelerTilkjentYtelse,
             endretUtbetalingAndeler
