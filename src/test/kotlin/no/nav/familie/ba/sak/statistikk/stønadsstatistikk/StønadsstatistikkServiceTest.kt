@@ -3,20 +3,16 @@ package no.nav.familie.ba.sak.statistikk.stønadsstatistikk
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.forrigeMåned
-import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelseUtvidet
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
-import no.nav.familie.ba.sak.common.lagPersonResultaterForSøkerOgToBarn
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.lagVedtak
-import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.ClientMocks.Companion.barnFnr
 import no.nav.familie.ba.sak.config.ClientMocks.Companion.søkerFnr
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.sats
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -24,12 +20,9 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -46,8 +39,6 @@ internal class StønadsstatistikkServiceTest {
     private val vedtakService: VedtakService = mockk()
     private val personopplysningerService: PersonopplysningerService = mockk()
     private val vedtakRepository: VedtakRepository = mockk()
-    private val vilkårService: VilkårService = mockk()
-    private val featureToggleService: FeatureToggleService = mockk()
 
     private val stønadsstatistikkService =
         StønadsstatistikkService(
@@ -56,9 +47,7 @@ internal class StønadsstatistikkServiceTest {
             beregningService,
             vedtakService,
             personopplysningerService,
-            vedtakRepository,
-            vilkårService,
-            featureToggleService
+            vedtakRepository
         )
     private val behandling = lagBehandling()
     private val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søkerFnr[0], barnFnr.toList())
@@ -77,6 +66,7 @@ internal class StønadsstatistikkServiceTest {
             behandling = behandling,
             person = barn1,
             periodeIdOffset = 1
+
         )
         val andelTilkjentYtelseBarn2 = lagAndelTilkjentYtelse(
             barn2.fødselsdato.nesteMåned().toString(),
@@ -108,8 +98,6 @@ internal class StønadsstatistikkServiceTest {
         every { persongrunnlagService.hentAktiv(any()) } returns personopplysningGrunnlag
         every { vedtakService.hentAktivForBehandling(any()) } returns vedtak
         every { personopplysningerService.hentLandkodeUtenlandskBostedsadresse(any()) } returns "DK"
-        every { vilkårService.hentVilkårsvurdering(any()) } returns Vilkårsvurdering(behandling = behandling)
-        every { featureToggleService.isEnabled(any()) } returns true
     }
 
     @Test
@@ -122,6 +110,13 @@ internal class StønadsstatistikkServiceTest {
             2 * sats(YtelseType.ORDINÆR_BARNETRYGD) + sats(YtelseType.UTVIDET_BARNETRYGD),
             vedtak.utbetalingsperioder[0].utbetaltPerMnd
         )
+
+        vedtak.utbetalingsperioder
+            .flatMap { it.utbetalingsDetaljer.map { ud -> ud.person } }
+            .filter { it.personIdent != søkerFnr[0] }
+            .forEach {
+                assertEquals(0, it.delingsprosentYtelse)
+            }
     }
 
     @Test
@@ -131,41 +126,6 @@ internal class StønadsstatistikkServiceTest {
         vedtak.utbetalingsperioder.forEach {
             assertEquals(it.utbetalingsDetaljer.size, it.utbetalingsDetaljer.distinctBy { it.delytelseId }.size)
         }
-    }
-
-    @Test
-    fun `Verifiser ved delt bosted så blir delingspresenten av ytelsen 50%`() {
-        val stønadFromBarn1 = barn1.fødselsdato.plusMonths(1).førsteDagIInneværendeMåned()
-        val stønadTomBarn2 = barn2.fødselsdato.plusYears(18)
-        val vilkårsvurdering = lagVilkårsvurdering(
-            behandling = behandling,
-            resultat = Resultat.OPPFYLT,
-            søkerFnr = personopplysningGrunnlag.søker.personIdent.ident
-        )
-
-        val personResultater = lagPersonResultaterForSøkerOgToBarn(
-            barn1Fnr = barn1.personIdent.ident,
-            barn2Fnr = barn2.personIdent.ident,
-            stønadFom = stønadFromBarn1,
-            stønadTom = stønadTomBarn2,
-            vilkårsvurdering = vilkårsvurdering,
-            søkerFnr = søkerFnr[0],
-            erDeltBosted = true
-        )
-
-        every { vilkårService.hentVilkårsvurdering(any()) } returns Vilkårsvurdering(behandling = behandling)
-            .also {
-                it.personResultater = personResultater
-            }
-
-        val vedtak = stønadsstatistikkService.hentVedtak(1L)
-
-        vedtak.utbetalingsperioder
-            .flatMap { it.utbetalingsDetaljer.map { ud -> ud.person } }
-            .filter { it.personIdent != søkerFnr[0] }
-            .forEach {
-                assertEquals(50, it.delingsprosentYtelse)
-            }
     }
 
     /**
@@ -180,9 +140,11 @@ internal class StønadsstatistikkServiceTest {
     @Test
     fun `Skal gi feil hvis det kommer en ny BehandlingÅrsak som det ikke er tatt høyde for mot stønaddstatistkk - Man trenger å oppdatere schema og varsle stønaddstatistikk - Tips i javadoc`() {
         val behandlingsÅrsakIBASak = enumValues<BehandlingÅrsak>().map { it.name }
-        val behandlingsÅrsakFraEksternKontrakt = enumValues<no.nav.familie.eksterne.kontrakter.BehandlingÅrsak>().map { it.name }
+        val behandlingsÅrsakFraEksternKontrakt =
+            enumValues<no.nav.familie.eksterne.kontrakter.BehandlingÅrsak>().map { it.name }
 
-        assertThat(behandlingsÅrsakIBASak).hasSize(behandlingsÅrsakFraEksternKontrakt.size).containsAll(behandlingsÅrsakFraEksternKontrakt)
+        assertThat(behandlingsÅrsakIBASak).hasSize(behandlingsÅrsakFraEksternKontrakt.size)
+            .containsAll(behandlingsÅrsakFraEksternKontrakt)
     }
 
     /**
@@ -197,8 +159,10 @@ internal class StønadsstatistikkServiceTest {
     @Test
     fun `Skal gi feil hvis det kommer en ny BehandlingType som det ikke er tatt høyde for mot stønaddstatistkk - Man trenger å oppdatere schema og varsle stønaddstatistikk`() {
         val behandlingsTypeIBasak = enumValues<BehandlingType>().map { it.name }
-        val behandlingsTypeFraStønadskontrakt = enumValues<no.nav.familie.eksterne.kontrakter.BehandlingType>().map { it.name }
+        val behandlingsTypeFraStønadskontrakt =
+            enumValues<no.nav.familie.eksterne.kontrakter.BehandlingType>().map { it.name }
 
-        assertThat(behandlingsTypeIBasak).hasSize(behandlingsTypeFraStønadskontrakt.size).containsAll(behandlingsTypeFraStønadskontrakt)
+        assertThat(behandlingsTypeIBasak).hasSize(behandlingsTypeFraStønadskontrakt.size)
+            .containsAll(behandlingsTypeFraStønadskontrakt)
     }
 }
