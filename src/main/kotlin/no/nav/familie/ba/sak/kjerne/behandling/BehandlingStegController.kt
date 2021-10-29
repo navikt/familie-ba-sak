@@ -45,7 +45,7 @@ class BehandlingStegController(
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandling.id)))
     }
 
-    @PostMapping(path = ["/{behandlingId}/valider"])
+    @PostMapping(path = ["/{behandlingId}/steg/vilkårsvurdering"])
     fun validerVilkårsvurdering(@PathVariable @BehandlingstilgangConstraint behandlingId: Long): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         val behandling = behandlingService.hent(behandlingId)
         stegService.håndterVilkårsvurdering(behandling)

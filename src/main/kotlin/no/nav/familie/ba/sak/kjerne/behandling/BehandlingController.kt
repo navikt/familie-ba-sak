@@ -4,12 +4,11 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.RessursUtils.illegalState
 import no.nav.familie.ba.sak.common.RessursUtils.ok
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
-import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsak
+import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
@@ -32,15 +31,15 @@ import org.springframework.web.bind.annotation.RestController
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class BehandlingController(
-    private val fagsakService: FagsakService,
     private val stegService: StegService,
     private val behandlingsService: BehandlingService,
     private val taskRepository: TaskRepositoryWrapper,
     private val tilgangService: TilgangService,
+    private val utvidetBehandlingService: UtvidetBehandlingService
 ) {
 
     @PostMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun opprettBehandling(@RequestBody nyBehandling: NyBehandling): ResponseEntity<Ressurs<RestFagsak>> {
+    fun opprettBehandling(@RequestBody nyBehandling: NyBehandling): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "opprette behandling"
@@ -64,8 +63,7 @@ class BehandlingController(
             stegService.håndterNyBehandling(nyBehandling)
         }.fold(
             onSuccess = {
-                val restFagsak = ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = it.fagsak.id))
-                restFagsak
+                ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = it.id)))
             },
             onFailure = {
                 throw it
@@ -97,7 +95,7 @@ class BehandlingController(
         @PathVariable behandlingId: Long,
         @RequestBody
         endreBehandling: RestEndreBehandlingstema
-    ): ResponseEntity<Ressurs<RestFagsak>> {
+    ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         val behandling = behandlingsService.oppdaterBehandlingstema(
             behandling = behandlingsService.hent(behandlingId),
             nyBehandlingUnderkategori = endreBehandling.behandlingUnderkategori,
@@ -105,9 +103,7 @@ class BehandlingController(
             manueltOppdatert = true
         )
 
-        val restFagsak = fagsakService.hentRestFagsak(fagsakId = behandling.fagsak.id)
-
-        return ResponseEntity.ok(restFagsak)
+        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandling.id)))
     }
 }
 

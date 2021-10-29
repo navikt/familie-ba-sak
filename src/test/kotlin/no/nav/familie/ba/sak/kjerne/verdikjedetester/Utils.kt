@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.kjerne.verdikjedetester
 import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
-import no.nav.familie.ba.sak.ekstern.restDomene.RestVedtak
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -40,10 +39,10 @@ fun generellAssertFagsak(
     if (restFagsak.status != Ressurs.Status.SUKSESS) throw IllegalStateException("generellAssertFagsak feilet. status: ${restFagsak.status.name},  melding: ${restFagsak.melding}")
     assertEquals(fagsakStatus, restFagsak.data?.status)
     if (behandlingStegType != null) {
-        assertEquals(behandlingStegType, hentAktivBehandling(restFagsak = restFagsak.data!!)?.steg)
+        assertEquals(behandlingStegType, hentAktivBehandling(restFagsak = restFagsak.data!!).steg)
     }
     if (behandlingResultat != null) {
-        assertEquals(behandlingResultat, hentAktivBehandling(restFagsak = restFagsak.data!!)?.resultat)
+        assertEquals(behandlingResultat, hentAktivBehandling(restFagsak = restFagsak.data!!).resultat)
     }
 }
 
@@ -65,10 +64,6 @@ fun hentNåværendeEllerNesteMånedsUtbetaling(behandling: RestUtvidetBehandling
 
 fun hentAktivBehandling(restFagsak: RestFagsak): RestUtvidetBehandling {
     return restFagsak.behandlinger.single { it.aktiv }
-}
-
-fun hentAktivtVedtak(restFagsak: RestFagsak): RestVedtak? {
-    return hentAktivBehandling(restFagsak).vedtakForBehandling.single { it.aktiv }
 }
 
 fun behandleFødselshendelse(

@@ -182,7 +182,7 @@ class BehandleFørstegangssøknadSmåbarnstilleggTest(
         )
 
         val vedtaksperiodeId =
-            hentAktivtVedtak(restFagsakEtterVurderTilbakekreving.data!!)!!.vedtaksperioderMedBegrunnelser.first()
+            restFagsakEtterVurderTilbakekreving.data!!.behandlinger.single { it.aktiv }.vedtak!!.vedtaksperioderMedBegrunnelser.first()
         familieBaSakKlient().oppdaterVedtaksperiodeMedStandardbegrunnelser(
             vedtaksperiodeId = vedtaksperiodeId.id,
             restPutVedtaksperiodeMedStandardbegrunnelser = RestPutVedtaksperiodeMedStandardbegrunnelser(

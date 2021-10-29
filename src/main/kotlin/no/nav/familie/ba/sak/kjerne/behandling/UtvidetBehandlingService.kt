@@ -49,7 +49,7 @@ class UtvidetBehandlingService(
 
         val arbeidsfordeling = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandlingId = behandling.id)
 
-        val vedtak = vedtakRepository.finnVedtakForBehandling(behandling.id)
+        val vedtak = vedtakRepository.findByBehandlingAndAktiv(behandling.id)
 
         val personResultater = vilkårsvurderingService.hentAktivForBehandling(behandling.id)?.personResultater
 
@@ -89,11 +89,9 @@ class UtvidetBehandlingService(
             endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(behandling.id)
                 .map { it.tilRestEndretUtbetalingAndel() },
             tilbakekreving = tilbakekreving?.tilRestTilbakekreving(),
-            vedtakForBehandling = vedtak.filter { it.aktiv }.map {
-                it.tilRestVedtak(
-                    vedtaksperiodeService.hentUtvidetVedtaksperiodeMedBegrunnelser(vedtak = it)
-                )
-            },
+            vedtak = vedtak?.tilRestVedtak(
+                vedtaksperiodeService.hentUtvidetVedtaksperiodeMedBegrunnelser(vedtak = vedtak)
+            ),
             totrinnskontroll = totrinnskontroll?.tilRestTotrinnskontroll(),
         )
     }

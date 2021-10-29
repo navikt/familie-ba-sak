@@ -78,7 +78,7 @@ class FagsakService(
     }
 
     @Transactional
-    fun hentEllerOpprettFagsak(fagsakRequest: FagsakRequest): Ressurs<RestFagsak> {
+    fun hentEllerOpprettFagsak(fagsakRequest: FagsakRequest): Ressurs<RestMinimalFagsak> {
         val personIdent = when {
             fagsakRequest.personIdent !== null -> PersonIdent(fagsakRequest.personIdent)
             fagsakRequest.aktørId !== null -> personopplysningerService.hentAktivPersonIdent(Ident(fagsakRequest.aktørId))
@@ -89,7 +89,7 @@ class FagsakService(
             )
         }
         val fagsak = hentEllerOpprettFagsak(personIdent)
-        return hentRestFagsak(fagsakId = fagsak.id).also {
+        return hentRestMinimalFagsak(fagsakId = fagsak.id).also {
             skyggesakService.opprettSkyggesak(personIdent.ident, fagsak.id)
         }
     }
@@ -284,8 +284,8 @@ class FagsakService(
                     relasjon.relasjonsrolle == FORELDERBARNRELASJONROLLE.MEDMOR
             }.forEach { relasjon ->
                 if (assosierteFagsakDeltagere.find { fagsakDeltager ->
-                    fagsakDeltager.ident == relasjon.personIdent.id
-                } == null
+                        fagsakDeltager.ident == relasjon.personIdent.id
+                    } == null
                 ) {
                     val maskertForelder = hentMaskertFagsakdeltakerVedManglendeTilgang(relasjon.personIdent.id)
                     if (maskertForelder != null) {
