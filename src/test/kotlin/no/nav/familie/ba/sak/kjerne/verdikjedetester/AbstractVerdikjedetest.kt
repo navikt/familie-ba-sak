@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
 import no.nav.familie.ba.sak.WebSpringAuthTestRunner
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.MockserverKlient
+import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock
 import org.springframework.context.ApplicationContextInitializer
 import org.springframework.context.ConfigurableApplicationContext
 import org.springframework.test.context.ActiveProfiles
@@ -49,6 +50,7 @@ class VerdikjedetesterPropertyOverrideContextInitializer :
 @ContextConfiguration(
     initializers = [VerdikjedetesterPropertyOverrideContextInitializer::class]
 )
+@AutoConfigureWireMock(port = 28085)
 abstract class AbstractVerdikjedetest : WebSpringAuthTestRunner() {
 
     fun familieBaSakKlient(): FamilieBaSakKlient = FamilieBaSakKlient(
