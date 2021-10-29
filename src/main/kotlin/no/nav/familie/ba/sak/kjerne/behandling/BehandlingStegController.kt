@@ -1,13 +1,14 @@
 package no.nav.familie.ba.sak.kjerne.behandling
 
-import no.nav.familie.ba.sak.common.RessursUtils
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
+import no.nav.familie.ba.sak.sikkerhet.validering.BehandlingstilgangConstraint
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
@@ -35,7 +36,7 @@ class BehandlingStegController(
         produces = [MediaType.APPLICATION_JSON_VALUE]
     )
     fun registrereSøknadOgHentPersongrunnlag(
-        @PathVariable behandlingId: Long,
+        @PathVariable @BehandlingstilgangConstraint behandlingId: Long,
         @RequestBody restRegistrerSøknad: RestRegistrerSøknad
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         val behandling = behandlingService.hent(behandlingId = behandlingId)
@@ -45,7 +46,7 @@ class BehandlingStegController(
     }
 
     @PostMapping(path = ["/{behandlingId}/valider"])
-    fun validerVilkårsvurdering(@PathVariable behandlingId: Long): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+    fun validerVilkårsvurdering(@PathVariable @BehandlingstilgangConstraint behandlingId: Long): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         val behandling = behandlingService.hent(behandlingId)
         stegService.håndterVilkårsvurdering(behandling)
 
@@ -53,7 +54,7 @@ class BehandlingStegController(
     }
 
     @PostMapping(path = ["/{behandlingId}/steg/behandlingsresultat"])
-    fun utledBehandlingsresultat(@PathVariable behandlingId: Long): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+    fun utledBehandlingsresultat(@PathVariable @BehandlingstilgangConstraint behandlingId: Long): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         val behandling = behandlingService.hent(behandlingId)
         stegService.håndterBehandlingsresultat(behandling)
 
@@ -62,7 +63,7 @@ class BehandlingStegController(
 
     @PostMapping(path = ["/{behandlingId}/tilbakekreving"])
     fun lagreTilbakekrevingOgGåVidereTilNesteSteg(
-        @PathVariable behandlingId: Long,
+        @PathVariable @BehandlingstilgangConstraint behandlingId: Long,
         @RequestBody restTilbakekreving: RestTilbakekreving
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
 
@@ -74,11 +75,10 @@ class BehandlingStegController(
 
     @PostMapping(path = ["/{behandlingId}/send-til-beslutter"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun sendTilBeslutter(
-        @PathVariable fagsakId: Long,
+        @PathVariable @BehandlingstilgangConstraint behandlingId: Long,
         @RequestParam behandlendeEnhet: String
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
-        val behandling = behandlingService.hentAktivForFagsak(fagsakId)
-            ?: return RessursUtils.notFound("Fant ikke behandling på fagsak $fagsakId")
+        val behandling = behandlingService.hent(behandlingId)
 
         stegService.håndterSendTilBeslutter(behandling, behandlendeEnhet)
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandling.id)))
@@ -86,7 +86,7 @@ class BehandlingStegController(
 
     @PostMapping(path = ["/{behandlingId}/iverksett-vedtak"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun iverksettVedtak(
-        @PathVariable fagsakId: Long,
+        @PathVariable @BehandlingstilgangConstraint behandlingId: Long,
         @RequestBody restBeslutningPåVedtak: RestBeslutningPåVedtak
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         tilgangService.verifiserHarTilgangTilHandling(
@@ -94,8 +94,7 @@ class BehandlingStegController(
             handling = "iverksette vedtak"
         )
 
-        val behandling = behandlingService.hentAktivForFagsak(fagsakId)
-            ?: return RessursUtils.notFound("Fant ikke behandling på fagsak $fagsakId")
+        val behandling = behandlingService.hent(behandlingId)
 
         stegService.håndterBeslutningForVedtak(behandling, restBeslutningPåVedtak)
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandling.id)))
@@ -103,7 +102,7 @@ class BehandlingStegController(
 
     @PutMapping(path = ["{behandlingId}/henlegg"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun henleggBehandlingOgSendBrev(
-        @PathVariable(name = "behandlingId") behandlingId: Long,
+        @PathVariable @BehandlingstilgangConstraint behandlingId: Long,
         @RequestBody henleggInfo: RestHenleggBehandlingInfo
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         tilgangService.verifiserHarTilgangTilHandling(
@@ -114,5 +113,22 @@ class BehandlingStegController(
         val behandling = behandlingService.hent(behandlingId)
         stegService.håndterHenleggBehandling(behandling, henleggInfo)
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandling.id)))
+    }
+}
+
+class RestHenleggBehandlingInfo(
+    val årsak: HenleggÅrsak,
+    val begrunnelse: String
+)
+
+enum class HenleggÅrsak(val beskrivelse: String) {
+    SØKNAD_TRUKKET("Søknad trukket"),
+    FEILAKTIG_OPPRETTET("Behandling feilaktig opprettet"),
+    FØDSELSHENDELSE_UGYLDIG_UTFALL("Behandlingen er automatisk henlagt");
+
+    fun tilBehandlingsresultat() = when (this) {
+        FEILAKTIG_OPPRETTET -> BehandlingResultat.HENLAGT_FEILAKTIG_OPPRETTET
+        SØKNAD_TRUKKET -> BehandlingResultat.HENLAGT_SØKNAD_TRUKKET
+        FØDSELSHENDELSE_UGYLDIG_UTFALL -> BehandlingResultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE
     }
 }

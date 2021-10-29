@@ -5,20 +5,14 @@ import no.nav.familie.ba.sak.common.RessursUtils.illegalState
 import no.nav.familie.ba.sak.common.RessursUtils.ok
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsak
-import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
-import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
-import no.nav.familie.ba.sak.kjerne.simulering.domene.RestSimulering
-import no.nav.familie.ba.sak.kjerne.simulering.vedtakSimuleringMottakereTilRestSimulering
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
-import no.nav.familie.ba.sak.sikkerhet.validering.BehandlingstilgangConstraint
 import no.nav.familie.ba.sak.task.BehandleFødselshendelseTask
 import no.nav.familie.ba.sak.task.dto.BehandleFødselshendelseTaskDTO
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -26,7 +20,6 @@ import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
-import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
@@ -42,10 +35,8 @@ class BehandlingController(
     private val fagsakService: FagsakService,
     private val stegService: StegService,
     private val behandlingsService: BehandlingService,
-    private val utvidetBehandlingService: UtvidetBehandlingService,
     private val taskRepository: TaskRepositoryWrapper,
     private val tilgangService: TilgangService,
-    private val simuleringService: SimuleringService,
 ) {
 
     @PostMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -101,21 +92,6 @@ class BehandlingController(
         }
     }
 
-    @GetMapping(path = ["{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun hentUtvidetBehandling(@PathVariable behandlingId: Long): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
-        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
-    }
-
-    @GetMapping(path = ["/{behandlingId}/simulering"])
-    fun hentSimulering(
-        @PathVariable @BehandlingstilgangConstraint
-        behandlingId: Long
-    ): ResponseEntity<Ressurs<RestSimulering>> {
-        val vedtakSimuleringMottaker = simuleringService.oppdaterSimuleringPåBehandlingVedBehov(behandlingId)
-        val restSimulering = vedtakSimuleringMottakereTilRestSimulering(vedtakSimuleringMottaker)
-        return ResponseEntity.ok(Ressurs.success(restSimulering))
-    }
-
     @PutMapping(path = ["/{behandlingId}/behandlingstema"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun endreBehandlingstema(
         @PathVariable behandlingId: Long,
@@ -152,24 +128,7 @@ class NyBehandlingHendelse(
     val barnasIdenter: List<String>
 )
 
-class RestHenleggBehandlingInfo(
-    val årsak: HenleggÅrsak,
-    val begrunnelse: String
-)
-
-class RestEndreBehandlingstema(
+data class RestEndreBehandlingstema(
     val behandlingUnderkategori: BehandlingUnderkategori,
     val behandlingKategori: BehandlingKategori
 )
-
-enum class HenleggÅrsak(val beskrivelse: String) {
-    SØKNAD_TRUKKET("Søknad trukket"),
-    FEILAKTIG_OPPRETTET("Behandling feilaktig opprettet"),
-    FØDSELSHENDELSE_UGYLDIG_UTFALL("Behandlingen er automatisk henlagt");
-
-    fun tilBehandlingsresultat() = when (this) {
-        FEILAKTIG_OPPRETTET -> BehandlingResultat.HENLAGT_FEILAKTIG_OPPRETTET
-        SØKNAD_TRUKKET -> BehandlingResultat.HENLAGT_SØKNAD_TRUKKET
-        FØDSELSHENDELSE_UGYLDIG_UTFALL -> BehandlingResultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE
-    }
-}

@@ -71,7 +71,7 @@ class SøknadGrunnlagTest(
     @Autowired
     private val vedtaksperiodeService: VedtaksperiodeService,
 
-    ) {
+) {
 
     @Test
     fun `Skal lagre ned og hente søknadsgrunnlag`() {

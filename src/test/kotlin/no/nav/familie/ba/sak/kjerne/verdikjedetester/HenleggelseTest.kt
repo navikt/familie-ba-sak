@@ -92,7 +92,7 @@ class HenleggelseTest(
                 brevmal = BrevType.HENLEGGE_TRUKKET_SØKNAD
             )
         )
-        assertThat(responseForhandsvis?.status == Ressurs.Status.SUKSESS)
+        assertThat(responseForhandsvis.status == Ressurs.Status.SUKSESS)
 
         val responseHenlagtSøknad = familieBaSakKlient().henleggSøknad(
             førsteBehandling.behandlingId,
