@@ -21,7 +21,7 @@ class InfotrygdFeedService(
 
     @Transactional
     fun sendStartBehandlingTilInfotrygdFeed(fnrStoenadsmottaker: String) {
-        if (!featureToggleService.isEnabled(SEND_START_BEHANDLING_TIL_INFOTRYGD)) {
+        if (!featureToggleService.isEnabled(SEND_START_BEHANDLING_TIL_INFOTRYGD, false)) {
             logger.info("send ikke startBehandling til infotrygd fordi feature er togglet av")
             return
         }
