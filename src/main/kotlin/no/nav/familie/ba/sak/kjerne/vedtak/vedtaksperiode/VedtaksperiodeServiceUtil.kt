@@ -89,7 +89,7 @@ fun hentPersoneidenterGjeldendeForBegrunnelse(
             identerMedUtbetaling +
                 persongrunnlag.søker.personIdent.ident +
                 endredeUtbetalingAndeler
-                    .somOverlapper(vedtaksperiodeMedBegrunnelser.hentMånedPeriode())
+                    .somOverlapper(vedtaksperiodeMedBegrunnelser.hentNullableMånedPeriode())
                     .map { it.person!!.personIdent.ident }
 
         triggesAv.barnMedSeksårsdag ->
