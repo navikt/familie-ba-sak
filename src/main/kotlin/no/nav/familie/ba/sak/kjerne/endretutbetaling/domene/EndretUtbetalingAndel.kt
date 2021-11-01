@@ -3,10 +3,13 @@ package no.nav.familie.ba.sak.kjerne.endretutbetaling.domene
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.MånedPeriode
+import no.nav.familie.ba.sak.common.NullableMånedPeriode
+import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.YearMonthConverter
 import no.nav.familie.ba.sak.common.erDagenFør
 import no.nav.familie.ba.sak.common.overlapperHeltEllerDelvisMed
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.ekstern.restDomene.RestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.dokument.domene.SanityBegrunnelse
@@ -125,6 +128,19 @@ data class EndretUtbetalingAndel(
         this.vedtakBegrunnelseSpesifikasjoner.contains(
             vedtakBegrunnelseSpesifikasjon
         )
+
+    fun erOverlappendeMed(nullableMånedPeriode: NullableMånedPeriode): Boolean {
+        if (this.fom == null || nullableMånedPeriode.fom == null) {
+            throw Feil("Fom ble null ved sjekk av overlapp av periode til endretUtbetalingAndel")
+        }
+
+        return MånedPeriode(this.fom!!, this.tom ?: TIDENES_ENDE.toYearMonth()).overlapperHeltEllerDelvisMed(
+            MånedPeriode(
+                nullableMånedPeriode.fom,
+                nullableMånedPeriode.tom ?: TIDENES_ENDE.toYearMonth()
+            )
+        )
+    }
 }
 
 enum class Årsak(val visningsnavn: String) {
@@ -210,3 +226,6 @@ fun EndretUtbetalingAndel.hentGyldigEndretBegrunnelser(sanityBegrunnelser: List<
             sanityBegrunnelse != null && triggesAvSkalUtbetales(listOf(this), sanityBegrunnelse.tilTriggesAv())
         }
 }
+
+fun List<EndretUtbetalingAndel>.somOverlapper(nullableMånedPeriode: NullableMånedPeriode) =
+    this.filter { it.erOverlappendeMed(nullableMånedPeriode) }
