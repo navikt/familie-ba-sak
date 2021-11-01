@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.MigreringResponseDto
+import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestClient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -31,6 +32,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
 import no.nav.familie.kontrakter.ba.infotrygd.Sak
+import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
@@ -62,7 +64,8 @@ class MigreringService(
     private val behandlingRepository: BehandlingRepository,
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
     private val totrinnskontrollService: TotrinnskontrollService,
-    private val env: EnvService
+    private val env: EnvService,
+    private val pdlRestClient: PdlRestClient
 ) {
 
     private val alleredeMigrertPersonFeilmelding = "Personen er allerede migrert."
@@ -74,6 +77,7 @@ class MigreringService(
         kastFeilDersomSakIkkeErOrdinær(løpendeSak)
 
         val barnasIdenter = finnBarnMedLøpendeStønad(løpendeSak)
+        validerAtBarnErIrelasjonMedPersonident(personIdent, barnasIdenter)
 
         fagsakService.hentEllerOpprettFagsakForPersonIdent(personIdent)
             .also { kastFeilDersomAlleredeMigrert(it) }
@@ -102,6 +106,14 @@ class MigreringService(
         iverksett(behandlingEtterVilkårsvurdering)
 
         return MigreringResponseDto(behandlingEtterVilkårsvurdering.fagsak.id, behandlingEtterVilkårsvurdering.id)
+    }
+
+    private fun validerAtBarnErIrelasjonMedPersonident(personIdent: String, barnasIdenter: List<String>) {
+        val listeBarnFraPdl = pdlRestClient.hentForeldreBarnRelasjon(personIdent)
+            .filter { it.relatertPersonsRolle == FORELDERBARNRELASJONROLLE.BARN }.map { it.relatertPersonsIdent }
+        if (barnasIdenter.size != listeBarnFraPdl.size || !listeBarnFraPdl.containsAll(barnasIdenter)) {
+            throw error("Kan ikke migrere fordi barn fra")
+        }
     }
 
     private fun kastFeilDersomAlleredeMigrert(fagsak: Fagsak) {

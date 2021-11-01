@@ -251,7 +251,7 @@ class PdlRestClient(
         } catch (e: Exception) {
             throw Feil(
                 message = "Feil ved oppslag på utenlandsk bostedsadresse. Gav feil: ${
-                NestedExceptionUtils.getMostSpecificCause(e).message
+                    NestedExceptionUtils.getMostSpecificCause(e).message
                 }",
                 frontendFeilmelding = "Feil oppsto ved oppslag på utenlandsk bostedsadresse $personIdent",
                 httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
@@ -263,6 +263,34 @@ class PdlRestClient(
         throw Feil(
             message = "Fant ikke data på person: ${response.errorMessages()}",
             frontendFeilmelding = "Fant ikke identer for person $personIdent: ${response.errorMessages()}",
+            httpStatus = HttpStatus.NOT_FOUND
+        )
+    }
+
+    /**
+     * Til bruk for migrering. Vurder hentPerson som gir maskerte data for personer med adressebeskyttelse.
+     *
+     */
+    fun hentForeldreBarnRelasjon(ident: String): List<no.nav.familie.kontrakter.felles.personopplysning.ForelderBarnRelasjon> {
+        val pdlPersonRequest = PdlPersonRequest(
+            variables = PdlPersonRequestVariables(ident),
+            query = hentGraphqlQuery("hentperson-relasjoner")
+        )
+        val response = try {
+            postForEntity<PdlHentPersonResponse>(pdlUri, pdlPersonRequest, httpHeaders())
+        } catch (e: Exception) {
+            throw Feil(
+                message = "Feil ved oppslag på person. Gav feil: ${e.message}",
+                frontendFeilmelding = "Feil oppsto ved oppslag på person $ident",
+                httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
+                throwable = e
+            )
+        }
+
+        if (!response.harFeil()) return response.data.person!!.forelderBarnRelasjon
+        throw Feil(
+            message = "Fant ikke data på person: ${response.errorMessages()}",
+            frontendFeilmelding = "Fant ikke identer for person $ident: ${response.errorMessages()}",
             httpStatus = HttpStatus.NOT_FOUND
         )
     }
