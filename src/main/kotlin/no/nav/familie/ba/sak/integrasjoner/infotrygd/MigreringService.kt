@@ -77,7 +77,7 @@ class MigreringService(
         kastFeilDersomSakIkkeErOrdinær(løpendeSak)
 
         val barnasIdenter = finnBarnMedLøpendeStønad(løpendeSak)
-        validerAtBarnErIrelasjonMedPersonident(personIdent, barnasIdenter)
+        validerAtBarnErIRelasjonMedPersonident(personIdent, barnasIdenter)
 
         fagsakService.hentEllerOpprettFagsakForPersonIdent(personIdent)
             .also { kastFeilDersomAlleredeMigrert(it) }
@@ -108,11 +108,11 @@ class MigreringService(
         return MigreringResponseDto(behandlingEtterVilkårsvurdering.fagsak.id, behandlingEtterVilkårsvurdering.id)
     }
 
-    private fun validerAtBarnErIrelasjonMedPersonident(personIdent: String, barnasIdenter: List<String>) {
-        val listeBarnFraPdl = pdlRestClient.hentForeldreBarnRelasjon(personIdent)
+    private fun validerAtBarnErIRelasjonMedPersonident(personIdent: String, barnasIdenter: List<String>) {
+        val listeBarnFraPdl = pdlRestClient.hentForelderBarnRelasjon(personIdent)
             .filter { it.relatertPersonsRolle == FORELDERBARNRELASJONROLLE.BARN }.map { it.relatertPersonsIdent }
         if (barnasIdenter.size != listeBarnFraPdl.size || !listeBarnFraPdl.containsAll(barnasIdenter)) {
-            throw error("Kan ikke migrere fordi barn fra")
+            throw error("Kan ikke migrere fordi barn fra PDL ikke samsvarer løpende barnetrygdbarn fra Infotrygd.")
         }
     }
 

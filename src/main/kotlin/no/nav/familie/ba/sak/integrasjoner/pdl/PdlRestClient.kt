@@ -271,7 +271,7 @@ class PdlRestClient(
      * Til bruk for migrering. Vurder hentPerson som gir maskerte data for personer med adressebeskyttelse.
      *
      */
-    fun hentForeldreBarnRelasjon(ident: String): List<no.nav.familie.kontrakter.felles.personopplysning.ForelderBarnRelasjon> {
+    fun hentForelderBarnRelasjon(ident: String): List<no.nav.familie.kontrakter.felles.personopplysning.ForelderBarnRelasjon> {
         val pdlPersonRequest = PdlPersonRequest(
             variables = PdlPersonRequestVariables(ident),
             query = hentGraphqlQuery("hentperson-relasjoner")

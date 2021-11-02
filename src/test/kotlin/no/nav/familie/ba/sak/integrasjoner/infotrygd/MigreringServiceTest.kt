@@ -234,7 +234,7 @@ class MigreringServiceTest {
 
         val migreringServiceMock = MigreringService(
             mockk(), mockk(), mockk(), mockk(), mockk(), mockk(), mockk(), mockk(), mockk(), mockk(), mockk(),
-            env = mockk(relaxed = true)
+            env = mockk(relaxed = true), mockk()
         ) // => env.erDev() = env.erE2E() = false
 
         listOf<Long>(0, 1).forEach { antallDagerEtterKjøredato ->
