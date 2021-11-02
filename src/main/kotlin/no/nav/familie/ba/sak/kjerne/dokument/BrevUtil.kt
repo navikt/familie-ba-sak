@@ -227,7 +227,8 @@ fun hentHjemmeltekst(
 fun UtvidetVedtaksperiodeMedBegrunnelser.tilBrevPeriode(
     personerIPersongrunnlag: List<Person>,
     målform: Målform,
-    uregistrerteBarn: List<BarnMedOpplysninger> = emptyList()
+    uregistrerteBarn: List<BarnMedOpplysninger> = emptyList(),
+    erStartPåUtvidetSammeMåned: Boolean = false,
 ): BrevPeriode? {
     val begrunnelserOgFritekster = this.byggBegrunnelserOgFritekster(
         personerIPersongrunnlag = personerIPersongrunnlag,
@@ -246,7 +247,11 @@ fun UtvidetVedtaksperiodeMedBegrunnelser.tilBrevPeriode(
 
         Vedtaksperiodetype.UTBETALING -> hentInnvilgelseBrevPeriode(tomDato, begrunnelserOgFritekster)
 
-        Vedtaksperiodetype.ENDRET_UTBETALING -> hentEndretUtbetalingBrevPeriode(tomDato, begrunnelserOgFritekster)
+        Vedtaksperiodetype.ENDRET_UTBETALING -> hentEndretUtbetalingBrevPeriode(
+            tomDato,
+            begrunnelserOgFritekster,
+            erStartPåUtvidetSammeMåned
+        )
 
         Vedtaksperiodetype.AVSLAG -> hentAvslagBrevPeriode(tomDato, begrunnelserOgFritekster)
 
@@ -272,20 +277,31 @@ private fun UtvidetVedtaksperiodeMedBegrunnelser.hentAvslagBrevPeriode(
 
 fun UtvidetVedtaksperiodeMedBegrunnelser.hentEndretUtbetalingBrevPeriode(
     tomDato: String?,
-    begrunnelserOgFritekster: List<Begrunnelse>
-) = EndretUtbetalingBrevPeriode(
-    fom = this.fom!!.tilDagMånedÅr(),
-    tom = tomDato,
-    barnasFodselsdager = this.utbetalingsperiodeDetaljer.tilBarnasFødselsdatoer(),
-    begrunnelser = begrunnelserOgFritekster,
-    type = when {
-        this.utbetalingsperiodeDetaljer.all { it.prosent == BigDecimal.ZERO } ->
-            EndretUtbetalingBrevPeriodeType.ENDRET_UTBETALINGSPERIODE_INGEN_UTBETALING
-        else ->
-            EndretUtbetalingBrevPeriodeType.ENDRET_UTBETALINGSPERIODE
-    },
-    typeBarnetrygd = EndretUtbetalingBernetrygtType.DELT
-)
+    begrunnelserOgFritekster: List<Begrunnelse>,
+    erStartPåUtvidetSammeMåned: Boolean = false,
+): EndretUtbetalingBrevPeriode {
+    val ingenUtbetaling =
+        utbetalingsperiodeDetaljer.all { it.prosent == BigDecimal.ZERO }
+
+    return EndretUtbetalingBrevPeriode(
+        fom = this.fom!!.tilDagMånedÅr(),
+        tom = tomDato,
+        barnasFodselsdager = this.utbetalingsperiodeDetaljer.tilBarnasFødselsdatoer(),
+        begrunnelser = begrunnelserOgFritekster,
+        type = when {
+            !erStartPåUtvidetSammeMåned && ingenUtbetaling ->
+                EndretUtbetalingBrevPeriodeType.ENDRET_UTBETALINGSPERIODE_INGEN_UTBETALING
+            erStartPåUtvidetSammeMåned && ingenUtbetaling ->
+                EndretUtbetalingBrevPeriodeType.ENDRET_UTBETALINGSPERIODE_DELVIS_UTBETALING
+            else ->
+                EndretUtbetalingBrevPeriodeType.ENDRET_UTBETALINGSPERIODE
+        },
+        typeBarnetrygd = if (erStartPåUtvidetSammeMåned)
+            EndretUtbetalingBernetrygtType.DELT_UTVIDET
+        else
+            EndretUtbetalingBernetrygtType.DELT
+    )
+}
 
 private fun UtvidetVedtaksperiodeMedBegrunnelser.hentInnvilgelseBrevPeriode(
     tomDato: String?,
