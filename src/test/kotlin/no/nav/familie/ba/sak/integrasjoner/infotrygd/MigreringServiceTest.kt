@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.integrasjoner.infotrygd
 
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.slot
 import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
@@ -10,6 +11,7 @@ import no.nav.familie.ba.sak.common.førsteDagINesteMåned
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
+import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestClient
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
@@ -36,6 +38,8 @@ import no.nav.familie.kontrakter.ba.infotrygd.InfotrygdSøkResponse
 import no.nav.familie.kontrakter.ba.infotrygd.Sak
 import no.nav.familie.kontrakter.ba.infotrygd.Stønad
 import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
+import no.nav.familie.kontrakter.felles.personopplysning.ForelderBarnRelasjon
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.assertj.core.api.Assertions.tuple
@@ -104,11 +108,21 @@ class MigreringServiceTest {
     @Autowired
     lateinit var vilkårService: VilkårService
 
+    @Autowired
+    lateinit var pdlRestClient: PdlRestClient
+
     @BeforeEach
     fun init() {
         MockKafkaProducer.sendteMeldinger.clear()
         databaseCleanupService.truncate()
         every { infotrygdBarnetrygdClient.harÅpenSakIInfotrygd(any(), any()) } returns false
+
+        val slot = slot<String>()
+        every { pdlRestClient.hentForelderBarnRelasjon(capture(slot)) } answers {
+            infotrygdBarnetrygdClient.hentSaker(listOf(slot.captured)).bruker.first().stønad!!.barn.map {
+                ForelderBarnRelasjon(relatertPersonsIdent = it.barnFnr!!, relatertPersonsRolle = FORELDERBARNRELASJONROLLE.BARN)
+            }
+        }
     }
 
     @Test
