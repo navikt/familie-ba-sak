@@ -35,6 +35,7 @@ import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
 import no.nav.familie.kontrakter.ba.infotrygd.Sak
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import no.nav.fpsak.tidsserie.LocalDateSegment
+import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -70,6 +71,7 @@ class MigreringService(
 ) {
 
     private val alleredeMigrertPersonFeilmelding = "Personen er allerede migrert."
+    private val secureLog = LoggerFactory.getLogger("secureLogger")
 
     @Transactional
     fun migrer(personIdent: String): MigreringResponseDto {
@@ -116,6 +118,10 @@ class MigreringService(
                     FoedselsNr(it.relatertPersonsIdent).foedselsdato.isAfter(LocalDate.now().minusYears(18))
             }.map { it.relatertPersonsIdent }
         if (barnasIdenter.size != listeBarnFraPdl.size || !listeBarnFraPdl.containsAll(barnasIdenter)) {
+            secureLog.info(
+                "Kan ikke migrere person $personIdent fordi barn fra PDL ikke samsvarer med løpende barnetrygdbarn fra Infotrygd.\n" +
+                    "Barn fra PDL: ${listeBarnFraPdl}\n Barn fra Infotrygd: $barnasIdenter"
+            )
             throw error("Kan ikke migrere fordi barn fra PDL ikke samsvarer med løpende barnetrygdbarn fra Infotrygd.")
         }
     }
