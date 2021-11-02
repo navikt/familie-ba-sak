@@ -7,9 +7,9 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.HenleggÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.RestHenleggBehandlingInfo
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.dokument.domene.BrevType
 import no.nav.familie.ba.sak.kjerne.dokument.domene.ManueltBrevRequest
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.logg.LoggType
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
@@ -52,28 +52,26 @@ class HenleggelseTest(
             )
         )
 
-        generellAssertFagsak(
-            restFagsak = responseHenlagtSøknad,
-            fagsakStatus = FagsakStatus.OPPRETTET,
+        generellAssertRestUtvidetBehandling(
+            restUtvidetBehandling = responseHenlagtSøknad,
+            behandlingStatus = BehandlingStatus.UTREDES,
             behandlingStegType = StegType.FERDIGSTILLE_BEHANDLING
         )
 
         val ferdigstiltBehandling = stegService.håndterFerdigstillBehandling(
-            behandling = behandlingService.hentAktivForFagsak(
-                fagsakId = responseHenlagtSøknad.data!!.id
-            )!!
+            behandling = behandlingService.hent(responseHenlagtSøknad.data!!.behandlingId)
         )
 
         assertThat(!ferdigstiltBehandling.aktiv)
         assertThat(ferdigstiltBehandling.resultat == BehandlingResultat.HENLAGT_FEILAKTIG_OPPRETTET)
 
-        val behandlingslogg = familieBaSakKlient().hentBehandlingslogg(responseHenlagtSøknad.data!!.id)
+        val behandlingslogg = familieBaSakKlient().hentBehandlingslogg(responseHenlagtSøknad.data!!.behandlingId)
         assertEquals(Ressurs.Status.SUKSESS, behandlingslogg.status)
         assertThat(behandlingslogg.data?.filter { it.type == LoggType.HENLEGG_BEHANDLING }?.size == 1)
         assertThat(behandlingslogg.data?.filter { it.type == LoggType.DISTRIBUERE_BREV }?.size == 0)
 
         val andreBehandling = opprettBehandlingOgRegistrerSøknad(scenario)
-        assertThat(andreBehandling.aktiv).isTrue
+        assertEquals(andreBehandling.status, BehandlingStatus.UTREDES)
     }
 
     @Test
@@ -102,22 +100,20 @@ class HenleggelseTest(
             )
         )
 
-        generellAssertFagsak(
-            restFagsak = responseHenlagtSøknad,
-            fagsakStatus = FagsakStatus.OPPRETTET,
+        generellAssertRestUtvidetBehandling(
+            restUtvidetBehandling = responseHenlagtSøknad,
+            behandlingStatus = BehandlingStatus.UTREDES,
             behandlingStegType = StegType.FERDIGSTILLE_BEHANDLING
         )
 
         val ferdigstiltBehandling = stegService.håndterFerdigstillBehandling(
-            behandling = behandlingService.hentAktivForFagsak(
-                fagsakId = responseHenlagtSøknad.data!!.id
-            )!!
+            behandling = behandlingService.hentAktivForFagsak(responseHenlagtSøknad.data!!.behandlingId)!!
         )
 
         assertThat(!ferdigstiltBehandling.aktiv)
         assertThat(ferdigstiltBehandling.resultat == BehandlingResultat.HENLAGT_SØKNAD_TRUKKET)
 
-        val behandlingslogg = familieBaSakKlient().hentBehandlingslogg(responseHenlagtSøknad.data!!.id)
+        val behandlingslogg = familieBaSakKlient().hentBehandlingslogg(responseHenlagtSøknad.data!!.behandlingId)
         assertEquals(Ressurs.Status.SUKSESS, behandlingslogg.status)
         assertThat(behandlingslogg.data?.filter { it.type == LoggType.HENLEGG_BEHANDLING }?.size == 1)
         assertThat(behandlingslogg.data?.filter { it.type == LoggType.DISTRIBUERE_BREV }?.size == 1)
@@ -129,7 +125,7 @@ class HenleggelseTest(
         familieBaSakKlient().opprettFagsak(søkersIdent = søkersIdent)
         val restFagsakMedBehandling = familieBaSakKlient().opprettBehandling(søkersIdent = søkersIdent)
 
-        val aktivBehandling = hentAktivBehandling(restFagsak = restFagsakMedBehandling.data!!)
+        val behandling = behandlingService.hent(restFagsakMedBehandling.data!!.behandlingId)
         val restRegistrerSøknad = RestRegistrerSøknad(
             søknad = lagSøknadDTO(
                 søkerIdent = søkersIdent,
@@ -137,10 +133,9 @@ class HenleggelseTest(
             ),
             bekreftEndringerViaFrontend = false
         )
-        val fagsakEtterRegistrerSøknad = familieBaSakKlient().registrererSøknad(
-            behandlingId = aktivBehandling.behandlingId,
+        return familieBaSakKlient().registrererSøknad(
+            behandlingId = behandling.id,
             restRegistrerSøknad = restRegistrerSøknad
-        )
-        return hentAktivBehandling(restFagsak = fagsakEtterRegistrerSøknad.data!!)
+        ).data!!
     }
 }

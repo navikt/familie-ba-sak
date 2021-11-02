@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
@@ -17,7 +18,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenario
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenarioPerson
 import no.nav.familie.ba.sak.task.BehandleFødselshendelseTask
-import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
@@ -57,25 +57,24 @@ class TekniskOpphørAvFødselshendelseTest(
             stegService = stegService
         )
 
-        val restFagsakMedBehandling = familieBaSakKlient().opprettBehandling(
+        val restUtvidetBehandling = familieBaSakKlient().opprettBehandling(
             søkersIdent = scenario.søker.ident,
             behandlingType = BehandlingType.TEKNISK_OPPHØR,
             behandlingÅrsak = BehandlingÅrsak.TEKNISK_OPPHØR
         )
-        generellAssertFagsak(
-            restFagsak = restFagsakMedBehandling,
-            fagsakStatus = FagsakStatus.LØPENDE,
+        generellAssertRestUtvidetBehandling(
+            restUtvidetBehandling = restUtvidetBehandling,
+            behandlingStatus = BehandlingStatus.UTREDES,
             behandlingStegType = StegType.VILKÅRSVURDERING
         )
-        assertEquals(2, restFagsakMedBehandling.data?.behandlinger?.size)
-
-        val aktivBehandling = hentAktivBehandling(restFagsak = restFagsakMedBehandling.data!!)
+        // TODO: Hvordan kan vi få testet at to behandlinger blitt oprettet.
+        // assertEquals(2, restUtvidetBehandling.data?.behandlinger?.size)
 
         // Setter alle vilkår til ikke-oppfylt på løpende førstegangsbehandling
-        aktivBehandling.personResultater.forEach { restPersonResultat ->
+        restUtvidetBehandling.data!!.personResultater.forEach { restPersonResultat ->
             restPersonResultat.vilkårResultater.forEach {
                 familieBaSakKlient().putVilkår(
-                    behandlingId = aktivBehandling.behandlingId,
+                    behandlingId = restUtvidetBehandling.data!!.behandlingId,
                     vilkårId = it.id,
                     restPersonResultat =
                     RestPersonResultat(
@@ -90,31 +89,32 @@ class TekniskOpphørAvFødselshendelseTest(
             }
         }
 
-        familieBaSakKlient().validerVilkårsvurdering(
-            behandlingId = aktivBehandling.behandlingId
-        )
-        val restFagsakEtterBehandlingsresultat =
+        val restUtvidetBehandlingEtterBehandlingsresultat =
             familieBaSakKlient().behandlingsresultatStegOgGåVidereTilNesteSteg(
-                behandlingId = aktivBehandling.behandlingId
+                behandlingId = restUtvidetBehandling.data!!.behandlingId
             )
-        generellAssertFagsak(
-            restFagsak = restFagsakEtterBehandlingsresultat,
-            fagsakStatus = FagsakStatus.LØPENDE,
+        generellAssertRestUtvidetBehandling(
+            restUtvidetBehandling = restUtvidetBehandlingEtterBehandlingsresultat,
+            behandlingStatus = BehandlingStatus.AVSLUTTET,
             behandlingStegType = StegType.SEND_TIL_BESLUTTER,
             behandlingResultat = BehandlingResultat.OPPHØRT
         )
 
-        val restFagsakEtterSendTilBeslutter =
-            familieBaSakKlient().sendTilBeslutter(fagsakId = restFagsakEtterBehandlingsresultat.data!!.id)
-        generellAssertFagsak(
-            restFagsak = restFagsakEtterSendTilBeslutter,
-            fagsakStatus = FagsakStatus.LØPENDE,
+        val behandlingEtterBehandlingsresultat =
+            behandlingService.hent(restUtvidetBehandlingEtterBehandlingsresultat.data!!.behandlingId)
+
+        val restUtvidetBehandlingEtterSendTilBeslutter =
+            familieBaSakKlient().sendTilBeslutter(behandlingId = behandlingEtterBehandlingsresultat.id)
+
+        generellAssertRestUtvidetBehandling(
+            restUtvidetBehandling = restUtvidetBehandlingEtterSendTilBeslutter,
+            behandlingStatus = BehandlingStatus.UTREDES,
             behandlingStegType = StegType.BESLUTTE_VEDTAK
         )
 
-        val restFagsakEtterIverksetting =
+        val restUtvidetBehandlingEtterIverksetting =
             familieBaSakKlient().iverksettVedtak(
-                fagsakId = restFagsakEtterSendTilBeslutter.data!!.id,
+                fagsakId = behandlingEtterBehandlingsresultat.fagsak.id,
                 restBeslutningPåVedtak = RestBeslutningPåVedtak(
                     Beslutning.GODKJENT
                 ),
@@ -132,14 +132,14 @@ class TekniskOpphørAvFødselshendelseTest(
                 }
             )
 
-        generellAssertFagsak(
-            restFagsak = restFagsakEtterIverksetting,
-            fagsakStatus = FagsakStatus.LØPENDE,
+        generellAssertRestUtvidetBehandling(
+            restUtvidetBehandling = restUtvidetBehandlingEtterIverksetting,
+            behandlingStatus = BehandlingStatus.UTREDES,
             behandlingStegType = StegType.IVERKSETT_MOT_OPPDRAG
         )
 
         håndterIverksettingAvBehandling(
-            behandlingEtterVurdering = behandlingService.hentAktivForFagsak(fagsakId = restFagsakEtterSendTilBeslutter.data!!.id)!!,
+            behandlingEtterVurdering = behandlingService.hentAktivForFagsak(fagsakId = behandlingEtterBehandlingsresultat.fagsak.id)!!,
             søkerFnr = scenario.søker.ident,
             fagsakStatusEtterIverksetting = FagsakStatus.AVSLUTTET,
             fagsakService = fagsakService,

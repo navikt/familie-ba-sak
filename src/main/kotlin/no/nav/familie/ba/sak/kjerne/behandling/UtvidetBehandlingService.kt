@@ -63,7 +63,6 @@ class UtvidetBehandlingService(
 
         return RestUtvidetBehandling(
             behandlingId = behandling.id,
-            aktiv = behandling.aktiv,
             steg = behandling.steg,
             stegTilstand = behandling.behandlingStegTilstand.map { it.tilRestBehandlingStegTilstand() },
             status = behandling.status,
