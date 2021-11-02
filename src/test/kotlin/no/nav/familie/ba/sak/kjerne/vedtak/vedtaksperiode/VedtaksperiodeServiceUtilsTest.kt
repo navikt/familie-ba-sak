@@ -1,14 +1,24 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
+import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagEndretUtbetalingAndel
 import no.nav.familie.ba.sak.common.lagPerson
+import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.lagVedtak
+import no.nav.familie.ba.sak.common.lagVedtaksperiodeMedBegrunnelser
+import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
+import java.time.LocalDate
 import java.time.YearMonth
 
 class VedtaksperiodeServiceUtilsTest {
@@ -287,6 +297,87 @@ class VedtaksperiodeServiceUtilsTest {
         Assertions.assertEquals(
             tom.plusMonths(2),
             endredeUtbetalingsperioderMedBegrunnelser.last().tom!!.toYearMonth()
+        )
+    }
+
+    @Test
+    fun `Skal legge til alle barn med utbetaling ved utvidet barnetrygd`() {
+        val behandling = lagBehandling()
+        val søker = lagPerson(type = PersonType.SØKER)
+        val barn = lagPerson(type = PersonType.BARN)
+
+        val persongrunnlag =
+            lagTestPersonopplysningGrunnlag(behandlingId = behandling.id, personer = arrayOf(søker, barn))
+        val triggesAv = TriggesAv(vilkår = setOf(Vilkår.UTVIDET_BARNETRYGD))
+        val vedtaksperiodeMedBegrunnelser = lagVedtaksperiodeMedBegrunnelser(type = Vedtaksperiodetype.UTBETALING)
+        val vilkårsvurdering = lagVilkårsvurdering(
+            søkerFnr = søker.personIdent.ident,
+            behandling = behandling,
+            resultat = Resultat.OPPFYLT
+        )
+        val identerMedUtbetaling = listOf(barn.personIdent.ident)
+
+        val personidenterForBegrunnelse = hentPersoneidenterGjeldendeForBegrunnelse(
+            triggesAv = triggesAv,
+            persongrunnlag = persongrunnlag,
+            vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
+            vilkårsvurdering = vilkårsvurdering,
+            vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET,
+            identerMedUtbetaling = identerMedUtbetaling,
+            endredeUtbetalingAndeler = emptyList(),
+        )
+
+        Assertions.assertEquals(listOf(barn.personIdent.ident, søker.personIdent.ident), personidenterForBegrunnelse)
+    }
+
+    @Test
+    fun `Skal legge til alle barn fra endret utbetaling ved utvidet barnetrygd og endret utbetaling`() {
+        val behandling = lagBehandling()
+        val søker = lagPerson(type = PersonType.SØKER)
+        val barn1 = lagPerson(type = PersonType.BARN)
+        val barn2 = lagPerson(type = PersonType.BARN)
+
+        val fom = LocalDate.now().withDayOfMonth(1)
+        val tom = LocalDate.now().let {
+            it.withDayOfMonth(it.lengthOfMonth())
+        }
+
+        val persongrunnlag =
+            lagTestPersonopplysningGrunnlag(behandlingId = behandling.id, personer = arrayOf(søker, barn2))
+        val triggesAv = TriggesAv(vilkår = setOf(Vilkår.UTVIDET_BARNETRYGD))
+        val vedtaksperiodeMedBegrunnelser = lagVedtaksperiodeMedBegrunnelser(
+            type = Vedtaksperiodetype.UTBETALING,
+            fom = fom,
+            tom = tom,
+        )
+        val vilkårsvurdering = lagVilkårsvurdering(
+            søkerFnr = søker.personIdent.ident,
+            behandling = behandling,
+            resultat = Resultat.OPPFYLT
+        )
+
+        val identerMedUtbetaling = listOf(barn1.personIdent.ident)
+        val endredeUtbetalingAndeler = listOf(
+            lagEndretUtbetalingAndel(
+                person = barn2,
+                fom = fom.toYearMonth(),
+                tom = tom.toYearMonth(),
+            )
+        )
+
+        val personidenterForBegrunnelse = hentPersoneidenterGjeldendeForBegrunnelse(
+            triggesAv = triggesAv,
+            persongrunnlag = persongrunnlag,
+            vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
+            vilkårsvurdering = vilkårsvurdering,
+            vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET,
+            identerMedUtbetaling = identerMedUtbetaling,
+            endredeUtbetalingAndeler = endredeUtbetalingAndeler,
+        )
+
+        Assertions.assertEquals(
+            setOf(barn1.personIdent.ident, barn2.personIdent.ident, søker.personIdent.ident),
+            personidenterForBegrunnelse.toSet()
         )
     }
 }

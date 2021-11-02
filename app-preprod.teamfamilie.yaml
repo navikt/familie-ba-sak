@@ -32,10 +32,10 @@ spec:
     cpuThresholdPercentage: 50
   resources:
     limits:
-      memory: 1024Mi
+      memory: 2048Mi
       cpu: "1"
     requests:
-      memory: 512Mi
+      memory: 1024Mi
       cpu: 200m
   ingresses: # Optional. List of ingress URLs that will route HTTP traffic to the application.
     - https://familie-ba-sak.dev-fss-pub.nais.io # Deprecated - erstattes av dev.adeo.no

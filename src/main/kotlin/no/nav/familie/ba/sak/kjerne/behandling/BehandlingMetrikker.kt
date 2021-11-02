@@ -9,9 +9,9 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.dokument.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeRepository
 import org.springframework.stereotype.Component
@@ -25,6 +25,11 @@ class BehandlingMetrikker(
     private val vedtaksperiodeRepository: VedtaksperiodeRepository,
     private val sanityService: SanityService
 ) {
+    private val sanityBegrunnelser: List<SanityBegrunnelse>
+
+    init {
+        sanityBegrunnelser = sanityService.hentSanityBegrunnelser()
+    }
 
     private val antallManuelleBehandlinger: Counter =
         Metrics.counter("behandling.behandlinger", "saksbehandling", "manuell")
@@ -48,10 +53,7 @@ class BehandlingMetrikker(
 
     private val antallBrevBegrunnelseSpesifikasjon: Map<VedtakBegrunnelseSpesifikasjon, Counter> =
         VedtakBegrunnelseSpesifikasjon.values().associateWith {
-            val tittel =
-                it
-                    .tilSanityBegrunnelse(sanityService.hentSanityBegrunnelser())
-                    .navnISystem
+            val tittel = it.tilSanityBegrunnelse(sanityBegrunnelser)?.navnISystem ?: it.name
 
             Metrics.counter(
                 "brevbegrunnelse",
@@ -98,7 +100,9 @@ class BehandlingMetrikker(
             val vedtaksperiodeMedBegrunnelser = vedtaksperiodeRepository.finnVedtaksperioderFor(vedtakId = vedtak.id)
 
             vedtaksperiodeMedBegrunnelser.forEach {
-                it.begrunnelser.forEach { vedtaksbegrunnelse: Vedtaksbegrunnelse -> antallBrevBegrunnelseSpesifikasjon[vedtaksbegrunnelse.vedtakBegrunnelseSpesifikasjon]?.increment() }
+                it.begrunnelser.forEach { vedtaksbegrunnelse: Vedtaksbegrunnelse ->
+                    antallBrevBegrunnelseSpesifikasjon[vedtaksbegrunnelse.vedtakBegrunnelseSpesifikasjon]?.increment()
+                }
             }
         }
     }

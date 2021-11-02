@@ -8,6 +8,7 @@ import io.mockk.slot
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.defaultFagsak
 import no.nav.familie.ba.sak.common.forrigeMåned
+import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagPersonResultat
@@ -18,6 +19,7 @@ import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.FeatureToggleService
+import no.nav.familie.ba.sak.ekstern.restDomene.tilRestBaseFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestFagsak
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
@@ -73,7 +75,9 @@ class BeregningServiceTest {
 
         every { tilkjentYtelseRepository.slettTilkjentYtelseFor(any()) } just Runs
         every { fagsakService.hentRestFagsak(any()) } answers {
-            Ressurs.success(defaultFagsak().tilRestFagsak(emptyList(), emptyList(), emptyList()))
+            Ressurs.success(
+                defaultFagsak().tilRestBaseFagsak(false, emptyList()).tilRestFagsak(emptyList(), emptyList())
+            )
         }
         every { featureToggleService.isEnabled(any()) } answers { true }
         every { endretUtbetalingAndelRepository.findByBehandlingId(any()) } answers { emptyList() }
@@ -251,6 +255,7 @@ class BeregningServiceTest {
             søkerFnr,
             listOf(barn.personIdent.ident)
         )
+
         every { endretUtbetalingAndelRepository.findByBehandlingId(any()) } returns
             listOf(
                 EndretUtbetalingAndel(
@@ -261,7 +266,13 @@ class BeregningServiceTest {
                     avtaletidspunktDeltBosted = avtaletidspunktDeltBosted,
                     søknadstidspunkt = søkandtidspunkt,
                     årsak = Årsak.DELT_BOSTED,
-                    begrunnelse = "En begrunnelse"
+                    begrunnelse = "En begrunnelse",
+                    andelTilkjentYtelser = mutableListOf(
+                        lagAndelTilkjentYtelse(
+                            fom = periodeFom.toYearMonth().toString(),
+                            tom = periodeTom.toYearMonth().toString()
+                        )
+                    )
                 )
             )
 

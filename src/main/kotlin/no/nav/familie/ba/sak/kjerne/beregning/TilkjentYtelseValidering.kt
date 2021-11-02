@@ -82,6 +82,7 @@ object TilkjentYtelseValidering {
                 barnMedAndreTilkjentYtelse.filter { it.first.personIdent.ident == barn.personIdent.ident }
                     .flatMap { it.second }
                     .flatMap { it.andelerTilkjentYtelse }
+                    .filter { it.personIdent == barn.personIdent.ident }
 
             validerIngenOverlappAvAndeler(
                 andeler,
@@ -107,7 +108,7 @@ object TilkjentYtelseValidering {
             ) {
                 throw UtbetalingsikkerhetFeil(
                     melding = "Vi finner flere utbetalinger for barn på behandling ${behandlendeBehandlingTilkjentYtelse.behandling.id}",
-                    frontendFeilmelding = "Det utbetales allerede barnetrygd for ${barn.personIdent.ident} i perioden ${andelTilkjentYtelse.stønadFom.tilKortString()} - ${andelTilkjentYtelse.stønadTom.tilKortString()}."
+                    frontendFeilmelding = "Det er allerede innvilget utbetaling av barnetrygd for ${barn.personIdent.ident} i perioden ${andelTilkjentYtelse.stønadFom.tilKortString()} - ${andelTilkjentYtelse.stønadTom.tilKortString()}."
                 )
             }
         }

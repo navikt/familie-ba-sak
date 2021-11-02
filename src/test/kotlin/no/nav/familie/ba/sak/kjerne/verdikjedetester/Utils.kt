@@ -63,12 +63,12 @@ fun hentNåværendeEllerNesteMånedsUtbetaling(behandling: RestUtvidetBehandling
     return nåværendeUtbetalingsperiode?.utbetaltPerMnd ?: nesteUtbetalingsperiode?.utbetaltPerMnd ?: 0
 }
 
-fun hentAktivBehandling(restFagsak: RestFagsak): RestUtvidetBehandling? {
-    return restFagsak.behandlinger.firstOrNull { it.aktiv }
+fun hentAktivBehandling(restFagsak: RestFagsak): RestUtvidetBehandling {
+    return restFagsak.behandlinger.single { it.aktiv }
 }
 
 fun hentAktivtVedtak(restFagsak: RestFagsak): RestVedtak? {
-    return hentAktivBehandling(restFagsak)?.vedtakForBehandling?.firstOrNull { it.aktiv }
+    return hentAktivBehandling(restFagsak).vedtakForBehandling.single { it.aktiv }
 }
 
 fun behandleFødselshendelse(
@@ -90,18 +90,19 @@ fun behandleFødselshendelse(
         )
     )
 
-    val restFagsakEtterVurdering = fagsakService.hentRestFagsakForPerson(personIdent = PersonIdent(søkerFnr))
-    if (restFagsakEtterVurdering.status != Ressurs.Status.SUKSESS) {
+    val restMinimalFagsakEtterVurdering = fagsakService.hentMinimalFagsakForPerson(personIdent = PersonIdent(søkerFnr))
+    if (restMinimalFagsakEtterVurdering.status != Ressurs.Status.SUKSESS) {
         return null
     }
 
-    val behandlingEtterVurdering = behandlingService.hentAktivForFagsak(fagsakId = restFagsakEtterVurdering.data!!.id)!!
+    val behandlingEtterVurdering =
+        behandlingService.hentAktivForFagsak(fagsakId = restMinimalFagsakEtterVurdering.data!!.id)!!
     if (behandlingEtterVurdering.erHenlagt()) {
         return stegService.håndterFerdigstillBehandling(behandlingEtterVurdering)
     }
 
     generellAssertFagsak(
-        restFagsak = restFagsakEtterVurdering,
+        restFagsak = fagsakService.hentRestFagsak(restMinimalFagsakEtterVurdering.data!!.id),
         fagsakStatus = fagsakStatusEtterVurdering,
         behandlingStegType = StegType.IVERKSETT_MOT_OPPDRAG
     )
@@ -178,9 +179,10 @@ fun håndterIverksettingAvBehandling(
 
     val ferdigstiltBehandling = stegService.håndterFerdigstillBehandling(behandlingSomSkalFerdigstilles)
 
-    val restFagsakEtterAvsluttetBehandling = fagsakService.hentRestFagsakForPerson(personIdent = PersonIdent(søkerFnr))
+    val restMinimalFagsakEtterAvsluttetBehandling =
+        fagsakService.hentMinimalFagsakForPerson(personIdent = PersonIdent(søkerFnr))
     generellAssertFagsak(
-        restFagsak = restFagsakEtterAvsluttetBehandling,
+        restFagsak = fagsakService.hentRestFagsak(restMinimalFagsakEtterAvsluttetBehandling.data!!.id),
         fagsakStatus = fagsakStatusEtterIverksetting,
         behandlingStegType = StegType.BEHANDLING_AVSLUTTET
     )

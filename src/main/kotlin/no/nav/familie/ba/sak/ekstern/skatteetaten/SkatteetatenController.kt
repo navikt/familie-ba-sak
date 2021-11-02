@@ -104,12 +104,13 @@ class SkatteetatenController(
         )
     }
 
-    private fun listeMedTestdataPerioder() =
-        listOf(
+    private fun listeMedTestdataPerioder(): List<SkatteetatenPerioder> {
+        val fraMaaned = "2021-02"
+        return listOf(
             SkatteetatenPerioder(
                 "01838398495", LocalDateTime.of(2021, 1, 1, 0, 0),
                 perioder = listOf(
-                    SkatteetatenPeriode("2021-02", Delingsprosent._50, tomMaaned = "2022-12")
+                    SkatteetatenPeriode(fraMaaned, Delingsprosent._50, tomMaaned = "2022-12")
 
                 )
             ),
@@ -117,7 +118,7 @@ class SkatteetatenController(
             SkatteetatenPerioder(
                 "09919094319", LocalDateTime.of(2021, 1, 1, 0, 0),
                 perioder = listOf(
-                    SkatteetatenPeriode("2021-02", Delingsprosent._0, tomMaaned = "2024-12")
+                    SkatteetatenPeriode(fraMaaned, Delingsprosent._0, tomMaaned = "2024-12")
 
                 )
             ),
@@ -125,7 +126,7 @@ class SkatteetatenController(
             SkatteetatenPerioder(
                 "15830699233", LocalDateTime.of(2021, 1, 1, 0, 0),
                 perioder = listOf(
-                    SkatteetatenPeriode("2021-02", Delingsprosent.usikker, tomMaaned = "2024-12")
+                    SkatteetatenPeriode(fraMaaned, Delingsprosent.usikker, tomMaaned = "2024-12")
 
                 )
             ),
@@ -133,7 +134,7 @@ class SkatteetatenController(
             SkatteetatenPerioder(
                 "01828499633", LocalDateTime.of(2021, 2, 1, 0, 0),
                 perioder = listOf(
-                    SkatteetatenPeriode("2021-02", Delingsprosent._50, tomMaaned = null)
+                    SkatteetatenPeriode(fraMaaned, Delingsprosent._50, tomMaaned = null)
 
                 )
             ),
@@ -163,4 +164,5 @@ class SkatteetatenController(
                 )
             ),
         )
+    }
 }

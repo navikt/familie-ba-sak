@@ -136,6 +136,7 @@ logging:
 
 
 DAGLIG_KVOTE_FØDSELSHENDELSER: 1000
+SANITY_DATASET: "ba-brev"
 
 PDL_URL: http://pdl-api-q1.pdl
 PDL_SCOPE: api://dev-fss.pdl.pdl-api-q1/.default

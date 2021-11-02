@@ -5,7 +5,6 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
-import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering.validerAtBarnIkkeFårFlereUtbetalingerSammePeriode
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerIngenOverlappendeEndring
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerPeriodeInnenforTilkjentytelse
@@ -40,8 +39,7 @@ class EndretUtbetalingAndelService(
                 .first()
 
         endretUtbetalingAndel.fraRestEndretUtbetalingAndel(restEndretUtbetalingAndel, person).also {
-            it.vedtakBegrunnelseSpesifikasjoner =
-                it.hentGyldigEndretBegrunnelser(sanityService.hentSanityBegrunnelser())
+            it.vedtakBegrunnelseSpesifikasjoner = it.hentGyldigEndretBegrunnelser(sanityService.hentSanityBegrunnelser())
         }
 
         validerIngenOverlappendeEndring(
@@ -58,16 +56,8 @@ class EndretUtbetalingAndelService(
             personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
                 ?: throw Feil("Fant ikke personopplysninggrunnlag på behandling ${behandling.id}")
 
-        val tilkjentYtelse = beregningService.oppdaterBehandlingMedBeregning(
+        beregningService.oppdaterBehandlingMedBeregning(
             behandling, personopplysningGrunnlag, endretUtbetalingAndel
-        )
-        val andreBehandlingerPåBarna = personopplysningGrunnlag.barna.map { barn ->
-            Pair(barn, beregningService.hentIverksattTilkjentYtelseForBarn(barn.personIdent, behandling))
-        }
-        validerAtBarnIkkeFårFlereUtbetalingerSammePeriode(
-            behandlendeBehandlingTilkjentYtelse = tilkjentYtelse,
-            barnMedAndreTilkjentYtelse = andreBehandlingerPåBarna,
-            personopplysningGrunnlag = personopplysningGrunnlag
         )
     }
 
@@ -76,7 +66,9 @@ class EndretUtbetalingAndelService(
         behandling: Behandling,
         endretUtbetalingAndelId: Long,
     ) {
-        endretUtbetalingAndelRepository.deleteById(endretUtbetalingAndelId)
+        val endretUtbetalingAndel = endretUtbetalingAndelRepository.getById(endretUtbetalingAndelId)
+        endretUtbetalingAndel.andelTilkjentYtelser.forEach { it.endretUtbetalingAndeler.clear() }
+        endretUtbetalingAndelRepository.delete(endretUtbetalingAndel)
 
         val personopplysningGrunnlag =
             personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
@@ -95,5 +87,25 @@ class EndretUtbetalingAndelService(
             )
         )
 
+    @Transactional
+    fun kopierEndretUtbetalingAndelFraForrigeBehandling(behandling: Behandling, forrigeBehandling: Behandling) {
+        hentForBehandling(forrigeBehandling.id).forEach {
+            endretUtbetalingAndelRepository.save(
+                it.copy(
+                    id = 0,
+                    behandlingId = behandling.id,
+                    andelTilkjentYtelser = mutableListOf()
+                )
+            )
+        }
+    }
+
     fun hentForBehandling(behandlingId: Long) = endretUtbetalingAndelRepository.findByBehandlingId(behandlingId)
+
+    @Transactional
+    fun fjernKnytningTilAndelTilkjentYtelse(behandlingId: Long) {
+        hentForBehandling(behandlingId).filter { it.andelTilkjentYtelser.isNotEmpty() }.forEach {
+            it.andelTilkjentYtelser.clear()
+        }
+    }
 }

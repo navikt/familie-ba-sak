@@ -26,8 +26,7 @@ class JournalføringServiceTest(
     private val journalføringService: JournalføringService,
 
     @Autowired
-    private val journalføringRepository: JournalføringRepository
-
+    private val journalføringRepository: JournalføringRepository,
 ) : AbstractSpringIntegrationTest() {
 
     @Test

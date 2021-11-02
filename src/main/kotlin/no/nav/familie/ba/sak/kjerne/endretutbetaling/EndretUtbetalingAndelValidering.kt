@@ -62,12 +62,11 @@ object EndretUtbetalingAndelValidering {
     ) {
         if (endretUtbetalingAndel.årsak != Årsak.DELT_BOSTED) return
 
-        if (!andelTilkjentYtelser
-            .filter { it.personIdent == endretUtbetalingAndel.person?.personIdent?.ident!! }
-            .filter
-            {
-                it.stønadsPeriode().overlapperHeltEllerDelvisMed(endretUtbetalingAndel.periode())
-            }.any { it.erDeltBosted() }
+        if (
+            !andelTilkjentYtelser
+                .filter { it.personIdent == endretUtbetalingAndel.person?.personIdent?.ident!! }
+                .filter { it.stønadsPeriode().overlapperHeltEllerDelvisMed(endretUtbetalingAndel.periode()) }
+                .any { it.erDeltBosted() }
         ) {
             throw UtbetalingsikkerhetFeil(
                 melding = "Det er ingen sats for delt bosted i perioden det opprettes en endring med årsak delt bosted for.",
@@ -85,5 +84,13 @@ object EndretUtbetalingAndelValidering {
                 frontendFeilmelding = "Du har opprettet en eller flere endrede utbetalingsperioder som er ufullstendig utfylt. Disse må enten fylles ut eller slettes før du kan gå videre."
             )
         }
+    }
+
+    fun validerAtEndringerErTilknyttetAndelTilkjentYtelse(endretUtbetalingAndeler: List<EndretUtbetalingAndel>) {
+        if (endretUtbetalingAndeler.any { it.andelTilkjentYtelser.isEmpty() })
+            throw FunksjonellFeil(
+                melding = "Det er opprettet instanser av EndretUtbetalingandel som ikke er tilknyttet noen andeler. De må enten lagres eller slettes av SB.",
+                frontendFeilmelding = "Du har endrede utbetalingsperioder. Bekreft, slett eller oppdater periodene i listen."
+            )
     }
 }

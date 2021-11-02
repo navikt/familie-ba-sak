@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
@@ -16,7 +15,6 @@ import no.nav.familie.ba.sak.kjerne.dokument.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.dokument.domene.tilTriggesAv
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
@@ -278,7 +276,7 @@ fun vedtakBegrunnelseSpesifikasjonerTilNedtrekksmenytekster(
         .groupBy { it.vedtakBegrunnelseType }
         .mapValues { begrunnelseGruppe ->
             begrunnelseGruppe.value
-                .filter { it.tilSanityBegrunnelse(sanityBegrunnelser).tilTriggesAv().valgbar }
+                .filter { it.tilSanityBegrunnelse(sanityBegrunnelser)?.tilTriggesAv()?.valgbar ?: false }
                 .flatMap { vedtakBegrunnelse ->
                     vedtakBegrunnelseTilRestVedtakBegrunnelseTilknyttetVilkår(
                         sanityBegrunnelser,
@@ -291,11 +289,10 @@ fun vedtakBegrunnelseTilRestVedtakBegrunnelseTilknyttetVilkår(
     sanityBegrunnelser: List<SanityBegrunnelse>,
     vedtakBegrunnelse: VedtakBegrunnelseSpesifikasjon,
 ): List<RestVedtakBegrunnelseTilknyttetVilkår> {
-    val triggesAv = vedtakBegrunnelse.tilSanityBegrunnelse(sanityBegrunnelser).tilTriggesAv()
+    val sanityBegrunnelse = vedtakBegrunnelse.tilSanityBegrunnelse(sanityBegrunnelser) ?: return emptyList()
 
-    val visningsnavn =
-        sanityBegrunnelser.find { it.apiNavn == vedtakBegrunnelse.sanityApiNavn }?.navnISystem
-            ?: throw Feil("Fant ikke begrunnelse med apiNavn=${vedtakBegrunnelse.sanityApiNavn} i Sanity.")
+    val triggesAv = sanityBegrunnelse.tilTriggesAv()
+    val visningsnavn = sanityBegrunnelse.navnISystem
 
     return if (triggesAv.vilkår.isEmpty()) {
         listOf(

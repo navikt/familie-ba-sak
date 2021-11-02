@@ -4,7 +4,6 @@ import io.mockk.mockk
 import no.nav.commons.foedselsnummer.testutils.FoedselsnummerGenerator
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPerson
-import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedStandardbegrunnelser
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.ekstern.restDomene.SøkerMedOpplysninger
@@ -21,13 +20,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTil
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
-import no.nav.familie.ba.sak.kjerne.dokument.domene.EndretUtbetalingsperiodeDeltBostedTriggere
-import no.nav.familie.ba.sak.kjerne.dokument.domene.EndretUtbetalingsperiodeTrigger
-import no.nav.familie.ba.sak.kjerne.dokument.domene.SanityBegrunnelse
-import no.nav.familie.ba.sak.kjerne.dokument.domene.SanityVilkår
-import no.nav.familie.ba.sak.kjerne.dokument.domene.VilkårRolle
-import no.nav.familie.ba.sak.kjerne.dokument.domene.VilkårTrigger
-import no.nav.familie.ba.sak.kjerne.dokument.domene.ØvrigTrigger
 import no.nav.familie.ba.sak.kjerne.dokument.hentBrevtype
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
@@ -229,7 +221,7 @@ fun lagAndelTilkjentYtelse(
         forrigePeriodeOffset = forrigeperiodeIdOffset,
         sats = beløp,
         prosent = prosent,
-        endretUtbetalingAndeler = endretUtbetalingAndeler
+        endretUtbetalingAndeler = endretUtbetalingAndeler.toMutableList()
     )
 }
 
@@ -894,10 +886,8 @@ fun leggTilBegrunnelsePåVedtaksperiodeIBehandling(
 
     vedtaksperiodeService.oppdaterVedtaksperiodeMedStandardbegrunnelser(
         vedtaksperiodeId = perisisterteVedtaksperioder.first().id,
-        restPutVedtaksperiodeMedStandardbegrunnelser = RestPutVedtaksperiodeMedStandardbegrunnelser(
-            standardbegrunnelser = listOf(
-                VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET,
-            )
+        standardbegrunnelserFraFrontend = listOf(
+            VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET,
         )
     )
 }
@@ -965,21 +955,21 @@ fun lagPerson(
     kjønn = kjønn
 )
 
-fun lagSanityBegrunnelse(
-    apiNavn: String? = null,
-    navnISystem: String? = null,
-    vilkaar: List<SanityVilkår>? = null,
-    rolle: List<VilkårRolle>? = null,
-    lovligOppholdTriggere: List<VilkårTrigger>? = null,
-    bosattIRiketTriggere: List<VilkårTrigger>? = null,
-    giftPartnerskapTriggere: List<VilkårTrigger>? = null,
-    borMedSokerTriggere: List<VilkårTrigger>? = null,
-    ovrigeTriggere: List<ØvrigTrigger>? = null,
-    endringsaarsaker: List<Årsak>? = null,
+fun lagRestSanityBegrunnelse(
+    apiNavn: String? = "",
+    navnISystem: String = "",
+    vilkaar: List<String>? = emptyList(),
+    rolle: List<String>? = emptyList(),
+    lovligOppholdTriggere: List<String>? = emptyList(),
+    bosattIRiketTriggere: List<String>? = emptyList(),
+    giftPartnerskapTriggere: List<String>? = emptyList(),
+    borMedSokerTriggere: List<String>? = emptyList(),
+    ovrigeTriggere: List<String>? = emptyList(),
+    endringsaarsaker: List<String>? = emptyList(),
     hjemler: List<String> = emptyList(),
-    endretUtbetalingsperiodeDeltBostedTriggere: List<EndretUtbetalingsperiodeDeltBostedTriggere>? = null,
-    endretUtbetalingsperiodeTriggere: List<EndretUtbetalingsperiodeTrigger>? = null,
-) = SanityBegrunnelse(
+    endretUtbetalingsperiodeDeltBostedTriggere: List<String>? = emptyList(),
+    endretUtbetalingsperiodeTriggere: List<String>? = emptyList(),
+): RestSanityBegrunnelse = RestSanityBegrunnelse(
     apiNavn = apiNavn,
     navnISystem = navnISystem,
     vilkaar = vilkaar,

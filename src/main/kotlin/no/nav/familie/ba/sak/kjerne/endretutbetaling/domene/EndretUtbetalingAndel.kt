@@ -3,21 +3,22 @@ package no.nav.familie.ba.sak.kjerne.endretutbetaling.domene
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.MånedPeriode
+import no.nav.familie.ba.sak.common.NullableMånedPeriode
+import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.YearMonthConverter
 import no.nav.familie.ba.sak.common.erDagenFør
 import no.nav.familie.ba.sak.common.overlapperHeltEllerDelvisMed
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.ekstern.restDomene.RestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.dokument.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.dokument.domene.tilTriggesAv
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjonListConverter
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.triggesAvSkalUtbetales
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
@@ -85,12 +86,11 @@ data class EndretUtbetalingAndel(
     var begrunnelse: String? = null,
 
     @ManyToMany(mappedBy = "endretUtbetalingAndeler")
-    val andelTilkjentYtelser: List<AndelTilkjentYtelse> = emptyList(),
+    val andelTilkjentYtelser: MutableList<AndelTilkjentYtelse> = mutableListOf(),
 
     @Column(name = "vedtak_begrunnelse_spesifikasjoner")
     @Convert(converter = VedtakBegrunnelseSpesifikasjonListConverter::class)
-    var vedtakBegrunnelseSpesifikasjoner: List<VedtakBegrunnelseSpesifikasjon> = emptyList(),
-
+    var vedtakBegrunnelseSpesifikasjoner: List<VedtakBegrunnelseSpesifikasjon> = emptyList()
 ) : BaseEntitet() {
 
     fun overlapperMed(periode: MånedPeriode) = periode.overlapperHeltEllerDelvisMed(this.periode())
@@ -113,7 +113,10 @@ data class EndretUtbetalingAndel(
         }
 
         if (fom!! > tom!!)
-            throw Feil("fom må være lik eller komme før tom")
+            throw Feil(
+                message = "fom må være lik eller komme før tom",
+                frontendFeilmelding = "Du kan ikke sette en f.o.m. dato som er etter t.o.m. dato",
+            )
 
         if (årsak == Årsak.DELT_BOSTED && avtaletidspunktDeltBosted == null)
             throw Feil("Avtaletidspunkt skal være utfylt når årsak er delt bosted: $this.tostring()")
@@ -125,6 +128,19 @@ data class EndretUtbetalingAndel(
         this.vedtakBegrunnelseSpesifikasjoner.contains(
             vedtakBegrunnelseSpesifikasjon
         )
+
+    fun erOverlappendeMed(nullableMånedPeriode: NullableMånedPeriode): Boolean {
+        if (this.fom == null || nullableMånedPeriode.fom == null) {
+            throw Feil("Fom ble null ved sjekk av overlapp av periode til endretUtbetalingAndel")
+        }
+
+        return MånedPeriode(this.fom!!, this.tom ?: TIDENES_ENDE.toYearMonth()).overlapperHeltEllerDelvisMed(
+            MånedPeriode(
+                nullableMånedPeriode.fom,
+                nullableMånedPeriode.tom ?: TIDENES_ENDE.toYearMonth()
+            )
+        )
+    }
 }
 
 enum class Årsak(val visningsnavn: String) {
@@ -143,7 +159,8 @@ fun EndretUtbetalingAndel.tilRestEndretUtbetalingAndel() = RestEndretUtbetalingA
     årsak = this.årsak,
     avtaletidspunktDeltBosted = this.avtaletidspunktDeltBosted,
     søknadstidspunkt = this.søknadstidspunkt,
-    begrunnelse = this.begrunnelse
+    begrunnelse = this.begrunnelse,
+    erTilknyttetAndeler = this.andelTilkjentYtelser.isNotEmpty()
 )
 
 fun EndretUtbetalingAndel.fraRestEndretUtbetalingAndel(
@@ -191,12 +208,12 @@ fun List<EndretUtbetalingAndel>.tilVedtaksperiodeMedBegrunnelser(
 fun hentPersonerForEtterEndretUtbetalingsperiode(
     endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
     vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser,
-    triggesAv: TriggesAv
+    endringsaarsaker: Set<Årsak>
 ) = endretUtbetalingAndeler.filter { endretUtbetalingAndel ->
     endretUtbetalingAndel.tom!!.sisteDagIInneværendeMåned()
         .erDagenFør(vedtaksperiodeMedBegrunnelser.fom) &&
-        triggesAv.endringsaarsaker.contains(endretUtbetalingAndel.årsak)
-}.mapNotNull { it.person?.personIdent?.ident }
+        endringsaarsaker.contains(endretUtbetalingAndel.årsak)
+}.mapNotNull { it.person }
 
 fun EndretUtbetalingAndel.hentGyldigEndretBegrunnelser(sanityBegrunnelser: List<SanityBegrunnelse>): List<VedtakBegrunnelseSpesifikasjon> {
 
@@ -205,7 +222,10 @@ fun EndretUtbetalingAndel.hentGyldigEndretBegrunnelser(sanityBegrunnelser: List<
             vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType == VedtakBegrunnelseType.ENDRET_UTBETALING
         }
         .filter { vedtakBegrunnelseSpesifikasjon ->
-            val triggesAv = vedtakBegrunnelseSpesifikasjon.tilSanityBegrunnelse(sanityBegrunnelser).tilTriggesAv()
-            triggesAvSkalUtbetales(listOf(this), triggesAv)
+            val sanityBegrunnelse = vedtakBegrunnelseSpesifikasjon.tilSanityBegrunnelse(sanityBegrunnelser)
+            sanityBegrunnelse != null && triggesAvSkalUtbetales(listOf(this), sanityBegrunnelse.tilTriggesAv())
         }
 }
+
+fun List<EndretUtbetalingAndel>.somOverlapper(nullableMånedPeriode: NullableMånedPeriode) =
+    this.filter { it.erOverlappendeMed(nullableMånedPeriode) }

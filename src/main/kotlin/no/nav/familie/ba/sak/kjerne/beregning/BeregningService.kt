@@ -1,15 +1,14 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerDeltBosted
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -37,11 +36,13 @@ class BeregningService(
     fun slettTilkjentYtelseForBehandling(behandlingId: Long) = tilkjentYtelseRepository.findByBehandling(behandlingId)
         ?.let { tilkjentYtelseRepository.delete(it) }
 
-    fun hentLøpendeAndelerTilkjentYtelseForBehandlinger(behandlingIder: List<Long>): List<AndelTilkjentYtelse> =
+    fun hentLøpendeAndelerTilkjentYtelseMedUtbetalingerForBehandlinger(behandlingIder: List<Long>): List<AndelTilkjentYtelse> =
         andelTilkjentYtelseRepository.finnLøpendeAndelerTilkjentYtelseForBehandlinger(behandlingIder)
+            .filter { it.erAndelSomSkalSendesTilOppdrag() }
 
-    fun hentAndelerTilkjentYtelseForBehandling(behandlingId: Long): List<AndelTilkjentYtelse> =
-        andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(listOf(behandlingId))
+    fun hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(behandlingId: Long): List<AndelTilkjentYtelse> =
+        andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId)
+            .filter { it.erAndelSomSkalSendesTilOppdrag() }
 
     fun lagreTilkjentYtelseMedOppdaterteAndeler(tilkjentYtelse: TilkjentYtelse) =
         tilkjentYtelseRepository.save(tilkjentYtelse)
@@ -55,7 +56,11 @@ class BeregningService(
 
     fun hentTilkjentYtelseForBehandlingerIverksattMotØkonomi(fagsakId: Long): List<TilkjentYtelse> {
         val iverksatteBehandlinger = behandlingRepository.findByFagsakAndAvsluttet(fagsakId)
-        return iverksatteBehandlinger.mapNotNull { tilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(it.id) }
+        return iverksatteBehandlinger.mapNotNull {
+            tilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(
+                it.id
+            )
+        }
     }
 
     /**
@@ -70,25 +75,20 @@ class BeregningService(
         val andreFagsaker = fagsakService.hentFagsakerPåPerson(barnIdent)
             .filter { it.id != behandlendeBehandling.fagsak.id }
 
-        return andreFagsaker.map { fagsak ->
-            behandlingRepository.finnBehandlinger(fagsakId = fagsak.id)
-                .asSequence()
-                .filter { it.status == BehandlingStatus.AVSLUTTET }
-                .filter { !it.erHenlagt() }
-                .map { behandling ->
-                    hentTilkjentYtelseForBehandling(behandlingId = behandling.id)
-                }
-                .sortedBy { tilkjentYtelse -> tilkjentYtelse.opprettetDato }
-                .lastOrNull { tilkjentYtelse ->
-                    val barnFinnesIBehandling =
-                        personopplysningGrunnlagRepository
-                            .findByBehandlingAndAktiv(behandlingId = tilkjentYtelse.behandling.id)
-                            ?.barna?.map { it.personIdent }
-                            ?.contains(barnIdent)
-                            ?: false
-
-                    barnFinnesIBehandling && tilkjentYtelse.erSendtTilIverksetting()
-                }
+        return andreFagsaker.mapNotNull { fagsak ->
+            Behandlingutils.hentSisteBehandlingSomErIverksatt(
+                iverksatteBehandlinger = behandlingRepository.finnIverksatteBehandlinger(
+                    fagsakId = fagsak.id
+                )
+            )
+        }.map {
+            hentTilkjentYtelseForBehandling(behandlingId = it.id)
+        }.filter {
+            personopplysningGrunnlagRepository
+                .findByBehandlingAndAktiv(behandlingId = it.behandling.id)
+                ?.barna?.map { it.personIdent }
+                ?.contains(barnIdent)
+                ?: false
         }.mapNotNull { it }
     }
 
@@ -96,8 +96,16 @@ class BeregningService(
     fun oppdaterBehandlingMedBeregning(
         behandling: Behandling,
         personopplysningGrunnlag: PersonopplysningGrunnlag,
-        endretUtbetalingAndel: EndretUtbetalingAndel? = null
+        nyEndretUtbetalingAndel: EndretUtbetalingAndel? = null
     ): TilkjentYtelse {
+
+        val endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(behandling.id).filter {
+            if (nyEndretUtbetalingAndel != null) {
+                it.id == nyEndretUtbetalingAndel.id || it.andelTilkjentYtelser.isNotEmpty()
+            } else {
+                it.andelTilkjentYtelser.isNotEmpty()
+            }
+        }
 
         tilkjentYtelseRepository.slettTilkjentYtelseFor(behandling)
         val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id)
@@ -115,10 +123,6 @@ class BeregningService(
                 )
             }
 
-        if (endretUtbetalingAndel != null)
-            validerDeltBosted(endretUtbetalingAndel, tilkjentYtelse.andelerTilkjentYtelse.toList())
-
-        val endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(behandling.id)
         val andelerTilkjentYtelse = TilkjentYtelseUtils.oppdaterTilkjentYtelseMedEndretUtbetalingAndeler(
             tilkjentYtelse.andelerTilkjentYtelse,
             endretUtbetalingAndeler

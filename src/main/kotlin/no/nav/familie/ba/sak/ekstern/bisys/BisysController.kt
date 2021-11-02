@@ -73,10 +73,11 @@ class BisysController(private val bisysService: BisysService) {
         @RequestBody
         request: BisysUtvidetBarnetrygdRequest
     ): ResponseEntity<BisysUtvidetBarnetrygdResponse> {
+        val path = "/api/bisys/hent-utvidet-barnetrygd"
         if (LocalDate.now().minusYears(5).isAfter(request.fraDato)) {
             throw EksternTjenesteFeilException(
                 EksternTjenesteFeil(
-                    "/api/bisys/hent-utvidet-barnetrygd",
+                    path,
                     HttpStatus.BAD_REQUEST
                 ),
                 "fraDato kan ikke være lenger enn 5 år tilbake i tid",
@@ -84,7 +85,7 @@ class BisysController(private val bisysService: BisysService) {
             )
         }
 
-        return try {
+        try {
             return ResponseEntity.ok(bisysService.hentUtvidetBarnetrygd(request.personIdent, request.fraDato))
         } catch (e: RuntimeException) {
             if ((e is Feil) && (e.httpStatus == HttpStatus.NOT_FOUND)) {
@@ -100,7 +101,7 @@ class BisysController(private val bisysService: BisysService) {
             }
 
             throw EksternTjenesteFeilException(
-                EksternTjenesteFeil("/api/bisys/hent-utvidet-barnetrygd"),
+                EksternTjenesteFeil(path),
                 e.message ?: "Ukjent feil ved hent utvidet barnetrygd",
                 request,
                 e
