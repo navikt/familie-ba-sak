@@ -128,6 +128,10 @@ class BehandleFørstegangssøknadSmåbarnstilleggTest(
             }
         }
 
+        familieBaSakKlient().validerVilkårsvurdering(
+            behandlingId = restUtvidetBehandling.data!!.behandlingId
+        )
+
         val restUtvidetBehandlingEtterBehandlingsResultat =
             familieBaSakKlient().behandlingsresultatStegOgGåVidereTilNesteSteg(
                 behandlingId = restUtvidetBehandling.data!!.behandlingId
@@ -193,13 +197,13 @@ class BehandleFørstegangssøknadSmåbarnstilleggTest(
 
         generellAssertRestUtvidetBehandling(
             restUtvidetBehandling = restUtvidetBehandlingEtterSendTilBeslutter,
-            behandlingStatus = BehandlingStatus.UTREDES,
+            behandlingStatus = BehandlingStatus.FATTER_VEDTAK,
             behandlingStegType = StegType.BESLUTTE_VEDTAK
         )
 
         val restUtvidetBehandlingEtterIverksetting =
             familieBaSakKlient().iverksettVedtak(
-                fagsakId = fagsak.data!!.id,
+                behandlingId = restUtvidetBehandlingEtterSendTilBeslutter.data!!.behandlingId,
                 restBeslutningPåVedtak = RestBeslutningPåVedtak(
                     Beslutning.GODKJENT
                 ),
@@ -218,7 +222,7 @@ class BehandleFørstegangssøknadSmåbarnstilleggTest(
             )
         generellAssertRestUtvidetBehandling(
             restUtvidetBehandling = restUtvidetBehandlingEtterIverksetting,
-            behandlingStatus = BehandlingStatus.UTREDES,
+            behandlingStatus = BehandlingStatus.IVERKSETTER_VEDTAK,
             behandlingStegType = StegType.IVERKSETT_MOT_OPPDRAG
         )
 

@@ -89,13 +89,17 @@ class TekniskOpphørAvFødselshendelseTest(
             }
         }
 
+        familieBaSakKlient().validerVilkårsvurdering(
+            behandlingId = restUtvidetBehandling.data!!.behandlingId
+        )
+
         val restUtvidetBehandlingEtterBehandlingsresultat =
             familieBaSakKlient().behandlingsresultatStegOgGåVidereTilNesteSteg(
                 behandlingId = restUtvidetBehandling.data!!.behandlingId
             )
         generellAssertRestUtvidetBehandling(
             restUtvidetBehandling = restUtvidetBehandlingEtterBehandlingsresultat,
-            behandlingStatus = BehandlingStatus.AVSLUTTET,
+            behandlingStatus = BehandlingStatus.UTREDES,
             behandlingStegType = StegType.SEND_TIL_BESLUTTER,
             behandlingResultat = BehandlingResultat.OPPHØRT
         )
@@ -108,13 +112,13 @@ class TekniskOpphørAvFødselshendelseTest(
 
         generellAssertRestUtvidetBehandling(
             restUtvidetBehandling = restUtvidetBehandlingEtterSendTilBeslutter,
-            behandlingStatus = BehandlingStatus.UTREDES,
+            behandlingStatus = BehandlingStatus.FATTER_VEDTAK,
             behandlingStegType = StegType.BESLUTTE_VEDTAK
         )
 
         val restUtvidetBehandlingEtterIverksetting =
             familieBaSakKlient().iverksettVedtak(
-                fagsakId = behandlingEtterBehandlingsresultat.fagsak.id,
+                behandlingId = restUtvidetBehandlingEtterSendTilBeslutter.data!!.behandlingId,
                 restBeslutningPåVedtak = RestBeslutningPåVedtak(
                     Beslutning.GODKJENT
                 ),
@@ -134,7 +138,7 @@ class TekniskOpphørAvFødselshendelseTest(
 
         generellAssertRestUtvidetBehandling(
             restUtvidetBehandling = restUtvidetBehandlingEtterIverksetting,
-            behandlingStatus = BehandlingStatus.UTREDES,
+            behandlingStatus = BehandlingStatus.IVERKSETTER_VEDTAK,
             behandlingStegType = StegType.IVERKSETT_MOT_OPPDRAG
         )
 

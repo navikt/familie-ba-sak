@@ -174,7 +174,7 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
 
         val restUtvidetBehandlingEtterIverksetting =
             familieBaSakKlient().iverksettVedtak(
-                fagsakId = fagsakId.data!!.toLong(),
+                behandlingId = restUtvidetBehandlingEtterSendTilBeslutter.data!!.behandlingId,
                 restBeslutningPåVedtak = RestBeslutningPåVedtak(
                     Beslutning.GODKJENT
                 ),
@@ -193,7 +193,7 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
             )
         generellAssertRestUtvidetBehandling(
             restUtvidetBehandling = restUtvidetBehandlingEtterIverksetting,
-            behandlingStatus = BehandlingStatus.UTREDES,
+            behandlingStatus = BehandlingStatus.IVERKSETTER_VEDTAK,
             behandlingStegType = StegType.IVERKSETT_MOT_OPPDRAG
         )
 
@@ -298,6 +298,10 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
             }
         }
 
+        familieBaSakKlient().validerVilkårsvurdering(
+            behandlingId = restUtvidetBehandling.data!!.behandlingId
+        )
+
         val restUtvidetBehandlingEtterBehandlingsresultat =
             familieBaSakKlient().behandlingsresultatStegOgGåVidereTilNesteSteg(
                 behandlingId = restUtvidetBehandling.data!!.behandlingId
@@ -344,13 +348,13 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
 
         generellAssertRestUtvidetBehandling(
             restUtvidetBehandling = restUtvidetBehandlingEtterSendTilBeslutter,
-            behandlingStatus = BehandlingStatus.UTREDES,
+            behandlingStatus = BehandlingStatus.FATTER_VEDTAK,
             behandlingStegType = StegType.BESLUTTE_VEDTAK
         )
 
         val restUtvidetBehandlingEtterIverksetting =
             familieBaSakKlient().iverksettVedtak(
-                fagsakId = fagsakId.data!!.toLong(),
+                behandlingId = restUtvidetBehandlingEtterSendTilBeslutter.data!!.behandlingId,
                 restBeslutningPåVedtak = RestBeslutningPåVedtak(
                     Beslutning.GODKJENT
                 ),
@@ -369,7 +373,7 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
             )
         generellAssertRestUtvidetBehandling(
             restUtvidetBehandling = restUtvidetBehandlingEtterIverksetting,
-            behandlingStatus = BehandlingStatus.UTREDES,
+            behandlingStatus = BehandlingStatus.IVERKSETTER_VEDTAK,
             behandlingStegType = StegType.IVERKSETT_MOT_OPPDRAG
         )
 

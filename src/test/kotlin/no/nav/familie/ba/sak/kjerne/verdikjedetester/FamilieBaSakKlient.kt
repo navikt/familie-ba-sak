@@ -182,11 +182,11 @@ class FamilieBaSakKlient(
     }
 
     fun iverksettVedtak(
-        fagsakId: Long,
+        behandlingId: Long,
         restBeslutningPåVedtak: RestBeslutningPåVedtak,
         beslutterHeaders: HttpHeaders
     ): Ressurs<RestUtvidetBehandling> {
-        val uri = URI.create("$baSakUrl/api/fagsaker/$fagsakId/steg/iverksett-vedtak")
+        val uri = URI.create("$baSakUrl/api/behandlinger/$behandlingId/steg/iverksett-vedtak")
 
         return postForEntity(uri, restBeslutningPåVedtak, beslutterHeaders)
     }
