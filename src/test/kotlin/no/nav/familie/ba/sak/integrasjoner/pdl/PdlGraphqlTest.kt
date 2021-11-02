@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.integrasjoner.pdl
 
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PdlAdressebeskyttelseResponse
+import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PdlHentPersonRelasjonerResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PdlHentPersonResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PdlNavn
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -41,7 +42,7 @@ class PdlGraphqlTest {
 
     @Test
     fun testForelderBsrnRelasjon() {
-        val resp = mapper.readValue(File(getFile("pdl/pdlForelderBarnRelasjonResponse.json")), PdlHentPersonResponse::class.java)
+        val resp = mapper.readValue(File(getFile("pdl/pdlForelderBarnRelasjonResponse.json")), PdlHentPersonRelasjonerResponse::class.java)
         assertThat(resp.data.person!!.forelderBarnRelasjon.first().relatertPersonsRolle).isEqualTo(FORELDERBARNRELASJONROLLE.BARN)
         assertThat(resp.data.person!!.forelderBarnRelasjon.first().relatertPersonsIdent).isEqualTo("32345678901")
     }

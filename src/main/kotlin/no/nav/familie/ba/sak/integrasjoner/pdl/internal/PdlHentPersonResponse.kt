@@ -17,16 +17,15 @@ data class PdlHentPersonResponse(
 
 data class PdlPerson(val person: PdlPersonData?)
 
-
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class PdlPersonData(
-    val foedsel: List<PdlFødselsDato> = emptyList(),
+    val foedsel: List<PdlFødselsDato>,
     val navn: List<PdlNavn> = emptyList(),
     val kjoenn: List<PdlKjoenn> = emptyList(),
     val forelderBarnRelasjon: List<ForelderBarnRelasjon> = emptyList(),
     val adressebeskyttelse: List<Adressebeskyttelse> = emptyList(),
-    val sivilstand: List<Sivilstand> = emptyList(),
-    val bostedsadresse: List<Bostedsadresse> = emptyList(),
+    val sivilstand: List<Sivilstand>,
+    val bostedsadresse: List<Bostedsadresse>,
     val opphold: List<Opphold> = emptyList(),
     val statsborgerskap: List<Statsborgerskap> = emptyList()
 )

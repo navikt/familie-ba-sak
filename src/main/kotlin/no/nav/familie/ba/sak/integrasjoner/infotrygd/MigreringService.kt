@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.integrasjoner.infotrygd
 
+import no.nav.commons.foedselsnummer.FoedselsNr
 import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
@@ -110,9 +111,11 @@ class MigreringService(
 
     private fun validerAtBarnErIRelasjonMedPersonident(personIdent: String, barnasIdenter: List<String>) {
         val listeBarnFraPdl = pdlRestClient.hentForelderBarnRelasjon(personIdent)
-            .filter { it.relatertPersonsRolle == FORELDERBARNRELASJONROLLE.BARN }.map { it.relatertPersonsIdent }
+            .filter { it.relatertPersonsRolle == FORELDERBARNRELASJONROLLE.BARN &&
+                    FoedselsNr(it.relatertPersonsIdent).foedselsdato.isAfter(LocalDate.now().minusYears(18))
+            }.map { it.relatertPersonsIdent }
         if (barnasIdenter.size != listeBarnFraPdl.size || !listeBarnFraPdl.containsAll(barnasIdenter)) {
-            throw error("Kan ikke migrere fordi barn fra PDL ikke samsvarer løpende barnetrygdbarn fra Infotrygd.")
+            throw error("Kan ikke migrere fordi barn fra PDL ikke samsvarer med løpende barnetrygdbarn fra Infotrygd.")
         }
     }
 

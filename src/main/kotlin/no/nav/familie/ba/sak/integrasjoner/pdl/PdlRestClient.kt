@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.internal.Doedsfall
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PdlDødsfallResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PdlHentIdenterResponse
+import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PdlHentPersonRelasjonerResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PdlHentPersonResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PdlOppholdResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PdlPersonRequest
@@ -277,7 +278,7 @@ class PdlRestClient(
             query = hentGraphqlQuery("hentperson-relasjoner")
         )
         val response = try {
-            postForEntity<PdlHentPersonResponse>(pdlUri, pdlPersonRequest, httpHeaders())
+            postForEntity<PdlHentPersonRelasjonerResponse>(pdlUri, pdlPersonRequest, httpHeaders())
         } catch (e: Exception) {
             throw Feil(
                 message = "Feil ved oppslag på person. Gav feil: ${e.message}",
