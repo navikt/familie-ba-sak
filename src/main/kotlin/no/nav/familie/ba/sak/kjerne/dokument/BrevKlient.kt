@@ -25,20 +25,6 @@ class BrevKlient(
         return response.body ?: error("Klarte ikke generere brev med familie-brev")
     }
 
-    @Cacheable("begrunnelsestekster-for-nedtreksmeny")
-    fun hentSanityBegrunnelser(): List<SanityBegrunnelse> {
-        val url = URI.create("$familieBrevUri/ba-sak/begrunnelser")
-        logger.info("Henter begrunnelser fra sanity")
-        val response = restTemplate.exchange(
-            url,
-            HttpMethod.GET,
-            null,
-            object : ParameterizedTypeReference<List<RestSanityBegrunnelse>>() {},
-        )
-        val restSanityBegrunnelser = response.body ?: error("Klarte ikke hente begrunnelsene fra familie-brev.")
-        return restSanityBegrunnelser.map { it.tilSanityBegrunnelse() }
-    }
-
     @Cacheable("begrunnelsestekst")
     fun hentBegrunnelsestekst(begrunnelseData: BegrunnelseData): String {
         val url = URI.create("$familieBrevUri/ba-sak/begrunnelser/${begrunnelseData.apiNavn}/tekst/")

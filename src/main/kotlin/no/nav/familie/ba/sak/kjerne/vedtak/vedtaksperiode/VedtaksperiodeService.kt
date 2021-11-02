@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedFritekster
+import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
 import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
@@ -112,7 +113,7 @@ class VedtaksperiodeService(
             .utbetalingsperiodeDetaljer
             .map { utbetalingsperiodeDetalj -> utbetalingsperiodeDetalj.person.personIdent }
 
-        val sanityBegrunnelser = brevKlient.hentSanityBegrunnelser()
+        val sanityBegrunnelser = sanityService.hentSanityBegrunnelser()
 
         val endredeUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(
             behandling.id

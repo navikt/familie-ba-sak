@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.dokument
 
+import no.nav.familie.ba.sak.kjerne.dokument.domene.RestSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.dokument.domene.SanityBegrunnelse
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
@@ -30,9 +31,10 @@ class SanityKlient(
             url,
             HttpMethod.GET,
             null,
-            object : ParameterizedTypeReference<SanityRespons<SanityBegrunnelse>>() {},
+            object : ParameterizedTypeReference<SanityRespons<RestSanityBegrunnelse>>() {},
         )
-        return response.body?.result ?: error("Klarte ikke hente begrunnelsene fra sanity.")
+        val restSanityBegrunnelser = response.body?.result ?: error("Klarte ikke hente begrunnelsene fra familie-brev.")
+        return restSanityBegrunnelser.map { it.tilSanityBegrunnelse() }
     }
 
     companion object {

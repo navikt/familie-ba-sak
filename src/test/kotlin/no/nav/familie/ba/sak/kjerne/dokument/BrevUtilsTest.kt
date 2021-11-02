@@ -334,11 +334,9 @@ internal class BrevUtilsTest {
                 utvidetVedtaksperioderMedBegrunnelser,
                 listOf(
                     lagSanityBegrunnelse(
-                        apiNavn = VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET.sanityApiNavn,
                         hjemler = listOf("11", "4", "2", "10"),
                     ),
                     lagSanityBegrunnelse(
-                        apiNavn = VedtakBegrunnelseSpesifikasjon.INNVILGET_SATSENDRING.sanityApiNavn,
                         hjemler = listOf("10"),
                     )
                 )
