@@ -4,5 +4,5 @@ data class MigreringResponseDto(
     val fagsakId: Long,
     val behandlingId: Long,
     val infotrygdStønadId: Long? = null,
-
+    val infotrygdSakId: Long? = null,
 )

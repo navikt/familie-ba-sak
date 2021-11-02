@@ -108,7 +108,12 @@ class MigreringService(
 
         iverksett(behandlingEtterVilkårsvurdering)
 
-        return MigreringResponseDto(behandlingEtterVilkårsvurdering.fagsak.id, behandlingEtterVilkårsvurdering.id)
+        return MigreringResponseDto(
+            fagsakId = behandlingEtterVilkårsvurdering.fagsak.id,
+            behandlingId = behandlingEtterVilkårsvurdering.id,
+            infotrygdStønadId = løpendeSak.stønad?.id,
+            infotrygdSakId = løpendeSak.id
+        )
     }
 
     private fun validerAtBarnErIRelasjonMedPersonident(personIdent: String, barnasIdenter: List<String>) {
