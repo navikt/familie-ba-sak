@@ -252,7 +252,7 @@ class PdlRestClient(
         } catch (e: Exception) {
             throw Feil(
                 message = "Feil ved oppslag på utenlandsk bostedsadresse. Gav feil: ${
-                    NestedExceptionUtils.getMostSpecificCause(e).message
+                NestedExceptionUtils.getMostSpecificCause(e).message
                 }",
                 frontendFeilmelding = "Feil oppsto ved oppslag på utenlandsk bostedsadresse $personIdent",
                 httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,

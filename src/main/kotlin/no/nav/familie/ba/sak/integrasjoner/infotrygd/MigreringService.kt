@@ -111,7 +111,8 @@ class MigreringService(
 
     private fun validerAtBarnErIRelasjonMedPersonident(personIdent: String, barnasIdenter: List<String>) {
         val listeBarnFraPdl = pdlRestClient.hentForelderBarnRelasjon(personIdent)
-            .filter { it.relatertPersonsRolle == FORELDERBARNRELASJONROLLE.BARN &&
+            .filter {
+                it.relatertPersonsRolle == FORELDERBARNRELASJONROLLE.BARN &&
                     FoedselsNr(it.relatertPersonsIdent).foedselsdato.isAfter(LocalDate.now().minusYears(18))
             }.map { it.relatertPersonsIdent }
         if (barnasIdenter.size != listeBarnFraPdl.size || !listeBarnFraPdl.containsAll(barnasIdenter)) {

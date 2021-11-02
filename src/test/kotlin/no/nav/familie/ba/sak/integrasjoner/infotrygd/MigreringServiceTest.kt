@@ -188,8 +188,10 @@ class MigreringServiceTest {
             infotrygdBarnetrygdClient.hentSaker(any(), any())
         } returns InfotrygdSøkResponse(listOf(opprettSakMedBeløp(2708.0)), emptyList())
         every { pdlRestClient.hentForelderBarnRelasjon(any()) } returns
-                listOf(ForelderBarnRelasjon(relatertPersonsIdent = barnUnder18, relatertPersonsRolle = FORELDERBARNRELASJONROLLE.BARN),
-                       ForelderBarnRelasjon(relatertPersonsIdent = barnOver18, relatertPersonsRolle = FORELDERBARNRELASJONROLLE.BARN))
+            listOf(
+                ForelderBarnRelasjon(relatertPersonsIdent = barnUnder18, relatertPersonsRolle = FORELDERBARNRELASJONROLLE.BARN),
+                ForelderBarnRelasjon(relatertPersonsIdent = barnOver18, relatertPersonsRolle = FORELDERBARNRELASJONROLLE.BARN)
+            )
 
         assertThatThrownBy {
             migreringService.migrer(ClientMocks.søkerFnr[0])

@@ -1,9 +1,7 @@
 package no.nav.familie.ba.sak.integrasjoner.pdl.internal
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-
 import no.nav.familie.kontrakter.felles.personopplysning.ForelderBarnRelasjon
-
 
 data class PdlHentPersonRelasjonerResponse(
     val data: PdlPersonRelasjon,
