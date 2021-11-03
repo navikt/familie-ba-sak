@@ -146,6 +146,19 @@ class FagsakService(
         return fagsak
     }
 
+    @Transactional
+    fun oppdaterFagsakDersomSøkerHarNyIdent(fagsakId: Long) {
+        val fagsak = fagsakRepository.finnFagsak(fagsakId) ?: return
+        val søkerIdent = fagsak.hentAktivIdent()
+        val identer = personopplysningerService.hentIdenter(Ident(søkerIdent.ident))
+        val gjeldendeIdent = identer.singleOrNull { !it.historisk }?.ident
+            ?: error("Fant ingen gjeldende ident for søker på fagsak $fagsakId")
+        if (søkerIdent.ident != gjeldendeIdent) {
+            fagsak.søkerIdenter += FagsakPerson(personIdent = PersonIdent(gjeldendeIdent), fagsak = fagsak)
+            lagre(fagsak)
+        }
+    }
+
     fun hentFagsakerPåPerson(personIdent: PersonIdent): List<Fagsak> {
         val versjonerAvBarn = personRepository.findByPersonIdent(personIdent)
         return versjonerAvBarn.map {
@@ -321,7 +334,11 @@ class FagsakService(
         return fagsakRepository.finnLøpendeFagsaker()
     }
 
-    fun hentFagsakDeltager(personIdent: String): List<RestFagsakDeltager> {
+    fun hentFagsakDeltager(ident: String): List<RestFagsakDeltager> {
+        val identer =
+            personopplysningerService.hentIdenter(Ident(ident))
+        val personIdent = identer.singleOrNull { !it.historisk }?.ident ?: ident
+
         val maskertDeltaker = runCatching {
             hentMaskertFagsakdeltakerVedManglendeTilgang(personIdent)
         }.fold(
@@ -345,7 +362,10 @@ class FagsakService(
 
         if (assosierteFagsakDeltagere.find { it.ident == personIdent } == null) {
             val fagsakId =
-                if (!erBarn) fagsakRepository.finnFagsakForPersonIdent(PersonIdent(personIdent))?.id else null
+                if (!erBarn) {
+                    fagsakPersonRepository.finnFagsak(personIdenter = identer.map { PersonIdent(it.ident) }.toSet())?.id
+                    // fagsakRepository.finnFagsakForPersonIdent(PersonIdent(personIdent))?.id
+                } else null
             assosierteFagsakDeltagere.add(
                 RestFagsakDeltager(
                     navn = personInfoMedRelasjoner.navn,

@@ -60,7 +60,7 @@ class FagsakController(
     @GetMapping(path = ["/{fagsakId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun hentFagsak(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<RestFagsak>> {
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} henter fagsak med id $fagsakId")
-
+        fagsakService.oppdaterFagsakDersomSøkerHarNyIdent(fagsakId)
         val fagsak = fagsakService.hentRestFagsak(fagsakId)
         return ResponseEntity.ok().body(fagsak)
     }
@@ -68,7 +68,7 @@ class FagsakController(
     @GetMapping(path = ["/minimal/{fagsakId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun hentMinimalFagsak(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<RestMinimalFagsak>> {
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} henter minimal fagsak med id $fagsakId")
-
+        fagsakService.oppdaterFagsakDersomSøkerHarNyIdent(fagsakId)
         val fagsak = fagsakService.hentRestMinimalFagsak(fagsakId)
         return ResponseEntity.ok().body(fagsak)
     }
