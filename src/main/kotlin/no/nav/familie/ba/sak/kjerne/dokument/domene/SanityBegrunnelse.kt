@@ -141,7 +141,6 @@ enum class ØvrigTrigger {
 
 enum class EndretUtbetalingsperiodeTrigger {
     ETTER_ENDRET_UTBETALINGSPERIODE,
-    KOMBINASJON_DELT_UTVIDET,
 }
 
 enum class EndretUtbetalingsperiodeDeltBostedTriggere {
