@@ -10,7 +10,7 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValide
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerPeriodeInnenforTilkjentytelse
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.erStartPåUtvidetSammeMåned
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.erUtvidetTilkjentYtelseMedSammeFomSomErUendret
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.fraRestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.hentGyldigEndretBegrunnelser
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -44,18 +44,8 @@ class EndretUtbetalingAndelService(
                 ?: throw Feil("Fant ikke personopplysninggrunnlag på behandling ${behandling.id}")
 
         val andelTilkjentYtelser = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id)
-        // Todo hva gjør vi med dette dersom den utvidede perioden endres til 0?
-        val erStartPåUtvidetSammeMåned =
-            erStartPåUtvidetSammeMåned(
-                personopplysningGrunnlag,
-                andelTilkjentYtelser,
-                restEndretUtbetalingAndel.fom
-            )
 
-        endretUtbetalingAndel.fraRestEndretUtbetalingAndel(restEndretUtbetalingAndel, person).also {
-            it.vedtakBegrunnelseSpesifikasjoner =
-                it.hentGyldigEndretBegrunnelser(brevKlient.hentSanityBegrunnelser(), erStartPåUtvidetSammeMåned)
-        }
+        endretUtbetalingAndel.fraRestEndretUtbetalingAndel(restEndretUtbetalingAndel, person)
 
         validerIngenOverlappendeEndring(
             endretUtbetalingAndel,
@@ -116,5 +106,24 @@ class EndretUtbetalingAndelService(
         hentForBehandling(behandlingId).filter { it.andelTilkjentYtelser.isNotEmpty() }.forEach {
             it.andelTilkjentYtelser.clear()
         }
+    }
+
+    @Transactional
+    fun oppdaterEndreteUtbetalingsandelerMedBegrunnelser(behandling: Behandling): MutableList<EndretUtbetalingAndel> {
+        val endredeUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(behandling.id)
+        val andelTilkjentYtelser = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id)
+
+        endredeUtbetalingAndeler.forEach {
+            val erUtvidetTilkjentYtelseMedSammeFomSomErUendret =
+                erUtvidetTilkjentYtelseMedSammeFomSomErUendret(andelTilkjentYtelser, it.fom, it.tom)
+
+            it.vedtakBegrunnelseSpesifikasjoner =
+                it.hentGyldigEndretBegrunnelser(
+                    brevKlient.hentSanityBegrunnelser(),
+                    erUtvidetTilkjentYtelseMedSammeFomSomErUendret,
+                )
+        }
+
+        return endretUtbetalingAndelRepository.saveAll(endredeUtbetalingAndeler)
     }
 }

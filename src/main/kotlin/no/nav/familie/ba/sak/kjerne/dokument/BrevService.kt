@@ -28,7 +28,7 @@ import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.SignaturVedtak
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.VedtakEndring
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.VedtakFellesfelter
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Vedtaksbrev
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.erStartPåUtvidetSammeMåned
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.erUtvidetTilkjentYtelseMedSammeFomSomErUendret
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
@@ -189,10 +189,10 @@ class BrevService(
                 målform = målform,
                 uregistrerteBarn = søknadGrunnlagService.hentAktiv(behandlingId = vedtak.behandling.id)
                     ?.hentUregistrerteBarn() ?: emptyList(),
-                erStartPåUtvidetSammeMåned = erStartPåUtvidetSammeMåned(
-                    grunnlagOgSignaturData.grunnlag,
+                erUtvidetTilkjentYtelseMedSammeFomSomErUendret = erUtvidetTilkjentYtelseMedSammeFomSomErUendret(
                     andelTilkjentYtelser,
-                    it.fom?.toYearMonth()
+                    it.fom?.toYearMonth(),
+                    it.tom?.toYearMonth(),
                 )
             )
         }

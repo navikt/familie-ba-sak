@@ -94,3 +94,49 @@ object EndretUtbetalingAndelValidering {
             )
     }
 }
+
+fun validerAtDetFinnesDeltBostedEndringerMedSammeProsentForUtvidedeEndringer(
+    endretUtbetalingAndeler: List<EndretUtbetalingAndel>
+) {
+    val endredeUtvidetAndeler =
+        endretUtbetalingAndeler.filter { endretUtbetaling ->
+            endretUtbetaling.andelTilkjentYtelser.any { it.erUtvidet() }
+        }
+
+    val alleEndredeAndelerErPåUtvidet =
+        endredeUtvidetAndeler.flatMap { endretUtbetaling -> endretUtbetaling.andelTilkjentYtelser }
+            .all { it.erUtvidet() }
+
+    if (!alleEndredeAndelerErPåUtvidet) {
+        val feilmelding =
+            "Endring på utvidet ytelse kan ikke være på ordinær ytelse også."
+        throw FunksjonellFeil(frontendFeilmelding = feilmelding, melding = feilmelding)
+    }
+
+    endredeUtvidetAndeler.forEach { endretPåUtvidet ->
+        val deltBostedEndringerISammePeriode = endretUtbetalingAndeler.filter {
+            it.årsak == Årsak.DELT_BOSTED &&
+                it.fom == endretPåUtvidet.fom &&
+                it.tom == endretPåUtvidet.tom
+        }
+
+        if (deltBostedEndringerISammePeriode.isNotEmpty()) {
+            val feilmelding =
+                "Det kan ikke være en endring på en utvidet ytelse uten en endring på en delt bosted ytelse. " +
+                    "Legg til en delt bosted endring i perioden ${endretPåUtvidet.fom} til " +
+                    "${endretPåUtvidet.tom} eller fjern endringen på den utvidede ytelsen."
+            throw FunksjonellFeil(frontendFeilmelding = feilmelding, melding = feilmelding)
+        }
+
+        val erForskjelligEndringPåutvidetOgDeltBostedISammePeriode =
+            deltBostedEndringerISammePeriode.any { endretPåUtvidet.prosent != it.prosent }
+
+        if (erForskjelligEndringPåutvidetOgDeltBostedISammePeriode) {
+            val feilmelding =
+                "Endring på delt bosted ytelse og utvidet ytelse i samme periode må være lik, " +
+                    "men endringene i perioden ${endretPåUtvidet.fom} til ${endretPåUtvidet.tom} " +
+                    "er forskjellige."
+            throw FunksjonellFeil(frontendFeilmelding = feilmelding, melding = feilmelding)
+        }
+    }
+}

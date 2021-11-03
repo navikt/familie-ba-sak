@@ -228,7 +228,7 @@ fun UtvidetVedtaksperiodeMedBegrunnelser.tilBrevPeriode(
     personerIPersongrunnlag: List<Person>,
     målform: Målform,
     uregistrerteBarn: List<BarnMedOpplysninger> = emptyList(),
-    erStartPåUtvidetSammeMåned: Boolean = false,
+    erUtvidetTilkjentYtelseMedSammeFomSomErUendret: Boolean = false,
 ): BrevPeriode? {
     val begrunnelserOgFritekster = this.byggBegrunnelserOgFritekster(
         personerIPersongrunnlag = personerIPersongrunnlag,
@@ -250,7 +250,7 @@ fun UtvidetVedtaksperiodeMedBegrunnelser.tilBrevPeriode(
         Vedtaksperiodetype.ENDRET_UTBETALING -> hentEndretUtbetalingBrevPeriode(
             tomDato,
             begrunnelserOgFritekster,
-            erStartPåUtvidetSammeMåned
+            erUtvidetTilkjentYtelseMedSammeFomSomErUendret
         )
 
         Vedtaksperiodetype.AVSLAG -> hentAvslagBrevPeriode(tomDato, begrunnelserOgFritekster)
@@ -278,7 +278,7 @@ private fun UtvidetVedtaksperiodeMedBegrunnelser.hentAvslagBrevPeriode(
 fun UtvidetVedtaksperiodeMedBegrunnelser.hentEndretUtbetalingBrevPeriode(
     tomDato: String?,
     begrunnelserOgFritekster: List<Begrunnelse>,
-    erStartPåUtvidetSammeMåned: Boolean = false,
+    erUtvidetTilkjentYtelseMedSammeFomSomErUendret: Boolean = false,
 ): EndretUtbetalingBrevPeriode {
     val ingenUtbetaling =
         utbetalingsperiodeDetaljer.all { it.prosent == BigDecimal.ZERO }
@@ -289,14 +289,14 @@ fun UtvidetVedtaksperiodeMedBegrunnelser.hentEndretUtbetalingBrevPeriode(
         barnasFodselsdager = this.utbetalingsperiodeDetaljer.tilBarnasFødselsdatoer(),
         begrunnelser = begrunnelserOgFritekster,
         type = when {
-            !erStartPåUtvidetSammeMåned && ingenUtbetaling ->
+            ingenUtbetaling ->
                 EndretUtbetalingBrevPeriodeType.ENDRET_UTBETALINGSPERIODE_INGEN_UTBETALING
-            erStartPåUtvidetSammeMåned && ingenUtbetaling ->
+            ingenUtbetaling && erUtvidetTilkjentYtelseMedSammeFomSomErUendret ->
                 EndretUtbetalingBrevPeriodeType.ENDRET_UTBETALINGSPERIODE_DELVIS_UTBETALING
             else ->
                 EndretUtbetalingBrevPeriodeType.ENDRET_UTBETALINGSPERIODE
         },
-        typeBarnetrygd = if (erStartPåUtvidetSammeMåned)
+        typeBarnetrygd = if (erUtvidetTilkjentYtelseMedSammeFomSomErUendret)
             EndretUtbetalingBernetrygtType.DELT_UTVIDET
         else
             EndretUtbetalingBernetrygtType.DELT
