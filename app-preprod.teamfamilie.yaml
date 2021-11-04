@@ -52,4 +52,4 @@ spec:
   accessPolicy:
     outbound:
       external:
-        - host: https://xsrv1mh6.apicdn.sanity.io/
+        - host: xsrv1mh6.apicdn.sanity.io
