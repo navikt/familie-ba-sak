@@ -98,13 +98,13 @@ object EndretUtbetalingAndelValidering {
 fun validerAtDetFinnesDeltBostedEndringerMedSammeProsentForUtvidedeEndringer(
     endretUtbetalingAndeler: List<EndretUtbetalingAndel>
 ) {
-    val endredeUtvidetAndeler =
+    val endredeUtvidetUtbetalingerAndeler =
         endretUtbetalingAndeler.filter { endretUtbetaling ->
             endretUtbetaling.andelTilkjentYtelser.any { it.erUtvidet() }
         }
 
     val alleEndredeAndelerErPåUtvidet =
-        endredeUtvidetAndeler.flatMap { endretUtbetaling -> endretUtbetaling.andelTilkjentYtelser }
+        endredeUtvidetUtbetalingerAndeler.flatMap { endretUtbetaling -> endretUtbetaling.andelTilkjentYtelser }
             .all { it.erUtvidet() }
 
     if (!alleEndredeAndelerErPåUtvidet) {
@@ -113,28 +113,29 @@ fun validerAtDetFinnesDeltBostedEndringerMedSammeProsentForUtvidedeEndringer(
         throw FunksjonellFeil(frontendFeilmelding = feilmelding, melding = feilmelding)
     }
 
-    endredeUtvidetAndeler.forEach { endretPåUtvidet ->
+    endredeUtvidetUtbetalingerAndeler.forEach { endretPåUtvidetUtbetalinger ->
         val deltBostedEndringerISammePeriode = endretUtbetalingAndeler.filter {
             it.årsak == Årsak.DELT_BOSTED &&
-                it.fom == endretPåUtvidet.fom &&
-                it.tom == endretPåUtvidet.tom
+                it.fom == endretPåUtvidetUtbetalinger.fom &&
+                it.tom == endretPåUtvidetUtbetalinger.tom &&
+                it.id != endretPåUtvidetUtbetalinger.id
         }
 
-        if (deltBostedEndringerISammePeriode.isNotEmpty()) {
+        if (deltBostedEndringerISammePeriode.isEmpty()) {
             val feilmelding =
                 "Det kan ikke være en endring på en utvidet ytelse uten en endring på en delt bosted ytelse. " +
-                    "Legg til en delt bosted endring i perioden ${endretPåUtvidet.fom} til " +
-                    "${endretPåUtvidet.tom} eller fjern endringen på den utvidede ytelsen."
+                    "Legg til en delt bosted endring i perioden ${endretPåUtvidetUtbetalinger.fom} til " +
+                    "${endretPåUtvidetUtbetalinger.tom} eller fjern endringen på den utvidede ytelsen."
             throw FunksjonellFeil(frontendFeilmelding = feilmelding, melding = feilmelding)
         }
 
         val erForskjelligEndringPåutvidetOgDeltBostedISammePeriode =
-            deltBostedEndringerISammePeriode.any { endretPåUtvidet.prosent != it.prosent }
+            deltBostedEndringerISammePeriode.any { endretPåUtvidetUtbetalinger.prosent != it.prosent }
 
         if (erForskjelligEndringPåutvidetOgDeltBostedISammePeriode) {
             val feilmelding =
                 "Endring på delt bosted ytelse og utvidet ytelse i samme periode må være lik, " +
-                    "men endringene i perioden ${endretPåUtvidet.fom} til ${endretPåUtvidet.tom} " +
+                    "men endringene i perioden ${endretPåUtvidetUtbetalinger.fom} til ${endretPåUtvidetUtbetalinger.tom} " +
                     "er forskjellige."
             throw FunksjonellFeil(frontendFeilmelding = feilmelding, melding = feilmelding)
         }
