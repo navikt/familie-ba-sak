@@ -22,7 +22,6 @@ import org.springframework.test.context.ContextConfiguration
     "mock-rest-template-config"
 )
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
-// @AutoConfigureWireMock(port = 28085)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Tag("integration")
 abstract class AbstractSpringIntegrationTest {
