@@ -20,8 +20,10 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock
 import java.util.Properties
 
+@AutoConfigureWireMock(port = 28085)
 class TilbakekrevingServiceTest(
     @Autowired private val vilkårsvurderingService: VilkårsvurderingService,
     @Autowired private val vedtakService: VedtakService,

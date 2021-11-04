@@ -19,8 +19,10 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock
 
 @Tag("integration")
+@AutoConfigureWireMock(port = 28085)
 class SimuleringServiceTest(
     @Autowired private val fagsakService: FagsakService,
     @Autowired private val vilkårsvurderingService: VilkårsvurderingService,

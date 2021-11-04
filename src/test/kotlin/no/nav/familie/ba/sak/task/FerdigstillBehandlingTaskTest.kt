@@ -28,7 +28,9 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock
 
+@AutoConfigureWireMock(port = 28085)
 class FerdigstillBehandlingTaskTest : AbstractSpringIntegrationTest() {
 
     @Autowired
@@ -100,7 +102,10 @@ class FerdigstillBehandlingTaskTest : AbstractSpringIntegrationTest() {
             vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering)
             val behandlingEtterVilkårsvurdering = stegService.håndterVilkårsvurdering(behandling)
 
-            behandlingService.oppdaterStatusPåBehandling(behandlingEtterVilkårsvurdering.id, BehandlingStatus.IVERKSETTER_VEDTAK)
+            behandlingService.oppdaterStatusPåBehandling(
+                behandlingEtterVilkårsvurdering.id,
+                BehandlingStatus.IVERKSETTER_VEDTAK
+            )
             behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(
                 behandlingId = behandlingEtterVilkårsvurdering.id,
                 steg = StegType.FERDIGSTILLE_BEHANDLING
