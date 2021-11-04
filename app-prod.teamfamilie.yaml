@@ -49,7 +49,3 @@ spec:
       value: prod
     - name: SRVUSER_BA_SAK_SECRET
       value: /var/run/secrets/srvfamilie-ba-sak/password
-  accessPolicy:
-    outbound:
-      external:
-        - host: xsrv1mh6.apicdn.sanity.io
