@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.ClientMocks
+import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
@@ -62,7 +63,10 @@ class VedtaksperiodeServiceTest(
     private val vedtaksperiodeService: VedtaksperiodeService,
 
     @Autowired
-    private val databaseCleanupService: DatabaseCleanupService
+    private val databaseCleanupService: DatabaseCleanupService,
+
+    @Autowired
+    private val taskRepository: TaskRepositoryWrapper,
 ) : AbstractSpringIntegrationTest() {
 
     val søkerFnr = randomFnr()
@@ -73,6 +77,7 @@ class VedtaksperiodeServiceTest(
 
     @BeforeAll
     fun init() {
+        taskRepository.findAll().forEach { it.ferdigstill() }
         databaseCleanupService.truncate()
         førstegangsbehandling = kjørStegprosessForFGB(
             tilSteg = StegType.BEHANDLING_AVSLUTTET,
