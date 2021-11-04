@@ -97,7 +97,9 @@ val sanityBegrunnelserMock: List<SanityBegrunnelse> =
                     else -> emptyList()
                 },
                 endretUtbetalingsperiodeDeltBostedTriggere = when (it) {
-                    VedtakBegrunnelseSpesifikasjon.ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_FULL_ORDINÆR_OG_ETTERBETALING_UTVIDET -> listOf(
+                    VedtakBegrunnelseSpesifikasjon.ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_FULL_ORDINÆR_OG_ETTERBETALING_UTVIDET,
+                    VedtakBegrunnelseSpesifikasjon.ENDRET_UTBETALING_DELT_BOSTED_FULL_UTBETALING,
+                    -> listOf(
                         EndretUtbetalingsperiodeDeltBostedTriggere.SKAL_UTBETALES
                     )
                     else -> emptyList()
