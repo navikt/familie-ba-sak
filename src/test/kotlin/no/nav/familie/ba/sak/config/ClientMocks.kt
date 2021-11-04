@@ -113,10 +113,17 @@ class ClientMocks {
         every {
             mockPersonopplysningerService.hentIdenter(capture(identSlot))
         } answers {
-            listOf(
-                IdentInformasjon(identSlot.captured.ident, false, "FOLKEREGISTERIDENT"),
-                IdentInformasjon(randomFnr(), true, "FOLKEREGISTERIDENT")
-            )
+            if (identSlot.captured.ident == historiskFolkeregisterIdent) {
+                listOf(
+                    IdentInformasjon(søkerFnr[0], false, "FOLKEREGISTERIDENT"),
+                    IdentInformasjon(historiskFolkeregisterIdent, true, "FOLKEREGISTERIDENT")
+                )
+            } else {
+                listOf(
+                    IdentInformasjon(identSlot.captured.ident, false, "FOLKEREGISTERIDENT"),
+                    IdentInformasjon(randomFnr(), true, "FOLKEREGISTERIDENT")
+                )
+            }
         }
 
         every {
@@ -577,6 +584,7 @@ class ClientMocks {
         }
 
         val søkerFnr = arrayOf("12345678910", "11223344556", "12345678911")
+        val historiskFolkeregisterIdent = "52345678910"
         private val barnFødselsdatoer = arrayOf(
             guttenBarnesenFødselsdato,
             LocalDate.now().withDayOfMonth(18).minusYears(1)

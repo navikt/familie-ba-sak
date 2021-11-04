@@ -5,6 +5,8 @@ import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
+import no.nav.familie.ba.sak.config.ClientMocks.Companion.historiskFolkeregisterIdent
+import no.nav.familie.ba.sak.config.ClientMocks.Companion.søkerFnr
 import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsakDeltager
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
@@ -265,7 +267,9 @@ class FagsakServiceTest(
             )
         )
 
-        fagsakService.lagre(fagsakService.hentFagsakPåPerson(setOf(PersonIdent(søker1Fnr))).also { it?.arkivert = true }!!)
+        fagsakService.lagre(
+            fagsakService.hentFagsakPåPerson(setOf(PersonIdent(søker1Fnr))).also { it?.arkivert = true }!!
+        )
 
         val søkeresultat1 = fagsakService.hentFagsakDeltager(søker1Fnr)
 
@@ -291,7 +295,9 @@ class FagsakServiceTest(
             )
         )
 
-        fagsakService.lagre(fagsakService.hentFagsakPåPerson(setOf(PersonIdent(søker1Fnr))).also { it?.arkivert = true }!!)
+        fagsakService.lagre(
+            fagsakService.hentFagsakPåPerson(setOf(PersonIdent(søker1Fnr))).also { it?.arkivert = true }!!
+        )
 
         val søkeresultat1 = fagsakService.hentFagsakDeltager(søker1Fnr)
 
@@ -330,8 +336,21 @@ class FagsakServiceTest(
         every {
             integrasjonClient.sjekkTilgangTilPersoner(any())
         } answers {
-            throw HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR, "[PdlRestClient][Feil ved oppslag på person: Fant ikke person]")
+            throw HttpServerErrorException(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                "[PdlRestClient][Feil ved oppslag på person: Fant ikke person]"
+            )
         }
         assertEquals(emptyList<RestFagsakDeltager>(), fagsakService.hentFagsakDeltager(randomFnr()))
+    }
+
+    @Test
+    fun `Tester at fagsak blir knyttet til ny ident for søker dersom søker har fått endret sin ident-historikk`() {
+        val fagsakId = fagsakService.hentEllerOpprettFagsak(FagsakRequest(historiskFolkeregisterIdent)).data!!.id
+        val fagsak = fagsakService.hentPåFagsakId(fagsakId)
+        assertEquals(historiskFolkeregisterIdent, fagsak.hentAktivIdent().ident)
+        fagsakService.oppdaterFagsakDersomSøkerHarNyIdent(fagsakId)
+        val oppdatertFagsak = fagsakService.hentPåFagsakId(fagsakId)
+        assertEquals(søkerFnr[0], oppdatertFagsak.hentAktivIdent().ident)
     }
 }
