@@ -36,6 +36,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.dao.DataIntegrityViolationException
+import org.testcontainers.shaded.com.google.common.collect.Iterables
 
 class VedtaksperiodeServiceTest(
     @Autowired
@@ -77,7 +78,17 @@ class VedtaksperiodeServiceTest(
 
     @BeforeAll
     fun init() {
-        taskRepository.findAll().forEach { it.ferdigstill() }
+        val tasker = taskRepository.findAll()
+        if (Iterables.size(tasker) > 0) {
+            error(
+                "Finnes uprosseserte tasker: \n" +
+                    "$tasker\n" +
+                    tasker.map {
+                        "type: ${it.type}, payload: ${it.payload}"
+                    }.joinToString("\n")
+            )
+        }
+
         databaseCleanupService.truncate()
         førstegangsbehandling = kjørStegprosessForFGB(
             tilSteg = StegType.BEHANDLING_AVSLUTTET,
@@ -137,7 +148,8 @@ class VedtaksperiodeServiceTest(
             )
         )
 
-        val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = behandlingEtterNySøknadsregistrering.id)
+        val vedtak =
+            vedtakService.hentAktivForBehandlingThrows(behandlingId = behandlingEtterNySøknadsregistrering.id)
 
         val vedtaksperioder = vedtaksperiodeService.genererVedtaksperioderMedBegrunnelser(vedtak)
 
@@ -182,7 +194,11 @@ class VedtaksperiodeServiceTest(
             type = type
         )
         val feil =
-            assertThrows<DataIntegrityViolationException> { vedtaksperiodeRepository.save(vedtaksperiodeMedSammePeriode) }
+            assertThrows<DataIntegrityViolationException> {
+                vedtaksperiodeRepository.save(
+                    vedtaksperiodeMedSammePeriode
+                )
+            }
         assertTrue(feil.message!!.contains("constraint [vedtaksperiode_fk_vedtak_id_fom_tom_type_key]"))
     }
 
@@ -207,7 +223,8 @@ class VedtaksperiodeServiceTest(
             standardbegrunnelserFraFrontend = listOf(VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_BARN_OG_SØKER_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE)
         )
 
-        val vedtaksperioderMedUtfylteBegrunnelser = vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak)
+        val vedtaksperioderMedUtfylteBegrunnelser =
+            vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak)
         assertEquals(1, vedtaksperioderMedUtfylteBegrunnelser.size)
         assertEquals(1, vedtaksperioderMedUtfylteBegrunnelser.first().begrunnelser.size)
         assertEquals(
@@ -220,7 +237,8 @@ class VedtaksperiodeServiceTest(
             standardbegrunnelserFraFrontend = listOf(VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_FAST_OMSORG),
         )
 
-        val vedtaksperioderMedOverskrevneBegrunnelser = vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak)
+        val vedtaksperioderMedOverskrevneBegrunnelser =
+            vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak)
         assertEquals(1, vedtaksperioderMedOverskrevneBegrunnelser.size)
         assertEquals(1, vedtaksperioderMedOverskrevneBegrunnelser.first().begrunnelser.size)
         assertEquals(
