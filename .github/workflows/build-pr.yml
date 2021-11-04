@@ -9,6 +9,8 @@ jobs:
   avslutt-andre-workflows-samme-branch:
     name: Avslutt andre workflows på samme branch
     runs-on: ubuntu-latest
+    permissions:
+      actions: write
     steps:
       - name: Cancel Previous Runs
         uses: styfle/cancel-workflow-action@0.9.1
