@@ -151,7 +151,7 @@ class FagsakService(
         val fagsak = fagsakRepository.finnFagsak(fagsakId) ?: return
         val søkerIdent = fagsak.hentAktivIdent()
         val identer = personopplysningerService.hentIdenter(Ident(søkerIdent.ident))
-        val gjeldendeIdent = identer.singleOrNull { !it.historisk }?.ident
+        val gjeldendeIdent = identer.singleOrNull { it.gruppe == "FOLKEREGISTERIDENT" && !it.historisk }?.ident
             ?: error("Fant ingen gjeldende ident for søker på fagsak $fagsakId")
         if (søkerIdent.ident != gjeldendeIdent) {
             fagsak.søkerIdenter += FagsakPerson(personIdent = PersonIdent(gjeldendeIdent), fagsak = fagsak)
@@ -337,7 +337,7 @@ class FagsakService(
     fun hentFagsakDeltager(ident: String): List<RestFagsakDeltager> {
         val identer =
             personopplysningerService.hentIdenter(Ident(ident))
-        val personIdent = identer.singleOrNull { !it.historisk }?.ident ?: ident
+        val personIdent = identer.singleOrNull { it.gruppe == "FOLKEREGISTERIDENT" && !it.historisk }?.ident ?: ident
 
         val maskertDeltaker = runCatching {
             hentMaskertFagsakdeltakerVedManglendeTilgang(personIdent)

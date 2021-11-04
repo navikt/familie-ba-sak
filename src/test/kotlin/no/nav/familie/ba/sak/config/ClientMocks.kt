@@ -431,10 +431,11 @@ class ClientMocks {
             )
         )
 
+        val identSlot = slot<Ident>()
         every {
-            mockPersonopplysningerService.hentIdenter(any())
+            mockPersonopplysningerService.hentIdenter(capture(identSlot))
         } answers {
-            listOf(IdentInformasjon("123", false, "FOLKEREGISTERIDENT"))
+            listOf(IdentInformasjon(identSlot.captured.ident, false, "FOLKEREGISTERIDENT"))
         }
 
         every {

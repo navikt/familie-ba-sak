@@ -34,7 +34,7 @@ class SøkFagsakNegativeTest {
     }
 
     @Test
-    fun `test generer riktig ressur ved feil`() {
+    fun `test generer riktig ressurs ved feil`() {
         val ukjentId = "43125678910"
         val feilId = "41235678910"
 
