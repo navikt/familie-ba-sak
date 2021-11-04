@@ -15,6 +15,7 @@ import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROL
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import no.nav.familie.kontrakter.felles.personopplysning.Opphold
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 import org.springframework.web.context.annotation.ApplicationScope
 
@@ -30,8 +31,9 @@ class PersonopplysningerService(
         val personinfo = hentPersoninfoMedQuery(personIdent, PersonInfoQuery.MED_RELASJONER_OG_REGISTERINFORMASJON)
         val identerMedAdressebeskyttelse = mutableSetOf<Pair<String, FORELDERBARNRELASJONROLLE>>()
         val forelderBarnRelasjon = personinfo.forelderBarnRelasjon.mapNotNull {
-            val harTilgang = integrasjonClient.sjekkTilgangTilPersoner(listOf(it.personIdent.id)).firstOrNull()?.harTilgang
-                ?: error("Fikk ikke svar på tilgang til person.")
+            val harTilgang =
+                integrasjonClient.sjekkTilgangTilPersoner(listOf(it.personIdent.id)).firstOrNull()?.harTilgang
+                    ?: error("Fikk ikke svar på tilgang til person.")
             if (harTilgang) {
                 val relasjonsinfo = hentPersoninfoEnkel(it.personIdent.id)
                 ForelderBarnRelasjon(
@@ -87,6 +89,7 @@ class PersonopplysningerService(
         return hentIdenter(ident.ident, true)
     }
 
+    @Cacheable("identer")
     fun hentIdenter(personIdent: String, historikk: Boolean): List<IdentInformasjon> {
         val hentIdenter = pdlRestClient.hentIdenter(personIdent)
 
