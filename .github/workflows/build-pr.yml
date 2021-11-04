@@ -7,7 +7,7 @@ env:
   IMAGE: ghcr.io/navikt/familie-ba-sak:${{ github.sha }}
 jobs:
   avslutt-andre-workflows-samme-branch:
-    name: Avslutt andre workflows på samme branch test
+    name: Avslutt andre workflows på samme branch
     runs-on: ubuntu-latest
     steps:
       - name: Cancel Previous Runs
