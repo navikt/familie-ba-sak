@@ -227,7 +227,7 @@ fun List<AndelTilkjentYtelse>.lagVertikaleSegmenter(): Map<LocalDateSegment<Int>
         }
 }
 
-fun List<AndelTilkjentYtelse>.erUtvidetEndringsutbetalingIPerioden(
+fun List<AndelTilkjentYtelse>.finnesUtvidetEndringsutbetalingIPerioden(
     fom: YearMonth?,
     tom: YearMonth?
 ) = this.any { andelTilkjentYtelse ->

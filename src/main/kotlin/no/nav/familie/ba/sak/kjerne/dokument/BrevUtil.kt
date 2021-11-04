@@ -224,12 +224,17 @@ fun hentHjemmeltekst(
     return hjemlerTilHjemmeltekst(sorterteHjemler)
 }
 
+enum class UtvidetScenario {
+    IKKE_UTVIDET_YTELSE,
+    UTVIDET_YTELSE_ENDRET,
+    UTVIDET_YTELSE_IKKE_ENDRET
+}
+
 fun UtvidetVedtaksperiodeMedBegrunnelser.tilBrevPeriode(
     personerIPersongrunnlag: List<Person>,
     målform: Målform,
+    utvidetScenario: UtvidetScenario = UtvidetScenario.IKKE_UTVIDET_YTELSE,
     uregistrerteBarn: List<BarnMedOpplysninger> = emptyList(),
-    erUtvidetEndringsutbetalingISammePeriode: Boolean = false,
-    erStartPåUtvidetSammeMåned: Boolean = false,
 ): BrevPeriode? {
     val begrunnelserOgFritekster = this.byggBegrunnelserOgFritekster(
         personerIPersongrunnlag = personerIPersongrunnlag,
@@ -251,7 +256,7 @@ fun UtvidetVedtaksperiodeMedBegrunnelser.tilBrevPeriode(
         Vedtaksperiodetype.ENDRET_UTBETALING -> hentEndretUtbetalingBrevPeriode(
             tomDato,
             begrunnelserOgFritekster,
-            erUtvidetEndringsutbetalingISammePeriode
+            utvidetScenario
         )
 
         Vedtaksperiodetype.AVSLAG -> hentAvslagBrevPeriode(tomDato, begrunnelserOgFritekster)
@@ -279,8 +284,7 @@ private fun UtvidetVedtaksperiodeMedBegrunnelser.hentAvslagBrevPeriode(
 fun UtvidetVedtaksperiodeMedBegrunnelser.hentEndretUtbetalingBrevPeriode(
     tomDato: String?,
     begrunnelserOgFritekster: List<Begrunnelse>,
-    erUtvidetEndringsutbetalingISammePeriode: Boolean = false,
-    erStartPåUtvidetSammeMåned: Boolean = false,
+    utvidetScenario: UtvidetScenario = UtvidetScenario.IKKE_UTVIDET_YTELSE,
 ): EndretUtbetalingBrevPeriode {
     val ingenUtbetaling =
         utbetalingsperiodeDetaljer.all { it.prosent == BigDecimal.ZERO }
@@ -291,17 +295,17 @@ fun UtvidetVedtaksperiodeMedBegrunnelser.hentEndretUtbetalingBrevPeriode(
         barnasFodselsdager = this.utbetalingsperiodeDetaljer.tilBarnasFødselsdatoer(),
         begrunnelser = begrunnelserOgFritekster,
         type = when {
-            erStartPåUtvidetSammeMåned && !erUtvidetEndringsutbetalingISammePeriode ->
+            utvidetScenario == UtvidetScenario.UTVIDET_YTELSE_IKKE_ENDRET ->
                 EndretUtbetalingBrevPeriodeType.ENDRET_UTBETALINGSPERIODE_DELVIS_UTBETALING
             ingenUtbetaling ->
                 EndretUtbetalingBrevPeriodeType.ENDRET_UTBETALINGSPERIODE_INGEN_UTBETALING
             else ->
                 EndretUtbetalingBrevPeriodeType.ENDRET_UTBETALINGSPERIODE
         },
-        typeBarnetrygd = if (erStartPåUtvidetSammeMåned)
-            EndretUtbetalingBernetrygtType.DELT_UTVIDET
-        else
+        typeBarnetrygd = if (utvidetScenario == UtvidetScenario.IKKE_UTVIDET_YTELSE)
             EndretUtbetalingBernetrygtType.DELT
+        else
+            EndretUtbetalingBernetrygtType.DELT_UTVIDET
     )
 }
 
