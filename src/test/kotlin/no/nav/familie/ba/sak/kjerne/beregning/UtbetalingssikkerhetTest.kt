@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.tilfeldigPerson
+import no.nav.familie.ba.sak.common.årMnd
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -28,8 +29,8 @@ class UtbetalingssikkerhetTest {
         val tilkjentYtelse = lagInitiellTilkjentYtelse()
 
         val andel = lagAndelTilkjentYtelse(
-            inneværendeMåned().minusYears(4).toString(),
-            "2020-01",
+            inneværendeMåned().minusYears(4),
+            årMnd("2020-01"),
             YtelseType.ORDINÆR_BARNETRYGD,
             1054,
             person = person
@@ -49,8 +50,8 @@ class UtbetalingssikkerhetTest {
         val tilkjentYtelse = lagInitiellTilkjentYtelse()
 
         val andel = lagAndelTilkjentYtelse(
-            inneværendeMåned().minusYears(3).toString(),
-            "2020-01",
+            inneværendeMåned().minusYears(3),
+            årMnd("2020-01"),
             YtelseType.ORDINÆR_BARNETRYGD,
             1054,
             person = person
@@ -76,22 +77,22 @@ class UtbetalingssikkerhetTest {
         tilkjentYtelse.andelerTilkjentYtelse.addAll(
             listOf(
                 lagAndelTilkjentYtelse(
-                    inneværendeMåned().minusYears(1).toString(),
-                    inneværendeMåned().minusMonths(6).toString(),
+                    inneværendeMåned().minusYears(1),
+                    inneværendeMåned().minusMonths(6),
                     YtelseType.UTVIDET_BARNETRYGD,
                     1054,
                     person = person
                 ),
                 lagAndelTilkjentYtelse(
-                    inneværendeMåned().minusYears(1).toString(),
-                    inneværendeMåned().minusMonths(6).toString(),
+                    inneværendeMåned().minusYears(1),
+                    inneværendeMåned().minusMonths(6),
                     YtelseType.UTVIDET_BARNETRYGD,
                     1054,
                     person = person
                 ),
                 lagAndelTilkjentYtelse(
-                    inneværendeMåned().minusYears(1).toString(),
-                    inneværendeMåned().minusMonths(6).toString(),
+                    inneværendeMåned().minusYears(1),
+                    inneværendeMåned().minusMonths(6),
                     YtelseType.SMÅBARNSTILLEGG,
                     660,
                     person = person
@@ -122,15 +123,15 @@ class UtbetalingssikkerhetTest {
         tilkjentYtelse.andelerTilkjentYtelse.addAll(
             listOf(
                 lagAndelTilkjentYtelse(
-                    inneværendeMåned().minusYears(1).toString(),
-                    inneværendeMåned().minusMonths(6).toString(),
+                    inneværendeMåned().minusYears(1),
+                    inneværendeMåned().minusMonths(6),
                     YtelseType.UTVIDET_BARNETRYGD,
                     1054,
                     person = person
                 ),
                 lagAndelTilkjentYtelse(
-                    inneværendeMåned().minusYears(1).toString(),
-                    inneværendeMåned().minusMonths(6).toString(),
+                    inneværendeMåned().minusYears(1),
+                    inneværendeMåned().minusMonths(6),
                     YtelseType.SMÅBARNSTILLEGG,
                     660,
                     person = person
@@ -159,15 +160,15 @@ class UtbetalingssikkerhetTest {
         tilkjentYtelse.andelerTilkjentYtelse.addAll(
             listOf(
                 lagAndelTilkjentYtelse(
-                    inneværendeMåned().minusYears(1).toString(),
-                    inneværendeMåned().minusMonths(6).toString(),
+                    inneværendeMåned().minusYears(1),
+                    inneværendeMåned().minusMonths(6),
                     YtelseType.ORDINÆR_BARNETRYGD,
                     1054,
                     person = person
                 ),
                 lagAndelTilkjentYtelse(
-                    inneværendeMåned().minusYears(1).toString(),
-                    inneværendeMåned().minusMonths(6).toString(),
+                    inneværendeMåned().minusYears(1),
+                    inneværendeMåned().minusMonths(6),
                     YtelseType.UTVIDET_BARNETRYGD,
                     1500,
                     person = person
@@ -198,15 +199,15 @@ class UtbetalingssikkerhetTest {
         tilkjentYtelse.andelerTilkjentYtelse.addAll(
             listOf(
                 lagAndelTilkjentYtelse(
-                    inneværendeMåned().minusYears(1).toString(),
-                    inneværendeMåned().minusMonths(6).toString(),
+                    inneværendeMåned().minusYears(1),
+                    inneværendeMåned().minusMonths(6),
                     YtelseType.UTVIDET_BARNETRYGD,
                     1054,
                     person = person
                 ),
                 lagAndelTilkjentYtelse(
-                    inneværendeMåned().minusYears(1).toString(),
-                    inneværendeMåned().minusMonths(6).toString(),
+                    inneværendeMåned().minusYears(1),
+                    inneværendeMåned().minusMonths(6),
                     YtelseType.SMÅBARNSTILLEGG,
                     660,
                     person = person
@@ -230,8 +231,8 @@ class UtbetalingssikkerhetTest {
         tilkjentYtelse.andelerTilkjentYtelse.addAll(
             listOf(
                 lagAndelTilkjentYtelse(
-                    barn.fødselsdato.nesteMåned().toString(),
-                    barn.fødselsdato.plusYears(18).forrigeMåned().toString(),
+                    barn.fødselsdato.nesteMåned(),
+                    barn.fødselsdato.plusYears(18).forrigeMåned(),
                     YtelseType.ORDINÆR_BARNETRYGD,
                     1054,
                     person = barn,
@@ -251,16 +252,16 @@ class UtbetalingssikkerhetTest {
         tilkjentYtelse2.andelerTilkjentYtelse.addAll(
             listOf(
                 lagAndelTilkjentYtelse(
-                    barn.fødselsdato.nesteMåned().toString(),
-                    barn.fødselsdato.plusYears(18).forrigeMåned().toString(),
+                    barn.fødselsdato.nesteMåned(),
+                    barn.fødselsdato.plusYears(18).forrigeMåned(),
                     YtelseType.ORDINÆR_BARNETRYGD,
                     1054,
                     person = barn,
                     prosent = BigDecimal(100)
                 ),
                 lagAndelTilkjentYtelse(
-                    barn.fødselsdato.nesteMåned().toString(),
-                    barn.fødselsdato.plusYears(18).forrigeMåned().toString(),
+                    barn.fødselsdato.nesteMåned(),
+                    barn.fødselsdato.plusYears(18).forrigeMåned(),
                     YtelseType.SMÅBARNSTILLEGG,
                     660,
                     person = barn
@@ -287,8 +288,8 @@ class UtbetalingssikkerhetTest {
         tilkjentYtelse.andelerTilkjentYtelse.addAll(
             listOf(
                 lagAndelTilkjentYtelse(
-                    barn.fødselsdato.nesteMåned().toString(),
-                    barn.fødselsdato.plusYears(18).forrigeMåned().toString(),
+                    barn.fødselsdato.nesteMåned(),
+                    barn.fødselsdato.plusYears(18).forrigeMåned(),
                     YtelseType.ORDINÆR_BARNETRYGD,
                     1054,
                     person = barn,
@@ -308,16 +309,16 @@ class UtbetalingssikkerhetTest {
         tilkjentYtelse2.andelerTilkjentYtelse.addAll(
             listOf(
                 lagAndelTilkjentYtelse(
-                    barn.fødselsdato.nesteMåned().toString(),
-                    barn.fødselsdato.plusYears(18).forrigeMåned().toString(),
+                    barn.fødselsdato.nesteMåned(),
+                    barn.fødselsdato.plusYears(18).forrigeMåned(),
                     YtelseType.ORDINÆR_BARNETRYGD,
                     1054,
                     person = barn,
                     prosent = BigDecimal(50)
                 ),
                 lagAndelTilkjentYtelse(
-                    barn.fødselsdato.nesteMåned().toString(),
-                    barn.fødselsdato.plusYears(18).forrigeMåned().toString(),
+                    barn.fødselsdato.nesteMåned(),
+                    barn.fødselsdato.plusYears(18).forrigeMåned(),
                     YtelseType.SMÅBARNSTILLEGG,
                     660,
                     person = barn
@@ -340,8 +341,8 @@ class UtbetalingssikkerhetTest {
         tilkjentYtelse.andelerTilkjentYtelse.addAll(
             listOf(
                 lagAndelTilkjentYtelse(
-                    barn.fødselsdato.nesteMåned().toString(),
-                    barn.fødselsdato.plusYears(18).forrigeMåned().toString(),
+                    barn.fødselsdato.nesteMåned(),
+                    barn.fødselsdato.plusYears(18).forrigeMåned(),
                     YtelseType.ORDINÆR_BARNETRYGD,
                     1054,
                     person = barn
@@ -361,8 +362,8 @@ class UtbetalingssikkerhetTest {
         tilkjentYtelse2.andelerTilkjentYtelse.addAll(
             listOf(
                 lagAndelTilkjentYtelse(
-                    barn2.fødselsdato.nesteMåned().toString(),
-                    barn2.fødselsdato.plusYears(18).forrigeMåned().toString(),
+                    barn2.fødselsdato.nesteMåned(),
+                    barn2.fødselsdato.plusYears(18).forrigeMåned(),
                     YtelseType.ORDINÆR_BARNETRYGD,
                     1054,
                     person = barn2

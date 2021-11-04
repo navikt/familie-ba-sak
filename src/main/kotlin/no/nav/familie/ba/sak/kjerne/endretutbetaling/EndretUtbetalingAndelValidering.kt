@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.endretutbetaling
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.UtbetalingsikkerhetFeil
+import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.overlapperHeltEllerDelvisMed
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
@@ -103,13 +104,16 @@ fun validerAtDetFinnesDeltBostedEndringerMedSammeProsentForUtvidedeEndringer(
             endretUtbetaling.andelTilkjentYtelser.any { it.erUtvidet() }
         }
 
-    val alleEndredeAndelerErPåUtvidet =
-        endredeUtvidetUtbetalingerAndeler.flatMap { endretUtbetaling -> endretUtbetaling.andelTilkjentYtelser }
-            .all { it.erUtvidet() }
+    val endredeUtvidetUtbetalingerMedOrdinæreAndeler =
+        endredeUtvidetUtbetalingerAndeler
+            .filter { it.andelTilkjentYtelser.any { andelTilkjentYtelse -> !andelTilkjentYtelse.erUtvidet() } }
 
-    if (!alleEndredeAndelerErPåUtvidet) {
+    if (endredeUtvidetUtbetalingerMedOrdinæreAndeler.isNotEmpty()) {
         val feilmelding =
-            "Endring på utvidet ytelse kan ikke være på ordinær ytelse også."
+            "Endring på utvidet ytelse kan ikke være på ordinær ytelse også, men endring " +
+                Utils.slåSammen(endredeUtvidetUtbetalingerMedOrdinæreAndeler.map { "fra ${it.fom} til ${it.tom}" }) +
+                " gikk over både ordinær og utvidet utelse. " +
+                "Del opp endringen(e) i to endringer, én på den ordinære delen og én på den utvidede delen"
         throw FunksjonellFeil(frontendFeilmelding = feilmelding, melding = feilmelding)
     }
 
