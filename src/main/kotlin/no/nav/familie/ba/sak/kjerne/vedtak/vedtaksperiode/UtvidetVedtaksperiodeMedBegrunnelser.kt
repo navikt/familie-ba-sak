@@ -6,6 +6,9 @@ import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.finnesUtvidetEndringsutbetalingIPerioden
+import no.nav.familie.ba.sak.kjerne.dokument.UtvidetScenario
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.erStartPåUtvidetSammeMåned
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
@@ -24,7 +27,21 @@ data class UtvidetVedtaksperiodeMedBegrunnelser(
     val fritekster: List<String> = emptyList(),
     val gyldigeBegrunnelser: List<VedtakBegrunnelseSpesifikasjon> = emptyList(),
     val utbetalingsperiodeDetaljer: List<UtbetalingsperiodeDetalj> = emptyList(),
-)
+) {
+    fun hentUtvidetYtelseScenario(
+        andelTilkjentYtelser: List<AndelTilkjentYtelse>,
+    ) = when {
+        !erStartPåUtvidetSammeMåned(
+            andelTilkjentYtelser,
+            this.fom?.toYearMonth()
+        ) -> UtvidetScenario.IKKE_UTVIDET_YTELSE
+        andelTilkjentYtelser.finnesUtvidetEndringsutbetalingIPerioden(
+            this.fom?.toYearMonth(),
+            this.tom?.toYearMonth(),
+        ) -> UtvidetScenario.UTVIDET_YTELSE_ENDRET
+        else -> UtvidetScenario.UTVIDET_YTELSE_IKKE_ENDRET
+    }
+}
 
 data class RestVedtaksbegrunnelse(
     val vedtakBegrunnelseSpesifikasjon: VedtakBegrunnelseSpesifikasjon,

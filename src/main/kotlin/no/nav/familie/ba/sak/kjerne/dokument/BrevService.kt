@@ -6,10 +6,8 @@ import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.Utils.storForbokstavIHvertOrd
 import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.tilMånedÅr
-import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
-import no.nav.familie.ba.sak.kjerne.beregning.domene.erUtvidetEndringsutbetalingIPerioden
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.AutovedtakNyfødtBarnFraFør
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.AutovedtakNyfødtFørsteBarn
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Avslag
@@ -29,7 +27,6 @@ import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.SignaturVedtak
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.VedtakEndring
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.VedtakFellesfelter
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Vedtaksbrev
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.erStartPåUtvidetSammeMåned
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
@@ -181,6 +178,7 @@ class BrevService(
         val hjemler = hentHjemmeltekst(utvidetVedtaksperioderMedBegrunnelser, sanityBegrunnelser)
 
         val målform = persongrunnlagService.hentSøkersMålform(vedtak.behandling.id)
+
         val andelTilkjentYtelser =
             andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(vedtak.behandling.id)
 
@@ -190,11 +188,7 @@ class BrevService(
                 målform = målform,
                 uregistrerteBarn = søknadGrunnlagService.hentAktiv(behandlingId = vedtak.behandling.id)
                     ?.hentUregistrerteBarn() ?: emptyList(),
-                erUtvidetEndringsutbetalingISammePeriode = andelTilkjentYtelser.erUtvidetEndringsutbetalingIPerioden(
-                    it.fom?.toYearMonth(),
-                    it.tom?.toYearMonth(),
-                ),
-                erStartPåUtvidetSammeMåned = erStartPåUtvidetSammeMåned(andelTilkjentYtelser, it.fom?.toYearMonth())
+                utvidetScenario = it.hentUtvidetYtelseScenario(andelTilkjentYtelser)
             )
         }
 
