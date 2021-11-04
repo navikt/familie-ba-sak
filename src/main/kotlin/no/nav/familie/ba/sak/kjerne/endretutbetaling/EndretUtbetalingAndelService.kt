@@ -5,12 +5,12 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.beregning.domene.erUtvidetEndringsutbetalingIPerioden
 import no.nav.familie.ba.sak.kjerne.dokument.BrevKlient
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerIngenOverlappendeEndring
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerPeriodeInnenforTilkjentytelse
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.erUtvidetTilkjentYtelseMedSammeFomSomErUendret
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.fraRestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.hentGyldigEndretBegrunnelser
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -114,13 +114,13 @@ class EndretUtbetalingAndelService(
         val andelTilkjentYtelser = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id)
 
         endredeUtbetalingAndeler.forEach {
-            val erUtvidetTilkjentYtelseMedSammeFomSomErUendret =
-                erUtvidetTilkjentYtelseMedSammeFomSomErUendret(andelTilkjentYtelser, it.fom, it.tom)
+            val erUtvidetEndringsutbetalingISammePeriode =
+                andelTilkjentYtelser.erUtvidetEndringsutbetalingIPerioden(it.fom, it.tom)
 
             it.vedtakBegrunnelseSpesifikasjoner =
                 it.hentGyldigEndretBegrunnelser(
                     brevKlient.hentSanityBegrunnelser(),
-                    erUtvidetTilkjentYtelseMedSammeFomSomErUendret,
+                    erUtvidetEndringsutbetalingISammePeriode,
                 )
         }
 

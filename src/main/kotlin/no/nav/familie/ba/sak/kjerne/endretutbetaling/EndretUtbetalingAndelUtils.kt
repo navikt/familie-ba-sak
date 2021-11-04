@@ -4,12 +4,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import java.time.YearMonth
 
-fun erUtvidetTilkjentYtelseMedSammeFomSomErUendret(
+fun erStartPåUtvidetSammeMåned(
     andelTilkjentYtelser: List<AndelTilkjentYtelse>,
     fom: YearMonth?,
-    tom: YearMonth?,
-) = andelTilkjentYtelser
-    .filter { it.type == YtelseType.UTVIDET_BARNETRYGD }
-    .all { andelTilkjentYtelse ->
-        !andelTilkjentYtelse.endretUtbetalingAndeler.any { it.fom == fom && it.tom == tom }
-    }
+) = andelTilkjentYtelser.any { it.stønadFom == fom && it.type == YtelseType.UTVIDET_BARNETRYGD }

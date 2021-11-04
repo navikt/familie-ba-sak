@@ -189,7 +189,7 @@ fun hentPersonerForEtterEndretUtbetalingsperiode(
 
 fun EndretUtbetalingAndel.hentGyldigEndretBegrunnelser(
     sanityBegrunnelser: List<SanityBegrunnelse>,
-    erUtvidetTilkjentYtelseMedSammeFomSomErUendret: Boolean,
+    erUtvidetEndringsutbetalingISammePeriode: Boolean,
 ): List<VedtakBegrunnelseSpesifikasjon> {
     val gyldigeBegrunnelser = VedtakBegrunnelseSpesifikasjon.values()
         .filter { vedtakBegrunnelseSpesifikasjon ->
@@ -202,7 +202,7 @@ fun EndretUtbetalingAndel.hentGyldigEndretBegrunnelser(
                 val triggesAv = sanityBegrunnelse.tilTriggesAv()
                 sanityBegrunnelse.oppfyllerKravForTriggereForEndretUtbetaling(
                     triggesAv,
-                    erUtvidetTilkjentYtelseMedSammeFomSomErUendret,
+                    erUtvidetEndringsutbetalingISammePeriode,
                     this
                 )
             } else false
@@ -220,11 +220,11 @@ fun EndretUtbetalingAndel.hentGyldigEndretBegrunnelser(
 
 private fun SanityBegrunnelse.oppfyllerKravForTriggereForEndretUtbetaling(
     triggesAv: TriggesAv,
-    erUtvidetTilkjentYtelseMedSammeFomSomErUendret: Boolean,
+    erUtvidetEndringsutbetalingISammePeriode: Boolean,
     endretUtbetalingAndel: EndretUtbetalingAndel
 ): Boolean {
     val skalUtbetalesKrav = triggesAvSkalUtbetales(listOf(endretUtbetalingAndel), triggesAv)
-    val utvidetKrav = erUtvidetTilkjentYtelseMedSammeFomSomErUendret ==
+    val utvidetKrav = !erUtvidetEndringsutbetalingISammePeriode ==
         (this.vilkaar?.contains(SanityVilkår.UTVIDET_BARNETRYGD) ?: false)
 
     return skalUtbetalesKrav && utvidetKrav
