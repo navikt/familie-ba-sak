@@ -18,7 +18,7 @@ object EndretUtbetalingAndelValidering {
         endretUtbetalingAndel.validerUtfyltEndring()
         if (eksisterendeEndringerPåBehandling.any
             {
-                it.overlapperMed(endretUtbetalingAndel.periode()) &&
+                it.overlapperMed(endretUtbetalingAndel.periode) &&
                     it.person == endretUtbetalingAndel.person &&
                     it.årsak == endretUtbetalingAndel.årsak
             }
@@ -66,7 +66,7 @@ object EndretUtbetalingAndelValidering {
         if (
             !andelTilkjentYtelser
                 .filter { it.personIdent == endretUtbetalingAndel.person?.personIdent?.ident!! }
-                .filter { it.stønadsPeriode().overlapperHeltEllerDelvisMed(endretUtbetalingAndel.periode()) }
+                .filter { it.stønadsPeriode().overlapperHeltEllerDelvisMed(endretUtbetalingAndel.periode) }
                 .any { it.erDeltBosted() }
         ) {
             throw UtbetalingsikkerhetFeil(

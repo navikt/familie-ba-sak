@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.beregning.domene.hentUtvidetYtelseScenario
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.AutovedtakNyfødtBarnFraFør
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.AutovedtakNyfødtFørsteBarn
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Avslag
@@ -188,7 +189,7 @@ class BrevService(
                 målform = målform,
                 uregistrerteBarn = søknadGrunnlagService.hentAktiv(behandlingId = vedtak.behandling.id)
                     ?.hentUregistrerteBarn() ?: emptyList(),
-                utvidetScenario = it.hentUtvidetYtelseScenario(andelTilkjentYtelser)
+                utvidetScenario = andelTilkjentYtelser.hentUtvidetYtelseScenario(it.hentMånedPeriode())
             )
         }
 
