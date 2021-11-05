@@ -159,6 +159,9 @@ data class AndelTilkjentYtelse(
             }
     }
 
+    fun harEndringsutbetalingIPerioden(fom: YearMonth?, tom: YearMonth?) =
+        endretUtbetalingAndeler.any { it.fom == fom && it.tom == tom }
+
     companion object {
 
         /**
@@ -222,6 +225,14 @@ fun List<AndelTilkjentYtelse>.lagVertikaleSegmenter(): Map<LocalDateSegment<Int>
             acc[segment] = andelerForSegment
             acc
         }
+}
+
+fun List<AndelTilkjentYtelse>.finnesUtvidetEndringsutbetalingIPerioden(
+    fom: YearMonth?,
+    tom: YearMonth?
+) = this.any { andelTilkjentYtelse ->
+    andelTilkjentYtelse.erUtvidet() &&
+        andelTilkjentYtelse.harEndringsutbetalingIPerioden(fom, tom)
 }
 
 enum class YtelseType(val klassifisering: String) {

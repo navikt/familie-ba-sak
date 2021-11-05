@@ -60,8 +60,8 @@ internal class StønadsstatistikkServiceTest {
         val vedtak = lagVedtak(behandling)
 
         val andelTilkjentYtelseBarn1 = lagAndelTilkjentYtelse(
-            barn1.fødselsdato.nesteMåned().toString(),
-            barn1.fødselsdato.plusYears(3).toYearMonth().toString(),
+            barn1.fødselsdato.nesteMåned(),
+            barn1.fødselsdato.plusYears(3).toYearMonth(),
             YtelseType.ORDINÆR_BARNETRYGD,
             behandling = behandling,
             person = barn1,
@@ -69,8 +69,8 @@ internal class StønadsstatistikkServiceTest {
 
         )
         val andelTilkjentYtelseBarn2 = lagAndelTilkjentYtelse(
-            barn2.fødselsdato.nesteMåned().toString(),
-            barn2.fødselsdato.plusYears(18).forrigeMåned().toString(),
+            barn2.fødselsdato.nesteMåned(),
+            barn2.fødselsdato.plusYears(18).forrigeMåned(),
             YtelseType.ORDINÆR_BARNETRYGD,
             behandling = behandling,
             person = barn2,
