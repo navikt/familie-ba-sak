@@ -168,8 +168,8 @@ class BehandlingController(
 }
 
 data class NyBehandling(
-    val kategori: BehandlingKategori,
-    val underkategori: BehandlingUnderkategori,
+    val kategori: BehandlingKategori?,
+    val underkategori: BehandlingUnderkategori?,
     val søkersIdent: String,
     val behandlingType: BehandlingType,
     val journalpostID: String? = null,
@@ -189,7 +189,10 @@ class RestHenleggBehandlingInfo(
     val begrunnelse: String
 )
 
-class RestEndreBehandlingstema(val behandlingUnderkategori: BehandlingUnderkategori, val behandlingKategori: BehandlingKategori)
+class RestEndreBehandlingstema(
+    val behandlingUnderkategori: BehandlingUnderkategori,
+    val behandlingKategori: BehandlingKategori
+)
 
 enum class HenleggÅrsak(val beskrivelse: String) {
     SØKNAD_TRUKKET("Søknad trukket"),

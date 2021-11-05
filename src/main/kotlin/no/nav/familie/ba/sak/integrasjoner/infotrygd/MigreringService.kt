@@ -69,21 +69,27 @@ class MigreringService(
 
     @Transactional
     fun migrer(personIdent: String): MigreringResponseDto {
-        val løpendeSak = hentLøpendeSakFraInfotrygd(personIdent)
+        val løpendeSak: Sak = hentLøpendeSakFraInfotrygd(personIdent)
 
+        // TODO: Fix hvis ønskelig å kunne migrere EØS / Utvidet saker
         kastFeilDersomSakIkkeErOrdinær(løpendeSak)
 
         val barnasIdenter = finnBarnMedLøpendeStønad(løpendeSak)
 
-        fagsakService.hentEllerOpprettFagsakForPersonIdent(personIdent)
+        val fagsak: Fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(personIdent)
             .also { kastFeilDersomAlleredeMigrert(it) }
+
+        val løpendeKategori: BehandlingKategori? =
+            behandlingService.hentLøpendeKategori(fagsakId = fagsak.id)
+        val løpendeUnderkategori: BehandlingUnderkategori? =
+            behandlingService.hentLøpendeUnderkategori(fagsakId = fagsak.id)
 
         val behandling = stegService.håndterNyBehandling(
             NyBehandling(
                 søkersIdent = personIdent,
                 behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
-                kategori = BehandlingKategori.NASJONAL,
-                underkategori = BehandlingUnderkategori.ORDINÆR,
+                kategori = løpendeKategori ?: BehandlingKategori.NASJONAL,
+                underkategori = løpendeUnderkategori ?: BehandlingUnderkategori.ORDINÆR,
                 behandlingÅrsak = BehandlingÅrsak.MIGRERING,
                 skalBehandlesAutomatisk = true,
                 barnasIdenter = barnasIdenter

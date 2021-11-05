@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.integrasjoner.journalføring
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestJournalføring
 import no.nav.familie.ba.sak.ekstern.restDomene.RestOppdaterJournalpost
@@ -124,8 +123,8 @@ class JournalføringService(
         navIdent: String,
         type: BehandlingType,
         årsak: BehandlingÅrsak,
-        kategori: BehandlingKategori = BehandlingKategori.NASJONAL,
-        underkategori: BehandlingUnderkategori
+        kategori: BehandlingKategori?,
+        underkategori: BehandlingUnderkategori?
     ): Behandling {
         fagsakService.hentEllerOpprettFagsak(PersonIdent(personIdent))
         return stegService.håndterNyBehandling(
@@ -151,31 +150,14 @@ class JournalføringService(
         val tilknyttedeBehandlingIder: MutableList<String> = request.tilknyttedeBehandlingIder.toMutableList()
 
         val nyBehandling: Behandling? = if (request.opprettOgKnyttTilNyBehandling) {
-
-            val kategori = request.kategori ?: BehandlingKategori.NASJONAL
-            if (kategori == BehandlingKategori.EØS && !featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS)) {
-                throw FunksjonellFeil(
-                    melding = "EØS er ikke påskrudd",
-                    frontendFeilmelding = "Det er ikke støtte for å behandle EØS søknad."
-                )
-            }
-
-            val underkategori = request.hentUnderkategori()
-            if (underkategori == BehandlingUnderkategori.UTVIDET && !featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_UTVIDET)) {
-                throw FunksjonellFeil(
-                    melding = "Utvidet er ikke påskrudd",
-                    frontendFeilmelding = "Det er ikke støtte for å behandle utvidet søknad og du må fjerne tilknytningen til behandling."
-                )
-            }
-
             val nyBehandling =
                 opprettBehandlingOgEvtFagsakForJournalføring(
                     personIdent = request.bruker.id,
                     navIdent = request.navIdent,
                     type = request.nyBehandlingstype,
                     årsak = request.nyBehandlingsårsak,
-                    kategori = kategori,
-                    underkategori = underkategori
+                    kategori = request.kategori,
+                    underkategori = request.underkategori
                 )
             tilknyttedeBehandlingIder.add(nyBehandling.id.toString())
             nyBehandling

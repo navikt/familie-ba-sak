@@ -144,6 +144,8 @@ data class AndelTilkjentYtelse(
 
     fun stønadsPeriode() = MånedPeriode(this.stønadFom, this.stønadTom)
 
+    fun erEøs() = this.type == YtelseType.EØS
+
     fun erUtvidet() = this.type == YtelseType.UTVIDET_BARNETRYGD
 
     fun erSmåbarnstillegg() = this.type == YtelseType.SMÅBARNSTILLEGG

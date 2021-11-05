@@ -95,12 +95,16 @@ class StegService(
         val behandlingsType =
             if (fagsak.status == FagsakStatus.LØPENDE) BehandlingType.REVURDERING else BehandlingType.FØRSTEGANGSBEHANDLING
 
+        val løpendeKategori: BehandlingKategori? = behandlingService.hentLøpendeKategori(fagsakId = fagsak.id)
+        val løpendeUnderkategori: BehandlingUnderkategori? =
+            behandlingService.hentLøpendeUnderkategori(fagsakId = fagsak.id)
+
         val behandling = håndterNyBehandling(
             NyBehandling(
                 søkersIdent = nyBehandlingHendelse.morsIdent,
                 behandlingType = behandlingsType,
-                kategori = BehandlingKategori.NASJONAL,
-                underkategori = BehandlingUnderkategori.ORDINÆR,
+                kategori = løpendeKategori ?: BehandlingKategori.NASJONAL,
+                underkategori = løpendeUnderkategori ?: BehandlingUnderkategori.ORDINÆR,
                 behandlingÅrsak = BehandlingÅrsak.FØDSELSHENDELSE,
                 skalBehandlesAutomatisk = true,
                 barnasIdenter = nyBehandlingHendelse.barnasIdenter
