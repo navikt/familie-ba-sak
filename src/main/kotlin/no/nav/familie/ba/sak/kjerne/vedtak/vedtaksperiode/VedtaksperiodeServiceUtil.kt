@@ -139,11 +139,13 @@ private fun hentAktuellePersonerForVedtaksperiode(
     } else true
 }
 
-fun validerSatsendring(fom: LocalDate?) {
+fun validerSatsendring(fom: LocalDate?, persongrunnlag: PersonopplysningGrunnlag) {
     val satsendring = SatsService
         .finnSatsendring(fom ?: TIDENES_MORGEN)
 
-    if (satsendring.isEmpty()) {
+    val harBarnMedSeksårsdagPåFom = persongrunnlag.harBarnMedSeksårsdagPåFom(fom)
+
+    if (satsendring.isEmpty() && !harBarnMedSeksårsdagPåFom) {
         throw FunksjonellFeil(
             melding = "Begrunnelsen stemmer ikke med satsendring.",
             frontendFeilmelding = "Begrunnelsen stemmer ikke med satsendring. Vennligst velg en annen begrunnelse."

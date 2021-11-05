@@ -12,7 +12,7 @@ import no.nav.familie.ba.sak.common.forrigeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.common.tilMånedÅr
-import no.nav.familie.ba.sak.kjerne.beregning.SatsService
+import no.nav.familie.ba.sak.kjerne.beregning.fomErPåSatsendring
 import no.nav.familie.ba.sak.kjerne.dokument.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
@@ -1025,16 +1025,15 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
             triggesAv
         )
 
+        val begrunnelseErRiktigType =
+            utvidetVedtaksperiodeMedBegrunnelser.type.tillatteBegrunnelsestyper.contains(vedtakBegrunnelseType)
         return when {
             !triggesAv.valgbar -> false
-            !utvidetVedtaksperiodeMedBegrunnelser.type.tillatteBegrunnelsestyper.contains(vedtakBegrunnelseType) -> false
+            !begrunnelseErRiktigType -> false
             triggesAv.personerManglerOpplysninger -> vilkårsvurdering.harPersonerManglerOpplysninger()
             triggesAv.barnMedSeksårsdag ->
                 persongrunnlag.harBarnMedSeksårsdagPåFom(utvidetVedtaksperiodeMedBegrunnelser.fom)
-            triggesAv.satsendring ->
-                SatsService
-                    .finnSatsendring(utvidetVedtaksperiodeMedBegrunnelser.fom ?: TIDENES_MORGEN)
-                    .isNotEmpty()
+            triggesAv.satsendring -> fomErPåSatsendring(utvidetVedtaksperiodeMedBegrunnelser.fom ?: TIDENES_MORGEN)
 
             triggesAv.erEndret() ->
                 erEtterEndretPeriode &&

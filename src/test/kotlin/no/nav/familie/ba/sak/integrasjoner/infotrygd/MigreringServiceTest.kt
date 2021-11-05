@@ -2,14 +2,17 @@ package no.nav.familie.ba.sak.integrasjoner.infotrygd
 
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.slot
 import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.fødselsnummerGenerator
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
+import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestClient
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
@@ -36,6 +39,8 @@ import no.nav.familie.kontrakter.ba.infotrygd.InfotrygdSøkResponse
 import no.nav.familie.kontrakter.ba.infotrygd.Sak
 import no.nav.familie.kontrakter.ba.infotrygd.Stønad
 import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
+import no.nav.familie.kontrakter.felles.personopplysning.ForelderBarnRelasjon
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.assertj.core.api.Assertions.tuple
@@ -104,11 +109,21 @@ class MigreringServiceTest {
     @Autowired
     lateinit var vilkårService: VilkårService
 
+    @Autowired
+    lateinit var pdlRestClient: PdlRestClient
+
     @BeforeEach
     fun init() {
         MockKafkaProducer.sendteMeldinger.clear()
         databaseCleanupService.truncate()
         every { infotrygdBarnetrygdClient.harÅpenSakIInfotrygd(any(), any()) } returns false
+
+        val slot = slot<String>()
+        every { pdlRestClient.hentForelderBarnRelasjon(capture(slot)) } answers {
+            infotrygdBarnetrygdClient.hentSaker(listOf(slot.captured)).bruker.first().stønad!!.barn.map {
+                ForelderBarnRelasjon(relatertPersonsIdent = it.barnFnr!!, relatertPersonsRolle = FORELDERBARNRELASJONROLLE.BARN)
+            }
+        }
     }
 
     @Test
@@ -163,6 +178,24 @@ class MigreringServiceTest {
         assertThat(vilkårResultater.filter { it.vilkårType.gjelderAlltidFraBarnetsFødselsdato() })
             .extracting("periodeFom")
             .hasSameElementsAs(barnasFødselsdatoer)
+    }
+
+    @Test
+    fun `migrering skal feile dersom PDL returnerer andre barn enn Infotrygd på person`() {
+        val barnUnder18 = fødselsnummerGenerator.foedselsnummer(LocalDate.now()).asString
+        val barnOver18 = fødselsnummerGenerator.foedselsnummer(LocalDate.now().minusYears(19)).asString
+        every {
+            infotrygdBarnetrygdClient.hentSaker(any(), any())
+        } returns InfotrygdSøkResponse(listOf(opprettSakMedBeløp(2708.0)), emptyList())
+        every { pdlRestClient.hentForelderBarnRelasjon(any()) } returns
+            listOf(
+                ForelderBarnRelasjon(relatertPersonsIdent = barnUnder18, relatertPersonsRolle = FORELDERBARNRELASJONROLLE.BARN),
+                ForelderBarnRelasjon(relatertPersonsIdent = barnOver18, relatertPersonsRolle = FORELDERBARNRELASJONROLLE.BARN)
+            )
+
+        assertThatThrownBy {
+            migreringService.migrer(ClientMocks.søkerFnr[0])
+        }.hasMessageContaining("Kan ikke migrere fordi barn fra PDL ikke samsvarer med løpende barnetrygdbarn fra Infotrygd.")
     }
 
     @Test
@@ -234,7 +267,7 @@ class MigreringServiceTest {
 
         val migreringServiceMock = MigreringService(
             mockk(), mockk(), mockk(), mockk(), mockk(), mockk(), mockk(), mockk(), mockk(), mockk(), mockk(),
-            env = mockk(relaxed = true)
+            env = mockk(relaxed = true), mockk()
         ) // => env.erDev() = env.erE2E() = false
 
         listOf<Long>(0, 1).forEach { antallDagerEtterKjøredato ->

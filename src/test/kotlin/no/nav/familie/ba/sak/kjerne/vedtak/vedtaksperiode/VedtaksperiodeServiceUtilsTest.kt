@@ -33,8 +33,8 @@ class VedtaksperiodeServiceUtilsTest {
             listOf(
                 lagAndelTilkjentYtelse(
                     person = person1,
-                    fom = fom.toString(),
-                    tom = tom.toString(),
+                    fom = fom,
+                    tom = tom,
                     prosent = BigDecimal(0),
                     endretUtbetalingAndeler = listOf(
                         lagEndretUtbetalingAndel(
@@ -47,8 +47,8 @@ class VedtaksperiodeServiceUtilsTest {
                 ),
                 lagAndelTilkjentYtelse(
                     person = person2,
-                    fom = fom.toString(),
-                    tom = tom.toString(),
+                    fom = fom,
+                    tom = tom,
                     prosent = BigDecimal(0),
                     endretUtbetalingAndeler = listOf(
                         lagEndretUtbetalingAndel(
@@ -86,8 +86,8 @@ class VedtaksperiodeServiceUtilsTest {
             listOf(
                 lagAndelTilkjentYtelse(
                     person = person1,
-                    fom = fom.toString(),
-                    tom = tom.toString(),
+                    fom = fom,
+                    tom = tom,
                     prosent = BigDecimal(100),
                     endretUtbetalingAndeler = listOf(
                         lagEndretUtbetalingAndel(
@@ -100,8 +100,8 @@ class VedtaksperiodeServiceUtilsTest {
                 ),
                 lagAndelTilkjentYtelse(
                     person = person2,
-                    fom = fom.toString(),
-                    tom = tom.toString(),
+                    fom = fom,
+                    tom = tom,
                     prosent = BigDecimal(0),
                     endretUtbetalingAndeler = listOf(
                         lagEndretUtbetalingAndel(
@@ -134,8 +134,8 @@ class VedtaksperiodeServiceUtilsTest {
             listOf(
                 lagAndelTilkjentYtelse(
                     person = person1,
-                    fom = fom.toString(),
-                    tom = tom.toString(),
+                    fom = fom,
+                    tom = tom,
                     prosent = BigDecimal(0),
                     endretUtbetalingAndeler = listOf(
                         lagEndretUtbetalingAndel(
@@ -148,8 +148,8 @@ class VedtaksperiodeServiceUtilsTest {
                 ),
                 lagAndelTilkjentYtelse(
                     person = person2,
-                    fom = fom.toString(),
-                    tom = tom.toString(),
+                    fom = fom,
+                    tom = tom,
                     prosent = BigDecimal(0),
                     endretUtbetalingAndeler = listOf(
                         lagEndretUtbetalingAndel(
@@ -195,8 +195,8 @@ class VedtaksperiodeServiceUtilsTest {
             listOf(
                 lagAndelTilkjentYtelse(
                     person = person1,
-                    fom = fom.toString(),
-                    tom = tom.toString(),
+                    fom = fom,
+                    tom = tom,
                     prosent = BigDecimal(0),
                     endretUtbetalingAndeler = listOf(
                         lagEndretUtbetalingAndel(
@@ -209,8 +209,8 @@ class VedtaksperiodeServiceUtilsTest {
                 ),
                 lagAndelTilkjentYtelse(
                     person = person2,
-                    fom = fom.minusMonths(2).toString(),
-                    tom = tom.minusMonths(2).toString(),
+                    fom = fom.minusMonths(2),
+                    tom = tom.minusMonths(2),
                     prosent = BigDecimal(0),
                     endretUtbetalingAndeler = listOf(
                         lagEndretUtbetalingAndel(
@@ -243,8 +243,8 @@ class VedtaksperiodeServiceUtilsTest {
             listOf(
                 lagAndelTilkjentYtelse(
                     person = person1,
-                    fom = fom.toString(),
-                    tom = tom.toString(),
+                    fom = fom,
+                    tom = tom,
                     prosent = BigDecimal(0),
                     endretUtbetalingAndeler = listOf(
                         lagEndretUtbetalingAndel(
@@ -257,8 +257,8 @@ class VedtaksperiodeServiceUtilsTest {
                 ),
                 lagAndelTilkjentYtelse(
                     person = person2,
-                    fom = fom.toString(),
-                    tom = tom.plusMonths(2).toString(),
+                    fom = fom,
+                    tom = tom.plusMonths(2),
                     prosent = BigDecimal(0),
                     endretUtbetalingAndeler = listOf(
                         lagEndretUtbetalingAndel(

@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.integrasjoner.infotrygd
 
+import no.nav.commons.foedselsnummer.FoedselsNr
 import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
@@ -7,6 +8,7 @@ import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.MigreringResponseDto
+import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestClient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -29,7 +31,9 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
 import no.nav.familie.kontrakter.ba.infotrygd.Sak
+import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import no.nav.fpsak.tidsserie.LocalDateSegment
+import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -60,10 +64,12 @@ class MigreringService(
     private val behandlingRepository: BehandlingRepository,
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
     private val totrinnskontrollService: TotrinnskontrollService,
-    private val env: EnvService
+    private val env: EnvService,
+    private val pdlRestClient: PdlRestClient
 ) {
 
     private val alleredeMigrertPersonFeilmelding = "Personen er allerede migrert."
+    private val secureLog = LoggerFactory.getLogger("secureLogger")
 
     @Transactional
     fun migrer(personIdent: String): MigreringResponseDto {
@@ -73,6 +79,7 @@ class MigreringService(
         kastFeilDersomSakIkkeErOrdinær(løpendeSak)
 
         val barnasIdenter = finnBarnMedLøpendeStønad(løpendeSak)
+        validerAtBarnErIRelasjonMedPersonident(personIdent, barnasIdenter)
 
         fagsakService.hentEllerOpprettFagsakForPersonIdent(personIdent)
             .also { kastFeilDersomAlleredeMigrert(it) }
@@ -98,7 +105,27 @@ class MigreringService(
 
         iverksett(behandlingEtterVilkårsvurdering)
 
-        return MigreringResponseDto(behandlingEtterVilkårsvurdering.fagsak.id, behandlingEtterVilkårsvurdering.id)
+        return MigreringResponseDto(
+            fagsakId = behandlingEtterVilkårsvurdering.fagsak.id,
+            behandlingId = behandlingEtterVilkårsvurdering.id,
+            infotrygdStønadId = løpendeSak.stønad?.id,
+            infotrygdSakId = løpendeSak.id
+        )
+    }
+
+    private fun validerAtBarnErIRelasjonMedPersonident(personIdent: String, barnasIdenter: List<String>) {
+        val listeBarnFraPdl = pdlRestClient.hentForelderBarnRelasjon(personIdent)
+            .filter {
+                it.relatertPersonsRolle == FORELDERBARNRELASJONROLLE.BARN &&
+                    FoedselsNr(it.relatertPersonsIdent).foedselsdato.isAfter(LocalDate.now().minusYears(18))
+            }.map { it.relatertPersonsIdent }
+        if (barnasIdenter.size != listeBarnFraPdl.size || !listeBarnFraPdl.containsAll(barnasIdenter)) {
+            secureLog.info(
+                "Kan ikke migrere person $personIdent fordi barn fra PDL ikke samsvarer med løpende barnetrygdbarn fra Infotrygd.\n" +
+                    "Barn fra PDL: ${listeBarnFraPdl}\n Barn fra Infotrygd: $barnasIdenter"
+            )
+            throw error("Kan ikke migrere fordi barn fra PDL ikke samsvarer med løpende barnetrygdbarn fra Infotrygd.")
+        }
     }
 
     private fun kastFeilDersomAlleredeMigrert(fagsak: Fagsak) {
