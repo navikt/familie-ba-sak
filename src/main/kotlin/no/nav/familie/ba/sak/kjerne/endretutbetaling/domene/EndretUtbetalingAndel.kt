@@ -13,16 +13,15 @@ import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.ekstern.restDomene.RestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.dokument.domene.SanityBegrunnelse
+import no.nav.familie.ba.sak.kjerne.dokument.domene.SanityVilkår
 import no.nav.familie.ba.sak.kjerne.dokument.domene.tilTriggesAv
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
-import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjonListConverter
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.triggesAvSkalUtbetales
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -165,7 +164,7 @@ fun EndretUtbetalingAndel.tilRestEndretUtbetalingAndel() = RestEndretUtbetalingA
 
 fun EndretUtbetalingAndel.fraRestEndretUtbetalingAndel(
     restEndretUtbetalingAndel: RestEndretUtbetalingAndel,
-    person: Person
+    person: Person,
 ): EndretUtbetalingAndel {
     this.fom = restEndretUtbetalingAndel.fom
     this.tom = restEndretUtbetalingAndel.tom
@@ -178,33 +177,6 @@ fun EndretUtbetalingAndel.fraRestEndretUtbetalingAndel(
     return this
 }
 
-fun List<EndretUtbetalingAndel>.tilVedtaksperiodeMedBegrunnelser(
-    vedtak: Vedtak,
-    fom: LocalDate?,
-    tom: LocalDate?,
-): VedtaksperiodeMedBegrunnelser {
-
-    return VedtaksperiodeMedBegrunnelser(
-        fom = fom,
-        tom = tom,
-        vedtak = vedtak,
-        type = Vedtaksperiodetype.ENDRET_UTBETALING
-    ).also { vedtakperiodeMedbegrunnelse ->
-        vedtakperiodeMedbegrunnelse.begrunnelser.addAll(
-            this.flatMap { it.vedtakBegrunnelseSpesifikasjoner }.toSet()
-                .map { vedtakBegrunnelseSpesifikasjon ->
-                    Vedtaksbegrunnelse(
-                        vedtaksperiodeMedBegrunnelser = vedtakperiodeMedbegrunnelse,
-                        vedtakBegrunnelseSpesifikasjon = vedtakBegrunnelseSpesifikasjon,
-                        personIdenter = this.filter {
-                            it.harVedtakBegrunnelseSpesifikasjon(vedtakBegrunnelseSpesifikasjon)
-                        }.mapNotNull { it.person?.personIdent?.ident }
-                    )
-                }
-        )
-    }
-}
-
 fun hentPersonerForEtterEndretUtbetalingsperiode(
     endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
     vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser,
@@ -215,16 +187,47 @@ fun hentPersonerForEtterEndretUtbetalingsperiode(
         endringsaarsaker.contains(endretUtbetalingAndel.årsak)
 }.mapNotNull { it.person }
 
-fun EndretUtbetalingAndel.hentGyldigEndretBegrunnelser(sanityBegrunnelser: List<SanityBegrunnelse>): List<VedtakBegrunnelseSpesifikasjon> {
-
-    return VedtakBegrunnelseSpesifikasjon.values()
+fun EndretUtbetalingAndel.hentGyldigEndretBegrunnelser(
+    sanityBegrunnelser: List<SanityBegrunnelse>,
+    erUtvidetEndringsutbetalingISammePeriode: Boolean,
+): List<VedtakBegrunnelseSpesifikasjon> {
+    val gyldigeBegrunnelser = VedtakBegrunnelseSpesifikasjon.values()
         .filter { vedtakBegrunnelseSpesifikasjon ->
             vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType == VedtakBegrunnelseType.ENDRET_UTBETALING
         }
         .filter { vedtakBegrunnelseSpesifikasjon ->
             val sanityBegrunnelse = vedtakBegrunnelseSpesifikasjon.tilSanityBegrunnelse(sanityBegrunnelser)
-            sanityBegrunnelse != null && triggesAvSkalUtbetales(listOf(this), sanityBegrunnelse.tilTriggesAv())
+
+            if (sanityBegrunnelse != null) {
+                val triggesAv = sanityBegrunnelse.tilTriggesAv()
+                sanityBegrunnelse.oppfyllerKravForTriggereForEndretUtbetaling(
+                    triggesAv,
+                    erUtvidetEndringsutbetalingISammePeriode,
+                    this
+                )
+            } else false
         }
+
+    if (gyldigeBegrunnelser.size != 1) {
+        throw Feil(
+            "Endret utbetalingandel skal ha nøyaktig én begrunnelse, " +
+                "men ${gyldigeBegrunnelser.size} gyldigeBegrunnelser ble funnet"
+        )
+    }
+
+    return gyldigeBegrunnelser
+}
+
+private fun SanityBegrunnelse.oppfyllerKravForTriggereForEndretUtbetaling(
+    triggesAv: TriggesAv,
+    erUtvidetEndringsutbetalingISammePeriode: Boolean,
+    endretUtbetalingAndel: EndretUtbetalingAndel
+): Boolean {
+    val skalUtbetalesKrav = triggesAvSkalUtbetales(listOf(endretUtbetalingAndel), triggesAv)
+    val utvidetKrav = !erUtvidetEndringsutbetalingISammePeriode ==
+        (this.vilkaar?.contains(SanityVilkår.UTVIDET_BARNETRYGD) ?: false)
+
+    return skalUtbetalesKrav && utvidetKrav
 }
 
 fun List<EndretUtbetalingAndel>.somOverlapper(nullableMånedPeriode: NullableMånedPeriode) =
