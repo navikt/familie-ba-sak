@@ -269,8 +269,8 @@ class BeregningServiceTest {
                     begrunnelse = "En begrunnelse",
                     andelTilkjentYtelser = mutableListOf(
                         lagAndelTilkjentYtelse(
-                            fom = periodeFom.toYearMonth().toString(),
-                            tom = periodeTom.toYearMonth().toString()
+                            fom = periodeFom.toYearMonth(),
+                            tom = periodeTom.toYearMonth()
                         )
                     )
                 )

@@ -1,6 +1,9 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.MånedPeriode
+import no.nav.familie.ba.sak.common.TIDENES_ENDE
+import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
@@ -24,7 +27,12 @@ data class UtvidetVedtaksperiodeMedBegrunnelser(
     val fritekster: List<String> = emptyList(),
     val gyldigeBegrunnelser: List<VedtakBegrunnelseSpesifikasjon> = emptyList(),
     val utbetalingsperiodeDetaljer: List<UtbetalingsperiodeDetalj> = emptyList(),
-)
+) {
+    fun hentMånedPeriode() = MånedPeriode(
+        (fom ?: TIDENES_MORGEN).toYearMonth(),
+        (tom ?: TIDENES_ENDE).toYearMonth()
+    )
+}
 
 data class RestVedtaksbegrunnelse(
     val vedtakBegrunnelseSpesifikasjon: VedtakBegrunnelseSpesifikasjon,
