@@ -14,6 +14,9 @@ object Behandlingutils {
             .findLast { !it.erTekniskOpphør() && it.steg == StegType.BEHANDLING_AVSLUTTET }
     }
 
+    fun hentSisteBehandlingSomIkkeErTekniskOpphør(iverksatteBehandlinger: List<Behandling>): Behandling? =
+        iverksatteBehandlinger.sortedBy { it.opprettetTidspunkt }.findLast { !it.erTekniskOpphør() }
+
     fun hentForrigeIverksatteBehandling(
         iverksatteBehandlinger: List<Behandling>,
         behandlingFørFølgende: Behandling
