@@ -168,8 +168,8 @@ class BehandlingController(
 }
 
 data class NyBehandling(
-    val kategori: BehandlingKategori?,
-    val underkategori: BehandlingUnderkategori?,
+    val kategori: BehandlingKategori? = null,
+    val underkategori: BehandlingUnderkategori? = null,
     val søkersIdent: String,
     val behandlingType: BehandlingType,
     val journalpostID: String? = null,

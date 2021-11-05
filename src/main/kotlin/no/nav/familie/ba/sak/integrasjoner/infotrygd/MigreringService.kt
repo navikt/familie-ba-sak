@@ -10,11 +10,9 @@ import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.MigreringResponseDto
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.beregnUtbetalingsperioderUtenKlassifisering
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
@@ -76,20 +74,13 @@ class MigreringService(
 
         val barnasIdenter = finnBarnMedLøpendeStønad(løpendeSak)
 
-        val fagsak: Fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(personIdent)
+        fagsakService.hentEllerOpprettFagsakForPersonIdent(personIdent)
             .also { kastFeilDersomAlleredeMigrert(it) }
-
-        val løpendeKategori: BehandlingKategori? =
-            behandlingService.hentLøpendeKategori(fagsakId = fagsak.id)
-        val løpendeUnderkategori: BehandlingUnderkategori? =
-            behandlingService.hentLøpendeUnderkategori(fagsakId = fagsak.id)
 
         val behandling = stegService.håndterNyBehandling(
             NyBehandling(
                 søkersIdent = personIdent,
                 behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
-                kategori = løpendeKategori ?: BehandlingKategori.NASJONAL,
-                underkategori = løpendeUnderkategori ?: BehandlingUnderkategori.ORDINÆR,
                 behandlingÅrsak = BehandlingÅrsak.MIGRERING,
                 skalBehandlesAutomatisk = true,
                 barnasIdenter = barnasIdenter
