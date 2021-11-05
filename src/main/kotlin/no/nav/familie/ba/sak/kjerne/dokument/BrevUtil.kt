@@ -295,7 +295,7 @@ fun UtvidetVedtaksperiodeMedBegrunnelser.hentEndretUtbetalingBrevPeriode(
         barnasFodselsdager = this.utbetalingsperiodeDetaljer.tilBarnasFødselsdatoer(),
         begrunnelser = begrunnelserOgFritekster,
         type = when {
-            utvidetScenario == UtvidetScenario.UTVIDET_YTELSE_IKKE_ENDRET ->
+            ingenUtbetaling && utvidetScenario == UtvidetScenario.UTVIDET_YTELSE_IKKE_ENDRET ->
                 EndretUtbetalingBrevPeriodeType.ENDRET_UTBETALINGSPERIODE_DELVIS_UTBETALING
             ingenUtbetaling ->
                 EndretUtbetalingBrevPeriodeType.ENDRET_UTBETALINGSPERIODE_INGEN_UTBETALING
