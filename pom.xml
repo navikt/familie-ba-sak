@@ -31,6 +31,7 @@
         <familie.kontrakter.skatteetaten>2.0_20210920094114_9c74239</familie.kontrakter.skatteetaten>
         <mockk.version>1.12.0</mockk.version>
         <token-validation-spring.version>1.3.9</token-validation-spring.version>
+        <nav-foedselsnummer.version>1.0-SNAPSHOT.6</nav-foedselsnummer.version>
 
         <!-- Må settes for å kunne kjøre opp mock-oauth2-server i unit-tester -->
         <okhttp3.version>4.9.0</okhttp3.version>
@@ -43,7 +44,6 @@
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
         <!--suppress UnresolvedMavenProperty Ligger som secret i github-->
         <sonar.login>${SONAR_LOGIN}</sonar.login>
-
     </properties>
 
     <dependencies>
@@ -202,8 +202,13 @@
         <dependency>
             <groupId>nav-foedselsnummer</groupId>
             <artifactId>testutils</artifactId>
-            <version>1.0-SNAPSHOT.6</version>
+            <version>${nav-foedselsnummer.version}</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>nav-foedselsnummer</groupId>
+            <artifactId>core</artifactId>
+            <version>${nav-foedselsnummer.version}</version>
         </dependency>
         <dependency>
             <groupId>no.nav.familie.felles</groupId>
