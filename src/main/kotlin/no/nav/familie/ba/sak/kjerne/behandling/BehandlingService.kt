@@ -126,39 +126,37 @@ class BehandlingService(
 
     fun oppdaterBehandlingstema(
         behandling: Behandling,
-        nyBehandlingKategori: BehandlingKategori,
-        nyBehandlingUnderkategori: BehandlingUnderkategori,
+        nyKategori: BehandlingKategori,
+        nyUnderkategori: BehandlingUnderkategori,
         manueltOppdatert: Boolean = false
     ): Behandling {
 
-        val nyBehandlingKategori = bestemKategori(
+        val nyKategori = bestemKategori(
             behandlingÅrsak = behandling.opprettetÅrsak,
-            nyBehandlingKategori = nyBehandlingKategori,
-            løpendeBehandlingKategori = behandling.kategori
+            nyBehandlingKategori = nyKategori,
+            løpendeBehandlingKategori = hentLøpendeKategori(fagsakId = behandling.fagsak.id)
         )
 
-        val nyBehandlingUnderkategori: BehandlingUnderkategori =
-            if (manueltOppdatert) nyBehandlingUnderkategori
+        val nyUnderkategori: BehandlingUnderkategori =
+            if (manueltOppdatert) nyUnderkategori
             else bestemUnderkategori(
-                nyUnderkategori = nyBehandlingUnderkategori,
+                nyUnderkategori = nyUnderkategori,
                 nyBehandlingType = behandling.type,
-                løpendeUnderkategori = hentLøpendeUnderkategori(
-                    fagsakId = behandling.fagsak.id
-                )
+                løpendeUnderkategori = hentLøpendeUnderkategori(fagsakId = behandling.fagsak.id)
             )
 
-        sjekkToggleOgThrowHvisBrudd(nyBehandlingKategori, nyBehandlingUnderkategori)
+        sjekkToggleOgThrowHvisBrudd(nyKategori, nyUnderkategori)
 
-        val forrigeBehandlingUnderkategori = behandling.underkategori
-        val forrigeBehandlingKategori = behandling.kategori
-        val skalOppdatereBehandlingKategori = nyBehandlingKategori != forrigeBehandlingKategori
-        val skalOppdatereBehandlingUnderkategori = nyBehandlingUnderkategori != forrigeBehandlingUnderkategori
+        val forrigeUnderkategori = behandling.underkategori
+        val forrigeKategori = behandling.kategori
+        val skalOppdatereKategori = nyKategori != forrigeKategori
+        val skalOppdatereUnderkategori = nyUnderkategori != forrigeUnderkategori
 
-        if (skalOppdatereBehandlingKategori) {
-            behandling.apply { kategori = nyBehandlingKategori }
+        if (skalOppdatereKategori) {
+            behandling.apply { kategori = nyKategori }
         }
-        if (skalOppdatereBehandlingUnderkategori) {
-            behandling.apply { underkategori = nyBehandlingUnderkategori }
+        if (skalOppdatereUnderkategori) {
+            behandling.apply { underkategori = nyUnderkategori }
         }
 
         return lagreEllerOppdater(behandling).also { behandling ->
@@ -171,13 +169,13 @@ class BehandlingService(
                 } else null
             }
 
-            if (manueltOppdatert && (skalOppdatereBehandlingKategori || skalOppdatereBehandlingUnderkategori)) {
+            if (manueltOppdatert && (skalOppdatereKategori || skalOppdatereUnderkategori)) {
                 loggService.opprettEndretBehandlingstema(
                     behandling = behandling,
-                    forrigeKategori = forrigeBehandlingKategori,
-                    forrigeUnderkategori = forrigeBehandlingUnderkategori,
-                    nyKategori = nyBehandlingKategori,
-                    nyUnderkategori = nyBehandlingUnderkategori
+                    forrigeKategori = forrigeKategori,
+                    forrigeUnderkategori = forrigeUnderkategori,
+                    nyKategori = nyKategori,
+                    nyUnderkategori = nyUnderkategori
                 )
             }
         }

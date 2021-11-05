@@ -135,8 +135,8 @@ class BehandlingController(
     ): ResponseEntity<Ressurs<RestFagsak>> {
         val behandling = behandlingsService.oppdaterBehandlingstema(
             behandling = behandlingsService.hent(behandlingId),
-            nyBehandlingUnderkategori = endreBehandling.behandlingUnderkategori,
-            nyBehandlingKategori = endreBehandling.behandlingKategori,
+            nyUnderkategori = endreBehandling.behandlingUnderkategori,
+            nyKategori = endreBehandling.behandlingKategori,
             manueltOppdatert = true
         )
 
