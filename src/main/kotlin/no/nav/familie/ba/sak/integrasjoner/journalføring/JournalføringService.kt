@@ -123,8 +123,8 @@ class JournalføringService(
         navIdent: String,
         type: BehandlingType,
         årsak: BehandlingÅrsak,
-        kategori: BehandlingKategori?,
-        underkategori: BehandlingUnderkategori?
+        kategori: BehandlingKategori? = null,
+        underkategori: BehandlingUnderkategori? = null
     ): Behandling {
         fagsakService.hentEllerOpprettFagsak(PersonIdent(personIdent))
         return stegService.håndterNyBehandling(

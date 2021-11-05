@@ -73,9 +73,8 @@ class MigreringService(
 
     @Transactional
     fun migrer(personIdent: String): MigreringResponseDto {
-        val løpendeSak: Sak = hentLøpendeSakFraInfotrygd(personIdent)
+        val løpendeSak = hentLøpendeSakFraInfotrygd(personIdent)
 
-        // TODO: Fix hvis ønskelig å kunne migrere EØS / Utvidet saker
         kastFeilDersomSakIkkeErOrdinær(løpendeSak)
 
         val barnasIdenter = finnBarnMedLøpendeStønad(løpendeSak)
