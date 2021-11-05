@@ -70,14 +70,14 @@ class BeregningService(
      */
     fun hentSentTilGodkjenningTilkjentYtelseForBarn(
         barnIdent: PersonIdent,
-        behandlendeBehandling: Behandling
+        fagsakId: Long
     ): List<TilkjentYtelse> {
         val andreFagsaker = fagsakService.hentFagsakerPåPerson(barnIdent)
-            .filter { it.id != behandlendeBehandling.fagsak.id }
+            .filter { it.id != fagsakId }
 
         return andreFagsaker.mapNotNull { fagsak ->
             Behandlingutils.hentSisteBehandlingSomIkkeErTekniskOpphør(
-                iverksatteBehandlinger = behandlingRepository.finnBehandlingerSentTilGodkjenning(
+                behandlinger = behandlingRepository.finnBehandlingerSentTilGodkjenning(
                     fagsakId = fagsak.id
                 )
             )
