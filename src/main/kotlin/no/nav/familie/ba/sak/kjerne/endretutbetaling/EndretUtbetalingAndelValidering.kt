@@ -103,7 +103,7 @@ fun validerDeltBostedEndringerIkkeKrysserUtvidetYtelse(
     endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
     andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
 ) {
-    fun EndretUtbetalingAndel.finnKrysserendeUtidetYtelse(
+    fun EndretUtbetalingAndel.finnKryssendeUtidetYtelse(
         andelTilkjentYtelser: List<AndelTilkjentYtelse>,
     ): AndelTilkjentYtelse? =
         andelTilkjentYtelser
@@ -114,7 +114,7 @@ fun validerDeltBostedEndringerIkkeKrysserUtvidetYtelse(
             }
 
     endretUtbetalingAndeler.forEach {
-        val kryssendeTilkjentYtelse = it.finnKrysserendeUtidetYtelse(
+        val kryssendeTilkjentYtelse = it.finnKryssendeUtidetYtelse(
             andelerTilkjentYtelse
         )
         if (it.årsakErDeltBosted() && kryssendeTilkjentYtelse != null) {
