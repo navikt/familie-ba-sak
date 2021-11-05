@@ -1,10 +1,13 @@
 package no.nav.familie.ba.sak.kjerne.endretutbetaling
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.UtbetalingsikkerhetFeil
 import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.overlapperHeltEllerDelvisMed
+import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 
@@ -93,6 +96,36 @@ object EndretUtbetalingAndelValidering {
                 melding = "Det er opprettet instanser av EndretUtbetalingandel som ikke er tilknyttet noen andeler. De må enten lagres eller slettes av SB.",
                 frontendFeilmelding = "Du har endrede utbetalingsperioder. Bekreft, slett eller oppdater periodene i listen."
             )
+    }
+}
+
+fun validerDeltBostedEndringerIkkeKrysserUtvidetYtelse(
+    endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
+    andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
+) {
+    fun EndretUtbetalingAndel.finnKrysserendeUtidetYtelse(
+        andelTilkjentYtelser: List<AndelTilkjentYtelse>,
+    ): AndelTilkjentYtelse? =
+        andelTilkjentYtelser
+            .filter { it.type == YtelseType.UTVIDET_BARNETRYGD }
+            .find {
+                it.overlapperPeriode(MånedPeriode(this.fom!!, this.tom!!)) &&
+                    (this.fom != it.stønadFom || this.tom!! > it.stønadTom)
+            }
+
+    endretUtbetalingAndeler.forEach {
+        val kryssendeTilkjentYtelse = it.finnKrysserendeUtidetYtelse(
+            andelerTilkjentYtelse
+        )
+        if (it.årsakErDeltBosted() && kryssendeTilkjentYtelse != null) {
+            val feilmelding =
+                "Delt bosted endring fra ${it.fom?.tilKortString()} til ${it.tom?.tilKortString()} krysser " +
+                    "utvidet periode fra ${kryssendeTilkjentYtelse.stønadFom.tilKortString()} til " +
+                    "${kryssendeTilkjentYtelse.stønadTom.tilKortString()}. " +
+                    "Sett fra og med datoen til samme dato og til og med datoen til endringen innenfor den utvidede " +
+                    "perioden eller flytt endringen utenfor den utvidede perioden."
+            throw FunksjonellFeil(frontendFeilmelding = feilmelding, melding = feilmelding)
+        }
     }
 }
 
