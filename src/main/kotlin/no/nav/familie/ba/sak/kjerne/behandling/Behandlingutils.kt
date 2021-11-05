@@ -26,11 +26,15 @@ object Behandlingutils {
             .findLast { !it.erTekniskOpphør() && it.steg == StegType.BEHANDLING_AVSLUTTET }
     }
 
-    fun bestemKategori(nyBehandling: NyBehandling, løpendeKategori: BehandlingKategori?): BehandlingKategori {
-        if (nyBehandling.behandlingÅrsak !== BehandlingÅrsak.SØKNAD && løpendeKategori != null) {
-            return løpendeKategori
+    fun bestemKategori(
+        behandlingÅrsak: BehandlingÅrsak,
+        nyBehandlingKategori: BehandlingKategori?,
+        løpendeBehandlingKategori: BehandlingKategori?
+    ): BehandlingKategori {
+        if (behandlingÅrsak !== BehandlingÅrsak.SØKNAD && løpendeBehandlingKategori != null) {
+            return løpendeBehandlingKategori
         }
-        return nyBehandling.kategori ?: BehandlingKategori.NASJONAL
+        return nyBehandlingKategori ?: BehandlingKategori.NASJONAL
     }
 
     fun bestemUnderkategori(

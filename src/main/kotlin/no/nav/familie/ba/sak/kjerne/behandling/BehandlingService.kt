@@ -72,8 +72,9 @@ class BehandlingService(
         return if (aktivBehandling == null || aktivBehandling.status == AVSLUTTET) {
 
             val kategori = bestemKategori(
-                nyBehandling = nyBehandling,
-                løpendeKategori = hentLøpendeKategori(fagsakId = fagsak.id)
+                behandlingÅrsak = nyBehandling.behandlingÅrsak,
+                nyBehandlingKategori = nyBehandling.kategori,
+                løpendeBehandlingKategori = hentLøpendeKategori(fagsakId = fagsak.id)
             )
 
             val underkategori = bestemUnderkategori(
@@ -82,19 +83,7 @@ class BehandlingService(
                 løpendeUnderkategori = hentLøpendeUnderkategori(fagsakId = fagsak.id)
             )
 
-            if (kategori == BehandlingKategori.EØS && !featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS)) {
-                throw FunksjonellFeil(
-                    melding = "EØS er ikke påskrudd",
-                    frontendFeilmelding = "Det er ikke støtte for å behandle EØS søknad."
-                )
-            }
-
-            if (underkategori == BehandlingUnderkategori.UTVIDET && !featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_UTVIDET)) {
-                throw FunksjonellFeil(
-                    melding = "Utvidet er ikke påskrudd",
-                    frontendFeilmelding = "Det er ikke støtte for å behandle utvidet søknad og du må fjerne tilknytningen til behandling."
-                )
-            }
+            sjekkToggleOgThrowHvisBrudd(kategori, underkategori)
 
             val behandling = Behandling(
                 fagsak = fagsak,
@@ -137,11 +126,18 @@ class BehandlingService(
 
     fun oppdaterBehandlingstema(
         behandling: Behandling,
-        nyBehandlingUnderkategori: BehandlingUnderkategori = BehandlingUnderkategori.ORDINÆR,
-        nyBehandlingKategori: BehandlingKategori = BehandlingKategori.NASJONAL,
+        nyBehandlingKategori: BehandlingKategori,
+        nyBehandlingUnderkategori: BehandlingUnderkategori,
         manueltOppdatert: Boolean = false
     ): Behandling {
-        val nyUnderkategori =
+
+        val nyBehandlingKategori = bestemKategori(
+            behandlingÅrsak = behandling.opprettetÅrsak,
+            nyBehandlingKategori = nyBehandlingKategori,
+            løpendeBehandlingKategori = behandling.kategori
+        )
+
+        val nyBehandlingUnderkategori: BehandlingUnderkategori =
             if (manueltOppdatert) nyBehandlingUnderkategori
             else bestemUnderkategori(
                 nyUnderkategori = nyBehandlingUnderkategori,
@@ -151,16 +147,18 @@ class BehandlingService(
                 )
             )
 
+        sjekkToggleOgThrowHvisBrudd(nyBehandlingKategori, nyBehandlingUnderkategori)
+
         val forrigeBehandlingUnderkategori = behandling.underkategori
         val forrigeBehandlingKategori = behandling.kategori
-        val skalOppdatereKategori = nyBehandlingKategori != forrigeBehandlingKategori
-        val skalOppdatereUnderkategori = nyUnderkategori != forrigeBehandlingUnderkategori
+        val skalOppdatereBehandlingKategori = nyBehandlingKategori != forrigeBehandlingKategori
+        val skalOppdatereBehandlingUnderkategori = nyBehandlingUnderkategori != forrigeBehandlingUnderkategori
 
-        if (skalOppdatereKategori) {
+        if (skalOppdatereBehandlingKategori) {
             behandling.apply { kategori = nyBehandlingKategori }
         }
-        if (skalOppdatereUnderkategori) {
-            behandling.apply { underkategori = nyUnderkategori }
+        if (skalOppdatereBehandlingUnderkategori) {
+            behandling.apply { underkategori = nyBehandlingUnderkategori }
         }
 
         return lagreEllerOppdater(behandling).also { behandling ->
@@ -173,15 +171,34 @@ class BehandlingService(
                 } else null
             }
 
-            if (manueltOppdatert && (skalOppdatereKategori || skalOppdatereUnderkategori)) {
+            if (manueltOppdatert && (skalOppdatereBehandlingKategori || skalOppdatereBehandlingUnderkategori)) {
                 loggService.opprettEndretBehandlingstema(
                     behandling = behandling,
                     forrigeKategori = forrigeBehandlingKategori,
                     forrigeUnderkategori = forrigeBehandlingUnderkategori,
                     nyKategori = nyBehandlingKategori,
-                    nyUnderkategori = nyUnderkategori
+                    nyUnderkategori = nyBehandlingUnderkategori
                 )
             }
+        }
+    }
+
+    private fun sjekkToggleOgThrowHvisBrudd(
+        kategori: BehandlingKategori,
+        underkategori: BehandlingUnderkategori
+    ) {
+        if (kategori == BehandlingKategori.EØS && !featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS)) {
+            throw FunksjonellFeil(
+                melding = "EØS er ikke påskrudd",
+                frontendFeilmelding = "Det er ikke støtte for å behandle EØS søknad."
+            )
+        }
+
+        if (underkategori == BehandlingUnderkategori.UTVIDET && !featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_UTVIDET)) {
+            throw FunksjonellFeil(
+                melding = "Utvidet er ikke påskrudd",
+                frontendFeilmelding = "Det er ikke støtte for å behandle utvidet søknad og du må fjerne tilknytningen til behandling."
+            )
         }
     }
 
