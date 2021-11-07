@@ -224,10 +224,17 @@ fun hentHjemmeltekst(
     return hjemlerTilHjemmeltekst(sorterteHjemler)
 }
 
+enum class UtvidetScenario {
+    IKKE_UTVIDET_YTELSE,
+    UTVIDET_YTELSE_ENDRET,
+    UTVIDET_YTELSE_IKKE_ENDRET
+}
+
 fun UtvidetVedtaksperiodeMedBegrunnelser.tilBrevPeriode(
     personerIPersongrunnlag: List<Person>,
     målform: Målform,
-    uregistrerteBarn: List<BarnMedOpplysninger> = emptyList()
+    utvidetScenario: UtvidetScenario = UtvidetScenario.IKKE_UTVIDET_YTELSE,
+    uregistrerteBarn: List<BarnMedOpplysninger> = emptyList(),
 ): BrevPeriode? {
     val begrunnelserOgFritekster = this.byggBegrunnelserOgFritekster(
         personerIPersongrunnlag = personerIPersongrunnlag,
@@ -246,7 +253,11 @@ fun UtvidetVedtaksperiodeMedBegrunnelser.tilBrevPeriode(
 
         Vedtaksperiodetype.UTBETALING -> hentInnvilgelseBrevPeriode(tomDato, begrunnelserOgFritekster)
 
-        Vedtaksperiodetype.ENDRET_UTBETALING -> hentEndretUtbetalingBrevPeriode(tomDato, begrunnelserOgFritekster)
+        Vedtaksperiodetype.ENDRET_UTBETALING -> hentEndretUtbetalingBrevPeriode(
+            tomDato,
+            begrunnelserOgFritekster,
+            utvidetScenario
+        )
 
         Vedtaksperiodetype.AVSLAG -> hentAvslagBrevPeriode(tomDato, begrunnelserOgFritekster)
 
@@ -272,20 +283,31 @@ private fun UtvidetVedtaksperiodeMedBegrunnelser.hentAvslagBrevPeriode(
 
 fun UtvidetVedtaksperiodeMedBegrunnelser.hentEndretUtbetalingBrevPeriode(
     tomDato: String?,
-    begrunnelserOgFritekster: List<Begrunnelse>
-) = EndretUtbetalingBrevPeriode(
-    fom = this.fom!!.tilDagMånedÅr(),
-    tom = tomDato,
-    barnasFodselsdager = this.utbetalingsperiodeDetaljer.tilBarnasFødselsdatoer(),
-    begrunnelser = begrunnelserOgFritekster,
-    type = when {
-        this.utbetalingsperiodeDetaljer.all { it.prosent == BigDecimal.ZERO } ->
-            EndretUtbetalingBrevPeriodeType.ENDRET_UTBETALINGSPERIODE_INGEN_UTBETALING
-        else ->
-            EndretUtbetalingBrevPeriodeType.ENDRET_UTBETALINGSPERIODE
-    },
-    typeBarnetrygd = EndretUtbetalingBernetrygtType.DELT
-)
+    begrunnelserOgFritekster: List<Begrunnelse>,
+    utvidetScenario: UtvidetScenario = UtvidetScenario.IKKE_UTVIDET_YTELSE,
+): EndretUtbetalingBrevPeriode {
+    val ingenUtbetaling =
+        utbetalingsperiodeDetaljer.all { it.prosent == BigDecimal.ZERO }
+
+    return EndretUtbetalingBrevPeriode(
+        fom = this.fom!!.tilDagMånedÅr(),
+        tom = tomDato,
+        barnasFodselsdager = this.utbetalingsperiodeDetaljer.tilBarnasFødselsdatoer(),
+        begrunnelser = begrunnelserOgFritekster,
+        type = when {
+            ingenUtbetaling && utvidetScenario == UtvidetScenario.UTVIDET_YTELSE_IKKE_ENDRET ->
+                EndretUtbetalingBrevPeriodeType.ENDRET_UTBETALINGSPERIODE_DELVIS_UTBETALING
+            ingenUtbetaling ->
+                EndretUtbetalingBrevPeriodeType.ENDRET_UTBETALINGSPERIODE_INGEN_UTBETALING
+            else ->
+                EndretUtbetalingBrevPeriodeType.ENDRET_UTBETALINGSPERIODE
+        },
+        typeBarnetrygd = if (utvidetScenario == UtvidetScenario.IKKE_UTVIDET_YTELSE)
+            EndretUtbetalingBernetrygtType.DELT
+        else
+            EndretUtbetalingBernetrygtType.DELT_UTVIDET
+    )
+}
 
 private fun UtvidetVedtaksperiodeMedBegrunnelser.hentInnvilgelseBrevPeriode(
     tomDato: String?,

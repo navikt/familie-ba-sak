@@ -46,22 +46,22 @@ class UtvidetVedtaksperiodeMedBegrunnelserTest {
             lagAndelTilkjentYtelse(
                 behandling = behandling,
                 endretUtbetalingAndeler = emptyList(),
-                fom = fom.toString(),
-                tom = tom.toString(),
+                fom = fom,
+                tom = tom,
                 person = barn1
             ),
             lagAndelTilkjentYtelse(
                 behandling = behandling,
                 endretUtbetalingAndeler = listOf(endretUtbetalingAndel),
-                fom = fom.toString(),
-                tom = tom.toString(),
+                fom = fom,
+                tom = tom,
                 person = barn2
             ),
             lagAndelTilkjentYtelse(
                 behandling = behandling,
                 endretUtbetalingAndeler = emptyList(),
-                fom = tom.plusMonths(1).toString(),
-                tom = tom.plusMonths(3).toString(),
+                fom = tom.plusMonths(1),
+                tom = tom.plusMonths(3),
                 person = barn1
             )
         )
@@ -110,22 +110,22 @@ class UtvidetVedtaksperiodeMedBegrunnelserTest {
             lagAndelTilkjentYtelse(
                 behandling = behandling,
                 endretUtbetalingAndeler = emptyList(),
-                fom = fom.toString(),
-                tom = tom.toString(),
+                fom = fom,
+                tom = tom,
                 person = barn1
             ),
             lagAndelTilkjentYtelse(
                 behandling = behandling,
                 endretUtbetalingAndeler = listOf(endretUtbetalingAndel),
-                fom = fom.toString(),
-                tom = tom.toString(),
+                fom = fom,
+                tom = tom,
                 person = barn2
             ),
             lagAndelTilkjentYtelse(
                 behandling = behandling,
                 endretUtbetalingAndeler = emptyList(),
-                fom = tom.plusMonths(1).toString(),
-                tom = tom.plusMonths(3).toString(),
+                fom = tom.plusMonths(1),
+                tom = tom.plusMonths(3),
                 person = barn1
             )
         )
