@@ -72,7 +72,7 @@ class FagsakService(
     fun oppdaterLøpendeStatusPåFagsaker() {
         val fagsaker = fagsakRepository.finnFagsakerSomSkalAvsluttes()
         for (fagsakId in fagsaker) {
-            val fagsak = fagsakRepository.getOne(fagsakId)
+            val fagsak = fagsakRepository.getById(fagsakId)
             oppdaterStatus(fagsak, FagsakStatus.AVSLUTTET)
         }
     }
@@ -284,8 +284,8 @@ class FagsakService(
                     relasjon.relasjonsrolle == FORELDERBARNRELASJONROLLE.MEDMOR
             }.forEach { relasjon ->
                 if (assosierteFagsakDeltagere.find { fagsakDeltager ->
-                    fagsakDeltager.ident == relasjon.personIdent.id
-                } == null
+                        fagsakDeltager.ident == relasjon.personIdent.id
+                    } == null
                 ) {
                     val maskertForelder = hentMaskertFagsakdeltakerVedManglendeTilgang(relasjon.personIdent.id)
                     if (maskertForelder != null) {
