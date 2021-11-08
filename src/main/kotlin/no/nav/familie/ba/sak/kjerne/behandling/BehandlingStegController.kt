@@ -79,7 +79,7 @@ class BehandlingStegController(
     @PostMapping(path = ["/{behandlingId}/steg/tilbakekreving"])
     fun lagreTilbakekrevingOgGåVidereTilNesteSteg(
         @PathVariable @BehandlingstilgangConstraint behandlingId: Long,
-        @RequestBody restTilbakekreving: RestTilbakekreving
+        @RequestBody restTilbakekreving: RestTilbakekreving?
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
