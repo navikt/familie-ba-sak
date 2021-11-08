@@ -8,43 +8,25 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestBaseFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsakDeltager
 import no.nav.familie.ba.sak.ekstern.restDomene.RestMinimalFagsak
-import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
-import no.nav.familie.ba.sak.ekstern.restDomene.tilRestArbeidsfordelingPåBehandling
-import no.nav.familie.ba.sak.ekstern.restDomene.tilRestBehandlingStegTilstand
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestFagsak
-import no.nav.familie.ba.sak.ekstern.restDomene.tilRestFødselshendelsefiltreringResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestMinimalFagsak
-import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonResultat
-import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonerMedAndeler
-import no.nav.familie.ba.sak.ekstern.restDomene.tilRestTotrinnskontroll
-import no.nav.familie.ba.sak.ekstern.restDomene.tilRestVedtak
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestVisningBehandling
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PersonInfo
 import no.nav.familie.ba.sak.integrasjoner.skyggesak.SkyggesakService
-import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils
-import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.tilRestEndretUtbetalingAndel
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.filtreringsregler.domene.FødselshendelsefiltreringResultatRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonRepository
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
-import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingsbehandlingService
-import no.nav.familie.ba.sak.kjerne.tilbakekreving.domene.TilbakekrevingRepository
-import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.sikkerhet.validering.FagsaktilgangConstraint
@@ -65,27 +47,19 @@ import java.time.Period
 
 @Service
 class FagsakService(
-    private val arbeidsfordelingService: ArbeidsfordelingService,
-    private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val fagsakRepository: FagsakRepository,
     private val fagsakPersonRepository: FagsakPersonRepository,
-    private val persongrunnlagService: PersongrunnlagService,
     private val personRepository: PersonRepository,
     private val behandlingRepository: BehandlingRepository,
-    private val vilkårsvurderingService: VilkårsvurderingService,
+    private val utvidetBehandlingService: UtvidetBehandlingService,
     private val vedtakRepository: VedtakRepository,
-    private val totrinnskontrollRepository: TotrinnskontrollRepository,
     private val personopplysningerService: PersonopplysningerService,
     private val integrasjonClient: IntegrasjonClient,
     private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
     private val skyggesakService: SkyggesakService,
     private val tilgangService: TilgangService,
     private val vedtaksperiodeService: VedtaksperiodeService,
-    private val søknadGrunnlagService: SøknadGrunnlagService,
-    private val tilbakekrevingRepository: TilbakekrevingRepository,
     private val tilbakekrevingsbehandlingService: TilbakekrevingsbehandlingService,
-    private val fødselshendelsefiltreringResultatRepository: FødselshendelsefiltreringResultatRepository,
-    private val endretUtbetalingAndelRepository: EndretUtbetalingAndelRepository,
     private val taskRepository: TaskRepository,
 ) {
 
@@ -98,13 +72,13 @@ class FagsakService(
     fun oppdaterLøpendeStatusPåFagsaker() {
         val fagsaker = fagsakRepository.finnFagsakerSomSkalAvsluttes()
         for (fagsakId in fagsaker) {
-            val fagsak = fagsakRepository.getOne(fagsakId)
+            val fagsak = fagsakRepository.getById(fagsakId)
             oppdaterStatus(fagsak, FagsakStatus.AVSLUTTET)
         }
     }
 
     @Transactional
-    fun hentEllerOpprettFagsak(fagsakRequest: FagsakRequest): Ressurs<RestFagsak> {
+    fun hentEllerOpprettFagsak(fagsakRequest: FagsakRequest): Ressurs<RestMinimalFagsak> {
         val personIdent = when {
             fagsakRequest.personIdent !== null -> PersonIdent(fagsakRequest.personIdent)
             fagsakRequest.aktørId !== null -> personopplysningerService.hentAktivPersonIdent(Ident(fagsakRequest.aktørId))
@@ -115,7 +89,7 @@ class FagsakService(
             )
         }
         val fagsak = hentEllerOpprettFagsak(personIdent)
-        return hentRestFagsak(fagsakId = fagsak.id).also {
+        return hentRestMinimalFagsak(fagsakId = fagsak.id).also {
             skyggesakService.opprettSkyggesak(personIdent.ident, fagsak.id)
         }
     }
@@ -205,7 +179,9 @@ class FagsakService(
 
         val tilbakekrevingsbehandlinger =
             tilbakekrevingsbehandlingService.hentRestTilbakekrevingsbehandlinger((fagsakId))
-        val utvidedeBehandlinger = behandlingRepository.finnBehandlinger(fagsakId).map { lagRestUtvidetBehandling(it) }
+        val utvidedeBehandlinger =
+            behandlingRepository.finnBehandlinger(fagsakId)
+                .map { utvidetBehandlingService.lagRestUtvidetBehandling(it.id) }
 
         return restBaseFagsak.tilRestFagsak(utvidedeBehandlinger, tilbakekrevingsbehandlinger)
     }
@@ -238,63 +214,6 @@ class FagsakService(
             else
                 aktivBehandling.status == BehandlingStatus.UTREDES || (aktivBehandling.steg >= StegType.BESLUTTE_VEDTAK && aktivBehandling.steg != StegType.BEHANDLING_AVSLUTTET),
             gjeldendeUtbetalingsperioder = gjeldendeUtbetalingsperioder,
-        )
-    }
-
-    fun lagRestUtvidetBehandling(behandling: Behandling): RestUtvidetBehandling {
-
-        val søknadsgrunnlag = søknadGrunnlagService.hentAktiv(behandlingId = behandling.id)
-        val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = behandling.id)
-        val personer = personopplysningGrunnlag?.personer
-
-        val arbeidsfordeling = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandlingId = behandling.id)
-
-        val vedtak = vedtakRepository.finnVedtakForBehandling(behandling.id)
-
-        val personResultater = vilkårsvurderingService.hentAktivForBehandling(behandling.id)?.personResultater
-
-        val andelerTilkjentYtelse =
-            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(listOf(behandling.id))
-
-        val totrinnskontroll =
-            totrinnskontrollRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
-
-        val tilbakekreving = tilbakekrevingRepository.findByBehandlingId(behandling.id)
-
-        return RestUtvidetBehandling(
-            behandlingId = behandling.id,
-            aktiv = behandling.aktiv,
-            steg = behandling.steg,
-            stegTilstand = behandling.behandlingStegTilstand.map { it.tilRestBehandlingStegTilstand() },
-            status = behandling.status,
-            resultat = behandling.resultat,
-            skalBehandlesAutomatisk = behandling.skalBehandlesAutomatisk,
-            type = behandling.type,
-            kategori = behandling.kategori,
-            underkategori = behandling.underkategori,
-            årsak = behandling.opprettetÅrsak,
-            opprettetTidspunkt = behandling.opprettetTidspunkt,
-            endretAv = behandling.endretAv,
-            arbeidsfordelingPåBehandling = arbeidsfordeling.tilRestArbeidsfordelingPåBehandling(),
-            søknadsgrunnlag = søknadsgrunnlag?.hentSøknadDto(),
-            personer = personer?.map { persongrunnlagService.mapTilRestPersonMedStatsborgerskapLand(it) }
-                ?: emptyList(),
-            personResultater = personResultater?.map { it.tilRestPersonResultat() } ?: emptyList(),
-            fødselshendelsefiltreringResultater = fødselshendelsefiltreringResultatRepository.finnFødselshendelsefiltreringResultater(
-                behandlingId = behandling.id
-            ).map { it.tilRestFødselshendelsefiltreringResultat() },
-            utbetalingsperioder = vedtaksperiodeService.hentUtbetalingsperioder(behandling),
-            personerMedAndelerTilkjentYtelse = personopplysningGrunnlag?.tilRestPersonerMedAndeler(andelerTilkjentYtelse)
-                ?: emptyList(),
-            endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(behandling.id)
-                .map { it.tilRestEndretUtbetalingAndel() },
-            tilbakekreving = tilbakekreving?.tilRestTilbakekreving(),
-            vedtakForBehandling = vedtak.filter { it.aktiv }.map {
-                it.tilRestVedtak(
-                    vedtaksperiodeService.hentUtvidetVedtaksperiodeMedBegrunnelser(vedtak = it)
-                )
-            },
-            totrinnskontroll = totrinnskontroll?.tilRestTotrinnskontroll(),
         )
     }
 

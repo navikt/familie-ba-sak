@@ -1,14 +1,14 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
 import no.nav.familie.ba.sak.ekstern.restDomene.RestAnnenVurdering
-import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestNyttVilkår
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
+import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVedtakBegrunnelseTilknyttetVilkår
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
-import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
@@ -34,10 +34,10 @@ class VilkårController(
     private val annenVurderingService: AnnenVurderingService,
     private val behandlingService: BehandlingService,
     private val vedtakService: VedtakService,
-    private val stegService: StegService,
     private val fagsakService: FagsakService,
     private val tilgangService: TilgangService,
     private val vilkårsvurderingService: VilkårsvurderingService,
+    private val utvidetBehandlingService: UtvidetBehandlingService
 ) {
 
     @PutMapping(path = ["/{behandlingId}/{vilkaarId}"])
@@ -45,7 +45,7 @@ class VilkårController(
         @PathVariable behandlingId: Long,
         @PathVariable vilkaarId: Long,
         @RequestBody restPersonResultat: RestPersonResultat
-    ): ResponseEntity<Ressurs<RestFagsak>> {
+    ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "endre vilkår"
@@ -58,7 +58,7 @@ class VilkårController(
             restPersonResultat = restPersonResultat
         )
         vedtakService.resettStegVedEndringPåVilkår(behandling.id)
-        return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = behandling.fagsak.id))
+        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }
 
     @PutMapping(path = ["/{behandlingId}/annenvurdering/{annenVurderingId}"])
@@ -66,7 +66,7 @@ class VilkårController(
         @PathVariable behandlingId: Long,
         @PathVariable annenVurderingId: Long,
         @RequestBody restAnnenVurdering: RestAnnenVurdering
-    ): ResponseEntity<Ressurs<RestFagsak>> {
+    ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "Annen vurdering"
@@ -78,7 +78,7 @@ class VilkårController(
             restAnnenVurdering = restAnnenVurdering
         )
 
-        return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = behandling.fagsak.id))
+        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }
 
     @DeleteMapping(path = ["/{behandlingId}/{vilkaarId}"])
@@ -86,7 +86,7 @@ class VilkårController(
         @PathVariable behandlingId: Long,
         @PathVariable vilkaarId: Long,
         @RequestBody personIdent: String
-    ): ResponseEntity<Ressurs<RestFagsak>> {
+    ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "slette vilkår"
@@ -100,12 +100,12 @@ class VilkårController(
         )
 
         vedtakService.resettStegVedEndringPåVilkår(behandling.id)
-        return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = behandling.fagsak.id))
+        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }
 
     @PostMapping(path = ["/{behandlingId}"])
     fun nyttVilkår(@PathVariable behandlingId: Long, @RequestBody restNyttVilkår: RestNyttVilkår):
-        ResponseEntity<Ressurs<RestFagsak>> {
+        ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "legge til vilkår"
@@ -115,15 +115,7 @@ class VilkårController(
         vilkårService.postVilkår(behandling.id, restNyttVilkår)
 
         vedtakService.resettStegVedEndringPåVilkår(behandlingId)
-        return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = behandling.fagsak.id))
-    }
-
-    @PostMapping(path = ["/{behandlingId}/valider"])
-    fun validerVilkårsvurdering(@PathVariable behandlingId: Long): ResponseEntity<Ressurs<RestFagsak>> {
-        val behandling = behandlingService.hent(behandlingId)
-        stegService.håndterVilkårsvurdering(behandling)
-
-        return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = behandling.fagsak.id))
+        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }
 
     @GetMapping(path = ["/vilkaarsbegrunnelser"])
