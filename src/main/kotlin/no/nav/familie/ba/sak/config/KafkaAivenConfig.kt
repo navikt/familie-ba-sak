@@ -41,11 +41,12 @@ class KafkaAivenConfig(val environment: Environment) {
     }
 
     @Bean
-    fun concurrentKafkaListenerContainerFactory(): ConcurrentKafkaListenerContainerFactory<String, String> {
+    fun concurrentKafkaListenerContainerFactory(kafkaErrorHandler: KafkaAivenErrorHandler): ConcurrentKafkaListenerContainerFactory<String, String> {
         val factory = ConcurrentKafkaListenerContainerFactory<String, String>()
         factory.setConcurrency(1)
         factory.containerProperties.ackMode = ContainerProperties.AckMode.MANUAL
         factory.consumerFactory = consumerFactory()
+        factory.setErrorHandler(kafkaErrorHandler)
         return factory
     }
 

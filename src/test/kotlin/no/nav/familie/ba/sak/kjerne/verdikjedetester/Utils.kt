@@ -30,6 +30,9 @@ import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.prosessering.domene.Task
 import org.junit.jupiter.api.Assertions.assertEquals
 import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.Period
+import java.time.temporal.ChronoUnit
 
 fun generellAssertFagsak(
     restFagsak: Ressurs<RestFagsak>,
@@ -188,4 +191,8 @@ fun håndterIverksettingAvBehandling(
     )
 
     return ferdigstiltBehandling
+}
+
+fun main() {
+    println(ChronoUnit.DAYS.between(LocalDate.now().minusDays(1),LocalDate.now()))
 }
