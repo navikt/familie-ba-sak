@@ -140,7 +140,7 @@ object TilkjentYtelseUtils {
                 // Deler opp hver enkelt andel i perioder som hhv blir berørt av endringene og de som ikke berøres av de.
                 val (perioderMedEndring, perioderUtenEndring) = andelForPerson.stønadsPeriode()
                     .perioderMedOgUtenOverlapp(
-                        endringerForPerson.map { endringerForPerson -> endringerForPerson.periode() }
+                        endringerForPerson.map { endringerForPerson -> endringerForPerson.periode }
                     )
                 // Legger til nye AndelTilkjentYtelse for perioder som er berørt av endringer.
                 nyeAndelerForPerson.addAll(

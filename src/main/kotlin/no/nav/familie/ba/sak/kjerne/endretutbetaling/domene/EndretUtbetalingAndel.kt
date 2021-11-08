@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.ekstern.restDomene.RestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.dokument.UtvidetScenario
 import no.nav.familie.ba.sak.kjerne.dokument.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.dokument.domene.SanityVilkår
 import no.nav.familie.ba.sak.kjerne.dokument.domene.tilTriggesAv
@@ -92,12 +93,13 @@ data class EndretUtbetalingAndel(
     var vedtakBegrunnelseSpesifikasjoner: List<VedtakBegrunnelseSpesifikasjon> = emptyList()
 ) : BaseEntitet() {
 
-    fun overlapperMed(periode: MånedPeriode) = periode.overlapperHeltEllerDelvisMed(this.periode())
+    fun overlapperMed(periode: MånedPeriode) = periode.overlapperHeltEllerDelvisMed(this.periode)
 
-    fun periode(): MånedPeriode {
-        validerUtfyltEndring()
-        return MånedPeriode(this.fom!!, this.tom!!)
-    }
+    val periode
+        get(): MånedPeriode {
+            validerUtfyltEndring()
+            return MånedPeriode(this.fom!!, this.tom!!)
+        }
 
     fun validerUtfyltEndring(): Boolean {
         if (person == null ||
@@ -189,7 +191,7 @@ fun hentPersonerForEtterEndretUtbetalingsperiode(
 
 fun EndretUtbetalingAndel.hentGyldigEndretBegrunnelser(
     sanityBegrunnelser: List<SanityBegrunnelse>,
-    erUtvidetEndringsutbetalingISammePeriode: Boolean,
+    utvidetScenario: UtvidetScenario,
 ): List<VedtakBegrunnelseSpesifikasjon> {
     val gyldigeBegrunnelser = VedtakBegrunnelseSpesifikasjon.values()
         .filter { vedtakBegrunnelseSpesifikasjon ->
@@ -202,7 +204,7 @@ fun EndretUtbetalingAndel.hentGyldigEndretBegrunnelser(
                 val triggesAv = sanityBegrunnelse.tilTriggesAv()
                 sanityBegrunnelse.oppfyllerKravForTriggereForEndretUtbetaling(
                     triggesAv,
-                    erUtvidetEndringsutbetalingISammePeriode,
+                    utvidetScenario,
                     this
                 )
             } else false
@@ -220,11 +222,11 @@ fun EndretUtbetalingAndel.hentGyldigEndretBegrunnelser(
 
 private fun SanityBegrunnelse.oppfyllerKravForTriggereForEndretUtbetaling(
     triggesAv: TriggesAv,
-    erUtvidetEndringsutbetalingISammePeriode: Boolean,
+    utvidetScenario: UtvidetScenario,
     endretUtbetalingAndel: EndretUtbetalingAndel
 ): Boolean {
     val skalUtbetalesKrav = triggesAvSkalUtbetales(listOf(endretUtbetalingAndel), triggesAv)
-    val utvidetKrav = !erUtvidetEndringsutbetalingISammePeriode ==
+    val utvidetKrav = (utvidetScenario == UtvidetScenario.UTVIDET_YTELSE_IKKE_ENDRET) ==
         (this.vilkaar?.contains(SanityVilkår.UTVIDET_BARNETRYGD) ?: false)
 
     return skalUtbetalesKrav && utvidetKrav
