@@ -5,7 +5,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
-import no.nav.familie.ba.sak.kjerne.beregning.domene.finnesUtvidetEndringsutbetalingIPerioden
+import no.nav.familie.ba.sak.kjerne.beregning.domene.hentUtvidetYtelseScenario
 import no.nav.familie.ba.sak.kjerne.dokument.BrevKlient
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerIngenOverlappendeEndring
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerPeriodeInnenforTilkjentytelse
@@ -114,13 +114,13 @@ class EndretUtbetalingAndelService(
         val andelTilkjentYtelser = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id)
 
         endredeUtbetalingAndeler.forEach {
-            val erUtvidetEndringsutbetalingISammePeriode =
-                andelTilkjentYtelser.finnesUtvidetEndringsutbetalingIPerioden(it.fom, it.tom)
+            val utvidetScenario =
+                andelTilkjentYtelser.hentUtvidetYtelseScenario(it.periode)
 
             it.vedtakBegrunnelseSpesifikasjoner =
                 it.hentGyldigEndretBegrunnelser(
                     brevKlient.hentSanityBegrunnelser(),
-                    erUtvidetEndringsutbetalingISammePeriode,
+                    utvidetScenario,
                 )
         }
 

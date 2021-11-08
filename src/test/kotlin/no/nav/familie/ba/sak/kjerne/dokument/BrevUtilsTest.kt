@@ -133,7 +133,7 @@ internal class BrevUtilsTest {
     }
 
     @Test
-    fun `test hentManuellVedtaksbrevtype kaster exception for ikke-støttede behandlingsresultater ved førstegangsbehandling`() {
+    fun `skal kaste exception for ikke-støttede behandlingsresultater ved førstegangsbehandling`() {
         val ikkeStøttedeBehandlingsersultater =
             BehandlingResultat.values().subtract(støttedeBehandlingsersultaterFørstegangsbehandling)
 
@@ -402,6 +402,13 @@ internal class BrevUtilsTest {
                     lagUtbetalingsperiodeDetalj(prosent = BigDecimal.ZERO)
                 )
             )
+        val utvidetVedtaksperiodeMedBegrunnelserFullUtbetaling =
+            lagUtvidetVedtaksperiodeMedBegrunnelser(
+                type = Vedtaksperiodetype.ENDRET_UTBETALING,
+                utbetalingsperiodeDetaljer = listOf(
+                    lagUtbetalingsperiodeDetalj(prosent = BigDecimal.valueOf(100))
+                )
+            )
 
         val begrunnelser = listOf(
             UtvidetScenario.IKKE_UTVIDET_YTELSE,
@@ -440,6 +447,22 @@ internal class BrevUtilsTest {
         Assertions.assertEquals(
             EndretUtbetalingBernetrygtType.DELT_UTVIDET.navn + " ",
             begrunnelser[2].typeBarnetrygd?.single()
+        )
+
+        val deltBostedEndringFullUtbetalingTilkjentYtelseUtenEndring =
+            utvidetVedtaksperiodeMedBegrunnelserFullUtbetaling.hentEndretUtbetalingBrevPeriode(
+                "",
+                emptyList(),
+                utvidetScenario = UtvidetScenario.UTVIDET_YTELSE_IKKE_ENDRET
+            )
+
+        Assertions.assertEquals(
+            EndretUtbetalingBrevPeriodeType.ENDRET_UTBETALINGSPERIODE.apiNavn,
+            deltBostedEndringFullUtbetalingTilkjentYtelseUtenEndring.type?.single()
+        )
+        Assertions.assertEquals(
+            EndretUtbetalingBernetrygtType.DELT_UTVIDET.navn + " ",
+            deltBostedEndringFullUtbetalingTilkjentYtelseUtenEndring.typeBarnetrygd?.single()
         )
     }
 }

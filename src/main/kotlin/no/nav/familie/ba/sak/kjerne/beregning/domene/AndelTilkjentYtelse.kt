@@ -5,7 +5,9 @@ import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.YearMonthConverter
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
+import no.nav.familie.ba.sak.kjerne.dokument.UtvidetScenario
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.erStartPåUtvidetSammeMåned
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.utledSegmenter
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.fpsak.tidsserie.LocalDateInterval
@@ -239,6 +241,20 @@ fun List<AndelTilkjentYtelse>.finnesUtvidetEndringsutbetalingIPerioden(
 ) = this.any { andelTilkjentYtelse ->
     andelTilkjentYtelse.erUtvidet() &&
         andelTilkjentYtelse.harEndringsutbetalingIPerioden(fom, tom)
+}
+
+fun List<AndelTilkjentYtelse>.hentUtvidetYtelseScenario(
+    månedPeriode: MånedPeriode,
+) = when {
+    !erStartPåUtvidetSammeMåned(
+        this,
+        månedPeriode.fom
+    ) -> UtvidetScenario.IKKE_UTVIDET_YTELSE
+    this.finnesUtvidetEndringsutbetalingIPerioden(
+        månedPeriode.fom,
+        månedPeriode.tom,
+    ) -> UtvidetScenario.UTVIDET_YTELSE_ENDRET
+    else -> UtvidetScenario.UTVIDET_YTELSE_IKKE_ENDRET
 }
 
 enum class YtelseType(val klassifisering: String) {
