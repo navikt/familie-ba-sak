@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.config
 
 import no.nav.familie.ba.sak.kjerne.dokument.BrevKlient
+import no.nav.familie.ba.sak.kjerne.dokument.domene.EndretUtbetalingsperiodeDeltBostedTriggere
 import no.nav.familie.ba.sak.kjerne.dokument.domene.EndretUtbetalingsperiodeTrigger
 import no.nav.familie.ba.sak.kjerne.dokument.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.dokument.domene.SanityVilkår
@@ -63,8 +64,15 @@ val sanityBegrunnelserMock: List<SanityBegrunnelse> =
                     VedtakBegrunnelseSpesifikasjon.OPPHØR_UTVANDRET -> listOf(SanityVilkår.BOSATT_I_RIKET)
                     VedtakBegrunnelseSpesifikasjon.OPPHØR_IKKE_MOTTATT_OPPLYSNINGER -> null
 
+                    VedtakBegrunnelseSpesifikasjon.ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_FULL_ORDINÆR_OG_ETTERBETALING_UTVIDET -> listOf(
+                        SanityVilkår.UTVIDET_BARNETRYGD
+                    )
+                    VedtakBegrunnelseSpesifikasjon.ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_KUN_ETTERBETALING_UTVIDET -> listOf(
+                        SanityVilkår.UTVIDET_BARNETRYGD
+                    )
+
                     else -> SanityVilkår.values()
-                        /*.filter { sanityVilkår -> sanityVilkår != SanityVilkår.UTVIDET_BARNETRYGD }*/.toList()
+                        .filter { sanityVilkår -> sanityVilkår != SanityVilkår.UTVIDET_BARNETRYGD }.toList()
                 },
                 rolle = when (it) {
                     VedtakBegrunnelseSpesifikasjon.REDUKSJON_BOSATT_I_RIKTET -> listOf(VilkårRolle.BARN)
@@ -86,6 +94,14 @@ val sanityBegrunnelserMock: List<SanityBegrunnelse> =
                 },
                 endretUtbetalingsperiodeTriggere = when (it.vedtakBegrunnelseType) {
                     VedtakBegrunnelseType.ETTER_ENDRET_UTBETALING -> listOf(EndretUtbetalingsperiodeTrigger.ETTER_ENDRET_UTBETALINGSPERIODE)
+                    else -> emptyList()
+                },
+                endretUtbetalingsperiodeDeltBostedTriggere = when (it) {
+                    VedtakBegrunnelseSpesifikasjon.ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_FULL_ORDINÆR_OG_ETTERBETALING_UTVIDET,
+                    VedtakBegrunnelseSpesifikasjon.ENDRET_UTBETALING_DELT_BOSTED_FULL_UTBETALING,
+                    -> listOf(
+                        EndretUtbetalingsperiodeDeltBostedTriggere.SKAL_UTBETALES
+                    )
                     else -> emptyList()
                 }
             )
