@@ -110,7 +110,7 @@ fun validerDeltBostedEndringerIkkeKrysserUtvidetYtelse(
             .filter { it.type == YtelseType.UTVIDET_BARNETRYGD }
             .find {
                 it.overlapperPeriode(MånedPeriode(this.fom!!, this.tom!!)) &&
-                    (this.fom != it.stønadFom || this.tom!! > it.stønadTom)
+                    (this.fom!! < it.stønadFom || this.tom!! > it.stønadTom)
             }
 
     endretUtbetalingAndeler.forEach {
@@ -120,10 +120,11 @@ fun validerDeltBostedEndringerIkkeKrysserUtvidetYtelse(
         if (it.årsakErDeltBosted() && kryssendeTilkjentYtelse != null) {
             val feilmelding =
                 "Delt bosted endring fra ${it.fom?.tilKortString()} til ${it.tom?.tilKortString()} krysser " +
-                    "utvidet periode fra ${kryssendeTilkjentYtelse.stønadFom.tilKortString()} til " +
-                    "${kryssendeTilkjentYtelse.stønadTom.tilKortString()}. " +
-                    "Sett fra og med datoen til samme dato og til og med datoen til endringen innenfor den utvidede " +
-                    "perioden eller flytt endringen utenfor den utvidede perioden."
+                    "starten eller slutten på den utvidede perioden fra " +
+                    "${kryssendeTilkjentYtelse.stønadFom.tilKortString()} " +
+                    "til ${kryssendeTilkjentYtelse.stønadTom.tilKortString()}. " +
+                    "Om endringen er i riktig periode må du opprette to endringsperioder, en utenfor" +
+                    " og en inni den utvidede ytelsen."
             throw FunksjonellFeil(frontendFeilmelding = feilmelding, melding = feilmelding)
         }
     }
