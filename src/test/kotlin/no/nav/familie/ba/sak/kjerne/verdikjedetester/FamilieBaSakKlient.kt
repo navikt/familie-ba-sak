@@ -155,7 +155,8 @@ class FamilieBaSakKlient(
         val uriPost = URI.create("$baSakUrl/api/endretutbetalingandel/$behandlingId")
         val fagsak = postForEntity<Ressurs<RestFagsak>>(uriPost, "", headers)
 
-        val endretUtbetalingAndelId = fagsak.data!!.behandlinger.first().endretUtbetalingAndeler.first().id
+        val endretUtbetalingAndelId =
+            fagsak.data!!.behandlinger.first().endretUtbetalingAndeler.maxByOrNull { it.id!! }!!.id
         val uriPut = URI.create("$baSakUrl/api/endretutbetalingandel/$behandlingId/$endretUtbetalingAndelId")
 
         return putForEntity(uriPut, restEndretUtbetalingAndel, headers)
