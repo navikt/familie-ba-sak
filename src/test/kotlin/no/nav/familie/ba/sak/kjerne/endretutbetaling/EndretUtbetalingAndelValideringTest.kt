@@ -320,6 +320,95 @@ class EndretUtbetalingAndelValideringTest {
         }
     }
 
+    @Test
+    fun `skal kaste feil dersom delt bosted endring krysser utvidet tilkjent ytelse og ikke ellers`() {
+
+        val fomUtvidet: YearMonth = inneværendeMåned().minusMonths(4)
+        val tomUtvidet: YearMonth = inneværendeMåned().minusMonths(2)
+
+        val førFomutvidet = inneværendeMåned().minusMonths(5)
+        val iPeriode = inneværendeMåned().minusMonths(3)
+        val etterPeriode = inneværendeMåned().minusMonths(1)
+
+        val andelerTilkjentYtelse = listOf(
+            lagAndelTilkjentYtelse(
+                fom = fomUtvidet,
+                tom = tomUtvidet,
+                ytelseType = YtelseType.UTVIDET_BARNETRYGD
+            )
+        )
+
+        Assertions.assertDoesNotThrow {
+            validerDeltBostedEndringerIkkeKrysserUtvidetYtelse(
+                endretUtbetalingAndeler = listOf(
+                    lagEndretUtbetalingAndel(
+                        fom = førFomutvidet,
+                        tom = førFomutvidet,
+                        årsak = Årsak.DELT_BOSTED,
+                        person = søker
+                    )
+                ),
+                andelerTilkjentYtelse = andelerTilkjentYtelse
+            )
+        }
+
+        Assertions.assertThrows(FunksjonellFeil::class.java) {
+            validerDeltBostedEndringerIkkeKrysserUtvidetYtelse(
+                endretUtbetalingAndeler = listOf(
+                    lagEndretUtbetalingAndel(
+                        fom = førFomutvidet,
+                        tom = fomUtvidet,
+                        årsak = Årsak.DELT_BOSTED,
+                        person = søker
+                    )
+                ),
+                andelerTilkjentYtelse = andelerTilkjentYtelse
+            )
+        }
+
+        Assertions.assertDoesNotThrow {
+            validerDeltBostedEndringerIkkeKrysserUtvidetYtelse(
+                endretUtbetalingAndeler = listOf(
+                    lagEndretUtbetalingAndel(
+                        fom = fomUtvidet,
+                        tom = iPeriode,
+                        årsak = Årsak.DELT_BOSTED,
+                        person = søker
+                    )
+                ),
+                andelerTilkjentYtelse = andelerTilkjentYtelse
+            )
+        }
+
+        Assertions.assertDoesNotThrow() {
+            validerDeltBostedEndringerIkkeKrysserUtvidetYtelse(
+                endretUtbetalingAndeler = listOf(
+                    lagEndretUtbetalingAndel(
+                        fom = fomUtvidet,
+                        tom = tomUtvidet,
+                        årsak = Årsak.DELT_BOSTED,
+                        person = søker
+                    )
+                ),
+                andelerTilkjentYtelse = andelerTilkjentYtelse
+            )
+        }
+
+        Assertions.assertDoesNotThrow {
+            validerDeltBostedEndringerIkkeKrysserUtvidetYtelse(
+                endretUtbetalingAndeler = listOf(
+                    lagEndretUtbetalingAndel(
+                        fom = etterPeriode,
+                        tom = etterPeriode,
+                        årsak = Årsak.DELT_BOSTED,
+                        person = søker
+                    )
+                ),
+                andelerTilkjentYtelse = andelerTilkjentYtelse
+            )
+        }
+    }
+
     private fun endretUtbetalingAndel(
         person: Person,
         ytelsestype: YtelseType,
