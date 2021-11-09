@@ -103,6 +103,9 @@ data class AndelTilkjentYtelse(
 
 ) : BaseEntitet() {
 
+    val periode
+        get() = MånedPeriode(stønadFom, stønadTom)
+
     override fun equals(other: Any?): Boolean {
         if (other == null || javaClass != other.javaClass) {
             return false
@@ -140,11 +143,16 @@ data class AndelTilkjentYtelse(
 
     fun overlapperMed(andelFraAnnenBehandling: AndelTilkjentYtelse): Boolean {
         return this.type == andelFraAnnenBehandling.type &&
-            this.stønadFom <= andelFraAnnenBehandling.stønadTom &&
-            this.stønadTom >= andelFraAnnenBehandling.stønadFom
+            this.overlapperPeriode(andelFraAnnenBehandling.periode)
     }
 
+    fun overlapperPeriode(måndePeriode: MånedPeriode): Boolean =
+        this.stønadFom <= måndePeriode.tom &&
+            this.stønadTom >= måndePeriode.fom
+
     fun stønadsPeriode() = MånedPeriode(this.stønadFom, this.stønadTom)
+
+    fun erEøs() = this.type == YtelseType.EØS
 
     fun erUtvidet() = this.type == YtelseType.UTVIDET_BARNETRYGD
 
