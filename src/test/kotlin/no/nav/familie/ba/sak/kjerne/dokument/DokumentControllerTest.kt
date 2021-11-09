@@ -27,7 +27,16 @@ class DokumentControllerTest(
     final val fagsakService: FagsakService = mockk()
     final val tilgangService: TilgangService = mockk(relaxed = true)
     val mockDokumentController =
-        DokumentController(mockDokumentService, vedtakService, behandlingService, fagsakService, tilgangService, mockk(relaxed = true), mockk(relaxed = true))
+        DokumentController(
+            mockDokumentService,
+            vedtakService,
+            behandlingService,
+            fagsakService,
+            tilgangService,
+            mockk(relaxed = true),
+            mockk(relaxed = true),
+            mockk(relaxed = true)
+        )
 
     @Test
     @Tag("integration")
