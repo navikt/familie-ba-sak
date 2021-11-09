@@ -16,6 +16,20 @@ jobs:
         uses: styfle/cancel-workflow-action@0.9.1
         with:
           access_token: ${{ github.token }}
+  sonarcloud:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          # Disabling shallow clone is recommended for improving relevancy of reporting
+          fetch-depth: 0
+      - name: SonarCloud Scan
+        uses: sonarsource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_PROJECTKEY }}
   build-jar-docker:
     name: Bygg app/image, push til github
     runs-on: ubuntu-latest
@@ -33,26 +47,8 @@ jobs:
             ${{ runner.os }}-maven-cache-
       - name: Bygg med maven + sonar
         env:
-          SONAR_PROJECTKEY: ${{ secrets.SONAR_PROJECTKEY }}
-          SONAR_LOGIN: ${{ secrets.SONAR_LOGIN }}
           GITHUB_USERNAME: x-access-token
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           mvn antrun:run@ktlint
-          if ${{ github.event_name == 'pull_request' }}
-          then
-            mvn -B --no-transfer-progress package verify sonar:sonar --settings .m2/maven-settings.xml --file pom.xml
-          else
-            mvn -B --no-transfer-progress package verify --settings .m2/maven-settings.xml --file pom.xml
-          fi
-      - name: Bygg Docker image
-        run: |
-          docker build -t $IMAGE .
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Push Docker image
-        run: docker push $IMAGE
+          mvn -B --no-transfer-progress verify --settings .m2/maven-settings.xml --file pom.xml -Dtest=!**/kjerne/verdikjedetester**
