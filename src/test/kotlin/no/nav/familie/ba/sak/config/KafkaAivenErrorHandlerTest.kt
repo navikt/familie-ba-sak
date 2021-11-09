@@ -31,8 +31,9 @@ class KafkaAivenErrorHandlerTest {
     @Test
     fun `handle skal stoppe container hvis man mottar feil med en tom liste med records`() {
         assertThatThrownBy { errorHandler.handle(RuntimeException("Feil i test"), emptyList(), consumer, container) }
-            .hasMessageContaining("Feil i test")
-            .hasCauseExactlyInstanceOf(RuntimeException::class.java)
+            .hasMessageNotContaining("Feil i test")
+            .hasMessageContaining("Sjekk securelogs for mer info")
+            .hasCauseExactlyInstanceOf(Exception::class.java)
     }
 
     @Test
@@ -46,14 +47,16 @@ class KafkaAivenErrorHandlerTest {
                 container
             )
         }
-            .hasMessageContaining("Feil i test")
-            .hasCauseExactlyInstanceOf(RuntimeException::class.java)
+            .hasMessageNotContaining("Feil i test")
+            .hasMessageContaining("Sjekk securelogs for mer info")
+            .hasCauseExactlyInstanceOf(Exception::class.java)
     }
 
     @Test
     fun `handle skal stoppe container hvis man mottar feil hvor liste med records er null`() {
         assertThatThrownBy { errorHandler.handle(RuntimeException("Feil i test"), null, consumer, container) }
-            .hasMessageContaining("Feil i test")
-            .hasCauseExactlyInstanceOf(RuntimeException::class.java)
+            .hasMessageNotContaining("Feil i test")
+            .hasMessageContaining("Sjekk securelogs for mer info")
+            .hasCauseExactlyInstanceOf(Exception::class.java)
     }
 }
