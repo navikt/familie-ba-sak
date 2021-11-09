@@ -4,6 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import no.nav.familie.ba.sak.common.DbContainerInitializer
+import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.fødselsnummerGenerator
@@ -112,6 +113,9 @@ class MigreringServiceTest {
     @Autowired
     lateinit var pdlRestClient: PdlRestClient
 
+    @Autowired
+    lateinit var env: EnvService
+
     @BeforeEach
     fun init() {
         MockKafkaProducer.sendteMeldinger.clear()
@@ -124,6 +128,7 @@ class MigreringServiceTest {
                 ForelderBarnRelasjon(relatertPersonsIdent = it.barnFnr!!, relatertPersonsRolle = FORELDERBARNRELASJONROLLE.BARN)
             }
         }
+        every { env.erPreprod() } returns false
     }
 
     @Test
