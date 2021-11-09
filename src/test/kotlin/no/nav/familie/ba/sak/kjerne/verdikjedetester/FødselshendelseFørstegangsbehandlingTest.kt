@@ -61,7 +61,7 @@ class FødselshendelseFørstegangsbehandlingTest(
             behandlingStegType = StegType.BEHANDLING_AVSLUTTET
         )
 
-        val aktivBehandling = restFagsakEtterBehandlingAvsluttet.getDataOrThrow().behandlinger.first { it.aktiv }
+        val aktivBehandling = restFagsakEtterBehandlingAvsluttet.getDataOrThrow().behandlinger.single()
         assertEquals(BehandlingResultat.INNVILGET, aktivBehandling.resultat)
 
         val utbetalingsperioder = aktivBehandling.utbetalingsperioder
@@ -117,7 +117,7 @@ class FødselshendelseFørstegangsbehandlingTest(
             behandlingStegType = StegType.BEHANDLING_AVSLUTTET
         )
 
-        val aktivBehandling = restFagsakEtterBehandlingAvsluttet.getDataOrThrow().behandlinger.first { it.aktiv }
+        val aktivBehandling = restFagsakEtterBehandlingAvsluttet.getDataOrThrow().behandlinger.single()
         assertEquals(BehandlingResultat.INNVILGET, aktivBehandling.resultat)
 
         val utbetalingsperioder = aktivBehandling.utbetalingsperioder

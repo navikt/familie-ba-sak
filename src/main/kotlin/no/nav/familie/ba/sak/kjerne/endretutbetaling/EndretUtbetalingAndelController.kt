@@ -1,9 +1,9 @@
 package no.nav.familie.ba.sak.kjerne.endretutbetaling
 
 import no.nav.familie.ba.sak.ekstern.restDomene.RestEndretUtbetalingAndel
-import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsak
+import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
@@ -27,8 +27,8 @@ class EndretUtbetalingAndelController(
     private val endretUtbetalingAndelService: EndretUtbetalingAndelService,
     private val tilgangService: TilgangService,
     private val behandlingService: BehandlingService,
-    private val fagsakService: FagsakService,
     private val vedtakService: VedtakService,
+    private val utvidetBehandlingService: UtvidetBehandlingService
 ) {
 
     @PutMapping(path = ["{behandlingId}/{endretUtbetalingAndelId}"])
@@ -36,7 +36,7 @@ class EndretUtbetalingAndelController(
         @PathVariable behandlingId: Long,
         @PathVariable endretUtbetalingAndelId: Long,
         @RequestBody restEndretUtbetalingAndel: RestEndretUtbetalingAndel
-    ): ResponseEntity<Ressurs<RestFagsak>> {
+    ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "Oppdater endretutbetalingandel"
@@ -51,14 +51,14 @@ class EndretUtbetalingAndelController(
         )
 
         vedtakService.resettStegVedEndringPåEndredeUtbetalingsperioder(behandlingId = behandling.id)
-        return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = behandling.fagsak.id))
+        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandling.id)))
     }
 
     @DeleteMapping(path = ["{behandlingId}/{endretUtbetalingAndelId}"])
     fun fjernEndretUtbetalingAndelOgOppdaterTilkjentYtelse(
         @PathVariable behandlingId: Long,
         @PathVariable endretUtbetalingAndelId: Long,
-    ): ResponseEntity<Ressurs<RestFagsak>> {
+    ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "Oppdater endretutbetalingandel"
@@ -72,13 +72,13 @@ class EndretUtbetalingAndelController(
         )
 
         vedtakService.resettStegVedEndringPåEndredeUtbetalingsperioder(behandlingId = behandling.id)
-        return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = behandling.fagsak.id))
+        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandling.id)))
     }
 
     @PostMapping(path = ["/{behandlingId}"])
     fun lagreEndretUtbetalingAndelOgOppdaterTilkjentYtelse(
         @PathVariable behandlingId: Long,
-    ): ResponseEntity<Ressurs<RestFagsak>> {
+    ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "Opprett endretutbetalingandel"
@@ -88,6 +88,6 @@ class EndretUtbetalingAndelController(
         endretUtbetalingAndelService.opprettTomEndretUtbetalingAndelOgOppdaterTilkjentYtelse(behandling)
 
         vedtakService.resettStegVedEndringPåEndredeUtbetalingsperioder(behandlingId = behandling.id)
-        return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = behandling.fagsak.id))
+        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandling.id)))
     }
 }

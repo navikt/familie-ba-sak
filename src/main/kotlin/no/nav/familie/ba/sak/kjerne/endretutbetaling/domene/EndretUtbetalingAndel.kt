@@ -142,6 +142,8 @@ data class EndretUtbetalingAndel(
             )
         )
     }
+
+    fun årsakErDeltBosted() = this.årsak == Årsak.DELT_BOSTED
 }
 
 enum class Årsak(val visningsnavn: String) {
