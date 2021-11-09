@@ -33,7 +33,7 @@ jobs:
           key: ${{ runner.os }}-maven-cache-${{ hashFiles('pom.xml') }}
           restore-keys: |
             ${{ runner.os }}-maven-cache-
-      - name: Bygg med maven + sonar
+      - name: Kjør ktlint og sonar
         env:
           SONAR_PROJECTKEY: ${{ secrets.SONAR_PROJECTKEY }}
           SONAR_LOGIN: ${{ secrets.SONAR_LOGIN }}
@@ -57,7 +57,7 @@ jobs:
           key: ${{ runner.os }}-maven-cache-${{ hashFiles('pom.xml') }}
           restore-keys: |
             ${{ runner.os }}-maven-cache-
-      - name: Bygg med maven + sonar
+      - name: Kjør enhetstester og integrasjonstester
         env:
           GITHUB_USERNAME: x-access-token
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -78,7 +78,7 @@ jobs:
           key: ${{ runner.os }}-maven-cache-${{ hashFiles('pom.xml') }}
           restore-keys: |
             ${{ runner.os }}-maven-cache-
-      - name: Bygg med maven + sonar
+      - name: Kjør verdikjedetester
         env:
           GITHUB_USERNAME: x-access-token
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
