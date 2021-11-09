@@ -35,7 +35,7 @@ class MockFagsakConfig(
             )
         )
 
-        val førsteBehandling = stegService.opprettNyBehandling(
+        val førsteBehandling = stegService.håndterNyBehandling(
             NyBehandling(
                 BehandlingKategori.NASJONAL,
                 BehandlingUnderkategori.ORDINÆR,

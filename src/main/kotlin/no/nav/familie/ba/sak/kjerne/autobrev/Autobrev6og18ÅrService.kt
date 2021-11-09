@@ -70,7 +70,7 @@ class Autobrev6og18ÅrService(
         }
 
         val opprettetBehandling =
-            stegService.opprettNyBehandling(
+            stegService.håndterNyBehandling(
                 nyBehandling = opprettNyOmregningBehandling(
                     behandling = behandling,
                     behandlingÅrsak = finnBehandlingÅrsakForAlder(

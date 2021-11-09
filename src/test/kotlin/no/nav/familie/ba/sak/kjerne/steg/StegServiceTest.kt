@@ -306,7 +306,7 @@ class StegServiceTest(
             stegService.infotrygdFeedService.opprettTaskService.taskRepository.save(capture(tasksSlot))
         } returns Task(type = SendStartBehandlingTilInfotrygdTask.TASK_STEP_TYPE, payload = "")
 
-        stegService.opprettNyBehandlingOgSendInfotrygdFeed(
+        stegService.håndterNyBehandlingOgSendInfotrygdFeed(
             NyBehandling(
                 kategori = BehandlingKategori.NASJONAL,
                 underkategori = BehandlingUnderkategori.ORDINÆR,
@@ -338,7 +338,7 @@ class StegServiceTest(
         every {
             stegService.infotrygdFeedService.opprettTaskService.taskRepository.save(capture(tasksSlot))
         } returns Task(type = SendStartBehandlingTilInfotrygdTask.TASK_STEP_TYPE, payload = "")
-        stegService.opprettNyBehandlingOgSendInfotrygdFeed(
+        stegService.håndterNyBehandlingOgSendInfotrygdFeed(
             NyBehandling(
                 kategori = BehandlingKategori.NASJONAL,
                 underkategori = BehandlingUnderkategori.ORDINÆR,
