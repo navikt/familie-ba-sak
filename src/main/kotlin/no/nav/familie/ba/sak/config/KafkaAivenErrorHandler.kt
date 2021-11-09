@@ -22,55 +22,51 @@ class KafkaAivenErrorHandler : ContainerStoppingErrorHandler() {
     private val executor: Executor
     private val teller = AtomicInteger(0)
     private val sisteFeil = AtomicLong(0)
-    override fun handle(
-        e: Exception,
-        records: List<ConsumerRecord<*, *>>?,
-        consumer: Consumer<*, *>,
-        container: MessageListenerContainer
-    ) {
+    override fun handle(e: Exception,
+                        records: List<ConsumerRecord<*, *>>?,
+                        consumer: Consumer<*, *>,
+                        container: MessageListenerContainer) {
         Thread.sleep(1000)
 
         if (records.isNullOrEmpty()) {
             logger.error("Feil ved konsumering av melding. Ingen records. ${consumer.subscription()}", e)
             scheduleRestart(
-                e,
-                records,
-                consumer,
-                container,
-                "Ukjent topic"
-            )
-        } else {
-            records.first().run {
-                logger.error(
-                    "Feil ved konsumering av melding fra ${this.topic()}. id ${this.key()}, " +
-                        "offset: ${this.offset()}, partition: ${this.partition()}"
-                )
-                secureLogger.error("${this.topic()} - Problemer med prosessering av $records", e)
-                scheduleRestart(
                     e,
                     records,
                     consumer,
                     container,
-                    this.topic()
+                    "Ukjent topic"
+            )
+        } else {
+            records.first().run {
+                logger.error(
+                        "Feil ved konsumering av melding fra ${this.topic()}. id ${this.key()}, " +
+                        "offset: ${this.offset()}, partition: ${this.partition()}"
+                )
+                secureLogger.error("${this.topic()} - Problemer med prosessering av $records", e)
+                scheduleRestart(
+                        e,
+                        records,
+                        consumer,
+                        container,
+                        this.topic()
                 )
             }
         }
     }
 
-    private fun scheduleRestart(
-        e: Exception,
-        records: List<ConsumerRecord<*, *>>? = null,
-        consumer: Consumer<*, *>,
-        container: MessageListenerContainer,
-        topic: String
-    ) {
+    private fun scheduleRestart(e: Exception,
+                                records: List<ConsumerRecord<*, *>>? = null,
+                                consumer: Consumer<*, *>,
+                                container: MessageListenerContainer,
+                                topic: String) {
         val now = System.currentTimeMillis()
         if (now - sisteFeil.getAndSet(now) > COUNTER_RESET_TID) {
             teller.set(0)
         }
         val numErrors = teller.incrementAndGet()
         val stopTime =
-            if (numErrors > MAKS_ANTALL_FEIL) MAKS_STOP_TID else MIN_STOP_TID * numErrors
+                if (numErrors > MAKS_ANTALL_FEIL) MAKS_STOP_TID else MIN_STOP_TID * numErrors
         executor.execute {
             try {
                 Thread.sleep(stopTime)
@@ -81,7 +77,7 @@ class KafkaAivenErrorHandler : ContainerStoppingErrorHandler() {
             }
         }
         logger.warn("Stopper kafka container for $topic i ${Duration.ofMillis(stopTime)}")
-        super.handle(e, records, consumer, container)
+        super.handle(Exception("Sjekk securelogs for mer info - ${e::class.java.simpleName}"), records, consumer, container)
     }
 
     companion object {
