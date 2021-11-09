@@ -13,9 +13,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.RestHenleggBehandlingInfo
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
@@ -99,8 +97,6 @@ class StegService(
             NyBehandling(
                 søkersIdent = nyBehandlingHendelse.morsIdent,
                 behandlingType = behandlingsType,
-                kategori = BehandlingKategori.NASJONAL,
-                underkategori = BehandlingUnderkategori.ORDINÆR,
                 behandlingÅrsak = BehandlingÅrsak.FØDSELSHENDELSE,
                 skalBehandlesAutomatisk = true,
                 barnasIdenter = nyBehandlingHendelse.barnasIdenter
