@@ -12,7 +12,6 @@ import java.time.LocalDateTime
 
 data class RestUtvidetBehandling(
     val behandlingId: Long,
-    val aktiv: Boolean,
     val steg: StegType,
     val stegTilstand: List<RestBehandlingStegTilstand>,
     val status: BehandlingStatus,
@@ -33,6 +32,6 @@ data class RestUtvidetBehandling(
     val personerMedAndelerTilkjentYtelse: List<RestPersonMedAndeler>,
     val endretUtbetalingAndeler: List<RestEndretUtbetalingAndel>,
     val tilbakekreving: RestTilbakekreving?,
-    val vedtakForBehandling: List<RestVedtak>,
+    val vedtak: RestVedtak?,
     val totrinnskontroll: RestTotrinnskontroll?,
 )
