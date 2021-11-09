@@ -25,6 +25,8 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 
+private const val INFOTRYGD_NULLDATO = "000000"
+
 @Service
 class VelgFagSystemService(
     private val fagsakService: FagsakService,
@@ -64,9 +66,9 @@ class VelgFagSystemService(
     }
 
     internal fun morHarSakerMenIkkeLøpendeIInfotrygd(morsIdent: String): Boolean {
-        return infotrygdService.harÅpenSakIInfotrygd(mutableListOf(morsIdent)) && !infotrygdService.harLøpendeSakIInfotrygd(
-            mutableListOf(morsIdent)
-        )
+        val stønader = infotrygdService.hentInfotrygdstønaderForSøker(morsIdent, historikk = true).bruker
+        if (stønader.any { it.opphørtFom == INFOTRYGD_NULLDATO }) throw IllegalStateException("Mor har løpende stønad i Infotrygd")
+        return stønader.isNotEmpty()
     }
 
     internal fun morEllerBarnHarLøpendeSakIInfotrygd(morsIdent: String, barnasIdenter: List<String>): Boolean {
