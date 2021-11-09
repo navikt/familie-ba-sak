@@ -39,6 +39,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -190,6 +191,7 @@ class VedtaksperiodeService(
         }
     }
 
+    @Transactional
     fun oppdaterVedtakMedVedtaksperioder(vedtak: Vedtak) {
 
         slettVedtaksperioderFor(vedtak)

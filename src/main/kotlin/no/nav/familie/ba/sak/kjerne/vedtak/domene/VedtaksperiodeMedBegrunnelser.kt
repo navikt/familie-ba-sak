@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.NullableMånedPeriode
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
@@ -132,4 +133,23 @@ class BegrunnelseComparator : Comparator<Vedtaksbegrunnelse> {
             -1
         } else 1
     }
+}
+
+fun VedtaksperiodeMedBegrunnelser.finnBegrunnelserForSegment(
+    andelerForSegment: List<AndelTilkjentYtelse>
+): List<Vedtaksbegrunnelse> {
+    val endretUtbetalingAndeler =
+        andelerForSegment.flatMap { it.endretUtbetalingAndeler }
+
+    return endretUtbetalingAndeler
+        .flatMap { it.vedtakBegrunnelseSpesifikasjoner }.toSet()
+        .map { vedtakBegrunnelseSpesifikasjon ->
+            Vedtaksbegrunnelse(
+                vedtaksperiodeMedBegrunnelser = this,
+                vedtakBegrunnelseSpesifikasjon = vedtakBegrunnelseSpesifikasjon,
+                personIdenter = endretUtbetalingAndeler.filter {
+                    it.harVedtakBegrunnelseSpesifikasjon(vedtakBegrunnelseSpesifikasjon)
+                }.mapNotNull { it.person?.personIdent?.ident }
+            )
+        }
 }

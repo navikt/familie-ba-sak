@@ -35,6 +35,7 @@ import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.slåSammenEtterfølgendeEndringsperioderMedSammeBegrunnelserOgPersoner
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.sorter
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
@@ -183,15 +184,19 @@ class BrevService(
         val andelTilkjentYtelser =
             andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(vedtak.behandling.id)
 
-        val brevperioder = utvidetVedtaksperioderMedBegrunnelser.sorter().mapNotNull {
-            it.tilBrevPeriode(
-                personerIPersongrunnlag = grunnlagOgSignaturData.grunnlag.personer.toList(),
-                målform = målform,
-                uregistrerteBarn = søknadGrunnlagService.hentAktiv(behandlingId = vedtak.behandling.id)
-                    ?.hentUregistrerteBarn() ?: emptyList(),
-                utvidetScenario = andelTilkjentYtelser.hentUtvidetYtelseScenario(it.hentMånedPeriode())
-            )
-        }
+        val brevperioder =
+            utvidetVedtaksperioderMedBegrunnelser
+                .slåSammenEtterfølgendeEndringsperioderMedSammeBegrunnelserOgPersoner()
+                .sorter()
+                .mapNotNull {
+                    it.tilBrevPeriode(
+                        personerIPersongrunnlag = grunnlagOgSignaturData.grunnlag.personer.toList(),
+                        målform = målform,
+                        uregistrerteBarn = søknadGrunnlagService.hentAktiv(behandlingId = vedtak.behandling.id)
+                            ?.hentUregistrerteBarn() ?: emptyList(),
+                        utvidetScenario = andelTilkjentYtelser.hentUtvidetYtelseScenario(it.hentMånedPeriode())
+                    )
+                }
 
         return VedtakFellesfelter(
             enhet = grunnlagOgSignaturData.enhet,

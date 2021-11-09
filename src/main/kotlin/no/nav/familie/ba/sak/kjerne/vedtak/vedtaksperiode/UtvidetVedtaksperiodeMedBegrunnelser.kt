@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.inneværendeMåned
+import no.nav.familie.ba.sak.common.sisteDagIForrigeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
@@ -32,6 +33,15 @@ data class UtvidetVedtaksperiodeMedBegrunnelser(
         (fom ?: TIDENES_MORGEN).toYearMonth(),
         (tom ?: TIDENES_ENDE).toYearMonth()
     )
+
+    fun inneholderSammeBegrunnelserOgPersonerSom(
+        utvidetVedtaksperiodeMedBegrunnelser: UtvidetVedtaksperiodeMedBegrunnelser
+    ) =
+        this.begrunnelser.containsAll(utvidetVedtaksperiodeMedBegrunnelser.begrunnelser) &&
+            this.hentPersonIdenter()
+                .containsAll(utvidetVedtaksperiodeMedBegrunnelser.hentPersonIdenter())
+
+    fun hentPersonIdenter() = utbetalingsperiodeDetaljer.map { it.person.personIdent }
 }
 
 data class RestVedtaksbegrunnelse(
@@ -51,7 +61,10 @@ fun VedtaksperiodeMedBegrunnelser.tilUtvidetVedtaksperiodeMedBegrunnelser(
 ): UtvidetVedtaksperiodeMedBegrunnelser {
 
     val utbetalingsperiodeDetaljer =
-        if (this.type == Vedtaksperiodetype.UTBETALING || this.type == Vedtaksperiodetype.ENDRET_UTBETALING || this.type == Vedtaksperiodetype.FORTSATT_INNVILGET) {
+        if (this.type == Vedtaksperiodetype.UTBETALING ||
+            this.type == Vedtaksperiodetype.ENDRET_UTBETALING ||
+            this.type == Vedtaksperiodetype.FORTSATT_INNVILGET
+        ) {
             val andelerForVedtaksperiodetype = andelerTilkjentYtelse.filter {
                 if (this.type == Vedtaksperiodetype.ENDRET_UTBETALING) {
                     endretUtbetalingAndelSkalVæreMed(it)
@@ -118,4 +131,23 @@ private fun hentAndelerForSegment(
             it.stønadTom.sisteDagIInneværendeMåned()
         )
     )
+}
+
+fun List<UtvidetVedtaksperiodeMedBegrunnelser>.slåSammenEtterfølgendeEndringsperioderMedSammeBegrunnelserOgPersoner():
+    List<UtvidetVedtaksperiodeMedBegrunnelser> {
+    return this
+        .filter { it.type == Vedtaksperiodetype.ENDRET_UTBETALING }
+        .sorter()
+        .fold(emptyList<UtvidetVedtaksperiodeMedBegrunnelser>()) { acc, utvidetVedtaksperiodeMedBegrunnelser ->
+            val forrigeEndringsperiode = acc.lastOrNull()
+            if (
+                forrigeEndringsperiode != null &&
+                forrigeEndringsperiode.inneholderSammeBegrunnelserOgPersonerSom(utvidetVedtaksperiodeMedBegrunnelser) &&
+                forrigeEndringsperiode.tom == utvidetVedtaksperiodeMedBegrunnelser.fom?.sisteDagIForrigeMåned()
+            )
+                acc.filter { forrigeEndringsperiode.id != it.id } +
+                    forrigeEndringsperiode.copy(tom = utvidetVedtaksperiodeMedBegrunnelser.tom)
+            else
+                acc + utvidetVedtaksperiodeMedBegrunnelser
+        } + this.filter { it.type != Vedtaksperiodetype.ENDRET_UTBETALING }
 }

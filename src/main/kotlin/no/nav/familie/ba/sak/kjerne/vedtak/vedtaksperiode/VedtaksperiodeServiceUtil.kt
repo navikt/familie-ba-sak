@@ -21,8 +21,8 @@ import no.nav.familie.ba.sak.kjerne.vedtak.VedtakUtils
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.finnBegrunnelserForSegment
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import java.time.LocalDate
@@ -30,7 +30,9 @@ import java.time.LocalDate
 fun hentVedtaksperioderMedBegrunnelserForEndredeUtbetalingsperioder(
     andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
     vedtak: Vedtak
-) = andelerTilkjentYtelse.filter { it.endretUtbetalingAndeler.isNotEmpty() }.groupBy { it.prosent }
+) = andelerTilkjentYtelse
+    .filter { it.endretUtbetalingAndeler.isNotEmpty() }
+    .groupBy { it.prosent }
     .flatMap { (_, andeler) ->
         andeler.lagVertikaleSegmenter()
             .map { (segmenter, andelerForSegment) ->
@@ -39,20 +41,9 @@ fun hentVedtaksperioderMedBegrunnelserForEndredeUtbetalingsperioder(
                     tom = segmenter.tom,
                     vedtak = vedtak,
                     type = Vedtaksperiodetype.ENDRET_UTBETALING
-                ).also { vedtaksperiodeMedBegrunnelse ->
-                    val endretUtbetalingAndeler = andelerForSegment.flatMap { it.endretUtbetalingAndeler }
-                    vedtaksperiodeMedBegrunnelse.begrunnelser.addAll(
-                        endretUtbetalingAndeler
-                            .flatMap { it.vedtakBegrunnelseSpesifikasjoner }.toSet()
-                            .map { vedtakBegrunnelseSpesifikasjon ->
-                                Vedtaksbegrunnelse(
-                                    vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelse,
-                                    vedtakBegrunnelseSpesifikasjon = vedtakBegrunnelseSpesifikasjon,
-                                    personIdenter = endretUtbetalingAndeler.filter {
-                                        it.harVedtakBegrunnelseSpesifikasjon(vedtakBegrunnelseSpesifikasjon)
-                                    }.mapNotNull { it.person?.personIdent?.ident }
-                                )
-                            }
+                ).also {
+                    it.begrunnelser.addAll(
+                        it.finnBegrunnelserForSegment(andelerForSegment = andelerForSegment)
                     )
                 }
             }

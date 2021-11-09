@@ -1,14 +1,21 @@
 package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
+import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.lagSøknadDTO
+import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.tilDagMånedÅr
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.ekstern.restDomene.RestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.dokument.BrevService
+import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.flettefelt
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenario
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenarioPerson
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
@@ -21,24 +28,27 @@ import java.time.LocalDate
 
 class EndretUtbetalingAndelMedUtvidetAndelTest(
     @Autowired private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
+    @Autowired private val vedtakService: VedtakService,
+    @Autowired private val brevService: BrevService,
 ) : AbstractVerdikjedetest() {
 
     @Test
-    fun `Skal teste at endret utbetalingsandeler for ordinær og utvidet endrer utbetaling for søker og barn`() {
-        val (scenario, restBehandlingEtterBehandlingsresultat) = genererBehandlingsresultat()
+    fun `Endret utbetalingsandeler for ordinær og utvidet endrer utbetaling for søker og barn og får kun én periode over satsendring`() {
+        val (scenario, restBehandlingEtterVilkårsvurdering) = genererBehandlingsresultat()
 
         val andelerTilkjentYtelse =
-            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = restBehandlingEtterBehandlingsresultat.behandlingId)
+            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = restBehandlingEtterVilkårsvurdering.behandlingId)
 
-        val endretFom = andelerTilkjentYtelse.last().stønadFom
-        val endretTom = andelerTilkjentYtelse.last().stønadTom.minusMonths(2)
+        val sorterteAndelerTilikjentYtelse = andelerTilkjentYtelse.sortedBy { it.stønadFom }
+        val endretFomFørSatsendring = sorterteAndelerTilikjentYtelse[sorterteAndelerTilikjentYtelse.size - 2].stønadFom
+        val endretTomEtterSatsendring = LocalDate.now().toYearMonth().minusMonths(1)
 
         val restEndretUtbetalingAndelUtvidetBarnetrygd = RestEndretUtbetalingAndel(
             id = null,
             personIdent = scenario.søker.ident,
             prosent = BigDecimal(0),
-            fom = endretFom,
-            tom = endretTom,
+            fom = endretFomFørSatsendring,
+            tom = endretTomEtterSatsendring,
             årsak = Årsak.DELT_BOSTED,
             avtaletidspunktDeltBosted = LocalDate.now(),
             søknadstidspunkt = LocalDate.now(),
@@ -47,7 +57,7 @@ class EndretUtbetalingAndelMedUtvidetAndelTest(
         )
 
         familieBaSakKlient().leggTilEndretUtbetalingAndel(
-            restBehandlingEtterBehandlingsresultat.behandlingId,
+            restBehandlingEtterVilkårsvurdering.behandlingId,
             restEndretUtbetalingAndelUtvidetBarnetrygd
         )
 
@@ -55,8 +65,8 @@ class EndretUtbetalingAndelMedUtvidetAndelTest(
             id = null,
             personIdent = scenario.barna.first().ident,
             prosent = BigDecimal(0),
-            fom = endretFom,
-            tom = endretTom,
+            fom = endretFomFørSatsendring,
+            tom = endretTomEtterSatsendring,
             årsak = Årsak.DELT_BOSTED, avtaletidspunktDeltBosted = LocalDate.now(),
             søknadstidspunkt = LocalDate.now(),
             begrunnelse = "begrunnelse",
@@ -64,43 +74,67 @@ class EndretUtbetalingAndelMedUtvidetAndelTest(
         )
 
         familieBaSakKlient().leggTilEndretUtbetalingAndel(
-            restBehandlingEtterBehandlingsresultat.behandlingId,
+            restBehandlingEtterVilkårsvurdering.behandlingId,
             restEndretUtbetalingAndelOrdinærBarnetrygd
         )
 
-        familieBaSakKlient().behandlingsresultatStegOgGåVidereTilNesteSteg(
-            behandlingId = restBehandlingEtterBehandlingsresultat.behandlingId
+        val behandlingsresultatRessurs = familieBaSakKlient().behandlingsresultatStegOgGåVidereTilNesteSteg(
+            behandlingId = restBehandlingEtterVilkårsvurdering.behandlingId
         )
 
+        if (behandlingsresultatRessurs.status != Ressurs.Status.SUKSESS) {
+            error("Klarte ikke å gjennomføre behandlingsresultatsteg.")
+        }
+
         val andelerTilkjentYtelseMedEndretPeriode =
-            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = restBehandlingEtterBehandlingsresultat.behandlingId)
+            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(
+                behandlingId = restBehandlingEtterVilkårsvurdering.behandlingId
+            )
 
         val endretAndeleTilkjentYtelser =
             andelerTilkjentYtelseMedEndretPeriode.filter { it.kalkulertUtbetalingsbeløp == 0 }
 
+        val vedtak = vedtakService.hentAktivForBehandling(restBehandlingEtterVilkårsvurdering.behandlingId)!!
+        val brevdata = brevService.lagVedtaksbrevFellesfelter(vedtak)
+
+        Assertions.assertEquals(
+            1,
+            brevdata.perioder.size
+        )
+
+        Assertions.assertEquals(
+            flettefelt(endretFomFørSatsendring.førsteDagIInneværendeMåned().tilDagMånedÅr()),
+            brevdata.perioder.single().fom
+        )
+
+        Assertions.assertEquals(
+            flettefelt("til ${endretTomEtterSatsendring.sisteDagIInneværendeMåned().tilDagMånedÅr()} "),
+            brevdata.perioder.single().tom
+        )
+
         Assertions.assertEquals(
             endretAndeleTilkjentYtelser.single { it.personIdent == scenario.barna.first().ident }.stønadFom,
-            endretFom
+            endretFomFørSatsendring
         )
 
         Assertions.assertEquals(
             endretAndeleTilkjentYtelser.single { it.personIdent == scenario.barna.first().ident }.stønadTom,
-            endretTom
+            endretTomEtterSatsendring
         )
 
         Assertions.assertEquals(
             endretAndeleTilkjentYtelser.single { it.personIdent == scenario.søker.ident }.stønadFom,
-            endretFom
+            endretFomFørSatsendring
         )
 
         Assertions.assertEquals(
             endretAndeleTilkjentYtelser.single { it.personIdent == scenario.søker.ident }.stønadTom,
-            endretTom
+            endretTomEtterSatsendring
         )
     }
 
     private fun genererBehandlingsresultat(): Pair<RestScenario, RestUtvidetBehandling> {
-        val barnFødselsdato = LocalDate.now().minusYears(3)
+        val barnFødselsdato = LocalDate.now().minusYears(6)
 
         val scenario = mockServerKlient().lagScenario(
             RestScenario(
@@ -150,7 +184,7 @@ class EndretUtbetalingAndelMedUtvidetAndelTest(
                         vilkårResultater = listOf(
                             it.copy(
                                 resultat = Resultat.OPPFYLT,
-                                periodeFom = barnFødselsdato,
+                                periodeFom = barnFødselsdato.plusYears(3),
                                 erDeltBosted = it.vilkårType == Vilkår.BOR_MED_SØKER
                             )
                         )
@@ -159,10 +193,10 @@ class EndretUtbetalingAndelMedUtvidetAndelTest(
             }
         }
 
-        val restBehandlingEtterBehandlingsresultat = familieBaSakKlient().validerVilkårsvurdering(
+        val restBehandlingEtterVilkårsvurdering = familieBaSakKlient().validerVilkårsvurdering(
             behandlingId = restUtvidetBehandling.behandlingId
         )
 
-        return Pair(scenario, restBehandlingEtterBehandlingsresultat.data!!)
+        return Pair(scenario, restBehandlingEtterVilkårsvurdering.data!!)
     }
 }
