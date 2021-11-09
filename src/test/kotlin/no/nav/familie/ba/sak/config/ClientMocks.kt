@@ -580,7 +580,7 @@ class ClientMocks {
             guttenBarnesenFødselsdato,
             LocalDate.now().withDayOfMonth(18).minusYears(1)
         )
-        val barnFnr = arrayOf(barnFødselsdatoer[0].tilddMMyy() + "00033", barnFødselsdatoer[1].tilddMMyy() + "00033")
+        val barnFnr = arrayOf(barnFødselsdatoer[0].tilddMMyy() + "50033", barnFødselsdatoer[1].tilddMMyy() + "50033")
         const val BARN_DET_IKKE_GIS_TILGANG_TIL_FNR = "12345678912"
         const val INTEGRASJONER_FNR = "10000111111"
         val bostedsadresse = Bostedsadresse(

@@ -1,18 +1,15 @@
 package no.nav.familie.ba.sak.kjerne.fagsak
 
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.RessursUtils
 import no.nav.familie.ba.sak.common.RessursUtils.illegalState
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsakDeltager
 import no.nav.familie.ba.sak.ekstern.restDomene.RestHentFagsakForPerson
+import no.nav.familie.ba.sak.ekstern.restDomene.RestMinimalFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestSøkParam
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
-import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingService
-import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.task.BehandleAnnullerFødselDto
@@ -29,7 +26,6 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
@@ -37,16 +33,13 @@ import org.springframework.web.bind.annotation.RestController
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class FagsakController(
-    private val behandlingService: BehandlingService,
-    private val vedtakService: VedtakService,
     private val fagsakService: FagsakService,
-    private val stegService: StegService,
     private val tilgangService: TilgangService,
     private val tilbakekrevingService: TilbakekrevingService,
 ) {
 
     @PostMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun hentEllerOpprettFagsak(@RequestBody fagsakRequest: FagsakRequest): ResponseEntity<Ressurs<RestFagsak>> {
+    fun hentEllerOpprettFagsak(@RequestBody fagsakRequest: FagsakRequest): ResponseEntity<Ressurs<RestMinimalFagsak>> {
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} henter eller oppretter ny fagsak")
 
         return Result.runCatching { fagsakService.hentEllerOpprettFagsak(fagsakRequest) }
@@ -57,11 +50,30 @@ class FagsakController(
     }
 
     @GetMapping(path = ["/{fagsakId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun hentFagsak(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<RestFagsak>> {
+    fun hentRestFagsak(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<RestFagsak>> {
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} henter fagsak med id $fagsakId")
 
         val fagsak = fagsakService.hentRestFagsak(fagsakId)
         return ResponseEntity.ok().body(fagsak)
+    }
+
+    @GetMapping(path = ["/minimal/{fagsakId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun hentMinimalFagsak(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<RestMinimalFagsak>> {
+        logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} henter minimal fagsak med id $fagsakId")
+
+        val fagsak = fagsakService.hentRestMinimalFagsak(fagsakId)
+        return ResponseEntity.ok().body(fagsak)
+    }
+
+    @PostMapping(path = ["/hent-fagsak-paa-person"], produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun hentMinimalFagsakForPerson(@RequestBody request: RestHentFagsakForPerson): ResponseEntity<Ressurs<RestMinimalFagsak>> {
+
+        return Result.runCatching {
+            fagsakService.hentMinimalFagsakForPerson(PersonIdent(request.personIdent))
+        }.fold(
+            onSuccess = { return ResponseEntity.ok().body(it) },
+            onFailure = { illegalState("Ukjent feil ved henting data for manuell journalføring.", it) }
+        )
     }
 
     @PostMapping(path = ["/sok"])
@@ -95,41 +107,6 @@ class FagsakController(
                         )
                 }
             )
-    }
-
-    @PostMapping(path = ["/hent-fagsak-paa-person"], produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun hentRestFagsak(@RequestBody request: RestHentFagsakForPerson): ResponseEntity<Ressurs<RestFagsak>> {
-
-        return Result.runCatching {
-            fagsakService.hentRestFagsakForPerson(PersonIdent(request.personIdent))
-        }.fold(
-            onSuccess = { return ResponseEntity.ok().body(it) },
-            onFailure = { illegalState("Ukjent feil ved henting data for manuell journalføring.", it) }
-        )
-    }
-
-    @PostMapping(path = ["/{fagsakId}/send-til-beslutter"], produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun sendBehandlingTilBeslutter(
-        @PathVariable fagsakId: Long,
-        @RequestParam behandlendeEnhet: String
-    ): ResponseEntity<Ressurs<RestFagsak>> {
-        val behandling = behandlingService.hentAktivForFagsak(fagsakId)
-            ?: return RessursUtils.notFound("Fant ikke behandling på fagsak $fagsakId")
-
-        stegService.håndterSendTilBeslutter(behandling, behandlendeEnhet)
-        return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId))
-    }
-
-    @PostMapping(path = ["/{fagsakId}/iverksett-vedtak"], produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun iverksettVedtak(
-        @PathVariable fagsakId: Long,
-        @RequestBody restBeslutningPåVedtak: RestBeslutningPåVedtak
-    ): ResponseEntity<Ressurs<RestFagsak>> {
-        val behandling = behandlingService.hentAktivForFagsak(fagsakId)
-            ?: return RessursUtils.notFound("Fant ikke behandling på fagsak $fagsakId")
-
-        stegService.håndterBeslutningForVedtak(behandling, restBeslutningPåVedtak)
-        return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId))
     }
 
     @GetMapping(path = ["/{fagsakId}/har-apen-tilbakekreving"], produces = [MediaType.APPLICATION_JSON_VALUE])

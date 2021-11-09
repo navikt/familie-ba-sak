@@ -4,7 +4,6 @@ import io.mockk.mockk
 import no.nav.commons.foedselsnummer.testutils.FoedselsnummerGenerator
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPerson
-import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedStandardbegrunnelser
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.ekstern.restDomene.SøkerMedOpplysninger
@@ -198,8 +197,8 @@ fun lagVedtak(behandling: Behandling = lagBehandling()) =
     )
 
 fun lagAndelTilkjentYtelse(
-    fom: String,
-    tom: String,
+    fom: YearMonth,
+    tom: YearMonth,
     ytelseType: YtelseType = YtelseType.ORDINÆR_BARNETRYGD,
     beløp: Int = sats(ytelseType),
     behandling: Behandling = lagBehandling(),
@@ -216,8 +215,8 @@ fun lagAndelTilkjentYtelse(
         behandlingId = behandling.id,
         tilkjentYtelse = tilkjentYtelse ?: lagInitiellTilkjentYtelse(behandling),
         kalkulertUtbetalingsbeløp = beløp,
-        stønadFom = årMnd(fom),
-        stønadTom = årMnd(tom),
+        stønadFom = fom,
+        stønadTom = tom,
         type = ytelseType,
         periodeOffset = periodeIdOffset,
         forrigePeriodeOffset = forrigeperiodeIdOffset,
@@ -888,10 +887,8 @@ fun leggTilBegrunnelsePåVedtaksperiodeIBehandling(
 
     vedtaksperiodeService.oppdaterVedtaksperiodeMedStandardbegrunnelser(
         vedtaksperiodeId = perisisterteVedtaksperioder.first().id,
-        restPutVedtaksperiodeMedStandardbegrunnelser = RestPutVedtaksperiodeMedStandardbegrunnelser(
-            standardbegrunnelser = listOf(
-                VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET,
-            )
+        standardbegrunnelserFraFrontend = listOf(
+            VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET,
         )
     )
 }
@@ -919,6 +916,7 @@ fun lagVilkårResultat(
 val guttenBarnesenFødselsdato = LocalDate.now().withDayOfMonth(10).minusYears(6)
 
 fun lagEndretUtbetalingAndel(
+    id: Long = 0,
     behandlingId: Long = 0,
     person: Person,
     prosent: BigDecimal = BigDecimal.valueOf(100),
@@ -928,8 +926,10 @@ fun lagEndretUtbetalingAndel(
     avtaletidspunktDeltBosted: LocalDate = LocalDate.now().minusMonths(1),
     søknadstidspunkt: LocalDate = LocalDate.now().minusMonths(1),
     vedtakBegrunnelseSpesifikasjoner: List<VedtakBegrunnelseSpesifikasjon> = emptyList(),
+    andelTilkjentYtelser: MutableList<AndelTilkjentYtelse> = mutableListOf()
 ) =
     EndretUtbetalingAndel(
+        id = id,
         behandlingId = behandlingId,
         person = person,
         prosent = prosent,
@@ -940,6 +940,7 @@ fun lagEndretUtbetalingAndel(
         søknadstidspunkt = søknadstidspunkt,
         begrunnelse = "Test",
         vedtakBegrunnelseSpesifikasjoner = vedtakBegrunnelseSpesifikasjoner,
+        andelTilkjentYtelser = andelTilkjentYtelser
     )
 
 fun lagPerson(

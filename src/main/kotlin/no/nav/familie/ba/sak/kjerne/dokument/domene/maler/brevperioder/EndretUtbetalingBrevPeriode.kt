@@ -44,5 +44,6 @@ data class EndretUtbetalingBrevPeriode(
 }
 
 enum class EndretUtbetalingBernetrygtType(val navn: String) {
-    DELT("delt")
+    DELT("delt"),
+    DELT_UTVIDET("delt utvidet"),
 }

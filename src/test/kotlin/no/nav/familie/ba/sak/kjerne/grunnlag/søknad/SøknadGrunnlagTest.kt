@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.SøkerMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.writeValueAsString
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
+import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
@@ -20,7 +21,6 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagSe
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
-import no.nav.familie.ba.sak.kjerne.tilbakekreving.domene.TilbakekrevingRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
@@ -35,7 +35,14 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
 
 @SpringBootTest
-@ActiveProfiles("dev", "mock-pdl", "mock-infotrygd-barnetrygd", "mock-økonomi", "mock-tilbakekreving-klient", "mock-brev-klient")
+@ActiveProfiles(
+    "dev",
+    "mock-pdl",
+    "mock-infotrygd-barnetrygd",
+    "mock-økonomi",
+    "mock-tilbakekreving-klient",
+    "mock-brev-klient"
+)
 class SøknadGrunnlagTest(
     @Autowired
     private val søknadGrunnlagService: SøknadGrunnlagService,
@@ -59,7 +66,7 @@ class SøknadGrunnlagTest(
     private val beregningService: BeregningService,
 
     @Autowired
-    private val tilbakekrevingsRepository: TilbakekrevingRepository,
+    private val utvidetBehandlingService: UtvidetBehandlingService,
 
     @Autowired
     private val vedtaksperiodeService: VedtaksperiodeService,
@@ -222,7 +229,8 @@ class SøknadGrunnlagTest(
 
         val error =
             assertThrows<IllegalStateException> { beregningService.hentTilkjentYtelseForBehandling(behandlingId = behandlingEtterNyRegistrering.id) }
-        val stegEtterNyRegistrering = behandlingEtterNyRegistrering.behandlingStegTilstand.map { it.behandlingSteg }.toSet()
+        val stegEtterNyRegistrering =
+            behandlingEtterNyRegistrering.behandlingStegTilstand.map { it.behandlingSteg }.toSet()
         assertEquals("Fant ikke tilkjent ytelse for behandling ${behandlingEtterNyRegistrering.id}", error.message)
         assertEquals(
             setOf(StegType.REGISTRERE_SØKNAD, StegType.REGISTRERE_PERSONGRUNNLAG, StegType.VILKÅRSVURDERING),
@@ -271,6 +279,6 @@ class SøknadGrunnlagTest(
             )
         )
 
-        assertDoesNotThrow { fagsakService.lagRestUtvidetBehandling(behandling = behandlingEtterNyRegistrering) }
+        assertDoesNotThrow { utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingEtterNyRegistrering.id) }
     }
 }

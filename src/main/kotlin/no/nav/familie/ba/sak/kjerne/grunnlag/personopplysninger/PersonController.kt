@@ -1,11 +1,11 @@
 package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger
 
-import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonInfo
+import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonInfo
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.sikkerhet.validering.PersontilgangConstraint
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -25,7 +25,7 @@ class PersonController(
     private val personopplysningerService: PersonopplysningerService,
     private val persongrunnlagService: PersongrunnlagService,
     private val integrasjonClient: IntegrasjonClient,
-    private val fagsakService: FagsakService
+    private val utvidetBehandlingService: UtvidetBehandlingService
 ) {
 
     @GetMapping
@@ -44,8 +44,8 @@ class PersonController(
     }
 
     @GetMapping(path = ["/oppdater-registeropplysninger/{behandlingId}"])
-    fun hentOgOppdaterRegisteropplysninger(@PathVariable behandlingId: Long): ResponseEntity<Ressurs<RestFagsak>> {
+    fun hentOgOppdaterRegisteropplysninger(@PathVariable behandlingId: Long): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         val personopplysningGrunnlag = persongrunnlagService.oppdaterRegisteropplysninger(behandlingId)
-        return ResponseEntity.ok(fagsakService.hentRestFagsakForPerson(personopplysningGrunnlag.søker.personIdent))
+        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = personopplysningGrunnlag.behandlingId)))
     }
 }

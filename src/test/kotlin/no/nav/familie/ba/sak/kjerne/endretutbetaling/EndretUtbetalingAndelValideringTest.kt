@@ -3,10 +3,13 @@ package no.nav.familie.ba.sak.kjerne.endretutbetaling
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.UtbetalingsikkerhetFeil
+import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagEndretUtbetalingAndel
+import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerAtAlleOpprettedeEndringerErUtfylt
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerAtEndringerErTilknyttetAndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerDeltBosted
@@ -14,14 +17,30 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValide
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerPeriodeInnenforTilkjentytelse
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
+import kotlin.random.Random
 
 class EndretUtbetalingAndelValideringTest {
+
+    val søker = lagPerson(type = PersonType.SØKER)
+    val barn = lagPerson(type = PersonType.BARN)
+    val endretUtbetalingAndelUtvidetNullutbetaling =
+        endretUtbetalingAndel(søker, YtelseType.UTVIDET_BARNETRYGD, BigDecimal.ZERO)
+    val endretUtbetalingAndelDeltBostedNullutbetaling =
+        endretUtbetalingAndel(barn, YtelseType.ORDINÆR_BARNETRYGD, BigDecimal.ZERO)
+
+    val endretUtbetalingAndelUtvidetFullUtbetaling =
+        endretUtbetalingAndel(søker, YtelseType.UTVIDET_BARNETRYGD, BigDecimal.valueOf(100))
+    val endretUtbetalingAndelDeltBostedFullUtbetaling =
+        endretUtbetalingAndel(barn, YtelseType.ORDINÆR_BARNETRYGD, BigDecimal.valueOf(100))
 
     @Test
     fun `skal sjekke at en endret periode ikke overlapper med eksisternede endrete perioder`() {
@@ -86,18 +105,18 @@ class EndretUtbetalingAndelValideringTest {
 
         val andelTilkjentYtelser = listOf(
             lagAndelTilkjentYtelse(
-                fom = YearMonth.of(2020, 2).toString(),
-                tom = YearMonth.of(2020, 4).toString(),
+                fom = YearMonth.of(2020, 2),
+                tom = YearMonth.of(2020, 4),
                 person = barn1
             ),
             lagAndelTilkjentYtelse(
-                fom = YearMonth.of(2020, 7).toString(),
-                tom = YearMonth.of(2020, 10).toString(),
+                fom = YearMonth.of(2020, 7),
+                tom = YearMonth.of(2020, 10),
                 person = barn1
             ),
             lagAndelTilkjentYtelse(
-                fom = YearMonth.of(2018, 10).toString(),
-                tom = YearMonth.of(2021, 10).toString(),
+                fom = YearMonth.of(2018, 10),
+                tom = YearMonth.of(2021, 10),
                 person = barn2
             ),
         )
@@ -151,8 +170,8 @@ class EndretUtbetalingAndelValideringTest {
     fun `skal sjekke at det eksisterer delt bostedsats ved opprettelse av endring med årsak delt bosted`() {
         val barn1 = tilfeldigPerson()
         val andelTilkjentYtelse = lagAndelTilkjentYtelse(
-            fom = YearMonth.of(2020, 2).toString(),
-            tom = YearMonth.of(2020, 4).toString(),
+            fom = YearMonth.of(2020, 2),
+            tom = YearMonth.of(2020, 4),
             person = barn1
         )
         val endretUtbetalingAndel = EndretUtbetalingAndel(
@@ -212,6 +231,204 @@ class EndretUtbetalingAndelValideringTest {
         validerAtEndringerErTilknyttetAndelTilkjentYtelse(
             listOf(
                 endretUtbetalingAndel1.copy(andelTilkjentYtelser = mutableListOf(andelTilkjentYtelse))
+            )
+        )
+    }
+
+    @Test
+    fun `skal ikke feile dersom de er en utvidet endring og delt bosded endring med samme periode og prosent`() {
+        validerAtDetFinnesDeltBostedEndringerMedSammeProsentForUtvidedeEndringer(
+            listOf(endretUtbetalingAndelUtvidetNullutbetaling, endretUtbetalingAndelDeltBostedNullutbetaling)
+        )
+        Assertions.assertDoesNotThrow {
+            validerAtDetFinnesDeltBostedEndringerMedSammeProsentForUtvidedeEndringer(
+                listOf(endretUtbetalingAndelUtvidetNullutbetaling, endretUtbetalingAndelDeltBostedNullutbetaling)
+            )
+        }
+    }
+
+    @Test
+    fun `skal ikke feile dersom endring strekker seg over utvidet og ordinær ytelse`() {
+        val fom1 = inneværendeMåned().minusMonths(2)
+        val tom1 = inneværendeMåned().minusMonths(2)
+        val fom2 = inneværendeMåned().minusMonths(1)
+        val tom2 = inneværendeMåned().minusMonths(1)
+
+        val utvidetEndring = lagEndretUtbetalingAndel(
+            fom = fom1,
+            tom = tom2,
+            person = søker,
+            årsak = Årsak.DELT_BOSTED,
+            prosent = BigDecimal.ZERO,
+            andelTilkjentYtelser = mutableListOf(
+                lagAndelTilkjentYtelse(
+                    fom = fom1,
+                    tom = tom1,
+                    ytelseType = YtelseType.UTVIDET_BARNETRYGD
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = fom2,
+                    tom = tom2,
+                    ytelseType = YtelseType.ORDINÆR_BARNETRYGD
+                )
+            )
+        )
+
+        val deltBostedEndring =
+            endretUtbetalingAndel(
+                barn, YtelseType.ORDINÆR_BARNETRYGD, BigDecimal.ZERO,
+                fomUtvidet = fom1,
+                tomUtvidet = tom2,
+            )
+
+        Assertions.assertThrows(FunksjonellFeil::class.java) {
+            validerAtDetFinnesDeltBostedEndringerMedSammeProsentForUtvidedeEndringer(
+                listOf(utvidetEndring, deltBostedEndring)
+            )
+        }
+    }
+
+    @Test
+    fun `skal kaste feil dersom det er en endring på utvidet ytelse uten en endring på delt bosted i samme periode`() {
+
+        Assertions.assertThrows(FunksjonellFeil::class.java) {
+            validerAtDetFinnesDeltBostedEndringerMedSammeProsentForUtvidedeEndringer(
+                listOf(endretUtbetalingAndelUtvidetNullutbetaling)
+            )
+        }
+    }
+
+    @Test
+    fun `skal kaste feil dersom det er en endring på utvidet ytelse og delt bosted med forskjellig prosent`() {
+
+        Assertions.assertThrows(FunksjonellFeil::class.java) {
+            validerAtDetFinnesDeltBostedEndringerMedSammeProsentForUtvidedeEndringer(
+                listOf(
+                    endretUtbetalingAndelUtvidetNullutbetaling,
+                    endretUtbetalingAndelDeltBostedFullUtbetaling
+                )
+            )
+        }
+
+        Assertions.assertThrows(FunksjonellFeil::class.java) {
+            validerAtDetFinnesDeltBostedEndringerMedSammeProsentForUtvidedeEndringer(
+                listOf(
+                    endretUtbetalingAndelUtvidetFullUtbetaling,
+                    endretUtbetalingAndelDeltBostedNullutbetaling
+                )
+            )
+        }
+    }
+
+    @Test
+    fun `skal kaste feil dersom delt bosted endring krysser utvidet tilkjent ytelse og ikke ellers`() {
+
+        val fomUtvidet: YearMonth = inneværendeMåned().minusMonths(4)
+        val tomUtvidet: YearMonth = inneværendeMåned().minusMonths(2)
+
+        val førFomutvidet = inneværendeMåned().minusMonths(5)
+        val iPeriode = inneværendeMåned().minusMonths(3)
+        val etterPeriode = inneværendeMåned().minusMonths(1)
+
+        val andelerTilkjentYtelse = listOf(
+            lagAndelTilkjentYtelse(
+                fom = fomUtvidet,
+                tom = tomUtvidet,
+                ytelseType = YtelseType.UTVIDET_BARNETRYGD
+            )
+        )
+
+        Assertions.assertDoesNotThrow {
+            validerDeltBostedEndringerIkkeKrysserUtvidetYtelse(
+                endretUtbetalingAndeler = listOf(
+                    lagEndretUtbetalingAndel(
+                        fom = førFomutvidet,
+                        tom = førFomutvidet,
+                        årsak = Årsak.DELT_BOSTED,
+                        person = søker
+                    )
+                ),
+                andelerTilkjentYtelse = andelerTilkjentYtelse
+            )
+        }
+
+        Assertions.assertThrows(FunksjonellFeil::class.java) {
+            validerDeltBostedEndringerIkkeKrysserUtvidetYtelse(
+                endretUtbetalingAndeler = listOf(
+                    lagEndretUtbetalingAndel(
+                        fom = førFomutvidet,
+                        tom = fomUtvidet,
+                        årsak = Årsak.DELT_BOSTED,
+                        person = søker
+                    )
+                ),
+                andelerTilkjentYtelse = andelerTilkjentYtelse
+            )
+        }
+
+        Assertions.assertDoesNotThrow {
+            validerDeltBostedEndringerIkkeKrysserUtvidetYtelse(
+                endretUtbetalingAndeler = listOf(
+                    lagEndretUtbetalingAndel(
+                        fom = fomUtvidet,
+                        tom = iPeriode,
+                        årsak = Årsak.DELT_BOSTED,
+                        person = søker
+                    )
+                ),
+                andelerTilkjentYtelse = andelerTilkjentYtelse
+            )
+        }
+
+        Assertions.assertDoesNotThrow() {
+            validerDeltBostedEndringerIkkeKrysserUtvidetYtelse(
+                endretUtbetalingAndeler = listOf(
+                    lagEndretUtbetalingAndel(
+                        fom = fomUtvidet,
+                        tom = tomUtvidet,
+                        årsak = Årsak.DELT_BOSTED,
+                        person = søker
+                    )
+                ),
+                andelerTilkjentYtelse = andelerTilkjentYtelse
+            )
+        }
+
+        Assertions.assertDoesNotThrow {
+            validerDeltBostedEndringerIkkeKrysserUtvidetYtelse(
+                endretUtbetalingAndeler = listOf(
+                    lagEndretUtbetalingAndel(
+                        fom = etterPeriode,
+                        tom = etterPeriode,
+                        årsak = Årsak.DELT_BOSTED,
+                        person = søker
+                    )
+                ),
+                andelerTilkjentYtelse = andelerTilkjentYtelse
+            )
+        }
+    }
+
+    private fun endretUtbetalingAndel(
+        person: Person,
+        ytelsestype: YtelseType,
+        prosent: BigDecimal,
+        fomUtvidet: YearMonth = inneværendeMåned().minusMonths(1),
+        tomUtvidet: YearMonth = inneværendeMåned().minusMonths(1),
+    ): EndretUtbetalingAndel {
+        return lagEndretUtbetalingAndel(
+            id = Random.nextLong(),
+            fom = fomUtvidet,
+            tom = tomUtvidet,
+            person = person,
+            årsak = Årsak.DELT_BOSTED,
+            prosent = prosent,
+            andelTilkjentYtelser = mutableListOf(
+                lagAndelTilkjentYtelse(
+                    fom = fomUtvidet,
+                    tom = tomUtvidet,
+                    ytelseType = ytelsestype
+                )
             )
         )
     }

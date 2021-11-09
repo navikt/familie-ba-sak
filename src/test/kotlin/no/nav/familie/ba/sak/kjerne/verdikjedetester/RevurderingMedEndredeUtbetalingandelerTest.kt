@@ -113,7 +113,7 @@ class RevurderingMedEndredeUtbetalingandelerTest(
             begrunnelse = "begrunnelse",
             personIdent = barnFnr,
             årsak = Årsak.DELT_BOSTED,
-            prosent = BigDecimal(50),
+            prosent = BigDecimal(100),
             erTilknyttetAndeler = false
         )
 
