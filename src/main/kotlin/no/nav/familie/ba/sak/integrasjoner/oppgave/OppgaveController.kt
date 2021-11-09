@@ -46,7 +46,8 @@ class OppgaveController(
     )
     fun hentOppgaver(@RequestBody restFinnOppgaveRequest: RestFinnOppgaveRequest): ResponseEntity<Ressurs<FinnOppgaveResponseDto>> =
         try {
-            val oppgaver: FinnOppgaveResponseDto = oppgaveService.hentOppgaver(restFinnOppgaveRequest.tilFinnOppgaveRequest())
+            val oppgaver: FinnOppgaveResponseDto =
+                oppgaveService.hentOppgaver(restFinnOppgaveRequest.tilFinnOppgaveRequest())
             ResponseEntity.ok().body(Ressurs.success(oppgaver, "Finn oppgaver OK"))
         } catch (e: Throwable) {
             illegalState("Henting av oppgaver feilet", e)
@@ -63,7 +64,11 @@ class OppgaveController(
         )
 
         val oppgaveId =
-            oppgaveService.fordelOppgave(oppgaveId = oppgaveId, saksbehandler = saksbehandler, overstyrFordeling = false)
+            oppgaveService.fordelOppgave(
+                oppgaveId = oppgaveId,
+                saksbehandler = saksbehandler,
+                overstyrFordeling = false
+            )
 
         return ResponseEntity.ok().body(Ressurs.success(oppgaveId))
     }
@@ -91,7 +96,8 @@ class OppgaveController(
         val personIdent = if (oppgave.aktoerId == null) null else {
             integrasjonClient.hentPersonIdent(oppgave.aktoerId) ?: error("Fant ikke personident for aktør id")
         }
-        val fagsak = if (personIdent == null) null else fagsakService.hentRestFagsakForPerson(personIdent).data
+        val minimalFagsak =
+            if (personIdent == null) null else fagsakService.hentMinimalFagsakForPerson(personIdent).data
 
         val dataForManuellJournalføring = DataForManuellJournalføring(
             oppgave = oppgave,
@@ -100,7 +106,7 @@ class OppgaveController(
                 personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(it)
                     .tilRestPersonInfo(it)
             },
-            fagsak = fagsak
+            minimalFagsak = minimalFagsak
         )
 
         val journalpost: Ressurs<Journalpost>? =
@@ -120,7 +126,11 @@ class OppgaveController(
                 )
             }
             journalpost.status == Ressurs.Status.FEILET -> ResponseEntity.ok(Ressurs.failure(journalpost.melding))
-            journalpost.status == Ressurs.Status.FUNKSJONELL_FEIL -> ResponseEntity.ok(Ressurs.funksjonellFeil(journalpost.melding))
+            journalpost.status == Ressurs.Status.FUNKSJONELL_FEIL -> ResponseEntity.ok(
+                Ressurs.funksjonellFeil(
+                    journalpost.melding
+                )
+            )
             journalpost.status == Ressurs.Status.IKKE_TILGANG -> ResponseEntity.ok(
                 Ressurs(
                     data = null,

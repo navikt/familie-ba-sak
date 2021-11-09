@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.ekstern.restDomene.RestHentFagsakForPerson
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
@@ -42,7 +41,7 @@ class FødselshendelseFørstegangsbehandlingTest(
                 )
             )
         )
-        behandleFødselshendelse(
+        val behandling = behandleFødselshendelse(
             nyBehandlingHendelse = NyBehandlingHendelse(
                 morsIdent = scenario.søker.ident!!,
                 barnasIdenter = listOf(scenario.barna.first().ident!!)
@@ -55,14 +54,14 @@ class FødselshendelseFørstegangsbehandlingTest(
         )
 
         val restFagsakEtterBehandlingAvsluttet =
-            familieBaSakKlient().hentFagsak(restHentFagsakForPerson = RestHentFagsakForPerson(personIdent = scenario.søker.ident))
+            familieBaSakKlient().hentFagsak(fagsakId = behandling!!.fagsak.id)
         generellAssertFagsak(
             restFagsak = restFagsakEtterBehandlingAvsluttet,
             fagsakStatus = FagsakStatus.LØPENDE,
             behandlingStegType = StegType.BEHANDLING_AVSLUTTET
         )
 
-        val aktivBehandling = restFagsakEtterBehandlingAvsluttet.getDataOrThrow().behandlinger.first { it.aktiv }
+        val aktivBehandling = restFagsakEtterBehandlingAvsluttet.getDataOrThrow().behandlinger.single()
         assertEquals(BehandlingResultat.INNVILGET, aktivBehandling.resultat)
 
         val utbetalingsperioder = aktivBehandling.utbetalingsperioder
@@ -72,7 +71,11 @@ class FødselshendelseFørstegangsbehandlingTest(
                 it.periodeFom.toYearMonth() <= SatsService.tilleggOrdinærSatsNesteMånedTilTester.gyldigTom.toYearMonth()
         }!!
 
-        assertUtbetalingsperiode(gjeldendeUtbetalingsperiode, 1, SatsService.tilleggOrdinærSatsNesteMånedTilTester.beløp * 1)
+        assertUtbetalingsperiode(
+            gjeldendeUtbetalingsperiode,
+            1,
+            SatsService.tilleggOrdinærSatsNesteMånedTilTester.beløp * 1
+        )
     }
 
     @Test
@@ -94,7 +97,7 @@ class FødselshendelseFørstegangsbehandlingTest(
                 )
             )
         )
-        behandleFødselshendelse(
+        val behandling = behandleFødselshendelse(
             nyBehandlingHendelse = NyBehandlingHendelse(
                 morsIdent = scenario.søker.ident!!,
                 barnasIdenter = scenario.barna.map { it.ident!! }
@@ -107,14 +110,14 @@ class FødselshendelseFørstegangsbehandlingTest(
         )
 
         val restFagsakEtterBehandlingAvsluttet =
-            familieBaSakKlient().hentFagsak(restHentFagsakForPerson = RestHentFagsakForPerson(personIdent = scenario.søker.ident))
+            familieBaSakKlient().hentFagsak(fagsakId = behandling!!.fagsak.id)
         generellAssertFagsak(
             restFagsak = restFagsakEtterBehandlingAvsluttet,
             fagsakStatus = FagsakStatus.LØPENDE,
             behandlingStegType = StegType.BEHANDLING_AVSLUTTET
         )
 
-        val aktivBehandling = restFagsakEtterBehandlingAvsluttet.getDataOrThrow().behandlinger.first { it.aktiv }
+        val aktivBehandling = restFagsakEtterBehandlingAvsluttet.getDataOrThrow().behandlinger.single()
         assertEquals(BehandlingResultat.INNVILGET, aktivBehandling.resultat)
 
         val utbetalingsperioder = aktivBehandling.utbetalingsperioder
@@ -123,6 +126,10 @@ class FødselshendelseFørstegangsbehandlingTest(
                 it.periodeFom.toYearMonth() <= SatsService.tilleggOrdinærSatsNesteMånedTilTester.gyldigTom.toYearMonth()
         }!!
 
-        assertUtbetalingsperiode(gjeldendeUtbetalingsperiode, 2, SatsService.tilleggOrdinærSatsNesteMånedTilTester.beløp * 2)
+        assertUtbetalingsperiode(
+            gjeldendeUtbetalingsperiode,
+            2,
+            SatsService.tilleggOrdinærSatsNesteMånedTilTester.beløp * 2
+        )
     }
 }

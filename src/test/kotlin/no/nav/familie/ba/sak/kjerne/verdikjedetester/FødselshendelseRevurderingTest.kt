@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.kjerne.verdikjedetester
 import io.mockk.every
 import no.nav.familie.ba.sak.common.LocalDateService
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.ekstern.restDomene.RestHentFagsakForPerson
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
@@ -68,7 +67,7 @@ class FødselshendelseRevurderingTest(
 
         val søkerIdent = scenario.søker.ident
         val vurdertBarn = scenario.barna.maxByOrNull { it.fødselsdato }!!.ident!!
-        behandleFødselshendelse(
+        val behandling = behandleFødselshendelse(
             nyBehandlingHendelse = NyBehandlingHendelse(
                 morsIdent = søkerIdent,
                 barnasIdenter = listOf(vurdertBarn)
@@ -82,14 +81,19 @@ class FødselshendelseRevurderingTest(
         )
 
         val restFagsakEtterBehandlingAvsluttet =
-            familieBaSakKlient().hentFagsak(restHentFagsakForPerson = RestHentFagsakForPerson(personIdent = søkerIdent))
+            familieBaSakKlient().hentFagsak(fagsakId = behandling!!.fagsak.id)
+
         generellAssertFagsak(
             restFagsak = restFagsakEtterBehandlingAvsluttet,
             fagsakStatus = FagsakStatus.LØPENDE,
-            behandlingStegType = StegType.BEHANDLING_AVSLUTTET
+            behandlingStegType = StegType.BEHANDLING_AVSLUTTET,
+            aktivBehandlingId = behandling.id
         )
 
-        val aktivBehandling = restFagsakEtterBehandlingAvsluttet.getDataOrThrow().behandlinger.first { it.aktiv }
+        val aktivBehandling =
+            restFagsakEtterBehandlingAvsluttet.getDataOrThrow().behandlinger
+                .single { it.behandlingId == behandlingService.hentAktivForFagsak(restFagsakEtterBehandlingAvsluttet.data!!.id)?.id }
+
         val vurderteVilkårIDenneBehandlingen = aktivBehandling.personResultater.flatMap { it.vilkårResultater }
             .filter { it.behandlingId == aktivBehandling.behandlingId }
         assertEquals(BehandlingResultat.INNVILGET, aktivBehandling.resultat)
@@ -101,6 +105,10 @@ class FødselshendelseRevurderingTest(
             it.periodeFom.toYearMonth() == SatsService.tilleggOrdinærSatsNesteMånedTilTester.gyldigFom.toYearMonth()
         }!!
 
-        assertUtbetalingsperiode(gjeldendeUtbetalingsperiode, 2, SatsService.tilleggOrdinærSatsNesteMånedTilTester.beløp * 2)
+        assertUtbetalingsperiode(
+            gjeldendeUtbetalingsperiode,
+            2,
+            SatsService.tilleggOrdinærSatsNesteMånedTilTester.beløp * 2
+        )
     }
 }

@@ -17,6 +17,8 @@ import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering.validerAt
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerAtAlleOpprettedeEndringerErUtfylt
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerAtEndringerErTilknyttetAndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.validerAtDetFinnesDeltBostedEndringerMedSammeProsentForUtvidedeEndringer
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.validerDeltBostedEndringerIkkeKrysserUtvidetYtelse
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
@@ -91,18 +93,27 @@ class BehandlingsresultatSteg(
             )
         }
 
-        validerAtAlleOpprettedeEndringerErUtfylt(endretUtbetalingAndelService.hentForBehandling(behandling.id))
-        validerAtEndringerErTilknyttetAndelTilkjentYtelse(endretUtbetalingAndelService.hentForBehandling(behandling.id))
+        val endretUtbetalingAndeler = endretUtbetalingAndelService.hentForBehandling(behandling.id)
+        validerAtAlleOpprettedeEndringerErUtfylt(endretUtbetalingAndeler)
+        validerAtEndringerErTilknyttetAndelTilkjentYtelse(endretUtbetalingAndeler)
+        validerAtDetFinnesDeltBostedEndringerMedSammeProsentForUtvidedeEndringer(endretUtbetalingAndeler)
 
         validerAtBarnIkkeFårFlereUtbetalingerSammePeriode(
             behandlendeBehandlingTilkjentYtelse = tilkjentYtelse,
             barnMedAndreTilkjentYtelse = andreBehandlingerPåBarna,
             personopplysningGrunnlag = personopplysningGrunnlag
         )
+
+        validerDeltBostedEndringerIkkeKrysserUtvidetYtelse(
+            endretUtbetalingAndeler,
+            tilkjentYtelse.andelerTilkjentYtelse.toList()
+        )
     }
 
     @Transactional
     override fun utførStegOgAngiNeste(behandling: Behandling, data: String): StegType {
+
+        endretUtbetalingAndelService.oppdaterEndreteUtbetalingsandelerMedBegrunnelser(behandling)
 
         val behandlingMedResultat = if (behandling.erMigrering() && behandling.skalBehandlesAutomatisk) {
             settBehandlingResultat(behandling, BehandlingResultat.INNVILGET)

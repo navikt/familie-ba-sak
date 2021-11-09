@@ -138,19 +138,19 @@ class BehandlingService(
             behandling.apply { underkategori = nyUnderkategori }
         }
 
-        return lagreEllerOppdater(behandling).also { behandling ->
-            oppgaveService.patchOppgaverForBehandling(behandling) {
-                if (it.behandlingstema != behandling.underkategori.tilBehandlingstema().value || it.behandlingstype != behandling.kategori.tilBehandlingstype().value) {
+        return lagreEllerOppdater(behandling).also { lagretBehandling ->
+            oppgaveService.patchOppgaverForBehandling(lagretBehandling) {
+                if (it.behandlingstema != lagretBehandling.underkategori.tilBehandlingstema().value || it.behandlingstype != lagretBehandling.kategori.tilBehandlingstype().value) {
                     it.copy(
-                        behandlingstema = behandling.underkategori.tilBehandlingstema().value,
-                        behandlingstype = behandling.kategori.tilBehandlingstype().value
+                        behandlingstema = lagretBehandling.underkategori.tilBehandlingstema().value,
+                        behandlingstype = lagretBehandling.kategori.tilBehandlingstype().value
                     )
                 } else null
             }
 
             if (manueltOppdatert && (skalOppdatereKategori || skalOppdatereUnderkategori)) {
                 loggService.opprettEndretBehandlingstema(
-                    behandling = behandling,
+                    behandling = lagretBehandling,
                     forrigeKategori = forrigeBehandlingKategori,
                     forrigeUnderkategori = forrigeBehandlingUnderkategori,
                     nyKategori = nyBehandlingKategori,
@@ -204,7 +204,8 @@ class BehandlingService(
         return behandlingRepository.finnBehandling(behandlingId)
     }
 
-    fun hentSisteIverksatteBehandlingerFraLøpendeFagsaker(): List<Long> = behandlingRepository.finnSisteIverksatteBehandlingFraLøpendeFagsaker()
+    fun hentSisteIverksatteBehandlingerFraLøpendeFagsaker(): List<Long> =
+        behandlingRepository.finnSisteIverksatteBehandlingFraLøpendeFagsaker()
 
     fun hentBehandlinger(fagsakId: Long): List<Behandling> {
         return behandlingRepository.finnBehandlinger(fagsakId)
