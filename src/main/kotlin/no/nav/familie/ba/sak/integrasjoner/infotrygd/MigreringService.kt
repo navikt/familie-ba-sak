@@ -212,7 +212,7 @@ class MigreringService(
     private fun virkningsdatoFra(kjøredato: LocalDate): LocalDate {
         LocalDate.now().run {
             return when {
-                env.erPreprod() -> LocalDate.of(2021, 7,1)
+                env.erPreprod() -> LocalDate.of(2021, 7, 1)
                 this.isBefore(kjøredato) -> this.førsteDagIInneværendeMåned()
                 this.isAfter(kjøredato.plusDays(1)) -> this.førsteDagINesteMåned()
                 env.erDev() || env.erE2E() -> this.førsteDagINesteMåned()
@@ -283,7 +283,7 @@ class MigreringService(
         val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
             ?: error("Fant ikke aktivt vedtak på behandling ${behandling.id}")
         if (env.erPreprod()) {
-            vedtak.vedtaksdato = LocalDate.of(2021, 7,1).atStartOfDay()
+            vedtak.vedtaksdato = LocalDate.of(2021, 7, 1).atStartOfDay()
         }
         vedtakService.oppdater(vedtak)
         behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.IVERKSETTER_VEDTAK)
