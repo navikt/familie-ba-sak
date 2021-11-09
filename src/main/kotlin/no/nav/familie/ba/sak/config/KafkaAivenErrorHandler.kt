@@ -22,10 +22,12 @@ class KafkaAivenErrorHandler : ContainerStoppingErrorHandler() {
     private val executor: Executor
     private val teller = AtomicInteger(0)
     private val sisteFeil = AtomicLong(0)
-    override fun handle(e: Exception,
-                        records: List<ConsumerRecord<*, *>>?,
-                        consumer: Consumer<*, *>,
-                        container: MessageListenerContainer) {
+    override fun handle(
+            e: Exception,
+            records: List<ConsumerRecord<*, *>>?,
+            consumer: Consumer<*, *>,
+            container: MessageListenerContainer
+    ) {
         Thread.sleep(1000)
 
         if (records.isNullOrEmpty()) {
@@ -55,11 +57,13 @@ class KafkaAivenErrorHandler : ContainerStoppingErrorHandler() {
         }
     }
 
-    private fun scheduleRestart(e: Exception,
-                                records: List<ConsumerRecord<*, *>>? = null,
-                                consumer: Consumer<*, *>,
-                                container: MessageListenerContainer,
-                                topic: String) {
+    private fun scheduleRestart(
+            e: Exception,
+            records: List<ConsumerRecord<*, *>>? = null,
+            consumer: Consumer<*, *>,
+            container: MessageListenerContainer,
+            topic: String
+    ) {
         val now = System.currentTimeMillis()
         if (now - sisteFeil.getAndSet(now) > COUNTER_RESET_TID) {
             teller.set(0)
