@@ -70,7 +70,7 @@ class BehandlingController(
         }
 
         return Result.runCatching {
-            stegService.opprettNyBehandlingOgSendInfotrygdFeed(nyBehandling)
+            stegService.håndterNyBehandlingOgSendInfotrygdFeed(nyBehandling)
         }.fold(
             onSuccess = {
                 val restFagsak = ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = it.fagsak.id))

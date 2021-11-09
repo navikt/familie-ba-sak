@@ -47,8 +47,8 @@ class StegService(
     private val stegFeiletMetrics: Map<StegType, Counter> = initStegMetrikker("feil")
     private val stegFunksjonellFeilMetrics: Map<StegType, Counter> = initStegMetrikker("funksjonell-feil")
 
-    fun opprettNyBehandlingOgSendInfotrygdFeed(nyBehandling: NyBehandling): Behandling {
-        val behandling = opprettNyBehandling(nyBehandling)
+    fun håndterNyBehandlingOgSendInfotrygdFeed(nyBehandling: NyBehandling): Behandling {
+        val behandling = håndterNyBehandling(nyBehandling)
         if (behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING) {
             infotrygdFeedService.sendStartBehandlingTilInfotrygdFeed(
                 behandling.fagsak.hentAktivIdent().ident,
@@ -58,7 +58,7 @@ class StegService(
     }
 
     @Transactional
-    fun opprettNyBehandling(nyBehandling: NyBehandling): Behandling {
+    fun håndterNyBehandling(nyBehandling: NyBehandling): Behandling {
         val behandling = behandlingService.opprettBehandling(nyBehandling)
 
         return if (nyBehandling.behandlingType == BehandlingType.MIGRERING_FRA_INFOTRYGD || nyBehandling.behandlingÅrsak == BehandlingÅrsak.FØDSELSHENDELSE) {
@@ -107,7 +107,7 @@ class StegService(
         val behandlingsType =
             if (fagsak.status == FagsakStatus.LØPENDE) BehandlingType.REVURDERING else BehandlingType.FØRSTEGANGSBEHANDLING
 
-        val behandling = opprettNyBehandlingOgSendInfotrygdFeed(
+        val behandling = håndterNyBehandlingOgSendInfotrygdFeed(
             NyBehandling(
                 søkersIdent = nyBehandlingHendelse.morsIdent,
                 behandlingType = behandlingsType,
