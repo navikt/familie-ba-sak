@@ -1,10 +1,14 @@
 package no.nav.familie.ba.sak.kjerne.behandling
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
+import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils.bestemKategori
 import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils.bestemUnderkategori
+import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils.utledLøpendeKategori
 import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils.utledLøpendeUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
@@ -16,6 +20,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus.FATTER_VE
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.initStatus
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatUtils
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakPersonRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
@@ -50,7 +55,8 @@ class BehandlingService(
     private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
     private val oppgaveService: OppgaveService,
     private val infotrygdService: InfotrygdService,
-    private val vedtaksperiodeService: VedtaksperiodeService
+    private val vedtaksperiodeService: VedtaksperiodeService,
+    private val featureToggleService: FeatureToggleService
 ) {
 
     @Transactional
@@ -64,18 +70,26 @@ class BehandlingService(
         val aktivBehandling = hentAktivForFagsak(fagsak.id)
 
         return if (aktivBehandling == null || aktivBehandling.status == AVSLUTTET) {
-            val underkategori =
-                bestemUnderkategori(
-                    nyUnderkategori = nyBehandling.underkategori,
-                    nyBehandlingType = nyBehandling.behandlingType,
-                    løpendeUnderkategori = hentLøpendeUnderkategori(fagsakId = fagsak.id)
-                )
+
+            val kategori = bestemKategori(
+                behandlingÅrsak = nyBehandling.behandlingÅrsak,
+                nyBehandlingKategori = nyBehandling.kategori,
+                løpendeBehandlingKategori = hentLøpendeKategori(fagsakId = fagsak.id)
+            )
+
+            val underkategori = bestemUnderkategori(
+                nyUnderkategori = nyBehandling.underkategori,
+                nyBehandlingType = nyBehandling.behandlingType,
+                løpendeUnderkategori = hentLøpendeUnderkategori(fagsakId = fagsak.id)
+            )
+
+            sjekkToggleOgThrowHvisBrudd(kategori, underkategori)
 
             val behandling = Behandling(
                 fagsak = fagsak,
                 opprettetÅrsak = nyBehandling.behandlingÅrsak,
                 type = nyBehandling.behandlingType,
-                kategori = nyBehandling.kategori,
+                kategori = kategori,
                 underkategori = underkategori,
                 skalBehandlesAutomatisk = nyBehandling.skalBehandlesAutomatisk
             )
@@ -112,27 +126,34 @@ class BehandlingService(
 
     fun oppdaterBehandlingstema(
         behandling: Behandling,
-        nyBehandlingUnderkategori: BehandlingUnderkategori = BehandlingUnderkategori.ORDINÆR,
-        nyBehandlingKategori: BehandlingKategori = BehandlingKategori.NASJONAL,
+        nyKategori: BehandlingKategori,
+        nyUnderkategori: BehandlingUnderkategori,
         manueltOppdatert: Boolean = false
     ): Behandling {
-        val nyUnderkategori =
-            if (manueltOppdatert) nyBehandlingUnderkategori
+
+        val nyKategori = bestemKategori(
+            behandlingÅrsak = behandling.opprettetÅrsak,
+            nyBehandlingKategori = nyKategori,
+            løpendeBehandlingKategori = hentLøpendeKategori(fagsakId = behandling.fagsak.id)
+        )
+
+        val nyUnderkategori: BehandlingUnderkategori =
+            if (manueltOppdatert) nyUnderkategori
             else bestemUnderkategori(
-                nyUnderkategori = nyBehandlingUnderkategori,
+                nyUnderkategori = nyUnderkategori,
                 nyBehandlingType = behandling.type,
-                løpendeUnderkategori = hentLøpendeUnderkategori(
-                    fagsakId = behandling.fagsak.id
-                )
+                løpendeUnderkategori = hentLøpendeUnderkategori(fagsakId = behandling.fagsak.id)
             )
 
-        val forrigeBehandlingUnderkategori = behandling.underkategori
-        val forrigeBehandlingKategori = behandling.kategori
-        val skalOppdatereKategori = nyBehandlingKategori != forrigeBehandlingKategori
-        val skalOppdatereUnderkategori = nyUnderkategori != forrigeBehandlingUnderkategori
+        sjekkToggleOgThrowHvisBrudd(nyKategori, nyUnderkategori)
+
+        val forrigeUnderkategori = behandling.underkategori
+        val forrigeKategori = behandling.kategori
+        val skalOppdatereKategori = nyKategori != forrigeKategori
+        val skalOppdatereUnderkategori = nyUnderkategori != forrigeUnderkategori
 
         if (skalOppdatereKategori) {
-            behandling.apply { kategori = nyBehandlingKategori }
+            behandling.apply { kategori = nyKategori }
         }
         if (skalOppdatereUnderkategori) {
             behandling.apply { underkategori = nyUnderkategori }
@@ -151,12 +172,31 @@ class BehandlingService(
             if (manueltOppdatert && (skalOppdatereKategori || skalOppdatereUnderkategori)) {
                 loggService.opprettEndretBehandlingstema(
                     behandling = lagretBehandling,
-                    forrigeKategori = forrigeBehandlingKategori,
-                    forrigeUnderkategori = forrigeBehandlingUnderkategori,
-                    nyKategori = nyBehandlingKategori,
+                    forrigeKategori = forrigeKategori,
+                    forrigeUnderkategori = forrigeUnderkategori,
+                    nyKategori = nyKategori,
                     nyUnderkategori = nyUnderkategori
                 )
             }
+        }
+    }
+
+    private fun sjekkToggleOgThrowHvisBrudd(
+        kategori: BehandlingKategori,
+        underkategori: BehandlingUnderkategori
+    ) {
+        if (kategori == BehandlingKategori.EØS && !featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS)) {
+            throw FunksjonellFeil(
+                melding = "EØS er ikke påskrudd",
+                frontendFeilmelding = "Det er ikke støtte for å behandle EØS søknad."
+            )
+        }
+
+        if (underkategori == BehandlingUnderkategori.UTVIDET && !featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_UTVIDET)) {
+            throw FunksjonellFeil(
+                melding = "Utvidet er ikke påskrudd",
+                frontendFeilmelding = "Det er ikke støtte for å behandle utvidet søknad og du må fjerne tilknytningen til behandling."
+            )
         }
     }
 
@@ -328,13 +368,19 @@ class BehandlingService(
         return lagreEllerOppdater(behandling)
     }
 
-    fun hentLøpendeUnderkategori(fagsakId: Long): BehandlingUnderkategori? {
+    fun hentForrigeAndeler(fagsakId: Long): List<AndelTilkjentYtelse>? {
         val forrigeIverksattBehandling = hentSisteBehandlingSomErIverksatt(fagsakId = fagsakId) ?: return null
+        return andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = forrigeIverksattBehandling.id)
+    }
 
-        val forrigeAndeler =
-            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = forrigeIverksattBehandling.id)
+    fun hentLøpendeKategori(fagsakId: Long): BehandlingKategori? {
+        val forrigeAndeler = hentForrigeAndeler(fagsakId)
+        return if (forrigeAndeler != null) utledLøpendeKategori(forrigeAndeler) else null
+    }
 
-        return utledLøpendeUnderkategori(forrigeAndeler)
+    fun hentLøpendeUnderkategori(fagsakId: Long): BehandlingUnderkategori? {
+        val forrigeAndeler = hentForrigeAndeler(fagsakId)
+        return if (forrigeAndeler != null) utledLøpendeUnderkategori(forrigeAndeler) else null
     }
 
     companion object {

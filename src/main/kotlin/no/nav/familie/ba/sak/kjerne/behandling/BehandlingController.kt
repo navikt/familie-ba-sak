@@ -98,8 +98,8 @@ class BehandlingController(
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         val behandling = behandlingsService.oppdaterBehandlingstema(
             behandling = behandlingsService.hent(behandlingId),
-            nyBehandlingUnderkategori = endreBehandling.behandlingUnderkategori,
-            nyBehandlingKategori = endreBehandling.behandlingKategori,
+            nyUnderkategori = endreBehandling.behandlingUnderkategori,
+            nyKategori = endreBehandling.behandlingKategori,
             manueltOppdatert = true
         )
 
@@ -108,8 +108,8 @@ class BehandlingController(
 }
 
 data class NyBehandling(
-    val kategori: BehandlingKategori,
-    val underkategori: BehandlingUnderkategori,
+    val kategori: BehandlingKategori? = null,
+    val underkategori: BehandlingUnderkategori? = null,
     val søkersIdent: String,
     val behandlingType: BehandlingType,
     val journalpostID: String? = null,
