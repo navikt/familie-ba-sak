@@ -127,7 +127,7 @@ class JournalføringService(
         underkategori: BehandlingUnderkategori? = null
     ): Behandling {
         fagsakService.hentEllerOpprettFagsak(PersonIdent(personIdent))
-        return stegService.håndterNyBehandling(
+        return stegService.håndterNyBehandlingOgSendInfotrygdFeed(
             NyBehandling(
                 kategori = kategori,
                 underkategori = underkategori,
