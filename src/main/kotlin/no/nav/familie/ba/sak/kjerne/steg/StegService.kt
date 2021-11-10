@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.ekstern.restDomene.writeValueAsString
+import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedService
 import no.nav.familie.ba.sak.integrasjoner.skyggesak.SkyggesakService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
@@ -36,12 +37,23 @@ class StegService(
     private val søknadGrunnlagService: SøknadGrunnlagService,
     private val skyggesakService: SkyggesakService,
     private val tilgangService: TilgangService,
+    val infotrygdFeedService: InfotrygdFeedService,
 ) {
 
     private val stegSuksessMetrics: Map<StegType, Counter> = initStegMetrikker("suksess")
 
     private val stegFeiletMetrics: Map<StegType, Counter> = initStegMetrikker("feil")
     private val stegFunksjonellFeilMetrics: Map<StegType, Counter> = initStegMetrikker("funksjonell-feil")
+
+    fun håndterNyBehandlingOgSendInfotrygdFeed(nyBehandling: NyBehandling): Behandling {
+        val behandling = håndterNyBehandling(nyBehandling)
+        if (behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING) {
+            infotrygdFeedService.sendStartBehandlingTilInfotrygdFeed(
+                behandling.fagsak.hentAktivIdent().ident,
+            )
+        }
+        return behandling
+    }
 
     @Transactional
     fun håndterNyBehandling(nyBehandling: NyBehandling): Behandling {
@@ -93,7 +105,7 @@ class StegService(
         val behandlingsType =
             if (fagsak.status == FagsakStatus.LØPENDE) BehandlingType.REVURDERING else BehandlingType.FØRSTEGANGSBEHANDLING
 
-        val behandling = håndterNyBehandling(
+        val behandling = håndterNyBehandlingOgSendInfotrygdFeed(
             NyBehandling(
                 søkersIdent = nyBehandlingHendelse.morsIdent,
                 behandlingType = behandlingsType,

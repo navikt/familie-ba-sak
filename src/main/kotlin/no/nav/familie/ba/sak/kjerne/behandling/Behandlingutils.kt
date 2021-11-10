@@ -16,6 +16,9 @@ object Behandlingutils {
             .findLast { it.steg == StegType.BEHANDLING_AVSLUTTET } // Avklaring - kan vi anta at man ikke igangsetter en teknisk opphørt sak?
     }
 
+    fun hentSisteBehandlingSomIkkeErTekniskOpphør(behandlinger: List<Behandling>): Behandling? =
+        behandlinger.sortedBy { it.opprettetTidspunkt }.findLast { !it.erTekniskOpphør() }
+
     fun hentForrigeIverksatteBehandling(
         iverksatteBehandlinger: List<Behandling>,
         behandlingFørFølgende: Behandling
