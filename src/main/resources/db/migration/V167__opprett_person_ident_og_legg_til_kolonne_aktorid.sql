@@ -9,10 +9,14 @@ create table PERSONIDENT
     OPPRETTET_AV        VARCHAR      DEFAULT 'VL'           NOT NULL,
     OPPRETTET_TID       TIMESTAMP(3) DEFAULT localtimestamp NOT NULL,
     ENDRET_AV           VARCHAR,
-    ENDRET_TID          TIMESTAMP(3)
+    ENDRET_TID          TIMESTAMP(3),
+    UNIQUE (FOEDSELSNUMMER)
 );
 
 create sequence PERSONIDENT_SEQ increment by 50 start with 1000000 NO CYCLE;
+
+create unique index UIDX_PERSONIDENT_AKTOER_ID ON PERSONIDENT(AKTOER_ID)
+    where AKTIV = true;
 
 alter table FAGSAK_PERSON
     add column AKTOER_ID VARCHAR;
