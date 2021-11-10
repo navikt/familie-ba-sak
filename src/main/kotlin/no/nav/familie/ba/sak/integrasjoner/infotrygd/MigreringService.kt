@@ -12,11 +12,9 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestClient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.beregnUtbetalingsperioderUtenKlassifisering
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
@@ -66,7 +64,7 @@ class MigreringService(
     private val behandlingRepository: BehandlingRepository,
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
     private val totrinnskontrollService: TotrinnskontrollService,
-    private val env: EnvService,
+    private val env: EnvService?,
     private val pdlRestClient: PdlRestClient
 ) {
 
@@ -89,8 +87,6 @@ class MigreringService(
             NyBehandling(
                 søkersIdent = personIdent,
                 behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
-                kategori = BehandlingKategori.NASJONAL,
-                underkategori = BehandlingUnderkategori.ORDINÆR,
                 behandlingÅrsak = BehandlingÅrsak.MIGRERING,
                 skalBehandlesAutomatisk = true,
                 barnasIdenter = barnasIdenter
@@ -212,9 +208,10 @@ class MigreringService(
     private fun virkningsdatoFra(kjøredato: LocalDate): LocalDate {
         LocalDate.now().run {
             return when {
+                env?.erPreprod() ?: false -> LocalDate.of(2021, 7, 1)
                 this.isBefore(kjøredato) -> this.førsteDagIInneværendeMåned()
                 this.isAfter(kjøredato.plusDays(1)) -> this.førsteDagINesteMåned()
-                env.erDev() || env.erE2E() || env.erPreprod() -> this.førsteDagINesteMåned()
+                env!!.erDev() || env.erE2E() -> this.førsteDagINesteMåned()
                 else -> throw FunksjonellFeil(
                     "Migrering er midlertidig deaktivert frem til ${kjøredato.plusDays(2)} da det kolliderer med Infotrygds kjøredato",
                     "Migrering er midlertidig deaktivert frem til ${kjøredato.plusDays(2)} da det kolliderer med Infotrygds kjøredato"
@@ -281,6 +278,9 @@ class MigreringService(
         totrinnskontrollService.opprettAutomatiskTotrinnskontroll(behandling)
         val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
             ?: error("Fant ikke aktivt vedtak på behandling ${behandling.id}")
+        if (env!!.erPreprod()) {
+            vedtak.vedtaksdato = LocalDate.of(2021, 7, 1).atStartOfDay()
+        }
         vedtakService.oppdater(vedtak)
         behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.IVERKSETTER_VEDTAK)
         val task = IverksettMotOppdragTask.opprettTask(behandling, vedtak, SikkerhetContext.hentSaksbehandler())

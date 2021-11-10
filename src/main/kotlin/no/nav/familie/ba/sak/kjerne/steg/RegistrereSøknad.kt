@@ -32,8 +32,8 @@ class RegistrereSøknad(
 
         behandlingService.oppdaterBehandlingstema(
             behandling = behandlingService.hent(behandlingId = behandling.id),
-            nyBehandlingKategori = behandling.kategori, // Hvis søknadDTO får feltet kategori, så må denne endres til søknadDTO.kategori
-            nyBehandlingUnderkategori = søknadDTO.underkategori
+            nyKategori = behandling.kategori, // Hvis søknadDTO får feltet kategori, så må denne endres til søknadDTO.kategori
+            nyUnderkategori = søknadDTO.underkategori
         )
 
         loggService.opprettRegistrertSøknadLogg(behandling, aktivSøknadGrunnlagFinnes)

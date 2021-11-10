@@ -127,7 +127,8 @@ class VedtakServiceTest(
             saksstatistikkEventPublisher,
             oppgaveService,
             infotrygdService,
-            vedtaksperiodeService
+            vedtaksperiodeService,
+            featureToggleService
         )
 
         stubFor(
@@ -197,8 +198,17 @@ class VedtakServiceTest(
 
         behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling = behandling)
 
-        totrinnskontrollService.opprettTotrinnskontrollMedSaksbehandler(behandling, "ansvarligSaksbehandler", "saksbehandlerId")
-        totrinnskontrollService.besluttTotrinnskontroll(behandling, "ansvarligBeslutter", "beslutterId", Beslutning.GODKJENT)
+        totrinnskontrollService.opprettTotrinnskontrollMedSaksbehandler(
+            behandling,
+            "ansvarligSaksbehandler",
+            "saksbehandlerId"
+        )
+        totrinnskontrollService.besluttTotrinnskontroll(
+            behandling,
+            "ansvarligBeslutter",
+            "beslutterId",
+            Beslutning.GODKJENT
+        )
 
         val hentetVedtak = vedtakService.hentAktivForBehandling(behandling.id)
         Assertions.assertNotNull(hentetVedtak)

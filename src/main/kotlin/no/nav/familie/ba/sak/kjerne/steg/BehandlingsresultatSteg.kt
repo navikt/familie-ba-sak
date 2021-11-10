@@ -18,6 +18,7 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelServic
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerAtAlleOpprettedeEndringerErUtfylt
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerAtEndringerErTilknyttetAndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.validerAtDetFinnesDeltBostedEndringerMedSammeProsentForUtvidedeEndringer
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.validerDeltBostedEndringerIkkeKrysserUtvidetYtelse
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
@@ -101,6 +102,11 @@ class BehandlingsresultatSteg(
             behandlendeBehandlingTilkjentYtelse = tilkjentYtelse,
             barnMedAndreTilkjentYtelse = andreBehandlingerPåBarna,
             personopplysningGrunnlag = personopplysningGrunnlag
+        )
+
+        validerDeltBostedEndringerIkkeKrysserUtvidetYtelse(
+            endretUtbetalingAndeler,
+            tilkjentYtelse.andelerTilkjentYtelse.toList()
         )
     }
 

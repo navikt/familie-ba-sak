@@ -1,10 +1,10 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
-import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedFritekster
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedStandardbegrunnelser
+import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
+import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.kjerne.dokument.BrevKlient
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.BegrunnelseData
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.FritekstBegrunnelse
@@ -25,10 +25,10 @@ import org.springframework.web.bind.annotation.RestController
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class VedtaksperiodeMedBegrunnelserController(
-    private val fagsakService: FagsakService,
     private val vedtaksperiodeService: VedtaksperiodeService,
     private val tilgangService: TilgangService,
     private val brevKlient: BrevKlient,
+    private val utvidetBehandlingService: UtvidetBehandlingService
 ) {
 
     @PutMapping("/standardbegrunnelser/{vedtaksperiodeId}")
@@ -37,7 +37,7 @@ class VedtaksperiodeMedBegrunnelserController(
         vedtaksperiodeId: Long,
         @RequestBody
         restPutVedtaksperiodeMedStandardbegrunnelser: RestPutVedtaksperiodeMedStandardbegrunnelser
-    ): ResponseEntity<Ressurs<RestFagsak>> {
+    ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = OPPDATERE_BEGRUNNELSER_HANDLING
@@ -48,7 +48,7 @@ class VedtaksperiodeMedBegrunnelserController(
             restPutVedtaksperiodeMedStandardbegrunnelser.standardbegrunnelser
         )
 
-        return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = vedtak.behandling.fagsak.id))
+        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = vedtak.behandling.id)))
     }
 
     @PutMapping("/fritekster/{vedtaksperiodeId}")
@@ -57,7 +57,7 @@ class VedtaksperiodeMedBegrunnelserController(
         vedtaksperiodeId: Long,
         @RequestBody
         restPutVedtaksperiodeMedFritekster: RestPutVedtaksperiodeMedFritekster
-    ): ResponseEntity<Ressurs<RestFagsak>> {
+    ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = OPPDATERE_BEGRUNNELSER_HANDLING
@@ -68,7 +68,7 @@ class VedtaksperiodeMedBegrunnelserController(
             restPutVedtaksperiodeMedFritekster
         )
 
-        return ResponseEntity.ok(fagsakService.hentRestFagsak(fagsakId = vedtak.behandling.fagsak.id))
+        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = vedtak.behandling.id)))
     }
 
     @GetMapping("/brevbegrunnelser/{vedtaksperiodeId}")
