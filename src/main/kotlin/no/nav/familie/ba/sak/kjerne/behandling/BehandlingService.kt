@@ -95,7 +95,6 @@ class BehandlingService(
             )
                 .initBehandlingStegTilstand()
 
-
             behandling.validerBehandling()
 
             val lagretBehandling = lagreNyOgDeaktiverGammelBehandling(behandling)
