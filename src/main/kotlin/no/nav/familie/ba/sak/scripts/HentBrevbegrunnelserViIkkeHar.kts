@@ -14,8 +14,12 @@ printUtAlleSanitybegrunnelserViIkkeHarIBaSak()
 fun printUtAlleSanitybegrunnelserViIkkeHarIBaSak() {
     val sanitybegrunnelser = hentSanityBegrunnelser()
     val begrunnelser = VedtakBegrunnelseSpesifikasjon.values()
+    val sanityBegrunnelserViIkkeHarIBaSak = sanitybegrunnelser.filter { !finnesIBaSak(begrunnelser, it) }
 
-    sanitybegrunnelser.filter { !finnesIBaSak(begrunnelser, it) }
+    println("Det er ${sanityBegrunnelserViIkkeHarIBaSak.size} begrunnelser i Sanity som ikke finnes i ba-sak:")
+    println("")
+
+    sanityBegrunnelserViIkkeHarIBaSak
         .groupBy { tilVedtakBegrunnelseType(it.begrunnelsetype!!) }
         .forEach { (key, values) ->
             println(key.name + "-begrunnelser som ikke finnes i ba-sak:")
