@@ -73,6 +73,12 @@ Kafka kø må opprettes manuelt i hver miljø, en gang. Detter gjørs som beskre
 i [Opprett kø](https://confluence.adeo.no/display/AURA/Kafka#Kafka-NavngivningavTopic)
 bruk topic definisjon og konfigurasjon som beskrevet i resources/kafka/topic-<env>.json
 
+## Hente begrunnelser fra sanity
+
+i `no/nav/familie/ba/sak/scripts/HentBrevbegrunnelserViIkkeHar.kts` finnes det et script som henter alle
+brevbegrunnelser vi ikke har i ba-sak. For å kjøre det kan du høyreklikke fila i Intellij og
+velge `Run HentBrevbegrunnelserViIkkeHar`
+
 ## Kontaktinformasjon
 
 For NAV-interne kan henvendelser om applikasjonen rettes til #team-familie på slack. Ellers kan man opprette et issue
