@@ -336,14 +336,16 @@ private fun UtvidetVedtaksperiodeMedBegrunnelser.hentInnvilgelseBrevPeriode(
 fun UtvidetVedtaksperiodeMedBegrunnelser.finnBarnIPeriode(
     personerIPersongrunnlag: List<Person>
 ): List<RestPerson> {
-    val barnIBegrunnelene = this.begrunnelser.flatMap { it.personIdenter }.toSet()
-        .mapNotNull { personIdent ->
-            personerIPersongrunnlag.filter { it.type == PersonType.BARN }.find { it.personIdent.ident == personIdent }
-        }
-    val barnMedUtbetaling =
-        this.utbetalingsperiodeDetaljer.filter { it.person.type == PersonType.BARN }.map { it.person }
+    val identerIBegrunnelene = this.begrunnelser.flatMap { it.personIdenter }
+    val identerMedUtbetaling = this.utbetalingsperiodeDetaljer.map { it.person.personIdent }
 
-    val barnIPeriode = (barnIBegrunnelene.map { it.tilRestPerson() } + barnMedUtbetaling).toSet().toList()
+    val barnIPeriode = (identerIBegrunnelene + identerMedUtbetaling)
+        .toSet()
+        .mapNotNull { personIdent ->
+            personerIPersongrunnlag.find { it.personIdent.ident == personIdent }?.tilRestPerson()
+        }
+        .filter { it.type == PersonType.BARN }
+
     return barnIPeriode
 }
 
