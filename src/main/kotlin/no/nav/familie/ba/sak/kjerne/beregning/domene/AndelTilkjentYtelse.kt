@@ -56,6 +56,9 @@ data class AndelTilkjentYtelse(
     @Column(name = "person_ident", nullable = false, updatable = false)
     val personIdent: String,
 
+    @Column(name = "aktoer_id")
+    val aktørId: String? = null,
+
     @Column(name = "kalkulert_utbetalingsbelop", nullable = false)
     val kalkulertUtbetalingsbeløp: Int,
 
@@ -119,11 +122,21 @@ data class AndelTilkjentYtelse(
             Objects.equals(kalkulertUtbetalingsbeløp, annen.kalkulertUtbetalingsbeløp) &&
             Objects.equals(stønadFom, annen.stønadFom) &&
             Objects.equals(stønadTom, annen.stønadTom) &&
-            Objects.equals(personIdent, annen.personIdent)
+            Objects.equals(personIdent, annen.personIdent) &&
+            Objects.equals(aktørId, annen.aktørId)
     }
 
     override fun hashCode(): Int {
-        return Objects.hash(id, behandlingId, type, kalkulertUtbetalingsbeløp, stønadFom, stønadTom, personIdent)
+        return Objects.hash(
+            id,
+            behandlingId,
+            type,
+            kalkulertUtbetalingsbeløp,
+            stønadFom,
+            stønadTom,
+            personIdent,
+            aktørId
+        )
     }
 
     override fun toString(): String {
@@ -134,6 +147,7 @@ data class AndelTilkjentYtelse(
     fun erTilsvarendeForUtbetaling(other: AndelTilkjentYtelse): Boolean {
         return (
             this.personIdent == other.personIdent &&
+                this.aktørId == other.aktørId &&
                 this.stønadFom == other.stønadFom &&
                 this.stønadTom == other.stønadTom &&
                 this.kalkulertUtbetalingsbeløp == other.kalkulertUtbetalingsbeløp &&

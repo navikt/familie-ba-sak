@@ -35,6 +35,9 @@ data class FødselshendelsePreLansering(
     @Column(name = "person_ident", nullable = false, updatable = false)
     val personIdent: String,
 
+    @Column(name = "aktoer_id")
+    val aktørId: String? = null,
+
     @Column(name = "ny_behandling_hendelse", nullable = false, updatable = false, columnDefinition = "TEXT")
     val nyBehandlingHendelse: String = "",
 

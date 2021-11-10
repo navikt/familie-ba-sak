@@ -43,6 +43,9 @@ class PersonResultat(
     @Column(name = "person_ident", nullable = false, updatable = false)
     val personIdent: String,
 
+    @Column(name = "aktoer_id")
+    val aktørId: String? = null,
+
     @OneToMany(
         fetch = FetchType.EAGER,
         mappedBy = "personResultat",
@@ -109,7 +112,8 @@ class PersonResultat(
     ): PersonResultat {
         val nyttPersonResultat = PersonResultat(
             vilkårsvurdering = vilkårsvurdering,
-            personIdent = personIdent
+            personIdent = personIdent,
+            aktørId = aktørId
         )
         val kopierteVilkårResultater: SortedSet<VilkårResultat> =
             vilkårResultater.map { it.kopierMedParent(nyttPersonResultat) }.toSortedSet(VilkårResultatComparator)
