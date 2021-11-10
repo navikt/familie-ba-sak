@@ -42,7 +42,7 @@ jobs:
         run: |
           mvn antrun:run@ktlint
           mvn sonar:sonar
-  build-jar-docker:
+  enhetstester-og-integrasjonstester:
     name: Enhetstester og integrasjonstester
     runs-on: ubuntu-latest
     steps:
@@ -63,7 +63,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           mvn -B --no-transfer-progress verify --settings .m2/maven-settings.xml --file pom.xml -Dtest="!no/nav/familie/ba/sak/kjerne/verdikjedetester/**"
-  build-jar-docker2:
+  verdikjedetester:
     name: Verdikjedetester
     runs-on: ubuntu-latest
     steps:
