@@ -6,6 +6,8 @@ import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.erSenereEnnInneværendeMåned
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
+import no.nav.familie.ba.sak.ekstern.restDomene.RestPerson
+import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPerson
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat.AVSLÅTT
@@ -41,6 +43,7 @@ import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.brevperioder.OpphørBr
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.domene.Totrinnskontroll
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
@@ -251,7 +254,11 @@ fun UtvidetVedtaksperiodeMedBegrunnelser.tilBrevPeriode(
     return when (this.type) {
         Vedtaksperiodetype.FORTSATT_INNVILGET -> hentFortsattInnvilgetBrevPeriode(målform, begrunnelserOgFritekster)
 
-        Vedtaksperiodetype.UTBETALING -> hentInnvilgelseBrevPeriode(tomDato, begrunnelserOgFritekster)
+        Vedtaksperiodetype.UTBETALING -> hentInnvilgelseBrevPeriode(
+            tomDato,
+            begrunnelserOgFritekster,
+            personerIPersongrunnlag
+        )
 
         Vedtaksperiodetype.ENDRET_UTBETALING -> hentEndretUtbetalingBrevPeriode(
             tomDato,
@@ -292,7 +299,7 @@ fun UtvidetVedtaksperiodeMedBegrunnelser.hentEndretUtbetalingBrevPeriode(
     return EndretUtbetalingBrevPeriode(
         fom = this.fom!!.tilDagMånedÅr(),
         tom = tomDato,
-        barnasFodselsdager = this.utbetalingsperiodeDetaljer.tilBarnasFødselsdatoer(),
+        barnasFodselsdager = this.utbetalingsperiodeDetaljer.map { it.person }.tilBarnasFødselsdatoer(),
         begrunnelser = begrunnelserOgFritekster,
         type = when {
             ingenUtbetaling && utvidetScenario == UtvidetScenario.UTVIDET_YTELSE_IKKE_ENDRET ->
@@ -311,15 +318,34 @@ fun UtvidetVedtaksperiodeMedBegrunnelser.hentEndretUtbetalingBrevPeriode(
 
 private fun UtvidetVedtaksperiodeMedBegrunnelser.hentInnvilgelseBrevPeriode(
     tomDato: String?,
-    begrunnelserOgFritekster: List<Begrunnelse>
-) = InnvilgelseBrevPeriode(
-    fom = this.fom!!.tilDagMånedÅr(),
-    tom = tomDato,
-    belop = Utils.formaterBeløp(this.utbetalingsperiodeDetaljer.totaltUtbetalt()),
-    antallBarn = this.utbetalingsperiodeDetaljer.antallBarn().toString(),
-    barnasFodselsdager = this.utbetalingsperiodeDetaljer.tilBarnasFødselsdatoer(),
-    begrunnelser = begrunnelserOgFritekster
-)
+    begrunnelserOgFritekster: List<Begrunnelse>,
+    personerIPersongrunnlag: List<Person>,
+): InnvilgelseBrevPeriode {
+    val barnIPeriode = finnBarnIPeriode(personerIPersongrunnlag)
+
+    return InnvilgelseBrevPeriode(
+        fom = this.fom!!.tilDagMånedÅr(),
+        tom = tomDato,
+        belop = Utils.formaterBeløp(this.utbetalingsperiodeDetaljer.totaltUtbetalt()),
+        antallBarn = barnIPeriode.size.toString(),
+        barnasFodselsdager = barnIPeriode.tilBarnasFødselsdatoer(),
+        begrunnelser = begrunnelserOgFritekster
+    )
+}
+
+private fun UtvidetVedtaksperiodeMedBegrunnelser.finnBarnIPeriode(
+    personerIPersongrunnlag: List<Person>
+): List<RestPerson> {
+    val barnIBegrunnelene = this.begrunnelser.flatMap { it.personIdenter }.toSet()
+        .mapNotNull { personIdent ->
+            personerIPersongrunnlag.filter { it.type == PersonType.BARN }.find { it.personIdent.ident == personIdent }
+        }
+    val barnMedUtbetaling =
+        this.utbetalingsperiodeDetaljer.filter { it.person.type == PersonType.BARN }.map { it.person }
+
+    val barnIPeriode = (barnIBegrunnelene.map { it.tilRestPerson() } + barnMedUtbetaling).toSet().toList()
+    return barnIPeriode
+}
 
 private fun UtvidetVedtaksperiodeMedBegrunnelser.hentFortsattInnvilgetBrevPeriode(
     målform: Målform,
@@ -337,7 +363,7 @@ private fun UtvidetVedtaksperiodeMedBegrunnelser.hentFortsattInnvilgetBrevPeriod
         fom = fom ?: "Du får:",
         belop = Utils.formaterBeløp(this.utbetalingsperiodeDetaljer.totaltUtbetalt()),
         antallBarn = this.utbetalingsperiodeDetaljer.antallBarn().toString(),
-        barnasFodselsdager = this.utbetalingsperiodeDetaljer.tilBarnasFødselsdatoer(),
+        barnasFodselsdager = this.utbetalingsperiodeDetaljer.map { it.person }.tilBarnasFødselsdatoer(),
         begrunnelser = begrunnelserOgFritekster
     )
 }
