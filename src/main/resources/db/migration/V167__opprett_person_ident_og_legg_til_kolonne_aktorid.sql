@@ -27,9 +27,6 @@ alter table ANDEL_TILKJENT_YTELSE
 alter table PERSON_RESULTAT
     add column AKTOER_ID VARCHAR;
 
-alter table OKONOMI_SIMULERING_MOTTAKER
-    add column AKTOER_ID VARCHAR;
-
 alter table GR_PERIODE_OVERGANGSSTONAD
     add column AKTOER_ID VARCHAR;
 
