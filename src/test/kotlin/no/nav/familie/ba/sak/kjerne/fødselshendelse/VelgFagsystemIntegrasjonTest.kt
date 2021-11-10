@@ -16,10 +16,7 @@ import no.nav.familie.kontrakter.ba.infotrygd.InfotrygdSøkResponse
 import no.nav.familie.kontrakter.ba.infotrygd.Stønad
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.MethodOrderer
-import org.junit.jupiter.api.Order
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestMethodOrder
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 
@@ -28,7 +25,6 @@ import org.springframework.boot.test.context.SpringBootTest
         "DAGLIG_KVOTE_FØDSELSHENDELSER: 0"
     ],
 )
-@TestMethodOrder(MethodOrderer.OrderAnnotation::class)
 class VelgFagsystemIntegrasjonTest(
     @Autowired val stegService: StegService,
     @Autowired val personopplysningerService: PersonopplysningerService,
@@ -50,7 +46,7 @@ class VelgFagsystemIntegrasjonTest(
 
     @Test
     fun `sjekk om mor har løpende utbetalinger i infotrygd`() {
-        every { infotrygdService.harLøpendeSakIInfotrygd(any(), any()) } returns true
+        every { infotrygdService.harLøpendeSakIInfotrygd(any(), any()) } returns true andThen false
 
         assertEquals(true, velgFagSystemService.morEllerBarnHarLøpendeSakIInfotrygd(søkerFnr, emptyList()))
     }
@@ -62,7 +58,6 @@ class VelgFagsystemIntegrasjonTest(
         assertEquals(FagsystemRegelVurdering.SEND_TIL_INFOTRYGD, velgFagSystemService.velgFagsystem(nyBehandling))
     }
 
-    @Order(1)
     @Test
     fun `skal IKKE velge ba-sak når mor har stønadhistorikk i Infotrygd`() {
         val nyBehandling = NyBehandlingHendelse(søkerFnr, listOf(søkerFnr))
