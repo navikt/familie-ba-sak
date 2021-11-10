@@ -83,10 +83,10 @@ class InfotrygdBarnetrygdClient(
         }
     }
 
-    fun hentStønader(søkersIdenter: List<String>, barnasIdenter: List<String>): InfotrygdSøkResponse<Stønad> {
+    fun hentStønader(søkersIdenter: List<String>, barnasIdenter: List<String>, historikk: Boolean = false): InfotrygdSøkResponse<Stønad> {
         if (environment.activeProfiles.contains("e2e")) return InfotrygdSøkResponse(emptyList(), emptyList())
 
-        val uri = URI.create("$clientUri/infotrygd/barnetrygd/stonad")
+        val uri = URI.create("$clientUri/infotrygd/barnetrygd/stonad?historikk=$historikk")
 
         return try {
             postForEntity(uri, InfotrygdSøkRequest(søkersIdenter, barnasIdenter))
