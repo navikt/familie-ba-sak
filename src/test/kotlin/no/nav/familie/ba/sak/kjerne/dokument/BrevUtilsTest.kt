@@ -471,7 +471,7 @@ internal class BrevUtilsTest {
     }
 
     @Test
-    fun `skal legge til barn med utbetalinger og fra alle beggrunnelsene i brev-utbetalings-periodene`() {
+    fun `skal legge til barn med utbetalinger og fra alle begrunnelsene i brev-utbetalings-periodene`() {
         val søker = tilfeldigSøker()
         val barn1 = tilfeldigPerson(personType = PersonType.BARN)
         val barn2 = tilfeldigPerson(personType = PersonType.BARN)
