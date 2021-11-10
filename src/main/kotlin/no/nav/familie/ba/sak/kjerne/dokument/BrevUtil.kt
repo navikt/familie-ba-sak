@@ -333,7 +333,7 @@ private fun UtvidetVedtaksperiodeMedBegrunnelser.hentInnvilgelseBrevPeriode(
     )
 }
 
-private fun UtvidetVedtaksperiodeMedBegrunnelser.finnBarnIPeriode(
+fun UtvidetVedtaksperiodeMedBegrunnelser.finnBarnIPeriode(
     personerIPersongrunnlag: List<Person>
 ): List<RestPerson> {
     val barnIBegrunnelene = this.begrunnelser.flatMap { it.personIdenter }.toSet()
