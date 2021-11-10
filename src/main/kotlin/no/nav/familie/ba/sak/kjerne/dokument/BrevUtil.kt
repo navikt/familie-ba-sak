@@ -53,9 +53,11 @@ import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import java.math.BigDecimal
 
 fun hentBrevtype(behandling: Behandling): Brevmal =
-    if (behandling.opprettetÅrsak == BehandlingÅrsak.DØDSFALL_BRUKER) Brevmal.DØDSFALL
-    else if (behandling.opprettetÅrsak == BehandlingÅrsak.KORREKSJON_VEDTAKSBREV) Brevmal.VEDTAK_KORREKSJON_VEDTAKSBREV
-    else hentVedtaksbrevmal(behandling)
+    when (behandling.opprettetÅrsak) {
+        BehandlingÅrsak.DØDSFALL_BRUKER -> Brevmal.DØDSFALL
+        BehandlingÅrsak.KORREKSJON_VEDTAKSBREV -> Brevmal.VEDTAK_KORREKSJON_VEDTAKSBREV
+        else -> hentVedtaksbrevmal(behandling)
+    }
 
 fun hentVedtaksbrevmal(behandling: Behandling): Brevmal {
     if (behandling.resultat == IKKE_VURDERT) {

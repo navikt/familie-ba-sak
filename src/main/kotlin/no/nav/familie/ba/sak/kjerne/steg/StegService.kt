@@ -63,10 +63,10 @@ class StegService(
                     barnasIdenter = emptyList()
                 )
             )
-        } else if (nyBehandling.behandlingType == BehandlingType.REVURDERING || nyBehandling.behandlingType == BehandlingType.TEKNISK_OPPHØR) {
+        } else if (nyBehandling.behandlingType == BehandlingType.REVURDERING || nyBehandling.behandlingType == BehandlingType.TEKNISK_ENDRING) {
             val sisteBehandling = behandlingService.hentSisteBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id)
                 ?: behandlingService.hentSisteBehandlingSomIkkeErHenlagt(behandling.fagsak.id)
-                ?: throw Feil("Forsøker å opprette en revurdering eller teknisk opphør, men kan ikke finne tidligere behandling på fagsak ${behandling.fagsak.id}")
+                ?: throw Feil("Forsøker å opprette en revurdering eller teknisk endring, men kan ikke finne tidligere behandling på fagsak ${behandling.fagsak.id}")
 
             val barnFraSisteBehandlingMedUtbetalinger =
                 behandlingService.finnBarnFraBehandlingMedTilkjentYtsele(sisteBehandling.id)
@@ -300,12 +300,12 @@ class StegService(
             }
 
             if (behandlingSteg.stegType().erSaksbehandlerSteg() && behandlingSteg.stegType()
-                .kommerEtter(behandling.steg)
+                    .kommerEtter(behandling.steg)
             ) {
                 error(
                     "${SikkerhetContext.hentSaksbehandlerNavn()} prøver å utføre steg '${
-                    behandlingSteg.stegType()
-                        .displayName()
+                        behandlingSteg.stegType()
+                            .displayName()
                     }', men behandlingen er på steg '${behandling.steg.displayName()}'"
                 )
             }

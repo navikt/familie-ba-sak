@@ -8,7 +8,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatService
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering.validerAtBarnIkkeFårFlereUtbetalingerSammePeriode
@@ -45,7 +44,7 @@ class BehandlingsresultatSteg(
     override fun preValiderSteg(behandling: Behandling, stegService: StegService?) {
         if (behandling.skalBehandlesAutomatisk) return
 
-        if (!behandling.erTekniskOpphør() && behandling.type != BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT) {
+        if (behandling.type != BehandlingType.TEKNISK_ENDRING && behandling.type != BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT) {
             val vilkårsvurdering = vilkårService.hentVilkårsvurdering(behandlingId = behandling.id)
                 ?: throw Feil("Finner ikke vilkårsvurdering på behandling ved validering.")
 
@@ -125,7 +124,7 @@ class BehandlingsresultatSteg(
             )
         }
 
-        if (behandlingMedResultat.opprettetÅrsak != BehandlingÅrsak.SATSENDRING) {
+        if (behandlingMedResultat.erBehandlingMedVedtaksbrevutsending()) {
             vedtaksperiodeService.oppdaterVedtakMedVedtaksperioder(
                 vedtak = vedtakService.hentAktivForBehandlingThrows(
                     behandlingId = behandling.id

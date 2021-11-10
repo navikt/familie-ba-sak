@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsoppdragGenerator
+import no.nav.familie.ba.sak.integrasjoner.økonomi.valider
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -32,15 +33,15 @@ class ØkonomiService(
     private val featureToggleService: FeatureToggleService,
 ) {
 
-    fun oppdaterTilkjentYtelseOgIverksettVedtak(vedtak: Vedtak, saksbehandlerId: String) {
+    fun oppdaterTilkjentYtelseMedUtbetalingsoppdrag(vedtak: Vedtak, saksbehandlerId: String): Utbetalingsoppdrag {
 
         val oppdatertBehandling = vedtak.behandling
         val utbetalingsoppdrag = genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(vedtak, saksbehandlerId)
         beregningService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(oppdatertBehandling, utbetalingsoppdrag)
-        iverksettOppdrag(utbetalingsoppdrag = utbetalingsoppdrag)
+        return utbetalingsoppdrag
     }
 
-    private fun iverksettOppdrag(utbetalingsoppdrag: Utbetalingsoppdrag) {
+    fun iverksettOppdrag(utbetalingsoppdrag: Utbetalingsoppdrag) {
         try {
             økonomiKlient.iverksettOppdrag(utbetalingsoppdrag)
         } catch (e: Exception) {
@@ -71,7 +72,7 @@ class ØkonomiService(
             beregningService.hentTilkjentYtelseForBehandlingerIverksattMotØkonomi(oppdatertBehandling.fagsak.id)
                 .isEmpty()
 
-        return if (erFørsteIverksatteBehandlingPåFagsak) {
+        val utbetalingsoppdrag = if (erFørsteIverksatteBehandlingPåFagsak) {
             utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOpptaderTilkjentYtelse(
                 saksbehandlerId = saksbehandlerId,
                 vedtak = vedtak,
@@ -111,17 +112,16 @@ class ØkonomiService(
                 ),
             )
 
-            if (!erSimulering && (
-                oppdatertBehandling.erTekniskOpphør() ||
-                    oppdatertBehandling.type == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT || behandlingService.hent(
-                        oppdatertBehandling.id
-                    ).resultat == BehandlingResultat.OPPHØRT
-                )
+            if (!erSimulering && (oppdatertBehandling.type == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT || behandlingService.hent(
+                    oppdatertBehandling.id
+                ).resultat == BehandlingResultat.OPPHØRT)
             )
                 validerOpphørsoppdrag(utbetalingsoppdrag)
 
-            return utbetalingsoppdrag
+            utbetalingsoppdrag
         }
+
+        return utbetalingsoppdrag.also { it.valider(vedtak.behandling.resultat) }
     }
 
     fun hentSisteOffsetPåFagsak(behandling: Behandling): Int? =

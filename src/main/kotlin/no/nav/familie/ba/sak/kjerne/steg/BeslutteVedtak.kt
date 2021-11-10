@@ -20,6 +20,7 @@ import no.nav.familie.ba.sak.task.FerdigstillOppgave
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
 import no.nav.familie.ba.sak.task.JournalførVedtaksbrevTask
 import no.nav.familie.ba.sak.task.OpprettOppgaveTask
+import no.nav.familie.ba.sak.økonomi.ØkonomiService
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -33,6 +34,7 @@ class BeslutteVedtak(
     private val loggService: LoggService,
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val featureToggleService: FeatureToggleService,
+    private val økonomiService: ØkonomiService
 ) : BehandlingSteg<RestBeslutningPåVedtak> {
 
     override fun utførStegOgAngiNeste(
@@ -68,7 +70,17 @@ class BeslutteVedtak(
             vedtakService.oppdaterVedtaksdatoOgBrev(vedtak)
 
             when (nesteSteg) {
-                StegType.IVERKSETT_MOT_OPPDRAG -> opprettTaskIverksettMotOppdrag(behandling, vedtak)
+                StegType.IVERKSETT_MOT_OPPDRAG -> {
+
+                    // Avklaring - denne er jeg litt usikker på... Ettersom vi her lagrer utbetalingsoppdrag og henter det ut json i iverksettingstasken kan modellen ha endret seg.
+                    // Bør vi heller lage en "validerUtbetalingsoppdrag" funksjon som vi kan kalle her/eller ved send til beslutter?
+                    økonomiService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(
+                        vedtak = vedtak,
+                        saksbehandlerId = SikkerhetContext.hentSaksbehandler()
+                    )
+
+                    opprettTaskIverksettMotOppdrag(behandling, vedtak)
+                }
                 StegType.JOURNALFØR_VEDTAKSBREV -> opprettJournalførVedtaksbrevTask(behandling, vedtak)
                 else -> throw Feil("Neste steg '$nesteSteg' er ikke implementert på beslutte vedtak steg")
             }

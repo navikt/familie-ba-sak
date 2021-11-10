@@ -13,7 +13,7 @@ object Behandlingutils {
     fun hentSisteBehandlingSomErIverksatt(iverksatteBehandlinger: List<Behandling>): Behandling? {
         return iverksatteBehandlinger
             .sortedBy { it.opprettetTidspunkt }
-            .findLast { !it.erTekniskOpphør() && it.steg == StegType.BEHANDLING_AVSLUTTET }
+            .findLast { it.steg == StegType.BEHANDLING_AVSLUTTET } // Avklaring - kan vi anta at man ikke igangsetter en teknisk opphørt sak?
     }
 
     fun hentForrigeIverksatteBehandling(
@@ -23,7 +23,7 @@ object Behandlingutils {
         return iverksatteBehandlinger
             .filter { it.opprettetTidspunkt.isBefore(behandlingFørFølgende.opprettetTidspunkt) }
             .sortedBy { it.opprettetTidspunkt }
-            .findLast { !it.erTekniskOpphør() && it.steg == StegType.BEHANDLING_AVSLUTTET }
+            .findLast { it.steg == StegType.BEHANDLING_AVSLUTTET } // Avklaring - kan vi anta at man ikke igangsetter en teknisk opphørt sak?
     }
 
     fun bestemKategori(

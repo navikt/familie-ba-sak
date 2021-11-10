@@ -95,7 +95,8 @@ class BehandlingService(
             )
                 .initBehandlingStegTilstand()
 
-            behandling.erTekniskOpphør() // Sjekker om teknisk opphør og kaster feil dersom BehandlingType og BehandlingÅrsak ikke samsvarer på eventuelt teknisk opphør
+
+            behandling.validerBehandling()
 
             val lagretBehandling = lagreNyOgDeaktiverGammelBehandling(behandling)
             opprettOgInitierNyttVedtakForBehandling(behandling = lagretBehandling)
