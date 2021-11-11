@@ -296,6 +296,7 @@ fun UtvidetVedtaksperiodeMedBegrunnelser.hentEndretUtbetalingBrevPeriode(
         tom = tomDato,
         barnasFodselsdager = this.utbetalingsperiodeDetaljer.tilBarnasFødselsdatoer(),
         begrunnelser = begrunnelserOgFritekster,
+        belop = Utils.formaterBeløp(this.utbetalingsperiodeDetaljer.totaltUtbetalt()),
         type = when {
             ingenUtbetaling && utvidetScenario == UtvidetScenario.UTVIDET_YTELSE_IKKE_ENDRET ->
                 EndretUtbetalingBrevPeriodeType.ENDRET_UTBETALINGSPERIODE_DELVIS_UTBETALING
