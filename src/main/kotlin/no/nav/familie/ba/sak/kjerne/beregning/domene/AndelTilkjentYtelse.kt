@@ -57,7 +57,7 @@ data class AndelTilkjentYtelse(
     val personIdent: String,
 
     @Column(name = "aktoer_id")
-    val aktørId: String? = null,
+    var aktørId: String? = null,
 
     @Column(name = "kalkulert_utbetalingsbelop", nullable = false)
     val kalkulertUtbetalingsbeløp: Int,

@@ -36,7 +36,7 @@ data class FødselshendelsePreLansering(
     val personIdent: String,
 
     @Column(name = "aktoer_id")
-    val aktørId: String? = null,
+    var aktørId: String? = null,
 
     @Column(name = "ny_behandling_hendelse", nullable = false, updatable = false, columnDefinition = "TEXT")
     val nyBehandlingHendelse: String = "",

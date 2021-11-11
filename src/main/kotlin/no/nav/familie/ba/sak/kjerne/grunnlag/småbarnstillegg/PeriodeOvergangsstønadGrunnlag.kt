@@ -39,7 +39,7 @@ class PeriodeOvergangsstønadGrunnlag(
     val personIdent: String,
 
     @Column(name = "aktoer_id")
-    val aktørId: String? = null,
+    var aktørId: String? = null,
 
     @Column(name = "fom", nullable = false, columnDefinition = "DATE")
     val fom: LocalDate,

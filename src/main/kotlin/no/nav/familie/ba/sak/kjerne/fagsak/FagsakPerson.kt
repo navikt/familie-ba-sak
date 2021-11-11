@@ -39,7 +39,7 @@ data class FagsakPerson(
     val personIdent: PersonIdent,
 
     @Column(name = "aktoer_id")
-    val aktørId: String? = null,
+    var aktørId: String? = null,
 
     @Column(name = "opprettet_av", nullable = false, updatable = false)
     val opprettetAv: String = SikkerhetContext.hentSaksbehandler(),

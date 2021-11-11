@@ -44,7 +44,7 @@ class PersonResultat(
     val personIdent: String,
 
     @Column(name = "aktoer_id")
-    val aktørId: String? = null,
+    var aktørId: String? = null,
 
     @OneToMany(
         fetch = FetchType.EAGER,
