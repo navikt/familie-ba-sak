@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.sikkerhet.validering
 
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.unmockkAll
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -23,12 +24,15 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSiv
 import no.nav.familie.ba.sak.kjerne.steg.FØRSTE_STEG
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import no.nav.familie.kontrakter.felles.tilgangskontroll.Tilgang
+import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import java.time.LocalDate
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class FagsaktilgangTest {
 
     private lateinit var personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository
@@ -40,6 +44,11 @@ internal class FagsaktilgangTest {
     private lateinit var fagsakRepository: FagsakRepository
 
     private lateinit var fagsaktilgang: Fagsaktilgang
+
+    @AfterAll
+    fun tearDown() {
+        unmockkAll()
+    }
 
     @BeforeEach
     fun setUp() {

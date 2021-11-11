@@ -1,17 +1,11 @@
 package no.nav.familie.ba.sak.kjerne.dokument
 
-import com.github.tomakehurst.wiremock.WireMockServer
-import com.github.tomakehurst.wiremock.client.WireMock.aResponse
-import com.github.tomakehurst.wiremock.client.WireMock.get
-import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
-import com.github.tomakehurst.wiremock.core.WireMockConfiguration
-import io.mockk.MockKAnnotations
-import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.TEST_PDF
 import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
@@ -31,34 +25,12 @@ import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.kontrakter.felles.objectMapper
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.context.ContextConfiguration
-import org.springframework.test.context.junit.jupiter.SpringExtension
 
-@SpringBootTest
-@ExtendWith(SpringExtension::class)
-@ContextConfiguration(initializers = [DbContainerInitializer::class])
-@ActiveProfiles(
-    "postgres",
-    "mock-brev-klient",
-    "mock-økonomi",
-    "mock-oauth",
-    "mock-pdl",
-    "mock-task-repository",
-    "mock-tilbakekreving-klient",
-    "mock-infotrygd-barnetrygd",
-
-    )
-@Tag("integration")
 class DokumentServiceTest(
     @Autowired
     private val fagsakService: FagsakService,
@@ -98,23 +70,11 @@ class DokumentServiceTest(
 
     @Autowired
     private val vedtaksperiodeService: VedtaksperiodeService,
-) {
-
-    private val wireMockServer = WireMockServer(WireMockConfiguration.wireMockConfig().dynamicPort())
+) : AbstractSpringIntegrationTest() {
 
     @BeforeEach
     fun setup() {
         databaseCleanupService.truncate()
-        MockKAnnotations.init(this)
-
-        wireMockServer.stubFor(
-            get(urlEqualTo("/api/aktoer/v1"))
-                .willReturn(
-                    aResponse()
-                        .withHeader("Content-Type", "application/json")
-                        .withBody(objectMapper.writeValueAsString(Ressurs.success(mapOf("aktørId" to "1"))))
-                )
-        )
     }
 
     @Test

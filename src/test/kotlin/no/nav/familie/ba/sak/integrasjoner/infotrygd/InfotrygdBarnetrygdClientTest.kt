@@ -5,9 +5,7 @@ import com.github.tomakehurst.wiremock.client.WireMock.anyRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.equalToJson
 import com.github.tomakehurst.wiremock.client.WireMock.okJson
 import com.github.tomakehurst.wiremock.client.WireMock.post
-import com.github.tomakehurst.wiremock.client.WireMock.stubFor
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
-import com.github.tomakehurst.wiremock.client.WireMock.verify
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTestDev
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.kontrakter.ba.infotrygd.InfotrygdSøkRequest
@@ -44,7 +42,6 @@ class InfotrygdBarnetrygdClientTest : AbstractSpringIntegrationTestDev() {
 
     @BeforeEach
     fun setUp() {
-        wireMockServer.start()
         client = InfotrygdBarnetrygdClient(
             URI.create(wireMockServer.baseUrl() + "/api"),
             restOperations,
@@ -53,9 +50,8 @@ class InfotrygdBarnetrygdClientTest : AbstractSpringIntegrationTestDev() {
     }
 
     @AfterEach
-    fun tearDown() {
+    fun clearTest() {
         wireMockServer.resetAll()
-        wireMockServer.stop()
     }
 
     @Test

@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.integrasjoner
 
-import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock.aResponse
 import com.github.tomakehurst.wiremock.client.WireMock.anyRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.anyUrl
@@ -16,13 +15,12 @@ import com.github.tomakehurst.wiremock.client.WireMock.post
 import com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.status
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
-import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
-import no.nav.familie.ba.sak.config.ApplicationConfig
+import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTestDev
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient.Companion.VEDTAK_VEDLEGG_FILNAVN
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient.Companion.VEDTAK_VEDLEGG_TITTEL
@@ -57,32 +55,17 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
-import org.junit.jupiter.api.TestInstance.Lifecycle
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.context.ActiveProfiles
 import org.springframework.web.client.RestOperations
 import java.net.URI
 import java.time.LocalDate
 import kotlin.random.Random
 
-@SpringBootTest(classes = [ApplicationConfig::class])
-@ActiveProfiles(
-    "dev",
-    "mock-rest-template-config",
-    "mock-oauth",
-    "mock-pdl",
-    "mock-brev-klient",
-)
-@TestInstance(Lifecycle.PER_CLASS)
-class IntergrasjonTjenesteTest {
-
-    private val wireMockServer = WireMockServer(WireMockConfiguration.wireMockConfig().dynamicPort())
+class IntergrasjonTjenesteTest : AbstractSpringIntegrationTestDev() {
 
     @Autowired
     @Qualifier("jwtBearer")
@@ -92,7 +75,6 @@ class IntergrasjonTjenesteTest {
 
     @BeforeEach
     fun setUp() {
-        wireMockServer.start()
         integrasjonClient = IntegrasjonClient(
             URI.create(wireMockServer.baseUrl() + "/api"),
             restOperations,
@@ -102,10 +84,9 @@ class IntergrasjonTjenesteTest {
     }
 
     @AfterEach
-    fun tearDown() {
+    fun clearTest() {
         MDC.clear()
         wireMockServer.resetAll()
-        wireMockServer.stop()
     }
 
     @Test

@@ -1,12 +1,10 @@
 package no.nav.familie.ba.sak.kjerne.arbeidsfordeling
 
-import com.github.tomakehurst.wiremock.WireMockServer
-import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import io.mockk.every
 import io.mockk.verify
-import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.lagSøknadDTO
+import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
@@ -33,23 +31,10 @@ import no.nav.familie.kontrakter.felles.personopplysning.Sivilstand
 import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.context.ContextConfiguration
 import java.time.LocalDate.now
 
-@SpringBootTest
-@ContextConfiguration(initializers = [DbContainerInitializer::class])
-@ActiveProfiles(
-    "postgres",
-    "mock-pdl",
-    "mock-infotrygd-barnetrygd",
-    "mock-brev-klient",
-)
-@Tag("integration")
 class ArbeidsfordelingIntegrationTest(
 
     @Autowired
@@ -72,9 +57,7 @@ class ArbeidsfordelingIntegrationTest(
 
     @Autowired
     private val mockPersonopplysningerService: PersonopplysningerService
-) {
-
-    private val wireMockServer = WireMockServer(WireMockConfiguration.wireMockConfig().dynamicPort())
+) : AbstractSpringIntegrationTest() {
 
     init {
         val now = now()
@@ -189,7 +172,8 @@ class ArbeidsfordelingIntegrationTest(
             )
         )
 
-        val arbeidsfordelingPåBehandling = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandlingId = behandling.id)
+        val arbeidsfordelingPåBehandling =
+            arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandlingId = behandling.id)
 
         assertEquals(IKKE_FORTROLIG_ENHET, arbeidsfordelingPåBehandling.behandlendeEnhetId)
     }
@@ -206,7 +190,8 @@ class ArbeidsfordelingIntegrationTest(
             )
         )
 
-        val arbeidsfordelingPåBehandling = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandlingId = behandling.id)
+        val arbeidsfordelingPåBehandling =
+            arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandlingId = behandling.id)
         assertEquals(IKKE_FORTROLIG_ENHET, arbeidsfordelingPåBehandling.behandlendeEnhetId)
 
         stegService.håndterSøknad(
@@ -237,7 +222,8 @@ class ArbeidsfordelingIntegrationTest(
             )
         )
 
-        val arbeidsfordelingPåBehandling = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandlingId = behandling.id)
+        val arbeidsfordelingPåBehandling =
+            arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandlingId = behandling.id)
         assertEquals(IKKE_FORTROLIG_ENHET, arbeidsfordelingPåBehandling.behandlendeEnhetId)
 
         stegService.håndterSøknad(
@@ -268,7 +254,8 @@ class ArbeidsfordelingIntegrationTest(
             )
         )
 
-        val arbeidsfordelingPåBehandling = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandlingId = behandling.id)
+        val arbeidsfordelingPåBehandling =
+            arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandlingId = behandling.id)
         assertEquals(IKKE_FORTROLIG_ENHET, arbeidsfordelingPåBehandling.behandlendeEnhetId)
 
         stegService.håndterSøknad(
@@ -305,7 +292,10 @@ class ArbeidsfordelingIntegrationTest(
 
         val arbeidsfordelingPåBehandlingEtterSøknadsregistreringMedDiskresjonskode =
             arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandlingId = behandling.id)
-        assertEquals(FORTROLIG_ENHET, arbeidsfordelingPåBehandlingEtterSøknadsregistreringMedDiskresjonskode.behandlendeEnhetId)
+        assertEquals(
+            FORTROLIG_ENHET,
+            arbeidsfordelingPåBehandlingEtterSøknadsregistreringMedDiskresjonskode.behandlendeEnhetId
+        )
     }
 
     @Test
@@ -320,7 +310,8 @@ class ArbeidsfordelingIntegrationTest(
             )
         )
 
-        val arbeidsfordelingPåBehandling = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandlingId = behandling.id)
+        val arbeidsfordelingPåBehandling =
+            arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandlingId = behandling.id)
         assertEquals(IKKE_FORTROLIG_ENHET, arbeidsfordelingPåBehandling.behandlendeEnhetId)
 
         arbeidsfordelingService.manueltOppdaterBehandlendeEnhet(
@@ -359,7 +350,8 @@ class ArbeidsfordelingIntegrationTest(
             )
         )
 
-        val arbeidsfordelingPåBehandling = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandlingId = behandling.id)
+        val arbeidsfordelingPåBehandling =
+            arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandlingId = behandling.id)
         assertEquals(IKKE_FORTROLIG_ENHET, arbeidsfordelingPåBehandling.behandlendeEnhetId)
 
         oppgaveService.opprettOppgave(behandling.id, Oppgavetype.BehandleSak, now())

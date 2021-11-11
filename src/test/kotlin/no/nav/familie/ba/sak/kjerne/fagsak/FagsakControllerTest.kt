@@ -92,7 +92,7 @@ class FagsakControllerTest(
 
         val fagsak = fagsakController.hentEllerOpprettFagsak(FagsakRequest(personIdent = fnr))
 
-         verify(exactly = 1) { mockIntegrasjonClient.opprettSkyggesak(any(), fagsak.body?.data?.id!!) }
+        verify(exactly = 1) { mockIntegrasjonClient.opprettSkyggesak(any(), fagsak.body?.data?.id!!) }
     }
 
     @Test

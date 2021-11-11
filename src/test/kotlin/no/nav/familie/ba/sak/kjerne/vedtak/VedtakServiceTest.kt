@@ -1,10 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.vedtak
 
-import com.github.tomakehurst.wiremock.client.WireMock.aResponse
-import com.github.tomakehurst.wiremock.client.WireMock.get
-import com.github.tomakehurst.wiremock.client.WireMock.stubFor
-import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
-import io.mockk.MockKAnnotations
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
@@ -35,8 +30,6 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat.Companion.VilkårResultatComparator
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
-import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.kontrakter.felles.objectMapper
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Tag
@@ -114,7 +107,6 @@ class VedtakServiceTest(
 
     @BeforeEach
     fun setup() {
-        MockKAnnotations.init(this)
         behandlingService = BehandlingService(
             behandlingRepository,
             personopplysningGrunnlagRepository,
@@ -129,15 +121,6 @@ class VedtakServiceTest(
             infotrygdService,
             vedtaksperiodeService,
             featureToggleService
-        )
-
-        wireMockServer.stubFor(
-            get(urlEqualTo("/api/aktoer/v1"))
-                .willReturn(
-                    aResponse()
-                        .withHeader("Content-Type", "application/json")
-                        .withBody(objectMapper.writeValueAsString(Ressurs.success(mapOf("aktørId" to "1"))))
-                )
         )
 
         val personIdent = randomFnr()

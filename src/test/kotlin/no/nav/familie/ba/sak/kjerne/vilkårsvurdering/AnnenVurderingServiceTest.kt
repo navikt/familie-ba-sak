@@ -68,7 +68,7 @@ class AnnenVurderingServiceTest {
             )
         )
 
-         verify(exactly = 1) {
+        verify(exactly = 1) {
             annenVurderingRepository.save(any())
         }
     }

@@ -27,7 +27,7 @@ import org.springframework.web.client.RestTemplate
     classes = [ApplicationConfig::class],
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
     properties = [
-        "no.nav.security.jwt.issuer.azuread.discoveryUrl: http://localhost:1234/azuread/.well-known/openid-configuration",
+        "no.nav.security.jwt.issuer.azuread.discoveryUrl: http://localhost:\${mock-oauth2-server.port}/azuread/.well-known/openid-configuration",
         "no.nav.security.jwt.issuer.azuread.accepted_audience: some-audience",
         "VEILEDER_ROLLE: VEILDER",
         "SAKSBEHANDLER_ROLLE: SAKSBEHANDLER",
@@ -36,7 +36,7 @@ import org.springframework.web.client.RestTemplate
     ],
 )
 @ExtendWith(SpringExtension::class)
-@EnableMockOAuth2Server(port = 1234)
+@EnableMockOAuth2Server
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
 @Tag("integration")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -58,8 +58,7 @@ abstract class WebSpringAuthTestRunner {
     private val port = 0
 
     @AfterAll
-    fun tearDown() {
-        mockOAuth2Server.shutdown()
+    fun stopMockOuath2Server() {
         unmockkAll()
     }
 

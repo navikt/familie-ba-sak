@@ -1,12 +1,10 @@
 package no.nav.familie.ba.sak.integrasjoner.pdl
 
-import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
-import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
@@ -14,33 +12,17 @@ import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
 import no.nav.familie.kontrakter.felles.tilgangskontroll.Tilgang
 import org.apache.commons.lang3.StringUtils
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertThrows
-import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.context.ContextConfiguration
-import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.web.client.RestOperations
 import java.net.URI
 import java.time.LocalDate
 
-@SpringBootTest(properties = ["PDL_URL=http://localhost:28085/api"])
-@ExtendWith(SpringExtension::class)
-@ContextConfiguration(initializers = [DbContainerInitializer::class])
-@ActiveProfiles("postgres", "mock-brev-klient", "mock-oauth", "mock-rest-template-config")
-@Tag("integration")
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class PersonopplysningerServiceTest {
-
-    private val wireMockServer = WireMockServer(WireMockConfiguration.wireMockConfig().dynamicPort())
+class PersonopplysningerServiceTest : AbstractSpringIntegrationTest() {
 
     lateinit var personopplysningerService: PersonopplysningerService
 
@@ -53,18 +35,12 @@ class PersonopplysningerServiceTest {
 
     @BeforeEach
     fun setUp() {
-        wireMockServer.start()
         personopplysningerService =
             PersonopplysningerService(
                 PdlRestClient(URI.create(wireMockServer.baseUrl() + "/api"), restTemplate),
                 SystemOnlyPdlRestClient(URI.create(wireMockServer.baseUrl() + "/api"), restTemplate, mockk()),
                 mockIntegrasjonClient
             )
-    }
-
-    @AfterEach
-    fun tearDown() {
-        wireMockServer.stop()
     }
 
     @Test

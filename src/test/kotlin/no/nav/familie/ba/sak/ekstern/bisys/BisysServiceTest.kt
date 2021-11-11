@@ -24,7 +24,7 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 @TestInstance(Lifecycle.PER_CLASS)
-internal class BisysServiceTest() {
+internal class BisysServiceTest {
 
     lateinit var bisysService: BisysService
     var mockPersonopplysningerService = mockk<PersonopplysningerService>()

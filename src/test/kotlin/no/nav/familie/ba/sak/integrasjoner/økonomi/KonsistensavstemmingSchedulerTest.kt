@@ -1,8 +1,8 @@
 package no.nav.familie.ba.sak.integrasjoner.økonomi
 
-import io.mockk.MockKAnnotations
 import io.mockk.called
 import io.mockk.spyk
+import io.mockk.unmockkAll
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
@@ -11,7 +11,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.prosessering.domene.Status
-import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Tag
@@ -49,17 +49,17 @@ class KonsistensavstemmingSchedulerTest {
     @Autowired
     private lateinit var databaseCleanupService: DatabaseCleanupService
 
-    @AfterEach
-    fun cleanUp() {
-        databaseCleanupService.truncate()
-    }
-
     @BeforeEach
     fun setUp() {
-        MockKAnnotations.init(this)
+        databaseCleanupService.truncate()
         konsistensavstemmingScheduler =
             KonsistensavstemmingScheduler(batchService, behandlingService, fagsakService, taskRepository)
         taskRepository = spyk(taskRepository)
+    }
+
+    @AfterAll
+    fun tearDown() {
+        unmockkAll()
     }
 
     @Test

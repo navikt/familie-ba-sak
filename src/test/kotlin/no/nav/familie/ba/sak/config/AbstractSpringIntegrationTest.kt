@@ -2,9 +2,9 @@ package no.nav.familie.ba.sak.config
 
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
-import io.mockk.clearAllMocks
 import io.mockk.unmockkAll
 import no.nav.familie.ba.sak.common.DbContainerInitializer
+import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.TestInstance
 import org.springframework.boot.test.context.SpringBootTest
@@ -32,6 +32,13 @@ abstract class AbstractSpringIntegrationTest {
     protected val wireMockServer = WireMockServer(WireMockConfiguration.wireMockConfig().dynamicPort())
 
     init {
+        wireMockServer.start()
+        unmockkAll()
+    }
+
+    @AfterAll
+    fun tearDown() {
+        wireMockServer.stop()
         unmockkAll()
     }
 }

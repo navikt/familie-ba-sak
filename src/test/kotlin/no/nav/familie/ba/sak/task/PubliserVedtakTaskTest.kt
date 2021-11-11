@@ -49,7 +49,7 @@ class PubliserVedtakTaskTest {
         taskRepositoryMock.save(task)
 
         val slot = slot<Task>()
-         verify(exactly = 1) { taskRepositoryMock.save(capture(slot)) }
+        verify(exactly = 1) { taskRepositoryMock.save(capture(slot)) }
         assertThat(slot.captured.metadata["offset"]).isEqualTo("100")
     }
 }

@@ -134,7 +134,7 @@ class BeregningServiceTest {
             personopplysningGrunnlag = personopplysningGrunnlag
         )
 
-         verify(exactly = 1) { tilkjentYtelseRepository.save(capture(slot)) }
+        verify(exactly = 1) { tilkjentYtelseRepository.save(capture(slot)) }
 
         Assertions.assertEquals(1, slot.captured.andelerTilkjentYtelse.size)
         Assertions.assertEquals(1054, slot.captured.andelerTilkjentYtelse.first().kalkulertUtbetalingsbeløp)
@@ -192,7 +192,7 @@ class BeregningServiceTest {
             personopplysningGrunnlag = personopplysningGrunnlag
         )
 
-         verify(exactly = 1) { tilkjentYtelseRepository.save(capture(slot)) }
+        verify(exactly = 1) { tilkjentYtelseRepository.save(capture(slot)) }
 
         Assertions.assertEquals(2, slot.captured.andelerTilkjentYtelse.size)
 
@@ -281,7 +281,7 @@ class BeregningServiceTest {
             personopplysningGrunnlag = personopplysningGrunnlag
         )
 
-         verify(exactly = 1) { tilkjentYtelseRepository.save(capture(slot)) }
+        verify(exactly = 1) { tilkjentYtelseRepository.save(capture(slot)) }
 
         Assertions.assertEquals(1, slot.captured.andelerTilkjentYtelse.size)
 
@@ -338,7 +338,7 @@ class BeregningServiceTest {
             personopplysningGrunnlag = personopplysningGrunnlag
         )
 
-         verify(exactly = 1) { tilkjentYtelseRepository.save(capture(slot)) }
+        verify(exactly = 1) { tilkjentYtelseRepository.save(capture(slot)) }
 
         Assertions.assertTrue(slot.captured.andelerTilkjentYtelse.isEmpty())
     }
@@ -437,7 +437,7 @@ class BeregningServiceTest {
             personopplysningGrunnlag = personopplysningGrunnlag
         )
 
-         verify(exactly = 1) { tilkjentYtelseRepository.save(capture(slot)) }
+        verify(exactly = 1) { tilkjentYtelseRepository.save(capture(slot)) }
 
         Assertions.assertEquals(5, slot.captured.andelerTilkjentYtelse.size)
         val andelerTilkjentYtelse = slot.captured.andelerTilkjentYtelse.sortedBy { it.stønadTom }
@@ -611,7 +611,7 @@ class BeregningServiceTest {
             personopplysningGrunnlag = personopplysningGrunnlag
         )
 
-         verify(exactly = 1) { tilkjentYtelseRepository.save(capture(slot)) }
+        verify(exactly = 1) { tilkjentYtelseRepository.save(capture(slot)) }
 
         Assertions.assertEquals(4, slot.captured.andelerTilkjentYtelse.size)
         val andelerTilkjentYtelse = slot.captured.andelerTilkjentYtelse.sortedBy { it.stønadTom }

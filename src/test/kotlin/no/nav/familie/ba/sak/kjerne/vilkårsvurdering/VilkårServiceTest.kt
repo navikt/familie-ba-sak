@@ -5,7 +5,7 @@ import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.nyOrdinærBehandling
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.vurderVilkårsvurderingTilInnvilget
-import no.nav.familie.ba.sak.config.AbstractTestWithJdbcTables
+import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVilkårResultat
@@ -26,23 +26,10 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.context.ActiveProfiles
 import java.time.LocalDate
 import java.time.LocalDateTime
-import javax.sql.DataSource
 
-@SpringBootTest
-@ActiveProfiles(
-    "dev",
-    "mock-pdl",
-    "mock-økonomi",
-    "mock-infotrygd-barnetrygd",
-    "mock-brev-klient",
-)
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class VilkårServiceTest(
     @Autowired
     private val behandlingService: BehandlingService,
@@ -61,11 +48,7 @@ class VilkårServiceTest(
 
     @Autowired
     private val databaseCleanupService: DatabaseCleanupService,
-
-    @Autowired
-    private val dataSource: DataSource,
-
-) : AbstractTestWithJdbcTables(dataSource) {
+) : AbstractSpringIntegrationTest() {
 
     @BeforeAll
     fun init() {

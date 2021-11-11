@@ -38,7 +38,6 @@ class InfotrygdFeedClientTest : AbstractSpringIntegrationTestDev() {
 
     @BeforeEach
     fun setUp() {
-        wireMockServer.start()
         client = InfotrygdFeedClient(
             URI.create(wireMockServer.baseUrl() + "/api"),
             restOperations,
@@ -47,9 +46,8 @@ class InfotrygdFeedClientTest : AbstractSpringIntegrationTestDev() {
     }
 
     @AfterEach
-    fun tearDown() {
+    fun clearTest() {
         wireMockServer.resetAll()
-        wireMockServer.stop()
     }
 
     @Test
