@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.integrasjoner.infotrygd
 
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.InfotrygdFødselhendelsesFeedDto
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.InfotrygdVedtakFeedDto
+import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.StartBehandlingDto
 import no.nav.familie.ba.sak.task.OpprettTaskService.Companion.RETRY_BACKOFF_5000MS
 import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -28,7 +29,10 @@ class InfotrygdFeedClient(
 
     fun sendFødselhendelsesFeedTilInfotrygd(infotrygdFødselhendelsesFeedDto: InfotrygdFødselhendelsesFeedDto) {
         return try {
-            sendFeedTilInfotrygd(URI.create("$clientUri/barnetrygd/v1/feed/foedselsmelding"), infotrygdFødselhendelsesFeedDto)
+            sendFeedTilInfotrygd(
+                URI.create("$clientUri/barnetrygd/v1/feed/foedselsmelding"),
+                infotrygdFødselhendelsesFeedDto
+            )
         } catch (e: Exception) {
             loggOgKastException(e)
         }
@@ -37,6 +41,17 @@ class InfotrygdFeedClient(
     fun sendVedtakFeedTilInfotrygd(infotrygdVedtakFeedDto: InfotrygdVedtakFeedDto) {
         try {
             sendFeedTilInfotrygd(URI.create("$clientUri/barnetrygd/v1/feed/vedtaksmelding"), infotrygdVedtakFeedDto)
+        } catch (e: Exception) {
+            loggOgKastException(e)
+        }
+    }
+
+    fun sendStartBehandlingTilInfotrygd(startBehandlingDto: StartBehandlingDto) {
+        try {
+            sendFeedTilInfotrygd(
+                URI.create("$clientUri/barnetrygd/v1/feed/startbehandlingsmelding"),
+                startBehandlingDto
+            )
         } catch (e: Exception) {
             loggOgKastException(e)
         }

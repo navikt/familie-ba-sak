@@ -33,7 +33,7 @@ import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.EndretUtbetalingBrevPe
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.brevperioder.AvslagBrevPeriode
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.brevperioder.AvslagUtenPeriodeBrevPeriode
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.brevperioder.BrevPeriode
-import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.brevperioder.EndretUtbetalingBernetrygtType
+import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.brevperioder.EndretUtbetalingBarnetrygdType
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.brevperioder.EndretUtbetalingBrevPeriode
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.brevperioder.FortsattInnvilgetBrevPeriode
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.brevperioder.InnvilgelseBrevPeriode
@@ -256,7 +256,8 @@ fun UtvidetVedtaksperiodeMedBegrunnelser.tilBrevPeriode(
         Vedtaksperiodetype.ENDRET_UTBETALING -> hentEndretUtbetalingBrevPeriode(
             tomDato,
             begrunnelserOgFritekster,
-            utvidetScenario
+            utvidetScenario,
+            målform
         )
 
         Vedtaksperiodetype.AVSLAG -> hentAvslagBrevPeriode(tomDato, begrunnelserOgFritekster)
@@ -271,7 +272,7 @@ fun UtvidetVedtaksperiodeMedBegrunnelser.tilBrevPeriode(
 
 private fun UtvidetVedtaksperiodeMedBegrunnelser.hentAvslagBrevPeriode(
     tomDato: String?,
-    begrunnelserOgFritekster: List<Begrunnelse>
+    begrunnelserOgFritekster: List<Begrunnelse>,
 ) =
     if (this.fom != null)
         AvslagBrevPeriode(
@@ -285,6 +286,7 @@ fun UtvidetVedtaksperiodeMedBegrunnelser.hentEndretUtbetalingBrevPeriode(
     tomDato: String?,
     begrunnelserOgFritekster: List<Begrunnelse>,
     utvidetScenario: UtvidetScenario = UtvidetScenario.IKKE_UTVIDET_YTELSE,
+    målform: Målform = Målform.NB,
 ): EndretUtbetalingBrevPeriode {
     val ingenUtbetaling =
         utbetalingsperiodeDetaljer.all { it.prosent == BigDecimal.ZERO }
@@ -303,9 +305,11 @@ fun UtvidetVedtaksperiodeMedBegrunnelser.hentEndretUtbetalingBrevPeriode(
                 EndretUtbetalingBrevPeriodeType.ENDRET_UTBETALINGSPERIODE
         },
         typeBarnetrygd = if (utvidetScenario == UtvidetScenario.IKKE_UTVIDET_YTELSE)
-            EndretUtbetalingBernetrygtType.DELT
-        else
-            EndretUtbetalingBernetrygtType.DELT_UTVIDET
+            EndretUtbetalingBarnetrygdType.DELT
+        else when (målform) {
+            Målform.NB -> EndretUtbetalingBarnetrygdType.DELT_UTVIDET_NB
+            Målform.NN -> EndretUtbetalingBarnetrygdType.DELT_UTVIDET_NN
+        }
     )
 }
 

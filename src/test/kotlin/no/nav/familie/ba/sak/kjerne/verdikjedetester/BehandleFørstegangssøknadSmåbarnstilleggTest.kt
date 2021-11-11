@@ -4,13 +4,14 @@ import io.mockk.every
 import no.nav.familie.ba.sak.common.lagSøknadDTO
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.FeatureToggleService
-import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedStandardbegrunnelser
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
+import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.integrasjoner.`ef-sak`.EfSakRestClient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService.sisteSmåbarnstilleggSatsTilTester
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService.sisteUtvidetSatsTilTester
@@ -19,7 +20,6 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseReposito
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.steg.StegService
@@ -82,13 +82,13 @@ class BehandleFørstegangssøknadSmåbarnstilleggTest(
             )
         )
 
-        familieBaSakKlient().opprettFagsak(søkersIdent = søkersIdent)
-        val restFagsakMedBehandling = familieBaSakKlient().opprettBehandling(
+        val fagsak = familieBaSakKlient().opprettFagsak(søkersIdent = søkersIdent)
+        val restBehandling = familieBaSakKlient().opprettBehandling(
             søkersIdent = søkersIdent,
             behandlingUnderkategori = BehandlingUnderkategori.UTVIDET
         )
 
-        val aktivBehandling = hentAktivBehandling(restFagsak = restFagsakMedBehandling.data!!)
+        val behandling = behandlingService.hent(restBehandling.data!!.behandlingId)
         val restRegistrerSøknad =
             RestRegistrerSøknad(
                 søknad = lagSøknadDTO(
@@ -98,23 +98,21 @@ class BehandleFørstegangssøknadSmåbarnstilleggTest(
                 ),
                 bekreftEndringerViaFrontend = false
             )
-        val restFagsakEtterRegistrertSøknad: Ressurs<RestFagsak> =
+        val restUtvidetBehandling: Ressurs<RestUtvidetBehandling> =
             familieBaSakKlient().registrererSøknad(
-                behandlingId = aktivBehandling.behandlingId,
+                behandlingId = behandling.id,
                 restRegistrerSøknad = restRegistrerSøknad
             )
-        generellAssertFagsak(
-            restFagsak = restFagsakEtterRegistrertSøknad,
-            fagsakStatus = FagsakStatus.OPPRETTET,
+        generellAssertRestUtvidetBehandling(
+            restUtvidetBehandling = restUtvidetBehandling,
+            behandlingStatus = BehandlingStatus.UTREDES,
             behandlingStegType = StegType.VILKÅRSVURDERING
         )
 
-        // Godkjenner alle vilkår på førstegangsbehandling.
-        val aktivBehandlingEtterRegistrertSøknad = hentAktivBehandling(restFagsakEtterRegistrertSøknad.data!!)
-        aktivBehandlingEtterRegistrertSøknad.personResultater.forEach { restPersonResultat ->
+        restUtvidetBehandling.data!!.personResultater.forEach { restPersonResultat ->
             restPersonResultat.vilkårResultater.filter { it.resultat == Resultat.IKKE_VURDERT }.forEach {
                 familieBaSakKlient().putVilkår(
-                    behandlingId = aktivBehandlingEtterRegistrertSøknad.behandlingId,
+                    behandlingId = restUtvidetBehandling.data!!.behandlingId,
                     vilkårId = it.id,
                     restPersonResultat =
                     RestPersonResultat(
@@ -131,24 +129,25 @@ class BehandleFørstegangssøknadSmåbarnstilleggTest(
         }
 
         familieBaSakKlient().validerVilkårsvurdering(
-            behandlingId = aktivBehandlingEtterRegistrertSøknad.behandlingId
+            behandlingId = restUtvidetBehandling.data!!.behandlingId
         )
-        val restFagsakEtterBehandlingsresultat =
+
+        val restUtvidetBehandlingEtterBehandlingsResultat =
             familieBaSakKlient().behandlingsresultatStegOgGåVidereTilNesteSteg(
-                behandlingId = aktivBehandlingEtterRegistrertSøknad.behandlingId
+                behandlingId = restUtvidetBehandling.data!!.behandlingId
             )
-        val behandlingEtterBehandlingsresultat =
-            hentAktivBehandling(restFagsak = restFagsakEtterBehandlingsresultat.data!!)
 
         assertEquals(
             tilleggOrdinærSatsTilTester.beløp + sisteUtvidetSatsTilTester.beløp + sisteSmåbarnstilleggSatsTilTester.beløp,
             hentNåværendeEllerNesteMånedsUtbetaling(
-                behandling = behandlingEtterBehandlingsresultat
+                behandling = restUtvidetBehandlingEtterBehandlingsResultat.data!!
             )
         )
 
         val andelerTilkjentYtelse =
-            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = behandlingEtterBehandlingsresultat.behandlingId)
+            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(
+                behandlingId = restUtvidetBehandlingEtterBehandlingsResultat.data!!.behandlingId
+            )
         val utvidedeAndeler = andelerTilkjentYtelse.filter { it.type == YtelseType.UTVIDET_BARNETRYGD }
         val småbarnstilleggAndeler = andelerTilkjentYtelse.filter { it.type == YtelseType.SMÅBARNSTILLEGG }
 
@@ -165,24 +164,25 @@ class BehandleFørstegangssøknadSmåbarnstilleggTest(
             småbarnstilleggAndeler.maxByOrNull { it.stønadFom }?.stønadTom
         )
 
-        generellAssertFagsak(
-            restFagsak = restFagsakEtterBehandlingsresultat,
-            fagsakStatus = FagsakStatus.OPPRETTET,
+        generellAssertRestUtvidetBehandling(
+            restUtvidetBehandling = restUtvidetBehandlingEtterBehandlingsResultat,
+            behandlingStatus = BehandlingStatus.UTREDES,
             behandlingStegType = StegType.VURDER_TILBAKEKREVING
         )
 
-        val restFagsakEtterVurderTilbakekreving = familieBaSakKlient().lagreTilbakekrevingOgGåVidereTilNesteSteg(
-            behandlingEtterBehandlingsresultat.behandlingId,
-            RestTilbakekreving(Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING, begrunnelse = "begrunnelse")
-        )
-        generellAssertFagsak(
-            restFagsak = restFagsakEtterVurderTilbakekreving,
-            fagsakStatus = FagsakStatus.OPPRETTET,
+        val restUtvidetBehandlingEtterVurderTilbakekreving =
+            familieBaSakKlient().lagreTilbakekrevingOgGåVidereTilNesteSteg(
+                restUtvidetBehandlingEtterBehandlingsResultat.data!!.behandlingId,
+                RestTilbakekreving(Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING, begrunnelse = "begrunnelse")
+            )
+        generellAssertRestUtvidetBehandling(
+            restUtvidetBehandling = restUtvidetBehandlingEtterVurderTilbakekreving,
+            behandlingStatus = BehandlingStatus.UTREDES,
             behandlingStegType = StegType.SEND_TIL_BESLUTTER
         )
 
         val vedtaksperiodeId =
-            hentAktivtVedtak(restFagsakEtterVurderTilbakekreving.data!!)!!.vedtaksperioderMedBegrunnelser.first()
+            restUtvidetBehandlingEtterVurderTilbakekreving.data!!.vedtak!!.vedtaksperioderMedBegrunnelser.first()
         familieBaSakKlient().oppdaterVedtaksperiodeMedStandardbegrunnelser(
             vedtaksperiodeId = vedtaksperiodeId.id,
             restPutVedtaksperiodeMedStandardbegrunnelser = RestPutVedtaksperiodeMedStandardbegrunnelser(
@@ -192,18 +192,18 @@ class BehandleFørstegangssøknadSmåbarnstilleggTest(
             )
         )
 
-        val restFagsakEtterSendTilBeslutter =
-            familieBaSakKlient().sendTilBeslutter(fagsakId = restFagsakEtterVurderTilbakekreving.data!!.id)
+        val restUtvidetBehandlingEtterSendTilBeslutter =
+            familieBaSakKlient().sendTilBeslutter(behandlingId = restUtvidetBehandlingEtterVurderTilbakekreving.data!!.behandlingId)
 
-        generellAssertFagsak(
-            restFagsak = restFagsakEtterSendTilBeslutter,
-            fagsakStatus = FagsakStatus.OPPRETTET,
+        generellAssertRestUtvidetBehandling(
+            restUtvidetBehandling = restUtvidetBehandlingEtterSendTilBeslutter,
+            behandlingStatus = BehandlingStatus.FATTER_VEDTAK,
             behandlingStegType = StegType.BESLUTTE_VEDTAK
         )
 
-        val restFagsakEtterIverksetting =
+        val restUtvidetBehandlingEtterIverksetting =
             familieBaSakKlient().iverksettVedtak(
-                fagsakId = restFagsakEtterVurderTilbakekreving.data!!.id,
+                behandlingId = restUtvidetBehandlingEtterSendTilBeslutter.data!!.behandlingId,
                 restBeslutningPåVedtak = RestBeslutningPåVedtak(
                     Beslutning.GODKJENT
                 ),
@@ -220,14 +220,14 @@ class BehandleFørstegangssøknadSmåbarnstilleggTest(
                     )
                 }
             )
-        generellAssertFagsak(
-            restFagsak = restFagsakEtterIverksetting,
-            fagsakStatus = FagsakStatus.OPPRETTET,
+        generellAssertRestUtvidetBehandling(
+            restUtvidetBehandling = restUtvidetBehandlingEtterIverksetting,
+            behandlingStatus = BehandlingStatus.IVERKSETTER_VEDTAK,
             behandlingStegType = StegType.IVERKSETT_MOT_OPPDRAG
         )
 
         håndterIverksettingAvBehandling(
-            behandlingEtterVurdering = behandlingService.hentAktivForFagsak(fagsakId = restFagsakEtterSendTilBeslutter.data!!.id)!!,
+            behandlingEtterVurdering = behandlingService.hentAktivForFagsak(fagsakId = fagsak.data!!.id)!!,
             søkerFnr = scenario.søker.ident,
             fagsakService = fagsakService,
             vedtakService = vedtakService,
