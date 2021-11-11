@@ -20,7 +20,12 @@ class InfotrygdFeedServiceTest : AbstractSpringIntegrationTestDev() {
     @Test
     fun `Skal ikke send start behandling feed hvis feature er togglet av`() {
         every { featureToggleServiceMock.isEnabled(any()) } returns true
-        every { featureToggleServiceMock.isEnabled(FeatureToggleConfig.SEND_START_BEHANDLING_TIL_INFOTRYGD) } returns false
+        every {
+            featureToggleServiceMock.isEnabled(
+                FeatureToggleConfig.SEND_START_BEHANDLING_TIL_INFOTRYGD,
+                false
+            )
+        } returns false
         every { opprettTaskServiceMock.opprettSendStartBehandlingTilInfotrygdTask(any()) } just runs
 
         val infotrygdFeedService = InfotrygdFeedService(opprettTaskServiceMock, featureToggleServiceMock)
@@ -33,7 +38,12 @@ class InfotrygdFeedServiceTest : AbstractSpringIntegrationTestDev() {
     @Test
     fun `Skal send riktig start behandling feed hvis feature er togglet`() {
         every { featureToggleServiceMock.isEnabled(any()) } returns false
-        every { featureToggleServiceMock.isEnabled(FeatureToggleConfig.SEND_START_BEHANDLING_TIL_INFOTRYGD) } returns true
+        every {
+            featureToggleServiceMock.isEnabled(
+                FeatureToggleConfig.SEND_START_BEHANDLING_TIL_INFOTRYGD,
+                false
+            )
+        } returns true
         val ident = "123"
         val identSlot = slot<String>()
         every { opprettTaskServiceMock.opprettSendStartBehandlingTilInfotrygdTask(capture(identSlot)) } just runs
