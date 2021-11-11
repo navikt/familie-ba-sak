@@ -31,11 +31,11 @@ data class Personident(
     val fødselsnummer: String,
 
     @Column(name = "aktiv", nullable = false)
-    val aktiv: Boolean = false,
+    var aktiv: Boolean = false,
 
-    @Column(name = "gjelder_til", nullable = false, columnDefinition = "DATE")
+    @Column(name = "gjelder_til", columnDefinition = "DATE")
     @Convert(converter = YearMonthConverter::class)
-    val gjelderTil: YearMonth,
+    var gjelderTil: YearMonth,
 
 ) : BaseEntitet() {
 
