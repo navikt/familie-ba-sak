@@ -24,7 +24,7 @@ class UtbetalingsoppdragUtilsTest {
             ).valider(behandlingsresultat = BehandlingResultat.FORTSATT_INNVILGET)
         }
         assertTrue(
-            feil.message!!.contains("Utbetalingsoppdraget inneholder ingen utbetalingsperioder og bør kanskje ikke iverksettes")
+            feil.message!!.contains("Utbetalingsoppdraget inneholder ingen utbetalingsperioder")
         )
     }
 
@@ -42,7 +42,7 @@ class UtbetalingsoppdragUtilsTest {
             ).valider(behandlingsresultat = BehandlingResultat.FORTSATT_INNVILGET)
         }
         assertTrue(
-            feil.message!!.contains("Fikk resultat fortsatt innvilget, men er perioder som ifølge systemet skal endres.")
+            feil.message!!.contains("Behandling har resultat fortsatt innvilget")
         )
     }
 }

@@ -33,15 +33,15 @@ class ØkonomiService(
     private val featureToggleService: FeatureToggleService,
 ) {
 
-    fun oppdaterTilkjentYtelseMedUtbetalingsoppdrag(vedtak: Vedtak, saksbehandlerId: String): Utbetalingsoppdrag {
+    fun oppdaterTilkjentYtelseMedUtbetalingsoppdragOgIverksett(vedtak: Vedtak, saksbehandlerId: String) {
 
         val oppdatertBehandling = vedtak.behandling
         val utbetalingsoppdrag = genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(vedtak, saksbehandlerId)
         beregningService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(oppdatertBehandling, utbetalingsoppdrag)
-        return utbetalingsoppdrag
+        iverksettOppdrag(utbetalingsoppdrag)
     }
 
-    fun iverksettOppdrag(utbetalingsoppdrag: Utbetalingsoppdrag) {
+    private fun iverksettOppdrag(utbetalingsoppdrag: Utbetalingsoppdrag) {
         try {
             økonomiKlient.iverksettOppdrag(utbetalingsoppdrag)
         } catch (e: Exception) {
@@ -113,10 +113,10 @@ class ØkonomiService(
             )
 
             if (!erSimulering && (
-                oppdatertBehandling.type == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT || behandlingService.hent(
+                    oppdatertBehandling.type == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT || behandlingService.hent(
                         oppdatertBehandling.id
                     ).resultat == BehandlingResultat.OPPHØRT
-                )
+                    )
             )
                 validerOpphørsoppdrag(utbetalingsoppdrag)
 

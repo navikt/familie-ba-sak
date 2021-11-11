@@ -71,14 +71,6 @@ class BeslutteVedtak(
 
             when (nesteSteg) {
                 StegType.IVERKSETT_MOT_OPPDRAG -> {
-
-                    // Avklaring - denne er jeg litt usikker på... Ettersom vi her lagrer utbetalingsoppdrag og henter det ut json i iverksettingstasken kan modellen ha endret seg.
-                    // Bør vi heller lage en "validerUtbetalingsoppdrag" funksjon som vi kan kalle her/eller ved send til beslutter?
-                    økonomiService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(
-                        vedtak = vedtak,
-                        saksbehandlerId = SikkerhetContext.hentSaksbehandler()
-                    )
-
                     opprettTaskIverksettMotOppdrag(behandling, vedtak)
                 }
                 StegType.JOURNALFØR_VEDTAKSBREV -> opprettJournalførVedtaksbrevTask(behandling, vedtak)

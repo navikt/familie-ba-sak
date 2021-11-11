@@ -111,10 +111,8 @@ class ØkonomiIntegrasjonTest : AbstractSpringIntegrationTest() {
 
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
 
-        val utbetalingsoppdrag =
-            økonomiService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(vedtak, "ansvarligSaksbehandler")
         assertDoesNotThrow {
-            økonomiService.iverksettOppdrag(utbetalingsoppdrag)
+            økonomiService.oppdaterTilkjentYtelseMedUtbetalingsoppdragOgIverksett(vedtak, "ansvarligSaksbehandler")
         }
     }
 
@@ -155,9 +153,7 @@ class ØkonomiIntegrasjonTest : AbstractSpringIntegrationTest() {
 
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
 
-        val utbetalingsoppdrag =
-            økonomiService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(vedtak, "ansvarligSaksbehandler")
-        økonomiService.iverksettOppdrag(utbetalingsoppdrag)
+        økonomiService.oppdaterTilkjentYtelseMedUtbetalingsoppdragOgIverksett(vedtak, "ansvarligSaksbehandler")
         behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.AVSLUTTET)
 
         fagsak.status = FagsakStatus.LØPENDE
