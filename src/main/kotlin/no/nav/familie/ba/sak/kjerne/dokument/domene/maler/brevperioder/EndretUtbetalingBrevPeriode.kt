@@ -25,10 +25,11 @@ data class EndretUtbetalingBrevPeriode(
         begrunnelser: List<Begrunnelse>,
         type: EndretUtbetalingBrevPeriodeType,
         typeBarnetrygd: EndretUtbetalingBarnetrygdType,
+        belop: String,
     ) : this(
         fom = flettefelt(fom),
         tom = flettefelt(if (tom.isNullOrBlank()) "" else "til $tom "),
-        belop = flettefelt(null),
+        belop = flettefelt(belop),
         antallBarn = flettefelt(null),
         barnasFodselsdager = flettefelt(barnasFodselsdager),
         begrunnelser = begrunnelser.map {
