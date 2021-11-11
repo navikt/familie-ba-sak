@@ -137,7 +137,7 @@ class BehandlingsresultatSteg(
                 behandlingMedResultat.id,
                 BehandlingStatus.IVERKSETTER_VEDTAK
             )
-        } else {
+        } else if (!behandlingMedResultat.skalBehandlesAutomatisk) {
             simuleringService.oppdaterSimuleringPåBehandling(behandlingMedResultat)
         }
 

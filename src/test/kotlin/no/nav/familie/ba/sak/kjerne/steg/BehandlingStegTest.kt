@@ -183,6 +183,7 @@ class BehandlingStegTest {
             StegType.REGISTRERE_PERSONGRUNNLAG,
             StegType.VILKÅRSVURDERING,
             StegType.BEHANDLINGSRESULTAT,
+            StegType.VURDER_TILBAKEKREVING,
             StegType.SEND_TIL_BESLUTTER,
             StegType.BESLUTTE_VEDTAK,
             StegType.IVERKSETT_MOT_OPPDRAG,
