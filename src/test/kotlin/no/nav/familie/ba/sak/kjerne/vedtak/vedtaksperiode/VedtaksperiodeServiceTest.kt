@@ -10,7 +10,6 @@ import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.ClientMocks
-import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
@@ -36,7 +35,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.dao.DataIntegrityViolationException
-import org.testcontainers.shaded.com.google.common.collect.Iterables
 
 class VedtaksperiodeServiceTest(
     @Autowired
@@ -65,9 +63,6 @@ class VedtaksperiodeServiceTest(
 
     @Autowired
     private val databaseCleanupService: DatabaseCleanupService,
-
-    @Autowired
-    private val taskRepository: TaskRepositoryWrapper,
 ) : AbstractSpringIntegrationTest() {
 
     val søkerFnr = randomFnr()
@@ -78,16 +73,6 @@ class VedtaksperiodeServiceTest(
 
     @BeforeAll
     fun init() {
-        val tasker = taskRepository.findAll()
-        if (Iterables.size(tasker) > 0) {
-            error(
-                "Finnes uprosseserte tasker: \n" +
-                    "$tasker\n" +
-                    tasker.map {
-                        "type: ${it.type}, payload: ${it.payload}"
-                    }.joinToString("\n")
-            )
-        }
 
         databaseCleanupService.truncate()
         førstegangsbehandling = kjørStegprosessForFGB(
