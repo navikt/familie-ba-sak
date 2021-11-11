@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.ekstern.tilbakekreving
 
 import io.mockk.every
+import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.spyk
@@ -33,9 +34,11 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.kafka.support.Acknowledgment
 import java.time.LocalDate
 
+@ExtendWith(MockKExtension::class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class HentFagsystemsbehandlingRequestConsumerTest {
 

@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.ekstern.bisys
 
 import io.mockk.every
+import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import io.mockk.unmockkAll
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelseUtvidet
@@ -22,9 +23,11 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.TestInstance.Lifecycle
+import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
 import java.time.YearMonth
 
+@ExtendWith(MockKExtension::class)
 @TestInstance(Lifecycle.PER_CLASS)
 internal class BisysServiceTest {
 

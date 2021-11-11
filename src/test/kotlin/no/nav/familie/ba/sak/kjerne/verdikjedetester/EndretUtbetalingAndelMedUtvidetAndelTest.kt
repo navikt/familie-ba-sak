@@ -25,7 +25,68 @@ class EndretUtbetalingAndelMedUtvidetAndelTest(
 
     @Test
     fun `Skal teste at endret utbetalingsandeler for ordinær og utvidet endrer utbetaling for søker og barn`() {
-        val (scenario, restBehandlingEtterBehandlingsresultat) = genererBehandlingsresultat()
+        val barnFødselsdato = LocalDate.now().minusYears(3)
+
+        val scenario = mockServerKlient().lagScenario(
+            RestScenario(
+                søker = RestScenarioPerson(fødselsdato = "1996-01-12", fornavn = "Mor", etternavn = "Søker"),
+                barna = listOf(
+                    RestScenarioPerson(
+                        fødselsdato = barnFødselsdato.toString(),
+                        fornavn = "Barn",
+                        etternavn = "Barnesen",
+                        bostedsadresser = emptyList()
+                    )
+                )
+            )
+        )
+
+        val søkersIdent = scenario.søker.ident!!
+
+        familieBaSakKlient().opprettFagsak(søkersIdent = søkersIdent)
+        val restUtvidetBehandling = familieBaSakKlient().opprettBehandling(
+            søkersIdent = søkersIdent,
+            behandlingUnderkategori = BehandlingUnderkategori.UTVIDET
+        ).data!!
+
+        val restRegistrerSøknad =
+            RestRegistrerSøknad(
+                søknad = lagSøknadDTO(
+                    søkerIdent = scenario.søker.ident,
+                    barnasIdenter = scenario.barna.map { it.ident!! },
+                    underkategori = BehandlingUnderkategori.UTVIDET
+                ),
+                bekreftEndringerViaFrontend = false
+            )
+        val restBehandlingEtterRegistrertSøknad: Ressurs<RestUtvidetBehandling> =
+            familieBaSakKlient().registrererSøknad(
+                behandlingId = restUtvidetBehandling.behandlingId,
+                restRegistrerSøknad = restRegistrerSøknad
+            )
+
+        restBehandlingEtterRegistrertSøknad.data!!.personResultater.forEach { restPersonResultat ->
+            restPersonResultat.vilkårResultater.filter { it.resultat == Resultat.IKKE_VURDERT }.forEach {
+                familieBaSakKlient().putVilkår(
+                    behandlingId = restBehandlingEtterRegistrertSøknad.data?.behandlingId!!,
+                    vilkårId = it.id,
+                    restPersonResultat =
+                    RestPersonResultat(
+                        personIdent = restPersonResultat.personIdent,
+                        vilkårResultater = listOf(
+                            it.copy(
+                                resultat = Resultat.OPPFYLT,
+                                periodeFom = barnFødselsdato,
+                                erDeltBosted = it.vilkårType == Vilkår.BOR_MED_SØKER
+                            )
+                        )
+                    )
+                )
+            }
+        }
+
+        val restBehandlingEtterBehandlingsresultat = familieBaSakKlient().validerVilkårsvurdering(
+            behandlingId = restBehandlingEtterRegistrertSøknad.data?.behandlingId!!
+        ).data!!
 
         val andelerTilkjentYtelse =
             andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = restBehandlingEtterBehandlingsresultat.behandlingId)
@@ -97,72 +158,5 @@ class EndretUtbetalingAndelMedUtvidetAndelTest(
             endretAndeleTilkjentYtelser.single { it.personIdent == scenario.søker.ident }.stønadTom,
             endretTom
         )
-    }
-
-    private fun genererBehandlingsresultat(): Pair<RestScenario, RestUtvidetBehandling> {
-        val barnFødselsdato = LocalDate.now().minusYears(3)
-
-        val scenario = mockServerKlient().lagScenario(
-            RestScenario(
-                søker = RestScenarioPerson(fødselsdato = "1996-01-12", fornavn = "Mor", etternavn = "Søker"),
-                barna = listOf(
-                    RestScenarioPerson(
-                        fødselsdato = barnFødselsdato.toString(),
-                        fornavn = "Barn",
-                        etternavn = "Barnesen",
-                        bostedsadresser = emptyList()
-                    )
-                )
-            )
-        )
-
-        val søkersIdent = scenario.søker.ident!!
-
-        familieBaSakKlient().opprettFagsak(søkersIdent = søkersIdent)
-        val restUtvidetBehandling = familieBaSakKlient().opprettBehandling(
-            søkersIdent = søkersIdent,
-            behandlingUnderkategori = BehandlingUnderkategori.UTVIDET
-        ).data!!
-
-        val restRegistrerSøknad =
-            RestRegistrerSøknad(
-                søknad = lagSøknadDTO(
-                    søkerIdent = scenario.søker.ident,
-                    barnasIdenter = scenario.barna.map { it.ident!! },
-                    underkategori = BehandlingUnderkategori.UTVIDET
-                ),
-                bekreftEndringerViaFrontend = false
-            )
-        val restBehandlingEtterRegistrertSøknad: Ressurs<RestUtvidetBehandling> =
-            familieBaSakKlient().registrererSøknad(
-                behandlingId = restUtvidetBehandling.behandlingId,
-                restRegistrerSøknad = restRegistrerSøknad
-            )
-
-        restBehandlingEtterRegistrertSøknad.data!!.personResultater.forEach { restPersonResultat ->
-            restPersonResultat.vilkårResultater.filter { it.resultat == Resultat.IKKE_VURDERT }.forEach {
-                familieBaSakKlient().putVilkår(
-                    behandlingId = restUtvidetBehandling.behandlingId,
-                    vilkårId = it.id,
-                    restPersonResultat =
-                    RestPersonResultat(
-                        personIdent = restPersonResultat.personIdent,
-                        vilkårResultater = listOf(
-                            it.copy(
-                                resultat = Resultat.OPPFYLT,
-                                periodeFom = barnFødselsdato,
-                                erDeltBosted = it.vilkårType == Vilkår.BOR_MED_SØKER
-                            )
-                        )
-                    )
-                )
-            }
-        }
-
-        val restBehandlingEtterBehandlingsresultat = familieBaSakKlient().validerVilkårsvurdering(
-            behandlingId = restUtvidetBehandling.behandlingId
-        )
-
-        return Pair(scenario, restBehandlingEtterBehandlingsresultat.data!!)
     }
 }

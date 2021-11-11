@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.sikkerhet.validering
 
 import io.mockk.every
+import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import io.mockk.unmockkAll
 import no.nav.familie.ba.sak.common.randomFnr
@@ -30,8 +31,10 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
 
+@ExtendWith(MockKExtension::class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class FagsaktilgangTest {
 

@@ -21,7 +21,6 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
-import org.springframework.web.client.RestOperations
 import org.springframework.web.client.RestTemplate
 
 @SpringBootTest(
@@ -48,9 +47,6 @@ abstract class WebSpringAuthTestRunner {
 
     @Autowired
     lateinit var restTemplate: RestTemplate
-
-    @Autowired
-    lateinit var restOperations: RestOperations
 
     @Autowired
     lateinit var mockOAuth2Server: MockOAuth2Server
