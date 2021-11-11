@@ -5,10 +5,9 @@ import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.randomFnr
-import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
+import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTestDev
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.TEST_PDF
-import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -26,7 +25,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
@@ -60,9 +58,6 @@ class DokumentServiceTest(
     private val brevService: BrevService,
 
     @Autowired
-    private val databaseCleanupService: DatabaseCleanupService,
-
-    @Autowired
     private val integrasjonClient: IntegrasjonClient,
 
     @Autowired
@@ -70,12 +65,7 @@ class DokumentServiceTest(
 
     @Autowired
     private val vedtaksperiodeService: VedtaksperiodeService,
-) : AbstractSpringIntegrationTest() {
-
-    @BeforeEach
-    fun setup() {
-        databaseCleanupService.truncate()
-    }
+) : AbstractSpringIntegrationTestDev() {
 
     @Test
     fun `Hent vedtaksbrev`() {

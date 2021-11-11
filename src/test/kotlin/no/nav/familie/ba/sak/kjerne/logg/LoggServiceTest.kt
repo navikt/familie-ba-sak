@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.logg
 
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.randomFnr
-import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
+import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTestDev
 import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.config.mockHentPersoninfoForMedIdenter
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
@@ -12,7 +12,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
@@ -28,12 +27,7 @@ class LoggServiceTest(
 
     @Autowired
     private val databaseCleanupService: DatabaseCleanupService
-) : AbstractSpringIntegrationTest() {
-
-    @BeforeAll
-    fun init() {
-        databaseCleanupService.truncate()
-    }
+) : AbstractSpringIntegrationTestDev() {
 
     @Test
     fun `Skal lage noen logginnslag på forskjellige behandlinger og hente dem fra databasen`() {
