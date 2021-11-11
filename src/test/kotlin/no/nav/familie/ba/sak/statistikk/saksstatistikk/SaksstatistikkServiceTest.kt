@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.statistikk.saksstatistikk
 
+import io.mockk.clearAllMocks
+import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.unmockkAll
@@ -100,7 +102,7 @@ internal class SaksstatistikkServiceTest {
 
     @AfterAll
     fun tearDown() {
-        unmockkAll()
+        clearAllMocks(answers = false)
     }
 
     @Test

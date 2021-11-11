@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.arbeidsfordeling
 
+import com.github.tomakehurst.wiremock.WireMockServer
+import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import io.mockk.every
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.DbContainerInitializer
@@ -49,6 +51,7 @@ import java.time.LocalDate.now
 )
 @Tag("integration")
 class ArbeidsfordelingIntegrationTest(
+
     @Autowired
     private val fagsakService: FagsakService,
 
@@ -70,6 +73,8 @@ class ArbeidsfordelingIntegrationTest(
     @Autowired
     private val mockPersonopplysningerService: PersonopplysningerService
 ) {
+
+    private val wireMockServer = WireMockServer(WireMockConfiguration.wireMockConfig().dynamicPort())
 
     init {
         val now = now()

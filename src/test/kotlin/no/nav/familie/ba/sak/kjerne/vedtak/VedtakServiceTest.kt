@@ -131,7 +131,7 @@ class VedtakServiceTest(
             featureToggleService
         )
 
-        stubFor(
+        wireMockServer.stubFor(
             get(urlEqualTo("/api/aktoer/v1"))
                 .willReturn(
                     aResponse()

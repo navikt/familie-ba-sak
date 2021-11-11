@@ -46,9 +46,7 @@ class VerdikjedetesterPropertyOverrideContextInitializer :
     "mock-task-repository",
     "mock-task-service"
 )
-@ContextConfiguration(
-    initializers = [VerdikjedetesterPropertyOverrideContextInitializer::class]
-)
+@ContextConfiguration(initializers = [VerdikjedetesterPropertyOverrideContextInitializer::class])
 abstract class AbstractVerdikjedetest : WebSpringAuthTestRunner() {
 
     fun familieBaSakKlient(): FamilieBaSakKlient = FamilieBaSakKlient(

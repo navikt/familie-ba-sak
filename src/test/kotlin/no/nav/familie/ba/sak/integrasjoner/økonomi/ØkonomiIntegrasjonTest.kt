@@ -4,7 +4,6 @@ import com.github.tomakehurst.wiremock.client.WireMock.aResponse
 import com.github.tomakehurst.wiremock.client.WireMock.anyUrl
 import com.github.tomakehurst.wiremock.client.WireMock.get
 import com.github.tomakehurst.wiremock.client.WireMock.post
-import com.github.tomakehurst.wiremock.client.WireMock.stubFor
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagPersonResultat
@@ -71,7 +70,7 @@ class ØkonomiIntegrasjonTest : AbstractSpringIntegrationTest() {
         val stønadTom = stønadFom.plusYears(17)
 
         val responseBody = Ressurs.Companion.success("ok")
-        stubFor(
+        wireMockServer.stubFor(
             get(urlEqualTo("/api/aktoer/v1"))
                 .willReturn(
                     aResponse()
@@ -80,7 +79,7 @@ class ØkonomiIntegrasjonTest : AbstractSpringIntegrationTest() {
                         .withBody(objectMapper.writeValueAsString(Ressurs.Companion.success(mapOf("aktørId" to 1L))))
                 )
         )
-        stubFor(
+        wireMockServer.stubFor(
             post(anyUrl())
                 .willReturn(
                     aResponse()
@@ -124,7 +123,7 @@ class ØkonomiIntegrasjonTest : AbstractSpringIntegrationTest() {
         val stønadFom = LocalDate.now()
         val stønadTom = stønadFom.plusYears(17)
 
-        stubFor(
+        wireMockServer.stubFor(
             post(anyUrl())
                 .willReturn(
                     aResponse()

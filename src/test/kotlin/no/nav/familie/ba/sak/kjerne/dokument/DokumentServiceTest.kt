@@ -1,9 +1,10 @@
 package no.nav.familie.ba.sak.kjerne.dokument
 
+import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock.aResponse
 import com.github.tomakehurst.wiremock.client.WireMock.get
-import com.github.tomakehurst.wiremock.client.WireMock.stubFor
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
+import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import io.mockk.MockKAnnotations
 import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.common.Feil
@@ -39,7 +40,6 @@ import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
@@ -57,9 +57,8 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
     "mock-tilbakekreving-klient",
     "mock-infotrygd-barnetrygd",
 
-)
+    )
 @Tag("integration")
-@AutoConfigureWireMock(port = 28085)
 class DokumentServiceTest(
     @Autowired
     private val fagsakService: FagsakService,
@@ -101,12 +100,14 @@ class DokumentServiceTest(
     private val vedtaksperiodeService: VedtaksperiodeService,
 ) {
 
+    private val wireMockServer = WireMockServer(WireMockConfiguration.wireMockConfig().dynamicPort())
+
     @BeforeEach
     fun setup() {
         databaseCleanupService.truncate()
         MockKAnnotations.init(this)
 
-        stubFor(
+        wireMockServer.stubFor(
             get(urlEqualTo("/api/aktoer/v1"))
                 .willReturn(
                     aResponse()
@@ -236,7 +237,8 @@ class DokumentServiceTest(
         val behandlingEtterVedtakBesluttet =
             behandlingEtterVilkårsvurderingSteg.leggTilBehandlingStegTilstand(StegType.IVERKSETT_MOT_OPPDRAG)
 
-        val vedtakEtterVedtakBesluttet = vedtakService.hentAktivForBehandling(behandlingId = behandlingEtterVedtakBesluttet.id)!!
+        val vedtakEtterVedtakBesluttet =
+            vedtakService.hentAktivForBehandling(behandlingId = behandlingEtterVedtakBesluttet.id)!!
 
         val vedtaksbrevFellesFelterEtterVedtakBesluttet =
             brevService.lagVedtaksbrevFellesfelter(vedtakEtterVedtakBesluttet)

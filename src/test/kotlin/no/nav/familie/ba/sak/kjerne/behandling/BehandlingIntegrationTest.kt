@@ -1,9 +1,11 @@
 package no.nav.familie.ba.sak.kjerne.behandling
 
+import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock.aResponse
 import com.github.tomakehurst.wiremock.client.WireMock.get
 import com.github.tomakehurst.wiremock.client.WireMock.stubFor
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
+import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import no.nav.familie.ba.sak.common.lagBehandling
@@ -128,7 +130,7 @@ class BehandlingIntegrationTest(
 
         MockKAnnotations.init(this)
 
-        stubFor(
+        wireMockServer.stubFor(
             get(urlEqualTo("/api/aktoer/v1"))
                 .willReturn(
                     aResponse()

@@ -5,7 +5,6 @@ import com.github.tomakehurst.wiremock.client.WireMock.anyRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.equalToJson
 import com.github.tomakehurst.wiremock.client.WireMock.okJson
 import com.github.tomakehurst.wiremock.client.WireMock.post
-import com.github.tomakehurst.wiremock.client.WireMock.resetAllRequests
 import com.github.tomakehurst.wiremock.client.WireMock.stubFor
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import com.github.tomakehurst.wiremock.client.WireMock.verify
@@ -16,6 +15,7 @@ import no.nav.familie.kontrakter.ba.infotrygd.InfotrygdSøkResponse
 import no.nav.familie.kontrakter.ba.infotrygd.Sak
 import no.nav.familie.kontrakter.ba.infotrygd.Stønad
 import no.nav.familie.kontrakter.felles.objectMapper
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -23,7 +23,6 @@ import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.core.env.Environment
-import org.springframework.core.env.get
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestOperations
 import java.net.URI
@@ -45,17 +44,23 @@ class InfotrygdBarnetrygdClientTest : AbstractSpringIntegrationTestDev() {
 
     @BeforeEach
     fun setUp() {
-        resetAllRequests()
+        wireMockServer.start()
         client = InfotrygdBarnetrygdClient(
-            URI.create("http://localhost:${environment["wiremock.server.port"]}/api"),
+            URI.create(wireMockServer.baseUrl() + "/api"),
             restOperations,
             environment
         )
     }
 
+    @AfterEach
+    fun tearDown() {
+        wireMockServer.resetAll()
+        wireMockServer.stop()
+    }
+
     @Test
     fun `Skal lage InfotrygdBarnetrygdRequest basert på lister med fnr og barns fødselsnummer`() {
-        stubFor(
+        wireMockServer.stubFor(
             post(løpendeBarnetrygdURL).willReturn(
                 okJson(
                     objectMapper.writeValueAsString(
@@ -64,7 +69,7 @@ class InfotrygdBarnetrygdClientTest : AbstractSpringIntegrationTestDev() {
                 )
             )
         )
-        stubFor(
+        wireMockServer.stubFor(
             post(sakerURL).willReturn(
                 okJson(
                     objectMapper.writeValueAsString(
@@ -73,7 +78,7 @@ class InfotrygdBarnetrygdClientTest : AbstractSpringIntegrationTestDev() {
                 )
             )
         )
-        stubFor(
+        wireMockServer.stubFor(
             post(stønaderURL).willReturn(
                 okJson(
                     objectMapper.writeValueAsString(
@@ -91,7 +96,7 @@ class InfotrygdBarnetrygdClientTest : AbstractSpringIntegrationTestDev() {
         val hentsakerResponse = client.hentSaker(søkersIdenter, barnasIdenter)
         val hentstønaderResponse = client.hentStønader(søkersIdenter, barnasIdenter)
 
-        verify(
+        wireMockServer.verify(
             anyRequestedFor(urlEqualTo(løpendeBarnetrygdURL)).withRequestBody(
                 equalToJson(
                     objectMapper.writeValueAsString(
@@ -100,7 +105,7 @@ class InfotrygdBarnetrygdClientTest : AbstractSpringIntegrationTestDev() {
                 )
             )
         )
-        verify(
+        wireMockServer.verify(
             anyRequestedFor(urlEqualTo(sakerURL)).withRequestBody(
                 equalToJson(
                     objectMapper.writeValueAsString(
@@ -109,7 +114,7 @@ class InfotrygdBarnetrygdClientTest : AbstractSpringIntegrationTestDev() {
                 )
             )
         )
-        verify(
+        wireMockServer.verify(
             anyRequestedFor(urlEqualTo(stønaderURL)).withRequestBody(
                 equalToJson(
                     objectMapper.writeValueAsString(
@@ -125,7 +130,7 @@ class InfotrygdBarnetrygdClientTest : AbstractSpringIntegrationTestDev() {
 
     @Test
     fun `Skal lage InfotrygdBarnetrygdRequest basert på lister med fnr`() {
-        stubFor(
+        wireMockServer.stubFor(
             post(løpendeBarnetrygdURL).willReturn(
                 okJson(
                     objectMapper.writeValueAsString(
@@ -140,7 +145,7 @@ class InfotrygdBarnetrygdClientTest : AbstractSpringIntegrationTestDev() {
 
         val finnesIkkeHosInfotrygd = client.harLøpendeSakIInfotrygd(søkersIdenter, emptyList())
 
-        verify(
+        wireMockServer.verify(
             anyRequestedFor(urlEqualTo(løpendeBarnetrygdURL)).withRequestBody(
                 equalToJson(
                     objectMapper.writeValueAsString(
@@ -154,7 +159,7 @@ class InfotrygdBarnetrygdClientTest : AbstractSpringIntegrationTestDev() {
 
     @Test
     fun `Invokering av Infotrygd-Barnetrygd genererer http feil`() {
-        stubFor(post(løpendeBarnetrygdURL).willReturn(aResponse().withStatus(401)))
+        wireMockServer.stubFor(post(løpendeBarnetrygdURL).willReturn(aResponse().withStatus(401)))
 
         assertThrows<HttpClientErrorException> {
             client.harLøpendeSakIInfotrygd(ClientMocks.søkerFnr.toList(), ClientMocks.barnFnr.toList())

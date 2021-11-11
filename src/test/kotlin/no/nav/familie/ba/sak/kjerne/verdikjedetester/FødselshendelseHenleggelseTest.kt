@@ -77,7 +77,7 @@ class FødselshendelseHenleggelseTest(
         )
         assertNull(behandling)
 
-        verify(exactly = 1) {
+         verify(exactly = 1) {
             opprettTaskService.opprettSendFeedTilInfotrygdTask(scenario.barna.map { it.ident!! })
         }
     }
@@ -116,7 +116,7 @@ class FødselshendelseHenleggelseTest(
         assertEquals(BehandlingResultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE, behandling?.resultat)
         assertEquals(StegType.BEHANDLING_AVSLUTTET, behandling?.steg)
 
-        verify(exactly = 1) {
+         verify(exactly = 1) {
             opprettTaskService.opprettOppgaveTask(
                 behandlingId = behandling!!.id,
                 oppgavetype = Oppgavetype.VurderLivshendelse,
@@ -163,7 +163,7 @@ class FødselshendelseHenleggelseTest(
         assertEquals(BehandlingResultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE, behandling?.resultat)
         assertEquals(StegType.BEHANDLING_AVSLUTTET, behandling?.steg)
 
-        verify(exactly = 1) {
+         verify(exactly = 1) {
             opprettTaskService.opprettOppgaveTask(
                 behandlingId = behandling!!.id,
                 oppgavetype = Oppgavetype.VurderLivshendelse,

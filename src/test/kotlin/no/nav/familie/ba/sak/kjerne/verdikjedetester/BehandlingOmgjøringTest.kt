@@ -103,7 +103,7 @@ class BehandlingOmgjøringTest(
                 payload = ""
             )
         )
-        verify(exactly = 1) { opprettTaskService.opprettAutovedtakFor6Og18ÅrBarn(behandling.fagsak.id, 6) }
+         verify(exactly = 1) { opprettTaskService.opprettAutovedtakFor6Og18ÅrBarn(behandling.fagsak.id, 6) }
 
         autobrev6og18ÅrService.opprettOmregningsoppgaveForBarnIBrytingsalder(
             autobrev6og18ÅrDTO = Autobrev6og18ÅrDTO(

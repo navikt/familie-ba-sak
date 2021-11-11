@@ -95,7 +95,7 @@ class GrensesnittavstemMotOppdragTest {
 
         grensesnittavstemMotOppdrag.onCompletion(testTask)
 
-        verify(exactly = 1) { taskRepositoryMock.save(capture(slot)) }
+         verify(exactly = 1) { taskRepositoryMock.save(capture(slot)) }
         assertEquals(GrensesnittavstemMotOppdrag.TASK_STEP_TYPE, slot.captured.type)
         assertEquals(iDag.plusDays(1).toLocalDate().atTime(8, 0), slot.captured.triggerTid)
         val taskDTO = objectMapper.readValue(slot.captured.payload, GrensesnittavstemmingTaskDTO::class.java)

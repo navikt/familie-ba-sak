@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.autobrev
 
+import com.github.tomakehurst.wiremock.WireMockServer
+import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
@@ -28,6 +30,8 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 internal class Autobrev6og18ÅrServiceTest {
+
+    private val wireMockServer = WireMockServer(WireMockConfiguration.wireMockConfig().dynamicPort())
 
     val personopplysningGrunnlagRepository = mockk<PersonopplysningGrunnlagRepository>()
     val persongrunnlagService = mockk<PersongrunnlagService>()
@@ -58,7 +62,7 @@ internal class Autobrev6og18ÅrServiceTest {
 
         autobrev6og18ÅrService.opprettOmregningsoppgaveForBarnIBrytingsalder(autobrev6og18ÅrDTO)
 
-        verify(exactly = 0) { stegService.håndterVilkårsvurdering(any()) }
+         verify(exactly = 0) { stegService.håndterVilkårsvurdering(any()) }
     }
 
     @Test
@@ -73,7 +77,7 @@ internal class Autobrev6og18ÅrServiceTest {
 
         autobrev6og18ÅrService.opprettOmregningsoppgaveForBarnIBrytingsalder(autobrev6og18ÅrDTO)
 
-        verify(exactly = 0) { stegService.håndterVilkårsvurdering(any()) }
+         verify(exactly = 0) { stegService.håndterVilkårsvurdering(any()) }
     }
 
     @Test
@@ -88,7 +92,7 @@ internal class Autobrev6og18ÅrServiceTest {
 
         autobrev6og18ÅrService.opprettOmregningsoppgaveForBarnIBrytingsalder(autobrev6og18ÅrDTO)
 
-        verify(exactly = 0) { stegService.håndterVilkårsvurdering(any()) }
+         verify(exactly = 0) { stegService.håndterVilkårsvurdering(any()) }
     }
 
     @Test
@@ -123,11 +127,11 @@ internal class Autobrev6og18ÅrServiceTest {
         every { taskRepository.save(any()) } returns Task(type = "test", payload = "")
         autobrev6og18ÅrService.opprettOmregningsoppgaveForBarnIBrytingsalder(autobrev6og18ÅrDTO)
 
-        verify(exactly = 1) { stegService.håndterVilkårsvurdering(any()) }
-        verify(exactly = 1) { stegService.håndterNyBehandling(any()) }
-        verify(exactly = 1) { vedtaksperiodeService.oppdaterFortsattInnvilgetPeriodeMedAutobrevBegrunnelse(any(), any()) }
-        verify(exactly = 1) { vedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(any()) }
-        verify(exactly = 1) { taskRepository.save(any()) }
+         verify(exactly = 1) { stegService.håndterVilkårsvurdering(any()) }
+         verify(exactly = 1) { stegService.håndterNyBehandling(any()) }
+         verify(exactly = 1) { vedtaksperiodeService.oppdaterFortsattInnvilgetPeriodeMedAutobrevBegrunnelse(any(), any()) }
+         verify(exactly = 1) { vedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(any()) }
+         verify(exactly = 1) { taskRepository.save(any()) }
     }
 
     private fun initMock(
