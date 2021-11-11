@@ -14,7 +14,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.EndretUtbetalingBrevPeriodeType
-import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.brevperioder.EndretUtbetalingBernetrygtType
+import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.brevperioder.EndretUtbetalingBarnetrygdType
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.flettefelt
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -431,7 +431,7 @@ internal class BrevUtilsTest {
             begrunnelser[0].type?.single()
         )
         Assertions.assertEquals(
-            EndretUtbetalingBernetrygtType.DELT.navn + " ",
+            EndretUtbetalingBarnetrygdType.DELT.navn + " ",
             begrunnelser[0].typeBarnetrygd?.single()
         )
 
@@ -440,7 +440,7 @@ internal class BrevUtilsTest {
             begrunnelser[1].type?.single()
         )
         Assertions.assertEquals(
-            EndretUtbetalingBernetrygtType.DELT_UTVIDET.navn + " ",
+            EndretUtbetalingBarnetrygdType.DELT_UTVIDET_NB.navn + " ",
             begrunnelser[1].typeBarnetrygd?.single()
         )
 
@@ -449,7 +449,7 @@ internal class BrevUtilsTest {
             begrunnelser[2].type?.single()
         )
         Assertions.assertEquals(
-            EndretUtbetalingBernetrygtType.DELT_UTVIDET.navn + " ",
+            EndretUtbetalingBarnetrygdType.DELT_UTVIDET_NB.navn + " ",
             begrunnelser[2].typeBarnetrygd?.single()
         )
 
@@ -465,7 +465,7 @@ internal class BrevUtilsTest {
             deltBostedEndringFullUtbetalingTilkjentYtelseUtenEndring.type?.single()
         )
         Assertions.assertEquals(
-            EndretUtbetalingBernetrygtType.DELT_UTVIDET.navn + " ",
+            EndretUtbetalingBarnetrygdType.DELT_UTVIDET_NB.navn + " ",
             deltBostedEndringFullUtbetalingTilkjentYtelseUtenEndring.typeBarnetrygd?.single()
         )
     }
