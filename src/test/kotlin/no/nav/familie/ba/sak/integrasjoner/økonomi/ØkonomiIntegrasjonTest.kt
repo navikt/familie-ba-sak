@@ -1,10 +1,5 @@
 package no.nav.familie.ba.sak.integrasjoner.økonomi
 
-import com.github.tomakehurst.wiremock.client.WireMock.aResponse
-import com.github.tomakehurst.wiremock.client.WireMock.anyUrl
-import com.github.tomakehurst.wiremock.client.WireMock.get
-import com.github.tomakehurst.wiremock.client.WireMock.post
-import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagPersonResultat
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
@@ -19,14 +14,11 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
-import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.økonomi.ØkonomiService
-import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.kontrakter.felles.objectMapper
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
@@ -35,31 +27,28 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-class ØkonomiIntegrasjonTest : AbstractSpringIntegrationTest() {
+class ØkonomiIntegrasjonTest(
+    @Autowired
+    private val behandlingService: BehandlingService,
 
     @Autowired
-    lateinit var behandlingService: BehandlingService
+    private val vilkårsvurderingService: VilkårsvurderingService,
 
     @Autowired
-    lateinit var vilkårsvurderingService: VilkårsvurderingService
+    private val fagsakService: FagsakService,
 
     @Autowired
-    lateinit var fagsakService: FagsakService
+    private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
 
     @Autowired
-    lateinit var personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository
+    private val økonomiService: ØkonomiService,
 
     @Autowired
-    lateinit var økonomiService: ØkonomiService
+    private val beregningService: BeregningService,
 
     @Autowired
-    lateinit var beregningService: BeregningService
-
-    @Autowired
-    lateinit var stegService: StegService
-
-    @Autowired
-    private lateinit var vedtakService: VedtakService
+    private val vedtakService: VedtakService,
+) : AbstractSpringIntegrationTest() {
 
     @Test
     @Tag("integration")
@@ -68,26 +57,6 @@ class ØkonomiIntegrasjonTest : AbstractSpringIntegrationTest() {
         val barnFnr = randomFnr()
         val stønadFom = LocalDate.now()
         val stønadTom = stønadFom.plusYears(17)
-
-        val responseBody = Ressurs.Companion.success("ok")
-        wireMockServer.stubFor(
-            get(urlEqualTo("/api/aktoer/v1"))
-                .willReturn(
-                    aResponse()
-                        .withStatus(200)
-                        .withHeader("Content-Type", "application/json")
-                        .withBody(objectMapper.writeValueAsString(Ressurs.Companion.success(mapOf("aktørId" to 1L))))
-                )
-        )
-        wireMockServer.stubFor(
-            post(anyUrl())
-                .willReturn(
-                    aResponse()
-                        .withStatus(200)
-                        .withHeader("Content-Type", "application/json")
-                        .withBody(objectMapper.writeValueAsString(responseBody))
-                )
-        )
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
@@ -122,16 +91,6 @@ class ØkonomiIntegrasjonTest : AbstractSpringIntegrationTest() {
         val barnFnr = randomFnr()
         val stønadFom = LocalDate.now()
         val stønadTom = stønadFom.plusYears(17)
-
-        wireMockServer.stubFor(
-            post(anyUrl())
-                .willReturn(
-                    aResponse()
-                        .withStatus(200)
-                        .withHeader("Content-Type", "application/json")
-                        .withBody(objectMapper.writeValueAsString(Ressurs.Companion.success("ok")))
-                )
-        )
 
         // Lag fagsak med behandling og personopplysningsgrunnlag og Iverksett.
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)

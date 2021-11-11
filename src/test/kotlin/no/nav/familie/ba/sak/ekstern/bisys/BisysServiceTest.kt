@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.ekstern.bisys
 
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.unmockkAll
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelseUtvidet
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
@@ -16,6 +17,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakPersonRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -42,6 +44,11 @@ internal class BisysServiceTest {
             mockBehandlingService,
             mockTilkjentYtelseRepository
         )
+    }
+
+    @AfterAll
+    fun tearDown() {
+        unmockkAll()
     }
 
     @Test
@@ -98,7 +105,7 @@ internal class BisysServiceTest {
     fun `Skal returnere utvidet barnetrygdperiode fra basak`() {
         val behandling = lagBehandling()
 
-        var tilkjentYtelse = lagInitiellTilkjentYtelse(behandling = behandling).copy(utbetalingsoppdrag = "utbetalt")
+        val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling = behandling).copy(utbetalingsoppdrag = "utbetalt")
 
         val andelTilkjentYtelse =
             lagAndelTilkjentYtelseUtvidet(

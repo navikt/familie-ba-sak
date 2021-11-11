@@ -2,11 +2,13 @@ package no.nav.familie.ba.sak.config
 
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
+import io.mockk.junit5.MockKExtension
 import io.mockk.unmockkAll
 import no.nav.familie.ba.sak.common.DbContainerInitializer
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
@@ -25,6 +27,7 @@ import org.springframework.test.context.ContextConfiguration
     "mock-rest-template-config",
 )
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
+@ExtendWith(MockKExtension::class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Tag("integration")
 abstract class AbstractSpringIntegrationTest {
@@ -33,7 +36,6 @@ abstract class AbstractSpringIntegrationTest {
 
     init {
         wireMockServer.start()
-        unmockkAll()
     }
 
     @AfterAll

@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak
 
+import io.mockk.junit5.MockKExtension
 import io.mockk.unmockkAll
 import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.config.ApplicationConfig
@@ -35,7 +36,7 @@ import org.springframework.web.client.RestTemplate
         "ENVIRONMENT_NAME: integrationtest",
     ],
 )
-@ExtendWith(SpringExtension::class)
+@ExtendWith(SpringExtension::class, MockKExtension::class)
 @EnableMockOAuth2Server
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
 @Tag("integration")
@@ -58,7 +59,7 @@ abstract class WebSpringAuthTestRunner {
     private val port = 0
 
     @AfterAll
-    fun stopMockOuath2Server() {
+    fun tearDown() {
         unmockkAll()
     }
 

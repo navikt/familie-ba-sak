@@ -7,7 +7,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
-import no.nav.familie.ba.sak.kjerne.simulering.vedtakSimuleringMottakereTilRestSimulering
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.domene.Tilbakekreving
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.domene.TilbakekrevingRepository
@@ -47,8 +46,7 @@ class TilbakekrevingService(
             handling = "opprette tilbakekreving"
         )
 
-        val simulering = simuleringService.hentSimuleringPåBehandling(behandlingId)
-        val feilutbetaling = vedtakSimuleringMottakereTilRestSimulering(simulering).feilutbetaling
+        val feilutbetaling = simuleringService.hentFeilutbetaling(behandlingId)
         validerVerdierPåRestTilbakekreving(restTilbakekreving, feilutbetaling)
     }
 

@@ -1,7 +1,9 @@
 package no.nav.familie.ba.sak.ekstern.skatteetaten
 
 import io.mockk.every
+import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
+import io.mockk.unmockkAll
 import no.nav.familie.ba.sak.common.defaultFagsak
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
@@ -9,14 +11,25 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.eksterne.kontrakter.skatteetaten.SkatteetatenPerson
 import no.nav.familie.eksterne.kontrakter.skatteetaten.SkatteetatenPersonerResponse
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
 
+@ExtendWith(MockKExtension::class)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class SkatteetatenServiceTest {
 
     private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient = mockk()
     private val fagsakRepository: FagsakRepository = mockk()
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository = mockk()
+
+    @AfterAll
+    fun tearDown() {
+        // HER?
+        unmockkAll()
+    }
 
     @Test
     fun `finnPersonerMedUtvidetBarnetrygd() skal returnere person fra fagsystem med nyeste vedtaksdato`() {
@@ -34,9 +47,12 @@ internal class SkatteetatenServiceTest {
             )
         )
 
-        val skatteetatenService = SkatteetatenService(infotrygdBarnetrygdClient, fagsakRepository, andelTilkjentYtelseRepository)
+        val skatteetatenService =
+            SkatteetatenService(infotrygdBarnetrygdClient, fagsakRepository, andelTilkjentYtelseRepository)
 
-        assertThat(skatteetatenService.finnPersonerMedUtvidetBarnetrygd(nyesteVedtaksdato.year.toString()).brukere).hasSize(2)
+        assertThat(skatteetatenService.finnPersonerMedUtvidetBarnetrygd(nyesteVedtaksdato.year.toString()).brukere).hasSize(
+            2
+        )
 
         assertThat(
             skatteetatenService.finnPersonerMedUtvidetBarnetrygd(nyesteVedtaksdato.year.toString()).brukere
@@ -65,8 +81,10 @@ internal class SkatteetatenServiceTest {
             fagsak2 to vedtaksdato.plusDays(2)
         )
 
-        val skatteetatenService = SkatteetatenService(infotrygdBarnetrygdClient, fagsakRepository, andelTilkjentYtelseRepository)
-        val personerMedUtvidetBarnetrygd = skatteetatenService.finnPersonerMedUtvidetBarnetrygd(vedtaksdato.year.toString())
+        val skatteetatenService =
+            SkatteetatenService(infotrygdBarnetrygdClient, fagsakRepository, andelTilkjentYtelseRepository)
+        val personerMedUtvidetBarnetrygd =
+            skatteetatenService.finnPersonerMedUtvidetBarnetrygd(vedtaksdato.year.toString())
 
         assertThat(personerMedUtvidetBarnetrygd.brukere).hasSize(2)
 
@@ -100,8 +118,10 @@ internal class SkatteetatenServiceTest {
                 )
             )
 
-        val skatteetatenService = SkatteetatenService(infotrygdBarnetrygdClient, fagsakRepository, andelTilkjentYtelseRepository)
-        val personerMedUtvidetBarnetrygd = skatteetatenService.finnPersonerMedUtvidetBarnetrygd(vedtaksdato.year.toString())
+        val skatteetatenService =
+            SkatteetatenService(infotrygdBarnetrygdClient, fagsakRepository, andelTilkjentYtelseRepository)
+        val personerMedUtvidetBarnetrygd =
+            skatteetatenService.finnPersonerMedUtvidetBarnetrygd(vedtaksdato.year.toString())
 
         assertThat(personerMedUtvidetBarnetrygd.brukere).hasSize(1)
 
