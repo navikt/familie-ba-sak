@@ -22,8 +22,11 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.test.annotation.DirtiesContext
 import java.time.LocalDate
 
+// Todo. Bruker every. Dette endrer funksjonalliteten for alle klasser.
+@DirtiesContext
 class AutomatiskVilkårsvurderingIntegrasjonTest(
     @Autowired val stegService: StegService,
     @Autowired val personopplysningerService: PersonopplysningerService,

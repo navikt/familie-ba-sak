@@ -26,7 +26,10 @@ import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
+import org.springframework.test.annotation.DirtiesContext
 
+// Todo. Bruker every. Dette endrer funksjonalliteten for alle klasser.
+@DirtiesContext
 class FagsakControllerTest(
     @Autowired
     private val fagsakService: FagsakService,

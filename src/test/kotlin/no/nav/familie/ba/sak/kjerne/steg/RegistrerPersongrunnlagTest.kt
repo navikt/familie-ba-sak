@@ -19,8 +19,12 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.test.annotation.DirtiesContext
 import java.time.LocalDate
 
+// TODO Fiks. Bruker every på personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon.
+// Ødlegger for alle tester som kommer etter som trenger samme metode. Løst med Dirties Context enn så lenge.
+@DirtiesContext
 class RegistrerPersongrunnlagTest(
     @Autowired
     private val stegService: StegService,

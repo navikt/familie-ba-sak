@@ -35,10 +35,13 @@ import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import java.time.LocalDate.now
 
+// Todo. Bruker every. Dette endrer funksjonalliteten for alle klasser.
+@DirtiesContext
 @SpringBootTest
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
 @ActiveProfiles(
@@ -184,7 +187,8 @@ class ArbeidsfordelingIntegrationTest(
             )
         )
 
-        val arbeidsfordelingPåBehandling = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandlingId = behandling.id)
+        val arbeidsfordelingPåBehandling =
+            arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandlingId = behandling.id)
 
         assertEquals(IKKE_FORTROLIG_ENHET, arbeidsfordelingPåBehandling.behandlendeEnhetId)
     }
@@ -201,7 +205,8 @@ class ArbeidsfordelingIntegrationTest(
             )
         )
 
-        val arbeidsfordelingPåBehandling = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandlingId = behandling.id)
+        val arbeidsfordelingPåBehandling =
+            arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandlingId = behandling.id)
         assertEquals(IKKE_FORTROLIG_ENHET, arbeidsfordelingPåBehandling.behandlendeEnhetId)
 
         stegService.håndterSøknad(
@@ -232,7 +237,8 @@ class ArbeidsfordelingIntegrationTest(
             )
         )
 
-        val arbeidsfordelingPåBehandling = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandlingId = behandling.id)
+        val arbeidsfordelingPåBehandling =
+            arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandlingId = behandling.id)
         assertEquals(IKKE_FORTROLIG_ENHET, arbeidsfordelingPåBehandling.behandlendeEnhetId)
 
         stegService.håndterSøknad(
@@ -263,7 +269,8 @@ class ArbeidsfordelingIntegrationTest(
             )
         )
 
-        val arbeidsfordelingPåBehandling = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandlingId = behandling.id)
+        val arbeidsfordelingPåBehandling =
+            arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandlingId = behandling.id)
         assertEquals(IKKE_FORTROLIG_ENHET, arbeidsfordelingPåBehandling.behandlendeEnhetId)
 
         stegService.håndterSøknad(
@@ -300,7 +307,10 @@ class ArbeidsfordelingIntegrationTest(
 
         val arbeidsfordelingPåBehandlingEtterSøknadsregistreringMedDiskresjonskode =
             arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandlingId = behandling.id)
-        assertEquals(FORTROLIG_ENHET, arbeidsfordelingPåBehandlingEtterSøknadsregistreringMedDiskresjonskode.behandlendeEnhetId)
+        assertEquals(
+            FORTROLIG_ENHET,
+            arbeidsfordelingPåBehandlingEtterSøknadsregistreringMedDiskresjonskode.behandlendeEnhetId
+        )
     }
 
     @Test
@@ -315,7 +325,8 @@ class ArbeidsfordelingIntegrationTest(
             )
         )
 
-        val arbeidsfordelingPåBehandling = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandlingId = behandling.id)
+        val arbeidsfordelingPåBehandling =
+            arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandlingId = behandling.id)
         assertEquals(IKKE_FORTROLIG_ENHET, arbeidsfordelingPåBehandling.behandlendeEnhetId)
 
         arbeidsfordelingService.manueltOppdaterBehandlendeEnhet(
@@ -354,7 +365,8 @@ class ArbeidsfordelingIntegrationTest(
             )
         )
 
-        val arbeidsfordelingPåBehandling = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandlingId = behandling.id)
+        val arbeidsfordelingPåBehandling =
+            arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandlingId = behandling.id)
         assertEquals(IKKE_FORTROLIG_ENHET, arbeidsfordelingPåBehandling.behandlendeEnhetId)
 
         oppgaveService.opprettOppgave(behandling.id, Oppgavetype.BehandleSak, now())

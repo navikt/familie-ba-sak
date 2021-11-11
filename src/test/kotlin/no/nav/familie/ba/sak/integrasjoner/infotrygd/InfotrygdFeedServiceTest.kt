@@ -12,7 +12,10 @@ import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
+import org.springframework.test.annotation.DirtiesContext
 
+// Todo. Bruker every. Dette endrer funksjonalliteten for alle klasser.
+@DirtiesContext
 class InfotrygdFeedServiceTest : AbstractSpringIntegrationTestDev() {
     val featureToggleServiceMock = mockk<FeatureToggleService>()
     val opprettTaskServiceMock = mockk<OpprettTaskService>()
