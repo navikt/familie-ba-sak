@@ -7,7 +7,6 @@ import com.github.tomakehurst.wiremock.client.WireMock.equalToJson
 import com.github.tomakehurst.wiremock.client.WireMock.post
 import com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
-import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import no.nav.familie.ba.sak.WebSpringAuthTestRunner
 import no.nav.familie.ba.sak.common.EksternTjenesteFeil
 import no.nav.familie.ba.sak.common.randomFnr
@@ -37,7 +36,8 @@ import java.time.temporal.ChronoUnit
 @ActiveProfiles("postgres", "mock-pdl", "mock-oauth", "mock-brev-klient")
 class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
 
-    private val wireMockServer = WireMockServer(WireMockConfiguration.wireMockConfig().dynamicPort())
+    // Trenger fast port for at klienten i ba-sak kan kalle wiremock'en
+    private val wireMockServer = WireMockServer(28085)
 
     @BeforeEach
     fun setUp() {
@@ -62,7 +62,7 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
 
         val error = assertThrows<HttpClientErrorException> {
             restTemplate.postForEntity<Any>(
-                wireMockServer.baseUrl() + "/api/bisys/hent-utvidet-barnetrygd",
+                hentUrl("/api/bisys/hent-utvidet-barnetrygd"),
                 requestEntity
             )
         }
@@ -96,7 +96,7 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
 
         val error = assertThrows<HttpServerErrorException> {
             restTemplate.postForEntity<Any>(
-                wireMockServer.baseUrl() + "/api/bisys/hent-utvidet-barnetrygd",
+                hentUrl("/api/bisys/hent-utvidet-barnetrygd"),
                 requestEntity
             )
         }
@@ -131,7 +131,7 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
         )
 
         val responseEntity = restTemplate.postForEntity<BisysUtvidetBarnetrygdResponse>(
-            wireMockServer.baseUrl() + "/api/bisys/hent-utvidet-barnetrygd",
+            hentUrl("/api/bisys/hent-utvidet-barnetrygd"),
             requestEntity
         )
         wireMockServer.verify(
@@ -189,7 +189,7 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
         )
 
         val responseEntity = restTemplate.postForEntity<BisysUtvidetBarnetrygdResponse>(
-            wireMockServer.baseUrl() + "/api/bisys/hent-utvidet-barnetrygd",
+            hentUrl("/api/bisys/hent-utvidet-barnetrygd"),
             requestEntity
         )
 
@@ -249,7 +249,7 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
         )
 
         val responseEntity = restTemplate.postForEntity<BisysUtvidetBarnetrygdResponse>(
-            wireMockServer.baseUrl() + "/api/bisys/hent-utvidet-barnetrygd",
+            hentUrl("/api/bisys/hent-utvidet-barnetrygd"),
             requestEntity
         )
 
@@ -294,7 +294,7 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
 
         val error = assertThrows<HttpClientErrorException> {
             restTemplate.postForEntity<Any>(
-                wireMockServer.baseUrl() + "/api/tullballtjeneste",
+                hentUrl("/api/tullballtjeneste"),
                 ikkeBisysTjeneste
             )
         }

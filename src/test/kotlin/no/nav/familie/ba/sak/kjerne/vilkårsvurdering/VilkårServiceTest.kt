@@ -104,7 +104,7 @@ class VilkårServiceTest(
             forrigeBehandling = forrigeBehandlingSomErIverksatt
         )
         val under18ÅrVilkårForBarn =
-            vilkårsvurdering.personResultater.find { it.personIdent === barnFnr }
+            vilkårsvurdering.personResultater.find { it.personIdent == barnFnr }
                 ?.tilRestPersonResultat()?.vilkårResultater?.find { it.vilkårType == Vilkår.UNDER_18_ÅR }
 
         val endretVilkårsvurdering: List<RestPersonResultat> =
@@ -124,7 +124,7 @@ class VilkårServiceTest(
             )
 
         val endretUnder18ÅrVilkårForBarn =
-            endretVilkårsvurdering.find { it.personIdent === barnFnr }
+            endretVilkårsvurdering.find { it.personIdent == barnFnr }
                 ?.vilkårResultater?.find { it.vilkårType == Vilkår.UNDER_18_ÅR }
         assertFalse(endretUnder18ÅrVilkårForBarn!!.erAutomatiskVurdert)
     }
