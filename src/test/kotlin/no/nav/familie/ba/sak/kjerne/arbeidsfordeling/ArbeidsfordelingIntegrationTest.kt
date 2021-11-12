@@ -58,7 +58,10 @@ class ArbeidsfordelingIntegrationTest(
 
     @Autowired
     private val mockPersonopplysningerService: PersonopplysningerService
-) : AbstractSpringIntegrationTest(mockPersonopplysningerService) {
+) : AbstractSpringIntegrationTest(
+    personopplysningerService = mockPersonopplysningerService,
+    integrasjonClient = integrasjonClient
+) {
 
     init {
         val now = now()

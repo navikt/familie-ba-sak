@@ -46,7 +46,7 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
 
     @AfterEach
     fun after() {
-        // wireMockServer.resetAll()
+        wireMockServer.resetAll()
         wireMockServer.stop()
     }
 

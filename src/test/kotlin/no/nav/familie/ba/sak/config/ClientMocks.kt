@@ -92,6 +92,7 @@ class ClientMocks {
     }
 
     @Bean
+    @Primary
     @Profile("mock-pdl-test-søk")
     fun mockPDL(): PersonopplysningerService {
         val mockPersonopplysningerService = mockk<PersonopplysningerService>()

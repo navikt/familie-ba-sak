@@ -32,9 +32,11 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import org.springframework.kafka.support.Acknowledgment
 import java.time.LocalDate
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class HentFagsystemsbehandlingRequestConsumerTest {
 
     private lateinit var hentFagsystemsbehandlingRequestConsumer: HentFagsystemsbehandlingRequestConsumer

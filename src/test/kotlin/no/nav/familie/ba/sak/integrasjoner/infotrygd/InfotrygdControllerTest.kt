@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.integrasjoner.infotrygd
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.kontrakter.ba.infotrygd.InfotrygdSøkResponse
@@ -12,8 +13,12 @@ import no.nav.familie.kontrakter.felles.tilgangskontroll.Tilgang
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.http.HttpStatus
 
+@ExtendWith(MockKExtension::class)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class InfotrygdControllerTest {
     @MockK
     lateinit var personopplysningerService: PersonopplysningerService

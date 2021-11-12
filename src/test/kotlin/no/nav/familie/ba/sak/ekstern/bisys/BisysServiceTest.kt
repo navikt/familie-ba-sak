@@ -18,9 +18,11 @@ import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import java.time.LocalDate
 import java.time.YearMonth
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class BisysServiceTest {
 
     lateinit var bisysService: BisysService
