@@ -49,11 +49,13 @@ import org.assertj.core.api.Assertions.within
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class SaksstatistikkServiceTest {
 
     private val behandlingService: BehandlingService = mockk(relaxed = true)

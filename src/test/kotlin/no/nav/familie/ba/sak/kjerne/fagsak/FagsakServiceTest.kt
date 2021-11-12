@@ -59,8 +59,10 @@ class FagsakServiceTest(
 
     @Autowired
     private val integrasjonClient: IntegrasjonClient
-
-) : AbstractSpringIntegrationTest(personopplysningerService) {
+) : AbstractSpringIntegrationTest(
+    personopplysningerService = personopplysningerService,
+    integrasjonClient = integrasjonClient
+) {
 
     @BeforeAll
     fun init() {
