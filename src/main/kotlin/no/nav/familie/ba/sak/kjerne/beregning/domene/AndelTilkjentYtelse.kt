@@ -5,7 +5,9 @@ import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.YearMonthConverter
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
+import no.nav.familie.ba.sak.kjerne.dokument.UtvidetScenario
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.erStartPåUtvidetSammeMåned
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.utledSegmenter
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.fpsak.tidsserie.LocalDateInterval
@@ -54,6 +56,9 @@ data class AndelTilkjentYtelse(
     @Column(name = "person_ident", nullable = false, updatable = false)
     val personIdent: String,
 
+    @Column(name = "aktoer_id")
+    var aktørId: String? = null,
+
     @Column(name = "kalkulert_utbetalingsbelop", nullable = false)
     val kalkulertUtbetalingsbeløp: Int,
 
@@ -101,6 +106,9 @@ data class AndelTilkjentYtelse(
 
 ) : BaseEntitet() {
 
+    val periode
+        get() = MånedPeriode(stønadFom, stønadTom)
+
     override fun equals(other: Any?): Boolean {
         if (other == null || javaClass != other.javaClass) {
             return false
@@ -114,11 +122,21 @@ data class AndelTilkjentYtelse(
             Objects.equals(kalkulertUtbetalingsbeløp, annen.kalkulertUtbetalingsbeløp) &&
             Objects.equals(stønadFom, annen.stønadFom) &&
             Objects.equals(stønadTom, annen.stønadTom) &&
-            Objects.equals(personIdent, annen.personIdent)
+            Objects.equals(personIdent, annen.personIdent) &&
+            Objects.equals(aktørId, annen.aktørId)
     }
 
     override fun hashCode(): Int {
-        return Objects.hash(id, behandlingId, type, kalkulertUtbetalingsbeløp, stønadFom, stønadTom, personIdent)
+        return Objects.hash(
+            id,
+            behandlingId,
+            type,
+            kalkulertUtbetalingsbeløp,
+            stønadFom,
+            stønadTom,
+            personIdent,
+            aktørId
+        )
     }
 
     override fun toString(): String {
@@ -129,6 +147,7 @@ data class AndelTilkjentYtelse(
     fun erTilsvarendeForUtbetaling(other: AndelTilkjentYtelse): Boolean {
         return (
             this.personIdent == other.personIdent &&
+                this.aktørId == other.aktørId &&
                 this.stønadFom == other.stønadFom &&
                 this.stønadTom == other.stønadTom &&
                 this.kalkulertUtbetalingsbeløp == other.kalkulertUtbetalingsbeløp &&
@@ -138,11 +157,16 @@ data class AndelTilkjentYtelse(
 
     fun overlapperMed(andelFraAnnenBehandling: AndelTilkjentYtelse): Boolean {
         return this.type == andelFraAnnenBehandling.type &&
-            this.stønadFom <= andelFraAnnenBehandling.stønadTom &&
-            this.stønadTom >= andelFraAnnenBehandling.stønadFom
+            this.overlapperPeriode(andelFraAnnenBehandling.periode)
     }
 
+    fun overlapperPeriode(måndePeriode: MånedPeriode): Boolean =
+        this.stønadFom <= måndePeriode.tom &&
+            this.stønadTom >= måndePeriode.fom
+
     fun stønadsPeriode() = MånedPeriode(this.stønadFom, this.stønadTom)
+
+    fun erEøs() = this.type == YtelseType.EØS
 
     fun erUtvidet() = this.type == YtelseType.UTVIDET_BARNETRYGD
 
@@ -158,6 +182,9 @@ data class AndelTilkjentYtelse(
                 it.årsak!!.kanGiNullutbetaling()
             }
     }
+
+    fun harEndringsutbetalingIPerioden(fom: YearMonth?, tom: YearMonth?) =
+        endretUtbetalingAndeler.any { it.fom == fom && it.tom == tom }
 
     companion object {
 
@@ -222,6 +249,28 @@ fun List<AndelTilkjentYtelse>.lagVertikaleSegmenter(): Map<LocalDateSegment<Int>
             acc[segment] = andelerForSegment
             acc
         }
+}
+
+fun List<AndelTilkjentYtelse>.finnesUtvidetEndringsutbetalingIPerioden(
+    fom: YearMonth?,
+    tom: YearMonth?
+) = this.any { andelTilkjentYtelse ->
+    andelTilkjentYtelse.erUtvidet() &&
+        andelTilkjentYtelse.harEndringsutbetalingIPerioden(fom, tom)
+}
+
+fun List<AndelTilkjentYtelse>.hentUtvidetYtelseScenario(
+    månedPeriode: MånedPeriode,
+) = when {
+    !erStartPåUtvidetSammeMåned(
+        this,
+        månedPeriode.fom
+    ) -> UtvidetScenario.IKKE_UTVIDET_YTELSE
+    this.finnesUtvidetEndringsutbetalingIPerioden(
+        månedPeriode.fom,
+        månedPeriode.tom,
+    ) -> UtvidetScenario.UTVIDET_YTELSE_ENDRET
+    else -> UtvidetScenario.UTVIDET_YTELSE_IKKE_ENDRET
 }
 
 enum class YtelseType(val klassifisering: String) {

@@ -32,7 +32,7 @@ class InfotrygdBarnetrygdClientTest : AbstractSpringIntegrationTestDev() {
 
     val løpendeBarnetrygdURL = "/api/infotrygd/barnetrygd/lopende-barnetrygd"
     val sakerURL = "/api/infotrygd/barnetrygd/saker"
-    val stønaderURL = "/api/infotrygd/barnetrygd/stonad"
+    val stønaderURL = "/api/infotrygd/barnetrygd/stonad?historikk=false"
 
     @Autowired
     @Qualifier("jwtBearer")

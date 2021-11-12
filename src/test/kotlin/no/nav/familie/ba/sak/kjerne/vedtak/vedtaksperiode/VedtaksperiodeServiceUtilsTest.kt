@@ -18,6 +18,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
+import java.time.LocalDate
 import java.time.YearMonth
 
 class VedtaksperiodeServiceUtilsTest {
@@ -32,8 +33,8 @@ class VedtaksperiodeServiceUtilsTest {
             listOf(
                 lagAndelTilkjentYtelse(
                     person = person1,
-                    fom = fom.toString(),
-                    tom = tom.toString(),
+                    fom = fom,
+                    tom = tom,
                     prosent = BigDecimal(0),
                     endretUtbetalingAndeler = listOf(
                         lagEndretUtbetalingAndel(
@@ -46,8 +47,8 @@ class VedtaksperiodeServiceUtilsTest {
                 ),
                 lagAndelTilkjentYtelse(
                     person = person2,
-                    fom = fom.toString(),
-                    tom = tom.toString(),
+                    fom = fom,
+                    tom = tom,
                     prosent = BigDecimal(0),
                     endretUtbetalingAndeler = listOf(
                         lagEndretUtbetalingAndel(
@@ -85,8 +86,8 @@ class VedtaksperiodeServiceUtilsTest {
             listOf(
                 lagAndelTilkjentYtelse(
                     person = person1,
-                    fom = fom.toString(),
-                    tom = tom.toString(),
+                    fom = fom,
+                    tom = tom,
                     prosent = BigDecimal(100),
                     endretUtbetalingAndeler = listOf(
                         lagEndretUtbetalingAndel(
@@ -99,8 +100,8 @@ class VedtaksperiodeServiceUtilsTest {
                 ),
                 lagAndelTilkjentYtelse(
                     person = person2,
-                    fom = fom.toString(),
-                    tom = tom.toString(),
+                    fom = fom,
+                    tom = tom,
                     prosent = BigDecimal(0),
                     endretUtbetalingAndeler = listOf(
                         lagEndretUtbetalingAndel(
@@ -133,8 +134,8 @@ class VedtaksperiodeServiceUtilsTest {
             listOf(
                 lagAndelTilkjentYtelse(
                     person = person1,
-                    fom = fom.toString(),
-                    tom = tom.toString(),
+                    fom = fom,
+                    tom = tom,
                     prosent = BigDecimal(0),
                     endretUtbetalingAndeler = listOf(
                         lagEndretUtbetalingAndel(
@@ -147,8 +148,8 @@ class VedtaksperiodeServiceUtilsTest {
                 ),
                 lagAndelTilkjentYtelse(
                     person = person2,
-                    fom = fom.toString(),
-                    tom = tom.toString(),
+                    fom = fom,
+                    tom = tom,
                     prosent = BigDecimal(0),
                     endretUtbetalingAndeler = listOf(
                         lagEndretUtbetalingAndel(
@@ -194,8 +195,8 @@ class VedtaksperiodeServiceUtilsTest {
             listOf(
                 lagAndelTilkjentYtelse(
                     person = person1,
-                    fom = fom.toString(),
-                    tom = tom.toString(),
+                    fom = fom,
+                    tom = tom,
                     prosent = BigDecimal(0),
                     endretUtbetalingAndeler = listOf(
                         lagEndretUtbetalingAndel(
@@ -208,8 +209,8 @@ class VedtaksperiodeServiceUtilsTest {
                 ),
                 lagAndelTilkjentYtelse(
                     person = person2,
-                    fom = fom.minusMonths(2).toString(),
-                    tom = tom.minusMonths(2).toString(),
+                    fom = fom.minusMonths(2),
+                    tom = tom.minusMonths(2),
                     prosent = BigDecimal(0),
                     endretUtbetalingAndeler = listOf(
                         lagEndretUtbetalingAndel(
@@ -242,8 +243,8 @@ class VedtaksperiodeServiceUtilsTest {
             listOf(
                 lagAndelTilkjentYtelse(
                     person = person1,
-                    fom = fom.toString(),
-                    tom = tom.toString(),
+                    fom = fom,
+                    tom = tom,
                     prosent = BigDecimal(0),
                     endretUtbetalingAndeler = listOf(
                         lagEndretUtbetalingAndel(
@@ -256,8 +257,8 @@ class VedtaksperiodeServiceUtilsTest {
                 ),
                 lagAndelTilkjentYtelse(
                     person = person2,
-                    fom = fom.toString(),
-                    tom = tom.plusMonths(2).toString(),
+                    fom = fom,
+                    tom = tom.plusMonths(2),
                     prosent = BigDecimal(0),
                     endretUtbetalingAndeler = listOf(
                         lagEndretUtbetalingAndel(
@@ -327,5 +328,56 @@ class VedtaksperiodeServiceUtilsTest {
         )
 
         Assertions.assertEquals(listOf(barn.personIdent.ident, søker.personIdent.ident), personidenterForBegrunnelse)
+    }
+
+    @Test
+    fun `Skal legge til alle barn fra endret utbetaling ved utvidet barnetrygd og endret utbetaling`() {
+        val behandling = lagBehandling()
+        val søker = lagPerson(type = PersonType.SØKER)
+        val barn1 = lagPerson(type = PersonType.BARN)
+        val barn2 = lagPerson(type = PersonType.BARN)
+
+        val fom = LocalDate.now().withDayOfMonth(1)
+        val tom = LocalDate.now().let {
+            it.withDayOfMonth(it.lengthOfMonth())
+        }
+
+        val persongrunnlag =
+            lagTestPersonopplysningGrunnlag(behandlingId = behandling.id, personer = arrayOf(søker, barn2))
+        val triggesAv = TriggesAv(vilkår = setOf(Vilkår.UTVIDET_BARNETRYGD))
+        val vedtaksperiodeMedBegrunnelser = lagVedtaksperiodeMedBegrunnelser(
+            type = Vedtaksperiodetype.UTBETALING,
+            fom = fom,
+            tom = tom,
+        )
+        val vilkårsvurdering = lagVilkårsvurdering(
+            søkerFnr = søker.personIdent.ident,
+            behandling = behandling,
+            resultat = Resultat.OPPFYLT
+        )
+
+        val identerMedUtbetaling = listOf(barn1.personIdent.ident)
+        val endredeUtbetalingAndeler = listOf(
+            lagEndretUtbetalingAndel(
+                person = barn2,
+                fom = fom.toYearMonth(),
+                tom = tom.toYearMonth(),
+            )
+        )
+
+        val personidenterForBegrunnelse = hentPersoneidenterGjeldendeForBegrunnelse(
+            triggesAv = triggesAv,
+            persongrunnlag = persongrunnlag,
+            vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
+            vilkårsvurdering = vilkårsvurdering,
+            vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET,
+            identerMedUtbetaling = identerMedUtbetaling,
+            endredeUtbetalingAndeler = endredeUtbetalingAndeler,
+        )
+
+        Assertions.assertEquals(
+            setOf(barn1.personIdent.ident, barn2.personIdent.ident, søker.personIdent.ident),
+            personidenterForBegrunnelse.toSet()
+        )
     }
 }

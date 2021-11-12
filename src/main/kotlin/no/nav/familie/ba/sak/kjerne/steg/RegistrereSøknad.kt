@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
+import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.writeValueAsString
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -26,12 +27,13 @@ class RegistrereSøknad(
         data: RestRegistrerSøknad
     ): StegType {
         val aktivSøknadGrunnlagFinnes = søknadGrunnlagService.hentAktiv(behandlingId = behandling.id) != null
-        val søknadDTO = data.søknad
+        val søknadDTO: SøknadDTO = data.søknad
         val innsendtSøknad = søknadDTO.writeValueAsString()
 
         behandlingService.oppdaterBehandlingstema(
             behandling = behandlingService.hent(behandlingId = behandling.id),
-            nyBehandlingUnderkategori = søknadDTO.underkategori
+            nyKategori = behandling.kategori, // Hvis søknadDTO får feltet kategori, så må denne endres til søknadDTO.kategori
+            nyUnderkategori = søknadDTO.underkategori
         )
 
         loggService.opprettRegistrertSøknadLogg(behandling, aktivSøknadGrunnlagFinnes)
@@ -42,7 +44,8 @@ class RegistrereSøknad(
             )
         )
 
-        val forrigeBehandlingSomErIverksatt = behandlingService.hentSisteBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id)
+        val forrigeBehandlingSomErIverksatt =
+            behandlingService.hentSisteBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id)
         persongrunnlagService.registrerBarnFraSøknad(
             behandling = behandlingService.hent(behandlingId = behandling.id),
             forrigeBehandling = forrigeBehandlingSomErIverksatt,
