@@ -1,10 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.behandling
 
-import com.github.tomakehurst.wiremock.client.WireMock.aResponse
-import com.github.tomakehurst.wiremock.client.WireMock.get
-import com.github.tomakehurst.wiremock.client.WireMock.stubFor
-import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
-import io.mockk.MockKAnnotations
 import io.mockk.every
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagPersonResultat
@@ -53,8 +48,6 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMellomlagringRepository
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMellomlagringType
-import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.Matrikkeladresse
@@ -73,10 +66,12 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.test.annotation.DirtiesContext
 import java.time.LocalDate
 import java.time.YearMonth
-import javax.transaction.Transactional
 
+// Todo. Bruker every. Dette endrer funksjonalliteten for alle klasser.
+@DirtiesContext
 class BehandlingIntegrationTest(
     @Autowired
     private val behandlingRepository: BehandlingRepository,
@@ -119,23 +114,11 @@ class BehandlingIntegrationTest(
 
     @Autowired
     private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
-
-) : AbstractSpringIntegrationTest() {
+) : AbstractSpringIntegrationTest(personopplysningerService) {
 
     @BeforeEach
-    fun setup() {
+    fun truncate() {
         databaseCleanupService.truncate()
-
-        MockKAnnotations.init(this)
-
-        stubFor(
-            get(urlEqualTo("/api/aktoer/v1"))
-                .willReturn(
-                    aResponse()
-                        .withHeader("Content-Type", "application/json")
-                        .withBody(objectMapper.writeValueAsString(Ressurs.success(mapOf("aktørId" to "1"))))
-                )
-        )
     }
 
     @Test
@@ -168,7 +151,6 @@ class BehandlingIntegrationTest(
     }
 
     @Test
-    @Transactional
     fun `Opprett behandling`() {
         val fnr = randomFnr()
 

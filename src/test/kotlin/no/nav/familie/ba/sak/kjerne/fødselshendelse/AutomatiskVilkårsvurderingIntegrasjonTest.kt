@@ -18,22 +18,26 @@ import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROL
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import no.nav.familie.kontrakter.felles.personopplysning.Sivilstand
 import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.test.annotation.DirtiesContext
 import java.time.LocalDate
 
+// Todo. Bruker every. Dette endrer funksjonalliteten for alle klasser.
+// TODO kan kanskje fjerne dirties
+@DirtiesContext
 class AutomatiskVilkårsvurderingIntegrasjonTest(
     @Autowired val stegService: StegService,
     @Autowired val personopplysningerService: PersonopplysningerService,
     @Autowired val persongrunnlagService: PersongrunnlagService,
     @Autowired val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
     @Autowired val databaseCleanupService: DatabaseCleanupService,
-) : AbstractSpringIntegrationTest() {
+) : AbstractSpringIntegrationTest(personopplysningerService) {
 
-    @AfterEach
-    fun init() {
+    @BeforeEach
+    fun truncate() {
         databaseCleanupService.truncate()
     }
 

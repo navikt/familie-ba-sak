@@ -24,6 +24,7 @@ import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
 
+// TODO - kan denne påvirke pga masse mocking av personopplysninger
 internal class VedtakBegrunnelseSpesifikasjonTest {
 
     val behandling = lagBehandling()
@@ -68,8 +69,6 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
 
     @Test
     fun `Har ikke barn med seksårsdag skal gi false`() {
-        // val persongrunnlag = mockk<PersonopplysningGrunnlag>()
-        // every { persongrunnlag.harBarnMedSeksårsdagPåFom(vedtaksperiodeMedBegrunnelser.fom) } returns true
         assertFalse(
             VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR
                 .triggesForPeriode(

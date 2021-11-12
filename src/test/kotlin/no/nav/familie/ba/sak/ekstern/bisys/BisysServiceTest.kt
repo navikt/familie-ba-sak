@@ -19,12 +19,11 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.junit.jupiter.api.TestInstance.Lifecycle
 import java.time.LocalDate
 import java.time.YearMonth
 
-@TestInstance(Lifecycle.PER_CLASS)
-internal class BisysServiceTest() {
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+internal class BisysServiceTest {
 
     lateinit var bisysService: BisysService
     var mockPersonopplysningerService = mockk<PersonopplysningerService>()
@@ -98,7 +97,7 @@ internal class BisysServiceTest() {
     fun `Skal returnere utvidet barnetrygdperiode fra basak`() {
         val behandling = lagBehandling()
 
-        var tilkjentYtelse = lagInitiellTilkjentYtelse(behandling = behandling).copy(utbetalingsoppdrag = "utbetalt")
+        val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling = behandling).copy(utbetalingsoppdrag = "utbetalt")
 
         val andelTilkjentYtelse =
             lagAndelTilkjentYtelseUtvidet(

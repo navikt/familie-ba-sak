@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.logg
 
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.randomFnr
-import no.nav.familie.ba.sak.config.AbstractTestWithJdbcTables
+import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTestDev
 import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.config.mockHentPersoninfoForMedIdenter
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
@@ -12,18 +12,9 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
-import org.junit.jupiter.api.TestInstance.Lifecycle
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.context.ActiveProfiles
-import javax.sql.DataSource
 
-@SpringBootTest
-@ActiveProfiles("dev", "mock-pdl", "mock-infotrygd-barnetrygd", "mock-brev-klient")
-@TestInstance(Lifecycle.PER_CLASS)
 class LoggServiceTest(
     @Autowired
     private val loggService: LoggService,
@@ -35,17 +26,8 @@ class LoggServiceTest(
     private val mockPersonopplysningerService: PersonopplysningerService,
 
     @Autowired
-    private val databaseCleanupService: DatabaseCleanupService,
-
-    @Autowired
-    private val dataSource: DataSource
-
-) : AbstractTestWithJdbcTables(dataSource) {
-
-    @BeforeAll
-    fun init() {
-        databaseCleanupService.truncate()
-    }
+    private val databaseCleanupService: DatabaseCleanupService
+) : AbstractSpringIntegrationTestDev() {
 
     @Test
     fun `Skal lage noen logginnslag på forskjellige behandlinger og hente dem fra databasen`() {
