@@ -3,8 +3,10 @@ package no.nav.familie.ba.sak.kjerne.vedtak.domene
 import com.fasterxml.jackson.annotation.JsonIgnore
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.NullableMånedPeriode
+import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
+import no.nav.familie.ba.sak.kjerne.dokument.totaltUtbetalt
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
@@ -118,7 +120,8 @@ fun UtvidetVedtaksperiodeMedBegrunnelser.byggBegrunnelserOgFritekster(
                 utvidetVedtaksperiodeMedBegrunnelser = this,
                 personerPåBegrunnelse = personerIPersongrunnlag.filter { person -> it.personIdenter.contains(person.personIdent.ident) },
                 målform = målform,
-                uregistrerteBarn = uregistrerteBarn
+                uregistrerteBarn = uregistrerteBarn,
+                beløpForPerioden = Utils.formaterBeløp(this.utbetalingsperiodeDetaljer.totaltUtbetalt()),
             )
         }
 
