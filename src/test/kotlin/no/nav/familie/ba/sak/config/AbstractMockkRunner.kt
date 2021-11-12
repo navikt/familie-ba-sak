@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.config
 
+import io.mockk.MockKAnnotations
 import io.mockk.junit5.MockKExtension
 import io.mockk.unmockkAll
 import no.nav.familie.ba.sak.integrasjoner.`ef-sak`.EfSakRestClient
@@ -8,9 +9,7 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
-import org.springframework.test.annotation.DirtiesContext
 
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 @ExtendWith(MockKExtension::class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 abstract class AbstractMockkRunner(
@@ -18,6 +17,10 @@ abstract class AbstractMockkRunner(
     private val integrasjonClient: IntegrasjonClient? = null,
     private val efSakRestClient: EfSakRestClient? = null
 ) {
+    init {
+        MockKAnnotations.init()
+    }
+
     @AfterAll
     fun afterAll() {
         clearMocks()
