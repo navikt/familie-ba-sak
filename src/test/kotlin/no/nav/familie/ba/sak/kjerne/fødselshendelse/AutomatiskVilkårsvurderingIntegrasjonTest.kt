@@ -30,11 +30,11 @@ import java.time.LocalDate
 @DirtiesContext
 class AutomatiskVilkårsvurderingIntegrasjonTest(
     @Autowired val stegService: StegService,
-    @Autowired val personopplysningerService: PersonopplysningerService,
+    @Autowired val mockPersonopplysningerService: PersonopplysningerService,
     @Autowired val persongrunnlagService: PersongrunnlagService,
     @Autowired val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
     @Autowired val databaseCleanupService: DatabaseCleanupService,
-) : AbstractSpringIntegrationTest(personopplysningerService) {
+) : AbstractSpringIntegrationTest(mockPersonopplysningerService) {
 
     @BeforeEach
     fun truncate() {
@@ -47,8 +47,8 @@ class AutomatiskVilkårsvurderingIntegrasjonTest(
         val barnFnr = randomFnr()
         val mockSøkerUtenHjem = genererAutomatiskTestperson(bostedsadresser = emptyList())
 
-        every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(søkerFnr) } returns mockSøkerUtenHjem
-        every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(barnFnr) } returns mockBarnAutomatiskBehandling
+        every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(søkerFnr) } returns mockSøkerUtenHjem
+        every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(barnFnr) } returns mockBarnAutomatiskBehandling
 
         val nyBehandling = NyBehandlingHendelse(søkerFnr, listOf(barnFnr))
         val behandlingFørVilkår = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling)
@@ -63,8 +63,8 @@ class AutomatiskVilkårsvurderingIntegrasjonTest(
         val barnFnr = randomFnr()
         val mockBarnGift = genererAutomatiskTestperson(sivilstander = listOf(Sivilstand(SIVILSTAND.GIFT)))
 
-        every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(søkerFnr) } returns mockSøkerAutomatiskBehandling
-        every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(barnFnr) } returns mockBarnGift
+        every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(søkerFnr) } returns mockSøkerAutomatiskBehandling
+        every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(barnFnr) } returns mockBarnGift
 
         val nyBehandling = NyBehandlingHendelse(søkerFnr, listOf(barnFnr))
         val behandlingFørVilkår = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling)
@@ -88,8 +88,8 @@ class AutomatiskVilkårsvurderingIntegrasjonTest(
             ),
             emptyList()
         )
-        every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(barnFnr) } returns barn
-        every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(søkerFnr) } returns søker
+        every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(barnFnr) } returns barn
+        every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(søkerFnr) } returns søker
 
         val nyBehandling = NyBehandlingHendelse(søkerFnr, listOf(barnFnr))
         val behandlingFørVilkår = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling)
@@ -132,8 +132,8 @@ class AutomatiskVilkårsvurderingIntegrasjonTest(
             )
         )
 
-        every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(barnFnr) } returns barn
-        every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(søkerFnr) } returns søker
+        every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(barnFnr) } returns barn
+        every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(søkerFnr) } returns søker
 
         val nyBehandling = NyBehandlingHendelse(søkerFnr, listOf(barnFnr))
         val behandlingFørVilkår = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling)

@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
-import io.mockk.every
 import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
 import no.nav.familie.ba.sak.common.kjørStegprosessForRevurderingÅrligKontroll
 import no.nav.familie.ba.sak.common.lagBehandling
@@ -8,19 +7,14 @@ import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.ClientMocks
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.config.mockHentPersoninfoForMedIdenter
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.HenleggÅrsak
-import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.RestHenleggBehandlingInfo
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -34,9 +28,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
-import no.nav.familie.ba.sak.task.SendStartBehandlingTilInfotrygdTask
-import no.nav.familie.prosessering.domene.Task
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -77,11 +68,12 @@ class StegServiceTest(
 
     @Autowired
     private val vedtaksperiodeService: VedtaksperiodeService,
-) : AbstractSpringIntegrationTest() {
+) : AbstractSpringIntegrationTest(personopplysningerService = mockPersonopplysningerService) {
 
     @BeforeEach
     fun init() {
         databaseCleanupService.truncate()
+        ClientMocks.clearPdlMocks(mockPersonopplysningerService)
     }
 
     @Test
@@ -286,68 +278,6 @@ class StegServiceTest(
                 )
             )
         }
-    }
-
-    @Test
-    fun `Skal opprett SendStartBehandlingTilInfotrygdTask når opprett førstgangsbehandling`() {
-        mockHentPersoninfoForMedIdenter(mockPersonopplysningerService, "123", "456")
-
-        fagsakService.hentEllerOpprettFagsakForPersonIdent("123")
-
-        every {
-            stegService.infotrygdFeedService.featureToggleService.isEnabled(
-                FeatureToggleConfig.SEND_START_BEHANDLING_TIL_INFOTRYGD,
-                any()
-            )
-        } returns true
-
-        val tasksSlot = mutableListOf<Task>()
-        every {
-            stegService.infotrygdFeedService.opprettTaskService.taskRepository.save(capture(tasksSlot))
-        } returns Task(type = SendStartBehandlingTilInfotrygdTask.TASK_STEP_TYPE, payload = "")
-
-        stegService.håndterNyBehandlingOgSendInfotrygdFeed(
-            NyBehandling(
-                kategori = BehandlingKategori.NASJONAL,
-                underkategori = BehandlingUnderkategori.ORDINÆR,
-                søkersIdent = "123",
-                behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-            )
-        )
-
-        assertThat(tasksSlot.count { it.type == SendStartBehandlingTilInfotrygdTask.TASK_STEP_TYPE }).isEqualTo(1)
-        assertThat(tasksSlot.find { it.type == SendStartBehandlingTilInfotrygdTask.TASK_STEP_TYPE }!!.payload).contains(
-            "123"
-        )
-    }
-
-    @Test
-    fun `Skal ikke opprett SendStartBehandlingTilInfotrygdTask når opprett behandling ved behandlingstype som er ikke førstgangsbehandling`() {
-        mockHentPersoninfoForMedIdenter(mockPersonopplysningerService, "123", "456")
-
-        fagsakService.hentEllerOpprettFagsakForPersonIdent("123")
-
-        every {
-            stegService.infotrygdFeedService.featureToggleService.isEnabled(
-                FeatureToggleConfig.SEND_START_BEHANDLING_TIL_INFOTRYGD,
-                any()
-            )
-        } returns true
-
-        val tasksSlot = mutableListOf<Task>()
-        every {
-            stegService.infotrygdFeedService.opprettTaskService.taskRepository.save(capture(tasksSlot))
-        } returns Task(type = SendStartBehandlingTilInfotrygdTask.TASK_STEP_TYPE, payload = "")
-        stegService.håndterNyBehandlingOgSendInfotrygdFeed(
-            NyBehandling(
-                kategori = BehandlingKategori.NASJONAL,
-                underkategori = BehandlingUnderkategori.ORDINÆR,
-                søkersIdent = "123",
-                behandlingType = BehandlingType.REVURDERING,
-            )
-        )
-
-        assertThat(tasksSlot.count { it.type == SendStartBehandlingTilInfotrygdTask.TASK_STEP_TYPE }).isZero()
     }
 
     private fun kjørGjennomStegInkludertVurderTilbakekreving(): Behandling {

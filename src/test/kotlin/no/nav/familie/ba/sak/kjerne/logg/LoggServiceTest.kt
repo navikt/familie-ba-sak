@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.kjerne.logg
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTestDev
-import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.config.mockHentPersoninfoForMedIdenter
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
@@ -24,10 +23,7 @@ class LoggServiceTest(
 
     @Autowired
     private val mockPersonopplysningerService: PersonopplysningerService,
-
-    @Autowired
-    private val databaseCleanupService: DatabaseCleanupService
-) : AbstractSpringIntegrationTestDev() {
+) : AbstractSpringIntegrationTestDev(personopplysningerService = mockPersonopplysningerService) {
 
     @Test
     fun `Skal lage noen logginnslag på forskjellige behandlinger og hente dem fra databasen`() {

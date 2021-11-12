@@ -137,7 +137,7 @@ class MigreringService(
                     FagsakStatus.OPPRETTET -> throw FunksjonellFeil("Migrering allerede påbegynt.")
                     FagsakStatus.LØPENDE -> throw FunksjonellFeil(alleredeMigrertPersonFeilmelding)
                     FagsakStatus.AVSLUTTET -> {
-                        behandlinger.find { it.erTekniskOpphør() && it.opprettetTidspunkt.isAfter(this.opprettetTidspunkt) }
+                        behandlinger.find { it.opprettetTidspunkt.isAfter(this.opprettetTidspunkt) }
                             ?: throw FunksjonellFeil(alleredeMigrertPersonFeilmelding)
                     }
                 }

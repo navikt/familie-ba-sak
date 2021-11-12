@@ -101,7 +101,7 @@ class BehandlingIntegrationTest(
     private val fagsakService: FagsakService,
 
     @Autowired
-    private val personopplysningerService: PersonopplysningerService,
+    private val mockPersonopplysningerService: PersonopplysningerService,
 
     @Autowired
     private val databaseCleanupService: DatabaseCleanupService,
@@ -114,7 +114,7 @@ class BehandlingIntegrationTest(
 
     @Autowired
     private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
-) : AbstractSpringIntegrationTest(personopplysningerService) {
+) : AbstractSpringIntegrationTest(mockPersonopplysningerService) {
 
     @BeforeEach
     fun truncate() {
@@ -498,7 +498,7 @@ class BehandlingIntegrationTest(
         val barn1Kommunenummer = "3233"
         val barn2BostedKommune = "Oslo"
 
-        every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(søkerFnr) } returns PersonInfo(
+        every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(søkerFnr) } returns PersonInfo(
             fødselsdato = LocalDate.of(1990, 1, 1),
             adressebeskyttelseGradering = null,
             navn = "Mor",
@@ -521,7 +521,7 @@ class BehandlingIntegrationTest(
             sivilstander = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT)),
         )
 
-        every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(barn1Fnr) } returns PersonInfo(
+        every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(barn1Fnr) } returns PersonInfo(
             fødselsdato = LocalDate.of(2009, 1, 1),
             adressebeskyttelseGradering = null,
             navn = "Gutt",
@@ -541,7 +541,7 @@ class BehandlingIntegrationTest(
             sivilstander = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT)),
         )
 
-        every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(barn2Fnr) } returns PersonInfo(
+        every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(barn2Fnr) } returns PersonInfo(
             fødselsdato = LocalDate.of(2012, 1, 1),
             adressebeskyttelseGradering = null,
             navn = "Jente",
@@ -551,7 +551,7 @@ class BehandlingIntegrationTest(
             sivilstander = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT)),
         )
 
-        every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(søkerFnr) } returns PersonInfo(
+        every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(søkerFnr) } returns PersonInfo(
             fødselsdato = LocalDate.of(1990, 1, 1),
             bostedsadresser = mutableListOf(
                 Bostedsadresse(
@@ -568,7 +568,7 @@ class BehandlingIntegrationTest(
                 )
             ),
         )
-        every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(barn1Fnr) } returns PersonInfo(
+        every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(barn1Fnr) } returns PersonInfo(
             fødselsdato = LocalDate.of(2009, 1, 1),
             bostedsadresser = mutableListOf(
                 Bostedsadresse(
@@ -582,7 +582,7 @@ class BehandlingIntegrationTest(
                 )
             )
         )
-        every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(barn2Fnr) } returns PersonInfo(
+        every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(barn2Fnr) } returns PersonInfo(
             fødselsdato = LocalDate.of(1990, 1, 1),
             bostedsadresser = mutableListOf(Bostedsadresse(ukjentBosted = UkjentBosted(barn2BostedKommune)))
         )
@@ -635,7 +635,7 @@ class BehandlingIntegrationTest(
         val søkerFnr = randomFnr()
         val barn1Fnr = randomFnr()
 
-        every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(søkerFnr) } returns PersonInfo(
+        every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(søkerFnr) } returns PersonInfo(
             fødselsdato = LocalDate.of(1990, 1, 1),
             adressebeskyttelseGradering = null,
             navn = "Mor",
@@ -645,7 +645,7 @@ class BehandlingIntegrationTest(
             sivilstander = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT)),
         )
 
-        every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(barn1Fnr) } returns PersonInfo(
+        every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(barn1Fnr) } returns PersonInfo(
             fødselsdato = LocalDate.of(2009, 1, 1),
             adressebeskyttelseGradering = null,
             navn = "Gutt",
