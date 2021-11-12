@@ -15,6 +15,7 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelServic
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand.Companion.sisteSivilstand
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingUtils.flyttResultaterTilInitielt
@@ -266,7 +267,7 @@ class VilkårService(
     }
 
     private fun lagManuellVilkårsvurdering(vilkårsvurdering: Vilkårsvurdering): Set<PersonResultat> {
-        val personopplysningGrunnlag =
+        val personopplysningGrunnlag: PersonopplysningGrunnlag =
             personopplysningGrunnlagRepository.findByBehandlingAndAktiv(vilkårsvurdering.behandling.id)
                 ?: throw Feil(message = "Fant ikke personopplysninggrunnlag for behandling ${vilkårsvurdering.behandling.id}")
 
@@ -276,7 +277,7 @@ class VilkårService(
                 personIdent = person.personIdent.ident
             )
 
-            val vilkårForPerson = Vilkår.hentVilkårFor(
+            val vilkårForPerson: Set<Vilkår> = Vilkår.hentVilkårFor(
                 personType = person.type,
                 ytelseType = vilkårsvurdering.behandling.hentYtelseTypeTilVilkår()
             )

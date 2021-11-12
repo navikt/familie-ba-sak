@@ -32,7 +32,6 @@ import javax.persistence.Table
 @EntityListeners(RollestyringMotDatabase::class)
 @Entity(name = "VilkårResultat")
 @Table(name = "VILKAR_RESULTAT")
-@VilkårResultatConstraint
 class VilkårResultat(
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "vilkar_resultat_seq_generator")
@@ -99,7 +98,11 @@ class VilkårResultat(
 
     @Enumerated(EnumType.STRING)
     @Column(name = "vurderes_etter")
-    var vurderesEtter: Regelverk? = vilkårType.defaultRegelverk()
+    var vurderesEtter: Regelverk? = vilkårType.defaultRegelverk(),
+
+    @Column(name = "utdypende_vilkarsvurderinger")
+    @Convert(converter = UtdypendeVilkårsvurderingerConverter::class)
+    var utdypendeVilkårsvurderinger: List<UtdypendeVilkårsvurderingType> = emptyList()
 ) : BaseEntitet() {
 
     override fun toString(): String {
@@ -132,6 +135,11 @@ class VilkårResultat(
         erMedlemskapVurdert = restVilkårResultat.erMedlemskapVurdert ?: false
         oppdaterPekerTilBehandling()
         vurderesEtter = restVilkårResultat.vurderesEtter
+        utdypendeVilkårsvurderinger = listOfNotNull(
+            if (restVilkårResultat.erSkjønnsmessigVurdert == true) UtdypendeVilkårsvurderingType.VURDERING_ANNET_GRUNNLAG else null,
+            if (restVilkårResultat.erMedlemskapVurdert == true) UtdypendeVilkårsvurderingType.VURDERT_MEDLEMSKAP else null,
+            if (restVilkårResultat.erDeltBosted == true) UtdypendeVilkårsvurderingType.DELT_BOSTED else null
+        )
     }
 
     fun kopierMedParent(nyPersonResultat: PersonResultat? = null): VilkårResultat {
