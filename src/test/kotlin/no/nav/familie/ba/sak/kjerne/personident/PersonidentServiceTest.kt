@@ -118,13 +118,13 @@ internal class PersonidentServiceTest() {
         val slot = mutableListOf<Personident>()
 
         verify(exactly = 2) { personidentRepository.save(capture(slot)) }
-        Assertions.assertEquals(false, slot[0].aktiv)
+        Assertions.assertEquals(true, slot[0].aktiv)
         Assertions.assertEquals(aktørId.id, slot[0].aktørId)
-        Assertions.assertEquals(personidentInaktiv, slot[0].fødselsnummer)
-        Assertions.assertTrue(slot[0].gjelderTil != null)
-        Assertions.assertEquals(true, slot[1].aktiv)
+        Assertions.assertEquals(personidentAktiv, slot[0].fødselsnummer)
+        Assertions.assertEquals(null, slot[0].gjelderTil)
+        Assertions.assertEquals(false, slot[1].aktiv)
         Assertions.assertEquals(aktørId.id, slot[1].aktørId)
-        Assertions.assertEquals(personidentAktiv, slot[1].fødselsnummer)
-        Assertions.assertEquals(null, slot[1].gjelderTil)
+        Assertions.assertEquals(personidentInaktiv, slot[1].fødselsnummer)
+        Assertions.assertTrue(slot[1].gjelderTil != null)
     }
 }
