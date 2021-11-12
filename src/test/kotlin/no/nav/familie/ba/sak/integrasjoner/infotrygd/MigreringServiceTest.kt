@@ -10,7 +10,7 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.fødselsnummerGenerator
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
-import no.nav.familie.ba.sak.config.AbstractMockkRunner
+import no.nav.familie.ba.sak.config.AbstractMockkSpringRunner
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
@@ -114,7 +114,7 @@ class MigreringServiceTest(
 
     @Autowired
     private val env: EnvService,
-) : AbstractMockkRunner() {
+) : AbstractMockkSpringRunner() {
 
     @BeforeEach
     fun init() {

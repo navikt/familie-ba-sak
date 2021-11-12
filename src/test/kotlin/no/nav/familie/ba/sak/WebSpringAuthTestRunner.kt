@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak
 
 import no.nav.familie.ba.sak.common.DbContainerInitializer
-import no.nav.familie.ba.sak.config.AbstractMockkRunner
+import no.nav.familie.ba.sak.config.AbstractMockkSpringRunner
 import no.nav.familie.ba.sak.config.ApplicationConfig
 import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.integrasjoner.`ef-sak`.EfSakRestClient
@@ -39,7 +39,7 @@ import org.springframework.web.client.RestTemplate
 @Tag("integration")
 abstract class WebSpringAuthTestRunner(
     efSakRestClient: EfSakRestClient? = null
-) : AbstractMockkRunner(efSakRestClient = efSakRestClient) {
+) : AbstractMockkSpringRunner(efSakRestClient = efSakRestClient) {
 
     @Autowired
     lateinit var databaseCleanupService: DatabaseCleanupService

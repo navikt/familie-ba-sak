@@ -12,7 +12,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 
 @ExtendWith(MockKExtension::class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-abstract class AbstractMockkRunner(
+abstract class AbstractMockkSpringRunner(
     private val personopplysningerService: PersonopplysningerService? = null,
     private val integrasjonClient: IntegrasjonClient? = null,
     private val efSakRestClient: EfSakRestClient? = null
