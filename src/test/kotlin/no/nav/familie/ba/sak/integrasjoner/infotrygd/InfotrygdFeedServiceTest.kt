@@ -6,16 +6,15 @@ import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.slot
 import io.mockk.verify
-import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTestDev
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
-class InfotrygdFeedServiceTest : AbstractSpringIntegrationTestDev() {
-    val featureToggleServiceMock = mockk<FeatureToggleService>()
-    val opprettTaskServiceMock = mockk<OpprettTaskService>()
+internal class InfotrygdFeedServiceTest {
+    private val featureToggleServiceMock = mockk<FeatureToggleService>()
+    private val opprettTaskServiceMock = mockk<OpprettTaskService>()
 
     @Test
     fun `Skal ikke send start behandling feed hvis feature er togglet av`() {
