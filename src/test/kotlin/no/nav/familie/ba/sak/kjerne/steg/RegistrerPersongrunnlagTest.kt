@@ -29,11 +29,11 @@ class RegistrerPersongrunnlagTest(
     private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
 
     @Autowired
-    private val personopplysningerService: PersonopplysningerService,
+    private val mockPersonopplysningerService: PersonopplysningerService,
 
     @Autowired
     private val databaseCleanupService: DatabaseCleanupService
-) : AbstractSpringIntegrationTest(personopplysningerService) {
+) : AbstractSpringIntegrationTest(mockPersonopplysningerService) {
 
     @BeforeAll
     fun truncate() {

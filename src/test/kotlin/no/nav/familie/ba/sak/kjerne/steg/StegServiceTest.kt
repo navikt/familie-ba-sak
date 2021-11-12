@@ -77,7 +77,7 @@ class StegServiceTest(
 
     @Autowired
     private val vedtaksperiodeService: VedtaksperiodeService,
-) : AbstractSpringIntegrationTest() {
+) : AbstractSpringIntegrationTest(personopplysningerService = mockPersonopplysningerService) {
 
     @BeforeEach
     fun init() {
