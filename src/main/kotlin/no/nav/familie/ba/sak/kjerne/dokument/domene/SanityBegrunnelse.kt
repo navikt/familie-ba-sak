@@ -136,7 +136,8 @@ enum class ØvrigTrigger {
     BARN_MED_6_ÅRS_DAG,
     ALLTID_AUTOMATISK,
     ETTER_ENDRET_UTBETALING,
-    ENDRET_UTBETALING
+    ENDRET_UTBETALING,
+    SMÅBARNSTILLEGG,
 }
 
 enum class EndretUtbetalingsperiodeTrigger {
