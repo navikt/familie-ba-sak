@@ -22,16 +22,16 @@ import org.springframework.web.client.RestOperations
 import java.net.URI
 import java.time.LocalDate
 
-class PersonopplysningerServiceTest : AbstractSpringIntegrationTest() {
-
-    lateinit var personopplysningerService: PersonopplysningerService
-
+internal class PersonopplysningerServiceTest(
     @Autowired
     @Qualifier("jwtBearer")
-    lateinit var restTemplate: RestOperations
+    private val restTemplate: RestOperations,
 
     @Autowired
-    lateinit var mockIntegrasjonClient: IntegrasjonClient
+    private val mockIntegrasjonClient: IntegrasjonClient
+) : AbstractSpringIntegrationTest() {
+
+    lateinit var personopplysningerService: PersonopplysningerService
 
     @BeforeEach
     fun setUp() {

@@ -1,18 +1,16 @@
 package no.nav.familie.ba.sak
 
-import io.mockk.junit5.MockKExtension
-import io.mockk.unmockkAll
 import no.nav.familie.ba.sak.common.DbContainerInitializer
+import no.nav.familie.ba.sak.config.AbstractMockkRunner
 import no.nav.familie.ba.sak.config.ApplicationConfig
 import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
+import no.nav.familie.ba.sak.integrasjoner.`ef-sak`.EfSakRestClient
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext.SYSTEM_FORKORTELSE
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import no.nav.security.mock.oauth2.token.DefaultOAuth2TokenCallback
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
-import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Tag
-import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -35,12 +33,13 @@ import org.springframework.web.client.RestTemplate
         "ENVIRONMENT_NAME: integrationtest",
     ],
 )
-@ExtendWith(SpringExtension::class, MockKExtension::class)
+@ExtendWith(SpringExtension::class)
 @EnableMockOAuth2Server
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
 @Tag("integration")
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-abstract class WebSpringAuthTestRunner {
+abstract class WebSpringAuthTestRunner(
+    efSakRestClient: EfSakRestClient? = null
+) : AbstractMockkRunner(efSakRestClient = efSakRestClient) {
 
     @Autowired
     lateinit var databaseCleanupService: DatabaseCleanupService
@@ -53,11 +52,6 @@ abstract class WebSpringAuthTestRunner {
 
     @LocalServerPort
     private val port = 0
-
-    @AfterAll
-    fun tearDown() {
-        unmockkAll()
-    }
 
     fun hentUrl(path: String) = "http://localhost:$port$path"
 

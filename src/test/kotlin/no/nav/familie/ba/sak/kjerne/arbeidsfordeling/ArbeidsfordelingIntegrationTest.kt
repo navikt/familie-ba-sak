@@ -33,11 +33,9 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.test.annotation.DirtiesContext
 import java.time.LocalDate.now
 
 // Todo. Bruker every. Dette endrer funksjonalliteten for alle klasser.
-@DirtiesContext
 class ArbeidsfordelingIntegrationTest(
 
     @Autowired
@@ -60,7 +58,7 @@ class ArbeidsfordelingIntegrationTest(
 
     @Autowired
     private val mockPersonopplysningerService: PersonopplysningerService
-) : AbstractSpringIntegrationTest() {
+) : AbstractSpringIntegrationTest(mockPersonopplysningerService) {
 
     init {
         val now = now()

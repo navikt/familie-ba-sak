@@ -1,9 +1,7 @@
 package no.nav.familie.ba.sak.ekstern.bisys
 
 import io.mockk.every
-import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
-import io.mockk.unmockkAll
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelseUtvidet
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
@@ -18,17 +16,11 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakPersonRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
-import org.junit.jupiter.api.TestInstance.Lifecycle
-import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
 import java.time.YearMonth
 
-@ExtendWith(MockKExtension::class)
-@TestInstance(Lifecycle.PER_CLASS)
 internal class BisysServiceTest {
 
     lateinit var bisysService: BisysService
@@ -47,11 +39,6 @@ internal class BisysServiceTest {
             mockBehandlingService,
             mockTilkjentYtelseRepository
         )
-    }
-
-    @AfterAll
-    fun tearDown() {
-        unmockkAll()
     }
 
     @Test

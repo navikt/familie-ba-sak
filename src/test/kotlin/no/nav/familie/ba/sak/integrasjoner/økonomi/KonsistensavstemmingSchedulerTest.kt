@@ -2,21 +2,19 @@ package no.nav.familie.ba.sak.integrasjoner.økonomi
 
 import io.mockk.called
 import io.mockk.spyk
-import io.mockk.unmockkAll
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.DbContainerInitializer
+import no.nav.familie.ba.sak.config.AbstractMockkRunner
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.prosessering.domene.Status
-import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -30,8 +28,7 @@ import java.time.LocalDate
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
 @ActiveProfiles("postgres", "mock-brev-klient")
 @Tag("integration")
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class KonsistensavstemmingSchedulerTest {
+class KonsistensavstemmingSchedulerTest : AbstractMockkRunner() {
 
     @Autowired
     lateinit var taskRepository: TaskRepositoryWrapper
@@ -57,11 +54,6 @@ class KonsistensavstemmingSchedulerTest {
         konsistensavstemmingScheduler =
             KonsistensavstemmingScheduler(batchService, behandlingService, fagsakService, taskRepository)
         taskRepository = spyk(taskRepository)
-    }
-
-    @AfterAll
-    fun tearDown() {
-        unmockkAll()
     }
 
     @Test

@@ -1,8 +1,6 @@
 package no.nav.familie.ba.sak.statistikk.saksstatistikk
 
-import io.mockk.clearAllMocks
 import io.mockk.every
-import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import io.mockk.unmockkAll
 import no.nav.familie.ba.sak.common.EnvService
@@ -51,15 +49,11 @@ import org.assertj.core.api.Assertions.within
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
-import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
 
-@ExtendWith(MockKExtension::class)
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class SaksstatistikkServiceTest {
 
     private val behandlingService: BehandlingService = mockk(relaxed = true)
@@ -104,8 +98,6 @@ internal class SaksstatistikkServiceTest {
 
     @AfterAll
     fun tearDown() {
-        // HER?
-        clearAllMocks(answers = false)
         unmockkAll()
     }
 

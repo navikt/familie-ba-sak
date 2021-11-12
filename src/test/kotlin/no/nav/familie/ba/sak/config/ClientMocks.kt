@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.config
 
+import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
@@ -37,7 +38,6 @@ import no.nav.familie.ba.sak.kjerne.fødselshendelse.mockSøkerAutomatiskBehandl
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
-import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.success
 import no.nav.familie.kontrakter.felles.kodeverk.BeskrivelseDto
 import no.nav.familie.kontrakter.felles.kodeverk.BetydningDto
@@ -57,17 +57,17 @@ import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import no.nav.familie.kontrakter.felles.personopplysning.Sivilstand
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import no.nav.familie.kontrakter.felles.tilgangskontroll.Tilgang
+import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Primary
 import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpStatus
-import org.springframework.stereotype.Component
 import org.springframework.web.client.HttpClientErrorException
 import java.time.LocalDate
 import java.time.Month
 import java.util.UUID
 
-@Component
+@TestConfiguration
 class ClientMocks {
 
     @Bean
@@ -76,199 +76,7 @@ class ClientMocks {
     fun mockPersonopplysningerService(): PersonopplysningerService {
         val mockPersonopplysningerService = mockk<PersonopplysningerService>(relaxed = false)
 
-        every {
-            mockPersonopplysningerService.hentAktivAktørId(any())
-        } answers {
-            randomAktørId()
-        }
-
-        every {
-            mockPersonopplysningerService.hentAktivPersonIdent(any())
-        } answers {
-            PersonIdent(randomFnr())
-        }
-
-        every {
-            mockPersonopplysningerService.hentGjeldendeStatsborgerskap(any())
-        } answers {
-            Statsborgerskap(
-                "NOR",
-                LocalDate.of(1990, 1, 25),
-                LocalDate.of(1990, 1, 25),
-                null
-            )
-        }
-
-        every {
-            mockPersonopplysningerService.hentGjeldendeOpphold(any())
-        } answers {
-            Opphold(
-                type = OPPHOLDSTILLATELSE.PERMANENT,
-                oppholdFra = LocalDate.of(1990, 1, 25),
-                oppholdTil = LocalDate.of(2499, 1, 1)
-            )
-        }
-
-        val identSlot = slot<Ident>()
-        every {
-            mockPersonopplysningerService.hentIdenter(capture(identSlot))
-        } answers {
-            listOf(
-                IdentInformasjon(identSlot.captured.ident, false, "FOLKEREGISTERIDENT"),
-                IdentInformasjon(randomFnr(), true, "FOLKEREGISTERIDENT")
-            )
-        }
-
-        every {
-            mockPersonopplysningerService.hentDødsfall(any())
-        } returns DødsfallData(false, null)
-
-        every {
-            mockPersonopplysningerService.hentVergeData(any())
-        } returns VergeData(false)
-
-        every {
-            mockPersonopplysningerService.harVerge(any())
-        } returns VergeResponse(false)
-
-        every {
-            mockPersonopplysningerService.hentLandkodeUtenlandskBostedsadresse(any())
-        } returns "NO"
-
-        val idSlotForHentPersoninfo = slot<String>()
-        every {
-            mockPersonopplysningerService.hentPersoninfoEnkel(capture(idSlotForHentPersoninfo))
-        } answers {
-            when (val id = idSlotForHentPersoninfo.captured) {
-                barnFnr[0], barnFnr[1] -> personInfo.getValue(id)
-                søkerFnr[0], søkerFnr[1] -> personInfo.getValue(id)
-                else -> personInfo.getValue(INTEGRASJONER_FNR)
-            }
-        }
-
-        val idSlot = slot<String>()
-        every {
-            mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(capture(idSlot))
-        } answers {
-            when (val id = idSlot.captured) {
-                "00000000000" -> throw HttpClientErrorException(
-                    HttpStatus.NOT_FOUND,
-                    "Fant ikke forespurte data på person."
-                )
-                barnFnr[0], barnFnr[1] -> personInfo.getValue(id)
-
-                søkerFnr[0] -> personInfo.getValue(id).copy(
-                    forelderBarnRelasjon = setOf(
-                        ForelderBarnRelasjon(
-                            personIdent = Personident(id = barnFnr[0]),
-                            relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
-                            navn = personInfo.getValue(barnFnr[0]).navn,
-                            fødselsdato = personInfo.getValue(barnFnr[0]).fødselsdato
-                        ),
-                        ForelderBarnRelasjon(
-                            personIdent = Personident(id = barnFnr[1]),
-                            relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
-                            navn = personInfo.getValue(barnFnr[1]).navn,
-                            fødselsdato = personInfo.getValue(barnFnr[1]).fødselsdato
-                        ),
-                        ForelderBarnRelasjon(
-                            personIdent = Personident(id = søkerFnr[1]),
-                            relasjonsrolle = FORELDERBARNRELASJONROLLE.MEDMOR
-                        )
-                    )
-                )
-
-                søkerFnr[1] -> personInfo.getValue(id).copy(
-                    forelderBarnRelasjon = setOf(
-                        ForelderBarnRelasjon(
-                            personIdent = Personident(id = barnFnr[0]),
-                            relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
-                            navn = personInfo.getValue(barnFnr[0]).navn,
-                            fødselsdato = personInfo.getValue(barnFnr[0]).fødselsdato
-                        ),
-                        ForelderBarnRelasjon(
-                            personIdent = Personident(id = barnFnr[1]),
-                            relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
-                            navn = personInfo.getValue(barnFnr[1]).navn,
-                            fødselsdato = personInfo.getValue(barnFnr[1]).fødselsdato
-                        ),
-                        ForelderBarnRelasjon(
-                            personIdent = Personident(id = søkerFnr[0]),
-                            relasjonsrolle = FORELDERBARNRELASJONROLLE.FAR
-                        )
-                    )
-                )
-
-                søkerFnr[2] -> personInfo.getValue(id).copy(
-                    forelderBarnRelasjon = setOf(
-                        ForelderBarnRelasjon(
-                            personIdent = Personident(id = barnFnr[0]),
-                            relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
-                            navn = personInfo.getValue(barnFnr[0]).navn,
-                            fødselsdato = personInfo.getValue(barnFnr[0]).fødselsdato
-                        ),
-                        ForelderBarnRelasjon(
-                            personIdent = Personident(id = barnFnr[1]),
-                            relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
-                            navn = personInfo.getValue(barnFnr[1]).navn,
-                            fødselsdato = personInfo.getValue(barnFnr[1]).fødselsdato,
-                            adressebeskyttelseGradering = personInfo.getValue(barnFnr[1]).adressebeskyttelseGradering
-                        ),
-                        ForelderBarnRelasjon(
-                            personIdent = Personident(id = søkerFnr[0]),
-                            relasjonsrolle = FORELDERBARNRELASJONROLLE.FAR
-                        )
-                    ),
-                    forelderBarnRelasjonMaskert = setOf(
-                        ForelderBarnRelasjonMaskert(
-                            relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
-                            adressebeskyttelseGradering = personInfo.getValue(
-                                BARN_DET_IKKE_GIS_TILGANG_TIL_FNR
-                            ).adressebeskyttelseGradering!!
-                        )
-                    )
-                )
-
-                INTEGRASJONER_FNR -> personInfo.getValue(id).copy(
-                    forelderBarnRelasjon = setOf(
-                        ForelderBarnRelasjon(
-                            personIdent = Personident(id = barnFnr[0]),
-                            relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
-                            navn = personInfo.getValue(barnFnr[0]).navn,
-                            fødselsdato = personInfo.getValue(barnFnr[0]).fødselsdato
-                        ),
-                        ForelderBarnRelasjon(
-                            personIdent = Personident(id = barnFnr[1]),
-                            relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
-                            navn = personInfo.getValue(barnFnr[1]).navn,
-                            fødselsdato = personInfo.getValue(barnFnr[1]).fødselsdato
-                        ),
-                        ForelderBarnRelasjon(
-                            personIdent = Personident(id = søkerFnr[1]),
-                            relasjonsrolle = FORELDERBARNRELASJONROLLE.MEDMOR
-                        )
-                    )
-                )
-                mockBarnAutomatiskBehandlingFnr -> personInfo.getValue(id)
-                mockBarnAutomatiskBehandling2Fnr -> personInfo.getValue(id)
-                mockSøkerAutomatiskBehandlingFnr -> personInfo.getValue(id)
-                mockBarnAutomatiskBehandlingSkalFeileFnr -> personInfo.getValue(id)
-                else -> personInfo.getValue(INTEGRASJONER_FNR)
-            }
-        }
-
-        every {
-            mockPersonopplysningerService.hentAdressebeskyttelseSomSystembruker(capture(idSlot))
-        } answers {
-            if (BARN_DET_IKKE_GIS_TILGANG_TIL_FNR == idSlot.captured)
-                ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG
-            else
-                ADRESSEBESKYTTELSEGRADERING.UGRADERT
-        }
-
-        every { mockPersonopplysningerService.harVerge(mockSøkerAutomatiskBehandlingFnr) } returns VergeResponse(
-            harVerge = false
-        )
+        clearPdlMocks(mockPersonopplysningerService)
 
         return mockPersonopplysningerService
     }
@@ -276,122 +84,15 @@ class ClientMocks {
     @Bean
     @Primary
     fun mockIntegrasjonClient(): IntegrasjonClient {
-
         val mockIntegrasjonClient = mockk<IntegrasjonClient>(relaxed = false)
 
-        every {
-            mockIntegrasjonClient.hentMaskertPersonInfoVedManglendeTilgang(any())
-        } returns null
-
-        every { mockIntegrasjonClient.hentJournalpost(any()) } answers {
-            success(
-                lagTestJournalpost(
-                    søkerFnr[0],
-                    UUID.randomUUID().toString()
-                )
-            )
-        }
-
-        every { mockIntegrasjonClient.hentJournalpost(any()) } answers {
-            success(
-                lagTestJournalpost(
-                    søkerFnr[0],
-                    UUID.randomUUID().toString()
-                )
-            )
-        }
-
-        every { mockIntegrasjonClient.hentJournalposterForBruker(any()) } answers {
-            success(
-                listOf(
-                    lagTestJournalpost(
-                        søkerFnr[0],
-                        UUID.randomUUID().toString()
-                    ),
-                    lagTestJournalpost(
-                        søkerFnr[0],
-                        UUID.randomUUID().toString()
-                    )
-                )
-            )
-        }
-
-        every { mockIntegrasjonClient.finnOppgaveMedId(any()) } returns
-            lagTestOppgaveDTO(1L)
-
-        every { mockIntegrasjonClient.hentOppgaver(any()) } returns
-            FinnOppgaveResponseDto(
-                2,
-                listOf(lagTestOppgaveDTO(1L), lagTestOppgaveDTO(2L, Oppgavetype.BehandleSak, "Z999999"))
-            )
-
-        every { mockIntegrasjonClient.opprettOppgave(any()) } returns
-            "12345678"
-
-        every { mockIntegrasjonClient.patchOppgave(any()) } returns
-            OppgaveResponse(12345678L)
-
-        every { mockIntegrasjonClient.fordelOppgave(any(), any()) } returns
-            "12345678"
-
-        every { mockIntegrasjonClient.oppdaterJournalpost(any(), any()) } returns
-            OppdaterJournalpostResponse("1234567")
-
-        every { mockIntegrasjonClient.journalførVedtaksbrev(any(), any(), any(), any()) } returns "journalpostId"
-
-        every {
-            mockIntegrasjonClient.journalførManueltBrev(any(), any(), any(), any(), any(), any())
-        } returns "journalpostId"
-
-        every {
-            mockIntegrasjonClient.leggTilLogiskVedlegg(any(), any())
-        } returns LogiskVedleggResponse(12345678)
-
-        every { mockIntegrasjonClient.distribuerBrev(any()) } returns success("bestillingsId")
-
-        every { mockIntegrasjonClient.ferdigstillJournalpost(any(), any()) } just runs
-
-        every { mockIntegrasjonClient.ferdigstillOppgave(any()) } just runs
-
-        every { mockIntegrasjonClient.hentBehandlendeEnhet(any()) } returns
-            listOf(Arbeidsfordelingsenhet("4833", "NAV Familie- og pensjonsytelser Oslo 1"))
-
-        every { mockIntegrasjonClient.hentDokument(any(), any()) } returns
-            Ressurs.success("mock data".toByteArray())
-
-        val idSlot = slot<List<String>>()
-        every {
-            mockIntegrasjonClient.sjekkTilgangTilPersoner(capture(idSlot))
-        } answers {
-            if (idSlot.captured.isNotEmpty() && idSlot.captured.contains(BARN_DET_IKKE_GIS_TILGANG_TIL_FNR))
-                listOf(Tilgang(false, null))
-            else
-                listOf(Tilgang(true, null))
-        }
-
-        every { mockIntegrasjonClient.hentPersonIdent(any()) } returns PersonIdent(søkerFnr[0])
-
-        every { mockIntegrasjonClient.hentArbeidsforhold(any(), any()) } returns emptyList()
-
-        every { mockIntegrasjonClient.hentBehandlendeEnhet(any()) } returns listOf(
-            Arbeidsfordelingsenhet(
-                "100",
-                "NAV Familie- og pensjonsytelser Oslo 1"
-            )
-        )
-
-        every { mockIntegrasjonClient.opprettSkyggesak(any(), any()) } returns Unit
-
-        every { mockIntegrasjonClient.hentLand(any()) } returns "Testland"
-
-        initEuKodeverk(mockIntegrasjonClient)
+        clearIntegrasjonMocks(mockIntegrasjonClient)
 
         return mockIntegrasjonClient
     }
 
-    @Profile("mock-pdl-test-søk")
-    @Primary
     @Bean
+    @Profile("mock-pdl-test-søk")
     fun mockPDL(): PersonopplysningerService {
         val mockPersonopplysningerService = mockk<PersonopplysningerService>()
 
@@ -539,14 +240,317 @@ class ClientMocks {
 
     companion object {
 
+        fun clearPdlMocks(mockPersonopplysningerService: PersonopplysningerService) {
+            clearMocks(mockPersonopplysningerService)
+
+            every {
+                mockPersonopplysningerService.hentAktivAktørId(any())
+            } answers {
+                randomAktørId()
+            }
+
+            every {
+                mockPersonopplysningerService.hentAktivPersonIdent(any())
+            } answers {
+                PersonIdent(randomFnr())
+            }
+
+            every {
+                mockPersonopplysningerService.hentGjeldendeStatsborgerskap(any())
+            } answers {
+                Statsborgerskap(
+                    "NOR",
+                    LocalDate.of(1990, 1, 25),
+                    LocalDate.of(1990, 1, 25),
+                    null
+                )
+            }
+
+            every {
+                mockPersonopplysningerService.hentGjeldendeOpphold(any())
+            } answers {
+                Opphold(
+                    type = OPPHOLDSTILLATELSE.PERMANENT,
+                    oppholdFra = LocalDate.of(1990, 1, 25),
+                    oppholdTil = LocalDate.of(2499, 1, 1)
+                )
+            }
+
+            val identSlot = slot<Ident>()
+            every {
+                mockPersonopplysningerService.hentIdenter(capture(identSlot))
+            } answers {
+                listOf(
+                    IdentInformasjon(identSlot.captured.ident, false, "FOLKEREGISTERIDENT"),
+                    IdentInformasjon(randomFnr(), true, "FOLKEREGISTERIDENT")
+                )
+            }
+
+            every {
+                mockPersonopplysningerService.hentDødsfall(any())
+            } returns DødsfallData(false, null)
+
+            every {
+                mockPersonopplysningerService.hentVergeData(any())
+            } returns VergeData(false)
+
+            every {
+                mockPersonopplysningerService.harVerge(any())
+            } returns VergeResponse(false)
+
+            every {
+                mockPersonopplysningerService.hentLandkodeUtenlandskBostedsadresse(any())
+            } returns "NO"
+
+            val idSlotForHentPersoninfo = slot<String>()
+            every {
+                mockPersonopplysningerService.hentPersoninfoEnkel(capture(idSlotForHentPersoninfo))
+            } answers {
+                when (val id = idSlotForHentPersoninfo.captured) {
+                    barnFnr[0], barnFnr[1] -> personInfo.getValue(id)
+                    søkerFnr[0], søkerFnr[1] -> personInfo.getValue(id)
+                    else -> personInfo.getValue(INTEGRASJONER_FNR)
+                }
+            }
+
+            val idSlot = slot<String>()
+            every {
+                mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(capture(idSlot))
+            } answers {
+                when (val id = idSlot.captured) {
+                    "00000000000" -> throw HttpClientErrorException(
+                        HttpStatus.NOT_FOUND,
+                        "Fant ikke forespurte data på person."
+                    )
+                    barnFnr[0], barnFnr[1] -> personInfo.getValue(id)
+
+                    søkerFnr[0] -> personInfo.getValue(id).copy(
+                        forelderBarnRelasjon = setOf(
+                            ForelderBarnRelasjon(
+                                personIdent = Personident(id = barnFnr[0]),
+                                relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
+                                navn = personInfo.getValue(barnFnr[0]).navn,
+                                fødselsdato = personInfo.getValue(barnFnr[0]).fødselsdato
+                            ),
+                            ForelderBarnRelasjon(
+                                personIdent = Personident(id = barnFnr[1]),
+                                relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
+                                navn = personInfo.getValue(barnFnr[1]).navn,
+                                fødselsdato = personInfo.getValue(barnFnr[1]).fødselsdato
+                            ),
+                            ForelderBarnRelasjon(
+                                personIdent = Personident(id = søkerFnr[1]),
+                                relasjonsrolle = FORELDERBARNRELASJONROLLE.MEDMOR
+                            )
+                        )
+                    )
+
+                    søkerFnr[1] -> personInfo.getValue(id).copy(
+                        forelderBarnRelasjon = setOf(
+                            ForelderBarnRelasjon(
+                                personIdent = Personident(id = barnFnr[0]),
+                                relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
+                                navn = personInfo.getValue(barnFnr[0]).navn,
+                                fødselsdato = personInfo.getValue(barnFnr[0]).fødselsdato
+                            ),
+                            ForelderBarnRelasjon(
+                                personIdent = Personident(id = barnFnr[1]),
+                                relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
+                                navn = personInfo.getValue(barnFnr[1]).navn,
+                                fødselsdato = personInfo.getValue(barnFnr[1]).fødselsdato
+                            ),
+                            ForelderBarnRelasjon(
+                                personIdent = Personident(id = søkerFnr[0]),
+                                relasjonsrolle = FORELDERBARNRELASJONROLLE.FAR
+                            )
+                        )
+                    )
+
+                    søkerFnr[2] -> personInfo.getValue(id).copy(
+                        forelderBarnRelasjon = setOf(
+                            ForelderBarnRelasjon(
+                                personIdent = Personident(id = barnFnr[0]),
+                                relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
+                                navn = personInfo.getValue(barnFnr[0]).navn,
+                                fødselsdato = personInfo.getValue(barnFnr[0]).fødselsdato
+                            ),
+                            ForelderBarnRelasjon(
+                                personIdent = Personident(id = barnFnr[1]),
+                                relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
+                                navn = personInfo.getValue(barnFnr[1]).navn,
+                                fødselsdato = personInfo.getValue(barnFnr[1]).fødselsdato,
+                                adressebeskyttelseGradering = personInfo.getValue(barnFnr[1]).adressebeskyttelseGradering
+                            ),
+                            ForelderBarnRelasjon(
+                                personIdent = Personident(id = søkerFnr[0]),
+                                relasjonsrolle = FORELDERBARNRELASJONROLLE.FAR
+                            )
+                        ),
+                        forelderBarnRelasjonMaskert = setOf(
+                            ForelderBarnRelasjonMaskert(
+                                relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
+                                adressebeskyttelseGradering = personInfo.getValue(
+                                    BARN_DET_IKKE_GIS_TILGANG_TIL_FNR
+                                ).adressebeskyttelseGradering!!
+                            )
+                        )
+                    )
+
+                    INTEGRASJONER_FNR -> personInfo.getValue(id).copy(
+                        forelderBarnRelasjon = setOf(
+                            ForelderBarnRelasjon(
+                                personIdent = Personident(id = barnFnr[0]),
+                                relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
+                                navn = personInfo.getValue(barnFnr[0]).navn,
+                                fødselsdato = personInfo.getValue(barnFnr[0]).fødselsdato
+                            ),
+                            ForelderBarnRelasjon(
+                                personIdent = Personident(id = barnFnr[1]),
+                                relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
+                                navn = personInfo.getValue(barnFnr[1]).navn,
+                                fødselsdato = personInfo.getValue(barnFnr[1]).fødselsdato
+                            ),
+                            ForelderBarnRelasjon(
+                                personIdent = Personident(id = søkerFnr[1]),
+                                relasjonsrolle = FORELDERBARNRELASJONROLLE.MEDMOR
+                            )
+                        )
+                    )
+                    mockBarnAutomatiskBehandlingFnr -> personInfo.getValue(id)
+                    mockBarnAutomatiskBehandling2Fnr -> personInfo.getValue(id)
+                    mockSøkerAutomatiskBehandlingFnr -> personInfo.getValue(id)
+                    mockBarnAutomatiskBehandlingSkalFeileFnr -> personInfo.getValue(id)
+                    else -> personInfo.getValue(INTEGRASJONER_FNR)
+                }
+            }
+
+            every {
+                mockPersonopplysningerService.hentAdressebeskyttelseSomSystembruker(capture(idSlot))
+            } answers {
+                if (BARN_DET_IKKE_GIS_TILGANG_TIL_FNR == idSlot.captured)
+                    ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG
+                else
+                    ADRESSEBESKYTTELSEGRADERING.UGRADERT
+            }
+
+            every { mockPersonopplysningerService.harVerge(mockSøkerAutomatiskBehandlingFnr) } returns VergeResponse(
+                harVerge = false
+            )
+        }
+
+        fun clearIntegrasjonMocks(mockIntegrasjonClient: IntegrasjonClient) {
+            every {
+                mockIntegrasjonClient.hentMaskertPersonInfoVedManglendeTilgang(any())
+            } returns null
+
+            every { mockIntegrasjonClient.hentJournalpost(any()) } answers {
+                success(
+                    lagTestJournalpost(
+                        søkerFnr[0],
+                        UUID.randomUUID().toString()
+                    )
+                )
+            }
+
+            every { mockIntegrasjonClient.hentJournalpost(any()) } answers {
+                success(
+                    lagTestJournalpost(
+                        søkerFnr[0],
+                        UUID.randomUUID().toString()
+                    )
+                )
+            }
+
+            every { mockIntegrasjonClient.hentJournalposterForBruker(any()) } answers {
+                success(
+                    listOf(
+                        lagTestJournalpost(
+                            søkerFnr[0],
+                            UUID.randomUUID().toString()
+                        ),
+                        lagTestJournalpost(
+                            søkerFnr[0],
+                            UUID.randomUUID().toString()
+                        )
+                    )
+                )
+            }
+
+            every { mockIntegrasjonClient.finnOppgaveMedId(any()) } returns
+                lagTestOppgaveDTO(1L)
+
+            every { mockIntegrasjonClient.hentOppgaver(any()) } returns
+                FinnOppgaveResponseDto(
+                    2,
+                    listOf(lagTestOppgaveDTO(1L), lagTestOppgaveDTO(2L, Oppgavetype.BehandleSak, "Z999999"))
+                )
+
+            every { mockIntegrasjonClient.opprettOppgave(any()) } returns
+                "12345678"
+
+            every { mockIntegrasjonClient.patchOppgave(any()) } returns
+                OppgaveResponse(12345678L)
+
+            every { mockIntegrasjonClient.fordelOppgave(any(), any()) } returns
+                "12345678"
+
+            every { mockIntegrasjonClient.oppdaterJournalpost(any(), any()) } returns
+                OppdaterJournalpostResponse("1234567")
+
+            every { mockIntegrasjonClient.journalførVedtaksbrev(any(), any(), any(), any()) } returns "journalpostId"
+
+            every {
+                mockIntegrasjonClient.journalførManueltBrev(any(), any(), any(), any(), any(), any())
+            } returns "journalpostId"
+
+            every {
+                mockIntegrasjonClient.leggTilLogiskVedlegg(any(), any())
+            } returns LogiskVedleggResponse(12345678)
+
+            every { mockIntegrasjonClient.distribuerBrev(any()) } returns success("bestillingsId")
+
+            every { mockIntegrasjonClient.ferdigstillJournalpost(any(), any()) } just runs
+
+            every { mockIntegrasjonClient.ferdigstillOppgave(any()) } just runs
+
+            every { mockIntegrasjonClient.hentBehandlendeEnhet(any()) } returns
+                listOf(Arbeidsfordelingsenhet("4833", "NAV Familie- og pensjonsytelser Oslo 1"))
+
+            every { mockIntegrasjonClient.hentDokument(any(), any()) } returns
+                success("mock data".toByteArray())
+
+            val idSlot = slot<List<String>>()
+            every {
+                mockIntegrasjonClient.sjekkTilgangTilPersoner(capture(idSlot))
+            } answers {
+                if (idSlot.captured.isNotEmpty() && idSlot.captured.contains(BARN_DET_IKKE_GIS_TILGANG_TIL_FNR))
+                    listOf(Tilgang(false, null))
+                else
+                    listOf(Tilgang(true, null))
+            }
+
+            every { mockIntegrasjonClient.hentPersonIdent(any()) } returns PersonIdent(søkerFnr[0])
+
+            every { mockIntegrasjonClient.hentArbeidsforhold(any(), any()) } returns emptyList()
+
+            every { mockIntegrasjonClient.hentBehandlendeEnhet(any()) } returns listOf(
+                Arbeidsfordelingsenhet(
+                    "100",
+                    "NAV Familie- og pensjonsytelser Oslo 1"
+                )
+            )
+
+            every { mockIntegrasjonClient.opprettSkyggesak(any(), any()) } returns Unit
+
+            every { mockIntegrasjonClient.hentLand(any()) } returns "Testland"
+
+            initEuKodeverk(mockIntegrasjonClient)
+        }
+
         private val FOM_1900 = LocalDate.of(1900, Month.JANUARY, 1)
         val FOM_1990 = LocalDate.of(1990, Month.JANUARY, 1)
-        val FOM_2000 = LocalDate.of(2000, Month.JANUARY, 1)
         val FOM_2004 = LocalDate.of(2004, Month.JANUARY, 1)
         val FOM_2008 = LocalDate.of(2008, Month.JANUARY, 1)
-        val FOM_2010 = LocalDate.of(2010, Month.JANUARY, 1)
-        val TOM_2000 = LocalDate.of(1999, Month.DECEMBER, 31)
-        val TOM_2004 = LocalDate.of(2003, Month.DECEMBER, 31)
         val TOM_2010 = LocalDate.of(2009, Month.DECEMBER, 31)
         private val TOM_9999 = LocalDate.of(9999, Month.DECEMBER, 31)
 

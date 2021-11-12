@@ -1,28 +1,16 @@
 package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger
 
 import io.mockk.every
-import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
-import io.mockk.unmockkAll
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.randomFnr
-import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
-import org.junit.jupiter.api.extension.ExtendWith
 
-@ExtendWith(MockKExtension::class)
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class PersongrunnlagServiceTest {
 
     private val persongrunnlagService = mockk<PersongrunnlagService>()
-
-    @AfterAll
-    fun tearDown() {
-        unmockkAll()
-    }
 
     @Test
     fun `Returnerer nytt barn fra personopplysningsgrunnlag`() {

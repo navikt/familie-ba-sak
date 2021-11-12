@@ -56,7 +56,7 @@ class EndretUtbetalingAndelTest(
             andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = restUtvidetBehandling.data!!.behandlingId)
 
         val endretAndeleTilkjentYtelse =
-            andelerTilkjentYtelseMedEndretPeriode.single { it.kalkulertUtbetalingsbeløp === 0 }
+            andelerTilkjentYtelseMedEndretPeriode.single { it.kalkulertUtbetalingsbeløp == 0 }
 
         Assertions.assertEquals(
             endretAndeleTilkjentYtelse.stønadFom,
@@ -69,7 +69,7 @@ class EndretUtbetalingAndelTest(
         )
 
         val førsteUtbetalingAndeleTilkjentYtelse =
-            andelerTilkjentYtelseMedEndretPeriode.last { it.kalkulertUtbetalingsbeløp !== 0 }
+            andelerTilkjentYtelseMedEndretPeriode.last { it.kalkulertUtbetalingsbeløp != 0 }
 
         Assertions.assertEquals(
             førsteUtbetalingAndeleTilkjentYtelse.stønadFom,

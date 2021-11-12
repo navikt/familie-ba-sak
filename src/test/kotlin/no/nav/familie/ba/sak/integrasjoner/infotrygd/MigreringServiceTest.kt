@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.integrasjoner.infotrygd
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
-import io.mockk.unmockkAll
 import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.Feil
@@ -11,6 +10,7 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.fødselsnummerGenerator
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
+import no.nav.familie.ba.sak.config.AbstractMockkRunner
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
@@ -46,11 +46,9 @@ import no.nav.familie.kontrakter.felles.personopplysning.ForelderBarnRelasjon
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.assertj.core.api.Assertions.tuple
-import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -76,7 +74,6 @@ import java.time.format.DateTimeFormatter
     "mock-oauth",
     "mock-rest-template-config"
 )
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Tag("integration")
 class MigreringServiceTest(
     @Autowired
@@ -117,12 +114,7 @@ class MigreringServiceTest(
 
     @Autowired
     private val env: EnvService,
-) {
-
-    @AfterAll
-    fun tearDown() {
-        unmockkAll()
-    }
+) : AbstractMockkRunner() {
 
     @BeforeEach
     fun init() {

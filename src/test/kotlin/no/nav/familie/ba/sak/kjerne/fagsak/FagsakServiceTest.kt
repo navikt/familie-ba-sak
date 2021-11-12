@@ -60,7 +60,7 @@ class FagsakServiceTest(
     @Autowired
     private val integrasjonClient: IntegrasjonClient
 
-) : AbstractSpringIntegrationTest() {
+) : AbstractSpringIntegrationTest(personopplysningerService) {
 
     @BeforeAll
     fun init() {
@@ -265,7 +265,9 @@ class FagsakServiceTest(
             )
         )
 
-        fagsakService.lagre(fagsakService.hentFagsakPåPerson(setOf(PersonIdent(søker1Fnr))).also { it?.arkivert = true }!!)
+        fagsakService.lagre(
+            fagsakService.hentFagsakPåPerson(setOf(PersonIdent(søker1Fnr))).also { it?.arkivert = true }!!
+        )
 
         val søkeresultat1 = fagsakService.hentFagsakDeltager(søker1Fnr)
 
@@ -291,7 +293,9 @@ class FagsakServiceTest(
             )
         )
 
-        fagsakService.lagre(fagsakService.hentFagsakPåPerson(setOf(PersonIdent(søker1Fnr))).also { it?.arkivert = true }!!)
+        fagsakService.lagre(
+            fagsakService.hentFagsakPåPerson(setOf(PersonIdent(søker1Fnr))).also { it?.arkivert = true }!!
+        )
 
         val søkeresultat1 = fagsakService.hentFagsakDeltager(søker1Fnr)
 
@@ -330,7 +334,10 @@ class FagsakServiceTest(
         every {
             integrasjonClient.sjekkTilgangTilPersoner(any())
         } answers {
-            throw HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR, "[PdlRestClient][Feil ved oppslag på person: Fant ikke person]")
+            throw HttpServerErrorException(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                "[PdlRestClient][Feil ved oppslag på person: Fant ikke person]"
+            )
         }
         assertEquals(emptyList<RestFagsakDeltager>(), fagsakService.hentFagsakDeltager(randomFnr()))
     }

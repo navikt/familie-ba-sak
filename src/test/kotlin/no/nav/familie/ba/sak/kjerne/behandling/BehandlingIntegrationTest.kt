@@ -66,13 +66,11 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.test.annotation.DirtiesContext
 import java.time.LocalDate
 import java.time.YearMonth
 import javax.transaction.Transactional
 
 // Todo. Bruker every. Dette endrer funksjonalliteten for alle klasser.
-@DirtiesContext
 class BehandlingIntegrationTest(
     @Autowired
     private val behandlingRepository: BehandlingRepository,
@@ -115,11 +113,10 @@ class BehandlingIntegrationTest(
 
     @Autowired
     private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
-
-) : AbstractSpringIntegrationTest() {
+) : AbstractSpringIntegrationTest(personopplysningerService) {
 
     @BeforeEach
-    fun setup() {
+    fun truncate() {
         databaseCleanupService.truncate()
     }
 
