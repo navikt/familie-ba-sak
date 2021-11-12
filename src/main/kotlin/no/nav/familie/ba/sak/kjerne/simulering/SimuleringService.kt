@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.simulering.domene.RestSimulering
 import no.nav.familie.ba.sak.kjerne.simulering.domene.ØknomiSimuleringMottakerRepository
@@ -33,6 +34,8 @@ class SimuleringService(
 
     fun hentSimuleringFraFamilieOppdrag(vedtak: Vedtak): DetaljertSimuleringResultat? {
         try {
+            if (vedtak.behandling.resultat == BehandlingResultat.FORTSATT_INNVILGET) return null
+
             /**
              * SOAP integrasjonen støtter ikke full epost som MQ,
              * så vi bruker bare første 8 tegn av saksbehandlers epost for simulering.
@@ -43,10 +46,6 @@ class SimuleringService(
                 saksbehandlerId = SikkerhetContext.hentSaksbehandler().take(8),
                 erSimulering = true,
             )
-
-            if (utbetalingsoppdrag.utbetalingsperiode.isEmpty()) {
-                return null
-            }
 
             return økonomiKlient.hentSimulering(utbetalingsoppdrag)?.data
         } catch (feil: Throwable) {
@@ -64,7 +63,8 @@ class SimuleringService(
     }
 
     @Transactional
-    fun slettSimuleringPåBehandling(behandlingId: Long) = øknomiSimuleringMottakerRepository.deleteByBehandlingId(behandlingId)
+    fun slettSimuleringPåBehandling(behandlingId: Long) =
+        øknomiSimuleringMottakerRepository.deleteByBehandlingId(behandlingId)
 
     fun hentSimuleringPåBehandling(behandlingId: Long): List<ØkonomiSimuleringMottaker> {
         return øknomiSimuleringMottakerRepository.findByBehandlingId(behandlingId)

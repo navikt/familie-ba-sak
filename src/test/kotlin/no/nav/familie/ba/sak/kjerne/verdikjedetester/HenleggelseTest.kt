@@ -107,7 +107,7 @@ class HenleggelseTest(
         )
 
         val ferdigstiltBehandling = stegService.håndterFerdigstillBehandling(
-            behandling = behandlingService.hentAktivForFagsak(responseHenlagtSøknad.data!!.behandlingId)!!
+            behandling = behandlingService.hent(responseHenlagtSøknad.data!!.behandlingId)
         )
 
         assertThat(!ferdigstiltBehandling.aktiv)

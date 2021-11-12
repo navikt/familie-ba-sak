@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.behandling.domene
 
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
@@ -88,6 +89,7 @@ data class Behandling(
         return "Behandling(id=$id, fagsak=${fagsak.id}, kategori=$kategori, underkategori=$underkategori, steg=$steg)"
     }
 
+    // Skal kun brukes på gamle behandlinger
     fun erTekniskOpphør(): Boolean {
         return if (type == BehandlingType.TEKNISK_OPPHØR ||
             opprettetÅrsak == BehandlingÅrsak.TEKNISK_OPPHØR
@@ -99,6 +101,28 @@ data class Behandling(
         } else {
             false
         }
+    }
+
+    fun validerBehandlingstype() {
+        if (type == BehandlingType.TEKNISK_OPPHØR) {
+            throw FunksjonellFeil(
+                melding = "Kan ikke lage teknisk opphør behandling.",
+                frontendFeilmelding = "Kan ikke lage teknisk opphør behandling, bruk heller teknisk endring."
+            )
+        }
+
+        if (type == BehandlingType.TEKNISK_ENDRING ||
+            opprettetÅrsak == BehandlingÅrsak.TEKNISK_ENDRING
+        ) {
+            if (type != BehandlingType.TEKNISK_ENDRING ||
+                opprettetÅrsak != BehandlingÅrsak.TEKNISK_ENDRING
+            )
+                throw Feil("Behandling er teknisk endring, men årsak $opprettetÅrsak og type $type samsvarer ikke.")
+        }
+    }
+
+    fun erBehandlingMedVedtaksbrevutsending(): Boolean {
+        return type != BehandlingType.TEKNISK_ENDRING && opprettetÅrsak != BehandlingÅrsak.SATSENDRING
     }
 
     fun erHenlagt() =
@@ -247,7 +271,8 @@ enum class BehandlingÅrsak(val visningsnavn: String) {
     DØDSFALL_BRUKER("Dødsfall bruker"),
     NYE_OPPLYSNINGER("Nye opplysninger"),
     KLAGE("Klage"),
-    TEKNISK_OPPHØR("Teknisk opphør"), // Kan være tilbakeføring til infotrygd, feilutbetaling
+    TEKNISK_OPPHØR("Teknisk opphør"), // Ikke lenger i bruk. Bruk heller teknisk endring
+    TEKNISK_ENDRING("Teknisk endring"), // Brukes i tilfeller ved systemfeil og vi ønsker å iverksette mot OS på nytt
     KORREKSJON_VEDTAKSBREV("Korrigere vedtak med egen brevmal"),
     OMREGNING_6ÅR("Omregning 6 år"),
     OMREGNING_18ÅR("Omregning 18 år"),
@@ -260,7 +285,8 @@ enum class BehandlingType(val visningsnavn: String) {
     REVURDERING("Revurdering"),
     MIGRERING_FRA_INFOTRYGD("Migrering fra infotrygd"),
     MIGRERING_FRA_INFOTRYGD_OPPHØRT("Opphør migrering fra infotrygd"),
-    TEKNISK_OPPHØR("Teknisk opphør")
+    TEKNISK_OPPHØR("Teknisk opphør"), // Ikke lenger i bruk. Bruk heller teknisk endring
+    TEKNISK_ENDRING("Teknisk endring")
 }
 
 enum class BehandlingKategori(val visningsnavn: String) {

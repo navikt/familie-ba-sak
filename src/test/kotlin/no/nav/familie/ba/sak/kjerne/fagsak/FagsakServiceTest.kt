@@ -46,7 +46,7 @@ class FagsakServiceTest(
     private val stegService: StegService,
 
     @Autowired
-    private val personopplysningerService: PersonopplysningerService,
+    private val mockPersonopplysningerService: PersonopplysningerService,
 
     @Autowired
     private val persongrunnlagService: PersongrunnlagService,
@@ -59,8 +59,10 @@ class FagsakServiceTest(
 
     @Autowired
     private val integrasjonClient: IntegrasjonClient
-
-) : AbstractSpringIntegrationTest() {
+) : AbstractSpringIntegrationTest(
+    personopplysningerService = mockPersonopplysningerService,
+    integrasjonClient = integrasjonClient
+) {
 
     @BeforeAll
     fun init() {
@@ -96,11 +98,11 @@ class FagsakServiceTest(
         val barn3Fnr = randomFnr()
 
         every {
-            personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(eq(barn1Fnr))
+            mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(eq(barn1Fnr))
         } returns PersonInfo(fødselsdato = LocalDate.of(2018, 5, 1), kjønn = Kjønn.KVINNE, navn = "barn1")
 
         every {
-            personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(eq(barn2Fnr))
+            mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(eq(barn2Fnr))
         } returns PersonInfo(
             fødselsdato = LocalDate.of(2019, 5, 1),
             kjønn = Kjønn.MANN,
@@ -122,31 +124,31 @@ class FagsakServiceTest(
         )
 
         every {
-            personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(eq(søker1Fnr))
+            mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(eq(søker1Fnr))
         } returns PersonInfo(fødselsdato = LocalDate.of(1990, 2, 19), kjønn = Kjønn.KVINNE, navn = "søker1")
 
         every {
-            personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(eq(søker2Fnr))
+            mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(eq(søker2Fnr))
         } returns PersonInfo(fødselsdato = LocalDate.of(1991, 2, 20), kjønn = Kjønn.MANN, navn = "søker2")
 
         every {
-            personopplysningerService.hentPersoninfoEnkel(eq(barn2Fnr))
+            mockPersonopplysningerService.hentPersoninfoEnkel(eq(barn2Fnr))
         } returns PersonInfo(fødselsdato = LocalDate.of(2019, 5, 1), kjønn = Kjønn.MANN, navn = "barn2")
 
         every {
-            personopplysningerService.hentPersoninfoEnkel(eq(barn3Fnr))
+            mockPersonopplysningerService.hentPersoninfoEnkel(eq(barn3Fnr))
         } returns PersonInfo(fødselsdato = LocalDate.of(2017, 3, 1), kjønn = Kjønn.KVINNE, navn = "barn3")
 
         every {
-            personopplysningerService.hentPersoninfoEnkel(eq(søker1Fnr))
+            mockPersonopplysningerService.hentPersoninfoEnkel(eq(søker1Fnr))
         } returns PersonInfo(fødselsdato = LocalDate.of(1990, 2, 19), kjønn = Kjønn.KVINNE, navn = "søker1")
 
         every {
-            personopplysningerService.hentPersoninfoEnkel(eq(søker2Fnr))
+            mockPersonopplysningerService.hentPersoninfoEnkel(eq(søker2Fnr))
         } returns PersonInfo(fødselsdato = LocalDate.of(1991, 2, 20), kjønn = Kjønn.MANN, navn = "søker2")
 
         every {
-            personopplysningerService.hentPersoninfoEnkel(eq(søker3Fnr))
+            mockPersonopplysningerService.hentPersoninfoEnkel(eq(søker3Fnr))
         } returns PersonInfo(fødselsdato = LocalDate.of(1990, 1, 10), kjønn = Kjønn.KVINNE, navn = "søker3")
 
         val fagsak0 = fagsakService.hentEllerOpprettFagsak(
@@ -243,11 +245,11 @@ class FagsakServiceTest(
         val søker1Fnr = randomFnr()
 
         every {
-            personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(eq(søker1Fnr))
+            mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(eq(søker1Fnr))
         } returns PersonInfo(fødselsdato = LocalDate.of(1991, 2, 19), kjønn = Kjønn.KVINNE, navn = "søker1")
 
         every {
-            personopplysningerService.hentPersoninfoEnkel(eq(søker1Fnr))
+            mockPersonopplysningerService.hentPersoninfoEnkel(eq(søker1Fnr))
         } returns PersonInfo(fødselsdato = LocalDate.of(1991, 2, 19), kjønn = Kjønn.KVINNE, navn = "søker1")
 
         fagsakService.hentEllerOpprettFagsak(
@@ -265,7 +267,9 @@ class FagsakServiceTest(
             )
         )
 
-        fagsakService.lagre(fagsakService.hentFagsakPåPerson(setOf(PersonIdent(søker1Fnr))).also { it?.arkivert = true }!!)
+        fagsakService.lagre(
+            fagsakService.hentFagsakPåPerson(setOf(PersonIdent(søker1Fnr))).also { it?.arkivert = true }!!
+        )
 
         val søkeresultat1 = fagsakService.hentFagsakDeltager(søker1Fnr)
 
@@ -278,11 +282,11 @@ class FagsakServiceTest(
         val søker1Fnr = randomFnr()
 
         every {
-            personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(eq(søker1Fnr))
+            mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(eq(søker1Fnr))
         } returns PersonInfo(fødselsdato = LocalDate.of(1992, 2, 19), kjønn = Kjønn.KVINNE, navn = "søker1")
 
         every {
-            personopplysningerService.hentPersoninfoEnkel(eq(søker1Fnr))
+            mockPersonopplysningerService.hentPersoninfoEnkel(eq(søker1Fnr))
         } returns PersonInfo(fødselsdato = LocalDate.of(1992, 2, 19), kjønn = Kjønn.KVINNE, navn = "søker1")
 
         fagsakService.hentEllerOpprettFagsak(
@@ -291,7 +295,9 @@ class FagsakServiceTest(
             )
         )
 
-        fagsakService.lagre(fagsakService.hentFagsakPåPerson(setOf(PersonIdent(søker1Fnr))).also { it?.arkivert = true }!!)
+        fagsakService.lagre(
+            fagsakService.hentFagsakPåPerson(setOf(PersonIdent(søker1Fnr))).also { it?.arkivert = true }!!
+        )
 
         val søkeresultat1 = fagsakService.hentFagsakDeltager(søker1Fnr)
 
@@ -330,7 +336,10 @@ class FagsakServiceTest(
         every {
             integrasjonClient.sjekkTilgangTilPersoner(any())
         } answers {
-            throw HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR, "[PdlRestClient][Feil ved oppslag på person: Fant ikke person]")
+            throw HttpServerErrorException(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                "[PdlRestClient][Feil ved oppslag på person: Fant ikke person]"
+            )
         }
         assertEquals(emptyList<RestFagsakDeltager>(), fagsakService.hentFagsakDeltager(randomFnr()))
     }

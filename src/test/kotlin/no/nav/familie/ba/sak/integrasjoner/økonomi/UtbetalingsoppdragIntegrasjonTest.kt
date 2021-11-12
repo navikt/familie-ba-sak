@@ -847,7 +847,7 @@ class UtbetalingsoppdragIntegrasjonTest(
     }
 
     @Test
-    fun `gerg`() {
+    fun `Skal teste uthenting av offset på revurderinger`() {
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(randomFnr())
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(
             lagBehandling(

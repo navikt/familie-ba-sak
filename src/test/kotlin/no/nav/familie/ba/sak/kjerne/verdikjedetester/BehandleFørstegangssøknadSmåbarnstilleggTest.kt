@@ -36,8 +36,11 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
+import org.springframework.test.annotation.DirtiesContext
 import java.time.LocalDate
 
+// Todo. Bruker every. Dette endrer funksjonalliteten for alle klasser.
+@DirtiesContext
 class BehandleFørstegangssøknadSmåbarnstilleggTest(
     @Autowired private val fagsakService: FagsakService,
     @Autowired private val behandlingService: BehandlingService,
@@ -46,7 +49,7 @@ class BehandleFørstegangssøknadSmåbarnstilleggTest(
     @Autowired private val featureToggleService: FeatureToggleService,
     @Autowired private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     @Autowired private val efSakRestClient: EfSakRestClient
-) : AbstractVerdikjedetest() {
+) : AbstractVerdikjedetest(efSakRestClient = efSakRestClient) {
 
     @Test
     fun `Skal behandle utvidet nasjonal sak med småbarnstillegg`() {

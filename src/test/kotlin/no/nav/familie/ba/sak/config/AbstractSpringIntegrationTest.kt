@@ -1,11 +1,14 @@
 package no.nav.familie.ba.sak.config
 
-import io.mockk.unmockkAll
+import com.github.tomakehurst.wiremock.WireMockServer
+import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import no.nav.familie.ba.sak.common.DbContainerInitializer
+import no.nav.familie.ba.sak.integrasjoner.`ef-sak`.EfSakRestClient
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
+import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Tag
-import org.junit.jupiter.api.TestInstance
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 
@@ -23,12 +26,21 @@ import org.springframework.test.context.ContextConfiguration
     "mock-rest-template-config",
 )
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
-@AutoConfigureWireMock(port = 28085)
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Tag("integration")
-abstract class AbstractSpringIntegrationTest {
+abstract class AbstractSpringIntegrationTest(
+    personopplysningerService: PersonopplysningerService? = null,
+    integrasjonClient: IntegrasjonClient? = null,
+    efSakRestClient: EfSakRestClient? = null,
+) : AbstractMockkSpringRunner(personopplysningerService, integrasjonClient, efSakRestClient) {
+
+    protected val wireMockServer = WireMockServer(WireMockConfiguration.wireMockConfig().dynamicPort())
 
     init {
-        unmockkAll()
+        wireMockServer.start()
+    }
+
+    @AfterAll
+    fun stopWiremockServer() {
+        wireMockServer.stop()
     }
 }
