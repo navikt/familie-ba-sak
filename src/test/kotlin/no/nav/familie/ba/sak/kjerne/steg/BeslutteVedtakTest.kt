@@ -27,6 +27,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.task.FerdigstillOppgave
 import no.nav.familie.ba.sak.task.OpprettOppgaveTask
+import no.nav.familie.ba.sak.økonomi.ØkonomiService
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.Task
 import org.junit.jupiter.api.Assertions
@@ -43,6 +44,7 @@ class BeslutteVedtakTest {
     private lateinit var dokumentService: DokumentService
     private lateinit var vilkårsvurderingService: VilkårsvurderingService
     private lateinit var featureToggleService: FeatureToggleService
+    private lateinit var økonomiService: ØkonomiService
 
     val randomVilkårsvurdering = Vilkårsvurdering(behandling = lagBehandling())
 
@@ -55,10 +57,20 @@ class BeslutteVedtakTest {
         behandlingService = mockk()
         vilkårsvurderingService = mockk()
         featureToggleService = mockk()
+        økonomiService = mockk()
+
         val loggService = mockk<LoggService>()
 
         every { taskRepository.save(any()) } returns Task(OpprettOppgaveTask.TASK_STEP_TYPE, "")
-        every { toTrinnKontrollService.besluttTotrinnskontroll(any(), any(), any(), any(), any()) } returns Totrinnskontroll(
+        every {
+            toTrinnKontrollService.besluttTotrinnskontroll(
+                any(),
+                any(),
+                any(),
+                any(),
+                any()
+            )
+        } returns Totrinnskontroll(
             behandling = lagBehandling(), saksbehandler = "Mock Saksbehandler", saksbehandlerId = "Mock.Saksbehandler"
         )
         every { loggService.opprettBeslutningOmVedtakLogg(any(), any(), any()) } just Runs
@@ -75,7 +87,8 @@ class BeslutteVedtakTest {
             taskRepository,
             loggService,
             vilkårsvurderingService,
-            featureToggleService
+            featureToggleService,
+            økonomiService
         )
     }
 
@@ -143,7 +156,10 @@ class BeslutteVedtakTest {
         mockkObject(FerdigstillOppgave.Companion)
         mockkObject(OpprettOppgaveTask.Companion)
         every { FerdigstillOppgave.opprettTask(any(), any()) } returns Task(FerdigstillOppgave.TASK_STEP_TYPE, "")
-        every { OpprettOppgaveTask.opprettTask(any(), any(), any()) } returns Task(OpprettOppgaveTask.TASK_STEP_TYPE, "")
+        every { OpprettOppgaveTask.opprettTask(any(), any(), any()) } returns Task(
+            OpprettOppgaveTask.TASK_STEP_TYPE,
+            ""
+        )
 
         beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak)
         verify(exactly = 1) { behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling, true, emptyList()) }

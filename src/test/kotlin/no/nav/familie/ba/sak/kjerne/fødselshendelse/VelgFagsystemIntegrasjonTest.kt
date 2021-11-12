@@ -6,7 +6,6 @@ import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
-import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -27,7 +26,6 @@ import org.springframework.boot.test.context.SpringBootTest
 )
 class VelgFagsystemIntegrasjonTest(
     @Autowired val stegService: StegService,
-    @Autowired val personopplysningerService: PersonopplysningerService,
     @Autowired val persongrunnlagService: PersongrunnlagService,
     @Autowired val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
     @Autowired val velgFagSystemService: VelgFagSystemService,

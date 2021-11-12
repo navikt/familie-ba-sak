@@ -22,9 +22,12 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.test.annotation.DirtiesContext
 import java.time.LocalDate
 import java.time.YearMonth
 
+// Todo. Bruker every. Dette endrer funksjonalliteten for alle klasser.
+@DirtiesContext
 class BehandlingSatsendringTest(
     @Autowired private val mockLocalDateService: LocalDateService,
     @Autowired private val behandleFødselshendelseTask: BehandleFødselshendelseTask,

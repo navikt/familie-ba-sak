@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
@@ -48,7 +49,12 @@ class StatusFraOppdrag(
 
             error("Mottok status '$oppdragStatus' fra oppdrag")
         } else {
-            when (hentNesteStegForNormalFlyt(behandling)) {
+            val nesteSteg = hentNesteStegForNormalFlyt(behandling)
+            if (nesteSteg == StegType.JOURNALFØR_VEDTAKSBREV && !behandling.erBehandlingMedVedtaksbrevutsending()) {
+                throw Feil("Neste steg på behandling $behandling er journalføring, men denne behandlingen skal ikke sende ut vedtaksbrev")
+            }
+
+            when (nesteSteg) {
                 StegType.JOURNALFØR_VEDTAKSBREV -> opprettTaskJournalførVedtaksbrev(
                     statusFraOppdragDTO.vedtaksId,
                     task
