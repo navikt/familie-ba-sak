@@ -1,12 +1,10 @@
 package no.nav.familie.ba.sak.kjerne.personident
 
 import no.nav.familie.ba.sak.common.BaseEntitet
-import no.nav.familie.ba.sak.common.YearMonthConverter
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
-import java.time.YearMonth
+import java.time.LocalDateTime
 import java.util.Objects
 import javax.persistence.Column
-import javax.persistence.Convert
 import javax.persistence.Entity
 import javax.persistence.EntityListeners
 import javax.persistence.GeneratedValue
@@ -34,8 +32,7 @@ data class Personident(
     var aktiv: Boolean = false,
 
     @Column(name = "gjelder_til", columnDefinition = "DATE")
-    @Convert(converter = YearMonthConverter::class)
-    var gjelderTil: YearMonth,
+    var gjelderTil: LocalDateTime? = null,
 
 ) : BaseEntitet() {
 

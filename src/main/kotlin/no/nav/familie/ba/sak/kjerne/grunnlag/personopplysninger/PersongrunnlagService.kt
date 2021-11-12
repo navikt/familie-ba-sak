@@ -15,15 +15,17 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.opphold.GrOpphold
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.StatsborgerskapService
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
+import no.nav.familie.ba.sak.kjerne.personident.PersonidentRepository
+import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
-import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -34,8 +36,10 @@ class PersongrunnlagService(
     private val statsborgerskapService: StatsborgerskapService,
     private val arbeidsfordelingService: ArbeidsfordelingService,
     private val personopplysningerService: PersonopplysningerService,
+    private val personidentService: PersonidentService,
     private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
     private val behandlingRepository: BehandlingRepository,
+    private val personidentRepository: PersonidentRepository,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val loggService: LoggService,
 ) {
@@ -123,7 +127,8 @@ class PersongrunnlagService(
     fun finnNyeBarn(behandling: Behandling, forrigeBehandling: Behandling?): List<Person> {
         val barnIForrigeGrunnlag = forrigeBehandling?.let { hentAktiv(behandlingId = it.id)?.barna } ?: emptySet()
         val barnINyttGrunnlag =
-            behandling.let { hentAktiv(behandlingId = it.id)?.barna } ?: throw Feil("Fant ikke personopplysningsgrunnlag")
+            behandling.let { hentAktiv(behandlingId = it.id)?.barna }
+                ?: throw Feil("Fant ikke personopplysningsgrunnlag")
 
         return barnINyttGrunnlag.filter { barn -> barnIForrigeGrunnlag.none { barn.personIdent == it.personIdent } }
     }
@@ -134,7 +139,8 @@ class PersongrunnlagService(
     fun registrerBarnFraSøknad(søknadDTO: SøknadDTO, behandling: Behandling, forrigeBehandling: Behandling? = null) {
         val søkerIdent = søknadDTO.søkerMedOpplysninger.ident
         val valgteBarnsIdenter =
-            søknadDTO.barnaMedOpplysninger.filter { it.inkludertISøknaden && it.erFolkeregistrert }.map { barn -> barn.ident }
+            søknadDTO.barnaMedOpplysninger.filter { it.inkludertISøknaden && it.erFolkeregistrert }
+                .map { barn -> barn.ident }
 
         if (behandling.type == BehandlingType.REVURDERING && forrigeBehandling != null) {
             val forrigePersongrunnlag = hentAktiv(behandlingId = forrigeBehandling.id)
@@ -176,17 +182,20 @@ class PersongrunnlagService(
     ): PersonopplysningGrunnlag {
         val personopplysningGrunnlag = lagreOgDeaktiverGammel(PersonopplysningGrunnlag(behandlingId = behandling.id))
 
+        val aktivFødselsnummer = personidentService.hentOgLagreAktivIdentMedAktørId(fødselsnummer)
+        val barnasAktiveFødselsnummer = personidentService.hentOgLagreAktiveIdenterMedAktørId(barnasFødselsnummer)
+
         val enkelPersonInfo = behandling.erMigrering()
         personopplysningGrunnlag.personer.add(
             hentPerson(
-                ident = fødselsnummer,
+                ident = aktivFødselsnummer,
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 målform = målform,
                 personType = PersonType.SØKER,
                 enkelPersonInfo = enkelPersonInfo
             )
         )
-        barnasFødselsnummer.forEach {
+        barnasAktiveFødselsnummer.forEach {
             personopplysningGrunnlag.personer.add(
                 hentPerson(
                     ident = it,
@@ -218,14 +227,16 @@ class PersongrunnlagService(
         val personinfo =
             if (enkelPersonInfo) personopplysningerService.hentPersoninfoEnkel(ident)
             else personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(ident)
-        val aktørId = personopplysningerService.hentAktivAktørId(Ident(ident))
+
+        val aktivIdent =
+            personidentRepository.hentAktivIdent(ident) ?: throw Feil("Personident har ikke aktørid persistert")
 
         return Person(
             personIdent = PersonIdent(ident),
             type = personType,
             personopplysningGrunnlag = personopplysningGrunnlag,
             fødselsdato = personinfo.fødselsdato,
-            aktørId = aktørId,
+            aktørId = AktørId(aktivIdent.aktørId),
             navn = personinfo.navn ?: "",
             kjønn = personinfo.kjønn ?: Kjønn.UKJENT,
             målform = målform
