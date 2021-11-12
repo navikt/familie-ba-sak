@@ -196,8 +196,7 @@ class VedtaksperiodeService(
         if (vedtak.behandling.resultat == BehandlingResultat.FORTSATT_INNVILGET) {
 
             val vedtaksbrevmal = hentVedtaksbrevmal(vedtak.behandling)
-            val erAutobrevFor6Og18År = vedtaksbrevmal == Brevmal.AUTOVEDTAK_BARN6_ÅR ||
-                vedtaksbrevmal == Brevmal.AUTOVEDTAK_BARN18_ÅR
+            val erAutobrevFor6Og18År = vedtaksbrevmal == Brevmal.AUTOVEDTAK_BARN_6_ELLER_18_ÅR
 
             val fom = if (erAutobrevFor6Og18År) {
                 YearMonth.now().førsteDagIInneværendeMåned()

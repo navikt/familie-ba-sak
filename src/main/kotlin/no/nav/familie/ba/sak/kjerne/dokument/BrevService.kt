@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.hentUtvidetYtelseScenario
+import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Autovedtak6eller18år
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.AutovedtakNyfødtBarnFraFør
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.AutovedtakNyfødtFørsteBarn
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Avslag
@@ -84,12 +85,8 @@ class BrevService(
 
             Brevmal.VEDTAK_FORTSATT_INNVILGET -> ForsattInnvilget(vedtakFellesfelter = vedtakFellesfelter)
 
-            Brevmal.AUTOVEDTAK_BARN6_ÅR,
-            Brevmal.AUTOVEDTAK_BARN18_ÅR -> VedtakEndring(
+            Brevmal.AUTOVEDTAK_BARN_6_ELLER_18_ÅR -> Autovedtak6eller18år(
                 vedtakFellesfelter = vedtakFellesfelter,
-                etterbetaling = null,
-                erKlage = false,
-                erFeilutbetalingPåBehandling = false
             )
             Brevmal.AUTOVEDTAK_NYFØDT_FØRSTE_BARN -> AutovedtakNyfødtFørsteBarn(
                 vedtakFellesfelter = vedtakFellesfelter,
