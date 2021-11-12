@@ -25,7 +25,7 @@ class BehandlingTest {
             behandlingType = BehandlingType.TEKNISK_ENDRING,
             årsak = BehandlingÅrsak.SØKNAD
         )
-        assertThrows<RuntimeException> { behandling.validerBehandling() }
+        assertThrows<RuntimeException> { behandling.validerBehandlingstype() }
     }
 
     @Test
@@ -34,7 +34,7 @@ class BehandlingTest {
             behandlingType = BehandlingType.TEKNISK_OPPHØR,
             årsak = BehandlingÅrsak.TEKNISK_OPPHØR
         )
-        assertThrows<RuntimeException> { behandling.validerBehandling() }
+        assertThrows<RuntimeException> { behandling.validerBehandlingstype() }
     }
 
     @Test

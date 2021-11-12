@@ -95,7 +95,7 @@ class BehandlingService(
             )
                 .initBehandlingStegTilstand()
 
-            behandling.validerBehandling()
+            behandling.validerBehandlingstype()
 
             val lagretBehandling = lagreNyOgDeaktiverGammelBehandling(behandling)
             opprettOgInitierNyttVedtakForBehandling(behandling = lagretBehandling)

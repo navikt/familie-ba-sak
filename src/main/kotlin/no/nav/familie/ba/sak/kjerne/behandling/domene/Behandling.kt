@@ -103,7 +103,7 @@ data class Behandling(
         }
     }
 
-    fun validerBehandling() {
+    fun validerBehandlingstype() {
         if (type == BehandlingType.TEKNISK_OPPHØR) {
             throw FunksjonellFeil(
                 melding = "Kan ikke lage teknisk opphør behandling.",
