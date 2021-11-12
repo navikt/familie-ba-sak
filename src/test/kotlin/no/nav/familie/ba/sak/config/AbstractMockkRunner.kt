@@ -18,17 +18,13 @@ abstract class AbstractMockkRunner(
     private val integrasjonClient: IntegrasjonClient? = null,
     private val efSakRestClient: EfSakRestClient? = null
 ) {
-
-    init {
-        clearMocks()
-    }
-
     @AfterAll
     fun afterAll() {
         clearMocks()
     }
 
     private fun clearMocks() {
+        unmockkAll()
         if (personopplysningerService != null)
             ClientMocks.clearPdlMocks(personopplysningerService)
 
@@ -37,6 +33,5 @@ abstract class AbstractMockkRunner(
 
         if (efSakRestClient != null)
             EfSakRestClientMock.clearEfSakRestMocks(efSakRestClient)
-        unmockkAll()
     }
 }

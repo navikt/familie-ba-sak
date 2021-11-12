@@ -109,7 +109,8 @@ class VilkårServiceTest(
 
         val endretVilkårsvurdering: List<RestPersonResultat> =
             vilkårService.endreVilkår(
-                behandlingId = behandling.id, vilkårId = under18ÅrVilkårForBarn!!.id,
+                behandlingId = behandling.id,
+                vilkårId = under18ÅrVilkårForBarn!!.id,
                 restPersonResultat =
                 RestPersonResultat(
                     personIdent = barnFnr,

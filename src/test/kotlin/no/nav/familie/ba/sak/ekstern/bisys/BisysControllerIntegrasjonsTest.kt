@@ -139,7 +139,7 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
                 .withRequestBody(
                     equalToJson(
                         """{"personIdent":"$fnr", "fraDato":"${
-                        YearMonth.now().minusYears(4)
+                            YearMonth.now().minusYears(4)
                         }" }"""
                     )
                 )
@@ -170,7 +170,7 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
                 .withRequestBody(
                     equalToJson(
                         """{"personIdent":"$fnr", "fraDato":"${
-                        YearMonth.now().minusYears(4)
+                            YearMonth.now().minusYears(4)
                         }" }"""
                     )
                 )
@@ -230,7 +230,7 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
                 .withRequestBody(
                     equalToJson(
                         """{"personIdent":"$fnr", "fraDato":"${
-                        YearMonth.now().minusYears(4)
+                            YearMonth.now().minusYears(4)
                         }" }"""
                     )
                 )
@@ -308,13 +308,12 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
         header.setBearerAuth(
             hentTokenForBisys()
         )
-        val requestEntity = HttpEntity<String>(
+        return HttpEntity(
             objectMapper.writeValueAsString(
                 request
             ),
             header
         )
-        return requestEntity
     }
 
     private fun hentTokenForBisys() = token(
