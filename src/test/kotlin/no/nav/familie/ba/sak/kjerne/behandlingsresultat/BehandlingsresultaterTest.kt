@@ -10,6 +10,7 @@ import java.time.YearMonth
 
 data class BehandlingsresultatPersonTestConfig(
     val personer: List<BehandlingsresultatPerson>,
+    val uregistrerteBarn: List<BehandlingsresultatUregistrertBarn> = emptyList(),
     val beskrivelse: String,
     val forventetResultat: BehandlingResultat,
     val inneværendeMåned: String,
@@ -29,6 +30,7 @@ class BehandlingsresultaterTest {
             val ytelsePersonerMedResultat =
                 YtelsePersonUtils.utledYtelsePersonerMedResultat(
                     behandlingsresultatPersoner = behandlingsresultatPersonTestConfig.personer,
+                    uregistrerteBarn = behandlingsresultatPersonTestConfig.uregistrerteBarn,
                     inneværendeMåned = YearMonth.parse(behandlingsresultatPersonTestConfig.inneværendeMåned)
                 )
 
