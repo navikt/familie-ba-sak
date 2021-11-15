@@ -34,7 +34,7 @@ class SimuleringService(
 
     fun hentSimuleringFraFamilieOppdrag(vedtak: Vedtak): DetaljertSimuleringResultat? {
         try {
-            if (vedtak.behandling.resultat == BehandlingResultat.FORTSATT_INNVILGET) return null
+            if (vedtak.behandling.resultat == BehandlingResultat.FORTSATT_INNVILGET || vedtak.behandling.resultat == BehandlingResultat.AVSLÅTT) return null
 
             /**
              * SOAP integrasjonen støtter ikke full epost som MQ,
