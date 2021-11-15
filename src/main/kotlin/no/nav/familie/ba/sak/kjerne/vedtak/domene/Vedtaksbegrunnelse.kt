@@ -76,7 +76,7 @@ data class BegrunnelseData(
     val maanedOgAarBegrunnelsenGjelderFor: String?,
     val maalform: String,
     val apiNavn: String,
-    val belopForPerioden: String,
+    val belop: String,
 ) : Begrunnelse
 
 data class FritekstBegrunnelse(val fritekst: String) : Begrunnelse
@@ -86,7 +86,7 @@ fun RestVedtaksbegrunnelse.tilBrevBegrunnelse(
     personerPåBegrunnelse: List<Person>,
     målform: Målform,
     uregistrerteBarn: List<BarnMedOpplysninger>,
-    beløpForPerioden: String,
+    beløp: String,
 ): Begrunnelse {
     val barnasFødselsdatoer =
         if (this.vedtakBegrunnelseSpesifikasjon == VedtakBegrunnelseSpesifikasjon.AVSLAG_UREGISTRERT_BARN)
@@ -117,6 +117,6 @@ fun RestVedtaksbegrunnelse.tilBrevBegrunnelse(
         maanedOgAarBegrunnelsenGjelderFor = månedOgÅrBegrunnelsenGjelderFor,
         maalform = målform.tilSanityFormat(),
         apiNavn = this.vedtakBegrunnelseSpesifikasjon.sanityApiNavn,
-        belopForPerioden = beløpForPerioden
+        belop = beløp
     )
 }

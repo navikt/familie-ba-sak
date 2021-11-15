@@ -121,7 +121,7 @@ fun UtvidetVedtaksperiodeMedBegrunnelser.byggBegrunnelserOgFritekster(
                 personerPåBegrunnelse = personerIPersongrunnlag.filter { person -> it.personIdenter.contains(person.personIdent.ident) },
                 målform = målform,
                 uregistrerteBarn = uregistrerteBarn,
-                beløpForPerioden = Utils.formaterBeløp(this.utbetalingsperiodeDetaljer.totaltUtbetalt()),
+                beløp = Utils.formaterBeløp(this.utbetalingsperiodeDetaljer.totaltUtbetalt()),
             )
         }
 
