@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.RestHenleggBehandlingInfo
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -186,13 +187,24 @@ class StegService(
         val behandlingSteg: BehandlingsresultatSteg =
             hentBehandlingSteg(StegType.BEHANDLINGSRESULTAT) as BehandlingsresultatSteg
 
-        return håndterSteg(behandling, behandlingSteg) {
+        val behandlingEtterBehandlingsresultatSteg = håndterSteg(behandling, behandlingSteg) {
             behandlingSteg.utførStegOgAngiNeste(behandling, "")
         }
+
+        return if (behandlingEtterBehandlingsresultatSteg.resultat == BehandlingResultat.AVSLÅTT &&
+            !behandlingEtterBehandlingsresultatSteg.skalBehandlesAutomatisk
+        ) {
+            håndterVurderTilbakekreving(
+                behandling = behandlingEtterBehandlingsresultatSteg
+            )
+        } else behandlingEtterBehandlingsresultatSteg
     }
 
     @Transactional
-    fun håndterVurderTilbakekreving(behandling: Behandling, restTilbakekreving: RestTilbakekreving?): Behandling {
+    fun håndterVurderTilbakekreving(
+        behandling: Behandling,
+        restTilbakekreving: RestTilbakekreving? = null
+    ): Behandling {
         val behandlingSteg: VurderTilbakekrevingSteg =
             hentBehandlingSteg(StegType.VURDER_TILBAKEKREVING) as VurderTilbakekrevingSteg
 

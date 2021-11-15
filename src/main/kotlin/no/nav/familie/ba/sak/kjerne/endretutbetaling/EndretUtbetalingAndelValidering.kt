@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.kjerne.endretutbetaling
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.UtbetalingsikkerhetFeil
-import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.overlapperHeltEllerDelvisMed
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
@@ -137,19 +136,6 @@ fun validerAtDetFinnesDeltBostedEndringerMedSammeProsentForUtvidedeEndringer(
         endretUtbetalingAndeler.filter { endretUtbetaling ->
             endretUtbetaling.andelTilkjentYtelser.any { it.erUtvidet() }
         }
-
-    val endredeUtvidetUtbetalingerMedOrdinæreAndeler =
-        endredeUtvidetUtbetalingerAndeler
-            .filter { it.andelTilkjentYtelser.any { andelTilkjentYtelse -> !andelTilkjentYtelse.erUtvidet() } }
-
-    if (endredeUtvidetUtbetalingerMedOrdinæreAndeler.isNotEmpty()) {
-        val feilmelding =
-            "Endring på utvidet ytelse kan ikke være på ordinær ytelse også, men endring " +
-                Utils.slåSammen(endredeUtvidetUtbetalingerMedOrdinæreAndeler.map { "fra ${it.fom} til ${it.tom}" }) +
-                " gikk over både ordinær og utvidet utelse. " +
-                "Del opp endringen(e) i to endringer, én på den ordinære delen og én på den utvidede delen"
-        throw FunksjonellFeil(frontendFeilmelding = feilmelding, melding = feilmelding)
-    }
 
     endredeUtvidetUtbetalingerAndeler.forEach { endretPåUtvidetUtbetalinger ->
         val deltBostedEndringerISammePeriode = endretUtbetalingAndeler.filter {
