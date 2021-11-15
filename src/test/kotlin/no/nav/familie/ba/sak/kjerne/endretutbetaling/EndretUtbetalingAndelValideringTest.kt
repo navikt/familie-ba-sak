@@ -248,11 +248,24 @@ class EndretUtbetalingAndelValideringTest {
     }
 
     @Test
-    fun `skal ikke feile dersom endring strekker seg over utvidet og ordinær ytelse`() {
+    fun `skal feile dersom endring strekker seg over utvidet og ordinær ytelse`() {
         val fom1 = inneværendeMåned().minusMonths(2)
         val tom1 = inneværendeMåned().minusMonths(2)
         val fom2 = inneværendeMåned().minusMonths(1)
         val tom2 = inneværendeMåned().minusMonths(1)
+
+        val andelTilkjentYtelser = mutableListOf(
+            lagAndelTilkjentYtelse(
+                fom = fom1,
+                tom = tom1,
+                ytelseType = YtelseType.UTVIDET_BARNETRYGD
+            ),
+            lagAndelTilkjentYtelse(
+                fom = fom2,
+                tom = tom2,
+                ytelseType = YtelseType.ORDINÆR_BARNETRYGD
+            )
+        )
 
         val utvidetEndring = lagEndretUtbetalingAndel(
             fom = fom1,
@@ -260,18 +273,7 @@ class EndretUtbetalingAndelValideringTest {
             person = søker,
             årsak = Årsak.DELT_BOSTED,
             prosent = BigDecimal.ZERO,
-            andelTilkjentYtelser = mutableListOf(
-                lagAndelTilkjentYtelse(
-                    fom = fom1,
-                    tom = tom1,
-                    ytelseType = YtelseType.UTVIDET_BARNETRYGD
-                ),
-                lagAndelTilkjentYtelse(
-                    fom = fom2,
-                    tom = tom2,
-                    ytelseType = YtelseType.ORDINÆR_BARNETRYGD
-                )
-            )
+            andelTilkjentYtelser = andelTilkjentYtelser
         )
 
         val deltBostedEndring =
@@ -282,8 +284,9 @@ class EndretUtbetalingAndelValideringTest {
             )
 
         Assertions.assertThrows(FunksjonellFeil::class.java) {
-            validerAtDetFinnesDeltBostedEndringerMedSammeProsentForUtvidedeEndringer(
-                listOf(utvidetEndring, deltBostedEndring)
+            validerDeltBostedEndringerIkkeKrysserUtvidetYtelse(
+                listOf(utvidetEndring, deltBostedEndring),
+                andelTilkjentYtelser
             )
         }
     }
