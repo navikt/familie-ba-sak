@@ -13,9 +13,9 @@ class JournalføringMetrikk {
 
     private val antallGenerellSak: Counter = Metrics.counter("journalfoering.behandling", "behandlingstype", "Fagsak")
 
-    private val antallTilBehandling = BehandlingType.values().map {
-        it to Metrics.counter("journalfoering.behandling", "behandlingstype", it.visningsnavn)
-    }.toMap()
+    private val antallTilBehandling = BehandlingType.values().associateWith {
+        Metrics.counter("journalfoering.behandling", "behandlingstype", it.visningsnavn)
+    }
 
     private val journalpostTittelMap = mapOf(
         "søknad om ordinær barnetrygd" to "Søknad om ordinær barnetrygd",
@@ -29,13 +29,13 @@ class JournalføringMetrikk {
         "tilleggskjema eøs" to "Tilleggskjema EØS"
     )
 
-    private val antallJournalpostTittel = journalpostTittelMap.values.toSet().map {
-        it to Metrics.counter(
+    private val antallJournalpostTittel = journalpostTittelMap.values.toSet().associateWith {
+        Metrics.counter(
             "journalfoering.journalpost",
             "tittel",
             it
         )
-    }.toMap()
+    }
 
     private val antallJournalpostTittelFritekst =
         Metrics.counter("journalfoering.journalpost", "tittel", "Fritekst")

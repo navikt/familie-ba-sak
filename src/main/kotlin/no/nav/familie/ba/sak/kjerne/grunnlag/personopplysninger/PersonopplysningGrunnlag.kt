@@ -58,7 +58,7 @@ data class PersonopplysningGrunnlag(
     fun harBarnMedSeksårsdagPåFom(fom: LocalDate?) = personer.any { person ->
         person
             .hentSeksårsdag()
-            .toYearMonth() == fom?.toYearMonth() ?: TIDENES_ENDE.toYearMonth()
+            .toYearMonth() == (fom?.toYearMonth() ?: TIDENES_ENDE.toYearMonth())
     }
 
     fun barnMedSeksårsdagPåFom(fom: LocalDate?): List<Person> {

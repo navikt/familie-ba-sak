@@ -25,7 +25,7 @@ import org.springframework.test.context.ActiveProfiles
 abstract class AbstractSpringIntegrationTestDev(
     personopplysningerService: PersonopplysningerService? = null
 ) : AbstractMockkSpringRunner(personopplysningerService) {
-    protected val wireMockServer = WireMockServer(WireMockConfiguration.wireMockConfig().dynamicPort())
+    protected final val wireMockServer = WireMockServer(WireMockConfiguration.wireMockConfig().dynamicPort())
 
     init {
         wireMockServer.start()

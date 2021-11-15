@@ -72,8 +72,7 @@ class RestFagsakTest(
             søkerFnr = søkerFnr,
             barnasIdenter = listOf(barnFnr),
             vedtakService = vedtakService,
-            stegService = stegService,
-            tilbakekrevingService = tilbakekrevingService
+            stegService = stegService
         )
 
         val restfagsak = fagsakService.hentRestFagsak(fagsakId = førstegangsbehandling.fagsak.id)

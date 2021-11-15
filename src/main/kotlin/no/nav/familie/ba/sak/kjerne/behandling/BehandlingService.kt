@@ -131,13 +131,13 @@ class BehandlingService(
         manueltOppdatert: Boolean = false
     ): Behandling {
 
-        val nyKategori = bestemKategori(
+        val utledetKategori = bestemKategori(
             behandlingÅrsak = behandling.opprettetÅrsak,
             nyBehandlingKategori = nyKategori,
             løpendeBehandlingKategori = hentLøpendeKategori(fagsakId = behandling.fagsak.id)
         )
 
-        val nyUnderkategori: BehandlingUnderkategori =
+        val utledetUnderkategori: BehandlingUnderkategori =
             if (manueltOppdatert) nyUnderkategori
             else bestemUnderkategori(
                 nyUnderkategori = nyUnderkategori,
@@ -145,18 +145,18 @@ class BehandlingService(
                 løpendeUnderkategori = hentLøpendeUnderkategori(fagsakId = behandling.fagsak.id)
             )
 
-        sjekkToggleOgThrowHvisBrudd(nyKategori, nyUnderkategori)
+        sjekkToggleOgThrowHvisBrudd(utledetKategori, utledetUnderkategori)
 
         val forrigeUnderkategori = behandling.underkategori
         val forrigeKategori = behandling.kategori
-        val skalOppdatereKategori = nyKategori != forrigeKategori
-        val skalOppdatereUnderkategori = nyUnderkategori != forrigeUnderkategori
+        val skalOppdatereKategori = utledetKategori != forrigeKategori
+        val skalOppdatereUnderkategori = utledetUnderkategori != forrigeUnderkategori
 
         if (skalOppdatereKategori) {
-            behandling.apply { kategori = nyKategori }
+            behandling.apply { kategori = utledetKategori }
         }
         if (skalOppdatereUnderkategori) {
-            behandling.apply { underkategori = nyUnderkategori }
+            behandling.apply { underkategori = utledetUnderkategori }
         }
 
         return lagreEllerOppdater(behandling).also { lagretBehandling ->
@@ -174,8 +174,8 @@ class BehandlingService(
                     behandling = lagretBehandling,
                     forrigeKategori = forrigeKategori,
                     forrigeUnderkategori = forrigeUnderkategori,
-                    nyKategori = nyKategori,
-                    nyUnderkategori = nyUnderkategori
+                    nyKategori = utledetKategori,
+                    nyUnderkategori = utledetUnderkategori
                 )
             }
         }

@@ -22,10 +22,10 @@ class DokumentControllerTest(
     private val behandlingService: BehandlingService,
 ) : AbstractSpringIntegrationTestDev() {
 
-    final val mockDokumentService: DokumentService = mockk()
-    final val vedtakService: VedtakService = mockk(relaxed = true)
-    final val fagsakService: FagsakService = mockk()
-    final val tilgangService: TilgangService = mockk(relaxed = true)
+    private val mockDokumentService: DokumentService = mockk()
+    private val vedtakService: VedtakService = mockk(relaxed = true)
+    private val fagsakService: FagsakService = mockk()
+    private val tilgangService: TilgangService = mockk(relaxed = true)
     val mockDokumentController =
         DokumentController(
             mockDokumentService,

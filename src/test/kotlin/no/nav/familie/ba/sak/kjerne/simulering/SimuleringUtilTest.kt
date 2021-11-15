@@ -16,7 +16,7 @@ import java.time.LocalDate
 
 class SimuleringUtilTest {
 
-    fun mockØkonomiSimuleringMottaker(
+    private fun mockØkonomiSimuleringMottaker(
         id: Long = 0,
         mottakerNummer: String? = randomFnr(),
         mottakerType: MottakerType = MottakerType.BRUKER,
@@ -24,7 +24,7 @@ class SimuleringUtilTest {
         økonomiSimuleringPostering: List<ØkonomiSimuleringPostering> = listOf(mockVedtakSimuleringPostering()),
     ) = ØkonomiSimuleringMottaker(id, mottakerNummer, mottakerType, behandling, økonomiSimuleringPostering)
 
-    fun mockVedtakSimuleringPostering(
+    private fun mockVedtakSimuleringPostering(
         økonomiSimuleringMottaker: ØkonomiSimuleringMottaker = mockk(relaxed = true),
         beløp: Int = 0,
         fagOmrådeKode: FagOmrådeKode = FagOmrådeKode.BARNETRYGD,
@@ -92,7 +92,7 @@ class SimuleringUtilTest {
         Assertions.assertEquals(BigDecimal.valueOf(1), hentResultatIPeriode(økonomiSimuleringPosteringer))
     }
 
-    val økonomiSimuleringPosteringerMedNegativFeilutbetaling = listOf(
+    private val økonomiSimuleringPosteringerMedNegativFeilutbetaling = listOf(
         mockVedtakSimuleringPostering(beløp = -500, posteringType = PosteringType.FEILUTBETALING),
         mockVedtakSimuleringPostering(beløp = -2000, posteringType = PosteringType.YTELSE),
         mockVedtakSimuleringPostering(beløp = 3000, posteringType = PosteringType.YTELSE),

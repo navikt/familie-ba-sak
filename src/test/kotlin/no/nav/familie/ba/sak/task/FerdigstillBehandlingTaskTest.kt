@@ -18,7 +18,6 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagSe
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
-import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
@@ -62,9 +61,6 @@ class FerdigstillBehandlingTaskTest : AbstractSpringIntegrationTest() {
     lateinit var envService: EnvService
 
     @Autowired
-    lateinit var tilbakekrevingService: TilbakekrevingService
-
-    @Autowired
     lateinit var vedtaksperiodeService: VedtaksperiodeService
 
     @BeforeEach
@@ -100,7 +96,10 @@ class FerdigstillBehandlingTaskTest : AbstractSpringIntegrationTest() {
             vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering)
             val behandlingEtterVilkårsvurdering = stegService.håndterVilkårsvurdering(behandling)
 
-            behandlingService.oppdaterStatusPåBehandling(behandlingEtterVilkårsvurdering.id, BehandlingStatus.IVERKSETTER_VEDTAK)
+            behandlingService.oppdaterStatusPåBehandling(
+                behandlingEtterVilkårsvurdering.id,
+                BehandlingStatus.IVERKSETTER_VEDTAK
+            )
             behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(
                 behandlingId = behandlingEtterVilkårsvurdering.id,
                 steg = StegType.FERDIGSTILLE_BEHANDLING

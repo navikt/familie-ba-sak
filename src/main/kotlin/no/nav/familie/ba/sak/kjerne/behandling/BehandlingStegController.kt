@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping("/api/behandlinger")
+@RequestMapping("/api/behandlinger/steg")
 @ProtectedWithClaims(issuer = "azuread")
 class BehandlingStegController(
     private val behandlingService: BehandlingService,
@@ -32,7 +32,7 @@ class BehandlingStegController(
 ) {
 
     @PostMapping(
-        path = ["/{behandlingId}/steg/registrer-søknad"],
+        path = ["/{behandlingId}/registrer-søknad"],
         produces = [MediaType.APPLICATION_JSON_VALUE]
     )
     fun registrereSøknadOgHentPersongrunnlag(
@@ -50,7 +50,7 @@ class BehandlingStegController(
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandling.id)))
     }
 
-    @PostMapping(path = ["/{behandlingId}/steg/vilkårsvurdering"])
+    @PostMapping(path = ["/{behandlingId}/vilkårsvurdering"])
     fun validerVilkårsvurdering(@PathVariable @BehandlingstilgangConstraint behandlingId: Long): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
@@ -63,7 +63,7 @@ class BehandlingStegController(
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandling.id)))
     }
 
-    @PostMapping(path = ["/{behandlingId}/steg/behandlingsresultat"])
+    @PostMapping(path = ["/{behandlingId}/behandlingsresultat"])
     fun utledBehandlingsresultat(@PathVariable @BehandlingstilgangConstraint behandlingId: Long): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
@@ -76,7 +76,7 @@ class BehandlingStegController(
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandling.id)))
     }
 
-    @PostMapping(path = ["/{behandlingId}/steg/tilbakekreving"])
+    @PostMapping(path = ["/{behandlingId}/tilbakekreving"])
     fun lagreTilbakekrevingOgGåVidereTilNesteSteg(
         @PathVariable @BehandlingstilgangConstraint behandlingId: Long,
         @RequestBody restTilbakekreving: RestTilbakekreving?
@@ -92,7 +92,7 @@ class BehandlingStegController(
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandling.id)))
     }
 
-    @PostMapping(path = ["/{behandlingId}/steg/send-til-beslutter"], produces = [MediaType.APPLICATION_JSON_VALUE])
+    @PostMapping(path = ["/{behandlingId}/send-til-beslutter"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun sendTilBeslutter(
         @PathVariable @BehandlingstilgangConstraint behandlingId: Long,
         @RequestParam behandlendeEnhet: String
@@ -108,7 +108,7 @@ class BehandlingStegController(
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandling.id)))
     }
 
-    @PostMapping(path = ["/{behandlingId}/steg/iverksett-vedtak"], produces = [MediaType.APPLICATION_JSON_VALUE])
+    @PostMapping(path = ["/{behandlingId}/iverksett-vedtak"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun iverksettVedtak(
         @PathVariable @BehandlingstilgangConstraint behandlingId: Long,
         @RequestBody restBeslutningPåVedtak: RestBeslutningPåVedtak
@@ -124,7 +124,7 @@ class BehandlingStegController(
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandling.id)))
     }
 
-    @PutMapping(path = ["{behandlingId}/steg/henlegg"], produces = [MediaType.APPLICATION_JSON_VALUE])
+    @PutMapping(path = ["{behandlingId}/henlegg"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun henleggBehandlingOgSendBrev(
         @PathVariable @BehandlingstilgangConstraint behandlingId: Long,
         @RequestBody henleggInfo: RestHenleggBehandlingInfo

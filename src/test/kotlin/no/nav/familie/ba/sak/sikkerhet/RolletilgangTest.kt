@@ -93,7 +93,7 @@ class RolletilgangTest(
                     "name" to "Mock McMockface",
                     "preferred_username" to "mock.mcmockface@nav.no"
                 )
-            ).toString()
+            )
         )
         val requestEntity = HttpEntity<String>(
             objectMapper.writeValueAsString(

@@ -1,7 +1,6 @@
-package no.nav.familie.ba.sak.kjerne.dokument
+package no.nav.familie.ba.sak.integrasjoner.infotrygd
 
 import io.mockk.mockk
-import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedClient
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Primary

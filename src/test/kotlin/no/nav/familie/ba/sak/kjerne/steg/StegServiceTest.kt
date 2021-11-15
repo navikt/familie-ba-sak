@@ -128,8 +128,7 @@ class StegServiceTest(
             søkerFnr = søkerFnr,
             barnasIdenter = listOf(ClientMocks.barnFnr[0]),
             vedtakService = vedtakService,
-            stegService = stegService,
-            tilbakekrevingService = tilbakekrevingService
+            stegService = stegService
         )
     }
 

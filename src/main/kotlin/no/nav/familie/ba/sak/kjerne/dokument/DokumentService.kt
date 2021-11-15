@@ -52,12 +52,12 @@ class DokumentService(
     private val envService: EnvService
 ) {
 
-    private val antallBrevSendt: Map<Brevmal, Counter> = mutableListOf<Brevmal>().plus(Brevmal.values()).map {
-        it to Metrics.counter(
+    private val antallBrevSendt: Map<Brevmal, Counter> = mutableListOf<Brevmal>().plus(Brevmal.values()).associateWith {
+        Metrics.counter(
             "brev.sendt",
             "brevtype", it.visningsTekst
         )
-    }.toMap()
+    }
 
     fun hentBrevForVedtak(vedtak: Vedtak): Ressurs<ByteArray> {
         if (SikkerhetContext.hentHøyesteRolletilgangForInnloggetBruker(rolleConfig) == BehandlerRolle.VEILEDER && vedtak.stønadBrevPdF == null) {

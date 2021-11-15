@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.integrasjoner.journalføring
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestJournalføring
 import no.nav.familie.ba.sak.ekstern.restDomene.RestOppdaterJournalpost
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
@@ -49,8 +48,7 @@ class JournalføringService(
     private val journalføringRepository: JournalføringRepository,
     private val loggService: LoggService,
     private val stegService: StegService,
-    private val journalføringMetrikk: JournalføringMetrikk,
-    private val featureToggleService: FeatureToggleService
+    private val journalføringMetrikk: JournalføringMetrikk
 ) {
 
     fun hentDokument(journalpostId: String, dokumentInfoId: String): Ressurs<ByteArray> {

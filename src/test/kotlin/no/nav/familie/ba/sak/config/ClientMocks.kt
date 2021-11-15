@@ -548,12 +548,12 @@ class ClientMocks {
             initEuKodeverk(mockIntegrasjonClient)
         }
 
-        private val FOM_1900 = LocalDate.of(1900, Month.JANUARY, 1)
+        val FOM_1900 = LocalDate.of(1900, Month.JANUARY, 1)
         val FOM_1990 = LocalDate.of(1990, Month.JANUARY, 1)
         val FOM_2004 = LocalDate.of(2004, Month.JANUARY, 1)
         val FOM_2008 = LocalDate.of(2008, Month.JANUARY, 1)
         val TOM_2010 = LocalDate.of(2009, Month.DECEMBER, 31)
-        private val TOM_9999 = LocalDate.of(9999, Month.DECEMBER, 31)
+        val TOM_9999 = LocalDate.of(9999, Month.DECEMBER, 31)
 
         fun initEuKodeverk(integrasjonClient: IntegrasjonClient) {
             val beskrivelsePolen = BeskrivelseDto("POL", "")
@@ -586,7 +586,7 @@ class ClientMocks {
             LocalDate.now().withDayOfMonth(18).minusYears(1)
         )
         val barnFnr = arrayOf(barnFødselsdatoer[0].tilddMMyy() + "50033", barnFødselsdatoer[1].tilddMMyy() + "50033")
-        const val BARN_DET_IKKE_GIS_TILGANG_TIL_FNR = "12345678912"
+        private const val BARN_DET_IKKE_GIS_TILGANG_TIL_FNR = "12345678912"
         const val INTEGRASJONER_FNR = "10000111111"
         val bostedsadresse = Bostedsadresse(
             matrikkeladresse = Matrikkeladresse(
@@ -594,7 +594,7 @@ class ClientMocks {
                 postnummer = "0202", kommunenummer = "2231"
             )
         )
-        val bostedsadresseHistorikk = mutableListOf(
+        private val bostedsadresseHistorikk = mutableListOf(
             Bostedsadresse(
                 angittFlyttedato = LocalDate.now().minusDays(15),
                 gyldigTilOgMed = null,
@@ -619,7 +619,7 @@ class ClientMocks {
             )
         )
 
-        val sivilstandHistorisk = listOf(
+        private val sivilstandHistorisk = listOf(
             Sivilstand(type = SIVILSTAND.GIFT, gyldigFraOgMed = LocalDate.now().minusMonths(8)),
             Sivilstand(type = SIVILSTAND.SKILT, gyldigFraOgMed = LocalDate.now().minusMonths(4)),
         )
