@@ -13,6 +13,8 @@ class PersonidentService(
     private val personopplysningerService: PersonopplysningerService
 ) {
     fun hentOgLagreAktivIdentMedAktørId(fødselsnummer: String): String {
+        // TODO: Når lytting på endring av ident meldinger er implementert skal denne metoden returnere hvis 
+        // iden allerede er persistert ellers så skal den hente og persistere den aktive identen.
         val identerFraPdl = personopplysningerService.hentIdenter(fødselsnummer, false)
 
         val aktørId = filtrerAktørId(identerFraPdl)
