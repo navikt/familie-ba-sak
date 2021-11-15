@@ -503,18 +503,22 @@ internal class TilkjentYtelseUtilsTest {
     ): Pair<Vilkårsvurdering, PersonopplysningGrunnlag> {
         val søkerFnr = randomFnr()
         val barnFnr = randomFnr()
+        val søkerAktørId = randomAktørId()
+        val barnAktørId = randomAktørId()
 
         val behandling = lagBehandling()
 
         val vilkårsvurdering = lagVilkårsvurdering(
             søkerFnr = søkerFnr,
+            søkerAktørId = søkerAktørId,
             behandling = behandling,
             resultat = Resultat.OPPFYLT,
             søkerPeriodeFom = LocalDate.of(2014, 1, 1),
             søkerPeriodeTom = null
         )
 
-        val barnResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = barnFnr)
+        val barnResultat =
+            PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = barnFnr, aktørId = barnAktørId)
         barnResultat.setSortedVilkårResultater(
             setOf(
                 VilkårResultat(

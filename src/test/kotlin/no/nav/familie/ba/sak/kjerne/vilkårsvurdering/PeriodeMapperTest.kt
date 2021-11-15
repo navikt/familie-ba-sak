@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
 import no.nav.familie.ba.sak.common.defaultFagsak
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
+import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
@@ -52,12 +53,13 @@ class PeriodeMapperTest {
             it.behandlingStegTilstand.add(BehandlingStegTilstand(0, it, FØRSTE_STEG))
         }
 
-        vilkårsvurdering = lagVilkårsvurdering("", behandling, Resultat.IKKE_VURDERT)
+        vilkårsvurdering = lagVilkårsvurdering("", randomAktørId(), behandling, Resultat.IKKE_VURDERT)
     }
 
     @Test
     fun `Kombinert tidslinje returnerer rette rette vilkårsresultater for tidsintervaller`() {
-        val personResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = "")
+        val personResultat =
+            PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = "", aktørId = randomAktørId())
 
         val tidslinje1 = LocalDateTimeline(
             listOf(
@@ -111,8 +113,12 @@ class PeriodeMapperTest {
     fun `Mapper tre PersonResultater til fire PeriodeResultater med rette vilkår og datoer for to personer`() {
         val fnr1 = randomFnr()
         val fnr2 = randomFnr()
-        val personResultat1 = PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = fnr1)
-        val personResultat2 = PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = fnr2)
+        val aktørId1 = randomAktørId()
+        val aktørId2 = randomAktørId()
+        val personResultat1 =
+            PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = fnr1, aktørId = aktørId1)
+        val personResultat2 =
+            PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = fnr2, aktørId = aktørId2)
         personResultat1.setSortedVilkårResultater(
             setOf(
                 VilkårResultat(
@@ -217,7 +223,8 @@ class PeriodeMapperTest {
     fun `Datoer på vilkårresultater mappes til hele måneder`() {
         // Periode med fom-dato medio mai og tom-dato medio juni skal bli hele mai og juni
 
-        val personResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = randomFnr())
+        val personResultat =
+            PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = randomFnr(), aktørId = randomAktørId())
         personResultat.setSortedVilkårResultater(
             setOf(
                 VilkårResultat(
@@ -244,7 +251,8 @@ class PeriodeMapperTest {
         val periodeFom18ÅrsVilkår = LocalDate.of(2020, 5, 15)
         val periodeTom18ÅrsVilkår = LocalDate.of(2038, 5, 15)
 
-        val personResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = barnFnr)
+        val personResultat =
+            PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = barnFnr, aktørId = randomAktørId())
         personResultat.setSortedVilkårResultater(
             setOf(
                 VilkårResultat(

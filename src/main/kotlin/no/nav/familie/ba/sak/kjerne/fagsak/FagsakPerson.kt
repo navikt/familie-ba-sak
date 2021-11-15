@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.fagsak
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
@@ -38,8 +39,9 @@ data class FagsakPerson(
     @AttributeOverrides(AttributeOverride(name = "ident", column = Column(name = "ident", updatable = false)))
     val personIdent: PersonIdent,
 
-    @Column(name = "aktoer_id")
-    var aktørId: String? = null,
+    @Embedded
+    @AttributeOverrides(AttributeOverride(name = "aktørId", column = Column(name = "aktoer_id", updatable = false)))
+    val aktørId: AktørId? = null,
 
     @Column(name = "opprettet_av", nullable = false, updatable = false)
     val opprettetAv: String = SikkerhetContext.hentSaksbehandler(),

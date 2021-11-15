@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.task.dto.FAGSYSTEM
 import no.nav.familie.ba.sak.økonomi.ØkonomiUtils.SMÅBARNSTILLEGG_SUFFIX
@@ -20,6 +21,7 @@ import java.time.YearMonth
 @Component
 class UtbetalingsoppdragGenerator(
     private val beregningService: BeregningService,
+    private val personidentService: PersonidentService,
 ) {
 
     /**
@@ -40,7 +42,7 @@ class UtbetalingsoppdragGenerator(
      * har endrede datoer eller må bygges opp igjen pga endringer før i kjeden
      * @return Utbetalingsoppdrag for vedtak
      */
-    fun lagUtbetalingsoppdragOgOpptaderTilkjentYtelse(
+    fun lagUtbetalingsoppdragOgOppdaterTilkjentYtelse(
         saksbehandlerId: String,
         vedtak: Vedtak,
         erFørsteBehandlingPåFagsak: Boolean,
@@ -94,12 +96,15 @@ class UtbetalingsoppdragGenerator(
                 vedtak = vedtak,
             ) else emptyList()
 
+        val søker = vedtak.behandling.fagsak.hentAktivIdent().ident
+        val søkerAktivIdent = personidentService.hentOgLagreAktivIdentMedAktørId(søker)
+
         return Utbetalingsoppdrag(
             saksbehandlerId = saksbehandlerId,
             kodeEndring = aksjonskodePåOppdragsnivå,
             fagSystem = FAGSYSTEM,
             saksnummer = vedtak.behandling.fagsak.id.toString(),
-            aktoer = vedtak.behandling.fagsak.hentAktivIdent().ident,
+            aktoer = søkerAktivIdent,
             utbetalingsperiode = listOf(opphøres, opprettes).flatten()
         )
     }

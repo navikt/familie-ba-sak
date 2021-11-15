@@ -15,7 +15,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.opphold.GrOpphold
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
@@ -236,7 +235,7 @@ class PersongrunnlagService(
             type = personType,
             personopplysningGrunnlag = personopplysningGrunnlag,
             fødselsdato = personinfo.fødselsdato,
-            aktørId = AktørId(aktivIdent.aktørId),
+            aktørId = aktivIdent.aktørId,
             navn = personinfo.navn ?: "",
             kjønn = personinfo.kjønn ?: Kjønn.UKJENT,
             målform = målform

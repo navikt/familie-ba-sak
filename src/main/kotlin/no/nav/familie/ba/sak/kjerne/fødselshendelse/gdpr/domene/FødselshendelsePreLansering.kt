@@ -1,9 +1,13 @@
 package no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.domene
 
 import no.nav.familie.ba.sak.common.BaseEntitet
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.util.Objects
+import javax.persistence.AttributeOverride
+import javax.persistence.AttributeOverrides
 import javax.persistence.Column
+import javax.persistence.Embedded
 import javax.persistence.Entity
 import javax.persistence.EntityListeners
 import javax.persistence.GeneratedValue
@@ -35,8 +39,9 @@ data class FødselshendelsePreLansering(
     @Column(name = "person_ident", nullable = false, updatable = false)
     val personIdent: String,
 
-    @Column(name = "aktoer_id")
-    var aktørId: String? = null,
+    @Embedded
+    @AttributeOverrides(AttributeOverride(name = "aktørId", column = Column(name = "aktoer_id", updatable = false)))
+    val aktørId: AktørId,
 
     @Column(name = "ny_behandling_hendelse", nullable = false, updatable = false, columnDefinition = "TEXT")
     val nyBehandlingHendelse: String = "",

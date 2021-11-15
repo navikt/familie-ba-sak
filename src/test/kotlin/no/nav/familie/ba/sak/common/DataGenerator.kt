@@ -212,6 +212,7 @@ fun lagAndelTilkjentYtelse(
 
     return AndelTilkjentYtelse(
         personIdent = person.personIdent.ident,
+        aktørId = person.hentAktørId(),
         behandlingId = behandling.id,
         tilkjentYtelse = tilkjentYtelse ?: lagInitiellTilkjentYtelse(behandling),
         kalkulertUtbetalingsbeløp = beløp,
@@ -240,6 +241,7 @@ fun lagAndelTilkjentYtelseUtvidet(
 
     return AndelTilkjentYtelse(
         personIdent = person.personIdent.ident,
+        aktørId = person.hentAktørId(),
         behandlingId = behandling.id,
         tilkjentYtelse = tilkjentYtelse ?: lagInitiellTilkjentYtelse(behandling),
         kalkulertUtbetalingsbeløp = beløp,
@@ -381,6 +383,9 @@ fun lagPersonResultaterForSøkerOgToBarn(
     søkerFnr: String,
     barn1Fnr: String,
     barn2Fnr: String,
+    søkerAktørId: AktørId,
+    barn1AktørId: AktørId,
+    barn2AktørId: AktørId,
     stønadFom: LocalDate,
     stønadTom: LocalDate,
     erDeltBosted: Boolean = false
@@ -389,6 +394,7 @@ fun lagPersonResultaterForSøkerOgToBarn(
         lagPersonResultat(
             vilkårsvurdering = vilkårsvurdering,
             fnr = søkerFnr,
+            aktørId = søkerAktørId,
             resultat = Resultat.OPPFYLT,
             periodeFom = stønadFom,
             periodeTom = stønadTom,
@@ -398,6 +404,7 @@ fun lagPersonResultaterForSøkerOgToBarn(
         lagPersonResultat(
             vilkårsvurdering = vilkårsvurdering,
             fnr = barn1Fnr,
+            aktørId = barn1AktørId,
             resultat = Resultat.OPPFYLT,
             periodeFom = stønadFom,
             periodeTom = stønadTom,
@@ -408,6 +415,7 @@ fun lagPersonResultaterForSøkerOgToBarn(
         lagPersonResultat(
             vilkårsvurdering = vilkårsvurdering,
             fnr = barn2Fnr,
+            aktørId = barn2AktørId,
             resultat = Resultat.OPPFYLT,
             periodeFom = stønadFom,
             periodeTom = stønadTom,
@@ -421,6 +429,7 @@ fun lagPersonResultaterForSøkerOgToBarn(
 fun lagPersonResultat(
     vilkårsvurdering: Vilkårsvurdering,
     fnr: String,
+    aktørId: AktørId,
     resultat: Resultat,
     periodeFom: LocalDate?,
     periodeTom: LocalDate?,
@@ -431,7 +440,8 @@ fun lagPersonResultat(
 ): PersonResultat {
     val personResultat = PersonResultat(
         vilkårsvurdering = vilkårsvurdering,
-        personIdent = fnr
+        personIdent = fnr,
+        aktørId = aktørId
     )
 
     if (lagFullstendigVilkårResultat) {
@@ -484,6 +494,7 @@ fun vurderVilkårsvurderingTilInnvilget(vilkårsvurdering: Vilkårsvurdering, ba
 
 fun lagVilkårsvurdering(
     søkerFnr: String,
+    søkerAktørId: AktørId,
     behandling: Behandling,
     resultat: Resultat,
     søkerPeriodeFom: LocalDate? = LocalDate.now().minusMonths(1),
@@ -494,7 +505,8 @@ fun lagVilkårsvurdering(
     )
     val personResultat = PersonResultat(
         vilkårsvurdering = vilkårsvurdering,
-        personIdent = søkerFnr
+        personIdent = søkerFnr,
+        aktørId = søkerAktørId
     )
     personResultat.setSortedVilkårResultater(
         setOf(

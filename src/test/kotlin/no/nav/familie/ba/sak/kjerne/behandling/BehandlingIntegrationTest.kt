@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.common.lagPersonResultat
 import no.nav.familie.ba.sak.common.lagPersonResultaterForSøkerOgToBarn
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.nyOrdinærBehandling
+import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.toLocalDate
 import no.nav.familie.ba.sak.common.toYearMonth
@@ -324,6 +325,10 @@ class BehandlingIntegrationTest(
         val barn1Fnr = randomFnr()
         val barn2Fnr = randomFnr()
 
+        val søkerAktørId = randomAktørId()
+        val barn1AktørId = randomAktørId()
+        val barn2AktørId = randomAktørId()
+
         val januar2020 = YearMonth.of(2020, 1)
         val oktober2020 = YearMonth.of(2020, 10)
         val stønadTom = januar2020.plusYears(17)
@@ -343,6 +348,7 @@ class BehandlingIntegrationTest(
             lagPersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
                 fnr = søkerFnr,
+                aktørId = søkerAktørId,
                 resultat = Resultat.OPPFYLT,
                 periodeFom = januar2020.minusMonths(1).toLocalDate(),
                 periodeTom = stønadTom.toLocalDate(),
@@ -352,6 +358,7 @@ class BehandlingIntegrationTest(
             lagPersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
                 fnr = barn1Fnr,
+                aktørId = barn1AktørId,
                 resultat = Resultat.OPPFYLT,
                 periodeFom = januar2020.minusMonths(1).toLocalDate(),
                 periodeTom = stønadTom.toLocalDate(),
@@ -361,6 +368,7 @@ class BehandlingIntegrationTest(
             lagPersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
                 fnr = barn2Fnr,
+                aktørId = barn2AktørId,
                 resultat = Resultat.OPPFYLT,
                 periodeFom = oktober2020.minusMonths(1).toLocalDate(),
                 periodeTom = stønadTom.toLocalDate(),
@@ -419,6 +427,11 @@ class BehandlingIntegrationTest(
         val barn2Fnr = randomFnr()
         val barn3Fnr = randomFnr()
 
+        val søkerAktørId = randomAktørId()
+        val barn1AktørId = randomAktørId()
+        val barn2AktørId = randomAktørId()
+        val barn3AktørId = randomAktørId()
+
         val januar2020 = YearMonth.of(2020, 1)
         val januar2021 = YearMonth.of(2021, 1)
         val stønadTom = januar2020.plusYears(17)
@@ -441,6 +454,9 @@ class BehandlingIntegrationTest(
             søkerFnr,
             barn1Fnr,
             barn2Fnr,
+            søkerAktørId,
+            barn1AktørId,
+            barn2AktørId,
             januar2020.minusMonths(1).toLocalDate(),
             stønadTom.toLocalDate()
         )
@@ -455,6 +471,9 @@ class BehandlingIntegrationTest(
             søkerFnr,
             barn1Fnr,
             barn3Fnr,
+            søkerAktørId,
+            barn1AktørId,
+            barn3AktørId,
             januar2021.minusMonths(1).toLocalDate(),
             stønadTom.toLocalDate()
         )

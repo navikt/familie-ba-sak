@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.AktørId
 import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
@@ -23,7 +24,8 @@ data class SmåbarnstilleggBarnetrygdGenerator(
     fun lagSmåbarnstilleggAndeler(
         perioderMedFullOvergangsstønad: List<PeriodeOvergangsstønad>,
         andelerSøker: List<AndelTilkjentYtelse>,
-        barnasFødselsdatoer: List<LocalDate>
+        barnasFødselsdatoer: List<LocalDate>,
+        søkerAktørId: AktørId,
     ): List<AndelTilkjentYtelse> {
         if (perioderMedFullOvergangsstønad.isEmpty() || andelerSøker.isEmpty()) return emptyList()
 
@@ -86,12 +88,12 @@ data class SmåbarnstilleggBarnetrygdGenerator(
                 )
                     .singleOrNull()?.sats
                     ?: error("Skal finnes én ordinær sats for gitt segment oppdelt basert på andeler")
-
                 AndelTilkjentYtelse(
                     behandlingId = behandlingId,
                     tilkjentYtelse = tilkjentYtelse,
                     personIdent = søkersIdent
                         ?: error("Genererer andeler for småbarnstillegg uten noen perioder med full overgangsstønad"),
+                    aktørId = søkerAktørId,
                     stønadFom = it.fom.toYearMonth(),
                     stønadTom = it.tom.toYearMonth(),
                     kalkulertUtbetalingsbeløp = ordinærSatsForPeriode,

@@ -1,10 +1,14 @@
 package no.nav.familie.ba.sak.kjerne.grunnlag.småbarnstillegg
 
 import no.nav.familie.ba.sak.common.BaseEntitet
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad
 import java.time.LocalDate
+import javax.persistence.AttributeOverride
+import javax.persistence.AttributeOverrides
 import javax.persistence.Column
+import javax.persistence.Embedded
 import javax.persistence.Entity
 import javax.persistence.EntityListeners
 import javax.persistence.EnumType
@@ -38,8 +42,9 @@ class PeriodeOvergangsstønadGrunnlag(
     @Column(name = "person_ident", nullable = false, updatable = false)
     val personIdent: String,
 
-    @Column(name = "aktoer_id")
-    var aktørId: String? = null,
+    @Embedded
+    @AttributeOverrides(AttributeOverride(name = "aktørId", column = Column(name = "aktoer_id", updatable = false)))
+    val aktørId: AktørId,
 
     @Column(name = "fom", nullable = false, columnDefinition = "DATE")
     val fom: LocalDate,
@@ -52,10 +57,12 @@ class PeriodeOvergangsstønadGrunnlag(
     val datakilde: PeriodeOvergangsstønad.Datakilde,
 ) : BaseEntitet()
 
-fun PeriodeOvergangsstønad.tilPeriodeOvergangsstønadGrunnlag(behandlingId: Long) = PeriodeOvergangsstønadGrunnlag(
-    behandlingId = behandlingId,
-    personIdent = this.personIdent,
-    fom = this.fomDato,
-    tom = this.tomDato,
-    datakilde = this.datakilde
-)
+fun PeriodeOvergangsstønad.tilPeriodeOvergangsstønadGrunnlag(behandlingId: Long, aktørId: AktørId) =
+    PeriodeOvergangsstønadGrunnlag(
+        behandlingId = behandlingId,
+        personIdent = this.personIdent,
+        aktørId = aktørId,
+        fom = this.fomDato,
+        tom = this.tomDato,
+        datakilde = this.datakilde
+    )

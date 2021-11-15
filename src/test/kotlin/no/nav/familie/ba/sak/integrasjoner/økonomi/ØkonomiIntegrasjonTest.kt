@@ -9,6 +9,7 @@ import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagPersonResultat
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
+import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -20,6 +21,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
@@ -67,6 +69,8 @@ class ØkonomiIntegrasjonTest : AbstractSpringIntegrationTest() {
     fun `Iverksett vedtak på aktiv behandling`() {
         val fnr = randomFnr()
         val barnFnr = randomFnr()
+        val aktørId = randomAktørId()
+        val barnAktørId = randomAktørId()
         val stønadFom = LocalDate.now()
         val stønadTom = stønadFom.plusYears(17)
 
@@ -93,7 +97,8 @@ class ØkonomiIntegrasjonTest : AbstractSpringIntegrationTest() {
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
 
-        val vilkårsvurdering = lagBehandlingResultat(behandling, fnr, barnFnr, stønadFom, stønadTom)
+        val vilkårsvurdering =
+            lagBehandlingResultat(behandling, fnr, barnFnr, aktørId, barnAktørId, stønadFom, stønadTom)
 
         vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering)
         Assertions.assertNotNull(behandling.fagsak.id)
@@ -121,6 +126,8 @@ class ØkonomiIntegrasjonTest : AbstractSpringIntegrationTest() {
     fun `Hent behandlinger for løpende fagsaker til konsistensavstemming mot økonomi`() {
         val fnr = randomFnr()
         val barnFnr = randomFnr()
+        val aktørId = randomAktørId()
+        val barnAktørId = randomAktørId()
         val stønadFom = LocalDate.now()
         val stønadTom = stønadFom.plusYears(17)
 
@@ -148,7 +155,8 @@ class ØkonomiIntegrasjonTest : AbstractSpringIntegrationTest() {
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
         behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling)
 
-        val vilkårsvurdering = lagBehandlingResultat(behandling, fnr, barnFnr, stønadFom, stønadTom)
+        val vilkårsvurdering =
+            lagBehandlingResultat(behandling, fnr, barnFnr, aktørId, barnAktørId, stønadFom, stønadTom)
         vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering)
 
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
@@ -168,6 +176,8 @@ class ØkonomiIntegrasjonTest : AbstractSpringIntegrationTest() {
         behandling: Behandling,
         søkerFnr: String,
         barnFnr: String,
+        søkerAktørId: AktørId,
+        barnAktørId: AktørId,
         stønadFom: LocalDate,
         stønadTom: LocalDate
     ): Vilkårsvurdering {
@@ -177,6 +187,7 @@ class ØkonomiIntegrasjonTest : AbstractSpringIntegrationTest() {
             lagPersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
                 fnr = søkerFnr,
+                aktørId = søkerAktørId,
                 resultat = Resultat.OPPFYLT,
                 periodeFom = stønadFom,
                 periodeTom = stønadTom,
@@ -186,6 +197,7 @@ class ØkonomiIntegrasjonTest : AbstractSpringIntegrationTest() {
             lagPersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
                 fnr = barnFnr,
+                aktørId = barnAktørId,
                 resultat = Resultat.OPPFYLT,
                 periodeFom = stønadFom,
                 periodeTom = stønadTom,

@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
 import no.nav.familie.ba.sak.common.kjørStegprosessForRevurderingÅrligKontroll
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
+import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.ClientMocks
@@ -219,13 +220,21 @@ class StegServiceTest(
     @Test
     fun `Underkjent beslutning setter steg tilbake til send til beslutter`() {
         val søkerFnr = randomFnr()
+        val søkerAktørId = randomAktørId()
         val barnFnr = randomFnr()
 
         mockHentPersoninfoForMedIdenter(mockPersonopplysningerService, søkerFnr, barnFnr)
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
-        vilkårsvurderingService.lagreNyOgDeaktiverGammel(lagVilkårsvurdering(søkerFnr, behandling, Resultat.OPPFYLT))
+        vilkårsvurderingService.lagreNyOgDeaktiverGammel(
+            lagVilkårsvurdering(
+                søkerFnr,
+                søkerAktørId,
+                behandling,
+                Resultat.OPPFYLT
+            )
+        )
         behandling.endretAv = "1234"
         assertEquals(FØRSTE_STEG, behandling.steg)
 

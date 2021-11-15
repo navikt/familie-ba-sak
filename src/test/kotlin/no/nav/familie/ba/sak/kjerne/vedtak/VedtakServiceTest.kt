@@ -8,6 +8,7 @@ import io.mockk.MockKAnnotations
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
+import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.FeatureToggleService
@@ -141,17 +142,19 @@ class VedtakServiceTest(
         )
 
         val personIdent = randomFnr()
+        val personAktørId = randomAktørId()
 
         behandling = lagBehandling()
 
         vilkår = Vilkår.LOVLIG_OPPHOLD
         resultat = Resultat.OPPFYLT
 
-        vilkårsvurdering = lagVilkårsvurdering(personIdent, behandling, resultat)
+        vilkårsvurdering = lagVilkårsvurdering(personIdent, personAktørId, behandling, resultat)
 
         personResultat = PersonResultat(
             vilkårsvurdering = vilkårsvurdering,
-            personIdent = personIdent
+            personIdent = personIdent,
+            aktørId = personAktørId
         )
 
         vilkårResultat1 = VilkårResultat(
@@ -182,13 +185,14 @@ class VedtakServiceTest(
     @Tag("integration")
     fun `Opprett behandling med vedtak`() {
         val fnr = randomFnr()
+        val fnrAktørNr = randomAktørId()
         val barnFnr = randomFnr()
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
 
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
 
-        val vilkårsvurdering = lagVilkårsvurdering(fnr, behandling, Resultat.OPPFYLT)
+        val vilkårsvurdering = lagVilkårsvurdering(fnr, fnrAktørNr, behandling, Resultat.OPPFYLT)
 
         vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering)
 

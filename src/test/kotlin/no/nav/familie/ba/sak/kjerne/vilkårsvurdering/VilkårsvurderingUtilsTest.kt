@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagVilkårResultat
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
+import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
@@ -21,7 +22,8 @@ import java.time.LocalDateTime
 
 class VilkårsvurderingUtilsTest {
 
-    private val uvesentligVilkårsvurdering = lagVilkårsvurdering(randomFnr(), lagBehandling(), Resultat.IKKE_VURDERT)
+    private val uvesentligVilkårsvurdering =
+        lagVilkårsvurdering(randomFnr(), randomAktørId(), lagBehandling(), Resultat.IKKE_VURDERT)
 
     private val vilkårResultatAvslag = lagVilkårResultat(
         personResultat = mockk(),
@@ -30,7 +32,11 @@ class VilkårsvurderingUtilsTest {
 
     @Test
     fun `feil kastes når det finnes løpende oppfylt ved forsøk på å legge til avslag uten periode`() {
-        val personResultat = PersonResultat(vilkårsvurdering = uvesentligVilkårsvurdering, personIdent = randomFnr())
+        val personResultat = PersonResultat(
+            vilkårsvurdering = uvesentligVilkårsvurdering,
+            personIdent = randomFnr(),
+            aktørId = randomAktørId()
+        )
         val løpendeOppfylt = VilkårResultat(
             personResultat = personResultat,
             periodeFom = LocalDate.of(2020, 1, 1),
@@ -65,7 +71,11 @@ class VilkårsvurderingUtilsTest {
 
     @Test
     fun `feil kastes når det finnes avslag uten periode ved forsøk på å legge til løpende oppfylt`() {
-        val personResultat = PersonResultat(vilkårsvurdering = uvesentligVilkårsvurdering, personIdent = randomFnr())
+        val personResultat = PersonResultat(
+            vilkårsvurdering = uvesentligVilkårsvurdering,
+            personIdent = randomFnr(),
+            aktørId = randomAktørId()
+        )
         val avslagUtenPeriode = VilkårResultat(
             personResultat = personResultat,
             periodeFom = null,
@@ -100,7 +110,11 @@ class VilkårsvurderingUtilsTest {
 
     @Test
     fun `feil kastes ikke når når ingen periode er løpende`() {
-        val personResultat = PersonResultat(vilkårsvurdering = uvesentligVilkårsvurdering, personIdent = randomFnr())
+        val personResultat = PersonResultat(
+            vilkårsvurdering = uvesentligVilkårsvurdering,
+            personIdent = randomFnr(),
+            aktørId = randomAktørId()
+        )
         val avslagUtenPeriode = VilkårResultat(
             personResultat = personResultat,
             periodeFom = null,
@@ -136,7 +150,10 @@ class VilkårsvurderingUtilsTest {
     @Test
     fun `Oppdatering av avslagbegrunnelse som ikke samsvarer med vilkår kaster feil`() {
         assertThrows<IllegalStateException> {
-            validerAvslagsbegrunnelse(triggesAv = TriggesAv(vilkår = setOf(Vilkår.LOVLIG_OPPHOLD)), vilkårResultatAvslag)
+            validerAvslagsbegrunnelse(
+                triggesAv = TriggesAv(vilkår = setOf(Vilkår.LOVLIG_OPPHOLD)),
+                vilkårResultatAvslag
+            )
         }
     }
 }

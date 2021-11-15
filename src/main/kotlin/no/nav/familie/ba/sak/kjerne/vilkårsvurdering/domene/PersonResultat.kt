@@ -5,12 +5,16 @@ import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.isSameOrBefore
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat.Companion.VilkårResultatComparator
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.time.LocalDate
 import java.util.SortedSet
+import javax.persistence.AttributeOverride
+import javax.persistence.AttributeOverrides
 import javax.persistence.CascadeType
 import javax.persistence.Column
+import javax.persistence.Embedded
 import javax.persistence.Entity
 import javax.persistence.EntityListeners
 import javax.persistence.FetchType
@@ -43,8 +47,9 @@ class PersonResultat(
     @Column(name = "person_ident", nullable = false, updatable = false)
     val personIdent: String,
 
-    @Column(name = "aktoer_id")
-    var aktørId: String? = null,
+    @Embedded
+    @AttributeOverrides(AttributeOverride(name = "aktørId", column = Column(name = "aktoer_id", updatable = false)))
+    val aktørId: AktørId,
 
     @OneToMany(
         fetch = FetchType.EAGER,

@@ -44,7 +44,7 @@ internal class PersonidentServiceTest() {
 
         every { personidentRepository.hentAktivIdentForAktørId(aktørId.id) } answers {
             Personident(
-                aktørId = aktørId.id,
+                aktørId = aktørId,
                 fødselsnummer = personidentAktiv,
                 aktiv = true
             )
@@ -58,7 +58,7 @@ internal class PersonidentServiceTest() {
         }
         every { personidentRepository.save(any()) } answers {
             Personident(
-                aktørId = aktørId.id,
+                aktørId = aktørId,
                 fødselsnummer = personidentAktiv,
                 aktiv = true
             )
@@ -81,7 +81,7 @@ internal class PersonidentServiceTest() {
     fun `Test aktiv ident som er peristert fra før`() {
         every { personidentRepository.hentAktivIdentForAktørId(aktørId.id) } answers {
             Personident(
-                aktørId = aktørId.id,
+                aktørId = aktørId,
                 fødselsnummer = personidentAktiv,
                 aktiv = true
             )
@@ -98,14 +98,14 @@ internal class PersonidentServiceTest() {
     fun `Test aktiv ident som har en tideligere ident peristert`() {
         every { personidentRepository.hentAktivIdentForAktørId(aktørId.id) } answers {
             Personident(
-                aktørId = aktørId.id,
+                aktørId = aktørId,
                 fødselsnummer = personidentInaktiv,
                 aktiv = true
             )
         }
         every { personidentRepository.save(any()) } answers {
             Personident(
-                aktørId = aktørId.id,
+                aktørId = aktørId,
                 fødselsnummer = personidentAktiv,
                 aktiv = true
             )

@@ -257,6 +257,7 @@ internal class TilkjentYtelseUtilsEndretUtbetalingAndelTest {
         behandlingId = behandling.id,
         tilkjentYtelse = tilkjentYtelse,
         personIdent = barn.personIdent.ident,
+        aktørId = barn.hentAktørId(),
         kalkulertUtbetalingsbeløp = beløp.toInt(),
         stønadFom = fom,
         stønadTom = tom,
@@ -265,15 +266,16 @@ internal class TilkjentYtelseUtilsEndretUtbetalingAndelTest {
         prosent = BigDecimal(100)
     )
 
-    private fun lagEndretUtbetalingAndel(barn: Person, fom: YearMonth, tom: YearMonth, prosent: Int) = EndretUtbetalingAndel(
-        behandlingId = behandling.id,
-        person = barn,
-        prosent = BigDecimal(prosent),
-        fom = fom,
-        tom = tom,
-        årsak = Årsak.DELT_BOSTED,
-        begrunnelse = "Begrunnelse for endring",
-        søknadstidspunkt = LocalDate.now(),
-        avtaletidspunktDeltBosted = LocalDate.now()
-    )
+    private fun lagEndretUtbetalingAndel(barn: Person, fom: YearMonth, tom: YearMonth, prosent: Int) =
+        EndretUtbetalingAndel(
+            behandlingId = behandling.id,
+            person = barn,
+            prosent = BigDecimal(prosent),
+            fom = fom,
+            tom = tom,
+            årsak = Årsak.DELT_BOSTED,
+            begrunnelse = "Begrunnelse for endring",
+            søknadstidspunkt = LocalDate.now(),
+            avtaletidspunktDeltBosted = LocalDate.now()
+        )
 }

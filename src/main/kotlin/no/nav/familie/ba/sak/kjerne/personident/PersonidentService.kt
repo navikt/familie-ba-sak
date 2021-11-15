@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.personident
 
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.IdentInformasjon
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.AktørId
 import no.nav.familie.kontrakter.felles.oppgave.IdentGruppe
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -23,7 +24,13 @@ class PersonidentService(
         val aktivIdentPersistert = personidentRepository.hentAktivIdentForAktørId(aktørId)
 
         if (aktivIdentErIkkePersistert(aktivIdentPersistert, fødselsnummerAktiv)) {
-            personidentRepository.save(Personident(aktørId = aktørId, fødselsnummer = fødselsnummerAktiv, aktiv = true))
+            personidentRepository.save(
+                Personident(
+                    aktørId = AktørId(aktørId),
+                    fødselsnummer = fødselsnummerAktiv,
+                    aktiv = true
+                )
+            )
         }
 
         if (identHarBlittInnaktivSidenSistPersistering(aktivIdentPersistert, fødselsnummerAktiv)) {

@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.behandling
 
 import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
@@ -109,6 +110,7 @@ class BehandlingTest {
     @Test
     fun `Skal returnere utvidet hvis det eksisterer en løpende utvidet-sak`() {
         val søker = randomFnr()
+        val søkerAktørId = randomAktørId()
 
         val behandling = lagBehandling()
 
@@ -124,6 +126,7 @@ class BehandlingTest {
                 type = YtelseType.UTVIDET_BARNETRYGD,
                 tilkjentYtelse = tilkjentYtelse,
                 personIdent = søker,
+                aktørId = søkerAktørId,
                 kalkulertUtbetalingsbeløp = 1054,
                 sats = 123,
                 stønadFom = YearMonth.of(2015, 6),
@@ -140,6 +143,7 @@ class BehandlingTest {
     @Test
     fun `Skal returnere ordinær hvis det eksisterer en utvidet-sak som er avsluttet`() {
         val søker = randomFnr()
+        val søkerAktørId = randomAktørId()
 
         val behandling = lagBehandling()
 
@@ -155,6 +159,7 @@ class BehandlingTest {
                 type = YtelseType.UTVIDET_BARNETRYGD,
                 tilkjentYtelse = tilkjentYtelse,
                 personIdent = søker,
+                aktørId = søkerAktørId,
                 kalkulertUtbetalingsbeløp = 1054,
                 sats = 123,
                 stønadFom = YearMonth.of(2015, 6),
@@ -171,6 +176,7 @@ class BehandlingTest {
     @Test
     fun `Skal returnere ordinær hvis det eksisterer en løpende ordinær-sak`() {
         val søker = randomFnr()
+        val søkerAktørId = randomAktørId()
 
         val behandling = lagBehandling()
 
@@ -186,6 +192,7 @@ class BehandlingTest {
                 type = YtelseType.ORDINÆR_BARNETRYGD,
                 tilkjentYtelse = tilkjentYtelse,
                 personIdent = søker,
+                aktørId = søkerAktørId,
                 kalkulertUtbetalingsbeløp = 1054,
                 sats = 123,
                 stønadFom = YearMonth.of(2015, 6),

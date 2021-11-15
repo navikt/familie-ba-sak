@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.integrasjoner.økonomi
 
 import no.nav.familie.ba.sak.common.nyOrdinærBehandling
 import no.nav.familie.ba.sak.common.nyRevurdering
+import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
@@ -253,6 +254,7 @@ class KonsistensavstemmingUtplukkingIntegrationTest : AbstractSpringIntegrationT
         periodeOffset: Long
     ) = AndelTilkjentYtelse(
         personIdent = randomFnr(),
+        aktørId = randomAktørId(),
         behandlingId = tilkjentYtelse.behandling.id,
         tilkjentYtelse = tilkjentYtelse,
         kalkulertUtbetalingsbeløp = 1054,

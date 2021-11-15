@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagPersonResultaterForSøkerOgToBarn
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
+import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.sisteDagIForrigeMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
@@ -65,7 +66,8 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
             tomBarn2
         )
 
-        val tilkjentYtelse = beregningService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(behandling, utbetalingsoppdrag)
+        val tilkjentYtelse =
+            beregningService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(behandling, utbetalingsoppdrag)
 
         Assertions.assertNotNull(tilkjentYtelse)
         Assertions.assertEquals(fomBarn1.toYearMonth(), tilkjentYtelse.stønadFom)
@@ -99,7 +101,8 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
             opphørsDato
         )
 
-        val tilkjentYtelse = beregningService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(behandling, utbetalingsoppdrag)
+        val tilkjentYtelse =
+            beregningService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(behandling, utbetalingsoppdrag)
 
         Assertions.assertNotNull(tilkjentYtelse)
         Assertions.assertNull(tilkjentYtelse.stønadFom)
@@ -144,7 +147,8 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
             tomDatoBarn2
         )
 
-        val tilkjentYtelse = beregningService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(behandling, utbetalingsoppdrag)
+        val tilkjentYtelse =
+            beregningService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(behandling, utbetalingsoppdrag)
 
         Assertions.assertNotNull(tilkjentYtelse)
         Assertions.assertEquals(revurderingFomBarn1.toYearMonth(), tilkjentYtelse.stønadFom)
@@ -157,12 +161,16 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
         val søkerFnr = randomFnr()
         val barn1Fnr = randomFnr()
         val barn2Fnr = randomFnr()
+        val søkerAktørId = randomAktørId()
+        val barn1AktørId = randomAktørId()
+        val barn2AktørId = randomAktørId()
         val dato_2021_11_01 = LocalDate.of(2021, 11, 1)
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
 
-        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søkerFnr, listOf(barn1Fnr, barn2Fnr))
+        val personopplysningGrunnlag =
+            lagTestPersonopplysningGrunnlag(behandling.id, søkerFnr, listOf(barn1Fnr, barn2Fnr))
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
         val barn1Id = personopplysningGrunnlag.barna.find { it.personIdent.ident == barn1Fnr }!!.personIdent.ident
@@ -174,6 +182,9 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
             søkerFnr,
             barn1Fnr,
             barn2Fnr,
+            søkerAktørId,
+            barn1AktørId,
+            barn2AktørId,
             dato_2021_11_01,
             dato_2021_11_01.plusYears(17)
         )

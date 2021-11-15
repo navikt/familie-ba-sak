@@ -1,10 +1,14 @@
 package no.nav.familie.ba.sak.kjerne.personident
 
 import no.nav.familie.ba.sak.common.BaseEntitet
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.time.LocalDateTime
 import java.util.Objects
+import javax.persistence.AttributeOverride
+import javax.persistence.AttributeOverrides
 import javax.persistence.Column
+import javax.persistence.Embedded
 import javax.persistence.Entity
 import javax.persistence.EntityListeners
 import javax.persistence.GeneratedValue
@@ -22,8 +26,9 @@ data class Personident(
     @SequenceGenerator(name = "personident_seq_generator", sequenceName = "personident_seq", allocationSize = 50)
     val id: Long = 0,
 
-    @Column(name = "aktoer_id", nullable = false)
-    val aktørId: String,
+    @Embedded
+    @AttributeOverrides(AttributeOverride(name = "aktørId", column = Column(name = "aktoer_id", updatable = false)))
+    val aktørId: AktørId,
 
     @Column(name = "foedselsnummer", nullable = false)
     val fødselsnummer: String,

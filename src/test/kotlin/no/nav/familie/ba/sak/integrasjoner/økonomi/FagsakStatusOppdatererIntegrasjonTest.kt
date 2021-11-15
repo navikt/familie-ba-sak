@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.integrasjoner.økonomi
 
 import no.nav.familie.ba.sak.common.nyOrdinærBehandling
+import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
@@ -70,7 +71,8 @@ class FagsakStatusOppdatererIntegrasjonTest : AbstractSpringIntegrationTest() {
         val fagsakOriginal = fagsakService.hentEllerOpprettFagsakForPersonIdent(forelderIdent).also {
             fagsakService.oppdaterStatus(it, FagsakStatus.LØPENDE)
         }
-        val førstegangsbehandling = opprettOgLagreBehandlingMedAndeler(personIdent = forelderIdent, offsetPåAndeler = listOf(1L))
+        val førstegangsbehandling =
+            opprettOgLagreBehandlingMedAndeler(personIdent = forelderIdent, offsetPåAndeler = listOf(1L))
 
         val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(førstegangsbehandling.id)
 
@@ -118,6 +120,7 @@ class FagsakStatusOppdatererIntegrasjonTest : AbstractSpringIntegrationTest() {
         periodeOffset: Long
     ) = AndelTilkjentYtelse(
         personIdent = randomFnr(),
+        aktørId = randomAktørId(),
         behandlingId = tilkjentYtelse.behandling.id,
         tilkjentYtelse = tilkjentYtelse,
         kalkulertUtbetalingsbeløp = 1054,

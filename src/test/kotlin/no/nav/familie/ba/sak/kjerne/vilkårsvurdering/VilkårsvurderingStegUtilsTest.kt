@@ -4,11 +4,13 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
+import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.toPeriode
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
@@ -36,17 +38,19 @@ class VilkårsvurderingStegUtilsTest {
     @BeforeEach
     fun init() {
         val personIdent = randomFnr()
+        val personAktørId = randomAktørId()
 
         behandling = lagBehandling()
 
         vilkår = Vilkår.BOR_MED_SØKER
         resultat = Resultat.OPPFYLT
 
-        vilkårsvurdering = lagVilkårsvurdering(personIdent, behandling, resultat)
+        vilkårsvurdering = lagVilkårsvurdering(personIdent, personAktørId, behandling, resultat)
 
         personResultat = PersonResultat(
             vilkårsvurdering = vilkårsvurdering,
-            personIdent = personIdent
+            personIdent = personIdent,
+            aktørId = personAktørId,
         )
 
         vilkårResultat1 = VilkårResultat(
@@ -311,7 +315,8 @@ class VilkårsvurderingStegUtilsTest {
     fun `Skal nullstille periode hvis det kun finnes en periode`() {
         val mockPersonResultat = PersonResultat(
             vilkårsvurdering = vilkårsvurdering,
-            personIdent = randomFnr()
+            personIdent = randomFnr(),
+            aktørId = randomAktørId(),
         )
 
         val mockVilkårResultat = VilkårResultat(
@@ -376,13 +381,15 @@ class VilkårsvurderingStegUtilsTest {
     @Test
     fun `flyttResultaterTilInitielt filtrer ikke bort ikke oppfylte perioder når det gjelder samme behandling`() {
         val søker = randomFnr()
+        val søkerAktørId = randomAktørId()
         val behandling = lagBehandling()
 
         val initiellVilkårvurdering =
-            lagVilkårsvurderingMedForskelligeResultat(søker, behandling, listOf(Resultat.OPPFYLT))
+            lagVilkårsvurderingMedForskelligeResultat(søker, søkerAktørId, behandling, listOf(Resultat.OPPFYLT))
         val aktivVilkårsvurdering =
             lagVilkårsvurderingMedForskelligeResultat(
                 søker,
+                søkerAktørId,
                 behandling,
                 listOf(Resultat.IKKE_OPPFYLT, Resultat.OPPFYLT)
             )
@@ -405,14 +412,16 @@ class VilkårsvurderingStegUtilsTest {
     @Test
     fun `flyttResultaterTilInitielt filtrer ikke oppfylt om oppfylt finnes ved kopiering fra forrige behandling`() {
         val søker = randomFnr()
+        val søkerAktørId = randomAktørId()
         val behandling = lagBehandling()
         val behandling2 = lagBehandling()
 
         val initiellVilkårvurdering =
-            lagVilkårsvurderingMedForskelligeResultat(søker, behandling, listOf(Resultat.OPPFYLT))
+            lagVilkårsvurderingMedForskelligeResultat(søker, søkerAktørId, behandling, listOf(Resultat.OPPFYLT))
         val aktivVilkårsvurdering =
             lagVilkårsvurderingMedForskelligeResultat(
                 søker,
+                søkerAktørId,
                 behandling2,
                 listOf(Resultat.IKKE_OPPFYLT, Resultat.OPPFYLT)
             )
@@ -432,13 +441,15 @@ class VilkårsvurderingStegUtilsTest {
     @Test
     fun `flyttResultaterTilInitielt filtrer ikke ikke oppfylt om oppfylt ikke finnes`() {
         val søker = randomFnr()
+        val søkerAktørId = randomAktørId()
         val behandling = lagBehandling()
 
         val initiellVilkårsvurdering =
-            lagVilkårsvurderingMedForskelligeResultat(søker, behandling, listOf(Resultat.OPPFYLT))
+            lagVilkårsvurderingMedForskelligeResultat(søker, søkerAktørId, behandling, listOf(Resultat.OPPFYLT))
         val activeVilkårvurdering =
             lagVilkårsvurderingMedForskelligeResultat(
                 søker,
+                søkerAktørId,
                 behandling,
                 listOf(Resultat.IKKE_OPPFYLT, Resultat.IKKE_OPPFYLT)
             )
@@ -457,6 +468,7 @@ class VilkårsvurderingStegUtilsTest {
 
     fun lagVilkårsvurderingMedForskelligeResultat(
         søkerFnr: String,
+        søkerAktørId: AktørId,
         behandling: Behandling,
         resultater: List<Resultat>
     ): Vilkårsvurdering {
@@ -466,7 +478,8 @@ class VilkårsvurderingStegUtilsTest {
         var månedsteller = 0L
         val personResultat = PersonResultat(
             vilkårsvurdering = vilkårsvurdering,
-            personIdent = søkerFnr
+            personIdent = søkerFnr,
+            aktørId = søkerAktørId
         )
         personResultat.setSortedVilkårResultater(
             resultater.map {

@@ -125,6 +125,8 @@ data class Person(
     fun hentAlder(): Int = Period.between(fødselsdato, LocalDate.now()).years
 
     fun hentSeksårsdag(): LocalDate = fødselsdato.plusYears(6)
+
+    fun hentAktørId(): AktørId = aktørId ?: error("Person har ikke aktørId")
 }
 
 enum class Kjønn {

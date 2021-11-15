@@ -4,6 +4,7 @@ import io.mockk.every
 import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
+import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.ClientMocks
@@ -80,6 +81,7 @@ class FerdigstillBehandlingTaskTest : AbstractSpringIntegrationTest() {
 
     private fun kjørSteg(resultat: Resultat): Behandling {
         val fnr = randomFnr()
+        val aktørId = randomAktørId()
         val fnrBarn = ClientMocks.barnFnr[0]
 
         val behandling = kjørStegprosessForFGB(
@@ -95,12 +97,15 @@ class FerdigstillBehandlingTaskTest : AbstractSpringIntegrationTest() {
         )
 
         return if (resultat == Resultat.IKKE_OPPFYLT) {
-            val vilkårsvurdering = lagVilkårsvurdering(fnr, behandling, resultat)
+            val vilkårsvurdering = lagVilkårsvurdering(fnr, aktørId, behandling, resultat)
 
             vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering)
             val behandlingEtterVilkårsvurdering = stegService.håndterVilkårsvurdering(behandling)
 
-            behandlingService.oppdaterStatusPåBehandling(behandlingEtterVilkårsvurdering.id, BehandlingStatus.IVERKSETTER_VEDTAK)
+            behandlingService.oppdaterStatusPåBehandling(
+                behandlingEtterVilkårsvurdering.id,
+                BehandlingStatus.IVERKSETTER_VEDTAK
+            )
             behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(
                 behandlingId = behandlingEtterVilkårsvurdering.id,
                 steg = StegType.FERDIGSTILLE_BEHANDLING

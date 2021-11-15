@@ -243,7 +243,8 @@ class VilkårService(
         return personopplysningGrunnlag.personer.map { person ->
             val personResultat = PersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
-                personIdent = person.personIdent.ident
+                personIdent = person.personIdent.ident,
+                aktørId = person.hentAktørId()
             )
 
             val vilkårForPerson = Vilkår.hentVilkårFor(person.type)
@@ -273,7 +274,8 @@ class VilkårService(
         return personopplysningGrunnlag.personer.map { person ->
             val personResultat = PersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
-                personIdent = person.personIdent.ident
+                personIdent = person.personIdent.ident,
+                aktørId = person.hentAktørId()
             )
 
             val vilkårForPerson = Vilkår.hentVilkårFor(
@@ -337,7 +339,8 @@ class VilkårService(
         return personopplysningGrunnlag.personer.map { person ->
             val personResultat = PersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
-                personIdent = person.personIdent.ident
+                personIdent = person.personIdent.ident,
+                aktørId = person.hentAktørId()
             )
 
             val vilkårForPerson = Vilkår.hentVilkårFor(person.type)
@@ -394,7 +397,8 @@ class VilkårService(
         return personopplysningGrunnlag.personer.filter { it.type != PersonType.ANNENPART }.map { person ->
             val personResultat = PersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
-                personIdent = person.personIdent.ident
+                personIdent = person.personIdent.ident,
+                aktørId = person.hentAktørId()
             )
 
             val vilkårTyperForPerson = Vilkår.hentVilkårFor(person.type)

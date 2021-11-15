@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.kjerne.dokument.UtvidetScenario
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.erStartPåUtvidetSammeMåned
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.utledSegmenter
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.fpsak.tidsserie.LocalDateInterval
@@ -15,9 +16,12 @@ import no.nav.fpsak.tidsserie.LocalDateSegment
 import java.math.BigDecimal
 import java.time.YearMonth
 import java.util.Objects
+import javax.persistence.AttributeOverride
+import javax.persistence.AttributeOverrides
 import javax.persistence.CascadeType
 import javax.persistence.Column
 import javax.persistence.Convert
+import javax.persistence.Embedded
 import javax.persistence.Entity
 import javax.persistence.EntityListeners
 import javax.persistence.EnumType
@@ -56,8 +60,9 @@ data class AndelTilkjentYtelse(
     @Column(name = "person_ident", nullable = false, updatable = false)
     val personIdent: String,
 
-    @Column(name = "aktoer_id")
-    var aktørId: String? = null,
+    @Embedded
+    @AttributeOverrides(AttributeOverride(name = "aktørId", column = Column(name = "aktoer_id", updatable = false)))
+    val aktørId: AktørId,
 
     @Column(name = "kalkulert_utbetalingsbelop", nullable = false)
     val kalkulertUtbetalingsbeløp: Int,

@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
+import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
@@ -12,6 +13,7 @@ class VilkårVurderingMatcherTest {
 
     private val randomBehandling = lagBehandling()
     private val søkerFnr = randomFnr()
+    private val søkerAktørId = randomAktørId()
 
     private fun likeVilkårResultater(a: VilkårResultat?, b: VilkårResultat?): Boolean =
         a?.vilkårType == b?.vilkårType &&
@@ -23,7 +25,7 @@ class VilkårVurderingMatcherTest {
 
     @Test
     fun `Kopierte vilkår matches og returneres som par`() {
-        val vilkårsvurderingOriginal = lagVilkårsvurdering(søkerFnr, randomBehandling, Resultat.OPPFYLT)
+        val vilkårsvurderingOriginal = lagVilkårsvurdering(søkerFnr, søkerAktørId, randomBehandling, Resultat.OPPFYLT)
         val vilkårsvurderingKopi = vilkårsvurderingOriginal.kopier()
         val vilkårPar = VilkårsvurderingService.matchVilkårResultater(vilkårsvurderingOriginal, vilkårsvurderingKopi)
         assertTrue(vilkårPar.all { likeVilkårResultater(it.first, it.second) })
@@ -31,8 +33,8 @@ class VilkårVurderingMatcherTest {
 
     @Test
     fun `Vilkår som kun finnes i den ene vilkårsvurderingen returneres alene`() {
-        val vilkårsvurderingOriginal = lagVilkårsvurdering(søkerFnr, randomBehandling, Resultat.OPPFYLT)
-        val vilkårsvurderingUlik = lagVilkårsvurdering(søkerFnr, randomBehandling, Resultat.IKKE_OPPFYLT)
+        val vilkårsvurderingOriginal = lagVilkårsvurdering(søkerFnr, søkerAktørId, randomBehandling, Resultat.OPPFYLT)
+        val vilkårsvurderingUlik = lagVilkårsvurdering(søkerFnr, søkerAktørId, randomBehandling, Resultat.IKKE_OPPFYLT)
         val vilkårPar = VilkårsvurderingService.matchVilkårResultater(vilkårsvurderingOriginal, vilkårsvurderingUlik)
         assertTrue(vilkårPar.any { it.first == null && it.second != null })
         assertTrue(vilkårPar.any { it.first != null && it.second == null })

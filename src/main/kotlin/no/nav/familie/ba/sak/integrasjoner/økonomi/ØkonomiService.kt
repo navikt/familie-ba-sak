@@ -72,7 +72,7 @@ class ØkonomiService(
                 .isEmpty()
 
         return if (erFørsteIverksatteBehandlingPåFagsak) {
-            utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOpptaderTilkjentYtelse(
+            utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOppdaterTilkjentYtelse(
                 saksbehandlerId = saksbehandlerId,
                 vedtak = vedtak,
                 erFørsteBehandlingPåFagsak = erFørsteIverksatteBehandlingPåFagsak,
@@ -97,7 +97,7 @@ class ØkonomiService(
                 beregningService.lagreTilkjentYtelseMedOppdaterteAndeler(tilkjentYtelseMedOppdaterteAndeler)
             }
 
-            val utbetalingsoppdrag = utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOpptaderTilkjentYtelse(
+            val utbetalingsoppdrag = utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOppdaterTilkjentYtelse(
                 saksbehandlerId = saksbehandlerId,
                 vedtak = vedtak,
                 erFørsteBehandlingPåFagsak = erFørsteIverksatteBehandlingPåFagsak,

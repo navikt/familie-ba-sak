@@ -36,6 +36,7 @@ data class UtvidetBarnetrygdGenerator(
         if (utvidetVilkår.isEmpty() || andelerBarna.isEmpty()) return emptyList()
 
         val søkerIdent = utvidetVilkår.first().personResultat?.personIdent ?: error("Vilkår mangler PersonResultat")
+        val søkerAktørId = utvidetVilkår.first().personResultat?.aktørId ?: error("Vilkår mangler PersonResultat")
 
         val utvidaTidslinje = LocalDateTimeline(
             utvidetVilkår
@@ -90,6 +91,7 @@ data class UtvidetBarnetrygdGenerator(
                     behandlingId = behandlingId,
                     tilkjentYtelse = tilkjentYtelse,
                     personIdent = søkerIdent,
+                    aktørId = søkerAktørId,
                     stønadFom = it.fom.toYearMonth(),
                     stønadTom = it.tom.toYearMonth(),
                     kalkulertUtbetalingsbeløp = ordinærSatsForPeriode.avrundetHeltallAvProsent(prosentForPeriode),
