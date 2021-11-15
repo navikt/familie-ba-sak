@@ -20,6 +20,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurderingType
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -400,5 +401,53 @@ class VilkårServiceTest(
             ),
             Vilkår.hentVilkårFor(personType = PersonType.SØKER, ytelseType = YtelseType.UTVIDET_BARNETRYGD)
         )
+    }
+    
+    @Test
+    fun `Skal ikke få duplikate utdypede vilkårsvurderinger`() {
+        val fnr = randomFnr()
+        val barnFnr = randomFnr()
+
+        fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
+        val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(fnr))
+        val forrigeBehandlingSomErIverksatt =
+            behandlingService.hentSisteBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id)
+
+        val personopplysningGrunnlag =
+            lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
+        persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
+
+        val vilkårsvurdering = vilkårService.initierVilkårsvurderingForBehandling(
+            behandling = behandling,
+            bekreftEndringerViaFrontend = true,
+            forrigeBehandling = forrigeBehandlingSomErIverksatt
+        )
+        val under18ÅrVilkårForBarn =
+            vilkårsvurdering.personResultater.find { it.personIdent == barnFnr }
+                ?.tilRestPersonResultat()?.vilkårResultater?.find { it.vilkårType == Vilkår.UNDER_18_ÅR }
+
+        val endretVilkårsvurdering: List<RestPersonResultat> =
+            vilkårService.endreVilkår(
+                behandlingId = behandling.id,
+                vilkårId = under18ÅrVilkårForBarn!!.id,
+                restPersonResultat =
+                RestPersonResultat(
+                    personIdent = barnFnr,
+                    vilkårResultater = listOf(
+                        under18ÅrVilkårForBarn.copy(
+                            resultat = Resultat.OPPFYLT,
+                            periodeFom = LocalDate.of(2019, 5, 8),
+                            erDeltBosted = true,
+                            utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED)
+                        )
+                    )
+                )
+            )
+
+        val endretUnder18ÅrVilkårForBarn =
+            endretVilkårsvurdering.find { it.personIdent == barnFnr }
+                ?.vilkårResultater?.find { it.vilkårType == Vilkår.UNDER_18_ÅR }
+        println("svar: ")
+        println(endretUnder18ÅrVilkårForBarn!!.utdypendeVilkårsvurderinger)
     }
 }
