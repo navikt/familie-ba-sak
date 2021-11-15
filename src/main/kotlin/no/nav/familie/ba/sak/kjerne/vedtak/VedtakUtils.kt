@@ -8,7 +8,7 @@ import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurderingType
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
@@ -105,21 +105,21 @@ object VedtakUtils {
         val erDeltBostedOppfylt =
             (
                 !triggesAv.deltbosted || vilkårResultat.erDeltBosted || vilkårResultat.utdypendeVilkårsvurderinger.contains(
-                    UtdypendeVilkårsvurderingType.DELT_BOSTED
+                    UtdypendeVilkårsvurdering.DELT_BOSTED
                 )
                 )
         val erSkjønnsmessigVurderingOppfylt =
             (
                 !triggesAv.vurderingAnnetGrunnlag || vilkårResultat.erSkjønnsmessigVurdert || vilkårResultat.utdypendeVilkårsvurderinger.contains(
-                    UtdypendeVilkårsvurderingType.VURDERING_ANNET_GRUNNLAG
+                    UtdypendeVilkårsvurdering.VURDERING_ANNET_GRUNNLAG
                 )
                 )
         val erMedlemskapOppfylt =
             vilkårResultat.erMedlemskapVurdert == triggesAv.medlemskap || (
                 vilkårResultat.utdypendeVilkårsvurderinger.contains(
-                    UtdypendeVilkårsvurderingType.VURDERT_MEDLEMSKAP
+                    UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP
                 ) && triggesAv.medlemskap
-                ) || (!vilkårResultat.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurderingType.VURDERT_MEDLEMSKAP) && !triggesAv.medlemskap)
+                ) || (!vilkårResultat.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP) && !triggesAv.medlemskap)
 
         return erDeltBostedOppfylt && erSkjønnsmessigVurderingOppfylt && erMedlemskapOppfylt
     }

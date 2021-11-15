@@ -5,7 +5,7 @@ import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurderingType
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -34,7 +34,7 @@ data class RestVilkårResultat(
     val erDeltBosted: Boolean? = false,
     val avslagBegrunnelser: List<VedtakBegrunnelseSpesifikasjon>? = null,
     val vurderesEtter: Regelverk? = null,
-    val utdypendeVilkårsvurderinger: List<UtdypendeVilkårsvurderingType>? = null
+    val utdypendeVilkårsvurderinger: List<UtdypendeVilkårsvurdering>? = null
 ) {
 
     fun erAvslagUtenPeriode() =
@@ -52,10 +52,10 @@ fun PersonResultat.tilRestPersonResultat() =
                 erAutomatiskVurdert = vilkårResultat.erAutomatiskVurdert,
                 erEksplisittAvslagPåSøknad = vilkårResultat.erEksplisittAvslagPåSøknad,
                 erSkjønnsmessigVurdert = vilkårResultat.utdypendeVilkårsvurderinger.contains(
-                    UtdypendeVilkårsvurderingType.VURDERING_ANNET_GRUNNLAG
+                    UtdypendeVilkårsvurdering.VURDERING_ANNET_GRUNNLAG
                 ),
-                erMedlemskapVurdert = vilkårResultat.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurderingType.VURDERT_MEDLEMSKAP),
-                erDeltBosted = vilkårResultat.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurderingType.DELT_BOSTED),
+                erMedlemskapVurdert = vilkårResultat.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP),
+                erDeltBosted = vilkårResultat.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.DELT_BOSTED),
                 id = vilkårResultat.id,
                 vilkårType = vilkårResultat.vilkårType,
                 periodeFom = vilkårResultat.periodeFom,

@@ -4,7 +4,7 @@ import no.nav.familie.ba.sak.common.Utils
 import javax.persistence.AttributeConverter
 import javax.persistence.Converter
 
-enum class UtdypendeVilkårsvurderingType(val tekst: String) {
+enum class UtdypendeVilkårsvurdering(val tekst: String) {
     VURDERING_ANNET_GRUNNLAG(tekst = "Vurdering annet grunnlag"),
     VURDERT_MEDLEMSKAP(tekst = "Vurdert medlemskap"),
     NORSK_LOVGIVNING(tekst = "Omfattet av norsk lovgivning"),
@@ -38,11 +38,11 @@ enum class UtdypendeVilkårsvurderingType(val tekst: String) {
 }
 
 @Converter
-class UtdypendeVilkårsvurderingerConverter : AttributeConverter<List<UtdypendeVilkårsvurderingType>, String> {
+class UtdypendeVilkårsvurderingerConverter : AttributeConverter<List<UtdypendeVilkårsvurdering>, String> {
 
-    override fun convertToDatabaseColumn(enumListe: List<UtdypendeVilkårsvurderingType>) =
+    override fun convertToDatabaseColumn(enumListe: List<UtdypendeVilkårsvurdering>) =
         Utils.konverterEnumsTilString(enumListe)
 
-    override fun convertToEntityAttribute(string: String?): List<UtdypendeVilkårsvurderingType> =
+    override fun convertToEntityAttribute(string: String?): List<UtdypendeVilkårsvurdering> =
         Utils.konverterStringTilEnums(string)
 }
