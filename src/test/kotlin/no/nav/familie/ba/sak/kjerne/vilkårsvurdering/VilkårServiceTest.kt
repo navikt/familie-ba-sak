@@ -402,7 +402,7 @@ class VilkårServiceTest(
             Vilkår.hentVilkårFor(personType = PersonType.SØKER, ytelseType = YtelseType.UTVIDET_BARNETRYGD)
         )
     }
-    
+
     @Test
     fun `Skal ikke få duplikate utdypede vilkårsvurderinger`() {
         val fnr = randomFnr()
