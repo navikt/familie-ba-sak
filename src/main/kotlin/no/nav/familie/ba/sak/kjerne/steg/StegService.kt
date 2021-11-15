@@ -191,7 +191,9 @@ class StegService(
             behandlingSteg.utførStegOgAngiNeste(behandling, "")
         }
 
-        return if (behandlingEtterBehandlingsresultatSteg.resultat == BehandlingResultat.AVSLÅTT) {
+        return if (behandlingEtterBehandlingsresultatSteg.resultat == BehandlingResultat.AVSLÅTT &&
+            !behandlingEtterBehandlingsresultatSteg.skalBehandlesAutomatisk
+        ) {
             håndterVurderTilbakekreving(
                 behandling = behandlingEtterBehandlingsresultatSteg
             )
@@ -322,12 +324,12 @@ class StegService(
             }
 
             if (behandlingSteg.stegType().erSaksbehandlerSteg() && behandlingSteg.stegType()
-                .kommerEtter(behandling.steg)
+                    .kommerEtter(behandling.steg)
             ) {
                 error(
                     "${SikkerhetContext.hentSaksbehandlerNavn()} prøver å utføre steg '${
-                    behandlingSteg.stegType()
-                        .displayName()
+                        behandlingSteg.stegType()
+                            .displayName()
                     }', men behandlingen er på steg '${behandling.steg.displayName()}'"
                 )
             }
