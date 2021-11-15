@@ -50,7 +50,8 @@ data class TriggesAv(
     val valgbar: Boolean = true,
     val endringsaarsaker: Set<Årsak> = emptySet(),
     val etterEndretUtbetaling: Boolean = false,
-    val endretUtbetaingSkalUtbetales: Boolean = false
+    val endretUtbetaingSkalUtbetales: Boolean = false,
+    val småbarnstillegg: Boolean = false
 ) {
     fun erEndret() = endringsaarsaker.isNotEmpty()
 }

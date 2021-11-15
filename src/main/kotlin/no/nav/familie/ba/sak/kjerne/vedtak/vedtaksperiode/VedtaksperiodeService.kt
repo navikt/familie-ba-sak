@@ -25,6 +25,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Personopplysning
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.erTilknyttetVilkår
@@ -321,10 +322,11 @@ class VedtaksperiodeService(
                                         ?.tilTriggesAv() ?: return@fold acc
                                 val vedtakBegrunnelseType = standardBegrunnelse.vedtakBegrunnelseType
 
-                                if (triggesAv.vilkår.contains(Vilkår.UTVIDET_BARNETRYGD) && ytelseTyper.contains(
-                                        YtelseType.UTVIDET_BARNETRYGD
-                                    ) &&
-                                    vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGET
+                                if (triggereForUtvidetBarnetrygdErOppfylt(
+                                        triggesAv,
+                                        ytelseTyper,
+                                        vedtakBegrunnelseType
+                                    )
                                 ) {
                                     acc.add(standardBegrunnelse)
                                 } else if (standardBegrunnelse.triggesForPeriode(
@@ -361,6 +363,19 @@ class VedtaksperiodeService(
             )
         }
     }
+
+    private fun triggereForUtvidetBarnetrygdErOppfylt(
+        triggesAv: TriggesAv,
+        ytelseTyper: List<YtelseType>,
+        vedtakBegrunnelseType: VedtakBegrunnelseType
+    ) =
+        if (triggesAv.småbarnstillegg) {
+            ytelseTyper.contains(YtelseType.SMÅBARNSTILLEGG)
+        } else if (triggesAv.vilkår.contains(Vilkår.UTVIDET_BARNETRYGD) &&
+            vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGET
+        ) {
+            ytelseTyper.contains(YtelseType.UTVIDET_BARNETRYGD)
+        } else false
 
     fun oppdaterFortsattInnvilgetPeriodeMedAutobrevBegrunnelse(
         vedtak: Vedtak,

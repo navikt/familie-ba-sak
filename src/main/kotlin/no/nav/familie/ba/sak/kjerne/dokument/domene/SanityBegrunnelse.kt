@@ -191,6 +191,7 @@ fun SanityBegrunnelse.tilTriggesAv(): TriggesAv {
         )
             ?: false,
         endringsaarsaker = this.endringsaarsaker?.toSet() ?: emptySet(),
+        småbarnstillegg = this.inneholderUtvidetBarnetrygdTrigger(UtvidetBarnetrygdTrigger.SMÅBARNSTILLEGG)
     )
 }
 
@@ -211,3 +212,6 @@ fun SanityBegrunnelse.inneholderGiftPartnerskapTrigger(vilkårTrigger: VilkårTr
 
 fun SanityBegrunnelse.inneholderBorMedSøkerTrigger(vilkårTrigger: VilkårTrigger) =
     this.borMedSokerTriggere?.contains(vilkårTrigger) ?: false
+
+fun SanityBegrunnelse.inneholderUtvidetBarnetrygdTrigger(utvidetBarnetrygdTrigger: UtvidetBarnetrygdTrigger) =
+    this.utvidetBarnetrygdTriggere?.contains(utvidetBarnetrygdTrigger) ?: false

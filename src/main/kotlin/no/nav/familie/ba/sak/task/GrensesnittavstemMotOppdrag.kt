@@ -44,7 +44,7 @@ class GrensesnittavstemMotOppdrag(val avstemmingService: AvstemmingService, val 
     fun nesteAvstemmingDTO(tideligereTriggerDato: LocalDate): GrensesnittavstemmingTaskDTO =
         GrensesnittavstemmingTaskDTO(
             tideligereTriggerDato.atStartOfDay(),
-            nesteGyldigeTriggertidForBehandlingIHverdager(24 * 60, tideligereTriggerDato.atStartOfDay())
+            nesteGyldigeTriggertidForBehandlingIHverdager((24 * 60).toLong(), tideligereTriggerDato.atStartOfDay())
                 .toLocalDate().atStartOfDay()
         )
 
