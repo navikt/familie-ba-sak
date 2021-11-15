@@ -31,3 +31,15 @@ set aktoer_id=(select aktoer_id from personident p where p.foedselsnummer = gpo.
 update foedselshendelse_pre_lansering fpl
 set aktoer_id=(select aktoer_id from personident p where p.foedselsnummer = fpl.person_ident);
 
+alter table fagsak
+    add column aktoer_id varchar;
+
+update fagsak f
+set aktoer_id=(select aktoer_id
+               from personident p
+               where p.foedselsnummer =
+                     (select ident
+                      from fagsak_person fp
+                      where fk_fagsak_id = f.id
+                        and fp.arkivert = false));
+
