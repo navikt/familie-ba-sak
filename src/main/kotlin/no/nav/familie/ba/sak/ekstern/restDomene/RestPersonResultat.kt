@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurderingType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -33,6 +34,7 @@ data class RestVilkårResultat(
     val erDeltBosted: Boolean? = false,
     val avslagBegrunnelser: List<VedtakBegrunnelseSpesifikasjon>? = null,
     val vurderesEtter: Regelverk? = null,
+    val utdypendeVilkårsvurderinger: List<UtdypendeVilkårsvurderingType>? = null
 ) {
 
     fun erAvslagUtenPeriode() =
@@ -49,9 +51,11 @@ fun PersonResultat.tilRestPersonResultat() =
                 resultat = vilkårResultat.resultat,
                 erAutomatiskVurdert = vilkårResultat.erAutomatiskVurdert,
                 erEksplisittAvslagPåSøknad = vilkårResultat.erEksplisittAvslagPåSøknad,
-                erSkjønnsmessigVurdert = vilkårResultat.erSkjønnsmessigVurdert,
-                erMedlemskapVurdert = vilkårResultat.erMedlemskapVurdert,
-                erDeltBosted = vilkårResultat.erDeltBosted,
+                erSkjønnsmessigVurdert = vilkårResultat.utdypendeVilkårsvurderinger.contains(
+                    UtdypendeVilkårsvurderingType.VURDERING_ANNET_GRUNNLAG
+                ),
+                erMedlemskapVurdert = vilkårResultat.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurderingType.VURDERT_MEDLEMSKAP),
+                erDeltBosted = vilkårResultat.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurderingType.DELT_BOSTED),
                 id = vilkårResultat.id,
                 vilkårType = vilkårResultat.vilkårType,
                 periodeFom = vilkårResultat.periodeFom,
@@ -63,6 +67,7 @@ fun PersonResultat.tilRestPersonResultat() =
                 erVurdert = vilkårResultat.resultat != Resultat.IKKE_VURDERT || vilkårResultat.versjon > 0,
                 avslagBegrunnelser = vilkårResultat.vedtakBegrunnelseSpesifikasjoner,
                 vurderesEtter = vilkårResultat.vurderesEtter,
+                utdypendeVilkårsvurderinger = vilkårResultat.utdypendeVilkårsvurderinger
             )
         },
         andreVurderinger = this.andreVurderinger.map { annenVurdering ->

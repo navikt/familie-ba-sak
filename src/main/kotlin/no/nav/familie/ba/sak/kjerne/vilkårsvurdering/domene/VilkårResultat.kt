@@ -73,9 +73,11 @@ class VilkårResultat(
     @Column(name = "er_eksplisitt_avslag_paa_soknad")
     var erEksplisittAvslagPåSøknad: Boolean? = null,
 
+    @Deprecated("Bruker utdypendeVilkårsvurderinger istede")
     @Column(name = "er_skjonnsmessig_vurdert")
     var erSkjønnsmessigVurdert: Boolean = false,
 
+    @Deprecated("Bruker utdypendeVilkårsvurderinger istede")
     @Column(name = "er_medlemskap_vurdert")
     var erMedlemskapVurdert: Boolean = false,
 
@@ -83,6 +85,7 @@ class VilkårResultat(
     @Convert(converter = StringListConverter::class)
     val evalueringÅrsaker: List<String> = emptyList(),
 
+    @Deprecated("Bruker utdypendeVilkårsvurderinger istede")
     @Column(name = "er_delt_bosted")
     var erDeltBosted: Boolean = false,
 
@@ -136,9 +139,24 @@ class VilkårResultat(
         oppdaterPekerTilBehandling()
         vurderesEtter = restVilkårResultat.vurderesEtter
         utdypendeVilkårsvurderinger = listOfNotNull(
-            if (restVilkårResultat.erSkjønnsmessigVurdert == true) UtdypendeVilkårsvurderingType.VURDERING_ANNET_GRUNNLAG else null,
-            if (restVilkårResultat.erMedlemskapVurdert == true) UtdypendeVilkårsvurderingType.VURDERT_MEDLEMSKAP else null,
-            if (restVilkårResultat.erDeltBosted == true) UtdypendeVilkårsvurderingType.DELT_BOSTED else null
+            if (restVilkårResultat.erSkjønnsmessigVurdert == true || (
+                restVilkårResultat.utdypendeVilkårsvurderinger != null && restVilkårResultat.utdypendeVilkårsvurderinger.contains(
+                        UtdypendeVilkårsvurderingType.VURDERING_ANNET_GRUNNLAG
+                    )
+                )
+            ) UtdypendeVilkårsvurderingType.VURDERING_ANNET_GRUNNLAG else null,
+            if (restVilkårResultat.erMedlemskapVurdert == true || (
+                restVilkårResultat.utdypendeVilkårsvurderinger != null && restVilkårResultat.utdypendeVilkårsvurderinger.contains(
+                        UtdypendeVilkårsvurderingType.VURDERT_MEDLEMSKAP
+                    )
+                )
+            ) UtdypendeVilkårsvurderingType.VURDERT_MEDLEMSKAP else null,
+            if (restVilkårResultat.erDeltBosted == true || (
+                restVilkårResultat.utdypendeVilkårsvurderinger != null && restVilkårResultat.utdypendeVilkårsvurderinger.contains(
+                        UtdypendeVilkårsvurderingType.DELT_BOSTED
+                    )
+                )
+            ) UtdypendeVilkårsvurderingType.DELT_BOSTED else null
         )
     }
 
@@ -159,6 +177,7 @@ class VilkårResultat(
             erMedlemskapVurdert = erMedlemskapVurdert,
             erDeltBosted = erDeltBosted,
             vurderesEtter = vurderesEtter,
+            utdypendeVilkårsvurderinger = utdypendeVilkårsvurderinger
         )
     }
 
@@ -179,6 +198,7 @@ class VilkårResultat(
             erMedlemskapVurdert = erMedlemskapVurdert,
             erDeltBosted = erDeltBosted,
             vurderesEtter = vurderesEtter,
+            utdypendeVilkårsvurderinger = utdypendeVilkårsvurderinger
         )
     }
 

@@ -1,9 +1,9 @@
 ALTER TABLE vilkar_resultat
     ADD COLUMN utdypende_vilkarsvurderinger VARCHAR;
 
--- er_skjonnsmessig_vurdert VURDERING_ANNET_GRUNNLAG
--- er_medlemskap_vurdert VURDERT_MEDLEMSKAP
--- er_delt_bosted DELT_BOSTED
+-- er_skjonnsmessig_vurdert -> VURDERING_ANNET_GRUNNLAG
+-- er_medlemskap_vurdert -> VURDERT_MEDLEMSKAP
+-- er_delt_bosted -> DELT_BOSTED
 UPDATE vilkar_resultat
 SET utdypende_vilkarsvurderinger
         = concat_ws(';'
