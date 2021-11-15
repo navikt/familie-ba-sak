@@ -138,26 +138,14 @@ class VilkårResultat(
         erMedlemskapVurdert = restVilkårResultat.erMedlemskapVurdert ?: false
         oppdaterPekerTilBehandling()
         vurderesEtter = restVilkårResultat.vurderesEtter
-        utdypendeVilkårsvurderinger = listOfNotNull(
-            if (restVilkårResultat.erSkjønnsmessigVurdert == true || (
-                restVilkårResultat.utdypendeVilkårsvurderinger != null && restVilkårResultat.utdypendeVilkårsvurderinger.contains(
-                        UtdypendeVilkårsvurderingType.VURDERING_ANNET_GRUNNLAG
-                    )
+        utdypendeVilkårsvurderinger =
+            (
+                (restVilkårResultat.utdypendeVilkårsvurderinger ?: emptyList()) + listOfNotNull(
+                    if (restVilkårResultat.erSkjønnsmessigVurdert == true) UtdypendeVilkårsvurderingType.VURDERING_ANNET_GRUNNLAG else null,
+                    if (restVilkårResultat.erMedlemskapVurdert == true) UtdypendeVilkårsvurderingType.VURDERT_MEDLEMSKAP else null,
+                    if (restVilkårResultat.erDeltBosted == true) UtdypendeVilkårsvurderingType.DELT_BOSTED else null
                 )
-            ) UtdypendeVilkårsvurderingType.VURDERING_ANNET_GRUNNLAG else null,
-            if (restVilkårResultat.erMedlemskapVurdert == true || (
-                restVilkårResultat.utdypendeVilkårsvurderinger != null && restVilkårResultat.utdypendeVilkårsvurderinger.contains(
-                        UtdypendeVilkårsvurderingType.VURDERT_MEDLEMSKAP
-                    )
-                )
-            ) UtdypendeVilkårsvurderingType.VURDERT_MEDLEMSKAP else null,
-            if (restVilkårResultat.erDeltBosted == true || (
-                restVilkårResultat.utdypendeVilkårsvurderinger != null && restVilkårResultat.utdypendeVilkårsvurderinger.contains(
-                        UtdypendeVilkårsvurderingType.DELT_BOSTED
-                    )
-                )
-            ) UtdypendeVilkårsvurderingType.DELT_BOSTED else null
-        )
+                ).distinct()
     }
 
     fun kopierMedParent(nyPersonResultat: PersonResultat? = null): VilkårResultat {
