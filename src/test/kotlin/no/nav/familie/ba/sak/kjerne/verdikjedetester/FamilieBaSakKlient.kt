@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
 import no.nav.familie.ba.sak.ekstern.restDomene.RestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsak
+import no.nav.familie.ba.sak.ekstern.restDomene.RestHentFagsakForPerson
 import no.nav.familie.ba.sak.ekstern.restDomene.RestJournalføring
 import no.nav.familie.ba.sak.ekstern.restDomene.RestMinimalFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
@@ -51,6 +52,16 @@ class FamilieBaSakKlient(
 
         return getForEntity(
             uri,
+            headers,
+        )
+    }
+
+    fun hentMinimalFagsakPåPerson(personIdent: String): Ressurs<RestMinimalFagsak> {
+        val uri = URI.create("$baSakUrl/api/fagsaker/hent-fagsak-paa-person")
+
+        return postForEntity(
+            uri,
+            RestHentFagsakForPerson(personIdent),
             headers,
         )
     }

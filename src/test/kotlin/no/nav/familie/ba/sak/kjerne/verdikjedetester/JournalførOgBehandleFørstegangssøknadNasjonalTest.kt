@@ -263,7 +263,7 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
             )
         val restUtvidetBehandling: Ressurs<RestUtvidetBehandling> =
             familieBaSakKlient().registrererSøknad(
-                behandlingId = aktivBehandling!!.behandlingId,
+                behandlingId = aktivBehandling.behandlingId,
                 restRegistrerSøknad = restRegistrerSøknad
             )
         generellAssertRestUtvidetBehandling(

@@ -1,10 +1,11 @@
 package no.nav.familie.ba.sak.kjerne.grunnlag.søknad
 
 import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
-import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagSøknadDTO
 import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.ClientMocks
+import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.SøkerMedOpplysninger
@@ -27,22 +28,12 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.context.ActiveProfiles
 
-@SpringBootTest
-@ActiveProfiles(
-    "dev",
-    "mock-pdl",
-    "mock-infotrygd-barnetrygd",
-    "mock-økonomi",
-    "mock-tilbakekreving-klient",
-    "mock-brev-klient"
-)
 class SøknadGrunnlagTest(
     @Autowired
     private val søknadGrunnlagService: SøknadGrunnlagService,
@@ -71,38 +62,61 @@ class SøknadGrunnlagTest(
     @Autowired
     private val vedtaksperiodeService: VedtaksperiodeService,
 
-) {
+    @Autowired
+    private val databaseCleanupService: DatabaseCleanupService
+) : AbstractSpringIntegrationTest() {
+
+    @BeforeAll
+    fun init() {
+        databaseCleanupService.truncate()
+    }
 
     @Test
     fun `Skal lagre ned og hente søknadsgrunnlag`() {
-        val behandlingId = 1L
         val søkerIdent = randomFnr()
         val barnIdent = randomFnr()
+        fagsakService.hentEllerOpprettFagsak(PersonIdent(søkerIdent))
+        val behandling = stegService.håndterNyBehandling(
+            NyBehandling(
+                BehandlingKategori.NASJONAL,
+                BehandlingUnderkategori.ORDINÆR,
+                søkerIdent,
+                BehandlingType.FØRSTEGANGSBEHANDLING
+            )
+        )
+
         val søknadDTO = lagSøknadDTO(søkerIdent = søkerIdent, barnasIdenter = listOf(barnIdent))
         søknadGrunnlagService.lagreOgDeaktiverGammel(
             SøknadGrunnlag(
-                behandlingId = behandlingId,
+                behandlingId = behandling.id,
                 søknad = søknadDTO.writeValueAsString()
             )
         )
 
-        val søknadGrunnlag = søknadGrunnlagService.hentAktiv(behandlingId)
+        val søknadGrunnlag = søknadGrunnlagService.hentAktiv(behandling.id)
         assertNotNull(søknadGrunnlag)
-        assertEquals(behandlingId, søknadGrunnlag?.behandlingId)
+        assertEquals(behandling.id, søknadGrunnlag?.behandlingId)
         assertEquals(true, søknadGrunnlag?.aktiv)
         assertEquals(søkerIdent, søknadGrunnlag?.hentSøknadDto()?.søkerMedOpplysninger?.ident)
     }
 
     @Test
     fun `Skal sjekke at det kun kan være et aktivt grunnlag for en behandling`() {
-        val behandling = lagBehandling()
         val søkerIdent = randomFnr()
         val barnIdent = randomFnr()
+        fagsakService.hentEllerOpprettFagsak(PersonIdent(søkerIdent))
+        val behandling = stegService.håndterNyBehandling(
+            NyBehandling(
+                BehandlingKategori.NASJONAL,
+                BehandlingUnderkategori.ORDINÆR,
+                søkerIdent,
+                BehandlingType.FØRSTEGANGSBEHANDLING
+            )
+        )
         val søknadDTO = lagSøknadDTO(søkerIdent = søkerIdent, barnasIdenter = listOf(barnIdent))
 
-        val søkerIdent2 = randomFnr()
         val barnIdent2 = randomFnr()
-        val søknadDTO2 = lagSøknadDTO(søkerIdent = søkerIdent2, barnasIdenter = listOf(barnIdent2))
+        val søknadDTO2 = lagSøknadDTO(søkerIdent = søkerIdent, barnasIdenter = listOf(barnIdent2))
 
         søknadGrunnlagService.lagreOgDeaktiverGammel(
             SøknadGrunnlag(

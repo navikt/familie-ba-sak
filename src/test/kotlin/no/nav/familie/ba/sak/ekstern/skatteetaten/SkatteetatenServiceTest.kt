@@ -34,9 +34,12 @@ internal class SkatteetatenServiceTest {
             )
         )
 
-        val skatteetatenService = SkatteetatenService(infotrygdBarnetrygdClient, fagsakRepository, andelTilkjentYtelseRepository)
+        val skatteetatenService =
+            SkatteetatenService(infotrygdBarnetrygdClient, fagsakRepository, andelTilkjentYtelseRepository)
 
-        assertThat(skatteetatenService.finnPersonerMedUtvidetBarnetrygd(nyesteVedtaksdato.year.toString()).brukere).hasSize(2)
+        assertThat(skatteetatenService.finnPersonerMedUtvidetBarnetrygd(nyesteVedtaksdato.year.toString()).brukere).hasSize(
+            2
+        )
 
         assertThat(
             skatteetatenService.finnPersonerMedUtvidetBarnetrygd(nyesteVedtaksdato.year.toString()).brukere
@@ -65,8 +68,10 @@ internal class SkatteetatenServiceTest {
             fagsak2 to vedtaksdato.plusDays(2)
         )
 
-        val skatteetatenService = SkatteetatenService(infotrygdBarnetrygdClient, fagsakRepository, andelTilkjentYtelseRepository)
-        val personerMedUtvidetBarnetrygd = skatteetatenService.finnPersonerMedUtvidetBarnetrygd(vedtaksdato.year.toString())
+        val skatteetatenService =
+            SkatteetatenService(infotrygdBarnetrygdClient, fagsakRepository, andelTilkjentYtelseRepository)
+        val personerMedUtvidetBarnetrygd =
+            skatteetatenService.finnPersonerMedUtvidetBarnetrygd(vedtaksdato.year.toString())
 
         assertThat(personerMedUtvidetBarnetrygd.brukere).hasSize(2)
 
@@ -100,8 +105,10 @@ internal class SkatteetatenServiceTest {
                 )
             )
 
-        val skatteetatenService = SkatteetatenService(infotrygdBarnetrygdClient, fagsakRepository, andelTilkjentYtelseRepository)
-        val personerMedUtvidetBarnetrygd = skatteetatenService.finnPersonerMedUtvidetBarnetrygd(vedtaksdato.year.toString())
+        val skatteetatenService =
+            SkatteetatenService(infotrygdBarnetrygdClient, fagsakRepository, andelTilkjentYtelseRepository)
+        val personerMedUtvidetBarnetrygd =
+            skatteetatenService.finnPersonerMedUtvidetBarnetrygd(vedtaksdato.year.toString())
 
         assertThat(personerMedUtvidetBarnetrygd.brukere).hasSize(1)
 
