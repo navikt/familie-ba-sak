@@ -1,12 +1,15 @@
 package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
 import no.nav.familie.ba.sak.WebSpringAuthTestRunner
+import no.nav.familie.ba.sak.integrasjoner.`ef-sak`.EfSakRestClient
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.MockserverKlient
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContextInitializer
 import org.springframework.context.ConfigurableApplicationContext
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.support.TestPropertySourceUtils
+import org.springframework.web.client.RestOperations
 import org.testcontainers.containers.FixedHostPortGenericContainer
 
 val MOCK_SERVER_IMAGE = "ghcr.io/navikt/familie-mock-server/familie-mock-server:latest"
@@ -46,10 +49,13 @@ class VerdikjedetesterPropertyOverrideContextInitializer :
     "mock-task-repository",
     "mock-task-service"
 )
-@ContextConfiguration(
-    initializers = [VerdikjedetesterPropertyOverrideContextInitializer::class]
-)
-abstract class AbstractVerdikjedetest : WebSpringAuthTestRunner() {
+@ContextConfiguration(initializers = [VerdikjedetesterPropertyOverrideContextInitializer::class])
+abstract class AbstractVerdikjedetest(
+    efSakRestClient: EfSakRestClient? = null
+) : WebSpringAuthTestRunner(efSakRestClient) {
+
+    @Autowired
+    lateinit var restOperations: RestOperations
 
     fun familieBaSakKlient(): FamilieBaSakKlient = FamilieBaSakKlient(
         baSakUrl = hentUrl(""),

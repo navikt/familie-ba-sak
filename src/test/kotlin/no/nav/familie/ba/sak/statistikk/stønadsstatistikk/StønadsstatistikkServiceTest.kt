@@ -1,7 +1,9 @@
 package no.nav.familie.ba.sak.statistikk.stønadsstatistikk
 
+import io.mockk.MockKAnnotations
 import io.mockk.every
-import io.mockk.mockk
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
 import no.nav.familie.ba.sak.common.forrigeMåned
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelseUtvidet
@@ -29,16 +31,29 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.extension.ExtendWith
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class StønadsstatistikkServiceTest {
+@ExtendWith(MockKExtension::class)
+internal class StønadsstatistikkServiceTest(
+    @MockK
+    private val behandlingService: BehandlingService,
 
-    private val behandlingService: BehandlingService = mockk()
-    private val persongrunnlagService: PersongrunnlagService = mockk()
-    private val beregningService: BeregningService = mockk()
-    private val vedtakService: VedtakService = mockk()
-    private val personopplysningerService: PersonopplysningerService = mockk()
-    private val vedtakRepository: VedtakRepository = mockk()
+    @MockK
+    private val persongrunnlagService: PersongrunnlagService,
+
+    @MockK
+    private val beregningService: BeregningService,
+
+    @MockK
+    private val vedtakService: VedtakService,
+
+    @MockK
+    private val personopplysningerService: PersonopplysningerService,
+
+    @MockK
+    private val vedtakRepository: VedtakRepository,
+) {
 
     private val stønadsstatistikkService =
         StønadsstatistikkService(
@@ -56,6 +71,8 @@ internal class StønadsstatistikkServiceTest {
 
     @BeforeAll
     fun init() {
+        MockKAnnotations.init(this)
+
         val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling)
         val vedtak = lagVedtak(behandling)
 

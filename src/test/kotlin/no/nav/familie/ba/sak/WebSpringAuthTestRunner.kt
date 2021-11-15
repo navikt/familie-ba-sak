@@ -1,34 +1,31 @@
 package no.nav.familie.ba.sak
 
-import io.mockk.unmockkAll
 import no.nav.familie.ba.sak.common.DbContainerInitializer
+import no.nav.familie.ba.sak.config.AbstractMockkSpringRunner
 import no.nav.familie.ba.sak.config.ApplicationConfig
 import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
+import no.nav.familie.ba.sak.integrasjoner.`ef-sak`.EfSakRestClient
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext.SYSTEM_FORKORTELSE
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import no.nav.security.mock.oauth2.token.DefaultOAuth2TokenCallback
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
-import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Tag
-import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.web.server.LocalServerPort
-import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
-import org.springframework.web.client.RestOperations
 import org.springframework.web.client.RestTemplate
 
 @SpringBootTest(
     classes = [ApplicationConfig::class],
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
     properties = [
-        "no.nav.security.jwt.issuer.azuread.discoveryUrl: http://localhost:1234/azuread/.well-known/openid-configuration",
+        "no.nav.security.jwt.issuer.azuread.discoveryUrl: http://localhost:\${mock-oauth2-server.port}/azuread/.well-known/openid-configuration",
         "no.nav.security.jwt.issuer.azuread.accepted_audience: some-audience",
         "VEILEDER_ROLLE: VEILDER",
         "SAKSBEHANDLER_ROLLE: SAKSBEHANDLER",
@@ -36,13 +33,13 @@ import org.springframework.web.client.RestTemplate
         "ENVIRONMENT_NAME: integrationtest",
     ],
 )
-@AutoConfigureWireMock(port = 28085)
 @ExtendWith(SpringExtension::class)
-@EnableMockOAuth2Server(port = 1234)
+@EnableMockOAuth2Server
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
 @Tag("integration")
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-abstract class WebSpringAuthTestRunner {
+abstract class WebSpringAuthTestRunner(
+    efSakRestClient: EfSakRestClient? = null
+) : AbstractMockkSpringRunner(efSakRestClient = efSakRestClient) {
 
     @Autowired
     lateinit var databaseCleanupService: DatabaseCleanupService
@@ -51,19 +48,10 @@ abstract class WebSpringAuthTestRunner {
     lateinit var restTemplate: RestTemplate
 
     @Autowired
-    lateinit var restOperations: RestOperations
-
-    @Autowired
     lateinit var mockOAuth2Server: MockOAuth2Server
 
     @LocalServerPort
     private val port = 0
-
-    @AfterAll
-    fun tearDown() {
-        mockOAuth2Server.shutdown()
-        unmockkAll()
-    }
 
     fun hentUrl(path: String) = "http://localhost:$port$path"
 

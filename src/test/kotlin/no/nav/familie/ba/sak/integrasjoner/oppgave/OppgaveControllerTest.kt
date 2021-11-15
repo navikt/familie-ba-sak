@@ -86,7 +86,12 @@ class OppgaveControllerTest {
             )
         } throws IntegrasjonException("Kall mot integrasjon feilet ved fordel oppgave")
 
-        val exception = assertThrows<IntegrasjonException> { oppgaveController.fordelOppgave(OPPGAVE_ID.toLong(), SAKSBEHANDLER_ID) }
+        val exception = assertThrows<IntegrasjonException> {
+            oppgaveController.fordelOppgave(
+                OPPGAVE_ID.toLong(),
+                SAKSBEHANDLER_ID
+            )
+        }
 
         Assertions.assertEquals("Kall mot integrasjon feilet ved fordel oppgave", exception.message)
     }

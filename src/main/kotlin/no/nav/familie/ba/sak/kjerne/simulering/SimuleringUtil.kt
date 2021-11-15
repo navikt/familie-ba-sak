@@ -33,7 +33,8 @@ fun vedtakSimuleringMottakereTilRestSimulering(økonomiSimuleringMottakere: List
         }
 
     val nestePeriode = framtidigePerioder.filter { it.feilutbetaling == BigDecimal.ZERO }.minByOrNull { it.fom }
-    val tomSisteUtbetaling = perioder.filter { nestePeriode == null || it.fom < nestePeriode.fom }.maxOfOrNull { it.tom }
+    val tomSisteUtbetaling =
+        perioder.filter { nestePeriode == null || it.fom < nestePeriode.fom }.maxOfOrNull { it.tom }
 
     return RestSimulering(
         perioder = vedtakSimuleringMottakereTilSimuleringPerioder(økonomiSimuleringMottakere),
@@ -91,7 +92,7 @@ fun hentFeilbetalingIPeriode(periode: List<ØkonomiSimuleringPostering>) =
 
 fun hentTidligereUtbetaltIPeriode(periode: List<ØkonomiSimuleringPostering>): BigDecimal {
     val sumNegativeYtelser = periode.filter { postering ->
-        (postering.posteringType === PosteringType.YTELSE && postering.beløp < BigDecimal.ZERO)
+        (postering.posteringType == PosteringType.YTELSE && postering.beløp < BigDecimal.ZERO)
     }.sumOf { it.beløp }
     val feilutbetaling = hentFeilbetalingIPeriode(periode)
     return if (feilutbetaling < BigDecimal.ZERO) -(sumNegativeYtelser - feilutbetaling) else -sumNegativeYtelser

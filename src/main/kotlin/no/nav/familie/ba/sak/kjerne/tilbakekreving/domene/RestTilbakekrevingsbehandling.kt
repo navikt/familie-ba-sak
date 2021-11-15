@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.tilbakekreving
+package no.nav.familie.ba.sak.kjerne.tilbakekreving.domene
 
 import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsresultatstype
 import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsstatus
