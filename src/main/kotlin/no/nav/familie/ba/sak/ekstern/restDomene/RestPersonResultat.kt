@@ -32,9 +32,9 @@ data class RestVilkårResultat(
     val erSkjønnsmessigVurdert: Boolean? = false,
     val erMedlemskapVurdert: Boolean? = false,
     val erDeltBosted: Boolean? = false,
-    val avslagBegrunnelser: List<VedtakBegrunnelseSpesifikasjon>? = null,
+    val avslagBegrunnelser: List<VedtakBegrunnelseSpesifikasjon>? = emptyList(),
     val vurderesEtter: Regelverk? = null,
-    val utdypendeVilkårsvurderinger: List<UtdypendeVilkårsvurdering>? = null
+    val utdypendeVilkårsvurderinger: List<UtdypendeVilkårsvurdering> = emptyList()
 ) {
 
     fun erAvslagUtenPeriode() =

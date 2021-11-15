@@ -447,7 +447,10 @@ class VilkårServiceTest(
         val endretUnder18ÅrVilkårForBarn =
             endretVilkårsvurdering.find { it.personIdent == barnFnr }
                 ?.vilkårResultater?.find { it.vilkårType == Vilkår.UNDER_18_ÅR }
-        println("svar: ")
-        println(endretUnder18ÅrVilkårForBarn!!.utdypendeVilkårsvurderinger)
+
+        Assertions.assertEquals(
+            1,
+            endretUnder18ÅrVilkårForBarn!!.utdypendeVilkårsvurderinger.size
+        )
     }
 }
