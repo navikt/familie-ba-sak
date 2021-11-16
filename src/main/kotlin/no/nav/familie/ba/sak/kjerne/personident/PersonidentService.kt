@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.kjerne.personident
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.IdentInformasjon
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.AktørId
-import no.nav.familie.kontrakter.felles.oppgave.IdentGruppe
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
@@ -57,13 +56,13 @@ class PersonidentService(
 
     private fun filtrerAktivtFødselsnummer(identerFraPdl: List<IdentInformasjon>) =
         (
-            identerFraPdl.singleOrNull { it.gruppe == IdentGruppe.FOLKEREGISTERIDENT.name }?.ident
+            identerFraPdl.singleOrNull { it.gruppe == "FOLKEREGISTERIDENT" }?.ident
                 ?: throw Error("Finner ikke aktiv ident i Pdl")
             )
 
     private fun filtrerAktørId(identerFraPdl: List<IdentInformasjon>) =
         (
-            identerFraPdl.singleOrNull { it.gruppe == IdentGruppe.AKTOERID.name }?.ident
+            identerFraPdl.singleOrNull { it.gruppe == "AKTORID" }?.ident
                 ?: throw Error("Finner ikke aktørId i Pdl")
             )
 

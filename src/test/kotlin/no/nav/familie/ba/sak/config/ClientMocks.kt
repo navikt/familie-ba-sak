@@ -290,21 +290,21 @@ class ClientMocks {
             every {
                 mockPersonopplysningerService.hentDødsfall(any())
             } returns DødsfallData(false, null)
-        val identSlot2 = slot<String>()
-        every {
-            mockPersonopplysningerService.hentIdenter(capture(identSlot2), false)
-        } answers {
-            listOf(
-                IdentInformasjon(
-                    identSlot2.captured, false, "FOLKEREGISTERIDENT"
-                ),
-                IdentInformasjon(identSlot2.captured, false, "AKTOERID"),
-            )
-        }
+            val identSlot2 = slot<String>()
+            every {
+                mockPersonopplysningerService.hentIdenter(capture(identSlot2), false)
+            } answers {
+                listOf(
+                    IdentInformasjon(
+                        identSlot2.captured, false, "FOLKEREGISTERIDENT"
+                    ),
+                    IdentInformasjon(identSlot2.captured + "00", false, "AKTORID"),
+                )
+            }
 
-        every {
-            mockPersonopplysningerService.hentDødsfall(any())
-        } returns DødsfallData(false, null)
+            every {
+                mockPersonopplysningerService.hentDødsfall(any())
+            } returns DødsfallData(false, null)
 
             every {
                 mockPersonopplysningerService.hentVergeData(any())
