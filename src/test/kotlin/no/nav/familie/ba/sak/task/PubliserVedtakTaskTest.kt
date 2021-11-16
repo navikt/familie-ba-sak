@@ -8,6 +8,7 @@ import io.mockk.slot
 import io.mockk.verify
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.statistikk.producer.KafkaProducer
+import no.nav.familie.ba.sak.statistikk.stønadsstatistikk.StønadsstatistikkService
 import no.nav.familie.eksterne.kontrakter.VedtakDVH
 import no.nav.familie.prosessering.domene.Task
 import org.assertj.core.api.Assertions.assertThat
@@ -24,7 +25,10 @@ class PubliserVedtakTaskTest {
     private lateinit var kafkaProducerMock: KafkaProducer
 
     @InjectMockKs
-    lateinit var publiserVedtakTask: PubliserVedtakTask
+    private lateinit var publiserVedtakTask: PubliserVedtakTask
+
+    @MockK(relaxed = true)
+    private lateinit var stønadsstatistikkService: StønadsstatistikkService
 
     @Test
     fun skalOppretteTask() {
