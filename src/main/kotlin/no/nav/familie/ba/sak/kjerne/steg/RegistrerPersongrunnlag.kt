@@ -51,9 +51,9 @@ class RegistrerPersongrunnlag(
         }
 
         if (!(
-                behandling.opprettetÅrsak == BehandlingÅrsak.SØKNAD ||
-                    behandling.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE
-                )
+            behandling.opprettetÅrsak == BehandlingÅrsak.SØKNAD ||
+                behandling.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE
+            )
         ) {
             vilkårService.initierVilkårsvurderingForBehandling(
                 behandling = behandling,

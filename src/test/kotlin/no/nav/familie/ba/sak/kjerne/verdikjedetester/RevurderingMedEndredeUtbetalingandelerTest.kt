@@ -45,7 +45,7 @@ class RevurderingMedEndredeUtbetalingandelerTest(
     @Autowired
     private val endretUtbetalingAndelService: EndretUtbetalingAndelService,
 
-    ) : AbstractVerdikjedetest() {
+) : AbstractVerdikjedetest() {
     @Test
     fun `Endrede utbetalingsandeler fra forrige behandling kopieres riktig`() {
 
