@@ -18,22 +18,26 @@ import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROL
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import no.nav.familie.kontrakter.felles.personopplysning.Sivilstand
 import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.test.annotation.DirtiesContext
 import java.time.LocalDate
 
+// Todo. Bruker every. Dette endrer funksjonalliteten for alle klasser.
+// TODO kan kanskje fjerne dirties
+@DirtiesContext
 class AutomatiskVilkårsvurderingIntegrasjonTest(
     @Autowired val stegService: StegService,
-    @Autowired val personopplysningerService: PersonopplysningerService,
+    @Autowired val mockPersonopplysningerService: PersonopplysningerService,
     @Autowired val persongrunnlagService: PersongrunnlagService,
     @Autowired val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
     @Autowired val databaseCleanupService: DatabaseCleanupService,
-) : AbstractSpringIntegrationTest() {
+) : AbstractSpringIntegrationTest(mockPersonopplysningerService) {
 
-    @AfterEach
-    fun init() {
+    @BeforeEach
+    fun truncate() {
         databaseCleanupService.truncate()
     }
 
@@ -43,8 +47,8 @@ class AutomatiskVilkårsvurderingIntegrasjonTest(
         val barnFnr = randomFnr()
         val mockSøkerUtenHjem = genererAutomatiskTestperson(bostedsadresser = emptyList())
 
-        every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(søkerFnr) } returns mockSøkerUtenHjem
-        every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(barnFnr) } returns mockBarnAutomatiskBehandling
+        every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(søkerFnr) } returns mockSøkerUtenHjem
+        every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(barnFnr) } returns mockBarnAutomatiskBehandling
 
         val nyBehandling = NyBehandlingHendelse(søkerFnr, listOf(barnFnr))
         val behandlingFørVilkår = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling)
@@ -59,8 +63,8 @@ class AutomatiskVilkårsvurderingIntegrasjonTest(
         val barnFnr = randomFnr()
         val mockBarnGift = genererAutomatiskTestperson(sivilstander = listOf(Sivilstand(SIVILSTAND.GIFT)))
 
-        every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(søkerFnr) } returns mockSøkerAutomatiskBehandling
-        every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(barnFnr) } returns mockBarnGift
+        every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(søkerFnr) } returns mockSøkerAutomatiskBehandling
+        every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(barnFnr) } returns mockBarnGift
 
         val nyBehandling = NyBehandlingHendelse(søkerFnr, listOf(barnFnr))
         val behandlingFørVilkår = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling)
@@ -84,8 +88,8 @@ class AutomatiskVilkårsvurderingIntegrasjonTest(
             ),
             emptyList()
         )
-        every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(barnFnr) } returns barn
-        every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(søkerFnr) } returns søker
+        every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(barnFnr) } returns barn
+        every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(søkerFnr) } returns søker
 
         val nyBehandling = NyBehandlingHendelse(søkerFnr, listOf(barnFnr))
         val behandlingFørVilkår = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling)
@@ -128,8 +132,8 @@ class AutomatiskVilkårsvurderingIntegrasjonTest(
             )
         )
 
-        every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(barnFnr) } returns barn
-        every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(søkerFnr) } returns søker
+        every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(barnFnr) } returns barn
+        every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(søkerFnr) } returns søker
 
         val nyBehandling = NyBehandlingHendelse(søkerFnr, listOf(barnFnr))
         val behandlingFørVilkår = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandling)

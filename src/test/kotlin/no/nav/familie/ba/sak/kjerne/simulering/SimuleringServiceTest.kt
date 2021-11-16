@@ -10,7 +10,6 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
-import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
@@ -28,7 +27,6 @@ class SimuleringServiceTest(
     @Autowired private val vedtakService: VedtakService,
     @Autowired private val stegService: StegService,
     @Autowired private val simuleringService: SimuleringService,
-    @Autowired private val tilbakekrevingService: TilbakekrevingService,
     @Autowired private val vedtaksperiodeService: VedtaksperiodeService,
     @Autowired private val databaseCleanupService: DatabaseCleanupService
 ) : AbstractSpringIntegrationTest() {

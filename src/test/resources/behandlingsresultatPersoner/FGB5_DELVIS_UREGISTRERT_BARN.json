@@ -1,0 +1,27 @@
+{
+  "beskrivelse": "FGB: Søknad for 1 barn der vi innvilger og har med 1 uregistrert barn",
+  "inneværendeMåned": "2021-09",
+  "personer": [
+    {
+      "personType": "BARN",
+      "søktForPerson": true,
+      "eksplisittAvslått": false,
+      "forrigeAndeler": [
+      ],
+      "andeler": [
+        {
+          "stønadFom": "2019-03",
+          "stønadTom": "2022-08",
+          "kalkulertUtbetalingsbeløp": 1054
+        }
+      ]
+    }
+  ],
+  "uregistrerteBarn": [
+    {
+      "personIdent": "",
+      "navn": "Mock Mockersen"
+    }
+  ],
+  "forventetResultat": "DELVIS_INNVILGET"
+}

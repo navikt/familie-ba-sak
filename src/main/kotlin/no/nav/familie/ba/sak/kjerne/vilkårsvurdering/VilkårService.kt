@@ -137,7 +137,7 @@ class VilkårService(
             ?: throw IllegalStateException("Fant ikke personopplysninggrunnlag for behandling ${behandling.id}")
 
         if (behandling.skalBehandlesAutomatisk) {
-            val barna = personopplysningGrunnlag.personer.filter { person -> person.type === PersonType.BARN }
+            val barna = personopplysningGrunnlag.personer.filter { person -> person.type == PersonType.BARN }
             if (barna.isEmpty()) {
                 throw IllegalStateException("PersonopplysningGrunnlag for fødselshendelse skal inneholde minst ett barn")
             }

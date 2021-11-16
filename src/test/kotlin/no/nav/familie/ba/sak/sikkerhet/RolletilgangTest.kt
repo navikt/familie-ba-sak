@@ -52,7 +52,7 @@ class RolletilgangTest(
                     "name" to "Mock McMockface",
                     "preferred_username" to "mock.mcmockface@nav.no"
                 )
-            ).toString()
+            )
         )
         val requestEntity = HttpEntity<String>(
             objectMapper.writeValueAsString(
@@ -126,7 +126,7 @@ class RolletilgangTest(
                     "name" to "Mock McMockface",
                     "preferred_username" to "mock.mcmockface@nav.no"
                 )
-            ).toString()
+            )
         )
         val requestEntity = HttpEntity<String>(objectMapper.writeValueAsString(nyOrdinærBehandling(fnr)), header)
 

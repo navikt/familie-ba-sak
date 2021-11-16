@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.RestHenleggBehandlingInfo
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -75,10 +76,10 @@ class StegService(
                     barnasIdenter = emptyList()
                 )
             )
-        } else if (nyBehandling.behandlingType == BehandlingType.REVURDERING || nyBehandling.behandlingType == BehandlingType.TEKNISK_OPPHØR) {
+        } else if (nyBehandling.behandlingType == BehandlingType.REVURDERING || nyBehandling.behandlingType == BehandlingType.TEKNISK_ENDRING) {
             val sisteBehandling = behandlingService.hentSisteBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id)
                 ?: behandlingService.hentSisteBehandlingSomIkkeErHenlagt(behandling.fagsak.id)
-                ?: throw Feil("Forsøker å opprette en revurdering eller teknisk opphør, men kan ikke finne tidligere behandling på fagsak ${behandling.fagsak.id}")
+                ?: throw Feil("Forsøker å opprette en revurdering eller teknisk endring, men kan ikke finne tidligere behandling på fagsak ${behandling.fagsak.id}")
 
             val barnFraSisteBehandlingMedUtbetalinger =
                 behandlingService.finnBarnFraBehandlingMedTilkjentYtsele(sisteBehandling.id)
@@ -186,13 +187,24 @@ class StegService(
         val behandlingSteg: BehandlingsresultatSteg =
             hentBehandlingSteg(StegType.BEHANDLINGSRESULTAT) as BehandlingsresultatSteg
 
-        return håndterSteg(behandling, behandlingSteg) {
+        val behandlingEtterBehandlingsresultatSteg = håndterSteg(behandling, behandlingSteg) {
             behandlingSteg.utførStegOgAngiNeste(behandling, "")
         }
+
+        return if (behandlingEtterBehandlingsresultatSteg.resultat == BehandlingResultat.AVSLÅTT &&
+            !behandlingEtterBehandlingsresultatSteg.skalBehandlesAutomatisk
+        ) {
+            håndterVurderTilbakekreving(
+                behandling = behandlingEtterBehandlingsresultatSteg
+            )
+        } else behandlingEtterBehandlingsresultatSteg
     }
 
     @Transactional
-    fun håndterVurderTilbakekreving(behandling: Behandling, restTilbakekreving: RestTilbakekreving?): Behandling {
+    fun håndterVurderTilbakekreving(
+        behandling: Behandling,
+        restTilbakekreving: RestTilbakekreving? = null
+    ): Behandling {
         val behandlingSteg: VurderTilbakekrevingSteg =
             hentBehandlingSteg(StegType.VURDER_TILBAKEKREVING) as VurderTilbakekrevingSteg
 

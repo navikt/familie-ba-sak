@@ -56,7 +56,7 @@ class IverksettMotOppdrag(
             )
         )
 
-        økonomiService.oppdaterTilkjentYtelseOgIverksettVedtak(
+        økonomiService.oppdaterTilkjentYtelseMedUtbetalingsoppdragOgIverksett(
             vedtak = vedtakService.hent(data.vedtaksId),
             saksbehandlerId = data.saksbehandlerId
         )

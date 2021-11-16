@@ -52,6 +52,11 @@ data class BehandlingsresultatPerson(
     }
 }
 
+data class BehandlingsresultatUregistrertBarn(
+    val personIdent: String,
+    val navn: String
+)
+
 data class BehandlingsresultatAndelTilkjentYtelse(
     val stønadFom: YearMonth,
     val stønadTom: YearMonth,
@@ -63,7 +68,8 @@ data class BehandlingsresultatAndelTilkjentYtelse(
     }
 }
 
-fun LocalDateSegment<BehandlingsresultatAndelTilkjentYtelse>.erLøpende() = this.tom > inneværendeMåned().sisteDagIInneværendeMåned()
+fun LocalDateSegment<BehandlingsresultatAndelTilkjentYtelse>.erLøpende() =
+    this.tom > inneværendeMåned().sisteDagIInneværendeMåned()
 
 fun lagBehandlingsresultatAndelTilkjentYtelse(
     fom: String,
