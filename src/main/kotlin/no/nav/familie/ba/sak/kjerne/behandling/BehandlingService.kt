@@ -255,12 +255,6 @@ class BehandlingService(
         return behandlingRepository.finnIverksatteBehandlinger(fagsakId = fagsakId)
     }
 
-    fun hentSisteBehandlingSomIkkeErHenlagt(fagsakId: Long): Behandling? {
-        return behandlingRepository.finnBehandlinger(fagsakId)
-            .filter { !it.erHenlagt() }
-            .maxByOrNull { it.opprettetTidspunkt }
-    }
-
     /**
      * Henter siste iverksatte behandling på fagsak
      */
@@ -283,11 +277,27 @@ class BehandlingService(
             } ?: emptyList()
 
     /**
-     * Henter siste iverksatte behandling FØR en gitt behandling
+     * Henter siste iverksatte behandling FØR en gitt behandling.
+     * Bør kun brukes i forbindelse med oppdrag mot økonomisystemet
+     * eller ved behandlingsresultat.
      */
     fun hentForrigeBehandlingSomErIverksatt(behandling: Behandling): Behandling? {
         val iverksatteBehandlinger = hentIverksatteBehandlinger(behandling.fagsak.id)
         return Behandlingutils.hentForrigeIverksatteBehandling(iverksatteBehandlinger, behandling)
+    }
+
+    fun hentSisteBehandlingSomErVedtatt(fagsakId: Long): Behandling? {
+        return behandlingRepository.finnBehandlinger(fagsakId)
+            .filter { !it.erHenlagt() && it.status == AVSLUTTET }
+            .maxByOrNull { it.opprettetTidspunkt }
+    }
+
+    /**
+     * Henter siste behandling som er vedtatt FØR en gitt behandling
+     */
+    fun hentForrigeBehandlingSomErVedtatt(behandling: Behandling): Behandling? {
+        val behandlinger = behandlingRepository.finnBehandlinger(behandling.fagsak.id)
+        return Behandlingutils.hentForrigeBehandlingSomErVedtatt(behandlinger, behandling)
     }
 
     fun lagreEllerOppdater(behandling: Behandling, sendTilDvh: Boolean = true): Behandling {
