@@ -137,7 +137,7 @@ class VilkårResultat(
         vurderesEtter = restVilkårResultat.vurderesEtter
         utdypendeVilkårsvurderinger =
             (
-                (restVilkårResultat.utdypendeVilkårsvurderinger ?: emptyList()) + listOfNotNull(
+                restVilkårResultat.utdypendeVilkårsvurderinger + listOfNotNull(
                     if (restVilkårResultat.erSkjønnsmessigVurdert == true) UtdypendeVilkårsvurdering.VURDERING_ANNET_GRUNNLAG else null,
                     if (restVilkårResultat.erMedlemskapVurdert == true) UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP else null,
                     if (restVilkårResultat.erDeltBosted == true) UtdypendeVilkårsvurdering.DELT_BOSTED else null
