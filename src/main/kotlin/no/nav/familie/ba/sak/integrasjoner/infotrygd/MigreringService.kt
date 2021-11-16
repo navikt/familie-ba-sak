@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.MigreringResponseDto
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestClient
@@ -108,7 +109,8 @@ class MigreringService(
             fagsakId = behandlingEtterVilkårsvurdering.fagsak.id,
             behandlingId = behandlingEtterVilkårsvurdering.id,
             infotrygdStønadId = løpendeSak.stønad?.id,
-            infotrygdSakId = løpendeSak.id
+            infotrygdSakId = løpendeSak.id,
+            virkningFom = virkningsdatoFra(infotrygdKjøredato(YearMonth.now())).plusMonths(1).toYearMonth()
         )
     }
 
