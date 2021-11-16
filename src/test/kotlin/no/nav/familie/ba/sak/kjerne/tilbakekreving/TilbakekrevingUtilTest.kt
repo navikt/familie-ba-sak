@@ -11,13 +11,13 @@ import java.time.LocalDate
 
 class TilbakekrevingUtilTest {
 
-    val fom1 = LocalDate.of(2020, 1, 1)
-    val tom1 = LocalDate.of(2020, 1, 31)
-    val tom2 = LocalDate.of(2020, 2, 28)
-    val fom3 = LocalDate.of(2020, 4, 1)
-    val tom3 = LocalDate.of(2020, 4, 30)
-    val fom4 = LocalDate.of(2020, 5, 1)
-    val tom4 = LocalDate.of(2020, 5, 31)
+    private val fom1 = LocalDate.of(2020, 1, 1)
+    private val tom1 = LocalDate.of(2020, 1, 31)
+    private val tom2 = LocalDate.of(2020, 2, 28)
+    private val fom3 = LocalDate.of(2020, 4, 1)
+    private val tom3 = LocalDate.of(2020, 4, 30)
+    private val fom4 = LocalDate.of(2020, 5, 1)
+    private val tom4 = LocalDate.of(2020, 5, 31)
 
     @Test
     fun `test validerVerdierPåRestTilbakekreving kaster feil ved tilbakekreving uten feilutbetaling`() {
@@ -47,7 +47,7 @@ class TilbakekrevingUtilTest {
     @Test
     fun `test sammenslåing av feilutbetalingsperioder med ensom siste periode`() {
 
-        val simuleringsPerioder = listOf<SimuleringsPeriode>(
+        val simuleringsPerioder = listOf(
             opprettSimuleringsPeriode(
                 fom = fom1,
                 tom = tom1,
@@ -82,7 +82,7 @@ class TilbakekrevingUtilTest {
     @Test
     fun `test sammenslåing av feilutbetalingsperioder med ensom første periode`() {
 
-        val simuleringsPerioder = listOf<SimuleringsPeriode>(
+        val simuleringsPerioder = listOf(
             opprettSimuleringsPeriode(
                 fom = fom1,
                 tom = tom1,
@@ -114,7 +114,7 @@ class TilbakekrevingUtilTest {
         Assertions.assertEquals(tom4, sammenslåttePerioder[1].tom)
     }
 
-    fun opprettSimuleringsPeriode(
+    private fun opprettSimuleringsPeriode(
         fom: LocalDate,
         tom: LocalDate,
         feilUtbetaling: BigDecimal

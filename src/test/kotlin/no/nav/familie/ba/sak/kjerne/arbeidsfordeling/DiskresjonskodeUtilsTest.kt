@@ -63,7 +63,7 @@ class DiskresjonskodeUtilsTest {
     fun `tom liste - skal gi null`() {
         assertEquals(
             null,
-            finnPersonMedStrengesteAdressebeskyttelse(listOf<IdentMedAdressebeskyttelse>())
+            finnPersonMedStrengesteAdressebeskyttelse(listOf())
         )
     }
 }

@@ -34,10 +34,10 @@ internal class Autobrev6og18ÅrServiceTest {
     val behandlingService = mockk<BehandlingService>()
     val stegService = mockk<StegService>()
     val vedtakService = mockk<VedtakService>(relaxed = true)
-    val taskRepository = mockk<TaskRepositoryWrapper>(relaxed = true)
+    private val taskRepository = mockk<TaskRepositoryWrapper>(relaxed = true)
     val vedtaksperiodeService = mockk<VedtaksperiodeService>()
 
-    val autobrev6og18ÅrService = Autobrev6og18ÅrService(
+    private val autobrev6og18ÅrService = Autobrev6og18ÅrService(
         personopplysningGrunnlagRepository = personopplysningGrunnlagRepository,
         behandlingService = behandlingService,
         stegService = stegService,
@@ -52,7 +52,7 @@ internal class Autobrev6og18ÅrServiceTest {
 
         val autobrev6og18ÅrDTO = Autobrev6og18ÅrDTO(
             fagsakId = behandling.fagsak.id,
-            alder = Alder.atten.år,
+            alder = Alder.ATTEN.år,
             årMåned = inneværendeMåned()
         )
 
@@ -67,7 +67,7 @@ internal class Autobrev6og18ÅrServiceTest {
 
         val autobrev6og18ÅrDTO = Autobrev6og18ÅrDTO(
             fagsakId = behandling.fagsak.id,
-            alder = Alder.seks.år,
+            alder = Alder.SEKS.år,
             årMåned = inneværendeMåned()
         )
 
@@ -82,7 +82,7 @@ internal class Autobrev6og18ÅrServiceTest {
 
         val autobrev6og18ÅrDTO = Autobrev6og18ÅrDTO(
             fagsakId = behandling.fagsak.id,
-            alder = Alder.seks.år,
+            alder = Alder.SEKS.år,
             årMåned = inneværendeMåned()
         )
 
@@ -97,7 +97,7 @@ internal class Autobrev6og18ÅrServiceTest {
 
         val autobrev6og18ÅrDTO = Autobrev6og18ÅrDTO(
             fagsakId = behandling.fagsak.id,
-            alder = Alder.seks.år,
+            alder = Alder.SEKS.år,
             årMåned = inneværendeMåned()
         )
 
@@ -112,7 +112,7 @@ internal class Autobrev6og18ÅrServiceTest {
 
         val autobrev6og18ÅrDTO = Autobrev6og18ÅrDTO(
             fagsakId = behandling.fagsak.id,
-            alder = Alder.seks.år,
+            alder = Alder.SEKS.år,
             årMåned = inneværendeMåned()
         )
 

@@ -5,7 +5,7 @@ import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
+import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
@@ -66,7 +66,8 @@ class BehandlingServiceTest(
                 )
             )
 
-        val forrigeBehandling = behandlingService.hentForrigeBehandlingSomErIverksatt(behandling = revurderingInnvilgetBehandling)
+        val forrigeBehandling =
+            behandlingService.hentForrigeBehandlingSomErIverksatt(behandling = revurderingInnvilgetBehandling)
         Assertions.assertNotNull(forrigeBehandling)
         Assertions.assertEquals(behandling.id, forrigeBehandling?.id)
     }
@@ -95,11 +96,17 @@ class BehandlingServiceTest(
         )
         personopplysningGrunnlagRepository.save(testPersonopplysningsGrunnlag)
 
-        Assertions.assertEquals(0, behandlingService.finnBarnFraBehandlingMedTilkjentYtsele(behandlingId = behandling.id).size)
+        Assertions.assertEquals(
+            0,
+            behandlingService.finnBarnFraBehandlingMedTilkjentYtsele(behandlingId = behandling.id).size
+        )
     }
 
     private fun ferdigstillBehandling(behandling: Behandling) {
         behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.AVSLUTTET)
-        behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(behandling.id, StegType.BEHANDLING_AVSLUTTET)
+        behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(
+            behandling.id,
+            StegType.BEHANDLING_AVSLUTTET
+        )
     }
 }

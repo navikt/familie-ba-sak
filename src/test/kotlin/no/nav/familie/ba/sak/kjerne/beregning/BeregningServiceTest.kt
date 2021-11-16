@@ -46,16 +46,16 @@ import java.time.YearMonth
 
 class BeregningServiceTest {
 
-    val tilkjentYtelseRepository = mockk<TilkjentYtelseRepository>()
-    val behandlingResultatRepository = mockk<VilkårsvurderingRepository>()
-    val behandlingRepository = mockk<BehandlingRepository>()
-    val søknadGrunnlagService = mockk<SøknadGrunnlagService>()
+    private val tilkjentYtelseRepository = mockk<TilkjentYtelseRepository>()
+    private val behandlingResultatRepository = mockk<VilkårsvurderingRepository>()
+    private val behandlingRepository = mockk<BehandlingRepository>()
+    private val søknadGrunnlagService = mockk<SøknadGrunnlagService>()
     val personopplysningGrunnlagRepository = mockk<PersonopplysningGrunnlagRepository>()
-    val endretUtbetalingAndelRepository = mockk<EndretUtbetalingAndelRepository>()
-    val småbarnstilleggService = mockk<SmåbarnstilleggService>()
-    val featureToggleService = mockk<FeatureToggleService>()
+    private val endretUtbetalingAndelRepository = mockk<EndretUtbetalingAndelRepository>()
+    private val småbarnstilleggService = mockk<SmåbarnstilleggService>()
+    private val featureToggleService = mockk<FeatureToggleService>()
 
-    lateinit var beregningService: BeregningService
+    private lateinit var beregningService: BeregningService
 
     @BeforeEach
     fun setUp() {
@@ -123,7 +123,7 @@ class BeregningServiceTest {
         val slot = slot<TilkjentYtelse>()
 
         every { behandlingResultatRepository.findByBehandlingAndAktiv(any()) } answers { vilkårsvurdering }
-        every { tilkjentYtelseRepository.save(any<TilkjentYtelse>()) } returns lagInitiellTilkjentYtelse(behandling)
+        every { tilkjentYtelseRepository.save(any()) } returns lagInitiellTilkjentYtelse(behandling)
         every { søknadGrunnlagService.hentAktiv(any())?.hentSøknadDto() } returns lagSøknadDTO(
             søkerFnr,
             listOf(barn1Fnr)
@@ -181,7 +181,7 @@ class BeregningServiceTest {
         val slot = slot<TilkjentYtelse>()
 
         every { behandlingResultatRepository.findByBehandlingAndAktiv(any()) } answers { vilkårsvurdering }
-        every { tilkjentYtelseRepository.save(any<TilkjentYtelse>()) } returns lagInitiellTilkjentYtelse(behandling)
+        every { tilkjentYtelseRepository.save(any()) } returns lagInitiellTilkjentYtelse(behandling)
         every { søknadGrunnlagService.hentAktiv(any())?.hentSøknadDto() } returns lagSøknadDTO(
             søkerFnr,
             listOf(barn1Fnr)
@@ -250,7 +250,7 @@ class BeregningServiceTest {
         val slot = slot<TilkjentYtelse>()
 
         every { behandlingResultatRepository.findByBehandlingAndAktiv(any()) } answers { vilkårsvurdering }
-        every { tilkjentYtelseRepository.save(any<TilkjentYtelse>()) } returns lagInitiellTilkjentYtelse(behandling)
+        every { tilkjentYtelseRepository.save(any()) } returns lagInitiellTilkjentYtelse(behandling)
         every { søknadGrunnlagService.hentAktiv(any())?.hentSøknadDto() } returns lagSøknadDTO(
             søkerFnr,
             listOf(barn.personIdent.ident)
@@ -327,7 +327,7 @@ class BeregningServiceTest {
         val slot = slot<TilkjentYtelse>()
 
         every { behandlingResultatRepository.findByBehandlingAndAktiv(any()) } answers { vilkårsvurdering }
-        every { tilkjentYtelseRepository.save(any<TilkjentYtelse>()) } returns lagInitiellTilkjentYtelse(behandling)
+        every { tilkjentYtelseRepository.save(any()) } returns lagInitiellTilkjentYtelse(behandling)
         every { søknadGrunnlagService.hentAktiv(any())?.hentSøknadDto() } returns lagSøknadDTO(
             søkerFnr,
             listOf(barn1Fnr)
@@ -426,7 +426,7 @@ class BeregningServiceTest {
         val slot = slot<TilkjentYtelse>()
 
         every { behandlingResultatRepository.findByBehandlingAndAktiv(any()) } answers { vilkårsvurdering }
-        every { tilkjentYtelseRepository.save(any<TilkjentYtelse>()) } returns lagInitiellTilkjentYtelse(behandling)
+        every { tilkjentYtelseRepository.save(any()) } returns lagInitiellTilkjentYtelse(behandling)
         every { søknadGrunnlagService.hentAktiv(any())?.hentSøknadDto() } returns lagSøknadDTO(
             søkerFnr,
             listOf(barn1Fnr, barn2Fnr)
@@ -529,7 +529,7 @@ class BeregningServiceTest {
         )
     }
 
-    internal fun kjørScenarioForBack2Backtester(
+    private fun kjørScenarioForBack2Backtester(
         førstePeriodeTomForBarnet: LocalDate,
         andrePeriodeFomForBarnet: LocalDate,
         forventetSluttForFørsteAndelsperiode: YearMonth,
@@ -549,7 +549,6 @@ class BeregningServiceTest {
         val andrePeriodeTomForBarnet = LocalDate.of(2021, 12, 11)
 
         // Den godkjente perioden for søker er ikke så relevant for testen annet enn at den settes før og etter periodene som brukes for barnet.
-        val periodeFomForSøker = førstePeriodeFomForBarnet
         val periodeTomForSøker = andrePeriodeTomForBarnet.plusMonths(1)
 
         val førsteSatsendringFom =
@@ -562,7 +561,7 @@ class BeregningServiceTest {
                 vilkårsvurdering = vilkårsvurdering,
                 fnr = søkerFnr,
                 resultat = Resultat.OPPFYLT,
-                periodeFom = periodeFomForSøker,
+                periodeFom = førstePeriodeFomForBarnet,
                 periodeTom = periodeTomForSøker,
                 lagFullstendigVilkårResultat = true,
                 personType = PersonType.SØKER
@@ -600,7 +599,7 @@ class BeregningServiceTest {
         val slot = slot<TilkjentYtelse>()
 
         every { behandlingResultatRepository.findByBehandlingAndAktiv(any()) } answers { vilkårsvurdering }
-        every { tilkjentYtelseRepository.save(any<TilkjentYtelse>()) } returns lagInitiellTilkjentYtelse(behandling)
+        every { tilkjentYtelseRepository.save(any()) } returns lagInitiellTilkjentYtelse(behandling)
         every { søknadGrunnlagService.hentAktiv(any())?.hentSøknadDto() } returns lagSøknadDTO(
             søkerFnr,
             listOf(barn1Fnr)

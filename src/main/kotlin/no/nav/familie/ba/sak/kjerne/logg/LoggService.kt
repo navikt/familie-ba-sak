@@ -25,15 +25,15 @@ class LoggService(
     private val rolleConfig: RolleConfig
 ) {
 
-    private val metrikkPerLoggType: Map<LoggType, Counter> = LoggType.values().map {
-        it to Metrics.counter(
+    private val metrikkPerLoggType: Map<LoggType, Counter> = LoggType.values().associateWith {
+        Metrics.counter(
             "behandling.logg",
             "type",
             it.name,
             "beskrivelse",
             it.visningsnavn
         )
-    }.toMap()
+    }
 
     fun opprettBehandlendeEnhetEndret(
         behandling: Behandling,
@@ -47,7 +47,10 @@ class LoggService(
                 behandlingId = behandling.id,
                 type = LoggType.BEHANDLENDE_ENHET_ENDRET,
                 tittel = "Endret enhet på behandling",
-                rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(rolleConfig, BehandlerRolle.SAKSBEHANDLER),
+                rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
+                    rolleConfig,
+                    BehandlerRolle.SAKSBEHANDLER
+                ),
                 tekst = "Behandlende enhet ${if (manuellOppdatering) "manuelt" else "automatisk"} endret fra " +
                     "${fraEnhet.enhetId} ${fraEnhet.enhetNavn} til ${tilEnhet.behandlendeEnhetId} ${tilEnhet.behandlendeEnhetNavn}." +
                     if (begrunnelse.isNotBlank()) "\n\n$begrunnelse" else ""
@@ -61,7 +64,10 @@ class LoggService(
                 behandlingId = behandling.id,
                 type = LoggType.DOKUMENT_MOTTATT,
                 tittel = "Dokument mottatt ${mottattDato.toLocalDate().tilKortString()}",
-                rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(rolleConfig, BehandlerRolle.SAKSBEHANDLER),
+                rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
+                    rolleConfig,
+                    BehandlerRolle.SAKSBEHANDLER
+                ),
                 tekst = tekst
             )
         )
@@ -74,7 +80,10 @@ class LoggService(
                 behandlingId = behandling.id,
                 type = LoggType.SØKNAD_REGISTRERT,
                 tittel = tittel,
-                rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(rolleConfig, BehandlerRolle.SAKSBEHANDLER),
+                rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
+                    rolleConfig,
+                    BehandlerRolle.SAKSBEHANDLER
+                ),
                 tekst = ""
             )
         )
@@ -96,7 +105,10 @@ class LoggService(
                 behandlingId = behandling.id,
                 type = LoggType.BEHANDLINGSTYPE_ENDRET,
                 tittel = "Endret behandlingstema",
-                rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(rolleConfig, BehandlerRolle.SAKSBEHANDLER),
+                rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
+                    rolleConfig,
+                    BehandlerRolle.SAKSBEHANDLER
+                ),
                 tekst = "Behandlingstema er manuelt endret fra ${
                 tilBehandlingstema(
                     underkategori = forrigeUnderkategori,
@@ -128,7 +140,10 @@ class LoggService(
                 behandlingId = behandling.id,
                 type = LoggType.VILKÅRSVURDERING,
                 tittel = if (forrigeBehandlingResultat != BehandlingResultat.IKKE_VURDERT) "Vilkårsvurdering endret" else "Vilkårsvurdering gjennomført",
-                rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(rolleConfig, BehandlerRolle.SAKSBEHANDLER),
+                rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
+                    rolleConfig,
+                    BehandlerRolle.SAKSBEHANDLER
+                ),
                 tekst = tekst
             )
         )
@@ -140,7 +155,10 @@ class LoggService(
                 behandlingId = behandling.id,
                 type = LoggType.FØDSELSHENDELSE,
                 tittel = "Mottok fødselshendelse",
-                rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(rolleConfig, BehandlerRolle.SAKSBEHANDLER),
+                rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
+                    rolleConfig,
+                    BehandlerRolle.SAKSBEHANDLER
+                ),
                 tekst = ""
             )
         )
@@ -156,7 +174,10 @@ class LoggService(
                 behandlingId = behandling.id,
                 type = LoggType.BEHANDLING_OPPRETTET,
                 tittel = "${behandling.type.visningsnavn} opprettet",
-                rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(rolleConfig, BehandlerRolle.SAKSBEHANDLER),
+                rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
+                    rolleConfig,
+                    BehandlerRolle.SAKSBEHANDLER
+                ),
                 tekst = ""
             )
         )
@@ -168,7 +189,10 @@ class LoggService(
                 behandlingId = behandling.id,
                 type = LoggType.SEND_TIL_BESLUTTER,
                 tittel = "Sendt til beslutter",
-                rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(rolleConfig, BehandlerRolle.SAKSBEHANDLER),
+                rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
+                    rolleConfig,
+                    BehandlerRolle.SAKSBEHANDLER
+                ),
                 tekst = ""
             )
         )
@@ -216,7 +240,10 @@ class LoggService(
                 behandlingId = behandling.id,
                 type = LoggType.HENLEGG_BEHANDLING,
                 tittel = "Behandlingen er henlagt",
-                rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(rolleConfig, BehandlerRolle.SAKSBEHANDLER),
+                rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
+                    rolleConfig,
+                    BehandlerRolle.SAKSBEHANDLER
+                ),
                 tekst = "$årsak: $begrunnelse"
             )
         )
@@ -230,7 +257,10 @@ class LoggService(
                 behandlingId = behandling.id,
                 type = LoggType.BARN_LAGT_TIL,
                 tittel = LoggType.BARN_LAGT_TIL.visningsnavn,
-                rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(rolleConfig, BehandlerRolle.SAKSBEHANDLER),
+                rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
+                    rolleConfig,
+                    BehandlerRolle.SAKSBEHANDLER
+                ),
                 tekst = beskrivelse
             )
         )

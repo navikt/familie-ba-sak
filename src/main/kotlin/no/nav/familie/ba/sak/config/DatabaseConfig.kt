@@ -17,7 +17,10 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories
 @Configuration
 @EnableJdbcAuditing
 @EnableJdbcRepositories("no.nav.familie.prosessering")
-@EnableJpaRepositories("no.nav.familie", excludeFilters = arrayOf(ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = arrayOf(TaskRepository::class))))
+@EnableJpaRepositories(
+    "no.nav.familie",
+    excludeFilters = [ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = arrayOf(TaskRepository::class))]
+)
 @EnableJpaAuditing
 class DatabaseConfig : AbstractJdbcConfiguration() {
     @Bean

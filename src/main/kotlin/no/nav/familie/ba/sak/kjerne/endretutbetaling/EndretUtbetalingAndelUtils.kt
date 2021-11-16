@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.endretutbetaling.domene
+package no.nav.familie.ba.sak.kjerne.endretutbetaling
 
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType

@@ -7,7 +7,6 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVedtakBegrunnelseTilknyttetVilkår
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
@@ -34,7 +33,6 @@ class VilkårController(
     private val annenVurderingService: AnnenVurderingService,
     private val behandlingService: BehandlingService,
     private val vedtakService: VedtakService,
-    private val fagsakService: FagsakService,
     private val tilgangService: TilgangService,
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val utvidetBehandlingService: UtvidetBehandlingService
@@ -72,7 +70,6 @@ class VilkårController(
             handling = "Annen vurdering"
         )
 
-        val behandling = behandlingService.hent(behandlingId)
         annenVurderingService.endreAnnenVurdering(
             annenVurderingId = annenVurderingId,
             restAnnenVurdering = restAnnenVurdering

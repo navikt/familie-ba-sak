@@ -1,0 +1,58 @@
+{
+  "beskrivelse": "RV8: Vi mottar en Klage, legger til barn manuelt og innvilger bare tilbake i tid.",
+  "inneværendeMåned": "2021-09",
+  "personer": [
+    {
+      "personType": "BARN",
+      "søktForPerson": false,
+      "eksplisittAvslått": false,
+      "forrigeAndeler": [
+        {
+          "stønadFom": "2020-10",
+          "stønadTom": "2032-11",
+          "kalkulertUtbetalingsbeløp": 1054
+        }
+      ],
+      "andeler": [
+        {
+          "stønadFom": "2020-10",
+          "stønadTom": "2032-11",
+          "kalkulertUtbetalingsbeløp": 1054
+        }
+      ]
+    },
+    {
+      "personType": "BARN",
+      "søktForPerson": false,
+      "eksplisittAvslått": false,
+      "forrigeAndeler": [
+        {
+          "stønadFom": "2020-10",
+          "stønadTom": "2028-11",
+          "kalkulertUtbetalingsbeløp": 1054
+        }
+      ],
+      "andeler": [
+        {
+          "stønadFom": "2020-10",
+          "stønadTom": "2028-11",
+          "kalkulertUtbetalingsbeløp": 1054
+        }
+      ]
+    },
+    {
+      "personType": "BARN",
+      "søktForPerson": true,
+      "eksplisittAvslått": false,
+      "forrigeAndeler": [],
+      "andeler": [
+        {
+          "stønadFom": "2019-03",
+          "stønadTom": "2020-12",
+          "kalkulertUtbetalingsbeløp": 1054
+        }
+      ]
+    }
+  ],
+  "forventetResultat": "INNVILGET"
+}

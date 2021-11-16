@@ -18,10 +18,10 @@ class BehandlingResultatMedKravTest {
 
     val søker = tilfeldigPerson()
 
-    val barn1Ident = randomFnr()
-    val barn2Ident = randomFnr()
-    val defaultYtelseSluttForLøpende = inneværendeMåned().plusMonths(1)
-    val defaultYtelseSluttForAvslått = TIDENES_MORGEN.toYearMonth()
+    private val barn1Ident = randomFnr()
+    private val barn2Ident = randomFnr()
+    private val defaultYtelseSluttForLøpende = inneværendeMåned().plusMonths(1)
+    private val defaultYtelseSluttForAvslått = TIDENES_MORGEN.toYearMonth()
 
     // Innvilget
     @Test

@@ -21,7 +21,6 @@ import no.nav.familie.http.util.UriUtil
 import no.nav.familie.kontrakter.felles.personopplysning.Opphold
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import org.apache.commons.lang3.StringUtils
-import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.NestedExceptionUtils
@@ -307,8 +306,7 @@ class PdlRestClient(
     companion object {
 
         private const val PATH_GRAPHQL = "graphql"
-        const val PDL_TEMA = "BAR"
-        private val logger = LoggerFactory.getLogger(PdlRestClient::class.java)
+        private const val PDL_TEMA = "BAR"
     }
 }
 
