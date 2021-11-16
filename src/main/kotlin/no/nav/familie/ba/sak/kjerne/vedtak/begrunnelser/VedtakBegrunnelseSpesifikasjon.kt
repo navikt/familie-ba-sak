@@ -321,6 +321,10 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
         override val sanityApiNavn = "innvilgetEktefelleDod"
     },
+    INNVILGET_SMÅBARNSTILLEGG {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetSmaabarnstillegg"
+    },
     REDUKSJON_BOSATT_I_RIKTET {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
         override val sanityApiNavn = "reduksjonBosattIRiket"
@@ -488,6 +492,14 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
     REDUKSJON_VURDERING_FLYTTET_SAMMEN_MED_ANNEN_FORELDER {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
         override val sanityApiNavn = "reduksjonVurderingFlyttetSammenMedAnnenForelder"
+    },
+    REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_BARN_UNDER_TRE_ÅR {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "reduksjonSmaabarnstilleggIkkeLengerBarnUnderTreAar"
+    },
+    REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_FULL_OVERGANGSSTØNAD {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "reduksjonSmaabarnstilleggIkkeLengerFullOvergangsstonad"
     },
     AVSLAG_BOSATT_I_RIKET {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
