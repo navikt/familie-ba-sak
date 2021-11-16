@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.config.e2e
+package no.nav.familie.ba.sak.config
 
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Profile
@@ -19,7 +19,7 @@ import org.springframework.data.relational.core.mapping.Table as JdbcTable
  * @author Sebastien Dubois
  */
 @Service
-@Profile("dev", "e2e", "postgres")
+@Profile("dev", "postgres")
 class DatabaseCleanupService(
     private val entityManager: EntityManager,
     private val environment: Environment,
@@ -45,7 +45,7 @@ class DatabaseCleanupService(
                         val tableAnnotation: Table? = it.javaType.kotlin.findAnnotation()
                         val jdbcTableAnnotation: JdbcTable? = it.javaType.kotlin.findAnnotation()
                         tableAnnotation?.name ?: jdbcTableAnnotation?.value
-                            ?: throw IllegalStateException("should never get here")
+                        ?: throw IllegalStateException("should never get here")
                     } + getJdbcTableNames()
             }
             return field
@@ -64,7 +64,7 @@ class DatabaseCleanupService(
     fun truncate() {
         logger.info("Truncating tables: $tableNames")
         entityManager.flush()
-        if (environment.activeProfiles.contains("e2e") || environment.activeProfiles.contains("postgres")) {
+        if (environment.activeProfiles.contains("postgres")) {
             tableNames?.forEach { tableName ->
                 entityManager.createNativeQuery("TRUNCATE TABLE $tableName CASCADE").executeUpdate()
             }

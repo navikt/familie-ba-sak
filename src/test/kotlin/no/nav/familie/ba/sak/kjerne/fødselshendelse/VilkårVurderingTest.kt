@@ -7,7 +7,7 @@ import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
+import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -147,7 +147,8 @@ class VilkårVurderingTest(
             bostedsadresser = grBostedsadresse?.let { mutableListOf(grBostedsadresse) } ?: mutableListOf()
         )
             .apply {
-                this.sivilstander = listOf(GrSivilstand(type = sivilstand, person = this, fom = LocalDate.of(1991, 1, 1)))
+                this.sivilstander =
+                    listOf(GrSivilstand(type = sivilstand, person = this, fom = LocalDate.of(1991, 1, 1)))
             }
     }
 
@@ -312,7 +313,10 @@ class VilkårVurderingTest(
         }
         personopplysningGrunnlag.personer.add(søker)
 
-        assertEquals(Resultat.IKKE_OPPFYLT, Vilkår.BOSATT_I_RIKET.vurderVilkår(søker, LocalDate.now().minusMonths(1)).resultat)
+        assertEquals(
+            Resultat.IKKE_OPPFYLT,
+            Vilkår.BOSATT_I_RIKET.vurderVilkår(søker, LocalDate.now().minusMonths(1)).resultat
+        )
     }
 
     @Test

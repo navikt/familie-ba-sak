@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Profile
 class InfotrygdFeedClientMock {
 
     @Bean
-    @Profile("mock-infotrygd-feed", "e2e")
+    @Profile("mock-infotrygd-feed")
     @Primary
     fun mockInfotrygdFeed(): InfotrygdFeedClient {
         return mockk(relaxed = true)

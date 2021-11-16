@@ -45,10 +45,6 @@ class TilbakekrevingKlient(
     }
 
     fun opprettTilbakekrevingBehandling(opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest): TilbakekrevingId {
-        if (environment.activeProfiles.contains("e2e")) {
-            return ""
-        }
-
         val response: Ressurs<String> =
             postForEntity(URI.create("$familieTilbakeUri/behandling/v1"), opprettTilbakekrevingRequest)
 
@@ -58,9 +54,6 @@ class TilbakekrevingKlient(
     }
 
     fun harÅpenTilbakekrevingsbehandling(fagsakId: Long): Boolean {
-        if (environment.activeProfiles.contains("e2e")) {
-            return false
-        }
         val uri = URI.create("$familieTilbakeUri/fagsystem/${Fagsystem.BA}/fagsak/$fagsakId/finnesApenBehandling/v1")
 
         val response: Ressurs<FinnesBehandlingsresponsDto> = getForEntity(uri)
@@ -72,7 +65,7 @@ class TilbakekrevingKlient(
     }
 
     fun hentTilbakekrevingsbehandlinger(fagsakId: Long): List<Behandling> {
-        if (!featureToggleService.isEnabled(FeatureToggleConfig.TILBAKEKREVING) || environment.activeProfiles.contains("e2e")) {
+        if (!featureToggleService.isEnabled(FeatureToggleConfig.TILBAKEKREVING)) {
             return emptyList()
         }
         try {
@@ -85,7 +78,10 @@ class TilbakekrevingKlient(
             return if (response.status == Ressurs.Status.SUKSESS) {
                 response.data!!
             } else {
-                log.error("Kallet for å hente tilbakekrevingsbehandlinger feilet! Feilmelding: ", response.frontendFeilmelding)
+                log.error(
+                    "Kallet for å hente tilbakekrevingsbehandlinger feilet! Feilmelding: ",
+                    response.frontendFeilmelding
+                )
                 emptyList()
             }
         } catch (e: Exception) {
@@ -96,7 +92,7 @@ class TilbakekrevingKlient(
     }
 
     fun kanTilbakekrevingsbehandlingOpprettesManuelt(fagsakId: Long): KanBehandlingOpprettesManueltRespons {
-        if (!featureToggleService.isEnabled(FeatureToggleConfig.TILBAKEKREVING) || environment.activeProfiles.contains("e2e")) {
+        if (!featureToggleService.isEnabled(FeatureToggleConfig.TILBAKEKREVING)) {
             return KanBehandlingOpprettesManueltRespons(
                 kanBehandlingOpprettes = false,
                 melding = "Kan ikke opprette tilbakekreving"
@@ -113,8 +109,14 @@ class TilbakekrevingKlient(
             return if (response.status == Ressurs.Status.SUKSESS) {
                 response.data!!
             } else {
-                log.error("Kallet for å sjekke om tilbakekrevingsbehandling kan opprettes feilet! Feilmelding: ", response.frontendFeilmelding)
-                KanBehandlingOpprettesManueltRespons(kanBehandlingOpprettes = false, melding = "Teknisk feil. Feilen er logget")
+                log.error(
+                    "Kallet for å sjekke om tilbakekrevingsbehandling kan opprettes feilet! Feilmelding: ",
+                    response.frontendFeilmelding
+                )
+                KanBehandlingOpprettesManueltRespons(
+                    kanBehandlingOpprettes = false,
+                    melding = "Teknisk feil. Feilen er logget"
+                )
             }
         } catch (e: Exception) {
             secureLogger.error("Trøbbel mot tilbakekreving", e)
@@ -127,7 +129,7 @@ class TilbakekrevingKlient(
     }
 
     fun opprettTilbakekrevingsbehandlingManuelt(request: OpprettManueltTilbakekrevingRequest): Boolean {
-        if (!featureToggleService.isEnabled(FeatureToggleConfig.TILBAKEKREVING) || environment.activeProfiles.contains("e2e")) {
+        if (!featureToggleService.isEnabled(FeatureToggleConfig.TILBAKEKREVING)) {
             return false
         }
 
@@ -142,7 +144,10 @@ class TilbakekrevingKlient(
                 log.debug("Respons fra familie-tilbake: ${response.data}")
                 true
             } else {
-                log.error("Kallet for å opprette tilbakekrevingsbehandling feilet! Feilmelding: ", response.frontendFeilmelding)
+                log.error(
+                    "Kallet for å opprette tilbakekrevingsbehandling feilet! Feilmelding: ",
+                    response.frontendFeilmelding
+                )
                 false
             }
         } catch (e: Exception) {

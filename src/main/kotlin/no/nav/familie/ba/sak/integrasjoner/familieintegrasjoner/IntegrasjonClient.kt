@@ -106,9 +106,6 @@ class IntegrasjonClient(
     }
 
     fun hentLand(landkode: String): String {
-        if (environment.activeProfiles.contains("e2e")) {
-            return "Testland"
-        }
         val uri = URI.create("$integrasjonUri/kodeverk/landkoder/$landkode")
 
         return try {
@@ -124,9 +121,6 @@ class IntegrasjonClient(
         backoff = Backoff(delayExpression = RETRY_BACKOFF_5000MS)
     )
     fun hentBehandlendeEnhet(ident: String): List<Arbeidsfordelingsenhet> {
-        if (environment.activeProfiles.contains("e2e")) {
-            return listOf(Arbeidsfordelingsenhet("4833", "NAV Familie- og pensjonsytelser Oslo 1"))
-        }
         val uri = UriComponentsBuilder.fromUri(integrasjonUri)
             .pathSegment("arbeidsfordeling", "enhet", "BAR")
             .build().toUri()
@@ -156,7 +150,8 @@ class IntegrasjonClient(
             .build().toUri()
 
         return try {
-            val response = postForEntity<Ressurs<List<Arbeidsforhold>>>(uri, ArbeidsforholdRequest(ident, ansettelsesperiodeFom))
+            val response =
+                postForEntity<Ressurs<List<Arbeidsforhold>>>(uri, ArbeidsforholdRequest(ident, ansettelsesperiodeFom))
             response.getDataOrThrow()
         } catch (e: RestClientException) {
             var feilmelding = "Kall mot integrasjon feilet ved henting av arbeidsforhold."
@@ -403,7 +398,8 @@ class IntegrasjonClient(
     }
 
     fun ferdigstillJournalpost(journalpostId: String, journalførendeEnhet: String) {
-        val uri = URI.create("$integrasjonUri/arkiv/v2/$journalpostId/ferdigstill?journalfoerendeEnhet=$journalførendeEnhet")
+        val uri =
+            URI.create("$integrasjonUri/arkiv/v2/$journalpostId/ferdigstill?journalfoerendeEnhet=$journalførendeEnhet")
         exchange(
             networkRequest = {
                 putForEntity<Ressurs<Any>>(uri, "")
@@ -461,7 +457,8 @@ class IntegrasjonClient(
     }
 
     fun journalførVedtaksbrev(fnr: String, fagsakId: String, vedtak: Vedtak, journalførendeEnhet: String): String {
-        val vedleggPdf = hentVedlegg(VEDTAK_VEDLEGG_FILNAVN) ?: error("Klarte ikke hente vedlegg $VEDTAK_VEDLEGG_FILNAVN")
+        val vedleggPdf =
+            hentVedlegg(VEDTAK_VEDLEGG_FILNAVN) ?: error("Klarte ikke hente vedlegg $VEDTAK_VEDLEGG_FILNAVN")
 
         val brev = listOf(
             Dokument(
@@ -473,7 +470,7 @@ class IntegrasjonClient(
         )
         logger.info(
             "Journalfører vedtaksbrev for behandling ${vedtak.behandling.id} med tittel ${
-            hentOverstyrtDokumenttittel(vedtak.behandling)
+                hentOverstyrtDokumenttittel(vedtak.behandling)
             }"
         )
         val vedlegg = listOf(
@@ -565,7 +562,10 @@ class IntegrasjonClient(
         }
     }
 
-    private inline fun <reified T> exchange(networkRequest: () -> Ressurs<T>?, onFailure: (Throwable) -> RuntimeException): T {
+    private inline fun <reified T> exchange(
+        networkRequest: () -> Ressurs<T>?,
+        onFailure: (Throwable) -> RuntimeException
+    ): T {
         return try {
             val response = networkRequest.invoke()
             validerOgPakkUt(response)
