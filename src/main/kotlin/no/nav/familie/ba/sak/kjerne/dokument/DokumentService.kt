@@ -157,9 +157,9 @@ class DokumentService(
         }
 
         if ((
-                manueltBrevRequest.brevmal == INNHENTE_OPPLYSNINGER ||
-                    manueltBrevRequest.brevmal == VARSEL_OM_REVURDERING
-                ) && behandling != null
+            manueltBrevRequest.brevmal == INNHENTE_OPPLYSNINGER ||
+                manueltBrevRequest.brevmal == VARSEL_OM_REVURDERING
+            ) && behandling != null
         ) {
             vilkårsvurderingService.opprettOglagreBlankAnnenVurdering(
                 annenVurderingType = AnnenVurderingType.OPPLYSNINGSPLIKT,
@@ -181,8 +181,7 @@ class DokumentService(
                 this["journalpostId"] = journalpostId
                 this["behandlingId"] = behandling?.id.toString()
                 this["fagsakId"] = fagsakId.toString()
-            },
-            envService
+            }
         ).also {
             taskRepository.save(it)
         }

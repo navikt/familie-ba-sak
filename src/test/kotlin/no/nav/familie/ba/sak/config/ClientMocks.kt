@@ -219,12 +219,6 @@ class ClientMocks {
         }
 
         every {
-            mockEnvService.erE2E()
-        } answers {
-            true
-        }
-
-        every {
             mockEnvService.erDev()
         } answers {
             true

@@ -45,7 +45,7 @@ class DatabaseCleanupService(
                         val tableAnnotation: Table? = it.javaType.kotlin.findAnnotation()
                         val jdbcTableAnnotation: JdbcTable? = it.javaType.kotlin.findAnnotation()
                         tableAnnotation?.name ?: jdbcTableAnnotation?.value
-                        ?: throw IllegalStateException("should never get here")
+                            ?: throw IllegalStateException("should never get here")
                     } + getJdbcTableNames()
             }
             return field

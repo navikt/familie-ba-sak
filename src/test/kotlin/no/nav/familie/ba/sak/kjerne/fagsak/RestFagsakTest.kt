@@ -43,7 +43,7 @@ class RestFagsakTest(
     @Autowired
     private val vedtaksperiodeService: VedtaksperiodeService,
 
-    ) : AbstractSpringIntegrationTest() {
+) : AbstractSpringIntegrationTest() {
 
     @BeforeAll
     fun init() {
