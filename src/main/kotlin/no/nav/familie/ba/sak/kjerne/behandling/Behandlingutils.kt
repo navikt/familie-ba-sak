@@ -12,31 +12,29 @@ object Behandlingutils {
 
     fun hentSisteBehandlingSomErIverksatt(iverksatteBehandlinger: List<Behandling>): Behandling? {
         return iverksatteBehandlinger
-            .sortedBy { it.opprettetTidspunkt }
-            .findLast { it.steg == StegType.BEHANDLING_AVSLUTTET }
+            .filter { it.steg == StegType.BEHANDLING_AVSLUTTET }
+            .maxByOrNull { it.opprettetTidspunkt }
     }
 
-    fun hentForrigeBehandlingSomIkkeErHenlagt(
+    fun hentForrigeBehandlingSomErVedtatt(
         behandlinger: List<Behandling>,
         behandlingFørFølgende: Behandling
     ): Behandling? {
         return behandlinger
-            .filter { it.opprettetTidspunkt.isBefore(behandlingFørFølgende.opprettetTidspunkt) }
-            .sortedBy { it.opprettetTidspunkt }
-            .findLast { it.steg == StegType.BEHANDLING_AVSLUTTET && !it.erHenlagt() }
+            .filter { it.opprettetTidspunkt.isBefore(behandlingFørFølgende.opprettetTidspunkt) && it.steg == StegType.BEHANDLING_AVSLUTTET && !it.erHenlagt() }
+            .maxByOrNull { it.opprettetTidspunkt }
     }
 
     fun hentSisteBehandlingSomIkkeErTekniskOpphør(behandlinger: List<Behandling>): Behandling? =
-        behandlinger.sortedBy { it.opprettetTidspunkt }.findLast { !it.erTekniskOpphør() }
+        behandlinger.filter { !it.erTekniskOpphør() }.maxByOrNull { it.opprettetTidspunkt }
 
     fun hentForrigeIverksatteBehandling(
         iverksatteBehandlinger: List<Behandling>,
         behandlingFørFølgende: Behandling
     ): Behandling? {
         return iverksatteBehandlinger
-            .filter { it.opprettetTidspunkt.isBefore(behandlingFørFølgende.opprettetTidspunkt) }
-            .sortedBy { it.opprettetTidspunkt }
-            .findLast { it.steg == StegType.BEHANDLING_AVSLUTTET }
+            .filter { it.opprettetTidspunkt.isBefore(behandlingFørFølgende.opprettetTidspunkt) && it.steg == StegType.BEHANDLING_AVSLUTTET }
+            .maxByOrNull { it.opprettetTidspunkt }
     }
 
     fun bestemKategori(

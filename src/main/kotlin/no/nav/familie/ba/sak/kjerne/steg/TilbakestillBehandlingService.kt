@@ -28,7 +28,7 @@ class TilbakestillBehandlingService(
         vilkårService.initierVilkårsvurderingForBehandling(
             behandling = behandling,
             bekreftEndringerViaFrontend = bekreftEndringerViaFrontend,
-            forrigeBehandlingSomIkkeErHenlagt = behandlingService.hentForrigeBehandlingSomIkkeErHenlagt(
+            forrigeBehandlingSomErVedtatt = behandlingService.hentForrigeBehandlingSomErVedtatt(
                 behandling
             )
         )

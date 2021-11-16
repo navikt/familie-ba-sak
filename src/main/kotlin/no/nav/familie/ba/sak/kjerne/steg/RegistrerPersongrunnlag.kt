@@ -22,15 +22,15 @@ class RegistrerPersongrunnlag(
         behandling: Behandling,
         data: RegistrerPersongrunnlagDTO
     ): StegType {
-        val forrigeBehandlingSomIkkeErHenlagt = behandlingService.hentForrigeBehandlingSomIkkeErHenlagt(
+        val forrigeBehandlingSomErVedtatt = behandlingService.hentForrigeBehandlingSomErVedtatt(
             behandling
         )
 
-        if (behandling.type == BehandlingType.REVURDERING && forrigeBehandlingSomIkkeErHenlagt != null) {
+        if (behandling.type == BehandlingType.REVURDERING && forrigeBehandlingSomErVedtatt != null) {
             val forrigePersongrunnlagBarna =
-                behandlingService.finnBarnFraBehandlingMedTilkjentYtsele(behandlingId = forrigeBehandlingSomIkkeErHenlagt.id)
+                behandlingService.finnBarnFraBehandlingMedTilkjentYtsele(behandlingId = forrigeBehandlingSomErVedtatt.id)
             val forrigeMålform =
-                persongrunnlagService.hentSøkersMålform(behandlingId = forrigeBehandlingSomIkkeErHenlagt.id)
+                persongrunnlagService.hentSøkersMålform(behandlingId = forrigeBehandlingSomErVedtatt.id)
 
             persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(
                 data.ident,
@@ -58,7 +58,7 @@ class RegistrerPersongrunnlag(
             vilkårService.initierVilkårsvurderingForBehandling(
                 behandling = behandling,
                 bekreftEndringerViaFrontend = true,
-                forrigeBehandlingSomIkkeErHenlagt = behandlingService.hentForrigeBehandlingSomIkkeErHenlagt(
+                forrigeBehandlingSomErVedtatt = behandlingService.hentForrigeBehandlingSomErVedtatt(
                     behandling
                 )
             )

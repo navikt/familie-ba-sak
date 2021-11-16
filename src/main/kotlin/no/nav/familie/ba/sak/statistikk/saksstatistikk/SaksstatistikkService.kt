@@ -51,7 +51,7 @@ class SaksstatistikkService(
 
     fun mapTilBehandlingDVH(behandlingId: Long): BehandlingDVH? {
         val behandling = behandlingService.hent(behandlingId)
-        val forrigeBehandlingId = behandlingService.hentForrigeBehandlingSomIkkeErHenlagt(behandling)
+        val forrigeBehandlingId = behandlingService.hentForrigeBehandlingSomErVedtatt(behandling)
             .takeIf { erRevurderingEllerTekniskBehandling(behandling) }?.id
 
         if (behandling.opprettetÅrsak == FØDSELSHENDELSE && !envService.skalIverksetteBehandling()) return null

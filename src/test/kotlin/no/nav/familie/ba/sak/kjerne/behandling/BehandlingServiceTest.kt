@@ -67,7 +67,7 @@ class BehandlingServiceTest(
             )
 
         val forrigeBehandling =
-            behandlingService.hentForrigeBehandlingSomIkkeErHenlagt(behandling = revurderingInnvilgetBehandling)
+            behandlingService.hentForrigeBehandlingSomErVedtatt(behandling = revurderingInnvilgetBehandling)
         Assertions.assertNotNull(forrigeBehandling)
         Assertions.assertEquals(behandling.id, forrigeBehandling?.id)
     }

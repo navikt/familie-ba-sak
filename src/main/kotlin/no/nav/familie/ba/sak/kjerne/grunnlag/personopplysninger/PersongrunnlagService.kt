@@ -135,19 +135,19 @@ class PersongrunnlagService(
     fun registrerBarnFraSøknad(
         søknadDTO: SøknadDTO,
         behandling: Behandling,
-        forrigeBehandlingSomIkkeErHenlagt: Behandling? = null
+        forrigeBehandlingSomErVedtatt: Behandling? = null
     ) {
         val søkerIdent = søknadDTO.søkerMedOpplysninger.ident
         val valgteBarnsIdenter =
             søknadDTO.barnaMedOpplysninger.filter { it.inkludertISøknaden && it.erFolkeregistrert }
                 .map { barn -> barn.ident }
 
-        if (behandling.type == BehandlingType.REVURDERING && forrigeBehandlingSomIkkeErHenlagt != null) {
-            val forrigePersongrunnlag = hentAktiv(behandlingId = forrigeBehandlingSomIkkeErHenlagt.id)
+        if (behandling.type == BehandlingType.REVURDERING && forrigeBehandlingSomErVedtatt != null) {
+            val forrigePersongrunnlag = hentAktiv(behandlingId = forrigeBehandlingSomErVedtatt.id)
             val forrigePersongrunnlagBarna = forrigePersongrunnlag?.barna?.map { it.personIdent.ident }
                 ?.filter {
                     andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(
-                        forrigeBehandlingSomIkkeErHenlagt.id,
+                        forrigeBehandlingSomErVedtatt.id,
                         it
                     )
                         .isNotEmpty()

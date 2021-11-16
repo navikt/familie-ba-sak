@@ -74,7 +74,7 @@ class RevurderingMedEndredeUtbetalingandelerTest(
         val vilkårsvurdering = vilkårService.initierVilkårsvurderingForBehandling(
             behandling = behandling,
             bekreftEndringerViaFrontend = true,
-            forrigeBehandlingSomIkkeErHenlagt = null
+            forrigeBehandlingSomErVedtatt = null
         )
 
         vilkårsvurdering.personResultater.map { personResultat ->
@@ -144,7 +144,7 @@ class RevurderingMedEndredeUtbetalingandelerTest(
         vilkårService.initierVilkårsvurderingForBehandling(
             behandling = behandlingRevurdering,
             bekreftEndringerViaFrontend = true,
-            forrigeBehandlingSomIkkeErHenlagt = iverksattBehandling
+            forrigeBehandlingSomErVedtatt = iverksattBehandling
         )
 
         val kopierteEndredeUtbetalingAndeler = endretUtbetalingAndelService.hentForBehandling(behandlingRevurdering.id)
