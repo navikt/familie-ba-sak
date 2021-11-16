@@ -44,6 +44,9 @@ class PersonidentService(
         return fødselsnummerAktiv
     }
 
+    fun hentAktørId(fødselsnummer: String): AktørId =
+        personidentRepository.hentAktivIdent(fødselsnummer)?.aktørId ?: error("Fødselsnummer er ikke persistert")
+
     private fun identHarBlittInnaktivSidenSistPersistering(
         aktivIdentPersistert: Personident?,
         fødselsnummerAktiv: String

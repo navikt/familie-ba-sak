@@ -22,6 +22,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingsbehandlingService
@@ -50,6 +51,7 @@ class FagsakService(
     private val fagsakRepository: FagsakRepository,
     private val fagsakPersonRepository: FagsakPersonRepository,
     private val personRepository: PersonRepository,
+    private val personidentService: PersonidentService,
     private val behandlingRepository: BehandlingRepository,
     private val utvidetBehandlingService: UtvidetBehandlingService,
     private val vedtakRepository: VedtakRepository,
@@ -102,7 +104,10 @@ class FagsakService(
         if (fagsak == null) {
             tilgangService.verifiserHarTilgangTilHandling(BehandlerRolle.SAKSBEHANDLER, "opprette fagsak")
 
-            fagsak = Fagsak().also {
+            personidentService.hentOgLagreAktivIdentMedAktørId(personIdent.ident)
+            val aktørId = personidentService.hentAktørId(personIdent.ident)
+
+            fagsak = Fagsak(aktørId = aktørId).also {
                 it.søkerIdenter = setOf(FagsakPerson(personIdent = personIdent, fagsak = it))
                 lagre(it)
             }

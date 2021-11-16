@@ -123,7 +123,9 @@ fun nesteUtvidetVedtaksperiodeId(): Long {
     return gjeldendeUtvidetVedtaksperiodeId
 }
 
-fun defaultFagsak() = Fagsak(1).also {
+fun defaultFagsak() = Fagsak(
+    1, aktørId = AktørId("2")
+).also {
     it.søkerIdenter =
         setOf(
             FagsakPerson(

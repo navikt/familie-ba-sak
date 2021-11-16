@@ -171,7 +171,7 @@ class OppgaveServiceTest {
 
     private fun lagTestBehandling(): Behandling {
         return Behandling(
-            fagsak = Fagsak(id = FAGSAK_ID).also {
+            fagsak = Fagsak(id = FAGSAK_ID, aktørId = AktørId("2")).also {
                 it.søkerIdenter = setOf(FagsakPerson(personIdent = PersonIdent(ident = FNR), fagsak = it))
             },
             type = BehandlingType.FØRSTEGANGSBEHANDLING,

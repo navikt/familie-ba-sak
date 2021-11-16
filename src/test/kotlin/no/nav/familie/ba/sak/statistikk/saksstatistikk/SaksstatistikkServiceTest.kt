@@ -282,7 +282,7 @@ internal class SaksstatistikkServiceTest(
     @Test
     fun `Skal mappe til sakDVH, ingen aktiv behandling, så kun aktør SØKER, bostedsadresse i Norge`() {
         every { fagsakService.hentPåFagsakId(any()) } answers {
-            val fagsak = Fagsak(status = FagsakStatus.OPPRETTET)
+            val fagsak = Fagsak(status = FagsakStatus.OPPRETTET, aktørId = AktørId("2"))
             val fagsakPerson = FagsakPerson(personIdent = PersonIdent("12345678910"), fagsak = fagsak)
             fagsak.copy(søkerIdenter = setOf(fagsakPerson))
         }
@@ -326,7 +326,7 @@ internal class SaksstatistikkServiceTest(
     @Test
     fun `Skal mappe til sakDVH, ingen aktiv behandling, så kun aktør SØKER, bostedsadresse i Utland`() {
         every { fagsakService.hentPåFagsakId(any()) } answers {
-            val fagsak = Fagsak(status = FagsakStatus.OPPRETTET)
+            val fagsak = Fagsak(status = FagsakStatus.OPPRETTET, aktørId = AktørId("2"))
             val fagsakPerson = FagsakPerson(personIdent = PersonIdent("12345678910"), fagsak = fagsak)
             fagsak.copy(søkerIdenter = setOf(fagsakPerson))
         }
@@ -357,7 +357,7 @@ internal class SaksstatistikkServiceTest(
     @Test
     fun `Skal mappe til sakDVH, aktører har SØKER og BARN`() {
         every { fagsakService.hentPåFagsakId(any()) } answers {
-            val fagsak = Fagsak(status = FagsakStatus.OPPRETTET)
+            val fagsak = Fagsak(status = FagsakStatus.OPPRETTET, aktørId = AktørId("2"))
             val fagsakPerson = FagsakPerson(personIdent = PersonIdent("12345678910"), fagsak = fagsak)
             fagsak.copy(søkerIdenter = setOf(fagsakPerson))
         }

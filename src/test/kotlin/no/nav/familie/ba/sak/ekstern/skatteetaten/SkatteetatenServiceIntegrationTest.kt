@@ -329,7 +329,7 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
     }
 
     fun lagerTilkjentYtelse(tilkjentYtelse: PerioderTestData) {
-        val fagsak = Fagsak()
+        val fagsak = Fagsak(aktørId = AktørId("2"))
         fagsakRepository.saveAndFlush(fagsak)
 
         val behandling = Behandling(
