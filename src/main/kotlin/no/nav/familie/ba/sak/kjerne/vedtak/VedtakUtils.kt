@@ -106,7 +106,10 @@ object VedtakUtils {
             (!triggesAv.vurderingAnnetGrunnlag || vilkårResultat.erSkjønnsmessigVurdert)
         val erMedlemskapOppfylt = vilkårResultat.erMedlemskapVurdert == triggesAv.medlemskap
 
-        return erDeltBostedOppfylt && erSkjønnsmessigVurderingOppfylt && erMedlemskapOppfylt
+        return erDeltBostedOppfylt &&
+            erSkjønnsmessigVurderingOppfylt &&
+            erMedlemskapOppfylt &&
+            !triggesAv.småbarnstillegg
     }
 }
 
