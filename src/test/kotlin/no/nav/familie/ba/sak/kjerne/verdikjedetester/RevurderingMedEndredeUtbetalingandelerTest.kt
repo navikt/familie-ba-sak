@@ -45,7 +45,7 @@ class RevurderingMedEndredeUtbetalingandelerTest(
     @Autowired
     private val endretUtbetalingAndelService: EndretUtbetalingAndelService,
 
-) : AbstractVerdikjedetest() {
+    ) : AbstractVerdikjedetest() {
     @Test
     fun `Endrede utbetalingsandeler fra forrige behandling kopieres riktig`() {
 
@@ -74,7 +74,7 @@ class RevurderingMedEndredeUtbetalingandelerTest(
         val vilkårsvurdering = vilkårService.initierVilkårsvurderingForBehandling(
             behandling = behandling,
             bekreftEndringerViaFrontend = true,
-            forrigeBehandling = null
+            forrigeBehandlingSomIkkeErHenlagt = null
         )
 
         vilkårsvurdering.personResultater.map { personResultat ->
@@ -144,7 +144,7 @@ class RevurderingMedEndredeUtbetalingandelerTest(
         vilkårService.initierVilkårsvurderingForBehandling(
             behandling = behandlingRevurdering,
             bekreftEndringerViaFrontend = true,
-            forrigeBehandling = iverksattBehandling
+            forrigeBehandlingSomIkkeErHenlagt = iverksattBehandling
         )
 
         val kopierteEndredeUtbetalingAndeler = endretUtbetalingAndelService.hentForBehandling(behandlingRevurdering.id)

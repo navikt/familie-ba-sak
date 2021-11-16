@@ -123,7 +123,8 @@ class PersongrunnlagService(
     fun finnNyeBarn(behandling: Behandling, forrigeBehandling: Behandling?): List<Person> {
         val barnIForrigeGrunnlag = forrigeBehandling?.let { hentAktiv(behandlingId = it.id)?.barna } ?: emptySet()
         val barnINyttGrunnlag =
-            behandling.let { hentAktiv(behandlingId = it.id)?.barna } ?: throw Feil("Fant ikke personopplysningsgrunnlag")
+            behandling.let { hentAktiv(behandlingId = it.id)?.barna }
+                ?: throw Feil("Fant ikke personopplysningsgrunnlag")
 
         return barnINyttGrunnlag.filter { barn -> barnIForrigeGrunnlag.none { barn.personIdent == it.personIdent } }
     }
@@ -131,17 +132,22 @@ class PersongrunnlagService(
     /**
      * Registrerer barn valgt i søknad og barn fra forrige behandling
      */
-    fun registrerBarnFraSøknad(søknadDTO: SøknadDTO, behandling: Behandling, forrigeBehandling: Behandling? = null) {
+    fun registrerBarnFraSøknad(
+        søknadDTO: SøknadDTO,
+        behandling: Behandling,
+        forrigeBehandlingSomIkkeErHenlagt: Behandling? = null
+    ) {
         val søkerIdent = søknadDTO.søkerMedOpplysninger.ident
         val valgteBarnsIdenter =
-            søknadDTO.barnaMedOpplysninger.filter { it.inkludertISøknaden && it.erFolkeregistrert }.map { barn -> barn.ident }
+            søknadDTO.barnaMedOpplysninger.filter { it.inkludertISøknaden && it.erFolkeregistrert }
+                .map { barn -> barn.ident }
 
-        if (behandling.type == BehandlingType.REVURDERING && forrigeBehandling != null) {
-            val forrigePersongrunnlag = hentAktiv(behandlingId = forrigeBehandling.id)
+        if (behandling.type == BehandlingType.REVURDERING && forrigeBehandlingSomIkkeErHenlagt != null) {
+            val forrigePersongrunnlag = hentAktiv(behandlingId = forrigeBehandlingSomIkkeErHenlagt.id)
             val forrigePersongrunnlagBarna = forrigePersongrunnlag?.barna?.map { it.personIdent.ident }
                 ?.filter {
                     andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(
-                        forrigeBehandling.id,
+                        forrigeBehandlingSomIkkeErHenlagt.id,
                         it
                     )
                         .isNotEmpty()

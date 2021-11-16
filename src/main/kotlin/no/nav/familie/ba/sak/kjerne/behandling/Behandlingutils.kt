@@ -16,6 +16,16 @@ object Behandlingutils {
             .findLast { it.steg == StegType.BEHANDLING_AVSLUTTET }
     }
 
+    fun hentForrigeBehandlingSomIkkeErHenlagt(
+        behandlinger: List<Behandling>,
+        behandlingFørFølgende: Behandling
+    ): Behandling? {
+        return behandlinger
+            .filter { it.opprettetTidspunkt.isBefore(behandlingFørFølgende.opprettetTidspunkt) }
+            .sortedBy { it.opprettetTidspunkt }
+            .findLast { it.steg == StegType.BEHANDLING_AVSLUTTET && !it.erHenlagt() }
+    }
+
     fun hentSisteBehandlingSomIkkeErTekniskOpphør(behandlinger: List<Behandling>): Behandling? =
         behandlinger.sortedBy { it.opprettetTidspunkt }.findLast { !it.erTekniskOpphør() }
 

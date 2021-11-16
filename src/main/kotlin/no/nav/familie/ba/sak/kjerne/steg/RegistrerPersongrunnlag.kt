@@ -22,11 +22,15 @@ class RegistrerPersongrunnlag(
         behandling: Behandling,
         data: RegistrerPersongrunnlagDTO
     ): StegType {
-        val forrigeBehandlingSomErIverksatt =
-            behandlingService.hentSisteBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id)
-        if (behandling.type == BehandlingType.REVURDERING && forrigeBehandlingSomErIverksatt != null) {
-            val forrigePersongrunnlagBarna = behandlingService.finnBarnFraBehandlingMedTilkjentYtsele(behandlingId = forrigeBehandlingSomErIverksatt.id)
-            val forrigeMålform = persongrunnlagService.hentSøkersMålform(behandlingId = forrigeBehandlingSomErIverksatt.id)
+        val forrigeBehandlingSomIkkeErHenlagt = behandlingService.hentForrigeBehandlingSomIkkeErHenlagt(
+            behandling
+        )
+
+        if (behandling.type == BehandlingType.REVURDERING && forrigeBehandlingSomIkkeErHenlagt != null) {
+            val forrigePersongrunnlagBarna =
+                behandlingService.finnBarnFraBehandlingMedTilkjentYtsele(behandlingId = forrigeBehandlingSomIkkeErHenlagt.id)
+            val forrigeMålform =
+                persongrunnlagService.hentSøkersMålform(behandlingId = forrigeBehandlingSomIkkeErHenlagt.id)
 
             persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(
                 data.ident,
@@ -45,15 +49,18 @@ class RegistrerPersongrunnlag(
                 Målform.NB
             )
         }
+
         if (!(
-            behandling.opprettetÅrsak == BehandlingÅrsak.SØKNAD ||
-                behandling.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE
-            )
+                behandling.opprettetÅrsak == BehandlingÅrsak.SØKNAD ||
+                    behandling.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE
+                )
         ) {
             vilkårService.initierVilkårsvurderingForBehandling(
                 behandling = behandling,
                 bekreftEndringerViaFrontend = true,
-                forrigeBehandling = forrigeBehandlingSomErIverksatt
+                forrigeBehandlingSomIkkeErHenlagt = behandlingService.hentForrigeBehandlingSomIkkeErHenlagt(
+                    behandling
+                )
             )
         }
 

@@ -72,7 +72,7 @@ class VilkårServiceTest(
         val vilkårsvurdering = vilkårService.initierVilkårsvurderingForBehandling(
             behandling = behandling,
             bekreftEndringerViaFrontend = true,
-            forrigeBehandling = forrigeBehandlingSomErIverksatt
+            forrigeBehandlingSomIkkeErHenlagt = forrigeBehandlingSomErIverksatt
         )
         vilkårsvurdering.personResultater.forEach { personResultat ->
             personResultat.vilkårResultater.forEach { vilkårResultat ->
@@ -101,7 +101,7 @@ class VilkårServiceTest(
         val vilkårsvurdering = vilkårService.initierVilkårsvurderingForBehandling(
             behandling = behandling,
             bekreftEndringerViaFrontend = true,
-            forrigeBehandling = forrigeBehandlingSomErIverksatt
+            forrigeBehandlingSomIkkeErHenlagt = forrigeBehandlingSomErIverksatt
         )
         val under18ÅrVilkårForBarn =
             vilkårsvurdering.personResultater.find { it.personIdent == barnFnr }
@@ -147,7 +147,7 @@ class VilkårServiceTest(
         val vilkårsvurdering = vilkårService.initierVilkårsvurderingForBehandling(
             behandling = behandling,
             bekreftEndringerViaFrontend = true,
-            forrigeBehandling = forrigeBehandlingSomErIverksatt
+            forrigeBehandlingSomIkkeErHenlagt = forrigeBehandlingSomErIverksatt
         )
         Assertions.assertEquals(2, vilkårsvurdering.personResultater.size)
 
@@ -158,7 +158,7 @@ class VilkårServiceTest(
         val behandlingResultatMedEkstraBarn = vilkårService.initierVilkårsvurderingForBehandling(
             behandling = behandling,
             bekreftEndringerViaFrontend = true,
-            forrigeBehandling = forrigeBehandlingSomErIverksatt
+            forrigeBehandlingSomIkkeErHenlagt = forrigeBehandlingSomErIverksatt
         )
         Assertions.assertEquals(3, behandlingResultatMedEkstraBarn.personResultater.size)
     }
@@ -193,7 +193,7 @@ class VilkårServiceTest(
         val vilkårsvurdering = vilkårService.initierVilkårsvurderingForBehandling(
             behandling = behandling,
             bekreftEndringerViaFrontend = true,
-            forrigeBehandling = forrigeBehandlingSomErIverksatt
+            forrigeBehandlingSomIkkeErHenlagt = forrigeBehandlingSomErIverksatt
         )
             .also {
                 it.personResultater
@@ -234,7 +234,7 @@ class VilkårServiceTest(
         val vilkårsvurdering = vilkårService.initierVilkårsvurderingForBehandling(
             behandling = behandling,
             bekreftEndringerViaFrontend = true,
-            forrigeBehandling = forrigeBehandlingSomErIverksatt
+            forrigeBehandlingSomIkkeErHenlagt = forrigeBehandlingSomErIverksatt
         )
         Assertions.assertEquals(2, vilkårsvurdering.personResultater.size)
 
@@ -270,7 +270,7 @@ class VilkårServiceTest(
         val vilkårsvurdering2 = vilkårService.initierVilkårsvurderingForBehandling(
             behandling = behandling2,
             bekreftEndringerViaFrontend = true,
-            forrigeBehandling = behandling
+            forrigeBehandlingSomIkkeErHenlagt = behandling
         )
 
         Assertions.assertEquals(3, vilkårsvurdering2.personResultater.size)
@@ -304,7 +304,7 @@ class VilkårServiceTest(
         val vilkårsvurdering = vilkårService.initierVilkårsvurderingForBehandling(
             behandling = behandling,
             bekreftEndringerViaFrontend = true,
-            forrigeBehandling = forrigeBehandlingSomErIverksatt
+            forrigeBehandlingSomIkkeErHenlagt = forrigeBehandlingSomErIverksatt
         )
 
         val barn: Person = personopplysningGrunnlag.barna.find { it.personIdent.ident == barnFnr }!!
@@ -325,7 +325,7 @@ class VilkårServiceTest(
         val behandlingResultat2 = vilkårService.initierVilkårsvurderingForBehandling(
             behandling = behandling2,
             bekreftEndringerViaFrontend = true,
-            forrigeBehandling = behandling
+            forrigeBehandlingSomIkkeErHenlagt = behandling
         )
 
         Assertions.assertEquals(3, behandlingResultat2.personResultater.size)

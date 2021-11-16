@@ -25,12 +25,12 @@ class TilbakestillBehandlingService(
         behandling: Behandling,
         bekreftEndringerViaFrontend: Boolean = true
     ) {
-
-        val forrigeBehandlingSomErIverksatt = behandlingService.hentSisteBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id)
         vilkårService.initierVilkårsvurderingForBehandling(
             behandling = behandling,
             bekreftEndringerViaFrontend = bekreftEndringerViaFrontend,
-            forrigeBehandling = forrigeBehandlingSomErIverksatt
+            forrigeBehandlingSomIkkeErHenlagt = behandlingService.hentForrigeBehandlingSomIkkeErHenlagt(
+                behandling
+            )
         )
 
         val vedtak = vedtakRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)

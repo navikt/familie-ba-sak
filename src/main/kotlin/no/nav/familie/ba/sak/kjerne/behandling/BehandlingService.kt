@@ -283,11 +283,21 @@ class BehandlingService(
             } ?: emptyList()
 
     /**
-     * Henter siste iverksatte behandling FØR en gitt behandling
+     * Henter siste iverksatte behandling FØR en gitt behandling.
+     * Bør kun brukes i forbindelse med oppdrag mot økonomisystemet
+     * eller ved behandlingsresultat.
      */
     fun hentForrigeBehandlingSomErIverksatt(behandling: Behandling): Behandling? {
         val iverksatteBehandlinger = hentIverksatteBehandlinger(behandling.fagsak.id)
         return Behandlingutils.hentForrigeIverksatteBehandling(iverksatteBehandlinger, behandling)
+    }
+
+    /**
+     * Henter siste behandling som ikke er henlagt FØR en gitt behandling
+     */
+    fun hentForrigeBehandlingSomIkkeErHenlagt(behandling: Behandling): Behandling? {
+        val behandlinger = behandlingRepository.finnBehandlinger(behandling.fagsak.id)
+        return Behandlingutils.hentForrigeBehandlingSomIkkeErHenlagt(behandlinger, behandling)
     }
 
     fun lagreEllerOppdater(behandling: Behandling, sendTilDvh: Boolean = true): Behandling {
