@@ -22,7 +22,7 @@ class SchedulingController(
     @GetMapping(path = ["/autobrev"])
     @Unprotected
     fun kjørSchedulerForAutobrev(): ResponseEntity<Ressurs<String>> {
-        return if (envService.erPreprod() || envService.erDev() || envService.erE2E()) {
+        return if (envService.erPreprod() || envService.erDev()) {
             scheduler.opprettTask()
             ResponseEntity.ok(Ressurs.success("Laget task."))
         } else {
@@ -33,7 +33,7 @@ class SchedulingController(
     @GetMapping(path = ["/test-satsendring/{behandlingId}"])
     @Unprotected
     fun utførSatsendringPåBehandling(@PathVariable behandlingId: Long): ResponseEntity<Ressurs<String>> {
-        return if (envService.erPreprod() || envService.erDev() || envService.erE2E()) {
+        return if (envService.erPreprod() || envService.erDev()) {
             satsendringService.utførSatsendring(behandlingId)
             ResponseEntity.ok(Ressurs.success("Trigget satsendring"))
         } else {

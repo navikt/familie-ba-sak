@@ -19,6 +19,5 @@ class EnvServiceTest(
         assertTrue(envService.erDev())
         assertFalse(envService.erProd())
         assertFalse(envService.erPreprod())
-        assertFalse(envService.erE2E())
     }
 }

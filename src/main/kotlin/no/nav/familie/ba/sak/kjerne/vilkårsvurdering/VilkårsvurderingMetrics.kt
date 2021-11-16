@@ -20,8 +20,8 @@ class VilkårsvurderingMetrics(
     private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository
 ) {
 
-    final val vilkårsvurderingUtfall = mutableMapOf<PersonType, Map<String, Counter>>()
-    final val vilkårsvurderingFørsteUtfall = mutableMapOf<PersonType, Map<String, Counter>>()
+    private val vilkårsvurderingUtfall = mutableMapOf<PersonType, Map<String, Counter>>()
+    private val vilkårsvurderingFørsteUtfall = mutableMapOf<PersonType, Map<String, Counter>>()
 
     val personTypeToDisplayedType = mapOf(
         PersonType.SØKER to "Mor",
@@ -39,7 +39,10 @@ class VilkårsvurderingMetrics(
         initVilkårMetrikker(VilkårTellerType.FØRSTEUTFALL, vilkårsvurderingFørsteUtfall)
     }
 
-    final fun initVilkårMetrikker(vilkårTellerType: VilkårTellerType, utfallMap: MutableMap<PersonType, Map<String, Counter>>) {
+    private fun initVilkårMetrikker(
+        vilkårTellerType: VilkårTellerType,
+        utfallMap: MutableMap<PersonType, Map<String, Counter>>
+    ) {
         PersonType.values().forEach { personType ->
             val vilkårUtfallMap = mutableMapOf<String, Counter>()
             listOf(
@@ -134,8 +137,9 @@ class VilkårsvurderingMetrics(
         vilkårsvurdering: Vilkårsvurdering,
         vilkår: Vilkår
     ): List<Pair<Person, VilkårResultat?>> {
-        val personer = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(vilkårsvurdering.behandling.id)?.personer
-            ?: error("Finner ikke persongrunnlag på behandling ${vilkårsvurdering.behandling.id}")
+        val personer =
+            personopplysningGrunnlagRepository.findByBehandlingAndAktiv(vilkårsvurdering.behandling.id)?.personer
+                ?: error("Finner ikke persongrunnlag på behandling ${vilkårsvurdering.behandling.id}")
 
         return personer.map { person ->
             val personResultat = vilkårsvurdering.personResultater.firstOrNull { personResultat ->

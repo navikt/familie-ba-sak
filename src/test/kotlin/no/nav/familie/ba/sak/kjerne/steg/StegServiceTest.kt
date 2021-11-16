@@ -7,7 +7,7 @@ import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.ClientMocks
-import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
+import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.config.mockHentPersoninfoForMedIdenter
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -128,8 +128,7 @@ class StegServiceTest(
             søkerFnr = søkerFnr,
             barnasIdenter = listOf(ClientMocks.barnFnr[0]),
             vedtakService = vedtakService,
-            stegService = stegService,
-            tilbakekrevingService = tilbakekrevingService
+            stegService = stegService
         )
     }
 

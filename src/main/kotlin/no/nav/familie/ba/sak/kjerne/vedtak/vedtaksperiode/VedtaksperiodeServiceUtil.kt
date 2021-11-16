@@ -176,7 +176,7 @@ fun kastFeilmeldingForBegrunnelserMedFeil(
                 val tittel =
                     sanityBegrunnelse.navnISystem
 
-                acc + "'$tittel' forventer vurdering på '$vilkårsbeskrivelse'"
+                "$acc'$tittel' forventer vurdering på '$vilkårsbeskrivelse'"
             }
     )
 }

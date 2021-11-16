@@ -63,14 +63,14 @@ class OppgaveController(
             handling = "fordele oppgave"
         )
 
-        val oppgaveId =
+        val oppgaveIdFraRespons =
             oppgaveService.fordelOppgave(
                 oppgaveId = oppgaveId,
                 saksbehandler = saksbehandler,
                 overstyrFordeling = false
             )
 
-        return ResponseEntity.ok().body(Ressurs.success(oppgaveId))
+        return ResponseEntity.ok().body(Ressurs.success(oppgaveIdFraRespons))
     }
 
     @PostMapping(path = ["/{oppgaveId}/tilbakestill"], produces = [MediaType.APPLICATION_JSON_VALUE])

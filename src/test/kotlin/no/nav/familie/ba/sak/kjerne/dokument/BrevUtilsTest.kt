@@ -151,7 +151,7 @@ internal class BrevUtilsTest {
         }
     }
 
-    val behandlingsersultaterForVedtakEndring = listOf(
+    private val behandlingsersultaterForVedtakEndring = listOf(
         BehandlingResultat.INNVILGET,
         BehandlingResultat.INNVILGET_OG_ENDRET,
         BehandlingResultat.DELVIS_INNVILGET,
@@ -173,7 +173,7 @@ internal class BrevUtilsTest {
         }
     }
 
-    val behandlingsersultaterForOpphørt = listOf(BehandlingResultat.OPPHØRT)
+    private val behandlingsersultaterForOpphørt = listOf(BehandlingResultat.OPPHØRT)
 
     @Test
     fun `test hentManuellVedtaksbrevtype gir riktig vedtaksbrevtype for 'Opphørt'`() {
@@ -188,7 +188,7 @@ internal class BrevUtilsTest {
         }
     }
 
-    val behandlingsersultaterForOpphørMedEndring = listOf(
+    private val behandlingsersultaterForOpphørMedEndring = listOf(
         BehandlingResultat.INNVILGET_OG_OPPHØRT,
         BehandlingResultat.INNVILGET_ENDRET_OG_OPPHØRT,
         BehandlingResultat.DELVIS_INNVILGET_OG_OPPHØRT,

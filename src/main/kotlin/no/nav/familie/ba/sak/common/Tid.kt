@@ -60,7 +60,6 @@ fun LocalDate.sisteDagIMåned(): LocalDate {
 
 fun LocalDate.førsteDagINesteMåned() = this.plusMonths(1).withDayOfMonth(1)
 fun LocalDate.førsteDagIInneværendeMåned() = this.withDayOfMonth(1)
-fun LocalDate.sisteDagINesteMåned() = this.plusMonths(1).sisteDagIMåned()
 
 fun LocalDate.erSenereEnnInneværendeMåned(): Boolean = this.isAfter(now().sisteDagIMåned())
 

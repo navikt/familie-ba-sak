@@ -27,7 +27,6 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.task.FerdigstillOppgave
 import no.nav.familie.ba.sak.task.OpprettOppgaveTask
-import no.nav.familie.ba.sak.økonomi.ØkonomiService
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.Task
 import org.junit.jupiter.api.Assertions
@@ -44,9 +43,8 @@ class BeslutteVedtakTest {
     private lateinit var dokumentService: DokumentService
     private lateinit var vilkårsvurderingService: VilkårsvurderingService
     private lateinit var featureToggleService: FeatureToggleService
-    private lateinit var økonomiService: ØkonomiService
 
-    val randomVilkårsvurdering = Vilkårsvurdering(behandling = lagBehandling())
+    private val randomVilkårsvurdering = Vilkårsvurdering(behandling = lagBehandling())
 
     @BeforeEach
     fun setUp() {
@@ -57,7 +55,6 @@ class BeslutteVedtakTest {
         behandlingService = mockk()
         vilkårsvurderingService = mockk()
         featureToggleService = mockk()
-        økonomiService = mockk()
 
         val loggService = mockk<LoggService>()
 
@@ -88,7 +85,6 @@ class BeslutteVedtakTest {
             loggService,
             vilkårsvurderingService,
             featureToggleService,
-            økonomiService
         )
     }
 

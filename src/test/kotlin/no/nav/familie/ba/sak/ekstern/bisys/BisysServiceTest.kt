@@ -25,12 +25,12 @@ import java.time.YearMonth
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class BisysServiceTest {
 
-    lateinit var bisysService: BisysService
-    var mockPersonopplysningerService = mockk<PersonopplysningerService>()
-    var mockFagsakPersonRepository = mockk<FagsakPersonRepository>()
-    var mockBehandlingService = mockk<BehandlingService>()
-    var mockTilkjentYtelseRepository = mockk<TilkjentYtelseRepository>()
-    var mockInfotrygdClient = mockk<InfotrygdBarnetrygdClient>()
+    private lateinit var bisysService: BisysService
+    private val mockPersonopplysningerService = mockk<PersonopplysningerService>()
+    private val mockFagsakPersonRepository = mockk<FagsakPersonRepository>()
+    private val mockBehandlingService = mockk<BehandlingService>()
+    private val mockTilkjentYtelseRepository = mockk<TilkjentYtelseRepository>()
+    private val mockInfotrygdClient = mockk<InfotrygdBarnetrygdClient>()
 
     @BeforeAll
     fun setUp() {
@@ -132,14 +132,14 @@ internal class BisysServiceTest {
         assertThat(response.perioder.first().beløp).isEqualTo(660.0)
         assertThat(response.perioder.first().fomMåned).isEqualTo(YearMonth.of(2020, 1))
         assertThat(response.perioder.first().tomMåned).isEqualTo(YearMonth.of(2040, 1))
-        assertThat(response.perioder.first().manueltBeregnet).isFalse()
+        assertThat(response.perioder.first().manueltBeregnet).isFalse
     }
 
     @Test
     fun `Skal slå sammen resultat fra ba-sak og infotrygd`() {
         val behandling = lagBehandling()
 
-        var tilkjentYtelse = lagInitiellTilkjentYtelse(behandling = behandling).copy(utbetalingsoppdrag = "utbetalt")
+        val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling = behandling).copy(utbetalingsoppdrag = "utbetalt")
 
         val andelTilkjentYtelse =
             lagAndelTilkjentYtelseUtvidet(
@@ -187,14 +187,14 @@ internal class BisysServiceTest {
         assertThat(response.perioder.first().beløp).isEqualTo(660.0)
         assertThat(response.perioder.first().fomMåned).isEqualTo(YearMonth.of(2019, 1))
         assertThat(response.perioder.first().tomMåned).isEqualTo(YearMonth.of(2040, 1))
-        assertThat(response.perioder.first().manueltBeregnet).isFalse()
+        assertThat(response.perioder.first().manueltBeregnet).isFalse
     }
 
     @Test
     fun `Skal ikke slå sammen resultat fra ba-sak og infotrygd hvis periode er manuelt beregnet i infotrygd`() {
         val behandling = lagBehandling()
 
-        var tilkjentYtelse = lagInitiellTilkjentYtelse(behandling = behandling).copy(utbetalingsoppdrag = "utbetalt")
+        val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling = behandling).copy(utbetalingsoppdrag = "utbetalt")
 
         val andelTilkjentYtelse =
             lagAndelTilkjentYtelseUtvidet(
@@ -242,11 +242,11 @@ internal class BisysServiceTest {
         assertThat(response.perioder.first().beløp).isEqualTo(660.0)
         assertThat(response.perioder.first().fomMåned).isEqualTo(YearMonth.of(2019, 1))
         assertThat(response.perioder.first().tomMåned).isEqualTo(YearMonth.of(2019, 12))
-        assertThat(response.perioder.first().manueltBeregnet).isTrue()
+        assertThat(response.perioder.first().manueltBeregnet).isTrue
 
         assertThat(response.perioder.last().beløp).isEqualTo(660.0)
         assertThat(response.perioder.last().fomMåned).isEqualTo(YearMonth.of(2020, 1))
         assertThat(response.perioder.last().tomMåned).isEqualTo(YearMonth.of(2040, 1))
-        assertThat(response.perioder.last().manueltBeregnet).isFalse()
+        assertThat(response.perioder.last().manueltBeregnet).isFalse
     }
 }

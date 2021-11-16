@@ -103,20 +103,17 @@ class StegService(
         // hentEllerOpprettFagsak
         skyggesakService.opprettSkyggesak(nyBehandlingHendelse.morsIdent, fagsak.id)
 
-        val behandlingsType =
-            if (fagsak.status == FagsakStatus.LØPENDE) BehandlingType.REVURDERING else BehandlingType.FØRSTEGANGSBEHANDLING
-
-        val behandling = håndterNyBehandlingOgSendInfotrygdFeed(
+        return håndterNyBehandlingOgSendInfotrygdFeed(
             NyBehandling(
                 søkersIdent = nyBehandlingHendelse.morsIdent,
-                behandlingType = behandlingsType,
+                behandlingType = if (fagsak.status == FagsakStatus.LØPENDE)
+                    BehandlingType.REVURDERING
+                else BehandlingType.FØRSTEGANGSBEHANDLING,
                 behandlingÅrsak = BehandlingÅrsak.FØDSELSHENDELSE,
                 skalBehandlesAutomatisk = true,
                 barnasIdenter = nyBehandlingHendelse.barnasIdenter
             )
         )
-
-        return behandling
     }
 
     @Transactional
@@ -385,7 +382,7 @@ class StegService(
     }
 
     private fun initStegMetrikker(type: String): Map<StegType, Counter> {
-        return steg.map {
+        return steg.associate {
             it.stegType() to Metrics.counter(
                 "behandling.steg.$type",
                 "steg",
@@ -393,7 +390,7 @@ class StegService(
                 "beskrivelse",
                 it.stegType().rekkefølge.toString() + " " + it.stegType().displayName()
             )
-        }.toMap()
+        }
     }
 
     companion object {

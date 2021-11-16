@@ -32,10 +32,10 @@ class BehandleAnnullertFødselTask(
     AsyncTaskStep {
 
     override fun doTask(task: Task) {
-        var dto = objectMapper.readValue(task.payload, BehandleAnnullerFødselDto::class.java)
-        var barnasIdenter = dto.barnasIdenter.map { PersonIdent(it.toString()) }
+        val dto = objectMapper.readValue(task.payload, BehandleAnnullerFødselDto::class.java)
+        val barnasIdenter = dto.barnasIdenter.map { PersonIdent(it) }
 
-        var tasker = taskRepositoryForAnnullertFødsel.hentTaskForTidligereHendelse(dto.tidligereHendelseId)
+        val tasker = taskRepositoryForAnnullertFødsel.hentTaskForTidligereHendelse(dto.tidligereHendelseId)
         if (tasker.isEmpty()) {
             logger.info("Finnes ikke åpen task for annullertfødsel tidligere Id = ${dto.tidligereHendelseId}. Forsøker å finne aktiv behandling.")
             if (personRepository.findByPersonIdenter(barnasIdenter).any {
@@ -62,7 +62,6 @@ class BehandleAnnullertFødselTask(
         const val TASK_STEP_TYPE = "BehandleAnnullertFødselTask"
         const val AVVIKSÅRSAK = "Annuller fødselshendelse"
         private val logger = LoggerFactory.getLogger(BehandleAnnullertFødselTask::class.java)
-        private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
         fun opprettTask(behandleAnnullerFødselDto: BehandleAnnullerFødselDto): Task {
             return Task(
@@ -81,10 +80,10 @@ data class BehandleAnnullerFødselDto(val barnasIdenter: List<String>, val tidli
 class TaskRepositoryForAnnullertFødsel(private val jdbcTemplate: JdbcTemplate) {
 
     fun hentTaskForTidligereHendelse(tidligereHendelseId: String): List<Long> {
-        var query = "SELECT id, metadata FROM task t\n" +
+        val query = "SELECT id, metadata FROM task t\n" +
             "WHERE t.status IN ('KLAR_TIL_PLUKK', 'UBEHANDLET', 'FEILET')\n" +
             "  AND t.type = 'behandleFødselshendelseTask'"
-        var rowMapper = RowMapper { row, index ->
+        val rowMapper = RowMapper { row, _ ->
             Pair(
                 row.getLong("id"),
                 Properties().also { it.load(StringReader((row.getString("metadata")))) }

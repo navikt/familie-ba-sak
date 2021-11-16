@@ -18,12 +18,6 @@ class EnvService(private val environment: Environment) {
         }
     }
 
-    fun erE2E(): Boolean {
-        return environment.activeProfiles.any {
-            it == "e2e"
-        }
-    }
-
     fun erDev(): Boolean {
         return environment.activeProfiles.any {
             it == "dev" || it == "postgres"

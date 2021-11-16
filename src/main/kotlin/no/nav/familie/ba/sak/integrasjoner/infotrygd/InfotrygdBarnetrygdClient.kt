@@ -34,10 +34,6 @@ class InfotrygdBarnetrygdClient(
 ) : AbstractRestClient(restOperations, "infotrygd") {
 
     fun harLøpendeSakIInfotrygd(søkersIdenter: List<String>, barnasIdenter: List<String> = emptyList()): Boolean {
-        if (environment.activeProfiles.contains("e2e")) {
-            return false
-        }
-
         val uri = URI.create("$clientUri/infotrygd/barnetrygd/lopende-barnetrygd")
 
         val request = InfotrygdSøkRequest(søkersIdenter, barnasIdenter)
@@ -51,10 +47,6 @@ class InfotrygdBarnetrygdClient(
     }
 
     fun harÅpenSakIInfotrygd(søkersIdenter: List<String>, barnasIdenter: List<String> = emptyList()): Boolean {
-        if (environment.activeProfiles.contains("e2e")) {
-            return false
-        }
-
         val uri = URI.create("$clientUri/infotrygd/barnetrygd/aapen-sak")
 
         val request = InfotrygdSøkRequest(søkersIdenter, barnasIdenter)
@@ -83,9 +75,11 @@ class InfotrygdBarnetrygdClient(
         }
     }
 
-    fun hentStønader(søkersIdenter: List<String>, barnasIdenter: List<String>, historikk: Boolean = false): InfotrygdSøkResponse<Stønad> {
-        if (environment.activeProfiles.contains("e2e")) return InfotrygdSøkResponse(emptyList(), emptyList())
-
+    fun hentStønader(
+        søkersIdenter: List<String>,
+        barnasIdenter: List<String>,
+        historikk: Boolean = false
+    ): InfotrygdSøkResponse<Stønad> {
         val uri = URI.create("$clientUri/infotrygd/barnetrygd/stonad?historikk=$historikk")
 
         return try {

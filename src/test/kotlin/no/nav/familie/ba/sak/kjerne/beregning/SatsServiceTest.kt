@@ -12,9 +12,9 @@ import java.time.LocalDate
 
 class SatsServiceTest {
 
-    val satsService = spyk(SatsService)
+    private val satsService = spyk(SatsService)
 
-    val MAX_GYLDIG_FRA_OG_MED = årMnd("2020-05")
+    private val MAX_GYLDIG_FRA_OG_MED = årMnd("2020-05")
 
     @Test
     fun `Skal bruke sats for satstype som er løpende`() {

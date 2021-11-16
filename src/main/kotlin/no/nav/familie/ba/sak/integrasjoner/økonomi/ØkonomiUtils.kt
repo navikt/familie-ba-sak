@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.økonomi
+package no.nav.familie.ba.sak.integrasjoner.økonomi
 
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse.Companion.disjunkteAndeler
@@ -164,7 +164,10 @@ object ØkonomiUtils {
                 .filter { (_, andelerSomOpphøres) -> andelerSomOpphøres.isNotEmpty() }
                 .mapValues { andelForKjede -> andelForKjede.value.sortedBy { it.stønadFom } }
                 .map { (_, kjedeEtterFørsteEndring) ->
-                    kjedeEtterFørsteEndring.last() to (endretMigreringsDato ?: kjedeEtterFørsteEndring.first().stønadFom)
+                    kjedeEtterFørsteEndring.last() to (
+                        endretMigreringsDato
+                            ?: kjedeEtterFørsteEndring.first().stønadFom
+                        )
                 }
         }
 

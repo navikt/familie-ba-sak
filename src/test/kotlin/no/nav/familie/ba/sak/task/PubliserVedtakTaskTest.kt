@@ -25,7 +25,7 @@ class PubliserVedtakTaskTest {
     private lateinit var kafkaProducerMock: KafkaProducer
 
     @InjectMockKs
-    lateinit var publiserVedtakTask: PubliserVedtakTask
+    private lateinit var publiserVedtakTask: PubliserVedtakTask
 
     @MockK(relaxed = true)
     private lateinit var stønadsstatistikkService: StønadsstatistikkService
