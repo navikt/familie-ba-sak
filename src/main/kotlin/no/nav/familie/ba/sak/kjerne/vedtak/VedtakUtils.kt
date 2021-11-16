@@ -102,24 +102,20 @@ object VedtakUtils {
         triggesAv: TriggesAv,
         vilkårResultat: VilkårResultat
     ): Boolean {
+
         val erDeltBostedOppfylt =
-            (
-                !triggesAv.deltbosted || vilkårResultat.erDeltBosted || vilkårResultat.utdypendeVilkårsvurderinger.contains(
-                    UtdypendeVilkårsvurdering.DELT_BOSTED
-                )
-                )
+            if (triggesAv.deltbosted) vilkårResultat.utdypendeVilkårsvurderinger.contains(
+                UtdypendeVilkårsvurdering.DELT_BOSTED
+            ) else true
+
         val erSkjønnsmessigVurderingOppfylt =
-            (
-                !triggesAv.vurderingAnnetGrunnlag || vilkårResultat.erSkjønnsmessigVurdert || vilkårResultat.utdypendeVilkårsvurderinger.contains(
-                    UtdypendeVilkårsvurdering.VURDERING_ANNET_GRUNNLAG
-                )
-                )
-        val erMedlemskapOppfylt =
-            vilkårResultat.erMedlemskapVurdert == triggesAv.medlemskap || (
-                vilkårResultat.utdypendeVilkårsvurderinger.contains(
-                    UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP
-                ) && triggesAv.medlemskap
-                ) || (!vilkårResultat.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP) && !triggesAv.medlemskap)
+            if (triggesAv.vurderingAnnetGrunnlag) vilkårResultat.utdypendeVilkårsvurderinger.contains(
+                UtdypendeVilkårsvurdering.VURDERING_ANNET_GRUNNLAG
+            ) else true
+
+        val erMedlemskapOppfylt = vilkårResultat.utdypendeVilkårsvurderinger.contains(
+            UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP
+        ) == triggesAv.medlemskap
 
         return erDeltBostedOppfylt && erSkjønnsmessigVurderingOppfylt && erMedlemskapOppfylt
     }
