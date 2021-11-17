@@ -78,7 +78,7 @@ class StegService(
             )
         } else if (nyBehandling.behandlingType == BehandlingType.REVURDERING || nyBehandling.behandlingType == BehandlingType.TEKNISK_ENDRING) {
             val sisteBehandling = behandlingService.hentSisteBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id)
-                ?: behandlingService.hentSisteBehandlingSomIkkeErHenlagt(behandling.fagsak.id)
+                ?: behandlingService.hentSisteBehandlingSomErVedtatt(behandling.fagsak.id)
                 ?: throw Feil("Forsøker å opprette en revurdering eller teknisk endring, men kan ikke finne tidligere behandling på fagsak ${behandling.fagsak.id}")
 
             val barnFraSisteBehandlingMedUtbetalinger =
