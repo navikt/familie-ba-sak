@@ -8,6 +8,8 @@ import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.erDagenFør
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.tilKortString
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.beregning.fomErPåSatsendring
 import no.nav.familie.ba.sak.kjerne.dokument.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
@@ -19,6 +21,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
@@ -120,3 +123,25 @@ fun VedtakBegrunnelseSpesifikasjon.tilVedtaksbegrunnelse(
         personIdenter = personIdenter
     )
 }
+
+fun VedtakBegrunnelseSpesifikasjon.triggereForUtvidetBarnetrygdErOppfylt(
+    triggesAv: TriggesAv,
+    ytelseTyper: List<YtelseType>,
+    andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
+    fomForPeriode: LocalDate?,
+) =
+    if (triggesAv.småbarnstillegg) {
+        when (this.vedtakBegrunnelseType) {
+            VedtakBegrunnelseType.INNVILGET -> ytelseTyper.contains(YtelseType.SMÅBARNSTILLEGG)
+            VedtakBegrunnelseType.REDUKSJON ->
+                !ytelseTyper.contains(YtelseType.SMÅBARNSTILLEGG) &&
+                    andelerTilkjentYtelse
+                        .filter { it.stønadTom.sisteDagIInneværendeMåned().erDagenFør(fomForPeriode) }
+                        .any { it.type == YtelseType.SMÅBARNSTILLEGG }
+            else -> false
+        }
+    } else if (triggesAv.vilkår.contains(Vilkår.UTVIDET_BARNETRYGD) &&
+        this.vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGET
+    ) {
+        ytelseTyper.contains(YtelseType.UTVIDET_BARNETRYGD)
+    } else false

@@ -29,6 +29,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.erTilknyttetVilkår
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilVedtaksbegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.triggereForUtvidetBarnetrygdErOppfylt
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.triggesForPeriode
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Begrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
@@ -319,12 +320,10 @@ class VedtaksperiodeService(
                                 val triggesAv =
                                     standardBegrunnelse.tilSanityBegrunnelse(sanityBegrunnelser)
                                         ?.tilTriggesAv() ?: return@fold acc
-                                val vedtakBegrunnelseType = standardBegrunnelse.vedtakBegrunnelseType
 
-                                if (triggereForUtvidetBarnetrygdErOppfylt(
+                                if (standardBegrunnelse.triggereForUtvidetBarnetrygdErOppfylt(
                                         triggesAv = triggesAv,
                                         ytelseTyper = ytelseTyper,
-                                        vedtakBegrunnelseType = vedtakBegrunnelseType,
                                         andelerTilkjentYtelse = andelerTilkjentYtelse,
                                         fomForPeriode = utvidetVedtaksperiodeMedBegrunnelser.fom
                                     )

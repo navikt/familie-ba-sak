@@ -4,12 +4,9 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
-import no.nav.familie.ba.sak.common.erDagenFør
-import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
-import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.lagVertikaleSegmenter
 import no.nav.familie.ba.sak.kjerne.dokument.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.dokument.domene.tilTriggesAv
@@ -210,26 +207,3 @@ fun validerVedtaksperiodeMedBegrunnelser(vedtaksperiodeMedBegrunnelser: Vedtaksp
         )
     }
 }
-
-fun triggereForUtvidetBarnetrygdErOppfylt(
-    triggesAv: TriggesAv,
-    ytelseTyper: List<YtelseType>,
-    vedtakBegrunnelseType: VedtakBegrunnelseType,
-    andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
-    fomForPeriode: LocalDate?,
-) =
-    if (triggesAv.småbarnstillegg) {
-        when (vedtakBegrunnelseType) {
-            VedtakBegrunnelseType.INNVILGET -> ytelseTyper.contains(YtelseType.SMÅBARNSTILLEGG)
-            VedtakBegrunnelseType.REDUKSJON ->
-                !ytelseTyper.contains(YtelseType.SMÅBARNSTILLEGG) &&
-                    andelerTilkjentYtelse
-                        .filter { it.stønadTom.sisteDagIInneværendeMåned().erDagenFør(fomForPeriode) }
-                        .any { it.type == YtelseType.SMÅBARNSTILLEGG }
-            else -> false
-        }
-    } else if (triggesAv.vilkår.contains(Vilkår.UTVIDET_BARNETRYGD) &&
-        vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGET
-    ) {
-        ytelseTyper.contains(YtelseType.UTVIDET_BARNETRYGD)
-    } else false
