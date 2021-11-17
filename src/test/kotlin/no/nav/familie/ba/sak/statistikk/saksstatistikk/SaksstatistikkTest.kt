@@ -4,7 +4,7 @@ import io.mockk.every
 import no.nav.familie.ba.sak.common.Utils.hentPropertyFraMaven
 import no.nav.familie.ba.sak.common.nyOrdinærBehandling
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
+import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.IdentInformasjon
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -123,7 +123,8 @@ class SaksstatistikkTest(
 
         behandlingService.oppdaterStatusPåBehandling(behandlingId = behandling.id, BehandlingStatus.AVSLUTTET)
 
-        val mellomlagretBehandling = saksstatistikkMellomlagringRepository.findByTypeAndTypeId(BEHANDLING, behandling.id)
+        val mellomlagretBehandling =
+            saksstatistikkMellomlagringRepository.findByTypeAndTypeId(BEHANDLING, behandling.id)
         assertThat(mellomlagretBehandling).hasSize(2)
         assertThat(mellomlagretBehandling.first().konvertertTidspunkt).isNull()
         assertThat(mellomlagretBehandling.first().sendtTidspunkt).isNull()

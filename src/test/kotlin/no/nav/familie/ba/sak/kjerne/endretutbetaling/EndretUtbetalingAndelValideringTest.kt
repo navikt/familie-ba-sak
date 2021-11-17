@@ -148,7 +148,7 @@ class EndretUtbetalingAndelValideringTest {
         )
 
         endretUtbetalingAndelerSomIkkeValiderer.forEach {
-            feil = assertThrows<UtbetalingsikkerhetFeil> {
+            feil = assertThrows {
                 validerPeriodeInnenforTilkjentytelse(it, andelTilkjentYtelser)
             }
             assertEquals(
@@ -383,7 +383,7 @@ class EndretUtbetalingAndelValideringTest {
             )
         }
 
-        Assertions.assertDoesNotThrow() {
+        Assertions.assertDoesNotThrow {
             validerDeltBostedEndringerIkkeKrysserUtvidetYtelse(
                 endretUtbetalingAndeler = listOf(
                     lagEndretUtbetalingAndel(

@@ -194,16 +194,16 @@ object TilkjentYtelseUtils {
             val andel = sorterteAndeler[index]
             val nesteAndel = if (index == sorterteAndeler.size - 1) null else sorterteAndeler[index + 1]
 
-            if (nesteAndel != null) {
+            periodenViSerPå = if (nesteAndel != null) {
                 val andelerSkalSlåsSammen =
                     skalAndelerSlåsSammen(andel, nesteAndel)
 
                 if (andelerSkalSlåsSammen) {
                     val nyAndel = periodenViSerPå.copy(stønadTom = nesteAndel.stønadTom)
-                    periodenViSerPå = nyAndel
+                    nyAndel
                 } else {
                     oppdatertListeMedAndeler.add(periodenViSerPå)
-                    periodenViSerPå = sorterteAndeler[index + 1]
+                    sorterteAndeler[index + 1]
                 }
             } else {
                 oppdatertListeMedAndeler.add(periodenViSerPå)
@@ -222,7 +222,7 @@ object TilkjentYtelseUtils {
             0
         ) && førsteAndel.endretUtbetalingAndeler.isNotEmpty() && førsteAndel.endretUtbetalingAndeler.singleOrNull() == nesteAndel.endretUtbetalingAndeler.singleOrNull()
 
-    fun beregnBeløpsperioder(
+    private fun beregnBeløpsperioder(
         overlappendePerioderesultatSøker: PeriodeResultat,
         periodeResultatBarn: PeriodeResultat,
         innvilgedePeriodeResultatBarna: List<PeriodeResultat>,
@@ -342,10 +342,7 @@ fun MånedPeriode.perioderMedOgUtenOverlapp(perioder: List<MånedPeriode>): Pair
     val alleMånederMedOverlappstatus = mutableMapOf<YearMonth, Boolean>()
     var nesteMåned = this.fom
     while (nesteMåned <= this.tom) {
-        alleMånederMedOverlappstatus.put(
-            nesteMåned,
-            perioder.any { månedPeriode -> månedPeriode.inkluderer(nesteMåned) }
-        )
+        alleMånederMedOverlappstatus[nesteMåned] = perioder.any { månedPeriode -> månedPeriode.inkluderer(nesteMåned) }
         nesteMåned = nesteMåned.plusMonths(1)
     }
 

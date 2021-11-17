@@ -211,7 +211,7 @@ class MigreringService(
                 env?.erPreprod() ?: false -> LocalDate.of(2021, 7, 1)
                 this.isBefore(kjøredato) -> this.førsteDagIInneværendeMåned()
                 this.isAfter(kjøredato.plusDays(1)) -> this.førsteDagINesteMåned()
-                env!!.erDev() || env.erE2E() -> this.førsteDagINesteMåned()
+                env!!.erDev() -> this.førsteDagINesteMåned()
                 else -> throw FunksjonellFeil(
                     "Migrering er midlertidig deaktivert frem til ${kjøredato.plusDays(2)} da det kolliderer med Infotrygds kjøredato",
                     "Migrering er midlertidig deaktivert frem til ${kjøredato.plusDays(2)} da det kolliderer med Infotrygds kjøredato"

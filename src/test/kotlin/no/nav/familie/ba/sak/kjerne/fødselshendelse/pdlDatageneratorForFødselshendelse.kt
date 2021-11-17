@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.fødselshendelse
 
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
-import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PersonInfo
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.Personident
@@ -141,27 +140,6 @@ fun genererAutomatiskTestperson(
     )
 }
 
-val mockSøkerMedToBarnAutomatiskBehandling = mockSøkerAutomatiskBehandling.copy(
-    forelderBarnRelasjon = setOf(
-        ForelderBarnRelasjon(
-            personIdent = Personident(id = mockBarnAutomatiskBehandlingFnr),
-            relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
-            navn = null,
-            fødselsdato = null,
-            adressebeskyttelseGradering =
-            null,
-        ),
-        ForelderBarnRelasjon(
-            personIdent = Personident(id = mockBarnAutomatiskBehandlingFnr),
-            relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
-            navn = null,
-            fødselsdato = null,
-            adressebeskyttelseGradering =
-            null,
-        )
-    )
-)
-
 val mockNåværendeBosted = GrMatrikkeladresse(
     matrikkelId = 123L,
     bruksenhetsnummer = "H301",
@@ -191,51 +169,3 @@ val mockTidligereBosted = GrMatrikkeladresse(
 ).apply {
     periode = DatoIntervallEntitet(fom = LocalDate.now().minusYears(3), tom = LocalDate.now().minusYears(1))
 }
-val mockTidløstBosted = GrMatrikkeladresse(
-    matrikkelId = 123L,
-    bruksenhetsnummer = "H301",
-    tilleggsnavn = "navn",
-    postnummer = "0202",
-    kommunenummer = "2231"
-)
-
-val personopplysningGrunnlagForGodkjentSak = lagTestPersonopplysningGrunnlag(
-    1L,
-    "04086226621",
-    mutableListOf("21111777001")
-).apply {
-    søker.bostedsadresser = mutableListOf(mockNåværendeBosted)
-    barna.forEach { it.bostedsadresser = mutableListOf(mockNåværendeBosted) }
-}
-
-val personopplysningGrunnlagMedUtdatertAdresse = lagTestPersonopplysningGrunnlag(
-    1L,
-    "04086226621",
-    mutableListOf("21111777001")
-).apply {
-    søker.bostedsadresser = mutableListOf(mockTidligereBosted)
-    barna.forEach { it.bostedsadresser = mutableListOf(mockNåværendeBosted) }
-}
-
-val personopplysningGrunnlagMedUlikeAdresser = lagTestPersonopplysningGrunnlag(
-    1L,
-    "04086226621",
-    mutableListOf("21111777001")
-).apply {
-    søker.bostedsadresser = mutableListOf(mockNåværendeBosted)
-    barna.forEach { it.bostedsadresser = mutableListOf(mockAnnetNåværendeBosted) }
-}
-
-val personopplysningGrunnlagMedUlikeAdresserForEtAvFlereBarn =
-    lagTestPersonopplysningGrunnlag(
-        1L,
-        "04086226621",
-        mutableListOf(
-            "21111777001",
-            "21111777002"
-        )
-    ).apply {
-        søker.bostedsadresser = mutableListOf(mockNåværendeBosted)
-        barna.first().bostedsadresser = mutableListOf(mockAnnetNåværendeBosted)
-        barna.last().bostedsadresser = mutableListOf(mockNåværendeBosted)
-    }

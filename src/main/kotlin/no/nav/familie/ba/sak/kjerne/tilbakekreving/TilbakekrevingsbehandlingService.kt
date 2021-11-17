@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.tilbakekreving
 
-import no.nav.familie.ba.sak.kjerne.tilbakekreving.domene.RestTilbakekrevingsVedtak
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.domene.RestTilbakekrevingsbehandling
 import org.springframework.stereotype.Service
 
@@ -18,14 +17,6 @@ class TilbakekrevingsbehandlingService(private val tilbakekrevingKlient: Tilbake
                 type = it.type,
                 status = it.status,
                 resultat = it.resultat,
-                vedtakForBehandling = if (it.vedtaksdato != null) {
-                    listOf(
-                        RestTilbakekrevingsVedtak(
-                            aktiv = true,
-                            vedtaksdato = it.vedtaksdato!!
-                        )
-                    )
-                } else emptyList(),
                 vedtaksdato = it.vedtaksdato
             )
         }

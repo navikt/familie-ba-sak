@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak
 import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.config.AbstractMockkSpringRunner
 import no.nav.familie.ba.sak.config.ApplicationConfig
-import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
+import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.integrasjoner.`ef-sak`.EfSakRestClient
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext.SYSTEM_FORKORTELSE
@@ -82,7 +82,7 @@ abstract class WebSpringAuthTestRunner(
             token(
                 mapOf(
                     "groups" to (groups ?: listOf(BehandlerRolle.SAKSBEHANDLER.name)),
-                    "azp" to "e2e-test",
+                    "azp" to "azp-test",
                     "name" to "Mock McMockface",
                     "preferred_username" to "mock.mcmockface@nav.no"
                 )
@@ -98,7 +98,7 @@ abstract class WebSpringAuthTestRunner(
             token(
                 mapOf(
                     "groups" to (groups ?: listOf(BehandlerRolle.SYSTEM.name)),
-                    "azp" to "e2e-test",
+                    "azp" to "azp-test",
                     "name" to SYSTEM_FORKORTELSE,
                     "preferred_username" to SYSTEM_FORKORTELSE
                 )
