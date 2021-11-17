@@ -322,8 +322,8 @@ class VedtaksperiodeService(
                                         ?.tilTriggesAv() ?: return@fold acc
 
                                 if (standardBegrunnelse.triggereForUtvidetBarnetrygdErOppfylt(
-                                        triggesAv = triggesAv,
-                                        ytelseTyper = ytelseTyper,
+                                        begrunnelseTriggesAv = triggesAv,
+                                        ytelseTyperForPeriode = ytelseTyper,
                                         andelerTilkjentYtelse = andelerTilkjentYtelse,
                                         fomForPeriode = utvidetVedtaksperiodeMedBegrunnelser.fom
                                     )
