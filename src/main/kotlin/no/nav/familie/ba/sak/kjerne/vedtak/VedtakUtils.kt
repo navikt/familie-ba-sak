@@ -109,6 +109,7 @@ object VedtakUtils {
         return erDeltBostedOppfylt &&
             erSkjønnsmessigVurderingOppfylt &&
             erMedlemskapOppfylt &&
+            // Småbarnstillegg håndteres i triggereForUtvidetBarnetrygdErOppfylt-funksjonen
             !triggesAv.småbarnstillegg
     }
 }
