@@ -420,7 +420,7 @@ class VilkårServiceTest(
         val vilkårsvurdering = vilkårService.initierVilkårsvurderingForBehandling(
             behandling = behandling,
             bekreftEndringerViaFrontend = true,
-            forrigeBehandling = forrigeBehandlingSomErIverksatt
+            forrigeBehandlingSomErVedtatt = forrigeBehandlingSomErIverksatt
         )
         val under18ÅrVilkårForBarn =
             vilkårsvurdering.personResultater.find { it.personIdent == barnFnr }
@@ -471,7 +471,7 @@ class VilkårServiceTest(
         val vilkårsvurdering = vilkårService.initierVilkårsvurderingForBehandling(
             behandling = behandling,
             bekreftEndringerViaFrontend = true,
-            forrigeBehandling = forrigeBehandlingSomErIverksatt
+            forrigeBehandlingSomErVedtatt = forrigeBehandlingSomErIverksatt
         )
         val under18ÅrVilkårForBarn =
             vilkårsvurdering.personResultater.find { it.personIdent == barnFnr }
