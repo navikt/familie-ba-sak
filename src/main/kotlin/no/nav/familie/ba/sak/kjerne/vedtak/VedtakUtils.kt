@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
@@ -101,10 +102,20 @@ object VedtakUtils {
         triggesAv: TriggesAv,
         vilkårResultat: VilkårResultat
     ): Boolean {
-        val erDeltBostedOppfylt = (!triggesAv.deltbosted || vilkårResultat.erDeltBosted)
+
+        val erDeltBostedOppfylt =
+            if (triggesAv.deltbosted) vilkårResultat.utdypendeVilkårsvurderinger.contains(
+                UtdypendeVilkårsvurdering.DELT_BOSTED
+            ) else true
+
         val erSkjønnsmessigVurderingOppfylt =
-            (!triggesAv.vurderingAnnetGrunnlag || vilkårResultat.erSkjønnsmessigVurdert)
-        val erMedlemskapOppfylt = vilkårResultat.erMedlemskapVurdert == triggesAv.medlemskap
+            if (triggesAv.vurderingAnnetGrunnlag) vilkårResultat.utdypendeVilkårsvurderinger.contains(
+                UtdypendeVilkårsvurdering.VURDERING_ANNET_GRUNNLAG
+            ) else true
+
+        val erMedlemskapOppfylt = vilkårResultat.utdypendeVilkårsvurderinger.contains(
+            UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP
+        ) == triggesAv.medlemskap
 
         return erDeltBostedOppfylt && erSkjønnsmessigVurderingOppfylt && erMedlemskapOppfylt
     }
