@@ -30,7 +30,9 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.erTilknyttetVilkår
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilVedtaksbegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.triggesForPeriode
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Begrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
@@ -323,7 +325,7 @@ class VedtaksperiodeService(
                                         ?.tilTriggesAv() ?: return@fold acc
                                 val vedtakBegrunnelseType = standardBegrunnelse.vedtakBegrunnelseType
 
-                                if (this.triggereForUtvidetBarnetrygdErOppfylt(
+                                if (triggereForUtvidetBarnetrygdErOppfylt(
                                         triggesAv = triggesAv,
                                         ytelseTyper = ytelseTyper,
                                         vedtakBegrunnelseType = vedtakBegrunnelseType,
@@ -338,7 +340,6 @@ class VedtaksperiodeService(
                                         persongrunnlag = persongrunnlag,
                                         identerMedUtbetaling = identerMedUtbetaling,
                                         triggesAv = triggesAv,
-                                        vedtakBegrunnelseType = vedtakBegrunnelseType,
                                         endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(
                                                 behandling.id
                                             )
