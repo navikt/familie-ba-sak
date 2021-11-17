@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.NullablePeriode
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
-import no.nav.familie.ba.sak.common.erDagenFør
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
@@ -15,7 +14,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
-import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.dokument.BrevKlient
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.dokument.domene.tilTriggesAv
@@ -26,7 +24,6 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Personopplysning
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.erTilknyttetVilkår
@@ -39,7 +36,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.byggBegrunnelserOgFritekster
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilVedtaksbegrunnelseFritekst
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
 import org.springframework.stereotype.Service
@@ -367,28 +363,6 @@ class VedtaksperiodeService(
             )
         }
     }
-
-    private fun triggereForUtvidetBarnetrygdErOppfylt(
-        triggesAv: TriggesAv,
-        ytelseTyper: List<YtelseType>,
-        vedtakBegrunnelseType: VedtakBegrunnelseType,
-        andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
-        fomForPeriode: LocalDate?,
-    ) =
-        if (triggesAv.småbarnstillegg) {
-            when (vedtakBegrunnelseType) {
-                VedtakBegrunnelseType.INNVILGET -> ytelseTyper.contains(YtelseType.SMÅBARNSTILLEGG)
-                VedtakBegrunnelseType.REDUKSJON ->
-                    andelerTilkjentYtelse
-                        .filter { it.stønadTom.sisteDagIInneværendeMåned().erDagenFør(fomForPeriode) }
-                        .any { it.type == YtelseType.SMÅBARNSTILLEGG }
-                else -> false
-            }
-        } else if (triggesAv.vilkår.contains(Vilkår.UTVIDET_BARNETRYGD) &&
-            vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGET
-        ) {
-            ytelseTyper.contains(YtelseType.UTVIDET_BARNETRYGD)
-        } else false
 
     fun oppdaterFortsattInnvilgetPeriodeMedAutobrevBegrunnelse(
         vedtak: Vedtak,
