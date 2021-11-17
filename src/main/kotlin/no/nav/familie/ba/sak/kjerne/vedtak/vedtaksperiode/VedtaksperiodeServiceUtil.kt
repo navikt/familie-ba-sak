@@ -86,7 +86,7 @@ fun hentPersoneidenterGjeldendeForBegrunnelse(
             vedtakBegrunnelseType == VedtakBegrunnelseType.FORTSATT_INNVILGET
 
     return when {
-        triggesAv.vilkår.contains(Vilkår.UTVIDET_BARNETRYGD) ->
+        triggesAv.vilkår.contains(Vilkår.UTVIDET_BARNETRYGD) || triggesAv.småbarnstillegg ->
             identerMedUtbetaling +
                 persongrunnlag.søker.personIdent.ident +
                 endredeUtbetalingAndeler
