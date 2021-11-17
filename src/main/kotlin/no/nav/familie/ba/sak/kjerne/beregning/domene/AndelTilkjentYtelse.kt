@@ -273,6 +273,12 @@ fun List<AndelTilkjentYtelse>.hentUtvidetYtelseScenario(
     else -> UtvidetScenario.UTVIDET_YTELSE_IKKE_ENDRET
 }
 
+fun List<AndelTilkjentYtelse>.erLik(andreAndeler: List<AndelTilkjentYtelse>): Boolean {
+    if (this.size != andreAndeler.size) return false
+
+    return this.all { andel -> andreAndeler.any { andel.erTilsvarendeForUtbetaling(it) } }
+}
+
 enum class YtelseType(val klassifisering: String) {
     ORDINÆR_BARNETRYGD("BATR"),
     UTVIDET_BARNETRYGD("BATR"),

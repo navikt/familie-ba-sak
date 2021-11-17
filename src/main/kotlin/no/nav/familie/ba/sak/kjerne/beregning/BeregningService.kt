@@ -117,7 +117,7 @@ class BeregningService(
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 behandling = behandling
             ) {
-                småbarnstilleggService.hentPerioderMedFullOvergangsstønad(
+                småbarnstilleggService.hentOgLagrePerioderMedFullOvergangsstønad(
                     personIdent = it,
                     behandlingId = behandling.id
                 )
