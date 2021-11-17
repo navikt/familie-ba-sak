@@ -130,18 +130,53 @@ fun VedtakBegrunnelseSpesifikasjon.triggereForUtvidetBarnetrygdErOppfylt(
     andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
     fomForPeriode: LocalDate?,
 ) =
-    if (begrunnelseTriggesAv.småbarnstillegg) {
-        when (this.vedtakBegrunnelseType) {
-            VedtakBegrunnelseType.INNVILGET -> ytelseTyperForPeriode.contains(YtelseType.SMÅBARNSTILLEGG)
-            VedtakBegrunnelseType.REDUKSJON ->
-                !ytelseTyperForPeriode.contains(YtelseType.SMÅBARNSTILLEGG) &&
-                    andelerTilkjentYtelse
-                        .filter { it.stønadTom.sisteDagIInneværendeMåned().erDagenFør(fomForPeriode) }
-                        .any { it.type == YtelseType.SMÅBARNSTILLEGG }
-            else -> false
-        }
-    } else if (begrunnelseTriggesAv.vilkår.contains(Vilkår.UTVIDET_BARNETRYGD) &&
-        this.vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGET
-    ) {
-        ytelseTyperForPeriode.contains(YtelseType.UTVIDET_BARNETRYGD)
-    } else false
+    when (this.vedtakBegrunnelseType) {
+        VedtakBegrunnelseType.INNVILGET -> triggereForUtvidetBarnetrygdErOppfyltVedInnvilget(
+            begrunnelseTriggesAv = begrunnelseTriggesAv,
+            ytelseTyperForPeriode = ytelseTyperForPeriode
+        )
+        VedtakBegrunnelseType.REDUKSJON -> triggereForUtvidetBarnetrygdErOppfyltVedReduksjon(
+            begrunnelseTriggesAv = begrunnelseTriggesAv,
+            ytelseTyperForPeriode = ytelseTyperForPeriode,
+            andelerTilkjentYtelse = andelerTilkjentYtelse,
+            fomForPeriode = fomForPeriode
+        )
+        else -> false
+    }
+
+fun triggereForUtvidetBarnetrygdErOppfyltVedInnvilget(
+    begrunnelseTriggesAv: TriggesAv,
+    ytelseTyperForPeriode: List<YtelseType>,
+) =
+    when {
+        begrunnelseTriggesAv.småbarnstillegg -> ytelseTyperForPeriode.contains(YtelseType.SMÅBARNSTILLEGG)
+        begrunnelseTriggesAv.vilkår.contains(Vilkår.UTVIDET_BARNETRYGD) ->
+            ytelseTyperForPeriode.contains(YtelseType.UTVIDET_BARNETRYGD)
+        else -> false
+    }
+
+fun triggereForUtvidetBarnetrygdErOppfyltVedReduksjon(
+    begrunnelseTriggesAv: TriggesAv,
+    ytelseTyperForPeriode: List<YtelseType>,
+    andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
+    fomForPeriode: LocalDate?,
+) =
+    when {
+        begrunnelseTriggesAv.småbarnstillegg ->
+            !ytelseTyperForPeriode.contains(YtelseType.SMÅBARNSTILLEGG) &&
+                ytelseOppfyltForrigeMåned(YtelseType.SMÅBARNSTILLEGG, andelerTilkjentYtelse, fomForPeriode)
+
+        begrunnelseTriggesAv.vilkår.contains(Vilkår.UTVIDET_BARNETRYGD) ->
+            !ytelseTyperForPeriode.contains(YtelseType.UTVIDET_BARNETRYGD) &&
+                ytelseOppfyltForrigeMåned(YtelseType.UTVIDET_BARNETRYGD, andelerTilkjentYtelse, fomForPeriode)
+
+        else -> false
+    }
+
+private fun ytelseOppfyltForrigeMåned(
+    ytelseType: YtelseType,
+    andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
+    fomForPeriode: LocalDate?
+) = andelerTilkjentYtelse
+    .filter { it.stønadTom.sisteDagIInneværendeMåned().erDagenFør(fomForPeriode) }
+    .any { it.type == ytelseType }
