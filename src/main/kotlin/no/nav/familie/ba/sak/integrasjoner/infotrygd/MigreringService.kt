@@ -32,6 +32,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
 import no.nav.familie.kontrakter.ba.infotrygd.Sak
+import no.nav.familie.kontrakter.ba.infotrygd.Stønad
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import org.slf4j.LoggerFactory
@@ -101,7 +102,9 @@ class MigreringService(
 
         val behandlingEtterVilkårsvurdering = stegService.håndterVilkårsvurdering(behandling)
 
-        sammenlignTilkjentYtelseMedBeløpFraInfotrygd(behandlingEtterVilkårsvurdering, løpendeSak)
+        val førsteUtbetalingsperiode = finnFørsteUtbetalingsperiode(behandling.id)
+
+        sammenlignFørsteUtbetalingsbeløpMedBeløpFraInfotrygd(førsteUtbetalingsperiode.value, løpendeSak.stønad!!)
 
         iverksett(behandlingEtterVilkårsvurdering)
 
@@ -110,7 +113,7 @@ class MigreringService(
             behandlingId = behandlingEtterVilkårsvurdering.id,
             infotrygdStønadId = løpendeSak.stønad?.id,
             infotrygdSakId = løpendeSak.id,
-            virkningFom = virkningsdatoFra(infotrygdKjøredato(YearMonth.now())).plusMonths(1).toYearMonth()
+            virkningFom = førsteUtbetalingsperiode.fom.toYearMonth()
         )
     }
 
@@ -244,11 +247,9 @@ class MigreringService(
         }
     }
 
-    private fun sammenlignTilkjentYtelseMedBeløpFraInfotrygd(
-        behandling: Behandling,
-        løpendeSak: Sak
-    ) {
-        tilkjentYtelseRepository.findByBehandlingOptional(behandling.id)?.andelerTilkjentYtelse?.let { andelerTilkjentYtelse: MutableSet<AndelTilkjentYtelse> ->
+    private fun finnFørsteUtbetalingsperiode(behandlingId: Long): LocalDateSegment<Int> {
+        return tilkjentYtelseRepository.findByBehandlingOptional(behandlingId)
+            ?.andelerTilkjentYtelse?.let { andelerTilkjentYtelse: MutableSet<AndelTilkjentYtelse> ->
             if (andelerTilkjentYtelse.isEmpty()) throw Feil(
                 "Migrering feilet: Fant ingen andeler tilkjent ytelse på behandlingen",
                 "Migrering feilet: Fant ingen andeler tilkjent ytelse på behandlingen",
@@ -258,20 +259,26 @@ class MigreringService(
             val førsteUtbetalingsperiode = beregnUtbetalingsperioderUtenKlassifisering(andelerTilkjentYtelse)
                 .sortedWith(compareBy<LocalDateSegment<Int>>({ it.fom }, { it.value }, { it.tom }))
                 .first()
-            val tilkjentBeløp = førsteUtbetalingsperiode.value
-            val beløpFraInfotrygd =
-                løpendeSak.stønad!!.delytelse.singleOrNull()?.beløp?.toInt() ?: error("Finnes flere delytelser på sak")
-
-            if (tilkjentBeløp != beløpFraInfotrygd) throw Feil(
-                "Migrering feilet: Nytt, beregnet beløp var ulikt beløp fra Infotrygd " +
-                    "($tilkjentBeløp =/= $beløpFraInfotrygd)",
-                "Migrering feilet: Nytt, beregnet beløp var ulikt beløp fra Infotrygd " +
-                    "($tilkjentBeløp =/= $beløpFraInfotrygd)",
-                HttpStatus.INTERNAL_SERVER_ERROR
-            )
+            førsteUtbetalingsperiode
         } ?: throw Feil(
             "Migrering feilet: Tilkjent ytelse er null.",
             "Migrering feilet: Tilkjent ytelse er null.",
+            HttpStatus.INTERNAL_SERVER_ERROR
+        )
+    }
+
+    private fun sammenlignFørsteUtbetalingsbeløpMedBeløpFraInfotrygd(
+        førsteUtbetalingsbeløp: Int?,
+        infotrygdStønad: Stønad,
+    ) {
+        val beløpFraInfotrygd =
+            infotrygdStønad.delytelse.singleOrNull()?.beløp?.toInt() ?: error("Finnes flere delytelser på sak")
+
+        if (førsteUtbetalingsbeløp != beløpFraInfotrygd) throw Feil(
+            "Migrering feilet: Nytt, beregnet beløp var ulikt beløp fra Infotrygd " +
+                    "($førsteUtbetalingsbeløp =/= $beløpFraInfotrygd)",
+            "Migrering feilet: Nytt, beregnet beløp var ulikt beløp fra Infotrygd " +
+                    "($førsteUtbetalingsbeløp =/= $beløpFraInfotrygd)",
             HttpStatus.INTERNAL_SERVER_ERROR
         )
     }
