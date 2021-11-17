@@ -22,11 +22,15 @@ class RegistrerPersongrunnlag(
         behandling: Behandling,
         data: RegistrerPersongrunnlagDTO
     ): StegType {
-        val forrigeBehandlingSomErIverksatt =
-            behandlingService.hentSisteBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id)
-        if (behandling.type == BehandlingType.REVURDERING && forrigeBehandlingSomErIverksatt != null) {
-            val forrigePersongrunnlagBarna = behandlingService.finnBarnFraBehandlingMedTilkjentYtsele(behandlingId = forrigeBehandlingSomErIverksatt.id)
-            val forrigeMålform = persongrunnlagService.hentSøkersMålform(behandlingId = forrigeBehandlingSomErIverksatt.id)
+        val forrigeBehandlingSomErVedtatt = behandlingService.hentForrigeBehandlingSomErVedtatt(
+            behandling
+        )
+
+        if (behandling.type == BehandlingType.REVURDERING && forrigeBehandlingSomErVedtatt != null) {
+            val forrigePersongrunnlagBarna =
+                behandlingService.finnBarnFraBehandlingMedTilkjentYtsele(behandlingId = forrigeBehandlingSomErVedtatt.id)
+            val forrigeMålform =
+                persongrunnlagService.hentSøkersMålform(behandlingId = forrigeBehandlingSomErVedtatt.id)
 
             persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(
                 data.ident,
@@ -45,6 +49,7 @@ class RegistrerPersongrunnlag(
                 Målform.NB
             )
         }
+
         if (!(
             behandling.opprettetÅrsak == BehandlingÅrsak.SØKNAD ||
                 behandling.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE
@@ -53,7 +58,9 @@ class RegistrerPersongrunnlag(
             vilkårService.initierVilkårsvurderingForBehandling(
                 behandling = behandling,
                 bekreftEndringerViaFrontend = true,
-                forrigeBehandling = forrigeBehandlingSomErIverksatt
+                forrigeBehandlingSomErVedtatt = behandlingService.hentForrigeBehandlingSomErVedtatt(
+                    behandling
+                )
             )
         }
 

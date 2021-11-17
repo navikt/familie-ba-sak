@@ -12,7 +12,7 @@ import java.time.LocalDate
 
 class BosattIRiketVilkårTest {
 
-    val defaultAdresse = Bostedsadresse(
+    private val defaultAdresse = Bostedsadresse(
         angittFlyttedato = LocalDate.parse("2020-07-13"),
         gyldigTilOgMed = null,
         matrikkeladresse = Matrikkeladresse(

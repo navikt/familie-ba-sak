@@ -200,9 +200,7 @@ fun hentHjemlerIVedtaksperioderFraSanity(
     utvidetVedtaksperiodeMedBegrunnelser.flatMap { periode ->
         periode.begrunnelser.mapNotNull {
             it.vedtakBegrunnelseSpesifikasjon.tilSanityBegrunnelse(sanityBegrunnelser)?.hjemler
-        }.flatMap {
-            it
-        }
+        }.flatten()
     }
 
 fun hjemlerTilHjemmeltekst(hjemler: List<String>): String {

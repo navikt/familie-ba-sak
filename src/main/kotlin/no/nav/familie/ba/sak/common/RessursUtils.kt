@@ -13,9 +13,6 @@ object RessursUtils {
     fun <T> unauthorized(errorMessage: String): ResponseEntity<Ressurs<T>> =
         ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Ressurs.failure(errorMessage))
 
-    fun <T> notFound(errorMessage: String): ResponseEntity<Ressurs<T>> =
-        errorResponse(HttpStatus.NOT_FOUND, errorMessage, null)
-
     fun <T> badRequest(errorMessage: String, throwable: Throwable?): ResponseEntity<Ressurs<T>> =
         errorResponse(HttpStatus.BAD_REQUEST, errorMessage, throwable)
 
@@ -29,7 +26,8 @@ object RessursUtils {
         funksjonellFeil
     )
 
-    fun <T> frontendFeil(feil: Feil, throwable: Throwable?): ResponseEntity<Ressurs<T>> = frontendErrorResponse(feil, throwable)
+    fun <T> frontendFeil(feil: Feil, throwable: Throwable?): ResponseEntity<Ressurs<T>> =
+        frontendErrorResponse(feil, throwable)
 
     fun <T> ok(data: T): ResponseEntity<Ressurs<T>> = ResponseEntity.ok(Ressurs.success(data))
 
@@ -84,7 +82,8 @@ object RessursUtils {
     }
 
     private fun <T> funksjonellErrorResponse(funksjonellFeil: FunksjonellFeil): ResponseEntity<Ressurs<T>> {
-        val className = if (funksjonellFeil.throwable != null) "[${funksjonellFeil.throwable!!::class.java.name}] " else ""
+        val className =
+            if (funksjonellFeil.throwable != null) "[${funksjonellFeil.throwable!!::class.java.name}] " else ""
 
         logger.info("$className En funksjonell feil har oppstått(${funksjonellFeil.httpStatus}): ${funksjonellFeil.message} ")
 
@@ -94,14 +93,6 @@ object RessursUtils {
                 melding = funksjonellFeil.melding
             )
         )
-    }
-
-    fun lagFrontendMelding(tittel: String, feilmeldinger: List<String>): String {
-        var melding = tittel
-        feilmeldinger.forEach {
-            melding = melding.plus("\n$it")
-        }
-        return melding
     }
 }
 

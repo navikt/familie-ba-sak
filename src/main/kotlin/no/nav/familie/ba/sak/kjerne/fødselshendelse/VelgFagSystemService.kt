@@ -11,7 +11,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.FagsystemUtfall.DAGLIG_KVOTE_OG_NORSK_STATSBORGER
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.FagsystemUtfall.FAGSAK_UTEN_IVERKSATTE_BEHANDLINGER_I_BA_SAK
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.FagsystemUtfall.IVERKSATTE_BEHANDLINGER_I_BA_SAK
@@ -61,7 +60,9 @@ class VelgFagSystemService(
 
     internal fun morHarLøpendeEllerTidligereUtbetalinger(fagsak: Fagsak?): Boolean {
         return if (fagsak == null) false
-        else if (behandlingService.hentBehandlinger(fagsakId = fagsak.id).any { it.status == BehandlingStatus.UTREDES }) true
+        else if (behandlingService.hentBehandlinger(fagsakId = fagsak.id)
+            .any { it.status == BehandlingStatus.UTREDES }
+        ) true
         else behandlingService.hentSisteBehandlingSomErIverksatt(fagsakId = fagsak.id) != null
     }
 
@@ -104,7 +105,10 @@ class VelgFagSystemService(
                 IVERKSATTE_BEHANDLINGER_I_BA_SAK,
                 FagsystemRegelVurdering.SEND_TIL_BA
             )
-            morEllerBarnHarLøpendeSakIInfotrygd(nyBehandlingHendelse.morsIdent, nyBehandlingHendelse.barnasIdenter) -> Pair(
+            morEllerBarnHarLøpendeSakIInfotrygd(
+                nyBehandlingHendelse.morsIdent,
+                nyBehandlingHendelse.barnasIdenter
+            ) -> Pair(
                 LØPENDE_SAK_I_INFOTRYGD,
                 FagsystemRegelVurdering.SEND_TIL_INFOTRYGD
             )
@@ -155,12 +159,4 @@ enum class FagsystemUtfall(val beskrivelse: String) {
     SAKER_I_INFOTRYGD_MEN_IKKE_LØPENDE_UTBETALINGER("Mor har saker i infotrygd, men ikke løpende utbetalinger"),
     DAGLIG_KVOTE_OG_NORSK_STATSBORGER("Daglig kvote er ikke nådd og mor har gyldig norsk statsborgerskap"),
     STANDARDUTFALL_INFOTRYGD("Ingen av de tidligere reglene slo til, sender til Infotrygd")
-}
-
-internal fun morHarLøpendeUtbetalingerIBA(fagsak: Fagsak?): Boolean {
-    return fagsak?.status == FagsakStatus.LØPENDE
-}
-
-internal fun morHarSakerMenIkkeLøpendeUtbetalingerIBA(fagsak: Fagsak?): Boolean {
-    return fagsak != null && fagsak.status != FagsakStatus.LØPENDE
 }

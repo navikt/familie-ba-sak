@@ -13,8 +13,8 @@ import org.junit.jupiter.api.Test
 class BehandlingResultatUtenKravTest {
 
     val søker = tilfeldigPerson()
-    val barn1Ident = randomFnr()
-    val barn2Ident = randomFnr()
+    private val barn1Ident = randomFnr()
+    private val barn2Ident = randomFnr()
 
     /**
      * Tester for caser hvor krav ikke er framstilt av søker.

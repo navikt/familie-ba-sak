@@ -52,12 +52,12 @@ class DokumentService(
     private val envService: EnvService
 ) {
 
-    private val antallBrevSendt: Map<Brevmal, Counter> = mutableListOf<Brevmal>().plus(Brevmal.values()).map {
-        it to Metrics.counter(
+    private val antallBrevSendt: Map<Brevmal, Counter> = mutableListOf<Brevmal>().plus(Brevmal.values()).associateWith {
+        Metrics.counter(
             "brev.sendt",
             "brevtype", it.visningsTekst
         )
-    }.toMap()
+    }
 
     fun hentBrevForVedtak(vedtak: Vedtak): Ressurs<ByteArray> {
         if (SikkerhetContext.hentHøyesteRolletilgangForInnloggetBruker(rolleConfig) == BehandlerRolle.VEILEDER && vedtak.stønadBrevPdF == null) {
@@ -70,7 +70,6 @@ class DokumentService(
     }
 
     fun genererBrevForVedtak(vedtak: Vedtak): ByteArray {
-        if (environment.activeProfiles.contains("e2e") && vedtak.behandling.skalBehandlesAutomatisk) return ByteArray(1)
         try {
             if (!vedtak.behandling.skalBehandlesAutomatisk && vedtak.behandling.steg > StegType.BESLUTTE_VEDTAK) {
                 throw Feil("Ikke tillatt å generere brev etter at behandlingen er sendt fra beslutter")
@@ -84,9 +83,9 @@ class DokumentService(
                     else -> brevService.hentVedtaksbrevData(vedtak)
                 }
             return brevKlient.genererBrev(målform.tilSanityFormat(), vedtaksbrev)
-        } catch (funksjonellFeil: FunksjonellFeil) {
-            throw funksjonellFeil
         } catch (feil: Throwable) {
+            if (feil is FunksjonellFeil) throw feil
+
             throw Feil(
                 message = "Klarte ikke generere vedtaksbrev: ${feil.message}",
                 frontendFeilmelding = "Det har skjedd en feil, og brevet er ikke sendt. Prøv igjen, og ta kontakt med brukerstøtte hvis problemet vedvarer.",
@@ -100,7 +99,6 @@ class DokumentService(
         manueltBrevRequest: ManueltBrevRequest,
         erForhåndsvisning: Boolean = false
     ): ByteArray {
-        if (environment.activeProfiles.contains("e2e")) return ByteArray(1)
         Result.runCatching {
             val brev: Brev = manueltBrevRequest.tilBrevmal()
             return brevKlient.genererBrev(
@@ -183,8 +181,7 @@ class DokumentService(
                 this["journalpostId"] = journalpostId
                 this["behandlingId"] = behandling?.id.toString()
                 this["fagsakId"] = fagsakId.toString()
-            },
-            envService
+            }
         ).also {
             taskRepository.save(it)
         }

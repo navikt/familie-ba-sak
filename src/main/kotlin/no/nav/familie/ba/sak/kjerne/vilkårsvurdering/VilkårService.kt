@@ -131,7 +131,7 @@ class VilkårService(
     fun initierVilkårsvurderingForBehandling(
         behandling: Behandling,
         bekreftEndringerViaFrontend: Boolean,
-        forrigeBehandling: Behandling? = null
+        forrigeBehandlingSomErVedtatt: Behandling? = null
     ): Vilkårsvurdering {
         val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
             ?: throw IllegalStateException("Fant ikke personopplysninggrunnlag for behandling ${behandling.id}")
@@ -154,14 +154,17 @@ class VilkårService(
                 barnaSomAlleredeErVurdert = barnaSomAlleredeErVurdert
             )
 
-        return if (forrigeBehandling != null && aktivVilkårsvurdering == null) {
+        return if (forrigeBehandlingSomErVedtatt != null && aktivVilkårsvurdering == null) {
             val vilkårsvurdering =
                 genererInitiellVilkårsvurderingFraAnnenBehandling(
                     initiellVilkårsvurdering = initiellVilkårsvurdering,
-                    annenBehandling = forrigeBehandling
+                    annenBehandling = forrigeBehandlingSomErVedtatt
                 )
 
-            endretUtbetalingAndelService.kopierEndretUtbetalingAndelFraForrigeBehandling(behandling, forrigeBehandling)
+            endretUtbetalingAndelService.kopierEndretUtbetalingAndelFraForrigeBehandling(
+                behandling,
+                forrigeBehandlingSomErVedtatt
+            )
 
             return vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering)
         } else {
@@ -170,8 +173,8 @@ class VilkårService(
                     initiellVilkårsvurdering = initiellVilkårsvurdering,
                     aktivVilkårsvurdering = aktivVilkårsvurdering,
                     løpendeUnderkategori = behandlingService.hentLøpendeUnderkategori(initiellVilkårsvurdering.behandling.fagsak.id),
-                    forrigeBehandlingVilkårsvurdering = if (forrigeBehandling != null) hentVilkårsvurdering(
-                        forrigeBehandling.id
+                    forrigeBehandlingVilkårsvurdering = if (forrigeBehandlingSomErVedtatt != null) hentVilkårsvurdering(
+                        forrigeBehandlingSomErVedtatt.id
                     ) else null
                 )
 

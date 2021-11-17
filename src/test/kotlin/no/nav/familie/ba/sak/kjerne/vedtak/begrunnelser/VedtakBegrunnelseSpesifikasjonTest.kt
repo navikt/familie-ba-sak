@@ -24,21 +24,20 @@ import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
 
-// TODO - kan denne påvirke pga masse mocking av personopplysninger
 internal class VedtakBegrunnelseSpesifikasjonTest {
 
-    val behandling = lagBehandling()
-    val søker = tilfeldigPerson(personType = PersonType.SØKER)
-    val barn = tilfeldigPerson(personType = PersonType.BARN)
-    val utvidetVedtaksperiodeMedBegrunnelser = lagUtvidetVedtaksperiodeMedBegrunnelser(
+    private val behandling = lagBehandling()
+    private val søker = tilfeldigPerson(personType = PersonType.SØKER)
+    private val barn = tilfeldigPerson(personType = PersonType.BARN)
+    private val utvidetVedtaksperiodeMedBegrunnelser = lagUtvidetVedtaksperiodeMedBegrunnelser(
         type = Vedtaksperiodetype.UTBETALING,
         utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj()),
     )
-    val vilkårsvurdering =
+    private val vilkårsvurdering =
         lagVilkårsvurdering(søker.personIdent.ident, søker.hentAktørId(), lagBehandling(), Resultat.OPPFYLT)
     val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søker, barn)
 
-    val identerMedUtbetaling = listOf(søker.personIdent.ident, barn.personIdent.ident)
+    private val identerMedUtbetaling = listOf(søker.personIdent.ident, barn.personIdent.ident)
 
     @Test
     fun `Oppfyller vilkår skal gi true`() {

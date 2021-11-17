@@ -32,8 +32,7 @@ abstract class AbstractSpringIntegrationTest(
     integrasjonClient: IntegrasjonClient? = null,
     efSakRestClient: EfSakRestClient? = null,
 ) : AbstractMockkSpringRunner(personopplysningerService, integrasjonClient, efSakRestClient) {
-
-    protected val wireMockServer = WireMockServer(WireMockConfiguration.wireMockConfig().dynamicPort())
+    protected final val wireMockServer = WireMockServer(WireMockConfiguration.wireMockConfig().dynamicPort())
 
     init {
         wireMockServer.start()

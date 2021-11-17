@@ -26,10 +26,10 @@ import org.junit.jupiter.api.Test
 
 class VedtaksperiodeMedBegrunnelseTest {
 
-    val søker = tilfeldigSøker()
-    val barn1 = tilfeldigPerson(personType = PersonType.BARN)
-    val barn2 = tilfeldigPerson(personType = PersonType.BARN)
-    val personerIPersongrunnlag = listOf(barn1, barn2, søker)
+    private val søker = tilfeldigSøker()
+    private val barn1 = tilfeldigPerson(personType = PersonType.BARN)
+    private val barn2 = tilfeldigPerson(personType = PersonType.BARN)
+    private val personerIPersongrunnlag = listOf(barn1, barn2, søker)
 
     @Test
     fun `Skal gi riktig antall brevbegrunnelser med riktig tekst`() {

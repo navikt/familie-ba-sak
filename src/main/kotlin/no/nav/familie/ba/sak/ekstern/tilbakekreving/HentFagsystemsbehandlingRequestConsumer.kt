@@ -6,14 +6,12 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.HentFagsystemsbehandlingR
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.slf4j.LoggerFactory
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
-import org.springframework.context.annotation.Profile
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.support.Acknowledgment
 import org.springframework.stereotype.Service
 import java.util.concurrent.CountDownLatch
 
 @Service
-@Profile("!e2e")
 @ConditionalOnProperty(
     value = ["funksjonsbrytere.kafka.producer.enabled"],
     havingValue = "true",
@@ -37,7 +35,8 @@ class HentFagsystemsbehandlingRequestConsumer(private val fagsystemsbehandlingSe
 
         val data: String = consumerRecord.value()
         val key: String = consumerRecord.key()
-        val request: HentFagsystemsbehandlingRequest = objectMapper.readValue(data, HentFagsystemsbehandlingRequest::class.java)
+        val request: HentFagsystemsbehandlingRequest =
+            objectMapper.readValue(data, HentFagsystemsbehandlingRequest::class.java)
 
         val fagsystemsbehandling = try {
             fagsystemsbehandlingService.hentFagsystemsbehandling(request)
