@@ -49,7 +49,7 @@ class BrevService(
     private val simuleringService: SimuleringService,
     private val vedtaksperiodeService: VedtaksperiodeService,
     private val søknadGrunnlagService: SøknadGrunnlagService,
-    private val sanityService: SanityService
+    private val sanityService: SanityService,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
 ) {
 

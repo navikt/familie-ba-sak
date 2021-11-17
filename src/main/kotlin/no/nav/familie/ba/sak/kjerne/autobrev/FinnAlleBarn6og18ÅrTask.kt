@@ -18,7 +18,7 @@ import java.time.LocalDate
     taskStepType = FinnAlleBarn6og18ÅrTask.TASK_STEP_TYPE,
     beskrivelse = "Send autobrev for barn som fyller 6 og 18 år til Dokdist",
     maxAntallFeil = 3,
-    triggerTidVedFeilISekunder = 60 * 60 * 24
+    triggerTidVedFeilISekunder = (60 * 60 * 24).toLong()
 )
 class FinnAlleBarn6og18ÅrTask(
     private val fagsakRepository: FagsakRepository,

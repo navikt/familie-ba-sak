@@ -26,6 +26,7 @@ class EndretUtbetalingAndelService(
     private val beregningService: BeregningService,
     private val persongrunnlagService: PersongrunnlagService,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
+    private val sanityService: SanityService,
 ) {
 
     @Transactional
@@ -119,7 +120,7 @@ class EndretUtbetalingAndelService(
 
             it.vedtakBegrunnelseSpesifikasjoner =
                 it.hentGyldigEndretBegrunnelser(
-                    brevKlient.hentSanityBegrunnelser(),
+                    sanityService.hentSanityBegrunnelser(),
                     utvidetScenario,
                 )
         }
