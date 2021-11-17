@@ -104,20 +104,8 @@ object VedtakUtils {
         val erDeltBostedOppfylt = (!triggesAv.deltbosted || vilkårResultat.erDeltBosted)
         val erSkjønnsmessigVurderingOppfylt =
             (!triggesAv.vurderingAnnetGrunnlag || vilkårResultat.erSkjønnsmessigVurdert)
-        val erMedlemskapOppfylt = (
-            (vilkårResultat.erMedlemskapVurdert && triggesAv.medlemskap) ||
-                (!triggesAv.medlemskap && !vilkårResultat.erMedlemskapVurdert)
-            )
+        val erMedlemskapOppfylt = vilkårResultat.erMedlemskapVurdert == triggesAv.medlemskap
 
         return erDeltBostedOppfylt && erSkjønnsmessigVurderingOppfylt && erMedlemskapOppfylt
-    }
-}
-
-fun validerAvslagsbegrunnelse(
-    triggesAv: TriggesAv,
-    vilkårResultat: VilkårResultat
-) {
-    if (triggesAv.vilkår.contains(vilkårResultat.vilkårType) != true) {
-        error("Avslagbegrunnelser som oppdateres må tilhøre samme vilkår")
     }
 }

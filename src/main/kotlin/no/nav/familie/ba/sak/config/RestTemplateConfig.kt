@@ -42,7 +42,10 @@ class RestTemplateConfig(
                 bearerTokenClientCredentialsClientInterceptor,
                 MdcValuesPropagatingClientInterceptor()
             )
-            .additionalMessageConverters(ByteArrayHttpMessageConverter(), MappingJackson2HttpMessageConverter(objectMapper))
+            .additionalMessageConverters(
+                ByteArrayHttpMessageConverter(),
+                MappingJackson2HttpMessageConverter(objectMapper)
+            )
             .also {
                 if (trengerProxy()) it.additionalCustomizers(NaisProxyCustomizer())
             }
@@ -60,7 +63,10 @@ class RestTemplateConfig(
                 bearerTokenClientInterceptor,
                 MdcValuesPropagatingClientInterceptor()
             )
-            .additionalMessageConverters(ByteArrayHttpMessageConverter(), MappingJackson2HttpMessageConverter(objectMapper))
+            .additionalMessageConverters(
+                ByteArrayHttpMessageConverter(),
+                MappingJackson2HttpMessageConverter(objectMapper)
+            )
             .also {
                 if (trengerProxy()) it.additionalCustomizers(NaisProxyCustomizer())
             }
@@ -80,7 +86,10 @@ class RestTemplateConfig(
                 bearerTokenClientInterceptor,
                 MdcValuesPropagatingClientInterceptor()
             )
-            .additionalMessageConverters(ByteArrayHttpMessageConverter(), MappingJackson2HttpMessageConverter(objectMapper))
+            .additionalMessageConverters(
+                ByteArrayHttpMessageConverter(),
+                MappingJackson2HttpMessageConverter(objectMapper)
+            )
             .also {
                 if (trengerProxy()) it.additionalCustomizers(NaisProxyCustomizer())
             }
@@ -105,7 +114,10 @@ class RestTemplateConfig(
     ): RestOperations {
         return RestTemplateBuilder()
             .interceptors(consumerIdClientInterceptor, mdcValuesPropagatingClientInterceptor)
-            .additionalMessageConverters(ByteArrayHttpMessageConverter(), MappingJackson2HttpMessageConverter(objectMapper))
+            .additionalMessageConverters(
+                ByteArrayHttpMessageConverter(),
+                MappingJackson2HttpMessageConverter(objectMapper)
+            )
             .build()
     }
 
@@ -129,7 +141,7 @@ class RestTemplateConfig(
 
     private fun trengerProxy(): Boolean {
         return !environment.activeProfiles.any {
-            listOf("e2e", "dev", "postgres").contains(it.trim(' '))
+            listOf("dev", "postgres").contains(it.trim(' '))
         }
     }
 }

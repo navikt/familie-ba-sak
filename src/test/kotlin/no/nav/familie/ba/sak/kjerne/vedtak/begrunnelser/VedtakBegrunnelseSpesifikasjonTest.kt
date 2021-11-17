@@ -26,17 +26,17 @@ import java.time.YearMonth
 
 internal class VedtakBegrunnelseSpesifikasjonTest {
 
-    val behandling = lagBehandling()
-    val søker = tilfeldigPerson(personType = PersonType.SØKER)
-    val barn = tilfeldigPerson(personType = PersonType.BARN)
-    val utvidetVedtaksperiodeMedBegrunnelser = lagUtvidetVedtaksperiodeMedBegrunnelser(
+    private val behandling = lagBehandling()
+    private val søker = tilfeldigPerson(personType = PersonType.SØKER)
+    private val barn = tilfeldigPerson(personType = PersonType.BARN)
+    private val utvidetVedtaksperiodeMedBegrunnelser = lagUtvidetVedtaksperiodeMedBegrunnelser(
         type = Vedtaksperiodetype.UTBETALING,
         utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj()),
     )
-    val vilkårsvurdering = lagVilkårsvurdering(søker.personIdent.ident, lagBehandling(), Resultat.OPPFYLT)
-    val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søker, barn)
+    private val vilkårsvurdering = lagVilkårsvurdering(søker.personIdent.ident, lagBehandling(), Resultat.OPPFYLT)
+    private val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søker, barn)
 
-    val identerMedUtbetaling = listOf(søker.personIdent.ident, barn.personIdent.ident)
+    private val identerMedUtbetaling = listOf(søker.personIdent.ident, barn.personIdent.ident)
 
     @Test
     fun `Oppfyller vilkår skal gi true`() {
@@ -68,8 +68,6 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
 
     @Test
     fun `Har ikke barn med seksårsdag skal gi false`() {
-        // val persongrunnlag = mockk<PersonopplysningGrunnlag>()
-        // every { persongrunnlag.harBarnMedSeksårsdagPåFom(vedtaksperiodeMedBegrunnelser.fom) } returns true
         assertFalse(
             VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR
                 .triggesForPeriode(

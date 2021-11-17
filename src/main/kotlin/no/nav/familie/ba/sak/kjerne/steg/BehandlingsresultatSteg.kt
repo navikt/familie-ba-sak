@@ -8,7 +8,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatService
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering.validerAtBarnIkkeFårFlereUtbetalingerSammePeriode
@@ -17,6 +16,8 @@ import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering.validerAt
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerAtAlleOpprettedeEndringerErUtfylt
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerAtEndringerErTilknyttetAndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.validerAtDetFinnesDeltBostedEndringerMedSammeProsentForUtvidedeEndringer
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.validerDeltBostedEndringerIkkeKrysserUtvidetYtelse
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
@@ -43,7 +44,7 @@ class BehandlingsresultatSteg(
     override fun preValiderSteg(behandling: Behandling, stegService: StegService?) {
         if (behandling.skalBehandlesAutomatisk) return
 
-        if (!behandling.erTekniskOpphør() && behandling.type != BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT) {
+        if (behandling.type != BehandlingType.TEKNISK_ENDRING && behandling.type != BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT) {
             val vilkårsvurdering = vilkårService.hentVilkårsvurdering(behandlingId = behandling.id)
                 ?: throw Feil("Finner ikke vilkårsvurdering på behandling ved validering.")
 
@@ -87,22 +88,31 @@ class BehandlingsresultatSteg(
         val andreBehandlingerPåBarna = personopplysningGrunnlag.barna.map {
             Pair(
                 it,
-                beregningService.hentIverksattTilkjentYtelseForBarn(it.personIdent, behandling)
+                beregningService.hentSentTilGodkjenningTilkjentYtelseForBarn(it.personIdent, behandling.fagsak.id)
             )
         }
 
-        validerAtAlleOpprettedeEndringerErUtfylt(endretUtbetalingAndelService.hentForBehandling(behandling.id))
-        validerAtEndringerErTilknyttetAndelTilkjentYtelse(endretUtbetalingAndelService.hentForBehandling(behandling.id))
+        val endretUtbetalingAndeler = endretUtbetalingAndelService.hentForBehandling(behandling.id)
+        validerAtAlleOpprettedeEndringerErUtfylt(endretUtbetalingAndeler)
+        validerAtEndringerErTilknyttetAndelTilkjentYtelse(endretUtbetalingAndeler)
+        validerAtDetFinnesDeltBostedEndringerMedSammeProsentForUtvidedeEndringer(endretUtbetalingAndeler)
 
         validerAtBarnIkkeFårFlereUtbetalingerSammePeriode(
             behandlendeBehandlingTilkjentYtelse = tilkjentYtelse,
             barnMedAndreTilkjentYtelse = andreBehandlingerPåBarna,
             personopplysningGrunnlag = personopplysningGrunnlag
         )
+
+        validerDeltBostedEndringerIkkeKrysserUtvidetYtelse(
+            endretUtbetalingAndeler,
+            tilkjentYtelse.andelerTilkjentYtelse.toList()
+        )
     }
 
     @Transactional
     override fun utførStegOgAngiNeste(behandling: Behandling, data: String): StegType {
+
+        endretUtbetalingAndelService.oppdaterEndreteUtbetalingsandelerMedBegrunnelser(behandling)
 
         val behandlingMedResultat = if (behandling.erMigrering() && behandling.skalBehandlesAutomatisk) {
             settBehandlingResultat(behandling, BehandlingResultat.INNVILGET)
@@ -114,7 +124,7 @@ class BehandlingsresultatSteg(
             )
         }
 
-        if (behandlingMedResultat.opprettetÅrsak != BehandlingÅrsak.SATSENDRING) {
+        if (behandlingMedResultat.erBehandlingMedVedtaksbrevutsending()) {
             vedtaksperiodeService.oppdaterVedtakMedVedtaksperioder(
                 vedtak = vedtakService.hentAktivForBehandlingThrows(
                     behandlingId = behandling.id
@@ -127,7 +137,7 @@ class BehandlingsresultatSteg(
                 behandlingMedResultat.id,
                 BehandlingStatus.IVERKSETTER_VEDTAK
             )
-        } else {
+        } else if (!behandlingMedResultat.skalBehandlesAutomatisk) {
             simuleringService.oppdaterSimuleringPåBehandling(behandlingMedResultat)
         }
 

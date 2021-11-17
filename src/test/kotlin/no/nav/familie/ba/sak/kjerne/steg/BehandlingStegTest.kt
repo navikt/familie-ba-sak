@@ -143,7 +143,7 @@ class BehandlingStegTest {
             steg = hentNesteSteg(
                 behandling = lagBehandling(
                     behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
-                    årsak = BehandlingÅrsak.TEKNISK_OPPHØR
+                    årsak = BehandlingÅrsak.MIGRERING
                 ),
                 utførendeStegType = it
             )
@@ -168,7 +168,7 @@ class BehandlingStegTest {
             steg = hentNesteSteg(
                 behandling = lagBehandling(
                     behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT,
-                    årsak = BehandlingÅrsak.TEKNISK_OPPHØR
+                    årsak = BehandlingÅrsak.MIGRERING
                 ),
                 utførendeStegType = it
             )
@@ -176,13 +176,14 @@ class BehandlingStegTest {
     }
 
     @Test
-    fun `Tester rekkefølgen på behandling av type teknisk opphør`() {
+    fun `Tester rekkefølgen på behandling av type teknisk endring`() {
         var steg = FØRSTE_STEG
 
         listOf(
             StegType.REGISTRERE_PERSONGRUNNLAG,
             StegType.VILKÅRSVURDERING,
             StegType.BEHANDLINGSRESULTAT,
+            StegType.VURDER_TILBAKEKREVING,
             StegType.SEND_TIL_BESLUTTER,
             StegType.BESLUTTE_VEDTAK,
             StegType.IVERKSETT_MOT_OPPDRAG,
@@ -194,8 +195,8 @@ class BehandlingStegTest {
             assertNotEquals(StegType.JOURNALFØR_VEDTAKSBREV, it)
             steg = hentNesteSteg(
                 behandling = lagBehandling(
-                    behandlingType = BehandlingType.TEKNISK_OPPHØR,
-                    årsak = BehandlingÅrsak.TEKNISK_OPPHØR
+                    behandlingType = BehandlingType.TEKNISK_ENDRING,
+                    årsak = BehandlingÅrsak.TEKNISK_ENDRING
                 ),
                 utførendeStegType = it
             )

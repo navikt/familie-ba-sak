@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.tilbakekreving
+package no.nav.familie.ba.sak.kjerne.tilbakekreving.domene
 
 import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsresultatstype
 import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingsstatus
@@ -16,9 +16,4 @@ class RestTilbakekrevingsbehandling(
     val status: Behandlingsstatus,
     val resultat: Behandlingsresultatstype?,
     val vedtaksdato: LocalDateTime?,
-    @Deprecated("Bruk vedtaksdato")
-    val vedtakForBehandling: List<RestTilbakekrevingsVedtak>
 )
-
-@Deprecated("Bruk vedtaksdato på RestTilbakekrevingsbehandling")
-class RestTilbakekrevingsVedtak(val aktiv: Boolean, val vedtaksdato: LocalDateTime)

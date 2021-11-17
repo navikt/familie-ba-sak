@@ -77,7 +77,15 @@ class BehandlingsresultatService(
 
         secureLogger.info("Behandlingsresultatpersoner: ${behandlingsresultatPersoner.convertDataClassToJson()}")
 
-        val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(behandlingsresultatPersoner)
+        val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(
+            behandlingsresultatPersoner = behandlingsresultatPersoner,
+            uregistrerteBarn = søknadGrunnlag?.hentUregistrerteBarn()?.map {
+                BehandlingsresultatUregistrertBarn(
+                    personIdent = it.ident,
+                    navn = it.navn
+                )
+            } ?: emptyList()
+        )
 
         validerYtelsePersoner(behandlingId = behandling.id, ytelsePersoner = ytelsePersonerMedResultat)
 
@@ -97,8 +105,12 @@ class BehandlingsresultatService(
     private fun validerYtelsePersoner(behandlingId: Long, ytelsePersoner: List<YtelsePerson>) {
         val søkerIdent = persongrunnlagService.hentSøker(behandlingId)?.personIdent?.ident
             ?: throw Feil("Fant ikke søker på behandling")
-        if (ytelsePersoner.any { it.ytelseType == YtelseType.UTVIDET_BARNETRYGD && it.personIdent != søkerIdent }) throw Feil("Barn kan ikke ha ytelsetype utvidet")
-        if (ytelsePersoner.any { it.ytelseType == YtelseType.ORDINÆR_BARNETRYGD && it.personIdent == søkerIdent }) throw Feil("Søker kan ikke ha ytelsetype ordinær")
+        if (ytelsePersoner.any { it.ytelseType == YtelseType.UTVIDET_BARNETRYGD && it.personIdent != søkerIdent }) throw Feil(
+            "Barn kan ikke ha ytelsetype utvidet"
+        )
+        if (ytelsePersoner.any { it.ytelseType == YtelseType.ORDINÆR_BARNETRYGD && it.personIdent == søkerIdent }) throw Feil(
+            "Søker kan ikke ha ytelsetype ordinær"
+        )
     }
 
     private fun hentPersonerFramstiltKravFor(

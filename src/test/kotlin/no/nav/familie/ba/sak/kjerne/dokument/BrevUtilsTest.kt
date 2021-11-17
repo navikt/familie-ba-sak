@@ -6,16 +6,23 @@ import no.nav.familie.ba.sak.common.lagRestVedtaksbegrunnelse
 import no.nav.familie.ba.sak.common.lagSanityBegrunnelse
 import no.nav.familie.ba.sak.common.lagUtbetalingsperiodeDetalj
 import no.nav.familie.ba.sak.common.lagUtvidetVedtaksperiodeMedBegrunnelser
+import no.nav.familie.ba.sak.common.tilfeldigPerson
+import no.nav.familie.ba.sak.common.tilfeldigSøker
+import no.nav.familie.ba.sak.config.sanityBegrunnelserMock
+import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPerson
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.EndretUtbetalingBrevPeriodeType
+import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.brevperioder.EndretUtbetalingBarnetrygdType
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.flettefelt
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.domene.Totrinnskontroll
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import org.junit.Assert.assertEquals
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertNull
@@ -131,7 +138,7 @@ internal class BrevUtilsTest {
     }
 
     @Test
-    fun `test hentManuellVedtaksbrevtype kaster exception for ikke-støttede behandlingsresultater ved førstegangsbehandling`() {
+    fun `skal kaste exception for ikke-støttede behandlingsresultater ved førstegangsbehandling`() {
         val ikkeStøttedeBehandlingsersultater =
             BehandlingResultat.values().subtract(støttedeBehandlingsersultaterFørstegangsbehandling)
 
@@ -145,7 +152,7 @@ internal class BrevUtilsTest {
         }
     }
 
-    val behandlingsersultaterForVedtakEndring = listOf(
+    private val behandlingsersultaterForVedtakEndring = listOf(
         BehandlingResultat.INNVILGET,
         BehandlingResultat.INNVILGET_OG_ENDRET,
         BehandlingResultat.DELVIS_INNVILGET,
@@ -167,7 +174,7 @@ internal class BrevUtilsTest {
         }
     }
 
-    val behandlingsersultaterForOpphørt = listOf(BehandlingResultat.OPPHØRT)
+    private val behandlingsersultaterForOpphørt = listOf(BehandlingResultat.OPPHØRT)
 
     @Test
     fun `test hentManuellVedtaksbrevtype gir riktig vedtaksbrevtype for 'Opphørt'`() {
@@ -182,7 +189,7 @@ internal class BrevUtilsTest {
         }
     }
 
-    val behandlingsersultaterForOpphørMedEndring = listOf(
+    private val behandlingsersultaterForOpphørMedEndring = listOf(
         BehandlingResultat.INNVILGET_OG_OPPHØRT,
         BehandlingResultat.INNVILGET_ENDRET_OG_OPPHØRT,
         BehandlingResultat.DELVIS_INNVILGET_OG_OPPHØRT,
@@ -383,18 +390,127 @@ internal class BrevUtilsTest {
 
         Assertions.assertEquals(
             flettefelt(EndretUtbetalingBrevPeriodeType.ENDRET_UTBETALINGSPERIODE.apiNavn),
-            utvidetVedtaksperiodMedBegrunnelserFullUtbetaling.hentEndretUtbetalingBrevPeriode("", emptyList()).type
+            utvidetVedtaksperiodMedBegrunnelserFullUtbetaling
+                .hentEndretUtbetalingBrevPeriode("", emptyList(), UtvidetScenario.IKKE_UTVIDET_YTELSE).type
         )
 
         Assertions.assertEquals(
             flettefelt(EndretUtbetalingBrevPeriodeType.ENDRET_UTBETALINGSPERIODE.apiNavn),
             utvidetVedtaksperiodMedBegrunnelserForskjelligUtbetaling
-                .hentEndretUtbetalingBrevPeriode("", emptyList()).type
+                .hentEndretUtbetalingBrevPeriode("", emptyList(), UtvidetScenario.IKKE_UTVIDET_YTELSE).type
         )
 
         Assertions.assertEquals(
             flettefelt(EndretUtbetalingBrevPeriodeType.ENDRET_UTBETALINGSPERIODE_INGEN_UTBETALING.apiNavn),
-            utvidetVedtaksperiodMedBegrunnelserIngenUtbetaling.hentEndretUtbetalingBrevPeriode("", emptyList()).type
+            utvidetVedtaksperiodMedBegrunnelserIngenUtbetaling
+                .hentEndretUtbetalingBrevPeriode("", emptyList(), UtvidetScenario.IKKE_UTVIDET_YTELSE).type
+        )
+    }
+
+    @Test
+    fun `skal gi riktig brevperiode for endret utbetaling for forskjellige utvidet scenarioer`() {
+
+        val utvidetVedtaksperiodeMedBegrunnelserIngenUtbetaling =
+            lagUtvidetVedtaksperiodeMedBegrunnelser(
+                type = Vedtaksperiodetype.ENDRET_UTBETALING,
+                utbetalingsperiodeDetaljer = listOf(
+                    lagUtbetalingsperiodeDetalj(prosent = BigDecimal.ZERO)
+                )
+            )
+        val utvidetVedtaksperiodeMedBegrunnelserFullUtbetaling =
+            lagUtvidetVedtaksperiodeMedBegrunnelser(
+                type = Vedtaksperiodetype.ENDRET_UTBETALING,
+                utbetalingsperiodeDetaljer = listOf(
+                    lagUtbetalingsperiodeDetalj(prosent = BigDecimal.valueOf(100))
+                )
+            )
+
+        val begrunnelser = listOf(
+            UtvidetScenario.IKKE_UTVIDET_YTELSE,
+            UtvidetScenario.UTVIDET_YTELSE_ENDRET,
+            UtvidetScenario.UTVIDET_YTELSE_IKKE_ENDRET
+        ).map {
+            utvidetVedtaksperiodeMedBegrunnelserIngenUtbetaling.hentEndretUtbetalingBrevPeriode(
+                "",
+                emptyList(),
+                utvidetScenario = it
+            )
+        }
+
+        Assertions.assertEquals(
+            EndretUtbetalingBrevPeriodeType.ENDRET_UTBETALINGSPERIODE_INGEN_UTBETALING.apiNavn,
+            begrunnelser[0].type?.single()
+        )
+        Assertions.assertEquals(
+            EndretUtbetalingBarnetrygdType.DELT.navn + " ",
+            begrunnelser[0].typeBarnetrygd?.single()
+        )
+
+        Assertions.assertEquals(
+            EndretUtbetalingBrevPeriodeType.ENDRET_UTBETALINGSPERIODE_INGEN_UTBETALING.apiNavn,
+            begrunnelser[1].type?.single()
+        )
+        Assertions.assertEquals(
+            EndretUtbetalingBarnetrygdType.DELT_UTVIDET_NB.navn + " ",
+            begrunnelser[1].typeBarnetrygd?.single()
+        )
+
+        Assertions.assertEquals(
+            EndretUtbetalingBrevPeriodeType.ENDRET_UTBETALINGSPERIODE_DELVIS_UTBETALING.apiNavn,
+            begrunnelser[2].type?.single()
+        )
+        Assertions.assertEquals(
+            EndretUtbetalingBarnetrygdType.DELT_UTVIDET_NB.navn + " ",
+            begrunnelser[2].typeBarnetrygd?.single()
+        )
+
+        val deltBostedEndringFullUtbetalingTilkjentYtelseUtenEndring =
+            utvidetVedtaksperiodeMedBegrunnelserFullUtbetaling.hentEndretUtbetalingBrevPeriode(
+                "",
+                emptyList(),
+                utvidetScenario = UtvidetScenario.UTVIDET_YTELSE_IKKE_ENDRET
+            )
+
+        Assertions.assertEquals(
+            EndretUtbetalingBrevPeriodeType.ENDRET_UTBETALINGSPERIODE.apiNavn,
+            deltBostedEndringFullUtbetalingTilkjentYtelseUtenEndring.type?.single()
+        )
+        Assertions.assertEquals(
+            EndretUtbetalingBarnetrygdType.DELT_UTVIDET_NB.navn + " ",
+            deltBostedEndringFullUtbetalingTilkjentYtelseUtenEndring.typeBarnetrygd?.single()
+        )
+    }
+
+    @Test
+    fun `skal legge til barn med utbetalinger og fra alle begrunnelsene i brev-utbetalings-periodene`() {
+        val søker = tilfeldigSøker()
+        val barn1 = tilfeldigPerson(personType = PersonType.BARN)
+        val barn2 = tilfeldigPerson(personType = PersonType.BARN)
+        val barn3 = tilfeldigPerson(personType = PersonType.BARN)
+
+        val utvidetVedtaksperiodeMedBegrunnelser = lagUtvidetVedtaksperiodeMedBegrunnelser(
+            type = Vedtaksperiodetype.UTBETALING,
+            utbetalingsperiodeDetaljer = listOf(
+                lagUtbetalingsperiodeDetalj(barn1.tilRestPerson()),
+                lagUtbetalingsperiodeDetalj(barn2.tilRestPerson()),
+                lagUtbetalingsperiodeDetalj(søker.tilRestPerson()),
+            ),
+            begrunnelser = listOf(
+                lagRestVedtaksbegrunnelse(
+                    personIdenter = listOf(barn1.personIdent.ident, barn3.personIdent.ident, søker.personIdent.ident),
+                ),
+            )
+        )
+
+        val personerIPersongrunnlag = listOf(barn1, barn2, barn3, søker)
+
+        val barnIPeriode = utvidetVedtaksperiodeMedBegrunnelser.finnBarnIPeriode(personerIPersongrunnlag)
+
+        Assertions.assertEquals(3, barnIPeriode.size)
+        Assertions.assertTrue(
+            barnIPeriode.contains(barn1.tilRestPerson()) &&
+                barnIPeriode.contains(barn2.tilRestPerson()) &&
+                barnIPeriode.contains(barn3.tilRestPerson())
         )
     }
 }

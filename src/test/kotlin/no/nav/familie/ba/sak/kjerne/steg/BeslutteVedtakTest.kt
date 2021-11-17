@@ -44,7 +44,7 @@ class BeslutteVedtakTest {
     private lateinit var vilkårsvurderingService: VilkårsvurderingService
     private lateinit var featureToggleService: FeatureToggleService
 
-    val randomVilkårsvurdering = Vilkårsvurdering(behandling = lagBehandling())
+    private val randomVilkårsvurdering = Vilkårsvurdering(behandling = lagBehandling())
 
     @BeforeEach
     fun setUp() {
@@ -55,10 +55,19 @@ class BeslutteVedtakTest {
         behandlingService = mockk()
         vilkårsvurderingService = mockk()
         featureToggleService = mockk()
+
         val loggService = mockk<LoggService>()
 
         every { taskRepository.save(any()) } returns Task(OpprettOppgaveTask.TASK_STEP_TYPE, "")
-        every { toTrinnKontrollService.besluttTotrinnskontroll(any(), any(), any(), any(), any()) } returns Totrinnskontroll(
+        every {
+            toTrinnKontrollService.besluttTotrinnskontroll(
+                any(),
+                any(),
+                any(),
+                any(),
+                any()
+            )
+        } returns Totrinnskontroll(
             behandling = lagBehandling(), saksbehandler = "Mock Saksbehandler", saksbehandlerId = "Mock.Saksbehandler"
         )
         every { loggService.opprettBeslutningOmVedtakLogg(any(), any(), any()) } just Runs
@@ -75,7 +84,7 @@ class BeslutteVedtakTest {
             taskRepository,
             loggService,
             vilkårsvurderingService,
-            featureToggleService
+            featureToggleService,
         )
     }
 
@@ -143,7 +152,10 @@ class BeslutteVedtakTest {
         mockkObject(FerdigstillOppgave.Companion)
         mockkObject(OpprettOppgaveTask.Companion)
         every { FerdigstillOppgave.opprettTask(any(), any()) } returns Task(FerdigstillOppgave.TASK_STEP_TYPE, "")
-        every { OpprettOppgaveTask.opprettTask(any(), any(), any()) } returns Task(OpprettOppgaveTask.TASK_STEP_TYPE, "")
+        every { OpprettOppgaveTask.opprettTask(any(), any(), any()) } returns Task(
+            OpprettOppgaveTask.TASK_STEP_TYPE,
+            ""
+        )
 
         beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak)
         verify(exactly = 1) { behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling, true, emptyList()) }

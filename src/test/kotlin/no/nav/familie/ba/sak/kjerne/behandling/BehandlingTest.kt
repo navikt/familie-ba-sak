@@ -20,7 +20,25 @@ import java.time.YearMonth
 class BehandlingTest {
 
     @Test
-    fun `erRentTekniskOpphør kastet feil hvis behandlingResultat og behandlingÅrsak ikke samsvarer ved teknisk opphør`() {
+    fun `validerBehandling kaster feil hvis behandlingType og behandlingÅrsak ikke samsvarer ved teknisk endring`() {
+        val behandling = lagBehandling(
+            behandlingType = BehandlingType.TEKNISK_ENDRING,
+            årsak = BehandlingÅrsak.SØKNAD
+        )
+        assertThrows<RuntimeException> { behandling.validerBehandlingstype() }
+    }
+
+    @Test
+    fun `validerBehandling kaster feil hvis behandlingType er teknisk opphør`() {
+        val behandling = lagBehandling(
+            behandlingType = BehandlingType.TEKNISK_OPPHØR,
+            årsak = BehandlingÅrsak.TEKNISK_OPPHØR
+        )
+        assertThrows<RuntimeException> { behandling.validerBehandlingstype() }
+    }
+
+    @Test
+    fun `erRentTekniskOpphør kastet feil hvis behandlingType og behandlingÅrsak ikke samsvarer ved teknisk opphør`() {
         val behandling = lagBehandling(
             behandlingType = BehandlingType.TEKNISK_OPPHØR,
             årsak = BehandlingÅrsak.SØKNAD

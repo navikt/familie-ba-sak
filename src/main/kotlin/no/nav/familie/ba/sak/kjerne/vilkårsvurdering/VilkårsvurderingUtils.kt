@@ -223,8 +223,10 @@ object VilkårsvurderingUtils {
                     }
                 }
                 val eksistererUtvidetVilkårPåForrigeBehandling =
-                    forrigeBehandlingVilkårsvurdering?.personResultater?.firstOrNull { it.personIdent == personFraInit.personIdent }?.vilkårResultater?.filter { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
-                        ?.isNotEmpty() ?: false
+                    forrigeBehandlingVilkårsvurdering?.personResultater
+                        ?.firstOrNull { it.personIdent == personFraInit.personIdent }
+                        ?.vilkårResultater
+                        ?.any { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD } ?: false
 
                 if (personsVilkårOppdatert.none { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD } &&
                     (eksistererUtvidetVilkårPåForrigeBehandling || løpendeUnderkategori == BehandlingUnderkategori.UTVIDET)

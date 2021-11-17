@@ -9,6 +9,8 @@ import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.beregning.domene.hentUtvidetYtelseScenario
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.AutovedtakNyfødtBarnFraFør
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.AutovedtakNyfødtFørsteBarn
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Avslag
@@ -47,8 +49,8 @@ class BrevService(
     private val simuleringService: SimuleringService,
     private val vedtaksperiodeService: VedtaksperiodeService,
     private val søknadGrunnlagService: SøknadGrunnlagService,
-    private val featureToggleService: FeatureToggleService,
     private val sanityService: SanityService
+    private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
 ) {
 
     fun hentVedtaksbrevData(vedtak: Vedtak): Vedtaksbrev {
@@ -167,7 +169,9 @@ class BrevService(
             }
 
         if (utvidetVedtaksperioderMedBegrunnelser.isEmpty()) {
-            throw FunksjonellFeil("Vedtaket mangler begrunnelser. Du må legge til begrunnelser for å generere vedtaksbrevet.")
+            throw FunksjonellFeil(
+                "Vedtaket mangler begrunnelser. Du må legge til begrunnelser for å generere vedtaksbrevet."
+            )
         }
 
         val grunnlagOgSignaturData = hentGrunnlagOgSignaturData(vedtak)
@@ -178,14 +182,19 @@ class BrevService(
 
         val målform = persongrunnlagService.hentSøkersMålform(vedtak.behandling.id)
 
+        val andelTilkjentYtelser =
+            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(vedtak.behandling.id)
+
         val brevperioder = utvidetVedtaksperioderMedBegrunnelser.sorter().mapNotNull {
             it.tilBrevPeriode(
                 personerIPersongrunnlag = grunnlagOgSignaturData.grunnlag.personer.toList(),
                 målform = målform,
                 uregistrerteBarn = søknadGrunnlagService.hentAktiv(behandlingId = vedtak.behandling.id)
-                    ?.hentUregistrerteBarn() ?: emptyList()
+                    ?.hentUregistrerteBarn() ?: emptyList(),
+                utvidetScenario = andelTilkjentYtelser.hentUtvidetYtelseScenario(it.hentMånedPeriode())
             )
         }
+
         return VedtakFellesfelter(
             enhet = grunnlagOgSignaturData.enhet,
             saksbehandler = grunnlagOgSignaturData.saksbehandler,

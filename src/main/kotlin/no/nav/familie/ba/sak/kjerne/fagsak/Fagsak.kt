@@ -40,6 +40,11 @@ data class Fagsak(
     var søkerIdenter: Set<FagsakPerson> = setOf()
 ) : BaseEntitet() {
 
+    fun hentAktivIdent(): PersonIdent {
+        return søkerIdenter.maxByOrNull { it.opprettetTidspunkt }?.personIdent
+            ?: error("Fant ingen ident på fagsak $id")
+    }
+
     override fun hashCode(): Int {
         return Objects.hashCode(id)
     }
@@ -48,9 +53,15 @@ data class Fagsak(
         return "Fagsak(id=$id)"
     }
 
-    fun hentAktivIdent(): PersonIdent {
-        return søkerIdenter.maxByOrNull { it.opprettetTidspunkt }?.personIdent
-            ?: error("Fant ingen ident på fagsak $id")
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as Fagsak
+
+        if (id != other.id) return false
+
+        return true
     }
 }
 

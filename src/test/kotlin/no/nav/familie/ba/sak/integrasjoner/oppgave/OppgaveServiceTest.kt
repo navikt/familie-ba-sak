@@ -45,7 +45,6 @@ import java.time.LocalDate
 
 @ExtendWith(MockKExtension::class)
 class OppgaveServiceTest {
-
     @MockK
     lateinit var integrasjonClient: IntegrasjonClient
 
@@ -99,7 +98,12 @@ class OppgaveServiceTest {
 
         assertThat(slot.captured.enhetsnummer).isEqualTo(ENHETSNUMMER)
         assertThat(slot.captured.saksId).isEqualTo(FAGSAK_ID.toString())
-        assertThat(slot.captured.ident).isEqualTo(OppgaveIdentV2(ident = AKTØR_ID_FAGSAK, gruppe = IdentGruppe.AKTOERID))
+        assertThat(slot.captured.ident).isEqualTo(
+            OppgaveIdentV2(
+                ident = AKTØR_ID_FAGSAK,
+                gruppe = IdentGruppe.AKTOERID
+            )
+        )
         assertThat(slot.captured.behandlingstema).isEqualTo(Behandlingstema.OrdinærBarnetrygd.value)
         assertThat(slot.captured.fristFerdigstillelse).isEqualTo(LocalDate.now().plusDays(1))
         assertThat(slot.captured.aktivFra).isEqualTo(LocalDate.now())

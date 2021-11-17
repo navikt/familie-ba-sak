@@ -24,11 +24,12 @@ data class EndretUtbetalingBrevPeriode(
         barnasFodselsdager: String,
         begrunnelser: List<Begrunnelse>,
         type: EndretUtbetalingBrevPeriodeType,
-        typeBarnetrygd: EndretUtbetalingBernetrygtType,
+        typeBarnetrygd: EndretUtbetalingBarnetrygdType,
+        belop: String,
     ) : this(
         fom = flettefelt(fom),
         tom = flettefelt(if (tom.isNullOrBlank()) "" else "til $tom "),
-        belop = flettefelt(null),
+        belop = flettefelt(belop),
         antallBarn = flettefelt(null),
         barnasFodselsdager = flettefelt(barnasFodselsdager),
         begrunnelser = begrunnelser.map {
@@ -43,6 +44,8 @@ data class EndretUtbetalingBrevPeriode(
     )
 }
 
-enum class EndretUtbetalingBernetrygtType(val navn: String) {
-    DELT("delt")
+enum class EndretUtbetalingBarnetrygdType(val navn: String) {
+    DELT("delt"),
+    DELT_UTVIDET_NB("delt utvidet"),
+    DELT_UTVIDET_NN("delt utvida"),
 }

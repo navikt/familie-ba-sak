@@ -7,9 +7,8 @@ import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.ClientMocks
-import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
+import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.config.mockHentPersoninfoForMedIdenter
-import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.HenleggÅrsak
@@ -65,18 +64,16 @@ class StegServiceTest(
     private val totrinnskontrollService: TotrinnskontrollService,
 
     @Autowired
-    private val infotrygdFeedClient: InfotrygdFeedClient,
-
-    @Autowired
     private val tilbakekrevingService: TilbakekrevingService,
 
     @Autowired
     private val vedtaksperiodeService: VedtaksperiodeService,
-) : AbstractSpringIntegrationTest() {
+) : AbstractSpringIntegrationTest(personopplysningerService = mockPersonopplysningerService) {
 
     @BeforeEach
     fun init() {
         databaseCleanupService.truncate()
+        ClientMocks.clearPdlMocks(mockPersonopplysningerService)
     }
 
     @Test
@@ -131,8 +128,7 @@ class StegServiceTest(
             søkerFnr = søkerFnr,
             barnasIdenter = listOf(ClientMocks.barnFnr[0]),
             vedtakService = vedtakService,
-            stegService = stegService,
-            tilbakekrevingService = tilbakekrevingService
+            stegService = stegService
         )
     }
 
@@ -168,7 +164,10 @@ class StegServiceTest(
         val feil = assertThrows<IllegalStateException> {
             stegService.håndterSendTilBeslutter(behandling, "1234")
         }
-        assertEquals("Behandling med id ${behandling.id} er avsluttet og stegprosessen kan ikke gjenåpnes", feil.message)
+        assertEquals(
+            "Behandling med id ${behandling.id} er avsluttet og stegprosessen kan ikke gjenåpnes",
+            feil.message
+        )
     }
 
     @Test

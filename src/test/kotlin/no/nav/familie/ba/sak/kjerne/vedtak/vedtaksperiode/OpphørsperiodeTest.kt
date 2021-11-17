@@ -31,24 +31,24 @@ class OpphørsperiodeTest {
         val periodeTomAndreAndel = inneværendeMåned().minusMonths(10)
         val periodeFomSisteAndel = inneværendeMåned().minusMonths(4)
         val andelBarn1 = lagAndelTilkjentYtelse(
-            inneværendeMåned().minusYears(4).toString(),
-            periodeTomFørsteAndel.toString(),
+            inneværendeMåned().minusYears(4),
+            periodeTomFørsteAndel,
             YtelseType.ORDINÆR_BARNETRYGD,
             1054,
             person = barn1
         )
 
         val andel2Barn1 = lagAndelTilkjentYtelse(
-            periodeFomAndreAndel.toString(),
-            periodeTomAndreAndel.toString(),
+            periodeFomAndreAndel,
+            periodeTomAndreAndel,
             YtelseType.ORDINÆR_BARNETRYGD,
             1054,
             person = barn1
         )
 
         val andel3Barn1 = lagAndelTilkjentYtelse(
-            periodeFomSisteAndel.toString(),
-            inneværendeMåned().plusMonths(12).toString(),
+            periodeFomSisteAndel,
+            inneværendeMåned().plusMonths(12),
             YtelseType.ORDINÆR_BARNETRYGD,
             1054,
             person = barn1
@@ -72,8 +72,8 @@ class OpphørsperiodeTest {
 
         val periodeTomFørsteAndel = inneværendeMåned().minusYears(1)
         val andelBarn1 = lagAndelTilkjentYtelse(
-            inneværendeMåned().minusYears(4).toString(),
-            periodeTomFørsteAndel.toString(),
+            inneværendeMåned().minusYears(4),
+            periodeTomFørsteAndel,
             YtelseType.ORDINÆR_BARNETRYGD,
             1054,
             person = barn1
@@ -94,8 +94,8 @@ class OpphørsperiodeTest {
 
         val periodeTomFørsteAndel = inneværendeMåned()
         val andelBarn1 = lagAndelTilkjentYtelse(
-            inneværendeMåned().minusYears(4).toString(),
-            periodeTomFørsteAndel.toString(),
+            inneværendeMåned().minusYears(4),
+            periodeTomFørsteAndel,
             YtelseType.ORDINÆR_BARNETRYGD,
             1054,
             person = barn1
@@ -117,16 +117,16 @@ class OpphørsperiodeTest {
         val reduksjonFom = inneværendeMåned().minusYears(5)
         val reduksjonTom = inneværendeMåned().minusYears(3)
         val forrigeAndelBarn1 = lagAndelTilkjentYtelse(
-            inneværendeMåned().minusYears(5).toString(),
-            inneværendeMåned().plusMonths(12).toString(),
+            inneværendeMåned().minusYears(5),
+            inneværendeMåned().plusMonths(12),
             YtelseType.ORDINÆR_BARNETRYGD,
             1054,
             person = barn1
         )
 
         val andelBarn1 = lagAndelTilkjentYtelse(
-            reduksjonTom.toString(),
-            inneværendeMåned().plusMonths(12).toString(),
+            reduksjonTom,
+            inneværendeMåned().plusMonths(12),
             YtelseType.ORDINÆR_BARNETRYGD,
             1054,
             person = barn1
@@ -151,24 +151,24 @@ class OpphørsperiodeTest {
         val reduksjonTom = inneværendeMåned()
 
         val forrigeAndel1Barn1 = lagAndelTilkjentYtelse(
-            reduksjonFom.toString(),
-            reduksjonFom.plusMonths(1).toString(),
+            reduksjonFom,
+            reduksjonFom.plusMonths(1),
             YtelseType.ORDINÆR_BARNETRYGD,
             1054,
             person = barn1
         )
 
         val forrigeAndel2Barn1 = lagAndelTilkjentYtelse(
-            reduksjonTom.minusMonths(1).toString(),
-            reduksjonTom.toString(),
+            reduksjonTom.minusMonths(1),
+            reduksjonTom,
             YtelseType.ORDINÆR_BARNETRYGD,
             1054,
             person = barn1
         )
 
         val andelBarn1 = lagAndelTilkjentYtelse(
-            reduksjonTom.plusMonths(1).toString(),
-            inneværendeMåned().plusMonths(12).toString(),
+            reduksjonTom.plusMonths(1),
+            inneværendeMåned().plusMonths(12),
             YtelseType.ORDINÆR_BARNETRYGD,
             1054,
             person = barn1
@@ -191,16 +191,16 @@ class OpphørsperiodeTest {
 
         val reduksjonFom = inneværendeMåned()
         val forrigeAndelBarn1 = lagAndelTilkjentYtelse(
-            inneværendeMåned().minusYears(5).toString(),
-            inneværendeMåned().plusMonths(12).toString(),
+            inneværendeMåned().minusYears(5),
+            inneværendeMåned().plusMonths(12),
             YtelseType.ORDINÆR_BARNETRYGD,
             1054,
             person = barn1
         )
 
         val andelBarn1 = lagAndelTilkjentYtelse(
-            inneværendeMåned().minusYears(5).toString(),
-            reduksjonFom.toString(),
+            inneværendeMåned().minusYears(5),
+            reduksjonFom,
             YtelseType.ORDINÆR_BARNETRYGD,
             1054,
             person = barn1
@@ -269,7 +269,10 @@ class OpphørsperiodeTest {
         val enPeriodeMedStartDato13MånederTilbake = slåSammenOpphørsperioder(toPerioderMedUlikStartdato)
 
         assertEquals(1, enPeriodeMedStartDato13MånederTilbake.size)
-        assertEquals(inneværendeMåned().minusMonths(13).toLocalDate(), enPeriodeMedStartDato13MånederTilbake.first().periodeFom)
+        assertEquals(
+            inneværendeMåned().minusMonths(13).toLocalDate(),
+            enPeriodeMedStartDato13MånederTilbake.first().periodeFom
+        )
     }
 
     @Test

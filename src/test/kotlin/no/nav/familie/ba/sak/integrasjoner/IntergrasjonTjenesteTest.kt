@@ -13,16 +13,14 @@ import com.github.tomakehurst.wiremock.client.WireMock.patch
 import com.github.tomakehurst.wiremock.client.WireMock.patchRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.post
 import com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor
-import com.github.tomakehurst.wiremock.client.WireMock.resetAllRequests
 import com.github.tomakehurst.wiremock.client.WireMock.status
-import com.github.tomakehurst.wiremock.client.WireMock.stubFor
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
-import com.github.tomakehurst.wiremock.client.WireMock.verify
+import io.mockk.mockk
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
-import no.nav.familie.ba.sak.config.ApplicationConfig
+import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTestDev
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient.Companion.VEDTAK_VEDLEGG_FILNAVN
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient.Companion.VEDTAK_VEDLEGG_TITTEL
@@ -54,48 +52,48 @@ import no.nav.familie.log.NavHttpHeaders
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
-import org.junit.jupiter.api.TestInstance.Lifecycle
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock
-import org.springframework.test.context.ActiveProfiles
+import org.springframework.web.client.RestOperations
+import java.net.URI
 import java.time.LocalDate
 import kotlin.random.Random
 
-@SpringBootTest(classes = [ApplicationConfig::class], properties = ["FAMILIE_INTEGRASJONER_API_URL=http://localhost:28085/api"])
-@ActiveProfiles(
-    "dev",
-    "mock-rest-template-config",
-    "mock-oauth",
-    "mock-pdl",
-    "mock-brev-klient",
-)
-@AutoConfigureWireMock(port = 28085)
-@TestInstance(Lifecycle.PER_CLASS)
-class IntergrasjonTjenesteTest {
+class IntergrasjonTjenesteTest : AbstractSpringIntegrationTestDev() {
 
     @Autowired
-    @Qualifier("integrasjonClient")
+    @Qualifier("jwtBearer")
+    lateinit var restOperations: RestOperations
+
     lateinit var integrasjonClient: IntegrasjonClient
 
+    @BeforeEach
+    fun setUp() {
+        integrasjonClient = IntegrasjonClient(
+            URI.create(wireMockServer.baseUrl() + "/api"),
+            restOperations,
+            mockk(relaxed = true),
+            mockk(relaxed = true)
+        )
+    }
+
     @AfterEach
-    fun cleanUp() {
+    fun clearTest() {
         MDC.clear()
-        resetAllRequests()
+        wireMockServer.resetAll()
     }
 
     @Test
     @Tag("integration")
     fun `Opprett oppgave skal returnere oppgave id`() {
         MDC.put("callId", "opprettOppgave")
-        stubFor(
+        wireMockServer.stubFor(
             post("/api/oppgave/opprett").willReturn(
                 okJson(objectMapper.writeValueAsString(success(OppgaveResponse(oppgaveId = 1234))))
             )
@@ -106,7 +104,7 @@ class IntergrasjonTjenesteTest {
         val opprettOppgaveResponse = integrasjonClient.opprettOppgave(request)
 
         assertThat(opprettOppgaveResponse).isEqualTo("1234")
-        verify(
+        wireMockServer.verify(
             anyRequestedFor(anyUrl())
                 .withHeader(NavHttpHeaders.NAV_CALL_ID.asString(), equalTo("opprettOppgave"))
                 .withHeader(NavHttpHeaders.NAV_CONSUMER_ID.asString(), equalTo("familie-ba-sak"))
@@ -117,7 +115,7 @@ class IntergrasjonTjenesteTest {
     @Test
     @Tag("integration")
     fun `Opprett oppgave skal kaste feil hvis response er ugyldig`() {
-        stubFor(
+        wireMockServer.stubFor(
             post("/api/oppgave/opprett").willReturn(
                 aResponse()
                     .withStatus(500)
@@ -135,7 +133,7 @@ class IntergrasjonTjenesteTest {
     @Tag("integration")
     fun `hentOppgaver skal returnere en liste av oppgaver og antallet oppgaver`() {
         val oppgave = Oppgave()
-        stubFor(
+        wireMockServer.stubFor(
             post("/api/oppgave/v4").willReturn(
                 okJson(
                     objectMapper.writeValueAsString(
@@ -153,7 +151,7 @@ class IntergrasjonTjenesteTest {
     @Tag("integration")
     fun `Journalfør vedtaksbrev skal journalføre dokument, returnere 201 og journalpostId`() {
         MDC.put("callId", "journalfør")
-        stubFor(
+        wireMockServer.stubFor(
             post("/api/arkiv/v4")
                 .withHeader("Accept", containing("json"))
                 .willReturn(
@@ -170,7 +168,7 @@ class IntergrasjonTjenesteTest {
         val journalPostId = integrasjonClient.journalførVedtaksbrev(MOCK_FNR, MOCK_FAGSAK_ID, vedtak, "1")
 
         assertThat(journalPostId).isEqualTo(MOCK_JOURNALPOST_FOR_VEDTAK_ID)
-        verify(
+        wireMockServer.verify(
             anyRequestedFor(anyUrl())
                 .withHeader(NavHttpHeaders.NAV_CALL_ID.asString(), equalTo("journalfør"))
                 .withHeader(NavHttpHeaders.NAV_CONSUMER_ID.asString(), equalTo("familie-ba-sak"))
@@ -182,14 +180,14 @@ class IntergrasjonTjenesteTest {
     @Tag("integration")
     fun `distribuerVedtaksbrev returnerer normalt ved vellykket integrasjonskall`() {
         MDC.put("callId", "distribuerVedtaksbrev")
-        stubFor(
+        wireMockServer.stubFor(
             post("/api/dist/v1")
                 .withHeader("Accept", containing("json"))
                 .willReturn(okJson(objectMapper.writeValueAsString(success("1234567"))))
         )
 
         assertDoesNotThrow { integrasjonClient.distribuerBrev("123456789") }
-        verify(
+        wireMockServer.verify(
             postRequestedFor(anyUrl())
                 .withHeader(NavHttpHeaders.NAV_CALL_ID.asString(), equalTo("distribuerVedtaksbrev"))
                 .withHeader(NavHttpHeaders.NAV_CONSUMER_ID.asString(), equalTo("familie-ba-sak"))
@@ -206,7 +204,7 @@ class IntergrasjonTjenesteTest {
     @Test
     @Tag("integration")
     fun `distribuerVedtaksbrev kaster exception hvis integrasjoner gir blank response`() {
-        stubFor(
+        wireMockServer.stubFor(
             post("/api/dist/v1")
                 .withHeader("Accept", containing("json"))
                 .willReturn(okJson(objectMapper.writeValueAsString(success(""))))
@@ -218,7 +216,7 @@ class IntergrasjonTjenesteTest {
     @Test
     @Tag("integration")
     fun `distribuerVedtaksbrev kaster exception hvis integrasjoner gir failure response`() {
-        stubFor(
+        wireMockServer.stubFor(
             post("/api/dist/v1")
                 .withHeader("Accept", containing("json"))
                 .willReturn(okJson(objectMapper.writeValueAsString(failure<Any>(""))))
@@ -230,7 +228,7 @@ class IntergrasjonTjenesteTest {
     @Test
     @Tag("integration")
     fun `distribuerVedtaksbrev kaster exception hvis responsekoden ikke er 2xx`() {
-        stubFor(
+        wireMockServer.stubFor(
             post("/api/dist/v1")
                 .withHeader("Accept", containing("json"))
                 .willReturn(
@@ -247,7 +245,7 @@ class IntergrasjonTjenesteTest {
     @Tag("integration")
     fun `Ferdigstill oppgave returnerer OK`() {
         MDC.put("callId", "ferdigstillOppgave")
-        stubFor(
+        wireMockServer.stubFor(
             patch(urlEqualTo("/api/oppgave/123/ferdigstill"))
                 .withHeader("Accept", containing("json"))
                 .willReturn(okJson(objectMapper.writeValueAsString(success(OppgaveResponse(1)))))
@@ -255,7 +253,7 @@ class IntergrasjonTjenesteTest {
 
         integrasjonClient.ferdigstillOppgave(123)
 
-        verify(
+        wireMockServer.verify(
             patchRequestedFor(urlEqualTo("/api/oppgave/123/ferdigstill"))
                 .withHeader(NavHttpHeaders.NAV_CALL_ID.asString(), equalTo("ferdigstillOppgave"))
                 .withHeader(NavHttpHeaders.NAV_CONSUMER_ID.asString(), equalTo("familie-ba-sak"))
@@ -266,7 +264,7 @@ class IntergrasjonTjenesteTest {
     @Tag("integration")
     fun `Ferdigstill oppgave returnerer feil `() {
         MDC.put("callId", "ferdigstillOppgave")
-        stubFor(
+        wireMockServer.stubFor(
             patch(urlEqualTo("/api/oppgave/123/ferdigstill"))
                 .withHeader("Accept", containing("json"))
                 .willReturn(
@@ -286,7 +284,7 @@ class IntergrasjonTjenesteTest {
     @Test
     @Tag("integration")
     fun `hentBehandlendeEnhet returnerer OK`() {
-        stubFor(
+        wireMockServer.stubFor(
             post("/api/arbeidsfordeling/enhet/BAR")
                 .withHeader("Accept", containing("json"))
                 .willReturn(
@@ -310,12 +308,20 @@ class IntergrasjonTjenesteTest {
     @Test
     @Tag("integration")
     fun `hentPersonIdent returnerer OK`() {
-        stubFor(get("/api/aktoer/v1/fraaktorid").willReturn(okJson(objectMapper.writeValueAsString(success(mapOf("personIdent" to 1L))))))
+        wireMockServer.stubFor(
+            get("/api/aktoer/v1/fraaktorid").willReturn(
+                okJson(
+                    objectMapper.writeValueAsString(
+                        success(mapOf("personIdent" to 1L))
+                    )
+                )
+            )
+        )
 
         val personIdent = integrasjonClient.hentPersonIdent("12")
         assertThat(personIdent?.ident).isEqualTo("1")
 
-        verify(
+        wireMockServer.verify(
             getRequestedFor(urlEqualTo("/api/aktoer/v1/fraaktorid"))
                 .withHeader("Nav-Aktorid", equalTo("12"))
         )
@@ -325,7 +331,7 @@ class IntergrasjonTjenesteTest {
     @Tag("integration")
     fun `finnOppgaveMedId returnerer OK`() {
         val oppgaveId = 1234L
-        stubFor(
+        wireMockServer.stubFor(
             get("/api/oppgave/$oppgaveId").willReturn(
                 okJson(
                     objectMapper.writeValueAsString(
@@ -342,7 +348,7 @@ class IntergrasjonTjenesteTest {
         val oppgave = integrasjonClient.finnOppgaveMedId(oppgaveId)
         assertThat(oppgave.id).isEqualTo(oppgaveId)
 
-        verify(getRequestedFor(urlEqualTo("/api/oppgave/$oppgaveId")))
+        wireMockServer.verify(getRequestedFor(urlEqualTo("/api/oppgave/$oppgaveId")))
     }
 
     @Test
@@ -350,7 +356,7 @@ class IntergrasjonTjenesteTest {
     fun `hentJournalpost returnerer OK`() {
         val journalpostId = "1234"
         val fnr = randomFnr()
-        stubFor(
+        wireMockServer.stubFor(
             get("/api/journalpost?journalpostId=$journalpostId").willReturn(
                 okJson(
                     objectMapper.writeValueAsString(
@@ -367,7 +373,7 @@ class IntergrasjonTjenesteTest {
         assertThat(oppgave.data?.journalpostId).isEqualTo(journalpostId)
         assertThat(oppgave.data?.bruker?.id).isEqualTo(fnr)
 
-        verify(getRequestedFor(urlEqualTo("/api/journalpost?journalpostId=$journalpostId")))
+        wireMockServer.verify(getRequestedFor(urlEqualTo("/api/journalpost?journalpostId=$journalpostId")))
     }
 
     @Test
@@ -384,7 +390,17 @@ class IntergrasjonTjenesteTest {
             )
         )
 
-        stubFor(post("/api/aareg/arbeidsforhold").willReturn(okJson(objectMapper.writeValueAsString(success(arbeidsforhold)))))
+        wireMockServer.stubFor(
+            post("/api/aareg/arbeidsforhold").willReturn(
+                okJson(
+                    objectMapper.writeValueAsString(
+                        success(
+                            arbeidsforhold
+                        )
+                    )
+                )
+            )
+        )
 
         val response = integrasjonClient.hentArbeidsforhold(fnr, LocalDate.now())
 
@@ -399,7 +415,7 @@ class IntergrasjonTjenesteTest {
     fun `skal kaste integrasjonsfeil mot arbeidsforhold`() {
         val fnr = randomFnr()
 
-        stubFor(post("/api/aareg/arbeidsforhold").willReturn(status(500)))
+        wireMockServer.stubFor(post("/api/aareg/arbeidsforhold").willReturn(status(500)))
 
         assertThatThrownBy {
             integrasjonClient.hentArbeidsforhold(fnr, LocalDate.now())
@@ -412,11 +428,11 @@ class IntergrasjonTjenesteTest {
     fun `skal opprette skyggesak for Sak`() {
         val aktørId = randomAktørId()
 
-        stubFor(post("/api/skyggesak/v1").willReturn(okJson(objectMapper.writeValueAsString(success(null)))))
+        wireMockServer.stubFor(post("/api/skyggesak/v1").willReturn(okJson(objectMapper.writeValueAsString(success(null)))))
 
         integrasjonClient.opprettSkyggesak(aktørId, MOCK_FAGSAK_ID.toLong())
 
-        verify(
+        wireMockServer.verify(
             postRequestedFor(urlEqualTo("/api/skyggesak/v1"))
                 .withRequestBody(
                     equalToJson(
@@ -438,7 +454,7 @@ class IntergrasjonTjenesteTest {
     fun `skal kaste integrasjonsfeil ved oppretting av skyggesak`() {
         val aktørId = randomAktørId()
 
-        stubFor(post("/api/skyggesak/v1").willReturn(status(500)))
+        wireMockServer.stubFor(post("/api/skyggesak/v1").willReturn(status(500)))
 
         assertThatThrownBy {
             integrasjonClient.opprettSkyggesak(aktørId, MOCK_FAGSAK_ID.toLong())

@@ -51,8 +51,8 @@ class SaksstatistikkService(
 
     fun mapTilBehandlingDVH(behandlingId: Long): BehandlingDVH? {
         val behandling = behandlingService.hent(behandlingId)
-        val forrigeBehandlingId = behandlingService.hentForrigeBehandlingSomErIverksatt(behandling)
-            .takeIf { erRevurderingEllerTekniskOpphør(behandling) }?.id
+        val forrigeBehandlingId = behandlingService.hentForrigeBehandlingSomErVedtatt(behandling)
+            .takeIf { erRevurderingEllerTekniskBehandling(behandling) }?.id
 
         if (behandling.opprettetÅrsak == FØDSELSHENDELSE && !envService.skalIverksetteBehandling()) return null
 
@@ -170,8 +170,8 @@ class SaksstatistikkService(
         }
     }
 
-    private fun erRevurderingEllerTekniskOpphør(behandling: Behandling) =
-        behandling.type == BehandlingType.REVURDERING || behandling.type == BehandlingType.TEKNISK_OPPHØR
+    private fun erRevurderingEllerTekniskBehandling(behandling: Behandling) =
+        behandling.type == BehandlingType.REVURDERING || behandling.type == BehandlingType.TEKNISK_OPPHØR || behandling.type == BehandlingType.TEKNISK_ENDRING
 
     private fun Behandling.resultatBegrunnelser(): List<ResultatBegrunnelseDVH> {
         return when (resultat) {

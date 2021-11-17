@@ -32,7 +32,8 @@ class SkatteetatenService(
         val personIdentSet = personerFraBaSak.map { it.ident }.toSet()
 
         // Assumes that vedtak in ba-sak is always newer than that in Infotrygd for the same person ident
-        val kombinertListe = personerFraBaSak + personerFraInfotrygd.brukere.filter { !personIdentSet.contains(it.ident) }
+        val kombinertListe =
+            personerFraBaSak + personerFraInfotrygd.brukere.filter { !personIdentSet.contains(it.ident) }
         LOG.debug("kombinert person fra Infotrygd og ba-sak: {} unik personer", kombinertListe.size)
 
         return SkatteetatenPersonerResponse(kombinertListe)
@@ -43,8 +44,12 @@ class SkatteetatenService(
         val unikePersoner = personer.toSet().toList()
         LOG.debug("finnPerioderMedUtvidetBarnetrygd(): {} unikePersoner", unikePersoner.size)
         val perioderFraBaSak = hentPerioderMedUtvidetBarnetrygdFraBaSak(unikePersoner, år)
-        val perioderFraInfotrygd = infotrygdBarnetrygdClient.hentPerioderMedUtvidetBarnetrygdForPersoner(unikePersoner.toList(), år)
-        LOG.debug("finnPerioderMedUtvidetBarnetrygd(): found periods for {} personer from Infotrygd", perioderFraInfotrygd.size)
+        val perioderFraInfotrygd =
+            infotrygdBarnetrygdClient.hentPerioderMedUtvidetBarnetrygdForPersoner(unikePersoner.toList(), år)
+        LOG.debug(
+            "finnPerioderMedUtvidetBarnetrygd(): found periods for {} personer from Infotrygd",
+            perioderFraInfotrygd.size
+        )
 
         val baSakPersonIdenter = perioderFraBaSak.map { it.ident }.toSet()
 
@@ -64,24 +69,28 @@ class SkatteetatenService(
             .map { SkatteetatenPerson(it.first.hentAktivIdent().ident, it.second.atStartOfDay()) }
     }
 
-    private fun hentPerioderMedUtvidetBarnetrygdFraBaSak(personer: List<String>, år: String): List<SkatteetatenPerioder> {
+    private fun hentPerioderMedUtvidetBarnetrygdFraBaSak(
+        personer: List<String>,
+        år: String
+    ): List<SkatteetatenPerioder> {
         val stonadPerioder = hentUtdannetStonadPerioderForPersoner(personer, år)
         LOG.debug("hentPerioderMedUtvidetBarnetrygdFraBaSak(): query to ba-sak returns {} entries", stonadPerioder.size)
-        val skatteetatenPerioderMap = stonadPerioder.fold(mutableMapOf<String, SkatteetatenPerioder>()) { perioderMap, period ->
-            val ident = period.getIdent()
-            val nyList = listOf(
-                SkatteetatenPeriode(
-                    fraMaaned = period.getFom().format(DateTimeFormatter.ofPattern("YYYY-MM")),
-                    delingsprosent = period.getProsent().tilDelingsprosent(),
-                    tomMaaned = period.getTom().format(DateTimeFormatter.ofPattern("YYYY-MM"))
+        val skatteetatenPerioderMap =
+            stonadPerioder.fold(mutableMapOf<String, SkatteetatenPerioder>()) { perioderMap, period ->
+                val ident = period.getIdent()
+                val nyList = listOf(
+                    SkatteetatenPeriode(
+                        fraMaaned = period.getFom().format(DateTimeFormatter.ofPattern("YYYY-MM")),
+                        delingsprosent = period.getProsent().tilDelingsprosent(),
+                        tomMaaned = period.getTom().format(DateTimeFormatter.ofPattern("YYYY-MM"))
+                    )
                 )
-            )
-            val samletPerioder = if (perioderMap.containsKey(ident))
-                perioderMap.get(ident)!!.perioder + nyList
-            else nyList
-            perioderMap.put(ident, SkatteetatenPerioder(ident, period.getEndretDato(), samletPerioder))
-            perioderMap
-        }
+                val samletPerioder = if (perioderMap.containsKey(ident))
+                    perioderMap[ident]!!.perioder + nyList
+                else nyList
+                perioderMap[ident] = SkatteetatenPerioder(ident, period.getEndretDato(), samletPerioder)
+                perioderMap
+            }
         LOG.debug(
             "hentPerioderMedUtvidetBarnetrygdFraBaSak(): merge {} entries into {} person slots",
             stonadPerioder.size,
@@ -92,13 +101,16 @@ class SkatteetatenService(
             SkatteetatenPerioder(
                 ident = it.second.ident,
                 sisteVedtakPaaIdent = it.second.sisteVedtakPaaIdent,
-                perioder = it.second.perioder.groupBy { it.delingsprosent }.values
+                perioder = it.second.perioder.groupBy { periode -> periode.delingsprosent }.values
                     .flatMap(::slåSammenSkatteetatenPeriode).toMutableList()
             )
         }
     }
 
-    private fun hentUtdannetStonadPerioderForPersoner(personIdenter: List<String>, år: String): List<AndelTilkjentYtelsePeriode> {
+    private fun hentUtdannetStonadPerioderForPersoner(
+        personIdenter: List<String>,
+        år: String
+    ): List<AndelTilkjentYtelsePeriode> {
         val yearStart = LocalDateTime.of(år.toInt(), 1, 1, 0, 0, 0)
         val yearEnd = LocalDateTime.of(år.toInt(), 12, 31, 23, 59, 59)
         return andelTilkjentYtelseRepository.finnStonadPeriodMedUtvidetBarnetrygdForPersoner(
@@ -112,7 +124,9 @@ class SkatteetatenService(
         return perioderAvEtGittDelingsprosent.sortedBy { it.fraMaaned }
             .fold(mutableListOf()) { sammenslåttePerioder, nesteUtbetaling ->
                 val nesteUtbetalingFraaMåned = YearMonth.parse(nesteUtbetaling.fraMaaned)
-                if (sammenslåttePerioder.lastOrNull()?.tomMaaned == nesteUtbetalingFraaMåned.minusMonths(1).toString()) {
+                if (sammenslåttePerioder.lastOrNull()?.tomMaaned == nesteUtbetalingFraaMåned.minusMonths(1)
+                    .toString()
+                ) {
                     sammenslåttePerioder.apply { add(removeLast().copy(tomMaaned = nesteUtbetaling.tomMaaned)) }
                 } else sammenslåttePerioder.apply { add(nesteUtbetaling) }
             }

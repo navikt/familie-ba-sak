@@ -42,7 +42,12 @@ class InfotrygdControllerTest {
     @Test
     fun `hentInfotrygdsakerForSøker skal returnere ok dersom saksbehandler har tilgang`() {
         every { integrasjonClient.sjekkTilgangTilPersoner(any()) } returns listOf(Tilgang(true))
-        every { infotrygdBarnetrygdClient.hentSaker(any(), any()) } returns InfotrygdSøkResponse(listOf(Sak(status = "IP")), emptyList())
+        every {
+            infotrygdBarnetrygdClient.hentSaker(
+                any(),
+                any()
+            )
+        } returns InfotrygdSøkResponse(listOf(Sak(status = "IP")), emptyList())
 
         val respons = infotrygdController.hentInfotrygdsakerForSøker(Personident("12345"))
 

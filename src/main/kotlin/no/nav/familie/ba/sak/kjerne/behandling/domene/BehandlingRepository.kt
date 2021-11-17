@@ -47,6 +47,13 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
     )
     fun finnIverksatteBehandlinger(fagsakId: Long): List<Behandling>
 
+    @Query(
+        """select b from Behandling b
+                           inner join BehandlingStegTilstand bst on b.id = bst.behandling.id
+                        where b.fagsak.id = :fagsakId AND bst.behandlingSteg = 'BESLUTTE_VEDTAK' """
+    )
+    fun finnBehandlingerSentTilGodkjenning(fagsakId: Long): List<Behandling>
+
     @Query("SELECT b FROM Behandling b JOIN b.fagsak f WHERE f.id = :fagsakId AND b.status = 'AVSLUTTET' AND f.arkivert = false")
     fun findByFagsakAndAvsluttet(fagsakId: Long): List<Behandling>
 
@@ -55,7 +62,11 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
     fun finnAntallBehandlingerIkkeAvsluttet(): Long
 
     @Query("SELECT DISTINCT aty.behandlingId FROM AndelTilkjentYtelse aty WHERE aty.behandlingId in :iverksatteLøpende AND aty.sats = :gammelSats AND aty.stønadTom >= :månedÅrForEndring")
-    fun finnBehadlingerForSatsendring(iverksatteLøpende: List<Long>, gammelSats: Long, månedÅrForEndring: YearMonth): List<Long>
+    fun finnBehadlingerForSatsendring(
+        iverksatteLøpende: List<Long>,
+        gammelSats: Long,
+        månedÅrForEndring: YearMonth
+    ): List<Long>
 
     @Query("SELECT b FROM Behandling b WHERE b.opprettetÅrsak = 'FØDSELSHENDELSE' AND b.opprettetTidspunkt >= current_date")
     fun finnFødselshendelserOpprettetIdag(): List<Behandling>

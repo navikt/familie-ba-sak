@@ -17,7 +17,7 @@ class BehandlingsresultatUtilsTest {
 
     val søker = tilfeldigPerson()
 
-    val barn1Ident = randomFnr()
+    private val barn1Ident = randomFnr()
 
     @Test
     fun `Skal kaste feil dersom det finnes uvurderte ytelsepersoner`() {

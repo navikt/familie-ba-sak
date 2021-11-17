@@ -82,13 +82,18 @@ class FødselshendelseRevurderingTest(
 
         val restFagsakEtterBehandlingAvsluttet =
             familieBaSakKlient().hentFagsak(fagsakId = behandling!!.fagsak.id)
+
         generellAssertFagsak(
             restFagsak = restFagsakEtterBehandlingAvsluttet,
             fagsakStatus = FagsakStatus.LØPENDE,
-            behandlingStegType = StegType.BEHANDLING_AVSLUTTET
+            behandlingStegType = StegType.BEHANDLING_AVSLUTTET,
+            aktivBehandlingId = behandling.id
         )
 
-        val aktivBehandling = restFagsakEtterBehandlingAvsluttet.getDataOrThrow().behandlinger.first { it.aktiv }
+        val aktivBehandling =
+            restFagsakEtterBehandlingAvsluttet.getDataOrThrow().behandlinger
+                .single { it.behandlingId == behandlingService.hentAktivForFagsak(restFagsakEtterBehandlingAvsluttet.data!!.id)?.id }
+
         val vurderteVilkårIDenneBehandlingen = aktivBehandling.personResultater.flatMap { it.vilkårResultater }
             .filter { it.behandlingId == aktivBehandling.behandlingId }
         assertEquals(BehandlingResultat.INNVILGET, aktivBehandling.resultat)

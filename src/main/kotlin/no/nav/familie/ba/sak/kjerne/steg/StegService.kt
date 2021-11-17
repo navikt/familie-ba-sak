@@ -7,15 +7,15 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.ekstern.restDomene.writeValueAsString
+import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedService
 import no.nav.familie.ba.sak.integrasjoner.skyggesak.SkyggesakService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.RestHenleggBehandlingInfo
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
@@ -38,12 +38,23 @@ class StegService(
     private val søknadGrunnlagService: SøknadGrunnlagService,
     private val skyggesakService: SkyggesakService,
     private val tilgangService: TilgangService,
+    val infotrygdFeedService: InfotrygdFeedService,
 ) {
 
     private val stegSuksessMetrics: Map<StegType, Counter> = initStegMetrikker("suksess")
 
     private val stegFeiletMetrics: Map<StegType, Counter> = initStegMetrikker("feil")
     private val stegFunksjonellFeilMetrics: Map<StegType, Counter> = initStegMetrikker("funksjonell-feil")
+
+    fun håndterNyBehandlingOgSendInfotrygdFeed(nyBehandling: NyBehandling): Behandling {
+        val behandling = håndterNyBehandling(nyBehandling)
+        if (behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING) {
+            infotrygdFeedService.sendStartBehandlingTilInfotrygdFeed(
+                behandling.fagsak.hentAktivIdent().ident,
+            )
+        }
+        return behandling
+    }
 
     @Transactional
     fun håndterNyBehandling(nyBehandling: NyBehandling): Behandling {
@@ -65,10 +76,10 @@ class StegService(
                     barnasIdenter = emptyList()
                 )
             )
-        } else if (nyBehandling.behandlingType == BehandlingType.REVURDERING || nyBehandling.behandlingType == BehandlingType.TEKNISK_OPPHØR) {
+        } else if (nyBehandling.behandlingType == BehandlingType.REVURDERING || nyBehandling.behandlingType == BehandlingType.TEKNISK_ENDRING) {
             val sisteBehandling = behandlingService.hentSisteBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id)
-                ?: behandlingService.hentSisteBehandlingSomIkkeErHenlagt(behandling.fagsak.id)
-                ?: throw Feil("Forsøker å opprette en revurdering eller teknisk opphør, men kan ikke finne tidligere behandling på fagsak ${behandling.fagsak.id}")
+                ?: behandlingService.hentSisteBehandlingSomErVedtatt(behandling.fagsak.id)
+                ?: throw Feil("Forsøker å opprette en revurdering eller teknisk endring, men kan ikke finne tidligere behandling på fagsak ${behandling.fagsak.id}")
 
             val barnFraSisteBehandlingMedUtbetalinger =
                 behandlingService.finnBarnFraBehandlingMedTilkjentYtsele(sisteBehandling.id)
@@ -92,22 +103,17 @@ class StegService(
         // hentEllerOpprettFagsak
         skyggesakService.opprettSkyggesak(nyBehandlingHendelse.morsIdent, fagsak.id)
 
-        val behandlingsType =
-            if (fagsak.status == FagsakStatus.LØPENDE) BehandlingType.REVURDERING else BehandlingType.FØRSTEGANGSBEHANDLING
-
-        val behandling = håndterNyBehandling(
+        return håndterNyBehandlingOgSendInfotrygdFeed(
             NyBehandling(
                 søkersIdent = nyBehandlingHendelse.morsIdent,
-                behandlingType = behandlingsType,
-                kategori = BehandlingKategori.NASJONAL,
-                underkategori = BehandlingUnderkategori.ORDINÆR,
+                behandlingType = if (fagsak.status == FagsakStatus.LØPENDE)
+                    BehandlingType.REVURDERING
+                else BehandlingType.FØRSTEGANGSBEHANDLING,
                 behandlingÅrsak = BehandlingÅrsak.FØDSELSHENDELSE,
                 skalBehandlesAutomatisk = true,
                 barnasIdenter = nyBehandlingHendelse.barnasIdenter
             )
         )
-
-        return behandling
     }
 
     @Transactional
@@ -178,13 +184,24 @@ class StegService(
         val behandlingSteg: BehandlingsresultatSteg =
             hentBehandlingSteg(StegType.BEHANDLINGSRESULTAT) as BehandlingsresultatSteg
 
-        return håndterSteg(behandling, behandlingSteg) {
+        val behandlingEtterBehandlingsresultatSteg = håndterSteg(behandling, behandlingSteg) {
             behandlingSteg.utførStegOgAngiNeste(behandling, "")
         }
+
+        return if (behandlingEtterBehandlingsresultatSteg.resultat == BehandlingResultat.AVSLÅTT &&
+            !behandlingEtterBehandlingsresultatSteg.skalBehandlesAutomatisk
+        ) {
+            håndterVurderTilbakekreving(
+                behandling = behandlingEtterBehandlingsresultatSteg
+            )
+        } else behandlingEtterBehandlingsresultatSteg
     }
 
     @Transactional
-    fun håndterVurderTilbakekreving(behandling: Behandling, restTilbakekreving: RestTilbakekreving?): Behandling {
+    fun håndterVurderTilbakekreving(
+        behandling: Behandling,
+        restTilbakekreving: RestTilbakekreving? = null
+    ): Behandling {
         val behandlingSteg: VurderTilbakekrevingSteg =
             hentBehandlingSteg(StegType.VURDER_TILBAKEKREVING) as VurderTilbakekrevingSteg
 
@@ -365,7 +382,7 @@ class StegService(
     }
 
     private fun initStegMetrikker(type: String): Map<StegType, Counter> {
-        return steg.map {
+        return steg.associate {
             it.stegType() to Metrics.counter(
                 "behandling.steg.$type",
                 "steg",
@@ -373,7 +390,7 @@ class StegService(
                 "beskrivelse",
                 it.stegType().rekkefølge.toString() + " " + it.stegType().displayName()
             )
-        }.toMap()
+        }
     }
 
     companion object {

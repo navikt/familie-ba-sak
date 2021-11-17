@@ -1,7 +1,9 @@
 package no.nav.familie.ba.sak.statistikk.saksstatistikk
 
+import io.mockk.MockKAnnotations
 import io.mockk.every
-import io.mockk.mockk
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
 import io.mockk.unmockkAll
 import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.lagBehandling
@@ -50,25 +52,48 @@ import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
 
+@ExtendWith(MockKExtension::class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class SaksstatistikkServiceTest {
+internal class SaksstatistikkServiceTest(
+    @MockK(relaxed = true)
+    private val behandlingService: BehandlingService,
 
-    private val behandlingService: BehandlingService = mockk(relaxed = true)
-    private val journalføringRepository: JournalføringRepository = mockk()
-    private val journalføringService: JournalføringService = mockk()
-    private val arbeidsfordelingService: ArbeidsfordelingService = mockk()
-    private val totrinnskontrollService: TotrinnskontrollService = mockk()
-    private val fagsakService: FagsakService = mockk()
-    private val personopplysningerService: PersonopplysningerService = mockk()
-    private val persongrunnlagService: PersongrunnlagService = mockk()
-    private val vedtakService: VedtakService = mockk()
-    private val envService: EnvService = mockk()
-    private val vedtaksperiodeService: VedtaksperiodeService = mockk()
+    @MockK
+    private val journalføringRepository: JournalføringRepository,
+
+    @MockK
+    private val journalføringService: JournalføringService,
+
+    @MockK
+    private val arbeidsfordelingService: ArbeidsfordelingService,
+
+    @MockK
+    private val totrinnskontrollService: TotrinnskontrollService,
+
+    @MockK
+    private val fagsakService: FagsakService,
+
+    @MockK
+    private val personopplysningerService: PersonopplysningerService,
+
+    @MockK
+    private val persongrunnlagService: PersongrunnlagService,
+
+    @MockK
+    private val vedtakService: VedtakService,
+
+    @MockK
+    private val envService: EnvService,
+
+    @MockK
+    private val vedtaksperiodeService: VedtaksperiodeService,
+) {
 
     private val sakstatistikkService = SaksstatistikkService(
         behandlingService,
@@ -86,6 +111,8 @@ internal class SaksstatistikkServiceTest {
 
     @BeforeAll
     fun init() {
+        MockKAnnotations.init()
+
         every { arbeidsfordelingService.hentAbeidsfordelingPåBehandling(any()) } returns ArbeidsfordelingPåBehandling(
             behandlendeEnhetId = "4820",
             behandlendeEnhetNavn = "Nav",

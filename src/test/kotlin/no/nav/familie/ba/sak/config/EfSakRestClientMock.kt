@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.config
 
+import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
@@ -19,20 +20,28 @@ class EfSakRestClientMock {
     fun mockEfSakRestClient(): EfSakRestClient {
         val efSakRestClient = mockk<EfSakRestClient>()
 
-        val hentPerioderMedFullOvergangsstønadSlot = slot<String>()
-        every { efSakRestClient.hentPerioderMedFullOvergangsstønad(capture(hentPerioderMedFullOvergangsstønadSlot)) } answers {
-            PerioderOvergangsstønadResponse(
-                perioder = listOf(
-                    PeriodeOvergangsstønad(
-                        personIdent = hentPerioderMedFullOvergangsstønadSlot.captured,
-                        fomDato = LocalDate.now().minusYears(2),
-                        datakilde = PeriodeOvergangsstønad.Datakilde.EF,
-                        tomDato = LocalDate.now().minusMonths(3),
-                    )
-                )
-            )
-        }
+        clearEfSakRestMocks(efSakRestClient)
 
         return efSakRestClient
+    }
+
+    companion object {
+        fun clearEfSakRestMocks(efSakRestClient: EfSakRestClient) {
+            clearMocks(efSakRestClient)
+
+            val hentPerioderMedFullOvergangsstønadSlot = slot<String>()
+            every { efSakRestClient.hentPerioderMedFullOvergangsstønad(capture(hentPerioderMedFullOvergangsstønadSlot)) } answers {
+                PerioderOvergangsstønadResponse(
+                    perioder = listOf(
+                        PeriodeOvergangsstønad(
+                            personIdent = hentPerioderMedFullOvergangsstønadSlot.captured,
+                            fomDato = LocalDate.now().minusYears(2),
+                            datakilde = PeriodeOvergangsstønad.Datakilde.EF,
+                            tomDato = LocalDate.now().minusMonths(3),
+                        )
+                    )
+                )
+            }
+        }
     }
 }

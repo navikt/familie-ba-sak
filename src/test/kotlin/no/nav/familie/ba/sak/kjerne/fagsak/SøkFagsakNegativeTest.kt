@@ -14,7 +14,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.test.context.ActiveProfiles
 
 @SpringBootTest
-@ActiveProfiles("dev", "mock-pdl-test-søk", "mock-infotrygd-barnetrygd", "mock-brev-klient")
+@ActiveProfiles("dev", "mock-oauth", "mock-pdl-test-søk", "mock-infotrygd-barnetrygd", "mock-brev-klient")
 @Tag("integration")
 class SøkFagsakNegativeTest {
 

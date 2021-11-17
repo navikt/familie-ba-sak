@@ -65,19 +65,19 @@ class BeregningService(
 
     /**
      * Denne metoden henter alle tilkjent ytelser for et barn gruppert på behandling.
-     * Den går gjennom alle fagsaker og sørger for å filtrere bort bort behandlende behandling,
+     * Den går gjennom alle fagsaker og sørger for å filtrere bort behandling ikke sent til godkjenning,
      * henlagte behandlinger, samt fagsaker som ikke lengre har barn i gjeldende behandling.
      */
-    fun hentIverksattTilkjentYtelseForBarn(
+    fun hentSentTilGodkjenningTilkjentYtelseForBarn(
         barnIdent: PersonIdent,
-        behandlendeBehandling: Behandling
+        fagsakId: Long
     ): List<TilkjentYtelse> {
         val andreFagsaker = fagsakService.hentFagsakerPåPerson(barnIdent)
-            .filter { it.id != behandlendeBehandling.fagsak.id }
+            .filter { it.id != fagsakId }
 
         return andreFagsaker.mapNotNull { fagsak ->
-            Behandlingutils.hentSisteBehandlingSomErIverksatt(
-                iverksatteBehandlinger = behandlingRepository.finnIverksatteBehandlinger(
+            Behandlingutils.hentSisteBehandlingSomIkkeErTekniskOpphør(
+                behandlinger = behandlingRepository.finnBehandlingerSentTilGodkjenning(
                     fagsakId = fagsak.id
                 )
             )
@@ -86,10 +86,10 @@ class BeregningService(
         }.filter {
             personopplysningGrunnlagRepository
                 .findByBehandlingAndAktiv(behandlingId = it.behandling.id)
-                ?.barna?.map { it.personIdent }
+                ?.barna?.map { barn -> barn.personIdent }
                 ?.contains(barnIdent)
                 ?: false
-        }.mapNotNull { it }
+        }.map { it }
     }
 
     @Transactional
@@ -146,10 +146,11 @@ class BeregningService(
         behandling: Behandling,
         utbetalingsoppdrag: Utbetalingsoppdrag
     ): TilkjentYtelse {
-        val erRentOpphør = utbetalingsoppdrag.utbetalingsperiode.all { it.opphør != null }
+        val erRentOpphør =
+            utbetalingsoppdrag.utbetalingsperiode.isNotEmpty() && utbetalingsoppdrag.utbetalingsperiode.all { it.opphør != null }
         var opphørsdato: LocalDate? = null
         if (erRentOpphør) {
-            opphørsdato = utbetalingsoppdrag.utbetalingsperiode.map { it.opphør!!.opphørDatoFom }.minOrNull()!!
+            opphørsdato = utbetalingsoppdrag.utbetalingsperiode.minOf { it.opphør!!.opphørDatoFom }
         }
 
         if (behandling.type == BehandlingType.REVURDERING) {

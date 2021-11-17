@@ -138,7 +138,7 @@ class VedtaksperiodeService(
                 )
 
                 if (triggesAv.satsendring) {
-                    validerSatsendring(vedtaksperiodeMedBegrunnelser.fom)
+                    validerSatsendring(vedtaksperiodeMedBegrunnelser.fom, persongrunnlag)
                 }
 
                 if (it.erTilknyttetVilkår(sanityBegrunnelser) && personerGjeldendeForBegrunnelseIdenter.isEmpty()) {
@@ -311,7 +311,10 @@ class VedtaksperiodeService(
 
                     val standardbegrunnelser: MutableSet<VedtakBegrunnelseSpesifikasjon> =
                         VedtakBegrunnelseSpesifikasjon.values()
-                            .filter { vedtakBegrunnelseSpesifikasjon -> vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType != VedtakBegrunnelseType.AVSLAG && vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType != VedtakBegrunnelseType.FORTSATT_INNVILGET }
+                            .filter { vedtakBegrunnelseSpesifikasjon ->
+                                vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType != VedtakBegrunnelseType.AVSLAG &&
+                                    vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType != VedtakBegrunnelseType.FORTSATT_INNVILGET
+                            }
                             .fold(mutableSetOf()) { acc, standardBegrunnelse ->
                                 val triggesAv =
                                     standardBegrunnelse.tilSanityBegrunnelse(sanityBegrunnelser)
@@ -341,7 +344,9 @@ class VedtaksperiodeService(
 
                                 acc
                             }
-                    if (utvidetVedtaksperiodeMedBegrunnelser.type == Vedtaksperiodetype.UTBETALING && standardbegrunnelser.isEmpty()) {
+                    if (utvidetVedtaksperiodeMedBegrunnelser.type == Vedtaksperiodetype.UTBETALING &&
+                        standardbegrunnelser.isEmpty()
+                    ) {
                         VedtakBegrunnelseSpesifikasjon.values()
                             .filter { it.vedtakBegrunnelseType == VedtakBegrunnelseType.FORTSATT_INNVILGET }
                     } else standardbegrunnelser
@@ -454,9 +459,10 @@ class VedtaksperiodeService(
                 persongrunnlagRepository.findByBehandlingAndAktiv(behandlingId = forrigeIverksatteBehandling.id)
             else null
         val forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse> =
-            if (forrigeIverksatteBehandling != null) andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(
-                behandlingId = forrigeIverksatteBehandling.id
-            ) else emptyList()
+            if (forrigeIverksatteBehandling != null)
+                andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(
+                    behandlingId = forrigeIverksatteBehandling.id
+                ) else emptyList()
 
         val personopplysningGrunnlag =
             persongrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
@@ -473,10 +479,12 @@ class VedtaksperiodeService(
     }
 
     private fun hentAvslagsperioderMedBegrunnelser(vedtak: Vedtak): List<VedtaksperiodeMedBegrunnelser> {
-
+        val behandling = vedtak.behandling
         val vilkårsvurdering =
-            vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId = vedtak.behandling.id)
-                ?: throw Feil("Fant ikke vilkårsvurdering for behandling ${vedtak.behandling.id} ved generering av avslagsperioder")
+            vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
+                ?: throw Feil(
+                    "Fant ikke vilkårsvurdering for behandling ${behandling.id} ved generering av avslagsperioder"
+                )
 
         val periodegrupperteAvslagsvilkår: Map<NullablePeriode, List<VilkårResultat>> =
             vilkårsvurdering.personResultater.flatMap { it.vilkårResultater }
@@ -508,7 +516,7 @@ class VedtaksperiodeService(
         }.toMutableList()
 
         val uregistrerteBarn =
-            søknadGrunnlagService.hentAktiv(behandlingId = vedtak.behandling.id)?.hentUregistrerteBarn()
+            søknadGrunnlagService.hentAktiv(behandlingId = behandling.id)?.hentUregistrerteBarn()
                 ?: emptyList()
 
         return if (uregistrerteBarn.isNotEmpty()) {
@@ -549,12 +557,16 @@ class VedtaksperiodeService(
         }.toList()
     }
 
-    private fun begrunnelserMedIdentgrupper(vilkårResultater: List<VilkårResultat>): Map<VedtakBegrunnelseSpesifikasjon, List<String>> {
+    private fun begrunnelserMedIdentgrupper(
+        vilkårResultater: List<VilkårResultat>
+    ): Map<VedtakBegrunnelseSpesifikasjon, List<String>> {
         val begrunnelseOgIdentListe: List<Pair<VedtakBegrunnelseSpesifikasjon, String>> =
             vilkårResultater
                 .map { vilkår ->
                     val personIdent = vilkår.personResultat?.personIdent
-                        ?: throw Feil("VilkårResultat ${vilkår.id} mangler PersonResultat ved sammenslåing av begrunnelser")
+                        ?: throw Feil(
+                            "VilkårResultat ${vilkår.id} mangler PersonResultat ved sammenslåing av begrunnelser"
+                        )
                     vilkår.vedtakBegrunnelseSpesifikasjoner.map { begrunnelse -> Pair(begrunnelse, personIdent) }
                 }
                 .flatten()

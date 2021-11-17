@@ -32,7 +32,7 @@ class BeslutteVedtak(
     private val taskRepository: TaskRepositoryWrapper,
     private val loggService: LoggService,
     private val vilkårsvurderingService: VilkårsvurderingService,
-    private val featureToggleService: FeatureToggleService,
+    private val featureToggleService: FeatureToggleService
 ) : BehandlingSteg<RestBeslutningPåVedtak> {
 
     override fun utførStegOgAngiNeste(
@@ -68,7 +68,9 @@ class BeslutteVedtak(
             vedtakService.oppdaterVedtaksdatoOgBrev(vedtak)
 
             when (nesteSteg) {
-                StegType.IVERKSETT_MOT_OPPDRAG -> opprettTaskIverksettMotOppdrag(behandling, vedtak)
+                StegType.IVERKSETT_MOT_OPPDRAG -> {
+                    opprettTaskIverksettMotOppdrag(behandling, vedtak)
+                }
                 StegType.JOURNALFØR_VEDTAKSBREV -> opprettJournalførVedtaksbrevTask(behandling, vedtak)
                 else -> throw Feil("Neste steg '$nesteSteg' er ikke implementert på beslutte vedtak steg")
             }

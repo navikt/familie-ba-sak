@@ -29,6 +29,7 @@ data class SanityBegrunnelse(
     val hjemler: List<String> = emptyList(),
     val endretUtbetalingsperiodeDeltBostedTriggere: List<EndretUtbetalingsperiodeDeltBostedTriggere>? = null,
     val endretUtbetalingsperiodeTriggere: List<EndretUtbetalingsperiodeTrigger>? = null,
+    val utvidetBarnetrygdTriggere: List<UtvidetBarnetrygdTrigger>? = null,
 )
 
 data class RestSanityBegrunnelse(
@@ -45,6 +46,7 @@ data class RestSanityBegrunnelse(
     val hjemler: List<String> = emptyList(),
     val endretUtbetalingsperiodeDeltBostedTriggere: List<String>? = emptyList(),
     val endretUtbetalingsperiodeTriggere: List<String>? = emptyList(),
+    val utvidetBarnetrygdTriggere: List<String>? = emptyList(),
 ) {
     fun tilSanityBegrunnelse(): SanityBegrunnelse {
         return SanityBegrunnelse(
@@ -78,6 +80,9 @@ data class RestSanityBegrunnelse(
             },
             endretUtbetalingsperiodeTriggere = endretUtbetalingsperiodeTriggere?.mapNotNull {
                 finnEnumverdi(it, EndretUtbetalingsperiodeTrigger.values(), apiNavn)
+            },
+            utvidetBarnetrygdTriggere = utvidetBarnetrygdTriggere?.mapNotNull {
+                finnEnumverdi(it, UtvidetBarnetrygdTrigger.values(), apiNavn)
             },
         )
     }
@@ -136,7 +141,7 @@ enum class ØvrigTrigger {
     BARN_MED_6_ÅRS_DAG,
     ALLTID_AUTOMATISK,
     ETTER_ENDRET_UTBETALING,
-    ENDRET_UTBETALING
+    ENDRET_UTBETALING,
 }
 
 enum class EndretUtbetalingsperiodeTrigger {
@@ -145,6 +150,10 @@ enum class EndretUtbetalingsperiodeTrigger {
 
 enum class EndretUtbetalingsperiodeDeltBostedTriggere {
     SKAL_UTBETALES,
+}
+
+enum class UtvidetBarnetrygdTrigger {
+    SMÅBARNSTILLEGG,
 }
 
 fun SanityBegrunnelse.tilTriggesAv(): TriggesAv {

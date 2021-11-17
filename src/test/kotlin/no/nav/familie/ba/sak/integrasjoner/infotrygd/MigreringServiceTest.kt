@@ -2,14 +2,19 @@ package no.nav.familie.ba.sak.integrasjoner.infotrygd
 
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.slot
 import no.nav.familie.ba.sak.common.DbContainerInitializer
+import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.fødselsnummerGenerator
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
+import no.nav.familie.ba.sak.config.AbstractMockkSpringRunner
 import no.nav.familie.ba.sak.config.ClientMocks
+import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
-import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
+import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestClient
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
@@ -36,13 +41,14 @@ import no.nav.familie.kontrakter.ba.infotrygd.InfotrygdSøkResponse
 import no.nav.familie.kontrakter.ba.infotrygd.Sak
 import no.nav.familie.kontrakter.ba.infotrygd.Stønad
 import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
+import no.nav.familie.kontrakter.felles.personopplysning.ForelderBarnRelasjon
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.assertj.core.api.Assertions.tuple
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -60,6 +66,7 @@ import java.time.format.DateTimeFormatter
     "postgres",
     "mock-økonomi",
     "mock-pdl",
+    "mock-pdl-client",
     "mock-infotrygd-barnetrygd",
     "mock-tilbakekreving-klient",
     "mock-brev-klient",
@@ -67,48 +74,64 @@ import java.time.format.DateTimeFormatter
     "mock-oauth",
     "mock-rest-template-config"
 )
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Tag("integration")
-class MigreringServiceTest {
+class MigreringServiceTest(
+    @Autowired
+    private val databaseCleanupService: DatabaseCleanupService,
 
     @Autowired
-    lateinit var databaseCleanupService: DatabaseCleanupService
+    private val taskRepository: TaskRepositoryWrapper,
 
     @Autowired
-    lateinit var taskRepository: TaskRepositoryWrapper
+    private val fagsakRepository: FagsakRepository,
 
     @Autowired
-    lateinit var fagsakRepository: FagsakRepository
+    private val saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository,
 
     @Autowired
-    lateinit var saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository
+    private val iverksettMotOppdragTask: IverksettMotOppdragTask,
 
     @Autowired
-    lateinit var iverksettMotOppdragTask: IverksettMotOppdragTask
+    private val statusFraOppdragTask: StatusFraOppdragTask,
 
     @Autowired
-    lateinit var statusFraOppdragTask: StatusFraOppdragTask
+    private val publiserVedtakTask: PubliserVedtakTask,
 
     @Autowired
-    lateinit var publiserVedtakTask: PubliserVedtakTask
+    private val ferdigstillBehandlingTask: FerdigstillBehandlingTask,
 
     @Autowired
-    lateinit var ferdigstillBehandlingTask: FerdigstillBehandlingTask
+    private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
 
     @Autowired
-    lateinit var infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient
+    private val migreringService: MigreringService,
 
     @Autowired
-    lateinit var migreringService: MigreringService
+    private val vilkårService: VilkårService,
 
     @Autowired
-    lateinit var vilkårService: VilkårService
+    private val pdlRestClient: PdlRestClient,
+
+    @Autowired
+    private val env: EnvService,
+) : AbstractMockkSpringRunner() {
 
     @BeforeEach
     fun init() {
         MockKafkaProducer.sendteMeldinger.clear()
         databaseCleanupService.truncate()
         every { infotrygdBarnetrygdClient.harÅpenSakIInfotrygd(any(), any()) } returns false
+
+        val slot = slot<String>()
+        every { pdlRestClient.hentForelderBarnRelasjon(capture(slot)) } answers {
+            infotrygdBarnetrygdClient.hentSaker(listOf(slot.captured)).bruker.first().stønad!!.barn.map {
+                ForelderBarnRelasjon(
+                    relatertPersonsIdent = it.barnFnr!!,
+                    relatertPersonsRolle = FORELDERBARNRELASJONROLLE.BARN
+                )
+            }
+        }
+        every { env.erPreprod() } returns false
     }
 
     @Test
@@ -151,18 +174,44 @@ class MigreringServiceTest {
     }
 
     @Test
-    fun`skal sette periodeFom til barnas fødselsdatoer på vilkårene som skal gjelde fra fødselsdato`() {
+    fun `skal sette periodeFom til barnas fødselsdatoer på vilkårene som skal gjelde fra fødselsdato`() {
         every {
             infotrygdBarnetrygdClient.hentSaker(any(), any())
         } returns InfotrygdSøkResponse(listOf(opprettSakMedBeløp(2708.0)), emptyList())
 
         val responseDto = migreringService.migrer(ClientMocks.søkerFnr[0])
 
-        val barnasFødselsdatoer = ClientMocks.barnFnr.map { LocalDate.parse(it.subSequence(0, 6), DateTimeFormatter.ofPattern("ddMMyy")) }
-        val vilkårResultater = vilkårService.hentVilkårsvurdering(behandlingId = responseDto.behandlingId)!!.personResultater.flatMap { it.vilkårResultater }
+        val barnasFødselsdatoer =
+            ClientMocks.barnFnr.map { LocalDate.parse(it.subSequence(0, 6), DateTimeFormatter.ofPattern("ddMMyy")) }
+        val vilkårResultater =
+            vilkårService.hentVilkårsvurdering(behandlingId = responseDto.behandlingId)!!.personResultater.flatMap { it.vilkårResultater }
         assertThat(vilkårResultater.filter { it.vilkårType.gjelderAlltidFraBarnetsFødselsdato() })
             .extracting("periodeFom")
             .hasSameElementsAs(barnasFødselsdatoer)
+    }
+
+    @Test
+    fun `migrering skal feile dersom PDL returnerer andre barn enn Infotrygd på person`() {
+        val barnUnder18 = fødselsnummerGenerator.foedselsnummer(LocalDate.now()).asString
+        val barnOver18 = fødselsnummerGenerator.foedselsnummer(LocalDate.now().minusYears(19)).asString
+        every {
+            infotrygdBarnetrygdClient.hentSaker(any(), any())
+        } returns InfotrygdSøkResponse(listOf(opprettSakMedBeløp(2708.0)), emptyList())
+        every { pdlRestClient.hentForelderBarnRelasjon(any()) } returns
+            listOf(
+                ForelderBarnRelasjon(
+                    relatertPersonsIdent = barnUnder18,
+                    relatertPersonsRolle = FORELDERBARNRELASJONROLLE.BARN
+                ),
+                ForelderBarnRelasjon(
+                    relatertPersonsIdent = barnOver18,
+                    relatertPersonsRolle = FORELDERBARNRELASJONROLLE.BARN
+                )
+            )
+
+        assertThatThrownBy {
+            migreringService.migrer(ClientMocks.søkerFnr[0])
+        }.hasMessageContaining("Kan ikke migrere fordi barn fra PDL ikke samsvarer med løpende barnetrygdbarn fra Infotrygd.")
     }
 
     @Test
@@ -229,12 +278,13 @@ class MigreringServiceTest {
 
     @Test
     fun `migrering skal feile på, og dagen etter, kjøredato i Infotrygd`() {
-        val virkningsdatoUtleder = MigreringService::class.java.getDeclaredMethod("virkningsdatoFra", LocalDate::class.java)
+        val virkningsdatoUtleder =
+            MigreringService::class.java.getDeclaredMethod("virkningsdatoFra", LocalDate::class.java)
         virkningsdatoUtleder.trySetAccessible()
 
         val migreringServiceMock = MigreringService(
             mockk(), mockk(), mockk(), mockk(), mockk(), mockk(), mockk(), mockk(), mockk(), mockk(), mockk(),
-            env = mockk(relaxed = true)
+            env = mockk(relaxed = true), mockk()
         ) // => env.erDev() = env.erE2E() = false
 
         listOf<Long>(0, 1).forEach { antallDagerEtterKjøredato ->
@@ -251,7 +301,9 @@ class MigreringServiceTest {
 
         LocalDate.now().run {
             val kjøredato = this.plusDays(1)
-            assertThat(virkningsdatoFra.invoke(migreringService, kjøredato)).isEqualTo(this.førsteDagIInneværendeMåned().minusMonths(1))
+            assertThat(virkningsdatoFra.invoke(migreringService, kjøredato)).isEqualTo(
+                this.førsteDagIInneværendeMåned().minusMonths(1)
+            )
         }
     }
 
@@ -263,7 +315,12 @@ class MigreringServiceTest {
         LocalDate.now().run {
             listOf<Long>(2, 3).forEach { antallDagerEtterKjøredato ->
                 val kjøredato = this.minusDays(antallDagerEtterKjøredato)
-                assertThat(virkningsdatoFra.invoke(migreringService, kjøredato)).isEqualTo(this.førsteDagIInneværendeMåned())
+                assertThat(
+                    virkningsdatoFra.invoke(
+                        migreringService,
+                        kjøredato
+                    )
+                ).isEqualTo(this.førsteDagIInneværendeMåned())
             }
         }
     }
@@ -286,9 +343,12 @@ class MigreringServiceTest {
         runCatching { migreringService.migrer(ClientMocks.søkerFnr[1]) }
             .onSuccess { throw IllegalStateException("Testen forutsetter at migrer(...) kaster exception") }
             .onFailure {
-                val antallNyeStatistikkEvents = saksstatistikkMellomlagringRepository.count() - antallStatistikkEventsEtterSisteVelykkedeMigrering
+                val antallNyeStatistikkEvents =
+                    saksstatistikkMellomlagringRepository.count() - antallStatistikkEventsEtterSisteVelykkedeMigrering
                 assertThat(antallNyeStatistikkEvents).isZero
-                assertThat(fagsakRepository.finnAntallFagsakerTotalt()).isEqualTo(antallFagsakerEtterSisteVelykkedeMigrering)
+                assertThat(fagsakRepository.finnAntallFagsakerTotalt()).isEqualTo(
+                    antallFagsakerEtterSisteVelykkedeMigrering
+                )
             }
     }
 
@@ -302,14 +362,22 @@ class MigreringServiceTest {
                     it.second.map { sakstatistikkObjectMapper.readValue(it.json, BehandlingDVH::class.java) }
             }
 
-        assertThat(sakDvhMeldinger).extracting("sakStatus").contains(FagsakStatus.OPPRETTET.name, FagsakStatus.LØPENDE.name)
+        assertThat(sakDvhMeldinger).extracting("sakStatus")
+            .contains(FagsakStatus.OPPRETTET.name, FagsakStatus.LØPENDE.name)
 
-        assertThat(behandlingDvhMeldinger).extracting("behandlingStatus").contains(BehandlingStatus.UTREDES.name, BehandlingStatus.IVERKSETTER_VEDTAK.name, BehandlingStatus.AVSLUTTET.name)
-        assertThat(behandlingDvhMeldinger).extracting("resultat").containsSequence(BehandlingResultat.IKKE_VURDERT.name, BehandlingResultat.INNVILGET.name)
+        assertThat(behandlingDvhMeldinger).extracting("behandlingStatus").contains(
+            BehandlingStatus.UTREDES.name,
+            BehandlingStatus.IVERKSETTER_VEDTAK.name,
+            BehandlingStatus.AVSLUTTET.name
+        )
+        assertThat(behandlingDvhMeldinger).extracting("resultat")
+            .containsSequence(BehandlingResultat.IKKE_VURDERT.name, BehandlingResultat.INNVILGET.name)
         assertThat(behandlingDvhMeldinger).extracting("totrinnsbehandling").containsOnly(false)
         assertThat(behandlingDvhMeldinger).extracting("behandlingAarsak").containsOnly(BehandlingÅrsak.MIGRERING.name)
-        assertThat(behandlingDvhMeldinger).extracting("behandlingType").containsOnly(BehandlingType.MIGRERING_FRA_INFOTRYGD.name)
-        assertThat(behandlingDvhMeldinger).extracting("saksbehandler", "beslutter").containsOnly(tuple(SYSTEM_FORKORTELSE, SYSTEM_FORKORTELSE), tuple(null, null))
+        assertThat(behandlingDvhMeldinger).extracting("behandlingType")
+            .containsOnly(BehandlingType.MIGRERING_FRA_INFOTRYGD.name)
+        assertThat(behandlingDvhMeldinger).extracting("saksbehandler", "beslutter")
+            .containsOnly(tuple(SYSTEM_FORKORTELSE, SYSTEM_FORKORTELSE), tuple(null, null))
     }
 
     private fun opprettSakMedBeløp(vararg beløp: Double) = Sak(

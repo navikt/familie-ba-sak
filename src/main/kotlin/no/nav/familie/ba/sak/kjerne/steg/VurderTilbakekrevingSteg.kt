@@ -9,19 +9,21 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
-class VurderTilbakekrevingSteg(val featureToggleService: FeatureToggleService, val tilbakekrevingService: TilbakekrevingService) :
-    BehandlingSteg<RestTilbakekreving?> {
+class VurderTilbakekrevingSteg(
+    val featureToggleService: FeatureToggleService,
+    val tilbakekrevingService: TilbakekrevingService
+) : BehandlingSteg<RestTilbakekreving?> {
 
     @Transactional
-    override fun utførStegOgAngiNeste(behandling: Behandling, restTilbakekreving: RestTilbakekreving?): StegType {
+    override fun utførStegOgAngiNeste(behandling: Behandling, data: RestTilbakekreving?): StegType {
 
         if (featureToggleService.isEnabled(FeatureToggleConfig.TILBAKEKREVING) &&
             !tilbakekrevingService.søkerHarÅpenTilbakekreving(behandling.fagsak.id)
         ) {
 
-            tilbakekrevingService.validerRestTilbakekreving(restTilbakekreving, behandling.id)
-            if (restTilbakekreving != null) {
-                tilbakekrevingService.lagreTilbakekreving(restTilbakekreving, behandling.id)
+            tilbakekrevingService.validerRestTilbakekreving(data, behandling.id)
+            if (data != null) {
+                tilbakekrevingService.lagreTilbakekreving(data, behandling.id)
             }
         }
 

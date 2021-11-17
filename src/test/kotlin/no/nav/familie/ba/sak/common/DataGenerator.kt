@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.integrasjoner.økonomi.sats
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
@@ -54,7 +55,6 @@ import no.nav.familie.ba.sak.kjerne.steg.JournalførVedtaksbrevDTO
 import no.nav.familie.ba.sak.kjerne.steg.StatusFraOppdragMedTask
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
-import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
@@ -204,8 +204,8 @@ fun lagVedtak(behandling: Behandling = lagBehandling()) =
     )
 
 fun lagAndelTilkjentYtelse(
-    fom: String,
-    tom: String,
+    fom: YearMonth,
+    tom: YearMonth,
     ytelseType: YtelseType = YtelseType.ORDINÆR_BARNETRYGD,
     beløp: Int = sats(ytelseType),
     behandling: Behandling = lagBehandling(),
@@ -222,8 +222,8 @@ fun lagAndelTilkjentYtelse(
         behandlingId = behandling.id,
         tilkjentYtelse = tilkjentYtelse ?: lagInitiellTilkjentYtelse(behandling),
         kalkulertUtbetalingsbeløp = beløp,
-        stønadFom = årMnd(fom),
-        stønadTom = årMnd(tom),
+        stønadFom = fom,
+        stønadTom = tom,
         type = ytelseType,
         periodeOffset = periodeIdOffset,
         forrigePeriodeOffset = forrigeperiodeIdOffset,
@@ -345,15 +345,6 @@ fun nyOrdinærBehandling(søkersIdent: String, årsak: BehandlingÅrsak = Behand
         behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
         kategori = BehandlingKategori.NASJONAL,
         underkategori = BehandlingUnderkategori.ORDINÆR,
-        behandlingÅrsak = årsak
-    )
-
-fun nyUtvidetBehandling(søkersIdent: String, årsak: BehandlingÅrsak = BehandlingÅrsak.SØKNAD): NyBehandling =
-    NyBehandling(
-        søkersIdent = søkersIdent,
-        behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-        kategori = BehandlingKategori.NASJONAL,
-        underkategori = BehandlingUnderkategori.UTVIDET,
         behandlingÅrsak = årsak
     )
 
@@ -692,8 +683,7 @@ fun kjørStegprosessForRevurderingÅrligKontroll(
     søkerFnr: String,
     barnasIdenter: List<String>,
     vedtakService: VedtakService,
-    stegService: StegService,
-    tilbakekrevingService: TilbakekrevingService
+    stegService: StegService
 ): Behandling {
     val behandling = stegService.håndterNyBehandling(
         NyBehandling(
@@ -716,16 +706,12 @@ fun kjørStegprosessForRevurderingÅrligKontroll(
 
     val behandlingEtterSimuleringSteg = stegService.håndterVurderTilbakekreving(
         behandlingEtterBehandlingsresultat,
-        RestTilbakekreving(
+        if (behandlingEtterBehandlingsresultat.resultat != BehandlingResultat.FORTSATT_INNVILGET) RestTilbakekreving(
             valg = Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING,
             begrunnelse = "Begrunnelse"
-        )
+        ) else null
     )
     if (tilSteg == StegType.VURDER_TILBAKEKREVING) return behandlingEtterSimuleringSteg
-
-    val restTilbakekreving = opprettRestTilbakekreving()
-    tilbakekrevingService.validerRestTilbakekreving(restTilbakekreving, behandlingEtterSimuleringSteg.id)
-    tilbakekrevingService.lagreTilbakekreving(restTilbakekreving, behandlingEtterSimuleringSteg.id)
 
     val behandlingEtterSendTilBeslutter = stegService.håndterSendTilBeslutter(behandlingEtterSimuleringSteg, "1234")
     if (tilSteg == StegType.SEND_TIL_BESLUTTER) return behandlingEtterSendTilBeslutter
@@ -923,6 +909,7 @@ fun lagVilkårResultat(
 val guttenBarnesenFødselsdato = LocalDate.now().withDayOfMonth(10).minusYears(6)
 
 fun lagEndretUtbetalingAndel(
+    id: Long = 0,
     behandlingId: Long = 0,
     person: Person,
     prosent: BigDecimal = BigDecimal.valueOf(100),
@@ -932,8 +919,10 @@ fun lagEndretUtbetalingAndel(
     avtaletidspunktDeltBosted: LocalDate = LocalDate.now().minusMonths(1),
     søknadstidspunkt: LocalDate = LocalDate.now().minusMonths(1),
     vedtakBegrunnelseSpesifikasjoner: List<VedtakBegrunnelseSpesifikasjon> = emptyList(),
+    andelTilkjentYtelser: MutableList<AndelTilkjentYtelse> = mutableListOf()
 ) =
     EndretUtbetalingAndel(
+        id = id,
         behandlingId = behandlingId,
         person = person,
         prosent = prosent,
@@ -944,6 +933,7 @@ fun lagEndretUtbetalingAndel(
         søknadstidspunkt = søknadstidspunkt,
         begrunnelse = "Test",
         vedtakBegrunnelseSpesifikasjoner = vedtakBegrunnelseSpesifikasjoner,
+        andelTilkjentYtelser = andelTilkjentYtelser
     )
 
 fun lagPerson(

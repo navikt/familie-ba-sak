@@ -603,8 +603,8 @@ internal class TilkjentYtelseUtilsTest {
         val tom = YearMonth.of(2019, 1)
         val utbetalinsandeler = listOf(
             lagAndelTilkjentYtelse(
-                fom = fom.toString(),
-                tom = tom.toString(),
+                fom = fom,
+                tom = tom,
                 person = person,
                 behandling = behandling
             )
@@ -644,14 +644,14 @@ internal class TilkjentYtelseUtilsTest {
 
         val utbetalinsandeler = listOf(
             lagAndelTilkjentYtelse(
-                fom = fom1.toString(),
-                tom = tom1.toString(),
+                fom = fom1,
+                tom = tom1,
                 person = person,
                 behandling = behandling
             ),
             lagAndelTilkjentYtelse(
-                fom = fom2.toString(),
-                tom = tom2.toString(),
+                fom = fom2,
+                tom = tom2,
                 person = person,
                 behandling = behandling
             ),

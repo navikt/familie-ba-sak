@@ -5,8 +5,8 @@ import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.nyOrdinærBehandling
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.vurderVilkårsvurderingTilInnvilget
-import no.nav.familie.ba.sak.config.AbstractTestWithJdbcTables
-import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
+import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
+import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonResultat
@@ -26,23 +26,10 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.context.ActiveProfiles
 import java.time.LocalDate
 import java.time.LocalDateTime
-import javax.sql.DataSource
 
-@SpringBootTest
-@ActiveProfiles(
-    "dev",
-    "mock-pdl",
-    "mock-økonomi",
-    "mock-infotrygd-barnetrygd",
-    "mock-brev-klient",
-)
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class VilkårServiceTest(
     @Autowired
     private val behandlingService: BehandlingService,
@@ -61,11 +48,7 @@ class VilkårServiceTest(
 
     @Autowired
     private val databaseCleanupService: DatabaseCleanupService,
-
-    @Autowired
-    private val dataSource: DataSource,
-
-) : AbstractTestWithJdbcTables(dataSource) {
+) : AbstractSpringIntegrationTest() {
 
     @BeforeAll
     fun init() {
@@ -89,7 +72,7 @@ class VilkårServiceTest(
         val vilkårsvurdering = vilkårService.initierVilkårsvurderingForBehandling(
             behandling = behandling,
             bekreftEndringerViaFrontend = true,
-            forrigeBehandling = forrigeBehandlingSomErIverksatt
+            forrigeBehandlingSomErVedtatt = forrigeBehandlingSomErIverksatt
         )
         vilkårsvurdering.personResultater.forEach { personResultat ->
             personResultat.vilkårResultater.forEach { vilkårResultat ->
@@ -118,15 +101,16 @@ class VilkårServiceTest(
         val vilkårsvurdering = vilkårService.initierVilkårsvurderingForBehandling(
             behandling = behandling,
             bekreftEndringerViaFrontend = true,
-            forrigeBehandling = forrigeBehandlingSomErIverksatt
+            forrigeBehandlingSomErVedtatt = forrigeBehandlingSomErIverksatt
         )
         val under18ÅrVilkårForBarn =
-            vilkårsvurdering.personResultater.find { it.personIdent === barnFnr }
+            vilkårsvurdering.personResultater.find { it.personIdent == barnFnr }
                 ?.tilRestPersonResultat()?.vilkårResultater?.find { it.vilkårType == Vilkår.UNDER_18_ÅR }
 
         val endretVilkårsvurdering: List<RestPersonResultat> =
             vilkårService.endreVilkår(
-                behandlingId = behandling.id, vilkårId = under18ÅrVilkårForBarn!!.id,
+                behandlingId = behandling.id,
+                vilkårId = under18ÅrVilkårForBarn!!.id,
                 restPersonResultat =
                 RestPersonResultat(
                     personIdent = barnFnr,
@@ -140,7 +124,7 @@ class VilkårServiceTest(
             )
 
         val endretUnder18ÅrVilkårForBarn =
-            endretVilkårsvurdering.find { it.personIdent === barnFnr }
+            endretVilkårsvurdering.find { it.personIdent == barnFnr }
                 ?.vilkårResultater?.find { it.vilkårType == Vilkår.UNDER_18_ÅR }
         assertFalse(endretUnder18ÅrVilkårForBarn!!.erAutomatiskVurdert)
     }
@@ -163,7 +147,7 @@ class VilkårServiceTest(
         val vilkårsvurdering = vilkårService.initierVilkårsvurderingForBehandling(
             behandling = behandling,
             bekreftEndringerViaFrontend = true,
-            forrigeBehandling = forrigeBehandlingSomErIverksatt
+            forrigeBehandlingSomErVedtatt = forrigeBehandlingSomErIverksatt
         )
         Assertions.assertEquals(2, vilkårsvurdering.personResultater.size)
 
@@ -174,7 +158,7 @@ class VilkårServiceTest(
         val behandlingResultatMedEkstraBarn = vilkårService.initierVilkårsvurderingForBehandling(
             behandling = behandling,
             bekreftEndringerViaFrontend = true,
-            forrigeBehandling = forrigeBehandlingSomErIverksatt
+            forrigeBehandlingSomErVedtatt = forrigeBehandlingSomErIverksatt
         )
         Assertions.assertEquals(3, behandlingResultatMedEkstraBarn.personResultater.size)
     }
@@ -209,7 +193,7 @@ class VilkårServiceTest(
         val vilkårsvurdering = vilkårService.initierVilkårsvurderingForBehandling(
             behandling = behandling,
             bekreftEndringerViaFrontend = true,
-            forrigeBehandling = forrigeBehandlingSomErIverksatt
+            forrigeBehandlingSomErVedtatt = forrigeBehandlingSomErIverksatt
         )
             .also {
                 it.personResultater
@@ -250,7 +234,7 @@ class VilkårServiceTest(
         val vilkårsvurdering = vilkårService.initierVilkårsvurderingForBehandling(
             behandling = behandling,
             bekreftEndringerViaFrontend = true,
-            forrigeBehandling = forrigeBehandlingSomErIverksatt
+            forrigeBehandlingSomErVedtatt = forrigeBehandlingSomErIverksatt
         )
         Assertions.assertEquals(2, vilkårsvurdering.personResultater.size)
 
@@ -286,7 +270,7 @@ class VilkårServiceTest(
         val vilkårsvurdering2 = vilkårService.initierVilkårsvurderingForBehandling(
             behandling = behandling2,
             bekreftEndringerViaFrontend = true,
-            forrigeBehandling = behandling
+            forrigeBehandlingSomErVedtatt = behandling
         )
 
         Assertions.assertEquals(3, vilkårsvurdering2.personResultater.size)
@@ -320,7 +304,7 @@ class VilkårServiceTest(
         val vilkårsvurdering = vilkårService.initierVilkårsvurderingForBehandling(
             behandling = behandling,
             bekreftEndringerViaFrontend = true,
-            forrigeBehandling = forrigeBehandlingSomErIverksatt
+            forrigeBehandlingSomErVedtatt = forrigeBehandlingSomErIverksatt
         )
 
         val barn: Person = personopplysningGrunnlag.barna.find { it.personIdent.ident == barnFnr }!!
@@ -341,7 +325,7 @@ class VilkårServiceTest(
         val behandlingResultat2 = vilkårService.initierVilkårsvurderingForBehandling(
             behandling = behandling2,
             bekreftEndringerViaFrontend = true,
-            forrigeBehandling = behandling
+            forrigeBehandlingSomErVedtatt = behandling
         )
 
         Assertions.assertEquals(3, behandlingResultat2.personResultater.size)

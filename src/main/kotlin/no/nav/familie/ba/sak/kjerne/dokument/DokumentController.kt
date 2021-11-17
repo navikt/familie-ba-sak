@@ -1,8 +1,10 @@
 package no.nav.familie.ba.sak.kjerne.dokument
 
-import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsak
+import no.nav.familie.ba.sak.ekstern.restDomene.RestMinimalFagsak
+import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.kjerne.dokument.domene.ManueltBrevRequest
 import no.nav.familie.ba.sak.kjerne.dokument.domene.byggMottakerdata
 import no.nav.familie.ba.sak.kjerne.dokument.domene.leggTilEnhet
@@ -16,6 +18,7 @@ import no.nav.familie.ba.sak.sikkerhet.validering.VedtaktilgangConstraint
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.slf4j.LoggerFactory
+import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -35,7 +38,8 @@ class DokumentController(
     private val fagsakService: FagsakService,
     private val tilgangService: TilgangService,
     private val persongrunnlagService: PersongrunnlagService,
-    private val arbeidsfordelingService: ArbeidsfordelingService
+    private val arbeidsfordelingService: ArbeidsfordelingService,
+    private val utvidetBehandlingService: UtvidetBehandlingService
 ) {
 
     @PostMapping(path = ["vedtaksbrev/{vedtakId}"])
@@ -95,7 +99,7 @@ class DokumentController(
     fun sendBrev(
         @PathVariable behandlingId: Long,
         @RequestBody manueltBrevRequest: ManueltBrevRequest
-    ): Ressurs<RestFagsak> {
+    ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} genererer og sender brev: ${manueltBrevRequest.brevmal}")
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
@@ -113,7 +117,7 @@ class DokumentController(
             behandling = behandling,
             fagsakId = behandling.fagsak.id
         )
-        return fagsakService.hentRestFagsak(fagsakId = behandling.fagsak.id)
+        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }
 
     @PostMapping(path = ["/fagsak/{fagsakId}/forhaandsvis-brev"])
@@ -133,11 +137,11 @@ class DokumentController(
         ).let { Ressurs.success(it) }
     }
 
-    @PostMapping(path = ["/fagsak/{fagsakId}/send-brev"])
+    @PostMapping(path = ["/fagsak/{fagsakId}/send-brev/send-brev"])
     fun sendBrevPåFagsak(
         @PathVariable fagsakId: Long,
         @RequestBody manueltBrevRequest: ManueltBrevRequest
-    ): Ressurs<RestFagsak> {
+    ): ResponseEntity<Ressurs<RestMinimalFagsak>> {
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} genererer og sender brev på fagsak $fagsakId: ${manueltBrevRequest.brevmal}")
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
@@ -148,7 +152,7 @@ class DokumentController(
             manueltBrevRequest = manueltBrevRequest.leggTilEnhet(arbeidsfordelingService),
             fagsakId = fagsakId
         )
-        return fagsakService.hentRestFagsak(fagsakId = fagsakId)
+        return ResponseEntity.ok(Ressurs.success(fagsakService.lagRestMinimalFagsak(fagsakId = fagsakId)))
     }
 
     companion object {

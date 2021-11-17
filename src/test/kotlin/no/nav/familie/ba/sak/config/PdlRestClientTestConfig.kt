@@ -1,7 +1,8 @@
-package no.nav.familie.ba.sak.integrasjoner.pdl
+package no.nav.familie.ba.sak.config
 
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PersonInfo
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.Personident
@@ -9,17 +10,17 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import no.nav.familie.kontrakter.felles.personopplysning.Sivilstand
+import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
 import org.springframework.context.annotation.Profile
 import java.time.LocalDate
 
-@Configuration
-class PdlTestConfig {
+@TestConfiguration
+class PdlRestClientTestConfig {
 
     @Bean
-    @Profile("mock-pdl")
+    @Profile("mock-pdl-client")
     @Primary
     fun pdlRestClientMock(): PdlRestClient {
         val klient = mockk<PdlRestClient>(relaxed = true)

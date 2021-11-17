@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.internal.Doedsfall
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PdlDødsfallResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PdlHentIdenterResponse
+import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PdlHentPersonRelasjonerResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PdlHentPersonResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PdlOppholdResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PdlPersonRequest
@@ -20,7 +21,6 @@ import no.nav.familie.http.util.UriUtil
 import no.nav.familie.kontrakter.felles.personopplysning.Opphold
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import org.apache.commons.lang3.StringUtils
-import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.NestedExceptionUtils
@@ -267,6 +267,34 @@ class PdlRestClient(
         )
     }
 
+    /**
+     * Til bruk for migrering. Vurder hentPerson som gir maskerte data for personer med adressebeskyttelse.
+     *
+     */
+    fun hentForelderBarnRelasjon(ident: String): List<no.nav.familie.kontrakter.felles.personopplysning.ForelderBarnRelasjon> {
+        val pdlPersonRequest = PdlPersonRequest(
+            variables = PdlPersonRequestVariables(ident),
+            query = hentGraphqlQuery("hentperson-relasjoner")
+        )
+        val response = try {
+            postForEntity<PdlHentPersonRelasjonerResponse>(pdlUri, pdlPersonRequest, httpHeaders())
+        } catch (e: Exception) {
+            throw Feil(
+                message = "Feil ved oppslag på person. Gav feil: ${e.message}",
+                frontendFeilmelding = "Feil oppsto ved oppslag på person $ident",
+                httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
+                throwable = e
+            )
+        }
+
+        if (!response.harFeil()) return response.data.person!!.forelderBarnRelasjon
+        throw Feil(
+            message = "Fant ikke data på person: ${response.errorMessages()}",
+            frontendFeilmelding = "Fant ikke identer for person $ident: ${response.errorMessages()}",
+            httpStatus = HttpStatus.NOT_FOUND
+        )
+    }
+
     fun httpHeaders(): HttpHeaders {
         return HttpHeaders().apply {
             contentType = MediaType.APPLICATION_JSON
@@ -278,8 +306,7 @@ class PdlRestClient(
     companion object {
 
         private const val PATH_GRAPHQL = "graphql"
-        const val PDL_TEMA = "BAR"
-        private val logger = LoggerFactory.getLogger(PdlRestClient::class.java)
+        private const val PDL_TEMA = "BAR"
     }
 }
 

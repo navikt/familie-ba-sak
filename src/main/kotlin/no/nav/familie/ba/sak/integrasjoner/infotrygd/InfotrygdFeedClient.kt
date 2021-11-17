@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.integrasjoner.infotrygd
 
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.InfotrygdFødselhendelsesFeedDto
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.InfotrygdVedtakFeedDto
+import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.StartBehandlingDto
 import no.nav.familie.ba.sak.task.OpprettTaskService.Companion.RETRY_BACKOFF_5000MS
 import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -9,7 +10,6 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.core.env.Environment
 import org.springframework.retry.annotation.Backoff
 import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Component
@@ -21,14 +21,15 @@ import java.net.URI
 @Component
 class InfotrygdFeedClient(
     @Value("\${FAMILIE_BA_INFOTRYGD_FEED_API_URL}") private val clientUri: URI,
-    @Qualifier("jwtBearer") restOperations: RestOperations,
-    private val environment: Environment
-) :
-    AbstractRestClient(restOperations, "infotrygd_feed") {
+    @Qualifier("jwtBearer") restOperations: RestOperations
+) : AbstractRestClient(restOperations, "infotrygd_feed") {
 
     fun sendFødselhendelsesFeedTilInfotrygd(infotrygdFødselhendelsesFeedDto: InfotrygdFødselhendelsesFeedDto) {
         return try {
-            sendFeedTilInfotrygd(URI.create("$clientUri/barnetrygd/v1/feed/foedselsmelding"), infotrygdFødselhendelsesFeedDto)
+            sendFeedTilInfotrygd(
+                URI.create("$clientUri/barnetrygd/v1/feed/foedselsmelding"),
+                infotrygdFødselhendelsesFeedDto
+            )
         } catch (e: Exception) {
             loggOgKastException(e)
         }
@@ -37,6 +38,17 @@ class InfotrygdFeedClient(
     fun sendVedtakFeedTilInfotrygd(infotrygdVedtakFeedDto: InfotrygdVedtakFeedDto) {
         try {
             sendFeedTilInfotrygd(URI.create("$clientUri/barnetrygd/v1/feed/vedtaksmelding"), infotrygdVedtakFeedDto)
+        } catch (e: Exception) {
+            loggOgKastException(e)
+        }
+    }
+
+    fun sendStartBehandlingTilInfotrygd(startBehandlingDto: StartBehandlingDto) {
+        try {
+            sendFeedTilInfotrygd(
+                URI.create("$clientUri/barnetrygd/v1/feed/startbehandlingsmelding"),
+                startBehandlingDto
+            )
         } catch (e: Exception) {
             loggOgKastException(e)
         }
@@ -58,9 +70,6 @@ class InfotrygdFeedClient(
         backoff = Backoff(delayExpression = RETRY_BACKOFF_5000MS),
     )
     private fun sendFeedTilInfotrygd(endpoint: URI, feed: Any) {
-        if (environment.activeProfiles.contains("e2e")) {
-            return
-        }
         postForEntity<Ressurs<String>>(endpoint, feed)
     }
 

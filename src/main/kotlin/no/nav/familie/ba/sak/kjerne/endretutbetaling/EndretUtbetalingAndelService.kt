@@ -6,6 +6,8 @@ import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.beregning.domene.hentUtvidetYtelseScenario
+import no.nav.familie.ba.sak.kjerne.dokument.BrevKlient
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerIngenOverlappendeEndring
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerPeriodeInnenforTilkjentytelse
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
@@ -23,7 +25,6 @@ class EndretUtbetalingAndelService(
     private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
     private val beregningService: BeregningService,
     private val persongrunnlagService: PersongrunnlagService,
-    private val sanityService: SanityService,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
 ) {
 
@@ -38,9 +39,13 @@ class EndretUtbetalingAndelService(
             persongrunnlagService.hentPersonerPåBehandling(listOf(restEndretUtbetalingAndel.personIdent!!), behandling)
                 .first()
 
-        endretUtbetalingAndel.fraRestEndretUtbetalingAndel(restEndretUtbetalingAndel, person).also {
-            it.vedtakBegrunnelseSpesifikasjoner = it.hentGyldigEndretBegrunnelser(sanityService.hentSanityBegrunnelser())
-        }
+        val personopplysningGrunnlag =
+            personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
+                ?: throw Feil("Fant ikke personopplysninggrunnlag på behandling ${behandling.id}")
+
+        val andelTilkjentYtelser = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id)
+
+        endretUtbetalingAndel.fraRestEndretUtbetalingAndel(restEndretUtbetalingAndel, person)
 
         validerIngenOverlappendeEndring(
             endretUtbetalingAndel,
@@ -48,13 +53,7 @@ class EndretUtbetalingAndelService(
                 .filter { it.id != endretUtbetalingAndelId }
         )
 
-        val andelTilkjentYtelser = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id)
-
         validerPeriodeInnenforTilkjentytelse(endretUtbetalingAndel, andelTilkjentYtelser)
-
-        val personopplysningGrunnlag =
-            personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
-                ?: throw Feil("Fant ikke personopplysninggrunnlag på behandling ${behandling.id}")
 
         beregningService.oppdaterBehandlingMedBeregning(
             behandling, personopplysningGrunnlag, endretUtbetalingAndel
@@ -107,5 +106,24 @@ class EndretUtbetalingAndelService(
         hentForBehandling(behandlingId).filter { it.andelTilkjentYtelser.isNotEmpty() }.forEach {
             it.andelTilkjentYtelser.clear()
         }
+    }
+
+    @Transactional
+    fun oppdaterEndreteUtbetalingsandelerMedBegrunnelser(behandling: Behandling): MutableList<EndretUtbetalingAndel> {
+        val endredeUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(behandling.id)
+        val andelTilkjentYtelser = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id)
+
+        endredeUtbetalingAndeler.forEach {
+            val utvidetScenario =
+                andelTilkjentYtelser.hentUtvidetYtelseScenario(it.periode)
+
+            it.vedtakBegrunnelseSpesifikasjoner =
+                it.hentGyldigEndretBegrunnelser(
+                    brevKlient.hentSanityBegrunnelser(),
+                    utvidetScenario,
+                )
+        }
+
+        return endretUtbetalingAndelRepository.saveAll(endredeUtbetalingAndeler)
     }
 }

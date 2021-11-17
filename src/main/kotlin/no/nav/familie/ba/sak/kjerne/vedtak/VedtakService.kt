@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.kjerne.vedtak
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.dokument.DokumentService
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
@@ -61,10 +60,8 @@ class VedtakService(
     }
 
     fun oppdaterVedtakMedStønadsbrev(vedtak: Vedtak): Vedtak {
-        val skalSendesBrev =
-            !vedtak.behandling.erTekniskOpphør() &&
-                vedtak.behandling.opprettetÅrsak != BehandlingÅrsak.SATSENDRING
-        return if (skalSendesBrev) {
+
+        return if (vedtak.behandling.erBehandlingMedVedtaksbrevutsending()) {
             val brev = dokumentService.genererBrevForVedtak(vedtak)
             vedtakRepository.save(vedtak.also { it.stønadBrevPdF = brev })
         } else {
