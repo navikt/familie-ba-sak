@@ -53,8 +53,7 @@ class JournalførVedtaksbrev(
                 brevmal = hentBrevtype(behandling),
                 erManueltSendt = false
             ),
-            properties = data.task.metadata,
-            envService
+            properties = data.task.metadata
         )
         taskRepository.save(nyTask)
 

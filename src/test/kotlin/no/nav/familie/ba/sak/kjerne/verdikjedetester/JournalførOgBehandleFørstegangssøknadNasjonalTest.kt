@@ -183,7 +183,7 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
                         token(
                             mapOf(
                                 "groups" to listOf("SAKSBEHANDLER", "BESLUTTER"),
-                                "azp" to "e2e-test",
+                                "azp" to "azp-test",
                                 "name" to "Mock McMockface Beslutter",
                                 "preferred_username" to "mock.mcmockface.beslutter@nav.no"
                             )
@@ -363,7 +363,7 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
                         token(
                             mapOf(
                                 "groups" to listOf("SAKSBEHANDLER", "BESLUTTER"),
-                                "azp" to "e2e-test",
+                                "azp" to "azp-test",
                                 "name" to "Mock McMockface Beslutter",
                                 "preferred_username" to "mock.mcmockface.beslutter@nav.no"
                             )

@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.task
 
-import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.dokument.DokumentService
@@ -13,7 +12,6 @@ import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import org.springframework.stereotype.Service
-import java.time.LocalDateTime
 import java.util.Properties
 
 @Service
@@ -48,15 +46,14 @@ class DistribuerDokumentTask(
 
         fun opprettDistribuerDokumentTask(
             distribuerDokumentDTO: DistribuerDokumentDTO,
-            properties: Properties,
-            envService: EnvService?
+            properties: Properties
         ): Task {
             return Task(
                 type = TASK_STEP_TYPE,
                 payload = objectMapper.writeValueAsString(distribuerDokumentDTO),
                 properties = properties,
             ).copy(
-                triggerTid = if (envService != null && envService.erE2E()) LocalDateTime.now() else nesteGyldigeTriggertidForBehandlingIHverdager()
+                triggerTid = nesteGyldigeTriggertidForBehandlingIHverdager()
             )
         }
 

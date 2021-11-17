@@ -109,12 +109,3 @@ object VedtakUtils {
         return erDeltBostedOppfylt && erSkjønnsmessigVurderingOppfylt && erMedlemskapOppfylt
     }
 }
-
-fun validerAvslagsbegrunnelse(
-    triggesAv: TriggesAv,
-    vilkårResultat: VilkårResultat
-) {
-    if (triggesAv.vilkår.contains(vilkårResultat.vilkårType) != true) {
-        error("Avslagbegrunnelser som oppdateres må tilhøre samme vilkår")
-    }
-}

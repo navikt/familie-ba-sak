@@ -48,7 +48,6 @@ import no.nav.familie.ba.sak.kjerne.steg.JournalførVedtaksbrevDTO
 import no.nav.familie.ba.sak.kjerne.steg.StatusFraOppdragMedTask
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
-import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
@@ -339,15 +338,6 @@ fun nyOrdinærBehandling(søkersIdent: String, årsak: BehandlingÅrsak = Behand
         behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
         kategori = BehandlingKategori.NASJONAL,
         underkategori = BehandlingUnderkategori.ORDINÆR,
-        behandlingÅrsak = årsak
-    )
-
-fun nyUtvidetBehandling(søkersIdent: String, årsak: BehandlingÅrsak = BehandlingÅrsak.SØKNAD): NyBehandling =
-    NyBehandling(
-        søkersIdent = søkersIdent,
-        behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-        kategori = BehandlingKategori.NASJONAL,
-        underkategori = BehandlingUnderkategori.UTVIDET,
         behandlingÅrsak = årsak
     )
 
@@ -686,8 +676,7 @@ fun kjørStegprosessForRevurderingÅrligKontroll(
     søkerFnr: String,
     barnasIdenter: List<String>,
     vedtakService: VedtakService,
-    stegService: StegService,
-    tilbakekrevingService: TilbakekrevingService
+    stegService: StegService
 ): Behandling {
     val behandling = stegService.håndterNyBehandling(
         NyBehandling(

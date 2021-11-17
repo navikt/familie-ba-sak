@@ -10,7 +10,6 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.core.env.Environment
 import org.springframework.retry.annotation.Backoff
 import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Component
@@ -22,10 +21,8 @@ import java.net.URI
 @Component
 class InfotrygdFeedClient(
     @Value("\${FAMILIE_BA_INFOTRYGD_FEED_API_URL}") private val clientUri: URI,
-    @Qualifier("jwtBearer") restOperations: RestOperations,
-    private val environment: Environment
-) :
-    AbstractRestClient(restOperations, "infotrygd_feed") {
+    @Qualifier("jwtBearer") restOperations: RestOperations
+) : AbstractRestClient(restOperations, "infotrygd_feed") {
 
     fun sendFødselhendelsesFeedTilInfotrygd(infotrygdFødselhendelsesFeedDto: InfotrygdFødselhendelsesFeedDto) {
         return try {
@@ -73,9 +70,6 @@ class InfotrygdFeedClient(
         backoff = Backoff(delayExpression = RETRY_BACKOFF_5000MS),
     )
     private fun sendFeedTilInfotrygd(endpoint: URI, feed: Any) {
-        if (environment.activeProfiles.contains("e2e")) {
-            return
-        }
         postForEntity<Ressurs<String>>(endpoint, feed)
     }
 

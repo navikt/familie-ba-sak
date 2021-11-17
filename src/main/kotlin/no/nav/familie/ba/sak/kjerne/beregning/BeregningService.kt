@@ -86,10 +86,10 @@ class BeregningService(
         }.filter {
             personopplysningGrunnlagRepository
                 .findByBehandlingAndAktiv(behandlingId = it.behandling.id)
-                ?.barna?.map { it.personIdent }
+                ?.barna?.map { barn -> barn.personIdent }
                 ?.contains(barnIdent)
                 ?: false
-        }.mapNotNull { it }
+        }.map { it }
     }
 
     @Transactional
@@ -150,7 +150,7 @@ class BeregningService(
             utbetalingsoppdrag.utbetalingsperiode.isNotEmpty() && utbetalingsoppdrag.utbetalingsperiode.all { it.opphør != null }
         var opphørsdato: LocalDate? = null
         if (erRentOpphør) {
-            opphørsdato = utbetalingsoppdrag.utbetalingsperiode.map { it.opphør!!.opphørDatoFom }.minOrNull()!!
+            opphørsdato = utbetalingsoppdrag.utbetalingsperiode.minOf { it.opphør!!.opphørDatoFom }
         }
 
         if (behandling.type == BehandlingType.REVURDERING) {

@@ -78,7 +78,7 @@ class StegService(
             )
         } else if (nyBehandling.behandlingType == BehandlingType.REVURDERING || nyBehandling.behandlingType == BehandlingType.TEKNISK_ENDRING) {
             val sisteBehandling = behandlingService.hentSisteBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id)
-                ?: behandlingService.hentSisteBehandlingSomIkkeErHenlagt(behandling.fagsak.id)
+                ?: behandlingService.hentSisteBehandlingSomErVedtatt(behandling.fagsak.id)
                 ?: throw Feil("Forsøker å opprette en revurdering eller teknisk endring, men kan ikke finne tidligere behandling på fagsak ${behandling.fagsak.id}")
 
             val barnFraSisteBehandlingMedUtbetalinger =
@@ -103,20 +103,17 @@ class StegService(
         // hentEllerOpprettFagsak
         skyggesakService.opprettSkyggesak(nyBehandlingHendelse.morsIdent, fagsak.id)
 
-        val behandlingsType =
-            if (fagsak.status == FagsakStatus.LØPENDE) BehandlingType.REVURDERING else BehandlingType.FØRSTEGANGSBEHANDLING
-
-        val behandling = håndterNyBehandlingOgSendInfotrygdFeed(
+        return håndterNyBehandlingOgSendInfotrygdFeed(
             NyBehandling(
                 søkersIdent = nyBehandlingHendelse.morsIdent,
-                behandlingType = behandlingsType,
+                behandlingType = if (fagsak.status == FagsakStatus.LØPENDE)
+                    BehandlingType.REVURDERING
+                else BehandlingType.FØRSTEGANGSBEHANDLING,
                 behandlingÅrsak = BehandlingÅrsak.FØDSELSHENDELSE,
                 skalBehandlesAutomatisk = true,
                 barnasIdenter = nyBehandlingHendelse.barnasIdenter
             )
         )
-
-        return behandling
     }
 
     @Transactional
@@ -385,7 +382,7 @@ class StegService(
     }
 
     private fun initStegMetrikker(type: String): Map<StegType, Counter> {
-        return steg.map {
+        return steg.associate {
             it.stegType() to Metrics.counter(
                 "behandling.steg.$type",
                 "steg",
@@ -393,7 +390,7 @@ class StegService(
                 "beskrivelse",
                 it.stegType().rekkefølge.toString() + " " + it.stegType().displayName()
             )
-        }.toMap()
+        }
     }
 
     companion object {

@@ -131,13 +131,13 @@ class BehandlingService(
         manueltOppdatert: Boolean = false
     ): Behandling {
 
-        val nyKategori = bestemKategori(
+        val utledetKategori = bestemKategori(
             behandlingÅrsak = behandling.opprettetÅrsak,
             nyBehandlingKategori = nyKategori,
             løpendeBehandlingKategori = hentLøpendeKategori(fagsakId = behandling.fagsak.id)
         )
 
-        val nyUnderkategori: BehandlingUnderkategori =
+        val utledetUnderkategori: BehandlingUnderkategori =
             if (manueltOppdatert) nyUnderkategori
             else bestemUnderkategori(
                 nyUnderkategori = nyUnderkategori,
@@ -145,18 +145,18 @@ class BehandlingService(
                 løpendeUnderkategori = hentLøpendeUnderkategori(fagsakId = behandling.fagsak.id)
             )
 
-        sjekkToggleOgThrowHvisBrudd(nyKategori, nyUnderkategori)
+        sjekkToggleOgThrowHvisBrudd(utledetKategori, utledetUnderkategori)
 
         val forrigeUnderkategori = behandling.underkategori
         val forrigeKategori = behandling.kategori
-        val skalOppdatereKategori = nyKategori != forrigeKategori
-        val skalOppdatereUnderkategori = nyUnderkategori != forrigeUnderkategori
+        val skalOppdatereKategori = utledetKategori != forrigeKategori
+        val skalOppdatereUnderkategori = utledetUnderkategori != forrigeUnderkategori
 
         if (skalOppdatereKategori) {
-            behandling.apply { kategori = nyKategori }
+            behandling.apply { kategori = utledetKategori }
         }
         if (skalOppdatereUnderkategori) {
-            behandling.apply { underkategori = nyUnderkategori }
+            behandling.apply { underkategori = utledetUnderkategori }
         }
 
         return lagreEllerOppdater(behandling).also { lagretBehandling ->
@@ -174,8 +174,8 @@ class BehandlingService(
                     behandling = lagretBehandling,
                     forrigeKategori = forrigeKategori,
                     forrigeUnderkategori = forrigeUnderkategori,
-                    nyKategori = nyKategori,
-                    nyUnderkategori = nyUnderkategori
+                    nyKategori = utledetKategori,
+                    nyUnderkategori = utledetUnderkategori
                 )
             }
         }
@@ -255,12 +255,6 @@ class BehandlingService(
         return behandlingRepository.finnIverksatteBehandlinger(fagsakId = fagsakId)
     }
 
-    fun hentSisteBehandlingSomIkkeErHenlagt(fagsakId: Long): Behandling? {
-        return behandlingRepository.finnBehandlinger(fagsakId)
-            .filter { !it.erHenlagt() }
-            .maxByOrNull { it.opprettetTidspunkt }
-    }
-
     /**
      * Henter siste iverksatte behandling på fagsak
      */
@@ -283,11 +277,27 @@ class BehandlingService(
             } ?: emptyList()
 
     /**
-     * Henter siste iverksatte behandling FØR en gitt behandling
+     * Henter siste iverksatte behandling FØR en gitt behandling.
+     * Bør kun brukes i forbindelse med oppdrag mot økonomisystemet
+     * eller ved behandlingsresultat.
      */
     fun hentForrigeBehandlingSomErIverksatt(behandling: Behandling): Behandling? {
         val iverksatteBehandlinger = hentIverksatteBehandlinger(behandling.fagsak.id)
         return Behandlingutils.hentForrigeIverksatteBehandling(iverksatteBehandlinger, behandling)
+    }
+
+    fun hentSisteBehandlingSomErVedtatt(fagsakId: Long): Behandling? {
+        return behandlingRepository.finnBehandlinger(fagsakId)
+            .filter { !it.erHenlagt() && it.status == AVSLUTTET }
+            .maxByOrNull { it.opprettetTidspunkt }
+    }
+
+    /**
+     * Henter siste behandling som er vedtatt FØR en gitt behandling
+     */
+    fun hentForrigeBehandlingSomErVedtatt(behandling: Behandling): Behandling? {
+        val behandlinger = behandlingRepository.finnBehandlinger(behandling.fagsak.id)
+        return Behandlingutils.hentForrigeBehandlingSomErVedtatt(behandlinger, behandling)
     }
 
     fun lagreEllerOppdater(behandling: Behandling, sendTilDvh: Boolean = true): Behandling {

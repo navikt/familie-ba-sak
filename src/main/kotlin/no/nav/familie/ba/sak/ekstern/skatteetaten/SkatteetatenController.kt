@@ -32,9 +32,6 @@ class SkatteetatenController(
     private val featureToggleService: FeatureToggleService
 ) {
 
-    private val logger = LoggerFactory.getLogger(this::class.java)
-    private val secureLogger = LoggerFactory.getLogger("secureLogger")
-
     @GetMapping(
         value = ["/personer"],
         produces = ["application/json;charset=UTF-8"]
@@ -164,5 +161,9 @@ class SkatteetatenController(
                 )
             ),
         )
+    }
+
+    companion object {
+        private val logger = LoggerFactory.getLogger(SkatteetatenController::class.java)
     }
 }
