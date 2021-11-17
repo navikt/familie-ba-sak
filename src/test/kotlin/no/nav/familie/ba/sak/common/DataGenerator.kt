@@ -51,6 +51,7 @@ import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
@@ -985,4 +986,34 @@ fun lagRestSanityBegrunnelse(
     hjemler = hjemler,
     endretUtbetalingsperiodeDeltBostedTriggere = endretUtbetalingsperiodeDeltBostedTriggere,
     endretUtbetalingsperiodeTriggere = endretUtbetalingsperiodeTriggere,
+)
+
+fun lagTriggesAv(
+    vilkår: Set<Vilkår> = emptySet(),
+    personTyper: Set<PersonType> = setOf(PersonType.BARN, PersonType.SØKER),
+    personerManglerOpplysninger: Boolean = false,
+    satsendring: Boolean = false,
+    barnMedSeksårsdag: Boolean = false,
+    vurderingAnnetGrunnlag: Boolean = false,
+    medlemskap: Boolean = false,
+    deltbosted: Boolean = false,
+    valgbar: Boolean = true,
+    endringsaarsaker: Set<Årsak> = emptySet(),
+    etterEndretUtbetaling: Boolean = false,
+    endretUtbetaingSkalUtbetales: Boolean = false,
+    småbarnstillegg: Boolean = false
+): TriggesAv = TriggesAv(
+    vilkår = vilkår,
+    personTyper = personTyper,
+    personerManglerOpplysninger = personerManglerOpplysninger,
+    satsendring = satsendring,
+    barnMedSeksårsdag = barnMedSeksårsdag,
+    vurderingAnnetGrunnlag = vurderingAnnetGrunnlag,
+    medlemskap = medlemskap,
+    deltbosted = deltbosted,
+    valgbar = valgbar,
+    endringsaarsaker = endringsaarsaker,
+    etterEndretUtbetaling = etterEndretUtbetaling,
+    endretUtbetaingSkalUtbetales = endretUtbetaingSkalUtbetales,
+    småbarnstillegg = småbarnstillegg,
 )

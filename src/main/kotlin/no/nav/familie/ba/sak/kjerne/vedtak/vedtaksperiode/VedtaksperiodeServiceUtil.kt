@@ -222,9 +222,10 @@ fun triggereForUtvidetBarnetrygdErOppfylt(
         when (vedtakBegrunnelseType) {
             VedtakBegrunnelseType.INNVILGET -> ytelseTyper.contains(YtelseType.SMÅBARNSTILLEGG)
             VedtakBegrunnelseType.REDUKSJON ->
-                andelerTilkjentYtelse
-                    .filter { it.stønadTom.sisteDagIInneværendeMåned().erDagenFør(fomForPeriode) }
-                    .any { it.type == YtelseType.SMÅBARNSTILLEGG }
+                !ytelseTyper.contains(YtelseType.SMÅBARNSTILLEGG) &&
+                    andelerTilkjentYtelse
+                        .filter { it.stønadTom.sisteDagIInneværendeMåned().erDagenFør(fomForPeriode) }
+                        .any { it.type == YtelseType.SMÅBARNSTILLEGG }
             else -> false
         }
     } else if (triggesAv.vilkår.contains(Vilkår.UTVIDET_BARNETRYGD) &&
