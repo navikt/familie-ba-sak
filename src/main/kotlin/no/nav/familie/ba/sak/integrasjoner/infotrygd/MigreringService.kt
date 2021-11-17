@@ -248,19 +248,19 @@ class MigreringService(
     }
 
     private fun finnFørsteUtbetalingsperiode(behandlingId: Long): LocalDateSegment<Int> {
-        return tilkjentYtelseRepository.findByBehandlingOptional(behandlingId)
-            ?.andelerTilkjentYtelse?.let { andelerTilkjentYtelse: MutableSet<AndelTilkjentYtelse> ->
-            if (andelerTilkjentYtelse.isEmpty()) throw Feil(
-                "Migrering feilet: Fant ingen andeler tilkjent ytelse på behandlingen",
-                "Migrering feilet: Fant ingen andeler tilkjent ytelse på behandlingen",
-                HttpStatus.INTERNAL_SERVER_ERROR
-            )
+        return tilkjentYtelseRepository.findByBehandlingOptional(behandlingId)?.andelerTilkjentYtelse
+            ?.let { andelerTilkjentYtelse: MutableSet<AndelTilkjentYtelse> ->
+                if (andelerTilkjentYtelse.isEmpty()) throw Feil(
+                    "Migrering feilet: Fant ingen andeler tilkjent ytelse på behandlingen",
+                    "Migrering feilet: Fant ingen andeler tilkjent ytelse på behandlingen",
+                    HttpStatus.INTERNAL_SERVER_ERROR
+                )
 
-            val førsteUtbetalingsperiode = beregnUtbetalingsperioderUtenKlassifisering(andelerTilkjentYtelse)
-                .sortedWith(compareBy<LocalDateSegment<Int>>({ it.fom }, { it.value }, { it.tom }))
-                .first()
-            førsteUtbetalingsperiode
-        } ?: throw Feil(
+                val førsteUtbetalingsperiode = beregnUtbetalingsperioderUtenKlassifisering(andelerTilkjentYtelse)
+                    .sortedWith(compareBy<LocalDateSegment<Int>>({ it.fom }, { it.value }, { it.tom }))
+                    .first()
+                førsteUtbetalingsperiode
+            } ?: throw Feil(
             "Migrering feilet: Tilkjent ytelse er null.",
             "Migrering feilet: Tilkjent ytelse er null.",
             HttpStatus.INTERNAL_SERVER_ERROR
@@ -276,9 +276,9 @@ class MigreringService(
 
         if (førsteUtbetalingsbeløp != beløpFraInfotrygd) throw Feil(
             "Migrering feilet: Nytt, beregnet beløp var ulikt beløp fra Infotrygd " +
-                    "($førsteUtbetalingsbeløp =/= $beløpFraInfotrygd)",
+                "($førsteUtbetalingsbeløp =/= $beløpFraInfotrygd)",
             "Migrering feilet: Nytt, beregnet beløp var ulikt beløp fra Infotrygd " +
-                    "($førsteUtbetalingsbeløp =/= $beløpFraInfotrygd)",
+                "($førsteUtbetalingsbeløp =/= $beløpFraInfotrygd)",
             HttpStatus.INTERNAL_SERVER_ERROR
         )
     }
