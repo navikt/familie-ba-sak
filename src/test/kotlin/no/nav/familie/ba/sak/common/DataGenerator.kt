@@ -65,6 +65,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurderingType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
@@ -888,6 +889,7 @@ fun lagVilkårResultat(
     begrunnelse: String = "",
     behandlingId: Long = lagBehandling().id,
     erMedlemskapVurdert: Boolean = false,
+    utdypendeVilkårsvurderinger: List<UtdypendeVilkårsvurdering> = emptyList()
 ) = VilkårResultat(
     personResultat = personResultat,
     vilkårType = vilkårType,
@@ -897,6 +899,9 @@ fun lagVilkårResultat(
     begrunnelse = begrunnelse,
     behandlingId = behandlingId,
     erMedlemskapVurdert = erMedlemskapVurdert,
+    utdypendeVilkårsvurderinger = (
+        utdypendeVilkårsvurderinger + listOfNotNull(if (erMedlemskapVurdert) UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP else null)
+        ).distinct()
 )
 
 val guttenBarnesenFødselsdato = LocalDate.now().withDayOfMonth(10).minusYears(6)
