@@ -96,6 +96,8 @@ fun genererVedtaksperioderMedBegrunnelser(
     månedPerioder: List<MånedPeriode>,
     vedtaksperiodetype: Vedtaksperiodetype
 ): List<VedtaksperiodeMedBegrunnelser> {
+    val vedtakBegrunnelseSpesifikasjon = hentVedtakBegrunnelseSpesifikasjonForSmåbarnstillegg(vedtaksperiodetype)
+
     return månedPerioder.map { månedPeriode ->
         val vedtaksperiodeMedBegrunnelser =
             vedtaksperioderMedBegrunnelser.find {
@@ -106,12 +108,14 @@ fun genererVedtaksperioderMedBegrunnelser(
 
         if (vedtaksperiodeMedBegrunnelser != null) {
             vedtaksperiodeMedBegrunnelser.settBegrunnelser(
-                (vedtaksperiodeMedBegrunnelser.begrunnelser +
-                    Vedtaksbegrunnelse(
-                        vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
-                        vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.REDUKSJON_SAMBOER_MER_ENN_12_MÅNEDER,
-                        personIdenter = listOf(søkersIdent)
-                    )).toList()
+                (
+                    vedtaksperiodeMedBegrunnelser.begrunnelser +
+                        Vedtaksbegrunnelse(
+                            vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
+                            vedtakBegrunnelseSpesifikasjon = vedtakBegrunnelseSpesifikasjon,
+                            personIdenter = listOf(søkersIdent)
+                        )
+                    ).toList()
             )
 
             vedtaksperiodeMedBegrunnelser
@@ -126,7 +130,7 @@ fun genererVedtaksperioderMedBegrunnelser(
                     begrunnelser.add(
                         Vedtaksbegrunnelse(
                             vedtaksperiodeMedBegrunnelser = this,
-                            vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.REDUKSJON_SAMBOER_MER_ENN_12_MÅNEDER,
+                            vedtakBegrunnelseSpesifikasjon = vedtakBegrunnelseSpesifikasjon,
                             personIdenter = listOf(søkersIdent)
                         )
                     )
@@ -134,3 +138,6 @@ fun genererVedtaksperioderMedBegrunnelser(
         }
     }
 }
+
+fun hentVedtakBegrunnelseSpesifikasjonForSmåbarnstillegg(vedtaksperiodetype: Vedtaksperiodetype) =
+    if (vedtaksperiodetype == Vedtaksperiodetype.UTBETALING) VedtakBegrunnelseSpesifikasjon.INNVILGET_SMÅBARNSTILLEGG else VedtakBegrunnelseSpesifikasjon.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_FULL_OVERGANGSSTØNAD

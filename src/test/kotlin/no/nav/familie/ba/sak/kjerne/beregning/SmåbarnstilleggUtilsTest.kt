@@ -64,6 +64,18 @@ class SmåbarnstilleggUtilsTest {
     }
 
     @Test
+    fun `Skal velge riktig begrunnelse basert på vedtaksperiodetype`() {
+        assertEquals(
+            VedtakBegrunnelseSpesifikasjon.INNVILGET_SMÅBARNSTILLEGG,
+            hentVedtakBegrunnelseSpesifikasjonForSmåbarnstillegg(vedtaksperiodetype = Vedtaksperiodetype.UTBETALING)
+        )
+        assertEquals(
+            VedtakBegrunnelseSpesifikasjon.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_FULL_OVERGANGSSTØNAD,
+            hentVedtakBegrunnelseSpesifikasjonForSmåbarnstillegg(vedtaksperiodetype = Vedtaksperiodetype.OPPHØR)
+        )
+    }
+
+    @Test
     fun `Skal svare false om at nye perioder med full OS påvirker behandling`() {
         val personIdent = randomFnr()
 
@@ -229,16 +241,19 @@ class SmåbarnstilleggUtilsTest {
         val vedtaksperioder = utledVedtaksperioderTilAutovedtakVedOSVedtak(
             vedtaksperioderMedBegrunnelser = listOf(
                 lagVedtaksperiodeMedBegrunnelser(
+                    begrunnelser = mutableSetOf(),
                     fom = forrigeFom.førsteDagIInneværendeMåned(),
                     tom = nyFom.forrigeMåned().sisteDagIInneværendeMåned(),
                     type = Vedtaksperiodetype.OPPHØR
                 ),
                 lagVedtaksperiodeMedBegrunnelser(
+                    begrunnelser = mutableSetOf(),
                     fom = forrigeFom.førsteDagIInneværendeMåned(),
                     tom = nyFom.forrigeMåned().sisteDagIInneværendeMåned(),
                     type = Vedtaksperiodetype.UTBETALING
                 ),
                 lagVedtaksperiodeMedBegrunnelser(
+                    begrunnelser = mutableSetOf(),
                     fom = nyFom.førsteDagIInneværendeMåned(),
                     tom = forrigeTom.sisteDagIInneværendeMåned(),
                     type = Vedtaksperiodetype.UTBETALING
@@ -274,9 +289,9 @@ class SmåbarnstilleggUtilsTest {
     ) {
         val reduksjonsperiode = vedtaksperioder.find { it.fom == fom && it.tom == tom && it.type == vedtaksperiodetype }
         assertNotNull(reduksjonsperiode)
-        when (vedtaksperiodetype) {
-            Vedtaksperiodetype.OPPHØR -> reduksjonsperiode?.begrunnelser?.any { it.vedtakBegrunnelseSpesifikasjon == VedtakBegrunnelseSpesifikasjon.REDUKSJON_SAMBOER_MER_ENN_12_MÅNEDER }
-            Vedtaksperiodetype.UTBETALING -> reduksjonsperiode?.begrunnelser?.any { it.vedtakBegrunnelseSpesifikasjon == VedtakBegrunnelseSpesifikasjon.INNVILGET_BOR_HOS_SØKER }
-        }
+        assertEquals(
+            hentVedtakBegrunnelseSpesifikasjonForSmåbarnstillegg(vedtaksperiodetype),
+            reduksjonsperiode?.begrunnelser?.single()?.vedtakBegrunnelseSpesifikasjon
+        )
     }
 }
