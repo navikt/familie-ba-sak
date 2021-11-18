@@ -273,10 +273,10 @@ fun List<AndelTilkjentYtelse>.hentUtvidetYtelseScenario(
     else -> UtvidetScenario.UTVIDET_YTELSE_IKKE_ENDRET
 }
 
-fun List<AndelTilkjentYtelse>.erLik(andreAndeler: List<AndelTilkjentYtelse>): Boolean {
-    if (this.size != andreAndeler.size) return false
+fun List<AndelTilkjentYtelse>.erUlike(andreAndeler: List<AndelTilkjentYtelse>): Boolean {
+    if (this.size != andreAndeler.size) return true
 
-    return this.all { andel -> andreAndeler.any { andel.erTilsvarendeForUtbetaling(it) } }
+    return this.any { andel -> andreAndeler.any { !andel.erTilsvarendeForUtbetaling(it) } }
 }
 
 enum class YtelseType(val klassifisering: String) {

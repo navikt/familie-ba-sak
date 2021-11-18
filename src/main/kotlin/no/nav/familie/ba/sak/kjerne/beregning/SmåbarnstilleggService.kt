@@ -6,7 +6,7 @@ import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.`ef-sak`.EfSakRestClient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
-import no.nav.familie.ba.sak.kjerne.beregning.domene.erLik
+import no.nav.familie.ba.sak.kjerne.beregning.domene.erUlike
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
@@ -100,5 +100,5 @@ fun vedtakOmOvergangsstønadPåvirkerFagsak(
         barnasFødselsdatoer = barnasFødselsdatoer
     )
 
-    return forrigeSøkersSmåbarnstilleggAndeler.erLik(nyeSmåbarnstilleggAndeler)
+    return forrigeSøkersSmåbarnstilleggAndeler.erUlike(nyeSmåbarnstilleggAndeler)
 }
