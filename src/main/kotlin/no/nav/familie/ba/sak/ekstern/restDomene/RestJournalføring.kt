@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.ekstern.restDomene
 
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.AvsenderMottaker
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.Bruker
+import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.IdType
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.OppdaterJournalpostRequest
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
@@ -40,7 +41,8 @@ data class RestJournalføring(
     fun oppdaterMedDokumentOgSak(sak: Sak): OppdaterJournalpostRequest {
         return OppdaterJournalpostRequest(
             avsenderMottaker = AvsenderMottaker(
-                this.avsender.id,
+                id = if (this.avsender.id != "") this.avsender.id else null,
+                idType = if (this.avsender.id != "") IdType.FNR else null,
                 navn = this.avsender.navn
             ),
             bruker = Bruker(

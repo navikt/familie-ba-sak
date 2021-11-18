@@ -21,7 +21,7 @@ class Bruker(
 )
 
 data class AvsenderMottaker(
-    val id: String,
+    val id: String?,
     val idType: IdType? = IdType.FNR,
     val navn: String
 )
