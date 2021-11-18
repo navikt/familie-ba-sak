@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
 import no.nav.familie.ba.sak.common.lagSøknadDTO
+import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.ekstern.restDomene.RestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
@@ -88,11 +89,8 @@ class EndretUtbetalingAndelMedUtvidetAndelTest(
             behandlingId = restBehandlingEtterRegistrertSøknad.data?.behandlingId!!
         ).data!!
 
-        val andelerTilkjentYtelse =
-            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = restBehandlingEtterBehandlingsresultat.behandlingId)
-
-        val endretFom = andelerTilkjentYtelse.last().stønadFom
-        val endretTom = andelerTilkjentYtelse.last().stønadTom.minusMonths(2)
+        val endretFom = barnFødselsdato.nesteMåned()
+        val endretTom = endretFom.plusMonths(2)
 
         val restEndretUtbetalingAndelUtvidetBarnetrygd = RestEndretUtbetalingAndel(
             id = null,

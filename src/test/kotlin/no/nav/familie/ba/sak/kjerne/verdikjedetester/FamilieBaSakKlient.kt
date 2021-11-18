@@ -175,7 +175,8 @@ class FamilieBaSakKlient(
         val uriPost = URI.create("$baSakUrl/api/endretutbetalingandel/$behandlingId")
         val restUtvidetBehandling = postForEntity<Ressurs<RestUtvidetBehandling>>(uriPost, "", headers)
 
-        val endretUtbetalingAndelId = restUtvidetBehandling.data!!.endretUtbetalingAndeler.first().id
+        val endretUtbetalingAndelId =
+            restUtvidetBehandling.data!!.endretUtbetalingAndeler.first { it.tom == null && it.fom == null }.id
         val uriPut = URI.create("$baSakUrl/api/endretutbetalingandel/$behandlingId/$endretUtbetalingAndelId")
 
         return putForEntity(uriPut, restEndretUtbetalingAndel, headers)

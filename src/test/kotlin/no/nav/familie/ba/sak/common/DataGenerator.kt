@@ -50,6 +50,7 @@ import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
@@ -65,6 +66,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurderingType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
@@ -888,6 +890,7 @@ fun lagVilkårResultat(
     begrunnelse: String = "",
     behandlingId: Long = lagBehandling().id,
     erMedlemskapVurdert: Boolean = false,
+    utdypendeVilkårsvurderinger: List<UtdypendeVilkårsvurdering> = emptyList()
 ) = VilkårResultat(
     personResultat = personResultat,
     vilkårType = vilkårType,
@@ -897,6 +900,9 @@ fun lagVilkårResultat(
     begrunnelse = begrunnelse,
     behandlingId = behandlingId,
     erMedlemskapVurdert = erMedlemskapVurdert,
+    utdypendeVilkårsvurderinger = (
+        utdypendeVilkårsvurderinger + listOfNotNull(if (erMedlemskapVurdert) UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP else null)
+        ).distinct()
 )
 
 val guttenBarnesenFødselsdato = LocalDate.now().withDayOfMonth(10).minusYears(6)
@@ -974,4 +980,34 @@ fun lagRestSanityBegrunnelse(
     hjemler = hjemler,
     endretUtbetalingsperiodeDeltBostedTriggere = endretUtbetalingsperiodeDeltBostedTriggere,
     endretUtbetalingsperiodeTriggere = endretUtbetalingsperiodeTriggere,
+)
+
+fun lagTriggesAv(
+    vilkår: Set<Vilkår> = emptySet(),
+    personTyper: Set<PersonType> = setOf(PersonType.BARN, PersonType.SØKER),
+    personerManglerOpplysninger: Boolean = false,
+    satsendring: Boolean = false,
+    barnMedSeksårsdag: Boolean = false,
+    vurderingAnnetGrunnlag: Boolean = false,
+    medlemskap: Boolean = false,
+    deltbosted: Boolean = false,
+    valgbar: Boolean = true,
+    endringsaarsaker: Set<Årsak> = emptySet(),
+    etterEndretUtbetaling: Boolean = false,
+    endretUtbetaingSkalUtbetales: Boolean = false,
+    småbarnstillegg: Boolean = false
+): TriggesAv = TriggesAv(
+    vilkår = vilkår,
+    personTyper = personTyper,
+    personerManglerOpplysninger = personerManglerOpplysninger,
+    satsendring = satsendring,
+    barnMedSeksårsdag = barnMedSeksårsdag,
+    vurderingAnnetGrunnlag = vurderingAnnetGrunnlag,
+    medlemskap = medlemskap,
+    deltbosted = deltbosted,
+    valgbar = valgbar,
+    endringsaarsaker = endringsaarsaker,
+    etterEndretUtbetaling = etterEndretUtbetaling,
+    endretUtbetaingSkalUtbetales = endretUtbetaingSkalUtbetales,
+    småbarnstillegg = småbarnstillegg,
 )

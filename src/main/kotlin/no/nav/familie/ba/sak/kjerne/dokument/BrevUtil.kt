@@ -48,6 +48,7 @@ import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.domene.Totrinnskontroll
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.hjemlerTilhørendeFritekst
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Begrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.byggBegrunnelserOgFritekster
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtvidetVedtaksperiodeMedBegrunnelser
