@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.kjerne.beregning
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.forrigeMåned
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
-import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
@@ -112,13 +111,10 @@ class SmåbarnstilleggUtilsTest {
             ),
         )
 
-        val (innvilgelseperioder, reduksjonsperioder) = hentEndredePerioderISmåbarnstillegg(
+        val reduksjonsperioder = hentReduserteAndelerSmåbarnstillegg(
             forrigeSmåbarnstilleggAndeler = forrigeAndeler,
             nyeSmåbarnstilleggAndeler = nyeAndeler
         )
-
-        assertEquals(forrigeTom.nesteMåned(), innvilgelseperioder.first().fom)
-        assertEquals(nyTom, innvilgelseperioder.first().tom)
 
         assertEquals(forrigeFom, reduksjonsperioder.first().fom)
         assertEquals(nyFom.forrigeMåned(), reduksjonsperioder.first().tom)

@@ -28,10 +28,10 @@ fun vedtakOmOvergangsstønadPåvirkerFagsak(
     return forrigeSøkersSmåbarnstilleggAndeler.erUlike(nyeSmåbarnstilleggAndeler)
 }
 
-fun hentEndredePerioderISmåbarnstillegg(
+fun hentReduserteAndelerSmåbarnstillegg(
     forrigeSmåbarnstilleggAndeler: List<AndelTilkjentYtelse>,
     nyeSmåbarnstilleggAndeler: List<AndelTilkjentYtelse>,
-): Pair<List<MånedPeriode>, List<MånedPeriode>> {
+): List<MånedPeriode> {
     val forrigeAndelerTidslinje = LocalDateTimeline(
         forrigeSmåbarnstilleggAndeler.map {
             LocalDateSegment(
@@ -51,11 +51,7 @@ fun hentEndredePerioderISmåbarnstillegg(
         }
     )
 
-    val segmenterLagtTil = andelerTidslinje.disjoint(forrigeAndelerTidslinje)
     val segmenterFjernet = forrigeAndelerTidslinje.disjoint(andelerTidslinje)
 
-    return Pair(
-        segmenterLagtTil.toSegments().map { MånedPeriode(fom = it.fom.toYearMonth(), tom = it.tom.toYearMonth()) },
-        segmenterFjernet.toSegments().map { MånedPeriode(fom = it.fom.toYearMonth(), tom = it.tom.toYearMonth()) }
-    )
+    return segmenterFjernet.toSegments().map { MånedPeriode(fom = it.fom.toYearMonth(), tom = it.tom.toYearMonth()) }
 }

@@ -153,8 +153,9 @@ data class Behandling(
     fun skalRettFraBehandlingsresultatTilIverksetting(): Boolean {
         return when {
             skalBehandlesAutomatisk && erOmregning() && resultat == BehandlingResultat.FORTSATT_INNVILGET -> true
-            skalBehandlesAutomatisk && resultat == BehandlingResultat.INNVILGET -> true
+            skalBehandlesAutomatisk && erFødselshendelse() && resultat == BehandlingResultat.INNVILGET -> true
             skalBehandlesAutomatisk && erSatsendring() && resultat == BehandlingResultat.ENDRET -> true
+            skalBehandlesAutomatisk && erSmåbarnstillegg() && (resultat == BehandlingResultat.ENDRET || resultat == BehandlingResultat.INNVILGET) -> true
             else -> false
         }
     }
@@ -205,6 +206,10 @@ data class Behandling(
         this.opprettetÅrsak == BehandlingÅrsak.OMREGNING_6ÅR || this.opprettetÅrsak == BehandlingÅrsak.OMREGNING_18ÅR
 
     private fun erSatsendring() = this.opprettetÅrsak == BehandlingÅrsak.SATSENDRING
+
+    private fun erSmåbarnstillegg() = this.opprettetÅrsak == BehandlingÅrsak.SMÅBARNSTILLEGG
+
+    private fun erFødselshendelse() = this.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE
 
     fun hentYtelseTypeTilVilkår(): YtelseType = when (underkategori) {
         BehandlingUnderkategori.UTVIDET -> YtelseType.UTVIDET_BARNETRYGD
@@ -276,6 +281,7 @@ enum class BehandlingÅrsak(val visningsnavn: String) {
     KORREKSJON_VEDTAKSBREV("Korrigere vedtak med egen brevmal"),
     OMREGNING_6ÅR("Omregning 6 år"),
     OMREGNING_18ÅR("Omregning 18 år"),
+    SMÅBARNSTILLEGG("Småbarnstillegg"),
     SATSENDRING("Satsendring"),
     MIGRERING("Migrering"),
 }

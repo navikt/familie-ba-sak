@@ -49,7 +49,9 @@ class SmåbarnstilleggService(
         val tilkjentYtelseFraSistIverksatteBehandling =
             tilkjentYtelseRepository.findByBehandling(behandlingId = sistIverksatteBehandling.id)
 
-        val forrigeSøkersAndeler = tilkjentYtelseFraSistIverksatteBehandling.andelerTilkjentYtelse.toList()
+        val forrigeSøkersAndeler =
+            tilkjentYtelseFraSistIverksatteBehandling.andelerTilkjentYtelse.filter { it.erSøkersAndel() }
+                .toList()
 
         val persongrunnlagFraSistIverksatteBehandling =
             persongrunnlagService.hentAktiv(behandlingId = sistIverksatteBehandling.id)

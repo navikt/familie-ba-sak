@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.verdikjedetester
 import io.mockk.every
 import no.nav.familie.ba.sak.common.lagSøknadDTO
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.config.EfSakRestClientMock
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedStandardbegrunnelser
@@ -13,15 +14,18 @@ import no.nav.familie.ba.sak.integrasjoner.`ef-sak`.EfSakRestClient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService.sisteSmåbarnstilleggSatsTilTester
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService.sisteUtvidetSatsTilTester
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService.tilleggOrdinærSatsTilTester
+import no.nav.familie.ba.sak.kjerne.beregning.VedtakOmOvergangsstønadService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
@@ -33,7 +37,12 @@ import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad
 import no.nav.familie.kontrakter.felles.ef.PerioderOvergangsstønadResponse
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotEquals
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.MethodOrderer
+import org.junit.jupiter.api.Order
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestMethodOrder
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
 import org.springframework.test.annotation.DirtiesContext
@@ -41,23 +50,26 @@ import java.time.LocalDate
 
 // Todo. Bruker every. Dette endrer funksjonalliteten for alle klasser.
 @DirtiesContext
-class BehandleFørstegangssøknadSmåbarnstilleggTest(
+@TestMethodOrder(MethodOrderer.OrderAnnotation::class)
+class BehandleSmåbarnstilleggTest(
     @Autowired private val fagsakService: FagsakService,
     @Autowired private val behandlingService: BehandlingService,
     @Autowired private val vedtakService: VedtakService,
     @Autowired private val stegService: StegService,
     @Autowired private val featureToggleService: FeatureToggleService,
     @Autowired private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
-    @Autowired private val efSakRestClient: EfSakRestClient
+    @Autowired private val efSakRestClient: EfSakRestClient,
+    @Autowired private val vedtakOmOvergangsstønadService: VedtakOmOvergangsstønadService
 ) : AbstractVerdikjedetest(efSakRestClient = efSakRestClient) {
 
-    @Test
-    fun `Skal behandle utvidet nasjonal sak med småbarnstillegg`() {
-        every { featureToggleService.isEnabled(any()) } returns true
+    private val barnFødselsdato = LocalDate.now().minusYears(3)
+    private val periodeMedFullOvergangsstønadFom = barnFødselsdato.plusYears(1)
 
-        val barnFødselsdato = LocalDate.now().minusYears(3)
+    lateinit var scenario: RestScenario
 
-        val scenario = mockServerKlient().lagScenario(
+    @BeforeAll
+    fun init() {
+        scenario = mockServerKlient().lagScenario(
             RestScenario(
                 søker = RestScenarioPerson(fødselsdato = "1996-01-12", fornavn = "Mor", etternavn = "Søker"),
                 barna = listOf(
@@ -70,10 +82,15 @@ class BehandleFørstegangssøknadSmåbarnstilleggTest(
                 )
             )
         )
+    }
+
+    @Test
+    @Order(1)
+    fun `Skal behandle utvidet nasjonal sak med småbarnstillegg`() {
+        every { featureToggleService.isEnabled(any()) } returns true
 
         val søkersIdent = scenario.søker.ident!!
 
-        val periodeMedFullOvergangsstønadFom = barnFødselsdato.plusYears(1)
         every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns PerioderOvergangsstønadResponse(
             perioder = listOf(
                 PeriodeOvergangsstønad(
@@ -95,7 +112,7 @@ class BehandleFørstegangssøknadSmåbarnstilleggTest(
         val restRegistrerSøknad =
             RestRegistrerSøknad(
                 søknad = lagSøknadDTO(
-                    søkerIdent = scenario.søker.ident,
+                    søkerIdent = søkersIdent,
                     barnasIdenter = scenario.barna.map { it.ident!! },
                     underkategori = BehandlingUnderkategori.UTVIDET
                 ),
@@ -231,7 +248,64 @@ class BehandleFørstegangssøknadSmåbarnstilleggTest(
 
         håndterIverksettingAvBehandling(
             behandlingEtterVurdering = behandlingService.hentAktivForFagsak(fagsakId = fagsak.data!!.id)!!,
-            søkerFnr = scenario.søker.ident,
+            søkerFnr = søkersIdent,
+            fagsakService = fagsakService,
+            vedtakService = vedtakService,
+            stegService = stegService
+        )
+    }
+
+    @Test
+    @Order(2)
+    fun `Skal ikke opprette behandling når det ikke finnes endringer på perioder med full overgangsstønad`() {
+        val søkersIdent = scenario.søker.ident!!
+        vedtakOmOvergangsstønadService.håndterVedtakOmOvergangsstønad(personIdent = søkersIdent)
+        val fagsak = fagsakService.hentFagsakPåPerson(identer = setOf(PersonIdent(søkersIdent)))
+        val aktivBehandling = behandlingService.hentAktivForFagsak(fagsakId = fagsak!!.id)!!
+
+        assertEquals(BehandlingStatus.AVSLUTTET, aktivBehandling.status)
+        assertNotEquals(BehandlingÅrsak.SMÅBARNSTILLEGG, aktivBehandling.opprettetÅrsak)
+    }
+
+    @Test
+    @Order(3)
+    fun `Skal automatisk endre småbarnstilleggperioder`() {
+        EfSakRestClientMock.clearEfSakRestMocks(efSakRestClient)
+        val søkersIdent = scenario.søker.ident!!
+
+        val nyPeriodeMedFullOvergangsstønadFom = periodeMedFullOvergangsstønadFom.plusMonths(3)
+        every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns PerioderOvergangsstønadResponse(
+            perioder = listOf(
+                PeriodeOvergangsstønad(
+                    personIdent = søkersIdent,
+                    fomDato = nyPeriodeMedFullOvergangsstønadFom,
+                    tomDato = barnFødselsdato.plusYears(18),
+                    datakilde = PeriodeOvergangsstønad.Datakilde.EF
+                )
+            )
+        )
+        vedtakOmOvergangsstønadService.håndterVedtakOmOvergangsstønad(personIdent = søkersIdent)
+
+        val fagsak = fagsakService.hentFagsakPåPerson(identer = setOf(PersonIdent(søkersIdent)))
+        val aktivBehandling = behandlingService.hentAktivForFagsak(fagsakId = fagsak!!.id)!!
+
+        val andelerTilkjentYtelse =
+            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(
+                behandlingId = aktivBehandling.id
+            )
+        val småbarnstilleggAndeler = andelerTilkjentYtelse.filter { it.type == YtelseType.SMÅBARNSTILLEGG }
+        assertEquals(
+            nyPeriodeMedFullOvergangsstønadFom.toYearMonth(),
+            småbarnstilleggAndeler.minByOrNull { it.stønadFom }?.stønadFom
+        )
+        assertEquals(
+            barnFødselsdato.plusYears(3).toYearMonth(),
+            småbarnstilleggAndeler.maxByOrNull { it.stønadFom }?.stønadTom
+        )
+
+        håndterIverksettingAvBehandling(
+            behandlingEtterVurdering = behandlingService.hentAktivForFagsak(fagsakId = fagsak.id)!!,
+            søkerFnr = søkersIdent,
             fagsakService = fagsakService,
             vedtakService = vedtakService,
             stegService = stegService
