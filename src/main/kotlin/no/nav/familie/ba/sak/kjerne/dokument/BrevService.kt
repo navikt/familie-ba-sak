@@ -85,7 +85,7 @@ class BrevService(
 
             Brevmal.VEDTAK_FORTSATT_INNVILGET -> ForsattInnvilget(vedtakFellesfelter = vedtakFellesfelter)
 
-            Brevmal.AUTOVEDTAK_BARN_6_ELLER_18_ÅR -> Autovedtak6eller18år(
+            Brevmal.AUTOVEDTAK_BARN_6_OG_18_ÅR -> Autovedtak6eller18år(
                 vedtakFellesfelter = vedtakFellesfelter,
             )
             Brevmal.AUTOVEDTAK_NYFØDT_FØRSTE_BARN -> AutovedtakNyfødtFørsteBarn(
