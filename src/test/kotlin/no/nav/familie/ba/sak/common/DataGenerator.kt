@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.SøkerMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPerson
 import no.nav.familie.ba.sak.integrasjoner.økonomi.sats
+import no.nav.familie.ba.sak.kjerne.aktørid.AktørId
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
@@ -39,7 +40,6 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrMatrikkeladresse
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
@@ -287,7 +287,6 @@ fun lagTestPersonopplysningGrunnlag(
     )
 
     val søker = Person(
-        aktørId = randomAktørId(),
         personIdent = PersonIdent(søkerPersonIdent),
         type = PersonType.SØKER,
         personopplysningGrunnlag = personopplysningGrunnlag,
@@ -310,7 +309,6 @@ fun lagTestPersonopplysningGrunnlag(
     barnasIdenter.map {
         personopplysningGrunnlag.personer.add(
             Person(
-                aktørId = randomAktørId(),
                 personIdent = PersonIdent(it),
                 type = PersonType.BARN,
                 personopplysningGrunnlag = personopplysningGrunnlag,

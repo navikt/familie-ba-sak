@@ -96,15 +96,12 @@ class UtbetalingsoppdragGenerator(
                 vedtak = vedtak,
             ) else emptyList()
 
-        val søker = vedtak.behandling.fagsak.hentAktivIdent().ident
-        val søkerAktivIdent = personidentService.hentOgLagreAktivIdentMedAktørId(søker)
-
         return Utbetalingsoppdrag(
             saksbehandlerId = saksbehandlerId,
             kodeEndring = aksjonskodePåOppdragsnivå,
             fagSystem = FAGSYSTEM,
             saksnummer = vedtak.behandling.fagsak.id.toString(),
-            aktoer = søkerAktivIdent,
+            aktoer = vedtak.behandling.fagsak.aktørId.aktivIdent().fødselsnummer,
             utbetalingsperiode = listOf(opphøres, opprettes).flatten()
         )
     }

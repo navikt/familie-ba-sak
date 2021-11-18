@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.fagsak
 
 import com.fasterxml.jackson.annotation.JsonIgnore
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
@@ -39,10 +38,6 @@ data class FagsakPerson(
     @AttributeOverrides(AttributeOverride(name = "ident", column = Column(name = "ident", updatable = false)))
     val personIdent: PersonIdent,
 
-    @Embedded
-    @AttributeOverrides(AttributeOverride(name = "aktørId", column = Column(name = "aktoer_id", updatable = false)))
-    val aktørId: AktørId? = null,
-
     @Column(name = "opprettet_av", nullable = false, updatable = false)
     val opprettetAv: String = SikkerhetContext.hentSaksbehandler(),
 
@@ -58,7 +53,6 @@ data class FagsakPerson(
 
         if (id != other.id) return false
         if (personIdent != other.personIdent) return false
-        if (aktørId != other.aktørId) return false
         if (opprettetAv != other.opprettetAv) return false
         if (opprettetTidspunkt != other.opprettetTidspunkt) return false
 
@@ -68,7 +62,6 @@ data class FagsakPerson(
     override fun hashCode(): Int {
         var result = id.hashCode()
         result = 31 * result + personIdent.hashCode()
-        result = 31 * result + aktørId.hashCode()
         result = 31 * result + opprettetAv.hashCode()
         result = 31 * result + opprettetTidspunkt.hashCode()
         return result

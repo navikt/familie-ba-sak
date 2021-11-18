@@ -3,9 +3,12 @@ package no.nav.familie.ba.sak.ekstern.skatteetaten
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.randomAktørId
+import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
+import no.nav.familie.ba.sak.kjerne.aktørid.AktørId
+import no.nav.familie.ba.sak.kjerne.aktørid.AktørIdRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
@@ -19,7 +22,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.AktørId
+import no.nav.familie.ba.sak.kjerne.personident.Personident
 import no.nav.familie.eksterne.kontrakter.skatteetaten.SkatteetatenPeriode
 import no.nav.familie.eksterne.kontrakter.skatteetaten.SkatteetatenPerioder
 import org.assertj.core.api.Assertions.assertThat
@@ -47,6 +50,9 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
 
     @Autowired
     lateinit var behandlingRepository: BehandlingRepository
+
+    @Autowired
+    lateinit var aktørIdRepository: AktørIdRepository
 
     val infotrygdBarnetrygdClientMock = mockk<InfotrygdBarnetrygdClient>()
 
@@ -329,7 +335,20 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
     }
 
     fun lagerTilkjentYtelse(tilkjentYtelse: PerioderTestData) {
-        val fagsak = Fagsak(aktørId = AktørId("2"))
+        val aktørId = randomAktørId()
+        val fødselsnummer = randomFnr()
+        aktørIdRepository.save(
+            AktørId(aktørId = aktørId.aktørId).also {
+                it.personidenter.add(
+                    Personident(
+                        fødselsnummer = fødselsnummer,
+                        aktørId = it
+                    )
+                )
+            }
+        )
+
+        val fagsak = Fagsak(aktørId = aktørId)
         fagsakRepository.saveAndFlush(fagsak)
 
         val behandling = Behandling(
@@ -353,7 +372,7 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
                         behandlingId = it.behandling.id,
                         tilkjentYtelse = it,
                         personIdent = tilkjentYtelse.fnr,
-                        aktørId = tilkjentYtelse.aktørId,
+                        aktørId = aktørId,
                         kalkulertUtbetalingsbeløp = 1000,
                         stønadFom = YearMonth.of(p.first.year, p.first.month),
                         stønadTom = YearMonth.of(p.second.year, p.second.month),

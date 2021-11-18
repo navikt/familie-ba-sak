@@ -8,16 +8,19 @@ import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.IdentInformasjon
+import no.nav.familie.ba.sak.kjerne.aktørid.AktørId
+import no.nav.familie.ba.sak.kjerne.aktørid.AktørIdRepository
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import org.springframework.data.repository.findByIdOrNull
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class PersonidentServiceTest() {
 
     private val personidentAktiv = randomFnr()
-    private val personidentInaktiv = randomFnr()
+    private val personidentHistorisk = randomFnr()
     private val aktørId = randomAktørId()
     private val personopplysningerService: PersonopplysningerService = mockk(relaxed = true)
 
@@ -26,27 +29,53 @@ internal class PersonidentServiceTest() {
 
         every { personopplysningerService.hentIdenter(personidentAktiv, false) } answers {
             listOf(
-                IdentInformasjon(aktørId.id, false, "AKTORID"),
-                IdentInformasjon(personidentAktiv, false, "FOLKEREGISTERIDENT"),
-            )
-        }
-
-        every { personopplysningerService.hentIdenter(personidentInaktiv, false) } answers {
-            listOf(
-                IdentInformasjon(aktørId.id, false, "AKTORID"),
+                IdentInformasjon(aktørId.aktørId, false, "AKTORID"),
                 IdentInformasjon(personidentAktiv, false, "FOLKEREGISTERIDENT"),
             )
         }
     }
 
     @Test
-    fun `Test aktiv ident som ikke er peristert fra før`() {
+    fun `Test aktør id som som ikke er peristert fra før`() {
         val personidentRepository: PersonidentRepository = mockk()
-        val personidentService = PersonidentService(personidentRepository, personopplysningerService)
+        val aktørIdRepository: AktørIdRepository = mockk()
 
-        every { personidentRepository.hentAktivIdentForAktørId(aktørId.id) } answers {
-            null
+        val personidentService = PersonidentService(personidentRepository, aktørIdRepository, personopplysningerService)
+
+        every { personidentRepository.findByIdOrNull(personidentAktiv) }.answers { null }
+        every { aktørIdRepository.findByIdOrNull(aktørId.aktørId) }.answers { null }
+
+        every { aktørIdRepository.save(any()) }.answers {
+            AktørId(aktørId = aktørId.aktørId).also {
+                it.personidenter.add(Personident(fødselsnummer = personidentAktiv, aktørId = it))
+            }
         }
+
+        val response = personidentService.hentOgLagreAktørIder(listOf(personidentAktiv))
+
+        Assertions.assertEquals(personidentAktiv, response.single())
+
+        val slotAktørId = slot<AktørId>()
+        verify(exactly = 1) { aktørIdRepository.save(capture(slotAktørId)) }
+        Assertions.assertEquals(aktørId.aktørId, slotAktørId.captured.aktørId)
+        Assertions.assertEquals(personidentAktiv, slotAktørId.captured.personidenter.single().fødselsnummer)
+    }
+
+    @Test
+    fun `Test aktør id som som er peristert fra før men ikke personident`() {
+        val personidentRepository: PersonidentRepository = mockk()
+        val aktørIdRepository: AktørIdRepository = mockk()
+
+        val personidentService = PersonidentService(personidentRepository, aktørIdRepository, personopplysningerService)
+
+        every { personidentRepository.findByIdOrNull(personidentAktiv) }.answers { null }
+        every { aktørIdRepository.findByIdOrNull(aktørId.aktørId) }.answers {
+            AktørId(
+                aktørId.aktørId,
+                mutableSetOf(Personident(fødselsnummer = personidentHistorisk, aktørId = aktørId, aktiv = true))
+            )
+        }
+
         every { personidentRepository.save(any()) } answers {
             Personident(
                 aktørId = aktørId,
@@ -55,73 +84,42 @@ internal class PersonidentServiceTest() {
             )
         }
 
-        val response = personidentService.hentOgLagreAktiveIdenterMedAktørId(listOf(personidentAktiv))
+        val response = personidentService.hentOgLagreAktørIder(listOf(personidentAktiv))
 
         Assertions.assertEquals(personidentAktiv, response.single())
 
-        val slot = slot<Personident>()
+        verify(exactly = 0) { aktørIdRepository.save(any()) }
 
-        verify(exactly = 1) { personidentRepository.save(capture(slot)) }
-        Assertions.assertEquals(true, slot.captured.aktiv)
-        Assertions.assertEquals(aktørId, slot.captured.aktørId)
-        Assertions.assertEquals(personidentAktiv, slot.captured.fødselsnummer)
-        Assertions.assertEquals(null, slot.captured.gjelderTil)
+        val slotPersonident = mutableListOf<Personident>()
+        verify(exactly = 2) { personidentRepository.save(capture(slotPersonident)) }
+
+        Assertions.assertEquals(false, slotPersonident.first().aktiv)
+        Assertions.assertEquals(aktørId.aktørId, slotPersonident.first().aktørId.aktørId)
+        Assertions.assertEquals(personidentHistorisk, slotPersonident.first().fødselsnummer)
+        Assertions.assertEquals(null, slotPersonident.first().gjelderTil)
+
+        Assertions.assertEquals(true, slotPersonident.last().aktiv)
+        Assertions.assertEquals(aktørId.aktørId, slotPersonident.last().aktørId.aktørId)
+        Assertions.assertEquals(personidentAktiv, slotPersonident.last().fødselsnummer)
+        Assertions.assertEquals(null, slotPersonident.last().gjelderTil)
     }
 
     @Test
-    fun `Test aktiv ident som er peristert fra før`() {
+    fun `Test aktør id pg personident som som er peristert fra før`() {
         val personidentRepository: PersonidentRepository = mockk()
-        val personidentService = PersonidentService(personidentRepository, personopplysningerService)
+        val aktørIdRepository: AktørIdRepository = mockk()
 
-        every { personidentRepository.hentAktivIdentForAktørId(aktørId.id) } answers {
-            Personident(
-                aktørId = aktørId,
-                fødselsnummer = personidentAktiv,
-                aktiv = true
-            )
+        val personidentService = PersonidentService(personidentRepository, aktørIdRepository, personopplysningerService)
+
+        every { personidentRepository.findByIdOrNull(personidentAktiv) }.answers {
+            Personident(fødselsnummer = personidentAktiv, aktørId = aktørId, aktiv = true)
         }
 
-        val response = personidentService.hentOgLagreAktiveIdenterMedAktørId(listOf(personidentAktiv))
+        val response = personidentService.hentOgLagreAktørIder(listOf(personidentAktiv))
 
         Assertions.assertEquals(personidentAktiv, response.single())
 
+        verify(exactly = 0) { aktørIdRepository.save(any()) }
         verify(exactly = 0) { personidentRepository.save(any()) }
-    }
-
-    @Test
-    fun `Test aktiv ident som har en tideligere ident peristert`() {
-        val personidentRepository: PersonidentRepository = mockk()
-        val personidentService = PersonidentService(personidentRepository, personopplysningerService)
-
-        every { personidentRepository.hentAktivIdentForAktørId(aktørId.id) } answers {
-            Personident(
-                aktørId = aktørId,
-                fødselsnummer = personidentInaktiv,
-                aktiv = true
-            )
-        }
-        every { personidentRepository.save(any()) } answers {
-            Personident(
-                aktørId = aktørId,
-                fødselsnummer = personidentAktiv,
-                aktiv = true
-            )
-        }
-
-        val response = personidentService.hentOgLagreAktiveIdenterMedAktørId(listOf(personidentAktiv))
-
-        Assertions.assertEquals(personidentAktiv, response.single())
-
-        val slot = mutableListOf<Personident>()
-
-        verify(exactly = 2) { personidentRepository.save(capture(slot)) }
-        Assertions.assertEquals(true, slot[0].aktiv)
-        Assertions.assertEquals(aktørId, slot[0].aktørId)
-        Assertions.assertEquals(personidentAktiv, slot[0].fødselsnummer)
-        Assertions.assertEquals(null, slot[0].gjelderTil)
-        Assertions.assertEquals(false, slot[1].aktiv)
-        Assertions.assertEquals(aktørId, slot[1].aktørId)
-        Assertions.assertEquals(personidentInaktiv, slot[1].fødselsnummer)
-        Assertions.assertTrue(slot[1].gjelderTil != null)
     }
 }

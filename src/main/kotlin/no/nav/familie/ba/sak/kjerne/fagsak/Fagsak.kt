@@ -1,14 +1,11 @@
 package no.nav.familie.ba.sak.kjerne.fagsak
 
 import no.nav.familie.ba.sak.common.BaseEntitet
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.AktørId
+import no.nav.familie.ba.sak.kjerne.aktørid.AktørId
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import java.util.Objects
-import javax.persistence.AttributeOverride
-import javax.persistence.AttributeOverrides
 import javax.persistence.CascadeType
 import javax.persistence.Column
-import javax.persistence.Embedded
 import javax.persistence.Entity
 import javax.persistence.EnumType
 import javax.persistence.Enumerated
@@ -16,7 +13,9 @@ import javax.persistence.FetchType
 import javax.persistence.GeneratedValue
 import javax.persistence.GenerationType
 import javax.persistence.Id
+import javax.persistence.JoinColumn
 import javax.persistence.OneToMany
+import javax.persistence.OneToOne
 import javax.persistence.SequenceGenerator
 import javax.persistence.Table
 
@@ -28,8 +27,12 @@ data class Fagsak(
     @SequenceGenerator(name = "fagsak_seq_generator", sequenceName = "fagsak_seq", allocationSize = 50)
     val id: Long = 0,
 
-    @Embedded
-    @AttributeOverrides(AttributeOverride(name = "aktørId", column = Column(name = "aktoer_id", updatable = false)))
+    @OneToOne(optional = false)
+    @JoinColumn(
+        name = "fk_aktoer_id",
+        nullable = false,
+        updatable = false
+    )
     val aktørId: AktørId,
 
     @Enumerated(EnumType.STRING)

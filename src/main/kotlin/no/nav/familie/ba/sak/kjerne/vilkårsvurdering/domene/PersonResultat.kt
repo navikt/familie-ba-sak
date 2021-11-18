@@ -5,16 +5,13 @@ import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.isSameOrBefore
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.AktørId
+import no.nav.familie.ba.sak.kjerne.aktørid.AktørId
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat.Companion.VilkårResultatComparator
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.time.LocalDate
 import java.util.SortedSet
-import javax.persistence.AttributeOverride
-import javax.persistence.AttributeOverrides
 import javax.persistence.CascadeType
 import javax.persistence.Column
-import javax.persistence.Embedded
 import javax.persistence.Entity
 import javax.persistence.EntityListeners
 import javax.persistence.FetchType
@@ -24,6 +21,7 @@ import javax.persistence.Id
 import javax.persistence.JoinColumn
 import javax.persistence.ManyToOne
 import javax.persistence.OneToMany
+import javax.persistence.OneToOne
 import javax.persistence.SequenceGenerator
 import javax.persistence.Table
 
@@ -47,8 +45,7 @@ class PersonResultat(
     @Column(name = "person_ident", nullable = false, updatable = false)
     val personIdent: String,
 
-    @Embedded
-    @AttributeOverrides(AttributeOverride(name = "aktørId", column = Column(name = "aktoer_id", updatable = false)))
+    @OneToOne(optional = false) @JoinColumn(name = "fk_aktoer_id", nullable = false, updatable = false)
     val aktørId: AktørId,
 
     @OneToMany(

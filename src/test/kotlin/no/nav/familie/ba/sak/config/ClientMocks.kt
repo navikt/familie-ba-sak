@@ -27,6 +27,7 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.internal.IdentInformasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PersonInfo
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.Personident
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.VergeData
+import no.nav.familie.ba.sak.kjerne.aktørid.AktørId
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.mockBarnAutomatiskBehandling
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.mockBarnAutomatiskBehandling2
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.mockBarnAutomatiskBehandling2Fnr
@@ -36,7 +37,6 @@ import no.nav.familie.ba.sak.kjerne.fødselshendelse.mockBarnAutomatiskBehandlin
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.mockSøkerAutomatiskBehandling
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.mockSøkerAutomatiskBehandlingFnr
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.success
 import no.nav.familie.kontrakter.felles.kodeverk.BeskrivelseDto

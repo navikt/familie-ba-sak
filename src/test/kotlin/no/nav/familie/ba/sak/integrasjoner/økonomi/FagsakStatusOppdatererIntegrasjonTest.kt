@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
+import no.nav.familie.ba.sak.kjerne.aktørid.AktørId
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
@@ -100,7 +101,8 @@ class FagsakStatusOppdatererIntegrasjonTest : AbstractSpringIntegrationTest() {
             andelTilkjentYtelseRepository.save(
                 andelPåTilkjentYtelse(
                     tilkjentYtelse = tilkjentYtelse,
-                    periodeOffset = it
+                    periodeOffset = it,
+                    aktørId = behandling.fagsak.aktørId
                 )
             )
         }
@@ -117,10 +119,11 @@ class FagsakStatusOppdatererIntegrasjonTest : AbstractSpringIntegrationTest() {
     // Kun offset og kobling til behandling/tilkjent ytelse som er relevant når man skal plukke ut til konsistensavstemming
     private fun andelPåTilkjentYtelse(
         tilkjentYtelse: TilkjentYtelse,
-        periodeOffset: Long
+        periodeOffset: Long,
+        aktørId: AktørId = randomAktørId()
     ) = AndelTilkjentYtelse(
         personIdent = randomFnr(),
-        aktørId = randomAktørId(),
+        aktørId = aktørId,
         behandlingId = tilkjentYtelse.behandling.id,
         tilkjentYtelse = tilkjentYtelse,
         kalkulertUtbetalingsbeløp = 1054,

@@ -130,13 +130,13 @@ class SaksstatistikkService(
                     landkodeSøker = hentLandkode(it)
                 }
                 AktørDVH(
-                    personopplysningerService.hentAktivAktørId(Ident(it.personIdent.ident)).id.toLong(),
+                    personopplysningerService.hentAktivAktørId(Ident(it.personIdent.ident)).aktørId.toLong(),
                     it.type.name
                 )
             }
         } else {
             landkodeSøker = hentLandkode(søkerIdent)
-            listOf(AktørDVH(søkersAktørId.id.toLong(), PersonType.SØKER.name))
+            listOf(AktørDVH(søkersAktørId.aktørId.toLong(), PersonType.SØKER.name))
         }
 
         return SakDVH(
@@ -145,7 +145,7 @@ class SaksstatistikkService(
             opprettetDato = LocalDate.now(),
             funksjonellId = UUID.randomUUID().toString(),
             sakId = sakId.toString(),
-            aktorId = søkersAktørId.id.toLong(),
+            aktorId = søkersAktørId.aktørId.toLong(),
             aktorer = deltagere,
             sakStatus = fagsak.status.name,
             avsender = "familie-ba-sak",

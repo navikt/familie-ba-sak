@@ -185,20 +185,17 @@ class PersongrunnlagService(
     ): PersonopplysningGrunnlag {
         val personopplysningGrunnlag = lagreOgDeaktiverGammel(PersonopplysningGrunnlag(behandlingId = behandling.id))
 
-        val aktivFødselsnummer = personidentService.hentOgLagreAktivIdentMedAktørId(fødselsnummer)
-        val barnasAktiveFødselsnummer = personidentService.hentOgLagreAktiveIdenterMedAktørId(barnasFødselsnummer)
-
         val enkelPersonInfo = behandling.erMigrering()
         personopplysningGrunnlag.personer.add(
             hentPerson(
-                ident = aktivFødselsnummer,
+                ident = fødselsnummer,
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 målform = målform,
                 personType = PersonType.SØKER,
                 enkelPersonInfo = enkelPersonInfo
             )
         )
-        barnasAktiveFødselsnummer.forEach {
+        barnasFødselsnummer.forEach {
             personopplysningGrunnlag.personer.add(
                 hentPerson(
                     ident = it,
@@ -230,16 +227,15 @@ class PersongrunnlagService(
         val personinfo =
             if (enkelPersonInfo) personopplysningerService.hentPersoninfoEnkel(ident)
             else personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(ident)
-
-        val aktivIdent =
-            personidentRepository.hentAktivIdent(ident) ?: throw Feil("Personident har ikke aktørid persistert")
+        
+        val aktørId = personidentService.hentOgLagreAktørId(ident)
 
         return Person(
             personIdent = PersonIdent(ident),
             type = personType,
             personopplysningGrunnlag = personopplysningGrunnlag,
             fødselsdato = personinfo.fødselsdato,
-            aktørId = aktivIdent.aktørId,
+            aktørId = aktørId,
             navn = personinfo.navn ?: "",
             kjønn = personinfo.kjønn ?: Kjønn.UKJENT,
             målform = målform

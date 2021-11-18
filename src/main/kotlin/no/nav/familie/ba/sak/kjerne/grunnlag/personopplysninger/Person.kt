@@ -2,9 +2,9 @@ package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import no.nav.familie.ba.sak.common.BaseEntitet
+import no.nav.familie.ba.sak.kjerne.aktørid.AktørId
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.arbeidsforhold.GrArbeidsforhold
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.opphold.GrOpphold
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
@@ -74,8 +74,7 @@ data class Person(
     @JoinColumn(name = "fk_gr_personopplysninger_id", nullable = false, updatable = false)
     val personopplysningGrunnlag: PersonopplysningGrunnlag,
 
-    @Embedded
-    @AttributeOverrides(AttributeOverride(name = "aktørId", column = Column(name = "aktoer_id", updatable = false)))
+    @ManyToOne(optional = false) @JoinColumn(name = "fk_aktoer_id", nullable = true, updatable = false)
     val aktørId: AktørId? = null,
 
     @OneToMany(mappedBy = "person", cascade = [CascadeType.ALL], fetch = FetchType.EAGER)

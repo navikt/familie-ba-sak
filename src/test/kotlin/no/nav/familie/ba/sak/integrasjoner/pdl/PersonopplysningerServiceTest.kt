@@ -6,6 +6,7 @@ import io.mockk.mockk
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
@@ -28,7 +29,11 @@ internal class PersonopplysningerServiceTest(
     private val restTemplate: RestOperations,
 
     @Autowired
-    private val mockIntegrasjonClient: IntegrasjonClient
+    private val mockIntegrasjonClient: IntegrasjonClient,
+
+    @Autowired
+    private val personidentService: PersonidentService
+
 ) : AbstractSpringIntegrationTest(integrasjonClient = mockIntegrasjonClient) {
 
     lateinit var personopplysningerService: PersonopplysningerService
@@ -39,7 +44,8 @@ internal class PersonopplysningerServiceTest(
             PersonopplysningerService(
                 PdlRestClient(URI.create(wireMockServer.baseUrl() + "/api"), restTemplate),
                 SystemOnlyPdlRestClient(URI.create(wireMockServer.baseUrl() + "/api"), restTemplate, mockk()),
-                mockIntegrasjonClient
+                mockIntegrasjonClient,
+                personidentService
             )
     }
 

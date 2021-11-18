@@ -21,6 +21,7 @@ import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.JournalføringR
 import no.nav.familie.ba.sak.integrasjoner.lagTestJournalpost
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PersonInfo
+import no.nav.familie.ba.sak.kjerne.aktørid.AktørId
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -32,7 +33,6 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.domene.Totrinnskontroll
@@ -376,7 +376,7 @@ internal class SaksstatistikkServiceTest(
         val sakDvh = sakstatistikkService.mapTilSakDvh(1)
         println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(sakDvh))
 
-        assertThat(sakDvh?.aktorId).isEqualTo(randomAktørId.id.toLong())
+        assertThat(sakDvh?.aktorId).isEqualTo(randomAktørId.aktørId.toLong())
         assertThat(sakDvh?.aktorer).hasSize(2).extracting("rolle").containsOnly("SØKER", "BARN")
         assertThat(sakDvh?.sakStatus).isEqualTo(FagsakStatus.OPPRETTET.name)
         assertThat(sakDvh?.avsender).isEqualTo("familie-ba-sak")

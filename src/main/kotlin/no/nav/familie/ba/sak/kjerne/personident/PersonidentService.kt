@@ -2,60 +2,52 @@ package no.nav.familie.ba.sak.kjerne.personident
 
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.IdentInformasjon
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.AktørId
+import no.nav.familie.ba.sak.kjerne.aktørid.AktørId
+import no.nav.familie.ba.sak.kjerne.aktørid.AktørIdRepository
 import org.slf4j.LoggerFactory
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
-import java.time.LocalDateTime
 
 @Service
 class PersonidentService(
     private val personidentRepository: PersonidentRepository,
+    private val aktørIdRepository: AktørIdRepository,
     private val personopplysningerService: PersonopplysningerService
 ) {
-    fun hentOgLagreAktivIdentMedAktørId(fødselsnummer: String): String {
-        // TODO: Når lytting på endring av ident meldinger er implementert skal denne metoden returnere hvis 
-        // iden allerede er persistert ellers så skal den hente og persistere den aktive identen.
-        val identerFraPdl = personopplysningerService.hentIdenter(fødselsnummer, false)
+    fun hentOgLagreAktørId(fødselsnummer: String): AktørId =
+        personidentRepository.findByIdOrNull(fødselsnummer)?.let { it.aktørId }
+            ?: kotlin.run {
+                val identerFraPdl = personopplysningerService.hentIdenter(fødselsnummer, false)
+                val aktørIdStr = filtrerAktørId(identerFraPdl)
+                val fødselsnummerAktiv = filtrerAktivtFødselsnummer(identerFraPdl)
 
-        val aktørId = filtrerAktørId(identerFraPdl)
-        val fødselsnummerAktiv = filtrerAktivtFødselsnummer(identerFraPdl)
+                return aktørIdRepository.findByIdOrNull(aktørIdStr)?.let { opprettPersonIdent(it, fødselsnummerAktiv) }
+                    ?: opprettAktørIdOgPersonident(aktørIdStr, fødselsnummerAktiv)
+            }
 
-        val aktivIdentPersistert = personidentRepository.hentAktivIdentForAktørId(aktørId)
-
-        if (aktivIdentErIkkePersistert(aktivIdentPersistert, fødselsnummerAktiv)) {
-            personidentRepository.save(
-                Personident(
-                    aktørId = AktørId(aktørId),
-                    fødselsnummer = fødselsnummerAktiv,
-                    aktiv = true
+    private fun opprettAktørIdOgPersonident(aktørIdStr: String, fødselsnummer: String): AktørId =
+        aktørIdRepository.save(
+            AktørId(aktørId = aktørIdStr).also {
+                it.personidenter.add(
+                    Personident(fødselsnummer = fødselsnummer, aktørId = it)
                 )
-            )
+            }
+        )
+
+    private fun opprettPersonIdent(aktørId: AktørId, fødselsnummer: String): AktørId {
+        aktørId.personidenter.filter { it.aktiv }.forEach {
+            it.aktiv = false
+            personidentRepository.save(it)
         }
 
-        if (identHarBlittInnaktivSidenSistPersistering(aktivIdentPersistert, fødselsnummerAktiv)) {
-            personidentRepository.save(
-                aktivIdentPersistert!!.also {
-                    it.aktiv = false
-                    it.gjelderTil = LocalDateTime.now()
-                }
+        return personidentRepository.save(
+            Personident(
+                fødselsnummer = fødselsnummer,
+                aktørId = aktørId,
+                aktiv = true
             )
-        }
-
-        return fødselsnummerAktiv
+        ).aktørId
     }
-
-    fun hentAktørId(fødselsnummer: String): AktørId =
-        personidentRepository.hentAktivIdent(fødselsnummer)?.aktørId ?: error("Fødselsnummer er ikke persistert")
-
-    private fun identHarBlittInnaktivSidenSistPersistering(
-        aktivIdentPersistert: Personident?,
-        fødselsnummerAktiv: String
-    ) = aktivIdentPersistert != null && aktivIdentPersistert.fødselsnummer != fødselsnummerAktiv
-
-    private fun aktivIdentErIkkePersistert(
-        aktivIdentPersistert: Personident?,
-        fødselsnummerAktiv: String
-    ) = aktivIdentPersistert == null || aktivIdentPersistert.fødselsnummer != fødselsnummerAktiv
 
     private fun filtrerAktivtFødselsnummer(identerFraPdl: List<IdentInformasjon>) =
         (
@@ -69,8 +61,8 @@ class PersonidentService(
                 ?: throw Error("Finner ikke aktørId i Pdl")
             )
 
-    fun hentOgLagreAktiveIdenterMedAktørId(barnasFødselsnummer: List<String>): List<String> {
-        return barnasFødselsnummer.map { hentOgLagreAktivIdentMedAktørId(it) }
+    fun hentOgLagreAktørIder(barnasFødselsnummer: List<String>): List<AktørId> {
+        return barnasFødselsnummer.map { hentOgLagreAktørId(it) }
     }
 
     companion object {

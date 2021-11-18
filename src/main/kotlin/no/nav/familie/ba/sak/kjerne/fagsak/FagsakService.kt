@@ -104,8 +104,7 @@ class FagsakService(
         if (fagsak == null) {
             tilgangService.verifiserHarTilgangTilHandling(BehandlerRolle.SAKSBEHANDLER, "opprette fagsak")
 
-            personidentService.hentOgLagreAktivIdentMedAktørId(personIdent.ident)
-            val aktørId = personidentService.hentAktørId(personIdent.ident)
+            val aktørId = personidentService.hentOgLagreAktørId(personIdent.ident)
 
             fagsak = Fagsak(aktørId = aktørId).also {
                 it.søkerIdenter = setOf(FagsakPerson(personIdent = personIdent, fagsak = it))

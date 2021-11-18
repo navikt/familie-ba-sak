@@ -8,8 +8,9 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.internal.ForelderBarnRelasjonMask
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.IdentInformasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PersonInfo
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.VergeData
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.AktørId
+import no.nav.familie.ba.sak.kjerne.aktørid.AktørId
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
@@ -23,15 +24,17 @@ import org.springframework.web.context.annotation.ApplicationScope
 class PersonopplysningerService(
     val pdlRestClient: PdlRestClient,
     val systemOnlyPdlRestClient: SystemOnlyPdlRestClient,
-    val integrasjonClient: IntegrasjonClient
+    val integrasjonClient: IntegrasjonClient,
+    val personidentService: PersonidentService,
 ) {
 
     fun hentPersoninfoMedRelasjonerOgRegisterinformasjon(personIdent: String): PersonInfo {
         val personinfo = hentPersoninfoMedQuery(personIdent, PersonInfoQuery.MED_RELASJONER_OG_REGISTERINFORMASJON)
         val identerMedAdressebeskyttelse = mutableSetOf<Pair<String, FORELDERBARNRELASJONROLLE>>()
         val forelderBarnRelasjon = personinfo.forelderBarnRelasjon.mapNotNull {
-            val harTilgang = integrasjonClient.sjekkTilgangTilPersoner(listOf(it.personIdent.id)).firstOrNull()?.harTilgang
-                ?: error("Fikk ikke svar på tilgang til person.")
+            val harTilgang =
+                integrasjonClient.sjekkTilgangTilPersoner(listOf(it.personIdent.id)).firstOrNull()?.harTilgang
+                    ?: error("Fikk ikke svar på tilgang til person.")
             if (harTilgang) {
                 val relasjonsinfo = hentPersoninfoEnkel(it.personIdent.id)
                 ForelderBarnRelasjon(
@@ -73,8 +76,7 @@ class PersonopplysningerService(
     }
 
     fun hentAktørId(personIdent: String): List<String> {
-        val hentIdenter = pdlRestClient.hentIdenter(personIdent)
-        return hentIdenter.data.pdlIdenter!!.identer.filter { it.gruppe == "AKTORID" && !it.historisk }.map { it.ident }
+        return listOf(personidentService.hentOgLagreAktørId(personIdent).aktørId)
     }
 
     fun hentAktivPersonIdent(ident: Ident): PersonIdent {
