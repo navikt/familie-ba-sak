@@ -1,12 +1,14 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
 import io.mockk.mockk
+import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagRestVedtaksbegrunnelse
 import no.nav.familie.ba.sak.common.lagUtbetalingsperiodeDetalj
 import no.nav.familie.ba.sak.common.lagUtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.common.lagVedtaksbegrunnelse
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.common.tilfeldigSøker
+import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPerson
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.brevperioder.AvslagBrevPeriode
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.brevperioder.FortsattInnvilgetBrevPeriode
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.brevperioder.InnvilgelseBrevPeriode
@@ -24,10 +26,10 @@ import org.junit.jupiter.api.Test
 
 class VedtaksperiodeMedBegrunnelseTest {
 
-    val søker = tilfeldigSøker()
-    val barn1 = tilfeldigPerson(personType = PersonType.BARN)
-    val barn2 = tilfeldigPerson(personType = PersonType.BARN)
-    val personerIPersongrunnlag = listOf(barn1, barn2, søker)
+    private val søker = tilfeldigSøker()
+    private val barn1 = tilfeldigPerson(personType = PersonType.BARN)
+    private val barn2 = tilfeldigPerson(personType = PersonType.BARN)
+    private val personerIPersongrunnlag = listOf(barn1, barn2, søker)
 
     @Test
     fun `Skal gi riktig antall brevbegrunnelser med riktig tekst`() {
@@ -201,5 +203,37 @@ class VedtaksperiodeMedBegrunnelseTest {
 
         Assertions.assertEquals(begrunnelseInnvilget, begrunnelser.first())
         Assertions.assertEquals(begrunnelseReduksjon, begrunnelser.last())
+    }
+
+    @Test
+    fun `Skal kun summere beløp tilhørende personer i begrunnelsen`() {
+        val søker = lagPerson(type = PersonType.SØKER)
+        val barn1 = lagPerson(type = PersonType.BARN)
+        val barn2 = lagPerson(type = PersonType.BARN)
+
+        val utbetalingsperiodeDetaljer = listOf(
+            lagUtbetalingsperiodeDetalj(
+                utbetaltPerMnd = 8,
+                person = søker.tilRestPerson()
+            ),
+            lagUtbetalingsperiodeDetalj(
+                utbetaltPerMnd = 9,
+                person = barn1.tilRestPerson()
+            ),
+            lagUtbetalingsperiodeDetalj(
+                utbetaltPerMnd = 10,
+                person = barn2.tilRestPerson()
+            ),
+        )
+
+        val utvidetVedtaksperiodeMedBegrunnelser =
+            lagUtvidetVedtaksperiodeMedBegrunnelser(utbetalingsperiodeDetaljer = utbetalingsperiodeDetaljer)
+        val restVedtaksbegrunnelse =
+            lagRestVedtaksbegrunnelse(personIdenter = listOf(søker.personIdent.ident, barn1.personIdent.ident))
+
+        Assertions.assertEquals(
+            17,
+            utvidetVedtaksperiodeMedBegrunnelser.utbetaltForPersonerIBegrunnelse(restVedtaksbegrunnelse)
+        )
     }
 }

@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.dokument.totaltUtbetalt
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
@@ -62,8 +63,7 @@ fun VedtaksperiodeMedBegrunnelser.tilUtvidetVedtaksperiodeMedBegrunnelser(
             val vertikaltSegmentForVedtaksperiode =
                 if (this.type == Vedtaksperiodetype.FORTSATT_INNVILGET)
                     hentLøpendeAndelForVedtaksperiode(andelerForVedtaksperiodetype)
-                else
-                    hentVertikaltSegmentForVedtaksperiode(andelerForVedtaksperiodetype)
+                else hentVertikaltSegmentForVedtaksperiode(andelerForVedtaksperiodetype)
 
             val andelerForSegment =
                 hentAndelerForSegment(andelerForVedtaksperiodetype, vertikaltSegmentForVedtaksperiode)
@@ -93,7 +93,7 @@ private fun VedtaksperiodeMedBegrunnelser.endretUtbetalingAndelSkalVæreMed(ande
         }
     }
 
-private fun VedtaksperiodeMedBegrunnelser.hentLøpendeAndelForVedtaksperiode(andelerTilkjentYtelse: List<AndelTilkjentYtelse>): LocalDateSegment<Int> {
+private fun hentLøpendeAndelForVedtaksperiode(andelerTilkjentYtelse: List<AndelTilkjentYtelse>): LocalDateSegment<Int> {
     val sorterteSegmenter = andelerTilkjentYtelse.utledSegmenter().sortedBy { it.fom }
     return sorterteSegmenter.lastOrNull { it.fom.toYearMonth() <= inneværendeMåned() }
         ?: sorterteSegmenter.firstOrNull()
@@ -119,3 +119,11 @@ private fun hentAndelerForSegment(
         )
     )
 }
+
+fun UtvidetVedtaksperiodeMedBegrunnelser.utbetaltForPersonerIBegrunnelse(
+    restVedtaksbegrunnelse: RestVedtaksbegrunnelse
+) = this.utbetalingsperiodeDetaljer.filter { utbetalingsperiodeDetalj ->
+    restVedtaksbegrunnelse.personIdenter.contains(
+        utbetalingsperiodeDetalj.person.personIdent
+    )
+}.totaltUtbetalt()

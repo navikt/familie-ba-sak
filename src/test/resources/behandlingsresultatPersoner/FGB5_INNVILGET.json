@@ -1,0 +1,31 @@
+{
+  "beskrivelse": "FGB2: Vi starter opp ytelsen igjen etter en lenger periode med opphør. Bruker søker for 2 barn og får innvilget for begge.",
+  "inneværendeMåned": "2021-09",
+  "personer": [
+    {
+      "personType": "BARN",
+      "søktForPerson": true,
+      "eksplisittAvslått": false,
+      "forrigeAndeler": [
+        {
+          "stønadFom": "2019-01",
+          "stønadTom": "2020-12",
+          "kalkulertUtbetalingsbeløp": 1054
+        }
+      ],
+      "andeler": [
+        {
+          "stønadFom": "2019-01",
+          "stønadTom": "2020-12",
+          "kalkulertUtbetalingsbeløp": 1054
+        },
+        {
+          "stønadFom": "2021-08",
+          "stønadTom": "2030-12",
+          "kalkulertUtbetalingsbeløp": 1054
+        }
+      ]
+    }
+  ],
+  "forventetResultat": "INNVILGET"
+}

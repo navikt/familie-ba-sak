@@ -48,7 +48,6 @@ import no.nav.familie.ba.sak.kjerne.steg.JournalførVedtaksbrevDTO
 import no.nav.familie.ba.sak.kjerne.steg.StatusFraOppdragMedTask
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
-import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
@@ -66,6 +65,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurderingType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
@@ -339,15 +339,6 @@ fun nyOrdinærBehandling(søkersIdent: String, årsak: BehandlingÅrsak = Behand
         behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
         kategori = BehandlingKategori.NASJONAL,
         underkategori = BehandlingUnderkategori.ORDINÆR,
-        behandlingÅrsak = årsak
-    )
-
-fun nyUtvidetBehandling(søkersIdent: String, årsak: BehandlingÅrsak = BehandlingÅrsak.SØKNAD): NyBehandling =
-    NyBehandling(
-        søkersIdent = søkersIdent,
-        behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-        kategori = BehandlingKategori.NASJONAL,
-        underkategori = BehandlingUnderkategori.UTVIDET,
         behandlingÅrsak = årsak
     )
 
@@ -686,8 +677,7 @@ fun kjørStegprosessForRevurderingÅrligKontroll(
     søkerFnr: String,
     barnasIdenter: List<String>,
     vedtakService: VedtakService,
-    stegService: StegService,
-    tilbakekrevingService: TilbakekrevingService
+    stegService: StegService
 ): Behandling {
     val behandling = stegService.håndterNyBehandling(
         NyBehandling(
@@ -899,6 +889,7 @@ fun lagVilkårResultat(
     begrunnelse: String = "",
     behandlingId: Long = lagBehandling().id,
     erMedlemskapVurdert: Boolean = false,
+    utdypendeVilkårsvurderinger: List<UtdypendeVilkårsvurdering> = emptyList()
 ) = VilkårResultat(
     personResultat = personResultat,
     vilkårType = vilkårType,
@@ -908,6 +899,9 @@ fun lagVilkårResultat(
     begrunnelse = begrunnelse,
     behandlingId = behandlingId,
     erMedlemskapVurdert = erMedlemskapVurdert,
+    utdypendeVilkårsvurderinger = (
+        utdypendeVilkårsvurderinger + listOfNotNull(if (erMedlemskapVurdert) UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP else null)
+        ).distinct()
 )
 
 val guttenBarnesenFødselsdato = LocalDate.now().withDayOfMonth(10).minusYears(6)

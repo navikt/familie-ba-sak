@@ -1,0 +1,33 @@
+{
+  "beskrivelse": "FGB: Bruker søker om utvidet barnetrygd og for 1 barn. Får innvilget begge deler.",
+  "inneværendeMåned": "2021-09",
+  "personer": [
+    {
+      "personType": "SØKER",
+      "søktForPerson": true,
+      "eksplisittAvslått": false,
+      "forrigeAndeler": [],
+      "andeler": [
+        {
+          "stønadFom": "2021-08",
+          "stønadTom": "2030-12",
+          "kalkulertUtbetalingsbeløp": 1054
+        }
+      ]
+    },
+    {
+      "personType": "BARN",
+      "søktForPerson": true,
+      "eksplisittAvslått": false,
+      "forrigeAndeler": [],
+      "andeler": [
+        {
+          "stønadFom": "2021-08",
+          "stønadTom": "2030-12",
+          "kalkulertUtbetalingsbeløp": 1354
+        }
+      ]
+    }
+  ],
+  "forventetResultat": "INNVILGET"
+}

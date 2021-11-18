@@ -5,9 +5,6 @@ import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.StringListConverter
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
-import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
-import no.nav.familie.ba.sak.common.førsteDagINesteMåned
-import no.nav.familie.ba.sak.common.sisteDagIForrigeMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
@@ -32,7 +29,6 @@ import javax.persistence.Table
 @EntityListeners(RollestyringMotDatabase::class)
 @Entity(name = "VilkårResultat")
 @Table(name = "VILKAR_RESULTAT")
-@VilkårResultatConstraint
 class VilkårResultat(
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "vilkar_resultat_seq_generator")
@@ -74,9 +70,11 @@ class VilkårResultat(
     @Column(name = "er_eksplisitt_avslag_paa_soknad")
     var erEksplisittAvslagPåSøknad: Boolean? = null,
 
+    @Deprecated("Bruker utdypendeVilkårsvurderinger istede")
     @Column(name = "er_skjonnsmessig_vurdert")
     var erSkjønnsmessigVurdert: Boolean = false,
 
+    @Deprecated("Bruker utdypendeVilkårsvurderinger istede")
     @Column(name = "er_medlemskap_vurdert")
     var erMedlemskapVurdert: Boolean = false,
 
@@ -84,6 +82,7 @@ class VilkårResultat(
     @Convert(converter = StringListConverter::class)
     val evalueringÅrsaker: List<String> = emptyList(),
 
+    @Deprecated("Bruker utdypendeVilkårsvurderinger istede")
     @Column(name = "er_delt_bosted")
     var erDeltBosted: Boolean = false,
 
@@ -99,7 +98,11 @@ class VilkårResultat(
 
     @Enumerated(EnumType.STRING)
     @Column(name = "vurderes_etter")
-    var vurderesEtter: Regelverk? = vilkårType.defaultRegelverk()
+    var vurderesEtter: Regelverk? = vilkårType.defaultRegelverk(),
+
+    @Column(name = "utdypende_vilkarsvurderinger")
+    @Convert(converter = UtdypendeVilkårsvurderingerConverter::class)
+    var utdypendeVilkårsvurderinger: List<UtdypendeVilkårsvurdering> = emptyList()
 ) : BaseEntitet() {
 
     override fun toString(): String {
@@ -132,6 +135,14 @@ class VilkårResultat(
         erMedlemskapVurdert = restVilkårResultat.erMedlemskapVurdert ?: false
         oppdaterPekerTilBehandling()
         vurderesEtter = restVilkårResultat.vurderesEtter
+        utdypendeVilkårsvurderinger =
+            (
+                restVilkårResultat.utdypendeVilkårsvurderinger + listOfNotNull(
+                    if (restVilkårResultat.erSkjønnsmessigVurdert == true) UtdypendeVilkårsvurdering.VURDERING_ANNET_GRUNNLAG else null,
+                    if (restVilkårResultat.erMedlemskapVurdert == true) UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP else null,
+                    if (restVilkårResultat.erDeltBosted == true) UtdypendeVilkårsvurdering.DELT_BOSTED else null
+                )
+                ).distinct()
     }
 
     fun kopierMedParent(nyPersonResultat: PersonResultat? = null): VilkårResultat {
@@ -151,6 +162,7 @@ class VilkårResultat(
             erMedlemskapVurdert = erMedlemskapVurdert,
             erDeltBosted = erDeltBosted,
             vurderesEtter = vurderesEtter,
+            utdypendeVilkårsvurderinger = utdypendeVilkårsvurderinger
         )
     }
 
@@ -171,6 +183,7 @@ class VilkårResultat(
             erMedlemskapVurdert = erMedlemskapVurdert,
             erDeltBosted = erDeltBosted,
             vurderesEtter = vurderesEtter,
+            utdypendeVilkårsvurderinger = utdypendeVilkårsvurderinger
         )
     }
 
@@ -182,15 +195,6 @@ class VilkårResultat(
         this.erEksplisittAvslagPåSøknad == true && this.periodeFom == null && this.periodeTom == null
 
     fun harFremtidigTom() = this.periodeTom == null || this.periodeTom!!.isAfter(LocalDate.now().sisteDagIMåned())
-
-    val vedtaksperiodeFom
-        get() =
-            if (this.vilkårType == Vilkår.UNDER_18_ÅR) this.periodeFom?.førsteDagIInneværendeMåned()
-            else this.periodeFom?.førsteDagINesteMåned()
-    val vedtaksperiodeTom
-        get() =
-            if (this.vilkårType == Vilkår.UNDER_18_ÅR) this.periodeTom?.sisteDagIForrigeMåned()
-            else this.periodeTom?.sisteDagIMåned()
 
     companion object {
 

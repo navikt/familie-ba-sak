@@ -10,10 +10,11 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.fødselsnummerGenerator
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.AbstractMockkSpringRunner
 import no.nav.familie.ba.sak.config.ClientMocks
+import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
-import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestClient
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
@@ -140,7 +141,7 @@ class MigreringServiceTest(
             infotrygdBarnetrygdClient.hentSaker(any(), any())
         } returns InfotrygdSøkResponse(listOf(opprettSakMedBeløp(2708.0)), emptyList())
 
-        migreringService.migrer(ClientMocks.søkerFnr[0])
+        val migreringResponseDto = migreringService.migrer(ClientMocks.søkerFnr[0])
 
         taskRepository.findAll().also { tasks ->
             assertThat(tasks).hasSize(1)
@@ -170,6 +171,7 @@ class MigreringServiceTest(
 
             val vedtakDVH = MockKafkaProducer.sendteMeldinger.values.first() as VedtakDVH
             assertThat(vedtakDVH.utbetalingsperioder.first().stønadFom).isEqualTo(forventetUtbetalingFom)
+            assertThat(migreringResponseDto.virkningFom).isEqualTo(forventetUtbetalingFom.toYearMonth())
         }
     }
 

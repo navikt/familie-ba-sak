@@ -43,7 +43,8 @@ class Autobrev6og18ÅrService(
 
         logger.info("opprettOmregningsoppgaveForBarnIBrytingsalder for fagsak ${autobrev6og18ÅrDTO.fagsakId}")
 
-        val behandling = behandlingService.hentAktivForFagsak(autobrev6og18ÅrDTO.fagsakId) ?: error("Fant ikke aktiv behandling")
+        val behandling =
+            behandlingService.hentAktivForFagsak(autobrev6og18ÅrDTO.fagsakId) ?: error("Fant ikke aktiv behandling")
 
         if (behandling.fagsak.status != FagsakStatus.LØPENDE) {
             logger.info("Fagsak ${behandling.fagsak.id} har ikke status løpende, og derfor prosesseres den ikke videre.")
@@ -55,7 +56,11 @@ class Autobrev6og18ÅrService(
             return
         }
 
-        if (!barnMedAngittAlderInneværendeMånedEksisterer(behandlingId = behandling.id, alder = autobrev6og18ÅrDTO.alder)) {
+        if (!barnMedAngittAlderInneværendeMånedEksisterer(
+                behandlingId = behandling.id,
+                alder = autobrev6og18ÅrDTO.alder
+            )
+        ) {
             logger.warn("Fagsak ${behandling.fagsak.id} har ikke noe barn med alder ${autobrev6og18ÅrDTO.alder} ")
             return
         }
@@ -86,7 +91,8 @@ class Autobrev6og18ÅrService(
             vedtakBegrunnelseSpesifikasjon = finnVedtakbegrunnelseForAlder(autobrev6og18ÅrDTO.alder)
         )
 
-        val opprettetVedtak = vedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(opprettetBehandling)
+        val opprettetVedtak =
+            vedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(opprettetBehandling)
 
         opprettTaskJournalførVedtaksbrev(vedtakId = opprettetVedtak.id)
     }
@@ -95,20 +101,20 @@ class Autobrev6og18ÅrService(
         autobrev6og18ÅrDTO: Autobrev6og18ÅrDTO,
         behandling: Behandling
     ) =
-        autobrev6og18ÅrDTO.alder == Alder.atten.år &&
+        autobrev6og18ÅrDTO.alder == Alder.ATTEN.år &&
             !barnUnder18årInneværendeMånedEksisterer(behandlingId = behandling.id)
 
     private fun finnBehandlingÅrsakForAlder(alder: Int): BehandlingÅrsak =
         when (alder) {
-            Alder.seks.år -> BehandlingÅrsak.OMREGNING_6ÅR
-            Alder.atten.år -> BehandlingÅrsak.OMREGNING_18ÅR
+            Alder.SEKS.år -> BehandlingÅrsak.OMREGNING_6ÅR
+            Alder.ATTEN.år -> BehandlingÅrsak.OMREGNING_18ÅR
             else -> throw Feil("Alder må være oppgitt til enten 6 eller 18 år.")
         }
 
     private fun finnVedtakbegrunnelseForAlder(alder: Int): VedtakBegrunnelseSpesifikasjon =
         when (alder) {
-            Alder.seks.år -> VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR
-            Alder.atten.år -> VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR
+            Alder.SEKS.år -> VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR
+            Alder.ATTEN.år -> VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR
             else -> throw Feil("Alder må være oppgitt til enten 6 eller 18 år.")
         }
 
@@ -134,7 +140,7 @@ class Autobrev6og18ÅrService(
 
     private fun barnUnder18årInneværendeMånedEksisterer(behandlingId: Long): Boolean =
         personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandlingId)?.personer
-            ?.any { it.type == PersonType.BARN && it.erYngreEnnInneværendeMåned(Alder.atten.år) } ?: false
+            ?.any { it.type == PersonType.BARN && it.erYngreEnnInneværendeMåned(Alder.ATTEN.år) } ?: false
 
     private fun opprettNyOmregningBehandling(behandling: Behandling, behandlingÅrsak: BehandlingÅrsak): NyBehandling =
         NyBehandling(
@@ -170,6 +176,6 @@ class Autobrev6og18ÅrService(
 }
 
 enum class Alder(val år: Int) {
-    seks(år = 6),
-    atten(år = 18)
+    SEKS(år = 6),
+    ATTEN(år = 18)
 }

@@ -10,7 +10,7 @@ import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.ClientMocks
-import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
+import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.SøkerMedOpplysninger
@@ -91,8 +91,7 @@ class VedtaksperiodeServiceTest(
             søkerFnr = søkerFnr,
             barnasIdenter = listOf(barnFnr),
             vedtakService = vedtakService,
-            stegService = stegService,
-            tilbakekrevingService = tilbakekrevingService
+            stegService = stegService
         )
     }
 

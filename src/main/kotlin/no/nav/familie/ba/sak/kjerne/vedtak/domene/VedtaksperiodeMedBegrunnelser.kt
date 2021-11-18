@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.vedtak.domene
 import com.fasterxml.jackson.annotation.JsonIgnore
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.NullableMånedPeriode
+import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
@@ -11,6 +12,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.utbetaltForPersonerIBegrunnelse
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import org.hibernate.annotations.SortComparator
 import java.time.LocalDate
@@ -118,7 +120,8 @@ fun UtvidetVedtaksperiodeMedBegrunnelser.byggBegrunnelserOgFritekster(
                 utvidetVedtaksperiodeMedBegrunnelser = this,
                 personerPåBegrunnelse = personerIPersongrunnlag.filter { person -> it.personIdenter.contains(person.personIdent.ident) },
                 målform = målform,
-                uregistrerteBarn = uregistrerteBarn
+                uregistrerteBarn = uregistrerteBarn,
+                beløp = Utils.formaterBeløp(this.utbetaltForPersonerIBegrunnelse(it)),
             )
         }
 

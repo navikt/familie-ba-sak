@@ -6,7 +6,7 @@ import no.nav.familie.ba.sak.common.nyOrdinærBehandling
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.vurderVilkårsvurderingTilInnvilget
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
+import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonResultat
@@ -20,6 +20,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurderingType
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -72,7 +73,7 @@ class VilkårServiceTest(
         val vilkårsvurdering = vilkårService.initierVilkårsvurderingForBehandling(
             behandling = behandling,
             bekreftEndringerViaFrontend = true,
-            forrigeBehandling = forrigeBehandlingSomErIverksatt
+            forrigeBehandlingSomErVedtatt = forrigeBehandlingSomErIverksatt
         )
         vilkårsvurdering.personResultater.forEach { personResultat ->
             personResultat.vilkårResultater.forEach { vilkårResultat ->
@@ -101,7 +102,7 @@ class VilkårServiceTest(
         val vilkårsvurdering = vilkårService.initierVilkårsvurderingForBehandling(
             behandling = behandling,
             bekreftEndringerViaFrontend = true,
-            forrigeBehandling = forrigeBehandlingSomErIverksatt
+            forrigeBehandlingSomErVedtatt = forrigeBehandlingSomErIverksatt
         )
         val under18ÅrVilkårForBarn =
             vilkårsvurdering.personResultater.find { it.personIdent == barnFnr }
@@ -147,7 +148,7 @@ class VilkårServiceTest(
         val vilkårsvurdering = vilkårService.initierVilkårsvurderingForBehandling(
             behandling = behandling,
             bekreftEndringerViaFrontend = true,
-            forrigeBehandling = forrigeBehandlingSomErIverksatt
+            forrigeBehandlingSomErVedtatt = forrigeBehandlingSomErIverksatt
         )
         Assertions.assertEquals(2, vilkårsvurdering.personResultater.size)
 
@@ -158,7 +159,7 @@ class VilkårServiceTest(
         val behandlingResultatMedEkstraBarn = vilkårService.initierVilkårsvurderingForBehandling(
             behandling = behandling,
             bekreftEndringerViaFrontend = true,
-            forrigeBehandling = forrigeBehandlingSomErIverksatt
+            forrigeBehandlingSomErVedtatt = forrigeBehandlingSomErIverksatt
         )
         Assertions.assertEquals(3, behandlingResultatMedEkstraBarn.personResultater.size)
     }
@@ -193,7 +194,7 @@ class VilkårServiceTest(
         val vilkårsvurdering = vilkårService.initierVilkårsvurderingForBehandling(
             behandling = behandling,
             bekreftEndringerViaFrontend = true,
-            forrigeBehandling = forrigeBehandlingSomErIverksatt
+            forrigeBehandlingSomErVedtatt = forrigeBehandlingSomErIverksatt
         )
             .also {
                 it.personResultater
@@ -234,7 +235,7 @@ class VilkårServiceTest(
         val vilkårsvurdering = vilkårService.initierVilkårsvurderingForBehandling(
             behandling = behandling,
             bekreftEndringerViaFrontend = true,
-            forrigeBehandling = forrigeBehandlingSomErIverksatt
+            forrigeBehandlingSomErVedtatt = forrigeBehandlingSomErIverksatt
         )
         Assertions.assertEquals(2, vilkårsvurdering.personResultater.size)
 
@@ -270,7 +271,7 @@ class VilkårServiceTest(
         val vilkårsvurdering2 = vilkårService.initierVilkårsvurderingForBehandling(
             behandling = behandling2,
             bekreftEndringerViaFrontend = true,
-            forrigeBehandling = behandling
+            forrigeBehandlingSomErVedtatt = behandling
         )
 
         Assertions.assertEquals(3, vilkårsvurdering2.personResultater.size)
@@ -304,7 +305,7 @@ class VilkårServiceTest(
         val vilkårsvurdering = vilkårService.initierVilkårsvurderingForBehandling(
             behandling = behandling,
             bekreftEndringerViaFrontend = true,
-            forrigeBehandling = forrigeBehandlingSomErIverksatt
+            forrigeBehandlingSomErVedtatt = forrigeBehandlingSomErIverksatt
         )
 
         val barn: Person = personopplysningGrunnlag.barna.find { it.personIdent.ident == barnFnr }!!
@@ -325,7 +326,7 @@ class VilkårServiceTest(
         val behandlingResultat2 = vilkårService.initierVilkårsvurderingForBehandling(
             behandling = behandling2,
             bekreftEndringerViaFrontend = true,
-            forrigeBehandling = behandling
+            forrigeBehandlingSomErVedtatt = behandling
         )
 
         Assertions.assertEquals(3, behandlingResultat2.personResultater.size)
@@ -399,6 +400,108 @@ class VilkårServiceTest(
                 Vilkår.UTVIDET_BARNETRYGD
             ),
             Vilkår.hentVilkårFor(personType = PersonType.SØKER, ytelseType = YtelseType.UTVIDET_BARNETRYGD)
+        )
+    }
+
+    @Test
+    fun `Skal ikke få duplikate utdypede vilkårsvurderinger`() {
+        val fnr = randomFnr()
+        val barnFnr = randomFnr()
+
+        fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
+        val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(fnr))
+        val forrigeBehandlingSomErIverksatt =
+            behandlingService.hentSisteBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id)
+
+        val personopplysningGrunnlag =
+            lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
+        persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
+
+        val vilkårsvurdering = vilkårService.initierVilkårsvurderingForBehandling(
+            behandling = behandling,
+            bekreftEndringerViaFrontend = true,
+            forrigeBehandlingSomErVedtatt = forrigeBehandlingSomErIverksatt
+        )
+        val under18ÅrVilkårForBarn =
+            vilkårsvurdering.personResultater.find { it.personIdent == barnFnr }
+                ?.tilRestPersonResultat()?.vilkårResultater?.find { it.vilkårType == Vilkår.UNDER_18_ÅR }
+
+        val endretVilkårsvurdering: List<RestPersonResultat> =
+            vilkårService.endreVilkår(
+                behandlingId = behandling.id,
+                vilkårId = under18ÅrVilkårForBarn!!.id,
+                restPersonResultat =
+                RestPersonResultat(
+                    personIdent = barnFnr,
+                    vilkårResultater = listOf(
+                        under18ÅrVilkårForBarn.copy(
+                            resultat = Resultat.OPPFYLT,
+                            periodeFom = LocalDate.of(2019, 5, 8),
+                            erDeltBosted = true,
+                            utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED)
+                        )
+                    )
+                )
+            )
+
+        val endretUnder18ÅrVilkårForBarn =
+            endretVilkårsvurdering.find { it.personIdent == barnFnr }
+                ?.vilkårResultater?.find { it.vilkårType == Vilkår.UNDER_18_ÅR }
+
+        Assertions.assertEquals(
+            1,
+            endretUnder18ÅrVilkårForBarn!!.utdypendeVilkårsvurderinger.size
+        )
+    }
+
+    @Test
+    fun `Skal legge til både erSkjønnsmessigVurdert og erMedlemskapVurdert i utdypendeVilkårsvurderinger liste`() {
+        val fnr = randomFnr()
+        val barnFnr = randomFnr()
+
+        fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
+        val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(fnr))
+        val forrigeBehandlingSomErIverksatt =
+            behandlingService.hentSisteBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id)
+
+        val personopplysningGrunnlag =
+            lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
+        persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
+
+        val vilkårsvurdering = vilkårService.initierVilkårsvurderingForBehandling(
+            behandling = behandling,
+            bekreftEndringerViaFrontend = true,
+            forrigeBehandlingSomErVedtatt = forrigeBehandlingSomErIverksatt
+        )
+        val under18ÅrVilkårForBarn =
+            vilkårsvurdering.personResultater.find { it.personIdent == barnFnr }
+                ?.tilRestPersonResultat()?.vilkårResultater?.find { it.vilkårType == Vilkår.UNDER_18_ÅR }
+
+        val endretVilkårsvurdering: List<RestPersonResultat> =
+            vilkårService.endreVilkår(
+                behandlingId = behandling.id,
+                vilkårId = under18ÅrVilkårForBarn!!.id,
+                restPersonResultat =
+                RestPersonResultat(
+                    personIdent = barnFnr,
+                    vilkårResultater = listOf(
+                        under18ÅrVilkårForBarn.copy(
+                            resultat = Resultat.OPPFYLT,
+                            periodeFom = LocalDate.of(2019, 5, 8),
+                            erSkjønnsmessigVurdert = true,
+                            erMedlemskapVurdert = true,
+                        )
+                    )
+                )
+            )
+
+        val endretUnder18ÅrVilkårForBarn =
+            endretVilkårsvurdering.find { it.personIdent == barnFnr }
+                ?.vilkårResultater?.find { it.vilkårType == Vilkår.UNDER_18_ÅR }
+
+        Assertions.assertEquals(
+            2,
+            endretUnder18ÅrVilkårForBarn!!.utdypendeVilkårsvurderinger.size
         )
     }
 }

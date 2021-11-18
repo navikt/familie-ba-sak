@@ -20,7 +20,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
-import org.springframework.core.env.Environment
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestOperations
 import java.net.URI
@@ -33,15 +32,11 @@ class InfotrygdFeedClientTest : AbstractSpringIntegrationTestDev() {
     @Qualifier("jwtBearer")
     lateinit var restOperations: RestOperations
 
-    @Autowired
-    lateinit var environment: Environment
-
     @BeforeEach
     fun setUp() {
         client = InfotrygdFeedClient(
             URI.create(wireMockServer.baseUrl() + "/api"),
-            restOperations,
-            environment
+            restOperations
         )
     }
 

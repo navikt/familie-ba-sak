@@ -52,7 +52,11 @@ data class VurderPersonErBosattIRiket(
          * En person som mangler registrert bostedsadresse er utflyttet.
          * See: https://navikt.github.io/pdl/#_utflytting
          */
-        return if (adresserMedGyldigFom.isNotEmpty() && erPersonBosattFraVurderingstidspunktet(adresserMedGyldigFom, vurderFra))
+        return if (adresserMedGyldigFom.isNotEmpty() && erPersonBosattFraVurderingstidspunktet(
+                adresserMedGyldigFom,
+                vurderFra
+            )
+        )
             Evaluering.oppfylt(VilkårOppfyltÅrsak.BOR_I_RIKET)
         else Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.BOR_IKKE_I_RIKET)
     }
@@ -66,7 +70,6 @@ data class VurderPersonErBosattIRiket(
 
     companion object {
 
-        private val logger = LoggerFactory.getLogger(VurderPersonErBosattIRiket::class.java)
         private val secureLogger = LoggerFactory.getLogger("secureLogger")
     }
 }
@@ -372,7 +375,8 @@ private fun hentMaxAvstandAvDagerMellomPerioder(
         .zipWithNext()
         .fold(defaultAvstand) { maksimumAvstand, pairs ->
             val avstand =
-                Duration.between(pairs.first.tom!!.atStartOfDay().plusDays(1), pairs.second.fom!!.atStartOfDay()).toDays()
+                Duration.between(pairs.first.tom!!.atStartOfDay().plusDays(1), pairs.second.fom!!.atStartOfDay())
+                    .toDays()
             maxOf(avstand, maksimumAvstand)
         }
 }

@@ -44,11 +44,11 @@ class RegistrereSøknad(
             )
         )
 
-        val forrigeBehandlingSomErIverksatt =
-            behandlingService.hentSisteBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id)
+        val forrigeBehandlingSomErVedtatt =
+            behandlingService.hentForrigeBehandlingSomErVedtatt(behandling = behandling)
         persongrunnlagService.registrerBarnFraSøknad(
             behandling = behandlingService.hent(behandlingId = behandling.id),
-            forrigeBehandling = forrigeBehandlingSomErIverksatt,
+            forrigeBehandlingSomErVedtatt = forrigeBehandlingSomErVedtatt,
             søknadDTO = søknadDTO
         )
 

@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.MigreringResponseDto
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestClient
@@ -31,6 +32,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
 import no.nav.familie.kontrakter.ba.infotrygd.Sak
+import no.nav.familie.kontrakter.ba.infotrygd.Stønad
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import org.slf4j.LoggerFactory
@@ -100,7 +102,9 @@ class MigreringService(
 
         val behandlingEtterVilkårsvurdering = stegService.håndterVilkårsvurdering(behandling)
 
-        sammenlignTilkjentYtelseMedBeløpFraInfotrygd(behandlingEtterVilkårsvurdering, løpendeSak)
+        val førsteUtbetalingsperiode = finnFørsteUtbetalingsperiode(behandling.id)
+
+        sammenlignFørsteUtbetalingsbeløpMedBeløpFraInfotrygd(førsteUtbetalingsperiode.value, løpendeSak.stønad!!)
 
         iverksett(behandlingEtterVilkårsvurdering)
 
@@ -108,7 +112,8 @@ class MigreringService(
             fagsakId = behandlingEtterVilkårsvurdering.fagsak.id,
             behandlingId = behandlingEtterVilkårsvurdering.id,
             infotrygdStønadId = løpendeSak.stønad?.id,
-            infotrygdSakId = løpendeSak.id
+            infotrygdSakId = løpendeSak.id,
+            virkningFom = førsteUtbetalingsperiode.fom.toYearMonth()
         )
     }
 
@@ -211,7 +216,7 @@ class MigreringService(
                 env?.erPreprod() ?: false -> LocalDate.of(2021, 7, 1)
                 this.isBefore(kjøredato) -> this.førsteDagIInneværendeMåned()
                 this.isAfter(kjøredato.plusDays(1)) -> this.førsteDagINesteMåned()
-                env!!.erDev() || env.erE2E() -> this.førsteDagINesteMåned()
+                env!!.erDev() -> this.førsteDagINesteMåned()
                 else -> throw FunksjonellFeil(
                     "Migrering er midlertidig deaktivert frem til ${kjøredato.plusDays(2)} da det kolliderer med Infotrygds kjøredato",
                     "Migrering er midlertidig deaktivert frem til ${kjøredato.plusDays(2)} da det kolliderer med Infotrygds kjøredato"
@@ -242,34 +247,38 @@ class MigreringService(
         }
     }
 
-    private fun sammenlignTilkjentYtelseMedBeløpFraInfotrygd(
-        behandling: Behandling,
-        løpendeSak: Sak
+    private fun finnFørsteUtbetalingsperiode(behandlingId: Long): LocalDateSegment<Int> {
+        return tilkjentYtelseRepository.findByBehandlingOptional(behandlingId)?.andelerTilkjentYtelse
+            ?.let { andelerTilkjentYtelse: MutableSet<AndelTilkjentYtelse> ->
+                if (andelerTilkjentYtelse.isEmpty()) throw Feil(
+                    "Migrering feilet: Fant ingen andeler tilkjent ytelse på behandlingen",
+                    "Migrering feilet: Fant ingen andeler tilkjent ytelse på behandlingen",
+                    HttpStatus.INTERNAL_SERVER_ERROR
+                )
+
+                val førsteUtbetalingsperiode = beregnUtbetalingsperioderUtenKlassifisering(andelerTilkjentYtelse)
+                    .sortedWith(compareBy<LocalDateSegment<Int>>({ it.fom }, { it.value }, { it.tom }))
+                    .first()
+                førsteUtbetalingsperiode
+            } ?: throw Feil(
+            "Migrering feilet: Tilkjent ytelse er null.",
+            "Migrering feilet: Tilkjent ytelse er null.",
+            HttpStatus.INTERNAL_SERVER_ERROR
+        )
+    }
+
+    private fun sammenlignFørsteUtbetalingsbeløpMedBeløpFraInfotrygd(
+        førsteUtbetalingsbeløp: Int?,
+        infotrygdStønad: Stønad,
     ) {
-        tilkjentYtelseRepository.findByBehandlingOptional(behandling.id)?.andelerTilkjentYtelse?.let { andelerTilkjentYtelse: MutableSet<AndelTilkjentYtelse> ->
-            if (andelerTilkjentYtelse.isEmpty()) throw Feil(
-                "Migrering feilet: Fant ingen andeler tilkjent ytelse på behandlingen",
-                "Migrering feilet: Fant ingen andeler tilkjent ytelse på behandlingen",
-                HttpStatus.INTERNAL_SERVER_ERROR
-            )
+        val beløpFraInfotrygd =
+            infotrygdStønad.delytelse.singleOrNull()?.beløp?.toInt() ?: error("Finnes flere delytelser på sak")
 
-            val førsteUtbetalingsperiode = beregnUtbetalingsperioderUtenKlassifisering(andelerTilkjentYtelse)
-                .sortedWith(compareBy<LocalDateSegment<Int>>({ it.fom }, { it.value }, { it.tom }))
-                .first()
-            val tilkjentBeløp = førsteUtbetalingsperiode.value
-            val beløpFraInfotrygd =
-                løpendeSak.stønad!!.delytelse.singleOrNull()?.beløp?.toInt() ?: error("Finnes flere delytelser på sak")
-
-            if (tilkjentBeløp != beløpFraInfotrygd) throw Feil(
-                "Migrering feilet: Nytt, beregnet beløp var ulikt beløp fra Infotrygd " +
-                    "($tilkjentBeløp =/= $beløpFraInfotrygd)",
-                "Migrering feilet: Nytt, beregnet beløp var ulikt beløp fra Infotrygd " +
-                    "($tilkjentBeløp =/= $beløpFraInfotrygd)",
-                HttpStatus.INTERNAL_SERVER_ERROR
-            )
-        } ?: throw Feil(
-            "Migrering feilet: Tilkjent ytelse er null.",
-            "Migrering feilet: Tilkjent ytelse er null.",
+        if (førsteUtbetalingsbeløp != beløpFraInfotrygd) throw Feil(
+            "Migrering feilet: Nytt, beregnet beløp var ulikt beløp fra Infotrygd " +
+                "($førsteUtbetalingsbeløp =/= $beløpFraInfotrygd)",
+            "Migrering feilet: Nytt, beregnet beløp var ulikt beløp fra Infotrygd " +
+                "($førsteUtbetalingsbeløp =/= $beløpFraInfotrygd)",
             HttpStatus.INTERNAL_SERVER_ERROR
         )
     }

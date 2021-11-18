@@ -1,0 +1,39 @@
+{
+  "beskrivelse": "RV: Det løper ordinær barneteygd. Vi mottar søknad om utvidet og innvilger denne.",
+  "inneværendeMåned": "2021-09",
+  "personer": [
+    {
+      "personType": "SØKER",
+      "søktForPerson": true,
+      "eksplisittAvslått": false,
+      "forrigeAndeler": [],
+      "andeler": [
+        {
+          "stønadFom": "2021-02",
+          "stønadTom": "2021-08",
+          "kalkulertUtbetalingsbeløp": 1054
+        }
+      ]
+    },
+    {
+      "personType": "BARN",
+      "søktForPerson": false,
+      "eksplisittAvslått": false,
+      "forrigeAndeler": [
+        {
+        "stønadFom": "2021-02",
+        "stønadTom": "2030-12",
+        "kalkulertUtbetalingsbeløp": 1354
+      }
+      ],
+      "andeler": [
+        {
+          "stønadFom": "2021-02",
+          "stønadTom": "2030-12",
+          "kalkulertUtbetalingsbeløp": 1354
+        }
+      ]
+    }
+  ],
+  "forventetResultat": "INNVILGET"
+}
