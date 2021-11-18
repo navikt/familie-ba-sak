@@ -32,6 +32,6 @@ data class InformasjonsbrevDeltBostedData(
     }
 
     data class DelmalData(
-        val medVennilgHilsen: MedVennilgHilsen
+        val medVennilgHilsen: MedVennligHilsen
     )
 }
