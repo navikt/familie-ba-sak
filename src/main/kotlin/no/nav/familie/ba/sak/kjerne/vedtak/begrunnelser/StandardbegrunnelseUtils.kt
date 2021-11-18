@@ -32,7 +32,8 @@ fun VedtakBegrunnelseSpesifikasjon.triggesForPeriode(
     persongrunnlag: PersonopplysningGrunnlag,
     identerMedUtbetaling: List<String>,
     triggesAv: TriggesAv,
-    endretUtbetalingAndeler: List<EndretUtbetalingAndel> = emptyList()
+    endretUtbetalingAndeler: List<EndretUtbetalingAndel> = emptyList(),
+    andelerTilkjentYtelse: List<AndelTilkjentYtelse> = emptyList(),
 ): Boolean {
 
     val aktuellePersoner = persongrunnlag.personer
@@ -49,12 +50,21 @@ fun VedtakBegrunnelseSpesifikasjon.triggesForPeriode(
         aktuellePersoner,
         triggesAv
     )
+    val ytelseTyperForPeriode = utvidetVedtaksperiodeMedBegrunnelser
+        .utbetalingsperiodeDetaljer.map { it.ytelseType }
 
     val begrunnelseErRiktigType =
         utvidetVedtaksperiodeMedBegrunnelser.type.tillatteBegrunnelsestyper.contains(this.vedtakBegrunnelseType)
     return when {
         !triggesAv.valgbar -> false
         !begrunnelseErRiktigType -> false
+
+        triggesAv.vilkår.contains(Vilkår.UTVIDET_BARNETRYGD) -> this.periodeErOppyltForYtelseType(
+            ytelseType = if (triggesAv.småbarnstillegg) YtelseType.SMÅBARNSTILLEGG else YtelseType.UTVIDET_BARNETRYGD,
+            ytelseTyperForPeriode = ytelseTyperForPeriode,
+            andelerTilkjentYtelse = andelerTilkjentYtelse,
+            fomForPeriode = utvidetVedtaksperiodeMedBegrunnelser.fom
+        )
         triggesAv.personerManglerOpplysninger -> vilkårsvurdering.harPersonerManglerOpplysninger()
         triggesAv.barnMedSeksårsdag ->
             persongrunnlag.harBarnMedSeksårsdagPåFom(utvidetVedtaksperiodeMedBegrunnelser.fom)
@@ -124,54 +134,19 @@ fun VedtakBegrunnelseSpesifikasjon.tilVedtaksbegrunnelse(
     )
 }
 
-fun VedtakBegrunnelseSpesifikasjon.triggereForUtvidetBarnetrygdErOppfylt(
-    begrunnelseTriggesAv: TriggesAv,
+fun VedtakBegrunnelseSpesifikasjon.periodeErOppyltForYtelseType(
+    ytelseType: YtelseType,
     ytelseTyperForPeriode: List<YtelseType>,
     andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
     fomForPeriode: LocalDate?,
-) =
-    when (this.vedtakBegrunnelseType) {
-        VedtakBegrunnelseType.INNVILGET -> triggereForUtvidetBarnetrygdErOppfyltVedInnvilget(
-            begrunnelseTriggesAv = begrunnelseTriggesAv,
-            ytelseTyperForPeriode = ytelseTyperForPeriode
-        )
-        VedtakBegrunnelseType.REDUKSJON -> triggereForUtvidetBarnetrygdErOppfyltVedReduksjon(
-            begrunnelseTriggesAv = begrunnelseTriggesAv,
-            ytelseTyperForPeriode = ytelseTyperForPeriode,
-            andelerTilkjentYtelse = andelerTilkjentYtelse,
-            fomForPeriode = fomForPeriode
-        )
+): Boolean {
+    return when (this.vedtakBegrunnelseType) {
+        VedtakBegrunnelseType.INNVILGET -> ytelseTyperForPeriode.contains(ytelseType)
+        VedtakBegrunnelseType.REDUKSJON -> !ytelseTyperForPeriode.contains(ytelseType) &&
+            ytelseOppfyltForrigeMåned(ytelseType, andelerTilkjentYtelse, fomForPeriode)
         else -> false
     }
-
-fun triggereForUtvidetBarnetrygdErOppfyltVedInnvilget(
-    begrunnelseTriggesAv: TriggesAv,
-    ytelseTyperForPeriode: List<YtelseType>,
-) =
-    when {
-        begrunnelseTriggesAv.småbarnstillegg -> ytelseTyperForPeriode.contains(YtelseType.SMÅBARNSTILLEGG)
-        begrunnelseTriggesAv.vilkår.contains(Vilkår.UTVIDET_BARNETRYGD) ->
-            ytelseTyperForPeriode.contains(YtelseType.UTVIDET_BARNETRYGD)
-        else -> false
-    }
-
-fun triggereForUtvidetBarnetrygdErOppfyltVedReduksjon(
-    begrunnelseTriggesAv: TriggesAv,
-    ytelseTyperForPeriode: List<YtelseType>,
-    andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
-    fomForPeriode: LocalDate?,
-) =
-    when {
-        begrunnelseTriggesAv.småbarnstillegg ->
-            !ytelseTyperForPeriode.contains(YtelseType.SMÅBARNSTILLEGG) &&
-                ytelseOppfyltForrigeMåned(YtelseType.SMÅBARNSTILLEGG, andelerTilkjentYtelse, fomForPeriode)
-
-        begrunnelseTriggesAv.vilkår.contains(Vilkår.UTVIDET_BARNETRYGD) ->
-            !ytelseTyperForPeriode.contains(YtelseType.UTVIDET_BARNETRYGD) &&
-                ytelseOppfyltForrigeMåned(YtelseType.UTVIDET_BARNETRYGD, andelerTilkjentYtelse, fomForPeriode)
-
-        else -> false
-    }
+}
 
 private fun ytelseOppfyltForrigeMåned(
     ytelseType: YtelseType,

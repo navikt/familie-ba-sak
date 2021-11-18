@@ -29,7 +29,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.erTilknyttetVilkår
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilVedtaksbegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.triggereForUtvidetBarnetrygdErOppfylt
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.triggesForPeriode
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Begrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
@@ -304,9 +303,6 @@ class VedtaksperiodeService(
                     val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id)
                         ?: error("Finner ikke vilkårsvurdering ved begrunning av vedtak")
 
-                    val ytelseTyper =
-                        utvidetVedtaksperiodeMedBegrunnelser.utbetalingsperiodeDetaljer.map { it.ytelseType }
-
                     val identerMedUtbetaling =
                         utvidetVedtaksperiodeMedBegrunnelser.utbetalingsperiodeDetaljer.map { it.person.personIdent }
 
@@ -321,15 +317,7 @@ class VedtaksperiodeService(
                                     standardBegrunnelse.tilSanityBegrunnelse(sanityBegrunnelser)
                                         ?.tilTriggesAv() ?: return@fold acc
 
-                                if (standardBegrunnelse.triggereForUtvidetBarnetrygdErOppfylt(
-                                        begrunnelseTriggesAv = triggesAv,
-                                        ytelseTyperForPeriode = ytelseTyper,
-                                        andelerTilkjentYtelse = andelerTilkjentYtelse,
-                                        fomForPeriode = utvidetVedtaksperiodeMedBegrunnelser.fom
-                                    )
-                                ) {
-                                    acc.add(standardBegrunnelse)
-                                } else if (standardBegrunnelse.triggesForPeriode(
+                                if (standardBegrunnelse.triggesForPeriode(
                                         utvidetVedtaksperiodeMedBegrunnelser = utvidetVedtaksperiodeMedBegrunnelser,
                                         vilkårsvurdering = vilkårsvurdering,
                                         persongrunnlag = persongrunnlag,
@@ -337,7 +325,8 @@ class VedtaksperiodeService(
                                         triggesAv = triggesAv,
                                         endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(
                                                 behandling.id
-                                            )
+                                            ),
+                                        andelerTilkjentYtelse = andelerTilkjentYtelse,
                                     )
                                 ) {
                                     acc.add(standardBegrunnelse)

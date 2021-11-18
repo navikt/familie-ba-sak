@@ -106,12 +106,6 @@ object VedtakUtils {
             (!triggesAv.vurderingAnnetGrunnlag || vilkårResultat.erSkjønnsmessigVurdert)
         val erMedlemskapOppfylt = vilkårResultat.erMedlemskapVurdert == triggesAv.medlemskap
 
-        return erDeltBostedOppfylt &&
-            erSkjønnsmessigVurderingOppfylt &&
-            erMedlemskapOppfylt &&
-            // Utvidet og småbarnstillegg håndteres i triggereForUtvidetBarnetrygdErOppfylt-funksjonen
-            // i vedtakperiodeService
-            !triggesAv.småbarnstillegg &&
-            !triggesAv.vilkår.contains(Vilkår.UTVIDET_BARNETRYGD)
+        return erDeltBostedOppfylt && erSkjønnsmessigVurderingOppfylt && erMedlemskapOppfylt
     }
 }

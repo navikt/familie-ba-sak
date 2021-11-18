@@ -6,7 +6,6 @@ import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagEndretUtbetalingAndel
 import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
-import no.nav.familie.ba.sak.common.lagTriggesAv
 import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.common.lagVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
@@ -17,7 +16,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.triggereForUtvidetBarnetrygdErOppfylt
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.periodeErOppyltForYtelseType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -385,8 +384,6 @@ class VedtaksperiodeServiceUtilsTest {
         )
     }
 
-    val triggesAvSmåbarnstillegg = lagTriggesAv(småbarnstillegg = true)
-
     val ytelseTyperSmåbarnstillegg =
         listOf(YtelseType.SMÅBARNSTILLEGG, YtelseType.UTVIDET_BARNETRYGD, YtelseType.ORDINÆR_BARNETRYGD)
     val ytelseTyperUtvidetOgOrdinær =
@@ -400,8 +397,8 @@ class VedtaksperiodeServiceUtilsTest {
 
         Assertions.assertEquals(
             true,
-            innvilgetBegrunnelse.triggereForUtvidetBarnetrygdErOppfylt(
-                begrunnelseTriggesAv = triggesAvSmåbarnstillegg,
+            innvilgetBegrunnelse.periodeErOppyltForYtelseType(
+                ytelseType = YtelseType.SMÅBARNSTILLEGG,
                 ytelseTyperForPeriode = ytelseTyperSmåbarnstillegg,
                 andelerTilkjentYtelse = emptyList(),
                 fomForPeriode = LocalDate.now()
@@ -410,8 +407,8 @@ class VedtaksperiodeServiceUtilsTest {
 
         Assertions.assertEquals(
             false,
-            innvilgetBegrunnelse.triggereForUtvidetBarnetrygdErOppfylt(
-                begrunnelseTriggesAv = triggesAvSmåbarnstillegg,
+            innvilgetBegrunnelse.periodeErOppyltForYtelseType(
+                ytelseType = YtelseType.SMÅBARNSTILLEGG,
                 ytelseTyperForPeriode = ytelseTyperUtvidetOgOrdinær,
                 andelerTilkjentYtelse = emptyList(),
                 fomForPeriode = LocalDate.now()
@@ -451,8 +448,8 @@ class VedtaksperiodeServiceUtilsTest {
 
         Assertions.assertEquals(
             true,
-            reduksjonSmåbarnBegrunnelse.triggereForUtvidetBarnetrygdErOppfylt(
-                begrunnelseTriggesAv = triggesAvSmåbarnstillegg,
+            reduksjonSmåbarnBegrunnelse.periodeErOppyltForYtelseType(
+                ytelseType = YtelseType.SMÅBARNSTILLEGG,
                 ytelseTyperForPeriode = ytelseTyperUtvidetOgOrdinær,
                 andelerTilkjentYtelse = andelerTilkjentYtelseMedSmåbarnstilleggDagenFør,
                 fomForPeriode = fom
@@ -461,8 +458,8 @@ class VedtaksperiodeServiceUtilsTest {
 
         Assertions.assertEquals(
             false,
-            reduksjonSmåbarnBegrunnelse.triggereForUtvidetBarnetrygdErOppfylt(
-                begrunnelseTriggesAv = triggesAvSmåbarnstillegg,
+            reduksjonSmåbarnBegrunnelse.periodeErOppyltForYtelseType(
+                ytelseType = YtelseType.SMÅBARNSTILLEGG,
                 ytelseTyperForPeriode = ytelseTyperSmåbarnstillegg,
                 andelerTilkjentYtelse = andelerTilkjentYtelseMedSmåbarnstilleggDagenFør,
                 fomForPeriode = fom
@@ -471,8 +468,8 @@ class VedtaksperiodeServiceUtilsTest {
 
         Assertions.assertEquals(
             false,
-            reduksjonSmåbarnBegrunnelse.triggereForUtvidetBarnetrygdErOppfylt(
-                begrunnelseTriggesAv = triggesAvSmåbarnstillegg,
+            reduksjonSmåbarnBegrunnelse.periodeErOppyltForYtelseType(
+                ytelseType = YtelseType.SMÅBARNSTILLEGG,
                 ytelseTyperForPeriode = ytelseTyperUtvidetOgOrdinær,
                 andelerTilkjentYtelse = andelerTilkjentYtelseMedOrdinærYtelseDagenFør,
                 fomForPeriode = fom
@@ -481,8 +478,8 @@ class VedtaksperiodeServiceUtilsTest {
 
         Assertions.assertEquals(
             false,
-            reduksjonSmåbarnBegrunnelse.triggereForUtvidetBarnetrygdErOppfylt(
-                begrunnelseTriggesAv = triggesAvSmåbarnstillegg,
+            reduksjonSmåbarnBegrunnelse.periodeErOppyltForYtelseType(
+                ytelseType = YtelseType.SMÅBARNSTILLEGG,
                 ytelseTyperForPeriode = ytelseTyperUtvidetOgOrdinær,
                 andelerTilkjentYtelse = andelerTilkjentYtelseMedSmåbarnstilleggIkkeDagenFør,
                 fomForPeriode = fom
@@ -495,8 +492,8 @@ class VedtaksperiodeServiceUtilsTest {
 
         Assertions.assertEquals(
             false,
-            VedtakBegrunnelseSpesifikasjon.AVSLAG_BOR_HOS_SØKER.triggereForUtvidetBarnetrygdErOppfylt(
-                begrunnelseTriggesAv = triggesAvSmåbarnstillegg,
+            VedtakBegrunnelseSpesifikasjon.AVSLAG_BOR_HOS_SØKER.periodeErOppyltForYtelseType(
+                ytelseType = YtelseType.SMÅBARNSTILLEGG,
                 ytelseTyperForPeriode = ytelseTyperSmåbarnstillegg,
                 andelerTilkjentYtelse = emptyList(),
                 fomForPeriode = LocalDate.now()
@@ -504,17 +501,14 @@ class VedtaksperiodeServiceUtilsTest {
         )
     }
 
-    val triggesAvUtvidet = lagTriggesAv(vilkår = setOf(Vilkår.UTVIDET_BARNETRYGD), småbarnstillegg = false)
-    val triggesIkkeAvUtvidet = lagTriggesAv(vilkår = setOf(Vilkår.LOVLIG_OPPHOLD), småbarnstillegg = false)
-
     @Test
     fun `Skal gi riktig svar for utvidet-trigger ved innvilget`() {
         val innvilgetUtvidetBegrunnelse = VedtakBegrunnelseSpesifikasjon.INNVILGET_ALENE_FRA_FØDSEL
 
         Assertions.assertEquals(
             true,
-            innvilgetUtvidetBegrunnelse.triggereForUtvidetBarnetrygdErOppfylt(
-                begrunnelseTriggesAv = triggesAvUtvidet,
+            innvilgetUtvidetBegrunnelse.periodeErOppyltForYtelseType(
+                ytelseType = YtelseType.UTVIDET_BARNETRYGD,
                 ytelseTyperForPeriode = ytelseTyperUtvidetOgOrdinær,
                 andelerTilkjentYtelse = emptyList(),
                 fomForPeriode = LocalDate.now()
@@ -523,18 +517,8 @@ class VedtaksperiodeServiceUtilsTest {
 
         Assertions.assertEquals(
             false,
-            innvilgetUtvidetBegrunnelse.triggereForUtvidetBarnetrygdErOppfylt(
-                begrunnelseTriggesAv = triggesIkkeAvUtvidet,
-                ytelseTyperForPeriode = ytelseTyperUtvidetOgOrdinær,
-                andelerTilkjentYtelse = emptyList(),
-                fomForPeriode = LocalDate.now()
-            )
-        )
-
-        Assertions.assertEquals(
-            false,
-            innvilgetUtvidetBegrunnelse.triggereForUtvidetBarnetrygdErOppfylt(
-                begrunnelseTriggesAv = triggesAvUtvidet,
+            innvilgetUtvidetBegrunnelse.periodeErOppyltForYtelseType(
+                ytelseType = YtelseType.UTVIDET_BARNETRYGD,
                 ytelseTyperForPeriode = ytelseTyperOrdinær,
                 andelerTilkjentYtelse = emptyList(),
                 fomForPeriode = LocalDate.now()
@@ -574,8 +558,8 @@ class VedtaksperiodeServiceUtilsTest {
 
         Assertions.assertEquals(
             true,
-            reduksjonBegrunnelseUtvidet.triggereForUtvidetBarnetrygdErOppfylt(
-                begrunnelseTriggesAv = triggesAvUtvidet,
+            reduksjonBegrunnelseUtvidet.periodeErOppyltForYtelseType(
+                ytelseType = YtelseType.UTVIDET_BARNETRYGD,
                 ytelseTyperForPeriode = ytelseTyperOrdinær,
                 andelerTilkjentYtelse = andelerTilkjentYtelseMedUtvidetBarnetrygdDagenFør,
                 fomForPeriode = fom
@@ -584,8 +568,8 @@ class VedtaksperiodeServiceUtilsTest {
 
         Assertions.assertEquals(
             false,
-            reduksjonBegrunnelseUtvidet.triggereForUtvidetBarnetrygdErOppfylt(
-                begrunnelseTriggesAv = triggesAvUtvidet,
+            reduksjonBegrunnelseUtvidet.periodeErOppyltForYtelseType(
+                ytelseType = YtelseType.UTVIDET_BARNETRYGD,
                 ytelseTyperForPeriode = ytelseTyperUtvidetOgOrdinær,
                 andelerTilkjentYtelse = andelerTilkjentYtelseMedUtvidetBarnetrygdDagenFør,
                 fomForPeriode = fom
@@ -594,8 +578,8 @@ class VedtaksperiodeServiceUtilsTest {
 
         Assertions.assertEquals(
             false,
-            reduksjonBegrunnelseUtvidet.triggereForUtvidetBarnetrygdErOppfylt(
-                begrunnelseTriggesAv = triggesAvUtvidet,
+            reduksjonBegrunnelseUtvidet.periodeErOppyltForYtelseType(
+                ytelseType = YtelseType.UTVIDET_BARNETRYGD,
                 ytelseTyperForPeriode = ytelseTyperOrdinær,
                 andelerTilkjentYtelse = andelerTilkjentYtelseMedOrdinærYtelseDagenFør,
                 fomForPeriode = fom
@@ -604,8 +588,8 @@ class VedtaksperiodeServiceUtilsTest {
 
         Assertions.assertEquals(
             false,
-            reduksjonBegrunnelseUtvidet.triggereForUtvidetBarnetrygdErOppfylt(
-                begrunnelseTriggesAv = triggesAvUtvidet,
+            reduksjonBegrunnelseUtvidet.periodeErOppyltForYtelseType(
+                ytelseType = YtelseType.UTVIDET_BARNETRYGD,
                 ytelseTyperForPeriode = ytelseTyperOrdinær,
                 andelerTilkjentYtelse = andelerTilkjentYtelseMedUtvidetBarnetrygdIkkeDagenFør,
                 fomForPeriode = fom
