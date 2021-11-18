@@ -152,7 +152,8 @@ class OppdaterVilkårsvurderingTest {
     ): Vilkårsvurdering {
         val vilkårsvurdering = Vilkårsvurdering(behandling = behandling)
         val personResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = søkerFnr)
-        val vilkårResultater = vilkår.map { lagVilkårResultat(vilkårType = it, personResultat = personResultat) }.toSet()
+        val vilkårResultater =
+            vilkår.map { lagVilkårResultat(vilkårType = it, personResultat = personResultat) }.toSet()
         personResultat.setSortedVilkårResultater(vilkårResultater)
         vilkårsvurdering.personResultater = setOf(personResultat)
         return vilkårsvurdering
