@@ -1,19 +1,22 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
 import io.mockk.mockk
+import no.nav.familie.ba.sak.common.forrigeMåned
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
+import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.YearMonth
 
-class SmåbarnstilleggUtils {
+class SmåbarnstilleggUtilsTest {
 
     @Test
     fun `Skal svare true om at nye perioder med full OS påvirker behandling`() {
@@ -87,5 +90,37 @@ class SmåbarnstilleggUtils {
         )
 
         assertFalse(påvirkerFagsak)
+    }
+
+    @Test
+    fun `Skal lage innvilgelsesperiode og reduksjonsperiode`() {
+        val forrigeFom = YearMonth.now().minusYears(2)
+        val forrigeTom = YearMonth.now().minusMonths(10)
+        val forrigeAndeler = listOf(
+            lagAndelTilkjentYtelse(
+                fom = forrigeFom,
+                tom = forrigeTom
+            ),
+        )
+
+        val nyFom = YearMonth.now().minusYears(1)
+        val nyTom = YearMonth.now().minusMonths(8)
+        val nyeAndeler = listOf(
+            lagAndelTilkjentYtelse(
+                fom = nyFom,
+                tom = nyTom
+            ),
+        )
+
+        val (innvilgelseperioder, reduksjonsperioder) = hentEndredePerioderISmåbarnstillegg(
+            forrigeSmåbarnstilleggAndeler = forrigeAndeler,
+            nyeSmåbarnstilleggAndeler = nyeAndeler
+        )
+
+        assertEquals(forrigeTom.nesteMåned(), innvilgelseperioder.first().fom)
+        assertEquals(nyTom, innvilgelseperioder.first().tom)
+
+        assertEquals(forrigeFom, reduksjonsperioder.first().fom)
+        assertEquals(nyFom.forrigeMåned(), reduksjonsperioder.first().tom)
     }
 }
