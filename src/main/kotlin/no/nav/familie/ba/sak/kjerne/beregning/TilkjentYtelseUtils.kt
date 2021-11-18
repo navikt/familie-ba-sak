@@ -129,14 +129,14 @@ object TilkjentYtelseUtils {
 
         val nyeAndelTilkjentYtelse = mutableListOf<AndelTilkjentYtelse>()
 
-        andelTilkjentYtelser.distinctBy { it.personIdent }.forEach { barnMedAndeler ->
-            val andelerForPerson = andelTilkjentYtelser.filter { it.personIdent == barnMedAndeler.personIdent }
+        andelTilkjentYtelser.filter { !it.erSmåbarnstillegg() }.groupBy { it.personIdent }.forEach { andelerForPerson ->
+            val personIdent = andelerForPerson.key
             val endringerForPerson =
-                endretUtbetalingAndeler.filter { it.person?.personIdent?.ident == barnMedAndeler.personIdent }
+                endretUtbetalingAndeler.filter { it.person?.personIdent?.ident == personIdent }
 
             val nyeAndelerForPerson = mutableListOf<AndelTilkjentYtelse>()
 
-            andelerForPerson.forEach { andelForPerson ->
+            andelerForPerson.value.forEach { andelForPerson ->
                 // Deler opp hver enkelt andel i perioder som hhv blir berørt av endringene og de som ikke berøres av de.
                 val (perioderMedEndring, perioderUtenEndring) = andelForPerson.stønadsPeriode()
                     .perioderMedOgUtenOverlapp(

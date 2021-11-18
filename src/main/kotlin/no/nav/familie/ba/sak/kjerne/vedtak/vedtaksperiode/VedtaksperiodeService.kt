@@ -14,7 +14,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
-import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.dokument.BrevKlient
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.dokument.domene.tilTriggesAv
@@ -28,14 +27,15 @@ import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.erTilknyttetVilkår
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilVedtaksbegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.triggesForPeriode
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Begrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.byggBegrunnelserOgFritekster
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilVedtaksbegrunnelseFritekst
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
 import org.springframework.stereotype.Service
@@ -302,9 +302,6 @@ class VedtaksperiodeService(
                     val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id)
                         ?: error("Finner ikke vilkårsvurdering ved begrunning av vedtak")
 
-                    val ytelseTyper =
-                        utvidetVedtaksperiodeMedBegrunnelser.utbetalingsperiodeDetaljer.map { it.ytelseType }
-
                     val identerMedUtbetaling =
                         utvidetVedtaksperiodeMedBegrunnelser.utbetalingsperiodeDetaljer.map { it.person.personIdent }
 
@@ -318,24 +315,17 @@ class VedtaksperiodeService(
                                 val triggesAv =
                                     standardBegrunnelse.tilSanityBegrunnelse(sanityBegrunnelser)
                                         ?.tilTriggesAv() ?: return@fold acc
-                                val vedtakBegrunnelseType = standardBegrunnelse.vedtakBegrunnelseType
 
-                                if (triggesAv.vilkår.contains(Vilkår.UTVIDET_BARNETRYGD) && ytelseTyper.contains(
-                                        YtelseType.UTVIDET_BARNETRYGD
-                                    ) &&
-                                    vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGET
-                                ) {
-                                    acc.add(standardBegrunnelse)
-                                } else if (standardBegrunnelse.triggesForPeriode(
+                                if (standardBegrunnelse.triggesForPeriode(
                                         utvidetVedtaksperiodeMedBegrunnelser = utvidetVedtaksperiodeMedBegrunnelser,
                                         vilkårsvurdering = vilkårsvurdering,
                                         persongrunnlag = persongrunnlag,
                                         identerMedUtbetaling = identerMedUtbetaling,
                                         triggesAv = triggesAv,
-                                        vedtakBegrunnelseType = vedtakBegrunnelseType,
                                         endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(
                                                 behandling.id
-                                            )
+                                            ),
+                                        andelerTilkjentYtelse = andelerTilkjentYtelse,
                                     )
                                 ) {
                                     acc.add(standardBegrunnelse)
