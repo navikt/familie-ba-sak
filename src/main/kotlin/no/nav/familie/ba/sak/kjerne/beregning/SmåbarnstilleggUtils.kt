@@ -6,6 +6,11 @@ import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.erUlike
+import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
@@ -26,6 +31,34 @@ fun vedtakOmOvergangsstønadPåvirkerFagsak(
     )
 
     return forrigeSøkersSmåbarnstilleggAndeler.erUlike(nyeSmåbarnstilleggAndeler)
+}
+
+fun utledVedtaksperioderTilAutovedtakVedOSVedtak(
+    vedtaksperioderMedBegrunnelser: List<VedtaksperiodeMedBegrunnelser>,
+    vedtak: Vedtak,
+    forrigeSmåbarnstilleggAndeler: List<AndelTilkjentYtelse>,
+    nyeSmåbarnstilleggAndeler: List<AndelTilkjentYtelse>
+): List<VedtaksperiodeMedBegrunnelser> {
+    val reduksjonsperioder = hentReduserteAndelerSmåbarnstillegg(
+        forrigeSmåbarnstilleggAndeler = forrigeSmåbarnstilleggAndeler,
+        nyeSmåbarnstilleggAndeler = nyeSmåbarnstilleggAndeler
+    )
+    val innvilgelsesperioder =
+        nyeSmåbarnstilleggAndeler.map { MånedPeriode(fom = it.stønadFom, tom = it.stønadTom) }
+
+    return genererVedtaksperioderMedBegrunnelser(
+        vedtaksperioderMedBegrunnelser = vedtaksperioderMedBegrunnelser,
+        vedtak = vedtak,
+        søkersIdent = vedtak.behandling.fagsak.hentAktivIdent().ident,
+        månedPerioder = reduksjonsperioder,
+        vedtaksperiodetype = Vedtaksperiodetype.OPPHØR
+    ) + genererVedtaksperioderMedBegrunnelser(
+        vedtaksperioderMedBegrunnelser = vedtaksperioderMedBegrunnelser,
+        vedtak = vedtak,
+        søkersIdent = vedtak.behandling.fagsak.hentAktivIdent().ident,
+        månedPerioder = innvilgelsesperioder,
+        vedtaksperiodetype = Vedtaksperiodetype.UTBETALING
+    )
 }
 
 fun hentReduserteAndelerSmåbarnstillegg(
@@ -54,4 +87,50 @@ fun hentReduserteAndelerSmåbarnstillegg(
     val segmenterFjernet = forrigeAndelerTidslinje.disjoint(andelerTidslinje)
 
     return segmenterFjernet.toSegments().map { MånedPeriode(fom = it.fom.toYearMonth(), tom = it.tom.toYearMonth()) }
+}
+
+fun genererVedtaksperioderMedBegrunnelser(
+    vedtaksperioderMedBegrunnelser: List<VedtaksperiodeMedBegrunnelser>,
+    vedtak: Vedtak,
+    søkersIdent: String,
+    månedPerioder: List<MånedPeriode>,
+    vedtaksperiodetype: Vedtaksperiodetype
+): List<VedtaksperiodeMedBegrunnelser> {
+    return månedPerioder.map { månedPeriode ->
+        val vedtaksperiodeMedBegrunnelser =
+            vedtaksperioderMedBegrunnelser.find {
+                it.fom == månedPeriode.fom.førsteDagIInneværendeMåned() &&
+                    it.tom == månedPeriode.tom.sisteDagIInneværendeMåned() &&
+                    it.type == vedtaksperiodetype
+            }
+
+        if (vedtaksperiodeMedBegrunnelser != null) {
+            vedtaksperiodeMedBegrunnelser.settBegrunnelser(
+                (vedtaksperiodeMedBegrunnelser.begrunnelser +
+                    Vedtaksbegrunnelse(
+                        vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
+                        vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.REDUKSJON_SAMBOER_MER_ENN_12_MÅNEDER,
+                        personIdenter = listOf(søkersIdent)
+                    )).toList()
+            )
+
+            vedtaksperiodeMedBegrunnelser
+        } else {
+            VedtaksperiodeMedBegrunnelser(
+                vedtak = vedtak,
+                fom = månedPeriode.fom.førsteDagIInneværendeMåned(),
+                tom = månedPeriode.tom.sisteDagIInneværendeMåned(),
+                type = vedtaksperiodetype
+            )
+                .apply {
+                    begrunnelser.add(
+                        Vedtaksbegrunnelse(
+                            vedtaksperiodeMedBegrunnelser = this,
+                            vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.REDUKSJON_SAMBOER_MER_ENN_12_MÅNEDER,
+                            personIdenter = listOf(søkersIdent)
+                        )
+                    )
+                }
+        }
+    }
 }
