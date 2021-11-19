@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.domene.erÅpen
@@ -83,7 +84,7 @@ class VedtakOmOvergangsstønadService(
             val behandlingEtterBehandlingsresultat =
                 stegService.håndterBehandlingsresultat(behandlingEtterVilkårsvurdering)
 
-            if (!simuleringService.autovedtakVedSmåbarnstilleggKanAutomatiskIverksettes(behandling = behandlingEtterBehandlingsresultat)) {
+            if (behandlingEtterBehandlingsresultat.status != BehandlingStatus.IVERKSETTER_VEDTAK) {
                 val feilutbetaling =
                     simuleringService.hentFeilutbetaling(behandlingId = behandlingEtterBehandlingsresultat.id)
                 val etterbetaling =

@@ -243,7 +243,10 @@ fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType): StegTyp
             when (utførendeStegType) {
                 REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
                 VILKÅRSVURDERING -> BEHANDLINGSRESULTAT
-                BEHANDLINGSRESULTAT -> IVERKSETT_MOT_OPPDRAG
+                BEHANDLINGSRESULTAT -> if (behandling.status == BehandlingStatus.IVERKSETTER_VEDTAK) IVERKSETT_MOT_OPPDRAG else VURDER_TILBAKEKREVING
+                VURDER_TILBAKEKREVING -> SEND_TIL_BESLUTTER
+                SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
+                BESLUTTE_VEDTAK -> hentNesteStegTypeBasertPåBehandlingsresultat(behandling.resultat)
                 IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
                 VENTE_PÅ_STATUS_FRA_ØKONOMI -> JOURNALFØR_VEDTAKSBREV
                 JOURNALFØR_VEDTAKSBREV -> DISTRIBUER_VEDTAKSBREV
