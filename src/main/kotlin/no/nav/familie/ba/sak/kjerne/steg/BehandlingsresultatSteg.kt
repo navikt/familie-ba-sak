@@ -137,7 +137,7 @@ class BehandlingsresultatSteg(
                 behandlingMedResultat.id,
                 BehandlingStatus.IVERKSETTER_VEDTAK
             )
-        } else if (!behandlingMedResultat.skalBehandlesAutomatisk) {
+        } else if (!behandlingMedResultat.skalBehandlesAutomatisk || behandlingMedResultat.erSmåbarnstillegg()) {
             simuleringService.oppdaterSimuleringPåBehandling(behandlingMedResultat)
         }
 

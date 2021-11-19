@@ -1,19 +1,17 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
 import io.mockk.mockk
-import no.nav.familie.ba.sak.common.forrigeMåned
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
-import no.nav.familie.ba.sak.common.lagVedtak
+import no.nav.familie.ba.sak.common.lagUtbetalingsperiodeDetalj
+import no.nav.familie.ba.sak.common.lagUtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.common.lagVedtaksperiodeMedBegrunnelser
-import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.randomFnr
-import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -67,11 +65,16 @@ class SmåbarnstilleggUtilsTest {
     fun `Skal velge riktig begrunnelse basert på vedtaksperiodetype`() {
         assertEquals(
             VedtakBegrunnelseSpesifikasjon.INNVILGET_SMÅBARNSTILLEGG,
-            hentVedtakBegrunnelseSpesifikasjonForSmåbarnstillegg(vedtaksperiodetype = Vedtaksperiodetype.UTBETALING)
+            hentVedtakBegrunnelseSpesifikasjonForSmåbarnstillegg(
+                ytelseTyper = listOf(
+                    YtelseType.UTVIDET_BARNETRYGD,
+                    YtelseType.SMÅBARNSTILLEGG
+                )
+            )
         )
         assertEquals(
             VedtakBegrunnelseSpesifikasjon.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_FULL_OVERGANGSSTØNAD,
-            hentVedtakBegrunnelseSpesifikasjonForSmåbarnstillegg(vedtaksperiodetype = Vedtaksperiodetype.OPPHØR)
+            hentVedtakBegrunnelseSpesifikasjonForSmåbarnstillegg(ytelseTyper = listOf(YtelseType.UTVIDET_BARNETRYGD))
         )
     }
 
@@ -113,185 +116,73 @@ class SmåbarnstilleggUtilsTest {
     }
 
     @Test
-    fun `Skal generere og begrunne reduksjon i småbarnstillegg, samt ny innvilget periode`() {
-        val forrigeFom = YearMonth.now().minusYears(2)
-        val forrigeTom = YearMonth.now().minusMonths(10)
-        val forrigeAndeler = listOf(
-            lagAndelTilkjentYtelse(
-                fom = forrigeFom,
-                tom = forrigeTom
-            ),
+    fun `Skal legge til innvilgelsesbegrunnelse for småbarnstillegg`() {
+        val vedtaksperiodeMedBegrunnelser = lagVedtaksperiodeMedBegrunnelser(
+            fom = LocalDate.now().førsteDagIInneværendeMåned(),
+            tom = LocalDate.now().plusMonths(3).sisteDagIMåned(),
+            type = Vedtaksperiodetype.UTBETALING
         )
 
-        val nyFom = YearMonth.now().minusYears(1)
-        val nyeAndeler = listOf(
-            lagAndelTilkjentYtelse(
-                fom = nyFom,
-                tom = forrigeTom
-            ),
-        )
-
-        val vedtaksperioder = utledVedtaksperioderTilAutovedtakVedOSVedtak(
-            vedtaksperioderMedBegrunnelser = emptyList(),
-            vedtak = lagVedtak(),
-            forrigeSmåbarnstilleggAndeler = forrigeAndeler,
-            nyeSmåbarnstilleggAndeler = nyeAndeler
-        )
-
-        assertEquals(vedtaksperioder.size, 2)
-
-        validerVedtaksperiode(
-            vedtaksperioder = vedtaksperioder,
-            fom = forrigeFom.førsteDagIInneværendeMåned(),
-            tom = nyFom.forrigeMåned().sisteDagIInneværendeMåned(),
-            vedtaksperiodetype = Vedtaksperiodetype.OPPHØR
-        )
-
-        validerVedtaksperiode(
-            vedtaksperioder = vedtaksperioder,
-            fom = nyFom.førsteDagIInneværendeMåned(),
-            tom = forrigeTom.sisteDagIInneværendeMåned(),
-            vedtaksperiodetype = Vedtaksperiodetype.UTBETALING
-        )
-    }
-
-    @Test
-    fun `Skal generere og begrunne reduksjoner i småbarnstillegg`() {
-        val forrigeFom = YearMonth.now().minusYears(2)
-        val forrigeTom = YearMonth.now().minusMonths(2)
-        val forrigeAndeler = listOf(
-            lagAndelTilkjentYtelse(
-                fom = forrigeFom,
-                tom = forrigeTom
-            ),
-        )
-
-        val nyTom1 = YearMonth.now().minusMonths(14)
-        val nyFom2 = YearMonth.now().minusMonths(12)
-        val nyTom2 = YearMonth.now().minusMonths(10)
-
-        val nyFom3 = YearMonth.now().minusMonths(8)
-        val nyTom3 = YearMonth.now().minusMonths(5)
-        val nyeAndeler = listOf(
-            lagAndelTilkjentYtelse(
-                fom = forrigeFom,
-                tom = nyTom1
-            ),
-            lagAndelTilkjentYtelse(
-                fom = nyFom2,
-                tom = nyTom2
-            ),
-            lagAndelTilkjentYtelse(
-                fom = nyFom3,
-                tom = nyTom3
-            ),
-        )
-
-        val vedtaksperioder = utledVedtaksperioderTilAutovedtakVedOSVedtak(
-            vedtaksperioderMedBegrunnelser = emptyList(),
-            vedtak = lagVedtak(),
-            forrigeSmåbarnstilleggAndeler = forrigeAndeler,
-            nyeSmåbarnstilleggAndeler = nyeAndeler
-        )
-
-        val reduksjonsperioder = vedtaksperioder.filter { it.type == Vedtaksperiodetype.OPPHØR }.sortedBy { it.fom }
-        assertEquals(reduksjonsperioder.size, 3)
-
-        validerVedtaksperiode(
-            vedtaksperioder = reduksjonsperioder,
-            fom = nyTom1.nesteMåned().førsteDagIInneværendeMåned(),
-            tom = nyFom2.forrigeMåned().sisteDagIInneværendeMåned(),
-            vedtaksperiodetype = Vedtaksperiodetype.OPPHØR
-        )
-
-        validerVedtaksperiode(
-            vedtaksperioder = reduksjonsperioder,
-            fom = nyTom2.nesteMåned().førsteDagIInneværendeMåned(),
-            tom = nyFom3.forrigeMåned().sisteDagIInneværendeMåned(),
-            vedtaksperiodetype = Vedtaksperiodetype.OPPHØR
-        )
-
-        validerVedtaksperiode(
-            vedtaksperioder = reduksjonsperioder,
-            fom = nyTom3.nesteMåned().førsteDagIInneværendeMåned(),
-            tom = forrigeTom.sisteDagIInneværendeMåned(),
-            vedtaksperiodetype = Vedtaksperiodetype.OPPHØR
-        )
-    }
-
-    @Test
-    fun `Skal gjenbruke opphør og utbetalingsperiode ved begrunnelse av småbarnstillegg`() {
-        val forrigeFom = YearMonth.now().minusYears(2)
-        val forrigeTom = YearMonth.now().minusMonths(10)
-        val forrigeAndeler = listOf(
-            lagAndelTilkjentYtelse(
-                fom = forrigeFom,
-                tom = forrigeTom
-            ),
-        )
-
-        val nyFom = YearMonth.now().minusYears(1)
-        val nyeAndeler = listOf(
-            lagAndelTilkjentYtelse(
-                fom = nyFom,
-                tom = forrigeTom
-            ),
-        )
-
-        val vedtaksperioder = utledVedtaksperioderTilAutovedtakVedOSVedtak(
-            vedtaksperioderMedBegrunnelser = listOf(
-                lagVedtaksperiodeMedBegrunnelser(
-                    begrunnelser = mutableSetOf(),
-                    fom = forrigeFom.førsteDagIInneværendeMåned(),
-                    tom = nyFom.forrigeMåned().sisteDagIInneværendeMåned(),
-                    type = Vedtaksperiodetype.OPPHØR
+        val utvidetVedtaksperiodeMedBegrunnelser = lagUtvidetVedtaksperiodeMedBegrunnelser(
+            id = vedtaksperiodeMedBegrunnelser.id,
+            fom = vedtaksperiodeMedBegrunnelser.fom,
+            tom = vedtaksperiodeMedBegrunnelser.tom,
+            type = vedtaksperiodeMedBegrunnelser.type,
+            utbetalingsperiodeDetaljer = listOf(
+                lagUtbetalingsperiodeDetalj(
+                    ytelseType = YtelseType.UTVIDET_BARNETRYGD
                 ),
-                lagVedtaksperiodeMedBegrunnelser(
-                    begrunnelser = mutableSetOf(),
-                    fom = forrigeFom.førsteDagIInneværendeMåned(),
-                    tom = nyFom.forrigeMåned().sisteDagIInneværendeMåned(),
-                    type = Vedtaksperiodetype.UTBETALING
-                ),
-                lagVedtaksperiodeMedBegrunnelser(
-                    begrunnelser = mutableSetOf(),
-                    fom = nyFom.førsteDagIInneværendeMåned(),
-                    tom = forrigeTom.sisteDagIInneværendeMåned(),
-                    type = Vedtaksperiodetype.UTBETALING
+                lagUtbetalingsperiodeDetalj(
+                    ytelseType = YtelseType.SMÅBARNSTILLEGG
                 )
+            )
+        )
+
+        val oppdatertVedtaksperiodeMedBegrunnelser = finnAktuellVedtaksperiodeOgLeggTilSmåbarnstilleggbegrunnelse(
+            utvidedeVedtaksperioderMedBegrunnelser = listOf(
+                utvidetVedtaksperiodeMedBegrunnelser
             ),
-            vedtak = lagVedtak(),
-            forrigeSmåbarnstilleggAndeler = forrigeAndeler,
-            nyeSmåbarnstilleggAndeler = nyeAndeler
+            vedtaksperioderMedBegrunnelser = listOf(
+                vedtaksperiodeMedBegrunnelser
+            )
         )
 
-        assertEquals(vedtaksperioder.size, 2)
-
-        validerVedtaksperiode(
-            vedtaksperioder = vedtaksperioder,
-            fom = forrigeFom.førsteDagIInneværendeMåned(),
-            tom = nyFom.forrigeMåned().sisteDagIInneværendeMåned(),
-            vedtaksperiodetype = Vedtaksperiodetype.OPPHØR
-        )
-
-        validerVedtaksperiode(
-            vedtaksperioder = vedtaksperioder,
-            fom = nyFom.førsteDagIInneværendeMåned(),
-            tom = forrigeTom.sisteDagIInneværendeMåned(),
-            vedtaksperiodetype = Vedtaksperiodetype.UTBETALING
-        )
+        assertNotNull(oppdatertVedtaksperiodeMedBegrunnelser)
+        assertTrue(oppdatertVedtaksperiodeMedBegrunnelser.begrunnelser.any { it.vedtakBegrunnelseSpesifikasjon == VedtakBegrunnelseSpesifikasjon.INNVILGET_SMÅBARNSTILLEGG })
+        assertTrue(oppdatertVedtaksperiodeMedBegrunnelser.begrunnelser.none { it.vedtakBegrunnelseSpesifikasjon == VedtakBegrunnelseSpesifikasjon.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_FULL_OVERGANGSSTØNAD })
     }
 
-    private fun validerVedtaksperiode(
-        vedtaksperioder: List<VedtaksperiodeMedBegrunnelser>,
-        fom: LocalDate,
-        tom: LocalDate,
-        vedtaksperiodetype: Vedtaksperiodetype
-    ) {
-        val reduksjonsperiode = vedtaksperioder.find { it.fom == fom && it.tom == tom && it.type == vedtaksperiodetype }
-        assertNotNull(reduksjonsperiode)
-        assertEquals(
-            hentVedtakBegrunnelseSpesifikasjonForSmåbarnstillegg(vedtaksperiodetype),
-            reduksjonsperiode?.begrunnelser?.single()?.vedtakBegrunnelseSpesifikasjon
+    @Test
+    fun `Skal legge til reduksjonsbegrunnelse for småbarnstillegg`() {
+        val vedtaksperiodeMedBegrunnelser = lagVedtaksperiodeMedBegrunnelser(
+            fom = LocalDate.now().førsteDagIInneværendeMåned(),
+            tom = LocalDate.now().plusMonths(3).sisteDagIMåned(),
+            type = Vedtaksperiodetype.UTBETALING
         )
+
+        val utvidetVedtaksperiodeMedBegrunnelser = lagUtvidetVedtaksperiodeMedBegrunnelser(
+            id = vedtaksperiodeMedBegrunnelser.id,
+            fom = vedtaksperiodeMedBegrunnelser.fom,
+            tom = vedtaksperiodeMedBegrunnelser.tom,
+            type = vedtaksperiodeMedBegrunnelser.type,
+            utbetalingsperiodeDetaljer = listOf(
+                lagUtbetalingsperiodeDetalj(
+                    ytelseType = YtelseType.UTVIDET_BARNETRYGD
+                )
+            )
+        )
+
+        val oppdatertVedtaksperiodeMedBegrunnelser = finnAktuellVedtaksperiodeOgLeggTilSmåbarnstilleggbegrunnelse(
+            utvidedeVedtaksperioderMedBegrunnelser = listOf(
+                utvidetVedtaksperiodeMedBegrunnelser
+            ),
+            vedtaksperioderMedBegrunnelser = listOf(
+                vedtaksperiodeMedBegrunnelser
+            )
+        )
+
+        assertNotNull(oppdatertVedtaksperiodeMedBegrunnelser)
+        assertTrue(oppdatertVedtaksperiodeMedBegrunnelser.begrunnelser.none { it.vedtakBegrunnelseSpesifikasjon == VedtakBegrunnelseSpesifikasjon.INNVILGET_SMÅBARNSTILLEGG })
+        assertTrue(oppdatertVedtaksperiodeMedBegrunnelser.begrunnelser.any { it.vedtakBegrunnelseSpesifikasjon == VedtakBegrunnelseSpesifikasjon.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_FULL_OVERGANGSSTØNAD })
     }
 }

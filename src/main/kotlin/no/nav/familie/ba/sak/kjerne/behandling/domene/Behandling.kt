@@ -59,8 +59,8 @@ data class Behandling(
     @Column(name = "opprettet_aarsak", nullable = false)
     val opprettetÅrsak: BehandlingÅrsak,
 
-    @Column(name = "skal_behandles_automatisk", nullable = false, updatable = false)
-    val skalBehandlesAutomatisk: Boolean = false,
+    @Column(name = "skal_behandles_automatisk", nullable = false, updatable = true)
+    var skalBehandlesAutomatisk: Boolean = false,
 
     @Enumerated(EnumType.STRING)
     @Column(name = "kategori", nullable = false, updatable = true)
@@ -156,7 +156,7 @@ data class Behandling(
             skalBehandlesAutomatisk && erMigrering() && resultat == BehandlingResultat.INNVILGET -> true
             skalBehandlesAutomatisk && erFødselshendelse() && resultat == BehandlingResultat.INNVILGET -> true
             skalBehandlesAutomatisk && erSatsendring() && resultat == BehandlingResultat.ENDRET -> true
-            skalBehandlesAutomatisk && erSmåbarnstillegg() && (resultat == BehandlingResultat.ENDRET || resultat == BehandlingResultat.INNVILGET) -> true
+            // TODO flytt? skalBehandlesAutomatisk && erSmåbarnstillegg() && (resultat == BehandlingResultat.ENDRET || resultat == BehandlingResultat.INNVILGET) -> true
             else -> false
         }
     }
@@ -198,6 +198,8 @@ data class Behandling(
         return this
     }
 
+    fun erSmåbarnstillegg() = this.opprettetÅrsak == BehandlingÅrsak.SMÅBARNSTILLEGG
+
     fun erKlage() = this.opprettetÅrsak == BehandlingÅrsak.KLAGE
 
     fun erMigrering() =
@@ -207,8 +209,6 @@ data class Behandling(
         this.opprettetÅrsak == BehandlingÅrsak.OMREGNING_6ÅR || this.opprettetÅrsak == BehandlingÅrsak.OMREGNING_18ÅR
 
     private fun erSatsendring() = this.opprettetÅrsak == BehandlingÅrsak.SATSENDRING
-
-    private fun erSmåbarnstillegg() = this.opprettetÅrsak == BehandlingÅrsak.SMÅBARNSTILLEGG
 
     private fun erFødselshendelse() = this.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE
 

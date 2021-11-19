@@ -7,12 +7,13 @@ import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.domene.erÅpen
-import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
@@ -20,6 +21,7 @@ import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.springframework.stereotype.Service
+import java.math.BigDecimal
 
 @Service
 class VedtakOmOvergangsstønadService(
@@ -28,7 +30,7 @@ class VedtakOmOvergangsstønadService(
     private val vedtakService: VedtakService,
     private val stegService: StegService,
     private val vedtaksperiodeService: VedtaksperiodeService,
-    private val beregningService: BeregningService,
+    private val simuleringService: SimuleringService,
     private val småbarnstilleggService: SmåbarnstilleggService,
     private val taskRepository: TaskRepository,
     private val featureToggleService: FeatureToggleService
@@ -42,6 +44,10 @@ class VedtakOmOvergangsstønadService(
         Metrics.counter("behandling", "saksbehandling", "hendelse", "smaabarnstillegg", "paavirker_fagsak")
     private val antallVedtakOmOvergangsstønadPåvirkerIkkeFagsak: Counter =
         Metrics.counter("behandling", "saksbehandling", "hendelse", "smaabarnstillegg", "paavirker_ikke_fagsak")
+    private val antallVedtakOmOvergangsstønadFeilutbetaling: Counter =
+        Metrics.counter("behandling", "saksbehandling", "hendelse", "smaabarnstillegg", "feilutbetaling")
+    private val antallVedtakOmOvergangsstønadEtterbetaling: Counter =
+        Metrics.counter("behandling", "saksbehandling", "hendelse", "smaabarnstillegg", "etterbetaling")
 
     fun håndterVedtakOmOvergangsstønad(personIdent: String): String {
         if (!featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_SMÅBARNSTILLEGG_AUTOMATISK))
@@ -78,7 +84,29 @@ class VedtakOmOvergangsstønadService(
             val behandlingEtterBehandlingsresultat =
                 stegService.håndterBehandlingsresultat(behandlingEtterVilkårsvurdering)
 
-            leggTilBegrunnelserPåVedtak(fagsak, behandlingEtterBehandlingsresultat)
+            val feilutbetaling =
+                simuleringService.hentFeilutbetaling(behandlingId = behandlingEtterBehandlingsresultat.id)
+            val etterbetaling =
+                simuleringService.hentEtterbetaling(behandlingId = behandlingEtterBehandlingsresultat.id)
+
+            if (feilutbetaling != BigDecimal(0)) {
+                antallVedtakOmOvergangsstønadFeilutbetaling.increment()
+                behandlingService.omgjørTilManuellBehandling(behandlingEtterBehandlingsresultat)
+                // TODO opprett oppgave
+                return "behandling fører til feilutbetaling, må fortsette behandling manuelt."
+            } else if (etterbetaling != BigDecimal(0)) {
+                antallVedtakOmOvergangsstønadEtterbetaling.increment()
+                behandlingService.omgjørTilManuellBehandling(behandlingEtterBehandlingsresultat)
+                // TODO opprett oppgave
+                return "behandling fører til etterbetaling, må fortsette behandling manuelt."
+            } else {
+                behandlingService.oppdaterStatusPåBehandling(
+                    behandlingEtterBehandlingsresultat.id,
+                    BehandlingStatus.IVERKSETTER_VEDTAK
+                )
+            }
+
+            leggTilBegrunnelserPåVedtak(behandlingEtterBehandlingsresultat)
 
             val vedtakEtterTotrinn = vedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(
                 behandlingEtterBehandlingsresultat
@@ -99,33 +127,17 @@ class VedtakOmOvergangsstønadService(
         }
     }
 
-    private fun leggTilBegrunnelserPåVedtak(
-        fagsak: Fagsak,
-        behandlingEtterBehandlingsresultat: Behandling
-    ) {
-        val sistIverksatteBehandling = behandlingService.hentSisteBehandlingSomErIverksatt(fagsakId = fagsak.id)
-        val forrigeSmåbarnstilleggAndeler =
-            if (sistIverksatteBehandling == null) emptyList()
-            else beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(
-                behandlingId = sistIverksatteBehandling.id
-            ).filter { it.erSmåbarnstillegg() }
-
-        val nyeSmåbarnstilleggAndeler =
-            if (sistIverksatteBehandling == null) emptyList()
-            else beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(
-                behandlingId = behandlingEtterBehandlingsresultat.id
-            ).filter { it.erSmåbarnstillegg() }
-
+    private fun leggTilBegrunnelserPåVedtak(behandlingEtterBehandlingsresultat: Behandling) {
         val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = behandlingEtterBehandlingsresultat.id)
-        val vedtaksperioderMedBegrunnelser = vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak)
 
-        vedtaksperiodeService.lagre(
-            utledVedtaksperioderTilAutovedtakVedOSVedtak(
-                vedtaksperioderMedBegrunnelser = vedtaksperioderMedBegrunnelser,
-                vedtak = vedtak,
-                forrigeSmåbarnstilleggAndeler = forrigeSmåbarnstilleggAndeler,
-                nyeSmåbarnstilleggAndeler = nyeSmåbarnstilleggAndeler
+        val vedtaksperiodeSomSkalOppdateres =
+            finnAktuellVedtaksperiodeOgLeggTilSmåbarnstilleggbegrunnelse(
+                utvidedeVedtaksperioderMedBegrunnelser = vedtaksperiodeService.hentUtvidetVedtaksperiodeMedBegrunnelser(
+                    vedtak
+                ),
+                vedtaksperioderMedBegrunnelser = vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak)
             )
-        )
+
+        vedtaksperiodeService.lagre(vedtaksperiodeSomSkalOppdateres)
     }
 }

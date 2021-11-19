@@ -1,20 +1,21 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
-import no.nav.familie.ba.sak.common.MånedPeriode
-import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
-import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.erUlike
-import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad
-import no.nav.fpsak.tidsserie.LocalDateSegment
-import no.nav.fpsak.tidsserie.LocalDateTimeline
+import org.slf4j.LoggerFactory
 import java.time.LocalDate
+import java.time.YearMonth
 
 fun vedtakOmOvergangsstønadPåvirkerFagsak(
     småbarnstilleggBarnetrygdGenerator: SmåbarnstilleggBarnetrygdGenerator,
@@ -33,111 +34,48 @@ fun vedtakOmOvergangsstønadPåvirkerFagsak(
     return forrigeSøkersSmåbarnstilleggAndeler.erUlike(nyeSmåbarnstilleggAndeler)
 }
 
-fun utledVedtaksperioderTilAutovedtakVedOSVedtak(
+fun finnAktuellVedtaksperiodeOgLeggTilSmåbarnstilleggbegrunnelse(
+    utvidedeVedtaksperioderMedBegrunnelser: List<UtvidetVedtaksperiodeMedBegrunnelser>,
     vedtaksperioderMedBegrunnelser: List<VedtaksperiodeMedBegrunnelser>,
-    vedtak: Vedtak,
-    forrigeSmåbarnstilleggAndeler: List<AndelTilkjentYtelse>,
-    nyeSmåbarnstilleggAndeler: List<AndelTilkjentYtelse>
-): List<VedtaksperiodeMedBegrunnelser> {
-    val reduksjonsperioder = hentReduserteAndelerSmåbarnstillegg(
-        forrigeSmåbarnstilleggAndeler = forrigeSmåbarnstilleggAndeler,
-        nyeSmåbarnstilleggAndeler = nyeSmåbarnstilleggAndeler
-    )
-    val innvilgelsesperioder =
-        nyeSmåbarnstilleggAndeler.map { MånedPeriode(fom = it.stønadFom, tom = it.stønadTom) }
-
-    return genererVedtaksperioderMedBegrunnelser(
-        vedtaksperioderMedBegrunnelser = vedtaksperioderMedBegrunnelser,
-        vedtak = vedtak,
-        søkersIdent = vedtak.behandling.fagsak.hentAktivIdent().ident,
-        månedPerioder = reduksjonsperioder,
-        vedtaksperiodetype = Vedtaksperiodetype.OPPHØR
-    ) + genererVedtaksperioderMedBegrunnelser(
-        vedtaksperioderMedBegrunnelser = vedtaksperioderMedBegrunnelser,
-        vedtak = vedtak,
-        søkersIdent = vedtak.behandling.fagsak.hentAktivIdent().ident,
-        månedPerioder = innvilgelsesperioder,
-        vedtaksperiodetype = Vedtaksperiodetype.UTBETALING
-    )
-}
-
-fun hentReduserteAndelerSmåbarnstillegg(
-    forrigeSmåbarnstilleggAndeler: List<AndelTilkjentYtelse>,
-    nyeSmåbarnstilleggAndeler: List<AndelTilkjentYtelse>,
-): List<MånedPeriode> {
-    val forrigeAndelerTidslinje = LocalDateTimeline(
-        forrigeSmåbarnstilleggAndeler.map {
-            LocalDateSegment(
-                it.stønadFom.førsteDagIInneværendeMåned(),
-                it.stønadTom.sisteDagIInneværendeMåned(),
-                it
-            )
-        }
-    )
-    val andelerTidslinje = LocalDateTimeline(
-        nyeSmåbarnstilleggAndeler.map {
-            LocalDateSegment(
-                it.stønadFom.førsteDagIInneværendeMåned(),
-                it.stønadTom.sisteDagIInneværendeMåned(),
-                it
-            )
-        }
-    )
-
-    val segmenterFjernet = forrigeAndelerTidslinje.disjoint(andelerTidslinje)
-
-    return segmenterFjernet.toSegments().map { MånedPeriode(fom = it.fom.toYearMonth(), tom = it.tom.toYearMonth()) }
-}
-
-fun genererVedtaksperioderMedBegrunnelser(
-    vedtaksperioderMedBegrunnelser: List<VedtaksperiodeMedBegrunnelser>,
-    vedtak: Vedtak,
-    søkersIdent: String,
-    månedPerioder: List<MånedPeriode>,
-    vedtaksperiodetype: Vedtaksperiodetype
-): List<VedtaksperiodeMedBegrunnelser> {
-    val vedtakBegrunnelseSpesifikasjon = hentVedtakBegrunnelseSpesifikasjonForSmåbarnstillegg(vedtaksperiodetype)
-
-    return månedPerioder.map { månedPeriode ->
-        val vedtaksperiodeMedBegrunnelser =
-            vedtaksperioderMedBegrunnelser.find {
-                it.fom == månedPeriode.fom.førsteDagIInneværendeMåned() &&
-                    it.tom == månedPeriode.tom.sisteDagIInneværendeMåned() &&
-                    it.type == vedtaksperiodetype
-            }
-
-        if (vedtaksperiodeMedBegrunnelser != null) {
-            vedtaksperiodeMedBegrunnelser.settBegrunnelser(
-                (
-                    vedtaksperiodeMedBegrunnelser.begrunnelser +
-                        Vedtaksbegrunnelse(
-                            vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
-                            vedtakBegrunnelseSpesifikasjon = vedtakBegrunnelseSpesifikasjon,
-                            personIdenter = listOf(søkersIdent)
-                        )
-                    ).toList()
-            )
-
-            vedtaksperiodeMedBegrunnelser
-        } else {
-            VedtaksperiodeMedBegrunnelser(
-                vedtak = vedtak,
-                fom = månedPeriode.fom.førsteDagIInneværendeMåned(),
-                tom = månedPeriode.tom.sisteDagIInneværendeMåned(),
-                type = vedtaksperiodetype
-            )
-                .apply {
-                    begrunnelser.add(
-                        Vedtaksbegrunnelse(
-                            vedtaksperiodeMedBegrunnelser = this,
-                            vedtakBegrunnelseSpesifikasjon = vedtakBegrunnelseSpesifikasjon,
-                            personIdenter = listOf(søkersIdent)
-                        )
-                    )
-                }
-        }
+): VedtaksperiodeMedBegrunnelser {
+    val utvidetVedtaksperiodeSomSkalOppdateres = utvidedeVedtaksperioderMedBegrunnelser.find {
+        (it.fom?.toYearMonth() == YearMonth.now() || it.fom?.toYearMonth() == YearMonth.now()
+            .nesteMåned()) && it.type == Vedtaksperiodetype.UTBETALING
     }
+
+    if (utvidetVedtaksperiodeSomSkalOppdateres == null) {
+        LoggerFactory.getLogger("secureLogger")
+            .info(
+                "Finner ikke aktuell periode å begrunne ved autovedtak småbarnstillegg. " +
+                    "Perioder: ${utvidedeVedtaksperioderMedBegrunnelser.map { "Periode(type=${it.type}, fom=${it.fom}, tom=${it.tom})" }}"
+            )
+
+        throw Feil("Finner ikke aktuell periode å begrunne ved autovedtak småbarnstillegg. Se securelogger for å periodene som ble generert.")
+    }
+
+    val søkersYtelsetyper =
+        utvidetVedtaksperiodeSomSkalOppdateres.utbetalingsperiodeDetaljer.filter { it.person.type == PersonType.SØKER }
+            .map { it.ytelseType }
+
+    val vedtaksperiodeSomSkalOppdateres = vedtaksperioderMedBegrunnelser
+        .single { it.id == utvidetVedtaksperiodeSomSkalOppdateres.id }
+
+    vedtaksperiodeSomSkalOppdateres.settBegrunnelser(
+        vedtaksperiodeSomSkalOppdateres.begrunnelser.toList() + listOf(
+            Vedtaksbegrunnelse(
+                vedtaksperiodeMedBegrunnelser = vedtaksperiodeSomSkalOppdateres,
+                personIdenter = emptyList(),
+                vedtakBegrunnelseSpesifikasjon = hentVedtakBegrunnelseSpesifikasjonForSmåbarnstillegg(
+                    søkersYtelsetyper
+                )
+            )
+        )
+    )
+    return vedtaksperiodeSomSkalOppdateres
 }
 
-fun hentVedtakBegrunnelseSpesifikasjonForSmåbarnstillegg(vedtaksperiodetype: Vedtaksperiodetype) =
-    if (vedtaksperiodetype == Vedtaksperiodetype.UTBETALING) VedtakBegrunnelseSpesifikasjon.INNVILGET_SMÅBARNSTILLEGG else VedtakBegrunnelseSpesifikasjon.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_FULL_OVERGANGSSTØNAD
+fun hentVedtakBegrunnelseSpesifikasjonForSmåbarnstillegg(ytelseTyper: List<YtelseType>): VedtakBegrunnelseSpesifikasjon {
+    return if (ytelseTyper.contains(YtelseType.SMÅBARNSTILLEGG)) VedtakBegrunnelseSpesifikasjon.INNVILGET_SMÅBARNSTILLEGG
+    else if (ytelseTyper.contains(YtelseType.UTVIDET_BARNETRYGD)) VedtakBegrunnelseSpesifikasjon.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_FULL_OVERGANGSSTØNAD
+    else error("Begrunnelse for småbarnstillegg er ikke støttet for ytelseTyper=$ytelseTyper")
+}
