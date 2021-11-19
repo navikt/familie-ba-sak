@@ -214,7 +214,6 @@ fun lagAndelTilkjentYtelse(
 
     return AndelTilkjentYtelse(
         personIdent = person.personIdent.ident,
-        aktørId = person.hentAktørId(),
         behandlingId = behandling.id,
         tilkjentYtelse = tilkjentYtelse ?: lagInitiellTilkjentYtelse(behandling),
         kalkulertUtbetalingsbeløp = beløp,
@@ -243,7 +242,7 @@ fun lagAndelTilkjentYtelseUtvidet(
 
     return AndelTilkjentYtelse(
         personIdent = person.personIdent.ident,
-        aktørId = person.hentAktørId(),
+        aktørId = person.aktørId,
         behandlingId = behandling.id,
         tilkjentYtelse = tilkjentYtelse ?: lagInitiellTilkjentYtelse(behandling),
         kalkulertUtbetalingsbeløp = beløp,

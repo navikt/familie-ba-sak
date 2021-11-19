@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.aktørid
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.kjerne.personident.Personident
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
+import java.util.Objects
 import javax.persistence.CascadeType
 import javax.persistence.Column
 import javax.persistence.Entity
@@ -39,6 +40,22 @@ data class AktørId(
             // skal ikke skje, funksjonelle feilmeldinger håndteres ikke her.
             "Ugyldig aktørId, støtter kun A-Z/0-9/:/-/_ tegn.)"
         }
+    }
+
+    override fun toString(): String {
+        return """aktørId=$aktørId""".trimMargin()
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (other == null || javaClass != other.javaClass) {
+            return false
+        }
+        val entitet: AktørId = other as AktørId
+        return Objects.equals(hashCode(), entitet.hashCode())
+    }
+
+    override fun hashCode(): Int {
+        return Objects.hash(aktørId)
     }
 
     fun aktivIdent() = personidenter.single { it.aktiv }

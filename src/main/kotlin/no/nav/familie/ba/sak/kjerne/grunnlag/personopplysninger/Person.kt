@@ -74,7 +74,7 @@ data class Person(
     @JoinColumn(name = "fk_gr_personopplysninger_id", nullable = false, updatable = false)
     val personopplysningGrunnlag: PersonopplysningGrunnlag,
 
-    @ManyToOne(optional = false) @JoinColumn(name = "fk_aktoer_id", nullable = true, updatable = false)
+    @ManyToOne(optional = true) @JoinColumn(name = "fk_aktoer_id", nullable = true, updatable = false)
     val aktørId: AktørId? = null,
 
     @OneToMany(mappedBy = "person", cascade = [CascadeType.ALL], fetch = FetchType.EAGER)

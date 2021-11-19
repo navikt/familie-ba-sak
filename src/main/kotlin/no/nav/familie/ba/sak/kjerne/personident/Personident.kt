@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.personident
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.kjerne.aktørid.AktørId
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
@@ -21,11 +22,13 @@ data class Personident(
     @Column(name = "foedselsnummer", nullable = false)
     val fødselsnummer: String,
 
-    @ManyToOne(optional = false) @JoinColumn(name = "fk_aktoer_id", nullable = false, updatable = false)
+    @JsonIgnore
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "fk_aktoer_id", nullable = false, updatable = false)
     val aktørId: AktørId,
 
     @Column(name = "aktiv", nullable = false)
-    var aktiv: Boolean = false,
+    var aktiv: Boolean = true,
 
     @Column(name = "gjelder_til", columnDefinition = "DATE")
     var gjelderTil: LocalDateTime? = null,

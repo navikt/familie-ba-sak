@@ -43,8 +43,7 @@ class PersonidentService(
         return personidentRepository.save(
             Personident(
                 fødselsnummer = fødselsnummer,
-                aktørId = aktørId,
-                aktiv = true
+                aktørId = aktørId
             )
         ).aktørId
     }

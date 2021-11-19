@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.integrasjoner.økonomi
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagPersonResultat
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
-import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.kjerne.aktørid.AktørId
@@ -16,6 +15,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
+import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
@@ -48,6 +48,9 @@ class ØkonomiIntegrasjonTest(
     private val beregningService: BeregningService,
 
     @Autowired
+    private val personidentService: PersonidentService,
+
+    @Autowired
     private val vedtakService: VedtakService,
 ) : AbstractSpringIntegrationTest() {
 
@@ -56,16 +59,15 @@ class ØkonomiIntegrasjonTest(
     fun `Iverksett vedtak på aktiv behandling`() {
         val fnr = randomFnr()
         val barnFnr = randomFnr()
-        val aktørId = randomAktørId()
-        val barnAktørId = randomAktørId()
         val stønadFom = LocalDate.now()
         val stønadTom = stønadFom.plusYears(17)
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        val barnAktørId = personidentService.hentOgLagreAktørId(barnFnr)
 
         val vilkårsvurdering =
-            lagBehandlingResultat(behandling, fnr, barnFnr, aktørId, barnAktørId, stønadFom, stønadTom)
+            lagBehandlingResultat(behandling, fnr, barnFnr, fagsak.aktørId, barnAktørId, stønadFom, stønadTom)
 
         vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering)
         Assertions.assertNotNull(behandling.fagsak.id)
@@ -93,14 +95,13 @@ class ØkonomiIntegrasjonTest(
     fun `Hent behandlinger for løpende fagsaker til konsistensavstemming mot økonomi`() {
         val fnr = randomFnr()
         val barnFnr = randomFnr()
-        val aktørId = randomAktørId()
-        val barnAktørId = randomAktørId()
         val stønadFom = LocalDate.now()
         val stønadTom = stønadFom.plusYears(17)
 
         // Lag fagsak med behandling og personopplysningsgrunnlag og Iverksett.
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        val barnAktørId = personidentService.hentOgLagreAktørId(barnFnr)
 
         val vedtak = Vedtak(
             behandling = behandling,
@@ -113,7 +114,7 @@ class ØkonomiIntegrasjonTest(
         behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling)
 
         val vilkårsvurdering =
-            lagBehandlingResultat(behandling, fnr, barnFnr, aktørId, barnAktørId, stønadFom, stønadTom)
+            lagBehandlingResultat(behandling, fnr, barnFnr, fagsak.aktørId, barnAktørId, stønadFom, stønadTom)
         vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering)
 
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)

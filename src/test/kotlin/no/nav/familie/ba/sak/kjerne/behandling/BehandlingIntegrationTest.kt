@@ -6,7 +6,6 @@ import no.nav.familie.ba.sak.common.lagPersonResultat
 import no.nav.familie.ba.sak.common.lagPersonResultaterForSøkerOgToBarn
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.nyOrdinærBehandling
-import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.toLocalDate
 import no.nav.familie.ba.sak.common.toYearMonth
@@ -40,6 +39,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.G
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrUkjentBosted
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrVegadresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlingStegStatus
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
@@ -115,6 +115,9 @@ class BehandlingIntegrationTest(
 
     @Autowired
     private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
+
+    @Autowired
+    private val personidentService: PersonidentService
 ) : AbstractSpringIntegrationTest(mockPersonopplysningerService) {
 
     @BeforeEach
@@ -307,9 +310,9 @@ class BehandlingIntegrationTest(
         val barn1Fnr = randomFnr()
         val barn2Fnr = randomFnr()
 
-        val søkerAktørId = randomAktørId()
-        val barn1AktørId = randomAktørId()
-        val barn2AktørId = randomAktørId()
+        val søkerAktørId = personidentService.hentOgLagreAktørId(søkerFnr)
+        val barn1AktørId = personidentService.hentOgLagreAktørId(barn1Fnr)
+        val barn2AktørId = personidentService.hentOgLagreAktørId(barn2Fnr)
 
         val januar2020 = YearMonth.of(2020, 1)
         val oktober2020 = YearMonth.of(2020, 10)
@@ -409,10 +412,10 @@ class BehandlingIntegrationTest(
         val barn2Fnr = randomFnr()
         val barn3Fnr = randomFnr()
 
-        val søkerAktørId = randomAktørId()
-        val barn1AktørId = randomAktørId()
-        val barn2AktørId = randomAktørId()
-        val barn3AktørId = randomAktørId()
+        val søkerAktørId = personidentService.hentOgLagreAktørId(søkerFnr)
+        val barn1AktørId = personidentService.hentOgLagreAktørId(barn1Fnr)
+        val barn2AktørId = personidentService.hentOgLagreAktørId(barn2Fnr)
+        val barn3AktørId = personidentService.hentOgLagreAktørId(barn3Fnr)
 
         val januar2020 = YearMonth.of(2020, 1)
         val januar2021 = YearMonth.of(2021, 1)

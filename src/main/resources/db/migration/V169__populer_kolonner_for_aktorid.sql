@@ -59,7 +59,6 @@ alter table PO_PERSON rename column AKTOER_ID to FK_AKTOER_ID;
 alter table PO_PERSON
     add constraint FK_PO_PERSON foreign key (FK_AKTOER_ID) references AKTOER_ID (AKTOER_ID);
 
-
 update fagsak_person fp
 set fk_aktoer_id=(select fk_aktoer_id from personident p where p.foedselsnummer = fp.ident);
 

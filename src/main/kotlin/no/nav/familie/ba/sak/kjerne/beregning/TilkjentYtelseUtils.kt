@@ -79,7 +79,7 @@ object TilkjentYtelseUtils {
                                 behandlingId = vilkårsvurdering.behandling.id,
                                 tilkjentYtelse = tilkjentYtelse,
                                 personIdent = person.personIdent.ident,
-                                aktørId = person.hentAktørId(),
+                                aktørId = person.aktørId,
                                 stønadFom = beløpsperiode.fraOgMed,
                                 stønadTom = beløpsperiode.tilOgMed,
                                 kalkulertUtbetalingsbeløp = beløpsperiode.sats.avrundetHeltallAvProsent(prosent),

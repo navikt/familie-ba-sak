@@ -22,6 +22,7 @@ import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
+import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
@@ -61,6 +62,9 @@ class VedtakServiceTest(
 
     @Autowired
     private val vedtaksperiodeService: VedtaksperiodeService,
+
+    @Autowired
+    private val personidentService: PersonidentService,
 
     @Autowired
     private val persongrunnlagService: PersongrunnlagService,
@@ -168,8 +172,9 @@ class VedtakServiceTest(
     @Tag("integration")
     fun `Opprett behandling med vedtak`() {
         val fnr = randomFnr()
-        val fnrAktørNr = randomAktørId()
         val barnFnr = randomFnr()
+
+        val fnrAktørNr = personidentService.hentOgLagreAktørId(fnr)
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
 

@@ -4,7 +4,6 @@ import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagPersonResultaterForSøkerOgToBarn
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
-import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.sisteDagIForrigeMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
@@ -16,6 +15,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
+import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import org.junit.jupiter.api.Assertions
@@ -42,6 +42,9 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
 
     @Autowired
     private lateinit var vilkårsvurderingService: VilkårsvurderingService
+
+    @Autowired
+    private lateinit var personidentService: PersonidentService
 
     @Test
     fun skalLagreRiktigTilkjentYtelseForFGBMedToBarn() {
@@ -161,9 +164,9 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
         val søkerFnr = randomFnr()
         val barn1Fnr = randomFnr()
         val barn2Fnr = randomFnr()
-        val søkerAktørId = randomAktørId()
-        val barn1AktørId = randomAktørId()
-        val barn2AktørId = randomAktørId()
+        val søkerAktørId = personidentService.hentOgLagreAktørId(søkerFnr)
+        val barn1AktørId = personidentService.hentOgLagreAktørId(barn1Fnr)
+        val barn2AktørId = personidentService.hentOgLagreAktørId(barn2Fnr)
         val dato_2021_11_01 = LocalDate.of(2021, 11, 1)
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)

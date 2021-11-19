@@ -53,7 +53,7 @@ internal class PersonidentServiceTest() {
 
         val response = personidentService.hentOgLagreAktørIder(listOf(personidentAktiv))
 
-        Assertions.assertEquals(personidentAktiv, response.single())
+        Assertions.assertEquals(aktørId.aktørId, response.single().aktørId)
 
         val slotAktørId = slot<AktørId>()
         verify(exactly = 1) { aktørIdRepository.save(capture(slotAktørId)) }
@@ -86,7 +86,7 @@ internal class PersonidentServiceTest() {
 
         val response = personidentService.hentOgLagreAktørIder(listOf(personidentAktiv))
 
-        Assertions.assertEquals(personidentAktiv, response.single())
+        Assertions.assertEquals(aktørId.aktørId, response.single().aktørId)
 
         verify(exactly = 0) { aktørIdRepository.save(any()) }
 
@@ -117,7 +117,7 @@ internal class PersonidentServiceTest() {
 
         val response = personidentService.hentOgLagreAktørIder(listOf(personidentAktiv))
 
-        Assertions.assertEquals(personidentAktiv, response.single())
+        Assertions.assertEquals(aktørId.aktørId, response.single().aktørId)
 
         verify(exactly = 0) { aktørIdRepository.save(any()) }
         verify(exactly = 0) { personidentRepository.save(any()) }

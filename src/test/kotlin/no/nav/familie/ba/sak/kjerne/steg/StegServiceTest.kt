@@ -4,7 +4,6 @@ import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
 import no.nav.familie.ba.sak.common.kjørStegprosessForRevurderingÅrligKontroll
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
-import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.ClientMocks
@@ -22,7 +21,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingService
+import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
@@ -65,7 +64,7 @@ class StegServiceTest(
     private val totrinnskontrollService: TotrinnskontrollService,
 
     @Autowired
-    private val tilbakekrevingService: TilbakekrevingService,
+    private val personidentService: PersonidentService,
 
     @Autowired
     private val vedtaksperiodeService: VedtaksperiodeService,
@@ -211,8 +210,9 @@ class StegServiceTest(
     @Test
     fun `Underkjent beslutning setter steg tilbake til send til beslutter`() {
         val søkerFnr = randomFnr()
-        val søkerAktørId = randomAktørId()
         val barnFnr = randomFnr()
+
+        val søkerAktørId = personidentService.hentOgLagreAktørId(søkerFnr)
 
         mockHentPersoninfoForMedIdenter(mockPersonopplysningerService, søkerFnr, barnFnr)
 
