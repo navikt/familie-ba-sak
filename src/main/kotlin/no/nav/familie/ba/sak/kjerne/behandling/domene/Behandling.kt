@@ -331,6 +331,10 @@ enum class BehandlingStatus {
     AVSLUTTET,
 }
 
+fun BehandlingStatus.erÅpen(): Boolean {
+    return this != BehandlingStatus.AVSLUTTET
+}
+
 class BehandlingStegComparator : Comparator<BehandlingStegTilstand> {
 
     override fun compare(bst1: BehandlingStegTilstand, bst2: BehandlingStegTilstand): Int {

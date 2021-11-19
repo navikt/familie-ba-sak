@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.behandling.domene.erÅpen
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
@@ -39,21 +40,23 @@ class VedtakOmOvergangsstønadService(
     private val antallVedtakOmOvergangsstønadPåvirkerIkkeFagsak: Counter =
         Metrics.counter("behandling", "saksbehandling", "hendelse", "smaabarnstillegg", "paavirker_ikke_fagsak")
 
-    fun håndterVedtakOmOvergangsstønad(personIdent: String) {
+    fun håndterVedtakOmOvergangsstønad(personIdent: String): String {
         antallVedtakOmOvergangsstønad.increment()
 
-        val fagsak = fagsakService.hent(personIdent = PersonIdent(personIdent)) ?: return
-        val harÅpenBehandling = behandlingService.hentAktivOgÅpenForFagsak(fagsakId = fagsak.id) != null
+        val fagsak = fagsakService.hent(personIdent = PersonIdent(personIdent)) ?: return "har ikke fagsak i systemet"
+        val aktivBehandling = behandlingService.hentAktivForFagsak(fagsakId = fagsak.id)
 
-        if (harÅpenBehandling) {
+        if (aktivBehandling == null) {
+            return "har ikke vært noe behandling på fagsak, ingenting å revurdere"
+        } else if (aktivBehandling.status.erÅpen()) {
             antallVedtakOmOvergangsstønadÅpenBehandling.increment()
             // TODO lag oppgave
-            return
+            return "har åpen behandling, lager oppgave"
         }
 
         val påvirkerFagsak = småbarnstilleggService.vedtakOmOvergangsstønadPåvirkerFagsak(fagsak)
 
-        if (påvirkerFagsak) {
+        return if (påvirkerFagsak) {
             antallVedtakOmOvergangsstønadPåvirkerFagsak.increment()
 
             val nyBehandling = stegService.håndterNyBehandling(
@@ -81,8 +84,12 @@ class VedtakOmOvergangsstønadService(
                 SikkerhetContext.hentSaksbehandler()
             )
             taskRepository.save(task)
+
+            "påvirker fagsak, kjører autovedtak"
         } else {
             antallVedtakOmOvergangsstønadPåvirkerIkkeFagsak.increment()
+
+            "påvirker ikke fagsak"
         }
     }
 
