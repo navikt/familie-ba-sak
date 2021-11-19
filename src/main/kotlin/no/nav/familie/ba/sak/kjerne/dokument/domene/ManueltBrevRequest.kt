@@ -13,7 +13,7 @@ import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.InformasjonsbrevDeltBo
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.InformasjonsbrevDeltBostedData
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.InnhenteOpplysningerBrev
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.InnhenteOpplysningerData
-import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.MedVennilgHilsen
+import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.MedVennligHilsen
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.SignaturDelmal
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.VarselOmRevurderingBrev
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.VarselOmRevurderingData
@@ -79,7 +79,7 @@ fun ManueltBrevRequest.tilBrevmal() = when (this.brevmal.malId) {
         InformasjonsbrevDeltBostedBrev(
             data = InformasjonsbrevDeltBostedData(
                 delmalData = InformasjonsbrevDeltBostedData.DelmalData(
-                    medVennilgHilsen = MedVennilgHilsen(
+                    medVennilgHilsen = MedVennligHilsen(
                         enhet = flettefelt(
                             this.enhetNavn()
                         )
