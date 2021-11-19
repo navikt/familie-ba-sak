@@ -40,7 +40,10 @@ class FinnAlleBarn6og18ÅrTask(
 
     private fun finnAlleBarnMedFødselsdagInneværendeMåned(alder: Long): Set<Fagsak> =
         LocalDate.now().minusYears(alder).let {
-            fagsakRepository.finnLøpendeFagsakMedBarnMedFødselsdatoInnenfor(it.førsteDagIInneværendeMåned(), it.sisteDagIMåned())
+            fagsakRepository.finnLøpendeFagsakMedBarnMedFødselsdatoInnenfor(
+                it.førsteDagIInneværendeMåned(),
+                it.sisteDagIMåned()
+            )
         }
 
     companion object {

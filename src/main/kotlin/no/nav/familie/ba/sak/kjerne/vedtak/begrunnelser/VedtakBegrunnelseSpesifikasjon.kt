@@ -1,34 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser
 
-import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.Periode
-import no.nav.familie.ba.sak.common.TIDENES_ENDE
-import no.nav.familie.ba.sak.common.TIDENES_MORGEN
-import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.Utils.konverterEnumsTilString
 import no.nav.familie.ba.sak.common.Utils.konverterStringTilEnums
-import no.nav.familie.ba.sak.common.erDagenFør
-import no.nav.familie.ba.sak.common.forrigeMåned
-import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
-import no.nav.familie.ba.sak.common.tilKortString
-import no.nav.familie.ba.sak.common.tilMånedÅr
-import no.nav.familie.ba.sak.kjerne.beregning.fomErPåSatsendring
-import no.nav.familie.ba.sak.kjerne.dokument.domene.SanityBegrunnelse
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
-import no.nav.familie.ba.sak.kjerne.vedtak.VedtakUtils.hentPersonerForAlleUtgjørendeVilkår
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtvidetVedtaksperiodeMedBegrunnelser
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
-import org.slf4j.LoggerFactory
-import java.math.BigDecimal
-import java.time.LocalDate
 import javax.persistence.AttributeConverter
 import javax.persistence.Converter
 
@@ -38,22 +11,7 @@ interface IVedtakBegrunnelse {
     val vedtakBegrunnelseType: VedtakBegrunnelseType
 }
 
-data class TriggesAv(
-    val vilkår: Set<Vilkår> = emptySet(),
-    val personTyper: Set<PersonType> = setOf(PersonType.BARN, PersonType.SØKER),
-    val personerManglerOpplysninger: Boolean = false,
-    val satsendring: Boolean = false,
-    val barnMedSeksårsdag: Boolean = false,
-    val vurderingAnnetGrunnlag: Boolean = false,
-    val medlemskap: Boolean = false,
-    val deltbosted: Boolean = false,
-    val valgbar: Boolean = true,
-    val endringsaarsaker: Set<Årsak> = emptySet(),
-    val etterEndretUtbetaling: Boolean = false,
-    val endretUtbetaingSkalUtbetales: Boolean = false
-) {
-    fun erEndret() = endringsaarsaker.isNotEmpty()
-}
+val hjemlerTilhørendeFritekst = setOf(2, 4, 11)
 
 enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
     INNVILGET_BOSATT_I_RIKTET {
@@ -320,6 +278,10 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
         override val sanityApiNavn = "innvilgetEktefelleDod"
     },
+    INNVILGET_SMÅBARNSTILLEGG {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetSmaabarnstillegg"
+    },
     REDUKSJON_BOSATT_I_RIKTET {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
         override val sanityApiNavn = "reduksjonBosattIRiket"
@@ -487,6 +449,14 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
     REDUKSJON_VURDERING_FLYTTET_SAMMEN_MED_ANNEN_FORELDER {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
         override val sanityApiNavn = "reduksjonVurderingFlyttetSammenMedAnnenForelder"
+    },
+    REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_BARN_UNDER_TRE_ÅR {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "reduksjonSmaabarnstilleggIkkeLengerBarnUnderTreAar"
+    },
+    REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_FULL_OVERGANGSSTØNAD {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "reduksjonSmaabarnstilleggIkkeLengerFullOvergangsstonad"
     },
     AVSLAG_BOSATT_I_RIKET {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
@@ -1000,146 +970,6 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
         override val sanityApiNavn = "etterEndretUtbetalingAvtaleDeltBosted"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.ETTER_ENDRET_UTBETALING
     };
-
-    fun triggesForPeriode(
-        utvidetVedtaksperiodeMedBegrunnelser: UtvidetVedtaksperiodeMedBegrunnelser,
-        vilkårsvurdering: Vilkårsvurdering,
-        persongrunnlag: PersonopplysningGrunnlag,
-        identerMedUtbetaling: List<String>,
-        triggesAv: TriggesAv,
-        vedtakBegrunnelseType: VedtakBegrunnelseType = this.vedtakBegrunnelseType,
-        endretUtbetalingAndeler: List<EndretUtbetalingAndel> = emptyList()
-    ): Boolean {
-        val aktuellePersoner = persongrunnlag.personer
-            .filter { person -> triggesAv.personTyper.contains(person.type) }
-            .filter { person ->
-                if (vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGET) {
-                    identerMedUtbetaling.contains(person.personIdent.ident) || person.type == PersonType.SØKER
-                } else true
-            }
-
-        val erEtterEndretPeriode = erEtterEndretPeriodeAvSammeÅrsak(
-            endretUtbetalingAndeler,
-            utvidetVedtaksperiodeMedBegrunnelser,
-            aktuellePersoner,
-            triggesAv
-        )
-
-        val begrunnelseErRiktigType =
-            utvidetVedtaksperiodeMedBegrunnelser.type.tillatteBegrunnelsestyper.contains(vedtakBegrunnelseType)
-        return when {
-            !triggesAv.valgbar -> false
-            !begrunnelseErRiktigType -> false
-            triggesAv.personerManglerOpplysninger -> vilkårsvurdering.harPersonerManglerOpplysninger()
-            triggesAv.barnMedSeksårsdag ->
-                persongrunnlag.harBarnMedSeksårsdagPåFom(utvidetVedtaksperiodeMedBegrunnelser.fom)
-            triggesAv.satsendring -> fomErPåSatsendring(utvidetVedtaksperiodeMedBegrunnelser.fom ?: TIDENES_MORGEN)
-
-            triggesAv.erEndret() ->
-                erEtterEndretPeriode &&
-                    triggesAv.etterEndretUtbetaling &&
-                    utvidetVedtaksperiodeMedBegrunnelser.type != Vedtaksperiodetype.ENDRET_UTBETALING
-
-            else -> hentPersonerForAlleUtgjørendeVilkår(
-                vilkårsvurdering = vilkårsvurdering,
-                vedtaksperiode = Periode(
-                    fom = utvidetVedtaksperiodeMedBegrunnelser.fom ?: TIDENES_MORGEN,
-                    tom = utvidetVedtaksperiodeMedBegrunnelser.tom ?: TIDENES_ENDE
-                ),
-                oppdatertBegrunnelseType = vedtakBegrunnelseType,
-                aktuellePersonerForVedtaksperiode = aktuellePersoner,
-                triggesAv = triggesAv
-            ).isNotEmpty()
-        }
-    }
-
-    fun tilSanityBegrunnelse(
-        sanityBegrunnelser: List<SanityBegrunnelse>
-    ): SanityBegrunnelse? {
-        val sanityBegrunnelse = sanityBegrunnelser.find { it.apiNavn == this.sanityApiNavn }
-        if (sanityBegrunnelse == null) {
-            logger.warn("Finner ikke begrunnelse med apinavn '${this.sanityApiNavn}' på '${this.name}' i Sanity")
-        }
-        return sanityBegrunnelse
-    }
-
-    companion object {
-        private val logger = LoggerFactory.getLogger(VedtakBegrunnelseSpesifikasjon::class.java)
-
-        fun List<LocalDate>.tilBrevTekst(): String = Utils.slåSammen(this.sorted().map { it.tilKortString() })
-    }
-}
-
-fun triggesAvSkalUtbetales(
-    endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
-    triggesAv: TriggesAv
-): Boolean {
-    if (triggesAv.etterEndretUtbetaling) return false
-
-    val inneholderAndelSomSkalUtbetales = endretUtbetalingAndeler.any { it.prosent!! != BigDecimal.ZERO }
-    val inneholderAndelSomIkkeSkalUtbetales = endretUtbetalingAndeler.any { it.prosent!! == BigDecimal.ZERO }
-
-    return if (triggesAv.endretUtbetaingSkalUtbetales) {
-        inneholderAndelSomSkalUtbetales
-    } else {
-        inneholderAndelSomIkkeSkalUtbetales
-    }
-}
-
-private fun erEtterEndretPeriodeAvSammeÅrsak(
-    endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
-    utvidetVedtaksperiodeMedBegrunnelser: UtvidetVedtaksperiodeMedBegrunnelser,
-    aktuellePersoner: List<Person>,
-    triggesAv: TriggesAv
-) = endretUtbetalingAndeler.any { endretUtbetalingAndel ->
-    endretUtbetalingAndel.tom!!.sisteDagIInneværendeMåned()
-        .erDagenFør(utvidetVedtaksperiodeMedBegrunnelser.fom) &&
-        aktuellePersoner.any { person -> person.personIdent == endretUtbetalingAndel.person?.personIdent } &&
-        triggesAv.endringsaarsaker.contains(endretUtbetalingAndel.årsak)
-}
-
-val hjemlerTilhørendeFritekst = setOf(2, 4, 11)
-
-fun VedtakBegrunnelseSpesifikasjon.erTilknyttetVilkår(sanityBegrunnelser: List<SanityBegrunnelse>): Boolean =
-    !this.tilSanityBegrunnelse(sanityBegrunnelser)?.vilkaar.isNullOrEmpty()
-
-enum class VedtakBegrunnelseType {
-    INNVILGET,
-    REDUKSJON,
-    AVSLAG,
-    OPPHØR,
-    FORTSATT_INNVILGET,
-    ENDRET_UTBETALING,
-    ETTER_ENDRET_UTBETALING
-}
-
-fun VedtakBegrunnelseSpesifikasjon.tilVedtaksbegrunnelse(
-    vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser,
-    personIdenter: List<String>
-): Vedtaksbegrunnelse {
-    if (!vedtaksperiodeMedBegrunnelser.type.tillatteBegrunnelsestyper.contains(this.vedtakBegrunnelseType)) {
-        throw Feil(
-            "Begrunnelsestype ${this.vedtakBegrunnelseType} passer ikke med " +
-                "typen '${vedtaksperiodeMedBegrunnelser.type}' som er satt på perioden."
-        )
-    }
-
-    return Vedtaksbegrunnelse(
-        vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
-        vedtakBegrunnelseSpesifikasjon = this,
-        personIdenter = personIdenter
-    )
-}
-
-fun VedtakBegrunnelseType.hentMånedOgÅrForBegrunnelse(periode: Periode) = when (this) {
-    VedtakBegrunnelseType.AVSLAG ->
-        if (periode.fom == TIDENES_MORGEN && periode.tom == TIDENES_ENDE) ""
-        else if (periode.tom == TIDENES_ENDE) periode.fom.tilMånedÅr()
-        else "${periode.fom.tilMånedÅr()} til ${periode.tom.tilMånedÅr()}"
-    else ->
-        if (periode.fom == TIDENES_MORGEN)
-            throw Feil("Prøver å finne fom-dato for begrunnelse, men fikk \"TIDENES_MORGEN\".")
-        else periode.fom.forrigeMåned().tilMånedÅr()
 }
 
 @Converter
