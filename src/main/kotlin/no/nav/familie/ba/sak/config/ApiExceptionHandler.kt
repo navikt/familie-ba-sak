@@ -11,10 +11,12 @@ import no.nav.familie.ba.sak.common.RessursUtils.illegalState
 import no.nav.familie.ba.sak.common.RessursUtils.rolleTilgangResponse
 import no.nav.familie.ba.sak.common.RessursUtils.unauthorized
 import no.nav.familie.ba.sak.common.RolleTilgangskontrollFeil
+import no.nav.familie.ba.sak.integrasjoner.infotrygd.KanIkkeMigrereException
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.spring.validation.interceptor.JwtTokenUnauthorizedException
 import org.slf4j.LoggerFactory
 import org.springframework.core.NestedExceptionUtils
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
@@ -76,7 +78,8 @@ class ApiExceptionHandler {
     fun handleEksternTjenesteFeil(feil: EksternTjenesteFeilException): ResponseEntity<EksternTjenesteFeil> {
         val mostSpecificThrowable =
             if (feil.throwable != null) NestedExceptionUtils.getMostSpecificCause(feil.throwable) else null
-        feil.eksternTjenesteFeil.exception = if (mostSpecificThrowable != null) "[${mostSpecificThrowable::class.java.name}] " else null
+        feil.eksternTjenesteFeil.exception =
+            if (mostSpecificThrowable != null) "[${mostSpecificThrowable::class.java.name}] " else null
 
         if (mostSpecificThrowable != null) {
             val sw = StringWriter()
@@ -88,5 +91,25 @@ class ApiExceptionHandler {
         logger.info("Feil ekstern tjeneste: path:${feil.eksternTjenesteFeil.path} status:${feil.eksternTjenesteFeil.status} exception:${feil.eksternTjenesteFeil.exception}")
 
         return ResponseEntity.status(feil.eksternTjenesteFeil.status).body(feil.eksternTjenesteFeil)
+    }
+
+    @ExceptionHandler(KanIkkeMigrereException::class)
+    fun handleKanIkkeMigrereException(feil: KanIkkeMigrereException): ResponseEntity<Ressurs<String>> {
+        val mostSpecificThrowable =
+            if (feil.throwable != null) NestedExceptionUtils.getMostSpecificCause(feil.throwable!!) else null
+
+        val feilmelding = if (feil.melding != null) feil.melding else feil.feiltype.beskrivelse
+
+        val ressurs: Ressurs<String> = Ressurs.failure<String>(
+            errorMessage = feilmelding,
+            frontendFeilmelding = feilmelding,
+            error = mostSpecificThrowable
+        ).copy(data = feil.feiltype.name)
+        secureLogger.warn("Feil ved migrering. feiltype=${feil.feiltype} melding=$feilmelding", feil)
+        logger.warn("Feil ved migrering. feiltype=${feil.feiltype} melding=$feilmelding")
+
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+            ressurs
+        )
     }
 }
