@@ -39,8 +39,10 @@ fun finnAktuellVedtaksperiodeOgLeggTilSmåbarnstilleggbegrunnelse(
     vedtaksperioderMedBegrunnelser: List<VedtaksperiodeMedBegrunnelser>,
 ): VedtaksperiodeMedBegrunnelser {
     val utvidetVedtaksperiodeSomSkalOppdateres = utvidedeVedtaksperioderMedBegrunnelser.find {
-        (it.fom?.toYearMonth() == YearMonth.now() || it.fom?.toYearMonth() == YearMonth.now()
-            .nesteMåned()) && it.type == Vedtaksperiodetype.UTBETALING
+        (
+            it.fom?.toYearMonth() == YearMonth.now() || it.fom?.toYearMonth() == YearMonth.now()
+                .nesteMåned()
+            ) && it.type == Vedtaksperiodetype.UTBETALING
     }
 
     if (utvidetVedtaksperiodeSomSkalOppdateres == null) {
