@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
 import io.mockk.every
 import no.nav.familie.ba.sak.common.lagSøknadDTO
+import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.EfSakRestClientMock
 import no.nav.familie.ba.sak.config.FeatureToggleService
@@ -11,6 +12,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.integrasjoner.`ef-sak`.EfSakRestClient
+import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
@@ -36,6 +38,7 @@ import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScena
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad
 import no.nav.familie.kontrakter.felles.ef.PerioderOvergangsstønadResponse
+import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
@@ -64,8 +67,9 @@ class BehandleSmåbarnstilleggTest(
     @Autowired private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     @Autowired private val efSakRestClient: EfSakRestClient,
     @Autowired private val vedtakOmOvergangsstønadService: VedtakOmOvergangsstønadService,
-    @Autowired private val vedtaksperiodeService: VedtaksperiodeService
-) : AbstractVerdikjedetest(efSakRestClient = efSakRestClient) {
+    @Autowired private val vedtaksperiodeService: VedtaksperiodeService,
+    @Autowired private val økonomiKlient: ØkonomiKlient
+) : AbstractVerdikjedetest(efSakRestClient = efSakRestClient, økonomiKlient = økonomiKlient) {
 
     private val barnFødselsdato = LocalDate.now().minusYears(2)
     private val periodeMedFullOvergangsstønadFom = barnFødselsdato.plusYears(1)
@@ -276,6 +280,10 @@ class BehandleSmåbarnstilleggTest(
     @Order(3)
     fun `Skal automatisk endre småbarnstilleggperioder`() {
         EfSakRestClientMock.clearEfSakRestMocks(efSakRestClient)
+        every { økonomiKlient.hentSimulering(any()) } returns Ressurs.Companion.success(
+            DetaljertSimuleringResultat(emptyList())
+        )
+
         val søkersIdent = scenario.søker.ident!!
 
         val periodeOvergangsstønadTom = LocalDate.now()
@@ -312,7 +320,8 @@ class BehandleSmåbarnstilleggTest(
             vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = aktivBehandling.id)
         )
 
-        val aktuellVedtaksperiode = vedtaksperioderMedBegrunnelser.find { it.fom?.toYearMonth() == YearMonth.now() }
+        val aktuellVedtaksperiode =
+            vedtaksperioderMedBegrunnelser.find { it.fom?.toYearMonth() == YearMonth.now().nesteMåned() }
         assertNotNull(aktuellVedtaksperiode)
         assertTrue(aktuellVedtaksperiode?.begrunnelser?.any { it.vedtakBegrunnelseSpesifikasjon == VedtakBegrunnelseSpesifikasjon.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_FULL_OVERGANGSSTØNAD } == true)
 

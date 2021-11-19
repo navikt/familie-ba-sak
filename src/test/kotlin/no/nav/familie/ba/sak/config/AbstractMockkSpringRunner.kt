@@ -4,6 +4,7 @@ import io.mockk.unmockkAll
 import no.nav.familie.ba.sak.integrasjoner.`ef-sak`.EfSakRestClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
+import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.TestInstance
 
@@ -11,7 +12,8 @@ import org.junit.jupiter.api.TestInstance
 abstract class AbstractMockkSpringRunner(
     private val personopplysningerService: PersonopplysningerService? = null,
     private val integrasjonClient: IntegrasjonClient? = null,
-    private val efSakRestClient: EfSakRestClient? = null
+    private val efSakRestClient: EfSakRestClient? = null,
+    private val økonomiKlient: ØkonomiKlient? = null
 ) {
 
     @AfterAll
@@ -29,5 +31,8 @@ abstract class AbstractMockkSpringRunner(
 
         if (efSakRestClient != null)
             EfSakRestClientMock.clearEfSakRestMocks(efSakRestClient)
+
+        if (økonomiKlient != null)
+            ØkonomiTestConfig.clearØkonomiMocks(økonomiKlient)
     }
 }
