@@ -116,7 +116,8 @@ class EndretUtbetalingAndelMedUtvidetAndelTest(
             prosent = BigDecimal(0),
             fom = endretFom,
             tom = endretTom,
-            årsak = Årsak.DELT_BOSTED, avtaletidspunktDeltBosted = LocalDate.now(),
+            årsak = Årsak.DELT_BOSTED,
+            avtaletidspunktDeltBosted = LocalDate.now(),
             søknadstidspunkt = LocalDate.now(),
             begrunnelse = "begrunnelse",
             erTilknyttetAndeler = true,
@@ -134,26 +135,26 @@ class EndretUtbetalingAndelMedUtvidetAndelTest(
         val andelerTilkjentYtelseMedEndretPeriode =
             andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = restBehandlingEtterBehandlingsresultat.behandlingId)
 
-        val endretAndeleTilkjentYtelser =
+        val endredeAndelerTilkjentYtelse =
             andelerTilkjentYtelseMedEndretPeriode.filter { it.kalkulertUtbetalingsbeløp == 0 }
 
         Assertions.assertEquals(
-            endretAndeleTilkjentYtelser.single { it.personIdent == scenario.barna.first().ident }.stønadFom,
+            endredeAndelerTilkjentYtelse.single { it.personIdent == scenario.barna.first().ident }.stønadFom,
             endretFom
         )
 
         Assertions.assertEquals(
-            endretAndeleTilkjentYtelser.single { it.personIdent == scenario.barna.first().ident }.stønadTom,
+            endredeAndelerTilkjentYtelse.single { it.personIdent == scenario.barna.first().ident }.stønadTom,
             endretTom
         )
 
         Assertions.assertEquals(
-            endretAndeleTilkjentYtelser.single { it.personIdent == scenario.søker.ident }.stønadFom,
+            endredeAndelerTilkjentYtelse.single { it.personIdent == scenario.søker.ident }.stønadFom,
             endretFom
         )
 
         Assertions.assertEquals(
-            endretAndeleTilkjentYtelser.single { it.personIdent == scenario.søker.ident }.stønadTom,
+            endredeAndelerTilkjentYtelse.single { it.personIdent == scenario.søker.ident }.stønadTom,
             endretTom
         )
     }
