@@ -12,7 +12,7 @@ val hentDokumenter =
         "bosattIRiketTriggere,\n" +
         "giftPartnerskapTriggere,\n" +
         "borMedSokerTriggere,\n" +
-        "ovrigeTriggere\n" +
+        "ovrigeTriggere,\n" +
         "endretUtbetalingsperiodeTriggere,\n" +
         "endretUtbetalingsperiodeDeltBostedTriggere,\n" +
         "endringsaarsaker,\n" +
