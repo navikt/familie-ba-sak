@@ -34,6 +34,12 @@ class SanityKlient(
             String::class.java
         )
 
+
+        logger.info("")
+        logger.info("Echo:")
+        logger.info(echo.body)
+        logger.info("")
+
         print("")
         print("Echo:")
         print(echo)
