@@ -30,6 +30,7 @@ import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenario
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenarioPerson
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -38,6 +39,8 @@ import no.nav.familie.kontrakter.felles.ef.PerioderOvergangsstønadResponse
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.MethodOrderer
 import org.junit.jupiter.api.Order
@@ -47,6 +50,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
 import org.springframework.test.annotation.DirtiesContext
 import java.time.LocalDate
+import java.time.YearMonth
 
 // Todo. Bruker every. Dette endrer funksjonalliteten for alle klasser.
 @DirtiesContext
@@ -59,10 +63,11 @@ class BehandleSmåbarnstilleggTest(
     @Autowired private val featureToggleService: FeatureToggleService,
     @Autowired private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     @Autowired private val efSakRestClient: EfSakRestClient,
-    @Autowired private val vedtakOmOvergangsstønadService: VedtakOmOvergangsstønadService
+    @Autowired private val vedtakOmOvergangsstønadService: VedtakOmOvergangsstønadService,
+    @Autowired private val vedtaksperiodeService: VedtaksperiodeService
 ) : AbstractVerdikjedetest(efSakRestClient = efSakRestClient) {
 
-    private val barnFødselsdato = LocalDate.now().minusYears(3)
+    private val barnFødselsdato = LocalDate.now().minusYears(2)
     private val periodeMedFullOvergangsstønadFom = barnFødselsdato.plusYears(1)
 
     lateinit var scenario: RestScenario
@@ -169,7 +174,7 @@ class BehandleSmåbarnstilleggTest(
                 behandlingId = restUtvidetBehandlingEtterBehandlingsResultat.data!!.behandlingId
             )
         val utvidedeAndeler = andelerTilkjentYtelse.filter { it.type == YtelseType.UTVIDET_BARNETRYGD }
-        val småbarnstilleggAndeler = andelerTilkjentYtelse.filter { it.type == YtelseType.SMÅBARNSTILLEGG }
+        val småbarnstilleggAndel = andelerTilkjentYtelse.single { it.type == YtelseType.SMÅBARNSTILLEGG }
 
         assertEquals(
             barnFødselsdato.plusMonths(1).toYearMonth(),
@@ -177,11 +182,11 @@ class BehandleSmåbarnstilleggTest(
         )
         assertEquals(
             periodeMedFullOvergangsstønadFom.toYearMonth(),
-            småbarnstilleggAndeler.minByOrNull { it.stønadFom }?.stønadFom
+            småbarnstilleggAndel.stønadFom
         )
         assertEquals(
             barnFødselsdato.plusYears(3).toYearMonth(),
-            småbarnstilleggAndeler.maxByOrNull { it.stønadFom }?.stønadTom
+            småbarnstilleggAndel.stønadTom
         )
 
         generellAssertRestUtvidetBehandling(
@@ -273,15 +278,15 @@ class BehandleSmåbarnstilleggTest(
         EfSakRestClientMock.clearEfSakRestMocks(efSakRestClient)
         val søkersIdent = scenario.søker.ident!!
 
-        val nyPeriodeMedFullOvergangsstønadFom = periodeMedFullOvergangsstønadFom.plusMonths(3)
+        val periodeOvergangsstønadTom = LocalDate.now()
         every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns PerioderOvergangsstønadResponse(
             perioder = listOf(
                 PeriodeOvergangsstønad(
                     personIdent = søkersIdent,
-                    fomDato = nyPeriodeMedFullOvergangsstønadFom,
-                    tomDato = barnFødselsdato.plusYears(18),
+                    fomDato = periodeMedFullOvergangsstønadFom,
+                    tomDato = periodeOvergangsstønadTom,
                     datakilde = PeriodeOvergangsstønad.Datakilde.EF
-                )
+                ),
             )
         )
         vedtakOmOvergangsstønadService.håndterVedtakOmOvergangsstønad(personIdent = søkersIdent)
@@ -293,15 +298,23 @@ class BehandleSmåbarnstilleggTest(
             andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(
                 behandlingId = aktivBehandling.id
             )
-        val småbarnstilleggAndeler = andelerTilkjentYtelse.filter { it.type == YtelseType.SMÅBARNSTILLEGG }
+        val småbarnstilleggAndel = andelerTilkjentYtelse.single { it.type == YtelseType.SMÅBARNSTILLEGG }
         assertEquals(
-            nyPeriodeMedFullOvergangsstønadFom.toYearMonth(),
-            småbarnstilleggAndeler.minByOrNull { it.stønadFom }?.stønadFom
+            periodeMedFullOvergangsstønadFom.toYearMonth(),
+            småbarnstilleggAndel.stønadFom
         )
         assertEquals(
-            barnFødselsdato.plusYears(3).toYearMonth(),
-            småbarnstilleggAndeler.maxByOrNull { it.stønadFom }?.stønadTom
+            periodeOvergangsstønadTom.toYearMonth(),
+            småbarnstilleggAndel.stønadTom
         )
+
+        val vedtaksperioderMedBegrunnelser = vedtaksperiodeService.hentPersisterteVedtaksperioder(
+            vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = aktivBehandling.id)
+        )
+
+        val aktuellVedtaksperiode = vedtaksperioderMedBegrunnelser.find { it.fom?.toYearMonth() == YearMonth.now() }
+        assertNotNull(aktuellVedtaksperiode)
+        assertTrue(aktuellVedtaksperiode?.begrunnelser?.any { it.vedtakBegrunnelseSpesifikasjon == VedtakBegrunnelseSpesifikasjon.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_FULL_OVERGANGSSTØNAD } == true)
 
         håndterIverksettingAvBehandling(
             behandlingEtterVurdering = behandlingService.hentAktivForFagsak(fagsakId = fagsak.id)!!,
