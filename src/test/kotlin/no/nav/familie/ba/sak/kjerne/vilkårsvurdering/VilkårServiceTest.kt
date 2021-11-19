@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.nyOrdinærBehandling
 import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.vurderVilkårsvurderingTilInnvilget
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
@@ -11,6 +12,8 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonResultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -20,8 +23,10 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurderingType
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -503,5 +508,112 @@ class VilkårServiceTest(
             2,
             endretUnder18ÅrVilkårForBarn!!.utdypendeVilkårsvurderinger.size
         )
+    }
+
+    @Test
+    fun `skal lage vilkårsvurderingsperiode for behandling migrering fra infotrygd med årsak endre migreringsdato`() {
+        val fnr = randomFnr()
+        val barnFnr = randomFnr()
+
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
+        val forrigeBehandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(
+            lagBehandling(
+                fagsak = fagsak,
+                behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
+                årsak = BehandlingÅrsak.MIGRERING,
+            )
+        )
+        val forrigePersonopplysningGrunnlag =
+            lagTestPersonopplysningGrunnlag(forrigeBehandling.id, fnr, listOf(barnFnr))
+        persongrunnlagService.lagreOgDeaktiverGammel(forrigePersonopplysningGrunnlag)
+
+        val forrigeVilkårsvurdering = vilkårService.initierVilkårsvurderingForBehandling(
+            behandling = forrigeBehandling,
+            bekreftEndringerViaFrontend = true
+        )
+        assertTrue { forrigeVilkårsvurdering.personResultater.isNotEmpty() }
+
+        val forrigeBehandlingPeriodeFom = LocalDate.now().minusYears(1)
+        val personResultater: Set<PersonResultat> = forrigeVilkårsvurdering.personResultater.map { personResultat ->
+            val vilkårResultater = personResultat.vilkårResultater.map { vilkår ->
+                VilkårResultat(
+                    vilkårType = vilkår.vilkårType,
+                    personResultat = personResultat,
+                    resultat = Resultat.OPPFYLT,
+                    periodeFom = if (vilkår.vilkårType.påvirketVilkårForEndreMigreringsdato())
+                        forrigeBehandlingPeriodeFom else vilkår.periodeFom,
+                    periodeTom = null,
+                    begrunnelse = vilkår.begrunnelse,
+                    behandlingId = vilkår.behandlingId
+                )
+            }.toSet()
+            personResultat.setSortedVilkårResultater(vilkårResultater)
+            personResultat
+        }.toSet()
+
+        vilkårsvurderingService.oppdater(forrigeVilkårsvurdering.copy(personResultater = personResultater))
+
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(
+            lagBehandling(
+                fagsak = fagsak,
+                behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
+                årsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
+            )
+        )
+
+        val personopplysningGrunnlag =
+            lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
+        persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
+
+        val nyMigreringsdato = LocalDate.now().minusYears(1).minusMonths(5)
+        val vilkårsvurdering = vilkårService.initierVilkårsvurderingForBehandling(
+            behandling = behandling,
+            bekreftEndringerViaFrontend = true,
+            forrigeBehandlingSomErVedtatt = forrigeBehandling,
+            nyMigreringsdato = nyMigreringsdato
+        )
+        assertTrue { vilkårsvurdering.personResultater.isNotEmpty() }
+        val søkerVilkårResultat = vilkårsvurdering.personResultater.first { it.personIdent == fnr }.vilkårResultater
+        assertTrue { søkerVilkårResultat.size == 4 }
+        assertTrue {
+            søkerVilkårResultat.any {
+                it.periodeFom == nyMigreringsdato &&
+                    it.periodeTom == forrigeBehandlingPeriodeFom.minusMonths(1).sisteDagIMåned()
+            }
+        }
+        assertTrue {
+            søkerVilkårResultat.any {
+                it.periodeFom == forrigeBehandlingPeriodeFom &&
+                    it.periodeTom == null
+            }
+        }
+
+        val barnVilkårResultat = vilkårsvurdering.personResultater.first { it.personIdent == barnFnr }.vilkårResultater
+        assertTrue { barnVilkårResultat.size == 8 }
+        assertTrue {
+            barnVilkårResultat.filter { it.vilkårType.påvirketVilkårForEndreMigreringsdato() }.any {
+                it.periodeFom == nyMigreringsdato &&
+                    it.periodeTom == forrigeBehandlingPeriodeFom.minusMonths(1).sisteDagIMåned()
+            }
+        }
+        assertTrue {
+            barnVilkårResultat.filter { it.vilkårType.påvirketVilkårForEndreMigreringsdato() }.any {
+                it.periodeFom == forrigeBehandlingPeriodeFom &&
+                    it.periodeTom == null
+            }
+        }
+        val barnetsfødselsdato = personopplysningGrunnlag.personer.first { it.personIdent.ident == barnFnr }.fødselsdato
+        assertTrue {
+            barnVilkårResultat.filter { it.vilkårType == Vilkår.UNDER_18_ÅR }.any {
+                it.periodeFom == barnetsfødselsdato &&
+                    it.periodeTom == barnetsfødselsdato.plusYears(18).minusDays(1)
+            }
+        }
+        assertTrue {
+            barnVilkårResultat.filter { it.vilkårType == Vilkår.GIFT_PARTNERSKAP }.any {
+                it.periodeFom == barnetsfødselsdato &&
+                    it.periodeTom == null
+            }
+        }
     }
 }

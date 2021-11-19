@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagSe
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDate
 
 @Service
 class RegistrerPersongrunnlag(
@@ -28,7 +29,8 @@ class RegistrerPersongrunnlag(
 
         if (behandling.type == BehandlingType.REVURDERING && forrigeBehandlingSomErVedtatt != null) {
             val forrigePersongrunnlagBarna =
-                behandlingService.finnBarnFraBehandlingMedTilkjentYtsele(behandlingId = forrigeBehandlingSomErVedtatt.id)
+                behandlingService
+                    .finnBarnFraBehandlingMedTilkjentYtsele(behandlingId = forrigeBehandlingSomErVedtatt.id)
             val forrigeMålform =
                 persongrunnlagService.hentSøkersMålform(behandlingId = forrigeBehandlingSomErVedtatt.id)
 
@@ -60,7 +62,8 @@ class RegistrerPersongrunnlag(
                 bekreftEndringerViaFrontend = true,
                 forrigeBehandlingSomErVedtatt = behandlingService.hentForrigeBehandlingSomErVedtatt(
                     behandling
-                )
+                ),
+                nyMigreringsdato = data.nyMigreringsdato
             )
         }
 
@@ -74,5 +77,6 @@ class RegistrerPersongrunnlag(
 
 data class RegistrerPersongrunnlagDTO(
     val ident: String,
-    val barnasIdenter: List<String>
+    val barnasIdenter: List<String>,
+    val nyMigreringsdato: LocalDate? = null
 )

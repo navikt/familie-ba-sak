@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import java.time.LocalDate
 
 @RestController
 @RequestMapping("/api/behandlinger")
@@ -52,10 +53,13 @@ class BehandlingController(
             )
         }
 
-        if (nyBehandling.behandlingType == BehandlingType.MIGRERING_FRA_INFOTRYGD && nyBehandling.barnasIdenter.isEmpty()) {
+        if (BehandlingType.MIGRERING_FRA_INFOTRYGD == nyBehandling.behandlingType &&
+            BehandlingÅrsak.ENDRE_MIGRERINGSDATO == nyBehandling.behandlingÅrsak &&
+            nyBehandling.nyMigreringsdato == null
+        ) {
             throw Feil(
-                message = "Listen med barn er tom ved opprettelse av migreringsbehandling",
-                frontendFeilmelding = "Klarte ikke å opprette behandling. Mangler barna det gjelder."
+                message = "Du må sette ny migreringsdato før du kan fortsette videre",
+                frontendFeilmelding = "Du må sette ny migreringsdato før du kan fortsette videre"
             )
         }
 
@@ -63,7 +67,7 @@ class BehandlingController(
             stegService.håndterNyBehandlingOgSendInfotrygdFeed(nyBehandling)
         }.fold(
             onSuccess = {
-                ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = it.id)))
+                ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(it.id)))
             },
             onFailure = {
                 throw it
@@ -103,7 +107,12 @@ class BehandlingController(
             manueltOppdatert = true
         )
 
-        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandling.id)))
+        return ResponseEntity.ok(
+            Ressurs.success(
+                utvidetBehandlingService
+                    .lagRestUtvidetBehandling(behandlingId = behandling.id)
+            )
+        )
     }
 }
 
@@ -116,7 +125,8 @@ data class NyBehandling(
     val behandlingÅrsak: BehandlingÅrsak = BehandlingÅrsak.SØKNAD,
     val skalBehandlesAutomatisk: Boolean = false,
     val navIdent: String? = null,
-    val barnasIdenter: List<String> = emptyList()
+    val barnasIdenter: List<String> = emptyList(),
+    val nyMigreringsdato: LocalDate? = null
 )
 
 class NyBehandlingHendelse(
