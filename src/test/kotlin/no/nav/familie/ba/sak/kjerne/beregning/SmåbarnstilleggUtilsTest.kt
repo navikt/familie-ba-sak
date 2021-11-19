@@ -9,11 +9,11 @@ import no.nav.familie.ba.sak.common.lagVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.tilfeldigPerson
+import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
-import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -34,11 +34,10 @@ class SmåbarnstilleggUtilsTest {
                 tilkjentYtelse = mockk()
             ),
             nyePerioderMedFullOvergangsstønad = listOf(
-                PeriodeOvergangsstønad(
+                InternPeriodeOvergangsstønad(
                     personIdent = personIdent,
                     fomDato = LocalDate.now().minusMonths(6),
                     tomDato = LocalDate.now().plusMonths(6),
-                    datakilde = PeriodeOvergangsstønad.Datakilde.EF
                 )
             ),
             forrigeSøkersAndeler = listOf(
@@ -88,11 +87,10 @@ class SmåbarnstilleggUtilsTest {
                 tilkjentYtelse = mockk()
             ),
             nyePerioderMedFullOvergangsstønad = listOf(
-                PeriodeOvergangsstønad(
+                InternPeriodeOvergangsstønad(
                     personIdent = personIdent,
                     fomDato = LocalDate.now().minusMonths(10),
                     tomDato = LocalDate.now().plusMonths(6),
-                    datakilde = PeriodeOvergangsstønad.Datakilde.EF
                 )
             ),
             forrigeSøkersAndeler = listOf(

@@ -4,7 +4,10 @@ import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.`ef-sak`.EfSakRestClient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.beregning.domene.slåSammenSammenhengendePerioder
+import no.nav.familie.ba.sak.kjerne.beregning.domene.tilInternPeriodeOvergangsstønad
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.småbarnstillegg.PeriodeOvergangsstønadGrunnlagRepository
@@ -25,7 +28,7 @@ class SmåbarnstilleggService(
     fun hentOgLagrePerioderMedFullOvergangsstønad(
         personIdent: String,
         behandlingId: Long
-    ): List<PeriodeOvergangsstønad> {
+    ): List<InternPeriodeOvergangsstønad> {
         return if (featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_SMÅBARNSTILLEGG)) {
             val periodeOvergangsstønad = hentPerioderMedFullOvergangsstønad(personIdent)
 
@@ -38,7 +41,7 @@ class SmåbarnstilleggService(
                 }
             )
 
-            periodeOvergangsstønad
+            periodeOvergangsstønad.map { it.tilInternPeriodeOvergangsstønad() }.slåSammenSammenhengendePerioder()
         } else emptyList()
     }
 
@@ -58,7 +61,7 @@ class SmåbarnstilleggService(
                 ?: error("Finner ikke persongrunnlag")
 
         val nyePerioderMedFullOvergangsstønad =
-            hentPerioderMedFullOvergangsstønad(personIdent = fagsak.hentAktivIdent().ident)
+            hentPerioderMedFullOvergangsstønad(personIdent = fagsak.hentAktivIdent().ident).map { it.tilInternPeriodeOvergangsstønad() }
 
         return vedtakOmOvergangsstønadPåvirkerFagsak(
             småbarnstilleggBarnetrygdGenerator = SmåbarnstilleggBarnetrygdGenerator(

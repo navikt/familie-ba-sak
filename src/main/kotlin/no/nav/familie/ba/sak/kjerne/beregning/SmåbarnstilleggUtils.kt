@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.erUlike
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -12,14 +13,13 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
-import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.YearMonth
 
 fun vedtakOmOvergangsstønadPåvirkerFagsak(
     småbarnstilleggBarnetrygdGenerator: SmåbarnstilleggBarnetrygdGenerator,
-    nyePerioderMedFullOvergangsstønad: List<PeriodeOvergangsstønad>,
+    nyePerioderMedFullOvergangsstønad: List<InternPeriodeOvergangsstønad>,
     forrigeSøkersAndeler: List<AndelTilkjentYtelse>,
     barnasFødselsdatoer: List<LocalDate>
 ): Boolean {

@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
@@ -16,7 +17,6 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
-import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvFileSource
@@ -136,11 +136,10 @@ class VilkårTilTilkjentYtelseTest {
         ) {
             if (småbarnstilleggTestPeriode != null)
                 listOf(
-                    PeriodeOvergangsstønad(
+                    InternPeriodeOvergangsstønad(
                         personIdent = it,
                         fomDato = småbarnstilleggTestPeriode.fraOgMed,
                         tomDato = småbarnstilleggTestPeriode.tilOgMed!!,
-                        datakilde = PeriodeOvergangsstønad.Datakilde.EF
                     )
                 ) else emptyList()
         }
