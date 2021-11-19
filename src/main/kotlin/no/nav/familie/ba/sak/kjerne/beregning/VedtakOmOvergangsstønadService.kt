@@ -2,6 +2,8 @@ package no.nav.familie.ba.sak.kjerne.beregning
 
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -28,7 +30,8 @@ class VedtakOmOvergangsstønadService(
     private val vedtaksperiodeService: VedtaksperiodeService,
     private val beregningService: BeregningService,
     private val småbarnstilleggService: SmåbarnstilleggService,
-    private val taskRepository: TaskRepository
+    private val taskRepository: TaskRepository,
+    private val featureToggleService: FeatureToggleService
 ) {
 
     private val antallVedtakOmOvergangsstønad: Counter =
@@ -41,6 +44,9 @@ class VedtakOmOvergangsstønadService(
         Metrics.counter("behandling", "saksbehandling", "hendelse", "smaabarnstillegg", "paavirker_ikke_fagsak")
 
     fun håndterVedtakOmOvergangsstønad(personIdent: String): String {
+        if (!featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_SMÅBARNSTILLEGG_AUTOMATISK))
+            return "automatisk behandling av småbarnstillegg er ikke påskrudd"
+
         antallVedtakOmOvergangsstønad.increment()
 
         val fagsak = fagsakService.hent(personIdent = PersonIdent(personIdent)) ?: return "har ikke fagsak i systemet"
@@ -85,7 +91,7 @@ class VedtakOmOvergangsstønadService(
             )
             taskRepository.save(task)
 
-            "påvirker fagsak, kjører autovedtak"
+            "påvirker fagsak, autovedtak kjørt vellykket"
         } else {
             antallVedtakOmOvergangsstønadPåvirkerIkkeFagsak.increment()
 
