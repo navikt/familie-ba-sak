@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.`ef-sak`.EfSakRestClient
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
+import no.nav.familie.ba.sak.kjerne.beregning.domene.slåSammenSammenhengendePerioder
 import no.nav.familie.ba.sak.kjerne.beregning.domene.tilInternPeriodeOvergangsstønad
 import no.nav.familie.ba.sak.kjerne.grunnlag.småbarnstillegg.PeriodeOvergangsstønadGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.småbarnstillegg.tilPeriodeOvergangsstønadGrunnlag
@@ -34,7 +35,7 @@ class SmåbarnstilleggService(
                 }
             )
 
-            periodeOvergangsstønad.map { it.tilInternPeriodeOvergangsstønad() }
+            periodeOvergangsstønad.map { it.tilInternPeriodeOvergangsstønad() }.slåSammenSammenhengendePerioder()
         } else emptyList()
     }
 }
