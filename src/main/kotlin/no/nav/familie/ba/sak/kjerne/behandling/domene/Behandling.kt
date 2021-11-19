@@ -153,6 +153,7 @@ data class Behandling(
     fun skalRettFraBehandlingsresultatTilIverksetting(): Boolean {
         return when {
             skalBehandlesAutomatisk && erOmregning() && resultat == BehandlingResultat.FORTSATT_INNVILGET -> true
+            skalBehandlesAutomatisk && erMigrering() && resultat == BehandlingResultat.INNVILGET -> true
             skalBehandlesAutomatisk && erFødselshendelse() && resultat == BehandlingResultat.INNVILGET -> true
             skalBehandlesAutomatisk && erSatsendring() && resultat == BehandlingResultat.ENDRET -> true
             skalBehandlesAutomatisk && erSmåbarnstillegg() && (resultat == BehandlingResultat.ENDRET || resultat == BehandlingResultat.INNVILGET) -> true
