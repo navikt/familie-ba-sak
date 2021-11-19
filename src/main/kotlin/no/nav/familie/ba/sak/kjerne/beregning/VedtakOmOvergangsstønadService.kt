@@ -7,7 +7,6 @@ import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.domene.erÅpen
@@ -84,26 +83,23 @@ class VedtakOmOvergangsstønadService(
             val behandlingEtterBehandlingsresultat =
                 stegService.håndterBehandlingsresultat(behandlingEtterVilkårsvurdering)
 
-            val feilutbetaling =
-                simuleringService.hentFeilutbetaling(behandlingId = behandlingEtterBehandlingsresultat.id)
-            val etterbetaling =
-                simuleringService.hentEtterbetaling(behandlingId = behandlingEtterBehandlingsresultat.id)
+            if (!simuleringService.autovedtakVedSmåbarnstilleggKanAutomatiskIverksettes(behandling = behandlingEtterBehandlingsresultat)) {
+                val feilutbetaling =
+                    simuleringService.hentFeilutbetaling(behandlingId = behandlingEtterBehandlingsresultat.id)
+                val etterbetaling =
+                    simuleringService.hentEtterbetaling(behandlingId = behandlingEtterBehandlingsresultat.id)
 
-            if (feilutbetaling != BigDecimal(0)) {
-                antallVedtakOmOvergangsstønadFeilutbetaling.increment()
-                behandlingService.omgjørTilManuellBehandling(behandlingEtterBehandlingsresultat)
-                // TODO opprett oppgave
-                return "behandling fører til feilutbetaling, må fortsette behandling manuelt."
-            } else if (etterbetaling != BigDecimal(0)) {
-                antallVedtakOmOvergangsstønadEtterbetaling.increment()
-                behandlingService.omgjørTilManuellBehandling(behandlingEtterBehandlingsresultat)
-                // TODO opprett oppgave
-                return "behandling fører til etterbetaling, må fortsette behandling manuelt."
-            } else {
-                behandlingService.oppdaterStatusPåBehandling(
-                    behandlingEtterBehandlingsresultat.id,
-                    BehandlingStatus.IVERKSETTER_VEDTAK
-                )
+                if (feilutbetaling != BigDecimal(0)) {
+                    antallVedtakOmOvergangsstønadFeilutbetaling.increment()
+                    behandlingService.omgjørTilManuellBehandling(behandlingEtterBehandlingsresultat)
+                    // TODO opprett oppgave
+                    return "behandling fører til feilutbetaling, må fortsette behandling manuelt."
+                } else if (etterbetaling != BigDecimal(0)) {
+                    antallVedtakOmOvergangsstønadEtterbetaling.increment()
+                    behandlingService.omgjørTilManuellBehandling(behandlingEtterBehandlingsresultat)
+                    // TODO opprett oppgave
+                    return "behandling fører til etterbetaling, må fortsette behandling manuelt."
+                }
             }
 
             leggTilBegrunnelserPåVedtak(behandlingEtterBehandlingsresultat)

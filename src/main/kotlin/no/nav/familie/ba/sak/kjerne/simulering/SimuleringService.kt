@@ -112,11 +112,24 @@ class SimuleringService(
 
     fun hentEtterbetaling(behandlingId: Long): BigDecimal {
         val vedtakSimuleringMottakere = hentSimuleringPåBehandling(behandlingId)
-        return vedtakSimuleringMottakereTilRestSimulering(vedtakSimuleringMottakere).etterbetaling
+        return hentEtterbetaling(vedtakSimuleringMottakere)
     }
 
     fun hentFeilutbetaling(behandlingId: Long): BigDecimal {
         val vedtakSimuleringMottakere = hentSimuleringPåBehandling(behandlingId)
-        return vedtakSimuleringMottakereTilRestSimulering(vedtakSimuleringMottakere).feilutbetaling
+        return hentFeilutbetaling(vedtakSimuleringMottakere)
+    }
+
+    fun autovedtakVedSmåbarnstilleggKanAutomatiskIverksettes(behandling: Behandling): Boolean {
+        return hentEtterbetaling(behandlingId = behandling.id) == BigDecimal(0) ||
+            hentFeilutbetaling(behandlingId = behandling.id) == BigDecimal(0)
+    }
+
+    fun hentEtterbetaling(økonomiSimuleringMottakere: List<ØkonomiSimuleringMottaker>): BigDecimal {
+        return vedtakSimuleringMottakereTilRestSimulering(økonomiSimuleringMottakere).etterbetaling
+    }
+
+    fun hentFeilutbetaling(økonomiSimuleringMottakere: List<ØkonomiSimuleringMottaker>): BigDecimal {
+        return vedtakSimuleringMottakereTilRestSimulering(økonomiSimuleringMottakere).feilutbetaling
     }
 }
