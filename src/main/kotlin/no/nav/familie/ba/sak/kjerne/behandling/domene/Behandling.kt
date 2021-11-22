@@ -156,7 +156,6 @@ data class Behandling(
             skalBehandlesAutomatisk && erMigrering() && resultat == BehandlingResultat.INNVILGET -> true
             skalBehandlesAutomatisk && erFødselshendelse() && resultat == BehandlingResultat.INNVILGET -> true
             skalBehandlesAutomatisk && erSatsendring() && resultat == BehandlingResultat.ENDRET -> true
-            // TODO flytt? skalBehandlesAutomatisk && erSmåbarnstillegg() && (resultat == BehandlingResultat.ENDRET || resultat == BehandlingResultat.INNVILGET) -> true
             else -> false
         }
     }
