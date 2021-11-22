@@ -88,8 +88,8 @@ private fun hentAutomatiskVedtaksbrevtype(behandlingÅrsak: BehandlingÅrsak, fa
             } else Brevmal.AUTOVEDTAK_NYFØDT_FØRSTE_BARN
         }
         BehandlingÅrsak.OMREGNING_6ÅR,
-        BehandlingÅrsak.OMREGNING_18ÅR -> Brevmal.AUTOVEDTAK_BARN_6_OG_18_ÅR
-        BehandlingÅrsak.SMÅBARNSTILLEGG -> Brevmal.AUTOVEDTAK_BARN_6_OG_18_ÅR // TODO ny brevmal
+        BehandlingÅrsak.OMREGNING_18ÅR,
+        BehandlingÅrsak.SMÅBARNSTILLEGG -> Brevmal.AUTOVEDTAK_BARN_6_OG_18_ÅR_OG_SMÅBARNSTILLEGG
         else -> throw Feil("Det er ikke laget funksjonalitet for automatisk behandling for $behandlingÅrsak")
     }
 
