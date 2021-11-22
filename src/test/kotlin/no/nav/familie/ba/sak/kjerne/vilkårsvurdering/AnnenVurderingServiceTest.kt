@@ -33,7 +33,7 @@ class AnnenVurderingServiceTest {
         personResultat = lagPersonResultat(
             vilkårsvurdering = Vilkårsvurdering(behandling = lagBehandling()),
             fnr = randomFnr(),
-            aktørId = randomAktørId(),
+            aktør = randomAktørId(),
             resultat = Resultat.OPPFYLT,
             periodeFom = LocalDate.of(2020, 1, 1),
             periodeTom = LocalDate.of(2020, 7, 1)

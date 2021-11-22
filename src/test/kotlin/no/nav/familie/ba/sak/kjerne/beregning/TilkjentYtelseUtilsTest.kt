@@ -510,7 +510,7 @@ internal class TilkjentYtelseUtilsTest {
 
         val vilkårsvurdering = lagVilkårsvurdering(
             søkerFnr = søkerFnr,
-            søkerAktørId = søkerAktørId,
+            søkerAktør = søkerAktørId,
             behandling = behandling,
             resultat = Resultat.OPPFYLT,
             søkerPeriodeFom = LocalDate.of(2014, 1, 1),
@@ -518,7 +518,7 @@ internal class TilkjentYtelseUtilsTest {
         )
 
         val barnResultat =
-            PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = barnFnr, aktørId = barnAktørId)
+            PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = barnFnr, aktør = barnAktørId)
         barnResultat.setSortedVilkårResultater(
             setOf(
                 VilkårResultat(
@@ -574,7 +574,7 @@ internal class TilkjentYtelseUtilsTest {
 
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandling.id)
         val barn = Person(
-            aktørId = randomAktørId(),
+            aktør = randomAktørId(),
             personIdent = PersonIdent(barnFnr),
             type = PersonType.BARN,
             personopplysningGrunnlag = personopplysningGrunnlag,
@@ -584,7 +584,7 @@ internal class TilkjentYtelseUtilsTest {
         )
             .apply { sivilstander = listOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this)) }
         val søker = Person(
-            aktørId = randomAktørId(),
+            aktør = randomAktørId(),
             personIdent = PersonIdent(søkerFnr),
             type = PersonType.SØKER,
             personopplysningGrunnlag = personopplysningGrunnlag,

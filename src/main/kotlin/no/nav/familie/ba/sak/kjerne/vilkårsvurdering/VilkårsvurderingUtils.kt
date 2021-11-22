@@ -189,7 +189,7 @@ object VilkårsvurderingUtils {
             val personTilOppdatert = PersonResultat(
                 vilkårsvurdering = initiellVilkårsvurdering,
                 personIdent = personFraInit.personIdent,
-                aktørId = personFraInit.aktørId
+                aktør = personFraInit.aktør
             )
             val personenSomFinnes = personResultaterAktivt.firstOrNull { it.personIdent == personFraInit.personIdent }
 

@@ -8,9 +8,9 @@ import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.toPeriode
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVilkårResultat
-import no.nav.familie.ba.sak.kjerne.aktørid.AktørId
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
@@ -50,7 +50,7 @@ class VilkårsvurderingStegUtilsTest {
         personResultat = PersonResultat(
             vilkårsvurdering = vilkårsvurdering,
             personIdent = personIdent,
-            aktørId = personAktørId,
+            aktør = personAktørId,
         )
 
         vilkårResultat1 = VilkårResultat(
@@ -316,7 +316,7 @@ class VilkårsvurderingStegUtilsTest {
         val mockPersonResultat = PersonResultat(
             vilkårsvurdering = vilkårsvurdering,
             personIdent = randomFnr(),
-            aktørId = randomAktørId(),
+            aktør = randomAktørId(),
         )
 
         val mockVilkårResultat = VilkårResultat(
@@ -468,7 +468,7 @@ class VilkårsvurderingStegUtilsTest {
 
     fun lagVilkårsvurderingMedForskelligeResultat(
         søkerFnr: String,
-        søkerAktørId: AktørId,
+        søkerAktør: Aktør,
         behandling: Behandling,
         resultater: List<Resultat>
     ): Vilkårsvurdering {
@@ -479,7 +479,7 @@ class VilkårsvurderingStegUtilsTest {
         val personResultat = PersonResultat(
             vilkårsvurdering = vilkårsvurdering,
             personIdent = søkerFnr,
-            aktørId = søkerAktørId
+            aktør = søkerAktør
         )
         personResultat.setSortedVilkårResultater(
             resultater.map {

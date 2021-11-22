@@ -14,7 +14,6 @@ import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClien
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.DbOppgave
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.OppgaveRepository
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
-import no.nav.familie.ba.sak.kjerne.aktørid.AktørId
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandlingRepository
@@ -28,6 +27,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTil
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakPerson
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.steg.FØRSTE_STEG
 import no.nav.familie.kontrakter.felles.Behandlingstema
 import no.nav.familie.kontrakter.felles.Tema
@@ -77,7 +77,7 @@ class OppgaveServiceTest {
                 any<Behandling>()
             )
         } returns null
-        every { personopplysningerService.hentAktivAktørId(any()) } returns AktørId(AKTØR_ID_FAGSAK)
+        every { personopplysningerService.hentAktivAktørId(any()) } returns Aktør(AKTØR_ID_FAGSAK)
 
         every { arbeidsfordelingService.hentAbeidsfordelingPåBehandling(any()) } returns ArbeidsfordelingPåBehandling(
             behandlingId = 1,
@@ -171,7 +171,7 @@ class OppgaveServiceTest {
 
     private fun lagTestBehandling(): Behandling {
         return Behandling(
-            fagsak = Fagsak(id = FAGSAK_ID, aktørId = AktørId("2")).also {
+            fagsak = Fagsak(id = FAGSAK_ID, aktør = Aktør("2")).also {
                 it.søkerIdenter = setOf(FagsakPerson(personIdent = PersonIdent(ident = FNR), fagsak = it))
             },
             type = BehandlingType.FØRSTEGANGSBEHANDLING,

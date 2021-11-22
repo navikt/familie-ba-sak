@@ -26,7 +26,7 @@ class VilkårsvurderingUtilsTest {
         val personResultat = PersonResultat(
             vilkårsvurdering = uvesentligVilkårsvurdering,
             personIdent = randomFnr(),
-            aktørId = randomAktørId()
+            aktør = randomAktørId()
         )
         val løpendeOppfylt = VilkårResultat(
             personResultat = personResultat,
@@ -65,7 +65,7 @@ class VilkårsvurderingUtilsTest {
         val personResultat = PersonResultat(
             vilkårsvurdering = uvesentligVilkårsvurdering,
             personIdent = randomFnr(),
-            aktørId = randomAktørId()
+            aktør = randomAktørId()
         )
         val avslagUtenPeriode = VilkårResultat(
             personResultat = personResultat,
@@ -104,7 +104,7 @@ class VilkårsvurderingUtilsTest {
         val personResultat = PersonResultat(
             vilkårsvurdering = uvesentligVilkårsvurdering,
             personIdent = randomFnr(),
-            aktørId = randomAktørId()
+            aktør = randomAktørId()
         )
         val avslagUtenPeriode = VilkårResultat(
             personResultat = personResultat,

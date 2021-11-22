@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.fødselshendelse.gdpr.domene
 
 import no.nav.familie.ba.sak.common.BaseEntitet
-import no.nav.familie.ba.sak.kjerne.aktørid.AktørId
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.util.Objects
 import javax.persistence.Column
@@ -39,7 +39,7 @@ data class FødselshendelsePreLansering(
     val personIdent: String,
 
     @OneToOne(optional = false) @JoinColumn(name = "fk_aktoer_id", nullable = false, updatable = false)
-    val aktørId: AktørId,
+    val aktør: Aktør,
 
     @Column(name = "ny_behandling_hendelse", nullable = false, updatable = false, columnDefinition = "TEXT")
     val nyBehandlingHendelse: String = "",

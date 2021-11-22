@@ -68,16 +68,16 @@ class EndretUtbetalingAndelTest(
             endretTom
         )
 
-        val førsteUtbetalingAndeleTilkjentYtelse =
-            andelerTilkjentYtelseMedEndretPeriode.last { it.kalkulertUtbetalingsbeløp != 0 }
+        val utbetalingAndeleTilkjentYtelse =
+            andelerTilkjentYtelseMedEndretPeriode.filter { it.kalkulertUtbetalingsbeløp != 0 }
 
         Assertions.assertEquals(
-            førsteUtbetalingAndeleTilkjentYtelse.stønadFom,
+            utbetalingAndeleTilkjentYtelse.minOf { it.stønadFom },
             endretTom.plusMonths(1)
         )
 
         Assertions.assertEquals(
-            førsteUtbetalingAndeleTilkjentYtelse.stønadTom,
+            utbetalingAndeleTilkjentYtelse.minOf { it.stønadTom },
             endretTom.plusMonths(2)
         )
     }

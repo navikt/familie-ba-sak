@@ -4,12 +4,12 @@ import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.kjerne.aktørid.AktørId
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
 import no.nav.fpsak.tidsserie.StandardCombinators
@@ -25,7 +25,7 @@ data class SmåbarnstilleggBarnetrygdGenerator(
         perioderMedFullOvergangsstønad: List<InternPeriodeOvergangsstønad>,
         andelerSøker: List<AndelTilkjentYtelse>,
         barnasFødselsdatoer: List<LocalDate>,
-        søkerAktørId: AktørId,
+        søkerAktør: Aktør,
     ): List<AndelTilkjentYtelse> {
         if (perioderMedFullOvergangsstønad.isEmpty() || andelerSøker.isEmpty()) return emptyList()
 
@@ -93,7 +93,7 @@ data class SmåbarnstilleggBarnetrygdGenerator(
                     tilkjentYtelse = tilkjentYtelse,
                     personIdent = søkersIdent
                         ?: error("Genererer andeler for småbarnstillegg uten noen perioder med full overgangsstønad"),
-                    aktørId = søkerAktørId,
+                    aktør = søkerAktør,
                     stønadFom = it.fom.toYearMonth(),
                     stønadTom = it.tom.toYearMonth(),
                     kalkulertUtbetalingsbeløp = ordinærSatsForPeriode,

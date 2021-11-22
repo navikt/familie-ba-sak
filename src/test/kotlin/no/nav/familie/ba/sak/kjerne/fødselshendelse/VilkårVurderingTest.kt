@@ -61,7 +61,7 @@ class VilkårVurderingTest(
 
     @Autowired
     private val personidentService: PersonidentService,
-    
+
 ) : AbstractSpringIntegrationTest() {
 
     @BeforeAll
@@ -108,8 +108,8 @@ class VilkårVurderingTest(
                 behandling.id,
                 fnr,
                 listOf(barnFnr),
-                søkerAktørId = personidentService.hentOgLagreAktørId(fnr),
-                barnAktørId = personidentService.hentOgLagreAktørIder(listOf(barnFnr))
+                søkerAktør = personidentService.hentOgLagreAktørId(fnr),
+                barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr))
             )
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
@@ -148,7 +148,7 @@ class VilkårVurderingTest(
         sivilstand: SIVILSTAND = SIVILSTAND.UGIFT
     ): Person {
         return Person(
-            aktørId = randomAktørId(),
+            aktør = randomAktørId(),
             personIdent = PersonIdent(randomFnr()),
             type = type,
             personopplysningGrunnlag = personopplysningGrunnlag,

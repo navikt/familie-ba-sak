@@ -102,7 +102,7 @@ class BeregningServiceTest {
         val personResultatBarn = lagPersonResultat(
             vilkårsvurdering = vilkårsvurdering,
             fnr = barn1Fnr,
-            aktørId = barn1AktørId,
+            aktør = barn1AktørId,
             resultat = Resultat.OPPFYLT,
             periodeFom = periodeFom,
             periodeTom = periodeTom,
@@ -113,7 +113,7 @@ class BeregningServiceTest {
         val personResultatSøker = lagPersonResultat(
             vilkårsvurdering = vilkårsvurdering,
             fnr = søkerFnr,
-            aktørId = søkerAktørId,
+            aktør = søkerAktørId,
             resultat = Resultat.OPPFYLT,
             periodeFom = periodeFom,
             periodeTom = periodeTom,
@@ -167,7 +167,7 @@ class BeregningServiceTest {
         val personResultatBarn = lagPersonResultat(
             vilkårsvurdering = vilkårsvurdering,
             fnr = barn1Fnr,
-            aktørId = barn1AktørId,
+            aktør = barn1AktørId,
             resultat = Resultat.OPPFYLT,
             periodeFom = periodeFom,
             periodeTom = periodeTom,
@@ -178,7 +178,7 @@ class BeregningServiceTest {
         val personResultatSøker = lagPersonResultat(
             vilkårsvurdering = vilkårsvurdering,
             fnr = søkerFnr,
-            aktørId = søkerAktørId,
+            aktør = søkerAktørId,
             resultat = Resultat.OPPFYLT,
             periodeFom = periodeFom,
             periodeTom = periodeTom,
@@ -239,7 +239,7 @@ class BeregningServiceTest {
         val personResultatBarn = lagPersonResultat(
             vilkårsvurdering = vilkårsvurdering,
             fnr = barn.personIdent.ident,
-            aktørId = barn.hentAktørId(),
+            aktør = barn.hentAktørId(),
             resultat = Resultat.OPPFYLT,
             periodeFom = periodeFom,
             periodeTom = periodeTom,
@@ -250,7 +250,7 @@ class BeregningServiceTest {
         val personResultatSøker = lagPersonResultat(
             vilkårsvurdering = vilkårsvurdering,
             fnr = søkerFnr,
-            aktørId = søkerAktørId,
+            aktør = søkerAktørId,
             resultat = Resultat.OPPFYLT,
             periodeFom = periodeFom,
             periodeTom = periodeTom,
@@ -324,7 +324,7 @@ class BeregningServiceTest {
         val personResultatBarn = lagPersonResultat(
             vilkårsvurdering = vilkårsvurdering,
             fnr = barn1Fnr,
-            aktørId = barn1AktørId,
+            aktør = barn1AktørId,
             resultat = Resultat.OPPFYLT,
             periodeFom = periodeFom,
             periodeTom = periodeTom
@@ -333,7 +333,7 @@ class BeregningServiceTest {
         val personResultatSøker = lagPersonResultat(
             vilkårsvurdering = vilkårsvurdering,
             fnr = søkerFnr,
-            aktørId = søkerAktørId,
+            aktør = søkerAktørId,
             resultat = Resultat.IKKE_OPPFYLT,
             periodeFom = periodeFom,
             periodeTom = periodeTom
@@ -395,7 +395,7 @@ class BeregningServiceTest {
             lagPersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
                 fnr = søkerFnr,
-                aktørId = søkerAktørId,
+                aktør = søkerAktørId,
                 resultat = Resultat.OPPFYLT,
                 periodeFom = periode1Fom,
                 periodeTom = periode1Tom,
@@ -405,7 +405,7 @@ class BeregningServiceTest {
             lagPersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
                 fnr = søkerFnr,
-                aktørId = søkerAktørId,
+                aktør = søkerAktørId,
                 resultat = Resultat.IKKE_OPPFYLT,
                 periodeFom = periode2Fom,
                 periodeTom = periode2Tom,
@@ -415,7 +415,7 @@ class BeregningServiceTest {
             lagPersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
                 fnr = søkerFnr,
-                aktørId = søkerAktørId,
+                aktør = søkerAktørId,
                 resultat = Resultat.OPPFYLT,
                 periodeFom = periode3Fom,
                 periodeTom = periode3Tom,
@@ -425,7 +425,7 @@ class BeregningServiceTest {
             lagPersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
                 fnr = barn1Fnr,
-                aktørId = barn1AktørId,
+                aktør = barn1AktørId,
                 resultat = Resultat.OPPFYLT,
                 periodeFom = periode1Fom.minusYears(1),
                 periodeTom = periode3Tom.plusYears(1),
@@ -435,7 +435,7 @@ class BeregningServiceTest {
             lagPersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
                 fnr = barn2Fnr,
-                aktørId = barn2AktørId,
+                aktør = barn2AktørId,
                 resultat = Resultat.OPPFYLT,
                 periodeFom = periode2Midt,
                 periodeTom = periode3Midt,
@@ -591,7 +591,7 @@ class BeregningServiceTest {
             lagPersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
                 fnr = søkerFnr,
-                aktørId = søkerAktørId,
+                aktør = søkerAktørId,
                 resultat = Resultat.OPPFYLT,
                 periodeFom = førstePeriodeFomForBarnet,
                 periodeTom = periodeTomForSøker,
@@ -601,7 +601,7 @@ class BeregningServiceTest {
             lagPersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
                 fnr = barn1Fnr,
-                aktørId = barn1AktørId,
+                aktør = barn1AktørId,
                 resultat = Resultat.OPPFYLT,
                 periodeFom = førstePeriodeFomForBarnet,
                 periodeTom = førstePeriodeTomForBarnet,
@@ -612,7 +612,7 @@ class BeregningServiceTest {
             lagPersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
                 fnr = barn1Fnr,
-                aktørId = barn1AktørId,
+                aktør = barn1AktørId,
                 resultat = Resultat.OPPFYLT,
                 periodeFom = andrePeriodeFomForBarnet,
                 periodeTom = andrePeriodeTomForBarnet,

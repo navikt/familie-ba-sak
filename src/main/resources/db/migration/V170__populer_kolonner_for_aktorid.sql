@@ -1,4 +1,4 @@
-insert into aktoer_id(aktoer_id,
+insert into aktoer(aktoer_id,
                       opprettet_av,
                       opprettet_tid,
                       endret_av,
@@ -37,27 +37,27 @@ order by person_ident, opprettet_tid desc;
 
 alter table FAGSAK_PERSON rename column AKTOER_ID to FK_AKTOER_ID;
 alter table FAGSAK_PERSON
-    add constraint FK_FAGSAK_PERSON foreign key (FK_AKTOER_ID) references AKTOER_ID (AKTOER_ID);
+    add constraint FK_FAGSAK_PERSON foreign key (FK_AKTOER_ID) references AKTOER (AKTOER_ID);
 
 alter table ANDEL_TILKJENT_YTELSE rename column AKTOER_ID to FK_AKTOER_ID;
 alter table ANDEL_TILKJENT_YTELSE
-    add constraint FK_ANDEL_TILKJENT_YTELSE foreign key (FK_AKTOER_ID) references AKTOER_ID (AKTOER_ID);
+    add constraint FK_ANDEL_TILKJENT_YTELSE foreign key (FK_AKTOER_ID) references AKTOER (AKTOER_ID);
 
 alter table PERSON_RESULTAT rename column AKTOER_ID to FK_AKTOER_ID;
 alter table PERSON_RESULTAT
-    add constraint FK_PERSON_RESULTAT foreign key (FK_AKTOER_ID) references AKTOER_ID (AKTOER_ID);
+    add constraint FK_PERSON_RESULTAT foreign key (FK_AKTOER_ID) references AKTOER (AKTOER_ID);
 
 alter table GR_PERIODE_OVERGANGSSTONAD rename column AKTOER_ID to FK_AKTOER_ID;
 alter table GR_PERIODE_OVERGANGSSTONAD
-    add constraint FK_GR_PERIODE_OVERGANGSSTONAD foreign key (FK_AKTOER_ID) references AKTOER_ID (AKTOER_ID);
+    add constraint FK_GR_PERIODE_OVERGANGSSTONAD foreign key (FK_AKTOER_ID) references AKTOER (AKTOER_ID);
 
 alter table FOEDSELSHENDELSE_PRE_LANSERING rename column AKTOER_ID to FK_AKTOER_ID;
 alter table FOEDSELSHENDELSE_PRE_LANSERING
-    add constraint FK_FOEDSELSHENDELSE_PRE_LANSERING foreign key (FK_AKTOER_ID) references AKTOER_ID (AKTOER_ID);
+    add constraint FK_FOEDSELSHENDELSE_PRE_LANSERING foreign key (FK_AKTOER_ID) references AKTOER (AKTOER_ID);
 
 alter table PO_PERSON rename column AKTOER_ID to FK_AKTOER_ID;
 alter table PO_PERSON
-    add constraint FK_PO_PERSON foreign key (FK_AKTOER_ID) references AKTOER_ID (AKTOER_ID);
+    add constraint FK_PO_PERSON foreign key (FK_AKTOER_ID) references AKTOER (AKTOER_ID);
 
 update fagsak_person fp
 set fk_aktoer_id=(select fk_aktoer_id from personident p where p.foedselsnummer = fp.ident);
@@ -76,7 +76,7 @@ set fk_aktoer_id=(select fk_aktoer_id from personident p where p.foedselsnummer 
 
 alter table fagsak add column fk_aktoer_id varchar;
 alter table FAGSAK
-    add constraint FAGSAK foreign key (FK_AKTOER_ID) references AKTOER_ID (AKTOER_ID);
+    add constraint FAGSAK foreign key (FK_AKTOER_ID) references AKTOER (AKTOER_ID);
 
 update fagsak f
 set fk_aktoer_id=(select fk_aktoer_id

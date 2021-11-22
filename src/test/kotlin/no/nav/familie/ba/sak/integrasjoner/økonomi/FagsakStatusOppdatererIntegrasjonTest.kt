@@ -6,7 +6,6 @@ import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
-import no.nav.familie.ba.sak.kjerne.aktørid.AktørId
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
@@ -17,6 +16,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -102,7 +102,7 @@ class FagsakStatusOppdatererIntegrasjonTest : AbstractSpringIntegrationTest() {
                 andelPåTilkjentYtelse(
                     tilkjentYtelse = tilkjentYtelse,
                     periodeOffset = it,
-                    aktørId = behandling.fagsak.aktørId
+                    aktør = behandling.fagsak.aktør
                 )
             )
         }
@@ -120,10 +120,10 @@ class FagsakStatusOppdatererIntegrasjonTest : AbstractSpringIntegrationTest() {
     private fun andelPåTilkjentYtelse(
         tilkjentYtelse: TilkjentYtelse,
         periodeOffset: Long,
-        aktørId: AktørId = randomAktørId()
+        aktør: Aktør = randomAktørId()
     ) = AndelTilkjentYtelse(
         personIdent = randomFnr(),
-        aktørId = aktørId,
+        aktør = aktør,
         behandlingId = tilkjentYtelse.behandling.id,
         tilkjentYtelse = tilkjentYtelse,
         kalkulertUtbetalingsbeløp = 1054,

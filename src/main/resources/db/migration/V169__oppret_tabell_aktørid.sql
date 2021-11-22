@@ -7,7 +7,7 @@ drop sequence PERSONIDENT_SEQ;
 alter table PERSONIDENT rename column AKTOER_ID to FK_AKTOER_ID;
 alter table PERSONIDENT drop column ID;
 
-create table AKTOER_ID
+create table AKTOER
 (
     AKTOER_ID           VARCHAR      PRIMARY KEY,
     VERSJON             BIGINT       DEFAULT 0              NOT NULL,
@@ -18,4 +18,4 @@ create table AKTOER_ID
 );
 
 alter table PERSONIDENT
-    add constraint FK_PERSONIDENT foreign key (FK_AKTOER_ID) references AKTOER_ID (AKTOER_ID);
+    add constraint FK_PERSONIDENT foreign key (FK_AKTOER_ID) references AKTOER (AKTOER_ID);

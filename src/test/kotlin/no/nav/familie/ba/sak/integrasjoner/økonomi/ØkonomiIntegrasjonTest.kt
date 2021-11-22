@@ -5,7 +5,6 @@ import no.nav.familie.ba.sak.common.lagPersonResultat
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.kjerne.aktørid.AktørId
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
@@ -15,6 +14,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
@@ -67,7 +67,7 @@ class ØkonomiIntegrasjonTest(
         val barnAktørId = personidentService.hentOgLagreAktørId(barnFnr)
 
         val vilkårsvurdering =
-            lagBehandlingResultat(behandling, fnr, barnFnr, fagsak.aktørId, barnAktørId, stønadFom, stønadTom)
+            lagBehandlingResultat(behandling, fnr, barnFnr, fagsak.aktør, barnAktørId, stønadFom, stønadTom)
 
         vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering)
         Assertions.assertNotNull(behandling.fagsak.id)
@@ -114,7 +114,7 @@ class ØkonomiIntegrasjonTest(
         behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling)
 
         val vilkårsvurdering =
-            lagBehandlingResultat(behandling, fnr, barnFnr, fagsak.aktørId, barnAktørId, stønadFom, stønadTom)
+            lagBehandlingResultat(behandling, fnr, barnFnr, fagsak.aktør, barnAktørId, stønadFom, stønadTom)
         vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering)
 
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
@@ -134,8 +134,8 @@ class ØkonomiIntegrasjonTest(
         behandling: Behandling,
         søkerFnr: String,
         barnFnr: String,
-        søkerAktørId: AktørId,
-        barnAktørId: AktørId,
+        søkerAktør: Aktør,
+        barnAktør: Aktør,
         stønadFom: LocalDate,
         stønadTom: LocalDate
     ): Vilkårsvurdering {
@@ -145,7 +145,7 @@ class ØkonomiIntegrasjonTest(
             lagPersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
                 fnr = søkerFnr,
-                aktørId = søkerAktørId,
+                aktør = søkerAktør,
                 resultat = Resultat.OPPFYLT,
                 periodeFom = stønadFom,
                 periodeTom = stønadTom,
@@ -155,7 +155,7 @@ class ØkonomiIntegrasjonTest(
             lagPersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
                 fnr = barnFnr,
-                aktørId = barnAktørId,
+                aktør = barnAktør,
                 resultat = Resultat.OPPFYLT,
                 periodeFom = stønadFom,
                 periodeTom = stønadTom,

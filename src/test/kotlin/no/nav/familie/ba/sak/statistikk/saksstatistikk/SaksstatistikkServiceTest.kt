@@ -21,7 +21,6 @@ import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.JournalføringR
 import no.nav.familie.ba.sak.integrasjoner.lagTestJournalpost
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PersonInfo
-import no.nav.familie.ba.sak.kjerne.aktørid.AktørId
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -34,6 +33,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.domene.Totrinnskontroll
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
@@ -282,13 +282,13 @@ internal class SaksstatistikkServiceTest(
     @Test
     fun `Skal mappe til sakDVH, ingen aktiv behandling, så kun aktør SØKER, bostedsadresse i Norge`() {
         every { fagsakService.hentPåFagsakId(any()) } answers {
-            val fagsak = Fagsak(status = FagsakStatus.OPPRETTET, aktørId = AktørId("2"))
+            val fagsak = Fagsak(status = FagsakStatus.OPPRETTET, aktør = Aktør("2"))
             val fagsakPerson = FagsakPerson(personIdent = PersonIdent("12345678910"), fagsak = fagsak)
             fagsak.copy(søkerIdenter = setOf(fagsakPerson))
         }
 
-        every { personopplysningerService.hentAktivAktørId(Ident("12345678910")) } returns AktørId("1234567891011")
-        every { personopplysningerService.hentAktivAktørId(Ident("12345678911")) } returns AktørId("1234567891111")
+        every { personopplysningerService.hentAktivAktørId(Ident("12345678910")) } returns Aktør("1234567891011")
+        every { personopplysningerService.hentAktivAktørId(Ident("12345678911")) } returns Aktør("1234567891111")
         every { personopplysningerService.hentPersoninfoEnkel("12345678910") } returns PersonInfo(
             fødselsdato = LocalDate.of(
                 2017,
@@ -326,13 +326,13 @@ internal class SaksstatistikkServiceTest(
     @Test
     fun `Skal mappe til sakDVH, ingen aktiv behandling, så kun aktør SØKER, bostedsadresse i Utland`() {
         every { fagsakService.hentPåFagsakId(any()) } answers {
-            val fagsak = Fagsak(status = FagsakStatus.OPPRETTET, aktørId = AktørId("2"))
+            val fagsak = Fagsak(status = FagsakStatus.OPPRETTET, aktør = Aktør("2"))
             val fagsakPerson = FagsakPerson(personIdent = PersonIdent("12345678910"), fagsak = fagsak)
             fagsak.copy(søkerIdenter = setOf(fagsakPerson))
         }
 
-        every { personopplysningerService.hentAktivAktørId(Ident("12345678910")) } returns AktørId("1234567891011")
-        every { personopplysningerService.hentAktivAktørId(Ident("12345678911")) } returns AktørId("1234567891111")
+        every { personopplysningerService.hentAktivAktørId(Ident("12345678910")) } returns Aktør("1234567891011")
+        every { personopplysningerService.hentAktivAktørId(Ident("12345678911")) } returns Aktør("1234567891111")
         every { personopplysningerService.hentPersoninfoEnkel("12345678910") } returns PersonInfo(
             fødselsdato = LocalDate.of(
                 2017,
@@ -357,7 +357,7 @@ internal class SaksstatistikkServiceTest(
     @Test
     fun `Skal mappe til sakDVH, aktører har SØKER og BARN`() {
         every { fagsakService.hentPåFagsakId(any()) } answers {
-            val fagsak = Fagsak(status = FagsakStatus.OPPRETTET, aktørId = AktørId("2"))
+            val fagsak = Fagsak(status = FagsakStatus.OPPRETTET, aktør = Aktør("2"))
             val fagsakPerson = FagsakPerson(personIdent = PersonIdent("12345678910"), fagsak = fagsak)
             fagsak.copy(søkerIdenter = setOf(fagsakPerson))
         }

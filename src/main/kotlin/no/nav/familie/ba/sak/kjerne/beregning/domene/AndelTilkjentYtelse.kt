@@ -5,10 +5,10 @@ import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.YearMonthConverter
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
-import no.nav.familie.ba.sak.kjerne.aktørid.AktørId
 import no.nav.familie.ba.sak.kjerne.dokument.UtvidetScenario
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.erStartPåUtvidetSammeMåned
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.utledSegmenter
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.fpsak.tidsserie.LocalDateInterval
@@ -59,7 +59,7 @@ data class AndelTilkjentYtelse(
     val personIdent: String,
 
     @OneToOne(optional = true) @JoinColumn(name = "fk_aktoer_id", nullable = true, updatable = false)
-    val aktørId: AktørId? = null,
+    val aktør: Aktør? = null,
 
     @Column(name = "kalkulert_utbetalingsbelop", nullable = false)
     val kalkulertUtbetalingsbeløp: Int,
@@ -125,7 +125,7 @@ data class AndelTilkjentYtelse(
             Objects.equals(stønadFom, annen.stønadFom) &&
             Objects.equals(stønadTom, annen.stønadTom) &&
             Objects.equals(personIdent, annen.personIdent) &&
-            Objects.equals(aktørId, annen.aktørId)
+            Objects.equals(aktør, annen.aktør)
     }
 
     override fun hashCode(): Int {
@@ -137,7 +137,7 @@ data class AndelTilkjentYtelse(
             stønadFom,
             stønadTom,
             personIdent,
-            aktørId
+            aktør
         )
     }
 
@@ -149,7 +149,7 @@ data class AndelTilkjentYtelse(
     fun erTilsvarendeForUtbetaling(other: AndelTilkjentYtelse): Boolean {
         return (
             this.personIdent == other.personIdent &&
-                this.aktørId == other.aktørId &&
+                this.aktør == other.aktør &&
                 this.stønadFom == other.stønadFom &&
                 this.stønadTom == other.stønadTom &&
                 this.kalkulertUtbetalingsbeløp == other.kalkulertUtbetalingsbeløp &&

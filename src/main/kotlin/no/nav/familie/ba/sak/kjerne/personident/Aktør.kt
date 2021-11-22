@@ -1,7 +1,6 @@
-package no.nav.familie.ba.sak.kjerne.aktørid
+package no.nav.familie.ba.sak.kjerne.personident
 
 import no.nav.familie.ba.sak.common.BaseEntitet
-import no.nav.familie.ba.sak.kjerne.personident.Personident
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.util.Objects
 import javax.persistence.CascadeType
@@ -19,17 +18,18 @@ import javax.validation.constraints.Pattern
  * går fra DNR til FNR i Folkeregisteret. Tilsvarende vil den kunne referere personer som har ident fra et utenlandsk system.
  */
 @EntityListeners(RollestyringMotDatabase::class)
-@Entity(name = "AktørId")
-@Table(name = "AKTOER_ID")
-data class AktørId(
+@Entity(name = "Aktør")
+@Table(name = "AKTOER")
+data class Aktør(
     @Id
     @Column(name = "aktoer_id", updatable = false, length = 50)
     @Pattern(regexp = VALID_REGEXP, flags = [Pattern.Flag.CASE_INSENSITIVE])
+    // Er ikke kalt id ettersom den refererer til en ekstern id.
     val aktørId: String,
 
     @OneToMany(
         fetch = FetchType.EAGER,
-        mappedBy = "aktørId",
+        mappedBy = "aktør",
         cascade = [CascadeType.ALL]
     )
     val personidenter: MutableSet<Personident> = mutableSetOf()
@@ -50,7 +50,7 @@ data class AktørId(
         if (other == null || javaClass != other.javaClass) {
             return false
         }
-        val entitet: AktørId = other as AktørId
+        val entitet: Aktør = other as Aktør
         return Objects.equals(hashCode(), entitet.hashCode())
     }
 

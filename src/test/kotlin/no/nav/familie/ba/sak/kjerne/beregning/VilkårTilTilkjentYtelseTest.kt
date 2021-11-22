@@ -296,7 +296,7 @@ class TestTilkjentYtelseBuilder(val behandling: Behandling) {
                 behandlingId = behandling.id,
                 tilkjentYtelse = tilkjentYtelse,
                 personIdent = person.personIdent.ident,
-                aktørId = person.hentAktørId(),
+                aktør = person.hentAktørId(),
                 stønadFom = stønadPeriode.fraOgMed.toYearMonth(),
                 stønadTom = stønadPeriode.tilOgMed!!.toYearMonth(),
                 kalkulertUtbetalingsbeløp = beløp.toInt(),

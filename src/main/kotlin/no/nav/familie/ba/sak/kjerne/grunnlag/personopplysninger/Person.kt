@@ -2,13 +2,13 @@ package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import no.nav.familie.ba.sak.common.BaseEntitet
-import no.nav.familie.ba.sak.kjerne.aktørid.AktørId
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.arbeidsforhold.GrArbeidsforhold
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.opphold.GrOpphold
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.familie.kontrakter.felles.Språkkode
 import org.hibernate.annotations.Fetch
@@ -75,7 +75,7 @@ data class Person(
     val personopplysningGrunnlag: PersonopplysningGrunnlag,
 
     @ManyToOne(optional = true) @JoinColumn(name = "fk_aktoer_id", nullable = true, updatable = false)
-    val aktørId: AktørId? = null,
+    val aktør: Aktør? = null,
 
     @OneToMany(mappedBy = "person", cascade = [CascadeType.ALL], fetch = FetchType.EAGER)
     // Workaround før Hibernatebug https://hibernate.atlassian.net/browse/HHH-1718
@@ -104,7 +104,7 @@ data class Person(
 ) : BaseEntitet() {
 
     override fun toString(): String {
-        return """Person(aktørId=$aktørId,
+        return """Person(aktørId=$aktør,
                         |type=$type
                         |fødselsdato=$fødselsdato)""".trimMargin()
     }
@@ -125,7 +125,7 @@ data class Person(
 
     fun hentSeksårsdag(): LocalDate = fødselsdato.plusYears(6)
 
-    fun hentAktørId(): AktørId = aktørId ?: error("Person har ikke aktørId")
+    fun hentAktørId(): Aktør = aktør ?: error("Person har ikke aktørId")
 }
 
 enum class Kjønn {

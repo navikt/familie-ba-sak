@@ -257,7 +257,7 @@ internal class TilkjentYtelseUtilsEndretUtbetalingAndelTest {
         behandlingId = behandling.id,
         tilkjentYtelse = tilkjentYtelse,
         personIdent = barn.personIdent.ident,
-        aktørId = barn.hentAktørId(),
+        aktør = barn.hentAktørId(),
         kalkulertUtbetalingsbeløp = beløp.toInt(),
         stønadFom = fom,
         stønadTom = tom,

@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.grunnlag.småbarnstillegg
 
 import no.nav.familie.ba.sak.common.BaseEntitet
-import no.nav.familie.ba.sak.kjerne.aktørid.AktørId
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad
 import java.time.LocalDate
@@ -42,7 +42,7 @@ class PeriodeOvergangsstønadGrunnlag(
     val personIdent: String,
 
     @OneToOne(optional = false) @JoinColumn(name = "fk_aktoer_id", nullable = false, updatable = false)
-    val aktørId: AktørId,
+    val aktør: Aktør,
 
     @Column(name = "fom", nullable = false, columnDefinition = "DATE")
     val fom: LocalDate,
@@ -55,11 +55,11 @@ class PeriodeOvergangsstønadGrunnlag(
     val datakilde: PeriodeOvergangsstønad.Datakilde,
 ) : BaseEntitet()
 
-fun PeriodeOvergangsstønad.tilPeriodeOvergangsstønadGrunnlag(behandlingId: Long, aktørId: AktørId) =
+fun PeriodeOvergangsstønad.tilPeriodeOvergangsstønadGrunnlag(behandlingId: Long, aktør: Aktør) =
     PeriodeOvergangsstønadGrunnlag(
         behandlingId = behandlingId,
         personIdent = this.personIdent,
-        aktørId = aktørId,
+        aktør = aktør,
         fom = this.fomDato,
         tom = this.tomDato,
         datakilde = this.datakilde

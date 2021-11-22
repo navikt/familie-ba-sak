@@ -27,7 +27,6 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.internal.IdentInformasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PersonInfo
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.Personident
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.VergeData
-import no.nav.familie.ba.sak.kjerne.aktørid.AktørId
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.mockBarnAutomatiskBehandling
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.mockBarnAutomatiskBehandling2
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.mockBarnAutomatiskBehandling2Fnr
@@ -38,6 +37,7 @@ import no.nav.familie.ba.sak.kjerne.fødselshendelse.mockSøkerAutomatiskBehandl
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.mockSøkerAutomatiskBehandlingFnr
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.success
 import no.nav.familie.kontrakter.felles.kodeverk.BeskrivelseDto
 import no.nav.familie.kontrakter.felles.kodeverk.BetydningDto
@@ -747,7 +747,7 @@ fun mockHentPersoninfoForMedIdenter(
 
     every {
         mockPersonopplysningerService.hentAktivAktørId(any())
-    } returns AktørId("1")
+    } returns Aktør("1")
 }
 
 val TEST_PDF = ClientMocks::class.java.getResource("/dokument/mockvedtak.pdf").readBytes()

@@ -59,7 +59,7 @@ class PeriodeMapperTest {
     @Test
     fun `Kombinert tidslinje returnerer rette rette vilkårsresultater for tidsintervaller`() {
         val personResultat =
-            PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = "", aktørId = randomAktørId())
+            PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = "", aktør = randomAktørId())
 
         val tidslinje1 = LocalDateTimeline(
             listOf(
@@ -116,9 +116,9 @@ class PeriodeMapperTest {
         val aktørId1 = randomAktørId()
         val aktørId2 = randomAktørId()
         val personResultat1 =
-            PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = fnr1, aktørId = aktørId1)
+            PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = fnr1, aktør = aktørId1)
         val personResultat2 =
-            PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = fnr2, aktørId = aktørId2)
+            PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = fnr2, aktør = aktørId2)
         personResultat1.setSortedVilkårResultater(
             setOf(
                 VilkårResultat(
@@ -224,7 +224,7 @@ class PeriodeMapperTest {
         // Periode med fom-dato medio mai og tom-dato medio juni skal bli hele mai og juni
 
         val personResultat =
-            PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = randomFnr(), aktørId = randomAktørId())
+            PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = randomFnr(), aktør = randomAktørId())
         personResultat.setSortedVilkårResultater(
             setOf(
                 VilkårResultat(
@@ -252,7 +252,7 @@ class PeriodeMapperTest {
         val periodeTom18ÅrsVilkår = LocalDate.of(2038, 5, 15)
 
         val personResultat =
-            PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = barnFnr, aktørId = randomAktørId())
+            PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = barnFnr, aktør = randomAktørId())
         personResultat.setSortedVilkårResultater(
             setOf(
                 VilkårResultat(

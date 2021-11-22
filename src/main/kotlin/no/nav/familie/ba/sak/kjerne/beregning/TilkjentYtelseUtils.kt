@@ -11,7 +11,6 @@ import no.nav.familie.ba.sak.common.minimum
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.kjerne.aktørid.AktørId
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
@@ -28,6 +27,7 @@ import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import java.math.BigDecimal
@@ -40,7 +40,7 @@ object TilkjentYtelseUtils {
         vilkårsvurdering: Vilkårsvurdering,
         personopplysningGrunnlag: PersonopplysningGrunnlag,
         behandling: Behandling,
-        hentPerioderMedFullOvergangsstønad: (personIdent: String, aktørId: AktørId) -> List<InternPeriodeOvergangsstønad> = { personIdent, aktørId -> emptyList() }
+        hentPerioderMedFullOvergangsstønad: (personIdent: String, aktør: Aktør) -> List<InternPeriodeOvergangsstønad> = { personIdent, aktørId -> emptyList() }
     ): TilkjentYtelse {
         val identBarnMap = personopplysningGrunnlag.barna
             .associateBy { it.personIdent.ident }
@@ -78,7 +78,7 @@ object TilkjentYtelseUtils {
                                 behandlingId = vilkårsvurdering.behandling.id,
                                 tilkjentYtelse = tilkjentYtelse,
                                 personIdent = person.personIdent.ident,
-                                aktørId = person.aktørId,
+                                aktør = person.aktør,
                                 stønadFom = beløpsperiode.fraOgMed,
                                 stønadTom = beløpsperiode.tilOgMed,
                                 kalkulertUtbetalingsbeløp = beløpsperiode.sats.avrundetHeltallAvProsent(prosent),
@@ -116,7 +116,7 @@ object TilkjentYtelseUtils {
                     perioderMedFullOvergangsstønad = perioderMedFullOvergangsstønad,
                     andelerSøker = andelerTilkjentYtelseSøker,
                     barnasFødselsdatoer = personopplysningGrunnlag.barna.map { it.fødselsdato },
-                    søkerAktørId = personopplysningGrunnlag.søker.hentAktørId()
+                    søkerAktør = personopplysningGrunnlag.søker.hentAktørId()
                 )
         } else emptyList()
 

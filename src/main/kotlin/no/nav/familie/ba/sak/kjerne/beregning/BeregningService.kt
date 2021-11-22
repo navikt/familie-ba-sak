@@ -119,7 +119,7 @@ class BeregningService(
             ) { personIdent, aktørId ->
                 småbarnstilleggService.hentOgLagrePerioderMedFullOvergangsstønad(
                     personIdent = personIdent,
-                    aktørId = aktørId,
+                    aktør = aktørId,
                     behandlingId = behandling.id
                 )
             }

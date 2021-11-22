@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.common.nesteMåned
+import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.tilfeldigPerson
@@ -55,7 +56,8 @@ class SmåbarnstilleggUtilsTest {
                     person = tilfeldigPerson(personIdent = PersonIdent(personIdent))
                 )
             ),
-            barnasFødselsdatoer = listOf(LocalDate.now().minusYears(2))
+            barnasFødselsdatoer = listOf(LocalDate.now().minusYears(2)),
+            søkerAktør = randomAktørId()
         )
 
         assertTrue(påvirkerFagsak)
@@ -64,6 +66,7 @@ class SmåbarnstilleggUtilsTest {
     @Test
     fun `Skal svare false om at nye perioder med full OS påvirker behandling`() {
         val personIdent = randomFnr()
+        val søkerAktørId = randomAktørId()
 
         val påvirkerFagsak = vedtakOmOvergangsstønadPåvirkerFagsak(
             småbarnstilleggBarnetrygdGenerator = SmåbarnstilleggBarnetrygdGenerator(
@@ -82,16 +85,19 @@ class SmåbarnstilleggUtilsTest {
                     fom = YearMonth.now().minusMonths(10),
                     tom = YearMonth.now().plusMonths(6),
                     ytelseType = YtelseType.UTVIDET_BARNETRYGD,
-                    person = tilfeldigPerson(personIdent = PersonIdent(personIdent))
+                    person = tilfeldigPerson(personIdent = PersonIdent(personIdent)),
+                    aktør = søkerAktørId,
                 ),
                 lagAndelTilkjentYtelse(
                     fom = YearMonth.now().minusMonths(10),
                     tom = YearMonth.now().plusMonths(6),
                     ytelseType = YtelseType.SMÅBARNSTILLEGG,
-                    person = tilfeldigPerson(personIdent = PersonIdent(personIdent))
+                    person = tilfeldigPerson(personIdent = PersonIdent(personIdent)),
+                    aktør = søkerAktørId,
                 )
             ),
-            barnasFødselsdatoer = listOf(LocalDate.now().minusYears(2))
+            barnasFødselsdatoer = listOf(LocalDate.now().minusYears(2)),
+            søkerAktør = søkerAktørId
         )
 
         assertFalse(påvirkerFagsak)

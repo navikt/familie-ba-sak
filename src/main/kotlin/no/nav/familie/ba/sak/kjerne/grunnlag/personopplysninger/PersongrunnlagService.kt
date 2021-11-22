@@ -227,7 +227,7 @@ class PersongrunnlagService(
         val personinfo =
             if (enkelPersonInfo) personopplysningerService.hentPersoninfoEnkel(ident)
             else personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(ident)
-        
+
         val aktørId = personidentService.hentOgLagreAktørId(ident)
 
         return Person(
@@ -235,7 +235,7 @@ class PersongrunnlagService(
             type = personType,
             personopplysningGrunnlag = personopplysningGrunnlag,
             fødselsdato = personinfo.fødselsdato,
-            aktørId = aktørId,
+            aktør = aktørId,
             navn = personinfo.navn ?: "",
             kjønn = personinfo.kjønn ?: Kjønn.UKJENT,
             målform = målform

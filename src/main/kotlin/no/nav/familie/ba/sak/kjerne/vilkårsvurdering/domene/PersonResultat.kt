@@ -5,7 +5,7 @@ import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.isSameOrBefore
-import no.nav.familie.ba.sak.kjerne.aktørid.AktørId
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat.Companion.VilkårResultatComparator
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.time.LocalDate
@@ -46,7 +46,7 @@ class PersonResultat(
     val personIdent: String,
 
     @OneToOne(optional = false) @JoinColumn(name = "fk_aktoer_id", nullable = false, updatable = false)
-    val aktørId: AktørId,
+    val aktør: Aktør,
 
     @OneToMany(
         fetch = FetchType.EAGER,
@@ -115,7 +115,7 @@ class PersonResultat(
         val nyttPersonResultat = PersonResultat(
             vilkårsvurdering = vilkårsvurdering,
             personIdent = personIdent,
-            aktørId = aktørId
+            aktør = aktør
         )
         val kopierteVilkårResultater: SortedSet<VilkårResultat> =
             vilkårResultater.map { it.kopierMedParent(nyttPersonResultat) }.toSortedSet(VilkårResultatComparator)

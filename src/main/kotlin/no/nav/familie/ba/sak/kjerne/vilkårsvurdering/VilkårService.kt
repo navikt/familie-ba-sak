@@ -247,7 +247,7 @@ class VilkårService(
             val personResultat = PersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
                 personIdent = person.personIdent.ident,
-                aktørId = person.hentAktørId()
+                aktør = person.hentAktørId()
             )
 
             val vilkårForPerson = Vilkår.hentVilkårFor(person.type)
@@ -278,7 +278,7 @@ class VilkårService(
             val personResultat = PersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
                 personIdent = person.personIdent.ident,
-                aktørId = person.hentAktørId()
+                aktør = person.hentAktørId()
             )
 
             val vilkårForPerson = Vilkår.hentVilkårFor(
@@ -343,7 +343,7 @@ class VilkårService(
             val personResultat = PersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
                 personIdent = person.personIdent.ident,
-                aktørId = person.hentAktørId()
+                aktør = person.hentAktørId()
             )
 
             val vilkårForPerson = Vilkår.hentVilkårFor(person.type)
@@ -401,7 +401,7 @@ class VilkårService(
             val personResultat = PersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
                 personIdent = person.personIdent.ident,
-                aktørId = person.hentAktørId()
+                aktør = person.hentAktørId()
             )
 
             val vilkårTyperForPerson = Vilkår.hentVilkårFor(person.type)

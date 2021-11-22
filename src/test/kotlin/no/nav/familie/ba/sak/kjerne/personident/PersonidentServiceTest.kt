@@ -8,8 +8,6 @@ import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.IdentInformasjon
-import no.nav.familie.ba.sak.kjerne.aktørid.AktørId
-import no.nav.familie.ba.sak.kjerne.aktørid.AktørIdRepository
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -46,8 +44,8 @@ internal class PersonidentServiceTest() {
         every { aktørIdRepository.findByIdOrNull(aktørId.aktørId) }.answers { null }
 
         every { aktørIdRepository.save(any()) }.answers {
-            AktørId(aktørId = aktørId.aktørId).also {
-                it.personidenter.add(Personident(fødselsnummer = personidentAktiv, aktørId = it))
+            Aktør(aktørId = aktørId.aktørId).also {
+                it.personidenter.add(Personident(fødselsnummer = personidentAktiv, aktør = it))
             }
         }
 
@@ -55,10 +53,10 @@ internal class PersonidentServiceTest() {
 
         Assertions.assertEquals(aktørId.aktørId, response.single().aktørId)
 
-        val slotAktørId = slot<AktørId>()
-        verify(exactly = 1) { aktørIdRepository.save(capture(slotAktørId)) }
-        Assertions.assertEquals(aktørId.aktørId, slotAktørId.captured.aktørId)
-        Assertions.assertEquals(personidentAktiv, slotAktørId.captured.personidenter.single().fødselsnummer)
+        val slotAktør = slot<Aktør>()
+        verify(exactly = 1) { aktørIdRepository.save(capture(slotAktør)) }
+        Assertions.assertEquals(aktørId.aktørId, slotAktør.captured.aktørId)
+        Assertions.assertEquals(personidentAktiv, slotAktør.captured.personidenter.single().fødselsnummer)
     }
 
     @Test
@@ -70,15 +68,15 @@ internal class PersonidentServiceTest() {
 
         every { personidentRepository.findByIdOrNull(personidentAktiv) }.answers { null }
         every { aktørIdRepository.findByIdOrNull(aktørId.aktørId) }.answers {
-            AktørId(
+            Aktør(
                 aktørId.aktørId,
-                mutableSetOf(Personident(fødselsnummer = personidentHistorisk, aktørId = aktørId, aktiv = true))
+                mutableSetOf(Personident(fødselsnummer = personidentHistorisk, aktør = aktørId, aktiv = true))
             )
         }
 
         every { personidentRepository.save(any()) } answers {
             Personident(
-                aktørId = aktørId,
+                aktør = aktørId,
                 fødselsnummer = personidentAktiv,
                 aktiv = true
             )
@@ -94,12 +92,12 @@ internal class PersonidentServiceTest() {
         verify(exactly = 2) { personidentRepository.save(capture(slotPersonident)) }
 
         Assertions.assertEquals(false, slotPersonident.first().aktiv)
-        Assertions.assertEquals(aktørId.aktørId, slotPersonident.first().aktørId.aktørId)
+        Assertions.assertEquals(aktørId.aktørId, slotPersonident.first().aktør.aktørId)
         Assertions.assertEquals(personidentHistorisk, slotPersonident.first().fødselsnummer)
         Assertions.assertEquals(null, slotPersonident.first().gjelderTil)
 
         Assertions.assertEquals(true, slotPersonident.last().aktiv)
-        Assertions.assertEquals(aktørId.aktørId, slotPersonident.last().aktørId.aktørId)
+        Assertions.assertEquals(aktørId.aktørId, slotPersonident.last().aktør.aktørId)
         Assertions.assertEquals(personidentAktiv, slotPersonident.last().fødselsnummer)
         Assertions.assertEquals(null, slotPersonident.last().gjelderTil)
     }
@@ -112,7 +110,7 @@ internal class PersonidentServiceTest() {
         val personidentService = PersonidentService(personidentRepository, aktørIdRepository, personopplysningerService)
 
         every { personidentRepository.findByIdOrNull(personidentAktiv) }.answers {
-            Personident(fødselsnummer = personidentAktiv, aktørId = aktørId, aktiv = true)
+            Personident(fødselsnummer = personidentAktiv, aktør = aktørId, aktiv = true)
         }
 
         val response = personidentService.hentOgLagreAktørIder(listOf(personidentAktiv))

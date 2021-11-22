@@ -7,8 +7,6 @@ import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
-import no.nav.familie.ba.sak.kjerne.aktørid.AktørId
-import no.nav.familie.ba.sak.kjerne.aktørid.AktørIdRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
@@ -22,6 +20,8 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.personident.AktørIdRepository
 import no.nav.familie.ba.sak.kjerne.personident.Personident
 import no.nav.familie.eksterne.kontrakter.skatteetaten.SkatteetatenPeriode
 import no.nav.familie.eksterne.kontrakter.skatteetaten.SkatteetatenPerioder
@@ -71,7 +71,7 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
 
     data class PerioderTestData(
         val fnr: String,
-        val aktørId: AktørId,
+        val aktør: Aktør,
         val endretDato: LocalDateTime,
         val perioder: List<Triple<LocalDateTime, LocalDateTime, SkatteetatenPeriode.Delingsprosent>>
     )
@@ -88,7 +88,7 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
             // Excluded because of the vedtak is older
             PerioderTestData(
                 fnr = duplicatedFnr,
-                aktørId = duplicatedAktørId,
+                aktør = duplicatedAktørId,
                 endretDato = LocalDateTime.of(2020, 11, 5, 12, 0),
                 perioder = listOf(
                     Triple(
@@ -101,7 +101,7 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
             // Included
             PerioderTestData(
                 fnr = duplicatedFnr,
-                aktørId = duplicatedAktørId,
+                aktør = duplicatedAktørId,
                 endretDato = LocalDateTime.of(2020, 11, 6, 12, 0),
                 perioder = listOf(
                     Triple(
@@ -119,7 +119,7 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
             // Excluded because the stonad period is earlier than the specified year
             PerioderTestData(
                 fnr = "00000000002",
-                aktørId = randomAktørId(),
+                aktør = randomAktørId(),
                 endretDato = LocalDateTime.of(2020, 8, 5, 12, 0),
                 perioder = listOf(
                     Triple(
@@ -132,7 +132,7 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
             // Excluded because the stonad period is later than the specified year
             PerioderTestData(
                 fnr = "00000000003",
-                aktørId = randomAktørId(),
+                aktør = randomAktørId(),
                 endretDato = LocalDateTime.of(2020, 8, 5, 12, 0),
                 perioder = listOf(
                     Triple(
@@ -145,7 +145,7 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
             // Excluded because the person ident is not in the provided list
             PerioderTestData(
                 fnr = excludedFnr,
-                aktørId = excludedAktørId,
+                aktør = excludedAktørId,
                 endretDato = LocalDateTime.of(2020, 8, 5, 12, 0),
                 perioder = listOf(
                     Triple(
@@ -162,7 +162,7 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
             // Excluded because the person ident can be found in ba-sak
             PerioderTestData(
                 fnr = duplicatedFnr,
-                aktørId = duplicatedAktørId,
+                aktør = duplicatedAktørId,
                 endretDato = LocalDateTime.of(2020, 9, 5, 12, 0),
                 perioder = listOf(
                     Triple(
@@ -175,7 +175,7 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
             // Included
             PerioderTestData(
                 fnr = "00000000010",
-                aktørId = randomAktørId(),
+                aktør = randomAktørId(),
                 endretDato = LocalDateTime.of(2020, 8, 5, 12, 0),
                 perioder = listOf(
                     Triple(
@@ -250,7 +250,7 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
         val testDataBaSak = arrayOf(
             PerioderTestData(
                 fnr = fnr,
-                aktørId = aktørId,
+                aktør = aktørId,
                 endretDato = LocalDateTime.of(2020, 11, 6, 12, 0),
                 perioder = listOf(
                     Triple(
@@ -338,17 +338,17 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
         val aktørId = randomAktørId()
         val fødselsnummer = randomFnr()
         aktørIdRepository.save(
-            AktørId(aktørId = aktørId.aktørId).also {
+            Aktør(aktørId = aktørId.aktørId).also {
                 it.personidenter.add(
                     Personident(
                         fødselsnummer = fødselsnummer,
-                        aktørId = it
+                        aktør = it
                     )
                 )
             }
         )
 
-        val fagsak = Fagsak(aktørId = aktørId)
+        val fagsak = Fagsak(aktør = aktørId)
         fagsakRepository.saveAndFlush(fagsak)
 
         val behandling = Behandling(
@@ -372,7 +372,7 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
                         behandlingId = it.behandling.id,
                         tilkjentYtelse = it,
                         personIdent = tilkjentYtelse.fnr,
-                        aktørId = aktørId,
+                        aktør = aktørId,
                         kalkulertUtbetalingsbeløp = 1000,
                         stønadFom = YearMonth.of(p.first.year, p.first.month),
                         stønadTom = YearMonth.of(p.second.year, p.second.month),

@@ -106,7 +106,7 @@ class FagsakService(
 
             val aktørId = personidentService.hentOgLagreAktørId(personIdent.ident)
 
-            fagsak = Fagsak(aktørId = aktørId).also {
+            fagsak = Fagsak(aktør = aktørId).also {
                 it.søkerIdenter = setOf(FagsakPerson(personIdent = personIdent, fagsak = it))
                 lagre(it)
             }

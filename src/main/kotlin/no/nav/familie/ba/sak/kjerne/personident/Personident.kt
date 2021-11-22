@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.personident
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import no.nav.familie.ba.sak.common.BaseEntitet
-import no.nav.familie.ba.sak.kjerne.aktørid.AktørId
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.time.LocalDateTime
 import java.util.Objects
@@ -25,7 +24,7 @@ data class Personident(
     @JsonIgnore
     @ManyToOne(optional = false)
     @JoinColumn(name = "fk_aktoer_id", nullable = false, updatable = false)
-    val aktørId: AktørId,
+    val aktør: Aktør,
 
     @Column(name = "aktiv", nullable = false)
     var aktiv: Boolean = true,
@@ -36,7 +35,7 @@ data class Personident(
 ) : BaseEntitet() {
 
     override fun toString(): String {
-        return """Personident(aktørId=${aktørId.aktørId},
+        return """Personident(aktørId=${aktør.aktørId},
                         |aktiv=$aktiv
                         |gjelderTil=$gjelderTil)""".trimMargin()
     }

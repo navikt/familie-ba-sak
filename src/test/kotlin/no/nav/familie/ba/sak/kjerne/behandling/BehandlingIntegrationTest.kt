@@ -333,7 +333,7 @@ class BehandlingIntegrationTest(
             lagPersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
                 fnr = søkerFnr,
-                aktørId = søkerAktørId,
+                aktør = søkerAktørId,
                 resultat = Resultat.OPPFYLT,
                 periodeFom = januar2020.minusMonths(1).toLocalDate(),
                 periodeTom = stønadTom.toLocalDate(),
@@ -343,7 +343,7 @@ class BehandlingIntegrationTest(
             lagPersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
                 fnr = barn1Fnr,
-                aktørId = barn1AktørId,
+                aktør = barn1AktørId,
                 resultat = Resultat.OPPFYLT,
                 periodeFom = januar2020.minusMonths(1).toLocalDate(),
                 periodeTom = stønadTom.toLocalDate(),
@@ -353,7 +353,7 @@ class BehandlingIntegrationTest(
             lagPersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
                 fnr = barn2Fnr,
-                aktørId = barn2AktørId,
+                aktør = barn2AktørId,
                 resultat = Resultat.OPPFYLT,
                 periodeFom = oktober2020.minusMonths(1).toLocalDate(),
                 periodeTom = stønadTom.toLocalDate(),

@@ -141,7 +141,7 @@ class VedtakServiceTest(
         personResultat = PersonResultat(
             vilkårsvurdering = vilkårsvurdering,
             personIdent = personIdent,
-            aktørId = personAktørId
+            aktør = personAktørId
         )
 
         vilkårResultat1 = VilkårResultat(

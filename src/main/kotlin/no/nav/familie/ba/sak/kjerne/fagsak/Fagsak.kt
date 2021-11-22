@@ -1,8 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.fagsak
 
 import no.nav.familie.ba.sak.common.BaseEntitet
-import no.nav.familie.ba.sak.kjerne.aktørid.AktørId
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import java.util.Objects
 import javax.persistence.CascadeType
 import javax.persistence.Column
@@ -33,7 +33,7 @@ data class Fagsak(
         nullable = false,
         updatable = false
     )
-    val aktørId: AktørId,
+    val aktør: Aktør,
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)

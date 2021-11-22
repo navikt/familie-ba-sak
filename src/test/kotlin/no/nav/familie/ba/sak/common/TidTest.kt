@@ -101,7 +101,7 @@ internal class TidTest {
         val personResultat = PersonResultat(
             vilkårsvurdering = vilkårsvurdering,
             personIdent = personIdent,
-            aktørId = personAktørId
+            aktør = personAktørId
         )
 
         val førsteVilkårResultat = VilkårResultat(

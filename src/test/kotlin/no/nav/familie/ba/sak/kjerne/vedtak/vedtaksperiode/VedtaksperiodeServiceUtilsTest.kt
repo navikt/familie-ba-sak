@@ -315,7 +315,7 @@ class VedtaksperiodeServiceUtilsTest {
         val vedtaksperiodeMedBegrunnelser = lagVedtaksperiodeMedBegrunnelser(type = Vedtaksperiodetype.UTBETALING)
         val vilkårsvurdering = lagVilkårsvurdering(
             søkerFnr = søker.personIdent.ident,
-            søkerAktørId = søker.hentAktørId(),
+            søkerAktør = søker.hentAktørId(),
             behandling = behandling,
             resultat = Resultat.OPPFYLT
         )
@@ -356,7 +356,7 @@ class VedtaksperiodeServiceUtilsTest {
         )
         val vilkårsvurdering = lagVilkårsvurdering(
             søkerFnr = søker.personIdent.ident,
-            søkerAktørId = søker.hentAktørId(),
+            søkerAktør = søker.hentAktørId(),
             behandling = behandling,
             resultat = Resultat.OPPFYLT
         )

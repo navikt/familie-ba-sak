@@ -8,8 +8,8 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.internal.ForelderBarnRelasjonMask
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.IdentInformasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PersonInfo
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.VergeData
-import no.nav.familie.ba.sak.kjerne.aktørid.AktørId
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
@@ -69,10 +69,10 @@ class PersonopplysningerService(
         return pdlRestClient.hentPerson(personIdent, personInfoQuery)
     }
 
-    fun hentAktivAktørId(ident: Ident): AktørId {
+    fun hentAktivAktørId(ident: Ident): Aktør {
         val aktørId = hentAktørId(ident.ident)
         if (aktørId.isEmpty()) error("Finner ingen aktiv aktørId for ident")
-        return AktørId(aktørId.first())
+        return Aktør(aktørId.first())
     }
 
     fun hentAktørId(personIdent: String): List<String> {
