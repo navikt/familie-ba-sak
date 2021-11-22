@@ -364,8 +364,8 @@ private fun UtvidetVedtaksperiodeMedBegrunnelser.hentFortsattInnvilgetBrevPeriod
     begrunnelserOgFritekster: List<Begrunnelse>
 ): FortsattInnvilgetBrevPeriode {
     val erAutobrev = this.begrunnelser.any { vedtaksbegrunnelse ->
-        vedtaksbegrunnelse.vedtakBegrunnelseSpesifikasjon == VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR ||
-            vedtaksbegrunnelse.vedtakBegrunnelseSpesifikasjon == VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR
+        vedtaksbegrunnelse.vedtakBegrunnelseSpesifikasjon == VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR_AUTOVEDTAK ||
+            vedtaksbegrunnelse.vedtakBegrunnelseSpesifikasjon == VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR_AUTOVEDTAK
     }
     val fom = if (erAutobrev && this.fom != null) {
         val fra = if (målform == Målform.NB) "Fra" else "Frå"

@@ -314,6 +314,14 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
         override val sanityApiNavn = "reduksjonUnder6Aar"
     },
+    REDUKSJON_UNDER_18_ÅR_AUTOVEDTAK {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "reduksjonAutovedtakBarn18Aar"
+    },
+    REDUKSJON_UNDER_6_ÅR_AUTOVEDTAK {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "reduksjonAutovedtakBarn6Aar"
+    },
     REDUKSJON_DELT_BOSTED_ENIGHET {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
         override val sanityApiNavn = "reduksjonDeltBostedEnighet"
