@@ -19,10 +19,14 @@ class Utbetalingsmetrikker(
 
     @Scheduled(initialDelay = 60000, fixedDelay = OPPDATERINGSFREKVENS)
     fun åpneBehandlinger() {
-        if (LeaderClient.isLeader() != true) return
         val totalUtbetalingInneværendeMåned = behandlingRepository.hentTotalUtbetalingInneværendeMåned()
+        if (LeaderClient.isLeader() != true) {
+            logger.info("Node er ikke leader, teller ikke metrikk. Total utbetaling: $totalUtbetalingInneværendeMåned")
+            return
+        } else {
+            logger.info("Node er leader, teller metrikk. Total utbetaling: $totalUtbetalingInneværendeMåned")
+        }
 
-        logger.info("Total utbetaling for inneværende måned: $totalUtbetalingInneværendeMåned")
         val rows = listOf(
             MultiGauge.Row.of(
                 Tags.of(
