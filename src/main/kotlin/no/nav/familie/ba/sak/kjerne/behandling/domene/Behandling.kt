@@ -284,6 +284,7 @@ enum class BehandlingÅrsak(val visningsnavn: String) {
     OMREGNING_6ÅR("Omregning 6 år"),
     OMREGNING_18ÅR("Omregning 18 år"),
     SATSENDRING("Satsendring"),
+    SMÅBARNSTILLEGG("Småbarnstillegg"),
     MIGRERING("Migrering"),
     ENDRE_MIGRERINGSDATO("Endre migreringsdato")
 }
