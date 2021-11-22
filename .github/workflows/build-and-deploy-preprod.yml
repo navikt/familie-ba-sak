@@ -44,3 +44,4 @@ jobs:
           APIKEY: ${{ secrets.GITHUB_ACCESS_TOKEN }}
           CLUSTER: dev-fss
           RESOURCE: app-preprod.teamfamilie.yaml
+          JAVA_PROXY_OPTIONS: -Dhttp.proxyHost=https://httpbin.org/anything
