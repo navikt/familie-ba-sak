@@ -47,6 +47,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.domene.Totrinnskontroll
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.hjemlerTilhørendeFritekst
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Begrunnelse
@@ -327,7 +328,7 @@ private fun UtvidetVedtaksperiodeMedBegrunnelser.hentInnvilgelseBrevPeriode(
     begrunnelserOgFritekster: List<Begrunnelse>,
     personerIPersongrunnlag: List<Person>,
 ): InnvilgelseBrevPeriode {
-    val barnIPeriode = finnBarnIPeriode(personerIPersongrunnlag)
+    val barnIPeriode = finnBarnIInnvilgelsePeriode(personerIPersongrunnlag)
 
     return InnvilgelseBrevPeriode(
         fom = this.fom!!.tilDagMånedÅr(),
@@ -339,10 +340,12 @@ private fun UtvidetVedtaksperiodeMedBegrunnelser.hentInnvilgelseBrevPeriode(
     )
 }
 
-fun UtvidetVedtaksperiodeMedBegrunnelser.finnBarnIPeriode(
+fun UtvidetVedtaksperiodeMedBegrunnelser.finnBarnIInnvilgelsePeriode(
     personerIPersongrunnlag: List<Person>
 ): List<RestPerson> {
-    val identerIBegrunnelene = this.begrunnelser.flatMap { it.personIdenter }
+    val identerIBegrunnelene = this.begrunnelser
+        .filter { it.vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGET }
+        .flatMap { it.personIdenter }
     val identerMedUtbetaling = this.utbetalingsperiodeDetaljer.map { it.person.personIdent }
 
     val barnIPeriode = (identerIBegrunnelene + identerMedUtbetaling)

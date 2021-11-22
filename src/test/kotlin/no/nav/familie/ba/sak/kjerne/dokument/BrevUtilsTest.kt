@@ -493,7 +493,7 @@ internal class BrevUtilsTest {
 
         val personerIPersongrunnlag = listOf(barn1, barn2, barn3, søker)
 
-        val barnIPeriode = utvidetVedtaksperiodeMedBegrunnelser.finnBarnIPeriode(personerIPersongrunnlag)
+        val barnIPeriode = utvidetVedtaksperiodeMedBegrunnelser.finnBarnIInnvilgelsePeriode(personerIPersongrunnlag)
 
         Assertions.assertEquals(3, barnIPeriode.size)
         Assertions.assertTrue(
