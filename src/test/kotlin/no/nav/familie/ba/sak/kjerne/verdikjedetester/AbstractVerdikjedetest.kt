@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
 import no.nav.familie.ba.sak.WebSpringAuthTestRunner
 import no.nav.familie.ba.sak.integrasjoner.`ef-sak`.EfSakRestClient
+import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.MockserverKlient
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContextInitializer
@@ -51,8 +52,9 @@ class VerdikjedetesterPropertyOverrideContextInitializer :
 )
 @ContextConfiguration(initializers = [VerdikjedetesterPropertyOverrideContextInitializer::class])
 abstract class AbstractVerdikjedetest(
-    efSakRestClient: EfSakRestClient? = null
-) : WebSpringAuthTestRunner(efSakRestClient) {
+    efSakRestClient: EfSakRestClient? = null,
+    økonomiKlient: ØkonomiKlient? = null
+) : WebSpringAuthTestRunner(efSakRestClient = efSakRestClient, økonomiKlient = økonomiKlient) {
 
     @Autowired
     lateinit var restOperations: RestOperations
