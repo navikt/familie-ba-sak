@@ -58,7 +58,7 @@ object TilkjentYtelseUtils {
         )
 
         val andelerTilkjentYtelseBarna = innvilgedePeriodeResultatBarna
-            .flatMap { periodeResultatBarn ->
+            .flatMap { periodeResultatBarn: PeriodeResultat ->
                 relevanteSøkerPerioder
                     .flatMap { overlappendePerioderesultatSøker ->
                         val person = identBarnMap[periodeResultatBarn.personIdent]

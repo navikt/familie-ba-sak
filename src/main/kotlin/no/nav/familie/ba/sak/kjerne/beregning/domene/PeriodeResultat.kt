@@ -47,14 +47,17 @@ data class PeriodeResultat(
             (periodeTom == null || annetPeriodeResultat.periodeFom == null || periodeTom >= annetPeriodeResultat.periodeFom)
     }
 
-    fun erDeltBosted() = vilkårResultater.firstOrNull { it.vilkårType == Vilkår.BOR_MED_SØKER }?.erDeltBosted ?: false
+    fun erDeltBosted() =
+        vilkårResultater.firstOrNull { it.vilkårType == Vilkår.BOR_MED_SØKER }?.utdypendeVilkårsvurderinger?.contains(
+            UtdypendeVilkårsvurdering.DELT_BOSTED
+        ) ?: false
 }
 
 data class PeriodeVilkår(
     val vilkårType: Vilkår,
     val resultat: Resultat,
     var begrunnelse: String,
-    var erDeltBosted: Boolean,
+    val utdypendeVilkårsvurderinger: List<UtdypendeVilkårsvurdering>,
     val periodeFom: LocalDate?,
     val periodeTom: LocalDate?
 )
@@ -114,7 +117,7 @@ fun PersonResultat.tilPeriodeResultater(brukMåned: Boolean, inkluderUtvidet: Bo
                     vilkårType = it.vilkårType,
                     resultat = it.resultat,
                     begrunnelse = it.begrunnelse,
-                    erDeltBosted = it.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.DELT_BOSTED),
+                    utdypendeVilkårsvurderinger = it.utdypendeVilkårsvurderinger,
                     periodeFom = if (brukMåned) it.periodeFom?.withDayOfMonth(1) else it.periodeFom,
                     periodeTom = if (brukMåned) it.periodeTom?.sisteDagIMåned() else it.periodeTom
                 )
