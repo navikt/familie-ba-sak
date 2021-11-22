@@ -15,7 +15,6 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
-import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -60,23 +59,6 @@ class SmåbarnstilleggUtilsTest {
         )
 
         assertTrue(påvirkerFagsak)
-    }
-
-    @Test
-    fun `Skal velge riktig begrunnelse basert på vedtaksperiodetype`() {
-        assertEquals(
-            VedtakBegrunnelseSpesifikasjon.INNVILGET_SMÅBARNSTILLEGG,
-            hentVedtakBegrunnelseSpesifikasjonForSmåbarnstillegg(
-                ytelseTyper = listOf(
-                    YtelseType.UTVIDET_BARNETRYGD,
-                    YtelseType.SMÅBARNSTILLEGG
-                )
-            )
-        )
-        assertEquals(
-            VedtakBegrunnelseSpesifikasjon.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_FULL_OVERGANGSSTØNAD,
-            hentVedtakBegrunnelseSpesifikasjonForSmåbarnstillegg(ytelseTyper = listOf(YtelseType.UTVIDET_BARNETRYGD))
-        )
     }
 
     @Test

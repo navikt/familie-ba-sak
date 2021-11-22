@@ -9,7 +9,6 @@ import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
-import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.erUlike
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
@@ -51,12 +50,6 @@ fun vedtakOmOvergangsstønadPåvirkerFagsak(
     return forrigeSøkersSmåbarnstilleggAndeler.erUlike(nyeSmåbarnstilleggAndeler)
 }
 
-fun hentVedtakBegrunnelseSpesifikasjonForSmåbarnstillegg(ytelseTyper: List<YtelseType>): VedtakBegrunnelseSpesifikasjon {
-    return if (ytelseTyper.contains(YtelseType.SMÅBARNSTILLEGG)) VedtakBegrunnelseSpesifikasjon.INNVILGET_SMÅBARNSTILLEGG
-    else if (ytelseTyper.contains(YtelseType.UTVIDET_BARNETRYGD)) VedtakBegrunnelseSpesifikasjon.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_FULL_OVERGANGSSTØNAD
-    else error("Begrunnelse for småbarnstillegg er ikke støttet for ytelseTyper=$ytelseTyper")
-}
-
 fun hentInnvilgedeOgReduserteAndelerSmåbarnstillegg(
     forrigeSmåbarnstilleggAndeler: List<AndelTilkjentYtelse>,
     nyeSmåbarnstilleggAndeler: List<AndelTilkjentYtelse>,
@@ -95,10 +88,10 @@ fun kanAutomatiskIverksetteSmåbarnstillegg(
 ): Boolean {
     // Kan ikke automatisk innvilge perioder mer enn en måned frem i tid
     if ((innvilgedeMånedPerioder + reduserteMånedPerioder).any {
-        it.fom.isAfter(
+            it.fom.isAfter(
                 YearMonth.now().nesteMåned()
             )
-    }
+        }
     ) return false
 
     return innvilgedeMånedPerioder.all {
