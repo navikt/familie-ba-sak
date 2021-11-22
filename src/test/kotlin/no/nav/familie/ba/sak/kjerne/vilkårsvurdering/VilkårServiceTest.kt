@@ -18,6 +18,7 @@ import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurderingType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
@@ -48,6 +49,10 @@ class VilkårServiceTest(
 
     @Autowired
     private val databaseCleanupService: DatabaseCleanupService,
+
+    @Autowired
+    private val personidentService: PersonidentService,
+
 ) : AbstractSpringIntegrationTest() {
 
     @BeforeAll
@@ -66,7 +71,11 @@ class VilkårServiceTest(
             behandlingService.hentSisteBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id)
 
         val personopplysningGrunnlag =
-            lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
+            lagTestPersonopplysningGrunnlag(
+                behandling.id, fnr, listOf(barnFnr),
+                søkerAktørId = personidentService.hentOgLagreAktørId(fnr),
+                barnAktørId = personidentService.hentOgLagreAktørIder(listOf(barnFnr))
+            )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
         val vilkårsvurdering = vilkårService.initierVilkårsvurderingForBehandling(
@@ -95,7 +104,11 @@ class VilkårServiceTest(
             behandlingService.hentSisteBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id)
 
         val personopplysningGrunnlag =
-            lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
+            lagTestPersonopplysningGrunnlag(
+                behandling.id, fnr, listOf(barnFnr),
+                søkerAktørId = personidentService.hentOgLagreAktørId(fnr),
+                barnAktørId = personidentService.hentOgLagreAktørIder(listOf(barnFnr))
+            )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
         val vilkårsvurdering = vilkårService.initierVilkårsvurderingForBehandling(
@@ -141,7 +154,11 @@ class VilkårServiceTest(
             behandlingService.hentSisteBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id)
 
         val personopplysningGrunnlag =
-            lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
+            lagTestPersonopplysningGrunnlag(
+                behandling.id, fnr, listOf(barnFnr),
+                søkerAktørId = personidentService.hentOgLagreAktørId(fnr),
+                barnAktørId = personidentService.hentOgLagreAktørIder(listOf(barnFnr))
+            )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
         val vilkårsvurdering = vilkårService.initierVilkårsvurderingForBehandling(
@@ -152,7 +169,13 @@ class VilkårServiceTest(
         Assertions.assertEquals(2, vilkårsvurdering.personResultater.size)
 
         val personopplysningGrunnlagMedEkstraBarn =
-            lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr, barnFnr2))
+            lagTestPersonopplysningGrunnlag(
+                behandling.id,
+                fnr,
+                listOf(barnFnr, barnFnr2),
+                søkerAktørId = personidentService.hentOgLagreAktørId(fnr),
+                barnAktørId = personidentService.hentOgLagreAktørIder(listOf(barnFnr, barnFnr2))
+            )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlagMedEkstraBarn)
 
         val behandlingResultatMedEkstraBarn = vilkårService.initierVilkårsvurderingForBehandling(
@@ -172,7 +195,11 @@ class VilkårServiceTest(
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
 
         val personopplysningGrunnlag =
-            lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
+            lagTestPersonopplysningGrunnlag(
+                behandling.id, fnr, listOf(barnFnr),
+                søkerAktørId = personidentService.hentOgLagreAktørId(fnr),
+                barnAktørId = personidentService.hentOgLagreAktørIder(listOf(barnFnr))
+            )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
     }
 
@@ -187,7 +214,11 @@ class VilkårServiceTest(
             behandlingService.hentSisteBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id)
 
         val personopplysningGrunnlag =
-            lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
+            lagTestPersonopplysningGrunnlag(
+                behandling.id, fnr, listOf(barnFnr),
+                søkerAktørId = personidentService.hentOgLagreAktørId(fnr),
+                barnAktørId = personidentService.hentOgLagreAktørIder(listOf(barnFnr))
+            )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
         val vilkårsvurdering = vilkårService.initierVilkårsvurderingForBehandling(
@@ -228,7 +259,11 @@ class VilkårServiceTest(
             behandlingService.hentSisteBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id)
 
         val personopplysningGrunnlag =
-            lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
+            lagTestPersonopplysningGrunnlag(
+                behandling.id, fnr, listOf(barnFnr),
+                søkerAktørId = personidentService.hentOgLagreAktørId(fnr),
+                barnAktørId = personidentService.hentOgLagreAktørIder(listOf(barnFnr))
+            )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
         val vilkårsvurdering = vilkårService.initierVilkårsvurderingForBehandling(
@@ -264,7 +299,11 @@ class VilkårServiceTest(
         val behandling2 = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
 
         val personopplysningGrunnlag2 =
-            lagTestPersonopplysningGrunnlag(behandling2.id, fnr, listOf(barnFnr, barnFnr2))
+            lagTestPersonopplysningGrunnlag(
+                behandling2.id, fnr, listOf(barnFnr, barnFnr2),
+                søkerAktørId = personidentService.hentOgLagreAktørId(fnr),
+                barnAktørId = personidentService.hentOgLagreAktørIder(listOf(barnFnr, barnFnr2))
+            )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag2)
 
         val vilkårsvurdering2 = vilkårService.initierVilkårsvurderingForBehandling(
@@ -298,7 +337,11 @@ class VilkårServiceTest(
             behandlingService.hentSisteBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id)
 
         val personopplysningGrunnlag =
-            lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
+            lagTestPersonopplysningGrunnlag(
+                behandling.id, fnr, listOf(barnFnr),
+                søkerAktørId = personidentService.hentOgLagreAktørId(fnr),
+                barnAktørId = personidentService.hentOgLagreAktørIder(listOf(barnFnr))
+            )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
         val vilkårsvurdering = vilkårService.initierVilkårsvurderingForBehandling(
@@ -319,7 +362,11 @@ class VilkårServiceTest(
         val behandling2 = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
 
         val personopplysningGrunnlag2 =
-            lagTestPersonopplysningGrunnlag(behandling2.id, fnr, listOf(barnFnr, barnFnr2))
+            lagTestPersonopplysningGrunnlag(
+                behandling2.id, fnr, listOf(barnFnr, barnFnr2),
+                søkerAktørId = personidentService.hentOgLagreAktørId(fnr),
+                barnAktørId = personidentService.hentOgLagreAktørIder(listOf(barnFnr, barnFnr2))
+            )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag2)
 
         val behandlingResultat2 = vilkårService.initierVilkårsvurderingForBehandling(

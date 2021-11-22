@@ -4,7 +4,6 @@ import io.mockk.every
 import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
-import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.ClientMocks
@@ -17,6 +16,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
+import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
@@ -64,6 +64,9 @@ class FerdigstillBehandlingTaskTest : AbstractSpringIntegrationTest() {
     @Autowired
     lateinit var vedtaksperiodeService: VedtaksperiodeService
 
+    @Autowired
+    lateinit var personidentService: PersonidentService
+
     @BeforeEach
     fun init() {
         databaseCleanupService.truncate()
@@ -77,7 +80,7 @@ class FerdigstillBehandlingTaskTest : AbstractSpringIntegrationTest() {
 
     private fun kjørSteg(resultat: Resultat): Behandling {
         val fnr = randomFnr()
-        val aktørId = randomAktørId()
+        val aktørId = personidentService.hentOgLagreAktørId(fnr)
         val fnrBarn = ClientMocks.barnFnr[0]
 
         val behandling = kjørStegprosessForFGB(

@@ -26,6 +26,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.G
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
+import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.GyldigVilkårsperiode
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
@@ -56,7 +57,11 @@ class VilkårVurderingTest(
     private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
 
     @Autowired
-    private val databaseCleanupService: DatabaseCleanupService
+    private val databaseCleanupService: DatabaseCleanupService,
+
+    @Autowired
+    private val personidentService: PersonidentService,
+    
 ) : AbstractSpringIntegrationTest() {
 
     @BeforeAll
@@ -99,7 +104,13 @@ class VilkårVurderingTest(
         )
 
         val personopplysningGrunnlag =
-            lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
+            lagTestPersonopplysningGrunnlag(
+                behandling.id,
+                fnr,
+                listOf(barnFnr),
+                søkerAktørId = personidentService.hentOgLagreAktørId(fnr),
+                barnAktørId = personidentService.hentOgLagreAktørIder(listOf(barnFnr))
+            )
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
         val vilkårsvurdering = vilkårService.initierVilkårsvurderingForBehandling(behandling, false)

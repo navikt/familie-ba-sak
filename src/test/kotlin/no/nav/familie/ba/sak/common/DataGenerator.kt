@@ -277,7 +277,9 @@ fun lagTestPersonopplysningGrunnlag(
     behandlingId: Long,
     søkerPersonIdent: String,
     barnasIdenter: List<String>,
-    barnFødselsdato: LocalDate = LocalDate.of(2019, 1, 1)
+    barnFødselsdato: LocalDate = LocalDate.of(2019, 1, 1),
+    søkerAktørId: AktørId? = null,
+    barnAktørId: List<AktørId>? = null
 ): PersonopplysningGrunnlag {
     val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandlingId)
     val bostedsadresse = GrMatrikkeladresse(
@@ -287,6 +289,7 @@ fun lagTestPersonopplysningGrunnlag(
 
     val søker = Person(
         personIdent = PersonIdent(søkerPersonIdent),
+        aktørId = søkerAktørId,
         type = PersonType.SØKER,
         personopplysningGrunnlag = personopplysningGrunnlag,
         fødselsdato = LocalDate.of(2019, 1, 1),
@@ -309,6 +312,10 @@ fun lagTestPersonopplysningGrunnlag(
         personopplysningGrunnlag.personer.add(
             Person(
                 personIdent = PersonIdent(it),
+                aktørId = barnAktørId?.firstOrNull { aktørId ->
+                    aktørId.personidenter.map { personident -> personident.fødselsnummer }
+                        .any { fødselsnummer -> fødselsnummer == it }
+                },
                 type = PersonType.BARN,
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 fødselsdato = barnFødselsdato,
