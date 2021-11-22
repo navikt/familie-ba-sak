@@ -127,7 +127,7 @@ class VedtaksperiodeService(
 
                 val vedtakBegrunnelseType = it.vedtakBegrunnelseType
 
-                val personerGjeldendeForBegrunnelseIdenter: List<String> = hentPersoneidenterGjeldendeForBegrunnelse(
+                val personerGjeldendeForBegrunnelseIdenter: List<String> = hentPersonidenterGjeldendeForBegrunnelse(
                     triggesAv = triggesAv,
                     persongrunnlag = persongrunnlag,
                     vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
