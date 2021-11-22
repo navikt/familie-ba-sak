@@ -65,7 +65,8 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
             tomBarn2
         )
 
-        val tilkjentYtelse = beregningService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(behandling, utbetalingsoppdrag)
+        val tilkjentYtelse =
+            beregningService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(behandling, utbetalingsoppdrag)
 
         Assertions.assertNotNull(tilkjentYtelse)
         Assertions.assertEquals(fomBarn1.toYearMonth(), tilkjentYtelse.stønadFom)
@@ -99,7 +100,8 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
             opphørsDato
         )
 
-        val tilkjentYtelse = beregningService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(behandling, utbetalingsoppdrag)
+        val tilkjentYtelse =
+            beregningService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(behandling, utbetalingsoppdrag)
 
         Assertions.assertNotNull(tilkjentYtelse)
         Assertions.assertNull(tilkjentYtelse.stønadFom)
@@ -144,7 +146,8 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
             tomDatoBarn2
         )
 
-        val tilkjentYtelse = beregningService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(behandling, utbetalingsoppdrag)
+        val tilkjentYtelse =
+            beregningService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(behandling, utbetalingsoppdrag)
 
         Assertions.assertNotNull(tilkjentYtelse)
         Assertions.assertEquals(revurderingFomBarn1.toYearMonth(), tilkjentYtelse.stønadFom)
@@ -162,7 +165,8 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
 
-        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søkerFnr, listOf(barn1Fnr, barn2Fnr))
+        val personopplysningGrunnlag =
+            lagTestPersonopplysningGrunnlag(behandling.id, søkerFnr, listOf(barn1Fnr, barn2Fnr))
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
         val barn1Id = personopplysningGrunnlag.barna.find { it.personIdent.ident == barn1Fnr }!!.personIdent.ident
@@ -181,7 +185,7 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
 
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
 
-        val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandling.id)!!
+        val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandling.id)
         val andelBarn1 = tilkjentYtelse.andelerTilkjentYtelse.filter { it.personIdent == barn1Id }
         val andelBarn2 = tilkjentYtelse.andelerTilkjentYtelse.filter { it.personIdent == barn2Id }
 

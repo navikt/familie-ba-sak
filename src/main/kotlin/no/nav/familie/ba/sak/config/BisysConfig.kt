@@ -23,7 +23,16 @@ class BisysConfig(
             response: HttpServletResponse,
             filterChain: FilterChain
         ) {
-            if (bisysClientId == oidcUtil.getClaim("azp") && !request.requestURI.startsWith("/api/bisys")) {
+            val clientId: String? = try {
+                oidcUtil.getClaim("azp")
+            } catch (throwable: Throwable) {
+                null
+            }
+
+            if (clientId == null) {
+                // Dersom requesten mangler auth token, skal ikke dette filteret gjøre autorisasjonen
+                filterChain.doFilter(request, response)
+            } else if (bisysClientId == clientId && !request.requestURI.startsWith("/api/bisys")) {
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Kun autorisert for kall mot /api/bisys*")
             } else {
                 filterChain.doFilter(request, response)
