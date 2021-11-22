@@ -17,7 +17,7 @@ class Utbetalingsmetrikker(
     val utbetalingInneværendeMånedGauge =
         MultiGauge.builder("UtbetalingInnevaerendeMaanedGauge").register(Metrics.globalRegistry)
 
-    @Scheduled(initialDelay = 60000, fixedDelay = OPPDATERINGSFREKVENS)
+    @Scheduled(initialDelay = 120000, fixedDelay = OPPDATERINGSFREKVENS)
     fun åpneBehandlinger() {
         val totalUtbetalingInneværendeMåned = behandlingRepository.hentTotalUtbetalingInneværendeMåned()
         if (LeaderClient.isLeader() != true) {
