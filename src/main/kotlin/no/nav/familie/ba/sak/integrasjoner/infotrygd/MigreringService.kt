@@ -69,8 +69,8 @@ class MigreringService(
     private val pdlRestClient: PdlRestClient
 ) {
 
-    private val alleredeMigrertPersonFeilmelding = "Personen er allerede migrert."
     private val secureLog = LoggerFactory.getLogger("secureLogger")
+    private val migrertCounter = Metrics.counter("migrering.ok")
 
     @Transactional
     fun migrer(personIdent: String): MigreringResponseDto {
@@ -109,7 +109,7 @@ class MigreringService(
             sammenlignFørsteUtbetalingsbeløpMedBeløpFraInfotrygd(førsteUtbetalingsperiode.value, løpendeSak.stønad!!)
 
             iverksett(behandlingEtterVilkårsvurdering)
-
+            migrertCounter.increment()
             return MigreringResponseDto(
                 fagsakId = behandlingEtterVilkårsvurdering.fagsak.id,
                 behandlingId = behandlingEtterVilkårsvurdering.id,

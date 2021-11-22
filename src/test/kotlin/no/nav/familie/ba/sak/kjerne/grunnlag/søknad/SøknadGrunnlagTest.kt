@@ -33,6 +33,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.dao.EmptyResultDataAccessException
 
 class SøknadGrunnlagTest(
     @Autowired
@@ -242,10 +243,10 @@ class SøknadGrunnlagTest(
         )
 
         val error =
-            assertThrows<IllegalStateException> { beregningService.hentTilkjentYtelseForBehandling(behandlingId = behandlingEtterNyRegistrering.id) }
+            assertThrows<EmptyResultDataAccessException> { beregningService.hentTilkjentYtelseForBehandling(behandlingId = behandlingEtterNyRegistrering.id) }
         val stegEtterNyRegistrering =
             behandlingEtterNyRegistrering.behandlingStegTilstand.map { it.behandlingSteg }.toSet()
-        assertEquals("Fant ikke tilkjent ytelse for behandling ${behandlingEtterNyRegistrering.id}", error.message)
+        assertEquals("Result must not be null!", error.message)
         assertEquals(
             setOf(StegType.REGISTRERE_SØKNAD, StegType.REGISTRERE_PERSONGRUNNLAG, StegType.VILKÅRSVURDERING),
             stegEtterNyRegistrering

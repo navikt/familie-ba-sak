@@ -37,7 +37,10 @@ class VilkårsvurderingSteg(
                 )
             )
         }
-        endretUtbetalingAndelService.fjernKnytningTilAndelTilkjentYtelse(behandling.id)
+
+        if (!behandling.skalBehandlesAutomatisk) {
+            endretUtbetalingAndelService.fjernKnytningTilAndelTilkjentYtelse(behandling.id)
+        }
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
         return hentNesteStegForNormalFlyt(behandling)
     }

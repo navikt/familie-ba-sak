@@ -1,11 +1,13 @@
 package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.fpsak.tidsserie.LocalDateSegment
+import java.time.Period
 import java.time.YearMonth
 
 data class BehandlingsresultatPerson(
@@ -65,6 +67,16 @@ data class BehandlingsresultatAndelTilkjentYtelse(
 
     fun erLøpende(inneværendeMåned: YearMonth): Boolean {
         return this.stønadTom > inneværendeMåned
+    }
+
+    fun sumForPeriode(): Int {
+        val between = Period.between(
+            stønadFom.førsteDagIInneværendeMåned(),
+            stønadTom.sisteDagIInneværendeMåned()
+        )
+        val antallMåneder = (between.years * 12) + between.months
+
+        return antallMåneder * kalkulertUtbetalingsbeløp
     }
 }
 

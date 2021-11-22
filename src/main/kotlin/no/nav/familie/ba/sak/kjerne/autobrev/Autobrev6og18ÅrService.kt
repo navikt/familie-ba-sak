@@ -113,8 +113,8 @@ class Autobrev6og18ÅrService(
 
     private fun finnVedtakbegrunnelseForAlder(alder: Int): VedtakBegrunnelseSpesifikasjon =
         when (alder) {
-            Alder.SEKS.år -> VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR
-            Alder.ATTEN.år -> VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR
+            Alder.SEKS.år -> VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR_AUTOVEDTAK
+            Alder.ATTEN.år -> VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR_AUTOVEDTAK
             else -> throw Feil("Alder må være oppgitt til enten 6 eller 18 år.")
         }
 

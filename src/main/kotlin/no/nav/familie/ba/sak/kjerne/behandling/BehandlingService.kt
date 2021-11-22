@@ -251,6 +251,14 @@ class BehandlingService(
         return behandlingRepository.finnBehandlinger(fagsakId)
     }
 
+    fun omgjørTilManuellBehandling(behandling: Behandling): Behandling {
+        if (!behandling.skalBehandlesAutomatisk) return behandling
+
+        logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} omgjør automatisk behandling $behandling til manuell.")
+        behandling.skalBehandlesAutomatisk = false
+        return behandlingRepository.save(behandling)
+    }
+
     private fun hentIverksatteBehandlinger(fagsakId: Long): List<Behandling> {
         return behandlingRepository.finnIverksatteBehandlinger(fagsakId = fagsakId)
     }
