@@ -20,6 +20,24 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
     @Query("SELECT b FROM Behandling b JOIN b.fagsak f WHERE f.id = :fagsakId AND b.aktiv = true AND b.status <> 'AVSLUTTET' AND f.arkivert = false")
     fun findByFagsakAndAktivAndOpen(fagsakId: Long): Behandling?
 
+    @Query(
+        value = """WITH sisteiverksattebehandlingfraløpendefagsak AS (
+                        SELECT f.id AS fagsakid, MAX(b.id) AS behandlingid
+                        FROM behandling b
+                                 INNER JOIN fagsak f ON f.id = b.fk_fagsak_id
+                                 INNER JOIN tilkjent_ytelse ty ON b.id = ty.fk_behandling_id
+                        WHERE f.status = 'LØPENDE'
+                          AND ty.utbetalingsoppdrag IS NOT NULL
+                          AND f.arkivert = false
+                        GROUP BY fagsakid)
+                        select sum(aty.kalkulert_utbetalingsbelop) from andel_tilkjent_ytelse aty
+                        where aty.stonad_fom <= DATE_TRUNC('month', CURRENT_TIMESTAMP)
+                          AND aty.stonad_tom >= DATE_TRUNC('month', CURRENT_TIMESTAMP)
+                        AND aty.fk_behandling_id in (SELECT behandlingid FROM sisteiverksattebehandlingfraløpendefagsak)""",
+        nativeQuery = true
+    )
+    fun hentTotalUtbetalingInneværendeMåned(): Long
+
     /* Denne henter først siste iverksatte behandling på en løpende fagsak.
      * Finner så alle perioder på siste iverksatte behandling
      * Finner deretter første behandling en periode oppstod i, som er det som skal avstemmes
