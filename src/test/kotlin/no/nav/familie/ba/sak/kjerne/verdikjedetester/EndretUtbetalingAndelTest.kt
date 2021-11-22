@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenario
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenarioPerson
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.junit.jupiter.api.Assertions
@@ -185,7 +186,9 @@ class EndretUtbetalingAndelTest(
                             it.copy(
                                 resultat = Resultat.OPPFYLT,
                                 periodeFom = barnFødselsdato,
-                                erDeltBosted = it.vilkårType == Vilkår.BOR_MED_SØKER
+                                utdypendeVilkårsvurderinger = listOfNotNull(
+                                    if (it.vilkårType == Vilkår.BOR_MED_SØKER) UtdypendeVilkårsvurdering.DELT_BOSTED else null
+                                )
                             )
                         )
                     )

@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
@@ -110,12 +111,12 @@ fun PersonResultat.tilPeriodeResultater(brukMåned: Boolean, inkluderUtvidet: Bo
             periodeTom = if (segment.tom == TIDENES_ENDE) null else segment.tom,
             vilkårResultater = segment.value.map {
                 PeriodeVilkår(
-                    it.vilkårType,
-                    it.resultat,
-                    it.begrunnelse,
-                    it.erDeltBosted,
-                    if (brukMåned) it.periodeFom?.withDayOfMonth(1) else it.periodeFom,
-                    if (brukMåned) it.periodeTom?.sisteDagIMåned() else it.periodeTom
+                    vilkårType = it.vilkårType,
+                    resultat = it.resultat,
+                    begrunnelse = it.begrunnelse,
+                    erDeltBosted = it.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.DELT_BOSTED),
+                    periodeFom = if (brukMåned) it.periodeFom?.withDayOfMonth(1) else it.periodeFom,
+                    periodeTom = if (brukMåned) it.periodeTom?.sisteDagIMåned() else it.periodeTom
                 )
             }.toSet()
         )
