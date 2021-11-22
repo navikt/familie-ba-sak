@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.kjerne.beregning
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
-import no.nav.familie.ba.sak.common.isSameOrBefore
+import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
@@ -95,8 +95,14 @@ fun kanAutomatiskIverksetteSmåbarnstillegg(
     ) return false
 
     return innvilgedeMånedPerioder.all {
-        YearMonth.now().isSameOrBefore(it.fom)
-    } && reduserteMånedPerioder.all { YearMonth.now().isSameOrBefore(it.fom) }
+        it.fom.isSameOrAfter(
+            YearMonth.now()
+        )
+    } && reduserteMånedPerioder.all {
+        it.fom.isSameOrAfter(
+            YearMonth.now()
+        )
+    }
 }
 
 fun finnAktuellVedtaksperiodeOgLeggTilSmåbarnstilleggbegrunnelse(
