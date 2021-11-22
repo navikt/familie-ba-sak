@@ -130,9 +130,15 @@ class VilkårResultat(
         resultat = restVilkårResultat.resultat
         erAutomatiskVurdert = false
         erEksplisittAvslagPåSøknad = restVilkårResultat.erEksplisittAvslagPåSøknad
-        erSkjønnsmessigVurdert = restVilkårResultat.erSkjønnsmessigVurdert ?: false
-        erDeltBosted = restVilkårResultat.erDeltBosted ?: false
-        erMedlemskapVurdert = restVilkårResultat.erMedlemskapVurdert ?: false
+        erSkjønnsmessigVurdert =
+            if (restVilkårResultat.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.VURDERING_ANNET_GRUNNLAG)) true else restVilkårResultat.erSkjønnsmessigVurdert
+                ?: false
+        erDeltBosted =
+            if (restVilkårResultat.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.DELT_BOSTED)) true else restVilkårResultat.erDeltBosted
+                ?: false
+        erMedlemskapVurdert =
+            if (restVilkårResultat.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP)) true else restVilkårResultat.erMedlemskapVurdert
+                ?: false
         oppdaterPekerTilBehandling()
         vurderesEtter = restVilkårResultat.vurderesEtter
         utdypendeVilkårsvurderinger =
