@@ -18,6 +18,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService.SatsPeriode
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService.splittPeriodePå6Årsdag
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
 import no.nav.familie.ba.sak.kjerne.beregning.domene.PeriodeResultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
@@ -29,7 +30,6 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
-import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
@@ -40,8 +40,7 @@ object TilkjentYtelseUtils {
         vilkårsvurdering: Vilkårsvurdering,
         personopplysningGrunnlag: PersonopplysningGrunnlag,
         behandling: Behandling,
-        hentPerioderMedFullOvergangsstønad: (personIdent: String, aktørId: AktørId) -> List<PeriodeOvergangsstønad> =
-            { personIdent, aktørId -> emptyList() }
+        hentPerioderMedFullOvergangsstønad: (personIdent: String, aktørId: AktørId) -> List<InternPeriodeOvergangsstønad> = { personIdent, aktørId -> emptyList() }
     ): TilkjentYtelse {
         val identBarnMap = personopplysningGrunnlag.barna
             .associateBy { it.personIdent.ident }
@@ -135,14 +134,14 @@ object TilkjentYtelseUtils {
 
         val nyeAndelTilkjentYtelse = mutableListOf<AndelTilkjentYtelse>()
 
-        andelTilkjentYtelser.distinctBy { it.personIdent }.forEach { barnMedAndeler ->
-            val andelerForPerson = andelTilkjentYtelser.filter { it.personIdent == barnMedAndeler.personIdent }
+        andelTilkjentYtelser.filter { !it.erSmåbarnstillegg() }.groupBy { it.personIdent }.forEach { andelerForPerson ->
+            val personIdent = andelerForPerson.key
             val endringerForPerson =
-                endretUtbetalingAndeler.filter { it.person?.personIdent?.ident == barnMedAndeler.personIdent }
+                endretUtbetalingAndeler.filter { it.person?.personIdent?.ident == personIdent }
 
             val nyeAndelerForPerson = mutableListOf<AndelTilkjentYtelse>()
 
-            andelerForPerson.forEach { andelForPerson ->
+            andelerForPerson.value.forEach { andelForPerson ->
                 // Deler opp hver enkelt andel i perioder som hhv blir berørt av endringene og de som ikke berøres av de.
                 val (perioderMedEndring, perioderUtenEndring) = andelForPerson.stønadsPeriode()
                     .perioderMedOgUtenOverlapp(

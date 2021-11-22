@@ -41,7 +41,7 @@ data class Hjemmeltekst(
     )
 }
 
-data class MedVennilgHilsen(
+data class MedVennligHilsen(
     val enhet: Flettefelt,
 ) {
 

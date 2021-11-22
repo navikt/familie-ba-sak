@@ -5,11 +5,10 @@ import io.mockk.mockk
 import io.mockk.slot
 import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.common.EnvService
-import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.fødselsnummerGenerator
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.AbstractMockkSpringRunner
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
@@ -140,7 +139,7 @@ class MigreringServiceTest(
             infotrygdBarnetrygdClient.hentSaker(any(), any())
         } returns InfotrygdSøkResponse(listOf(opprettSakMedBeløp(2708.0)), emptyList())
 
-        migreringService.migrer(ClientMocks.søkerFnr[0])
+        val migreringResponseDto = migreringService.migrer(ClientMocks.søkerFnr[0])
 
         taskRepository.findAll().also { tasks ->
             assertThat(tasks).hasSize(1)
@@ -170,6 +169,7 @@ class MigreringServiceTest(
 
             val vedtakDVH = MockKafkaProducer.sendteMeldinger.values.first() as VedtakDVH
             assertThat(vedtakDVH.utbetalingsperioder.first().stønadFom).isEqualTo(forventetUtbetalingFom)
+            assertThat(migreringResponseDto.virkningFom).isEqualTo(forventetUtbetalingFom.toYearMonth())
         }
     }
 
@@ -211,7 +211,9 @@ class MigreringServiceTest(
 
         assertThatThrownBy {
             migreringService.migrer(ClientMocks.søkerFnr[0])
-        }.hasMessageContaining("Kan ikke migrere fordi barn fra PDL ikke samsvarer med løpende barnetrygdbarn fra Infotrygd.")
+        }.isInstanceOf(KanIkkeMigrereException::class.java)
+            .hasMessage(null)
+            .extracting("feiltype").isEqualTo(MigreringsfeilType.DIFF_BARN_INFOTRYGD_OG_PDL)
     }
 
     @Test
@@ -224,21 +226,26 @@ class MigreringServiceTest(
 
         assertThatThrownBy {
             migreringService.migrer(ClientMocks.søkerFnr[0])
-        }.hasMessageContaining("allerede påbegynt")
+        }.isInstanceOf(KanIkkeMigrereException::class.java)
+            .hasMessage(null)
+            .extracting("feiltype").isEqualTo(MigreringsfeilType.MIGRERING_ALLEREDE_PÅBEGYNT)
     }
 
     @Test
     fun `migrering skal feile dersom personen allerede er migrert`() {
         run { `migrering happy case`() }
 
+        assertThatThrownBy { migreringService.migrer(ClientMocks.søkerFnr[0]) }.isInstanceOf(KanIkkeMigrereException::class.java)
+
         assertThatThrownBy {
             migreringService.migrer(ClientMocks.søkerFnr[0])
-        }.hasFieldOrProperty("frontendFeilmelding")
-            .hasMessageContaining("allerede migrert")
+        }.isInstanceOf(KanIkkeMigrereException::class.java)
+            .hasMessage(null)
+            .extracting("feiltype").isEqualTo(MigreringsfeilType.ALLEREDE_MIGRERT)
     }
 
     @Test
-    fun `migrering skal avbrytes med feilmelding dersom personen har en åpen sak i Infotrygd`() {
+    fun `migrering skal avbrytes med feilmelding dersom opprett behandling feiler`() {
         every {
             infotrygdBarnetrygdClient.hentSaker(any(), any())
         } returns InfotrygdSøkResponse(listOf(opprettSakMedBeløp(2708.0)), emptyList())
@@ -248,32 +255,38 @@ class MigreringServiceTest(
 
         assertThatThrownBy {
             migreringService.migrer(ClientMocks.søkerFnr[0])
-        }.hasFieldOrProperty("frontendFeilmelding")
-            .hasMessageContaining("sak i Infotrygd")
+        }.isInstanceOf(KanIkkeMigrereException::class.java)
+            .hasMessage("Kan ikke lage behandling på person med aktiv sak i Infotrygd")
+            .extracting("feiltype").isEqualTo(MigreringsfeilType.KAN_IKKE_OPPRETTE_BEHANDLING)
     }
 
     @Test
     fun `migrering skal feile hvis beregnet beløp ikke er lik beløp fra infotrygd`() {
         every { infotrygdBarnetrygdClient.hentSaker(any(), any()) } returns
             InfotrygdSøkResponse(listOf(opprettSakMedBeløp(1354.0)), emptyList())
-        assertThatThrownBy { migreringService.migrer(ClientMocks.søkerFnr[0]) }.isInstanceOf(Feil::class.java)
-            .hasMessageContaining("beløp")
+        assertThatThrownBy { migreringService.migrer(ClientMocks.søkerFnr[0]) }
+            .isInstanceOf(KanIkkeMigrereException::class.java)
+            .hasMessageContaining("1354")
+            .extracting("feiltype")
+            .isEqualTo(MigreringsfeilType.BEREGNET_BELØP_FOR_UTBETALING_ULIKT_BELØP_FRA_INFOTRYGD)
     }
 
     @Test
     fun `migrering skal feile hvis saken fra Infotrygd inneholder mer enn ett beløp`() {
         every { infotrygdBarnetrygdClient.hentSaker(any(), any()) } returns
             InfotrygdSøkResponse(listOf(opprettSakMedBeløp(2708.0, 660.0)), emptyList())
-        assertThatThrownBy { migreringService.migrer(ClientMocks.søkerFnr[0]) }.isInstanceOf(FunksjonellFeil::class.java)
-            .hasMessageContaining("Fant 2")
+        assertThatThrownBy { migreringService.migrer(ClientMocks.søkerFnr[0]) }.isInstanceOf(KanIkkeMigrereException::class.java)
+            .hasMessage(null)
+            .extracting("feiltype").isEqualTo(MigreringsfeilType.UGYLDIG_ANTALL_DELYTELSER_I_INFOTRYGD)
     }
 
     @Test
     fun `migrering skal feile hvis saken fra Infotrygd ikke er ordinær`() {
         every { infotrygdBarnetrygdClient.hentSaker(any(), any()) } returns
             InfotrygdSøkResponse(listOf(opprettSakMedBeløp(2708.0).copy(valg = "UT")), emptyList())
-        assertThatThrownBy { migreringService.migrer(ClientMocks.søkerFnr[0]) }.isInstanceOf(FunksjonellFeil::class.java)
-            .hasMessageContaining("ordinær")
+        assertThatThrownBy { migreringService.migrer(ClientMocks.søkerFnr[0]) }.isInstanceOf(KanIkkeMigrereException::class.java)
+            .hasMessage(null)
+            .extracting("feiltype").isEqualTo(MigreringsfeilType.IKKE_STØTTET_SAKSTYPE)
     }
 
     @Test
@@ -289,8 +302,11 @@ class MigreringServiceTest(
 
         listOf<Long>(0, 1).forEach { antallDagerEtterKjøredato ->
             val kjøredato = LocalDate.now().minusDays(antallDagerEtterKjøredato)
-            assertThatThrownBy { virkningsdatoUtleder.invoke(migreringServiceMock, kjøredato) }.cause
+
+            assertThatThrownBy { virkningsdatoUtleder.invoke(migreringServiceMock, kjøredato) }
+                .cause.isInstanceOf(KanIkkeMigrereException::class.java)
                 .hasMessageContaining("midlertidig deaktivert")
+                .extracting("feiltype").isEqualTo(MigreringsfeilType.IKKE_GYLDIG_KJØREDATO)
         }
     }
 

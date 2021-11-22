@@ -2,21 +2,18 @@ package no.nav.familie.ba.sak.kjerne.dokument.domene.maler
 
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.brevperioder.BrevPeriode
 
-data class AutovedtakNyfødtBarnFraFør(
-    override val mal: Brevmal = Brevmal.AUTOVEDTAK_NYFØDT_BARN_FRA_FØR,
-    override val data: AutovedtakNyfødtBarnFraFørData
+data class Autovedtak6og18år(
+    override val mal: Brevmal = Brevmal.AUTOVEDTAK_BARN_6_OG_18_ÅR,
+    override val data: Autovedtak6og18årData
 ) : Vedtaksbrev {
 
     constructor(
         vedtakFellesfelter: VedtakFellesfelter,
-        etterbetaling: Etterbetaling?,
     ) :
         this(
-            data = AutovedtakNyfødtBarnFraFørData(
-                delmalData = AutovedtakNyfødtBarnFraFørData.Delmaler(
-                    etterbetaling = etterbetaling,
+            data = Autovedtak6og18årData(
+                delmalData = Autovedtak6og18årData.Delmaler(
                     hjemmeltekst = vedtakFellesfelter.hjemmeltekst,
-                    medVennilgHilsen = MedVennligHilsen(vedtakFellesfelter.enhet)
                 ),
                 flettefelter = FlettefelterForDokumentImpl(
                     navn = vedtakFellesfelter.søkerNavn,
@@ -27,15 +24,13 @@ data class AutovedtakNyfødtBarnFraFør(
         )
 }
 
-data class AutovedtakNyfødtBarnFraFørData(
+data class Autovedtak6og18årData(
     override val delmalData: Delmaler,
     override val flettefelter: FlettefelterForDokumentImpl,
     override val perioder: List<BrevPeriode>
 ) : VedtaksbrevData {
 
     data class Delmaler(
-        val etterbetaling: Etterbetaling?,
         val hjemmeltekst: Hjemmeltekst,
-        val medVennilgHilsen: MedVennligHilsen
     )
 }
