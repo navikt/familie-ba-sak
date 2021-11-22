@@ -38,7 +38,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           mvn antrun:run@ktlint
-          mvn -B --no-transfer-progress package verify sonar:sonar --settings .m2/maven-settings.xml
+          mvn sonar:sonar
   enhetstester-og-integrasjonstester:
     name: Enhetstester og integrasjonstester
     runs-on: ubuntu-latest
