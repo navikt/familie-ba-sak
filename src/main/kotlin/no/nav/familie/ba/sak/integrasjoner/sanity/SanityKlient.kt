@@ -27,24 +27,6 @@ class SanityKlient(
         val url = URI.create("$sanityFamilieApi?query=$parameters")
         logger.info("Henter begrunnelser fra sanity")
 
-        val echo = restTemplate.exchange(
-            "https://httpbin.org/anything",
-            HttpMethod.GET,
-            null,
-            String::class.java
-        )
-
-
-        logger.info("")
-        logger.info("Echo:")
-        logger.info(echo.body)
-        logger.info("")
-
-        print("")
-        print("Echo:")
-        print(echo)
-        print("")
-
         val response = restTemplate.exchange(
             url,
             HttpMethod.GET,
