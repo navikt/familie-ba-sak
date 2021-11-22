@@ -174,6 +174,8 @@ data class AndelTilkjentYtelse(
 
     fun erSmåbarnstillegg() = this.type == YtelseType.SMÅBARNSTILLEGG
 
+    fun erSøkersAndel() = erUtvidet() || erSmåbarnstillegg()
+
     fun erLøpende(): Boolean = this.stønadTom > YearMonth.now()
 
     fun erDeltBosted() = this.prosent == BigDecimal(50)
@@ -273,6 +275,12 @@ fun List<AndelTilkjentYtelse>.hentUtvidetYtelseScenario(
         månedPeriode.tom,
     ) -> UtvidetScenario.UTVIDET_YTELSE_ENDRET
     else -> UtvidetScenario.UTVIDET_YTELSE_IKKE_ENDRET
+}
+
+fun List<AndelTilkjentYtelse>.erUlike(andreAndeler: List<AndelTilkjentYtelse>): Boolean {
+    if (this.size != andreAndeler.size) return true
+
+    return this.any { andel -> andreAndeler.any { !andel.erTilsvarendeForUtbetaling(it) } }
 }
 
 enum class YtelseType(val klassifisering: String) {

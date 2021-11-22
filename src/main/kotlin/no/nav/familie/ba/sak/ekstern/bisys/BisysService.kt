@@ -70,7 +70,7 @@ class BisysService(
         }
 
         return tilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(behandling.id)?.andelerTilkjentYtelse
-            ?.filter { it.erUtvidet() || it.erSmåbarnstillegg() }
+            ?.filter { it.erSøkersAndel() }
             ?.filter {
                 it.stønadTom.isSameOrAfter(fraDato.toYearMonth())
             }

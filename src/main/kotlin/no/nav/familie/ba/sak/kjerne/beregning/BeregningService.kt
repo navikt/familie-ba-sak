@@ -33,8 +33,9 @@ class BeregningService(
     private val endretUtbetalingAndelRepository: EndretUtbetalingAndelRepository,
     private val småbarnstilleggService: SmåbarnstilleggService
 ) {
-    fun slettTilkjentYtelseForBehandling(behandlingId: Long) = tilkjentYtelseRepository.findByBehandling(behandlingId)
-        ?.let { tilkjentYtelseRepository.delete(it) }
+    fun slettTilkjentYtelseForBehandling(behandlingId: Long) =
+        tilkjentYtelseRepository.findByBehandlingOptional(behandlingId)
+            ?.let { tilkjentYtelseRepository.delete(it) }
 
     fun hentLøpendeAndelerTilkjentYtelseMedUtbetalingerForBehandlinger(behandlingIder: List<Long>): List<AndelTilkjentYtelse> =
         andelTilkjentYtelseRepository.finnLøpendeAndelerTilkjentYtelseForBehandlinger(behandlingIder)
@@ -49,7 +50,6 @@ class BeregningService(
 
     fun hentTilkjentYtelseForBehandling(behandlingId: Long) =
         tilkjentYtelseRepository.findByBehandling(behandlingId)
-            ?: error("Fant ikke tilkjent ytelse for behandling $behandlingId")
 
     fun hentOptionalTilkjentYtelseForBehandling(behandlingId: Long) =
         tilkjentYtelseRepository.findByBehandlingOptional(behandlingId)
@@ -117,7 +117,7 @@ class BeregningService(
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 behandling = behandling
             ) { personIdent, aktørId ->
-                småbarnstilleggService.hentPerioderMedFullOvergangsstønad(
+                småbarnstilleggService.hentOgLagrePerioderMedFullOvergangsstønad(
                     personIdent = personIdent,
                     aktørId = aktørId,
                     behandlingId = behandling.id
@@ -143,6 +143,35 @@ class BeregningService(
         return tilkjentYtelseRepository.save(nyTilkjentYtelse)
     }
 
+    fun kanAutomatiskIverksetteSmåbarnstilleggEndring(
+        behandling: Behandling,
+        sistIverksatteBehandling: Behandling?
+    ): Boolean {
+        if (!behandling.skalBehandlesAutomatisk || !behandling.erSmåbarnstillegg()) return false
+
+        val forrigeSmåbarnstilleggAndeler =
+            if (sistIverksatteBehandling == null) emptyList()
+            else hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(
+                behandlingId = sistIverksatteBehandling.id
+            ).filter { it.erSmåbarnstillegg() }
+
+        val nyeSmåbarnstilleggAndeler =
+            if (sistIverksatteBehandling == null) emptyList()
+            else hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(
+                behandlingId = behandling.id
+            ).filter { it.erSmåbarnstillegg() }
+
+        val (innvilgedeMånedPerioder, reduserteMånedPerioder) = hentInnvilgedeOgReduserteAndelerSmåbarnstillegg(
+            forrigeSmåbarnstilleggAndeler = forrigeSmåbarnstilleggAndeler,
+            nyeSmåbarnstilleggAndeler = nyeSmåbarnstilleggAndeler,
+        )
+
+        return kanAutomatiskIverksetteSmåbarnstillegg(
+            innvilgedeMånedPerioder = innvilgedeMånedPerioder,
+            reduserteMånedPerioder = reduserteMånedPerioder
+        )
+    }
+
     private fun populerTilkjentYtelse(
         behandling: Behandling,
         utbetalingsoppdrag: Utbetalingsoppdrag
@@ -163,7 +192,7 @@ class BeregningService(
 
         val tilkjentYtelse =
             tilkjentYtelseRepository.findByBehandling(behandling.id)
-                ?: error("Fant ikke tilkjent ytelse for behandling ${behandling.id}")
+
         return tilkjentYtelse.apply {
             this.utbetalingsoppdrag = objectMapper.writeValueAsString(utbetalingsoppdrag)
             this.stønadTom =

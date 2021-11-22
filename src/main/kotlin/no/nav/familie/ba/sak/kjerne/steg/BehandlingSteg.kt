@@ -239,6 +239,23 @@ fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType): StegTyp
                 else -> throw IllegalStateException("Stegtype ${utførendeStegType.displayName()} er ikke implementert for behandling med årsak $behandlingÅrsak og type $behandlingType.")
             }
         }
+        BehandlingÅrsak.SMÅBARNSTILLEGG -> {
+            when (utførendeStegType) {
+                REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
+                VILKÅRSVURDERING -> BEHANDLINGSRESULTAT
+                BEHANDLINGSRESULTAT -> if (behandling.status == BehandlingStatus.IVERKSETTER_VEDTAK) IVERKSETT_MOT_OPPDRAG else VURDER_TILBAKEKREVING
+                VURDER_TILBAKEKREVING -> SEND_TIL_BESLUTTER
+                SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
+                BESLUTTE_VEDTAK -> hentNesteStegTypeBasertPåBehandlingsresultat(behandling.resultat)
+                IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
+                VENTE_PÅ_STATUS_FRA_ØKONOMI -> JOURNALFØR_VEDTAKSBREV
+                JOURNALFØR_VEDTAKSBREV -> DISTRIBUER_VEDTAKSBREV
+                DISTRIBUER_VEDTAKSBREV -> FERDIGSTILLE_BEHANDLING
+                FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET
+                BEHANDLING_AVSLUTTET -> BEHANDLING_AVSLUTTET
+                else -> throw IllegalStateException("Stegtype ${utførendeStegType.displayName()} er ikke implementert for småbarnstillegg")
+            }
+        }
         BehandlingÅrsak.SATSENDRING -> {
             when (utførendeStegType) {
                 REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING

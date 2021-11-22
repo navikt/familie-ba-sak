@@ -321,7 +321,7 @@ class VedtaksperiodeServiceUtilsTest {
         )
         val identerMedUtbetaling = listOf(barn.personIdent.ident)
 
-        val personidenterForBegrunnelse = hentPersoneidenterGjeldendeForBegrunnelse(
+        val personidenterForBegrunnelse = hentPersonidenterGjeldendeForBegrunnelse(
             triggesAv = triggesAv,
             persongrunnlag = persongrunnlag,
             vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
@@ -370,7 +370,7 @@ class VedtaksperiodeServiceUtilsTest {
             )
         )
 
-        val personidenterForBegrunnelse = hentPersoneidenterGjeldendeForBegrunnelse(
+        val personidenterForBegrunnelse = hentPersonidenterGjeldendeForBegrunnelse(
             triggesAv = triggesAv,
             persongrunnlag = persongrunnlag,
             vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
