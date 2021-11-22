@@ -28,7 +28,7 @@ jobs:
       - uses: actions/setup-java@v2
         with:
           java-version: 11
-          distribution: 'adopt'
+          distribution: 'temurin'
           cache: 'maven'
       - name: Kjør ktlint og sonar
         env:
@@ -38,7 +38,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           mvn antrun:run@ktlint
-          mvn sonar:sonar
+          mvn -B --no-transfer-progress package verify sonar:sonar --settings .m2/maven-settings.xml
   enhetstester-og-integrasjonstester:
     name: Enhetstester og integrasjonstester
     runs-on: ubuntu-latest
@@ -49,7 +49,7 @@ jobs:
       - uses: actions/setup-java@v2.3.1
         with:
           java-version: 11
-          distribution: 'adopt'
+          distribution: 'temurin'
           cache: 'maven'
       - name: Kjør enhetstester og integrasjonstester
         env:
