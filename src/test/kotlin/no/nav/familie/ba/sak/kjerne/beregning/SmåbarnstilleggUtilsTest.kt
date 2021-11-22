@@ -1,14 +1,15 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
 import io.mockk.mockk
+import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
-import no.nav.familie.ba.sak.common.lagUtbetalingsperiodeDetalj
-import no.nav.familie.ba.sak.common.lagUtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.common.lagVedtaksperiodeMedBegrunnelser
+import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.tilfeldigPerson
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
@@ -19,6 +20,7 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -121,28 +123,15 @@ class SmåbarnstilleggUtilsTest {
             type = Vedtaksperiodetype.UTBETALING
         )
 
-        val utvidetVedtaksperiodeMedBegrunnelser = lagUtvidetVedtaksperiodeMedBegrunnelser(
-            id = vedtaksperiodeMedBegrunnelser.id,
-            fom = vedtaksperiodeMedBegrunnelser.fom,
-            tom = vedtaksperiodeMedBegrunnelser.tom,
-            type = vedtaksperiodeMedBegrunnelser.type,
-            utbetalingsperiodeDetaljer = listOf(
-                lagUtbetalingsperiodeDetalj(
-                    ytelseType = YtelseType.UTVIDET_BARNETRYGD
-                ),
-                lagUtbetalingsperiodeDetalj(
-                    ytelseType = YtelseType.SMÅBARNSTILLEGG
-                )
-            )
-        )
-
         val oppdatertVedtaksperiodeMedBegrunnelser = finnAktuellVedtaksperiodeOgLeggTilSmåbarnstilleggbegrunnelse(
-            utvidedeVedtaksperioderMedBegrunnelser = listOf(
-                utvidetVedtaksperiodeMedBegrunnelser
-            ),
             vedtaksperioderMedBegrunnelser = listOf(
                 vedtaksperiodeMedBegrunnelser
-            )
+            ),
+            innvilgetMånedPeriode = MånedPeriode(
+                fom = YearMonth.now(),
+                tom = vedtaksperiodeMedBegrunnelser.tom!!.toYearMonth()
+            ),
+            redusertMånedPeriode = null
         )
 
         assertNotNull(oppdatertVedtaksperiodeMedBegrunnelser)
@@ -153,34 +142,138 @@ class SmåbarnstilleggUtilsTest {
     @Test
     fun `Skal legge til reduksjonsbegrunnelse for småbarnstillegg`() {
         val vedtaksperiodeMedBegrunnelser = lagVedtaksperiodeMedBegrunnelser(
-            fom = LocalDate.now().førsteDagIInneværendeMåned(),
+            fom = LocalDate.now().nesteMåned().førsteDagIInneværendeMåned(),
             tom = LocalDate.now().plusMonths(3).sisteDagIMåned(),
             type = Vedtaksperiodetype.UTBETALING
         )
 
-        val utvidetVedtaksperiodeMedBegrunnelser = lagUtvidetVedtaksperiodeMedBegrunnelser(
-            id = vedtaksperiodeMedBegrunnelser.id,
-            fom = vedtaksperiodeMedBegrunnelser.fom,
-            tom = vedtaksperiodeMedBegrunnelser.tom,
-            type = vedtaksperiodeMedBegrunnelser.type,
-            utbetalingsperiodeDetaljer = listOf(
-                lagUtbetalingsperiodeDetalj(
-                    ytelseType = YtelseType.UTVIDET_BARNETRYGD
-                )
-            )
-        )
-
         val oppdatertVedtaksperiodeMedBegrunnelser = finnAktuellVedtaksperiodeOgLeggTilSmåbarnstilleggbegrunnelse(
-            utvidedeVedtaksperioderMedBegrunnelser = listOf(
-                utvidetVedtaksperiodeMedBegrunnelser
-            ),
             vedtaksperioderMedBegrunnelser = listOf(
                 vedtaksperiodeMedBegrunnelser
+            ),
+            innvilgetMånedPeriode = null,
+            redusertMånedPeriode = MånedPeriode(
+                fom = YearMonth.now().nesteMåned(),
+                tom = vedtaksperiodeMedBegrunnelser.tom!!.toYearMonth()
             )
         )
 
         assertNotNull(oppdatertVedtaksperiodeMedBegrunnelser)
         assertTrue(oppdatertVedtaksperiodeMedBegrunnelser.begrunnelser.none { it.vedtakBegrunnelseSpesifikasjon == VedtakBegrunnelseSpesifikasjon.INNVILGET_SMÅBARNSTILLEGG })
         assertTrue(oppdatertVedtaksperiodeMedBegrunnelser.begrunnelser.any { it.vedtakBegrunnelseSpesifikasjon == VedtakBegrunnelseSpesifikasjon.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_FULL_OVERGANGSSTØNAD })
+    }
+
+    @Test
+    fun `Skal kaste feil om det ikke finnes innvilget eller redusert periode å begrunne`() {
+        val vedtaksperiodeMedBegrunnelser = lagVedtaksperiodeMedBegrunnelser(
+            fom = LocalDate.now().nesteMåned().førsteDagIInneværendeMåned(),
+            tom = LocalDate.now().plusMonths(3).sisteDagIMåned(),
+            type = Vedtaksperiodetype.UTBETALING
+        )
+
+        assertThrows<VedtaksperiodefinnerSmåbarnstilleggFeil> {
+            finnAktuellVedtaksperiodeOgLeggTilSmåbarnstilleggbegrunnelse(
+                vedtaksperioderMedBegrunnelser = listOf(
+                    vedtaksperiodeMedBegrunnelser
+                ),
+                innvilgetMånedPeriode = null,
+                redusertMånedPeriode = null
+            )
+        }
+    }
+
+    @Test
+    fun `Skal kunne automatisk iverksette småbarnstillegg når endringer i OS kun er frem i tid`() {
+        val forrigeAndeler = listOf(
+            lagAndelTilkjentYtelse(
+                fom = YearMonth.now().minusYears(2),
+                tom = YearMonth.now().minusMonths(10)
+            ),
+        )
+
+        val nyeAndeler = forrigeAndeler + listOf(
+            lagAndelTilkjentYtelse(
+                fom = YearMonth.now(),
+                tom = YearMonth.now().plusMonths(2)
+            ),
+        )
+
+        val (innvilgedeMånedPerioder, reduserteMånedPerioder) = hentInnvilgedeOgReduserteAndelerSmåbarnstillegg(
+            forrigeSmåbarnstilleggAndeler = forrigeAndeler,
+            nyeSmåbarnstilleggAndeler = nyeAndeler
+        )
+
+        assertTrue(
+            kanAutomatiskIverksetteSmåbarnstillegg(
+                innvilgedeMånedPerioder = innvilgedeMånedPerioder,
+                reduserteMånedPerioder = reduserteMånedPerioder
+            )
+        )
+    }
+
+    @Test
+    fun `Skal ikke kunne automatisk iverksette småbarnstillegg når endringer i OS er tilbake og frem i tid`() {
+        val forrigeAndeler = listOf(
+            lagAndelTilkjentYtelse(
+                fom = YearMonth.now().minusYears(2),
+                tom = YearMonth.now().minusMonths(10)
+            ),
+        )
+
+        val nyeAndeler = listOf(
+            lagAndelTilkjentYtelse(
+                fom = YearMonth.now().minusYears(2),
+                tom = YearMonth.now().minusMonths(5)
+            ),
+            lagAndelTilkjentYtelse(
+                fom = YearMonth.now(),
+                tom = YearMonth.now().plusMonths(2)
+            ),
+        )
+
+        val (innvilgedeMånedPerioder, reduserteMånedPerioder) = hentInnvilgedeOgReduserteAndelerSmåbarnstillegg(
+            forrigeSmåbarnstilleggAndeler = forrigeAndeler,
+            nyeSmåbarnstilleggAndeler = nyeAndeler
+        )
+
+        assertFalse(
+            kanAutomatiskIverksetteSmåbarnstillegg(
+                innvilgedeMånedPerioder = innvilgedeMånedPerioder,
+                reduserteMånedPerioder = reduserteMånedPerioder
+            )
+        )
+    }
+
+    @Test
+    fun `Skal ikke kunne automatisk iverksette småbarnstillegg når endringer i OS er 2 måneder frem i tid`() {
+        val forrigeAndeler = listOf(
+            lagAndelTilkjentYtelse(
+                fom = YearMonth.now().minusYears(2),
+                tom = YearMonth.now().minusMonths(10)
+            ),
+        )
+
+        val nyeAndeler = listOf(
+            lagAndelTilkjentYtelse(
+                fom = YearMonth.now().minusYears(2),
+                tom = YearMonth.now().minusMonths(5)
+            ),
+            lagAndelTilkjentYtelse(
+                fom = YearMonth.now().plusMonths(2),
+                tom = YearMonth.now().plusMonths(4)
+            ),
+        )
+
+        val (innvilgedeMånedPerioder, reduserteMånedPerioder) = hentInnvilgedeOgReduserteAndelerSmåbarnstillegg(
+            forrigeSmåbarnstilleggAndeler = forrigeAndeler,
+            nyeSmåbarnstilleggAndeler = nyeAndeler
+        )
+
+        assertFalse(
+            kanAutomatiskIverksetteSmåbarnstillegg(
+                innvilgedeMånedPerioder = innvilgedeMånedPerioder,
+                reduserteMånedPerioder = reduserteMånedPerioder
+            )
+        )
     }
 }

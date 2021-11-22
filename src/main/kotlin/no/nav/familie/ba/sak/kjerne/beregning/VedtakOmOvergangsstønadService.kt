@@ -20,8 +20,8 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
 import no.nav.familie.prosessering.domene.TaskRepository
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import java.math.BigDecimal
 
 @Service
 class VedtakOmOvergangsstønadService(
@@ -33,7 +33,8 @@ class VedtakOmOvergangsstønadService(
     private val simuleringService: SimuleringService,
     private val småbarnstilleggService: SmåbarnstilleggService,
     private val taskRepository: TaskRepository,
-    private val featureToggleService: FeatureToggleService
+    private val featureToggleService: FeatureToggleService,
+    private val beregningService: BeregningService
 ) {
 
     private val antallVedtakOmOvergangsstønad: Counter =
@@ -44,10 +45,26 @@ class VedtakOmOvergangsstønadService(
         Metrics.counter("behandling", "saksbehandling", "hendelse", "smaabarnstillegg", "paavirker_fagsak")
     private val antallVedtakOmOvergangsstønadPåvirkerIkkeFagsak: Counter =
         Metrics.counter("behandling", "saksbehandling", "hendelse", "smaabarnstillegg", "paavirker_ikke_fagsak")
-    private val antallVedtakOmOvergangsstønadFeilutbetaling: Counter =
-        Metrics.counter("behandling", "saksbehandling", "hendelse", "smaabarnstillegg", "feilutbetaling")
-    private val antallVedtakOmOvergangsstønadEtterbetaling: Counter =
-        Metrics.counter("behandling", "saksbehandling", "hendelse", "smaabarnstillegg", "etterbetaling")
+
+    enum class TilManuellBehandlingÅrsak(val beskrivelse: String) {
+        ETTERBETALING_ELLER_FEILUTBETALING("Endring i OS gir etterbetaling eller feilutbetaling"),
+        KLARER_IKKE_BEGRUNNE("Klarer ikke å begrunne")
+    }
+
+    private val antallVedtakOmOvergangsstønadTilManuellBehandling: Map<TilManuellBehandlingÅrsak, Counter> =
+        TilManuellBehandlingÅrsak.values().associateWith {
+            Metrics.counter(
+                "behandling",
+                "saksbehandling",
+                "hendelse",
+                "smaabarnstillegg",
+                "til_manuell_behandling",
+                "aarsak",
+                it.name,
+                "beskrivelse",
+                it.beskrivelse,
+            )
+        }
 
     fun håndterVedtakOmOvergangsstønad(personIdent: String): String {
         if (!featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_SMÅBARNSTILLEGG_AUTOMATISK))
@@ -85,25 +102,26 @@ class VedtakOmOvergangsstønadService(
                 stegService.håndterBehandlingsresultat(behandlingEtterVilkårsvurdering)
 
             if (behandlingEtterBehandlingsresultat.status != BehandlingStatus.IVERKSETTER_VEDTAK) {
-                val feilutbetaling =
-                    simuleringService.hentFeilutbetaling(behandlingId = behandlingEtterBehandlingsresultat.id)
-                val etterbetaling =
-                    simuleringService.hentEtterbetaling(behandlingId = behandlingEtterBehandlingsresultat.id)
-
-                if (feilutbetaling != BigDecimal(0)) {
-                    antallVedtakOmOvergangsstønadFeilutbetaling.increment()
-                    behandlingService.omgjørTilManuellBehandling(behandlingEtterBehandlingsresultat)
-                    // TODO opprett oppgave
-                    return "behandling fører til feilutbetaling, må fortsette behandling manuelt."
-                } else if (etterbetaling != BigDecimal(0)) {
-                    antallVedtakOmOvergangsstønadEtterbetaling.increment()
-                    behandlingService.omgjørTilManuellBehandling(behandlingEtterBehandlingsresultat)
-                    // TODO opprett oppgave
-                    return "behandling fører til etterbetaling, må fortsette behandling manuelt."
-                }
+                return kanIkkeBehandleAutomatisk(
+                    behandling = behandlingEtterBehandlingsresultat,
+                    metric = antallVedtakOmOvergangsstønadTilManuellBehandling[TilManuellBehandlingÅrsak.ETTERBETALING_ELLER_FEILUTBETALING]!!,
+                    årsak = "behandling fører til etterbetaling/feilutbetaling, må fortsette behandling manuelt.",
+                    meldingIOppgave = ""
+                )
             }
 
-            leggTilBegrunnelserPåVedtak(behandlingEtterBehandlingsresultat)
+            try {
+                begrunnAutovedtakForSmåbarnstillegg(behandlingEtterBehandlingsresultat)
+            } catch (vedtaksperiodefinnerSmåbarnstilleggFeil: VedtaksperiodefinnerSmåbarnstilleggFeil) {
+                logger.error(vedtaksperiodefinnerSmåbarnstilleggFeil.message)
+
+                return kanIkkeBehandleAutomatisk(
+                    behandling = behandlingEtterBehandlingsresultat,
+                    metric = antallVedtakOmOvergangsstønadTilManuellBehandling[TilManuellBehandlingÅrsak.KLARER_IKKE_BEGRUNNE]!!,
+                    årsak = "finner ikke aktuell vedtaksperiode å begrunne, må fortsette behandling manuelt.",
+                    meldingIOppgave = ""
+                )
+            }
 
             val vedtakEtterTotrinn = vedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(
                 behandlingEtterBehandlingsresultat
@@ -124,17 +142,54 @@ class VedtakOmOvergangsstønadService(
         }
     }
 
-    private fun leggTilBegrunnelserPåVedtak(behandlingEtterBehandlingsresultat: Behandling) {
-        val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = behandlingEtterBehandlingsresultat.id)
+    private fun begrunnAutovedtakForSmåbarnstillegg(
+        behandlingEtterBehandlingsresultat: Behandling
+    ) {
+        val sistIverksatteBehandling =
+            behandlingService.hentSisteBehandlingSomErIverksatt(fagsakId = behandlingEtterBehandlingsresultat.fagsak.id)
+        val forrigeSmåbarnstilleggAndeler =
+            if (sistIverksatteBehandling == null) emptyList()
+            else beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(
+                behandlingId = sistIverksatteBehandling.id
+            ).filter { it.erSmåbarnstillegg() }
 
-        val vedtaksperiodeSomSkalOppdateres =
+        val nyeSmåbarnstilleggAndeler =
+            if (sistIverksatteBehandling == null) emptyList()
+            else beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(
+                behandlingId = behandlingEtterBehandlingsresultat.id
+            ).filter { it.erSmåbarnstillegg() }
+
+        val (innvilgedeMånedPerioder, reduserteMånedPerioder) = hentInnvilgedeOgReduserteAndelerSmåbarnstillegg(
+            forrigeSmåbarnstilleggAndeler = forrigeSmåbarnstilleggAndeler,
+            nyeSmåbarnstilleggAndeler = nyeSmåbarnstilleggAndeler,
+        )
+
+        vedtaksperiodeService.lagre(
             finnAktuellVedtaksperiodeOgLeggTilSmåbarnstilleggbegrunnelse(
-                utvidedeVedtaksperioderMedBegrunnelser = vedtaksperiodeService.hentUtvidetVedtaksperiodeMedBegrunnelser(
-                    vedtak
-                ),
-                vedtaksperioderMedBegrunnelser = vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak)
+                innvilgetMånedPeriode = innvilgedeMånedPerioder.singleOrNull(),
+                redusertMånedPeriode = reduserteMånedPerioder.singleOrNull(),
+                vedtaksperioderMedBegrunnelser = vedtaksperiodeService.hentPersisterteVedtaksperioder(
+                    vedtak = vedtakService.hentAktivForBehandlingThrows(
+                        behandlingId = behandlingEtterBehandlingsresultat.id
+                    )
+                )
             )
+        )
+    }
 
-        vedtaksperiodeService.lagre(vedtaksperiodeSomSkalOppdateres)
+    private fun kanIkkeBehandleAutomatisk(
+        behandling: Behandling,
+        metric: Counter,
+        årsak: String,
+        meldingIOppgave: String
+    ): String {
+        metric.increment()
+        behandlingService.omgjørTilManuellBehandling(behandling)
+        // TODO opprett oppgave
+        return årsak
+    }
+
+    companion object {
+        val logger = LoggerFactory.getLogger(VedtakOmOvergangsstønadService::class.java)
     }
 }

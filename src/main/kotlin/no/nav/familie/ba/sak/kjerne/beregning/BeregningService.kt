@@ -142,6 +142,35 @@ class BeregningService(
         return tilkjentYtelseRepository.save(nyTilkjentYtelse)
     }
 
+    fun kanAutomatiskIverksetteSmåbarnstilleggEndring(
+        behandling: Behandling,
+        sistIverksatteBehandling: Behandling?
+    ): Boolean {
+        if (!behandling.skalBehandlesAutomatisk || !behandling.erSmåbarnstillegg()) return false
+
+        val forrigeSmåbarnstilleggAndeler =
+            if (sistIverksatteBehandling == null) emptyList()
+            else hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(
+                behandlingId = sistIverksatteBehandling.id
+            ).filter { it.erSmåbarnstillegg() }
+
+        val nyeSmåbarnstilleggAndeler =
+            if (sistIverksatteBehandling == null) emptyList()
+            else hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(
+                behandlingId = behandling.id
+            ).filter { it.erSmåbarnstillegg() }
+
+        val (innvilgedeMånedPerioder, reduserteMånedPerioder) = hentInnvilgedeOgReduserteAndelerSmåbarnstillegg(
+            forrigeSmåbarnstilleggAndeler = forrigeSmåbarnstilleggAndeler,
+            nyeSmåbarnstilleggAndeler = nyeSmåbarnstilleggAndeler,
+        )
+
+        return kanAutomatiskIverksetteSmåbarnstillegg(
+            innvilgedeMånedPerioder = innvilgedeMånedPerioder,
+            reduserteMånedPerioder = reduserteMånedPerioder
+        )
+    }
+
     private fun populerTilkjentYtelse(
         behandling: Behandling,
         utbetalingsoppdrag: Utbetalingsoppdrag

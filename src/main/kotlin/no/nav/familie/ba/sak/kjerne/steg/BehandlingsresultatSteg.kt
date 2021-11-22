@@ -132,17 +132,18 @@ class BehandlingsresultatSteg(
             )
         }
 
-        if (!behandlingMedResultat.skalBehandlesAutomatisk || behandlingMedResultat.erSmåbarnstillegg()) {
-            simuleringService.oppdaterSimuleringPåBehandling(behandlingMedResultat)
-        }
-
         if (behandlingMedResultat.skalRettFraBehandlingsresultatTilIverksetting() ||
-            simuleringService.autovedtakVedSmåbarnstilleggKanAutomatiskIverksettes(behandling = behandlingMedResultat)
+            beregningService.kanAutomatiskIverksetteSmåbarnstilleggEndring(
+                    behandling = behandlingMedResultat,
+                    sistIverksatteBehandling = behandlingService.hentForrigeBehandlingSomErIverksatt(behandling = behandlingMedResultat)
+                )
         ) {
             behandlingService.oppdaterStatusPåBehandling(
                 behandlingMedResultat.id,
                 BehandlingStatus.IVERKSETTER_VEDTAK
             )
+        } else {
+            simuleringService.oppdaterSimuleringPåBehandling(behandlingMedResultat)
         }
 
         return hentNesteStegForNormalFlyt(behandlingMedResultat)
