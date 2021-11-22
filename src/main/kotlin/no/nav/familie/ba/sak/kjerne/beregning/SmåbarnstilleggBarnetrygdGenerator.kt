@@ -5,10 +5,10 @@ import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
-import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
 import no.nav.fpsak.tidsserie.StandardCombinators
@@ -21,7 +21,7 @@ data class SmåbarnstilleggBarnetrygdGenerator(
 ) {
 
     fun lagSmåbarnstilleggAndeler(
-        perioderMedFullOvergangsstønad: List<PeriodeOvergangsstønad>,
+        perioderMedFullOvergangsstønad: List<InternPeriodeOvergangsstønad>,
         andelerSøker: List<AndelTilkjentYtelse>,
         barnasFødselsdatoer: List<LocalDate>
     ): List<AndelTilkjentYtelse> {
