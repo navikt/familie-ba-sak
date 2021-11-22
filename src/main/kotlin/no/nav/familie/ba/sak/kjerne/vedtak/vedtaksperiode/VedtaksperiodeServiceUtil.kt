@@ -72,7 +72,7 @@ fun hentVedtaksperioderMedBegrunnelserForUtbetalingsperioder(
         )
     }
 
-fun hentPersoneidenterGjeldendeForBegrunnelse(
+fun hentPersonidenterGjeldendeForBegrunnelse(
     triggesAv: TriggesAv,
     persongrunnlag: PersonopplysningGrunnlag,
     vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser,

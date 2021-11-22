@@ -21,6 +21,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.domene.Totrinnskontroll
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import org.junit.Assert.assertEquals
 import org.junit.jupiter.api.Assertions
@@ -471,7 +472,7 @@ internal class BrevUtilsTest {
     }
 
     @Test
-    fun `skal legge til barn med utbetalinger og fra alle begrunnelsene i brev-utbetalings-periodene`() {
+    fun `skal legge til barn med utbetalinger og fra alle utbetalingsbegrunnelsene i brev-utbetalings-periodene`() {
         val søker = tilfeldigSøker()
         val barn1 = tilfeldigPerson(personType = PersonType.BARN)
         val barn2 = tilfeldigPerson(personType = PersonType.BARN)
@@ -481,25 +482,32 @@ internal class BrevUtilsTest {
             type = Vedtaksperiodetype.UTBETALING,
             utbetalingsperiodeDetaljer = listOf(
                 lagUtbetalingsperiodeDetalj(barn1.tilRestPerson()),
-                lagUtbetalingsperiodeDetalj(barn2.tilRestPerson()),
                 lagUtbetalingsperiodeDetalj(søker.tilRestPerson()),
             ),
             begrunnelser = listOf(
                 lagRestVedtaksbegrunnelse(
-                    personIdenter = listOf(barn1.personIdent.ident, barn3.personIdent.ident, søker.personIdent.ident),
+                    vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON,
+                    personIdenter = listOf(
+                        barn3.personIdent.ident
+                    ),
+                ),
+                lagRestVedtaksbegrunnelse(
+                    vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET,
+                    personIdenter = listOf(
+                        barn2.personIdent.ident
+                    ),
                 ),
             )
         )
 
         val personerIPersongrunnlag = listOf(barn1, barn2, barn3, søker)
 
-        val barnIPeriode = utvidetVedtaksperiodeMedBegrunnelser.finnBarnIPeriode(personerIPersongrunnlag)
+        val barnIPeriode = utvidetVedtaksperiodeMedBegrunnelser.finnBarnIInnvilgelsePeriode(personerIPersongrunnlag)
 
-        Assertions.assertEquals(3, barnIPeriode.size)
+        Assertions.assertEquals(2, barnIPeriode.size)
         Assertions.assertTrue(
             barnIPeriode.contains(barn1.tilRestPerson()) &&
-                barnIPeriode.contains(barn2.tilRestPerson()) &&
-                barnIPeriode.contains(barn3.tilRestPerson())
+                barnIPeriode.contains(barn2.tilRestPerson())
         )
     }
 }
