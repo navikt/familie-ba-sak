@@ -475,6 +475,7 @@ class VilkårService(
                 ) person.fødselsdato else nyMigreringsdato
 
                 val tom: LocalDate? = when {
+                    person.fødselsdato.isAfter(nyMigreringsdato) -> null
                     vilkår.påvirketVilkårForEndreMigreringsdato() -> {
                         hentForrigeVilkårsvurderingsdato(forrigeBehandlingsvilkårsvurdering, person)
                     }
