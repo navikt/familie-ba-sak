@@ -49,6 +49,4 @@ spec:
       value: preprod
     - name: SRVUSER_BA_SAK_SECRET
       value: /var/run/secrets/srvfamilie-ba-sak/password
-    - name: JAVA_PROXY_OPTIONS
-      value: -Dhttp.proxyHost=https://xsrv1mh6.apicdn.sanity.io/v2021-06-07/data/query/ba-brev
   webproxy: true
