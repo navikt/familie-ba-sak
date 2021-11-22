@@ -22,6 +22,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Personopplysning
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
@@ -560,8 +561,10 @@ internal class TilkjentYtelseUtilsTest {
                     periodeFom = barnFødselsdato,
                     periodeTom = null,
                     begrunnelse = "",
-                    erDeltBosted = erDeltBosted,
-                    behandlingId = behandling.id
+                    behandlingId = behandling.id,
+                    utdypendeVilkårsvurderinger = listOfNotNull(
+                        if (erDeltBosted) UtdypendeVilkårsvurdering.DELT_BOSTED else null
+                    )
                 )
             )
         )

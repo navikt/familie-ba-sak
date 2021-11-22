@@ -438,7 +438,9 @@ fun lagPersonResultat(
                     resultat = resultat,
                     begrunnelse = "",
                     behandlingId = vilkårsvurdering.behandling.id,
-                    erDeltBosted = erDeltBosted && it == Vilkår.BOR_MED_SØKER
+                    utdypendeVilkårsvurderinger = listOfNotNull(
+                        if (erDeltBosted && it == Vilkår.BOR_MED_SØKER) UtdypendeVilkårsvurdering.DELT_BOSTED else null
+                    )
                 )
             }.toSet()
         )
@@ -889,7 +891,6 @@ fun lagVilkårResultat(
     periodeTom: LocalDate = LocalDate.of(2010, 1, 31),
     begrunnelse: String = "",
     behandlingId: Long = lagBehandling().id,
-    erMedlemskapVurdert: Boolean = false,
     utdypendeVilkårsvurderinger: List<UtdypendeVilkårsvurdering> = emptyList()
 ) = VilkårResultat(
     personResultat = personResultat,
@@ -899,10 +900,7 @@ fun lagVilkårResultat(
     periodeTom = periodeTom,
     begrunnelse = begrunnelse,
     behandlingId = behandlingId,
-    erMedlemskapVurdert = erMedlemskapVurdert,
-    utdypendeVilkårsvurderinger = (
-        utdypendeVilkårsvurderinger + listOfNotNull(if (erMedlemskapVurdert) UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP else null)
-        ).distinct()
+    utdypendeVilkårsvurderinger = utdypendeVilkårsvurderinger
 )
 
 val guttenBarnesenFødselsdato = LocalDate.now().withDayOfMonth(10).minusYears(6)

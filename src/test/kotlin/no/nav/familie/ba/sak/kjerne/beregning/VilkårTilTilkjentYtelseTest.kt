@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
@@ -244,14 +245,16 @@ class TestVilkårsvurderingBuilder(sakType: String) {
 
         val vilkårsresultater = TestVilkårParser.parse(vilkår).map {
             VilkårResultat(
-                erDeltBosted = erDeltBosted ?: false,
                 personResultat = personResultat,
                 vilkårType = it,
                 resultat = Resultat.OPPFYLT,
                 periodeFom = testperiode.fraOgMed,
                 periodeTom = testperiode.tilOgMed,
                 begrunnelse = "",
-                behandlingId = vilkårsvurdering.behandling.id
+                behandlingId = vilkårsvurdering.behandling.id,
+                utdypendeVilkårsvurderinger = listOfNotNull(
+                    if (erDeltBosted == true) UtdypendeVilkårsvurdering.DELT_BOSTED else null
+                )
             )
         }.toSet()
 

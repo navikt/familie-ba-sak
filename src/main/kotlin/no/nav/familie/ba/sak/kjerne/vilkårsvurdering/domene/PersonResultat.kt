@@ -136,7 +136,7 @@ class PersonResultat(
             .filter {
                 (it.periodeFom == null || it.periodeFom!!.isSameOrBefore(segmentFom)) &&
                     (it.periodeTom == null || it.periodeTom!!.isSameOrAfter(segmentFom))
-            }.any { it.erDeltBosted }
+            }.any { it.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.DELT_BOSTED) }
 
     fun harEksplisittAvslag() = vilkårResultater.any { it.erEksplisittAvslagPåSøknad == true }
 }
