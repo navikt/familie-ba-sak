@@ -2,7 +2,9 @@ package no.nav.familie.ba.sak.kjerne.vedtak
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.Periode
+import no.nav.familie.ba.sak.common.overlapperHeltEllerDelvisMed
 import no.nav.familie.ba.sak.common.sisteDagIMåned
+import no.nav.familie.ba.sak.common.toPeriode
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
@@ -82,7 +84,10 @@ object VedtakUtils {
 
                         oppdatertBegrunnelseType == VedtakBegrunnelseType.OPPHØR &&
                             triggesAv.gjelderFørstePeriode
-                        -> !andelerTilkjentYtelse.any { it.stønadFom.isBefore(vedtaksperiode.fom.toYearMonth()) }
+                        -> !andelerTilkjentYtelse.any { it.stønadFom.isBefore(vedtaksperiode.fom.toYearMonth()) } &&
+                            triggereErOppfylt(triggesAv, vilkårResultat) &&
+                            vilkårResultat.resultat == Resultat.IKKE_OPPFYLT &&
+                            vilkårResultat.toPeriode().overlapperHeltEllerDelvisMed(vedtaksperiode)
 
                         oppdatertBegrunnelseType == VedtakBegrunnelseType.REDUKSJON ||
                             oppdatertBegrunnelseType == VedtakBegrunnelseType.OPPHØR -> {
