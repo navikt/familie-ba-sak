@@ -49,3 +49,12 @@ data class MedVennligHilsen(
         flettefelt(hjemler),
     )
 }
+
+data class AutoUnderskrift(
+    val enhet: Flettefelt,
+) {
+
+    constructor(enhet: String) : this(
+        flettefelt(enhet),
+    )
+}
