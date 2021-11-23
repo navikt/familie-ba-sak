@@ -78,7 +78,7 @@ object YtelsePersonUtils {
 
             if (behandlingsresultatPerson.søktForPerson) {
                 val beløpRedusert = (segmenterLagtTil + segmenterFjernet).isEmpty() &&
-                    (behandlingsresultatPerson.forrigeAndeler.sumOf { it.kalkulertUtbetalingsbeløp } - behandlingsresultatPerson.andeler.sumOf { it.kalkulertUtbetalingsbeløp }) > 0
+                    (behandlingsresultatPerson.forrigeAndeler.sumOf { it.sumForPeriode() } - behandlingsresultatPerson.andeler.sumOf { it.sumForPeriode() }) > 0
 
                 val finnesReduksjonerTilbakeITid = ytelsePerson.erFramstiltKravForITidligereBehandling() &&
                     finnesEndretSegmentTilbakeITid(segmenterFjernet)
@@ -88,7 +88,7 @@ object YtelsePersonUtils {
                 }
             } else {
                 val beløpEndret = (segmenterLagtTil + segmenterFjernet).isEmpty() &&
-                    behandlingsresultatPerson.forrigeAndeler.sumOf { it.kalkulertUtbetalingsbeløp } != behandlingsresultatPerson.andeler.sumOf { it.kalkulertUtbetalingsbeløp }
+                    behandlingsresultatPerson.forrigeAndeler.sumOf { it.sumForPeriode() } != behandlingsresultatPerson.andeler.sumOf { it.sumForPeriode() }
 
                 val enesteEndringErLøpendeTilOpphørt =
                     enesteEndringErLøpendeTilOpphørt(

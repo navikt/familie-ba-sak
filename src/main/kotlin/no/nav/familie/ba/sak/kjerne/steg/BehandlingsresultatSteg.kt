@@ -132,12 +132,17 @@ class BehandlingsresultatSteg(
             )
         }
 
-        if (behandlingMedResultat.skalRettFraBehandlingsresultatTilIverksetting()) {
+        if (behandlingMedResultat.skalRettFraBehandlingsresultatTilIverksetting() ||
+            beregningService.kanAutomatiskIverksetteSmåbarnstilleggEndring(
+                    behandling = behandlingMedResultat,
+                    sistIverksatteBehandling = behandlingService.hentForrigeBehandlingSomErIverksatt(behandling = behandlingMedResultat)
+                )
+        ) {
             behandlingService.oppdaterStatusPåBehandling(
                 behandlingMedResultat.id,
                 BehandlingStatus.IVERKSETTER_VEDTAK
             )
-        } else if (!behandlingMedResultat.skalBehandlesAutomatisk) {
+        } else {
             simuleringService.oppdaterSimuleringPåBehandling(behandlingMedResultat)
         }
 

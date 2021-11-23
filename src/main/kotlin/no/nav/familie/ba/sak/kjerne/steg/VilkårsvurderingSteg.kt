@@ -37,6 +37,7 @@ class VilkårsvurderingSteg(
                 )
             )
         }
+
         endretUtbetalingAndelService.fjernKnytningTilAndelTilkjentYtelse(behandling.id)
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
         return hentNesteStegForNormalFlyt(behandling)

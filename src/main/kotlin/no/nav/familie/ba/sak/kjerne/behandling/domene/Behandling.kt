@@ -59,8 +59,8 @@ data class Behandling(
     @Column(name = "opprettet_aarsak", nullable = false)
     val opprettetÅrsak: BehandlingÅrsak,
 
-    @Column(name = "skal_behandles_automatisk", nullable = false, updatable = false)
-    val skalBehandlesAutomatisk: Boolean = false,
+    @Column(name = "skal_behandles_automatisk", nullable = false, updatable = true)
+    var skalBehandlesAutomatisk: Boolean = false,
 
     @Enumerated(EnumType.STRING)
     @Column(name = "kategori", nullable = false, updatable = true)
@@ -159,7 +159,8 @@ data class Behandling(
     fun skalRettFraBehandlingsresultatTilIverksetting(): Boolean {
         return when {
             skalBehandlesAutomatisk && erOmregning() && resultat == BehandlingResultat.FORTSATT_INNVILGET -> true
-            skalBehandlesAutomatisk && resultat == BehandlingResultat.INNVILGET -> true
+            skalBehandlesAutomatisk && erMigrering() && resultat == BehandlingResultat.INNVILGET -> true
+            skalBehandlesAutomatisk && erFødselshendelse() && resultat == BehandlingResultat.INNVILGET -> true
             skalBehandlesAutomatisk && erSatsendring() && resultat == BehandlingResultat.ENDRET -> true
             else -> false
         }
@@ -203,6 +204,8 @@ data class Behandling(
         return this
     }
 
+    fun erSmåbarnstillegg() = this.opprettetÅrsak == BehandlingÅrsak.SMÅBARNSTILLEGG
+
     fun erKlage() = this.opprettetÅrsak == BehandlingÅrsak.KLAGE
 
     fun erMigrering() =
@@ -212,6 +215,8 @@ data class Behandling(
         this.opprettetÅrsak == BehandlingÅrsak.OMREGNING_6ÅR || this.opprettetÅrsak == BehandlingÅrsak.OMREGNING_18ÅR
 
     private fun erSatsendring() = this.opprettetÅrsak == BehandlingÅrsak.SATSENDRING
+
+    private fun erFødselshendelse() = this.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE
 
     fun hentYtelseTypeTilVilkår(): YtelseType = when (underkategori) {
         BehandlingUnderkategori.UTVIDET -> YtelseType.UTVIDET_BARNETRYGD
@@ -283,6 +288,7 @@ enum class BehandlingÅrsak(val visningsnavn: String) {
     KORREKSJON_VEDTAKSBREV("Korrigere vedtak med egen brevmal"),
     OMREGNING_6ÅR("Omregning 6 år"),
     OMREGNING_18ÅR("Omregning 18 år"),
+    SMÅBARNSTILLEGG("Småbarnstillegg"),
     SATSENDRING("Satsendring"),
     SMÅBARNSTILLEGG("Småbarnstillegg"),
     MIGRERING("Migrering"),
@@ -332,6 +338,10 @@ enum class BehandlingStatus {
     FATTER_VEDTAK,
     IVERKSETTER_VEDTAK,
     AVSLUTTET,
+}
+
+fun BehandlingStatus.erÅpen(): Boolean {
+    return this != BehandlingStatus.AVSLUTTET
 }
 
 class BehandlingStegComparator : Comparator<BehandlingStegTilstand> {
