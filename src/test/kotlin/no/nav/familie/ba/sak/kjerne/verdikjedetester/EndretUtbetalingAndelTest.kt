@@ -21,7 +21,7 @@ import org.springframework.test.annotation.DirtiesContext
 import java.math.BigDecimal
 import java.time.LocalDate
 
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
+@DirtiesContext
 class EndretUtbetalingAndelTest(
     @Autowired private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     @Autowired private val behandlingService: BehandlingService,
