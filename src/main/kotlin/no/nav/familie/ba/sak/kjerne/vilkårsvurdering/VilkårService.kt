@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestNyttVilkår
@@ -470,20 +469,10 @@ class VilkårService(
             val vilkårTyperForPerson = Vilkår.hentVilkårFor(person.type)
 
             val vilkårResultater = vilkårTyperForPerson.map { vilkår ->
-                val fom = if (person.fødselsdato.isAfter(nyMigreringsdato) ||
-                    !vilkår.påvirketVilkårForEndreMigreringsdato()
-                ) person.fødselsdato else nyMigreringsdato
+                val fom = utledPeriodeFom(forrigeBehandlingsvilkårsvurdering, vilkår, person, nyMigreringsdato)
 
-                val tom: LocalDate? = when {
-                    person.fødselsdato.isAfter(nyMigreringsdato) -> null
-                    vilkår.påvirketVilkårForEndreMigreringsdato() -> {
-                        hentForrigeVilkårsvurderingsdato(forrigeBehandlingsvilkårsvurdering, person)
-                    }
-                    vilkår == Vilkår.UNDER_18_ÅR -> {
-                        fom.plusYears(18).minusDays(1)
-                    }
-                    else -> null
-                }
+                val tom: LocalDate? =
+                    utledPeriodeTom(forrigeBehandlingsvilkårsvurdering, vilkår, person, fom)
 
                 val begrunnelse = "Migrering"
 
@@ -498,12 +487,12 @@ class VilkårService(
                     behandlingId = personResultat.vilkårsvurdering.behandling.id
                 )
             }.toSortedSet(VilkårResultatComparator)
-            // kopi forrige vilkårsvurderingsperiode
-            vilkårResultater.addAll(
-                kopiForrigeVilkårResultat(forrigeBehandlingsvilkårsvurdering, person)
-                    .map { it.kopierMedParent(personResultat) }
-                    .toSet()
+
+            val manglendePerioder = kopiManglendePerioderFraForrigeVilkårsvurdering(
+                vilkårResultater,
+                forrigeBehandlingsvilkårsvurdering, person
             )
+            vilkårResultater.addAll(manglendePerioder.map { it.kopierMedParent(personResultat) }.toSet())
             personResultat.setSortedVilkårResultater(vilkårResultater)
 
             personResultat
@@ -515,26 +504,69 @@ class VilkårService(
             .hentAktivForBehandling(behandlingId = vilkårsvurdering.behandling.id) == null
     }
 
-    private fun hentForrigeVilkårsvurderingsdato(
+    private fun hentForrigeVilkårsvurderingVilkårResultater(
         forrigeBehandlingsvilkårsvurdering: Vilkårsvurdering,
+        vilkår: Vilkår,
         person: Person
-    ): LocalDate {
-        val personResultat = forrigeBehandlingsvilkårsvurdering.personResultater
-            .first { it.personIdent == person.personIdent.ident }
-        val førstVilkårsdato = personResultat.vilkårResultater
-            .filter { it.vilkårType.påvirketVilkårForEndreMigreringsdato() }
-            .minOf { it.periodeFom!! }
-        return førstVilkårsdato.toYearMonth().minusMonths(1).atEndOfMonth()
-    }
-
-    private fun kopiForrigeVilkårResultat(
-        forrigeBehandlingsvilkårsvurdering: Vilkårsvurdering,
-        person: Person
-    ): Set<VilkårResultat> {
+    ): List<VilkårResultat> {
         val personResultat = forrigeBehandlingsvilkårsvurdering.personResultater
             .first { it.personIdent == person.personIdent.ident }
         return personResultat.vilkårResultater
-            .filter { it.vilkårType.påvirketVilkårForEndreMigreringsdato() }.toSortedSet(VilkårResultatComparator)
+            .filter { it.vilkårType == vilkår }
+    }
+
+    private fun utledPeriodeFom(
+        forrigeBehandlingsvilkårsvurdering: Vilkårsvurdering,
+        vilkår: Vilkår,
+        person: Person,
+        nyMigreringsdato: LocalDate
+    ): LocalDate {
+        val forrigeVilkårsPeriodeFom = hentForrigeVilkårsvurderingVilkårResultater(
+            forrigeBehandlingsvilkårsvurdering,
+            vilkår, person
+        ).minOf { it.periodeFom!! }
+        return when {
+            person.fødselsdato.isAfter(nyMigreringsdato) ||
+                vilkår.gjelderAlltidFraBarnetsFødselsdato() -> person.fødselsdato
+            forrigeVilkårsPeriodeFom.isBefore(nyMigreringsdato) -> forrigeVilkårsPeriodeFom
+            else -> nyMigreringsdato
+        }
+    }
+
+    private fun utledPeriodeTom(
+        forrigeBehandlingsvilkårsvurdering: Vilkårsvurdering,
+        vilkår: Vilkår,
+        person: Person,
+        periodeFom: LocalDate,
+    ): LocalDate? {
+        val forrigeVilkårsPeriodeTom: LocalDate? = hentForrigeVilkårsvurderingVilkårResultater(
+            forrigeBehandlingsvilkårsvurdering, vilkår, person
+        ).minWithOrNull(VilkårResultatComparator)?.periodeTom
+        return when {
+            vilkår == Vilkår.UNDER_18_ÅR -> periodeFom.plusYears(18).minusDays(1)
+            vilkår == Vilkår.GIFT_PARTNERSKAP -> null
+            forrigeVilkårsPeriodeTom != null -> forrigeVilkårsPeriodeTom
+            else -> null
+        }
+    }
+
+    private fun kopiManglendePerioderFraForrigeVilkårsvurdering(
+        vilkårResulater: Set<VilkårResultat>,
+        forrigeBehandlingsvilkårsvurdering: Vilkårsvurdering,
+        person: Person
+    ): List<VilkårResultat> {
+        val manglendeVilkårResultater = mutableListOf<VilkårResultat>()
+        vilkårResulater.forEach {
+            val forrigeVilkårResultater =
+                hentForrigeVilkårsvurderingVilkårResultater(forrigeBehandlingsvilkårsvurdering, it.vilkårType, person)
+            manglendeVilkårResultater.addAll(
+                forrigeVilkårResultater.filter { forrigeVilkårResultat ->
+                    forrigeVilkårResultat.periodeFom != it.periodeFom &&
+                        forrigeVilkårResultat.periodeTom != it.periodeTom
+                }
+            )
+        }
+        return manglendeVilkårResultater
     }
 }
 
