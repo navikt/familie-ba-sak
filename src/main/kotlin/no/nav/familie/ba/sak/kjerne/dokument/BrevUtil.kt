@@ -47,6 +47,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.domene.Totrinnskontroll
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.hjemlerTilhørendeFritekst
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Begrunnelse
@@ -87,7 +88,8 @@ private fun hentAutomatiskVedtaksbrevtype(behandlingÅrsak: BehandlingÅrsak, fa
             } else Brevmal.AUTOVEDTAK_NYFØDT_FØRSTE_BARN
         }
         BehandlingÅrsak.OMREGNING_6ÅR,
-        BehandlingÅrsak.OMREGNING_18ÅR -> Brevmal.AUTOVEDTAK_BARN_6_OG_18_ÅR
+        BehandlingÅrsak.OMREGNING_18ÅR,
+        BehandlingÅrsak.SMÅBARNSTILLEGG -> Brevmal.AUTOVEDTAK_BARN_6_OG_18_ÅR_OG_SMÅBARNSTILLEGG
         else -> throw Feil("Det er ikke laget funksjonalitet for automatisk behandling for $behandlingÅrsak")
     }
 
@@ -327,7 +329,7 @@ private fun UtvidetVedtaksperiodeMedBegrunnelser.hentInnvilgelseBrevPeriode(
     begrunnelserOgFritekster: List<Begrunnelse>,
     personerIPersongrunnlag: List<Person>,
 ): InnvilgelseBrevPeriode {
-    val barnIPeriode = finnBarnIPeriode(personerIPersongrunnlag)
+    val barnIPeriode = finnBarnIInnvilgelsePeriode(personerIPersongrunnlag)
 
     return InnvilgelseBrevPeriode(
         fom = this.fom!!.tilDagMånedÅr(),
@@ -339,10 +341,12 @@ private fun UtvidetVedtaksperiodeMedBegrunnelser.hentInnvilgelseBrevPeriode(
     )
 }
 
-fun UtvidetVedtaksperiodeMedBegrunnelser.finnBarnIPeriode(
+fun UtvidetVedtaksperiodeMedBegrunnelser.finnBarnIInnvilgelsePeriode(
     personerIPersongrunnlag: List<Person>
 ): List<RestPerson> {
-    val identerIBegrunnelene = this.begrunnelser.flatMap { it.personIdenter }
+    val identerIBegrunnelene = this.begrunnelser
+        .filter { it.vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGET }
+        .flatMap { it.personIdenter }
     val identerMedUtbetaling = this.utbetalingsperiodeDetaljer.map { it.person.personIdent }
 
     val barnIPeriode = (identerIBegrunnelene + identerMedUtbetaling)
@@ -360,8 +364,8 @@ private fun UtvidetVedtaksperiodeMedBegrunnelser.hentFortsattInnvilgetBrevPeriod
     begrunnelserOgFritekster: List<Begrunnelse>
 ): FortsattInnvilgetBrevPeriode {
     val erAutobrev = this.begrunnelser.any { vedtaksbegrunnelse ->
-        vedtaksbegrunnelse.vedtakBegrunnelseSpesifikasjon == VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR ||
-            vedtaksbegrunnelse.vedtakBegrunnelseSpesifikasjon == VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR
+        vedtaksbegrunnelse.vedtakBegrunnelseSpesifikasjon == VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR_AUTOVEDTAK ||
+            vedtaksbegrunnelse.vedtakBegrunnelseSpesifikasjon == VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR_AUTOVEDTAK
     }
     val fom = if (erAutobrev && this.fom != null) {
         val fra = if (målform == Målform.NB) "Fra" else "Frå"

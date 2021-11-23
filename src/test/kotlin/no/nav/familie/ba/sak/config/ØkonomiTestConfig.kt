@@ -28,19 +28,33 @@ class ØkonomiTestConfig {
     fun mockØkonomiKlient(): ØkonomiKlient {
         val økonomiKlient: ØkonomiKlient = mockk()
 
-        val iverksettRespons =
-            Ressurs("Mocksvar fra Økonomi-klient", Ressurs.Status.SUKSESS, "", "", null)
-        every { økonomiKlient.iverksettOppdrag(any()) } returns iverksettRespons
-
-        val hentStatusRespons =
-            Ressurs(OppdragStatus.KVITTERT_OK, Ressurs.Status.SUKSESS, "", "", null)
-        every { økonomiKlient.hentStatus(any()) } returns hentStatusRespons
-
-        every { økonomiKlient.hentEtterbetalingsbeløp(any()) } returns Ressurs.success(RestSimulerResultat(etterbetaling = 1054))
-
-        every { økonomiKlient.hentSimulering(any()) } returns Ressurs.success(DetaljertSimuleringResultat(simuleringMottakerMock))
+        clearØkonomiMocks(økonomiKlient)
 
         return økonomiKlient
+    }
+
+    companion object {
+        fun clearØkonomiMocks(økonomiKlient: ØkonomiKlient) {
+            val iverksettRespons =
+                Ressurs("Mocksvar fra Økonomi-klient", Ressurs.Status.SUKSESS, "", "", null)
+            every { økonomiKlient.iverksettOppdrag(any()) } returns iverksettRespons
+
+            val hentStatusRespons =
+                Ressurs(OppdragStatus.KVITTERT_OK, Ressurs.Status.SUKSESS, "", "", null)
+            every { økonomiKlient.hentStatus(any()) } returns hentStatusRespons
+
+            every { økonomiKlient.hentEtterbetalingsbeløp(any()) } returns Ressurs.success(
+                RestSimulerResultat(
+                    etterbetaling = 1054
+                )
+            )
+
+            every { økonomiKlient.hentSimulering(any()) } returns Ressurs.success(
+                DetaljertSimuleringResultat(
+                    simuleringMottakerMock
+                )
+            )
+        }
     }
 }
 
