@@ -16,7 +16,9 @@ data class AutovedtakNyfødtFørsteBarn(
                 delmalData = AutovedtakNyfødtFørsteBarnData.Delmaler(
                     etterbetaling = etterbetaling,
                     hjemmeltekst = vedtakFellesfelter.hjemmeltekst,
-                    medVennilgHilsen = MedVennligHilsen(vedtakFellesfelter.enhet)
+                    autoUnderskrift = AutoUnderskrift(
+                        vedtakFellesfelter.enhet
+                    )
                 ),
                 flettefelter = FlettefelterForDokumentImpl(
                     navn = vedtakFellesfelter.søkerNavn,
@@ -36,6 +38,6 @@ data class AutovedtakNyfødtFørsteBarnData(
     data class Delmaler(
         val etterbetaling: Etterbetaling?,
         val hjemmeltekst: Hjemmeltekst,
-        val medVennilgHilsen: MedVennligHilsen
+        val autoUnderskrift: AutoUnderskrift,
     )
 }
