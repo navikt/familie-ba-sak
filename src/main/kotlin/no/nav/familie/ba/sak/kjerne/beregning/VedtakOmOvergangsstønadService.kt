@@ -22,6 +22,7 @@ import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class VedtakOmOvergangsstønadService(
@@ -66,6 +67,7 @@ class VedtakOmOvergangsstønadService(
             )
         }
 
+    @Transactional
     fun håndterVedtakOmOvergangsstønad(personIdent: String): String {
         if (!featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_SMÅBARNSTILLEGG_AUTOMATISK))
             return "automatisk behandling av småbarnstillegg er ikke påskrudd"
