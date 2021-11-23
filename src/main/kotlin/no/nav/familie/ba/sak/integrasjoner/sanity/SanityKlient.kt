@@ -3,11 +3,12 @@ package no.nav.familie.ba.sak.kjerne.dokument
 import no.nav.familie.ba.sak.kjerne.dokument.domene.RestSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.dokument.domene.SanityBegrunnelse
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.HttpMethod
 import org.springframework.stereotype.Component
-import org.springframework.web.client.RestTemplate
+import org.springframework.web.client.RestOperations
 import java.net.URI
 
 data class SanityRespons<T>(
@@ -19,7 +20,7 @@ data class SanityRespons<T>(
 @Component
 class SanityKlient(
     @Value("\${SANITY_FAMILIE_API_URL}") private val sanityFamilieApi: String,
-    private val restTemplate: RestTemplate
+    @Qualifier("medProxy") val restOperations: RestOperations,
 ) {
 
     fun hentSanityBegrunnelser(): List<SanityBegrunnelse> {
@@ -27,7 +28,7 @@ class SanityKlient(
         val url = URI.create("$sanityFamilieApi?query=$parameters")
         logger.info("Henter begrunnelser fra sanity")
 
-        val response = restTemplate.exchange(
+        val response = restOperations.exchange(
             url,
             HttpMethod.GET,
             null,
