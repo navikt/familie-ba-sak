@@ -73,7 +73,6 @@ class SmåbarnstilleggService(
             nyePerioderMedFullOvergangsstønad = nyePerioderMedFullOvergangsstønad,
             forrigeSøkersAndeler = forrigeSøkersAndeler,
             barnasFødselsdatoer = persongrunnlagFraSistIverksatteBehandling.barna.map { it.fødselsdato },
-            søkerAktør = fagsak.aktør
         )
     }
 

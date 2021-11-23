@@ -58,7 +58,6 @@ class SmåbarnstilleggUtilsTest {
                 )
             ),
             barnasFødselsdatoer = listOf(LocalDate.now().minusYears(2)),
-            søkerAktør = randomAktørId()
         )
 
         assertTrue(påvirkerFagsak)
@@ -98,7 +97,6 @@ class SmåbarnstilleggUtilsTest {
                 )
             ),
             barnasFødselsdatoer = listOf(LocalDate.now().minusYears(2)),
-            søkerAktør = søkerAktørId
         )
 
         assertFalse(påvirkerFagsak)

@@ -120,7 +120,7 @@ class SaksstatistikkService(
         // Skipper saker som er fødselshendelse
         if (aktivBehandling?.opprettetÅrsak == FØDSELSHENDELSE && !envService.skalIverksetteBehandling()) return null
 
-        val søkersAktørId = personopplysningerService.hentAktivAktørId(Ident(søkerIdent))
+        val søkersAktørId = personopplysningerService.hentOgLagreAktørId(Ident(søkerIdent))
 
         var landkodeSøker: String = PersonopplysningerService.UKJENT_LANDKODE
         val deltagere = if (aktivBehandling != null) {
@@ -130,7 +130,7 @@ class SaksstatistikkService(
                     landkodeSøker = hentLandkode(it)
                 }
                 AktørDVH(
-                    personopplysningerService.hentAktivAktørId(Ident(it.personIdent.ident)).aktørId.toLong(),
+                    personopplysningerService.hentOgLagreAktørId(Ident(it.personIdent.ident)).aktørId.toLong(),
                     it.type.name
                 )
             }

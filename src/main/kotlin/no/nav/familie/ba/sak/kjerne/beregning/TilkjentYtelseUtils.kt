@@ -116,7 +116,6 @@ object TilkjentYtelseUtils {
                     perioderMedFullOvergangsstønad = perioderMedFullOvergangsstønad,
                     andelerSøker = andelerTilkjentYtelseSøker,
                     barnasFødselsdatoer = personopplysningGrunnlag.barna.map { it.fødselsdato },
-                    søkerAktør = personopplysningGrunnlag.søker.hentAktørId()
                 )
         } else emptyList()
 

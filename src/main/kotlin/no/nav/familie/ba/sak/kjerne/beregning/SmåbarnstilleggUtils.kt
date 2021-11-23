@@ -10,7 +10,6 @@ import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
 import no.nav.familie.ba.sak.kjerne.beregning.domene.erUlike
-import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
@@ -39,7 +38,6 @@ fun vedtakOmOvergangsstønadPåvirkerFagsak(
     nyePerioderMedFullOvergangsstønad: List<InternPeriodeOvergangsstønad>,
     forrigeSøkersAndeler: List<AndelTilkjentYtelse>,
     barnasFødselsdatoer: List<LocalDate>,
-    søkerAktør: Aktør,
 ): Boolean {
     val (forrigeSøkersSmåbarnstilleggAndeler, forrigeSøkersAndreAndeler) = forrigeSøkersAndeler.partition { it.erSmåbarnstillegg() }
 
@@ -47,7 +45,6 @@ fun vedtakOmOvergangsstønadPåvirkerFagsak(
         perioderMedFullOvergangsstønad = nyePerioderMedFullOvergangsstønad,
         andelerSøker = forrigeSøkersAndreAndeler,
         barnasFødselsdatoer = barnasFødselsdatoer,
-        søkerAktør = søkerAktør,
     )
 
     return forrigeSøkersSmåbarnstilleggAndeler.erUlike(nyeSmåbarnstilleggAndeler)

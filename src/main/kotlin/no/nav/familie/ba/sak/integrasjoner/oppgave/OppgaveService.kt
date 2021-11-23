@@ -69,7 +69,7 @@ class OppgaveService(
             }
 
             val aktorId =
-                personopplysningerService.hentAktivAktørId(Ident(behandling.fagsak.hentAktivIdent().ident))
+                personopplysningerService.hentOgLagreAktørId(Ident(behandling.fagsak.hentAktivIdent().ident))
             val opprettOppgave = OpprettOppgaveRequest(
                 ident = OppgaveIdentV2(ident = aktorId.aktørId, gruppe = IdentGruppe.AKTOERID),
                 saksId = fagsakId.toString(),

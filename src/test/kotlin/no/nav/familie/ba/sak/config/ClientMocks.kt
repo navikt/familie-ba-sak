@@ -140,7 +140,7 @@ class ClientMocks {
         }
 
         every {
-            mockPersonopplysningerService.hentAktivAktørId(any())
+            mockPersonopplysningerService.hentOgLagreAktørId(any())
         } answers {
             randomAktørId()
         }
@@ -239,7 +239,7 @@ class ClientMocks {
             clearMocks(mockPersonopplysningerService)
 
             every {
-                mockPersonopplysningerService.hentAktivAktørId(any())
+                mockPersonopplysningerService.hentOgLagreAktørId(any())
             } answers {
                 randomAktørId()
             }
@@ -746,7 +746,7 @@ fun mockHentPersoninfoForMedIdenter(
     } returns PersonInfo(fødselsdato = LocalDate.of(1990, 2, 19), kjønn = Kjønn.KVINNE, navn = "Mor Moresen")
 
     every {
-        mockPersonopplysningerService.hentAktivAktørId(any())
+        mockPersonopplysningerService.hentOgLagreAktørId(any())
     } returns Aktør("1")
 }
 

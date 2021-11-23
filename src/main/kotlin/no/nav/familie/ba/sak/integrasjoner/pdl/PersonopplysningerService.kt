@@ -69,15 +69,7 @@ class PersonopplysningerService(
         return pdlRestClient.hentPerson(personIdent, personInfoQuery)
     }
 
-    fun hentAktivAktørId(ident: Ident): Aktør {
-        val aktørId = hentAktørId(ident.ident)
-        if (aktørId.isEmpty()) error("Finner ingen aktiv aktørId for ident")
-        return Aktør(aktørId.first())
-    }
-
-    fun hentAktørId(personIdent: String): List<String> {
-        return listOf(personidentService.hentOgLagreAktørId(personIdent).aktørId)
-    }
+    fun hentOgLagreAktørId(ident: Ident): Aktør = personidentService.hentOgLagreAktørId(ident.ident)
 
     fun hentAktivPersonIdent(ident: Ident): PersonIdent {
         val identer = hentIdenter(ident).filter { !it.historisk && it.gruppe == "FOLKEREGISTERIDENT" }.map { it.ident }

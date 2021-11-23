@@ -287,8 +287,8 @@ internal class SaksstatistikkServiceTest(
             fagsak.copy(søkerIdenter = setOf(fagsakPerson))
         }
 
-        every { personopplysningerService.hentAktivAktørId(Ident("12345678910")) } returns Aktør("1234567891011")
-        every { personopplysningerService.hentAktivAktørId(Ident("12345678911")) } returns Aktør("1234567891111")
+        every { personopplysningerService.hentOgLagreAktørId(Ident("12345678910")) } returns Aktør("1234567891011")
+        every { personopplysningerService.hentOgLagreAktørId(Ident("12345678911")) } returns Aktør("1234567891111")
         every { personopplysningerService.hentPersoninfoEnkel("12345678910") } returns PersonInfo(
             fødselsdato = LocalDate.of(
                 2017,
@@ -331,8 +331,8 @@ internal class SaksstatistikkServiceTest(
             fagsak.copy(søkerIdenter = setOf(fagsakPerson))
         }
 
-        every { personopplysningerService.hentAktivAktørId(Ident("12345678910")) } returns Aktør("1234567891011")
-        every { personopplysningerService.hentAktivAktørId(Ident("12345678911")) } returns Aktør("1234567891111")
+        every { personopplysningerService.hentOgLagreAktørId(Ident("12345678910")) } returns Aktør("1234567891011")
+        every { personopplysningerService.hentOgLagreAktørId(Ident("12345678911")) } returns Aktør("1234567891111")
         every { personopplysningerService.hentPersoninfoEnkel("12345678910") } returns PersonInfo(
             fødselsdato = LocalDate.of(
                 2017,
@@ -362,7 +362,7 @@ internal class SaksstatistikkServiceTest(
             fagsak.copy(søkerIdenter = setOf(fagsakPerson))
         }
         val randomAktørId = randomAktørId()
-        every { personopplysningerService.hentAktivAktørId(any()) } returns randomAktørId
+        every { personopplysningerService.hentOgLagreAktørId(any()) } returns randomAktørId
         every { personopplysningerService.hentLandkodeUtenlandskBostedsadresse(any()) } returns "SE"
 
         every { persongrunnlagService.hentAktiv(any()) } returns lagTestPersonopplysningGrunnlag(

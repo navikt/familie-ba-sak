@@ -77,7 +77,7 @@ class OppgaveServiceTest {
                 any<Behandling>()
             )
         } returns null
-        every { personopplysningerService.hentAktivAktørId(any()) } returns Aktør(AKTØR_ID_FAGSAK)
+        every { personopplysningerService.hentOgLagreAktørId(any()) } returns Aktør(AKTØR_ID_FAGSAK)
 
         every { arbeidsfordelingService.hentAbeidsfordelingPåBehandling(any()) } returns ArbeidsfordelingPåBehandling(
             behandlingId = 1,
