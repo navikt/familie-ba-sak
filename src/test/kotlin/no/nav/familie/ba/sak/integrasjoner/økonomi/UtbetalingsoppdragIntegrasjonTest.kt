@@ -60,6 +60,7 @@ class UtbetalingsoppdragIntegrasjonTest(
     @Test
     fun `skal opprette et nytt utbetalingsoppdrag med felles løpende periodeId og separat kjeding på to personer`() {
         val personMedFlerePerioder = tilfeldigPerson()
+        val tilfeldigPerson = tilfeldigPerson()
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(personMedFlerePerioder.personIdent.ident)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
         val vedtak = lagVedtak(behandling = behandling)
@@ -72,6 +73,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                 660,
                 behandling,
                 person = personMedFlerePerioder,
+                aktør = personidentService.hentOgLagreAktørId(personMedFlerePerioder.personIdent.ident),
                 tilkjentYtelse = tilkjentYtelse
             ),
             lagAndelTilkjentYtelse(
@@ -81,6 +83,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                 660,
                 behandling,
                 person = personMedFlerePerioder,
+                aktør = personidentService.hentOgLagreAktørId(personMedFlerePerioder.personIdent.ident),
                 tilkjentYtelse = tilkjentYtelse
             ),
             lagAndelTilkjentYtelse(
@@ -89,7 +92,9 @@ class UtbetalingsoppdragIntegrasjonTest(
                 YtelseType.ORDINÆR_BARNETRYGD,
                 1054,
                 behandling,
-                tilkjentYtelse = tilkjentYtelse
+                tilkjentYtelse = tilkjentYtelse,
+                person = tilfeldigPerson,
+                aktør = personidentService.hentOgLagreAktørId(tilfeldigPerson.personIdent.ident),
             )
         )
         tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerTilkjentYtelse)
@@ -150,6 +155,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                 660,
                 behandling,
                 person = personMedFlerePerioder,
+                aktør = personidentService.hentOgLagreAktørId(personMedFlerePerioder.personIdent.ident),
                 periodeIdOffset = 0
             ),
             lagAndelTilkjentYtelse(
@@ -159,6 +165,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                 660,
                 behandling,
                 person = personMedFlerePerioder,
+                aktør = personidentService.hentOgLagreAktørId(personMedFlerePerioder.personIdent.ident),
                 periodeIdOffset = 1
             ),
             lagAndelTilkjentYtelse(
@@ -226,6 +233,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                 behandling,
                 periodeIdOffset = 0,
                 person = person,
+                aktør = personidentService.hentOgLagreAktørId(person.personIdent.ident),
                 tilkjentYtelse = tilkjentYtelse
             ),
             lagAndelTilkjentYtelse(
@@ -236,6 +244,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                 behandling,
                 periodeIdOffset = 1,
                 person = person,
+                aktør = personidentService.hentOgLagreAktørId(person.personIdent.ident),
                 tilkjentYtelse = tilkjentYtelse
             ),
             lagAndelTilkjentYtelse(
@@ -246,6 +255,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                 behandling,
                 periodeIdOffset = 2,
                 person = person,
+                aktør = personidentService.hentOgLagreAktørId(person.personIdent.ident),
                 tilkjentYtelse = tilkjentYtelse
             )
         )
@@ -273,6 +283,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                 behandling2,
                 periodeIdOffset = 0,
                 person = person,
+                aktør = personidentService.hentOgLagreAktørId(person.personIdent.ident),
                 tilkjentYtelse = tilkjentYtelse
             ),
             lagAndelTilkjentYtelse(
@@ -283,6 +294,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                 behandling2,
                 periodeIdOffset = 3,
                 person = person,
+                aktør = personidentService.hentOgLagreAktørId(person.personIdent.ident),
                 tilkjentYtelse = tilkjentYtelse2
             ),
             lagAndelTilkjentYtelse(
@@ -293,6 +305,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                 behandling2,
                 periodeIdOffset = 4,
                 person = person,
+                aktør = personidentService.hentOgLagreAktørId(person.personIdent.ident),
                 tilkjentYtelse = tilkjentYtelse2
             )
         )
@@ -370,6 +383,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                 behandling,
                 periodeIdOffset = 0,
                 person = person,
+                aktør = personidentService.hentOgLagreAktørId(person.personIdent.ident),
                 tilkjentYtelse = tilkjentYtelse
             ),
             lagAndelTilkjentYtelse(
@@ -380,6 +394,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                 behandling,
                 periodeIdOffset = 1,
                 person = person,
+                aktør = personidentService.hentOgLagreAktørId(person.personIdent.ident),
                 tilkjentYtelse = tilkjentYtelse
             )
         )
@@ -408,6 +423,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                 behandling2,
                 periodeIdOffset = 2,
                 person = nyPerson,
+                aktør = personidentService.hentOgLagreAktørId(nyPerson.personIdent.ident),
                 tilkjentYtelse = tilkjentYtelse2
             ),
             lagAndelTilkjentYtelse(
@@ -418,6 +434,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                 behandling2,
                 periodeIdOffset = 3,
                 person = nyPerson,
+                aktør = personidentService.hentOgLagreAktørId(nyPerson.personIdent.ident),
                 tilkjentYtelse = tilkjentYtelse2
             )
         )
@@ -458,7 +475,8 @@ class UtbetalingsoppdragIntegrasjonTest(
                 YtelseType.SMÅBARNSTILLEGG,
                 660,
                 behandling,
-                person = personMedFlerePerioder
+                person = personMedFlerePerioder,
+                aktør = personidentService.hentOgLagreAktørId(personMedFlerePerioder.personIdent.ident),
             ),
             lagAndelTilkjentYtelse(
                 årMnd("2026-05"),
@@ -466,7 +484,8 @@ class UtbetalingsoppdragIntegrasjonTest(
                 YtelseType.SMÅBARNSTILLEGG,
                 660,
                 behandling,
-                person = personMedFlerePerioder
+                person = personMedFlerePerioder,
+                aktør = personidentService.hentOgLagreAktørId(personMedFlerePerioder.personIdent.ident),
             ),
             lagAndelTilkjentYtelse(
                 årMnd("2019-03"),
@@ -474,7 +493,8 @@ class UtbetalingsoppdragIntegrasjonTest(
                 YtelseType.UTVIDET_BARNETRYGD,
                 1054,
                 behandling,
-                person = personMedFlerePerioder
+                person = personMedFlerePerioder,
+                aktør = personidentService.hentOgLagreAktørId(personMedFlerePerioder.personIdent.ident),
             )
         )
 
@@ -560,6 +580,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                 behandling,
                 periodeIdOffset = 0,
                 person = person,
+                aktør = personidentService.hentOgLagreAktørId(person.personIdent.ident),
                 tilkjentYtelse = tilkjentYtelse
             ),
             lagAndelTilkjentYtelse(
@@ -570,6 +591,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                 behandling,
                 periodeIdOffset = 1,
                 person = person,
+                aktør = personidentService.hentOgLagreAktørId(person.personIdent.ident),
                 tilkjentYtelse = tilkjentYtelse
             ),
             lagAndelTilkjentYtelse(
@@ -580,6 +602,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                 behandling,
                 periodeIdOffset = 2,
                 person = person,
+                aktør = personidentService.hentOgLagreAktørId(person.personIdent.ident),
                 tilkjentYtelse = tilkjentYtelse
             )
         )
@@ -608,6 +631,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                 behandling2,
                 periodeIdOffset = 0,
                 person = person,
+                aktør = personidentService.hentOgLagreAktørId(person.personIdent.ident),
                 tilkjentYtelse = tilkjentYtelse
             ),
             lagAndelTilkjentYtelse(
@@ -618,6 +642,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                 behandling2,
                 periodeIdOffset = 3,
                 person = person,
+                aktør = personidentService.hentOgLagreAktørId(person.personIdent.ident),
                 tilkjentYtelse = tilkjentYtelse2
             ),
             lagAndelTilkjentYtelse(
@@ -628,6 +653,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                 behandling2,
                 periodeIdOffset = 4,
                 person = person,
+                aktør = personidentService.hentOgLagreAktørId(person.personIdent.ident),
                 tilkjentYtelse = tilkjentYtelse2
             )
         )
@@ -715,6 +741,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                 behandling,
                 periodeIdOffset = 0,
                 person = person,
+                aktør = personidentService.hentOgLagreAktørId(person.personIdent.ident),
                 tilkjentYtelse = tilkjentYtelse
             ),
             lagAndelTilkjentYtelse(
@@ -725,6 +752,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                 behandling,
                 periodeIdOffset = 1,
                 person = person,
+                aktør = personidentService.hentOgLagreAktørId(person.personIdent.ident),
                 tilkjentYtelse = tilkjentYtelse
             ),
             lagAndelTilkjentYtelse(
@@ -735,6 +763,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                 behandling,
                 periodeIdOffset = 2,
                 person = person,
+                aktør = personidentService.hentOgLagreAktørId(person.personIdent.ident),
                 tilkjentYtelse = tilkjentYtelse
             )
         )
@@ -762,6 +791,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                 behandling2,
                 periodeIdOffset = 0,
                 person = person,
+                aktør = personidentService.hentOgLagreAktørId(person.personIdent.ident),
                 tilkjentYtelse = tilkjentYtelse
             ),
             lagAndelTilkjentYtelse(
@@ -772,6 +802,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                 behandling2,
                 periodeIdOffset = 3,
                 person = person,
+                aktør = personidentService.hentOgLagreAktørId(person.personIdent.ident),
                 tilkjentYtelse = tilkjentYtelse2
             ),
             lagAndelTilkjentYtelse(
@@ -782,6 +813,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                 behandling2,
                 periodeIdOffset = 4,
                 person = person,
+                aktør = personidentService.hentOgLagreAktørId(person.personIdent.ident),
                 tilkjentYtelse = tilkjentYtelse2
             )
         )
@@ -870,6 +902,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                 behandling,
                 periodeIdOffset = 0,
                 person = person,
+                aktør = personidentService.hentOgLagreAktørId(person.personIdent.ident),
                 tilkjentYtelse = tilkjentYtelse
             )
         )
@@ -918,6 +951,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                 behandling3,
                 periodeIdOffset = 0,
                 person = person,
+                aktør = personidentService.hentOgLagreAktørId(person.personIdent.ident),
                 tilkjentYtelse = tilkjentYtelse
             )
         )

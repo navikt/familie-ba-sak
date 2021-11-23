@@ -184,8 +184,15 @@ class VedtakServiceTest(
 
         vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering)
 
+        val barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr))
         val personopplysningGrunnlag =
-            lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
+            lagTestPersonopplysningGrunnlag(
+                behandling.id,
+                fnr,
+                listOf(barnFnr),
+                søkerAktør = fagsak.aktør,
+                barnAktør = barnAktør
+            )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
         behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling = behandling)

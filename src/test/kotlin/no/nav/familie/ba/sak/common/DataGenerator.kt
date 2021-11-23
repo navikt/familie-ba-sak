@@ -43,6 +43,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIde
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.personident.Personident
 import no.nav.familie.ba.sak.kjerne.steg.FØRSTE_STEG
 import no.nav.familie.ba.sak.kjerne.steg.JournalførVedtaksbrevDTO
 import no.nav.familie.ba.sak.kjerne.steg.StatusFraOppdragMedTask
@@ -207,7 +208,7 @@ fun lagAndelTilkjentYtelse(
     beløp: Int = sats(ytelseType),
     behandling: Behandling = lagBehandling(),
     person: Person = tilfeldigPerson(),
-    aktør: Aktør? = null,
+    aktør: Aktør = Aktør(person.personIdent.ident),
     periodeIdOffset: Long? = null,
     forrigeperiodeIdOffset: Long? = null,
     tilkjentYtelse: TilkjentYtelse? = null,
@@ -282,8 +283,24 @@ fun lagTestPersonopplysningGrunnlag(
     søkerPersonIdent: String,
     barnasIdenter: List<String>,
     barnFødselsdato: LocalDate = LocalDate.of(2019, 1, 1),
-    søkerAktør: Aktør? = null,
-    barnAktør: List<Aktør>? = null
+    søkerAktør: Aktør = randomAktørId().also {
+        it.personidenter.add(
+            Personident(
+                fødselsnummer = søkerPersonIdent,
+                aktør = it
+            )
+        )
+    },
+    barnAktør: List<Aktør> = barnasIdenter.map { fødselsnummer ->
+        randomAktørId().also {
+            it.personidenter.add(
+                Personident(
+                    fødselsnummer = fødselsnummer,
+                    aktør = it
+                )
+            )
+        }
+    },
 ): PersonopplysningGrunnlag {
     val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandlingId)
     val bostedsadresse = GrMatrikkeladresse(
@@ -316,7 +333,7 @@ fun lagTestPersonopplysningGrunnlag(
         personopplysningGrunnlag.personer.add(
             Person(
                 personIdent = PersonIdent(it),
-                aktør = barnAktør?.firstOrNull { aktørId ->
+                aktør = barnAktør.first { aktørId ->
                     aktørId.personidenter.map { personident -> personident.fødselsnummer }
                         .any { fødselsnummer -> fødselsnummer == it }
                 },

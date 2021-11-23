@@ -72,8 +72,15 @@ class ØkonomiIntegrasjonTest(
         vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering)
         Assertions.assertNotNull(behandling.fagsak.id)
 
+        val barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr))
         val personopplysningGrunnlag =
-            lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
+            lagTestPersonopplysningGrunnlag(
+                behandling.id,
+                fnr,
+                listOf(barnFnr),
+                søkerAktør = fagsak.aktør,
+                barnAktør = barnAktør
+            )
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
         behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling = behandling)
@@ -108,8 +115,15 @@ class ØkonomiIntegrasjonTest(
             vedtaksdato = LocalDateTime.of(2020, 1, 1, 4, 35)
         )
 
+        val barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr))
         val personopplysningGrunnlag =
-            lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
+            lagTestPersonopplysningGrunnlag(
+                behandling.id,
+                fnr,
+                listOf(barnFnr),
+                søkerAktør = fagsak.aktør,
+                barnAktør = barnAktør
+            )
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
         behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling)
 

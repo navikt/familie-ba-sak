@@ -74,8 +74,10 @@ data class Person(
     @JoinColumn(name = "fk_gr_personopplysninger_id", nullable = false, updatable = false)
     val personopplysningGrunnlag: PersonopplysningGrunnlag,
 
-    @ManyToOne(optional = true) @JoinColumn(name = "fk_aktoer_id", nullable = true, updatable = false)
-    val aktør: Aktør? = null,
+    @JsonIgnore
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "fk_aktoer_id", nullable = false, updatable = false)
+    val aktør: Aktør,
 
     @OneToMany(mappedBy = "person", cascade = [CascadeType.ALL], fetch = FetchType.EAGER)
     // Workaround før Hibernatebug https://hibernate.atlassian.net/browse/HHH-1718

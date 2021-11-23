@@ -58,8 +58,8 @@ data class AndelTilkjentYtelse(
     @Column(name = "person_ident", nullable = false, updatable = false)
     val personIdent: String,
 
-    @OneToOne(optional = true) @JoinColumn(name = "fk_aktoer_id", nullable = true, updatable = false)
-    val aktør: Aktør? = null,
+    @OneToOne(optional = false) @JoinColumn(name = "fk_aktoer_id", nullable = false, updatable = false)
+    val aktør: Aktør,
 
     @Column(name = "kalkulert_utbetalingsbelop", nullable = false)
     val kalkulertUtbetalingsbeløp: Int,

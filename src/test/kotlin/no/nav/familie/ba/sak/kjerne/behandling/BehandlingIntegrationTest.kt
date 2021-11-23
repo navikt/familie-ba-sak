@@ -321,8 +321,12 @@ class BehandlingIntegrationTest(
         fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = søkerFnr))
         val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(søkerFnr))
 
+        val barnAktør = personidentService.hentOgLagreAktørIder(listOf(barn1Fnr, barn2Fnr))
         val personopplysningGrunnlag =
-            lagTestPersonopplysningGrunnlag(behandling.id, søkerFnr, listOf(barn1Fnr, barn2Fnr))
+            lagTestPersonopplysningGrunnlag(
+                behandling.id, søkerFnr, listOf(barn1Fnr, barn2Fnr),
+                søkerAktør = behandling.fagsak.aktør, barnAktør = barnAktør
+            )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
         behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling = behandling)
@@ -424,8 +428,12 @@ class BehandlingIntegrationTest(
         fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = søkerFnr))
         val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(søkerFnr))
 
+        val barnAktør = personidentService.hentOgLagreAktørIder(listOf(barn1Fnr, barn2Fnr, barn3Fnr))
         val personopplysningGrunnlag =
-            lagTestPersonopplysningGrunnlag(behandling.id, søkerFnr, listOf(barn1Fnr, barn2Fnr, barn3Fnr))
+            lagTestPersonopplysningGrunnlag(
+                behandling.id, søkerFnr, listOf(barn1Fnr, barn2Fnr, barn3Fnr),
+                søkerAktør = behandling.fagsak.aktør, barnAktør = barnAktør
+            )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
         assertNotNull(personopplysningGrunnlag)

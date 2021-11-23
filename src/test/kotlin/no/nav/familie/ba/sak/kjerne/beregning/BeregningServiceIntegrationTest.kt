@@ -172,8 +172,12 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
 
+        val barnAktør = personidentService.hentOgLagreAktørIder(listOf(barn1Fnr, barn2Fnr))
         val personopplysningGrunnlag =
-            lagTestPersonopplysningGrunnlag(behandling.id, søkerFnr, listOf(barn1Fnr, barn2Fnr))
+            lagTestPersonopplysningGrunnlag(
+                behandling.id, søkerFnr, listOf(barn1Fnr, barn2Fnr),
+                søkerAktør = fagsak.aktør, barnAktør = barnAktør
+            )
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
         val barn1Id = personopplysningGrunnlag.barna.find { it.personIdent.ident == barn1Fnr }!!.personIdent.ident
