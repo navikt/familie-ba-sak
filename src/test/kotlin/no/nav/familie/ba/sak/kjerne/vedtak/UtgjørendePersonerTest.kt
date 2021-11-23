@@ -128,6 +128,7 @@ class UtgjørendePersonerTest {
             oppdatertBegrunnelseType = VedtakBegrunnelseType.INNVILGET,
             triggesAv = TriggesAv(setOf(Vilkår.LOVLIG_OPPHOLD)),
             aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList(),
+            andelerTilkjentYtelse = emptyList()
         )
 
         assertEquals(2, personerMedUtgjørendeVilkårLovligOpphold.size)
@@ -144,7 +145,8 @@ class UtgjørendePersonerTest {
             ),
             oppdatertBegrunnelseType = VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET.vedtakBegrunnelseType,
             triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOSATT_I_RIKET)),
-            aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList()
+            aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList(),
+            andelerTilkjentYtelse = emptyList()
         )
 
         assertEquals(1, personerMedUtgjørendeVilkårBosattIRiket.size)
@@ -212,7 +214,8 @@ class UtgjørendePersonerTest {
             ),
             oppdatertBegrunnelseType = VedtakBegrunnelseSpesifikasjon.REDUKSJON_BOSATT_I_RIKTET.vedtakBegrunnelseType,
             triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOSATT_I_RIKET)),
-            aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList()
+            aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList(),
+            andelerTilkjentYtelse = emptyList()
         )
 
         assertEquals(1, personerMedUtgjørendeVilkårBosattIRiket.size)
@@ -229,7 +232,8 @@ class UtgjørendePersonerTest {
             ),
             oppdatertBegrunnelseType = VedtakBegrunnelseSpesifikasjon.OPPHØR_UTVANDRET.vedtakBegrunnelseType,
             triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOSATT_I_RIKET)),
-            aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList() // Husk å fikse dette!
+            aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList(), // Husk å fikse dette!
+            andelerTilkjentYtelse = emptyList()
         )
 
         assertEquals(1, personerMedUtgjørendeVilkårBarnUtvandret.size)
@@ -292,7 +296,8 @@ class UtgjørendePersonerTest {
             ),
             oppdatertBegrunnelseType = VedtakBegrunnelseType.INNVILGET,
             triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOSATT_I_RIKET), medlemskap = true),
-            aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList()
+            aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList(),
+            andelerTilkjentYtelse = emptyList()
         )
 
         val personerMedUtgjørendeVilkårBosattIRiket = VedtakUtils.hentPersonerForAlleUtgjørendeVilkår(
@@ -303,7 +308,8 @@ class UtgjørendePersonerTest {
             ),
             oppdatertBegrunnelseType = VedtakBegrunnelseType.INNVILGET,
             triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOSATT_I_RIKET)),
-            aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList()
+            aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList(),
+            andelerTilkjentYtelse = emptyList()
         )
 
         assertEquals(1, personerMedUtgjørendeVilkårBosattIRiketMedlemskap.size)

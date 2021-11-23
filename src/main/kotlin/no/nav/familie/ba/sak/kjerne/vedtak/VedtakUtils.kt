@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
@@ -31,6 +32,7 @@ object VedtakUtils {
         oppdatertBegrunnelseType: VedtakBegrunnelseType,
         aktuellePersonerForVedtaksperiode: List<Person>,
         triggesAv: TriggesAv,
+        andelerTilkjentYtelse: List<AndelTilkjentYtelse>
     ): Set<Person> {
         return triggesAv.vilkår.fold(mutableSetOf()) { acc, vilkår ->
             acc.addAll(
@@ -40,7 +42,8 @@ object VedtakUtils {
                     oppdatertBegrunnelseType = oppdatertBegrunnelseType,
                     utgjørendeVilkår = vilkår,
                     aktuellePersonerForVedtaksperiode = aktuellePersonerForVedtaksperiode,
-                    triggesAv = triggesAv
+                    triggesAv = triggesAv,
+                    andelerTilkjentYtelse = andelerTilkjentYtelse,
                 )
             )
 
@@ -54,7 +57,8 @@ object VedtakUtils {
         oppdatertBegrunnelseType: VedtakBegrunnelseType,
         utgjørendeVilkår: Vilkår?,
         aktuellePersonerForVedtaksperiode: List<Person>,
-        triggesAv: TriggesAv
+        triggesAv: TriggesAv,
+        andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
     ): List<Person> {
 
         return vilkårsvurdering.personResultater
@@ -75,6 +79,10 @@ object VedtakUtils {
                                 .toYearMonth() &&
                                 vilkårResultat.resultat == Resultat.OPPFYLT
                         }
+
+                        oppdatertBegrunnelseType == VedtakBegrunnelseType.OPPHØR &&
+                            triggesAv.gjelderFørstePeriode
+                        -> !andelerTilkjentYtelse.any { it.stønadFom.isBefore(vedtaksperiode.fom.toYearMonth()) }
 
                         oppdatertBegrunnelseType == VedtakBegrunnelseType.REDUKSJON ||
                             oppdatertBegrunnelseType == VedtakBegrunnelseType.OPPHØR -> {

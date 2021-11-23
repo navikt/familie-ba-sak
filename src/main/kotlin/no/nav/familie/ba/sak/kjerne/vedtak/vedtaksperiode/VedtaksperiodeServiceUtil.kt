@@ -79,7 +79,8 @@ fun hentPersonidenterGjeldendeForBegrunnelse(
     vilkårsvurdering: Vilkårsvurdering,
     vedtakBegrunnelseType: VedtakBegrunnelseType,
     identerMedUtbetaling: List<String>,
-    endredeUtbetalingAndeler: List<EndretUtbetalingAndel>
+    endredeUtbetalingAndeler: List<EndretUtbetalingAndel>,
+    andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
 ): List<String> {
     val erFortsattInnvilgetBegrunnelse =
         vedtaksperiodeMedBegrunnelser.type == Vedtaksperiodetype.FORTSATT_INNVILGET ||
@@ -125,7 +126,8 @@ fun hentPersonidenterGjeldendeForBegrunnelse(
                     vedtakBegrunnelseType,
                     identerMedUtbetaling
                 ),
-                triggesAv = triggesAv
+                triggesAv = triggesAv,
+                andelerTilkjentYtelse = andelerTilkjentYtelse
             ).map { person -> person.personIdent.ident }
     }.toSet().toList()
 }

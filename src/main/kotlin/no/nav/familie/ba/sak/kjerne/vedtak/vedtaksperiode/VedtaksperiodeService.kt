@@ -135,6 +135,7 @@ class VedtaksperiodeService(
                     vedtakBegrunnelseType = vedtakBegrunnelseType,
                     identerMedUtbetaling = identerMedUtbetaling,
                     endredeUtbetalingAndeler = endredeUtbetalingAndeler,
+                    andelerTilkjentYtelse = andelerTilkjentYtelse
                 )
 
                 if (triggesAv.satsendring) {

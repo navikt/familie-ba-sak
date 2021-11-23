@@ -19,7 +19,8 @@ data class TriggesAv(
     val endringsaarsaker: Set<Årsak> = emptySet(),
     val etterEndretUtbetaling: Boolean = false,
     val endretUtbetaingSkalUtbetales: Boolean = false,
-    val småbarnstillegg: Boolean = false
+    val småbarnstillegg: Boolean = false,
+    val gjelderFørstePeriode: Boolean = false,
 ) {
     fun erEndret() = endringsaarsaker.isNotEmpty()
 }

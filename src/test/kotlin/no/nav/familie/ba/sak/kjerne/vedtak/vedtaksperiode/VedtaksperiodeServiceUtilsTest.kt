@@ -328,6 +328,7 @@ class VedtaksperiodeServiceUtilsTest {
             vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET,
             identerMedUtbetaling = identerMedUtbetaling,
             endredeUtbetalingAndeler = emptyList(),
+            andelerTilkjentYtelse = emptyList()
         )
 
         Assertions.assertEquals(listOf(barn.personIdent.ident, søker.personIdent.ident), personidenterForBegrunnelse)
@@ -375,7 +376,7 @@ class VedtaksperiodeServiceUtilsTest {
             vilkårsvurdering = vilkårsvurdering,
             vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET,
             identerMedUtbetaling = identerMedUtbetaling,
-            endredeUtbetalingAndeler = endredeUtbetalingAndeler,
+            endredeUtbetalingAndeler = endredeUtbetalingAndeler, andelerTilkjentYtelse = emptyList()
         )
 
         Assertions.assertEquals(
