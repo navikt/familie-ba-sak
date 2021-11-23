@@ -14,8 +14,8 @@ jobs:
       - uses: actions/setup-java@v2.3.1
         with:
           java-version: 11
-          distribution: 'adopt'
-      - uses: actions/cache@v2.1.6
+          distribution: 'temurin'
+      - uses: actions/cache@v2.1.7
         with:
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-cache-${{ hashFiles('pom.xml') }}

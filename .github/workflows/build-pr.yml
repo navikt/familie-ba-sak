@@ -23,16 +23,13 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-java@v2.3.1
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-java@v2
         with:
           java-version: 11
-          distribution: 'adopt'
-      - uses: actions/cache@v2.1.6
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-cache-${{ hashFiles('pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-cache-
+          distribution: 'temurin'
+          cache: 'maven'
       - name: Kjør ktlint og sonar
         env:
           SONAR_PROJECTKEY: ${{ secrets.SONAR_PROJECTKEY }}
@@ -47,16 +44,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
       - uses: actions/setup-java@v2.3.1
         with:
           java-version: 11
-          distribution: 'adopt'
-      - uses: actions/cache@v2.1.6
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-cache-${{ hashFiles('pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-cache-
+          distribution: 'temurin'
+          cache: 'maven'
       - name: Kjør enhetstester og integrasjonstester
         env:
           GITHUB_USERNAME: x-access-token
@@ -68,16 +62,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-java@v2.3.1
+      - uses: actions/setup-java@v2
         with:
           java-version: 11
           distribution: 'adopt'
-      - uses: actions/cache@v2.1.6
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-cache-${{ hashFiles('pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-cache-
+          cache: 'maven'
       - name: Kjør verdikjedetester
         env:
           GITHUB_USERNAME: x-access-token
