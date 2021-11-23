@@ -127,9 +127,11 @@ object TilkjentYtelseUtils {
 
         if (endretUtbetalingAndeler.isEmpty()) return andelTilkjentYtelser.map { it.copy() }.toMutableSet()
 
+        val (andelerUtenSmåbarnstillegg, andelerMedSmåbarnstillegg) = andelTilkjentYtelser.partition { !it.erSmåbarnstillegg() }
+
         val nyeAndelTilkjentYtelse = mutableListOf<AndelTilkjentYtelse>()
 
-        andelTilkjentYtelser.filter { !it.erSmåbarnstillegg() }.groupBy { it.personIdent }.forEach { andelerForPerson ->
+        andelerUtenSmåbarnstillegg.groupBy { it.personIdent }.forEach { andelerForPerson ->
             val personIdent = andelerForPerson.key
             val endringerForPerson =
                 endretUtbetalingAndeler.filter { it.person?.personIdent?.ident == personIdent }
@@ -172,6 +174,10 @@ object TilkjentYtelseUtils {
 
             nyeAndelTilkjentYtelse.addAll(nyeAndelerForPersonEtterSammenslåing)
         }
+
+        // Ettersom vi aldri ønsker å overstyre småbarnstillegg perioder fjerner vi dem og legger dem til igjen her
+        nyeAndelTilkjentYtelse.addAll(andelerMedSmåbarnstillegg)
+
         // Sorterer primært av hensyn til måten testene er implementert og kan muligens fjernes dersom dette skrives om.
         nyeAndelTilkjentYtelse.sortWith(
             compareBy(
