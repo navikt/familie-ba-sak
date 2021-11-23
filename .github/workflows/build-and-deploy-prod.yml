@@ -11,20 +11,14 @@ jobs:
     name: Bygg app/image, push til github, deploy til prod-fss og dev-fss
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v1
-      - name: Read/save .m2 cache
-        uses: actions/cache@v2.1.6
+      - uses: actions/checkout@v2
         with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-
-      - name: Set up JDK 1.11
-        uses: actions/setup-java@v2.3.1
+          fetch-depth: 0
+      - uses: actions/setup-java@v2.3.1
         with:
           java-version: 11
-          distribution: 'adopt'
+          distribution: 'temurin'
+          cache: 'maven'
       - name: Bygg med maven
         env:
           GITHUB_USERNAME: x-access-token
@@ -43,6 +37,18 @@ jobs:
         run: docker push ${IMAGE}
       - name: Push Docker image med 'latest' tag
         run: docker push ${IMAGE_LATEST}
+      - name: Deploy bisys_opphoer_av_barnetrygd_topic
+        uses: nais/deploy/actions/deploy@v1
+        env:
+          APIKEY: ${{ secrets.GITHUB_ACCESS_TOKEN }}
+          CLUSTER: prod-fss
+          RESOURCE: .deploy/nais/kafka/prod/bisys_opphoer_av_barnetrygd.yaml
+      - name: Deploy bisys_utvidet_barnetrygd_topic
+        uses: nais/deploy/actions/deploy@v1
+        env:
+          APIKEY: ${{ secrets.GITHUB_ACCESS_TOKEN }}
+          CLUSTER: prod-fss
+          RESOURCE: .deploy/nais/kafka/prod/bisys_utvidet_barnetrygd.yaml
       - name: Deploy til dev-fss
         uses: nais/deploy/actions/deploy@v1
         env:
