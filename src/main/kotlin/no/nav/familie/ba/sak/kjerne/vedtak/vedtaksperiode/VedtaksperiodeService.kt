@@ -196,13 +196,14 @@ class VedtaksperiodeService(
         if (vedtak.behandling.resultat == BehandlingResultat.FORTSATT_INNVILGET) {
 
             val vedtaksbrevmal = hentVedtaksbrevmal(vedtak.behandling)
-            val erAutobrevFor6Og18År = vedtaksbrevmal == Brevmal.AUTOVEDTAK_BARN_6_OG_18_ÅR
+            val erAutobrevFor6Og18ÅrOgSmåbarnstillegg =
+                vedtaksbrevmal == Brevmal.AUTOVEDTAK_BARN_6_OG_18_ÅR_OG_SMÅBARNSTILLEGG
 
-            val fom = if (erAutobrevFor6Og18År) {
+            val fom = if (erAutobrevFor6Og18ÅrOgSmåbarnstillegg) {
                 YearMonth.now().førsteDagIInneværendeMåned()
             } else null
 
-            val tom = if (erAutobrevFor6Og18År) {
+            val tom = if (erAutobrevFor6Og18ÅrOgSmåbarnstillegg) {
                 finnTomDatoIFørsteUtbetalingsintervallFraInneværendeMåned(vedtak.behandling.id)
             } else null
 

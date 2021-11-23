@@ -2,8 +2,8 @@ package no.nav.familie.ba.sak.kjerne.dokument.domene.maler
 
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.brevperioder.BrevPeriode
 
-data class Autovedtak6og18år(
-    override val mal: Brevmal = Brevmal.AUTOVEDTAK_BARN_6_OG_18_ÅR,
+data class Autovedtak6og18årOgSmåbarnstillegg(
+    override val mal: Brevmal = Brevmal.AUTOVEDTAK_BARN_6_OG_18_ÅR_OG_SMÅBARNSTILLEGG,
     override val data: Autovedtak6og18årData
 ) : Vedtaksbrev {
 

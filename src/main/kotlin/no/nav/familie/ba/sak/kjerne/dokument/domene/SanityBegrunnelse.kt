@@ -88,7 +88,7 @@ data class RestSanityBegrunnelse(
     }
 }
 
-val logger: Logger = LoggerFactory.getLogger(RestSanityBegrunnelse::class.java)
+private val logger: Logger = LoggerFactory.getLogger(RestSanityBegrunnelse::class.java)
 
 fun <T : Enum<T>> finnEnumverdi(verdi: String, enumverdier: Array<T>, apiNavn: String?): T? {
     val enumverdi = enumverdier.firstOrNull { verdi == it.name }

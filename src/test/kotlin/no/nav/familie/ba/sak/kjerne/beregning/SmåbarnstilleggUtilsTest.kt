@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
@@ -251,6 +252,30 @@ class SmåbarnstilleggUtilsTest {
                 tom = YearMonth.now().plusMonths(4)
             ),
         )
+
+        val (innvilgedeMånedPerioder, reduserteMånedPerioder) = hentInnvilgedeOgReduserteAndelerSmåbarnstillegg(
+            forrigeSmåbarnstilleggAndeler = forrigeAndeler,
+            nyeSmåbarnstilleggAndeler = nyeAndeler
+        )
+
+        assertFalse(
+            kanAutomatiskIverksetteSmåbarnstillegg(
+                innvilgedeMånedPerioder = innvilgedeMånedPerioder,
+                reduserteMånedPerioder = reduserteMånedPerioder
+            )
+        )
+    }
+
+    @Test
+    fun `Skal ikke kunne automatisk iverksette småbarnstillegg når reduksjon i OS kun tilbake i tid`() {
+        val forrigeAndeler = listOf(
+            lagAndelTilkjentYtelse(
+                fom = YearMonth.now().minusYears(2),
+                tom = YearMonth.now().minusMonths(10)
+            ),
+        )
+
+        val nyeAndeler = emptyList<AndelTilkjentYtelse>()
 
         val (innvilgedeMånedPerioder, reduserteMånedPerioder) = hentInnvilgedeOgReduserteAndelerSmåbarnstillegg(
             forrigeSmåbarnstilleggAndeler = forrigeAndeler,
