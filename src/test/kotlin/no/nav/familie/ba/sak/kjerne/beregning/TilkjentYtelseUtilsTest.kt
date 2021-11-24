@@ -489,8 +489,8 @@ internal class TilkjentYtelseUtilsTest {
 
         vilkårsvurdering.personResultater =
             vilkårsvurdering.personResultater.filter { it.personIdent != personResultat.personIdent }.toSet() + setOf(
-                personResultat
-            )
+            personResultat
+        )
 
         return vilkårsvurdering
     }

@@ -61,7 +61,7 @@ class VelgFagSystemService(
     internal fun morHarLøpendeEllerTidligereUtbetalinger(fagsak: Fagsak?): Boolean {
         return if (fagsak == null) false
         else if (behandlingService.hentBehandlinger(fagsakId = fagsak.id)
-                .any { it.status == BehandlingStatus.UTREDES }
+            .any { it.status == BehandlingStatus.UTREDES }
         ) true
         else behandlingService.hentSisteBehandlingSomErIverksatt(fagsakId = fagsak.id) != null
     }
