@@ -24,8 +24,8 @@ select distinct
     on (person_ident) person_ident,
                       aktoer_id,
                       case when
-                                   opprettet_tid = (select max(ppi.opprettet_tid) from po_person ppi where ppi.aktoer_id = ppy.aktoer_id ) then true
-                           else false
+                           aktoer_id IN (select y.aktoer_id  from po_person i join po_person y on i.aktoer_id = y.aktoer_id where  y.person_ident != i.person_ident ) then false
+                           else true
                           end,
                       null,
                       opprettet_av,
