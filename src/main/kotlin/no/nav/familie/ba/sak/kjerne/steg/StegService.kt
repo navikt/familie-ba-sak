@@ -322,12 +322,12 @@ class StegService(
             }
 
             if (behandlingSteg.stegType().erSaksbehandlerSteg() && behandlingSteg.stegType()
-                    .kommerEtter(behandling.steg)
+                .kommerEtter(behandling.steg)
             ) {
                 error(
                     "${SikkerhetContext.hentSaksbehandlerNavn()} prøver å utføre steg '${
-                        behandlingSteg.stegType()
-                            .displayName()
+                    behandlingSteg.stegType()
+                        .displayName()
                     }', men behandlingen er på steg '${behandling.steg.displayName()}'"
                 )
             }
@@ -363,7 +363,8 @@ class StegService(
         } catch (exception: Exception) {
             when (exception) {
                 is RekjørSenereException -> {
-                    throw exception
+                    stegFunksjonellFeilMetrics[behandlingSteg.stegType()]?.increment()
+                    logger.info("Steg '${behandlingSteg.stegType()}' har trigget rekjøring senere på behandling $behandling. Årsak: ${exception.årsak}")
                 }
                 is FunksjonellFeil -> {
                     stegFunksjonellFeilMetrics[behandlingSteg.stegType()]?.increment()

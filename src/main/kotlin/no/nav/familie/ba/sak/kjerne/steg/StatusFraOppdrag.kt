@@ -43,7 +43,6 @@ class StatusFraOppdrag(
                     årsak = "Mottok lagt på kø kvittering fra oppdrag.",
                     triggerTid = nesteGyldigeTriggertidForBehandlingIHverdager(minutesToAdd = 15)
                 )
-                RuntimeException(message = "")
             } else {
                 taskRepository.save(task.copy(status = Status.MANUELL_OPPFØLGING))
             }
