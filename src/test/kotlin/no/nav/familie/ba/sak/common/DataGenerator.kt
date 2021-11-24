@@ -886,7 +886,7 @@ fun lagVilkårResultat(
     vilkårType: Vilkår = Vilkår.BOSATT_I_RIKET,
     resultat: Resultat = Resultat.OPPFYLT,
     periodeFom: LocalDate = LocalDate.of(2009, 12, 24),
-    periodeTom: LocalDate = LocalDate.of(2010, 1, 31),
+    periodeTom: LocalDate? = LocalDate.of(2010, 1, 31),
     begrunnelse: String = "",
     behandlingId: Long = lagBehandling().id,
     erMedlemskapVurdert: Boolean = false,
