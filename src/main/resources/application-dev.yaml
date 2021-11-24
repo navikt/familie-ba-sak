@@ -104,3 +104,50 @@ no.nav.security.jwt:
           client-id: ${BA_SAK_CLIENT_ID}
           client-secret: ${CLIENT_SECRET}
           client-auth-method: client_secret_basic
+
+
+logging:
+  config: "classpath:logback-test.xml"
+  level:
+    root: INFO
+
+funksjonsbrytere:
+  enabled: false
+  unleash:
+    uri: http://dummy/api/
+    cluster: localhost
+    applicationName: familie-ba-sak
+  kafka:
+    producer:
+      enabled: false
+
+spring:
+  jpa:
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql=false
+    hibernate:
+      ddl-auto: create
+  flyway:
+    enabled: false
+  kafka:
+    bootstrap-servers: http://localhost:9092
+    properties:
+      security.protocol: SASL_PLAINTEXT
+      sasl:
+        jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="igroup" password="itest";
+
+FAMILIE_INTEGRASJONER_SCOPE: "dummy"
+DAGLIG_KVOTE_FØDSELSHENDELSER: 1000
+
+FAMILIE_INTEGRASJONER_API_URL: http://localhost:8085/api
+FAMILIE_BA_INFOTRYGD_FEED_API_URL: http://localhost:8092/api
+FAMILIE_BA_INFOTRYGD_API_URL: http://localhost:8093
+FAMILIE_TILBAKE_API_URL: http://localhost:8030/api
+FAMILIE_OPPDRAG_API_URL: http://localhost:8087/api
+PDL_URL: "dummy"
+CREDENTIAL_USERNAME: not-a-real-srvuser
+CREDENTIAL_PASSWORD: not-a-real-pw
+
+retry.backoff.delay: 5
