@@ -67,6 +67,7 @@ spec:
           cluster: prod-gcp
         - application: familie-ba-mottak
         - application: familie-prosessering
+           cluster: prod-gcp
         - application: familie-ba-skatteetaten-api
           cluster: prod-gcp
         - application: familie-ba-migrering
