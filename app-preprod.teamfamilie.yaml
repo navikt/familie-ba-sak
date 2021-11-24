@@ -55,10 +55,10 @@ spec:
       allowAllUsers: false
       claims:
         groups:
-          - id: "87190cf3-b278-457d-8ab7-1a5c55a9edd7"  # Group_87190cf3-b278-457d-8ab7-1a5c55a9edd7 tilgang til prosessering
-          - id: "199c2b39-e535-4ae8-ac59-8ccbee7991ae"  # VEILEDER_ROLLE
-          - id: "847e3d72-9dc1-41c3-80ff-f5d4acdd5d46"  # SAKSBEHANDLER_ROLLE
-          - id: "7a271f87-39fb-468b-a9ee-6cf3c070f548"  # BESLUTTER_ROLLE
+          - id: "928636f4-fd0d-4149-978e-a6fb68bb19de"  # 0000-GA-STDAPPS
+          - id: "93a26831-9866-4410-927b-74ff51a9107c"  # VEILEDER_ROLLE
+          - id: "d21e00a4-969d-4b28-8782-dc818abfae65"  # SAKSBEHANDLER_ROLLE
+          - id: "9449c153-5a1e-44a7-84c6-7cc7a8867233"  # BESLUTTER_ROLLE
   accessPolicy:
     inbound:
       rules:
@@ -67,9 +67,16 @@ spec:
           cluster: dev-gcp
         - application: familie-ba-mottak
         - application: familie-prosessering
+          cluster: dev-gcp
         - application: familie-ba-skatteetaten-api
           cluster: dev-gcp
         - application: familie-ba-migrering
+          cluster: dev-gcp
+        - application: bidrag-grunnlag-feature
+          namespace: bidrag
+          cluster: dev-gcp
+        - application: bidrag-grunnlag
+          namespace: bidrag
           cluster: dev-gcp
     outbound:
       rules:
