@@ -106,10 +106,10 @@ class LoggService(
                     BehandlerRolle.SAKSBEHANDLER
                 ),
                 tekst = "Behandlingstema er manuelt endret fra ${
-                tilBehandlingstema(
-                    underkategori = forrigeUnderkategori,
-                    kategori = forrigeKategori
-                )
+                    tilBehandlingstema(
+                        underkategori = forrigeUnderkategori,
+                        kategori = forrigeKategori
+                    )
                 } til ${tilBehandlingstema(underkategori = nyUnderkategori, kategori = nyKategori)}"
             )
         )
@@ -150,7 +150,7 @@ class LoggService(
             Logg(
                 behandlingId = behandling.id,
                 type = LoggType.AUTOVEDTAK_TIL_MANUELL_BEHANDLING,
-                tittel = "Autovedtak sendt til manuell behandling", // TODO
+                tittel = "Automatisk behandling stoppet",
                 rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
                     rolleConfig,
                     BehandlerRolle.SAKSBEHANDLER
