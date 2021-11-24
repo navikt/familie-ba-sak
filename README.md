@@ -55,8 +55,11 @@ Obs! Husk å sette VM Options til `-Dspring.profiles.active=postgres`.
 
 Dersom man vil gjøre autentiserte kall mot andre tjenester, må man sette opp følgende miljø-variabler:
 
-* Client secret
-* Client id
+Secret kan hentes fra cluster med
+`kubectl -n teamfamilie get secret azuread-familie-ba-sak-lokal -o json | jq '.data | map_values(@base64d)'`
+
+* `AZURE_APP_CLIENT_ID` (fra secret)
+* `AZURE_APP_CLIENT_SECRET` (fra secret)
 * Scope for den aktuelle tjenesten
 
 Alle disse variablene finnes i applikasjonens mappe for preprod-fss
