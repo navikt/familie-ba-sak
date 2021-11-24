@@ -63,6 +63,8 @@ spec:
   inbound:
     rules:
       - application: familie-ba-sak-frontend
+      - application: familie-ba-sak-frontend
+        cluster: prod-gcp
       - application: familie-ba-mottak
       - application: familie-prosessering
       - application: familie-ba-skatteetaten-api

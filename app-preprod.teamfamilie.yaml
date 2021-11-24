@@ -63,16 +63,18 @@ spec:
     inbound:
       rules:
         - application: familie-ba-sak-frontend
+        - application: familie-ba-sak-frontend
+          cluster: dev-gcp
         - application: familie-ba-mottak
         - application: familie-prosessering
         - application: familie-ba-skatteetaten-api
-          cluster: prod-gcp
+          cluster: dev-gcp
         - application: familie-ba-migrering
-          cluster: prod-gcp
+          cluster: dev-gcp
     outbound:
       rules:
         - application: familie-brev
-          cluster: prod-gcp
+          cluster: dev-gcp
         - application: familie-integrasjoner
         - application: familie-ba-infotrygd-feed
         - application: familie-ba-infotrygd
