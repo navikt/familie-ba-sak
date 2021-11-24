@@ -17,6 +17,9 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand.Companion.sisteSivilstand
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingMigreringUtils.kopiManglendePerioderFraForrigeVilkårsvurdering
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingMigreringUtils.utledPeriodeFom
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingMigreringUtils.utledPeriodeTom
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingUtils.flyttResultaterTilInitielt
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingUtils.lagFjernAdvarsel
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingUtils.muterPersonResultatDelete
@@ -505,79 +508,8 @@ class VilkårService(
         return vilkårsvurderingService
             .hentAktivForBehandling(behandlingId = vilkårsvurdering.behandling.id) == null
     }
-
-    private fun hentForrigeVilkårsvurderingVilkårResultater(
-        forrigeBehandlingsvilkårsvurdering: Vilkårsvurdering,
-        vilkår: Vilkår,
-        person: Person
-    ): List<VilkårResultat> {
-        val personResultat = forrigeBehandlingsvilkårsvurdering.personResultater
-            .first { it.personIdent == person.personIdent.ident }
-        return personResultat.vilkårResultater
-            .filter { it.vilkårType == vilkår }
-    }
-
-    private fun utledPeriodeFom(
-        forrigeBehandlingsvilkårsvurdering: Vilkårsvurdering,
-        vilkår: Vilkår,
-        person: Person,
-        nyMigreringsdato: LocalDate
-    ): LocalDate {
-        val forrigeVilkårsPeriodeFom = hentForrigeVilkårsvurderingVilkårResultater(
-            forrigeBehandlingsvilkårsvurdering,
-            vilkår, person
-        ).minOf { it.periodeFom!! }
-        return when {
-            person.fødselsdato.isAfter(nyMigreringsdato) ||
-                vilkår.gjelderAlltidFraBarnetsFødselsdato() -> person.fødselsdato
-            forrigeVilkårsPeriodeFom.isBefore(nyMigreringsdato) -> forrigeVilkårsPeriodeFom
-            else -> nyMigreringsdato
-        }
-    }
-
-    private fun utledPeriodeTom(
-        forrigeBehandlingsvilkårsvurdering: Vilkårsvurdering,
-        vilkår: Vilkår,
-        person: Person,
-        periodeFom: LocalDate,
-    ): LocalDate? {
-        val forrigeVilkårsPeriodeTom: LocalDate? = hentForrigeVilkårsvurderingVilkårResultater(
-            forrigeBehandlingsvilkårsvurdering, vilkår, person
-        ).minWithOrNull(VilkårResultatComparator)?.periodeTom
-        return when {
-            vilkår == Vilkår.UNDER_18_ÅR -> periodeFom.plusYears(18).minusDays(1)
-            vilkår == Vilkår.GIFT_PARTNERSKAP -> null
-            forrigeVilkårsPeriodeTom != null -> forrigeVilkårsPeriodeTom
-            else -> null
-        }
-    }
-
-    private fun kopiManglendePerioderFraForrigeVilkårsvurdering(
-        vilkårResulater: Set<VilkårResultat>,
-        forrigeBehandlingsvilkårsvurdering: Vilkårsvurdering,
-        person: Person
-    ): List<VilkårResultat> {
-        val manglendeVilkårResultater = mutableListOf<VilkårResultat>()
-        vilkårResulater.forEach {
-            val forrigeVilkårResultater =
-                hentForrigeVilkårsvurderingVilkårResultater(forrigeBehandlingsvilkårsvurdering, it.vilkårType, person)
-            manglendeVilkårResultater.addAll(
-                forrigeVilkårResultater.filter { forrigeVilkårResultat ->
-                    forrigeVilkårResultat.periodeFom != it.periodeFom &&
-                        forrigeVilkårResultat.periodeTom != it.periodeTom
-                }
-            )
-        }
-        return manglendeVilkårResultater
-    }
 }
 
 fun Vilkår.gjelderAlltidFraBarnetsFødselsdato() = this == Vilkår.GIFT_PARTNERSKAP || this == Vilkår.UNDER_18_ÅR
-
-fun Vilkår.påvirketVilkårForEndreMigreringsdato() = this in listOf(
-    Vilkår.BOSATT_I_RIKET,
-    Vilkår.LOVLIG_OPPHOLD,
-    Vilkår.BOR_MED_SØKER
-)
 
 fun SIVILSTAND.somForventetHosBarn() = this == SIVILSTAND.UOPPGITT || this == SIVILSTAND.UGIFT

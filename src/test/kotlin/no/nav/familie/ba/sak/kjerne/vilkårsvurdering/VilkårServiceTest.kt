@@ -958,4 +958,10 @@ class VilkårServiceTest(
             )
         )
     }
+
+    fun Vilkår.påvirketVilkårForEndreMigreringsdato() = this in listOf(
+        Vilkår.BOSATT_I_RIKET,
+        Vilkår.LOVLIG_OPPHOLD,
+        Vilkår.BOR_MED_SØKER
+    )
 }

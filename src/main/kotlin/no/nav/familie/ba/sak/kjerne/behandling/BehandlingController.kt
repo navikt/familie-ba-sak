@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.behandling
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.RessursUtils.illegalState
 import no.nav.familie.ba.sak.common.RessursUtils.ok
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
@@ -57,8 +58,8 @@ class BehandlingController(
             BehandlingÅrsak.ENDRE_MIGRERINGSDATO == nyBehandling.behandlingÅrsak &&
             nyBehandling.nyMigreringsdato == null
         ) {
-            throw Feil(
-                message = "Du må sette ny migreringsdato før du kan fortsette videre",
+            throw FunksjonellFeil(
+                melding = "Du må sette ny migreringsdato før du kan fortsette videre",
                 frontendFeilmelding = "Du må sette ny migreringsdato før du kan fortsette videre"
             )
         }
