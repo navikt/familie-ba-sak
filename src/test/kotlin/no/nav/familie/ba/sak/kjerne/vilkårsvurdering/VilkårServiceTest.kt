@@ -610,9 +610,8 @@ class VilkårServiceTest(
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
         val nyMigreringsdato = LocalDate.now().minusMonths(5)
-        val vilkårsvurdering = vilkårService.initierVilkårsvurderingForBehandling(
+        val vilkårsvurdering = vilkårService.genererVilkårsvurderingForMigreringsbehandlingMedÅrsakEndreMigreringsdato(
             behandling = behandling,
-            bekreftEndringerViaFrontend = true,
             forrigeBehandlingSomErVedtatt = forrigeBehandling,
             nyMigreringsdato = nyMigreringsdato
         )
@@ -747,9 +746,8 @@ class VilkårServiceTest(
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
         val nyMigreringsdato = LocalDate.of(2021, 1, 1)
-        val vilkårsvurdering = vilkårService.initierVilkårsvurderingForBehandling(
+        val vilkårsvurdering = vilkårService.genererVilkårsvurderingForMigreringsbehandlingMedÅrsakEndreMigreringsdato(
             behandling = behandling,
-            bekreftEndringerViaFrontend = true,
             forrigeBehandlingSomErVedtatt = forrigeBehandling,
             nyMigreringsdato = nyMigreringsdato
         )
@@ -892,9 +890,8 @@ class VilkårServiceTest(
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
         val nyMigreringsdato = LocalDate.of(2021, 1, 1)
-        val vilkårsvurdering = vilkårService.initierVilkårsvurderingForBehandling(
+        val vilkårsvurdering = vilkårService.genererVilkårsvurderingForMigreringsbehandlingMedÅrsakEndreMigreringsdato(
             behandling = behandling,
-            bekreftEndringerViaFrontend = true,
             forrigeBehandlingSomErVedtatt = forrigeBehandling,
             nyMigreringsdato = nyMigreringsdato
         )

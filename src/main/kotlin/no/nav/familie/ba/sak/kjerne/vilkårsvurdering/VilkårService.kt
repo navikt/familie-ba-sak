@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonResultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType.MIGRERING_FRA_INFOTRYGD
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
@@ -69,7 +70,6 @@ class VilkårService(
 
         val restVilkårResultat = restPersonResultat.vilkårResultater.singleOrNull { it.id == vilkårId }
             ?: throw Feil("Fant ikke vilkårResultat med id $vilkårId ved opppdatering av vikår")
-
         val personResultat =
             vilkårsvurdering.personResultater.singleOrNull { it.personIdent == restPersonResultat.personIdent }
                 ?: throw Feil(
@@ -131,8 +131,7 @@ class VilkårService(
     fun initierVilkårsvurderingForBehandling(
         behandling: Behandling,
         bekreftEndringerViaFrontend: Boolean,
-        forrigeBehandlingSomErVedtatt: Behandling? = null,
-        nyMigreringsdato: LocalDate? = null
+        forrigeBehandlingSomErVedtatt: Behandling? = null
     ): Vilkårsvurdering {
         val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
             ?: throw IllegalStateException("Fant ikke personopplysninggrunnlag for behandling ${behandling.id}")
@@ -152,14 +151,10 @@ class VilkårService(
         val initiellVilkårsvurdering =
             genererInitiellVilkårsvurdering(
                 behandling = behandling,
-                barnaSomAlleredeErVurdert = barnaSomAlleredeErVurdert,
-                forrigeBehandlingSomErVedtatt = forrigeBehandlingSomErVedtatt,
-                nyMigreringsdato = nyMigreringsdato
+                barnaSomAlleredeErVurdert = barnaSomAlleredeErVurdert
             )
 
-        return if (behandling.opprettetÅrsak == BehandlingÅrsak.ENDRE_MIGRERINGSDATO) {
-            return vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = initiellVilkårsvurdering)
-        } else if (forrigeBehandlingSomErVedtatt != null && aktivVilkårsvurdering == null) {
+        return if (forrigeBehandlingSomErVedtatt != null && aktivVilkårsvurdering == null) {
             val vilkårsvurdering =
                 genererInitiellVilkårsvurderingFraAnnenBehandling(
                     initiellVilkårsvurdering = initiellVilkårsvurdering,
@@ -219,13 +214,12 @@ class VilkårService(
 
     fun genererInitiellVilkårsvurdering(
         behandling: Behandling,
-        barnaSomAlleredeErVurdert: List<String>,
-        forrigeBehandlingSomErVedtatt: Behandling? = null,
-        nyMigreringsdato: LocalDate? = null
+        barnaSomAlleredeErVurdert: List<String>
     ): Vilkårsvurdering {
         return Vilkårsvurdering(behandling = behandling).apply {
             when {
-                behandling.opprettetÅrsak == BehandlingÅrsak.MIGRERING -> {
+                behandling.type == MIGRERING_FRA_INFOTRYGD &&
+                    behandling.opprettetÅrsak == BehandlingÅrsak.MIGRERING -> {
                     personResultater = lagVilkårsvurderingForMigreringsbehandling(this)
                 }
                 behandling.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE -> {
@@ -237,19 +231,27 @@ class VilkårService(
                         vilkårsvurderingMetrics.tellMetrikker(this)
                     }
                 }
-                behandling.opprettetÅrsak == BehandlingÅrsak.ENDRE_MIGRERINGSDATO -> {
-                    personResultater = lagVilkårsvurderingForMigreringsbehandlingMedÅrsakEndreMigreringsdato(
-                        this,
-                        forrigeBehandlingSomErVedtatt!!,
-                        nyMigreringsdato!!
-                    )
-                }
                 !behandling.skalBehandlesAutomatisk -> {
                     personResultater = lagManuellVilkårsvurdering(this)
                 }
                 else -> personResultater = lagTomVilkårsvurdering(this)
             }
         }
+    }
+
+    fun genererVilkårsvurderingForMigreringsbehandlingMedÅrsakEndreMigreringsdato(
+        behandling: Behandling,
+        forrigeBehandlingSomErVedtatt: Behandling? = null,
+        nyMigreringsdato: LocalDate
+    ): Vilkårsvurdering {
+        val vilkårsvurdering = Vilkårsvurdering(behandling = behandling).apply {
+            personResultater = lagVilkårsvurderingForMigreringsbehandlingMedÅrsakEndreMigreringsdato(
+                this,
+                forrigeBehandlingSomErVedtatt!!,
+                nyMigreringsdato
+            )
+        }
+        return vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering)
     }
 
     private fun lagTomVilkårsvurdering(vilkårsvurdering: Vilkårsvurdering): Set<PersonResultat> {

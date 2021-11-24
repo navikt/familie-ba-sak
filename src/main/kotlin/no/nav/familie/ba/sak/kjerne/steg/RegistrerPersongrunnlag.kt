@@ -51,8 +51,13 @@ class RegistrerPersongrunnlag(
                 Målform.NB
             )
         }
-
-        if (!(
+        if (behandling.opprettetÅrsak == BehandlingÅrsak.ENDRE_MIGRERINGSDATO) {
+            vilkårService.genererVilkårsvurderingForMigreringsbehandlingMedÅrsakEndreMigreringsdato(
+                behandling = behandling,
+                forrigeBehandlingSomErVedtatt = behandlingService.hentForrigeBehandlingSomErVedtatt(behandling),
+                nyMigreringsdato = data.nyMigreringsdato!!
+            )
+        } else if (!(
             behandling.opprettetÅrsak == BehandlingÅrsak.SØKNAD ||
                 behandling.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE
             )
@@ -62,8 +67,7 @@ class RegistrerPersongrunnlag(
                 bekreftEndringerViaFrontend = true,
                 forrigeBehandlingSomErVedtatt = behandlingService.hentForrigeBehandlingSomErVedtatt(
                     behandling
-                ),
-                nyMigreringsdato = data.nyMigreringsdato
+                )
             )
         }
 
