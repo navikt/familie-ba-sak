@@ -25,6 +25,7 @@ import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.task.DistribuerDokumentDTO
 import no.nav.familie.ba.sak.task.dto.IverksettingTaskDTO
+import no.nav.familie.prosessering.error.RekjørSenereException
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -321,12 +322,12 @@ class StegService(
             }
 
             if (behandlingSteg.stegType().erSaksbehandlerSteg() && behandlingSteg.stegType()
-                .kommerEtter(behandling.steg)
+                    .kommerEtter(behandling.steg)
             ) {
                 error(
                     "${SikkerhetContext.hentSaksbehandlerNavn()} prøver å utføre steg '${
-                    behandlingSteg.stegType()
-                        .displayName()
+                        behandlingSteg.stegType()
+                            .displayName()
                     }', men behandlingen er på steg '${behandling.steg.displayName()}'"
                 )
             }
@@ -360,17 +361,22 @@ class StegService(
             }
             return returBehandling
         } catch (exception: Exception) {
-
-            if (exception is FunksjonellFeil) {
-                stegFunksjonellFeilMetrics[behandlingSteg.stegType()]?.increment()
-                logger.info("Håndtering av stegtype '${behandlingSteg.stegType()}' feilet på grunn av funksjonell feil på behandling $behandling. Melding: ${exception.melding}")
-            } else {
-                stegFeiletMetrics[behandlingSteg.stegType()]?.increment()
-                logger.error("Håndtering av stegtype '${behandlingSteg.stegType()}' feilet på behandling $behandling.")
-                secureLogger.error(
-                    "Håndtering av stegtype '${behandlingSteg.stegType()}' feilet på behandling $behandling.",
-                    exception
-                )
+            when (exception) {
+                is RekjørSenereException -> {
+                    throw exception
+                }
+                is FunksjonellFeil -> {
+                    stegFunksjonellFeilMetrics[behandlingSteg.stegType()]?.increment()
+                    logger.info("Håndtering av stegtype '${behandlingSteg.stegType()}' feilet på grunn av funksjonell feil på behandling $behandling. Melding: ${exception.melding}")
+                }
+                else -> {
+                    stegFeiletMetrics[behandlingSteg.stegType()]?.increment()
+                    logger.error("Håndtering av stegtype '${behandlingSteg.stegType()}' feilet på behandling $behandling.")
+                    secureLogger.error(
+                        "Håndtering av stegtype '${behandlingSteg.stegType()}' feilet på behandling $behandling.",
+                        exception
+                    )
+                }
             }
 
             throw exception
