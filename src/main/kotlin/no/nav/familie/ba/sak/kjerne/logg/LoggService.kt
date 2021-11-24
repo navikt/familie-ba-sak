@@ -89,10 +89,6 @@ class LoggService(
         )
     }
 
-    private fun tilBehandlingstema(underkategori: BehandlingUnderkategori, kategori: BehandlingKategori): String {
-        return "${kategori.visningsnavn}  ${underkategori.visningsnavn.lowercase()}"
-    }
-
     fun opprettEndretBehandlingstema(
         behandling: Behandling,
         forrigeUnderkategori: BehandlingUnderkategori,
@@ -110,10 +106,10 @@ class LoggService(
                     BehandlerRolle.SAKSBEHANDLER
                 ),
                 tekst = "Behandlingstema er manuelt endret fra ${
-                tilBehandlingstema(
-                    underkategori = forrigeUnderkategori,
-                    kategori = forrigeKategori
-                )
+                    tilBehandlingstema(
+                        underkategori = forrigeUnderkategori,
+                        kategori = forrigeKategori
+                    )
                 } til ${tilBehandlingstema(underkategori = nyUnderkategori, kategori = nyKategori)}"
             )
         )
@@ -149,6 +145,21 @@ class LoggService(
         )
     }
 
+    fun opprettAutovedtakTilManuellBehandling(behandling: Behandling, tekst: String) {
+        lagre(
+            Logg(
+                behandlingId = behandling.id,
+                type = LoggType.AUTOVEDTAK_TIL_MANUELL_BEHANDLING,
+                tittel = "Autovedtak sendt til manuell behandling", // TODO
+                rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
+                    rolleConfig,
+                    BehandlerRolle.SAKSBEHANDLER
+                ),
+                tekst = tekst
+            )
+        )
+    }
+
     fun opprettFødselshendelseLogg(behandling: Behandling) {
         lagre(
             Logg(
@@ -165,6 +176,7 @@ class LoggService(
     }
 
     fun opprettBehandlingLogg(behandling: Behandling) {
+        // TODO legge inn logg om at hendelse om endring på vedtak for full OS har kommet inn?
         if (behandling.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE) {
             opprettFødselshendelseLogg(behandling)
         }
@@ -274,5 +286,11 @@ class LoggService(
 
     fun hentLoggForBehandling(behandlingId: Long): List<Logg> {
         return loggRepository.hentLoggForBehandling(behandlingId)
+    }
+
+    companion object {
+        private fun tilBehandlingstema(underkategori: BehandlingUnderkategori, kategori: BehandlingKategori): String {
+            return "${kategori.visningsnavn}  ${underkategori.visningsnavn.lowercase()}"
+        }
     }
 }

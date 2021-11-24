@@ -1,10 +1,10 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene
 
 import no.nav.familie.ba.sak.common.BaseEntitet
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.PeriodeResultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.personResultaterTilPeriodeResultater
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
@@ -52,7 +52,7 @@ data class Vilkårsvurdering(
     @Column(name = "ytelse_personer", columnDefinition = "text")
     var ytelsePersoner: String? = null,
 
-) : BaseEntitet() {
+    ) : BaseEntitet() {
 
     override fun toString(): String {
         return "Vilkårsvurdering(id=$id, behandling=${behandling.id})"

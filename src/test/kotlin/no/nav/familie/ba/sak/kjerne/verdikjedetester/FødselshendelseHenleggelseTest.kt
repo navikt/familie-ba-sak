@@ -2,12 +2,12 @@ package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.tilKortString
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
@@ -168,8 +168,8 @@ class FødselshendelseHenleggelseTest(
                 behandlingId = behandling!!.id,
                 oppgavetype = Oppgavetype.VurderLivshendelse,
                 beskrivelse = "Barnet (fødselsdato: ${
-                LocalDate.parse(scenario.barna.first().fødselsdato)
-                    .tilKortString()
+                    LocalDate.parse(scenario.barna.first().fødselsdato)
+                        .tilKortString()
                 }) er ikke bosatt med mor."
             )
         }
