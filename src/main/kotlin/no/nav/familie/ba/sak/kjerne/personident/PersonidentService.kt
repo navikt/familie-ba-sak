@@ -26,7 +26,7 @@ class PersonidentService(
     fun hentOgLagreAktørIder(barnasFødselsnummer: List<String>): List<Aktør> {
         return barnasFødselsnummer.map { hentOgLagreAktørId(it) }
     }
-    
+
     private fun opprettAktørIdOgPersonident(aktørIdStr: String, fødselsnummer: String): Aktør =
         aktørIdRepository.save(
             Aktør(aktørId = aktørIdStr).also {
