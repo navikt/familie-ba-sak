@@ -472,7 +472,8 @@ class VilkårService(
         return personopplysningGrunnlag.personer.filter { it.type != PersonType.ANNENPART }.map { person ->
             val personResultat = PersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
-                personIdent = person.personIdent.ident
+                personIdent = person.personIdent.ident,
+                aktør = person.hentAktørId()
             )
 
             val vilkårTyperForPerson = Vilkår.hentVilkårFor(person.type)
