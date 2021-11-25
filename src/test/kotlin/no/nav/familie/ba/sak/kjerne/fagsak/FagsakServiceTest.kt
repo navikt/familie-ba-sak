@@ -21,6 +21,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.RegistrerPersongrunnlagDTO
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMellomlagringRepository
@@ -41,6 +42,9 @@ class FagsakServiceTest(
 
     @Autowired
     private val behandlingService: BehandlingService,
+
+    @Autowired
+    private val personidentService: PersonidentService,
 
     @Autowired
     private val stegService: StegService,
@@ -313,8 +317,11 @@ class FagsakServiceTest(
         val fagsakMor = fagsakService.hentEllerOpprettFagsakForPersonIdent(mor)
         val behandlingMor = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsakMor))
 
-        val personopplysningGrunnlag =
-            lagTestPersonopplysningGrunnlag(behandlingMor.id, mor, listOf(barnFnr))
+        val barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr))
+        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
+            behandlingMor.id, mor, listOf(barnFnr),
+            søkerAktør = fagsakMor.aktør, barnAktør = barnAktør
+        )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
         val far = randomFnr()
@@ -322,8 +329,10 @@ class FagsakServiceTest(
         val fagsakFar = fagsakService.hentEllerOpprettFagsakForPersonIdent(far)
         val behandlingFar = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsakFar))
 
-        val personopplysningGrunnlagFar =
-            lagTestPersonopplysningGrunnlag(behandlingFar.id, far, listOf(barnFnr))
+        val personopplysningGrunnlagFar = lagTestPersonopplysningGrunnlag(
+            behandlingFar.id, far, listOf(barnFnr),
+            søkerAktør = fagsakFar.aktør, barnAktør = barnAktør
+        )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlagFar)
 
         val fagsaker = fagsakService.hentFagsakerPåPerson(PersonIdent(barnFnr))

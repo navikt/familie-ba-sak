@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.kjerne.dokument.UtvidetScenario
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.erStartPåUtvidetSammeMåned
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.utledSegmenter
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.fpsak.tidsserie.LocalDateInterval
@@ -30,6 +31,7 @@ import javax.persistence.JoinColumn
 import javax.persistence.JoinTable
 import javax.persistence.ManyToMany
 import javax.persistence.ManyToOne
+import javax.persistence.OneToOne
 import javax.persistence.SequenceGenerator
 import javax.persistence.Table
 
@@ -56,8 +58,8 @@ data class AndelTilkjentYtelse(
     @Column(name = "person_ident", nullable = false, updatable = false)
     val personIdent: String,
 
-    @Column(name = "aktoer_id")
-    var aktørId: String? = null,
+    @OneToOne(optional = false) @JoinColumn(name = "fk_aktoer_id", nullable = false, updatable = false)
+    val aktør: Aktør,
 
     @Column(name = "kalkulert_utbetalingsbelop", nullable = false)
     val kalkulertUtbetalingsbeløp: Int,
@@ -123,7 +125,7 @@ data class AndelTilkjentYtelse(
             Objects.equals(stønadFom, annen.stønadFom) &&
             Objects.equals(stønadTom, annen.stønadTom) &&
             Objects.equals(personIdent, annen.personIdent) &&
-            Objects.equals(aktørId, annen.aktørId)
+            Objects.equals(aktør, annen.aktør)
     }
 
     override fun hashCode(): Int {
@@ -135,7 +137,7 @@ data class AndelTilkjentYtelse(
             stønadFom,
             stønadTom,
             personIdent,
-            aktørId
+            aktør
         )
     }
 
@@ -147,7 +149,7 @@ data class AndelTilkjentYtelse(
     fun erTilsvarendeForUtbetaling(other: AndelTilkjentYtelse): Boolean {
         return (
             this.personIdent == other.personIdent &&
-                this.aktørId == other.aktørId &&
+                this.aktør == other.aktør &&
                 this.stønadFom == other.stønadFom &&
                 this.stønadTom == other.stønadTom &&
                 this.kalkulertUtbetalingsbeløp == other.kalkulertUtbetalingsbeløp &&
