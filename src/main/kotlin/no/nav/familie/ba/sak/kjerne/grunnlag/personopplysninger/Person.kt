@@ -127,7 +127,7 @@ data class Person(
 
     fun hentSeksårsdag(): LocalDate = fødselsdato.plusYears(6)
 
-    fun hentAktørId(): Aktør = aktør ?: error("Person har ikke aktørId")
+    fun hentAktørId(): Aktør = aktør
 }
 
 enum class Kjønn {
