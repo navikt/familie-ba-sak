@@ -28,6 +28,8 @@ class HentOgSetAktørPåFagsak(val fagsakRepository: FagsakRepository, val perso
                 fagsakRepository.save(it)
             }
             logger.info("Ferdig satt aktørid på fagsak")
+        } else {
+            logger.info("Poden er ikke satt som leader")
         }
     }
 
