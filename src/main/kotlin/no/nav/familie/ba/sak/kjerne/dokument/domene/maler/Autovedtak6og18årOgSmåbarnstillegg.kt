@@ -14,6 +14,9 @@ data class Autovedtak6og18årOgSmåbarnstillegg(
             data = Autovedtak6og18årData(
                 delmalData = Autovedtak6og18årData.Delmaler(
                     hjemmeltekst = vedtakFellesfelter.hjemmeltekst,
+                    autoUnderskrift = AutoUnderskrift(
+                        enhet = vedtakFellesfelter.enhet
+                    )
                 ),
                 flettefelter = FlettefelterForDokumentImpl(
                     navn = vedtakFellesfelter.søkerNavn,
@@ -32,5 +35,6 @@ data class Autovedtak6og18årData(
 
     data class Delmaler(
         val hjemmeltekst: Hjemmeltekst,
+        val autoUnderskrift: AutoUnderskrift,
     )
 }
