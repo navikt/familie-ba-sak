@@ -51,7 +51,7 @@ class VedtakOmOvergangsstønadService(
         Metrics.counter("behandling", "saksbehandling", "hendelse", "smaabarnstillegg", "paavirker_ikke_fagsak")
 
     enum class TilManuellBehandlingÅrsak(val beskrivelse: String) {
-        ETTERBETALING_ELLER_FEILUTBETALING("Endring i OS gir etterbetaling eller feilutbetaling"),
+        NYE_UTBETALINGSPERIODER_FØRER_TIL_MANUELL_BEHANDLING("Endring i OS gir etterbetaling, feilutbetaling eller endring mer enn 1 måned frem i tid"),
         KLARER_IKKE_BEGRUNNE("Klarer ikke å begrunne")
     }
 
@@ -86,7 +86,7 @@ class VedtakOmOvergangsstønadService(
             antallVedtakOmOvergangsstønadÅpenBehandling.increment()
             return autovedtakService.opprettOppgaveForManuellBehandling(
                 behandling = aktivBehandling,
-                begrunnelse = "Behandling av småbarnstillegg stoppet pga. ", // TODO
+                begrunnelse = "Småbarnstillegg: Bruker har åpen behandling",
                 oppgavetype = Oppgavetype.VurderLivshendelse,
                 opprettLogginnslag = false
             )
@@ -107,8 +107,8 @@ class VedtakOmOvergangsstønadService(
             if (behandlingEtterBehandlingsresultat.status != BehandlingStatus.IVERKSETTER_VEDTAK) {
                 return kanIkkeBehandleAutomatisk(
                     behandling = behandlingEtterBehandlingsresultat,
-                    metric = antallVedtakOmOvergangsstønadTilManuellBehandling[TilManuellBehandlingÅrsak.ETTERBETALING_ELLER_FEILUTBETALING]!!,
-                    meldingIOppgave = "" // TODO
+                    metric = antallVedtakOmOvergangsstønadTilManuellBehandling[TilManuellBehandlingÅrsak.NYE_UTBETALINGSPERIODER_FØRER_TIL_MANUELL_BEHANDLING]!!,
+                    meldingIOppgave = "Småbarnstillegg: endring i overgangsstønad må behandles manuelt"
                 )
             }
 
@@ -120,7 +120,7 @@ class VedtakOmOvergangsstønadService(
                 return kanIkkeBehandleAutomatisk(
                     behandling = behandlingEtterBehandlingsresultat,
                     metric = antallVedtakOmOvergangsstønadTilManuellBehandling[TilManuellBehandlingÅrsak.KLARER_IKKE_BEGRUNNE]!!,
-                    meldingIOppgave = "" // TODO
+                    meldingIOppgave = "Småbarnstillegg: endring i overgangsstønad må behandles manuelt"
                 )
             }
 

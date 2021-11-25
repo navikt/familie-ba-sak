@@ -53,7 +53,8 @@ data class Logg(
 
 enum class LoggType(val visningsnavn: String) {
     AUTOVEDTAK_TIL_MANUELL_BEHANDLING("Autovedtak til manuell behandling"),
-    FØDSELSHENDELSE("Fødselshendelse"),
+    FØDSELSHENDELSE("Fødselshendelse"), // Deprecated, bruk livshendelse
+    LIVSHENDELSE("Livshendelse"),
     BEHANDLENDE_ENHET_ENDRET("Behandlende enhet endret"),
     BEHANDLING_OPPRETTET("Behandling opprettet"),
     BEHANDLINGSTYPE_ENDRET("Endret behandlingstype"),

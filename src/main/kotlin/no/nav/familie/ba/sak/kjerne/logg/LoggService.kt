@@ -160,12 +160,12 @@ class LoggService(
         )
     }
 
-    fun opprettFødselshendelseLogg(behandling: Behandling) {
+    private fun opprettLivshendelseLogg(behandling: Behandling, tittel: String) {
         lagre(
             Logg(
                 behandlingId = behandling.id,
-                type = LoggType.FØDSELSHENDELSE,
-                tittel = "Mottok fødselshendelse",
+                type = LoggType.LIVSHENDELSE,
+                tittel = tittel,
                 rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
                     rolleConfig,
                     BehandlerRolle.SAKSBEHANDLER
@@ -176,9 +176,10 @@ class LoggService(
     }
 
     fun opprettBehandlingLogg(behandling: Behandling) {
-        // TODO legge inn logg om at hendelse om endring på vedtak for full OS har kommet inn?
         if (behandling.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE) {
-            opprettFødselshendelseLogg(behandling)
+            opprettLivshendelseLogg(behandling = behandling, tittel = "Mottok fødselshendelse")
+        } else if (behandling.skalBehandlesAutomatisk && behandling.erSmåbarnstillegg()) {
+            opprettLivshendelseLogg(behandling = behandling, tittel = "Mottok overgansstønadshendelse")
         }
 
         lagre(
