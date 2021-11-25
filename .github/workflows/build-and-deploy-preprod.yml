@@ -35,6 +35,18 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Push Docker image
         run: docker push $IMAGE
+      - name: Deploy til dev-fss
+        uses: nais/deploy/actions/deploy@v1
+        env:
+          APIKEY: ${{ secrets.GITHUB_ACCESS_TOKEN }}
+          CLUSTER: dev-fss
+          RESOURCE: app-preprod.teamfamilie.yaml
+
+
+  deploy-kafka-topics:
+    name: Deploy Kafka topics
+    runs-on: ubuntu-latest
+    steps:
       - name: Deploy bisys_opphoer_av_barnetrygd_topic
         uses: nais/deploy/actions/deploy@v1
         env:
@@ -47,9 +59,3 @@ jobs:
           APIKEY: ${{ secrets.GITHUB_ACCESS_TOKEN }}
           CLUSTER: dev-fss
           RESOURCE: .deploy/nais/kafka/dev/bisys_utvidet_barnetrygd.yaml
-      - name: Deploy til dev-fss
-        uses: nais/deploy/actions/deploy@v1
-        env:
-          APIKEY: ${{ secrets.GITHUB_ACCESS_TOKEN }}
-          CLUSTER: dev-fss
-          RESOURCE: app-preprod.teamfamilie.yaml
