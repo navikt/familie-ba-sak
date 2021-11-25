@@ -129,14 +129,16 @@ private fun triggereErOppfylt(
 ): Boolean {
 
     val erDeltBostedOppfylt =
-        if (triggesAv.deltbosted) vilkårResultat.utdypendeVilkårsvurderinger.contains(
-            UtdypendeVilkårsvurdering.DELT_BOSTED
-        ) else true
+        triggesAv.deltbosted &&
+            vilkårResultat.utdypendeVilkårsvurderinger.contains(
+                UtdypendeVilkårsvurdering.DELT_BOSTED
+            ) || !triggesAv.deltbosted
 
     val erSkjønnsmessigVurderingOppfylt =
-        if (triggesAv.vurderingAnnetGrunnlag) vilkårResultat.utdypendeVilkårsvurderinger.contains(
-            UtdypendeVilkårsvurdering.VURDERING_ANNET_GRUNNLAG
-        ) else true
+        triggesAv.vurderingAnnetGrunnlag &&
+            vilkårResultat.utdypendeVilkårsvurderinger.contains(
+                UtdypendeVilkårsvurdering.VURDERING_ANNET_GRUNNLAG
+            ) || !triggesAv.vurderingAnnetGrunnlag
 
     val erMedlemskapOppfylt =
         triggesAv.medlemskap ==
