@@ -82,7 +82,10 @@ data class Behandling(
         get() = behandlingStegTilstand.last().behandlingSteg
 
     fun opprettBehandleSakOppgave(): Boolean {
-        return !skalBehandlesAutomatisk && (type == BehandlingType.FØRSTEGANGSBEHANDLING || type == BehandlingType.REVURDERING)
+        return !skalBehandlesAutomatisk && (
+            type == BehandlingType.FØRSTEGANGSBEHANDLING ||
+                type == BehandlingType.REVURDERING
+            )
     }
 
     override fun toString(): String {
@@ -97,7 +100,10 @@ data class Behandling(
             if (type == BehandlingType.TEKNISK_OPPHØR &&
                 opprettetÅrsak == BehandlingÅrsak.TEKNISK_OPPHØR
             )
-                true else throw Feil("Behandling er teknisk opphør, men årsak $opprettetÅrsak og type $type samsvarer ikke.")
+                true else throw Feil(
+                "Behandling er teknisk opphør, men årsak $opprettetÅrsak " +
+                    "og type $type samsvarer ikke."
+            )
         } else {
             false
         }
@@ -166,7 +172,8 @@ data class Behandling(
                 BehandlingStegTilstand(
                     behandling = this,
                     behandlingSteg = steg,
-                    behandlingStegStatus = if (steg == SISTE_STEG) BehandlingStegStatus.UTFØRT else BehandlingStegStatus.IKKE_UTFØRT
+                    behandlingStegStatus = if (steg == SISTE_STEG) BehandlingStegStatus.UTFØRT
+                    else BehandlingStegStatus.IKKE_UTFØRT
                 )
             )
         }
@@ -281,9 +288,10 @@ enum class BehandlingÅrsak(val visningsnavn: String) {
     KORREKSJON_VEDTAKSBREV("Korrigere vedtak med egen brevmal"),
     OMREGNING_6ÅR("Omregning 6 år"),
     OMREGNING_18ÅR("Omregning 18 år"),
-    SMÅBARNSTILLEGG("Småbarnstillegg"),
     SATSENDRING("Satsendring"),
+    SMÅBARNSTILLEGG("Småbarnstillegg"),
     MIGRERING("Migrering"),
+    ENDRE_MIGRERINGSDATO("Endre migreringsdato")
 }
 
 enum class BehandlingType(val visningsnavn: String) {

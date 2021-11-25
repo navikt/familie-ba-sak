@@ -12,7 +12,7 @@ class SkyggesakService(
 ) {
 
     fun opprettSkyggesak(ident: String, fagsakId: Long) {
-        val aktørId = personopplysningerService.hentAktivAktørId(Ident(ident))
+        val aktørId = personopplysningerService.hentOgLagreAktørId(Ident(ident))
         integrasjonClient.opprettSkyggesak(aktørId, fagsakId)
     }
 }

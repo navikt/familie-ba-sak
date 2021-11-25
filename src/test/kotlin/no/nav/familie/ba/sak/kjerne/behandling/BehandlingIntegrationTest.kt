@@ -16,6 +16,7 @@ import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PersonInfo
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
@@ -28,7 +29,6 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRequest
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonRepository
@@ -39,6 +39,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.G
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrUkjentBosted
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrVegadresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlingStegStatus
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
@@ -114,6 +115,9 @@ class BehandlingIntegrationTest(
 
     @Autowired
     private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
+
+    @Autowired
+    private val personidentService: PersonidentService
 ) : AbstractSpringIntegrationTest(mockPersonopplysningerService) {
 
     @BeforeEach
@@ -306,6 +310,10 @@ class BehandlingIntegrationTest(
         val barn1Fnr = randomFnr()
         val barn2Fnr = randomFnr()
 
+        val søkerAktørId = personidentService.hentOgLagreAktørId(søkerFnr)
+        val barn1AktørId = personidentService.hentOgLagreAktørId(barn1Fnr)
+        val barn2AktørId = personidentService.hentOgLagreAktørId(barn2Fnr)
+
         val januar2020 = YearMonth.of(2020, 1)
         val oktober2020 = YearMonth.of(2020, 10)
         val stønadTom = januar2020.plusYears(17)
@@ -313,8 +321,12 @@ class BehandlingIntegrationTest(
         fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = søkerFnr))
         val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(søkerFnr))
 
+        val barnAktør = personidentService.hentOgLagreAktørIder(listOf(barn1Fnr, barn2Fnr))
         val personopplysningGrunnlag =
-            lagTestPersonopplysningGrunnlag(behandling.id, søkerFnr, listOf(barn1Fnr, barn2Fnr))
+            lagTestPersonopplysningGrunnlag(
+                behandling.id, søkerFnr, listOf(barn1Fnr, barn2Fnr),
+                søkerAktør = behandling.fagsak.aktør, barnAktør = barnAktør
+            )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
         behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling = behandling)
@@ -325,6 +337,7 @@ class BehandlingIntegrationTest(
             lagPersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
                 fnr = søkerFnr,
+                aktør = søkerAktørId,
                 resultat = Resultat.OPPFYLT,
                 periodeFom = januar2020.minusMonths(1).toLocalDate(),
                 periodeTom = stønadTom.toLocalDate(),
@@ -334,6 +347,7 @@ class BehandlingIntegrationTest(
             lagPersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
                 fnr = barn1Fnr,
+                aktør = barn1AktørId,
                 resultat = Resultat.OPPFYLT,
                 periodeFom = januar2020.minusMonths(1).toLocalDate(),
                 periodeTom = stønadTom.toLocalDate(),
@@ -343,6 +357,7 @@ class BehandlingIntegrationTest(
             lagPersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
                 fnr = barn2Fnr,
+                aktør = barn2AktørId,
                 resultat = Resultat.OPPFYLT,
                 periodeFom = oktober2020.minusMonths(1).toLocalDate(),
                 periodeTom = stønadTom.toLocalDate(),
@@ -401,6 +416,11 @@ class BehandlingIntegrationTest(
         val barn2Fnr = randomFnr()
         val barn3Fnr = randomFnr()
 
+        val søkerAktørId = personidentService.hentOgLagreAktørId(søkerFnr)
+        val barn1AktørId = personidentService.hentOgLagreAktørId(barn1Fnr)
+        val barn2AktørId = personidentService.hentOgLagreAktørId(barn2Fnr)
+        val barn3AktørId = personidentService.hentOgLagreAktørId(barn3Fnr)
+
         val januar2020 = YearMonth.of(2020, 1)
         val januar2021 = YearMonth.of(2021, 1)
         val stønadTom = januar2020.plusYears(17)
@@ -408,8 +428,12 @@ class BehandlingIntegrationTest(
         fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = søkerFnr))
         val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(søkerFnr))
 
+        val barnAktør = personidentService.hentOgLagreAktørIder(listOf(barn1Fnr, barn2Fnr, barn3Fnr))
         val personopplysningGrunnlag =
-            lagTestPersonopplysningGrunnlag(behandling.id, søkerFnr, listOf(barn1Fnr, barn2Fnr, barn3Fnr))
+            lagTestPersonopplysningGrunnlag(
+                behandling.id, søkerFnr, listOf(barn1Fnr, barn2Fnr, barn3Fnr),
+                søkerAktør = behandling.fagsak.aktør, barnAktør = barnAktør
+            )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
         assertNotNull(personopplysningGrunnlag)
@@ -423,6 +447,9 @@ class BehandlingIntegrationTest(
             søkerFnr,
             barn1Fnr,
             barn2Fnr,
+            søkerAktørId,
+            barn1AktørId,
+            barn2AktørId,
             januar2020.minusMonths(1).toLocalDate(),
             stønadTom.toLocalDate()
         )
@@ -437,6 +464,9 @@ class BehandlingIntegrationTest(
             søkerFnr,
             barn1Fnr,
             barn3Fnr,
+            søkerAktørId,
+            barn1AktørId,
+            barn3AktørId,
             januar2021.minusMonths(1).toLocalDate(),
             stønadTom.toLocalDate()
         )

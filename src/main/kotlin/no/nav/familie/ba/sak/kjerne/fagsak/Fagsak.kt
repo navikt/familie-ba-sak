@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.fagsak
 
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import java.util.Objects
 import javax.persistence.CascadeType
 import javax.persistence.Column
@@ -12,7 +13,9 @@ import javax.persistence.FetchType
 import javax.persistence.GeneratedValue
 import javax.persistence.GenerationType
 import javax.persistence.Id
+import javax.persistence.JoinColumn
 import javax.persistence.OneToMany
+import javax.persistence.OneToOne
 import javax.persistence.SequenceGenerator
 import javax.persistence.Table
 
@@ -23,6 +26,14 @@ data class Fagsak(
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "fagsak_seq_generator")
     @SequenceGenerator(name = "fagsak_seq_generator", sequenceName = "fagsak_seq", allocationSize = 50)
     val id: Long = 0,
+
+    @OneToOne(optional = false)
+    @JoinColumn(
+        name = "fk_aktoer_id",
+        nullable = false,
+        updatable = false
+    )
+    val aktør: Aktør,
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)

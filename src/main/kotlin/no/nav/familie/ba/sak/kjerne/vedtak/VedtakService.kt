@@ -2,13 +2,9 @@ package no.nav.familie.ba.sak.kjerne.vedtak
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
-import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.dokument.DokumentService
-import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
-import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingService
-import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import org.slf4j.LoggerFactory
@@ -20,22 +16,11 @@ import java.time.LocalDateTime
 @Service
 class VedtakService(
     private val behandlingService: BehandlingService,
-    private val loggService: LoggService,
     private val vedtakRepository: VedtakRepository,
     private val dokumentService: DokumentService,
-    private val totrinnskontrollService: TotrinnskontrollService,
     private val tilbakekrevingService: TilbakekrevingService,
     private val vedtaksperiodeService: VedtaksperiodeService
 ) {
-
-    fun opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(behandling: Behandling): Vedtak {
-        totrinnskontrollService.opprettAutomatiskTotrinnskontroll(behandling)
-        loggService.opprettBeslutningOmVedtakLogg(behandling, Beslutning.GODKJENT)
-
-        val vedtak = hentAktivForBehandling(behandlingId = behandling.id)
-            ?: error("Fant ikke aktivt vedtak på behandling ${behandling.id}")
-        return oppdaterVedtakMedStønadsbrev(vedtak = vedtak)
-    }
 
     fun hent(vedtakId: Long): Vedtak {
         return vedtakRepository.getById(vedtakId)
