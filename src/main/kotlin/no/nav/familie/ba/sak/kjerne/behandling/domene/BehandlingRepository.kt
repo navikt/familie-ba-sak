@@ -4,6 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Lock
 import org.springframework.data.jpa.repository.Query
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.YearMonth
 import javax.persistence.LockModeType
 
@@ -32,12 +33,12 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
                           AND f.arkivert = false
                         GROUP BY fagsakid)
                         select sum(aty.kalkulert_utbetalingsbelop) from andel_tilkjent_ytelse aty
-                        where aty.stonad_fom <= DATE_TRUNC('month', :måned)
-                          AND aty.stonad_tom >= DATE_TRUNC('month', :måned)
+                        where aty.stonad_fom <= :måned
+                          AND aty.stonad_tom >= :måned
                         AND aty.fk_behandling_id in (SELECT behandlingid FROM sisteiverksattebehandlingfraløpendefagsak)""",
         nativeQuery = true
     )
-    fun hentTotalUtbetalingForMåned(måned: LocalDate): Long
+    fun hentTotalUtbetalingForMåned(måned: LocalDateTime): Long
 
     /* Denne henter først siste iverksatte behandling på en løpende fagsak.
      * Finner så alle perioder på siste iverksatte behandling

@@ -10,7 +10,9 @@ import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import java.time.Duration
+import java.time.Instant
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.YearMonth
 
 @Service
@@ -31,8 +33,12 @@ class TeamStatistikkService(
 
     @Scheduled(initialDelay = INITIAL_DELAY, fixedDelay = OPPDATERINGSFREKVENS)
     fun utbetalinger() {
+        Instant.from(YearMonth.now())
         val månederMedTotalUtbetaling =
-            listOf<LocalDate>(LocalDate.now(), LocalDate.now().plusMonths(1)).associateWith {
+            listOf<LocalDateTime>(
+                LocalDateTime.now(),
+                LocalDateTime.now().plusMonths(1)
+            ).associateWith {
                 behandlingRepository.hentTotalUtbetalingForMåned(it)
             }
 
