@@ -58,9 +58,11 @@ Dersom man vil gjøre autentiserte kall mot andre tjenester, må man sette opp f
 Secret kan hentes fra cluster med
 `kubectl -n teamfamilie get secret azuread-familie-ba-sak-lokal -o json | jq '.data | map_values(@base64d)'`
 
-* `AZURE_APP_CLIENT_ID` (fra secret)
-* `AZURE_APP_CLIENT_SECRET` (fra secret)
+* BA_SAK_CLIENT_ID=`AZURE_APP_CLIENT_ID` (fra secret)
+* CLIENT_SECRET=`AZURE_APP_CLIENT_SECRET` (fra secret)
 * Scope for den aktuelle tjenesten
+
+Dvs må sette `BA_SAK_CLIENT_ID` i intellij til verdien av `AZURE_APP_CLIENT_ID` fra kubernetes(azuread-familie-ba-sak-lokal)
 
 Alle disse variablene finnes i applikasjonens mappe for preprod-fss
 på [Vault](https://vault.adeo.no/ui/vault/secrets/kv%2Fpreprod%2Ffss/show/familie-ba-sak/default). Variablene legges inn
