@@ -97,6 +97,12 @@ fun LocalDate.isBetween(toCompare: Periode): Boolean {
     return this.isSameOrAfter(toCompare.fom) && this.isSameOrBefore(toCompare.tom)
 }
 
+fun Periode.overlapperHeltEllerDelvisMed(annenPeriode: Periode) =
+    this.fom.isBetween(annenPeriode) ||
+        this.tom.isBetween(annenPeriode) ||
+        annenPeriode.fom.isBetween(this) ||
+        annenPeriode.tom.isBetween(this)
+
 fun MånedPeriode.inkluderer(yearMonth: YearMonth) = yearMonth >= this.fom && yearMonth <= this.tom
 
 fun MånedPeriode.overlapperHeltEllerDelvisMed(annenPeriode: MånedPeriode) =
@@ -110,7 +116,8 @@ fun Periode.kanErstatte(other: Periode): Boolean {
 }
 
 fun Periode.kanSplitte(other: Periode): Boolean {
-    return this.fom.isBetween(other) && this.tom.isBetween(other) && (this.tom != TIDENES_ENDE || other.tom != TIDENES_ENDE)
+    return this.fom.isBetween(other) && this.tom.isBetween(other) &&
+        (this.tom != TIDENES_ENDE || other.tom != TIDENES_ENDE)
 }
 
 fun Periode.kanFlytteFom(other: Periode): Boolean {

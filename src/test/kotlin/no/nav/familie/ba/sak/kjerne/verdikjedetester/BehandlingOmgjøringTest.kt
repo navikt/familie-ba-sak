@@ -3,8 +3,8 @@ package no.nav.familie.ba.sak.kjerne.verdikjedetester
 import io.mockk.every
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.LocalDateService
-import no.nav.familie.ba.sak.kjerne.autobrev.Autobrev6og18ÅrService
-import no.nav.familie.ba.sak.kjerne.autobrev.FinnAlleBarn6og18ÅrTask
+import no.nav.familie.ba.sak.kjerne.autovedtak.omregning.Autobrev6og18ÅrService
+import no.nav.familie.ba.sak.kjerne.autovedtak.omregning.FinnAlleBarn6og18ÅrTask
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat

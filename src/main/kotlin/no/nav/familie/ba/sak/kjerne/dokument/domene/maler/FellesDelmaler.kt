@@ -41,15 +41,6 @@ data class Hjemmeltekst(
     )
 }
 
-data class MedVennligHilsen(
-    val enhet: Flettefelt,
-) {
-
-    constructor(hjemler: String) : this(
-        flettefelt(hjemler),
-    )
-}
-
 data class AutoUnderskrift(
     val enhet: Flettefelt,
 ) {
