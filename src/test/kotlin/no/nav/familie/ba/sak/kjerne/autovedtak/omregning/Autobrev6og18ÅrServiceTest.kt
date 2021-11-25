@@ -125,8 +125,13 @@ internal class Autobrev6og18ÅrServiceTest {
         every { taskRepository.save(any()) } returns Task(type = "test", payload = "")
         autobrev6og18ÅrService.opprettOmregningsoppgaveForBarnIBrytingsalder(autobrev6og18ÅrDTO)
 
-        verify(exactly = 1) { stegService.håndterVilkårsvurdering(any()) }
-        verify(exactly = 1) { stegService.håndterNyBehandling(any()) }
+        verify(exactly = 1) {
+            autovedtakService.opprettAutomatiskBehandlingOgKjørTilBehandlingsresultat(
+                any(),
+                any(),
+                any()
+            )
+        }
         verify(exactly = 1) {
             vedtaksperiodeService.oppdaterFortsattInnvilgetPeriodeMedAutobrevBegrunnelse(
                 any(),
