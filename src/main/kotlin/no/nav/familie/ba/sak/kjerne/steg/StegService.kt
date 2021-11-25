@@ -60,39 +60,29 @@ class StegService(
     @Transactional
     fun håndterNyBehandling(nyBehandling: NyBehandling): Behandling {
         val behandling = behandlingService.opprettBehandling(nyBehandling)
-
-        return if (nyBehandling.behandlingType == BehandlingType.MIGRERING_FRA_INFOTRYGD || nyBehandling.behandlingÅrsak == BehandlingÅrsak.FØDSELSHENDELSE) {
-            håndterPersongrunnlag(
-                behandling,
-                RegistrerPersongrunnlagDTO(
-                    ident = nyBehandling.søkersIdent,
-                    barnasIdenter = nyBehandling.barnasIdenter
-                )
-            )
+        val barnasIdenter: List<String>
+        if (nyBehandling.behandlingÅrsak in listOf(BehandlingÅrsak.MIGRERING, BehandlingÅrsak.FØDSELSHENDELSE)) {
+            barnasIdenter = nyBehandling.barnasIdenter
         } else if (nyBehandling.behandlingType == BehandlingType.FØRSTEGANGSBEHANDLING) {
-            håndterPersongrunnlag(
-                behandling,
-                RegistrerPersongrunnlagDTO(
-                    ident = nyBehandling.søkersIdent,
-                    barnasIdenter = emptyList()
+            barnasIdenter = emptyList()
+        } else if (nyBehandling.behandlingType in listOf(BehandlingType.REVURDERING, BehandlingType.TEKNISK_ENDRING) ||
+            (
+                nyBehandling.behandlingType == BehandlingType.MIGRERING_FRA_INFOTRYGD &&
+                    nyBehandling.behandlingÅrsak == BehandlingÅrsak.ENDRE_MIGRERINGSDATO
                 )
-            )
-        } else if (nyBehandling.behandlingType == BehandlingType.REVURDERING || nyBehandling.behandlingType == BehandlingType.TEKNISK_ENDRING) {
-            val sisteBehandling = behandlingService.hentSisteBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id)
-                ?: behandlingService.hentSisteBehandlingSomErVedtatt(behandling.fagsak.id)
-                ?: throw Feil("Forsøker å opprette en revurdering eller teknisk endring, men kan ikke finne tidligere behandling på fagsak ${behandling.fagsak.id}")
-
-            val barnFraSisteBehandlingMedUtbetalinger =
-                behandlingService.finnBarnFraBehandlingMedTilkjentYtsele(sisteBehandling.id)
-
-            håndterPersongrunnlag(
-                behandling,
-                RegistrerPersongrunnlagDTO(
-                    ident = nyBehandling.søkersIdent,
-                    barnasIdenter = barnFraSisteBehandlingMedUtbetalinger
-                )
-            )
+        ) {
+            val sisteBehandling = hentSisteAvsluttetBehandling(behandling)
+            barnasIdenter = behandlingService.finnBarnFraBehandlingMedTilkjentYtsele(sisteBehandling.id)
         } else throw Feil("Ukjent oppførsel ved opprettelse av behandling.")
+
+        return håndterPersongrunnlag(
+            behandling,
+            RegistrerPersongrunnlagDTO(
+                ident = nyBehandling.søkersIdent,
+                barnasIdenter = barnasIdenter,
+                nyMigreringsdato = nyBehandling.nyMigreringsdato
+            )
+        )
     }
 
     @Transactional
@@ -386,6 +376,16 @@ class StegService(
 
     fun hentBehandlingSteg(stegType: StegType): BehandlingSteg<*>? {
         return steg.firstOrNull { it.stegType() == stegType }
+    }
+
+    private fun hentSisteAvsluttetBehandling(behandling: Behandling): Behandling {
+        return behandlingService.hentSisteBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id)
+            ?: behandlingService.hentSisteBehandlingSomErVedtatt(behandling.fagsak.id)
+            ?: throw Feil(
+                "Forsøker å opprette en ${behandling.type.visningsnavn} " +
+                    "med årsak ${behandling.opprettetÅrsak.visningsnavn}, " +
+                    "men kan ikke finne tidligere behandling på fagsak ${behandling.fagsak.id}"
+            )
     }
 
     private fun initStegMetrikker(type: String): Map<StegType, Counter> {
