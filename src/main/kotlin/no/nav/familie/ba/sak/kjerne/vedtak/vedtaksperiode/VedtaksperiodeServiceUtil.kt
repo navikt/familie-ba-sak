@@ -72,62 +72,68 @@ fun hentVedtaksperioderMedBegrunnelserForUtbetalingsperioder(
         )
     }
 
+data class BegrunnelseGrunnlag(
+
+    val persongrunnlag: PersonopplysningGrunnlag,
+    val vilkårsvurdering: Vilkårsvurdering,
+    val identerMedUtbetaling: List<String>,
+    val endredeUtbetalingAndeler: List<EndretUtbetalingAndel>,
+    val andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
+)
+
 fun hentPersonidenterGjeldendeForBegrunnelse(
     triggesAv: TriggesAv,
-    persongrunnlag: PersonopplysningGrunnlag,
     vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser,
-    vilkårsvurdering: Vilkårsvurdering,
     vedtakBegrunnelseType: VedtakBegrunnelseType,
-    identerMedUtbetaling: List<String>,
-    endredeUtbetalingAndeler: List<EndretUtbetalingAndel>,
-    andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
+    begrunnelseGrunnlag: BegrunnelseGrunnlag,
 ): List<String> {
+
     val erFortsattInnvilgetBegrunnelse =
         vedtaksperiodeMedBegrunnelser.type == Vedtaksperiodetype.FORTSATT_INNVILGET ||
             vedtakBegrunnelseType == VedtakBegrunnelseType.FORTSATT_INNVILGET
 
     return when {
         triggesAv.vilkår.contains(Vilkår.UTVIDET_BARNETRYGD) || triggesAv.småbarnstillegg ->
-            identerMedUtbetaling +
-                persongrunnlag.søker.personIdent.ident +
-                endredeUtbetalingAndeler
+            begrunnelseGrunnlag.identerMedUtbetaling +
+                begrunnelseGrunnlag.persongrunnlag.søker.personIdent.ident +
+                begrunnelseGrunnlag.endredeUtbetalingAndeler
                     .somOverlapper(vedtaksperiodeMedBegrunnelser.hentNullableMånedPeriode())
                     .map { it.person!!.personIdent.ident }
 
         triggesAv.barnMedSeksårsdag ->
-            persongrunnlag.barnMedSeksårsdagPåFom(vedtaksperiodeMedBegrunnelser.fom)
+            begrunnelseGrunnlag.persongrunnlag.barnMedSeksårsdagPåFom(vedtaksperiodeMedBegrunnelser.fom)
                 .map { person -> person.personIdent.ident }
 
         triggesAv.personerManglerOpplysninger ->
-            if (vilkårsvurdering.harPersonerManglerOpplysninger())
+            if (begrunnelseGrunnlag.vilkårsvurdering.harPersonerManglerOpplysninger())
                 emptyList()
             else
                 error("Legg til opplysningsplikt ikke oppfylt begrunnelse men det er ikke person med det resultat")
 
-        erFortsattInnvilgetBegrunnelse -> identerMedUtbetaling
+        erFortsattInnvilgetBegrunnelse -> begrunnelseGrunnlag.identerMedUtbetaling
 
         triggesAv.etterEndretUtbetaling ->
             hentPersonerForEtterEndretUtbetalingsperiode(
-                endretUtbetalingAndeler = endredeUtbetalingAndeler,
+                endretUtbetalingAndeler = begrunnelseGrunnlag.endredeUtbetalingAndeler,
                 vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
                 endringsaarsaker = triggesAv.endringsaarsaker
             ).map { person -> person.personIdent.ident }
 
         else ->
             VedtakUtils.hentPersonerForAlleUtgjørendeVilkår(
-                vilkårsvurdering = vilkårsvurdering,
+                vilkårsvurdering = begrunnelseGrunnlag.vilkårsvurdering,
                 vedtaksperiode = Periode(
                     fom = vedtaksperiodeMedBegrunnelser.fom ?: TIDENES_MORGEN,
                     tom = vedtaksperiodeMedBegrunnelser.tom ?: TIDENES_ENDE
                 ),
                 oppdatertBegrunnelseType = vedtakBegrunnelseType,
                 aktuellePersonerForVedtaksperiode = hentAktuellePersonerForVedtaksperiode(
-                    persongrunnlag,
+                    begrunnelseGrunnlag.persongrunnlag,
                     vedtakBegrunnelseType,
-                    identerMedUtbetaling
+                    begrunnelseGrunnlag.identerMedUtbetaling
                 ),
                 triggesAv = triggesAv,
-                andelerTilkjentYtelse = andelerTilkjentYtelse
+                andelerTilkjentYtelse = begrunnelseGrunnlag.andelerTilkjentYtelse
             ).map { person -> person.personIdent.ident }
     }.toSet().toList()
 }
