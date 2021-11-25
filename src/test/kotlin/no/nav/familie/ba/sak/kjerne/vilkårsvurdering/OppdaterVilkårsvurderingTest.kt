@@ -2,10 +2,12 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagVilkårResultat
+import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingUtils.flyttResultaterTilInitielt
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingUtils.lagFjernAdvarsel
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
@@ -21,9 +23,10 @@ class OppdaterVilkårsvurderingTest {
     @Test
     fun `Skal legge til nytt vilkår`() {
         val fnr1 = randomFnr()
+        val aktørId1 = randomAktørId()
         val behandling = lagBehandling()
-        val resA = lagBehandlingResultat(behandling = behandling, fnr = listOf(fnr1))
-        val resB = lagBehandlingResultatB(behandling = behandling, fnr = listOf(fnr1))
+        val resA = lagBehandlingResultat(behandling = behandling, fnrAktør = listOf(Pair(fnr1, aktørId1)))
+        val resB = lagBehandlingResultatB(behandling = behandling, fnrAktør = listOf(Pair(fnr1, aktørId1)))
 
         val (oppdatert, gammelt) = flyttResultaterTilInitielt(resB, resA)
         Assertions.assertEquals(3, oppdatert.personResultater.first().vilkårResultater.size)
@@ -38,9 +41,10 @@ class OppdaterVilkårsvurderingTest {
     @Test
     fun `Skal fjerne vilkår`() {
         val fnr1 = randomFnr()
+        val aktørId1 = randomAktørId()
         val behandling = lagBehandling()
-        val resA = lagBehandlingResultatB(behandling = behandling, fnr = listOf(fnr1))
-        val resB = lagBehandlingResultat(behandling = behandling, fnr = listOf(fnr1))
+        val resA = lagBehandlingResultatB(behandling = behandling, fnrAktør = listOf(Pair(fnr1, aktørId1)))
+        val resB = lagBehandlingResultat(behandling = behandling, fnrAktør = listOf(Pair(fnr1, aktørId1)))
 
         val (oppdatert, gammelt) = flyttResultaterTilInitielt(resB, resA)
         Assertions.assertEquals(2, oppdatert.personResultater.first().vilkårResultater.size)
@@ -57,9 +61,14 @@ class OppdaterVilkårsvurderingTest {
     fun `Skal legge til person på vilkårsvurdering`() {
         val fnr1 = randomFnr()
         val fnr2 = randomFnr()
+        val aktørId1 = randomAktørId()
+        val aktørId2 = randomAktørId()
         val behandling = lagBehandling()
-        val resA = lagBehandlingResultat(behandling = behandling, fnr = listOf(fnr1))
-        val resB = lagBehandlingResultat(behandling = behandling, fnr = listOf(fnr1, fnr2))
+        val resA = lagBehandlingResultat(behandling = behandling, fnrAktør = listOf(Pair(fnr1, aktørId1)))
+        val resB = lagBehandlingResultat(
+            behandling = behandling,
+            fnrAktør = listOf(Pair(fnr1, aktørId1), Pair(fnr2, aktørId2))
+        )
 
         val (oppdatert, gammelt) = flyttResultaterTilInitielt(resB, resA)
         Assertions.assertEquals(2, oppdatert.personResultater.size)
@@ -70,9 +79,14 @@ class OppdaterVilkårsvurderingTest {
     fun `Skal fjerne person på vilkårsvurdering`() {
         val fnr1 = randomFnr()
         val fnr2 = randomFnr()
+        val aktørId1 = randomAktørId()
+        val aktørId2 = randomAktørId()
         val behandling = lagBehandling()
-        val resA = lagBehandlingResultat(behandling = behandling, fnr = listOf(fnr1, fnr2))
-        val resB = lagBehandlingResultat(behandling = behandling, fnr = listOf(fnr1))
+        val resA = lagBehandlingResultat(
+            behandling = behandling,
+            fnrAktør = listOf(Pair(fnr1, aktørId1), Pair(fnr2, aktørId2))
+        )
+        val resB = lagBehandlingResultat(behandling = behandling, fnrAktør = listOf(Pair(fnr1, aktørId1)))
 
         val (oppdatert, gammelt) = flyttResultaterTilInitielt(resB, resA)
         Assertions.assertEquals(1, oppdatert.personResultater.size)
@@ -83,9 +97,14 @@ class OppdaterVilkårsvurderingTest {
     fun `Skal lage advarsel tekst`() {
         val fnr1 = randomFnr()
         val fnr2 = randomFnr()
+        val aktørId1 = randomAktørId()
+        val aktørId2 = randomAktørId()
         val behandling = lagBehandling()
-        val resultat1 = lagBehandlingResultat(behandling = behandling, fnr = listOf(fnr1, fnr2))
-        val resultat2 = lagBehandlingResultat(behandling = behandling, fnr = listOf(fnr2))
+        val resultat1 = lagBehandlingResultat(
+            behandling = behandling,
+            fnrAktør = listOf(Pair(fnr1, aktørId1), Pair(fnr2, aktørId2))
+        )
+        val resultat2 = lagBehandlingResultat(behandling = behandling, fnrAktør = listOf(Pair(fnr2, aktørId2)))
 
         val resterende = flyttResultaterTilInitielt(resultat2, resultat1).second
         val fjernedeVilkår = resultat1.personResultater.first().vilkårResultater.toList()
@@ -103,11 +122,18 @@ class OppdaterVilkårsvurderingTest {
     @Test
     fun `Skal beholde vilkår om utvidet barnetrygd når det eksisterer løpende sak med utvidet`() {
         val søkerFnr = randomFnr()
+        val søkerAktørId = randomAktørId()
         val behandling = lagBehandling()
 
-        val initUtenUtvidetVilkår = lagVilkårsvurderingMedForskjelligeTyperVilkår(søkerFnr, behandling, listOf())
+        val initUtenUtvidetVilkår =
+            lagVilkårsvurderingMedForskjelligeTyperVilkår(søkerFnr, søkerAktørId, behandling, listOf())
         val aktivMedUtvidetVilkår =
-            lagVilkårsvurderingMedForskjelligeTyperVilkår(søkerFnr, behandling, listOf(Vilkår.UTVIDET_BARNETRYGD))
+            lagVilkårsvurderingMedForskjelligeTyperVilkår(
+                søkerFnr,
+                søkerAktørId,
+                behandling,
+                listOf(Vilkår.UTVIDET_BARNETRYGD)
+            )
 
         val (nyInit, nyAktiv) = flyttResultaterTilInitielt(
             initiellVilkårsvurdering = initUtenUtvidetVilkår,
@@ -125,11 +151,18 @@ class OppdaterVilkårsvurderingTest {
     @Test
     fun `Skal fjerne vilkår om utvidet barnetrygd når det ikke eksisterer løpende sak med utvidet`() {
         val søkerFnr = randomFnr()
+        val søkerAktørId = randomAktørId()
         val behandling = lagBehandling()
 
-        val initUtenUtvidetVilkår = lagVilkårsvurderingMedForskjelligeTyperVilkår(søkerFnr, behandling, listOf())
+        val initUtenUtvidetVilkår =
+            lagVilkårsvurderingMedForskjelligeTyperVilkår(søkerFnr, søkerAktørId, behandling, listOf())
         val aktivMedUtvidetVilkår =
-            lagVilkårsvurderingMedForskjelligeTyperVilkår(søkerFnr, behandling, listOf(Vilkår.UTVIDET_BARNETRYGD))
+            lagVilkårsvurderingMedForskjelligeTyperVilkår(
+                søkerFnr,
+                søkerAktørId,
+                behandling,
+                listOf(Vilkår.UTVIDET_BARNETRYGD)
+            )
 
         val (nyInit, nyAktiv) = flyttResultaterTilInitielt(
             initiellVilkårsvurdering = initUtenUtvidetVilkår,
@@ -147,11 +180,13 @@ class OppdaterVilkårsvurderingTest {
 
     fun lagVilkårsvurderingMedForskjelligeTyperVilkår(
         søkerFnr: String,
+        søkerAktør: Aktør,
         behandling: Behandling,
         vilkår: List<Vilkår>
     ): Vilkårsvurdering {
         val vilkårsvurdering = Vilkårsvurdering(behandling = behandling)
-        val personResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = søkerFnr)
+        val personResultat =
+            PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = søkerFnr, aktør = søkerAktør)
         val vilkårResultater =
             vilkår.map { lagVilkårResultat(vilkårType = it, personResultat = personResultat) }.toSet()
         personResultat.setSortedVilkårResultater(vilkårResultater)
@@ -159,15 +194,16 @@ class OppdaterVilkårsvurderingTest {
         return vilkårsvurdering
     }
 
-    fun lagBehandlingResultat(fnr: List<String>, behandling: Behandling): Vilkårsvurdering {
+    fun lagBehandlingResultat(fnrAktør: List<Pair<String, Aktør>>, behandling: Behandling): Vilkårsvurdering {
         val vilkårsvurdering = Vilkårsvurdering(
             behandling = behandling
         )
 
-        vilkårsvurdering.personResultater = fnr.map {
+        vilkårsvurdering.personResultater = fnrAktør.map {
             val personResultat = PersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
-                personIdent = it
+                personIdent = it.first,
+                aktør = it.second
             )
 
             personResultat.setSortedVilkårResultater(
@@ -199,15 +235,16 @@ class OppdaterVilkårsvurderingTest {
         return vilkårsvurdering
     }
 
-    fun lagBehandlingResultatB(fnr: List<String>, behandling: Behandling): Vilkårsvurdering {
+    fun lagBehandlingResultatB(fnrAktør: List<Pair<String, Aktør>>, behandling: Behandling): Vilkårsvurdering {
         val vilkårsvurdering = Vilkårsvurdering(
             behandling = behandling
         )
 
-        vilkårsvurdering.personResultater = fnr.map {
+        vilkårsvurdering.personResultater = fnrAktør.map {
             val personResultat = PersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
-                personIdent = it
+                personIdent = it.first,
+                aktør = it.second
             )
 
             personResultat.setSortedVilkårResultater(

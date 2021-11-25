@@ -74,7 +74,8 @@ class FagsakControllerTest(
     fun `Skal opprette fagsak med aktørid`() {
         val aktørId = randomAktørId()
 
-        val response = fagsakController.hentEllerOpprettFagsak(FagsakRequest(personIdent = null, aktørId = aktørId.id))
+        val response =
+            fagsakController.hentEllerOpprettFagsak(FagsakRequest(personIdent = null, aktørId = aktørId.aktørId))
         val restFagsak = response.body?.data
         assertEquals(HttpStatus.CREATED, response.statusCode)
         assertEquals(FagsakStatus.OPPRETTET, restFagsak?.status)
@@ -158,17 +159,17 @@ class FagsakControllerTest(
         val aktørId = randomAktørId()
 
         every {
-            mockPersonopplysningerService.hentAktivPersonIdent(Ident(aktørId.id))
+            mockPersonopplysningerService.hentAktivPersonIdent(Ident(aktørId.aktørId))
         } returns PersonIdent("123")
 
         val nyRestFagsak = fagsakController.hentEllerOpprettFagsak(
-            FagsakRequest(personIdent = null, aktørId = aktørId.id)
+            FagsakRequest(personIdent = null, aktørId = aktørId.aktørId)
         )
         assertEquals(Ressurs.Status.SUKSESS, nyRestFagsak.body?.status)
 
         val eksisterendeRestFagsak = fagsakController.hentEllerOpprettFagsak(
             FagsakRequest(
-                personIdent = null, aktørId = aktørId.id
+                personIdent = null, aktørId = aktørId.aktørId
             )
         )
         assertEquals(Ressurs.Status.SUKSESS, eksisterendeRestFagsak.body?.status)

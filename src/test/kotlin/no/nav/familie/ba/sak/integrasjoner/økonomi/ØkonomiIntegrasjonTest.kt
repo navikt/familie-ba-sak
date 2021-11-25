@@ -14,6 +14,8 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
@@ -46,6 +48,9 @@ class ØkonomiIntegrasjonTest(
     private val beregningService: BeregningService,
 
     @Autowired
+    private val personidentService: PersonidentService,
+
+    @Autowired
     private val vedtakService: VedtakService,
 ) : AbstractSpringIntegrationTest() {
 
@@ -59,14 +64,23 @@ class ØkonomiIntegrasjonTest(
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        val barnAktørId = personidentService.hentOgLagreAktørId(barnFnr)
 
-        val vilkårsvurdering = lagBehandlingResultat(behandling, fnr, barnFnr, stønadFom, stønadTom)
+        val vilkårsvurdering =
+            lagBehandlingResultat(behandling, fnr, barnFnr, fagsak.aktør, barnAktørId, stønadFom, stønadTom)
 
         vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering)
         Assertions.assertNotNull(behandling.fagsak.id)
 
+        val barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr))
         val personopplysningGrunnlag =
-            lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
+            lagTestPersonopplysningGrunnlag(
+                behandling.id,
+                fnr,
+                listOf(barnFnr),
+                søkerAktør = fagsak.aktør,
+                barnAktør = barnAktør
+            )
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
         behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling = behandling)
@@ -94,18 +108,27 @@ class ØkonomiIntegrasjonTest(
         // Lag fagsak med behandling og personopplysningsgrunnlag og Iverksett.
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        val barnAktørId = personidentService.hentOgLagreAktørId(barnFnr)
 
         val vedtak = Vedtak(
             behandling = behandling,
             vedtaksdato = LocalDateTime.of(2020, 1, 1, 4, 35)
         )
 
+        val barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr))
         val personopplysningGrunnlag =
-            lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
+            lagTestPersonopplysningGrunnlag(
+                behandling.id,
+                fnr,
+                listOf(barnFnr),
+                søkerAktør = fagsak.aktør,
+                barnAktør = barnAktør
+            )
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
         behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling)
 
-        val vilkårsvurdering = lagBehandlingResultat(behandling, fnr, barnFnr, stønadFom, stønadTom)
+        val vilkårsvurdering =
+            lagBehandlingResultat(behandling, fnr, barnFnr, fagsak.aktør, barnAktørId, stønadFom, stønadTom)
         vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering)
 
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
@@ -125,6 +148,8 @@ class ØkonomiIntegrasjonTest(
         behandling: Behandling,
         søkerFnr: String,
         barnFnr: String,
+        søkerAktør: Aktør,
+        barnAktør: Aktør,
         stønadFom: LocalDate,
         stønadTom: LocalDate
     ): Vilkårsvurdering {
@@ -134,6 +159,7 @@ class ØkonomiIntegrasjonTest(
             lagPersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
                 fnr = søkerFnr,
+                aktør = søkerAktør,
                 resultat = Resultat.OPPFYLT,
                 periodeFom = stønadFom,
                 periodeTom = stønadTom,
@@ -143,6 +169,7 @@ class ØkonomiIntegrasjonTest(
             lagPersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
                 fnr = barnFnr,
+                aktør = barnAktør,
                 resultat = Resultat.OPPFYLT,
                 periodeFom = stønadFom,
                 periodeTom = stønadTom,

@@ -133,11 +133,11 @@ class VilkårTilTilkjentYtelseTest {
             vilkårsvurdering = vilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
             behandling = lagBehandling()
-        ) {
+        ) { personIdent, aktørId ->
             if (småbarnstilleggTestPeriode != null)
                 listOf(
                     InternPeriodeOvergangsstønad(
-                        personIdent = it,
+                        personIdent = personIdent,
                         fomDato = småbarnstilleggTestPeriode.fraOgMed,
                         tomDato = småbarnstilleggTestPeriode.tilOgMed!!,
                     )
@@ -238,7 +238,9 @@ class TestVilkårsvurderingBuilder(sakType: String) {
             return this
 
         val ident = person.personIdent.ident
-        val personResultat = identPersonResultatMap.getOrPut(ident) { PersonResultat(0, vilkårsvurdering, ident) }
+        val aktørId = person.hentAktørId()
+        val personResultat =
+            identPersonResultatMap.getOrPut(ident) { PersonResultat(0, vilkårsvurdering, ident, aktørId) }
 
         val testperiode = TestPeriode.parse(periode)
 
@@ -294,6 +296,7 @@ class TestTilkjentYtelseBuilder(val behandling: Behandling) {
                 behandlingId = behandling.id,
                 tilkjentYtelse = tilkjentYtelse,
                 personIdent = person.personIdent.ident,
+                aktør = person.hentAktørId(),
                 stønadFom = stønadPeriode.fraOgMed.toYearMonth(),
                 stønadTom = stønadPeriode.tilOgMed!!.toYearMonth(),
                 kalkulertUtbetalingsbeløp = beløp.toInt(),

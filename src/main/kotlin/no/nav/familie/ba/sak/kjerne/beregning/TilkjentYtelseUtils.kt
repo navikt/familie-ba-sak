@@ -27,6 +27,7 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAnde
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import java.math.BigDecimal
@@ -39,7 +40,7 @@ object TilkjentYtelseUtils {
         vilkårsvurdering: Vilkårsvurdering,
         personopplysningGrunnlag: PersonopplysningGrunnlag,
         behandling: Behandling,
-        hentPerioderMedFullOvergangsstønad: (personIdent: String) -> List<InternPeriodeOvergangsstønad> = { emptyList() }
+        hentPerioderMedFullOvergangsstønad: (personIdent: String, aktør: Aktør) -> List<InternPeriodeOvergangsstønad> = { personIdent, aktørId -> emptyList() }
     ): TilkjentYtelse {
         val identBarnMap = personopplysningGrunnlag.barna
             .associateBy { it.personIdent.ident }
@@ -71,13 +72,13 @@ object TilkjentYtelseUtils {
                                 innvilgetPeriodeResultatSøker,
                                 person
                             )
-
                         beløpsperioder.map { beløpsperiode ->
                             val prosent = if (periodeResultatBarn.erDeltBosted()) BigDecimal(50) else BigDecimal(100)
                             AndelTilkjentYtelse(
                                 behandlingId = vilkårsvurdering.behandling.id,
                                 tilkjentYtelse = tilkjentYtelse,
                                 personIdent = person.personIdent.ident,
+                                aktør = person.aktør,
                                 stønadFom = beløpsperiode.fraOgMed,
                                 stønadTom = beløpsperiode.tilOgMed,
                                 kalkulertUtbetalingsbeløp = beløpsperiode.sats.avrundetHeltallAvProsent(prosent),
@@ -102,7 +103,10 @@ object TilkjentYtelseUtils {
 
         val andelerTilkjentYtelseSmåbarnstillegg = if (andelerTilkjentYtelseSøker.isNotEmpty()) {
             val perioderMedFullOvergangsstønad =
-                hentPerioderMedFullOvergangsstønad(personopplysningGrunnlag.søker.personIdent.ident)
+                hentPerioderMedFullOvergangsstønad(
+                    personopplysningGrunnlag.søker.personIdent.ident,
+                    personopplysningGrunnlag.søker.hentAktørId()
+                )
 
             SmåbarnstilleggBarnetrygdGenerator(
                 behandlingId = vilkårsvurdering.behandling.id,
@@ -111,7 +115,7 @@ object TilkjentYtelseUtils {
                 .lagSmåbarnstilleggAndeler(
                     perioderMedFullOvergangsstønad = perioderMedFullOvergangsstønad,
                     andelerSøker = andelerTilkjentYtelseSøker,
-                    barnasFødselsdatoer = personopplysningGrunnlag.barna.map { it.fødselsdato }
+                    barnasFødselsdatoer = personopplysningGrunnlag.barna.map { it.fødselsdato },
                 )
         } else emptyList()
 

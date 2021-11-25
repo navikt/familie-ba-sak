@@ -16,6 +16,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
+import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
@@ -63,6 +64,9 @@ class FerdigstillBehandlingTaskTest : AbstractSpringIntegrationTest() {
     @Autowired
     lateinit var vedtaksperiodeService: VedtaksperiodeService
 
+    @Autowired
+    lateinit var personidentService: PersonidentService
+
     @BeforeEach
     fun init() {
         databaseCleanupService.truncate()
@@ -76,6 +80,7 @@ class FerdigstillBehandlingTaskTest : AbstractSpringIntegrationTest() {
 
     private fun kjørSteg(resultat: Resultat): Behandling {
         val fnr = randomFnr()
+        val aktørId = personidentService.hentOgLagreAktørId(fnr)
         val fnrBarn = ClientMocks.barnFnr[0]
 
         val behandling = kjørStegprosessForFGB(
@@ -91,7 +96,7 @@ class FerdigstillBehandlingTaskTest : AbstractSpringIntegrationTest() {
         )
 
         return if (resultat == Resultat.IKKE_OPPFYLT) {
-            val vilkårsvurdering = lagVilkårsvurdering(fnr, behandling, resultat)
+            val vilkårsvurdering = lagVilkårsvurdering(fnr, aktørId, behandling, resultat)
 
             vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering)
             val behandlingEtterVilkårsvurdering = stegService.håndterVilkårsvurdering(behandling)

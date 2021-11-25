@@ -19,7 +19,7 @@ class MorHarJobbetINorgeSiste5ÅrTest {
 
     private fun lagSøkerMedArbeidsforhold(perioder: List<DatoIntervallEntitet>?): Person {
         return Person(
-            aktørId = randomAktørId(),
+            aktør = randomAktørId(),
             personIdent = PersonIdent(randomFnr()),
             type = PersonType.SØKER,
             personopplysningGrunnlag = PersonopplysningGrunnlag(0, 0, mutableSetOf(), true),

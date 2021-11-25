@@ -36,8 +36,8 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.mockBarnAutomati
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.mockSøkerAutomatiskBehandling
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.mockSøkerAutomatiskBehandlingFnr
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.success
 import no.nav.familie.kontrakter.felles.kodeverk.BeskrivelseDto
 import no.nav.familie.kontrakter.felles.kodeverk.BetydningDto
@@ -140,7 +140,7 @@ class ClientMocks {
         }
 
         every {
-            mockPersonopplysningerService.hentAktivAktørId(any())
+            mockPersonopplysningerService.hentOgLagreAktørId(any())
         } answers {
             randomAktørId()
         }
@@ -239,7 +239,7 @@ class ClientMocks {
             clearMocks(mockPersonopplysningerService)
 
             every {
-                mockPersonopplysningerService.hentAktivAktørId(any())
+                mockPersonopplysningerService.hentOgLagreAktørId(any())
             } answers {
                 randomAktørId()
             }
@@ -278,6 +278,21 @@ class ClientMocks {
                 listOf(
                     IdentInformasjon(identSlot.captured.ident, false, "FOLKEREGISTERIDENT"),
                     IdentInformasjon(randomFnr(), true, "FOLKEREGISTERIDENT")
+                )
+            }
+
+            every {
+                mockPersonopplysningerService.hentDødsfall(any())
+            } returns DødsfallData(false, null)
+            val identSlot2 = slot<String>()
+            every {
+                mockPersonopplysningerService.hentIdenter(capture(identSlot2), false)
+            } answers {
+                listOf(
+                    IdentInformasjon(
+                        identSlot2.captured, false, "FOLKEREGISTERIDENT"
+                    ),
+                    IdentInformasjon(identSlot2.captured + "00", false, "AKTORID"),
                 )
             }
 
@@ -731,8 +746,8 @@ fun mockHentPersoninfoForMedIdenter(
     } returns PersonInfo(fødselsdato = LocalDate.of(1990, 2, 19), kjønn = Kjønn.KVINNE, navn = "Mor Moresen")
 
     every {
-        mockPersonopplysningerService.hentAktivAktørId(any())
-    } returns AktørId("1")
+        mockPersonopplysningerService.hentOgLagreAktørId(any())
+    } returns Aktør("1")
 }
 
 val TEST_PDF = ClientMocks::class.java.getResource("/dokument/mockvedtak.pdf").readBytes()

@@ -438,7 +438,7 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTestDev() {
                     equalToJson(
                         objectMapper.writeValueAsString(
                             Skyggesak(
-                                aktoerId = aktørId.id,
+                                aktoerId = aktørId.aktørId,
                                 MOCK_FAGSAK_ID,
                                 "BAR",
                                 "BA"

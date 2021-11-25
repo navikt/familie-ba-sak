@@ -216,7 +216,7 @@ class FiltreringsregelForFlereBarnTest {
         sivilstand: SIVILSTAND = SIVILSTAND.UGIFT
     ): Person {
         return Person(
-            aktørId = randomAktørId(),
+            aktør = randomAktørId(),
             personIdent = PersonIdent(ident),
             type = type,
             personopplysningGrunnlag = personopplysningGrunnlag,
