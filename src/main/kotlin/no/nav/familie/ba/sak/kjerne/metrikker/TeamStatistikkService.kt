@@ -33,7 +33,6 @@ class TeamStatistikkService(
 
     @Scheduled(initialDelay = INITIAL_DELAY, fixedDelay = OPPDATERINGSFREKVENS)
     fun utbetalinger() {
-        Instant.from(YearMonth.now())
         val månederMedTotalUtbetaling =
             listOf<LocalDateTime>(
                 LocalDateTime.now(),
