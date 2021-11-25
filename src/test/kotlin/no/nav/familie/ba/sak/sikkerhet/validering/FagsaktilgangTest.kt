@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.sikkerhet.validering
 
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -103,7 +104,8 @@ internal class FagsaktilgangTest {
                     kjønn = Kjønn.MANN,
                     personIdent = PersonIdent(randomFnr()),
                     målform = Målform.NB,
-                    personopplysningGrunnlag = PersonopplysningGrunnlag(1, 1)
+                    personopplysningGrunnlag = PersonopplysningGrunnlag(1, 1),
+                    aktør = randomAktørId(),
                 )
                     .apply {
                         sivilstander =

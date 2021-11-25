@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
+import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
@@ -69,7 +70,8 @@ class SendTilBeslutterTest {
 
     @Test
     fun `Sjekk validering som inneholder annen vurdering som ikke er vurdert`() {
-        val vilkårsvurdering = lagVilkårsvurdering(randomFnr(), lagBehandling(), Resultat.IKKE_VURDERT)
+        val vilkårsvurdering =
+            lagVilkårsvurdering(randomFnr(), randomAktørId(), lagBehandling(), Resultat.IKKE_VURDERT)
 
         assertThrows<FunksjonellFeil> {
             vilkårsvurdering.validerAtAlleAnndreVurderingerErVurdert()
@@ -78,7 +80,8 @@ class SendTilBeslutterTest {
 
     @Test
     fun `Sjekk validering som inneholder annen vurdering hvor alle er vurdert`() {
-        val vilkårsvurdering = lagVilkårsvurdering(randomFnr(), lagBehandling(), Resultat.IKKE_OPPFYLT)
+        val vilkårsvurdering =
+            lagVilkårsvurdering(randomFnr(), randomAktørId(), lagBehandling(), Resultat.IKKE_OPPFYLT)
 
         vilkårsvurdering.validerAtAlleAnndreVurderingerErVurdert()
     }

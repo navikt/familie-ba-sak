@@ -25,11 +25,12 @@ data class SmåbarnstilleggBarnetrygdGenerator(
     fun lagSmåbarnstilleggAndeler(
         perioderMedFullOvergangsstønad: List<InternPeriodeOvergangsstønad>,
         andelerSøker: List<AndelTilkjentYtelse>,
-        barnasFødselsdatoer: List<LocalDate>
+        barnasFødselsdatoer: List<LocalDate>,
     ): List<AndelTilkjentYtelse> {
         if (perioderMedFullOvergangsstønad.isEmpty() || andelerSøker.isEmpty()) return emptyList()
 
         val søkersIdent = perioderMedFullOvergangsstønad.firstOrNull()?.personIdent
+        val søkerAktør = andelerSøker.firstOrNull()?.aktør
 
         val perioderMedFullOvergangsstønadTidslinje =
             LocalDateTimeline(
@@ -97,12 +98,12 @@ data class SmåbarnstilleggBarnetrygdGenerator(
                 )
                     .singleOrNull()?.sats
                     ?: error("Skal finnes én ordinær sats for gitt segment oppdelt basert på andeler")
-
                 AndelTilkjentYtelse(
                     behandlingId = behandlingId,
                     tilkjentYtelse = tilkjentYtelse,
                     personIdent = søkersIdent
                         ?: error("Genererer andeler for småbarnstillegg uten noen perioder med full overgangsstønad"),
+                    aktør = søkerAktør!!,
                     stønadFom = it.fom.toYearMonth(),
                     stønadTom = it.tom.toYearMonth(),
                     kalkulertUtbetalingsbeløp = ordinærSatsForPeriode,
