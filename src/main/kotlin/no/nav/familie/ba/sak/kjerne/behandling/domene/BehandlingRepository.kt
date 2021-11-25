@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.behandling.domene
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Lock
 import org.springframework.data.jpa.repository.Query
+import java.time.LocalDate
 import java.time.YearMonth
 import javax.persistence.LockModeType
 
@@ -31,12 +32,12 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
                           AND f.arkivert = false
                         GROUP BY fagsakid)
                         select sum(aty.kalkulert_utbetalingsbelop) from andel_tilkjent_ytelse aty
-                        where aty.stonad_fom <= DATE_TRUNC('month', CURRENT_TIMESTAMP)
-                          AND aty.stonad_tom >= DATE_TRUNC('month', CURRENT_TIMESTAMP)
+                        where aty.stonad_fom <= DATE_TRUNC('month', :måned)
+                          AND aty.stonad_tom >= DATE_TRUNC('month', :måned)
                         AND aty.fk_behandling_id in (SELECT behandlingid FROM sisteiverksattebehandlingfraløpendefagsak)""",
         nativeQuery = true
     )
-    fun hentTotalUtbetalingInneværendeMåned(): Long
+    fun hentTotalUtbetalingForMåned(måned: LocalDate): Long
 
     /* Denne henter først siste iverksatte behandling på en løpende fagsak.
      * Finner så alle perioder på siste iverksatte behandling
@@ -78,6 +79,10 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
     @Lock(LockModeType.NONE)
     @Query("SELECT count(*) FROM Behandling b WHERE NOT b.status = 'AVSLUTTET'")
     fun finnAntallBehandlingerIkkeAvsluttet(): Long
+
+    @Lock(LockModeType.NONE)
+    @Query("SELECT b.opprettetTidspunkt FROM Behandling b WHERE NOT b.status = 'AVSLUTTET'")
+    fun finnOpprettelsestidspunktPåÅpneBehandlinger(): List<LocalDate>
 
     @Query("SELECT DISTINCT aty.behandlingId FROM AndelTilkjentYtelse aty WHERE aty.behandlingId in :iverksatteLøpende AND aty.sats = :gammelSats AND aty.stønadTom >= :månedÅrForEndring")
     fun finnBehadlingerForSatsendring(
