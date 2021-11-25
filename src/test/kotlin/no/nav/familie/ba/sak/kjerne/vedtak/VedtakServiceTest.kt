@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.vedtak
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
+import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.FeatureToggleService
@@ -21,6 +22,7 @@ import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
+import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
@@ -60,6 +62,9 @@ class VedtakServiceTest(
 
     @Autowired
     private val vedtaksperiodeService: VedtaksperiodeService,
+
+    @Autowired
+    private val personidentService: PersonidentService,
 
     @Autowired
     private val persongrunnlagService: PersongrunnlagService,
@@ -124,17 +129,19 @@ class VedtakServiceTest(
         )
 
         val personIdent = randomFnr()
+        val personAktørId = randomAktørId()
 
         behandling = lagBehandling()
 
         vilkår = Vilkår.LOVLIG_OPPHOLD
         resultat = Resultat.OPPFYLT
 
-        vilkårsvurdering = lagVilkårsvurdering(personIdent, behandling, resultat)
+        vilkårsvurdering = lagVilkårsvurdering(personIdent, personAktørId, behandling, resultat)
 
         personResultat = PersonResultat(
             vilkårsvurdering = vilkårsvurdering,
-            personIdent = personIdent
+            personIdent = personIdent,
+            aktør = personAktørId
         )
 
         vilkårResultat1 = VilkårResultat(
@@ -167,16 +174,25 @@ class VedtakServiceTest(
         val fnr = randomFnr()
         val barnFnr = randomFnr()
 
+        val fnrAktørNr = personidentService.hentOgLagreAktørId(fnr)
+
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
 
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
 
-        val vilkårsvurdering = lagVilkårsvurdering(fnr, behandling, Resultat.OPPFYLT)
+        val vilkårsvurdering = lagVilkårsvurdering(fnr, fnrAktørNr, behandling, Resultat.OPPFYLT)
 
         vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering)
 
+        val barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr))
         val personopplysningGrunnlag =
-            lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
+            lagTestPersonopplysningGrunnlag(
+                behandling.id,
+                fnr,
+                listOf(barnFnr),
+                søkerAktør = fagsak.aktør,
+                barnAktør = barnAktør
+            )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
         behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling = behandling)
