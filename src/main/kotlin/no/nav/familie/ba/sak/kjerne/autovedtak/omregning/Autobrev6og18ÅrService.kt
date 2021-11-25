@@ -84,7 +84,7 @@ class Autobrev6og18ÅrService(
 
         vedtaksperiodeService.oppdaterFortsattInnvilgetPeriodeMedAutobrevBegrunnelse(
             vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingEtterBehandlingsresultat.id),
-            vedtakBegrunnelseSpesifikasjon = finnVedtakbegrunnelseForAlder(autobrev6og18ÅrDTO.alder)
+            vedtakBegrunnelseSpesifikasjon = finnAutobrevVedtakbegrunnelseReduksjonForAlder(autobrev6og18ÅrDTO.alder)
         )
 
         val opprettetVedtak =
@@ -109,10 +109,23 @@ class Autobrev6og18ÅrService(
             else -> throw Feil("Alder må være oppgitt til enten 6 eller 18 år.")
         }
 
-    private fun finnVedtakbegrunnelseForAlder(alder: Int): VedtakBegrunnelseSpesifikasjon =
+    private fun finnAutobrevVedtakbegrunnelseReduksjonForAlder(alder: Int): VedtakBegrunnelseSpesifikasjon =
         when (alder) {
             Alder.SEKS.år -> VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR_AUTOVEDTAK
             Alder.ATTEN.år -> VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR_AUTOVEDTAK
+            else -> throw Feil("Alder må være oppgitt til enten 6 eller 18 år.")
+        }
+
+    private fun finnVedtakbegrunnelseReduksjonForAlder(alder: Int): List<VedtakBegrunnelseSpesifikasjon> =
+        when (alder) {
+            Alder.SEKS.år -> listOf(
+                VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR_AUTOVEDTAK,
+                VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR
+            )
+            Alder.ATTEN.år -> listOf(
+                VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR_AUTOVEDTAK,
+                VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR
+            )
             else -> throw Feil("Alder må være oppgitt til enten 6 eller 18 år.")
         }
 
@@ -123,9 +136,10 @@ class Autobrev6og18ÅrService(
                 val vedtak = vedtakService.hentAktivForBehandlingThrows(behandling.id)
                 val vedtaksperioderMedBegrunnelser = vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak)
 
+                val vedtaksBegrunnelserForReduksjon = finnVedtakbegrunnelseReduksjonForAlder(autobrev6og18ÅrDTO.alder)
                 vedtaksperioderMedBegrunnelser.any { vedtaksperiodeMedBegrunnelser ->
                     vedtaksperiodeMedBegrunnelser.begrunnelser.map { it.vedtakBegrunnelseSpesifikasjon }
-                        .contains(finnVedtakbegrunnelseForAlder(autobrev6og18ÅrDTO.alder))
+                        .any { vedtaksBegrunnelserForReduksjon.contains(it) }
                 }
             }
 
