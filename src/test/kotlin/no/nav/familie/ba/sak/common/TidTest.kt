@@ -252,7 +252,7 @@ internal class TidTest {
     }
 
     @Test
-    fun `sjekk for om to perioder helt eller delvis er overlappende`() {
+    fun `sjekk for om to måned perioder helt eller delvis er overlappende`() {
         val jan2020_aug2020 = MånedPeriode(YearMonth.of(2020, 1), YearMonth.of(2020, 8))
         val jul2020_des2020 = MånedPeriode(YearMonth.of(2020, 7), YearMonth.of(2020, 12))
         val des2019_sep2021 = MånedPeriode(YearMonth.of(2019, 12), YearMonth.of(2020, 9))
@@ -260,6 +260,30 @@ internal class TidTest {
         val aug2020 = MånedPeriode(YearMonth.of(2020, 8), YearMonth.of(2020, 8))
         val des2019 = MånedPeriode(YearMonth.of(2019, 12), YearMonth.of(2019, 12))
         val sep2021 = MånedPeriode(YearMonth.of(2021, 9), YearMonth.of(2021, 9))
+
+        assertTrue(jan2020_aug2020.overlapperHeltEllerDelvisMed(jul2020_des2020))
+        assertTrue(jul2020_des2020.overlapperHeltEllerDelvisMed(jan2020_aug2020))
+        assertTrue(jan2020_aug2020.overlapperHeltEllerDelvisMed(des2019_sep2021))
+        assertTrue(des2019_sep2021.overlapperHeltEllerDelvisMed(jan2020_aug2020))
+        assertTrue(jan2020_aug2020.overlapperHeltEllerDelvisMed(jan2020))
+        assertTrue(jan2020.overlapperHeltEllerDelvisMed(jan2020_aug2020))
+        assertTrue(jan2020_aug2020.overlapperHeltEllerDelvisMed(aug2020))
+        assertTrue(aug2020.overlapperHeltEllerDelvisMed(jan2020_aug2020))
+        assertFalse(jan2020_aug2020.overlapperHeltEllerDelvisMed(des2019))
+        assertFalse(des2019.overlapperHeltEllerDelvisMed(jan2020_aug2020))
+        assertFalse(jan2020_aug2020.overlapperHeltEllerDelvisMed(sep2021))
+        assertFalse(sep2021.overlapperHeltEllerDelvisMed(jan2020_aug2020))
+    }
+
+    @Test
+    fun `sjekk for om to perioder helt eller delvis er overlappende`() {
+        val jan2020_aug2020 = Periode(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 8, 1))
+        val jul2020_des2020 = Periode(LocalDate.of(2020, 7, 1), LocalDate.of(2020, 12, 1))
+        val des2019_sep2021 = Periode(LocalDate.of(2019, 12, 1), LocalDate.of(2020, 9, 1))
+        val jan2020 = Periode(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 1, 1))
+        val aug2020 = Periode(LocalDate.of(2020, 8, 1), LocalDate.of(2020, 8, 1))
+        val des2019 = Periode(LocalDate.of(2019, 12, 1), LocalDate.of(2019, 12, 1))
+        val sep2021 = Periode(LocalDate.of(2021, 9, 1), LocalDate.of(2021, 9, 1))
 
         assertTrue(jan2020_aug2020.overlapperHeltEllerDelvisMed(jul2020_des2020))
         assertTrue(jul2020_des2020.overlapperHeltEllerDelvisMed(jan2020_aug2020))

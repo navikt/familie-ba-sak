@@ -83,7 +83,8 @@ fun VedtakBegrunnelseSpesifikasjon.triggesForPeriode(
             ),
             oppdatertBegrunnelseType = this.vedtakBegrunnelseType,
             aktuellePersonerForVedtaksperiode = aktuellePersoner,
-            triggesAv = triggesAv
+            triggesAv = triggesAv,
+            andelerTilkjentYtelse = andelerTilkjentYtelse,
         ).isNotEmpty()
     }
 }
