@@ -14,8 +14,8 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.tilAdressebeskyttelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.dokument.hentOverstyrtDokumenttittel
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.OpprettTaskService.Companion.RETRY_BACKOFF_5000MS
@@ -548,11 +548,11 @@ class IntegrasjonClient(
         )
     }
 
-    fun opprettSkyggesak(aktørId: AktørId, fagsakId: Long) {
+    fun opprettSkyggesak(aktør: Aktør, fagsakId: Long) {
         val uri = URI.create("$integrasjonUri/skyggesak/v1")
 
         try {
-            postForEntity<Ressurs<Unit>>(uri, Skyggesak(aktørId.id, fagsakId.toString()))
+            postForEntity<Ressurs<Unit>>(uri, Skyggesak(aktør.aktørId, fagsakId.toString()))
         } catch (e: RestClientException) {
             throw IntegrasjonException(
                 "Kall mot integrasjon feilet ved oppretting av skyggesak i Sak for fagsak=$fagsakId",

@@ -38,9 +38,6 @@ data class FagsakPerson(
     @AttributeOverrides(AttributeOverride(name = "ident", column = Column(name = "ident", updatable = false)))
     val personIdent: PersonIdent,
 
-    @Column(name = "aktoer_id")
-    var aktørId: String? = null,
-
     @Column(name = "opprettet_av", nullable = false, updatable = false)
     val opprettetAv: String = SikkerhetContext.hentSaksbehandler(),
 
@@ -56,7 +53,6 @@ data class FagsakPerson(
 
         if (id != other.id) return false
         if (personIdent != other.personIdent) return false
-        if (aktørId != other.aktørId) return false
         if (opprettetAv != other.opprettetAv) return false
         if (opprettetTidspunkt != other.opprettetTidspunkt) return false
 
@@ -66,7 +62,6 @@ data class FagsakPerson(
     override fun hashCode(): Int {
         var result = id.hashCode()
         result = 31 * result + personIdent.hashCode()
-        result = 31 * result + aktørId.hashCode()
         result = 31 * result + opprettetAv.hashCode()
         result = 31 * result + opprettetTidspunkt.hashCode()
         return result
