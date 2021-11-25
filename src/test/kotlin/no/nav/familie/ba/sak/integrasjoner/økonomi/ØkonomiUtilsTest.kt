@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.integrasjoner.økonomi
 
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
+import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.common.årMnd
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.andelerTilOpphørMedDato
@@ -10,6 +11,7 @@ import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.oppdaterBestå
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.sisteBeståendeAndelPerKjede
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType.ORDINÆR_BARNETRYGD
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType.SMÅBARNSTILLEGG
+import no.nav.familie.ba.sak.kjerne.personident.Personident
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -220,6 +222,14 @@ internal class ØkonomiUtilsTest {
     @Test
     fun `skal velge rette perioder til opphør og oppbygging fra endring`() {
         val person = tilfeldigPerson()
+        val aktør = randomAktørId().also {
+            it.personidenter.add(
+                Personident(
+                    aktør = it,
+                    fødselsnummer = person.personIdent.ident
+                ),
+            )
+        }
         val datoSomSkalOppdateres = "2022-01"
         val datoSomErOppdatert = "2021-01"
 
@@ -230,21 +240,24 @@ internal class ØkonomiUtilsTest {
                     årMnd("2020-01"),
                     ORDINÆR_BARNETRYGD,
                     1054,
-                    person = person
+                    person = person,
+                    aktør = aktør
                 ),
                 lagAndelTilkjentYtelse(
                     årMnd(datoSomSkalOppdateres),
                     årMnd("2023-01"),
                     ORDINÆR_BARNETRYGD,
                     1054,
-                    person = person
+                    person = person,
+                    aktør = aktør
                 ),
                 lagAndelTilkjentYtelse(
                     årMnd("2025-04"),
                     årMnd("2026-01"),
                     ORDINÆR_BARNETRYGD,
                     1054,
-                    person = person
+                    person = person,
+                    aktør = aktør
                 )
             )
         )
@@ -255,27 +268,33 @@ internal class ØkonomiUtilsTest {
                     årMnd("2020-01"),
                     ORDINÆR_BARNETRYGD,
                     1054,
-                    person = person
+                    person = person,
+                    aktør = aktør
                 ),
                 lagAndelTilkjentYtelse(
                     årMnd(datoSomErOppdatert),
                     årMnd("2023-01"),
                     ORDINÆR_BARNETRYGD,
                     1054,
-                    person = person
+                    person = person,
+                    aktør = aktør
                 ),
                 lagAndelTilkjentYtelse(
                     årMnd("2025-04"),
                     årMnd("2026-01"),
                     ORDINÆR_BARNETRYGD,
                     1054,
-                    person = person
+                    person = person,
+                    aktør = aktør
                 )
             )
         )
 
         val sisteBeståendePerKjede =
-            sisteBeståendeAndelPerKjede(forrigeKjeder = kjederBehandling1, oppdaterteKjeder = kjederBehandling2)
+            sisteBeståendeAndelPerKjede(
+                forrigeKjeder = kjederBehandling1,
+                oppdaterteKjeder = kjederBehandling2
+            )
         val andelerTilOpprettelse =
             andelerTilOpprettelse(
                 oppdaterteKjeder = kjederBehandling2,
@@ -336,7 +355,10 @@ internal class ØkonomiUtilsTest {
         )
 
         val sisteBeståendePerKjede =
-            sisteBeståendeAndelPerKjede(forrigeKjeder = kjederBehandling1, oppdaterteKjeder = kjederBehandling2)
+            sisteBeståendeAndelPerKjede(
+                forrigeKjeder = kjederBehandling1,
+                oppdaterteKjeder = kjederBehandling2
+            )
         val andelerTilOpprettelse =
             andelerTilOpprettelse(
                 oppdaterteKjeder = kjederBehandling2,
@@ -401,7 +423,10 @@ internal class ØkonomiUtilsTest {
         )
 
         val oppdaterte =
-            oppdaterBeståendeAndelerMedOffset(forrigeKjeder = kjederBehandling1, oppdaterteKjeder = kjederBehandling2)
+            oppdaterBeståendeAndelerMedOffset(
+                forrigeKjeder = kjederBehandling1,
+                oppdaterteKjeder = kjederBehandling2
+            )
 
         assertEquals(1, oppdaterte.getValue(person.personIdent.ident).first().periodeOffset)
         assertEquals(0, oppdaterte.getValue(person.personIdent.ident).first().forrigePeriodeOffset)
