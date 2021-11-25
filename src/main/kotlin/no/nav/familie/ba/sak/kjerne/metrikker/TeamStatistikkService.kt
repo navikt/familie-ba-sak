@@ -50,7 +50,7 @@ class TeamStatistikkService(
         val rows = månederMedTotalUtbetaling.map {
             MultiGauge.Row.of(
                 Tags.of(
-                    "aar-maaned", it.key.year.toString() + "-" + it.key.month.toString()
+                    ÅR_MÅNED_TAG, it.key.year.toString() + "-" + it.key.month.toString()
                 ),
                 it.value
             )
