@@ -73,7 +73,7 @@ class TeamStatistikkService(
         val rows = listOf(
             MultiGauge.Row.of(
                 Tags.of(
-                    "aar-maaned", YearMonth.now().year.toString() + "-" + YearMonth.now().month.toString()
+                    ÅR_MÅNED_TAG, YearMonth.now().year.toString() + "-" + YearMonth.now().month.toString()
                 ),
                 antallFagsaker
             )
@@ -95,7 +95,7 @@ class TeamStatistikkService(
         val rows = listOf(
             MultiGauge.Row.of(
                 Tags.of(
-                    "aar-maaned", YearMonth.now().year.toString() + "-" + YearMonth.now().month.toString()
+                    ÅR_MÅNED_TAG, YearMonth.now().year.toString() + "-" + YearMonth.now().month.toString()
                 ),
                 løpendeFagsaker
             )
@@ -117,7 +117,7 @@ class TeamStatistikkService(
         val rows = listOf(
             MultiGauge.Row.of(
                 Tags.of(
-                    "aar-maaned", YearMonth.now().year.toString() + "-" + YearMonth.now().month.toString()
+                    ÅR_MÅNED_TAG, YearMonth.now().year.toString() + "-" + YearMonth.now().month.toString()
                 ),
                 åpneBehandlinger
             )
@@ -179,6 +179,7 @@ class TeamStatistikkService(
     companion object {
         const val OPPDATERINGSFREKVENS = 30 * 60 * 1000L
         const val INITIAL_DELAY = 120000L
+        const val ÅR_MÅNED_TAG = "aar-maaned"
         val logger = LoggerFactory.getLogger(TeamStatistikkService::class.java)
     }
 }
