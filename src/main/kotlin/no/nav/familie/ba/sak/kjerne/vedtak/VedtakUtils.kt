@@ -82,12 +82,13 @@ object VedtakUtils {
                                 vilkårResultat.resultat == Resultat.OPPFYLT
                         }
 
-                        oppdatertBegrunnelseType == VedtakBegrunnelseType.OPPHØR &&
-                            triggesAv.gjelderFørstePeriode
-                        -> !andelerTilkjentYtelse.any { it.stønadFom.isBefore(vedtaksperiode.fom.toYearMonth()) } &&
-                            triggereErOppfylt(triggesAv, vilkårResultat) &&
-                            vilkårResultat.resultat == Resultat.IKKE_OPPFYLT &&
-                            vilkårResultat.toPeriode().overlapperHeltEllerDelvisMed(vedtaksperiode)
+                        oppdatertBegrunnelseType == VedtakBegrunnelseType.OPPHØR && triggesAv.gjelderFørstePeriode
+                        -> erFørstePeriodeOgVilkårIkkeOppfylt(
+                            andelerTilkjentYtelse = andelerTilkjentYtelse,
+                            vedtaksperiode = vedtaksperiode,
+                            triggesAv = triggesAv,
+                            vilkårResultat = vilkårResultat
+                        )
 
                         oppdatertBegrunnelseType == VedtakBegrunnelseType.REDUKSJON ||
                             oppdatertBegrunnelseType == VedtakBegrunnelseType.OPPHØR -> {
@@ -110,26 +111,36 @@ object VedtakUtils {
                 acc
             }
     }
+}
 
-    private fun triggereErOppfylt(
-        triggesAv: TriggesAv,
-        vilkårResultat: VilkårResultat
-    ): Boolean {
+fun erFørstePeriodeOgVilkårIkkeOppfylt(
+    andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
+    vedtaksperiode: Periode,
+    triggesAv: TriggesAv,
+    vilkårResultat: VilkårResultat
+) = !andelerTilkjentYtelse.any { it.stønadFom.isBefore(vedtaksperiode.fom.toYearMonth()) } &&
+    triggereErOppfylt(triggesAv, vilkårResultat) &&
+    vilkårResultat.resultat == Resultat.IKKE_OPPFYLT &&
+    vilkårResultat.toPeriode().overlapperHeltEllerDelvisMed(vedtaksperiode)
 
-        val erDeltBostedOppfylt =
-            if (triggesAv.deltbosted) vilkårResultat.utdypendeVilkårsvurderinger.contains(
-                UtdypendeVilkårsvurdering.DELT_BOSTED
-            ) else true
+private fun triggereErOppfylt(
+    triggesAv: TriggesAv,
+    vilkårResultat: VilkårResultat
+): Boolean {
 
-        val erSkjønnsmessigVurderingOppfylt =
-            if (triggesAv.vurderingAnnetGrunnlag) vilkårResultat.utdypendeVilkårsvurderinger.contains(
-                UtdypendeVilkårsvurdering.VURDERING_ANNET_GRUNNLAG
-            ) else true
+    val erDeltBostedOppfylt =
+        if (triggesAv.deltbosted) vilkårResultat.utdypendeVilkårsvurderinger.contains(
+            UtdypendeVilkårsvurdering.DELT_BOSTED
+        ) else true
 
-        val erMedlemskapOppfylt = vilkårResultat.utdypendeVilkårsvurderinger.contains(
-            UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP
-        ) == triggesAv.medlemskap
+    val erSkjønnsmessigVurderingOppfylt =
+        if (triggesAv.vurderingAnnetGrunnlag) vilkårResultat.utdypendeVilkårsvurderinger.contains(
+            UtdypendeVilkårsvurdering.VURDERING_ANNET_GRUNNLAG
+        ) else true
 
-        return erDeltBostedOppfylt && erSkjønnsmessigVurderingOppfylt && erMedlemskapOppfylt
-    }
+    val erMedlemskapOppfylt =
+        triggesAv.medlemskap ==
+            vilkårResultat.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP)
+
+    return erDeltBostedOppfylt && erSkjønnsmessigVurderingOppfylt && erMedlemskapOppfylt
 }
