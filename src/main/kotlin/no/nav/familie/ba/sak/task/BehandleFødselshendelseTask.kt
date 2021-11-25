@@ -3,9 +3,9 @@ package no.nav.familie.ba.sak.task
 import io.micrometer.core.instrument.DistributionSummary
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedService
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.FagsystemRegelVurdering
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.FødselshendelseService
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.VelgFagSystemService
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.FagsystemRegelVurdering
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.FødselshendelseService
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.VelgFagSystemService
 import no.nav.familie.ba.sak.task.dto.BehandleFødselshendelseTaskDTO
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
