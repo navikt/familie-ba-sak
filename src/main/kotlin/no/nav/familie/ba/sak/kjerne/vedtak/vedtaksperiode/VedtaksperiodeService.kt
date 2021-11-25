@@ -98,7 +98,8 @@ class VedtaksperiodeService(
         val andelerTilkjentYtelse =
             andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = behandling.id)
         val persongrunnlag =
-            persongrunnlagRepository.findByBehandlingAndAktiv(behandling.id) ?: error("Finner ikke persongrunnlag")
+            persongrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
+                ?: error(finnerIkkePersongrunnlagFeilmelding)
 
         val utvidetVedtaksperiodeMedBegrunnelser =
             vedtaksperiodeMedBegrunnelser.tilUtvidetVedtaksperiodeMedBegrunnelser(
@@ -165,7 +166,7 @@ class VedtaksperiodeService(
     fun oppdaterVedtaksperioderForBarnVurdertIFødselshendelse(vedtak: Vedtak, barnaSomVurderes: List<String>) {
         val vedtaksperioderMedBegrunnelser = vedtaksperiodeRepository.finnVedtaksperioderFor(vedtakId = vedtak.id)
         val persongrunnlag = persongrunnlagRepository.findByBehandlingAndAktiv(behandlingId = vedtak.behandling.id)
-            ?: error("Finner ikke persongrunnlag")
+            ?: error(finnerIkkePersongrunnlagFeilmelding)
         val vurderteBarnSomPersoner =
             barnaSomVurderes.map { barnSomVurderes ->
                 persongrunnlag.barna.find { it.personIdent.ident == barnSomVurderes }
@@ -281,7 +282,8 @@ class VedtaksperiodeService(
         )
 
         val persongrunnlag =
-            persongrunnlagRepository.findByBehandlingAndAktiv(behandling.id) ?: error("Finner ikke persongrunnlag")
+            persongrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
+                ?: error(finnerIkkePersongrunnlagFeilmelding)
 
         val sanityBegrunnelser = brevKlient.hentSanityBegrunnelser()
 
@@ -565,5 +567,9 @@ class VedtaksperiodeService(
         return begrunnelseOgIdentListe
             .groupBy { (begrunnelse, _) -> begrunnelse }
             .mapValues { (_, parGruppe) -> parGruppe.map { it.second } }
+    }
+
+    companion object {
+        val finnerIkkePersongrunnlagFeilmelding = "Finner ikke persongrunnlag"
     }
 }
