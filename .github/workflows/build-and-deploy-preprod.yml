@@ -42,7 +42,6 @@ jobs:
           CLUSTER: dev-fss
           RESOURCE: app-preprod.teamfamilie.yaml
 
-
   deploy-kafka-topics:
     name: Deploy Kafka topics
     runs-on: ubuntu-latest
