@@ -46,6 +46,9 @@ jobs:
     name: Deploy Kafka topics
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
+          with:
+            fetch-depth: 0
       - name: Deploy bisys_opphoer_av_barnetrygd_topic
         uses: nais/deploy/actions/deploy@v1
         env:
