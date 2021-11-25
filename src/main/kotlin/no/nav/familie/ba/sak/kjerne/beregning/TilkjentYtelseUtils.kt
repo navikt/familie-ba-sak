@@ -40,7 +40,7 @@ object TilkjentYtelseUtils {
         vilkårsvurdering: Vilkårsvurdering,
         personopplysningGrunnlag: PersonopplysningGrunnlag,
         behandling: Behandling,
-        hentPerioderMedFullOvergangsstønad: (personIdent: String, aktør: Aktør) -> List<InternPeriodeOvergangsstønad> = { personIdent, aktørId -> emptyList() }
+        hentPerioderMedFullOvergangsstønad: (personIdent: String, aktør: Aktør) -> List<InternPeriodeOvergangsstønad> = { _, _ -> emptyList() }
     ): TilkjentYtelse {
         val identBarnMap = personopplysningGrunnlag.barna
             .associateBy { it.personIdent.ident }
