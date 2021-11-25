@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenario
@@ -45,6 +46,9 @@ class RevurderingMedEndredeUtbetalingandelerTest(
     @Autowired
     private val endretUtbetalingAndelService: EndretUtbetalingAndelService,
 
+    @Autowired
+    private val personidentService: PersonidentService,
+
 ) : AbstractVerdikjedetest() {
     @Test
     fun `Endrede utbetalingsandeler fra forrige behandling kopieres riktig`() {
@@ -68,7 +72,11 @@ class RevurderingMedEndredeUtbetalingandelerTest(
         val behandling = stegService.håndterNyBehandling(nyOrdinærBehandling(fnr))
 
         persongrunnlagService.lagreOgDeaktiverGammel(
-            lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
+            lagTestPersonopplysningGrunnlag(
+                behandling.id, fnr, listOf(barnFnr),
+                søkerAktør = personidentService.hentOgLagreAktørId(fnr),
+                barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr))
+            )
         )
 
         val vilkårsvurdering = vilkårService.initierVilkårsvurderingForBehandling(
@@ -138,7 +146,11 @@ class RevurderingMedEndredeUtbetalingandelerTest(
         val behandlingRevurdering = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
 
         persongrunnlagService.lagreOgDeaktiverGammel(
-            lagTestPersonopplysningGrunnlag(behandlingRevurdering.id, fnr, listOf(barnFnr))
+            lagTestPersonopplysningGrunnlag(
+                behandlingRevurdering.id, fnr, listOf(barnFnr),
+                søkerAktør = personidentService.hentOgLagreAktørId(fnr),
+                barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr))
+            )
         )
 
         vilkårService.initierVilkårsvurderingForBehandling(

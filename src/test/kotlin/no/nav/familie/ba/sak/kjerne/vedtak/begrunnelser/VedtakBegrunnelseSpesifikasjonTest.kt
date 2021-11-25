@@ -33,8 +33,9 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
         type = Vedtaksperiodetype.UTBETALING,
         utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj()),
     )
-    private val vilkårsvurdering = lagVilkårsvurdering(søker.personIdent.ident, lagBehandling(), Resultat.OPPFYLT)
-    private val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søker, barn)
+    private val vilkårsvurdering =
+        lagVilkårsvurdering(søker.personIdent.ident, søker.hentAktørId(), lagBehandling(), Resultat.OPPFYLT)
+    val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søker, barn)
 
     private val identerMedUtbetaling = listOf(søker.personIdent.ident, barn.personIdent.ident)
 
