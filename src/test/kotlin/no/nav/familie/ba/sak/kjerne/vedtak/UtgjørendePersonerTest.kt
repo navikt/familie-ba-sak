@@ -246,8 +246,8 @@ class UtgjørendePersonerTest {
             ),
             oppdatertBegrunnelseType = VedtakBegrunnelseSpesifikasjon.OPPHØR_UTVANDRET.vedtakBegrunnelseType,
             triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOSATT_I_RIKET)),
-            aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList(), // Husk å fikse dette!
-            andelerTilkjentYtelse = emptyList()
+            aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList(),
+            andelerTilkjentYtelse = emptyList(),
         )
 
         assertEquals(1, personerMedUtgjørendeVilkårBarnUtvandret.size)
