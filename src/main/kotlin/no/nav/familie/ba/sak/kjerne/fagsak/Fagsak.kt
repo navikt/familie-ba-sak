@@ -27,13 +27,14 @@ data class Fagsak(
     @SequenceGenerator(name = "fagsak_seq_generator", sequenceName = "fagsak_seq", allocationSize = 50)
     val id: Long = 0,
 
-    @OneToOne(optional = false)
+    // TODO: Er temporært satt til optional og var, kan fjernes etter at HentOgSetAktørPåFagsak.kt kjørt en gang.
+    @OneToOne(optional = true)
     @JoinColumn(
         name = "fk_aktoer_id",
-        nullable = false,
-        updatable = false
+        nullable = true,
+        updatable = true
     )
-    val aktør: Aktør,
+    var aktør: Aktør?,
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)

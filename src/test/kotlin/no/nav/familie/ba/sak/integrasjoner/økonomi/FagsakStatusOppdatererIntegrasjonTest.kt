@@ -102,7 +102,7 @@ class FagsakStatusOppdatererIntegrasjonTest : AbstractSpringIntegrationTest() {
                 andelPåTilkjentYtelse(
                     tilkjentYtelse = tilkjentYtelse,
                     periodeOffset = it,
-                    aktør = behandling.fagsak.aktør
+                    aktør = behandling.fagsak.aktør!!
                 )
             )
         }
