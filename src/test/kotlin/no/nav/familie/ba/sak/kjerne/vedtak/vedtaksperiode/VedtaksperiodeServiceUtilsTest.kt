@@ -376,7 +376,8 @@ class VedtaksperiodeServiceUtilsTest {
             vilkårsvurdering = vilkårsvurdering,
             vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET,
             identerMedUtbetaling = identerMedUtbetaling,
-            endredeUtbetalingAndeler = endredeUtbetalingAndeler, andelerTilkjentYtelse = emptyList()
+            endredeUtbetalingAndeler = endredeUtbetalingAndeler,
+            andelerTilkjentYtelse = emptyList(),
         )
 
         Assertions.assertEquals(
