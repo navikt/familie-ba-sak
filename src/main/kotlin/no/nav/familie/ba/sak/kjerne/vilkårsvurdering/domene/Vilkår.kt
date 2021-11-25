@@ -2,14 +2,14 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.convertDataClassToJson
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Evaluering
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurdering.VurderBarnErBosattMedSøker
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurdering.VurderBarnErUgift
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurdering.VurderBarnErUnder18
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurdering.VurderPersonErBosattIRiket
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurdering.VurderPersonHarLovligOpphold
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.Evaluering
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.vilkårsvurdering.VurderBarnErBosattMedSøker
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.vilkårsvurdering.VurderBarnErUgift
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.vilkårsvurdering.VurderBarnErUnder18
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.vilkårsvurdering.VurderPersonErBosattIRiket
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.vilkårsvurdering.VurderPersonHarLovligOpphold
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType.BARN
