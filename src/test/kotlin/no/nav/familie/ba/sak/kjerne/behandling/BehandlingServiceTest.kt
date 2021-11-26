@@ -98,7 +98,7 @@ class BehandlingServiceTest(
             behandlingId = behandling.id,
             søkerPersonIdent = søker,
             barnasIdenter = listOf(barn),
-            søkerAktør = fagsak.aktør!!,
+            søkerAktør = fagsak.aktør,
             barnAktør = barnAktør
         )
         personopplysningGrunnlagRepository.save(testPersonopplysningsGrunnlag)

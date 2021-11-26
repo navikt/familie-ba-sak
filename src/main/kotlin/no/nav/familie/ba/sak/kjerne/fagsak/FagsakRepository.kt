@@ -25,11 +25,6 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
     @Query(value = "SELECT f FROM Fagsak f WHERE f.id = :fagsakId AND f.arkivert = false")
     fun finnFagsak(fagsakId: Long): Fagsak?
 
-    // TODO: Er temporært satt til optional, kan fjernes etter at HentOgSetAktørPåFagsak.kt kjørt en gang.
-    @Lock(LockModeType.NONE)
-    @Query(value = "SELECT f FROM Fagsak f WHERE f.aktør is null")
-    fun finnAlleFagsakerUtenAktør(): List<Fagsak>
-
     @Lock(LockModeType.NONE)
     @Query(value = "SELECT f FROM Fagsak f, FagsakPerson fp WHERE f.id = fp.fagsak.id and fp.personIdent = :personIdent and f.arkivert = false")
     fun finnFagsakForPersonIdent(personIdent: PersonIdent): Fagsak?

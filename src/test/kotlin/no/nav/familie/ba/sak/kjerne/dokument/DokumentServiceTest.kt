@@ -248,7 +248,7 @@ class DokumentServiceTest(
         val personopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(
                 behandling.id, fnr, listOf(barn1Fnr, barn2Fnr),
-                søkerAktør = behandling.fagsak.aktør!!, barnAktør = barnAktør
+                søkerAktør = behandling.fagsak.aktør, barnAktør = barnAktør
             )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
