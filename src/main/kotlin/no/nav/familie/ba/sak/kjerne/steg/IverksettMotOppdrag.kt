@@ -5,18 +5,24 @@ import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedClient
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.InfotrygdVedtakFeedDto
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.beregning.beregnUtbetalingsperioderUtenKlassifisering
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.task.dto.IverksettingTaskDTO
+import no.nav.fpsak.tidsserie.LocalDateSegment
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 
 @Service
 class IverksettMotOppdrag(
     private val økonomiService: ØkonomiService,
     private val totrinnskontrollService: TotrinnskontrollService,
     private val infotrygdFeedClient: InfotrygdFeedClient,
-    private val vedtakService: VedtakService
+    private val vedtakService: VedtakService,
+    private val tilkjentYtelseRepository: TilkjentYtelseRepository
 ) : BehandlingSteg<IverksettingTaskDTO> {
 
     override fun preValiderSteg(behandling: Behandling, stegService: StegService?) {
@@ -52,7 +58,7 @@ class IverksettMotOppdrag(
         infotrygdFeedClient.sendVedtakFeedTilInfotrygd(
             InfotrygdVedtakFeedDto(
                 hentFnrStoenadsmottaker(behandling.fagsak),
-                hentVedtaksdato(behandling.id).toLocalDate()
+                finnFørsteUtbetalingsperiode(behandling.id)
             )
         )
 
@@ -70,7 +76,15 @@ class IverksettMotOppdrag(
 
     private fun hentFnrStoenadsmottaker(fagsak: Fagsak) = fagsak.hentAktivIdent().ident
 
-    private fun hentVedtaksdato(behandlingsId: Long) =
-        vedtakService.hentAktivForBehandling(behandlingsId)?.vedtaksdato
-            ?: throw Exception("Aktivt vedtak eller vedtaksdato eksisterer ikke for $behandlingsId")
+    private fun finnFørsteUtbetalingsperiode(behandlingId: Long): LocalDate {
+        return tilkjentYtelseRepository.findByBehandlingOptional(behandlingId)?.andelerTilkjentYtelse
+            ?.let { andelerTilkjentYtelse: MutableSet<AndelTilkjentYtelse> ->
+                if (andelerTilkjentYtelse.isNotEmpty()) {
+                    val førsteUtbetalingsperiode = beregnUtbetalingsperioderUtenKlassifisering(andelerTilkjentYtelse)
+                        .sortedWith(compareBy<LocalDateSegment<Int>>({ it.fom }, { it.value }, { it.tom }))
+                        .first()
+                    førsteUtbetalingsperiode.fom
+                } else null
+            } ?: error("Finner ikke første utbetalingsperiode")
+    }
 }
