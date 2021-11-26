@@ -72,7 +72,7 @@ spec:
           cluster: prod-gcp
         - application: familie-ba-migrering
           cluster: prod-gcp
-       - application: bidrag-grunnlag
+        - application: bidrag-grunnlag
           cluster: prod-gcp
           namespace: bidrag
     outbound:
