@@ -34,7 +34,7 @@ data class RestOppdaterJournalpost(
 
         return OppdaterJournalpostRequest(
             avsenderMottaker = AvsenderMottaker(
-                id = if (this.avsender.id != "") this.avsender.id else null,
+                id = this.avsender.id,
                 idType = if (this.avsender.id != "") BrukerIdType.FNR else null,
                 navn = this.avsender.navn
             ),
