@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import java.time.Duration
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 
@@ -128,7 +127,7 @@ class TeamStatistikkService(
     fun tidFraOpprettelsePåÅpneBehandlinger() {
         val opprettelsestidspunktPååpneBehandlinger = behandlingRepository.finnOpprettelsestidspunktPåÅpneBehandlinger()
         val diffPåÅpneBehandlinger =
-            opprettelsestidspunktPååpneBehandlinger.map { Duration.between(it, LocalDate.now()).seconds }
+            opprettelsestidspunktPååpneBehandlinger.map { Duration.between(it, LocalDateTime.now()).seconds }
 
         val snitt = diffPåÅpneBehandlinger.average()
         val max = diffPåÅpneBehandlinger.maxOf { it }

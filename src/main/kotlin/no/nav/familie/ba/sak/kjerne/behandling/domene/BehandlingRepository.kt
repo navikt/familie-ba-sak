@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.kjerne.behandling.domene
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Lock
 import org.springframework.data.jpa.repository.Query
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import javax.persistence.LockModeType
@@ -83,7 +82,7 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
 
     @Lock(LockModeType.NONE)
     @Query("SELECT b.opprettetTidspunkt FROM Behandling b WHERE NOT b.status = 'AVSLUTTET'")
-    fun finnOpprettelsestidspunktPåÅpneBehandlinger(): List<LocalDate>
+    fun finnOpprettelsestidspunktPåÅpneBehandlinger(): List<LocalDateTime>
 
     @Query("SELECT DISTINCT aty.behandlingId FROM AndelTilkjentYtelse aty WHERE aty.behandlingId in :iverksatteLøpende AND aty.sats = :gammelSats AND aty.stønadTom >= :månedÅrForEndring")
     fun finnBehadlingerForSatsendring(
