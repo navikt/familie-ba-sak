@@ -1,28 +1,22 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedClient
-import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.InfotrygdVedtakFeedDto
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.beregning.beregnUtbetalingsperioderUtenKlassifisering
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
-import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
+import no.nav.familie.ba.sak.task.SendVedtakTilInfotrygdTask
 import no.nav.familie.ba.sak.task.dto.IverksettingTaskDTO
-import no.nav.fpsak.tidsserie.LocalDateSegment
+import no.nav.familie.prosessering.domene.TaskRepository
 import org.springframework.stereotype.Service
-import java.time.LocalDate
 
 @Service
 class IverksettMotOppdrag(
     private val økonomiService: ØkonomiService,
     private val totrinnskontrollService: TotrinnskontrollService,
-    private val infotrygdFeedClient: InfotrygdFeedClient,
     private val vedtakService: VedtakService,
-    private val tilkjentYtelseRepository: TilkjentYtelseRepository
+    private val taskRepository: TaskRepository,
 ) : BehandlingSteg<IverksettingTaskDTO> {
 
     override fun preValiderSteg(behandling: Behandling, stegService: StegService?) {
@@ -55,17 +49,13 @@ class IverksettMotOppdrag(
         behandling: Behandling,
         data: IverksettingTaskDTO
     ): StegType {
-        infotrygdFeedClient.sendVedtakFeedTilInfotrygd(
-            InfotrygdVedtakFeedDto(
-                hentFnrStoenadsmottaker(behandling.fagsak),
-                finnFørsteUtbetalingsperiode(behandling.id)
-            )
-        )
 
         økonomiService.oppdaterTilkjentYtelseMedUtbetalingsoppdragOgIverksett(
             vedtak = vedtakService.hent(data.vedtaksId),
             saksbehandlerId = data.saksbehandlerId
         )
+
+        taskRepository.save(SendVedtakTilInfotrygdTask.opprettTask(hentFnrStoenadsmottaker(behandling.fagsak), behandling.id))
 
         return hentNesteStegForNormalFlyt(behandling)
     }
@@ -75,16 +65,4 @@ class IverksettMotOppdrag(
     }
 
     private fun hentFnrStoenadsmottaker(fagsak: Fagsak) = fagsak.hentAktivIdent().ident
-
-    private fun finnFørsteUtbetalingsperiode(behandlingId: Long): LocalDate {
-        return tilkjentYtelseRepository.findByBehandlingOptional(behandlingId)?.andelerTilkjentYtelse
-            ?.let { andelerTilkjentYtelse: MutableSet<AndelTilkjentYtelse> ->
-                if (andelerTilkjentYtelse.isNotEmpty()) {
-                    val førsteUtbetalingsperiode = beregnUtbetalingsperioderUtenKlassifisering(andelerTilkjentYtelse)
-                        .sortedWith(compareBy<LocalDateSegment<Int>>({ it.fom }, { it.value }, { it.tom }))
-                        .first()
-                    førsteUtbetalingsperiode.fom
-                } else null
-            } ?: error("Finner ikke første utbetalingsperiode")
-    }
 }
