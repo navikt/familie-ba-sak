@@ -190,7 +190,7 @@ class VedtakServiceTest(
                 behandling.id,
                 fnr,
                 listOf(barnFnr),
-                søkerAktør = fagsak.aktør,
+                søkerAktør = fagsak.aktør!!,
                 barnAktør = barnAktør
             )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)

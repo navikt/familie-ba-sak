@@ -176,7 +176,7 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
         val personopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(
                 behandling.id, søkerFnr, listOf(barn1Fnr, barn2Fnr),
-                søkerAktør = fagsak.aktør, barnAktør = barnAktør
+                søkerAktør = fagsak.aktør!!, barnAktør = barnAktør
             )
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
