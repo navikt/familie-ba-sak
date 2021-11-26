@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.vedtak.domene
 import com.fasterxml.jackson.annotation.JsonIgnore
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.NullableMånedPeriode
+import no.nav.familie.ba.sak.common.NullablePeriode
 import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
@@ -117,7 +118,7 @@ fun UtvidetVedtaksperiodeMedBegrunnelser.byggBegrunnelserOgFritekster(
     val begrunnelser =
         this.begrunnelser.sortedBy { it.vedtakBegrunnelseType }.map {
             it.tilBrevBegrunnelse(
-                utvidetVedtaksperiodeMedBegrunnelser = this,
+                vedtaksperiode = NullablePeriode(this.fom, this.tom),
                 personerIPersongrunnlag = personerIPersongrunnlag,
                 målform = målform,
                 uregistrerteBarn = uregistrerteBarn,

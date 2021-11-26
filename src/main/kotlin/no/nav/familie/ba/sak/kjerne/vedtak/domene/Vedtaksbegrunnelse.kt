@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.domene
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import no.nav.familie.ba.sak.common.NullablePeriode
 import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.common.StringListConverter
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
@@ -13,7 +14,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.hentMånedOgÅrForBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilBrevTekst
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.RestVedtaksbegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.time.LocalDate
 import javax.persistence.Column
@@ -84,7 +84,7 @@ data class BegrunnelseData(
 data class FritekstBegrunnelse(val fritekst: String) : Begrunnelse
 
 fun RestVedtaksbegrunnelse.tilBrevBegrunnelse(
-    utvidetVedtaksperiodeMedBegrunnelser: UtvidetVedtaksperiodeMedBegrunnelser,
+    vedtaksperiode: NullablePeriode,
     personerIPersongrunnlag: List<Person>,
     målform: Målform,
     uregistrerteBarn: List<BarnMedOpplysninger>,
@@ -97,7 +97,7 @@ fun RestVedtaksbegrunnelse.tilBrevBegrunnelse(
 
     val erAvslagPåKunSøker = gjelderSøker &&
         personerPåBegrunnelse.size == 1 &&
-        this.vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType == VedtakBegrunnelseType.AVSLAG
+        this.vedtakBegrunnelseType == VedtakBegrunnelseType.AVSLAG
 
     val barnasFødselsdatoer = hentBarnasFødselsdagerForBegrunnelse(
         uregistrerteBarn = uregistrerteBarn,
@@ -109,11 +109,11 @@ fun RestVedtaksbegrunnelse.tilBrevBegrunnelse(
     val antallBarn = hentAntallBarnForBegrunnelse(uregistrerteBarn, erAvslagPåKunSøker, barnasFødselsdatoer)
 
     val månedOgÅrBegrunnelsenGjelderFor =
-        if (utvidetVedtaksperiodeMedBegrunnelser.fom == null) null
-        else this.vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType.hentMånedOgÅrForBegrunnelse(
+        if (vedtaksperiode.fom == null) null
+        else this.vedtakBegrunnelseType.hentMånedOgÅrForBegrunnelse(
             periode = Periode(
-                fom = utvidetVedtaksperiodeMedBegrunnelser.fom,
-                tom = utvidetVedtaksperiodeMedBegrunnelser.tom ?: TIDENES_ENDE
+                fom = vedtaksperiode.fom,
+                tom = vedtaksperiode.tom ?: TIDENES_ENDE
             )
         )
 
