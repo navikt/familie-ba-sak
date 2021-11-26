@@ -16,10 +16,10 @@ import java.util.Properties
 
 @Service
 @TaskStepBeskrivelse(
-    taskStepType = SendFeedTilInfotrygdTask.TASK_STEP_TYPE,
+    taskStepType = SendFødselsmeldingTilInfotrygdTask.TASK_STEP_TYPE,
     beskrivelse = "Send fødselshendelse til Infotrygd feed."
 )
-class SendFeedTilInfotrygdTask(
+class SendFødselsmeldingTilInfotrygdTask(
     private val infotrygdFeedClient: InfotrygdFeedClient
 ) : AsyncTaskStep {
 
