@@ -34,7 +34,7 @@ class HentOgSetAktørPåFagsak(val fagsakRepository: FagsakRepository, val perso
             fagsakRepository.save(fagsak)
             return 1
         } catch (e: Exception) {
-            logger.warn("Feilet å sette aktør på fagsak: ${fagsak.aktør}")
+            logger.warn("Feilet å sette aktør på fagsak: ${fagsak.id} med feil ${e.message}")
             return 0
         }
     }
