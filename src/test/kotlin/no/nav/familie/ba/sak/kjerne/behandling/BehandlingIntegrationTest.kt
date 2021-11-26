@@ -325,7 +325,7 @@ class BehandlingIntegrationTest(
         val personopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(
                 behandling.id, søkerFnr, listOf(barn1Fnr, barn2Fnr),
-                søkerAktør = behandling.fagsak.aktør!!, barnAktør = barnAktør
+                søkerAktør = behandling.fagsak.aktør, barnAktør = barnAktør
             )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
@@ -432,7 +432,7 @@ class BehandlingIntegrationTest(
         val personopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(
                 behandling.id, søkerFnr, listOf(barn1Fnr, barn2Fnr, barn3Fnr),
-                søkerAktør = behandling.fagsak.aktør!!, barnAktør = barnAktør
+                søkerAktør = behandling.fagsak.aktør, barnAktør = barnAktør
             )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
