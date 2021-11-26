@@ -320,7 +320,7 @@ class FagsakServiceTest(
         val barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr))
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
             behandlingMor.id, mor, listOf(barnFnr),
-            søkerAktør = fagsakMor.aktør!!, barnAktør = barnAktør
+            søkerAktør = fagsakMor.aktør, barnAktør = barnAktør
         )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
@@ -331,7 +331,7 @@ class FagsakServiceTest(
 
         val personopplysningGrunnlagFar = lagTestPersonopplysningGrunnlag(
             behandlingFar.id, far, listOf(barnFnr),
-            søkerAktør = fagsakFar.aktør!!, barnAktør = barnAktør
+            søkerAktør = fagsakFar.aktør, barnAktør = barnAktør
         )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlagFar)
 
