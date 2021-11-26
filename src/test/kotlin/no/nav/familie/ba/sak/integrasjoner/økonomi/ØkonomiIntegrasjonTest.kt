@@ -67,7 +67,7 @@ class ØkonomiIntegrasjonTest(
         val barnAktørId = personidentService.hentOgLagreAktørId(barnFnr)
 
         val vilkårsvurdering =
-            lagBehandlingResultat(behandling, fnr, barnFnr, fagsak.aktør, barnAktørId, stønadFom, stønadTom)
+            lagBehandlingResultat(behandling, fnr, barnFnr, fagsak.aktør!!, barnAktørId, stønadFom, stønadTom)
 
         vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering)
         Assertions.assertNotNull(behandling.fagsak.id)
@@ -78,7 +78,7 @@ class ØkonomiIntegrasjonTest(
                 behandling.id,
                 fnr,
                 listOf(barnFnr),
-                søkerAktør = fagsak.aktør,
+                søkerAktør = fagsak.aktør!!,
                 barnAktør = barnAktør
             )
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
@@ -121,14 +121,14 @@ class ØkonomiIntegrasjonTest(
                 behandling.id,
                 fnr,
                 listOf(barnFnr),
-                søkerAktør = fagsak.aktør,
+                søkerAktør = fagsak.aktør!!,
                 barnAktør = barnAktør
             )
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
         behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling)
 
         val vilkårsvurdering =
-            lagBehandlingResultat(behandling, fnr, barnFnr, fagsak.aktør, barnAktørId, stønadFom, stønadTom)
+            lagBehandlingResultat(behandling, fnr, barnFnr, fagsak.aktør!!, barnAktørId, stønadFom, stønadTom)
         vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering)
 
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
