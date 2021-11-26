@@ -42,9 +42,8 @@ class VurderTilbakekrevingSteg(
                 )
         ) {
             throw FunksjonellFeil(
-                frontendFeilmelding = "Ved migrering tilbake i tid skal utbetalingen i ny vedtaksløsning " +
-                    "være lik utbetalingen i infotrygd. Her har du fått feilutbetaling/etterbetaling " +
-                    "og må gå tilbake å korrigere.",
+                frontendFeilmelding = "Utbetalingen må være lik utbetalingen i Infotrygd. " +
+                    "Du må tilbake og gjøre nødvendige endringer for å komme videre i behandlingen",
                 melding = "Migreringsbehandling med årsak endre migreringsdato kan ikke fortsette " +
                     "når det finnes feilutbetaling/etterbetaling"
             )
