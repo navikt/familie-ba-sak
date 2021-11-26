@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.internal.IdentInformasjon
 import org.slf4j.LoggerFactory
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
+import java.time.LocalDateTime
 
 @Service
 class PersonidentService(
@@ -25,6 +26,14 @@ class PersonidentService(
 
     fun hentOgLagreAktørIder(barnasFødselsnummer: List<String>): List<Aktør> {
         return barnasFødselsnummer.map { hentOgLagreAktørId(it) }
+    }
+
+    fun hentGjeldendeFødselsnummerForTidspunkt(aktør: Aktør, tidspunkt: LocalDateTime): String {
+        val alleIdenter = personidentRepository.hentAlleIdenterForAktørid(aktør.aktørId)
+        if (alleIdenter.size == 1) return alleIdenter.first().fødselsnummer
+        return alleIdenter.filter { it.gjelderTil?.isAfter(tidspunkt) ?: false }
+            .minByOrNull { it.gjelderTil!! }?.fødselsnummer
+            ?: alleIdenter.first { it.aktiv }.fødselsnummer
     }
 
     private fun opprettAktørIdOgPersonident(aktørIdStr: String, fødselsnummer: String): Aktør =
