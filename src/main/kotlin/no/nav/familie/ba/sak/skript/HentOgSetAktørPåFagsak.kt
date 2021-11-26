@@ -16,7 +16,6 @@ class HentOgSetAktørPåFagsak(val fagsakRepository: FagsakRepository, val perso
         val fagsaker = fagsakRepository.finnAlleFagsakerUtenAktør()
 
         logger.info("Sett aktørid på fagsak ${fagsaker.size}")
-        // Prod inneholder 33 fagsaker uten aktør id, mens preprod inneholder 240 
         if (fagsaker.size > 250) throw error("Skal maks sette aktør id på 250 fagsaker fant ${fagsaker.size}.")
 
         var teller = 0
