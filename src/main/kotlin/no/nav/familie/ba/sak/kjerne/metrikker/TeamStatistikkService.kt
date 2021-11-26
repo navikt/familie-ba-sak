@@ -48,7 +48,7 @@ class TeamStatistikkService(
         val rows = månederMedTotalUtbetaling.map {
             MultiGauge.Row.of(
                 Tags.of(
-                    ÅR_MÅNED_TAG, it.key.year.toString() + "-" + it.key.month.toString()
+                    ÅR_MÅNED_TAG, "${it.key.year}-${it.key.month}"
                 ),
                 it.value
             )
@@ -70,7 +70,7 @@ class TeamStatistikkService(
         val rows = listOf(
             MultiGauge.Row.of(
                 Tags.of(
-                    ÅR_MÅNED_TAG, YearMonth.now().year.toString() + "-" + YearMonth.now().month.toString()
+                    ÅR_MÅNED_TAG, "${YearMonth.now().year}-${YearMonth.now().month}"
                 ),
                 antallFagsaker
             )
@@ -92,7 +92,7 @@ class TeamStatistikkService(
         val rows = listOf(
             MultiGauge.Row.of(
                 Tags.of(
-                    ÅR_MÅNED_TAG, YearMonth.now().year.toString() + "-" + YearMonth.now().month.toString()
+                    ÅR_MÅNED_TAG, "${YearMonth.now().year}-${YearMonth.now().month}"
                 ),
                 løpendeFagsaker
             )
@@ -114,7 +114,7 @@ class TeamStatistikkService(
         val rows = listOf(
             MultiGauge.Row.of(
                 Tags.of(
-                    ÅR_MÅNED_TAG, YearMonth.now().year.toString() + "-" + YearMonth.now().month.toString()
+                    ÅR_MÅNED_TAG, "${YearMonth.now().year}-${YearMonth.now().month}"
                 ),
                 åpneBehandlinger
             )
@@ -142,19 +142,19 @@ class TeamStatistikkService(
         val rows = listOf(
             MultiGauge.Row.of(
                 Tags.of(
-                    "aar-maaned-snitt", YearMonth.now().year.toString() + "-" + YearMonth.now().month.toString()
+                    ÅR_MÅNED_TAG, "${YearMonth.now().year}-${YearMonth.now().month}-snitt"
                 ),
                 snitt
             ),
             MultiGauge.Row.of(
                 Tags.of(
-                    "aar-maaned-max", YearMonth.now().year.toString() + "-" + YearMonth.now().month.toString()
+                    ÅR_MÅNED_TAG, "${YearMonth.now().year}-${YearMonth.now().month}-max"
                 ),
                 max
             ),
             MultiGauge.Row.of(
                 Tags.of(
-                    "aar-maaned-min", YearMonth.now().year.toString() + "-" + YearMonth.now().month.toString()
+                    ÅR_MÅNED_TAG, "${YearMonth.now().year}-${YearMonth.now().month}-min"
                 ),
                 min
             )
