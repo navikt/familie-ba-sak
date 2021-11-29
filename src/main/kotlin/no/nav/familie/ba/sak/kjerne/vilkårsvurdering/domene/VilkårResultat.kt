@@ -7,7 +7,7 @@ import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVilkårResultat
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjonListConverter
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase

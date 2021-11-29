@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
+import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
@@ -28,6 +29,9 @@ class BehandlingServiceTest(
 
     @Autowired
     private val behandlingService: BehandlingService,
+
+    @Autowired
+    private val personidentService: PersonidentService,
 
     @Autowired
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
@@ -89,10 +93,13 @@ class BehandlingServiceTest(
             )
         )
 
+        val barnAktør = personidentService.hentOgLagreAktørIder(listOf(barn))
         val testPersonopplysningsGrunnlag = lagTestPersonopplysningGrunnlag(
             behandlingId = behandling.id,
             søkerPersonIdent = søker,
-            barnasIdenter = listOf(barn)
+            barnasIdenter = listOf(barn),
+            søkerAktør = fagsak.aktør,
+            barnAktør = barnAktør
         )
         personopplysningGrunnlagRepository.save(testPersonopplysningsGrunnlag)
 

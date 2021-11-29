@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.ekstern.restDomene
 
 import no.nav.familie.ba.sak.common.sisteDagIMåned
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk

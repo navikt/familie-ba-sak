@@ -37,18 +37,6 @@ jobs:
         run: docker push ${IMAGE}
       - name: Push Docker image med 'latest' tag
         run: docker push ${IMAGE_LATEST}
-      - name: Deploy bisys_opphoer_av_barnetrygd_topic
-        uses: nais/deploy/actions/deploy@v1
-        env:
-          APIKEY: ${{ secrets.GITHUB_ACCESS_TOKEN }}
-          CLUSTER: prod-fss
-          RESOURCE: .deploy/nais/kafka/prod/bisys_opphoer_av_barnetrygd.yaml
-      - name: Deploy bisys_utvidet_barnetrygd_topic
-        uses: nais/deploy/actions/deploy@v1
-        env:
-          APIKEY: ${{ secrets.GITHUB_ACCESS_TOKEN }}
-          CLUSTER: prod-fss
-          RESOURCE: .deploy/nais/kafka/prod/bisys_utvidet_barnetrygd.yaml
       - name: Deploy til dev-fss
         uses: nais/deploy/actions/deploy@v1
         env:
@@ -61,3 +49,23 @@ jobs:
           APIKEY: ${{ secrets.GITHUB_ACCESS_TOKEN }}
           CLUSTER: prod-fss
           RESOURCE: app-prod.teamfamilie.yaml
+
+  deploy-kafka-topics:
+    name: Deploy Kafka topics
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Deploy bisys_opphoer_av_barnetrygd_topic
+        uses: nais/deploy/actions/deploy@v1
+        env:
+          APIKEY: ${{ secrets.GITHUB_ACCESS_TOKEN }}
+          CLUSTER: prod-fss
+          RESOURCE: .deploy/nais/kafka/prod/bisys_opphoer_av_barnetrygd.yaml
+      - name: Deploy bisys_utvidet_barnetrygd_topic
+        uses: nais/deploy/actions/deploy@v1
+        env:
+          APIKEY: ${{ secrets.GITHUB_ACCESS_TOKEN }}
+          CLUSTER: prod-fss
+          RESOURCE: .deploy/nais/kafka/prod/bisys_utvidet_barnetrygd.yaml

@@ -10,10 +10,10 @@ import no.nav.familie.ba.sak.common.kanSplitte
 import no.nav.familie.ba.sak.common.toPeriode
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVedtakBegrunnelseTilknyttetVilkår
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVilkårResultat
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.dokument.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.dokument.domene.tilTriggesAv
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
@@ -188,7 +188,8 @@ object VilkårsvurderingUtils {
         initiellVilkårsvurdering.personResultater.forEach { personFraInit ->
             val personTilOppdatert = PersonResultat(
                 vilkårsvurdering = initiellVilkårsvurdering,
-                personIdent = personFraInit.personIdent
+                personIdent = personFraInit.personIdent,
+                aktør = personFraInit.aktør
             )
             val personenSomFinnes = personResultaterAktivt.firstOrNull { it.personIdent == personFraInit.personIdent }
 
@@ -279,7 +280,6 @@ fun vedtakBegrunnelseSpesifikasjonerTilNedtrekksmenytekster(
         .groupBy { it.vedtakBegrunnelseType }
         .mapValues { begrunnelseGruppe ->
             begrunnelseGruppe.value
-                .filter { it.tilSanityBegrunnelse(sanityBegrunnelser)?.tilTriggesAv()?.valgbar ?: false }
                 .flatMap { vedtakBegrunnelse ->
                     vedtakBegrunnelseTilRestVedtakBegrunnelseTilknyttetVilkår(
                         sanityBegrunnelser,

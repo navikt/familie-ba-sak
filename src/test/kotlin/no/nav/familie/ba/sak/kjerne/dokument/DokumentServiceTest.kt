@@ -18,6 +18,7 @@ import no.nav.familie.ba.sak.kjerne.dokument.domene.byggMottakerdata
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
@@ -37,6 +38,9 @@ class DokumentServiceTest(
 
     @Autowired
     private val behandlingService: BehandlingService,
+
+    @Autowired
+    private val personidentService: PersonidentService,
 
     @Autowired
     private val vilkårsvurderingService: VilkårsvurderingService,
@@ -240,8 +244,12 @@ class DokumentServiceTest(
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
 
+        val barnAktør = personidentService.hentOgLagreAktørIder(listOf(barn1Fnr, barn2Fnr))
         val personopplysningGrunnlag =
-            lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barn1Fnr, barn2Fnr))
+            lagTestPersonopplysningGrunnlag(
+                behandling.id, fnr, listOf(barn1Fnr, barn2Fnr),
+                søkerAktør = behandling.fagsak.aktør, barnAktør = barnAktør
+            )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
         val manueltBrevRequest = ManueltBrevRequest(

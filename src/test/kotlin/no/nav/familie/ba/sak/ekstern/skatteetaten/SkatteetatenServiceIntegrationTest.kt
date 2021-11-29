@@ -2,6 +2,8 @@ package no.nav.familie.ba.sak.ekstern.skatteetaten
 
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.familie.ba.sak.common.randomAktørId
+import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
@@ -18,6 +20,9 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.personident.AktørIdRepository
+import no.nav.familie.ba.sak.kjerne.personident.Personident
 import no.nav.familie.eksterne.kontrakter.skatteetaten.SkatteetatenPeriode
 import no.nav.familie.eksterne.kontrakter.skatteetaten.SkatteetatenPerioder
 import org.assertj.core.api.Assertions.assertThat
@@ -46,6 +51,9 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
     @Autowired
     lateinit var behandlingRepository: BehandlingRepository
 
+    @Autowired
+    lateinit var aktørIdRepository: AktørIdRepository
+
     val infotrygdBarnetrygdClientMock = mockk<InfotrygdBarnetrygdClient>()
 
     lateinit var skatteetatenService: SkatteetatenService
@@ -63,6 +71,7 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
 
     data class PerioderTestData(
         val fnr: String,
+        val aktør: Aktør,
         val endretDato: LocalDateTime,
         val perioder: List<Triple<LocalDateTime, LocalDateTime, SkatteetatenPeriode.Delingsprosent>>
     )
@@ -71,12 +80,15 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
     fun `finnPerioderMedUtvidetBarnetrygd() skal return riktig data`() {
         val duplicatedFnr = "00000000001"
         val excludedFnr = "10000000004"
+        val duplicatedAktørId = randomAktørId()
+        val excludedAktørId = randomAktørId()
 
         // Result from ba-sak
         val testDataBaSak = arrayOf(
             // Excluded because of the vedtak is older
             PerioderTestData(
                 fnr = duplicatedFnr,
+                aktør = duplicatedAktørId,
                 endretDato = LocalDateTime.of(2020, 11, 5, 12, 0),
                 perioder = listOf(
                     Triple(
@@ -89,6 +101,7 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
             // Included
             PerioderTestData(
                 fnr = duplicatedFnr,
+                aktør = duplicatedAktørId,
                 endretDato = LocalDateTime.of(2020, 11, 6, 12, 0),
                 perioder = listOf(
                     Triple(
@@ -106,6 +119,7 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
             // Excluded because the stonad period is earlier than the specified year
             PerioderTestData(
                 fnr = "00000000002",
+                aktør = randomAktørId(),
                 endretDato = LocalDateTime.of(2020, 8, 5, 12, 0),
                 perioder = listOf(
                     Triple(
@@ -118,6 +132,7 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
             // Excluded because the stonad period is later than the specified year
             PerioderTestData(
                 fnr = "00000000003",
+                aktør = randomAktørId(),
                 endretDato = LocalDateTime.of(2020, 8, 5, 12, 0),
                 perioder = listOf(
                     Triple(
@@ -130,6 +145,7 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
             // Excluded because the person ident is not in the provided list
             PerioderTestData(
                 fnr = excludedFnr,
+                aktør = excludedAktørId,
                 endretDato = LocalDateTime.of(2020, 8, 5, 12, 0),
                 perioder = listOf(
                     Triple(
@@ -146,6 +162,7 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
             // Excluded because the person ident can be found in ba-sak
             PerioderTestData(
                 fnr = duplicatedFnr,
+                aktør = duplicatedAktørId,
                 endretDato = LocalDateTime.of(2020, 9, 5, 12, 0),
                 perioder = listOf(
                     Triple(
@@ -158,6 +175,7 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
             // Included
             PerioderTestData(
                 fnr = "00000000010",
+                aktør = randomAktørId(),
                 endretDato = LocalDateTime.of(2020, 8, 5, 12, 0),
                 perioder = listOf(
                     Triple(
@@ -225,12 +243,14 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
     @Test
     fun `finnPerioderMedUtvidetBarnetrygd() skal slå sammen perioder basert på prosent`() {
         val fnr = "00000000001"
+        val aktørId = randomAktørId()
         val excludedFnr = "10000000004"
 
         // Result from ba-sak
         val testDataBaSak = arrayOf(
             PerioderTestData(
                 fnr = fnr,
+                aktør = aktørId,
                 endretDato = LocalDateTime.of(2020, 11, 6, 12, 0),
                 perioder = listOf(
                     Triple(
@@ -315,7 +335,20 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
     }
 
     fun lagerTilkjentYtelse(tilkjentYtelse: PerioderTestData) {
-        val fagsak = Fagsak()
+        val aktørId = randomAktørId()
+        val fødselsnummer = randomFnr()
+        aktørIdRepository.save(
+            Aktør(aktørId = aktørId.aktørId).also {
+                it.personidenter.add(
+                    Personident(
+                        fødselsnummer = fødselsnummer,
+                        aktør = it
+                    )
+                )
+            }
+        )
+
+        val fagsak = Fagsak(aktør = aktørId)
         fagsakRepository.saveAndFlush(fagsak)
 
         val behandling = Behandling(
@@ -339,6 +372,7 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
                         behandlingId = it.behandling.id,
                         tilkjentYtelse = it,
                         personIdent = tilkjentYtelse.fnr,
+                        aktør = aktørId,
                         kalkulertUtbetalingsbeløp = 1000,
                         stønadFom = YearMonth.of(p.first.year, p.first.month),
                         stønadTom = YearMonth.of(p.second.year, p.second.month),

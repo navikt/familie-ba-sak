@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.integrasjoner.økonomi
 
 import no.nav.familie.ba.sak.common.nyOrdinærBehandling
 import no.nav.familie.ba.sak.common.nyRevurdering
+import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
@@ -17,6 +18,8 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.MethodOrderer
@@ -34,6 +37,9 @@ class KonsistensavstemmingUtplukkingIntegrationTest : AbstractSpringIntegrationT
 
     @Autowired
     private lateinit var behandlingService: BehandlingService
+
+    @Autowired
+    private lateinit var personidentService: PersonidentService
 
     @Autowired
     private lateinit var behandlingRepository: BehandlingRepository
@@ -205,12 +211,16 @@ class KonsistensavstemmingUtplukkingIntegrationTest : AbstractSpringIntegrationT
         behandlingService.lagreEllerOppdater(behandling)
         val tilkjentYtelse = tilkjentYtelse(behandling = behandling, erIverksatt = erIverksatt)
         tilkjentYtelseRepository.save(tilkjentYtelse)
+        val personFnr = randomFnr()
+        val aktør = personidentService.hentOgLagreAktørId(personFnr)
         kildeOgOffsetPåAndeler.forEach {
             andelTilkjentYtelseRepository.save(
                 andelPåTilkjentYtelse(
                     tilkjentYtelse = tilkjentYtelse,
                     kildeBehandlingId = it.kilde ?: behandling.id,
-                    periodeOffset = it.offset
+                    periodeOffset = it.offset,
+                    personFnr = personFnr,
+                    aktør = aktør,
                 )
             )
         }
@@ -225,12 +235,16 @@ class KonsistensavstemmingUtplukkingIntegrationTest : AbstractSpringIntegrationT
         val behandling = behandlingService.opprettBehandling(nyRevurdering(personIdent))
         val tilkjentYtelse = tilkjentYtelse(behandling = behandling, erIverksatt = erIverksatt)
         tilkjentYtelseRepository.save(tilkjentYtelse)
+        val personFnr = randomFnr()
+        val aktør = personidentService.hentOgLagreAktørId(personFnr)
         kildeOgOffsetPåAndeler.forEach {
             andelTilkjentYtelseRepository.save(
                 andelPåTilkjentYtelse(
                     tilkjentYtelse = tilkjentYtelse,
                     kildeBehandlingId = it.kilde ?: behandling.id,
-                    periodeOffset = it.offset
+                    periodeOffset = it.offset,
+                    personFnr = personFnr,
+                    aktør = aktør,
                 )
             )
         }
@@ -248,9 +262,11 @@ class KonsistensavstemmingUtplukkingIntegrationTest : AbstractSpringIntegrationT
     private fun andelPåTilkjentYtelse(
         tilkjentYtelse: TilkjentYtelse,
         kildeBehandlingId: Long,
-        periodeOffset: Long
+        periodeOffset: Long,
+        personFnr: String = randomFnr(),
+        aktør: Aktør = randomAktørId(),
     ) = AndelTilkjentYtelse(
-        personIdent = randomFnr(),
+        personIdent = personFnr,
         behandlingId = tilkjentYtelse.behandling.id,
         tilkjentYtelse = tilkjentYtelse,
         kalkulertUtbetalingsbeløp = 1054,
@@ -265,7 +281,8 @@ class KonsistensavstemmingUtplukkingIntegrationTest : AbstractSpringIntegrationT
         periodeOffset = periodeOffset,
         forrigePeriodeOffset = null,
         sats = 1054,
-        prosent = BigDecimal(100)
+        prosent = BigDecimal(100),
+        aktør = aktør,
     )
 }
 

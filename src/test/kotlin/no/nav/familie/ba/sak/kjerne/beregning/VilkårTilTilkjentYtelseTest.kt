@@ -4,13 +4,13 @@ import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
@@ -134,11 +134,11 @@ class VilkårTilTilkjentYtelseTest {
             vilkårsvurdering = vilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
             behandling = lagBehandling()
-        ) {
+        ) { personIdent, aktørId ->
             if (småbarnstilleggTestPeriode != null)
                 listOf(
                     InternPeriodeOvergangsstønad(
-                        personIdent = it,
+                        personIdent = personIdent,
                         fomDato = småbarnstilleggTestPeriode.fraOgMed,
                         tomDato = småbarnstilleggTestPeriode.tilOgMed!!,
                     )
@@ -239,7 +239,9 @@ class TestVilkårsvurderingBuilder(sakType: String) {
             return this
 
         val ident = person.personIdent.ident
-        val personResultat = identPersonResultatMap.getOrPut(ident) { PersonResultat(0, vilkårsvurdering, ident) }
+        val aktørId = person.hentAktørId()
+        val personResultat =
+            identPersonResultatMap.getOrPut(ident) { PersonResultat(0, vilkårsvurdering, ident, aktørId) }
 
         val testperiode = TestPeriode.parse(periode)
 
@@ -297,6 +299,7 @@ class TestTilkjentYtelseBuilder(val behandling: Behandling) {
                 behandlingId = behandling.id,
                 tilkjentYtelse = tilkjentYtelse,
                 personIdent = person.personIdent.ident,
+                aktør = person.hentAktørId(),
                 stønadFom = stønadPeriode.fraOgMed.toYearMonth(),
                 stønadTom = stønadPeriode.tilOgMed!!.toYearMonth(),
                 kalkulertUtbetalingsbeløp = beløp.toInt(),

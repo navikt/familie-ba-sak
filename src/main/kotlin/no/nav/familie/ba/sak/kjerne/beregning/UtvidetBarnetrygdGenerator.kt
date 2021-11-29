@@ -9,13 +9,13 @@ import no.nav.familie.ba.sak.common.førsteDagINesteMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseUtils.erBack2BackIMånedsskifte
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseUtils.slåSammenPerioderSomIkkeSkulleHaVærtSplittet
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.fpsak.tidsserie.LocalDateSegment
@@ -36,6 +36,7 @@ data class UtvidetBarnetrygdGenerator(
         if (utvidetVilkår.isEmpty() || andelerBarna.isEmpty()) return emptyList()
 
         val søkerIdent = utvidetVilkår.first().personResultat?.personIdent ?: error("Vilkår mangler PersonResultat")
+        val søkerAktørId = utvidetVilkår.first().personResultat?.aktør ?: error("Vilkår mangler PersonResultat")
 
         val utvidaTidslinje = LocalDateTimeline(
             utvidetVilkår
@@ -90,6 +91,7 @@ data class UtvidetBarnetrygdGenerator(
                     behandlingId = behandlingId,
                     tilkjentYtelse = tilkjentYtelse,
                     personIdent = søkerIdent,
+                    aktør = søkerAktørId,
                     stønadFom = it.fom.toYearMonth(),
                     stønadTom = it.tom.toYearMonth(),
                     kalkulertUtbetalingsbeløp = ordinærSatsForPeriode.avrundetHeltallAvProsent(prosentForPeriode),

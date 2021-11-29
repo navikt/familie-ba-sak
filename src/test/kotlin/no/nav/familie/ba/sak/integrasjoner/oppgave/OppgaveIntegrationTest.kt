@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.OppgaveRepository
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
+import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions
@@ -35,6 +36,9 @@ class OppgaveIntegrationTest : AbstractSpringIntegrationTest() {
     private lateinit var oppgaveRepository: OppgaveRepository
 
     @Autowired
+    private lateinit var personidentService: PersonidentService
+
+    @Autowired
     private lateinit var personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository
 
     @Test
@@ -42,12 +46,19 @@ class OppgaveIntegrationTest : AbstractSpringIntegrationTest() {
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(SØKER_FNR)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
-        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, SØKER_FNR, listOf(BARN_FNR))
+        val barnAktør = personidentService.hentOgLagreAktørIder(listOf(BARN_FNR))
+        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
+            behandling.id, SØKER_FNR, listOf(BARN_FNR),
+            søkerAktør = fagsak.aktør, barnAktør = barnAktør
+        )
+
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
-        val godkjenneVedtakOppgaveId = oppgaveService.opprettOppgave(behandling.id, Oppgavetype.GodkjenneVedtak, LocalDate.now())
+        val godkjenneVedtakOppgaveId =
+            oppgaveService.opprettOppgave(behandling.id, Oppgavetype.GodkjenneVedtak, LocalDate.now())
 
-        val opprettetOppgave = oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(Oppgavetype.GodkjenneVedtak, behandling)
+        val opprettetOppgave =
+            oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(Oppgavetype.GodkjenneVedtak, behandling)
 
         Assertions.assertNotNull(opprettetOppgave)
         Assertions.assertEquals(Oppgavetype.GodkjenneVedtak, opprettetOppgave!!.type)
@@ -66,7 +77,12 @@ class OppgaveIntegrationTest : AbstractSpringIntegrationTest() {
 
         oppgaveService.ferdigstillOppgave(behandling.id, Oppgavetype.GodkjenneVedtak)
 
-        Assertions.assertNull(oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(Oppgavetype.GodkjenneVedtak, behandling))
+        Assertions.assertNull(
+            oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(
+                Oppgavetype.GodkjenneVedtak,
+                behandling
+            )
+        )
     }
 
     @Test
@@ -79,7 +95,12 @@ class OppgaveIntegrationTest : AbstractSpringIntegrationTest() {
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(SØKER_FNR)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
-        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, SØKER_FNR, listOf(BARN_FNR))
+        val barnAktør = personidentService.hentOgLagreAktørIder(listOf(BARN_FNR))
+        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
+            behandling.id, SØKER_FNR, listOf(BARN_FNR),
+            søkerAktør = fagsak.aktør, barnAktør = barnAktør
+        )
+
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
         oppgaveService.opprettOppgave(behandling.id, Oppgavetype.GodkjenneVedtak, LocalDate.now())

@@ -4,11 +4,11 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.arbeidsforhold.GrArbeidsforhold
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.opphold.GrOpphold
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.familie.kontrakter.felles.Språkkode
 import org.hibernate.annotations.Fetch
@@ -74,9 +74,10 @@ data class Person(
     @JoinColumn(name = "fk_gr_personopplysninger_id", nullable = false, updatable = false)
     val personopplysningGrunnlag: PersonopplysningGrunnlag,
 
-    @Embedded
-    @AttributeOverrides(AttributeOverride(name = "aktørId", column = Column(name = "aktoer_id", updatable = false)))
-    val aktørId: AktørId? = null,
+    @JsonIgnore
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "fk_aktoer_id", nullable = false, updatable = false)
+    val aktør: Aktør,
 
     @OneToMany(mappedBy = "person", cascade = [CascadeType.ALL], fetch = FetchType.EAGER)
     // Workaround før Hibernatebug https://hibernate.atlassian.net/browse/HHH-1718
@@ -105,7 +106,7 @@ data class Person(
 ) : BaseEntitet() {
 
     override fun toString(): String {
-        return """Person(aktørId=$aktørId,
+        return """Person(aktørId=$aktør,
                         |type=$type
                         |fødselsdato=$fødselsdato)""".trimMargin()
     }
@@ -125,6 +126,8 @@ data class Person(
     fun hentAlder(): Int = Period.between(fødselsdato, LocalDate.now()).years
 
     fun hentSeksårsdag(): LocalDate = fødselsdato.plusYears(6)
+
+    fun hentAktørId(): Aktør = aktør
 }
 
 enum class Kjønn {

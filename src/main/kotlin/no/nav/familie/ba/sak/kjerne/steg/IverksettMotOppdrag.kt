@@ -1,13 +1,13 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedClient
-import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.InfotrygdVedtakFeedDto
+import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
+import no.nav.familie.ba.sak.task.SendVedtakTilInfotrygdTask
 import no.nav.familie.ba.sak.task.dto.IverksettingTaskDTO
 import org.springframework.stereotype.Service
 
@@ -15,8 +15,8 @@ import org.springframework.stereotype.Service
 class IverksettMotOppdrag(
     private val økonomiService: ØkonomiService,
     private val totrinnskontrollService: TotrinnskontrollService,
-    private val infotrygdFeedClient: InfotrygdFeedClient,
-    private val vedtakService: VedtakService
+    private val vedtakService: VedtakService,
+    private val taskRepository: TaskRepositoryWrapper,
 ) : BehandlingSteg<IverksettingTaskDTO> {
 
     override fun preValiderSteg(behandling: Behandling, stegService: StegService?) {
@@ -49,17 +49,13 @@ class IverksettMotOppdrag(
         behandling: Behandling,
         data: IverksettingTaskDTO
     ): StegType {
-        infotrygdFeedClient.sendVedtakFeedTilInfotrygd(
-            InfotrygdVedtakFeedDto(
-                hentFnrStoenadsmottaker(behandling.fagsak),
-                hentVedtaksdato(behandling.id).toLocalDate()
-            )
-        )
 
         økonomiService.oppdaterTilkjentYtelseMedUtbetalingsoppdragOgIverksett(
             vedtak = vedtakService.hent(data.vedtaksId),
             saksbehandlerId = data.saksbehandlerId
         )
+
+        taskRepository.save(SendVedtakTilInfotrygdTask.opprettTask(hentFnrStoenadsmottaker(behandling.fagsak), behandling.id))
 
         return hentNesteStegForNormalFlyt(behandling)
     }
@@ -69,8 +65,4 @@ class IverksettMotOppdrag(
     }
 
     private fun hentFnrStoenadsmottaker(fagsak: Fagsak) = fagsak.hentAktivIdent().ident
-
-    private fun hentVedtaksdato(behandlingsId: Long) =
-        vedtakService.hentAktivForBehandling(behandlingsId)?.vedtaksdato
-            ?: throw Exception("Aktivt vedtak eller vedtaksdato eksisterer ikke for $behandlingsId")
 }

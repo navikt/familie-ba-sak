@@ -698,6 +698,10 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
         override val sanityApiNavn = "avslagIkkeDokumentertSamboerDod"
     },
+    AVSLAG_VURDERING_BOSATT_UNDER_12_MÅNEDER {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
+        override val sanityApiNavn = "avslagVurderingBosattUnder12Maaneder"
+    },
     OPPHØR_BARN_FLYTTET_FRA_SØKER {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
         override val sanityApiNavn = "opphorBarnBorIkkeMedSoker"
@@ -810,6 +814,51 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
         override val sanityApiNavn = "opphorVurderingForeldreneBorSammen"
     },
+    OPPHØR_FORELDRENE_BODD_SAMMEN {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
+        override val sanityApiNavn = "opphorForeldreneBoddSammen"
+    },
+    OPPHØR_IKKE_OPPHOLDSTILLATELSE {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
+        override val sanityApiNavn = "opphorIkkeOppholdstillatelse"
+    },
+    OPPHØR_VURDERING_FORELDRENE_BODDE_SAMMEN {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
+        override val sanityApiNavn = "opphorVurderingForeldreneBoddeSammen"
+    },
+    OPPHØR_IKKE_BOSATT_I_NORGE {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
+        override val sanityApiNavn = "opphorIkkeBosattINorge"
+    },
+    OPPHØR_BARN_BODDE_IKKE_MED_SØKER {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
+        override val sanityApiNavn = "opphorBarnBoddeIkkeMedSoker"
+    },
+    OPPHØR_AVTALE_DELT_BOSTED_IKKE_GYLDIG {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
+        override val sanityApiNavn = "opphorAvtaleDeltBostedIkkeGyldig"
+    },
+    OPPHØR_VURDERING_VAR_IKKE_MEDLEM {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
+        override val sanityApiNavn = "opphorVurderingVarIkkeMedlem"
+    },
+    OPPHØR_VAR_IKKE_MEDLEM {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
+        override val sanityApiNavn = "opphorVarIkkeMedlem"
+    },
+    OPPHØR_VURDERING_DEN_ANDRE_FORELDEREN_VAR_IKKE_MEDLEM {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
+        override val sanityApiNavn = "opphorVurderingDenAndreForelderenVarIkkeMedlem"
+    },
+    OPPHØR_AVTALE_DELT_BOSTED_FØLGES_IKKE {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
+        override val sanityApiNavn = "opphorAvtaleDeltBostedFolgesIkke"
+    },
+    OPPHØR_DEN_ANDRE_FORELDEREN_VAR_IKKE_MEDLEM {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
+        override val sanityApiNavn = "opphorDenAndreForelderenVarIkkeMedlem"
+    },
+
     FORTSATT_INNVILGET_SØKER_OG_BARN_BOSATT_I_RIKET {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
         override val sanityApiNavn = "fortsattInnvilgetSokerOgBarnBosattIRiket"

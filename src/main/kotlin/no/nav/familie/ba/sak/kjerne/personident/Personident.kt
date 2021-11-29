@@ -1,18 +1,16 @@
 package no.nav.familie.ba.sak.kjerne.personident
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import no.nav.familie.ba.sak.common.BaseEntitet
-import no.nav.familie.ba.sak.common.YearMonthConverter
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
-import java.time.YearMonth
+import java.time.LocalDateTime
 import java.util.Objects
 import javax.persistence.Column
-import javax.persistence.Convert
 import javax.persistence.Entity
 import javax.persistence.EntityListeners
-import javax.persistence.GeneratedValue
-import javax.persistence.GenerationType
 import javax.persistence.Id
-import javax.persistence.SequenceGenerator
+import javax.persistence.JoinColumn
+import javax.persistence.ManyToOne
 import javax.persistence.Table
 
 @EntityListeners(RollestyringMotDatabase::class)
@@ -20,27 +18,24 @@ import javax.persistence.Table
 @Table(name = "PERSONIDENT")
 data class Personident(
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "personident_seq_generator")
-    @SequenceGenerator(name = "personident_seq_generator", sequenceName = "personident_seq", allocationSize = 50)
-    val id: Long = 0,
-
-    @Column(name = "aktoer_id", nullable = false)
-    val aktørId: String,
-
     @Column(name = "foedselsnummer", nullable = false)
     val fødselsnummer: String,
 
+    @JsonIgnore
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "fk_aktoer_id", nullable = false, updatable = false)
+    val aktør: Aktør,
+
     @Column(name = "aktiv", nullable = false)
-    var aktiv: Boolean = false,
+    var aktiv: Boolean = true,
 
     @Column(name = "gjelder_til", columnDefinition = "DATE")
-    @Convert(converter = YearMonthConverter::class)
-    var gjelderTil: YearMonth,
+    var gjelderTil: LocalDateTime? = null,
 
 ) : BaseEntitet() {
 
     override fun toString(): String {
-        return """Personident(aktørId=$aktørId,
+        return """Personident(aktørId=${aktør.aktørId},
                         |aktiv=$aktiv
                         |gjelderTil=$gjelderTil)""".trimMargin()
     }
@@ -54,6 +49,6 @@ data class Personident(
     }
 
     override fun hashCode(): Int {
-        return Objects.hash(aktørId, fødselsnummer)
+        return Objects.hash(fødselsnummer)
     }
 }
