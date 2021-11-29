@@ -78,7 +78,6 @@ data class SmåbarnstilleggBarnetrygdGenerator(
                 kombinerTidslinjerForÅLageSmåbarnstilleggAndeler(sammenlagt, neste)
             }
 
-
         return sammenslåttTidslinje.toSegments()
             .filter { segement ->
                 segement.value.containsAll(
@@ -119,15 +118,17 @@ data class SmåbarnstilleggBarnetrygdGenerator(
     ): List<MånedPeriode> {
         return slåSammenOverlappendePerioder(
             barnasIdenterOgFødselsdatoer.map {
-                val barnetsMånedPeriodeAndeler = LocalDateTimeline(barnasAndeler
-                    .filter { andel -> andel.personIdent == it.first }
-                    .map { andel ->
-                        LocalDateSegment(
-                            andel.stønadFom.førsteDagIInneværendeMåned(),
-                            andel.stønadTom.sisteDagIInneværendeMåned(),
-                            listOf(BarnSinRettTilSmåbarnstilleggKombinator.UTBETALING)
-                        )
-                    })
+                val barnetsMånedPeriodeAndeler = LocalDateTimeline(
+                    barnasAndeler
+                        .filter { andel -> andel.personIdent == it.first }
+                        .map { andel ->
+                            LocalDateSegment(
+                                andel.stønadFom.førsteDagIInneværendeMåned(),
+                                andel.stønadTom.sisteDagIInneværendeMåned(),
+                                listOf(BarnSinRettTilSmåbarnstilleggKombinator.UTBETALING)
+                            )
+                        }
+                )
 
                 val barnetsUnder3ÅrTidslinje = LocalDateTimeline(
                     listOf(
