@@ -2,9 +2,11 @@ package no.nav.familie.ba.sak.kjerne.personident
 
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.IdentInformasjon
+import no.nav.familie.kontrakter.felles.PersonIdent
 import org.slf4j.LoggerFactory
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class PersonidentService(
@@ -12,6 +14,23 @@ class PersonidentService(
     private val aktørIdRepository: AktørIdRepository,
     private val personopplysningerService: PersonopplysningerService
 ) {
+
+    @Transactional
+    fun håndterNyIdent(nyIdent: PersonIdent): Aktør? {
+        logger.info("Håndterer ny ident")
+        secureLogger.info("Håndterer ny ident ${nyIdent.ident}")
+        val identerFraPdl = personopplysningerService.hentIdenter(nyIdent.ident, false)
+        val aktørId = filtrerAktørId(identerFraPdl)
+
+        val aktør = aktørIdRepository.findByIdOrNull(aktørId)
+
+        return if (aktør != null && aktør.personidenter.none { it.fødselsnummer == nyIdent.ident }) {
+            logger.info("Legger til ny ident")
+            secureLogger.info("Legger til ny ident ${nyIdent.ident} på aktør ${aktør.aktørId}")
+            opprettPersonIdent(aktør, nyIdent.ident)
+        } else aktør
+    }
+
     fun hentOgLagreAktørId(fødselsnummer: String): Aktør =
         personidentRepository.findByIdOrNull(fødselsnummer)?.let { it.aktør }
             ?: kotlin.run {
@@ -37,17 +56,19 @@ class PersonidentService(
         )
 
     private fun opprettPersonIdent(aktør: Aktør, fødselsnummer: String): Aktør {
-        aktør.personidenter.filter { it.aktiv }.forEach {
+        aktør.personidenter.filter { it.aktiv }.map {
             it.aktiv = false
-            personidentRepository.save(it)
         }
-
-        return personidentRepository.save(
+        aktør.personidenter.add(
             Personident(
                 fødselsnummer = fødselsnummer,
                 aktør = aktør
             )
-        ).aktør
+        )
+
+        return aktørIdRepository.save(
+            aktør
+        )
     }
 
     private fun filtrerAktivtFødselsnummer(identerFraPdl: List<IdentInformasjon>) =
@@ -63,6 +84,7 @@ class PersonidentService(
             )
 
     companion object {
+        val logger = LoggerFactory.getLogger(PersonidentService::class.java)
         val secureLogger = LoggerFactory.getLogger("secureLogger")
     }
 }
