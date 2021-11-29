@@ -74,8 +74,8 @@ class VedtaksperiodeMedBegrunnelserController(
     @GetMapping("/brevbegrunnelser/{vedtaksperiodeId}")
     fun genererBrevBegrunnelserForPeriode(@PathVariable vedtaksperiodeId: Long): ResponseEntity<Ressurs<List<String>>> {
         tilgangService.verifiserHarTilgangTilHandling(
-            minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-            handling = OPPDATERE_BEGRUNNELSER_HANDLING
+            minimumBehandlerRolle = BehandlerRolle.VEILEDER,
+            handling = "hente genererte begrunnelser"
         )
 
         val begrunnelser = vedtaksperiodeService.genererBrevBegrunnelserForPeriode(vedtaksperiodeId).map {

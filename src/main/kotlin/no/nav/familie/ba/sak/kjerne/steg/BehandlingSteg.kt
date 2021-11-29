@@ -161,8 +161,10 @@ fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType): StegTyp
     val behandlingType = behandling.type
     val behandlingÅrsak = behandling.opprettetÅrsak
 
-    if (behandlingType == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT ||
-        behandlingType == BehandlingType.MIGRERING_FRA_INFOTRYGD
+    if (behandlingType in listOf(
+            BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT,
+            BehandlingType.MIGRERING_FRA_INFOTRYGD
+        ) && behandling.opprettetÅrsak == BehandlingÅrsak.MIGRERING
     ) {
         return when (utførendeStegType) {
             REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING

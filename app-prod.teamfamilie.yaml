@@ -72,6 +72,9 @@ spec:
           cluster: prod-gcp
         - application: familie-ba-migrering
           cluster: prod-gcp
+        - application: bidrag-grunnlag
+          cluster: prod-gcp
+          namespace: bidrag
     outbound:
       rules:
         - application: familie-brev
@@ -80,4 +83,5 @@ spec:
         - application: familie-ba-infotrygd-feed
         - application: familie-ba-infotrygd
         - application: familie-ef-sak
+          cluster: prod-gcp
 

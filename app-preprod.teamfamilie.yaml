@@ -86,3 +86,4 @@ spec:
         - application: familie-ba-infotrygd-feed
         - application: familie-ba-infotrygd
         - application: familie-ef-sak
+          cluster: dev-gcp
