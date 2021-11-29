@@ -34,8 +34,8 @@ class EndretUtbetalingAndelTest(
         val andelerTilkjentYtelse =
             andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = restUtvidetBehandling.data!!.behandlingId)
 
-        val endretFom = andelerTilkjentYtelse.last().stønadFom
-        val endretTom = andelerTilkjentYtelse.last().stønadTom.minusMonths(2)
+        val endretFom = andelerTilkjentYtelse.minOf { it.stønadFom }
+        val endretTom = andelerTilkjentYtelse.minOf { it.stønadTom }.minusMonths(2)
 
         val restEndretUtbetalingAndel = RestEndretUtbetalingAndel(
             id = null,
