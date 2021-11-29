@@ -114,8 +114,13 @@ object TilkjentYtelseUtils {
             )
                 .lagSmåbarnstilleggAndeler(
                     perioderMedFullOvergangsstønad = perioderMedFullOvergangsstønad,
-                    andelerSøker = andelerTilkjentYtelseSøker,
-                    barnasFødselsdatoer = personopplysningGrunnlag.barna.map { it.fødselsdato },
+                    andelerTilkjentYtelse = andelerTilkjentYtelseSøker + andelerTilkjentYtelseBarna,
+                    barnasIdenterOgFødselsdatoer = personopplysningGrunnlag.barna.map {
+                        Pair(
+                            it.personIdent.ident,
+                            it.fødselsdato
+                        )
+                    },
                 )
         } else emptyList()
 

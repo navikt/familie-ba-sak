@@ -36,15 +36,15 @@ class VedtaksperiodefinnerSmåbarnstilleggFeil(
 fun vedtakOmOvergangsstønadPåvirkerFagsak(
     småbarnstilleggBarnetrygdGenerator: SmåbarnstilleggBarnetrygdGenerator,
     nyePerioderMedFullOvergangsstønad: List<InternPeriodeOvergangsstønad>,
-    forrigeSøkersAndeler: List<AndelTilkjentYtelse>,
-    barnasFødselsdatoer: List<LocalDate>,
+    forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>,
+    barnasIdenterOgFødselsdatoer: List<Pair<String, LocalDate>>,
 ): Boolean {
-    val (forrigeSøkersSmåbarnstilleggAndeler, forrigeSøkersAndreAndeler) = forrigeSøkersAndeler.partition { it.erSmåbarnstillegg() }
+    val (forrigeSøkersSmåbarnstilleggAndeler, forrigeSøkersAndreAndeler) = forrigeAndelerTilkjentYtelse.partition { it.erSmåbarnstillegg() }
 
     val nyeSmåbarnstilleggAndeler = småbarnstilleggBarnetrygdGenerator.lagSmåbarnstilleggAndeler(
         perioderMedFullOvergangsstønad = nyePerioderMedFullOvergangsstønad,
-        andelerSøker = forrigeSøkersAndreAndeler,
-        barnasFødselsdatoer = barnasFødselsdatoer,
+        andelerTilkjentYtelse = forrigeSøkersAndreAndeler,
+        barnasIdenterOgFødselsdatoer = barnasIdenterOgFødselsdatoer,
     )
 
     return forrigeSøkersSmåbarnstilleggAndeler.erUlike(nyeSmåbarnstilleggAndeler)
