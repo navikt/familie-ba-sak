@@ -52,7 +52,7 @@ class TestVerktøyController(
     @Unprotected
     fun utførSatsendringPåAlleBehandlinger(): ResponseEntity<Ressurs<String>> {
         return if (envService.erPreprod() || envService.erDev()) {
-            taskRepository.save(StartSatsendringForAlleBehandlingerTask.opprettTask(1054))
+            taskRepository.save(StartSatsendringForAlleBehandlingerTask.opprettTask(1654))
             ResponseEntity.ok(Ressurs.success("Trigget satsendring for alle behandlinger"))
         } else {
             ResponseEntity.ok(Ressurs.success("Endepunktet gjør ingenting i prod."))

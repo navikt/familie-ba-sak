@@ -25,7 +25,6 @@ class StartSatsendringForAlleBehandlingerTask(
         satsendringService.finnBehandlingerForSatsendring(gammelSats, YearMonth.now()).forEach {
             taskRepository.save(SatsendringTask.opprettTask(it))
         }
-
     }
 
     companion object {
