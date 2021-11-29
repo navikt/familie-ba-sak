@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIde
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
@@ -481,7 +482,7 @@ internal class UtvidetBarnetrygdTest {
                             periodeTom = b2bTom,
                             begrunnelse = "",
                             behandlingId = this.vilkårsvurdering.behandling.id,
-                            erDeltBosted = false
+                            utdypendeVilkårsvurderinger = emptyList()
                         ),
                         VilkårResultat(
                             personResultat = this,
@@ -491,7 +492,7 @@ internal class UtvidetBarnetrygdTest {
                             periodeTom = null,
                             begrunnelse = "",
                             behandlingId = this.vilkårsvurdering.behandling.id,
-                            erDeltBosted = false
+                            utdypendeVilkårsvurderinger = emptyList()
                         )
                     )
                 )
@@ -577,7 +578,7 @@ internal class UtvidetBarnetrygdTest {
                             periodeTom = utvidetFørstePeriodeTom,
                             begrunnelse = "",
                             behandlingId = this.vilkårsvurdering.behandling.id,
-                            erDeltBosted = false
+                            utdypendeVilkårsvurderinger = emptyList()
                         ),
                         VilkårResultat(
                             personResultat = this,
@@ -587,7 +588,7 @@ internal class UtvidetBarnetrygdTest {
                             periodeTom = null,
                             begrunnelse = "",
                             behandlingId = this.vilkårsvurdering.behandling.id,
-                            erDeltBosted = false
+                            utdypendeVilkårsvurderinger = emptyList()
                         )
                     )
                 )
@@ -673,7 +674,9 @@ internal class UtvidetBarnetrygdTest {
                 periodeTom = if (it == Vilkår.UNDER_18_ÅR) fødselsdato.plusYears(18) else vilkårOppfyltTom,
                 begrunnelse = "",
                 behandlingId = personResultat.vilkårsvurdering.behandling.id,
-                erDeltBosted = erDeltBosted
+                utdypendeVilkårsvurderinger = listOfNotNull(
+                    if (erDeltBosted) UtdypendeVilkårsvurdering.DELT_BOSTED else null
+                )
             )
         }.toSet()
     }

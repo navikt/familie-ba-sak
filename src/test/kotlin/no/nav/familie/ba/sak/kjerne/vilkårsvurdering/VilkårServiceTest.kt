@@ -457,7 +457,7 @@ class VilkårServiceTest(
     }
 
     @Test
-    fun `Skal ikke få duplikate utdypede vilkårsvurderinger`() {
+    fun `Skal legge til både VURDERING_ANNET_GRUNNLAG og VURDERT_MEDLEMSKAP i utdypendeVilkårsvurderinger liste`() {
         val fnr = randomFnr()
         val barnFnr = randomFnr()
 
@@ -494,63 +494,10 @@ class VilkårServiceTest(
                         under18ÅrVilkårForBarn.copy(
                             resultat = Resultat.OPPFYLT,
                             periodeFom = LocalDate.of(2019, 5, 8),
-                            erDeltBosted = true,
-                            utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED)
-                        )
-                    )
-                )
-            )
-
-        val endretUnder18ÅrVilkårForBarn =
-            endretVilkårsvurdering.find { it.personIdent == barnFnr }
-                ?.vilkårResultater?.find { it.vilkårType == Vilkår.UNDER_18_ÅR }
-
-        Assertions.assertEquals(
-            1,
-            endretUnder18ÅrVilkårForBarn!!.utdypendeVilkårsvurderinger.size
-        )
-    }
-
-    @Test
-    fun `Skal legge til både erSkjønnsmessigVurdert og erMedlemskapVurdert i utdypendeVilkårsvurderinger liste`() {
-        val fnr = randomFnr()
-        val barnFnr = randomFnr()
-
-        fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
-        val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(fnr))
-        val forrigeBehandlingSomErIverksatt =
-            behandlingService.hentSisteBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id)
-
-        val personopplysningGrunnlag =
-            lagTestPersonopplysningGrunnlag(
-                behandling.id, fnr, listOf(barnFnr),
-                søkerAktør = personidentService.hentOgLagreAktørId(fnr),
-                barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr))
-            )
-        persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
-
-        val vilkårsvurdering = vilkårService.initierVilkårsvurderingForBehandling(
-            behandling = behandling,
-            bekreftEndringerViaFrontend = true,
-            forrigeBehandlingSomErVedtatt = forrigeBehandlingSomErIverksatt
-        )
-        val under18ÅrVilkårForBarn =
-            vilkårsvurdering.personResultater.find { it.personIdent == barnFnr }
-                ?.tilRestPersonResultat()?.vilkårResultater?.find { it.vilkårType == Vilkår.UNDER_18_ÅR }
-
-        val endretVilkårsvurdering: List<RestPersonResultat> =
-            vilkårService.endreVilkår(
-                behandlingId = behandling.id,
-                vilkårId = under18ÅrVilkårForBarn!!.id,
-                restPersonResultat =
-                RestPersonResultat(
-                    personIdent = barnFnr,
-                    vilkårResultater = listOf(
-                        under18ÅrVilkårForBarn.copy(
-                            resultat = Resultat.OPPFYLT,
-                            periodeFom = LocalDate.of(2019, 5, 8),
-                            erSkjønnsmessigVurdert = true,
-                            erMedlemskapVurdert = true,
+                            utdypendeVilkårsvurderinger = listOf(
+                                UtdypendeVilkårsvurdering.VURDERING_ANNET_GRUNNLAG,
+                                UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP
+                            )
                         )
                     )
                 )
