@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.endretutbetaling.domene
 
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -18,7 +17,7 @@ internal class EndretUtbetalingAndelTest {
         val endretUtbetalingAndel = EndretUtbetalingAndel(behandlingId = behandling.id)
         endretUtbetalingAndel.begrunnelse = ""
 
-        assertThrows<Feil> {
+        assertThrows<RuntimeException> {
             endretUtbetalingAndel.validerUtfyltEndring()
         }
     }
@@ -34,7 +33,7 @@ internal class EndretUtbetalingAndelTest {
         endretUtbetalingAndel.søknadstidspunkt = LocalDate.now()
         endretUtbetalingAndel.begrunnelse = "begrunnelse"
 
-        assertThrows<Feil> {
+        assertThrows<RuntimeException> {
             endretUtbetalingAndel.validerUtfyltEndring()
         }
     }
@@ -68,7 +67,7 @@ internal class EndretUtbetalingAndelTest {
         endretUtbetalingAndel.søknadstidspunkt = LocalDate.now()
         endretUtbetalingAndel.begrunnelse = "begrunnelse"
 
-        assertThrows<Feil> {
+        assertThrows<RuntimeException> {
             endretUtbetalingAndel.validerUtfyltEndring()
         }
     }
