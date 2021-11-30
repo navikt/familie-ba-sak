@@ -27,13 +27,13 @@ class SanityKlient(
         val url = URI.create("$sanityFamilieApi?query=$parameters")
         logger.info("Henter begrunnelser fra sanity")
 
-        val echo = getForEntity<String>(
+        val echo = getForEntity<Any>(
             URI.create("https://httpbin.org/anything"),
         )
 
         logger.info("")
         logger.info("Echo:")
-        logger.info(echo)
+        logger.info(echo.toString())
         logger.info("")
 
         println("")
