@@ -25,7 +25,8 @@ class NaisProxyCustomizer : RestTemplateCustomizer {
                 ): HttpHost? {
                     logger.info("Debug: Skal gå mot ${target.hostName} via ${proxy.hostName}")
                     return if (target.hostName.contains("microsoft") ||
-                        target.hostName.contains("sanity")
+                        target.hostName.contains("sanity") ||
+                        target.hostName.contains("httpbin")
                     ) {
                         logger.info("Går mot ${target.hostName} via ${proxy.hostName}")
                         super.determineProxy(target, request, context)
