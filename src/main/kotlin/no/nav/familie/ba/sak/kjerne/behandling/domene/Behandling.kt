@@ -128,7 +128,11 @@ data class Behandling(
     }
 
     fun erBehandlingMedVedtaksbrevutsending(): Boolean {
-        return type != BehandlingType.TEKNISK_ENDRING && opprettetÅrsak != BehandlingÅrsak.SATSENDRING
+        return when {
+            type == BehandlingType.TEKNISK_ENDRING && opprettetÅrsak == BehandlingÅrsak.SATSENDRING -> false
+            erManuellMigrering() -> false
+            else -> true
+        }
     }
 
     fun erHenlagt() =
@@ -210,6 +214,8 @@ data class Behandling(
 
     fun erMigrering() =
         type == BehandlingType.MIGRERING_FRA_INFOTRYGD || type == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT
+
+    fun erManuellMigrering() = erMigrering() && opprettetÅrsak == BehandlingÅrsak.ENDRE_MIGRERINGSDATO
 
     private fun erOmregning() =
         this.opprettetÅrsak == BehandlingÅrsak.OMREGNING_6ÅR || this.opprettetÅrsak == BehandlingÅrsak.OMREGNING_18ÅR
