@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.integrasjoner.journalføring.domene
 
 import com.fasterxml.jackson.annotation.JsonInclude
+import no.nav.familie.kontrakter.felles.dokarkiv.AvsenderMottaker
 import no.nav.familie.kontrakter.felles.journalpost.DokumentInfo
 import no.nav.familie.kontrakter.felles.journalpost.Sak
 
@@ -15,12 +16,6 @@ data class OppdaterJournalpostRequest(
 )
 
 class Bruker(
-    val id: String,
-    val idType: IdType? = IdType.FNR,
-    val navn: String
-)
-
-data class AvsenderMottaker(
     val id: String,
     val idType: IdType? = IdType.FNR,
     val navn: String

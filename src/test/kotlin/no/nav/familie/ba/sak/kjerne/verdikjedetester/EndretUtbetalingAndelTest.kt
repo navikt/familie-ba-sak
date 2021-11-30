@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseReposito
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenario
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenarioPerson
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.junit.jupiter.api.Assertions
@@ -34,8 +35,8 @@ class EndretUtbetalingAndelTest(
         val andelerTilkjentYtelse =
             andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = restUtvidetBehandling.data!!.behandlingId)
 
-        val endretFom = andelerTilkjentYtelse.last().stønadFom
-        val endretTom = andelerTilkjentYtelse.last().stønadTom.minusMonths(2)
+        val endretFom = andelerTilkjentYtelse.minOf { it.stønadFom }
+        val endretTom = andelerTilkjentYtelse.minOf { it.stønadTom }.minusMonths(2)
 
         val restEndretUtbetalingAndel = RestEndretUtbetalingAndel(
             id = null,
@@ -187,7 +188,9 @@ class EndretUtbetalingAndelTest(
                             it.copy(
                                 resultat = Resultat.OPPFYLT,
                                 periodeFom = barnFødselsdato,
-                                erDeltBosted = it.vilkårType == Vilkår.BOR_MED_SØKER
+                                utdypendeVilkårsvurderinger = listOfNotNull(
+                                    if (it.vilkårType == Vilkår.BOR_MED_SØKER) UtdypendeVilkårsvurdering.DELT_BOSTED else null
+                                )
                             )
                         )
                     )
