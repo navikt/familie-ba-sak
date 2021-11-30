@@ -78,6 +78,7 @@ class MigreringService(
             val løpendeSak = hentLøpendeSakFraInfotrygd(personIdent)
 
             kastFeilDersomSakIkkeErOrdinær(løpendeSak)
+            secureLog.info("Migrering: fant løpende sak for $personIdent sak=${løpendeSak.id} stønad=${løpendeSak.stønad?.id}")
 
             val barnasIdenter = finnBarnMedLøpendeStønad(løpendeSak)
             validerAtBarnErIRelasjonMedPersonident(personIdent, barnasIdenter)
@@ -110,13 +111,15 @@ class MigreringService(
 
             iverksett(behandlingEtterVilkårsvurdering)
             migrertCounter.increment()
-            return MigreringResponseDto(
+            val migreringResponseDto = MigreringResponseDto(
                 fagsakId = behandlingEtterVilkårsvurdering.fagsak.id,
                 behandlingId = behandlingEtterVilkårsvurdering.id,
                 infotrygdStønadId = løpendeSak.stønad?.id,
                 infotrygdSakId = løpendeSak.id,
                 virkningFom = førsteUtbetalingsperiode.fom.toYearMonth()
             )
+            secureLog.info("Ferdig migrert $personIdent. Response til familie-ba-migrering: $migreringResponseDto")
+            return migreringResponseDto
         } catch (e: Exception) {
             if (e is KanIkkeMigrereException) throw e
             kastOgTellMigreringsFeil(MigreringsfeilType.UKJENT, e.message, e)
