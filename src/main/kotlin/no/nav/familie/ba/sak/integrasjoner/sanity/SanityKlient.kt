@@ -27,6 +27,20 @@ class SanityKlient(
         val url = URI.create("$sanityFamilieApi?query=$parameters")
         logger.info("Henter begrunnelser fra sanity")
 
+        val echo = getForEntity<String>(
+            URI.create("https://httpbin.org/anything"),
+        )
+
+        logger.info("")
+        logger.info("Echo:")
+        logger.info(echo)
+        logger.info("")
+
+        println("")
+        println("Echo:")
+        println(echo)
+        println("")
+
         val response = getForEntity<SanityRespons<RestSanityBegrunnelse>>(url)
         val restSanityBegrunnelser = response.result
         return restSanityBegrunnelser.map { it.tilSanityBegrunnelse() }
