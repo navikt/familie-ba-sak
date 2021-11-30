@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.integrasjoner.infotrygd
 
+import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
+import no.nav.familie.ba.sak.task.VedtakOmOvergangsstønadTask
 import no.nav.familie.kontrakter.ba.infotrygd.Sak
 import no.nav.familie.kontrakter.ba.infotrygd.Stønad
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -18,7 +20,8 @@ import org.springframework.web.bind.annotation.RestController
 @Validated
 class InfotrygdController(
     private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
-    private val infotrygdService: InfotrygdService
+    private val infotrygdService: InfotrygdService,
+    private val taskRepository: TaskRepositoryWrapper
 ) {
 
     @PostMapping(path = ["/hent-infotrygdsaker-for-soker"])
@@ -41,6 +44,12 @@ class InfotrygdController(
     fun harLøpendeSak(@RequestBody personIdent: Personident): ResponseEntity<Ressurs<RestLøpendeSak>> {
         val harLøpendeSak = infotrygdBarnetrygdClient.harLøpendeSakIInfotrygd(listOf(personIdent.ident))
         return ResponseEntity.ok(Ressurs.success(RestLøpendeSak(harLøpendeSak)))
+    }
+
+    @PostMapping(path = ["/overgangsstonad"])
+    fun håndterVedtakOmOvergangsstønad(@RequestBody personIdent: Personident): Ressurs<String> {
+        taskRepository.save(VedtakOmOvergangsstønadTask.opprettTask(personIdent.ident))
+        return Ressurs.success("Ok", "Ok")
     }
 }
 
