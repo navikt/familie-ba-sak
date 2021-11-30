@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDateTime
 
 @Service
 class PersonidentService(
@@ -24,7 +25,7 @@ class PersonidentService(
 
         val aktør = aktørIdRepository.findByIdOrNull(aktørId)
 
-        return if (aktør != null && aktør.personidenter.none { it.fødselsnummer == nyIdent.ident }) {
+        return if (aktør?.harIdent(fødselsnummer = nyIdent.ident) == false) {
             logger.info("Legger til ny ident")
             secureLogger.info("Legger til ny ident ${nyIdent.ident} på aktør ${aktør.aktørId}")
             opprettPersonIdent(aktør, nyIdent.ident)
@@ -58,17 +59,12 @@ class PersonidentService(
     private fun opprettPersonIdent(aktør: Aktør, fødselsnummer: String): Aktør {
         aktør.personidenter.filter { it.aktiv }.map {
             it.aktiv = false
+            it.gjelderTil = LocalDateTime.now()
         }
         aktør.personidenter.add(
-            Personident(
-                fødselsnummer = fødselsnummer,
-                aktør = aktør
-            )
+            Personident(fødselsnummer = fødselsnummer, aktør = aktør)
         )
-
-        return aktørIdRepository.save(
-            aktør
-        )
+        return aktørIdRepository.save(aktør)
     }
 
     private fun filtrerAktivtFødselsnummer(identerFraPdl: List<IdentInformasjon>) =

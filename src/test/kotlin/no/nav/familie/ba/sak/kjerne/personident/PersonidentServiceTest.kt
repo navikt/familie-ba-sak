@@ -12,11 +12,13 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.internal.IdentInformasjon
 import no.nav.familie.kontrakter.felles.PersonIdent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.springframework.data.repository.findByIdOrNull
+import java.time.LocalDateTime
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class PersonidentServiceTest {
@@ -93,12 +95,14 @@ internal class PersonidentServiceTest {
         val aktør = personidentService.håndterNyIdent(nyIdent = PersonIdent(personIdentSomSkalLeggesTil))
 
         assertEquals(2, aktør?.personidenter?.size)
+        assertEquals(personIdentSomSkalLeggesTil, aktør!!.aktivIdent().fødselsnummer)
+        assertTrue(aktør!!.personidenter.first { !it.aktiv }.gjelderTil!!.isBefore(LocalDateTime.now()))
         verify(exactly = 1) { aktørIdRepository.save(any()) }
         verify(exactly = 0) { personidentRepository.save(any()) }
     }
 
     @Test
-    fun `Skal ikke legge til ny ident på aktør som finnes i systemet og allerede har ident`() {
+    fun `Skal ikke legge til ny ident på aktør som ikke finnes i systemet`() {
         val personIdentSomSkalLeggesTil = randomFnr()
         val aktørIdSomIkkeFinnes = randomAktørId()
 
@@ -123,7 +127,7 @@ internal class PersonidentServiceTest {
     }
 
     @Test
-    fun `Skal ikke legge til ny ident på aktør som ikke finnes i systemet`() {
+    fun `Skal ikke legge til ny ident på aktør som allerede har denne identen registert i systemet`() {
         val personIdentSomFinnes = randomFnr()
         val aktørIdSomFinnes = randomAktørId()
         aktørIdSomFinnes.personidenter.add(
@@ -140,10 +144,6 @@ internal class PersonidentServiceTest {
             )
         }
 
-        every { personidentRepository.findByIdOrNull(personIdentSomFinnes) }.answers {
-            Personident(fødselsnummer = personidentAktiv, aktør = aktørIdSomFinnes, aktiv = true)
-        }
-
         every { aktørIdRepository.findByIdOrNull(aktørIdSomFinnes.aktørId) }.answers { aktørIdSomFinnes }
 
         val personidentService = PersonidentService(personidentRepository, aktørIdRepository, personopplysningerService)
@@ -158,7 +158,7 @@ internal class PersonidentServiceTest {
     }
 
     @Test
-    fun `Test aktør id som som ikke er peristert fra før`() {
+    fun `Test aktør id som som ikke er persistert fra før`() {
         val personidentService = PersonidentService(personidentRepository, aktørIdRepository, personopplysningerService)
 
         every { personidentRepository.findByIdOrNull(personidentAktiv) } answers { null }
@@ -172,7 +172,7 @@ internal class PersonidentServiceTest {
     }
 
     @Test
-    fun `Test aktør id som som er peristert fra før men ikke personident`() {
+    fun `Test aktør id som som er persistert fra før men ikke personident`() {
         val personidentHistorisk = randomFnr()
 
         val personidentService = PersonidentService(personidentRepository, aktørIdRepository, personopplysningerService)
@@ -197,7 +197,7 @@ internal class PersonidentServiceTest {
     }
 
     @Test
-    fun `Test aktør id og personident som som er peristert fra før`() {
+    fun `Test aktør id og personident som som er persistert fra før`() {
         val personidentRepository: PersonidentRepository = mockk()
         val aktørIdRepository: AktørIdRepository = mockk()
 
