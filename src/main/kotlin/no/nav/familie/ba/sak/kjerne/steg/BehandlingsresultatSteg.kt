@@ -85,10 +85,10 @@ class BehandlingsresultatSteg(
 
         validerAtTilkjentYtelseHarGyldigEtterbetalingsperiode(tilkjentYtelse)
 
-        val andreBehandlingerPåBarna = personopplysningGrunnlag.barna.map {
+        val barnMedAndreRelevanteTilkjentYtelser = personopplysningGrunnlag.barna.map {
             Pair(
                 it,
-                beregningService.hentSentTilGodkjenningTilkjentYtelseForBarn(it.personIdent, behandling.fagsak.id)
+                beregningService.hentRelevanteTilkjentYtelserForBarn(it.personIdent, behandling.fagsak.id)
             )
         }
 
@@ -99,7 +99,7 @@ class BehandlingsresultatSteg(
 
         validerAtBarnIkkeFårFlereUtbetalingerSammePeriode(
             behandlendeBehandlingTilkjentYtelse = tilkjentYtelse,
-            barnMedAndreTilkjentYtelse = andreBehandlingerPåBarna,
+            barnMedAndreRelevanteTilkjentYtelser = barnMedAndreRelevanteTilkjentYtelser,
             personopplysningGrunnlag = personopplysningGrunnlag
         )
 
@@ -134,9 +134,9 @@ class BehandlingsresultatSteg(
 
         if (behandlingMedResultat.skalRettFraBehandlingsresultatTilIverksetting() ||
             beregningService.kanAutomatiskIverksetteSmåbarnstilleggEndring(
-                    behandling = behandlingMedResultat,
-                    sistIverksatteBehandling = behandlingService.hentForrigeBehandlingSomErIverksatt(behandling = behandlingMedResultat)
-                )
+                behandling = behandlingMedResultat,
+                sistIverksatteBehandling = behandlingService.hentForrigeBehandlingSomErIverksatt(behandling = behandlingMedResultat)
+            )
         ) {
             behandlingService.oppdaterStatusPåBehandling(
                 behandlingMedResultat.id,
