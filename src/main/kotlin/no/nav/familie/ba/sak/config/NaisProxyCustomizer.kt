@@ -7,6 +7,7 @@ import org.apache.http.client.HttpClient
 import org.apache.http.impl.client.HttpClientBuilder
 import org.apache.http.impl.conn.DefaultProxyRoutePlanner
 import org.apache.http.protocol.HttpContext
+import org.slf4j.LoggerFactory
 import org.springframework.boot.web.client.RestTemplateCustomizer
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory
 import org.springframework.web.client.RestTemplate
@@ -22,12 +23,20 @@ class NaisProxyCustomizer : RestTemplateCustomizer {
                     request: HttpRequest,
                     context: HttpContext
                 ): HttpHost? {
-                    return if (target.hostName.contains("microsoft")) {
+                    return if (target.hostName.contains("microsoft") ||
+                        target.hostName.contains("sanity")
+                    ) {
+                        logger.info("Proxier ${target.hostName} via ${proxy.hostName}")
                         super.determineProxy(target, request, context)
                     } else null
                 }
             })
             .build()
         restTemplate.requestFactory = HttpComponentsClientHttpRequestFactory(client)
+    }
+
+    companion object {
+
+        private val logger = LoggerFactory.getLogger(NaisProxyCustomizer::class.java)
     }
 }
