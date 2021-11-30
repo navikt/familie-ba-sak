@@ -7,7 +7,7 @@ import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVilkårResultat
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjonListConverter
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
@@ -70,21 +70,9 @@ class VilkårResultat(
     @Column(name = "er_eksplisitt_avslag_paa_soknad")
     var erEksplisittAvslagPåSøknad: Boolean? = null,
 
-    @Deprecated("Bruker utdypendeVilkårsvurderinger istede")
-    @Column(name = "er_skjonnsmessig_vurdert")
-    var erSkjønnsmessigVurdert: Boolean = false,
-
-    @Deprecated("Bruker utdypendeVilkårsvurderinger istede")
-    @Column(name = "er_medlemskap_vurdert")
-    var erMedlemskapVurdert: Boolean = false,
-
     @Column(name = "evaluering_aarsak")
     @Convert(converter = StringListConverter::class)
     val evalueringÅrsaker: List<String> = emptyList(),
-
-    @Deprecated("Bruker utdypendeVilkårsvurderinger istede")
-    @Column(name = "er_delt_bosted")
-    var erDeltBosted: Boolean = false,
 
     @Column(name = "regel_input", columnDefinition = "TEXT")
     var regelInput: String? = null,
@@ -130,25 +118,9 @@ class VilkårResultat(
         resultat = restVilkårResultat.resultat
         erAutomatiskVurdert = false
         erEksplisittAvslagPåSøknad = restVilkårResultat.erEksplisittAvslagPåSøknad
-        erSkjønnsmessigVurdert =
-            if (restVilkårResultat.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.VURDERING_ANNET_GRUNNLAG)) true
-            else restVilkårResultat.erSkjønnsmessigVurdert ?: false
-        erDeltBosted =
-            if (restVilkårResultat.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.DELT_BOSTED)) true
-            else restVilkårResultat.erDeltBosted ?: false
-        erMedlemskapVurdert =
-            if (restVilkårResultat.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP)) true
-            else restVilkårResultat.erMedlemskapVurdert ?: false
         oppdaterPekerTilBehandling()
         vurderesEtter = restVilkårResultat.vurderesEtter
-        utdypendeVilkårsvurderinger =
-            (
-                restVilkårResultat.utdypendeVilkårsvurderinger + listOfNotNull(
-                    if (restVilkårResultat.erSkjønnsmessigVurdert == true) UtdypendeVilkårsvurdering.VURDERING_ANNET_GRUNNLAG else null,
-                    if (restVilkårResultat.erMedlemskapVurdert == true) UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP else null,
-                    if (restVilkårResultat.erDeltBosted == true) UtdypendeVilkårsvurdering.DELT_BOSTED else null
-                )
-                ).distinct()
+        utdypendeVilkårsvurderinger = restVilkårResultat.utdypendeVilkårsvurderinger
     }
 
     fun kopierMedParent(nyPersonResultat: PersonResultat? = null): VilkårResultat {
@@ -164,9 +136,6 @@ class VilkårResultat(
             regelInput = regelInput,
             regelOutput = regelOutput,
             erEksplisittAvslagPåSøknad = erEksplisittAvslagPåSøknad,
-            erSkjønnsmessigVurdert = erSkjønnsmessigVurdert,
-            erMedlemskapVurdert = erMedlemskapVurdert,
-            erDeltBosted = erDeltBosted,
             vurderesEtter = vurderesEtter,
             utdypendeVilkårsvurderinger = utdypendeVilkårsvurderinger
         )
@@ -185,9 +154,6 @@ class VilkårResultat(
             regelOutput = regelOutput,
             behandlingId = behandlingId,
             erEksplisittAvslagPåSøknad = erEksplisittAvslagPåSøknad,
-            erSkjønnsmessigVurdert = erSkjønnsmessigVurdert,
-            erMedlemskapVurdert = erMedlemskapVurdert,
-            erDeltBosted = erDeltBosted,
             vurderesEtter = vurderesEtter,
             utdypendeVilkårsvurderinger = utdypendeVilkårsvurderinger
         )

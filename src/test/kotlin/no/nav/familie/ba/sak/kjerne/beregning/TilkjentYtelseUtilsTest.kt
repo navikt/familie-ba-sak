@@ -13,8 +13,8 @@ import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.sisteDagIForrigeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseUtils.oppdaterTilkjentYtelseMedEndretUtbetalingAndeler
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -22,6 +22,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Personopplysning
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
@@ -503,18 +504,22 @@ internal class TilkjentYtelseUtilsTest {
     ): Pair<Vilkårsvurdering, PersonopplysningGrunnlag> {
         val søkerFnr = randomFnr()
         val barnFnr = randomFnr()
+        val søkerAktørId = randomAktørId()
+        val barnAktørId = randomAktørId()
 
         val behandling = lagBehandling()
 
         val vilkårsvurdering = lagVilkårsvurdering(
             søkerFnr = søkerFnr,
+            søkerAktør = søkerAktørId,
             behandling = behandling,
             resultat = Resultat.OPPFYLT,
             søkerPeriodeFom = LocalDate.of(2014, 1, 1),
             søkerPeriodeTom = null
         )
 
-        val barnResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = barnFnr)
+        val barnResultat =
+            PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = barnFnr, aktør = barnAktørId)
         barnResultat.setSortedVilkårResultater(
             setOf(
                 VilkårResultat(
@@ -560,8 +565,10 @@ internal class TilkjentYtelseUtilsTest {
                     periodeFom = barnFødselsdato,
                     periodeTom = null,
                     begrunnelse = "",
-                    erDeltBosted = erDeltBosted,
-                    behandlingId = behandling.id
+                    behandlingId = behandling.id,
+                    utdypendeVilkårsvurderinger = listOfNotNull(
+                        if (erDeltBosted) UtdypendeVilkårsvurdering.DELT_BOSTED else null
+                    )
                 )
             )
         )
@@ -570,7 +577,7 @@ internal class TilkjentYtelseUtilsTest {
 
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandling.id)
         val barn = Person(
-            aktørId = randomAktørId(),
+            aktør = randomAktørId(),
             personIdent = PersonIdent(barnFnr),
             type = PersonType.BARN,
             personopplysningGrunnlag = personopplysningGrunnlag,
@@ -580,7 +587,7 @@ internal class TilkjentYtelseUtilsTest {
         )
             .apply { sivilstander = listOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this)) }
         val søker = Person(
-            aktørId = randomAktørId(),
+            aktør = randomAktørId(),
             personIdent = PersonIdent(søkerFnr),
             type = PersonType.SØKER,
             personopplysningGrunnlag = personopplysningGrunnlag,

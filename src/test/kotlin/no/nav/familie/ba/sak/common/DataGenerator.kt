@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.SøkerMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPerson
 import no.nav.familie.ba.sak.integrasjoner.økonomi.sats
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
@@ -37,7 +38,6 @@ import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakPerson
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Medlemskap
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
@@ -46,10 +46,11 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrMatrikkeladresse
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.AktørId
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.personident.Personident
 import no.nav.familie.ba.sak.kjerne.steg.FØRSTE_STEG
 import no.nav.familie.ba.sak.kjerne.steg.JournalførVedtaksbrevDTO
 import no.nav.familie.ba.sak.kjerne.steg.StatusFraOppdragMedTask
@@ -97,7 +98,7 @@ import kotlin.random.Random
 val fødselsnummerGenerator = FoedselsnummerGenerator()
 
 fun randomFnr(): String = fødselsnummerGenerator.foedselsnummer().asString
-fun randomAktørId(): AktørId = AktørId(Random.nextLong(1000_000_000_000, 31_121_299_99999).toString())
+fun randomAktørId(): Aktør = Aktør(Random.nextLong(1000_000_000_000, 31_121_299_99999).toString())
 
 private var gjeldendeVedtakId: Long = abs(Random.nextLong(10000000))
 private var gjeldendeVedtakBegrunnelseId: Long = abs(Random.nextLong(10000000))
@@ -131,7 +132,9 @@ fun nesteUtvidetVedtaksperiodeId(): Long {
     return gjeldendeUtvidetVedtaksperiodeId
 }
 
-fun defaultFagsak() = Fagsak(1).also {
+fun defaultFagsak() = Fagsak(
+    1, aktør = Aktør("2")
+).also {
     it.søkerIdenter =
         setOf(
             FagsakPerson(
@@ -170,7 +173,7 @@ fun tilfeldigPerson(
 ) =
     Person(
         id = nestePersonId(),
-        aktørId = randomAktørId(),
+        aktør = randomAktørId(),
         personIdent = personIdent,
         fødselsdato = fødselsdato,
         type = personType,
@@ -188,7 +191,7 @@ fun tilfeldigSøker(
 ) =
     Person(
         id = nestePersonId(),
-        aktørId = randomAktørId(),
+        aktør = randomAktørId(),
         personIdent = personIdent,
         fødselsdato = fødselsdato,
         type = personType,
@@ -212,6 +215,7 @@ fun lagAndelTilkjentYtelse(
     beløp: Int = sats(ytelseType),
     behandling: Behandling = lagBehandling(),
     person: Person = tilfeldigPerson(),
+    aktør: Aktør = Aktør(person.personIdent.ident),
     periodeIdOffset: Long? = null,
     forrigeperiodeIdOffset: Long? = null,
     tilkjentYtelse: TilkjentYtelse? = null,
@@ -221,6 +225,7 @@ fun lagAndelTilkjentYtelse(
 
     return AndelTilkjentYtelse(
         personIdent = person.personIdent.ident,
+        aktør = aktør,
         behandlingId = behandling.id,
         tilkjentYtelse = tilkjentYtelse ?: lagInitiellTilkjentYtelse(behandling),
         kalkulertUtbetalingsbeløp = beløp,
@@ -249,6 +254,7 @@ fun lagAndelTilkjentYtelseUtvidet(
 
     return AndelTilkjentYtelse(
         personIdent = person.personIdent.ident,
+        aktør = person.aktør,
         behandlingId = behandling.id,
         tilkjentYtelse = tilkjentYtelse ?: lagInitiellTilkjentYtelse(behandling),
         kalkulertUtbetalingsbeløp = beløp,
@@ -283,7 +289,25 @@ fun lagTestPersonopplysningGrunnlag(
     behandlingId: Long,
     søkerPersonIdent: String,
     barnasIdenter: List<String>,
-    barnFødselsdato: LocalDate = LocalDate.of(2019, 1, 1)
+    barnFødselsdato: LocalDate = LocalDate.of(2019, 1, 1),
+    søkerAktør: Aktør = randomAktørId().also {
+        it.personidenter.add(
+            Personident(
+                fødselsnummer = søkerPersonIdent,
+                aktør = it
+            )
+        )
+    },
+    barnAktør: List<Aktør> = barnasIdenter.map { fødselsnummer ->
+        randomAktørId().also {
+            it.personidenter.add(
+                Personident(
+                    fødselsnummer = fødselsnummer,
+                    aktør = it
+                )
+            )
+        }
+    },
 ): PersonopplysningGrunnlag {
     val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandlingId)
     val bostedsadresse = GrMatrikkeladresse(
@@ -292,8 +316,8 @@ fun lagTestPersonopplysningGrunnlag(
     )
 
     val søker = Person(
-        aktørId = randomAktørId(),
         personIdent = PersonIdent(søkerPersonIdent),
+        aktør = søkerAktør,
         type = PersonType.SØKER,
         personopplysningGrunnlag = personopplysningGrunnlag,
         fødselsdato = LocalDate.of(2019, 1, 1),
@@ -315,8 +339,11 @@ fun lagTestPersonopplysningGrunnlag(
     barnasIdenter.map {
         personopplysningGrunnlag.personer.add(
             Person(
-                aktørId = randomAktørId(),
                 personIdent = PersonIdent(it),
+                aktør = barnAktør.first { aktørId ->
+                    aktørId.personidenter.map { personident -> personident.fødselsnummer }
+                        .any { fødselsnummer -> fødselsnummer == it }
+                },
                 type = PersonType.BARN,
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 fødselsdato = barnFødselsdato,
@@ -381,6 +408,9 @@ fun lagPersonResultaterForSøkerOgToBarn(
     søkerFnr: String,
     barn1Fnr: String,
     barn2Fnr: String,
+    søkerAktør: Aktør,
+    barn1Aktør: Aktør,
+    barn2Aktør: Aktør,
     stønadFom: LocalDate,
     stønadTom: LocalDate,
     erDeltBosted: Boolean = false
@@ -389,6 +419,7 @@ fun lagPersonResultaterForSøkerOgToBarn(
         lagPersonResultat(
             vilkårsvurdering = vilkårsvurdering,
             fnr = søkerFnr,
+            aktør = søkerAktør,
             resultat = Resultat.OPPFYLT,
             periodeFom = stønadFom,
             periodeTom = stønadTom,
@@ -398,6 +429,7 @@ fun lagPersonResultaterForSøkerOgToBarn(
         lagPersonResultat(
             vilkårsvurdering = vilkårsvurdering,
             fnr = barn1Fnr,
+            aktør = barn1Aktør,
             resultat = Resultat.OPPFYLT,
             periodeFom = stønadFom,
             periodeTom = stønadTom,
@@ -408,6 +440,7 @@ fun lagPersonResultaterForSøkerOgToBarn(
         lagPersonResultat(
             vilkårsvurdering = vilkårsvurdering,
             fnr = barn2Fnr,
+            aktør = barn2Aktør,
             resultat = Resultat.OPPFYLT,
             periodeFom = stønadFom,
             periodeTom = stønadTom,
@@ -421,6 +454,7 @@ fun lagPersonResultaterForSøkerOgToBarn(
 fun lagPersonResultat(
     vilkårsvurdering: Vilkårsvurdering,
     fnr: String,
+    aktør: Aktør,
     resultat: Resultat,
     periodeFom: LocalDate?,
     periodeTom: LocalDate?,
@@ -431,7 +465,8 @@ fun lagPersonResultat(
 ): PersonResultat {
     val personResultat = PersonResultat(
         vilkårsvurdering = vilkårsvurdering,
-        personIdent = fnr
+        personIdent = fnr,
+        aktør = aktør
     )
 
     if (lagFullstendigVilkårResultat) {
@@ -445,7 +480,9 @@ fun lagPersonResultat(
                     resultat = resultat,
                     begrunnelse = "",
                     behandlingId = vilkårsvurdering.behandling.id,
-                    erDeltBosted = erDeltBosted && it == Vilkår.BOR_MED_SØKER
+                    utdypendeVilkårsvurderinger = listOfNotNull(
+                        if (erDeltBosted && it == Vilkår.BOR_MED_SØKER) UtdypendeVilkårsvurdering.DELT_BOSTED else null
+                    )
                 )
             }.toSet()
         )
@@ -484,6 +521,7 @@ fun vurderVilkårsvurderingTilInnvilget(vilkårsvurdering: Vilkårsvurdering, ba
 
 fun lagVilkårsvurdering(
     søkerFnr: String,
+    søkerAktør: Aktør,
     behandling: Behandling,
     resultat: Resultat,
     søkerPeriodeFom: LocalDate? = LocalDate.now().minusMonths(1),
@@ -494,7 +532,8 @@ fun lagVilkårsvurdering(
     )
     val personResultat = PersonResultat(
         vilkårsvurdering = vilkårsvurdering,
-        personIdent = søkerFnr
+        personIdent = søkerFnr,
+        aktør = søkerAktør
     )
     personResultat.setSortedVilkårResultater(
         setOf(
@@ -893,10 +932,9 @@ fun lagVilkårResultat(
     vilkårType: Vilkår = Vilkår.BOSATT_I_RIKET,
     resultat: Resultat = Resultat.OPPFYLT,
     periodeFom: LocalDate = LocalDate.of(2009, 12, 24),
-    periodeTom: LocalDate = LocalDate.of(2010, 1, 31),
+    periodeTom: LocalDate? = LocalDate.of(2010, 1, 31),
     begrunnelse: String = "",
     behandlingId: Long = lagBehandling().id,
-    erMedlemskapVurdert: Boolean = false,
     utdypendeVilkårsvurderinger: List<UtdypendeVilkårsvurdering> = emptyList()
 ) = VilkårResultat(
     personResultat = personResultat,
@@ -906,10 +944,7 @@ fun lagVilkårResultat(
     periodeTom = periodeTom,
     begrunnelse = begrunnelse,
     behandlingId = behandlingId,
-    erMedlemskapVurdert = erMedlemskapVurdert,
-    utdypendeVilkårsvurderinger = (
-        utdypendeVilkårsvurderinger + listOfNotNull(if (erMedlemskapVurdert) UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP else null)
-        ).distinct()
+    utdypendeVilkårsvurderinger = utdypendeVilkårsvurderinger
 )
 
 val guttenBarnesenFødselsdato = LocalDate.now().withDayOfMonth(10).minusYears(6)
@@ -943,14 +978,14 @@ fun lagEndretUtbetalingAndel(
     )
 
 fun lagPerson(
-    aktørId: AktørId = randomAktørId(),
+    aktør: Aktør = randomAktørId(),
     personIdent: PersonIdent = PersonIdent(randomFnr()),
     type: PersonType = PersonType.SØKER,
     personopplysningGrunnlag: PersonopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 0),
     fødselsdato: LocalDate = LocalDate.now().minusYears(19),
     kjønn: Kjønn = Kjønn.KVINNE
 ) = Person(
-    aktørId = aktørId,
+    aktør = aktør,
     personIdent = personIdent,
     type = type,
     personopplysningGrunnlag = personopplysningGrunnlag,

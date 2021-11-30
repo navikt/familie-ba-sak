@@ -21,9 +21,10 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSiv
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.StatsborgerskapService
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
+import no.nav.familie.ba.sak.kjerne.personident.PersonidentRepository
+import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
-import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -34,8 +35,10 @@ class PersongrunnlagService(
     private val statsborgerskapService: StatsborgerskapService,
     private val arbeidsfordelingService: ArbeidsfordelingService,
     private val personopplysningerService: PersonopplysningerService,
+    private val personidentService: PersonidentService,
     private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
     private val behandlingRepository: BehandlingRepository,
+    private val personidentRepository: PersonidentRepository,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val loggService: LoggService,
 ) {
@@ -224,14 +227,15 @@ class PersongrunnlagService(
         val personinfo =
             if (enkelPersonInfo) personopplysningerService.hentPersoninfoEnkel(ident)
             else personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(ident)
-        val aktørId = personopplysningerService.hentAktivAktørId(Ident(ident))
+
+        val aktørId = personidentService.hentOgLagreAktørId(ident)
 
         return Person(
             personIdent = PersonIdent(ident),
             type = personType,
             personopplysningGrunnlag = personopplysningGrunnlag,
             fødselsdato = personinfo.fødselsdato,
-            aktørId = aktørId,
+            aktør = aktørId,
             navn = personinfo.navn ?: "",
             kjønn = personinfo.kjønn ?: Kjønn.UKJENT,
             målform = målform

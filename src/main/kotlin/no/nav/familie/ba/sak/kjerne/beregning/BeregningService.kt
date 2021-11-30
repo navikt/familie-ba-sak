@@ -100,7 +100,9 @@ class BeregningService(
     ): TilkjentYtelse {
 
         val endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(behandling.id).filter {
-            if (nyEndretUtbetalingAndel != null) {
+            // Ved automatiske behandlinger ønsker vi alltid å ta vare på de gamle endrede andelene
+            if (behandling.skalBehandlesAutomatisk) true
+            else if (nyEndretUtbetalingAndel != null) {
                 it.id == nyEndretUtbetalingAndel.id || it.andelTilkjentYtelser.isNotEmpty()
             } else {
                 it.andelTilkjentYtelser.isNotEmpty()
@@ -116,9 +118,10 @@ class BeregningService(
                 vilkårsvurdering = vilkårsvurdering,
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 behandling = behandling
-            ) {
+            ) { personIdent, aktørId ->
                 småbarnstilleggService.hentOgLagrePerioderMedFullOvergangsstønad(
-                    personIdent = it,
+                    personIdent = personIdent,
+                    aktør = aktørId,
                     behandlingId = behandling.id
                 )
             }

@@ -9,9 +9,9 @@ import no.nav.familie.ba.sak.common.lagUtbetalingsperiodeDetalj
 import no.nav.familie.ba.sak.common.lagUtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.tilfeldigPerson
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
@@ -33,8 +33,9 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
         type = Vedtaksperiodetype.UTBETALING,
         utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj()),
     )
-    private val vilkårsvurdering = lagVilkårsvurdering(søker.personIdent.ident, lagBehandling(), Resultat.OPPFYLT)
-    private val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søker, barn)
+    private val vilkårsvurdering =
+        lagVilkårsvurdering(søker.personIdent.ident, søker.hentAktørId(), lagBehandling(), Resultat.OPPFYLT)
+    val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søker, barn)
 
     private val identerMedUtbetaling = listOf(søker.personIdent.ident, barn.personIdent.ident)
 

@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.ekstern.restDomene
 
 import no.nav.familie.ba.sak.common.sisteDagIMåned
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
@@ -29,9 +29,6 @@ data class RestVilkårResultat(
     val erVurdert: Boolean = false,
     val erAutomatiskVurdert: Boolean = false,
     val erEksplisittAvslagPåSøknad: Boolean? = null,
-    val erSkjønnsmessigVurdert: Boolean? = false,
-    val erMedlemskapVurdert: Boolean? = false,
-    val erDeltBosted: Boolean? = false,
     val avslagBegrunnelser: List<VedtakBegrunnelseSpesifikasjon>? = emptyList(),
     val vurderesEtter: Regelverk? = null,
     val utdypendeVilkårsvurderinger: List<UtdypendeVilkårsvurdering> = emptyList()
@@ -51,11 +48,6 @@ fun PersonResultat.tilRestPersonResultat() =
                 resultat = vilkårResultat.resultat,
                 erAutomatiskVurdert = vilkårResultat.erAutomatiskVurdert,
                 erEksplisittAvslagPåSøknad = vilkårResultat.erEksplisittAvslagPåSøknad,
-                erSkjønnsmessigVurdert = vilkårResultat.utdypendeVilkårsvurderinger.contains(
-                    UtdypendeVilkårsvurdering.VURDERING_ANNET_GRUNNLAG
-                ),
-                erMedlemskapVurdert = vilkårResultat.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP),
-                erDeltBosted = vilkårResultat.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.DELT_BOSTED),
                 id = vilkårResultat.id,
                 vilkårType = vilkårResultat.vilkårType,
                 periodeFom = vilkårResultat.periodeFom,

@@ -2,9 +2,12 @@ package no.nav.familie.ba.sak.kjerne.vedtak
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.Periode
+import no.nav.familie.ba.sak.common.overlapperHeltEllerDelvisMed
 import no.nav.familie.ba.sak.common.sisteDagIMåned
+import no.nav.familie.ba.sak.common.toPeriode
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
@@ -31,6 +34,7 @@ object VedtakUtils {
         oppdatertBegrunnelseType: VedtakBegrunnelseType,
         aktuellePersonerForVedtaksperiode: List<Person>,
         triggesAv: TriggesAv,
+        andelerTilkjentYtelse: List<AndelTilkjentYtelse>
     ): Set<Person> {
         return triggesAv.vilkår.fold(mutableSetOf()) { acc, vilkår ->
             acc.addAll(
@@ -40,7 +44,8 @@ object VedtakUtils {
                     oppdatertBegrunnelseType = oppdatertBegrunnelseType,
                     utgjørendeVilkår = vilkår,
                     aktuellePersonerForVedtaksperiode = aktuellePersonerForVedtaksperiode,
-                    triggesAv = triggesAv
+                    triggesAv = triggesAv,
+                    andelerTilkjentYtelse = andelerTilkjentYtelse,
                 )
             )
 
@@ -54,7 +59,8 @@ object VedtakUtils {
         oppdatertBegrunnelseType: VedtakBegrunnelseType,
         utgjørendeVilkår: Vilkår?,
         aktuellePersonerForVedtaksperiode: List<Person>,
-        triggesAv: TriggesAv
+        triggesAv: TriggesAv,
+        andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
     ): List<Person> {
 
         return vilkårsvurdering.personResultater
@@ -75,6 +81,14 @@ object VedtakUtils {
                                 .toYearMonth() &&
                                 vilkårResultat.resultat == Resultat.OPPFYLT
                         }
+
+                        oppdatertBegrunnelseType == VedtakBegrunnelseType.OPPHØR && triggesAv.gjelderFørstePeriode
+                        -> erFørstePeriodeOgVilkårIkkeOppfylt(
+                            andelerTilkjentYtelse = andelerTilkjentYtelse,
+                            vedtaksperiode = vedtaksperiode,
+                            triggesAv = triggesAv,
+                            vilkårResultat = vilkårResultat
+                        )
 
                         oppdatertBegrunnelseType == VedtakBegrunnelseType.REDUKSJON ||
                             oppdatertBegrunnelseType == VedtakBegrunnelseType.OPPHØR -> {
@@ -97,26 +111,47 @@ object VedtakUtils {
                 acc
             }
     }
+}
 
-    private fun triggereErOppfylt(
-        triggesAv: TriggesAv,
-        vilkårResultat: VilkårResultat
-    ): Boolean {
+fun erFørstePeriodeOgVilkårIkkeOppfylt(
+    andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
+    vedtaksperiode: Periode,
+    triggesAv: TriggesAv,
+    vilkårResultat: VilkårResultat
+): Boolean {
+    val vilkårIkkeOppfyltForPeriode =
+        vilkårResultat.resultat == Resultat.IKKE_OPPFYLT &&
+            vilkårResultat.toPeriode().overlapperHeltEllerDelvisMed(vedtaksperiode)
 
-        val erDeltBostedOppfylt =
-            if (triggesAv.deltbosted) vilkårResultat.utdypendeVilkårsvurderinger.contains(
+    val vilkårOppfyltRettEtterPeriode =
+        vilkårResultat.resultat == Resultat.OPPFYLT &&
+            vedtaksperiode.tom.toYearMonth() == vilkårResultat.periodeFom!!.toYearMonth()
+
+    return !andelerTilkjentYtelse.any { it.stønadFom.isBefore(vedtaksperiode.fom.toYearMonth()) } &&
+        triggereErOppfylt(triggesAv, vilkårResultat) &&
+        (vilkårIkkeOppfyltForPeriode || vilkårOppfyltRettEtterPeriode)
+}
+
+private fun triggereErOppfylt(
+    triggesAv: TriggesAv,
+    vilkårResultat: VilkårResultat
+): Boolean {
+
+    val erDeltBostedOppfylt =
+        triggesAv.deltbosted &&
+            vilkårResultat.utdypendeVilkårsvurderinger.contains(
                 UtdypendeVilkårsvurdering.DELT_BOSTED
-            ) else true
+            ) || !triggesAv.deltbosted
 
-        val erSkjønnsmessigVurderingOppfylt =
-            if (triggesAv.vurderingAnnetGrunnlag) vilkårResultat.utdypendeVilkårsvurderinger.contains(
+    val erSkjønnsmessigVurderingOppfylt =
+        triggesAv.vurderingAnnetGrunnlag &&
+            vilkårResultat.utdypendeVilkårsvurderinger.contains(
                 UtdypendeVilkårsvurdering.VURDERING_ANNET_GRUNNLAG
-            ) else true
+            ) || !triggesAv.vurderingAnnetGrunnlag
 
-        val erMedlemskapOppfylt = vilkårResultat.utdypendeVilkårsvurderinger.contains(
-            UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP
-        ) == triggesAv.medlemskap
+    val erMedlemskapOppfylt =
+        triggesAv.medlemskap ==
+            vilkårResultat.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP)
 
-        return erDeltBostedOppfylt && erSkjønnsmessigVurderingOppfylt && erMedlemskapOppfylt
-    }
+    return erDeltBostedOppfylt && erSkjønnsmessigVurderingOppfylt && erMedlemskapOppfylt
 }

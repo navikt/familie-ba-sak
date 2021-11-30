@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.småbarnstillegg.PeriodeOvergangsstønadGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.småbarnstillegg.tilPeriodeOvergangsstønadGrunnlag
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad
 import org.springframework.stereotype.Service
 
@@ -22,11 +23,12 @@ class SmåbarnstilleggService(
     private val featureToggleService: FeatureToggleService,
     private val behandlingService: BehandlingService,
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
-    private val persongrunnlagService: PersongrunnlagService
+    private val persongrunnlagService: PersongrunnlagService,
 ) {
 
     fun hentOgLagrePerioderMedFullOvergangsstønad(
         personIdent: String,
+        aktør: Aktør,
         behandlingId: Long
     ): List<InternPeriodeOvergangsstønad> {
         return if (featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_SMÅBARNSTILLEGG)) {
@@ -36,7 +38,7 @@ class SmåbarnstilleggService(
             periodeOvergangsstønadGrunnlagRepository.saveAll(
                 periodeOvergangsstønad.map {
                     it.tilPeriodeOvergangsstønadGrunnlag(
-                        behandlingId
+                        behandlingId, aktør
                     )
                 }
             )
@@ -52,10 +54,6 @@ class SmåbarnstilleggService(
         val tilkjentYtelseFraSistIverksatteBehandling =
             tilkjentYtelseRepository.findByBehandling(behandlingId = sistIverksatteBehandling.id)
 
-        val forrigeSøkersAndeler =
-            tilkjentYtelseFraSistIverksatteBehandling.andelerTilkjentYtelse.filter { it.erSøkersAndel() }
-                .toList()
-
         val persongrunnlagFraSistIverksatteBehandling =
             persongrunnlagService.hentAktiv(behandlingId = sistIverksatteBehandling.id)
                 ?: error("Finner ikke persongrunnlag")
@@ -69,8 +67,13 @@ class SmåbarnstilleggService(
                 tilkjentYtelse = tilkjentYtelseFraSistIverksatteBehandling
             ),
             nyePerioderMedFullOvergangsstønad = nyePerioderMedFullOvergangsstønad,
-            forrigeSøkersAndeler = forrigeSøkersAndeler,
-            barnasFødselsdatoer = persongrunnlagFraSistIverksatteBehandling.barna.map { it.fødselsdato },
+            forrigeAndelerTilkjentYtelse = tilkjentYtelseFraSistIverksatteBehandling.andelerTilkjentYtelse.toList(),
+            barnasIdenterOgFødselsdatoer = persongrunnlagFraSistIverksatteBehandling.barna.map {
+                Pair(
+                    it.personIdent.ident,
+                    it.fødselsdato
+                )
+            },
         )
     }
 

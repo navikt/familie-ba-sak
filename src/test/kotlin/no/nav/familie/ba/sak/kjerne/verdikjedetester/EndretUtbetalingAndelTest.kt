@@ -5,21 +5,24 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenario
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenarioPerson
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.test.annotation.DirtiesContext
 import java.math.BigDecimal
 import java.time.LocalDate
 
+@DirtiesContext
 class EndretUtbetalingAndelTest(
     @Autowired private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     @Autowired private val behandlingService: BehandlingService,
@@ -32,8 +35,8 @@ class EndretUtbetalingAndelTest(
         val andelerTilkjentYtelse =
             andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = restUtvidetBehandling.data!!.behandlingId)
 
-        val endretFom = andelerTilkjentYtelse.last().stønadFom
-        val endretTom = andelerTilkjentYtelse.last().stønadTom.minusMonths(2)
+        val endretFom = andelerTilkjentYtelse.minOf { it.stønadFom }
+        val endretTom = andelerTilkjentYtelse.minOf { it.stønadTom }.minusMonths(2)
 
         val restEndretUtbetalingAndel = RestEndretUtbetalingAndel(
             id = null,
@@ -68,16 +71,16 @@ class EndretUtbetalingAndelTest(
             endretTom
         )
 
-        val førsteUtbetalingAndeleTilkjentYtelse =
-            andelerTilkjentYtelseMedEndretPeriode.last { it.kalkulertUtbetalingsbeløp != 0 }
+        val utbetalingAndeleTilkjentYtelse =
+            andelerTilkjentYtelseMedEndretPeriode.filter { it.kalkulertUtbetalingsbeløp != 0 }
 
         Assertions.assertEquals(
-            førsteUtbetalingAndeleTilkjentYtelse.stønadFom,
+            utbetalingAndeleTilkjentYtelse.minOf { it.stønadFom },
             endretTom.plusMonths(1)
         )
 
         Assertions.assertEquals(
-            førsteUtbetalingAndeleTilkjentYtelse.stønadTom,
+            utbetalingAndeleTilkjentYtelse.minOf { it.stønadTom },
             endretTom.plusMonths(2)
         )
     }
@@ -89,8 +92,8 @@ class EndretUtbetalingAndelTest(
         val andelerTilkjentYtelse =
             andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = restUtvidetBehandling.data!!.behandlingId)
 
-        val endretFom = andelerTilkjentYtelse.last().stønadFom
-        val endretTom = andelerTilkjentYtelse.last().stønadTom.minusMonths(2)
+        val endretFom = andelerTilkjentYtelse.minOf { it.stønadFom }
+        val endretTom = andelerTilkjentYtelse.minOf { it.stønadTom }.minusMonths(2)
 
         val restEndretUtbetalingAndel = RestEndretUtbetalingAndel(
             id = null,
@@ -122,13 +125,13 @@ class EndretUtbetalingAndelTest(
             andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = restUtvidetBehandling.data!!.behandlingId)
 
         Assertions.assertEquals(
-            andelerTilkjentYtelseEtterFjeringAvEndretUtbetaling.last().stønadFom,
-            endretFom
+            endretFom,
+            andelerTilkjentYtelseEtterFjeringAvEndretUtbetaling.minOf { it.stønadFom }
         )
 
         Assertions.assertEquals(
-            andelerTilkjentYtelseEtterFjeringAvEndretUtbetaling.last().stønadTom,
-            endretTom.plusMonths(2)
+            endretTom.plusMonths(2),
+            andelerTilkjentYtelseEtterFjeringAvEndretUtbetaling.minOf { it.stønadTom },
         )
     }
 
@@ -185,7 +188,9 @@ class EndretUtbetalingAndelTest(
                             it.copy(
                                 resultat = Resultat.OPPFYLT,
                                 periodeFom = barnFødselsdato,
-                                erDeltBosted = it.vilkårType == Vilkår.BOR_MED_SØKER
+                                utdypendeVilkårsvurderinger = listOfNotNull(
+                                    if (it.vilkårType == Vilkår.BOR_MED_SØKER) UtdypendeVilkårsvurdering.DELT_BOSTED else null
+                                )
                             )
                         )
                     )

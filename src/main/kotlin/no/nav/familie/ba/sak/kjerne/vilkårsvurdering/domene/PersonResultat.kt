@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.isSameOrBefore
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat.Companion.VilkårResultatComparator
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.time.LocalDate
@@ -20,6 +21,7 @@ import javax.persistence.Id
 import javax.persistence.JoinColumn
 import javax.persistence.ManyToOne
 import javax.persistence.OneToMany
+import javax.persistence.OneToOne
 import javax.persistence.SequenceGenerator
 import javax.persistence.Table
 
@@ -43,8 +45,8 @@ class PersonResultat(
     @Column(name = "person_ident", nullable = false, updatable = false)
     val personIdent: String,
 
-    @Column(name = "aktoer_id")
-    var aktørId: String? = null,
+    @OneToOne(optional = false) @JoinColumn(name = "fk_aktoer_id", nullable = false, updatable = false)
+    val aktør: Aktør,
 
     @OneToMany(
         fetch = FetchType.EAGER,
@@ -113,7 +115,7 @@ class PersonResultat(
         val nyttPersonResultat = PersonResultat(
             vilkårsvurdering = vilkårsvurdering,
             personIdent = personIdent,
-            aktørId = aktørId
+            aktør = aktør
         )
         val kopierteVilkårResultater: SortedSet<VilkårResultat> =
             vilkårResultater.map { it.kopierMedParent(nyttPersonResultat) }.toSortedSet(VilkårResultatComparator)
@@ -136,7 +138,7 @@ class PersonResultat(
             .filter {
                 (it.periodeFom == null || it.periodeFom!!.isSameOrBefore(segmentFom)) &&
                     (it.periodeTom == null || it.periodeTom!!.isSameOrAfter(segmentFom))
-            }.any { it.erDeltBosted }
+            }.any { it.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.DELT_BOSTED) }
 
     fun harEksplisittAvslag() = vilkårResultater.any { it.erEksplisittAvslagPåSøknad == true }
 }

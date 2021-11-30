@@ -16,8 +16,8 @@ jobs:
         uses: styfle/cancel-workflow-action@0.9.1
         with:
           access_token: ${{ github.token }}
-  sonarcloud:
-    name: Sonarcloud og ktlint
+  ktlint:
+    name: Ktlint
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -30,17 +30,14 @@ jobs:
           java-version: 11
           distribution: 'temurin'
           cache: 'maven'
-      - name: Kjør ktlint og sonar
+      - name: Kjør ktlint
         env:
-          SONAR_PROJECTKEY: ${{ secrets.SONAR_PROJECTKEY }}
-          SONAR_LOGIN: ${{ secrets.SONAR_LOGIN }}
           GITHUB_USERNAME: x-access-token
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           mvn antrun:run@ktlint
-          mvn sonar:sonar
-  enhetstester-og-integrasjonstester:
-    name: Enhetstester og integrasjonstester
+  enhetstester-integrasjonstester-og-sonar:
+    name: Enhetstester, integrasjonstester og sonar
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -51,12 +48,14 @@ jobs:
           java-version: 11
           distribution: 'temurin'
           cache: 'maven'
-      - name: Kjør enhetstester og integrasjonstester
+      - name: Kjør enhetstester, integrasjonstester og sonar
         env:
+          SONAR_PROJECTKEY: ${{ secrets.SONAR_PROJECTKEY }}
+          SONAR_LOGIN: ${{ secrets.SONAR_LOGIN }}
           GITHUB_USERNAME: x-access-token
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          mvn -B --no-transfer-progress verify --settings .m2/maven-settings.xml --file pom.xml -Dtest="!no/nav/familie/ba/sak/kjerne/verdikjedetester/**"
+          mvn -B --no-transfer-progress verify sonar:sonar --settings .m2/maven-settings.xml --file pom.xml -Dtest="!no/nav/familie/ba/sak/kjerne/verdikjedetester/**"
   verdikjedetester:
     name: Verdikjedetester
     runs-on: ubuntu-latest

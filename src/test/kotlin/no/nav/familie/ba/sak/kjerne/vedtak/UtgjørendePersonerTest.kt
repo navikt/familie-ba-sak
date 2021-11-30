@@ -5,12 +5,14 @@ import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.lagVilkårResultat
+import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
@@ -26,6 +28,10 @@ class UtgjørendePersonerTest {
         val barn1Fnr = randomFnr()
         val barn2Fnr = randomFnr()
 
+        val søkerAktørId = randomAktørId()
+        val barn1AktørId = randomAktørId()
+        val barn2AktørId = randomAktørId()
+
         val behandling = lagBehandling()
         val personopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(behandling.id, søkerFnr, listOf(barn1Fnr, barn2Fnr))
@@ -34,7 +40,8 @@ class UtgjørendePersonerTest {
             behandling = behandling
         )
 
-        val søkerPersonResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = søkerFnr)
+        val søkerPersonResultat =
+            PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = søkerFnr, aktør = søkerAktørId)
         søkerPersonResultat.setSortedVilkårResultater(
             setOf(
                 VilkårResultat(
@@ -58,7 +65,8 @@ class UtgjørendePersonerTest {
             )
         )
 
-        val barn1PersonResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = barn1Fnr)
+        val barn1PersonResultat =
+            PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = barn1Fnr, aktør = barn1AktørId)
 
         barn1PersonResultat.setSortedVilkårResultater(
             setOf(
@@ -92,7 +100,8 @@ class UtgjørendePersonerTest {
             )
         )
 
-        val barn2PersonResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = barn1Fnr)
+        val barn2PersonResultat =
+            PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = barn1Fnr, aktør = barn1AktørId)
 
         barn2PersonResultat.setSortedVilkårResultater(
             setOf(
@@ -128,6 +137,7 @@ class UtgjørendePersonerTest {
             oppdatertBegrunnelseType = VedtakBegrunnelseType.INNVILGET,
             triggesAv = TriggesAv(setOf(Vilkår.LOVLIG_OPPHOLD)),
             aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList(),
+            andelerTilkjentYtelse = emptyList()
         )
 
         assertEquals(2, personerMedUtgjørendeVilkårLovligOpphold.size)
@@ -144,7 +154,8 @@ class UtgjørendePersonerTest {
             ),
             oppdatertBegrunnelseType = VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET.vedtakBegrunnelseType,
             triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOSATT_I_RIKET)),
-            aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList()
+            aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList(),
+            andelerTilkjentYtelse = emptyList()
         )
 
         assertEquals(1, personerMedUtgjørendeVilkårBosattIRiket.size)
@@ -156,6 +167,10 @@ class UtgjørendePersonerTest {
         val søkerFnr = randomFnr()
         val barnFnr = randomFnr()
         val barn2Fnr = randomFnr()
+
+        val søkerAktørId = randomAktørId()
+        val barnAktørId = randomAktørId()
+        val barn2AktørId = randomAktørId()
 
         val behandling = lagBehandling()
         val personopplysningGrunnlag =
@@ -170,7 +185,8 @@ class UtgjørendePersonerTest {
             behandling = behandling
         )
 
-        val barnPersonResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = barnFnr)
+        val barnPersonResultat =
+            PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = barnFnr, aktør = barnAktørId)
 
         barnPersonResultat.setSortedVilkårResultater(
             setOf(
@@ -186,7 +202,8 @@ class UtgjørendePersonerTest {
             )
         )
 
-        val barn2PersonResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = barn2Fnr)
+        val barn2PersonResultat =
+            PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = barn2Fnr, aktør = barn2AktørId)
 
         barn2PersonResultat.setSortedVilkårResultater(
             setOf(
@@ -212,7 +229,8 @@ class UtgjørendePersonerTest {
             ),
             oppdatertBegrunnelseType = VedtakBegrunnelseSpesifikasjon.REDUKSJON_BOSATT_I_RIKTET.vedtakBegrunnelseType,
             triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOSATT_I_RIKET)),
-            aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList()
+            aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList(),
+            andelerTilkjentYtelse = emptyList()
         )
 
         assertEquals(1, personerMedUtgjørendeVilkårBosattIRiket.size)
@@ -229,7 +247,8 @@ class UtgjørendePersonerTest {
             ),
             oppdatertBegrunnelseType = VedtakBegrunnelseSpesifikasjon.OPPHØR_UTVANDRET.vedtakBegrunnelseType,
             triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOSATT_I_RIKET)),
-            aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList() // Husk å fikse dette!
+            aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList(),
+            andelerTilkjentYtelse = emptyList(),
         )
 
         assertEquals(1, personerMedUtgjørendeVilkårBarnUtvandret.size)
@@ -245,6 +264,10 @@ class UtgjørendePersonerTest {
         val barn1Fnr = randomFnr()
         val barn2Fnr = randomFnr()
 
+        val søkerAktørId = randomAktørId()
+        val barn1AktørId = randomAktørId()
+        val barn2AktørId = randomAktørId()
+
         val behandling = lagBehandling()
         val personopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(
@@ -257,8 +280,10 @@ class UtgjørendePersonerTest {
             behandling = behandling
         )
 
-        val barn1PersonResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = barn1Fnr)
-        val barn2PersonResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = barn2Fnr)
+        val barn1PersonResultat =
+            PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = barn1Fnr, aktør = barn1AktørId)
+        val barn2PersonResultat =
+            PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = barn2Fnr, aktør = barn2AktørId)
 
         barn1PersonResultat.setSortedVilkårResultater(
             setOf(
@@ -266,7 +291,7 @@ class UtgjørendePersonerTest {
                     barn1PersonResultat,
                     vilkårType = Vilkår.BOSATT_I_RIKET,
                     periodeFom = LocalDate.of(2021, 11, 1),
-                    erMedlemskapVurdert = true
+                    utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP)
                 )
             )
         )
@@ -276,7 +301,7 @@ class UtgjørendePersonerTest {
                     barn2PersonResultat,
                     vilkårType = Vilkår.BOSATT_I_RIKET,
                     periodeFom = LocalDate.of(2021, 11, 1),
-                    erMedlemskapVurdert = false
+                    utdypendeVilkårsvurderinger = emptyList()
                 )
             )
         )
@@ -292,7 +317,8 @@ class UtgjørendePersonerTest {
             ),
             oppdatertBegrunnelseType = VedtakBegrunnelseType.INNVILGET,
             triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOSATT_I_RIKET), medlemskap = true),
-            aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList()
+            aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList(),
+            andelerTilkjentYtelse = emptyList()
         )
 
         val personerMedUtgjørendeVilkårBosattIRiket = VedtakUtils.hentPersonerForAlleUtgjørendeVilkår(
@@ -303,7 +329,8 @@ class UtgjørendePersonerTest {
             ),
             oppdatertBegrunnelseType = VedtakBegrunnelseType.INNVILGET,
             triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOSATT_I_RIKET)),
-            aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList()
+            aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList(),
+            andelerTilkjentYtelse = emptyList()
         )
 
         assertEquals(1, personerMedUtgjørendeVilkårBosattIRiketMedlemskap.size)

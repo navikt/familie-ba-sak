@@ -6,18 +6,20 @@ import no.nav.familie.ba.sak.common.nyOrdinærBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.RestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonResultat
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenario
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenarioPerson
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -45,6 +47,9 @@ class RevurderingMedEndredeUtbetalingandelerTest(
     @Autowired
     private val endretUtbetalingAndelService: EndretUtbetalingAndelService,
 
+    @Autowired
+    private val personidentService: PersonidentService,
+
 ) : AbstractVerdikjedetest() {
     @Test
     fun `Endrede utbetalingsandeler fra forrige behandling kopieres riktig`() {
@@ -68,7 +73,11 @@ class RevurderingMedEndredeUtbetalingandelerTest(
         val behandling = stegService.håndterNyBehandling(nyOrdinærBehandling(fnr))
 
         persongrunnlagService.lagreOgDeaktiverGammel(
-            lagTestPersonopplysningGrunnlag(behandling.id, fnr, listOf(barnFnr))
+            lagTestPersonopplysningGrunnlag(
+                behandling.id, fnr, listOf(barnFnr),
+                søkerAktør = personidentService.hentOgLagreAktørId(fnr),
+                barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr))
+            )
         )
 
         val vilkårsvurdering = vilkårService.initierVilkårsvurderingForBehandling(
@@ -88,7 +97,9 @@ class RevurderingMedEndredeUtbetalingandelerTest(
                             it.copy(
                                 resultat = Resultat.OPPFYLT,
                                 periodeFom = LocalDate.of(2019, 5, 8),
-                                erDeltBosted = it.vilkårType == Vilkår.BOR_MED_SØKER
+                                utdypendeVilkårsvurderinger = listOfNotNull(
+                                    if (it.vilkårType == Vilkår.BOR_MED_SØKER) UtdypendeVilkårsvurdering.DELT_BOSTED else null
+                                )
                             )
                         )
                     )
@@ -138,7 +149,11 @@ class RevurderingMedEndredeUtbetalingandelerTest(
         val behandlingRevurdering = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
 
         persongrunnlagService.lagreOgDeaktiverGammel(
-            lagTestPersonopplysningGrunnlag(behandlingRevurdering.id, fnr, listOf(barnFnr))
+            lagTestPersonopplysningGrunnlag(
+                behandlingRevurdering.id, fnr, listOf(barnFnr),
+                søkerAktør = personidentService.hentOgLagreAktørId(fnr),
+                barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr))
+            )
         )
 
         vilkårService.initierVilkårsvurderingForBehandling(

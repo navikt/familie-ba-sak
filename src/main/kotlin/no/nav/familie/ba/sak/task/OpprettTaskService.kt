@@ -32,7 +32,7 @@ class OpprettTaskService(
     }
 
     fun opprettSendFeedTilInfotrygdTask(barnasIdenter: List<String>) {
-        taskRepository.save(SendFeedTilInfotrygdTask.opprettTask(barnasIdenter))
+        taskRepository.save(SendFødselsmeldingTilInfotrygdTask.opprettTask(barnasIdenter))
     }
 
     fun opprettSendStartBehandlingTilInfotrygdTask(fnrStoenadsmottaker: String) {

@@ -68,9 +68,10 @@ class OppgaveService(
                 logger.warn("Fant ikke behandlende enhet på behandling ${behandling.id} ved opprettelse av $oppgavetype-oppgave.")
             }
 
-            val aktorId = personopplysningerService.hentAktivAktørId(Ident(behandling.fagsak.hentAktivIdent().ident)).id
+            val aktorId =
+                personopplysningerService.hentOgLagreAktørId(Ident(behandling.fagsak.hentAktivIdent().ident))
             val opprettOppgave = OpprettOppgaveRequest(
-                ident = OppgaveIdentV2(ident = aktorId, gruppe = IdentGruppe.AKTOERID),
+                ident = OppgaveIdentV2(ident = aktorId.aktørId, gruppe = IdentGruppe.AKTOERID),
                 saksId = fagsakId.toString(),
                 tema = Tema.BAR,
                 oppgavetype = oppgavetype,

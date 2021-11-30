@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.common.minimum
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
@@ -23,10 +24,10 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import java.math.BigDecimal
@@ -39,7 +40,7 @@ object TilkjentYtelseUtils {
         vilkårsvurdering: Vilkårsvurdering,
         personopplysningGrunnlag: PersonopplysningGrunnlag,
         behandling: Behandling,
-        hentPerioderMedFullOvergangsstønad: (personIdent: String) -> List<InternPeriodeOvergangsstønad> = { emptyList() }
+        hentPerioderMedFullOvergangsstønad: (personIdent: String, aktør: Aktør) -> List<InternPeriodeOvergangsstønad> = { _, _ -> emptyList() }
     ): TilkjentYtelse {
         val identBarnMap = personopplysningGrunnlag.barna
             .associateBy { it.personIdent.ident }
@@ -58,7 +59,7 @@ object TilkjentYtelseUtils {
         )
 
         val andelerTilkjentYtelseBarna = innvilgedePeriodeResultatBarna
-            .flatMap { periodeResultatBarn ->
+            .flatMap { periodeResultatBarn: PeriodeResultat ->
                 relevanteSøkerPerioder
                     .flatMap { overlappendePerioderesultatSøker ->
                         val person = identBarnMap[periodeResultatBarn.personIdent]
@@ -71,13 +72,13 @@ object TilkjentYtelseUtils {
                                 innvilgetPeriodeResultatSøker,
                                 person
                             )
-
                         beløpsperioder.map { beløpsperiode ->
                             val prosent = if (periodeResultatBarn.erDeltBosted()) BigDecimal(50) else BigDecimal(100)
                             AndelTilkjentYtelse(
                                 behandlingId = vilkårsvurdering.behandling.id,
                                 tilkjentYtelse = tilkjentYtelse,
                                 personIdent = person.personIdent.ident,
+                                aktør = person.aktør,
                                 stønadFom = beløpsperiode.fraOgMed,
                                 stønadTom = beløpsperiode.tilOgMed,
                                 kalkulertUtbetalingsbeløp = beløpsperiode.sats.avrundetHeltallAvProsent(prosent),
@@ -102,7 +103,10 @@ object TilkjentYtelseUtils {
 
         val andelerTilkjentYtelseSmåbarnstillegg = if (andelerTilkjentYtelseSøker.isNotEmpty()) {
             val perioderMedFullOvergangsstønad =
-                hentPerioderMedFullOvergangsstønad(personopplysningGrunnlag.søker.personIdent.ident)
+                hentPerioderMedFullOvergangsstønad(
+                    personopplysningGrunnlag.søker.personIdent.ident,
+                    personopplysningGrunnlag.søker.hentAktørId()
+                )
 
             SmåbarnstilleggBarnetrygdGenerator(
                 behandlingId = vilkårsvurdering.behandling.id,
@@ -110,8 +114,13 @@ object TilkjentYtelseUtils {
             )
                 .lagSmåbarnstilleggAndeler(
                     perioderMedFullOvergangsstønad = perioderMedFullOvergangsstønad,
-                    andelerSøker = andelerTilkjentYtelseSøker,
-                    barnasFødselsdatoer = personopplysningGrunnlag.barna.map { it.fødselsdato }
+                    andelerTilkjentYtelse = andelerTilkjentYtelseSøker + andelerTilkjentYtelseBarna,
+                    barnasIdenterOgFødselsdatoer = personopplysningGrunnlag.barna.map {
+                        Pair(
+                            it.personIdent.ident,
+                            it.fødselsdato
+                        )
+                    },
                 )
         } else emptyList()
 
@@ -127,9 +136,11 @@ object TilkjentYtelseUtils {
 
         if (endretUtbetalingAndeler.isEmpty()) return andelTilkjentYtelser.map { it.copy() }.toMutableSet()
 
+        val (andelerUtenSmåbarnstillegg, andelerMedSmåbarnstillegg) = andelTilkjentYtelser.partition { !it.erSmåbarnstillegg() }
+
         val nyeAndelTilkjentYtelse = mutableListOf<AndelTilkjentYtelse>()
 
-        andelTilkjentYtelser.filter { !it.erSmåbarnstillegg() }.groupBy { it.personIdent }.forEach { andelerForPerson ->
+        andelerUtenSmåbarnstillegg.groupBy { it.personIdent }.forEach { andelerForPerson ->
             val personIdent = andelerForPerson.key
             val endringerForPerson =
                 endretUtbetalingAndeler.filter { it.person?.personIdent?.ident == personIdent }
@@ -172,6 +183,10 @@ object TilkjentYtelseUtils {
 
             nyeAndelTilkjentYtelse.addAll(nyeAndelerForPersonEtterSammenslåing)
         }
+
+        // Ettersom vi aldri ønsker å overstyre småbarnstillegg perioder fjerner vi dem og legger dem til igjen her
+        nyeAndelTilkjentYtelse.addAll(andelerMedSmåbarnstillegg)
+
         // Sorterer primært av hensyn til måten testene er implementert og kan muligens fjernes dersom dette skrives om.
         nyeAndelTilkjentYtelse.sortWith(
             compareBy(

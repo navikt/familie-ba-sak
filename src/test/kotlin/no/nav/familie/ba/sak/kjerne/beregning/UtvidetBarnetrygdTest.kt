@@ -5,14 +5,16 @@ import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
@@ -44,28 +46,29 @@ internal class UtvidetBarnetrygdTest {
         val behandling = lagBehandling()
         val vilkårsvurdering = Vilkårsvurdering(behandling = behandling)
 
-        val søkerResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = søker.ident)
-            .apply {
-                vilkårResultater.addAll(
-                    oppfylteVilkårFor(
-                        personResultat = this,
-                        vilkårOppfyltFom = søker.fom,
-                        vilkårOppfyltTom = søker.tom,
-                        personType = PersonType.SØKER
+        val søkerResultat =
+            PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = søker.ident, aktør = søker.aktør)
+                .apply {
+                    vilkårResultater.addAll(
+                        oppfylteVilkårFor(
+                            personResultat = this,
+                            vilkårOppfyltFom = søker.fom,
+                            vilkårOppfyltTom = søker.tom,
+                            personType = PersonType.SØKER
+                        )
                     )
-                )
-                vilkårResultater.addAll(
-                    oppfylteVilkårFor(
-                        personResultat = this,
-                        vilkårOppfyltFom = søker.fom,
-                        vilkårOppfyltTom = søker.tom,
-                        personType = PersonType.SØKER,
-                        erUtvidet = true
+                    vilkårResultater.addAll(
+                        oppfylteVilkårFor(
+                            personResultat = this,
+                            vilkårOppfyltFom = søker.fom,
+                            vilkårOppfyltTom = søker.tom,
+                            personType = PersonType.SØKER,
+                            erUtvidet = true
+                        )
                     )
-                )
-            }
+                }
         val barnResultater = listOf(barnA, barnB).map {
-            PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = it.ident)
+            PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = it.ident, aktør = søker.aktør)
                 .apply {
                     vilkårResultater.addAll(
                         oppfylteVilkårFor(
@@ -132,27 +135,32 @@ internal class UtvidetBarnetrygdTest {
         val behandling = lagBehandling()
         val vilkårsvurdering = Vilkårsvurdering(behandling = behandling)
 
-        val søkerResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = søker.ident)
-            .apply {
-                vilkårResultater.addAll(
-                    oppfylteVilkårFor(
-                        personResultat = this,
-                        vilkårOppfyltFom = søker.fom,
-                        vilkårOppfyltTom = søker.tom,
-                        personType = PersonType.SØKER
+        val søkerResultat =
+            PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = søker.ident, aktør = søker.aktør)
+                .apply {
+                    vilkårResultater.addAll(
+                        oppfylteVilkårFor(
+                            personResultat = this,
+                            vilkårOppfyltFom = søker.fom,
+                            vilkårOppfyltTom = søker.tom,
+                            personType = PersonType.SØKER
+                        )
                     )
-                )
-                vilkårResultater.addAll(
-                    oppfylteVilkårFor(
-                        personResultat = this,
-                        vilkårOppfyltFom = søker.fom,
-                        vilkårOppfyltTom = søker.tom,
-                        personType = PersonType.SØKER,
-                        erUtvidet = true
+                    vilkårResultater.addAll(
+                        oppfylteVilkårFor(
+                            personResultat = this,
+                            vilkårOppfyltFom = søker.fom,
+                            vilkårOppfyltTom = søker.tom,
+                            personType = PersonType.SØKER,
+                            erUtvidet = true
+                        )
                     )
-                )
-            }
-        val barnResultater = PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = oppfyltBarn.ident)
+                }
+        val barnResultater = PersonResultat(
+            vilkårsvurdering = vilkårsvurdering,
+            personIdent = oppfyltBarn.ident,
+            aktør = søker.aktør
+        )
             .apply {
                 vilkårResultater.addAll(
                     oppfylteVilkårFor(
@@ -207,7 +215,11 @@ internal class UtvidetBarnetrygdTest {
 
         val behandling = lagBehandling()
         val vilkårsvurdering = Vilkårsvurdering(behandling = behandling)
-        val søkerResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = søkerOrdinær.ident)
+        val søkerResultat = PersonResultat(
+            vilkårsvurdering = vilkårsvurdering,
+            personIdent = søkerOrdinær.ident,
+            aktør = søkerOrdinær.aktør
+        )
             .apply {
                 vilkårResultater.addAll(
                     oppfylteVilkårFor(
@@ -229,7 +241,11 @@ internal class UtvidetBarnetrygdTest {
             }
 
         val barnResultater =
-            PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = barnOppfylt.ident)
+            PersonResultat(
+                vilkårsvurdering = vilkårsvurdering,
+                personIdent = barnOppfylt.ident,
+                aktør = barnOppfylt.aktør
+            )
                 .apply {
                     vilkårResultater.addAll(
                         oppfylteVilkårFor(
@@ -280,7 +296,11 @@ internal class UtvidetBarnetrygdTest {
 
         val behandling = lagBehandling()
         val vilkårsvurdering = Vilkårsvurdering(behandling = behandling)
-        val søkerResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = søkerOrdinær.ident)
+        val søkerResultat = PersonResultat(
+            vilkårsvurdering = vilkårsvurdering,
+            personIdent = søkerOrdinær.ident,
+            aktør = søkerOrdinær.aktør
+        )
             .apply {
                 vilkårResultater.addAll(
                     oppfylteVilkårFor(
@@ -302,7 +322,11 @@ internal class UtvidetBarnetrygdTest {
             }
 
         val barnResultater =
-            PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = barnOppfylt.ident)
+            PersonResultat(
+                vilkårsvurdering = vilkårsvurdering,
+                personIdent = barnOppfylt.ident,
+                aktør = barnOppfylt.aktør
+            )
                 .apply {
                     vilkårResultater.addAll(
                         oppfylteVilkårFor(
@@ -354,7 +378,11 @@ internal class UtvidetBarnetrygdTest {
 
         val behandling = lagBehandling()
         val vilkårsvurdering = Vilkårsvurdering(behandling = behandling)
-        val søkerResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = søkerOrdinær.ident)
+        val søkerResultat = PersonResultat(
+            vilkårsvurdering = vilkårsvurdering,
+            personIdent = søkerOrdinær.ident,
+            aktør = søkerOrdinær.aktør
+        )
             .apply {
                 vilkårResultater.addAll(
                     oppfylteVilkårFor(
@@ -376,7 +404,11 @@ internal class UtvidetBarnetrygdTest {
             }
 
         val barnResultater =
-            PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = barnOppfylt.ident)
+            PersonResultat(
+                vilkårsvurdering = vilkårsvurdering,
+                personIdent = barnOppfylt.ident,
+                aktør = barnOppfylt.aktør
+            )
                 .apply {
                     vilkårResultater.addAll(
                         oppfylteVilkårFor(
@@ -426,7 +458,11 @@ internal class UtvidetBarnetrygdTest {
 
         val behandling = lagBehandling()
         val vilkårsvurdering = Vilkårsvurdering(behandling = behandling)
-        val søkerResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = søkerOrdinær.ident)
+        val søkerResultat = PersonResultat(
+            vilkårsvurdering = vilkårsvurdering,
+            personIdent = søkerOrdinær.ident,
+            aktør = søkerOrdinær.aktør
+        )
             .apply {
                 vilkårResultater.addAll(
                     oppfylteVilkårFor(
@@ -446,7 +482,7 @@ internal class UtvidetBarnetrygdTest {
                             periodeTom = b2bTom,
                             begrunnelse = "",
                             behandlingId = this.vilkårsvurdering.behandling.id,
-                            erDeltBosted = false
+                            utdypendeVilkårsvurderinger = emptyList()
                         ),
                         VilkårResultat(
                             personResultat = this,
@@ -456,14 +492,18 @@ internal class UtvidetBarnetrygdTest {
                             periodeTom = null,
                             begrunnelse = "",
                             behandlingId = this.vilkårsvurdering.behandling.id,
-                            erDeltBosted = false
+                            utdypendeVilkårsvurderinger = emptyList()
                         )
                     )
                 )
             }
 
         val barnResultater =
-            PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = barnOppfylt.ident)
+            PersonResultat(
+                vilkårsvurdering = vilkårsvurdering,
+                personIdent = barnOppfylt.ident,
+                aktør = barnOppfylt.aktør
+            )
                 .apply {
                     vilkårResultater.addAll(
                         oppfylteVilkårFor(
@@ -514,7 +554,11 @@ internal class UtvidetBarnetrygdTest {
 
         val behandling = lagBehandling()
         val vilkårsvurdering = Vilkårsvurdering(behandling = behandling)
-        val søkerResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = søkerOrdinær.ident)
+        val søkerResultat = PersonResultat(
+            vilkårsvurdering = vilkårsvurdering,
+            personIdent = søkerOrdinær.ident,
+            aktør = søkerOrdinær.aktør
+        )
             .apply {
                 vilkårResultater.addAll(
                     oppfylteVilkårFor(
@@ -534,7 +578,7 @@ internal class UtvidetBarnetrygdTest {
                             periodeTom = utvidetFørstePeriodeTom,
                             begrunnelse = "",
                             behandlingId = this.vilkårsvurdering.behandling.id,
-                            erDeltBosted = false
+                            utdypendeVilkårsvurderinger = emptyList()
                         ),
                         VilkårResultat(
                             personResultat = this,
@@ -544,14 +588,18 @@ internal class UtvidetBarnetrygdTest {
                             periodeTom = null,
                             begrunnelse = "",
                             behandlingId = this.vilkårsvurdering.behandling.id,
-                            erDeltBosted = false
+                            utdypendeVilkårsvurderinger = emptyList()
                         )
                     )
                 )
             }
 
         val barnResultater =
-            PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = barnOppfylt.ident)
+            PersonResultat(
+                vilkårsvurdering = vilkårsvurdering,
+                personIdent = barnOppfylt.ident,
+                aktør = barnOppfylt.aktør
+            )
                 .apply {
                     vilkårResultater.addAll(
                         oppfylteVilkårFor(
@@ -597,6 +645,7 @@ internal class UtvidetBarnetrygdTest {
         val fom: LocalDate,
         val tom: LocalDate,
         val ident: String = randomFnr(),
+        val aktør: Aktør = randomAktørId(),
         val rolle: PersonType = PersonType.SØKER,
         val erUtvidet: Boolean = false,
         val erDeltBosted: Boolean = false
@@ -625,7 +674,9 @@ internal class UtvidetBarnetrygdTest {
                 periodeTom = if (it == Vilkår.UNDER_18_ÅR) fødselsdato.plusYears(18) else vilkårOppfyltTom,
                 begrunnelse = "",
                 behandlingId = personResultat.vilkårsvurdering.behandling.id,
-                erDeltBosted = erDeltBosted
+                utdypendeVilkårsvurderinger = listOfNotNull(
+                    if (erDeltBosted) UtdypendeVilkårsvurdering.DELT_BOSTED else null
+                )
             )
         }.toSet()
     }
@@ -635,7 +686,7 @@ internal class UtvidetBarnetrygdTest {
         fødselsdato: LocalDate = fødselsdatoOver6År
     ): List<Person> = this.map {
         Person(
-            aktørId = randomAktørId(),
+            aktør = randomAktørId(),
             personIdent = PersonIdent(it.ident),
             type = it.rolle,
             personopplysningGrunnlag = personopplysningGrunnlag,

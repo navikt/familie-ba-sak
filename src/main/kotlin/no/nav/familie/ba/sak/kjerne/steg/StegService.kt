@@ -25,6 +25,7 @@ import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.task.DistribuerDokumentDTO
 import no.nav.familie.ba.sak.task.dto.IverksettingTaskDTO
+import no.nav.familie.prosessering.error.RekjørSenereException
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -59,39 +60,29 @@ class StegService(
     @Transactional
     fun håndterNyBehandling(nyBehandling: NyBehandling): Behandling {
         val behandling = behandlingService.opprettBehandling(nyBehandling)
-
-        return if (nyBehandling.behandlingType == BehandlingType.MIGRERING_FRA_INFOTRYGD || nyBehandling.behandlingÅrsak == BehandlingÅrsak.FØDSELSHENDELSE) {
-            håndterPersongrunnlag(
-                behandling,
-                RegistrerPersongrunnlagDTO(
-                    ident = nyBehandling.søkersIdent,
-                    barnasIdenter = nyBehandling.barnasIdenter
-                )
-            )
+        val barnasIdenter: List<String>
+        if (nyBehandling.behandlingÅrsak in listOf(BehandlingÅrsak.MIGRERING, BehandlingÅrsak.FØDSELSHENDELSE)) {
+            barnasIdenter = nyBehandling.barnasIdenter
         } else if (nyBehandling.behandlingType == BehandlingType.FØRSTEGANGSBEHANDLING) {
-            håndterPersongrunnlag(
-                behandling,
-                RegistrerPersongrunnlagDTO(
-                    ident = nyBehandling.søkersIdent,
-                    barnasIdenter = emptyList()
+            barnasIdenter = emptyList()
+        } else if (nyBehandling.behandlingType in listOf(BehandlingType.REVURDERING, BehandlingType.TEKNISK_ENDRING) ||
+            (
+                nyBehandling.behandlingType == BehandlingType.MIGRERING_FRA_INFOTRYGD &&
+                    nyBehandling.behandlingÅrsak == BehandlingÅrsak.ENDRE_MIGRERINGSDATO
                 )
-            )
-        } else if (nyBehandling.behandlingType == BehandlingType.REVURDERING || nyBehandling.behandlingType == BehandlingType.TEKNISK_ENDRING) {
-            val sisteBehandling = behandlingService.hentSisteBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id)
-                ?: behandlingService.hentSisteBehandlingSomErVedtatt(behandling.fagsak.id)
-                ?: throw Feil("Forsøker å opprette en revurdering eller teknisk endring, men kan ikke finne tidligere behandling på fagsak ${behandling.fagsak.id}")
-
-            val barnFraSisteBehandlingMedUtbetalinger =
-                behandlingService.finnBarnFraBehandlingMedTilkjentYtsele(sisteBehandling.id)
-
-            håndterPersongrunnlag(
-                behandling,
-                RegistrerPersongrunnlagDTO(
-                    ident = nyBehandling.søkersIdent,
-                    barnasIdenter = barnFraSisteBehandlingMedUtbetalinger
-                )
-            )
+        ) {
+            val sisteBehandling = hentSisteAvsluttetBehandling(behandling)
+            barnasIdenter = behandlingService.finnBarnFraBehandlingMedTilkjentYtsele(sisteBehandling.id)
         } else throw Feil("Ukjent oppførsel ved opprettelse av behandling.")
+
+        return håndterPersongrunnlag(
+            behandling,
+            RegistrerPersongrunnlagDTO(
+                ident = nyBehandling.søkersIdent,
+                barnasIdenter = barnasIdenter,
+                nyMigreringsdato = nyBehandling.nyMigreringsdato
+            )
+        )
     }
 
     @Transactional
@@ -360,17 +351,23 @@ class StegService(
             }
             return returBehandling
         } catch (exception: Exception) {
-
-            if (exception is FunksjonellFeil) {
-                stegFunksjonellFeilMetrics[behandlingSteg.stegType()]?.increment()
-                logger.info("Håndtering av stegtype '${behandlingSteg.stegType()}' feilet på grunn av funksjonell feil på behandling $behandling. Melding: ${exception.melding}")
-            } else {
-                stegFeiletMetrics[behandlingSteg.stegType()]?.increment()
-                logger.error("Håndtering av stegtype '${behandlingSteg.stegType()}' feilet på behandling $behandling.")
-                secureLogger.error(
-                    "Håndtering av stegtype '${behandlingSteg.stegType()}' feilet på behandling $behandling.",
-                    exception
-                )
+            when (exception) {
+                is RekjørSenereException -> {
+                    stegFunksjonellFeilMetrics[behandlingSteg.stegType()]?.increment()
+                    logger.info("Steg '${behandlingSteg.stegType()}' har trigget rekjøring senere på behandling $behandling. Årsak: ${exception.årsak}")
+                }
+                is FunksjonellFeil -> {
+                    stegFunksjonellFeilMetrics[behandlingSteg.stegType()]?.increment()
+                    logger.info("Håndtering av stegtype '${behandlingSteg.stegType()}' feilet på grunn av funksjonell feil på behandling $behandling. Melding: ${exception.melding}")
+                }
+                else -> {
+                    stegFeiletMetrics[behandlingSteg.stegType()]?.increment()
+                    logger.error("Håndtering av stegtype '${behandlingSteg.stegType()}' feilet på behandling $behandling.")
+                    secureLogger.error(
+                        "Håndtering av stegtype '${behandlingSteg.stegType()}' feilet på behandling $behandling.",
+                        exception
+                    )
+                }
             }
 
             throw exception
@@ -379,6 +376,16 @@ class StegService(
 
     fun hentBehandlingSteg(stegType: StegType): BehandlingSteg<*>? {
         return steg.firstOrNull { it.stegType() == stegType }
+    }
+
+    private fun hentSisteAvsluttetBehandling(behandling: Behandling): Behandling {
+        return behandlingService.hentSisteBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id)
+            ?: behandlingService.hentSisteBehandlingSomErVedtatt(behandling.fagsak.id)
+            ?: throw Feil(
+                "Forsøker å opprette en ${behandling.type.visningsnavn} " +
+                    "med årsak ${behandling.opprettetÅrsak.visningsnavn}, " +
+                    "men kan ikke finne tidligere behandling på fagsak ${behandling.fagsak.id}"
+            )
     }
 
     private fun initStegMetrikker(type: String): Map<StegType, Counter> {

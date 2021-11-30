@@ -2,9 +2,10 @@ package no.nav.familie.ba.sak.kjerne.beregning.domene
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.sisteDagIMåned
-import no.nav.familie.ba.sak.kjerne.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
@@ -46,14 +47,17 @@ data class PeriodeResultat(
             (periodeTom == null || annetPeriodeResultat.periodeFom == null || periodeTom >= annetPeriodeResultat.periodeFom)
     }
 
-    fun erDeltBosted() = vilkårResultater.firstOrNull { it.vilkårType == Vilkår.BOR_MED_SØKER }?.erDeltBosted ?: false
+    fun erDeltBosted() =
+        vilkårResultater.firstOrNull { it.vilkårType == Vilkår.BOR_MED_SØKER }?.utdypendeVilkårsvurderinger?.contains(
+            UtdypendeVilkårsvurdering.DELT_BOSTED
+        ) ?: false
 }
 
 data class PeriodeVilkår(
     val vilkårType: Vilkår,
     val resultat: Resultat,
     var begrunnelse: String,
-    var erDeltBosted: Boolean,
+    val utdypendeVilkårsvurderinger: List<UtdypendeVilkårsvurdering>,
     val periodeFom: LocalDate?,
     val periodeTom: LocalDate?
 )
@@ -110,12 +114,12 @@ fun PersonResultat.tilPeriodeResultater(brukMåned: Boolean, inkluderUtvidet: Bo
             periodeTom = if (segment.tom == TIDENES_ENDE) null else segment.tom,
             vilkårResultater = segment.value.map {
                 PeriodeVilkår(
-                    it.vilkårType,
-                    it.resultat,
-                    it.begrunnelse,
-                    it.erDeltBosted,
-                    if (brukMåned) it.periodeFom?.withDayOfMonth(1) else it.periodeFom,
-                    if (brukMåned) it.periodeTom?.sisteDagIMåned() else it.periodeTom
+                    vilkårType = it.vilkårType,
+                    resultat = it.resultat,
+                    begrunnelse = it.begrunnelse,
+                    utdypendeVilkårsvurderinger = it.utdypendeVilkårsvurderinger,
+                    periodeFom = if (brukMåned) it.periodeFom?.withDayOfMonth(1) else it.periodeFom,
+                    periodeTom = if (brukMåned) it.periodeTom?.sisteDagIMåned() else it.periodeTom
                 )
             }.toSet()
         )
