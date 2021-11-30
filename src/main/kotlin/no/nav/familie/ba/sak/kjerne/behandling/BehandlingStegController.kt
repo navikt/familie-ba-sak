@@ -4,7 +4,6 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
-import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.steg.StegService
@@ -106,9 +105,6 @@ class BehandlingStegController(
         val behandling = behandlingService.hent(behandlingId)
 
         stegService.håndterSendTilBeslutter(behandling, behandlendeEnhet)
-        if (behandling.erManuellMigrering()) {
-            stegService.håndterBeslutningForVedtak(behandling, RestBeslutningPåVedtak(beslutning = Beslutning.GODKJENT))
-        }
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandling.id)))
     }
 
