@@ -377,7 +377,10 @@ class VedtaksperiodeService(
                 ?: throw Feil("Finner ingen eller flere vedtaksperioder ved fortsatt innvilget")
 
         val personidenter =
-            if (vedtakBegrunnelseSpesifikasjon == VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR) {
+            if (vedtakBegrunnelseSpesifikasjon == VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR ||
+                vedtakBegrunnelseSpesifikasjon == VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR_AUTOVEDTAK
+            ) {
+                // Barn som har fylt 18 år har ingen utbetalingsperioder og må hentes fra persongrunnlaget.
                 val fødselsMånedOgÅrForAlder18 = YearMonth.from(LocalDate.now()).minusYears(18)
                 val persongrunnlag = persongrunnlagRepository.findByBehandlingAndAktiv(vedtak.behandling.id)
                     ?: error("Fant ikke persongrunnlag for behandling ${vedtak.behandling.id}")
