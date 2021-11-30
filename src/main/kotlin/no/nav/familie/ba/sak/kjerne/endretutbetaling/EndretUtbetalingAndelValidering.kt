@@ -39,11 +39,11 @@ object EndretUtbetalingAndelValidering {
 
         endretUtbetalingAndel.validerUtfyltEndring()
         val minsteDatoForTilkjentYtelse = andelTilkjentYtelser.filter {
-            it.personIdent == endretUtbetalingAndel.person!!.personIdent.ident
+            it.aktør == endretUtbetalingAndel.person!!.aktør
         }.minByOrNull { it.stønadFom }?.stønadFom
 
         val størsteDatoForTilkjentYtelse = andelTilkjentYtelser.filter {
-            it.personIdent == endretUtbetalingAndel.person!!.personIdent.ident
+            it.aktør == endretUtbetalingAndel.person!!.aktør
         }.maxByOrNull { it.stønadTom }?.stønadTom
 
         if ((minsteDatoForTilkjentYtelse == null || størsteDatoForTilkjentYtelse == null) ||
@@ -67,7 +67,7 @@ object EndretUtbetalingAndelValidering {
 
         if (
             !andelTilkjentYtelser
-                .filter { it.personIdent == endretUtbetalingAndel.person?.personIdent?.ident!! }
+                .filter { it.aktør == endretUtbetalingAndel.person?.aktør }
                 .filter { it.stønadsPeriode().overlapperHeltEllerDelvisMed(endretUtbetalingAndel.periode) }
                 .any { it.erDeltBosted() }
         ) {

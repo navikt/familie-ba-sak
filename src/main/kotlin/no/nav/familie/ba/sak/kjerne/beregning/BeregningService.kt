@@ -14,7 +14,7 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAnde
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
@@ -69,10 +69,10 @@ class BeregningService(
      * henlagte behandlinger, samt fagsaker som ikke lengre har barn i gjeldende behandling.
      */
     fun hentSentTilGodkjenningTilkjentYtelseForBarn(
-        barnIdent: PersonIdent,
+        barnAktør: Aktør,
         fagsakId: Long
     ): List<TilkjentYtelse> {
-        val andreFagsaker = fagsakService.hentFagsakerPåPerson(barnIdent)
+        val andreFagsaker = fagsakService.hentFagsakerPåPerson(barnAktør)
             .filter { it.id != fagsakId }
 
         return andreFagsaker.mapNotNull { fagsak ->
@@ -86,8 +86,8 @@ class BeregningService(
         }.filter {
             personopplysningGrunnlagRepository
                 .findByBehandlingAndAktiv(behandlingId = it.behandling.id)
-                ?.barna?.map { barn -> barn.personIdent }
-                ?.contains(barnIdent)
+                ?.barna?.map { barn -> barn.aktør }
+                ?.contains(barnAktør)
                 ?: false
         }.map { it }
     }
@@ -120,7 +120,6 @@ class BeregningService(
                 behandling = behandling
             ) { personIdent, aktørId ->
                 småbarnstilleggService.hentOgLagrePerioderMedFullOvergangsstønad(
-                    personIdent = personIdent,
                     aktør = aktørId,
                     behandlingId = behandling.id
                 )

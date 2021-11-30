@@ -11,6 +11,8 @@ import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåB
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import org.slf4j.LoggerFactory
@@ -20,6 +22,7 @@ import org.springframework.stereotype.Service
 class ArbeidsfordelingService(
     private val arbeidsfordelingPåBehandlingRepository: ArbeidsfordelingPåBehandlingRepository,
     private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
+    private val personidentService: PersonidentService,
     private val oppgaveService: OppgaveService,
     private val loggService: LoggService,
     private val norg2RestClient: Norg2RestClient,
@@ -132,7 +135,7 @@ class ArbeidsfordelingService(
     }
 
     fun hentArbeidsfordelingsenhet(behandling: Behandling): Arbeidsfordelingsenhet {
-        val søker = identMedAdressebeskyttelse(behandling.fagsak.hentAktivIdent().ident)
+        val søker = identMedAdressebeskyttelse(behandling.fagsak.aktør)
 
         val personinfoliste = when (
             val personopplysningGrunnlag =
@@ -140,7 +143,7 @@ class ArbeidsfordelingService(
         ) {
             null -> listOf(søker)
             else -> personopplysningGrunnlag.barna.map { barn ->
-                identMedAdressebeskyttelse(barn.personIdent.ident)
+                identMedAdressebeskyttelse(barn.aktør)
             }.plus(søker)
         }
 
@@ -160,7 +163,16 @@ class ArbeidsfordelingService(
 
     private fun identMedAdressebeskyttelse(ident: String) = IdentMedAdressebeskyttelse(
         ident = ident,
-        adressebeskyttelsegradering = personopplysningerService.hentPersoninfoEnkel(ident).adressebeskyttelseGradering
+        adressebeskyttelsegradering = personopplysningerService.hentPersoninfoEnkel(
+            personidentService.hentOgLagreAktør(
+                ident
+            )
+        ).adressebeskyttelseGradering
+    )
+
+    private fun identMedAdressebeskyttelse(aktør: Aktør) = IdentMedAdressebeskyttelse(
+        ident = aktør.aktivIdent(),
+        adressebeskyttelsegradering = personopplysningerService.hentPersoninfoEnkel(aktør).adressebeskyttelseGradering
     )
 
     data class IdentMedAdressebeskyttelse(

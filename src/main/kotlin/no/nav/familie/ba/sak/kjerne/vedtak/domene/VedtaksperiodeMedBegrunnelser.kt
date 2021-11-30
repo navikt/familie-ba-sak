@@ -118,7 +118,7 @@ fun UtvidetVedtaksperiodeMedBegrunnelser.byggBegrunnelserOgFritekster(
         this.begrunnelser.sortedBy { it.vedtakBegrunnelseType }.map {
             it.tilBrevBegrunnelse(
                 utvidetVedtaksperiodeMedBegrunnelser = this,
-                personerPåBegrunnelse = personerIPersongrunnlag.filter { person -> it.personIdenter.contains(person.personIdent.ident) },
+                personerPåBegrunnelse = personerIPersongrunnlag.filter { person -> it.personIdenter.contains(person.aktør.aktivIdent()) },
                 målform = målform,
                 uregistrerteBarn = uregistrerteBarn,
                 beløp = Utils.formaterBeløp(this.utbetaltForPersonerIBegrunnelse(it)),

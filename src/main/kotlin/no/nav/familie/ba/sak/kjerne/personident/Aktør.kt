@@ -58,7 +58,7 @@ data class Aktør(
         return Objects.hash(aktørId)
     }
 
-    fun aktivIdent() = personidenter.single { it.aktiv }
+    fun aktivIdent() = personidenter.single { it.aktiv }.fødselsnummer
 
     companion object {
         private const val CHARS = "a-z0-9_:-"

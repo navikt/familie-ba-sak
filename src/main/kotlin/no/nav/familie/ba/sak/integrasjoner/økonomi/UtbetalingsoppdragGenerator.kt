@@ -101,7 +101,7 @@ class UtbetalingsoppdragGenerator(
             kodeEndring = aksjonskodePåOppdragsnivå,
             fagSystem = FAGSYSTEM,
             saksnummer = vedtak.behandling.fagsak.id.toString(),
-            aktoer = vedtak.behandling.fagsak.aktør.aktivIdent().fødselsnummer,
+            aktoer = vedtak.behandling.fagsak.aktør.aktivIdent(),
             utbetalingsperiode = listOf(opphøres, opprettes).flatten()
         )
     }

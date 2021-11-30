@@ -40,10 +40,9 @@ object TilkjentYtelseUtils {
         vilkårsvurdering: Vilkårsvurdering,
         personopplysningGrunnlag: PersonopplysningGrunnlag,
         behandling: Behandling,
-        hentPerioderMedFullOvergangsstønad: (personIdent: String, aktør: Aktør) -> List<InternPeriodeOvergangsstønad> = { _, _ -> emptyList() }
+        hentPerioderMedFullOvergangsstønad: (aktør: Aktør) -> List<InternPeriodeOvergangsstønad> = { _ -> emptyList() }
     ): TilkjentYtelse {
-        val identBarnMap = personopplysningGrunnlag.barna
-            .associateBy { it.personIdent.ident }
+        val identBarnMap = personopplysningGrunnlag.barna.associateBy { it.aktør.aktørId }
 
         val (innvilgetPeriodeResultatSøker, innvilgedePeriodeResultatBarna) = vilkårsvurdering.hentInnvilgedePerioder(
             personopplysningGrunnlag
@@ -77,7 +76,8 @@ object TilkjentYtelseUtils {
                             AndelTilkjentYtelse(
                                 behandlingId = vilkårsvurdering.behandling.id,
                                 tilkjentYtelse = tilkjentYtelse,
-                                personIdent = person.personIdent.ident,
+                                // TODO: Robustgjøring dnr/fnr fjern ved contract.
+                                personIdent = person.aktør.aktivIdent(),
                                 aktør = person.aktør,
                                 stønadFom = beløpsperiode.fraOgMed,
                                 stønadTom = beløpsperiode.tilOgMed,
@@ -104,8 +104,7 @@ object TilkjentYtelseUtils {
         val andelerTilkjentYtelseSmåbarnstillegg = if (andelerTilkjentYtelseSøker.isNotEmpty()) {
             val perioderMedFullOvergangsstønad =
                 hentPerioderMedFullOvergangsstønad(
-                    personopplysningGrunnlag.søker.personIdent.ident,
-                    personopplysningGrunnlag.søker.hentAktørId()
+                    personopplysningGrunnlag.søker.aktør
                 )
 
             SmåbarnstilleggBarnetrygdGenerator(
@@ -135,10 +134,10 @@ object TilkjentYtelseUtils {
 
         val nyeAndelTilkjentYtelse = mutableListOf<AndelTilkjentYtelse>()
 
-        andelerUtenSmåbarnstillegg.groupBy { it.personIdent }.forEach { andelerForPerson ->
-            val personIdent = andelerForPerson.key
+        andelerUtenSmåbarnstillegg.groupBy { it.aktør }.forEach { andelerForPerson ->
+            val aktør = andelerForPerson.key
             val endringerForPerson =
-                endretUtbetalingAndeler.filter { it.person?.personIdent?.ident == personIdent }
+                endretUtbetalingAndeler.filter { it.person?.aktør == aktør }
 
             val nyeAndelerForPerson = mutableListOf<AndelTilkjentYtelse>()
 

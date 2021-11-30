@@ -17,6 +17,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand.Companion.sisteSivilstand
+import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingMigreringUtils.kopiManglendePerioderFraForrigeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingMigreringUtils.utledPeriodeFom
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingMigreringUtils.utledPeriodeTom
@@ -42,6 +43,7 @@ class VilkårService(
     private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
     private val vilkårsvurderingMetrics: VilkårsvurderingMetrics,
     private val behandlingService: BehandlingService,
+    private val personidentService: PersonidentService,
     private val featureToggleService: FeatureToggleService,
     private val endretUtbetalingAndelService: EndretUtbetalingAndelService,
 ) {
@@ -148,8 +150,8 @@ class VilkårService(
 
         val aktivVilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandling.id)
         val barnaSomAlleredeErVurdert = aktivVilkårsvurdering?.personResultater?.mapNotNull {
-            personopplysningGrunnlag.barna.firstOrNull { barn -> barn.personIdent.ident == it.personIdent }
-        }?.filter { it.type == PersonType.BARN }?.map { it.personIdent.ident } ?: emptyList()
+            personopplysningGrunnlag.barna.firstOrNull { barn -> barn.aktør == it.aktør }
+        }?.filter { it.type == PersonType.BARN }?.map { it.aktør.aktørId } ?: emptyList()
 
         val initiellVilkårsvurdering =
             genererInitiellVilkårsvurdering(
@@ -265,8 +267,8 @@ class VilkårService(
         return personopplysningGrunnlag.personer.map { person ->
             val personResultat = PersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
-                personIdent = person.personIdent.ident,
-                aktør = person.hentAktørId()
+                personIdent = person.aktør.aktørId,
+                aktør = person.aktør
             )
 
             val vilkårForPerson = Vilkår.hentVilkårFor(person.type)
@@ -296,8 +298,8 @@ class VilkårService(
         return personopplysningGrunnlag.personer.map { person ->
             val personResultat = PersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
-                personIdent = person.personIdent.ident,
-                aktør = person.hentAktørId()
+                personIdent = person.aktør.aktivIdent(),
+                aktør = person.aktør
             )
 
             val vilkårForPerson = Vilkår.hentVilkårFor(
@@ -349,20 +351,22 @@ class VilkårService(
         vilkårsvurdering: Vilkårsvurdering,
         barnaSomAlleredeErVurdert: List<String>
     ): Set<PersonResultat> {
+        val barnaAktørSomAlleredeErVurdert = personidentService.hentOgLagreAktørIder(barnaSomAlleredeErVurdert)
+
         val personopplysningGrunnlag =
             personopplysningGrunnlagRepository.findByBehandlingAndAktiv(vilkårsvurdering.behandling.id)
                 ?: throw Feil(message = "Fant ikke personopplysninggrunnlag for behandling ${vilkårsvurdering.behandling.id}")
 
         val eldsteBarnSomVurderesSinFødselsdato =
-            personopplysningGrunnlag.barna.filter { !barnaSomAlleredeErVurdert.contains(it.personIdent.ident) }
+            personopplysningGrunnlag.barna.filter { !barnaAktørSomAlleredeErVurdert.contains(it.aktør) }
                 .maxByOrNull { it.fødselsdato }?.fødselsdato
                 ?: throw Feil("Finner ingen barn på persongrunnlag")
 
         return personopplysningGrunnlag.personer.map { person ->
             val personResultat = PersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
-                personIdent = person.personIdent.ident,
-                aktør = person.hentAktørId()
+                personIdent = person.aktør.aktivIdent(),
+                aktør = person.aktør
             )
 
             val vilkårForPerson = Vilkår.hentVilkårFor(person.type)
@@ -419,8 +423,8 @@ class VilkårService(
         return personopplysningGrunnlag.personer.filter { it.type != PersonType.ANNENPART }.map { person ->
             val personResultat = PersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
-                personIdent = person.personIdent.ident,
-                aktør = person.hentAktørId()
+                personIdent = person.aktør.aktivIdent(),
+                aktør = person.aktør
             )
 
             val vilkårTyperForPerson = Vilkår.hentVilkårFor(person.type)
@@ -472,8 +476,8 @@ class VilkårService(
         return personopplysningGrunnlag.personer.filter { it.type != PersonType.ANNENPART }.map { person ->
             val personResultat = PersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
-                personIdent = person.personIdent.ident,
-                aktør = person.hentAktørId()
+                personIdent = person.aktør.aktørId,
+                aktør = person.aktør
             )
 
             val vilkårTyperForPerson = Vilkår.hentVilkårFor(person.type)

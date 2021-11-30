@@ -138,7 +138,7 @@ class FødselshendelseService(
         val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId)
         val behandling = behandlingService.hent(behandlingId)
         val søker = persongrunnlagService.hentSøker(behandling.id)
-        val søkerResultat = vilkårsvurdering?.personResultater?.find { it.personIdent == søker?.personIdent?.ident }
+        val søkerResultat = vilkårsvurdering?.personResultater?.find { it.aktør == søker?.aktør }
 
         val bosattIRiketResultat = søkerResultat?.vilkårResultater?.find { it.vilkårType == Vilkår.BOSATT_I_RIKET }
         if (bosattIRiketResultat?.resultat == Resultat.IKKE_OPPFYLT) {
@@ -147,7 +147,7 @@ class FødselshendelseService(
 
         persongrunnlagService.hentBarna(behandling).forEach { barn ->
             val vilkårsresultat =
-                vilkårsvurdering?.personResultater?.find { it.personIdent == barn.personIdent.ident }?.vilkårResultater
+                vilkårsvurdering?.personResultater?.find { it.aktør == barn.aktør }?.vilkårResultater
 
             if (vilkårsresultat?.find { it.vilkårType == Vilkår.UNDER_18_ÅR }?.resultat == Resultat.IKKE_OPPFYLT) {
                 return "Barnet (fødselsdato: ${barn.fødselsdato.tilKortString()}) er over 18 år."

@@ -122,7 +122,7 @@ object YtelsePersonUtils {
             )
         } + uregistrerteBarn.map {
             YtelsePerson(
-                personIdent = it.personIdent,
+                aktør = it.aktør,
                 resultater = setOf(YtelsePersonResultat.AVSLÅTT),
                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                 ytelseSlutt = TIDENES_MORGEN.toYearMonth(),

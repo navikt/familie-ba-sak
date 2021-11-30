@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
@@ -29,10 +30,11 @@ data class PersonInfo(
     val statsborgerskap: List<Statsborgerskap>? = emptyList(),
 )
 
-fun List<Bostedsadresse>.filtrerUtKunNorskeBostedsadresser() = this.filter { it.vegadresse != null || it.matrikkeladresse != null || it.ukjentBosted != null }
+fun List<Bostedsadresse>.filtrerUtKunNorskeBostedsadresser() =
+    this.filter { it.vegadresse != null || it.matrikkeladresse != null || it.ukjentBosted != null }
 
 data class ForelderBarnRelasjon(
-    val personIdent: Personident,
+    val aktør: Aktør,
     val relasjonsrolle: FORELDERBARNRELASJONROLLE,
     val navn: String? = null,
     val fødselsdato: LocalDate? = null,

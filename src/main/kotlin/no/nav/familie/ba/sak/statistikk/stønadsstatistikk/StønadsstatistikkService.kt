@@ -25,7 +25,6 @@ import no.nav.familie.eksterne.kontrakter.Underkategori
 import no.nav.familie.eksterne.kontrakter.UtbetalingsDetaljDVH
 import no.nav.familie.eksterne.kontrakter.UtbetalingsperiodeDVH
 import no.nav.familie.eksterne.kontrakter.VedtakDVH
-import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import no.nav.fpsak.tidsserie.LocalDateInterval
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import org.slf4j.LoggerFactory
@@ -134,7 +133,7 @@ class StønadsstatistikkService(
             utbetaltPerMnd = segment.value,
             utbetalingsDetaljer = andelerForSegment.map { andel ->
                 val personForAndel =
-                    personopplysningGrunnlag.personer.find { person -> andel.personIdent == person.personIdent.ident }
+                    personopplysningGrunnlag.personer.find { person -> andel.aktør == person.aktør }
                         ?: throw IllegalStateException("Fant ikke personopplysningsgrunnlag for andel")
                 UtbetalingsDetaljDVH(
                     person = lagPersonDVH(
@@ -161,23 +160,22 @@ class StønadsstatistikkService(
             annenpartBostedsland = "Ikke implementert",
             annenpartPersonident = "ikke implementert",
             annenpartStatsborgerskap = "ikke implementert",
-            personIdent = person.personIdent.ident
+            personIdent = person.aktør.aktivIdent()
         )
     }
 
     private fun hentStatsborgerskap(person: Person): List<String> = if (person.statsborgerskap.isNotEmpty()) {
         person.statsborgerskap.map { grStatsborgerskap: GrStatsborgerskap -> grStatsborgerskap.landkode }
     } else {
-        listOf(personopplysningerService.hentGjeldendeStatsborgerskap(Ident(person.personIdent.ident)).land)
+        listOf(personopplysningerService.hentGjeldendeStatsborgerskap(person.aktør).land)
     }
 
     private fun hentLandkode(person: Person): String = if (person.bostedsadresser.sisteAdresse() != null) "NO" else {
-        val landKode = personopplysningerService.hentLandkodeUtenlandskBostedsadresse(
-            person.personIdent.ident
-        )
+        val landKode = personopplysningerService.hentLandkodeUtenlandskBostedsadresse(person.aktør)
+
         if (landKode == PersonopplysningerService.UKJENT_LANDKODE) {
             logger.warn("Sender landkode ukjent til DVH. Bør undersøke om hvorfor. Ident i securelogger")
-            secureLogger.warn("Ukjent land sendt til DVH for person ${person.personIdent.ident}")
+            secureLogger.warn("Ukjent land sendt til DVH for person ${person.aktør.aktivIdent()}")
         }
         landKode
     }

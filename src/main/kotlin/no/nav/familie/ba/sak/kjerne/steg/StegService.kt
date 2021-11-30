@@ -92,7 +92,7 @@ class StegService(
         // Denne vil sende selv om det allerede eksisterer en fagsak. Vi tenker det er greit. Ellers så blir det vanskelig å
         // filtere bort for fødselshendelser. Når vi slutter å filtere bort fødselshendelser, så kan vi flytte den tilbake til
         // hentEllerOpprettFagsak
-        skyggesakService.opprettSkyggesak(nyBehandlingHendelse.morsIdent, fagsak.id)
+        skyggesakService.opprettSkyggesak(fagsak.aktør, fagsak.id)
 
         return håndterNyBehandlingOgSendInfotrygdFeed(
             NyBehandling(

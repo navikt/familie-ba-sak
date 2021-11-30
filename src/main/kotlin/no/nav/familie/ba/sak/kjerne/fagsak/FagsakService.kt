@@ -22,6 +22,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.steg.StegType
@@ -92,21 +93,20 @@ class FagsakService(
         }
         val fagsak = hentEllerOpprettFagsak(personIdent)
         return hentRestMinimalFagsak(fagsakId = fagsak.id).also {
-            skyggesakService.opprettSkyggesak(personIdent.ident, fagsak.id)
+            skyggesakService.opprettSkyggesak(fagsak.aktør, fagsak.id)
         }
     }
 
     @Transactional
     fun hentEllerOpprettFagsak(personIdent: PersonIdent, fraAutomatiskBehandling: Boolean = false): Fagsak {
-        val identer =
-            personopplysningerService.hentIdenter(Ident(personIdent.ident)).map { PersonIdent(it.ident) }.toSet()
-        var fagsak = fagsakPersonRepository.finnFagsak(personIdenter = identer)
+        val aktør = personidentService.hentOgLagreAktør(personIdent.ident)
+
+        var fagsak = fagsakRepository.finnFagsakForAktør(aktør)
         if (fagsak == null) {
             tilgangService.verifiserHarTilgangTilHandling(BehandlerRolle.SAKSBEHANDLER, "opprette fagsak")
 
-            val aktørId = personidentService.hentOgLagreAktørId(personIdent.ident)
-
-            fagsak = Fagsak(aktør = aktørId).also {
+            // TODO: robustgjøring dnr/fnr fjern opprettelse av fagsak person ved contract. 
+            fagsak = Fagsak(aktør = aktør).also {
                 it.søkerIdenter = setOf(FagsakPerson(personIdent = personIdent, fagsak = it))
                 lagre(it)
             }
@@ -115,17 +115,12 @@ class FagsakService(
             } else {
                 antallFagsakerOpprettetFraManuell.increment()
             }
-        } else if (fagsak.søkerIdenter.none { fagsakPerson -> fagsakPerson.personIdent == personIdent }) {
-            fagsak.also {
-                it.søkerIdenter += FagsakPerson(personIdent = personIdent, fagsak = it)
-                lagre(it)
-            }
         }
         return fagsak
     }
 
-    fun hentFagsakerPåPerson(personIdent: PersonIdent): List<Fagsak> {
-        val versjonerAvBarn = personRepository.findByPersonIdent(personIdent)
+    fun hentFagsakerPåPerson(aktør: Aktør): List<Fagsak> {
+        val versjonerAvBarn = personRepository.findByAktør(aktør)
         return versjonerAvBarn.map {
             it.personopplysningGrunnlag.behandlingId
         }.map {
@@ -149,8 +144,8 @@ class FagsakService(
         lagre(fagsak)
     }
 
-    fun hentMinimalFagsakForPerson(personIdent: PersonIdent): Ressurs<RestMinimalFagsak> {
-        val fagsak = fagsakRepository.finnFagsakForPersonIdent(personIdent)
+    fun hentMinimalFagsakForPerson(aktør: Aktør): Ressurs<RestMinimalFagsak> {
+        val fagsak = fagsakRepository.finnFagsakForAktør(aktør)
         return if (fagsak != null) Ressurs.success(data = lagRestMinimalFagsak(fagsakId = fagsak.id)) else Ressurs.failure(
             errorMessage = "Fant ikke fagsak på person"
         )
@@ -227,26 +222,25 @@ class FagsakService(
     }
 
     fun hent(personIdent: PersonIdent): Fagsak? {
-        val identer =
-            personopplysningerService.hentIdenter(Ident(personIdent.ident)).map { PersonIdent(it.ident) }.toSet()
-        return fagsakPersonRepository.finnFagsak(identer)
+        val aktør = personidentService.hentOgLagreAktør(personIdent.ident)
+        return fagsakRepository.finnFagsakForAktør(aktør)
     }
 
     fun hentPåFagsakId(fagsakId: Long): Fagsak {
         return fagsakRepository.finnFagsak(fagsakId) ?: error("Finner ikke fagsak med id $fagsakId")
     }
 
-    fun hentFagsakPåPerson(identer: Set<PersonIdent>): Fagsak? {
-        return fagsakPersonRepository.finnFagsak(identer)
+    fun hentFagsakPåPerson(aktør: Aktør): Fagsak? {
+        return fagsakRepository.finnFagsakForAktør(aktør)
     }
 
     fun hentLøpendeFagsaker(): List<Fagsak> {
         return fagsakRepository.finnLøpendeFagsaker()
     }
 
-    fun hentFagsakDeltager(personIdent: String): List<RestFagsakDeltager> {
+    fun hentFagsakDeltager(aktør: Aktør): List<RestFagsakDeltager> {
         val maskertDeltaker = runCatching {
-            hentMaskertFagsakdeltakerVedManglendeTilgang(personIdent)
+            hentMaskertFagsakdeltakerVedManglendeTilgang(aktør.aktivIdent())
         }.fold(
             onSuccess = { it },
             onFailure = { return sjekkStatuskodeOgHåndterFeil(it) }
@@ -257,22 +251,22 @@ class FagsakService(
         }
 
         val personInfoMedRelasjoner = runCatching {
-            personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(personIdent)
+            personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(aktør)
         }.fold(
             onSuccess = { it },
             onFailure = { return sjekkStatuskodeOgHåndterFeil(it) }
         )
-        val assosierteFagsakDeltagere = hentAssosierteFagsakdeltagere(personIdent, personInfoMedRelasjoner)
+        val assosierteFagsakDeltagere = hentAssosierteFagsakdeltagere(aktør, personInfoMedRelasjoner)
 
         val erBarn = Period.between(personInfoMedRelasjoner.fødselsdato, LocalDate.now()).years < 18
 
-        if (assosierteFagsakDeltagere.find { it.ident == personIdent } == null) {
+        if (assosierteFagsakDeltagere.find { it.ident == aktør.aktivIdent() } == null) {
             val fagsakId =
-                if (!erBarn) fagsakRepository.finnFagsakForPersonIdent(PersonIdent(personIdent))?.id else null
+                if (!erBarn) fagsakRepository.finnFagsakForAktør(aktør)?.id else null
             assosierteFagsakDeltagere.add(
                 RestFagsakDeltager(
                     navn = personInfoMedRelasjoner.navn,
-                    ident = personIdent,
+                    ident = aktør.aktivIdent(),
                     // we set the role to unknown when the person is not a child because the person may not have a child
                     rolle = if (erBarn) FagsakDeltagerRolle.BARN else FagsakDeltagerRolle.UKJENT,
                     kjønn = personInfoMedRelasjoner.kjønn,
@@ -288,16 +282,17 @@ class FagsakService(
                     relasjon.relasjonsrolle == FORELDERBARNRELASJONROLLE.MEDMOR
             }.forEach { relasjon ->
                 if (assosierteFagsakDeltagere.find { fagsakDeltager ->
-                    fagsakDeltager.ident == relasjon.personIdent.id
+                    fagsakDeltager.ident == relasjon.aktør.aktivIdent()
                 } == null
                 ) {
-                    val maskertForelder = hentMaskertFagsakdeltakerVedManglendeTilgang(relasjon.personIdent.id)
+                    val maskertForelder =
+                        hentMaskertFagsakdeltakerVedManglendeTilgang(relasjon.aktør.aktivIdent())
                     if (maskertForelder != null) {
                         assosierteFagsakDeltagere.add(maskertForelder.copy(rolle = FagsakDeltagerRolle.FORELDER))
                     } else {
 
                         val forelderInfo = runCatching {
-                            personopplysningerService.hentPersoninfoEnkel(relasjon.personIdent.id)
+                            personopplysningerService.hentPersoninfoEnkel(relasjon.aktør)
                         }.fold(
                             onSuccess = { it },
                             onFailure = {
@@ -305,11 +300,11 @@ class FagsakService(
                             }
                         )
 
-                        val fagsak = fagsakRepository.finnFagsakForPersonIdent(PersonIdent(relasjon.personIdent.id))
+                        val fagsak = fagsakRepository.finnFagsakForAktør(relasjon.aktør)
                         assosierteFagsakDeltagere.add(
                             RestFagsakDeltager(
                                 navn = forelderInfo.navn,
-                                ident = relasjon.personIdent.id,
+                                ident = relasjon.aktør.aktivIdent(),
                                 rolle = FagsakDeltagerRolle.FORELDER,
                                 kjønn = forelderInfo.kjønn,
                                 fagsakId = fagsak?.id
@@ -335,12 +330,12 @@ class FagsakService(
 
     // We find all cases that either have the given person as applicant, or have it as a child
     private fun hentAssosierteFagsakdeltagere(
-        personIdent: String,
+        aktør: Aktør,
         personInfoMedRelasjoner: PersonInfo
     ): MutableList<RestFagsakDeltager> {
         val assosierteFagsakDeltagerMap = mutableMapOf<Long, RestFagsakDeltager>()
 
-        personRepository.findByPersonIdent(PersonIdent(personIdent)).forEach { person: Person ->
+        personRepository.findByAktør(aktør).forEach { person: Person ->
             if (person.personopplysningGrunnlag.aktiv) {
                 val behandling = behandlingRepository.finnBehandling(person.personopplysningGrunnlag.behandlingId)
                 if (behandling.aktiv && !behandling.fagsak.arkivert && !assosierteFagsakDeltagerMap.containsKey(
@@ -348,7 +343,7 @@ class FagsakService(
                     )
                 ) {
                     // get applicant info from PDL. we assume that the applicant is always a person whose info is stored in PDL.
-                    if (behandling.fagsak.hentAktivIdent().ident == personIdent) {
+                    if (behandling.fagsak.aktør == aktør) {
                         assosierteFagsakDeltagerMap[behandling.fagsak.id] = RestFagsakDeltager(
                             navn = personInfoMedRelasjoner.navn,
                             ident = behandling.fagsak.hentAktivIdent().ident,
@@ -358,14 +353,14 @@ class FagsakService(
                         )
                     } else {
                         val maskertForelder =
-                            hentMaskertFagsakdeltakerVedManglendeTilgang(behandling.fagsak.hentAktivIdent().ident)
+                            hentMaskertFagsakdeltakerVedManglendeTilgang(behandling.fagsak.aktør.aktivIdent())
                         if (maskertForelder != null) {
                             assosierteFagsakDeltagerMap[behandling.fagsak.id] =
                                 maskertForelder.copy(rolle = FagsakDeltagerRolle.FORELDER)
                         } else {
                             val personinfo =
                                 runCatching {
-                                    personopplysningerService.hentPersoninfoEnkel(behandling.fagsak.hentAktivIdent().ident)
+                                    personopplysningerService.hentPersoninfoEnkel(behandling.fagsak.aktør)
                                 }.fold(
                                     onSuccess = { it },
                                     onFailure = {
@@ -402,14 +397,13 @@ class FagsakService(
         } else null
     }
 
-    fun oppgiFagsakdeltagere(personIdent: String, barnasIdenter: List<String>): List<RestFagsakDeltager> {
+    fun oppgiFagsakdeltagere(aktør: Aktør, barnasAktørId: List<Aktør>): List<RestFagsakDeltager> {
         val fagsakDeltagere = mutableListOf<RestFagsakDeltager>()
 
-        val personIdenter = personopplysningerService.hentIdenter(Ident(personIdent))
-        hentFagsakPåPerson(personIdenter.map { PersonIdent(it.ident) }.toSet())?.also { fagsak ->
+        hentFagsakPåPerson(aktør)?.also { fagsak ->
             fagsakDeltagere.add(
                 RestFagsakDeltager(
-                    ident = personIdent,
+                    ident = aktør.aktivIdent(),
                     fagsakId = fagsak.id,
                     fagsakStatus = fagsak.status,
                     rolle = FagsakDeltagerRolle.FORELDER
@@ -417,18 +411,17 @@ class FagsakService(
             )
         }
 
-        barnasIdenter.forEach { barnIdent ->
-            personopplysningerService.hentIdenter(Ident(barnIdent)).filter { it.gruppe == "FOLKEREGISTERIDENT" }
-                .flatMap { hentFagsakerPåPerson(PersonIdent(it.ident)) }.toSet().forEach { fagsak ->
-                    fagsakDeltagere.add(
-                        RestFagsakDeltager(
-                            ident = barnIdent,
-                            fagsakId = fagsak.id,
-                            fagsakStatus = fagsak.status,
-                            rolle = FagsakDeltagerRolle.BARN
-                        )
+        barnasAktørId.forEach { barnsAktørId ->
+            hentFagsakerPåPerson(barnsAktørId).toSet().forEach { fagsak ->
+                fagsakDeltagere.add(
+                    RestFagsakDeltager(
+                        ident = barnsAktørId.aktivIdent(),
+                        fagsakId = fagsak.id,
+                        fagsakStatus = fagsak.status,
+                        rolle = FagsakDeltagerRolle.BARN
                     )
-                }
+                )
+            }
         }
 
         return fagsakDeltagere

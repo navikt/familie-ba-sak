@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
@@ -16,7 +17,7 @@ import no.nav.fpsak.tidsserie.StandardCombinators
 import java.time.LocalDate
 
 data class PeriodeResultat(
-    val personIdent: String,
+    val aktør: Aktør,
     val periodeFom: LocalDate?,
     val periodeTom: LocalDate?,
     val vilkårResultater: Set<PeriodeVilkår>

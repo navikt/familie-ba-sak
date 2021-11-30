@@ -12,10 +12,12 @@ class PersonidentService(
     private val aktørIdRepository: AktørIdRepository,
     private val personopplysningerService: PersonopplysningerService
 ) {
-    fun hentOgLagreAktørId(fødselsnummer: String): Aktør =
-        personidentRepository.findByIdOrNull(fødselsnummer)?.let { it.aktør }
+    // TODO: robustgjøring dnr/fnr skriv test for endringen i logikken i denne metoden. 
+    fun hentOgLagreAktør(ident: String): Aktør =
+        aktørIdRepository.findByIdOrNull(ident)
+            ?: personidentRepository.findByIdOrNull(ident)?.aktør
             ?: kotlin.run {
-                val identerFraPdl = personopplysningerService.hentIdenter(fødselsnummer, false)
+                val identerFraPdl = personopplysningerService.hentIdenter(ident, false)
                 val aktørIdStr = filtrerAktørId(identerFraPdl)
                 val fødselsnummerAktiv = filtrerAktivtFødselsnummer(identerFraPdl)
 
@@ -24,7 +26,7 @@ class PersonidentService(
             }
 
     fun hentOgLagreAktørIder(barnasFødselsnummer: List<String>): List<Aktør> {
-        return barnasFødselsnummer.map { hentOgLagreAktørId(it) }
+        return barnasFødselsnummer.map { hentOgLagreAktør(it) }
     }
 
     private fun opprettAktørIdOgPersonident(aktørIdStr: String, fødselsnummer: String): Aktør =

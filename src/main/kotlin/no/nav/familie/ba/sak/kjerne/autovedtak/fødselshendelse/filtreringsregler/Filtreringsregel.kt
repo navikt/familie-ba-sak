@@ -34,7 +34,7 @@ fun evaluerFiltreringsregler(fakta: FiltreringsreglerFakta) = Filtreringsregel.v
     }
 
 fun morHarGyldigFnr(fakta: FiltreringsreglerFakta): Evaluering {
-    val erMorFnrGyldig = (!erBostNummer(fakta.mor.personIdent.ident) && !erFDatnummer(fakta.mor.personIdent.ident))
+    val erMorFnrGyldig = (!erBostNummer(fakta.mor.aktør.aktørId) && !erFDatnummer(fakta.mor.aktør.aktørId))
 
     return if (erMorFnrGyldig) Evaluering.oppfylt(FiltreringsregelOppfylt.MOR_HAR_GYLDIG_FNR) else Evaluering.ikkeOppfylt(
         FiltreringsregelIkkeOppfylt.MOR_HAR_UGYLDIG_FNR
@@ -43,7 +43,7 @@ fun morHarGyldigFnr(fakta: FiltreringsreglerFakta): Evaluering {
 
 fun barnHarGyldigFnr(fakta: FiltreringsreglerFakta): Evaluering {
     val erbarnFnrGyldig =
-        fakta.barnaFraHendelse.all { (!erBostNummer(it.personIdent.ident) && !erFDatnummer(it.personIdent.ident)) }
+        fakta.barnaFraHendelse.all { (!erBostNummer(it.aktør.aktivIdent()) && !erFDatnummer(it.aktør.aktivIdent())) }
 
     return if (erbarnFnrGyldig) Evaluering.oppfylt(FiltreringsregelOppfylt.BARN_HAR_GYLDIG_FNR) else Evaluering.ikkeOppfylt(
         FiltreringsregelIkkeOppfylt.BARN_HAR_UGYLDIG_FNR

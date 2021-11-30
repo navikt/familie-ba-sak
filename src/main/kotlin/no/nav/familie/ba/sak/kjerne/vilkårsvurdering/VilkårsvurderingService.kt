@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVedtakBegrunnelseTilknyttetVilkår
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.dokument.BrevKlient
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurderingType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
@@ -29,13 +30,13 @@ class VilkårsvurderingService(
         return vilkårsvurderingRepository.finnBehandlingResultater(behandlingId = behandlingId)
     }
 
-    fun finnBarnMedEksplisittAvslagPåBehandling(behandlingId: Long): List<String> {
+    fun finnBarnMedEksplisittAvslagPåBehandling(behandlingId: Long): List<Aktør> {
         val eksplisistteAvslagPåBehandling = hentEksplisitteAvslagPåBehandling(behandlingId)
         return eksplisistteAvslagPåBehandling
             .filterNot {
                 it.personResultat?.erSøkersResultater() ?: error("VilkårResultat mangler kobling til PersonResultat")
             }
-            .map { it.personResultat!!.personIdent }
+            .map { it.personResultat!!.aktør }
             .distinct()
     }
 

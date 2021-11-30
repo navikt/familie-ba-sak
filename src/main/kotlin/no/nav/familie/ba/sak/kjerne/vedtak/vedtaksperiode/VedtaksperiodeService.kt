@@ -23,6 +23,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
+import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
@@ -45,6 +46,7 @@ import java.time.YearMonth
 @Service
 class VedtaksperiodeService(
     private val behandlingRepository: BehandlingRepository,
+    private val personidentService: PersonidentService,
     private val persongrunnlagRepository: PersonopplysningGrunnlagRepository,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val vedtaksperiodeRepository: VedtaksperiodeRepository,
@@ -175,12 +177,14 @@ class VedtaksperiodeService(
     }
 
     fun oppdaterVedtaksperioderForBarnVurdertIFødselshendelse(vedtak: Vedtak, barnaSomVurderes: List<String>) {
+        val barnaAktørSomVurderes = personidentService.hentOgLagreAktørIder(barnaSomVurderes)
+
         val vedtaksperioderMedBegrunnelser = vedtaksperiodeRepository.finnVedtaksperioderFor(vedtakId = vedtak.id)
         val persongrunnlag = persongrunnlagRepository.findByBehandlingAndAktiv(behandlingId = vedtak.behandling.id)
             ?: error(finnerIkkePersongrunnlagFeilmelding)
         val vurderteBarnSomPersoner =
-            barnaSomVurderes.map { barnSomVurderes ->
-                persongrunnlag.barna.find { it.personIdent.ident == barnSomVurderes }
+            barnaAktørSomVurderes.map { barnAktørSomVurderes ->
+                persongrunnlag.barna.find { it.aktør == barnAktørSomVurderes }
                     ?: error("Finner ikke barn som har blitt vurdert i persongrunnlaget")
             }
 
@@ -335,7 +339,9 @@ class VedtaksperiodeService(
                                         utvidetVedtaksperiodeMedBegrunnelser = utvidetVedtaksperiodeMedBegrunnelser,
                                         vilkårsvurdering = vilkårsvurdering,
                                         persongrunnlag = persongrunnlag,
-                                        identerMedUtbetaling = identerMedUtbetaling,
+                                        aktørerMedUtbetaling = personidentService.hentOgLagreAktørIder(
+                                                identerMedUtbetaling
+                                            ),
                                         triggesAv = triggesAv,
                                         endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(
                                                 behandling.id
@@ -385,7 +391,7 @@ class VedtaksperiodeService(
                 persongrunnlag.barna.filter { barn ->
                     barn.fødselsdato.toYearMonth().equals(fødselsMånedOgÅrForAlder18) ||
                         barn.fødselsdato.toYearMonth().equals(fødselsMånedOgÅrForAlder18.plusMonths(1))
-                }.map { it.personIdent.ident }
+                }.map { it.aktør.aktivIdent() }
             } else {
                 hentPersonIdenterFraUtbetalingsperioder(hentUtbetalingsperioder(vedtak.behandling))
             }

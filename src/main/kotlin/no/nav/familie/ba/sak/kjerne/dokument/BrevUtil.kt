@@ -352,7 +352,7 @@ fun UtvidetVedtaksperiodeMedBegrunnelser.finnBarnIInnvilgelsePeriode(
     val barnIPeriode = (identerIBegrunnelene + identerMedUtbetaling)
         .toSet()
         .mapNotNull { personIdent ->
-            personerIPersongrunnlag.find { it.personIdent.ident == personIdent }?.tilRestPerson()
+            personerIPersongrunnlag.find { it.aktør.aktivIdent() == personIdent }?.tilRestPerson()
         }
         .filter { it.type == PersonType.BARN }
 

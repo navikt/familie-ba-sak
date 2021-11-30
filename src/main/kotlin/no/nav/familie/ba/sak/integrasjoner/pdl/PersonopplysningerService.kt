@@ -28,24 +28,25 @@ class PersonopplysningerService(
     val personidentService: PersonidentService,
 ) {
 
-    fun hentPersoninfoMedRelasjonerOgRegisterinformasjon(personIdent: String): PersonInfo {
-        val personinfo = hentPersoninfoMedQuery(personIdent, PersonInfoQuery.MED_RELASJONER_OG_REGISTERINFORMASJON)
+    fun hentPersoninfoMedRelasjonerOgRegisterinformasjon(aktør: Aktør): PersonInfo {
+        val personinfo = hentPersoninfoMedQuery(aktør, PersonInfoQuery.MED_RELASJONER_OG_REGISTERINFORMASJON)
         val identerMedAdressebeskyttelse = mutableSetOf<Pair<String, FORELDERBARNRELASJONROLLE>>()
         val forelderBarnRelasjon = personinfo.forelderBarnRelasjon.mapNotNull {
             val harTilgang =
-                integrasjonClient.sjekkTilgangTilPersoner(listOf(it.personIdent.id)).firstOrNull()?.harTilgang
+                integrasjonClient.sjekkTilgangTilPersoner(listOf(it.aktør.aktivIdent()))
+                    .firstOrNull()?.harTilgang
                     ?: error("Fikk ikke svar på tilgang til person.")
             if (harTilgang) {
-                val relasjonsinfo = hentPersoninfoEnkel(it.personIdent.id)
+                val relasjonsinfo = hentPersoninfoEnkel(it.aktør)
                 ForelderBarnRelasjon(
-                    personIdent = it.personIdent,
+                    aktør = it.aktør,
                     relasjonsrolle = it.relasjonsrolle,
                     fødselsdato = relasjonsinfo.fødselsdato,
                     navn = relasjonsinfo.navn,
                     adressebeskyttelseGradering = relasjonsinfo.adressebeskyttelseGradering
                 )
             } else {
-                identerMedAdressebeskyttelse.add(Pair(it.personIdent.id, it.relasjonsrolle))
+                identerMedAdressebeskyttelse.add(Pair(it.aktør.aktivIdent(), it.relasjonsrolle))
                 null
             }
         }.toSet()
@@ -61,15 +62,13 @@ class PersonopplysningerService(
         )
     }
 
-    fun hentPersoninfoEnkel(personIdent: String): PersonInfo {
-        return hentPersoninfoMedQuery(personIdent, PersonInfoQuery.ENKEL)
+    fun hentPersoninfoEnkel(aktør: Aktør): PersonInfo {
+        return hentPersoninfoMedQuery(aktør, PersonInfoQuery.ENKEL)
     }
 
-    private fun hentPersoninfoMedQuery(personIdent: String, personInfoQuery: PersonInfoQuery): PersonInfo {
-        return pdlRestClient.hentPerson(personIdent, personInfoQuery)
+    private fun hentPersoninfoMedQuery(aktør: Aktør, personInfoQuery: PersonInfoQuery): PersonInfo {
+        return pdlRestClient.hentPerson(aktør, personInfoQuery)
     }
-
-    fun hentOgLagreAktørId(ident: Ident): Aktør = personidentService.hentOgLagreAktørId(ident.ident)
 
     fun hentAktivPersonIdent(ident: Ident): PersonIdent {
         val identer = hentIdenter(ident).filter { !it.historisk && it.gruppe == "FOLKEREGISTERIDENT" }.map { it.ident }
@@ -91,8 +90,8 @@ class PersonopplysningerService(
         }
     }
 
-    fun hentDødsfall(ident: Ident): DødsfallData {
-        val doedsfall = pdlRestClient.hentDødsfall(ident.ident)
+    fun hentDødsfall(aktør: Aktør): DødsfallData {
+        val doedsfall = pdlRestClient.hentDødsfall(aktør)
         return DødsfallResponse(
             erDød = doedsfall.isNotEmpty(),
             dødsdato = doedsfall.filter { it.doedsdato != null }
@@ -102,12 +101,12 @@ class PersonopplysningerService(
             .let { DødsfallData(erDød = it.erDød, dødsdato = it.dødsdato) }
     }
 
-    fun hentVergeData(ident: Ident): VergeData {
-        return VergeData(harVerge = harVerge(ident.ident).harVerge)
+    fun hentVergeData(aktør: Aktør): VergeData {
+        return VergeData(harVerge = harVerge(aktør).harVerge)
     }
 
-    fun harVerge(personIdent: String): VergeResponse {
-        val harVerge = pdlRestClient.hentVergemaalEllerFremtidsfullmakt(personIdent)
+    fun harVerge(aktør: Aktør): VergeResponse {
+        val harVerge = pdlRestClient.hentVergemaalEllerFremtidsfullmakt(aktør)
             .any { it.type != "stadfestetFremtidsfullmakt" }
 
         return VergeResponse(harVerge)
@@ -126,8 +125,8 @@ class PersonopplysningerService(
             frontendFeilmelding = "Person ($ident) mangler opphold."
         )
 
-    fun hentLandkodeUtenlandskBostedsadresse(ident: String): String {
-        val landkode = pdlRestClient.hentUtenlandskBostedsadresse(ident)?.landkode
+    fun hentLandkodeUtenlandskBostedsadresse(aktør: Aktør): String {
+        val landkode = pdlRestClient.hentUtenlandskBostedsadresse(aktør.aktivIdent())?.landkode
         return if (landkode.isNullOrEmpty()) UKJENT_LANDKODE else landkode
     }
 

@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.arbeidsforhold.GrArbeidsforhold
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.opphold.GrOpphold
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
@@ -16,11 +15,8 @@ import org.hibernate.annotations.FetchMode
 import java.time.LocalDate
 import java.time.Period
 import java.util.Objects
-import javax.persistence.AttributeOverride
-import javax.persistence.AttributeOverrides
 import javax.persistence.CascadeType
 import javax.persistence.Column
-import javax.persistence.Embedded
 import javax.persistence.Entity
 import javax.persistence.EntityListeners
 import javax.persistence.EnumType
@@ -60,14 +56,14 @@ data class Person(
     @Enumerated(EnumType.STRING) @Column(name = "maalform", nullable = false)
     val målform: Målform = Målform.NB,
 
-    @Embedded
+    /*@Embedded
     @AttributeOverrides(
         AttributeOverride(
             name = "ident",
             column = Column(name = "person_ident", updatable = false)
         )
     )
-    val personIdent: PersonIdent,
+    val XXYY: PersonIdent,*/
 
     @JsonIgnore
     @ManyToOne(optional = false)
@@ -120,14 +116,12 @@ data class Person(
     }
 
     override fun hashCode(): Int {
-        return Objects.hash(personIdent, fødselsdato)
+        return Objects.hash(aktør, fødselsdato)
     }
 
     fun hentAlder(): Int = Period.between(fødselsdato, LocalDate.now()).years
 
     fun hentSeksårsdag(): LocalDate = fødselsdato.plusYears(6)
-
-    fun hentAktørId(): Aktør = aktør
 }
 
 enum class Kjønn {

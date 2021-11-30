@@ -54,7 +54,7 @@ class BehandlingsresultatSteg(
             barna.map { barn ->
                 vilkårsvurdering.personResultater
                     .flatMap { it.vilkårResultater }
-                    .filter { it.personResultat?.personIdent == barn.personIdent.ident }
+                    .filter { it.personResultat?.aktør == barn.aktør }
                     .forEach { vilkårResultat ->
                         if (vilkårResultat.resultat == Resultat.OPPFYLT && vilkårResultat.periodeFom == null) {
                             listeAvFeil.add("Vilkår '${vilkårResultat.vilkårType}' for barn med fødselsdato ${barn.fødselsdato.tilDagMånedÅr()} mangler fom dato.")
@@ -88,7 +88,7 @@ class BehandlingsresultatSteg(
         val andreBehandlingerPåBarna = personopplysningGrunnlag.barna.map {
             Pair(
                 it,
-                beregningService.hentSentTilGodkjenningTilkjentYtelseForBarn(it.personIdent, behandling.fagsak.id)
+                beregningService.hentSentTilGodkjenningTilkjentYtelseForBarn(it.aktør, behandling.fagsak.id)
             )
         }
 

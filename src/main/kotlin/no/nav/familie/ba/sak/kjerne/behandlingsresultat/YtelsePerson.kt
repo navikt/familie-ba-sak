@@ -13,7 +13,7 @@ import java.util.Objects
  * @property ytelseSlutt Tom-dato på personens siste andel etter denne behandlingen (utbetalingsslutt)
  */
 data class YtelsePerson(
-    val personIdent: String,
+    val aktør: Aktør,
     val ytelseType: YtelseType,
     val kravOpprinnelse: List<KravOpprinnelse>,
     val resultater: Set<YtelsePersonResultat> = emptySet(),

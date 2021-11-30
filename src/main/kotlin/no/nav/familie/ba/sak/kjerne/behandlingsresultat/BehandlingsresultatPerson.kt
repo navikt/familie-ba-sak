@@ -6,12 +6,13 @@ import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import java.time.Period
 import java.time.YearMonth
 
 data class BehandlingsresultatPerson(
-    val personIdent: String = "",
+    val aktør: Aktør,
     val personType: PersonType,
     val søktForPerson: Boolean,
     val eksplisittAvslag: Boolean = false,
@@ -28,7 +29,7 @@ data class BehandlingsresultatPerson(
      */
     fun utledYtelsePerson(): YtelsePerson {
         return YtelsePerson(
-            personIdent = personIdent,
+            aktør = aktør,
             ytelseType = utledYtelseType(),
             kravOpprinnelse = utledKravOpprinnelser(),
         )
@@ -55,7 +56,7 @@ data class BehandlingsresultatPerson(
 }
 
 data class BehandlingsresultatUregistrertBarn(
-    val personIdent: String,
+    val aktør: Aktør,
     val navn: String
 )
 
