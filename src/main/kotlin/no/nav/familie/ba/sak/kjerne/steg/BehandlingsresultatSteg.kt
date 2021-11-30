@@ -134,9 +134,9 @@ class BehandlingsresultatSteg(
 
         if (behandlingMedResultat.skalRettFraBehandlingsresultatTilIverksetting() ||
             beregningService.kanAutomatiskIverksetteSmåbarnstilleggEndring(
-                behandling = behandlingMedResultat,
-                sistIverksatteBehandling = behandlingService.hentForrigeBehandlingSomErIverksatt(behandling = behandlingMedResultat)
-            )
+                    behandling = behandlingMedResultat,
+                    sistIverksatteBehandling = behandlingService.hentForrigeBehandlingSomErIverksatt(behandling = behandlingMedResultat)
+                )
         ) {
             behandlingService.oppdaterStatusPåBehandling(
                 behandlingMedResultat.id,
