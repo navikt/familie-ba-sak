@@ -270,14 +270,11 @@ class StegServiceTest(
         )
         assertTrue(
             henlagtBehandling.behandlingStegTilstand.firstOrNull {
-                it.behandlingSteg == StegType.FERDIGSTILLE_BEHANDLING && it.behandlingStegStatus == BehandlingStegStatus.IKKE_UTFØRT
+                it.behandlingSteg == StegType.FERDIGSTILLE_BEHANDLING && it.behandlingStegStatus == BehandlingStegStatus.UTFØRT
             } != null
         )
 
-        stegService.håndterFerdigstillBehandling(henlagtBehandling)
-
-        val behandlingEtterFerdigstiltBehandling = behandlingService.hent(behandlingId = henlagtBehandling.id)
-        assertEquals(StegType.BEHANDLING_AVSLUTTET, behandlingEtterFerdigstiltBehandling.steg)
+        assertEquals(StegType.BEHANDLING_AVSLUTTET, henlagtBehandling.steg)
     }
 
     @Test
