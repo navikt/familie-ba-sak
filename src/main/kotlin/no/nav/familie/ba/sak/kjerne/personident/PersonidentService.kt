@@ -1,8 +1,11 @@
 package no.nav.familie.ba.sak.kjerne.personident
 
+import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.IdentInformasjon
 import no.nav.familie.kontrakter.felles.PersonIdent
+import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.prosessering.domene.Task
 import org.slf4j.LoggerFactory
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
@@ -13,7 +16,8 @@ import java.time.LocalDateTime
 class PersonidentService(
     private val personidentRepository: PersonidentRepository,
     private val aktørIdRepository: AktørIdRepository,
-    private val personopplysningerService: PersonopplysningerService
+    private val personopplysningerService: PersonopplysningerService,
+    private val taskRepository: TaskRepositoryWrapper,
 ) {
 
     @Transactional
@@ -30,6 +34,20 @@ class PersonidentService(
             secureLogger.info("Legger til ny ident ${nyIdent.ident} på aktør ${aktør.aktørId}")
             opprettPersonIdent(aktør, nyIdent.ident)
         } else aktør
+    }
+
+    @Transactional
+    fun opprettTaskForIdentHendelse(nyIdent: PersonIdent) {
+        logger.info("Oppretter task for senere håndterering av ny ident")
+        secureLogger.info("Oppretter task for senere håndterering av ny ident ${nyIdent.ident}")
+        taskRepository.save(
+            Task(
+                type = IdentHendelseTask.TASK_STEP_TYPE,
+                payload = objectMapper.writeValueAsString(nyIdent)
+            ).medTriggerTid(
+                triggerTid = LocalDateTime.now().plusMinutes(1) // TODO: Settes med liten forsinkelse for test
+            )
+        )
     }
 
     fun hentOgLagreAktørId(fødselsnummer: String): Aktør =

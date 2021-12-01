@@ -20,7 +20,7 @@ class IdentController(
 
     @PostMapping
     fun håndterPdlHendelse(@RequestBody nyIdent: PersonIdent): ResponseEntity<Ressurs<String>> {
-        personidentService.håndterNyIdent(nyIdent)
+        personidentService.opprettTaskForIdentHendelse(nyIdent)
         return ResponseEntity.ok(Ressurs.success("Håndtert ny ident"))
     }
 }

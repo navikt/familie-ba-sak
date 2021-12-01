@@ -90,7 +90,9 @@ internal class PersonidentServiceTest {
             aktørIdSomFinnes
         }
 
-        val personidentService = PersonidentService(personidentRepository, aktørIdRepository, personopplysningerService)
+        val personidentService = PersonidentService(
+            personidentRepository, aktørIdRepository, personopplysningerService, mockk()
+        )
 
         val aktør = personidentService.håndterNyIdent(nyIdent = PersonIdent(personIdentSomSkalLeggesTil))
 
@@ -117,7 +119,9 @@ internal class PersonidentServiceTest {
 
         every { aktørIdRepository.findByIdOrNull(aktørIdSomIkkeFinnes.aktørId) }.answers { null }
 
-        val personidentService = PersonidentService(personidentRepository, aktørIdRepository, personopplysningerService)
+        val personidentService = PersonidentService(
+            personidentRepository, aktørIdRepository, personopplysningerService, mockk()
+        )
 
         val aktør = personidentService.håndterNyIdent(nyIdent = PersonIdent(personIdentSomSkalLeggesTil))
 
@@ -146,7 +150,9 @@ internal class PersonidentServiceTest {
 
         every { aktørIdRepository.findByIdOrNull(aktørIdSomFinnes.aktørId) }.answers { aktørIdSomFinnes }
 
-        val personidentService = PersonidentService(personidentRepository, aktørIdRepository, personopplysningerService)
+        val personidentService = PersonidentService(
+            personidentRepository, aktørIdRepository, personopplysningerService, mockk()
+        )
 
         val aktør = personidentService.håndterNyIdent(nyIdent = PersonIdent(personIdentSomFinnes))
 
@@ -159,7 +165,9 @@ internal class PersonidentServiceTest {
 
     @Test
     fun `Test aktør id som som ikke er persistert fra før`() {
-        val personidentService = PersonidentService(personidentRepository, aktørIdRepository, personopplysningerService)
+        val personidentService = PersonidentService(
+            personidentRepository, aktørIdRepository, personopplysningerService, mockk()
+        )
 
         every { personidentRepository.findByIdOrNull(personidentAktiv) } answers { null }
         every { aktørIdRepository.findByIdOrNull(aktørId.aktørId) } answers { null }
@@ -175,7 +183,9 @@ internal class PersonidentServiceTest {
     fun `Test aktør id som som er persistert fra før men ikke personident`() {
         val personidentHistorisk = randomFnr()
 
-        val personidentService = PersonidentService(personidentRepository, aktørIdRepository, personopplysningerService)
+        val personidentService = PersonidentService(
+            personidentRepository, aktørIdRepository, personopplysningerService, mockk()
+        )
 
         every { personidentRepository.findByIdOrNull(personidentAktiv) } answers { null }
         every { aktørIdRepository.findByIdOrNull(aktørId.aktørId) } answers {
@@ -201,7 +211,9 @@ internal class PersonidentServiceTest {
         val personidentRepository: PersonidentRepository = mockk()
         val aktørIdRepository: AktørIdRepository = mockk()
 
-        val personidentService = PersonidentService(personidentRepository, aktørIdRepository, personopplysningerService)
+        val personidentService = PersonidentService(
+            personidentRepository, aktørIdRepository, personopplysningerService, mockk()
+        )
 
         every { personidentRepository.findByIdOrNull(personidentAktiv) }.answers {
             Personident(fødselsnummer = personidentAktiv, aktør = aktørId, aktiv = true)
