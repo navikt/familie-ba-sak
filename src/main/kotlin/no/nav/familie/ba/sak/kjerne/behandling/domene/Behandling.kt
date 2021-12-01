@@ -132,6 +132,7 @@ data class Behandling(
             type == BehandlingType.TEKNISK_ENDRING -> false
             opprettetÅrsak == BehandlingÅrsak.SATSENDRING -> false
             erManuellMigrering() -> false
+            erMigrering() -> false
             else -> true
         }
     }
