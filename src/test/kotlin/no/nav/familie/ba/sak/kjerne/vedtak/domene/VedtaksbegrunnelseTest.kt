@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.NullablePeriode
 import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagRestVedtaksbegrunnelse
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
+import no.nav.familie.ba.sak.kjerne.behandlingsresultat.tilUregisrertBarnEnkel
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
@@ -27,7 +28,7 @@ class VedtaksbegrunnelseTest {
 
     val vedtaksperiode = NullablePeriode(LocalDate.now().minusMonths(1), LocalDate.now())
 
-    val personerIPersongrunnlag = listOf(søker, barn1, barn2, barn3)
+    val personerIPersongrunnlag = listOf(søker, barn1, barn2, barn3).map { it.tilBegrunnelsePerson() }
 
     val målform = Målform.NB
 
@@ -38,7 +39,7 @@ class VedtaksbegrunnelseTest {
 
         val brevbegrunnelse = restVedtaksbegrunnelse.tilBrevBegrunnelse(
             vedtaksperiode = vedtaksperiode,
-            personerIPersongrunnlag = personerIPersongrunnlag,
+            begrunnelsepersonerIBehandling = personerIPersongrunnlag,
             målform = målform,
             uregistrerteBarn = emptyList(),
             beløp = beløp
@@ -64,7 +65,7 @@ class VedtaksbegrunnelseTest {
 
         val brevbegrunnelse = restVedtaksbegrunnelseAvslag.tilBrevBegrunnelse(
             vedtaksperiode = vedtaksperiode,
-            personerIPersongrunnlag = personerIPersongrunnlag,
+            begrunnelsepersonerIBehandling = personerIPersongrunnlag,
             målform = målform,
             uregistrerteBarn = emptyList(),
             beløp = beløp
@@ -85,7 +86,12 @@ class VedtaksbegrunnelseTest {
         val uregistrerteBarn = listOf(
             lagPerson(type = PersonType.BARN),
             lagPerson(type = PersonType.BARN)
-        ).map { BarnMedOpplysninger(ident = it.personIdent.ident, fødselsdato = it.fødselsdato) }
+        ).map {
+            BarnMedOpplysninger(
+                ident = it.personIdent.ident,
+                fødselsdato = it.fødselsdato
+            ).tilUregisrertBarnEnkel()
+        }
 
         val restVedtaksbegrunnelseAvslag = lagRestVedtaksbegrunnelse(
             vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.AVSLAG_UREGISTRERT_BARN,
@@ -95,7 +101,7 @@ class VedtaksbegrunnelseTest {
 
         val brevbegrunnelse = restVedtaksbegrunnelseAvslag.tilBrevBegrunnelse(
             vedtaksperiode = vedtaksperiode,
-            personerIPersongrunnlag = personerIPersongrunnlag,
+            begrunnelsepersonerIBehandling = personerIPersongrunnlag,
             målform = målform,
             uregistrerteBarn = uregistrerteBarn,
             beløp = beløp

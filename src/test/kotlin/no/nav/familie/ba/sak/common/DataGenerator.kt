@@ -67,6 +67,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.RestVedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Utbetalingsperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtbetalingsperiodeDetalj
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtbetalingsperiodeDetaljEnkel
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
@@ -98,7 +99,18 @@ import kotlin.random.Random
 val fødselsnummerGenerator = FoedselsnummerGenerator()
 
 fun randomFnr(): String = fødselsnummerGenerator.foedselsnummer().asString
-fun randomAktørId(): Aktør = Aktør(Random.nextLong(1000_000_000_000, 31_121_299_99999).toString())
+fun randomAktørId(personIdenter: List<String> = emptyList()): Aktør = Aktør(
+    aktørId = Random.nextLong(1000_000_000_000, 31_121_299_99999).toString(),
+).also {
+    it.personidenter.addAll(
+        personIdenter.map { personIdent ->
+            Personident(
+                fødselsnummer = personIdent,
+                aktør = it
+            )
+        }
+    )
+}
 
 private var gjeldendeVedtakId: Long = abs(Random.nextLong(10000000))
 private var gjeldendeVedtakBegrunnelseId: Long = abs(Random.nextLong(10000000))
@@ -170,36 +182,34 @@ fun tilfeldigPerson(
     personType: PersonType = PersonType.BARN,
     kjønn: Kjønn = Kjønn.MANN,
     personIdent: PersonIdent = PersonIdent(randomFnr())
-) =
-    Person(
-        id = nestePersonId(),
-        aktør = randomAktørId(),
-        personIdent = personIdent,
-        fødselsdato = fødselsdato,
-        type = personType,
-        personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 0),
-        navn = "",
-        kjønn = kjønn,
-        målform = Målform.NB
-    ).apply { sivilstander = listOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this)) }
+) = Person(
+    id = nestePersonId(),
+    aktør = randomAktørId(listOf(personIdent.ident)),
+    personIdent = personIdent,
+    fødselsdato = fødselsdato,
+    type = personType,
+    personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 0),
+    navn = "",
+    kjønn = kjønn,
+    målform = Målform.NB
+).apply { sivilstander = listOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this)) }
 
 fun tilfeldigSøker(
     fødselsdato: LocalDate = LocalDate.now(),
     personType: PersonType = PersonType.SØKER,
     kjønn: Kjønn = Kjønn.MANN,
     personIdent: PersonIdent = PersonIdent(randomFnr())
-) =
-    Person(
-        id = nestePersonId(),
-        aktør = randomAktørId(),
-        personIdent = personIdent,
-        fødselsdato = fødselsdato,
-        type = personType,
-        personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 0),
-        navn = "",
-        kjønn = kjønn,
-        målform = Målform.NB
-    ).apply { sivilstander = listOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this)) }
+) = Person(
+    id = nestePersonId(),
+    aktør = randomAktørId(listOf(personIdent.ident)),
+    personIdent = personIdent,
+    fødselsdato = fødselsdato,
+    type = personType,
+    personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 0),
+    navn = "",
+    kjønn = kjønn,
+    målform = Målform.NB
+).apply { sivilstander = listOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this)) }
 
 fun lagVedtak(behandling: Behandling = lagBehandling()) =
     Vedtak(
@@ -852,6 +862,13 @@ fun lagUtbetalingsperiodeDetalj(
     utbetaltPerMnd: Int = sats(YtelseType.ORDINÆR_BARNETRYGD),
     prosent: BigDecimal = BigDecimal.valueOf(100)
 ) = UtbetalingsperiodeDetalj(person, ytelseType, utbetaltPerMnd, false, prosent)
+
+fun lagUtbetalingsperiodeDetaljEnkel(
+    personIdent: String = randomFnr(),
+    ytelseType: YtelseType = YtelseType.ORDINÆR_BARNETRYGD,
+    utbetaltPerMnd: Int = sats(YtelseType.ORDINÆR_BARNETRYGD),
+    prosent: BigDecimal = BigDecimal.valueOf(100)
+) = UtbetalingsperiodeDetaljEnkel(personIdent, ytelseType, utbetaltPerMnd, prosent)
 
 fun lagVedtaksbegrunnelse(
     vedtakBegrunnelseSpesifikasjon: VedtakBegrunnelseSpesifikasjon =

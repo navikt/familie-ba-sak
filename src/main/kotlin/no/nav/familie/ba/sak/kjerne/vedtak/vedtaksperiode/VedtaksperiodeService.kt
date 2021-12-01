@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
+import no.nav.familie.ba.sak.kjerne.behandlingsresultat.tilUregisrertBarnEnkel
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Brevmal
@@ -34,8 +35,9 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.Begrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeRepository
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.byggBegrunnelserOgFritekster
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilBegrunnelsePerson
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilVedtaksbegrunnelseFritekst
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.v2byggBegrunnelserOgFritekster
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
 import org.springframework.stereotype.Service
@@ -413,7 +415,8 @@ class VedtaksperiodeService(
         val persongrunnlag = persongrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandlingId)
             ?: throw Feil("Finner ikke persongrunnlag for behandling $behandlingId")
         val uregistrerteBarn =
-            søknadGrunnlagService.hentAktiv(behandlingId = behandlingId)?.hentUregistrerteBarn() ?: emptyList()
+            søknadGrunnlagService.hentAktiv(behandlingId = behandlingId)?.hentUregistrerteBarn()
+                ?.map { it.tilUregisrertBarnEnkel() } ?: emptyList()
 
         val utvidetVedtaksperiodeMedBegrunnelse = vedtaksperiode.tilUtvidetVedtaksperiodeMedBegrunnelser(
             personopplysningGrunnlag = persongrunnlag,
@@ -422,8 +425,13 @@ class VedtaksperiodeService(
             )
         )
 
-        return utvidetVedtaksperiodeMedBegrunnelse.byggBegrunnelserOgFritekster(
-            personerIPersongrunnlag = persongrunnlag.personer.toList(),
+        return v2byggBegrunnelserOgFritekster(
+            fom = utvidetVedtaksperiodeMedBegrunnelse.fom,
+            tom = utvidetVedtaksperiodeMedBegrunnelse.tom,
+            utbetalingsperiodeDetaljerEnkel = utvidetVedtaksperiodeMedBegrunnelse.utbetalingsperiodeDetaljer.map { it.tilUtbetalingsperiodeDetaljEnkel() },
+            standardbegrunnelser = utvidetVedtaksperiodeMedBegrunnelse.begrunnelser,
+            fritekster = utvidetVedtaksperiodeMedBegrunnelse.fritekster,
+            begrunnelsepersonerIBehandling = persongrunnlag.personer.map { it.tilBegrunnelsePerson() },
             målform = persongrunnlag.søker.målform,
             uregistrerteBarn = uregistrerteBarn
         )

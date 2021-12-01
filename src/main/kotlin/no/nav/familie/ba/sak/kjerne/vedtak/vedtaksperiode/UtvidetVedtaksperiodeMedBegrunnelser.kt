@@ -9,7 +9,6 @@ import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
-import no.nav.familie.ba.sak.kjerne.dokument.totaltUtbetalt
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
@@ -120,10 +119,10 @@ private fun hentAndelerForSegment(
     )
 }
 
-fun UtvidetVedtaksperiodeMedBegrunnelser.utbetaltForPersonerIBegrunnelse(
+fun List<UtbetalingsperiodeDetaljEnkel>.utbetaltForPersonerIBegrunnelse(
     restVedtaksbegrunnelse: RestVedtaksbegrunnelse
-) = this.utbetalingsperiodeDetaljer.filter { utbetalingsperiodeDetalj ->
+) = this.filter { utbetalingsperiodeDetalj ->
     restVedtaksbegrunnelse.personIdenter.contains(
-        utbetalingsperiodeDetalj.person.personIdent
+        utbetalingsperiodeDetalj.personIdent
     )
-}.totaltUtbetalt()
+}.sumOf { it.utbetaltPerMnd }
