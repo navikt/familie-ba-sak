@@ -202,7 +202,7 @@ class FagsakService(
         return RestBaseFagsak(
             opprettetTidspunkt = fagsak.opprettetTidspunkt,
             id = fagsak.id,
-            søkerFødselsnummer = fagsak.hentAktivIdent().ident,
+            søkerFødselsnummer = fagsak.aktør.aktivIdent(),
             status = fagsak.status,
             underBehandling =
             if (aktivBehandling == null)
@@ -343,7 +343,7 @@ class FagsakService(
                     if (behandling.fagsak.aktør == aktør) {
                         assosierteFagsakDeltagerMap[behandling.fagsak.id] = RestFagsakDeltager(
                             navn = personInfoMedRelasjoner.navn,
-                            ident = behandling.fagsak.hentAktivIdent().ident,
+                            ident = behandling.fagsak.aktør.aktivIdent(),
                             rolle = FagsakDeltagerRolle.FORELDER,
                             kjønn = personInfoMedRelasjoner.kjønn,
                             fagsakId = behandling.fagsak.id
@@ -367,7 +367,7 @@ class FagsakService(
 
                             assosierteFagsakDeltagerMap[behandling.fagsak.id] = RestFagsakDeltager(
                                 navn = personinfo.navn,
-                                ident = behandling.fagsak.hentAktivIdent().ident,
+                                ident = behandling.fagsak.aktør.aktivIdent(),
                                 rolle = FagsakDeltagerRolle.FORELDER,
                                 kjønn = personinfo.kjønn,
                                 fagsakId = behandling.fagsak.id

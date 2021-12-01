@@ -32,7 +32,7 @@ class JournalførVedtaksbrev(
     ): StegType {
         val vedtak = vedtakService.hent(vedtakId = data.vedtakId)
 
-        val fnr = vedtak.behandling.fagsak.hentAktivIdent().ident
+        val fnr = vedtak.behandling.fagsak.aktør.aktivIdent()
         val fagsakId = "${vedtak.behandling.fagsak.id}"
 
         val behanlendeEnhet =

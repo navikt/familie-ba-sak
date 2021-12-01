@@ -117,7 +117,7 @@ class SaksstatistikkService(
 
     fun mapTilSakDvh(sakId: Long): SakDVH? {
         val fagsak = fagsakService.hentPåFagsakId(sakId)
-        val søkerIdent = fagsak.hentAktivIdent().ident
+        val søkerIdent = fagsak.aktør.aktivIdent()
         val aktivBehandling = behandlingService.hentAktivForFagsak(fagsakId = fagsak.id)
         // Skipper saker som er fødselshendelse
         if (aktivBehandling?.opprettetÅrsak == FØDSELSHENDELSE && !envService.skalIverksetteBehandling()) return null
