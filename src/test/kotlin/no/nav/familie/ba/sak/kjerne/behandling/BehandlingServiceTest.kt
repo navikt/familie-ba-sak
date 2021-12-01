@@ -56,6 +56,8 @@ class BehandlingServiceTest(
 
     @Test
     fun `Skal svare med behandling som er opprettet før X tid`() {
+        databaseCleanupService.truncate()
+
         val fnr = randomFnr()
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
