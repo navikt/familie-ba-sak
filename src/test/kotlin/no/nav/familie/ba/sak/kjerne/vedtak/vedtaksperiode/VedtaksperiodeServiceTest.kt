@@ -247,7 +247,10 @@ class VedtaksperiodeServiceTest(
                 standardbegrunnelserFraFrontend = listOf(VedtakBegrunnelseSpesifikasjon.REDUKSJON_BOSATT_I_RIKTET)
             )
         }
-        assertTrue(funksjonellFeil.frontendFeilmelding?.contains("REDUKSJON_BOSATT_I_RIKTET' forventer vurdering på 'Bosatt i riket'") == true)
+        assertTrue(
+            funksjonellFeil.frontendFeilmelding
+                ?.contains("'Barn har flyttet fra Norge' forventer vurdering på 'Bosatt i riket'") == true
+        )
     }
 
     @Test
