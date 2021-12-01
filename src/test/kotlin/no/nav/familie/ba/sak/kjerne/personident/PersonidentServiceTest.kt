@@ -8,11 +8,12 @@ import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.IdentInformasjon
-import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.springframework.data.repository.findByIdOrNull
+import java.time.LocalDateTime
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class PersonidentServiceTest() {
@@ -51,12 +52,12 @@ internal class PersonidentServiceTest() {
 
         val response = personidentService.hentOgLagreAktørIder(listOf(personidentAktiv))
 
-        Assertions.assertEquals(aktørId.aktørId, response.single().aktørId)
+        assertEquals(aktørId.aktørId, response.single().aktørId)
 
         val slotAktør = slot<Aktør>()
         verify(exactly = 1) { aktørIdRepository.save(capture(slotAktør)) }
-        Assertions.assertEquals(aktørId.aktørId, slotAktør.captured.aktørId)
-        Assertions.assertEquals(personidentAktiv, slotAktør.captured.personidenter.single().fødselsnummer)
+        assertEquals(aktørId.aktørId, slotAktør.captured.aktørId)
+        assertEquals(personidentAktiv, slotAktør.captured.personidenter.single().fødselsnummer)
     }
 
     @Test
@@ -84,22 +85,22 @@ internal class PersonidentServiceTest() {
 
         val response = personidentService.hentOgLagreAktørIder(listOf(personidentAktiv))
 
-        Assertions.assertEquals(aktørId.aktørId, response.single().aktørId)
+        assertEquals(aktørId.aktørId, response.single().aktørId)
 
         verify(exactly = 0) { aktørIdRepository.save(any()) }
 
         val slotPersonident = mutableListOf<Personident>()
         verify(exactly = 2) { personidentRepository.save(capture(slotPersonident)) }
 
-        Assertions.assertEquals(false, slotPersonident.first().aktiv)
-        Assertions.assertEquals(aktørId.aktørId, slotPersonident.first().aktør.aktørId)
-        Assertions.assertEquals(personidentHistorisk, slotPersonident.first().fødselsnummer)
-        Assertions.assertEquals(null, slotPersonident.first().gjelderTil)
+        assertEquals(false, slotPersonident.first().aktiv)
+        assertEquals(aktørId.aktørId, slotPersonident.first().aktør.aktørId)
+        assertEquals(personidentHistorisk, slotPersonident.first().fødselsnummer)
+        assertEquals(null, slotPersonident.first().gjelderTil)
 
-        Assertions.assertEquals(true, slotPersonident.last().aktiv)
-        Assertions.assertEquals(aktørId.aktørId, slotPersonident.last().aktør.aktørId)
-        Assertions.assertEquals(personidentAktiv, slotPersonident.last().fødselsnummer)
-        Assertions.assertEquals(null, slotPersonident.last().gjelderTil)
+        assertEquals(true, slotPersonident.last().aktiv)
+        assertEquals(aktørId.aktørId, slotPersonident.last().aktør.aktørId)
+        assertEquals(personidentAktiv, slotPersonident.last().fødselsnummer)
+        assertEquals(null, slotPersonident.last().gjelderTil)
     }
 
     @Test
@@ -115,9 +116,41 @@ internal class PersonidentServiceTest() {
 
         val response = personidentService.hentOgLagreAktørIder(listOf(personidentAktiv))
 
-        Assertions.assertEquals(aktørId.aktørId, response.single().aktørId)
+        assertEquals(aktørId.aktørId, response.single().aktørId)
 
         verify(exactly = 0) { aktørIdRepository.save(any()) }
         verify(exactly = 0) { personidentRepository.save(any()) }
+    }
+
+    @Test
+    fun `Hent ident gyldig på et gitt tidspunkt`() {
+        val aktør = Aktør(aktørId = "123")
+        val now = LocalDateTime.now()
+        val personidentRepository: PersonidentRepository = mockk()
+
+        every { personidentRepository.hentAlleIdenterForAktørid(any()) } returns listOf(
+            Personident(fødselsnummer = "11111111111", aktør, false, now.minusYears(2)),
+            Personident(fødselsnummer = "22222222222", aktør, false, now.minusYears(1)),
+            Personident(fødselsnummer = "33333333333", aktør, true, null)
+        )
+
+        val aktørIdRepository: AktørIdRepository = mockk()
+
+        val personidentService = PersonidentService(personidentRepository, aktørIdRepository, personopplysningerService)
+
+        assertEquals(
+            "33333333333",
+            personidentService.hentGjeldendeFødselsnummerForTidspunkt(aktør, LocalDateTime.now())
+        )
+        assertEquals(
+            "11111111111",
+            personidentService.hentGjeldendeFødselsnummerForTidspunkt(aktør, now.minusYears(3))
+        )
+        assertEquals(
+            "2222222222",
+            personidentService.hentGjeldendeFødselsnummerForTidspunkt(
+                aktør, now.minusYears(1).minusMonths(1)
+            )
+        )
     }
 }

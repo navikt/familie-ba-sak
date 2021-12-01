@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.familie.kontrakter.felles.Behandlingstema
 import no.nav.familie.kontrakter.felles.oppgave.Behandlingstype
 import org.hibernate.annotations.SortComparator
+import java.time.LocalDateTime
 import javax.persistence.CascadeType
 import javax.persistence.Column
 import javax.persistence.Entity
@@ -91,6 +92,12 @@ data class Behandling(
     override fun toString(): String {
         return "Behandling(id=$id, fagsak=${fagsak.id}, kategori=$kategori, underkategori=$underkategori, steg=$steg)"
     }
+
+    fun erLåstForEndinger() = this.steg.rekkefølge < StegType.BESLUTTE_VEDTAK.rekkefølge
+
+    fun låstForEndringerTidspunkt(): LocalDateTime? = this.behandlingStegTilstand
+        .filter { it.behandlingSteg.rekkefølge >= StegType.BESLUTTE_VEDTAK.rekkefølge }
+        .minOfOrNull { it.opprettetTidspunkt }
 
     // Skal kun brukes på gamle behandlinger
     fun erTekniskOpphør(): Boolean {
