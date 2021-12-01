@@ -88,10 +88,10 @@ fun kanAutomatiskIverksetteSmåbarnstillegg(
 ): Boolean {
     // Kan ikke automatisk innvilge perioder mer enn en måned frem i tid
     if ((innvilgedeMånedPerioder + reduserteMånedPerioder).any {
-        it.fom.isAfter(
+            it.fom.isAfter(
                 YearMonth.now().nesteMåned()
             )
-    }
+        }
     ) return false
 
     return innvilgedeMånedPerioder.all {
@@ -120,8 +120,7 @@ fun finnAktuellVedtaksperiodeOgLeggTilSmåbarnstilleggbegrunnelse(
                 )
             }
             innvilgetMånedPeriode == null && redusertMånedPeriode != null -> {
-                if (redusertMånedPeriode.fom == YearMonth.now()) null // Opphøret er begrunnet i automatisk brev
-                else Pair(
+                Pair(
                     vedtaksperioderMedBegrunnelser.find { it.fom?.toYearMonth() == redusertMånedPeriode.fom && it.type == Vedtaksperiodetype.UTBETALING },
                     VedtakBegrunnelseSpesifikasjon.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_FULL_OVERGANGSSTØNAD
                 )

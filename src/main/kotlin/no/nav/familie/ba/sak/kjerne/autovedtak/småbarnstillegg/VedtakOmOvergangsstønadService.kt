@@ -117,6 +117,12 @@ class VedtakOmOvergangsstønadService(
             } catch (vedtaksperiodefinnerSmåbarnstilleggFeil: VedtaksperiodefinnerSmåbarnstilleggFeil) {
                 logger.error(vedtaksperiodefinnerSmåbarnstilleggFeil.message)
 
+                // Tilbakestill behandling slik at den kan behandles videre manuelt
+                behandlingService.oppdaterStatusPåBehandling(
+                    behandlingId = behandlingEtterBehandlingsresultat.id,
+                    status = BehandlingStatus.UTREDES
+                )
+                vedtakService.resettTilVurderTilbakekrevingSteg(behandlingId = behandlingEtterBehandlingsresultat.id)
                 return kanIkkeBehandleAutomatisk(
                     behandling = behandlingEtterBehandlingsresultat,
                     metric = antallVedtakOmOvergangsstønadTilManuellBehandling[TilManuellBehandlingÅrsak.KLARER_IKKE_BEGRUNNE]!!,

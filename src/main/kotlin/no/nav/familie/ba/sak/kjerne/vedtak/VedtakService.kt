@@ -91,6 +91,18 @@ class VedtakService(
         tilbakekrevingService.slettTilbakekrevingPåBehandling(behandlingId)
     }
 
+    /**
+     * Resetter behandlingen tilbake til vurder tilbakekrevingssteget
+     */
+    @Transactional
+    fun resettTilVurderTilbakekrevingSteg(behandlingId: Long) {
+        behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(
+            behandlingId = behandlingId,
+            steg = StegType.VURDER_TILBAKEKREVING
+        )
+        tilbakekrevingService.slettTilbakekrevingPåBehandling(behandlingId)
+    }
+
     companion object {
 
         private val logger = LoggerFactory.getLogger(VedtakService::class.java)
