@@ -3,12 +3,12 @@ package no.nav.familie.ba.sak.kjerne.behandling
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.DistributionSummary
 import io.micrometer.core.instrument.Metrics
+import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
-import no.nav.familie.ba.sak.kjerne.dokument.BrevKlient
 import no.nav.familie.ba.sak.kjerne.dokument.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
@@ -24,12 +24,12 @@ class BehandlingMetrikker(
     private val behandlingRepository: BehandlingRepository,
     private val vedtakRepository: VedtakRepository,
     private val vedtaksperiodeRepository: VedtaksperiodeRepository,
-    brevKlient: BrevKlient
+    private val sanityService: SanityService
 ) {
     private val sanityBegrunnelser: List<SanityBegrunnelse>
 
     init {
-        sanityBegrunnelser = brevKlient.hentSanityBegrunnelser()
+        sanityBegrunnelser = sanityService.hentSanityBegrunnelser()
     }
 
     private val antallManuelleBehandlinger: Counter =
