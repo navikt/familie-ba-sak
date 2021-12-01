@@ -82,19 +82,6 @@ class RestTemplateTestConfig {
             .build()
     }
 
-    @Bean("medProxy")
-    fun restTemplateMedProxy(): RestOperations {
-        return RestTemplateBuilder()
-            .interceptors(
-                MdcValuesPropagatingClientInterceptor()
-            )
-            .additionalMessageConverters(
-                ByteArrayHttpMessageConverter(),
-                MappingJackson2HttpMessageConverter(objectMapper)
-            )
-            .build()
-    }
-
     @Bean
     fun restTemplateBuilderMedProxy(
         consumerIdClientInterceptor: ConsumerIdClientInterceptor,

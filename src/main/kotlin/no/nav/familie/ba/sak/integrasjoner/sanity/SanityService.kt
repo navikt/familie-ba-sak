@@ -1,12 +1,26 @@
 package no.nav.familie.ba.sak.integrasjoner.sanity
 
+import no.nav.familie.ba.sak.kjerne.dokument.BrevKlient
 import no.nav.familie.ba.sak.kjerne.dokument.domene.SanityBegrunnelse
+import org.springframework.core.env.Environment
 import org.springframework.stereotype.Service
 
 @Service
-class SanityService(private val cachedSanityKlient: CachedSanityKlient) {
+class SanityService(
+    private val cachedSanityKlient: CachedSanityKlient,
+    private val brevKlient: BrevKlient,
+    private val environment: Environment
+) {
 
     fun hentSanityBegrunnelser(): List<SanityBegrunnelse> {
-        return cachedSanityKlient.hentSanityBegrunnelserCached()
+        val erIMiljø = environment.activeProfiles.any {
+            listOf("preprod", "prod").contains(it.trim(' '))
+        }
+
+        return if (erIMiljø) {
+            brevKlient.hentSanityBegrunnelser()
+        } else {
+            cachedSanityKlient.hentSanityBegrunnelserCached()
+        }
     }
 }

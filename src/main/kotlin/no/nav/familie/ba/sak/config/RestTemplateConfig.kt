@@ -96,22 +96,6 @@ class RestTemplateConfig(
             .build()
     }
 
-    @Bean("medProxy")
-    fun restTemplateMedProxy(): RestOperations {
-        return RestTemplateBuilder()
-            .interceptors(
-                MdcValuesPropagatingClientInterceptor()
-            )
-            .additionalMessageConverters(
-                ByteArrayHttpMessageConverter(),
-                MappingJackson2HttpMessageConverter(objectMapper)
-            )
-            .also {
-                if (trengerProxy()) it.additionalCustomizers(NaisProxyCustomizer())
-            }
-            .build()
-    }
-
     @Bean
     fun restTemplate(): RestTemplate {
         return RestTemplate(
