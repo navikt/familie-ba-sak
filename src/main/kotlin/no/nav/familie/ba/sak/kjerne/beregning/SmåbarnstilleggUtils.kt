@@ -88,10 +88,10 @@ fun kanAutomatiskIverksetteSmåbarnstillegg(
 ): Boolean {
     // Kan ikke automatisk innvilge perioder mer enn en måned frem i tid
     if ((innvilgedeMånedPerioder + reduserteMånedPerioder).any {
-        it.fom.isAfter(
+            it.fom.isAfter(
                 YearMonth.now().nesteMåned()
             )
-    }
+        }
     ) return false
 
     return innvilgedeMånedPerioder.all {
@@ -132,7 +132,9 @@ fun finnAktuellVedtaksperiodeOgLeggTilSmåbarnstilleggbegrunnelse(
     if (vedtaksperiodeSomSkalOppdateres == null) {
         LoggerFactory.getLogger("secureLogger")
             .info(
-                "Finner ikke aktuell periode å begrunne ved autovedtak småbarnstillegg. " +
+                "Finner ikke aktuell periode å begrunne ved autovedtak småbarnstillegg.\n" +
+                    "Innvilget periode: $innvilgetMånedPeriode.\n" +
+                    "Redusert periode: $redusertMånedPeriode.\n" +
                     "Perioder: ${vedtaksperioderMedBegrunnelser.map { "Periode(type=${it.type}, fom=${it.fom}, tom=${it.tom})" }}"
             )
 
