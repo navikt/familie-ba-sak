@@ -19,7 +19,7 @@ import java.time.LocalDate
 
 data class SmåbarnstilleggBarnetrygdGenerator(
     val behandlingId: Long,
-    val tilkjentYtelse: TilkjentYtelse
+    val tilkjentYtelse: TilkjentYtelse,
 ) {
 
     fun lagSmåbarnstilleggAndeler(
@@ -29,7 +29,6 @@ data class SmåbarnstilleggBarnetrygdGenerator(
     ): List<AndelTilkjentYtelse> {
         if (perioderMedFullOvergangsstønad.isEmpty() || andelerSøker.isEmpty()) return emptyList()
 
-        val søkersIdent = perioderMedFullOvergangsstønad.firstOrNull()?.personIdent
         val søkerAktør = andelerSøker.firstOrNull()?.aktør
 
         val perioderMedFullOvergangsstønadTidslinje =
@@ -101,9 +100,9 @@ data class SmåbarnstilleggBarnetrygdGenerator(
                 AndelTilkjentYtelse(
                     behandlingId = behandlingId,
                     tilkjentYtelse = tilkjentYtelse,
-                    personIdent = søkersIdent
+                    personIdent = søkerAktør?.aktivIdent()
                         ?: error("Genererer andeler for småbarnstillegg uten noen perioder med full overgangsstønad"),
-                    aktør = søkerAktør!!,
+                    aktør = søkerAktør,
                     stønadFom = it.fom.toYearMonth(),
                     stønadTom = it.tom.toYearMonth(),
                     kalkulertUtbetalingsbeløp = ordinærSatsForPeriode,
