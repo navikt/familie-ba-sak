@@ -1,7 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
-import io.mockk.every
-import no.nav.familie.ba.sak.common.LocalDateService
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
@@ -22,7 +20,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate.now
 
 class FødselshendelseRevurderingTest(
-    @Autowired private val mockLocalDateService: LocalDateService,
     @Autowired private val behandleFødselshendelseTask: BehandleFødselshendelseTask,
     @Autowired private val fagsakService: FagsakService,
     @Autowired private val behandlingService: BehandlingService,
@@ -32,7 +29,6 @@ class FødselshendelseRevurderingTest(
 
     @Test
     fun `Skal innvilge fødselshendelse på mor med 1 barn med eksisterende utbetalinger`() {
-        every { mockLocalDateService.now() } returns now().minusMonths(12) andThen now()
 
         val revurderingsbarnSinFødselsdato = now().minusMonths(3)
         val scenario = mockServerKlient().lagScenario(
@@ -102,7 +98,10 @@ class FødselshendelseRevurderingTest(
 
         val utbetalingsperioder = aktivBehandling.utbetalingsperioder
         val gjeldendeUtbetalingsperiode = utbetalingsperioder.find {
-            it.periodeFom.toYearMonth() == SatsService.tilleggOrdinærSatsNesteMånedTilTester.gyldigFom.toYearMonth()
+            it.periodeFom.toYearMonth() == maxOf(
+                SatsService.tilleggOrdinærSatsNesteMånedTilTester.gyldigFom.toYearMonth(),
+                now().minusMonths(2).toYearMonth()
+            )
         }!!
 
         assertUtbetalingsperiode(
