@@ -34,7 +34,7 @@ class IverksettMotOppdragTask(
 
     override fun onCompletion(task: Task) {
         val iverksettingTask = objectMapper.readValue(task.payload, IverksettingTaskDTO::class.java)
-        val nyTask = Task(
+        val statusFraOppdragTask = Task(
             type = StatusFraOppdragTask.TASK_STEP_TYPE,
             payload = objectMapper.writeValueAsString(
                 StatusFraOppdragDTO(
@@ -46,7 +46,13 @@ class IverksettMotOppdragTask(
             ),
             properties = task.metadata
         )
-        taskRepository.save(nyTask)
+
+        val sendMeldingTilBisysTask = Task(
+            type = SendMeldingTilBisysTask.TASK_STEP_TYPE,
+            payload = iverksettingTask.behandlingsId.toString())
+
+        taskRepository.save(statusFraOppdragTask)
+        taskRepository.save(sendMeldingTilBisysTask)
     }
 
     companion object {

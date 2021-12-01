@@ -50,6 +50,10 @@ class BisysService(
         )
     }
 
+    fun sendStartUtvidetbarnetrygdTilBisys() {
+
+    }
+
     private fun hentBisysPerioderFraInfotrygd(
         personIdenter: List<String>,
         fraDato: LocalDate
