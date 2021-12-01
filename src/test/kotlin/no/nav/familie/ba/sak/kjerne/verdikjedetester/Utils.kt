@@ -128,7 +128,7 @@ fun behandleFødselshendelse(
     val behandlingEtterVurdering =
         behandlingService.hentAktivForFagsak(fagsakId = restMinimalFagsakEtterVurdering.data!!.id)!!
     if (behandlingEtterVurdering.erHenlagt()) {
-        return stegService.håndterFerdigstillBehandling(behandlingEtterVurdering)
+        return behandlingEtterVurdering
     }
 
     generellAssertFagsak(
