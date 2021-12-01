@@ -5,7 +5,7 @@ import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakPersonRepository
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import org.springframework.stereotype.Service
@@ -14,8 +14,8 @@ import java.time.LocalDate
 @Service
 class BisysService(
     private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
-    private val fagsakPersonRepository: FagsakPersonRepository,
     private val behandlingService: BehandlingService,
+    private val fagsakRepository: FagsakRepository,
     private val personidentService: PersonidentService,
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
 ) {
@@ -61,7 +61,7 @@ class BisysService(
         aktør: Aktør,
         fraDato: LocalDate
     ): List<UtvidetBarnetrygdPeriode> {
-        val fagsak = fagsakPersonRepository.finnFagsak(aktør)
+        val fagsak = fagsakRepository.finnFagsakForAktør(aktør)
         val behandling = fagsak?.let { behandlingService.hentSisteBehandlingSomErIverksatt(it.id) }
         if (fagsak == null || behandling == null) {
             return emptyList()

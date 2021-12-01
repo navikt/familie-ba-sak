@@ -118,7 +118,7 @@ class BeregningService(
                 vilkårsvurdering = vilkårsvurdering,
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 behandling = behandling
-            ) { personIdent, aktørId ->
+            ) { aktørId ->
                 småbarnstilleggService.hentOgLagrePerioderMedFullOvergangsstønad(
                     aktør = aktørId,
                     behandlingId = behandling.id

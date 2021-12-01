@@ -8,7 +8,6 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.internal.ForelderBarnRelasjonMask
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.IdentInformasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PersonInfo
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.VergeData
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
@@ -30,7 +29,7 @@ class PersonopplysningerService(
 
     fun hentPersoninfoMedRelasjonerOgRegisterinformasjon(aktør: Aktør): PersonInfo {
         val personinfo = hentPersoninfoMedQuery(aktør, PersonInfoQuery.MED_RELASJONER_OG_REGISTERINFORMASJON)
-        val identerMedAdressebeskyttelse = mutableSetOf<Pair<String, FORELDERBARNRELASJONROLLE>>()
+        val identerMedAdressebeskyttelse = mutableSetOf<Pair<Aktør, FORELDERBARNRELASJONROLLE>>()
         val forelderBarnRelasjon = personinfo.forelderBarnRelasjon.mapNotNull {
             val harTilgang =
                 integrasjonClient.sjekkTilgangTilPersoner(listOf(it.aktør.aktivIdent()))
@@ -46,7 +45,7 @@ class PersonopplysningerService(
                     adressebeskyttelseGradering = relasjonsinfo.adressebeskyttelseGradering
                 )
             } else {
-                identerMedAdressebeskyttelse.add(Pair(it.aktør.aktivIdent(), it.relasjonsrolle))
+                identerMedAdressebeskyttelse.add(Pair(it.aktør, it.relasjonsrolle))
                 null
             }
         }.toSet()
@@ -68,12 +67,6 @@ class PersonopplysningerService(
 
     private fun hentPersoninfoMedQuery(aktør: Aktør, personInfoQuery: PersonInfoQuery): PersonInfo {
         return pdlRestClient.hentPerson(aktør, personInfoQuery)
-    }
-
-    fun hentAktivPersonIdent(ident: Ident): PersonIdent {
-        val identer = hentIdenter(ident).filter { !it.historisk && it.gruppe == "FOLKEREGISTERIDENT" }.map { it.ident }
-        if (identer.isEmpty()) error("Finner ingen aktiv personIdent for ident")
-        return PersonIdent(identer.first())
     }
 
     fun hentIdenter(ident: Ident): List<IdentInformasjon> {
@@ -112,26 +105,26 @@ class PersonopplysningerService(
         return VergeResponse(harVerge)
     }
 
-    fun hentGjeldendeStatsborgerskap(ident: Ident): Statsborgerskap =
-        pdlRestClient.hentStatsborgerskapUtenHistorikk(ident.ident).firstOrNull()
+    fun hentGjeldendeStatsborgerskap(aktør: Aktør): Statsborgerskap =
+        pdlRestClient.hentStatsborgerskapUtenHistorikk(aktør).firstOrNull()
             ?: throw Feil(
                 message = "Bruker mangler statsborgerskap",
-                frontendFeilmelding = "Person ($ident) mangler statsborgerskap."
+                frontendFeilmelding = "Person (${aktør.aktivIdent()}) mangler statsborgerskap."
             )
 
-    fun hentGjeldendeOpphold(ident: String): Opphold = pdlRestClient.hentOppholdUtenHistorikk(ident).firstOrNull()
+    fun hentGjeldendeOpphold(aktør: Aktør): Opphold = pdlRestClient.hentOppholdUtenHistorikk(aktør).firstOrNull()
         ?: throw Feil(
             message = "Bruker mangler opphold",
-            frontendFeilmelding = "Person ($ident) mangler opphold."
+            frontendFeilmelding = "Person (${aktør.aktivIdent()}) mangler opphold."
         )
 
     fun hentLandkodeUtenlandskBostedsadresse(aktør: Aktør): String {
-        val landkode = pdlRestClient.hentUtenlandskBostedsadresse(aktør.aktivIdent())?.landkode
+        val landkode = pdlRestClient.hentUtenlandskBostedsadresse(aktør)?.landkode
         return if (landkode.isNullOrEmpty()) UKJENT_LANDKODE else landkode
     }
 
-    fun hentAdressebeskyttelseSomSystembruker(ident: String): ADRESSEBESKYTTELSEGRADERING =
-        systemOnlyPdlRestClient.hentAdressebeskyttelse(ident).tilAdressebeskyttelse()
+    fun hentAdressebeskyttelseSomSystembruker(aktør: Aktør): ADRESSEBESKYTTELSEGRADERING =
+        systemOnlyPdlRestClient.hentAdressebeskyttelse(aktør).tilAdressebeskyttelse()
 
     companion object {
 

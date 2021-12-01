@@ -106,7 +106,7 @@ fun PersonResultat.tilPeriodeResultater(brukMåned: Boolean, inkluderUtvidet: Bo
     val kombinertTidslinje = lagTidslinjeMedOverlappendePerioder(tidslinjer)
     return kombinertTidslinje.toSegments().map { segment ->
         PeriodeResultat(
-            personIdent = personIdent,
+            aktør = aktør,
             periodeFom = if (segment.fom == TIDENES_BEGYNNELSE) null else segment.fom,
             periodeTom = if (segment.tom == TIDENES_ENDE) null else segment.tom,
             vilkårResultater = segment.value.map {

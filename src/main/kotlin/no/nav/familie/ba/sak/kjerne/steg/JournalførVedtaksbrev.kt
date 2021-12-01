@@ -47,7 +47,7 @@ class JournalførVedtaksbrev(
 
         val nyTask = DistribuerDokumentTask.opprettDistribuerDokumentTask(
             distribuerDokumentDTO = DistribuerDokumentDTO(
-                personIdent = vedtak.behandling.fagsak.hentAktivIdent().ident,
+                personIdent = vedtak.behandling.fagsak.aktør.aktivIdent(),
                 behandlingId = vedtak.behandling.id,
                 journalpostId = journalpostId,
                 brevmal = hentBrevtype(behandling),

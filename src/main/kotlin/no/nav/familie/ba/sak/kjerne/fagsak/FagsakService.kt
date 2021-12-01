@@ -37,7 +37,6 @@ import no.nav.familie.ba.sak.task.BehandleAnnullerFødselDto
 import no.nav.familie.ba.sak.task.BehandleAnnullertFødselTask
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
-import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
@@ -82,32 +81,30 @@ class FagsakService(
 
     @Transactional
     fun hentEllerOpprettFagsak(fagsakRequest: FagsakRequest): Ressurs<RestMinimalFagsak> {
-        val personIdent = when {
-            fagsakRequest.personIdent !== null -> PersonIdent(fagsakRequest.personIdent)
-            fagsakRequest.aktørId !== null -> personopplysningerService.hentAktivPersonIdent(Ident(fagsakRequest.aktørId))
+        val aktør = when {
+            fagsakRequest.personIdent !== null -> personidentService.hentOgLagreAktør(fagsakRequest.personIdent)
+            fagsakRequest.aktørId !== null -> personidentService.hentOgLagreAktør(fagsakRequest.aktørId)
             else -> throw Feil(
                 "Hverken aktørid eller personident er satt på fagsak-requesten. Klarer ikke opprette eller hente fagsak.",
                 "Fagsak er forsøkt opprettet uten ident. Dette er en systemfeil, vennligst ta kontakt med systemansvarlig.",
                 HttpStatus.BAD_REQUEST
             )
         }
-        val fagsak = hentEllerOpprettFagsak(personIdent)
+        val fagsak = hentEllerOpprettFagsak(aktør)
         return hentRestMinimalFagsak(fagsakId = fagsak.id).also {
             skyggesakService.opprettSkyggesak(fagsak.aktør, fagsak.id)
         }
     }
 
     @Transactional
-    fun hentEllerOpprettFagsak(personIdent: PersonIdent, fraAutomatiskBehandling: Boolean = false): Fagsak {
-        val aktør = personidentService.hentOgLagreAktør(personIdent.ident)
-
+    fun hentEllerOpprettFagsak(aktør: Aktør, fraAutomatiskBehandling: Boolean = false): Fagsak {
         var fagsak = fagsakRepository.finnFagsakForAktør(aktør)
         if (fagsak == null) {
             tilgangService.verifiserHarTilgangTilHandling(BehandlerRolle.SAKSBEHANDLER, "opprette fagsak")
 
             // TODO: robustgjøring dnr/fnr fjern opprettelse av fagsak person ved contract. 
             fagsak = Fagsak(aktør = aktør).also {
-                it.søkerIdenter = setOf(FagsakPerson(personIdent = personIdent, fagsak = it))
+                it.søkerIdenter = setOf(FagsakPerson(personIdent = PersonIdent(aktør.aktivIdent()), fagsak = it))
                 lagre(it)
             }
             if (fraAutomatiskBehandling) {
@@ -217,8 +214,8 @@ class FagsakService(
     }
 
     fun hentEllerOpprettFagsakForPersonIdent(fødselsnummer: String, fraAutomatiskBehandling: Boolean = false): Fagsak {
-        val personIdent = PersonIdent(fødselsnummer)
-        return hentEllerOpprettFagsak(personIdent, fraAutomatiskBehandling)
+        val aktør = personidentService.hentOgLagreAktør(fødselsnummer)
+        return hentEllerOpprettFagsak(aktør, fraAutomatiskBehandling)
     }
 
     fun hent(personIdent: PersonIdent): Fagsak? {
@@ -240,7 +237,7 @@ class FagsakService(
 
     fun hentFagsakDeltager(aktør: Aktør): List<RestFagsakDeltager> {
         val maskertDeltaker = runCatching {
-            hentMaskertFagsakdeltakerVedManglendeTilgang(aktør.aktivIdent())
+            hentMaskertFagsakdeltakerVedManglendeTilgang(aktør)
         }.fold(
             onSuccess = { it },
             onFailure = { return sjekkStatuskodeOgHåndterFeil(it) }
@@ -286,7 +283,7 @@ class FagsakService(
                 } == null
                 ) {
                     val maskertForelder =
-                        hentMaskertFagsakdeltakerVedManglendeTilgang(relasjon.aktør.aktivIdent())
+                        hentMaskertFagsakdeltakerVedManglendeTilgang(relasjon.aktør)
                     if (maskertForelder != null) {
                         assosierteFagsakDeltagere.add(maskertForelder.copy(rolle = FagsakDeltagerRolle.FORELDER))
                     } else {
@@ -353,7 +350,7 @@ class FagsakService(
                         )
                     } else {
                         val maskertForelder =
-                            hentMaskertFagsakdeltakerVedManglendeTilgang(behandling.fagsak.aktør.aktivIdent())
+                            hentMaskertFagsakdeltakerVedManglendeTilgang(behandling.fagsak.aktør)
                         if (maskertForelder != null) {
                             assosierteFagsakDeltagerMap[behandling.fagsak.id] =
                                 maskertForelder.copy(rolle = FagsakDeltagerRolle.FORELDER)
@@ -385,10 +382,10 @@ class FagsakService(
         return assosierteFagsakDeltagerMap.values.toMutableList()
     }
 
-    private fun hentMaskertFagsakdeltakerVedManglendeTilgang(personIdent: String): RestFagsakDeltager? {
-        val harTilgang = integrasjonClient.sjekkTilgangTilPersoner(listOf(personIdent)).first().harTilgang
+    private fun hentMaskertFagsakdeltakerVedManglendeTilgang(aktør: Aktør): RestFagsakDeltager? {
+        val harTilgang = integrasjonClient.sjekkTilgangTilPersoner(listOf(aktør.aktivIdent())).first().harTilgang
         return if (!harTilgang) {
-            val adressebeskyttelse = personopplysningerService.hentAdressebeskyttelseSomSystembruker(personIdent)
+            val adressebeskyttelse = personopplysningerService.hentAdressebeskyttelseSomSystembruker(aktør)
             RestFagsakDeltager(
                 rolle = FagsakDeltagerRolle.UKJENT,
                 adressebeskyttelseGradering = adressebeskyttelse,

@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import java.time.YearMonth
 import java.util.Objects
 
@@ -33,7 +34,7 @@ data class YtelsePerson(
      * Søknadskrav trumfer, men håndteres ikke av equals/hashcode.
      */
     override fun hashCode(): Int {
-        return Objects.hash(personIdent, ytelseType)
+        return Objects.hash(aktør, ytelseType)
     }
 
     fun erFramstiltKravForIInneværendeBehandling() = this.kravOpprinnelse.contains(KravOpprinnelse.INNEVÆRENDE)

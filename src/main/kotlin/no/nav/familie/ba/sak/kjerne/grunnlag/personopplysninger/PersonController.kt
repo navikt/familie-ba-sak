@@ -32,7 +32,8 @@ class PersonController(
 
     @GetMapping
     fun hentPerson(@RequestHeader personIdent: String): ResponseEntity<Ressurs<RestPersonInfo>> {
-        val personinfo = integrasjonClient.hentMaskertPersonInfoVedManglendeTilgang(personIdent)
+        val aktør = personidentService.hentOgLagreAktør(personIdent)
+        val personinfo = integrasjonClient.hentMaskertPersonInfoVedManglendeTilgang(aktør)
             ?: personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(
                 personidentService.hentOgLagreAktør(
                     personIdent

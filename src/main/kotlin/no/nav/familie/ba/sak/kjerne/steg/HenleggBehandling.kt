@@ -50,7 +50,7 @@ class HenleggBehandling(
 
         behandlingService.lagreEllerOppdater(behandling)
 
-        opprettFerdigstillBehandling(behandling.id, behandling.fagsak.hentAktivIdent().ident)
+        opprettFerdigstillBehandling(behandling.id, behandling.fagsak.aktør.aktivIdent())
 
         return hentNesteStegForNormalFlyt(behandling)
     }

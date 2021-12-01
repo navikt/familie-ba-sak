@@ -22,7 +22,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.initStatus
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatUtils
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakPersonRepository
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
@@ -49,7 +49,7 @@ class BehandlingService(
     private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val behandlingMetrikker: BehandlingMetrikker,
-    private val fagsakPersonRepository: FagsakPersonRepository,
+    private val fagsakRepository: FagsakRepository,
     private val vedtakRepository: VedtakRepository,
     private val loggService: LoggService,
     private val arbeidsfordelingService: ArbeidsfordelingService,
@@ -65,7 +65,7 @@ class BehandlingService(
     fun opprettBehandling(nyBehandling: NyBehandling): Behandling {
         val søkersAktør = personidentService.hentOgLagreAktør(nyBehandling.søkersIdent)
 
-        val fagsak = fagsakPersonRepository.finnFagsak(søkersAktør)
+        val fagsak = fagsakRepository.finnFagsakForAktør(søkersAktør)
             ?: throw FunksjonellFeil(
                 melding = "Kan ikke lage behandling på person uten tilknyttet fagsak",
                 frontendFeilmelding = "Kan ikke lage behandling på person uten tilknyttet fagsak"

@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.fagsak
 
 import no.nav.familie.ba.sak.common.BaseEntitet
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import java.util.Objects
 import javax.persistence.CascadeType
@@ -50,11 +49,6 @@ data class Fagsak(
     )
     var søkerIdenter: Set<FagsakPerson> = setOf()
 ) : BaseEntitet() {
-
-    fun hentAktivIdent(): PersonIdent {
-        return søkerIdenter.maxByOrNull { it.opprettetTidspunkt }?.personIdent
-            ?: error("Fant ingen ident på fagsak $id")
-    }
 
     override fun hashCode(): Int {
         return Objects.hashCode(id)

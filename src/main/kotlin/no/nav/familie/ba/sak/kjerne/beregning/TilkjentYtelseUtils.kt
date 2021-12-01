@@ -61,7 +61,7 @@ object TilkjentYtelseUtils {
             .flatMap { periodeResultatBarn ->
                 relevanteSøkerPerioder
                     .flatMap { overlappendePerioderesultatSøker ->
-                        val person = identBarnMap[periodeResultatBarn.personIdent]
+                        val person = identBarnMap[periodeResultatBarn.aktør.aktørId]
                             ?: error("Finner ikke barn på map over barna i behandlingen")
                         val beløpsperioder =
                             beregnBeløpsperioder(
@@ -260,7 +260,7 @@ object TilkjentYtelseUtils {
                                 barnetsPeriodeLøperVidere = barnetsPeriodeLøperVidere
                             )
                         ) &&
-                    periodeResultatBarn.personIdent == periodeResultat.personIdent
+                    periodeResultatBarn.aktør == periodeResultat.aktør
             }
 
         val oppfyltTom = if (skalVidereføresEnMånedEkstra) minsteTom.plusMonths(1) else minsteTom
