@@ -201,6 +201,9 @@ class BehandlingService(
     }
 
     @Transactional
+    fun lagre(behandling: Behandling) = behandlingRepository.save(behandling)
+
+    @Transactional
     fun opprettOgInitierNyttVedtakForBehandling(
         behandling: Behandling,
         kopierVedtakBegrunnelser: Boolean = false,
