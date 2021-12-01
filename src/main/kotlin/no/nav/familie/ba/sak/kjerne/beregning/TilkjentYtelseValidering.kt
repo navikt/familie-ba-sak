@@ -71,7 +71,7 @@ object TilkjentYtelseValidering {
 
     fun validerAtBarnIkkeFårFlereUtbetalingerSammePeriode(
         behandlendeBehandlingTilkjentYtelse: TilkjentYtelse,
-        barnMedAndreTilkjentYtelse: List<Pair<Person, List<TilkjentYtelse>>>,
+        barnMedAndreRelevanteTilkjentYtelser: List<Pair<Person, List<TilkjentYtelse>>>,
         personopplysningGrunnlag: PersonopplysningGrunnlag
     ) {
         val barna = personopplysningGrunnlag.barna.sortedBy { it.fødselsdato }
@@ -80,7 +80,7 @@ object TilkjentYtelseValidering {
 
         barnasAndeler.forEach { (barn, andeler) ->
             val barnsAndelerFraAndreBehandlinger =
-                barnMedAndreTilkjentYtelse.filter { it.first.personIdent.ident == barn.personIdent.ident }
+                barnMedAndreRelevanteTilkjentYtelser.filter { it.first.personIdent.ident == barn.personIdent.ident }
                     .flatMap { it.second }
                     .flatMap { it.andelerTilkjentYtelse }
                     .filter { it.personIdent == barn.personIdent.ident }

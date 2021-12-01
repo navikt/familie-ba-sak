@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.endretutbetaling.domene
 
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.NullableMånedPeriode
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
@@ -111,17 +112,20 @@ data class EndretUtbetalingAndel(
             søknadstidspunkt == null ||
             (begrunnelse == null || begrunnelse!!.isEmpty())
         ) {
-            throw Feil("Person, prosent, fom, tom, årsak, begrunnese og søknadstidspunkt skal være utfylt: $this.tostring()")
+            val feilmelding =
+                "Person, prosent, fom, tom, årsak, begrunnese og søknadstidspunkt skal være utfylt: $this.tostring()"
+            throw FunksjonellFeil(melding = feilmelding, frontendFeilmelding = feilmelding)
         }
 
         if (fom!! > tom!!)
-            throw Feil(
-                message = "fom må være lik eller komme før tom",
+            throw FunksjonellFeil(
+                melding = "fom må være lik eller komme før tom",
                 frontendFeilmelding = "Du kan ikke sette en f.o.m. dato som er etter t.o.m. dato",
             )
 
-        if (årsak == Årsak.DELT_BOSTED && avtaletidspunktDeltBosted == null)
-            throw Feil("Avtaletidspunkt skal være utfylt når årsak er delt bosted: $this.tostring()")
+        if (årsak == Årsak.DELT_BOSTED && avtaletidspunktDeltBosted == null) {
+            throw FunksjonellFeil("Avtaletidspunkt skal være utfylt når årsak er delt bosted: $this.tostring()")
+        }
 
         return true
     }

@@ -8,13 +8,13 @@ import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedFritekster
+import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
 import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
-import no.nav.familie.ba.sak.kjerne.dokument.BrevKlient
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.dokument.domene.tilTriggesAv
 import no.nav.familie.ba.sak.kjerne.dokument.hentVedtaksbrevmal
@@ -49,7 +49,7 @@ class VedtaksperiodeService(
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val vedtaksperiodeRepository: VedtaksperiodeRepository,
     private val vilkårsvurderingRepository: VilkårsvurderingRepository,
-    private val brevKlient: BrevKlient,
+    private val sanityService: SanityService,
     private val søknadGrunnlagService: SøknadGrunnlagService,
     private val endretUtbetalingAndelRepository: EndretUtbetalingAndelRepository
 ) {
@@ -97,7 +97,7 @@ class VedtaksperiodeService(
 
         val begrunnelseGrunnlag = hentBegrunnelseGrunnlag(behandling, vedtaksperiodeMedBegrunnelser)
 
-        val sanityBegrunnelser = brevKlient.hentSanityBegrunnelser()
+        val sanityBegrunnelser = sanityService.hentSanityBegrunnelser()
 
         vedtaksperiodeMedBegrunnelser.settBegrunnelser(
             standardbegrunnelserFraFrontend.mapNotNull {
@@ -296,7 +296,7 @@ class VedtaksperiodeService(
             persongrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
                 ?: error(finnerIkkePersongrunnlagFeilmelding)
 
-        val sanityBegrunnelser = brevKlient.hentSanityBegrunnelser()
+        val sanityBegrunnelser = sanityService.hentSanityBegrunnelser()
 
         return vedtaksperioderMedBegrunnelser.map {
             it.tilUtvidetVedtaksperiodeMedBegrunnelser(
@@ -377,7 +377,10 @@ class VedtaksperiodeService(
                 ?: throw Feil("Finner ingen eller flere vedtaksperioder ved fortsatt innvilget")
 
         val personidenter =
-            if (vedtakBegrunnelseSpesifikasjon == VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR) {
+            if (vedtakBegrunnelseSpesifikasjon == VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR ||
+                vedtakBegrunnelseSpesifikasjon == VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR_AUTOVEDTAK
+            ) {
+                // Barn som har fylt 18 år har ingen utbetalingsperioder og må hentes fra persongrunnlaget.
                 val fødselsMånedOgÅrForAlder18 = YearMonth.from(LocalDate.now()).minusYears(18)
                 val persongrunnlag = persongrunnlagRepository.findByBehandlingAndAktiv(vedtak.behandling.id)
                     ?: error("Fant ikke persongrunnlag for behandling ${vedtak.behandling.id}")
