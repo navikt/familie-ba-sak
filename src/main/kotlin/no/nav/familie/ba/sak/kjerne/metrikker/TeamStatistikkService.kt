@@ -163,6 +163,25 @@ class TeamStatistikkService(
         tidSidenOpprettelseåpneBehandlingerPerMånedGauge.register(rows)
     }
 
+    @Scheduled(cron = "0 0 9 1 * *")
+    fun loggÅpneBehandlingerSomHarLiggetLenge() {
+        listOf(180, 150, 120, 90, 60).fold(mutableSetOf<Long>()) { acc, dagerSiden ->
+            val åpneBehandlinger = behandlingRepository.finnÅpneBehandlinger(
+                opprettetFør = LocalDateTime.now().minusDays(dagerSiden.toLong())
+            ).filter { !acc.contains(it.id) }
+
+            if (åpneBehandlinger.isNotEmpty()) {
+                logger.warn(
+                    "${åpneBehandlinger.size} åpne behandlinger har ligget i over $dagerSiden dager: \n" +
+                        "${åpneBehandlinger.map { behandling -> "$behandling\n" }}"
+                )
+                acc.addAll(åpneBehandlinger.map { it.id })
+            }
+
+            acc
+        }
+    }
+
     private fun erLeaderOgLoggResultat(beskrivelse: String, resultat: String): Boolean {
         return if (LeaderClient.isLeader() != true) {
             logger.info("Node er ikke leader, teller ikke metrikk. $beskrivelse: $resultat")
