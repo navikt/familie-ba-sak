@@ -87,5 +87,3 @@ spec:
         - application: familie-ba-infotrygd
         - application: familie-ef-sak
           cluster: dev-gcp
-      external:
-        - host: xsrv1mh6.apicdn.sanity.io

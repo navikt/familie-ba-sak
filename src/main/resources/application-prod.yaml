@@ -147,6 +147,5 @@ SANITY_DATASET: "ba-brev"
 NORG2_BASE_URL: https://app.adeo.no/norg2
 FAMILIE_BREV_API_URL: https://familie-brev.intern.nav.no
 FAMILIE_TILBAKE_API_URL: https://familie-tilbake.intern.nav.no/api
-SANITY_FAMILIE_API_URL: https://xsrv1mh6.apicdn.sanity.io/v2021-06-07/data/query/ba-brev
 
 ENVIRONMENT_NAME: p
