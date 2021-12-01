@@ -218,7 +218,9 @@ class LoggService(
                 type = LoggType.GODKJENNE_VEDTAK,
                 tittel = if (beslutning.erGodkjent()) "Vedtak godkjent " else "Vedtak underkjent",
                 rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(rolleConfig, BehandlerRolle.BESLUTTER),
-                tekst = if (!beslutning.erGodkjent()) "Begrunnelse: $begrunnelse" else ""
+                tekst = if (!beslutning.erGodkjent()) "Begrunnelse: $begrunnelse" else "",
+                opprettetAv = if (behandling.erManuellMigrering()) SikkerhetContext.SYSTEM_NAVN else
+                    SikkerhetContext.hentSaksbehandlerNavn()
             )
         )
     }
