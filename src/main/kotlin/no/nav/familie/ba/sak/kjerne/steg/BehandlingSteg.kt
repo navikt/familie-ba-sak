@@ -186,7 +186,10 @@ fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType): StegTyp
                 VENTE_PÅ_STATUS_FRA_ØKONOMI -> FERDIGSTILLE_BEHANDLING
                 FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET
                 BEHANDLING_AVSLUTTET -> BEHANDLING_AVSLUTTET
-                else -> throw IllegalStateException("StegType ${utførendeStegType.displayName()} ugyldig ved migrering")
+                else -> throw IllegalStateException(
+                    "StegType ${utførendeStegType.displayName()} " +
+                        "er ugyldig ved migreringsbehandling med endre migreringsdato"
+                )
             }
         }
         BehandlingÅrsak.TEKNISK_ENDRING -> {

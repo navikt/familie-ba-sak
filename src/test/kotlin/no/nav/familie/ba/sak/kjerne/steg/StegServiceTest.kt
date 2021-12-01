@@ -299,7 +299,7 @@ class StegServiceTest(
     }
 
     @Test
-    fun `skal kjøre gjennom steg for migreringsbehandling`() {
+    fun `skal kjøre gjennom steg for migreringsbehandling med årsak endre migreringsdato`() {
         val søkerFnr = randomFnr()
         val barnFnr = ClientMocks.barnFnr[0]
         val barnasIdenter = listOf(barnFnr)
@@ -372,13 +372,11 @@ class StegServiceTest(
         }
         val totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(behandling.id)
         assertNotNull(totrinnskontroll)
-        assertTrue {
-            totrinnskontroll!!.godkjent &&
-                totrinnskontroll.saksbehandler == SikkerhetContext.hentSaksbehandlerNavn() &&
-                totrinnskontroll.saksbehandlerId == SikkerhetContext.hentSaksbehandler() &&
-                totrinnskontroll.beslutter == SikkerhetContext.SYSTEM_NAVN
-            totrinnskontroll.beslutterId == SikkerhetContext.SYSTEM_FORKORTELSE
-        }
+        assertEquals(true, totrinnskontroll!!.godkjent)
+        assertEquals(SikkerhetContext.hentSaksbehandlerNavn(), totrinnskontroll.saksbehandler)
+        assertEquals(SikkerhetContext.hentSaksbehandler(), totrinnskontroll.saksbehandlerId)
+        assertEquals(SikkerhetContext.SYSTEM_NAVN, totrinnskontroll.beslutter)
+        assertEquals(SikkerhetContext.SYSTEM_FORKORTELSE, totrinnskontroll.beslutterId)
     }
 
     private fun kjørGjennomStegInkludertVurderTilbakekreving(): Behandling {

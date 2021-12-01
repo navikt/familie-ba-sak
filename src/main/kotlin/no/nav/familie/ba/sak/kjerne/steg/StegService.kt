@@ -216,15 +216,6 @@ class StegService(
     }
 
     @Transactional
-    fun håndterSendTilBeslutterOgBeslutteVedtakForMigreringsbehandling(
-        behandling: Behandling,
-        behandlendeEnhet: String
-    ): Behandling {
-        val behandlingEtterBeslutterSteg = håndterSendTilBeslutter(behandling, behandlendeEnhet)
-        return håndterBeslutningForVedtak(behandlingEtterBeslutterSteg, RestBeslutningPåVedtak(Beslutning.GODKJENT))
-    }
-
-    @Transactional
     fun håndterBeslutningForVedtak(behandling: Behandling, restBeslutningPåVedtak: RestBeslutningPåVedtak): Behandling {
         val behandlingSteg: BeslutteVedtak =
             hentBehandlingSteg(StegType.BESLUTTE_VEDTAK) as BeslutteVedtak
