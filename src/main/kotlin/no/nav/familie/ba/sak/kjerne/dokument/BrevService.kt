@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.Utils.storForbokstavIHvertOrd
 import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.tilMånedÅr
+import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.hentUtvidetYtelseScenario
@@ -48,7 +49,7 @@ class BrevService(
     private val simuleringService: SimuleringService,
     private val vedtaksperiodeService: VedtaksperiodeService,
     private val søknadGrunnlagService: SøknadGrunnlagService,
-    private val brevKlient: BrevKlient,
+    private val sanityService: SanityService,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
 ) {
 
@@ -171,7 +172,7 @@ class BrevService(
 
         val grunnlagOgSignaturData = hentGrunnlagOgSignaturData(vedtak)
 
-        val sanityBegrunnelser = brevKlient.hentSanityBegrunnelser()
+        val sanityBegrunnelser = sanityService.hentSanityBegrunnelser()
 
         val hjemler = hentHjemmeltekst(utvidetVedtaksperioderMedBegrunnelser, sanityBegrunnelser)
 

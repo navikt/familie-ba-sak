@@ -42,7 +42,10 @@ class RestTemplateTestConfig {
     ): RestOperations {
         return RestTemplateBuilder()
             .interceptors(consumerIdClientInterceptor, mdcValuesPropagatingClientInterceptor)
-            .additionalMessageConverters(ByteArrayHttpMessageConverter(), MappingJackson2HttpMessageConverter(objectMapper))
+            .additionalMessageConverters(
+                ByteArrayHttpMessageConverter(),
+                MappingJackson2HttpMessageConverter(objectMapper)
+            )
             .build()
     }
 
