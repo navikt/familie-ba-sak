@@ -49,7 +49,6 @@ import java.time.Period
 @Service
 class FagsakService(
     private val fagsakRepository: FagsakRepository,
-    private val fagsakPersonRepository: FagsakPersonRepository,
     private val personRepository: PersonRepository,
     private val personidentService: PersonidentService,
     private val behandlingRepository: BehandlingRepository,
@@ -218,10 +217,7 @@ class FagsakService(
         return hentEllerOpprettFagsak(aktør, fraAutomatiskBehandling)
     }
 
-    fun hent(personIdent: PersonIdent): Fagsak? {
-        val aktør = personidentService.hentOgLagreAktør(personIdent.ident)
-        return fagsakRepository.finnFagsakForAktør(aktør)
-    }
+    fun hent(aktør: Aktør): Fagsak? = fagsakRepository.finnFagsakForAktør(aktør)
 
     fun hentPåFagsakId(fagsakId: Long): Fagsak {
         return fagsakRepository.finnFagsak(fagsakId) ?: error("Finner ikke fagsak med id $fagsakId")

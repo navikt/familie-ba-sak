@@ -17,7 +17,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.VedtaksperiodefinnerSmåbarnstille
 import no.nav.familie.ba.sak.kjerne.beregning.finnAktuellVedtaksperiodeOgLeggTilSmåbarnstilleggbegrunnelse
 import no.nav.familie.ba.sak.kjerne.beregning.hentInnvilgedeOgReduserteAndelerSmåbarnstillegg
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
@@ -71,13 +71,13 @@ class VedtakOmOvergangsstønadService(
         }
 
     @Transactional
-    fun håndterVedtakOmOvergangsstønad(personIdent: String): String {
+    fun håndterVedtakOmOvergangsstønad(aktør: Aktør): String {
         if (!featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_SMÅBARNSTILLEGG_AUTOMATISK))
             return "automatisk behandling av småbarnstillegg er ikke påskrudd"
 
         antallVedtakOmOvergangsstønad.increment()
 
-        val fagsak = fagsakService.hent(personIdent = PersonIdent(personIdent)) ?: return "har ikke fagsak i systemet"
+        val fagsak = fagsakService.hent(aktør = aktør) ?: return "har ikke fagsak i systemet"
         val aktivBehandling = behandlingService.hentAktivForFagsak(fagsakId = fagsak.id)
 
         if (aktivBehandling == null) {

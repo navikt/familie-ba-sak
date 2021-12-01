@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.kjerne.autovedtak.omregning.Autobrev6og18ÅrScheduler
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.SatsendringService
 import no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg.VedtakOmOvergangsstønadService
+import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.Unprotected
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController
 class TestVerktøyController(
     private val scheduler: Autobrev6og18ÅrScheduler,
     private val satsendringService: SatsendringService,
+    private val personidentService: PersonidentService,
     private val envService: EnvService,
     private val vedtakOmOvergangsstønadService: VedtakOmOvergangsstønadService
 ) {
@@ -50,7 +52,8 @@ class TestVerktøyController(
     @Unprotected
     fun mottaHendelseOmVedtakOmOvergangsstønad(@RequestBody personIdent: PersonIdent): ResponseEntity<Ressurs<String>> {
         return if (envService.erPreprod() || envService.erDev()) {
-            val melding = vedtakOmOvergangsstønadService.håndterVedtakOmOvergangsstønad(personIdent = personIdent.ident)
+            val aktør = personidentService.hentOgLagreAktør(personIdent.ident)
+            val melding = vedtakOmOvergangsstønadService.håndterVedtakOmOvergangsstønad(aktør = aktør)
             ResponseEntity.ok(Ressurs.success(melding))
         } else {
             ResponseEntity.ok(Ressurs.success("Endepunktet gjør ingenting i prod."))

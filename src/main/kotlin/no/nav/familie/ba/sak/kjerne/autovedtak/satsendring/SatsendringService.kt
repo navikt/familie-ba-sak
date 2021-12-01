@@ -53,7 +53,7 @@ class SatsendringService(
     fun utførSatsendring(behandlingId: Long) {
 
         val behandling = behandlingRepository.finnBehandling(behandlingId = behandlingId)
-        val søkerIdent = behandling.fagsak.aktør.aktivIdent()
+        val søkerAktør = behandling.fagsak.aktør
 
         if (behandling.fagsak.status != FagsakStatus.LØPENDE) throw Feil("Forsøker å utføre satsendring på ikke løpende fagsak ${behandling.fagsak.id}")
         if (behandling.status != BehandlingStatus.AVSLUTTET) throw Feil("Forsøker å utføre satsendring på behandling ${behandling.id} som ikke er avsluttet")
@@ -78,7 +78,7 @@ class SatsendringService(
             )
         } else {
             FerdigstillBehandlingTask.opprettTask(
-                personIdent = søkerIdent,
+                aktørId = søkerAktør.aktørId,
                 behandlingsId = behandlingEtterBehandlingsresultat.id
             )
         }

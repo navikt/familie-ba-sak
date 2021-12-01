@@ -18,7 +18,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
@@ -99,10 +98,9 @@ class VelgFagSystemService(
 
     fun velgFagsystem(nyBehandlingHendelse: NyBehandlingHendelse): FagsystemRegelVurdering {
         val behandlingIBaSakErPåskrudd = featureToggleService.isEnabled(FeatureToggleConfig.AUTOMATISK_FØDSELSHENDELSE)
-
-        val morsPersonIdent = PersonIdent(nyBehandlingHendelse.morsIdent)
-        val fagsak = fagsakService.hent(morsPersonIdent)
         val morsAktør = personidentService.hentOgLagreAktør(nyBehandlingHendelse.morsIdent)
+
+        val fagsak = fagsakService.hent(morsAktør)
 
         val (fagsystemUtfall: FagsystemUtfall, fagsystem: FagsystemRegelVurdering) = when {
             morHarLøpendeEllerTidligereUtbetalinger(fagsak) -> Pair(

@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.kjerne.dokument.domene.ManueltBrevRequest
 import no.nav.familie.ba.sak.kjerne.dokument.domene.byggMottakerdata
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
 import org.springframework.stereotype.Service
 
@@ -50,7 +51,7 @@ class HenleggBehandling(
 
         behandlingService.lagreEllerOppdater(behandling)
 
-        opprettFerdigstillBehandling(behandling.id, behandling.fagsak.aktør.aktivIdent())
+        opprettFerdigstillBehandling(behandling.id, behandling.fagsak.aktør)
 
         return hentNesteStegForNormalFlyt(behandling)
     }
@@ -59,9 +60,9 @@ class HenleggBehandling(
         return StegType.HENLEGG_BEHANDLING
     }
 
-    private fun opprettFerdigstillBehandling(behandlingsId: Long, personIdent: String) {
+    private fun opprettFerdigstillBehandling(behandlingsId: Long, aktør: Aktør) {
         val ferdigstillBehandling =
-            FerdigstillBehandlingTask.opprettTask(behandlingsId = behandlingsId, personIdent = personIdent)
+            FerdigstillBehandlingTask.opprettTask(behandlingsId = behandlingsId, aktørId = aktør.aktørId)
         taskRepository.save(ferdigstillBehandling)
     }
 }

@@ -12,7 +12,8 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
@@ -35,6 +36,7 @@ class FødselshendelseService(
     private val behandlingService: BehandlingService,
     private val vilkårsvurderingRepository: VilkårsvurderingRepository,
     private val persongrunnlagService: PersongrunnlagService,
+    private val personidentService: PersonidentService,
     private val stegService: StegService,
     private val vedtakService: VedtakService,
     private val vedtaksperiodeService: VedtaksperiodeService,
@@ -48,7 +50,8 @@ class FødselshendelseService(
     val passertFiltreringOgVilkårsvurderingCounter = Metrics.counter("familie.ba.sak.henvendelse.passert")
 
     fun behandleFødselshendelse(nyBehandling: NyBehandlingHendelse) {
-        val morsÅpneBehandling = hentÅpenBehandling(ident = nyBehandling.morsIdent)
+        val morsAktør = personidentService.hentOgLagreAktør(nyBehandling.morsIdent)
+        val morsÅpneBehandling = hentÅpenBehandling(aktør = morsAktør)
         if (morsÅpneBehandling != null) {
             autovedtakService.opprettOppgaveForManuellBehandling(
                 behandling = morsÅpneBehandling,
@@ -101,8 +104,8 @@ class FødselshendelseService(
         }
     }
 
-    private fun hentÅpenBehandling(ident: String): Behandling? {
-        return fagsakService.hent(PersonIdent(ident))?.let {
+    private fun hentÅpenBehandling(aktør: Aktør): Behandling? {
+        return fagsakService.hent(aktør)?.let {
             behandlingService.hentAktivOgÅpenForFagsak(it.id)
         }
     }

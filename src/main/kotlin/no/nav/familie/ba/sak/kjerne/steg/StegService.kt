@@ -51,7 +51,7 @@ class StegService(
         val behandling = håndterNyBehandling(nyBehandling)
         if (behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING) {
             infotrygdFeedService.sendStartBehandlingTilInfotrygdFeed(
-                behandling.fagsak.aktør.aktivIdent(),
+                behandling.fagsak.aktør,
             )
         }
         return behandling

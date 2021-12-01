@@ -4,7 +4,7 @@ class IverksettingTaskDTO(
     val behandlingsId: Long,
     val vedtaksId: Long,
     val saksbehandlerId: String,
-    personIdent: String
-) : DefaultTaskDTO(personIdent)
+    aktørId: String
+) : DefaultTaskDTO(aktørId)
 
 const val FAGSYSTEM = "BA"
