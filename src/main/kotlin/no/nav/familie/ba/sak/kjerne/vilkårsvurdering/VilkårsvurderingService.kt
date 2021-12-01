@@ -100,7 +100,7 @@ class VilkårsvurderingService(
                 (vilkårsvurdering1.personResultater.map { it.vilkårResultater } + vilkårsvurdering2.personResultater.map { it.vilkårResultater }).flatten()
 
             data class Match(
-                val personIdent: String,
+                val aktør: Aktør,
                 val vilkårType: Vilkår,
                 val resultat: Resultat,
                 val periodeFom: LocalDate?,
@@ -111,7 +111,7 @@ class VilkårsvurderingService(
 
             val gruppert = vilkårResultater.groupBy {
                 Match(
-                    personIdent = it.personResultat?.personIdent ?: error("VilkårResultat mangler PersonResultat"),
+                    aktør = it.personResultat?.aktør ?: error("VilkårResultat mangler aktør"),
                     vilkårType = it.vilkårType,
                     resultat = it.resultat,
                     periodeFom = it.periodeFom,

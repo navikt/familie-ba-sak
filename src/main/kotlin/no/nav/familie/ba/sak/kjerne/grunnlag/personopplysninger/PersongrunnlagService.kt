@@ -24,6 +24,7 @@ import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
+import no.nav.familie.kontrakter.felles.PersonIdent
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -232,8 +233,7 @@ class PersongrunnlagService(
             else personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(aktør)
 
         return Person(
-            // TODO: Robustgjøring dnr/fnr, fjern ved contract.
-            // personIdent = aktør.aktivIdent()
+            personIdent = PersonIdent(aktør.aktivIdent()),
             type = personType,
             personopplysningGrunnlag = personopplysningGrunnlag,
             fødselsdato = personinfo.fødselsdato,

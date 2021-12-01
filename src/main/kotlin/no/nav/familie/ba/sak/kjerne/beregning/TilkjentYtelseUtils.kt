@@ -184,7 +184,7 @@ object TilkjentYtelseUtils {
         // Sorterer primært av hensyn til måten testene er implementert og kan muligens fjernes dersom dette skrives om.
         nyeAndelTilkjentYtelse.sortWith(
             compareBy(
-                { it.personIdent },
+                { it.aktør.aktivIdent() },
                 { it.stønadFom }
             )
         )

@@ -17,6 +17,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
@@ -35,8 +36,7 @@ data class UtvidetBarnetrygdGenerator(
     ): List<AndelTilkjentYtelse> {
         if (utvidetVilkår.isEmpty() || andelerBarna.isEmpty()) return emptyList()
 
-        val søkerIdent = utvidetVilkår.first().personResultat?.personIdent ?: error("Vilkår mangler PersonResultat")
-        val søkerAktørId = utvidetVilkår.first().personResultat?.aktør ?: error("Vilkår mangler PersonResultat")
+        val søkerAktør = utvidetVilkår.first().personResultat?.aktør ?: error("Vilkår mangler PersonResultat")
 
         val utvidaTidslinje = LocalDateTimeline(
             utvidetVilkår
@@ -46,13 +46,13 @@ data class UtvidetBarnetrygdGenerator(
                     LocalDateSegment(
                         it.periodeFom!!.førsteDagINesteMåned(),
                         finnTilOgMedDatoForUtvidetSegment(tilOgMed = it.periodeTom, vilkårResultater = utvidetVilkår),
-                        listOf(PeriodeData(ident = søkerIdent, rolle = PersonType.SØKER))
+                        listOf(PeriodeData(aktør = søkerAktør, rolle = PersonType.SØKER))
                     )
                 }
         )
 
         val barnasTidslinjer: List<LocalDateTimeline<List<PeriodeData>>> = andelerBarna
-            .groupBy { it.personIdent }
+            .groupBy { it.aktør }
             .map { identMedAndeler ->
                 LocalDateTimeline(
                     identMedAndeler.value.map {
@@ -61,7 +61,7 @@ data class UtvidetBarnetrygdGenerator(
                             it.stønadTom.sisteDagIInneværendeMåned(),
                             listOf(
                                 PeriodeData(
-                                    ident = identMedAndeler.key,
+                                    aktør = identMedAndeler.key,
                                     rolle = PersonType.BARN,
                                     prosent = it.prosent
                                 )
@@ -90,8 +90,8 @@ data class UtvidetBarnetrygdGenerator(
                 AndelTilkjentYtelse(
                     behandlingId = behandlingId,
                     tilkjentYtelse = tilkjentYtelse,
-                    personIdent = søkerIdent,
-                    aktør = søkerAktørId,
+                    personIdent = søkerAktør.aktivIdent(),
+                    aktør = søkerAktør,
                     stønadFom = it.fom.toYearMonth(),
                     stønadTom = it.tom.toYearMonth(),
                     kalkulertUtbetalingsbeløp = ordinærSatsForPeriode.avrundetHeltallAvProsent(prosentForPeriode),
@@ -109,7 +109,7 @@ data class UtvidetBarnetrygdGenerator(
         return utvidetAndelerEtterSammenslåing
     }
 
-    private data class PeriodeData(val ident: String, val rolle: PersonType, val prosent: BigDecimal = BigDecimal.ZERO)
+    private data class PeriodeData(val aktør: Aktør, val rolle: PersonType, val prosent: BigDecimal = BigDecimal.ZERO)
 
     private fun skalUtvidetAndelerSlåsSammen(
         førsteAndel: AndelTilkjentYtelse,

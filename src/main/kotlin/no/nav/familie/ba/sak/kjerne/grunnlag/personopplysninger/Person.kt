@@ -9,14 +9,18 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSiv
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
+import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.Språkkode
 import org.hibernate.annotations.Fetch
 import org.hibernate.annotations.FetchMode
 import java.time.LocalDate
 import java.time.Period
 import java.util.Objects
+import javax.persistence.AttributeOverride
+import javax.persistence.AttributeOverrides
 import javax.persistence.CascadeType
 import javax.persistence.Column
+import javax.persistence.Embedded
 import javax.persistence.Entity
 import javax.persistence.EntityListeners
 import javax.persistence.EnumType
@@ -56,14 +60,15 @@ data class Person(
     @Enumerated(EnumType.STRING) @Column(name = "maalform", nullable = false)
     val målform: Målform = Målform.NB,
 
-    /*@Embedded
+    @Embedded
     @AttributeOverrides(
         AttributeOverride(
             name = "ident",
             column = Column(name = "person_ident", updatable = false)
         )
     )
-    val XXYY: PersonIdent,*/
+    // TODO: Robustgjøring dnr/fnr, fjern ved contract.
+    val personIdent: PersonIdent,
 
     @JsonIgnore
     @ManyToOne(optional = false)

@@ -573,7 +573,7 @@ class VedtaksperiodeService(
         val begrunnelseOgIdentListe: List<Pair<VedtakBegrunnelseSpesifikasjon, String>> =
             vilkårResultater
                 .map { vilkår ->
-                    val personIdent = vilkår.personResultat?.personIdent
+                    val personIdent = vilkår.personResultat?.aktør?.aktivIdent()
                         ?: throw Feil(
                             "VilkårResultat ${vilkår.id} mangler PersonResultat ved sammenslåing av begrunnelser"
                         )

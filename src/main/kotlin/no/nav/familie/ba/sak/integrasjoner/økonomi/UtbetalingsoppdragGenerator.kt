@@ -145,7 +145,7 @@ class UtbetalingsoppdragGenerator(
 
         val utbetalingsperioder = andeler.filter { kjede -> kjede.isNotEmpty() }
             .flatMap { kjede: List<AndelTilkjentYtelse> ->
-                val ident = kjede.first().personIdent
+                val ident = kjede.first().aktør.aktivIdent()
                 val ytelseType = kjede.first().type
                 var forrigeOffsetIKjede: Int? = null
                 if (!erFørsteBehandlingPåFagsak) {
