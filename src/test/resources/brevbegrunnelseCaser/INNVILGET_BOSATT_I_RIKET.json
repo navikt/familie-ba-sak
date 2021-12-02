@@ -20,7 +20,9 @@
       ]
     }
   ],
-  "fritekster": [],
+  "fritekster": [
+    "Dette er en fritekst"
+  ],
   "begrunnelsepersoner": [
     {
       "personIdent": "123456789",
@@ -37,6 +39,10 @@
     "antallBarn": 1,
     "barnasFodselsdager": "08.01.20",
     "begrunnelser": [
+      {
+        "fritekst": "Dette er en fritekst",
+        "type": "fritekst"
+      },
       {
         "gjelderSoker": false,
         "barnasFodselsdatoer": "08.01.20",

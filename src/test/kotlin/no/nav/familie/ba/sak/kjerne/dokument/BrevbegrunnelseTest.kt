@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.dokument
 
+import com.fasterxml.jackson.annotation.JsonSubTypes
+import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ba.sak.common.Utils.formaterBeløp
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPerson
@@ -34,6 +36,17 @@ data class BrevBegrunnelseTestConfig(
     val forventetOutput: BrevPeriodeTestConfig
 )
 
+@JsonTypeInfo(
+    use = JsonTypeInfo.Id.NAME,
+    include = JsonTypeInfo.As.PROPERTY,
+    property = "type",
+    defaultImpl = BegrunnelseDataTestConfig::class
+)
+@JsonSubTypes(value = [JsonSubTypes.Type(value = FritekstBegrunnelseTestConfig::class, name = "fritekst")])
+interface TestBegrunnelse
+
+data class FritekstBegrunnelseTestConfig(val fritekst: String) : TestBegrunnelse
+
 data class BegrunnelseDataTestConfig(
     val gjelderSoker: Boolean,
     val barnasFodselsdatoer: String,
@@ -42,7 +55,7 @@ data class BegrunnelseDataTestConfig(
     val maalform: String,
     val apiNavn: String,
     val belop: Int,
-)
+) : TestBegrunnelse
 
 data class BrevPeriodeTestConfig(
     val fom: String,
@@ -50,7 +63,7 @@ data class BrevPeriodeTestConfig(
     val belop: Int,
     val antallBarn: String,
     val barnasFodselsdager: String,
-    val begrunnelser: List<BegrunnelseDataTestConfig>,
+    val begrunnelser: List<TestBegrunnelse>,
     val type: String,
 )
 
@@ -167,7 +180,14 @@ class BrevbegrunnelseTest {
             validerFelt(forventetOutput.antallBarn, output.antallBarn?.single(), "antallBarn")
             validerFelt(formaterBeløp(forventetOutput.belop), output.belop?.single(), "belop")
 
-            val forventedeBegrunnelser = forventetOutput.begrunnelser.map { it.tilBegrunnelseData() }
+            val forventedeBegrunnelser = forventetOutput.begrunnelser.map {
+                when (it) {
+                    is BegrunnelseDataTestConfig -> it.tilBegrunnelseData()
+                    is FritekstBegrunnelseTestConfig -> it.fritekst
+                    else -> throw IllegalArgumentException("Ugyldig testconfig")
+                }
+            }
+
             forventedeBegrunnelser.filter { !output.begrunnelser.contains(it) }.forEach {
                 feil.add(
                     "Fant ingen begrunnelser i output-begrunnelsene som matcher forventet begrunnelse $it"
