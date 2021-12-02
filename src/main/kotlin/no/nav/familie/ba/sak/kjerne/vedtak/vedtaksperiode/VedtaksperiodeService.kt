@@ -340,8 +340,8 @@ class VedtaksperiodeService(
                                         identerMedUtbetaling = identerMedUtbetaling,
                                         triggesAv = triggesAv,
                                         endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(
-                                            behandling.id
-                                        ),
+                                                behandling.id
+                                            ),
                                         andelerTilkjentYtelse = andelerTilkjentYtelse,
                                     )
                                 ) {
