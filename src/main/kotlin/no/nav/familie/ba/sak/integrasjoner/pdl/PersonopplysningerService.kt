@@ -9,7 +9,6 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.internal.IdentInformasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PersonInfo
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.VergeData
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
@@ -24,7 +23,6 @@ class PersonopplysningerService(
     val pdlRestClient: PdlRestClient,
     val systemOnlyPdlRestClient: SystemOnlyPdlRestClient,
     val integrasjonClient: IntegrasjonClient,
-    val personidentService: PersonidentService,
 ) {
 
     fun hentPersoninfoMedRelasjonerOgRegisterinformasjon(aktør: Aktør): PersonInfo {
