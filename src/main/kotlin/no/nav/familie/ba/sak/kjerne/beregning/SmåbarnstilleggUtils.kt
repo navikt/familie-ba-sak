@@ -120,8 +120,7 @@ fun finnAktuellVedtaksperiodeOgLeggTilSmåbarnstilleggbegrunnelse(
                 )
             }
             innvilgetMånedPeriode == null && redusertMånedPeriode != null -> {
-                if (redusertMånedPeriode.fom == YearMonth.now()) null // Opphøret er begrunnet i automatisk brev
-                else Pair(
+                Pair(
                     vedtaksperioderMedBegrunnelser.find { it.fom?.toYearMonth() == redusertMånedPeriode.fom && it.type == Vedtaksperiodetype.UTBETALING },
                     VedtakBegrunnelseSpesifikasjon.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_FULL_OVERGANGSSTØNAD
                 )
@@ -133,7 +132,9 @@ fun finnAktuellVedtaksperiodeOgLeggTilSmåbarnstilleggbegrunnelse(
     if (vedtaksperiodeSomSkalOppdateres == null) {
         LoggerFactory.getLogger("secureLogger")
             .info(
-                "Finner ikke aktuell periode å begrunne ved autovedtak småbarnstillegg. " +
+                "Finner ikke aktuell periode å begrunne ved autovedtak småbarnstillegg.\n" +
+                    "Innvilget periode: $innvilgetMånedPeriode.\n" +
+                    "Redusert periode: $redusertMånedPeriode.\n" +
                     "Perioder: ${vedtaksperioderMedBegrunnelser.map { "Periode(type=${it.type}, fom=${it.fom}, tom=${it.tom})" }}"
             )
 

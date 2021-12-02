@@ -126,9 +126,10 @@ fun behandleFødselshendelse(
     }
 
     val behandlingEtterVurdering =
-        behandlingService.hentAktivForFagsak(fagsakId = restMinimalFagsakEtterVurdering.data!!.id)!!
+        behandlingService.hentBehandlinger(fagsakId = restMinimalFagsakEtterVurdering.data!!.id)
+            .maxByOrNull { it.opprettetTidspunkt }!!
     if (behandlingEtterVurdering.erHenlagt()) {
-        return stegService.håndterFerdigstillBehandling(behandlingEtterVurdering)
+        return behandlingEtterVurdering
     }
 
     generellAssertFagsak(
