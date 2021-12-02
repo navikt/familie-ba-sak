@@ -1,5 +1,5 @@
 {
-  "beskrivelse": "Test",
+  "beskrivelse": "Skal teste at innvilget utbetaling gir riktig resultat",
   "fom": "2021-09-01",
   "tom": "2021-12-31",
   "vedtaksperiodetype": "UTBETALING",
