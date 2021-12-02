@@ -145,7 +145,7 @@ class BrevbegrunnelseTest {
                 )
                 acc + 1
             } else {
-                0
+                acc
             }
         }
 
