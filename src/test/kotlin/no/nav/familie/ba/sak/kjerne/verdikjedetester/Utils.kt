@@ -183,7 +183,7 @@ fun håndterIverksettingAvBehandling(
             )
         )
 
-    val behandlingSomSkalFerdigstilles = if (behandlingEtterIverksetteVedtak.steg == StegType.JOURNALFØR_VEDTAKSBREV) {
+    val behandlingSomSkalFerdigstilles = if (behandlingEtterStatusFraOppdrag.steg == StegType.JOURNALFØR_VEDTAKSBREV) {
         val behandlingEtterJournalførtVedtak =
             stegService.håndterJournalførVedtaksbrev(
                 behandlingEtterStatusFraOppdrag,
