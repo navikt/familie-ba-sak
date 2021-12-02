@@ -327,7 +327,7 @@ class BehandlingService(
 
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} oppretter behandling $behandling")
         return lagreEllerOppdater(behandling, false).also {
-            arbeidsfordelingService.fastsettBehandlendeEnhet(it)
+            arbeidsfordelingService.fastsettBehandlendeEnhet(it, hentSisteBehandlingSomErIverksatt(it.fagsak.id))
             sendTilDvh(it)
             if (it.versjon == 0L) {
                 behandlingMetrikker.tellNøkkelTallVedOpprettelseAvBehandling(it)
