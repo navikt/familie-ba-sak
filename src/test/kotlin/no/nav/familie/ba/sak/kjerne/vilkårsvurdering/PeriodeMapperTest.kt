@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.defaultFagsak
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
@@ -113,8 +114,8 @@ class PeriodeMapperTest {
     fun `Mapper tre PersonResultater til fire PeriodeResultater med rette vilkår og datoer for to personer`() {
         val fnr1 = randomFnr()
         val fnr2 = randomFnr()
-        val aktørId1 = randomAktørId()
-        val aktørId2 = randomAktørId()
+        val aktørId1 = tilAktør(fnr1)
+        val aktørId2 = tilAktør(fnr2)
         val personResultat1 =
             PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = fnr1, aktør = aktørId1)
         val personResultat2 =

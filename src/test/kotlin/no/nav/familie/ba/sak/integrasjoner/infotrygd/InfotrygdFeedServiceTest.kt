@@ -54,6 +54,6 @@ internal class InfotrygdFeedServiceTest {
         verify(exactly = 1) {
             opprettTaskServiceMock.opprettSendStartBehandlingTilInfotrygdTask(any())
         }
-        assertThat(identSlot.captured).isEqualTo(ident)
+        assertThat(identSlot.captured.aktivIdent()).isEqualTo(ident)
     }
 }
