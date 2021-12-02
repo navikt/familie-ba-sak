@@ -6,6 +6,7 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
+import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.kontrakter.ba.infotrygd.InfotrygdSøkResponse
 import no.nav.familie.kontrakter.ba.infotrygd.Sak
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
@@ -29,6 +30,9 @@ class InfotrygdControllerTest {
     @MockK
     lateinit var infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient
 
+    @MockK
+    lateinit var personidentService: PersonidentService
+
     @InjectMockKs
     lateinit var infotrygdService: InfotrygdService
 
@@ -36,7 +40,7 @@ class InfotrygdControllerTest {
 
     @BeforeAll
     fun init() {
-        infotrygdController = InfotrygdController(infotrygdBarnetrygdClient, infotrygdService)
+        infotrygdController = InfotrygdController(infotrygdBarnetrygdClient, personidentService, infotrygdService)
     }
 
     @Test

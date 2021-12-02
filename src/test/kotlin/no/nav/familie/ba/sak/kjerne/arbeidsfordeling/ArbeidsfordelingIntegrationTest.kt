@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.lagSøknadDTO
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
+import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfordelingsenhet
@@ -13,14 +14,12 @@ import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PersonInfo
-import no.nav.familie.ba.sak.integrasjoner.pdl.internal.Personident
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
@@ -70,7 +69,7 @@ class ArbeidsfordelingIntegrationTest(
         val now = now()
 
         every {
-            mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(SØKER_FNR)
+            mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(tilAktør(SØKER_FNR))
         } returns PersonInfo(
             fødselsdato = now.minusYears(20),
             navn = "Mor Søker",
@@ -81,7 +80,7 @@ class ArbeidsfordelingIntegrationTest(
         )
 
         every {
-            mockPersonopplysningerService.hentPersoninfoEnkel(SØKER_FNR)
+            mockPersonopplysningerService.hentPersoninfoEnkel(tilAktør(SØKER_FNR))
         } returns PersonInfo(
             fødselsdato = now.minusYears(20),
             navn = "Mor Søker",
@@ -92,7 +91,7 @@ class ArbeidsfordelingIntegrationTest(
         )
 
         every {
-            mockPersonopplysningerService.hentPersoninfoEnkel(BARN_UTEN_DISKRESJONSKODE)
+            mockPersonopplysningerService.hentPersoninfoEnkel(tilAktør(BARN_UTEN_DISKRESJONSKODE))
         } returns PersonInfo(
             fødselsdato = now.førsteDagIInneværendeMåned(),
             navn = "Gutt Barn",
@@ -103,7 +102,11 @@ class ArbeidsfordelingIntegrationTest(
         )
 
         every {
-            mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(BARN_UTEN_DISKRESJONSKODE)
+            mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(
+                tilAktør(
+                    BARN_UTEN_DISKRESJONSKODE
+                )
+            )
         } returns PersonInfo(
             fødselsdato = now.førsteDagIInneværendeMåned(),
             navn = "Gutt Barn",
@@ -111,7 +114,7 @@ class ArbeidsfordelingIntegrationTest(
             sivilstander = listOf(Sivilstand(type = SIVILSTAND.UGIFT)),
             forelderBarnRelasjon = setOf(
                 ForelderBarnRelasjon(
-                    personIdent = Personident(id = SØKER_FNR),
+                    aktør = tilAktør(SØKER_FNR),
                     relasjonsrolle = FORELDERBARNRELASJONROLLE.MOR
                 )
             ),
@@ -120,7 +123,7 @@ class ArbeidsfordelingIntegrationTest(
         )
 
         every {
-            mockPersonopplysningerService.hentPersoninfoEnkel(BARN_MED_DISKRESJONSKODE)
+            mockPersonopplysningerService.hentPersoninfoEnkel(tilAktør(BARN_MED_DISKRESJONSKODE))
         } returns PersonInfo(
             fødselsdato = now.førsteDagIInneværendeMåned(),
             navn = "Gutt Barn fortrolig",
@@ -131,7 +134,11 @@ class ArbeidsfordelingIntegrationTest(
         )
 
         every {
-            mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(BARN_MED_DISKRESJONSKODE)
+            mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(
+                tilAktør(
+                    BARN_MED_DISKRESJONSKODE
+                )
+            )
         } returns PersonInfo(
             fødselsdato = now.førsteDagIInneværendeMåned(),
             navn = "Gutt Barn fortrolig",
@@ -139,7 +146,7 @@ class ArbeidsfordelingIntegrationTest(
             sivilstander = listOf(Sivilstand(type = SIVILSTAND.UGIFT)),
             forelderBarnRelasjon = setOf(
                 ForelderBarnRelasjon(
-                    personIdent = Personident(id = SØKER_FNR),
+                    aktør = tilAktør(SØKER_FNR),
                     relasjonsrolle = FORELDERBARNRELASJONROLLE.MOR
                 )
             ),
@@ -169,7 +176,7 @@ class ArbeidsfordelingIntegrationTest(
 
     @Test
     fun `Skal fastsette behandlende enhet ved opprettelse av behandling`() {
-        fagsakService.hentEllerOpprettFagsak(PersonIdent(SØKER_FNR))
+        fagsakService.hentEllerOpprettFagsak(tilAktør(SØKER_FNR))
         val behandling = stegService.håndterNyBehandling(
             NyBehandling(
                 BehandlingKategori.NASJONAL,
@@ -187,7 +194,7 @@ class ArbeidsfordelingIntegrationTest(
 
     @Test
     fun `Skal ikke fastsette ny behandlende enhet ved registrering av søknad`() {
-        fagsakService.hentEllerOpprettFagsak(PersonIdent(SØKER_FNR))
+        fagsakService.hentEllerOpprettFagsak(tilAktør(SØKER_FNR))
         val behandling = stegService.håndterNyBehandling(
             NyBehandling(
                 BehandlingKategori.NASJONAL,
@@ -219,7 +226,7 @@ class ArbeidsfordelingIntegrationTest(
 
     @Test
     fun `Skal fastsette ny behandlende enhet ved registrering av søknad`() {
-        fagsakService.hentEllerOpprettFagsak(PersonIdent(SØKER_FNR))
+        fagsakService.hentEllerOpprettFagsak(tilAktør(SØKER_FNR))
         val behandling = stegService.håndterNyBehandling(
             NyBehandling(
                 BehandlingKategori.NASJONAL,
@@ -251,7 +258,7 @@ class ArbeidsfordelingIntegrationTest(
 
     @Test
     fun `Skal fastsette ny behandlende enhet når man legger til nytt barn ved endring på søknadsgrunnlag`() {
-        fagsakService.hentEllerOpprettFagsak(PersonIdent(SØKER_FNR))
+        fagsakService.hentEllerOpprettFagsak(tilAktør(SØKER_FNR))
         val behandling = stegService.håndterNyBehandling(
             NyBehandling(
                 BehandlingKategori.NASJONAL,
@@ -307,7 +314,7 @@ class ArbeidsfordelingIntegrationTest(
 
     @Test
     fun `Skal ikke fastsette ny behandlende enhet ved registrering av søknad når enhet er manuelt satt`() {
-        fagsakService.hentEllerOpprettFagsak(PersonIdent(SØKER_FNR))
+        fagsakService.hentEllerOpprettFagsak(tilAktør(SØKER_FNR))
         val behandling = stegService.håndterNyBehandling(
             NyBehandling(
                 BehandlingKategori.NASJONAL,
@@ -347,7 +354,7 @@ class ArbeidsfordelingIntegrationTest(
 
     @Test
     fun `Skal fastsette ny behandlende enhet og oppdatere eksisterende oppgave ved registrering av søknad`() {
-        fagsakService.hentEllerOpprettFagsak(PersonIdent(SØKER_FNR))
+        fagsakService.hentEllerOpprettFagsak(tilAktør(SØKER_FNR))
         val behandling = stegService.håndterNyBehandling(
             NyBehandling(
                 BehandlingKategori.NASJONAL,

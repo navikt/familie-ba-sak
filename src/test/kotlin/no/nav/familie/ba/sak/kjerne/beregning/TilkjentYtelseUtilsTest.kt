@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.sisteDagIForrigeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseUtils.oppdaterTilkjentYtelseMedEndretUtbetalingAndeler
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
@@ -488,7 +489,7 @@ internal class TilkjentYtelseUtilsTest {
         )
 
         vilkårsvurdering.personResultater =
-            vilkårsvurdering.personResultater.filter { it.personIdent != personResultat.personIdent }.toSet() + setOf(
+            vilkårsvurdering.personResultater.filter { it.aktør != personResultat.aktør }.toSet() + setOf(
             personResultat
         )
 
@@ -573,8 +574,9 @@ internal class TilkjentYtelseUtilsTest {
         vilkårsvurdering.personResultater = setOf(vilkårsvurdering.personResultater.first(), barnResultat)
 
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandling.id)
+
         val barn = Person(
-            aktør = randomAktørId(),
+            aktør = tilAktør(barnFnr),
             personIdent = PersonIdent(barnFnr),
             type = PersonType.BARN,
             personopplysningGrunnlag = personopplysningGrunnlag,
@@ -584,7 +586,7 @@ internal class TilkjentYtelseUtilsTest {
         )
             .apply { sivilstander = listOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this)) }
         val søker = Person(
-            aktør = randomAktørId(),
+            aktør = tilAktør(søkerFnr),
             personIdent = PersonIdent(søkerFnr),
             type = PersonType.SØKER,
             personopplysningGrunnlag = personopplysningGrunnlag,

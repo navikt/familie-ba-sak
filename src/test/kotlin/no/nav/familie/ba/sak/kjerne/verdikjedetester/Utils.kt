@@ -13,7 +13,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.dokument.hentBrevtype
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.JournalførVedtaksbrevDTO
 import no.nav.familie.ba.sak.kjerne.steg.StatusFraOppdragMedTask
 import no.nav.familie.ba.sak.kjerne.steg.StegService
@@ -107,10 +107,12 @@ fun behandleFødselshendelse(
     behandleFødselshendelseTask: BehandleFødselshendelseTask,
     fagsakService: FagsakService,
     behandlingService: BehandlingService,
+    personidentService: PersonidentService,
     vedtakService: VedtakService,
     stegService: StegService,
 ): Behandling? {
     val søkerFnr = nyBehandlingHendelse.morsIdent
+    val søkerAktør = personidentService.hentOgLagreAktør(søkerFnr)
 
     behandleFødselshendelseTask.doTask(
         BehandleFødselshendelseTask.opprettTask(
@@ -120,7 +122,7 @@ fun behandleFødselshendelse(
         )
     )
 
-    val restMinimalFagsakEtterVurdering = fagsakService.hentMinimalFagsakForPerson(personIdent = PersonIdent(søkerFnr))
+    val restMinimalFagsakEtterVurdering = fagsakService.hentMinimalFagsakForPerson(aktør = søkerAktør)
     if (restMinimalFagsakEtterVurdering.status != Ressurs.Status.SUKSESS) {
         return null
     }
@@ -164,7 +166,7 @@ fun håndterIverksettingAvBehandling(
                 behandlingsId = behandlingEtterVurdering.id,
                 vedtaksId = vedtak.id,
                 saksbehandlerId = "System",
-                personIdent = søkerFnr
+                aktørId = behandlingEtterVurdering.fagsak.aktør.aktivIdent()
             )
         )
 
@@ -175,6 +177,7 @@ fun håndterIverksettingAvBehandling(
                 statusFraOppdragDTO = StatusFraOppdragDTO(
                     fagsystem = FAGSYSTEM,
                     personIdent = søkerFnr,
+                    aktørId = behandlingEtterVurdering.fagsak.aktør.aktørId,
                     behandlingsId = behandlingEtterIverksetteVedtak.id,
                     vedtaksId = vedtak.id
                 ),
@@ -211,7 +214,7 @@ fun håndterIverksettingAvBehandling(
     val ferdigstiltBehandling = stegService.håndterFerdigstillBehandling(behandlingSomSkalFerdigstilles)
 
     val restMinimalFagsakEtterAvsluttetBehandling =
-        fagsakService.hentMinimalFagsakForPerson(personIdent = PersonIdent(søkerFnr))
+        fagsakService.hentMinimalFagsakForPerson(aktør = ferdigstiltBehandling.fagsak.aktør)
     generellAssertFagsak(
         restFagsak = fagsakService.hentRestFagsak(restMinimalFagsakEtterAvsluttetBehandling.data!!.id),
         fagsakStatus = fagsakStatusEtterIverksetting,

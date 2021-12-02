@@ -3,12 +3,12 @@ package no.nav.familie.ba.sak.integrasjoner.journalføring
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
+import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.DbJournalpostType
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.JournalføringRepository
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.Sakstype
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
@@ -33,7 +33,7 @@ class JournalføringServiceTest(
     fun `lagrer journalpostreferanse til behandling og fagsak til journalpost`() {
 
         val søkerFnr = randomFnr()
-        val fagsak = fagsakService.hentEllerOpprettFagsak(PersonIdent(søkerFnr))
+        val fagsak = fagsakService.hentEllerOpprettFagsak(tilAktør(søkerFnr))
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
 
         val (sak, behandlinger) = journalføringService
@@ -50,7 +50,7 @@ class JournalføringServiceTest(
     @Test
     fun `ferdigstill skal oppdatere journalpost med GENERELL_SAKSTYPE hvis knyttTilFagsak er false`() {
         val søkerFnr = randomFnr()
-        val fagsak = fagsakService.hentEllerOpprettFagsak(PersonIdent(søkerFnr))
+        val fagsak = fagsakService.hentEllerOpprettFagsak(tilAktør(søkerFnr))
         behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
 
         val (sak, behandlinger) = journalføringService

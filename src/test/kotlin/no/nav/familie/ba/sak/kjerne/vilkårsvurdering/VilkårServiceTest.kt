@@ -80,7 +80,7 @@ class VilkårServiceTest(
         val personopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(
                 behandling.id, fnr, listOf(barnFnr),
-                søkerAktør = personidentService.hentOgLagreAktørId(fnr),
+                søkerAktør = personidentService.hentOgLagreAktør(fnr),
                 barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr))
             )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
@@ -113,7 +113,7 @@ class VilkårServiceTest(
         val personopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(
                 behandling.id, fnr, listOf(barnFnr),
-                søkerAktør = personidentService.hentOgLagreAktørId(fnr),
+                søkerAktør = personidentService.hentOgLagreAktør(fnr),
                 barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr))
             )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
@@ -124,7 +124,7 @@ class VilkårServiceTest(
             forrigeBehandlingSomErVedtatt = forrigeBehandlingSomErIverksatt
         )
         val under18ÅrVilkårForBarn =
-            vilkårsvurdering.personResultater.find { it.personIdent == barnFnr }
+            vilkårsvurdering.personResultater.find { it.aktør.aktivIdent() == barnFnr }
                 ?.tilRestPersonResultat()?.vilkårResultater?.find { it.vilkårType == Vilkår.UNDER_18_ÅR }
 
         val endretVilkårsvurdering: List<RestPersonResultat> =
@@ -163,7 +163,7 @@ class VilkårServiceTest(
         val personopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(
                 behandling.id, fnr, listOf(barnFnr),
-                søkerAktør = personidentService.hentOgLagreAktørId(fnr),
+                søkerAktør = personidentService.hentOgLagreAktør(fnr),
                 barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr))
             )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
@@ -180,7 +180,7 @@ class VilkårServiceTest(
                 behandling.id,
                 fnr,
                 listOf(barnFnr, barnFnr2),
-                søkerAktør = personidentService.hentOgLagreAktørId(fnr),
+                søkerAktør = personidentService.hentOgLagreAktør(fnr),
                 barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr, barnFnr2))
             )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlagMedEkstraBarn)
@@ -204,7 +204,7 @@ class VilkårServiceTest(
         val personopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(
                 behandling.id, fnr, listOf(barnFnr),
-                søkerAktør = personidentService.hentOgLagreAktørId(fnr),
+                søkerAktør = personidentService.hentOgLagreAktør(fnr),
                 barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr))
             )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
@@ -223,7 +223,7 @@ class VilkårServiceTest(
         val personopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(
                 behandling.id, fnr, listOf(barnFnr),
-                søkerAktør = personidentService.hentOgLagreAktørId(fnr),
+                søkerAktør = personidentService.hentOgLagreAktør(fnr),
                 barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr))
             )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
@@ -268,7 +268,7 @@ class VilkårServiceTest(
         val personopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(
                 behandling.id, fnr, listOf(barnFnr),
-                søkerAktør = personidentService.hentOgLagreAktørId(fnr),
+                søkerAktør = personidentService.hentOgLagreAktør(fnr),
                 barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr))
             )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
@@ -286,7 +286,7 @@ class VilkårServiceTest(
                     behandlingId = behandling.id, vilkårId = it.id,
                     restPersonResultat =
                     RestPersonResultat(
-                        personIdent = personResultat.personIdent,
+                        personIdent = personResultat.aktør.aktivIdent(),
                         vilkårResultater = listOf(
                             it.copy(
                                 resultat = Resultat.OPPFYLT,
@@ -308,7 +308,7 @@ class VilkårServiceTest(
         val personopplysningGrunnlag2 =
             lagTestPersonopplysningGrunnlag(
                 behandling2.id, fnr, listOf(barnFnr, barnFnr2),
-                søkerAktør = personidentService.hentOgLagreAktørId(fnr),
+                søkerAktør = personidentService.hentOgLagreAktør(fnr),
                 barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr, barnFnr2))
             )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag2)
@@ -323,7 +323,7 @@ class VilkårServiceTest(
 
         vilkårsvurdering2.personResultater.forEach { personResultat ->
             personResultat.vilkårResultater.forEach { vilkårResultat ->
-                if (personResultat.personIdent == barnFnr2) {
+                if (personResultat.aktør.aktivIdent() == barnFnr2) {
                     Assertions.assertEquals(behandling2.id, vilkårResultat.behandlingId)
                 } else {
                     Assertions.assertEquals(Resultat.OPPFYLT, vilkårResultat.resultat)
@@ -346,7 +346,7 @@ class VilkårServiceTest(
         val personopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(
                 behandling.id, fnr, listOf(barnFnr),
-                søkerAktør = personidentService.hentOgLagreAktørId(fnr),
+                søkerAktør = personidentService.hentOgLagreAktør(fnr),
                 barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr))
             )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
@@ -357,7 +357,7 @@ class VilkårServiceTest(
             forrigeBehandlingSomErVedtatt = forrigeBehandlingSomErIverksatt
         )
 
-        val barn: Person = personopplysningGrunnlag.barna.find { it.personIdent.ident == barnFnr }!!
+        val barn: Person = personopplysningGrunnlag.barna.find { it.aktør.aktivIdent() == barnFnr }!!
         vurderVilkårsvurderingTilInnvilget(vilkårsvurdering, barn)
 
         vilkårsvurderingService.oppdater(vilkårsvurdering)
@@ -371,7 +371,7 @@ class VilkårServiceTest(
         val personopplysningGrunnlag2 =
             lagTestPersonopplysningGrunnlag(
                 behandling2.id, fnr, listOf(barnFnr, barnFnr2),
-                søkerAktør = personidentService.hentOgLagreAktørId(fnr),
+                søkerAktør = personidentService.hentOgLagreAktør(fnr),
                 barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr, barnFnr2))
             )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag2)
@@ -384,7 +384,7 @@ class VilkårServiceTest(
 
         Assertions.assertEquals(3, behandlingResultat2.personResultater.size)
 
-        val personResultat = behandlingResultat2.personResultater.find { it.personIdent == barnFnr }!!
+        val personResultat = behandlingResultat2.personResultater.find { it.aktør.aktivIdent() == barnFnr }!!
         val borMedSøkerVilkår = personResultat.vilkårResultater.find { it.vilkårType == Vilkår.BOR_MED_SØKER }!!
         Assertions.assertEquals(behandling.id, borMedSøkerVilkår.behandlingId)
 
@@ -405,7 +405,7 @@ class VilkårServiceTest(
 
         val behandlingResultatEtterEndring = vilkårsvurderingService.oppdater(behandlingResultat2)
         val personResultatEtterEndring =
-            behandlingResultatEtterEndring.personResultater.find { it.personIdent == barnFnr }!!
+            behandlingResultatEtterEndring.personResultater.find { it.aktør.aktivIdent() == barnFnr }!!
         val borMedSøkerVilkårEtterEndring =
             personResultatEtterEndring.vilkårResultater.find { it.vilkårType == Vilkår.BOR_MED_SØKER }!!
         Assertions.assertEquals(behandling2.id, borMedSøkerVilkårEtterEndring.behandlingId)
@@ -469,7 +469,7 @@ class VilkårServiceTest(
         val personopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(
                 behandling.id, fnr, listOf(barnFnr),
-                søkerAktør = personidentService.hentOgLagreAktørId(fnr),
+                søkerAktør = personidentService.hentOgLagreAktør(fnr),
                 barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr))
             )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
@@ -480,7 +480,7 @@ class VilkårServiceTest(
             forrigeBehandlingSomErVedtatt = forrigeBehandlingSomErIverksatt
         )
         val under18ÅrVilkårForBarn =
-            vilkårsvurdering.personResultater.find { it.personIdent == barnFnr }
+            vilkårsvurdering.personResultater.find { it.aktør.aktivIdent() == barnFnr }
                 ?.tilRestPersonResultat()?.vilkårResultater?.find { it.vilkårType == Vilkår.UNDER_18_ÅR }
 
         val endretVilkårsvurdering: List<RestPersonResultat> =
@@ -524,7 +524,7 @@ class VilkårServiceTest(
         val personopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(
                 behandling.id, fnr, listOf(barnFnr),
-                søkerAktør = personidentService.hentOgLagreAktørId(fnr),
+                søkerAktør = personidentService.hentOgLagreAktør(fnr),
                 barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr))
             )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
@@ -535,7 +535,7 @@ class VilkårServiceTest(
             forrigeBehandlingSomErVedtatt = forrigeBehandlingSomErIverksatt
         )
         val under18ÅrVilkårForBarn =
-            vilkårsvurdering.personResultater.find { it.personIdent == barnFnr }
+            vilkårsvurdering.personResultater.find { it.aktør.aktivIdent() == barnFnr }
                 ?.tilRestPersonResultat()?.vilkårResultater?.find { it.vilkårType == Vilkår.UNDER_18_ÅR }
 
         val endretVilkårsvurdering: List<RestPersonResultat> =
@@ -585,7 +585,7 @@ class VilkårServiceTest(
             forrigeBehandling.id,
             fnr, listOf(barnFnr),
             barnetsFødselsdato,
-            personidentService.hentOgLagreAktørId(fnr),
+            personidentService.hentOgLagreAktør(fnr),
             personidentService.hentOgLagreAktørIder(listOf(barnFnr))
         )
         persongrunnlagService.lagreOgDeaktiverGammel(forrigePersonopplysningGrunnlag)
@@ -594,7 +594,7 @@ class VilkårServiceTest(
         val søkerPersonResultat = PersonResultat(
             vilkårsvurdering = forrigeVilkårsvurdering,
             personIdent = fnr,
-            aktør = personidentService.hentOgLagreAktørId(fnr)
+            aktør = personidentService.hentOgLagreAktør(fnr)
         )
         søkerPersonResultat.setSortedVilkårResultater(
             lagSøkerVilkårResultat(
@@ -605,7 +605,7 @@ class VilkårServiceTest(
         )
         val barnPersonResultat = PersonResultat(
             vilkårsvurdering = forrigeVilkårsvurdering, personIdent = barnFnr,
-            aktør = personidentService.hentOgLagreAktørId(barnFnr)
+            aktør = personidentService.hentOgLagreAktør(barnFnr)
         )
         barnPersonResultat.setSortedVilkårResultater(
             setOf(
@@ -670,7 +670,7 @@ class VilkårServiceTest(
             behandling.id,
             fnr, listOf(barnFnr),
             barnetsFødselsdato,
-            personidentService.hentOgLagreAktørId(fnr),
+            personidentService.hentOgLagreAktør(fnr),
             personidentService.hentOgLagreAktørIder(listOf(barnFnr))
         )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
@@ -682,7 +682,8 @@ class VilkårServiceTest(
             nyMigreringsdato = nyMigreringsdato
         )
         assertTrue { vilkårsvurdering.personResultater.isNotEmpty() }
-        val søkerVilkårResultat = vilkårsvurdering.personResultater.first { it.personIdent == fnr }.vilkårResultater
+        val søkerVilkårResultat =
+            vilkårsvurdering.personResultater.first { it.aktør.aktivIdent() == fnr }.vilkårResultater
         assertTrue { søkerVilkårResultat.size == 2 }
         assertTrue {
             søkerVilkårResultat.all {
@@ -691,7 +692,8 @@ class VilkårServiceTest(
             }
         }
 
-        val barnVilkårResultat = vilkårsvurdering.personResultater.first { it.personIdent == barnFnr }.vilkårResultater
+        val barnVilkårResultat =
+            vilkårsvurdering.personResultater.first { it.aktør.aktivIdent() == barnFnr }.vilkårResultater
         assertTrue { barnVilkårResultat.size == 5 }
         assertTrue {
             barnVilkårResultat.filter { it.vilkårType == Vilkår.BOR_MED_SØKER }.all {
@@ -732,7 +734,7 @@ class VilkårServiceTest(
             forrigeBehandling.id,
             fnr, listOf(barnFnr),
             barnetsFødselsdato,
-            personidentService.hentOgLagreAktørId(fnr),
+            personidentService.hentOgLagreAktør(fnr),
             personidentService.hentOgLagreAktørIder(listOf(barnFnr))
         )
         persongrunnlagService.lagreOgDeaktiverGammel(forrigePersonopplysningGrunnlag)
@@ -741,7 +743,7 @@ class VilkårServiceTest(
         val søkerPersonResultat = PersonResultat(
             vilkårsvurdering = forrigeVilkårsvurdering,
             personIdent = fnr,
-            aktør = personidentService.hentOgLagreAktørId(fnr)
+            aktør = personidentService.hentOgLagreAktør(fnr)
         )
         søkerPersonResultat.setSortedVilkårResultater(
             lagSøkerVilkårResultat(
@@ -753,7 +755,7 @@ class VilkårServiceTest(
         val barnPersonResultat = PersonResultat(
             vilkårsvurdering = forrigeVilkårsvurdering,
             personIdent = barnFnr,
-            aktør = personidentService.hentOgLagreAktørId(barnFnr)
+            aktør = personidentService.hentOgLagreAktør(barnFnr)
         )
         barnPersonResultat.setSortedVilkårResultater(
             setOf(
@@ -818,7 +820,7 @@ class VilkårServiceTest(
             behandling.id,
             fnr, listOf(barnFnr),
             barnetsFødselsdato,
-            personidentService.hentOgLagreAktørId(fnr),
+            personidentService.hentOgLagreAktør(fnr),
             personidentService.hentOgLagreAktørIder(listOf(barnFnr))
         )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
@@ -830,7 +832,8 @@ class VilkårServiceTest(
             nyMigreringsdato = nyMigreringsdato
         )
         assertTrue { vilkårsvurdering.personResultater.isNotEmpty() }
-        val søkerVilkårResultat = vilkårsvurdering.personResultater.first { it.personIdent == fnr }.vilkårResultater
+        val søkerVilkårResultat =
+            vilkårsvurdering.personResultater.first { it.aktør.aktivIdent() == fnr }.vilkårResultater
         assertTrue { søkerVilkårResultat.size == 2 }
         assertTrue {
             søkerVilkårResultat.all {
@@ -839,7 +842,8 @@ class VilkårServiceTest(
             }
         }
 
-        val barnVilkårResultat = vilkårsvurdering.personResultater.first { it.personIdent == barnFnr }.vilkårResultater
+        val barnVilkårResultat =
+            vilkårsvurdering.personResultater.first { it.aktør.aktivIdent() == barnFnr }.vilkårResultater
         assertTrue { barnVilkårResultat.size == 5 }
         assertTrue {
             barnVilkårResultat.filter { it.vilkårType.påvirketVilkårForEndreMigreringsdato() }.all {
@@ -880,7 +884,7 @@ class VilkårServiceTest(
             forrigeBehandling.id,
             fnr, listOf(barnFnr),
             barnetsFødselsdato,
-            personidentService.hentOgLagreAktørId(fnr),
+            personidentService.hentOgLagreAktør(fnr),
             personidentService.hentOgLagreAktørIder(listOf(barnFnr))
         )
         persongrunnlagService.lagreOgDeaktiverGammel(forrigePersonopplysningGrunnlag)
@@ -888,7 +892,7 @@ class VilkårServiceTest(
         var forrigeVilkårsvurdering = Vilkårsvurdering(behandling = forrigeBehandling)
         val søkerPersonResultat = PersonResultat(
             vilkårsvurdering = forrigeVilkårsvurdering, personIdent = fnr,
-            aktør = personidentService.hentOgLagreAktørId(fnr)
+            aktør = personidentService.hentOgLagreAktør(fnr)
         )
         søkerPersonResultat.setSortedVilkårResultater(
             lagSøkerVilkårResultat(
@@ -900,7 +904,7 @@ class VilkårServiceTest(
         val barnPersonResultat = PersonResultat(
             vilkårsvurdering = forrigeVilkårsvurdering,
             personIdent = barnFnr,
-            aktør = personidentService.hentOgLagreAktørId(barnFnr)
+            aktør = personidentService.hentOgLagreAktør(barnFnr)
         )
         barnPersonResultat.setSortedVilkårResultater(
             setOf(
@@ -973,7 +977,7 @@ class VilkårServiceTest(
             behandling.id,
             fnr, listOf(barnFnr),
             barnetsFødselsdato,
-            personidentService.hentOgLagreAktørId(fnr),
+            personidentService.hentOgLagreAktør(fnr),
             personidentService.hentOgLagreAktørIder(listOf(barnFnr))
         )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
@@ -985,7 +989,8 @@ class VilkårServiceTest(
             nyMigreringsdato = nyMigreringsdato
         )
         assertTrue { vilkårsvurdering.personResultater.isNotEmpty() }
-        val søkerVilkårResultat = vilkårsvurdering.personResultater.first { it.personIdent == fnr }.vilkårResultater
+        val søkerVilkårResultat =
+            vilkårsvurdering.personResultater.first { it.aktør.aktivIdent() == fnr }.vilkårResultater
         assertTrue { søkerVilkårResultat.size == 2 }
         assertTrue {
             søkerVilkårResultat.all {
@@ -994,7 +999,8 @@ class VilkårServiceTest(
             }
         }
 
-        val barnVilkårResultat = vilkårsvurdering.personResultater.first { it.personIdent == barnFnr }.vilkårResultater
+        val barnVilkårResultat =
+            vilkårsvurdering.personResultater.first { it.aktør.aktivIdent() == barnFnr }.vilkårResultater
         assertTrue { barnVilkårResultat.size == 6 }
         assertTrue {
             barnVilkårResultat.filter { it.vilkårType == Vilkår.BOR_MED_SØKER }.any {

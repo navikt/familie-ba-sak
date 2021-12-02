@@ -28,6 +28,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakPerson
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.FØRSTE_STEG
 import no.nav.familie.kontrakter.felles.Behandlingstema
 import no.nav.familie.kontrakter.felles.Tema
@@ -61,6 +62,9 @@ class OppgaveServiceTest {
     lateinit var behandlingRepository: BehandlingRepository
 
     @MockK
+    lateinit var personidentService: PersonidentService
+
+    @MockK
     lateinit var oppgaveRepository: OppgaveRepository
 
     @InjectMockKs
@@ -77,7 +81,7 @@ class OppgaveServiceTest {
                 any<Behandling>()
             )
         } returns null
-        every { personopplysningerService.hentOgLagreAktørId(any()) } returns Aktør(AKTØR_ID_FAGSAK)
+        every { personidentService.hentOgLagreAktør(any()) } returns Aktør(AKTØR_ID_FAGSAK)
 
         every { arbeidsfordelingService.hentAbeidsfordelingPåBehandling(any()) } returns ArbeidsfordelingPåBehandling(
             behandlingId = 1,

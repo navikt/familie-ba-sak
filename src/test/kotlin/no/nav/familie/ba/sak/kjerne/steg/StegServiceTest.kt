@@ -97,12 +97,12 @@ class StegServiceTest(
         val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)!!
         assertEquals(
             Resultat.OPPFYLT,
-            vilkårsvurdering.personResultater.first { it.personIdent == barnFnr1 }.vilkårResultater
+            vilkårsvurdering.personResultater.first { it.aktør.aktivIdent() == barnFnr1 }.vilkårResultater
                 .single { it.vilkårType == Vilkår.GIFT_PARTNERSKAP }.resultat
         )
         assertEquals(
             Resultat.IKKE_VURDERT,
-            vilkårsvurdering.personResultater.first { it.personIdent == barnFnr2 }.vilkårResultater
+            vilkårsvurdering.personResultater.first { it.aktør.aktivIdent() == barnFnr2 }.vilkårResultater
                 .single { it.vilkårType == Vilkår.GIFT_PARTNERSKAP }.resultat
         )
     }
@@ -212,7 +212,7 @@ class StegServiceTest(
         val søkerFnr = randomFnr()
         val barnFnr = randomFnr()
 
-        val søkerAktørId = personidentService.hentOgLagreAktørId(søkerFnr)
+        val søkerAktørId = personidentService.hentOgLagreAktør(søkerFnr)
 
         mockHentPersoninfoForMedIdenter(mockPersonopplysningerService, søkerFnr, barnFnr)
 

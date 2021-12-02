@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
@@ -30,6 +31,7 @@ class FødselshendelseHenleggelseTest(
     @Autowired private val behandleFødselshendelseTask: BehandleFødselshendelseTask,
     @Autowired private val fagsakService: FagsakService,
     @Autowired private val behandlingService: BehandlingService,
+    @Autowired private val personidentService: PersonidentService,
     @Autowired private val vedtakService: VedtakService,
     @Autowired private val stegService: StegService
 ) : AbstractVerdikjedetest() {
@@ -73,7 +75,8 @@ class FødselshendelseHenleggelseTest(
             fagsakService = fagsakService,
             behandlingService = behandlingService,
             vedtakService = vedtakService,
-            stegService = stegService
+            stegService = stegService,
+            personidentService = personidentService,
         )
         assertNull(behandling)
 
@@ -109,6 +112,7 @@ class FødselshendelseHenleggelseTest(
             behandleFødselshendelseTask = behandleFødselshendelseTask,
             fagsakService = fagsakService,
             behandlingService = behandlingService,
+            personidentService = personidentService,
             vedtakService = vedtakService,
             stegService = stegService
         )
@@ -156,6 +160,7 @@ class FødselshendelseHenleggelseTest(
             behandleFødselshendelseTask = behandleFødselshendelseTask,
             fagsakService = fagsakService,
             behandlingService = behandlingService,
+            personidentService = personidentService,
             vedtakService = vedtakService,
             stegService = stegService
         )

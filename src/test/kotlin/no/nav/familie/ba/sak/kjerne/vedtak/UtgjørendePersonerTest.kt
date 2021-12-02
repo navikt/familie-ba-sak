@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.lagVilkårResultat
 import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
@@ -27,9 +28,9 @@ class UtgjørendePersonerTest {
         val barn1Fnr = randomFnr()
         val barn2Fnr = randomFnr()
 
-        val søkerAktørId = randomAktørId()
-        val barn1AktørId = randomAktørId()
-        val barn2AktørId = randomAktørId()
+        val søkerAktørId = tilAktør(søkerFnr)
+        val barn1AktørId = tilAktør(barn1Fnr)
+        val barn2AktørId = tilAktør(barn2Fnr)
 
         val behandling = lagBehandling()
         val personopplysningGrunnlag =
@@ -142,7 +143,7 @@ class UtgjørendePersonerTest {
         assertEquals(2, personerMedUtgjørendeVilkårLovligOpphold.size)
         assertEquals(
             listOf(søkerFnr, barn1Fnr).sorted(),
-            personerMedUtgjørendeVilkårLovligOpphold.map { it.personIdent.ident }.sorted()
+            personerMedUtgjørendeVilkårLovligOpphold.map { it.aktør.aktivIdent() }.sorted()
         )
 
         val personerMedUtgjørendeVilkårBosattIRiket = VedtakUtils.hentPersonerForAlleUtgjørendeVilkår(
@@ -158,7 +159,7 @@ class UtgjørendePersonerTest {
         )
 
         assertEquals(1, personerMedUtgjørendeVilkårBosattIRiket.size)
-        assertEquals(barn1Fnr, personerMedUtgjørendeVilkårBosattIRiket.first().personIdent.ident)
+        assertEquals(barn1Fnr, personerMedUtgjørendeVilkårBosattIRiket.first().aktør.aktivIdent())
     }
 
     @Test
@@ -235,7 +236,7 @@ class UtgjørendePersonerTest {
         assertEquals(1, personerMedUtgjørendeVilkårBosattIRiket.size)
         assertEquals(
             barn2Fnr,
-            personerMedUtgjørendeVilkårBosattIRiket.first().personIdent.ident
+            personerMedUtgjørendeVilkårBosattIRiket.first().aktør.aktivIdent()
         )
 
         val personerMedUtgjørendeVilkårBarnUtvandret = VedtakUtils.hentPersonerForAlleUtgjørendeVilkår(
@@ -253,7 +254,7 @@ class UtgjørendePersonerTest {
         assertEquals(1, personerMedUtgjørendeVilkårBarnUtvandret.size)
         assertEquals(
             barnFnr,
-            personerMedUtgjørendeVilkårBarnUtvandret.first().personIdent.ident
+            personerMedUtgjørendeVilkårBarnUtvandret.first().aktør.aktivIdent()
         )
     }
 
@@ -335,13 +336,13 @@ class UtgjørendePersonerTest {
         assertEquals(1, personerMedUtgjørendeVilkårBosattIRiketMedlemskap.size)
         assertEquals(
             barn1Fnr,
-            personerMedUtgjørendeVilkårBosattIRiketMedlemskap.first().personIdent.ident
+            personerMedUtgjørendeVilkårBosattIRiketMedlemskap.first().aktør.aktivIdent()
         )
 
         assertEquals(1, personerMedUtgjørendeVilkårBosattIRiket.size)
         assertEquals(
             barn2Fnr,
-            personerMedUtgjørendeVilkårBosattIRiket.first().personIdent.ident
+            personerMedUtgjørendeVilkårBosattIRiket.first().aktør.aktivIdent()
         )
     }
 }

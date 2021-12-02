@@ -23,7 +23,7 @@ class YtelsePersonResultatTest {
         val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(
             listOf(
                 BehandlingsresultatPerson(
-                    personIdent = barn1.personIdent.ident,
+                    aktør = barn1.aktør,
                     søktForPerson = true,
                     personType = barn1.type,
                     forrigeAndeler = emptyList(),
@@ -41,7 +41,7 @@ class YtelsePersonResultatTest {
         assertEquals(1, ytelsePersonerMedResultat.size)
         assertEquals(
             setOf(YtelsePersonResultat.INNVILGET),
-            ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater
+            ytelsePersonerMedResultat.find { it.aktør == barn1.aktør }?.resultater
         )
     }
 
@@ -62,14 +62,14 @@ class YtelsePersonResultatTest {
         val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(
             listOf(
                 BehandlingsresultatPerson(
-                    personIdent = barn1.personIdent.ident,
+                    aktør = barn1.aktør,
                     søktForPerson = false,
                     personType = barn1.type,
                     forrigeAndeler = listOf(forrigeAndelBarn1),
                     andeler = listOf(forrigeAndelBarn1)
                 ),
                 BehandlingsresultatPerson(
-                    personIdent = barn2.personIdent.ident,
+                    aktør = barn2.aktør,
                     søktForPerson = true,
                     personType = barn2.type,
                     forrigeAndeler = emptyList(),
@@ -81,11 +81,11 @@ class YtelsePersonResultatTest {
         assertEquals(2, ytelsePersonerMedResultat.size)
         assertEquals(
             emptySet<YtelsePersonResultat>(),
-            ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater
+            ytelsePersonerMedResultat.find { it.aktør == barn1.aktør }?.resultater
         )
         assertEquals(
             setOf(YtelsePersonResultat.INNVILGET),
-            ytelsePersonerMedResultat.find { it.personIdent == barn2.personIdent.ident }?.resultater
+            ytelsePersonerMedResultat.find { it.aktør == barn2.aktør }?.resultater
         )
     }
 
@@ -106,14 +106,14 @@ class YtelsePersonResultatTest {
         val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(
             listOf(
                 BehandlingsresultatPerson(
-                    personIdent = barn1.personIdent.ident,
+                    aktør = barn1.aktør,
                     søktForPerson = false,
                     personType = barn1.type,
                     forrigeAndeler = listOf(forrigeAndelBarn1),
                     andeler = listOf(forrigeAndelBarn1)
                 ),
                 BehandlingsresultatPerson(
-                    personIdent = barn2.personIdent.ident,
+                    aktør = barn2.aktør,
                     søktForPerson = true,
                     personType = barn2.type,
                     forrigeAndeler = emptyList(),
@@ -124,12 +124,12 @@ class YtelsePersonResultatTest {
 
         assertEquals(
             emptySet<YtelsePersonResultat>(),
-            ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater
+            ytelsePersonerMedResultat.find { it.aktør == barn1.aktør }?.resultater
         )
 
         assertEquals(
             setOf(YtelsePersonResultat.INNVILGET),
-            ytelsePersonerMedResultat.find { it.personIdent == barn2.personIdent.ident }?.resultater
+            ytelsePersonerMedResultat.find { it.aktør == barn2.aktør }?.resultater
         )
     }
 
@@ -155,14 +155,14 @@ class YtelsePersonResultatTest {
         val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(
             listOf(
                 BehandlingsresultatPerson(
-                    personIdent = barn1.personIdent.ident,
+                    aktør = barn1.aktør,
                     søktForPerson = false,
                     personType = barn1.type,
                     forrigeAndeler = listOf(forrigeAndelBarn1),
                     andeler = listOf(forrigeAndelBarn1)
                 ),
                 BehandlingsresultatPerson(
-                    personIdent = barn2.personIdent.ident,
+                    aktør = barn2.aktør,
                     søktForPerson = true,
                     personType = barn2.type,
                     forrigeAndeler = emptyList(),
@@ -174,19 +174,19 @@ class YtelsePersonResultatTest {
         assertEquals(2, ytelsePersonerMedResultat.size)
         assertEquals(
             emptySet<YtelsePersonResultat>(),
-            ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater
+            ytelsePersonerMedResultat.find { it.aktør == barn1.aktør }?.resultater
         )
         assertEquals(
             setOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.OPPHØRT),
-            ytelsePersonerMedResultat.find { it.personIdent == barn2.personIdent.ident }?.resultater
+            ytelsePersonerMedResultat.find { it.aktør == barn2.aktør }?.resultater
         )
         assertEquals(
             ytelseFørsteBarn,
-            ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.ytelseSlutt
+            ytelsePersonerMedResultat.find { it.aktør == barn1.aktør }?.ytelseSlutt
         )
         assertEquals(
             ytelseSluttNyttBarn,
-            ytelsePersonerMedResultat.find { it.personIdent == barn2.personIdent.ident }?.ytelseSlutt
+            ytelsePersonerMedResultat.find { it.aktør == barn2.aktør }?.ytelseSlutt
         )
     }
 
@@ -207,7 +207,7 @@ class YtelsePersonResultatTest {
         val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(
             listOf(
                 BehandlingsresultatPerson(
-                    personIdent = barn1.personIdent.ident,
+                    aktør = barn1.aktør,
                     søktForPerson = true,
                     personType = barn1.type,
                     forrigeAndeler = listOf(forrigeAndelBarn1),
@@ -218,7 +218,7 @@ class YtelsePersonResultatTest {
 
         assertEquals(
             setOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.OPPHØRT),
-            ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater
+            ytelsePersonerMedResultat.find { it.aktør == barn1.aktør }?.resultater
         )
     }
 
@@ -248,7 +248,7 @@ class YtelsePersonResultatTest {
         val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(
             listOf(
                 BehandlingsresultatPerson(
-                    personIdent = barn1.personIdent.ident,
+                    aktør = barn1.aktør,
                     søktForPerson = true,
                     personType = barn1.type,
                     forrigeAndeler = listOf(forrigeAndelBarn1),
@@ -260,7 +260,7 @@ class YtelsePersonResultatTest {
 
         assertEquals(
             setOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.AVSLÅTT, YtelsePersonResultat.ENDRET),
-            ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater
+            ytelsePersonerMedResultat.find { it.aktør == barn1.aktør }?.resultater
         )
     }
 
@@ -284,7 +284,7 @@ class YtelsePersonResultatTest {
         val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(
             listOf(
                 BehandlingsresultatPerson(
-                    personIdent = barn1.personIdent.ident,
+                    aktør = barn1.aktør,
                     søktForPerson = true,
                     personType = barn1.type,
                     forrigeAndeler = listOf(forrigeAndelBarn1),
@@ -296,7 +296,7 @@ class YtelsePersonResultatTest {
 
         assertEquals(
             setOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.AVSLÅTT),
-            ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater
+            ytelsePersonerMedResultat.find { it.aktør == barn1.aktør }?.resultater
         )
     }
 
@@ -308,7 +308,7 @@ class YtelsePersonResultatTest {
         val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(
             listOf(
                 BehandlingsresultatPerson(
-                    personIdent = barn1.personIdent.ident,
+                    aktør = barn1.aktør,
                     søktForPerson = true,
                     personType = barn1.type,
                     forrigeAndeler = emptyList(),
@@ -320,7 +320,7 @@ class YtelsePersonResultatTest {
 
         assertEquals(
             setOf(YtelsePersonResultat.AVSLÅTT),
-            ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater
+            ytelsePersonerMedResultat.find { it.aktør == barn1.aktør }?.resultater
         )
     }
 
@@ -335,7 +335,7 @@ class YtelsePersonResultatTest {
         val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(
             listOf(
                 BehandlingsresultatPerson(
-                    personIdent = barn1.personIdent.ident,
+                    aktør = barn1.aktør,
                     søktForPerson = false,
                     personType = barn1.type,
                     forrigeAndeler = listOf(forrigeAndelBarn1),
@@ -343,7 +343,7 @@ class YtelsePersonResultatTest {
                     eksplisittAvslag = false
                 ),
                 BehandlingsresultatPerson(
-                    personIdent = barn2.personIdent.ident,
+                    aktør = barn2.aktør,
                     søktForPerson = true,
                     personType = barn2.type,
                     forrigeAndeler = listOf(forrigeAndelBarn1),
@@ -355,11 +355,11 @@ class YtelsePersonResultatTest {
 
         assertEquals(
             emptySet<YtelsePersonResultat>(),
-            ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater
+            ytelsePersonerMedResultat.find { it.aktør == barn1.aktør }?.resultater
         )
         assertEquals(
             setOf(YtelsePersonResultat.AVSLÅTT, YtelsePersonResultat.OPPHØRT),
-            ytelsePersonerMedResultat.find { it.personIdent == barn2.personIdent.ident }?.resultater
+            ytelsePersonerMedResultat.find { it.aktør == barn2.aktør }?.resultater
         )
     }
 
@@ -378,7 +378,7 @@ class YtelsePersonResultatTest {
         val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(
             listOf(
                 BehandlingsresultatPerson(
-                    personIdent = barn1.personIdent.ident,
+                    aktør = barn1.aktør,
                     søktForPerson = false,
                     personType = barn1.type,
                     forrigeAndeler = listOf(forrigeAndelBarn1),
@@ -390,7 +390,7 @@ class YtelsePersonResultatTest {
 
         assertEquals(
             emptySet<YtelsePersonResultat>(),
-            ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater
+            ytelsePersonerMedResultat.find { it.aktør == barn1.aktør }?.resultater
         )
     }
 
@@ -416,7 +416,7 @@ class YtelsePersonResultatTest {
         val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(
             listOf(
                 BehandlingsresultatPerson(
-                    personIdent = barn1.personIdent.ident,
+                    aktør = barn1.aktør,
                     søktForPerson = false,
                     personType = barn1.type,
                     forrigeAndeler = listOf(forrigeAndelBarn1),
@@ -428,11 +428,11 @@ class YtelsePersonResultatTest {
 
         assertEquals(
             setOf(YtelsePersonResultat.OPPHØRT),
-            ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater
+            ytelsePersonerMedResultat.find { it.aktør == barn1.aktør }?.resultater
         )
         assertEquals(
             ytelseSlutt,
-            ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.ytelseSlutt
+            ytelsePersonerMedResultat.find { it.aktør == barn1.aktør }?.ytelseSlutt
         )
     }
 
@@ -452,7 +452,7 @@ class YtelsePersonResultatTest {
         val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(
             listOf(
                 BehandlingsresultatPerson(
-                    personIdent = barn1.personIdent.ident,
+                    aktør = barn1.aktør,
                     søktForPerson = false,
                     personType = barn1.type,
                     forrigeAndeler = listOf(forrigeAndel1, forrigeAndel2),
@@ -465,11 +465,11 @@ class YtelsePersonResultatTest {
         assertEquals(1, ytelsePersonerMedResultat.size)
         assertEquals(
             setOf(YtelsePersonResultat.OPPHØRT),
-            ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater
+            ytelsePersonerMedResultat.find { it.aktør == barn1.aktør }?.resultater
         )
         assertEquals(
             TIDENES_MORGEN.toYearMonth(),
-            ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.ytelseSlutt
+            ytelsePersonerMedResultat.find { it.aktør == barn1.aktør }?.ytelseSlutt
         )
     }
 
@@ -490,7 +490,7 @@ class YtelsePersonResultatTest {
         val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(
             listOf(
                 BehandlingsresultatPerson(
-                    personIdent = barn1.personIdent.ident,
+                    aktør = barn1.aktør,
                     søktForPerson = false,
                     personType = barn1.type,
                     forrigeAndeler = listOf(forrigeAndel1, forrigeAndel2),
@@ -502,11 +502,11 @@ class YtelsePersonResultatTest {
 
         assertEquals(
             setOf(YtelsePersonResultat.OPPHØRT),
-            ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater
+            ytelsePersonerMedResultat.find { it.aktør == barn1.aktør }?.resultater
         )
         assertEquals(
             ytelseSlutt,
-            ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.ytelseSlutt
+            ytelsePersonerMedResultat.find { it.aktør == barn1.aktør }?.ytelseSlutt
         )
     }
 
@@ -533,7 +533,7 @@ class YtelsePersonResultatTest {
         val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(
             listOf(
                 BehandlingsresultatPerson(
-                    personIdent = barn1.personIdent.ident,
+                    aktør = barn1.aktør,
                     søktForPerson = false,
                     personType = barn1.type,
                     forrigeAndeler = listOf(forrigeAndel1, forrigeAndel2),
@@ -545,11 +545,11 @@ class YtelsePersonResultatTest {
 
         assertEquals(
             setOf(YtelsePersonResultat.OPPHØRT),
-            ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater
+            ytelsePersonerMedResultat.find { it.aktør == barn1.aktør }?.resultater
         )
         assertEquals(
             ytelseSlutt,
-            ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.ytelseSlutt
+            ytelsePersonerMedResultat.find { it.aktør == barn1.aktør }?.ytelseSlutt
         )
     }
 
@@ -564,7 +564,7 @@ class YtelsePersonResultatTest {
         val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(
             listOf(
                 BehandlingsresultatPerson(
-                    personIdent = barn1.personIdent.ident,
+                    aktør = barn1.aktør,
                     søktForPerson = false,
                     personType = barn1.type,
                     forrigeAndeler = listOf(forrigeAndelBarn1),
@@ -576,7 +576,7 @@ class YtelsePersonResultatTest {
 
         assertEquals(
             setOf(YtelsePersonResultat.OPPHØRT),
-            ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater
+            ytelsePersonerMedResultat.find { it.aktør == barn1.aktør }?.resultater
         )
     }
 
@@ -606,7 +606,7 @@ class YtelsePersonResultatTest {
         val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(
             listOf(
                 BehandlingsresultatPerson(
-                    personIdent = barn1.personIdent.ident,
+                    aktør = barn1.aktør,
                     søktForPerson = false,
                     personType = barn1.type,
                     forrigeAndeler = listOf(forrigeAndelBarn1),
@@ -618,7 +618,7 @@ class YtelsePersonResultatTest {
 
         assertEquals(
             setOf(YtelsePersonResultat.ENDRET),
-            ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater
+            ytelsePersonerMedResultat.find { it.aktør == barn1.aktør }?.resultater
         )
     }
 
@@ -639,7 +639,7 @@ class YtelsePersonResultatTest {
         val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(
             listOf(
                 BehandlingsresultatPerson(
-                    personIdent = barn1.personIdent.ident,
+                    aktør = barn1.aktør,
                     søktForPerson = false,
                     personType = barn1.type,
                     forrigeAndeler = listOf(forrigeAndelBarn1),
@@ -651,7 +651,7 @@ class YtelsePersonResultatTest {
 
         assertEquals(
             setOf(YtelsePersonResultat.ENDRET),
-            ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater
+            ytelsePersonerMedResultat.find { it.aktør == barn1.aktør }?.resultater
         )
     }
 
@@ -677,7 +677,7 @@ class YtelsePersonResultatTest {
         val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(
             listOf(
                 BehandlingsresultatPerson(
-                    personIdent = barn1.personIdent.ident,
+                    aktør = barn1.aktør,
                     søktForPerson = false,
                     personType = barn1.type,
                     forrigeAndeler = listOf(forrigeAndelBarn1),
@@ -689,7 +689,7 @@ class YtelsePersonResultatTest {
 
         assertEquals(
             setOf(YtelsePersonResultat.ENDRET),
-            ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater
+            ytelsePersonerMedResultat.find { it.aktør == barn1.aktør }?.resultater
         )
     }
 
@@ -714,7 +714,7 @@ class YtelsePersonResultatTest {
         val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(
             listOf(
                 BehandlingsresultatPerson(
-                    personIdent = barn1.personIdent.ident,
+                    aktør = barn1.aktør,
                     søktForPerson = false,
                     personType = barn1.type,
                     forrigeAndeler = listOf(forrigeAndel),
@@ -726,11 +726,11 @@ class YtelsePersonResultatTest {
 
         assertEquals(
             setOf(YtelsePersonResultat.OPPHØRT, YtelsePersonResultat.ENDRET),
-            ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater
+            ytelsePersonerMedResultat.find { it.aktør == barn1.aktør }?.resultater
         )
         assertEquals(
             ytelseSlutt,
-            ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.ytelseSlutt
+            ytelsePersonerMedResultat.find { it.aktør == barn1.aktør }?.ytelseSlutt
         )
     }
 
@@ -758,7 +758,7 @@ class YtelsePersonResultatTest {
         val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(
             listOf(
                 BehandlingsresultatPerson(
-                    personIdent = barn1.personIdent.ident,
+                    aktør = barn1.aktør,
                     søktForPerson = false,
                     personType = barn1.type,
                     forrigeAndeler = listOf(forrigeAndelBarn1),
@@ -770,11 +770,11 @@ class YtelsePersonResultatTest {
 
         assertEquals(
             setOf(YtelsePersonResultat.ENDRET, YtelsePersonResultat.OPPHØRT),
-            ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.resultater
+            ytelsePersonerMedResultat.find { it.aktør == barn1.aktør }?.resultater
         )
         assertEquals(
             ytelseSlutt,
-            ytelsePersonerMedResultat.find { it.personIdent == barn1.personIdent.ident }?.ytelseSlutt
+            ytelsePersonerMedResultat.find { it.aktør == barn1.aktør }?.ytelseSlutt
         )
     }
 }

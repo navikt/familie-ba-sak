@@ -37,12 +37,12 @@ class VedtaksperiodeMedBegrunnelseTest {
             type = Vedtaksperiodetype.FORTSATT_INNVILGET,
             begrunnelser = listOf(
                 lagRestVedtaksbegrunnelse(
-                    personIdenter = listOf(barn1.personIdent.ident),
+                    personIdenter = listOf(barn1.aktør.aktivIdent()),
                     vedtakBegrunnelseSpesifikasjon =
                     VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_SØKER_OG_BARN_BOSATT_I_RIKET,
                 ),
                 lagRestVedtaksbegrunnelse(
-                    personIdenter = listOf(barn2.personIdent.ident),
+                    personIdenter = listOf(barn2.aktør.aktivIdent()),
                     vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_BOR_MED_SØKER,
                 ),
             ),
@@ -92,7 +92,7 @@ class VedtaksperiodeMedBegrunnelseTest {
             type = Vedtaksperiodetype.FORTSATT_INNVILGET,
             begrunnelser = listOf(
                 lagRestVedtaksbegrunnelse(
-                    personIdenter = listOf(barn1.personIdent.ident),
+                    personIdenter = listOf(barn1.aktør.aktivIdent()),
                     vedtakBegrunnelseSpesifikasjon =
                     VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_SØKER_OG_BARN_BOSATT_I_RIKET,
                 ),
@@ -114,7 +114,7 @@ class VedtaksperiodeMedBegrunnelseTest {
             type = Vedtaksperiodetype.UTBETALING,
             begrunnelser = listOf(
                 lagRestVedtaksbegrunnelse(
-                    personIdenter = listOf(barn1.personIdent.ident),
+                    personIdenter = listOf(barn1.aktør.aktivIdent()),
                     vedtakBegrunnelseSpesifikasjon =
                     VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET,
                 ),
@@ -136,7 +136,7 @@ class VedtaksperiodeMedBegrunnelseTest {
             type = Vedtaksperiodetype.AVSLAG,
             begrunnelser = listOf(
                 lagRestVedtaksbegrunnelse(
-                    personIdenter = listOf(barn1.personIdent.ident),
+                    personIdenter = listOf(barn1.aktør.aktivIdent()),
                     vedtakBegrunnelseSpesifikasjon =
                     VedtakBegrunnelseSpesifikasjon.AVSLAG_BOR_HOS_SØKER,
                 ),
@@ -157,7 +157,7 @@ class VedtaksperiodeMedBegrunnelseTest {
             type = Vedtaksperiodetype.OPPHØR,
             begrunnelser = listOf(
                 lagRestVedtaksbegrunnelse(
-                    personIdenter = listOf(barn1.personIdent.ident),
+                    personIdenter = listOf(barn1.aktør.aktivIdent()),
                     vedtakBegrunnelseSpesifikasjon =
                     VedtakBegrunnelseSpesifikasjon.OPPHØR_BARN_FLYTTET_FRA_SØKER,
                 ),
@@ -229,7 +229,7 @@ class VedtaksperiodeMedBegrunnelseTest {
         val utvidetVedtaksperiodeMedBegrunnelser =
             lagUtvidetVedtaksperiodeMedBegrunnelser(utbetalingsperiodeDetaljer = utbetalingsperiodeDetaljer)
         val restVedtaksbegrunnelse =
-            lagRestVedtaksbegrunnelse(personIdenter = listOf(søker.personIdent.ident, barn1.personIdent.ident))
+            lagRestVedtaksbegrunnelse(personIdenter = listOf(søker.aktør.aktivIdent(), barn1.aktør.aktivIdent()))
 
         Assertions.assertEquals(
             17,

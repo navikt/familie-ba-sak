@@ -91,7 +91,15 @@ import kotlin.random.Random
 val fødselsnummerGenerator = FoedselsnummerGenerator()
 
 fun randomFnr(): String = fødselsnummerGenerator.foedselsnummer().asString
-fun randomAktørId(): Aktør = Aktør(Random.nextLong(1000_000_000_000, 31_121_299_99999).toString())
+fun randomPersonident(aktør: Aktør, fnr: String = randomFnr()): Personident =
+    Personident(fødselsnummer = fnr, aktør = aktør)
+
+fun randomAktørId(fnr: String = randomFnr()): Aktør =
+    Aktør(Random.nextLong(1000_000_000_000, 31_121_299_99999).toString()).also {
+        it.personidenter.add(
+            randomPersonident(it, fnr)
+        )
+    }
 
 private var gjeldendeVedtakId: Long = abs(Random.nextLong(10000000))
 private var gjeldendeVedtakBegrunnelseId: Long = abs(Random.nextLong(10000000))
@@ -162,11 +170,12 @@ fun tilfeldigPerson(
     fødselsdato: LocalDate = LocalDate.now(),
     personType: PersonType = PersonType.BARN,
     kjønn: Kjønn = Kjønn.MANN,
-    personIdent: PersonIdent = PersonIdent(randomFnr())
+    personIdent: PersonIdent = PersonIdent(randomFnr()),
+    aktør: Aktør = randomAktørId(personIdent.ident),
 ) =
     Person(
         id = nestePersonId(),
-        aktør = randomAktørId(),
+        aktør = aktør,
         personIdent = personIdent,
         fødselsdato = fødselsdato,
         type = personType,
@@ -180,11 +189,12 @@ fun tilfeldigSøker(
     fødselsdato: LocalDate = LocalDate.now(),
     personType: PersonType = PersonType.SØKER,
     kjønn: Kjønn = Kjønn.MANN,
-    personIdent: PersonIdent = PersonIdent(randomFnr())
+    personIdent: PersonIdent = PersonIdent(randomFnr()),
+    aktør: Aktør = randomAktørId(personIdent.ident),
 ) =
     Person(
         id = nestePersonId(),
-        aktør = randomAktørId(),
+        aktør = aktør,
         personIdent = personIdent,
         fødselsdato = fødselsdato,
         type = personType,
@@ -208,7 +218,7 @@ fun lagAndelTilkjentYtelse(
     beløp: Int = sats(ytelseType),
     behandling: Behandling = lagBehandling(),
     person: Person = tilfeldigPerson(),
-    aktør: Aktør = Aktør(person.personIdent.ident),
+    aktør: Aktør = person.aktør,
     periodeIdOffset: Long? = null,
     forrigeperiodeIdOffset: Long? = null,
     tilkjentYtelse: TilkjentYtelse? = null,
@@ -217,7 +227,7 @@ fun lagAndelTilkjentYtelse(
 ): AndelTilkjentYtelse {
 
     return AndelTilkjentYtelse(
-        personIdent = person.personIdent.ident,
+        personIdent = aktør.aktivIdent(),
         aktør = aktør,
         behandlingId = behandling.id,
         tilkjentYtelse = tilkjentYtelse ?: lagInitiellTilkjentYtelse(behandling),
@@ -246,7 +256,7 @@ fun lagAndelTilkjentYtelseUtvidet(
 ): AndelTilkjentYtelse {
 
     return AndelTilkjentYtelse(
-        personIdent = person.personIdent.ident,
+        personIdent = person.aktør.aktivIdent(),
         aktør = person.aktør,
         behandlingId = behandling.id,
         tilkjentYtelse = tilkjentYtelse ?: lagInitiellTilkjentYtelse(behandling),
@@ -309,8 +319,8 @@ fun lagTestPersonopplysningGrunnlag(
     )
 
     val søker = Person(
-        personIdent = PersonIdent(søkerPersonIdent),
         aktør = søkerAktør,
+        personIdent = PersonIdent(søkerPersonIdent),
         type = PersonType.SØKER,
         personopplysningGrunnlag = personopplysningGrunnlag,
         fødselsdato = LocalDate.of(2019, 1, 1),
@@ -653,7 +663,7 @@ fun kjørStegprosessForFGB(
                 behandlingsId = behandlingEtterBeslutteVedtak.id,
                 vedtaksId = vedtak!!.id,
                 saksbehandlerId = "System",
-                personIdent = søkerFnr
+                aktørId = behandlingEtterBeslutteVedtak.fagsak.aktør.aktørId
             )
         )
     if (tilSteg == StegType.IVERKSETT_MOT_OPPDRAG) return behandlingEtterIverksetteVedtak
@@ -665,6 +675,7 @@ fun kjørStegprosessForFGB(
                 statusFraOppdragDTO = StatusFraOppdragDTO(
                     fagsystem = FAGSYSTEM,
                     personIdent = søkerFnr,
+                    aktørId = behandlingEtterIverksetteVedtak.fagsak.aktør.aktivIdent(),
                     behandlingsId = behandlingEtterIverksetteVedtak.id,
                     vedtaksId = vedtak.id
                 ),
@@ -763,7 +774,7 @@ fun kjørStegprosessForRevurderingÅrligKontroll(
                 behandlingsId = behandlingEtterBeslutteVedtak.id,
                 vedtaksId = vedtak!!.id,
                 saksbehandlerId = "System",
-                personIdent = søkerFnr
+                aktørId = behandlingEtterBeslutteVedtak.fagsak.aktør.aktørId,
             )
         )
     if (tilSteg == StegType.IVERKSETT_MOT_OPPDRAG) return behandlingEtterIverksetteVedtak
@@ -775,6 +786,7 @@ fun kjørStegprosessForRevurderingÅrligKontroll(
                 statusFraOppdragDTO = StatusFraOppdragDTO(
                     fagsystem = FAGSYSTEM,
                     personIdent = søkerFnr,
+                    aktørId = behandlingEtterIverksetteVedtak.fagsak.aktør.aktørId,
                     behandlingsId = behandlingEtterIverksetteVedtak.id,
                     vedtaksId = vedtak.id
                 ),
@@ -847,7 +859,7 @@ fun lagUtbetalingsperiodeDetalj(
 fun lagVedtaksbegrunnelse(
     vedtakBegrunnelseSpesifikasjon: VedtakBegrunnelseSpesifikasjon =
         VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_SØKER_OG_BARN_BOSATT_I_RIKET,
-    personIdenter: List<String> = listOf(tilfeldigPerson().personIdent.ident),
+    personIdenter: List<String> = listOf(tilfeldigPerson().aktør.aktivIdent()),
     vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser = mockk()
 ) = Vedtaksbegrunnelse(
     vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
@@ -875,7 +887,7 @@ fun lagRestVedtaksbegrunnelse(
     vedtakBegrunnelseSpesifikasjon: VedtakBegrunnelseSpesifikasjon =
         VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_SØKER_OG_BARN_BOSATT_I_RIKET,
     vedtakBegrunnelseType: VedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET,
-    personIdenter: List<String> = listOf(tilfeldigPerson().personIdent.ident),
+    personIdenter: List<String> = listOf(tilfeldigPerson().aktør.aktivIdent()),
 ) = RestVedtaksbegrunnelse(
     vedtakBegrunnelseSpesifikasjon = vedtakBegrunnelseSpesifikasjon,
     vedtakBegrunnelseType = vedtakBegrunnelseType,
@@ -973,8 +985,8 @@ fun lagEndretUtbetalingAndel(
     )
 
 fun lagPerson(
-    aktør: Aktør = randomAktørId(),
     personIdent: PersonIdent = PersonIdent(randomFnr()),
+    aktør: Aktør = randomAktørId(personIdent.ident),
     type: PersonType = PersonType.SØKER,
     personopplysningGrunnlag: PersonopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 0),
     fødselsdato: LocalDate = LocalDate.now().minusYears(19),

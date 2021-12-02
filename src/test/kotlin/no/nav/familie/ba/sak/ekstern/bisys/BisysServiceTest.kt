@@ -6,14 +6,15 @@ import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelseUtvidet
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.IdentInformasjon
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakPersonRepository
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
+import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeAll
@@ -27,7 +28,8 @@ internal class BisysServiceTest {
 
     private lateinit var bisysService: BisysService
     private val mockPersonopplysningerService = mockk<PersonopplysningerService>()
-    private val mockFagsakPersonRepository = mockk<FagsakPersonRepository>()
+    private val mockPersonidentService = mockk<PersonidentService>()
+    private val mockFagsakRepository = mockk<FagsakRepository>()
     private val mockBehandlingService = mockk<BehandlingService>()
     private val mockTilkjentYtelseRepository = mockk<TilkjentYtelseRepository>()
     private val mockInfotrygdClient = mockk<InfotrygdBarnetrygdClient>()
@@ -36,9 +38,9 @@ internal class BisysServiceTest {
     fun setUp() {
         bisysService = BisysService(
             mockInfotrygdClient,
-            mockPersonopplysningerService,
-            mockFagsakPersonRepository,
             mockBehandlingService,
+            mockFagsakRepository,
+            mockPersonidentService,
             mockTilkjentYtelseRepository
         )
     }
@@ -58,7 +60,7 @@ internal class BisysServiceTest {
             perioder = emptyList()
         )
 
-        every { mockFagsakPersonRepository.finnFagsak(setOf(PersonIdent(ident = fnr))) } returns null
+        every { mockFagsakRepository.finnFagsakForAktør(tilAktør(fnr)) } returns null
 
         val response = bisysService.hentUtvidetBarnetrygd(fnr, LocalDate.of(2021, 1, 1))
 
@@ -86,7 +88,7 @@ internal class BisysServiceTest {
             perioder = listOf(periodeInfotrygd)
         )
 
-        every { mockFagsakPersonRepository.finnFagsak(setOf(PersonIdent(ident = fnr))) } returns null
+        every { mockFagsakRepository.finnFagsakForAktør(tilAktør(fnr)) } returns null
 
         val response = bisysService.hentUtvidetBarnetrygd(fnr, LocalDate.of(2021, 1, 1))
 
@@ -122,7 +124,7 @@ internal class BisysServiceTest {
             perioder = emptyList()
         )
 
-        every { mockFagsakPersonRepository.finnFagsak(any()) } returns behandling.fagsak
+        every { mockFagsakRepository.finnFagsakForAktør(any()) } returns behandling.fagsak
         every { mockBehandlingService.hentSisteBehandlingSomErIverksatt(behandling.fagsak.id) } returns behandling
         every { mockTilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(behandling.id) } returns andelTilkjentYtelse.tilkjentYtelse
 
@@ -177,7 +179,8 @@ internal class BisysServiceTest {
             perioder = listOf(periodeInfotrygd)
         )
 
-        every { mockFagsakPersonRepository.finnFagsak(any()) } returns behandling.fagsak
+        every { mockFagsakRepository.finnFagsakForAktør(any()) } returns behandling.fagsak
+
         every { mockBehandlingService.hentSisteBehandlingSomErIverksatt(behandling.fagsak.id) } returns behandling
         every { mockTilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(behandling.id) } returns andelTilkjentYtelse.tilkjentYtelse
 
@@ -232,7 +235,7 @@ internal class BisysServiceTest {
             perioder = listOf(periodeInfotrygd)
         )
 
-        every { mockFagsakPersonRepository.finnFagsak(any()) } returns behandling.fagsak
+        every { mockFagsakRepository.finnFagsakForAktør(any()) } returns behandling.fagsak
         every { mockBehandlingService.hentSisteBehandlingSomErIverksatt(behandling.fagsak.id) } returns behandling
         every { mockTilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(behandling.id) } returns andelTilkjentYtelse.tilkjentYtelse
 
