@@ -50,11 +50,12 @@ class BeslutteVedtak(
                 melding = "Årsak ${BehandlingÅrsak.KORREKSJON_VEDTAKSBREV.visningsnavn} og toggle ${FeatureToggleConfig.KAN_MANUELT_KORRIGERE_MED_VEDTAKSBREV} false",
                 frontendFeilmelding = "Du har ikke tilgang til å beslutte for denne behandlingen. Ta kontakt med teamet dersom dette ikke stemmer."
             )
-
         val totrinnskontroll = totrinnskontrollService.besluttTotrinnskontroll(
             behandling = behandling,
-            beslutter = SikkerhetContext.hentSaksbehandlerNavn(),
-            beslutterId = SikkerhetContext.hentSaksbehandler(),
+            beslutter = if (behandling.erManuellMigrering()) SikkerhetContext.SYSTEM_NAVN else
+                SikkerhetContext.hentSaksbehandlerNavn(),
+            beslutterId = if (behandling.erManuellMigrering()) SikkerhetContext.SYSTEM_FORKORTELSE else
+                SikkerhetContext.hentSaksbehandler(),
             beslutning = data.beslutning,
             kontrollerteSider = data.kontrollerteSider
         )
