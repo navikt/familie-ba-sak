@@ -21,7 +21,6 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
     @Query("SELECT b FROM Behandling b JOIN b.fagsak f WHERE f.id = :fagsakId AND b.aktiv = true AND b.status <> 'AVSLUTTET' AND f.arkivert = false")
     fun findByFagsakAndAktivAndOpen(fagsakId: Long): Behandling?
 
-    @Lock(LockModeType.NONE)
     @Query(
         value = """WITH sisteiverksattebehandlingfraløpendefagsak AS (
                         SELECT f.id AS fagsakid, MAX(b.id) AS behandlingid
