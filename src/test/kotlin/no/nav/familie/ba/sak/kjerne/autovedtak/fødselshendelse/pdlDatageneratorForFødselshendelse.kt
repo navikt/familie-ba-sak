@@ -129,7 +129,7 @@ fun genererAutomatiskTestperson(
         navn = "Autogenerert Navn $fødselsdato",
         forelderBarnRelasjon = forelderBarnRelasjon.map {
             ForelderBarnRelasjon(
-                aktør = tilAktør(it.toString()),
+                aktør = tilAktør(it.aktør.personidenter.first().fødselsnummer),
                 relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
                 navn = null,
                 fødselsdato = null,

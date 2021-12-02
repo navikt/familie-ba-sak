@@ -34,7 +34,7 @@ fun evaluerFiltreringsregler(fakta: FiltreringsreglerFakta) = Filtreringsregel.v
     }
 
 fun morHarGyldigFnr(fakta: FiltreringsreglerFakta): Evaluering {
-    val erMorFnrGyldig = (!erBostNummer(fakta.mor.aktør.aktørId) && !erFDatnummer(fakta.mor.aktør.aktørId))
+    val erMorFnrGyldig = (!erBostNummer(fakta.mor.aktør.aktivIdent()) && !erFDatnummer(fakta.mor.aktør.aktivIdent()))
 
     return if (erMorFnrGyldig) Evaluering.oppfylt(FiltreringsregelOppfylt.MOR_HAR_GYLDIG_FNR) else Evaluering.ikkeOppfylt(
         FiltreringsregelIkkeOppfylt.MOR_HAR_UGYLDIG_FNR

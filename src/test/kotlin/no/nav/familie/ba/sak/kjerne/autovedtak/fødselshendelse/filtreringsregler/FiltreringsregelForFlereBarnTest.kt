@@ -130,6 +130,16 @@ class FiltreringsregelForFlereBarnTest {
 
         every { localDateServiceMock.now() } returns LocalDate.now().withDayOfMonth(15)
 
+        every { personidentService.hentOgLagreAktør(gyldigAktør.aktivIdent()) } returns gyldigAktør
+        every {
+            personidentService.hentOgLagreAktørIder(
+                listOf(
+                    barnAktør0.aktivIdent(),
+                    barnAktør1.aktivIdent()
+                )
+            )
+        } returns listOf(barnAktør0, barnAktør1)
+
         val fødselshendelsefiltreringResultater = filtreringsreglerService.kjørFiltreringsregler(
             NyBehandlingHendelse(
                 morsIdent = gyldigAktør.aktivIdent(),
@@ -192,6 +202,16 @@ class FiltreringsregelForFlereBarnTest {
         every { personopplysningerServiceMock.harVerge(gyldigAktør) } returns VergeResponse(harVerge = false)
 
         every { localDateServiceMock.now() } returns LocalDate.now().withDayOfMonth(20)
+
+        every { personidentService.hentOgLagreAktør(gyldigAktør.aktivIdent()) } returns gyldigAktør
+        every {
+            personidentService.hentOgLagreAktørIder(
+                listOf(
+                    barnAktør0.aktivIdent(),
+                    barnAktør1.aktivIdent()
+                )
+            )
+        } returns listOf(barnAktør0, barnAktør1)
 
         val fødselshendelsefiltreringResultater = filtreringsreglerService.kjørFiltreringsregler(
             NyBehandlingHendelse(
