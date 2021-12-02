@@ -104,11 +104,13 @@ fun randomAktørId(personIdenter: List<String> = emptyList()): Aktør = Aktør(
     it.personidenter.addAll(
         personIdenter.map { personIdent ->
             Personident(
+                aktiv = true,
                 fødselsnummer = personIdent,
                 aktør = it
             )
         }
     )
+    print("")
 }
 
 private var gjeldendeVedtakId: Long = abs(Random.nextLong(10000000))
@@ -987,14 +989,14 @@ fun lagEndretUtbetalingAndel(
     )
 
 fun lagPerson(
-    aktør: Aktør = randomAktørId(),
+    aktør: Aktør? = null,
     personIdent: PersonIdent = PersonIdent(randomFnr()),
     type: PersonType = PersonType.SØKER,
     personopplysningGrunnlag: PersonopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 0),
     fødselsdato: LocalDate = LocalDate.now().minusYears(19),
     kjønn: Kjønn = Kjønn.KVINNE
 ) = Person(
-    aktør = aktør,
+    aktør = aktør ?: randomAktørId(listOf(personIdent.ident)),
     personIdent = personIdent,
     type = type,
     personopplysningGrunnlag = personopplysningGrunnlag,
