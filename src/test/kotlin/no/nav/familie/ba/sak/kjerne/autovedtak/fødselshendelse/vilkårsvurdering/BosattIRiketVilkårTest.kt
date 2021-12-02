@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurderi
 
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurdering.utfall.VilkårIkkeOppfyltÅrsak
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurdering.utfall.VilkårOppfyltÅrsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse
@@ -261,5 +262,44 @@ class BosattIRiketVilkårTest {
 
         assertEquals(Resultat.OPPFYLT, evaluering.resultat)
         assertEquals(VilkårOppfyltÅrsak.BOR_I_RIKET_EN_ADRESSE_HELE_LIVET, evaluering.evalueringÅrsaker.single())
+    }
+
+    @Test
+    fun `Skal sjekke at person ikke bor i riket om hen har flere adresser uten fom `() {
+        val søker = tilfeldigPerson(personType = PersonType.SØKER)
+
+        søker.apply {
+            bostedsadresser = mutableListOf(
+                GrBostedsadresse.fraBostedsadresse(
+                    defaultAdresse.copy(
+                        angittFlyttedato = null,
+                    ),
+                    søker
+                ),
+                GrBostedsadresse.fraBostedsadresse(
+                    defaultAdresse.copy(
+                        angittFlyttedato = null,
+                    ),
+                    søker
+                ),
+                GrBostedsadresse.fraBostedsadresse(
+                    defaultAdresse.copy(
+                        angittFlyttedato = LocalDate.now().minusMonths(7),
+                    ),
+                    søker
+                ),
+            )
+        }
+
+        val evaluering = VurderPersonErBosattIRiket(
+            adresser = søker.bostedsadresser,
+            vurderFra = LocalDate.now().minusMonths(4)
+        ).vurder()
+
+        assertEquals(Resultat.IKKE_OPPFYLT, evaluering.resultat)
+        assertEquals(
+            VilkårIkkeOppfyltÅrsak.BOR_IKKE_I_RIKET_FLERE_ADRESSER_UTEN_FOM,
+            evaluering.evalueringÅrsaker.single()
+        )
     }
 }

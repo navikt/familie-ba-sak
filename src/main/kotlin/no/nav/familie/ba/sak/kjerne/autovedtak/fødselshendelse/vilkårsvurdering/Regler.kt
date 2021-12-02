@@ -41,14 +41,16 @@ data class VurderPersonErBosattIRiket(
              * adresse hele livet.
              */
             return Evaluering.oppfylt(VilkårOppfyltÅrsak.BOR_I_RIKET_EN_ADRESSE_HELE_LIVET)
+        } else if (adresser.filter { !it.harGyldigFom() }.size > 1) {
+            return Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.BOR_IKKE_I_RIKET_FLERE_ADRESSER_UTEN_FOM)
         }
 
         if (adresser.any { !it.harGyldigFom() }) {
             val person = adresser.first().person
             secureLogger.info(
                 "Har ugyldige adresser på person (${person?.personIdent?.ident}, ${person?.type}): ${
-                adresser.filter { !it.harGyldigFom() }
-                    .map { "(${it.periode?.fom}, ${it.periode?.tom}): ${it.toSecureString()}" }
+                    adresser.filter { !it.harGyldigFom() }
+                        .map { "(${it.periode?.fom}, ${it.periode?.tom}): ${it.toSecureString()}" }
                 }"
             )
         }
@@ -98,18 +100,18 @@ data class VurderBarnErBosattMedSøker(
 
     override fun vurder(): Evaluering {
         return if (barnAdresser.isNotEmpty() && barnAdresser.all {
-            søkerAdresser.any { søkerAdresse ->
-                val søkerAdresseFom = søkerAdresse.periode?.fom ?: TIDENES_MORGEN
-                val søkerAdresseTom = søkerAdresse.periode?.tom ?: TIDENES_ENDE
+                søkerAdresser.any { søkerAdresse ->
+                    val søkerAdresseFom = søkerAdresse.periode?.fom ?: TIDENES_MORGEN
+                    val søkerAdresseTom = søkerAdresse.periode?.tom ?: TIDENES_ENDE
 
-                val barnAdresseFom = it.periode?.fom ?: TIDENES_MORGEN
-                val barnAdresseTom = it.periode?.tom ?: TIDENES_ENDE
+                    val barnAdresseFom = it.periode?.fom ?: TIDENES_MORGEN
+                    val barnAdresseTom = it.periode?.tom ?: TIDENES_ENDE
 
-                søkerAdresseFom.isSameOrBefore(barnAdresseFom) &&
-                    søkerAdresseTom.isSameOrAfter(barnAdresseTom) &&
-                    GrBostedsadresse.erSammeAdresse(søkerAdresse, it)
+                    søkerAdresseFom.isSameOrBefore(barnAdresseFom) &&
+                        søkerAdresseTom.isSameOrAfter(barnAdresseTom) &&
+                        GrBostedsadresse.erSammeAdresse(søkerAdresse, it)
+                }
             }
-        }
         ) Evaluering.oppfylt(VilkårOppfyltÅrsak.BARNET_BOR_MED_MOR)
         else Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.BARNET_BOR_IKKE_MED_MOR)
     }
