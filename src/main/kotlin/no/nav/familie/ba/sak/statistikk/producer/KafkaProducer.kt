@@ -29,7 +29,7 @@ interface KafkaProducer {
         key: String,
         behandlingId: String
     )
-    fun sendOpphørBarnetrygdBisys(personident: String, opphørFom : YearMonth, behandlingId: String)
+    fun sendOpphørBarnetrygdBisys(personident: String, opphørFom: YearMonth, behandlingId: String)
 }
 
 @Service
@@ -109,7 +109,9 @@ class DefaultKafkaProducer(val saksstatistikkMellomlagringRepository: Saksstatis
     }
 
     override fun sendOpphørBarnetrygdBisys(
-        personident: String, opphørFom : YearMonth, behandlingId: String
+        personident: String,
+        opphørFom: YearMonth,
+        behandlingId: String
     ) {
         val opphørBarnetrygdBisysMelding = objectMapper.writeValueAsString(OpphørBarnetrygdBisysMelding(personident, opphørFom))
 
@@ -125,7 +127,7 @@ class DefaultKafkaProducer(val saksstatistikkMellomlagringRepository: Saksstatis
                 {
                     val feilmelding =
                         "Melding på topic $OPPHOER_BARNETRYGD_BISYS_TOPIC kan ikke sendes for " +
-                            "${behandlingId}. Feiler med ${it.message}"
+                            "$behandlingId. Feiler med ${it.message}"
                     logger.warn(feilmelding)
                     throw Feil(message = feilmelding)
                 }
@@ -140,7 +142,7 @@ class DefaultKafkaProducer(val saksstatistikkMellomlagringRepository: Saksstatis
         private const val SAKSSTATISTIKK_SAK_TOPIC = "aapen-barnetrygd-saksstatistikk-sak-v1"
         private const val COUNTER_NAME = "familie.ba.sak.kafka.produsert"
         private const val FAGSYSTEMSBEHANDLING_RESPONS_TBK_TOPIC = "teamfamilie.privat-tbk-hentfagsystemsbehandling-respons-topic"
-        private const val OPPHOER_BARNETRYGD_BISYS_TOPIC = "teamfamilie.aapen-familie-ba-sak-opphoer-barnetrygd"
+        const val OPPHOER_BARNETRYGD_BISYS_TOPIC = "teamfamilie.aapen-familie-ba-sak-opphoer-barnetrygd"
     }
 }
 
@@ -183,7 +185,9 @@ class MockKafkaProducer(val saksstatistikkMellomlagringRepository: Saksstatistik
     }
 
     override fun sendOpphørBarnetrygdBisys(
-        personident: String, opphørFom : YearMonth, behandlingId: String
+        personident: String,
+        opphørFom: YearMonth,
+        behandlingId: String
     ) {
         logger.info("Skipper sending av sendOpphørBarnetrygdBisys respons for $behandlingId fordi kafka ikke er enablet")
     }
@@ -196,4 +200,4 @@ class MockKafkaProducer(val saksstatistikkMellomlagringRepository: Saksstatistik
     }
 }
 
-data class OpphørBarnetrygdBisysMelding(val personident: String, val opphørFom : YearMonth)
+data class OpphørBarnetrygdBisysMelding(val personident: String, val opphørFom: YearMonth)
