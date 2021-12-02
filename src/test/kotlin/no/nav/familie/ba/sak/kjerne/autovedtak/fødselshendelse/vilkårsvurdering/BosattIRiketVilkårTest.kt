@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurderi
 
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurdering.utfall.VilkårOppfyltÅrsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
@@ -26,7 +27,7 @@ class BosattIRiketVilkårTest {
 
     @Test
     fun `Skal sjekke at person bor i riket dersom vedkommende har vært utvandret langt tilbake i tid`() {
-        val søker = tilfeldigPerson(personType = PersonType.BARN)
+        val søker = tilfeldigPerson(personType = PersonType.SØKER)
 
         søker.apply {
             bostedsadresser = mutableListOf(
@@ -104,7 +105,7 @@ class BosattIRiketVilkårTest {
 
     @Test
     fun `Skal sjekke at person ikke bor i riket`() {
-        val søker = tilfeldigPerson(personType = PersonType.BARN)
+        val søker = tilfeldigPerson(personType = PersonType.SØKER)
 
         søker.apply {
             bostedsadresser = mutableListOf(
@@ -134,7 +135,7 @@ class BosattIRiketVilkårTest {
 
     @Test
     fun `Skal sjekke at person ikke bor i riket dersom vedkommende har vært utvandret`() {
-        val søker = tilfeldigPerson(personType = PersonType.BARN)
+        val søker = tilfeldigPerson(personType = PersonType.SØKER)
 
         søker.apply {
             bostedsadresser = mutableListOf(
@@ -164,7 +165,7 @@ class BosattIRiketVilkårTest {
 
     @Test
     fun `Skal sjekke at person ikke bor i riket dersom vedkommende har vært utvandret først i perioden`() {
-        val søker = tilfeldigPerson(personType = PersonType.BARN)
+        val søker = tilfeldigPerson(personType = PersonType.SØKER)
 
         søker.apply {
             bostedsadresser = mutableListOf(
@@ -187,7 +188,7 @@ class BosattIRiketVilkårTest {
 
     @Test
     fun `Skal sjekke at person ikke bor i riket dersom vedkommende har vært utvandret sist i perioden`() {
-        val søker = tilfeldigPerson(personType = PersonType.BARN)
+        val søker = tilfeldigPerson(personType = PersonType.SØKER)
 
         søker.apply {
             bostedsadresser = mutableListOf(
@@ -211,7 +212,7 @@ class BosattIRiketVilkårTest {
 
     @Test
     fun `Skal sjekke at person bor i riket selv om hen har ekstra adresse uten fom`() {
-        val søker = tilfeldigPerson(personType = PersonType.BARN)
+        val søker = tilfeldigPerson(personType = PersonType.SØKER)
 
         søker.apply {
             bostedsadresser = mutableListOf(
@@ -236,5 +237,29 @@ class BosattIRiketVilkårTest {
         ).vurder()
 
         assertEquals(Resultat.OPPFYLT, evaluering.resultat)
+    }
+
+    @Test
+    fun `Skal sjekke at person bor i riket selv om hen kun har en adresse uten fom `() {
+        val søker = tilfeldigPerson(personType = PersonType.SØKER)
+
+        søker.apply {
+            bostedsadresser = mutableListOf(
+                GrBostedsadresse.fraBostedsadresse(
+                    defaultAdresse.copy(
+                        angittFlyttedato = null,
+                    ),
+                    søker
+                )
+            )
+        }
+
+        val evaluering = VurderPersonErBosattIRiket(
+            adresser = søker.bostedsadresser,
+            vurderFra = LocalDate.now().minusMonths(4)
+        ).vurder()
+
+        assertEquals(Resultat.OPPFYLT, evaluering.resultat)
+        assertEquals(VilkårOppfyltÅrsak.BOR_I_RIKET_EN_ADRESSE_HELE_LIVET, evaluering.evalueringÅrsaker.single())
     }
 }
