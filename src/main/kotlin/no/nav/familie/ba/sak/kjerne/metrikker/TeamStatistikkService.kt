@@ -163,7 +163,7 @@ class TeamStatistikkService(
         tidSidenOpprettelseåpneBehandlingerPerMånedGauge.register(rows)
     }
 
-    @Scheduled(cron = "0 0 9 1 * *")
+    @Scheduled(cron = "0 0 14 * * *")
     fun loggÅpneBehandlingerSomHarLiggetLenge() {
         listOf(180, 150, 120, 90, 60).fold(mutableSetOf<Long>()) { acc, dagerSiden ->
             val åpneBehandlinger = behandlingRepository.finnÅpneBehandlinger(
