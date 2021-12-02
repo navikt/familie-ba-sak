@@ -1,41 +1,65 @@
 package no.nav.familie.ba.sak.kjerne.dokument
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
-import no.nav.familie.ba.sak.common.sisteDagIMåned
-import no.nav.familie.ba.sak.common.tilfeldigPerson
+import no.nav.familie.ba.sak.ekstern.restDomene.RestPerson
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.UregistrertBarnEnkel
-import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.brevperioder.BrevPeriode
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.BegrunnelseData
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.BegrunnelsePerson
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilBegrunnelsePerson
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.v2byggBegrunnelserOgFritekster
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.RestVedtaksbegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtbetalingsperiodeDetalj
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtbetalingsperiodeDetaljEnkel
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtvidetVedtaksperiodeMedBegrunnelser
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.kontrakter.felles.objectMapper
-import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestReporter
 import java.io.File
-import java.math.BigDecimal
 import java.time.LocalDate
 
 data class BrevBegrunnelseTestConfig(
     val beskrivelse: String,
     val fom: LocalDate,
     val tom: LocalDate,
+    val vedtaksperiodetype: Vedtaksperiodetype,
     val utbetalingsperiodeDetaljer: List<UtbetalingsperiodeDetaljEnkel>,
     val standardbegrunnelser: List<RestVedtaksbegrunnelse>,
     val fritekster: List<String>,
     val begrunnelsepersoner: List<BegrunnelsePerson>,
     val målform: Målform,
     val uregistrerteBarn: List<UregistrertBarnEnkel>,
-    val forventetOutput: List<BegrunnelseData>
+    val forventetOutput: BrevPeriodeTestConfig
 )
+
+data class BrevPeriodeTestConfig(
+    val fom: String,
+    val tom: String,
+    val belop: String,
+    val antallBarn: String,
+    val barnasFodselsdager: String,
+    val begrunnelser: List<BegrunnelseData>,
+    val type: String,
+)
+
+private fun BegrunnelsePerson.tilRestPersonTilTester() = RestPerson(
+    personIdent = this.personIdent,
+    fødselsdato = this.fødselsdato,
+    type = this.type,
+    navn = "Mock Mockersen",
+    kjønn = Kjønn.KVINNE,
+    målform = Målform.NB
+)
+
+private fun UtbetalingsperiodeDetaljEnkel.tilUtbetalingsperiodeDetalj(restPerson: RestPerson) =
+    UtbetalingsperiodeDetalj(
+        person = restPerson,
+        utbetaltPerMnd = this.utbetaltPerMnd,
+        prosent = this.prosent,
+        erPåvirketAvEndring = this.erPåvirketAvEndring,
+        ytelseType = this.ytelseType
+    )
 
 class BrevbegrunnelseTest {
 
@@ -48,21 +72,42 @@ class BrevbegrunnelseTest {
             val behandlingsresultatPersonTestConfig =
                 objectMapper.readValue<BrevBegrunnelseTestConfig>(fil.readText())
 
-            val begrunnelser: List<BegrunnelseData> = v2byggBegrunnelserOgFritekster(
+            val restPersoner =
+                behandlingsresultatPersonTestConfig.begrunnelsepersoner.map { it.tilRestPersonTilTester() }
+
+            val utvidetVedtaksperiodeMedBegrunnelser = UtvidetVedtaksperiodeMedBegrunnelser(
+                id = 1L,
                 fom = behandlingsresultatPersonTestConfig.fom,
                 tom = behandlingsresultatPersonTestConfig.tom,
-                utbetalingsperiodeDetaljerEnkel = behandlingsresultatPersonTestConfig.utbetalingsperiodeDetaljer,
-                standardbegrunnelser = behandlingsresultatPersonTestConfig.standardbegrunnelser,
+                type = behandlingsresultatPersonTestConfig.vedtaksperiodetype,
+                begrunnelser = behandlingsresultatPersonTestConfig.standardbegrunnelser,
                 fritekster = behandlingsresultatPersonTestConfig.fritekster,
-                begrunnelsepersonerIBehandling = behandlingsresultatPersonTestConfig.begrunnelsepersoner,
-                målform = behandlingsresultatPersonTestConfig.målform,
-                uregistrerteBarn = behandlingsresultatPersonTestConfig.uregistrerteBarn
-            ).map { it as BegrunnelseData }
+                gyldigeBegrunnelser = emptyList(),
+                utbetalingsperiodeDetaljer = behandlingsresultatPersonTestConfig.utbetalingsperiodeDetaljer.map {
+                    it.tilUtbetalingsperiodeDetalj(
+                        restPersoner.find { restPerson -> restPerson.personIdent == it.personIdent }!!
+                    )
+                }
+            )
 
-            if (behandlingsresultatPersonTestConfig.forventetOutput.single().barnasFodselsdatoer != begrunnelser.single().barnasFodselsdatoer) {
+            val brevperiode: BrevPeriode? =
+                utvidetVedtaksperiodeMedBegrunnelser.tilBrevPeriode(
+                    begrunnelsepersonerIBehandling = behandlingsresultatPersonTestConfig.begrunnelsepersoner,
+                    målform = behandlingsresultatPersonTestConfig.målform,
+                    uregistrerteBarn = behandlingsresultatPersonTestConfig.uregistrerteBarn,
+                    utvidetScenario = UtvidetScenario.IKKE_UTVIDET_YTELSE
+                )
+
+
+            if (!erLike(
+                    testReporter = testReporter,
+                    forventetOutput = behandlingsresultatPersonTestConfig.forventetOutput,
+                    output = brevperiode
+                )
+            ) {
                 testReporter.publishEntry(
                     it,
-                    "${behandlingsresultatPersonTestConfig.beskrivelse}\nForventet ${behandlingsresultatPersonTestConfig.forventetOutput.single().barnasFodselsdatoer}, men fikk ${begrunnelser.single().barnasFodselsdatoer}."
+                    "${behandlingsresultatPersonTestConfig.beskrivelse}\nForventet ${behandlingsresultatPersonTestConfig.forventetOutput}, men fikk ${brevperiode}."
                 )
                 acc + 1
             } else {
@@ -73,36 +118,25 @@ class BrevbegrunnelseTest {
         assert(antallFeil == 0)
     }
 
-    @Test
-    fun `Skal lage begrunnelser for innvilgelsesperiode`() {
-        val barn = tilfeldigPerson(personType = PersonType.BARN)
+    private fun erLike(
+        testReporter: TestReporter,
+        forventetOutput: BrevPeriodeTestConfig?,
+        output: BrevPeriode?
+    ): Boolean {
 
-        val fom = LocalDate.now().minusMonths(2).førsteDagIInneværendeMåned()
-        val tom = LocalDate.now().plusMonths(2).sisteDagIMåned()
-        val begrunnelser = v2byggBegrunnelserOgFritekster(
-            fom = fom,
-            tom = tom,
-            utbetalingsperiodeDetaljerEnkel = listOf(
-                UtbetalingsperiodeDetaljEnkel(
-                    personIdent = barn.aktør.aktivIdent().fødselsnummer,
-                    utbetaltPerMnd = 1054,
-                    prosent = BigDecimal(100),
-                    ytelseType = YtelseType.ORDINÆR_BARNETRYGD
-                )
-            ),
-            standardbegrunnelser = listOf(
-                RestVedtaksbegrunnelse(
-                    vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.INNVILGET_BOR_HOS_SØKER,
-                    vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET,
-                    personIdenter = listOf(barn.aktør.aktivIdent().fødselsnummer)
-                )
-            ),
-            fritekster = emptyList(),
-            begrunnelsepersonerIBehandling = listOf(barn.tilBegrunnelsePerson()),
-            målform = Målform.NB,
-            uregistrerteBarn = emptyList()
-        )
-
-        assertEquals(1, begrunnelser.size)
+        return when {
+            forventetOutput == null && output == null -> true
+            forventetOutput != null && output == null -> false
+            forventetOutput == null && output != null -> false
+            forventetOutput?.fom != output?.fom?.single() -> false
+            forventetOutput?.tom != output?.tom?.single() -> false
+            forventetOutput?.type != output?.type?.single() -> false
+            forventetOutput?.barnasFodselsdager != output?.barnasFodselsdager?.single() -> false
+            forventetOutput?.antallBarn != output?.antallBarn?.single() -> false
+            forventetOutput?.belop != output?.belop?.single() -> false
+            forventetOutput?.antallBarn != output?.antallBarn?.single() -> false
+            forventetOutput?.begrunnelser?.any { output?.begrunnelser?.contains(it) == false } == true -> false
+            else -> false
+        }
     }
 }

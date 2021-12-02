@@ -2,11 +2,13 @@
   "beskrivelse": "Test",
   "fom": "2021-09-01",
   "tom": "2021-12-31",
+  "vedtaksperiodetype": "UTBETALING",
   "utbetalingsperiodeDetaljer": [
     {
       "personIdent": "123456789",
       "utbetaltPerMnd": 1054,
-      "ytelseType": "ORDINÆR_BARNETRYGD"
+      "ytelseType": "ORDINÆR_BARNETRYGD",
+      "erPåvirketAvEndring": false
     }
   ],
   "standardbegrunnelser": [
@@ -28,15 +30,23 @@
   ],
   "målform": "NB",
   "uregistrerteBarn": [],
-  "forventetOutput": [
-    {
-      "gjelderSoker": false,
-      "barnasFodselsdatoer": "08.01.20",
-      "antallBarn": 1,
-      "maanedOgAarBegrunnelsenGjelderFor": "September 2021",
-      "maalform": "NB",
-      "apiNavn": "",
-      "belop": "1 054"
-    }
-  ]
+  "forventetOutput": {
+    "fom": "1. september 2021",
+    "tom": "til 31. desember 2021 ",
+    "belop": "1 054",
+    "antallBarn": 1,
+    "barnasFodselsdager": "08.01.21",
+    "begrunnelser": [
+      {
+        "gjelderSoker": false,
+        "barnasFodselsdatoer": "08.01.20",
+        "antallBarn": 1,
+        "maanedOgAarBegrunnelsenGjelderFor": "august 2021",
+        "maalform": "NB",
+        "apiNavn": "",
+        "belop": "1 054"
+      }
+    ],
+    "type": "innvilgelse"
+  }
 }

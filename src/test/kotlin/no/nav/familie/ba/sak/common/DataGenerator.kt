@@ -67,7 +67,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.RestVedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Utbetalingsperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtbetalingsperiodeDetalj
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtbetalingsperiodeDetaljEnkel
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
@@ -862,13 +861,6 @@ fun lagUtbetalingsperiodeDetalj(
     utbetaltPerMnd: Int = sats(YtelseType.ORDINÆR_BARNETRYGD),
     prosent: BigDecimal = BigDecimal.valueOf(100)
 ) = UtbetalingsperiodeDetalj(person, ytelseType, utbetaltPerMnd, false, prosent)
-
-fun lagUtbetalingsperiodeDetaljEnkel(
-    personIdent: String = randomFnr(),
-    ytelseType: YtelseType = YtelseType.ORDINÆR_BARNETRYGD,
-    utbetaltPerMnd: Int = sats(YtelseType.ORDINÆR_BARNETRYGD),
-    prosent: BigDecimal = BigDecimal.valueOf(100)
-) = UtbetalingsperiodeDetaljEnkel(personIdent, ytelseType, utbetaltPerMnd, prosent)
 
 fun lagVedtaksbegrunnelse(
     vedtakBegrunnelseSpesifikasjon: VedtakBegrunnelseSpesifikasjon =

@@ -42,17 +42,11 @@ data class UtbetalingsperiodeDetalj(
     val prosent: BigDecimal,
 )
 
-fun UtbetalingsperiodeDetalj.tilUtbetalingsperiodeDetaljEnkel() = UtbetalingsperiodeDetaljEnkel(
-    personIdent = this.person.personIdent,
-    ytelseType = this.ytelseType,
-    utbetaltPerMnd = this.utbetaltPerMnd,
-    prosent = this.prosent
-)
-
 data class UtbetalingsperiodeDetaljEnkel(
     val personIdent: String,
     val ytelseType: YtelseType,
     val utbetaltPerMnd: Int,
+    val erPåvirketAvEndring: Boolean = false,
     val prosent: BigDecimal = BigDecimal(100),
 )
 

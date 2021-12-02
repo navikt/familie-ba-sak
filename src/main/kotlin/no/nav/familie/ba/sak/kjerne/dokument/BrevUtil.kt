@@ -49,11 +49,10 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.hjemlerTilhørendeFritek
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Begrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.BegrunnelsePerson
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.byggBegrunnelserOgFritekster
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilBarnasFødselsdatoer
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.v2byggBegrunnelserOgFritekster
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.tilUtbetalingsperiodeDetaljEnkel
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import java.math.BigDecimal
 
@@ -242,12 +241,7 @@ fun UtvidetVedtaksperiodeMedBegrunnelser.tilBrevPeriode(
     utvidetScenario: UtvidetScenario = UtvidetScenario.IKKE_UTVIDET_YTELSE,
     uregistrerteBarn: List<UregistrertBarnEnkel> = emptyList(),
 ): BrevPeriode? {
-    val begrunnelserOgFritekster = v2byggBegrunnelserOgFritekster(
-        fom = this.fom,
-        tom = this.tom,
-        utbetalingsperiodeDetaljerEnkel = this.utbetalingsperiodeDetaljer.map { it.tilUtbetalingsperiodeDetaljEnkel() },
-        standardbegrunnelser = this.begrunnelser,
-        fritekster = this.fritekster,
+    val begrunnelserOgFritekster = this.byggBegrunnelserOgFritekster(
         begrunnelsepersonerIBehandling = begrunnelsepersonerIBehandling,
         målform = målform,
         uregistrerteBarn = uregistrerteBarn

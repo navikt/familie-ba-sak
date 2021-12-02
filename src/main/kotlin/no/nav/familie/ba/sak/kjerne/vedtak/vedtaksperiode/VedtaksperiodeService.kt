@@ -35,9 +35,9 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.Begrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeRepository
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.byggBegrunnelserOgFritekster
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilBegrunnelsePerson
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilVedtaksbegrunnelseFritekst
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.v2byggBegrunnelserOgFritekster
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
 import org.springframework.stereotype.Service
@@ -340,8 +340,8 @@ class VedtaksperiodeService(
                                         identerMedUtbetaling = identerMedUtbetaling,
                                         triggesAv = triggesAv,
                                         endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(
-                                                behandling.id
-                                            ),
+                                            behandling.id
+                                        ),
                                         andelerTilkjentYtelse = andelerTilkjentYtelse,
                                     )
                                 ) {
@@ -425,12 +425,7 @@ class VedtaksperiodeService(
             )
         )
 
-        return v2byggBegrunnelserOgFritekster(
-            fom = utvidetVedtaksperiodeMedBegrunnelse.fom,
-            tom = utvidetVedtaksperiodeMedBegrunnelse.tom,
-            utbetalingsperiodeDetaljerEnkel = utvidetVedtaksperiodeMedBegrunnelse.utbetalingsperiodeDetaljer.map { it.tilUtbetalingsperiodeDetaljEnkel() },
-            standardbegrunnelser = utvidetVedtaksperiodeMedBegrunnelse.begrunnelser,
-            fritekster = utvidetVedtaksperiodeMedBegrunnelse.fritekster,
+        return utvidetVedtaksperiodeMedBegrunnelse.byggBegrunnelserOgFritekster(
             begrunnelsepersonerIBehandling = persongrunnlag.personer.map { it.tilBegrunnelsePerson() },
             målform = persongrunnlag.søker.målform,
             uregistrerteBarn = uregistrerteBarn
