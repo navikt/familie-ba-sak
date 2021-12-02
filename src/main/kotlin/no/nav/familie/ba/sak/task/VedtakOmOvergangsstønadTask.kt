@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service
 @Service
 @TaskStepBeskrivelse(
     taskStepType = VedtakOmOvergangsstønadTask.TASK_STEP_TYPE,
-    beskrivelse = "Håndterer vedtak om overgangsstønad fra Infotrygd",
+    beskrivelse = "Håndterer vedtak om overgangsstønad",
     maxAntallFeil = 3
 )
 class VedtakOmOvergangsstønadTask(
