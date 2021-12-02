@@ -6,6 +6,7 @@ import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import java.util.Properties
 
 @Service
 @TaskStepBeskrivelse(
@@ -20,6 +21,7 @@ class VedtakOmOvergangsstønadTask(
     override fun doTask(task: Task) {
         val personIdent = task.payload
         logger.info("Håndterer vedtak om overgangsstønad. Se secureLog for detaljer")
+        secureLogger.info("Håndterer vedtak om overgangsstønad for person $personIdent.")
 
         val responeFraService = vedtakOmOvergangsstønadService.håndterVedtakOmOvergangsstønad(personIdent)
         secureLogger.info("Håndterte vedtak om overgangsstønad for person $personIdent:\n$responeFraService")
@@ -34,7 +36,10 @@ class VedtakOmOvergangsstønadTask(
         fun opprettTask(personIdent: String): Task {
             return Task(
                 type = TASK_STEP_TYPE,
-                payload = personIdent
+                payload = personIdent,
+                properties = Properties().apply {
+                    this["personIdent"] = personIdent
+                }
             )
         }
     }
