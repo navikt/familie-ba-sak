@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.dokument
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.familie.ba.sak.common.Utils.formaterBeløp
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPerson
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.UregistrertBarnEnkel
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.brevperioder.BrevPeriode
@@ -33,13 +34,23 @@ data class BrevBegrunnelseTestConfig(
     val forventetOutput: BrevPeriodeTestConfig
 )
 
+data class BegrunnelseDataTestConfig(
+    val gjelderSoker: Boolean,
+    val barnasFodselsdatoer: String,
+    val antallBarn: Int,
+    val maanedOgAarBegrunnelsenGjelderFor: String?,
+    val maalform: String,
+    val apiNavn: String,
+    val belop: Int,
+)
+
 data class BrevPeriodeTestConfig(
     val fom: String,
     val tom: String,
-    val belop: String,
+    val belop: Int,
     val antallBarn: String,
     val barnasFodselsdager: String,
-    val begrunnelser: List<BegrunnelseData>,
+    val begrunnelser: List<BegrunnelseDataTestConfig>,
     val type: String,
 )
 
@@ -50,6 +61,16 @@ private fun BegrunnelsePerson.tilRestPersonTilTester() = RestPerson(
     navn = "Mock Mockersen",
     kjønn = Kjønn.KVINNE,
     målform = Målform.NB
+)
+
+fun BegrunnelseDataTestConfig.tilBegrunnelseData() = BegrunnelseData(
+    belop = formaterBeløp(this.belop),
+    gjelderSoker = this.gjelderSoker,
+    barnasFodselsdatoer = this.barnasFodselsdatoer,
+    antallBarn = this.antallBarn,
+    maanedOgAarBegrunnelsenGjelderFor = this.maanedOgAarBegrunnelsenGjelderFor,
+    maalform = this.maalform,
+    apiNavn = this.apiNavn,
 )
 
 private fun UtbetalingsperiodeDetaljEnkel.tilUtbetalingsperiodeDetalj(restPerson: RestPerson) =
@@ -98,16 +119,16 @@ class BrevbegrunnelseTest {
                     utvidetScenario = UtvidetScenario.IKKE_UTVIDET_YTELSE
                 )
 
+            val feil = erLike(
+                forventetOutput = behandlingsresultatPersonTestConfig.forventetOutput,
+                output = brevperiode
+            )
 
-            if (!erLike(
-                    testReporter = testReporter,
-                    forventetOutput = behandlingsresultatPersonTestConfig.forventetOutput,
-                    output = brevperiode
-                )
-            ) {
+            if (feil.isNotEmpty()) {
                 testReporter.publishEntry(
                     it,
-                    "${behandlingsresultatPersonTestConfig.beskrivelse}\nForventet ${behandlingsresultatPersonTestConfig.forventetOutput}, men fikk ${brevperiode}."
+                    "${behandlingsresultatPersonTestConfig.beskrivelse}\n" +
+                        feil.joinToString("\n")
                 )
                 acc + 1
             } else {
@@ -119,24 +140,46 @@ class BrevbegrunnelseTest {
     }
 
     private fun erLike(
-        testReporter: TestReporter,
         forventetOutput: BrevPeriodeTestConfig?,
         output: BrevPeriode?
-    ): Boolean {
+    ): List<String> {
 
-        return when {
-            forventetOutput == null && output == null -> true
-            forventetOutput != null && output == null -> false
-            forventetOutput == null && output != null -> false
-            forventetOutput?.fom != output?.fom?.single() -> false
-            forventetOutput?.tom != output?.tom?.single() -> false
-            forventetOutput?.type != output?.type?.single() -> false
-            forventetOutput?.barnasFodselsdager != output?.barnasFodselsdager?.single() -> false
-            forventetOutput?.antallBarn != output?.antallBarn?.single() -> false
-            forventetOutput?.belop != output?.belop?.single() -> false
-            forventetOutput?.antallBarn != output?.antallBarn?.single() -> false
-            forventetOutput?.begrunnelser?.any { output?.begrunnelser?.contains(it) == false } == true -> false
-            else -> false
+        val feil = mutableListOf<String>()
+
+        fun validerFelt(forventet: String, faktisk: String?, variabelNavn: String) {
+            if (forventet != faktisk) {
+                feil.add(
+                    "Forventet $variabelNavn var: '$forventet', men fikk '$faktisk'"
+                )
+            }
         }
+
+        if (forventetOutput == null || output == null) {
+            if (forventetOutput != null && output == null)
+                feil.add("Output er null, men forventet output er $forventetOutput.")
+            if (forventetOutput == null && output != null)
+                feil.add("Forventet output er null, men output er $output.")
+        } else {
+            validerFelt(forventetOutput.fom, output.fom?.single(), "fom")
+            validerFelt(forventetOutput.tom, output.tom?.single(), "tom")
+            validerFelt(forventetOutput.type, output.type?.single(), "type")
+            validerFelt(forventetOutput.barnasFodselsdager, output.barnasFodselsdager?.single(), "barnasFodselsdager")
+            validerFelt(forventetOutput.antallBarn, output.antallBarn?.single(), "antallBarn")
+            validerFelt(formaterBeløp(forventetOutput.belop), output.belop?.single(), "belop")
+
+            val forventedeBegrunnelser = forventetOutput.begrunnelser.map { it.tilBegrunnelseData() }
+            forventedeBegrunnelser.filter { !output.begrunnelser.contains(it) }.forEach {
+                feil.add(
+                    "Fant ingen begrunnelser i output-begrunnelsene som matcher forventet begrunnelse $it"
+                )
+            }
+            output.begrunnelser.filter { !forventedeBegrunnelser.contains(it) }.forEach {
+                feil.add(
+                    "Fant ingen begrunnelser i de forventede begrunnelser som matcher begrunnelse $it"
+                )
+            }
+        }
+
+        return feil
     }
 }

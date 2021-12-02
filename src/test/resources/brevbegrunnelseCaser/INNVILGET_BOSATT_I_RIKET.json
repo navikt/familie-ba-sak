@@ -33,18 +33,18 @@
   "forventetOutput": {
     "fom": "1. september 2021",
     "tom": "til 31. desember 2021 ",
-    "belop": "1 054",
+    "belop": 1054,
     "antallBarn": 1,
-    "barnasFodselsdager": "08.01.21",
+    "barnasFodselsdager": "08.01.20",
     "begrunnelser": [
       {
         "gjelderSoker": false,
         "barnasFodselsdatoer": "08.01.20",
         "antallBarn": 1,
         "maanedOgAarBegrunnelsenGjelderFor": "august 2021",
-        "maalform": "NB",
-        "apiNavn": "",
-        "belop": "1 054"
+        "maalform": "bokmaal",
+        "apiNavn": "innvilgetBorHosSoker",
+        "belop": 1054
       }
     ],
     "type": "innvilgelse"
