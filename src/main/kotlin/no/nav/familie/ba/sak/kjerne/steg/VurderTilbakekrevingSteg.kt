@@ -22,9 +22,7 @@ class VurderTilbakekrevingSteg(
     @Transactional
     override fun utførStegOgAngiNeste(behandling: Behandling, data: RestTilbakekreving?): StegType {
 
-        if (featureToggleService.isEnabled(FeatureToggleConfig.TILBAKEKREVING) &&
-            !tilbakekrevingService.søkerHarÅpenTilbakekreving(behandling.fagsak.id)
-        ) {
+        if (!tilbakekrevingService.søkerHarÅpenTilbakekreving(behandling.fagsak.id)) {
 
             tilbakekrevingService.validerRestTilbakekreving(data, behandling.id)
             if (data != null) {

@@ -83,7 +83,7 @@ class BehandlingService(
                 løpendeUnderkategori = hentLøpendeUnderkategori(fagsakId = fagsak.id)
             )
 
-            sjekkToggleOgThrowHvisBrudd(kategori, underkategori)
+            sjekkEøsToggleOgThrowHvisBrudd(kategori)
 
             val behandling = Behandling(
                 fagsak = fagsak,
@@ -145,7 +145,7 @@ class BehandlingService(
                 løpendeUnderkategori = hentLøpendeUnderkategori(fagsakId = behandling.fagsak.id)
             )
 
-        sjekkToggleOgThrowHvisBrudd(utledetKategori, utledetUnderkategori)
+        sjekkEøsToggleOgThrowHvisBrudd(utledetKategori)
 
         val forrigeUnderkategori = behandling.underkategori
         val forrigeKategori = behandling.kategori
@@ -181,21 +181,13 @@ class BehandlingService(
         }
     }
 
-    private fun sjekkToggleOgThrowHvisBrudd(
+    private fun sjekkEøsToggleOgThrowHvisBrudd(
         kategori: BehandlingKategori,
-        underkategori: BehandlingUnderkategori
     ) {
         if (kategori == BehandlingKategori.EØS && !featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS)) {
             throw FunksjonellFeil(
                 melding = "EØS er ikke påskrudd",
                 frontendFeilmelding = "Det er ikke støtte for å behandle EØS søknad."
-            )
-        }
-
-        if (underkategori == BehandlingUnderkategori.UTVIDET && !featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_UTVIDET)) {
-            throw FunksjonellFeil(
-                melding = "Utvidet er ikke påskrudd",
-                frontendFeilmelding = "Det er ikke støtte for å behandle utvidet søknad og du må fjerne tilknytningen til behandling."
             )
         }
     }
