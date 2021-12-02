@@ -8,6 +8,8 @@ import no.nav.familie.prosessering.domene.Task
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import java.time.LocalDateTime
+import java.util.Properties
 
 @Service
 @TaskStepBeskrivelse(
@@ -29,5 +31,17 @@ class IdentHendelseTask(
     companion object {
         const val TASK_STEP_TYPE = "IdentHendelseTask"
         private val logger: Logger = LoggerFactory.getLogger(IdentHendelseTask::class.java)
+
+        fun opprettTask(nyIdent: PersonIdent): Task {
+            return Task(
+                type = TASK_STEP_TYPE,
+                payload = objectMapper.writeValueAsString(nyIdent),
+                properties = Properties().apply {
+                    this["nyPersonIdent"] = nyIdent.ident
+                }
+            ).medTriggerTid(
+                triggerTid = LocalDateTime.now().plusMinutes(1) // TODO: Settes med liten forsinkelse for test
+            )
+        }
     }
 }

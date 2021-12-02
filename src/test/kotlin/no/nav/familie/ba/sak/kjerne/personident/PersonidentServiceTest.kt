@@ -7,9 +7,12 @@ import io.mockk.slot
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.IdentInformasjon
 import no.nav.familie.kontrakter.felles.PersonIdent
+import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.prosessering.domene.Task
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -101,6 +104,23 @@ internal class PersonidentServiceTest {
         assertTrue(aktør!!.personidenter.first { !it.aktiv }.gjelderTil!!.isBefore(LocalDateTime.now()))
         verify(exactly = 1) { aktørIdRepository.save(any()) }
         verify(exactly = 0) { personidentRepository.save(any()) }
+    }
+
+    @Test
+    fun `Skal opprette task for håndtering av ny ident`() {
+        val taskRepositoryMock = mockk<TaskRepositoryWrapper>(relaxed = true)
+        val personidentService = PersonidentService(
+            personidentRepository, aktørIdRepository, personopplysningerService, taskRepositoryMock
+        )
+
+        val slot = slot<Task>()
+        every { taskRepositoryMock.save(capture(slot)) } answers { slot.captured }
+
+        val ident = PersonIdent("123")
+        personidentService.opprettTaskForIdentHendelse(ident)
+
+        verify(exactly = 1) { taskRepositoryMock.save(any()) }
+        assertEquals(ident, objectMapper.readValue(slot.captured.payload, PersonIdent::class.java))
     }
 
     @Test

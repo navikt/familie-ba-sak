@@ -4,8 +4,6 @@ import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.IdentInformasjon
 import no.nav.familie.kontrakter.felles.PersonIdent
-import no.nav.familie.kontrakter.felles.objectMapper
-import no.nav.familie.prosessering.domene.Task
 import org.slf4j.LoggerFactory
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
@@ -40,14 +38,7 @@ class PersonidentService(
     fun opprettTaskForIdentHendelse(nyIdent: PersonIdent) {
         logger.info("Oppretter task for senere håndterering av ny ident")
         secureLogger.info("Oppretter task for senere håndterering av ny ident ${nyIdent.ident}")
-        taskRepository.save(
-            Task(
-                type = IdentHendelseTask.TASK_STEP_TYPE,
-                payload = objectMapper.writeValueAsString(nyIdent)
-            ).medTriggerTid(
-                triggerTid = LocalDateTime.now().plusMinutes(1) // TODO: Settes med liten forsinkelse for test
-            )
-        )
+        taskRepository.save(IdentHendelseTask.opprettTask(nyIdent))
     }
 
     fun hentOgLagreAktørId(fødselsnummer: String): Aktør =
