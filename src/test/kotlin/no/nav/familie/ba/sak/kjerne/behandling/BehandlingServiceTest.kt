@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
@@ -16,11 +17,13 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Personopplysning
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 @Tag("integration")
 class BehandlingServiceTest(
@@ -40,12 +43,30 @@ class BehandlingServiceTest(
     private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
 
     @Autowired
-    private val databaseCleanupService: DatabaseCleanupService
+    private val databaseCleanupService: DatabaseCleanupService,
+
+    @Autowired
+    private val behandlingRepository: BehandlingRepository
 ) : AbstractSpringIntegrationTest() {
 
     @BeforeAll
     fun init() {
         databaseCleanupService.truncate()
+    }
+
+    @Test
+    fun `Skal svare med behandling som er opprettet før X tid`() {
+        databaseCleanupService.truncate()
+
+        val fnr = randomFnr()
+
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        val behandlingerSomErOpprettetFørIMorgen =
+            behandlingRepository.finnÅpneBehandlinger(LocalDateTime.now().plusDays(1))
+
+        assertEquals(1, behandlingerSomErOpprettetFørIMorgen.size)
+        assertEquals(behandling.id, behandlingerSomErOpprettetFørIMorgen.single().id)
     }
 
     @Test
