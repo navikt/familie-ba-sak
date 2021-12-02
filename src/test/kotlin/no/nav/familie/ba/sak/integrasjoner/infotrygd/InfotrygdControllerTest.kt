@@ -4,15 +4,12 @@ import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
-import io.mockk.slot
-import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.kontrakter.ba.infotrygd.InfotrygdSøkResponse
 import no.nav.familie.kontrakter.ba.infotrygd.Sak
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.kontrakter.felles.tilgangskontroll.Tilgang
-import no.nav.familie.prosessering.domene.Task
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -32,9 +29,6 @@ class InfotrygdControllerTest {
     @MockK
     lateinit var infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient
 
-    @MockK
-    lateinit var taskRepository: TaskRepositoryWrapper
-
     @InjectMockKs
     lateinit var infotrygdService: InfotrygdService
 
@@ -42,7 +36,7 @@ class InfotrygdControllerTest {
 
     @BeforeAll
     fun init() {
-        infotrygdController = InfotrygdController(infotrygdBarnetrygdClient, infotrygdService, taskRepository)
+        infotrygdController = InfotrygdController(infotrygdBarnetrygdClient, infotrygdService)
     }
 
     @Test
@@ -72,16 +66,5 @@ class InfotrygdControllerTest {
         Assertions.assertEquals(HttpStatus.OK, respons.statusCode)
         Assertions.assertEquals(false, respons.body?.data?.harTilgang)
         Assertions.assertEquals(ADRESSEBESKYTTELSEGRADERING.FORTROLIG, respons.body?.data?.adressebeskyttelsegradering)
-    }
-
-    @Test
-    fun `håndterVedtakOmOvergangsstønad skal lagre VedtakOmOvergangsstønadTask med personIdent som paylooad`() {
-        val task = slot<Task>()
-        every { taskRepository.save(capture(task)) } returns Task("", "")
-
-        val ident = "12345678910"
-        infotrygdController.håndterVedtakOmOvergangsstønad(Personident(ident))
-
-        Assertions.assertEquals(ident, task.captured.payload)
     }
 }

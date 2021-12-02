@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.integrasjoner.infotrygd
 
-import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.kontrakter.ba.infotrygd.Sak
 import no.nav.familie.kontrakter.ba.infotrygd.Stønad
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -19,8 +18,7 @@ import org.springframework.web.bind.annotation.RestController
 @Validated
 class InfotrygdController(
     private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
-    private val infotrygdService: InfotrygdService,
-    private val taskRepository: TaskRepositoryWrapper
+    private val infotrygdService: InfotrygdService
 ) {
 
     @PostMapping(path = ["/hent-infotrygdsaker-for-soker"])
