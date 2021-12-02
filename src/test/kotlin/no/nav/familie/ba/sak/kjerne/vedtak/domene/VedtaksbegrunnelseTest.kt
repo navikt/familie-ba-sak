@@ -35,27 +35,6 @@ class VedtaksbegrunnelseTest {
     val beløp = "1234"
 
     @Test
-    fun `skal konvertere til brev begrunnnelse på forventet måte`() {
-
-        val brevbegrunnelse = restVedtaksbegrunnelse.tilBrevBegrunnelse(
-            vedtaksperiode = vedtaksperiode,
-            begrunnelsepersonerIBehandling = personerIPersongrunnlag,
-            målform = målform,
-            uregistrerteBarn = emptyList(),
-            beløp = beløp
-        ) as BegrunnelseData
-
-        Assertions.assertEquals(true, brevbegrunnelse.gjelderSoker)
-        Assertions.assertEquals(
-            listOf(barn1, barn2).map { it.fødselsdato }.tilBrevTekst(),
-            brevbegrunnelse.barnasFodselsdatoer
-        )
-        Assertions.assertEquals(2, brevbegrunnelse.antallBarn)
-        Assertions.assertEquals(målform.tilSanityFormat(), brevbegrunnelse.maalform)
-        Assertions.assertEquals(beløp, brevbegrunnelse.belop)
-    }
-
-    @Test
     fun `skal ta med alle barnas fødselsdatoer ved avslag på søker, men ikke inkludere dem i antall barn`() {
         val restVedtaksbegrunnelseAvslag = lagRestVedtaksbegrunnelse(
             vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.AVSLAG_BOR_HOS_SØKER,
