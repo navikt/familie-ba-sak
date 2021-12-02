@@ -263,6 +263,30 @@ class SmåbarnstilleggUtilsTest {
     }
 
     @Test
+    fun `Skal legge til reduksjonsbegrunnelse fra inneværende måned for småbarnstillegg`() {
+        val vedtaksperiodeMedBegrunnelser = lagVedtaksperiodeMedBegrunnelser(
+            fom = LocalDate.now().førsteDagIInneværendeMåned(),
+            tom = LocalDate.now().plusMonths(3).sisteDagIMåned(),
+            type = Vedtaksperiodetype.UTBETALING
+        )
+
+        val oppdatertVedtaksperiodeMedBegrunnelser = finnAktuellVedtaksperiodeOgLeggTilSmåbarnstilleggbegrunnelse(
+            vedtaksperioderMedBegrunnelser = listOf(
+                vedtaksperiodeMedBegrunnelser
+            ),
+            innvilgetMånedPeriode = null,
+            redusertMånedPeriode = MånedPeriode(
+                fom = YearMonth.now(),
+                tom = vedtaksperiodeMedBegrunnelser.tom!!.toYearMonth()
+            )
+        )
+
+        assertNotNull(oppdatertVedtaksperiodeMedBegrunnelser)
+        assertTrue(oppdatertVedtaksperiodeMedBegrunnelser.begrunnelser.none { it.vedtakBegrunnelseSpesifikasjon == VedtakBegrunnelseSpesifikasjon.INNVILGET_SMÅBARNSTILLEGG })
+        assertTrue(oppdatertVedtaksperiodeMedBegrunnelser.begrunnelser.any { it.vedtakBegrunnelseSpesifikasjon == VedtakBegrunnelseSpesifikasjon.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_FULL_OVERGANGSSTØNAD })
+    }
+
+    @Test
     fun `Skal kaste feil om det ikke finnes innvilget eller redusert periode å begrunne`() {
         val vedtaksperiodeMedBegrunnelser = lagVedtaksperiodeMedBegrunnelser(
             fom = LocalDate.now().nesteMåned().førsteDagIInneværendeMåned(),

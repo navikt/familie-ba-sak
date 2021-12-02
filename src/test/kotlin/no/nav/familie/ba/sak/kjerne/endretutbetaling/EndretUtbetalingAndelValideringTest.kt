@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.endretutbetaling
 
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.common.UtbetalingsikkerhetFeil
 import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagEndretUtbetalingAndel
@@ -58,7 +57,7 @@ class EndretUtbetalingAndelValideringTest {
             avtaletidspunktDeltBosted = LocalDate.now()
         )
 
-        val feil = assertThrows<UtbetalingsikkerhetFeil> {
+        val feil = assertThrows<FunksjonellFeil> {
             validerIngenOverlappendeEndring(
                 endretUtbetalingAndel,
                 listOf(
@@ -133,7 +132,7 @@ class EndretUtbetalingAndelValideringTest {
             avtaletidspunktDeltBosted = LocalDate.now()
         )
 
-        var feil = assertThrows<UtbetalingsikkerhetFeil> {
+        var feil = assertThrows<FunksjonellFeil> {
             validerPeriodeInnenforTilkjentytelse(endretUtbetalingAndel, emptyList())
         }
         assertEquals(
@@ -185,7 +184,7 @@ class EndretUtbetalingAndelValideringTest {
             søknadstidspunkt = LocalDate.now(),
             avtaletidspunktDeltBosted = LocalDate.now()
         )
-        val feil = assertThrows<UtbetalingsikkerhetFeil> {
+        val feil = assertThrows<FunksjonellFeil> {
             validerDeltBosted(endretUtbetalingAndel, listOf(andelTilkjentYtelse))
         }
         assertEquals(

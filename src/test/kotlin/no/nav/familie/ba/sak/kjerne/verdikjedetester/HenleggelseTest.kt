@@ -11,7 +11,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.dokument.domene.BrevType
 import no.nav.familie.ba.sak.kjerne.dokument.domene.ManueltBrevRequest
 import no.nav.familie.ba.sak.kjerne.logg.LoggType
-import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenario
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenarioPerson
@@ -23,8 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 
 class HenleggelseTest(
-    @Autowired private val behandlingService: BehandlingService,
-    @Autowired private val stegService: StegService
+    @Autowired private val behandlingService: BehandlingService
 ) : AbstractVerdikjedetest() {
 
     val restScenario = RestScenario(
@@ -54,13 +52,11 @@ class HenleggelseTest(
 
         generellAssertRestUtvidetBehandling(
             restUtvidetBehandling = responseHenlagtSøknad,
-            behandlingStatus = BehandlingStatus.UTREDES,
-            behandlingStegType = StegType.FERDIGSTILLE_BEHANDLING
+            behandlingStatus = BehandlingStatus.AVSLUTTET,
+            behandlingStegType = StegType.BEHANDLING_AVSLUTTET
         )
 
-        val ferdigstiltBehandling = stegService.håndterFerdigstillBehandling(
-            behandling = behandlingService.hent(responseHenlagtSøknad.data!!.behandlingId)
-        )
+        val ferdigstiltBehandling = behandlingService.hent(behandlingId = responseHenlagtSøknad.data!!.behandlingId)
 
         assertThat(!ferdigstiltBehandling.aktiv)
         assertThat(ferdigstiltBehandling.resultat == BehandlingResultat.HENLAGT_FEILAKTIG_OPPRETTET)
@@ -102,13 +98,11 @@ class HenleggelseTest(
 
         generellAssertRestUtvidetBehandling(
             restUtvidetBehandling = responseHenlagtSøknad,
-            behandlingStatus = BehandlingStatus.UTREDES,
-            behandlingStegType = StegType.FERDIGSTILLE_BEHANDLING
+            behandlingStatus = BehandlingStatus.AVSLUTTET,
+            behandlingStegType = StegType.BEHANDLING_AVSLUTTET
         )
 
-        val ferdigstiltBehandling = stegService.håndterFerdigstillBehandling(
-            behandling = behandlingService.hent(responseHenlagtSøknad.data!!.behandlingId)
-        )
+        val ferdigstiltBehandling = behandlingService.hent(behandlingId = responseHenlagtSøknad.data!!.behandlingId)
 
         assertThat(!ferdigstiltBehandling.aktiv)
         assertThat(ferdigstiltBehandling.resultat == BehandlingResultat.HENLAGT_SØKNAD_TRUKKET)
