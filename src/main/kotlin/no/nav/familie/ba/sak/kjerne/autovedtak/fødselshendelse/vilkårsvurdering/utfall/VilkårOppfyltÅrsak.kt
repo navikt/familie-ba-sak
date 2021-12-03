@@ -21,6 +21,7 @@ enum class VilkårOppfyltÅrsak(val beskrivelse: String, val vilkår: Vilkår) :
 
     // Bosatt i riket
     BOR_I_RIKET("Er bosatt i riket", Vilkår.BOSATT_I_RIKET),
+    BOR_I_RIKET_EN_ADRESSE_HELE_LIVET("Er bosatt i riket - samme adresse hele livet", Vilkår.BOSATT_I_RIKET),
 
     // Lovlig opphold
     AUTOMATISK_VURDERING_BARN_LOVLIG_OPPHOLD(
