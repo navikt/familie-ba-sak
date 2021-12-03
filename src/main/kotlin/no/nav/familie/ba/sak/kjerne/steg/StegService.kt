@@ -27,9 +27,11 @@ import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.task.DistribuerDokumentDTO
 import no.nav.familie.ba.sak.task.dto.IverksettingTaskDTO
 import no.nav.familie.prosessering.error.RekjørSenereException
+import org.hibernate.exception.ConstraintViolationException
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDateTime
 import java.util.Properties
 
 @Service
@@ -88,7 +90,18 @@ class StegService(
 
     @Transactional
     fun opprettNyBehandlingOgRegistrerPersongrunnlagForHendelse(nyBehandlingHendelse: NyBehandlingHendelse): Behandling {
-        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(nyBehandlingHendelse.morsIdent, true)
+        val fagsak = try {
+            fagsakService.hentEllerOpprettFagsakForPersonIdent(nyBehandlingHendelse.morsIdent, true)
+        } catch (exception: Exception) {
+            if (exception is ConstraintViolationException) {
+                throw RekjørSenereException(
+                    triggerTid = LocalDateTime.now().plusMinutes(15),
+                    årsak = "Klarte ikke å opprette fagsak på grunn av krasj i databasen, prøver igjen om 15 minutter."
+                )
+            }
+
+            throw exception
+        }
 
         // Denne vil sende selv om det allerede eksisterer en fagsak. Vi tenker det er greit. Ellers så blir det vanskelig å
         // filtere bort for fødselshendelser. Når vi slutter å filtere bort fødselshendelser, så kan vi flytte den tilbake til
@@ -321,12 +334,12 @@ class StegService(
             }
 
             if (behandlingSteg.stegType().erSaksbehandlerSteg() && behandlingSteg.stegType()
-                .kommerEtter(behandling.steg)
+                    .kommerEtter(behandling.steg)
             ) {
                 error(
                     "${SikkerhetContext.hentSaksbehandlerNavn()} prøver å utføre steg '${
-                    behandlingSteg.stegType()
-                        .displayName()
+                        behandlingSteg.stegType()
+                            .displayName()
                     }', men behandlingen er på steg '${behandling.steg.displayName()}'"
                 )
             }
