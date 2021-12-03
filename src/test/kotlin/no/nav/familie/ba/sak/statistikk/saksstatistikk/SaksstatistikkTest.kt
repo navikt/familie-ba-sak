@@ -93,7 +93,7 @@ class SaksstatistikkTest(
         val fnr = "12345678910"
 
         every {
-            mockPersonopplysningerService.hentIdenter(Ident(fnr))
+            mockPersonopplysningerService.hentIdenter(fnr, false)
         } throws RuntimeException("Testen skal feile")
 
         assertThatThrownBy {

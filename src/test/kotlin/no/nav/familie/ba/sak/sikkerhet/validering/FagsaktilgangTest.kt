@@ -47,6 +47,7 @@ internal class FagsaktilgangTest {
         behandlingRepository = mockk()
         personopplysningGrunnlagRepository = mockk()
         fagsakRepository = mockk(relaxed = true)
+        every { fagsakRepository.finnFagsak(any()) } returns null
         client = mockk()
         every { behandlingRepository.finnBehandlinger(any()) }
             .returns(behandlinger)

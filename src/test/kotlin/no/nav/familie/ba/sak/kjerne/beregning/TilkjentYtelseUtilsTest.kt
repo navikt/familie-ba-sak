@@ -9,7 +9,6 @@ import no.nav.familie.ba.sak.common.lagEndretUtbetalingAndel
 import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.nesteMåned
-import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.sisteDagIForrigeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
@@ -504,8 +503,8 @@ internal class TilkjentYtelseUtilsTest {
     ): Pair<Vilkårsvurdering, PersonopplysningGrunnlag> {
         val søkerFnr = randomFnr()
         val barnFnr = randomFnr()
-        val søkerAktørId = randomAktørId()
-        val barnAktørId = randomAktørId()
+        val søkerAktørId = tilAktør(søkerFnr)
+        val barnAktørId = tilAktør(barnFnr)
 
         val behandling = lagBehandling()
 

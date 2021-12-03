@@ -4,6 +4,7 @@ import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
+import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
@@ -45,6 +46,9 @@ class InfotrygdControllerTest {
 
     @Test
     fun `hentInfotrygdsakerForSøker skal returnere ok dersom saksbehandler har tilgang`() {
+        val fnr = "12345"
+
+        every { personidentService.hentOgLagreAktør(fnr) } returns tilAktør(fnr)
         every { integrasjonClient.sjekkTilgangTilPersoner(any()) } returns listOf(Tilgang(true))
         every {
             infotrygdBarnetrygdClient.hentSaker(
@@ -52,8 +56,7 @@ class InfotrygdControllerTest {
                 any()
             )
         } returns InfotrygdSøkResponse(listOf(Sak(status = "IP")), emptyList())
-
-        val respons = infotrygdController.hentInfotrygdsakerForSøker(Personident("12345"))
+        val respons = infotrygdController.hentInfotrygdsakerForSøker(Personident(fnr))
 
         Assertions.assertEquals(HttpStatus.OK, respons.statusCode)
         Assertions.assertEquals(true, respons.body?.data?.harTilgang)
@@ -62,10 +65,13 @@ class InfotrygdControllerTest {
 
     @Test
     fun `hentInfotrygdsakerForSøker skal returnere ok, men ha gradering satt, dersom saksbehandler ikke har tilgang`() {
+        val fnr = "12345"
+
+        every { personidentService.hentOgLagreAktør(fnr) } returns tilAktør(fnr)
         every { integrasjonClient.sjekkTilgangTilPersoner(any()) } returns listOf(Tilgang(false))
         every { personopplysningerService.hentAdressebeskyttelseSomSystembruker(any()) } returns ADRESSEBESKYTTELSEGRADERING.FORTROLIG
 
-        val respons = infotrygdController.hentInfotrygdsakerForSøker(Personident("12345"))
+        val respons = infotrygdController.hentInfotrygdsakerForSøker(Personident(fnr))
 
         Assertions.assertEquals(HttpStatus.OK, respons.statusCode)
         Assertions.assertEquals(false, respons.body?.data?.harTilgang)

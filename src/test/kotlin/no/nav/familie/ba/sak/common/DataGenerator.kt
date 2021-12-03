@@ -989,7 +989,7 @@ fun lagEndretUtbetalingAndel(
 
 fun lagPerson(
     personIdent: PersonIdent = PersonIdent(randomFnr()),
-    aktør: Aktør = randomAktørId(personIdent.ident),
+    aktør: Aktør = tilAktør(personIdent.ident),
     type: PersonType = PersonType.SØKER,
     personopplysningGrunnlag: PersonopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 0),
     fødselsdato: LocalDate = LocalDate.now().minusYears(19),
