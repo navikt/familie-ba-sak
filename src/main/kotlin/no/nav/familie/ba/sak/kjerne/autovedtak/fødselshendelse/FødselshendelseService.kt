@@ -112,7 +112,7 @@ class FødselshendelseService(
             )
 
             stansetIAutomatiskFiltreringCounter.increment()
-        } else vurderVilkår(behandling = behandlingEtterFiltrering, barnaSomVurderes = nyBehandling.barnasIdenter)
+        } else vurderVilkår(behandling = behandlingEtterFiltrering, barnaSomVurderes = barnSomSkalBehandlesForMor)
     }
 
     private fun vurderVilkår(behandling: Behandling, barnaSomVurderes: List<String>) {
@@ -202,10 +202,10 @@ class FødselshendelseService(
 
         val bosattIRiketResultat = søkerResultat?.vilkårResultater?.find { it.vilkårType == Vilkår.BOSATT_I_RIKET }
         if (bosattIRiketResultat?.resultat == Resultat.IKKE_OPPFYLT && bosattIRiketResultat.evalueringÅrsaker.any {
-            VilkårIkkeOppfyltÅrsak.valueOf(
+                VilkårIkkeOppfyltÅrsak.valueOf(
                     it
                 ) == VilkårIkkeOppfyltÅrsak.BOR_IKKE_I_RIKET_FLERE_ADRESSER_UTEN_FOM
-        }
+            }
         ) {
             return "Mor har flere bostedsadresser uten fra- og med dato"
         } else if (bosattIRiketResultat?.resultat == Resultat.IKKE_OPPFYLT) {
