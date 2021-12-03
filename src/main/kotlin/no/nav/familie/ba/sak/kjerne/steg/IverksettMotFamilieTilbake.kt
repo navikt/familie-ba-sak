@@ -44,6 +44,10 @@ class IverksettMotFamilieTilbake(
             tilbakekrevingRepository.save(tilbakekreving)
         }
 
+        if (!behandling.erBehandlingMedVedtaksbrevutsending()) {
+            throw Feil("Neste steg på behandling $behandling er journalføring, men denne behandlingen skal ikke sende ut vedtaksbrev")
+        }
+
         opprettTaskJournalførVedtaksbrev(vedtakId = vedtak.id, data.metadata)
 
         return hentNesteStegForNormalFlyt(behandling)
