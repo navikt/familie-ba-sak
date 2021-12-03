@@ -24,7 +24,7 @@ fun finnBarnSomSkalBehandlesForMor(
 
     secureLogger?.info(
         "Behandler fødselshendelse på ${nyBehandlingHendelse.morsIdent}. " +
-            "Barn på hendelse: ${barnaPåHendelse.map { it.toSecureString() }}, barn med tilstøtende fødselsdato som også behandles: ${andreBarnFødtInnenEnDag.map { it.toSecureString() }}"
+            "Alle barna til mor: ${barnaTilMor.map { it.toSecureString() }}, barn på hendelse: ${barnaPåHendelse.map { it.toSecureString() }}, barn med tilstøtende fødselsdato som også behandles: ${andreBarnFødtInnenEnDag.map { it.toSecureString() }}"
     )
 
     val alleBarnSomKanBehandles = (barnaPåHendelse + andreBarnFødtInnenEnDag).map { it.personIdent.id }
