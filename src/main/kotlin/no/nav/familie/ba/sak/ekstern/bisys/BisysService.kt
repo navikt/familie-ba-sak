@@ -50,12 +50,10 @@ class BisysService(
     private fun hentBisysPerioderFraInfotrygd(
         aktør: Aktør,
         fraDato: LocalDate
-    ): List<UtvidetBarnetrygdPeriode> {
-        return infotrygdBarnetrygdClient.hentUtvidetBarnetrygd(
-            aktør.aktivIdent(),
-            fraDato.toYearMonth()
-        ).perioder
-    }
+    ): List<UtvidetBarnetrygdPeriode> =
+        personidentService.hentAlleFødselsnummerForEnAktør(aktør).flatMap {
+            infotrygdBarnetrygdClient.hentUtvidetBarnetrygd(it, fraDato.toYearMonth()).perioder
+        }
 
     private fun hentBisysPerioderFraBaSak(
         aktør: Aktør,

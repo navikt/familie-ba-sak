@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.personident
 
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.IdentInformasjon
+import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import org.slf4j.LoggerFactory
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
@@ -14,6 +15,10 @@ class PersonidentService(
     private val personopplysningerService: PersonopplysningerService
 ) {
     // TODO: robustgjøring dnr/fnr skriv test for endringen i logikken i denne metoden. 
+    fun hentAlleFødselsnummerForEnAktør(aktør: Aktør) =
+        personopplysningerService.hentIdenter(Ident(aktør.aktivIdent())).filter { it.gruppe == "FOLKEREGISTERIDENT" }
+            .map { it.ident }
+
     fun hentOgLagreAktør(ident: String): Aktør =
         aktørIdRepository.findByIdOrNull(ident)
             ?: personidentRepository.findByIdOrNull(ident)?.aktør
