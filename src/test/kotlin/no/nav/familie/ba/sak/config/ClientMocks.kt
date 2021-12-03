@@ -145,6 +145,18 @@ class ClientMocks {
             listOf(IdentInformasjon("123", false, "FOLKEREGISTERIDENT"))
         }
 
+        val identSlot = slot<String>()
+        every {
+            mockPersonopplysningerService.hentIdenter(capture(identSlot), false)
+        } answers {
+            listOf(
+                IdentInformasjon(
+                    identSlot.captured, false, "FOLKEREGISTERIDENT"
+                ),
+                IdentInformasjon(identSlot.captured + "00", false, "AKTORID"),
+            )
+        }
+
         every {
             mockPersonidentService.hentOgLagreAktør(any())
         } answers {

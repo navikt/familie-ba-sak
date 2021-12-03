@@ -126,7 +126,7 @@ class MigreringServiceTest(
         val slotAktør = slot<Aktør>()
 
         every { pdlRestClient.hentForelderBarnRelasjon(capture(slotAktør)) } answers {
-            infotrygdBarnetrygdClient.hentSaker(listOf(slot.captured)).bruker.first().stønad!!.barn.map {
+            infotrygdBarnetrygdClient.hentSaker(listOf(slotAktør.captured.aktivIdent())).bruker.first().stønad!!.barn.map {
                 ForelderBarnRelasjon(
                     relatertPersonsIdent = it.barnFnr!!,
                     relatertPersonsRolle = FORELDERBARNRELASJONROLLE.BARN

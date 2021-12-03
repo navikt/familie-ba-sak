@@ -82,6 +82,7 @@ internal class StønadsstatistikkServiceTest(
             YtelseType.ORDINÆR_BARNETRYGD,
             behandling = behandling,
             person = barn1,
+            aktør = barn1.aktør,
             periodeIdOffset = 1
 
         )
@@ -91,6 +92,7 @@ internal class StønadsstatistikkServiceTest(
             YtelseType.ORDINÆR_BARNETRYGD,
             behandling = behandling,
             person = barn2,
+            aktør = barn2.aktør,
             periodeIdOffset = 2
         )
 

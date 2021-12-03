@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.common
 
 import io.mockk.mockk
 import no.nav.commons.foedselsnummer.testutils.FoedselsnummerGenerator
+import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPerson
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
@@ -134,7 +135,7 @@ fun nesteUtvidetVedtaksperiodeId(): Long {
 }
 
 fun defaultFagsak() = Fagsak(
-    1, aktør = Aktør("2")
+    1, aktør = tilAktør(randomFnr())
 ).also {
     it.søkerIdenter =
         setOf(
@@ -297,7 +298,8 @@ fun lagTestPersonopplysningGrunnlag(
         it.personidenter.add(
             Personident(
                 fødselsnummer = søkerPersonIdent,
-                aktør = it
+                aktør = it,
+                aktiv = søkerPersonIdent == it.personidenter.first().fødselsnummer
             )
         )
     },
@@ -306,7 +308,8 @@ fun lagTestPersonopplysningGrunnlag(
             it.personidenter.add(
                 Personident(
                     fødselsnummer = fødselsnummer,
-                    aktør = it
+                    aktør = it,
+                    aktiv = fødselsnummer == it.personidenter.first().fødselsnummer
                 )
             )
         }

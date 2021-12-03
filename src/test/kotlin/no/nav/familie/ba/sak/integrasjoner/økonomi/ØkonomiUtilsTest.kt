@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.integrasjoner.økonomi
 
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
-import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.common.årMnd
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.andelerTilOpphørMedDato
@@ -11,7 +10,6 @@ import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.oppdaterBestå
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.sisteBeståendeAndelPerKjede
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType.ORDINÆR_BARNETRYGD
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType.SMÅBARNSTILLEGG
-import no.nav.familie.ba.sak.kjerne.personident.Personident
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -222,14 +220,7 @@ internal class ØkonomiUtilsTest {
     @Test
     fun `skal velge rette perioder til opphør og oppbygging fra endring`() {
         val person = tilfeldigPerson()
-        val aktør = randomAktørId().also {
-            it.personidenter.add(
-                Personident(
-                    aktør = it,
-                    fødselsnummer = person.aktør.aktivIdent()
-                ),
-            )
-        }
+
         val datoSomSkalOppdateres = "2022-01"
         val datoSomErOppdatert = "2021-01"
 
@@ -241,7 +232,7 @@ internal class ØkonomiUtilsTest {
                     ORDINÆR_BARNETRYGD,
                     1054,
                     person = person,
-                    aktør = aktør
+                    aktør = person.aktør
                 ),
                 lagAndelTilkjentYtelse(
                     årMnd(datoSomSkalOppdateres),
@@ -249,7 +240,7 @@ internal class ØkonomiUtilsTest {
                     ORDINÆR_BARNETRYGD,
                     1054,
                     person = person,
-                    aktør = aktør
+                    aktør = person.aktør
                 ),
                 lagAndelTilkjentYtelse(
                     årMnd("2025-04"),
@@ -257,7 +248,7 @@ internal class ØkonomiUtilsTest {
                     ORDINÆR_BARNETRYGD,
                     1054,
                     person = person,
-                    aktør = aktør
+                    aktør = person.aktør
                 )
             )
         )
@@ -269,7 +260,7 @@ internal class ØkonomiUtilsTest {
                     ORDINÆR_BARNETRYGD,
                     1054,
                     person = person,
-                    aktør = aktør
+                    aktør = person.aktør
                 ),
                 lagAndelTilkjentYtelse(
                     årMnd(datoSomErOppdatert),
@@ -277,7 +268,7 @@ internal class ØkonomiUtilsTest {
                     ORDINÆR_BARNETRYGD,
                     1054,
                     person = person,
-                    aktør = aktør
+                    aktør = person.aktør
                 ),
                 lagAndelTilkjentYtelse(
                     årMnd("2025-04"),
@@ -285,7 +276,7 @@ internal class ØkonomiUtilsTest {
                     ORDINÆR_BARNETRYGD,
                     1054,
                     person = person,
-                    aktør = aktør
+                    aktør = person.aktør
                 )
             )
         )

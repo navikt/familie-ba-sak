@@ -287,13 +287,13 @@ internal class SaksstatistikkServiceTest(
     @Test
     fun `Skal mappe til sakDVH, ingen aktiv behandling, så kun aktør SØKER, bostedsadresse i Norge`() {
         every { fagsakService.hentPåFagsakId(any()) } answers {
-            val fagsak = Fagsak(status = FagsakStatus.OPPRETTET, aktør = Aktør("2"))
+            val fagsak = Fagsak(status = FagsakStatus.OPPRETTET, aktør = tilAktør("12345678910"))
             val fagsakPerson = FagsakPerson(personIdent = PersonIdent("12345678910"), fagsak = fagsak)
             fagsak.copy(søkerIdenter = setOf(fagsakPerson))
         }
 
-        every { personidentService.hentOgLagreAktør("12345678910") } returns Aktør("1234567891011")
-        every { personidentService.hentOgLagreAktør("12345678911") } returns Aktør("1234567891111")
+        every { personidentService.hentOgLagreAktør("12345678910") } returns Aktør("1234567891000")
+        every { personidentService.hentOgLagreAktør("12345678911") } returns Aktør("1234567891100")
         every { personopplysningerService.hentPersoninfoEnkel(tilAktør("12345678910")) } returns PersonInfo(
             fødselsdato = LocalDate.of(
                 2017,
@@ -321,7 +321,7 @@ internal class SaksstatistikkServiceTest(
         val sakDvh = sakstatistikkService.mapTilSakDvh(1)
         println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(sakDvh))
 
-        assertThat(sakDvh?.aktorId).isEqualTo(1234567891011)
+        assertThat(sakDvh?.aktorId).isEqualTo(1234567891000)
         assertThat(sakDvh?.aktorer).hasSize(1).extracting("rolle").contains("SØKER")
         assertThat(sakDvh?.sakStatus).isEqualTo(FagsakStatus.OPPRETTET.name)
         assertThat(sakDvh?.avsender).isEqualTo("familie-ba-sak")
@@ -331,13 +331,14 @@ internal class SaksstatistikkServiceTest(
     @Test
     fun `Skal mappe til sakDVH, ingen aktiv behandling, så kun aktør SØKER, bostedsadresse i Utland`() {
         every { fagsakService.hentPåFagsakId(any()) } answers {
-            val fagsak = Fagsak(status = FagsakStatus.OPPRETTET, aktør = Aktør("2"))
+            val fagsak = Fagsak(status = FagsakStatus.OPPRETTET, aktør = tilAktør("12345678910"))
             val fagsakPerson = FagsakPerson(personIdent = PersonIdent("12345678910"), fagsak = fagsak)
             fagsak.copy(søkerIdenter = setOf(fagsakPerson))
         }
 
-        every { personidentService.hentOgLagreAktør("12345678910") } returns Aktør("1234567891011")
-        every { personidentService.hentOgLagreAktør("12345678911") } returns Aktør("1234567891111")
+        every { personidentService.hentOgLagreAktør("12345678910") } returns Aktør("1234567891000")
+        every { personidentService.hentOgLagreAktør("12345678911") } returns Aktør("1234567891100")
+
         every { personopplysningerService.hentPersoninfoEnkel(tilAktør("12345678910")) } returns PersonInfo(
             fødselsdato = LocalDate.of(
                 2017,
@@ -352,7 +353,7 @@ internal class SaksstatistikkServiceTest(
         val sakDvh = sakstatistikkService.mapTilSakDvh(1)
         println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(sakDvh))
 
-        assertThat(sakDvh?.aktorId).isEqualTo(1234567891011)
+        assertThat(sakDvh?.aktorId).isEqualTo(1234567891000)
         assertThat(sakDvh?.aktorer).hasSize(1).extracting("rolle").contains("SØKER")
         assertThat(sakDvh?.sakStatus).isEqualTo(FagsakStatus.OPPRETTET.name)
         assertThat(sakDvh?.avsender).isEqualTo("familie-ba-sak")
@@ -362,7 +363,7 @@ internal class SaksstatistikkServiceTest(
     @Test
     fun `Skal mappe til sakDVH, aktører har SØKER og BARN`() {
         every { fagsakService.hentPåFagsakId(any()) } answers {
-            val fagsak = Fagsak(status = FagsakStatus.OPPRETTET, aktør = Aktør("2"))
+            val fagsak = Fagsak(status = FagsakStatus.OPPRETTET, aktør = tilAktør("12345678910"))
             val fagsakPerson = FagsakPerson(personIdent = PersonIdent("12345678910"), fagsak = fagsak)
             fagsak.copy(søkerIdenter = setOf(fagsakPerson))
         }
