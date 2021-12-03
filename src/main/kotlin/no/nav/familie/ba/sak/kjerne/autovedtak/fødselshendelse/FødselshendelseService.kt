@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.FiltreringsreglerService
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurdering.utfall.VilkårIkkeOppfyltÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.HenleggÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
@@ -188,7 +189,7 @@ class FødselshendelseService(
 
         autovedtakService.opprettOppgaveForManuellBehandling(
             behandling = behandling,
-            begrunnelse = begrunnelseForManuellOppgave,
+            begrunnelse = "Fødselshendelse: $begrunnelseForManuellOppgave",
             oppgavetype = Oppgavetype.VurderLivshendelse
         )
     }
@@ -200,7 +201,14 @@ class FødselshendelseService(
         val søkerResultat = vilkårsvurdering?.personResultater?.find { it.personIdent == søker?.personIdent?.ident }
 
         val bosattIRiketResultat = søkerResultat?.vilkårResultater?.find { it.vilkårType == Vilkår.BOSATT_I_RIKET }
-        if (bosattIRiketResultat?.resultat == Resultat.IKKE_OPPFYLT) {
+        if (bosattIRiketResultat?.resultat == Resultat.IKKE_OPPFYLT && bosattIRiketResultat.evalueringÅrsaker.any {
+            VilkårIkkeOppfyltÅrsak.valueOf(
+                    it
+                ) == VilkårIkkeOppfyltÅrsak.BOR_IKKE_I_RIKET_FLERE_ADRESSER_UTEN_FOM
+        }
+        ) {
+            return "Mor har flere bostedsadresser uten fra- og med dato"
+        } else if (bosattIRiketResultat?.resultat == Resultat.IKKE_OPPFYLT) {
             return "Mor er ikke bosatt i riket."
         }
 
