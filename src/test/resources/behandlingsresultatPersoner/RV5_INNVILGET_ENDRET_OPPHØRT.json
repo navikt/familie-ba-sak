@@ -4,6 +4,10 @@
   "personer": [
     {
       "personType": "BARN",
+      "aktør": {
+        "fødselsnummer": "12345678911",
+        "aktørId": "1234567891100"
+      },
       "søktForPerson": false,
       "eksplisittAvslått": false,
       "forrigeAndeler": [
@@ -23,6 +27,10 @@
     },
     {
       "personType": "BARN",
+      "aktør": {
+        "fødselsnummer": "12345678912",
+        "aktørId": "1234567891200"
+      },
       "søktForPerson": false,
       "eksplisittAvslått": false,
       "forrigeAndeler": [
@@ -42,6 +50,10 @@
     },
     {
       "personType": "BARN",
+      "aktør": {
+        "fødselsnummer": "12345678913",
+        "aktørId": "1234567891300"
+      },
       "søktForPerson": true,
       "eksplisittAvslått": false,
       "forrigeAndeler": [],

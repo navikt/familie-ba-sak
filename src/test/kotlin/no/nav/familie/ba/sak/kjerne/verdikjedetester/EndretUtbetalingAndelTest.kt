@@ -35,7 +35,7 @@ class EndretUtbetalingAndelTest(
             andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = restUtvidetBehandling.data!!.behandlingId)
 
         val endretFom = andelerTilkjentYtelse.last().stønadFom
-        val endretTom = andelerTilkjentYtelse.last().stønadTom.minusMonths(2)
+        val endretTom = andelerTilkjentYtelse.last().stønadTom.minusMonths(1)
 
         val restEndretUtbetalingAndel = RestEndretUtbetalingAndel(
             id = null,
@@ -80,7 +80,7 @@ class EndretUtbetalingAndelTest(
 
         Assertions.assertEquals(
             utbetalingAndeleTilkjentYtelse.minOf { it.stønadTom },
-            endretTom.plusMonths(2)
+            endretTom.plusMonths(1)
         )
     }
 

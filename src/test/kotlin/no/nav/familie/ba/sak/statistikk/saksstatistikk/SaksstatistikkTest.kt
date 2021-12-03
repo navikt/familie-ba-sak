@@ -90,7 +90,7 @@ class SaksstatistikkTest(
     @Test
     @Tag("integration")
     fun `Skal utføre rollback på sak og saksstatistikk ved feil`() {
-        val fnr = "12345678910"
+        val fnr = "12345678912"
 
         every {
             mockPersonopplysningerService.hentIdenter(fnr, false)
