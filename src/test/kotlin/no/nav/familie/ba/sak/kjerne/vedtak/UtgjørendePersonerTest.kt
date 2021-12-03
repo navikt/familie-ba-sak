@@ -5,7 +5,6 @@ import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.lagVilkårResultat
-import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
@@ -30,7 +29,6 @@ class UtgjørendePersonerTest {
 
         val søkerAktørId = tilAktør(søkerFnr)
         val barn1AktørId = tilAktør(barn1Fnr)
-        val barn2AktørId = tilAktør(barn2Fnr)
 
         val behandling = lagBehandling()
         val personopplysningGrunnlag =
@@ -168,9 +166,8 @@ class UtgjørendePersonerTest {
         val barnFnr = randomFnr()
         val barn2Fnr = randomFnr()
 
-        val søkerAktørId = randomAktørId()
-        val barnAktørId = randomAktørId()
-        val barn2AktørId = randomAktørId()
+        val barnAktørId = tilAktør(barnFnr)
+        val barn2AktørId = tilAktør(barn2Fnr)
 
         val behandling = lagBehandling()
         val personopplysningGrunnlag =
@@ -264,9 +261,9 @@ class UtgjørendePersonerTest {
         val barn1Fnr = randomFnr()
         val barn2Fnr = randomFnr()
 
-        val søkerAktørId = randomAktørId()
-        val barn1AktørId = randomAktørId()
-        val barn2AktørId = randomAktørId()
+        val søkerAktørId = tilAktør(søkerFnr)
+        val barn1AktørId = tilAktør(barn1Fnr)
+        val barn2AktørId = tilAktør(barn2Fnr)
 
         val behandling = lagBehandling()
         val personopplysningGrunnlag =

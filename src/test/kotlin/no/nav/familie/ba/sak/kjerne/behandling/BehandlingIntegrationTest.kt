@@ -6,7 +6,6 @@ import no.nav.familie.ba.sak.common.lagPersonResultat
 import no.nav.familie.ba.sak.common.lagPersonResultaterForSøkerOgToBarn
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.nyOrdinærBehandling
-import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.toLocalDate
 import no.nav.familie.ba.sak.common.toYearMonth
@@ -621,14 +620,18 @@ class BehandlingIntegrationTest(
         fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = søkerFnr))
         val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(søkerFnr))
 
+        val søkerAktør = personidentService.hentOgLagreAktør(søkerFnr)
+        val barn1Aktør = personidentService.hentOgLagreAktør(barn1Fnr)
+        val barn2Aktør = personidentService.hentOgLagreAktør(barn2Fnr)
+
         persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(
-            tilAktør(søkerFnr),
-            listOf(tilAktør(barn1Fnr), tilAktør(barn2Fnr)),
+            søkerAktør,
+            listOf(barn1Aktør, barn2Aktør),
             behandling,
             Målform.NB
         )
 
-        val søker = personRepository.findByAktør(tilAktør(søkerFnr)).first()
+        val søker = personRepository.findByAktør(søkerAktør).first()
         val vegadresse = søker.bostedsadresser.sisteAdresse() as GrVegadresse
         assertEquals(søkerAdressnavn, vegadresse.adressenavn)
         assertEquals(matrikkelId, vegadresse.matrikkelId)
@@ -663,8 +666,8 @@ class BehandlingIntegrationTest(
 
     @Test
     fun `Skal filtrere ut bostedsadresse uten verdier når de mappes inn`() {
-        val søkerAktør = randomAktørId()
-        val barn1Aktør = randomAktørId()
+        val søkerAktør = personidentService.hentOgLagreAktør(randomFnr())
+        val barn1Aktør = personidentService.hentOgLagreAktør(randomFnr())
 
         every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(søkerAktør) } returns PersonInfo(
             fødselsdato = LocalDate.of(1990, 1, 1),

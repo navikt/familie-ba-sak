@@ -172,7 +172,7 @@ fun tilfeldigPerson(
     personType: PersonType = PersonType.BARN,
     kjønn: Kjønn = Kjønn.MANN,
     personIdent: PersonIdent = PersonIdent(randomFnr()),
-    aktør: Aktør = randomAktørId(personIdent.ident),
+    aktør: Aktør = tilAktør(personIdent.ident),
 ) =
     Person(
         id = nestePersonId(),
@@ -294,7 +294,7 @@ fun lagTestPersonopplysningGrunnlag(
     søkerPersonIdent: String,
     barnasIdenter: List<String>,
     barnFødselsdato: LocalDate = LocalDate.of(2019, 1, 1),
-    søkerAktør: Aktør = randomAktørId().also {
+    søkerAktør: Aktør = tilAktør(søkerPersonIdent).also {
         it.personidenter.add(
             Personident(
                 fødselsnummer = søkerPersonIdent,
@@ -304,7 +304,7 @@ fun lagTestPersonopplysningGrunnlag(
         )
     },
     barnAktør: List<Aktør> = barnasIdenter.map { fødselsnummer ->
-        randomAktørId().also {
+        tilAktør(fødselsnummer).also {
             it.personidenter.add(
                 Personident(
                     fødselsnummer = fødselsnummer,

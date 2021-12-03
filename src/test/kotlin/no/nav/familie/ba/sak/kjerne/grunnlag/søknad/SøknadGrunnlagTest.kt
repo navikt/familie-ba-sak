@@ -6,7 +6,6 @@ import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
-import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.SøkerMedOpplysninger
@@ -20,6 +19,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
@@ -49,6 +49,9 @@ class SøknadGrunnlagTest(
     private val persongrunnlagService: PersongrunnlagService,
 
     @Autowired
+    private val personidentService: PersonidentService,
+
+    @Autowired
     private val vedtakService: VedtakService,
 
     @Autowired
@@ -76,7 +79,9 @@ class SøknadGrunnlagTest(
     fun `Skal lagre ned og hente søknadsgrunnlag`() {
         val søkerIdent = randomFnr()
         val barnIdent = randomFnr()
-        fagsakService.hentEllerOpprettFagsak(tilAktør(søkerIdent))
+        val søkerAktør = personidentService.hentOgLagreAktør(søkerIdent)
+
+        fagsakService.hentEllerOpprettFagsak(søkerAktør)
         val behandling = stegService.håndterNyBehandling(
             NyBehandling(
                 BehandlingKategori.NASJONAL,
@@ -105,7 +110,9 @@ class SøknadGrunnlagTest(
     fun `Skal sjekke at det kun kan være et aktivt grunnlag for en behandling`() {
         val søkerIdent = randomFnr()
         val barnIdent = randomFnr()
-        fagsakService.hentEllerOpprettFagsak(tilAktør(søkerIdent))
+        val søkerAktør = personidentService.hentOgLagreAktør(søkerIdent)
+
+        fagsakService.hentEllerOpprettFagsak(søkerAktør)
         val behandling = stegService.håndterNyBehandling(
             NyBehandling(
                 BehandlingKategori.NASJONAL,
@@ -144,6 +151,9 @@ class SøknadGrunnlagTest(
         val søkerIdent = randomFnr()
         val folkeregistrertBarn = ClientMocks.barnFnr[0]
         val uregistrertBarn = randomFnr()
+
+        val søkerAktør = personidentService.hentOgLagreAktør(søkerIdent)
+
         val søknadDTO = SøknadDTO(
             underkategori = BehandlingUnderkategori.ORDINÆR,
             søkerMedOpplysninger = SøkerMedOpplysninger(
@@ -161,7 +171,7 @@ class SøknadGrunnlagTest(
             endringAvOpplysningerBegrunnelse = ""
         )
 
-        fagsakService.hentEllerOpprettFagsak(tilAktør(søkerIdent))
+        fagsakService.hentEllerOpprettFagsak(søkerAktør)
         val behandling = stegService.håndterNyBehandling(
             NyBehandling(
                 BehandlingKategori.NASJONAL,
