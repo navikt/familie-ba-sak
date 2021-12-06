@@ -2,8 +2,6 @@ package no.nav.familie.ba.sak.kjerne.tilbakekreving
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.assertGenerelleSuksessKriterier
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -15,7 +13,6 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettTilbakekrevingRequ
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.core.env.Environment
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
@@ -30,8 +27,6 @@ data class FinnesBehandlingsresponsDto(val finnesÅpenBehandling: Boolean)
 class TilbakekrevingKlient(
     @Value("\${FAMILIE_TILBAKE_API_URL}") private val familieTilbakeUri: URI,
     @Qualifier("jwtBearer") restOperations: RestOperations,
-    private val environment: Environment,
-    private val featureToggleService: FeatureToggleService,
 ) : AbstractRestClient(restOperations, "Tilbakekreving") {
 
     fun hentForhåndsvisningVarselbrev(forhåndsvisVarselbrevRequest: ForhåndsvisVarselbrevRequest): ByteArray {
@@ -65,9 +60,6 @@ class TilbakekrevingKlient(
     }
 
     fun hentTilbakekrevingsbehandlinger(fagsakId: Long): List<Behandling> {
-        if (!featureToggleService.isEnabled(FeatureToggleConfig.TILBAKEKREVING)) {
-            return emptyList()
-        }
         try {
             val uri = URI.create("$familieTilbakeUri/fagsystem/${Fagsystem.BA}/fagsak/$fagsakId/behandlinger/v1")
 
@@ -92,12 +84,6 @@ class TilbakekrevingKlient(
     }
 
     fun kanTilbakekrevingsbehandlingOpprettesManuelt(fagsakId: Long): KanBehandlingOpprettesManueltRespons {
-        if (!featureToggleService.isEnabled(FeatureToggleConfig.TILBAKEKREVING)) {
-            return KanBehandlingOpprettesManueltRespons(
-                kanBehandlingOpprettes = false,
-                melding = "Kan ikke opprette tilbakekreving"
-            )
-        }
         try {
             val uri =
                 URI.create("$familieTilbakeUri/ytelsestype/${Ytelsestype.BARNETRYGD}/fagsak/$fagsakId/kanBehandlingOpprettesManuelt/v1")
@@ -129,10 +115,6 @@ class TilbakekrevingKlient(
     }
 
     fun opprettTilbakekrevingsbehandlingManuelt(request: OpprettManueltTilbakekrevingRequest): Boolean {
-        if (!featureToggleService.isEnabled(FeatureToggleConfig.TILBAKEKREVING)) {
-            return false
-        }
-
         try {
             val uri = URI.create("$familieTilbakeUri/behandling/manuelt/task/v1")
 
