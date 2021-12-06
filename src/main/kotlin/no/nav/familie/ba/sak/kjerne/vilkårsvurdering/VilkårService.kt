@@ -124,13 +124,6 @@ class VilkårService(
                 message = "Fant ikke vilkårsvurdering for person",
                 frontendFeilmelding = "Fant ikke vilkårsvurdering for person med ident '${restSlettVilkår.personIdent}"
             )
-        val vilkårResultat =
-            personResultat.vilkårResultater.singleOrNull { it.vilkårType == restSlettVilkår.vilkårType }
-                ?: throw Feil(
-                    message = "Fant ikke ${restSlettVilkår.vilkårType.beskrivelse} for person",
-                    frontendFeilmelding = "Fant ikke ${restSlettVilkår.vilkårType.beskrivelse} " +
-                        "for person med ident '${restSlettVilkår.personIdent}"
-                )
         val behandling = behandlingService.hent(behandlingId)
         if (!behandling.erManuellMigrering() ||
             Vilkår.UTVIDET_BARNETRYGD != restSlettVilkår.vilkårType ||
@@ -143,7 +136,17 @@ class VilkårService(
                     "for behandling $behandlingId",
             )
         }
-        personResultat.removeVilkårResultat(vilkårResultat.id)
+        val vilkårResultater = personResultat.vilkårResultater.filter { it.vilkårType == restSlettVilkår.vilkårType }
+        if (vilkårResultater.isEmpty()) {
+            throw Feil(
+                message = "Fant ikke ${restSlettVilkår.vilkårType.beskrivelse} for person",
+                frontendFeilmelding = "Fant ikke ${restSlettVilkår.vilkårType.beskrivelse} " +
+                    "for person med ident '${restSlettVilkår.personIdent}"
+            )
+        } else {
+            vilkårResultater.forEach { personResultat.removeVilkårResultat(it.id) }
+        }
+
         return vilkårsvurderingService.oppdater(vilkårsvurdering).personResultater.map { it.tilRestPersonResultat() }
     }
 
