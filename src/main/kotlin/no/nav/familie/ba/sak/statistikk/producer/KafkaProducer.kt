@@ -17,7 +17,6 @@ import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
 import java.time.YearMonth
-import no.nav.familie.kontrakter.ba.bisys.OpphørBarnetrygdBisysMelding
 
 interface KafkaProducer {
 
@@ -200,3 +199,5 @@ class MockKafkaProducer(val saksstatistikkMellomlagringRepository: Saksstatistik
         var sendteMeldinger = mutableMapOf<String, Any>()
     }
 }
+
+data class OpphørBarnetrygdBisysMelding(val personident: String, val opphørFom: YearMonth)
