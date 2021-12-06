@@ -53,10 +53,6 @@ class SmåbarnstilleggService(
         val tilkjentYtelseFraSistIverksatteBehandling =
             tilkjentYtelseRepository.findByBehandling(behandlingId = sistIverksatteBehandling.id)
 
-        val forrigeSøkersAndeler =
-            tilkjentYtelseFraSistIverksatteBehandling.andelerTilkjentYtelse.filter { it.erSøkersAndel() }
-                .toList()
-
         val persongrunnlagFraSistIverksatteBehandling =
             persongrunnlagService.hentAktiv(behandlingId = sistIverksatteBehandling.id)
                 ?: error("Finner ikke persongrunnlag")
@@ -70,8 +66,13 @@ class SmåbarnstilleggService(
                 tilkjentYtelse = tilkjentYtelseFraSistIverksatteBehandling
             ),
             nyePerioderMedFullOvergangsstønad = nyePerioderMedFullOvergangsstønad,
-            forrigeSøkersAndeler = forrigeSøkersAndeler,
-            barnasFødselsdatoer = persongrunnlagFraSistIverksatteBehandling.barna.map { it.fødselsdato },
+            forrigeAndelerTilkjentYtelse = tilkjentYtelseFraSistIverksatteBehandling.andelerTilkjentYtelse.toList(),
+            barnasIdenterOgFødselsdatoer = persongrunnlagFraSistIverksatteBehandling.barna.map {
+                Pair(
+                    it.personIdent.ident,
+                    it.fødselsdato
+                )
+            },
         )
     }
 

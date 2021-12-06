@@ -60,6 +60,8 @@ data class Aktør(
 
     fun aktivIdent() = personidenter.single { it.aktiv }.fødselsnummer
 
+    fun harIdent(fødselsnummer: String) = personidenter.any { it.fødselsnummer == fødselsnummer }
+
     companion object {
         private const val CHARS = "a-z0-9_:-"
         private const val VALID_REGEXP = "^(-?[1-9]|[a-z0])[$CHARS]*$"

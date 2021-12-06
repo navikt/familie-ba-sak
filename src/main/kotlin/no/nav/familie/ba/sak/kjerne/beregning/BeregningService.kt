@@ -64,9 +64,11 @@ class BeregningService(
     }
 
     /**
-     * Denne metoden henter alle tilkjent ytelser for et barn gruppert på behandling.
-     * Den går gjennom alle fagsaker og sørger for å filtrere bort behandling ikke sent til godkjenning,
-     * henlagte behandlinger, samt fagsaker som ikke lengre har barn i gjeldende behandling.
+     * Denne metoden henter alle relaterte behandlinger på en person.
+     * Per fagsak henter man tilkjent ytelse fra:
+     * 1. Behandling som er til godkjenning
+     * 2. Siste behandling som er iverksatt
+     * 3. Filtrer bort behandlinger der barnet ikke lenger finnes
      */
     fun hentSentTilGodkjenningTilkjentYtelseForBarn(
         barnAktør: Aktør,
@@ -76,11 +78,15 @@ class BeregningService(
             .filter { it.id != fagsakId }
 
         return andreFagsaker.mapNotNull { fagsak ->
-            Behandlingutils.hentSisteBehandlingSomIkkeErTekniskOpphør(
-                behandlinger = behandlingRepository.finnBehandlingerSentTilGodkjenning(
-                    fagsakId = fagsak.id
-                )
-            )
+            val behandlingSomErSendtTilGodkjenning = behandlingRepository.finnBehandlingerSentTilGodkjenning(
+                fagsakId = fagsak.id
+            ).singleOrNull()
+
+            if (behandlingSomErSendtTilGodkjenning != null) behandlingSomErSendtTilGodkjenning
+            else {
+                val iverksatteBehandlinger = behandlingRepository.finnIverksatteBehandlinger(fagsakId = fagsakId)
+                Behandlingutils.hentSisteBehandlingSomErIverksatt(iverksatteBehandlinger)
+            }
         }.map {
             hentTilkjentYtelseForBehandling(behandlingId = it.id)
         }.filter {

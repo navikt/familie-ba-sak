@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
@@ -288,7 +289,7 @@ class UtgjørendePersonerTest {
                     barn1PersonResultat,
                     vilkårType = Vilkår.BOSATT_I_RIKET,
                     periodeFom = LocalDate.of(2021, 11, 1),
-                    erMedlemskapVurdert = true
+                    utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP)
                 )
             )
         )
@@ -298,7 +299,7 @@ class UtgjørendePersonerTest {
                     barn2PersonResultat,
                     vilkårType = Vilkår.BOSATT_I_RIKET,
                     periodeFom = LocalDate.of(2021, 11, 1),
-                    erMedlemskapVurdert = false
+                    utdypendeVilkårsvurderinger = emptyList()
                 )
             )
         )

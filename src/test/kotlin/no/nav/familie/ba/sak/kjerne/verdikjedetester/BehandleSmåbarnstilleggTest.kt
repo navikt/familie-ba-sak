@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
 import io.mockk.every
+import io.mockk.verify
 import no.nav.familie.ba.sak.common.lagSøknadDTO
 import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.toYearMonth
@@ -16,6 +17,8 @@ import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg.VedtakOmOvergangsstønadService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.HenleggÅrsak
+import no.nav.familie.ba.sak.kjerne.behandling.RestHenleggBehandlingInfo
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
@@ -35,10 +38,11 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifi
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenario
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenarioPerson
+import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad
 import no.nav.familie.kontrakter.felles.ef.PerioderOvergangsstønadResponse
-import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
+import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
@@ -69,7 +73,8 @@ class BehandleSmåbarnstilleggTest(
     @Autowired private val efSakRestClient: EfSakRestClient,
     @Autowired private val vedtakOmOvergangsstønadService: VedtakOmOvergangsstønadService,
     @Autowired private val vedtaksperiodeService: VedtaksperiodeService,
-    @Autowired private val økonomiKlient: ØkonomiKlient
+    @Autowired private val økonomiKlient: ØkonomiKlient,
+    @Autowired private val opprettTaskService: OpprettTaskService
 ) : AbstractVerdikjedetest(efSakRestClient = efSakRestClient, økonomiKlient = økonomiKlient) {
 
     private val barnFødselsdato = LocalDate.now().minusYears(2)
@@ -280,11 +285,52 @@ class BehandleSmåbarnstilleggTest(
 
     @Test
     @Order(3)
+    fun `Skal stoppe automatisk behandling som må fortsette manuelt pga tilbakekreving`() {
+        EfSakRestClientMock.clearEfSakRestMocks(efSakRestClient)
+
+        val søkersIdent = scenario.søker.ident!!
+
+        val periodeOvergangsstønadTom = LocalDate.now().minusMonths(3)
+        every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns PerioderOvergangsstønadResponse(
+            perioder = listOf(
+                PeriodeOvergangsstønad(
+                    personIdent = søkersIdent,
+                    fomDato = periodeMedFullOvergangsstønadFom,
+                    tomDato = periodeOvergangsstønadTom,
+                    datakilde = PeriodeOvergangsstønad.Datakilde.EF
+                ),
+            )
+        )
+        vedtakOmOvergangsstønadService.håndterVedtakOmOvergangsstønad(personIdent = søkersIdent)
+
+        val fagsak = fagsakService.hentFagsakPåPerson(identer = setOf(PersonIdent(søkersIdent)))
+        val aktivBehandling = behandlingService.hentAktivForFagsak(fagsakId = fagsak!!.id)!!
+
+        verify(exactly = 1) {
+            opprettTaskService.opprettOppgaveTask(
+                behandlingId = aktivBehandling.id,
+                oppgavetype = Oppgavetype.BehandleSak,
+                beskrivelse = "Småbarnstillegg: endring i overgangsstønad må behandles manuelt"
+            )
+        }
+
+        assertEquals(StegType.VURDER_TILBAKEKREVING, aktivBehandling.steg)
+        assertEquals(BehandlingStatus.UTREDES, aktivBehandling.status)
+
+        val behandlingEtterHenleggelse = stegService.håndterHenleggBehandling(
+            behandling = aktivBehandling,
+            henleggBehandlingInfo = RestHenleggBehandlingInfo(
+                årsak = HenleggÅrsak.FEILAKTIG_OPPRETTET,
+                begrunnelse = ""
+            )
+        )
+        assertEquals(false, behandlingEtterHenleggelse.aktiv)
+    }
+
+    @Test
+    @Order(4)
     fun `Skal automatisk endre småbarnstilleggperioder`() {
         EfSakRestClientMock.clearEfSakRestMocks(efSakRestClient)
-        every { økonomiKlient.hentSimulering(any()) } returns Ressurs.Companion.success(
-            DetaljertSimuleringResultat(emptyList())
-        )
 
         val søkersIdent = scenario.søker.ident!!
         val søkersAktør = personidentService.hentOgLagreAktør(søkersIdent)

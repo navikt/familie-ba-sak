@@ -118,10 +118,19 @@ fun erFørstePeriodeOgVilkårIkkeOppfylt(
     vedtaksperiode: Periode,
     triggesAv: TriggesAv,
     vilkårResultat: VilkårResultat
-) = !andelerTilkjentYtelse.any { it.stønadFom.isBefore(vedtaksperiode.fom.toYearMonth()) } &&
-    triggereErOppfylt(triggesAv, vilkårResultat) &&
-    vilkårResultat.resultat == Resultat.IKKE_OPPFYLT &&
-    vilkårResultat.toPeriode().overlapperHeltEllerDelvisMed(vedtaksperiode)
+): Boolean {
+    val vilkårIkkeOppfyltForPeriode =
+        vilkårResultat.resultat == Resultat.IKKE_OPPFYLT &&
+            vilkårResultat.toPeriode().overlapperHeltEllerDelvisMed(vedtaksperiode)
+
+    val vilkårOppfyltRettEtterPeriode =
+        vilkårResultat.resultat == Resultat.OPPFYLT &&
+            vedtaksperiode.tom.toYearMonth() == vilkårResultat.periodeFom!!.toYearMonth()
+
+    return !andelerTilkjentYtelse.any { it.stønadFom.isBefore(vedtaksperiode.fom.toYearMonth()) } &&
+        triggereErOppfylt(triggesAv, vilkårResultat) &&
+        (vilkårIkkeOppfyltForPeriode || vilkårOppfyltRettEtterPeriode)
+}
 
 private fun triggereErOppfylt(
     triggesAv: TriggesAv,

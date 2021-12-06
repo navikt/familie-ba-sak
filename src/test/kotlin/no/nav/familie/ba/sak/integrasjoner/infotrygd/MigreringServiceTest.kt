@@ -31,6 +31,7 @@ import no.nav.familie.ba.sak.statistikk.saksstatistikk.sakstatistikkObjectMapper
 import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
 import no.nav.familie.ba.sak.task.PubliserVedtakTask
+import no.nav.familie.ba.sak.task.SendVedtakTilInfotrygdTask
 import no.nav.familie.ba.sak.task.StatusFraOppdragTask
 import no.nav.familie.eksterne.kontrakter.VedtakDVH
 import no.nav.familie.eksterne.kontrakter.saksstatistikk.BehandlingDVH
@@ -95,6 +96,9 @@ class MigreringServiceTest(
     private val statusFraOppdragTask: StatusFraOppdragTask,
 
     @Autowired
+    private val sendVedtakTilInfotrygdTask: SendVedtakTilInfotrygdTask,
+
+    @Autowired
     private val publiserVedtakTask: PubliserVedtakTask,
 
     @Autowired
@@ -151,13 +155,18 @@ class MigreringServiceTest(
             iverksettMotOppdragTask.onCompletion(task)
         }
         taskRepository.findAll().also { tasks ->
-            assertThat(tasks).hasSize(2)
+            val task = tasks.find { it.type == SendVedtakTilInfotrygdTask.TASK_STEP_TYPE }!!
+            sendVedtakTilInfotrygdTask.doTask(task)
+            sendVedtakTilInfotrygdTask.onCompletion(task)
+        }
+        taskRepository.findAll().also { tasks ->
+            assertThat(tasks).hasSize(3)
             val task = tasks.find { it.type == StatusFraOppdragTask.TASK_STEP_TYPE }!!
             statusFraOppdragTask.doTask(task)
             statusFraOppdragTask.onCompletion(task)
         }
         taskRepository.findAll().also { tasks ->
-            assertThat(tasks).hasSize(4)
+            assertThat(tasks).hasSize(5)
             var task = tasks.find { it.type == FerdigstillBehandlingTask.TASK_STEP_TYPE }!!
             ferdigstillBehandlingTask.doTask(task)
             ferdigstillBehandlingTask.onCompletion(task)

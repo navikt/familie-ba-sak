@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.YearMonth
@@ -55,6 +56,8 @@ class SatsendringService(
         val behandling = behandlingRepository.finnBehandling(behandlingId = behandlingId)
         val søkerAktør = behandling.fagsak.aktør
 
+        logger.info("Kjører satsendring på $behandling")
+        secureLogger.info("Kjører satsendring på $behandling for ${søkerAktør.aktivIdent()}")
         if (behandling.fagsak.status != FagsakStatus.LØPENDE) throw Feil("Forsøker å utføre satsendring på ikke løpende fagsak ${behandling.fagsak.id}")
         if (behandling.status != BehandlingStatus.AVSLUTTET) throw Feil("Forsøker å utføre satsendring på behandling ${behandling.id} som ikke er avsluttet")
 
@@ -83,5 +86,10 @@ class SatsendringService(
             )
         }
         taskRepository.save(task)
+    }
+
+    companion object {
+        val logger = LoggerFactory.getLogger(SatsendringService::class.java)
+        val secureLogger = LoggerFactory.getLogger("secureLogger")
     }
 }

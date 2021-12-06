@@ -214,10 +214,7 @@ class ClientMocks {
         every {
             mockFeatureToggleService.isEnabled(capture(featureSlot))
         } answers {
-            when (featureSlot.captured) {
-                FeatureToggleConfig.KAN_BEHANDLE_UTVIDET -> true
-                else -> true
-            }
+            true
         }
 
         return mockFeatureToggleService

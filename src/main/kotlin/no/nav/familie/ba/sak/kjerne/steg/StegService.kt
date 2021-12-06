@@ -17,6 +17,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
@@ -206,9 +207,13 @@ class StegService(
     fun håndterSendTilBeslutter(behandling: Behandling, behandlendeEnhet: String): Behandling {
         val behandlingSteg: SendTilBeslutter = hentBehandlingSteg(StegType.SEND_TIL_BESLUTTER) as SendTilBeslutter
 
-        return håndterSteg(behandling, behandlingSteg) {
+        val behandlingEtterBeslutterSteg = håndterSteg(behandling, behandlingSteg) {
             behandlingSteg.utførStegOgAngiNeste(behandling, behandlendeEnhet)
         }
+        if (behandlingEtterBeslutterSteg.erManuellMigrering()) {
+            return håndterBeslutningForVedtak(behandlingEtterBeslutterSteg, RestBeslutningPåVedtak(Beslutning.GODKJENT))
+        }
+        return behandlingEtterBeslutterSteg
     }
 
     @Transactional
@@ -226,9 +231,13 @@ class StegService(
         val behandlingSteg: HenleggBehandling =
             hentBehandlingSteg(StegType.HENLEGG_BEHANDLING) as HenleggBehandling
 
-        return håndterSteg(behandling, behandlingSteg) {
+        val behandlingEtterHenleggeSteg = håndterSteg(behandling, behandlingSteg) {
             behandlingSteg.utførStegOgAngiNeste(behandling, henleggBehandlingInfo)
         }
+
+        return håndterFerdigstillBehandling(
+            behandling = behandlingEtterHenleggeSteg
+        )
     }
 
     @Transactional

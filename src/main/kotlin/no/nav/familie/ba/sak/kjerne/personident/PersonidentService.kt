@@ -1,20 +1,49 @@
 package no.nav.familie.ba.sak.kjerne.personident
 
+import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.IdentInformasjon
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
+import no.nav.familie.kontrakter.felles.PersonIdent
 import org.slf4j.LoggerFactory
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
+import java.time.LocalDateTime
+import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
 
 @Service
 class PersonidentService(
     private val personidentRepository: PersonidentRepository,
     private val aktørIdRepository: AktørIdRepository,
-    private val personopplysningerService: PersonopplysningerService
+    private val personopplysningerService: PersonopplysningerService,
+    private val taskRepository: TaskRepositoryWrapper,
 ) {
-    // TODO: robustgjøring dnr/fnr skriv test for endringen i logikken i denne metoden. 
+
+    @Transactional
+    fun håndterNyIdent(nyIdent: PersonIdent): Aktør? {
+        logger.info("Håndterer ny ident")
+        secureLogger.info("Håndterer ny ident ${nyIdent.ident}")
+        val identerFraPdl = personopplysningerService.hentIdenter(nyIdent.ident, false)
+        val aktørId = filtrerAktørId(identerFraPdl)
+
+        val aktør = aktørIdRepository.findByIdOrNull(aktørId)
+
+        return if (aktør?.harIdent(fødselsnummer = nyIdent.ident) == false) {
+            logger.info("Legger til ny ident")
+            secureLogger.info("Legger til ny ident ${nyIdent.ident} på aktør ${aktør.aktørId}")
+            opprettPersonIdent(aktør, nyIdent.ident)
+        } else aktør
+    }
+
+    @Transactional
+    fun opprettTaskForIdentHendelse(nyIdent: PersonIdent) {
+        logger.info("Oppretter task for senere håndterering av ny ident")
+        secureLogger.info("Oppretter task for senere håndterering av ny ident ${nyIdent.ident}")
+        taskRepository.save(IdentHendelseTask.opprettTask(nyIdent))
+    }
+
+    // TODO: robustgjøring dnr/fnr skriv test for endringen i logikken i denne metoden.
     fun hentAlleFødselsnummerForEnAktør(aktør: Aktør) =
         personopplysningerService.hentIdenter(Ident(aktør.aktivIdent())).filter { it.gruppe == "FOLKEREGISTERIDENT" }
             .map { it.ident }
@@ -53,17 +82,14 @@ class PersonidentService(
         )
 
     private fun opprettPersonIdent(aktør: Aktør, fødselsnummer: String): Aktør {
-        aktør.personidenter.filter { it.aktiv }.forEach {
+        aktør.personidenter.filter { it.aktiv }.map {
             it.aktiv = false
-            personidentRepository.save(it)
+            it.gjelderTil = LocalDateTime.now()
         }
-
-        return personidentRepository.save(
-            Personident(
-                fødselsnummer = fødselsnummer,
-                aktør = aktør
-            )
-        ).aktør
+        aktør.personidenter.add(
+            Personident(fødselsnummer = fødselsnummer, aktør = aktør)
+        )
+        return aktørIdRepository.save(aktør)
     }
 
     private fun filtrerAktivtFødselsnummer(identerFraPdl: List<IdentInformasjon>) =
@@ -79,6 +105,7 @@ class PersonidentService(
             )
 
     companion object {
+        val logger = LoggerFactory.getLogger(PersonidentService::class.java)
         val secureLogger = LoggerFactory.getLogger("secureLogger")
     }
 }

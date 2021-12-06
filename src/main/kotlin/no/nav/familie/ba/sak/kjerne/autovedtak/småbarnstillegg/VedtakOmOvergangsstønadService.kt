@@ -13,7 +13,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.domene.erÅpen
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.SmåbarnstilleggService
-import no.nav.familie.ba.sak.kjerne.beregning.VedtaksperiodefinnerSmåbarnstilleggFeil
 import no.nav.familie.ba.sak.kjerne.beregning.finnAktuellVedtaksperiodeOgLeggTilSmåbarnstilleggbegrunnelse
 import no.nav.familie.ba.sak.kjerne.beregning.hentInnvilgedeOgReduserteAndelerSmåbarnstillegg
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -112,17 +111,7 @@ class VedtakOmOvergangsstønadService(
                 )
             }
 
-            try {
-                begrunnAutovedtakForSmåbarnstillegg(behandlingEtterBehandlingsresultat)
-            } catch (vedtaksperiodefinnerSmåbarnstilleggFeil: VedtaksperiodefinnerSmåbarnstilleggFeil) {
-                logger.error(vedtaksperiodefinnerSmåbarnstilleggFeil.message)
-
-                return kanIkkeBehandleAutomatisk(
-                    behandling = behandlingEtterBehandlingsresultat,
-                    metric = antallVedtakOmOvergangsstønadTilManuellBehandling[TilManuellBehandlingÅrsak.KLARER_IKKE_BEGRUNNE]!!,
-                    meldingIOppgave = "Småbarnstillegg: endring i overgangsstønad må behandles manuelt"
-                )
-            }
+            begrunnAutovedtakForSmåbarnstillegg(behandlingEtterBehandlingsresultat)
 
             val vedtakEtterTotrinn = autovedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(
                 behandlingEtterBehandlingsresultat
@@ -187,7 +176,7 @@ class VedtakOmOvergangsstønadService(
         behandlingService.omgjørTilManuellBehandling(behandling)
         return autovedtakService.opprettOppgaveForManuellBehandling(
             behandling = behandling,
-            begrunnelse = meldingIOppgave, // TODO
+            begrunnelse = meldingIOppgave,
             oppgavetype = Oppgavetype.BehandleSak,
             opprettLogginnslag = true
         )

@@ -2,8 +2,8 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVedtakBegrunnelseTilknyttetVilkår
+import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
-import no.nav.familie.ba.sak.kjerne.dokument.BrevKlient
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurderingType
@@ -19,7 +19,7 @@ import java.time.LocalDate
 @Service
 class VilkårsvurderingService(
     private val vilkårsvurderingRepository: VilkårsvurderingRepository,
-    private val brevKlient: BrevKlient,
+    private val sanityService: SanityService,
 ) {
 
     fun hentAktivForBehandling(behandlingId: Long): Vilkårsvurdering? {
@@ -34,7 +34,8 @@ class VilkårsvurderingService(
         val eksplisistteAvslagPåBehandling = hentEksplisitteAvslagPåBehandling(behandlingId)
         return eksplisistteAvslagPåBehandling
             .filterNot {
-                it.personResultat?.erSøkersResultater() ?: error("VilkårResultat mangler kobling til PersonResultat")
+                it.personResultat?.erSøkersResultater()
+                    ?: error("VilkårResultat mangler kobling til PersonResultat")
             }
             .map { it.personResultat!!.aktør }
             .distinct()
@@ -86,7 +87,7 @@ class VilkårsvurderingService(
     }
 
     fun hentVilkårsbegrunnelser(): Map<VedtakBegrunnelseType, List<RestVedtakBegrunnelseTilknyttetVilkår>> =
-        vedtakBegrunnelseSpesifikasjonerTilNedtrekksmenytekster(brevKlient.hentSanityBegrunnelser())
+        vedtakBegrunnelseSpesifikasjonerTilNedtrekksmenytekster(sanityService.hentSanityBegrunnelser())
 
     companion object {
 

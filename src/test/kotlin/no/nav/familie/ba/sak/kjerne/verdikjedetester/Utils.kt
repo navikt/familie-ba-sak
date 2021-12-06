@@ -32,6 +32,7 @@ import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.prosessering.domene.Task
 import org.junit.jupiter.api.Assertions.assertEquals
 import java.time.LocalDate
+import java.util.Properties
 
 fun generellAssertRestUtvidetBehandling(
     restUtvidetBehandling: Ressurs<RestUtvidetBehandling>,
@@ -128,9 +129,10 @@ fun behandleFødselshendelse(
     }
 
     val behandlingEtterVurdering =
-        behandlingService.hentAktivForFagsak(fagsakId = restMinimalFagsakEtterVurdering.data!!.id)!!
+        behandlingService.hentBehandlinger(fagsakId = restMinimalFagsakEtterVurdering.data!!.id)
+            .maxByOrNull { it.opprettetTidspunkt }!!
     if (behandlingEtterVurdering.erHenlagt()) {
-        return stegService.håndterFerdigstillBehandling(behandlingEtterVurdering)
+        return behandlingEtterVurdering
     }
 
     generellAssertFagsak(
@@ -185,31 +187,38 @@ fun håndterIverksettingAvBehandling(
             )
         )
 
-    val behandlingSomSkalFerdigstilles = if (behandlingEtterIverksetteVedtak.steg == StegType.JOURNALFØR_VEDTAKSBREV) {
-        val behandlingEtterJournalførtVedtak =
-            stegService.håndterJournalførVedtaksbrev(
-                behandlingEtterStatusFraOppdrag,
-                JournalførVedtaksbrevDTO(
-                    vedtakId = vedtak.id,
-                    task = Task(type = JournalførVedtaksbrevTask.TASK_STEP_TYPE, payload = "")
-                )
-            )
+    val behandlingEtterIverksettTilbakekreving =
+        if (behandlingEtterStatusFraOppdrag.steg == StegType.IVERKSETT_MOT_FAMILIE_TILBAKE) stegService.håndterIverksettMotFamilieTilbake(
+            behandling = behandlingEtterStatusFraOppdrag,
+            metadata = Properties()
+        ) else behandlingEtterStatusFraOppdrag
 
-        val behandlingEtterDistribuertVedtak =
-            stegService.håndterDistribuerVedtaksbrev(
-                behandlingEtterJournalførtVedtak,
-                DistribuerDokumentDTO(
-                    behandlingId = behandlingEtterJournalførtVedtak.id,
-                    journalpostId = "1234",
-                    personIdent = søkerFnr,
-                    brevmal = hentBrevtype(
-                        behandlingEtterJournalførtVedtak
-                    ),
-                    erManueltSendt = false
+    val behandlingSomSkalFerdigstilles =
+        if (behandlingEtterIverksettTilbakekreving.steg == StegType.JOURNALFØR_VEDTAKSBREV) {
+            val behandlingEtterJournalførtVedtak =
+                stegService.håndterJournalførVedtaksbrev(
+                    behandlingEtterStatusFraOppdrag,
+                    JournalførVedtaksbrevDTO(
+                        vedtakId = vedtak.id,
+                        task = Task(type = JournalførVedtaksbrevTask.TASK_STEP_TYPE, payload = "")
+                    )
                 )
-            )
-        behandlingEtterDistribuertVedtak
-    } else behandlingEtterStatusFraOppdrag
+
+            val behandlingEtterDistribuertVedtak =
+                stegService.håndterDistribuerVedtaksbrev(
+                    behandlingEtterJournalførtVedtak,
+                    DistribuerDokumentDTO(
+                        behandlingId = behandlingEtterJournalførtVedtak.id,
+                        journalpostId = "1234",
+                        personIdent = søkerFnr,
+                        brevmal = hentBrevtype(
+                            behandlingEtterJournalførtVedtak
+                        ),
+                        erManueltSendt = false
+                    )
+                )
+            behandlingEtterDistribuertVedtak
+        } else behandlingEtterStatusFraOppdrag
 
     val ferdigstiltBehandling = stegService.håndterFerdigstillBehandling(behandlingSomSkalFerdigstilles)
 

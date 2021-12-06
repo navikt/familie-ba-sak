@@ -14,11 +14,14 @@ import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenario
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenarioPerson
+import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.defaultBostedsadresseHistorikk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.task.BehandleFødselshendelseTask
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.kontrakter.ba.infotrygd.InfotrygdSøkResponse
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
+import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
+import no.nav.familie.kontrakter.felles.personopplysning.Matrikkeladresse
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
@@ -124,7 +127,7 @@ class FødselshendelseHenleggelseTest(
             opprettTaskService.opprettOppgaveTask(
                 behandlingId = behandling!!.id,
                 oppgavetype = Oppgavetype.VurderLivshendelse,
-                beskrivelse = "Mor er under 18 år."
+                beskrivelse = "Fødselshendelse: Mor er under 18 år."
             )
         }
 
@@ -133,6 +136,73 @@ class FødselshendelseHenleggelseTest(
 
         val automatiskVurdertBehandling = fagsak?.behandlinger?.first { it.skalBehandlesAutomatisk }!!
         assertEquals(0, automatiskVurdertBehandling.personResultater.size)
+    }
+
+    @Test
+    fun `Skal henlegge fødselshendelse på grunn av at søker har flere adresser uten fom-dato (vilkårsvurdering)`() {
+        val scenario = mockServerKlient().lagScenario(
+            RestScenario(
+                søker = RestScenarioPerson(
+                    fødselsdato = "1993-01-12",
+                    fornavn = "Mor",
+                    etternavn = "Søker",
+                    bostedsadresser = defaultBostedsadresseHistorikk + listOf(
+                        Bostedsadresse(
+                            angittFlyttedato = null,
+                            gyldigTilOgMed = null,
+                            matrikkeladresse = Matrikkeladresse(
+                                matrikkelId = 123L,
+                                bruksenhetsnummer = "H301",
+                                tilleggsnavn = "navn",
+                                postnummer = "0202",
+                                kommunenummer = "2231"
+                            )
+                        ),
+                        Bostedsadresse(
+                            angittFlyttedato = null,
+                            gyldigTilOgMed = null,
+                            matrikkeladresse = Matrikkeladresse(
+                                matrikkelId = 123L,
+                                bruksenhetsnummer = "H301",
+                                tilleggsnavn = "navn",
+                                postnummer = "0202",
+                                kommunenummer = "2231"
+                            )
+                        ),
+                    )
+                ),
+                barna = listOf(
+                    RestScenarioPerson(
+                        fødselsdato = now().toString(),
+                        fornavn = "Barn",
+                        etternavn = "Barnesen",
+                    )
+                )
+            )
+        )
+
+        val behandling = behandleFødselshendelse(
+            nyBehandlingHendelse = NyBehandlingHendelse(
+                morsIdent = scenario.søker.ident!!,
+                barnasIdenter = listOf(scenario.barna.first().ident!!)
+            ),
+            behandleFødselshendelseTask = behandleFødselshendelseTask,
+            fagsakService = fagsakService,
+            behandlingService = behandlingService,
+            vedtakService = vedtakService,
+            stegService = stegService
+        )
+
+        assertEquals(BehandlingResultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE, behandling?.resultat)
+        assertEquals(StegType.BEHANDLING_AVSLUTTET, behandling?.steg)
+
+        verify(exactly = 1) {
+            opprettTaskService.opprettOppgaveTask(
+                behandlingId = behandling!!.id,
+                oppgavetype = Oppgavetype.VurderLivshendelse,
+                beskrivelse = "Fødselshendelse: Mor har flere bostedsadresser uten fra- og med dato"
+            )
+        }
     }
 
     @Test
@@ -172,7 +242,7 @@ class FødselshendelseHenleggelseTest(
             opprettTaskService.opprettOppgaveTask(
                 behandlingId = behandling!!.id,
                 oppgavetype = Oppgavetype.VurderLivshendelse,
-                beskrivelse = "Barnet (fødselsdato: ${
+                beskrivelse = "Fødselshendelse: Barnet (fødselsdato: ${
                 LocalDate.parse(scenario.barna.first().fødselsdato)
                     .tilKortString()
                 }) er ikke bosatt med mor."

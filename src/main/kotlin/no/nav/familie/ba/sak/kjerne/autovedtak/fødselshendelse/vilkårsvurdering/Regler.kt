@@ -35,6 +35,16 @@ data class VurderPersonErBosattIRiket(
 ) : Vilkårsregel {
 
     override fun vurder(): Evaluering {
+        if (adresser.size == 1 && !adresser.single().harGyldigFom()) {
+            /**
+             * Bruker har kun en adresse og den er uten fom som betyr at vedkommende har bodd på samme
+             * adresse hele livet.
+             */
+            return Evaluering.oppfylt(VilkårOppfyltÅrsak.BOR_I_RIKET_EN_ADRESSE_HELE_LIVET)
+        } else if (adresser.filter { !it.harGyldigFom() }.size > 1) {
+            return Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.BOR_IKKE_I_RIKET_FLERE_ADRESSER_UTEN_FOM)
+        }
+
         if (adresser.any { !it.harGyldigFom() }) {
             val person = adresser.first().person
             secureLogger.info(

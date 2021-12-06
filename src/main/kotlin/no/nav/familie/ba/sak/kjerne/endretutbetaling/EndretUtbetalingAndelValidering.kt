@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.endretutbetaling
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.MånedPeriode
-import no.nav.familie.ba.sak.common.UtbetalingsikkerhetFeil
 import no.nav.familie.ba.sak.common.overlapperHeltEllerDelvisMed
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
@@ -25,7 +24,7 @@ object EndretUtbetalingAndelValidering {
                     it.årsak == endretUtbetalingAndel.årsak
             }
         ) {
-            throw UtbetalingsikkerhetFeil(
+            throw FunksjonellFeil(
                 melding = "Perioden som blir forsøkt lagt til overlapper med eksisterende periode på person.",
                 frontendFeilmelding = "Perioden du forsøker å legge til overlapper med eksisterende periode på personen. Om dette er ønskelig må du først endre den eksisterende perioden."
             )
@@ -52,7 +51,7 @@ object EndretUtbetalingAndelValidering {
                     endretUtbetalingAndel.tom!!.isAfter(størsteDatoForTilkjentYtelse)
                 )
         ) {
-            throw UtbetalingsikkerhetFeil(
+            throw FunksjonellFeil(
                 melding = "Det er ingen tilkjent ytelse for personen det blir forsøkt lagt til en endret periode for.",
                 frontendFeilmelding = "Du har valgt en periode der det ikke finnes tilkjent ytelse for valgt person i hele eller deler av perioden."
             )
@@ -71,7 +70,7 @@ object EndretUtbetalingAndelValidering {
                 .filter { it.stønadsPeriode().overlapperHeltEllerDelvisMed(endretUtbetalingAndel.periode) }
                 .any { it.erDeltBosted() }
         ) {
-            throw UtbetalingsikkerhetFeil(
+            throw FunksjonellFeil(
                 melding = "Det er ingen sats for delt bosted i perioden det opprettes en endring med årsak delt bosted for.",
                 frontendFeilmelding = "Du har valgt årsaken 'delt bosted', denne samstemmer ikke med vurderingene gjort på vilkårsvurderingssiden i perioden du har valgt."
             )

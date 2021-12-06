@@ -235,3 +235,13 @@ fun slåSammenOverlappendePerioder(input: Collection<DatoIntervallEntitet>): Lis
     }
     return result
 }
+
+fun List<DatoIntervallEntitet>.slåSammenSammenhengendePerioder(): List<DatoIntervallEntitet> {
+    return this.sortedBy { it.fom }
+        .fold(mutableListOf()) { sammenslåttePerioder, nestePeriode ->
+            if (sammenslåttePerioder.lastOrNull()?.tom?.toYearMonth() == nestePeriode.fom?.forrigeMåned()
+            ) {
+                sammenslåttePerioder.apply { add(removeLast().copy(tom = nestePeriode.tom)) }
+            } else sammenslåttePerioder.apply { add(nestePeriode) }
+        }
+}

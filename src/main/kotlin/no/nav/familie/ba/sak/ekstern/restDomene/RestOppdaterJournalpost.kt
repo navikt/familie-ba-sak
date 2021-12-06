@@ -1,8 +1,9 @@
 package no.nav.familie.ba.sak.ekstern.restDomene
 
-import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.AvsenderMottaker
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.Bruker
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.OppdaterJournalpostRequest
+import no.nav.familie.kontrakter.felles.BrukerIdType
+import no.nav.familie.kontrakter.felles.dokarkiv.AvsenderMottaker
 import no.nav.familie.kontrakter.felles.journalpost.DokumentInfo
 import no.nav.familie.kontrakter.felles.journalpost.Dokumentstatus
 import no.nav.familie.kontrakter.felles.journalpost.LogiskVedlegg
@@ -33,7 +34,8 @@ data class RestOppdaterJournalpost(
 
         return OppdaterJournalpostRequest(
             avsenderMottaker = AvsenderMottaker(
-                this.avsender.id,
+                id = this.avsender.id,
+                idType = if (this.avsender.id != "") BrukerIdType.FNR else null,
                 navn = this.avsender.navn
             ),
             bruker = Bruker(

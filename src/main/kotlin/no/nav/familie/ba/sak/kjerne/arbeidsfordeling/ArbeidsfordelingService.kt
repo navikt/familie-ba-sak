@@ -59,9 +59,7 @@ class ArbeidsfordelingService(
         saksstatistikkEventPublisher.publiserBehandlingsstatistikk(behandling.id)
     }
 
-    fun fastsettBehandlendeEnhet(behandling: Behandling) {
-        val arbeidsfordelingsenhet = hentArbeidsfordelingsenhet(behandling)
-
+    fun fastsettBehandlendeEnhet(behandling: Behandling, sisteBehandlingSomErIverksatt: Behandling? = null) {
         val aktivArbeidsfordelingPåBehandling =
             arbeidsfordelingPåBehandlingRepository.finnArbeidsfordelingPåBehandling(behandling.id)
 
@@ -71,30 +69,41 @@ class ArbeidsfordelingService(
                 enhetNavn = aktivArbeidsfordelingPåBehandling.behandlendeEnhetNavn
             ) else null
 
-        val oppdatertArbeidsfordelingPåBehandling = when (aktivArbeidsfordelingPåBehandling) {
-            null -> {
-                arbeidsfordelingPåBehandlingRepository.save(
-                    ArbeidsfordelingPåBehandling(
-                        behandlingId = behandling.id,
-                        behandlendeEnhetId = arbeidsfordelingsenhet.enhetId,
-                        behandlendeEnhetNavn = arbeidsfordelingsenhet.enhetNavn
-                    )
+        val oppdatertArbeidsfordelingPåBehandling =
+            if (behandling.erSatsendring()) {
+                fastsettArbeidsfordelingsenhetPåSatsendringsbehandling(
+                    behandling,
+                    sisteBehandlingSomErIverksatt,
+                    aktivArbeidsfordelingPåBehandling
                 )
-            }
-            else -> {
-                if (!aktivArbeidsfordelingPåBehandling.manueltOverstyrt &&
-                    (aktivArbeidsfordelingPåBehandling.behandlendeEnhetId != arbeidsfordelingsenhet.enhetId)
-                ) {
+            } else {
+                val arbeidsfordelingsenhet = hentArbeidsfordelingsenhet(behandling)
 
-                    aktivArbeidsfordelingPåBehandling.also {
-                        it.behandlendeEnhetId = arbeidsfordelingsenhet.enhetId
-                        it.behandlendeEnhetNavn = arbeidsfordelingsenhet.enhetNavn
+                when (aktivArbeidsfordelingPåBehandling) {
+                    null -> {
+                        arbeidsfordelingPåBehandlingRepository.save(
+                            ArbeidsfordelingPåBehandling(
+                                behandlingId = behandling.id,
+                                behandlendeEnhetId = arbeidsfordelingsenhet.enhetId,
+                                behandlendeEnhetNavn = arbeidsfordelingsenhet.enhetNavn
+                            )
+                        )
                     }
-                    arbeidsfordelingPåBehandlingRepository.save(aktivArbeidsfordelingPåBehandling)
+                    else -> {
+                        if (!aktivArbeidsfordelingPåBehandling.manueltOverstyrt &&
+                            (aktivArbeidsfordelingPåBehandling.behandlendeEnhetId != arbeidsfordelingsenhet.enhetId)
+                        ) {
+
+                            aktivArbeidsfordelingPåBehandling.also {
+                                it.behandlendeEnhetId = arbeidsfordelingsenhet.enhetId
+                                it.behandlendeEnhetNavn = arbeidsfordelingsenhet.enhetNavn
+                            }
+                            arbeidsfordelingPåBehandlingRepository.save(aktivArbeidsfordelingPåBehandling)
+                        }
+                        aktivArbeidsfordelingPåBehandling
+                    }
                 }
-                aktivArbeidsfordelingPåBehandling
             }
-        }
 
         postFastsattBehandlendeEnhet(
             behandling = behandling,
@@ -102,6 +111,30 @@ class ArbeidsfordelingService(
             oppdatertArbeidsfordelingPåBehandling = oppdatertArbeidsfordelingPåBehandling,
             manuellOppdatering = false,
         )
+    }
+
+    private fun fastsettArbeidsfordelingsenhetPåSatsendringsbehandling(
+        behandling: Behandling,
+        sisteBehandlingSomErIverksatt: Behandling?,
+        aktivArbeidsfordelingPåBehandling: ArbeidsfordelingPåBehandling?
+    ): ArbeidsfordelingPåBehandling {
+        return aktivArbeidsfordelingPåBehandling
+            ?: if (sisteBehandlingSomErIverksatt != null) {
+                val forrigeIverksattesBehandlingArbeidsfordelingsenhet =
+                    arbeidsfordelingPåBehandlingRepository.finnArbeidsfordelingPåBehandling(
+                        sisteBehandlingSomErIverksatt.id
+                    )
+
+                arbeidsfordelingPåBehandlingRepository.save(
+                    forrigeIverksattesBehandlingArbeidsfordelingsenhet?.copy(
+                        id = 0,
+                        behandlingId = behandling.id
+                    )
+                        ?: throw Feil("Finner ikke arbeidsfordelingsenhet på forrige iverksatte behandling på satsendringsbehandling")
+                )
+            } else {
+                throw Feil("Klarte ikke å fastsette arbeidsfordelingsenhet på satsendringsbehandling.")
+            }
     }
 
     private fun postFastsattBehandlendeEnhet(

@@ -85,7 +85,7 @@ class BehandlingsresultatSteg(
 
         validerAtTilkjentYtelseHarGyldigEtterbetalingsperiode(tilkjentYtelse)
 
-        val andreBehandlingerPåBarna = personopplysningGrunnlag.barna.map {
+        val barnMedAndreRelevanteTilkjentYtelser = personopplysningGrunnlag.barna.map {
             Pair(
                 it,
                 beregningService.hentSentTilGodkjenningTilkjentYtelseForBarn(it.aktør, behandling.fagsak.id)
@@ -99,7 +99,7 @@ class BehandlingsresultatSteg(
 
         validerAtBarnIkkeFårFlereUtbetalingerSammePeriode(
             behandlendeBehandlingTilkjentYtelse = tilkjentYtelse,
-            barnMedAndreTilkjentYtelse = andreBehandlingerPåBarna,
+            barnMedAndreRelevanteTilkjentYtelser = barnMedAndreRelevanteTilkjentYtelser,
             personopplysningGrunnlag = personopplysningGrunnlag
         )
 
