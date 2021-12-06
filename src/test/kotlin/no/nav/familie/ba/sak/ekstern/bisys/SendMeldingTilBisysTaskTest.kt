@@ -13,8 +13,8 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.statistikk.producer.DefaultKafkaProducer
 import no.nav.familie.ba.sak.statistikk.producer.DefaultKafkaProducer.Companion.OPPHOER_BARNETRYGD_BISYS_TOPIC
-import no.nav.familie.ba.sak.statistikk.producer.OpphørBarnetrygdBisysMelding
 import no.nav.familie.ba.sak.task.SendMeldingTilBisysTask
+import no.nav.familie.eksterne.kontrakter.bisys.OpphørBarnetrygdBisysMelding
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test

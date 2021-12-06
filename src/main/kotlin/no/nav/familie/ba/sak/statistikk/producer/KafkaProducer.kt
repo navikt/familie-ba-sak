@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMellomlagring
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMellomlagringRepository
 import no.nav.familie.eksterne.kontrakter.VedtakDVH
+import no.nav.familie.eksterne.kontrakter.bisys.OpphørBarnetrygdBisysMelding
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.tilbakekreving.HentFagsystemsbehandlingRespons
 import org.slf4j.LoggerFactory
@@ -199,5 +200,3 @@ class MockKafkaProducer(val saksstatistikkMellomlagringRepository: Saksstatistik
         var sendteMeldinger = mutableMapOf<String, Any>()
     }
 }
-
-data class OpphørBarnetrygdBisysMelding(val personident: String, val opphørFom: YearMonth)
