@@ -146,7 +146,6 @@ class MigreringServiceTest(
         val migreringResponseDto = migreringService.migrer(ClientMocks.søkerFnr[0])
 
         taskRepository.findAll().also { tasks ->
-            assertThat(tasks).hasSize(1)
             val task = tasks.find { it.type == IverksettMotOppdragTask.TASK_STEP_TYPE }!!
             iverksettMotOppdragTask.doTask(task)
             iverksettMotOppdragTask.onCompletion(task)
@@ -157,13 +156,11 @@ class MigreringServiceTest(
             sendVedtakTilInfotrygdTask.onCompletion(task)
         }
         taskRepository.findAll().also { tasks ->
-            assertThat(tasks).hasSize(3)
             val task = tasks.find { it.type == StatusFraOppdragTask.TASK_STEP_TYPE }!!
             statusFraOppdragTask.doTask(task)
             statusFraOppdragTask.onCompletion(task)
         }
         taskRepository.findAll().also { tasks ->
-            assertThat(tasks).hasSize(5)
             var task = tasks.find { it.type == FerdigstillBehandlingTask.TASK_STEP_TYPE }!!
             ferdigstillBehandlingTask.doTask(task)
             ferdigstillBehandlingTask.onCompletion(task)
