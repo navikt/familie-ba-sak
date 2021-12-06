@@ -6,7 +6,6 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.internal.IdentInformasjon
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import org.slf4j.LoggerFactory
-import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
@@ -26,7 +25,7 @@ class PersonidentService(
         val identerFraPdl = personopplysningerService.hentIdenter(nyIdent.ident, false)
         val aktørId = filtrerAktørId(identerFraPdl)
 
-        val aktør = aktørIdRepository.findByIdOrNull(aktørId)
+        val aktør = aktørIdRepository.findByAktørIdOrNull(aktørId)
 
         return if (aktør?.harIdent(fødselsnummer = nyIdent.ident) == false) {
             logger.info("Legger til ny ident")
@@ -46,20 +45,34 @@ class PersonidentService(
         personopplysningerService.hentIdenter(Ident(aktør.aktivIdent())).filter { it.gruppe == "FOLKEREGISTERIDENT" }
             .map { it.ident }
 
-    fun hentOgLagreAktør(ident: String): Aktør =
+    fun hentOgLagreAktør(ident: String): Aktør {
         // Noter at ident kan være både av typen aktørid eller fødselsnummer (d- og f nummer)
-        personidentRepository.findByIdOrNull(ident)?.aktør ?: kotlin.run {
-
-            val identerFraPdl = personopplysningerService.hentIdenter(ident, false)
-            val fødselsnummerAktiv = filtrerAktivtFødselsnummer(identerFraPdl)
-
-            aktørIdRepository.findByIdOrNull(ident)?.let {
-                return opprettPersonIdent(it, fødselsnummerAktiv)
-            } ?: kotlin.run {
-                val aktørIdStr = filtrerAktørId(identerFraPdl)
-                return opprettAktørIdOgPersonident(aktørIdStr, fødselsnummerAktiv)
-            }
+        val personident = personidentRepository.findByFødselsnummerOrNull(ident)
+        if (personident != null) {
+            return personident.aktør
         }
+
+        val aktørIdent = aktørIdRepository.findByAktørIdOrNull(ident)
+        if (aktørIdent != null) {
+            return aktørIdent
+        }
+
+        val identerFraPdl = personopplysningerService.hentIdenter(ident, false)
+        val fødselsnummerAktiv = filtrerAktivtFødselsnummer(identerFraPdl)
+        val aktørIdStr = filtrerAktørId(identerFraPdl)
+
+        val personidentPersistert = personidentRepository.findByFødselsnummerOrNull(fødselsnummerAktiv)
+        if (personidentPersistert != null) {
+            return personidentPersistert.aktør
+        }
+
+        val aktørPersistert = aktørIdRepository.findByAktørIdOrNull(aktørIdStr)
+        if (aktørPersistert != null) {
+            return opprettPersonIdent(aktørPersistert, fødselsnummerAktiv)
+        }
+
+        return opprettAktørIdOgPersonident(aktørIdStr, fødselsnummerAktiv)
+    }
 
     fun hentOgLagreAktørIder(barnasFødselsnummer: List<String>): List<Aktør> {
         return barnasFødselsnummer.map { hentOgLagreAktør(it) }
