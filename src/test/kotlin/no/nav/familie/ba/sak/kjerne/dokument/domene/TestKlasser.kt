@@ -35,7 +35,7 @@ data class UtbetalingsperiodeDetaljEnkel(
 data class BrevBegrunnelseTestConfig(
     val beskrivelse: String,
     val fom: LocalDate,
-    val tom: LocalDate,
+    val tom: LocalDate?,
     val vedtaksperiodetype: Vedtaksperiodetype,
     val utbetalingsperiodeDetaljer: List<UtbetalingsperiodeDetaljEnkel>,
     val standardbegrunnelser: List<RestVedtaksbegrunnelse>,
@@ -80,10 +80,10 @@ data class BegrunnelseDataTestConfig(
 
 data class BrevPeriodeTestConfig(
     val fom: String,
-    val tom: String,
-    val belop: Int,
-    val antallBarn: String,
-    val barnasFodselsdager: String,
+    val tom: String?,
+    val belop: Int?,
+    val antallBarn: String?,
+    val barnasFodselsdager: String?,
     val begrunnelser: List<TestBegrunnelse>,
     val type: String,
 )

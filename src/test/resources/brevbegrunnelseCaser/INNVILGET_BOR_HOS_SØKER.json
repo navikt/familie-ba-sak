@@ -1,11 +1,11 @@
 {
-  "beskrivelse": "Skal teste at innvilget utbetaling gir riktig resultat",
+  "beskrivelse": "1 barn bor med søker fra august 2021 på behandling med 1 barn",
   "fom": "2021-09-01",
   "tom": "2021-12-31",
   "vedtaksperiodetype": "UTBETALING",
   "utbetalingsperiodeDetaljer": [
     {
-      "personIdent": "123456789",
+      "personIdent": "20012011111",
       "utbetaltPerMnd": 1054,
       "ytelseType": "ORDINÆR_BARNETRYGD",
       "erPåvirketAvEndring": false
@@ -16,18 +16,23 @@
       "vedtakBegrunnelseSpesifikasjon": "INNVILGET_BOR_HOS_SØKER",
       "vedtakBegrunnelseType": "INNVILGET",
       "personIdenter": [
-        "123456789"
+        "20012011111",
+        "10089322222"
       ]
     }
   ],
   "fritekster": [
-    "Dette er en fritekst"
   ],
   "begrunnelsepersoner": [
     {
-      "personIdent": "123456789",
-      "fødselsdato": "2020-01-08",
+      "personIdent": "20012011111",
+      "fødselsdato": "2020-01-20",
       "type": "BARN"
+    },
+    {
+      "personIdent": "10089322222",
+      "fødselsdato": "1993-08-10",
+      "type": "SØKER"
     }
   ],
   "målform": "NB",
@@ -37,15 +42,11 @@
     "tom": "til 31. desember 2021 ",
     "belop": 1054,
     "antallBarn": 1,
-    "barnasFodselsdager": "08.01.20",
+    "barnasFodselsdager": "20.01.20",
     "begrunnelser": [
       {
-        "fritekst": "Dette er en fritekst",
-        "type": "fritekst"
-      },
-      {
-        "gjelderSoker": false,
-        "barnasFodselsdatoer": "08.01.20",
+        "gjelderSoker": true,
+        "barnasFodselsdatoer": "20.01.20",
         "antallBarn": 1,
         "maanedOgAarBegrunnelsenGjelderFor": "august 2021",
         "maalform": "bokmaal",

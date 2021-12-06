@@ -78,7 +78,7 @@ class BrevbegrunnelseTest {
 
         val feil = mutableListOf<String>()
 
-        fun validerFelt(forventet: String, faktisk: String?, variabelNavn: String) {
+        fun validerFelt(forventet: String?, faktisk: String?, variabelNavn: String) {
             if (forventet != faktisk) {
                 feil.add(
                     "Forventet $variabelNavn var: '$forventet', men fikk '$faktisk'"
@@ -97,7 +97,12 @@ class BrevbegrunnelseTest {
             validerFelt(forventetOutput.type, output.type?.single(), "type")
             validerFelt(forventetOutput.barnasFodselsdager, output.barnasFodselsdager?.single(), "barnasFodselsdager")
             validerFelt(forventetOutput.antallBarn, output.antallBarn?.single(), "antallBarn")
-            validerFelt(formaterBeløp(forventetOutput.belop), output.belop?.single(), "belop")
+            validerFelt(
+                if (forventetOutput.belop != null)
+                    formaterBeløp(forventetOutput.belop)
+                else null,
+                output.belop?.single(), "belop"
+            )
 
             val forventedeBegrunnelser = forventetOutput.begrunnelser.map {
                 when (it) {
