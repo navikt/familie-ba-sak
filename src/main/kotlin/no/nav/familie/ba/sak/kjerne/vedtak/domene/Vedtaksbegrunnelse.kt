@@ -147,6 +147,7 @@ private fun RestVedtaksbegrunnelse.hentBarnasFødselsdagerForBegrunnelse(
 ) = if (this.vedtakBegrunnelseSpesifikasjon == VedtakBegrunnelseSpesifikasjon.AVSLAG_UREGISTRERT_BARN)
     uregistrerteBarn.mapNotNull { it.fødselsdato }
 else if (erAvslagPåKunSøker) {
-    personerIPersongrunnlag.filter { it.type == PersonType.BARN }.map { it.fødselsdato }
+    personerIPersongrunnlag.filter { it.type == PersonType.BARN }
+        .map { it.fødselsdato } + uregistrerteBarn.mapNotNull { it.fødselsdato }
 } else
     personerPåBegrunnelse.filter { it.type == PersonType.BARN }.map { it.fødselsdato }
