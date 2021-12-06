@@ -26,6 +26,7 @@
         <prosessering.version>1.20211125150647_a7c6f64</prosessering.version>
         <felles.version>1.20211202083100_64f46dd</felles.version>
         <felles-kontrakter.version>2.0_20211130102051_80f114f</felles-kontrakter.version>
+        <eksterne-kontrakter-bisys.version>2.0_20211206135732_b1f79fd</eksterne-kontrakter-bisys.version>
         <familie.kontrakter.saksstatistikk>2.0_20211026082237_0675986</familie.kontrakter.saksstatistikk>
         <familie.kontrakter.stønadsstatistikk>2.0_20211122094116_2ba5372</familie.kontrakter.stønadsstatistikk>
         <familie.kontrakter.skatteetaten>2.0_20210920094114_9c74239</familie.kontrakter.skatteetaten>
@@ -250,6 +251,11 @@
             <groupId>no.nav.familie.kontrakter</groupId>
             <artifactId>barnetrygd</artifactId>
             <version>${felles-kontrakter.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.familie.eksterne.kontrakter</groupId>
+            <artifactId>bisys</artifactId>
+            <version>${eksterne-kontrakter-bisys.version}</version>
         </dependency>
         <dependency>
             <groupId>no.nav.fpsak.tidsserie</groupId>

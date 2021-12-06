@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMellomlagring
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMellomlagringRepository
 import no.nav.familie.eksterne.kontrakter.VedtakDVH
+import no.nav.familie.eksterne.kontrakter.bisys.OpphørBarnetrygdBisysMelding
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.tilbakekreving.HentFagsystemsbehandlingRespons
 import org.slf4j.LoggerFactory
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
+import java.time.YearMonth
 
 interface KafkaProducer {
 
@@ -28,6 +30,8 @@ interface KafkaProducer {
         key: String,
         behandlingId: String
     )
+
+    fun sendOpphørBarnetrygdBisys(personident: String, opphørFom: YearMonth, behandlingId: String)
 }
 
 @Service
@@ -37,7 +41,8 @@ interface KafkaProducer {
     matchIfMissing = false
 )
 @Primary
-class DefaultKafkaProducer(val saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository) : KafkaProducer {
+class DefaultKafkaProducer(val saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository) :
+    KafkaProducer {
 
     private val vedtakCounter = Metrics.counter(COUNTER_NAME, "type", "vedtak")
     private val saksstatistikkSakDvhCounter = Metrics.counter(COUNTER_NAME, "type", "sak")
@@ -59,7 +64,8 @@ class DefaultKafkaProducer(val saksstatistikkMellomlagringRepository: Saksstatis
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     override fun sendMessageForTopicBehandling(melding: SaksstatistikkMellomlagring): Long {
         val response =
-            kafkaTemplate.send(SAKSSTATISTIKK_BEHANDLING_TOPIC, melding.funksjonellId, melding.jsonToBehandlingDVH()).get()
+            kafkaTemplate.send(SAKSSTATISTIKK_BEHANDLING_TOPIC, melding.funksjonellId, melding.jsonToBehandlingDVH())
+                .get()
         logger.info("$SAKSSTATISTIKK_BEHANDLING_TOPIC -> message sent -> ${response.recordMetadata.offset()}")
         saksstatistikkBehandlingDvhCounter.increment()
         melding.offsetVerdi = response.recordMetadata.offset()
@@ -106,6 +112,33 @@ class DefaultKafkaProducer(val saksstatistikkMellomlagringRepository: Saksstatis
             )
     }
 
+    override fun sendOpphørBarnetrygdBisys(
+        personident: String,
+        opphørFom: YearMonth,
+        behandlingId: String
+    ) {
+        val opphørBarnetrygdBisysMelding =
+            objectMapper.writeValueAsString(OpphørBarnetrygdBisysMelding(personident, opphørFom))
+
+        kafkaAivenTemplate.send(OPPHOER_BARNETRYGD_BISYS_TOPIC, behandlingId, opphørBarnetrygdBisysMelding)
+            .addCallback(
+                {
+                    logger.info(
+                        "Melding på topic $OPPHOER_BARNETRYGD_BISYS_TOPIC for " +
+                            "$behandlingId er sendt. " +
+                            "Fikk offset ${it?.recordMetadata?.offset()}"
+                    )
+                },
+                {
+                    val feilmelding =
+                        "Melding på topic $OPPHOER_BARNETRYGD_BISYS_TOPIC kan ikke sendes for " +
+                            "$behandlingId. Feiler med ${it.message}"
+                    logger.warn(feilmelding)
+                    throw Feil(message = feilmelding)
+                }
+            )
+    }
+
     companion object {
 
         private val logger = LoggerFactory.getLogger(DefaultKafkaProducer::class.java)
@@ -113,12 +146,15 @@ class DefaultKafkaProducer(val saksstatistikkMellomlagringRepository: Saksstatis
         private const val SAKSSTATISTIKK_BEHANDLING_TOPIC = "aapen-barnetrygd-saksstatistikk-behandling-v1"
         private const val SAKSSTATISTIKK_SAK_TOPIC = "aapen-barnetrygd-saksstatistikk-sak-v1"
         private const val COUNTER_NAME = "familie.ba.sak.kafka.produsert"
-        private const val FAGSYSTEMSBEHANDLING_RESPONS_TBK_TOPIC = "teamfamilie.privat-tbk-hentfagsystemsbehandling-respons-topic"
+        private const val FAGSYSTEMSBEHANDLING_RESPONS_TBK_TOPIC =
+            "teamfamilie.privat-tbk-hentfagsystemsbehandling-respons-topic"
+        const val OPPHOER_BARNETRYGD_BISYS_TOPIC = "teamfamilie.aapen-familie-ba-sak-opphoer-barnetrygd"
     }
 }
 
 @Service
-class MockKafkaProducer(val saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository) : KafkaProducer {
+class MockKafkaProducer(val saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository) :
+    KafkaProducer {
 
     override fun sendMessageForTopicVedtak(vedtak: VedtakDVH): Long {
         logger.info("Skipper sending av vedtak for ${vedtak.behandlingsId} fordi kafka ikke er enablet")
@@ -153,6 +189,14 @@ class MockKafkaProducer(val saksstatistikkMellomlagringRepository: Saksstatistik
         behandlingId: String
     ) {
         logger.info("Skipper sending av fagsystemsbehandling respons for $behandlingId fordi kafka ikke er enablet")
+    }
+
+    override fun sendOpphørBarnetrygdBisys(
+        personident: String,
+        opphørFom: YearMonth,
+        behandlingId: String
+    ) {
+        logger.info("Skipper sending av sendOpphørBarnetrygdBisys respons for $behandlingId fordi kafka ikke er enablet")
     }
 
     companion object {
