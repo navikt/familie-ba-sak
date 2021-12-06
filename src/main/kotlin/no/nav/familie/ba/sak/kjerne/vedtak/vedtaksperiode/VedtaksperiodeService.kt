@@ -184,9 +184,9 @@ class VedtaksperiodeService(
                     ?: error("Finner ikke barn som har blitt vurdert i persongrunnlaget")
             }
 
-        vurderteBarnSomPersoner.forEach { barn ->
+        vurderteBarnSomPersoner.groupBy { it.fødselsdato.toYearMonth() }.forEach { (fødselsmåned, barna) ->
             val vedtaksperiodeMedBegrunnelser = vedtaksperioderMedBegrunnelser.firstOrNull {
-                barn.fødselsdato.toYearMonth().plusMonths(1).equals(it.fom?.toYearMonth() ?: TIDENES_ENDE)
+                fødselsmåned.plusMonths(1).equals(it.fom?.toYearMonth() ?: TIDENES_ENDE)
             } ?: throw Feil("Finner ikke vedtaksperiode å begrunne for barn fra hendelse")
 
             vedtaksperiodeMedBegrunnelser.settBegrunnelser(
@@ -196,6 +196,7 @@ class VedtaksperiodeService(
                             VedtakBegrunnelseSpesifikasjon.INNVILGET_FØDSELSHENDELSE_NYFØDT_BARN
                         } else VedtakBegrunnelseSpesifikasjon.INNVILGET_FØDSELSHENDELSE_NYFØDT_BARN_FØRSTE,
                         vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
+                        personIdenter = barna.map { it.personIdent.ident }
                     )
                 )
             )
