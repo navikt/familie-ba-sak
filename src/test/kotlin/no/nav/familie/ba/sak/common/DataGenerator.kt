@@ -110,7 +110,6 @@ fun randomAktørId(personIdenter: List<String> = emptyList()): Aktør = Aktør(
             )
         }
     )
-    print("")
 }
 
 private var gjeldendeVedtakId: Long = abs(Random.nextLong(10000000))
