@@ -22,7 +22,7 @@ object YtelsePersonUtils {
      */
     fun utledYtelsePersonerMedResultat(
         behandlingsresultatPersoner: List<BehandlingsresultatPerson>,
-        uregistrerteBarn: List<BehandlingsresultatUregistrertBarn> = emptyList(),
+        uregistrerteBarn: List<UregistrertBarnEnkel> = emptyList(),
         inneværendeMåned: YearMonth = YearMonth.now()
     ): List<YtelsePerson> {
         return behandlingsresultatPersoner.map { behandlingsresultatPerson ->

@@ -1,0 +1,59 @@
+{
+  "beskrivelse": "1 barn bor med søker fra august 2021 på behandling med 1 barn",
+  "fom": "2021-09-01",
+  "tom": "2021-12-31",
+  "vedtaksperiodetype": "UTBETALING",
+  "utbetalingsperiodeDetaljer": [
+    {
+      "personIdent": "20012011111",
+      "utbetaltPerMnd": 1054,
+      "ytelseType": "ORDINÆR_BARNETRYGD",
+      "erPåvirketAvEndring": false
+    }
+  ],
+  "standardbegrunnelser": [
+    {
+      "vedtakBegrunnelseSpesifikasjon": "INNVILGET_BOR_HOS_SØKER",
+      "vedtakBegrunnelseType": "INNVILGET",
+      "personIdenter": [
+        "20012011111",
+        "10089322222"
+      ]
+    }
+  ],
+  "fritekster": [
+  ],
+  "begrunnelsepersoner": [
+    {
+      "personIdent": "20012011111",
+      "fødselsdato": "2020-01-20",
+      "type": "BARN"
+    },
+    {
+      "personIdent": "10089322222",
+      "fødselsdato": "1993-08-10",
+      "type": "SØKER"
+    }
+  ],
+  "målform": "NB",
+  "uregistrerteBarn": [],
+  "forventetOutput": {
+    "fom": "1. september 2021",
+    "tom": "til 31. desember 2021 ",
+    "belop": 1054,
+    "antallBarn": 1,
+    "barnasFodselsdager": "20.01.20",
+    "begrunnelser": [
+      {
+        "gjelderSoker": true,
+        "barnasFodselsdatoer": "20.01.20",
+        "antallBarn": 1,
+        "maanedOgAarBegrunnelsenGjelderFor": "august 2021",
+        "maalform": "bokmaal",
+        "apiNavn": "innvilgetBorHosSoker",
+        "belop": 1054
+      }
+    ],
+    "type": "innvilgelse"
+  }
+}

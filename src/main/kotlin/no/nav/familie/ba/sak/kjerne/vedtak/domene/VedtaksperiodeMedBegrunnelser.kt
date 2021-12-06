@@ -6,9 +6,8 @@ import no.nav.familie.ba.sak.common.NullableMånedPeriode
 import no.nav.familie.ba.sak.common.NullablePeriode
 import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
+import no.nav.familie.ba.sak.kjerne.behandlingsresultat.UregistrertBarnEnkel
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtvidetVedtaksperiodeMedBegrunnelser
@@ -109,24 +108,22 @@ data class VedtaksperiodeMedBegrunnelser(
 }
 
 fun UtvidetVedtaksperiodeMedBegrunnelser.byggBegrunnelserOgFritekster(
-    personerIPersongrunnlag: List<Person>,
+    begrunnelsepersonerIBehandling: List<BegrunnelsePerson>,
     målform: Målform,
-    uregistrerteBarn: List<BarnMedOpplysninger> = emptyList(),
+    uregistrerteBarn: List<UregistrertBarnEnkel> = emptyList(),
 ): List<Begrunnelse> {
-    val fritekster =
-        this.fritekster.map { FritekstBegrunnelse(it) }
     val begrunnelser =
         this.begrunnelser.sortedBy { it.vedtakBegrunnelseType }.map {
             it.tilBrevBegrunnelse(
-                vedtaksperiode = NullablePeriode(this.fom, this.tom),
-                personerIPersongrunnlag = personerIPersongrunnlag,
+                vedtaksperiode = NullablePeriode(fom, tom),
+                begrunnelsepersonerIBehandling = begrunnelsepersonerIBehandling,
                 målform = målform,
                 uregistrerteBarn = uregistrerteBarn,
                 beløp = Utils.formaterBeløp(this.utbetaltForPersonerIBegrunnelse(it)),
             )
         }
 
-    return begrunnelser + fritekster
+    return begrunnelser + fritekster.map { FritekstBegrunnelse(it) }
 }
 
 class BegrunnelseComparator : Comparator<Vedtaksbegrunnelse> {
