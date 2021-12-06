@@ -76,6 +76,18 @@ enum class Vilkår(
                 LOVLIG_OPPHOLD,
             )
         }
+
+        fun hentVilkårForMigreringsbehandling(
+            personType: PersonType,
+            ytelseType: YtelseType = YtelseType.ORDINÆR_BARNETRYGD,
+            finnesUtvidetPeriodeIForrigeBehandling: Boolean
+        ): Set<Vilkår> {
+            return values().filter {
+                if (finnesUtvidetPeriodeIForrigeBehandling) {
+                    personType in it.parterDetteGjelderFor
+                } else personType in it.parterDetteGjelderFor && ytelseType == it.ytelseType
+            }.toSet()
+        }
     }
 
     fun defaultRegelverk(): Regelverk? {

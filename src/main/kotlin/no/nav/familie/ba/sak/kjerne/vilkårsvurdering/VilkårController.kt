@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 import no.nav.familie.ba.sak.ekstern.restDomene.RestAnnenVurdering
 import no.nav.familie.ba.sak.ekstern.restDomene.RestNyttVilkår
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
+import no.nav.familie.ba.sak.ekstern.restDomene.RestSlettVilkår
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVedtakBegrunnelseTilknyttetVilkår
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -79,7 +80,7 @@ class VilkårController(
     }
 
     @DeleteMapping(path = ["/{behandlingId}/{vilkaarId}"])
-    fun slettVilkår(
+    fun slettVilkårsperiode(
         @PathVariable behandlingId: Long,
         @PathVariable vilkaarId: Long,
         @RequestBody personIdent: String
@@ -90,11 +91,28 @@ class VilkårController(
         )
 
         val behandling = behandlingService.hent(behandlingId)
-        vilkårService.deleteVilkår(
+        vilkårService.deleteVilkårsperiode(
             behandlingId = behandling.id,
             vilkårId = vilkaarId,
             personIdent = personIdent
         )
+
+        vedtakService.resettStegVedEndringPåVilkår(behandling.id)
+        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
+    }
+
+    @DeleteMapping(path = ["/{behandlingId}"])
+    fun slettVilkår(
+        @PathVariable behandlingId: Long,
+        @RequestBody restSlettVilkår: RestSlettVilkår
+    ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
+            handling = "slette vilkår"
+        )
+
+        val behandling = behandlingService.hent(behandlingId)
+        vilkårService.deleteVilkår(behandlingId, restSlettVilkår)
 
         vedtakService.resettStegVedEndringPåVilkår(behandling.id)
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
