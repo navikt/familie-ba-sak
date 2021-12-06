@@ -98,11 +98,8 @@ class FeatureToggleConfig(
     }
 
     companion object {
-        const val TILBAKEKREVING = "familie-ba-sak.behandling.tilbakekreving"
-        const val MIGRERING_NYTT_REVURDERINGSDATO = "familie-ba-sak.behandling.migrerings-nytt-revurderingsdato"
         const val AUTOMATISK_FØDSELSHENDELSE = "familie-ba-sak.behandling.automatisk-fodselshendelse"
         const val KAN_MANUELT_KORRIGERE_MED_VEDTAKSBREV = "familie-ba-sak.behandling.korreksjon-vedtaksbrev"
-        const val KAN_BEHANDLE_UTVIDET = "familie-ba-sak.behandling.utvidet"
         const val KAN_BEHANDLE_SMÅBARNSTILLEGG = "familie-ba-sak.behandling.smaabarnstillegg"
         const val KAN_BEHANDLE_SMÅBARNSTILLEGG_AUTOMATISK = "familie-ba-sak.behandling.automatisk.smaabarnstillegg"
         const val SKATTEETATEN_API_EKTE_DATA = "familie-ba-sak.skatteetaten-api-ekte-data-i-respons"
