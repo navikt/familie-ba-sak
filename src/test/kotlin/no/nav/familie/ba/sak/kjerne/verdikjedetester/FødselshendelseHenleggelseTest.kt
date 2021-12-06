@@ -189,6 +189,7 @@ class FødselshendelseHenleggelseTest(
             behandleFødselshendelseTask = behandleFødselshendelseTask,
             fagsakService = fagsakService,
             behandlingService = behandlingService,
+            personidentService = personidentService,
             vedtakService = vedtakService,
             stegService = stegService
         )

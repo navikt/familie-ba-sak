@@ -3,12 +3,11 @@ package no.nav.familie.ba.sak.kjerne.personident
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.IdentInformasjon
-import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import no.nav.familie.kontrakter.felles.PersonIdent
+import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import org.slf4j.LoggerFactory
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
-import java.time.LocalDateTime
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
 

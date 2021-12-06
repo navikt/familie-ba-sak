@@ -288,22 +288,22 @@ class BehandleSmåbarnstilleggTest(
     fun `Skal stoppe automatisk behandling som må fortsette manuelt pga tilbakekreving`() {
         EfSakRestClientMock.clearEfSakRestMocks(efSakRestClient)
 
-        val søkersIdent = scenario.søker.ident!!
+        val søkersAktør = personidentService.hentOgLagreAktør(scenario.søker.aktørId!!)
 
         val periodeOvergangsstønadTom = LocalDate.now().minusMonths(3)
         every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns PerioderOvergangsstønadResponse(
             perioder = listOf(
                 PeriodeOvergangsstønad(
-                    personIdent = søkersIdent,
+                    personIdent = søkersAktør.aktivIdent(),
                     fomDato = periodeMedFullOvergangsstønadFom,
                     tomDato = periodeOvergangsstønadTom,
                     datakilde = PeriodeOvergangsstønad.Datakilde.EF
                 ),
             )
         )
-        vedtakOmOvergangsstønadService.håndterVedtakOmOvergangsstønad(personIdent = søkersIdent)
+        vedtakOmOvergangsstønadService.håndterVedtakOmOvergangsstønad(aktør = søkersAktør)
 
-        val fagsak = fagsakService.hentFagsakPåPerson(identer = setOf(PersonIdent(søkersIdent)))
+        val fagsak = fagsakService.hentFagsakPåPerson(aktør = søkersAktør)
         val aktivBehandling = behandlingService.hentAktivForFagsak(fagsakId = fagsak!!.id)!!
 
         verify(exactly = 1) {
