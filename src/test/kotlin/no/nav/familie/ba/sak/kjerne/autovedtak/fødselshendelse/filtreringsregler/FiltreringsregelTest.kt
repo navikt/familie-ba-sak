@@ -224,6 +224,27 @@ internal class FiltreringsregelTest {
     }
 
     @Test
+    fun `Tvillinger født på samme dag skal gi oppfylt`() {
+        val søkerPerson =
+            tilfeldigSøker(fødselsdato = LocalDate.parse("1962-10-23"), personIdent = PersonIdent(randomFnr()))
+        val barn1Person =
+            tilfeldigPerson(fødselsdato = LocalDate.parse("2020-10-23"), personIdent = PersonIdent(randomFnr()))
+        val barn2PersonInfo = PersonInfo(fødselsdato = LocalDate.parse("2020-10-23"))
+
+        val evaluering = Filtreringsregel.MER_ENN_5_MND_SIDEN_FORRIGE_BARN.vurder(
+            FiltreringsreglerFakta(
+                søkerPerson,
+                listOf(barn1Person),
+                listOf(barn2PersonInfo),
+                morLever = true,
+                barnaLever = true,
+                morHarVerge = false
+            )
+        )
+        assertThat(evaluering.resultat).isEqualTo(Resultat.OPPFYLT)
+    }
+
+    @Test
     fun `Mor lever ikke`() {
         val søkerPerson =
             tilfeldigSøker(fødselsdato = LocalDate.parse("1962-10-23"), personIdent = PersonIdent("04086226621"))
