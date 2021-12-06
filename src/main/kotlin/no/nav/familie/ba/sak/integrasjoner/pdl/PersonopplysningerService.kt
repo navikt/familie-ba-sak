@@ -22,10 +22,10 @@ import org.springframework.web.context.annotation.ApplicationScope
 @Service
 @ApplicationScope
 class PersonopplysningerService(
-    val pdlRestClient: PdlRestClient,
-    val systemOnlyPdlRestClient: SystemOnlyPdlRestClient,
-    val integrasjonClient: IntegrasjonClient,
-    val personidentService: PersonidentService,
+    private val pdlRestClient: PdlRestClient,
+    private val systemOnlyPdlRestClient: SystemOnlyPdlRestClient,
+    private val integrasjonClient: IntegrasjonClient,
+    private val personidentService: PersonidentService,
 ) {
 
     fun hentPersoninfoMedRelasjonerOgRegisterinformasjon(personIdent: String): PersonInfo {
