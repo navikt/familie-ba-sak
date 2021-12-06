@@ -137,8 +137,9 @@ class VilkårService(
             finnesUtvidetBarnetrydIForrigeBehandling(behandling, restSlettVilkår.personIdent)
         ) {
             throw Feil(
-                message = "Vilkår ${restSlettVilkår.vilkårType} kan ikke slettes for behandling $behandlingId",
-                frontendFeilmelding = "Vilkår ${restSlettVilkår.vilkårType} kan ikke slettes " +
+                message = "Vilkår ${restSlettVilkår.vilkårType.beskrivelse} kan ikke slettes " +
+                    "for behandling $behandlingId",
+                frontendFeilmelding = "Vilkår ${restSlettVilkår.vilkårType.beskrivelse} kan ikke slettes " +
                     "for behandling $behandlingId",
             )
         }
