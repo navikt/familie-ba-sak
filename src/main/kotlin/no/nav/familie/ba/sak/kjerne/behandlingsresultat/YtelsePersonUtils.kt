@@ -22,7 +22,7 @@ object YtelsePersonUtils {
      */
     fun utledYtelsePersonerMedResultat(
         behandlingsresultatPersoner: List<BehandlingsresultatPerson>,
-        uregistrerteBarn: List<BehandlingsresultatUregistrertBarn> = emptyList(),
+        uregistrerteBarn: List<UregistrertBarnEnkel> = emptyList(),
         inneværendeMåned: YearMonth = YearMonth.now()
     ): List<YtelsePerson> {
         return behandlingsresultatPersoner.map { behandlingsresultatPerson ->
@@ -182,7 +182,7 @@ object YtelsePersonUtils {
             val opphører = stønadSlutt.isBefore(inneværendeMåned.plusMonths(1))
             val sisteForrigeAndel = segmenterFjernet.maxByOrNull { it.fom }
             val ingenFjernetFørStønadslutt = segmenterFjernet.none { it.fom.isBefore(stønadSlutt.toLocalDate()) }
-            opphører && ingenFjernetFørStønadslutt && sisteForrigeAndel != null && sisteForrigeAndel.tom.toYearMonth() > inneværendeMåned
+            opphører && ingenFjernetFørStønadslutt && sisteForrigeAndel != null && sisteForrigeAndel.tom.toYearMonth() >= inneværendeMåned
         } else {
             false
         }

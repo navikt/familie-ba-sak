@@ -6,7 +6,9 @@ import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.Utils.storForbokstavIHvertOrd
 import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.tilMånedÅr
+import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
+import no.nav.familie.ba.sak.kjerne.behandlingsresultat.tilUregisrertBarnEnkel
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.hentUtvidetYtelseScenario
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Autovedtak6og18årOgSmåbarnstillegg
@@ -35,6 +37,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilBegrunnelsePerson
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.sorter
 import org.springframework.stereotype.Service
@@ -48,7 +51,7 @@ class BrevService(
     private val simuleringService: SimuleringService,
     private val vedtaksperiodeService: VedtaksperiodeService,
     private val søknadGrunnlagService: SøknadGrunnlagService,
-    private val brevKlient: BrevKlient,
+    private val sanityService: SanityService,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
 ) {
 
@@ -171,7 +174,7 @@ class BrevService(
 
         val grunnlagOgSignaturData = hentGrunnlagOgSignaturData(vedtak)
 
-        val sanityBegrunnelser = brevKlient.hentSanityBegrunnelser()
+        val sanityBegrunnelser = sanityService.hentSanityBegrunnelser()
 
         val hjemler = hentHjemmeltekst(utvidetVedtaksperioderMedBegrunnelser, sanityBegrunnelser)
 
@@ -182,10 +185,11 @@ class BrevService(
 
         val brevperioder = utvidetVedtaksperioderMedBegrunnelser.sorter().mapNotNull {
             it.tilBrevPeriode(
-                personerIPersongrunnlag = grunnlagOgSignaturData.grunnlag.personer.toList(),
+                begrunnelsepersonerIBehandling = grunnlagOgSignaturData.grunnlag.personer.map { it.tilBegrunnelsePerson() },
                 målform = målform,
                 uregistrerteBarn = søknadGrunnlagService.hentAktiv(behandlingId = vedtak.behandling.id)
-                    ?.hentUregistrerteBarn() ?: emptyList(),
+                    ?.hentUregistrerteBarn()?.map { uregistrertBarn -> uregistrertBarn.tilUregisrertBarnEnkel() }
+                    ?: emptyList(),
                 utvidetScenario = andelTilkjentYtelser.hentUtvidetYtelseScenario(it.hentMånedPeriode())
             )
         }

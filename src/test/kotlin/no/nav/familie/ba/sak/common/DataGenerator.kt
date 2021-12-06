@@ -22,7 +22,14 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTil
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.dokument.domene.EndretUtbetalingsperiodeDeltBostedTriggere
+import no.nav.familie.ba.sak.kjerne.dokument.domene.EndretUtbetalingsperiodeTrigger
 import no.nav.familie.ba.sak.kjerne.dokument.domene.RestSanityBegrunnelse
+import no.nav.familie.ba.sak.kjerne.dokument.domene.SanityBegrunnelse
+import no.nav.familie.ba.sak.kjerne.dokument.domene.SanityVilkår
+import no.nav.familie.ba.sak.kjerne.dokument.domene.VilkårRolle
+import no.nav.familie.ba.sak.kjerne.dokument.domene.VilkårTrigger
+import no.nav.familie.ba.sak.kjerne.dokument.domene.ØvrigTrigger
 import no.nav.familie.ba.sak.kjerne.dokument.hentBrevtype
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
@@ -91,7 +98,19 @@ import kotlin.random.Random
 val fødselsnummerGenerator = FoedselsnummerGenerator()
 
 fun randomFnr(): String = fødselsnummerGenerator.foedselsnummer().asString
-fun randomAktørId(): Aktør = Aktør(Random.nextLong(1000_000_000_000, 31_121_299_99999).toString())
+fun randomAktørId(personIdenter: List<String> = emptyList()): Aktør = Aktør(
+    aktørId = Random.nextLong(1000_000_000_000, 31_121_299_99999).toString(),
+).also {
+    it.personidenter.addAll(
+        personIdenter.map { personIdent ->
+            Personident(
+                aktiv = true,
+                fødselsnummer = personIdent,
+                aktør = it
+            )
+        }
+    )
+}
 
 private var gjeldendeVedtakId: Long = abs(Random.nextLong(10000000))
 private var gjeldendeVedtakBegrunnelseId: Long = abs(Random.nextLong(10000000))
@@ -165,36 +184,34 @@ fun tilfeldigPerson(
     personType: PersonType = PersonType.BARN,
     kjønn: Kjønn = Kjønn.MANN,
     personIdent: PersonIdent = PersonIdent(randomFnr())
-) =
-    Person(
-        id = nestePersonId(),
-        aktør = randomAktørId(),
-        personIdent = personIdent,
-        fødselsdato = fødselsdato,
-        type = personType,
-        personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 0),
-        navn = "",
-        kjønn = kjønn,
-        målform = Målform.NB
-    ).apply { sivilstander = listOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this)) }
+) = Person(
+    id = nestePersonId(),
+    aktør = randomAktørId(listOf(personIdent.ident)),
+    personIdent = personIdent,
+    fødselsdato = fødselsdato,
+    type = personType,
+    personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 0),
+    navn = "",
+    kjønn = kjønn,
+    målform = Målform.NB
+).apply { sivilstander = listOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this)) }
 
 fun tilfeldigSøker(
     fødselsdato: LocalDate = LocalDate.now(),
     personType: PersonType = PersonType.SØKER,
     kjønn: Kjønn = Kjønn.MANN,
     personIdent: PersonIdent = PersonIdent(randomFnr())
-) =
-    Person(
-        id = nestePersonId(),
-        aktør = randomAktørId(),
-        personIdent = personIdent,
-        fødselsdato = fødselsdato,
-        type = personType,
-        personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 0),
-        navn = "",
-        kjønn = kjønn,
-        målform = Målform.NB
-    ).apply { sivilstander = listOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this)) }
+) = Person(
+    id = nestePersonId(),
+    aktør = randomAktørId(listOf(personIdent.ident)),
+    personIdent = personIdent,
+    fødselsdato = fødselsdato,
+    type = personType,
+    personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 0),
+    navn = "",
+    kjønn = kjønn,
+    målform = Målform.NB
+).apply { sivilstander = listOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this)) }
 
 fun lagVedtak(behandling: Behandling = lagBehandling()) =
     Vedtak(
@@ -973,14 +990,14 @@ fun lagEndretUtbetalingAndel(
     )
 
 fun lagPerson(
-    aktør: Aktør = randomAktørId(),
+    aktør: Aktør? = null,
     personIdent: PersonIdent = PersonIdent(randomFnr()),
     type: PersonType = PersonType.SØKER,
     personopplysningGrunnlag: PersonopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 0),
     fødselsdato: LocalDate = LocalDate.now().minusYears(19),
     kjønn: Kjønn = Kjønn.KVINNE
 ) = Person(
-    aktør = aktør,
+    aktør = aktør ?: randomAktørId(listOf(personIdent.ident)),
     personIdent = personIdent,
     type = type,
     personopplysningGrunnlag = personopplysningGrunnlag,
@@ -1004,6 +1021,36 @@ fun lagRestSanityBegrunnelse(
     endretUtbetalingsperiodeDeltBostedTriggere: List<String>? = emptyList(),
     endretUtbetalingsperiodeTriggere: List<String>? = emptyList(),
 ): RestSanityBegrunnelse = RestSanityBegrunnelse(
+    apiNavn = apiNavn,
+    navnISystem = navnISystem,
+    vilkaar = vilkaar,
+    rolle = rolle,
+    lovligOppholdTriggere = lovligOppholdTriggere,
+    bosattIRiketTriggere = bosattIRiketTriggere,
+    giftPartnerskapTriggere = giftPartnerskapTriggere,
+    borMedSokerTriggere = borMedSokerTriggere,
+    ovrigeTriggere = ovrigeTriggere,
+    endringsaarsaker = endringsaarsaker,
+    hjemler = hjemler,
+    endretUtbetalingsperiodeDeltBostedTriggere = endretUtbetalingsperiodeDeltBostedTriggere,
+    endretUtbetalingsperiodeTriggere = endretUtbetalingsperiodeTriggere,
+)
+
+fun lagSanityBegrunnelse(
+    apiNavn: String? = "",
+    navnISystem: String = "",
+    vilkaar: List<SanityVilkår>? = null,
+    rolle: List<VilkårRolle> = emptyList(),
+    lovligOppholdTriggere: List<VilkårTrigger>? = null,
+    bosattIRiketTriggere: List<VilkårTrigger>? = null,
+    giftPartnerskapTriggere: List<VilkårTrigger>? = null,
+    borMedSokerTriggere: List<VilkårTrigger>? = null,
+    ovrigeTriggere: List<ØvrigTrigger>? = null,
+    endringsaarsaker: List<Årsak>? = null,
+    hjemler: List<String> = emptyList(),
+    endretUtbetalingsperiodeDeltBostedTriggere: List<EndretUtbetalingsperiodeDeltBostedTriggere>? = null,
+    endretUtbetalingsperiodeTriggere: List<EndretUtbetalingsperiodeTrigger>? = null,
+): SanityBegrunnelse = SanityBegrunnelse(
     apiNavn = apiNavn,
     navnISystem = navnISystem,
     vilkaar = vilkaar,

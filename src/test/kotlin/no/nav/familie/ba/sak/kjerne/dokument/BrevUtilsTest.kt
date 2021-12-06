@@ -3,11 +3,11 @@ package no.nav.familie.ba.sak.kjerne.dokument
 import no.nav.familie.ba.sak.common.defaultFagsak
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagRestVedtaksbegrunnelse
+import no.nav.familie.ba.sak.common.lagSanityBegrunnelse
 import no.nav.familie.ba.sak.common.lagUtbetalingsperiodeDetalj
 import no.nav.familie.ba.sak.common.lagUtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.common.tilfeldigSøker
-import no.nav.familie.ba.sak.config.sanityBegrunnelserMock
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPerson
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
@@ -22,6 +22,7 @@ import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.domene.Totrinnskontroll
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilBegrunnelsePerson
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import org.junit.Assert.assertEquals
 import org.junit.jupiter.api.Assertions
@@ -337,7 +338,19 @@ internal class BrevUtilsTest {
 
         Assertions.assertEquals(
             "§§ 2, 4, 10 og 11",
-            hentHjemmeltekst(utvidetVedtaksperioderMedBegrunnelser, sanityBegrunnelserMock)
+            hentHjemmeltekst(
+                utvidetVedtaksperioderMedBegrunnelser,
+                listOf(
+                    lagSanityBegrunnelse(
+                        apiNavn = VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET.sanityApiNavn,
+                        hjemler = listOf("11", "4", "2", "10"),
+                    ),
+                    lagSanityBegrunnelse(
+                        apiNavn = VedtakBegrunnelseSpesifikasjon.INNVILGET_SATSENDRING.sanityApiNavn,
+                        hjemler = listOf("10"),
+                    )
+                )
+            )
         )
     }
 
@@ -500,14 +513,14 @@ internal class BrevUtilsTest {
             )
         )
 
-        val personerIPersongrunnlag = listOf(barn1, barn2, barn3, søker)
+        val personerIPersongrunnlag = listOf(barn1, barn2, barn3, søker).map { it.tilBegrunnelsePerson() }
 
         val barnIPeriode = utvidetVedtaksperiodeMedBegrunnelser.finnBarnIInnvilgelsePeriode(personerIPersongrunnlag)
 
         Assertions.assertEquals(2, barnIPeriode.size)
         Assertions.assertTrue(
-            barnIPeriode.contains(barn1.tilRestPerson()) &&
-                barnIPeriode.contains(barn2.tilRestPerson())
+            barnIPeriode.any { it.personIdent == barn1.personIdent.ident } &&
+                barnIPeriode.any { it.personIdent == barn2.personIdent.ident }
         )
     }
 }

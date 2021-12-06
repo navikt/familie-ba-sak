@@ -1,0 +1,41 @@
+{
+  "beskrivelse": "Avslag på behandling med 1 barn med fritekst.",
+  "fom": "2021-09-01",
+  "tom": null,
+  "vedtaksperiodetype": "AVSLAG",
+  "utbetalingsperiodeDetaljer": [
+  ],
+  "standardbegrunnelser": [
+  ],
+  "fritekster": [
+    "Du får ikke barnetrygd fordi test"
+  ],
+  "begrunnelsepersoner": [
+    {
+      "personIdent": "20012011111",
+      "fødselsdato": "2020-01-20",
+      "type": "BARN"
+    },
+    {
+      "personIdent": "10089322222",
+      "fødselsdato": "1993-08-10",
+      "type": "SØKER"
+    }
+  ],
+  "målform": "NB",
+  "uregistrerteBarn": [],
+  "forventetOutput": {
+    "fom": "1. september 2021",
+    "tom": "",
+    "belop": null,
+    "antallBarn": null,
+    "barnasFodselsdager": null,
+    "begrunnelser": [
+      {
+        "fritekst": "Du får ikke barnetrygd fordi test",
+        "type": "fritekst"
+      }
+    ],
+    "type": "avslag"
+  }
+}

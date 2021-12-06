@@ -5,7 +5,6 @@ import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingService
 import org.springframework.stereotype.Service
@@ -22,9 +21,7 @@ class VurderTilbakekrevingSteg(
     @Transactional
     override fun utførStegOgAngiNeste(behandling: Behandling, data: RestTilbakekreving?): StegType {
 
-        if (featureToggleService.isEnabled(FeatureToggleConfig.TILBAKEKREVING) &&
-            !tilbakekrevingService.søkerHarÅpenTilbakekreving(behandling.fagsak.id)
-        ) {
+        if (!tilbakekrevingService.søkerHarÅpenTilbakekreving(behandling.fagsak.id)) {
 
             tilbakekrevingService.validerRestTilbakekreving(data, behandling.id)
             if (data != null) {
@@ -32,9 +29,7 @@ class VurderTilbakekrevingSteg(
             }
         }
 
-        val erMigreringsbehandlingMedÅrsakEndreMigreringsdato = behandling.erMigrering() &&
-            behandling.opprettetÅrsak == BehandlingÅrsak.ENDRE_MIGRERINGSDATO
-        if (erMigreringsbehandlingMedÅrsakEndreMigreringsdato &&
+        if (behandling.erManuellMigrering() &&
             !featureToggleService.isEnabled(FeatureToggleConfig.IKKE_STOPP_MIGRERINGSBEHANDLING) &&
             (
                 simuleringService.hentFeilutbetaling(behandling.id) != BigDecimal.ZERO ||

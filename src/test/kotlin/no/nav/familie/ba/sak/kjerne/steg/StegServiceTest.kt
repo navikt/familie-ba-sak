@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.e2e.DatabaseCleanupService
 import no.nav.familie.ba.sak.config.mockHentPersoninfoForMedIdenter
+import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.HenleggÅrsak
@@ -34,15 +35,16 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
-import no.nav.familie.ba.sak.task.SendStartBehandlingTilInfotrygdTask
-import no.nav.familie.prosessering.domene.Task
-import org.assertj.core.api.Assertions.assertThat
+import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
+import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
+import java.time.LocalDate
 
 class StegServiceTest(
     @Autowired
@@ -260,14 +262,11 @@ class StegServiceTest(
         )
         assertTrue(
             henlagtBehandling.behandlingStegTilstand.firstOrNull {
-                it.behandlingSteg == StegType.FERDIGSTILLE_BEHANDLING && it.behandlingStegStatus == BehandlingStegStatus.IKKE_UTFØRT
+                it.behandlingSteg == StegType.FERDIGSTILLE_BEHANDLING && it.behandlingStegStatus == BehandlingStegStatus.UTFØRT
             } != null
         )
 
-        stegService.håndterFerdigstillBehandling(henlagtBehandling)
-
-        val behandlingEtterFerdigstiltBehandling = behandlingService.hent(behandlingId = henlagtBehandling.id)
-        assertEquals(StegType.BEHANDLING_AVSLUTTET, behandlingEtterFerdigstiltBehandling.steg)
+        assertEquals(StegType.BEHANDLING_AVSLUTTET, henlagtBehandling.steg)
     }
 
     @Test
@@ -289,65 +288,84 @@ class StegServiceTest(
     }
 
     @Test
-    fun `Skal opprett SendStartBehandlingTilInfotrygdTask når opprett førstgangsbehandling`() {
-        mockHentPersoninfoForMedIdenter(mockPersonopplysningerService, "123", "456")
+    fun `skal kjøre gjennom steg for migreringsbehandling med årsak endre migreringsdato`() {
+        val søkerFnr = randomFnr()
+        val barnFnr = ClientMocks.barnFnr[0]
+        val barnasIdenter = listOf(barnFnr)
 
-        fagsakService.hentEllerOpprettFagsakForPersonIdent("123")
+        kjørStegprosessForFGB(
+            tilSteg = StegType.BEHANDLING_AVSLUTTET,
+            søkerFnr = søkerFnr,
+            barnasIdenter = barnasIdenter,
+            fagsakService = fagsakService,
+            vedtakService = vedtakService,
+            persongrunnlagService = persongrunnlagService,
+            vilkårsvurderingService = vilkårsvurderingService,
+            stegService = stegService,
+            vedtaksperiodeService = vedtaksperiodeService,
+        )
 
-        every {
-            stegService.infotrygdFeedService.featureToggleService.isEnabled(
-                FeatureToggleConfig.SEND_START_BEHANDLING_TIL_INFOTRYGD,
-                any()
-            )
-        } returns true
-
-        val tasksSlot = mutableListOf<Task>()
-        every {
-            stegService.infotrygdFeedService.opprettTaskService.taskRepository.save(capture(tasksSlot))
-        } returns Task(type = SendStartBehandlingTilInfotrygdTask.TASK_STEP_TYPE, payload = "")
-
-        stegService.håndterNyBehandlingOgSendInfotrygdFeed(
+        fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
+        val behandling = stegService.håndterNyBehandling(
             NyBehandling(
                 kategori = BehandlingKategori.NASJONAL,
                 underkategori = BehandlingUnderkategori.ORDINÆR,
-                søkersIdent = "123",
-                behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
+                behandlingÅrsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
+                søkersIdent = søkerFnr,
+                barnasIdenter = barnasIdenter,
+                nyMigreringsdato = LocalDate.now().minusMonths(6)
             )
         )
+        assertEquals(StegType.VILKÅRSVURDERING, behandling.steg)
+        assertTrue {
+            behandling.behandlingStegTilstand.any {
+                it.behandlingSteg == StegType.REGISTRERE_PERSONGRUNNLAG &&
+                    it.behandlingStegStatus == BehandlingStegStatus.UTFØRT
+            }
+        }
+        assertNotNull(vilkårsvurderingService.hentAktivForBehandling(behandling.id))
 
-        assertThat(tasksSlot.count { it.type == SendStartBehandlingTilInfotrygdTask.TASK_STEP_TYPE }).isEqualTo(1)
-        assertThat(tasksSlot.find { it.type == SendStartBehandlingTilInfotrygdTask.TASK_STEP_TYPE }!!.payload).contains(
-            "123"
-        )
-    }
+        val behandlingEtterVilkårsvurdering = stegService.håndterVilkårsvurdering(behandling)
+        assertEquals(StegType.BEHANDLINGSRESULTAT, behandlingEtterVilkårsvurdering.steg)
 
-    @Test
-    fun `Skal ikke opprett SendStartBehandlingTilInfotrygdTask når opprett behandling ved behandlingstype som er ikke førstgangsbehandling`() {
-        mockHentPersoninfoForMedIdenter(mockPersonopplysningerService, "123", "456")
+        val behandlingEtterBehandlingsresultatSteg =
+            stegService.håndterBehandlingsresultat(behandlingEtterVilkårsvurdering)
+        assertEquals(StegType.VURDER_TILBAKEKREVING, behandlingEtterBehandlingsresultatSteg.steg)
 
-        fagsakService.hentEllerOpprettFagsakForPersonIdent("123")
-
-        every {
-            stegService.infotrygdFeedService.featureToggleService.isEnabled(
-                FeatureToggleConfig.SEND_START_BEHANDLING_TIL_INFOTRYGD,
-                any()
-            )
-        } returns true
-
-        val tasksSlot = mutableListOf<Task>()
-        every {
-            stegService.infotrygdFeedService.opprettTaskService.taskRepository.save(capture(tasksSlot))
-        } returns Task(type = SendStartBehandlingTilInfotrygdTask.TASK_STEP_TYPE, payload = "")
-        stegService.håndterNyBehandlingOgSendInfotrygdFeed(
-            NyBehandling(
-                kategori = BehandlingKategori.NASJONAL,
-                underkategori = BehandlingUnderkategori.ORDINÆR,
-                søkersIdent = "123",
-                behandlingType = BehandlingType.REVURDERING,
+        val behandlingEtterTilbakekrevingSteg = stegService.håndterVurderTilbakekreving(
+            behandlingEtterBehandlingsresultatSteg,
+            RestTilbakekreving(
+                valg = Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING,
+                begrunnelse = "ignorer tilbakekreving"
             )
         )
+        assertEquals(StegType.SEND_TIL_BESLUTTER, behandlingEtterTilbakekrevingSteg.steg)
 
-        assertThat(tasksSlot.count { it.type == SendStartBehandlingTilInfotrygdTask.TASK_STEP_TYPE }).isZero()
+        val behandlingEtterBesultterSteg = stegService.håndterSendTilBeslutter(
+            behandlingEtterTilbakekrevingSteg,
+            "1234"
+        )
+        assertEquals(StegType.IVERKSETT_MOT_OPPDRAG, behandlingEtterBesultterSteg.steg)
+        assertTrue {
+            behandlingEtterBesultterSteg.behandlingStegTilstand.any {
+                it.behandlingSteg == StegType.SEND_TIL_BESLUTTER &&
+                    it.behandlingStegStatus == BehandlingStegStatus.UTFØRT
+            }
+        }
+        assertTrue {
+            behandlingEtterBesultterSteg.behandlingStegTilstand.any {
+                it.behandlingSteg == StegType.BESLUTTE_VEDTAK &&
+                    it.behandlingStegStatus == BehandlingStegStatus.UTFØRT
+            }
+        }
+        val totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(behandling.id)
+        assertNotNull(totrinnskontroll)
+        assertEquals(true, totrinnskontroll!!.godkjent)
+        assertEquals(SikkerhetContext.hentSaksbehandlerNavn(), totrinnskontroll.saksbehandler)
+        assertEquals(SikkerhetContext.hentSaksbehandler(), totrinnskontroll.saksbehandlerId)
+        assertEquals(SikkerhetContext.SYSTEM_NAVN, totrinnskontroll.beslutter)
+        assertEquals(SikkerhetContext.SYSTEM_FORKORTELSE, totrinnskontroll.beslutterId)
     }
 
     private fun kjørGjennomStegInkludertVurderTilbakekreving(): Behandling {

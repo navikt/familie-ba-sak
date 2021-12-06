@@ -223,4 +223,54 @@ class BehandlingTest {
 
         assertEquals(BehandlingUnderkategori.ORDINÆR, løpendeUndekategori)
     }
+
+    @Test
+    fun `erBehandlingMedVedtaksbrevutsending kan sende vedtaksbrev for ordinær førstegangsbehandling`() {
+        val behandling = lagBehandling()
+        assertTrue { behandling.erBehandlingMedVedtaksbrevutsending() }
+    }
+
+    @Test
+    fun `erBehandlingMedVedtaksbrevutsending kan sende vedtaksbrev for ordinær revurdering`() {
+        val behandling = lagBehandling(
+            behandlingType = BehandlingType.REVURDERING,
+            årsak = BehandlingÅrsak.NYE_OPPLYSNINGER
+        )
+        assertTrue { behandling.erBehandlingMedVedtaksbrevutsending() }
+    }
+
+    @Test
+    fun `erBehandlingMedVedtaksbrevutsending kan ikke sende vedtaksbrev for migrering med endre migreringsdato`() {
+        val behandling = lagBehandling(
+            behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
+            årsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO
+        )
+        assertFalse { behandling.erBehandlingMedVedtaksbrevutsending() }
+    }
+
+    @Test
+    fun `erBehandlingMedVedtaksbrevutsending kan ikke sende vedtaksbrev for automatisk migrering`() {
+        val behandling = lagBehandling(
+            behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
+            årsak = BehandlingÅrsak.MIGRERING
+        )
+        assertFalse { behandling.erBehandlingMedVedtaksbrevutsending() }
+    }
+
+    @Test
+    fun `erBehandlingMedVedtaksbrevutsending kan ikke sende vedtaksbrev for teknisk endring`() {
+        val behandling = lagBehandling(
+            behandlingType = BehandlingType.TEKNISK_ENDRING
+        )
+        assertFalse { behandling.erBehandlingMedVedtaksbrevutsending() }
+    }
+
+    @Test
+    fun `erBehandlingMedVedtaksbrevutsending kan ikke sende vedtaksbrev for revurdering med satsendring`() {
+        val behandling = lagBehandling(
+            behandlingType = BehandlingType.REVURDERING,
+            årsak = BehandlingÅrsak.SATSENDRING
+        )
+        assertFalse { behandling.erBehandlingMedVedtaksbrevutsending() }
+    }
 }

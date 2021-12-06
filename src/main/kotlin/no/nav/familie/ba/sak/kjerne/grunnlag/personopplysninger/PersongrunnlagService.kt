@@ -185,7 +185,7 @@ class PersongrunnlagService(
     ): PersonopplysningGrunnlag {
         val personopplysningGrunnlag = lagreOgDeaktiverGammel(PersonopplysningGrunnlag(behandlingId = behandling.id))
 
-        val enkelPersonInfo = behandling.erMigrering()
+        val enkelPersonInfo = behandling.erMigrering() || behandling.erSatsendring()
         personopplysningGrunnlag.personer.add(
             hentPerson(
                 ident = fødselsnummer,

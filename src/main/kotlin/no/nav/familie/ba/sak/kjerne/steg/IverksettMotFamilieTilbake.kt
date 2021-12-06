@@ -1,8 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingService
@@ -24,7 +22,6 @@ class IverksettMotFamilieTilbake(
     private val vedtakService: VedtakService,
     private val tilbakekrevingService: TilbakekrevingService,
     private val taskRepository: TaskRepositoryWrapper,
-    private val featureToggleService: FeatureToggleService,
     private val tilbakekrevingRepository: TilbakekrevingRepository,
 ) : BehandlingSteg<IverksettMotFamilieTilbakeData> {
 
@@ -33,14 +30,11 @@ class IverksettMotFamilieTilbake(
             "Fant ikke vedtak for behandling ${behandling.id} ved iverksetting mot familie-tilbake."
         )
 
-        val enableTilbakeKreving = featureToggleService.isEnabled(FeatureToggleConfig.TILBAKEKREVING)
-
         val tilbakekreving = tilbakekrevingRepository.findByBehandlingId(behandling.id)
 
         if (tilbakekreving != null &&
             tilbakekreving.valg != Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING &&
-            !tilbakekrevingService.søkerHarÅpenTilbakekreving(behandling.fagsak.id) &&
-            enableTilbakeKreving
+            !tilbakekrevingService.søkerHarÅpenTilbakekreving(behandling.fagsak.id)
         ) {
 
             val tilbakekrevingId = tilbakekrevingService.opprettTilbakekreving(behandling)
@@ -48,6 +42,10 @@ class IverksettMotFamilieTilbake(
 
             logger.info("Opprettet tilbakekreving for behandling ${behandling.id} og tilbakekrevingsid $tilbakekrevingId")
             tilbakekrevingRepository.save(tilbakekreving)
+        }
+
+        if (!behandling.erBehandlingMedVedtaksbrevutsending()) {
+            throw Feil("Neste steg på behandling $behandling er journalføring, men denne behandlingen skal ikke sende ut vedtaksbrev")
         }
 
         opprettTaskJournalførVedtaksbrev(vedtakId = vedtak.id, data.metadata)

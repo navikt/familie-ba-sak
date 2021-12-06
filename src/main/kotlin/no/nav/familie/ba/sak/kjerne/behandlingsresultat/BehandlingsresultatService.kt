@@ -80,7 +80,7 @@ class BehandlingsresultatService(
         val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(
             behandlingsresultatPersoner = behandlingsresultatPersoner,
             uregistrerteBarn = søknadGrunnlag?.hentUregistrerteBarn()?.map {
-                BehandlingsresultatUregistrertBarn(
+                UregistrertBarnEnkel(
                     personIdent = it.ident,
                     navn = it.navn
                 )

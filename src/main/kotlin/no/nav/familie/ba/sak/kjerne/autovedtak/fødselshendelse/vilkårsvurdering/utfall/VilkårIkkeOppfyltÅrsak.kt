@@ -21,6 +21,10 @@ enum class VilkårIkkeOppfyltÅrsak(val beskrivelse: String, val metrikkBeskrive
 
     // Bosatt i riket
     BOR_IKKE_I_RIKET(beskrivelse = "Er ikke bosatt i riket", vilkår = Vilkår.BOSATT_I_RIKET),
+    BOR_IKKE_I_RIKET_FLERE_ADRESSER_UTEN_FOM(
+        beskrivelse = "Er ikke bosatt i riket, flere adresser uten fom",
+        vilkår = Vilkår.BOSATT_I_RIKET
+    ),
 
     // Lovlig opphold
     STATSBORGERSKAP_ANNEN_FORELDER_UKLART(
