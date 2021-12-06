@@ -2,6 +2,9 @@ package no.nav.familie.ba.sak.kjerne.vedtak.domene
 
 import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.tilKortString
+import no.nav.familie.ba.sak.ekstern.restDomene.RestPerson
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import java.time.LocalDate
@@ -29,3 +32,12 @@ fun List<BegrunnelsePerson>.tilBarnasFødselsdatoer(): String =
                 person.fødselsdato.tilKortString() ?: ""
             }
     )
+
+fun BegrunnelsePerson.tilRestPersonTilTester() = RestPerson(
+    personIdent = this.personIdent,
+    fødselsdato = this.fødselsdato,
+    type = this.type,
+    navn = "Mock Mockersen",
+    kjønn = Kjønn.KVINNE,
+    målform = Målform.NB
+)

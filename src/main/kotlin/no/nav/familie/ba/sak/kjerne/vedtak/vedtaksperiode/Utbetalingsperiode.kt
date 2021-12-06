@@ -42,14 +42,6 @@ data class UtbetalingsperiodeDetalj(
     val prosent: BigDecimal,
 )
 
-data class UtbetalingsperiodeDetaljEnkel(
-    val personIdent: String,
-    val ytelseType: YtelseType,
-    val utbetaltPerMnd: Int,
-    val erPåvirketAvEndring: Boolean = false,
-    val prosent: BigDecimal = BigDecimal(100),
-)
-
 fun hentUtbetalingsperiodeForVedtaksperiode(
     utbetalingsperioder: List<Utbetalingsperiode>,
     fom: LocalDate?
