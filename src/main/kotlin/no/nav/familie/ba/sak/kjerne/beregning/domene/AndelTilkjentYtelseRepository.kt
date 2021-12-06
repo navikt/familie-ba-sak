@@ -34,8 +34,10 @@ interface AndelTilkjentYtelseRepository : JpaRepository<AndelTilkjentYtelse, Lon
                      aty.tilkjent_ytelse_id aty_tyid,
                      aty.id
               FROM andel_tilkjent_ytelse aty
+              JOIN personident p on p.fk_aktoer_id = aty.fk_aktoer_id
               WHERE aty.type = 'UTVIDET_BARNETRYGD'
-                AND aty.person_ident IN :personIdenter
+                AND p.foedselsnummer IN :personIdenter
+                AND p.aktiv = true
                 AND aty.stonad_fom <= :tom
                 AND aty.stonad_tom >= :fom
           ) AS qualified_aty
