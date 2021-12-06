@@ -42,27 +42,30 @@ class PersonidentService(
         taskRepository.save(IdentHendelseTask.opprettTask(nyIdent))
     }
 
-    // TODO: robustgjøring dnr/fnr skriv test for endringen i logikken i denne metoden.
     fun hentAlleFødselsnummerForEnAktør(aktør: Aktør) =
         personopplysningerService.hentIdenter(Ident(aktør.aktivIdent())).filter { it.gruppe == "FOLKEREGISTERIDENT" }
             .map { it.ident }
 
     fun hentOgLagreAktør(ident: String): Aktør =
-        aktørIdRepository.findByIdOrNull(ident)
-            ?: personidentRepository.findByIdOrNull(ident)?.aktør
-            ?: kotlin.run {
-                val identerFraPdl = personopplysningerService.hentIdenter(ident, false)
-                val aktørIdStr = filtrerAktørId(identerFraPdl)
-                val fødselsnummerAktiv = filtrerAktivtFødselsnummer(identerFraPdl)
+        // Noter at ident kan være både av typen aktørid eller fødselsnummer (d- og f nummer)
+        personidentRepository.findByIdOrNull(ident)?.aktør ?: kotlin.run {
 
-                return aktørIdRepository.findByIdOrNull(aktørIdStr)?.let { opprettPersonIdent(it, fødselsnummerAktiv) }
-                    ?: opprettAktørIdOgPersonident(aktørIdStr, fødselsnummerAktiv)
+            val identerFraPdl = personopplysningerService.hentIdenter(ident, false)
+            val fødselsnummerAktiv = filtrerAktivtFødselsnummer(identerFraPdl)
+
+            aktørIdRepository.findByIdOrNull(ident)?.let {
+                return opprettPersonIdent(it, fødselsnummerAktiv)
+            } ?: kotlin.run {
+                val aktørIdStr = filtrerAktørId(identerFraPdl)
+                return opprettAktørIdOgPersonident(aktørIdStr, fødselsnummerAktiv)
             }
+        }
 
     fun hentOgLagreAktørIder(barnasFødselsnummer: List<String>): List<Aktør> {
         return barnasFødselsnummer.map { hentOgLagreAktør(it) }
     }
 
+    // TODO: Skriv test for denne metoden når den tas i bruk.
     fun hentGjeldendeFødselsnummerForTidspunkt(aktør: Aktør, tidspunkt: LocalDateTime): String {
         val alleIdenter = personidentRepository.hentAlleIdenterForAktørid(aktør.aktørId)
         if (alleIdenter.size == 1) return alleIdenter.first().fødselsnummer
