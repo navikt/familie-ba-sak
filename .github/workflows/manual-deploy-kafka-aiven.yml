@@ -15,21 +15,9 @@ jobs:
           APIKEY: ${{ secrets.GITHUB_ACCESS_TOKEN }}
           CLUSTER: dev-fss
           RESOURCE: .deploy/nais/kafka/dev/bisys_opphoer_av_barnetrygd.yaml
-      - name: Deploy bisys_utvidet_barnetrygd_topic til dev
-        uses: nais/deploy/actions/deploy@v1
-        env:
-          APIKEY: ${{ secrets.GITHUB_ACCESS_TOKEN }}
-          CLUSTER: dev-fss
-          RESOURCE: .deploy/nais/kafka/dev/bisys_utvidet_barnetrygd.yaml
       - name: Deploy bisys_opphoer_av_barnetrygd_topic til prod
         uses: nais/deploy/actions/deploy@v1
         env:
           APIKEY: ${{ secrets.GITHUB_ACCESS_TOKEN }}
           CLUSTER: prod-fss
           RESOURCE: .deploy/nais/kafka/prod/bisys_opphoer_av_barnetrygd.yaml
-      - name: Deploy bisys_utvidet_barnetrygd_topic til prod
-        uses: nais/deploy/actions/deploy@v1
-        env:
-          APIKEY: ${{ secrets.GITHUB_ACCESS_TOKEN }}
-          CLUSTER: prod-fss
-          RESOURCE: .deploy/nais/kafka/prod/bisys_utvidet_barnetrygd.yaml
