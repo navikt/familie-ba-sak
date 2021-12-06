@@ -49,7 +49,8 @@ class IverksettMotOppdragTask(
 
         val sendMeldingTilBisysTask = Task(
             type = SendMeldingTilBisysTask.TASK_STEP_TYPE,
-            payload = iverksettingTask.behandlingsId.toString())
+            payload = iverksettingTask.behandlingsId.toString()
+        )
 
         taskRepository.save(statusFraOppdragTask)
         taskRepository.save(sendMeldingTilBisysTask)
