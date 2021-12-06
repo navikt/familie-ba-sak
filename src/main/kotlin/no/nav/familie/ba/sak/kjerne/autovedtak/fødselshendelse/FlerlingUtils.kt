@@ -22,14 +22,17 @@ fun finnBarnSomSkalBehandlesForMor(
         }
     }
 
-    secureLogger?.info(
-        "Behandler fødselshendelse på ${nyBehandlingHendelse.morsIdent}. " +
-            "Alle barna til mor: ${barnaTilMor.map { it.toSecureString() }}, barn på hendelse: ${barnaPåHendelse.map { it.toSecureString() }}, barn med tilstøtende fødselsdato som også behandles: ${andreBarnFødtInnenEnDag.map { it.toSecureString() }}"
-    )
-
     val alleBarnSomKanBehandles = (barnaPåHendelse + andreBarnFødtInnenEnDag).map { it.personIdent.id }
     val barnSomSkalBehandlesForMor = alleBarnSomKanBehandles
         .filter { !barnaSomHarBlittBehandlet.contains(it) }
+
+    secureLogger?.info(
+        "Behandler fødselshendelse på ${nyBehandlingHendelse.morsIdent}. " +
+            "Alle barna til mor: ${barnaTilMor.map { it.toSecureString() }}\n" +
+            "Barn på hendelse: ${barnaPåHendelse.map { it.personIdent.id }}\n" +
+            "Barn med tilstøtende fødselsdato som også behandles: ${andreBarnFødtInnenEnDag.map { it.personIdent.id }}\n" +
+            "Barn som faktisk skal behandles for mor: ${barnSomSkalBehandlesForMor.map { it }}"
+    )
 
     return Pair(barnSomSkalBehandlesForMor, alleBarnSomKanBehandles)
 }
