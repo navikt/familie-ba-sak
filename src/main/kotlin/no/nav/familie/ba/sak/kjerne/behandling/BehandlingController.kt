@@ -135,7 +135,7 @@ data class NyBehandling(
     val nyMigreringsdato: LocalDate? = null
 )
 
-class NyBehandlingHendelse(
+data class NyBehandlingHendelse(
     val morsIdent: String,
     val barnasIdenter: List<String>
 )
