@@ -98,7 +98,19 @@ import kotlin.random.Random
 val fødselsnummerGenerator = FoedselsnummerGenerator()
 
 fun randomFnr(): String = fødselsnummerGenerator.foedselsnummer().asString
-fun randomAktørId(): Aktør = Aktør(Random.nextLong(1000_000_000_000, 31_121_299_99999).toString())
+fun randomAktørId(personIdenter: List<String> = emptyList()): Aktør = Aktør(
+    aktørId = Random.nextLong(1000_000_000_000, 31_121_299_99999).toString(),
+).also {
+    it.personidenter.addAll(
+        personIdenter.map { personIdent ->
+            Personident(
+                aktiv = true,
+                fødselsnummer = personIdent,
+                aktør = it
+            )
+        }
+    )
+}
 
 private var gjeldendeVedtakId: Long = abs(Random.nextLong(10000000))
 private var gjeldendeVedtakBegrunnelseId: Long = abs(Random.nextLong(10000000))
@@ -170,36 +182,34 @@ fun tilfeldigPerson(
     personType: PersonType = PersonType.BARN,
     kjønn: Kjønn = Kjønn.MANN,
     personIdent: PersonIdent = PersonIdent(randomFnr())
-) =
-    Person(
-        id = nestePersonId(),
-        aktør = randomAktørId(),
-        personIdent = personIdent,
-        fødselsdato = fødselsdato,
-        type = personType,
-        personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 0),
-        navn = "",
-        kjønn = kjønn,
-        målform = Målform.NB
-    ).apply { sivilstander = listOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this)) }
+) = Person(
+    id = nestePersonId(),
+    aktør = randomAktørId(listOf(personIdent.ident)),
+    personIdent = personIdent,
+    fødselsdato = fødselsdato,
+    type = personType,
+    personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 0),
+    navn = "",
+    kjønn = kjønn,
+    målform = Målform.NB
+).apply { sivilstander = listOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this)) }
 
 fun tilfeldigSøker(
     fødselsdato: LocalDate = LocalDate.now(),
     personType: PersonType = PersonType.SØKER,
     kjønn: Kjønn = Kjønn.MANN,
     personIdent: PersonIdent = PersonIdent(randomFnr())
-) =
-    Person(
-        id = nestePersonId(),
-        aktør = randomAktørId(),
-        personIdent = personIdent,
-        fødselsdato = fødselsdato,
-        type = personType,
-        personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 0),
-        navn = "",
-        kjønn = kjønn,
-        målform = Målform.NB
-    ).apply { sivilstander = listOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this)) }
+) = Person(
+    id = nestePersonId(),
+    aktør = randomAktørId(listOf(personIdent.ident)),
+    personIdent = personIdent,
+    fødselsdato = fødselsdato,
+    type = personType,
+    personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 0),
+    navn = "",
+    kjønn = kjønn,
+    målform = Målform.NB
+).apply { sivilstander = listOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this)) }
 
 fun lagVedtak(behandling: Behandling = lagBehandling()) =
     Vedtak(
@@ -978,14 +988,14 @@ fun lagEndretUtbetalingAndel(
     )
 
 fun lagPerson(
-    aktør: Aktør = randomAktørId(),
+    aktør: Aktør? = null,
     personIdent: PersonIdent = PersonIdent(randomFnr()),
     type: PersonType = PersonType.SØKER,
     personopplysningGrunnlag: PersonopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 0),
     fødselsdato: LocalDate = LocalDate.now().minusYears(19),
     kjønn: Kjønn = Kjønn.KVINNE
 ) = Person(
-    aktør = aktør,
+    aktør = aktør ?: randomAktørId(listOf(personIdent.ident)),
     personIdent = personIdent,
     type = type,
     personopplysningGrunnlag = personopplysningGrunnlag,

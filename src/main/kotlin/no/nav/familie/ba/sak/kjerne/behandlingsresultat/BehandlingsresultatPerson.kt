@@ -4,9 +4,11 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
+import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.fpsak.tidsserie.LocalDateSegment
+import java.time.LocalDate
 import java.time.Period
 import java.time.YearMonth
 
@@ -54,9 +56,16 @@ data class BehandlingsresultatPerson(
     }
 }
 
-data class BehandlingsresultatUregistrertBarn(
+data class UregistrertBarnEnkel(
     val personIdent: String,
-    val navn: String
+    val navn: String,
+    val fødselsdato: LocalDate? = null
+)
+
+fun BarnMedOpplysninger.tilUregisrertBarnEnkel() = UregistrertBarnEnkel(
+    personIdent = this.ident,
+    navn = this.navn,
+    fødselsdato = this.fødselsdato
 )
 
 data class BehandlingsresultatAndelTilkjentYtelse(

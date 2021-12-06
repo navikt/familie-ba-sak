@@ -29,7 +29,8 @@ data class PersonInfo(
     val statsborgerskap: List<Statsborgerskap>? = emptyList(),
 )
 
-fun List<Bostedsadresse>.filtrerUtKunNorskeBostedsadresser() = this.filter { it.vegadresse != null || it.matrikkeladresse != null || it.ukjentBosted != null }
+fun List<Bostedsadresse>.filtrerUtKunNorskeBostedsadresser() =
+    this.filter { it.vegadresse != null || it.matrikkeladresse != null || it.ukjentBosted != null }
 
 data class ForelderBarnRelasjon(
     val personIdent: Personident,
@@ -37,12 +38,24 @@ data class ForelderBarnRelasjon(
     val navn: String? = null,
     val fødselsdato: LocalDate? = null,
     val adressebeskyttelseGradering: ADRESSEBESKYTTELSEGRADERING? = null
-)
+) {
+    override fun toString(): String {
+        return "ForelderBarnRelasjon(personIdent=XXX, relasjonsrolle=$relasjonsrolle, navn=XXX, fødselsdato=$fødselsdato)"
+    }
+
+    fun toSecureString(): String {
+        return "ForelderBarnRelasjon(personIdent=$personIdent, relasjonsrolle=$relasjonsrolle, navn=XXX, fødselsdato=$fødselsdato)"
+    }
+}
 
 data class ForelderBarnRelasjonMaskert(
     val relasjonsrolle: FORELDERBARNRELASJONROLLE,
     val adressebeskyttelseGradering: ADRESSEBESKYTTELSEGRADERING
-)
+) {
+    override fun toString(): String {
+        return "ForelderBarnRelasjonMaskert(relasjonsrolle=$relasjonsrolle)"
+    }
+}
 
 data class Personident(
     val id: String
