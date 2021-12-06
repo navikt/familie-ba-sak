@@ -8,7 +8,7 @@ import no.nav.familie.ba.sak.kjerne.dokument.domene.BrevPeriodeTestConfig
 import no.nav.familie.ba.sak.kjerne.dokument.domene.FritekstBegrunnelseTestConfig
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.brevperioder.BrevPeriode
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilRestPersonTilTester
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtvidetVedtaksperiodeMedBegrunnelser
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.`no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.BrevPeriodeGrunnlag`
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestReporter
@@ -28,24 +28,25 @@ class BrevbegrunnelseTest {
             val restPersoner =
                 behandlingsresultatPersonTestConfig.begrunnelsepersoner.map { it.tilRestPersonTilTester() }
 
-            val utvidetVedtaksperiodeMedBegrunnelser = UtvidetVedtaksperiodeMedBegrunnelser(
-                id = 1L,
-                fom = behandlingsresultatPersonTestConfig.fom,
-                tom = behandlingsresultatPersonTestConfig.tom,
-                type = behandlingsresultatPersonTestConfig.vedtaksperiodetype,
-                begrunnelser = behandlingsresultatPersonTestConfig.standardbegrunnelser,
-                fritekster = behandlingsresultatPersonTestConfig.fritekster,
-                gyldigeBegrunnelser = emptyList(),
-                utbetalingsperiodeDetaljer = behandlingsresultatPersonTestConfig.utbetalingsperiodeDetaljer.map {
-                    it.tilUtbetalingsperiodeDetalj(
-                        restPersoner.find { restPerson -> restPerson.personIdent == it.personIdent }!!
-                    )
-                }
-            )
+            val utvidetVedtaksperiodeMedBegrunnelser =
+                `no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.BrevPeriodeGrunnlag`(
+                    id = 1L,
+                    fom = behandlingsresultatPersonTestConfig.fom,
+                    tom = behandlingsresultatPersonTestConfig.tom,
+                    type = behandlingsresultatPersonTestConfig.vedtaksperiodetype,
+                    begrunnelser = behandlingsresultatPersonTestConfig.standardbegrunnelser,
+                    fritekster = behandlingsresultatPersonTestConfig.fritekster,
+                    gyldigeBegrunnelser = emptyList(),
+                    utbetalingsperiodeDetaljer = behandlingsresultatPersonTestConfig.utbetalingsperiodeDetaljer.map {
+                        it.tilUtbetalingsperiodeDetalj(
+                            restPersoner.find { restPerson -> restPerson.personIdent == it.personIdent }!!
+                        )
+                    }
+                )
 
             val brevperiode: BrevPeriode? =
                 utvidetVedtaksperiodeMedBegrunnelser.tilBrevPeriode(
-                    begrunnelsepersonerIBehandling = behandlingsresultatPersonTestConfig.begrunnelsepersoner,
+                    personerIPersongrunnlag = behandlingsresultatPersonTestConfig.begrunnelsepersoner,
                     målform = behandlingsresultatPersonTestConfig.målform,
                     uregistrerteBarn = behandlingsresultatPersonTestConfig.uregistrerteBarn,
                     utvidetScenario = UtvidetScenario.IKKE_UTVIDET_YTELSE

@@ -44,7 +44,7 @@ class VedtaksbegrunnelseTest {
 
         val brevbegrunnelse = restVedtaksbegrunnelseAvslag.tilBrevBegrunnelse(
             vedtaksperiode = vedtaksperiode,
-            begrunnelsepersonerIBehandling = personerIPersongrunnlag,
+            personerIPersongrunnlag = personerIPersongrunnlag,
             målform = målform,
             uregistrerteBarn = emptyList(),
             beløp = beløp
@@ -80,7 +80,7 @@ class VedtaksbegrunnelseTest {
 
         val brevbegrunnelse = restVedtaksbegrunnelseAvslag.tilBrevBegrunnelse(
             vedtaksperiode = vedtaksperiode,
-            begrunnelsepersonerIBehandling = personerIPersongrunnlag,
+            personerIPersongrunnlag = personerIPersongrunnlag,
             målform = målform,
             uregistrerteBarn = uregistrerteBarn,
             beløp = beløp

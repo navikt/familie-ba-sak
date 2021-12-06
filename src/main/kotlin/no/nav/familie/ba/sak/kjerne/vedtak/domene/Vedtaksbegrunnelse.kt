@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.hentMånedOgÅrForBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilBrevTekst
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.RestVedtaksbegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.BrevBegrunnelseGrunnlag
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.time.LocalDate
 import javax.persistence.Column
@@ -82,15 +83,16 @@ data class BegrunnelseData(
 
 data class FritekstBegrunnelse(val fritekst: String) : Begrunnelse
 
-fun RestVedtaksbegrunnelse.tilBrevBegrunnelse(
+fun BrevBegrunnelseGrunnlag.tilBrevBegrunnelse(
     vedtaksperiode: NullablePeriode,
-    begrunnelsepersonerIBehandling: List<BegrunnelsePerson>,
+    personerIPersongrunnlag: List<BegrunnelsePerson>,
     målform: Målform,
     uregistrerteBarn: List<UregistrertBarnEnkel>,
-    beløp: String,
+    personidenterGjeldendeForBegrunnelse: List<String>,
+    beløp: String
 ): Begrunnelse {
     val begrunnelsepersonerPåBegrunnelse =
-        begrunnelsepersonerIBehandling.filter { person -> this.personIdenter.contains(person.personIdent) }
+        personerIPersongrunnlag.filter { person -> personidenterGjeldendeForBegrunnelse.contains(person.personIdent) }
 
     val gjelderSøker = begrunnelsepersonerPåBegrunnelse.any { it.type == PersonType.SØKER }
 
@@ -101,8 +103,8 @@ fun RestVedtaksbegrunnelse.tilBrevBegrunnelse(
     val barnasFødselsdatoer = hentBarnasFødselsdagerForBegrunnelse(
         uregistrerteBarn = uregistrerteBarn,
         erAvslagPåKunSøker = erAvslagPåKunSøker,
-        begrunnelsepersonerIBehandling = begrunnelsepersonerIBehandling,
-        begrunnelspersonerPåBegrunnelse = begrunnelsepersonerPåBegrunnelse
+        personerIBehandling = personerIPersongrunnlag,
+        personerPåBegrunnelse = begrunnelsepersonerPåBegrunnelse
     )
 
     val antallBarn = hentAntallBarnForBegrunnelse(uregistrerteBarn, erAvslagPåKunSøker, barnasFødselsdatoer)
@@ -127,7 +129,7 @@ fun RestVedtaksbegrunnelse.tilBrevBegrunnelse(
     )
 }
 
-private fun RestVedtaksbegrunnelse.hentAntallBarnForBegrunnelse(
+private fun BrevBegrunnelseGrunnlag.hentAntallBarnForBegrunnelse(
     uregistrerteBarn: List<UregistrertBarnEnkel>,
     erAvslagPåKunSøker: Boolean,
     barnasFødselsdatoer: List<LocalDate>
@@ -138,15 +140,15 @@ else if (erAvslagPåKunSøker)
 else
     barnasFødselsdatoer.size
 
-private fun RestVedtaksbegrunnelse.hentBarnasFødselsdagerForBegrunnelse(
+private fun BrevBegrunnelseGrunnlag.hentBarnasFødselsdagerForBegrunnelse(
     uregistrerteBarn: List<UregistrertBarnEnkel>,
     erAvslagPåKunSøker: Boolean,
-    begrunnelsepersonerIBehandling: List<BegrunnelsePerson>,
-    begrunnelspersonerPåBegrunnelse: List<BegrunnelsePerson>
+    personerIBehandling: List<BegrunnelsePerson>,
+    personerPåBegrunnelse: List<BegrunnelsePerson>
 ) = if (this.vedtakBegrunnelseSpesifikasjon == VedtakBegrunnelseSpesifikasjon.AVSLAG_UREGISTRERT_BARN)
     uregistrerteBarn.mapNotNull { it.fødselsdato }
 else if (erAvslagPåKunSøker) {
-    begrunnelsepersonerIBehandling.filter { it.type == PersonType.BARN }
+    personerIBehandling.filter { it.type == PersonType.BARN }
         .map { it.fødselsdato } + uregistrerteBarn.mapNotNull { it.fødselsdato }
 } else
-    begrunnelspersonerPåBegrunnelse.filter { it.type == PersonType.BARN }.map { it.fødselsdato }
+    personerPåBegrunnelse.filter { it.type == PersonType.BARN }.map { it.fødselsdato }

@@ -43,6 +43,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.domene.Totrinnskontroll
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.hjemlerTilhørendeFritekst
@@ -51,8 +52,11 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.Begrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.BegrunnelsePerson
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.byggBegrunnelserOgFritekster
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilBarnasFødselsdatoer
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtvidetVedtaksperiodeMedBegrunnelser
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilBegrunnelsePerson
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.BegrunnelseGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.BrevPeriodeGrunnlag
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.BrevPeriodeGrunnlag
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import java.math.BigDecimal
 
@@ -196,7 +200,7 @@ fun hentOverstyrtDokumenttittel(behandling: Behandling): String? {
 }
 
 fun hentHjemlerIVedtaksperioderFraSanity(
-    utvidetVedtaksperiodeMedBegrunnelser: List<UtvidetVedtaksperiodeMedBegrunnelser>,
+    utvidetVedtaksperiodeMedBegrunnelser: List<`no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.BrevPeriodeGrunnlag`>,
     sanityBegrunnelser: List<SanityBegrunnelse>
 ): List<String> =
     utvidetVedtaksperiodeMedBegrunnelser.flatMap { periode ->
@@ -214,7 +218,7 @@ fun hjemlerTilHjemmeltekst(hjemler: List<String>): String {
 }
 
 fun hentHjemmeltekst(
-    utvidetVedtaksperiodeMedBegrunnelser: List<UtvidetVedtaksperiodeMedBegrunnelser>,
+    utvidetVedtaksperiodeMedBegrunnelser: List<`no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.BrevPeriodeGrunnlag`>,
     sanityBegrunnelser: List<SanityBegrunnelse>
 ): String {
     val hjemler =
@@ -235,16 +239,20 @@ enum class UtvidetScenario {
     UTVIDET_YTELSE_IKKE_ENDRET
 }
 
-fun UtvidetVedtaksperiodeMedBegrunnelser.tilBrevPeriode(
-    begrunnelsepersonerIBehandling: List<BegrunnelsePerson>,
+fun BrevPeriodeGrunnlag.tilBrevPeriode(
+    begrunnelseGrunnlag: BegrunnelseGrunnlag,
+    triggesAv: List<TriggesAv>,
     målform: Målform,
     utvidetScenario: UtvidetScenario = UtvidetScenario.IKKE_UTVIDET_YTELSE,
     uregistrerteBarn: List<UregistrertBarnEnkel> = emptyList(),
 ): BrevPeriode? {
+    val personerIPersongrunnlag = begrunnelseGrunnlag.persongrunnlag.personer.map { it.tilBegrunnelsePerson() },
+
     val begrunnelserOgFritekster = this.byggBegrunnelserOgFritekster(
-        begrunnelsepersonerIBehandling = begrunnelsepersonerIBehandling,
+        personerIPersongrunnlag = personerIPersongrunnlag,
         målform = målform,
-        uregistrerteBarn = uregistrerteBarn
+        uregistrerteBarn = uregistrerteBarn,
+        begrunnelseGrunnlag = begrunnelseGrunnlag,
     )
 
     if (begrunnelserOgFritekster.isEmpty()) return null
@@ -259,7 +267,7 @@ fun UtvidetVedtaksperiodeMedBegrunnelser.tilBrevPeriode(
         Vedtaksperiodetype.UTBETALING -> hentInnvilgelseBrevPeriode(
             tomDato,
             begrunnelserOgFritekster,
-            begrunnelsepersonerIBehandling
+            personerIPersongrunnlag
         )
 
         Vedtaksperiodetype.ENDRET_UTBETALING -> hentEndretUtbetalingBrevPeriode(
@@ -279,7 +287,7 @@ fun UtvidetVedtaksperiodeMedBegrunnelser.tilBrevPeriode(
     }
 }
 
-private fun UtvidetVedtaksperiodeMedBegrunnelser.hentAvslagBrevPeriode(
+private fun BrevPeriodeGrunnlag.hentAvslagBrevPeriode(
     tomDato: String?,
     begrunnelserOgFritekster: List<Begrunnelse>,
 ) =
@@ -291,7 +299,7 @@ private fun UtvidetVedtaksperiodeMedBegrunnelser.hentAvslagBrevPeriode(
         )
     else AvslagUtenPeriodeBrevPeriode(begrunnelser = begrunnelserOgFritekster)
 
-fun UtvidetVedtaksperiodeMedBegrunnelser.hentEndretUtbetalingBrevPeriode(
+fun BrevPeriodeGrunnlag.hentEndretUtbetalingBrevPeriode(
     tomDato: String?,
     begrunnelserOgFritekster: List<Begrunnelse>,
     utvidetScenario: UtvidetScenario = UtvidetScenario.IKKE_UTVIDET_YTELSE,
@@ -323,7 +331,7 @@ fun UtvidetVedtaksperiodeMedBegrunnelser.hentEndretUtbetalingBrevPeriode(
     )
 }
 
-private fun UtvidetVedtaksperiodeMedBegrunnelser.hentInnvilgelseBrevPeriode(
+private fun BrevPeriodeGrunnlag.hentInnvilgelseBrevPeriode(
     tomDato: String?,
     begrunnelserOgFritekster: List<Begrunnelse>,
     personerIPersongrunnlag: List<BegrunnelsePerson>,
@@ -340,7 +348,7 @@ private fun UtvidetVedtaksperiodeMedBegrunnelser.hentInnvilgelseBrevPeriode(
     )
 }
 
-fun UtvidetVedtaksperiodeMedBegrunnelser.finnBarnIInnvilgelsePeriode(
+fun BrevPeriodeGrunnlag.finnBarnIInnvilgelsePeriode(
     personerIPersongrunnlag: List<BegrunnelsePerson>
 ): List<BegrunnelsePerson> {
     val identerIBegrunnelene = this.begrunnelser
@@ -358,7 +366,7 @@ fun UtvidetVedtaksperiodeMedBegrunnelser.finnBarnIInnvilgelsePeriode(
     return barnIPeriode
 }
 
-private fun UtvidetVedtaksperiodeMedBegrunnelser.hentFortsattInnvilgetBrevPeriode(
+private fun BrevPeriodeGrunnlag.hentFortsattInnvilgetBrevPeriode(
     målform: Målform,
     begrunnelserOgFritekster: List<Begrunnelse>
 ): FortsattInnvilgetBrevPeriode {

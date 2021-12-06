@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.NullablePeriode
 import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
@@ -83,13 +84,14 @@ data class BegrunnelseGrunnlag(
 
 fun hentPersonidenterGjeldendeForBegrunnelse(
     triggesAv: TriggesAv,
-    vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser,
+    periode: NullablePeriode,
+    vedtaksperiodeType: Vedtaksperiodetype,
     vedtakBegrunnelseType: VedtakBegrunnelseType,
     begrunnelseGrunnlag: BegrunnelseGrunnlag,
 ): List<String> {
 
     val erFortsattInnvilgetBegrunnelse =
-        vedtaksperiodeMedBegrunnelser.type == Vedtaksperiodetype.FORTSATT_INNVILGET ||
+        vedtaksperiodeType == Vedtaksperiodetype.FORTSATT_INNVILGET ||
             vedtakBegrunnelseType == VedtakBegrunnelseType.FORTSATT_INNVILGET
 
     return when {
@@ -97,11 +99,11 @@ fun hentPersonidenterGjeldendeForBegrunnelse(
             begrunnelseGrunnlag.identerMedUtbetaling +
                 begrunnelseGrunnlag.persongrunnlag.søker.personIdent.ident +
                 begrunnelseGrunnlag.endredeUtbetalingAndeler
-                    .somOverlapper(vedtaksperiodeMedBegrunnelser.hentNullableMånedPeriode())
+                    .somOverlapper(periode.tilNullableMånedPeriode())
                     .map { it.person!!.personIdent.ident }
 
         triggesAv.barnMedSeksårsdag ->
-            begrunnelseGrunnlag.persongrunnlag.barnMedSeksårsdagPåFom(vedtaksperiodeMedBegrunnelser.fom)
+            begrunnelseGrunnlag.persongrunnlag.barnMedSeksårsdagPåFom(periode.fom)
                 .map { person -> person.personIdent.ident }
 
         triggesAv.personerManglerOpplysninger ->
@@ -115,7 +117,7 @@ fun hentPersonidenterGjeldendeForBegrunnelse(
         triggesAv.etterEndretUtbetaling ->
             hentPersonerForEtterEndretUtbetalingsperiode(
                 endretUtbetalingAndeler = begrunnelseGrunnlag.endredeUtbetalingAndeler,
-                vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
+                fom = periode.fom,
                 endringsaarsaker = triggesAv.endringsaarsaker
             ).map { person -> person.personIdent.ident }
 
@@ -123,8 +125,8 @@ fun hentPersonidenterGjeldendeForBegrunnelse(
             VedtakUtils.hentPersonerForAlleUtgjørendeVilkår(
                 vilkårsvurdering = begrunnelseGrunnlag.vilkårsvurdering,
                 vedtaksperiode = Periode(
-                    fom = vedtaksperiodeMedBegrunnelser.fom ?: TIDENES_MORGEN,
-                    tom = vedtaksperiodeMedBegrunnelser.tom ?: TIDENES_ENDE
+                    fom = periode.fom ?: TIDENES_MORGEN,
+                    tom = periode.tom ?: TIDENES_ENDE
                 ),
                 oppdatertBegrunnelseType = vedtakBegrunnelseType,
                 aktuellePersonerForVedtaksperiode = hentAktuellePersonerForVedtaksperiode(
@@ -192,9 +194,9 @@ fun kastFeilmeldingForBegrunnelserMedFeil(
 
 fun validerVedtaksperiodeMedBegrunnelser(vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser) {
     if ((
-        vedtaksperiodeMedBegrunnelser.type == Vedtaksperiodetype.OPPHØR ||
-            vedtaksperiodeMedBegrunnelser.type == Vedtaksperiodetype.AVSLAG
-        ) &&
+            vedtaksperiodeMedBegrunnelser.type == Vedtaksperiodetype.OPPHØR ||
+                vedtaksperiodeMedBegrunnelser.type == Vedtaksperiodetype.AVSLAG
+            ) &&
         vedtaksperiodeMedBegrunnelser.harFriteksterUtenStandardbegrunnelser()
     ) {
         val fritekstUtenStandardbegrunnelserFeilmelding =

@@ -52,7 +52,7 @@ class VedtaksperiodeMedBegrunnelseTest {
         )
 
         val begrunnelserOgFritekster = utvidetVedtaksperiodeMedBegrunnelser.byggBegrunnelserOgFritekster(
-            begrunnelsepersonerIBehandling = emptyList(),
+            personerIPersongrunnlag = emptyList(),
             målform = Målform.NB,
             uregistrerteBarn = emptyList()
         )
@@ -81,7 +81,7 @@ class VedtaksperiodeMedBegrunnelseTest {
         )
 
         val begrunnelserOgFritekster = utvidetVedtaksperiodeMedBegrunnelser.byggBegrunnelserOgFritekster(
-            begrunnelsepersonerIBehandling = emptyList(),
+            personerIPersongrunnlag = emptyList(),
             målform = Målform.NB,
             uregistrerteBarn = emptyList()
         )
@@ -106,7 +106,7 @@ class VedtaksperiodeMedBegrunnelseTest {
 
         Assertions.assertTrue(
             utvidetVedtaksperiodeMedBegrunnelser.tilBrevPeriode(
-                begrunnelsepersonerIBehandling = personerIPersongrunnlag,
+                personerIPersongrunnlag = personerIPersongrunnlag,
                 målform = Målform.NB,
             ) is FortsattInnvilgetBrevPeriode
         )
@@ -128,7 +128,7 @@ class VedtaksperiodeMedBegrunnelseTest {
 
         Assertions.assertTrue(
             utvidetVedtaksperiodeMedBegrunnelser.tilBrevPeriode(
-                begrunnelsepersonerIBehandling = personerIPersongrunnlag,
+                personerIPersongrunnlag = personerIPersongrunnlag,
                 målform = Målform.NB,
             ) is InnvilgelseBrevPeriode
         )
@@ -149,7 +149,7 @@ class VedtaksperiodeMedBegrunnelseTest {
 
         Assertions.assertTrue(
             utvidetVedtaksperiodeMedBegrunnelser.tilBrevPeriode(
-                begrunnelsepersonerIBehandling = personerIPersongrunnlag,
+                personerIPersongrunnlag = personerIPersongrunnlag,
                 målform = Målform.NB,
             ) is AvslagBrevPeriode
         )
@@ -170,7 +170,7 @@ class VedtaksperiodeMedBegrunnelseTest {
 
         Assertions.assertTrue(
             utvidetVedtaksperiodeMedBegrunnelser.tilBrevPeriode(
-                begrunnelsepersonerIBehandling = personerIPersongrunnlag,
+                personerIPersongrunnlag = personerIPersongrunnlag,
                 målform = Målform.NB,
             ) is OpphørBrevPeriode
         )
@@ -187,7 +187,7 @@ class VedtaksperiodeMedBegrunnelseTest {
 
         Assertions.assertTrue(
             utvidetVedtaksperiodeMedBegrunnelser.tilBrevPeriode(
-                begrunnelsepersonerIBehandling = personerIPersongrunnlag,
+                personerIPersongrunnlag = personerIPersongrunnlag,
                 målform = Målform.NB,
             ) == null
         )

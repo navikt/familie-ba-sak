@@ -15,11 +15,12 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifi
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilRestVedtaksbegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.BrevPeriodeGrunnlag
 import no.nav.fpsak.tidsserie.LocalDateInterval
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import java.time.LocalDate
 
-data class UtvidetVedtaksperiodeMedBegrunnelser(
+data class `no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.BrevPeriodeGrunnlag`(
     val id: Long,
     val fom: LocalDate?,
     val tom: LocalDate?,
@@ -41,7 +42,7 @@ data class RestVedtaksbegrunnelse(
     val personIdenter: List<String> = emptyList(),
 )
 
-fun List<UtvidetVedtaksperiodeMedBegrunnelser>.sorter(): List<UtvidetVedtaksperiodeMedBegrunnelser> {
+fun List<`no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.BrevPeriodeGrunnlag`>.sorter(): List<`no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.BrevPeriodeGrunnlag`> {
     val (perioderMedFom, perioderUtenFom) = this.partition { it.fom != null }
     return perioderMedFom.sortedWith(compareBy { it.fom }) + perioderUtenFom
 }
@@ -49,7 +50,7 @@ fun List<UtvidetVedtaksperiodeMedBegrunnelser>.sorter(): List<UtvidetVedtaksperi
 fun VedtaksperiodeMedBegrunnelser.tilUtvidetVedtaksperiodeMedBegrunnelser(
     personopplysningGrunnlag: PersonopplysningGrunnlag,
     andelerTilkjentYtelse: List<AndelTilkjentYtelse>
-): UtvidetVedtaksperiodeMedBegrunnelser {
+): `no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.BrevPeriodeGrunnlag` {
 
     val utbetalingsperiodeDetaljer =
         if (this.type == Vedtaksperiodetype.UTBETALING || this.type == Vedtaksperiodetype.ENDRET_UTBETALING || this.type == Vedtaksperiodetype.FORTSATT_INNVILGET) {
@@ -73,7 +74,7 @@ fun VedtaksperiodeMedBegrunnelser.tilUtvidetVedtaksperiodeMedBegrunnelser(
             emptyList()
         }
 
-    return UtvidetVedtaksperiodeMedBegrunnelser(
+    return `no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.BrevPeriodeGrunnlag`(
         id = this.id,
         fom = this.fom,
         tom = this.tom,
@@ -120,10 +121,10 @@ private fun hentAndelerForSegment(
     )
 }
 
-fun UtvidetVedtaksperiodeMedBegrunnelser.utbetaltForPersonerIBegrunnelse(
-    restVedtaksbegrunnelse: RestVedtaksbegrunnelse
+fun BrevPeriodeGrunnlag.utbetaltForPersonerIBegrunnelse(
+    personIdenterForBegrunnelse: List<String>
 ) = this.utbetalingsperiodeDetaljer.filter { utbetalingsperiodeDetalj ->
-    restVedtaksbegrunnelse.personIdenter.contains(
+    personIdenterForBegrunnelse.contains(
         utbetalingsperiodeDetalj.person.personIdent
     )
 }.totaltUtbetalt()

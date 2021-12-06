@@ -111,7 +111,8 @@ class VedtaksperiodeService(
                 val personerGjeldendeForBegrunnelseIdenter: List<String> = hentPersonidenterGjeldendeForBegrunnelse(
                     triggesAv = triggesAv,
                     vedtakBegrunnelseType = vedtakBegrunnelseType,
-                    vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
+                    periode = vedtaksperiodeMedBegrunnelser.hentNullablePeriode(),
+                    vedtaksperiodeType = vedtaksperiodeMedBegrunnelser.type,
                     begrunnelseGrunnlag = begrunnelseGrunnlag
                 )
 
@@ -139,7 +140,7 @@ class VedtaksperiodeService(
         return vedtaksperiodeMedBegrunnelser.vedtak
     }
 
-    private fun hentBegrunnelseGrunnlag(
+    fun hentBegrunnelseGrunnlag(
         behandling: Behandling,
         vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser
     ): BegrunnelseGrunnlag {
@@ -287,7 +288,7 @@ class VedtaksperiodeService(
         return vedtaksperiodeRepository.finnVedtaksperioderFor(vedtakId = vedtak.id)
     }
 
-    fun hentUtvidetVedtaksperiodeMedBegrunnelser(vedtak: Vedtak): List<UtvidetVedtaksperiodeMedBegrunnelser> {
+    fun hentUtvidetVedtaksperiodeMedBegrunnelser(vedtak: Vedtak): List<`no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.BrevPeriodeGrunnlag`> {
         val vedtaksperioderMedBegrunnelser = hentPersisterteVedtaksperioder(vedtak)
 
         val behandling = vedtak.behandling
@@ -341,8 +342,8 @@ class VedtaksperiodeService(
                                         identerMedUtbetaling = identerMedUtbetaling,
                                         triggesAv = triggesAv,
                                         endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(
-                                                behandling.id
-                                            ),
+                                            behandling.id
+                                        ),
                                         andelerTilkjentYtelse = andelerTilkjentYtelse,
                                     )
                                 ) {
@@ -427,7 +428,7 @@ class VedtaksperiodeService(
         )
 
         return utvidetVedtaksperiodeMedBegrunnelse.byggBegrunnelserOgFritekster(
-            begrunnelsepersonerIBehandling = persongrunnlag.personer.map { it.tilBegrunnelsePerson() },
+            personerIPersongrunnlag = persongrunnlag.personer.map { it.tilBegrunnelsePerson() },
             målform = persongrunnlag.søker.målform,
             uregistrerteBarn = uregistrerteBarn
         )

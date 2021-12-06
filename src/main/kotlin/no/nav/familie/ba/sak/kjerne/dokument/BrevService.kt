@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.tilUregisrertBarnEnkel
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.hentUtvidetYtelseScenario
+import no.nav.familie.ba.sak.kjerne.dokument.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Autovedtak6og18årOgSmåbarnstillegg
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.AutovedtakNyfødtBarnFraFør
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.AutovedtakNyfødtFørsteBarn
@@ -31,15 +32,18 @@ import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.SignaturVedtak
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.VedtakEndring
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.VedtakFellesfelter
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Vedtaksbrev
+import no.nav.familie.ba.sak.kjerne.dokument.domene.tilTriggesAv
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilBegrunnelsePerson
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.BegrunnelseGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.sorter
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 
@@ -53,7 +57,10 @@ class BrevService(
     private val søknadGrunnlagService: SøknadGrunnlagService,
     private val sanityService: SanityService,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
-) {
+    private val vilkårsvurderingRepository: VilkårsvurderingRepository,
+    private val endretUtbetalingAndelRepository: EndretUtbetalingAndelRepository,
+
+    ) {
 
     fun hentVedtaksbrevData(vedtak: Vedtak): Vedtaksbrev {
         val brevmal = hentVedtaksbrevmal(vedtak.behandling)
@@ -161,6 +168,7 @@ class BrevService(
         }
 
     fun lagVedtaksbrevFellesfelter(vedtak: Vedtak): VedtakFellesfelter {
+
         val utvidetVedtaksperioderMedBegrunnelser =
             vedtaksperiodeService.hentUtvidetVedtaksperiodeMedBegrunnelser(vedtak).filter {
                 it.begrunnelser.isNotEmpty() || it.fritekster.isNotEmpty()
@@ -183,16 +191,35 @@ class BrevService(
         val andelTilkjentYtelser =
             andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(vedtak.behandling.id)
 
-        val brevperioder = utvidetVedtaksperioderMedBegrunnelser.sorter().mapNotNull {
-            it.tilBrevPeriode(
-                begrunnelsepersonerIBehandling = grunnlagOgSignaturData.grunnlag.personer.map { it.tilBegrunnelsePerson() },
-                målform = målform,
-                uregistrerteBarn = søknadGrunnlagService.hentAktiv(behandlingId = vedtak.behandling.id)
-                    ?.hentUregistrerteBarn()?.map { uregistrertBarn -> uregistrertBarn.tilUregisrertBarnEnkel() }
-                    ?: emptyList(),
-                utvidetScenario = andelTilkjentYtelser.hentUtvidetYtelseScenario(it.hentMånedPeriode())
-            )
-        }
+        val endredeUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(
+            vedtak.behandling.id
+        )
+
+        val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(vedtak.behandling.id)
+            ?: error("Finner ikke vilkårsvurdering ved begrunning av vedtak")
+
+        val brevperioder = utvidetVedtaksperioderMedBegrunnelser
+            .sorter()
+            .tilBrevPeriodeGrunnlag(sanityBegrunnelser).mapNotNull {
+                val begrunnelseGrunnlag = BegrunnelseGrunnlag(
+                    persongrunnlag = grunnlagOgSignaturData.grunnlag,
+                    vilkårsvurdering = vilkårsvurdering,
+                    identerMedUtbetaling = it.utbetalingsperiodeDetaljer
+                        .map { utbetalingsperiodeDetalj -> utbetalingsperiodeDetalj.person.personIdent },
+                    endredeUtbetalingAndeler = endredeUtbetalingAndeler,
+                    andelerTilkjentYtelse = andelTilkjentYtelser,
+                )
+
+                it.tilBrevPeriode(
+                    begrunnelseGrunnlag = begrunnelseGrunnlag,
+                    triggesAv = it.triggesAvForPeriode(sanityBegrunnelser),
+                    målform = målform,
+                    uregistrerteBarn = søknadGrunnlagService.hentAktiv(behandlingId = vedtak.behandling.id)
+                        ?.hentUregistrerteBarn()?.map { uregistrertBarn -> uregistrertBarn.tilUregisrertBarnEnkel() }
+                        ?: emptyList(),
+                    utvidetScenario = andelTilkjentYtelser.hentUtvidetYtelseScenario(it.hentMånedPeriode())
+                )
+            }
 
         return VedtakFellesfelter(
             enhet = grunnlagOgSignaturData.enhet,
@@ -204,6 +231,13 @@ class BrevService(
             perioder = brevperioder
         )
     }
+
+    private fun `no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.BrevPeriodeGrunnlag`.triggesAvForPeriode(
+        sanityBegrunnelser: List<SanityBegrunnelse>
+    ) = sanityBegrunnelser.filter { sanityBegrunnelse ->
+        this.begrunnelser.map { begrunnelse -> begrunnelse.vedtakBegrunnelseSpesifikasjon.sanityApiNavn }
+            .contains(sanityBegrunnelse.apiNavn)
+    }.map { begrunnelse -> begrunnelse.tilTriggesAv() }
 
     private fun hentAktivtPersonopplysningsgrunnlag(behandlingId: Long) =
         persongrunnlagService.hentAktiv(behandlingId = behandlingId)

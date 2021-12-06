@@ -24,7 +24,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifi
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.triggesAvSkalUtbetales
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -188,11 +187,11 @@ fun EndretUtbetalingAndel.fraRestEndretUtbetalingAndel(
 
 fun hentPersonerForEtterEndretUtbetalingsperiode(
     endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
-    vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser,
+    fom: LocalDate?,
     endringsaarsaker: Set<Årsak>
 ) = endretUtbetalingAndeler.filter { endretUtbetalingAndel ->
     endretUtbetalingAndel.tom!!.sisteDagIInneværendeMåned()
-        .erDagenFør(vedtaksperiodeMedBegrunnelser.fom) &&
+        .erDagenFør(fom) &&
         endringsaarsaker.contains(endretUtbetalingAndel.årsak)
 }.mapNotNull { it.person }
 
