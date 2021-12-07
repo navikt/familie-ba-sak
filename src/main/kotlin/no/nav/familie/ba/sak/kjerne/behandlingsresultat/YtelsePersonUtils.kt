@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toLocalDate
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
 import java.time.YearMonth
@@ -22,8 +23,9 @@ object YtelsePersonUtils {
      */
     fun utledYtelsePersonerMedResultat(
         behandlingsresultatPersoner: List<BehandlingsresultatPerson>,
-        uregistrerteBarn: List<BehandlingsresultatUregistrertBarn> = emptyList(),
-        inneværendeMåned: YearMonth = YearMonth.now()
+        uregistrerteBarn: List<UregistrertBarnEnkel> = emptyList(),
+        inneværendeMåned: YearMonth = YearMonth.now(),
+        personidentService: PersonidentService,
     ): List<YtelsePerson> {
         return behandlingsresultatPersoner.map { behandlingsresultatPerson ->
             val forrigeAndelerTidslinje = LocalDateTimeline(
@@ -122,7 +124,7 @@ object YtelsePersonUtils {
             )
         } + uregistrerteBarn.map {
             YtelsePerson(
-                aktør = it.aktør,
+                aktør = personidentService.hentOgLagreAktør(it.personIdent),
                 resultater = setOf(YtelsePersonResultat.AVSLÅTT),
                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                 ytelseSlutt = TIDENES_MORGEN.toYearMonth(),

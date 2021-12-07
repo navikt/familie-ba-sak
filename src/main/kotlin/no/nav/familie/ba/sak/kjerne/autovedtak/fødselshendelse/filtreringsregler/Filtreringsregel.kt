@@ -4,6 +4,8 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Evaluering
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.utfall.FiltreringsregelIkkeOppfylt
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.utfall.FiltreringsregelOppfylt
+import java.time.temporal.ChronoUnit
+import kotlin.math.abs
 
 enum class Filtreringsregel(val vurder: FiltreringsreglerFakta.() -> Evaluering) {
     MOR_GYLDIG_FNR(vurder = { morHarGyldigFnr(this) }),
@@ -74,8 +76,8 @@ fun merEnn5mndEllerMindreEnnFemDagerSidenForrigeBarn(fakta: FiltreringsreglerFak
     return when (
         fakta.barnaFraHendelse.all { barnFraHendelse ->
             fakta.restenAvBarna.all {
-                barnFraHendelse.fødselsdato.isAfter(it.fødselsdato.plusMonths(5)) ||
-                    barnFraHendelse.fødselsdato.isBefore(it.fødselsdato.plusDays(6))
+                abs(ChronoUnit.MONTHS.between(barnFraHendelse.fødselsdato, it.fødselsdato)) > 5 ||
+                    abs(ChronoUnit.DAYS.between(barnFraHendelse.fødselsdato, it.fødselsdato)) <= 6
             }
         }
     ) {

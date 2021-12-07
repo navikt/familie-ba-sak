@@ -108,6 +108,19 @@ fun randomAktørId(fnr: String = randomFnr()): Aktør =
             randomPersonident(it, fnr)
         )
     }
+/*fun randomAktørId(personIdenter: List<String> = emptyList()): Aktør = Aktør(
+    aktørId = Random.nextLong(1000_000_000_000, 31_121_299_99999).toString(),
+).also {
+    it.personidenter.addAll(
+        personIdenter.map { personIdent ->
+            Personident(
+                aktiv = true,
+                fødselsnummer = personIdent,
+                aktør = it
+            )
+        }
+    )
+}*/
 
 private var gjeldendeVedtakId: Long = abs(Random.nextLong(10000000))
 private var gjeldendeVedtakBegrunnelseId: Long = abs(Random.nextLong(10000000))
@@ -198,7 +211,7 @@ fun tilfeldigSøker(
     personType: PersonType = PersonType.SØKER,
     kjønn: Kjønn = Kjønn.MANN,
     personIdent: PersonIdent = PersonIdent(randomFnr()),
-    aktør: Aktør = randomAktørId(personIdent.ident),
+    aktør: Aktør = tilAktør(personIdent.ident),
 ) =
     Person(
         id = nestePersonId(),

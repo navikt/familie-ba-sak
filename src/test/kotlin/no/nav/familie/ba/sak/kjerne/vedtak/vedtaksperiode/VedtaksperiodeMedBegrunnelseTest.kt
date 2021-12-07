@@ -21,6 +21,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.BegrunnelseComparator
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.FritekstBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksbegrunnelseFritekst
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.byggBegrunnelserOgFritekster
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilBegrunnelsePerson
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
@@ -29,7 +30,7 @@ class VedtaksperiodeMedBegrunnelseTest {
     private val søker = tilfeldigSøker()
     private val barn1 = tilfeldigPerson(personType = PersonType.BARN)
     private val barn2 = tilfeldigPerson(personType = PersonType.BARN)
-    private val personerIPersongrunnlag = listOf(barn1, barn2, søker)
+    private val personerIPersongrunnlag = listOf(barn1, barn2, søker).map { it.tilBegrunnelsePerson() }
 
     @Test
     fun `Skal gi riktig antall brevbegrunnelser med riktig tekst`() {
@@ -51,8 +52,9 @@ class VedtaksperiodeMedBegrunnelseTest {
         )
 
         val begrunnelserOgFritekster = utvidetVedtaksperiodeMedBegrunnelser.byggBegrunnelserOgFritekster(
-            personerIPersongrunnlag = personerIPersongrunnlag,
+            begrunnelsepersonerIBehandling = emptyList(),
             målform = Målform.NB,
+            uregistrerteBarn = emptyList()
         )
 
         Assertions.assertEquals(2, begrunnelserOgFritekster.size)
@@ -77,9 +79,11 @@ class VedtaksperiodeMedBegrunnelseTest {
             ),
             utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj()),
         )
+
         val begrunnelserOgFritekster = utvidetVedtaksperiodeMedBegrunnelser.byggBegrunnelserOgFritekster(
-            personerIPersongrunnlag = personerIPersongrunnlag,
+            begrunnelsepersonerIBehandling = emptyList(),
             målform = Målform.NB,
+            uregistrerteBarn = emptyList()
         )
 
         Assertions.assertEquals("Fritekst1", (begrunnelserOgFritekster[0] as FritekstBegrunnelse).fritekst)
@@ -102,7 +106,7 @@ class VedtaksperiodeMedBegrunnelseTest {
 
         Assertions.assertTrue(
             utvidetVedtaksperiodeMedBegrunnelser.tilBrevPeriode(
-                personerIPersongrunnlag = personerIPersongrunnlag,
+                begrunnelsepersonerIBehandling = personerIPersongrunnlag,
                 målform = Målform.NB,
             ) is FortsattInnvilgetBrevPeriode
         )
@@ -124,7 +128,7 @@ class VedtaksperiodeMedBegrunnelseTest {
 
         Assertions.assertTrue(
             utvidetVedtaksperiodeMedBegrunnelser.tilBrevPeriode(
-                personerIPersongrunnlag = personerIPersongrunnlag,
+                begrunnelsepersonerIBehandling = personerIPersongrunnlag,
                 målform = Målform.NB,
             ) is InnvilgelseBrevPeriode
         )
@@ -145,7 +149,7 @@ class VedtaksperiodeMedBegrunnelseTest {
 
         Assertions.assertTrue(
             utvidetVedtaksperiodeMedBegrunnelser.tilBrevPeriode(
-                personerIPersongrunnlag = personerIPersongrunnlag,
+                begrunnelsepersonerIBehandling = personerIPersongrunnlag,
                 målform = Målform.NB,
             ) is AvslagBrevPeriode
         )
@@ -166,7 +170,7 @@ class VedtaksperiodeMedBegrunnelseTest {
 
         Assertions.assertTrue(
             utvidetVedtaksperiodeMedBegrunnelser.tilBrevPeriode(
-                personerIPersongrunnlag = personerIPersongrunnlag,
+                begrunnelsepersonerIBehandling = personerIPersongrunnlag,
                 målform = Målform.NB,
             ) is OpphørBrevPeriode
         )
@@ -183,7 +187,7 @@ class VedtaksperiodeMedBegrunnelseTest {
 
         Assertions.assertTrue(
             utvidetVedtaksperiodeMedBegrunnelser.tilBrevPeriode(
-                personerIPersongrunnlag = personerIPersongrunnlag,
+                begrunnelsepersonerIBehandling = personerIPersongrunnlag,
                 målform = Målform.NB,
             ) == null
         )

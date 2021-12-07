@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler
 
 import no.nav.familie.ba.sak.common.randomAktørId
+import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.common.tilfeldigSøker
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PersonInfo
@@ -221,6 +222,27 @@ internal class FiltreringsregelTest {
                 )
             )
         assertIkkeOppfyltFiltreringsregel(evalueringer, Filtreringsregel.MER_ENN_5_MND_SIDEN_FORRIGE_BARN)
+    }
+
+    @Test
+    fun `Tvillinger født på samme dag skal gi oppfylt`() {
+        val søkerPerson =
+            tilfeldigSøker(fødselsdato = LocalDate.parse("1962-10-23"), personIdent = PersonIdent(randomFnr()))
+        val barn1Person =
+            tilfeldigPerson(fødselsdato = LocalDate.parse("2020-10-23"), personIdent = PersonIdent(randomFnr()))
+        val barn2PersonInfo = PersonInfo(fødselsdato = LocalDate.parse("2020-10-23"))
+
+        val evaluering = Filtreringsregel.MER_ENN_5_MND_SIDEN_FORRIGE_BARN.vurder(
+            FiltreringsreglerFakta(
+                søkerPerson,
+                listOf(barn1Person),
+                listOf(barn2PersonInfo),
+                morLever = true,
+                barnaLever = true,
+                morHarVerge = false
+            )
+        )
+        assertThat(evaluering.resultat).isEqualTo(Resultat.OPPFYLT)
     }
 
     @Test

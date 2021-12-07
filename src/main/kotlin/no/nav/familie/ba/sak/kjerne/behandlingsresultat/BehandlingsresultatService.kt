@@ -82,9 +82,10 @@ class BehandlingsresultatService(
 
         val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(
             behandlingsresultatPersoner = behandlingsresultatPersoner,
+            personidentService = personidentService,
             uregistrerteBarn = søknadGrunnlag?.hentUregistrerteBarn()?.map {
-                BehandlingsresultatUregistrertBarn(
-                    aktør = personidentService.hentOgLagreAktør(it.ident),
+                UregistrertBarnEnkel(
+                    personIdent = it.ident,
                     navn = it.navn
                 )
             } ?: emptyList()

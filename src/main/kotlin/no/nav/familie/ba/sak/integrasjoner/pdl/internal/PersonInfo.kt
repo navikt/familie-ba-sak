@@ -39,12 +39,24 @@ data class ForelderBarnRelasjon(
     val navn: String? = null,
     val fødselsdato: LocalDate? = null,
     val adressebeskyttelseGradering: ADRESSEBESKYTTELSEGRADERING? = null
-)
+) {
+    override fun toString(): String {
+        return "ForelderBarnRelasjon(personIdent=XXX, relasjonsrolle=$relasjonsrolle, navn=XXX, fødselsdato=$fødselsdato)"
+    }
+
+    fun toSecureString(): String {
+        return "ForelderBarnRelasjon(personIdent=${aktør.aktivIdent()}, relasjonsrolle=$relasjonsrolle, navn=XXX, fødselsdato=$fødselsdato)"
+    }
+}
 
 data class ForelderBarnRelasjonMaskert(
     val relasjonsrolle: FORELDERBARNRELASJONROLLE,
     val adressebeskyttelseGradering: ADRESSEBESKYTTELSEGRADERING
-)
+) {
+    override fun toString(): String {
+        return "ForelderBarnRelasjonMaskert(relasjonsrolle=$relasjonsrolle)"
+    }
+}
 
 data class Personident(
     val id: String
