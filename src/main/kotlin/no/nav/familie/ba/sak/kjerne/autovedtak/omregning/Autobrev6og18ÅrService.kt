@@ -178,6 +178,7 @@ class Autobrev6og18ÅrService(
 }
 
 enum class Alder(val år: Int) {
+    TRE(år = 3),
     SEKS(år = 6),
     ATTEN(år = 18)
 }

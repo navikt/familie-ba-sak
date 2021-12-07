@@ -1,9 +1,11 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.omregning
 
+import io.mockk.CapturingSlot
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
+import io.mockk.slot
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.lagBehandling
@@ -21,6 +23,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Personopplysning
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.task.dto.Autobrev6og18ÅrDTO
 import no.nav.familie.prosessering.domene.Task
@@ -50,7 +53,7 @@ internal class Autobrev6og18ÅrServiceTest {
 
     @Test
     fun `Verifiser at løpende fagsak med avsluttede behandlinger og barn på 18 ikke oppretter en behandling for omregning`() {
-        val behandling = initMock(alder = 18)
+        val behandling = initMock(alder = 18, lagTestPersonopplysningGrunnlagFunc = ::lagTestPersonopplysningGrunnlag)
 
         val autobrev6og18ÅrDTO = Autobrev6og18ÅrDTO(
             fagsakId = behandling.fagsak.id,
@@ -65,7 +68,7 @@ internal class Autobrev6og18ÅrServiceTest {
 
     @Test
     fun `Verifiser at behandling for omregning ikke opprettes om barn med angitt ålder ikke finnes`() {
-        val behandling = initMock(alder = 7)
+        val behandling = initMock(alder = 7, lagTestPersonopplysningGrunnlagFunc = ::lagTestPersonopplysningGrunnlag)
 
         val autobrev6og18ÅrDTO = Autobrev6og18ÅrDTO(
             fagsakId = behandling.fagsak.id,
@@ -80,7 +83,11 @@ internal class Autobrev6og18ÅrServiceTest {
 
     @Test
     fun `Verifiser at behandling for omregning ikke opprettes om fagsak ikke er løpende`() {
-        val behandling = initMock(fagsakStatus = FagsakStatus.OPPRETTET, alder = 6)
+        val behandling = initMock(
+            fagsakStatus = FagsakStatus.OPPRETTET,
+            alder = 6,
+            lagTestPersonopplysningGrunnlagFunc = ::lagTestPersonopplysningGrunnlag
+        )
 
         val autobrev6og18ÅrDTO = Autobrev6og18ÅrDTO(
             fagsakId = behandling.fagsak.id,
@@ -95,7 +102,11 @@ internal class Autobrev6og18ÅrServiceTest {
 
     @Test
     fun `Verifiser at behandling for omregning kaster feil om behandling ikke er avsluttet`() {
-        val behandling = initMock(BehandlingStatus.OPPRETTET, alder = 6)
+        val behandling = initMock(
+            BehandlingStatus.OPPRETTET,
+            alder = 6,
+            lagTestPersonopplysningGrunnlagFunc = ::lagTestPersonopplysningGrunnlag
+        )
 
         val autobrev6og18ÅrDTO = Autobrev6og18ÅrDTO(
             fagsakId = behandling.fagsak.id,
@@ -110,7 +121,7 @@ internal class Autobrev6og18ÅrServiceTest {
 
     @Test
     fun `Verifiser at behandling for omregning blir opprettet og prosessert for løpende fagsak med barn som fyller inneværende måned`() {
-        val behandling = initMock(alder = 6)
+        val behandling = initMock(alder = 6, lagTestPersonopplysningGrunnlagFunc = ::lagTestPersonopplysningGrunnlag)
 
         val autobrev6og18ÅrDTO = Autobrev6og18ÅrDTO(
             fagsakId = behandling.fagsak.id,
@@ -142,17 +153,74 @@ internal class Autobrev6og18ÅrServiceTest {
         verify(exactly = 1) { taskRepository.save(any()) }
     }
 
+    @Test
+    fun `Verifiser at behandling for reduksjon blir opprettet og prosessert for løpende fagsak med barn som fylte 3 måneden før`() {
+        val behandling = initMock(
+            alder = 3,
+            lagTestPersonopplysningGrunnlagFunc = ::lagTestPersonopplysningGrunnlag3År
+        )
+
+        val autobrev6og18ÅrDTO = Autobrev6og18ÅrDTO(
+            fagsakId = behandling.fagsak.id,
+            alder = Alder.TRE.år,
+            årMåned = inneværendeMåned()
+        )
+
+        every { stegService.håndterVilkårsvurdering(any()) } returns behandling
+        every { stegService.håndterNyBehandling(any()) } returns behandling
+        every { persongrunnlagService.hentSøker(any()) } returns tilfeldigSøker()
+
+        /**
+         * ved kjøring av vedtaksperiodeService.oppdaterFortsattInnvilgetPeriodeMedAutobrevBegrunnelse(vedtak, vedtakBegrunnelseSpesifikasjon)
+         * få tak i vedtakBegrunnelseSpesifikasjon input parameter
+         * gjør sjekk på verdien
+         * f eks verdi
+         * vedtakBegrunnelseType = REDUKSJON
+         * sanityApiNavn = reduksjonAutovedtakBarn6Aar
+         * name = "REDUKSJON_UNDER_6_ÅR_AUTOVEDTAK
+         * ordinal = 76
+         */
+        val vedtakBegrunnelseSpesifikasjonSlot: CapturingSlot<VedtakBegrunnelseSpesifikasjon> =
+            slot<VedtakBegrunnelseSpesifikasjon>()
+        every {
+            vedtaksperiodeService.oppdaterFortsattInnvilgetPeriodeMedAutobrevBegrunnelse(
+                vedtak = any(),
+                vedtakBegrunnelseSpesifikasjon = capture(vedtakBegrunnelseSpesifikasjonSlot)
+            )
+        } just runs
+        every { taskRepository.save(any()) } returns Task(type = "test", payload = "")
+        autobrev6og18ÅrService.opprettOmregningsoppgaveForBarnIBrytingsalder(autobrev6og18ÅrDTO)
+
+        verify(exactly = 1) {
+            autovedtakService.opprettAutomatiskBehandlingOgKjørTilBehandlingsresultat(
+                any(),
+                any(),
+                any()
+            )
+        }
+        verify(exactly = 1) {
+            vedtaksperiodeService.oppdaterFortsattInnvilgetPeriodeMedAutobrevBegrunnelse(
+                any(),
+                any()
+            )
+        }
+        verify(exactly = 1) { autovedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(any()) }
+        verify(exactly = 1) { taskRepository.save(any()) }
+        assert(vedtakBegrunnelseSpesifikasjonSlot.captured.sanityApiNavn == "putt inn riktig verdi her")
+    }
+
     private fun initMock(
         behandlingStatus: BehandlingStatus = BehandlingStatus.AVSLUTTET,
         fagsakStatus: FagsakStatus = FagsakStatus.LØPENDE,
-        alder: Long
+        alder: Long,
+        lagTestPersonopplysningGrunnlagFunc: (alder: Long, behandling: Behandling) -> PersonopplysningGrunnlag
     ): Behandling {
         val behandling = lagBehandling().also {
             it.fagsak.status = fagsakStatus
             it.status = behandlingStatus
         }
 
-        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(alder = alder, behandling)
+        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlagFunc(alder, behandling)
 
         every { behandlingService.hentAktivForFagsak(behandling.fagsak.id) } returns behandling
         every { behandlingService.opprettBehandling(any()) } returns behandling
@@ -163,6 +231,19 @@ internal class Autobrev6og18ÅrServiceTest {
 
     private fun lagTestPersonopplysningGrunnlag(alder: Long, behandling: Behandling): PersonopplysningGrunnlag {
         val barn = tilfeldigPerson(fødselsdato = LocalDate.now().minusYears(alder))
+        val søker = tilfeldigSøker()
+
+        return lagTestPersonopplysningGrunnlag(
+            behandlingId = behandling.id,
+            søkerPersonIdent = søker.personIdent.ident,
+            barnasIdenter = listOf(barn.personIdent.ident),
+            barnFødselsdato = LocalDate.now()
+                .minusYears(alder)
+        )
+    }
+
+    private fun lagTestPersonopplysningGrunnlag3År(alder: Long, behandling: Behandling): PersonopplysningGrunnlag {
+        val barn = tilfeldigPerson(fødselsdato = LocalDate.now().minusYears(alder).minusMonths(1))
         val søker = tilfeldigSøker()
 
         return lagTestPersonopplysningGrunnlag(
