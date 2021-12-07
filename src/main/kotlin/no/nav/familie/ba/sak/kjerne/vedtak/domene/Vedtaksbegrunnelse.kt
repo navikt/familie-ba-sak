@@ -86,7 +86,7 @@ data class FritekstBegrunnelse(val fritekst: String) : Begrunnelse
 fun BrevBegrunnelseGrunnlagMedPersoner.tilBrevBegrunnelse(
     vedtaksperiode: NullablePeriode,
     personerIPersongrunnlag: List<BegrunnelsePerson>,
-    målform: Målform,
+    målformSøker: Målform,
     uregistrerteBarn: List<UregistrertBarnEnkel>,
     beløp: String
 ): Begrunnelse {
@@ -122,7 +122,7 @@ fun BrevBegrunnelseGrunnlagMedPersoner.tilBrevBegrunnelse(
         barnasFodselsdatoer = barnasFødselsdatoer.tilBrevTekst(),
         antallBarn = antallBarn,
         maanedOgAarBegrunnelsenGjelderFor = månedOgÅrBegrunnelsenGjelderFor,
-        maalform = målform.tilSanityFormat(),
+        maalform = målformSøker.tilSanityFormat(),
         apiNavn = this.vedtakBegrunnelseSpesifikasjon.sanityApiNavn,
         belop = beløp
     )

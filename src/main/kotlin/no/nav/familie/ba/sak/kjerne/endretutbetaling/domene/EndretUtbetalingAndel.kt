@@ -4,13 +4,10 @@ import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.MånedPeriode
-import no.nav.familie.ba.sak.common.NullableMånedPeriode
-import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.YearMonthConverter
 import no.nav.familie.ba.sak.common.erDagenFør
 import no.nav.familie.ba.sak.common.overlapperHeltEllerDelvisMed
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
-import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.ekstern.restDomene.RestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.dokument.UtvidetScenario
@@ -24,6 +21,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifi
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.triggesAvSkalUtbetales
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.MinimertEndretUtbetalingAndel
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -134,19 +132,6 @@ data class EndretUtbetalingAndel(
             vedtakBegrunnelseSpesifikasjon
         )
 
-    fun erOverlappendeMed(nullableMånedPeriode: NullableMånedPeriode): Boolean {
-        if (this.fom == null || nullableMånedPeriode.fom == null) {
-            throw Feil("Fom ble null ved sjekk av overlapp av periode til endretUtbetalingAndel")
-        }
-
-        return MånedPeriode(this.fom!!, this.tom ?: TIDENES_ENDE.toYearMonth()).overlapperHeltEllerDelvisMed(
-            MånedPeriode(
-                nullableMånedPeriode.fom,
-                nullableMånedPeriode.tom ?: TIDENES_ENDE.toYearMonth()
-            )
-        )
-    }
-
     fun årsakErDeltBosted() = this.årsak == Årsak.DELT_BOSTED
 }
 
@@ -186,14 +171,14 @@ fun EndretUtbetalingAndel.fraRestEndretUtbetalingAndel(
 }
 
 fun hentPersonerForEtterEndretUtbetalingsperiode(
-    endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
+    minimerteEndredeUtbetalingAndeler: List<MinimertEndretUtbetalingAndel>,
     fom: LocalDate?,
     endringsaarsaker: Set<Årsak>
-) = endretUtbetalingAndeler.filter { endretUtbetalingAndel ->
-    endretUtbetalingAndel.tom!!.sisteDagIInneværendeMåned()
+) = minimerteEndredeUtbetalingAndeler.filter { endretUtbetalingAndel ->
+    endretUtbetalingAndel.periode.tom.sisteDagIInneværendeMåned()
         .erDagenFør(fom) &&
         endringsaarsaker.contains(endretUtbetalingAndel.årsak)
-}.mapNotNull { it.person }
+}.mapNotNull { it.personIdent }
 
 fun EndretUtbetalingAndel.hentGyldigEndretBegrunnelser(
     sanityBegrunnelser: List<SanityBegrunnelse>,
@@ -237,6 +222,3 @@ private fun SanityBegrunnelse.oppfyllerKravForTriggereForEndretUtbetaling(
 
     return skalUtbetalesKrav && utvidetKrav
 }
-
-fun List<EndretUtbetalingAndel>.somOverlapper(nullableMånedPeriode: NullableMånedPeriode) =
-    this.filter { it.erOverlappendeMed(nullableMånedPeriode) }

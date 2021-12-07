@@ -17,6 +17,7 @@ fun lagBrevPeriodeGrunnlagMedPersoner(
     begrunnelser: List<BrevBegrunnelseGrunnlagMedPersoner> = emptyList(),
     fritekster: List<String> = emptyList(),
     utbetalingsperiodeDetaljer: List<UtbetalingsperiodeDetalj> = emptyList(),
+    erFørsteVedtaksperiodePåFagsak: Boolean = false
 ): BrevPeriodeGrunnlagMedPersoner {
     return BrevPeriodeGrunnlagMedPersoner(
         fom = fom,
@@ -24,7 +25,8 @@ fun lagBrevPeriodeGrunnlagMedPersoner(
         type = type,
         begrunnelser = begrunnelser,
         fritekster = fritekster,
-        utbetalingsperiodeDetaljer = utbetalingsperiodeDetaljer
+        utbetalingsperiodeDetaljer = utbetalingsperiodeDetaljer,
+        erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak
     )
 }
 

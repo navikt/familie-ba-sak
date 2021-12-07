@@ -7,45 +7,45 @@ import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.toPeriode
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.BegrunnelsePerson
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 
 object VedtakUtils {
 
     /**
+     * TODO fix this
      * Funksjonen henter personer som trigger den gitte vedtaksperioden ved å hente vilkårResultater
      * basert på de attributter som definerer om en vedtaksbegrunnelse er trigget for en periode.
      *
-     * @param vilkårsvurdering - Vilkårsvurderingen man ser på for å sammenligne vilkår
+     * @param personResultater - Vilkårsvurderingen man ser på for å sammenligne vilkår
      * @param vedtaksperiode - Perioden det skal sjekkes for
      * @param oppdatertBegrunnelseType - Begrunnelsestype det skal sjekkes for
      * @param triggesAv -  Hva som trigger en vedtaksbegrynnelse.
      * @return List med personene det trigges endring på
      */
     fun hentPersonerForAlleUtgjørendeVilkår(
-        vilkårsvurdering: Vilkårsvurdering,
+        personResultater: Set<PersonResultat>,
         vedtaksperiode: Periode,
         oppdatertBegrunnelseType: VedtakBegrunnelseType,
-        aktuellePersonerForVedtaksperiode: List<Person>,
+        aktuellePersonerForVedtaksperiode: List<BegrunnelsePerson>,
         triggesAv: TriggesAv,
-        andelerTilkjentYtelse: List<AndelTilkjentYtelse>
-    ): Set<Person> {
+        erFørsteVedtaksperiodePåFagsak: Boolean
+    ): Set<BegrunnelsePerson> {
         return triggesAv.vilkår.fold(mutableSetOf()) { acc, vilkår ->
             acc.addAll(
                 hentPersonerMedUtgjørendeVilkår(
-                    vilkårsvurdering = vilkårsvurdering,
+                    personResultater = personResultater,
                     vedtaksperiode = vedtaksperiode,
                     oppdatertBegrunnelseType = oppdatertBegrunnelseType,
                     utgjørendeVilkår = vilkår,
                     aktuellePersonerForVedtaksperiode = aktuellePersonerForVedtaksperiode,
                     triggesAv = triggesAv,
-                    andelerTilkjentYtelse = andelerTilkjentYtelse,
+                    erAndelerMedFomFørPeriode = erFørsteVedtaksperiodePåFagsak
                 )
             )
 
@@ -54,16 +54,16 @@ object VedtakUtils {
     }
 
     private fun hentPersonerMedUtgjørendeVilkår(
-        vilkårsvurdering: Vilkårsvurdering,
+        personResultater: Set<PersonResultat>,
         vedtaksperiode: Periode,
         oppdatertBegrunnelseType: VedtakBegrunnelseType,
         utgjørendeVilkår: Vilkår?,
-        aktuellePersonerForVedtaksperiode: List<Person>,
+        aktuellePersonerForVedtaksperiode: List<BegrunnelsePerson>,
         triggesAv: TriggesAv,
-        andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
-    ): List<Person> {
+        erAndelerMedFomFørPeriode: Boolean
+    ): List<BegrunnelsePerson> {
 
-        return vilkårsvurdering.personResultater
+        return personResultater
             .fold(mutableListOf()) { acc, personResultat ->
                 val utgjørendeVilkårResultat = personResultat.vilkårResultater.firstOrNull { vilkårResultat ->
 
@@ -84,7 +84,7 @@ object VedtakUtils {
 
                         oppdatertBegrunnelseType == VedtakBegrunnelseType.OPPHØR && triggesAv.gjelderFørstePeriode
                         -> erFørstePeriodeOgVilkårIkkeOppfylt(
-                            andelerTilkjentYtelse = andelerTilkjentYtelse,
+                            erFørsteVedtaksperiodePåFagsak = erAndelerMedFomFørPeriode,
                             vedtaksperiode = vedtaksperiode,
                             triggesAv = triggesAv,
                             vilkårResultat = vilkårResultat
@@ -103,7 +103,7 @@ object VedtakUtils {
                 }
 
                 val person = aktuellePersonerForVedtaksperiode.firstOrNull { person ->
-                    person.personIdent.ident == personResultat.personIdent
+                    person.personIdent == personResultat.personIdent
                 }
                 if (utgjørendeVilkårResultat != null && person != null) {
                     acc.add(person)
@@ -114,7 +114,7 @@ object VedtakUtils {
 }
 
 fun erFørstePeriodeOgVilkårIkkeOppfylt(
-    andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
+    erFørsteVedtaksperiodePåFagsak: Boolean,
     vedtaksperiode: Periode,
     triggesAv: TriggesAv,
     vilkårResultat: VilkårResultat
@@ -127,7 +127,7 @@ fun erFørstePeriodeOgVilkårIkkeOppfylt(
         vilkårResultat.resultat == Resultat.OPPFYLT &&
             vedtaksperiode.tom.toYearMonth() == vilkårResultat.periodeFom!!.toYearMonth()
 
-    return !andelerTilkjentYtelse.any { it.stønadFom.isBefore(vedtaksperiode.fom.toYearMonth()) } &&
+    return erFørsteVedtaksperiodePåFagsak &&
         triggereErOppfylt(triggesAv, vilkårResultat) &&
         (vilkårIkkeOppfyltForPeriode || vilkårOppfyltRettEtterPeriode)
 }

@@ -31,18 +31,16 @@ import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.SignaturVedtak
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.VedtakEndring
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.VedtakFellesfelter
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Vedtaksbrev
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.BegrunnelseGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilBrevPeriodeGrunnlag
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.erFørsteVedtaksperiodePåFagsak
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.sorter
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 
@@ -56,10 +54,7 @@ class BrevService(
     private val søknadGrunnlagService: SøknadGrunnlagService,
     private val sanityService: SanityService,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
-    private val vilkårsvurderingRepository: VilkårsvurderingRepository,
-    private val endretUtbetalingAndelRepository: EndretUtbetalingAndelRepository,
-
-    ) {
+) {
 
     fun hentVedtaksbrevData(vedtak: Vedtak): Vedtaksbrev {
         val brevmal = hentVedtaksbrevmal(vedtak.behandling)
@@ -185,33 +180,25 @@ class BrevService(
 
         val hjemler = hentHjemmeltekst(utvidetVedtaksperioderMedBegrunnelser, sanityBegrunnelser)
 
-        val andelTilkjentYtelser =
+        val andelerTilkjentYtelse =
             andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(vedtak.behandling.id)
 
-        val endredeUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(
-            vedtak.behandling.id
-        )
-
-        val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(vedtak.behandling.id)
-            ?: error("Finner ikke vilkårsvurdering ved begrunning av vedtak")
+        val begrunnelseGrunnlag = vedtaksperiodeService.hentBegrunnelseGrunnlag(vedtak.behandling.id)
 
         val brevperioder = utvidetVedtaksperioderMedBegrunnelser
             .sorter()
             .map { it.tilBrevPeriodeGrunnlag(sanityBegrunnelser) }
-            .mapNotNull {
-                val begrunnelseGrunnlag = BegrunnelseGrunnlag(
-                    persongrunnlag = grunnlagOgSignaturData.grunnlag,
-                    vilkårsvurdering = vilkårsvurdering,
-                    identerMedUtbetaling = it.utbetalingsperiodeDetaljer
-                        .map { utbetalingsperiodeDetalj -> utbetalingsperiodeDetalj.person.personIdent },
-                    endredeUtbetalingAndeler = endredeUtbetalingAndeler,
-                    andelerTilkjentYtelse = andelTilkjentYtelser,
-                )
+            .mapNotNull { brevPeriodeGrunnlag ->
+                val erFørsteVedtaksperiodePåFagsak =
+                    erFørsteVedtaksperiodePåFagsak(andelerTilkjentYtelse, brevPeriodeGrunnlag.fom)
 
-                it.tilBrevPeriode(
+                brevPeriodeGrunnlag.tilBrevPeriode(
                     begrunnelseGrunnlag = begrunnelseGrunnlag,
                     uregistrerteBarn = hentUregistrerteBarn(vedtak.behandling.id),
-                    utvidetScenario = andelTilkjentYtelser.hentUtvidetYtelseScenario(it.hentMånedPeriode())
+                    utvidetScenario = andelerTilkjentYtelse
+                        .hentUtvidetYtelseScenario(brevPeriodeGrunnlag.hentMånedPeriode()),
+                    erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
+                    målformSøker = grunnlagOgSignaturData.grunnlag.søker.målform,
                 )
             }
 

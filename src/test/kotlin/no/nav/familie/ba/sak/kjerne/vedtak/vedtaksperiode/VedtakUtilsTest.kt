@@ -2,12 +2,9 @@ package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.Periode
-import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagTriggesAv
 import no.nav.familie.ba.sak.common.lagVilkårResultat
-import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.vedtak.erFørstePeriodeOgVilkårIkkeOppfylt
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import org.junit.jupiter.api.Assertions
@@ -20,20 +17,7 @@ class VedtakUtilsTest {
         fom = LocalDate.now().minusMonths(2),
         tom = LocalDate.now().plusMonths(4)
     )
-    val andelerTilkjentYtelseMedYtelseFørPeriode: List<AndelTilkjentYtelse> =
-        listOf(
-            lagAndelTilkjentYtelse(
-                fom = vedtaksperiode.fom.minusMonths(2).toYearMonth(),
-                tom = vedtaksperiode.fom.minusMonths(1).toYearMonth()
-            )
-        )
-    val andelerTilkjentYtelseUtenYtelseFørPeriode: List<AndelTilkjentYtelse> =
-        listOf(
-            lagAndelTilkjentYtelse(
-                fom = vedtaksperiode.tom.plusMonths(1).toYearMonth(),
-                tom = vedtaksperiode.tom.plusMonths(2).toYearMonth()
-            )
-        )
+
     val triggesAv = lagTriggesAv(deltbosted = false, vurderingAnnetGrunnlag = false, medlemskap = false)
     val vilkårResultatIkkeOppfylt: VilkårResultat = lagVilkårResultat(
         resultat = Resultat.IKKE_OPPFYLT,
@@ -65,7 +49,7 @@ class VedtakUtilsTest {
     fun `skal gi true dersom resultat ikke er godkjent og det ikke er noen andeler tilkjent ytelse før perioden`() {
         Assertions.assertTrue(
             erFørstePeriodeOgVilkårIkkeOppfylt(
-                andelerTilkjentYtelse = andelerTilkjentYtelseUtenYtelseFørPeriode,
+                erFørsteVedtaksperiodePåFagsak = false,
                 vilkårResultat = vilkårResultatIkkeOppfylt,
                 vedtaksperiode = vedtaksperiode,
                 triggesAv = triggesAv
@@ -73,7 +57,7 @@ class VedtakUtilsTest {
         )
         Assertions.assertTrue(
             erFørstePeriodeOgVilkårIkkeOppfylt(
-                andelerTilkjentYtelse = andelerTilkjentYtelseUtenYtelseFørPeriode,
+                erFørsteVedtaksperiodePåFagsak = false,
                 vilkårResultat = vilkårResultatIkkeOppfyltDelvisOverlapp,
                 vedtaksperiode = vedtaksperiode,
                 triggesAv = triggesAv
@@ -85,7 +69,7 @@ class VedtakUtilsTest {
     fun `skal gi false dersom det er en andel tilkjent ytelse før perioden`() {
         Assertions.assertFalse(
             erFørstePeriodeOgVilkårIkkeOppfylt(
-                andelerTilkjentYtelse = andelerTilkjentYtelseMedYtelseFørPeriode,
+                erFørsteVedtaksperiodePåFagsak = true,
                 vilkårResultat = vilkårResultatIkkeOppfylt,
                 vedtaksperiode = vedtaksperiode,
                 triggesAv = triggesAv
@@ -97,7 +81,7 @@ class VedtakUtilsTest {
     fun `skal gi false dersom vilkårResultatet er oppfylt`() {
         Assertions.assertFalse(
             erFørstePeriodeOgVilkårIkkeOppfylt(
-                andelerTilkjentYtelse = andelerTilkjentYtelseUtenYtelseFørPeriode,
+                erFørsteVedtaksperiodePåFagsak = false,
                 vilkårResultat = vilkårResultatOppfylt,
                 vedtaksperiode = vedtaksperiode,
                 triggesAv = triggesAv
@@ -109,7 +93,7 @@ class VedtakUtilsTest {
     fun `skal gi false dersom vilkårResultatet ikke overlapper med periode`() {
         Assertions.assertFalse(
             erFørstePeriodeOgVilkårIkkeOppfylt(
-                andelerTilkjentYtelse = andelerTilkjentYtelseUtenYtelseFørPeriode,
+                erFørsteVedtaksperiodePåFagsak = false,
                 vilkårResultat = vilkårResultatUtenforPeriode,
                 vedtaksperiode = vedtaksperiode,
                 triggesAv = triggesAv

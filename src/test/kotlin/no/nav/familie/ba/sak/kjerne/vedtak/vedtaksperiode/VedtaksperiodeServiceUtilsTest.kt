@@ -17,6 +17,9 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.periodeErOppyltForYtelseType
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilBegrunnelsePerson
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.BegrunnelseGrunnlag
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilMinimertEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -339,12 +342,12 @@ class VedtaksperiodeServiceUtilsTest {
             vedtaksperiodeType = Vedtaksperiodetype.UTBETALING,
             periode = NullablePeriode(LocalDate.now().minusMonths(1), null),
             begrunnelseGrunnlag = BegrunnelseGrunnlag(
-                persongrunnlag = persongrunnlag,
-                vilkårsvurdering = vilkårsvurdering,
-                identerMedUtbetaling = identerMedUtbetaling,
-                endredeUtbetalingAndeler = emptyList(),
-                andelerTilkjentYtelse = emptyList()
-            )
+                personResultater = vilkårsvurdering.personResultater,
+                begrunnelsePersoner = persongrunnlag.personer.map { it.tilBegrunnelsePerson() },
+                minimerteEndredeUtbetalingAndeler = emptyList(),
+            ),
+            identerMedUtbetaling = identerMedUtbetaling,
+            erFørsteVedtaksperiodePåFagsak = false
         )
 
         Assertions.assertEquals(listOf(barn.personIdent.ident, søker.personIdent.ident), personidenterForBegrunnelse)
@@ -387,12 +390,12 @@ class VedtaksperiodeServiceUtilsTest {
             vedtaksperiodeType = Vedtaksperiodetype.UTBETALING,
             vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET,
             begrunnelseGrunnlag = BegrunnelseGrunnlag(
-                vilkårsvurdering = vilkårsvurdering,
-                persongrunnlag = persongrunnlag,
-                identerMedUtbetaling = identerMedUtbetaling,
-                endredeUtbetalingAndeler = endredeUtbetalingAndeler,
-                andelerTilkjentYtelse = emptyList(),
+                personResultater = vilkårsvurdering.personResultater,
+                begrunnelsePersoner = persongrunnlag.personer.map { it.tilBegrunnelsePerson() },
+                minimerteEndredeUtbetalingAndeler = endredeUtbetalingAndeler.map { it.tilMinimertEndretUtbetalingAndel() },
             ),
+            identerMedUtbetaling = identerMedUtbetaling,
+            erFørsteVedtaksperiodePåFagsak = false
         )
 
         Assertions.assertEquals(

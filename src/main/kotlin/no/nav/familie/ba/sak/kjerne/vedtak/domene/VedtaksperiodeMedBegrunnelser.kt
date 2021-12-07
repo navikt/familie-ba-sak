@@ -2,16 +2,24 @@ package no.nav.familie.ba.sak.kjerne.vedtak.domene
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import no.nav.familie.ba.sak.common.BaseEntitet
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.NullablePeriode
-import no.nav.familie.ba.sak.common.Utils
-import no.nav.familie.ba.sak.kjerne.behandlingsresultat.UregistrertBarnEnkel
+import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.inneværendeMåned
+import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.dokument.totaltUtbetalt
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.BegrunnelseGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.BrevPeriodeGrunnlagMedPersoner
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.utbetaltForPersonerIBegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.lagUtbetalingsperiodeDetaljer
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.utledSegmenter
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
+import no.nav.fpsak.tidsserie.LocalDateInterval
+import no.nav.fpsak.tidsserie.LocalDateSegment
 import org.hibernate.annotations.SortComparator
 import java.time.LocalDate
 import javax.persistence.CascadeType
@@ -100,35 +108,79 @@ data class VedtaksperiodeMedBegrunnelser(
         tom = this.tom,
     )
 
+    fun hentUtbetalingsperiodeDetaljer(
+        andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
+        personopplysningGrunnlag: PersonopplysningGrunnlag
+    ) =
+        if (this.type == Vedtaksperiodetype.UTBETALING || this.type == Vedtaksperiodetype.ENDRET_UTBETALING || this.type == Vedtaksperiodetype.FORTSATT_INNVILGET) {
+            val andelerForVedtaksperiodetype = andelerTilkjentYtelse.filter {
+                if (this.type == Vedtaksperiodetype.ENDRET_UTBETALING) {
+                    endretUtbetalingAndelSkalVæreMed(it)
+                } else {
+                    it.endretUtbetalingAndeler.isEmpty()
+                }
+            }
+            val vertikaltSegmentForVedtaksperiode =
+                if (this.type == Vedtaksperiodetype.FORTSATT_INNVILGET)
+                    hentLøpendeAndelForVedtaksperiode(andelerForVedtaksperiodetype)
+                else hentVertikaltSegmentForVedtaksperiode(andelerForVedtaksperiodetype)
+
+            val andelerForSegment =
+                hentAndelerForSegment(andelerForVedtaksperiodetype, vertikaltSegmentForVedtaksperiode)
+
+            andelerForSegment.lagUtbetalingsperiodeDetaljer(personopplysningGrunnlag)
+        } else {
+            emptyList()
+        }
+
     companion object {
         val comparator = BegrunnelseComparator()
     }
 }
 
-fun BrevPeriodeGrunnlagMedPersoner.byggBegrunnelserOgFritekster(
-    begrunnelseGrunnlag: BegrunnelseGrunnlag,
-    uregistrerteBarn: List<UregistrertBarnEnkel> = emptyList(),
-): List<Begrunnelse> {
+private fun hentLøpendeAndelForVedtaksperiode(andelerTilkjentYtelse: List<AndelTilkjentYtelse>): LocalDateSegment<Int> {
+    val sorterteSegmenter = andelerTilkjentYtelse.utledSegmenter().sortedBy { it.fom }
+    return sorterteSegmenter.lastOrNull { it.fom.toYearMonth() <= inneværendeMåned() }
+        ?: sorterteSegmenter.firstOrNull()
+        ?: throw Feil("Finner ikke gjeldende segment ved fortsatt innvilget")
+}
 
-    val begrunnelser =
-        this.begrunnelser.sortedBy { it.vedtakBegrunnelseType }.map { brevBegrunnelseGrunnlag ->
-            val beløp = Utils.formaterBeløp(
-                this.utbetaltForPersonerIBegrunnelse(brevBegrunnelseGrunnlag.personIdenter)
-            )
+private fun VedtaksperiodeMedBegrunnelser.hentVertikaltSegmentForVedtaksperiode(
+    andelerTilkjentYtelse: List<AndelTilkjentYtelse>
+) = andelerTilkjentYtelse
+    .utledSegmenter()
+    .find { localDateSegment ->
+        localDateSegment.fom == this.fom || localDateSegment.tom == this.tom
+    } ?: throw Feil("Finner ikke segment for vedtaksperiode (${this.fom}, ${this.tom})")
 
-            brevBegrunnelseGrunnlag.tilBrevBegrunnelse(
-                vedtaksperiode = NullablePeriode(this.fom, this.tom),
-                personerIPersongrunnlag = begrunnelseGrunnlag.persongrunnlag.personer.map { it.tilBegrunnelsePerson() },
-                målform = begrunnelseGrunnlag.persongrunnlag.søker.målform,
-                uregistrerteBarn = uregistrerteBarn,
-                beløp = beløp,
+private fun hentAndelerForSegment(
+    andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
+    vertikaltSegmentForVedtaksperiode: LocalDateSegment<Int>
+) = andelerTilkjentYtelse.filter {
+    vertikaltSegmentForVedtaksperiode.localDateInterval.overlaps(
+        LocalDateInterval(
+            it.stønadFom.førsteDagIInneværendeMåned(),
+            it.stønadTom.sisteDagIInneværendeMåned()
+        )
+    )
+}
+
+private fun VedtaksperiodeMedBegrunnelser.endretUtbetalingAndelSkalVæreMed(andelTilkjentYtelse: AndelTilkjentYtelse) =
+    andelTilkjentYtelse.endretUtbetalingAndeler.isNotEmpty() && andelTilkjentYtelse.endretUtbetalingAndeler.all { endretUtbetalingAndel ->
+        this.begrunnelser.any { vedtaksbegrunnelse ->
+            vedtaksbegrunnelse.personIdenter.contains(
+                endretUtbetalingAndel.person!!.personIdent.ident
             )
         }
+    }
 
-    val fritekster = fritekster.map { FritekstBegrunnelse(it) }
-
-    return begrunnelser + fritekster
-}
+fun BrevPeriodeGrunnlagMedPersoner.utbetaltForPersonerIBegrunnelse(
+    personIdenterForBegrunnelse: List<String>
+) = this.utbetalingsperiodeDetaljer.filter { utbetalingsperiodeDetalj ->
+    personIdenterForBegrunnelse.contains(
+        utbetalingsperiodeDetalj.person.personIdent
+    )
+}.totaltUtbetalt()
 
 class BegrunnelseComparator : Comparator<Vedtaksbegrunnelse> {
 

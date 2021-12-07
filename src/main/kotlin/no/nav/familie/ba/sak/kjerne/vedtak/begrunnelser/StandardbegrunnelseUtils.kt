@@ -19,10 +19,13 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Personopplysning
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakUtils
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilBegrunnelsePerson
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.erFørsteVedtaksperiodePåFagsak
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.harPersonerSomManglerOpplysninger
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 
@@ -65,7 +68,7 @@ fun VedtakBegrunnelseSpesifikasjon.triggesForPeriode(
             andelerTilkjentYtelse = andelerTilkjentYtelse,
             fomForPeriode = utvidetVedtaksperiodeMedBegrunnelser.fom
         )
-        triggesAv.personerManglerOpplysninger -> vilkårsvurdering.harPersonerManglerOpplysninger()
+        triggesAv.personerManglerOpplysninger -> vilkårsvurdering.personResultater.harPersonerSomManglerOpplysninger()
         triggesAv.barnMedSeksårsdag ->
             persongrunnlag.harBarnMedSeksårsdagPåFom(utvidetVedtaksperiodeMedBegrunnelser.fom)
         triggesAv.satsendring -> fomErPåSatsendring(utvidetVedtaksperiodeMedBegrunnelser.fom ?: TIDENES_MORGEN)
@@ -76,15 +79,18 @@ fun VedtakBegrunnelseSpesifikasjon.triggesForPeriode(
                 utvidetVedtaksperiodeMedBegrunnelser.type != Vedtaksperiodetype.ENDRET_UTBETALING
 
         else -> VedtakUtils.hentPersonerForAlleUtgjørendeVilkår(
-            vilkårsvurdering = vilkårsvurdering,
+            personResultater = vilkårsvurdering.personResultater,
             vedtaksperiode = Periode(
                 fom = utvidetVedtaksperiodeMedBegrunnelser.fom ?: TIDENES_MORGEN,
                 tom = utvidetVedtaksperiodeMedBegrunnelser.tom ?: TIDENES_ENDE
             ),
             oppdatertBegrunnelseType = this.vedtakBegrunnelseType,
-            aktuellePersonerForVedtaksperiode = aktuellePersoner,
+            aktuellePersonerForVedtaksperiode = aktuellePersoner.map { it.tilBegrunnelsePerson() },
             triggesAv = triggesAv,
-            andelerTilkjentYtelse = andelerTilkjentYtelse,
+            erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak(
+                andelerTilkjentYtelse,
+                utvidetVedtaksperiodeMedBegrunnelser.fom
+            )
         ).isNotEmpty()
     }
 }

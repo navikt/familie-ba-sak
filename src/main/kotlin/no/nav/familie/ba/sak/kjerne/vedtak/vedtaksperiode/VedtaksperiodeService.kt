@@ -35,9 +35,11 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.Begrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeRepository
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.byggBegrunnelserOgFritekster
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilBegrunnelsePerson
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilVedtaksbegrunnelseFritekst
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.BegrunnelseGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilBrevPeriodeGrunnlag
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilMinimertEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
 import org.springframework.stereotype.Service
@@ -97,9 +99,17 @@ class VedtaksperiodeService(
 
         val behandling = vedtaksperiodeMedBegrunnelser.vedtak.behandling
 
-        val begrunnelseGrunnlag = hentBegrunnelseGrunnlag(behandling, vedtaksperiodeMedBegrunnelser)
+        val begrunnelseGrunnlag = hentBegrunnelseGrunnlag(behandling.id)
 
         val sanityBegrunnelser = sanityService.hentSanityBegrunnelser()
+
+        val andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id)
+
+        val personopplysningGrunnlag = persongrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
+            ?: throw Feil("Fant ikke personopplysninger for behandling ${behandling.id}")
+
+        val erFørsteVedtaksperiodePåFagsak =
+            erFørsteVedtaksperiodePåFagsak(andelerTilkjentYtelse, vedtaksperiodeMedBegrunnelser.fom)
 
         vedtaksperiodeMedBegrunnelser.settBegrunnelser(
             standardbegrunnelserFraFrontend.mapNotNull {
@@ -113,11 +123,16 @@ class VedtaksperiodeService(
                     vedtakBegrunnelseType = vedtakBegrunnelseType,
                     periode = vedtaksperiodeMedBegrunnelser.hentNullablePeriode(),
                     vedtaksperiodeType = vedtaksperiodeMedBegrunnelser.type,
-                    begrunnelseGrunnlag = begrunnelseGrunnlag
+                    begrunnelseGrunnlag = begrunnelseGrunnlag,
+                    erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
+                    identerMedUtbetaling = vedtaksperiodeMedBegrunnelser.hentUtbetalingsperiodeDetaljer(
+                        andelerTilkjentYtelse,
+                        personopplysningGrunnlag
+                    ).map { utbetalingsperiodeDetalj -> utbetalingsperiodeDetalj.person.personIdent },
                 )
 
                 if (triggesAv.satsendring) {
-                    validerSatsendring(vedtaksperiodeMedBegrunnelser.fom, begrunnelseGrunnlag.persongrunnlag)
+                    validerSatsendring(vedtaksperiodeMedBegrunnelser.fom, begrunnelseGrunnlag.begrunnelsePersoner)
                 }
 
                 if (it.erTilknyttetVilkår(sanityBegrunnelser) && personerGjeldendeForBegrunnelseIdenter.isEmpty()) {
@@ -141,39 +156,24 @@ class VedtaksperiodeService(
     }
 
     fun hentBegrunnelseGrunnlag(
-        behandling: Behandling,
-        vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser
+        behandlingId: Long,
     ): BegrunnelseGrunnlag {
 
-        val andelerTilkjentYtelse =
-            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = behandling.id)
         val persongrunnlag =
-            persongrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
-                ?: error(finnerIkkePersongrunnlagFeilmelding(behandling.id))
+            persongrunnlagRepository.findByBehandlingAndAktiv(behandlingId)
+                ?: error(finnerIkkePersongrunnlagFeilmelding(behandlingId))
 
-        val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id)
+        val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId)
             ?: error("Finner ikke vilkårsvurdering ved begrunning av vedtak")
 
-        val utvidetVedtaksperiodeMedBegrunnelser =
-            vedtaksperiodeMedBegrunnelser.tilUtvidetVedtaksperiodeMedBegrunnelser(
-                andelerTilkjentYtelse = andelerTilkjentYtelse,
-                personopplysningGrunnlag = persongrunnlag
-            )
-
-        val identerMedUtbetaling = utvidetVedtaksperiodeMedBegrunnelser
-            .utbetalingsperiodeDetaljer
-            .map { utbetalingsperiodeDetalj -> utbetalingsperiodeDetalj.person.personIdent }
-
         val endredeUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(
-            behandling.id
+            behandlingId
         )
 
         return BegrunnelseGrunnlag(
-            persongrunnlag = persongrunnlag,
-            vilkårsvurdering = vilkårsvurdering,
-            identerMedUtbetaling = identerMedUtbetaling,
-            endredeUtbetalingAndeler = endredeUtbetalingAndeler,
-            andelerTilkjentYtelse = andelerTilkjentYtelse,
+            begrunnelsePersoner = persongrunnlag.personer.map { it.tilBegrunnelsePerson() },
+            personResultater = vilkårsvurdering.personResultater,
+            minimerteEndredeUtbetalingAndeler = endredeUtbetalingAndeler.map { it.tilMinimertEndretUtbetalingAndel() },
         )
     }
 
@@ -421,23 +421,32 @@ class VedtaksperiodeService(
             søknadGrunnlagService.hentAktiv(behandlingId = behandlingId)?.hentUregistrerteBarn()
                 ?.map { it.tilUregisrertBarnEnkel() } ?: emptyList()
 
-        val begrunnelseGrunnlag =
-            hentBegrunnelseGrunnlag(vedtaksperiodeMedBegrunnelser.vedtak.behandling, vedtaksperiodeMedBegrunnelser)
+        val begrunnelseGrunnlag = hentBegrunnelseGrunnlag(behandlingId)
+        val personopplysningGrunnlag = persongrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandlingId)
+            ?: throw Feil(finnerIkkePersongrunnlagFeilmelding(behandlingId))
 
         val utvidetVedtaksperiodeMedBegrunnelse = vedtaksperiodeMedBegrunnelser.tilUtvidetVedtaksperiodeMedBegrunnelser(
-            personopplysningGrunnlag = begrunnelseGrunnlag.persongrunnlag,
+            personopplysningGrunnlag = personopplysningGrunnlag,
             andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(
                 behandlingId
             )
         )
 
+        val andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId)
+
+        val erFørsteVedtaksperiodePeriodePåFagsak =
+            erFørsteVedtaksperiodePåFagsak(andelerTilkjentYtelse, utvidetVedtaksperiodeMedBegrunnelse.fom)
 
         return utvidetVedtaksperiodeMedBegrunnelse
             .tilBrevPeriodeGrunnlag(sanityBegrunnelser)
-            .tilBrevPeriodeGrunnlagMedPersoner(begrunnelseGrunnlag)
+            .tilBrevPeriodeGrunnlagMedPersoner(
+                begrunnelseGrunnlag = begrunnelseGrunnlag,
+                erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePeriodePåFagsak
+            )
             .byggBegrunnelserOgFritekster(
                 begrunnelseGrunnlag = begrunnelseGrunnlag,
-                uregistrerteBarn = uregistrerteBarn
+                uregistrerteBarn = uregistrerteBarn,
+                målformSøker = personopplysningGrunnlag.søker.målform
             )
     }
 

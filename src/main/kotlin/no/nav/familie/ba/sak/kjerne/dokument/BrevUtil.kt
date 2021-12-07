@@ -49,12 +49,10 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.hjemlerTilhørendeFritek
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Begrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.BegrunnelsePerson
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.byggBegrunnelserOgFritekster
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilBarnasFødselsdatoer
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilBegrunnelsePerson
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.BegrunnelseGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.BegrunnelseGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.BrevPeriodeGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.BrevPeriodeGrunnlagMedPersoner
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
@@ -243,14 +241,18 @@ fun BrevPeriodeGrunnlag.tilBrevPeriode(
     begrunnelseGrunnlag: BegrunnelseGrunnlag,
     utvidetScenario: UtvidetScenario = UtvidetScenario.IKKE_UTVIDET_YTELSE,
     uregistrerteBarn: List<UregistrertBarnEnkel> = emptyList(),
+    erFørsteVedtaksperiodePåFagsak: Boolean,
+    målformSøker: Målform
 ): BrevPeriode? {
-    val brevPeriodeGrunnlagMedPersoner = this.tilBrevPeriodeGrunnlagMedPersoner(begrunnelseGrunnlag)
+    val brevPeriodeGrunnlagMedPersoner =
+        this.tilBrevPeriodeGrunnlagMedPersoner(begrunnelseGrunnlag, erFørsteVedtaksperiodePåFagsak)
 
-    val personerIPersongrunnlag = begrunnelseGrunnlag.persongrunnlag.personer.map { it.tilBegrunnelsePerson() }
+    val personerIPersongrunnlag = begrunnelseGrunnlag.begrunnelsePersoner
 
     val begrunnelserOgFritekster = brevPeriodeGrunnlagMedPersoner.byggBegrunnelserOgFritekster(
         uregistrerteBarn = uregistrerteBarn,
         begrunnelseGrunnlag = begrunnelseGrunnlag,
+        målformSøker = målformSøker
     )
 
     if (begrunnelserOgFritekster.isEmpty()) return null
@@ -260,11 +262,9 @@ fun BrevPeriodeGrunnlag.tilBrevPeriode(
             brevPeriodeGrunnlagMedPersoner.tom.tilDagMånedÅr()
         else null
 
-    val målform = begrunnelseGrunnlag.persongrunnlag.søker.målform
-
     return when (brevPeriodeGrunnlagMedPersoner.type) {
         Vedtaksperiodetype.FORTSATT_INNVILGET -> brevPeriodeGrunnlagMedPersoner.hentFortsattInnvilgetBrevPeriode(
-            målform,
+            målformSøker,
             begrunnelserOgFritekster
         )
 
@@ -278,7 +278,7 @@ fun BrevPeriodeGrunnlag.tilBrevPeriode(
             tomDato,
             begrunnelserOgFritekster,
             utvidetScenario,
-            målform
+            målformSøker
         )
 
         Vedtaksperiodetype.AVSLAG -> brevPeriodeGrunnlagMedPersoner.hentAvslagBrevPeriode(
