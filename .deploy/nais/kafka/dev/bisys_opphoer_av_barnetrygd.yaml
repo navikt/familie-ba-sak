@@ -18,6 +18,9 @@ spec:
     - team: teamfamilie
       application: familie-ba-sak #owner
       access: write   # readwrite
+    - team: teamfamilie
+      application: familie-ba-mottak #testing
+      access: read   # testing
     - team: bidrag
       application: bidrag-grunnlag-feature #consumer
       access: read
