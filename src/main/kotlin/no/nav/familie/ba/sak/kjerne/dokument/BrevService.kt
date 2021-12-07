@@ -11,7 +11,6 @@ import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.tilUregisrertBarnEnkel
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.hentUtvidetYtelseScenario
-import no.nav.familie.ba.sak.kjerne.dokument.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Autovedtak6og18årOgSmåbarnstillegg
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.AutovedtakNyfødtBarnFraFør
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.AutovedtakNyfødtFørsteBarn
@@ -32,7 +31,6 @@ import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.SignaturVedtak
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.VedtakEndring
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.VedtakFellesfelter
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Vedtaksbrev
-import no.nav.familie.ba.sak.kjerne.dokument.domene.tilTriggesAv
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
@@ -42,6 +40,7 @@ import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.BegrunnelseGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilBrevPeriodeGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.sorter
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
 import org.springframework.stereotype.Service
@@ -186,8 +185,6 @@ class BrevService(
 
         val hjemler = hentHjemmeltekst(utvidetVedtaksperioderMedBegrunnelser, sanityBegrunnelser)
 
-        val målform = persongrunnlagService.hentSøkersMålform(vedtak.behandling.id)
-
         val andelTilkjentYtelser =
             andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(vedtak.behandling.id)
 
@@ -200,7 +197,8 @@ class BrevService(
 
         val brevperioder = utvidetVedtaksperioderMedBegrunnelser
             .sorter()
-            .tilBrevPeriodeGrunnlag(sanityBegrunnelser).mapNotNull {
+            .map { it.tilBrevPeriodeGrunnlag(sanityBegrunnelser) }
+            .mapNotNull {
                 val begrunnelseGrunnlag = BegrunnelseGrunnlag(
                     persongrunnlag = grunnlagOgSignaturData.grunnlag,
                     vilkårsvurdering = vilkårsvurdering,
@@ -212,11 +210,7 @@ class BrevService(
 
                 it.tilBrevPeriode(
                     begrunnelseGrunnlag = begrunnelseGrunnlag,
-                    triggesAv = it.triggesAvForPeriode(sanityBegrunnelser),
-                    målform = målform,
-                    uregistrerteBarn = søknadGrunnlagService.hentAktiv(behandlingId = vedtak.behandling.id)
-                        ?.hentUregistrerteBarn()?.map { uregistrertBarn -> uregistrertBarn.tilUregisrertBarnEnkel() }
-                        ?: emptyList(),
+                    uregistrerteBarn = hentUregistrerteBarn(vedtak.behandling.id),
                     utvidetScenario = andelTilkjentYtelser.hentUtvidetYtelseScenario(it.hentMånedPeriode())
                 )
             }
@@ -232,12 +226,10 @@ class BrevService(
         )
     }
 
-    private fun `no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.BrevPeriodeGrunnlag`.triggesAvForPeriode(
-        sanityBegrunnelser: List<SanityBegrunnelse>
-    ) = sanityBegrunnelser.filter { sanityBegrunnelse ->
-        this.begrunnelser.map { begrunnelse -> begrunnelse.vedtakBegrunnelseSpesifikasjon.sanityApiNavn }
-            .contains(sanityBegrunnelse.apiNavn)
-    }.map { begrunnelse -> begrunnelse.tilTriggesAv() }
+    private fun hentUregistrerteBarn(behandlingId: Long) =
+        (søknadGrunnlagService.hentAktiv(behandlingId)
+            ?.hentUregistrerteBarn()?.map { uregistrertBarn -> uregistrertBarn.tilUregisrertBarnEnkel() }
+            ?: emptyList())
 
     private fun hentAktivtPersonopplysningsgrunnlag(behandlingId: Long) =
         persongrunnlagService.hentAktiv(behandlingId = behandlingId)

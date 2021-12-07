@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.vedtak.domene
 import no.nav.familie.ba.sak.common.NullablePeriode
 import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagRestVedtaksbegrunnelse
+import no.nav.familie.ba.sak.dataGenerator.lagBrevBegrunnelseGrunnlagMedPersoner
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.tilUregisrertBarnEnkel
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
@@ -36,13 +37,13 @@ class VedtaksbegrunnelseTest {
 
     @Test
     fun `skal ta med alle barnas fødselsdatoer ved avslag på søker, men ikke inkludere dem i antall barn`() {
-        val restVedtaksbegrunnelseAvslag = lagRestVedtaksbegrunnelse(
+        val brevBegrunnelseGrunnlagMedPersoner = lagBrevBegrunnelseGrunnlagMedPersoner(
             vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.AVSLAG_BOR_HOS_SØKER,
             personIdenter = listOf(søker).map { it.personIdent.ident },
             vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
         )
 
-        val brevbegrunnelse = restVedtaksbegrunnelseAvslag.tilBrevBegrunnelse(
+        val brevbegrunnelse = brevBegrunnelseGrunnlagMedPersoner.tilBrevBegrunnelse(
             vedtaksperiode = vedtaksperiode,
             personerIPersongrunnlag = personerIPersongrunnlag,
             målform = målform,
@@ -72,13 +73,13 @@ class VedtaksbegrunnelseTest {
             ).tilUregisrertBarnEnkel()
         }
 
-        val restVedtaksbegrunnelseAvslag = lagRestVedtaksbegrunnelse(
+        val brevBegrunnelseGrunnlagMedPersoner = lagBrevBegrunnelseGrunnlagMedPersoner(
             vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.AVSLAG_UREGISTRERT_BARN,
             personIdenter = emptyList(),
             vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
         )
 
-        val brevbegrunnelse = restVedtaksbegrunnelseAvslag.tilBrevBegrunnelse(
+        val brevbegrunnelse = brevBegrunnelseGrunnlagMedPersoner.tilBrevBegrunnelse(
             vedtaksperiode = vedtaksperiode,
             personerIPersongrunnlag = personerIPersongrunnlag,
             målform = målform,

@@ -1,22 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.dokument
 
-import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.familie.ba.sak.common.Utils.formaterBeløp
-import no.nav.familie.ba.sak.kjerne.dokument.domene.BegrunnelseDataTestConfig
-import no.nav.familie.ba.sak.kjerne.dokument.domene.BrevBegrunnelseTestConfig
-import no.nav.familie.ba.sak.kjerne.dokument.domene.BrevPeriodeTestConfig
-import no.nav.familie.ba.sak.kjerne.dokument.domene.FritekstBegrunnelseTestConfig
-import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.brevperioder.BrevPeriode
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilRestPersonTilTester
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.`no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.BrevPeriodeGrunnlag`
-import no.nav.familie.kontrakter.felles.objectMapper
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestReporter
-import java.io.File
-
 class BrevbegrunnelseTest {
 
-    @Test
+    /*@Test
     fun test(testReporter: TestReporter) {
         val testmappe = File("./src/test/resources/brevbegrunnelseCaser")
 
@@ -29,7 +15,7 @@ class BrevbegrunnelseTest {
                 behandlingsresultatPersonTestConfig.begrunnelsepersoner.map { it.tilRestPersonTilTester() }
 
             val utvidetVedtaksperiodeMedBegrunnelser =
-                `no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.BrevPeriodeGrunnlag`(
+                UtvidetVedtaksperiodeMedBegrunnelser(
                     id = 1L,
                     fom = behandlingsresultatPersonTestConfig.fom,
                     tom = behandlingsresultatPersonTestConfig.tom,
@@ -126,5 +112,5 @@ class BrevbegrunnelseTest {
         }
 
         return feil
-    }
+    }*/
 }

@@ -1,9 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.MånedPeriode
-import no.nav.familie.ba.sak.common.TIDENES_ENDE
-import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
@@ -15,12 +12,12 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifi
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilRestVedtaksbegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.BrevPeriodeGrunnlag
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.BrevPeriodeGrunnlagMedPersoner
 import no.nav.fpsak.tidsserie.LocalDateInterval
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import java.time.LocalDate
 
-data class `no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.BrevPeriodeGrunnlag`(
+data class UtvidetVedtaksperiodeMedBegrunnelser(
     val id: Long,
     val fom: LocalDate?,
     val tom: LocalDate?,
@@ -29,12 +26,7 @@ data class `no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.BrevPeriod
     val fritekster: List<String> = emptyList(),
     val gyldigeBegrunnelser: List<VedtakBegrunnelseSpesifikasjon> = emptyList(),
     val utbetalingsperiodeDetaljer: List<UtbetalingsperiodeDetalj> = emptyList(),
-) {
-    fun hentMånedPeriode() = MånedPeriode(
-        (fom ?: TIDENES_MORGEN).toYearMonth(),
-        (tom ?: TIDENES_ENDE).toYearMonth()
-    )
-}
+)
 
 data class RestVedtaksbegrunnelse(
     val vedtakBegrunnelseSpesifikasjon: VedtakBegrunnelseSpesifikasjon,
@@ -42,7 +34,7 @@ data class RestVedtaksbegrunnelse(
     val personIdenter: List<String> = emptyList(),
 )
 
-fun List<`no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.BrevPeriodeGrunnlag`>.sorter(): List<`no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.BrevPeriodeGrunnlag`> {
+fun List<UtvidetVedtaksperiodeMedBegrunnelser>.sorter(): List<UtvidetVedtaksperiodeMedBegrunnelser> {
     val (perioderMedFom, perioderUtenFom) = this.partition { it.fom != null }
     return perioderMedFom.sortedWith(compareBy { it.fom }) + perioderUtenFom
 }
@@ -50,7 +42,7 @@ fun List<`no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.BrevPeriodeG
 fun VedtaksperiodeMedBegrunnelser.tilUtvidetVedtaksperiodeMedBegrunnelser(
     personopplysningGrunnlag: PersonopplysningGrunnlag,
     andelerTilkjentYtelse: List<AndelTilkjentYtelse>
-): `no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.BrevPeriodeGrunnlag` {
+): UtvidetVedtaksperiodeMedBegrunnelser {
 
     val utbetalingsperiodeDetaljer =
         if (this.type == Vedtaksperiodetype.UTBETALING || this.type == Vedtaksperiodetype.ENDRET_UTBETALING || this.type == Vedtaksperiodetype.FORTSATT_INNVILGET) {
@@ -74,7 +66,7 @@ fun VedtaksperiodeMedBegrunnelser.tilUtvidetVedtaksperiodeMedBegrunnelser(
             emptyList()
         }
 
-    return `no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.BrevPeriodeGrunnlag`(
+    return UtvidetVedtaksperiodeMedBegrunnelser(
         id = this.id,
         fom = this.fom,
         tom = this.tom,
@@ -121,7 +113,7 @@ private fun hentAndelerForSegment(
     )
 }
 
-fun BrevPeriodeGrunnlag.utbetaltForPersonerIBegrunnelse(
+fun BrevPeriodeGrunnlagMedPersoner.utbetaltForPersonerIBegrunnelse(
     personIdenterForBegrunnelse: List<String>
 ) = this.utbetalingsperiodeDetaljer.filter { utbetalingsperiodeDetalj ->
     personIdenterForBegrunnelse.contains(

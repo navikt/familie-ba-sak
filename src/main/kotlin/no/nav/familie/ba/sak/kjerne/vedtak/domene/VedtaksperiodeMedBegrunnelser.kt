@@ -5,14 +5,11 @@ import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.NullablePeriode
 import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.UregistrertBarnEnkel
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.BegrunnelseGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.BrevPeriodeGrunnlag
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.hentPersonidenterGjeldendeForBegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.BrevPeriodeGrunnlagMedPersoner
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.utbetaltForPersonerIBegrunnelse
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import org.hibernate.annotations.SortComparator
@@ -108,38 +105,29 @@ data class VedtaksperiodeMedBegrunnelser(
     }
 }
 
-fun BrevPeriodeGrunnlag.byggBegrunnelserOgFritekster(
+fun BrevPeriodeGrunnlagMedPersoner.byggBegrunnelserOgFritekster(
     begrunnelseGrunnlag: BegrunnelseGrunnlag,
-    triggesAvListe: List<TriggesAv>,
-    personerIPersongrunnlag: List<BegrunnelsePerson>,
-    målform: Målform,
     uregistrerteBarn: List<UregistrertBarnEnkel> = emptyList(),
 ): List<Begrunnelse> {
-    val begrunnelser =
-        this.begrunnelser.sortedBy { it.vedtakBegrunnelseType }.map {
-            val vedtaksperiode = NullablePeriode(fom, tom)
 
-            val personidenterGjeldendeForBegrunnelse: List<String> = hentPersonidenterGjeldendeForBegrunnelse(
-                triggesAv = it.triggesAv,
-                vedtakBegrunnelseType = it.vedtakBegrunnelseType,
-                periode = vedtaksperiode,
-                vedtaksperiodeType = this.type,
-                begrunnelseGrunnlag = begrunnelseGrunnlag
+    val begrunnelser =
+        this.begrunnelser.sortedBy { it.vedtakBegrunnelseType }.map { brevBegrunnelseGrunnlag ->
+            val beløp = Utils.formaterBeløp(
+                this.utbetaltForPersonerIBegrunnelse(brevBegrunnelseGrunnlag.personIdenter)
             )
 
-            val beløp = Utils.formaterBeløp(this.utbetaltForPersonerIBegrunnelse(personidenterGjeldendeForBegrunnelse))
-
-            it.tilBrevBegrunnelse(
-                vedtaksperiode = NullablePeriode(fom, tom),
-                personerIPersongrunnlag = personerIPersongrunnlag,
-                målform = målform,
+            brevBegrunnelseGrunnlag.tilBrevBegrunnelse(
+                vedtaksperiode = NullablePeriode(this.fom, this.tom),
+                personerIPersongrunnlag = begrunnelseGrunnlag.persongrunnlag.personer.map { it.tilBegrunnelsePerson() },
+                målform = begrunnelseGrunnlag.persongrunnlag.søker.målform,
                 uregistrerteBarn = uregistrerteBarn,
                 beløp = beløp,
-                personidenterGjeldendeForBegrunnelse = personidenterGjeldendeForBegrunnelse,
             )
         }
 
-    return begrunnelser + fritekster.map { FritekstBegrunnelse(it) }
+    val fritekster = fritekster.map { FritekstBegrunnelse(it) }
+
+    return begrunnelser + fritekster
 }
 
 class BegrunnelseComparator : Comparator<Vedtaksbegrunnelse> {

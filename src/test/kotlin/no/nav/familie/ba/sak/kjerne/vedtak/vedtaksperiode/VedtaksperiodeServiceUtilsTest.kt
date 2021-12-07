@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
+import no.nav.familie.ba.sak.common.NullablePeriode
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagBehandling
@@ -7,7 +8,6 @@ import no.nav.familie.ba.sak.common.lagEndretUtbetalingAndel
 import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.lagVedtak
-import no.nav.familie.ba.sak.common.lagVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
@@ -325,7 +325,6 @@ class VedtaksperiodeServiceUtilsTest {
         val persongrunnlag =
             lagTestPersonopplysningGrunnlag(behandlingId = behandling.id, personer = arrayOf(søker, barn))
         val triggesAv = TriggesAv(vilkår = setOf(Vilkår.UTVIDET_BARNETRYGD))
-        val vedtaksperiodeMedBegrunnelser = lagVedtaksperiodeMedBegrunnelser(type = Vedtaksperiodetype.UTBETALING)
         val vilkårsvurdering = lagVilkårsvurdering(
             søkerFnr = søker.personIdent.ident,
             søkerAktør = søker.hentAktørId(),
@@ -337,7 +336,8 @@ class VedtaksperiodeServiceUtilsTest {
         val personidenterForBegrunnelse = hentPersonidenterGjeldendeForBegrunnelse(
             triggesAv = triggesAv,
             vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET,
-            vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
+            vedtaksperiodeType = Vedtaksperiodetype.UTBETALING,
+            periode = NullablePeriode(LocalDate.now().minusMonths(1), null),
             begrunnelseGrunnlag = BegrunnelseGrunnlag(
                 persongrunnlag = persongrunnlag,
                 vilkårsvurdering = vilkårsvurdering,
@@ -365,11 +365,6 @@ class VedtaksperiodeServiceUtilsTest {
         val persongrunnlag =
             lagTestPersonopplysningGrunnlag(behandlingId = behandling.id, personer = arrayOf(søker, barn2))
         val triggesAv = TriggesAv(vilkår = setOf(Vilkår.UTVIDET_BARNETRYGD))
-        val vedtaksperiodeMedBegrunnelser = lagVedtaksperiodeMedBegrunnelser(
-            type = Vedtaksperiodetype.UTBETALING,
-            fom = fom,
-            tom = tom,
-        )
         val vilkårsvurdering = lagVilkårsvurdering(
             søkerFnr = søker.personIdent.ident,
             søkerAktør = søker.hentAktørId(),
@@ -388,7 +383,8 @@ class VedtaksperiodeServiceUtilsTest {
 
         val personidenterForBegrunnelse = hentPersonidenterGjeldendeForBegrunnelse(
             triggesAv = triggesAv,
-            vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
+            periode = NullablePeriode(fom, tom),
+            vedtaksperiodeType = Vedtaksperiodetype.UTBETALING,
             vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET,
             begrunnelseGrunnlag = BegrunnelseGrunnlag(
                 vilkårsvurdering = vilkårsvurdering,
