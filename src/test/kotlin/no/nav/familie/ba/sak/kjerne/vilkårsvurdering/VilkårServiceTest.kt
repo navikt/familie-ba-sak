@@ -242,8 +242,8 @@ class VilkårServiceTest(
         )
             .also {
                 it.personResultater
-                    .forEach {
-                        it.leggTilBlankAnnenVurdering(annenVurderingType = AnnenVurderingType.OPPLYSNINGSPLIKT)
+                    .forEach { personResultat ->
+                        personResultat.leggTilBlankAnnenVurdering(AnnenVurderingType.OPPLYSNINGSPLIKT)
                     }
             }
 
@@ -927,7 +927,7 @@ class VilkårServiceTest(
         val nåVærendeBehandling = behandlinger.second
 
         val nyMigreringsdato = LocalDate.of(2021, 1, 1)
-        var vilkårsvurdering = vilkårService.genererVilkårsvurderingForMigreringsbehandlingMedÅrsakEndreMigreringsdato(
+        val vilkårsvurdering = vilkårService.genererVilkårsvurderingForMigreringsbehandlingMedÅrsakEndreMigreringsdato(
             behandling = nåVærendeBehandling,
             forrigeBehandlingSomErVedtatt = behandlinger.first,
             nyMigreringsdato = nyMigreringsdato
