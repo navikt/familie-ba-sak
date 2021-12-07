@@ -149,7 +149,7 @@ internal class SaksstatistikkServiceTest(
 
     @Test
     fun `Skal mappe til behandlingDVH for Automatisk rute`() {
-        val behandling = lagBehandling(årsak = BehandlingÅrsak.FØDSELSHENDELSE, automatiskOpprettelse = true).also {
+        val behandling = lagBehandling(årsak = BehandlingÅrsak.FØDSELSHENDELSE, skalBehandlesAutomatisk = true).also {
             it.resultat = BehandlingResultat.INNVILGET
         }
 

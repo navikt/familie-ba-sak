@@ -269,7 +269,11 @@ internal class BrevUtilsTest {
 
         val fagsak = defaultFagsak().copy(status = FagsakStatus.LØPENDE)
         val behandling =
-            lagBehandling(fagsak = fagsak, automatiskOpprettelse = true, årsak = BehandlingÅrsak.FØDSELSHENDELSE).copy(
+            lagBehandling(
+                fagsak = fagsak,
+                skalBehandlesAutomatisk = true,
+                årsak = BehandlingÅrsak.FØDSELSHENDELSE
+            ).copy(
                 resultat = BehandlingResultat.INNVILGET
             )
         Assertions.assertEquals(
@@ -282,7 +286,11 @@ internal class BrevUtilsTest {
     fun `test hentAutomatiskVedtaksbrevtype gir riktig vedtaksbrevtype for førstegangsbehandling nyfødt barn`() {
         val fagsak = defaultFagsak()
         val behandling =
-            lagBehandling(fagsak = fagsak, automatiskOpprettelse = true, årsak = BehandlingÅrsak.FØDSELSHENDELSE).copy(
+            lagBehandling(
+                fagsak = fagsak,
+                skalBehandlesAutomatisk = true,
+                årsak = BehandlingÅrsak.FØDSELSHENDELSE
+            ).copy(
                 resultat = BehandlingResultat.INNVILGET
             )
         Assertions.assertEquals(

@@ -14,6 +14,59 @@ import org.junit.jupiter.api.Test
 class BehandlingStegTest {
 
     @Test
+    fun `Tester rekkefølgen på behandling MIGRERING`() {
+        var steg = FØRSTE_STEG
+
+        listOf(
+            StegType.REGISTRERE_PERSONGRUNNLAG,
+            StegType.VILKÅRSVURDERING,
+            StegType.BEHANDLINGSRESULTAT,
+            StegType.IVERKSETT_MOT_OPPDRAG,
+            StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI,
+            StegType.FERDIGSTILLE_BEHANDLING,
+            StegType.BEHANDLING_AVSLUTTET
+        ).forEach {
+            assertEquals(steg, it)
+            steg = hentNesteSteg(
+                behandling = lagBehandling(
+                    årsak = BehandlingÅrsak.MIGRERING
+                ).copy(
+                    resultat = BehandlingResultat.INNVILGET
+                ),
+                utførendeStegType = it
+            )
+        }
+    }
+
+    @Test
+    fun `Tester rekkefølgen på behandling ENDRE_MIGRERINGSDATO`() {
+        var steg = FØRSTE_STEG
+
+        listOf(
+            StegType.REGISTRERE_PERSONGRUNNLAG,
+            StegType.VILKÅRSVURDERING,
+            StegType.BEHANDLINGSRESULTAT,
+            StegType.VURDER_TILBAKEKREVING,
+            StegType.SEND_TIL_BESLUTTER,
+            StegType.BESLUTTE_VEDTAK,
+            StegType.IVERKSETT_MOT_OPPDRAG,
+            StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI,
+            StegType.FERDIGSTILLE_BEHANDLING,
+            StegType.BEHANDLING_AVSLUTTET
+        ).forEach {
+            assertEquals(steg, it)
+            steg = hentNesteSteg(
+                behandling = lagBehandling(
+                    årsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO
+                ).copy(
+                    resultat = BehandlingResultat.INNVILGET
+                ),
+                utførendeStegType = it
+            )
+        }
+    }
+
+    @Test
     fun `Tester rekkefølgen på behandling av søknad`() {
         var steg = FØRSTE_STEG
 
@@ -198,6 +251,141 @@ class BehandlingStegTest {
                     behandlingType = BehandlingType.TEKNISK_ENDRING,
                     årsak = BehandlingÅrsak.TEKNISK_ENDRING
                 ),
+                utførendeStegType = it
+            )
+        }
+    }
+
+    @Test
+    fun `Tester rekkefølgen på behandling av omregn 18 år`() {
+        var steg = FØRSTE_STEG
+
+        listOf(
+            StegType.REGISTRERE_PERSONGRUNNLAG,
+            StegType.VILKÅRSVURDERING,
+            StegType.BEHANDLINGSRESULTAT,
+            StegType.JOURNALFØR_VEDTAKSBREV,
+            StegType.DISTRIBUER_VEDTAKSBREV,
+            StegType.FERDIGSTILLE_BEHANDLING,
+            StegType.BEHANDLING_AVSLUTTET
+        ).forEach {
+            assertEquals(it, steg)
+            steg = hentNesteSteg(
+                behandling = lagBehandling(
+                    årsak = BehandlingÅrsak.OMREGNING_18ÅR,
+                    skalBehandlesAutomatisk = false,
+                ).copy(resultat = BehandlingResultat.INNVILGET),
+                utførendeStegType = it
+            )
+        }
+    }
+
+    @Test
+    fun `Tester rekkefølgen på behandling av småbarnstillegg`() {
+        var steg = FØRSTE_STEG
+
+        listOf(
+            StegType.REGISTRERE_PERSONGRUNNLAG,
+            StegType.VILKÅRSVURDERING,
+            StegType.BEHANDLINGSRESULTAT,
+            StegType.VURDER_TILBAKEKREVING,
+            StegType.SEND_TIL_BESLUTTER,
+            StegType.BESLUTTE_VEDTAK,
+            StegType.IVERKSETT_MOT_OPPDRAG,
+            StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI,
+            StegType.IVERKSETT_MOT_FAMILIE_TILBAKE,
+            StegType.JOURNALFØR_VEDTAKSBREV,
+            StegType.DISTRIBUER_VEDTAKSBREV,
+            StegType.FERDIGSTILLE_BEHANDLING,
+            StegType.BEHANDLING_AVSLUTTET
+        ).forEach {
+            assertEquals(it, steg)
+            steg = hentNesteSteg(
+                behandling = lagBehandling(
+                    årsak = BehandlingÅrsak.SMÅBARNSTILLEGG,
+                    skalBehandlesAutomatisk = false,
+                ).copy(resultat = BehandlingResultat.INNVILGET),
+                utførendeStegType = it
+            )
+        }
+    }
+
+    @Test
+    fun `Tester rekkefølgen på behandling av ÅRLIG_KONTROLL, som er test av else gren`() {
+        var steg = FØRSTE_STEG
+
+        listOf(
+            StegType.REGISTRERE_PERSONGRUNNLAG,
+            StegType.VILKÅRSVURDERING,
+            StegType.BEHANDLINGSRESULTAT,
+            StegType.VURDER_TILBAKEKREVING,
+            StegType.SEND_TIL_BESLUTTER,
+            StegType.BESLUTTE_VEDTAK,
+            StegType.IVERKSETT_MOT_OPPDRAG,
+            StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI,
+            StegType.IVERKSETT_MOT_FAMILIE_TILBAKE,
+            StegType.JOURNALFØR_VEDTAKSBREV,
+            StegType.DISTRIBUER_VEDTAKSBREV,
+            StegType.FERDIGSTILLE_BEHANDLING,
+            StegType.BEHANDLING_AVSLUTTET
+        ).forEach {
+            assertEquals(it, steg)
+            steg = hentNesteSteg(
+                behandling = lagBehandling(
+                    årsak = BehandlingÅrsak.ÅRLIG_KONTROLL,
+                    skalBehandlesAutomatisk = false,
+                ).copy(resultat = BehandlingResultat.INNVILGET),
+                utførendeStegType = it
+            )
+        }
+    }
+
+    @Test
+    fun `Tester rekkefølgen på behandling av satsendring`() {
+        var steg = FØRSTE_STEG
+
+        listOf(
+            StegType.REGISTRERE_PERSONGRUNNLAG,
+            StegType.VILKÅRSVURDERING,
+            StegType.BEHANDLINGSRESULTAT,
+            StegType.IVERKSETT_MOT_OPPDRAG,
+            StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI,
+            StegType.FERDIGSTILLE_BEHANDLING,
+            StegType.BEHANDLING_AVSLUTTET
+        ).forEach {
+            assertEquals(it, steg)
+            steg = hentNesteSteg(
+                behandling = lagBehandling(
+                    årsak = BehandlingÅrsak.SATSENDRING,
+                    skalBehandlesAutomatisk = false,
+                ).copy(resultat = BehandlingResultat.ENDRET),
+                utførendeStegType = it
+            )
+        }
+    }
+
+    @Test
+    fun `Tester rekkefølgen på behandling av ÅRLIG_KONTROLL, som er test av else gren, med FORTSATT_INNVILGET`() {
+        var steg = FØRSTE_STEG
+
+        listOf(
+            StegType.REGISTRERE_PERSONGRUNNLAG,
+            StegType.VILKÅRSVURDERING,
+            StegType.BEHANDLINGSRESULTAT,
+            StegType.VURDER_TILBAKEKREVING,
+            StegType.SEND_TIL_BESLUTTER,
+            StegType.BESLUTTE_VEDTAK,
+            StegType.JOURNALFØR_VEDTAKSBREV,
+            StegType.DISTRIBUER_VEDTAKSBREV,
+            StegType.FERDIGSTILLE_BEHANDLING,
+            StegType.BEHANDLING_AVSLUTTET
+        ).forEach {
+            assertEquals(it, steg)
+            steg = hentNesteSteg(
+                behandling = lagBehandling(
+                    årsak = BehandlingÅrsak.ÅRLIG_KONTROLL,
+                    skalBehandlesAutomatisk = false,
+                ).copy(resultat = BehandlingResultat.FORTSATT_INNVILGET),
                 utførendeStegType = it
             )
         }

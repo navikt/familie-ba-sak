@@ -162,13 +162,13 @@ fun lagBehandling(
     behandlingKategori: BehandlingKategori = BehandlingKategori.NASJONAL,
     behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
     årsak: BehandlingÅrsak = BehandlingÅrsak.SØKNAD,
-    automatiskOpprettelse: Boolean = false,
+    skalBehandlesAutomatisk: Boolean = false,
     førsteSteg: StegType = FØRSTE_STEG
 ) =
     Behandling(
         id = nesteBehandlingId(),
         fagsak = fagsak,
-        skalBehandlesAutomatisk = automatiskOpprettelse,
+        skalBehandlesAutomatisk = skalBehandlesAutomatisk,
         type = behandlingType,
         kategori = behandlingKategori,
         underkategori = BehandlingUnderkategori.ORDINÆR,

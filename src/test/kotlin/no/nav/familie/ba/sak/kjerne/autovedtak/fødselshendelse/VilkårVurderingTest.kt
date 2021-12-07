@@ -100,7 +100,7 @@ class VilkårVurderingTest(
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(
-            lagBehandling(fagsak, årsak = BehandlingÅrsak.FØDSELSHENDELSE, automatiskOpprettelse = true)
+            lagBehandling(fagsak, årsak = BehandlingÅrsak.FØDSELSHENDELSE, skalBehandlesAutomatisk = true)
         )
 
         val personopplysningGrunnlag =
