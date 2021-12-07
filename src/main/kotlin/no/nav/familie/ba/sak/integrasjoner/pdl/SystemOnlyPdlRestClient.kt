@@ -27,7 +27,7 @@ class SystemOnlyPdlRestClient(
 
     fun hentAdressebeskyttelse(aktør: Aktør): List<Adressebeskyttelse> {
         val pdlPersonRequest = PdlPersonRequest(
-            variables = PdlPersonRequestVariables(aktør.aktørId),
+            variables = PdlPersonRequestVariables(aktør.aktivIdent()),
             query = hentGraphqlQuery("hent-adressebeskyttelse")
         )
 

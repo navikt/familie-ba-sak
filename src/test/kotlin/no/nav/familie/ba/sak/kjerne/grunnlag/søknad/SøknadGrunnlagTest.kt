@@ -81,7 +81,7 @@ class SøknadGrunnlagTest(
         val barnIdent = randomFnr()
         val søkerAktør = personidentService.hentOgLagreAktør(søkerIdent)
 
-        fagsakService.hentEllerOpprettFagsak(søkerAktør)
+        fagsakService.hentEllerOpprettFagsak(søkerAktør.aktivIdent())
         val behandling = stegService.håndterNyBehandling(
             NyBehandling(
                 BehandlingKategori.NASJONAL,
@@ -112,7 +112,7 @@ class SøknadGrunnlagTest(
         val barnIdent = randomFnr()
         val søkerAktør = personidentService.hentOgLagreAktør(søkerIdent)
 
-        fagsakService.hentEllerOpprettFagsak(søkerAktør)
+        fagsakService.hentEllerOpprettFagsak(søkerAktør.aktivIdent())
         val behandling = stegService.håndterNyBehandling(
             NyBehandling(
                 BehandlingKategori.NASJONAL,
@@ -171,7 +171,7 @@ class SøknadGrunnlagTest(
             endringAvOpplysningerBegrunnelse = ""
         )
 
-        fagsakService.hentEllerOpprettFagsak(søkerAktør)
+        fagsakService.hentEllerOpprettFagsak(søkerAktør.aktivIdent())
         val behandling = stegService.håndterNyBehandling(
             NyBehandling(
                 BehandlingKategori.NASJONAL,

@@ -70,7 +70,7 @@ class BeregningService(
      * 2. Siste behandling som er iverksatt
      * 3. Filtrer bort behandlinger der barnet ikke lenger finnes
      */
-    fun hentSentTilGodkjenningTilkjentYtelseForBarn(
+    fun hentRelevanteTilkjentYtelserForBarn(
         barnAktør: Aktør,
         fagsakId: Long
     ): List<TilkjentYtelse> {

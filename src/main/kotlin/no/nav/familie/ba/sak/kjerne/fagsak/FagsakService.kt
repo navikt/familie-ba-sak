@@ -80,23 +80,24 @@ class FagsakService(
 
     @Transactional
     fun hentEllerOpprettFagsak(fagsakRequest: FagsakRequest): Ressurs<RestMinimalFagsak> {
-        val aktør = when {
-            fagsakRequest.personIdent !== null -> personidentService.hentOgLagreAktør(fagsakRequest.personIdent)
-            fagsakRequest.aktørId !== null -> personidentService.hentOgLagreAktør(fagsakRequest.aktørId)
+        val personident = when {
+            fagsakRequest.personIdent !== null -> fagsakRequest.personIdent
+            fagsakRequest.aktørId !== null -> fagsakRequest.aktørId
             else -> throw Feil(
                 "Hverken aktørid eller personident er satt på fagsak-requesten. Klarer ikke opprette eller hente fagsak.",
                 "Fagsak er forsøkt opprettet uten ident. Dette er en systemfeil, vennligst ta kontakt med systemansvarlig.",
                 HttpStatus.BAD_REQUEST
             )
         }
-        val fagsak = hentEllerOpprettFagsak(aktør)
+        val fagsak = hentEllerOpprettFagsak(personident)
         return hentRestMinimalFagsak(fagsakId = fagsak.id).also {
             skyggesakService.opprettSkyggesak(fagsak.aktør, fagsak.id)
         }
     }
 
     @Transactional
-    fun hentEllerOpprettFagsak(aktør: Aktør, fraAutomatiskBehandling: Boolean = false): Fagsak {
+    fun hentEllerOpprettFagsak(personIdent: String, fraAutomatiskBehandling: Boolean = false): Fagsak {
+        val aktør = personidentService.hentOgLagreAktør(personIdent)
         var fagsak = fagsakRepository.finnFagsakForAktør(aktør)
         if (fagsak == null) {
             tilgangService.verifiserHarTilgangTilHandling(BehandlerRolle.SAKSBEHANDLER, "opprette fagsak")
@@ -213,8 +214,7 @@ class FagsakService(
     }
 
     fun hentEllerOpprettFagsakForPersonIdent(fødselsnummer: String, fraAutomatiskBehandling: Boolean = false): Fagsak {
-        val aktør = personidentService.hentOgLagreAktør(fødselsnummer)
-        return hentEllerOpprettFagsak(aktør, fraAutomatiskBehandling)
+        return hentEllerOpprettFagsak(fødselsnummer, fraAutomatiskBehandling)
     }
 
     fun hent(aktør: Aktør): Fagsak? = fagsakRepository.finnFagsakForAktør(aktør)

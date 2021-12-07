@@ -129,7 +129,7 @@ class BehandlingsresultatService(
 
         val utvidetBarnetrygdSøker =
             if (søknadDTO?.underkategori == BehandlingUnderkategori.UTVIDET)
-                listOf(personidentService.hentOgLagreAktør(søknadDTO.søkerMedOpplysninger.ident))
+                listOf(behandling.fagsak.aktør)
             else emptyList()
 
         val nyeBarn = persongrunnlagService.finnNyeBarn(forrigeBehandling = forrigeBehandling, behandling = behandling)

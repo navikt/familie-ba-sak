@@ -88,7 +88,7 @@ class BehandlingsresultatSteg(
         val barnMedAndreRelevanteTilkjentYtelser = personopplysningGrunnlag.barna.map {
             Pair(
                 it,
-                beregningService.hentSentTilGodkjenningTilkjentYtelseForBarn(it.aktør, behandling.fagsak.id)
+                beregningService.hentRelevanteTilkjentYtelserForBarn(it.aktør, behandling.fagsak.id)
             )
         }
 

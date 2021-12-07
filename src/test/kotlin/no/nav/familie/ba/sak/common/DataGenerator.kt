@@ -688,7 +688,7 @@ fun kjørStegprosessForFGB(
                 behandlingsId = behandlingEtterBeslutteVedtak.id,
                 vedtaksId = vedtak!!.id,
                 saksbehandlerId = "System",
-                aktørId = behandlingEtterBeslutteVedtak.fagsak.aktør.aktørId
+                personIdent = behandlingEtterBeslutteVedtak.fagsak.aktør.aktivIdent()
             )
         )
     if (tilSteg == StegType.IVERKSETT_MOT_OPPDRAG) return behandlingEtterIverksetteVedtak
@@ -799,7 +799,7 @@ fun kjørStegprosessForRevurderingÅrligKontroll(
                 behandlingsId = behandlingEtterBeslutteVedtak.id,
                 vedtaksId = vedtak!!.id,
                 saksbehandlerId = "System",
-                aktørId = behandlingEtterBeslutteVedtak.fagsak.aktør.aktørId,
+                personIdent = behandlingEtterBeslutteVedtak.fagsak.aktør.aktivIdent(),
             )
         )
     if (tilSteg == StegType.IVERKSETT_MOT_OPPDRAG) return behandlingEtterIverksetteVedtak

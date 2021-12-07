@@ -125,8 +125,7 @@ class JournalføringService(
         kategori: BehandlingKategori? = null,
         underkategori: BehandlingUnderkategori? = null
     ): Behandling {
-        val aktør = personidentService.hentOgLagreAktør(personIdent)
-        fagsakService.hentEllerOpprettFagsak(aktør)
+        fagsakService.hentEllerOpprettFagsak(personIdent)
         return stegService.håndterNyBehandlingOgSendInfotrygdFeed(
             NyBehandling(
                 kategori = kategori,

@@ -62,7 +62,7 @@ class HenleggBehandling(
 
     private fun opprettFerdigstillBehandling(behandlingsId: Long, aktør: Aktør) {
         val ferdigstillBehandling =
-            FerdigstillBehandlingTask.opprettTask(behandlingsId = behandlingsId, aktørId = aktør.aktørId)
+            FerdigstillBehandlingTask.opprettTask(behandlingsId = behandlingsId, søkerPersonIdent = aktør.aktivIdent())
         taskRepository.save(ferdigstillBehandling)
     }
 }

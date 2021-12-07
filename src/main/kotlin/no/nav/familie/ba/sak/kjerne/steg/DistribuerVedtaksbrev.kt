@@ -31,7 +31,7 @@ class DistribuerVedtaksbrev(
         val aktør = personidentService.hentOgLagreAktør(data.personIdent)
 
         val ferdigstillBehandlingTask = FerdigstillBehandlingTask.opprettTask(
-            aktørId = aktør.aktørId,
+            søkerPersonIdent = aktør.aktivIdent(),
             behandlingsId = data.behandlingId!!
         )
         taskRepository.save(ferdigstillBehandlingTask)

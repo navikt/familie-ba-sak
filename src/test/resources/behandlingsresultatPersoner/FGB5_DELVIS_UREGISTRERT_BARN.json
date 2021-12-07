@@ -24,11 +24,7 @@
   "uregistrerteBarn": [
     {
       "personIdent": "",
-      "navn": "Mock Mockersen",
-      "aktør": {
-        "fødselsnummer": "12345678912",
-        "aktørId": "1234567891200"
-      }
+      "navn": "Mock Mockersen"
     }
   ],
   "forventetResultat": "DELVIS_INNVILGET"

@@ -187,7 +187,7 @@ class FagsakControllerTest(
     fun `Skal oppgi person med fagsak som fagsakdeltaker`() {
         val personAktør = personidentService.hentOgLagreAktør(randomFnr())
 
-        fagsakService.hentEllerOpprettFagsak(personAktør)
+        fagsakService.hentEllerOpprettFagsak(personAktør.aktivIdent())
             .also { fagsakService.oppdaterStatus(it, FagsakStatus.LØPENDE) }
 
         fagsakController.oppgiFagsakdeltagere(RestSøkParam(personAktør.aktivIdent(), emptyList())).apply {
@@ -202,7 +202,7 @@ class FagsakControllerTest(
         val søkerAktør = personidentService.hentOgLagreAktør(ClientMocks.søkerFnr[0])
         val barnaAktør = personidentService.hentOgLagreAktørIder(ClientMocks.barnFnr.toList().subList(0, 1))
 
-        fagsakService.hentEllerOpprettFagsak(søkerAktør)
+        fagsakService.hentEllerOpprettFagsak(søkerAktør.aktivIdent())
 
         val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(ClientMocks.søkerFnr[0]))
         persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(

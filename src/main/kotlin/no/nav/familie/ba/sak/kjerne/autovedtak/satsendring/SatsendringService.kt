@@ -81,7 +81,7 @@ class SatsendringService(
             )
         } else {
             FerdigstillBehandlingTask.opprettTask(
-                aktørId = søkerAktør.aktørId,
+                søkerPersonIdent = søkerAktør.aktivIdent(),
                 behandlingsId = behandlingEtterBehandlingsresultat.id
             )
         }

@@ -38,12 +38,12 @@ class IverksettMotOppdragTask(
     override fun onCompletion(task: Task) {
 
         val iverksettingTask = objectMapper.readValue(task.payload, IverksettingTaskDTO::class.java)
-        val personIdent = personidentService.hentOgLagreAktør(iverksettingTask.aktørId).aktivIdent()
+        val personIdent = personidentService.hentOgLagreAktør(iverksettingTask.personIdent).aktivIdent()
         val nyTask = Task(
             type = StatusFraOppdragTask.TASK_STEP_TYPE,
             payload = objectMapper.writeValueAsString(
                 StatusFraOppdragDTO(
-                    aktørId = iverksettingTask.aktørId,
+                    aktørId = iverksettingTask.personIdent,
                     personIdent = personIdent,
                     fagsystem = FAGSYSTEM,
                     behandlingsId = iverksettingTask.behandlingsId,
@@ -73,14 +73,14 @@ class IverksettMotOppdragTask(
                 type = TASK_STEP_TYPE,
                 payload = objectMapper.writeValueAsString(
                     IverksettingTaskDTO(
-                        aktørId = aktør.aktørId,
+                        personIdent = aktør.aktivIdent(),
                         behandlingsId = behandlingsId,
                         vedtaksId = vedtaksId,
                         saksbehandlerId = saksbehandlerId
                     )
                 ),
                 properties = Properties().apply {
-                    this["aktørId"] = aktør.aktørId
+                    this["personIdent"] = aktør.aktivIdent()
                     this["behandlingsId"] = behandlingsId.toString()
                     this["vedtakId"] = vedtaksId.toString()
                 }
