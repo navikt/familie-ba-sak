@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestNyttVilkår
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
+import no.nav.familie.ba.sak.ekstern.restDomene.RestSlettVilkår
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonResultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
@@ -24,6 +25,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
+import no.nav.familie.ba.sak.kjerne.steg.BehandlingStegStatus
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurderingType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
@@ -943,6 +945,220 @@ class VilkårServiceTest(
             )
         }
         assertEquals("${Vilkår.UTVIDET_BARNETRYGD.beskrivelse} kan ikke legges til for BARN", exception.message)
+    }
+
+    @Test
+    fun `skal ikke slette bor med søker vilkår for migreringsbehandling`() {
+        val fnr = randomFnr()
+        val barnFnr = randomFnr()
+        val forrigeVilkårsdato = LocalDate.of(2021, 8, 1)
+        val barnetsFødselsdato = LocalDate.now().minusYears(1)
+
+        val behandlinger = lagMigreringsbehandling(fnr, barnFnr, barnetsFødselsdato, forrigeVilkårsdato)
+        val behandling = behandlinger.second
+        vilkårService.genererVilkårsvurderingForMigreringsbehandlingMedÅrsakEndreMigreringsdato(
+            behandling = behandling,
+            forrigeBehandlingSomErVedtatt = behandlinger.first,
+            nyMigreringsdato = LocalDate.of(2021, 1, 1)
+        )
+
+        val exception = assertThrows<RuntimeException> {
+            vilkårService.deleteVilkår(
+                behandling.id,
+                RestSlettVilkår(
+                    personIdent = fnr,
+                    vilkårType = Vilkår.BOR_MED_SØKER
+                )
+            )
+        }
+        assertEquals(
+            "Vilkår ${Vilkår.BOR_MED_SØKER.beskrivelse} kan ikke slettes " +
+                "for behandling ${behandling.id}",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `skal ikke slette utvidet barnetrygd vilkår for førstegangsbehandling`() {
+        val fnr = randomFnr()
+        val barnFnr = randomFnr()
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(
+            lagBehandling(
+                fagsak = fagsak,
+                behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                årsak = BehandlingÅrsak.SØKNAD,
+            )
+        )
+        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
+            behandling.id,
+            fnr, listOf(barnFnr),
+            LocalDate.now().minusYears(1),
+            personidentService.hentOgLagreAktørId(fnr),
+            personidentService.hentOgLagreAktørIder(listOf(barnFnr))
+        )
+        persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
+        vilkårService.initierVilkårsvurderingForBehandling(behandling, false)
+
+        val exception = assertThrows<RuntimeException> {
+            vilkårService.deleteVilkår(
+                behandling.id,
+                RestSlettVilkår(
+                    personIdent = fnr,
+                    vilkårType = Vilkår.UTVIDET_BARNETRYGD
+                )
+            )
+        }
+        assertEquals(
+            "Vilkår ${Vilkår.UTVIDET_BARNETRYGD.beskrivelse} kan ikke slettes " +
+                "for behandling ${behandling.id}",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `skal ikke slette utvidet barnetrygd vilkår for migreringsbehandling når det finnes i forrige behandling`() {
+        val fnr = randomFnr()
+        val barnFnr = randomFnr()
+        val forrigeVilkårsdato = LocalDate.of(2021, 8, 1)
+        val barnetsFødselsdato = LocalDate.now().minusYears(1)
+
+        val behandlinger = lagMigreringsbehandling(fnr, barnFnr, barnetsFødselsdato, forrigeVilkårsdato)
+        var forrigeBehandling = behandlinger.first
+        val behandling = behandlinger.second
+
+        val forrigeVilkårvurdering = vilkårService.hentVilkårsvurdering(forrigeBehandling.id)!!
+        val forrigeSøkerPersonResultat = forrigeVilkårvurdering.personResultater.first { it.personIdent == fnr }
+        val forrigeBarnPersonResultat = forrigeVilkårvurdering.personResultater.first { it.personIdent == barnFnr }
+        val forrigeVilkårResultat = forrigeSøkerPersonResultat.vilkårResultater
+        forrigeVilkårResultat.add(
+            lagVilkårResultat(
+                personResultat = forrigeSøkerPersonResultat,
+                vilkårType = Vilkår.UTVIDET_BARNETRYGD,
+                periodeFom = LocalDate.of(2021, 5, 1),
+                periodeTom = LocalDate.of(2021, 5, 31),
+                behandlingId = forrigeBehandling.id
+            )
+        )
+        vilkårsvurderingService.oppdater(
+            forrigeVilkårvurdering.copy(
+                personResultater = setOf(
+                    forrigeSøkerPersonResultat,
+                    forrigeBarnPersonResultat
+                )
+            )
+        )
+        forrigeBehandling = behandlingService.hent(forrigeBehandling.id)
+        forrigeBehandling.behandlingStegTilstand.add(
+            BehandlingStegTilstand(
+                behandling = forrigeBehandling,
+                behandlingSteg = StegType.BEHANDLING_AVSLUTTET,
+                behandlingStegStatus = BehandlingStegStatus.UTFØRT
+            )
+        )
+        behandlingService.lagreEllerOppdater(forrigeBehandling)
+
+        val vilkårsvurdering = vilkårService.genererVilkårsvurderingForMigreringsbehandlingMedÅrsakEndreMigreringsdato(
+            behandling = behandling,
+            forrigeBehandlingSomErVedtatt = forrigeBehandling,
+            nyMigreringsdato = LocalDate.of(2021, 1, 1)
+        )
+        assertTrue { vilkårsvurdering.personResultater.first { it.personIdent == fnr }.vilkårResultater.size == 3 }
+        val exception = assertThrows<RuntimeException> {
+            vilkårService.deleteVilkår(
+                behandling.id,
+                RestSlettVilkår(
+                    personIdent = fnr,
+                    vilkårType = Vilkår.UTVIDET_BARNETRYGD
+                )
+            )
+        }
+        assertEquals(
+            "Vilkår ${Vilkår.UTVIDET_BARNETRYGD.beskrivelse} kan ikke slettes " +
+                "for behandling ${behandling.id}",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `skal ikke slette utvidet barnetrygd vilkår for migreringsbehandling når det ikke finnes`() {
+        val fnr = randomFnr()
+        val barnFnr = randomFnr()
+        val forrigeVilkårsdato = LocalDate.of(2021, 8, 1)
+        val barnetsFødselsdato = LocalDate.now().minusYears(1)
+
+        val behandlinger = lagMigreringsbehandling(fnr, barnFnr, barnetsFødselsdato, forrigeVilkårsdato)
+        val behandling = behandlinger.second
+        vilkårService.genererVilkårsvurderingForMigreringsbehandlingMedÅrsakEndreMigreringsdato(
+            behandling = behandling,
+            forrigeBehandlingSomErVedtatt = behandlinger.first,
+            nyMigreringsdato = LocalDate.of(2021, 1, 1)
+        )
+
+        val exception = assertThrows<RuntimeException> {
+            vilkårService.deleteVilkår(
+                behandling.id,
+                RestSlettVilkår(
+                    personIdent = fnr,
+                    vilkårType = Vilkår.UTVIDET_BARNETRYGD
+                )
+            )
+        }
+        assertEquals(
+            "Fant ikke ${Vilkår.UTVIDET_BARNETRYGD.beskrivelse} for person",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `skal slette utvidet barnetrygd vilkår for migreringsbehandling`() {
+        val fnr = randomFnr()
+        val barnFnr = randomFnr()
+        val forrigeVilkårsdato = LocalDate.of(2021, 8, 1)
+        val barnetsFødselsdato = LocalDate.now().minusYears(1)
+
+        val behandlinger = lagMigreringsbehandling(fnr, barnFnr, barnetsFødselsdato, forrigeVilkårsdato)
+        val behandling = behandlinger.second
+        vilkårService.genererVilkårsvurderingForMigreringsbehandlingMedÅrsakEndreMigreringsdato(
+            behandling = behandling,
+            forrigeBehandlingSomErVedtatt = behandlinger.first,
+            nyMigreringsdato = LocalDate.of(2021, 1, 1)
+        )
+
+        vilkårService.postVilkår(
+            behandling.id,
+            RestNyttVilkår(personIdent = fnr, vilkårType = Vilkår.UTVIDET_BARNETRYGD)
+        )
+
+        assertTrue {
+            vilkårService.hentVilkårsvurdering(behandling.id)!!
+                .personResultater.first { it.personIdent == fnr }.vilkårResultater.size == 3
+        }
+
+        assertTrue {
+            vilkårService.hentVilkårsvurdering(behandling.id)!!
+                .personResultater.first { it.personIdent == fnr }
+                .vilkårResultater.any { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
+        }
+
+        vilkårService.deleteVilkår(
+            behandling.id,
+            RestSlettVilkår(
+                personIdent = fnr,
+                vilkårType = Vilkår.UTVIDET_BARNETRYGD
+            )
+        )
+
+        assertTrue {
+            vilkårService.hentVilkårsvurdering(behandling.id)!!
+                .personResultater.first { it.personIdent == fnr }.vilkårResultater.size == 2
+        }
+
+        assertTrue {
+            vilkårService.hentVilkårsvurdering(behandling.id)!!
+                .personResultater.first { it.personIdent == fnr }
+                .vilkårResultater.none { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
+        }
     }
 
     private fun lagMigreringsbehandling(

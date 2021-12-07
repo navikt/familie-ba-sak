@@ -141,7 +141,7 @@ class VilkårService(
             throw Feil(
                 message = "Fant ikke ${restSlettVilkår.vilkårType.beskrivelse} for person",
                 frontendFeilmelding = "Fant ikke ${restSlettVilkår.vilkårType.beskrivelse} " +
-                    "for person med ident '${restSlettVilkår.personIdent}"
+                    "for person med ident ${restSlettVilkår.personIdent}"
             )
         } else {
             vilkårResultater.forEach { personResultat.removeVilkårResultat(it.id) }
