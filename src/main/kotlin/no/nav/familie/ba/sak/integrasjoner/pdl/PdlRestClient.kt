@@ -48,7 +48,7 @@ class PdlRestClient(
     fun hentPerson(aktør: Aktør, personInfoQuery: PersonInfoQuery): PersonInfo {
 
         val pdlPersonRequest = PdlPersonRequest(
-            variables = PdlPersonRequestVariables(aktør.aktørId),
+            variables = PdlPersonRequestVariables(aktør.aktivIdent()),
             query = personInfoQuery.graphQL
         )
         try {
@@ -140,7 +140,7 @@ class PdlRestClient(
 
     fun hentDødsfall(aktør: Aktør): List<Doedsfall> {
         val pdlPersonRequest = PdlPersonRequest(
-            variables = PdlPersonRequestVariables(aktør.aktørId),
+            variables = PdlPersonRequestVariables(aktør.aktivIdent()),
             query = hentGraphqlQuery("doedsfall")
         )
         val response = try {
@@ -164,7 +164,7 @@ class PdlRestClient(
 
     fun hentVergemaalEllerFremtidsfullmakt(aktør: Aktør): List<VergemaalEllerFremtidsfullmakt> {
         val pdlPersonRequest = PdlPersonRequest(
-            variables = PdlPersonRequestVariables(aktør.aktørId),
+            variables = PdlPersonRequestVariables(aktør.aktivIdent()),
             query = hentGraphqlQuery("verge")
         )
         val response = try {
@@ -189,7 +189,7 @@ class PdlRestClient(
     fun hentStatsborgerskapUtenHistorikk(aktør: Aktør): List<Statsborgerskap> {
 
         val pdlPersonRequest = PdlPersonRequest(
-            variables = PdlPersonRequestVariables(aktør.aktørId),
+            variables = PdlPersonRequestVariables(aktør.aktivIdent()),
             query = hentGraphqlQuery("statsborgerskap-uten-historikk")
         )
         val response = try {
@@ -213,7 +213,7 @@ class PdlRestClient(
 
     fun hentOppholdUtenHistorikk(aktør: Aktør): List<Opphold> {
         val pdlPersonRequest = PdlPersonRequest(
-            variables = PdlPersonRequestVariables(aktør.aktørId),
+            variables = PdlPersonRequestVariables(aktør.aktivIdent()),
             query = hentGraphqlQuery("opphold-uten-historikk")
         )
         val response = try {
@@ -247,7 +247,7 @@ class PdlRestClient(
 
     fun hentUtenlandskBostedsadresse(aktør: Aktør): PdlUtenlandskAdressseResponse.UtenlandskAdresse? {
         val pdlPersonRequest = PdlPersonRequest(
-            variables = PdlPersonRequestVariables(aktør.aktørId),
+            variables = PdlPersonRequestVariables(aktør.aktivIdent()),
             query = hentGraphqlQuery("bostedsadresse-utenlandsk")
         )
         val response = try {
@@ -277,7 +277,7 @@ class PdlRestClient(
      */
     fun hentForelderBarnRelasjon(aktør: Aktør): List<no.nav.familie.kontrakter.felles.personopplysning.ForelderBarnRelasjon> {
         val pdlPersonRequest = PdlPersonRequest(
-            variables = PdlPersonRequestVariables(aktør.aktørId),
+            variables = PdlPersonRequestVariables(aktør.aktivIdent()),
             query = hentGraphqlQuery("hentperson-relasjoner")
         )
         val response = try {
