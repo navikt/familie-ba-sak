@@ -126,7 +126,7 @@ enum class StegType(
     ),
     FERDIGSTILLE_BEHANDLING(
         rekkefølge = 13,
-        tillattFor = listOf(BehandlerRolle.SYSTEM),
+        tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
         gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSETTER_VEDTAK, BehandlingStatus.UTREDES)
     ),
     BEHANDLING_AVSLUTTET(
@@ -259,7 +259,7 @@ fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType): StegTyp
                 VILKÅRSVURDERING -> BEHANDLINGSRESULTAT
                 BEHANDLINGSRESULTAT -> {
                     if (!behandling.skalBehandlesAutomatisk) VURDER_TILBAKEKREVING
-                    else if (behandling.skalBehandlesAutomatisk && behandling.status == BehandlingStatus.IVERKSETTER_VEDTAK) IVERKSETT_MOT_OPPDRAG else BEHANDLINGSRESULTAT
+                    else if (behandling.skalBehandlesAutomatisk && behandling.status == BehandlingStatus.IVERKSETTER_VEDTAK) IVERKSETT_MOT_OPPDRAG else VURDER_TILBAKEKREVING
                 }
                 VURDER_TILBAKEKREVING -> SEND_TIL_BESLUTTER
                 SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK

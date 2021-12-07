@@ -97,12 +97,10 @@ class FødselshendelseRevurderingTest(
         vurderteVilkårIDenneBehandlingen.forEach { assertEquals(revurderingsbarnSinFødselsdato, it.periodeFom) }
 
         val utbetalingsperioder = aktivBehandling.utbetalingsperioder
-        val gjeldendeUtbetalingsperiode = utbetalingsperioder.find {
-            it.periodeFom.toYearMonth() == maxOf(
-                SatsService.tilleggOrdinærSatsNesteMånedTilTester.gyldigFom.toYearMonth(),
-                now().minusMonths(2).toYearMonth()
-            )
-        }!!
+        val førsteMånedMed2Barn = revurderingsbarnSinFødselsdato.plusMonths(1).toYearMonth()
+        val gjeldendeUtbetalingsperiode = utbetalingsperioder.sortedBy { it.periodeFom }.first {
+            it.periodeFom.toYearMonth() <= førsteMånedMed2Barn && førsteMånedMed2Barn <= it.periodeTom.toYearMonth()
+        }
 
         assertUtbetalingsperiode(
             gjeldendeUtbetalingsperiode,

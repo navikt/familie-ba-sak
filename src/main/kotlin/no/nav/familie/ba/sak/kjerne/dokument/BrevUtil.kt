@@ -5,9 +5,6 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.erSenereEnnInneværendeMåned
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
-import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
-import no.nav.familie.ba.sak.ekstern.restDomene.RestPerson
-import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPerson
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat.AVSLÅTT
@@ -29,6 +26,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat.INNVILG
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat.OPPHØRT
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.behandlingsresultat.UregistrertBarnEnkel
 import no.nav.familie.ba.sak.kjerne.dokument.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.EndretUtbetalingBrevPeriodeType
@@ -42,7 +40,6 @@ import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.brevperioder.Innvilgel
 import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.brevperioder.OpphørBrevPeriode
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.domene.Totrinnskontroll
@@ -51,7 +48,9 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.hjemlerTilhørendeFritekst
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Begrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.BegrunnelsePerson
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.byggBegrunnelserOgFritekster
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilBarnasFødselsdatoer
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
@@ -237,13 +236,13 @@ enum class UtvidetScenario {
 }
 
 fun UtvidetVedtaksperiodeMedBegrunnelser.tilBrevPeriode(
-    personerIPersongrunnlag: List<Person>,
+    begrunnelsepersonerIBehandling: List<BegrunnelsePerson>,
     målform: Målform,
     utvidetScenario: UtvidetScenario = UtvidetScenario.IKKE_UTVIDET_YTELSE,
-    uregistrerteBarn: List<BarnMedOpplysninger> = emptyList(),
+    uregistrerteBarn: List<UregistrertBarnEnkel> = emptyList(),
 ): BrevPeriode? {
     val begrunnelserOgFritekster = this.byggBegrunnelserOgFritekster(
-        personerIPersongrunnlag = personerIPersongrunnlag,
+        begrunnelsepersonerIBehandling = begrunnelsepersonerIBehandling,
         målform = målform,
         uregistrerteBarn = uregistrerteBarn
     )
@@ -260,7 +259,7 @@ fun UtvidetVedtaksperiodeMedBegrunnelser.tilBrevPeriode(
         Vedtaksperiodetype.UTBETALING -> hentInnvilgelseBrevPeriode(
             tomDato,
             begrunnelserOgFritekster,
-            personerIPersongrunnlag
+            begrunnelsepersonerIBehandling
         )
 
         Vedtaksperiodetype.ENDRET_UTBETALING -> hentEndretUtbetalingBrevPeriode(
@@ -327,7 +326,7 @@ fun UtvidetVedtaksperiodeMedBegrunnelser.hentEndretUtbetalingBrevPeriode(
 private fun UtvidetVedtaksperiodeMedBegrunnelser.hentInnvilgelseBrevPeriode(
     tomDato: String?,
     begrunnelserOgFritekster: List<Begrunnelse>,
-    personerIPersongrunnlag: List<Person>,
+    personerIPersongrunnlag: List<BegrunnelsePerson>,
 ): InnvilgelseBrevPeriode {
     val barnIPeriode = finnBarnIInnvilgelsePeriode(personerIPersongrunnlag)
 
@@ -342,8 +341,8 @@ private fun UtvidetVedtaksperiodeMedBegrunnelser.hentInnvilgelseBrevPeriode(
 }
 
 fun UtvidetVedtaksperiodeMedBegrunnelser.finnBarnIInnvilgelsePeriode(
-    personerIPersongrunnlag: List<Person>
-): List<RestPerson> {
+    personerIPersongrunnlag: List<BegrunnelsePerson>
+): List<BegrunnelsePerson> {
     val identerIBegrunnelene = this.begrunnelser
         .filter { it.vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGET }
         .flatMap { it.personIdenter }
@@ -352,7 +351,7 @@ fun UtvidetVedtaksperiodeMedBegrunnelser.finnBarnIInnvilgelsePeriode(
     val barnIPeriode = (identerIBegrunnelene + identerMedUtbetaling)
         .toSet()
         .mapNotNull { personIdent ->
-            personerIPersongrunnlag.find { it.personIdent.ident == personIdent }?.tilRestPerson()
+            personerIPersongrunnlag.find { it.personIdent == personIdent }
         }
         .filter { it.type == PersonType.BARN }
 

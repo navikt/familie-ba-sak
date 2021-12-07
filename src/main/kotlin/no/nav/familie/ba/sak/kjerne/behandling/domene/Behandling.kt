@@ -217,12 +217,12 @@ data class Behandling(
     fun erMigrering() =
         type == BehandlingType.MIGRERING_FRA_INFOTRYGD || type == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT
 
+    fun erSatsendring() = this.opprettetÅrsak == BehandlingÅrsak.SATSENDRING
+
     fun erManuellMigrering() = erMigrering() && opprettetÅrsak == BehandlingÅrsak.ENDRE_MIGRERINGSDATO
 
     private fun erOmregning() =
         this.opprettetÅrsak == BehandlingÅrsak.OMREGNING_6ÅR || this.opprettetÅrsak == BehandlingÅrsak.OMREGNING_18ÅR
-
-    private fun erSatsendring() = this.opprettetÅrsak == BehandlingÅrsak.SATSENDRING
 
     private fun erFødselshendelse() = this.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE
 

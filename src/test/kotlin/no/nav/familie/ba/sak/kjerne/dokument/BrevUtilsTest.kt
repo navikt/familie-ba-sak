@@ -22,6 +22,7 @@ import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.domene.Totrinnskontroll
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilBegrunnelsePerson
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import org.junit.Assert.assertEquals
 import org.junit.jupiter.api.Assertions
@@ -512,14 +513,14 @@ internal class BrevUtilsTest {
             )
         )
 
-        val personerIPersongrunnlag = listOf(barn1, barn2, barn3, søker)
+        val personerIPersongrunnlag = listOf(barn1, barn2, barn3, søker).map { it.tilBegrunnelsePerson() }
 
         val barnIPeriode = utvidetVedtaksperiodeMedBegrunnelser.finnBarnIInnvilgelsePeriode(personerIPersongrunnlag)
 
         Assertions.assertEquals(2, barnIPeriode.size)
         Assertions.assertTrue(
-            barnIPeriode.contains(barn1.tilRestPerson()) &&
-                barnIPeriode.contains(barn2.tilRestPerson())
+            barnIPeriode.any { it.personIdent == barn1.personIdent.ident } &&
+                barnIPeriode.any { it.personIdent == barn2.personIdent.ident }
         )
     }
 }

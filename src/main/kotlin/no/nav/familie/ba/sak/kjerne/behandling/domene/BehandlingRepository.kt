@@ -69,7 +69,7 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
     @Query(
         """select b from Behandling b
                            inner join BehandlingStegTilstand bst on b.id = bst.behandling.id
-                        where b.fagsak.id = :fagsakId AND bst.behandlingSteg = 'BESLUTTE_VEDTAK' """
+                        where b.fagsak.id = :fagsakId AND bst.behandlingSteg = 'BESLUTTE_VEDTAK' AND bst.behandlingStegStatus = 'IKKE_UTFØRT'"""
     )
     fun finnBehandlingerSentTilGodkjenning(fagsakId: Long): List<Behandling>
 
@@ -77,12 +77,16 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
     fun findByFagsakAndAvsluttet(fagsakId: Long): List<Behandling>
 
     @Lock(LockModeType.NONE)
-    @Query("SELECT count(*) FROM Behandling b WHERE NOT b.status = 'AVSLUTTET'")
+    @Query("SELECT count(*) FROM Behandling b JOIN b.fagsak f WHERE NOT b.status = 'AVSLUTTET' AND f.arkivert = false")
     fun finnAntallBehandlingerIkkeAvsluttet(): Long
 
     @Lock(LockModeType.NONE)
-    @Query("SELECT b.opprettetTidspunkt FROM Behandling b WHERE NOT b.status = 'AVSLUTTET'")
+    @Query("SELECT b.opprettetTidspunkt FROM Behandling b JOIN b.fagsak f WHERE NOT b.status = 'AVSLUTTET' AND f.arkivert = false")
     fun finnOpprettelsestidspunktPåÅpneBehandlinger(): List<LocalDateTime>
+
+    @Lock(LockModeType.NONE)
+    @Query("SELECT b FROM Behandling b JOIN b.fagsak f WHERE b.opprettetTidspunkt < :opprettetFør AND b.status <> 'AVSLUTTET' AND f.arkivert = false")
+    fun finnÅpneBehandlinger(opprettetFør: LocalDateTime): List<Behandling>
 
     @Query("SELECT DISTINCT aty.behandlingId FROM AndelTilkjentYtelse aty WHERE aty.behandlingId in :iverksatteLøpende AND aty.sats = :gammelSats AND aty.stønadTom >= :månedÅrForEndring")
     fun finnBehadlingerForSatsendring(
