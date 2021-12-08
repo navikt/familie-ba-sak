@@ -102,7 +102,7 @@ class FagsakService(
         if (fagsak == null) {
             tilgangService.verifiserHarTilgangTilHandling(BehandlerRolle.SAKSBEHANDLER, "opprette fagsak")
 
-            // TODO: robustgjøring dnr/fnr fjern opprettelse av fagsak person ved contract. 
+            // TODO: robustgjøring dnr/fnr fjern opprettelse av fagsak person ved contract.
             fagsak = Fagsak(aktør = aktør).also {
                 it.søkerIdenter = setOf(FagsakPerson(personIdent = PersonIdent(aktør.aktivIdent()), fagsak = it))
                 lagre(it)
