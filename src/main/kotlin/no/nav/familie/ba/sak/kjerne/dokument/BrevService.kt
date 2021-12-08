@@ -174,33 +174,37 @@ class BrevService(
             )
         }
 
-        val grunnlagOgSignaturData = hentGrunnlagOgSignaturData(vedtak)
-
         val sanityBegrunnelser = sanityService.hentSanityBegrunnelser()
 
-        val hjemler = hentHjemmeltekst(utvidetVedtaksperioderMedBegrunnelser, sanityBegrunnelser)
+        val grunnlagOgSignaturData = hentGrunnlagOgSignaturData(vedtak)
 
         val andelerTilkjentYtelse =
             andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(vedtak.behandling.id)
 
         val brevGrunnlag = vedtaksperiodeService.hentBrevGrunnlag(vedtak.behandling.id)
 
-        val brevperioder = utvidetVedtaksperioderMedBegrunnelser
+        val uregistrerteBarn = hentUregistrerteBarn(vedtak.behandling.id)
+
+        val brevPeriodeGunnlag = utvidetVedtaksperioderMedBegrunnelser
             .sorter()
             .map { it.tilBrevPeriodeGrunnlag(sanityBegrunnelser) }
-            .mapNotNull { brevPeriodeGrunnlag ->
-                brevPeriodeGrunnlag.tilBrevPeriode(
+
+        val brevperioder = brevPeriodeGunnlag
+            .mapNotNull {
+                it.tilBrevPeriode(
                     brevGrunnlag = brevGrunnlag,
-                    uregistrerteBarn = hentUregistrerteBarn(vedtak.behandling.id),
+                    uregistrerteBarn = uregistrerteBarn,
                     utvidetScenario = andelerTilkjentYtelse
-                        .hentUtvidetYtelseScenario(brevPeriodeGrunnlag.hentMånedPeriode()),
+                        .hentUtvidetYtelseScenario(it.hentMånedPeriode()),
                     erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak(
                         andelerTilkjentYtelse,
-                        brevPeriodeGrunnlag.fom
+                        it.fom
                     ),
                     målformSøker = grunnlagOgSignaturData.grunnlag.søker.målform,
                 )
             }
+
+        val hjemler = hentHjemmeltekst(brevPeriodeGunnlag, sanityBegrunnelser)
 
         return VedtakFellesfelter(
             enhet = grunnlagOgSignaturData.enhet,

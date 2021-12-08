@@ -49,7 +49,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.hjemlerTilhørendeFritek
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Begrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.MinimertPerson
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.BrevGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.BrevPeriodeGrunnlag
@@ -197,10 +196,10 @@ fun hentOverstyrtDokumenttittel(behandling: Behandling): String? {
 }
 
 fun hentHjemlerIVedtaksperioderFraSanity(
-    utvidetVedtaksperiodeMedBegrunnelser: List<UtvidetVedtaksperiodeMedBegrunnelser>,
+    brevPeriodeGrunnlag: List<BrevPeriodeGrunnlag>,
     sanityBegrunnelser: List<SanityBegrunnelse>
 ): List<String> =
-    utvidetVedtaksperiodeMedBegrunnelser.flatMap { periode ->
+    brevPeriodeGrunnlag.flatMap { periode ->
         periode.begrunnelser.mapNotNull {
             it.vedtakBegrunnelseSpesifikasjon.tilSanityBegrunnelse(sanityBegrunnelser)?.hjemler
         }.flatten()
@@ -215,13 +214,13 @@ fun hjemlerTilHjemmeltekst(hjemler: List<String>): String {
 }
 
 fun hentHjemmeltekst(
-    utvidetVedtaksperioderMedBegrunnelser: List<UtvidetVedtaksperiodeMedBegrunnelser>,
+    brevPeriodeGrunnlag: List<BrevPeriodeGrunnlag>,
     sanityBegrunnelser: List<SanityBegrunnelse>
 ): String {
     val hjemler =
-        hentHjemlerIVedtaksperioderFraSanity(utvidetVedtaksperioderMedBegrunnelser, sanityBegrunnelser).toMutableSet()
+        hentHjemlerIVedtaksperioderFraSanity(brevPeriodeGrunnlag, sanityBegrunnelser).toMutableSet()
 
-    if (utvidetVedtaksperioderMedBegrunnelser.flatMap { it.fritekster }.isNotEmpty()) {
+    if (brevPeriodeGrunnlag.flatMap { it.fritekster }.isNotEmpty()) {
         hjemler.addAll(hjemlerTilhørendeFritekst.map { it.toString() }.toSet())
     }
 
