@@ -114,7 +114,7 @@ internal class PersonidentServiceTest {
         assertEquals(2, aktør?.personidenter?.size)
         assertEquals(personIdentSomSkalLeggesTil, aktør!!.aktivIdent())
         assertTrue(aktør!!.personidenter.first { !it.aktiv }.gjelderTil!!.isBefore(LocalDateTime.now()))
-        verify(exactly = 1) { aktørIdRepository.save(any()) }
+        verify(exactly = 2) { aktørIdRepository.save(any()) }
         verify(exactly = 0) { personidentRepository.save(any()) }
     }
 
@@ -250,7 +250,7 @@ internal class PersonidentServiceTest {
 
         val aktør = personidentService.hentOgLagreAktør(personidentHistorisk)
 
-        verify(exactly = 1) { aktørIdRepository.save(any()) }
+        verify(exactly = 2) { aktørIdRepository.save(any()) }
         verify(exactly = 0) { personidentRepository.save(any()) }
         assertEquals(aktørIdAktiv.aktørId, aktør.aktørId)
         assertEquals(personidentAktiv, aktør.personidenter.single().fødselsnummer)
