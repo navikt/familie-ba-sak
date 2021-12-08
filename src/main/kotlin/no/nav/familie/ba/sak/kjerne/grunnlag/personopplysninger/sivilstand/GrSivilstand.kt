@@ -76,6 +76,8 @@ data class GrSivilstand(
     companion object {
 
         fun List<GrSivilstand>.sisteSivilstand(): GrSivilstand? {
+            if (this.size == 1) return this.single()
+
             val sivilstandMedFom = this.filter { it.harGyldigFom() }
             return sivilstandMedFom.maxByOrNull { it.fom!! }
         }
