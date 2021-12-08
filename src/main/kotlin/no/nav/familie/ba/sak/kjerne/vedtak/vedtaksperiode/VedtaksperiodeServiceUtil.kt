@@ -20,13 +20,13 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.BegrunnelsePerson
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.MinimertPerson
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.barnMedSeksårsdagPåFom
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.harBarnMedSeksårsdagPåFom
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.hentSøker
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.BegrunnelseGrunnlag
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.BrevGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.harPersonerSomManglerOpplysninger
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.somOverlapper
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
@@ -81,7 +81,7 @@ fun hentPersonidenterGjeldendeForBegrunnelse(
     periode: NullablePeriode,
     vedtaksperiodeType: Vedtaksperiodetype,
     vedtakBegrunnelseType: VedtakBegrunnelseType,
-    begrunnelseGrunnlag: BegrunnelseGrunnlag,
+    begrunnelseGrunnlag: BrevGrunnlag,
     identerMedUtbetaling: List<String>,
     erFørsteVedtaksperiodePåFagsak: Boolean,
 ): List<String> {
@@ -93,14 +93,14 @@ fun hentPersonidenterGjeldendeForBegrunnelse(
     return when {
         triggesAv.vilkår.contains(Vilkår.UTVIDET_BARNETRYGD) || triggesAv.småbarnstillegg ->
             identerMedUtbetaling +
-                begrunnelseGrunnlag.begrunnelsePersoner.hentSøker().personIdent +
+                begrunnelseGrunnlag.personerPåBehandling.hentSøker().personIdent +
                 begrunnelseGrunnlag
                     .minimerteEndredeUtbetalingAndeler
                     .somOverlapper(periode.tilNullableMånedPeriode())
                     .map { it.personIdent }
 
         triggesAv.barnMedSeksårsdag ->
-            begrunnelseGrunnlag.begrunnelsePersoner.barnMedSeksårsdagPåFom(periode.fom)
+            begrunnelseGrunnlag.personerPåBehandling.barnMedSeksårsdagPåFom(periode.fom)
                 .map { person -> person.personIdent }
 
         triggesAv.personerManglerOpplysninger ->
@@ -127,7 +127,7 @@ fun hentPersonidenterGjeldendeForBegrunnelse(
                 ),
                 oppdatertBegrunnelseType = vedtakBegrunnelseType,
                 aktuellePersonerForVedtaksperiode = hentAktuellePersonerForVedtaksperiode(
-                    begrunnelseGrunnlag.begrunnelsePersoner,
+                    begrunnelseGrunnlag.personerPåBehandling,
                     vedtakBegrunnelseType,
                     identerMedUtbetaling
                 ),
@@ -138,16 +138,16 @@ fun hentPersonidenterGjeldendeForBegrunnelse(
 }
 
 private fun hentAktuellePersonerForVedtaksperiode(
-    begrunnelsePersoner: List<BegrunnelsePerson>,
+    begrunnelsePersoner: List<MinimertPerson>,
     vedtakBegrunnelseType: VedtakBegrunnelseType,
     identerMedUtbetaling: List<String>
-): List<BegrunnelsePerson> = begrunnelsePersoner.filter { person ->
+): List<MinimertPerson> = begrunnelsePersoner.filter { person ->
     if (vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGET) {
         identerMedUtbetaling.contains(person.personIdent) || person.type == PersonType.SØKER
     } else true
 }
 
-fun validerSatsendring(fom: LocalDate?, begrunnelsePerson: List<BegrunnelsePerson>) {
+fun validerSatsendring(fom: LocalDate?, begrunnelsePerson: List<MinimertPerson>) {
     val satsendring = SatsService
         .finnSatsendring(fom ?: TIDENES_MORGEN)
 

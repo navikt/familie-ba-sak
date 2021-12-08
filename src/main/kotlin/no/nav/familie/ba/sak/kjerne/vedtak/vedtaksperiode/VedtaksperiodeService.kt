@@ -37,7 +37,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilBegrunnelsePerson
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilVedtaksbegrunnelseFritekst
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.BegrunnelseGrunnlag
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.BrevGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilBrevPeriodeGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilMinimertEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilMinimertPersonResultat
@@ -133,7 +133,7 @@ class VedtaksperiodeService(
                 )
 
                 if (triggesAv.satsendring) {
-                    validerSatsendring(vedtaksperiodeMedBegrunnelser.fom, begrunnelseGrunnlag.begrunnelsePersoner)
+                    validerSatsendring(vedtaksperiodeMedBegrunnelser.fom, begrunnelseGrunnlag.personerPåBehandling)
                 }
 
                 if (it.erTilknyttetVilkår(sanityBegrunnelser) && personerGjeldendeForBegrunnelseIdenter.isEmpty()) {
@@ -158,7 +158,7 @@ class VedtaksperiodeService(
 
     fun hentBegrunnelseGrunnlag(
         behandlingId: Long,
-    ): BegrunnelseGrunnlag {
+    ): BrevGrunnlag {
 
         val persongrunnlag =
             persongrunnlagRepository.findByBehandlingAndAktiv(behandlingId)
@@ -171,8 +171,8 @@ class VedtaksperiodeService(
             behandlingId
         )
 
-        return BegrunnelseGrunnlag(
-            begrunnelsePersoner = persongrunnlag.personer.map { it.tilBegrunnelsePerson() },
+        return BrevGrunnlag(
+            personerPåBehandling = persongrunnlag.personer.map { it.tilBegrunnelsePerson() },
             minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
             minimerteEndredeUtbetalingAndeler = endredeUtbetalingAndeler.map { it.tilMinimertEndretUtbetalingAndel() },
         )

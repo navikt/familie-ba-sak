@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.dokument
 
 import no.nav.familie.ba.sak.common.defaultFagsak
 import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.common.lagMinimertUtbetalingsperiodeDetalj
 import no.nav.familie.ba.sak.common.lagRestVedtaksbegrunnelse
 import no.nav.familie.ba.sak.common.lagSanityBegrunnelse
 import no.nav.familie.ba.sak.common.lagUtbetalingsperiodeDetalj
@@ -25,6 +26,7 @@ import no.nav.familie.ba.sak.kjerne.totrinnskontroll.domene.Totrinnskontroll
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilBegrunnelsePerson
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilMinimertPerson
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import org.junit.Assert.assertEquals
 import org.junit.jupiter.api.Assertions
@@ -360,22 +362,22 @@ internal class BrevUtilsTest {
     fun `hentEndretUtbetalingBrevPeriode skal gi riktig periodetype`() {
         val utvidetVedtaksperiodMedBegrunnelserFullUtbetaling =
             lagBrevPeriodeGrunnlagMedPersoner(
-                utbetalingsperiodeDetaljer = listOf(
-                    lagUtbetalingsperiodeDetalj(
+                minimertUtbetalingsperiodeDetalj = listOf(
+                    lagMinimertUtbetalingsperiodeDetalj(
                         prosent = BigDecimal.valueOf(100)
                     ),
-                    lagUtbetalingsperiodeDetalj(
+                    lagMinimertUtbetalingsperiodeDetalj(
                         prosent = BigDecimal.valueOf(100)
                     )
                 )
             )
         val utvidetVedtaksperiodMedBegrunnelserForskjelligUtbetaling =
             lagBrevPeriodeGrunnlagMedPersoner(
-                utbetalingsperiodeDetaljer = listOf(
-                    lagUtbetalingsperiodeDetalj(
+                minimertUtbetalingsperiodeDetalj = listOf(
+                    lagMinimertUtbetalingsperiodeDetalj(
                         prosent = BigDecimal.valueOf(100)
                     ),
-                    lagUtbetalingsperiodeDetalj(
+                    lagMinimertUtbetalingsperiodeDetalj(
                         prosent = BigDecimal.ZERO
                     )
                 )
@@ -383,11 +385,11 @@ internal class BrevUtilsTest {
             )
         val utvidetVedtaksperiodMedBegrunnelserIngenUtbetaling =
             lagBrevPeriodeGrunnlagMedPersoner(
-                utbetalingsperiodeDetaljer = listOf(
-                    lagUtbetalingsperiodeDetalj(
+                minimertUtbetalingsperiodeDetalj = listOf(
+                    lagMinimertUtbetalingsperiodeDetalj(
                         prosent = BigDecimal.ZERO
                     ),
-                    lagUtbetalingsperiodeDetalj(
+                    lagMinimertUtbetalingsperiodeDetalj(
                         prosent = BigDecimal.ZERO
                     )
                 )
@@ -418,15 +420,15 @@ internal class BrevUtilsTest {
         val utvidetVedtaksperiodeMedBegrunnelserIngenUtbetaling =
             lagBrevPeriodeGrunnlagMedPersoner(
                 type = Vedtaksperiodetype.ENDRET_UTBETALING,
-                utbetalingsperiodeDetaljer = listOf(
-                    lagUtbetalingsperiodeDetalj(prosent = BigDecimal.ZERO)
+                minimertUtbetalingsperiodeDetalj = listOf(
+                    lagMinimertUtbetalingsperiodeDetalj(prosent = BigDecimal.ZERO)
                 )
             )
         val utvidetVedtaksperiodeMedBegrunnelserFullUtbetaling =
             lagBrevPeriodeGrunnlagMedPersoner(
                 type = Vedtaksperiodetype.ENDRET_UTBETALING,
-                utbetalingsperiodeDetaljer = listOf(
-                    lagUtbetalingsperiodeDetalj(prosent = BigDecimal.valueOf(100))
+                minimertUtbetalingsperiodeDetalj = listOf(
+                    lagMinimertUtbetalingsperiodeDetalj(prosent = BigDecimal.valueOf(100))
                 )
             )
 
@@ -495,9 +497,9 @@ internal class BrevUtilsTest {
 
         val brevPeriodeGrunnlagMedPersoner = lagBrevPeriodeGrunnlagMedPersoner(
             type = Vedtaksperiodetype.UTBETALING,
-            utbetalingsperiodeDetaljer = listOf(
-                lagUtbetalingsperiodeDetalj(barn1.tilRestPerson()),
-                lagUtbetalingsperiodeDetalj(søker.tilRestPerson()),
+            minimertUtbetalingsperiodeDetalj = listOf(
+                lagMinimertUtbetalingsperiodeDetalj(barn1.tilRestPerson().tilMinimertPerson()),
+                lagMinimertUtbetalingsperiodeDetalj(søker.tilRestPerson().tilMinimertPerson()),
             ),
             begrunnelser = listOf(
                 lagBrevBegrunnelseGrunnlagMedPersoner(

@@ -8,7 +8,7 @@ import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.BegrunnelsePerson
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.MinimertPerson
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.MinimertPersonResultat
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.MinimertVilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
@@ -31,10 +31,10 @@ object VedtakUtils {
         minimertePersonResultater: List<MinimertPersonResultat>,
         vedtaksperiode: Periode,
         oppdatertBegrunnelseType: VedtakBegrunnelseType,
-        aktuellePersonerForVedtaksperiode: List<BegrunnelsePerson>,
+        aktuellePersonerForVedtaksperiode: List<MinimertPerson>,
         triggesAv: TriggesAv,
         erFørsteVedtaksperiodePåFagsak: Boolean
-    ): Set<BegrunnelsePerson> {
+    ): Set<MinimertPerson> {
         return triggesAv.vilkår.fold(mutableSetOf()) { acc, vilkår ->
             acc.addAll(
                 hentPersonerMedUtgjørendeVilkår(
@@ -57,10 +57,10 @@ object VedtakUtils {
         vedtaksperiode: Periode,
         oppdatertBegrunnelseType: VedtakBegrunnelseType,
         utgjørendeVilkår: Vilkår?,
-        aktuellePersonerForVedtaksperiode: List<BegrunnelsePerson>,
+        aktuellePersonerForVedtaksperiode: List<MinimertPerson>,
         triggesAv: TriggesAv,
         erAndelerMedFomFørPeriode: Boolean
-    ): List<BegrunnelsePerson> {
+    ): List<MinimertPerson> {
 
         return minimertPersonResultater
             .fold(mutableListOf()) { acc, personResultat ->
@@ -77,7 +77,7 @@ object VedtakUtils {
                             minimertVilkårResultat.periodeFom == null -> false
                             oppdatertBegrunnelseType == VedtakBegrunnelseType.INNVILGET -> {
                                 triggereErOppfylt(triggesAv, minimertVilkårResultat) &&
-                                    minimertVilkårResultat.periodeFom!!.toYearMonth() == vedtaksperiode.fom.minusMonths(
+                                    minimertVilkårResultat.periodeFom.toYearMonth() == vedtaksperiode.fom.minusMonths(
                                     1
                                 )
                                     .toYearMonth() &&

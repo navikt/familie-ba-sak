@@ -85,7 +85,7 @@ data class FritekstBegrunnelse(val fritekst: String) : Begrunnelse
 
 fun BrevBegrunnelseGrunnlagMedPersoner.tilBrevBegrunnelse(
     vedtaksperiode: NullablePeriode,
-    personerIPersongrunnlag: List<BegrunnelsePerson>,
+    personerIPersongrunnlag: List<MinimertPerson>,
     målformSøker: Målform,
     uregistrerteBarn: List<UregistrertBarnEnkel>,
     beløp: String
@@ -142,8 +142,8 @@ else
 private fun BrevBegrunnelseGrunnlagMedPersoner.hentBarnasFødselsdagerForBegrunnelse(
     uregistrerteBarn: List<UregistrertBarnEnkel>,
     erAvslagPåKunSøker: Boolean,
-    personerIBehandling: List<BegrunnelsePerson>,
-    personerPåBegrunnelse: List<BegrunnelsePerson>
+    personerIBehandling: List<MinimertPerson>,
+    personerPåBegrunnelse: List<MinimertPerson>
 ) = if (this.vedtakBegrunnelseSpesifikasjon == VedtakBegrunnelseSpesifikasjon.AVSLAG_UREGISTRERT_BARN)
     uregistrerteBarn.mapNotNull { it.fødselsdato }
 else if (erAvslagPåKunSøker) {

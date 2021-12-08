@@ -3,27 +3,107 @@
   "fom": "2021-09-01",
   "tom": null,
   "vedtaksperiodetype": "AVSLAG",
-  "utbetalingsperiodeDetaljer": [
-  ],
-  "standardbegrunnelser": [
-  ],
+  "begrunnelser": [],
   "fritekster": [
     "Du får ikke barnetrygd fordi test"
   ],
-  "begrunnelsepersoner": [
+  "utvidetScenario": "IKKE_UTVIDET_YTELSE",
+  "uregistrerteBarn": [],
+  "erFørsteVedtaksperiodePåFagsak": false,
+  "målformSøker": "NB",
+  "personerPåBehandling": [
     {
       "personIdent": "20012011111",
       "fødselsdato": "2020-01-20",
-      "type": "BARN"
+      "type": "BARN",
+      "vilkårResultater": [
+        {
+          "vilkårType": "UNDER_18_ÅR",
+          "resultat": "OPPFYLT",
+          "periodeFom": "2020-01-20",
+          "periodeTom": null,
+          "utdypendeVilkårsvurderinger": [],
+          "erEksplisittAvslagPåSøknad": false
+        },
+        {
+          "vilkårType": "BOR_MED_SØKER",
+          "resultat": "OPPFYLT",
+          "periodeFom": "2021-08-01",
+          "periodeTom": null,
+          "utdypendeVilkårsvurderinger": [],
+          "erEksplisittAvslagPåSøknad": false
+        },
+        {
+          "vilkårType": "GIFT_PARTNERSKAP",
+          "resultat": "OPPFYLT",
+          "periodeFom": "2020-01-20",
+          "periodeTom": null,
+          "utdypendeVilkårsvurderinger": [],
+          "erEksplisittAvslagPåSøknad": false
+        },
+        {
+          "vilkårType": "BOSATT_I_RIKET",
+          "resultat": "OPPFYLT",
+          "periodeFom": "2020-01-20",
+          "periodeTom": null,
+          "utdypendeVilkårsvurderinger": [],
+          "erEksplisittAvslagPåSøknad": false
+        },
+        {
+          "vilkårType": "LOVLIG_OPPHOLD",
+          "resultat": "OPPFYLT",
+          "periodeFom": "2020-01-20",
+          "periodeTom": null,
+          "utdypendeVilkårsvurderinger": [],
+          "erEksplisittAvslagPåSøknad": false
+        },
+        {
+          "vilkårType": "LOVLIG_OPPHOLD",
+          "resultat": "OPPFYLT",
+          "periodeFom": "2020-01-20",
+          "periodeTom": null,
+          "utdypendeVilkårsvurderinger": [],
+          "erEksplisittAvslagPåSøknad": false
+        }
+      ],
+      "andreVurderinger": [],
+      "endredeUtbetalinger": [],
+      "utbetalinger": [
+        {
+          "ytelseType": "ORDINÆR_BARNETRYGD",
+          "utbetaltPerMnd": 1054,
+          "erPåvirketAvEndring": false,
+          "prosent": 100
+        }
+      ]
     },
     {
       "personIdent": "10089322222",
       "fødselsdato": "1993-08-10",
-      "type": "SØKER"
+      "type": "SØKER",
+      "vilkårResultater": [
+        {
+          "vilkårType": "BOSATT_I_RIKET",
+          "resultat": "OPPFYLT",
+          "periodeFom": "1993-08-10",
+          "periodeTom": null,
+          "utdypendeVilkårsvurderinger": [],
+          "erEksplisittAvslagPåSøknad": false
+        },
+        {
+          "vilkårType": "LOVLIG_OPPHOLD",
+          "resultat": "IKKE_OPPFYLT",
+          "periodeFom": "1993-08-10",
+          "periodeTom": null,
+          "utdypendeVilkårsvurderinger": [],
+          "erEksplisittAvslagPåSøknad": false
+        }
+      ],
+      "andreVurderinger": [],
+      "endredeUtbetalinger": [],
+      "utbetalinger": []
     }
   ],
-  "målform": "NB",
-  "uregistrerteBarn": [],
   "forventetOutput": {
     "fom": "1. september 2021",
     "tom": "",

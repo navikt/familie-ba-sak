@@ -4,10 +4,10 @@ import no.nav.familie.ba.sak.common.lagTriggesAv
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtbetalingsperiodeDetalj
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.BrevBegrunnelseGrunnlagMedPersoner
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.BrevPeriodeGrunnlagMedPersoner
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.MinimertUtbetalingsperiodeDetalj
 import java.time.LocalDate
 
 fun lagBrevPeriodeGrunnlagMedPersoner(
@@ -16,7 +16,7 @@ fun lagBrevPeriodeGrunnlagMedPersoner(
     type: Vedtaksperiodetype = Vedtaksperiodetype.UTBETALING,
     begrunnelser: List<BrevBegrunnelseGrunnlagMedPersoner> = emptyList(),
     fritekster: List<String> = emptyList(),
-    utbetalingsperiodeDetaljer: List<UtbetalingsperiodeDetalj> = emptyList(),
+    minimertUtbetalingsperiodeDetalj: List<MinimertUtbetalingsperiodeDetalj> = emptyList(),
     erFørsteVedtaksperiodePåFagsak: Boolean = false
 ): BrevPeriodeGrunnlagMedPersoner {
     return BrevPeriodeGrunnlagMedPersoner(
@@ -25,7 +25,7 @@ fun lagBrevPeriodeGrunnlagMedPersoner(
         type = type,
         begrunnelser = begrunnelser,
         fritekster = fritekster,
-        utbetalingsperiodeDetaljer = utbetalingsperiodeDetaljer,
+        minimerteUtbetalingsperiodeDetaljer = minimertUtbetalingsperiodeDetalj,
         erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak
     )
 }

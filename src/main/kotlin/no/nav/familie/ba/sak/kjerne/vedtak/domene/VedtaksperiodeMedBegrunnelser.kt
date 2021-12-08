@@ -176,7 +176,7 @@ private fun VedtaksperiodeMedBegrunnelser.endretUtbetalingAndelSkalVæreMed(ande
 
 fun BrevPeriodeGrunnlagMedPersoner.utbetaltForPersonerIBegrunnelse(
     personIdenterForBegrunnelse: List<String>
-) = this.utbetalingsperiodeDetaljer.filter { utbetalingsperiodeDetalj ->
+) = this.minimerteUtbetalingsperiodeDetaljer.filter { utbetalingsperiodeDetalj ->
     personIdenterForBegrunnelse.contains(
         utbetalingsperiodeDetalj.person.personIdent
     )

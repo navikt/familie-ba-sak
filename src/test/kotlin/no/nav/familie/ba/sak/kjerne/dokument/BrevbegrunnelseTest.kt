@@ -1,41 +1,59 @@
 package no.nav.familie.ba.sak.kjerne.dokument
 
+import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.familie.ba.sak.common.Utils.formaterBeløp
+import no.nav.familie.ba.sak.common.hentSanityBegrunnelser
+import no.nav.familie.ba.sak.kjerne.dokument.domene.BegrunnelseDataTestConfig
+import no.nav.familie.ba.sak.kjerne.dokument.domene.BrevBegrunnelseTestConfig
+import no.nav.familie.ba.sak.kjerne.dokument.domene.BrevPeriodeTestConfig
+import no.nav.familie.ba.sak.kjerne.dokument.domene.FritekstBegrunnelseTestConfig
+import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.brevperioder.BrevPeriode
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.BrevGrunnlag
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.BrevPeriodeGrunnlag
+import no.nav.familie.kontrakter.felles.objectMapper
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestReporter
+import java.io.File
+
 class BrevbegrunnelseTest {
 
-    /*@Test
+    @Test
     fun test(testReporter: TestReporter) {
         val testmappe = File("./src/test/resources/brevbegrunnelseCaser")
+
+        val sanityBegrunnelser = hentSanityBegrunnelser()
 
         val antallFeil = testmappe.list()?.fold(0) { acc, it ->
             val fil = File("./src/test/resources/brevbegrunnelseCaser/$it")
             val behandlingsresultatPersonTestConfig =
                 objectMapper.readValue<BrevBegrunnelseTestConfig>(fil.readText())
 
-            val restPersoner =
-                behandlingsresultatPersonTestConfig.begrunnelsepersoner.map { it.tilRestPersonTilTester() }
-
-            val utvidetVedtaksperiodeMedBegrunnelser =
-                UtvidetVedtaksperiodeMedBegrunnelser(
-                    id = 1L,
+            val brevPeriodeGrunnlag =
+                BrevPeriodeGrunnlag(
                     fom = behandlingsresultatPersonTestConfig.fom,
                     tom = behandlingsresultatPersonTestConfig.tom,
                     type = behandlingsresultatPersonTestConfig.vedtaksperiodetype,
-                    begrunnelser = behandlingsresultatPersonTestConfig.standardbegrunnelser,
+                    begrunnelser = behandlingsresultatPersonTestConfig
+                        .begrunnelser.map { it.tilBrevBegrunnelseGrunnlag(sanityBegrunnelser) },
                     fritekster = behandlingsresultatPersonTestConfig.fritekster,
-                    gyldigeBegrunnelser = emptyList(),
-                    utbetalingsperiodeDetaljer = behandlingsresultatPersonTestConfig.utbetalingsperiodeDetaljer.map {
-                        it.tilUtbetalingsperiodeDetalj(
-                            restPersoner.find { restPerson -> restPerson.personIdent == it.personIdent }!!
-                        )
-                    }
+                    minimerteUtbetalingsperiodeDetaljer = behandlingsresultatPersonTestConfig
+                        .personerPåBehandling
+                        .flatMap { it.tilUtbetalingsperiodeDetaljer() }
                 )
 
+            val brevGrunnlag = BrevGrunnlag(
+                personerPåBehandling = behandlingsresultatPersonTestConfig.personerPåBehandling.map { it.tilMinimertPerson() },
+                minimerteEndredeUtbetalingAndeler = behandlingsresultatPersonTestConfig.personerPåBehandling.flatMap { it.tilMinimerteEndredeUtbetalingAndeler() },
+                minimertePersonResultater = behandlingsresultatPersonTestConfig.personerPåBehandling.map { it.tilMinimertePersonResultater() }
+            )
+
             val brevperiode: BrevPeriode? =
-                utvidetVedtaksperiodeMedBegrunnelser.tilBrevPeriode(
-                    personerIPersongrunnlag = behandlingsresultatPersonTestConfig.begrunnelsepersoner,
-                    målform = behandlingsresultatPersonTestConfig.målform,
+                brevPeriodeGrunnlag.tilBrevPeriode(
+                    brevGrunnlag = brevGrunnlag,
+                    utvidetScenario = behandlingsresultatPersonTestConfig.utvidetScenario,
                     uregistrerteBarn = behandlingsresultatPersonTestConfig.uregistrerteBarn,
-                    utvidetScenario = UtvidetScenario.IKKE_UTVIDET_YTELSE
+                    erFørsteVedtaksperiodePåFagsak = behandlingsresultatPersonTestConfig.erFørsteVedtaksperiodePåFagsak,
+                    målformSøker = behandlingsresultatPersonTestConfig.målformSøker,
                 )
 
             val feil = erLike(
@@ -112,5 +130,5 @@ class BrevbegrunnelseTest {
         }
 
         return feil
-    }*/
+    }
 }

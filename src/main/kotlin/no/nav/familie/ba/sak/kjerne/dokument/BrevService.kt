@@ -193,7 +193,7 @@ class BrevService(
                     erFørsteVedtaksperiodePåFagsak(andelerTilkjentYtelse, brevPeriodeGrunnlag.fom)
 
                 brevPeriodeGrunnlag.tilBrevPeriode(
-                    begrunnelseGrunnlag = begrunnelseGrunnlag,
+                    brevGrunnlag = begrunnelseGrunnlag,
                     uregistrerteBarn = hentUregistrerteBarn(vedtak.behandling.id),
                     utvidetScenario = andelerTilkjentYtelse
                         .hentUtvidetYtelseScenario(brevPeriodeGrunnlag.hentMånedPeriode()),

@@ -1,42 +1,112 @@
 {
-  "beskrivelse": "1 barn bor med søker fra august 2021 på behandling med 1 barn",
+  "beskrivelse": "Innvilget 1 barn bor med søker fra august 2021 på behandling med 1 barn",
   "fom": "2021-09-01",
   "tom": "2021-12-31",
   "vedtaksperiodetype": "UTBETALING",
-  "utbetalingsperiodeDetaljer": [
-    {
-      "personIdent": "20012011111",
-      "utbetaltPerMnd": 1054,
-      "ytelseType": "ORDINÆR_BARNETRYGD",
-      "erPåvirketAvEndring": false
-    }
-  ],
-  "standardbegrunnelser": [
+  "begrunnelser": [
     {
       "vedtakBegrunnelseSpesifikasjon": "INNVILGET_BOR_HOS_SØKER",
-      "vedtakBegrunnelseType": "INNVILGET",
-      "personIdenter": [
-        "20012011111",
-        "10089322222"
-      ]
+      "vedtakBegrunnelseType": "INNVILGET"
     }
   ],
-  "fritekster": [
-  ],
-  "begrunnelsepersoner": [
+  "fritekster": [],
+  "utvidetScenario": "IKKE_UTVIDET_YTELSE",
+  "uregistrerteBarn": [],
+  "erFørsteVedtaksperiodePåFagsak": false,
+  "målformSøker": "NB",
+  "personerPåBehandling": [
     {
       "personIdent": "20012011111",
       "fødselsdato": "2020-01-20",
-      "type": "BARN"
+      "type": "BARN",
+      "vilkårResultater": [
+        {
+          "vilkårType": "UNDER_18_ÅR",
+          "resultat": "OPPFYLT",
+          "periodeFom": "2020-01-20",
+          "periodeTom": null,
+          "utdypendeVilkårsvurderinger": [],
+          "erEksplisittAvslagPåSøknad": false
+        },
+        {
+          "vilkårType": "BOR_MED_SØKER",
+          "resultat": "OPPFYLT",
+          "periodeFom": "2021-08-01",
+          "periodeTom": null,
+          "utdypendeVilkårsvurderinger": [],
+          "erEksplisittAvslagPåSøknad": false
+        },
+        {
+          "vilkårType": "GIFT_PARTNERSKAP",
+          "resultat": "OPPFYLT",
+          "periodeFom": "2020-01-20",
+          "periodeTom": null,
+          "utdypendeVilkårsvurderinger": [],
+          "erEksplisittAvslagPåSøknad": false
+        },
+        {
+          "vilkårType": "BOSATT_I_RIKET",
+          "resultat": "OPPFYLT",
+          "periodeFom": "2020-01-20",
+          "periodeTom": null,
+          "utdypendeVilkårsvurderinger": [],
+          "erEksplisittAvslagPåSøknad": false
+        },
+        {
+          "vilkårType": "LOVLIG_OPPHOLD",
+          "resultat": "OPPFYLT",
+          "periodeFom": "2020-01-20",
+          "periodeTom": null,
+          "utdypendeVilkårsvurderinger": [],
+          "erEksplisittAvslagPåSøknad": false
+        },
+        {
+          "vilkårType": "LOVLIG_OPPHOLD",
+          "resultat": "OPPFYLT",
+          "periodeFom": "2020-01-20",
+          "periodeTom": null,
+          "utdypendeVilkårsvurderinger": [],
+          "erEksplisittAvslagPåSøknad": false
+        }
+      ],
+      "andreVurderinger": [],
+      "endredeUtbetalinger": [],
+      "utbetalinger": [
+        {
+          "ytelseType": "ORDINÆR_BARNETRYGD",
+          "utbetaltPerMnd": 1054,
+          "erPåvirketAvEndring": false,
+          "prosent": 100
+        }
+      ]
     },
     {
       "personIdent": "10089322222",
       "fødselsdato": "1993-08-10",
-      "type": "SØKER"
+      "type": "SØKER",
+      "vilkårResultater": [
+        {
+          "vilkårType": "BOSATT_I_RIKET",
+          "resultat": "OPPFYLT",
+          "periodeFom": "1993-08-10",
+          "periodeTom": null,
+          "utdypendeVilkårsvurderinger": [],
+          "erEksplisittAvslagPåSøknad": false
+        },
+        {
+          "vilkårType": "LOVLIG_OPPHOLD",
+          "resultat": "OPPFYLT",
+          "periodeFom": "1993-08-10",
+          "periodeTom": null,
+          "utdypendeVilkårsvurderinger": [],
+          "erEksplisittAvslagPåSøknad": false
+        }
+      ],
+      "andreVurderinger": [],
+      "endredeUtbetalinger": [],
+      "utbetalinger": []
     }
   ],
-  "målform": "NB",
-  "uregistrerteBarn": [],
   "forventetOutput": {
     "fom": "1. september 2021",
     "tom": "til 31. desember 2021 ",
@@ -45,7 +115,7 @@
     "barnasFodselsdager": "20.01.20",
     "begrunnelser": [
       {
-        "gjelderSoker": true,
+        "gjelderSoker": false,
         "barnasFodselsdatoer": "20.01.20",
         "antallBarn": 1,
         "maanedOgAarBegrunnelsenGjelderFor": "august 2021",

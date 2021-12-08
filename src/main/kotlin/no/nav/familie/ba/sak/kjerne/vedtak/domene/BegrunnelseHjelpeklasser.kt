@@ -6,13 +6,11 @@ import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPerson
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import java.time.LocalDate
 
-data class BegrunnelsePerson(
+data class MinimertPerson(
     val personIdent: String,
     val fødselsdato: LocalDate,
     val type: PersonType
@@ -20,7 +18,13 @@ data class BegrunnelsePerson(
     fun hentSeksårsdag(): LocalDate = fødselsdato.plusYears(6)
 }
 
-fun List<BegrunnelsePerson>.barnMedSeksårsdagPåFom(fom: LocalDate?): List<BegrunnelsePerson> {
+fun RestPerson.tilMinimertPerson() = MinimertPerson(
+    personIdent = this.personIdent,
+    fødselsdato = fødselsdato ?: throw Feil("Fødselsdato mangler"),
+    type = this.type
+)
+
+fun List<MinimertPerson>.barnMedSeksårsdagPåFom(fom: LocalDate?): List<MinimertPerson> {
     return this
         .filter { it.type == PersonType.BARN }
         .filter { person ->
@@ -31,24 +35,24 @@ fun List<BegrunnelsePerson>.barnMedSeksårsdagPåFom(fom: LocalDate?): List<Begr
         }
 }
 
-fun List<BegrunnelsePerson>.harBarnMedSeksårsdagPåFom(fom: LocalDate?) =
+fun List<MinimertPerson>.harBarnMedSeksårsdagPåFom(fom: LocalDate?) =
     this.any { person ->
         person
             .hentSeksårsdag()
             .toYearMonth() == (fom?.toYearMonth() ?: TIDENES_ENDE.toYearMonth())
     }
 
-fun List<BegrunnelsePerson>.hentSøker() =
+fun List<MinimertPerson>.hentSøker() =
     this.firstOrNull { it.type == PersonType.SØKER }
         ?: throw Feil("Fant ikke søker blant begrunnelsepersonene")
 
-fun Person.tilBegrunnelsePerson() = BegrunnelsePerson(
+fun Person.tilBegrunnelsePerson() = MinimertPerson(
     personIdent = this.aktør.aktivIdent().fødselsnummer,
     fødselsdato = this.fødselsdato,
     type = this.type
 )
 
-fun List<BegrunnelsePerson>.tilBarnasFødselsdatoer(): String =
+fun List<MinimertPerson>.tilBarnasFødselsdatoer(): String =
     Utils.slåSammen(
         this
             .filter { it.type == PersonType.BARN }
@@ -59,12 +63,3 @@ fun List<BegrunnelsePerson>.tilBarnasFødselsdatoer(): String =
                 person.fødselsdato.tilKortString() ?: ""
             }
     )
-
-fun BegrunnelsePerson.tilRestPersonTilTester() = RestPerson(
-    personIdent = this.personIdent,
-    fødselsdato = this.fødselsdato,
-    type = this.type,
-    navn = "Mock Mockersen",
-    kjønn = Kjønn.KVINNE,
-    målform = Målform.NB
-)

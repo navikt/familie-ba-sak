@@ -18,7 +18,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifi
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.periodeErOppyltForYtelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilBegrunnelsePerson
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.BegrunnelseGrunnlag
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.BrevGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilMinimertEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilMinimertPersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
@@ -342,9 +342,9 @@ class VedtaksperiodeServiceUtilsTest {
             vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET,
             vedtaksperiodeType = Vedtaksperiodetype.UTBETALING,
             periode = NullablePeriode(LocalDate.now().minusMonths(1), null),
-            begrunnelseGrunnlag = BegrunnelseGrunnlag(
+            begrunnelseGrunnlag = BrevGrunnlag(
                 minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
-                begrunnelsePersoner = persongrunnlag.personer.map { it.tilBegrunnelsePerson() },
+                personerPåBehandling = persongrunnlag.personer.map { it.tilBegrunnelsePerson() },
                 minimerteEndredeUtbetalingAndeler = emptyList(),
             ),
             identerMedUtbetaling = identerMedUtbetaling,
@@ -390,9 +390,9 @@ class VedtaksperiodeServiceUtilsTest {
             periode = NullablePeriode(fom, tom),
             vedtaksperiodeType = Vedtaksperiodetype.UTBETALING,
             vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET,
-            begrunnelseGrunnlag = BegrunnelseGrunnlag(
+            begrunnelseGrunnlag = BrevGrunnlag(
                 minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
-                begrunnelsePersoner = persongrunnlag.personer.map { it.tilBegrunnelsePerson() },
+                personerPåBehandling = persongrunnlag.personer.map { it.tilBegrunnelsePerson() },
                 minimerteEndredeUtbetalingAndeler = endredeUtbetalingAndeler
                     .map { it.tilMinimertEndretUtbetalingAndel() },
             ),

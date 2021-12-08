@@ -48,11 +48,10 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.hjemlerTilhørendeFritekst
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Begrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.BegrunnelsePerson
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilBarnasFødselsdatoer
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.MinimertPerson
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.BegrunnelseGrunnlag
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.BrevGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.BrevPeriodeGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.BrevPeriodeGrunnlagMedPersoner
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
@@ -238,20 +237,20 @@ enum class UtvidetScenario {
 }
 
 fun BrevPeriodeGrunnlag.tilBrevPeriode(
-    begrunnelseGrunnlag: BegrunnelseGrunnlag,
+    brevGrunnlag: BrevGrunnlag,
     utvidetScenario: UtvidetScenario = UtvidetScenario.IKKE_UTVIDET_YTELSE,
     uregistrerteBarn: List<UregistrertBarnEnkel> = emptyList(),
     erFørsteVedtaksperiodePåFagsak: Boolean,
     målformSøker: Målform
 ): BrevPeriode? {
     val brevPeriodeGrunnlagMedPersoner =
-        this.tilBrevPeriodeGrunnlagMedPersoner(begrunnelseGrunnlag, erFørsteVedtaksperiodePåFagsak)
+        this.tilBrevPeriodeGrunnlagMedPersoner(brevGrunnlag, erFørsteVedtaksperiodePåFagsak)
 
-    val personerIPersongrunnlag = begrunnelseGrunnlag.begrunnelsePersoner
+    val personerIPersongrunnlag = brevGrunnlag.personerPåBehandling
 
     val begrunnelserOgFritekster = brevPeriodeGrunnlagMedPersoner.byggBegrunnelserOgFritekster(
         uregistrerteBarn = uregistrerteBarn,
-        begrunnelseGrunnlag = begrunnelseGrunnlag,
+        begrunnelseGrunnlag = brevGrunnlag,
         målformSøker = målformSøker
     )
 
@@ -313,14 +312,14 @@ fun BrevPeriodeGrunnlagMedPersoner.hentEndretUtbetalingBrevPeriode(
     målform: Målform = Målform.NB,
 ): EndretUtbetalingBrevPeriode {
     val ingenUtbetaling =
-        utbetalingsperiodeDetaljer.all { it.prosent == BigDecimal.ZERO }
+        minimerteUtbetalingsperiodeDetaljer.all { it.prosent == BigDecimal.ZERO }
 
     return EndretUtbetalingBrevPeriode(
         fom = this.fom!!.tilDagMånedÅr(),
         tom = tomDato,
-        barnasFodselsdager = this.utbetalingsperiodeDetaljer.map { it.person }.tilBarnasFødselsdatoer(),
+        barnasFodselsdager = this.minimerteUtbetalingsperiodeDetaljer.map { it.person }.tilBarnasFødselsdatoer(),
         begrunnelser = begrunnelserOgFritekster,
-        belop = Utils.formaterBeløp(this.utbetalingsperiodeDetaljer.totaltUtbetalt()),
+        belop = Utils.formaterBeløp(this.minimerteUtbetalingsperiodeDetaljer.totaltUtbetalt()),
         type = when {
             ingenUtbetaling && utvidetScenario == UtvidetScenario.UTVIDET_YTELSE_IKKE_ENDRET ->
                 EndretUtbetalingBrevPeriodeType.ENDRET_UTBETALINGSPERIODE_DELVIS_UTBETALING
@@ -341,14 +340,14 @@ fun BrevPeriodeGrunnlagMedPersoner.hentEndretUtbetalingBrevPeriode(
 private fun BrevPeriodeGrunnlagMedPersoner.hentInnvilgelseBrevPeriode(
     tomDato: String?,
     begrunnelserOgFritekster: List<Begrunnelse>,
-    personerIPersongrunnlag: List<BegrunnelsePerson>,
+    personerIPersongrunnlag: List<MinimertPerson>,
 ): InnvilgelseBrevPeriode {
     val barnIPeriode = this.finnBarnIInnvilgelsePeriode(personerIPersongrunnlag)
 
     return InnvilgelseBrevPeriode(
         fom = this.fom!!.tilDagMånedÅr(),
         tom = tomDato,
-        belop = Utils.formaterBeløp(this.utbetalingsperiodeDetaljer.totaltUtbetalt()),
+        belop = Utils.formaterBeløp(this.minimerteUtbetalingsperiodeDetaljer.totaltUtbetalt()),
         antallBarn = barnIPeriode.size.toString(),
         barnasFodselsdager = barnIPeriode.tilBarnasFødselsdatoer(),
         begrunnelser = begrunnelserOgFritekster
@@ -356,12 +355,12 @@ private fun BrevPeriodeGrunnlagMedPersoner.hentInnvilgelseBrevPeriode(
 }
 
 fun BrevPeriodeGrunnlagMedPersoner.finnBarnIInnvilgelsePeriode(
-    personerIPersongrunnlag: List<BegrunnelsePerson>,
-): List<BegrunnelsePerson> {
+    personerIPersongrunnlag: List<MinimertPerson>,
+): List<MinimertPerson> {
     val identerIBegrunnelsene = this.begrunnelser
         .filter { it.vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGET }
         .flatMap { it.personIdenter }
-    val identerMedUtbetaling = this.utbetalingsperiodeDetaljer.map { it.person.personIdent }
+    val identerMedUtbetaling = this.minimerteUtbetalingsperiodeDetaljer.map { it.person.personIdent }
 
     val barnIPeriode = (identerIBegrunnelsene + identerMedUtbetaling)
         .toSet()
@@ -387,9 +386,9 @@ private fun BrevPeriodeGrunnlagMedPersoner.hentFortsattInnvilgetBrevPeriode(
     } else null
     return FortsattInnvilgetBrevPeriode(
         fom = fom ?: "Du får:",
-        belop = Utils.formaterBeløp(this.utbetalingsperiodeDetaljer.totaltUtbetalt()),
-        antallBarn = this.utbetalingsperiodeDetaljer.antallBarn().toString(),
-        barnasFodselsdager = this.utbetalingsperiodeDetaljer.map { it.person }.tilBarnasFødselsdatoer(),
+        belop = Utils.formaterBeløp(this.minimerteUtbetalingsperiodeDetaljer.totaltUtbetalt()),
+        antallBarn = this.minimerteUtbetalingsperiodeDetaljer.antallBarn().toString(),
+        barnasFodselsdager = this.minimerteUtbetalingsperiodeDetaljer.map { it.person }.tilBarnasFødselsdatoer(),
         begrunnelser = begrunnelserOgFritekster
     )
 }
