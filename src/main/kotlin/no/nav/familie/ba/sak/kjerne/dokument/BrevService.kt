@@ -189,15 +189,15 @@ class BrevService(
             .sorter()
             .map { it.tilBrevPeriodeGrunnlag(sanityBegrunnelser) }
             .mapNotNull { brevPeriodeGrunnlag ->
-                val erFørsteVedtaksperiodePåFagsak =
-                    erFørsteVedtaksperiodePåFagsak(andelerTilkjentYtelse, brevPeriodeGrunnlag.fom)
-
                 brevPeriodeGrunnlag.tilBrevPeriode(
                     brevGrunnlag = begrunnelseGrunnlag,
                     uregistrerteBarn = hentUregistrerteBarn(vedtak.behandling.id),
                     utvidetScenario = andelerTilkjentYtelse
                         .hentUtvidetYtelseScenario(brevPeriodeGrunnlag.hentMånedPeriode()),
-                    erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
+                    erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak(
+                        andelerTilkjentYtelse,
+                        brevPeriodeGrunnlag.fom
+                    ),
                     målformSøker = grunnlagOgSignaturData.grunnlag.søker.målform,
                 )
             }
