@@ -27,9 +27,9 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.barnMedSeksårsdagPåFom
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.harBarnMedSeksårsdagPåFom
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.hentSøker
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.BegrunnelseGrunnlag
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.harPersonerSomManglerOpplysninger
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.somOverlapper
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.harPersonerSomManglerOpplysninger
 import java.time.LocalDate
 
 fun hentVedtaksperioderMedBegrunnelserForEndredeUtbetalingsperioder(
@@ -104,7 +104,7 @@ fun hentPersonidenterGjeldendeForBegrunnelse(
                 .map { person -> person.personIdent }
 
         triggesAv.personerManglerOpplysninger ->
-            if (begrunnelseGrunnlag.personResultater.harPersonerSomManglerOpplysninger())
+            if (begrunnelseGrunnlag.minimertePersonResultater.harPersonerSomManglerOpplysninger())
                 emptyList()
             else
                 error("Legg til opplysningsplikt ikke oppfylt begrunnelse men det er ikke person med det resultat")
@@ -120,7 +120,7 @@ fun hentPersonidenterGjeldendeForBegrunnelse(
 
         else ->
             VedtakUtils.hentPersonerForAlleUtgjørendeVilkår(
-                personResultater = begrunnelseGrunnlag.personResultater,
+                minimertePersonResultater = begrunnelseGrunnlag.minimertePersonResultater,
                 vedtaksperiode = Periode(
                     fom = periode.fom ?: TIDENES_MORGEN,
                     tom = periode.tom ?: TIDENES_ENDE

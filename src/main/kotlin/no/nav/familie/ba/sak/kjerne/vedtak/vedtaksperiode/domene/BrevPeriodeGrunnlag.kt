@@ -4,16 +4,17 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.NullableMånedPeriode
 import no.nav.familie.ba.sak.common.NullablePeriode
+import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
+import no.nav.familie.ba.sak.common.lagOgValiderPeriodeFraVilkår
 import no.nav.familie.ba.sak.common.overlapperHeltEllerDelvisMed
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.dokument.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.dokument.domene.tilTriggesAv
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
@@ -23,8 +24,12 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtbetalingsperiodeDeta
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.hentPersonidenterGjeldendeForBegrunnelse
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurdering
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurderingType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import java.time.LocalDate
 
 data class BrevPeriodeGrunnlag(
@@ -133,9 +138,55 @@ data class BrevBegrunnelseGrunnlagMedPersoner(
 
 data class BegrunnelseGrunnlag(
     val begrunnelsePersoner: List<BegrunnelsePerson>,
-    val personResultater: Set<PersonResultat>, // TODO: Kan minimeres?
+    val minimertePersonResultater: List<MinimertPersonResultat>,
     val minimerteEndredeUtbetalingAndeler: List<MinimertEndretUtbetalingAndel>,
 )
+
+data class MinimertPersonResultat(
+    val personIdent: String,
+    val minimerteVilkårResultater: List<MinimertVilkårResultat>,
+    val andreVurderinger: List<AnnenVurdering>
+)
+
+fun PersonResultat.tilMinimertPersonResultat() =
+    MinimertPersonResultat(
+        personIdent = this.personIdent,
+        minimerteVilkårResultater = this.vilkårResultater.map { it.tilMinimertVilkårResultat() },
+        andreVurderinger = this.andreVurderinger.toList()
+    )
+
+data class MinimertVilkårResultat(
+    val vilkårType: Vilkår,
+    val periodeFom: LocalDate?,
+    val periodeTom: LocalDate?,
+    val resultat: Resultat,
+    val utdypendeVilkårsvurderinger: List<UtdypendeVilkårsvurdering>,
+    val erEksplisittAvslagPåSøknad: Boolean?,
+) {
+
+    fun toPeriode(): Periode = lagOgValiderPeriodeFraVilkår(
+        this.periodeFom,
+        this.periodeTom,
+        this.erEksplisittAvslagPåSøknad
+    )
+}
+
+fun VilkårResultat.tilMinimertVilkårResultat() =
+    MinimertVilkårResultat(
+        vilkårType = this.vilkårType,
+        periodeFom = this.periodeFom,
+        periodeTom = this.periodeTom,
+        resultat = this.resultat,
+        utdypendeVilkårsvurderinger = this.utdypendeVilkårsvurderinger,
+        erEksplisittAvslagPåSøknad = this.erEksplisittAvslagPåSøknad,
+    )
+
+fun List<MinimertPersonResultat>.harPersonerSomManglerOpplysninger(): Boolean =
+    this.any { personResultat ->
+        personResultat.andreVurderinger.any {
+            it.type == AnnenVurderingType.OPPLYSNINGSPLIKT && it.resultat == Resultat.IKKE_OPPFYLT
+        }
+    }
 
 data class MinimertEndretUtbetalingAndel(
     val periode: MånedPeriode,
@@ -161,14 +212,6 @@ data class MinimertEndretUtbetalingAndel(
 
 fun List<MinimertEndretUtbetalingAndel>.somOverlapper(nullableMånedPeriode: NullableMånedPeriode) =
     this.filter { it.erOverlappendeMed(nullableMånedPeriode) }
-
-data class BegrunnelseGrunnlag2(
-
-    val persongrunnlag: PersonopplysningGrunnlag,
-    val vilkårsvurdering: Vilkårsvurdering,
-    val endredeUtbetalingAndeler: List<EndretUtbetalingAndel>,
-    val andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
-)
 
 fun EndretUtbetalingAndel.tilMinimertEndretUtbetalingAndel() = MinimertEndretUtbetalingAndel(
     periode = this.periode,

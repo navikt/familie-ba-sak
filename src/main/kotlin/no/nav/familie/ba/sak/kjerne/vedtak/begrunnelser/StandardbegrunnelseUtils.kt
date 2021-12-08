@@ -22,16 +22,16 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilBegrunnelsePerson
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.MinimertPersonResultat
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.harPersonerSomManglerOpplysninger
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.erFørsteVedtaksperiodePåFagsak
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.harPersonerSomManglerOpplysninger
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 
 fun VedtakBegrunnelseSpesifikasjon.triggesForPeriode(
     utvidetVedtaksperiodeMedBegrunnelser: UtvidetVedtaksperiodeMedBegrunnelser,
-    vilkårsvurdering: Vilkårsvurdering,
+    minimertePersonResultater: List<MinimertPersonResultat>,
     persongrunnlag: PersonopplysningGrunnlag,
     identerMedUtbetaling: List<String>,
     triggesAv: TriggesAv,
@@ -68,7 +68,7 @@ fun VedtakBegrunnelseSpesifikasjon.triggesForPeriode(
             andelerTilkjentYtelse = andelerTilkjentYtelse,
             fomForPeriode = utvidetVedtaksperiodeMedBegrunnelser.fom
         )
-        triggesAv.personerManglerOpplysninger -> vilkårsvurdering.personResultater.harPersonerSomManglerOpplysninger()
+        triggesAv.personerManglerOpplysninger -> minimertePersonResultater.harPersonerSomManglerOpplysninger()
         triggesAv.barnMedSeksårsdag ->
             persongrunnlag.harBarnMedSeksårsdagPåFom(utvidetVedtaksperiodeMedBegrunnelser.fom)
         triggesAv.satsendring -> fomErPåSatsendring(utvidetVedtaksperiodeMedBegrunnelser.fom ?: TIDENES_MORGEN)
@@ -79,7 +79,7 @@ fun VedtakBegrunnelseSpesifikasjon.triggesForPeriode(
                 utvidetVedtaksperiodeMedBegrunnelser.type != Vedtaksperiodetype.ENDRET_UTBETALING
 
         else -> VedtakUtils.hentPersonerForAlleUtgjørendeVilkår(
-            personResultater = vilkårsvurdering.personResultater,
+            minimertePersonResultater = minimertePersonResultater,
             vedtaksperiode = Periode(
                 fom = utvidetVedtaksperiodeMedBegrunnelser.fom ?: TIDENES_MORGEN,
                 tom = utvidetVedtaksperiodeMedBegrunnelser.tom ?: TIDENES_ENDE

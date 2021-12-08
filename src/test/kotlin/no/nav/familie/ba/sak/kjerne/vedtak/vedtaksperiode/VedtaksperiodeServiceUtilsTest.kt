@@ -20,6 +20,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.periodeErOppyltForYtelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilBegrunnelsePerson
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.BegrunnelseGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilMinimertEndretUtbetalingAndel
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilMinimertPersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -342,7 +343,7 @@ class VedtaksperiodeServiceUtilsTest {
             vedtaksperiodeType = Vedtaksperiodetype.UTBETALING,
             periode = NullablePeriode(LocalDate.now().minusMonths(1), null),
             begrunnelseGrunnlag = BegrunnelseGrunnlag(
-                personResultater = vilkårsvurdering.personResultater,
+                minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
                 begrunnelsePersoner = persongrunnlag.personer.map { it.tilBegrunnelsePerson() },
                 minimerteEndredeUtbetalingAndeler = emptyList(),
             ),
@@ -390,9 +391,10 @@ class VedtaksperiodeServiceUtilsTest {
             vedtaksperiodeType = Vedtaksperiodetype.UTBETALING,
             vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET,
             begrunnelseGrunnlag = BegrunnelseGrunnlag(
-                personResultater = vilkårsvurdering.personResultater,
+                minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
                 begrunnelsePersoner = persongrunnlag.personer.map { it.tilBegrunnelsePerson() },
-                minimerteEndredeUtbetalingAndeler = endredeUtbetalingAndeler.map { it.tilMinimertEndretUtbetalingAndel() },
+                minimerteEndredeUtbetalingAndeler = endredeUtbetalingAndeler
+                    .map { it.tilMinimertEndretUtbetalingAndel() },
             ),
             identerMedUtbetaling = identerMedUtbetaling,
             erFørsteVedtaksperiodePåFagsak = false

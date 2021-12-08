@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.common.lagTriggesAv
 import no.nav.familie.ba.sak.common.lagVilkårResultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.vedtak.erFørstePeriodeOgVilkårIkkeOppfylt
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilMinimertVilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -50,7 +51,7 @@ class VedtakUtilsTest {
         Assertions.assertTrue(
             erFørstePeriodeOgVilkårIkkeOppfylt(
                 erFørsteVedtaksperiodePåFagsak = false,
-                vilkårResultat = vilkårResultatIkkeOppfylt,
+                vilkårResultat = vilkårResultatIkkeOppfylt.tilMinimertVilkårResultat(),
                 vedtaksperiode = vedtaksperiode,
                 triggesAv = triggesAv
             )
@@ -58,7 +59,7 @@ class VedtakUtilsTest {
         Assertions.assertTrue(
             erFørstePeriodeOgVilkårIkkeOppfylt(
                 erFørsteVedtaksperiodePåFagsak = false,
-                vilkårResultat = vilkårResultatIkkeOppfyltDelvisOverlapp,
+                vilkårResultat = vilkårResultatIkkeOppfyltDelvisOverlapp.tilMinimertVilkårResultat(),
                 vedtaksperiode = vedtaksperiode,
                 triggesAv = triggesAv
             )
@@ -70,7 +71,7 @@ class VedtakUtilsTest {
         Assertions.assertFalse(
             erFørstePeriodeOgVilkårIkkeOppfylt(
                 erFørsteVedtaksperiodePåFagsak = true,
-                vilkårResultat = vilkårResultatIkkeOppfylt,
+                vilkårResultat = vilkårResultatIkkeOppfylt.tilMinimertVilkårResultat(),
                 vedtaksperiode = vedtaksperiode,
                 triggesAv = triggesAv
             )
@@ -82,7 +83,7 @@ class VedtakUtilsTest {
         Assertions.assertFalse(
             erFørstePeriodeOgVilkårIkkeOppfylt(
                 erFørsteVedtaksperiodePåFagsak = false,
-                vilkårResultat = vilkårResultatOppfylt,
+                vilkårResultat = vilkårResultatOppfylt.tilMinimertVilkårResultat(),
                 vedtaksperiode = vedtaksperiode,
                 triggesAv = triggesAv
             )
@@ -94,7 +95,7 @@ class VedtakUtilsTest {
         Assertions.assertFalse(
             erFørstePeriodeOgVilkårIkkeOppfylt(
                 erFørsteVedtaksperiodePåFagsak = false,
-                vilkårResultat = vilkårResultatUtenforPeriode,
+                vilkårResultat = vilkårResultatUtenforPeriode.tilMinimertVilkårResultat(),
                 vedtaksperiode = vedtaksperiode,
                 triggesAv = triggesAv
             )

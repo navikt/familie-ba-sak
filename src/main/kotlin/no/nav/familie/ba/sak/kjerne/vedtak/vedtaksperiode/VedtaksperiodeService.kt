@@ -40,6 +40,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilVedtaksbegrunnelseFritekst
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.BegrunnelseGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilBrevPeriodeGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilMinimertEndretUtbetalingAndel
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilMinimertPersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
 import org.springframework.stereotype.Service
@@ -172,7 +173,7 @@ class VedtaksperiodeService(
 
         return BegrunnelseGrunnlag(
             begrunnelsePersoner = persongrunnlag.personer.map { it.tilBegrunnelsePerson() },
-            personResultater = vilkårsvurdering.personResultater,
+            minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
             minimerteEndredeUtbetalingAndeler = endredeUtbetalingAndeler.map { it.tilMinimertEndretUtbetalingAndel() },
         )
     }
@@ -337,7 +338,7 @@ class VedtaksperiodeService(
 
                                 if (standardBegrunnelse.triggesForPeriode(
                                         utvidetVedtaksperiodeMedBegrunnelser = utvidetVedtaksperiodeMedBegrunnelser,
-                                        vilkårsvurdering = vilkårsvurdering,
+                                        minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
                                         persongrunnlag = persongrunnlag,
                                         identerMedUtbetaling = identerMedUtbetaling,
                                         triggesAv = triggesAv,

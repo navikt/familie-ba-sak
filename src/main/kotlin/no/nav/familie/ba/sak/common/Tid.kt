@@ -141,7 +141,7 @@ fun VilkårResultat.erEtterfølgendePeriode(other: VilkårResultat): Boolean {
         this.toPeriode().tom.year == other.toPeriode().fom.year
 }
 
-private fun lagOgValiderPeriodeFraVilkår(
+fun lagOgValiderPeriodeFraVilkår(
     periodeFom: LocalDate?,
     periodeTom: LocalDate?,
     erEksplisittAvslagPåSøknad: Boolean? = null
