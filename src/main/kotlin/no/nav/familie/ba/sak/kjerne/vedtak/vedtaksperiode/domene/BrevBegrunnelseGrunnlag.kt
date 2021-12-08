@@ -52,10 +52,3 @@ fun RestVedtaksbegrunnelse.tilBrevBegrunnelseGrunnlag(
             .tilTriggesAv()
     )
 }
-
-data class BrevBegrunnelseGrunnlagMedPersoner(
-    val vedtakBegrunnelseSpesifikasjon: VedtakBegrunnelseSpesifikasjon,
-    val vedtakBegrunnelseType: VedtakBegrunnelseType,
-    val triggesAv: TriggesAv,
-    val personIdenter: List<String>,
-)

@@ -5,14 +5,9 @@ import no.nav.familie.ba.sak.common.NullablePeriode
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.dokument.domene.SanityBegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.MinimertPerson
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilMinimertPerson
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtbetalingsperiodeDetalj
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
-import java.math.BigDecimal
 import java.time.LocalDate
 
 data class BrevPeriodeGrunnlag(
@@ -55,22 +50,6 @@ data class BrevPeriodeGrunnlag(
         (tom ?: TIDENES_ENDE).toYearMonth()
     )
 }
-
-data class MinimertUtbetalingsperiodeDetalj(
-    val person: MinimertPerson,
-    val ytelseType: YtelseType,
-    val utbetaltPerMnd: Int,
-    val erPåvirketAvEndring: Boolean,
-    val prosent: BigDecimal,
-)
-
-fun UtbetalingsperiodeDetalj.tilMinimertUtbetalingsperiodeDetalj() = MinimertUtbetalingsperiodeDetalj(
-    person = this.person.tilMinimertPerson(),
-    ytelseType = this.ytelseType,
-    utbetaltPerMnd = this.utbetaltPerMnd,
-    erPåvirketAvEndring = this.erPåvirketAvEndring,
-    prosent = this.prosent
-)
 
 fun UtvidetVedtaksperiodeMedBegrunnelser.tilBrevPeriodeGrunnlag(
     sanityBegrunnelser: List<SanityBegrunnelse>
