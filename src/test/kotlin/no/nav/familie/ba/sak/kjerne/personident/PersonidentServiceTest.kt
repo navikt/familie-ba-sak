@@ -62,11 +62,11 @@ internal class PersonidentServiceTest {
         clearMocks(answers = true, firstMock = aktørIdRepository)
         clearMocks(answers = true, firstMock = personidentRepository)
 
-        every { personidentRepository.save(capture(personIdentSlot)) } answers {
+        every { personidentRepository.saveAndFlush(capture(personIdentSlot)) } answers {
             personIdentSlot.captured
         }
 
-        every { aktørIdRepository.save(capture(aktørSlot)) } answers {
+        every { aktørIdRepository.saveAndFlush(capture(aktørSlot)) } answers {
             aktørSlot.captured
         }
     }
@@ -114,8 +114,8 @@ internal class PersonidentServiceTest {
         assertEquals(2, aktør?.personidenter?.size)
         assertEquals(personIdentSomSkalLeggesTil, aktør!!.aktivIdent())
         assertTrue(aktør!!.personidenter.first { !it.aktiv }.gjelderTil!!.isBefore(LocalDateTime.now()))
-        verify(exactly = 2) { aktørIdRepository.save(any()) }
-        verify(exactly = 0) { personidentRepository.save(any()) }
+        verify(exactly = 2) { aktørIdRepository.saveAndFlush(any()) }
+        verify(exactly = 0) { personidentRepository.saveAndFlush(any()) }
     }
 
     @Test
@@ -191,8 +191,8 @@ internal class PersonidentServiceTest {
         assertEquals(aktørIdSomFinnes.aktørId, aktør?.aktørId)
         assertEquals(1, aktør?.personidenter?.size)
         assertEquals(personIdentSomFinnes, aktør?.personidenter?.single()?.fødselsnummer)
-        verify(exactly = 0) { aktørIdRepository.save(any()) }
-        verify(exactly = 0) { personidentRepository.save(any()) }
+        verify(exactly = 0) { aktørIdRepository.saveAndFlush(any()) }
+        verify(exactly = 0) { personidentRepository.saveAndFlush(any()) }
     }
 
     @Test
@@ -202,8 +202,8 @@ internal class PersonidentServiceTest {
 
         val aktør = personidentService.hentOgLagreAktør(aktørIdAleredePersistert.aktørId)
 
-        verify(exactly = 0) { aktørIdRepository.save(any()) }
-        verify(exactly = 0) { personidentRepository.save(any()) }
+        verify(exactly = 0) { aktørIdRepository.saveAndFlush(any()) }
+        verify(exactly = 0) { personidentRepository.saveAndFlush(any()) }
         assertEquals(aktørIdAleredePersistert.aktørId, aktør.aktørId)
         assertEquals(personidentAleredePersistert, aktør.personidenter.single().fødselsnummer)
     }
@@ -214,8 +214,8 @@ internal class PersonidentServiceTest {
 
         val aktør = personidentService.hentOgLagreAktør(personidentAleredePersistert)
 
-        verify(exactly = 0) { aktørIdRepository.save(any()) }
-        verify(exactly = 0) { personidentRepository.save(any()) }
+        verify(exactly = 0) { aktørIdRepository.saveAndFlush(any()) }
+        verify(exactly = 0) { personidentRepository.saveAndFlush(any()) }
         assertEquals(aktørIdAleredePersistert.aktørId, aktør.aktørId)
         assertEquals(personidentAleredePersistert, aktør.personidenter.single().fødselsnummer)
     }
@@ -234,8 +234,8 @@ internal class PersonidentServiceTest {
 
         val aktør = personidentService.hentOgLagreAktør(personidentAktiv)
 
-        verify(exactly = 0) { aktørIdRepository.save(any()) }
-        verify(exactly = 0) { personidentRepository.save(any()) }
+        verify(exactly = 0) { aktørIdRepository.saveAndFlush(any()) }
+        verify(exactly = 0) { personidentRepository.saveAndFlush(any()) }
         assertEquals(aktørIdAktiv.aktørId, aktør.aktørId)
         assertEquals(personidentAktiv, aktør.personidenter.single().fødselsnummer)
     }
@@ -250,8 +250,8 @@ internal class PersonidentServiceTest {
 
         val aktør = personidentService.hentOgLagreAktør(personidentHistorisk)
 
-        verify(exactly = 2) { aktørIdRepository.save(any()) }
-        verify(exactly = 0) { personidentRepository.save(any()) }
+        verify(exactly = 2) { aktørIdRepository.saveAndFlush(any()) }
+        verify(exactly = 0) { personidentRepository.saveAndFlush(any()) }
         assertEquals(aktørIdAktiv.aktørId, aktør.aktørId)
         assertEquals(personidentAktiv, aktør.personidenter.single().fødselsnummer)
     }
@@ -266,8 +266,8 @@ internal class PersonidentServiceTest {
 
         val aktør = personidentService.hentOgLagreAktør(personidentAktiv)
 
-        verify(exactly = 1) { aktørIdRepository.save(any()) }
-        verify(exactly = 0) { personidentRepository.save(any()) }
+        verify(exactly = 1) { aktørIdRepository.saveAndFlush(any()) }
+        verify(exactly = 0) { personidentRepository.saveAndFlush(any()) }
         assertEquals(aktørIdAktiv.aktørId, aktør.aktørId)
         assertEquals(personidentAktiv, aktør.personidenter.single().fødselsnummer)
     }

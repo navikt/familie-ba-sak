@@ -88,7 +88,7 @@ class PersonidentService(
     }
 
     private fun opprettAktørIdOgPersonident(aktørIdStr: String, fødselsnummer: String): Aktør =
-        aktørIdRepository.save(
+        aktørIdRepository.saveAndFlush(
             Aktør(aktørId = aktørIdStr).also {
                 it.personidenter.add(
                     Personident(fødselsnummer = fødselsnummer, aktør = it)
@@ -102,11 +102,11 @@ class PersonidentService(
             it.gjelderTil = LocalDateTime.now()
         }
         // Ekstra persistering eller kommer unique constraint feile.  
-        aktørIdRepository.save(aktør)
+        aktørIdRepository.saveAndFlush(aktør)
         aktør.personidenter.add(
             Personident(fødselsnummer = fødselsnummer, aktør = aktør)
         )
-        return aktørIdRepository.save(aktør)
+        return aktørIdRepository.saveAndFlush(aktør)
     }
 
     private fun filtrerAktivtFødselsnummer(identerFraPdl: List<IdentInformasjon>) =
