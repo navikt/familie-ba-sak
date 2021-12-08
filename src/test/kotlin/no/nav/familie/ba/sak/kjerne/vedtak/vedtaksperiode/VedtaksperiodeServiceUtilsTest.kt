@@ -342,7 +342,7 @@ class VedtaksperiodeServiceUtilsTest {
             vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET,
             vedtaksperiodeType = Vedtaksperiodetype.UTBETALING,
             periode = NullablePeriode(LocalDate.now().minusMonths(1), null),
-            begrunnelseGrunnlag = BrevGrunnlag(
+            brevGrunnlag = BrevGrunnlag(
                 minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
                 personerPåBehandling = persongrunnlag.personer.map { it.tilBegrunnelsePerson() },
                 minimerteEndredeUtbetalingAndeler = emptyList(),
@@ -390,7 +390,7 @@ class VedtaksperiodeServiceUtilsTest {
             periode = NullablePeriode(fom, tom),
             vedtaksperiodeType = Vedtaksperiodetype.UTBETALING,
             vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET,
-            begrunnelseGrunnlag = BrevGrunnlag(
+            brevGrunnlag = BrevGrunnlag(
                 minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
                 personerPåBehandling = persongrunnlag.personer.map { it.tilBegrunnelsePerson() },
                 minimerteEndredeUtbetalingAndeler = endredeUtbetalingAndeler

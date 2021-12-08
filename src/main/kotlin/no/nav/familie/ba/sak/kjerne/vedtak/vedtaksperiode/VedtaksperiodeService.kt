@@ -100,7 +100,7 @@ class VedtaksperiodeService(
 
         val behandling = vedtaksperiodeMedBegrunnelser.vedtak.behandling
 
-        val begrunnelseGrunnlag = hentBegrunnelseGrunnlag(behandling.id)
+        val brevGrunnlag = hentBrevGrunnlag(behandling.id)
 
         val sanityBegrunnelser = sanityService.hentSanityBegrunnelser()
 
@@ -124,7 +124,7 @@ class VedtaksperiodeService(
                     vedtakBegrunnelseType = vedtakBegrunnelseType,
                     periode = vedtaksperiodeMedBegrunnelser.hentNullablePeriode(),
                     vedtaksperiodeType = vedtaksperiodeMedBegrunnelser.type,
-                    begrunnelseGrunnlag = begrunnelseGrunnlag,
+                    brevGrunnlag = brevGrunnlag,
                     erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
                     identerMedUtbetaling = vedtaksperiodeMedBegrunnelser.hentUtbetalingsperiodeDetaljer(
                         andelerTilkjentYtelse,
@@ -133,7 +133,7 @@ class VedtaksperiodeService(
                 )
 
                 if (triggesAv.satsendring) {
-                    validerSatsendring(vedtaksperiodeMedBegrunnelser.fom, begrunnelseGrunnlag.personerPåBehandling)
+                    validerSatsendring(vedtaksperiodeMedBegrunnelser.fom, brevGrunnlag.personerPåBehandling)
                 }
 
                 if (it.erTilknyttetVilkår(sanityBegrunnelser) && personerGjeldendeForBegrunnelseIdenter.isEmpty()) {
@@ -156,7 +156,7 @@ class VedtaksperiodeService(
         return vedtaksperiodeMedBegrunnelser.vedtak
     }
 
-    fun hentBegrunnelseGrunnlag(
+    fun hentBrevGrunnlag(
         behandlingId: Long,
     ): BrevGrunnlag {
 
@@ -422,7 +422,7 @@ class VedtaksperiodeService(
             søknadGrunnlagService.hentAktiv(behandlingId = behandlingId)?.hentUregistrerteBarn()
                 ?.map { it.tilUregisrertBarnEnkel() } ?: emptyList()
 
-        val begrunnelseGrunnlag = hentBegrunnelseGrunnlag(behandlingId)
+        val brevGrunnlag = hentBrevGrunnlag(behandlingId)
         val personopplysningGrunnlag = persongrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandlingId)
             ?: throw Feil(finnerIkkePersongrunnlagFeilmelding(behandlingId))
 
@@ -441,11 +441,11 @@ class VedtaksperiodeService(
         return utvidetVedtaksperiodeMedBegrunnelse
             .tilBrevPeriodeGrunnlag(sanityBegrunnelser)
             .tilBrevPeriodeGrunnlagMedPersoner(
-                begrunnelseGrunnlag = begrunnelseGrunnlag,
+                brevGrunnlag = brevGrunnlag,
                 erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePeriodePåFagsak
             )
             .byggBegrunnelserOgFritekster(
-                begrunnelseGrunnlag = begrunnelseGrunnlag,
+                brevGrunnlag = brevGrunnlag,
                 uregistrerteBarn = uregistrerteBarn,
                 målformSøker = personopplysningGrunnlag.søker.målform
             )

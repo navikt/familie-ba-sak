@@ -250,7 +250,7 @@ fun BrevPeriodeGrunnlag.tilBrevPeriode(
 
     val begrunnelserOgFritekster = brevPeriodeGrunnlagMedPersoner.byggBegrunnelserOgFritekster(
         uregistrerteBarn = uregistrerteBarn,
-        begrunnelseGrunnlag = brevGrunnlag,
+        brevGrunnlag = brevGrunnlag,
         målformSøker = målformSøker
     )
 

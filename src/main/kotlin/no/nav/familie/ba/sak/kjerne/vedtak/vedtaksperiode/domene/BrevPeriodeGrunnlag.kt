@@ -24,7 +24,7 @@ data class BrevPeriodeGrunnlag(
     val minimerteUtbetalingsperiodeDetaljer: List<MinimertUtbetalingsperiodeDetalj> = emptyList(),
 ) {
     fun tilBrevPeriodeGrunnlagMedPersoner(
-        begrunnelseGrunnlag: BrevGrunnlag,
+        brevGrunnlag: BrevGrunnlag,
         erFørsteVedtaksperiodePåFagsak: Boolean
     ): BrevPeriodeGrunnlagMedPersoner {
         return BrevPeriodeGrunnlagMedPersoner(
@@ -38,7 +38,7 @@ data class BrevPeriodeGrunnlag(
                         tom = this.tom
                     ),
                     periodeType = this.type,
-                    begrunnelseGrunnlag = begrunnelseGrunnlag,
+                    brevGrunnlag = brevGrunnlag,
                     identerMedUtbetaling = this.minimerteUtbetalingsperiodeDetaljer
                         .map { utbetalingsperiodeDetalj -> utbetalingsperiodeDetalj.person.personIdent },
                     erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak

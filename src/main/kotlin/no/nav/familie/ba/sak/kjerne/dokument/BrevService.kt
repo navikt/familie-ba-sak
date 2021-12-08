@@ -183,14 +183,14 @@ class BrevService(
         val andelerTilkjentYtelse =
             andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(vedtak.behandling.id)
 
-        val begrunnelseGrunnlag = vedtaksperiodeService.hentBegrunnelseGrunnlag(vedtak.behandling.id)
+        val brevGrunnlag = vedtaksperiodeService.hentBrevGrunnlag(vedtak.behandling.id)
 
         val brevperioder = utvidetVedtaksperioderMedBegrunnelser
             .sorter()
             .map { it.tilBrevPeriodeGrunnlag(sanityBegrunnelser) }
             .mapNotNull { brevPeriodeGrunnlag ->
                 brevPeriodeGrunnlag.tilBrevPeriode(
-                    brevGrunnlag = begrunnelseGrunnlag,
+                    brevGrunnlag = brevGrunnlag,
                     uregistrerteBarn = hentUregistrerteBarn(vedtak.behandling.id),
                     utvidetScenario = andelerTilkjentYtelse
                         .hentUtvidetYtelseScenario(brevPeriodeGrunnlag.hentMånedPeriode()),

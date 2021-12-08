@@ -174,13 +174,10 @@ private fun VedtaksperiodeMedBegrunnelser.endretUtbetalingAndelSkalVæreMed(ande
         }
     }
 
-fun BrevPeriodeGrunnlagMedPersoner.utbetaltForPersonerIBegrunnelse(
-    personIdenterForBegrunnelse: List<String>
-) = this.minimerteUtbetalingsperiodeDetaljer.filter { utbetalingsperiodeDetalj ->
-    personIdenterForBegrunnelse.contains(
-        utbetalingsperiodeDetalj.person.personIdent
-    )
-}.totaltUtbetalt()
+fun BrevPeriodeGrunnlagMedPersoner.beløpUtbetaltFor(personIdenter: List<String>) =
+    this.minimerteUtbetalingsperiodeDetaljer
+        .filter { utbetalingsperiodeDetalj -> personIdenter.contains(utbetalingsperiodeDetalj.person.personIdent) }
+        .totaltUtbetalt()
 
 class BegrunnelseComparator : Comparator<Vedtaksbegrunnelse> {
 

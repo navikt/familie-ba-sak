@@ -6,8 +6,8 @@ import no.nav.familie.ba.sak.kjerne.behandlingsresultat.UregistrertBarnEnkel
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Begrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.FritekstBegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.beløpUtbetaltFor
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilBrevBegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.utbetaltForPersonerIBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import java.time.LocalDate
 
@@ -21,23 +21,20 @@ data class BrevPeriodeGrunnlagMedPersoner(
     val erFørsteVedtaksperiodePåFagsak: Boolean,
 ) {
     fun byggBegrunnelserOgFritekster(
-        begrunnelseGrunnlag: BrevGrunnlag,
+        brevGrunnlag: BrevGrunnlag,
         uregistrerteBarn: List<UregistrertBarnEnkel> = emptyList(),
         målformSøker: Målform
     ): List<Begrunnelse> {
 
-        val begrunnelser =
-            this.begrunnelser.sortedBy { it.vedtakBegrunnelseType }.map { brevBegrunnelseGrunnlag ->
-                val beløp = Utils.formaterBeløp(
-                    this.utbetaltForPersonerIBegrunnelse(brevBegrunnelseGrunnlag.personIdenter)
-                )
-
-                brevBegrunnelseGrunnlag.tilBrevBegrunnelse(
+        val begrunnelser = this.begrunnelser
+            .sortedBy { it.vedtakBegrunnelseType }
+            .map {
+                it.tilBrevBegrunnelse(
                     vedtaksperiode = NullablePeriode(this.fom, this.tom),
-                    personerIPersongrunnlag = begrunnelseGrunnlag.personerPåBehandling,
+                    personerIPersongrunnlag = brevGrunnlag.personerPåBehandling,
                     målformSøker = målformSøker,
                     uregistrerteBarn = uregistrerteBarn,
-                    beløp = beløp,
+                    beløp = Utils.formaterBeløp(this.beløpUtbetaltFor(it.personIdenter)),
                 )
             }
 

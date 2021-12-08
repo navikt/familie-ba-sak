@@ -81,7 +81,7 @@ fun hentPersonidenterGjeldendeForBegrunnelse(
     periode: NullablePeriode,
     vedtaksperiodeType: Vedtaksperiodetype,
     vedtakBegrunnelseType: VedtakBegrunnelseType,
-    begrunnelseGrunnlag: BrevGrunnlag,
+    brevGrunnlag: BrevGrunnlag,
     identerMedUtbetaling: List<String>,
     erFørsteVedtaksperiodePåFagsak: Boolean,
 ): List<String> {
@@ -93,18 +93,18 @@ fun hentPersonidenterGjeldendeForBegrunnelse(
     return when {
         triggesAv.vilkår.contains(Vilkår.UTVIDET_BARNETRYGD) || triggesAv.småbarnstillegg ->
             identerMedUtbetaling +
-                begrunnelseGrunnlag.personerPåBehandling.hentSøker().personIdent +
-                begrunnelseGrunnlag
+                brevGrunnlag.personerPåBehandling.hentSøker().personIdent +
+                brevGrunnlag
                     .minimerteEndredeUtbetalingAndeler
                     .somOverlapper(periode.tilNullableMånedPeriode())
                     .map { it.personIdent }
 
         triggesAv.barnMedSeksårsdag ->
-            begrunnelseGrunnlag.personerPåBehandling.barnMedSeksårsdagPåFom(periode.fom)
+            brevGrunnlag.personerPåBehandling.barnMedSeksårsdagPåFom(periode.fom)
                 .map { person -> person.personIdent }
 
         triggesAv.personerManglerOpplysninger ->
-            if (begrunnelseGrunnlag.minimertePersonResultater.harPersonerSomManglerOpplysninger())
+            if (brevGrunnlag.minimertePersonResultater.harPersonerSomManglerOpplysninger())
                 emptyList()
             else
                 error("Legg til opplysningsplikt ikke oppfylt begrunnelse men det er ikke person med det resultat")
@@ -113,21 +113,21 @@ fun hentPersonidenterGjeldendeForBegrunnelse(
 
         triggesAv.etterEndretUtbetaling ->
             hentPersonerForEtterEndretUtbetalingsperiode(
-                minimerteEndredeUtbetalingAndeler = begrunnelseGrunnlag.minimerteEndredeUtbetalingAndeler,
+                minimerteEndredeUtbetalingAndeler = brevGrunnlag.minimerteEndredeUtbetalingAndeler,
                 fom = periode.fom,
                 endringsaarsaker = triggesAv.endringsaarsaker
             )
 
         else ->
             VedtakUtils.hentPersonerForAlleUtgjørendeVilkår(
-                minimertePersonResultater = begrunnelseGrunnlag.minimertePersonResultater,
+                minimertePersonResultater = brevGrunnlag.minimertePersonResultater,
                 vedtaksperiode = Periode(
                     fom = periode.fom ?: TIDENES_MORGEN,
                     tom = periode.tom ?: TIDENES_ENDE
                 ),
                 oppdatertBegrunnelseType = vedtakBegrunnelseType,
                 aktuellePersonerForVedtaksperiode = hentAktuellePersonerForVedtaksperiode(
-                    begrunnelseGrunnlag.personerPåBehandling,
+                    brevGrunnlag.personerPåBehandling,
                     vedtakBegrunnelseType,
                     identerMedUtbetaling
                 ),
