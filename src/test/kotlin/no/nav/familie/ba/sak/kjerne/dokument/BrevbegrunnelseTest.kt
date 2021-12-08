@@ -25,8 +25,15 @@ class BrevbegrunnelseTest {
 
         val antallFeil = testmappe.list()?.fold(0) { acc, it ->
             val fil = File("./src/test/resources/brevbegrunnelseCaser/$it")
+
             val behandlingsresultatPersonTestConfig =
-                objectMapper.readValue<BrevBegrunnelseTestConfig>(fil.readText())
+                try {
+                    objectMapper.readValue<BrevBegrunnelseTestConfig>(fil.readText())
+                } catch (e: Exception) {
+                    testReporter.publishEntry("Feil i fil: $it")
+                    testReporter.publishEntry(e.message)
+                    return@fold acc + 1
+                }
 
             val brevPeriodeGrunnlag =
                 BrevPeriodeGrunnlag(

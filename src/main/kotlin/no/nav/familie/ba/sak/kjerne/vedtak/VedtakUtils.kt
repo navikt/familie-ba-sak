@@ -66,6 +66,9 @@ object VedtakUtils {
             .fold(mutableListOf()) { acc, personResultat ->
                 val utgjørendeVilkårResultat =
                     personResultat.minimerteVilkårResultater.firstOrNull { minimertVilkårResultat ->
+                        if (minimertVilkårResultat.resultat == Resultat.IKKE_OPPFYLT) {
+                            print("Hei")
+                        }
 
                         val oppfyltTomMånedEtter =
                             if (minimertVilkårResultat.vilkårType == Vilkår.UNDER_18_ÅR &&

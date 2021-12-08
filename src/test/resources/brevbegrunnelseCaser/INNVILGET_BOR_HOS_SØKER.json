@@ -19,51 +19,11 @@
       "personIdent": "20012011111",
       "fødselsdato": "2020-01-20",
       "type": "BARN",
-      "vilkårResultater": [
-        {
-          "vilkårType": "UNDER_18_ÅR",
-          "resultat": "OPPFYLT",
-          "periodeFom": "2020-01-20",
-          "periodeTom": null,
-          "utdypendeVilkårsvurderinger": [],
-          "erEksplisittAvslagPåSøknad": false
-        },
+      "atypiskeVilkårResultater": [
         {
           "vilkårType": "BOR_MED_SØKER",
           "resultat": "OPPFYLT",
           "periodeFom": "2021-08-01",
-          "periodeTom": null,
-          "utdypendeVilkårsvurderinger": [],
-          "erEksplisittAvslagPåSøknad": false
-        },
-        {
-          "vilkårType": "GIFT_PARTNERSKAP",
-          "resultat": "OPPFYLT",
-          "periodeFom": "2020-01-20",
-          "periodeTom": null,
-          "utdypendeVilkårsvurderinger": [],
-          "erEksplisittAvslagPåSøknad": false
-        },
-        {
-          "vilkårType": "BOSATT_I_RIKET",
-          "resultat": "OPPFYLT",
-          "periodeFom": "2020-01-20",
-          "periodeTom": null,
-          "utdypendeVilkårsvurderinger": [],
-          "erEksplisittAvslagPåSøknad": false
-        },
-        {
-          "vilkårType": "LOVLIG_OPPHOLD",
-          "resultat": "OPPFYLT",
-          "periodeFom": "2020-01-20",
-          "periodeTom": null,
-          "utdypendeVilkårsvurderinger": [],
-          "erEksplisittAvslagPåSøknad": false
-        },
-        {
-          "vilkårType": "LOVLIG_OPPHOLD",
-          "resultat": "OPPFYLT",
-          "periodeFom": "2020-01-20",
           "periodeTom": null,
           "utdypendeVilkårsvurderinger": [],
           "erEksplisittAvslagPåSøknad": false
@@ -84,24 +44,7 @@
       "personIdent": "10089322222",
       "fødselsdato": "1993-08-10",
       "type": "SØKER",
-      "vilkårResultater": [
-        {
-          "vilkårType": "BOSATT_I_RIKET",
-          "resultat": "OPPFYLT",
-          "periodeFom": "1993-08-10",
-          "periodeTom": null,
-          "utdypendeVilkårsvurderinger": [],
-          "erEksplisittAvslagPåSøknad": false
-        },
-        {
-          "vilkårType": "LOVLIG_OPPHOLD",
-          "resultat": "OPPFYLT",
-          "periodeFom": "1993-08-10",
-          "periodeTom": null,
-          "utdypendeVilkårsvurderinger": [],
-          "erEksplisittAvslagPåSøknad": false
-        }
-      ],
+      "atypiskeVilkårResultater": [],
       "andreVurderinger": [],
       "endredeUtbetalinger": [],
       "utbetalinger": []

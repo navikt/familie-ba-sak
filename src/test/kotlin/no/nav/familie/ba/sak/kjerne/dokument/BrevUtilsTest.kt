@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.dokument
 
 import no.nav.familie.ba.sak.common.defaultFagsak
+import no.nav.familie.ba.sak.common.hentSanityBegrunnelser
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagMinimertUtbetalingsperiodeDetalj
 import no.nav.familie.ba.sak.common.lagRestVedtaksbegrunnelse
@@ -28,6 +29,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilBegrunnelsePerson
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilMinimertPerson
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilBrevPeriodeGrunnlag
 import org.junit.Assert.assertEquals
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertNull
@@ -343,7 +345,7 @@ internal class BrevUtilsTest {
         Assertions.assertEquals(
             "§§ 2, 4, 10 og 11",
             hentHjemmeltekst(
-                utvidetVedtaksperioderMedBegrunnelser,
+                utvidetVedtaksperioderMedBegrunnelser.map { it.tilBrevPeriodeGrunnlag(hentSanityBegrunnelser()) },
                 listOf(
                     lagSanityBegrunnelse(
                         apiNavn = VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET.sanityApiNavn,

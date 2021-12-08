@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.Utils
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.UregistrertBarnEnkel
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.dokument.UtvidetScenario
@@ -22,6 +23,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.MinimertPersonR
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.MinimertUtbetalingsperiodeDetalj
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.MinimertVilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurdering
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import java.math.BigDecimal
 import java.time.LocalDate
 
@@ -48,7 +50,7 @@ data class PersonPåBehandlingConfig(
     val personIdent: String,
     val fødselsdato: LocalDate,
     val type: PersonType,
-    val vilkårResultater: List<MinimertVilkårResultat>,
+    val atypiskeVilkårResultater: List<MinimertVilkårResultat>,
     val andreVurderinger: List<AnnenVurdering>,
     val endredeUtbetalinger: List<EndretUtbetalingAndelPåPerson>,
     val utbetalinger: List<UtbetalingPåPerson>
@@ -61,12 +63,27 @@ data class PersonPåBehandlingConfig(
     fun tilMinimerteEndredeUtbetalingAndeler() =
         endredeUtbetalinger.map { it.tilMinimertEndretUtbetalingAndel(this.personIdent) }
 
-    fun tilMinimertePersonResultater() =
-        MinimertPersonResultat(
+    fun tilMinimertePersonResultater(): MinimertPersonResultat {
+        return MinimertPersonResultat(
             personIdent = this.personIdent,
-            minimerteVilkårResultater = this.vilkårResultater,
+            minimerteVilkårResultater = this.atypiskeVilkårResultater + hentTypiskeVilkårForPersontype(),
             andreVurderinger = this.andreVurderinger,
         )
+    }
+
+    private fun hentTypiskeVilkårForPersontype() =
+        Vilkår.hentVilkårFor(this.type)
+            .filter { vilkår -> !this.atypiskeVilkårResultater.any { it.vilkårType == vilkår } }
+            .map { vilkår ->
+                MinimertVilkårResultat(
+                    vilkårType = vilkår,
+                    periodeFom = this.fødselsdato,
+                    periodeTom = null,
+                    resultat = Resultat.OPPFYLT,
+                    utdypendeVilkårsvurderinger = emptyList(),
+                    erEksplisittAvslagPåSøknad = false,
+                )
+            }
 }
 
 data class UtbetalingPåPerson(
