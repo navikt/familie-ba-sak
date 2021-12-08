@@ -100,9 +100,15 @@ object VedtakUtils {
                                 triggereErOppfylt(triggesAv, minimertVilkårResultat) &&
                                     minimertVilkårResultat.periodeTom != null &&
                                     minimertVilkårResultat.resultat == Resultat.OPPFYLT &&
-                                    minimertVilkårResultat.periodeTom!!.toYearMonth() ==
+                                    minimertVilkårResultat.periodeTom.toYearMonth() ==
                                     vedtaksperiode.fom.minusMonths(oppfyltTomMånedEtter).toYearMonth()
                             }
+
+                            oppdatertBegrunnelseType == VedtakBegrunnelseType.AVSLAG ->
+                                minimertVilkårResultat.periodeFom.toYearMonth() ==
+                                    vedtaksperiode.fom.toYearMonth() &&
+                                    minimertVilkårResultat.resultat == Resultat.IKKE_OPPFYLT
+
                             else -> throw Feil("Henting av personer med utgjørende vilkår when: Ikke implementert")
                         }
                     }
