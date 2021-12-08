@@ -175,14 +175,10 @@ class BrevService(
         }
 
         val sanityBegrunnelser = sanityService.hentSanityBegrunnelser()
-
         val grunnlagOgSignaturData = hentGrunnlagOgSignaturData(vedtak)
-
         val andelerTilkjentYtelse =
             andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(vedtak.behandling.id)
-
         val brevGrunnlag = vedtaksperiodeService.hentBrevGrunnlag(vedtak.behandling.id)
-
         val uregistrerteBarn = hentUregistrerteBarn(vedtak.behandling.id)
 
         val brevPeriodeGunnlag = utvidetVedtaksperioderMedBegrunnelser
@@ -194,12 +190,8 @@ class BrevService(
                 it.tilBrevPeriode(
                     brevGrunnlag = brevGrunnlag,
                     uregistrerteBarn = uregistrerteBarn,
-                    utvidetScenario = andelerTilkjentYtelse
-                        .hentUtvidetYtelseScenario(it.hentMånedPeriode()),
-                    erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak(
-                        andelerTilkjentYtelse,
-                        it.fom
-                    ),
+                    utvidetScenario = andelerTilkjentYtelse.hentUtvidetYtelseScenario(it.hentMånedPeriode()),
+                    erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak(andelerTilkjentYtelse, it.fom),
                     målformSøker = grunnlagOgSignaturData.grunnlag.søker.målform,
                 )
             }
