@@ -101,7 +101,7 @@ class PersonidentService(
             it.aktiv = false
             it.gjelderTil = LocalDateTime.now()
         }
-        // Ekstra persistering eller kommer unique constraint feile.  
+        // Ekstra persistering eller kommer unique constraint feile.
         aktørIdRepository.saveAndFlush(aktør)
         aktør.personidenter.add(
             Personident(fødselsnummer = fødselsnummer, aktør = aktør)
