@@ -265,7 +265,8 @@ fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType): StegTyp
                 SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
                 BESLUTTE_VEDTAK -> hentNesteStegTypeBasertPåBehandlingsresultat(behandling.resultat)
                 IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
-                VENTE_PÅ_STATUS_FRA_ØKONOMI -> JOURNALFØR_VEDTAKSBREV
+                VENTE_PÅ_STATUS_FRA_ØKONOMI -> IVERKSETT_MOT_FAMILIE_TILBAKE
+                IVERKSETT_MOT_FAMILIE_TILBAKE -> JOURNALFØR_VEDTAKSBREV
                 JOURNALFØR_VEDTAKSBREV -> DISTRIBUER_VEDTAKSBREV
                 DISTRIBUER_VEDTAKSBREV -> FERDIGSTILLE_BEHANDLING
                 FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET
