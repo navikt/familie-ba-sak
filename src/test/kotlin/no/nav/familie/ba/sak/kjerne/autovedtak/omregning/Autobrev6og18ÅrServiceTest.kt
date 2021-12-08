@@ -25,7 +25,7 @@ import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
-import no.nav.familie.ba.sak.task.dto.Autobrev6og18ÅrDTO
+import no.nav.familie.ba.sak.task.dto.Autobrev3og6og18ÅrDTO
 import no.nav.familie.prosessering.domene.Task
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -55,13 +55,13 @@ internal class Autobrev6og18ÅrServiceTest {
     fun `Verifiser at løpende fagsak med avsluttede behandlinger og barn på 18 ikke oppretter en behandling for omregning`() {
         val behandling = initMock(alder = 18, lagTestPersonopplysningGrunnlagFunc = ::lagTestPersonopplysningGrunnlag)
 
-        val autobrev6og18ÅrDTO = Autobrev6og18ÅrDTO(
+        val autobrev3og6Og18ÅrDTO = Autobrev3og6og18ÅrDTO(
             fagsakId = behandling.fagsak.id,
             alder = Alder.ATTEN.år,
             årMåned = inneværendeMåned()
         )
 
-        autobrev6og18ÅrService.opprettOmregningsoppgaveForBarnIBrytingsalder(autobrev6og18ÅrDTO)
+        autobrev6og18ÅrService.opprettOmregningsoppgaveForBarnIBrytingsalder(autobrev3og6Og18ÅrDTO)
 
         verify(exactly = 0) { stegService.håndterVilkårsvurdering(any()) }
     }
@@ -70,13 +70,13 @@ internal class Autobrev6og18ÅrServiceTest {
     fun `Verifiser at behandling for omregning ikke opprettes om barn med angitt ålder ikke finnes`() {
         val behandling = initMock(alder = 7, lagTestPersonopplysningGrunnlagFunc = ::lagTestPersonopplysningGrunnlag)
 
-        val autobrev6og18ÅrDTO = Autobrev6og18ÅrDTO(
+        val autobrev3og6Og18ÅrDTO = Autobrev3og6og18ÅrDTO(
             fagsakId = behandling.fagsak.id,
             alder = Alder.SEKS.år,
             årMåned = inneværendeMåned()
         )
 
-        autobrev6og18ÅrService.opprettOmregningsoppgaveForBarnIBrytingsalder(autobrev6og18ÅrDTO)
+        autobrev6og18ÅrService.opprettOmregningsoppgaveForBarnIBrytingsalder(autobrev3og6Og18ÅrDTO)
 
         verify(exactly = 0) { stegService.håndterVilkårsvurdering(any()) }
     }
@@ -89,13 +89,13 @@ internal class Autobrev6og18ÅrServiceTest {
             lagTestPersonopplysningGrunnlagFunc = ::lagTestPersonopplysningGrunnlag
         )
 
-        val autobrev6og18ÅrDTO = Autobrev6og18ÅrDTO(
+        val autobrev3og6Og18ÅrDTO = Autobrev3og6og18ÅrDTO(
             fagsakId = behandling.fagsak.id,
             alder = Alder.SEKS.år,
             årMåned = inneværendeMåned()
         )
 
-        autobrev6og18ÅrService.opprettOmregningsoppgaveForBarnIBrytingsalder(autobrev6og18ÅrDTO)
+        autobrev6og18ÅrService.opprettOmregningsoppgaveForBarnIBrytingsalder(autobrev3og6Og18ÅrDTO)
 
         verify(exactly = 0) { stegService.håndterVilkårsvurdering(any()) }
     }
@@ -108,14 +108,14 @@ internal class Autobrev6og18ÅrServiceTest {
             lagTestPersonopplysningGrunnlagFunc = ::lagTestPersonopplysningGrunnlag
         )
 
-        val autobrev6og18ÅrDTO = Autobrev6og18ÅrDTO(
+        val autobrev3og6Og18ÅrDTO = Autobrev3og6og18ÅrDTO(
             fagsakId = behandling.fagsak.id,
             alder = Alder.SEKS.år,
             årMåned = inneværendeMåned()
         )
 
         Assertions.assertThrows(IllegalStateException::class.java) {
-            autobrev6og18ÅrService.opprettOmregningsoppgaveForBarnIBrytingsalder(autobrev6og18ÅrDTO)
+            autobrev6og18ÅrService.opprettOmregningsoppgaveForBarnIBrytingsalder(autobrev3og6Og18ÅrDTO)
         }
     }
 
@@ -123,7 +123,7 @@ internal class Autobrev6og18ÅrServiceTest {
     fun `Verifiser at behandling for omregning blir opprettet og prosessert for løpende fagsak med barn som fyller inneværende måned`() {
         val behandling = initMock(alder = 6, lagTestPersonopplysningGrunnlagFunc = ::lagTestPersonopplysningGrunnlag)
 
-        val autobrev6og18ÅrDTO = Autobrev6og18ÅrDTO(
+        val autobrev3og6Og18ÅrDTO = Autobrev3og6og18ÅrDTO(
             fagsakId = behandling.fagsak.id,
             alder = Alder.SEKS.år,
             årMåned = inneværendeMåned()
@@ -134,7 +134,7 @@ internal class Autobrev6og18ÅrServiceTest {
         every { persongrunnlagService.hentSøker(any()) } returns tilfeldigSøker()
         every { vedtaksperiodeService.oppdaterFortsattInnvilgetPeriodeMedAutobrevBegrunnelse(any(), any()) } just runs
         every { taskRepository.save(any()) } returns Task(type = "test", payload = "")
-        autobrev6og18ÅrService.opprettOmregningsoppgaveForBarnIBrytingsalder(autobrev6og18ÅrDTO)
+        autobrev6og18ÅrService.opprettOmregningsoppgaveForBarnIBrytingsalder(autobrev3og6Og18ÅrDTO)
 
         verify(exactly = 1) {
             autovedtakService.opprettAutomatiskBehandlingOgKjørTilBehandlingsresultat(
@@ -160,7 +160,7 @@ internal class Autobrev6og18ÅrServiceTest {
             lagTestPersonopplysningGrunnlagFunc = ::lagTestPersonopplysningGrunnlag3År
         )
 
-        val autobrev6og18ÅrDTO = Autobrev6og18ÅrDTO(
+        val autobrev3og6Og18ÅrDTO = Autobrev3og6og18ÅrDTO(
             fagsakId = behandling.fagsak.id,
             alder = Alder.TRE.år,
             årMåned = inneværendeMåned()
@@ -189,7 +189,7 @@ internal class Autobrev6og18ÅrServiceTest {
             )
         } just runs
         every { taskRepository.save(any()) } returns Task(type = "test", payload = "")
-        autobrev6og18ÅrService.opprettOmregningsoppgaveForBarnIBrytingsalder(autobrev6og18ÅrDTO)
+        autobrev6og18ÅrService.opprettOmregningsoppgaveForBarnIBrytingsalder(autobrev3og6Og18ÅrDTO)
 
         verify(exactly = 1) {
             autovedtakService.opprettAutomatiskBehandlingOgKjørTilBehandlingsresultat(
@@ -206,7 +206,7 @@ internal class Autobrev6og18ÅrServiceTest {
         }
         verify(exactly = 1) { autovedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(any()) }
         verify(exactly = 1) { taskRepository.save(any()) }
-        assert(vedtakBegrunnelseSpesifikasjonSlot.captured.sanityApiNavn == "putt inn riktig verdi her")
+        assert(vedtakBegrunnelseSpesifikasjonSlot.captured.sanityApiNavn == VedtakBegrunnelseSpesifikasjon.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_BARN_UNDER_TRE_ÅR.sanityApiNavn)
     }
 
     private fun initMock(
@@ -250,8 +250,7 @@ internal class Autobrev6og18ÅrServiceTest {
             behandlingId = behandling.id,
             søkerPersonIdent = søker.personIdent.ident,
             barnasIdenter = listOf(barn.personIdent.ident),
-            barnFødselsdato = LocalDate.now()
-                .minusYears(alder)
+            barnFødselsdato = LocalDate.now().minusYears(alder).minusMonths(1)
         )
     }
 }

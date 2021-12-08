@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.task
 
 import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
-import no.nav.familie.ba.sak.task.dto.Autobrev6og18ÅrDTO
+import no.nav.familie.ba.sak.task.dto.Autobrev3og6og18ÅrDTO
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.log.IdUtils
@@ -39,12 +39,12 @@ class OpprettTaskService(
         taskRepository.save(SendStartBehandlingTilInfotrygdTask.opprettTask(fnrStoenadsmottaker))
     }
 
-    fun opprettAutovedtakFor6Og18ÅrBarn(fagsakId: Long, alder: Int) {
+    fun opprettAutovedtakFor3og6og18ÅrBarn(fagsakId: Long, alder: Int) {
         taskRepository.save(
             Task(
-                type = SendAutobrev6og18ÅrTask.TASK_STEP_TYPE,
+                type = SendAutobrev3og6og18ÅrTask.TASK_STEP_TYPE,
                 payload = objectMapper.writeValueAsString(
-                    Autobrev6og18ÅrDTO(
+                    Autobrev3og6og18ÅrDTO(
                         fagsakId = fagsakId,
                         alder = alder,
                         årMåned = inneværendeMåned()

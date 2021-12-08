@@ -15,22 +15,31 @@ import java.time.LocalDate
 
 @Service
 @TaskStepBeskrivelse(
-    taskStepType = FinnAlleBarn6og18ÅrTask.TASK_STEP_TYPE,
-    beskrivelse = "Send autobrev for barn som fyller 6 og 18 år til Dokdist",
+    taskStepType = FinnAlleBarn3og6og18ÅrTask.TASK_STEP_TYPE,
+    beskrivelse = "Send autobrev for barn som fyller 3, 6 og 18 år til Dokdist",
     maxAntallFeil = 3,
     triggerTidVedFeilISekunder = (60 * 60 * 24).toLong()
 )
-class FinnAlleBarn6og18ÅrTask(
+class FinnAlleBarn3og6og18ÅrTask(
     private val fagsakRepository: FagsakRepository,
     private val opprettTaskService: OpprettTaskService
 ) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
-        listOf<Long>(6, 18).forEach { alder ->
-            val berørteFagsaker = finnAlleBarnMedFødselsdagInneværendeMåned(alder)
-            logger.info("Oppretter tasker for ${berørteFagsaker.size} fagsaker med barn som fyller $alder år inneværende måned.")
+        listOf<Long>(3, 6, 18).forEach { alder ->
+
+            val (berørteFagsaker, tekst) = when (alder) {
+                3L -> {
+                    Pair(finnAlleBarnMedFødselsdagForrigeMåned(3), "fylte 3 år forrige måned.")
+                }
+                else -> {
+                    Pair(finnAlleBarnMedFødselsdagInneværendeMåned(alder), "fyller $alder år inneværende måned.")
+                }
+            }
+            logger.info("Oppretter tasker for ${berørteFagsaker.size} fagsaker med barn som $tekst")
+
             berørteFagsaker.forEach { fagsak ->
-                opprettTaskService.opprettAutovedtakFor6Og18ÅrBarn(
+                opprettTaskService.opprettAutovedtakFor3og6og18ÅrBarn(
                     fagsakId = fagsak.id,
                     alder = alder.toInt()
                 )
@@ -46,9 +55,17 @@ class FinnAlleBarn6og18ÅrTask(
             )
         }
 
+    private fun finnAlleBarnMedFødselsdagForrigeMåned(alder: Long): Set<Fagsak> =
+        LocalDate.now().minusYears(alder).plusMonths(1).let {
+            fagsakRepository.finnLøpendeFagsakMedBarnMedFødselsdatoInnenfor(
+                it.førsteDagIInneværendeMåned(),
+                it.sisteDagIMåned()
+            )
+        }
+
     companion object {
 
         const val TASK_STEP_TYPE = "FinnAlleBarn6og18ÅrTask"
-        private val logger: Logger = LoggerFactory.getLogger(FinnAlleBarn6og18ÅrTask::class.java)
+        private val logger: Logger = LoggerFactory.getLogger(FinnAlleBarn3og6og18ÅrTask::class.java)
     }
 }

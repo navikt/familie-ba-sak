@@ -4,7 +4,7 @@ import io.mockk.every
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.LocalDateService
 import no.nav.familie.ba.sak.kjerne.autovedtak.omregning.Autobrev6og18ÅrService
-import no.nav.familie.ba.sak.kjerne.autovedtak.omregning.FinnAlleBarn6og18ÅrTask
+import no.nav.familie.ba.sak.kjerne.autovedtak.omregning.FinnAlleBarn3og6og18ÅrTask
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
@@ -16,7 +16,7 @@ import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScena
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenarioPerson
 import no.nav.familie.ba.sak.task.BehandleFødselshendelseTask
 import no.nav.familie.ba.sak.task.OpprettTaskService
-import no.nav.familie.ba.sak.task.dto.Autobrev6og18ÅrDTO
+import no.nav.familie.ba.sak.task.dto.Autobrev3og6og18ÅrDTO
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.Matrikkeladresse
 import no.nav.familie.prosessering.domene.Task
@@ -30,7 +30,7 @@ import java.time.YearMonth
 class BehandlingOmgjøringTest(
     @Autowired private val mockLocalDateService: LocalDateService,
     @Autowired private val autobrev6og18ÅrService: Autobrev6og18ÅrService,
-    @Autowired private val finnAlleBarn6og18ÅrTask: FinnAlleBarn6og18ÅrTask,
+    @Autowired private val finnAlleBarn3og6Og18ÅrTask: FinnAlleBarn3og6og18ÅrTask,
     @Autowired private val behandleFødselshendelseTask: BehandleFødselshendelseTask,
     @Autowired private val fagsakService: FagsakService,
     @Autowired private val behandlingService: BehandlingService,
@@ -97,16 +97,16 @@ class BehandlingOmgjøringTest(
             stegService = stegService
         )!!
 
-        finnAlleBarn6og18ÅrTask.doTask(
+        finnAlleBarn3og6Og18ÅrTask.doTask(
             Task(
-                type = FinnAlleBarn6og18ÅrTask.TASK_STEP_TYPE,
+                type = FinnAlleBarn3og6og18ÅrTask.TASK_STEP_TYPE,
                 payload = ""
             )
         )
-        verify(exactly = 1) { opprettTaskService.opprettAutovedtakFor6Og18ÅrBarn(behandling.fagsak.id, 6) }
+        verify(exactly = 1) { opprettTaskService.opprettAutovedtakFor3og6og18ÅrBarn(behandling.fagsak.id, 6) }
 
         autobrev6og18ÅrService.opprettOmregningsoppgaveForBarnIBrytingsalder(
-            autobrev6og18ÅrDTO = Autobrev6og18ÅrDTO(
+            autobrev3og6Og18ÅrDTO = Autobrev3og6og18ÅrDTO(
                 fagsakId = behandling.fagsak.id,
                 alder = scenario.barna.first().alder,
                 årMåned = YearMonth.now()
