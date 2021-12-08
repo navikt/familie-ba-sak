@@ -210,9 +210,11 @@ class BrevService(
     }
 
     private fun hentUregistrerteBarn(behandlingId: Long) =
-        (søknadGrunnlagService.hentAktiv(behandlingId)
-            ?.hentUregistrerteBarn()?.map { uregistrertBarn -> uregistrertBarn.tilUregisrertBarnEnkel() }
-            ?: emptyList())
+        søknadGrunnlagService
+            .hentAktiv(behandlingId)
+            ?.hentUregistrerteBarn()
+            ?.map { uregistrertBarn -> uregistrertBarn.tilUregisrertBarnEnkel() }
+            ?: emptyList()
 
     private fun hentAktivtPersonopplysningsgrunnlag(behandlingId: Long) =
         persongrunnlagService.hentAktiv(behandlingId = behandlingId)
