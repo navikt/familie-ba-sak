@@ -116,7 +116,11 @@ class MigreringService(
                 behandlingId = behandlingEtterVilkårsvurdering.id,
                 infotrygdStønadId = løpendeSak.stønad?.id,
                 infotrygdSakId = løpendeSak.id,
-                virkningFom = førsteUtbetalingsperiode.fom.toYearMonth()
+                virkningFom = førsteUtbetalingsperiode.fom.toYearMonth(),
+                infotrygdTkNr = løpendeSak.tkNr,
+                infotrygdIverksattFom = løpendeSak.stønad?.iverksattFom,
+                infotrygdVirkningFom = løpendeSak.stønad?.virkningFom,
+                infotrygdRegion = løpendeSak.region
             )
             secureLog.info("Ferdig migrert $personIdent. Response til familie-ba-migrering: $migreringResponseDto")
             return migreringResponseDto
