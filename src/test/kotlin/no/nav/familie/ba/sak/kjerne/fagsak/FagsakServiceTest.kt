@@ -3,15 +3,16 @@ package no.nav.familie.ba.sak.kjerne.fagsak
 import io.mockk.every
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
+import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
+import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsakDeltager
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PersonInfo
-import no.nav.familie.ba.sak.integrasjoner.pdl.internal.Personident
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
@@ -20,7 +21,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.RegistrerPersongrunnlagDTO
 import no.nav.familie.ba.sak.kjerne.steg.StegService
@@ -101,25 +101,32 @@ class FagsakServiceTest(
         val barn2Fnr = randomFnr()
         val barn3Fnr = randomFnr()
 
+        val søker1Aktør = tilAktør(søker1Fnr)
+        val søker2Aktør = tilAktør(søker2Fnr)
+        val søker3Aktør = tilAktør(søker3Fnr)
+        val barn1Aktør = tilAktør(barn1Fnr)
+        val barn2Aktør = tilAktør(barn2Fnr)
+        val barn3Aktør = tilAktør(barn3Fnr)
+
         every {
-            mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(eq(barn1Fnr))
+            mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(eq(barn1Aktør))
         } returns PersonInfo(fødselsdato = LocalDate.of(2018, 5, 1), kjønn = Kjønn.KVINNE, navn = "barn1")
 
         every {
-            mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(eq(barn2Fnr))
+            mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(eq(barn2Aktør))
         } returns PersonInfo(
             fødselsdato = LocalDate.of(2019, 5, 1),
             kjønn = Kjønn.MANN,
             navn = "barn2",
             forelderBarnRelasjon = setOf(
                 ForelderBarnRelasjon(
-                    Personident(søker1Fnr),
+                    søker1Aktør,
                     FORELDERBARNRELASJONROLLE.MEDMOR,
                     "søker1",
                     LocalDate.of(1990, 2, 19)
                 ),
                 ForelderBarnRelasjon(
-                    Personident(søker3Fnr),
+                    søker3Aktør,
                     FORELDERBARNRELASJONROLLE.MEDMOR,
                     "søker3",
                     LocalDate.of(1990, 1, 10)
@@ -128,31 +135,31 @@ class FagsakServiceTest(
         )
 
         every {
-            mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(eq(søker1Fnr))
+            mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(eq(søker1Aktør))
         } returns PersonInfo(fødselsdato = LocalDate.of(1990, 2, 19), kjønn = Kjønn.KVINNE, navn = "søker1")
 
         every {
-            mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(eq(søker2Fnr))
+            mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(eq(søker2Aktør))
         } returns PersonInfo(fødselsdato = LocalDate.of(1991, 2, 20), kjønn = Kjønn.MANN, navn = "søker2")
 
         every {
-            mockPersonopplysningerService.hentPersoninfoEnkel(eq(barn2Fnr))
+            mockPersonopplysningerService.hentPersoninfoEnkel(eq(barn2Aktør))
         } returns PersonInfo(fødselsdato = LocalDate.of(2019, 5, 1), kjønn = Kjønn.MANN, navn = "barn2")
 
         every {
-            mockPersonopplysningerService.hentPersoninfoEnkel(eq(barn3Fnr))
+            mockPersonopplysningerService.hentPersoninfoEnkel(eq(barn3Aktør))
         } returns PersonInfo(fødselsdato = LocalDate.of(2017, 3, 1), kjønn = Kjønn.KVINNE, navn = "barn3")
 
         every {
-            mockPersonopplysningerService.hentPersoninfoEnkel(eq(søker1Fnr))
+            mockPersonopplysningerService.hentPersoninfoEnkel(eq(søker1Aktør))
         } returns PersonInfo(fødselsdato = LocalDate.of(1990, 2, 19), kjønn = Kjønn.KVINNE, navn = "søker1")
 
         every {
-            mockPersonopplysningerService.hentPersoninfoEnkel(eq(søker2Fnr))
+            mockPersonopplysningerService.hentPersoninfoEnkel(eq(søker2Aktør))
         } returns PersonInfo(fødselsdato = LocalDate.of(1991, 2, 20), kjønn = Kjønn.MANN, navn = "søker2")
 
         every {
-            mockPersonopplysningerService.hentPersoninfoEnkel(eq(søker3Fnr))
+            mockPersonopplysningerService.hentPersoninfoEnkel(eq(søker3Aktør))
         } returns PersonInfo(fødselsdato = LocalDate.of(1990, 1, 10), kjønn = Kjønn.KVINNE, navn = "søker3")
 
         val fagsak0 = fagsakService.hentEllerOpprettFagsak(
@@ -211,13 +218,13 @@ class FagsakServiceTest(
             RegistrerPersongrunnlagDTO(ident = søker2Fnr, barnasIdenter = listOf(barn1Fnr))
         )
 
-        val søkeresultat1 = fagsakService.hentFagsakDeltager(søker1Fnr)
+        val søkeresultat1 = fagsakService.hentFagsakDeltager(søker1Aktør)
         assertEquals(1, søkeresultat1.size)
         assertEquals(Kjønn.KVINNE, søkeresultat1[0].kjønn)
         assertEquals("søker1", søkeresultat1[0].navn)
         assertEquals(fagsak0.data!!.id, søkeresultat1[0].fagsakId)
 
-        val søkeresultat2 = fagsakService.hentFagsakDeltager(barn1Fnr)
+        val søkeresultat2 = fagsakService.hentFagsakDeltager(barn1Aktør)
         assertEquals(3, søkeresultat2.size)
         var matching = 0
         søkeresultat2.forEach {
@@ -226,7 +233,7 @@ class FagsakServiceTest(
         assertEquals(11, matching)
         assertEquals(1, søkeresultat2.filter { it.ident == barn1Fnr }.size)
 
-        val søkeresultat3 = fagsakService.hentFagsakDeltager(barn2Fnr)
+        val søkeresultat3 = fagsakService.hentFagsakDeltager(barn2Aktør)
         assertEquals(3, søkeresultat3.size)
         assertEquals(1, søkeresultat3.filter { it.ident == barn2Fnr }.size)
         assertNull(søkeresultat3.find { it.ident == barn2Fnr }!!.fagsakId)
@@ -235,7 +242,7 @@ class FagsakServiceTest(
         assertEquals("søker3", søkeresultat3.filter { it.ident == søker3Fnr }[0].navn)
         assertNull(søkeresultat3.find { it.ident == søker3Fnr }!!.fagsakId)
 
-        val fagsak = fagsakService.hent(PersonIdent(søker1Fnr))!!
+        val fagsak = fagsakService.hent(søker1Aktør)!!
 
         assertEquals(
             FagsakStatus.OPPRETTET.name,
@@ -247,13 +254,14 @@ class FagsakServiceTest(
     @Test
     fun `Skal teste at arkiverte fagsaker med behandling ikke blir funnet ved søk`() {
         val søker1Fnr = randomFnr()
+        val søker1Aktør = tilAktør(søker1Fnr)
 
         every {
-            mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(eq(søker1Fnr))
+            mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(eq(søker1Aktør))
         } returns PersonInfo(fødselsdato = LocalDate.of(1991, 2, 19), kjønn = Kjønn.KVINNE, navn = "søker1")
 
         every {
-            mockPersonopplysningerService.hentPersoninfoEnkel(eq(søker1Fnr))
+            mockPersonopplysningerService.hentPersoninfoEnkel(eq(søker1Aktør))
         } returns PersonInfo(fødselsdato = LocalDate.of(1991, 2, 19), kjønn = Kjønn.KVINNE, navn = "søker1")
 
         fagsakService.hentEllerOpprettFagsak(
@@ -272,10 +280,10 @@ class FagsakServiceTest(
         )
 
         fagsakService.lagre(
-            fagsakService.hentFagsakPåPerson(setOf(PersonIdent(søker1Fnr))).also { it?.arkivert = true }!!
+            fagsakService.hentFagsakPåPerson(søker1Aktør).also { it?.arkivert = true }!!
         )
 
-        val søkeresultat1 = fagsakService.hentFagsakDeltager(søker1Fnr)
+        val søkeresultat1 = fagsakService.hentFagsakDeltager(søker1Aktør)
 
         assertEquals(1, søkeresultat1.size)
         assertNull(søkeresultat1.first().fagsakId)
@@ -284,13 +292,14 @@ class FagsakServiceTest(
     @Test
     fun `Skal teste at arkiverte fagsaker uten behandling ikke blir funnet ved søk`() {
         val søker1Fnr = randomFnr()
+        val søker1Aktør = tilAktør(søker1Fnr)
 
         every {
-            mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(eq(søker1Fnr))
+            mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(eq(søker1Aktør))
         } returns PersonInfo(fødselsdato = LocalDate.of(1992, 2, 19), kjønn = Kjønn.KVINNE, navn = "søker1")
 
         every {
-            mockPersonopplysningerService.hentPersoninfoEnkel(eq(søker1Fnr))
+            mockPersonopplysningerService.hentPersoninfoEnkel(eq(søker1Aktør))
         } returns PersonInfo(fødselsdato = LocalDate.of(1992, 2, 19), kjønn = Kjønn.KVINNE, navn = "søker1")
 
         fagsakService.hentEllerOpprettFagsak(
@@ -300,10 +309,10 @@ class FagsakServiceTest(
         )
 
         fagsakService.lagre(
-            fagsakService.hentFagsakPåPerson(setOf(PersonIdent(søker1Fnr))).also { it?.arkivert = true }!!
+            fagsakService.hentFagsakPåPerson(søker1Aktør).also { it?.arkivert = true }!!
         )
 
-        val søkeresultat1 = fagsakService.hentFagsakDeltager(søker1Fnr)
+        val søkeresultat1 = fagsakService.hentFagsakDeltager(søker1Aktør)
 
         assertEquals(1, søkeresultat1.size)
         assertNull(søkeresultat1.first().fagsakId)
@@ -335,7 +344,7 @@ class FagsakServiceTest(
         )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlagFar)
 
-        val fagsaker = fagsakService.hentFagsakerPåPerson(PersonIdent(barnFnr))
+        val fagsaker = fagsakService.hentFagsakerPåPerson(barnAktør.first())
         assertEquals(2, fagsaker.size)
     }
 
@@ -350,6 +359,6 @@ class FagsakServiceTest(
                 "[PdlRestClient][Feil ved oppslag på person: Fant ikke person]"
             )
         }
-        assertEquals(emptyList<RestFagsakDeltager>(), fagsakService.hentFagsakDeltager(randomFnr()))
+        assertEquals(emptyList<RestFagsakDeltager>(), fagsakService.hentFagsakDeltager(randomAktørId()))
     }
 }

@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler
 
+import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.common.tilfeldigSøker
@@ -15,12 +16,12 @@ import java.time.LocalDate
 
 internal class FiltreringsregelTest {
 
-    val gyldigFnr = PersonIdent(randomFnr())
+    val gyldigAktørId = randomAktørId()
 
     @Test
     fun `Regelevaluering skal resultere i Ja`() {
-        val mor = tilfeldigPerson(LocalDate.now().minusYears(20)).copy(personIdent = gyldigFnr)
-        val barnet = tilfeldigPerson(LocalDate.now()).copy(personIdent = gyldigFnr)
+        val mor = tilfeldigPerson(LocalDate.now().minusYears(20)).copy(aktør = gyldigAktørId)
+        val barnet = tilfeldigPerson(LocalDate.now()).copy(aktør = gyldigAktørId)
         val restenAvBarna: List<PersonInfo> = listOf()
 
         val evalueringer = evaluerFiltreringsregler(
@@ -39,8 +40,8 @@ internal class FiltreringsregelTest {
 
     @Test
     fun `Regelevaluering skal resultere i NEI når mor er under 18 år`() {
-        val mor = tilfeldigPerson(LocalDate.now().minusYears(17)).copy(personIdent = gyldigFnr)
-        val barnet = tilfeldigPerson(LocalDate.now()).copy(personIdent = gyldigFnr)
+        val mor = tilfeldigPerson(LocalDate.now().minusYears(17)).copy(aktør = gyldigAktørId)
+        val barnet = tilfeldigPerson(LocalDate.now()).copy(aktør = gyldigAktørId)
         val restenAvBarna: List<PersonInfo> = listOf()
 
         val evalueringer = evaluerFiltreringsregler(
@@ -60,9 +61,9 @@ internal class FiltreringsregelTest {
 
     @Test
     fun `Regelevaluering skal resultere i JA når det har gått mer enn 5 måneder siden forrige barn ble født`() {
-        val mor = tilfeldigPerson(LocalDate.now().minusYears(20)).copy(personIdent = gyldigFnr)
-        val barnet1 = tilfeldigPerson(LocalDate.now().plusMonths(0)).copy(personIdent = gyldigFnr)
-        val barnet2 = tilfeldigPerson(LocalDate.now().minusMonths(1)).copy(personIdent = gyldigFnr)
+        val mor = tilfeldigPerson(LocalDate.now().minusYears(20)).copy(aktør = gyldigAktørId)
+        val barnet1 = tilfeldigPerson(LocalDate.now().plusMonths(0)).copy(aktør = gyldigAktørId)
+        val barnet2 = tilfeldigPerson(LocalDate.now().minusMonths(1)).copy(aktør = gyldigAktørId)
         val restenAvBarna: List<PersonInfo> = listOf(
             PersonInfo(LocalDate.now().minusMonths(8).minusDays(1)),
             PersonInfo(LocalDate.now().minusMonths(8))
@@ -83,9 +84,9 @@ internal class FiltreringsregelTest {
 
     @Test
     fun `Regelevaluering skal resultere i NEI når det har gått mindre enn 5 måneder siden forrige barn ble født`() {
-        val mor = tilfeldigPerson(LocalDate.now().minusYears(20)).copy(personIdent = gyldigFnr)
-        val barnet1 = tilfeldigPerson(LocalDate.now()).copy(personIdent = gyldigFnr)
-        val barnet2 = tilfeldigPerson(LocalDate.now().minusMonths(1)).copy(personIdent = gyldigFnr)
+        val mor = tilfeldigPerson(LocalDate.now().minusYears(20)).copy(aktør = gyldigAktørId)
+        val barnet1 = tilfeldigPerson(LocalDate.now()).copy(aktør = gyldigAktørId)
+        val barnet2 = tilfeldigPerson(LocalDate.now().minusMonths(1)).copy(aktør = gyldigAktørId)
         val restenAvBarna: List<PersonInfo> = listOf(
             PersonInfo(LocalDate.now().minusMonths(5).minusDays(1)),
             PersonInfo(LocalDate.now().minusMonths(8))
@@ -107,8 +108,8 @@ internal class FiltreringsregelTest {
 
     @Test
     fun `Regelevaluering skal resultere i NEI når det er registrert dødsfall på mor`() {
-        val mor = tilfeldigPerson(LocalDate.now().minusYears(20)).copy(personIdent = gyldigFnr)
-        val barnet = tilfeldigPerson(LocalDate.now()).copy(personIdent = gyldigFnr)
+        val mor = tilfeldigPerson(LocalDate.now().minusYears(20)).copy(aktør = gyldigAktørId)
+        val barnet = tilfeldigPerson(LocalDate.now()).copy(aktør = gyldigAktørId)
         val restenAvBarna: List<PersonInfo> = listOf()
 
         val evalueringer = evaluerFiltreringsregler(
@@ -128,8 +129,8 @@ internal class FiltreringsregelTest {
 
     @Test
     fun `Regelevaluering skal resultere i NEI når det er registrert dødsfall på barnet`() {
-        val mor = tilfeldigPerson(LocalDate.now().minusYears(20)).copy(personIdent = gyldigFnr)
-        val barnet = tilfeldigPerson(LocalDate.now()).copy(personIdent = gyldigFnr)
+        val mor = tilfeldigPerson(LocalDate.now().minusYears(20)).copy(aktør = gyldigAktørId)
+        val barnet = tilfeldigPerson(LocalDate.now()).copy(aktør = gyldigAktørId)
         val restenAvBarna: List<PersonInfo> = listOf()
 
         val evalueringer = evaluerFiltreringsregler(
@@ -149,8 +150,8 @@ internal class FiltreringsregelTest {
 
     @Test
     fun `Regelevaluering skal resultere i NEI når mor har verge`() {
-        val mor = tilfeldigPerson(LocalDate.now().minusYears(20)).copy(personIdent = gyldigFnr)
-        val barnet = tilfeldigPerson(LocalDate.now()).copy(personIdent = gyldigFnr)
+        val mor = tilfeldigPerson(LocalDate.now().minusYears(20)).copy(aktør = gyldigAktørId)
+        val barnet = tilfeldigPerson(LocalDate.now()).copy(aktør = gyldigAktørId)
         val restenAvBarna: List<PersonInfo> = listOf()
 
         val evalueringer = evaluerFiltreringsregler(

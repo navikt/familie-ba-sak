@@ -1,8 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurdering
 
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
-import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -18,9 +18,10 @@ import java.time.LocalDate
 class MorHarJobbetINorgeSiste5ÅrTest {
 
     private fun lagSøkerMedArbeidsforhold(perioder: List<DatoIntervallEntitet>?): Person {
+        val fnr = randomFnr()
         return Person(
-            aktør = randomAktørId(),
-            personIdent = PersonIdent(randomFnr()),
+            aktør = tilAktør(fnr),
+            personIdent = PersonIdent(fnr),
             type = PersonType.SØKER,
             personopplysningGrunnlag = PersonopplysningGrunnlag(0, 0, mutableSetOf(), true),
             fødselsdato = LocalDate.of(1991, 1, 1),

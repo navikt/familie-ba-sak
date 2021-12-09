@@ -19,7 +19,7 @@ class YtelsePersonUtilsTest {
     fun `Skal kun finne personer framstilt krav for`() {
         val ytelsePersoner = listOf(
             BehandlingsresultatPerson(
-                personIdent = barn1.personIdent.ident,
+                aktør = barn1.aktør,
                 søktForPerson = true,
                 personType = barn1.type,
                 forrigeAndeler = emptyList(),
@@ -28,7 +28,7 @@ class YtelsePersonUtilsTest {
         ).map { it.utledYtelsePerson() }
 
         assertEquals(1, ytelsePersoner.size)
-        assertEquals(barn1.personIdent.ident, ytelsePersoner.first().personIdent)
+        assertEquals(barn1.aktør, ytelsePersoner.first().aktør)
         assertEquals(YtelseType.ORDINÆR_BARNETRYGD, ytelsePersoner.first().ytelseType)
         assertTrue(ytelsePersoner.first().erFramstiltKravForIInneværendeBehandling())
     }
@@ -37,7 +37,7 @@ class YtelsePersonUtilsTest {
     fun `Skal kun finne endringsytelsePersoner`() {
         val ytelsePersoner = listOf(
             BehandlingsresultatPerson(
-                personIdent = barn1.personIdent.ident,
+                aktør = barn1.aktør,
                 søktForPerson = false,
                 personType = barn1.type,
                 forrigeAndeler = listOf(
@@ -52,7 +52,7 @@ class YtelsePersonUtilsTest {
         ).map { it.utledYtelsePerson() }
 
         assertEquals(1, ytelsePersoner.size)
-        assertEquals(barn1.personIdent.ident, ytelsePersoner.first().personIdent)
+        assertEquals(barn1.aktør, ytelsePersoner.first().aktør)
         assertEquals(YtelseType.ORDINÆR_BARNETRYGD, ytelsePersoner.first().ytelseType)
         assertFalse(ytelsePersoner.first().erFramstiltKravForIInneværendeBehandling())
     }
@@ -61,7 +61,7 @@ class YtelsePersonUtilsTest {
     fun `Skal finne 2 ytelsePersoner ved utvidet`() {
         val ytelsePersoner = listOf(
             BehandlingsresultatPerson(
-                personIdent = barn1.personIdent.ident,
+                aktør = barn1.aktør,
                 søktForPerson = false,
                 personType = barn1.type,
                 forrigeAndeler = listOf(
@@ -74,7 +74,7 @@ class YtelsePersonUtilsTest {
                 andeler = emptyList()
             ),
             BehandlingsresultatPerson(
-                personIdent = søker.personIdent.ident,
+                aktør = søker.aktør,
                 personType = søker.type,
                 søktForPerson = false,
                 forrigeAndeler = listOf(
@@ -90,15 +90,15 @@ class YtelsePersonUtilsTest {
         ).map { it.utledYtelsePerson() }
 
         assertEquals(2, ytelsePersoner.size)
-        assertTrue(ytelsePersoner.any { it.personIdent == barn1.personIdent.ident && it.ytelseType == YtelseType.ORDINÆR_BARNETRYGD && !it.erFramstiltKravForIInneværendeBehandling() })
-        assertTrue(ytelsePersoner.any { it.personIdent == søker.personIdent.ident && it.ytelseType == YtelseType.UTVIDET_BARNETRYGD && !it.erFramstiltKravForIInneværendeBehandling() })
+        assertTrue(ytelsePersoner.any { it.aktør == barn1.aktør && it.ytelseType == YtelseType.ORDINÆR_BARNETRYGD && !it.erFramstiltKravForIInneværendeBehandling() })
+        assertTrue(ytelsePersoner.any { it.aktør == søker.aktør && it.ytelseType == YtelseType.UTVIDET_BARNETRYGD && !it.erFramstiltKravForIInneværendeBehandling() })
     }
 
     @Test
     fun `Skal finne 1 av 2 endringsytelsePersoner og 1 søknadsytelsePersoner`() {
         val ytelsePersoner = listOf(
             BehandlingsresultatPerson(
-                personIdent = barn1.personIdent.ident,
+                aktør = barn1.aktør,
                 søktForPerson = true,
                 personType = barn1.type,
                 forrigeAndeler = listOf(
@@ -111,7 +111,7 @@ class YtelsePersonUtilsTest {
                 andeler = emptyList()
             ),
             BehandlingsresultatPerson(
-                personIdent = søker.personIdent.ident,
+                aktør = søker.aktør,
                 personType = søker.type,
                 søktForPerson = false,
                 forrigeAndeler = listOf(
@@ -126,22 +126,22 @@ class YtelsePersonUtilsTest {
         ).map { it.utledYtelsePerson() }
 
         assertEquals(2, ytelsePersoner.size)
-        assertTrue(ytelsePersoner.any { it.personIdent == barn1.personIdent.ident && it.ytelseType == YtelseType.ORDINÆR_BARNETRYGD && it.erFramstiltKravForIInneværendeBehandling() })
-        assertTrue(ytelsePersoner.any { it.personIdent == søker.personIdent.ident && it.ytelseType == YtelseType.UTVIDET_BARNETRYGD && !it.erFramstiltKravForIInneværendeBehandling() })
+        assertTrue(ytelsePersoner.any { it.aktør == barn1.aktør && it.ytelseType == YtelseType.ORDINÆR_BARNETRYGD && it.erFramstiltKravForIInneværendeBehandling() })
+        assertTrue(ytelsePersoner.any { it.aktør == søker.aktør && it.ytelseType == YtelseType.UTVIDET_BARNETRYGD && !it.erFramstiltKravForIInneværendeBehandling() })
     }
 
     @Test
     fun `Skal utlede krav for person som ikke finnes i søknad, men har andeler fra tidligere`() {
         val ytelsePersoner = listOf(
             BehandlingsresultatPerson(
-                personIdent = barn2.personIdent.ident,
+                aktør = barn2.aktør,
                 søktForPerson = true,
                 personType = barn2.type,
                 forrigeAndeler = emptyList(),
                 andeler = emptyList()
             ),
             BehandlingsresultatPerson(
-                personIdent = barn1.personIdent.ident,
+                aktør = barn1.aktør,
                 søktForPerson = false,
                 personType = barn1.type,
                 forrigeAndeler = listOf(
@@ -156,7 +156,19 @@ class YtelsePersonUtilsTest {
         ).map { it.utledYtelsePerson() }
 
         assertEquals(2, ytelsePersoner.size)
-        assertTrue(ytelsePersoner.any { it.personIdent == barn1.personIdent.ident && it.kravOpprinnelse == listOf(KravOpprinnelse.TIDLIGERE) && !it.erFramstiltKravForIInneværendeBehandling() })
-        assertTrue(ytelsePersoner.any { it.personIdent == barn2.personIdent.ident && it.kravOpprinnelse == listOf(KravOpprinnelse.INNEVÆRENDE) && it.erFramstiltKravForIInneværendeBehandling() })
+        assertTrue(
+            ytelsePersoner.any {
+                it.aktør == barn1.aktør && it.kravOpprinnelse == listOf(
+                    KravOpprinnelse.TIDLIGERE
+                ) && !it.erFramstiltKravForIInneværendeBehandling()
+            }
+        )
+        assertTrue(
+            ytelsePersoner.any {
+                it.aktør == barn2.aktør && it.kravOpprinnelse == listOf(
+                    KravOpprinnelse.INNEVÆRENDE
+                ) && it.erFramstiltKravForIInneværendeBehandling()
+            }
+        )
     }
 }

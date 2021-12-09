@@ -4,7 +4,9 @@ import no.nav.familie.kontrakter.felles.oppdrag.OppdragId
 
 data class StatusFraOppdragDTO(
     val fagsystem: String,
+    // OppdragId trenger personIdent
     val personIdent: String,
+    val aktørId: String,
     val behandlingsId: Long,
     val vedtaksId: Long
 ) {

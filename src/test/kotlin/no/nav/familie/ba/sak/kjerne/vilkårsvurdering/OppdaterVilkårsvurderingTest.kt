@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagVilkårResultat
 import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
@@ -97,8 +98,8 @@ class OppdaterVilkårsvurderingTest {
     fun `Skal lage advarsel tekst`() {
         val fnr1 = randomFnr()
         val fnr2 = randomFnr()
-        val aktørId1 = randomAktørId()
-        val aktørId2 = randomAktørId()
+        val aktørId1 = tilAktør(fnr1)
+        val aktørId2 = tilAktør(fnr2)
         val behandling = lagBehandling()
         val resultat1 = lagBehandlingResultat(
             behandling = behandling,

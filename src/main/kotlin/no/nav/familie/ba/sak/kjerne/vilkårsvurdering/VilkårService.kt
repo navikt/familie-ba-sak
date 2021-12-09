@@ -18,6 +18,8 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand.Companion.sisteSivilstand
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingMigreringUtils.kopiManglendePerioderFraForrigeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingMigreringUtils.utledPeriodeFom
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingMigreringUtils.utledPeriodeTom
@@ -43,6 +45,7 @@ class VilkårService(
     private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
     private val vilkårsvurderingMetrics: VilkårsvurderingMetrics,
     private val behandlingService: BehandlingService,
+    private val personidentService: PersonidentService,
     private val featureToggleService: FeatureToggleService,
     private val endretUtbetalingAndelService: EndretUtbetalingAndelService,
 ) {
@@ -75,7 +78,7 @@ class VilkårService(
         val restVilkårResultat = restPersonResultat.vilkårResultater.singleOrNull { it.id == vilkårId }
             ?: throw Feil("Fant ikke vilkårResultat med id $vilkårId ved opppdatering av vikår")
         val personResultat =
-            vilkårsvurdering.personResultater.singleOrNull { it.personIdent == restPersonResultat.personIdent }
+            vilkårsvurdering.personResultater.singleOrNull { it.aktør.aktivIdent() == restPersonResultat.personIdent }
                 ?: throw Feil(
                     message = "Fant ikke vilkårsvurdering for person",
                     frontendFeilmelding = "Fant ikke vilkårsvurdering for person med ident '${restPersonResultat.personIdent}"
@@ -94,17 +97,17 @@ class VilkårService(
     }
 
     @Transactional
-    fun deleteVilkårsperiode(behandlingId: Long, vilkårId: Long, personIdent: String): List<RestPersonResultat> {
+    fun deleteVilkårsperiode(behandlingId: Long, vilkårId: Long, personIdent: String, aktør: Aktør): List<RestPersonResultat> {
         val vilkårsvurdering = hentVilkårsvurdering(behandlingId = behandlingId)
             ?: throw Feil(
                 message = "Fant ikke aktiv vilkårsvurdering ved sletting av vilkår",
                 frontendFeilmelding = "Fant ikke aktiv vilkårsvurdering"
             )
 
-        val personResultat = vilkårsvurdering.personResultater.find { it.personIdent == personIdent }
+        val personResultat = vilkårsvurdering.personResultater.find { it.aktør == aktør }
             ?: throw Feil(
                 message = "Fant ikke vilkårsvurdering for person",
-                frontendFeilmelding = "Fant ikke vilkårsvurdering for person med ident '$personIdent"
+                frontendFeilmelding = "Fant ikke vilkårsvurdering for person med ident '${aktør.aktivIdent()}"
             )
 
         muterPersonResultatDelete(personResultat, vilkårId)
@@ -158,7 +161,7 @@ class VilkårService(
                 frontendFeilmelding = "Fant ikke aktiv vilkårsvurdering"
             )
 
-        val personResultat = vilkårsvurdering.personResultater.find { it.personIdent == restNyttVilkår.personIdent }
+        val personResultat = vilkårsvurdering.personResultater.find { it.aktør.aktivIdent() == restNyttVilkår.personIdent }
             ?: throw Feil(
                 message = "Fant ikke vilkårsvurdering for person",
                 frontendFeilmelding =
@@ -209,8 +212,8 @@ class VilkårService(
 
         val aktivVilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandling.id)
         val barnaSomAlleredeErVurdert = aktivVilkårsvurdering?.personResultater?.mapNotNull {
-            personopplysningGrunnlag.barna.firstOrNull { barn -> barn.personIdent.ident == it.personIdent }
-        }?.filter { it.type == PersonType.BARN }?.map { it.personIdent.ident } ?: emptyList()
+            personopplysningGrunnlag.barna.firstOrNull { barn -> barn.aktør == it.aktør }
+        }?.filter { it.type == PersonType.BARN }?.map { it.aktør.aktørId } ?: emptyList()
 
         val initiellVilkårsvurdering =
             genererInitiellVilkårsvurdering(
@@ -287,9 +290,7 @@ class VilkårService(
                     personResultater = lagVilkårsvurderingForMigreringsbehandling(this)
                 }
                 behandling.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE -> {
-                    if (featureToggleService.isEnabled(FeatureToggleConfig.AUTOMATISK_FØDSELSHENDELSE)) {
-                        personResultater = lagVilkårsvurderingForFødselshendelse(this, barnaSomAlleredeErVurdert)
-                    }
+                    personResultater = lagVilkårsvurderingForFødselshendelse(this, barnaSomAlleredeErVurdert)
 
                     if (førstegangskjøringAvVilkårsvurdering(this)) {
                         vilkårsvurderingMetrics.tellMetrikker(this)
@@ -326,8 +327,8 @@ class VilkårService(
         return personopplysningGrunnlag.personer.map { person ->
             val personResultat = PersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
-                personIdent = person.personIdent.ident,
-                aktør = person.hentAktørId()
+                personIdent = person.aktør.aktivIdent(),
+                aktør = person.aktør
             )
 
             val vilkårForPerson = Vilkår.hentVilkårFor(person.type)
@@ -357,8 +358,8 @@ class VilkårService(
         return personopplysningGrunnlag.personer.map { person ->
             val personResultat = PersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
-                personIdent = person.personIdent.ident,
-                aktør = person.hentAktørId()
+                personIdent = person.aktør.aktivIdent(),
+                aktør = person.aktør
             )
 
             val vilkårForPerson = Vilkår.hentVilkårFor(
@@ -410,20 +411,22 @@ class VilkårService(
         vilkårsvurdering: Vilkårsvurdering,
         barnaSomAlleredeErVurdert: List<String>
     ): Set<PersonResultat> {
+        val barnaAktørSomAlleredeErVurdert = personidentService.hentOgLagreAktørIder(barnaSomAlleredeErVurdert)
+
         val personopplysningGrunnlag =
             personopplysningGrunnlagRepository.findByBehandlingAndAktiv(vilkårsvurdering.behandling.id)
                 ?: throw Feil(message = "Fant ikke personopplysninggrunnlag for behandling ${vilkårsvurdering.behandling.id}")
 
         val eldsteBarnSomVurderesSinFødselsdato =
-            personopplysningGrunnlag.barna.filter { !barnaSomAlleredeErVurdert.contains(it.personIdent.ident) }
+            personopplysningGrunnlag.barna.filter { !barnaAktørSomAlleredeErVurdert.contains(it.aktør) }
                 .maxByOrNull { it.fødselsdato }?.fødselsdato
                 ?: throw Feil("Finner ingen barn på persongrunnlag")
 
         return personopplysningGrunnlag.personer.map { person ->
             val personResultat = PersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
-                personIdent = person.personIdent.ident,
-                aktør = person.hentAktørId()
+                personIdent = person.aktør.aktivIdent(),
+                aktør = person.aktør
             )
 
             val vilkårForPerson = Vilkår.hentVilkårFor(person.type)
@@ -480,8 +483,8 @@ class VilkårService(
         return personopplysningGrunnlag.personer.filter { it.type != PersonType.ANNENPART }.map { person ->
             val personResultat = PersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
-                personIdent = person.personIdent.ident,
-                aktør = person.hentAktørId()
+                personIdent = person.aktør.aktivIdent(),
+                aktør = person.aktør
             )
 
             val vilkårTyperForPerson = Vilkår.hentVilkårFor(person.type)
@@ -533,8 +536,8 @@ class VilkårService(
         return personopplysningGrunnlag.personer.filter { it.type != PersonType.ANNENPART }.map { person ->
             val personResultat = PersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
-                personIdent = person.personIdent.ident,
-                aktør = person.hentAktørId()
+                personIdent = person.aktør.aktivIdent(),
+                aktør = person.aktør
             )
 
             val finnesUtvidetPeriodeIForrigeBehandling = forrigeBehandlingsvilkårsvurdering.personResultater

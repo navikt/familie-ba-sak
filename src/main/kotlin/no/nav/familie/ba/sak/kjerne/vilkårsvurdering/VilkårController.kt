@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVedtakBegrunnelseTilknyttetVilkår
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
+import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
@@ -33,6 +34,7 @@ class VilkårController(
     private val vilkårService: VilkårService,
     private val annenVurderingService: AnnenVurderingService,
     private val behandlingService: BehandlingService,
+    private val personidentService: PersonidentService,
     private val vedtakService: VedtakService,
     private val tilgangService: TilgangService,
     private val vilkårsvurderingService: VilkårsvurderingService,
@@ -90,11 +92,12 @@ class VilkårController(
             handling = "slette vilkår"
         )
 
+        val aktør = personidentService.hentOgLagreAktør(personIdent)
         val behandling = behandlingService.hent(behandlingId)
         vilkårService.deleteVilkårsperiode(
             behandlingId = behandling.id,
             vilkårId = vilkaarId,
-            personIdent = personIdent
+            aktør = aktør
         )
 
         vedtakService.resettStegVedEndringPåVilkår(behandling.id)
