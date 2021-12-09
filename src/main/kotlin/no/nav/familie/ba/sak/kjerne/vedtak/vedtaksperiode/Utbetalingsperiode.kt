@@ -59,11 +59,8 @@ fun hentUtbetalingsperiodeForVedtaksperiode(
         ?: throw Feil("Finner ikke gjeldende utbetalingsperiode ved fortsatt innvilget")
 }
 
-fun hentPersonIdenterFraUtbetalingsperioder(utbetalingsperioder: List<Utbetalingsperiode>): List<String> {
-    return hentUtbetalingsperiodeForVedtaksperiode(
-        utbetalingsperioder,
-        null
-    ).utbetalingsperiodeDetaljer.map { it.person.personIdent }
+fun hentPersonIdenterFraUtbetalingsperiode(utbetalingsperiode: Utbetalingsperiode): List<String> {
+    return utbetalingsperiode.utbetalingsperiodeDetaljer.map { it.person.personIdent }
 }
 
 fun mapTilUtbetalingsperioder(
@@ -84,11 +81,7 @@ fun mapTilUtbetalingsperioder(
     }
 }
 
-fun hentbarnMedSeksårsdagPåInneværendeUtbetalingPeriode(utbetalingsperioder: List<Utbetalingsperiode>): List<String> {
-    val utbetalingsperiode = hentUtbetalingsperiodeForVedtaksperiode(
-        utbetalingsperioder,
-        null
-    )
+fun hentbarnMedSeksårsdagPåPeriode(utbetalingsperiode: Utbetalingsperiode): List<String> {
     val personerIPeriode = utbetalingsperiode.utbetalingsperiodeDetaljer.map { it.person }
 
     val barnMed6ÅrsdagPåPeriode = personerIPeriode.filter {
