@@ -45,7 +45,7 @@ object VedtakUtils {
                     utgjørendeVilkår = vilkår,
                     aktuellePersonerForVedtaksperiode = aktuellePersonerForVedtaksperiode,
                     triggesAv = triggesAv,
-                    erAndelerMedFomFørPeriode = erFørsteVedtaksperiodePåFagsak
+                    erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak
                 )
             )
 
@@ -60,7 +60,7 @@ object VedtakUtils {
         utgjørendeVilkår: Vilkår?,
         aktuellePersonerForVedtaksperiode: List<MinimertPerson>,
         triggesAv: TriggesAv,
-        erAndelerMedFomFørPeriode: Boolean
+        erFørsteVedtaksperiodePåFagsak: Boolean
     ): List<MinimertPerson> {
 
         return minimertPersonResultater
@@ -87,7 +87,7 @@ object VedtakUtils {
 
                             oppdatertBegrunnelseType == VedtakBegrunnelseType.OPPHØR && triggesAv.gjelderFørstePeriode
                             -> erFørstePeriodeOgVilkårIkkeOppfylt(
-                                erFørsteVedtaksperiodePåFagsak = erAndelerMedFomFørPeriode,
+                                erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
                                 vedtaksperiode = vedtaksperiode,
                                 triggesAv = triggesAv,
                                 vilkårResultat = minimertVilkårResultat
