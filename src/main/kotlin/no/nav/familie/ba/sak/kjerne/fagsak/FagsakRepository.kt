@@ -100,4 +100,19 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
     )
     @Timed
     fun finnFagsakerMedUtvidetBarnetrygdInnenfor(fom: YearMonth, tom: YearMonth): List<Pair<Fagsak, LocalDate>>
+
+    @Lock(LockModeType.NONE)
+    @Query(
+        value = """
+        SELECT f FROM Fagsak f
+        WHERE f.arkivert = false AND f.status = 'LØPENDE' AND f IN ( 
+            SELECT b.fagsak FROM Behandling b 
+            WHERE b.aktiv=true AND b.id IN (
+                SELECT pog.behandlingId FROM PeriodeOvergangsstønadGrunnlag pog
+                WHERE pog.tom BETWEEN :fom AND :tom
+            )
+        )
+        """
+    )
+    fun finnLøpendeFagsakerMedOpphørAvFullOvergangsstonadIInterval(fom: LocalDate, tom: LocalDate): Set<Fagsak>
 }

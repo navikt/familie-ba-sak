@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.internal
 import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.autovedtak.omregning.Autobrev3og6og18ÅrScheduler
+import no.nav.familie.ba.sak.kjerne.autovedtak.omregning.OpphørAvFullOvergangsstonadScheduler
 import no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg.VedtakOmOvergangsstønadService
 import no.nav.familie.ba.sak.task.SatsendringTask
 import no.nav.familie.ba.sak.task.StartSatsendringForAlleBehandlingerTask
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping(value = ["/internal", "/testverktoy"])
 class TestVerktøyController(
     private val scheduler: Autobrev3og6og18ÅrScheduler,
+    private val opphørAvFullOvergangsstonadScheduler: OpphørAvFullOvergangsstonadScheduler,
     private val envService: EnvService,
     private val vedtakOmOvergangsstønadService: VedtakOmOvergangsstønadService,
     private val taskRepository: TaskRepositoryWrapper
@@ -32,6 +34,17 @@ class TestVerktøyController(
     fun kjørSchedulerForAutobrev(): ResponseEntity<Ressurs<String>> {
         return if (envService.erPreprod() || envService.erDev()) {
             scheduler.opprettTask()
+            ResponseEntity.ok(Ressurs.success("Laget task."))
+        } else {
+            ResponseEntity.ok(Ressurs.success(ikkeProdTekst))
+        }
+    }
+
+    @GetMapping(path = ["/autobrev-opphor-overgangsstonad"])
+    @Unprotected
+    fun kjørSchedulerForOpphørAvFullOvergangsstonadScheduler(): ResponseEntity<Ressurs<String>> {
+        return if (envService.erPreprod() || envService.erDev()) {
+            opphørAvFullOvergangsstonadScheduler.opprettTask()
             ResponseEntity.ok(Ressurs.success("Laget task."))
         } else {
             ResponseEntity.ok(Ressurs.success(ikkeProdTekst))

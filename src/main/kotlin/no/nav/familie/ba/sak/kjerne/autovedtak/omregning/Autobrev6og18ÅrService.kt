@@ -69,7 +69,7 @@ class Autobrev6og18ÅrService(
         }
 
         if (
-            (autobrev3og6Og18ÅrDTO.alder == 3 && behandling.erSmåbarnstillegg()) ||
+            (autobrev3og6Og18ÅrDTO.alder == 3 && !behandling.erSmåbarnstillegg()) ||
             alderEr3ÅrOgHarSmåbarnstilleggMenHarFortsattBarnUnder3År(autobrev3og6Og18ÅrDTO, behandling)
         ) {
             logger.info("Fagsak ${behandling.fagsak.id} er ikke småbarnstillegg, eller er småbarnstillegg men har fortsatt andre barn under 3 år")

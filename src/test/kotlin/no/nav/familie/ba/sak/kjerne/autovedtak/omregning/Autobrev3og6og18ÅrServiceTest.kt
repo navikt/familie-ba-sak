@@ -17,6 +17,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
@@ -31,7 +32,7 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
-internal class Autobrev6og18ÅrServiceTest {
+internal class Autobrev3og6og18ÅrServiceTest {
 
     val personopplysningGrunnlagRepository = mockk<PersonopplysningGrunnlagRepository>()
     val persongrunnlagService = mockk<PersongrunnlagService>()
@@ -170,16 +171,6 @@ internal class Autobrev6og18ÅrServiceTest {
         every { stegService.håndterNyBehandling(any()) } returns behandling
         every { persongrunnlagService.hentSøker(any()) } returns tilfeldigSøker()
 
-        /**
-         * ved kjøring av vedtaksperiodeService.oppdaterFortsattInnvilgetPeriodeMedAutobrevBegrunnelse(vedtak, vedtakBegrunnelseSpesifikasjon)
-         * få tak i vedtakBegrunnelseSpesifikasjon input parameter
-         * gjør sjekk på verdien
-         * f eks verdi
-         * vedtakBegrunnelseType = REDUKSJON
-         * sanityApiNavn = reduksjonAutovedtakBarn6Aar
-         * name = "REDUKSJON_UNDER_6_ÅR_AUTOVEDTAK
-         * ordinal = 76
-         */
         val vedtakBegrunnelseSpesifikasjonSlot: CapturingSlot<VedtakBegrunnelseSpesifikasjon> =
             slot<VedtakBegrunnelseSpesifikasjon>()
         every {
@@ -215,7 +206,7 @@ internal class Autobrev6og18ÅrServiceTest {
         alder: Long,
         lagTestPersonopplysningGrunnlagFunc: (alder: Long, behandling: Behandling) -> PersonopplysningGrunnlag
     ): Behandling {
-        val behandling = lagBehandling().also {
+        val behandling = lagBehandling(årsak = BehandlingÅrsak.SMÅBARNSTILLEGG).also {
             it.fagsak.status = fagsakStatus
             it.status = behandlingStatus
         }
