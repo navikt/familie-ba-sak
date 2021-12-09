@@ -39,7 +39,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilBegrunnelsePerson
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilVedtaksbegrunnelseFritekst
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.BrevGrunnlag
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilBrevPeriodeGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilMinimertEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilMinimertPersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
@@ -345,8 +344,8 @@ class VedtaksperiodeService(
                                         minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
                                         persongrunnlag = persongrunnlag,
                                         aktørerMedUtbetaling = personidentService.hentOgLagreAktørIder(
-                                                identerMedUtbetaling
-                                            ),
+                                            identerMedUtbetaling
+                                        ),
                                         triggesAv = triggesAv,
                                         endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(
                                             behandling.id
@@ -441,20 +440,16 @@ class VedtaksperiodeService(
 
         val andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId)
 
-        val erFørsteVedtaksperiodePeriodePåFagsak =
-            erFørsteVedtaksperiodePåFagsak(andelerTilkjentYtelse, utvidetVedtaksperiodeMedBegrunnelse.fom)
-
-        return utvidetVedtaksperiodeMedBegrunnelse
-            .tilBrevPeriodeGrunnlag(sanityBegrunnelser)
-            .tilBrevPeriodeGrunnlagMedPersoner(
-                brevGrunnlag = brevGrunnlag,
-                erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePeriodePåFagsak
-            )
-            .byggBegrunnelserOgFritekster(
-                brevGrunnlag = brevGrunnlag,
-                uregistrerteBarn = uregistrerteBarn,
-                målformSøker = personopplysningGrunnlag.søker.målform
-            )
+        return utvidetVedtaksperiodeMedBegrunnelse.hentBegrunnelserOgFritekster(
+            brevGrunnlag = brevGrunnlag,
+            sanityBegrunnelser = sanityBegrunnelser,
+            uregistrerteBarn = uregistrerteBarn,
+            erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak(
+                andelerTilkjentYtelse,
+                utvidetVedtaksperiodeMedBegrunnelse.fom
+            ),
+            målformSøker = personopplysningGrunnlag.søker.målform,
+        )
     }
 
     private fun finnTomDatoIFørsteUtbetalingsintervallFraInneværendeMåned(behandlingId: Long): LocalDate =

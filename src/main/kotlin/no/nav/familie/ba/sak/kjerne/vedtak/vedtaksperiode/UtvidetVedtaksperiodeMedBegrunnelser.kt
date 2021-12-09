@@ -1,11 +1,16 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
+import no.nav.familie.ba.sak.kjerne.behandlingsresultat.UregistrertBarnEnkel
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.dokument.domene.SanityBegrunnelse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilRestVedtaksbegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.BrevGrunnlag
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilBrevPeriodeGrunnlag
 import java.time.LocalDate
 
 data class UtvidetVedtaksperiodeMedBegrunnelser(
@@ -17,7 +22,25 @@ data class UtvidetVedtaksperiodeMedBegrunnelser(
     val fritekster: List<String> = emptyList(),
     val gyldigeBegrunnelser: List<VedtakBegrunnelseSpesifikasjon> = emptyList(),
     val utbetalingsperiodeDetaljer: List<UtbetalingsperiodeDetalj> = emptyList(),
-)
+) {
+    fun hentBegrunnelserOgFritekster(
+        brevGrunnlag: BrevGrunnlag,
+        sanityBegrunnelser: List<SanityBegrunnelse>,
+        erFørsteVedtaksperiodePåFagsak: Boolean,
+        uregistrerteBarn: List<UregistrertBarnEnkel>,
+        målformSøker: Målform,
+    ) = this
+        .tilBrevPeriodeGrunnlag(sanityBegrunnelser)
+        .tilBrevPeriodeGrunnlagMedPersoner(
+            brevGrunnlag = brevGrunnlag,
+            erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak
+        )
+        .byggBegrunnelserOgFritekster(
+            brevGrunnlag = brevGrunnlag,
+            uregistrerteBarn = uregistrerteBarn,
+            målformSøker = målformSøker
+        )
+}
 
 data class RestVedtaksbegrunnelse(
     val vedtakBegrunnelseSpesifikasjon: VedtakBegrunnelseSpesifikasjon,
