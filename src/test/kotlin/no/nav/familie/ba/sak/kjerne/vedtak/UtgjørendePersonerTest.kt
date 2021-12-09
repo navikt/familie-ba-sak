@@ -30,7 +30,6 @@ class UtgjørendePersonerTest {
 
         val søkerAktørId = randomAktørId()
         val barn1AktørId = randomAktørId()
-        val barn2AktørId = randomAktørId()
 
         val behandling = lagBehandling()
         val personopplysningGrunnlag =
@@ -168,7 +167,6 @@ class UtgjørendePersonerTest {
         val barnFnr = randomFnr()
         val barn2Fnr = randomFnr()
 
-        val søkerAktørId = randomAktørId()
         val barnAktørId = randomAktørId()
         val barn2AktørId = randomAktørId()
 
@@ -264,7 +262,6 @@ class UtgjørendePersonerTest {
         val barn1Fnr = randomFnr()
         val barn2Fnr = randomFnr()
 
-        val søkerAktørId = randomAktørId()
         val barn1AktørId = randomAktørId()
         val barn2AktørId = randomAktørId()
 
