@@ -50,7 +50,7 @@ class VedtakUtilsTest {
     fun `skal gi true dersom resultat ikke er godkjent og det ikke er noen andeler tilkjent ytelse før perioden`() {
         Assertions.assertTrue(
             erFørstePeriodeOgVilkårIkkeOppfylt(
-                erFørsteVedtaksperiodePåFagsak = false,
+                erFørsteVedtaksperiodePåFagsak = true,
                 vilkårResultat = vilkårResultatIkkeOppfylt.tilMinimertVilkårResultat(),
                 vedtaksperiode = vedtaksperiode,
                 triggesAv = triggesAv
@@ -58,7 +58,7 @@ class VedtakUtilsTest {
         )
         Assertions.assertTrue(
             erFørstePeriodeOgVilkårIkkeOppfylt(
-                erFørsteVedtaksperiodePåFagsak = false,
+                erFørsteVedtaksperiodePåFagsak = true,
                 vilkårResultat = vilkårResultatIkkeOppfyltDelvisOverlapp.tilMinimertVilkårResultat(),
                 vedtaksperiode = vedtaksperiode,
                 triggesAv = triggesAv
@@ -70,7 +70,7 @@ class VedtakUtilsTest {
     fun `skal gi false dersom det er en andel tilkjent ytelse før perioden`() {
         Assertions.assertFalse(
             erFørstePeriodeOgVilkårIkkeOppfylt(
-                erFørsteVedtaksperiodePåFagsak = true,
+                erFørsteVedtaksperiodePåFagsak = false,
                 vilkårResultat = vilkårResultatIkkeOppfylt.tilMinimertVilkårResultat(),
                 vedtaksperiode = vedtaksperiode,
                 triggesAv = triggesAv
@@ -82,7 +82,7 @@ class VedtakUtilsTest {
     fun `skal gi false dersom vilkårResultatet er oppfylt`() {
         Assertions.assertFalse(
             erFørstePeriodeOgVilkårIkkeOppfylt(
-                erFørsteVedtaksperiodePåFagsak = false,
+                erFørsteVedtaksperiodePåFagsak = true,
                 vilkårResultat = vilkårResultatOppfylt.tilMinimertVilkårResultat(),
                 vedtaksperiode = vedtaksperiode,
                 triggesAv = triggesAv
@@ -94,7 +94,7 @@ class VedtakUtilsTest {
     fun `skal gi false dersom vilkårResultatet ikke overlapper med periode`() {
         Assertions.assertFalse(
             erFørstePeriodeOgVilkårIkkeOppfylt(
-                erFørsteVedtaksperiodePåFagsak = false,
+                erFørsteVedtaksperiodePåFagsak = true,
                 vilkårResultat = vilkårResultatUtenforPeriode.tilMinimertVilkårResultat(),
                 vedtaksperiode = vedtaksperiode,
                 triggesAv = triggesAv
