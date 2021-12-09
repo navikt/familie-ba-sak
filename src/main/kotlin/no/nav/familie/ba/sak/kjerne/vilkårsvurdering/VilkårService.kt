@@ -97,7 +97,7 @@ class VilkårService(
     }
 
     @Transactional
-    fun deleteVilkårsperiode(behandlingId: Long, vilkårId: Long, personIdent: String, aktør: Aktør): List<RestPersonResultat> {
+    fun deleteVilkårsperiode(behandlingId: Long, vilkårId: Long, aktør: Aktør): List<RestPersonResultat> {
         val vilkårsvurdering = hentVilkårsvurdering(behandlingId = behandlingId)
             ?: throw Feil(
                 message = "Fant ikke aktiv vilkårsvurdering ved sletting av vilkår",
@@ -161,12 +161,13 @@ class VilkårService(
                 frontendFeilmelding = "Fant ikke aktiv vilkårsvurdering"
             )
 
-        val personResultat = vilkårsvurdering.personResultater.find { it.aktør.aktivIdent() == restNyttVilkår.personIdent }
-            ?: throw Feil(
-                message = "Fant ikke vilkårsvurdering for person",
-                frontendFeilmelding =
-                "Fant ikke vilkårsvurdering for person med ident '${restNyttVilkår.personIdent}"
-            )
+        val personResultat =
+            vilkårsvurdering.personResultater.find { it.aktør.aktivIdent() == restNyttVilkår.personIdent }
+                ?: throw Feil(
+                    message = "Fant ikke vilkårsvurdering for person",
+                    frontendFeilmelding =
+                    "Fant ikke vilkårsvurdering for person med ident '${restNyttVilkår.personIdent}"
+                )
         // valider for å legge til utvidet barnetrygd
         val behandling = behandlingService.hent(behandlingId)
         if (Vilkår.UTVIDET_BARNETRYGD == restNyttVilkår.vilkårType) {

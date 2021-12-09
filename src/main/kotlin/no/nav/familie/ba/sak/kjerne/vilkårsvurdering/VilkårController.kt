@@ -114,10 +114,9 @@ class VilkårController(
             handling = "slette vilkår"
         )
 
-        val behandling = behandlingService.hent(behandlingId)
         vilkårService.deleteVilkår(behandlingId, restSlettVilkår)
 
-        vedtakService.resettStegVedEndringPåVilkår(behandling.id)
+        vedtakService.resettStegVedEndringPåVilkår(behandlingId)
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }
 

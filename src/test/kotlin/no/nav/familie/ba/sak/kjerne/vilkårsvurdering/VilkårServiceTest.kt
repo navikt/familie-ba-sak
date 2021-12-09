@@ -903,7 +903,7 @@ class VilkårServiceTest(
             behandling.id,
             fnr, listOf(barnFnr),
             LocalDate.now().minusYears(1),
-            personidentService.hentOgLagreAktørId(fnr),
+            personidentService.hentOgLagreAktør(fnr),
             personidentService.hentOgLagreAktørIder(listOf(barnFnr))
         )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
@@ -1002,7 +1002,7 @@ class VilkårServiceTest(
             behandling.id,
             fnr, listOf(barnFnr),
             LocalDate.now().minusYears(1),
-            personidentService.hentOgLagreAktørId(fnr),
+            personidentService.hentOgLagreAktør(fnr),
             personidentService.hentOgLagreAktørIder(listOf(barnFnr))
         )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
@@ -1187,7 +1187,7 @@ class VilkårServiceTest(
             forrigeBehandling.id,
             fnr, listOf(barnFnr),
             barnetsFødselsdato,
-            personidentService.hentOgLagreAktørId(fnr),
+            personidentService.hentOgLagreAktør(fnr),
             personidentService.hentOgLagreAktørIder(listOf(barnFnr))
         )
         persongrunnlagService.lagreOgDeaktiverGammel(forrigePersonopplysningGrunnlag)
@@ -1196,7 +1196,7 @@ class VilkårServiceTest(
         val søkerPersonResultat = PersonResultat(
             vilkårsvurdering = forrigeVilkårsvurdering,
             personIdent = fnr,
-            aktør = personidentService.hentOgLagreAktørId(fnr)
+            aktør = personidentService.hentOgLagreAktør(fnr)
         )
         søkerPersonResultat.setSortedVilkårResultater(
             lagSøkerVilkårResultat(
@@ -1208,7 +1208,7 @@ class VilkårServiceTest(
         val barnPersonResultat = PersonResultat(
             vilkårsvurdering = forrigeVilkårsvurdering,
             personIdent = barnFnr,
-            aktør = personidentService.hentOgLagreAktørId(barnFnr)
+            aktør = personidentService.hentOgLagreAktør(barnFnr)
         )
         barnPersonResultat.setSortedVilkårResultater(
             lagBarnVilkårResultat(
@@ -1238,7 +1238,7 @@ class VilkårServiceTest(
             behandling.id,
             fnr, listOf(barnFnr),
             barnetsFødselsdato,
-            personidentService.hentOgLagreAktørId(fnr),
+            personidentService.hentOgLagreAktør(fnr),
             personidentService.hentOgLagreAktørIder(listOf(barnFnr))
         )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
