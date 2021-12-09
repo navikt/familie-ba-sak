@@ -24,7 +24,7 @@ class SendAutobrevOpphørOvergangsstonadTask(
         val autobrevOpphørOvergangsstonadDTO =
             objectMapper.readValue(task.payload, AutobrevOpphørOvergangsstonadDTO::class.java)
 
-        opphørAvFullOvergangsstonadService.opprettOmregningsoppgavePgaOpphørtOvergangsstønadInneværendeMåned(
+        opphørAvFullOvergangsstonadService.opprettOmregningsoppgaveForAvsluttetOvergangsstonad(
             autobrevOpphørOvergangsstonadDTO
         )
     }

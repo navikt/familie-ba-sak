@@ -52,7 +52,7 @@ class AutobrevScheduler(val taskRepository: TaskRepositoryWrapper) {
         logger.info("Opprett task som skal finne alle barn 3 og 6 og 18 år")
         taskRepository.save(
             Task(
-                type = FinnAlleBarn3og6og18ÅrTask.TASK_STEP_TYPE,
+                type = FinnAlleBarnTask.TASK_STEP_TYPE,
                 payload = ""
             ).medTriggerTid(
                 triggerTid = triggerTid
