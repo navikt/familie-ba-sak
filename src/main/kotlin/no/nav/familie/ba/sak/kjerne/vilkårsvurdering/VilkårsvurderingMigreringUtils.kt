@@ -14,7 +14,7 @@ object VilkårsvurderingMigreringUtils {
         person: Person
     ): List<VilkårResultat> {
         val personResultat = forrigeBehandlingsvilkårsvurdering.personResultater
-            .first { it.personIdent == person.personIdent.ident }
+            .first { it.aktør == person.aktør }
         return personResultat.vilkårResultater
             .filter { it.vilkårType == vilkår }
     }

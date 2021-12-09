@@ -8,7 +8,6 @@ import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.FagsystemUtfall.DAGLIG_KVOTE_OG_NORSK_STATSBORGER
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.FagsystemUtfall.FAGSAK_UTEN_IVERKSATTE_BEHANDLINGER_I_BA_SAK
-import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.FagsystemUtfall.IVERKSATTE_BEHANDLINGER_I_BA_SAK
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.FagsystemUtfall.LØPENDE_SAK_I_INFOTRYGD
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.FagsystemUtfall.SAKER_I_INFOTRYGD_MEN_IKKE_LØPENDE_UTBETALINGER
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.FagsystemUtfall.STANDARDUTFALL_INFOTRYGD
@@ -18,7 +17,8 @@ import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -29,6 +29,7 @@ private const val INFOTRYGD_NULLDATO = "000000"
 class VelgFagSystemService(
     private val fagsakService: FagsakService,
     private val infotrygdService: InfotrygdService,
+    private val personidentService: PersonidentService,
     private val behandlingService: BehandlingService,
     private val personopplysningerService: PersonopplysningerService,
     private val featureToggleService: FeatureToggleService
@@ -83,21 +84,21 @@ class VelgFagSystemService(
         return infotrygdService.harLøpendeSakIInfotrygd(morsIdenter, alleBarnasIdenter)
     }
 
-    internal fun harMorGyldigNorskstatsborger(morsIdent: Ident): Boolean {
-        val gjeldendeStatsborgerskap = personopplysningerService.hentGjeldendeStatsborgerskap(morsIdent)
+    internal fun harMorGyldigNorskstatsborger(morsAktør: Aktør): Boolean {
+        val gjeldendeStatsborgerskap = personopplysningerService.hentGjeldendeStatsborgerskap(morsAktør)
 
-        secureLogger.info("Gjeldende statsborgerskap for $morsIdent=(${gjeldendeStatsborgerskap.land}, bekreftelsesdato=${gjeldendeStatsborgerskap.bekreftelsesdato}, gyldigFom=${gjeldendeStatsborgerskap.gyldigFraOgMed}, gyldigTom=${gjeldendeStatsborgerskap.gyldigTilOgMed})")
+        secureLogger.info("Gjeldende statsborgerskap for ${morsAktør.aktivIdent()}=(${gjeldendeStatsborgerskap.land}, bekreftelsesdato=${gjeldendeStatsborgerskap.bekreftelsesdato}, gyldigFom=${gjeldendeStatsborgerskap.gyldigFraOgMed}, gyldigTom=${gjeldendeStatsborgerskap.gyldigTilOgMed})")
         return gjeldendeStatsborgerskap.land == "NOR"
     }
 
     fun velgFagsystem(nyBehandlingHendelse: NyBehandlingHendelse): FagsystemRegelVurdering {
+        val morsAktør = personidentService.hentOgLagreAktør(nyBehandlingHendelse.morsIdent)
 
-        val morsPersonIdent = PersonIdent(nyBehandlingHendelse.morsIdent)
-        val fagsak = fagsakService.hent(morsPersonIdent)
+        val fagsak = fagsakService.hent(morsAktør)
 
         val (fagsystemUtfall: FagsystemUtfall, fagsystem: FagsystemRegelVurdering) = when {
             morHarLøpendeEllerTidligereUtbetalinger(fagsak) -> Pair(
-                IVERKSATTE_BEHANDLINGER_I_BA_SAK,
+                FagsystemUtfall.IVERKSATTE_BEHANDLINGER_I_BA_SAK,
                 FagsystemRegelVurdering.SEND_TIL_BA
             )
             morEllerBarnHarLøpendeSakIInfotrygd(
@@ -115,7 +116,7 @@ class VelgFagSystemService(
                 SAKER_I_INFOTRYGD_MEN_IKKE_LØPENDE_UTBETALINGER,
                 FagsystemRegelVurdering.SEND_TIL_INFOTRYGD
             )
-            kanBehandleINyttSystem() && harMorGyldigNorskstatsborger(Ident(morsPersonIdent.ident)) -> Pair(
+            kanBehandleINyttSystem() && harMorGyldigNorskstatsborger(morsAktør) -> Pair(
                 DAGLIG_KVOTE_OG_NORSK_STATSBORGER,
                 FagsystemRegelVurdering.SEND_TIL_BA
             )

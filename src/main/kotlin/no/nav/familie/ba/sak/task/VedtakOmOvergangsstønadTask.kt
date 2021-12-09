@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.task
 
 import no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg.VedtakOmOvergangsstønadService
+import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
@@ -16,6 +17,7 @@ import java.util.Properties
 )
 class VedtakOmOvergangsstønadTask(
     private val vedtakOmOvergangsstønadService: VedtakOmOvergangsstønadService,
+    private val personidentService: PersonidentService,
 ) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
@@ -23,7 +25,11 @@ class VedtakOmOvergangsstønadTask(
         logger.info("Håndterer vedtak om overgangsstønad. Se secureLog for detaljer")
         secureLogger.info("Håndterer vedtak om overgangsstønad for person $personIdent.")
 
-        val responeFraService = vedtakOmOvergangsstønadService.håndterVedtakOmOvergangsstønad(personIdent)
+        val aktør = personidentService.hentOgLagreAktør(personIdent)
+
+        val responeFraService = vedtakOmOvergangsstønadService.håndterVedtakOmOvergangsstønad(
+            aktør
+        )
         secureLogger.info("Håndterte vedtak om overgangsstønad for person $personIdent:\n$responeFraService")
     }
 

@@ -160,7 +160,7 @@ enum class Årsak(val visningsnavn: String) {
 
 fun EndretUtbetalingAndel.tilRestEndretUtbetalingAndel() = RestEndretUtbetalingAndel(
     id = this.id,
-    personIdent = this.person?.personIdent?.ident,
+    personIdent = this.person?.aktør?.aktivIdent(),
     prosent = this.prosent,
     fom = this.fom,
     tom = this.tom,

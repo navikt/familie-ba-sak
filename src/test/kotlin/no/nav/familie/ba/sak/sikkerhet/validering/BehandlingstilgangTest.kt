@@ -2,8 +2,8 @@ package no.nav.familie.ba.sak.sikkerhet.validering
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
@@ -41,7 +41,7 @@ internal class BehandlingstilgangTest {
 
     @Test
     fun `isValid returnerer true hvis sjekkTilgangTilPersoner returnerer true for alle personer knyttet til behandling`() {
-        every { client.sjekkTilgangTilPersoner(personopplysningsgrunnlag.personer.map { it.personIdent.ident }) }
+        every { client.sjekkTilgangTilPersoner(personopplysningsgrunnlag.personer.map { it.aktør.aktivIdent() }) }
             .returns(
                 listOf(
                     Tilgang(true),
@@ -57,7 +57,7 @@ internal class BehandlingstilgangTest {
 
     @Test
     fun `isValid returnerer false hvis sjekkTilgangTilPersoner returnerer false for en person knyttet til behandling`() {
-        every { client.sjekkTilgangTilPersoner(personopplysningsgrunnlag.personer.map { it.personIdent.ident }) }
+        every { client.sjekkTilgangTilPersoner(personopplysningsgrunnlag.personer.map { it.aktør.aktivIdent() }) }
             .returns(
                 listOf(
                     Tilgang(true),
@@ -71,6 +71,7 @@ internal class BehandlingstilgangTest {
         assertFalse(harTilgang)
     }
 
+    private val fnr = randomFnr()
     private val personopplysningsgrunnlag =
         PersonopplysningGrunnlag(
             1,
@@ -81,10 +82,10 @@ internal class BehandlingstilgangTest {
                     fødselsdato = LocalDate.of(1984, 12, 16),
                     navn = "Mock Mockson",
                     kjønn = Kjønn.MANN,
-                    personIdent = PersonIdent(randomFnr()),
+                    personIdent = PersonIdent(fnr),
                     målform = Målform.NB,
                     personopplysningGrunnlag = PersonopplysningGrunnlag(1, 1),
-                    aktør = randomAktørId(),
+                    aktør = tilAktør(fnr),
                 )
                     .apply {
                         sivilstander =

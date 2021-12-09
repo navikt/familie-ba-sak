@@ -5,7 +5,6 @@ import io.mockk.mockk
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PersonInfo
-import no.nav.familie.ba.sak.integrasjoner.pdl.internal.Personident
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
@@ -33,7 +32,7 @@ class PdlRestClientTestConfig {
             kjønn = Kjønn.KVINNE,
             forelderBarnRelasjon = setOf(
                 ForelderBarnRelasjon(
-                    personIdent = Personident(id = "12345678910"),
+                    aktør = tilAktør("12345678910"),
                     relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN
                 )
             ),

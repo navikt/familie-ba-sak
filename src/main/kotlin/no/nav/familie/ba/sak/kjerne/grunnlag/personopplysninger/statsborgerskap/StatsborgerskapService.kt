@@ -5,8 +5,8 @@ import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClien
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Medlemskap
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.kontrakter.felles.kodeverk.BetydningDto
-import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -43,12 +43,15 @@ class StatsborgerskapService(
      * ganske dårlig og koden under som ser på perioder kan derfor være utdatert
      * og bør gås opp igjen om man skal bruke det.
      */
-    fun hentStatsborgerskapMedMedlemskapOgHistorikk(ident: Ident, person: Person): List<GrStatsborgerskap> =
-        listOf(personopplysningerService.hentGjeldendeStatsborgerskap(ident)).flatMap { statsborgerskap: Statsborgerskap ->
+    fun hentStatsborgerskapMedMedlemskapOgHistorikk(aktør: Aktør, person: Person): List<GrStatsborgerskap> =
+        listOf(personopplysningerService.hentGjeldendeStatsborgerskap(aktør)).flatMap { statsborgerskap: Statsborgerskap ->
             hentStatsborgerskapMedMedlemskap(statsborgerskap, person)
         }.sortedWith(fomComparator)
 
-    private fun hentStatsborgerskapMedMedlemskap(statsborgerskap: Statsborgerskap, person: Person): List<GrStatsborgerskap> {
+    private fun hentStatsborgerskapMedMedlemskap(
+        statsborgerskap: Statsborgerskap,
+        person: Person
+    ): List<GrStatsborgerskap> {
         if (statsborgerskap.iNordiskLand()) {
             return listOf(
                 GrStatsborgerskap(
@@ -67,7 +70,11 @@ class StatsborgerskapService(
         val grStatsborgerskap = ArrayList<GrStatsborgerskap>()
         var datoFra = statsborgerskap.gyldigFraOgMed
 
-        hentMedlemskapsIntervaller(alleEØSLandInkludertHistoriske, statsborgerskap.gyldigFraOgMed, statsborgerskap.gyldigTilOgMed)
+        hentMedlemskapsIntervaller(
+            alleEØSLandInkludertHistoriske,
+            statsborgerskap.gyldigFraOgMed,
+            statsborgerskap.gyldigTilOgMed
+        )
             .forEach {
                 grStatsborgerskap += GrStatsborgerskap(
                     gyldigPeriode = DatoIntervallEntitet(
@@ -102,7 +109,11 @@ class StatsborgerskapService(
         return grStatsborgerskap
     }
 
-    private fun hentMedlemskapsIntervaller(eøsLand: List<BetydningDto>?, fra: LocalDate?, til: LocalDate?): List<LocalDate> =
+    private fun hentMedlemskapsIntervaller(
+        eøsLand: List<BetydningDto>?,
+        fra: LocalDate?,
+        til: LocalDate?
+    ): List<LocalDate> =
         eøsLand?.flatMap {
             listOf(it.gyldigFra, it.gyldigTil.plusDays(1))
         }?.filter { datoForEndringIMedlemskap ->

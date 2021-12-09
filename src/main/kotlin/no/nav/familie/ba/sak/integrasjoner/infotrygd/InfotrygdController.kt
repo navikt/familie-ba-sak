@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.integrasjoner.infotrygd
 
+import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.kontrakter.ba.infotrygd.Sak
 import no.nav.familie.kontrakter.ba.infotrygd.Stønad
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -18,20 +19,23 @@ import org.springframework.web.bind.annotation.RestController
 @Validated
 class InfotrygdController(
     private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
+    private val personidentService: PersonidentService,
     private val infotrygdService: InfotrygdService
 ) {
 
     @PostMapping(path = ["/hent-infotrygdsaker-for-soker"])
     fun hentInfotrygdsakerForSøker(@RequestBody personIdent: Personident): ResponseEntity<Ressurs<RestInfotrygdsaker>> {
-        val infotrygdsaker = infotrygdService.hentMaskertRestInfotrygdsakerVedManglendeTilgang(personIdent.ident)
-            ?: RestInfotrygdsaker(infotrygdService.hentInfotrygdsakerForSøker(personIdent.ident).bruker)
+        val aktør = personidentService.hentOgLagreAktør(personIdent.ident)
+        val infotrygdsaker = infotrygdService.hentMaskertRestInfotrygdsakerVedManglendeTilgang(aktør)
+            ?: RestInfotrygdsaker(infotrygdService.hentInfotrygdsakerForSøker(aktør).bruker)
 
         return ResponseEntity.ok(Ressurs.success(infotrygdsaker))
     }
 
     @PostMapping(path = ["/hent-infotrygdstonader-for-soker"])
     fun hentInfotrygdstønaderForSøker(@RequestBody personIdent: Personident): ResponseEntity<Ressurs<RestInfotrygdstønader>> {
-        val infotrygdstønader = infotrygdService.hentMaskertRestInfotrygdstønaderVedManglendeTilgang(personIdent.ident)
+        val aktør = personidentService.hentOgLagreAktør(personIdent.ident)
+        val infotrygdstønader = infotrygdService.hentMaskertRestInfotrygdstønaderVedManglendeTilgang(aktør)
             ?: RestInfotrygdstønader(infotrygdService.hentInfotrygdstønaderForSøker(personIdent.ident).bruker)
 
         return ResponseEntity.ok(Ressurs.success(infotrygdstønader))

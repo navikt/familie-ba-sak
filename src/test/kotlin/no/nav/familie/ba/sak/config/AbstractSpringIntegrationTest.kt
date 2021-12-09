@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.integrasjoner.`ef-sak`.EfSakRestClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
+import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Tag
 import org.springframework.boot.test.context.SpringBootTest
@@ -29,9 +30,10 @@ import org.springframework.test.context.ContextConfiguration
 @Tag("integration")
 abstract class AbstractSpringIntegrationTest(
     personopplysningerService: PersonopplysningerService? = null,
+    personidentService: PersonidentService? = null,
     integrasjonClient: IntegrasjonClient? = null,
     efSakRestClient: EfSakRestClient? = null,
-) : AbstractMockkSpringRunner(personopplysningerService, integrasjonClient, efSakRestClient) {
+) : AbstractMockkSpringRunner(personopplysningerService, personidentService, integrasjonClient, efSakRestClient) {
     protected final val wireMockServer = WireMockServer(WireMockConfiguration.wireMockConfig().dynamicPort())
 
     init {
