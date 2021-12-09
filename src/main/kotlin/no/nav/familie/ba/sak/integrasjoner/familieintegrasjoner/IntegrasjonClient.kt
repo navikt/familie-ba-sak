@@ -589,11 +589,11 @@ class IntegrasjonClient(
     }
 
     fun hentMaskertPersonInfoVedManglendeTilgang(aktør: Aktør): RestPersonInfo? {
-        val harTilgang = sjekkTilgangTilPersoner(listOf(aktør.aktivIdent())).first().harTilgang
+        val harTilgang = sjekkTilgangTilPersoner(listOf(aktør.aktivFødselsnummer())).first().harTilgang
         return if (!harTilgang) {
             val adressebeskyttelse = systemOnlyPdlRestClient.hentAdressebeskyttelse(aktør).tilAdressebeskyttelse()
             RestPersonInfo(
-                personIdent = aktør.aktivIdent(),
+                personIdent = aktør.aktivFødselsnummer(),
                 adressebeskyttelseGradering = adressebeskyttelse,
                 harTilgang = false
             )

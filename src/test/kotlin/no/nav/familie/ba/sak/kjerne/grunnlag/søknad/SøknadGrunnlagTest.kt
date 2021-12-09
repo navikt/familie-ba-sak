@@ -81,7 +81,7 @@ class SøknadGrunnlagTest(
         val barnIdent = randomFnr()
         val søkerAktør = personidentService.hentOgLagreAktør(søkerIdent)
 
-        fagsakService.hentEllerOpprettFagsak(søkerAktør.aktivIdent())
+        fagsakService.hentEllerOpprettFagsak(søkerAktør.aktivFødselsnummer())
         val behandling = stegService.håndterNyBehandling(
             NyBehandling(
                 BehandlingKategori.NASJONAL,
@@ -112,7 +112,7 @@ class SøknadGrunnlagTest(
         val barnIdent = randomFnr()
         val søkerAktør = personidentService.hentOgLagreAktør(søkerIdent)
 
-        fagsakService.hentEllerOpprettFagsak(søkerAktør.aktivIdent())
+        fagsakService.hentEllerOpprettFagsak(søkerAktør.aktivFødselsnummer())
         val behandling = stegService.håndterNyBehandling(
             NyBehandling(
                 BehandlingKategori.NASJONAL,
@@ -171,7 +171,7 @@ class SøknadGrunnlagTest(
             endringAvOpplysningerBegrunnelse = ""
         )
 
-        fagsakService.hentEllerOpprettFagsak(søkerAktør.aktivIdent())
+        fagsakService.hentEllerOpprettFagsak(søkerAktør.aktivFødselsnummer())
         val behandling = stegService.håndterNyBehandling(
             NyBehandling(
                 BehandlingKategori.NASJONAL,
@@ -192,8 +192,8 @@ class SøknadGrunnlagTest(
         val persongrunnlag = persongrunnlagService.hentAktiv(behandlingId = behandling.id)
 
         assertEquals(1, persongrunnlag!!.barna.size)
-        assertTrue(persongrunnlag.barna.any { it.aktør.aktivIdent() == folkeregistrertBarn })
-        assertTrue(persongrunnlag.barna.none { it.aktør.aktivIdent() == uregistrertBarn })
+        assertTrue(persongrunnlag.barna.any { it.aktør.aktivFødselsnummer() == folkeregistrertBarn })
+        assertTrue(persongrunnlag.barna.none { it.aktør.aktivFødselsnummer() == uregistrertBarn })
     }
 
     @Test

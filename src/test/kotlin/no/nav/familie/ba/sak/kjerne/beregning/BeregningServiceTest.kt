@@ -238,7 +238,7 @@ class BeregningServiceTest {
         val søkandtidspunkt = LocalDate.of(2018, 9, 1)
         val personResultatBarn = lagPersonResultat(
             vilkårsvurdering = vilkårsvurdering,
-            fnr = barn.aktør.aktivIdent(),
+            fnr = barn.aktør.aktivFødselsnummer(),
             aktør = barn.aktør,
             resultat = Resultat.OPPFYLT,
             periodeFom = periodeFom,
@@ -262,7 +262,7 @@ class BeregningServiceTest {
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
             behandlingId = behandling.id,
             søkerPersonIdent = søkerFnr,
-            barnasIdenter = listOf(barn.aktør.aktivIdent())
+            barnasIdenter = listOf(barn.aktør.aktivFødselsnummer())
         )
         val slot = slot<TilkjentYtelse>()
 
@@ -270,7 +270,7 @@ class BeregningServiceTest {
         every { tilkjentYtelseRepository.save(any()) } returns lagInitiellTilkjentYtelse(behandling)
         every { søknadGrunnlagService.hentAktiv(any())?.hentSøknadDto() } returns lagSøknadDTO(
             søkerFnr,
-            listOf(barn.aktør.aktivIdent())
+            listOf(barn.aktør.aktivFødselsnummer())
         )
 
         every { endretUtbetalingAndelRepository.findByBehandlingId(any()) } returns

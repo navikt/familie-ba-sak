@@ -160,7 +160,7 @@ class StønadsstatistikkService(
             annenpartBostedsland = "Ikke implementert",
             annenpartPersonident = "ikke implementert",
             annenpartStatsborgerskap = "ikke implementert",
-            personIdent = person.aktør.aktivIdent()
+            personIdent = person.aktør.aktivFødselsnummer()
         )
     }
 
@@ -175,7 +175,7 @@ class StønadsstatistikkService(
 
         if (landKode == PersonopplysningerService.UKJENT_LANDKODE) {
             logger.warn("Sender landkode ukjent til DVH. Bør undersøke om hvorfor. Ident i securelogger")
-            secureLogger.warn("Ukjent land sendt til DVH for person ${person.aktør.aktivIdent()}")
+            secureLogger.warn("Ukjent land sendt til DVH for person ${person.aktør.aktivFødselsnummer()}")
         }
         landKode
     }

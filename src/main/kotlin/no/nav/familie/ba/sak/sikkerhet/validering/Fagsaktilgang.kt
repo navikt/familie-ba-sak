@@ -32,7 +32,7 @@ class Fagsaktilgang(
 
         fagsak?.aktør?.let { personer.add(it) }
 
-        integrasjonClient.sjekkTilgangTilPersoner(personer.map { it.aktivIdent() }.toList())
+        integrasjonClient.sjekkTilgangTilPersoner(personer.map { it.aktivFødselsnummer() }.toList())
             .filterNot { it.harTilgang }
             .forEach {
                 logger.error("Bruker har ikke tilgang: ${it.begrunnelse}")

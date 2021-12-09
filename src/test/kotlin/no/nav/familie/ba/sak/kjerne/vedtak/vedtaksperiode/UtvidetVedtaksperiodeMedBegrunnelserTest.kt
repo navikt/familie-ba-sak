@@ -28,7 +28,7 @@ class UtvidetVedtaksperiodeMedBegrunnelserTest {
 
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
             behandlingId = behandling.id,
-            barnasIdenter = listOf(barn1.aktør.aktivIdent(), barn2.aktør.aktivIdent()),
+            barnasIdenter = listOf(barn1.aktør.aktivFødselsnummer(), barn2.aktør.aktivFødselsnummer()),
             søkerPersonIdent = søker.aktør.aktørId
         )
 
@@ -92,8 +92,8 @@ class UtvidetVedtaksperiodeMedBegrunnelserTest {
 
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
             behandlingId = behandling.id,
-            barnasIdenter = listOf(barn1.aktør.aktivIdent(), barn2.aktør.aktivIdent()),
-            søkerPersonIdent = søker.aktør.aktivIdent()
+            barnasIdenter = listOf(barn1.aktør.aktivFødselsnummer(), barn2.aktør.aktivFødselsnummer()),
+            søkerPersonIdent = søker.aktør.aktivFødselsnummer()
         )
 
         val fom = YearMonth.of(2018, 6)
@@ -134,7 +134,7 @@ class UtvidetVedtaksperiodeMedBegrunnelserTest {
             fom = fom.førsteDagIInneværendeMåned(),
             tom = tom.sisteDagIInneværendeMåned(),
             type = Vedtaksperiodetype.ENDRET_UTBETALING,
-            begrunnelser = mutableSetOf(lagVedtaksbegrunnelse(personIdenter = listOf(barn2.aktør.aktivIdent())))
+            begrunnelser = mutableSetOf(lagVedtaksbegrunnelse(personIdenter = listOf(barn2.aktør.aktivFødselsnummer())))
         )
 
         val utvidetVedtaksperiodeMedBegrunnelser =

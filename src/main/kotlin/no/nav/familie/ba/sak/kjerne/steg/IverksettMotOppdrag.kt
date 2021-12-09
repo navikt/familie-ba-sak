@@ -55,7 +55,12 @@ class IverksettMotOppdrag(
             saksbehandlerId = data.saksbehandlerId
         )
 
-        taskRepository.save(SendVedtakTilInfotrygdTask.opprettTask(hentFnrStoenadsmottaker(behandling.fagsak), behandling.id))
+        taskRepository.save(
+            SendVedtakTilInfotrygdTask.opprettTask(
+                hentFnrStoenadsmottaker(behandling.fagsak),
+                behandling.id
+            )
+        )
 
         return hentNesteStegForNormalFlyt(behandling)
     }
@@ -64,5 +69,5 @@ class IverksettMotOppdrag(
         return StegType.IVERKSETT_MOT_OPPDRAG
     }
 
-    private fun hentFnrStoenadsmottaker(fagsak: Fagsak) = fagsak.aktør.aktivIdent()
+    private fun hentFnrStoenadsmottaker(fagsak: Fagsak) = fagsak.aktør.aktivFødselsnummer()
 }

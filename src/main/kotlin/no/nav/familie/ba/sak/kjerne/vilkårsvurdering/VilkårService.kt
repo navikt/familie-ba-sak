@@ -77,7 +77,7 @@ class VilkårService(
         val restVilkårResultat = restPersonResultat.vilkårResultater.singleOrNull { it.id == vilkårId }
             ?: throw Feil("Fant ikke vilkårResultat med id $vilkårId ved opppdatering av vikår")
         val personResultat =
-            vilkårsvurdering.personResultater.singleOrNull { it.aktør.aktivIdent() == restPersonResultat.personIdent }
+            vilkårsvurdering.personResultater.singleOrNull { it.aktør.aktivFødselsnummer() == restPersonResultat.personIdent }
                 ?: throw Feil(
                     message = "Fant ikke vilkårsvurdering for person",
                     frontendFeilmelding = "Fant ikke vilkårsvurdering for person med ident '${restPersonResultat.personIdent}"
@@ -106,7 +106,7 @@ class VilkårService(
         val personResultat = vilkårsvurdering.personResultater.find { it.aktør == aktør }
             ?: throw Feil(
                 message = "Fant ikke vilkårsvurdering for person",
-                frontendFeilmelding = "Fant ikke vilkårsvurdering for person med ident '${aktør.aktivIdent()}"
+                frontendFeilmelding = "Fant ikke vilkårsvurdering for person med ident '${aktør.aktivFødselsnummer()}"
             )
 
         muterPersonResultatDelete(personResultat, vilkårId)
@@ -123,7 +123,7 @@ class VilkårService(
             )
 
         val personResultat =
-            vilkårsvurdering.personResultater.find { it.aktør.aktivIdent() == restNyttVilkår.personIdent }
+            vilkårsvurdering.personResultater.find { it.aktør.aktivFødselsnummer() == restNyttVilkår.personIdent }
                 ?: throw Feil(
                     message = "Fant ikke vilkårsvurdering for person",
                     frontendFeilmelding =
@@ -267,7 +267,7 @@ class VilkårService(
         return personopplysningGrunnlag.personer.map { person ->
             val personResultat = PersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
-                personIdent = person.aktør.aktivIdent(),
+                personIdent = person.aktør.aktivFødselsnummer(),
                 aktør = person.aktør
             )
 
@@ -298,7 +298,7 @@ class VilkårService(
         return personopplysningGrunnlag.personer.map { person ->
             val personResultat = PersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
-                personIdent = person.aktør.aktivIdent(),
+                personIdent = person.aktør.aktivFødselsnummer(),
                 aktør = person.aktør
             )
 
@@ -365,7 +365,7 @@ class VilkårService(
         return personopplysningGrunnlag.personer.map { person ->
             val personResultat = PersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
-                personIdent = person.aktør.aktivIdent(),
+                personIdent = person.aktør.aktivFødselsnummer(),
                 aktør = person.aktør
             )
 
@@ -423,7 +423,7 @@ class VilkårService(
         return personopplysningGrunnlag.personer.filter { it.type != PersonType.ANNENPART }.map { person ->
             val personResultat = PersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
-                personIdent = person.aktør.aktivIdent(),
+                personIdent = person.aktør.aktivFødselsnummer(),
                 aktør = person.aktør
             )
 
@@ -476,7 +476,7 @@ class VilkårService(
         return personopplysningGrunnlag.personer.filter { it.type != PersonType.ANNENPART }.map { person ->
             val personResultat = PersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
-                personIdent = person.aktør.aktivIdent(),
+                personIdent = person.aktør.aktivFødselsnummer(),
                 aktør = person.aktør
             )
 

@@ -48,7 +48,7 @@ class PdlRestClient(
     fun hentPerson(aktør: Aktør, personInfoQuery: PersonInfoQuery): PersonInfo {
 
         val pdlPersonRequest = PdlPersonRequest(
-            variables = PdlPersonRequestVariables(aktør.aktivIdent()),
+            variables = PdlPersonRequestVariables(aktør.aktivFødselsnummer()),
             query = personInfoQuery.graphQL
         )
         try {
@@ -91,7 +91,7 @@ class PdlRestClient(
                     onFailure = {
                         throw Feil(
                             message = "Fant ikke forespurte data på person.",
-                            frontendFeilmelding = "Kunne ikke slå opp data for person ${aktør.aktivIdent()}",
+                            frontendFeilmelding = "Kunne ikke slå opp data for person ${aktør.aktivFødselsnummer()}",
                             httpStatus = HttpStatus.NOT_FOUND,
                             throwable = it
                         )
@@ -100,7 +100,7 @@ class PdlRestClient(
             } else {
                 throw Feil(
                     message = "Feil ved oppslag på person: ${response.errorMessages()}",
-                    frontendFeilmelding = "Feil ved oppslag på person ${aktør.aktivIdent()}: ${response.errorMessages()}",
+                    frontendFeilmelding = "Feil ved oppslag på person ${aktør.aktivFødselsnummer()}: ${response.errorMessages()}",
                     httpStatus = HttpStatus.INTERNAL_SERVER_ERROR
                 )
             }
@@ -111,7 +111,7 @@ class PdlRestClient(
                 is Feil -> throw e
                 else -> throw Feil(
                     message = "Feil ved oppslag på person. Gav feil: ${mostSpecificThrowable.message}.",
-                    frontendFeilmelding = "Feil oppsto ved oppslag på person ${aktør.aktivIdent()}",
+                    frontendFeilmelding = "Feil oppsto ved oppslag på person ${aktør.aktivFødselsnummer()}",
                     httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
                     throwable = mostSpecificThrowable
                 )
@@ -140,7 +140,7 @@ class PdlRestClient(
 
     fun hentDødsfall(aktør: Aktør): List<Doedsfall> {
         val pdlPersonRequest = PdlPersonRequest(
-            variables = PdlPersonRequestVariables(aktør.aktivIdent()),
+            variables = PdlPersonRequestVariables(aktør.aktivFødselsnummer()),
             query = hentGraphqlQuery("doedsfall")
         )
         val response = try {
@@ -148,7 +148,7 @@ class PdlRestClient(
         } catch (e: Exception) {
             throw Feil(
                 message = "Feil ved oppslag på person. Gav feil: ${e.message}",
-                frontendFeilmelding = "Feil oppsto ved oppslag på person ${aktør.aktivIdent()}",
+                frontendFeilmelding = "Feil oppsto ved oppslag på person ${aktør.aktivFødselsnummer()}",
                 httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
                 throwable = e
             )
@@ -157,14 +157,14 @@ class PdlRestClient(
         if (!response.harFeil()) return response.data.person!!.doedsfall
         throw Feil(
             message = "Fant ikke data på person: ${response.errorMessages()}",
-            frontendFeilmelding = "Fant ikke identer for person ${aktør.aktivIdent()}: ${response.errorMessages()}",
+            frontendFeilmelding = "Fant ikke identer for person ${aktør.aktivFødselsnummer()}: ${response.errorMessages()}",
             httpStatus = HttpStatus.NOT_FOUND
         )
     }
 
     fun hentVergemaalEllerFremtidsfullmakt(aktør: Aktør): List<VergemaalEllerFremtidsfullmakt> {
         val pdlPersonRequest = PdlPersonRequest(
-            variables = PdlPersonRequestVariables(aktør.aktivIdent()),
+            variables = PdlPersonRequestVariables(aktør.aktivFødselsnummer()),
             query = hentGraphqlQuery("verge")
         )
         val response = try {
@@ -172,7 +172,7 @@ class PdlRestClient(
         } catch (e: Exception) {
             throw Feil(
                 message = "Feil ved oppslag på person. Gav feil: ${e.message}",
-                frontendFeilmelding = "Feil oppsto ved oppslag på person ${aktør.aktivIdent()}",
+                frontendFeilmelding = "Feil oppsto ved oppslag på person ${aktør.aktivFødselsnummer()}",
                 httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
                 throwable = e
             )
@@ -181,7 +181,7 @@ class PdlRestClient(
         if (!response.harFeil()) return response.data.person!!.vergemaalEllerFremtidsfullmakt
         throw Feil(
             message = "Fant ikke data på person: ${response.errorMessages()}",
-            frontendFeilmelding = "Fant ikke data på person ${aktør.aktivIdent()}: ${response.errorMessages()}",
+            frontendFeilmelding = "Fant ikke data på person ${aktør.aktivFødselsnummer()}: ${response.errorMessages()}",
             httpStatus = HttpStatus.NOT_FOUND
         )
     }
@@ -189,7 +189,7 @@ class PdlRestClient(
     fun hentStatsborgerskapUtenHistorikk(aktør: Aktør): List<Statsborgerskap> {
 
         val pdlPersonRequest = PdlPersonRequest(
-            variables = PdlPersonRequestVariables(aktør.aktivIdent()),
+            variables = PdlPersonRequestVariables(aktør.aktivFødselsnummer()),
             query = hentGraphqlQuery("statsborgerskap-uten-historikk")
         )
         val response = try {
@@ -197,7 +197,7 @@ class PdlRestClient(
         } catch (e: Exception) {
             throw Feil(
                 message = "Feil ved oppslag på person. Gav feil: ${e.message}",
-                frontendFeilmelding = "Feil oppsto ved oppslag på person ${aktør.aktivIdent()}",
+                frontendFeilmelding = "Feil oppsto ved oppslag på person ${aktør.aktivFødselsnummer()}",
                 httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
                 throwable = e
             )
@@ -206,14 +206,14 @@ class PdlRestClient(
         if (!response.harFeil()) return response.data.person!!.statsborgerskap
         throw Feil(
             message = "Fant ikke data på person: ${response.errorMessages()}",
-            frontendFeilmelding = "Fant ikke identer for person ${aktør.aktivIdent()}: ${response.errorMessages()}",
+            frontendFeilmelding = "Fant ikke identer for person ${aktør.aktivFødselsnummer()}: ${response.errorMessages()}",
             httpStatus = HttpStatus.NOT_FOUND
         )
     }
 
     fun hentOppholdUtenHistorikk(aktør: Aktør): List<Opphold> {
         val pdlPersonRequest = PdlPersonRequest(
-            variables = PdlPersonRequestVariables(aktør.aktivIdent()),
+            variables = PdlPersonRequestVariables(aktør.aktivFødselsnummer()),
             query = hentGraphqlQuery("opphold-uten-historikk")
         )
         val response = try {
@@ -221,7 +221,7 @@ class PdlRestClient(
         } catch (e: Exception) {
             throw Feil(
                 message = "Feil ved oppslag på person. Gav feil: ${e.message}",
-                frontendFeilmelding = "Feil oppsto ved oppslag på person ${aktør.aktivIdent()}",
+                frontendFeilmelding = "Feil oppsto ved oppslag på person ${aktør.aktivFødselsnummer()}",
                 httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
                 throwable = e
             )
@@ -231,7 +231,7 @@ class PdlRestClient(
             if (response.data?.person?.opphold == null) {
                 throw Feil(
                     message = "Ugyldig response (null) fra PDL ved henting av opphold.",
-                    frontendFeilmelding = "Feilet ved henting av opphold for person ${aktør.aktivIdent()}",
+                    frontendFeilmelding = "Feilet ved henting av opphold for person ${aktør.aktivFødselsnummer()}",
                     httpStatus = HttpStatus.INTERNAL_SERVER_ERROR
                 )
             }
@@ -240,14 +240,14 @@ class PdlRestClient(
 
         throw Feil(
             message = "Fant ikke data på person: ${response.errorMessages()}",
-            frontendFeilmelding = "Fant ikke opphold for person ${aktør.aktivIdent()}: ${response.errorMessages()}",
+            frontendFeilmelding = "Fant ikke opphold for person ${aktør.aktivFødselsnummer()}: ${response.errorMessages()}",
             httpStatus = HttpStatus.NOT_FOUND
         )
     }
 
     fun hentUtenlandskBostedsadresse(aktør: Aktør): PdlUtenlandskAdressseResponse.UtenlandskAdresse? {
         val pdlPersonRequest = PdlPersonRequest(
-            variables = PdlPersonRequestVariables(aktør.aktivIdent()),
+            variables = PdlPersonRequestVariables(aktør.aktivFødselsnummer()),
             query = hentGraphqlQuery("bostedsadresse-utenlandsk")
         )
         val response = try {
@@ -257,7 +257,7 @@ class PdlRestClient(
                 message = "Feil ved oppslag på utenlandsk bostedsadresse. Gav feil: ${
                 NestedExceptionUtils.getMostSpecificCause(e).message
                 }",
-                frontendFeilmelding = "Feil oppsto ved oppslag på utenlandsk bostedsadresse ${aktør.aktivIdent()}",
+                frontendFeilmelding = "Feil oppsto ved oppslag på utenlandsk bostedsadresse ${aktør.aktivFødselsnummer()}",
                 httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
                 throwable = e
             )
@@ -266,7 +266,7 @@ class PdlRestClient(
         if (!response.harFeil()) return response.data?.person?.bostedsadresse?.firstOrNull { it.utenlandskAdresse != null }?.utenlandskAdresse
         throw Feil(
             message = "Fant ikke data på person: ${response.errorMessages()}",
-            frontendFeilmelding = "Fant ikke identer for person ${aktør.aktivIdent()}: ${response.errorMessages()}",
+            frontendFeilmelding = "Fant ikke identer for person ${aktør.aktivFødselsnummer()}: ${response.errorMessages()}",
             httpStatus = HttpStatus.NOT_FOUND
         )
     }
@@ -277,7 +277,7 @@ class PdlRestClient(
      */
     fun hentForelderBarnRelasjon(aktør: Aktør): List<no.nav.familie.kontrakter.felles.personopplysning.ForelderBarnRelasjon> {
         val pdlPersonRequest = PdlPersonRequest(
-            variables = PdlPersonRequestVariables(aktør.aktivIdent()),
+            variables = PdlPersonRequestVariables(aktør.aktivFødselsnummer()),
             query = hentGraphqlQuery("hentperson-relasjoner")
         )
         val response = try {
@@ -285,7 +285,7 @@ class PdlRestClient(
         } catch (e: Exception) {
             throw Feil(
                 message = "Feil ved oppslag på person. Gav feil: ${e.message}",
-                frontendFeilmelding = "Feil oppsto ved oppslag på person ${aktør.aktivIdent()}",
+                frontendFeilmelding = "Feil oppsto ved oppslag på person ${aktør.aktivFødselsnummer()}",
                 httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
                 throwable = e
             )
@@ -294,7 +294,7 @@ class PdlRestClient(
         if (!response.harFeil()) return response.data.person!!.forelderBarnRelasjon
         throw Feil(
             message = "Fant ikke data på person: ${response.errorMessages()}",
-            frontendFeilmelding = "Fant ikke identer for person ${aktør.aktivIdent()}: ${response.errorMessages()}",
+            frontendFeilmelding = "Fant ikke identer for person ${aktør.aktivFødselsnummer()}: ${response.errorMessages()}",
             httpStatus = HttpStatus.NOT_FOUND
         )
     }

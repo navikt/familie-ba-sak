@@ -26,7 +26,7 @@ class Vedtaktilgang(
                 it.aktør
             } ?: emptyList()
 
-        integrasjonClient.sjekkTilgangTilPersoner(personer.map { it.aktivIdent() })
+        integrasjonClient.sjekkTilgangTilPersoner(personer.map { it.aktivFødselsnummer() })
             .filterNot { it.harTilgang }
             .forEach {
                 logger.error("Bruker har ikke tilgang: ${it.begrunnelse}")

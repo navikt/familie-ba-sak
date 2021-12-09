@@ -57,7 +57,7 @@ class SatsendringService(
         val søkerAktør = behandling.fagsak.aktør
 
         logger.info("Kjører satsendring på $behandling")
-        secureLogger.info("Kjører satsendring på $behandling for ${søkerAktør.aktivIdent()}")
+        secureLogger.info("Kjører satsendring på $behandling for ${søkerAktør.aktivFødselsnummer()}")
         if (behandling.fagsak.status != FagsakStatus.LØPENDE) throw Feil("Forsøker å utføre satsendring på ikke løpende fagsak ${behandling.fagsak.id}")
         if (behandling.status != BehandlingStatus.AVSLUTTET) throw Feil("Forsøker å utføre satsendring på behandling ${behandling.id} som ikke er avsluttet")
 
@@ -81,7 +81,7 @@ class SatsendringService(
             )
         } else {
             FerdigstillBehandlingTask.opprettTask(
-                søkerPersonIdent = søkerAktør.aktivIdent(),
+                søkerPersonIdent = søkerAktør.aktivFødselsnummer(),
                 behandlingsId = behandlingEtterBehandlingsresultat.id
             )
         }

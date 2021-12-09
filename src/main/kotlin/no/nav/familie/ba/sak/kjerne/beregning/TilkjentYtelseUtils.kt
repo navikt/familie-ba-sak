@@ -77,7 +77,7 @@ object TilkjentYtelseUtils {
                                 behandlingId = vilkårsvurdering.behandling.id,
                                 tilkjentYtelse = tilkjentYtelse,
                                 // TODO: Robustgjøring dnr/fnr fjern ved contract.
-                                personIdent = person.aktør.aktivIdent(),
+                                personIdent = person.aktør.aktivFødselsnummer(),
                                 aktør = person.aktør,
                                 stønadFom = beløpsperiode.fraOgMed,
                                 stønadTom = beløpsperiode.tilOgMed,
@@ -189,7 +189,7 @@ object TilkjentYtelseUtils {
         // Sorterer primært av hensyn til måten testene er implementert og kan muligens fjernes dersom dette skrives om.
         nyeAndelTilkjentYtelse.sortWith(
             compareBy(
-                { it.aktør.aktivIdent() },
+                { it.aktør.aktivFødselsnummer() },
                 { it.stønadFom }
             )
         )

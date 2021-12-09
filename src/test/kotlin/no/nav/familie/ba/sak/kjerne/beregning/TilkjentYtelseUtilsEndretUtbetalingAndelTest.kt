@@ -103,7 +103,7 @@ internal class TilkjentYtelseUtilsEndretUtbetalingAndelTest {
 
         verifiserAndelTilkjentYtelse(
             andelerTilkjentYtelserEtterEUAList[0],
-            barn1.aktør.aktivIdent(),
+            barn1.aktør.aktivFødselsnummer(),
             beløp / BigDecimal(2),
             YearMonth.of(2018, 1),
             YearMonth.of(2018, 3)
@@ -111,7 +111,7 @@ internal class TilkjentYtelseUtilsEndretUtbetalingAndelTest {
 
         verifiserAndelTilkjentYtelse(
             andelerTilkjentYtelserEtterEUAList[1],
-            barn1.aktør.aktivIdent(),
+            barn1.aktør.aktivFødselsnummer(),
             beløp / BigDecimal(2),
             YearMonth.of(2018, 4),
             YearMonth.of(2018, 4)
@@ -119,7 +119,7 @@ internal class TilkjentYtelseUtilsEndretUtbetalingAndelTest {
 
         verifiserAndelTilkjentYtelse(
             andelerTilkjentYtelserEtterEUAList[2],
-            barn1.aktør.aktivIdent(),
+            barn1.aktør.aktivFødselsnummer(),
             beløp,
             YearMonth.of(2018, 10),
             YearMonth.of(2021, 8)
@@ -127,7 +127,7 @@ internal class TilkjentYtelseUtilsEndretUtbetalingAndelTest {
 
         verifiserAndelTilkjentYtelse(
             andelerTilkjentYtelserEtterEUAList[3],
-            barn2.aktør.aktivIdent(),
+            barn2.aktør.aktivFødselsnummer(),
             beløp,
             YearMonth.of(2018, 2),
             YearMonth.of(2018, 3)
@@ -135,7 +135,7 @@ internal class TilkjentYtelseUtilsEndretUtbetalingAndelTest {
 
         verifiserAndelTilkjentYtelse(
             andelerTilkjentYtelserEtterEUAList[4],
-            barn2.aktør.aktivIdent(),
+            barn2.aktør.aktivFødselsnummer(),
             beløp / BigDecimal(2),
             YearMonth.of(2018, 4),
             YearMonth.of(2018, 5)
@@ -143,7 +143,7 @@ internal class TilkjentYtelseUtilsEndretUtbetalingAndelTest {
 
         verifiserAndelTilkjentYtelse(
             andelerTilkjentYtelserEtterEUAList[5],
-            barn2.aktør.aktivIdent(),
+            barn2.aktør.aktivFødselsnummer(),
             beløp,
             YearMonth.of(2018, 6),
             YearMonth.of(2018, 6)
@@ -151,7 +151,7 @@ internal class TilkjentYtelseUtilsEndretUtbetalingAndelTest {
 
         verifiserAndelTilkjentYtelse(
             andelerTilkjentYtelserEtterEUAList[6],
-            barn2.aktør.aktivIdent(),
+            barn2.aktør.aktivFødselsnummer(),
             beløp / BigDecimal(2),
             YearMonth.of(2018, 7),
             YearMonth.of(2018, 8)
@@ -159,7 +159,7 @@ internal class TilkjentYtelseUtilsEndretUtbetalingAndelTest {
 
         verifiserAndelTilkjentYtelse(
             andelerTilkjentYtelserEtterEUAList[7],
-            barn2.aktør.aktivIdent(),
+            barn2.aktør.aktivFødselsnummer(),
             beløp / BigDecimal(2),
             YearMonth.of(2018, 11),
             YearMonth.of(2021, 9)
@@ -256,7 +256,7 @@ internal class TilkjentYtelseUtilsEndretUtbetalingAndelTest {
     private fun lagAndelTilkjentYtelse(barn: Person, fom: YearMonth, tom: YearMonth) = AndelTilkjentYtelse(
         behandlingId = behandling.id,
         tilkjentYtelse = tilkjentYtelse,
-        personIdent = barn.aktør.aktivIdent(),
+        personIdent = barn.aktør.aktivFødselsnummer(),
         aktør = barn.aktør,
         kalkulertUtbetalingsbeløp = beløp.toInt(),
         stønadFom = fom,

@@ -138,7 +138,7 @@ class MigreringService(
     }
 
     private fun validerAtBarnErIRelasjonMedPersonident(personAktør: Aktør, barnasAktør: List<Aktør>) {
-        val barnasIdenter = barnasAktør.map { it.aktivIdent() }
+        val barnasIdenter = barnasAktør.map { it.aktivFødselsnummer() }
 
         val listeBarnFraPdl = pdlRestClient.hentForelderBarnRelasjon(personAktør)
             .filter {
@@ -147,7 +147,7 @@ class MigreringService(
             }.map { it.relatertPersonsIdent }
         if (barnasAktør.size != listeBarnFraPdl.size || !listeBarnFraPdl.containsAll(barnasIdenter)) {
             secureLog.info(
-                "Kan ikke migrere person ${personAktør.aktivIdent()} fordi barn fra PDL ikke samsvarer med løpende barnetrygdbarn fra Infotrygd.\n" +
+                "Kan ikke migrere person ${personAktør.aktivFødselsnummer()} fordi barn fra PDL ikke samsvarer med løpende barnetrygdbarn fra Infotrygd.\n" +
                     "Barn fra PDL: ${listeBarnFraPdl}\n Barn fra Infotrygd: $barnasIdenter"
             )
             kastOgTellMigreringsFeil(MigreringsfeilType.DIFF_BARN_INFOTRYGD_OG_PDL)
