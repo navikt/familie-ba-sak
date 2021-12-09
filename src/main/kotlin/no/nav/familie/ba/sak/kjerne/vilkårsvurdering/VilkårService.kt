@@ -230,9 +230,7 @@ class VilkårService(
                     personResultater = lagVilkårsvurderingForMigreringsbehandling(this)
                 }
                 behandling.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE -> {
-                    if (featureToggleService.isEnabled(FeatureToggleConfig.AUTOMATISK_FØDSELSHENDELSE)) {
-                        personResultater = lagVilkårsvurderingForFødselshendelse(this, barnaSomAlleredeErVurdert)
-                    }
+                    personResultater = lagVilkårsvurderingForFødselshendelse(this, barnaSomAlleredeErVurdert)
 
                     if (førstegangskjøringAvVilkårsvurdering(this)) {
                         vilkårsvurderingMetrics.tellMetrikker(this)
