@@ -181,7 +181,7 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
                 .triggesForPeriode(
                     persongrunnlag = personopplysningGrunnlag,
                     minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
-                    identerMedUtbetaling = aktørerMedUtbetaling,
+                    aktørerMedUtbetaling = aktørerMedUtbetaling,
                     utvidetVedtaksperiodeMedBegrunnelser = lagUtvidetVedtaksperiodeMedBegrunnelser(
                         type = Vedtaksperiodetype.UTBETALING,
                         fom = LocalDate.of(2021, 10, 1),
@@ -211,7 +211,7 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
                 .triggesForPeriode(
                     persongrunnlag = personopplysningGrunnlag,
                     minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
-                    identerMedUtbetaling = aktørerMedUtbetaling,
+                    aktørerMedUtbetaling = aktørerMedUtbetaling,
                     utvidetVedtaksperiodeMedBegrunnelser = lagUtvidetVedtaksperiodeMedBegrunnelser(
                         type = Vedtaksperiodetype.UTBETALING,
                         fom = LocalDate.of(2021, 10, 1),
