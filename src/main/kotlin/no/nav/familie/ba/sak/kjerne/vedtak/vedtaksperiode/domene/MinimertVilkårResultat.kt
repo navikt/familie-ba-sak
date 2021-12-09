@@ -33,4 +33,3 @@ fun VilkårResultat.tilMinimertVilkårResultat() =
         utdypendeVilkårsvurderinger = this.utdypendeVilkårsvurderinger,
         erEksplisittAvslagPåSøknad = this.erEksplisittAvslagPåSøknad,
     )
-

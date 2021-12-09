@@ -63,5 +63,3 @@ fun UtvidetVedtaksperiodeMedBegrunnelser.tilBrevPeriodeGrunnlag(
         begrunnelser = this.begrunnelser.map { it.tilBrevBegrunnelseGrunnlag(sanityBegrunnelser) }
     )
 }
-
-

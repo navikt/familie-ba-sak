@@ -51,7 +51,7 @@ data class Vilkårsvurdering(
     @Column(name = "ytelse_personer", columnDefinition = "text")
     var ytelsePersoner: String? = null,
 
-    ) : BaseEntitet() {
+) : BaseEntitet() {
 
     override fun toString(): String {
         return "Vilkårsvurdering(id=$id, behandling=${behandling.id})"

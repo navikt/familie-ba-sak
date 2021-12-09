@@ -7,6 +7,3 @@ data class BrevGrunnlag(
     val minimertePersonResultater: List<MinimertPersonResultat>,
     val minimerteEndredeUtbetalingAndeler: List<MinimertEndretUtbetalingAndel>,
 )
-
-
-

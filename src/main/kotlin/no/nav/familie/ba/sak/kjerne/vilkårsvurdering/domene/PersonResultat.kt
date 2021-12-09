@@ -143,4 +143,3 @@ class PersonResultat(
 
     fun harEksplisittAvslag() = vilkårResultater.any { it.erEksplisittAvslagPåSøknad == true }
 }
-
