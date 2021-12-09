@@ -17,7 +17,7 @@ spec:
   acl:
     - team: teamfamilie
       application: familie-ba-sak #owner
-      access: readwrite   # readwrite
+      access: write   # readwrite
     - team: bidrag
       application: bidrag-grunnlag #consumer
       access: read
