@@ -21,9 +21,7 @@ class OpphørAvFullOvergangsstonadService(
 ) {
     @Transactional
     fun opprettOmregningsoppgavePgaOpphørtOvergangsstønadInneværendeMåned(asdf: AutobrevOpphørOvergangsstonadDTO) {
-        println("kjør noen sjekker på at automatisk behandling faktisk skal kjøres")
-
-
-        println("Kjør automatisk behandling")
+        println("TODO: kjør noen sjekker på at automatisk behandling faktisk skal kjøres")
+        println("TODO: Kjør automatisk behandling")
     }
 }
