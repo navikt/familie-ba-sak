@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPerson
@@ -81,6 +82,23 @@ fun mapTilUtbetalingsperioder(
             utbetalingsperiodeDetaljer = andelerForSegment.lagUtbetalingsperiodeDetaljer(personopplysningGrunnlag)
         )
     }
+}
+
+fun hentbarnMedSeksårsdagPåInneværendeUtbetalingPeriode(utbetalingsperioder: List<Utbetalingsperiode>): List<String> {
+    val utbetalingsperiode = hentUtbetalingsperiodeForVedtaksperiode(
+        utbetalingsperioder,
+        null
+    )
+    val personerIPeriode = utbetalingsperiode.utbetalingsperiodeDetaljer.map { it.person }
+
+    val barnMed6ÅrsdagPåPeriode = personerIPeriode.filter {
+        it.fødselsdato?.plusYears(6)?.toYearMonth() == (
+            utbetalingsperiode.periodeFom.toYearMonth()
+                ?: TIDENES_ENDE.toYearMonth()
+            )
+    }
+
+    return barnMed6ÅrsdagPåPeriode.map { it.personIdent }
 }
 
 internal fun List<AndelTilkjentYtelse>.utledSegmenter(): List<LocalDateSegment<Int>> {
