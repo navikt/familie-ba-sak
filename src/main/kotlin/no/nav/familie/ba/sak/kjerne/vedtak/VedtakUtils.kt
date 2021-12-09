@@ -17,14 +17,15 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 object VedtakUtils {
 
     /**
-     * TODO fix this
      * Funksjonen henter personer som trigger den gitte vedtaksperioden ved å hente vilkårResultater
      * basert på de attributter som definerer om en vedtaksbegrunnelse er trigget for en periode.
      *
-     * @param minimertePersonResultater - Vilkårsvurderingen man ser på for å sammenligne vilkår
+     * @param minimertePersonResultater - Vilkårresultatene man ser på for å sammenligne vilkår
      * @param vedtaksperiode - Perioden det skal sjekkes for
      * @param oppdatertBegrunnelseType - Begrunnelsestype det skal sjekkes for
+     * @param aktuellePersonerForVedtaksperiode - Personer som passer for vedtaksperiode
      * @param triggesAv -  Hva som trigger en vedtaksbegrynnelse.
+     * @param erFørsteVedtaksperiodePåFagsak - Om vedtaksperioden er første periode på fagsak.
      * @return List med personene det trigges endring på
      */
     fun hentPersonerForAlleUtgjørendeVilkår(
@@ -66,7 +67,7 @@ object VedtakUtils {
             .fold(mutableListOf()) { acc, personResultat ->
                 val utgjørendeVilkårResultat =
                     personResultat.minimerteVilkårResultater.firstOrNull { minimertVilkårResultat ->
-                        
+
                         val oppfyltTomMånedEtter =
                             if (minimertVilkårResultat.vilkårType == Vilkår.UNDER_18_ÅR &&
                                 minimertVilkårResultat.periodeTom != minimertVilkårResultat.periodeTom?.sisteDagIMåned()
