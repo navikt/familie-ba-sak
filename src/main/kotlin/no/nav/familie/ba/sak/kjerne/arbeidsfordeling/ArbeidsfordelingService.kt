@@ -204,7 +204,7 @@ class ArbeidsfordelingService(
     )
 
     private fun identMedAdressebeskyttelse(aktør: Aktør) = IdentMedAdressebeskyttelse(
-        ident = aktør.aktivIdent(),
+        ident = aktør.aktivFødselsnummer(),
         adressebeskyttelsegradering = personopplysningerService.hentPersoninfoEnkel(aktør).adressebeskyttelseGradering
     )
 

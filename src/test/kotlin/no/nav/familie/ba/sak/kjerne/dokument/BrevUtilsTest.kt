@@ -501,13 +501,13 @@ internal class BrevUtilsTest {
                 lagRestVedtaksbegrunnelse(
                     vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON,
                     personIdenter = listOf(
-                        barn3.aktør.aktivIdent()
+                        barn3.aktør.aktivFødselsnummer()
                     ),
                 ),
                 lagRestVedtaksbegrunnelse(
                     vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET,
                     personIdenter = listOf(
-                        barn2.aktør.aktivIdent()
+                        barn2.aktør.aktivFødselsnummer()
                     ),
                 ),
             )

@@ -42,7 +42,8 @@ class PersonidentService(
     }
 
     fun hentAlleFødselsnummerForEnAktør(aktør: Aktør) =
-        personopplysningerService.hentIdenter(Ident(aktør.aktivIdent())).filter { it.gruppe == "FOLKEREGISTERIDENT" }
+        personopplysningerService.hentIdenter(Ident(aktør.aktivFødselsnummer()))
+            .filter { it.gruppe == "FOLKEREGISTERIDENT" }
             .map { it.ident }
 
     fun hentOgLagreAktør(ident: String): Aktør {

@@ -168,7 +168,7 @@ fun håndterIverksettingAvBehandling(
                 behandlingsId = behandlingEtterVurdering.id,
                 vedtaksId = vedtak.id,
                 saksbehandlerId = "System",
-                personIdent = behandlingEtterVurdering.fagsak.aktør.aktivIdent()
+                personIdent = behandlingEtterVurdering.fagsak.aktør.aktivFødselsnummer()
             )
         )
 

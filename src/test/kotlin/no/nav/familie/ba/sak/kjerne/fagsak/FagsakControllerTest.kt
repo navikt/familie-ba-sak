@@ -80,7 +80,7 @@ class FagsakControllerTest(
         } returns listOf(IdentInformasjon(ident = fnr, historisk = true, gruppe = "FOLKEREGISTERIDENT"))
 
         fagsakController.hentEllerOpprettFagsak(FagsakRequest(personIdent = fnr))
-        assertEquals(fnr, fagsakService.hent(tilAktør(fnr))?.aktør?.aktivIdent())
+        assertEquals(fnr, fagsakService.hent(tilAktør(fnr))?.aktør?.aktivFødselsnummer())
     }
 
     @Test
@@ -123,7 +123,7 @@ class FagsakControllerTest(
 
         val nyRestFagsak = fagsakController.hentEllerOpprettFagsak(FagsakRequest(personIdent = fnr))
         assertEquals(Ressurs.Status.SUKSESS, nyRestFagsak.body?.status)
-        assertEquals(fnr, fagsakService.hent(tilAktør(fnr))?.aktør?.aktivIdent())
+        assertEquals(fnr, fagsakService.hent(tilAktør(fnr))?.aktør?.aktivFødselsnummer())
 
         val eksisterendeRestFagsak = fagsakController.hentEllerOpprettFagsak(
             FagsakRequest(
@@ -147,7 +147,7 @@ class FagsakControllerTest(
 
         val nyRestFagsak = fagsakController.hentEllerOpprettFagsak(FagsakRequest(personIdent = fnr))
         assertEquals(Ressurs.Status.SUKSESS, nyRestFagsak.body?.status)
-        assertEquals(fnr, fagsakService.hent(aktør)?.aktør?.aktivIdent())
+        assertEquals(fnr, fagsakService.hent(aktør)?.aktør?.aktivFødselsnummer())
 
         personidentRepository.save(
             personidentRepository.getById(fnr).also { it.aktiv = false }
@@ -187,11 +187,11 @@ class FagsakControllerTest(
     fun `Skal oppgi person med fagsak som fagsakdeltaker`() {
         val personAktør = personidentService.hentOgLagreAktør(randomFnr())
 
-        fagsakService.hentEllerOpprettFagsak(personAktør.aktivIdent())
+        fagsakService.hentEllerOpprettFagsak(personAktør.aktivFødselsnummer())
             .also { fagsakService.oppdaterStatus(it, FagsakStatus.LØPENDE) }
 
-        fagsakController.oppgiFagsakdeltagere(RestSøkParam(personAktør.aktivIdent(), emptyList())).apply {
-            assertEquals(personAktør.aktivIdent(), body!!.data!!.first().ident)
+        fagsakController.oppgiFagsakdeltagere(RestSøkParam(personAktør.aktivFødselsnummer(), emptyList())).apply {
+            assertEquals(personAktør.aktivFødselsnummer(), body!!.data!!.first().ident)
             assertEquals(FagsakDeltagerRolle.FORELDER, body!!.data!!.first().rolle)
         }
     }
@@ -202,7 +202,7 @@ class FagsakControllerTest(
         val søkerAktør = personidentService.hentOgLagreAktør(ClientMocks.søkerFnr[0])
         val barnaAktør = personidentService.hentOgLagreAktørIder(ClientMocks.barnFnr.toList().subList(0, 1))
 
-        fagsakService.hentEllerOpprettFagsak(søkerAktør.aktivIdent())
+        fagsakService.hentEllerOpprettFagsak(søkerAktør.aktivFødselsnummer())
 
         val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(ClientMocks.søkerFnr[0]))
         persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(
@@ -212,7 +212,12 @@ class FagsakControllerTest(
             Målform.NB
         )
 
-        fagsakController.oppgiFagsakdeltagere(RestSøkParam(personAktør.aktivIdent(), ClientMocks.barnFnr.toList()))
+        fagsakController.oppgiFagsakdeltagere(
+            RestSøkParam(
+                personAktør.aktivFødselsnummer(),
+                ClientMocks.barnFnr.toList()
+            )
+        )
             .apply {
                 assertEquals(ClientMocks.barnFnr.toList().subList(0, 1), body!!.data!!.map { it.ident })
                 assertEquals(listOf(FagsakDeltagerRolle.BARN), body!!.data!!.map { it.rolle })

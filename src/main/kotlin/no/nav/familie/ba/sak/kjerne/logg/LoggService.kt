@@ -266,7 +266,7 @@ class LoggService(
 
     fun opprettBarnLagtTilLogg(behandling: Behandling, barn: Person) {
         val beskrivelse =
-            "${barn.navn.uppercase()} (${barn.hentAlder()} år) | ${Utils.formaterIdent(barn.aktør.aktivIdent())} lagt til"
+            "${barn.navn.uppercase()} (${barn.hentAlder()} år) | ${Utils.formaterIdent(barn.aktør.aktivFødselsnummer())} lagt til"
         lagre(
             Logg(
                 behandlingId = behandling.id,

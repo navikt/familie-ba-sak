@@ -248,7 +248,7 @@ fun lagAndelTilkjentYtelse(
 ): AndelTilkjentYtelse {
 
     return AndelTilkjentYtelse(
-        personIdent = aktør.aktivIdent(),
+        personIdent = aktør.aktivFødselsnummer(),
         aktør = aktør,
         behandlingId = behandling.id,
         tilkjentYtelse = tilkjentYtelse ?: lagInitiellTilkjentYtelse(behandling),
@@ -277,7 +277,7 @@ fun lagAndelTilkjentYtelseUtvidet(
 ): AndelTilkjentYtelse {
 
     return AndelTilkjentYtelse(
-        personIdent = person.aktør.aktivIdent(),
+        personIdent = person.aktør.aktivFødselsnummer(),
         aktør = person.aktør,
         behandlingId = behandling.id,
         tilkjentYtelse = tilkjentYtelse ?: lagInitiellTilkjentYtelse(behandling),
@@ -688,7 +688,7 @@ fun kjørStegprosessForFGB(
                 behandlingsId = behandlingEtterBeslutteVedtak.id,
                 vedtaksId = vedtak!!.id,
                 saksbehandlerId = "System",
-                personIdent = behandlingEtterBeslutteVedtak.fagsak.aktør.aktivIdent()
+                personIdent = behandlingEtterBeslutteVedtak.fagsak.aktør.aktivFødselsnummer()
             )
         )
     if (tilSteg == StegType.IVERKSETT_MOT_OPPDRAG) return behandlingEtterIverksetteVedtak
@@ -700,7 +700,7 @@ fun kjørStegprosessForFGB(
                 statusFraOppdragDTO = StatusFraOppdragDTO(
                     fagsystem = FAGSYSTEM,
                     personIdent = søkerFnr,
-                    aktørId = behandlingEtterIverksetteVedtak.fagsak.aktør.aktivIdent(),
+                    aktørId = behandlingEtterIverksetteVedtak.fagsak.aktør.aktivFødselsnummer(),
                     behandlingsId = behandlingEtterIverksetteVedtak.id,
                     vedtaksId = vedtak.id
                 ),
@@ -799,7 +799,7 @@ fun kjørStegprosessForRevurderingÅrligKontroll(
                 behandlingsId = behandlingEtterBeslutteVedtak.id,
                 vedtaksId = vedtak!!.id,
                 saksbehandlerId = "System",
-                personIdent = behandlingEtterBeslutteVedtak.fagsak.aktør.aktivIdent(),
+                personIdent = behandlingEtterBeslutteVedtak.fagsak.aktør.aktivFødselsnummer(),
             )
         )
     if (tilSteg == StegType.IVERKSETT_MOT_OPPDRAG) return behandlingEtterIverksetteVedtak
@@ -884,7 +884,7 @@ fun lagUtbetalingsperiodeDetalj(
 fun lagVedtaksbegrunnelse(
     vedtakBegrunnelseSpesifikasjon: VedtakBegrunnelseSpesifikasjon =
         VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_SØKER_OG_BARN_BOSATT_I_RIKET,
-    personIdenter: List<String> = listOf(tilfeldigPerson().aktør.aktivIdent()),
+    personIdenter: List<String> = listOf(tilfeldigPerson().aktør.aktivFødselsnummer()),
     vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser = mockk()
 ) = Vedtaksbegrunnelse(
     vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
@@ -912,7 +912,7 @@ fun lagRestVedtaksbegrunnelse(
     vedtakBegrunnelseSpesifikasjon: VedtakBegrunnelseSpesifikasjon =
         VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_SØKER_OG_BARN_BOSATT_I_RIKET,
     vedtakBegrunnelseType: VedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET,
-    personIdenter: List<String> = listOf(tilfeldigPerson().aktør.aktivIdent()),
+    personIdenter: List<String> = listOf(tilfeldigPerson().aktør.aktivFødselsnummer()),
 ) = RestVedtaksbegrunnelse(
     vedtakBegrunnelseSpesifikasjon = vedtakBegrunnelseSpesifikasjon,
     vedtakBegrunnelseType = vedtakBegrunnelseType,

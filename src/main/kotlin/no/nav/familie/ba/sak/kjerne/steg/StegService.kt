@@ -76,7 +76,8 @@ class StegService(
         ) {
             val sisteBehandling = hentSisteAvsluttetBehandling(behandling)
             barnasIdenter =
-                behandlingService.finnBarnFraBehandlingMedTilkjentYtsele(sisteBehandling.id).map { it.aktivIdent() }
+                behandlingService.finnBarnFraBehandlingMedTilkjentYtsele(sisteBehandling.id)
+                    .map { it.aktivFødselsnummer() }
         } else throw Feil("Ukjent oppførsel ved opprettelse av behandling.")
 
         return håndterPersongrunnlag(

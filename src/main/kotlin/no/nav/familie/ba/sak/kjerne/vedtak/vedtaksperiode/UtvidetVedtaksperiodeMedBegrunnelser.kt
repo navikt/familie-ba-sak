@@ -88,7 +88,7 @@ private fun VedtaksperiodeMedBegrunnelser.endretUtbetalingAndelSkalVæreMed(ande
     andelTilkjentYtelse.endretUtbetalingAndeler.isNotEmpty() && andelTilkjentYtelse.endretUtbetalingAndeler.all { endretUtbetalingAndel ->
         this.begrunnelser.any { vedtaksbegrunnelse ->
             vedtaksbegrunnelse.personIdenter.contains(
-                endretUtbetalingAndel.person!!.aktør.aktivIdent()
+                endretUtbetalingAndel.person!!.aktør.aktivFødselsnummer()
             )
         }
     }

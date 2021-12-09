@@ -92,7 +92,7 @@ class RevurderingMedEndredeUtbetalingandelerTest(
                     behandlingId = behandling.id, vilkårId = it.id,
                     restPersonResultat =
                     RestPersonResultat(
-                        personIdent = personResultat.aktør.aktivIdent(),
+                        personIdent = personResultat.aktør.aktivFødselsnummer(),
                         vilkårResultater = listOf(
                             it.copy(
                                 resultat = Resultat.OPPFYLT,
