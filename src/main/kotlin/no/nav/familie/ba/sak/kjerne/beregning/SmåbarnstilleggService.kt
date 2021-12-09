@@ -27,12 +27,11 @@ class SmåbarnstilleggService(
 ) {
 
     fun hentOgLagrePerioderMedFullOvergangsstønad(
-        personIdent: String,
         aktør: Aktør,
         behandlingId: Long
     ): List<InternPeriodeOvergangsstønad> {
         return if (featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_SMÅBARNSTILLEGG)) {
-            val periodeOvergangsstønad = hentPerioderMedFullOvergangsstønad(personIdent)
+            val periodeOvergangsstønad = hentPerioderMedFullOvergangsstønad(aktør)
 
             periodeOvergangsstønadGrunnlagRepository.deleteByBehandlingId(behandlingId)
             periodeOvergangsstønadGrunnlagRepository.saveAll(
@@ -59,7 +58,7 @@ class SmåbarnstilleggService(
                 ?: error("Finner ikke persongrunnlag")
 
         val nyePerioderMedFullOvergangsstønad =
-            hentPerioderMedFullOvergangsstønad(personIdent = fagsak.hentAktivIdent().ident).map { it.tilInternPeriodeOvergangsstønad() }
+            hentPerioderMedFullOvergangsstønad(aktør = fagsak.aktør).map { it.tilInternPeriodeOvergangsstønad() }
 
         return vedtakOmOvergangsstønadPåvirkerFagsak(
             småbarnstilleggBarnetrygdGenerator = SmåbarnstilleggBarnetrygdGenerator(
@@ -77,9 +76,9 @@ class SmåbarnstilleggService(
         )
     }
 
-    private fun hentPerioderMedFullOvergangsstønad(personIdent: String): List<PeriodeOvergangsstønad> {
+    private fun hentPerioderMedFullOvergangsstønad(aktør: Aktør): List<PeriodeOvergangsstønad> {
         return efSakRestClient.hentPerioderMedFullOvergangsstønad(
-            personIdent
+            aktør.aktivIdent()
         ).perioder
     }
 }

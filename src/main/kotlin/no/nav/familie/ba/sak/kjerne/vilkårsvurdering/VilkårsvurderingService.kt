@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVedtakBegrunnelseTilknyttetVilkår
 import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurderingType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
@@ -29,14 +30,14 @@ class VilkårsvurderingService(
         return vilkårsvurderingRepository.finnBehandlingResultater(behandlingId = behandlingId)
     }
 
-    fun finnBarnMedEksplisittAvslagPåBehandling(behandlingId: Long): List<String> {
+    fun finnBarnMedEksplisittAvslagPåBehandling(behandlingId: Long): List<Aktør> {
         val eksplisistteAvslagPåBehandling = hentEksplisitteAvslagPåBehandling(behandlingId)
         return eksplisistteAvslagPåBehandling
             .filterNot {
                 it.personResultat?.erSøkersResultater()
                     ?: error("VilkårResultat mangler kobling til PersonResultat")
             }
-            .map { it.personResultat!!.personIdent }
+            .map { it.personResultat!!.aktør }
             .distinct()
     }
 
@@ -100,7 +101,7 @@ class VilkårsvurderingService(
                 (vilkårsvurdering1.personResultater.map { it.vilkårResultater } + vilkårsvurdering2.personResultater.map { it.vilkårResultater }).flatten()
 
             data class Match(
-                val personIdent: String,
+                val aktør: Aktør,
                 val vilkårType: Vilkår,
                 val resultat: Resultat,
                 val periodeFom: LocalDate?,
@@ -111,7 +112,7 @@ class VilkårsvurderingService(
 
             val gruppert = vilkårResultater.groupBy {
                 Match(
-                    personIdent = it.personResultat?.personIdent ?: error("VilkårResultat mangler PersonResultat"),
+                    aktør = it.personResultat?.aktør ?: error("VilkårResultat mangler aktør"),
                     vilkårType = it.vilkårType,
                     resultat = it.resultat,
                     periodeFom = it.periodeFom,

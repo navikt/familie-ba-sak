@@ -2,8 +2,8 @@ package no.nav.familie.ba.sak.sikkerhet.validering
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
@@ -47,6 +47,7 @@ internal class FagsaktilgangTest {
         behandlingRepository = mockk()
         personopplysningGrunnlagRepository = mockk()
         fagsakRepository = mockk(relaxed = true)
+        every { fagsakRepository.finnFagsak(any()) } returns null
         client = mockk()
         every { behandlingRepository.finnBehandlinger(any()) }
             .returns(behandlinger)
@@ -62,7 +63,7 @@ internal class FagsaktilgangTest {
 
     @Test
     fun `isValid returnerer true om sjekkTilgangTilPersoner gir true for alle personer knyttet til behandlinger for fagsak`() {
-        every { client.sjekkTilgangTilPersoner(personopplysningsgrunnlag.personer.map { it.personIdent.ident }) }
+        every { client.sjekkTilgangTilPersoner(personopplysningsgrunnlag.personer.map { it.aktør.aktivIdent() }) }
             .returns(
                 listOf(
                     Tilgang(true),
@@ -78,7 +79,7 @@ internal class FagsaktilgangTest {
 
     @Test
     fun `isValid returnerer false om sjekkTilgangTilPersoner gir false for en person knyttet til en behandling for fagsak`() {
-        every { client.sjekkTilgangTilPersoner(personopplysningsgrunnlag.personer.map { it.personIdent.ident }) }
+        every { client.sjekkTilgangTilPersoner(personopplysningsgrunnlag.personer.map { it.aktør.aktivIdent() }) }
             .returns(
                 listOf(
                     Tilgang(true),
@@ -92,6 +93,7 @@ internal class FagsaktilgangTest {
         assertFalse(harTilgang)
     }
 
+    private val fnr = randomFnr()
     private val personopplysningsgrunnlag =
         PersonopplysningGrunnlag(
             1,
@@ -102,10 +104,10 @@ internal class FagsaktilgangTest {
                     fødselsdato = LocalDate.of(1984, 12, 16),
                     navn = "Mock Mockson",
                     kjønn = Kjønn.MANN,
-                    personIdent = PersonIdent(randomFnr()),
+                    personIdent = PersonIdent(fnr),
                     målform = Målform.NB,
                     personopplysningGrunnlag = PersonopplysningGrunnlag(1, 1),
-                    aktør = randomAktørId(),
+                    aktør = tilAktør(fnr),
                 )
                     .apply {
                         sivilstander =

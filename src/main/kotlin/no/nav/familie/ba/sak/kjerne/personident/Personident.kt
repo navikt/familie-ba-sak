@@ -19,6 +19,7 @@ import javax.persistence.Table
 data class Personident(
     @Id
     @Column(name = "foedselsnummer", nullable = false)
+    // Lovlige typer er fnr, dnr eller npid
     val fødselsnummer: String,
 
     @JsonIgnore

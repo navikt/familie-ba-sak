@@ -7,7 +7,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsakDeltager
 import no.nav.familie.ba.sak.ekstern.restDomene.RestHentFagsakForPerson
 import no.nav.familie.ba.sak.ekstern.restDomene.RestMinimalFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestSøkParam
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
@@ -34,6 +34,7 @@ import org.springframework.web.bind.annotation.RestController
 @Validated
 class FagsakController(
     private val fagsakService: FagsakService,
+    private val personidentService: PersonidentService,
     private val tilgangService: TilgangService,
     private val tilbakekrevingService: TilbakekrevingService,
 ) {
@@ -69,7 +70,8 @@ class FagsakController(
     fun hentMinimalFagsakForPerson(@RequestBody request: RestHentFagsakForPerson): ResponseEntity<Ressurs<RestMinimalFagsak>> {
 
         return Result.runCatching {
-            fagsakService.hentMinimalFagsakForPerson(PersonIdent(request.personIdent))
+            val aktør = personidentService.hentOgLagreAktør(request.personIdent)
+            fagsakService.hentMinimalFagsakForPerson(aktør)
         }.fold(
             onSuccess = { return ResponseEntity.ok().body(it) },
             onFailure = { illegalState("Ukjent feil ved henting data for manuell journalføring.", it) }
@@ -80,17 +82,18 @@ class FagsakController(
     fun søkFagsak(@RequestBody søkParam: RestSøkParam): ResponseEntity<Ressurs<List<RestFagsakDeltager>>> {
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} søker fagsak")
 
-        val fagsakDeltagere = fagsakService.hentFagsakDeltager(søkParam.personIdent)
+        val aktør = personidentService.hentOgLagreAktør(søkParam.personIdent)
+        val fagsakDeltagere = fagsakService.hentFagsakDeltager(aktør)
         return ResponseEntity.ok().body(Ressurs.success(fagsakDeltagere))
     }
 
     @PostMapping(path = ["/sok/fagsakdeltagere"])
     fun oppgiFagsakdeltagere(@RequestBody restSøkParam: RestSøkParam): ResponseEntity<Ressurs<List<RestFagsakDeltager>>> {
         return Result.runCatching {
-            fagsakService.oppgiFagsakdeltagere(
-                restSøkParam.personIdent,
-                restSøkParam.barnasIdenter
-            )
+            val aktør = personidentService.hentOgLagreAktør(restSøkParam.personIdent)
+            val barnsAktørId = personidentService.hentOgLagreAktørIder(restSøkParam.barnasIdenter)
+
+            fagsakService.oppgiFagsakdeltagere(aktør, barnsAktørId)
         }
             .fold(
                 onSuccess = { ResponseEntity.ok(Ressurs.success(it)) },

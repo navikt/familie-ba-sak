@@ -26,10 +26,10 @@ fun hentGyldigEtterbetalingFom(kravDato: LocalDateTime) =
 fun hentSøkersAndeler(
     andeler: List<AndelTilkjentYtelse>,
     søker: Person
-) = andeler.filter { it.personIdent == søker.personIdent.ident }
+) = andeler.filter { it.aktør == søker.aktør }
 
 fun hentBarnasAndeler(andeler: List<AndelTilkjentYtelse>, barna: List<Person>) = barna.map { barn ->
-    barn to andeler.filter { it.personIdent == barn.personIdent.ident }
+    barn to andeler.filter { it.aktør == barn.aktør }
 }
 
 /**
@@ -80,10 +80,10 @@ object TilkjentYtelseValidering {
 
         barnasAndeler.forEach { (barn, andeler) ->
             val barnsAndelerFraAndreBehandlinger =
-                barnMedAndreRelevanteTilkjentYtelser.filter { it.first.personIdent.ident == barn.personIdent.ident }
+                barnMedAndreRelevanteTilkjentYtelser.filter { it.first.aktør == barn.aktør }
                     .flatMap { it.second }
                     .flatMap { it.andelerTilkjentYtelse }
-                    .filter { it.personIdent == barn.personIdent.ident }
+                    .filter { it.aktør == barn.aktør }
 
             validerIngenOverlappAvAndeler(
                 andeler,
@@ -109,7 +109,7 @@ object TilkjentYtelseValidering {
             ) {
                 throw UtbetalingsikkerhetFeil(
                     melding = "Vi finner flere utbetalinger for barn på behandling ${behandlendeBehandlingTilkjentYtelse.behandling.id}",
-                    frontendFeilmelding = "Det er allerede innvilget utbetaling av barnetrygd for ${barn.personIdent.ident} i perioden ${andelTilkjentYtelse.stønadFom.tilKortString()} - ${andelTilkjentYtelse.stønadTom.tilKortString()}."
+                    frontendFeilmelding = "Det er allerede innvilget utbetaling av barnetrygd for ${barn.aktør.aktivIdent()} i perioden ${andelTilkjentYtelse.stønadFom.tilKortString()} - ${andelTilkjentYtelse.stønadTom.tilKortString()}."
                 )
             }
         }

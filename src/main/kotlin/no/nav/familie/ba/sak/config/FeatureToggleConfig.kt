@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.config
 import no.finn.unleash.DefaultUnleash
 import no.finn.unleash.UnleashContext
 import no.finn.unleash.UnleashContextProvider
+import no.finn.unleash.strategy.GradualRolloutRandomStrategy
 import no.finn.unleash.strategy.Strategy
 import no.finn.unleash.util.UnleashConfig
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
@@ -46,7 +47,8 @@ class FeatureToggleConfig(
                 .unleashContextProvider(lagUnleashContextProvider())
                 .build(),
             ByClusterStrategy(unleash.cluster),
-            ByAnsvarligSaksbehandler()
+            ByAnsvarligSaksbehandler(),
+            GradualRolloutRandomStrategy()
         )
 
         return object : FeatureToggleService {
@@ -98,13 +100,13 @@ class FeatureToggleConfig(
     }
 
     companion object {
-        const val AUTOMATISK_FØDSELSHENDELSE = "familie-ba-sak.behandling.automatisk-fodselshendelse"
+        const val AUTOMATISK_FØDSELSHENDELSE_GRADUAL_ROLLOUT =
+            "familie-ba-sak.behandling.automatisk-fodselshendelse-gradual-rollout"
         const val KAN_MANUELT_KORRIGERE_MED_VEDTAKSBREV = "familie-ba-sak.behandling.korreksjon-vedtaksbrev"
         const val KAN_BEHANDLE_SMÅBARNSTILLEGG = "familie-ba-sak.behandling.smaabarnstillegg"
         const val KAN_BEHANDLE_SMÅBARNSTILLEGG_AUTOMATISK = "familie-ba-sak.behandling.automatisk.smaabarnstillegg"
         const val SKATTEETATEN_API_EKTE_DATA = "familie-ba-sak.skatteetaten-api-ekte-data-i-respons"
         const val KAN_BEHANDLE_EØS = "familie-ba-sak.behandling.eos"
-        const val SEND_START_BEHANDLING_TIL_INFOTRYGD = "familie-ba-sak.start.behandling.infotrygd.feed"
         const val IKKE_STOPP_MIGRERINGSBEHANDLING = "familie-ba-sak.ikke.stopp.migeringsbehandling"
 
         private val logger = LoggerFactory.getLogger(FeatureToggleConfig::class.java)

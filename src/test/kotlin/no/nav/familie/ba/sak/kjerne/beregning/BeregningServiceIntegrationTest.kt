@@ -164,9 +164,9 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
         val søkerFnr = randomFnr()
         val barn1Fnr = randomFnr()
         val barn2Fnr = randomFnr()
-        val søkerAktørId = personidentService.hentOgLagreAktørId(søkerFnr)
-        val barn1AktørId = personidentService.hentOgLagreAktørId(barn1Fnr)
-        val barn2AktørId = personidentService.hentOgLagreAktørId(barn2Fnr)
+        val søkerAktørId = personidentService.hentOgLagreAktør(søkerFnr)
+        val barn1AktørId = personidentService.hentOgLagreAktør(barn1Fnr)
+        val barn2AktørId = personidentService.hentOgLagreAktør(barn2Fnr)
         val dato_2021_11_01 = LocalDate.of(2021, 11, 1)
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
@@ -180,8 +180,8 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
             )
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
-        val barn1Id = personopplysningGrunnlag.barna.find { it.personIdent.ident == barn1Fnr }!!.personIdent.ident
-        val barn2Id = personopplysningGrunnlag.barna.find { it.personIdent.ident == barn2Fnr }!!.personIdent.ident
+        val barn1Id = personopplysningGrunnlag.barna.find { it.aktør.aktivIdent() == barn1Fnr }!!.aktør.aktivIdent()
+        val barn2Id = personopplysningGrunnlag.barna.find { it.aktør.aktivIdent() == barn2Fnr }!!.aktør.aktivIdent()
 
         val vilkårsvurdering = Vilkårsvurdering(behandling = behandling)
         vilkårsvurdering.personResultater = lagPersonResultaterForSøkerOgToBarn(

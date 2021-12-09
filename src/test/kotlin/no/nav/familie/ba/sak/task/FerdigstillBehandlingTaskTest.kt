@@ -80,7 +80,7 @@ class FerdigstillBehandlingTaskTest : AbstractSpringIntegrationTest() {
 
     private fun kjørSteg(resultat: Resultat): Behandling {
         val fnr = randomFnr()
-        val aktørId = personidentService.hentOgLagreAktørId(fnr)
+        val aktørId = personidentService.hentOgLagreAktør(fnr)
         val fnrBarn = ClientMocks.barnFnr[0]
 
         val behandling = kjørStegprosessForFGB(
