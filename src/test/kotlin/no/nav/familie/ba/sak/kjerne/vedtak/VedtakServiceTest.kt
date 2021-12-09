@@ -17,7 +17,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakPersonRepository
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
@@ -73,7 +73,7 @@ class VedtakServiceTest(
     private val fagsakService: FagsakService,
 
     @Autowired
-    private val fagsakPersonRepository: FagsakPersonRepository,
+    private val fagsakRepository: FagsakRepository,
 
     @Autowired
     private val totrinnskontrollService: TotrinnskontrollService,
@@ -117,7 +117,7 @@ class VedtakServiceTest(
             personopplysningGrunnlagRepository,
             andelTilkjentYtelseRepository,
             behandlingMetrikker,
-            fagsakPersonRepository,
+            fagsakRepository,
             vedtakRepository,
             loggService,
             arbeidsfordelingService,
@@ -125,6 +125,7 @@ class VedtakServiceTest(
             oppgaveService,
             infotrygdService,
             vedtaksperiodeService,
+            personidentService,
             featureToggleService
         )
 
@@ -174,7 +175,7 @@ class VedtakServiceTest(
         val fnr = randomFnr()
         val barnFnr = randomFnr()
 
-        val fnrAktørNr = personidentService.hentOgLagreAktørId(fnr)
+        val fnrAktørNr = personidentService.hentOgLagreAktør(fnr)
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
 

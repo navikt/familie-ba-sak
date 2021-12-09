@@ -3,31 +3,28 @@ package no.nav.familie.ba.sak.ekstern.bisys
 import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
-import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakPersonRepository
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
-import no.nav.familie.kontrakter.felles.personopplysning.Ident
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 
 @Service
 class BisysService(
     private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
-    private val personopplysningerService: PersonopplysningerService,
-    private val fagsakPersonRepository: FagsakPersonRepository,
     private val behandlingService: BehandlingService,
+    private val fagsakRepository: FagsakRepository,
+    private val personidentService: PersonidentService,
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
 ) {
     fun hentUtvidetBarnetrygd(personIdent: String, fraDato: LocalDate): BisysUtvidetBarnetrygdResponse {
-        val folkeregisteridenter = personopplysningerService.hentIdenter(Ident(personIdent)).filter {
-            it.gruppe == "FOLKEREGISTERIDENT"
-        }.map { it.ident }
+        val aktør = personidentService.hentOgLagreAktør(personIdent)
 
         val samledeUtvidetBarnetrygdPerioder = mutableListOf<UtvidetBarnetrygdPeriode>()
-        samledeUtvidetBarnetrygdPerioder.addAll(hentBisysPerioderFraInfotrygd(folkeregisteridenter, fraDato))
-        samledeUtvidetBarnetrygdPerioder.addAll(hentBisysPerioderFraBaSak(folkeregisteridenter, fraDato))
+        samledeUtvidetBarnetrygdPerioder.addAll(hentBisysPerioderFraInfotrygd(aktør, fraDato))
+        samledeUtvidetBarnetrygdPerioder.addAll(hentBisysPerioderFraBaSak(aktør, fraDato))
 
         val sammenslåttePerioder =
             samledeUtvidetBarnetrygdPerioder.filter { it.stønadstype == BisysStønadstype.UTVIDET }
@@ -51,19 +48,18 @@ class BisysService(
     }
 
     private fun hentBisysPerioderFraInfotrygd(
-        personIdenter: List<String>,
+        aktør: Aktør,
         fraDato: LocalDate
-    ): List<UtvidetBarnetrygdPeriode> {
-        return personIdenter.flatMap {
+    ): List<UtvidetBarnetrygdPeriode> =
+        personidentService.hentAlleFødselsnummerForEnAktør(aktør).flatMap {
             infotrygdBarnetrygdClient.hentUtvidetBarnetrygd(it, fraDato.toYearMonth()).perioder
         }
-    }
 
     private fun hentBisysPerioderFraBaSak(
-        personIdenter: List<String>,
+        aktør: Aktør,
         fraDato: LocalDate
     ): List<UtvidetBarnetrygdPeriode> {
-        val fagsak = fagsakPersonRepository.finnFagsak(personIdenter.map { PersonIdent(ident = it) }.toSet())
+        val fagsak = fagsakRepository.finnFagsakForAktør(aktør)
         val behandling = fagsak?.let { behandlingService.hentSisteBehandlingSomErIverksatt(it.id) }
         if (fagsak == null || behandling == null) {
             return emptyList()

@@ -108,7 +108,7 @@ class VilkårVurderingTest(
                 behandling.id,
                 fnr,
                 listOf(barnFnr),
-                søkerAktør = personidentService.hentOgLagreAktørId(fnr),
+                søkerAktør = personidentService.hentOgLagreAktør(fnr),
                 barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr))
             )
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
@@ -147,9 +147,10 @@ class VilkårVurderingTest(
         kjønn: Kjønn = Kjønn.KVINNE,
         sivilstand: SIVILSTAND = SIVILSTAND.UGIFT
     ): Person {
+        val fnr = randomFnr()
         return Person(
-            aktør = randomAktørId(),
-            personIdent = PersonIdent(randomFnr()),
+            personIdent = PersonIdent(fnr),
+            aktør = randomAktørId(fnr),
             type = type,
             personopplysningGrunnlag = personopplysningGrunnlag,
             fødselsdato = LocalDate.of(1991, 1, 1),

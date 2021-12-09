@@ -62,15 +62,15 @@ data class Vilkårsvurdering(
         val periodeResultater = this.personResultaterTilPeriodeResultater(false)
 
         val identBarnMap = personopplysningGrunnlag.barna
-            .associateBy { it.personIdent.ident }
+            .associateBy { it.aktør }
 
         val innvilgetPeriodeResultatSøker = periodeResultater.filter {
-            it.personIdent == personopplysningGrunnlag.søker.personIdent.ident && it.allePåkrevdeVilkårErOppfylt(
+            it.aktør == personopplysningGrunnlag.søker.aktør && it.allePåkrevdeVilkårErOppfylt(
                 PersonType.SØKER
             )
         }
         val innvilgedePeriodeResultatBarna = periodeResultater.filter {
-            identBarnMap.containsKey(it.personIdent) && it.allePåkrevdeVilkårErOppfylt(
+            identBarnMap.containsKey(it.aktør) && it.allePåkrevdeVilkårErOppfylt(
                 PersonType.BARN
             )
         }

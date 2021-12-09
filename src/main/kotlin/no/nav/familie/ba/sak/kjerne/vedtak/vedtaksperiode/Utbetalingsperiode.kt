@@ -77,7 +77,7 @@ fun mapTilUtbetalingsperioder(
             ytelseTyper = andelerForSegment.map(AndelTilkjentYtelse::type),
             utbetaltPerMnd = segment.value,
             antallBarn = andelerForSegment.count { andel ->
-                personopplysningGrunnlag.barna.any { barn -> barn.personIdent.ident == andel.personIdent }
+                personopplysningGrunnlag.barna.any { barn -> barn.aktør == andel.aktør }
             },
             utbetalingsperiodeDetaljer = andelerForSegment.lagUtbetalingsperiodeDetaljer(personopplysningGrunnlag)
         )
@@ -116,7 +116,7 @@ internal fun List<AndelTilkjentYtelse>.lagUtbetalingsperiodeDetaljer(
 ): List<UtbetalingsperiodeDetalj> =
     this.map { andel ->
         val personForAndel =
-            personopplysningGrunnlag.personer.find { person -> andel.personIdent == person.personIdent.ident }
+            personopplysningGrunnlag.personer.find { person -> andel.aktør == person.aktør }
                 ?: throw IllegalStateException("Fant ikke personopplysningsgrunnlag for andel")
 
         UtbetalingsperiodeDetalj(

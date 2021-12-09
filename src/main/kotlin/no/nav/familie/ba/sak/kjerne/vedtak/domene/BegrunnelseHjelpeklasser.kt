@@ -16,7 +16,7 @@ data class BegrunnelsePerson(
 )
 
 fun Person.tilBegrunnelsePerson() = BegrunnelsePerson(
-    personIdent = this.aktør.aktivIdent().fødselsnummer,
+    personIdent = this.aktør.aktivIdent(),
     fødselsdato = this.fødselsdato,
     type = this.type
 )

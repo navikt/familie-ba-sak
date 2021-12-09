@@ -6,11 +6,11 @@ import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.common.nesteMåned
-import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
@@ -171,7 +171,8 @@ class SmåbarnstilleggUtilsTest {
     fun `Skal svare false om at nye perioder med full OS påvirker behandling`() {
         val personIdent = randomFnr()
         val barnIdent = randomFnr()
-        val søkerAktørId = randomAktørId()
+        val søkerAktør = tilAktør(personIdent)
+        val barnAktør = tilAktør(barnIdent)
 
         val påvirkerFagsak = vedtakOmOvergangsstønadPåvirkerFagsak(
             småbarnstilleggBarnetrygdGenerator = SmåbarnstilleggBarnetrygdGenerator(
@@ -191,21 +192,21 @@ class SmåbarnstilleggUtilsTest {
                     tom = YearMonth.now().plusMonths(6),
                     ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                     person = tilfeldigPerson(personIdent = PersonIdent(barnIdent)),
-                    aktør = søkerAktørId,
+                    aktør = barnAktør,
                 ),
                 lagAndelTilkjentYtelse(
                     fom = YearMonth.now().minusMonths(10),
                     tom = YearMonth.now().plusMonths(6),
                     ytelseType = YtelseType.UTVIDET_BARNETRYGD,
                     person = tilfeldigPerson(personIdent = PersonIdent(personIdent)),
-                    aktør = søkerAktørId,
+                    aktør = søkerAktør,
                 ),
                 lagAndelTilkjentYtelse(
                     fom = YearMonth.now().minusMonths(10),
                     tom = YearMonth.now().plusMonths(6),
                     ytelseType = YtelseType.SMÅBARNSTILLEGG,
                     person = tilfeldigPerson(personIdent = PersonIdent(personIdent)),
-                    aktør = søkerAktørId,
+                    aktør = søkerAktør,
                 )
             ),
             barnasIdenterOgFødselsdatoer = listOf(Pair(barnIdent, LocalDate.now().minusYears(2))),
