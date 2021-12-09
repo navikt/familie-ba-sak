@@ -47,7 +47,7 @@ fun List<MinimertPerson>.hentSøker() =
         ?: throw Feil("Fant ikke søker blant begrunnelsepersonene")
 
 fun Person.tilBegrunnelsePerson() = MinimertPerson(
-    personIdent = this.aktør.aktivIdent(),
+    personIdent = this.aktør.aktivFødselsnummer(),
     fødselsdato = this.fødselsdato,
     type = this.type
 )
