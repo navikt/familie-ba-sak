@@ -64,5 +64,5 @@ class IverksettMotOppdrag(
         return StegType.IVERKSETT_MOT_OPPDRAG
     }
 
-    private fun hentFnrStoenadsmottaker(fagsak: Fagsak) = fagsak.hentAktivIdent().ident
+    private fun hentFnrStoenadsmottaker(fagsak: Fagsak) = fagsak.aktør.aktivIdent()
 }

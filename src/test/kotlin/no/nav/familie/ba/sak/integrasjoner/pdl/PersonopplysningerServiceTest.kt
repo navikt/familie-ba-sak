@@ -5,10 +5,10 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
+import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
-import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
 import no.nav.familie.kontrakter.felles.tilgangskontroll.Tilgang
 import org.apache.commons.lang3.StringUtils
@@ -42,10 +42,14 @@ internal class PersonopplysningerServiceTest(
     fun setUp() {
         personopplysningerService =
             PersonopplysningerService(
-                PdlRestClient(URI.create(wireMockServer.baseUrl() + "/api"), restTemplate),
-                SystemOnlyPdlRestClient(URI.create(wireMockServer.baseUrl() + "/api"), restTemplate, mockk()),
+                PdlRestClient(URI.create(wireMockServer.baseUrl() + "/api"), restTemplate, personidentService),
+                SystemOnlyPdlRestClient(
+                    URI.create(wireMockServer.baseUrl() + "/api"),
+                    restTemplate,
+                    mockk(),
+                    personidentService
+                ),
                 mockIntegrasjonClient,
-                personidentService
             )
     }
 
@@ -59,7 +63,7 @@ internal class PersonopplysningerServiceTest(
             mockIntegrasjonClient.sjekkTilgangTilPersoner(listOf(ID_BARN_2))
         } returns listOf(Tilgang(false, null))
 
-        val personInfo = personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(ID_MOR)
+        val personInfo = personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(tilAktør(ID_MOR))
 
         assert(LocalDate.of(1955, 9, 13) == personInfo.fødselsdato)
         assertThat(personInfo.adressebeskyttelseGradering).isEqualTo(ADRESSEBESKYTTELSEGRADERING.UGRADERT)
@@ -69,49 +73,50 @@ internal class PersonopplysningerServiceTest(
 
     @Test
     fun `hentStatsborgerskap() skal return riktig statsborgerskap`() {
-        val statsborgerskap = personopplysningerService.hentGjeldendeStatsborgerskap(Ident(ID_MOR))
+        val statsborgerskap = personopplysningerService.hentGjeldendeStatsborgerskap(tilAktør(ID_MOR))
         assert(statsborgerskap.land == "XXX")
     }
 
     @Test
     fun `hentOpphold() skal returnere riktig opphold`() {
-        val opphold = personopplysningerService.hentGjeldendeOpphold(ID_MOR)
+        val opphold = personopplysningerService.hentGjeldendeOpphold(tilAktør(ID_MOR))
         assert(opphold.type == OPPHOLDSTILLATELSE.MIDLERTIDIG)
     }
 
     @Test
     fun `hentLandkodeUtenlandskAdresse() skal returnere landkode `() {
-        val landkode = personopplysningerService.hentLandkodeUtenlandskBostedsadresse(ID_MOR)
+        val landkode = personopplysningerService.hentLandkodeUtenlandskBostedsadresse(tilAktør(ID_MOR))
         assertThat(landkode).isEqualTo("DK")
     }
 
     @Test
     fun `hentLandkodeUtenlandskAdresse() skal returnere ZZ hvis ingen landkode `() {
-        val landkode = personopplysningerService.hentLandkodeUtenlandskBostedsadresse(ID_BARN_1)
+        val landkode = personopplysningerService.hentLandkodeUtenlandskBostedsadresse(tilAktør(ID_BARN_1))
         assertThat(landkode).isEqualTo("ZZ")
     }
 
     @Test
     fun `hentLandkodeUtenlandskAdresse() skal returnere ZZ hvis ingen bostedsadresse `() {
-        val landkode = personopplysningerService.hentLandkodeUtenlandskBostedsadresse(ID_MOR_MED_TOM_BOSTEDSADRESSE)
+        val landkode =
+            personopplysningerService.hentLandkodeUtenlandskBostedsadresse(tilAktør(ID_MOR_MED_TOM_BOSTEDSADRESSE))
         assertThat(landkode).isEqualTo("ZZ")
     }
 
     @Test
     fun `hentadressebeskyttelse skal returnere gradering`() {
-        val gradering = personopplysningerService.hentAdressebeskyttelseSomSystembruker(ID_BARN_1)
+        val gradering = personopplysningerService.hentAdressebeskyttelseSomSystembruker(tilAktør(ID_BARN_1))
         assertThat(gradering).isEqualTo(ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG)
     }
 
     @Test
     fun `hentadressebeskyttelse skal returnere ugradert ved tom liste fra pdl`() {
-        val gradering = personopplysningerService.hentAdressebeskyttelseSomSystembruker(ID_UGRADERT_PERSON)
+        val gradering = personopplysningerService.hentAdressebeskyttelseSomSystembruker(tilAktør(ID_UGRADERT_PERSON))
         assertThat(gradering).isEqualTo(ADRESSEBESKYTTELSEGRADERING.UGRADERT)
     }
 
     @Test
     fun `hentadressebeskyttelse feiler`() {
-        assertThrows<Feil> { personopplysningerService.hentAdressebeskyttelseSomSystembruker(ID_MOR) }
+        assertThrows<Feil> { personopplysningerService.hentAdressebeskyttelseSomSystembruker(tilAktør(ID_MOR)) }
     }
 
     companion object {

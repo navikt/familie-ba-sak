@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
+import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
@@ -23,6 +24,7 @@ class FødselshendelseFørstegangsbehandlingTest(
     @Autowired private val behandleFødselshendelseTask: BehandleFødselshendelseTask,
     @Autowired private val fagsakService: FagsakService,
     @Autowired private val behandlingService: BehandlingService,
+    @Autowired private val personidentService: PersonidentService,
     @Autowired private val vedtakService: VedtakService,
     @Autowired private val stegService: StegService
 ) : AbstractVerdikjedetest() {
@@ -50,7 +52,8 @@ class FødselshendelseFørstegangsbehandlingTest(
             fagsakService = fagsakService,
             behandlingService = behandlingService,
             vedtakService = vedtakService,
-            stegService = stegService
+            stegService = stegService,
+            personidentService = personidentService,
         )
 
         val restFagsakEtterBehandlingAvsluttet =
@@ -105,6 +108,7 @@ class FødselshendelseFørstegangsbehandlingTest(
             behandleFødselshendelseTask = behandleFødselshendelseTask,
             fagsakService = fagsakService,
             behandlingService = behandlingService,
+            personidentService = personidentService,
             vedtakService = vedtakService,
             stegService = stegService
         )

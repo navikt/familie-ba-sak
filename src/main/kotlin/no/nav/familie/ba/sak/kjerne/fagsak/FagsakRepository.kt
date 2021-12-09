@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.fagsak
 
 import io.micrometer.core.annotation.Timed
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Lock
 import org.springframework.data.jpa.repository.Modifying
@@ -26,8 +26,8 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
     fun finnFagsak(fagsakId: Long): Fagsak?
 
     @Lock(LockModeType.NONE)
-    @Query(value = "SELECT f FROM Fagsak f, FagsakPerson fp WHERE f.id = fp.fagsak.id and fp.personIdent = :personIdent and f.arkivert = false")
-    fun finnFagsakForPersonIdent(personIdent: PersonIdent): Fagsak?
+    @Query(value = "SELECT f FROM Fagsak f WHERE f.aktør = :aktør and f.arkivert = false")
+    fun finnFagsakForAktør(aktør: Aktør): Fagsak?
 
     @Lock(LockModeType.NONE)
     @Query(value = "SELECT f from Fagsak f WHERE f.status = 'LØPENDE'  AND f.arkivert = false")

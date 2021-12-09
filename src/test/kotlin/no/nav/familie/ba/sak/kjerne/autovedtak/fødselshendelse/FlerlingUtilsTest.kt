@@ -1,8 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse
 
 import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.ForelderBarnRelasjon
-import no.nav.familie.ba.sak.integrasjoner.pdl.internal.Personident
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -21,7 +21,7 @@ class FlerlingUtilsTest {
             nyBehandlingHendelse = NyBehandlingHendelse(morsIdent = morsIdent, barnasIdenter = listOf(barn)),
             barnaTilMor = listOf(
                 ForelderBarnRelasjon(
-                    personIdent = Personident(barn),
+                    aktør = tilAktør(barn),
                     relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
                     fødselsdato = LocalDate.now()
                 )
@@ -42,12 +42,12 @@ class FlerlingUtilsTest {
             nyBehandlingHendelse = NyBehandlingHendelse(morsIdent = morsIdent, barnasIdenter = listOf(barn)),
             barnaTilMor = listOf(
                 ForelderBarnRelasjon(
-                    personIdent = Personident(barn),
+                    aktør = tilAktør(barn),
                     relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
                     fødselsdato = LocalDate.now()
                 ),
                 ForelderBarnRelasjon(
-                    personIdent = Personident(barn2),
+                    aktør = tilAktør(barn2),
                     relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
                     fødselsdato = LocalDate.now().minusYears(2)
                 )
@@ -68,12 +68,12 @@ class FlerlingUtilsTest {
             nyBehandlingHendelse = NyBehandlingHendelse(morsIdent = morsIdent, barnasIdenter = listOf(barn2)),
             barnaTilMor = listOf(
                 ForelderBarnRelasjon(
-                    personIdent = Personident(barn),
+                    aktør = tilAktør(barn),
                     relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
                     fødselsdato = LocalDate.now()
                 ),
                 ForelderBarnRelasjon(
-                    personIdent = Personident(barn2),
+                    aktør = tilAktør(barn2),
                     relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
                     fødselsdato = LocalDate.now().minusYears(2)
                 )
@@ -97,12 +97,12 @@ class FlerlingUtilsTest {
             ),
             barnaTilMor = listOf(
                 ForelderBarnRelasjon(
-                    personIdent = Personident(barn),
+                    aktør = tilAktør(barn),
                     relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
                     fødselsdato = LocalDate.now()
                 ),
                 ForelderBarnRelasjon(
-                    personIdent = Personident(barn2),
+                    aktør = tilAktør(barn2),
                     relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
                     fødselsdato = LocalDate.now().minusYears(2)
                 )
@@ -127,12 +127,12 @@ class FlerlingUtilsTest {
             ),
             barnaTilMor = listOf(
                 ForelderBarnRelasjon(
-                    personIdent = Personident(barn),
+                    aktør = tilAktør(barn),
                     relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
                     fødselsdato = LocalDate.now()
                 ),
                 ForelderBarnRelasjon(
-                    personIdent = Personident(barn2),
+                    aktør = tilAktør(barn2),
                     relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
                     fødselsdato = LocalDate.now()
                 )
@@ -160,22 +160,22 @@ class FlerlingUtilsTest {
             ),
             barnaTilMor = listOf(
                 ForelderBarnRelasjon(
-                    personIdent = Personident(barn),
+                    aktør = tilAktør(barn),
                     relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
                     fødselsdato = LocalDate.now()
                 ),
                 ForelderBarnRelasjon(
-                    personIdent = Personident(barn2),
+                    aktør = tilAktør(barn2),
                     relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
                     fødselsdato = LocalDate.now()
                 ),
                 ForelderBarnRelasjon(
-                    personIdent = Personident(barn3),
+                    aktør = tilAktør(barn3),
                     relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
                     fødselsdato = LocalDate.now()
                 ),
                 ForelderBarnRelasjon(
-                    personIdent = Personident(barn4),
+                    aktør = tilAktør(barn4),
                     relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
                     fødselsdato = LocalDate.now()
                 )
@@ -202,12 +202,12 @@ class FlerlingUtilsTest {
             ),
             barnaTilMor = listOf(
                 ForelderBarnRelasjon(
-                    personIdent = Personident(barn),
+                    aktør = tilAktør(barn),
                     relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
                     fødselsdato = LocalDate.now()
                 ),
                 ForelderBarnRelasjon(
-                    personIdent = Personident(barn2),
+                    aktør = tilAktør(barn2),
                     relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
                     fødselsdato = LocalDate.now().minusDays(1)
                 )
@@ -232,12 +232,12 @@ class FlerlingUtilsTest {
             ),
             barnaTilMor = listOf(
                 ForelderBarnRelasjon(
-                    personIdent = Personident(barn),
+                    aktør = tilAktør(barn),
                     relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
                     fødselsdato = LocalDate.now()
                 ),
                 ForelderBarnRelasjon(
-                    personIdent = Personident(barn2),
+                    aktør = tilAktør(barn2),
                     relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
                     fødselsdato = LocalDate.now().plusDays(1)
                 )

@@ -51,7 +51,7 @@ fun hentVedtaksperioderMedBegrunnelserForEndredeUtbetalingsperioder(
                                     vedtakBegrunnelseSpesifikasjon = vedtakBegrunnelseSpesifikasjon,
                                     personIdenter = endretUtbetalingAndeler.filter {
                                         it.harVedtakBegrunnelseSpesifikasjon(vedtakBegrunnelseSpesifikasjon)
-                                    }.mapNotNull { it.person?.personIdent?.ident }
+                                    }.mapNotNull { it.person?.aktør?.aktivIdent() }
                                 )
                             }
                     )
@@ -95,14 +95,14 @@ fun hentPersonidenterGjeldendeForBegrunnelse(
     return when {
         triggesAv.vilkår.contains(Vilkår.UTVIDET_BARNETRYGD) || triggesAv.småbarnstillegg ->
             begrunnelseGrunnlag.identerMedUtbetaling +
-                begrunnelseGrunnlag.persongrunnlag.søker.personIdent.ident +
+                begrunnelseGrunnlag.persongrunnlag.søker.aktør.aktivIdent() +
                 begrunnelseGrunnlag.endredeUtbetalingAndeler
                     .somOverlapper(vedtaksperiodeMedBegrunnelser.hentNullableMånedPeriode())
-                    .map { it.person!!.personIdent.ident }
+                    .map { it.person!!.aktør.aktivIdent() }
 
         triggesAv.barnMedSeksårsdag ->
             begrunnelseGrunnlag.persongrunnlag.barnMedSeksårsdagPåFom(vedtaksperiodeMedBegrunnelser.fom)
-                .map { person -> person.personIdent.ident }
+                .map { person -> person.aktør.aktørId }
 
         triggesAv.personerManglerOpplysninger ->
             if (begrunnelseGrunnlag.vilkårsvurdering.harPersonerManglerOpplysninger())
@@ -117,7 +117,7 @@ fun hentPersonidenterGjeldendeForBegrunnelse(
                 endretUtbetalingAndeler = begrunnelseGrunnlag.endredeUtbetalingAndeler,
                 vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
                 endringsaarsaker = triggesAv.endringsaarsaker
-            ).map { person -> person.personIdent.ident }
+            ).map { person -> person.aktør.aktivIdent() }
 
         else ->
             VedtakUtils.hentPersonerForAlleUtgjørendeVilkår(
@@ -134,7 +134,7 @@ fun hentPersonidenterGjeldendeForBegrunnelse(
                 ),
                 triggesAv = triggesAv,
                 andelerTilkjentYtelse = begrunnelseGrunnlag.andelerTilkjentYtelse
-            ).map { person -> person.personIdent.ident }
+            ).map { person -> person.aktør.aktivIdent() }
     }.toSet().toList()
 }
 
@@ -144,7 +144,7 @@ private fun hentAktuellePersonerForVedtaksperiode(
     identerMedUtbetaling: List<String>
 ): List<Person> = persongrunnlag.personer.filter { person ->
     if (vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGET) {
-        identerMedUtbetaling.contains(person.personIdent.ident) || person.type == PersonType.SØKER
+        identerMedUtbetaling.contains(person.aktør.aktivIdent()) || person.type == PersonType.SØKER
     } else true
 }
 

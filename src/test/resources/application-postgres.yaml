@@ -163,7 +163,6 @@ spring:
         role: postgres
 
 FAMILIE_INTEGRASJONER_SCOPE: "dummy"
-DAGLIG_KVOTE_FØDSELSHENDELSER: 1000
 SANITY_DATASET: "ba-test"
 
 FAMILIE_OPPDRAG_API_URL: http://localhost:8087/api

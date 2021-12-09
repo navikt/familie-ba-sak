@@ -38,6 +38,10 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
         override val sanityApiNavn = "innvilgetLovligOppholdSkjonnsmessigVurderingTredjelandsborger"
     },
+    INNVILGET_TREDJELANDSBORGER_LOVLIG_OPPHOLD_FOR_BOSATT_I_NORGE {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetTredjelandsborgerLovligOppholdForBosattINorge"
+    },
     INNVILGET_OMSORG_FOR_BARN {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
         override val sanityApiNavn = "innvilgetOmsorgForBarn"

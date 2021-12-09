@@ -39,7 +39,7 @@ private fun ForelderBarnRelasjonMaskert.tilRestForelderBarnRelasjonMaskert() = R
 )
 
 private fun ForelderBarnRelasjon.tilRestForelderBarnRelasjon() = RestForelderBarnRelasjon(
-    personIdent = this.personIdent.id,
+    personIdent = this.aktør.aktivIdent(),
     relasjonRolle = this.relasjonsrolle,
     navn = this.navn ?: "",
     fødselsdato = this.fødselsdato,
@@ -48,7 +48,8 @@ private fun ForelderBarnRelasjon.tilRestForelderBarnRelasjon() = RestForelderBar
 )
 
 fun PersonInfo.tilRestPersonInfo(personIdent: String): RestPersonInfo {
-    val bostedsadresse = this.bostedsadresser.filter { it.angittFlyttedato != null }.maxByOrNull { it.angittFlyttedato!! }
+    val bostedsadresse =
+        this.bostedsadresser.filter { it.angittFlyttedato != null }.maxByOrNull { it.angittFlyttedato!! }
     val kommunenummer: String = when {
         bostedsadresse == null -> null
         bostedsadresse.vegadresse != null -> bostedsadresse.vegadresse?.kommunenummer

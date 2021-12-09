@@ -14,6 +14,8 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -25,6 +27,7 @@ import org.springframework.stereotype.Service
 class BehandlingsresultatService(
     private val behandlingService: BehandlingService,
     private val søknadGrunnlagService: SøknadGrunnlagService,
+    private val personidentService: PersonidentService,
     private val beregningService: BeregningService,
     private val persongrunnlagService: PersongrunnlagService,
     private val vilkårsvurderingService: VilkårsvurderingService,
@@ -69,7 +72,7 @@ class BehandlingsresultatService(
                 personerFremstiltKravFor = personerFremstiltKravFor,
                 forrigeTilkjentYtelse = forrigeTilkjentYtelse,
                 tilkjentYtelse = tilkjentYtelse,
-                erEksplisittAvslag = vilkårsvurdering.personResultater.find { personResultat -> personResultat.personIdent == it.personIdent.ident }
+                erEksplisittAvslag = vilkårsvurdering.personResultater.find { personResultat -> personResultat.aktør == it.aktør }
                     ?.harEksplisittAvslag()
                     ?: false
             )
@@ -79,6 +82,7 @@ class BehandlingsresultatService(
 
         val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(
             behandlingsresultatPersoner = behandlingsresultatPersoner,
+            personidentService = personidentService,
             uregistrerteBarn = søknadGrunnlag?.hentUregistrerteBarn()?.map {
                 UregistrertBarnEnkel(
                     personIdent = it.ident,
@@ -103,12 +107,12 @@ class BehandlingsresultatService(
     }
 
     private fun validerYtelsePersoner(behandlingId: Long, ytelsePersoner: List<YtelsePerson>) {
-        val søkerIdent = persongrunnlagService.hentSøker(behandlingId)?.personIdent?.ident
+        val søkerAktør = persongrunnlagService.hentSøker(behandlingId)?.aktør
             ?: throw Feil("Fant ikke søker på behandling")
-        if (ytelsePersoner.any { it.ytelseType == YtelseType.UTVIDET_BARNETRYGD && it.personIdent != søkerIdent }) throw Feil(
+        if (ytelsePersoner.any { it.ytelseType == YtelseType.UTVIDET_BARNETRYGD && it.aktør != søkerAktør }) throw Feil(
             "Barn kan ikke ha ytelsetype utvidet"
         )
-        if (ytelsePersoner.any { it.ytelseType == YtelseType.ORDINÆR_BARNETRYGD && it.personIdent == søkerIdent }) throw Feil(
+        if (ytelsePersoner.any { it.ytelseType == YtelseType.ORDINÆR_BARNETRYGD && it.aktør == søkerAktør }) throw Feil(
             "Søker kan ikke ha ytelsetype ordinær"
         )
     }
@@ -117,17 +121,19 @@ class BehandlingsresultatService(
         behandling: Behandling,
         søknadDTO: SøknadDTO? = null,
         forrigeBehandling: Behandling?
-    ): List<String> {
+    ): List<Aktør> {
         val barnFraSøknad = søknadDTO?.barnaMedOpplysninger
             ?.filter { it.inkludertISøknaden }
-            ?.map { it.ident }
+            ?.map { personidentService.hentOgLagreAktør(it.ident) }
             ?: emptyList()
 
         val utvidetBarnetrygdSøker =
-            if (søknadDTO?.underkategori == BehandlingUnderkategori.UTVIDET) listOf(søknadDTO.søkerMedOpplysninger.ident) else emptyList()
+            if (søknadDTO?.underkategori == BehandlingUnderkategori.UTVIDET)
+                listOf(behandling.fagsak.aktør)
+            else emptyList()
 
         val nyeBarn = persongrunnlagService.finnNyeBarn(forrigeBehandling = forrigeBehandling, behandling = behandling)
-            .map { it.personIdent.ident }
+            .map { it.aktør }
 
         val barnMedEksplisitteAvslag =
             vilkårsvurderingService.finnBarnMedEksplisittAvslagPåBehandling(behandlingId = behandling.id)

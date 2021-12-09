@@ -67,6 +67,7 @@ data class Person(
             column = Column(name = "person_ident", updatable = false)
         )
     )
+    // TODO: Robustgjøring dnr/fnr, fjern ved contract.
     val personIdent: PersonIdent,
 
     @JsonIgnore
@@ -120,14 +121,12 @@ data class Person(
     }
 
     override fun hashCode(): Int {
-        return Objects.hash(personIdent, fødselsdato)
+        return Objects.hash(aktør, fødselsdato)
     }
 
     fun hentAlder(): Int = Period.between(fødselsdato, LocalDate.now()).years
 
     fun hentSeksårsdag(): LocalDate = fødselsdato.plusYears(6)
-
-    fun hentAktørId(): Aktør = aktør
 }
 
 enum class Kjønn {
