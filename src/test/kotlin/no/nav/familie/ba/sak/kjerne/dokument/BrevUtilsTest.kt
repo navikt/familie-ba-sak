@@ -507,13 +507,13 @@ internal class BrevUtilsTest {
                 lagBrevBegrunnelseGrunnlagMedPersoner(
                     vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON,
                     personIdenter = listOf(
-                        barn3.aktør.aktivIdent()
+                        barn3.aktør.aktivFødselsnummer()
                     ),
                 ),
                 lagBrevBegrunnelseGrunnlagMedPersoner(
                     vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET,
                     personIdenter = listOf(
-                        barn2.aktør.aktivIdent()
+                        barn2.aktør.aktivFødselsnummer()
                     ),
                 ),
             )

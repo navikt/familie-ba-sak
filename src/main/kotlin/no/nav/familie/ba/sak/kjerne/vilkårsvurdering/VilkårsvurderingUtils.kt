@@ -188,7 +188,7 @@ object VilkårsvurderingUtils {
         initiellVilkårsvurdering.personResultater.forEach { personFraInit ->
             val personTilOppdatert = PersonResultat(
                 vilkårsvurdering = initiellVilkårsvurdering,
-                personIdent = personFraInit.aktør.aktivIdent(),
+                personIdent = personFraInit.aktør.aktivFødselsnummer(),
                 aktør = personFraInit.aktør
             )
             val personenSomFinnes = personResultaterAktivt.firstOrNull { it.aktør == personFraInit.aktør }
@@ -262,7 +262,7 @@ object VilkårsvurderingUtils {
         var advarsel =
             "Du har gjort endringer i behandlingsgrunnlaget. Dersom du går videre vil vilkår for følgende personer fjernes:"
         personResultater.forEach {
-            advarsel = advarsel.plus("\n${it.aktør.aktivIdent()}:")
+            advarsel = advarsel.plus("\n${it.aktør.aktivFødselsnummer()}:")
             it.vilkårResultater.forEach { vilkårResultat ->
                 advarsel = advarsel.plus("\n   - ${vilkårResultat.vilkårType.beskrivelse}")
             }

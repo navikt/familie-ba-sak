@@ -32,7 +32,7 @@ class JournalførVedtaksbrev(
     ): StegType {
         val vedtak = vedtakService.hent(vedtakId = data.vedtakId)
 
-        val fnr = vedtak.behandling.fagsak.aktør.aktivIdent()
+        val fnr = vedtak.behandling.fagsak.aktør.aktivFødselsnummer()
         val fagsakId = "${vedtak.behandling.fagsak.id}"
 
         val behanlendeEnhet =
@@ -47,7 +47,7 @@ class JournalførVedtaksbrev(
 
         val nyTask = DistribuerDokumentTask.opprettDistribuerDokumentTask(
             distribuerDokumentDTO = DistribuerDokumentDTO(
-                personIdent = vedtak.behandling.fagsak.aktør.aktivIdent(),
+                personIdent = vedtak.behandling.fagsak.aktør.aktivFødselsnummer(),
                 behandlingId = vedtak.behandling.id,
                 journalpostId = journalpostId,
                 brevmal = hentBrevtype(behandling),

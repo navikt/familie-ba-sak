@@ -398,7 +398,7 @@ class VedtaksperiodeService(
                 persongrunnlag.barna.filter { barn ->
                     barn.fødselsdato.toYearMonth().equals(fødselsMånedOgÅrForAlder18) ||
                         barn.fødselsdato.toYearMonth().equals(fødselsMånedOgÅrForAlder18.plusMonths(1))
-                }.map { it.aktør.aktivIdent() }
+                }.map { it.aktør.aktivFødselsnummer() }
             } else {
                 hentPersonIdenterFraUtbetalingsperioder(hentUtbetalingsperioder(vedtak.behandling))
             }
@@ -593,7 +593,7 @@ class VedtaksperiodeService(
         val begrunnelseOgIdentListe: List<Pair<VedtakBegrunnelseSpesifikasjon, String>> =
             vilkårResultater
                 .map { vilkår ->
-                    val personIdent = vilkår.personResultat?.aktør?.aktivIdent()
+                    val personIdent = vilkår.personResultat?.aktør?.aktivFødselsnummer()
                         ?: throw Feil(
                             "VilkårResultat ${vilkår.id} mangler PersonResultat ved sammenslåing av begrunnelser"
                         )

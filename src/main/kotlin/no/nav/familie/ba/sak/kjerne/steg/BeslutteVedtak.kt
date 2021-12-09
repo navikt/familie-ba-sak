@@ -126,7 +126,7 @@ class BeslutteVedtak(
     private fun opprettJournalførVedtaksbrevTask(behandling: Behandling, vedtak: Vedtak) {
         val task = JournalførVedtaksbrevTask.opprettTaskJournalførVedtaksbrev(
             vedtakId = vedtak.id,
-            personIdent = behandling.fagsak.aktør.aktivIdent(),
+            personIdent = behandling.fagsak.aktør.aktivFødselsnummer(),
             behandlingId = behandling.id
         )
         taskRepository.save(task)

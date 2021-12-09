@@ -98,7 +98,7 @@ data class SmåbarnstilleggBarnetrygdGenerator(
                 AndelTilkjentYtelse(
                     behandlingId = behandlingId,
                     tilkjentYtelse = tilkjentYtelse,
-                    personIdent = søkerAktør?.aktivIdent()
+                    personIdent = søkerAktør?.aktivFødselsnummer()
                         ?: error("Genererer andeler for småbarnstillegg uten noen perioder med full overgangsstønad"),
                     aktør = søkerAktør,
                     stønadFom = it.fom.toYearMonth(),

@@ -34,7 +34,7 @@ class HenleggBehandling(
                 behandling = behandling,
                 fagsakId = behandling.fagsak.id,
                 manueltBrevRequest = ManueltBrevRequest(
-                    mottakerIdent = behandling.fagsak.aktør.aktivIdent(),
+                    mottakerIdent = behandling.fagsak.aktør.aktivFødselsnummer(),
                     brevmal = BrevType.HENLEGGE_TRUKKET_SØKNAD,
                 ).byggMottakerdata(behandling, persongrunnlagService, arbeidsfordelingService)
             )
@@ -62,7 +62,10 @@ class HenleggBehandling(
 
     private fun opprettFerdigstillBehandling(behandlingsId: Long, aktør: Aktør) {
         val ferdigstillBehandling =
-            FerdigstillBehandlingTask.opprettTask(behandlingsId = behandlingsId, søkerPersonIdent = aktør.aktivIdent())
+            FerdigstillBehandlingTask.opprettTask(
+                behandlingsId = behandlingsId,
+                søkerPersonIdent = aktør.aktivFødselsnummer()
+            )
         taskRepository.save(ferdigstillBehandling)
     }
 }

@@ -645,7 +645,7 @@ class BehandlingIntegrationTest(
         assertEquals(3, søker.personopplysningGrunnlag.personer.size)
 
         søker.personopplysningGrunnlag.barna.forEach {
-            when (it.aktør.aktivIdent()) {
+            when (it.aktør.aktivFødselsnummer()) {
                 barn1Fnr -> {
                     val matrikkeladresse = it.bostedsadresser.sisteAdresse() as GrMatrikkeladresse
                     assertEquals(barn1Bruksenhetsnummer, matrikkeladresse.bruksenhetsnummer)
@@ -689,8 +689,8 @@ class BehandlingIntegrationTest(
             sivilstander = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT)),
         )
 
-        fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = søkerAktør.aktivIdent()))
-        val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(søkerAktør.aktivIdent()))
+        fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = søkerAktør.aktivFødselsnummer()))
+        val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(søkerAktør.aktivFødselsnummer()))
 
         val personopplysningGrunnlag = persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(
             søkerAktør,
