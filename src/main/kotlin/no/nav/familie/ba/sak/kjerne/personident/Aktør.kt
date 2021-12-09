@@ -58,7 +58,7 @@ data class Aktør(
         return Objects.hash(aktørId)
     }
 
-    fun aktivIdent() = personidenter.single { it.aktiv }
+    fun aktivIdent() = personidenter.single { it.aktiv }.fødselsnummer
 
     fun harIdent(fødselsnummer: String) = personidenter.any { it.fødselsnummer == fødselsnummer }
 

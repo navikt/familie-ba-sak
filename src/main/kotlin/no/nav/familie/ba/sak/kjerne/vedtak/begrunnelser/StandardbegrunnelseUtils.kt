@@ -16,6 +16,7 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAnde
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakUtils
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
@@ -33,7 +34,7 @@ fun VedtakBegrunnelseSpesifikasjon.triggesForPeriode(
     utvidetVedtaksperiodeMedBegrunnelser: UtvidetVedtaksperiodeMedBegrunnelser,
     minimertePersonResultater: List<MinimertPersonResultat>,
     persongrunnlag: PersonopplysningGrunnlag,
-    identerMedUtbetaling: List<String>,
+    aktørerMedUtbetaling: List<Aktør>,
     triggesAv: TriggesAv,
     endretUtbetalingAndeler: List<EndretUtbetalingAndel> = emptyList(),
     andelerTilkjentYtelse: List<AndelTilkjentYtelse> = emptyList(),
@@ -43,7 +44,7 @@ fun VedtakBegrunnelseSpesifikasjon.triggesForPeriode(
         .filter { person -> triggesAv.personTyper.contains(person.type) }
         .filter { person ->
             if (this.vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGET) {
-                identerMedUtbetaling.contains(person.personIdent.ident) || person.type == PersonType.SØKER
+                aktørerMedUtbetaling.contains(person.aktør) || person.type == PersonType.SØKER
             } else true
         }
 
@@ -103,7 +104,7 @@ private fun erEtterEndretPeriodeAvSammeÅrsak(
 ) = endretUtbetalingAndeler.any { endretUtbetalingAndel ->
     endretUtbetalingAndel.tom!!.sisteDagIInneværendeMåned()
         .erDagenFør(utvidetVedtaksperiodeMedBegrunnelser.fom) &&
-        aktuellePersoner.any { person -> person.personIdent == endretUtbetalingAndel.person?.personIdent } &&
+        aktuellePersoner.any { person -> person.aktør == endretUtbetalingAndel.person?.aktør } &&
         triggesAv.endringsaarsaker.contains(endretUtbetalingAndel.årsak)
 }
 

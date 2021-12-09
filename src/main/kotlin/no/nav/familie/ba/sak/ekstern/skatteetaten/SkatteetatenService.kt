@@ -66,7 +66,7 @@ class SkatteetatenService(
             fom = YearMonth.of(år.toInt(), 1),
             tom = YearMonth.of(år.toInt(), 12)
         )
-            .map { SkatteetatenPerson(it.first.hentAktivIdent().ident, it.second.atStartOfDay()) }
+            .map { SkatteetatenPerson(it.first.aktør.aktivIdent(), it.second.atStartOfDay()) }
     }
 
     private fun hentPerioderMedUtvidetBarnetrygdFraBaSak(

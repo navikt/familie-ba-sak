@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
@@ -17,7 +18,7 @@ import no.nav.fpsak.tidsserie.StandardCombinators
 import java.time.LocalDate
 
 data class PeriodeResultat(
-    val personIdent: String,
+    val aktør: Aktør,
     val periodeFom: LocalDate?,
     val periodeTom: LocalDate?,
     val vilkårResultater: Set<PeriodeVilkår>
@@ -109,7 +110,7 @@ fun PersonResultat.tilPeriodeResultater(brukMåned: Boolean, inkluderUtvidet: Bo
     val kombinertTidslinje = lagTidslinjeMedOverlappendePerioder(tidslinjer)
     return kombinertTidslinje.toSegments().map { segment ->
         PeriodeResultat(
-            personIdent = personIdent,
+            aktør = aktør,
             periodeFom = if (segment.fom == TIDENES_BEGYNNELSE) null else segment.fom,
             periodeTom = if (segment.tom == TIDENES_ENDE) null else segment.tom,
             vilkårResultater = segment.value.map {

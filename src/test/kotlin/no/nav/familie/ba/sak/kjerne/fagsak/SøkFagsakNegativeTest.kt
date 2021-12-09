@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.fagsak
 
+import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsakDeltager
 import no.nav.familie.ba.sak.ekstern.restDomene.RestSøkParam
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonException
@@ -29,7 +30,7 @@ class SøkFagsakNegativeTest {
         val feilId = "41235678910"
 
         assertThrows<IntegrasjonException> {
-            fagsakService.hentFagsakDeltager(feilId)
+            fagsakService.hentFagsakDeltager(tilAktør(feilId))
         }
     }
 

@@ -1,16 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.fagsak
 
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import org.springframework.data.jpa.repository.JpaRepository
-import org.springframework.data.jpa.repository.Lock
-import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
-import javax.persistence.LockModeType
 
 @Repository
-interface FagsakPersonRepository : JpaRepository<FagsakPerson, Long> {
-
-    @Lock(LockModeType.NONE)
-    @Query(value = "SELECT DISTINCT(f.fagsak) FROM FagsakPerson f WHERE f.personIdent in :personIdenter AND f.fagsak.arkivert = false")
-    fun finnFagsak(personIdenter: Set<PersonIdent>): Fagsak?
-}
+interface FagsakPersonRepository : JpaRepository<FagsakPerson, Long>

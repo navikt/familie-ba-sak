@@ -129,7 +129,7 @@ class BrevService(
                     ),
                     flettefelter = DødsfallData.Flettefelter(
                         navn = data.grunnlag.søker.navn,
-                        fodselsnummer = data.grunnlag.søker.personIdent.ident,
+                        fodselsnummer = data.grunnlag.søker.aktør.aktivIdent(),
                         // Selv om det er feil å anta at alle navn er på dette formatet er det ønskelig å skrive
                         // det slik, da uppercase kan oppleves som skrikende i et brev som skal være skånsomt
                         navnAvdode = data.grunnlag.søker.navn.storForbokstavIHvertOrd(),
@@ -155,7 +155,7 @@ class BrevService(
                     ),
                     flettefelter = KorreksjonVedtaksbrevData.Flettefelter(
                         navn = data.grunnlag.søker.navn,
-                        fodselsnummer = data.grunnlag.søker.personIdent.ident
+                        fodselsnummer = data.grunnlag.søker.aktør.aktivIdent()
                     )
                 )
             )
@@ -204,7 +204,7 @@ class BrevService(
             beslutter = grunnlagOgSignaturData.beslutter,
             hjemmeltekst = Hjemmeltekst(hjemler),
             søkerNavn = grunnlagOgSignaturData.grunnlag.søker.navn,
-            søkerFødselsnummer = grunnlagOgSignaturData.grunnlag.søker.personIdent.ident,
+            søkerFødselsnummer = grunnlagOgSignaturData.grunnlag.søker.aktør.aktivIdent(),
             perioder = brevperioder
         )
     }

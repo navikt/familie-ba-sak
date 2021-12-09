@@ -84,7 +84,7 @@ class VilkårsvurderingMetrics(
             ?: error("Finner ikke aktivt persongrunnlag ved telling av metrikker")
 
         vilkårsvurdering.personResultater.forEach { personResultat ->
-            val person = persongrunnlag.personer.firstOrNull { it.personIdent.ident == personResultat.personIdent }
+            val person = persongrunnlag.personer.firstOrNull { it.aktør == personResultat.aktør }
                 ?: error("Finner ikke person")
 
             val negativeVilkår = personResultat.vilkårResultater.filter { vilkårResultat ->
@@ -93,7 +93,7 @@ class VilkårsvurderingMetrics(
 
             if (negativeVilkår.isNotEmpty()) {
                 logger.info("Behandling: ${vilkårsvurdering.behandling.id}, personType=${person.type}. Vilkår som får negativt resultat og årsakene: ${negativeVilkår.map { "${it.vilkårType}=${it.evalueringÅrsaker}" }}.")
-                secureLogger.info("Behandling: ${vilkårsvurdering.behandling.id}, person=${person.personIdent.ident}. Vilkår som får negativt resultat og årsakene: ${negativeVilkår.map { "${it.vilkårType}=${it.evalueringÅrsaker}" }}.")
+                secureLogger.info("Behandling: ${vilkårsvurdering.behandling.id}, person=${person.aktør.aktivIdent()}. Vilkår som får negativt resultat og årsakene: ${negativeVilkår.map { "${it.vilkårType}=${it.evalueringÅrsaker}" }}.")
             }
 
             personResultat.vilkårResultater.forEach { vilkårResultat ->
@@ -143,7 +143,7 @@ class VilkårsvurderingMetrics(
 
         return personer.map { person ->
             val personResultat = vilkårsvurdering.personResultater.firstOrNull { personResultat ->
-                personResultat.personIdent == person.personIdent.ident
+                personResultat.aktør == person.aktør
             }
 
             Pair(
@@ -158,11 +158,11 @@ class VilkårsvurderingMetrics(
         val personer = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId)?.personer
             ?: error("Finner ikke aktivt persongrunnlag ved telling av metrikker")
 
-        val person = personer.firstOrNull { it.personIdent.ident == vilkårResultat.personResultat?.personIdent }
+        val person = personer.firstOrNull { it.aktør == vilkårResultat.personResultat?.aktør }
             ?: error("Finner ikke person")
 
         logger.info("Første vilkår med feil=$vilkårResultat, på personType=${person.type}, på behandling $behandlingId")
-        secureLogger.info("Første vilkår med feil=$vilkårResultat, på person=${person.personIdent.ident}, på behandling $behandlingId")
+        secureLogger.info("Første vilkår med feil=$vilkårResultat, på person=${person.aktør.aktivIdent()}, på behandling $behandlingId")
         vilkårResultat.evalueringÅrsaker.forEach { årsak ->
             vilkårsvurderingFørsteUtfall[person.type]?.get(årsak)?.increment()
         }

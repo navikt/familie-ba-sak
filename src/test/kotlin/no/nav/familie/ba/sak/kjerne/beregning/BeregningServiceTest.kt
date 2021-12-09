@@ -15,11 +15,11 @@ import no.nav.familie.ba.sak.common.lagPersonResultat
 import no.nav.familie.ba.sak.common.lagSøknadDTO
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.nesteMåned
-import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.FeatureToggleService
+import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestBaseFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestFagsak
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
@@ -91,8 +91,8 @@ class BeregningServiceTest {
         val barn1Fnr = randomFnr()
         val søkerFnr = randomFnr()
 
-        val barn1AktørId = randomAktørId()
-        val søkerAktørId = randomAktørId()
+        val barn1AktørId = tilAktør(barn1Fnr)
+        val søkerAktørId = tilAktør(søkerFnr)
 
         val vilkårsvurdering =
             Vilkårsvurdering(behandling = behandling)
@@ -156,8 +156,8 @@ class BeregningServiceTest {
         val barn1Fnr = randomFnr()
         val søkerFnr = randomFnr()
 
-        val barn1AktørId = randomAktørId()
-        val søkerAktørId = randomAktørId()
+        val barn1AktørId = tilAktør(barn1Fnr)
+        val søkerAktørId = tilAktør(søkerFnr)
 
         val vilkårsvurdering =
             Vilkårsvurdering(behandling = behandling)
@@ -228,7 +228,7 @@ class BeregningServiceTest {
         val behandling = lagBehandling()
         val barn = tilfeldigPerson(personType = PersonType.BARN)
         val søkerFnr = randomFnr()
-        val søkerAktørId = randomAktørId()
+        val søkerAktørId = tilAktør(søkerFnr)
         val vilkårsvurdering =
             Vilkårsvurdering(behandling = behandling)
 
@@ -238,8 +238,8 @@ class BeregningServiceTest {
         val søkandtidspunkt = LocalDate.of(2018, 9, 1)
         val personResultatBarn = lagPersonResultat(
             vilkårsvurdering = vilkårsvurdering,
-            fnr = barn.personIdent.ident,
-            aktør = barn.hentAktørId(),
+            fnr = barn.aktør.aktivIdent(),
+            aktør = barn.aktør,
             resultat = Resultat.OPPFYLT,
             periodeFom = periodeFom,
             periodeTom = periodeTom,
@@ -262,7 +262,7 @@ class BeregningServiceTest {
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
             behandlingId = behandling.id,
             søkerPersonIdent = søkerFnr,
-            barnasIdenter = listOf(barn.personIdent.ident)
+            barnasIdenter = listOf(barn.aktør.aktivIdent())
         )
         val slot = slot<TilkjentYtelse>()
 
@@ -270,7 +270,7 @@ class BeregningServiceTest {
         every { tilkjentYtelseRepository.save(any()) } returns lagInitiellTilkjentYtelse(behandling)
         every { søknadGrunnlagService.hentAktiv(any())?.hentSøknadDto() } returns lagSøknadDTO(
             søkerFnr,
-            listOf(barn.personIdent.ident)
+            listOf(barn.aktør.aktivIdent())
         )
 
         every { endretUtbetalingAndelRepository.findByBehandlingId(any()) } returns
@@ -314,8 +314,8 @@ class BeregningServiceTest {
         val behandling = lagBehandling()
         val barn1Fnr = randomFnr()
         val søkerFnr = randomFnr()
-        val barn1AktørId = randomAktørId()
-        val søkerAktørId = randomAktørId()
+        val barn1AktørId = tilAktør(barn1Fnr)
+        val søkerAktørId = tilAktør(søkerFnr)
         val vilkårsvurdering =
             Vilkårsvurdering(behandling = behandling)
 
@@ -371,9 +371,9 @@ class BeregningServiceTest {
         val barn1Fnr = randomFnr()
         val barn2Fnr = randomFnr()
         val søkerFnr = randomFnr()
-        val barn1AktørId = randomAktørId()
-        val barn2AktørId = randomAktørId()
-        val søkerAktørId = randomAktørId()
+        val barn1AktørId = tilAktør(barn1Fnr)
+        val barn2AktørId = tilAktør(barn2Fnr)
+        val søkerAktørId = tilAktør(søkerFnr)
         val vilkårsvurdering = Vilkårsvurdering(
             behandling = behandling
         )
@@ -570,8 +570,8 @@ class BeregningServiceTest {
         val barnFødselsdato = LocalDate.of(2019, 1, 1)
         val barn1Fnr = randomFnr()
         val søkerFnr = randomFnr()
-        val barn1AktørId = randomAktørId()
-        val søkerAktørId = randomAktørId()
+        val barn1AktørId = tilAktør(barn1Fnr)
+        val søkerAktørId = tilAktør(søkerFnr)
         val vilkårsvurdering = Vilkårsvurdering(
             behandling = behandling
         )
