@@ -28,6 +28,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakPerson
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.FØRSTE_STEG
 import no.nav.familie.kontrakter.felles.Behandlingstema
 import no.nav.familie.kontrakter.felles.Tema
@@ -61,6 +62,9 @@ class OppgaveServiceTest {
     lateinit var behandlingRepository: BehandlingRepository
 
     @MockK
+    lateinit var personidentService: PersonidentService
+
+    @MockK
     lateinit var oppgaveRepository: OppgaveRepository
 
     @InjectMockKs
@@ -68,7 +72,7 @@ class OppgaveServiceTest {
 
     @Test
     fun `Opprett oppgave skal lage oppgave med enhetsnummer fra behandlingen`() {
-        every { behandlingRepository.finnBehandling(BEHANDLING_ID) } returns lagTestBehandling()
+        every { behandlingRepository.finnBehandling(BEHANDLING_ID) } returns lagTestBehandling(aktørId = AKTØR_ID_FAGSAK)
         every { behandlingRepository.save(any<Behandling>()) } returns lagTestBehandling()
         every { oppgaveRepository.save(any<DbOppgave>()) } returns lagTestOppgave()
         every {
@@ -77,7 +81,7 @@ class OppgaveServiceTest {
                 any<Behandling>()
             )
         } returns null
-        every { personopplysningerService.hentOgLagreAktørId(any()) } returns Aktør(AKTØR_ID_FAGSAK)
+        every { personidentService.hentOgLagreAktør(any()) } returns Aktør(AKTØR_ID_FAGSAK)
 
         every { arbeidsfordelingService.hentAbeidsfordelingPåBehandling(any()) } returns ArbeidsfordelingPåBehandling(
             behandlingId = 1,
@@ -169,9 +173,9 @@ class OppgaveServiceTest {
         verify(exactly = 1) { integrasjonClient.fordelOppgave(any(), null) }
     }
 
-    private fun lagTestBehandling(): Behandling {
+    private fun lagTestBehandling(aktørId: String = "2"): Behandling {
         return Behandling(
-            fagsak = Fagsak(id = FAGSAK_ID, aktør = Aktør("2")).also {
+            fagsak = Fagsak(id = FAGSAK_ID, aktør = Aktør(aktørId)).also {
                 it.søkerIdenter = setOf(FagsakPerson(personIdent = PersonIdent(ident = FNR), fagsak = it))
             },
             type = BehandlingType.FØRSTEGANGSBEHANDLING,

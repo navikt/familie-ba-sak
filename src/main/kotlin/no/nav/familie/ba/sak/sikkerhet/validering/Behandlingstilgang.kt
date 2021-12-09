@@ -19,9 +19,9 @@ class Behandlingstilgang(
     override fun isValid(behandlingId: Long, ctx: ConstraintValidatorContext): Boolean {
 
         val personer = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId)?.personer
-            ?.map { it.personIdent.ident }
+            ?.map { it.aktør }
         if (personer != null) {
-            integrasjonClient.sjekkTilgangTilPersoner(personer)
+            integrasjonClient.sjekkTilgangTilPersoner(personer.map { it.aktivIdent() })
                 .filterNot { it.harTilgang }
                 .forEach {
                     logger.error("Bruker har ikke tilgang: ${it.begrunnelse}")

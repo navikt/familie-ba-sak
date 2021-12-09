@@ -212,7 +212,7 @@ class KonsistensavstemmingUtplukkingIntegrationTest : AbstractSpringIntegrationT
         val tilkjentYtelse = tilkjentYtelse(behandling = behandling, erIverksatt = erIverksatt)
         tilkjentYtelseRepository.save(tilkjentYtelse)
         val personFnr = randomFnr()
-        val aktør = personidentService.hentOgLagreAktørId(personFnr)
+        val aktør = personidentService.hentOgLagreAktør(personFnr)
         kildeOgOffsetPåAndeler.forEach {
             andelTilkjentYtelseRepository.save(
                 andelPåTilkjentYtelse(
@@ -236,7 +236,7 @@ class KonsistensavstemmingUtplukkingIntegrationTest : AbstractSpringIntegrationT
         val tilkjentYtelse = tilkjentYtelse(behandling = behandling, erIverksatt = erIverksatt)
         tilkjentYtelseRepository.save(tilkjentYtelse)
         val personFnr = randomFnr()
-        val aktør = personidentService.hentOgLagreAktørId(personFnr)
+        val aktør = personidentService.hentOgLagreAktør(personFnr)
         kildeOgOffsetPåAndeler.forEach {
             andelTilkjentYtelseRepository.save(
                 andelPåTilkjentYtelse(

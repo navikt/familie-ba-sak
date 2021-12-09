@@ -21,8 +21,8 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
+import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.kontrakter.felles.BrukerIdType
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -43,6 +43,7 @@ import javax.transaction.Transactional
 class JournalføringService(
     private val integrasjonClient: IntegrasjonClient,
     private val fagsakService: FagsakService,
+    private val personidentService: PersonidentService,
     private val behandlingService: BehandlingService,
     private val oppgaveService: OppgaveService,
     private val journalføringRepository: JournalføringRepository,
@@ -124,7 +125,7 @@ class JournalføringService(
         kategori: BehandlingKategori? = null,
         underkategori: BehandlingUnderkategori? = null
     ): Behandling {
-        fagsakService.hentEllerOpprettFagsak(PersonIdent(personIdent))
+        fagsakService.hentEllerOpprettFagsak(personIdent)
         return stegService.håndterNyBehandlingOgSendInfotrygdFeed(
             NyBehandling(
                 kategori = kategori,

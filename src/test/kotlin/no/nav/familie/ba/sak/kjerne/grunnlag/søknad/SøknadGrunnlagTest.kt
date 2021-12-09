@@ -19,7 +19,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
@@ -49,6 +49,9 @@ class SøknadGrunnlagTest(
     private val persongrunnlagService: PersongrunnlagService,
 
     @Autowired
+    private val personidentService: PersonidentService,
+
+    @Autowired
     private val vedtakService: VedtakService,
 
     @Autowired
@@ -76,7 +79,9 @@ class SøknadGrunnlagTest(
     fun `Skal lagre ned og hente søknadsgrunnlag`() {
         val søkerIdent = randomFnr()
         val barnIdent = randomFnr()
-        fagsakService.hentEllerOpprettFagsak(PersonIdent(søkerIdent))
+        val søkerAktør = personidentService.hentOgLagreAktør(søkerIdent)
+
+        fagsakService.hentEllerOpprettFagsak(søkerAktør.aktivIdent())
         val behandling = stegService.håndterNyBehandling(
             NyBehandling(
                 BehandlingKategori.NASJONAL,
@@ -105,7 +110,9 @@ class SøknadGrunnlagTest(
     fun `Skal sjekke at det kun kan være et aktivt grunnlag for en behandling`() {
         val søkerIdent = randomFnr()
         val barnIdent = randomFnr()
-        fagsakService.hentEllerOpprettFagsak(PersonIdent(søkerIdent))
+        val søkerAktør = personidentService.hentOgLagreAktør(søkerIdent)
+
+        fagsakService.hentEllerOpprettFagsak(søkerAktør.aktivIdent())
         val behandling = stegService.håndterNyBehandling(
             NyBehandling(
                 BehandlingKategori.NASJONAL,
@@ -144,6 +151,9 @@ class SøknadGrunnlagTest(
         val søkerIdent = randomFnr()
         val folkeregistrertBarn = ClientMocks.barnFnr[0]
         val uregistrertBarn = randomFnr()
+
+        val søkerAktør = personidentService.hentOgLagreAktør(søkerIdent)
+
         val søknadDTO = SøknadDTO(
             underkategori = BehandlingUnderkategori.ORDINÆR,
             søkerMedOpplysninger = SøkerMedOpplysninger(
@@ -161,7 +171,7 @@ class SøknadGrunnlagTest(
             endringAvOpplysningerBegrunnelse = ""
         )
 
-        fagsakService.hentEllerOpprettFagsak(PersonIdent(søkerIdent))
+        fagsakService.hentEllerOpprettFagsak(søkerAktør.aktivIdent())
         val behandling = stegService.håndterNyBehandling(
             NyBehandling(
                 BehandlingKategori.NASJONAL,
@@ -182,8 +192,8 @@ class SøknadGrunnlagTest(
         val persongrunnlag = persongrunnlagService.hentAktiv(behandlingId = behandling.id)
 
         assertEquals(1, persongrunnlag!!.barna.size)
-        assertTrue(persongrunnlag.barna.any { it.personIdent.ident == folkeregistrertBarn })
-        assertTrue(persongrunnlag.barna.none { it.personIdent.ident == uregistrertBarn })
+        assertTrue(persongrunnlag.barna.any { it.aktør.aktivIdent() == folkeregistrertBarn })
+        assertTrue(persongrunnlag.barna.none { it.aktør.aktivIdent() == uregistrertBarn })
     }
 
     @Test

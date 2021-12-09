@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.inneværendeMåned
-import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
@@ -18,8 +18,8 @@ class BehandlingResultatMedKravTest {
 
     val søker = tilfeldigPerson()
 
-    private val barn1Ident = randomFnr()
-    private val barn2Ident = randomFnr()
+    private val barn1Aktør = randomAktørId()
+    private val barn2Aktør = randomAktørId()
     private val defaultYtelseSluttForLøpende = inneværendeMåned().plusMonths(1)
     private val defaultYtelseSluttForAvslått = TIDENES_MORGEN.toYearMonth()
 
@@ -29,7 +29,7 @@ class BehandlingResultatMedKravTest {
         val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
             listOf(
                 YtelsePerson(
-                    personIdent = barn1Ident,
+                    aktør = barn1Aktør,
                     ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                     kravOpprinnelse = listOf(KravOpprinnelse.INNEVÆRENDE),
                     resultater = setOf(YtelsePersonResultat.INNVILGET),
@@ -46,14 +46,14 @@ class BehandlingResultatMedKravTest {
         val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
             listOf(
                 YtelsePerson(
-                    personIdent = barn1Ident,
+                    aktør = barn1Aktør,
                     ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                     kravOpprinnelse = listOf(KravOpprinnelse.INNEVÆRENDE),
                     resultater = setOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.OPPHØRT),
                     ytelseSlutt = inneværendeMåned()
                 ),
                 YtelsePerson(
-                    personIdent = barn2Ident,
+                    aktør = barn2Aktør,
                     ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                     kravOpprinnelse = listOf(KravOpprinnelse.INNEVÆRENDE),
                     resultater = setOf(YtelsePersonResultat.INNVILGET),
@@ -70,14 +70,14 @@ class BehandlingResultatMedKravTest {
         val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
             listOf(
                 YtelsePerson(
-                    personIdent = barn2Ident,
+                    aktør = barn2Aktør,
                     ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                     kravOpprinnelse = listOf(KravOpprinnelse.TIDLIGERE),
                     resultater = setOf(),
                     ytelseSlutt = defaultYtelseSluttForLøpende,
                 ),
                 YtelsePerson(
-                    personIdent = barn1Ident,
+                    aktør = barn1Aktør,
                     ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                     kravOpprinnelse = listOf(KravOpprinnelse.INNEVÆRENDE),
                     resultater = setOf(YtelsePersonResultat.INNVILGET),
@@ -94,14 +94,14 @@ class BehandlingResultatMedKravTest {
         val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
             listOf(
                 YtelsePerson(
-                    personIdent = barn2Ident,
+                    aktør = barn2Aktør,
                     ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                     kravOpprinnelse = listOf(KravOpprinnelse.INNEVÆRENDE),
                     resultater = setOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.OPPHØRT),
                     ytelseSlutt = inneværendeMåned()
                 ),
                 YtelsePerson(
-                    personIdent = barn1Ident,
+                    aktør = barn1Aktør,
                     ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                     kravOpprinnelse = listOf(KravOpprinnelse.INNEVÆRENDE),
                     resultater = setOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.OPPHØRT),
@@ -118,14 +118,14 @@ class BehandlingResultatMedKravTest {
         val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
             listOf(
                 YtelsePerson(
-                    personIdent = barn2Ident,
+                    aktør = barn2Aktør,
                     ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                     kravOpprinnelse = listOf(KravOpprinnelse.INNEVÆRENDE),
                     resultater = setOf(YtelsePersonResultat.INNVILGET),
                     ytelseSlutt = defaultYtelseSluttForLøpende,
                 ),
                 YtelsePerson(
-                    personIdent = barn1Ident,
+                    aktør = barn1Aktør,
                     ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                     kravOpprinnelse = listOf(KravOpprinnelse.TIDLIGERE),
                     resultater = setOf(YtelsePersonResultat.OPPHØRT),
@@ -141,14 +141,14 @@ class BehandlingResultatMedKravTest {
         val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
             listOf(
                 YtelsePerson(
-                    personIdent = barn2Ident,
+                    aktør = barn2Aktør,
                     ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                     kravOpprinnelse = listOf(KravOpprinnelse.INNEVÆRENDE),
                     resultater = setOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.OPPHØRT),
                     ytelseSlutt = inneværendeMåned(),
                 ),
                 YtelsePerson(
-                    personIdent = barn1Ident,
+                    aktør = barn1Aktør,
                     ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                     kravOpprinnelse = listOf(KravOpprinnelse.TIDLIGERE),
                     resultater = setOf(YtelsePersonResultat.OPPHØRT),
@@ -164,14 +164,14 @@ class BehandlingResultatMedKravTest {
         val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
             listOf(
                 YtelsePerson(
-                    personIdent = barn2Ident,
+                    aktør = barn2Aktør,
                     ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                     kravOpprinnelse = listOf(KravOpprinnelse.INNEVÆRENDE),
                     resultater = setOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.OPPHØRT),
                     ytelseSlutt = inneværendeMåned()
                 ),
                 YtelsePerson(
-                    personIdent = barn1Ident,
+                    aktør = barn1Aktør,
                     ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                     kravOpprinnelse = listOf(KravOpprinnelse.TIDLIGERE),
                     resultater = setOf(YtelsePersonResultat.ENDRET, YtelsePersonResultat.OPPHØRT),
@@ -189,7 +189,7 @@ class BehandlingResultatMedKravTest {
         val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
             listOf(
                 YtelsePerson(
-                    personIdent = barn1Ident,
+                    aktør = barn1Aktør,
                     ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                     kravOpprinnelse = listOf(KravOpprinnelse.INNEVÆRENDE),
                     resultater = setOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.AVSLÅTT),
@@ -206,14 +206,14 @@ class BehandlingResultatMedKravTest {
         val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
             listOf(
                 YtelsePerson(
-                    personIdent = barn2Ident,
+                    aktør = barn2Aktør,
                     ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                     kravOpprinnelse = listOf(KravOpprinnelse.TIDLIGERE),
                     resultater = setOf(),
                     ytelseSlutt = defaultYtelseSluttForLøpende,
                 ),
                 YtelsePerson(
-                    personIdent = barn1Ident,
+                    aktør = barn1Aktør,
                     ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                     kravOpprinnelse = listOf(KravOpprinnelse.INNEVÆRENDE),
                     resultater = setOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.AVSLÅTT),
@@ -230,14 +230,14 @@ class BehandlingResultatMedKravTest {
         val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
             listOf(
                 YtelsePerson(
-                    personIdent = barn1Ident,
+                    aktør = barn1Aktør,
                     ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                     kravOpprinnelse = listOf(KravOpprinnelse.INNEVÆRENDE),
                     resultater = setOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.OPPHØRT),
                     ytelseSlutt = inneværendeMåned()
                 ),
                 YtelsePerson(
-                    personIdent = barn2Ident,
+                    aktør = barn2Aktør,
                     ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                     kravOpprinnelse = listOf(KravOpprinnelse.INNEVÆRENDE),
                     resultater = setOf(YtelsePersonResultat.AVSLÅTT),
@@ -254,7 +254,7 @@ class BehandlingResultatMedKravTest {
         val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
             listOf(
                 YtelsePerson(
-                    personIdent = barn2Ident,
+                    aktør = barn2Aktør,
                     ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                     kravOpprinnelse = listOf(KravOpprinnelse.INNEVÆRENDE),
                     resultater = setOf(
@@ -265,7 +265,7 @@ class BehandlingResultatMedKravTest {
                     ytelseSlutt = inneværendeMåned()
                 ),
                 YtelsePerson(
-                    personIdent = barn1Ident,
+                    aktør = barn1Aktør,
                     ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                     kravOpprinnelse = listOf(KravOpprinnelse.INNEVÆRENDE),
                     resultater = setOf(
@@ -286,14 +286,14 @@ class BehandlingResultatMedKravTest {
         val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
             listOf(
                 YtelsePerson(
-                    personIdent = barn2Ident,
+                    aktør = barn2Aktør,
                     ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                     kravOpprinnelse = listOf(KravOpprinnelse.INNEVÆRENDE),
                     resultater = setOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.AVSLÅTT),
                     ytelseSlutt = defaultYtelseSluttForLøpende
                 ),
                 YtelsePerson(
-                    personIdent = barn1Ident,
+                    aktør = barn1Aktør,
                     ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                     kravOpprinnelse = listOf(KravOpprinnelse.TIDLIGERE),
                     resultater = setOf(YtelsePersonResultat.OPPHØRT),
@@ -309,7 +309,7 @@ class BehandlingResultatMedKravTest {
         val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
             listOf(
                 YtelsePerson(
-                    personIdent = barn2Ident,
+                    aktør = barn2Aktør,
                     ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                     kravOpprinnelse = listOf(KravOpprinnelse.INNEVÆRENDE),
                     resultater = setOf(
@@ -320,7 +320,7 @@ class BehandlingResultatMedKravTest {
                     ytelseSlutt = inneværendeMåned()
                 ),
                 YtelsePerson(
-                    personIdent = barn1Ident,
+                    aktør = barn1Aktør,
                     ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                     kravOpprinnelse = listOf(KravOpprinnelse.TIDLIGERE),
                     resultater = setOf(YtelsePersonResultat.ENDRET, YtelsePersonResultat.OPPHØRT),
@@ -337,7 +337,7 @@ class BehandlingResultatMedKravTest {
         val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
             listOf(
                 YtelsePerson(
-                    personIdent = barn2Ident,
+                    aktør = barn2Aktør,
                     ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                     kravOpprinnelse = listOf(KravOpprinnelse.INNEVÆRENDE),
                     resultater = setOf(
@@ -347,7 +347,7 @@ class BehandlingResultatMedKravTest {
                     ytelseSlutt = inneværendeMåned()
                 ),
                 YtelsePerson(
-                    personIdent = barn1Ident,
+                    aktør = barn1Aktør,
                     ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                     kravOpprinnelse = listOf(KravOpprinnelse.TIDLIGERE),
                     resultater = setOf(YtelsePersonResultat.OPPHØRT),
@@ -365,7 +365,7 @@ class BehandlingResultatMedKravTest {
         val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
             listOf(
                 YtelsePerson(
-                    personIdent = barn1Ident,
+                    aktør = barn1Aktør,
                     ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                     kravOpprinnelse = listOf(KravOpprinnelse.INNEVÆRENDE),
                     resultater = setOf(YtelsePersonResultat.AVSLÅTT),
@@ -381,14 +381,14 @@ class BehandlingResultatMedKravTest {
         val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
             listOf(
                 YtelsePerson(
-                    personIdent = barn1Ident,
+                    aktør = barn1Aktør,
                     ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                     kravOpprinnelse = listOf(KravOpprinnelse.TIDLIGERE),
                     resultater = setOf(),
                     ytelseSlutt = defaultYtelseSluttForAvslått
                 ),
                 YtelsePerson(
-                    personIdent = barn2Ident,
+                    aktør = barn2Aktør,
                     ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                     kravOpprinnelse = listOf(KravOpprinnelse.INNEVÆRENDE),
                     resultater = setOf(YtelsePersonResultat.AVSLÅTT),
@@ -404,14 +404,14 @@ class BehandlingResultatMedKravTest {
         val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
             listOf(
                 YtelsePerson(
-                    personIdent = barn1Ident,
+                    aktør = barn1Aktør,
                     ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                     kravOpprinnelse = listOf(KravOpprinnelse.TIDLIGERE),
                     resultater = setOf(YtelsePersonResultat.OPPHØRT),
                     ytelseSlutt = inneværendeMåned()
                 ),
                 YtelsePerson(
-                    personIdent = barn2Ident,
+                    aktør = barn2Aktør,
                     ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                     kravOpprinnelse = listOf(KravOpprinnelse.INNEVÆRENDE),
                     resultater = setOf(YtelsePersonResultat.AVSLÅTT),
@@ -427,14 +427,14 @@ class BehandlingResultatMedKravTest {
         val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
             listOf(
                 YtelsePerson(
-                    personIdent = barn1Ident,
+                    aktør = barn1Aktør,
                     ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                     kravOpprinnelse = listOf(KravOpprinnelse.TIDLIGERE),
                     resultater = setOf(YtelsePersonResultat.ENDRET),
                     ytelseSlutt = defaultYtelseSluttForLøpende,
                 ),
                 YtelsePerson(
-                    personIdent = barn2Ident,
+                    aktør = barn2Aktør,
                     ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                     kravOpprinnelse = listOf(KravOpprinnelse.INNEVÆRENDE),
                     resultater = setOf(YtelsePersonResultat.AVSLÅTT),
@@ -450,14 +450,14 @@ class BehandlingResultatMedKravTest {
         val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
             listOf(
                 YtelsePerson(
-                    personIdent = barn1Ident,
+                    aktør = barn1Aktør,
                     ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                     kravOpprinnelse = listOf(KravOpprinnelse.TIDLIGERE),
                     resultater = setOf(YtelsePersonResultat.ENDRET, YtelsePersonResultat.OPPHØRT),
                     ytelseSlutt = inneværendeMåned()
                 ),
                 YtelsePerson(
-                    personIdent = barn2Ident,
+                    aktør = barn2Aktør,
                     ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                     kravOpprinnelse = listOf(KravOpprinnelse.INNEVÆRENDE),
                     resultater = setOf(YtelsePersonResultat.AVSLÅTT),
@@ -473,7 +473,7 @@ class BehandlingResultatMedKravTest {
         val behandlingsresultat = BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
             listOf(
                 YtelsePerson(
-                    personIdent = barn1Ident,
+                    aktør = barn1Aktør,
                     ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                     kravOpprinnelse = listOf(KravOpprinnelse.TIDLIGERE, KravOpprinnelse.INNEVÆRENDE),
                     resultater = setOf(),

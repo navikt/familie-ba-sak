@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonInfo
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
+import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.sikkerhet.validering.PersontilgangConstraint
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -24,14 +25,20 @@ import org.springframework.web.bind.annotation.RestController
 class PersonController(
     private val personopplysningerService: PersonopplysningerService,
     private val persongrunnlagService: PersongrunnlagService,
+    private val personidentService: PersonidentService,
     private val integrasjonClient: IntegrasjonClient,
     private val utvidetBehandlingService: UtvidetBehandlingService
 ) {
 
     @GetMapping
     fun hentPerson(@RequestHeader personIdent: String): ResponseEntity<Ressurs<RestPersonInfo>> {
-        val personinfo = integrasjonClient.hentMaskertPersonInfoVedManglendeTilgang(personIdent)
-            ?: personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(personIdent)
+        val aktør = personidentService.hentOgLagreAktør(personIdent)
+        val personinfo = integrasjonClient.hentMaskertPersonInfoVedManglendeTilgang(aktør)
+            ?: personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(
+                personidentService.hentOgLagreAktør(
+                    personIdent
+                )
+            )
                 .tilRestPersonInfo(personIdent)
         return ResponseEntity.ok(Ressurs.success(personinfo))
     }
@@ -39,7 +46,7 @@ class PersonController(
     @GetMapping(path = ["/enkel"])
     @PersontilgangConstraint
     fun hentPersonEnkel(@RequestHeader personIdent: String): ResponseEntity<Ressurs<RestPersonInfo>> {
-        val personinfo = personopplysningerService.hentPersoninfoEnkel(personIdent)
+        val personinfo = personopplysningerService.hentPersoninfoEnkel(personidentService.hentOgLagreAktør(personIdent))
         return ResponseEntity.ok(Ressurs.success(personinfo.tilRestPersonInfo(personIdent)))
     }
 

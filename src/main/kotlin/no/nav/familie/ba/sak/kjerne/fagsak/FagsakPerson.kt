@@ -36,6 +36,7 @@ data class FagsakPerson(
 
     @Embedded
     @AttributeOverrides(AttributeOverride(name = "ident", column = Column(name = "ident", updatable = false)))
+    // TODO: Robustgjøring dnr/fnr, fjern ved contract.
     val personIdent: PersonIdent,
 
     @Column(name = "opprettet_av", nullable = false, updatable = false)

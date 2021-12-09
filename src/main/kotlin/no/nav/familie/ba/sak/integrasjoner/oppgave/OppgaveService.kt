@@ -6,10 +6,10 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.DbOppgave
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.OppgaveRepository
-import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
+import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
@@ -19,7 +19,6 @@ import no.nav.familie.kontrakter.felles.oppgave.OppgaveIdentV2
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveResponse
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgaveRequest
-import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -29,7 +28,7 @@ import java.time.format.DateTimeFormatter
 @Service
 class OppgaveService(
     private val integrasjonClient: IntegrasjonClient,
-    private val personopplysningerService: PersonopplysningerService,
+    private val personidentService: PersonidentService,
     private val behandlingRepository: BehandlingRepository,
     private val oppgaveRepository: OppgaveRepository,
     private val arbeidsfordelingPåBehandlingRepository: ArbeidsfordelingPåBehandlingRepository
@@ -68,10 +67,8 @@ class OppgaveService(
                 logger.warn("Fant ikke behandlende enhet på behandling ${behandling.id} ved opprettelse av $oppgavetype-oppgave.")
             }
 
-            val aktorId =
-                personopplysningerService.hentOgLagreAktørId(Ident(behandling.fagsak.hentAktivIdent().ident))
             val opprettOppgave = OpprettOppgaveRequest(
-                ident = OppgaveIdentV2(ident = aktorId.aktørId, gruppe = IdentGruppe.AKTOERID),
+                ident = OppgaveIdentV2(ident = behandling.fagsak.aktør.aktørId, gruppe = IdentGruppe.AKTOERID),
                 saksId = fagsakId.toString(),
                 tema = Tema.BAR,
                 oppgavetype = oppgavetype,
