@@ -19,7 +19,7 @@ data class RestPerson(
 fun Person.tilRestPerson() = RestPerson(
     type = this.type,
     fødselsdato = this.fødselsdato,
-    personIdent = this.aktør.aktivIdent(),
+    personIdent = this.aktør.aktivFødselsnummer(),
     navn = this.navn,
     kjønn = this.kjønn,
     registerhistorikk = this.tilRestRegisterhistorikk(),

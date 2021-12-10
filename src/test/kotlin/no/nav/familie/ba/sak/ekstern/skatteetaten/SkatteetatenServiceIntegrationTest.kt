@@ -337,7 +337,7 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
     }
 
     fun lagerTilkjentYtelse(tilkjentYtelse: PerioderTestData) {
-        val fødselsnummer = tilkjentYtelse.aktør.aktivIdent()
+        val fødselsnummer = tilkjentYtelse.aktør.aktivFødselsnummer()
         val aktør = tilkjentYtelse.aktør
         personidentService.hentOgLagreAktør(fødselsnummer)
 

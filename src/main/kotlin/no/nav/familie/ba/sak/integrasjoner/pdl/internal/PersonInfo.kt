@@ -45,7 +45,7 @@ data class ForelderBarnRelasjon(
     }
 
     fun toSecureString(): String {
-        return "ForelderBarnRelasjon(personIdent=${aktør.aktivIdent()}, relasjonsrolle=$relasjonsrolle, navn=XXX, fødselsdato=$fødselsdato)"
+        return "ForelderBarnRelasjon(personIdent=${aktør.aktivFødselsnummer()}, relasjonsrolle=$relasjonsrolle, navn=XXX, fødselsdato=$fødselsdato)"
     }
 }
 

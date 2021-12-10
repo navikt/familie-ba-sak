@@ -37,6 +37,6 @@ internal class PersongrunnlagServiceTest {
         every { persongrunnlagService.finnNyeBarn(any(), any()) } answers { callOriginal() }
 
         val nye = persongrunnlagService.finnNyeBarn(forrigeBehandling = forrigeBehandling, behandling = behandling)
-        assertEquals(nyttbarn, nye.singleOrNull()!!.aktør.aktivIdent())
+        assertEquals(nyttbarn, nye.singleOrNull()!!.aktør.aktivFødselsnummer())
     }
 }

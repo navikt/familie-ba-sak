@@ -27,7 +27,7 @@ class SystemOnlyPdlRestClient(
 
     fun hentAdressebeskyttelse(aktør: Aktør): List<Adressebeskyttelse> {
         val pdlPersonRequest = PdlPersonRequest(
-            variables = PdlPersonRequestVariables(aktør.aktivIdent()),
+            variables = PdlPersonRequestVariables(aktør.aktivFødselsnummer()),
             query = hentGraphqlQuery("hent-adressebeskyttelse")
         )
 
@@ -36,7 +36,7 @@ class SystemOnlyPdlRestClient(
         } catch (e: Exception) {
             throw Feil(
                 message = "Feil ved oppslag på person. Gav feil: ${e.message}",
-                frontendFeilmelding = "Feil oppsto ved oppslag på person ${aktør.aktivIdent()}",
+                frontendFeilmelding = "Feil oppsto ved oppslag på person ${aktør.aktivFødselsnummer()}",
                 httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
                 throwable = e
             )
@@ -45,7 +45,7 @@ class SystemOnlyPdlRestClient(
         if (!response.harFeil()) return response.data.person!!.adressebeskyttelse
         throw Feil(
             message = "Fant ikke data på person: ${response.errorMessages()}",
-            frontendFeilmelding = "Fant ikke data for person ${aktør.aktivIdent()}: ${response.errorMessages()}",
+            frontendFeilmelding = "Fant ikke data for person ${aktør.aktivFødselsnummer()}: ${response.errorMessages()}",
             httpStatus = HttpStatus.NOT_FOUND
         )
     }

@@ -87,7 +87,7 @@ class VelgFagSystemService(
     internal fun harMorGyldigNorskstatsborger(morsAktør: Aktør): Boolean {
         val gjeldendeStatsborgerskap = personopplysningerService.hentGjeldendeStatsborgerskap(morsAktør)
 
-        secureLogger.info("Gjeldende statsborgerskap for ${morsAktør.aktivIdent()}=(${gjeldendeStatsborgerskap.land}, bekreftelsesdato=${gjeldendeStatsborgerskap.bekreftelsesdato}, gyldigFom=${gjeldendeStatsborgerskap.gyldigFraOgMed}, gyldigTom=${gjeldendeStatsborgerskap.gyldigTilOgMed})")
+        secureLogger.info("Gjeldende statsborgerskap for ${morsAktør.aktivFødselsnummer()}=(${gjeldendeStatsborgerskap.land}, bekreftelsesdato=${gjeldendeStatsborgerskap.bekreftelsesdato}, gyldigFom=${gjeldendeStatsborgerskap.gyldigFraOgMed}, gyldigTom=${gjeldendeStatsborgerskap.gyldigTilOgMed})")
         return gjeldendeStatsborgerskap.land == "NOR"
     }
 

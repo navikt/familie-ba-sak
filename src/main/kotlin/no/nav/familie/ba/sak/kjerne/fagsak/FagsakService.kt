@@ -104,7 +104,8 @@ class FagsakService(
 
             // TODO: robustgjøring dnr/fnr fjern opprettelse av fagsak person ved contract.
             fagsak = Fagsak(aktør = aktør).also {
-                it.søkerIdenter = setOf(FagsakPerson(personIdent = PersonIdent(aktør.aktivIdent()), fagsak = it))
+                it.søkerIdenter =
+                    setOf(FagsakPerson(personIdent = PersonIdent(aktør.aktivFødselsnummer()), fagsak = it))
                 lagre(it)
             }
             if (fraAutomatiskBehandling) {
@@ -202,7 +203,7 @@ class FagsakService(
         return RestBaseFagsak(
             opprettetTidspunkt = fagsak.opprettetTidspunkt,
             id = fagsak.id,
-            søkerFødselsnummer = fagsak.aktør.aktivIdent(),
+            søkerFødselsnummer = fagsak.aktør.aktivFødselsnummer(),
             status = fagsak.status,
             underBehandling =
             if (aktivBehandling == null)
@@ -253,13 +254,13 @@ class FagsakService(
 
         val erBarn = Period.between(personInfoMedRelasjoner.fødselsdato, LocalDate.now()).years < 18
 
-        if (assosierteFagsakDeltagere.find { it.ident == aktør.aktivIdent() } == null) {
+        if (assosierteFagsakDeltagere.find { it.ident == aktør.aktivFødselsnummer() } == null) {
             val fagsakId =
                 if (!erBarn) fagsakRepository.finnFagsakForAktør(aktør)?.id else null
             assosierteFagsakDeltagere.add(
                 RestFagsakDeltager(
                     navn = personInfoMedRelasjoner.navn,
-                    ident = aktør.aktivIdent(),
+                    ident = aktør.aktivFødselsnummer(),
                     // we set the role to unknown when the person is not a child because the person may not have a child
                     rolle = if (erBarn) FagsakDeltagerRolle.BARN else FagsakDeltagerRolle.UKJENT,
                     kjønn = personInfoMedRelasjoner.kjønn,
@@ -275,7 +276,7 @@ class FagsakService(
                     relasjon.relasjonsrolle == FORELDERBARNRELASJONROLLE.MEDMOR
             }.forEach { relasjon ->
                 if (assosierteFagsakDeltagere.find { fagsakDeltager ->
-                    fagsakDeltager.ident == relasjon.aktør.aktivIdent()
+                    fagsakDeltager.ident == relasjon.aktør.aktivFødselsnummer()
                 } == null
                 ) {
                     val maskertForelder =
@@ -297,7 +298,7 @@ class FagsakService(
                         assosierteFagsakDeltagere.add(
                             RestFagsakDeltager(
                                 navn = forelderInfo.navn,
-                                ident = relasjon.aktør.aktivIdent(),
+                                ident = relasjon.aktør.aktivFødselsnummer(),
                                 rolle = FagsakDeltagerRolle.FORELDER,
                                 kjønn = forelderInfo.kjønn,
                                 fagsakId = fagsak?.id
@@ -339,7 +340,7 @@ class FagsakService(
                     if (behandling.fagsak.aktør == aktør) {
                         assosierteFagsakDeltagerMap[behandling.fagsak.id] = RestFagsakDeltager(
                             navn = personInfoMedRelasjoner.navn,
-                            ident = behandling.fagsak.aktør.aktivIdent(),
+                            ident = behandling.fagsak.aktør.aktivFødselsnummer(),
                             rolle = FagsakDeltagerRolle.FORELDER,
                             kjønn = personInfoMedRelasjoner.kjønn,
                             fagsakId = behandling.fagsak.id
@@ -363,7 +364,7 @@ class FagsakService(
 
                             assosierteFagsakDeltagerMap[behandling.fagsak.id] = RestFagsakDeltager(
                                 navn = personinfo.navn,
-                                ident = behandling.fagsak.aktør.aktivIdent(),
+                                ident = behandling.fagsak.aktør.aktivFødselsnummer(),
                                 rolle = FagsakDeltagerRolle.FORELDER,
                                 kjønn = personinfo.kjønn,
                                 fagsakId = behandling.fagsak.id
@@ -379,7 +380,8 @@ class FagsakService(
     }
 
     private fun hentMaskertFagsakdeltakerVedManglendeTilgang(aktør: Aktør): RestFagsakDeltager? {
-        val harTilgang = integrasjonClient.sjekkTilgangTilPersoner(listOf(aktør.aktivIdent())).first().harTilgang
+        val harTilgang =
+            integrasjonClient.sjekkTilgangTilPersoner(listOf(aktør.aktivFødselsnummer())).first().harTilgang
         return if (!harTilgang) {
             val adressebeskyttelse = personopplysningerService.hentAdressebeskyttelseSomSystembruker(aktør)
             RestFagsakDeltager(
@@ -396,7 +398,7 @@ class FagsakService(
         hentFagsakPåPerson(aktør)?.also { fagsak ->
             fagsakDeltagere.add(
                 RestFagsakDeltager(
-                    ident = aktør.aktivIdent(),
+                    ident = aktør.aktivFødselsnummer(),
                     fagsakId = fagsak.id,
                     fagsakStatus = fagsak.status,
                     rolle = FagsakDeltagerRolle.FORELDER
@@ -408,7 +410,7 @@ class FagsakService(
             hentFagsakerPåPerson(barnsAktørId).toSet().forEach { fagsak ->
                 fagsakDeltagere.add(
                     RestFagsakDeltager(
-                        ident = barnsAktørId.aktivIdent(),
+                        ident = barnsAktørId.aktivFødselsnummer(),
                         fagsakId = fagsak.id,
                         fagsakStatus = fagsak.status,
                         rolle = FagsakDeltagerRolle.BARN

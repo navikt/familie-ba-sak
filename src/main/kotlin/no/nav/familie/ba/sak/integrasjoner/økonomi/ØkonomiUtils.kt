@@ -19,7 +19,7 @@ object ØkonomiUtils {
     fun kjedeinndelteAndeler(andelerForInndeling: List<AndelTilkjentYtelse>): Map<String, List<AndelTilkjentYtelse>> {
         val (personMedSmåbarnstilleggAndeler, personerMedAndeler) =
             andelerForInndeling.partition { it.type == YtelseType.SMÅBARNSTILLEGG }.toList().map {
-                it.groupBy { andel -> andel.aktør.aktivIdent() }
+                it.groupBy { andel -> andel.aktør.aktivFødselsnummer() }
             }
         val andelerForKjeding = mutableMapOf<String, List<AndelTilkjentYtelse>>()
         andelerForKjeding.putAll(personerMedAndeler)
