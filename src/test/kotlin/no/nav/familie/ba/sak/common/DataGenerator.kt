@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.common
 
 import io.mockk.mockk
 import no.nav.commons.foedselsnummer.testutils.FoedselsnummerGenerator
+import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPerson
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
@@ -98,7 +99,16 @@ import kotlin.random.Random
 val fødselsnummerGenerator = FoedselsnummerGenerator()
 
 fun randomFnr(): String = fødselsnummerGenerator.foedselsnummer().asString
-fun randomAktørId(personIdenter: List<String> = emptyList()): Aktør = Aktør(
+fun randomPersonident(aktør: Aktør, fnr: String = randomFnr()): Personident =
+    Personident(fødselsnummer = fnr, aktør = aktør)
+
+fun randomAktørId(fnr: String = randomFnr()): Aktør =
+    Aktør(Random.nextLong(1000_000_000_000, 31_121_299_99999).toString()).also {
+        it.personidenter.add(
+            randomPersonident(it, fnr)
+        )
+    }
+/*fun randomAktørId(personIdenter: List<String> = emptyList()): Aktør = Aktør(
     aktørId = Random.nextLong(1000_000_000_000, 31_121_299_99999).toString(),
 ).also {
     it.personidenter.addAll(
@@ -110,7 +120,7 @@ fun randomAktørId(personIdenter: List<String> = emptyList()): Aktør = Aktør(
             )
         }
     )
-}
+}*/
 
 private var gjeldendeVedtakId: Long = abs(Random.nextLong(10000000))
 private var gjeldendeVedtakBegrunnelseId: Long = abs(Random.nextLong(10000000))
@@ -145,7 +155,7 @@ fun nesteUtvidetVedtaksperiodeId(): Long {
 }
 
 fun defaultFagsak() = Fagsak(
-    1, aktør = Aktør("2")
+    1, aktør = tilAktør(randomFnr())
 ).also {
     it.søkerIdenter =
         setOf(
@@ -181,35 +191,39 @@ fun tilfeldigPerson(
     fødselsdato: LocalDate = LocalDate.now(),
     personType: PersonType = PersonType.BARN,
     kjønn: Kjønn = Kjønn.MANN,
-    personIdent: PersonIdent = PersonIdent(randomFnr())
-) = Person(
-    id = nestePersonId(),
-    aktør = randomAktørId(listOf(personIdent.ident)),
-    personIdent = personIdent,
-    fødselsdato = fødselsdato,
-    type = personType,
-    personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 0),
-    navn = "",
-    kjønn = kjønn,
-    målform = Målform.NB
-).apply { sivilstander = listOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this)) }
+    personIdent: PersonIdent = PersonIdent(randomFnr()),
+    aktør: Aktør = tilAktør(personIdent.ident),
+) =
+    Person(
+        id = nestePersonId(),
+        aktør = aktør,
+        personIdent = personIdent,
+        fødselsdato = fødselsdato,
+        type = personType,
+        personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 0),
+        navn = "",
+        kjønn = kjønn,
+        målform = Målform.NB
+    ).apply { sivilstander = listOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this)) }
 
 fun tilfeldigSøker(
     fødselsdato: LocalDate = LocalDate.now(),
     personType: PersonType = PersonType.SØKER,
     kjønn: Kjønn = Kjønn.MANN,
-    personIdent: PersonIdent = PersonIdent(randomFnr())
-) = Person(
-    id = nestePersonId(),
-    aktør = randomAktørId(listOf(personIdent.ident)),
-    personIdent = personIdent,
-    fødselsdato = fødselsdato,
-    type = personType,
-    personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 0),
-    navn = "",
-    kjønn = kjønn,
-    målform = Målform.NB
-).apply { sivilstander = listOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this)) }
+    personIdent: PersonIdent = PersonIdent(randomFnr()),
+    aktør: Aktør = tilAktør(personIdent.ident),
+) =
+    Person(
+        id = nestePersonId(),
+        aktør = aktør,
+        personIdent = personIdent,
+        fødselsdato = fødselsdato,
+        type = personType,
+        personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 0),
+        navn = "",
+        kjønn = kjønn,
+        målform = Målform.NB
+    ).apply { sivilstander = listOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this)) }
 
 fun lagVedtak(behandling: Behandling = lagBehandling()) =
     Vedtak(
@@ -225,7 +239,7 @@ fun lagAndelTilkjentYtelse(
     beløp: Int = sats(ytelseType),
     behandling: Behandling = lagBehandling(),
     person: Person = tilfeldigPerson(),
-    aktør: Aktør = Aktør(person.personIdent.ident),
+    aktør: Aktør = person.aktør,
     periodeIdOffset: Long? = null,
     forrigeperiodeIdOffset: Long? = null,
     tilkjentYtelse: TilkjentYtelse? = null,
@@ -234,7 +248,7 @@ fun lagAndelTilkjentYtelse(
 ): AndelTilkjentYtelse {
 
     return AndelTilkjentYtelse(
-        personIdent = person.personIdent.ident,
+        personIdent = aktør.aktivFødselsnummer(),
         aktør = aktør,
         behandlingId = behandling.id,
         tilkjentYtelse = tilkjentYtelse ?: lagInitiellTilkjentYtelse(behandling),
@@ -263,7 +277,7 @@ fun lagAndelTilkjentYtelseUtvidet(
 ): AndelTilkjentYtelse {
 
     return AndelTilkjentYtelse(
-        personIdent = person.personIdent.ident,
+        personIdent = person.aktør.aktivFødselsnummer(),
         aktør = person.aktør,
         behandlingId = behandling.id,
         tilkjentYtelse = tilkjentYtelse ?: lagInitiellTilkjentYtelse(behandling),
@@ -300,20 +314,22 @@ fun lagTestPersonopplysningGrunnlag(
     søkerPersonIdent: String,
     barnasIdenter: List<String>,
     barnFødselsdato: LocalDate = LocalDate.of(2019, 1, 1),
-    søkerAktør: Aktør = randomAktørId().also {
+    søkerAktør: Aktør = tilAktør(søkerPersonIdent).also {
         it.personidenter.add(
             Personident(
                 fødselsnummer = søkerPersonIdent,
-                aktør = it
+                aktør = it,
+                aktiv = søkerPersonIdent == it.personidenter.first().fødselsnummer
             )
         )
     },
     barnAktør: List<Aktør> = barnasIdenter.map { fødselsnummer ->
-        randomAktørId().also {
+        tilAktør(fødselsnummer).also {
             it.personidenter.add(
                 Personident(
                     fødselsnummer = fødselsnummer,
-                    aktør = it
+                    aktør = it,
+                    aktiv = fødselsnummer == it.personidenter.first().fødselsnummer
                 )
             )
         }
@@ -326,8 +342,8 @@ fun lagTestPersonopplysningGrunnlag(
     )
 
     val søker = Person(
-        personIdent = PersonIdent(søkerPersonIdent),
         aktør = søkerAktør,
+        personIdent = PersonIdent(søkerPersonIdent),
         type = PersonType.SØKER,
         personopplysningGrunnlag = personopplysningGrunnlag,
         fødselsdato = LocalDate.of(2019, 1, 1),
@@ -672,7 +688,7 @@ fun kjørStegprosessForFGB(
                 behandlingsId = behandlingEtterBeslutteVedtak.id,
                 vedtaksId = vedtak!!.id,
                 saksbehandlerId = "System",
-                personIdent = søkerFnr
+                personIdent = behandlingEtterBeslutteVedtak.fagsak.aktør.aktivFødselsnummer()
             )
         )
     if (tilSteg == StegType.IVERKSETT_MOT_OPPDRAG) return behandlingEtterIverksetteVedtak
@@ -684,6 +700,7 @@ fun kjørStegprosessForFGB(
                 statusFraOppdragDTO = StatusFraOppdragDTO(
                     fagsystem = FAGSYSTEM,
                     personIdent = søkerFnr,
+                    aktørId = behandlingEtterIverksetteVedtak.fagsak.aktør.aktivFødselsnummer(),
                     behandlingsId = behandlingEtterIverksetteVedtak.id,
                     vedtaksId = vedtak.id
                 ),
@@ -782,7 +799,7 @@ fun kjørStegprosessForRevurderingÅrligKontroll(
                 behandlingsId = behandlingEtterBeslutteVedtak.id,
                 vedtaksId = vedtak!!.id,
                 saksbehandlerId = "System",
-                personIdent = søkerFnr
+                personIdent = behandlingEtterBeslutteVedtak.fagsak.aktør.aktivFødselsnummer(),
             )
         )
     if (tilSteg == StegType.IVERKSETT_MOT_OPPDRAG) return behandlingEtterIverksetteVedtak
@@ -794,6 +811,7 @@ fun kjørStegprosessForRevurderingÅrligKontroll(
                 statusFraOppdragDTO = StatusFraOppdragDTO(
                     fagsystem = FAGSYSTEM,
                     personIdent = søkerFnr,
+                    aktørId = behandlingEtterIverksetteVedtak.fagsak.aktør.aktørId,
                     behandlingsId = behandlingEtterIverksetteVedtak.id,
                     vedtaksId = vedtak.id
                 ),
@@ -866,7 +884,7 @@ fun lagUtbetalingsperiodeDetalj(
 fun lagVedtaksbegrunnelse(
     vedtakBegrunnelseSpesifikasjon: VedtakBegrunnelseSpesifikasjon =
         VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_SØKER_OG_BARN_BOSATT_I_RIKET,
-    personIdenter: List<String> = listOf(tilfeldigPerson().personIdent.ident),
+    personIdenter: List<String> = listOf(tilfeldigPerson().aktør.aktivFødselsnummer()),
     vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser = mockk()
 ) = Vedtaksbegrunnelse(
     vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
@@ -894,7 +912,7 @@ fun lagRestVedtaksbegrunnelse(
     vedtakBegrunnelseSpesifikasjon: VedtakBegrunnelseSpesifikasjon =
         VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_SØKER_OG_BARN_BOSATT_I_RIKET,
     vedtakBegrunnelseType: VedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET,
-    personIdenter: List<String> = listOf(tilfeldigPerson().personIdent.ident),
+    personIdenter: List<String> = listOf(tilfeldigPerson().aktør.aktivFødselsnummer()),
 ) = RestVedtaksbegrunnelse(
     vedtakBegrunnelseSpesifikasjon = vedtakBegrunnelseSpesifikasjon,
     vedtakBegrunnelseType = vedtakBegrunnelseType,
@@ -988,14 +1006,14 @@ fun lagEndretUtbetalingAndel(
     )
 
 fun lagPerson(
-    aktør: Aktør? = null,
     personIdent: PersonIdent = PersonIdent(randomFnr()),
+    aktør: Aktør = tilAktør(personIdent.ident),
     type: PersonType = PersonType.SØKER,
     personopplysningGrunnlag: PersonopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 0),
     fødselsdato: LocalDate = LocalDate.now().minusYears(19),
     kjønn: Kjønn = Kjønn.KVINNE
 ) = Person(
-    aktør = aktør ?: randomAktørId(listOf(personIdent.ident)),
+    aktør = aktør,
     personIdent = personIdent,
     type = type,
     personopplysningGrunnlag = personopplysningGrunnlag,

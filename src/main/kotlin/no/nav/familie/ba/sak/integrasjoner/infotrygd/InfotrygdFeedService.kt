@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.integrasjoner.infotrygd
 
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -17,9 +18,9 @@ class InfotrygdFeedService(
     }
 
     @Transactional
-    fun sendStartBehandlingTilInfotrygdFeed(fnrStoenadsmottaker: String) {
+    fun sendStartBehandlingTilInfotrygdFeed(aktørStoenadsmottaker: Aktør) {
         logger.info("Send startBehandling til Infotrygd.")
-        opprettTaskService.opprettSendStartBehandlingTilInfotrygdTask(fnrStoenadsmottaker)
+        opprettTaskService.opprettSendStartBehandlingTilInfotrygdTask(aktørStoenadsmottaker)
     }
 
     companion object {

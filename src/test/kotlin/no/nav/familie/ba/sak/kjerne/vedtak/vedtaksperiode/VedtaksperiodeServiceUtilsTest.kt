@@ -77,7 +77,7 @@ class VedtaksperiodeServiceUtilsTest {
         Assertions.assertEquals(1, endredeUtbetalingsperioderMedBegrunnelser.size)
 
         Assertions.assertEquals(
-            setOf(person2.personIdent.ident, person1.personIdent.ident),
+            setOf(person2.aktør.aktivFødselsnummer(), person1.aktør.aktivFødselsnummer()),
             endredeUtbetalingsperioderMedBegrunnelser.single().begrunnelser.single().personIdenter.toSet()
         )
     }
@@ -195,7 +195,7 @@ class VedtaksperiodeServiceUtilsTest {
                 }
 
         Assertions.assertEquals(
-            listOf(person1.personIdent.ident),
+            listOf(person1.aktør.aktivFødselsnummer()),
             begrunnelsePerson1?.personIdenter
         )
     }
@@ -327,12 +327,12 @@ class VedtaksperiodeServiceUtilsTest {
         val triggesAv = TriggesAv(vilkår = setOf(Vilkår.UTVIDET_BARNETRYGD))
         val vedtaksperiodeMedBegrunnelser = lagVedtaksperiodeMedBegrunnelser(type = Vedtaksperiodetype.UTBETALING)
         val vilkårsvurdering = lagVilkårsvurdering(
-            søkerFnr = søker.personIdent.ident,
-            søkerAktør = søker.hentAktørId(),
+            søkerFnr = søker.aktør.aktivFødselsnummer(),
+            søkerAktør = søker.aktør,
             behandling = behandling,
             resultat = Resultat.OPPFYLT
         )
-        val identerMedUtbetaling = listOf(barn.personIdent.ident)
+        val identerMedUtbetaling = listOf(barn.aktør.aktivFødselsnummer())
 
         val personidenterForBegrunnelse = hentPersonidenterGjeldendeForBegrunnelse(
             triggesAv = triggesAv,
@@ -347,7 +347,10 @@ class VedtaksperiodeServiceUtilsTest {
             )
         )
 
-        Assertions.assertEquals(listOf(barn.personIdent.ident, søker.personIdent.ident), personidenterForBegrunnelse)
+        Assertions.assertEquals(
+            listOf(barn.aktør.aktivFødselsnummer(), søker.aktør.aktivFødselsnummer()),
+            personidenterForBegrunnelse
+        )
     }
 
     @Test
@@ -371,13 +374,13 @@ class VedtaksperiodeServiceUtilsTest {
             tom = tom,
         )
         val vilkårsvurdering = lagVilkårsvurdering(
-            søkerFnr = søker.personIdent.ident,
-            søkerAktør = søker.hentAktørId(),
+            søkerFnr = søker.aktør.aktivFødselsnummer(),
+            søkerAktør = søker.aktør,
             behandling = behandling,
             resultat = Resultat.OPPFYLT
         )
 
-        val identerMedUtbetaling = listOf(barn1.personIdent.ident)
+        val identerMedUtbetaling = listOf(barn1.aktør.aktivFødselsnummer())
         val endredeUtbetalingAndeler = listOf(
             lagEndretUtbetalingAndel(
                 person = barn2,
@@ -400,7 +403,7 @@ class VedtaksperiodeServiceUtilsTest {
         )
 
         Assertions.assertEquals(
-            setOf(barn1.personIdent.ident, barn2.personIdent.ident, søker.personIdent.ident),
+            setOf(barn1.aktør.aktivFødselsnummer(), barn2.aktør.aktivFødselsnummer(), søker.aktør.aktivFødselsnummer()),
             personidenterForBegrunnelse.toSet()
         )
     }

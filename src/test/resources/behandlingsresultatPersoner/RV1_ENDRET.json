@@ -4,6 +4,10 @@
   "personer": [
     {
       "personType": "BARN",
+      "aktør": {
+        "fødselsnummer": "12345678911",
+        "aktørId": "1234567891100"
+      },
       "søktForPerson": false,
       "eksplisittAvslått": false,
       "forrigeAndeler": [

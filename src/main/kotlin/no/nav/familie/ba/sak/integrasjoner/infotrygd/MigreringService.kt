@@ -23,6 +23,8 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
@@ -57,6 +59,7 @@ class MigreringService(
     private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
     private val fagsakService: FagsakService,
     private val behandlingService: BehandlingService,
+    private val personidentService: PersonidentService,
     private val stegService: StegService,
     private val vedtakService: VedtakService,
     private val taskRepository: TaskRepositoryWrapper,
@@ -81,7 +84,11 @@ class MigreringService(
             secureLog.info("Migrering: fant løpende sak for $personIdent sak=${løpendeSak.id} stønad=${løpendeSak.stønad?.id}")
 
             val barnasIdenter = finnBarnMedLøpendeStønad(løpendeSak)
-            validerAtBarnErIRelasjonMedPersonident(personIdent, barnasIdenter)
+
+            val personAktør = personidentService.hentOgLagreAktør(personIdent)
+            val barnasAktør = personidentService.hentOgLagreAktørIder(barnasIdenter)
+
+            validerAtBarnErIRelasjonMedPersonident(personAktør, barnasAktør)
 
             fagsakService.hentEllerOpprettFagsakForPersonIdent(personIdent)
                 .also { kastFeilDersomAlleredeMigrert(it) }
@@ -116,7 +123,11 @@ class MigreringService(
                 behandlingId = behandlingEtterVilkårsvurdering.id,
                 infotrygdStønadId = løpendeSak.stønad?.id,
                 infotrygdSakId = løpendeSak.id,
-                virkningFom = førsteUtbetalingsperiode.fom.toYearMonth()
+                virkningFom = førsteUtbetalingsperiode.fom.toYearMonth(),
+                infotrygdTkNr = løpendeSak.tkNr,
+                infotrygdIverksattFom = løpendeSak.stønad?.iverksattFom,
+                infotrygdVirkningFom = løpendeSak.stønad?.virkningFom,
+                infotrygdRegion = løpendeSak.region
             )
             secureLog.info("Ferdig migrert $personIdent. Response til familie-ba-migrering: $migreringResponseDto")
             return migreringResponseDto
@@ -126,15 +137,17 @@ class MigreringService(
         }
     }
 
-    private fun validerAtBarnErIRelasjonMedPersonident(personIdent: String, barnasIdenter: List<String>) {
-        val listeBarnFraPdl = pdlRestClient.hentForelderBarnRelasjon(personIdent)
+    private fun validerAtBarnErIRelasjonMedPersonident(personAktør: Aktør, barnasAktør: List<Aktør>) {
+        val barnasIdenter = barnasAktør.map { it.aktivFødselsnummer() }
+
+        val listeBarnFraPdl = pdlRestClient.hentForelderBarnRelasjon(personAktør)
             .filter {
                 it.relatertPersonsRolle == FORELDERBARNRELASJONROLLE.BARN &&
                     FoedselsNr(it.relatertPersonsIdent).foedselsdato.isAfter(LocalDate.now().minusYears(18))
             }.map { it.relatertPersonsIdent }
-        if (barnasIdenter.size != listeBarnFraPdl.size || !listeBarnFraPdl.containsAll(barnasIdenter)) {
+        if (barnasAktør.size != listeBarnFraPdl.size || !listeBarnFraPdl.containsAll(barnasIdenter)) {
             secureLog.info(
-                "Kan ikke migrere person $personIdent fordi barn fra PDL ikke samsvarer med løpende barnetrygdbarn fra Infotrygd.\n" +
+                "Kan ikke migrere person ${personAktør.aktivFødselsnummer()} fordi barn fra PDL ikke samsvarer med løpende barnetrygdbarn fra Infotrygd.\n" +
                     "Barn fra PDL: ${listeBarnFraPdl}\n Barn fra Infotrygd: $barnasIdenter"
             )
             kastOgTellMigreringsFeil(MigreringsfeilType.DIFF_BARN_INFOTRYGD_OG_PDL)

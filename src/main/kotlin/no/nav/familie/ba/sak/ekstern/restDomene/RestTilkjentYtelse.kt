@@ -25,7 +25,7 @@ data class RestYtelsePeriode(
 
 fun PersonopplysningGrunnlag.tilRestPersonerMedAndeler(andelerKnyttetTilPersoner: List<AndelTilkjentYtelse>): List<RestPersonMedAndeler> =
     andelerKnyttetTilPersoner
-        .groupBy { it.personIdent }
+        .groupBy { it.aktør }
         .map { andelerForPerson ->
             val personId = andelerForPerson.key
             val andeler = andelerForPerson.value
@@ -34,7 +34,7 @@ fun PersonopplysningGrunnlag.tilRestPersonerMedAndeler(andelerKnyttetTilPersoner
                 andeler.groupBy { it.type }.flatMap { it.value.slåSammenBack2BackAndelsperioderMedSammeBeløp() }
 
             RestPersonMedAndeler(
-                personIdent = this.personer.find { person -> person.personIdent.ident == personId }?.personIdent?.ident,
+                personIdent = this.personer.find { person -> person.aktør == personId }?.aktør?.aktivFødselsnummer(),
                 beløp = sammenslåtteAndeler.sumOf { it.kalkulertUtbetalingsbeløp },
                 stønadFom = sammenslåtteAndeler.map { it.stønadFom }.minOrNull() ?: LocalDate.MIN.toYearMonth(),
                 stønadTom = sammenslåtteAndeler.map { it.stønadTom }.maxOrNull() ?: LocalDate.MAX.toYearMonth(),

@@ -19,11 +19,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 
-@SpringBootTest(
-    properties = [
-        "DAGLIG_KVOTE_FØDSELSHENDELSER: 0"
-    ],
-)
+@SpringBootTest
 class VelgFagsystemIntegrasjonTest(
     @Autowired val stegService: StegService,
     @Autowired val persongrunnlagService: PersongrunnlagService,
@@ -47,13 +43,6 @@ class VelgFagsystemIntegrasjonTest(
         every { infotrygdService.harLøpendeSakIInfotrygd(any(), any()) } returns true andThen false
 
         assertEquals(true, velgFagSystemService.morEllerBarnHarLøpendeSakIInfotrygd(søkerFnr, emptyList()))
-    }
-
-    @Test
-    fun `skal velge ba-sak når mor ikke har noe løpende i Infotrygd, men daglig kvote er oppbrukt`() {
-        val nyBehandling = NyBehandlingHendelse(søkerFnr, listOf(søkerFnr))
-
-        assertEquals(FagsystemRegelVurdering.SEND_TIL_INFOTRYGD, velgFagSystemService.velgFagsystem(nyBehandling))
     }
 
     @Test

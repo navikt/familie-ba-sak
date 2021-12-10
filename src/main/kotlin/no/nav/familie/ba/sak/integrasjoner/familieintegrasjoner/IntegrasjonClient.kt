@@ -588,12 +588,12 @@ class IntegrasjonClient(
         return postForEntity(tilgangUri, personIdenter)
     }
 
-    fun hentMaskertPersonInfoVedManglendeTilgang(personIdent: String): RestPersonInfo? {
-        val harTilgang = sjekkTilgangTilPersoner(listOf(personIdent)).first().harTilgang
+    fun hentMaskertPersonInfoVedManglendeTilgang(aktør: Aktør): RestPersonInfo? {
+        val harTilgang = sjekkTilgangTilPersoner(listOf(aktør.aktivFødselsnummer())).first().harTilgang
         return if (!harTilgang) {
-            val adressebeskyttelse = systemOnlyPdlRestClient.hentAdressebeskyttelse(personIdent).tilAdressebeskyttelse()
+            val adressebeskyttelse = systemOnlyPdlRestClient.hentAdressebeskyttelse(aktør).tilAdressebeskyttelse()
             RestPersonInfo(
-                personIdent = personIdent,
+                personIdent = aktør.aktivFødselsnummer(),
                 adressebeskyttelseGradering = adressebeskyttelse,
                 harTilgang = false
             )

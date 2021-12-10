@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.task
 
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.StatusFraOppdragMedTask
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.task.StatusFraOppdragTask.Companion.TASK_STEP_TYPE
@@ -29,6 +30,7 @@ import org.springframework.stereotype.Service
 class StatusFraOppdragTask(
     private val stegService: StegService,
     private val behandlingService: BehandlingService,
+    private val personidentService: PersonidentService,
     private val taskRepository: TaskRepositoryWrapper
 ) : AsyncTaskStep {
 
@@ -47,7 +49,9 @@ class StatusFraOppdragTask(
 
     override fun onCompletion(task: Task) {
         val statusFraOppdragDTO = objectMapper.readValue(task.payload, StatusFraOppdragDTO::class.java)
-        val nyTask = PubliserVedtakTask.opprettTask(statusFraOppdragDTO.personIdent, statusFraOppdragDTO.behandlingsId)
+        val personIdent = personidentService.hentOgLagreAktør(statusFraOppdragDTO.aktørId).aktivFødselsnummer()
+
+        val nyTask = PubliserVedtakTask.opprettTask(personIdent, statusFraOppdragDTO.behandlingsId)
         taskRepository.save(nyTask)
     }
 

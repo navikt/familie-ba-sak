@@ -103,7 +103,7 @@ object VedtakUtils {
                 }
 
                 val person = aktuellePersonerForVedtaksperiode.firstOrNull { person ->
-                    person.personIdent.ident == personResultat.personIdent
+                    person.aktør == personResultat.aktør
                 }
                 if (utgjørendeVilkårResultat != null && person != null) {
                     acc.add(person)

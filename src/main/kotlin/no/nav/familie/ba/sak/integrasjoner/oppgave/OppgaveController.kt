@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.DataForManuellJournalf
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.RestFinnOppgaveRequest
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -34,6 +35,7 @@ import org.springframework.web.bind.annotation.RestController
 class OppgaveController(
     private val oppgaveService: OppgaveService,
     private val fagsakService: FagsakService,
+    private val personidentService: PersonidentService,
     private val integrasjonClient: IntegrasjonClient,
     private val personopplysningerService: PersonopplysningerService,
     private val tilgangService: TilgangService
@@ -92,19 +94,17 @@ class OppgaveController(
     fun hentDataForManuellJournalføring(@PathVariable(name = "oppgaveId") oppgaveId: Long): ResponseEntity<Ressurs<DataForManuellJournalføring>> {
 
         val oppgave = oppgaveService.hentOppgave(oppgaveId)
+        val aktør = oppgave.aktoerId?.let { personidentService.hentOgLagreAktør(it) }
+            ?: error("Ved henting av personident er aktørId null eller tom")
 
-        val personIdent = if (oppgave.aktoerId == null) null else {
-            integrasjonClient.hentPersonIdent(oppgave.aktoerId) ?: error("Fant ikke personident for aktør id")
-        }
-        val minimalFagsak =
-            if (personIdent == null) null else fagsakService.hentMinimalFagsakForPerson(personIdent).data
+        val minimalFagsak = fagsakService.hentMinimalFagsakForPerson(aktør).data
 
         val dataForManuellJournalføring = DataForManuellJournalføring(
             oppgave = oppgave,
             journalpost = null,
-            person = personIdent?.ident?.let {
+            person = aktør.let {
                 personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(it)
-                    .tilRestPersonInfo(it)
+                    .tilRestPersonInfo(it.aktivFødselsnummer())
             },
             minimalFagsak = minimalFagsak
         )

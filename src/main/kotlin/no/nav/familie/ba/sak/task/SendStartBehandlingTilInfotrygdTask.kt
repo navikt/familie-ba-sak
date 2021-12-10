@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.task
 
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedClient
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.StartBehandlingDto
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.log.IdUtils
 import no.nav.familie.log.mdc.MDCConstants
@@ -32,11 +33,11 @@ class SendStartBehandlingTilInfotrygdTask(
         const val TASK_STEP_TYPE = "SendStartBehandlingTilInfotrygd"
         private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
-        fun opprettTask(fnrStoenadsmottaker: String): Task {
-            secureLogger.info("Send startBehandling for $fnrStoenadsmottaker til Infotrygd.")
+        fun opprettTask(aktørStoenadsmottaker: Aktør): Task {
+            secureLogger.info("Send startBehandling for ${aktørStoenadsmottaker.aktivFødselsnummer()} til Infotrygd.")
 
             val metadata = Properties().apply {
-                this["personIdenter"] = fnrStoenadsmottaker
+                this["personIdenter"] = aktørStoenadsmottaker.aktivFødselsnummer()
                 if (!MDC.get(MDCConstants.MDC_CALL_ID).isNullOrEmpty()) {
                     this["callId"] = MDC.get(MDCConstants.MDC_CALL_ID) ?: IdUtils.generateId()
                 }
@@ -46,7 +47,7 @@ class SendStartBehandlingTilInfotrygdTask(
                 type = TASK_STEP_TYPE,
                 payload = objectMapper.writeValueAsString(
                     StartBehandlingDto(
-                        fnrStoenadsmottaker = fnrStoenadsmottaker,
+                        fnrStoenadsmottaker = aktørStoenadsmottaker.aktivFødselsnummer(),
                     )
                 ),
                 properties = metadata

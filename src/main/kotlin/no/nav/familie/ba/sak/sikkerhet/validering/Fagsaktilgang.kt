@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClien
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import javax.transaction.Transactional
@@ -22,16 +23,16 @@ class Fagsaktilgang(
     @Transactional
     override fun isValid(fagsakId: Long, ctx: ConstraintValidatorContext): Boolean {
         val fagsak = fagsakRepository.finnFagsak(fagsakId)
-        val personer: MutableSet<String> = behandlingRepository.finnBehandlinger(fagsakId)
+        val personer: MutableSet<Aktør> = behandlingRepository.finnBehandlinger(fagsakId)
             .asSequence()
             .mapNotNull { personopplysningGrunnlagRepository.findByBehandlingAndAktiv(it.id)?.personer }
             .flatten()
-            .map { it.personIdent.ident }
+            .map { it.aktør }
             .toMutableSet()
 
-        personer.addAll(fagsak?.søkerIdenter?.map { it.personIdent.ident } ?: emptyList())
+        fagsak?.aktør?.let { personer.add(it) }
 
-        integrasjonClient.sjekkTilgangTilPersoner(personer.toList())
+        integrasjonClient.sjekkTilgangTilPersoner(personer.map { it.aktivFødselsnummer() }.toList())
             .filterNot { it.harTilgang }
             .forEach {
                 logger.error("Bruker har ikke tilgang: ${it.begrunnelse}")

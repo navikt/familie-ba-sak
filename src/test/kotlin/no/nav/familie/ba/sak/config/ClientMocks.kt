@@ -25,7 +25,6 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.internal.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.ForelderBarnRelasjonMaskert
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.IdentInformasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PersonInfo
-import no.nav.familie.ba.sak.integrasjoner.pdl.internal.Personident
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.VergeData
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.mockBarnAutomatiskBehandling
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.mockBarnAutomatiskBehandling2
@@ -34,10 +33,12 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.mockBarnAutomati
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.mockBarnAutomatiskBehandlingSkalFeile
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.mockBarnAutomatiskBehandlingSkalFeileFnr
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.mockSøkerAutomatiskBehandling
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.mockSøkerAutomatiskBehandlingAktør
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.mockSøkerAutomatiskBehandlingFnr
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.success
 import no.nav.familie.kontrakter.felles.kodeverk.BeskrivelseDto
 import no.nav.familie.kontrakter.felles.kodeverk.BetydningDto
@@ -96,36 +97,41 @@ class ClientMocks {
     @Profile("mock-pdl-test-søk")
     fun mockPDL(): PersonopplysningerService {
         val mockPersonopplysningerService = mockk<PersonopplysningerService>()
+        val mockPersonidentService = mockk<PersonidentService>()
 
         val farId = "12345678910"
         val morId = "21345678910"
         val barnId = "31245678910"
+
+        val farAktør = tilAktør(farId)
+        val morAktør = tilAktør(morId)
+        val barnAktør = tilAktør(barnId)
 
         every {
             mockPersonopplysningerService.hentPersoninfoEnkel(any())
         } returns personInfo.getValue(INTEGRASJONER_FNR)
 
         every {
-            mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(farId)
+            mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(farAktør)
         } returns PersonInfo(fødselsdato = LocalDate.of(1969, 5, 1), kjønn = Kjønn.MANN, navn = "Far Mocksen")
 
         every {
-            mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(morId)
+            mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(morAktør)
         } returns PersonInfo(fødselsdato = LocalDate.of(1979, 5, 1), kjønn = Kjønn.KVINNE, navn = "Mor Mocksen")
 
         every {
-            mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(barnId)
+            mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(barnAktør)
         } returns PersonInfo(
             fødselsdato = LocalDate.of(2009, 5, 1), kjønn = Kjønn.MANN, navn = "Barn Mocksen",
             forelderBarnRelasjon = setOf(
                 ForelderBarnRelasjon(
-                    Personident(farId),
+                    farAktør,
                     FORELDERBARNRELASJONROLLE.FAR,
                     "Far Mocksen",
                     LocalDate.of(1969, 5, 1)
                 ),
                 ForelderBarnRelasjon(
-                    Personident(morId),
+                    morAktør,
                     FORELDERBARNRELASJONROLLE.MOR,
                     "Mor Mocksen",
                     LocalDate.of(1979, 5, 1)
@@ -139,8 +145,20 @@ class ClientMocks {
             listOf(IdentInformasjon("123", false, "FOLKEREGISTERIDENT"))
         }
 
+        val identSlot = slot<String>()
         every {
-            mockPersonopplysningerService.hentOgLagreAktørId(any())
+            mockPersonopplysningerService.hentIdenter(capture(identSlot), false)
+        } answers {
+            listOf(
+                IdentInformasjon(
+                    identSlot.captured, false, "FOLKEREGISTERIDENT"
+                ),
+                IdentInformasjon(identSlot.captured + "00", false, "AKTORID"),
+            )
+        }
+
+        every {
+            mockPersonidentService.hentOgLagreAktør(any())
         } answers {
             randomAktørId()
         }
@@ -171,13 +189,17 @@ class ClientMocks {
         } returns "NO"
 
         val ukjentId = "43125678910"
+        val ukjentAktør = tilAktør(ukjentId)
+
         every {
-            mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(ukjentId)
+            mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(ukjentAktør)
         } throws HttpClientErrorException(HttpStatus.NOT_FOUND, "ikke funnet")
 
         val feilId = "41235678910"
+        val feilIdAktør = tilAktør(feilId)
+
         every {
-            mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(feilId)
+            mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(feilIdAktør)
         } throws IntegrasjonException("feil id")
 
         return mockPersonopplysningerService
@@ -231,21 +253,28 @@ class ClientMocks {
     }
 
     companion object {
-
-        fun clearPdlMocks(mockPersonopplysningerService: PersonopplysningerService) {
-            clearMocks(mockPersonopplysningerService)
+        fun clearPdlMocks(
+            mockPersonidentService: PersonidentService
+        ) {
+            clearMocks(mockPersonidentService)
 
             every {
-                mockPersonopplysningerService.hentOgLagreAktørId(any())
+                mockPersonidentService.hentOgLagreAktør(any())
             } answers {
                 randomAktørId()
             }
 
             every {
-                mockPersonopplysningerService.hentAktivPersonIdent(any())
+                mockPersonidentService.hentOgLagreAktør(any())
             } answers {
-                PersonIdent(randomFnr())
+                randomAktørId()
             }
+        }
+
+        fun clearPdlMocks(
+            mockPersonopplysningerService: PersonopplysningerService
+        ) {
+            clearMocks(mockPersonopplysningerService)
 
             every {
                 mockPersonopplysningerService.hentGjeldendeStatsborgerskap(any())
@@ -309,22 +338,22 @@ class ClientMocks {
                 mockPersonopplysningerService.hentLandkodeUtenlandskBostedsadresse(any())
             } returns "NO"
 
-            val idSlotForHentPersoninfo = slot<String>()
+            val idSlotForHentPersoninfo = slot<Aktør>()
             every {
                 mockPersonopplysningerService.hentPersoninfoEnkel(capture(idSlotForHentPersoninfo))
             } answers {
-                when (val id = idSlotForHentPersoninfo.captured) {
+                when (val id = idSlotForHentPersoninfo.captured.aktivFødselsnummer()) {
                     barnFnr[0], barnFnr[1] -> personInfo.getValue(id)
                     søkerFnr[0], søkerFnr[1] -> personInfo.getValue(id)
                     else -> personInfo.getValue(INTEGRASJONER_FNR)
                 }
             }
 
-            val idSlot = slot<String>()
+            val idSlot = slot<Aktør>()
             every {
                 mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(capture(idSlot))
             } answers {
-                when (val id = idSlot.captured) {
+                when (val id = idSlot.captured.aktivFødselsnummer()) {
                     "00000000000" -> throw HttpClientErrorException(
                         HttpStatus.NOT_FOUND,
                         "Fant ikke forespurte data på person."
@@ -334,19 +363,19 @@ class ClientMocks {
                     søkerFnr[0] -> personInfo.getValue(id).copy(
                         forelderBarnRelasjon = setOf(
                             ForelderBarnRelasjon(
-                                personIdent = Personident(id = barnFnr[0]),
+                                aktør = tilAktør(barnFnr[0]),
                                 relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
                                 navn = personInfo.getValue(barnFnr[0]).navn,
                                 fødselsdato = personInfo.getValue(barnFnr[0]).fødselsdato
                             ),
                             ForelderBarnRelasjon(
-                                personIdent = Personident(id = barnFnr[1]),
+                                aktør = tilAktør(barnFnr[1]),
                                 relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
                                 navn = personInfo.getValue(barnFnr[1]).navn,
                                 fødselsdato = personInfo.getValue(barnFnr[1]).fødselsdato
                             ),
                             ForelderBarnRelasjon(
-                                personIdent = Personident(id = søkerFnr[1]),
+                                aktør = tilAktør(søkerFnr[1]),
                                 relasjonsrolle = FORELDERBARNRELASJONROLLE.MEDMOR
                             )
                         )
@@ -355,19 +384,19 @@ class ClientMocks {
                     søkerFnr[1] -> personInfo.getValue(id).copy(
                         forelderBarnRelasjon = setOf(
                             ForelderBarnRelasjon(
-                                personIdent = Personident(id = barnFnr[0]),
+                                aktør = tilAktør(barnFnr[0]),
                                 relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
                                 navn = personInfo.getValue(barnFnr[0]).navn,
                                 fødselsdato = personInfo.getValue(barnFnr[0]).fødselsdato
                             ),
                             ForelderBarnRelasjon(
-                                personIdent = Personident(id = barnFnr[1]),
+                                aktør = tilAktør(barnFnr[1]),
                                 relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
                                 navn = personInfo.getValue(barnFnr[1]).navn,
                                 fødselsdato = personInfo.getValue(barnFnr[1]).fødselsdato
                             ),
                             ForelderBarnRelasjon(
-                                personIdent = Personident(id = søkerFnr[0]),
+                                aktør = tilAktør(søkerFnr[0]),
                                 relasjonsrolle = FORELDERBARNRELASJONROLLE.FAR
                             )
                         )
@@ -376,20 +405,20 @@ class ClientMocks {
                     søkerFnr[2] -> personInfo.getValue(id).copy(
                         forelderBarnRelasjon = setOf(
                             ForelderBarnRelasjon(
-                                personIdent = Personident(id = barnFnr[0]),
+                                aktør = tilAktør(barnFnr[0]),
                                 relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
                                 navn = personInfo.getValue(barnFnr[0]).navn,
                                 fødselsdato = personInfo.getValue(barnFnr[0]).fødselsdato
                             ),
                             ForelderBarnRelasjon(
-                                personIdent = Personident(id = barnFnr[1]),
+                                aktør = tilAktør(barnFnr[1]),
                                 relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
                                 navn = personInfo.getValue(barnFnr[1]).navn,
                                 fødselsdato = personInfo.getValue(barnFnr[1]).fødselsdato,
                                 adressebeskyttelseGradering = personInfo.getValue(barnFnr[1]).adressebeskyttelseGradering
                             ),
                             ForelderBarnRelasjon(
-                                personIdent = Personident(id = søkerFnr[0]),
+                                aktør = tilAktør(søkerFnr[0]),
                                 relasjonsrolle = FORELDERBARNRELASJONROLLE.FAR
                             )
                         ),
@@ -406,19 +435,19 @@ class ClientMocks {
                     INTEGRASJONER_FNR -> personInfo.getValue(id).copy(
                         forelderBarnRelasjon = setOf(
                             ForelderBarnRelasjon(
-                                personIdent = Personident(id = barnFnr[0]),
+                                aktør = tilAktør(barnFnr[0]),
                                 relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
                                 navn = personInfo.getValue(barnFnr[0]).navn,
                                 fødselsdato = personInfo.getValue(barnFnr[0]).fødselsdato
                             ),
                             ForelderBarnRelasjon(
-                                personIdent = Personident(id = barnFnr[1]),
+                                aktør = tilAktør(barnFnr[1]),
                                 relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
                                 navn = personInfo.getValue(barnFnr[1]).navn,
                                 fødselsdato = personInfo.getValue(barnFnr[1]).fødselsdato
                             ),
                             ForelderBarnRelasjon(
-                                personIdent = Personident(id = søkerFnr[1]),
+                                aktør = tilAktør(søkerFnr[1]),
                                 relasjonsrolle = FORELDERBARNRELASJONROLLE.MEDMOR
                             )
                         )
@@ -434,13 +463,13 @@ class ClientMocks {
             every {
                 mockPersonopplysningerService.hentAdressebeskyttelseSomSystembruker(capture(idSlot))
             } answers {
-                if (BARN_DET_IKKE_GIS_TILGANG_TIL_FNR == idSlot.captured)
+                if (BARN_DET_IKKE_GIS_TILGANG_TIL_FNR == idSlot.captured.aktivFødselsnummer())
                     ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG
                 else
                     ADRESSEBESKYTTELSEGRADERING.UGRADERT
             }
 
-            every { mockPersonopplysningerService.harVerge(mockSøkerAutomatiskBehandlingFnr) } returns VergeResponse(
+            every { mockPersonopplysningerService.harVerge(mockSøkerAutomatiskBehandlingAktør) } returns VergeResponse(
                 harVerge = false
             )
         }
@@ -730,7 +759,7 @@ fun mockHentPersoninfoForMedIdenter(
     barnFnr: String
 ) {
     every {
-        mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(eq(barnFnr))
+        mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(eq(tilAktør(barnFnr)))
     } returns PersonInfo(
         fødselsdato = LocalDate.of(2018, 5, 1),
         kjønn = Kjønn.KVINNE,
@@ -739,12 +768,12 @@ fun mockHentPersoninfoForMedIdenter(
     )
 
     every {
-        mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(eq(søkerFnr))
+        mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(eq(tilAktør(søkerFnr)))
     } returns PersonInfo(fødselsdato = LocalDate.of(1990, 2, 19), kjønn = Kjønn.KVINNE, navn = "Mor Moresen")
+}
 
-    every {
-        mockPersonopplysningerService.hentOgLagreAktørId(any())
-    } returns Aktør("1")
+fun tilAktør(fnr: String) = Aktør(fnr + "00").also {
+    it.personidenter.add(no.nav.familie.ba.sak.kjerne.personident.Personident(fnr, aktør = it))
 }
 
 val TEST_PDF = ClientMocks::class.java.getResource("/dokument/mockvedtak.pdf").readBytes()

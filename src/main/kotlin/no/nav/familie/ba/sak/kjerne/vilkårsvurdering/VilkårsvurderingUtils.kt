@@ -188,10 +188,10 @@ object VilkårsvurderingUtils {
         initiellVilkårsvurdering.personResultater.forEach { personFraInit ->
             val personTilOppdatert = PersonResultat(
                 vilkårsvurdering = initiellVilkårsvurdering,
-                personIdent = personFraInit.personIdent,
+                personIdent = personFraInit.aktør.aktivFødselsnummer(),
                 aktør = personFraInit.aktør
             )
-            val personenSomFinnes = personResultaterAktivt.firstOrNull { it.personIdent == personFraInit.personIdent }
+            val personenSomFinnes = personResultaterAktivt.firstOrNull { it.aktør == personFraInit.aktør }
 
             if (personenSomFinnes == null) {
                 // Legg til ny person
@@ -226,7 +226,7 @@ object VilkårsvurderingUtils {
                 }
                 val eksistererUtvidetVilkårPåForrigeBehandling =
                     forrigeBehandlingVilkårsvurdering?.personResultater
-                        ?.firstOrNull { it.personIdent == personFraInit.personIdent }
+                        ?.firstOrNull { it.aktør == personFraInit.aktør }
                         ?.vilkårResultater
                         ?.any { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD } ?: false
 
@@ -262,7 +262,7 @@ object VilkårsvurderingUtils {
         var advarsel =
             "Du har gjort endringer i behandlingsgrunnlaget. Dersom du går videre vil vilkår for følgende personer fjernes:"
         personResultater.forEach {
-            advarsel = advarsel.plus("\n${it.personIdent}:")
+            advarsel = advarsel.plus("\n${it.aktør.aktivFødselsnummer()}:")
             it.vilkårResultater.forEach { vilkårResultat ->
                 advarsel = advarsel.plus("\n   - ${vilkårResultat.vilkårType.beskrivelse}")
             }

@@ -22,10 +22,11 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.initStatus
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatUtils
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakPersonRepository
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.FØRSTE_STEG
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
@@ -48,7 +49,7 @@ class BehandlingService(
     private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val behandlingMetrikker: BehandlingMetrikker,
-    private val fagsakPersonRepository: FagsakPersonRepository,
+    private val fagsakRepository: FagsakRepository,
     private val vedtakRepository: VedtakRepository,
     private val loggService: LoggService,
     private val arbeidsfordelingService: ArbeidsfordelingService,
@@ -56,12 +57,15 @@ class BehandlingService(
     private val oppgaveService: OppgaveService,
     private val infotrygdService: InfotrygdService,
     private val vedtaksperiodeService: VedtaksperiodeService,
+    private val personidentService: PersonidentService,
     private val featureToggleService: FeatureToggleService
 ) {
 
     @Transactional
     fun opprettBehandling(nyBehandling: NyBehandling): Behandling {
-        val fagsak = fagsakPersonRepository.finnFagsak(setOf(PersonIdent(nyBehandling.søkersIdent)))
+        val søkersAktør = personidentService.hentOgLagreAktør(nyBehandling.søkersIdent)
+
+        val fagsak = fagsakRepository.finnFagsakForAktør(søkersAktør)
             ?: throw FunksjonellFeil(
                 melding = "Kan ikke lage behandling på person uten tilknyttet fagsak",
                 frontendFeilmelding = "Kan ikke lage behandling på person uten tilknyttet fagsak"
@@ -269,8 +273,8 @@ class BehandlingService(
     /**
      * Henter alle barn på behandlingen som har minst en periode med tilkjentytelse.
      */
-    fun finnBarnFraBehandlingMedTilkjentYtsele(behandlingId: Long): List<String> =
-        personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId)?.barna?.map { it.personIdent.ident }
+    fun finnBarnFraBehandlingMedTilkjentYtsele(behandlingId: Long): List<Aktør> =
+        personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId)?.barna?.map { it.aktør }
             ?.filter {
                 andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(
                     behandlingId,

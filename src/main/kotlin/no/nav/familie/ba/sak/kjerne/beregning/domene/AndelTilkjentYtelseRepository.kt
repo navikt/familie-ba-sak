@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.beregning.domene
 
 import io.micrometer.core.annotation.Timed
 import no.nav.familie.ba.sak.ekstern.skatteetaten.AndelTilkjentYtelsePeriode
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import java.time.LocalDateTime
@@ -14,8 +15,8 @@ interface AndelTilkjentYtelseRepository : JpaRepository<AndelTilkjentYtelse, Lon
     @Query(value = "SELECT aty FROM AndelTilkjentYtelse aty WHERE aty.behandlingId = :behandlingId")
     fun finnAndelerTilkjentYtelseForBehandling(behandlingId: Long): List<AndelTilkjentYtelse>
 
-    @Query(value = "SELECT aty FROM AndelTilkjentYtelse aty WHERE aty.behandlingId = :behandlingId AND aty.personIdent = :barnIdent")
-    fun finnAndelerTilkjentYtelseForBehandlingOgBarn(behandlingId: Long, barnIdent: String): List<AndelTilkjentYtelse>
+    @Query(value = "SELECT aty FROM AndelTilkjentYtelse aty WHERE aty.behandlingId = :behandlingId AND aty.aktør = :barnAktør")
+    fun finnAndelerTilkjentYtelseForBehandlingOgBarn(behandlingId: Long, barnAktør: Aktør): List<AndelTilkjentYtelse>
 
     @Query(value = "SELECT aty FROM AndelTilkjentYtelse aty WHERE aty.behandlingId IN :behandlingIder AND aty.stønadTom >= DATE_TRUNC('month', CURRENT_TIMESTAMP)")
     fun finnLøpendeAndelerTilkjentYtelseForBehandlinger(behandlingIder: List<Long>): List<AndelTilkjentYtelse>
@@ -33,8 +34,10 @@ interface AndelTilkjentYtelseRepository : JpaRepository<AndelTilkjentYtelse, Lon
                      aty.tilkjent_ytelse_id aty_tyid,
                      aty.id
               FROM andel_tilkjent_ytelse aty
+              JOIN personident p on p.fk_aktoer_id = aty.fk_aktoer_id
               WHERE aty.type = 'UTVIDET_BARNETRYGD'
-                AND aty.person_ident IN :personIdenter
+                AND p.foedselsnummer IN :personIdenter
+                AND p.aktiv = true
                 AND aty.stonad_fom <= :tom
                 AND aty.stonad_tom >= :fom
           ) AS qualified_aty

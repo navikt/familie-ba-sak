@@ -54,7 +54,7 @@ class StegService(
         val behandling = håndterNyBehandling(nyBehandling)
         if (behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING) {
             infotrygdFeedService.sendStartBehandlingTilInfotrygdFeed(
-                behandling.fagsak.hentAktivIdent().ident,
+                behandling.fagsak.aktør,
             )
         }
         return behandling
@@ -75,7 +75,9 @@ class StegService(
                 )
         ) {
             val sisteBehandling = hentSisteAvsluttetBehandling(behandling)
-            barnasIdenter = behandlingService.finnBarnFraBehandlingMedTilkjentYtsele(sisteBehandling.id)
+            barnasIdenter =
+                behandlingService.finnBarnFraBehandlingMedTilkjentYtsele(sisteBehandling.id)
+                    .map { it.aktivFødselsnummer() }
         } else throw Feil("Ukjent oppførsel ved opprettelse av behandling.")
 
         return håndterPersongrunnlag(
@@ -106,7 +108,7 @@ class StegService(
         // Denne vil sende selv om det allerede eksisterer en fagsak. Vi tenker det er greit. Ellers så blir det vanskelig å
         // filtere bort for fødselshendelser. Når vi slutter å filtere bort fødselshendelser, så kan vi flytte den tilbake til
         // hentEllerOpprettFagsak
-        skyggesakService.opprettSkyggesak(nyBehandlingHendelse.morsIdent, fagsak.id)
+        skyggesakService.opprettSkyggesak(fagsak.aktør, fagsak.id)
 
         return håndterNyBehandlingOgSendInfotrygdFeed(
             NyBehandling(
