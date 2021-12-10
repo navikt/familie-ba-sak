@@ -102,7 +102,7 @@ fun hentPersonidenterGjeldendeForBegrunnelse(
 
         triggesAv.barnMedSeksårsdag ->
             begrunnelseGrunnlag.persongrunnlag.barnMedSeksårsdagPåFom(vedtaksperiodeMedBegrunnelser.fom)
-                .map { person -> person.aktør.aktørId }
+                .map { person -> person.aktør.aktivFødselsnummer() }
 
         triggesAv.personerManglerOpplysninger ->
             if (begrunnelseGrunnlag.vilkårsvurdering.harPersonerManglerOpplysninger())
@@ -192,9 +192,9 @@ fun kastFeilmeldingForBegrunnelserMedFeil(
 
 fun validerVedtaksperiodeMedBegrunnelser(vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser) {
     if ((
-        vedtaksperiodeMedBegrunnelser.type == Vedtaksperiodetype.OPPHØR ||
-            vedtaksperiodeMedBegrunnelser.type == Vedtaksperiodetype.AVSLAG
-        ) &&
+            vedtaksperiodeMedBegrunnelser.type == Vedtaksperiodetype.OPPHØR ||
+                vedtaksperiodeMedBegrunnelser.type == Vedtaksperiodetype.AVSLAG
+            ) &&
         vedtaksperiodeMedBegrunnelser.harFriteksterUtenStandardbegrunnelser()
     ) {
         val fritekstUtenStandardbegrunnelserFeilmelding =
