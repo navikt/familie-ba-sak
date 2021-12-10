@@ -127,7 +127,6 @@ internal class SaksstatistikkServiceTest(
             "4821",
             "NAV"
         )
-        every { envService.skalIverksetteBehandling() } returns true
     }
 
     @AfterAll
