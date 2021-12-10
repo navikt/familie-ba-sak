@@ -241,5 +241,5 @@ fun hentBarnSomFyller18År(barna: List<Person>): List<String> {
     return barna.filter { barn ->
         barn.fødselsdato.toYearMonth().equals(fødselsMånedOgÅrForAlder18) ||
             barn.fødselsdato.toYearMonth().equals(fødselsMånedOgÅrForAlder18.plusMonths(1))
-    }.map { it.aktør.aktivIdent() }
+    }.map { it.aktør.aktivFødselsnummer() }
 }
