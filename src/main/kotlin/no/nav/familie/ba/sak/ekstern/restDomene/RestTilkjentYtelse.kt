@@ -34,7 +34,7 @@ fun PersonopplysningGrunnlag.tilRestPersonerMedAndeler(andelerKnyttetTilPersoner
                 andeler.groupBy { it.type }.flatMap { it.value.slåSammenBack2BackAndelsperioderMedSammeBeløp() }
 
             RestPersonMedAndeler(
-                personIdent = this.personer.find { person -> person.aktør == personId }?.aktør?.aktivIdent(),
+                personIdent = this.personer.find { person -> person.aktør == personId }?.aktør?.aktivFødselsnummer(),
                 beløp = sammenslåtteAndeler.sumOf { it.kalkulertUtbetalingsbeløp },
                 stønadFom = sammenslåtteAndeler.map { it.stønadFom }.minOrNull() ?: LocalDate.MIN.toYearMonth(),
                 stønadTom = sammenslåtteAndeler.map { it.stønadTom }.maxOrNull() ?: LocalDate.MAX.toYearMonth(),

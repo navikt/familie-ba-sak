@@ -294,7 +294,7 @@ class BehandleSmåbarnstilleggTest(
         every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns PerioderOvergangsstønadResponse(
             perioder = listOf(
                 PeriodeOvergangsstønad(
-                    personIdent = søkersAktør.aktivIdent(),
+                    personIdent = søkersAktør.aktivFødselsnummer(),
                     fomDato = periodeMedFullOvergangsstønadFom,
                     tomDato = periodeOvergangsstønadTom,
                     datakilde = PeriodeOvergangsstønad.Datakilde.EF

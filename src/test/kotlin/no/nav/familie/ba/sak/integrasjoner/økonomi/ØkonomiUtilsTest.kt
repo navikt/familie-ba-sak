@@ -112,8 +112,8 @@ internal class ØkonomiUtilsTest {
 
         val sisteBeståendePerKjede =
             sisteBeståendeAndelPerKjede(forrigeKjeder = kjederBehandling1, oppdaterteKjeder = kjederBehandling2)
-        assertEquals(årMnd("2019-04"), sisteBeståendePerKjede[person.aktør.aktivIdent()]?.stønadFom)
-        assertEquals(årMnd("2022-01"), sisteBeståendePerKjede[person2.aktør.aktivIdent()]?.stønadFom)
+        assertEquals(årMnd("2019-04"), sisteBeståendePerKjede[person.aktør.aktivFødselsnummer()]?.stønadFom)
+        assertEquals(årMnd("2022-01"), sisteBeståendePerKjede[person2.aktør.aktivFødselsnummer()]?.stønadFom)
     }
 
     @Test
@@ -419,9 +419,9 @@ internal class ØkonomiUtilsTest {
                 oppdaterteKjeder = kjederBehandling2
             )
 
-        assertEquals(1, oppdaterte.getValue(person.aktør.aktivIdent()).first().periodeOffset)
-        assertEquals(0, oppdaterte.getValue(person.aktør.aktivIdent()).first().forrigePeriodeOffset)
-        assertEquals(null, oppdaterte.getValue(person2.aktør.aktivIdent()).first().periodeOffset)
-        assertEquals(null, oppdaterte.getValue(person2.aktør.aktivIdent()).first().forrigePeriodeOffset)
+        assertEquals(1, oppdaterte.getValue(person.aktør.aktivFødselsnummer()).first().periodeOffset)
+        assertEquals(0, oppdaterte.getValue(person.aktør.aktivFødselsnummer()).first().forrigePeriodeOffset)
+        assertEquals(null, oppdaterte.getValue(person2.aktør.aktivFødselsnummer()).first().periodeOffset)
+        assertEquals(null, oppdaterte.getValue(person2.aktør.aktivFødselsnummer()).first().forrigePeriodeOffset)
     }
 }

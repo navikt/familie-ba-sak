@@ -17,11 +17,12 @@ class InfotrygdService(
 ) {
 
     fun hentInfotrygdsakerForSøker(aktør: Aktør): InfotrygdSøkResponse<Sak> {
-        return infotrygdBarnetrygdClient.hentSaker(listOf(aktør.aktivIdent()), emptyList())
+        return infotrygdBarnetrygdClient.hentSaker(listOf(aktør.aktivFødselsnummer()), emptyList())
     }
 
     fun hentMaskertRestInfotrygdsakerVedManglendeTilgang(aktør: Aktør): RestInfotrygdsaker? {
-        val harTilgang = integrasjonClient.sjekkTilgangTilPersoner(listOf(aktør.aktivIdent())).first().harTilgang
+        val harTilgang =
+            integrasjonClient.sjekkTilgangTilPersoner(listOf(aktør.aktivFødselsnummer())).first().harTilgang
         return if (!harTilgang) {
             RestInfotrygdsaker(
                 adressebeskyttelsegradering = personopplysningerService.hentAdressebeskyttelseSomSystembruker(aktør),
@@ -38,7 +39,8 @@ class InfotrygdService(
     }
 
     fun hentMaskertRestInfotrygdstønaderVedManglendeTilgang(aktør: Aktør): RestInfotrygdstønader? {
-        val harTilgang = integrasjonClient.sjekkTilgangTilPersoner(listOf(aktør.aktivIdent())).first().harTilgang
+        val harTilgang =
+            integrasjonClient.sjekkTilgangTilPersoner(listOf(aktør.aktivFødselsnummer())).first().harTilgang
         return if (!harTilgang) {
             RestInfotrygdstønader(
                 adressebeskyttelsegradering = personopplysningerService.hentAdressebeskyttelseSomSystembruker(

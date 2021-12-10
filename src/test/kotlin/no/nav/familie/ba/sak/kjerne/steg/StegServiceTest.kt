@@ -107,12 +107,12 @@ class StegServiceTest(
         val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)!!
         assertEquals(
             Resultat.OPPFYLT,
-            vilkårsvurdering.personResultater.first { it.aktør.aktivIdent() == barnFnr1 }.vilkårResultater
+            vilkårsvurdering.personResultater.first { it.aktør.aktivFødselsnummer() == barnFnr1 }.vilkårResultater
                 .single { it.vilkårType == Vilkår.GIFT_PARTNERSKAP }.resultat
         )
         assertEquals(
             Resultat.IKKE_VURDERT,
-            vilkårsvurdering.personResultater.first { it.aktør.aktivIdent() == barnFnr2 }.vilkårResultater
+            vilkårsvurdering.personResultater.first { it.aktør.aktivFødselsnummer() == barnFnr2 }.vilkårResultater
                 .single { it.vilkårType == Vilkår.GIFT_PARTNERSKAP }.resultat
         )
     }

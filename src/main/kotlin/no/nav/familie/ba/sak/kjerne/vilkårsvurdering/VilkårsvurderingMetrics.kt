@@ -93,7 +93,7 @@ class VilkårsvurderingMetrics(
 
             if (negativeVilkår.isNotEmpty()) {
                 logger.info("Behandling: ${vilkårsvurdering.behandling.id}, personType=${person.type}. Vilkår som får negativt resultat og årsakene: ${negativeVilkår.map { "${it.vilkårType}=${it.evalueringÅrsaker}" }}.")
-                secureLogger.info("Behandling: ${vilkårsvurdering.behandling.id}, person=${person.aktør.aktivIdent()}. Vilkår som får negativt resultat og årsakene: ${negativeVilkår.map { "${it.vilkårType}=${it.evalueringÅrsaker}" }}.")
+                secureLogger.info("Behandling: ${vilkårsvurdering.behandling.id}, person=${person.aktør.aktivFødselsnummer()}. Vilkår som får negativt resultat og årsakene: ${negativeVilkår.map { "${it.vilkårType}=${it.evalueringÅrsaker}" }}.")
             }
 
             personResultat.vilkårResultater.forEach { vilkårResultat ->
@@ -162,7 +162,7 @@ class VilkårsvurderingMetrics(
             ?: error("Finner ikke person")
 
         logger.info("Første vilkår med feil=$vilkårResultat, på personType=${person.type}, på behandling $behandlingId")
-        secureLogger.info("Første vilkår med feil=$vilkårResultat, på person=${person.aktør.aktivIdent()}, på behandling $behandlingId")
+        secureLogger.info("Første vilkår med feil=$vilkårResultat, på person=${person.aktør.aktivFødselsnummer()}, på behandling $behandlingId")
         vilkårResultat.evalueringÅrsaker.forEach { årsak ->
             vilkårsvurderingFørsteUtfall[person.type]?.get(årsak)?.increment()
         }

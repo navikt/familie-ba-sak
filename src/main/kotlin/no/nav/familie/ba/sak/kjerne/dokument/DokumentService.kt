@@ -176,7 +176,7 @@ class DokumentService(
                 erManueltSendt = true
             ),
             properties = Properties().apply {
-                this["fagsakIdent"] = behandling?.fagsak?.aktør?.aktivIdent() ?: ""
+                this["fagsakIdent"] = behandling?.fagsak?.aktør?.aktivFødselsnummer() ?: ""
                 this["mottakerIdent"] = manueltBrevRequest.mottakerIdent
                 this["journalpostId"] = journalpostId
                 this["behandlingId"] = behandling?.id.toString()

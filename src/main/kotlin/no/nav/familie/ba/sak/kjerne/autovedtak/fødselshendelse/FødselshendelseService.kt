@@ -160,7 +160,7 @@ class FødselshendelseService(
 
         val barnaSomHarBlittBehandlet =
             if (fagsak != null) behandlingService.hentBehandlinger(fagsakId = fagsak.id).flatMap {
-                persongrunnlagService.hentBarna(behandling = it).map { barn -> barn.aktør.aktivIdent() }
+                persongrunnlagService.hentBarna(behandling = it).map { barn -> barn.aktør.aktivFødselsnummer() }
             }.distinct() else emptyList()
 
         return finnBarnSomSkalBehandlesForMor(

@@ -112,7 +112,7 @@ internal class PersonidentServiceTest {
         val aktør = personidentService.håndterNyIdent(nyIdent = PersonIdent(personIdentSomSkalLeggesTil))
 
         assertEquals(2, aktør?.personidenter?.size)
-        assertEquals(personIdentSomSkalLeggesTil, aktør!!.aktivIdent())
+        assertEquals(personIdentSomSkalLeggesTil, aktør!!.aktivFødselsnummer())
         assertTrue(aktør!!.personidenter.first { !it.aktiv }.gjelderTil!!.isBefore(LocalDateTime.now()))
         verify(exactly = 2) { aktørIdRepository.saveAndFlush(any()) }
         verify(exactly = 0) { personidentRepository.saveAndFlush(any()) }

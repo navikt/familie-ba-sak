@@ -131,7 +131,7 @@ class VilkårServiceTest(
             forrigeBehandlingSomErVedtatt = forrigeBehandlingSomErIverksatt
         )
         val under18ÅrVilkårForBarn =
-            vilkårsvurdering.personResultater.find { it.aktør.aktivIdent() == barnFnr }
+            vilkårsvurdering.personResultater.find { it.aktør.aktivFødselsnummer() == barnFnr }
                 ?.tilRestPersonResultat()?.vilkårResultater?.find { it.vilkårType == Vilkår.UNDER_18_ÅR }
 
         val endretVilkårsvurdering: List<RestPersonResultat> =
@@ -293,7 +293,7 @@ class VilkårServiceTest(
                     behandlingId = behandling.id, vilkårId = it.id,
                     restPersonResultat =
                     RestPersonResultat(
-                        personIdent = personResultat.aktør.aktivIdent(),
+                        personIdent = personResultat.aktør.aktivFødselsnummer(),
                         vilkårResultater = listOf(
                             it.copy(
                                 resultat = Resultat.OPPFYLT,
@@ -330,9 +330,8 @@ class VilkårServiceTest(
 
         vilkårsvurdering2.personResultater.forEach { personResultat ->
             personResultat.vilkårResultater.forEach { vilkårResultat ->
-
-                if (personResultat.aktør.aktivIdent() == barnFnr2) {
-                    assertEquals(behandling2.id, vilkårResultat.behandlingId)
+                if (personResultat.aktør.aktivFødselsnummer() == barnFnr2) {
+                    Assertions.assertEquals(behandling2.id, vilkårResultat.behandlingId)
                 } else {
                     assertEquals(Resultat.OPPFYLT, vilkårResultat.resultat)
                     assertEquals(behandling.id, vilkårResultat.behandlingId)
@@ -365,7 +364,7 @@ class VilkårServiceTest(
             forrigeBehandlingSomErVedtatt = forrigeBehandlingSomErIverksatt
         )
 
-        val barn: Person = personopplysningGrunnlag.barna.find { it.aktør.aktivIdent() == barnFnr }!!
+        val barn: Person = personopplysningGrunnlag.barna.find { it.aktør.aktivFødselsnummer() == barnFnr }!!
         vurderVilkårsvurderingTilInnvilget(vilkårsvurdering, barn)
 
         vilkårsvurderingService.oppdater(vilkårsvurdering)
@@ -392,7 +391,7 @@ class VilkårServiceTest(
 
         assertEquals(3, behandlingResultat2.personResultater.size)
 
-        val personResultat = behandlingResultat2.personResultater.find { it.aktør.aktivIdent() == barnFnr }!!
+        val personResultat = behandlingResultat2.personResultater.find { it.aktør.aktivFødselsnummer() == barnFnr }!!
         val borMedSøkerVilkår = personResultat.vilkårResultater.find { it.vilkårType == Vilkår.BOR_MED_SØKER }!!
         assertEquals(behandling.id, borMedSøkerVilkår.behandlingId)
 
@@ -413,7 +412,7 @@ class VilkårServiceTest(
 
         val behandlingResultatEtterEndring = vilkårsvurderingService.oppdater(behandlingResultat2)
         val personResultatEtterEndring =
-            behandlingResultatEtterEndring.personResultater.find { it.aktør.aktivIdent() == barnFnr }!!
+            behandlingResultatEtterEndring.personResultater.find { it.aktør.aktivFødselsnummer() == barnFnr }!!
         val borMedSøkerVilkårEtterEndring =
             personResultatEtterEndring.vilkårResultater.find { it.vilkårType == Vilkår.BOR_MED_SØKER }!!
         assertEquals(behandling2.id, borMedSøkerVilkårEtterEndring.behandlingId)
@@ -488,7 +487,7 @@ class VilkårServiceTest(
             forrigeBehandlingSomErVedtatt = forrigeBehandlingSomErIverksatt
         )
         val under18ÅrVilkårForBarn =
-            vilkårsvurdering.personResultater.find { it.aktør.aktivIdent() == barnFnr }
+            vilkårsvurdering.personResultater.find { it.aktør.aktivFødselsnummer() == barnFnr }
                 ?.tilRestPersonResultat()?.vilkårResultater?.find { it.vilkårType == Vilkår.UNDER_18_ÅR }
 
         val endretVilkårsvurdering: List<RestPersonResultat> =
@@ -604,7 +603,7 @@ class VilkårServiceTest(
         )
         assertTrue { vilkårsvurdering.personResultater.isNotEmpty() }
         val søkerVilkårResultat =
-            vilkårsvurdering.personResultater.first { it.aktør.aktivIdent() == fnr }.vilkårResultater
+            vilkårsvurdering.personResultater.first { it.aktør.aktivFødselsnummer() == fnr }.vilkårResultater
         assertTrue { søkerVilkårResultat.size == 2 }
         assertTrue {
             søkerVilkårResultat.all {
@@ -614,7 +613,7 @@ class VilkårServiceTest(
         }
 
         val barnVilkårResultat =
-            vilkårsvurdering.personResultater.first { it.aktør.aktivIdent() == barnFnr }.vilkårResultater
+            vilkårsvurdering.personResultater.first { it.aktør.aktivFødselsnummer() == barnFnr }.vilkårResultater
         assertTrue { barnVilkårResultat.size == 5 }
         assertTrue {
             barnVilkårResultat.filter { it.vilkårType == Vilkår.BOR_MED_SØKER }.all {
@@ -655,7 +654,7 @@ class VilkårServiceTest(
         )
         assertTrue { vilkårsvurdering.personResultater.isNotEmpty() }
         val søkerVilkårResultat =
-            vilkårsvurdering.personResultater.first { it.aktør.aktivIdent() == fnr }.vilkårResultater
+            vilkårsvurdering.personResultater.first { it.aktør.aktivFødselsnummer() == fnr }.vilkårResultater
         assertTrue { søkerVilkårResultat.size == 2 }
         assertTrue {
             søkerVilkårResultat.all {
@@ -665,7 +664,7 @@ class VilkårServiceTest(
         }
 
         val barnVilkårResultat =
-            vilkårsvurdering.personResultater.first { it.aktør.aktivIdent() == barnFnr }.vilkårResultater
+            vilkårsvurdering.personResultater.first { it.aktør.aktivFødselsnummer() == barnFnr }.vilkårResultater
         assertTrue { barnVilkårResultat.size == 5 }
         assertTrue {
             barnVilkårResultat.filter { it.vilkårType.påvirketVilkårForEndreMigreringsdato() }.all {
@@ -812,7 +811,7 @@ class VilkårServiceTest(
         )
         assertTrue { vilkårsvurdering.personResultater.isNotEmpty() }
         val søkerVilkårResultat =
-            vilkårsvurdering.personResultater.first { it.aktør.aktivIdent() == fnr }.vilkårResultater
+            vilkårsvurdering.personResultater.first { it.aktør.aktivFødselsnummer() == fnr }.vilkårResultater
         assertTrue { søkerVilkårResultat.size == 2 }
         assertTrue {
             søkerVilkårResultat.all {
@@ -822,7 +821,7 @@ class VilkårServiceTest(
         }
 
         val barnVilkårResultat =
-            vilkårsvurdering.personResultater.first { it.aktør.aktivIdent() == barnFnr }.vilkårResultater
+            vilkårsvurdering.personResultater.first { it.aktør.aktivFødselsnummer() == barnFnr }.vilkårResultater
         assertTrue { barnVilkårResultat.size == 6 }
         assertTrue {
             barnVilkårResultat.filter { it.vilkårType == Vilkår.BOR_MED_SØKER }.any {

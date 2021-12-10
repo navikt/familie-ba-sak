@@ -342,7 +342,7 @@ class ClientMocks {
             every {
                 mockPersonopplysningerService.hentPersoninfoEnkel(capture(idSlotForHentPersoninfo))
             } answers {
-                when (val id = idSlotForHentPersoninfo.captured.aktivIdent()) {
+                when (val id = idSlotForHentPersoninfo.captured.aktivFødselsnummer()) {
                     barnFnr[0], barnFnr[1] -> personInfo.getValue(id)
                     søkerFnr[0], søkerFnr[1] -> personInfo.getValue(id)
                     else -> personInfo.getValue(INTEGRASJONER_FNR)
@@ -353,7 +353,7 @@ class ClientMocks {
             every {
                 mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(capture(idSlot))
             } answers {
-                when (val id = idSlot.captured.aktivIdent()) {
+                when (val id = idSlot.captured.aktivFødselsnummer()) {
                     "00000000000" -> throw HttpClientErrorException(
                         HttpStatus.NOT_FOUND,
                         "Fant ikke forespurte data på person."
@@ -463,7 +463,7 @@ class ClientMocks {
             every {
                 mockPersonopplysningerService.hentAdressebeskyttelseSomSystembruker(capture(idSlot))
             } answers {
-                if (BARN_DET_IKKE_GIS_TILGANG_TIL_FNR == idSlot.captured.aktivIdent())
+                if (BARN_DET_IKKE_GIS_TILGANG_TIL_FNR == idSlot.captured.aktivFødselsnummer())
                     ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG
                 else
                     ADRESSEBESKYTTELSEGRADERING.UGRADERT

@@ -42,7 +42,7 @@ data class RestVilkårResultat(
 
 fun PersonResultat.tilRestPersonResultat() =
     RestPersonResultat(
-        personIdent = this.aktør.aktivIdent(),
+        personIdent = this.aktør.aktivFødselsnummer(),
         vilkårResultater = this.vilkårResultater.map { vilkårResultat ->
             RestVilkårResultat(
                 resultat = vilkårResultat.resultat,

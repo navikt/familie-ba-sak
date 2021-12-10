@@ -21,7 +21,7 @@ class Behandlingstilgang(
         val personer = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId)?.personer
             ?.map { it.aktør }
         if (personer != null) {
-            integrasjonClient.sjekkTilgangTilPersoner(personer.map { it.aktivIdent() })
+            integrasjonClient.sjekkTilgangTilPersoner(personer.map { it.aktivFødselsnummer() })
                 .filterNot { it.harTilgang }
                 .forEach {
                     logger.error("Bruker har ikke tilgang: ${it.begrunnelse}")

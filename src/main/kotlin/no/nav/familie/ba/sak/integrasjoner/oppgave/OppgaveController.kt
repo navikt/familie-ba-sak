@@ -104,7 +104,7 @@ class OppgaveController(
             journalpost = null,
             person = aktør.let {
                 personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(it)
-                    .tilRestPersonInfo(it.aktivIdent())
+                    .tilRestPersonInfo(it.aktivFødselsnummer())
             },
             minimalFagsak = minimalFagsak
         )
