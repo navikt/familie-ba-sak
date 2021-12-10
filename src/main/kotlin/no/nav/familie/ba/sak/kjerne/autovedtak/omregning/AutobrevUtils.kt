@@ -17,7 +17,7 @@ object AutobrevUtils {
                 VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR_AUTOVEDTAK,
                 VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR
             )
-            else -> throw Feil("Alder må være oppgitt til enten 6 eller 18 år.")
+            else -> throw Feil("Alder må være oppgitt til enten 3, 6 eller 18 år.")
         }
 
     fun hentGjeldendeVedtakbegrunnelseReduksjonForAlder(alder: Int): VedtakBegrunnelseSpesifikasjon =
@@ -25,6 +25,6 @@ object AutobrevUtils {
             Alder.TRE.år -> VedtakBegrunnelseSpesifikasjon.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_BARN_UNDER_TRE_ÅR
             Alder.SEKS.år -> VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR_AUTOVEDTAK
             Alder.ATTEN.år -> VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR_AUTOVEDTAK
-            else -> throw Feil("Alder må være oppgitt til enten 6 eller 18 år.")
+            else -> throw Feil("Alder må være oppgitt til enten 3, 6 eller 18 år.")
         }
 }
