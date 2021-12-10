@@ -243,7 +243,6 @@ class ClientMocks {
             true
         }
 
-
         return mockEnvService
     }
 
