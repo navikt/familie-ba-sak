@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.task
 
-import io.mockk.every
 import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
@@ -72,12 +71,6 @@ class FerdigstillBehandlingTaskTest : AbstractSpringIntegrationTest() {
         databaseCleanupService.truncate()
     }
 
-    private fun initEnvServiceMock() {
-        every {
-            envService.skalIverksetteBehandling()
-        } returns true
-    }
-
     private fun kjørSteg(resultat: Resultat): Behandling {
         val fnr = randomFnr()
         val aktørId = personidentService.hentOgLagreAktør(fnr)
@@ -114,7 +107,6 @@ class FerdigstillBehandlingTaskTest : AbstractSpringIntegrationTest() {
 
     @Test
     fun `Skal ferdigstille behandling og fagsak blir til løpende`() {
-        initEnvServiceMock()
 
         val behandling = kjørSteg(Resultat.OPPFYLT)
 
@@ -145,7 +137,6 @@ class FerdigstillBehandlingTaskTest : AbstractSpringIntegrationTest() {
 
     @Test
     fun `Skal ferdigstille behandling og sette fagsak til stanset`() {
-        initEnvServiceMock()
 
         val behandling = kjørSteg(Resultat.IKKE_OPPFYLT)
 

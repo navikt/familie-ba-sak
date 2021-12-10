@@ -23,8 +23,4 @@ class EnvService(private val environment: Environment) {
             it == "dev" || it == "postgres"
         }
     }
-
-    fun skalIverksetteBehandling(): Boolean {
-        return !erProd()
-    }
 }

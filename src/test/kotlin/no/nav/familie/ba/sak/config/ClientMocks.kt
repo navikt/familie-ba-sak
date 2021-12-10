@@ -243,12 +243,6 @@ class ClientMocks {
             true
         }
 
-        every {
-            mockEnvService.skalIverksetteBehandling()
-        } answers {
-            false
-        }
-
         return mockEnvService
     }
 
