@@ -1,7 +1,7 @@
-package no.nav.familie.ba.sak.kjerne.dokument
+package no.nav.familie.ba.sak.kjerne.brev
 
-import no.nav.familie.ba.sak.kjerne.dokument.domene.RestSanityBegrunnelse
-import no.nav.familie.ba.sak.kjerne.dokument.domene.SanityBegrunnelse
+import no.nav.familie.ba.sak.kjerne.brev.domene.RestSanityBegrunnelse
+import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.http.client.AbstractRestClient
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value

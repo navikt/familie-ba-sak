@@ -16,9 +16,9 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.tilUregisrertBarnEnkel
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
-import no.nav.familie.ba.sak.kjerne.dokument.domene.maler.Brevmal
-import no.nav.familie.ba.sak.kjerne.dokument.domene.tilTriggesAv
-import no.nav.familie.ba.sak.kjerne.dokument.hentVedtaksbrevmal
+import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
+import no.nav.familie.ba.sak.kjerne.brev.domene.tilTriggesAv
+import no.nav.familie.ba.sak.kjerne.brev.hentVedtaksbrevmal
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
@@ -344,12 +344,12 @@ class VedtaksperiodeService(
                                         minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
                                         persongrunnlag = persongrunnlag,
                                         aktørerMedUtbetaling = personidentService.hentOgLagreAktørIder(
-                                                identerMedUtbetaling
-                                            ),
+                                            identerMedUtbetaling
+                                        ),
                                         triggesAv = triggesAv,
                                         endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(
-                                                behandling.id
-                                            ),
+                                            behandling.id
+                                        ),
                                         andelerTilkjentYtelse = andelerTilkjentYtelse,
                                     )
                                 ) {

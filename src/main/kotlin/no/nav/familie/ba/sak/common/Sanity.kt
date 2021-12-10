@@ -1,8 +1,8 @@
 package no.nav.familie.ba.sak.common
 
-import no.nav.familie.ba.sak.kjerne.dokument.domene.RestSanityBegrunnelse
-import no.nav.familie.ba.sak.kjerne.dokument.domene.SanityBegrunnelse
-import no.nav.familie.ba.sak.kjerne.dokument.hentDokumenter
+import no.nav.familie.ba.sak.kjerne.brev.domene.RestSanityBegrunnelse
+import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
+import no.nav.familie.ba.sak.kjerne.brev.hentDokumenter
 import no.nav.familie.kontrakter.felles.objectMapper
 import java.net.URI
 import java.net.http.HttpClient

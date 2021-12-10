@@ -10,8 +10,8 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.lagVertikaleSegmenter
-import no.nav.familie.ba.sak.kjerne.dokument.domene.SanityBegrunnelse
-import no.nav.familie.ba.sak.kjerne.dokument.domene.tilTriggesAv
+import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
+import no.nav.familie.ba.sak.kjerne.brev.domene.tilTriggesAv
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.hentPersonerForEtterEndretUtbetalingsperiode
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
@@ -191,9 +191,9 @@ fun kastFeilmeldingForBegrunnelserMedFeil(
 
 fun validerVedtaksperiodeMedBegrunnelser(vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser) {
     if ((
-        vedtaksperiodeMedBegrunnelser.type == Vedtaksperiodetype.OPPHØR ||
-            vedtaksperiodeMedBegrunnelser.type == Vedtaksperiodetype.AVSLAG
-        ) &&
+            vedtaksperiodeMedBegrunnelser.type == Vedtaksperiodetype.OPPHØR ||
+                vedtaksperiodeMedBegrunnelser.type == Vedtaksperiodetype.AVSLAG
+            ) &&
         vedtaksperiodeMedBegrunnelser.harFriteksterUtenStandardbegrunnelser()
     ) {
         val fritekstUtenStandardbegrunnelserFeilmelding =

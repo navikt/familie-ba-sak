@@ -1,0 +1,25 @@
+package no.nav.familie.ba.sak.kjerne.brev
+
+import no.nav.familie.ba.sak.common.Utils
+import no.nav.familie.ba.sak.common.tilKortString
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.MinimertPerson
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.MinimertUtbetalingsperiodeDetalj
+
+fun List<MinimertPerson>.tilBarnasFødselsdatoer(): String =
+    Utils.slåSammen(
+        this
+            .filter { it.type == PersonType.BARN }
+            .sortedBy { person ->
+                person.fødselsdato
+            }
+            .map { person ->
+                person.fødselsdato.tilKortString()
+            }
+    )
+
+fun List<MinimertUtbetalingsperiodeDetalj>.antallBarn(): Int =
+    this.filter { it.person.type == PersonType.BARN }.size
+
+fun List<MinimertUtbetalingsperiodeDetalj>.totaltUtbetalt(): Int =
+    this.sumOf { it.utbetaltPerMnd }

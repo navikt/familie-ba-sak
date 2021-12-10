@@ -5,7 +5,7 @@ import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.YearMonthConverter
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
-import no.nav.familie.ba.sak.kjerne.dokument.UtvidetScenario
+import no.nav.familie.ba.sak.kjerne.brev.UtvidetScenarioForEndringsperiode
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.erStartPåUtvidetSammeMåned
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
@@ -270,12 +270,12 @@ fun List<AndelTilkjentYtelse>.hentUtvidetYtelseScenario(
     !erStartPåUtvidetSammeMåned(
         this,
         månedPeriode.fom
-    ) -> UtvidetScenario.IKKE_UTVIDET_YTELSE
+    ) -> UtvidetScenarioForEndringsperiode.IKKE_UTVIDET_YTELSE
     this.finnesUtvidetEndringsutbetalingIPerioden(
         månedPeriode.fom,
         månedPeriode.tom,
-    ) -> UtvidetScenario.UTVIDET_YTELSE_ENDRET
-    else -> UtvidetScenario.UTVIDET_YTELSE_IKKE_ENDRET
+    ) -> UtvidetScenarioForEndringsperiode.UTVIDET_YTELSE_ENDRET
+    else -> UtvidetScenarioForEndringsperiode.UTVIDET_YTELSE_IKKE_ENDRET
 }
 
 fun List<AndelTilkjentYtelse>.erUlike(andreAndeler: List<AndelTilkjentYtelse>): Boolean {

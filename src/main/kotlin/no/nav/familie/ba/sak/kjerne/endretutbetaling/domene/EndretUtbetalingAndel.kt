@@ -10,10 +10,10 @@ import no.nav.familie.ba.sak.common.overlapperHeltEllerDelvisMed
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.ekstern.restDomene.RestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
-import no.nav.familie.ba.sak.kjerne.dokument.UtvidetScenario
-import no.nav.familie.ba.sak.kjerne.dokument.domene.SanityBegrunnelse
-import no.nav.familie.ba.sak.kjerne.dokument.domene.SanityVilkår
-import no.nav.familie.ba.sak.kjerne.dokument.domene.tilTriggesAv
+import no.nav.familie.ba.sak.kjerne.brev.UtvidetScenarioForEndringsperiode
+import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
+import no.nav.familie.ba.sak.kjerne.brev.domene.SanityVilkår
+import no.nav.familie.ba.sak.kjerne.brev.domene.tilTriggesAv
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
@@ -182,7 +182,7 @@ fun hentPersonerForEtterEndretUtbetalingsperiode(
 
 fun EndretUtbetalingAndel.hentGyldigEndretBegrunnelser(
     sanityBegrunnelser: List<SanityBegrunnelse>,
-    utvidetScenario: UtvidetScenario,
+    utvidetScenario: UtvidetScenarioForEndringsperiode,
 ): List<VedtakBegrunnelseSpesifikasjon> {
     val gyldigeBegrunnelser = VedtakBegrunnelseSpesifikasjon.values()
         .filter { vedtakBegrunnelseSpesifikasjon ->
@@ -213,11 +213,11 @@ fun EndretUtbetalingAndel.hentGyldigEndretBegrunnelser(
 
 private fun SanityBegrunnelse.oppfyllerKravForTriggereForEndretUtbetaling(
     triggesAv: TriggesAv,
-    utvidetScenario: UtvidetScenario,
+    utvidetScenario: UtvidetScenarioForEndringsperiode,
     endretUtbetalingAndel: EndretUtbetalingAndel
 ): Boolean {
     val skalUtbetalesKrav = triggesAvSkalUtbetales(listOf(endretUtbetalingAndel), triggesAv)
-    val utvidetKrav = (utvidetScenario == UtvidetScenario.UTVIDET_YTELSE_IKKE_ENDRET) ==
+    val utvidetKrav = (utvidetScenario == UtvidetScenarioForEndringsperiode.UTVIDET_YTELSE_IKKE_ENDRET) ==
         (this.vilkaar?.contains(SanityVilkår.UTVIDET_BARNETRYGD) ?: false)
 
     return skalUtbetalesKrav && utvidetKrav

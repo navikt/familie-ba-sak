@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.integrasjoner.sanity
 
-import no.nav.familie.ba.sak.kjerne.dokument.SanityKlient
-import no.nav.familie.ba.sak.kjerne.dokument.domene.SanityBegrunnelse
+import no.nav.familie.ba.sak.kjerne.brev.SanityKlient
+import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Component
 
