@@ -34,10 +34,10 @@ class SendStartBehandlingTilInfotrygdTask(
         private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
         fun opprettTask(aktørStoenadsmottaker: Aktør): Task {
-            secureLogger.info("Send startBehandling for ${aktørStoenadsmottaker.aktivIdent()} til Infotrygd.")
+            secureLogger.info("Send startBehandling for ${aktørStoenadsmottaker.aktivFødselsnummer()} til Infotrygd.")
 
             val metadata = Properties().apply {
-                this["personIdenter"] = aktørStoenadsmottaker.aktivIdent()
+                this["personIdenter"] = aktørStoenadsmottaker.aktivFødselsnummer()
                 if (!MDC.get(MDCConstants.MDC_CALL_ID).isNullOrEmpty()) {
                     this["callId"] = MDC.get(MDCConstants.MDC_CALL_ID) ?: IdUtils.generateId()
                 }
@@ -47,7 +47,7 @@ class SendStartBehandlingTilInfotrygdTask(
                 type = TASK_STEP_TYPE,
                 payload = objectMapper.writeValueAsString(
                     StartBehandlingDto(
-                        fnrStoenadsmottaker = aktørStoenadsmottaker.aktivIdent(),
+                        fnrStoenadsmottaker = aktørStoenadsmottaker.aktivFødselsnummer(),
                     )
                 ),
                 properties = metadata

@@ -130,22 +130,22 @@ class FiltreringsregelForFlereBarnTest {
 
         every { localDateServiceMock.now() } returns LocalDate.now().withDayOfMonth(15)
 
-        every { personidentService.hentOgLagreAktør(gyldigAktør.aktivIdent()) } returns gyldigAktør
+        every { personidentService.hentOgLagreAktør(gyldigAktør.aktivFødselsnummer()) } returns gyldigAktør
         every {
             personidentService.hentOgLagreAktørIder(
                 listOf(
-                    barnAktør0.aktivIdent(),
-                    barnAktør1.aktivIdent()
+                    barnAktør0.aktivFødselsnummer(),
+                    barnAktør1.aktivFødselsnummer()
                 )
             )
         } returns listOf(barnAktør0, barnAktør1)
 
         val fødselshendelsefiltreringResultater = filtreringsreglerService.kjørFiltreringsregler(
             NyBehandlingHendelse(
-                morsIdent = gyldigAktør.aktivIdent(),
+                morsIdent = gyldigAktør.aktivFødselsnummer(),
                 barnasIdenter = listOf(
-                    barnAktør0.aktivIdent(),
-                    barnAktør1.aktivIdent()
+                    barnAktør0.aktivFødselsnummer(),
+                    barnAktør1.aktivFødselsnummer()
                 )
             ),
             behandling
@@ -203,22 +203,22 @@ class FiltreringsregelForFlereBarnTest {
 
         every { localDateServiceMock.now() } returns LocalDate.now().withDayOfMonth(20)
 
-        every { personidentService.hentOgLagreAktør(gyldigAktør.aktivIdent()) } returns gyldigAktør
+        every { personidentService.hentOgLagreAktør(gyldigAktør.aktivFødselsnummer()) } returns gyldigAktør
         every {
             personidentService.hentOgLagreAktørIder(
                 listOf(
-                    barnAktør0.aktivIdent(),
-                    barnAktør1.aktivIdent()
+                    barnAktør0.aktivFødselsnummer(),
+                    barnAktør1.aktivFødselsnummer()
                 )
             )
         } returns listOf(barnAktør0, barnAktør1)
 
         val fødselshendelsefiltreringResultater = filtreringsreglerService.kjørFiltreringsregler(
             NyBehandlingHendelse(
-                morsIdent = gyldigAktør.aktivIdent(),
+                morsIdent = gyldigAktør.aktivFødselsnummer(),
                 barnasIdenter = listOf(
-                    barnAktør0.aktivIdent(),
-                    barnAktør1.aktivIdent()
+                    barnAktør0.aktivFødselsnummer(),
+                    barnAktør1.aktivFødselsnummer()
                 )
             ),
             behandling
@@ -238,7 +238,7 @@ class FiltreringsregelForFlereBarnTest {
     ): Person {
         return Person(
             aktør = aktør,
-            personIdent = PersonIdent(aktør.aktivIdent()),
+            personIdent = PersonIdent(aktør.aktivFødselsnummer()),
             type = type,
             personopplysningGrunnlag = personopplysningGrunnlag,
             fødselsdato = fødselsDato ?: LocalDate.of(1991, 1, 1),

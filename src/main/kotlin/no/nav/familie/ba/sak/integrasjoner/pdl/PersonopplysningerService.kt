@@ -30,7 +30,7 @@ class PersonopplysningerService(
         val identerMedAdressebeskyttelse = mutableSetOf<Pair<Aktør, FORELDERBARNRELASJONROLLE>>()
         val forelderBarnRelasjon = personinfo.forelderBarnRelasjon.mapNotNull {
             val harTilgang =
-                integrasjonClient.sjekkTilgangTilPersoner(listOf(it.aktør.aktivIdent()))
+                integrasjonClient.sjekkTilgangTilPersoner(listOf(it.aktør.aktivFødselsnummer()))
                     .firstOrNull()?.harTilgang
                     ?: error("Fikk ikke svar på tilgang til person.")
             if (harTilgang) {
@@ -107,13 +107,13 @@ class PersonopplysningerService(
         pdlRestClient.hentStatsborgerskapUtenHistorikk(aktør).firstOrNull()
             ?: throw Feil(
                 message = "Bruker mangler statsborgerskap",
-                frontendFeilmelding = "Person (${aktør.aktivIdent()}) mangler statsborgerskap."
+                frontendFeilmelding = "Person (${aktør.aktivFødselsnummer()}) mangler statsborgerskap."
             )
 
     fun hentGjeldendeOpphold(aktør: Aktør): Opphold = pdlRestClient.hentOppholdUtenHistorikk(aktør).firstOrNull()
         ?: throw Feil(
             message = "Bruker mangler opphold",
-            frontendFeilmelding = "Person (${aktør.aktivIdent()}) mangler opphold."
+            frontendFeilmelding = "Person (${aktør.aktivFødselsnummer()}) mangler opphold."
         )
 
     fun hentLandkodeUtenlandskBostedsadresse(aktør: Aktør): String {

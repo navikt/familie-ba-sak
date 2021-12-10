@@ -232,7 +232,7 @@ class PersongrunnlagService(
             else personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(aktør)
 
         return Person(
-            personIdent = PersonIdent(aktør.aktivIdent()),
+            personIdent = PersonIdent(aktør.aktivFødselsnummer()),
             type = personType,
             personopplysningGrunnlag = personopplysningGrunnlag,
             fødselsdato = personinfo.fødselsdato,

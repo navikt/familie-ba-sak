@@ -78,7 +78,7 @@ class SmåbarnstilleggService(
 
     private fun hentPerioderMedFullOvergangsstønad(aktør: Aktør): List<PeriodeOvergangsstønad> {
         return efSakRestClient.hentPerioderMedFullOvergangsstønad(
-            aktør.aktivIdent()
+            aktør.aktivFødselsnummer()
         ).perioder
     }
 }

@@ -38,7 +38,7 @@ class JournalføringServiceTest(
         val søkerFnr = randomFnr()
         val søkerAktør = personidentService.hentOgLagreAktør(søkerFnr)
 
-        val fagsak = fagsakService.hentEllerOpprettFagsak(søkerAktør.aktivIdent())
+        val fagsak = fagsakService.hentEllerOpprettFagsak(søkerAktør.aktivFødselsnummer())
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
 
         val (sak, behandlinger) = journalføringService
@@ -57,7 +57,7 @@ class JournalføringServiceTest(
         val søkerFnr = randomFnr()
         val søkerAktør = personidentService.hentOgLagreAktør(søkerFnr)
 
-        val fagsak = fagsakService.hentEllerOpprettFagsak(søkerAktør.aktivIdent())
+        val fagsak = fagsakService.hentEllerOpprettFagsak(søkerAktør.aktivFødselsnummer())
         behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
 
         val (sak, behandlinger) = journalføringService

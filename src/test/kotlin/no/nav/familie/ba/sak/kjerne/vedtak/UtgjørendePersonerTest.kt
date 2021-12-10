@@ -142,7 +142,7 @@ class UtgjørendePersonerTest {
         assertEquals(2, personerMedUtgjørendeVilkårLovligOpphold.size)
         assertEquals(
             listOf(søkerFnr, barn1Fnr).sorted(),
-            personerMedUtgjørendeVilkårLovligOpphold.map { it.aktør.aktivIdent() }.sorted()
+            personerMedUtgjørendeVilkårLovligOpphold.map { it.aktør.aktivFødselsnummer() }.sorted()
         )
 
         val personerMedUtgjørendeVilkårBosattIRiket = VedtakUtils.hentPersonerForAlleUtgjørendeVilkår(
@@ -158,7 +158,7 @@ class UtgjørendePersonerTest {
         )
 
         assertEquals(1, personerMedUtgjørendeVilkårBosattIRiket.size)
-        assertEquals(barn1Fnr, personerMedUtgjørendeVilkårBosattIRiket.first().aktør.aktivIdent())
+        assertEquals(barn1Fnr, personerMedUtgjørendeVilkårBosattIRiket.first().aktør.aktivFødselsnummer())
     }
 
     @Test
@@ -234,7 +234,7 @@ class UtgjørendePersonerTest {
         assertEquals(1, personerMedUtgjørendeVilkårBosattIRiket.size)
         assertEquals(
             barn2Fnr,
-            personerMedUtgjørendeVilkårBosattIRiket.first().aktør.aktivIdent()
+            personerMedUtgjørendeVilkårBosattIRiket.first().aktør.aktivFødselsnummer()
         )
 
         val personerMedUtgjørendeVilkårBarnUtvandret = VedtakUtils.hentPersonerForAlleUtgjørendeVilkår(
@@ -252,7 +252,7 @@ class UtgjørendePersonerTest {
         assertEquals(1, personerMedUtgjørendeVilkårBarnUtvandret.size)
         assertEquals(
             barnFnr,
-            personerMedUtgjørendeVilkårBarnUtvandret.first().aktør.aktivIdent()
+            personerMedUtgjørendeVilkårBarnUtvandret.first().aktør.aktivFødselsnummer()
         )
     }
 
@@ -334,13 +334,13 @@ class UtgjørendePersonerTest {
         assertEquals(1, personerMedUtgjørendeVilkårBosattIRiketMedlemskap.size)
         assertEquals(
             barn1Fnr,
-            personerMedUtgjørendeVilkårBosattIRiketMedlemskap.first().aktør.aktivIdent()
+            personerMedUtgjørendeVilkårBosattIRiketMedlemskap.first().aktør.aktivFødselsnummer()
         )
 
         assertEquals(1, personerMedUtgjørendeVilkårBosattIRiket.size)
         assertEquals(
             barn2Fnr,
-            personerMedUtgjørendeVilkårBosattIRiket.first().aktør.aktivIdent()
+            personerMedUtgjørendeVilkårBosattIRiket.first().aktør.aktivFødselsnummer()
         )
     }
 }

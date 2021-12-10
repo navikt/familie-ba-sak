@@ -39,7 +39,7 @@ private fun ForelderBarnRelasjonMaskert.tilRestForelderBarnRelasjonMaskert() = R
 )
 
 private fun ForelderBarnRelasjon.tilRestForelderBarnRelasjon() = RestForelderBarnRelasjon(
-    personIdent = this.aktør.aktivIdent(),
+    personIdent = this.aktør.aktivFødselsnummer(),
     relasjonRolle = this.relasjonsrolle,
     navn = this.navn ?: "",
     fødselsdato = this.fødselsdato,

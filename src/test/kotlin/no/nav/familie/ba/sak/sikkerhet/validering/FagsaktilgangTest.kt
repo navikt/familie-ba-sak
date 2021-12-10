@@ -63,7 +63,7 @@ internal class FagsaktilgangTest {
 
     @Test
     fun `isValid returnerer true om sjekkTilgangTilPersoner gir true for alle personer knyttet til behandlinger for fagsak`() {
-        every { client.sjekkTilgangTilPersoner(personopplysningsgrunnlag.personer.map { it.aktør.aktivIdent() }) }
+        every { client.sjekkTilgangTilPersoner(personopplysningsgrunnlag.personer.map { it.aktør.aktivFødselsnummer() }) }
             .returns(
                 listOf(
                     Tilgang(true),
@@ -79,7 +79,7 @@ internal class FagsaktilgangTest {
 
     @Test
     fun `isValid returnerer false om sjekkTilgangTilPersoner gir false for en person knyttet til en behandling for fagsak`() {
-        every { client.sjekkTilgangTilPersoner(personopplysningsgrunnlag.personer.map { it.aktør.aktivIdent() }) }
+        every { client.sjekkTilgangTilPersoner(personopplysningsgrunnlag.personer.map { it.aktør.aktivFødselsnummer() }) }
             .returns(
                 listOf(
                     Tilgang(true),

@@ -347,8 +347,8 @@ class VedtaksperiodeService(
                                             ),
                                         triggesAv = triggesAv,
                                         endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(
-                                            behandling.id
-                                        ),
+                                                behandling.id
+                                            ),
                                         andelerTilkjentYtelse = andelerTilkjentYtelse,
                                     )
                                 ) {
@@ -579,7 +579,7 @@ class VedtaksperiodeService(
         val begrunnelseOgIdentListe: List<Pair<VedtakBegrunnelseSpesifikasjon, String>> =
             vilkårResultater
                 .map { vilkår ->
-                    val personIdent = vilkår.personResultat?.aktør?.aktivIdent()
+                    val personIdent = vilkår.personResultat?.aktør?.aktivFødselsnummer()
                         ?: throw Feil(
                             "VilkårResultat ${vilkår.id} mangler PersonResultat ved sammenslåing av begrunnelser"
                         )
