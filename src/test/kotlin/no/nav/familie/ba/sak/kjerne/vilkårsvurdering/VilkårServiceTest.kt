@@ -869,7 +869,7 @@ class VilkårServiceTest(
         assertTrue { vilkårsvurdering.personResultater.isNotEmpty() }
         assertTrue { vilkårsvurdering.personResultater.any { it.personIdent == fnr } }
         assertTrue { vilkårsvurdering.personResultater.find { it.personIdent == fnr }!!.vilkårResultater.size == 2 }
-        vilkårService.postVilkår(
+        vilkårService.postVilkårUtvidetBarnetrygd(
             nåVærendeBehandling.id,
             RestNyttVilkår(
                 personIdent = fnr,
@@ -909,7 +909,7 @@ class VilkårServiceTest(
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
         vilkårService.initierVilkårsvurderingForBehandling(behandling, false)
         val exception = assertThrows<RuntimeException> {
-            vilkårService.postVilkår(
+            vilkårService.postVilkårUtvidetBarnetrygd(
                 behandling.id,
                 RestNyttVilkår(
                     personIdent = fnr,
@@ -944,7 +944,7 @@ class VilkårServiceTest(
         assertTrue { vilkårsvurdering.personResultater.any { it.personIdent == fnr } }
         assertTrue { vilkårsvurdering.personResultater.find { it.personIdent == fnr }!!.vilkårResultater.size == 2 }
         val exception = assertThrows<RuntimeException> {
-            vilkårService.postVilkår(
+            vilkårService.postVilkårUtvidetBarnetrygd(
                 nåVærendeBehandling.id,
                 RestNyttVilkår(
                     personIdent = barnFnr,

@@ -169,6 +169,22 @@ class VilkårService(
                     "Fant ikke vilkårsvurdering for person med ident '${restNyttVilkår.personIdent}"
                 )
         // valider for å legge til utvidet barnetrygd
+        validerFørLeggeTilUtvidetBarnetrygd(behandlingId, restNyttVilkår)
+
+        muterPersonResultatPost(personResultat, restNyttVilkår.vilkårType)
+
+        return vilkårsvurderingService.oppdater(vilkårsvurdering).personResultater.map { it.tilRestPersonResultat() }
+    }
+
+    fun postVilkårUtvidetBarnetrygd(behandlingId: Long, restNyttVilkår: RestNyttVilkår): List<RestPersonResultat> {
+        validerFørLeggeTilUtvidetBarnetrygd(behandlingId, restNyttVilkår)
+        return postVilkår(behandlingId, restNyttVilkår)
+    }
+
+    private fun validerFørLeggeTilUtvidetBarnetrygd(
+        behandlingId: Long,
+        restNyttVilkår: RestNyttVilkår
+    ) {
         val behandling = behandlingService.hent(behandlingId)
         if (Vilkår.UTVIDET_BARNETRYGD == restNyttVilkår.vilkårType) {
             if (!behandling.erManuellMigrering()) {
@@ -190,10 +206,6 @@ class VilkårService(
                 )
             }
         }
-
-        muterPersonResultatPost(personResultat, restNyttVilkår.vilkårType)
-
-        return vilkårsvurderingService.oppdater(vilkårsvurdering).personResultater.map { it.tilRestPersonResultat() }
     }
 
     fun initierVilkårsvurderingForBehandling(
