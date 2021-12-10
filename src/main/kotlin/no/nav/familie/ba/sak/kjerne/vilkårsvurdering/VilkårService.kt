@@ -553,13 +553,8 @@ class VilkårService(
                 aktør = person.aktør
             )
 
-            val finnesUtvidetPeriodeIForrigeBehandling = forrigeBehandlingsvilkårsvurdering.personResultater
-                .single { it.personIdent == person.personIdent.ident }
-                .vilkårResultater.any { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
-            val vilkårTyperForPerson = Vilkår.hentVilkårForMigreringsbehandling(
-                personType = person.type,
-                finnesUtvidetPeriodeIForrigeBehandling = finnesUtvidetPeriodeIForrigeBehandling
-            )
+            val vilkårTyperForPerson = forrigeBehandlingsvilkårsvurdering.personResultater
+                .single { it.personIdent == person.personIdent.ident }.vilkårResultater.map { it.vilkårType }
 
             val vilkårResultater = vilkårTyperForPerson.map { vilkår ->
                 val fom = utledPeriodeFom(forrigeBehandlingsvilkårsvurdering, vilkår, person, nyMigreringsdato)
