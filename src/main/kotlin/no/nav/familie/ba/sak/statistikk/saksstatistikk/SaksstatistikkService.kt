@@ -123,7 +123,6 @@ class SaksstatistikkService(
         if (aktivBehandling?.opprettetÅrsak == FØDSELSHENDELSE && !envService.skalIverksetteBehandling()) return null
 
         var landkodeSøker: String = PersonopplysningerService.UKJENT_LANDKODE
-        val søkersAktør = personidentService.hentOgLagreAktør(søkerIdent)
 
         val deltagere = if (aktivBehandling != null) {
             val personer = persongrunnlagService.hentAktiv(aktivBehandling.id)?.personer ?: emptySet()
@@ -138,8 +137,8 @@ class SaksstatistikkService(
             }
         } else {
 
-            landkodeSøker = hentLandkode(søkersAktør)
-            listOf(AktørDVH(søkersAktør.aktørId.toLong(), PersonType.SØKER.name))
+            landkodeSøker = hentLandkode(fagsak.aktør)
+            listOf(AktørDVH(fagsak.aktør.aktørId.toLong(), PersonType.SØKER.name))
         }
 
         return SakDVH(
@@ -148,7 +147,7 @@ class SaksstatistikkService(
             opprettetDato = LocalDate.now(),
             funksjonellId = UUID.randomUUID().toString(),
             sakId = sakId.toString(),
-            aktorId = søkersAktør.aktørId.toLong(),
+            aktorId = fagsak.aktør.aktørId.toLong(),
             aktorer = deltagere,
             sakStatus = fagsak.status.name,
             avsender = "familie-ba-sak",

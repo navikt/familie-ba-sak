@@ -23,7 +23,8 @@ import javax.validation.constraints.Pattern
 data class Aktør(
     @Id
     @Column(name = "aktoer_id", updatable = false, length = 50)
-    @Pattern(regexp = VALID_REGEXP, flags = [Pattern.Flag.CASE_INSENSITIVE])
+    // Validator kommer virke først i Spring 3.0 grunnet at hibernate tatt i bruke Jakarta.
+    @Pattern(regexp = VALID_REGEXP)
     // Er ikke kalt id ettersom den refererer til en ekstern id.
     val aktørId: String,
 
@@ -38,7 +39,7 @@ data class Aktør(
     init {
         require(VALID.matcher(aktørId).matches()) {
             // skal ikke skje, funksjonelle feilmeldinger håndteres ikke her.
-            "Ugyldig aktørId, støtter kun A-Z/0-9/:/-/_ tegn.)"
+            "Ugyldig fødselsnummer, støtter kun 13 siffer.)"
         }
     }
 
@@ -63,8 +64,7 @@ data class Aktør(
     fun harIdent(fødselsnummer: String) = personidenter.any { it.fødselsnummer == fødselsnummer }
 
     companion object {
-        private const val CHARS = "a-z0-9_:-"
-        private const val VALID_REGEXP = "^(-?[1-9]|[a-z0])[$CHARS]*$"
-        private val VALID = java.util.regex.Pattern.compile(VALID_REGEXP, java.util.regex.Pattern.CASE_INSENSITIVE)
+        private const val VALID_REGEXP = "^\\d{13}$"
+        private val VALID = java.util.regex.Pattern.compile(VALID_REGEXP)
     }
 }

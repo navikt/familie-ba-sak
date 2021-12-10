@@ -51,8 +51,6 @@ class HenleggBehandling(
 
         behandlingService.lagreEllerOppdater(behandling)
 
-        opprettFerdigstillBehandling(behandling.id, behandling.fagsak.aktør)
-
         return hentNesteStegForNormalFlyt(behandling)
     }
 
