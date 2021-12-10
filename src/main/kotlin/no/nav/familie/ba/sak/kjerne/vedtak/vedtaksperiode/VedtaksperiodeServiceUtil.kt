@@ -102,7 +102,7 @@ fun hentPersonidenterGjeldendeForBegrunnelse(
 
         triggesAv.barnMedSeksårsdag ->
             begrunnelseGrunnlag.persongrunnlag.barnMedSeksårsdagPåFom(vedtaksperiodeMedBegrunnelser.fom)
-                .map { person -> person.aktør.aktørId }
+                .map { person -> person.aktør.aktivFødselsnummer() }
 
         triggesAv.personerManglerOpplysninger ->
             if (begrunnelseGrunnlag.vilkårsvurdering.harPersonerManglerOpplysninger())
