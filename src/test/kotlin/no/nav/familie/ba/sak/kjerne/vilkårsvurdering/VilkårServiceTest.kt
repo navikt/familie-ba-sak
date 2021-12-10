@@ -331,7 +331,7 @@ class VilkårServiceTest(
         vilkårsvurdering2.personResultater.forEach { personResultat ->
             personResultat.vilkårResultater.forEach { vilkårResultat ->
                 if (personResultat.aktør.aktivFødselsnummer() == barnFnr2) {
-                    Assertions.assertEquals(behandling2.id, vilkårResultat.behandlingId)
+                    assertEquals(behandling2.id, vilkårResultat.behandlingId)
                 } else {
                     assertEquals(Resultat.OPPFYLT, vilkårResultat.resultat)
                     assertEquals(behandling.id, vilkårResultat.behandlingId)
@@ -1083,36 +1083,6 @@ class VilkårServiceTest(
         assertEquals(
             "Vilkår ${Vilkår.UTVIDET_BARNETRYGD.beskrivelse} kan ikke slettes " +
                 "for behandling ${behandling.id}",
-            exception.message
-        )
-    }
-
-    @Test
-    fun `skal ikke slette utvidet barnetrygd vilkår for migreringsbehandling når det ikke finnes`() {
-        val fnr = randomFnr()
-        val barnFnr = randomFnr()
-        val forrigeVilkårsdato = LocalDate.of(2021, 8, 1)
-        val barnetsFødselsdato = LocalDate.now().minusYears(1)
-
-        val behandlinger = lagMigreringsbehandling(fnr, barnFnr, barnetsFødselsdato, forrigeVilkårsdato)
-        val behandling = behandlinger.second
-        vilkårService.genererVilkårsvurderingForMigreringsbehandlingMedÅrsakEndreMigreringsdato(
-            behandling = behandling,
-            forrigeBehandlingSomErVedtatt = behandlinger.first,
-            nyMigreringsdato = LocalDate.of(2021, 1, 1)
-        )
-
-        val exception = assertThrows<RuntimeException> {
-            vilkårService.deleteVilkår(
-                behandling.id,
-                RestSlettVilkår(
-                    personIdent = fnr,
-                    vilkårType = Vilkår.UTVIDET_BARNETRYGD
-                )
-            )
-        }
-        assertEquals(
-            "Fant ikke ${Vilkår.UTVIDET_BARNETRYGD.beskrivelse} for person",
             exception.message
         )
     }

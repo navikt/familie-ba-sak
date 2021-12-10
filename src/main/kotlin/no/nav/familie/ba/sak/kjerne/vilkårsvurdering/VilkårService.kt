@@ -139,16 +139,8 @@ class VilkårService(
                     "for behandling $behandlingId",
             )
         }
-        val vilkårResultater = personResultat.vilkårResultater.filter { it.vilkårType == restSlettVilkår.vilkårType }
-        if (vilkårResultater.isEmpty()) {
-            throw Feil(
-                message = "Fant ikke ${restSlettVilkår.vilkårType.beskrivelse} for person",
-                frontendFeilmelding = "Fant ikke ${restSlettVilkår.vilkårType.beskrivelse} " +
-                    "for person med ident ${restSlettVilkår.personIdent}"
-            )
-        } else {
-            vilkårResultater.forEach { personResultat.removeVilkårResultat(it.id) }
-        }
+        personResultat.vilkårResultater.filter { it.vilkårType == restSlettVilkår.vilkårType }
+            .forEach { personResultat.removeVilkårResultat(it.id) }
 
         return vilkårsvurderingService.oppdater(vilkårsvurdering).personResultater.map { it.tilRestPersonResultat() }
     }
