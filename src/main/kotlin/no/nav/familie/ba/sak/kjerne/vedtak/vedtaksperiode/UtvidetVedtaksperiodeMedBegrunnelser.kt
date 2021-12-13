@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
-import no.nav.familie.ba.sak.kjerne.behandlingsresultat.UregistrertBarnEnkel
+import no.nav.familie.ba.sak.kjerne.behandlingsresultat.MinimertUregistrertBarn
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
@@ -27,7 +27,7 @@ data class UtvidetVedtaksperiodeMedBegrunnelser(
         brevGrunnlag: BrevGrunnlag,
         sanityBegrunnelser: List<SanityBegrunnelse>,
         erFørsteVedtaksperiodePåFagsak: Boolean,
-        uregistrerteBarn: List<UregistrertBarnEnkel>,
+        uregistrerteBarn: List<MinimertUregistrertBarn>,
         målformSøker: Målform,
     ) = this
         .tilBrevPeriodeGrunnlag(sanityBegrunnelser)

@@ -26,7 +26,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat.INNVILG
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat.OPPHØRT
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
-import no.nav.familie.ba.sak.kjerne.behandlingsresultat.UregistrertBarnEnkel
+import no.nav.familie.ba.sak.kjerne.behandlingsresultat.MinimertUregistrertBarn
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.EndretUtbetalingBrevPeriodeType
@@ -238,7 +238,7 @@ enum class UtvidetScenarioForEndringsperiode {
 fun BrevPeriodeGrunnlag.tilBrevPeriode(
     brevGrunnlag: BrevGrunnlag,
     utvidetScenario: UtvidetScenarioForEndringsperiode = UtvidetScenarioForEndringsperiode.IKKE_UTVIDET_YTELSE,
-    uregistrerteBarn: List<UregistrertBarnEnkel> = emptyList(),
+    uregistrerteBarn: List<MinimertUregistrertBarn> = emptyList(),
     erFørsteVedtaksperiodePåFagsak: Boolean,
     målformSøker: Målform
 ): BrevPeriode? {

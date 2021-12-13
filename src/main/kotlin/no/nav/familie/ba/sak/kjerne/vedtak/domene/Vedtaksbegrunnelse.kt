@@ -5,7 +5,7 @@ import no.nav.familie.ba.sak.common.NullablePeriode
 import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.common.StringListConverter
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
-import no.nav.familie.ba.sak.kjerne.behandlingsresultat.UregistrertBarnEnkel
+import no.nav.familie.ba.sak.kjerne.behandlingsresultat.MinimertUregistrertBarn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
@@ -87,7 +87,7 @@ fun BrevBegrunnelseGrunnlagMedPersoner.tilBrevBegrunnelse(
     vedtaksperiode: NullablePeriode,
     personerIPersongrunnlag: List<MinimertPerson>,
     målformSøker: Målform,
-    uregistrerteBarn: List<UregistrertBarnEnkel>,
+    uregistrerteBarn: List<MinimertUregistrertBarn>,
     beløp: String
 ): Begrunnelse {
     val begrunnelsepersonerPåBegrunnelse =
@@ -129,7 +129,7 @@ fun BrevBegrunnelseGrunnlagMedPersoner.tilBrevBegrunnelse(
 }
 
 private fun BrevBegrunnelseGrunnlagMedPersoner.hentAntallBarnForBegrunnelse(
-    uregistrerteBarn: List<UregistrertBarnEnkel>,
+    uregistrerteBarn: List<MinimertUregistrertBarn>,
     erAvslagPåKunSøker: Boolean,
     barnasFødselsdatoer: List<LocalDate>
 ) = if (this.vedtakBegrunnelseSpesifikasjon == VedtakBegrunnelseSpesifikasjon.AVSLAG_UREGISTRERT_BARN)
@@ -140,7 +140,7 @@ else
     barnasFødselsdatoer.size
 
 private fun BrevBegrunnelseGrunnlagMedPersoner.hentBarnasFødselsdagerForBegrunnelse(
-    uregistrerteBarn: List<UregistrertBarnEnkel>,
+    uregistrerteBarn: List<MinimertUregistrertBarn>,
     erAvslagPåKunSøker: Boolean,
     personerIBehandling: List<MinimertPerson>,
     personerPåBegrunnelse: List<MinimertPerson>

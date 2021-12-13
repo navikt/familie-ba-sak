@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo
 import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
-import no.nav.familie.ba.sak.kjerne.behandlingsresultat.UregistrertBarnEnkel
+import no.nav.familie.ba.sak.kjerne.behandlingsresultat.MinimertUregistrertBarn
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.brev.UtvidetScenarioForEndringsperiode
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
@@ -39,7 +39,7 @@ data class BrevBegrunnelseTestConfig(
     val personerPåBehandling: List<PersonPåBehandlingConfig>,
 
     val utvidetScenarioForEndringsperiode: UtvidetScenarioForEndringsperiode = UtvidetScenarioForEndringsperiode.IKKE_UTVIDET_YTELSE,
-    val uregistrerteBarn: List<UregistrertBarnEnkel>,
+    val uregistrerteBarn: List<MinimertUregistrertBarn>,
     val erFørsteVedtaksperiodePåFagsak: Boolean = false,
     val målformSøker: Målform,
 

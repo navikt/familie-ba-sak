@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene
 
 import no.nav.familie.ba.sak.common.NullablePeriode
 import no.nav.familie.ba.sak.common.Utils
-import no.nav.familie.ba.sak.kjerne.behandlingsresultat.UregistrertBarnEnkel
+import no.nav.familie.ba.sak.kjerne.behandlingsresultat.MinimertUregistrertBarn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Begrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.FritekstBegrunnelse
@@ -22,7 +22,7 @@ data class BrevPeriodeGrunnlagMedPersoner(
 ) {
     fun byggBegrunnelserOgFritekster(
         brevGrunnlag: BrevGrunnlag,
-        uregistrerteBarn: List<UregistrertBarnEnkel> = emptyList(),
+        uregistrerteBarn: List<MinimertUregistrertBarn> = emptyList(),
         målformSøker: Målform
     ): List<Begrunnelse> {
 
