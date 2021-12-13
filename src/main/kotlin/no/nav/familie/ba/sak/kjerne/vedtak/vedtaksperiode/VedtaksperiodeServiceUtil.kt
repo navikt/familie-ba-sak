@@ -138,10 +138,10 @@ fun hentPersonidenterGjeldendeForBegrunnelse(
 }
 
 private fun hentAktuellePersonerForVedtaksperiode(
-    begrunnelsePersoner: List<MinimertPerson>,
+    personerPåBehandling: List<MinimertPerson>,
     vedtakBegrunnelseType: VedtakBegrunnelseType,
     identerMedUtbetaling: List<String>
-): List<MinimertPerson> = begrunnelsePersoner.filter { person ->
+): List<MinimertPerson> = personerPåBehandling.filter { person ->
     if (vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGET) {
         identerMedUtbetaling.contains(person.personIdent) || person.type == PersonType.SØKER
     } else true
