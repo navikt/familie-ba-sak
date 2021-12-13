@@ -20,12 +20,13 @@ object VedtakUtils {
      * Funksjonen henter personer som trigger den gitte vedtaksperioden ved å hente vilkårResultater
      * basert på de attributter som definerer om en vedtaksbegrunnelse er trigget for en periode.
      *
-     * @param minimertePersonResultater - Vilkårresultatene man ser på for å sammenligne vilkår
+     * @param minimertePersonResultater - Resultatene fra vilkårsvurderingen for hver person
      * @param vedtaksperiode - Perioden det skal sjekkes for
      * @param oppdatertBegrunnelseType - Begrunnelsestype det skal sjekkes for
-     * @param aktuellePersonerForVedtaksperiode - Personer som passer for vedtaksperiode
+     * @param aktuellePersonerForVedtaksperiode - Personer på behandlingen som er aktuelle for vedtaksperioden
      * @param triggesAv -  Hva som trigger en vedtaksbegrynnelse.
      * @param erFørsteVedtaksperiodePåFagsak - Om vedtaksperioden er første periode på fagsak.
+     *        Brukes for opphør som har egen logikk dersom det er første periode.
      * @return List med personene det trigges endring på
      */
     fun hentPersonerForAlleUtgjørendeVilkår(
