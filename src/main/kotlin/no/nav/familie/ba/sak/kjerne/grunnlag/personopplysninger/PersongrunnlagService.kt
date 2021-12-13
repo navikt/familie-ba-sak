@@ -267,6 +267,8 @@ class PersongrunnlagService(
         hentSøker(behandlingId)?.målform ?: Målform.NB
 
     companion object {
+        fun finnerIkkePersongrunnlagFeilmelding(behandlingId: Long) =
+            "Finner ikke persongrunnlag på behandling $behandlingId"
 
         private val logger = LoggerFactory.getLogger(PersongrunnlagService::class.java)
     }

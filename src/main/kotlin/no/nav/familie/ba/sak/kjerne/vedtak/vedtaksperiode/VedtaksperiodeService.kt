@@ -22,6 +22,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.tilTriggesAv
 import no.nav.familie.ba.sak.kjerne.brev.hentVedtaksbrevmal
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
@@ -126,7 +127,7 @@ class VedtaksperiodeService(
 
         val vedtaksperioderMedBegrunnelser = vedtaksperiodeRepository.finnVedtaksperioderFor(vedtakId = vedtak.id)
         val persongrunnlag = persongrunnlagRepository.findByBehandlingAndAktiv(behandlingId = vedtak.behandling.id)
-            ?: error(finnerIkkePersongrunnlagFeilmelding(vedtak.behandling.id))
+            ?: error(PersongrunnlagService.finnerIkkePersongrunnlagFeilmelding(behandlingId = vedtak.behandling.id))
         val vurderteBarnSomPersoner =
             barnaAktørSomVurderes.map { barnAktørSomVurderes ->
                 persongrunnlag.barna.find { it.aktør == barnAktørSomVurderes }
@@ -244,7 +245,7 @@ class VedtaksperiodeService(
 
         val persongrunnlag =
             persongrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
-                ?: error(finnerIkkePersongrunnlagFeilmelding(behandling.id))
+                ?: error(PersongrunnlagService.finnerIkkePersongrunnlagFeilmelding(behandlingId = behandling.id))
 
         val sanityBegrunnelser = sanityService.hentSanityBegrunnelser()
 
@@ -353,7 +354,7 @@ class VedtaksperiodeService(
 
         val brevGrunnlag = brevService.hentBrevGrunnlag(behandlingId)
         val personopplysningGrunnlag = persongrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandlingId)
-            ?: throw Feil(finnerIkkePersongrunnlagFeilmelding(behandlingId))
+            ?: throw Feil(PersongrunnlagService.finnerIkkePersongrunnlagFeilmelding(behandlingId = behandlingId))
 
         val utvidetVedtaksperiodeMedBegrunnelse = vedtaksperiodeMedBegrunnelser.tilUtvidetVedtaksperiodeMedBegrunnelser(
             personopplysningGrunnlag = personopplysningGrunnlag,
@@ -528,10 +529,5 @@ class VedtaksperiodeService(
         return begrunnelseOgIdentListe
             .groupBy { (begrunnelse, _) -> begrunnelse }
             .mapValues { (_, parGruppe) -> parGruppe.map { it.second } }
-    }
-
-    companion object {
-        fun finnerIkkePersongrunnlagFeilmelding(behandlingId: Long) =
-            "Finner ikke persongrunnlag på behandling $behandlingId"
     }
 }

@@ -269,7 +269,7 @@ class BrevService(
 
         val persongrunnlag =
             persongrunnlagService.hentAktiv(behandlingId)
-                ?: error(VedtaksperiodeService.finnerIkkePersongrunnlagFeilmelding(behandlingId))
+                ?: error(PersongrunnlagService.finnerIkkePersongrunnlagFeilmelding(behandlingId = behandlingId))
 
         val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId)
             ?: error("Finner ikke vilkårsvurdering ved begrunning av vedtak")
