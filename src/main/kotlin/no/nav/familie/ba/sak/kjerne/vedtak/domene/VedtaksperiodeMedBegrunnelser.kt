@@ -5,10 +5,9 @@ import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.NullablePeriode
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
-import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
-import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.hentLøpendeAndelForVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.brev.totaltUtbetalt
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
@@ -122,7 +121,7 @@ data class VedtaksperiodeMedBegrunnelser(
             }
             val vertikaltSegmentForVedtaksperiode =
                 if (this.type == Vedtaksperiodetype.FORTSATT_INNVILGET)
-                    hentLøpendeAndelForVedtaksperiode(andelerForVedtaksperiodetype)
+                    andelerForVedtaksperiodetype.hentLøpendeAndelForVedtaksperiode()
                 else hentVertikaltSegmentForVedtaksperiode(andelerForVedtaksperiodetype)
 
             val andelerForSegment =
@@ -136,13 +135,6 @@ data class VedtaksperiodeMedBegrunnelser(
     companion object {
         val comparator = BegrunnelseComparator()
     }
-}
-
-private fun hentLøpendeAndelForVedtaksperiode(andelerTilkjentYtelse: List<AndelTilkjentYtelse>): LocalDateSegment<Int> {
-    val sorterteSegmenter = andelerTilkjentYtelse.utledSegmenter().sortedBy { it.fom }
-    return sorterteSegmenter.lastOrNull { it.fom.toYearMonth() <= inneværendeMåned() }
-        ?: sorterteSegmenter.firstOrNull()
-        ?: throw Feil("Finner ikke gjeldende segment ved fortsatt innvilget")
 }
 
 private fun VedtaksperiodeMedBegrunnelser.hentVertikaltSegmentForVedtaksperiode(
