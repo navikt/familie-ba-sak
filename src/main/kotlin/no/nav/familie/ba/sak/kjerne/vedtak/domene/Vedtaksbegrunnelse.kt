@@ -12,8 +12,8 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifi
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.hentMånedOgÅrForBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilBrevTekst
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.RestVedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.BrevBegrunnelseGrunnlagMedPersoner
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.RestVedtaksbegrunnelse
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import javax.persistence.Column
 import javax.persistence.Convert
