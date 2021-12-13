@@ -5,8 +5,8 @@ import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.common.lagTriggesAv
 import no.nav.familie.ba.sak.common.lagVilkårResultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
-import no.nav.familie.ba.sak.kjerne.vedtak.erFørstePeriodeOgVilkårIkkeOppfylt
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertVilkårResultat
+import no.nav.familie.ba.sak.kjerne.vedtak.erFørstePeriodeOgVilkårIkkeOppfylt
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -47,7 +47,7 @@ class VilkårUtilsTest {
     )
 
     @Test
-    fun `skal gi true dersom resultat ikke er godkjent og det ikke er noen andeler tilkjent ytelse før perioden`() {
+    fun `Er førte periode dersom resultat ikke er godkjent og det ikke er noen andeler tilkjent ytelse før perioden`() {
         Assertions.assertTrue(
             erFørstePeriodeOgVilkårIkkeOppfylt(
                 erFørsteVedtaksperiodePåFagsak = true,
@@ -67,7 +67,7 @@ class VilkårUtilsTest {
     }
 
     @Test
-    fun `skal gi false dersom det er en andel tilkjent ytelse før perioden`() {
+    fun `Er ikke førte periode dersom det er en andel tilkjent ytelse før perioden`() {
         Assertions.assertFalse(
             erFørstePeriodeOgVilkårIkkeOppfylt(
                 erFørsteVedtaksperiodePåFagsak = false,
@@ -79,7 +79,7 @@ class VilkårUtilsTest {
     }
 
     @Test
-    fun `skal gi false dersom vilkårResultatet er oppfylt`() {
+    fun `Er ikke førte periode dersom vilkårResultatet er oppfylt`() {
         Assertions.assertFalse(
             erFørstePeriodeOgVilkårIkkeOppfylt(
                 erFørsteVedtaksperiodePåFagsak = true,
@@ -91,7 +91,7 @@ class VilkårUtilsTest {
     }
 
     @Test
-    fun `skal gi false dersom vilkårResultatet ikke overlapper med periode`() {
+    fun `Er ikke førte periode dersom vilkårResultatet ikke overlapper med periode`() {
         Assertions.assertFalse(
             erFørstePeriodeOgVilkårIkkeOppfylt(
                 erFørsteVedtaksperiodePåFagsak = true,

@@ -11,20 +11,20 @@ import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.beregning.fomErPåSatsendring
+import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertPersonResultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
+import no.nav.familie.ba.sak.kjerne.brev.domene.harPersonerSomManglerOpplysninger
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import no.nav.familie.ba.sak.kjerne.vedtak.VilkårUtils
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilMinimertPerson
+import no.nav.familie.ba.sak.kjerne.vedtak.hentPersonerForAlleUtgjørendeVilkår
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
-import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertPersonResultat
-import no.nav.familie.ba.sak.kjerne.brev.domene.harPersonerSomManglerOpplysninger
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.erFørsteVedtaksperiodePåFagsak
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import org.slf4j.LoggerFactory
@@ -79,7 +79,7 @@ fun VedtakBegrunnelseSpesifikasjon.triggesForPeriode(
                 triggesAv.etterEndretUtbetaling &&
                 utvidetVedtaksperiodeMedBegrunnelser.type != Vedtaksperiodetype.ENDRET_UTBETALING
 
-        else -> VilkårUtils.hentPersonerForAlleUtgjørendeVilkår(
+        else -> hentPersonerForAlleUtgjørendeVilkår(
             minimertePersonResultater = minimertePersonResultater,
             vedtaksperiode = Periode(
                 fom = utvidetVedtaksperiodeMedBegrunnelser.fom ?: TIDENES_MORGEN,

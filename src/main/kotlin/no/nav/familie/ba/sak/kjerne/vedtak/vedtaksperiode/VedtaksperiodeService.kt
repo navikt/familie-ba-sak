@@ -17,13 +17,13 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.brev.BrevService
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
+import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertPersonResultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilTriggesAv
 import no.nav.familie.ba.sak.kjerne.brev.hentVedtaksbrevmal
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
@@ -36,7 +36,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilVedtaksbegrunnelseFritekst
-import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertPersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
 import org.springframework.stereotype.Service
@@ -47,7 +46,7 @@ import java.time.YearMonth
 class VedtaksperiodeService(
     private val behandlingRepository: BehandlingRepository,
     private val personidentService: PersonidentService,
-    private val persongrunnlagRepository: PersonopplysningGrunnlagRepository,
+    private val persongrunnlagService: PersongrunnlagService,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val vedtaksperiodeRepository: VedtaksperiodeRepository,
     private val vilkårsvurderingRepository: VilkårsvurderingRepository,
@@ -124,8 +123,7 @@ class VedtaksperiodeService(
         val barnaAktørSomVurderes = personidentService.hentOgLagreAktørIder(barnaSomVurderes)
 
         val vedtaksperioderMedBegrunnelser = vedtaksperiodeRepository.finnVedtaksperioderFor(vedtakId = vedtak.id)
-        val persongrunnlag = persongrunnlagRepository.findByBehandlingAndAktiv(behandlingId = vedtak.behandling.id)
-            ?: error(PersongrunnlagService.finnerIkkePersongrunnlagFeilmelding(behandlingId = vedtak.behandling.id))
+        val persongrunnlag = persongrunnlagService.hentAktivThrows(behandlingId = vedtak.behandling.id)
         val vurderteBarnSomPersoner =
             barnaAktørSomVurderes.map { barnAktørSomVurderes ->
                 persongrunnlag.barna.find { it.aktør == barnAktørSomVurderes }
@@ -242,8 +240,7 @@ class VedtaksperiodeService(
         )
 
         val persongrunnlag =
-            persongrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
-                ?: error(PersongrunnlagService.finnerIkkePersongrunnlagFeilmelding(behandlingId = behandling.id))
+            persongrunnlagService.hentAktivThrows(behandling.id)
 
         val sanityBegrunnelser = sanityService.hentSanityBegrunnelser()
 
@@ -349,7 +346,7 @@ class VedtaksperiodeService(
         behandling: Behandling,
     ): List<Utbetalingsperiode> {
         val personopplysningGrunnlag =
-            persongrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
+            persongrunnlagService.hentAktiv(behandlingId = behandling.id)
                 ?: return emptyList()
         val andelerTilkjentYtelse =
             andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = behandling.id)
@@ -373,7 +370,7 @@ class VedtaksperiodeService(
 
         val forrigePersonopplysningGrunnlag: PersonopplysningGrunnlag? =
             if (forrigeIverksatteBehandling != null)
-                persongrunnlagRepository.findByBehandlingAndAktiv(behandlingId = forrigeIverksatteBehandling.id)
+                persongrunnlagService.hentAktiv(behandlingId = forrigeIverksatteBehandling.id)
             else null
         val forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse> =
             if (forrigeIverksatteBehandling != null)
@@ -382,7 +379,7 @@ class VedtaksperiodeService(
                 ) else emptyList()
 
         val personopplysningGrunnlag =
-            persongrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
+            persongrunnlagService.hentAktiv(behandlingId = behandling.id)
                 ?: return emptyList()
         val andelerTilkjentYtelse =
             andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = behandling.id)
