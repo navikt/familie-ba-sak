@@ -309,7 +309,7 @@ class BehandleSmåbarnstilleggTest(
         verify(exactly = 1) {
             opprettTaskService.opprettOppgaveTask(
                 behandlingId = aktivBehandling.id,
-                oppgavetype = Oppgavetype.BehandleSak,
+                oppgavetype = Oppgavetype.VurderLivshendelse,
                 beskrivelse = "Småbarnstillegg: endring i overgangsstønad må behandles manuelt"
             )
         }
