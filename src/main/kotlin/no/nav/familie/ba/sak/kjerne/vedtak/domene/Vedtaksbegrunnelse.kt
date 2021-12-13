@@ -90,20 +90,20 @@ fun BrevBegrunnelseGrunnlagMedPersoner.tilBrevBegrunnelse(
     uregistrerteBarn: List<MinimertUregistrertBarn>,
     beløp: String
 ): Begrunnelse {
-    val begrunnelsepersonerPåBegrunnelse =
+    val personerPåBegrunnelse =
         personerIPersongrunnlag.filter { person -> this.personIdenter.contains(person.personIdent) }
 
-    val gjelderSøker = begrunnelsepersonerPåBegrunnelse.any { it.type == PersonType.SØKER }
+    val gjelderSøker = personerPåBegrunnelse.any { it.type == PersonType.SØKER }
 
     val erAvslagPåKunSøker = gjelderSøker &&
-        begrunnelsepersonerPåBegrunnelse.size == 1 &&
+        personerPåBegrunnelse.size == 1 &&
         this.vedtakBegrunnelseType == VedtakBegrunnelseType.AVSLAG
 
     val barnasFødselsdatoer = this.hentBarnasFødselsdagerForBegrunnelse(
         uregistrerteBarn = uregistrerteBarn,
         erAvslagPåKunSøker = erAvslagPåKunSøker,
         personerIBehandling = personerIPersongrunnlag,
-        personerPåBegrunnelse = begrunnelsepersonerPåBegrunnelse
+        personerPåBegrunnelse = personerPåBegrunnelse
     )
 
     val antallBarn = this.hentAntallBarnForBegrunnelse(uregistrerteBarn, erAvslagPåKunSøker, barnasFødselsdatoer)
