@@ -11,7 +11,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.MinimertPerson
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.barnMedSeksårsdagPåFom
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.hentSøker
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.BrevGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.harPersonerSomManglerOpplysninger
@@ -90,8 +89,7 @@ private fun hentPersonerForUtvidetOgSmåbarnstillegg(
     identerMedUtbetaling: List<String>,
     brevGrunnlag: BrevGrunnlag,
     periode: NullablePeriode
-): List<String> = listOf(brevGrunnlag.personerPåBehandling.hentSøker().personIdent) +
-    identerMedUtbetaling +
+): List<String> = identerMedUtbetaling +
     brevGrunnlag
         .minimerteEndredeUtbetalingAndeler
         .somOverlapper(periode.tilNullableMånedPeriode())
