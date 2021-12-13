@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.Utils
+import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.MinimertUregistrertBarn
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
@@ -42,7 +43,7 @@ data class BrevBegrunnelseTestConfig(
 )
 
 data class PersonPåBehandlingConfig(
-    val personIdent: String,
+    val personIdent: String = randomFnr(),
     val fødselsdato: LocalDate,
     val type: PersonType,
     val atypiskeVilkårResultater: List<MinimertVilkårResultat>,

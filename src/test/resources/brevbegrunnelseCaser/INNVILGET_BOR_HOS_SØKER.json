@@ -16,7 +16,6 @@
   "målformSøker": "NB",
   "personerPåBehandling": [
     {
-      "personIdent": "20012011111",
       "fødselsdato": "2020-01-20",
       "type": "BARN",
       "atypiskeVilkårResultater": [
@@ -41,7 +40,6 @@
       ]
     },
     {
-      "personIdent": "10089322222",
       "fødselsdato": "1993-08-10",
       "type": "SØKER",
       "atypiskeVilkårResultater": [],
