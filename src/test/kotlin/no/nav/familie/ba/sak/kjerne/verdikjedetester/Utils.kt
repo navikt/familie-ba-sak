@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
 import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsak
-import no.nav.familie.ba.sak.ekstern.restDomene.RestMinimertFagsak
+import no.nav.familie.ba.sak.ekstern.restDomene.RestMinimalFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVisningBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -98,8 +98,8 @@ fun hentAktivBehandling(restFagsak: RestFagsak): RestUtvidetBehandling {
     return restFagsak.behandlinger.single()
 }
 
-fun hentAktivBehandling(restMinimertFagsak: RestMinimertFagsak): RestVisningBehandling {
-    return restMinimertFagsak.behandlinger.single { it.aktiv }
+fun hentAktivBehandling(restMinimalFagsak: RestMinimalFagsak): RestVisningBehandling {
+    return restMinimalFagsak.behandlinger.single { it.aktiv }
 }
 
 fun behandleFødselshendelse(

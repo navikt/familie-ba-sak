@@ -59,7 +59,7 @@ fun RestBaseFagsak.tilRestFagsak(
     tilbakekrevingsbehandlinger = tilbakekrevingsbehandlinger,
 )
 
-data class RestMinimertFagsak(
+data class RestMinimalFagsak(
     override val opprettetTidspunkt: LocalDateTime,
     override val id: Long,
     override val søkerFødselsnummer: String,
@@ -80,7 +80,7 @@ data class RestMinimertFagsak(
 fun RestBaseFagsak.tilRestMinimalFagsak(
     restVisningBehandlinger: List<RestVisningBehandling>,
     tilbakekrevingsbehandlinger: List<RestTilbakekrevingsbehandling>
-) = RestMinimertFagsak(
+) = RestMinimalFagsak(
     opprettetTidspunkt = this.opprettetTidspunkt,
     id = this.id,
     søkerFødselsnummer = this.søkerFødselsnummer,
