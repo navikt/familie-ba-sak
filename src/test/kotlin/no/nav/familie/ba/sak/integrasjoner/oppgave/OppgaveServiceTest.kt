@@ -173,7 +173,7 @@ class OppgaveServiceTest {
         verify(exactly = 1) { integrasjonClient.fordelOppgave(any(), null) }
     }
 
-    private fun lagTestBehandling(aktørId: String = "2"): Behandling {
+    private fun lagTestBehandling(aktørId: String = "1234567891000"): Behandling {
         return Behandling(
             fagsak = Fagsak(id = FAGSAK_ID, aktør = Aktør(aktørId)).also {
                 it.søkerIdenter = mutableSetOf(FagsakPerson(personIdent = PersonIdent(ident = FNR), fagsak = it))
@@ -196,9 +196,9 @@ class OppgaveServiceTest {
         private const val FAGSAK_ID = 10000000L
         private const val BEHANDLING_ID = 20000000L
         private const val OPPGAVE_ID = "42"
-        private const val FNR = "fnr"
+        private const val FNR = "12345678910"
         private const val ENHETSNUMMER = "enhet"
-        private const val AKTØR_ID_FAGSAK = "0123456789"
+        private const val AKTØR_ID_FAGSAK = "1234567891000"
         private const val SAKSBEHANDLER_ID = "Z999999"
         private val FRIST_FERDIGSTILLELSE_BEH_SAK = LocalDate.now().plusDays(1)
     }
