@@ -4,7 +4,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestHentFagsakForPerson
 import no.nav.familie.ba.sak.ekstern.restDomene.RestJournalføring
-import no.nav.familie.ba.sak.ekstern.restDomene.RestMinimalFagsak
+import no.nav.familie.ba.sak.ekstern.restDomene.RestMinimertFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedStandardbegrunnelser
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
@@ -33,7 +33,7 @@ class FamilieBaSakKlient(
     private val headers: HttpHeaders
 ) : AbstractRestClient(restOperations, "familie-ba-sak") {
 
-    fun opprettFagsak(søkersIdent: String): Ressurs<RestMinimalFagsak> {
+    fun opprettFagsak(søkersIdent: String): Ressurs<RestMinimertFagsak> {
         val uri = URI.create("$baSakUrl/api/fagsaker")
 
         return postForEntity(
@@ -54,7 +54,7 @@ class FamilieBaSakKlient(
         )
     }
 
-    fun hentMinimalFagsakPåPerson(personIdent: String): Ressurs<RestMinimalFagsak> {
+    fun hentMinimalFagsakPåPerson(personIdent: String): Ressurs<RestMinimertFagsak> {
         val uri = URI.create("$baSakUrl/api/fagsaker/hent-fagsak-paa-person")
 
         return postForEntity(

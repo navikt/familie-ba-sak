@@ -5,7 +5,7 @@ import no.nav.familie.ba.sak.common.RessursUtils.illegalState
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsakDeltager
 import no.nav.familie.ba.sak.ekstern.restDomene.RestHentFagsakForPerson
-import no.nav.familie.ba.sak.ekstern.restDomene.RestMinimalFagsak
+import no.nav.familie.ba.sak.ekstern.restDomene.RestMinimertFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestSøkParam
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
@@ -40,7 +40,7 @@ class FagsakController(
 ) {
 
     @PostMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun hentEllerOpprettFagsak(@RequestBody fagsakRequest: FagsakRequest): ResponseEntity<Ressurs<RestMinimalFagsak>> {
+    fun hentEllerOpprettFagsak(@RequestBody fagsakRequest: FagsakRequest): ResponseEntity<Ressurs<RestMinimertFagsak>> {
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} henter eller oppretter ny fagsak")
 
         return Result.runCatching { fagsakService.hentEllerOpprettFagsak(fagsakRequest) }
@@ -59,7 +59,7 @@ class FagsakController(
     }
 
     @GetMapping(path = ["/minimal/{fagsakId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun hentMinimalFagsak(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<RestMinimalFagsak>> {
+    fun hentMinimalFagsak(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<RestMinimertFagsak>> {
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} henter minimal fagsak med id $fagsakId")
 
         val fagsak = fagsakService.hentRestMinimalFagsak(fagsakId)
@@ -67,7 +67,7 @@ class FagsakController(
     }
 
     @PostMapping(path = ["/hent-fagsak-paa-person"], produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun hentMinimalFagsakForPerson(@RequestBody request: RestHentFagsakForPerson): ResponseEntity<Ressurs<RestMinimalFagsak>> {
+    fun hentMinimalFagsakForPerson(@RequestBody request: RestHentFagsakForPerson): ResponseEntity<Ressurs<RestMinimertFagsak>> {
 
         return Result.runCatching {
             val aktør = personidentService.hentOgLagreAktør(request.personIdent)

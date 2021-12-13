@@ -7,7 +7,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.FagsakDeltagerRolle
 import no.nav.familie.ba.sak.ekstern.restDomene.RestBaseFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsakDeltager
-import no.nav.familie.ba.sak.ekstern.restDomene.RestMinimalFagsak
+import no.nav.familie.ba.sak.ekstern.restDomene.RestMinimertFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestMinimalFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestVisningBehandling
@@ -79,7 +79,7 @@ class FagsakService(
     }
 
     @Transactional
-    fun hentEllerOpprettFagsak(fagsakRequest: FagsakRequest): Ressurs<RestMinimalFagsak> {
+    fun hentEllerOpprettFagsak(fagsakRequest: FagsakRequest): Ressurs<RestMinimertFagsak> {
         val personident = when {
             fagsakRequest.personIdent !== null -> fagsakRequest.personIdent
             fagsakRequest.aktørId !== null -> fagsakRequest.aktørId
@@ -142,7 +142,7 @@ class FagsakService(
         lagre(fagsak)
     }
 
-    fun hentMinimalFagsakForPerson(aktør: Aktør): Ressurs<RestMinimalFagsak> {
+    fun hentMinimalFagsakForPerson(aktør: Aktør): Ressurs<RestMinimertFagsak> {
         val fagsak = fagsakRepository.finnFagsakForAktør(aktør)
         return if (fagsak != null) Ressurs.success(data = lagRestMinimalFagsak(fagsakId = fagsak.id)) else Ressurs.failure(
             errorMessage = "Fant ikke fagsak på person"
@@ -151,10 +151,10 @@ class FagsakService(
 
     fun hentRestFagsak(fagsakId: Long): Ressurs<RestFagsak> = Ressurs.success(data = lagRestFagsak(fagsakId))
 
-    fun hentRestMinimalFagsak(fagsakId: Long): Ressurs<RestMinimalFagsak> =
+    fun hentRestMinimalFagsak(fagsakId: Long): Ressurs<RestMinimertFagsak> =
         Ressurs.success(data = lagRestMinimalFagsak(fagsakId))
 
-    fun lagRestMinimalFagsak(fagsakId: Long): RestMinimalFagsak {
+    fun lagRestMinimalFagsak(fagsakId: Long): RestMinimertFagsak {
         val restBaseFagsak = lagRestBaseFagsak(fagsakId)
 
         val tilbakekrevingsbehandlinger =

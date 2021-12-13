@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.brev
 
-import no.nav.familie.ba.sak.ekstern.restDomene.RestMinimalFagsak
+import no.nav.familie.ba.sak.ekstern.restDomene.RestMinimertFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -141,7 +141,7 @@ class DokumentController(
     fun sendBrevPåFagsak(
         @PathVariable fagsakId: Long,
         @RequestBody manueltBrevRequest: ManueltBrevRequest
-    ): ResponseEntity<Ressurs<RestMinimalFagsak>> {
+    ): ResponseEntity<Ressurs<RestMinimertFagsak>> {
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} genererer og sender brev på fagsak $fagsakId: ${manueltBrevRequest.brevmal}")
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
