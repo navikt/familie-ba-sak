@@ -225,11 +225,7 @@ class BrevService(
             ?: emptyList()
 
     private fun hentAktivtPersonopplysningsgrunnlag(behandlingId: Long) =
-        persongrunnlagService.hentAktiv(behandlingId = behandlingId)
-            ?: throw Feil(
-                message = "Finner ikke personopplysningsgrunnlag ved generering av vedtaksbrev",
-                frontendFeilmelding = "Finner ikke personopplysningsgrunnlag ved generering av vedtaksbrev"
-            )
+        persongrunnlagService.hentAktivThrows(behandlingId = behandlingId)
 
     private fun hentEtterbetaling(vedtak: Vedtak): Etterbetaling? =
         hentEtterbetalingsbeløp(vedtak)?.let { Etterbetaling(it) }
@@ -261,9 +257,7 @@ class BrevService(
         behandlingId: Long,
     ): BrevGrunnlag {
 
-        val persongrunnlag =
-            persongrunnlagService.hentAktiv(behandlingId)
-                ?: error(PersongrunnlagService.finnerIkkePersongrunnlagFeilmelding(behandlingId = behandlingId))
+        val persongrunnlag = persongrunnlagService.hentAktivThrows(behandlingId = behandlingId)
 
         val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId)
             ?: error("Finner ikke vilkårsvurdering ved begrunning av vedtak")

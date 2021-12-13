@@ -1,11 +1,9 @@
 package no.nav.familie.ba.sak.kjerne.brev
 
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.tilUregisrertBarnEnkel
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Begrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeRepository
@@ -15,7 +13,7 @@ import org.springframework.stereotype.Service
 
 @Service
 class BegrunnelseService(
-    private val persongrunnlagRepository: PersonopplysningGrunnlagRepository,
+    private val persongrunnlagService: PersongrunnlagService,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val vedtaksperiodeRepository: VedtaksperiodeRepository,
     private val sanityService: SanityService,
@@ -34,8 +32,7 @@ class BegrunnelseService(
                 ?.map { it.tilUregisrertBarnEnkel() } ?: emptyList()
 
         val brevGrunnlag = brevService.hentBrevGrunnlag(behandlingId)
-        val personopplysningGrunnlag = persongrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandlingId)
-            ?: throw Feil(PersongrunnlagService.finnerIkkePersongrunnlagFeilmelding(behandlingId = behandlingId))
+        val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandlingId = behandlingId)
 
         val utvidetVedtaksperiodeMedBegrunnelse = vedtaksperiodeMedBegrunnelser.tilUtvidetVedtaksperiodeMedBegrunnelser(
             personopplysningGrunnlag = personopplysningGrunnlag,

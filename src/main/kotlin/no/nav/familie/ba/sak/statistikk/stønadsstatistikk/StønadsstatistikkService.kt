@@ -78,7 +78,7 @@ class StønadsstatistikkService(
     }
 
     private fun hentSøker(behandlingId: Long): PersonDVH {
-        val persongrunnlag = persongrunnlagService.hentAktiv(behandlingId) ?: error("Fant ikke aktivt persongrunnlag")
+        val persongrunnlag = persongrunnlagService.hentAktivThrows(behandlingId)
         val søker = persongrunnlag.søker
         return lagPersonDVH(søker)
     }
@@ -86,7 +86,7 @@ class StønadsstatistikkService(
     private fun hentUtbetalingsperioder(behandlingId: Long): List<UtbetalingsperiodeDVH> {
 
         val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandlingId)
-        val persongrunnlag = persongrunnlagService.hentAktiv(behandlingId) ?: error("Fant ikke aktivt persongrunnlag")
+        val persongrunnlag = persongrunnlagService.hentAktivThrows(behandlingId)
 
         if (tilkjentYtelse.andelerTilkjentYtelse.isEmpty()) return emptyList()
 

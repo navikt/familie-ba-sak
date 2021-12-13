@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
@@ -25,8 +24,7 @@ class VilkårsvurderingSteg(
         behandling: Behandling,
         data: String
     ): StegType {
-        val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandling.id)
-            ?: throw Feil("Fant ikke personopplysninggrunnlag på behandling ${behandling.id}")
+        val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandling.id)
 
         if (behandling.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE) {
             vilkårService.initierVilkårsvurderingForBehandling(

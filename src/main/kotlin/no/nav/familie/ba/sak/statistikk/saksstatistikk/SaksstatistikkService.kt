@@ -121,7 +121,7 @@ class SaksstatistikkService(
         val søkersAktør = personidentService.hentOgLagreAktør(søkerIdent)
 
         val deltagere = if (aktivBehandling != null) {
-            val personer = persongrunnlagService.hentAktiv(aktivBehandling.id)?.personer ?: emptySet()
+            val personer = persongrunnlagService.hentAktiv(behandlingId = aktivBehandling.id)?.personer ?: emptySet()
             personer.map {
                 if (it.type == PersonType.SØKER) {
                     landkodeSøker = hentLandkode(it)

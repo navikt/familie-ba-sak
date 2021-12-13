@@ -72,12 +72,16 @@ class PersongrunnlagService(
     }
 
     fun hentAktiv(behandlingId: Long): PersonopplysningGrunnlag? {
-        return personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId)
+        return personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandlingId)
+    }
+
+    fun hentAktivThrows(behandlingId: Long): PersonopplysningGrunnlag {
+        return hentAktiv(behandlingId = behandlingId)
+            ?: throw Feil("Finner ikke personopplysningsgrunnlag på behandling $behandlingId")
     }
 
     fun oppdaterRegisteropplysninger(behandlingId: Long): PersonopplysningGrunnlag {
-        val nåværendeGrunnlag =
-            hentAktiv(behandlingId) ?: throw Feil("Ingen aktivt personopplysningsgrunnlag på behandling $behandlingId")
+        val nåværendeGrunnlag = hentAktivThrows(behandlingId)
         val behandling = behandlingRepository.finnBehandling(behandlingId)
 
         if (behandling.status != BehandlingStatus.UTREDES) throw Feil("BehandlingStatus må være UTREDES for å manuelt oppdatere registeropplysninger")
@@ -99,12 +103,7 @@ class PersongrunnlagService(
     ) {
         val nyttbarnAktør = personidentService.hentOgLagreAktør(nyttBarnIdent)
 
-        val personopplysningGrunnlag =
-            hentAktiv(behandlingId = behandling.id)
-                ?: throw FunksjonellFeil(
-                    melding = "Fant ikke personopplysningsgrunnlag på behandling ${behandling.id} ved oppdatering av barn",
-                    frontendFeilmelding = "En feil oppsto og barn ble ikke lagt til"
-                )
+        val personopplysningGrunnlag = hentAktivThrows(behandlingId = behandling.id)
 
         val barnIGrunnlag = personopplysningGrunnlag.barna.map { it.aktør }
 
@@ -127,9 +126,7 @@ class PersongrunnlagService(
 
     fun finnNyeBarn(behandling: Behandling, forrigeBehandling: Behandling?): List<Person> {
         val barnIForrigeGrunnlag = forrigeBehandling?.let { hentAktiv(behandlingId = it.id)?.barna } ?: emptySet()
-        val barnINyttGrunnlag =
-            behandling.let { hentAktiv(behandlingId = it.id)?.barna }
-                ?: throw Feil("Fant ikke personopplysningsgrunnlag")
+        val barnINyttGrunnlag = behandling.let { hentAktivThrows(behandlingId = it.id).barna }
 
         return barnINyttGrunnlag.filter { barn -> barnIForrigeGrunnlag.none { barn.aktør == it.aktør } }
     }
@@ -267,9 +264,6 @@ class PersongrunnlagService(
         hentSøker(behandlingId)?.målform ?: Målform.NB
 
     companion object {
-        fun finnerIkkePersongrunnlagFeilmelding(behandlingId: Long) =
-            "Finner ikke persongrunnlag på behandling $behandlingId"
-
         private val logger = LoggerFactory.getLogger(PersongrunnlagService::class.java)
     }
 }
