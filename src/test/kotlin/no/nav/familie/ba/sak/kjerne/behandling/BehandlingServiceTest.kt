@@ -1,8 +1,10 @@
 package no.nav.familie.ba.sak.kjerne.behandling
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
+import no.nav.familie.ba.sak.common.nyRevurdering
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
@@ -15,12 +17,15 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
+import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -46,12 +51,30 @@ class BehandlingServiceTest(
     private val databaseCleanupService: DatabaseCleanupService,
 
     @Autowired
-    private val behandlingRepository: BehandlingRepository
+    private val behandlingRepository: BehandlingRepository,
+
+    @Autowired
+    private val stegService: StegService
 ) : AbstractSpringIntegrationTest() {
 
     @BeforeAll
     fun init() {
         databaseCleanupService.truncate()
+    }
+
+    @Test
+    fun `Skal rulle tilbake behandling om noe feiler etter opprettelse`() {
+        databaseCleanupService.truncate()
+
+        val fnr = randomFnr()
+
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
+        val error = assertThrows<Feil> { stegService.håndterNyBehandlingOgSendInfotrygdFeed(nyRevurdering(fnr)) }
+
+        error.message?.contains("Forsøker å opprette en Revurdering med årsak Søknad")?.let { assertTrue(it) }
+
+        val behandlinger = behandlingRepository.finnBehandlinger(fagsakId = fagsak.id)
+        assertEquals(0, behandlinger.size)
     }
 
     @Test

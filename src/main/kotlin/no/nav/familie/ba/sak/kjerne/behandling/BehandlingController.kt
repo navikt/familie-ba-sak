@@ -64,20 +64,13 @@ class BehandlingController(
             )
         }
 
-        return Result.runCatching {
-            stegService.håndterNyBehandlingOgSendInfotrygdFeed(nyBehandling)
-        }.fold(
-            onSuccess = {
-                ResponseEntity.ok(
-                    Ressurs.success(
-                        utvidetBehandlingService
-                            .lagRestUtvidetBehandling(behandlingId = it.id)
-                    )
-                )
-            },
-            onFailure = {
-                throw it
-            }
+        val behandling = stegService.håndterNyBehandlingOgSendInfotrygdFeed(nyBehandling)
+
+        return ResponseEntity.ok(
+            Ressurs.success(
+                utvidetBehandlingService
+                    .lagRestUtvidetBehandling(behandlingId = behandling.id)
+            )
         )
     }
 
