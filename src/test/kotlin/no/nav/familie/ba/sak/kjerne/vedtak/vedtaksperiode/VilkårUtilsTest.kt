@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
-class VedtakUtilsTest {
+class VilkårUtilsTest {
 
     val vedtaksperiode: Periode = Periode(
         fom = LocalDate.now().minusMonths(2),

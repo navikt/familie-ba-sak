@@ -129,7 +129,7 @@ class UtgjørendePersonerTest {
 
         vilkårsvurdering.personResultater = setOf(søkerPersonResultat, barn1PersonResultat, barn2PersonResultat)
 
-        val personerMedUtgjørendeVilkårLovligOpphold = VedtakUtils.hentPersonerForAlleUtgjørendeVilkår(
+        val personerMedUtgjørendeVilkårLovligOpphold = VilkårUtils.hentPersonerForAlleUtgjørendeVilkår(
             minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
             vedtaksperiode = Periode(
                 fom = LocalDate.of(2010, 1, 1),
@@ -148,7 +148,7 @@ class UtgjørendePersonerTest {
             personerMedUtgjørendeVilkårLovligOpphold.map { it.personIdent }.sorted()
         )
 
-        val personerMedUtgjørendeVilkårBosattIRiket = VedtakUtils.hentPersonerForAlleUtgjørendeVilkår(
+        val personerMedUtgjørendeVilkårBosattIRiket = VilkårUtils.hentPersonerForAlleUtgjørendeVilkår(
             minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
             vedtaksperiode = Periode(
                 fom = LocalDate.of(2010, 1, 1),
@@ -223,7 +223,7 @@ class UtgjørendePersonerTest {
 
         vilkårsvurdering.personResultater = setOf(barnPersonResultat, barn2PersonResultat)
 
-        val personerMedUtgjørendeVilkårBosattIRiket = VedtakUtils.hentPersonerForAlleUtgjørendeVilkår(
+        val personerMedUtgjørendeVilkårBosattIRiket = VilkårUtils.hentPersonerForAlleUtgjørendeVilkår(
             minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
             vedtaksperiode = Periode(
                 fom = LocalDate.of(2021, 2, 1),
@@ -242,7 +242,7 @@ class UtgjørendePersonerTest {
             personerMedUtgjørendeVilkårBosattIRiket.first().personIdent
         )
 
-        val personerMedUtgjørendeVilkårBarnUtvandret = VedtakUtils.hentPersonerForAlleUtgjørendeVilkår(
+        val personerMedUtgjørendeVilkårBarnUtvandret = VilkårUtils.hentPersonerForAlleUtgjørendeVilkår(
             minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
             vedtaksperiode = Periode(
                 fom = LocalDate.of(2021, 4, 1),
@@ -313,7 +313,7 @@ class UtgjørendePersonerTest {
         vilkårsvurdering.personResultater =
             setOf(barn1PersonResultat, barn2PersonResultat)
 
-        val personerMedUtgjørendeVilkårBosattIRiketMedlemskap = VedtakUtils.hentPersonerForAlleUtgjørendeVilkår(
+        val personerMedUtgjørendeVilkårBosattIRiketMedlemskap = VilkårUtils.hentPersonerForAlleUtgjørendeVilkår(
             minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
             vedtaksperiode = Periode(
                 fom = LocalDate.of(2021, 12, 1),
@@ -326,7 +326,7 @@ class UtgjørendePersonerTest {
             erFørsteVedtaksperiodePåFagsak = false,
         )
 
-        val personerMedUtgjørendeVilkårBosattIRiket = VedtakUtils.hentPersonerForAlleUtgjørendeVilkår(
+        val personerMedUtgjørendeVilkårBosattIRiket = VilkårUtils.hentPersonerForAlleUtgjørendeVilkår(
             minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
             vedtaksperiode = Periode(
                 fom = LocalDate.of(2021, 12, 1),

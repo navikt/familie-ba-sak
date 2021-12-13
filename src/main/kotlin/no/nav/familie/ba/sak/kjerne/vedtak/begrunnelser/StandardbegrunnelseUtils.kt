@@ -17,7 +17,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import no.nav.familie.ba.sak.kjerne.vedtak.VedtakUtils
+import no.nav.familie.ba.sak.kjerne.vedtak.VilkårUtils
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilMinimertPerson
@@ -79,7 +79,7 @@ fun VedtakBegrunnelseSpesifikasjon.triggesForPeriode(
                 triggesAv.etterEndretUtbetaling &&
                 utvidetVedtaksperiodeMedBegrunnelser.type != Vedtaksperiodetype.ENDRET_UTBETALING
 
-        else -> VedtakUtils.hentPersonerForAlleUtgjørendeVilkår(
+        else -> VilkårUtils.hentPersonerForAlleUtgjørendeVilkår(
             minimertePersonResultater = minimertePersonResultater,
             vedtaksperiode = Periode(
                 fom = utvidetVedtaksperiodeMedBegrunnelser.fom ?: TIDENES_MORGEN,

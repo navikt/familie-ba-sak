@@ -6,11 +6,11 @@ import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.hentPersonerForEtterEndretUtbetalingsperiode
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.kjerne.vedtak.VedtakUtils
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.MinimertPerson
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.barnMedSeksårsdagPåFom
+import no.nav.familie.ba.sak.kjerne.vedtak.hentPersonerForAlleUtgjørendeVilkår
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.BrevGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.harPersonerSomManglerOpplysninger
@@ -59,7 +59,7 @@ fun hentPersonidenterGjeldendeForBegrunnelse(
             )
 
         else ->
-            VedtakUtils.hentPersonerForAlleUtgjørendeVilkår(
+            hentPersonerForAlleUtgjørendeVilkår(
                 minimertePersonResultater = brevGrunnlag.minimertePersonResultater,
                 vedtaksperiode = Periode(
                     fom = periode.fom ?: TIDENES_MORGEN,
