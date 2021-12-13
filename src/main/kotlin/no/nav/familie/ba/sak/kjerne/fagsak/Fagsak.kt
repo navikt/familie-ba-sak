@@ -30,9 +30,9 @@ data class Fagsak(
     @JoinColumn(
         name = "fk_aktoer_id",
         nullable = false,
-        updatable = true
+        updatable = false
     )
-    var aktør: Aktør,
+    val aktør: Aktør,
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
