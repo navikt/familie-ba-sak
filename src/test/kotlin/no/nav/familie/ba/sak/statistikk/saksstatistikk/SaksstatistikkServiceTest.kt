@@ -288,7 +288,7 @@ internal class SaksstatistikkServiceTest(
         every { fagsakService.hentPåFagsakId(any()) } answers {
             val fagsak = Fagsak(status = FagsakStatus.OPPRETTET, aktør = tilAktør("12345678910"))
             val fagsakPerson = FagsakPerson(personIdent = PersonIdent("12345678910"), fagsak = fagsak)
-            fagsak.copy(søkerIdenter = setOf(fagsakPerson))
+            fagsak.copy(søkerIdenter = mutableSetOf(fagsakPerson))
         }
 
         every { personidentService.hentOgLagreAktør("12345678910") } returns Aktør("1234567891000")
@@ -332,7 +332,7 @@ internal class SaksstatistikkServiceTest(
         every { fagsakService.hentPåFagsakId(any()) } answers {
             val fagsak = Fagsak(status = FagsakStatus.OPPRETTET, aktør = tilAktør("12345678910"))
             val fagsakPerson = FagsakPerson(personIdent = PersonIdent("12345678910"), fagsak = fagsak)
-            fagsak.copy(søkerIdenter = setOf(fagsakPerson))
+            fagsak.copy(søkerIdenter = mutableSetOf(fagsakPerson))
         }
 
         every { personidentService.hentOgLagreAktør("12345678910") } returns Aktør("1234567891000")
@@ -364,7 +364,7 @@ internal class SaksstatistikkServiceTest(
         every { fagsakService.hentPåFagsakId(any()) } answers {
             val fagsak = Fagsak(status = FagsakStatus.OPPRETTET, aktør = tilAktør("12345678910"))
             val fagsakPerson = FagsakPerson(personIdent = PersonIdent("12345678910"), fagsak = fagsak)
-            fagsak.copy(søkerIdenter = setOf(fagsakPerson))
+            fagsak.copy(søkerIdenter = mutableSetOf(fagsakPerson))
         }
         val randomAktørId = randomAktørId()
         every { personidentService.hentOgLagreAktør(any()) } returns randomAktørId
