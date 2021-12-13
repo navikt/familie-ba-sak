@@ -105,7 +105,7 @@ class FagsakService(
             // TODO: robustgjøring dnr/fnr fjern opprettelse av fagsak person ved contract.
             fagsak = Fagsak(aktør = aktør).also {
                 it.søkerIdenter =
-                    setOf(FagsakPerson(personIdent = PersonIdent(aktør.aktivFødselsnummer()), fagsak = it))
+                    mutableSetOf(FagsakPerson(personIdent = PersonIdent(aktør.aktivFødselsnummer()), fagsak = it))
                 lagre(it)
             }
             if (fraAutomatiskBehandling) {
