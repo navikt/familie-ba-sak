@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -36,6 +37,31 @@ class BehandlingTest {
             årsak = BehandlingÅrsak.TEKNISK_OPPHØR
         )
         assertThrows<RuntimeException> { behandling.validerBehandlingstype() }
+    }
+
+    @Test
+    fun `validerBehandling kaster feil hvis man prøver å opprette revurdering uten andre vedtatte behandlinger`() {
+        val behandling = lagBehandling(
+            behandlingType = BehandlingType.REVURDERING,
+            årsak = BehandlingÅrsak.SØKNAD
+        )
+        assertThrows<RuntimeException> { behandling.validerBehandlingstype() }
+    }
+
+    @Test
+    fun `validerBehandling kaster ikke feil hvis man prøver å opprette revurdering med andre vedtatte behandlinger`() {
+        val behandling = lagBehandling(
+            behandlingType = BehandlingType.REVURDERING,
+            årsak = BehandlingÅrsak.SØKNAD
+        )
+        assertDoesNotThrow {
+            behandling.validerBehandlingstype(
+                sisteBehandlingSomErVedtatt = lagBehandling(
+                    behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                    årsak = BehandlingÅrsak.SØKNAD
+                )
+            )
+        }
     }
 
     @Test
