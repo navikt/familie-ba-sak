@@ -13,7 +13,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
-import no.nav.familie.ba.sak.kjerne.behandlingsresultat.tilUregisrertBarnEnkel
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.brev.BrevService
@@ -33,7 +32,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilVedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.triggesForPeriode
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.Begrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeRepository
@@ -339,42 +337,6 @@ class VedtaksperiodeService(
         )
 
         lagre(fortsattInnvilgetPeriode)
-    }
-
-    fun genererBrevBegrunnelserForPeriode(vedtaksperiodeId: Long): List<Begrunnelse> {
-        val vedtaksperiodeMedBegrunnelser = vedtaksperiodeRepository.hentVedtaksperiode(vedtaksperiodeId)
-
-        val sanityBegrunnelser = sanityService.hentSanityBegrunnelser()
-
-        val behandlingId = vedtaksperiodeMedBegrunnelser.vedtak.behandling.id
-
-        val uregistrerteBarn =
-            søknadGrunnlagService.hentAktiv(behandlingId = behandlingId)?.hentUregistrerteBarn()
-                ?.map { it.tilUregisrertBarnEnkel() } ?: emptyList()
-
-        val brevGrunnlag = brevService.hentBrevGrunnlag(behandlingId)
-        val personopplysningGrunnlag = persongrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandlingId)
-            ?: throw Feil(PersongrunnlagService.finnerIkkePersongrunnlagFeilmelding(behandlingId = behandlingId))
-
-        val utvidetVedtaksperiodeMedBegrunnelse = vedtaksperiodeMedBegrunnelser.tilUtvidetVedtaksperiodeMedBegrunnelser(
-            personopplysningGrunnlag = personopplysningGrunnlag,
-            andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(
-                behandlingId
-            )
-        )
-
-        val andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId)
-
-        return utvidetVedtaksperiodeMedBegrunnelse.hentBegrunnelserOgFritekster(
-            brevGrunnlag = brevGrunnlag,
-            sanityBegrunnelser = sanityBegrunnelser,
-            uregistrerteBarn = uregistrerteBarn,
-            erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak(
-                andelerTilkjentYtelse,
-                utvidetVedtaksperiodeMedBegrunnelse.fom
-            ),
-            målformSøker = personopplysningGrunnlag.søker.målform,
-        )
     }
 
     private fun finnTomDatoIFørsteUtbetalingsintervallFraInneværendeMåned(behandlingId: Long): LocalDate =

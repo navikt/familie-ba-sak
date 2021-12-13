@@ -50,12 +50,6 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 
-/**
- * Service for å generere brev for vedtak
- * Bruker personnummer
- * TODO skrive ut.
- */
-
 @Service
 class BrevService(
     private val totrinnskontrollService: TotrinnskontrollService,
