@@ -4,21 +4,16 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.NullablePeriode
-import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
-import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.hentAndelerForSegment
 import no.nav.familie.ba.sak.kjerne.beregning.domene.hentLøpendeAndelForVedtaksperiode
-import no.nav.familie.ba.sak.kjerne.brev.totaltUtbetalt
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.BrevPeriodeGrunnlagMedPersoner
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.lagUtbetalingsperiodeDetaljer
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.utledSegmenter
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
-import no.nav.fpsak.tidsserie.LocalDateInterval
-import no.nav.fpsak.tidsserie.LocalDateSegment
 import org.hibernate.annotations.SortComparator
 import java.time.LocalDate
 import javax.persistence.CascadeType
@@ -125,51 +120,34 @@ data class VedtaksperiodeMedBegrunnelser(
                 else hentVertikaltSegmentForVedtaksperiode(andelerForVedtaksperiodetype)
 
             val andelerForSegment =
-                hentAndelerForSegment(andelerForVedtaksperiodetype, vertikaltSegmentForVedtaksperiode)
+                andelerForVedtaksperiodetype.hentAndelerForSegment(vertikaltSegmentForVedtaksperiode)
 
             andelerForSegment.lagUtbetalingsperiodeDetaljer(personopplysningGrunnlag)
         } else {
             emptyList()
         }
 
+    fun hentVertikaltSegmentForVedtaksperiode(
+        andelerTilkjentYtelse: List<AndelTilkjentYtelse>
+    ) = andelerTilkjentYtelse
+        .utledSegmenter()
+        .find { localDateSegment ->
+            localDateSegment.fom == this.fom || localDateSegment.tom == this.tom
+        } ?: throw Feil("Finner ikke segment for vedtaksperiode (${this.fom}, ${this.tom})")
+
+    fun endretUtbetalingAndelSkalVæreMed(andelTilkjentYtelse: AndelTilkjentYtelse) =
+        andelTilkjentYtelse.endretUtbetalingAndeler.isNotEmpty() && andelTilkjentYtelse.endretUtbetalingAndeler.all { endretUtbetalingAndel ->
+            this.begrunnelser.any { vedtaksbegrunnelse ->
+                vedtaksbegrunnelse.personIdenter.contains(
+                    endretUtbetalingAndel.person!!.personIdent.ident
+                )
+            }
+        }
+
     companion object {
         val comparator = BegrunnelseComparator()
     }
 }
-
-private fun VedtaksperiodeMedBegrunnelser.hentVertikaltSegmentForVedtaksperiode(
-    andelerTilkjentYtelse: List<AndelTilkjentYtelse>
-) = andelerTilkjentYtelse
-    .utledSegmenter()
-    .find { localDateSegment ->
-        localDateSegment.fom == this.fom || localDateSegment.tom == this.tom
-    } ?: throw Feil("Finner ikke segment for vedtaksperiode (${this.fom}, ${this.tom})")
-
-private fun hentAndelerForSegment(
-    andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
-    vertikaltSegmentForVedtaksperiode: LocalDateSegment<Int>
-) = andelerTilkjentYtelse.filter {
-    vertikaltSegmentForVedtaksperiode.localDateInterval.overlaps(
-        LocalDateInterval(
-            it.stønadFom.førsteDagIInneværendeMåned(),
-            it.stønadTom.sisteDagIInneværendeMåned()
-        )
-    )
-}
-
-private fun VedtaksperiodeMedBegrunnelser.endretUtbetalingAndelSkalVæreMed(andelTilkjentYtelse: AndelTilkjentYtelse) =
-    andelTilkjentYtelse.endretUtbetalingAndeler.isNotEmpty() && andelTilkjentYtelse.endretUtbetalingAndeler.all { endretUtbetalingAndel ->
-        this.begrunnelser.any { vedtaksbegrunnelse ->
-            vedtaksbegrunnelse.personIdenter.contains(
-                endretUtbetalingAndel.person!!.personIdent.ident
-            )
-        }
-    }
-
-fun BrevPeriodeGrunnlagMedPersoner.beløpUtbetaltFor(personIdenter: List<String>) =
-    this.minimerteUtbetalingsperiodeDetaljer
-        .filter { utbetalingsperiodeDetalj -> personIdenter.contains(utbetalingsperiodeDetalj.person.personIdent) }
-        .totaltUtbetalt()
 
 class BegrunnelseComparator : Comparator<Vedtaksbegrunnelse> {
 

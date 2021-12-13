@@ -3,10 +3,10 @@ package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene
 import no.nav.familie.ba.sak.common.NullablePeriode
 import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.MinimertUregistrertBarn
+import no.nav.familie.ba.sak.kjerne.brev.totaltUtbetalt
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Begrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.FritekstBegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.beløpUtbetaltFor
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilBrevBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import java.time.LocalDate
@@ -42,4 +42,9 @@ data class BrevPeriodeGrunnlagMedPersoner(
 
         return begrunnelser + fritekster
     }
+
+    fun beløpUtbetaltFor(personIdenter: List<String>) =
+        this.minimerteUtbetalingsperiodeDetaljer
+            .filter { utbetalingsperiodeDetalj -> personIdenter.contains(utbetalingsperiodeDetalj.person.personIdent) }
+            .totaltUtbetalt()
 }

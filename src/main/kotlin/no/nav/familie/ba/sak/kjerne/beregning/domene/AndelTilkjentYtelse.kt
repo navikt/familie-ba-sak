@@ -301,3 +301,14 @@ fun List<AndelTilkjentYtelse>.hentLøpendeAndelForVedtaksperiode(): LocalDateSeg
         ?: sorterteSegmenter.firstOrNull()
         ?: throw Feil("Finner ikke gjeldende segment ved fortsatt innvilget")
 }
+
+fun List<AndelTilkjentYtelse>.hentAndelerForSegment(
+    vertikaltSegmentForVedtaksperiode: LocalDateSegment<Int>
+) = this.filter {
+    vertikaltSegmentForVedtaksperiode.localDateInterval.overlaps(
+        LocalDateInterval(
+            it.stønadFom.førsteDagIInneværendeMåned(),
+            it.stønadTom.sisteDagIInneværendeMåned()
+        )
+    )
+}
