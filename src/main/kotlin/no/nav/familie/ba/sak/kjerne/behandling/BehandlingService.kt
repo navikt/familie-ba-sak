@@ -71,7 +71,8 @@ class BehandlingService(
                 frontendFeilmelding = "Kan ikke lage behandling på person uten tilknyttet fagsak"
             )
 
-        val aktivBehandling = hentAktivForFagsak(fagsak.id)
+        val aktivBehandling = hentAktivForFagsak(fagsakId = fagsak.id)
+        val sisteBehandlingSomErVedtatt = hentSisteBehandlingSomErVedtatt(fagsakId = fagsak.id)
 
         return if (aktivBehandling == null || aktivBehandling.status == AVSLUTTET) {
 
@@ -99,7 +100,9 @@ class BehandlingService(
             )
                 .initBehandlingStegTilstand()
 
-            behandling.validerBehandlingstype()
+            behandling.validerBehandlingstype(
+                sisteBehandlingSomErVedtatt = sisteBehandlingSomErVedtatt
+            )
 
             val lagretBehandling = lagreNyOgDeaktiverGammelBehandling(behandling)
             opprettOgInitierNyttVedtakForBehandling(behandling = lagretBehandling)
