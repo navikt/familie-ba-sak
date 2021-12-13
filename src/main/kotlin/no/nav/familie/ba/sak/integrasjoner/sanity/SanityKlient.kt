@@ -1,38 +1,33 @@
 package no.nav.familie.ba.sak.kjerne.brev
 
+import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.config.restTemplate
 import no.nav.familie.ba.sak.kjerne.brev.domene.RestSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
-import no.nav.familie.http.client.AbstractRestClient
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Value
-import org.springframework.stereotype.Component
-import org.springframework.web.client.RestTemplate
+import org.springframework.web.client.getForEntity
 import java.net.URI
 
-data class SanityRespons<T>(
+data class SanityRespons(
     val ms: Int,
     val query: String,
-    val result: List<T>
+    val result: List<RestSanityBegrunnelse>
 )
 
-@Component
-class SanityKlient(
-    @Value("\${SANITY_FAMILIE_API_URL}") private val sanityFamilieApi: String,
-    restTemplate: RestTemplate,
-) : AbstractRestClient(restTemplate, "sanity") {
+private val logger = LoggerFactory.getLogger(BrevKlient::class.java)
 
-    fun hentSanityBegrunnelser(): List<SanityBegrunnelse> {
-        val parameters = java.net.URLEncoder.encode(hentDokumenter, "utf-8")
-        val url = URI.create("$sanityFamilieApi?query=$parameters")
-        logger.info("Henter begrunnelser fra sanity")
+fun hentSanityBegrunnelser(): List<SanityBegrunnelse> {
+    val sanityUrl = "https://xsrv1mh6.apicdn.sanity.io/v2021-06-07/data/query/ba-brev"
+    val query = hentDokumenter
+    val parameters = java.net.URLEncoder.encode(query, "utf-8")
 
-        val response = getForEntity<SanityRespons<RestSanityBegrunnelse>>(url)
-        val restSanityBegrunnelser = response.result
-        return restSanityBegrunnelser.map { it.tilSanityBegrunnelse() }
-    }
+    val client = restTemplate
 
-    companion object {
+    logger.info("Henter begrunnelser fra sanity")
 
-        private val logger = LoggerFactory.getLogger(BrevKlient::class.java)
-    }
+    val response = client.getForEntity<SanityRespons>(URI.create("$sanityUrl?query=$parameters"))
+    val restSanityBegrunnelser = response.body?.result
+        ?: throw Feil("Klarer ikke å hente begrunnelser fra sanity")
+
+    return restSanityBegrunnelser.map { it.tilSanityBegrunnelse() }
 }

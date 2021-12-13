@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.brev
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ba.sak.common.Utils.formaterBeløp
-import no.nav.familie.ba.sak.common.hentSanityBegrunnelser
 import no.nav.familie.ba.sak.kjerne.brev.domene.BegrunnelseDataTestConfig
 import no.nav.familie.ba.sak.kjerne.brev.domene.BrevBegrunnelseTestConfig
 import no.nav.familie.ba.sak.kjerne.brev.domene.BrevPeriodeTestConfig

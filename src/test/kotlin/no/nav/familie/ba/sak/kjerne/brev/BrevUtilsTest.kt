@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.brev
 
 import no.nav.familie.ba.sak.common.defaultFagsak
-import no.nav.familie.ba.sak.common.hentSanityBegrunnelser
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagMinimertUtbetalingsperiodeDetalj
 import no.nav.familie.ba.sak.common.lagRestVedtaksbegrunnelse
