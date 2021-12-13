@@ -9,6 +9,10 @@ import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 
+/**
+ * NB: Bør ikke brukes internt, men kun ut mot eksterne tjenester siden klassen
+ * inneholder personIdent og ikke aktørId.
+ */
 data class MinimertEndretUtbetalingAndel(
     val periode: MånedPeriode,
     val personIdent: String,
