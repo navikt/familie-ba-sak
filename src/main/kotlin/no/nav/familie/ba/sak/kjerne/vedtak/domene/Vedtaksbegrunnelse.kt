@@ -15,7 +15,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilBrevTekst
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.RestVedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.BrevBegrunnelseGrunnlagMedPersoner
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
-import java.time.LocalDate
 import javax.persistence.Column
 import javax.persistence.Convert
 import javax.persistence.Entity
@@ -128,26 +127,4 @@ fun BrevBegrunnelseGrunnlagMedPersoner.tilBrevBegrunnelse(
     )
 }
 
-private fun BrevBegrunnelseGrunnlagMedPersoner.hentAntallBarnForBegrunnelse(
-    uregistrerteBarn: List<MinimertUregistrertBarn>,
-    erAvslagPåKunSøker: Boolean,
-    barnasFødselsdatoer: List<LocalDate>
-) = if (this.vedtakBegrunnelseSpesifikasjon == VedtakBegrunnelseSpesifikasjon.AVSLAG_UREGISTRERT_BARN)
-    uregistrerteBarn.size
-else if (erAvslagPåKunSøker)
-    0
-else
-    barnasFødselsdatoer.size
 
-private fun BrevBegrunnelseGrunnlagMedPersoner.hentBarnasFødselsdagerForBegrunnelse(
-    uregistrerteBarn: List<MinimertUregistrertBarn>,
-    erAvslagPåKunSøker: Boolean,
-    personerIBehandling: List<MinimertPerson>,
-    personerPåBegrunnelse: List<MinimertPerson>
-) = if (this.vedtakBegrunnelseSpesifikasjon == VedtakBegrunnelseSpesifikasjon.AVSLAG_UREGISTRERT_BARN)
-    uregistrerteBarn.mapNotNull { it.fødselsdato }
-else if (erAvslagPåKunSøker) {
-    personerIBehandling.filter { it.type == PersonType.BARN }
-        .map { it.fødselsdato } + uregistrerteBarn.mapNotNull { it.fødselsdato }
-} else
-    personerPåBegrunnelse.filter { it.type == PersonType.BARN }.map { it.fødselsdato }
