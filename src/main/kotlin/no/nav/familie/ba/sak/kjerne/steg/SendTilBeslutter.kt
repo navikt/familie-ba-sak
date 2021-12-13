@@ -68,7 +68,7 @@ class SendTilBeslutter(
             Oppgavetype.BehandleUnderkjentVedtak,
             Oppgavetype.VurderLivshendelse
         ).forEach { oppgavetype ->
-            oppgaveService.hentOppgaveSomIkkeErFerdigstilt(Oppgavetype.BehandleSak, behandling)?.also {
+            oppgaveService.hentOppgaveSomIkkeErFerdigstilt(oppgavetype, behandling)?.also {
                 val ferdigstillBehandleSakTask = FerdigstillOppgave.opprettTask(behandling.id, oppgavetype)
                 taskRepository.save(ferdigstillBehandleSakTask)
             }
