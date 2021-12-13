@@ -130,6 +130,9 @@ fun validerVedtaksperiodeMedBegrunnelser(vedtaksperiodeMedBegrunnelser: Vedtaksp
     }
 }
 
+/**
+ * Brukes for opphør som har egen logikk dersom det er første periode.
+ */
 fun erFørsteVedtaksperiodePåFagsak(
     andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
     periodeFom: LocalDate?
