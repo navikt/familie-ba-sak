@@ -30,9 +30,9 @@ data class Fagsak(
     @JoinColumn(
         name = "fk_aktoer_id",
         nullable = false,
-        updatable = false
+        updatable = true
     )
-    val aktør: Aktør,
+    var aktør: Aktør,
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
@@ -47,7 +47,7 @@ data class Fagsak(
         cascade = [CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE],
         orphanRemoval = false
     )
-    var søkerIdenter: Set<FagsakPerson> = setOf()
+    var søkerIdenter: MutableSet<FagsakPerson> = mutableSetOf()
 ) : BaseEntitet() {
 
     override fun hashCode(): Int {
