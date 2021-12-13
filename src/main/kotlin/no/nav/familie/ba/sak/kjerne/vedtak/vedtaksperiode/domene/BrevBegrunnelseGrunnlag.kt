@@ -3,11 +3,11 @@ package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene
 import no.nav.familie.ba.sak.common.NullablePeriode
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilTriggesAv
+import no.nav.familie.ba.sak.kjerne.brev.hentPersonidenterGjeldendeForBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.hentPersonidenterGjeldendeForBegrunnelse
 
 data class BrevBegrunnelseGrunnlag(
     val vedtakBegrunnelseSpesifikasjon: VedtakBegrunnelseSpesifikasjon,

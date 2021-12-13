@@ -1,9 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.common.NullablePeriode
-import no.nav.familie.ba.sak.common.Periode
-import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
@@ -12,24 +9,13 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.lagVertikaleSegmenter
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilTriggesAv
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.hentPersonerForEtterEndretUtbetalingsperiode
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
-import no.nav.familie.ba.sak.kjerne.vedtak.VedtakUtils
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.MinimertPerson
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.barnMedSeksårsdagPåFom
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.harBarnMedSeksårsdagPåFom
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.hentSøker
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.BrevGrunnlag
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.harPersonerSomManglerOpplysninger
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.somOverlapper
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import java.time.LocalDate
 
 fun hentVedtaksperioderMedBegrunnelserForEndredeUtbetalingsperioder(
@@ -75,77 +61,6 @@ fun hentVedtaksperioderMedBegrunnelserForUtbetalingsperioder(
             type = Vedtaksperiodetype.UTBETALING
         )
     }
-
-fun hentPersonidenterGjeldendeForBegrunnelse(
-    triggesAv: TriggesAv,
-    periode: NullablePeriode,
-    vedtaksperiodeType: Vedtaksperiodetype,
-    vedtakBegrunnelseType: VedtakBegrunnelseType,
-    brevGrunnlag: BrevGrunnlag,
-    identerMedUtbetaling: List<String>,
-    erFørsteVedtaksperiodePåFagsak: Boolean,
-): List<String> {
-
-    val erFortsattInnvilgetBegrunnelse =
-        vedtaksperiodeType == Vedtaksperiodetype.FORTSATT_INNVILGET ||
-            vedtakBegrunnelseType == VedtakBegrunnelseType.FORTSATT_INNVILGET
-
-    return when {
-        triggesAv.vilkår.contains(Vilkår.UTVIDET_BARNETRYGD) || triggesAv.småbarnstillegg ->
-            identerMedUtbetaling +
-                brevGrunnlag.personerPåBehandling.hentSøker().personIdent +
-                brevGrunnlag
-                    .minimerteEndredeUtbetalingAndeler
-                    .somOverlapper(periode.tilNullableMånedPeriode())
-                    .map { it.personIdent }
-
-        triggesAv.barnMedSeksårsdag ->
-            brevGrunnlag.personerPåBehandling.barnMedSeksårsdagPåFom(periode.fom)
-                .map { person -> person.personIdent }
-
-        triggesAv.personerManglerOpplysninger ->
-            if (brevGrunnlag.minimertePersonResultater.harPersonerSomManglerOpplysninger())
-                emptyList()
-            else
-                error("Legg til opplysningsplikt ikke oppfylt begrunnelse men det er ikke person med det resultat")
-
-        erFortsattInnvilgetBegrunnelse -> identerMedUtbetaling
-
-        triggesAv.etterEndretUtbetaling ->
-            hentPersonerForEtterEndretUtbetalingsperiode(
-                minimerteEndredeUtbetalingAndeler = brevGrunnlag.minimerteEndredeUtbetalingAndeler,
-                fom = periode.fom,
-                endringsaarsaker = triggesAv.endringsaarsaker
-            )
-
-        else ->
-            VedtakUtils.hentPersonerForAlleUtgjørendeVilkår(
-                minimertePersonResultater = brevGrunnlag.minimertePersonResultater,
-                vedtaksperiode = Periode(
-                    fom = periode.fom ?: TIDENES_MORGEN,
-                    tom = periode.tom ?: TIDENES_ENDE
-                ),
-                oppdatertBegrunnelseType = vedtakBegrunnelseType,
-                aktuellePersonerForVedtaksperiode = hentAktuellePersonerForVedtaksperiode(
-                    brevGrunnlag.personerPåBehandling,
-                    vedtakBegrunnelseType,
-                    identerMedUtbetaling
-                ),
-                triggesAv = triggesAv,
-                erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak
-            ).map { person -> person.personIdent }
-    }.toSet().toList()
-}
-
-private fun hentAktuellePersonerForVedtaksperiode(
-    personerPåBehandling: List<MinimertPerson>,
-    vedtakBegrunnelseType: VedtakBegrunnelseType,
-    identerMedUtbetaling: List<String>
-): List<MinimertPerson> = personerPåBehandling.filter { person ->
-    if (vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGET) {
-        identerMedUtbetaling.contains(person.personIdent) || person.type == PersonType.SØKER
-    } else true
-}
 
 fun validerSatsendring(fom: LocalDate?, begrunnelsePerson: List<MinimertPerson>) {
     val satsendring = SatsService
