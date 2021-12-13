@@ -4,11 +4,11 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ba.sak.common.Utils.formaterBeløp
 import no.nav.familie.ba.sak.kjerne.brev.domene.BegrunnelseDataTestConfig
 import no.nav.familie.ba.sak.kjerne.brev.domene.BrevBegrunnelseTestConfig
+import no.nav.familie.ba.sak.kjerne.brev.domene.BrevGrunnlag
+import no.nav.familie.ba.sak.kjerne.brev.domene.BrevPeriodeGrunnlag
 import no.nav.familie.ba.sak.kjerne.brev.domene.BrevPeriodeTestConfig
 import no.nav.familie.ba.sak.kjerne.brev.domene.FritekstBegrunnelseTestConfig
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.BrevPeriode
-import no.nav.familie.ba.sak.kjerne.brev.domene.BrevGrunnlag
-import no.nav.familie.ba.sak.kjerne.brev.domene.BrevPeriodeGrunnlag
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestReporter
@@ -70,8 +70,9 @@ class BrevbegrunnelseTest {
             if (feil.isNotEmpty()) {
                 testReporter.publishEntry(
                     it,
-                    "${behandlingsresultatPersonTestConfig.beskrivelse}\n" +
-                        feil.joinToString("\n")
+                    "${behandlingsresultatPersonTestConfig.beskrivelse}\n\n" +
+                        feil.joinToString("\n\n") +
+                        "\n-----------------------------------"
                 )
                 acc + 1
             } else {
@@ -123,18 +124,25 @@ class BrevbegrunnelseTest {
                 }
             }
 
-            forventedeBegrunnelser.filter { !output.begrunnelser.contains(it) }.forEach {
+            if (forventedeBegrunnelser.size != output.begrunnelser.size) {
                 feil.add(
-                    "Fant ingen begrunnelser i output-begrunnelsene som matcher forventet begrunnelse $it"
+                    "Forventet antall begrunnelser var ${forventedeBegrunnelser.size} begrunnelser, " +
+                        "men fikk ${output.begrunnelser.size}." +
+                        "\nForventede begrunnelser: $forventedeBegrunnelser" +
+                        "\nOutput: ${output.begrunnelser}"
                 )
-            }
-            output.begrunnelser.filter { !forventedeBegrunnelser.contains(it) }.forEach {
-                feil.add(
-                    "Fant ingen begrunnelser i de forventede begrunnelser som matcher begrunnelse $it"
-                )
+            } else {
+                forventedeBegrunnelser.forEachIndexed { index, _ ->
+                    if (forventedeBegrunnelser[index] != output.begrunnelser[index]) {
+                        feil.add(
+                            "Forventet begrunnelse nr. ${index + 1} var: '${forventedeBegrunnelser[index]}', " +
+                                "men fikk '${output.begrunnelser[index]}'"
+                        )
+                    }
+                }
             }
         }
-
         return feil
     }
 }
+

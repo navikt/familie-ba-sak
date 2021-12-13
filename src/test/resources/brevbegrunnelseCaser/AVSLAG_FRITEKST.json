@@ -5,7 +5,9 @@
   "vedtaksperiodetype": "AVSLAG",
   "begrunnelser": [],
   "fritekster": [
-    "Du får ikke barnetrygd fordi test"
+    "Du får ikke barnetrygd fordi test 1",
+    "Du får ikke barnetrygd fordi test 2",
+    "Du får ikke barnetrygd fordi test 3"
   ],
   "utvidetScenario": "IKKE_UTVIDET_YTELSE",
   "uregistrerteBarn": [],
@@ -53,7 +55,15 @@
     "barnasFodselsdager": null,
     "begrunnelser": [
       {
-        "fritekst": "Du får ikke barnetrygd fordi test",
+        "fritekst": "Du får ikke barnetrygd fordi test 1",
+        "type": "fritekst"
+      },
+      {
+        "fritekst": "Du får ikke barnetrygd fordi test 2",
+        "type": "fritekst"
+      },
+      {
+        "fritekst": "Du får ikke barnetrygd fordi test 3",
         "type": "fritekst"
       }
     ],
