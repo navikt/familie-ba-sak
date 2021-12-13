@@ -126,7 +126,6 @@ fun VedtakBegrunnelseSpesifikasjon.erTilknyttetVilkår(sanityBegrunnelser: List<
 
 fun VedtakBegrunnelseSpesifikasjon.tilVedtaksbegrunnelse(
     vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser,
-    personIdenter: List<String>
 ): Vedtaksbegrunnelse {
     if (!vedtaksperiodeMedBegrunnelser.type.tillatteBegrunnelsestyper.contains(this.vedtakBegrunnelseType)) {
         throw Feil(
@@ -138,7 +137,6 @@ fun VedtakBegrunnelseSpesifikasjon.tilVedtaksbegrunnelse(
     return Vedtaksbegrunnelse(
         vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
         vedtakBegrunnelseSpesifikasjon = this,
-        personIdenter = personIdenter
     )
 }
 

@@ -28,7 +28,6 @@ import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.erTilknyttetVilkår
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilVedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.triggesForPeriode
@@ -97,7 +96,6 @@ class VedtaksperiodeService(
         standardbegrunnelserFraFrontend: List<VedtakBegrunnelseSpesifikasjon>
     ): Vedtak {
         val vedtaksperiodeMedBegrunnelser = vedtaksperiodeRepository.hentVedtaksperiode(vedtaksperiodeId)
-        val begrunnelserMedFeil = mutableListOf<VedtakBegrunnelseSpesifikasjon>()
 
         val behandling = vedtaksperiodeMedBegrunnelser.vedtak.behandling
 
@@ -105,52 +103,19 @@ class VedtaksperiodeService(
 
         val sanityBegrunnelser = sanityService.hentSanityBegrunnelser()
 
-        val andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id)
-
-        val personopplysningGrunnlag = persongrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
-            ?: throw Feil("Fant ikke personopplysninger for behandling ${behandling.id}")
-
-        val erFørsteVedtaksperiodePåFagsak =
-            erFørsteVedtaksperiodePåFagsak(andelerTilkjentYtelse, vedtaksperiodeMedBegrunnelser.fom)
-
         vedtaksperiodeMedBegrunnelser.settBegrunnelser(
             standardbegrunnelserFraFrontend.mapNotNull {
 
                 val triggesAv = it.tilSanityBegrunnelse(sanityBegrunnelser)?.tilTriggesAv()
                     ?: return@mapNotNull null
 
-                val vedtakBegrunnelseType = it.vedtakBegrunnelseType
-                val personerGjeldendeForBegrunnelseIdenter: List<String> = hentPersonidenterGjeldendeForBegrunnelse(
-                    triggesAv = triggesAv,
-                    vedtakBegrunnelseType = vedtakBegrunnelseType,
-                    periode = vedtaksperiodeMedBegrunnelser.hentNullablePeriode(),
-                    vedtaksperiodeType = vedtaksperiodeMedBegrunnelser.type,
-                    brevGrunnlag = brevGrunnlag,
-                    erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
-                    identerMedUtbetaling = vedtaksperiodeMedBegrunnelser.hentUtbetalingsperiodeDetaljer(
-                        andelerTilkjentYtelse,
-                        personopplysningGrunnlag
-                    ).map { utbetalingsperiodeDetalj -> utbetalingsperiodeDetalj.person.personIdent },
-                )
-
                 if (triggesAv.satsendring) {
                     validerSatsendring(vedtaksperiodeMedBegrunnelser.fom, brevGrunnlag.personerPåBehandling)
                 }
 
-                if (it.erTilknyttetVilkår(sanityBegrunnelser) && personerGjeldendeForBegrunnelseIdenter.isEmpty()) {
-                    begrunnelserMedFeil.add(it)
-                }
-
-                it.tilVedtaksbegrunnelse(
-                    vedtaksperiodeMedBegrunnelser,
-                    personerGjeldendeForBegrunnelseIdenter
-                )
+                it.tilVedtaksbegrunnelse(vedtaksperiodeMedBegrunnelser)
             }
         )
-
-        if (begrunnelserMedFeil.isNotEmpty()) {
-            kastFeilmeldingForBegrunnelserMedFeil(begrunnelserMedFeil, sanityBegrunnelser)
-        }
 
         lagre(vedtaksperiodeMedBegrunnelser)
 

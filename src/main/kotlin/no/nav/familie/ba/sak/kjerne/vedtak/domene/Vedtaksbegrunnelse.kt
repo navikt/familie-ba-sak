@@ -50,6 +50,10 @@ class Vedtaksbegrunnelse(
     @Column(name = "vedtak_begrunnelse_spesifikasjon", updatable = false)
     val vedtakBegrunnelseSpesifikasjon: VedtakBegrunnelseSpesifikasjon,
 
+    @Deprecated(
+        "Skal ikke brukes. Personidenter settes ved opprettelse av brev i " +
+            "BrevPeriodeGrunnlag.tilBrevPeriode funksjonen"
+    )
     @Column(name = "person_identer", columnDefinition = "TEXT")
     @Convert(converter = StringListConverter::class)
     val personIdenter: List<String> = emptyList(),
