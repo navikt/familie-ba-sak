@@ -39,7 +39,7 @@ data class Aktør(
     init {
         require(VALID.matcher(aktørId).matches()) {
             // skal ikke skje, funksjonelle feilmeldinger håndteres ikke her.
-            "Ugyldig fødselsnummer, støtter kun 13 siffer.)"
+            "Ugyldig aktør, støtter kun 13 siffer.)"
         }
     }
 
