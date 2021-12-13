@@ -158,7 +158,7 @@ fun defaultFagsak() = Fagsak(
     1, aktør = tilAktør(randomFnr())
 ).also {
     it.søkerIdenter =
-        setOf(
+        mutableSetOf(
             FagsakPerson(
                 fagsak = it,
                 personIdent = PersonIdent(randomFnr()),

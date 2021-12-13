@@ -47,7 +47,7 @@ data class Fagsak(
         cascade = [CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE],
         orphanRemoval = false
     )
-    var søkerIdenter: Set<FagsakPerson> = setOf()
+    var søkerIdenter: MutableSet<FagsakPerson> = mutableSetOf()
 ) : BaseEntitet() {
 
     override fun hashCode(): Int {
