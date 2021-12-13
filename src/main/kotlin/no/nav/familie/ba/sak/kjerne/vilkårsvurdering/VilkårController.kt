@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 import no.nav.familie.ba.sak.ekstern.restDomene.RestAnnenVurdering
 import no.nav.familie.ba.sak.ekstern.restDomene.RestNyttVilkår
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
+import no.nav.familie.ba.sak.ekstern.restDomene.RestSlettVilkår
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVedtakBegrunnelseTilknyttetVilkår
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -11,6 +12,7 @@ import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -81,7 +83,7 @@ class VilkårController(
     }
 
     @DeleteMapping(path = ["/{behandlingId}/{vilkaarId}"])
-    fun slettVilkår(
+    fun slettVilkårsperiode(
         @PathVariable behandlingId: Long,
         @PathVariable vilkaarId: Long,
         @RequestBody personIdent: String
@@ -93,13 +95,29 @@ class VilkårController(
 
         val aktør = personidentService.hentOgLagreAktør(personIdent)
         val behandling = behandlingService.hent(behandlingId)
-        vilkårService.deleteVilkår(
+        vilkårService.deleteVilkårsperiode(
             behandlingId = behandling.id,
             vilkårId = vilkaarId,
             aktør = aktør
         )
 
         vedtakService.resettStegVedEndringPåVilkår(behandling.id)
+        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
+    }
+
+    @DeleteMapping(path = ["/{behandlingId}/vilkaar"])
+    fun slettVilkår(
+        @PathVariable behandlingId: Long,
+        @RequestBody restSlettVilkår: RestSlettVilkår
+    ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
+            handling = "slette vilkår"
+        )
+
+        vilkårService.deleteVilkår(behandlingId, restSlettVilkår)
+
+        vedtakService.resettStegVedEndringPåVilkår(behandlingId)
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }
 
@@ -111,11 +129,20 @@ class VilkårController(
             handling = "legge til vilkår"
         )
 
-        val behandling = behandlingService.hent(behandlingId)
-        vilkårService.postVilkår(behandling.id, restNyttVilkår)
+        if (restNyttVilkår.vilkårType == Vilkår.UTVIDET_BARNETRYGD) {
+            vilkårService.postVilkårUtvidetBarnetrygd(
+                behandlingId,
+                restNyttVilkår
+            )
+        } else vilkårService.postVilkår(behandlingId, restNyttVilkår)
 
         vedtakService.resettStegVedEndringPåVilkår(behandlingId)
-        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
+        return ResponseEntity.ok(
+            Ressurs.success(
+                utvidetBehandlingService
+                    .lagRestUtvidetBehandling(behandlingId = behandlingId)
+            )
+        )
     }
 
     @GetMapping(path = ["/vilkaarsbegrunnelser"])
