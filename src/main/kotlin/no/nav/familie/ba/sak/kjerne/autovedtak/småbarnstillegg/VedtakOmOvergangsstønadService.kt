@@ -177,7 +177,7 @@ class VedtakOmOvergangsstønadService(
         return autovedtakService.opprettOppgaveForManuellBehandling(
             behandling = behandling,
             begrunnelse = meldingIOppgave,
-            oppgavetype = Oppgavetype.BehandleSak,
+            oppgavetype = Oppgavetype.VurderLivshendelse,
             opprettLogginnslag = true
         )
     }

@@ -55,26 +55,24 @@ class SendTilBeslutter(
         )
         taskRepository.save(godkjenneVedtakTask)
 
-        val behandleSakDbOppgave =
-            oppgaveService.hentOppgaveSomIkkeErFerdigstilt(Oppgavetype.BehandleSak, behandling)
-        if (behandleSakDbOppgave !== null) {
-            val ferdigstillBehandleSakTask = FerdigstillOppgave.opprettTask(behandling.id, Oppgavetype.BehandleSak)
-            taskRepository.save(ferdigstillBehandleSakTask)
-        }
+        opprettFerdigstillOppgaveTasker(behandling)
 
-        val behandleUnderkjentVedtakOppgave =
-            oppgaveService.hentOppgaveSomIkkeErFerdigstilt(
-                Oppgavetype.BehandleUnderkjentVedtak,
-                behandling
-            )
-        if (behandleUnderkjentVedtakOppgave !== null) {
-            val ferdigstillBehandleUnderkjentVedtakTask =
-                FerdigstillOppgave.opprettTask(behandling.id, Oppgavetype.BehandleUnderkjentVedtak)
-            taskRepository.save(ferdigstillBehandleUnderkjentVedtakTask)
-        }
         behandlingService.sendBehandlingTilBeslutter(behandling)
 
         return hentNesteStegForNormalFlyt(behandling)
+    }
+
+    private fun opprettFerdigstillOppgaveTasker(behandling: Behandling) {
+        listOf(
+            Oppgavetype.BehandleSak,
+            Oppgavetype.BehandleUnderkjentVedtak,
+            Oppgavetype.VurderLivshendelse
+        ).forEach { oppgavetype ->
+            oppgaveService.hentOppgaveSomIkkeErFerdigstilt(Oppgavetype.BehandleSak, behandling)?.also {
+                val ferdigstillBehandleSakTask = FerdigstillOppgave.opprettTask(behandling.id, oppgavetype)
+                taskRepository.save(ferdigstillBehandleSakTask)
+            }
+        }
     }
 
     override fun stegType(): StegType {
