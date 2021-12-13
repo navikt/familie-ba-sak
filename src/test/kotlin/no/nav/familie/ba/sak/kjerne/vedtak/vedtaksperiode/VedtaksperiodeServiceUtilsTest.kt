@@ -17,7 +17,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.periodeErOppyltForYtelseType
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilBegrunnelsePerson
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilMinimertPerson
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.BrevGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilMinimertEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilMinimertPersonResultat
@@ -344,7 +344,7 @@ class VedtaksperiodeServiceUtilsTest {
             periode = NullablePeriode(LocalDate.now().minusMonths(1), null),
             brevGrunnlag = BrevGrunnlag(
                 minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
-                personerPåBehandling = persongrunnlag.personer.map { it.tilBegrunnelsePerson() },
+                personerPåBehandling = persongrunnlag.personer.map { it.tilMinimertPerson() },
                 minimerteEndredeUtbetalingAndeler = emptyList(),
             ),
             identerMedUtbetaling = identerMedUtbetaling,
@@ -395,7 +395,7 @@ class VedtaksperiodeServiceUtilsTest {
             vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET,
             brevGrunnlag = BrevGrunnlag(
                 minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
-                personerPåBehandling = persongrunnlag.personer.map { it.tilBegrunnelsePerson() },
+                personerPåBehandling = persongrunnlag.personer.map { it.tilMinimertPerson() },
                 minimerteEndredeUtbetalingAndeler = endredeUtbetalingAndeler
                     .map { it.tilMinimertEndretUtbetalingAndel() },
             ),

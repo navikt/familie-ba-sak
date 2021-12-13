@@ -29,7 +29,7 @@ class VedtaksbegrunnelseTest {
 
     val vedtaksperiode = NullablePeriode(LocalDate.now().minusMonths(1), LocalDate.now())
 
-    val personerIPersongrunnlag = listOf(søker, barn1, barn2, barn3).map { it.tilBegrunnelsePerson() }
+    val personerIPersongrunnlag = listOf(søker, barn1, barn2, barn3).map { it.tilMinimertPerson() }
 
     val målform = Målform.NB
 

@@ -50,7 +50,7 @@ fun List<MinimertPerson>.hentSøker() =
     this.firstOrNull { it.type == PersonType.SØKER }
         ?: throw Feil("Fant ikke søker blant begrunnelsepersonene")
 
-fun Person.tilBegrunnelsePerson() = MinimertPerson(
+fun Person.tilMinimertPerson() = MinimertPerson(
     personIdent = this.aktør.aktivFødselsnummer(),
     fødselsdato = this.fødselsdato,
     type = this.type

@@ -3,14 +3,14 @@ package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.common.tilfeldigSøker
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilBegrunnelsePerson
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilMinimertPerson
 
 class VedtaksperiodeMedBegrunnelseTest {
 
     private val søker = tilfeldigSøker()
     private val barn1 = tilfeldigPerson(personType = PersonType.BARN)
     private val barn2 = tilfeldigPerson(personType = PersonType.BARN)
-    private val personerIPersongrunnlag = listOf(barn1, barn2, søker).map { it.tilBegrunnelsePerson() }
+    private val personerIPersongrunnlag = listOf(barn1, barn2, søker).map { it.tilMinimertPerson() }
 
     /*
     TODO: Fiks når vi har minimert dataene inn til brevperioder

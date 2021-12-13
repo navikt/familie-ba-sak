@@ -25,7 +25,6 @@ import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.domene.Totrinnskontroll
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilBegrunnelsePerson
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilMinimertPerson
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilBrevPeriodeGrunnlag
@@ -530,7 +529,7 @@ internal class BrevUtilsTest {
             )
         )
 
-        val personerIPersongrunnlag = listOf(barn1, barn2, barn3, søker).map { it.tilBegrunnelsePerson() }
+        val personerIPersongrunnlag = listOf(barn1, barn2, barn3, søker).map { it.tilMinimertPerson() }
 
         val barnIPeriode = brevPeriodeGrunnlagMedPersoner.finnBarnIInnvilgelsePeriode(personerIPersongrunnlag)
 

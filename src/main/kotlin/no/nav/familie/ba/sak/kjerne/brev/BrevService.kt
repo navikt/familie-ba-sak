@@ -31,16 +31,22 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.maler.SignaturVedtak
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VedtakEndring
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VedtakFellesfelter
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Vedtaksbrev
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilMinimertPerson
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.BrevGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilBrevPeriodeGrunnlag
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilMinimertEndretUtbetalingAndel
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilMinimertPersonResultat
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.erFørsteVedtaksperiodePåFagsak
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.sorter
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 
@@ -60,6 +66,8 @@ class BrevService(
     private val søknadGrunnlagService: SøknadGrunnlagService,
     private val sanityService: SanityService,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
+    private val vilkårsvurderingService: VilkårsvurderingService,
+    private val endretUtbetalingAndelService: EndretUtbetalingAndelService,
 ) {
 
     fun hentVedtaksbrevData(vedtak: Vedtak): Vedtaksbrev {
@@ -184,7 +192,7 @@ class BrevService(
         val grunnlagOgSignaturData = hentGrunnlagOgSignaturData(vedtak)
         val andelerTilkjentYtelse =
             andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(vedtak.behandling.id)
-        val brevGrunnlag = vedtaksperiodeService.hentBrevGrunnlag(vedtak.behandling.id)
+        val brevGrunnlag = hentBrevGrunnlag(vedtak.behandling.id)
         val uregistrerteBarn = hentUregistrerteBarn(vedtak.behandling.id)
 
         val brevPerioderGunnlag = utvidetVedtaksperioderMedBegrunnelser
@@ -252,6 +260,26 @@ class BrevService(
             saksbehandler = saksbehandler,
             beslutter = beslutter,
             enhet = enhet
+        )
+    }
+
+    fun hentBrevGrunnlag(
+        behandlingId: Long,
+    ): BrevGrunnlag {
+
+        val persongrunnlag =
+            persongrunnlagService.hentAktiv(behandlingId)
+                ?: error(VedtaksperiodeService.finnerIkkePersongrunnlagFeilmelding(behandlingId))
+
+        val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId)
+            ?: error("Finner ikke vilkårsvurdering ved begrunning av vedtak")
+
+        val endredeUtbetalingAndeler = endretUtbetalingAndelService.hentForBehandling(behandlingId)
+
+        return BrevGrunnlag(
+            personerPåBehandling = persongrunnlag.personer.map { it.tilMinimertPerson() },
+            minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
+            minimerteEndredeUtbetalingAndeler = endredeUtbetalingAndeler.map { it.tilMinimertEndretUtbetalingAndel() },
         )
     }
 

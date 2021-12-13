@@ -11,7 +11,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilBegrunnelsePerson
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilMinimertPerson
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilMinimertPersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
@@ -138,7 +138,7 @@ class UtgjørendePersonerTest {
             oppdatertBegrunnelseType = VedtakBegrunnelseType.INNVILGET,
             triggesAv = TriggesAv(setOf(Vilkår.LOVLIG_OPPHOLD)),
             aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList()
-                .map { it.tilBegrunnelsePerson() },
+                .map { it.tilMinimertPerson() },
             erFørsteVedtaksperiodePåFagsak = false
         )
 
@@ -157,7 +157,7 @@ class UtgjørendePersonerTest {
             oppdatertBegrunnelseType = VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET.vedtakBegrunnelseType,
             triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOSATT_I_RIKET)),
             aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList()
-                .map { it.tilBegrunnelsePerson() },
+                .map { it.tilMinimertPerson() },
             erFørsteVedtaksperiodePåFagsak = false,
         )
 
@@ -232,7 +232,7 @@ class UtgjørendePersonerTest {
             oppdatertBegrunnelseType = VedtakBegrunnelseSpesifikasjon.REDUKSJON_BOSATT_I_RIKTET.vedtakBegrunnelseType,
             triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOSATT_I_RIKET)),
             aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList()
-                .map { it.tilBegrunnelsePerson() },
+                .map { it.tilMinimertPerson() },
             erFørsteVedtaksperiodePåFagsak = false,
         )
 
@@ -251,7 +251,7 @@ class UtgjørendePersonerTest {
             oppdatertBegrunnelseType = VedtakBegrunnelseSpesifikasjon.OPPHØR_UTVANDRET.vedtakBegrunnelseType,
             triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOSATT_I_RIKET)),
             aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList()
-                .map { it.tilBegrunnelsePerson() },
+                .map { it.tilMinimertPerson() },
             erFørsteVedtaksperiodePåFagsak = false,
         )
 
@@ -322,7 +322,7 @@ class UtgjørendePersonerTest {
             oppdatertBegrunnelseType = VedtakBegrunnelseType.INNVILGET,
             triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOSATT_I_RIKET), medlemskap = true),
             aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList()
-                .map { it.tilBegrunnelsePerson() },
+                .map { it.tilMinimertPerson() },
             erFørsteVedtaksperiodePåFagsak = false,
         )
 
@@ -335,7 +335,7 @@ class UtgjørendePersonerTest {
             oppdatertBegrunnelseType = VedtakBegrunnelseType.INNVILGET,
             triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOSATT_I_RIKET)),
             aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList()
-                .map { it.tilBegrunnelsePerson() },
+                .map { it.tilMinimertPerson() },
             erFørsteVedtaksperiodePåFagsak = false,
         )
 
