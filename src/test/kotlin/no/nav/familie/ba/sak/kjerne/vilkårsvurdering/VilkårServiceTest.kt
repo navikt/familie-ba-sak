@@ -8,11 +8,14 @@ import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.vurderVilkårsvurderingTilInnvilget
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
+import no.nav.familie.ba.sak.ekstern.restDomene.RestNyttVilkår
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
+import no.nav.familie.ba.sak.ekstern.restDomene.RestSlettVilkår
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonResultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
@@ -22,6 +25,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
+import no.nav.familie.ba.sak.kjerne.steg.BehandlingStegStatus
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurderingType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
@@ -30,10 +34,13 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -173,7 +180,7 @@ class VilkårServiceTest(
             bekreftEndringerViaFrontend = true,
             forrigeBehandlingSomErVedtatt = forrigeBehandlingSomErIverksatt
         )
-        Assertions.assertEquals(2, vilkårsvurdering.personResultater.size)
+        assertEquals(2, vilkårsvurdering.personResultater.size)
 
         val personopplysningGrunnlagMedEkstraBarn =
             lagTestPersonopplysningGrunnlag(
@@ -190,7 +197,7 @@ class VilkårServiceTest(
             bekreftEndringerViaFrontend = true,
             forrigeBehandlingSomErVedtatt = forrigeBehandlingSomErIverksatt
         )
-        Assertions.assertEquals(3, behandlingResultatMedEkstraBarn.personResultater.size)
+        assertEquals(3, behandlingResultatMedEkstraBarn.personResultater.size)
     }
 
     @Test
@@ -235,8 +242,8 @@ class VilkårServiceTest(
         )
             .also {
                 it.personResultater
-                    .forEach {
-                        it.leggTilBlankAnnenVurdering(annenVurderingType = AnnenVurderingType.OPPLYSNINGSPLIKT)
+                    .forEach { personResultat ->
+                        personResultat.leggTilBlankAnnenVurdering(AnnenVurderingType.OPPLYSNINGSPLIKT)
                     }
             }
 
@@ -246,10 +253,10 @@ class VilkårServiceTest(
         val behandlingsResultater = vilkårsvurderingService
             .hentBehandlingResultatForBehandling(behandlingId = behandling.id)
 
-        Assertions.assertEquals(2, behandlingsResultater.size)
+        assertEquals(2, behandlingsResultater.size)
         Assertions.assertNotEquals(vilkårsvurdering.id, kopiertBehandlingResultat.id)
-        Assertions.assertEquals(1, kopiertBehandlingResultat.personResultater.first().andreVurderinger.size)
-        Assertions.assertEquals(
+        assertEquals(1, kopiertBehandlingResultat.personResultater.first().andreVurderinger.size)
+        assertEquals(
             AnnenVurderingType.OPPLYSNINGSPLIKT,
             kopiertBehandlingResultat.personResultater.first().andreVurderinger.first().type
         )
@@ -278,7 +285,7 @@ class VilkårServiceTest(
             bekreftEndringerViaFrontend = true,
             forrigeBehandlingSomErVedtatt = forrigeBehandlingSomErIverksatt
         )
-        Assertions.assertEquals(2, vilkårsvurdering.personResultater.size)
+        assertEquals(2, vilkårsvurdering.personResultater.size)
 
         vilkårsvurdering.personResultater.map { personResultat ->
             personResultat.tilRestPersonResultat().vilkårResultater.map {
@@ -319,15 +326,15 @@ class VilkårServiceTest(
             forrigeBehandlingSomErVedtatt = behandling
         )
 
-        Assertions.assertEquals(3, vilkårsvurdering2.personResultater.size)
+        assertEquals(3, vilkårsvurdering2.personResultater.size)
 
         vilkårsvurdering2.personResultater.forEach { personResultat ->
             personResultat.vilkårResultater.forEach { vilkårResultat ->
                 if (personResultat.aktør.aktivFødselsnummer() == barnFnr2) {
-                    Assertions.assertEquals(behandling2.id, vilkårResultat.behandlingId)
+                    assertEquals(behandling2.id, vilkårResultat.behandlingId)
                 } else {
-                    Assertions.assertEquals(Resultat.OPPFYLT, vilkårResultat.resultat)
-                    Assertions.assertEquals(behandling.id, vilkårResultat.behandlingId)
+                    assertEquals(Resultat.OPPFYLT, vilkårResultat.resultat)
+                    assertEquals(behandling.id, vilkårResultat.behandlingId)
                 }
             }
         }
@@ -382,11 +389,11 @@ class VilkårServiceTest(
             forrigeBehandlingSomErVedtatt = behandling
         )
 
-        Assertions.assertEquals(3, behandlingResultat2.personResultater.size)
+        assertEquals(3, behandlingResultat2.personResultater.size)
 
         val personResultat = behandlingResultat2.personResultater.find { it.aktør.aktivFødselsnummer() == barnFnr }!!
         val borMedSøkerVilkår = personResultat.vilkårResultater.find { it.vilkårType == Vilkår.BOR_MED_SØKER }!!
-        Assertions.assertEquals(behandling.id, borMedSøkerVilkår.behandlingId)
+        assertEquals(behandling.id, borMedSøkerVilkår.behandlingId)
 
         VilkårsvurderingUtils.muterPersonVilkårResultaterPut(
             personResultat,
@@ -408,12 +415,12 @@ class VilkårServiceTest(
             behandlingResultatEtterEndring.personResultater.find { it.aktør.aktivFødselsnummer() == barnFnr }!!
         val borMedSøkerVilkårEtterEndring =
             personResultatEtterEndring.vilkårResultater.find { it.vilkårType == Vilkår.BOR_MED_SØKER }!!
-        Assertions.assertEquals(behandling2.id, borMedSøkerVilkårEtterEndring.behandlingId)
+        assertEquals(behandling2.id, borMedSøkerVilkårEtterEndring.behandlingId)
     }
 
     @Test
     fun `Valider gyldige vilkårspermutasjoner for barn og søker`() {
-        Assertions.assertEquals(
+        assertEquals(
             setOf(
                 Vilkår.UNDER_18_ÅR,
                 Vilkår.BOR_MED_SØKER,
@@ -424,7 +431,7 @@ class VilkårServiceTest(
             Vilkår.hentVilkårFor(PersonType.BARN)
         )
 
-        Assertions.assertEquals(
+        assertEquals(
             setOf(
                 Vilkår.BOSATT_I_RIKET,
                 Vilkår.LOVLIG_OPPHOLD
@@ -435,7 +442,7 @@ class VilkårServiceTest(
 
     @Test
     fun `Valider gyldige vilkårspermutasjoner for barn og søker ved utvidet barnetrygd`() {
-        Assertions.assertEquals(
+        assertEquals(
             setOf(
                 Vilkår.UNDER_18_ÅR,
                 Vilkår.BOR_MED_SØKER,
@@ -446,7 +453,7 @@ class VilkårServiceTest(
             Vilkår.hentVilkårFor(personType = PersonType.BARN, ytelseType = YtelseType.UTVIDET_BARNETRYGD)
         )
 
-        Assertions.assertEquals(
+        assertEquals(
             setOf(
                 Vilkår.BOSATT_I_RIKET,
                 Vilkår.LOVLIG_OPPHOLD,
@@ -507,7 +514,7 @@ class VilkårServiceTest(
             endretVilkårsvurdering.find { it.personIdent == barnFnr }
                 ?.vilkårResultater?.find { it.vilkårType == Vilkår.UNDER_18_ÅR }
 
-        Assertions.assertEquals(
+        assertEquals(
             2,
             endretUnder18ÅrVilkårForBarn!!.utdypendeVilkårsvurderinger.size
         )
@@ -555,49 +562,15 @@ class VilkårServiceTest(
             aktør = personidentService.hentOgLagreAktør(barnFnr)
         )
         barnPersonResultat.setSortedVilkårResultater(
-            setOf(
-                lagVilkårResultat(
-                    personResultat = barnPersonResultat,
-                    vilkårType = Vilkår.UNDER_18_ÅR,
-                    resultat = Resultat.OPPFYLT,
-                    periodeFom = barnetsFødselsdato,
-                    periodeTom = barnetsFødselsdato.plusYears(18).minusMonths(1),
-                    behandlingId = forrigeBehandling.id
-                ),
-                lagVilkårResultat(
-                    personResultat = barnPersonResultat,
-                    vilkårType = Vilkår.GIFT_PARTNERSKAP,
-                    resultat = Resultat.OPPFYLT,
-                    periodeFom = barnetsFødselsdato,
-                    periodeTom = null,
-                    behandlingId = forrigeBehandling.id
-                ),
-                lagVilkårResultat(
-                    personResultat = barnPersonResultat,
-                    vilkårType = Vilkår.BOR_MED_SØKER,
-                    resultat = Resultat.OPPFYLT,
-                    periodeFom = LocalDate.now().minusMonths(1),
-                    periodeTom = null,
-                    behandlingId = forrigeBehandling.id
-                ),
-                lagVilkårResultat(
-                    personResultat = barnPersonResultat,
-                    vilkårType = Vilkår.BOSATT_I_RIKET,
-                    resultat = Resultat.OPPFYLT,
-                    periodeFom = barnetsFødselsdato,
-                    periodeTom = null,
-                    behandlingId = forrigeBehandling.id
-                ),
-                lagVilkårResultat(
-                    personResultat = barnPersonResultat,
-                    vilkårType = Vilkår.LOVLIG_OPPHOLD,
-                    resultat = Resultat.OPPFYLT,
-                    periodeFom = barnetsFødselsdato,
-                    periodeTom = null,
-                    behandlingId = forrigeBehandling.id
-                )
+            lagBarnVilkårResultat(
+                barnPersonResultat = barnPersonResultat,
+                barnetsFødselsdato = barnetsFødselsdato,
+                behandlingId = forrigeBehandling.id,
+                forrigeMigreringsdato = LocalDate.now().minusMonths(1),
+                flytteSak = true
             )
         )
+
         forrigeVilkårsvurdering = forrigeVilkårsvurdering.apply {
             personResultater = setOf(
                 søkerPersonResultat,
@@ -654,6 +627,7 @@ class VilkårServiceTest(
                     it.periodeTom == barnetsFødselsdato.plusYears(18).minusDays(1)
             }
         }
+
         assertTrue {
             barnVilkårResultat.filter { it.vilkårType !in listOf(Vilkår.BOR_MED_SØKER, Vilkår.UNDER_18_ÅR) }.all {
                 it.periodeFom == barnetsFødselsdato &&
@@ -669,113 +643,13 @@ class VilkårServiceTest(
         val forrigeVilkårsdato = LocalDate.of(2021, 8, 1)
         val barnetsFødselsdato = LocalDate.now().minusYears(1)
 
-        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
-        val forrigeBehandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(
-            lagBehandling(
-                fagsak = fagsak,
-                behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
-                årsak = BehandlingÅrsak.MIGRERING,
-            )
-        )
-        val forrigePersonopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
-            forrigeBehandling.id,
-            fnr, listOf(barnFnr),
-            barnetsFødselsdato,
-            personidentService.hentOgLagreAktør(fnr),
-            personidentService.hentOgLagreAktørIder(listOf(barnFnr))
-        )
-        persongrunnlagService.lagreOgDeaktiverGammel(forrigePersonopplysningGrunnlag)
-
-        var forrigeVilkårsvurdering = Vilkårsvurdering(behandling = forrigeBehandling)
-        val søkerPersonResultat = PersonResultat(
-            vilkårsvurdering = forrigeVilkårsvurdering,
-            personIdent = fnr,
-            aktør = personidentService.hentOgLagreAktør(fnr)
-        )
-        søkerPersonResultat.setSortedVilkårResultater(
-            lagSøkerVilkårResultat(
-                søkerPersonResultat = søkerPersonResultat,
-                periodeFom = forrigeVilkårsdato,
-                behandlingId = forrigeBehandling.id
-            )
-        )
-        val barnPersonResultat = PersonResultat(
-            vilkårsvurdering = forrigeVilkårsvurdering,
-            personIdent = barnFnr,
-            aktør = personidentService.hentOgLagreAktør(barnFnr)
-        )
-        barnPersonResultat.setSortedVilkårResultater(
-            setOf(
-                lagVilkårResultat(
-                    personResultat = barnPersonResultat,
-                    vilkårType = Vilkår.UNDER_18_ÅR,
-                    resultat = Resultat.OPPFYLT,
-                    periodeFom = barnetsFødselsdato,
-                    periodeTom = barnetsFødselsdato.plusYears(18).minusMonths(1),
-                    behandlingId = forrigeBehandling.id
-                ),
-                lagVilkårResultat(
-                    personResultat = barnPersonResultat,
-                    vilkårType = Vilkår.GIFT_PARTNERSKAP,
-                    resultat = Resultat.OPPFYLT,
-                    periodeFom = barnetsFødselsdato,
-                    periodeTom = null,
-                    behandlingId = forrigeBehandling.id
-                ),
-                lagVilkårResultat(
-                    personResultat = barnPersonResultat,
-                    vilkårType = Vilkår.BOR_MED_SØKER,
-                    resultat = Resultat.OPPFYLT,
-                    periodeFom = forrigeVilkårsdato,
-                    periodeTom = null,
-                    behandlingId = forrigeBehandling.id
-                ),
-                lagVilkårResultat(
-                    personResultat = barnPersonResultat,
-                    vilkårType = Vilkår.BOSATT_I_RIKET,
-                    resultat = Resultat.OPPFYLT,
-                    periodeFom = forrigeVilkårsdato,
-                    periodeTom = null,
-                    behandlingId = forrigeBehandling.id
-                ),
-                lagVilkårResultat(
-                    personResultat = barnPersonResultat,
-                    vilkårType = Vilkår.LOVLIG_OPPHOLD,
-                    resultat = Resultat.OPPFYLT,
-                    periodeFom = forrigeVilkårsdato,
-                    periodeTom = null,
-                    behandlingId = forrigeBehandling.id
-                )
-            )
-        )
-        forrigeVilkårsvurdering = forrigeVilkårsvurdering.apply {
-            personResultater = setOf(
-                søkerPersonResultat,
-                barnPersonResultat
-            )
-        }
-        vilkårsvurderingService.lagreNyOgDeaktiverGammel(forrigeVilkårsvurdering)
-
-        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(
-            lagBehandling(
-                fagsak = fagsak,
-                behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
-                årsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
-            )
-        )
-        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
-            behandling.id,
-            fnr, listOf(barnFnr),
-            barnetsFødselsdato,
-            personidentService.hentOgLagreAktør(fnr),
-            personidentService.hentOgLagreAktørIder(listOf(barnFnr))
-        )
-        persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
+        val behandlinger = lagMigreringsbehandling(fnr, barnFnr, barnetsFødselsdato, forrigeVilkårsdato)
+        val behandling = behandlinger.second
 
         val nyMigreringsdato = LocalDate.of(2021, 1, 1)
         val vilkårsvurdering = vilkårService.genererVilkårsvurderingForMigreringsbehandlingMedÅrsakEndreMigreringsdato(
             behandling = behandling,
-            forrigeBehandlingSomErVedtatt = forrigeBehandling,
+            forrigeBehandlingSomErVedtatt = behandlinger.first,
             nyMigreringsdato = nyMigreringsdato
         )
         assertTrue { vilkårsvurdering.personResultater.isNotEmpty() }
@@ -975,6 +849,371 @@ class VilkårServiceTest(
         }
     }
 
+    @Test
+    fun `skal lage utvidet barnetrygd vilkår for migreringsbehandling`() {
+        val fnr = randomFnr()
+        val barnFnr = randomFnr()
+        val forrigeVilkårsdato = LocalDate.of(2021, 8, 1)
+        val barnetsFødselsdato = LocalDate.now().minusYears(1)
+
+        val behandlinger = lagMigreringsbehandling(fnr, barnFnr, barnetsFødselsdato, forrigeVilkårsdato)
+        val nåVærendeBehandling = behandlinger.second
+
+        val nyMigreringsdato = LocalDate.of(2021, 1, 1)
+        var vilkårsvurdering = vilkårService.genererVilkårsvurderingForMigreringsbehandlingMedÅrsakEndreMigreringsdato(
+            behandling = nåVærendeBehandling,
+            forrigeBehandlingSomErVedtatt = behandlinger.first,
+            nyMigreringsdato = nyMigreringsdato
+        )
+        assertTrue { vilkårsvurdering.personResultater.isNotEmpty() }
+        assertTrue { vilkårsvurdering.personResultater.any { it.personIdent == fnr } }
+        assertTrue { vilkårsvurdering.personResultater.find { it.personIdent == fnr }!!.vilkårResultater.size == 2 }
+        vilkårService.postVilkårUtvidetBarnetrygd(
+            nåVærendeBehandling.id,
+            RestNyttVilkår(
+                personIdent = fnr,
+                vilkårType = Vilkår.UTVIDET_BARNETRYGD
+            )
+        )
+        vilkårsvurdering = vilkårService.hentVilkårsvurdering(nåVærendeBehandling.id)!!
+        assertTrue { vilkårsvurdering.personResultater.find { it.personIdent == fnr }!!.vilkårResultater.size == 3 }
+        val personResultat = vilkårsvurdering.personResultater.find { it.personIdent == fnr }!!
+        assertTrue { personResultat.vilkårResultater.any { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD } }
+        val utvidetBarnetrygdVilkår =
+            personResultat.vilkårResultater.first { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
+        assertEquals(Resultat.IKKE_VURDERT, utvidetBarnetrygdVilkår.resultat)
+        assertNull(utvidetBarnetrygdVilkår.periodeFom)
+        assertNull(utvidetBarnetrygdVilkår.periodeTom)
+    }
+
+    @Test
+    fun `skal ikke lage utvidet barnetrygd vilkår for ordinær behandling`() {
+        val fnr = randomFnr()
+        val barnFnr = randomFnr()
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(
+            lagBehandling(
+                fagsak = fagsak,
+                behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                årsak = BehandlingÅrsak.SØKNAD,
+            )
+        )
+        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
+            behandling.id,
+            fnr, listOf(barnFnr),
+            LocalDate.now().minusYears(1),
+            personidentService.hentOgLagreAktør(fnr),
+            personidentService.hentOgLagreAktørIder(listOf(barnFnr))
+        )
+        persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
+        vilkårService.initierVilkårsvurderingForBehandling(behandling, false)
+        val exception = assertThrows<RuntimeException> {
+            vilkårService.postVilkårUtvidetBarnetrygd(
+                behandling.id,
+                RestNyttVilkår(
+                    personIdent = fnr,
+                    vilkårType = Vilkår.UTVIDET_BARNETRYGD
+                )
+            )
+        }
+        assertEquals(
+            "${Vilkår.UTVIDET_BARNETRYGD.beskrivelse} kan ikke legges til for behandling " +
+                "${behandling.id} med behandlingType ${behandling.type.visningsnavn}",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `skal ikke lage utvidet barnetrygd vilkår for barn i migreringsbehandling`() {
+        val fnr = randomFnr()
+        val barnFnr = randomFnr()
+        val forrigeVilkårsdato = LocalDate.of(2021, 8, 1)
+        val barnetsFødselsdato = LocalDate.now().minusYears(1)
+
+        val behandlinger = lagMigreringsbehandling(fnr, barnFnr, barnetsFødselsdato, forrigeVilkårsdato)
+        val nåVærendeBehandling = behandlinger.second
+
+        val nyMigreringsdato = LocalDate.of(2021, 1, 1)
+        val vilkårsvurdering = vilkårService.genererVilkårsvurderingForMigreringsbehandlingMedÅrsakEndreMigreringsdato(
+            behandling = nåVærendeBehandling,
+            forrigeBehandlingSomErVedtatt = behandlinger.first,
+            nyMigreringsdato = nyMigreringsdato
+        )
+        assertTrue { vilkårsvurdering.personResultater.isNotEmpty() }
+        assertTrue { vilkårsvurdering.personResultater.any { it.personIdent == fnr } }
+        assertTrue { vilkårsvurdering.personResultater.find { it.personIdent == fnr }!!.vilkårResultater.size == 2 }
+        val exception = assertThrows<RuntimeException> {
+            vilkårService.postVilkårUtvidetBarnetrygd(
+                nåVærendeBehandling.id,
+                RestNyttVilkår(
+                    personIdent = barnFnr,
+                    vilkårType = Vilkår.UTVIDET_BARNETRYGD
+                )
+            )
+        }
+        assertEquals("${Vilkår.UTVIDET_BARNETRYGD.beskrivelse} kan ikke legges til for BARN", exception.message)
+    }
+
+    @Test
+    fun `skal ikke slette bor med søker vilkår for migreringsbehandling`() {
+        val fnr = randomFnr()
+        val barnFnr = randomFnr()
+        val forrigeVilkårsdato = LocalDate.of(2021, 8, 1)
+        val barnetsFødselsdato = LocalDate.now().minusYears(1)
+
+        val behandlinger = lagMigreringsbehandling(fnr, barnFnr, barnetsFødselsdato, forrigeVilkårsdato)
+        val behandling = behandlinger.second
+        vilkårService.genererVilkårsvurderingForMigreringsbehandlingMedÅrsakEndreMigreringsdato(
+            behandling = behandling,
+            forrigeBehandlingSomErVedtatt = behandlinger.first,
+            nyMigreringsdato = LocalDate.of(2021, 1, 1)
+        )
+
+        val exception = assertThrows<RuntimeException> {
+            vilkårService.deleteVilkår(
+                behandling.id,
+                RestSlettVilkår(
+                    personIdent = fnr,
+                    vilkårType = Vilkår.BOR_MED_SØKER
+                )
+            )
+        }
+        assertEquals(
+            "Vilkår ${Vilkår.BOR_MED_SØKER.beskrivelse} kan ikke slettes " +
+                "for behandling ${behandling.id}",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `skal ikke slette utvidet barnetrygd vilkår for førstegangsbehandling`() {
+        val fnr = randomFnr()
+        val barnFnr = randomFnr()
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(
+            lagBehandling(
+                fagsak = fagsak,
+                behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                årsak = BehandlingÅrsak.SØKNAD,
+            )
+        )
+        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
+            behandling.id,
+            fnr, listOf(barnFnr),
+            LocalDate.now().minusYears(1),
+            personidentService.hentOgLagreAktør(fnr),
+            personidentService.hentOgLagreAktørIder(listOf(barnFnr))
+        )
+        persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
+        vilkårService.initierVilkårsvurderingForBehandling(behandling, false)
+
+        val exception = assertThrows<RuntimeException> {
+            vilkårService.deleteVilkår(
+                behandling.id,
+                RestSlettVilkår(
+                    personIdent = fnr,
+                    vilkårType = Vilkår.UTVIDET_BARNETRYGD
+                )
+            )
+        }
+        assertEquals(
+            "Vilkår ${Vilkår.UTVIDET_BARNETRYGD.beskrivelse} kan ikke slettes " +
+                "for behandling ${behandling.id}",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `skal ikke slette utvidet barnetrygd vilkår for migreringsbehandling når det finnes i forrige behandling`() {
+        val fnr = randomFnr()
+        val barnFnr = randomFnr()
+        val forrigeVilkårsdato = LocalDate.of(2021, 8, 1)
+        val barnetsFødselsdato = LocalDate.now().minusYears(1)
+
+        val behandlinger = lagMigreringsbehandling(fnr, barnFnr, barnetsFødselsdato, forrigeVilkårsdato)
+        var forrigeBehandling = behandlinger.first
+        val behandling = behandlinger.second
+
+        val forrigeVilkårvurdering = vilkårService.hentVilkårsvurdering(forrigeBehandling.id)!!
+        val forrigeSøkerPersonResultat = forrigeVilkårvurdering.personResultater.first { it.personIdent == fnr }
+        val forrigeBarnPersonResultat = forrigeVilkårvurdering.personResultater.first { it.personIdent == barnFnr }
+        val forrigeVilkårResultat = forrigeSøkerPersonResultat.vilkårResultater
+        forrigeVilkårResultat.add(
+            lagVilkårResultat(
+                personResultat = forrigeSøkerPersonResultat,
+                vilkårType = Vilkår.UTVIDET_BARNETRYGD,
+                periodeFom = LocalDate.of(2021, 5, 1),
+                periodeTom = LocalDate.of(2021, 5, 31),
+                behandlingId = forrigeBehandling.id
+            )
+        )
+        vilkårsvurderingService.oppdater(
+            forrigeVilkårvurdering.copy(
+                personResultater = setOf(
+                    forrigeSøkerPersonResultat,
+                    forrigeBarnPersonResultat
+                )
+            )
+        )
+        forrigeBehandling = behandlingService.hent(forrigeBehandling.id)
+        forrigeBehandling.behandlingStegTilstand.add(
+            BehandlingStegTilstand(
+                behandling = forrigeBehandling,
+                behandlingSteg = StegType.BEHANDLING_AVSLUTTET,
+                behandlingStegStatus = BehandlingStegStatus.UTFØRT
+            )
+        )
+        behandlingService.lagreEllerOppdater(forrigeBehandling)
+
+        val vilkårsvurdering = vilkårService.genererVilkårsvurderingForMigreringsbehandlingMedÅrsakEndreMigreringsdato(
+            behandling = behandling,
+            forrigeBehandlingSomErVedtatt = forrigeBehandling,
+            nyMigreringsdato = LocalDate.of(2021, 1, 1)
+        )
+        assertTrue { vilkårsvurdering.personResultater.first { it.personIdent == fnr }.vilkårResultater.size == 3 }
+        val exception = assertThrows<RuntimeException> {
+            vilkårService.deleteVilkår(
+                behandling.id,
+                RestSlettVilkår(
+                    personIdent = fnr,
+                    vilkårType = Vilkår.UTVIDET_BARNETRYGD
+                )
+            )
+        }
+        assertEquals(
+            "Vilkår ${Vilkår.UTVIDET_BARNETRYGD.beskrivelse} kan ikke slettes " +
+                "for behandling ${behandling.id}",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `skal slette utvidet barnetrygd vilkår for migreringsbehandling`() {
+        val fnr = randomFnr()
+        val barnFnr = randomFnr()
+        val forrigeVilkårsdato = LocalDate.of(2021, 8, 1)
+        val barnetsFødselsdato = LocalDate.now().minusYears(1)
+
+        val behandlinger = lagMigreringsbehandling(fnr, barnFnr, barnetsFødselsdato, forrigeVilkårsdato)
+        val behandling = behandlinger.second
+        vilkårService.genererVilkårsvurderingForMigreringsbehandlingMedÅrsakEndreMigreringsdato(
+            behandling = behandling,
+            forrigeBehandlingSomErVedtatt = behandlinger.first,
+            nyMigreringsdato = LocalDate.of(2021, 1, 1)
+        )
+
+        vilkårService.postVilkår(
+            behandling.id,
+            RestNyttVilkår(personIdent = fnr, vilkårType = Vilkår.UTVIDET_BARNETRYGD)
+        )
+
+        assertTrue {
+            vilkårService.hentVilkårsvurdering(behandling.id)!!
+                .personResultater.first { it.personIdent == fnr }.vilkårResultater.size == 3
+        }
+
+        assertTrue {
+            vilkårService.hentVilkårsvurdering(behandling.id)!!
+                .personResultater.first { it.personIdent == fnr }
+                .vilkårResultater.any { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
+        }
+
+        vilkårService.deleteVilkår(
+            behandling.id,
+            RestSlettVilkår(
+                personIdent = fnr,
+                vilkårType = Vilkår.UTVIDET_BARNETRYGD
+            )
+        )
+
+        assertTrue {
+            vilkårService.hentVilkårsvurdering(behandling.id)!!
+                .personResultater.first { it.personIdent == fnr }.vilkårResultater.size == 2
+        }
+
+        assertTrue {
+            vilkårService.hentVilkårsvurdering(behandling.id)!!
+                .personResultater.first { it.personIdent == fnr }
+                .vilkårResultater.none { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
+        }
+    }
+
+    private fun lagMigreringsbehandling(
+        fnr: String,
+        barnFnr: String,
+        barnetsFødselsdato: LocalDate,
+        forrigeVilkårsdato: LocalDate
+    ): Pair<Behandling, Behandling> {
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
+        val forrigeBehandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(
+            lagBehandling(
+                fagsak = fagsak,
+                behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
+                årsak = BehandlingÅrsak.MIGRERING,
+            )
+        )
+        val forrigePersonopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
+            forrigeBehandling.id,
+            fnr, listOf(barnFnr),
+            barnetsFødselsdato,
+            personidentService.hentOgLagreAktør(fnr),
+            personidentService.hentOgLagreAktørIder(listOf(barnFnr))
+        )
+        persongrunnlagService.lagreOgDeaktiverGammel(forrigePersonopplysningGrunnlag)
+
+        var forrigeVilkårsvurdering = Vilkårsvurdering(behandling = forrigeBehandling)
+        val søkerPersonResultat = PersonResultat(
+            vilkårsvurdering = forrigeVilkårsvurdering,
+            personIdent = fnr,
+            aktør = personidentService.hentOgLagreAktør(fnr)
+        )
+        søkerPersonResultat.setSortedVilkårResultater(
+            lagSøkerVilkårResultat(
+                søkerPersonResultat = søkerPersonResultat,
+                periodeFom = forrigeVilkårsdato,
+                behandlingId = forrigeBehandling.id
+            )
+        )
+        val barnPersonResultat = PersonResultat(
+            vilkårsvurdering = forrigeVilkårsvurdering,
+            personIdent = barnFnr,
+            aktør = personidentService.hentOgLagreAktør(barnFnr)
+        )
+        barnPersonResultat.setSortedVilkårResultater(
+            lagBarnVilkårResultat(
+                barnPersonResultat = barnPersonResultat,
+                barnetsFødselsdato = barnetsFødselsdato,
+                forrigeMigreringsdato = forrigeVilkårsdato,
+                behandlingId = forrigeBehandling.id,
+                flytteSak = false
+            )
+        )
+        forrigeVilkårsvurdering = forrigeVilkårsvurdering.apply {
+            personResultater = setOf(
+                søkerPersonResultat,
+                barnPersonResultat
+            )
+        }
+        vilkårsvurderingService.lagreNyOgDeaktiverGammel(forrigeVilkårsvurdering)
+
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(
+            lagBehandling(
+                fagsak = fagsak,
+                behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
+                årsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
+            )
+        )
+        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
+            behandling.id,
+            fnr, listOf(barnFnr),
+            barnetsFødselsdato,
+            personidentService.hentOgLagreAktør(fnr),
+            personidentService.hentOgLagreAktørIder(listOf(barnFnr))
+        )
+        persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
+        return Pair(forrigeBehandling, behandling)
+    }
+
     private fun lagSøkerVilkårResultat(
         søkerPersonResultat: PersonResultat,
         periodeFom: LocalDate,
@@ -996,6 +1235,57 @@ class VilkårServiceTest(
                 resultat = Resultat.OPPFYLT,
                 periodeFom = periodeFom,
                 periodeTom = periodeTom,
+                behandlingId = behandlingId
+            )
+        )
+    }
+
+    private fun lagBarnVilkårResultat(
+        barnPersonResultat: PersonResultat,
+        barnetsFødselsdato: LocalDate,
+        behandlingId: Long,
+        forrigeMigreringsdato: LocalDate,
+        flytteSak: Boolean = false
+    ): Set<VilkårResultat> {
+        return setOf(
+            lagVilkårResultat(
+                personResultat = barnPersonResultat,
+                vilkårType = Vilkår.UNDER_18_ÅR,
+                resultat = Resultat.OPPFYLT,
+                periodeFom = barnetsFødselsdato,
+                periodeTom = barnetsFødselsdato.plusYears(18).minusMonths(1),
+                behandlingId = behandlingId
+            ),
+            lagVilkårResultat(
+                personResultat = barnPersonResultat,
+                vilkårType = Vilkår.GIFT_PARTNERSKAP,
+                resultat = Resultat.OPPFYLT,
+                periodeFom = barnetsFødselsdato,
+                periodeTom = null,
+                behandlingId = behandlingId
+            ),
+            lagVilkårResultat(
+                personResultat = barnPersonResultat,
+                vilkårType = Vilkår.BOR_MED_SØKER,
+                resultat = Resultat.OPPFYLT,
+                periodeFom = forrigeMigreringsdato,
+                periodeTom = null,
+                behandlingId = behandlingId
+            ),
+            lagVilkårResultat(
+                personResultat = barnPersonResultat,
+                vilkårType = Vilkår.BOSATT_I_RIKET,
+                resultat = Resultat.OPPFYLT,
+                periodeFom = if (flytteSak) barnetsFødselsdato else forrigeMigreringsdato,
+                periodeTom = null,
+                behandlingId = behandlingId
+            ),
+            lagVilkårResultat(
+                personResultat = barnPersonResultat,
+                vilkårType = Vilkår.LOVLIG_OPPHOLD,
+                resultat = Resultat.OPPFYLT,
+                periodeFom = if (flytteSak) barnetsFødselsdato else forrigeMigreringsdato,
+                periodeTom = null,
                 behandlingId = behandlingId
             )
         )
