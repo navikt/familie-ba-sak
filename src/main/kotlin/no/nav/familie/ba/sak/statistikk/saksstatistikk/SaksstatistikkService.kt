@@ -13,7 +13,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat.HENLAGT
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat.HENLAGT_SØKNAD_TRUKKET
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak.FØDSELSHENDELSE
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -55,8 +54,6 @@ class SaksstatistikkService(
         val behandling = behandlingService.hent(behandlingId)
         val forrigeBehandlingId = behandlingService.hentForrigeBehandlingSomErVedtatt(behandling)
             .takeIf { erRevurderingEllerTekniskBehandling(behandling) }?.id
-
-        if (behandling.opprettetÅrsak == FØDSELSHENDELSE && !envService.skalIverksetteBehandling()) return null
 
         val datoMottatt = when (behandling.opprettetÅrsak) {
             BehandlingÅrsak.SØKNAD -> {
@@ -119,8 +116,6 @@ class SaksstatistikkService(
         val fagsak = fagsakService.hentPåFagsakId(sakId)
         val søkerIdent = fagsak.aktør.aktivFødselsnummer()
         val aktivBehandling = behandlingService.hentAktivForFagsak(fagsakId = fagsak.id)
-        // Skipper saker som er fødselshendelse
-        if (aktivBehandling?.opprettetÅrsak == FØDSELSHENDELSE && !envService.skalIverksetteBehandling()) return null
 
         var landkodeSøker: String = PersonopplysningerService.UKJENT_LANDKODE
 
