@@ -116,7 +116,7 @@ class VelgFagSystemService(
                 SAKER_I_INFOTRYGD_MEN_IKKE_LØPENDE_UTBETALINGER,
                 FagsystemRegelVurdering.SEND_TIL_INFOTRYGD
             )
-            kanBehandleINyttSystem() && harMorGyldigNorskstatsborger(morsAktør) -> Pair(
+            harMorGyldigNorskstatsborger(morsAktør) && kanBehandleINyttSystem() -> Pair(
                 DAGLIG_KVOTE_OG_NORSK_STATSBORGER,
                 FagsystemRegelVurdering.SEND_TIL_BA
             )
