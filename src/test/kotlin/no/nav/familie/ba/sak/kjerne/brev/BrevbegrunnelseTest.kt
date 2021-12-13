@@ -7,8 +7,8 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.BrevBegrunnelseTestConfig
 import no.nav.familie.ba.sak.kjerne.brev.domene.BrevPeriodeTestConfig
 import no.nav.familie.ba.sak.kjerne.brev.domene.FritekstBegrunnelseTestConfig
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.BrevPeriode
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.BrevGrunnlag
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.BrevPeriodeGrunnlag
+import no.nav.familie.ba.sak.kjerne.brev.domene.BrevGrunnlag
+import no.nav.familie.ba.sak.kjerne.brev.domene.BrevPeriodeGrunnlag
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestReporter
