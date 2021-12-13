@@ -7,7 +7,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import java.time.LocalDate
 
 /**
- * Bør ikke brukes internt, men kun ut mot eksterne tjenester siden klassen
+ * NB: Bør ikke brukes internt, men kun ut mot eksterne tjenester siden klassen
  * inneholder aktiv personIdent og ikke aktørId.
  */
 data class RestPerson(
