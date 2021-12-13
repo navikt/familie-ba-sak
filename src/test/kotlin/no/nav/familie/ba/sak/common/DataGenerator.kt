@@ -1,8 +1,8 @@
 package no.nav.familie.ba.sak.common
 
-import io.mockk.mockk
 import no.nav.commons.foedselsnummer.testutils.FoedselsnummerGenerator
 import no.nav.familie.ba.sak.config.tilAktør
+import no.nav.familie.ba.sak.dataGenerator.vedtak.lagVedtaksbegrunnelse
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPerson
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
@@ -62,17 +62,14 @@ import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.MinimertPerson
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksbegrunnelseFritekst
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilMinimertPerson
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Utbetalingsperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtbetalingsperiodeDetalj
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
-import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertUtbetalingsperiodeDetalj
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.RestVedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurdering
@@ -883,24 +880,6 @@ fun lagUtbetalingsperiodeDetalj(
     utbetaltPerMnd: Int = sats(YtelseType.ORDINÆR_BARNETRYGD),
     prosent: BigDecimal = BigDecimal.valueOf(100)
 ) = UtbetalingsperiodeDetalj(person, ytelseType, utbetaltPerMnd, false, prosent)
-
-fun lagMinimertUtbetalingsperiodeDetalj(
-    person: MinimertPerson = tilfeldigSøker().tilRestPerson().tilMinimertPerson(),
-    ytelseType: YtelseType = YtelseType.ORDINÆR_BARNETRYGD,
-    utbetaltPerMnd: Int = sats(YtelseType.ORDINÆR_BARNETRYGD),
-    prosent: BigDecimal = BigDecimal.valueOf(100)
-) = MinimertUtbetalingsperiodeDetalj(person, ytelseType, utbetaltPerMnd, false, prosent)
-
-fun lagVedtaksbegrunnelse(
-    vedtakBegrunnelseSpesifikasjon: VedtakBegrunnelseSpesifikasjon =
-        VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_SØKER_OG_BARN_BOSATT_I_RIKET,
-    personIdenter: List<String> = listOf(tilfeldigPerson().aktør.aktivFødselsnummer()),
-    vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser = mockk()
-) = Vedtaksbegrunnelse(
-    vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
-    vedtakBegrunnelseSpesifikasjon = vedtakBegrunnelseSpesifikasjon,
-    personIdenter = personIdenter,
-)
 
 fun lagVedtaksperiodeMedBegrunnelser(
     vedtak: Vedtak = lagVedtak(),
