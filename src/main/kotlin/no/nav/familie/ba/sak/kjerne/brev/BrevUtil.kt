@@ -243,7 +243,7 @@ enum class UtvidetScenarioForEndringsperiode {
 
 fun BrevPeriodeGrunnlag.tilBrevPeriode(
     brevGrunnlag: BrevGrunnlag,
-    utvidetScenario: UtvidetScenarioForEndringsperiode = UtvidetScenarioForEndringsperiode.IKKE_UTVIDET_YTELSE,
+    utvidetScenarioForEndringsperiode: UtvidetScenarioForEndringsperiode = UtvidetScenarioForEndringsperiode.IKKE_UTVIDET_YTELSE,
     uregistrerteBarn: List<MinimertUregistrertBarn> = emptyList(),
     erFørsteVedtaksperiodePåFagsak: Boolean,
     målformSøker: Målform
@@ -281,7 +281,7 @@ fun BrevPeriodeGrunnlag.tilBrevPeriode(
         Vedtaksperiodetype.ENDRET_UTBETALING -> brevPeriodeGrunnlagMedPersoner.hentEndretUtbetalingBrevPeriode(
             tomDato,
             begrunnelserOgFritekster,
-            utvidetScenario,
+            utvidetScenarioForEndringsperiode,
             målformSøker
         )
 

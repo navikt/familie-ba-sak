@@ -56,7 +56,7 @@ class BrevbegrunnelseTest {
             val brevperiode: BrevPeriode? =
                 brevPeriodeGrunnlag.tilBrevPeriode(
                     brevGrunnlag = brevGrunnlag,
-                    utvidetScenario = behandlingsresultatPersonTestConfig.utvidetScenarioForEndringsperiode,
+                    utvidetScenarioForEndringsperiode = behandlingsresultatPersonTestConfig.utvidetScenarioForEndringsperiode,
                     uregistrerteBarn = behandlingsresultatPersonTestConfig.uregistrerteBarn,
                     erFørsteVedtaksperiodePåFagsak = behandlingsresultatPersonTestConfig.erFørsteVedtaksperiodePåFagsak,
                     målformSøker = behandlingsresultatPersonTestConfig.målformSøker,

@@ -6,7 +6,7 @@ import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
-import no.nav.familie.ba.sak.kjerne.beregning.domene.hentUtvidetYtelseScenario
+import no.nav.familie.ba.sak.kjerne.beregning.domene.hentUtvidetScenarioForEndringsperiode
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerIngenOverlappendeEndring
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerPeriodeInnenforTilkjentytelse
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
@@ -115,7 +115,7 @@ class EndretUtbetalingAndelService(
 
         endredeUtbetalingAndeler.forEach {
             val utvidetScenario =
-                andelTilkjentYtelser.hentUtvidetYtelseScenario(it.periode)
+                andelTilkjentYtelser.hentUtvidetScenarioForEndringsperiode(it.periode)
 
             it.vedtakBegrunnelseSpesifikasjoner =
                 it.hentGyldigEndretBegrunnelser(

@@ -267,9 +267,12 @@ fun List<AndelTilkjentYtelse>.finnesUtvidetEndringsutbetalingIPerioden(
         andelTilkjentYtelse.harEndringsutbetalingIPerioden(fom, tom)
 }
 
-fun List<AndelTilkjentYtelse>.hentUtvidetYtelseScenario(
+/**
+ * Endringspeiroder påvirkes dersom det er en utvidet periode i samme tidsrom.
+ */
+fun List<AndelTilkjentYtelse>.hentUtvidetScenarioForEndringsperiode(
     månedPeriode: MånedPeriode,
-) = when {
+): UtvidetScenarioForEndringsperiode = when {
     !erStartPåUtvidetSammeMåned(
         this,
         månedPeriode.fom

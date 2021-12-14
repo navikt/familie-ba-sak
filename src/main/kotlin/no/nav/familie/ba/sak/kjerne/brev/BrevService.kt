@@ -10,7 +10,7 @@ import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.tilUregisrertBarnEnkel
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
-import no.nav.familie.ba.sak.kjerne.beregning.domene.hentUtvidetYtelseScenario
+import no.nav.familie.ba.sak.kjerne.beregning.domene.hentUtvidetScenarioForEndringsperiode
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Autovedtak6og18årOgSmåbarnstillegg
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.AutovedtakNyfødtBarnFraFør
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.AutovedtakNyfødtFørsteBarn
@@ -202,7 +202,8 @@ class BrevService(
                 it.tilBrevPeriode(
                     brevGrunnlag = brevGrunnlag,
                     uregistrerteBarn = uregistrerteBarn,
-                    utvidetScenario = andelerTilkjentYtelse.hentUtvidetYtelseScenario(it.hentMånedPeriode()),
+                    utvidetScenarioForEndringsperiode = andelerTilkjentYtelse
+                        .hentUtvidetScenarioForEndringsperiode(it.hentMånedPeriode()),
                     erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak(andelerTilkjentYtelse, it.fom),
                     målformSøker = grunnlagOgSignaturData.grunnlag.søker.målform,
                 )
