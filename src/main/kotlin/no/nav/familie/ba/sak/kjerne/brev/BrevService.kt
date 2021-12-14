@@ -8,7 +8,6 @@ import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
-import no.nav.familie.ba.sak.kjerne.behandlingsresultat.tilUregisrertBarnEnkel
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.hentUtvidetScenarioForEndringsperiode
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Autovedtak6og18årOgSmåbarnstillegg
@@ -191,7 +190,7 @@ class BrevService(
             endredeUtbetalingAndeler = endredeUtbetalingAndeler,
             persongrunnlag = grunnlagOgSignaturData.grunnlag
         )
-        val uregistrerteBarn = hentUregistrerteBarn(vedtak.behandling.id)
+        val uregistrerteBarn = søknadGrunnlagService.hentMinimerteUregistrerteBarn(vedtak.behandling.id)
 
         val brevPerioderGrunnlag = utvidetVedtaksperioderMedBegrunnelser
             .sorter()
@@ -221,13 +220,6 @@ class BrevService(
             perioder = brevperioder
         )
     }
-
-    private fun hentUregistrerteBarn(behandlingId: Long) =
-        søknadGrunnlagService
-            .hentAktiv(behandlingId)
-            ?.hentUregistrerteBarn()
-            ?.map { uregistrertBarn -> uregistrertBarn.tilUregisrertBarnEnkel() }
-            ?: emptyList()
 
     private fun hentAktivtPersonopplysningsgrunnlag(behandlingId: Long) =
         persongrunnlagService.hentAktivThrows(behandlingId = behandlingId)

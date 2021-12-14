@@ -63,7 +63,7 @@ data class MinimertUregistrertBarn(
     val fødselsdato: LocalDate? = null
 )
 
-fun BarnMedOpplysninger.tilUregisrertBarnEnkel() = MinimertUregistrertBarn(
+fun BarnMedOpplysninger.tilMinimertUregisrertBarn() = MinimertUregistrertBarn(
     personIdent = this.ident,
     navn = this.navn,
     fødselsdato = this.fødselsdato
