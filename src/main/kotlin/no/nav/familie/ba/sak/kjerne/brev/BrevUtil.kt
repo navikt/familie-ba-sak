@@ -363,7 +363,7 @@ private fun BrevPeriodeGrunnlagMedPersoner.hentInnvilgelseBrevPeriode(
  * Dersom perioden gjelder søker skal alle barna i behandlingen komme med selv om de ikke har utbetaling.
  */
 fun BrevPeriodeGrunnlagMedPersoner.finnBarnIInnvilgelsePeriode(
-    personerIPersongrunnlag: List<MinimertPerson>,
+    personerPåBehandling: List<MinimertPerson>,
 ): List<MinimertPerson> {
     val identerIBegrunnelsene = this.begrunnelser
         .filter { it.vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGET }
@@ -373,7 +373,7 @@ fun BrevPeriodeGrunnlagMedPersoner.finnBarnIInnvilgelsePeriode(
     val barnIPeriode = (identerIBegrunnelsene + identerMedUtbetaling)
         .toSet()
         .mapNotNull { personIdent ->
-            personerIPersongrunnlag.find { it.personIdent == personIdent }
+            personerPåBehandling.find { it.personIdent == personIdent }
         }
         .filter { it.type == PersonType.BARN }
 
