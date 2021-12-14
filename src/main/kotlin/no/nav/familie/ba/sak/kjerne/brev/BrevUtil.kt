@@ -27,6 +27,9 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat.OPPHØR
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.MinimertUregistrertBarn
+import no.nav.familie.ba.sak.kjerne.brev.domene.BrevGrunnlag
+import no.nav.familie.ba.sak.kjerne.brev.domene.BrevPeriodeGrunnlag
+import no.nav.familie.ba.sak.kjerne.brev.domene.BrevPeriodeGrunnlagMedPersoner
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.EndretUtbetalingBrevPeriodeType
@@ -38,9 +41,13 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.EndretUtbetal
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.FortsattInnvilgetBrevPeriode
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.InnvilgelseBrevPeriode
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.OpphørBrevPeriode
+import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertEndretUtbetalingAndel
+import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertPersonResultat
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.domene.Totrinnskontroll
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
@@ -49,10 +56,9 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.hjemlerTilhørendeFritek
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Begrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.MinimertPerson
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilMinimertPerson
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
-import no.nav.familie.ba.sak.kjerne.brev.domene.BrevGrunnlag
-import no.nav.familie.ba.sak.kjerne.brev.domene.BrevPeriodeGrunnlag
-import no.nav.familie.ba.sak.kjerne.brev.domene.BrevPeriodeGrunnlagMedPersoner
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import java.math.BigDecimal
 
@@ -389,5 +395,18 @@ private fun BrevPeriodeGrunnlagMedPersoner.hentFortsattInnvilgetBrevPeriode(
         antallBarn = this.minimerteUtbetalingsperiodeDetaljer.antallBarn().toString(),
         barnasFodselsdager = this.minimerteUtbetalingsperiodeDetaljer.map { it.person }.tilBarnasFødselsdatoer(),
         begrunnelser = begrunnelserOgFritekster
+    )
+}
+
+fun hentBrevGrunnlag(
+    persongrunnlag: PersonopplysningGrunnlag,
+    vilkårsvurdering: Vilkårsvurdering,
+    endredeUtbetalingAndeler: List<EndretUtbetalingAndel>
+): BrevGrunnlag {
+
+    return BrevGrunnlag(
+        personerPåBehandling = persongrunnlag.personer.map { it.tilMinimertPerson() },
+        minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
+        minimerteEndredeUtbetalingAndeler = endredeUtbetalingAndeler.map { it.tilMinimertEndretUtbetalingAndel() },
     )
 }

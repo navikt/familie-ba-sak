@@ -12,10 +12,8 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.tilTriggesAv
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.MinimertPerson
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.harBarnMedSeksårsdagPåFom
 import java.time.LocalDate
 
 fun hentVedtaksperioderMedBegrunnelserForEndredeUtbetalingsperioder(
@@ -62,11 +60,9 @@ fun hentVedtaksperioderMedBegrunnelserForUtbetalingsperioder(
         )
     }
 
-fun validerSatsendring(fom: LocalDate?, begrunnelsePerson: List<MinimertPerson>) {
+fun validerSatsendring(fom: LocalDate?, harBarnMedSeksårsdagPåFom: Boolean) {
     val satsendring = SatsService
         .finnSatsendring(fom ?: TIDENES_MORGEN)
-
-    val harBarnMedSeksårsdagPåFom = begrunnelsePerson.harBarnMedSeksårsdagPåFom(fom)
 
     if (satsendring.isEmpty() && !harBarnMedSeksårsdagPåFom) {
         throw FunksjonellFeil(

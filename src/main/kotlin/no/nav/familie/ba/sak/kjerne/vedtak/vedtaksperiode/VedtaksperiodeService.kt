@@ -15,7 +15,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
-import no.nav.familie.ba.sak.kjerne.brev.BrevService
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertPersonResultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilTriggesAv
@@ -53,7 +52,6 @@ class VedtaksperiodeService(
     private val sanityService: SanityService,
     private val søknadGrunnlagService: SøknadGrunnlagService,
     private val endretUtbetalingAndelRepository: EndretUtbetalingAndelRepository,
-    private val brevService: BrevService,
 ) {
 
     fun lagre(vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser): VedtaksperiodeMedBegrunnelser {
@@ -96,7 +94,7 @@ class VedtaksperiodeService(
 
         val behandling = vedtaksperiodeMedBegrunnelser.vedtak.behandling
 
-        val brevGrunnlag = brevService.hentBrevGrunnlag(behandling.id)
+        val persongrunnlag = persongrunnlagService.hentAktivThrows(behandlingId = behandling.id)
 
         val sanityBegrunnelser = sanityService.hentSanityBegrunnelser()
 
@@ -107,7 +105,12 @@ class VedtaksperiodeService(
                     ?: return@mapNotNull null
 
                 if (triggesAv.satsendring) {
-                    validerSatsendring(vedtaksperiodeMedBegrunnelser.fom, brevGrunnlag.personerPåBehandling)
+                    validerSatsendring(
+                        fom = vedtaksperiodeMedBegrunnelser.fom,
+                        harBarnMedSeksårsdagPåFom = persongrunnlag.harBarnMedSeksårsdagPåFom(
+                            vedtaksperiodeMedBegrunnelser.fom
+                        )
+                    )
                 }
 
                 it.tilVedtaksbegrunnelse(vedtaksperiodeMedBegrunnelser)

@@ -3,12 +3,14 @@ package no.nav.familie.ba.sak.kjerne.brev
 import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.tilUregisrertBarnEnkel
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Begrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.erFørsteVedtaksperiodePåFagsak
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.tilUtvidetVedtaksperiodeMedBegrunnelser
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import org.springframework.stereotype.Service
 
 @Service
@@ -18,21 +20,30 @@ class BegrunnelseService(
     private val vedtaksperiodeRepository: VedtaksperiodeRepository,
     private val sanityService: SanityService,
     private val søknadGrunnlagService: SøknadGrunnlagService,
-    private val brevService: BrevService,
+    private val vilkårsvurderingService: VilkårsvurderingService,
+    private val endretUtbetalingAndelService: EndretUtbetalingAndelService,
 ) {
     fun genererBrevBegrunnelserForPeriode(vedtaksperiodeId: Long): List<Begrunnelse> {
         val vedtaksperiodeMedBegrunnelser = vedtaksperiodeRepository.hentVedtaksperiode(vedtaksperiodeId)
 
-        val sanityBegrunnelser = sanityService.hentSanityBegrunnelser()
-
         val behandlingId = vedtaksperiodeMedBegrunnelser.vedtak.behandling.id
+
+        val sanityBegrunnelser = sanityService.hentSanityBegrunnelser()
+        val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandlingId)
+            ?: error("Finner ikke vilkårsvurdering ved begrunning av vedtak")
+        val endredeUtbetalingAndeler =
+            endretUtbetalingAndelService.hentForBehandling(behandlingId = behandlingId)
+        val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandlingId = behandlingId)
 
         val uregistrerteBarn =
             søknadGrunnlagService.hentAktiv(behandlingId = behandlingId)?.hentUregistrerteBarn()
                 ?.map { it.tilUregisrertBarnEnkel() } ?: emptyList()
 
-        val brevGrunnlag = brevService.hentBrevGrunnlag(behandlingId)
-        val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandlingId = behandlingId)
+        val brevGrunnlag = hentBrevGrunnlag(
+            vilkårsvurdering = vilkårsvurdering,
+            endredeUtbetalingAndeler = endredeUtbetalingAndeler,
+            persongrunnlag = personopplysningGrunnlag
+        )
 
         val utvidetVedtaksperiodeMedBegrunnelse = vedtaksperiodeMedBegrunnelser.tilUtvidetVedtaksperiodeMedBegrunnelser(
             personopplysningGrunnlag = personopplysningGrunnlag,
