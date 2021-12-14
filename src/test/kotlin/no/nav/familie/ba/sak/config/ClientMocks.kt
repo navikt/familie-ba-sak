@@ -64,6 +64,7 @@ import org.springframework.context.annotation.Primary
 import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpStatus
 import org.springframework.web.client.HttpClientErrorException
+import java.lang.Integer.min
 import java.time.LocalDate
 import java.time.Month
 import java.util.UUID
@@ -151,9 +152,13 @@ class ClientMocks {
         } answers {
             listOf(
                 IdentInformasjon(
-                    identSlot.captured, false, "FOLKEREGISTERIDENT"
+                    identSlot.captured.substring(0, min(11, identSlot.captured.length)), false, "FOLKEREGISTERIDENT"
                 ),
-                IdentInformasjon(identSlot.captured + "00", false, "AKTORID"),
+                IdentInformasjon(
+                    identSlot.captured.substring(0, min(11, identSlot.captured.length)) + "00",
+                    false,
+                    "AKTORID"
+                ),
             )
         }
 
@@ -310,9 +315,15 @@ class ClientMocks {
             } answers {
                 listOf(
                     IdentInformasjon(
-                        identSlot2.captured, false, "FOLKEREGISTERIDENT"
+                        identSlot2.captured.substring(0, min(11, identSlot2.captured.length)),
+                        false,
+                        "FOLKEREGISTERIDENT"
                     ),
-                    IdentInformasjon(identSlot2.captured + "00", false, "AKTORID"),
+                    IdentInformasjon(
+                        identSlot2.captured.substring(0, min(11, identSlot2.captured.length)) + "00",
+                        false,
+                        "AKTORID"
+                    ),
                 )
             }
 

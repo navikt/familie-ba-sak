@@ -170,13 +170,13 @@ class FagsakControllerTest(
         val aktørId = randomAktørId()
 
         val nyRestFagsak = fagsakController.hentEllerOpprettFagsak(
-            FagsakRequest(personIdent = null, aktørId = aktørId.aktørId)
+            FagsakRequest(personIdent = aktørId.aktivFødselsnummer(), aktørId = aktørId.aktørId)
         )
         assertEquals(Ressurs.Status.SUKSESS, nyRestFagsak.body?.status)
 
         val eksisterendeRestFagsak = fagsakController.hentEllerOpprettFagsak(
             FagsakRequest(
-                personIdent = null, aktørId = aktørId.aktørId
+                personIdent = aktørId.aktivFødselsnummer(), aktørId = aktørId.aktørId
             )
         )
         assertEquals(Ressurs.Status.SUKSESS, eksisterendeRestFagsak.body?.status)

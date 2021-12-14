@@ -137,7 +137,7 @@ class DokumentController(
         ).let { Ressurs.success(it) }
     }
 
-    @PostMapping(path = ["/fagsak/{fagsakId}/send-brev/send-brev"])
+    @PostMapping(path = ["/fagsak/{fagsakId}/send-brev"])
     fun sendBrevPåFagsak(
         @PathVariable fagsakId: Long,
         @RequestBody manueltBrevRequest: ManueltBrevRequest

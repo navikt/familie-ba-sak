@@ -146,7 +146,7 @@ class StegServiceTest(
     fun `Skal feile når man prøver å håndtere feil steg`() {
         val søkerFnr = randomFnr()
 
-        mockHentPersoninfoForMedIdenter(mockPersonopplysningerService, søkerFnr, "")
+        mockHentPersoninfoForMedIdenter(mockPersonopplysningerService, søkerFnr, "98765432110")
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
@@ -161,7 +161,7 @@ class StegServiceTest(
     fun `Skal feile når man prøver å endre en avsluttet behandling`() {
         val søkerFnr = randomFnr()
 
-        mockHentPersoninfoForMedIdenter(mockPersonopplysningerService, søkerFnr, "")
+        mockHentPersoninfoForMedIdenter(mockPersonopplysningerService, søkerFnr, "98765432110")
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
@@ -184,7 +184,7 @@ class StegServiceTest(
     fun `Skal feile når man prøver å noe annet enn å beslutte behandling når den er på dette steget`() {
         val søkerFnr = randomFnr()
 
-        mockHentPersoninfoForMedIdenter(mockPersonopplysningerService, søkerFnr, "")
+        mockHentPersoninfoForMedIdenter(mockPersonopplysningerService, søkerFnr, "98765432110")
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
@@ -203,7 +203,7 @@ class StegServiceTest(
     fun `Skal feile når man prøver å kalle beslutning-steget med feil status på behandling`() {
         val søkerFnr = randomFnr()
 
-        mockHentPersoninfoForMedIdenter(mockPersonopplysningerService, søkerFnr, "")
+        mockHentPersoninfoForMedIdenter(mockPersonopplysningerService, søkerFnr, "98765432110")
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))

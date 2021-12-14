@@ -82,8 +82,7 @@ class FagsakController(
     fun søkFagsak(@RequestBody søkParam: RestSøkParam): ResponseEntity<Ressurs<List<RestFagsakDeltager>>> {
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} søker fagsak")
 
-        val aktør = personidentService.hentOgLagreAktør(søkParam.personIdent)
-        val fagsakDeltagere = fagsakService.hentFagsakDeltager(aktør)
+        val fagsakDeltagere = fagsakService.hentFagsakDeltager(søkParam.personIdent)
         return ResponseEntity.ok().body(Ressurs.success(fagsakDeltagere))
     }
 

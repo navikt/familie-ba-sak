@@ -50,6 +50,7 @@ class StegService(
     private val stegFeiletMetrics: Map<StegType, Counter> = initStegMetrikker("feil")
     private val stegFunksjonellFeilMetrics: Map<StegType, Counter> = initStegMetrikker("funksjonell-feil")
 
+    @Transactional
     fun håndterNyBehandlingOgSendInfotrygdFeed(nyBehandling: NyBehandling): Behandling {
         val behandling = håndterNyBehandling(nyBehandling)
         if (behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING) {
@@ -63,22 +64,24 @@ class StegService(
     @Transactional
     fun håndterNyBehandling(nyBehandling: NyBehandling): Behandling {
         val behandling = behandlingService.opprettBehandling(nyBehandling)
-        val barnasIdenter: List<String>
-        if (nyBehandling.behandlingÅrsak in listOf(BehandlingÅrsak.MIGRERING, BehandlingÅrsak.FØDSELSHENDELSE)) {
-            barnasIdenter = nyBehandling.barnasIdenter
-        } else if (nyBehandling.behandlingType == BehandlingType.FØRSTEGANGSBEHANDLING) {
-            barnasIdenter = emptyList()
-        } else if (nyBehandling.behandlingType in listOf(BehandlingType.REVURDERING, BehandlingType.TEKNISK_ENDRING) ||
-            (
-                nyBehandling.behandlingType == BehandlingType.MIGRERING_FRA_INFOTRYGD &&
-                    nyBehandling.behandlingÅrsak == BehandlingÅrsak.ENDRE_MIGRERINGSDATO
-                )
-        ) {
-            val sisteBehandling = hentSisteAvsluttetBehandling(behandling)
-            barnasIdenter =
+        val barnasIdenter: List<String> = when {
+            nyBehandling.behandlingÅrsak in listOf(BehandlingÅrsak.MIGRERING, BehandlingÅrsak.FØDSELSHENDELSE) -> {
+                nyBehandling.barnasIdenter
+            }
+            nyBehandling.behandlingType == BehandlingType.FØRSTEGANGSBEHANDLING -> {
+                emptyList()
+            }
+            nyBehandling.behandlingType in listOf(
+                BehandlingType.REVURDERING,
+                BehandlingType.TEKNISK_ENDRING
+            ) || nyBehandling.behandlingType == BehandlingType.MIGRERING_FRA_INFOTRYGD &&
+                nyBehandling.behandlingÅrsak == BehandlingÅrsak.ENDRE_MIGRERINGSDATO -> {
+                val sisteBehandling = hentSisteAvsluttetBehandling(behandling)
                 behandlingService.finnBarnFraBehandlingMedTilkjentYtsele(sisteBehandling.id)
                     .map { it.aktivFødselsnummer() }
-        } else throw Feil("Ukjent oppførsel ved opprettelse av behandling.")
+            }
+            else -> throw Feil("Ukjent oppførsel ved opprettelse av behandling.")
+        }
 
         return håndterPersongrunnlag(
             behandling,
