@@ -68,6 +68,19 @@ class StegService(
             nyBehandling.behandlingÅrsak in listOf(BehandlingÅrsak.MIGRERING, BehandlingÅrsak.FØDSELSHENDELSE) -> {
                 nyBehandling.barnasIdenter
             }
+            nyBehandling.behandlingÅrsak == BehandlingÅrsak.HELMANUELL_MIGRERING -> {
+                if (behandlingService.hentSisteBehandlingSomErVedtatt(behandling.fagsak.id) != null) {
+                    throw Feil(
+                        message = "Det finnes allerede en vedtatt behandling på fagsak ${behandling.fagsak.id}." +
+                            "Behandling kan ikke opprettes med årsak " +
+                            BehandlingÅrsak.HELMANUELL_MIGRERING.visningsnavn,
+                        frontendFeilmelding = "Det finnes allerede en vedtatt behandling på fagsak." +
+                            "Behandling kan ikke opprettes med årsak " +
+                            BehandlingÅrsak.HELMANUELL_MIGRERING.visningsnavn
+                    )
+                }
+                nyBehandling.barnasIdenter
+            }
             nyBehandling.behandlingType == BehandlingType.FØRSTEGANGSBEHANDLING -> {
                 emptyList()
             }

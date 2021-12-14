@@ -275,6 +275,15 @@ class BehandlingTest {
     }
 
     @Test
+    fun `erBehandlingMedVedtaksbrevutsending kan ikke sende vedtaksbrev for helmanuell migrering`() {
+        val behandling = lagBehandling(
+            behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
+            årsak = BehandlingÅrsak.HELMANUELL_MIGRERING
+        )
+        assertFalse { behandling.erBehandlingMedVedtaksbrevutsending() }
+    }
+
+    @Test
     fun `erBehandlingMedVedtaksbrevutsending kan ikke sende vedtaksbrev for automatisk migrering`() {
         val behandling = lagBehandling(
             behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
