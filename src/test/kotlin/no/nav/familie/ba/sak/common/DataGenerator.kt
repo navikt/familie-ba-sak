@@ -158,7 +158,7 @@ fun defaultFagsak() = Fagsak(
     1, aktør = tilAktør(randomFnr())
 ).also {
     it.søkerIdenter =
-        setOf(
+        mutableSetOf(
             FagsakPerson(
                 fagsak = it,
                 personIdent = PersonIdent(randomFnr()),
@@ -611,12 +611,13 @@ fun kjørStegprosessForFGB(
     vilkårsvurderingService: VilkårsvurderingService,
     stegService: StegService,
     vedtaksperiodeService: VedtaksperiodeService,
+    behandlingUnderkategori: BehandlingUnderkategori = BehandlingUnderkategori.ORDINÆR
 ): Behandling {
     fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
     val behandling = stegService.håndterNyBehandling(
         NyBehandling(
             kategori = BehandlingKategori.NASJONAL,
-            underkategori = BehandlingUnderkategori.ORDINÆR,
+            underkategori = behandlingUnderkategori,
             behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
             behandlingÅrsak = BehandlingÅrsak.SØKNAD,
             søkersIdent = søkerFnr,
@@ -630,7 +631,8 @@ fun kjørStegprosessForFGB(
             restRegistrerSøknad = RestRegistrerSøknad(
                 søknad = lagSøknadDTO(
                     søkerIdent = søkerFnr,
-                    barnasIdenter = barnasIdenter
+                    barnasIdenter = barnasIdenter,
+                    underkategori = behandlingUnderkategori
                 ),
                 bekreftEndringerViaFrontend = true
             )

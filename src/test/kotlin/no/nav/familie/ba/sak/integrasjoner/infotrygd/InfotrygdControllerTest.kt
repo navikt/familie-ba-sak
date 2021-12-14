@@ -46,7 +46,7 @@ class InfotrygdControllerTest {
 
     @Test
     fun `hentInfotrygdsakerForSøker skal returnere ok dersom saksbehandler har tilgang`() {
-        val fnr = "12345"
+        val fnr = "12345678910"
 
         every { personidentService.hentOgLagreAktør(fnr) } returns tilAktør(fnr)
         every { integrasjonClient.sjekkTilgangTilPersoner(any()) } returns listOf(Tilgang(true))
@@ -65,7 +65,7 @@ class InfotrygdControllerTest {
 
     @Test
     fun `hentInfotrygdsakerForSøker skal returnere ok, men ha gradering satt, dersom saksbehandler ikke har tilgang`() {
-        val fnr = "12345"
+        val fnr = "12345678910"
 
         every { personidentService.hentOgLagreAktør(fnr) } returns tilAktør(fnr)
         every { integrasjonClient.sjekkTilgangTilPersoner(any()) } returns listOf(Tilgang(false))
