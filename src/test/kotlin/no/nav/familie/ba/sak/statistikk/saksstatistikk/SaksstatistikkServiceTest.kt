@@ -361,12 +361,13 @@ internal class SaksstatistikkServiceTest(
 
     @Test
     fun `Skal mappe til sakDVH, aktører har SØKER og BARN`() {
+        val randomAktørId = randomAktørId()
         every { fagsakService.hentPåFagsakId(any()) } answers {
-            val fagsak = Fagsak(status = FagsakStatus.OPPRETTET, aktør = tilAktør("12345678910"))
-            val fagsakPerson = FagsakPerson(personIdent = PersonIdent("12345678910"), fagsak = fagsak)
+            val fagsak = Fagsak(status = FagsakStatus.OPPRETTET, aktør = randomAktørId)
+            val fagsakPerson =
+                FagsakPerson(personIdent = PersonIdent(randomAktørId.aktivFødselsnummer()), fagsak = fagsak)
             fagsak.copy(søkerIdenter = mutableSetOf(fagsakPerson))
         }
-        val randomAktørId = randomAktørId()
         every { personidentService.hentOgLagreAktør(any()) } returns randomAktørId
         every { personopplysningerService.hentLandkodeUtenlandskBostedsadresse(any()) } returns "SE"
 
