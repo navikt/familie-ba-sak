@@ -268,6 +268,7 @@ fun List<AndelTilkjentYtelse>.finnesUtvidetEndringsutbetalingIPerioden(
 }
 
 /**
+ * Brukes for endringsperioder.
  * Endringspeiroder påvirkes dersom det er en utvidet periode i samme tidsrom.
  */
 fun List<AndelTilkjentYtelse>.hentUtvidetScenarioForEndringsperiode(
