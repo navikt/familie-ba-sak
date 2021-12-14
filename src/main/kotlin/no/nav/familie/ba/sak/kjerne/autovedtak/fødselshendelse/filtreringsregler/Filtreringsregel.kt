@@ -15,6 +15,7 @@ enum class Filtreringsregel(val vurder: FiltreringsreglerFakta.() -> Evaluering)
     MER_ENN_5_MND_SIDEN_FORRIGE_BARN(vurder = { merEnn5mndEllerMindreEnnFemDagerSidenForrigeBarn(this) }),
     MOR_ER_OVER_18_ÅR(vurder = { morErOver18år(this) }),
     MOR_HAR_IKKE_VERGE(vurder = { morHarIkkeVerge(this) }),
+    MOR_MOTTAR_IKKE_LØPENDE_UTVIDET(vurder = { morMottarIkkeLøpendeUtvidet(this) })
 }
 
 fun evaluerFiltreringsregler(fakta: FiltreringsreglerFakta) = Filtreringsregel.values()
@@ -72,6 +73,13 @@ fun morHarIkkeVerge(fakta: FiltreringsreglerFakta): Evaluering = if (!fakta.morH
 ) else Evaluering.ikkeOppfylt(
     FiltreringsregelIkkeOppfylt.MOR_ER_UMYNDIG
 )
+
+fun morMottarIkkeLøpendeUtvidet(fakta: FiltreringsreglerFakta): Evaluering =
+    if (!fakta.morMottarLøpendeUtvidet) Evaluering.oppfylt(
+        FiltreringsregelOppfylt.MOR_MOTTAR_IKKE_LØPENDE_UTVIDET
+    ) else Evaluering.ikkeOppfylt(
+        FiltreringsregelIkkeOppfylt.MOR_MOTTAR_LØPENDE_UTVIDET
+    )
 
 fun merEnn5mndEllerMindreEnnFemDagerSidenForrigeBarn(fakta: FiltreringsreglerFakta): Evaluering {
     return when (
