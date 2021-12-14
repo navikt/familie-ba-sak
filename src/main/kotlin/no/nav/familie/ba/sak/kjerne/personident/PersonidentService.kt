@@ -46,6 +46,10 @@ class PersonidentService(
             .filter { it.gruppe == "FOLKEREGISTERIDENT" }
             .map { it.ident }
 
+    fun hentDummyAktørId(ident: String): Aktør {
+        return Aktør(aktørId = DUMMY_AKTØR_ID).also { it.personidenter.add(Personident(ident, it)) }
+    }
+
     fun hentOgLagreAktør(ident: String): Aktør {
         // Noter at ident kan være både av typen aktørid eller fødselsnummer (d- og f nummer)
         val personident = personidentRepository.findByFødselsnummerOrNull(ident)
@@ -123,6 +127,8 @@ class PersonidentService(
             )
 
     companion object {
+        private const val DUMMY_AKTØR_ID = "0000000000000"
+
         val logger = LoggerFactory.getLogger(PersonidentService::class.java)
         val secureLogger = LoggerFactory.getLogger("secureLogger")
     }

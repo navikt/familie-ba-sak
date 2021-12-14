@@ -232,9 +232,8 @@ class FagsakService(
         return fagsakRepository.finnLøpendeFagsaker()
     }
 
-    @Transactional
     fun hentFagsakDeltager(personIdent: String): List<RestFagsakDeltager> {
-        val aktør = personidentService.hentOgLagreAktør(personIdent)
+        val aktør = personidentService.hentDummyAktørId(personIdent)
 
         val maskertDeltaker = runCatching {
             hentMaskertFagsakdeltakerVedManglendeTilgang(aktør)
