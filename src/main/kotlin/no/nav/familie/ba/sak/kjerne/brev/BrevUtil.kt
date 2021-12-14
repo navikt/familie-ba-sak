@@ -359,6 +359,9 @@ private fun BrevPeriodeGrunnlagMedPersoner.hentInnvilgelseBrevPeriode(
     )
 }
 
+/**
+ * Dersom perioden gjelder søker skal alle barna i behandlingen komme med selv om de ikke har utbetaling.
+ */
 fun BrevPeriodeGrunnlagMedPersoner.finnBarnIInnvilgelsePeriode(
     personerIPersongrunnlag: List<MinimertPerson>,
 ): List<MinimertPerson> {
