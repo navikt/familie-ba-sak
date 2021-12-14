@@ -116,7 +116,7 @@ data class Behandling(
         }
     }
 
-    fun validerBehandlingstype() {
+    fun validerBehandlingstype(sisteBehandlingSomErVedtatt: Behandling? = null) {
         if (type == BehandlingType.TEKNISK_OPPHØR) {
             throw FunksjonellFeil(
                 melding = "Kan ikke lage teknisk opphør behandling.",
@@ -131,6 +131,10 @@ data class Behandling(
                 opprettetÅrsak != BehandlingÅrsak.TEKNISK_ENDRING
             )
                 throw Feil("Behandling er teknisk endring, men årsak $opprettetÅrsak og type $type samsvarer ikke.")
+        }
+
+        if (type == BehandlingType.REVURDERING && sisteBehandlingSomErVedtatt == null) {
+            throw Feil("Kan ikke opprette revurdering på $fagsak uten noen andre behandlinger som er vedtatt")
         }
     }
 
