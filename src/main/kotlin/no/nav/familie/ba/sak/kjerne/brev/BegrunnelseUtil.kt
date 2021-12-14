@@ -4,6 +4,9 @@ import no.nav.familie.ba.sak.common.NullablePeriode
 import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
+import no.nav.familie.ba.sak.kjerne.brev.domene.BrevGrunnlag
+import no.nav.familie.ba.sak.kjerne.brev.domene.harPersonerSomManglerOpplysninger
+import no.nav.familie.ba.sak.kjerne.brev.domene.somOverlapper
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.hentPersonerForEtterEndretUtbetalingsperiode
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
@@ -11,25 +14,18 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.MinimertPerson
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.barnMedSeksårsdagPåFom
 import no.nav.familie.ba.sak.kjerne.vedtak.hentPersonerForAlleUtgjørendeVilkår
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
-import no.nav.familie.ba.sak.kjerne.brev.domene.BrevGrunnlag
-import no.nav.familie.ba.sak.kjerne.brev.domene.harPersonerSomManglerOpplysninger
-import no.nav.familie.ba.sak.kjerne.brev.domene.somOverlapper
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 
 fun hentPersonidenterGjeldendeForBegrunnelse(
     triggesAv: TriggesAv,
     periode: NullablePeriode,
-    vedtaksperiodeType: Vedtaksperiodetype,
     vedtakBegrunnelseType: VedtakBegrunnelseType,
     brevGrunnlag: BrevGrunnlag,
     identerMedUtbetaling: List<String>,
     erFørsteVedtaksperiodePåFagsak: Boolean,
 ): List<String> {
 
-    val erFortsattInnvilgetBegrunnelse =
-        vedtaksperiodeType == Vedtaksperiodetype.FORTSATT_INNVILGET ||
-            vedtakBegrunnelseType == VedtakBegrunnelseType.FORTSATT_INNVILGET
+    val erFortsattInnvilgetBegrunnelse = vedtakBegrunnelseType == VedtakBegrunnelseType.FORTSATT_INNVILGET
 
     return when {
         triggesAv.vilkår.contains(Vilkår.UTVIDET_BARNETRYGD) || triggesAv.småbarnstillegg ->

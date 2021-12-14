@@ -5,7 +5,6 @@ import no.nav.familie.ba.sak.kjerne.brev.hentPersonidenterGjeldendeForBegrunnels
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.RestVedtaksbegrunnelse
 
 data class BrevBegrunnelseGrunnlag(
@@ -15,7 +14,6 @@ data class BrevBegrunnelseGrunnlag(
 ) {
     fun tilBrevBegrunnelseGrunnlagMedPersoner(
         periode: NullablePeriode,
-        periodeType: Vedtaksperiodetype,
         brevGrunnlag: BrevGrunnlag,
         identerMedUtbetaling: List<String>,
         erFørsteVedtaksperiodePåFagsak: Boolean,
@@ -24,7 +22,6 @@ data class BrevBegrunnelseGrunnlag(
             triggesAv = this.triggesAv,
             vedtakBegrunnelseType = this.vedtakBegrunnelseType,
             periode = periode,
-            vedtaksperiodeType = periodeType,
             brevGrunnlag = brevGrunnlag,
             identerMedUtbetaling = identerMedUtbetaling,
             erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,

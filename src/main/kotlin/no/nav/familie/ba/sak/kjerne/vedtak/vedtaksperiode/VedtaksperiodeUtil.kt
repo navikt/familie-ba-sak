@@ -15,7 +15,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import java.time.LocalDate
-import java.time.YearMonth
 
 fun hentVedtaksperioderMedBegrunnelserForEndredeUtbetalingsperioder(
     andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
@@ -137,30 +136,4 @@ fun erFørsteVedtaksperiodePåFagsak(
     it.stønadFom.isBefore(
         periodeFom?.toYearMonth() ?: TIDENES_MORGEN.toYearMonth()
     )
-}
-
-fun hentPersonerForAutovedtakBegrunnelse(
-    vedtakBegrunnelseSpesifikasjon: VedtakBegrunnelseSpesifikasjon,
-    barna: List<Person>,
-    nåværendeUtbetalingsperiode: Utbetalingsperiode
-): List<String> = when (vedtakBegrunnelseSpesifikasjon) {
-    VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR,
-    VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR_AUTOVEDTAK ->
-        hentBarnSomFyller18År(barna)
-
-    VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR,
-    VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR_AUTOVEDTAK ->
-        hentbarnMedSeksårsdagPåPeriode(nåværendeUtbetalingsperiode)
-
-    else -> hentPersonIdenterFraUtbetalingsperiode(nåværendeUtbetalingsperiode)
-}
-
-fun hentBarnSomFyller18År(barna: List<Person>): List<String> {
-    // Barn som har fylt 18 år har ingen utbetalingsperioder og må hentes fra persongrunnlaget.
-    val fødselsMånedOgÅrForAlder18 = YearMonth.from(LocalDate.now()).minusYears(18)
-
-    return barna.filter { barn ->
-        barn.fødselsdato.toYearMonth().equals(fødselsMånedOgÅrForAlder18) ||
-            barn.fødselsdato.toYearMonth().equals(fødselsMånedOgÅrForAlder18.plusMonths(1))
-    }.map { it.aktør.aktivFødselsnummer() }
 }

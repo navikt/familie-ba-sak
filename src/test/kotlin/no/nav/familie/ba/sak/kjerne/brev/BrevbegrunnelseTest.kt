@@ -135,8 +135,10 @@ class BrevbegrunnelseTest {
                 forventedeBegrunnelser.forEachIndexed { index, _ ->
                     if (forventedeBegrunnelser[index] != output.begrunnelser[index]) {
                         feil.add(
-                            "Forventet begrunnelse nr. ${index + 1} var: '${forventedeBegrunnelser[index]}', " +
-                                "men fikk '${output.begrunnelser[index]}'"
+                            "Forventet begrunnelse nr. ${index + 1} var: " +
+                                "\n'${forventedeBegrunnelser[index]}', " +
+                                "\nmen fikk " +
+                                "\n'${output.begrunnelser[index]}'"
                         )
                     }
                 }
