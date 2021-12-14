@@ -39,7 +39,7 @@ data class BrevBegrunnelseTestConfig(
     val erFørsteVedtaksperiodePåFagsak: Boolean = false,
     val målformSøker: Målform,
 
-    val forventetOutput: BrevPeriodeTestConfig
+    val forventetOutput: BrevPeriodeTestConfig?
 )
 
 data class PersonPåBehandlingConfig(

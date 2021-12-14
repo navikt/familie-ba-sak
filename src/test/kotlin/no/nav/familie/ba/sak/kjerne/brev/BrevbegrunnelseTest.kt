@@ -99,9 +99,9 @@ class BrevbegrunnelseTest {
         }
 
         if (forventetOutput == null || output == null) {
-            if (forventetOutput != null && output == null)
+            if (forventetOutput != null)
                 feil.add("Output er null, men forventet output er $forventetOutput.")
-            if (forventetOutput == null && output != null)
+            if (output != null)
                 feil.add("Forventet output er null, men output er $output.")
         } else {
             validerFelt(forventetOutput.fom, output.fom?.single(), "fom")

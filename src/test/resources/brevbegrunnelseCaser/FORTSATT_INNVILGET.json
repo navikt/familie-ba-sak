@@ -60,7 +60,7 @@
   ],
   "forventetOutput": {
     "fom": "Du får:",
-    "tom": null,
+    "tom": "",
     "belop": 2108,
     "antallBarn": 2,
     "barnasFodselsdager": "20.01.20 og 20.12.20",

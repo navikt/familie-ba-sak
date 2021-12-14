@@ -25,7 +25,7 @@ data class FortsattInnvilgetBrevPeriode(
         begrunnelser: List<Begrunnelse>,
     ) : this(
         fom = flettefelt(fom),
-        tom = flettefelt(null),
+        tom = flettefelt(""),
         belop = flettefelt(belop),
         antallBarn = flettefelt(antallBarn),
         barnasFodselsdager = flettefelt(barnasFodselsdager),
