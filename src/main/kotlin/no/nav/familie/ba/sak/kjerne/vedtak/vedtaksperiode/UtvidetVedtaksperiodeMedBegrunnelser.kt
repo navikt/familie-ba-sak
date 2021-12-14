@@ -1,11 +1,9 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
-import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
@@ -60,13 +58,12 @@ fun VedtaksperiodeMedBegrunnelser.tilUtvidetVedtaksperiodeMedBegrunnelser(
                     it.endretUtbetalingAndeler.isEmpty()
                 }
             }
-            val vertikaltSegmentForVedtaksperiode =
-                if (this.type == Vedtaksperiodetype.FORTSATT_INNVILGET)
-                    hentLøpendeAndelForVedtaksperiode(andelerForVedtaksperiodetype)
-                else hentVertikaltSegmentForVedtaksperiode(andelerForVedtaksperiodetype)
 
             val andelerForSegment =
-                hentAndelerForSegment(andelerForVedtaksperiodetype, vertikaltSegmentForVedtaksperiode)
+                hentAndelerForSegment(
+                    andelerForVedtaksperiodetype,
+                    LocalDateSegment(this.fom, this.tom, null)
+                )
 
             andelerForSegment.lagUtbetalingsperiodeDetaljer(personopplysningGrunnlag)
         } else {
@@ -93,24 +90,9 @@ private fun VedtaksperiodeMedBegrunnelser.endretUtbetalingAndelSkalVæreMed(ande
         }
     }
 
-private fun hentLøpendeAndelForVedtaksperiode(andelerTilkjentYtelse: List<AndelTilkjentYtelse>): LocalDateSegment<Int> {
-    val sorterteSegmenter = andelerTilkjentYtelse.utledSegmenter().sortedBy { it.fom }
-    return sorterteSegmenter.lastOrNull { it.fom.toYearMonth() <= inneværendeMåned() }
-        ?: sorterteSegmenter.firstOrNull()
-        ?: throw Feil("Finner ikke gjeldende segment ved fortsatt innvilget")
-}
-
-private fun VedtaksperiodeMedBegrunnelser.hentVertikaltSegmentForVedtaksperiode(
-    andelerTilkjentYtelse: List<AndelTilkjentYtelse>
-) = andelerTilkjentYtelse
-    .utledSegmenter()
-    .find { localDateSegment ->
-        localDateSegment.fom == this.fom || localDateSegment.tom == this.tom
-    } ?: throw Feil("Finner ikke segment for vedtaksperiode (${this.fom}, ${this.tom})")
-
 private fun hentAndelerForSegment(
     andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
-    vertikaltSegmentForVedtaksperiode: LocalDateSegment<Int>
+    vertikaltSegmentForVedtaksperiode: LocalDateSegment<Nothing>
 ) = andelerTilkjentYtelse.filter {
     vertikaltSegmentForVedtaksperiode.localDateInterval.overlaps(
         LocalDateInterval(
