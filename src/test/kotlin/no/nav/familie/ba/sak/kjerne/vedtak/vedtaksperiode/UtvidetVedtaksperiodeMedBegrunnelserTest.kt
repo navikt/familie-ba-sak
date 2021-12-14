@@ -29,7 +29,7 @@ class UtvidetVedtaksperiodeMedBegrunnelserTest {
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
             behandlingId = behandling.id,
             barnasIdenter = listOf(barn1.aktør.aktivFødselsnummer(), barn2.aktør.aktivFødselsnummer()),
-            søkerPersonIdent = søker.aktør.aktørId
+            søkerPersonIdent = søker.aktør.aktivFødselsnummer()
         )
 
         val fom = YearMonth.of(2018, 6)

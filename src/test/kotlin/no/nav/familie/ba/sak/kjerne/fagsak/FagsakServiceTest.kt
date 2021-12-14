@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.kjerne.fagsak
 import io.mockk.every
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
-import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
@@ -101,12 +100,12 @@ class FagsakServiceTest(
         val barn2Fnr = randomFnr()
         val barn3Fnr = randomFnr()
 
-        val søker1Aktør = tilAktør(søker1Fnr)
-        val søker2Aktør = tilAktør(søker2Fnr)
-        val søker3Aktør = tilAktør(søker3Fnr)
-        val barn1Aktør = tilAktør(barn1Fnr)
-        val barn2Aktør = tilAktør(barn2Fnr)
-        val barn3Aktør = tilAktør(barn3Fnr)
+        val søker1Aktør = personidentService.hentOgLagreAktør(søker1Fnr)
+        val søker2Aktør = personidentService.hentOgLagreAktør(søker2Fnr)
+        val søker3Aktør = personidentService.hentOgLagreAktør(søker3Fnr)
+        val barn1Aktør = personidentService.hentOgLagreAktør(barn1Fnr)
+        val barn2Aktør = personidentService.hentOgLagreAktør(barn2Fnr)
+        val barn3Aktør = personidentService.hentOgLagreAktør(barn3Fnr)
 
         every {
             mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(eq(barn1Aktør))
@@ -218,13 +217,13 @@ class FagsakServiceTest(
             RegistrerPersongrunnlagDTO(ident = søker2Fnr, barnasIdenter = listOf(barn1Fnr))
         )
 
-        val søkeresultat1 = fagsakService.hentFagsakDeltager(søker1Aktør)
+        val søkeresultat1 = fagsakService.hentFagsakDeltager(søker1Fnr)
         assertEquals(1, søkeresultat1.size)
         assertEquals(Kjønn.KVINNE, søkeresultat1[0].kjønn)
         assertEquals("søker1", søkeresultat1[0].navn)
         assertEquals(fagsak0.data!!.id, søkeresultat1[0].fagsakId)
 
-        val søkeresultat2 = fagsakService.hentFagsakDeltager(barn1Aktør)
+        val søkeresultat2 = fagsakService.hentFagsakDeltager(barn1Fnr)
         assertEquals(3, søkeresultat2.size)
         var matching = 0
         søkeresultat2.forEach {
@@ -233,7 +232,7 @@ class FagsakServiceTest(
         assertEquals(11, matching)
         assertEquals(1, søkeresultat2.filter { it.ident == barn1Fnr }.size)
 
-        val søkeresultat3 = fagsakService.hentFagsakDeltager(barn2Aktør)
+        val søkeresultat3 = fagsakService.hentFagsakDeltager(barn2Fnr)
         assertEquals(3, søkeresultat3.size)
         assertEquals(1, søkeresultat3.filter { it.ident == barn2Fnr }.size)
         assertNull(søkeresultat3.find { it.ident == barn2Fnr }!!.fagsakId)
@@ -283,7 +282,7 @@ class FagsakServiceTest(
             fagsakService.hentFagsakPåPerson(søker1Aktør).also { it?.arkivert = true }!!
         )
 
-        val søkeresultat1 = fagsakService.hentFagsakDeltager(søker1Aktør)
+        val søkeresultat1 = fagsakService.hentFagsakDeltager(søker1Fnr)
 
         assertEquals(1, søkeresultat1.size)
         assertNull(søkeresultat1.first().fagsakId)
@@ -312,7 +311,7 @@ class FagsakServiceTest(
             fagsakService.hentFagsakPåPerson(søker1Aktør).also { it?.arkivert = true }!!
         )
 
-        val søkeresultat1 = fagsakService.hentFagsakDeltager(søker1Aktør)
+        val søkeresultat1 = fagsakService.hentFagsakDeltager(søker1Fnr)
 
         assertEquals(1, søkeresultat1.size)
         assertNull(søkeresultat1.first().fagsakId)
@@ -359,6 +358,6 @@ class FagsakServiceTest(
                 "[PdlRestClient][Feil ved oppslag på person: Fant ikke person]"
             )
         }
-        assertEquals(emptyList<RestFagsakDeltager>(), fagsakService.hentFagsakDeltager(randomAktørId()))
+        assertEquals(emptyList<RestFagsakDeltager>(), fagsakService.hentFagsakDeltager(randomFnr()))
     }
 }
