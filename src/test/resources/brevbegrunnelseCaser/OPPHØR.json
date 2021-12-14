@@ -1,0 +1,63 @@
+{
+  "beskrivelse": "Innvilget 1 barn bor med søker fra august 2021 på behandling med 1 barn",
+  "fom": "2021-09-01",
+  "tom": null,
+  "vedtaksperiodetype": "OPPHØR",
+  "begrunnelser": [
+    {
+      "vedtakBegrunnelseSpesifikasjon": "OPPHØR_BARN_FLYTTET_FRA_SØKER",
+      "vedtakBegrunnelseType": "OPPHØR"
+    }
+  ],
+  "fritekster": [],
+  "utvidetScenario": "IKKE_UTVIDET_YTELSE",
+  "uregistrerteBarn": [],
+  "erFørsteVedtaksperiodePåFagsak": false,
+  "målformSøker": "NB",
+  "personerPåBehandling": [
+    {
+      "fødselsdato": "2020-01-20",
+      "type": "BARN",
+      "atypiskeVilkårResultater": [
+        {
+          "vilkårType": "BOR_MED_SØKER",
+          "resultat": "OPPFYLT",
+          "periodeFom": "2020-01-20",
+          "periodeTom": "2021-08-01",
+          "utdypendeVilkårsvurderinger": [],
+          "erEksplisittAvslagPåSøknad": false
+        }
+      ],
+      "andreVurderinger": [],
+      "endredeUtbetalinger": [],
+      "utbetalinger": []
+    },
+    {
+      "fødselsdato": "1993-08-10",
+      "type": "SØKER",
+      "atypiskeVilkårResultater": [],
+      "andreVurderinger": [],
+      "endredeUtbetalinger": [],
+      "utbetalinger": []
+    }
+  ],
+  "forventetOutput": {
+    "fom": "1. september 2021",
+    "tom": "",
+    "belop": null,
+    "antallBarn": null,
+    "barnasFodselsdager": null,
+    "begrunnelser": [
+      {
+        "gjelderSoker": false,
+        "barnasFodselsdatoer": "20.01.20",
+        "antallBarn": 1,
+        "maanedOgAarBegrunnelsenGjelderFor": "august 2021",
+        "maalform": "bokmaal",
+        "apiNavn": "opphorBarnBorIkkeMedSoker",
+        "belop": 0
+      }
+    ],
+    "type": "opphor"
+  }
+}
