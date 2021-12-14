@@ -193,11 +193,11 @@ class BrevService(
         )
         val uregistrerteBarn = hentUregistrerteBarn(vedtak.behandling.id)
 
-        val brevPerioderGunnlag = utvidetVedtaksperioderMedBegrunnelser
+        val brevPerioderGrunnlag = utvidetVedtaksperioderMedBegrunnelser
             .sorter()
             .map { it.tilBrevPeriodeGrunnlag(sanityBegrunnelser) }
 
-        val brevperioder = brevPerioderGunnlag
+        val brevperioder = brevPerioderGrunnlag
             .mapNotNull {
                 it.tilBrevPeriode(
                     brevGrunnlag = brevGrunnlag,
@@ -208,7 +208,7 @@ class BrevService(
                 )
             }
 
-        val hjemler = hentHjemmeltekst(brevPerioderGunnlag, sanityBegrunnelser)
+        val hjemler = hentHjemmeltekst(brevPerioderGrunnlag, sanityBegrunnelser)
 
         return VedtakFellesfelter(
             enhet = grunnlagOgSignaturData.enhet,
