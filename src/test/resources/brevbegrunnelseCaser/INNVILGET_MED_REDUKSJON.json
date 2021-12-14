@@ -17,12 +17,12 @@
   "utvidetScenario": "IKKE_UTVIDET_YTELSE",
   "uregistrerteBarn": [],
   "erFørsteVedtaksperiodePåFagsak": false,
-  "målformSøker": "NB",
+  "brevMålform": "NB",
   "personerPåBehandling": [
     {
       "fødselsdato": "2019-03-14",
       "type": "BARN",
-      "atypiskeVilkårResultater": [
+      "overstyrteVilkårresultater": [
         {
           "vilkårType": "BOR_MED_SØKER",
           "resultat": "OPPFYLT",
@@ -46,7 +46,7 @@
     {
       "fødselsdato": "2020-01-20",
       "type": "BARN",
-      "atypiskeVilkårResultater": [
+      "overstyrteVilkårresultater": [
         {
           "vilkårType": "BOR_MED_SØKER",
           "resultat": "OPPFYLT",
@@ -63,7 +63,7 @@
     {
       "fødselsdato": "1993-08-10",
       "type": "SØKER",
-      "atypiskeVilkårResultater": [],
+      "overstyrteVilkårresultater": [],
       "andreVurderinger": [],
       "endredeUtbetalinger": [],
       "utbetalinger": []

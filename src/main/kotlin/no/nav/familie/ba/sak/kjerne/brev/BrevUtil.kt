@@ -246,17 +246,15 @@ fun BrevPeriodeGrunnlag.tilBrevPeriode(
     utvidetScenarioForEndringsperiode: UtvidetScenarioForEndringsperiode = UtvidetScenarioForEndringsperiode.IKKE_UTVIDET_YTELSE,
     uregistrerteBarn: List<MinimertUregistrertBarn> = emptyList(),
     erFørsteVedtaksperiodePåFagsak: Boolean,
-    målformSøker: Målform
+    brevMålform: Målform
 ): BrevPeriode? {
     val brevPeriodeGrunnlagMedPersoner =
         this.tilBrevPeriodeGrunnlagMedPersoner(brevGrunnlag, erFørsteVedtaksperiodePåFagsak)
 
-    val personerIPersongrunnlag = brevGrunnlag.personerPåBehandling
-
     val begrunnelserOgFritekster = brevPeriodeGrunnlagMedPersoner.byggBegrunnelserOgFritekster(
         uregistrerteBarn = uregistrerteBarn,
         brevGrunnlag = brevGrunnlag,
-        målformSøker = målformSøker
+        brevMålform = brevMålform
     )
 
     if (begrunnelserOgFritekster.isEmpty()) return null
@@ -268,26 +266,26 @@ fun BrevPeriodeGrunnlag.tilBrevPeriode(
 
     return when (brevPeriodeGrunnlagMedPersoner.type) {
         Vedtaksperiodetype.FORTSATT_INNVILGET -> brevPeriodeGrunnlagMedPersoner.hentFortsattInnvilgetBrevPeriode(
-            målformSøker,
-            begrunnelserOgFritekster
+            målform = brevMålform,
+            begrunnelserOgFritekster = begrunnelserOgFritekster
         )
 
         Vedtaksperiodetype.UTBETALING -> brevPeriodeGrunnlagMedPersoner.hentInnvilgelseBrevPeriode(
-            tomDato,
-            begrunnelserOgFritekster,
-            personerIPersongrunnlag
+            tomDato = tomDato,
+            begrunnelserOgFritekster = begrunnelserOgFritekster,
+            personerIPersongrunnlag = brevGrunnlag.personerPåBehandling
         )
 
         Vedtaksperiodetype.ENDRET_UTBETALING -> brevPeriodeGrunnlagMedPersoner.hentEndretUtbetalingBrevPeriode(
-            tomDato,
-            begrunnelserOgFritekster,
-            utvidetScenarioForEndringsperiode,
-            målformSøker
+            tomDato = tomDato,
+            begrunnelserOgFritekster = begrunnelserOgFritekster,
+            utvidetScenario = utvidetScenarioForEndringsperiode,
+            målform = brevMålform
         )
 
         Vedtaksperiodetype.AVSLAG -> brevPeriodeGrunnlagMedPersoner.hentAvslagBrevPeriode(
-            tomDato,
-            begrunnelserOgFritekster
+            tomDato = tomDato,
+            begrunnelserOgFritekster = begrunnelserOgFritekster
         )
 
         Vedtaksperiodetype.OPPHØR -> OpphørBrevPeriode(

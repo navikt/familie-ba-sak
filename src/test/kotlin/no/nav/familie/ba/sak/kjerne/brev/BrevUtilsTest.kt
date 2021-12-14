@@ -28,7 +28,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifi
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilMinimertPerson
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
-import org.junit.Assert.assertEquals
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
@@ -67,8 +66,8 @@ internal class BrevUtilsTest {
             )
         )
 
-        assertEquals("Mock Saksbehandler", saksbehandler)
-        assertEquals("System", beslutter)
+        Assertions.assertEquals("Mock Saksbehandler", saksbehandler)
+        Assertions.assertEquals("System", beslutter)
     }
 
     @Test
@@ -85,8 +84,8 @@ internal class BrevUtilsTest {
             )
         )
 
-        assertEquals("System", saksbehandler)
-        assertEquals("Beslutter", beslutter)
+        Assertions.assertEquals("System", saksbehandler)
+        Assertions.assertEquals("Beslutter", beslutter)
     }
 
     @Test
@@ -105,8 +104,8 @@ internal class BrevUtilsTest {
             )
         )
 
-        assertEquals("Mock Saksbehandler", saksbehandler)
-        assertEquals("Mock Beslutter", beslutter)
+        Assertions.assertEquals("Mock Saksbehandler", saksbehandler)
+        Assertions.assertEquals("Mock Beslutter", beslutter)
     }
 
     private val støttedeBehandlingsersultaterFørstegangsbehandling = listOf(

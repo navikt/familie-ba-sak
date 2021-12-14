@@ -3,9 +3,9 @@ package no.nav.familie.ba.sak.kjerne.brev
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ba.sak.common.Utils.formaterBeløp
 import no.nav.familie.ba.sak.kjerne.brev.domene.BegrunnelseDataTestConfig
-import no.nav.familie.ba.sak.kjerne.brev.domene.BrevBegrunnelseTestConfig
 import no.nav.familie.ba.sak.kjerne.brev.domene.BrevGrunnlag
 import no.nav.familie.ba.sak.kjerne.brev.domene.BrevPeriodeGrunnlag
+import no.nav.familie.ba.sak.kjerne.brev.domene.BrevPeriodeOutput
 import no.nav.familie.ba.sak.kjerne.brev.domene.BrevPeriodeTestConfig
 import no.nav.familie.ba.sak.kjerne.brev.domene.FritekstBegrunnelseTestConfig
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.BrevPeriode
@@ -27,7 +27,7 @@ class BrevbegrunnelseTest {
 
             val behandlingsresultatPersonTestConfig =
                 try {
-                    objectMapper.readValue<BrevBegrunnelseTestConfig>(fil.readText())
+                    objectMapper.readValue<BrevPeriodeTestConfig>(fil.readText())
                 } catch (e: Exception) {
                     testReporter.publishEntry("Feil i fil: $it")
                     testReporter.publishEntry(e.message)
@@ -59,7 +59,7 @@ class BrevbegrunnelseTest {
                     utvidetScenarioForEndringsperiode = behandlingsresultatPersonTestConfig.utvidetScenarioForEndringsperiode,
                     uregistrerteBarn = behandlingsresultatPersonTestConfig.uregistrerteBarn,
                     erFørsteVedtaksperiodePåFagsak = behandlingsresultatPersonTestConfig.erFørsteVedtaksperiodePåFagsak,
-                    målformSøker = behandlingsresultatPersonTestConfig.målformSøker,
+                    brevMålform = behandlingsresultatPersonTestConfig.brevMålform,
                 )
 
             val feil = erLike(
@@ -84,7 +84,7 @@ class BrevbegrunnelseTest {
     }
 
     private fun erLike(
-        forventetOutput: BrevPeriodeTestConfig?,
+        forventetOutput: BrevPeriodeOutput?,
         output: BrevPeriode?
     ): List<String> {
 

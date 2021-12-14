@@ -23,7 +23,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import java.math.BigDecimal
 import java.time.LocalDate
 
-data class BrevBegrunnelseTestConfig(
+data class BrevPeriodeTestConfig(
     val beskrivelse: String,
 
     val fom: LocalDate,
@@ -32,21 +32,21 @@ data class BrevBegrunnelseTestConfig(
     val begrunnelser: List<BrevBegrunnelseGrunnlagConfig>,
     val fritekster: List<String>,
 
-    val personerPåBehandling: List<PersonPåBehandlingConfig>,
+    val personerPåBehandling: List<BrevPeriodeTestPerson>,
 
     val utvidetScenarioForEndringsperiode: UtvidetScenarioForEndringsperiode = UtvidetScenarioForEndringsperiode.IKKE_UTVIDET_YTELSE,
     val uregistrerteBarn: List<MinimertUregistrertBarn>,
     val erFørsteVedtaksperiodePåFagsak: Boolean = false,
-    val målformSøker: Målform,
+    val brevMålform: Målform,
 
-    val forventetOutput: BrevPeriodeTestConfig?
+    val forventetOutput: BrevPeriodeOutput?
 )
 
-data class PersonPåBehandlingConfig(
+data class BrevPeriodeTestPerson(
     val personIdent: String = randomFnr(),
     val fødselsdato: LocalDate,
     val type: PersonType,
-    val atypiskeVilkårResultater: List<MinimertVilkårResultat>,
+    val overstyrteVilkårresultater: List<MinimertVilkårResultat>,
     val andreVurderinger: List<AnnenVurdering>,
     val endredeUtbetalinger: List<EndretUtbetalingAndelPåPerson>,
     val utbetalinger: List<UtbetalingPåPerson>
@@ -62,24 +62,25 @@ data class PersonPåBehandlingConfig(
     fun tilMinimertePersonResultater(): MinimertPersonResultat {
         return MinimertPersonResultat(
             personIdent = this.personIdent,
-            minimerteVilkårResultater = this.atypiskeVilkårResultater + hentTypiskeVilkårForPersontype(),
+            minimerteVilkårResultater = hentVilkårForPerson(),
             andreVurderinger = this.andreVurderinger,
         )
     }
 
-    private fun hentTypiskeVilkårForPersontype() =
-        Vilkår.hentVilkårFor(this.type)
-            .filter { vilkår -> !this.atypiskeVilkårResultater.any { it.vilkårType == vilkår } }
-            .map { vilkår ->
-                MinimertVilkårResultat(
-                    vilkårType = vilkår,
-                    periodeFom = this.fødselsdato,
-                    periodeTom = null,
-                    resultat = Resultat.OPPFYLT,
-                    utdypendeVilkårsvurderinger = emptyList(),
-                    erEksplisittAvslagPåSøknad = false,
-                )
-            }
+    private fun hentVilkårForPerson() =
+        this.overstyrteVilkårresultater +
+            Vilkår.hentVilkårFor(this.type)
+                .filter { vilkår -> !this.overstyrteVilkårresultater.any { it.vilkårType == vilkår } }
+                .map { vilkår ->
+                    MinimertVilkårResultat(
+                        vilkårType = vilkår,
+                        periodeFom = this.fødselsdato,
+                        periodeTom = null,
+                        resultat = Resultat.OPPFYLT,
+                        utdypendeVilkårsvurderinger = emptyList(),
+                        erEksplisittAvslagPåSøknad = false,
+                    )
+                }
 }
 
 data class UtbetalingPåPerson(
@@ -142,7 +143,7 @@ data class BegrunnelseDataTestConfig(
     )
 }
 
-data class BrevPeriodeTestConfig(
+data class BrevPeriodeOutput(
     val fom: String,
     val tom: String?,
     val belop: Int?,

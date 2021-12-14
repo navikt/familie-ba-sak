@@ -2,15 +2,15 @@ package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.MinimertUregistrertBarn
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.brev.domene.BrevGrunnlag
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
+import no.nav.familie.ba.sak.kjerne.brev.domene.tilBrevPeriodeGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilRestVedtaksbegrunnelse
-import no.nav.familie.ba.sak.kjerne.brev.domene.BrevGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.RestVedtaksbegrunnelse
-import no.nav.familie.ba.sak.kjerne.brev.domene.tilBrevPeriodeGrunnlag
 import java.time.LocalDate
 
 data class UtvidetVedtaksperiodeMedBegrunnelser(
@@ -28,7 +28,7 @@ data class UtvidetVedtaksperiodeMedBegrunnelser(
         sanityBegrunnelser: List<SanityBegrunnelse>,
         erFørsteVedtaksperiodePåFagsak: Boolean,
         uregistrerteBarn: List<MinimertUregistrertBarn>,
-        målformSøker: Målform,
+        brevMålform: Målform,
     ) = this
         .tilBrevPeriodeGrunnlag(sanityBegrunnelser)
         .tilBrevPeriodeGrunnlagMedPersoner(
@@ -38,7 +38,7 @@ data class UtvidetVedtaksperiodeMedBegrunnelser(
         .byggBegrunnelserOgFritekster(
             brevGrunnlag = brevGrunnlag,
             uregistrerteBarn = uregistrerteBarn,
-            målformSøker = målformSøker
+            brevMålform = brevMålform
         )
 }
 

@@ -62,7 +62,7 @@ class BegrunnelseService(
                 andelerTilkjentYtelse,
                 utvidetVedtaksperiodeMedBegrunnelse.fom
             ),
-            målformSøker = personopplysningGrunnlag.søker.målform,
+            brevMålform = personopplysningGrunnlag.søker.målform,
         )
     }
 }

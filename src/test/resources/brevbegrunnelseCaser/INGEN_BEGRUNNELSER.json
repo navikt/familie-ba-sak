@@ -8,12 +8,12 @@
   "utvidetScenario": "IKKE_UTVIDET_YTELSE",
   "uregistrerteBarn": [],
   "erFørsteVedtaksperiodePåFagsak": false,
-  "målformSøker": "NB",
+  "brevMålform": "NB",
   "personerPåBehandling": [
     {
       "fødselsdato": "2020-01-20",
       "type": "BARN",
-      "atypiskeVilkårResultater": [],
+      "overstyrteVilkårresultater": [],
       "andreVurderinger": [],
       "endredeUtbetalinger": [],
       "utbetalinger": [
@@ -28,7 +28,7 @@
     {
       "fødselsdato": "1993-08-10",
       "type": "SØKER",
-      "atypiskeVilkårResultater": [],
+      "overstyrteVilkårresultater": [],
       "andreVurderinger": [],
       "endredeUtbetalinger": [],
       "utbetalinger": []

@@ -204,7 +204,7 @@ class BrevService(
                     utvidetScenarioForEndringsperiode = andelerTilkjentYtelse
                         .hentUtvidetScenarioForEndringsperiode(it.hentMånedPeriode()),
                     erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak(andelerTilkjentYtelse, it.fom),
-                    målformSøker = grunnlagOgSignaturData.grunnlag.søker.målform,
+                    brevMålform = grunnlagOgSignaturData.grunnlag.søker.målform,
                 )
             }
 
