@@ -232,7 +232,10 @@ class FagsakService(
         return fagsakRepository.finnLøpendeFagsaker()
     }
 
-    fun hentFagsakDeltager(aktør: Aktør): List<RestFagsakDeltager> {
+    @Transactional
+    fun hentFagsakDeltager(personIdent: String): List<RestFagsakDeltager> {
+        val aktør = personidentService.hentOgLagreAktør(personIdent)
+
         val maskertDeltaker = runCatching {
             hentMaskertFagsakdeltakerVedManglendeTilgang(aktør)
         }.fold(
