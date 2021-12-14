@@ -48,7 +48,7 @@ class AutobrevTask(
 
     companion object {
 
-        const val TASK_STEP_TYPE = "FinnAlleBarn6og18ÅrTask" // TODO: Endre uten å lage problemer i prod
+        const val TASK_STEP_TYPE = "FinnAlleBarn6og18ÅrTask"
         private val logger: Logger = LoggerFactory.getLogger(AutobrevTask::class.java)
     }
 }

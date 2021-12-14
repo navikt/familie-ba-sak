@@ -35,7 +35,7 @@ class TestVerktøyController(
             scheduler.opprettTask()
             ResponseEntity.ok(Ressurs.success("Laget task."))
         } else {
-            ResponseEntity.ok(Ressurs.success("Endepunktet gjør ingenting i prod."))
+            ResponseEntity.ok(Ressurs.success(MELDING))
         }
     }
 
@@ -46,7 +46,7 @@ class TestVerktøyController(
             SatsendringTask.opprettTask(behandlingId)
             ResponseEntity.ok(Ressurs.success("Trigget satsendring for behandling $behandlingId"))
         } else {
-            ResponseEntity.ok(Ressurs.success("Endepunktet gjør ingenting i prod."))
+            ResponseEntity.ok(Ressurs.success(MELDING))
         }
     }
 
@@ -57,7 +57,7 @@ class TestVerktøyController(
             taskRepository.save(StartSatsendringForAlleBehandlingerTask.opprettTask(1654))
             ResponseEntity.ok(Ressurs.success("Trigget satsendring for alle behandlinger"))
         } else {
-            ResponseEntity.ok(Ressurs.success("Endepunktet gjør ingenting i prod."))
+            ResponseEntity.ok(Ressurs.success(MELDING))
         }
     }
 
@@ -69,7 +69,11 @@ class TestVerktøyController(
             val melding = vedtakOmOvergangsstønadService.håndterVedtakOmOvergangsstønad(aktør = aktør)
             ResponseEntity.ok(Ressurs.success(melding))
         } else {
-            ResponseEntity.ok(Ressurs.success("Endepunktet gjør ingenting i prod."))
+            ResponseEntity.ok(Ressurs.success(MELDING))
         }
+    }
+
+    companion object {
+        const val MELDING = "Endepunktet gjør ingenting i prod."
     }
 }
