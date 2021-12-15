@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.task
 import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.isSameOrBefore
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
@@ -25,7 +24,6 @@ import java.util.Properties
     maxAntallFeil = 3
 )
 class SendMeldingTilBisysTask(
-    private val behandlingService: BehandlingService,
     private val kafkaProducer: KafkaProducer,
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
     private val behandlingRepository: BehandlingRepository,
@@ -34,27 +32,36 @@ class SendMeldingTilBisysTask(
     private val logger = LoggerFactory.getLogger(SendMeldingTilBisysTask::class.java)
 
     override fun doTask(task: Task) {
-        val behandling = behandlingService.hent(task.payload.toLong())
+        val behandling = behandlingRepository.finnBehandling(task.payload.toLong())
+
         // Bisys vil kun ha rene manuelle opphør
         if (behandling.resultat == BehandlingResultat.OPPHØRT) {
-            kafkaProducer.sendOpphørBarnetrygdBisys(
-                behandling.fagsak.hentAktivIdent().ident,
-                finnOpphørsdato(behandling.id),
-                behandling.id.toString()
+            val endretPerioder = finnEndretPerioder(behandling)
+            val barnetrygdBisysMelding = BarnetrygdBisysMelding(
+                søker = behandling.fagsak.hentAktivIdent().ident,
+                barn = endretPerioder.map {
+                    val førstPeriod = it.value[0]
+                    BarnEndretOpplysning(
+                        ident = it.key,
+                        årsakskode = førstPeriod.type,
+                        fom = førstPeriod.fom,
+                        tom = førstPeriod.tom
+                    )
+                }
+            )
+
+            kafkaProducer.sendBarnetrygdBisysMelding(
+                behandling.id.toString(),
+                barnetrygdBisysMelding
             )
         } else {
             logger.info("Sender ikke melding til bisys siden resultat ikke er opphørt.")
         }
     }
 
-    private fun finnOpphørsdato(behandlingId: Long): YearMonth {
-        return tilkjentYtelseRepository.findByBehandlingOptional(behandlingId)?.opphørFom!!
-    }
-
     fun finnEndretPerioder(behandling: Behandling): Map<String, List<EndretPeriode>> {
         val iverksatteBehandlinger =
             behandlingRepository.finnIverksatteBehandlinger(fagsakId = behandling.fagsak.id)
-
         val forrigeIverksatteBehandling = Behandlingutils.hentForrigeIverksatteBehandling(
             iverksatteBehandlinger = iverksatteBehandlinger,
             behandlingFørFølgende = behandling
@@ -67,8 +74,9 @@ class SendMeldingTilBisysTask(
 
         forrigeTilkjentYtelse.andelerTilkjentYtelse.groupBy { it.personIdent }.entries.forEach { entry ->
             val nyAndelerTilkjentYtelse =
-                tilkjentYtelse.andelerTilkjentYtelse.filter { it.personIdent == entry.key }.sortedBy { it.stønadFom }
-            entry.value.forEach {
+                tilkjentYtelse.andelerTilkjentYtelse.filter { it.personIdent == entry.key }
+                    .sortedBy { it.stønadFom }
+            entry.value.sortedBy { it.periode.fom }.forEach {
                 var forblePeriode: MånedPeriode? = it.periode
                 val prosent = it.prosent
                 if (!endretPerioder.contains(it.personIdent)) {
@@ -81,7 +89,7 @@ class SendMeldingTilBisysTask(
                             EndretPeriode(
                                 fom = forblePeriode!!.fom,
                                 tom = it.periode.fom.minusMonths(1),
-                                type = EndretType.OPPHØRT
+                                type = EndretType.RO
                             )
                         )
                     }
@@ -90,7 +98,7 @@ class SendMeldingTilBisysTask(
                             EndretPeriode(
                                 fom = latest(it.periode.fom, forblePeriode!!.fom),
                                 tom = earlist(it.periode.tom, forblePeriode!!.tom),
-                                type = EndretType.REDUSERT
+                                type = EndretType.RR
                             )
                         )
                     }
@@ -104,7 +112,7 @@ class SendMeldingTilBisysTask(
                         EndretPeriode(
                             fom = forblePeriode!!.fom,
                             tom = forblePeriode!!.tom,
-                            type = EndretType.OPPHØRT
+                            type = EndretType.RO
                         )
                     )
                 }
@@ -129,8 +137,8 @@ class SendMeldingTilBisysTask(
 }
 
 enum class EndretType {
-    OPPHØRT,
-    REDUSERT,
+    RO, // Revurdering og Opphør
+    RR, // Revurdering og Reduksjon
     ØKT,
 }
 
@@ -159,3 +167,15 @@ inline fun MånedPeriode.intersect(periode: MånedPeriode): Triple<MånedPeriode
 }
 
 inline fun MånedPeriode.erTom() = fom.isAfter(tom)
+
+data class BarnEndretOpplysning(
+    val ident: String,
+    val årsakskode: EndretType,
+    val fom: YearMonth,
+    val tom: YearMonth
+)
+
+data class BarnetrygdBisysMelding(
+    val søker: String,
+    val barn: List<BarnEndretOpplysning>
+)
