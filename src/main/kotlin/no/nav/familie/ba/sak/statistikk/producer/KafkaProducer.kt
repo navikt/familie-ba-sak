@@ -6,7 +6,6 @@ import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMell
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMellomlagringRepository
 import no.nav.familie.ba.sak.task.BarnetrygdBisysMelding
 import no.nav.familie.eksterne.kontrakter.VedtakDVH
-import no.nav.familie.eksterne.kontrakter.bisys.OpphørBarnetrygdBisysMelding
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.tilbakekreving.HentFagsystemsbehandlingRespons
 import org.slf4j.LoggerFactory
@@ -18,7 +17,6 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
-import java.time.YearMonth
 
 interface KafkaProducer {
 
@@ -31,8 +29,6 @@ interface KafkaProducer {
         key: String,
         behandlingId: String
     )
-
-    fun sendOpphørBarnetrygdBisys(personident: String, opphørFom: YearMonth, behandlingId: String)
 
     fun sendBarnetrygdBisysMelding(
         behandlingId: String,
@@ -118,33 +114,6 @@ class DefaultKafkaProducer(val saksstatistikkMellomlagringRepository: Saksstatis
             )
     }
 
-    override fun sendOpphørBarnetrygdBisys(
-        personident: String,
-        opphørFom: YearMonth,
-        behandlingId: String
-    ) {
-        val opphørBarnetrygdBisysMelding =
-            objectMapper.writeValueAsString(OpphørBarnetrygdBisysMelding(personident, opphørFom))
-
-        kafkaAivenTemplate.send(OPPHOER_BARNETRYGD_BISYS_TOPIC, behandlingId, opphørBarnetrygdBisysMelding)
-            .addCallback(
-                {
-                    logger.info(
-                        "Melding på topic $OPPHOER_BARNETRYGD_BISYS_TOPIC for " +
-                            "$behandlingId er sendt. " +
-                            "Fikk offset ${it?.recordMetadata?.offset()}"
-                    )
-                },
-                {
-                    val feilmelding =
-                        "Melding på topic $OPPHOER_BARNETRYGD_BISYS_TOPIC kan ikke sendes for " +
-                            "$behandlingId. Feiler med ${it.message}"
-                    logger.warn(feilmelding)
-                    throw Feil(message = feilmelding)
-                }
-            )
-    }
-
     override fun sendBarnetrygdBisysMelding(
         behandlingId: String,
         barnetrygdBisysMelding: BarnetrygdBisysMelding
@@ -221,14 +190,6 @@ class MockKafkaProducer(val saksstatistikkMellomlagringRepository: Saksstatistik
         behandlingId: String
     ) {
         logger.info("Skipper sending av fagsystemsbehandling respons for $behandlingId fordi kafka ikke er enablet")
-    }
-
-    override fun sendOpphørBarnetrygdBisys(
-        personident: String,
-        opphørFom: YearMonth,
-        behandlingId: String
-    ) {
-        logger.info("Skipper sending av sendOpphørBarnetrygdBisys respons for $behandlingId fordi kafka ikke er enablet")
     }
 
     override fun sendBarnetrygdBisysMelding(
