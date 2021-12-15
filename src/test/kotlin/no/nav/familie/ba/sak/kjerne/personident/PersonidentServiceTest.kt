@@ -209,7 +209,7 @@ internal class PersonidentServiceTest {
     }
 
     @Test
-    fun `Test personident som som er persistert fra før`() {
+    fun `Test personident som er persistert fra før`() {
         every { personidentRepository.findByFødselsnummerOrNull(personidentAleredePersistert) } answers { aktørIdAleredePersistert.personidenter.first() }
 
         val aktør = personidentService.hentOgLagreAktør(personidentAleredePersistert)
@@ -221,7 +221,7 @@ internal class PersonidentServiceTest {
     }
 
     @Test
-    fun `Test aktiv personident som som er persistert fra før`() {
+    fun `Test aktiv personident som er persistert fra før`() {
         every { personidentRepository.findByFødselsnummerOrNull(personidentAktiv) } answers { null }
         every { aktørIdRepository.findByAktørIdOrNull(personidentAktiv) } answers { null }
 
@@ -241,7 +241,7 @@ internal class PersonidentServiceTest {
     }
 
     @Test
-    fun `Test aktiv aktør id som som er persistert fra før men aktiv personident som ikke er persistert`() {
+    fun `Test aktør id som som er persistert fra før men aktiv personident som ikke er persistert`() {
         every { personidentRepository.findByFødselsnummerOrNull(personidentHistorisk) } answers { null }
         every { aktørIdRepository.findByAktørIdOrNull(personidentHistorisk) } answers { null }
         every { personidentRepository.findByFødselsnummerOrNull(personidentAktiv) } answers { null }
@@ -257,7 +257,7 @@ internal class PersonidentServiceTest {
     }
 
     @Test
-    fun `Test hverken aktør id aktiv aktør id eller aktiv personident som er persistert fra før`() {
+    fun `Test hverken aktør id eller aktiv personident som er persistert fra før`() {
         every { personidentRepository.findByFødselsnummerOrNull(personidentAktiv) } answers { null }
         every { aktørIdRepository.findByAktørIdOrNull(personidentAktiv) } answers { null }
         every { personidentRepository.findByFødselsnummerOrNull(personidentAktiv) } answers { null }
@@ -267,6 +267,22 @@ internal class PersonidentServiceTest {
         val aktør = personidentService.hentOgLagreAktør(personidentAktiv)
 
         verify(exactly = 1) { aktørIdRepository.saveAndFlush(any()) }
+        verify(exactly = 0) { personidentRepository.saveAndFlush(any()) }
+        assertEquals(aktørIdAktiv.aktørId, aktør.aktørId)
+        assertEquals(personidentAktiv, aktør.personidenter.single().fødselsnummer)
+    }
+
+    @Test
+    fun `Test hverken aktør id eller aktiv personident som er persistert fra før men som ikke skal persisteres`() {
+        every { personidentRepository.findByFødselsnummerOrNull(personidentAktiv) } answers { null }
+        every { aktørIdRepository.findByAktørIdOrNull(personidentAktiv) } answers { null }
+        every { personidentRepository.findByFødselsnummerOrNull(personidentAktiv) } answers { null }
+
+        every { aktørIdRepository.findByAktørIdOrNull(aktørIdAktiv.aktørId) } answers { null }
+
+        val aktør = personidentService.hentOgLagreAktør(personidentAktiv, true)
+
+        verify(exactly = 0) { aktørIdRepository.saveAndFlush(any()) }
         verify(exactly = 0) { personidentRepository.saveAndFlush(any()) }
         assertEquals(aktørIdAktiv.aktørId, aktør.aktørId)
         assertEquals(personidentAktiv, aktør.personidenter.single().fødselsnummer)
