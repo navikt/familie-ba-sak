@@ -256,27 +256,27 @@ class MigreringService(
 
     private fun infotrygdKjøredato(yearMonth: YearMonth): LocalDate {
         yearMonth.run {
-            if (this.year > 2022) {
-                kastOgTellMigreringsFeil(
-                    MigreringsfeilType.IKKE_GYLDIG_KJØREDATO,
-                    "Kopien av Infotrygds kjøreplan er utdatert."
-                )
+            if (this.year == 2021 || this.year == 2022) {
+                return when (this.month) {
+                    JANUARY -> 18
+                    FEBRUARY -> 15
+                    MARCH -> 18
+                    APRIL -> 19
+                    MAY -> 16
+                    JUNE -> 17
+                    JULY -> 18
+                    AUGUST -> 18
+                    SEPTEMBER -> 19
+                    OCTOBER -> 18
+                    NOVEMBER -> 17
+                    DECEMBER -> 5
+                }.run { yearMonth.atDay(this) }
             }
-            return when (this.month) {
-                JANUARY -> 18
-                FEBRUARY -> 15
-                MARCH -> 18
-                APRIL -> 19
-                MAY -> 16
-                JUNE -> 17
-                JULY -> 18
-                AUGUST -> 18
-                SEPTEMBER -> 19
-                OCTOBER -> 18
-                NOVEMBER -> 17
-                DECEMBER -> 5
-            }.run { yearMonth.atDay(this) }
         }
+        kastOgTellMigreringsFeil(
+            MigreringsfeilType.IKKE_GYLDIG_KJØREDATO,
+            "Kopien av Infotrygds kjøreplan er utdatert."
+        )
     }
 
     private fun finnFørsteUtbetalingsperiode(behandlingId: Long): LocalDateSegment<Int> {
