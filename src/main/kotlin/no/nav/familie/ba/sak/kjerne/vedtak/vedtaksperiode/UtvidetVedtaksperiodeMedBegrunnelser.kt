@@ -1,9 +1,11 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
@@ -59,10 +61,15 @@ fun VedtaksperiodeMedBegrunnelser.tilUtvidetVedtaksperiodeMedBegrunnelser(
                 }
             }
 
+            // LocalDateSegment trenger en type for verdien, men det brukes ikke videre og derfor setter vi 0 i else
+            val vertikaltSegment: LocalDateSegment<Int> = if (this.type == Vedtaksperiodetype.FORTSATT_INNVILGET) {
+                hentLøpendeSegment(andelerForVedtaksperiodetype)
+            } else LocalDateSegment(this.fom, this.tom, 0)
+
             val andelerForSegment =
                 hentAndelerForSegment(
                     andelerForVedtaksperiodetype,
-                    LocalDateSegment(this.fom, this.tom, null)
+                    vertikaltSegment
                 )
 
             andelerForSegment.lagUtbetalingsperiodeDetaljer(personopplysningGrunnlag)
@@ -81,6 +88,13 @@ fun VedtaksperiodeMedBegrunnelser.tilUtvidetVedtaksperiodeMedBegrunnelser(
     )
 }
 
+private fun hentLøpendeSegment(andelerTilkjentYtelse: List<AndelTilkjentYtelse>): LocalDateSegment<Int> {
+    val sorterteSegmenter = andelerTilkjentYtelse.utledSegmenter().sortedBy { it.fom }
+    return sorterteSegmenter.lastOrNull { it.fom.toYearMonth() <= inneværendeMåned() }
+        ?: sorterteSegmenter.firstOrNull()
+        ?: throw Feil("Finner ikke gjeldende segment ved fortsatt innvilget")
+}
+
 private fun VedtaksperiodeMedBegrunnelser.endretUtbetalingAndelSkalVæreMed(andelTilkjentYtelse: AndelTilkjentYtelse) =
     andelTilkjentYtelse.endretUtbetalingAndeler.isNotEmpty() && andelTilkjentYtelse.endretUtbetalingAndeler.all { endretUtbetalingAndel ->
         this.begrunnelser.any { vedtaksbegrunnelse ->
@@ -92,7 +106,7 @@ private fun VedtaksperiodeMedBegrunnelser.endretUtbetalingAndelSkalVæreMed(ande
 
 private fun hentAndelerForSegment(
     andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
-    vertikaltSegmentForVedtaksperiode: LocalDateSegment<Nothing>
+    vertikaltSegmentForVedtaksperiode: LocalDateSegment<Int>
 ) = andelerTilkjentYtelse.filter {
     vertikaltSegmentForVedtaksperiode.localDateInterval.overlaps(
         LocalDateInterval(

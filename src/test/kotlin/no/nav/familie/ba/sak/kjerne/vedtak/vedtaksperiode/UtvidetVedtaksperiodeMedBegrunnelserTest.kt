@@ -67,8 +67,8 @@ class UtvidetVedtaksperiodeMedBegrunnelserTest {
         )
 
         val vedtaksperiodeMedBegrunnelser = lagVedtaksperiodeMedBegrunnelser(
-            fom = fom.førsteDagIInneværendeMåned(),
-            tom = tom.sisteDagIInneværendeMåned(),
+            fom = null,
+            tom = null,
             type = Vedtaksperiodetype.FORTSATT_INNVILGET
         )
 

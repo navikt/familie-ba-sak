@@ -69,7 +69,6 @@ fun hentVedtaksbrevmal(behandling: Behandling): Brevmal {
     }
 
     val brevmal = if (behandling.skalBehandlesAutomatisk)
-
         hentAutomatiskVedtaksbrevtype(behandling.opprettetÅrsak, behandling.fagsak.status)
     else {
         hentManuellVedtaksbrevtype(behandling.type, behandling.resultat)
