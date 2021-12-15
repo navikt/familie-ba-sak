@@ -73,7 +73,11 @@ fun VedtaksperiodeMedBegrunnelser.tilUtvidetVedtaksperiodeMedBegrunnelser(
                     LoggerFactory.getLogger(VedtaksperiodeMedBegrunnelser::class.java)
                         .error("Finner ikke segment for vedtaksperiode $this. Se securelogger for mer informasjon.")
                     LoggerFactory.getLogger("secureLogger")
-                        .info("Finner ikke segment for vedtaksperiode $this. Alle andeler=$andelerTilkjentYtelse, andelerForVedtaksperiode=$andelerForVedtaksperiodetype.")
+                        .info(
+                            "Finner ikke segment for vedtaksperiode $this.\n " +
+                                "Alle andeler=$andelerTilkjentYtelse.\n" +
+                                "AndelerForVedtaksperiode=$andelerForVedtaksperiodetype."
+                        )
 
                     emptyList()
                 } else {
