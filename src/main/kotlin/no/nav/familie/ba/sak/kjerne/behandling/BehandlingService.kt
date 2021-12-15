@@ -42,6 +42,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.YearMonth
 
 @Service
 class BehandlingService(
@@ -322,9 +323,11 @@ class BehandlingService(
         return behandlingRepository.finnFødselshendelserOpprettetIdag()
     }
 
-    fun hentAlleBehandlingerMedOpphørSmåbarnstilleggInneværendeMåned(): List<Behandling> {
-        return behandlingRepository.hentAlleBehandlingerMedOpphørSmåbarnstilleggInneværendeMåned()
-    }
+    fun hentAlleBehandlingsIderMedOpphørSmåbarnstilleggIMåned(
+        måned: YearMonth
+    ): List<Long> = behandlingRepository.finnAlleBehandlingsIderMedOpphørSmåbarnstilleggForMåned(
+        måned = måned
+    )
 
     fun lagreNyOgDeaktiverGammelBehandling(behandling: Behandling): Behandling {
         val aktivBehandling = hentAktivForFagsak(behandling.fagsak.id)
