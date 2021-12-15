@@ -6,12 +6,8 @@ import no.nav.familie.ba.sak.common.lagRestVedtaksbegrunnelse
 import no.nav.familie.ba.sak.common.lagSanityBegrunnelse
 import no.nav.familie.ba.sak.common.lagUtbetalingsperiodeDetalj
 import no.nav.familie.ba.sak.common.lagUtvidetVedtaksperiodeMedBegrunnelser
-import no.nav.familie.ba.sak.common.tilfeldigPerson
-import no.nav.familie.ba.sak.common.tilfeldigSøker
-import no.nav.familie.ba.sak.dataGenerator.brev.lagBrevBegrunnelseGrunnlagMedPersoner
 import no.nav.familie.ba.sak.dataGenerator.brev.lagBrevPeriodeGrunnlagMedPersoner
 import no.nav.familie.ba.sak.dataGenerator.brev.lagMinimertUtbetalingsperiodeDetalj
-import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPerson
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
@@ -21,12 +17,9 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.EndretUtbetal
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.flettefelt
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilBrevPeriodeGrunnlag
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.domene.Totrinnskontroll
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilMinimertPerson
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertNull
@@ -496,46 +489,6 @@ internal class BrevUtilsTest {
         Assertions.assertEquals(
             EndretUtbetalingBarnetrygdType.DELT_UTVIDET_NB.navn + " ",
             deltBostedEndringFullUtbetalingTilkjentYtelseUtenEndring.typeBarnetrygd?.single()
-        )
-    }
-
-    @Test
-    fun `skal legge til barn med utbetalinger og fra alle utbetalingsbegrunnelsene i brev-utbetalings-periodene`() {
-        val søker = tilfeldigSøker()
-        val barn1 = tilfeldigPerson(personType = PersonType.BARN)
-        val barn2 = tilfeldigPerson(personType = PersonType.BARN)
-        val barn3 = tilfeldigPerson(personType = PersonType.BARN)
-
-        val brevPeriodeGrunnlagMedPersoner = lagBrevPeriodeGrunnlagMedPersoner(
-            type = Vedtaksperiodetype.UTBETALING,
-            minimertUtbetalingsperiodeDetalj = listOf(
-                lagMinimertUtbetalingsperiodeDetalj(barn1.tilRestPerson().tilMinimertPerson()),
-                lagMinimertUtbetalingsperiodeDetalj(søker.tilRestPerson().tilMinimertPerson()),
-            ),
-            begrunnelser = listOf(
-                lagBrevBegrunnelseGrunnlagMedPersoner(
-                    vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON,
-                    personIdenter = listOf(
-                        barn3.aktør.aktivFødselsnummer()
-                    ),
-                ),
-                lagBrevBegrunnelseGrunnlagMedPersoner(
-                    vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET,
-                    personIdenter = listOf(
-                        barn2.aktør.aktivFødselsnummer()
-                    ),
-                ),
-            )
-        )
-
-        val personerIPersongrunnlag = listOf(barn1, barn2, barn3, søker).map { it.tilMinimertPerson() }
-
-        val barnIPeriode = brevPeriodeGrunnlagMedPersoner.finnBarnIInnvilgelsePeriode(personerIPersongrunnlag)
-
-        Assertions.assertEquals(2, barnIPeriode.size)
-        Assertions.assertTrue(
-            barnIPeriode.any { it.personIdent == barn1.personIdent.ident } &&
-                barnIPeriode.any { it.personIdent == barn2.personIdent.ident }
         )
     }
 }
