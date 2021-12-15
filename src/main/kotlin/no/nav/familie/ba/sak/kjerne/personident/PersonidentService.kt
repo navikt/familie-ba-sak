@@ -30,7 +30,7 @@ class PersonidentService(
         return if (aktør?.harIdent(fødselsnummer = nyIdent.ident) == false) {
             logger.info("Legger til ny ident")
             secureLogger.info("Legger til ny ident ${nyIdent.ident} på aktør ${aktør.aktørId}")
-            opprettPersonIdent(aktør, nyIdent.ident)
+            opprettPersonIdent(aktør, nyIdent.ident, false)
         } else aktør
     }
 
@@ -46,11 +46,7 @@ class PersonidentService(
             .filter { it.gruppe == "FOLKEREGISTERIDENT" }
             .map { it.ident }
 
-    fun hentDummyAktørId(ident: String): Aktør {
-        return Aktør(aktørId = DUMMY_AKTØR_ID).also { it.personidenter.add(Personident(ident, it)) }
-    }
-
-    fun hentOgLagreAktør(ident: String): Aktør {
+    fun hentOgLagreAktør(ident: String, ikkeLagre: Boolean = false): Aktør {
         // Noter at ident kan være både av typen aktørid eller fødselsnummer (d- og f nummer)
         val personident = personidentRepository.findByFødselsnummerOrNull(ident)
         if (personident != null) {
@@ -73,10 +69,10 @@ class PersonidentService(
 
         val aktørPersistert = aktørIdRepository.findByAktørIdOrNull(aktørIdStr)
         if (aktørPersistert != null) {
-            return opprettPersonIdent(aktørPersistert, fødselsnummerAktiv)
+            return opprettPersonIdent(aktørPersistert, fødselsnummerAktiv, ikkeLagre)
         }
 
-        return opprettAktørIdOgPersonident(aktørIdStr, fødselsnummerAktiv)
+        return opprettAktørIdOgPersonident(aktørIdStr, fødselsnummerAktiv, ikkeLagre)
     }
 
     fun hentOgLagreAktørIder(barnasFødselsnummer: List<String>): List<Aktør> {
@@ -92,16 +88,21 @@ class PersonidentService(
             ?: alleIdenter.first { it.aktiv }.fødselsnummer
     }
 
-    private fun opprettAktørIdOgPersonident(aktørIdStr: String, fødselsnummer: String): Aktør =
-        aktørIdRepository.saveAndFlush(
-            Aktør(aktørId = aktørIdStr).also {
-                it.personidenter.add(
-                    Personident(fødselsnummer = fødselsnummer, aktør = it)
-                )
-            }
-        )
+    private fun opprettAktørIdOgPersonident(aktørIdStr: String, fødselsnummer: String, ikkeLagre: Boolean): Aktør {
+        val aktør = Aktør(aktørId = aktørIdStr).also {
+            it.personidenter.add(
+                Personident(fødselsnummer = fødselsnummer, aktør = it)
+            )
+        }
 
-    private fun opprettPersonIdent(aktør: Aktør, fødselsnummer: String): Aktør {
+        return if (ikkeLagre) {
+            aktør
+        } else {
+            aktørIdRepository.saveAndFlush(aktør)
+        }
+    }
+
+    private fun opprettPersonIdent(aktør: Aktør, fødselsnummer: String, ikkeLagre: Boolean): Aktør {
         aktør.personidenter.filter { it.aktiv }.map {
             it.aktiv = false
             it.gjelderTil = LocalDateTime.now()
@@ -111,7 +112,11 @@ class PersonidentService(
         aktør.personidenter.add(
             Personident(fødselsnummer = fødselsnummer, aktør = aktør)
         )
-        return aktørIdRepository.saveAndFlush(aktør)
+        return if (ikkeLagre) {
+            aktør
+        } else {
+            aktørIdRepository.saveAndFlush(aktør)
+        }
     }
 
     private fun filtrerAktivtFødselsnummer(identerFraPdl: List<IdentInformasjon>) =
@@ -127,8 +132,6 @@ class PersonidentService(
             )
 
     companion object {
-        private const val DUMMY_AKTØR_ID = "0000000000000"
-
         val logger = LoggerFactory.getLogger(PersonidentService::class.java)
         val secureLogger = LoggerFactory.getLogger("secureLogger")
     }
