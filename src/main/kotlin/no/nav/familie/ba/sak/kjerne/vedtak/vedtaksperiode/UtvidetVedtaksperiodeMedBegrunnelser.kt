@@ -17,6 +17,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilRestVedtaksbegrunnelse
 import no.nav.fpsak.tidsserie.LocalDateInterval
 import no.nav.fpsak.tidsserie.LocalDateSegment
+import org.slf4j.LoggerFactory
 import java.time.LocalDate
 
 data class UtvidetVedtaksperiodeMedBegrunnelser(
@@ -60,15 +61,28 @@ fun VedtaksperiodeMedBegrunnelser.tilUtvidetVedtaksperiodeMedBegrunnelser(
                     it.endretUtbetalingAndeler.isEmpty()
                 }
             }
-            val vertikaltSegmentForVedtaksperiode =
-                if (this.type == Vedtaksperiodetype.FORTSATT_INNVILGET)
-                    hentLøpendeAndelForVedtaksperiode(andelerForVedtaksperiodetype)
-                else hentVertikaltSegmentForVedtaksperiode(andelerForVedtaksperiodetype)
 
-            val andelerForSegment =
-                hentAndelerForSegment(andelerForVedtaksperiodetype, vertikaltSegmentForVedtaksperiode)
+            if (andelerForVedtaksperiodetype.isEmpty()) emptyList()
+            else {
+                val vertikaltSegmentForVedtaksperiode =
+                    if (this.type == Vedtaksperiodetype.FORTSATT_INNVILGET)
+                        hentLøpendeAndelForVedtaksperiode(andelerForVedtaksperiodetype)
+                    else hentVertikaltSegmentForVedtaksperiode(andelerForVedtaksperiodetype)
 
-            andelerForSegment.lagUtbetalingsperiodeDetaljer(personopplysningGrunnlag)
+                if (vertikaltSegmentForVedtaksperiode == null) {
+                    LoggerFactory.getLogger(VedtaksperiodeMedBegrunnelser::class.java)
+                        .error("Finner ikke segment for vedtaksperiode $this. Se securelogger for mer informasjon.")
+                    LoggerFactory.getLogger("secureLogger")
+                        .info("Finner ikke segment for vedtaksperiode $this. Alle andeler=$andelerTilkjentYtelse, andelerForVedtaksperiode=$andelerForVedtaksperiodetype.")
+
+                    emptyList()
+                } else {
+                    val andelerForSegment =
+                        hentAndelerForSegment(andelerForVedtaksperiodetype, vertikaltSegmentForVedtaksperiode)
+
+                    andelerForSegment.lagUtbetalingsperiodeDetaljer(personopplysningGrunnlag)
+                }
+            }
         } else {
             emptyList()
         }
@@ -106,7 +120,7 @@ private fun VedtaksperiodeMedBegrunnelser.hentVertikaltSegmentForVedtaksperiode(
     .utledSegmenter()
     .find { localDateSegment ->
         localDateSegment.fom == this.fom || localDateSegment.tom == this.tom
-    } ?: throw Feil("Finner ikke segment for vedtaksperiode (${this.fom}, ${this.tom})")
+    }
 
 private fun hentAndelerForSegment(
     andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
