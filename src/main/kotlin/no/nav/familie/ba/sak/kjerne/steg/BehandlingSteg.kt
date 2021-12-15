@@ -174,7 +174,7 @@ fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType): StegTyp
                 else -> throw IllegalStateException("StegType ${utførendeStegType.displayName()} ugyldig ved migrering")
             }
         }
-        BehandlingÅrsak.ENDRE_MIGRERINGSDATO -> {
+        BehandlingÅrsak.ENDRE_MIGRERINGSDATO, BehandlingÅrsak.HELMANUELL_MIGRERING -> {
             when (utførendeStegType) {
                 REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
                 VILKÅRSVURDERING -> BEHANDLINGSRESULTAT
