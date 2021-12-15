@@ -1,20 +1,28 @@
 package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
 import io.mockk.verify
+import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
+import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService
+import no.nav.familie.ba.sak.kjerne.beregning.SatsService.sisteUtvidetSatsTilTester
+import no.nav.familie.ba.sak.kjerne.beregning.SatsService.tilleggOrdinærSatsTilTester
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenario
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenarioPerson
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.defaultBostedsadresseHistorikk
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.task.BehandleFødselshendelseTask
 import no.nav.familie.ba.sak.task.OpprettTaskService
@@ -36,7 +44,11 @@ class FødselshendelseHenleggelseTest(
     @Autowired private val behandlingService: BehandlingService,
     @Autowired private val personidentService: PersonidentService,
     @Autowired private val vedtakService: VedtakService,
-    @Autowired private val stegService: StegService
+    @Autowired private val stegService: StegService,
+    @Autowired private val persongrunnlagService: PersongrunnlagService,
+    @Autowired private val vilkårsvurderingService: VilkårsvurderingService,
+    @Autowired private val vedtaksperiodeService: VedtaksperiodeService,
+    @Autowired private val utvidetBehandlingService: UtvidetBehandlingService
 ) : AbstractVerdikjedetest() {
 
     @Test
@@ -261,5 +273,76 @@ class FødselshendelseHenleggelseTest(
 
         assertEquals(Resultat.IKKE_OPPFYLT, borMedSøkerVikårForbarn?.resultat)
         assertEquals(Resultat.IKKE_OPPFYLT, bosattIRiketVikårForbarn?.resultat)
+    }
+
+    @Test
+    fun `Skal henlegge fødselshendelse på grunn av at mor mottar utvidet barnetrygd (filtreringsregel)`() {
+        val scenario = mockServerKlient().lagScenario(
+            RestScenario(
+                søker = RestScenarioPerson(
+                    fødselsdato = now().minusYears(26).toString(),
+                    fornavn = "Mor",
+                    etternavn = "Søker"
+                ),
+                barna = listOf(
+                    RestScenarioPerson(
+                        fødselsdato = now().minusMonths(2).toString(),
+                        fornavn = "Barn",
+                        etternavn = "Barnesen",
+                    ),
+                    RestScenarioPerson(
+                        fødselsdato = now().minusYears(2).toString(),
+                        fornavn = "Barn",
+                        etternavn = "Barnesen",
+                    )
+                )
+            )
+        )
+
+        val behandling = kjørStegprosessForFGB(
+            tilSteg = StegType.BEHANDLING_AVSLUTTET,
+            søkerFnr = scenario.søker.ident!!,
+            barnasIdenter = listOf(scenario.barna.last().ident!!),
+            fagsakService = fagsakService,
+            vedtakService = vedtakService,
+            persongrunnlagService = persongrunnlagService,
+            vilkårsvurderingService = vilkårsvurderingService,
+            stegService = stegService,
+            vedtaksperiodeService = vedtaksperiodeService,
+            behandlingUnderkategori = BehandlingUnderkategori.UTVIDET
+        )
+
+        assertEquals(BehandlingUnderkategori.UTVIDET, behandling.underkategori)
+        assertEquals(
+            tilleggOrdinærSatsTilTester.beløp + sisteUtvidetSatsTilTester.beløp,
+            hentNåværendeEllerNesteMånedsUtbetaling(
+                behandling = utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandling.id)
+            )
+        )
+
+        val revurdering = behandleFødselshendelse(
+            nyBehandlingHendelse = NyBehandlingHendelse(
+                morsIdent = scenario.søker.ident,
+                barnasIdenter = listOf(scenario.barna.first().ident!!)
+            ),
+            behandleFødselshendelseTask = behandleFødselshendelseTask,
+            fagsakService = fagsakService,
+            behandlingService = behandlingService,
+            personidentService = personidentService,
+            vedtakService = vedtakService,
+            stegService = stegService
+        )
+
+        assertEquals(BehandlingUnderkategori.UTVIDET, revurdering?.underkategori)
+        assertEquals(BehandlingResultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE, revurdering?.resultat)
+        assertEquals(StegType.BEHANDLING_AVSLUTTET, revurdering?.steg)
+
+        verify(exactly = 1) {
+            opprettTaskService.opprettOppgaveTask(
+                behandlingId = revurdering!!.id,
+                oppgavetype = Oppgavetype.VurderLivshendelse,
+                beskrivelse = "Fødselshendelse: Mor mottar utvidet barnetrygd."
+            )
+        }
     }
 }

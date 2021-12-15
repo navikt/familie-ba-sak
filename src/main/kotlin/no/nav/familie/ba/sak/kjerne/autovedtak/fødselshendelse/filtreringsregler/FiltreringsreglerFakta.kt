@@ -7,6 +7,7 @@ import java.time.LocalDate
 
 data class FiltreringsreglerFakta(
     val mor: Person,
+    val morMottarLøpendeUtvidet: Boolean = false,
     val barnaFraHendelse: List<Person>,
     val restenAvBarna: List<PersonInfo>,
     val morLever: Boolean,
