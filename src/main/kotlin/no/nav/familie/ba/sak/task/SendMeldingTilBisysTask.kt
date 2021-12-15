@@ -1,6 +1,12 @@
 package no.nav.familie.ba.sak.task
 
+import no.nav.familie.ba.sak.common.MånedPeriode
+import no.nav.familie.ba.sak.common.isSameOrAfter
+import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.statistikk.producer.KafkaProducer
@@ -21,7 +27,8 @@ import java.util.Properties
 class SendMeldingTilBisysTask(
     private val behandlingService: BehandlingService,
     private val kafkaProducer: KafkaProducer,
-    private val tilkjentYtelseRepository: TilkjentYtelseRepository
+    private val tilkjentYtelseRepository: TilkjentYtelseRepository,
+    private val behandlingRepository: BehandlingRepository,
 ) : AsyncTaskStep {
 
     private val logger = LoggerFactory.getLogger(SendMeldingTilBisysTask::class.java)
@@ -44,6 +51,68 @@ class SendMeldingTilBisysTask(
         return tilkjentYtelseRepository.findByBehandlingOptional(behandlingId)?.opphørFom!!
     }
 
+    fun finnEndretPerioder(behandling: Behandling): Map<String, List<EndretPeriode>> {
+        val iverksatteBehandlinger =
+            behandlingRepository.finnIverksatteBehandlinger(fagsakId = behandling.fagsak.id)
+
+        val forrigeIverksatteBehandling = Behandlingutils.hentForrigeIverksatteBehandling(
+            iverksatteBehandlinger = iverksatteBehandlinger,
+            behandlingFørFølgende = behandling
+        ) ?: error("Finnes ikke forrige behandling for behandling ${behandling.id}")
+
+        val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandling.id)
+        val forrigeTilkjentYtelse = tilkjentYtelseRepository.findByBehandling(forrigeIverksatteBehandling.id)
+
+        val endretPerioder: MutableMap<String, MutableList<EndretPeriode>> = mutableMapOf()
+
+        forrigeTilkjentYtelse.andelerTilkjentYtelse.groupBy { it.personIdent }.entries.forEach { entry ->
+            val nyAndelerTilkjentYtelse =
+                tilkjentYtelse.andelerTilkjentYtelse.filter { it.personIdent == entry.key }.sortedBy { it.stønadFom }
+            entry.value.forEach {
+                var forblePeriode: MånedPeriode? = it.periode
+                val prosent = it.prosent
+                if (!endretPerioder.contains(it.personIdent)) {
+                    endretPerioder[it.personIdent] = mutableListOf()
+                }
+                nyAndelerTilkjentYtelse.forEach {
+                    val intersectPerioder = forblePeriode!!.intersect(it.periode)
+                    if (intersectPerioder.first != null) {
+                        endretPerioder[it.personIdent]!!.add(
+                            EndretPeriode(
+                                fom = forblePeriode!!.fom,
+                                tom = it.periode.fom.minusMonths(1),
+                                type = EndretType.OPPHØRT
+                            )
+                        )
+                    }
+                    if (intersectPerioder.second != null && it.prosent < prosent) {
+                        endretPerioder[it.personIdent]!!.add(
+                            EndretPeriode(
+                                fom = latest(it.periode.fom, forblePeriode!!.fom),
+                                tom = earlist(it.periode.tom, forblePeriode!!.tom),
+                                type = EndretType.REDUSERT
+                            )
+                        )
+                    }
+                    forblePeriode = intersectPerioder.third
+                    if (forblePeriode == null) {
+                        return@forEach
+                    }
+                }
+                if (forblePeriode != null && !forblePeriode!!.erTom()) {
+                    endretPerioder[it.personIdent]!!.add(
+                        EndretPeriode(
+                            fom = forblePeriode!!.fom,
+                            tom = forblePeriode!!.tom,
+                            type = EndretType.OPPHØRT
+                        )
+                    )
+                }
+            }
+        }
+        return endretPerioder
+    }
+
     companion object {
         const val TASK_STEP_TYPE = "sendMeldingOmOpphørTilBisys"
 
@@ -58,3 +127,35 @@ class SendMeldingTilBisysTask(
         }
     }
 }
+
+enum class EndretType {
+    OPPHØRT,
+    REDUSERT,
+    ØKT,
+}
+
+data class EndretPeriode(
+    val fom: YearMonth,
+    val tom: YearMonth,
+    val type: EndretType,
+)
+
+inline fun earlist(yearMonth1: YearMonth, yearMonth2: YearMonth): YearMonth {
+    return if (yearMonth1.isSameOrBefore(yearMonth2)) yearMonth1 else yearMonth2
+}
+
+inline fun latest(yearMonth1: YearMonth, yearMonth2: YearMonth): YearMonth {
+    return if (yearMonth1.isSameOrAfter(yearMonth2)) yearMonth1 else yearMonth2
+}
+
+inline fun MånedPeriode.intersect(periode: MånedPeriode): Triple<MånedPeriode?, MånedPeriode?, MånedPeriode?> {
+    val overlappetFom = latest(this.fom, periode.fom)
+    val overlappetTom = earlist(this.tom, periode.tom)
+    return Triple(
+        if (this.fom.isSameOrAfter(periode.fom)) null else MånedPeriode(this.fom, periode.fom.minusMonths(1)),
+        if (overlappetTom.isBefore(overlappetFom)) null else MånedPeriode(overlappetFom, overlappetTom),
+        if (this.tom.isSameOrBefore(periode.tom)) null else MånedPeriode(periode.tom.plusMonths(1), this.tom)
+    )
+}
+
+inline fun MånedPeriode.erTom() = fom.isAfter(tom)
