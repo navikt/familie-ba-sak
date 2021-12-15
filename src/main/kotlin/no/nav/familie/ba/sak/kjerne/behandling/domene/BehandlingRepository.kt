@@ -97,4 +97,7 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
 
     @Query("SELECT b FROM Behandling b WHERE b.opprettetÅrsak = 'FØDSELSHENDELSE' AND b.opprettetTidspunkt >= current_date")
     fun finnFødselshendelserOpprettetIdag(): List<Behandling>
+
+    // TODO: implement query
+    fun hentAlleBehandlingerMedOpphørSmåbarnstilleggInneværendeMåned(): List<Behandling> = emptyList()
 }
