@@ -32,7 +32,7 @@ data class BrevPeriodeGrunnlag(
                         tom = this.tom
                     ),
                     brevGrunnlag = brevGrunnlag,
-                    identerMedUtbetaling = this.minimerteUtbetalingsperiodeDetaljer
+                    identerMedUtbetalingPåPeriode = this.minimerteUtbetalingsperiodeDetaljer
                         .map { utbetalingsperiodeDetalj -> utbetalingsperiodeDetalj.person.personIdent },
                     erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak
                 )

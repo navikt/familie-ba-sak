@@ -21,7 +21,7 @@ fun hentPersonidenterGjeldendeForBegrunnelse(
     periode: NullablePeriode,
     vedtakBegrunnelseType: VedtakBegrunnelseType,
     brevGrunnlag: BrevGrunnlag,
-    identerMedUtbetaling: List<String>,
+    identerMedUtbetalingPåPeriode: List<String>,
     erFørsteVedtaksperiodePåFagsak: Boolean,
 ): List<String> {
 
@@ -29,8 +29,8 @@ fun hentPersonidenterGjeldendeForBegrunnelse(
 
     return when {
         triggesAv.vilkår.contains(Vilkår.UTVIDET_BARNETRYGD) || triggesAv.småbarnstillegg ->
-            hentPersonerForUtvidetOgSmåbarnstillegg(
-                identerMedUtbetaling = identerMedUtbetaling,
+            hentPersonerForUtvidetOgSmåbarnstilleggBegrunnelse(
+                identerMedUtbetaling = identerMedUtbetalingPåPeriode,
                 brevGrunnlag = brevGrunnlag,
                 periode = periode,
             )
@@ -45,7 +45,7 @@ fun hentPersonidenterGjeldendeForBegrunnelse(
             else
                 error("Legg til opplysningsplikt ikke oppfylt begrunnelse men det er ikke person med det resultat")
 
-        erFortsattInnvilgetBegrunnelse -> identerMedUtbetaling
+        erFortsattInnvilgetBegrunnelse -> identerMedUtbetalingPåPeriode
 
         triggesAv.etterEndretUtbetaling ->
             hentPersonerForEtterEndretUtbetalingsperiode(
@@ -65,7 +65,7 @@ fun hentPersonidenterGjeldendeForBegrunnelse(
                 aktuellePersonerForVedtaksperiode = hentAktuellePersonerForVedtaksperiode(
                     brevGrunnlag.personerPåBehandling,
                     vedtakBegrunnelseType,
-                    identerMedUtbetaling
+                    identerMedUtbetalingPåPeriode
                 ),
                 triggesAv = triggesAv,
                 erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak
@@ -81,22 +81,26 @@ fun hentPersonidenterGjeldendeForBegrunnelse(
  * sendt ut til partner, og delt bosted er endret til at det ikke er noen utbetaling, ønsker vi fremdeles å ta med
  * barna uten utbetaling i begrunnelsen.
  */
-private fun hentPersonerForUtvidetOgSmåbarnstillegg(
+private fun hentPersonerForUtvidetOgSmåbarnstilleggBegrunnelse(
     identerMedUtbetaling: List<String>,
     brevGrunnlag: BrevGrunnlag,
     periode: NullablePeriode
-): List<String> = identerMedUtbetaling +
-    brevGrunnlag
+): List<String> {
+    val identerFraSammenfallendeEndringsperioder = brevGrunnlag
         .minimerteEndredeUtbetalingAndeler
         .somOverlapper(periode.tilNullableMånedPeriode())
         .map { it.personIdent }
 
+    return identerMedUtbetaling +
+        identerFraSammenfallendeEndringsperioder
+}
+
 private fun hentAktuellePersonerForVedtaksperiode(
     personerPåBehandling: List<MinimertPerson>,
     vedtakBegrunnelseType: VedtakBegrunnelseType,
-    identerMedUtbetaling: List<String>
+    identerMedUtbetalingPåPeriode: List<String>
 ): List<MinimertPerson> = personerPåBehandling.filter { person ->
     if (vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGET) {
-        identerMedUtbetaling.contains(person.personIdent) || person.type == PersonType.SØKER
+        identerMedUtbetalingPåPeriode.contains(person.personIdent) || person.type == PersonType.SØKER
     } else true
 }

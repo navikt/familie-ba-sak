@@ -15,7 +15,7 @@ data class BrevBegrunnelseGrunnlag(
     fun tilBrevBegrunnelseGrunnlagMedPersoner(
         periode: NullablePeriode,
         brevGrunnlag: BrevGrunnlag,
-        identerMedUtbetaling: List<String>,
+        identerMedUtbetalingPåPeriode: List<String>,
         erFørsteVedtaksperiodePåFagsak: Boolean,
     ): BrevBegrunnelseGrunnlagMedPersoner {
         val personidenterGjeldendeForBegrunnelse: List<String> = hentPersonidenterGjeldendeForBegrunnelse(
@@ -23,7 +23,7 @@ data class BrevBegrunnelseGrunnlag(
             vedtakBegrunnelseType = this.vedtakBegrunnelseType,
             periode = periode,
             brevGrunnlag = brevGrunnlag,
-            identerMedUtbetaling = identerMedUtbetaling,
+            identerMedUtbetalingPåPeriode = identerMedUtbetalingPåPeriode,
             erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
         )
 
