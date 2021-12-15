@@ -347,7 +347,7 @@ class VedtaksperiodeServiceUtilsTest {
                 personerPåBehandling = persongrunnlag.personer.map { it.tilMinimertPerson() },
                 minimerteEndredeUtbetalingAndeler = emptyList(),
             ),
-            identerMedUtbetaling = identerMedUtbetaling,
+            identerMedUtbetalingPåPeriode = identerMedUtbetaling,
             erFørsteVedtaksperiodePåFagsak = false
         )
 
@@ -398,7 +398,7 @@ class VedtaksperiodeServiceUtilsTest {
                 minimerteEndredeUtbetalingAndeler = endredeUtbetalingAndeler
                     .map { it.tilMinimertEndretUtbetalingAndel() },
             ),
-            identerMedUtbetaling = identerMedUtbetaling,
+            identerMedUtbetalingPåPeriode = identerMedUtbetaling,
             erFørsteVedtaksperiodePåFagsak = false
         )
 

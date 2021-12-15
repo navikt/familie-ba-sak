@@ -2,9 +2,11 @@ package no.nav.familie.ba.sak.kjerne.brev
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.NullableMånedPeriode
 import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.erSenereEnnInneværendeMåned
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat.AVSLÅTT
@@ -41,6 +43,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.EndretUtbetal
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.FortsattInnvilgetBrevPeriode
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.InnvilgelseBrevPeriode
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.OpphørBrevPeriode
+import no.nav.familie.ba.sak.kjerne.brev.domene.somOverlapper
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertPersonResultat
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
@@ -51,7 +54,6 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Personopplysning
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.domene.Totrinnskontroll
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.hjemlerTilhørendeFritekst
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Begrunnelse
@@ -273,7 +275,7 @@ fun BrevPeriodeGrunnlag.tilBrevPeriode(
         Vedtaksperiodetype.UTBETALING -> brevPeriodeGrunnlagMedPersoner.hentInnvilgelseBrevPeriode(
             tomDato = tomDato,
             begrunnelserOgFritekster = begrunnelserOgFritekster,
-            personerIPersongrunnlag = brevGrunnlag.personerPåBehandling
+            brevGrunnlag = brevGrunnlag,
         )
 
         Vedtaksperiodetype.ENDRET_UTBETALING -> brevPeriodeGrunnlagMedPersoner.hentEndretUtbetalingBrevPeriode(
@@ -343,9 +345,9 @@ fun BrevPeriodeGrunnlagMedPersoner.hentEndretUtbetalingBrevPeriode(
 private fun BrevPeriodeGrunnlagMedPersoner.hentInnvilgelseBrevPeriode(
     tomDato: String?,
     begrunnelserOgFritekster: List<Begrunnelse>,
-    personerIPersongrunnlag: List<MinimertPerson>,
+    brevGrunnlag: BrevGrunnlag,
 ): InnvilgelseBrevPeriode {
-    val barnIPeriode = this.finnBarnIInnvilgelsePeriode(personerIPersongrunnlag)
+    val barnIPeriode = this.finnBarnIInnvilgelsePeriode(brevGrunnlag)
 
     return InnvilgelseBrevPeriode(
         fom = this.fom!!.tilDagMånedÅr(),
@@ -361,17 +363,23 @@ private fun BrevPeriodeGrunnlagMedPersoner.hentInnvilgelseBrevPeriode(
  * Dersom perioden gjelder søker skal alle barna i behandlingen komme med selv om de ikke har utbetaling.
  */
 fun BrevPeriodeGrunnlagMedPersoner.finnBarnIInnvilgelsePeriode(
-    personerPåBehandling: List<MinimertPerson>,
+    brevGrunnlag: BrevGrunnlag,
 ): List<MinimertPerson> {
-    val identerIBegrunnelsene = this.begrunnelser
-        .filter { it.vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGET }
-        .flatMap { it.personIdenter }
+    val identerFraSammenfallendeEndringsperioder = brevGrunnlag
+        .minimerteEndredeUtbetalingAndeler
+        .somOverlapper(
+            NullableMånedPeriode(
+                fom = this.fom?.toYearMonth(),
+                tom = this.tom?.toYearMonth()
+            )
+        ).map { it.personIdent }
+
     val identerMedUtbetaling = this.minimerteUtbetalingsperiodeDetaljer.map { it.person.personIdent }
 
-    val barnIPeriode = (identerIBegrunnelsene + identerMedUtbetaling)
+    val barnIPeriode = (identerFraSammenfallendeEndringsperioder + identerMedUtbetaling)
         .toSet()
         .mapNotNull { personIdent ->
-            personerPåBehandling.find { it.personIdent == personIdent }
+            brevGrunnlag.personerPåBehandling.find { it.personIdent == personIdent }
         }
         .filter { it.type == PersonType.BARN }
 
