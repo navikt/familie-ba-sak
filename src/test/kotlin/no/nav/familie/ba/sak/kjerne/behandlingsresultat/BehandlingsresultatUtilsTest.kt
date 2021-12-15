@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
@@ -17,7 +17,7 @@ class BehandlingsresultatUtilsTest {
 
     val søker = tilfeldigPerson()
 
-    private val barn1Ident = randomFnr()
+    private val barn1Aktør = randomAktørId()
 
     @Test
     fun `Skal kaste feil dersom det finnes uvurderte ytelsepersoner`() {
@@ -25,7 +25,7 @@ class BehandlingsresultatUtilsTest {
             BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
                 listOf(
                     YtelsePerson(
-                        personIdent = barn1Ident,
+                        aktør = barn1Aktør,
                         ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                         kravOpprinnelse = listOf(KravOpprinnelse.TIDLIGERE),
                         resultater = setOf(YtelsePersonResultat.IKKE_VURDERT)

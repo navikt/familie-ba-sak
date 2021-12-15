@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.task
 
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonRepository
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
@@ -24,6 +24,7 @@ import java.util.Properties
     maxAntallFeil = 3
 )
 class BehandleAnnullertFødselTask(
+    val personidentService: PersonidentService,
     val taskRepository: TaskRepository,
     val behandlingRepository: BehandlingRepository,
     val personRepository: PersonRepository,
@@ -33,12 +34,12 @@ class BehandleAnnullertFødselTask(
 
     override fun doTask(task: Task) {
         val dto = objectMapper.readValue(task.payload, BehandleAnnullerFødselDto::class.java)
-        val barnasIdenter = dto.barnasIdenter.map { PersonIdent(it) }
+        val barnasAktørIder = personidentService.hentOgLagreAktørIder(dto.barnasIdenter)
 
         val tasker = taskRepositoryForAnnullertFødsel.hentTaskForTidligereHendelse(dto.tidligereHendelseId)
         if (tasker.isEmpty()) {
             logger.info("Finnes ikke åpen task for annullertfødsel tidligere Id = ${dto.tidligereHendelseId}. Forsøker å finne aktiv behandling.")
-            if (personRepository.findByPersonIdenter(barnasIdenter).any {
+            if (personRepository.findByAktører(barnasAktørIder).any {
                 behandlingRepository.finnBehandling(it.personopplysningGrunnlag.behandlingId).aktiv
             }
             ) {

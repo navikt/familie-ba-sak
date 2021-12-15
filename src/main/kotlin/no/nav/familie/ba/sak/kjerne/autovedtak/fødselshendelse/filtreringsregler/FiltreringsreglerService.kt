@@ -13,16 +13,19 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregle
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.domene.FødselshendelsefiltreringResultatRepository
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
-import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
 class FiltreringsreglerService(
     private val personopplysningerService: PersonopplysningerService,
+    private val personidentService: PersonidentService,
     private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
     private val localDateService: LocalDateService,
     private val fødselshendelsefiltreringResultatRepository: FødselshendelsefiltreringResultatRepository,
@@ -80,20 +83,21 @@ class FiltreringsreglerService(
         nyBehandlingHendelse: NyBehandlingHendelse,
         behandling: Behandling
     ): List<FødselshendelsefiltreringResultat> {
-        val morsIdent = nyBehandlingHendelse.morsIdent
-        val barnasIdenter = nyBehandlingHendelse.barnasIdenter
+        val morsAktørId = personidentService.hentOgLagreAktør(nyBehandlingHendelse.morsIdent)
+        val barnasAktørId = personidentService.hentOgLagreAktørIder(nyBehandlingHendelse.barnasIdenter)
 
         val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
             ?: throw IllegalStateException("Fant ikke personopplysninggrunnlag for behandling ${behandling.id}")
-        val barnaFraHendelse = personopplysningGrunnlag.barna.filter { barnasIdenter.contains(it.personIdent.ident) }
+        val barnaFraHendelse = personopplysningGrunnlag.barna.filter { barnasAktørId.contains(it.aktør) }
 
         val fakta = FiltreringsreglerFakta(
             mor = personopplysningGrunnlag.søker,
+            morMottarLøpendeUtvidet = behandling.underkategori == BehandlingUnderkategori.UTVIDET,
             barnaFraHendelse = barnaFraHendelse,
-            restenAvBarna = finnRestenAvBarnasPersonInfo(morsIdent, barnaFraHendelse),
-            morLever = !personopplysningerService.hentDødsfall(Ident(morsIdent)).erDød,
-            barnaLever = barnasIdenter.none { personopplysningerService.hentDødsfall(Ident(it)).erDød },
-            morHarVerge = personopplysningerService.harVerge(morsIdent).harVerge,
+            restenAvBarna = finnRestenAvBarnasPersonInfo(morsAktørId, barnaFraHendelse),
+            morLever = !personopplysningerService.hentDødsfall(morsAktørId).erDød,
+            barnaLever = barnasAktørId.none { personopplysningerService.hentDødsfall(it).erDød },
+            morHarVerge = personopplysningerService.harVerge(morsAktørId).harVerge,
             dagensDato = localDateService.now()
         )
         val evalueringer = evaluerFiltreringsregler(fakta)
@@ -101,7 +105,7 @@ class FiltreringsreglerService(
 
         logger.info("Resultater fra filtreringsregler på behandling $behandling: ${evalueringer.map { "${it.identifikator}: ${it.resultat}" }}")
         if (!evalueringer.erOppfylt()) {
-            logger.info("Resultater fra filtreringsregler på behandling $behandling: (Fakta: ${fakta.convertDataClassToJson()}): ${evalueringer.map { "${it.identifikator}: ${it.resultat}" }}")
+            secureLogger.info("Resultater fra filtreringsregler på behandling $behandling: (Fakta: ${fakta.convertDataClassToJson()}): ${evalueringer.map { "${it.identifikator}: ${it.resultat}" }}")
         }
 
         return lagreFiltreringsregler(
@@ -111,11 +115,11 @@ class FiltreringsreglerService(
         )
     }
 
-    private fun finnRestenAvBarnasPersonInfo(morsIndent: String, barnaFraHendelse: List<Person>): List<PersonInfo> {
-        return personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(morsIndent).forelderBarnRelasjon.filter {
-            it.relasjonsrolle == FORELDERBARNRELASJONROLLE.BARN && barnaFraHendelse.none { barn -> barn.personIdent.ident == it.personIdent.id }
+    private fun finnRestenAvBarnasPersonInfo(morsAktørId: Aktør, barnaFraHendelse: List<Person>): List<PersonInfo> {
+        return personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(morsAktørId).forelderBarnRelasjon.filter {
+            it.relasjonsrolle == FORELDERBARNRELASJONROLLE.BARN && barnaFraHendelse.none { barn -> barn.aktør == it.aktør }
         }.map {
-            personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(it.personIdent.id)
+            personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(it.aktør)
         }
     }
 

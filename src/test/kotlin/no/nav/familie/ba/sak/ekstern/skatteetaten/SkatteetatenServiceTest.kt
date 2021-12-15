@@ -30,7 +30,7 @@ internal class SkatteetatenServiceTest {
         )
         every { infotrygdBarnetrygdClient.hentPersonerMedUtvidetBarnetrygd(any()) } returns SkatteetatenPersonerResponse(
             listOf(
-                SkatteetatenPerson(fagsak.hentAktivIdent().ident, nyesteVedtaksdato.atStartOfDay().minusYears(1))
+                SkatteetatenPerson(fagsak.aktør.aktivFødselsnummer(), nyesteVedtaksdato.atStartOfDay().minusYears(1))
             )
         )
 
@@ -43,13 +43,13 @@ internal class SkatteetatenServiceTest {
 
         assertThat(
             skatteetatenService.finnPersonerMedUtvidetBarnetrygd(nyesteVedtaksdato.year.toString()).brukere
-                .find { it.ident == fagsak.hentAktivIdent().ident }!!.sisteVedtakPaaIdent
+                .find { it.ident == fagsak.aktør.aktivFødselsnummer() }!!.sisteVedtakPaaIdent
         )
             .isEqualTo(nyesteVedtaksdato.atStartOfDay())
 
         assertThat(
             skatteetatenService.finnPersonerMedUtvidetBarnetrygd(nyesteVedtaksdato.year.toString()).brukere
-                .find { it.ident == fagsak2.hentAktivIdent().ident }!!.sisteVedtakPaaIdent
+                .find { it.ident == fagsak2.aktør.aktivFødselsnummer() }!!.sisteVedtakPaaIdent
         )
             .isEqualTo(nyesteVedtaksdato.plusDays(2).atStartOfDay())
     }
@@ -77,13 +77,13 @@ internal class SkatteetatenServiceTest {
 
         assertThat(
             personerMedUtvidetBarnetrygd.brukere
-                .find { it.ident == fagsak.hentAktivIdent().ident }!!.sisteVedtakPaaIdent
+                .find { it.ident == fagsak.aktør.aktivFødselsnummer() }!!.sisteVedtakPaaIdent
         )
             .isEqualTo(vedtaksdato.atStartOfDay())
 
         assertThat(
             personerMedUtvidetBarnetrygd.brukere
-                .find { it.ident == fagsak2.hentAktivIdent().ident }!!.sisteVedtakPaaIdent
+                .find { it.ident == fagsak2.aktør.aktivFødselsnummer() }!!.sisteVedtakPaaIdent
         )
             .isEqualTo(vedtaksdato.plusDays(2).atStartOfDay())
     }
@@ -99,7 +99,7 @@ internal class SkatteetatenServiceTest {
             SkatteetatenPersonerResponse(
                 brukere = listOf(
                     SkatteetatenPerson(
-                        fagsak.hentAktivIdent().ident,
+                        fagsak.aktør.aktivFødselsnummer(),
                         vedtaksdato.atStartOfDay()
                     )
                 )
@@ -114,7 +114,7 @@ internal class SkatteetatenServiceTest {
 
         assertThat(
             personerMedUtvidetBarnetrygd.brukere
-                .find { it.ident == fagsak.hentAktivIdent().ident }!!.sisteVedtakPaaIdent
+                .find { it.ident == fagsak.aktør.aktivFødselsnummer() }!!.sisteVedtakPaaIdent
         )
             .isEqualTo(vedtaksdato.atStartOfDay())
     }

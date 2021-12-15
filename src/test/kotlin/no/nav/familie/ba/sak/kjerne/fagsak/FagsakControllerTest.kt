@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
+import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.ekstern.restDomene.FagsakDeltagerRolle
 import no.nav.familie.ba.sak.ekstern.restDomene.RestSøkParam
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
@@ -16,7 +17,11 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.internal.IdentInformasjon
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.personident.AktørIdRepository
+import no.nav.familie.ba.sak.kjerne.personident.Personident
+import no.nav.familie.ba.sak.kjerne.personident.PersonidentRepository
+import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -48,6 +53,15 @@ class FagsakControllerTest(
     private val persongrunnlagService: PersongrunnlagService,
 
     @Autowired
+    private val personidentService: PersonidentService,
+
+    @Autowired
+    private val aktørIdRepository: AktørIdRepository,
+
+    @Autowired
+    private val personidentRepository: PersonidentRepository,
+
+    @Autowired
     private val databaseCleanupService: DatabaseCleanupService,
 ) : AbstractSpringIntegrationTest(mockPersonopplysningerService) {
 
@@ -66,7 +80,7 @@ class FagsakControllerTest(
         } returns listOf(IdentInformasjon(ident = fnr, historisk = true, gruppe = "FOLKEREGISTERIDENT"))
 
         fagsakController.hentEllerOpprettFagsak(FagsakRequest(personIdent = fnr))
-        assertEquals(fnr, fagsakService.hent(PersonIdent(fnr))?.hentAktivIdent()?.ident)
+        assertEquals(fnr, fagsakService.hent(tilAktør(fnr))?.aktør?.aktivFødselsnummer())
     }
 
     @Test
@@ -109,7 +123,7 @@ class FagsakControllerTest(
 
         val nyRestFagsak = fagsakController.hentEllerOpprettFagsak(FagsakRequest(personIdent = fnr))
         assertEquals(Ressurs.Status.SUKSESS, nyRestFagsak.body?.status)
-        assertEquals(fnr, fagsakService.hent(PersonIdent(fnr))?.hentAktivIdent()?.ident)
+        assertEquals(fnr, fagsakService.hent(tilAktør(fnr))?.aktør?.aktivFødselsnummer())
 
         val eksisterendeRestFagsak = fagsakController.hentEllerOpprettFagsak(
             FagsakRequest(
@@ -125,23 +139,20 @@ class FagsakControllerTest(
     fun `Skal returnere eksisterende fagsak på person som allerede finnes med gammel ident`() {
         val fnr = randomFnr()
         val nyttFnr = randomFnr()
+        val aktørId = randomAktørId().aktørId
 
-        every {
-            mockPersonopplysningerService.hentIdenter(Ident(fnr))
-        } returns listOf(
-            IdentInformasjon(ident = fnr, historisk = true, gruppe = "FOLKEREGISTERIDENT")
-        )
+        // Får ikke mockPersonopplysningerService til å virke riktig derfor oppdateres db direkte.
+        val aktør = aktørIdRepository.save(Aktør(aktørId))
+        personidentRepository.save(Personident(fødselsnummer = fnr, aktør = aktør, aktiv = true))
 
         val nyRestFagsak = fagsakController.hentEllerOpprettFagsak(FagsakRequest(personIdent = fnr))
         assertEquals(Ressurs.Status.SUKSESS, nyRestFagsak.body?.status)
-        assertEquals(fnr, fagsakService.hent(PersonIdent(fnr))?.hentAktivIdent()?.ident)
+        assertEquals(fnr, fagsakService.hent(aktør)?.aktør?.aktivFødselsnummer())
 
-        every {
-            mockPersonopplysningerService.hentIdenter(Ident(nyttFnr))
-        } returns listOf(
-            IdentInformasjon(ident = fnr, historisk = true, gruppe = "FOLKEREGISTERIDENT"),
-            IdentInformasjon(ident = nyttFnr, historisk = false, gruppe = "FOLKEREGISTERIDENT")
+        personidentRepository.save(
+            personidentRepository.getById(fnr).also { it.aktiv = false }
         )
+        personidentRepository.save(Personident(fødselsnummer = nyttFnr, aktør = aktør, aktiv = true))
 
         val eksisterendeRestFagsak = fagsakController.hentEllerOpprettFagsak(
             FagsakRequest(
@@ -158,18 +169,14 @@ class FagsakControllerTest(
     fun `Skal returnere eksisterende fagsak på person som allerede finnes basert på aktørid`() {
         val aktørId = randomAktørId()
 
-        every {
-            mockPersonopplysningerService.hentAktivPersonIdent(Ident(aktørId.aktørId))
-        } returns PersonIdent("123")
-
         val nyRestFagsak = fagsakController.hentEllerOpprettFagsak(
-            FagsakRequest(personIdent = null, aktørId = aktørId.aktørId)
+            FagsakRequest(personIdent = aktørId.aktivFødselsnummer(), aktørId = aktørId.aktørId)
         )
         assertEquals(Ressurs.Status.SUKSESS, nyRestFagsak.body?.status)
 
         val eksisterendeRestFagsak = fagsakController.hentEllerOpprettFagsak(
             FagsakRequest(
-                personIdent = null, aktørId = aktørId.aktørId
+                personIdent = aktørId.aktivFødselsnummer(), aktørId = aktørId.aktørId
             )
         )
         assertEquals(Ressurs.Status.SUKSESS, eksisterendeRestFagsak.body?.status)
@@ -178,34 +185,42 @@ class FagsakControllerTest(
 
     @Test
     fun `Skal oppgi person med fagsak som fagsakdeltaker`() {
-        val personIdent = randomFnr()
+        val personAktør = personidentService.hentOgLagreAktør(randomFnr())
 
-        fagsakService.hentEllerOpprettFagsak(PersonIdent(personIdent))
+        fagsakService.hentEllerOpprettFagsak(personAktør.aktivFødselsnummer())
             .also { fagsakService.oppdaterStatus(it, FagsakStatus.LØPENDE) }
 
-        fagsakController.oppgiFagsakdeltagere(RestSøkParam(personIdent, emptyList())).apply {
-            assertEquals(personIdent, body!!.data!!.first().ident)
+        fagsakController.oppgiFagsakdeltagere(RestSøkParam(personAktør.aktivFødselsnummer(), emptyList())).apply {
+            assertEquals(personAktør.aktivFødselsnummer(), body!!.data!!.first().ident)
             assertEquals(FagsakDeltagerRolle.FORELDER, body!!.data!!.first().rolle)
         }
     }
 
     @Test
     fun `Skal oppgi det første barnet i listen som fagsakdeltaker`() {
-        val personIdent = randomFnr()
+        val personAktør = personidentService.hentOgLagreAktør(randomFnr())
+        val søkerAktør = personidentService.hentOgLagreAktør(ClientMocks.søkerFnr[0])
+        val barnaAktør = personidentService.hentOgLagreAktørIder(ClientMocks.barnFnr.toList().subList(0, 1))
 
-        fagsakService.hentEllerOpprettFagsak(PersonIdent(ClientMocks.søkerFnr[0]))
+        fagsakService.hentEllerOpprettFagsak(søkerAktør.aktivFødselsnummer())
 
         val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(ClientMocks.søkerFnr[0]))
         persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(
-            personIdent,
-            ClientMocks.barnFnr.toList().subList(0, 1),
+            personAktør,
+            barnaAktør,
             behandling,
             Målform.NB
         )
 
-        fagsakController.oppgiFagsakdeltagere(RestSøkParam(personIdent, ClientMocks.barnFnr.toList())).apply {
-            assertEquals(ClientMocks.barnFnr.toList().subList(0, 1), body!!.data!!.map { it.ident })
-            assertEquals(listOf(FagsakDeltagerRolle.BARN), body!!.data!!.map { it.rolle })
-        }
+        fagsakController.oppgiFagsakdeltagere(
+            RestSøkParam(
+                personAktør.aktivFødselsnummer(),
+                ClientMocks.barnFnr.toList()
+            )
+        )
+            .apply {
+                assertEquals(ClientMocks.barnFnr.toList().subList(0, 1), body!!.data!!.map { it.ident })
+                assertEquals(listOf(FagsakDeltagerRolle.BARN), body!!.data!!.map { it.rolle })
+            }
     }
 }

@@ -1,11 +1,15 @@
 package no.nav.familie.ba.sak.kjerne.behandling
 
+import io.mockk.every
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
+import no.nav.familie.ba.sak.common.nyOrdinærBehandling
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
+import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
@@ -15,12 +19,14 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
+import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -46,12 +52,40 @@ class BehandlingServiceTest(
     private val databaseCleanupService: DatabaseCleanupService,
 
     @Autowired
-    private val behandlingRepository: BehandlingRepository
-) : AbstractSpringIntegrationTest() {
+    private val behandlingRepository: BehandlingRepository,
+
+    @Autowired
+    private val stegService: StegService,
+
+    @Autowired
+    private val mockPersonopplysningerService: PersonopplysningerService
+) : AbstractSpringIntegrationTest(personopplysningerService = mockPersonopplysningerService) {
 
     @BeforeAll
     fun init() {
         databaseCleanupService.truncate()
+    }
+
+    @Test
+    fun `Skal rulle tilbake behandling om noe feiler etter opprettelse`() {
+        databaseCleanupService.truncate()
+
+        val feilmelding = "Feil ved henting av personinformasjon"
+        every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(any()) } answers {
+            throw Feil(
+                feilmelding
+            )
+        }
+
+        val fnr = randomFnr()
+
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
+        val error = assertThrows<Feil> { stegService.håndterNyBehandlingOgSendInfotrygdFeed(nyOrdinærBehandling(fnr)) }
+
+        assertEquals(feilmelding, error.message)
+
+        val behandlinger = behandlingRepository.finnBehandlinger(fagsakId = fagsak.id)
+        assertEquals(0, behandlinger.size)
     }
 
     @Test

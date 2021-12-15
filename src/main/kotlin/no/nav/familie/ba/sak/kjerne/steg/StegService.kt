@@ -50,11 +50,12 @@ class StegService(
     private val stegFeiletMetrics: Map<StegType, Counter> = initStegMetrikker("feil")
     private val stegFunksjonellFeilMetrics: Map<StegType, Counter> = initStegMetrikker("funksjonell-feil")
 
+    @Transactional
     fun håndterNyBehandlingOgSendInfotrygdFeed(nyBehandling: NyBehandling): Behandling {
         val behandling = håndterNyBehandling(nyBehandling)
         if (behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING) {
             infotrygdFeedService.sendStartBehandlingTilInfotrygdFeed(
-                behandling.fagsak.hentAktivIdent().ident,
+                behandling.fagsak.aktør,
             )
         }
         return behandling
@@ -63,20 +64,37 @@ class StegService(
     @Transactional
     fun håndterNyBehandling(nyBehandling: NyBehandling): Behandling {
         val behandling = behandlingService.opprettBehandling(nyBehandling)
-        val barnasIdenter: List<String>
-        if (nyBehandling.behandlingÅrsak in listOf(BehandlingÅrsak.MIGRERING, BehandlingÅrsak.FØDSELSHENDELSE)) {
-            barnasIdenter = nyBehandling.barnasIdenter
-        } else if (nyBehandling.behandlingType == BehandlingType.FØRSTEGANGSBEHANDLING) {
-            barnasIdenter = emptyList()
-        } else if (nyBehandling.behandlingType in listOf(BehandlingType.REVURDERING, BehandlingType.TEKNISK_ENDRING) ||
-            (
-                nyBehandling.behandlingType == BehandlingType.MIGRERING_FRA_INFOTRYGD &&
-                    nyBehandling.behandlingÅrsak == BehandlingÅrsak.ENDRE_MIGRERINGSDATO
-                )
-        ) {
-            val sisteBehandling = hentSisteAvsluttetBehandling(behandling)
-            barnasIdenter = behandlingService.finnBarnFraBehandlingMedTilkjentYtsele(sisteBehandling.id)
-        } else throw Feil("Ukjent oppførsel ved opprettelse av behandling.")
+        val barnasIdenter: List<String> = when {
+            nyBehandling.behandlingÅrsak in listOf(BehandlingÅrsak.MIGRERING, BehandlingÅrsak.FØDSELSHENDELSE) -> {
+                nyBehandling.barnasIdenter
+            }
+            nyBehandling.behandlingÅrsak == BehandlingÅrsak.HELMANUELL_MIGRERING -> {
+                if (behandlingService.hentSisteBehandlingSomErVedtatt(behandling.fagsak.id) != null) {
+                    throw Feil(
+                        message = "Det finnes allerede en vedtatt behandling på fagsak ${behandling.fagsak.id}." +
+                            "Behandling kan ikke opprettes med årsak " +
+                            BehandlingÅrsak.HELMANUELL_MIGRERING.visningsnavn,
+                        frontendFeilmelding = "Det finnes allerede en vedtatt behandling på fagsak." +
+                            "Behandling kan ikke opprettes med årsak " +
+                            BehandlingÅrsak.HELMANUELL_MIGRERING.visningsnavn
+                    )
+                }
+                nyBehandling.barnasIdenter
+            }
+            nyBehandling.behandlingType == BehandlingType.FØRSTEGANGSBEHANDLING -> {
+                emptyList()
+            }
+            nyBehandling.behandlingType in listOf(
+                BehandlingType.REVURDERING,
+                BehandlingType.TEKNISK_ENDRING
+            ) || nyBehandling.behandlingType == BehandlingType.MIGRERING_FRA_INFOTRYGD &&
+                nyBehandling.behandlingÅrsak == BehandlingÅrsak.ENDRE_MIGRERINGSDATO -> {
+                val sisteBehandling = hentSisteAvsluttetBehandling(behandling)
+                behandlingService.finnBarnFraBehandlingMedTilkjentYtsele(sisteBehandling.id)
+                    .map { it.aktivFødselsnummer() }
+            }
+            else -> throw Feil("Ukjent oppførsel ved opprettelse av behandling.")
+        }
 
         return håndterPersongrunnlag(
             behandling,
@@ -106,7 +124,7 @@ class StegService(
         // Denne vil sende selv om det allerede eksisterer en fagsak. Vi tenker det er greit. Ellers så blir det vanskelig å
         // filtere bort for fødselshendelser. Når vi slutter å filtere bort fødselshendelser, så kan vi flytte den tilbake til
         // hentEllerOpprettFagsak
-        skyggesakService.opprettSkyggesak(nyBehandlingHendelse.morsIdent, fagsak.id)
+        skyggesakService.opprettSkyggesak(fagsak.aktør, fagsak.id)
 
         return håndterNyBehandlingOgSendInfotrygdFeed(
             NyBehandling(

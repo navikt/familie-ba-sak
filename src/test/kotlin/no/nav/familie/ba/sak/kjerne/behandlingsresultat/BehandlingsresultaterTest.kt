@@ -1,8 +1,13 @@
 package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import io.mockk.every
+import io.mockk.mockk
+import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
+import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.kontrakter.felles.objectMapper
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestReporter
 import java.io.File
@@ -17,6 +22,12 @@ data class BehandlingsresultatPersonTestConfig(
 )
 
 class BehandlingsresultaterTest {
+    private val personidentService = mockk<PersonidentService>()
+
+    @BeforeEach
+    fun init() {
+        every { personidentService.hentOgLagreAktør(any()) } answers { randomAktørId() }
+    }
 
     @Test
     fun `Skal sjekke at forventet resultat blir utledet for alle json testfiler`(testReporter: TestReporter) {
@@ -31,7 +42,8 @@ class BehandlingsresultaterTest {
                 YtelsePersonUtils.utledYtelsePersonerMedResultat(
                     behandlingsresultatPersoner = behandlingsresultatPersonTestConfig.personer,
                     uregistrerteBarn = behandlingsresultatPersonTestConfig.uregistrerteBarn,
-                    inneværendeMåned = YearMonth.parse(behandlingsresultatPersonTestConfig.inneværendeMåned)
+                    inneværendeMåned = YearMonth.parse(behandlingsresultatPersonTestConfig.inneværendeMåned),
+                    personidentService,
                 )
 
             val behandlingsresultat =

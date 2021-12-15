@@ -28,6 +28,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakPerson
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.FØRSTE_STEG
 import no.nav.familie.kontrakter.felles.Behandlingstema
 import no.nav.familie.kontrakter.felles.Tema
@@ -61,6 +62,9 @@ class OppgaveServiceTest {
     lateinit var behandlingRepository: BehandlingRepository
 
     @MockK
+    lateinit var personidentService: PersonidentService
+
+    @MockK
     lateinit var oppgaveRepository: OppgaveRepository
 
     @InjectMockKs
@@ -68,7 +72,7 @@ class OppgaveServiceTest {
 
     @Test
     fun `Opprett oppgave skal lage oppgave med enhetsnummer fra behandlingen`() {
-        every { behandlingRepository.finnBehandling(BEHANDLING_ID) } returns lagTestBehandling()
+        every { behandlingRepository.finnBehandling(BEHANDLING_ID) } returns lagTestBehandling(aktørId = AKTØR_ID_FAGSAK)
         every { behandlingRepository.save(any<Behandling>()) } returns lagTestBehandling()
         every { oppgaveRepository.save(any<DbOppgave>()) } returns lagTestOppgave()
         every {
@@ -77,7 +81,7 @@ class OppgaveServiceTest {
                 any<Behandling>()
             )
         } returns null
-        every { personopplysningerService.hentOgLagreAktørId(any()) } returns Aktør(AKTØR_ID_FAGSAK)
+        every { personidentService.hentOgLagreAktør(any()) } returns Aktør(AKTØR_ID_FAGSAK)
 
         every { arbeidsfordelingService.hentAbeidsfordelingPåBehandling(any()) } returns ArbeidsfordelingPåBehandling(
             behandlingId = 1,
@@ -169,10 +173,10 @@ class OppgaveServiceTest {
         verify(exactly = 1) { integrasjonClient.fordelOppgave(any(), null) }
     }
 
-    private fun lagTestBehandling(): Behandling {
+    private fun lagTestBehandling(aktørId: String = "1234567891000"): Behandling {
         return Behandling(
-            fagsak = Fagsak(id = FAGSAK_ID, aktør = Aktør("2")).also {
-                it.søkerIdenter = setOf(FagsakPerson(personIdent = PersonIdent(ident = FNR), fagsak = it))
+            fagsak = Fagsak(id = FAGSAK_ID, aktør = Aktør(aktørId)).also {
+                it.søkerIdenter = mutableSetOf(FagsakPerson(personIdent = PersonIdent(ident = FNR), fagsak = it))
             },
             type = BehandlingType.FØRSTEGANGSBEHANDLING,
             kategori = BehandlingKategori.NASJONAL,
@@ -192,9 +196,9 @@ class OppgaveServiceTest {
         private const val FAGSAK_ID = 10000000L
         private const val BEHANDLING_ID = 20000000L
         private const val OPPGAVE_ID = "42"
-        private const val FNR = "fnr"
+        private const val FNR = "12345678910"
         private const val ENHETSNUMMER = "enhet"
-        private const val AKTØR_ID_FAGSAK = "0123456789"
+        private const val AKTØR_ID_FAGSAK = "1234567891000"
         private const val SAKSBEHANDLER_ID = "Z999999"
         private val FRIST_FERDIGSTILLELSE_BEH_SAK = LocalDate.now().plusDays(1)
     }

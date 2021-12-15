@@ -64,7 +64,7 @@ class ØkonomiIntegrasjonTest(
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
-        val barnAktørId = personidentService.hentOgLagreAktørId(barnFnr)
+        val barnAktørId = personidentService.hentOgLagreAktør(barnFnr)
 
         val vilkårsvurdering =
             lagBehandlingResultat(behandling, fnr, barnFnr, fagsak.aktør, barnAktørId, stønadFom, stønadTom)
@@ -108,7 +108,7 @@ class ØkonomiIntegrasjonTest(
         // Lag fagsak med behandling og personopplysningsgrunnlag og Iverksett.
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
-        val barnAktørId = personidentService.hentOgLagreAktørId(barnFnr)
+        val barnAktørId = personidentService.hentOgLagreAktør(barnFnr)
 
         val vedtak = Vedtak(
             behandling = behandling,

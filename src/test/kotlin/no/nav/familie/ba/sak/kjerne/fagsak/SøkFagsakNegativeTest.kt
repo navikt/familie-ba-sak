@@ -27,7 +27,6 @@ class SøkFagsakNegativeTest {
     @Test
     fun `test å søke fagsak deltager med ugyldig fnr`() {
         val feilId = "41235678910"
-
         assertThrows<IntegrasjonException> {
             fagsakService.hentFagsakDeltager(feilId)
         }

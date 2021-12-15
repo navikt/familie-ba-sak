@@ -15,6 +15,7 @@ enum class Filtreringsregel(val vurder: FiltreringsreglerFakta.() -> Evaluering)
     MER_ENN_5_MND_SIDEN_FORRIGE_BARN(vurder = { merEnn5mndEllerMindreEnnFemDagerSidenForrigeBarn(this) }),
     MOR_ER_OVER_18_ÅR(vurder = { morErOver18år(this) }),
     MOR_HAR_IKKE_VERGE(vurder = { morHarIkkeVerge(this) }),
+    MOR_MOTTAR_IKKE_LØPENDE_UTVIDET(vurder = { morMottarIkkeLøpendeUtvidet(this) })
 }
 
 fun evaluerFiltreringsregler(fakta: FiltreringsreglerFakta) = Filtreringsregel.values()
@@ -36,7 +37,8 @@ fun evaluerFiltreringsregler(fakta: FiltreringsreglerFakta) = Filtreringsregel.v
     }
 
 fun morHarGyldigFnr(fakta: FiltreringsreglerFakta): Evaluering {
-    val erMorFnrGyldig = (!erBostNummer(fakta.mor.personIdent.ident) && !erFDatnummer(fakta.mor.personIdent.ident))
+    val erMorFnrGyldig =
+        (!erBostNummer(fakta.mor.aktør.aktivFødselsnummer()) && !erFDatnummer(fakta.mor.aktør.aktivFødselsnummer()))
 
     return if (erMorFnrGyldig) Evaluering.oppfylt(FiltreringsregelOppfylt.MOR_HAR_GYLDIG_FNR) else Evaluering.ikkeOppfylt(
         FiltreringsregelIkkeOppfylt.MOR_HAR_UGYLDIG_FNR
@@ -45,7 +47,7 @@ fun morHarGyldigFnr(fakta: FiltreringsreglerFakta): Evaluering {
 
 fun barnHarGyldigFnr(fakta: FiltreringsreglerFakta): Evaluering {
     val erbarnFnrGyldig =
-        fakta.barnaFraHendelse.all { (!erBostNummer(it.personIdent.ident) && !erFDatnummer(it.personIdent.ident)) }
+        fakta.barnaFraHendelse.all { (!erBostNummer(it.aktør.aktivFødselsnummer()) && !erFDatnummer(it.aktør.aktivFødselsnummer())) }
 
     return if (erbarnFnrGyldig) Evaluering.oppfylt(FiltreringsregelOppfylt.BARN_HAR_GYLDIG_FNR) else Evaluering.ikkeOppfylt(
         FiltreringsregelIkkeOppfylt.BARN_HAR_UGYLDIG_FNR
@@ -71,6 +73,13 @@ fun morHarIkkeVerge(fakta: FiltreringsreglerFakta): Evaluering = if (!fakta.morH
 ) else Evaluering.ikkeOppfylt(
     FiltreringsregelIkkeOppfylt.MOR_ER_UMYNDIG
 )
+
+fun morMottarIkkeLøpendeUtvidet(fakta: FiltreringsreglerFakta): Evaluering =
+    if (!fakta.morMottarLøpendeUtvidet) Evaluering.oppfylt(
+        FiltreringsregelOppfylt.MOR_MOTTAR_IKKE_LØPENDE_UTVIDET
+    ) else Evaluering.ikkeOppfylt(
+        FiltreringsregelIkkeOppfylt.MOR_MOTTAR_LØPENDE_UTVIDET
+    )
 
 fun merEnn5mndEllerMindreEnnFemDagerSidenForrigeBarn(fakta: FiltreringsreglerFakta): Evaluering {
     return when (

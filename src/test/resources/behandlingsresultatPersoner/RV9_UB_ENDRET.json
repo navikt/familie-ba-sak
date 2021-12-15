@@ -4,14 +4,18 @@
   "personer": [
     {
       "personType": "SØKER",
+      "aktør": {
+        "fødselsnummer": "12345678910",
+        "aktørId": "1234567891000"
+      },
       "søktForPerson": false,
       "eksplisittAvslått": false,
       "forrigeAndeler": [
         {
-        "stønadFom": "2021-02",
-        "stønadTom": "2030-12",
-        "kalkulertUtbetalingsbeløp": 1054
-      }
+          "stønadFom": "2021-02",
+          "stønadTom": "2030-12",
+          "kalkulertUtbetalingsbeløp": 1054
+        }
       ],
       "andeler": [
         {
@@ -23,14 +27,18 @@
     },
     {
       "personType": "BARN",
+      "aktør": {
+        "fødselsnummer": "12345678911",
+        "aktørId": "1234567891100"
+      },
       "søktForPerson": false,
       "eksplisittAvslått": false,
       "forrigeAndeler": [
         {
-        "stønadFom": "2021-02",
-        "stønadTom": "2030-12",
-        "kalkulertUtbetalingsbeløp": 1354
-      }
+          "stønadFom": "2021-02",
+          "stønadTom": "2030-12",
+          "kalkulertUtbetalingsbeløp": 1354
+        }
       ],
       "andeler": [
         {

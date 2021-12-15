@@ -30,7 +30,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
@@ -69,6 +69,7 @@ class BehandleSmåbarnstilleggTest(
     @Autowired private val stegService: StegService,
     @Autowired private val featureToggleService: FeatureToggleService,
     @Autowired private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
+    @Autowired private val personidentService: PersonidentService,
     @Autowired private val efSakRestClient: EfSakRestClient,
     @Autowired private val vedtakOmOvergangsstønadService: VedtakOmOvergangsstønadService,
     @Autowired private val vedtaksperiodeService: VedtaksperiodeService,
@@ -273,8 +274,9 @@ class BehandleSmåbarnstilleggTest(
     @Order(2)
     fun `Skal ikke opprette behandling når det ikke finnes endringer på perioder med full overgangsstønad`() {
         val søkersIdent = scenario.søker.ident!!
-        vedtakOmOvergangsstønadService.håndterVedtakOmOvergangsstønad(personIdent = søkersIdent)
-        val fagsak = fagsakService.hentFagsakPåPerson(identer = setOf(PersonIdent(søkersIdent)))
+        val søkersAktør = personidentService.hentOgLagreAktør(søkersIdent)
+        vedtakOmOvergangsstønadService.håndterVedtakOmOvergangsstønad(aktør = søkersAktør)
+        val fagsak = fagsakService.hentFagsakPåPerson(aktør = søkersAktør)
         val aktivBehandling = behandlingService.hentAktivForFagsak(fagsakId = fagsak!!.id)!!
 
         assertEquals(BehandlingStatus.AVSLUTTET, aktivBehandling.status)
@@ -286,28 +288,36 @@ class BehandleSmåbarnstilleggTest(
     fun `Skal stoppe automatisk behandling som må fortsette manuelt pga tilbakekreving`() {
         EfSakRestClientMock.clearEfSakRestMocks(efSakRestClient)
 
-        val søkersIdent = scenario.søker.ident!!
+        val søkersAktør = personidentService.hentOgLagreAktør(scenario.søker.aktørId!!)
 
         val periodeOvergangsstønadTom = LocalDate.now().minusMonths(3)
         every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns PerioderOvergangsstønadResponse(
             perioder = listOf(
                 PeriodeOvergangsstønad(
-                    personIdent = søkersIdent,
+                    personIdent = søkersAktør.aktivFødselsnummer(),
                     fomDato = periodeMedFullOvergangsstønadFom,
                     tomDato = periodeOvergangsstønadTom,
                     datakilde = PeriodeOvergangsstønad.Datakilde.EF
                 ),
             )
         )
-        vedtakOmOvergangsstønadService.håndterVedtakOmOvergangsstønad(personIdent = søkersIdent)
+        vedtakOmOvergangsstønadService.håndterVedtakOmOvergangsstønad(aktør = søkersAktør)
 
-        val fagsak = fagsakService.hentFagsakPåPerson(identer = setOf(PersonIdent(søkersIdent)))
+        val fagsak = fagsakService.hentFagsakPåPerson(aktør = søkersAktør)
         val aktivBehandling = behandlingService.hentAktivForFagsak(fagsakId = fagsak!!.id)!!
+
+        // Vedtaksperioder skal være slettet etter at den er blitt omgjort til manuell behandling
+        assertEquals(
+            0,
+            vedtaksperiodeService.hentPersisterteVedtaksperioder(
+                vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = aktivBehandling.id)
+            ).size
+        )
 
         verify(exactly = 1) {
             opprettTaskService.opprettOppgaveTask(
                 behandlingId = aktivBehandling.id,
-                oppgavetype = Oppgavetype.BehandleSak,
+                oppgavetype = Oppgavetype.VurderLivshendelse,
                 beskrivelse = "Småbarnstillegg: endring i overgangsstønad må behandles manuelt"
             )
         }
@@ -331,6 +341,7 @@ class BehandleSmåbarnstilleggTest(
         EfSakRestClientMock.clearEfSakRestMocks(efSakRestClient)
 
         val søkersIdent = scenario.søker.ident!!
+        val søkersAktør = personidentService.hentOgLagreAktør(søkersIdent)
 
         val periodeOvergangsstønadTom = LocalDate.now()
         every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns PerioderOvergangsstønadResponse(
@@ -343,9 +354,9 @@ class BehandleSmåbarnstilleggTest(
                 ),
             )
         )
-        vedtakOmOvergangsstønadService.håndterVedtakOmOvergangsstønad(personIdent = søkersIdent)
+        vedtakOmOvergangsstønadService.håndterVedtakOmOvergangsstønad(aktør = søkersAktør)
 
-        val fagsak = fagsakService.hentFagsakPåPerson(identer = setOf(PersonIdent(søkersIdent)))
+        val fagsak = fagsakService.hentFagsakPåPerson(aktør = søkersAktør)
         val aktivBehandling = behandlingService.hentAktivForFagsak(fagsakId = fagsak!!.id)!!
 
         val andelerTilkjentYtelse =

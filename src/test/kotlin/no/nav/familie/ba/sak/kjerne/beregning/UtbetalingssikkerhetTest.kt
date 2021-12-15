@@ -277,7 +277,7 @@ class UtbetalingssikkerhetTest {
             )
         }
 
-        assertTrue(feil.frontendFeilmelding?.contains("Det er allerede innvilget utbetaling av barnetrygd for ${barn.personIdent.ident}")!!)
+        assertTrue(feil.frontendFeilmelding?.contains("Det er allerede innvilget utbetaling av barnetrygd for ${barn.aktør.aktivFødselsnummer()}")!!)
     }
 
     @Test

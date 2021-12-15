@@ -135,7 +135,6 @@ logging:
     root: INFO
 
 
-DAGLIG_KVOTE_FØDSELSHENDELSER: 1000
 SANITY_DATASET: "ba-brev"
 
 PDL_URL: http://pdl-api-q1.pdl

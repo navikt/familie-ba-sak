@@ -6,10 +6,13 @@ import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagEndretUtbetalingAndel
 import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
+import no.nav.familie.ba.sak.common.lagUtbetalingsperiode
+import no.nav.familie.ba.sak.common.lagUtbetalingsperiodeDetalj
 import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.common.lagVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPerson
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -77,7 +80,7 @@ class VedtaksperiodeServiceUtilsTest {
         Assertions.assertEquals(1, endredeUtbetalingsperioderMedBegrunnelser.size)
 
         Assertions.assertEquals(
-            setOf(person2.personIdent.ident, person1.personIdent.ident),
+            setOf(person2.aktør.aktivFødselsnummer(), person1.aktør.aktivFødselsnummer()),
             endredeUtbetalingsperioderMedBegrunnelser.single().begrunnelser.single().personIdenter.toSet()
         )
     }
@@ -195,7 +198,7 @@ class VedtaksperiodeServiceUtilsTest {
                 }
 
         Assertions.assertEquals(
-            listOf(person1.personIdent.ident),
+            listOf(person1.aktør.aktivFødselsnummer()),
             begrunnelsePerson1?.personIdenter
         )
     }
@@ -327,12 +330,12 @@ class VedtaksperiodeServiceUtilsTest {
         val triggesAv = TriggesAv(vilkår = setOf(Vilkår.UTVIDET_BARNETRYGD))
         val vedtaksperiodeMedBegrunnelser = lagVedtaksperiodeMedBegrunnelser(type = Vedtaksperiodetype.UTBETALING)
         val vilkårsvurdering = lagVilkårsvurdering(
-            søkerFnr = søker.personIdent.ident,
-            søkerAktør = søker.hentAktørId(),
+            søkerFnr = søker.aktør.aktivFødselsnummer(),
+            søkerAktør = søker.aktør,
             behandling = behandling,
             resultat = Resultat.OPPFYLT
         )
-        val identerMedUtbetaling = listOf(barn.personIdent.ident)
+        val identerMedUtbetaling = listOf(barn.aktør.aktivFødselsnummer())
 
         val personidenterForBegrunnelse = hentPersonidenterGjeldendeForBegrunnelse(
             triggesAv = triggesAv,
@@ -347,7 +350,10 @@ class VedtaksperiodeServiceUtilsTest {
             )
         )
 
-        Assertions.assertEquals(listOf(barn.personIdent.ident, søker.personIdent.ident), personidenterForBegrunnelse)
+        Assertions.assertEquals(
+            listOf(barn.aktør.aktivFødselsnummer(), søker.aktør.aktivFødselsnummer()),
+            personidenterForBegrunnelse
+        )
     }
 
     @Test
@@ -371,13 +377,13 @@ class VedtaksperiodeServiceUtilsTest {
             tom = tom,
         )
         val vilkårsvurdering = lagVilkårsvurdering(
-            søkerFnr = søker.personIdent.ident,
-            søkerAktør = søker.hentAktørId(),
+            søkerFnr = søker.aktør.aktivFødselsnummer(),
+            søkerAktør = søker.aktør,
             behandling = behandling,
             resultat = Resultat.OPPFYLT
         )
 
-        val identerMedUtbetaling = listOf(barn1.personIdent.ident)
+        val identerMedUtbetaling = listOf(barn1.aktør.aktivFødselsnummer())
         val endredeUtbetalingAndeler = listOf(
             lagEndretUtbetalingAndel(
                 person = barn2,
@@ -400,7 +406,7 @@ class VedtaksperiodeServiceUtilsTest {
         )
 
         Assertions.assertEquals(
-            setOf(barn1.personIdent.ident, barn2.personIdent.ident, søker.personIdent.ident),
+            setOf(barn1.aktør.aktivFødselsnummer(), barn2.aktør.aktivFødselsnummer(), søker.aktør.aktivFødselsnummer()),
             personidenterForBegrunnelse.toSet()
         )
     }
@@ -616,5 +622,39 @@ class VedtaksperiodeServiceUtilsTest {
                 fomForPeriode = fom
             )
         )
+    }
+
+    @Test
+    fun `Skal gi riktig personer for autovedtakbegrunnelse for barn 6 og 18 år`() {
+        listOf<Pair<Long, VedtakBegrunnelseSpesifikasjon>>(
+            Pair(6, VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR_AUTOVEDTAK),
+            Pair(18, VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR_AUTOVEDTAK)
+        ).forEach { (år, begrunnelse) ->
+            val barn1 = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.now().minusYears(år))
+            val barn2 = lagPerson(
+                type = PersonType.BARN,
+                fødselsdato = LocalDate.now().minusYears(år + 1).plusMonths(11),
+            )
+            val barn3 = lagPerson(
+                type = PersonType.BARN,
+                fødselsdato = LocalDate.now().minusYears(år - 1).minusMonths(10),
+            )
+
+            val barna = listOf(barn1, barn2, barn3)
+            val utbetalingsperiodeDetaljer = barna.map { lagUtbetalingsperiodeDetalj(person = it.tilRestPerson()) }
+            val nåværendeUtbetalingsperiode = lagUtbetalingsperiode(
+                periodeFom = LocalDate.now(),
+                utbetalingsperiodeDetaljer = utbetalingsperiodeDetaljer
+            )
+
+            Assertions.assertEquals(
+                barn1.personIdent.ident,
+                hentPersonerForAutovedtakBegrunnelse(
+                    barna = barna,
+                    vedtakBegrunnelseSpesifikasjon = begrunnelse,
+                    nåværendeUtbetalingsperiode = nåværendeUtbetalingsperiode
+                ).single()
+            )
+        }
     }
 }

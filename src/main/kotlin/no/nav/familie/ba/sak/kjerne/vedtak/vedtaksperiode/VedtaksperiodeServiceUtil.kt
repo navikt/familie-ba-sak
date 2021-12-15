@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
@@ -27,6 +28,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import java.time.LocalDate
+import java.time.YearMonth
 
 fun hentVedtaksperioderMedBegrunnelserForEndredeUtbetalingsperioder(
     andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
@@ -51,7 +53,7 @@ fun hentVedtaksperioderMedBegrunnelserForEndredeUtbetalingsperioder(
                                     vedtakBegrunnelseSpesifikasjon = vedtakBegrunnelseSpesifikasjon,
                                     personIdenter = endretUtbetalingAndeler.filter {
                                         it.harVedtakBegrunnelseSpesifikasjon(vedtakBegrunnelseSpesifikasjon)
-                                    }.mapNotNull { it.person?.personIdent?.ident }
+                                    }.mapNotNull { it.person?.aktør?.aktivFødselsnummer() }
                                 )
                             }
                     )
@@ -95,14 +97,14 @@ fun hentPersonidenterGjeldendeForBegrunnelse(
     return when {
         triggesAv.vilkår.contains(Vilkår.UTVIDET_BARNETRYGD) || triggesAv.småbarnstillegg ->
             begrunnelseGrunnlag.identerMedUtbetaling +
-                begrunnelseGrunnlag.persongrunnlag.søker.personIdent.ident +
+                begrunnelseGrunnlag.persongrunnlag.søker.aktør.aktivFødselsnummer() +
                 begrunnelseGrunnlag.endredeUtbetalingAndeler
                     .somOverlapper(vedtaksperiodeMedBegrunnelser.hentNullableMånedPeriode())
-                    .map { it.person!!.personIdent.ident }
+                    .map { it.person!!.aktør.aktivFødselsnummer() }
 
         triggesAv.barnMedSeksårsdag ->
             begrunnelseGrunnlag.persongrunnlag.barnMedSeksårsdagPåFom(vedtaksperiodeMedBegrunnelser.fom)
-                .map { person -> person.personIdent.ident }
+                .map { person -> person.aktør.aktivFødselsnummer() }
 
         triggesAv.personerManglerOpplysninger ->
             if (begrunnelseGrunnlag.vilkårsvurdering.harPersonerManglerOpplysninger())
@@ -117,7 +119,7 @@ fun hentPersonidenterGjeldendeForBegrunnelse(
                 endretUtbetalingAndeler = begrunnelseGrunnlag.endredeUtbetalingAndeler,
                 vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
                 endringsaarsaker = triggesAv.endringsaarsaker
-            ).map { person -> person.personIdent.ident }
+            ).map { person -> person.aktør.aktivFødselsnummer() }
 
         else ->
             VedtakUtils.hentPersonerForAlleUtgjørendeVilkår(
@@ -134,7 +136,7 @@ fun hentPersonidenterGjeldendeForBegrunnelse(
                 ),
                 triggesAv = triggesAv,
                 andelerTilkjentYtelse = begrunnelseGrunnlag.andelerTilkjentYtelse
-            ).map { person -> person.personIdent.ident }
+            ).map { person -> person.aktør.aktivFødselsnummer() }
     }.toSet().toList()
 }
 
@@ -144,7 +146,7 @@ private fun hentAktuellePersonerForVedtaksperiode(
     identerMedUtbetaling: List<String>
 ): List<Person> = persongrunnlag.personer.filter { person ->
     if (vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGET) {
-        identerMedUtbetaling.contains(person.personIdent.ident) || person.type == PersonType.SØKER
+        identerMedUtbetaling.contains(person.aktør.aktivFødselsnummer()) || person.type == PersonType.SØKER
     } else true
 }
 
@@ -214,4 +216,30 @@ fun validerVedtaksperiodeMedBegrunnelser(vedtaksperiodeMedBegrunnelser: Vedtaksp
                 "Vedtaket skal enten ha fritekst eller bregrunnelse, men ikke begge deler."
         )
     }
+}
+
+fun hentPersonerForAutovedtakBegrunnelse(
+    vedtakBegrunnelseSpesifikasjon: VedtakBegrunnelseSpesifikasjon,
+    barna: List<Person>,
+    nåværendeUtbetalingsperiode: Utbetalingsperiode
+): List<String> = when (vedtakBegrunnelseSpesifikasjon) {
+    VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR,
+    VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR_AUTOVEDTAK ->
+        hentBarnSomFyller18År(barna)
+
+    VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR,
+    VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR_AUTOVEDTAK ->
+        hentbarnMedSeksårsdagPåPeriode(nåværendeUtbetalingsperiode)
+
+    else -> hentPersonIdenterFraUtbetalingsperiode(nåværendeUtbetalingsperiode)
+}
+
+fun hentBarnSomFyller18År(barna: List<Person>): List<String> {
+    // Barn som har fylt 18 år har ingen utbetalingsperioder og må hentes fra persongrunnlaget.
+    val fødselsMånedOgÅrForAlder18 = YearMonth.from(LocalDate.now()).minusYears(18)
+
+    return barna.filter { barn ->
+        barn.fødselsdato.toYearMonth().equals(fødselsMånedOgÅrForAlder18) ||
+            barn.fødselsdato.toYearMonth().equals(fødselsMånedOgÅrForAlder18.plusMonths(1))
+    }.map { it.aktør.aktivFødselsnummer() }
 }

@@ -2,9 +2,9 @@ package no.nav.familie.ba.sak.kjerne.beregning
 
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.nesteMåned
-import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
@@ -68,7 +68,7 @@ internal class UtvidetBarnetrygdTest {
                     )
                 }
         val barnResultater = listOf(barnA, barnB).map {
-            PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = it.ident, aktør = søker.aktør)
+            PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = it.ident, aktør = it.aktør)
                 .apply {
                     vilkårResultater.addAll(
                         oppfylteVilkårFor(
@@ -159,7 +159,7 @@ internal class UtvidetBarnetrygdTest {
         val barnResultater = PersonResultat(
             vilkårsvurdering = vilkårsvurdering,
             personIdent = oppfyltBarn.ident,
-            aktør = søker.aktør
+            aktør = oppfyltBarn.aktør
         )
             .apply {
                 vilkårResultater.addAll(
@@ -645,7 +645,7 @@ internal class UtvidetBarnetrygdTest {
         val fom: LocalDate,
         val tom: LocalDate,
         val ident: String = randomFnr(),
-        val aktør: Aktør = randomAktørId(),
+        val aktør: Aktør = tilAktør(ident),
         val rolle: PersonType = PersonType.SØKER,
         val erUtvidet: Boolean = false,
         val erDeltBosted: Boolean = false
@@ -686,7 +686,7 @@ internal class UtvidetBarnetrygdTest {
         fødselsdato: LocalDate = fødselsdatoOver6År
     ): List<Person> = this.map {
         Person(
-            aktør = randomAktørId(),
+            aktør = tilAktør(it.ident),
             personIdent = PersonIdent(it.ident),
             type = it.rolle,
             personopplysningGrunnlag = personopplysningGrunnlag,

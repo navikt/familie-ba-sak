@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.familie.kontrakter.felles.Behandlingstema
 import no.nav.familie.kontrakter.felles.oppgave.Behandlingstype
 import org.hibernate.annotations.SortComparator
+import java.time.LocalDateTime
 import javax.persistence.CascadeType
 import javax.persistence.Column
 import javax.persistence.Entity
@@ -92,6 +93,12 @@ data class Behandling(
         return "Behandling(id=$id, fagsak=${fagsak.id}, kategori=$kategori, underkategori=$underkategori, steg=$steg)"
     }
 
+    fun erLåstForEndinger() = this.steg.rekkefølge < StegType.BESLUTTE_VEDTAK.rekkefølge
+
+    fun låstForEndringerTidspunkt(): LocalDateTime? = this.behandlingStegTilstand
+        .filter { it.behandlingSteg.rekkefølge >= StegType.BESLUTTE_VEDTAK.rekkefølge }
+        .minOfOrNull { it.opprettetTidspunkt }
+
     // Skal kun brukes på gamle behandlinger
     fun erTekniskOpphør(): Boolean {
         return if (type == BehandlingType.TEKNISK_OPPHØR ||
@@ -109,7 +116,7 @@ data class Behandling(
         }
     }
 
-    fun validerBehandlingstype() {
+    fun validerBehandlingstype(sisteBehandlingSomErVedtatt: Behandling? = null) {
         if (type == BehandlingType.TEKNISK_OPPHØR) {
             throw FunksjonellFeil(
                 melding = "Kan ikke lage teknisk opphør behandling.",
@@ -124,6 +131,10 @@ data class Behandling(
                 opprettetÅrsak != BehandlingÅrsak.TEKNISK_ENDRING
             )
                 throw Feil("Behandling er teknisk endring, men årsak $opprettetÅrsak og type $type samsvarer ikke.")
+        }
+
+        if (type == BehandlingType.REVURDERING && sisteBehandlingSomErVedtatt == null) {
+            throw Feil("Kan ikke opprette revurdering på $fagsak uten noen andre behandlinger som er vedtatt")
         }
     }
 
@@ -219,7 +230,12 @@ data class Behandling(
 
     fun erSatsendring() = this.opprettetÅrsak == BehandlingÅrsak.SATSENDRING
 
-    fun erManuellMigrering() = erMigrering() && opprettetÅrsak == BehandlingÅrsak.ENDRE_MIGRERINGSDATO
+    fun erManuellMigreringForEndreMigreringsdato() = erMigrering() &&
+        opprettetÅrsak == BehandlingÅrsak.ENDRE_MIGRERINGSDATO
+
+    fun erHelmanuellMigrering() = erMigrering() && opprettetÅrsak == BehandlingÅrsak.HELMANUELL_MIGRERING
+
+    fun erManuellMigrering() = erManuellMigreringForEndreMigreringsdato() || erHelmanuellMigrering()
 
     private fun erOmregning() =
         this.opprettetÅrsak == BehandlingÅrsak.OMREGNING_6ÅR || this.opprettetÅrsak == BehandlingÅrsak.OMREGNING_18ÅR
@@ -299,7 +315,8 @@ enum class BehandlingÅrsak(val visningsnavn: String) {
     SATSENDRING("Satsendring"),
     SMÅBARNSTILLEGG("Småbarnstillegg"),
     MIGRERING("Migrering"),
-    ENDRE_MIGRERINGSDATO("Endre migreringsdato")
+    ENDRE_MIGRERINGSDATO("Endre migreringsdato"),
+    HELMANUELL_MIGRERING("Manuell migrering")
 }
 
 enum class BehandlingType(val visningsnavn: String) {

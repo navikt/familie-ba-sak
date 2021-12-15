@@ -10,6 +10,10 @@ enum class FiltreringsregelOppfylt(val beskrivelse: String, private val filtreri
     BARN_HAR_GYLDIG_FNR("Barn har gyldig fødselsnummer", Filtreringsregel.BARN_GYLDIG_FNR),
     MOR_ER_OVER_18_ÅR("Mor er over 18 år.", Filtreringsregel.MOR_ER_OVER_18_ÅR),
     MOR_ER_MYNDIG("Mor er myndig.", Filtreringsregel.MOR_HAR_IKKE_VERGE),
+    MOR_MOTTAR_IKKE_LØPENDE_UTVIDET(
+        "Mor mottar ikke utvidet barnetrygd.",
+        Filtreringsregel.MOR_MOTTAR_IKKE_LØPENDE_UTVIDET
+    ),
     MOR_LEVER("Det er ikke registrert dødsdato på mor.", Filtreringsregel.MOR_LEVER),
     BARNET_LEVER("Det er ikke registrert dødsdato på barnet.", Filtreringsregel.BARN_LEVER),
     MER_ENN_5_MND_SIDEN_FORRIGE_BARN_UTFALL(

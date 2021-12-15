@@ -13,12 +13,13 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat.HENLAGT
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat.HENLAGT_SØKNAD_TRUKKET
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak.FØDSELSHENDELSE
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse.Companion.sisteAdresse
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
@@ -27,7 +28,6 @@ import no.nav.familie.eksterne.kontrakter.saksstatistikk.AktørDVH
 import no.nav.familie.eksterne.kontrakter.saksstatistikk.BehandlingDVH
 import no.nav.familie.eksterne.kontrakter.saksstatistikk.ResultatBegrunnelseDVH
 import no.nav.familie.eksterne.kontrakter.saksstatistikk.SakDVH
-import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.ZoneId
@@ -44,6 +44,7 @@ class SaksstatistikkService(
     private val vedtakService: VedtakService,
     private val fagsakService: FagsakService,
     private val personopplysningerService: PersonopplysningerService,
+    private val personidentService: PersonidentService,
     private val persongrunnlagService: PersongrunnlagService,
     private val envService: EnvService,
     private val vedtaksperiodeService: VedtaksperiodeService,
@@ -53,8 +54,6 @@ class SaksstatistikkService(
         val behandling = behandlingService.hent(behandlingId)
         val forrigeBehandlingId = behandlingService.hentForrigeBehandlingSomErVedtatt(behandling)
             .takeIf { erRevurderingEllerTekniskBehandling(behandling) }?.id
-
-        if (behandling.opprettetÅrsak == FØDSELSHENDELSE && !envService.skalIverksetteBehandling()) return null
 
         val datoMottatt = when (behandling.opprettetÅrsak) {
             BehandlingÅrsak.SØKNAD -> {
@@ -115,14 +114,11 @@ class SaksstatistikkService(
 
     fun mapTilSakDvh(sakId: Long): SakDVH? {
         val fagsak = fagsakService.hentPåFagsakId(sakId)
-        val søkerIdent = fagsak.hentAktivIdent().ident
+        val søkerIdent = fagsak.aktør.aktivFødselsnummer()
         val aktivBehandling = behandlingService.hentAktivForFagsak(fagsakId = fagsak.id)
-        // Skipper saker som er fødselshendelse
-        if (aktivBehandling?.opprettetÅrsak == FØDSELSHENDELSE && !envService.skalIverksetteBehandling()) return null
-
-        val søkersAktørId = personopplysningerService.hentOgLagreAktørId(Ident(søkerIdent))
 
         var landkodeSøker: String = PersonopplysningerService.UKJENT_LANDKODE
+
         val deltagere = if (aktivBehandling != null) {
             val personer = persongrunnlagService.hentAktiv(aktivBehandling.id)?.personer ?: emptySet()
             personer.map {
@@ -130,13 +126,14 @@ class SaksstatistikkService(
                     landkodeSøker = hentLandkode(it)
                 }
                 AktørDVH(
-                    personopplysningerService.hentOgLagreAktørId(Ident(it.personIdent.ident)).aktørId.toLong(),
+                    it.aktør.aktørId.toLong(),
                     it.type.name
                 )
             }
         } else {
-            landkodeSøker = hentLandkode(søkerIdent)
-            listOf(AktørDVH(søkersAktørId.aktørId.toLong(), PersonType.SØKER.name))
+
+            landkodeSøker = hentLandkode(fagsak.aktør)
+            listOf(AktørDVH(fagsak.aktør.aktørId.toLong(), PersonType.SØKER.name))
         }
 
         return SakDVH(
@@ -145,7 +142,7 @@ class SaksstatistikkService(
             opprettetDato = LocalDate.now(),
             funksjonellId = UUID.randomUUID().toString(),
             sakId = sakId.toString(),
-            aktorId = søkersAktørId.aktørId.toLong(),
+            aktorId = fagsak.aktør.aktørId.toLong(),
             aktorer = deltagere,
             sakStatus = fagsak.status.name,
             avsender = "familie-ba-sak",
@@ -157,16 +154,16 @@ class SaksstatistikkService(
     private fun hentLandkode(person: Person): String {
         return if (person.bostedsadresser.sisteAdresse() != null) "NO" else {
             personopplysningerService.hentLandkodeUtenlandskBostedsadresse(
-                person.personIdent.ident
+                person.aktør
             )
         }
     }
 
-    private fun hentLandkode(ident: String): String {
-        val personInfo = personopplysningerService.hentPersoninfoEnkel(ident)
+    private fun hentLandkode(aktør: Aktør): String {
+        val personInfo = personopplysningerService.hentPersoninfoEnkel(aktør)
 
         return if (personInfo.bostedsadresser.isNotEmpty()) "NO" else {
-            personopplysningerService.hentLandkodeUtenlandskBostedsadresse(ident)
+            personopplysningerService.hentLandkodeUtenlandskBostedsadresse(aktør)
         }
     }
 

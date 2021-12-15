@@ -21,7 +21,7 @@ fun Fagsak.tilRestBaseFagsak(
 ): RestBaseFagsak = RestBaseFagsak(
     opprettetTidspunkt = this.opprettetTidspunkt,
     id = this.id,
-    søkerFødselsnummer = this.hentAktivIdent().ident,
+    søkerFødselsnummer = this.aktør.aktivFødselsnummer(),
     status = this.status,
     underBehandling = underBehandling,
     gjeldendeUtbetalingsperioder = gjeldendeUtbetalingsperioder

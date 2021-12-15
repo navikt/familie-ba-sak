@@ -8,7 +8,6 @@ import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.FagsystemUtfall.DAGLIG_KVOTE_OG_NORSK_STATSBORGER
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.FagsystemUtfall.FAGSAK_UTEN_IVERKSATTE_BEHANDLINGER_I_BA_SAK
-import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.FagsystemUtfall.IVERKSATTE_BEHANDLINGER_I_BA_SAK
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.FagsystemUtfall.LØPENDE_SAK_I_INFOTRYGD
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.FagsystemUtfall.SAKER_I_INFOTRYGD_MEN_IKKE_LØPENDE_UTBETALINGER
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.FagsystemUtfall.STANDARDUTFALL_INFOTRYGD
@@ -18,10 +17,10 @@ import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 
 private const val INFOTRYGD_NULLDATO = "000000"
@@ -30,10 +29,10 @@ private const val INFOTRYGD_NULLDATO = "000000"
 class VelgFagSystemService(
     private val fagsakService: FagsakService,
     private val infotrygdService: InfotrygdService,
+    private val personidentService: PersonidentService,
     private val behandlingService: BehandlingService,
     private val personopplysningerService: PersonopplysningerService,
-    private val featureToggleService: FeatureToggleService,
-    @Value("\${DAGLIG_KVOTE_FØDSELSHENDELSER}") val dagligKvote: Long = 0
+    private val featureToggleService: FeatureToggleService
 ) {
 
     val utfallForValgAvFagsystem = mutableMapOf<FagsystemUtfall, Counter>()
@@ -85,24 +84,21 @@ class VelgFagSystemService(
         return infotrygdService.harLøpendeSakIInfotrygd(morsIdenter, alleBarnasIdenter)
     }
 
-    internal fun erUnderDagligKvote(): Boolean = behandlingService.hentDagensFødselshendelser().size < dagligKvote
+    internal fun harMorGyldigNorskstatsborger(morsAktør: Aktør): Boolean {
+        val gjeldendeStatsborgerskap = personopplysningerService.hentGjeldendeStatsborgerskap(morsAktør)
 
-    internal fun harMorGyldigNorskstatsborger(morsIdent: Ident): Boolean {
-        val gjeldendeStatsborgerskap = personopplysningerService.hentGjeldendeStatsborgerskap(morsIdent)
-
-        secureLogger.info("Gjeldende statsborgerskap for $morsIdent=(${gjeldendeStatsborgerskap.land}, bekreftelsesdato=${gjeldendeStatsborgerskap.bekreftelsesdato}, gyldigFom=${gjeldendeStatsborgerskap.gyldigFraOgMed}, gyldigTom=${gjeldendeStatsborgerskap.gyldigTilOgMed})")
+        secureLogger.info("Gjeldende statsborgerskap for ${morsAktør.aktivFødselsnummer()}=(${gjeldendeStatsborgerskap.land}, bekreftelsesdato=${gjeldendeStatsborgerskap.bekreftelsesdato}, gyldigFom=${gjeldendeStatsborgerskap.gyldigFraOgMed}, gyldigTom=${gjeldendeStatsborgerskap.gyldigTilOgMed})")
         return gjeldendeStatsborgerskap.land == "NOR"
     }
 
     fun velgFagsystem(nyBehandlingHendelse: NyBehandlingHendelse): FagsystemRegelVurdering {
-        val behandlingIBaSakErPåskrudd = featureToggleService.isEnabled(FeatureToggleConfig.AUTOMATISK_FØDSELSHENDELSE)
+        val morsAktør = personidentService.hentOgLagreAktør(nyBehandlingHendelse.morsIdent)
 
-        val morsPersonIdent = PersonIdent(nyBehandlingHendelse.morsIdent)
-        val fagsak = fagsakService.hent(morsPersonIdent)
+        val fagsak = fagsakService.hent(morsAktør)
 
         val (fagsystemUtfall: FagsystemUtfall, fagsystem: FagsystemRegelVurdering) = when {
             morHarLøpendeEllerTidligereUtbetalinger(fagsak) -> Pair(
-                IVERKSATTE_BEHANDLINGER_I_BA_SAK,
+                FagsystemUtfall.IVERKSATTE_BEHANDLINGER_I_BA_SAK,
                 FagsystemRegelVurdering.SEND_TIL_BA
             )
             morEllerBarnHarLøpendeSakIInfotrygd(
@@ -120,7 +116,7 @@ class VelgFagSystemService(
                 SAKER_I_INFOTRYGD_MEN_IKKE_LØPENDE_UTBETALINGER,
                 FagsystemRegelVurdering.SEND_TIL_INFOTRYGD
             )
-            erUnderDagligKvote() && harMorGyldigNorskstatsborger(Ident(morsPersonIdent.ident)) -> Pair(
+            harMorGyldigNorskstatsborger(morsAktør) && kanBehandleINyttSystem() -> Pair(
                 DAGLIG_KVOTE_OG_NORSK_STATSBORGER,
                 FagsystemRegelVurdering.SEND_TIL_BA
             )
@@ -130,20 +126,23 @@ class VelgFagSystemService(
 
         foreslåttUtfallForValgAvFagsystem[fagsystemUtfall]?.increment()
 
-        return if (behandlingIBaSakErPåskrudd) {
-            secureLogger.info("Sender fødselshendelse for ${nyBehandlingHendelse.morsIdent} til $fagsystem med utfall $fagsystemUtfall")
-            utfallForValgAvFagsystem[fagsystemUtfall]?.increment()
-            fagsystem
-        } else {
-            secureLogger.info("Sender fødselshendelse for ${nyBehandlingHendelse.morsIdent} til infotrygd, men foreslått fagsystem er $fagsystem med utfall $fagsystemUtfall")
-            utfallForValgAvFagsystem[STANDARDUTFALL_INFOTRYGD]?.increment()
-            FagsystemRegelVurdering.SEND_TIL_INFOTRYGD
-        }
+        secureLogger.info("Sender fødselshendelse for ${nyBehandlingHendelse.morsIdent} til $fagsystem med utfall $fagsystemUtfall")
+        utfallForValgAvFagsystem[fagsystemUtfall]?.increment()
+        return fagsystem
+    }
+
+    private fun kanBehandleINyttSystem(): Boolean {
+        val gradualRolloutFødselshendelser =
+            featureToggleService.isEnabled(FeatureToggleConfig.AUTOMATISK_FØDSELSHENDELSE_GRADUAL_ROLLOUT)
+        logger.info("Toggle for gradvis utrulling er $gradualRolloutFødselshendelser")
+
+        return gradualRolloutFødselshendelser
     }
 
     companion object {
 
         val secureLogger = LoggerFactory.getLogger("secureLogger")
+        val logger = LoggerFactory.getLogger(VelgFagSystemService::class.java)
     }
 }
 

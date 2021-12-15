@@ -1,9 +1,9 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse
 
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
+import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PersonInfo
-import no.nav.familie.ba.sak.integrasjoner.pdl.internal.Personident
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrMatrikkeladresse
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
@@ -94,13 +94,15 @@ val mockBarnAutomatiskBehandlingSkalFeile = PersonInfo(
 )
 
 val mockSøkerAutomatiskBehandlingFnr = "04136226623"
+val mockSøkerAutomatiskBehandlingAktør = tilAktør(mockSøkerAutomatiskBehandlingFnr)
+
 val mockSøkerAutomatiskBehandling = PersonInfo(
     fødselsdato = LocalDate.parse("1962-08-04"),
     navn = "LEALAUS GYNGEHEST",
     kjønn = Kjønn.KVINNE,
     forelderBarnRelasjon = setOf(
         ForelderBarnRelasjon(
-            personIdent = Personident(id = mockBarnAutomatiskBehandlingFnr),
+            aktør = tilAktør(mockBarnAutomatiskBehandlingFnr),
             relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
             navn = null,
             fødselsdato = null,
@@ -127,7 +129,7 @@ fun genererAutomatiskTestperson(
         navn = "Autogenerert Navn $fødselsdato",
         forelderBarnRelasjon = forelderBarnRelasjon.map {
             ForelderBarnRelasjon(
-                personIdent = Personident(id = it.toString()),
+                aktør = tilAktør(it.aktør.personidenter.first().fødselsnummer),
                 relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
                 navn = null,
                 fødselsdato = null,

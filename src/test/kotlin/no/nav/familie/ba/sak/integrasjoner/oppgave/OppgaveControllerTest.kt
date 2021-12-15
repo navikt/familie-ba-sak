@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonExcep
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.RestFinnOppgaveRequest
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
@@ -32,6 +33,9 @@ class OppgaveControllerTest {
 
     @MockK
     lateinit var personopplysningerService: PersonopplysningerService
+
+    @MockK
+    lateinit var personidentService: PersonidentService
 
     @MockK
     lateinit var integrasjonClient: IntegrasjonClient
