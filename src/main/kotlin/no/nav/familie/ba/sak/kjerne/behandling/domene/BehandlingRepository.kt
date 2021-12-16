@@ -105,6 +105,7 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
             JOIN TilkjentYtelse ty ON b.id = ty.behandling.id
         WHERE aty.type = 'SMÅBARNSTILLEGG'
             AND aty.stønadTom = :måned
+            AND b.aktiv = true 
             AND ty.utbetalingsoppdrag IS NOT NULL 
         """
     )

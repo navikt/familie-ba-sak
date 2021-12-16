@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.kjerne.verdikjedetester
 import io.mockk.every
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.lagSøknadDTO
-import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.ekstern.restDomene.RestMinimalFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedStandardbegrunnelser
@@ -40,6 +39,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
 import org.springframework.test.annotation.DirtiesContext
 import java.time.LocalDate
+import java.time.YearMonth
 
 @DirtiesContext
 @TestMethodOrder(MethodOrderer.OrderAnnotation::class)
@@ -86,7 +86,7 @@ class AutobrevSmåbarnstilleggOpphørTest(
 
         val behandlinger: List<Long> =
             behandlingService.hentAlleBehandlingsIderMedOpphørSmåbarnstilleggIMåned(
-                måned = LocalDate.now().toYearMonth().minusMonths(1)
+                måned = YearMonth.now().minusMonths(1)
             )
 
         assertTrue(behandlinger.containsAll(listOf(behandling2.id, behandling4.id)))
