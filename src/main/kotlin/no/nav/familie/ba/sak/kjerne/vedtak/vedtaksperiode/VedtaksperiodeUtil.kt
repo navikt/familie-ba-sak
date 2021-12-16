@@ -37,9 +37,6 @@ fun hentVedtaksperioderMedBegrunnelserForEndredeUtbetalingsperioder(
                                 Vedtaksbegrunnelse(
                                     vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelse,
                                     vedtakBegrunnelseSpesifikasjon = vedtakBegrunnelseSpesifikasjon,
-                                    personIdenter = endretUtbetalingAndeler.filter {
-                                        it.harVedtakBegrunnelseSpesifikasjon(vedtakBegrunnelseSpesifikasjon)
-                                    }.mapNotNull { it.person?.aktør?.aktivFødselsnummer() }
                                 )
                             }
                     )
