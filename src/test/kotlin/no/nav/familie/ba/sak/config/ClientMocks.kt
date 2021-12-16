@@ -623,7 +623,7 @@ class ClientMocks {
         val søkerFnr = arrayOf("12345678910", "11223344556", "12345678911")
         private val barnFødselsdatoer = arrayOf(
             guttenBarnesenFødselsdato,
-            LocalDate.now().withDayOfMonth(10).minusYears(18)
+            LocalDate.now().withDayOfMonth(18).minusYears(1)
         )
         val barnFnr = arrayOf(barnFødselsdatoer[0].tilddMMyy() + "50033", barnFødselsdatoer[1].tilddMMyy() + "50033")
         private const val BARN_DET_IKKE_GIS_TILGANG_TIL_FNR = "12345678912"
