@@ -13,14 +13,17 @@ import no.nav.familie.ba.sak.dataGenerator.vedtak.lagVedtaksbegrunnelse
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPerson
 import no.nav.familie.ba.sak.kjerne.brev.hentSanityBegrunnelser
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
+import java.math.BigDecimal
 import java.time.YearMonth
 
 class UtvidetVedtaksperiodeMedBegrunnelserTest {
 
     val barn1 = tilfeldigPerson(personType = PersonType.BARN)
     val barn2 = tilfeldigPerson(personType = PersonType.BARN)
+    val barn3 = tilfeldigPerson(personType = PersonType.BARN)
     val søker = tilfeldigSøker()
     val sanityBegrunnelser = hentSanityBegrunnelser()
 
@@ -167,11 +170,21 @@ class UtvidetVedtaksperiodeMedBegrunnelserTest {
         val fom = YearMonth.of(2018, 6)
         val tom = YearMonth.of(2018, 8)
 
-        val endretUtbetalingAndel = lagEndretUtbetalingAndel(
+        val endretUtbetalingAndel1 = lagEndretUtbetalingAndel(
             behandlingId = behandling.id,
             fom = fom,
             tom = tom,
-            person = barn2
+            person = barn2,
+            prosent = BigDecimal.valueOf(100)
+        )
+
+        val endretUtbetalingAndel2 = lagEndretUtbetalingAndel(
+            behandlingId = behandling.id,
+            fom = fom,
+            tom = tom,
+            person = barn3,
+            prosent = BigDecimal.ZERO
+
         )
 
         val andelerTilkjentYtelse = listOf(
@@ -184,10 +197,17 @@ class UtvidetVedtaksperiodeMedBegrunnelserTest {
             ),
             lagAndelTilkjentYtelse(
                 behandling = behandling,
-                endretUtbetalingAndeler = listOf(endretUtbetalingAndel),
+                endretUtbetalingAndeler = listOf(endretUtbetalingAndel1),
                 fom = fom,
                 tom = tom,
                 person = barn2
+            ),
+            lagAndelTilkjentYtelse(
+                behandling = behandling,
+                endretUtbetalingAndeler = listOf(endretUtbetalingAndel2),
+                fom = fom,
+                tom = tom,
+                person = barn3
             ),
             lagAndelTilkjentYtelse(
                 behandling = behandling,
@@ -202,7 +222,7 @@ class UtvidetVedtaksperiodeMedBegrunnelserTest {
             fom = fom.førsteDagIInneværendeMåned(),
             tom = tom.sisteDagIInneværendeMåned(),
             type = Vedtaksperiodetype.ENDRET_UTBETALING,
-            begrunnelser = mutableSetOf(lagVedtaksbegrunnelse())
+            begrunnelser = mutableSetOf(lagVedtaksbegrunnelse(vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.ENDRET_UTBETALING_DELT_BOSTED_FULL_UTBETALING))
         )
 
         val utvidetVedtaksperiodeMedBegrunnelser =
