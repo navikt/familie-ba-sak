@@ -901,11 +901,9 @@ fun lagRestVedtaksbegrunnelse(
     vedtakBegrunnelseSpesifikasjon: VedtakBegrunnelseSpesifikasjon =
         VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_SØKER_OG_BARN_BOSATT_I_RIKET,
     vedtakBegrunnelseType: VedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET,
-    personIdenter: List<String> = listOf(tilfeldigPerson().aktør.aktivFødselsnummer()),
 ) = RestVedtaksbegrunnelse(
     vedtakBegrunnelseSpesifikasjon = vedtakBegrunnelseSpesifikasjon,
     vedtakBegrunnelseType = vedtakBegrunnelseType,
-    personIdenter = personIdenter,
 )
 
 fun lagUtvidetVedtaksperiodeMedBegrunnelser(

@@ -136,7 +136,7 @@ class UtvidetVedtaksperiodeMedBegrunnelserTest {
             fom = fom.førsteDagIInneværendeMåned(),
             tom = tom.sisteDagIInneværendeMåned(),
             type = Vedtaksperiodetype.ENDRET_UTBETALING,
-            begrunnelser = mutableSetOf(lagVedtaksbegrunnelse(personIdenter = listOf(barn2.aktør.aktivFødselsnummer())))
+            begrunnelser = mutableSetOf(lagVedtaksbegrunnelse())
         )
 
         val utvidetVedtaksperiodeMedBegrunnelser =

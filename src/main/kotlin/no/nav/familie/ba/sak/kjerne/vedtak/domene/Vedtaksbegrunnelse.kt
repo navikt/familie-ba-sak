@@ -62,14 +62,12 @@ class Vedtaksbegrunnelse(
     fun kopier(vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser): Vedtaksbegrunnelse = Vedtaksbegrunnelse(
         vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
         vedtakBegrunnelseSpesifikasjon = this.vedtakBegrunnelseSpesifikasjon,
-        personIdenter = this.personIdenter
     )
 }
 
 fun Vedtaksbegrunnelse.tilRestVedtaksbegrunnelse() = RestVedtaksbegrunnelse(
     vedtakBegrunnelseSpesifikasjon = this.vedtakBegrunnelseSpesifikasjon,
     vedtakBegrunnelseType = this.vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType,
-    personIdenter = this.personIdenter
 )
 
 interface Begrunnelse

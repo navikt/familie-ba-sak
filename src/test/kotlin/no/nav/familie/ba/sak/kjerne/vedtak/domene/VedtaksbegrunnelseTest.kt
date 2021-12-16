@@ -23,7 +23,6 @@ class VedtaksbegrunnelseTest {
 
     val restVedtaksbegrunnelse = lagRestVedtaksbegrunnelse(
         vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET,
-        personIdenter = listOf(søker, barn1, barn2).map { it.personIdent.ident },
         vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
     )
 
