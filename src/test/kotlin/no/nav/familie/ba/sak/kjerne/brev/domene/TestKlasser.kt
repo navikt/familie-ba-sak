@@ -59,8 +59,8 @@ data class BrevPeriodeTestPerson(
     fun tilMinimerteEndredeUtbetalingAndeler() =
         endredeUtbetalinger.map { it.tilMinimertEndretUtbetalingAndel(this.personIdent) }
 
-    fun tilMinimertePersonResultater(): MinimertPersonResultat {
-        return MinimertPersonResultat(
+    fun tilMinimertePersonResultater(): MinimertRestPersonResultat {
+        return MinimertRestPersonResultat(
             personIdent = this.personIdent,
             minimerteVilkårResultater = hentVilkårForPerson(),
             andreVurderinger = this.andreVurderinger,

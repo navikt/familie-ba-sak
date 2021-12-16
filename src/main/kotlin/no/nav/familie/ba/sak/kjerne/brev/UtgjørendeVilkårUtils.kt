@@ -6,7 +6,7 @@ import no.nav.familie.ba.sak.common.overlapperHeltEllerDelvisMed
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
-import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertPersonResultat
+import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertRestPersonResultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertVilkårResultat
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
@@ -28,7 +28,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
  * @return List med personene det trigges endring på
  */
 fun hentPersonerForAlleUtgjørendeVilkår(
-    minimertePersonResultater: List<MinimertPersonResultat>,
+    minimertePersonResultater: List<MinimertRestPersonResultat>,
     vedtaksperiode: Periode,
     oppdatertBegrunnelseType: VedtakBegrunnelseType,
     aktuellePersonerForVedtaksperiode: List<MinimertRestPerson>,
@@ -38,7 +38,7 @@ fun hentPersonerForAlleUtgjørendeVilkår(
     return triggesAv.vilkår.fold(mutableSetOf()) { acc, vilkår ->
         acc.addAll(
             hentPersonerMedUtgjørendeVilkår(
-                minimertPersonResultater = minimertePersonResultater,
+                minimertRestPersonResultater = minimertePersonResultater,
                 vedtaksperiode = vedtaksperiode,
                 oppdatertBegrunnelseType = oppdatertBegrunnelseType,
                 utgjørendeVilkår = vilkår,
@@ -53,7 +53,7 @@ fun hentPersonerForAlleUtgjørendeVilkår(
 }
 
 private fun hentPersonerMedUtgjørendeVilkår(
-    minimertPersonResultater: List<MinimertPersonResultat>,
+    minimertRestPersonResultater: List<MinimertRestPersonResultat>,
     vedtaksperiode: Periode,
     oppdatertBegrunnelseType: VedtakBegrunnelseType,
     utgjørendeVilkår: Vilkår?,
@@ -62,7 +62,7 @@ private fun hentPersonerMedUtgjørendeVilkår(
     erFørsteVedtaksperiodePåFagsak: Boolean
 ): List<MinimertRestPerson> {
 
-    return minimertPersonResultater
+    return minimertRestPersonResultater
         .fold(mutableListOf()) { acc, personResultat ->
             val utgjørendeVilkårResultat =
                 personResultat.minimerteVilkårResultater.firstOrNull { minimertVilkårResultat ->

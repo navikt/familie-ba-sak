@@ -11,7 +11,7 @@ import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.beregning.fomErPåSatsendring
-import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertPersonResultat
+import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertRestPersonResultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.harPersonerSomManglerOpplysninger
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
@@ -32,7 +32,7 @@ import java.time.LocalDate
 
 fun VedtakBegrunnelseSpesifikasjon.triggesForPeriode(
     utvidetVedtaksperiodeMedBegrunnelser: UtvidetVedtaksperiodeMedBegrunnelser,
-    minimertePersonResultater: List<MinimertPersonResultat>,
+    minimertePersonResultater: List<MinimertRestPersonResultat>,
     persongrunnlag: PersonopplysningGrunnlag,
     aktørerMedUtbetaling: List<Aktør>,
     triggesAv: TriggesAv,
