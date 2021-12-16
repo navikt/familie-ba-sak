@@ -28,7 +28,7 @@ data class BrevBegrunnelseGrunnlag(
             erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
         )
 
-        if (personidenterGjeldendeForBegrunnelse.isEmpty()) {
+        if (personidenterGjeldendeForBegrunnelse.isEmpty() && !this.triggesAv.satsendring) {
             throw Feil(
                 "Begrunnelse '${this.vedtakBegrunnelseSpesifikasjon}' var ikke knyttet til noen personer."
             )
