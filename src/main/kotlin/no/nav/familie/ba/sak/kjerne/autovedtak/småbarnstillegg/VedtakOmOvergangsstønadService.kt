@@ -174,6 +174,7 @@ class VedtakOmOvergangsstønadService(
     ): String {
         metric.increment()
         behandlingService.omgjørTilManuellBehandling(behandling)
+        vedtaksperiodeService.slettVedtaksperioderFor(vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = behandling.id))
         return autovedtakService.opprettOppgaveForManuellBehandling(
             behandling = behandling,
             begrunnelse = meldingIOppgave,

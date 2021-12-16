@@ -34,10 +34,15 @@ class VedtaksbegrunnelseFritekst(
     val fritekst: String,
 ) {
 
-    fun kopier(vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser): VedtaksbegrunnelseFritekst = VedtaksbegrunnelseFritekst(
-        vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
-        fritekst = this.fritekst,
-    )
+    fun kopier(vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser): VedtaksbegrunnelseFritekst =
+        VedtaksbegrunnelseFritekst(
+            vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
+            fritekst = this.fritekst,
+        )
+
+    override fun toString(): String {
+        return "VedtaksbegrunnelseFritekst(id=$id)"
+    }
 }
 
 fun tilVedtaksbegrunnelseFritekst(

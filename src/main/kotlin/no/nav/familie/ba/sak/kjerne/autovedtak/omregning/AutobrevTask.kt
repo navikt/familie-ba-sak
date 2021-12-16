@@ -15,12 +15,12 @@ import java.time.LocalDate
 
 @Service
 @TaskStepBeskrivelse(
-    taskStepType = FinnAlleBarn6og18ÅrTask.TASK_STEP_TYPE,
-    beskrivelse = "Send autobrev for barn som fyller 6 og 18 år til Dokdist",
+    taskStepType = AutobrevTask.TASK_STEP_TYPE,
+    beskrivelse = "Opprett oppgaver for sending av autobrev",
     maxAntallFeil = 3,
     triggerTidVedFeilISekunder = (60 * 60 * 24).toLong()
 )
-class FinnAlleBarn6og18ÅrTask(
+class AutobrevTask(
     private val fagsakRepository: FagsakRepository,
     private val opprettTaskService: OpprettTaskService
 ) : AsyncTaskStep {
@@ -49,6 +49,6 @@ class FinnAlleBarn6og18ÅrTask(
     companion object {
 
         const val TASK_STEP_TYPE = "FinnAlleBarn6og18ÅrTask"
-        private val logger: Logger = LoggerFactory.getLogger(FinnAlleBarn6og18ÅrTask::class.java)
+        private val logger: Logger = LoggerFactory.getLogger(AutobrevTask::class.java)
     }
 }
