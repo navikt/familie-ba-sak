@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.task.dto.Autobrev6og18ÅrDTO
+import no.nav.familie.ba.sak.task.dto.AutobrevOpphørSmåbarnstilleggDTO
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.log.IdUtils
@@ -53,6 +54,23 @@ class OpprettTaskService(
                 ),
                 properties = Properties().apply {
                     this["fagsak"] = fagsakId.toString()
+                    this["callId"] = IdUtils.generateId()
+                }
+            )
+        )
+    }
+
+    fun opprettAutovedtakForOpphørSmåbarnstilleggTask(behandlingId: Long) {
+        taskRepository.save(
+            Task(
+                type = SendAutobrevOpphørSmåbarnstilleggTask.TASK_STEP_TYPE,
+                payload = objectMapper.writeValueAsString(
+                    AutobrevOpphørSmåbarnstilleggDTO(
+                        behandlingId = behandlingId
+                    )
+                ),
+                properties = Properties().apply {
+                    this["behandlingId"] = behandlingId.toString()
                     this["callId"] = IdUtils.generateId()
                 }
             )
