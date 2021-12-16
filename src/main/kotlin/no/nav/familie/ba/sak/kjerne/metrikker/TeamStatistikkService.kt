@@ -29,7 +29,7 @@ class TeamStatistikkService(
     val tidSidenOpprettelseåpneBehandlingerPerMånedGauge =
         MultiGauge.builder("TidSidenOpprettelseAapneBehandlingerPerMaanedGauge").register(Metrics.globalRegistry)
 
-    @Scheduled(cron = "*/$OPPDATERINGSFREKVENS_MINUTTER * * * *")
+    @Scheduled(cron = OPPDATERING_HVER_HALVTIME)
     fun utbetalinger() {
         val månederMedTotalUtbetaling =
             listOf<LocalDateTime>(
@@ -57,7 +57,7 @@ class TeamStatistikkService(
         utbetalingerPerMånedGauge.register(rows)
     }
 
-    @Scheduled(cron = "*/$OPPDATERINGSFREKVENS_MINUTTER * * * *")
+    @Scheduled(cron = OPPDATERING_HVER_HALVTIME)
     fun antallFagsaker() {
         val antallFagsaker = fagsakRepository.finnAntallFagsakerTotalt()
 
@@ -79,7 +79,7 @@ class TeamStatistikkService(
         antallFagsakerPerMånedGauge.register(rows)
     }
 
-    @Scheduled(cron = "*/$OPPDATERINGSFREKVENS_MINUTTER * * * *")
+    @Scheduled(cron = OPPDATERING_HVER_HALVTIME)
     fun løpendeFagsaker() {
         val løpendeFagsaker = fagsakRepository.finnAntallFagsakerLøpende()
 
@@ -101,7 +101,7 @@ class TeamStatistikkService(
         løpendeFagsakerPerMånedGauge.register(rows)
     }
 
-    @Scheduled(initialDelay = INITIAL_DELAY, fixedDelay = OPPDATERINGSFREKVENS)
+    @Scheduled(cron = OPPDATERING_HVER_HALVTIME)
     fun åpneBehandlinger() {
         val åpneBehandlinger = behandlingRepository.finnAntallBehandlingerIkkeAvsluttet()
 
@@ -123,7 +123,7 @@ class TeamStatistikkService(
         åpneBehandlingerPerMånedGauge.register(rows)
     }
 
-    @Scheduled(cron = "*/$OPPDATERINGSFREKVENS_MINUTTER * * * *")
+    @Scheduled(cron = OPPDATERING_HVER_HALVTIME)
     fun tidFraOpprettelsePåÅpneBehandlinger() {
         val opprettelsestidspunktPååpneBehandlinger = behandlingRepository.finnOpprettelsestidspunktPåÅpneBehandlinger()
         val diffPåÅpneBehandlinger =
@@ -193,9 +193,7 @@ class TeamStatistikkService(
     }
 
     companion object {
-        const val OPPDATERINGSFREKVENS = 30 * 60 * 1000L
-        const val OPPDATERINGSFREKVENS_MINUTTER = 30
-        const val INITIAL_DELAY = 120000L
+        const val OPPDATERING_HVER_HALVTIME: String = "0 0/30 * * * *"
         const val ÅR_MÅNED_TAG = "aar-maaned"
         val logger = LoggerFactory.getLogger(TeamStatistikkService::class.java)
     }
