@@ -12,18 +12,15 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 
 @Component
-class Autobrev6og18ÅrScheduler(val taskRepository: TaskRepositoryWrapper) {
+class AutobrevScheduler(val taskRepository: TaskRepositoryWrapper) {
 
-    /*
-     * Hver måned skal løpende fagsaker med barn som fyller 6- eller 18 år i løpet av måneden slås opp og tasker for å sjekke om
-     * autobrev skal sendes ut opprettes for disse. Dette skal da gjøres første virkedag i hver måned. Denne klassen kjøres
-     * skedulert kl.7 den første dagen i måneden og setter da triggertid på tasken til kl.8 den første virkedagen i måneden.
-     * For testformål kan funksjonen opprettTask også kalles direkte via et restendepunkt, og da settes triggertiden 30 sek
-     * frem i tid.
+    /**
+     * Denne funksjonen kjøres kl.7 den første dagen i måneden og setter triggertid på tasken til kl.8 den første virkedagen i måneden.
+     * For testformål kan funksjonen opprettTask også kalles direkte via et restendepunkt.
      */
     @Transactional
     @Scheduled(cron = "0 0 $KLOKKETIME_SCHEDULER_TRIGGES 1 * *")
-    fun opprettTaskAutoBrev6og18år() {
+    fun opprettTask() {
         when (LeaderClient.isLeader()) {
             true -> {
                 // Timen for triggertid økes med en. Det er nødvendig å sette klokkeslettet litt frem dersom den 1. i
@@ -34,16 +31,16 @@ class Autobrev6og18ÅrScheduler(val taskRepository: TaskRepositoryWrapper) {
                     ).atTime(KLOKKETIME_SCHEDULER_TRIGGES.inc(), 0)
                 )
             }
-            false -> logger.info("Poden er ikke satt opp som leader - oppretter ikke FinnAlleBarn6og18ÅrTask")
-            null -> logger.info("Poden svarer ikke om den er leader eller ikke - oppretter ikke FinnAlleBarn6og18ÅrTask")
+            false -> logger.info("Poden er ikke satt opp som leader - oppretter ikke task")
+            null -> logger.info("Poden svarer ikke om den er leader eller ikke - oppretter ikke task")
         }
     }
 
     fun opprettTask(triggerTid: LocalDateTime = LocalDateTime.now().plusSeconds(30)) {
-        logger.info("Opprett task som skal finne alle barn 6 og 18 år")
+        logger.info("Opprett månedlig task")
         taskRepository.save(
             Task(
-                type = FinnAlleBarn6og18ÅrTask.TASK_STEP_TYPE,
+                type = AutobrevTask.TASK_STEP_TYPE,
                 payload = ""
             ).medTriggerTid(
                 triggerTid = triggerTid
@@ -53,7 +50,7 @@ class Autobrev6og18ÅrScheduler(val taskRepository: TaskRepositoryWrapper) {
 
     companion object {
 
-        private val logger = LoggerFactory.getLogger(Autobrev6og18ÅrScheduler::class.java)
+        private val logger = LoggerFactory.getLogger(AutobrevScheduler::class.java)
         const val KLOKKETIME_SCHEDULER_TRIGGES = 7
     }
 }

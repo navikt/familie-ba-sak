@@ -2,6 +2,8 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.omregning
 
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.task.OpprettTaskService
@@ -15,14 +17,15 @@ import java.time.LocalDate
 
 @Service
 @TaskStepBeskrivelse(
-    taskStepType = FinnAlleBarn6og18ÅrTask.TASK_STEP_TYPE,
-    beskrivelse = "Send autobrev for barn som fyller 6 og 18 år til Dokdist",
+    taskStepType = AutobrevTask.TASK_STEP_TYPE,
+    beskrivelse = "Opprett oppgaver for sending av autobrev",
     maxAntallFeil = 3,
     triggerTidVedFeilISekunder = (60 * 60 * 24).toLong()
 )
-class FinnAlleBarn6og18ÅrTask(
+class AutobrevTask(
     private val fagsakRepository: FagsakRepository,
-    private val opprettTaskService: OpprettTaskService
+    private val opprettTaskService: OpprettTaskService,
+    private val featureToggleService: FeatureToggleService
 ) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
@@ -35,6 +38,9 @@ class FinnAlleBarn6og18ÅrTask(
                     alder = alder.toInt()
                 )
             }
+        }
+        if (featureToggleService.isEnabled(FeatureToggleConfig.AUTOBREV_OPPHØR_SMÅBARNSTILLEGG)) {
+            logger.info("Sending av autobrev ved opphør av småbarnstillegg er enabled.")
         }
     }
 
@@ -49,6 +55,6 @@ class FinnAlleBarn6og18ÅrTask(
     companion object {
 
         const val TASK_STEP_TYPE = "FinnAlleBarn6og18ÅrTask"
-        private val logger: Logger = LoggerFactory.getLogger(FinnAlleBarn6og18ÅrTask::class.java)
+        private val logger: Logger = LoggerFactory.getLogger(AutobrevTask::class.java)
     }
 }
