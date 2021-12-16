@@ -29,7 +29,7 @@ class TeamStatistikkService(
     val tidSidenOpprettelseåpneBehandlingerPerMånedGauge =
         MultiGauge.builder("TidSidenOpprettelseAapneBehandlingerPerMaanedGauge").register(Metrics.globalRegistry)
 
-    @Scheduled(initialDelay = INITIAL_DELAY, fixedDelay = OPPDATERINGSFREKVENS)
+    @Scheduled(cron = "*/$OPPDATERINGSFREKVENS_MINUTTER * * * *")
     fun utbetalinger() {
         val månederMedTotalUtbetaling =
             listOf<LocalDateTime>(
@@ -57,7 +57,7 @@ class TeamStatistikkService(
         utbetalingerPerMånedGauge.register(rows)
     }
 
-    @Scheduled(initialDelay = INITIAL_DELAY, fixedDelay = OPPDATERINGSFREKVENS)
+    @Scheduled(cron = "*/$OPPDATERINGSFREKVENS_MINUTTER * * * *")
     fun antallFagsaker() {
         val antallFagsaker = fagsakRepository.finnAntallFagsakerTotalt()
 
@@ -79,7 +79,7 @@ class TeamStatistikkService(
         antallFagsakerPerMånedGauge.register(rows)
     }
 
-    @Scheduled(initialDelay = INITIAL_DELAY, fixedDelay = OPPDATERINGSFREKVENS)
+    @Scheduled(cron = "*/$OPPDATERINGSFREKVENS_MINUTTER * * * *")
     fun løpendeFagsaker() {
         val løpendeFagsaker = fagsakRepository.finnAntallFagsakerLøpende()
 
@@ -123,7 +123,7 @@ class TeamStatistikkService(
         åpneBehandlingerPerMånedGauge.register(rows)
     }
 
-    @Scheduled(initialDelay = INITIAL_DELAY, fixedDelay = OPPDATERINGSFREKVENS)
+    @Scheduled(cron = "*/$OPPDATERINGSFREKVENS_MINUTTER * * * *")
     fun tidFraOpprettelsePåÅpneBehandlinger() {
         val opprettelsestidspunktPååpneBehandlinger = behandlingRepository.finnOpprettelsestidspunktPåÅpneBehandlinger()
         val diffPåÅpneBehandlinger =
@@ -194,6 +194,7 @@ class TeamStatistikkService(
 
     companion object {
         const val OPPDATERINGSFREKVENS = 30 * 60 * 1000L
+        const val OPPDATERINGSFREKVENS_MINUTTER = 30
         const val INITIAL_DELAY = 120000L
         const val ÅR_MÅNED_TAG = "aar-maaned"
         val logger = LoggerFactory.getLogger(TeamStatistikkService::class.java)
