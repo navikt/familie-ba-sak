@@ -125,7 +125,7 @@ fun ManueltBrevRequest.tilBrevmal() = when (this.brevmal.malId) {
         )
     else -> error(
         "Kan ikke mappe brevmal for ${
-            this.brevmal.visningsTekst
+        this.brevmal.visningsTekst
         } til ny brevtype da denne ikke er støttet i ny løsning enda."
     )
 }

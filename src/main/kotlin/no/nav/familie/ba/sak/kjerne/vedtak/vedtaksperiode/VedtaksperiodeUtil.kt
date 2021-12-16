@@ -99,9 +99,9 @@ fun kastFeilmeldingForBegrunnelserMedFeil(
 
 fun validerVedtaksperiodeMedBegrunnelser(vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser) {
     if ((
-            vedtaksperiodeMedBegrunnelser.type == Vedtaksperiodetype.OPPHØR ||
-                vedtaksperiodeMedBegrunnelser.type == Vedtaksperiodetype.AVSLAG
-            ) &&
+        vedtaksperiodeMedBegrunnelser.type == Vedtaksperiodetype.OPPHØR ||
+            vedtaksperiodeMedBegrunnelser.type == Vedtaksperiodetype.AVSLAG
+        ) &&
         vedtaksperiodeMedBegrunnelser.harFriteksterUtenStandardbegrunnelser()
     ) {
         val fritekstUtenStandardbegrunnelserFeilmelding =

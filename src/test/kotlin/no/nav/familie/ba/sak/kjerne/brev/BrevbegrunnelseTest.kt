@@ -147,4 +147,3 @@ class BrevbegrunnelseTest {
         return feil
     }
 }
-

@@ -132,5 +132,3 @@ fun BrevBegrunnelseGrunnlagMedPersoner.tilBrevBegrunnelse(
         belop = beløp
     )
 }
-
-

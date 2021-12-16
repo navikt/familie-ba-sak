@@ -285,12 +285,12 @@ class VedtaksperiodeService(
                                         minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
                                         persongrunnlag = persongrunnlag,
                                         aktørerMedUtbetaling = personidentService.hentOgLagreAktørIder(
-                                            identerMedUtbetaling
-                                        ),
+                                                identerMedUtbetaling
+                                            ),
                                         triggesAv = triggesAv,
                                         endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(
-                                            behandling.id
-                                        ),
+                                                behandling.id
+                                            ),
                                         andelerTilkjentYtelse = andelerTilkjentYtelse,
                                     )
                                 ) {
