@@ -21,11 +21,9 @@ fun hentSanityBegrunnelser(): List<SanityBegrunnelse> {
     val query = hentDokumenter
     val parameters = java.net.URLEncoder.encode(query, "utf-8")
 
-    val client = restTemplate
-
     logger.info("Henter begrunnelser fra sanity")
 
-    val response = client.getForEntity<SanityRespons>(URI.create("$sanityUrl?query=$parameters"))
+    val response = restTemplate.getForEntity<SanityRespons>(URI.create("$sanityUrl?query=$parameters"))
     val restSanityBegrunnelser = response.body?.result
         ?: throw Feil("Klarer ikke å hente begrunnelser fra sanity")
 
