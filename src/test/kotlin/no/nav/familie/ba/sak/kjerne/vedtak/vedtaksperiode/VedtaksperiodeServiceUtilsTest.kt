@@ -80,11 +80,6 @@ class VedtaksperiodeServiceUtilsTest {
             )
 
         Assertions.assertEquals(1, endredeUtbetalingsperioderMedBegrunnelser.size)
-
-        Assertions.assertEquals(
-            setOf(person2.aktør.aktivFødselsnummer(), person1.aktør.aktivFødselsnummer()),
-            endredeUtbetalingsperioderMedBegrunnelser.single().begrunnelser.single().personIdenter.toSet()
-        )
     }
 
     @Test
@@ -137,72 +132,6 @@ class VedtaksperiodeServiceUtilsTest {
             )
 
         Assertions.assertEquals(2, endredeUtbetalingsperioderMedBegrunnelser.size)
-    }
-
-    @Test
-    fun `skal ikke legge til personer på begrunnelse dersom begrunnelsen ikke tilhører dem`() {
-        val person1 = lagPerson()
-        val person2 = lagPerson()
-        val fom = YearMonth.now().minusMonths(1)
-        val tom = YearMonth.now()
-
-        val andelTilkjentYtelser =
-            listOf(
-                lagAndelTilkjentYtelse(
-                    person = person1,
-                    fom = fom,
-                    tom = tom,
-                    prosent = BigDecimal(0),
-                    endretUtbetalingAndeler = listOf(
-                        lagEndretUtbetalingAndel(
-                            person = person1,
-                            fom = fom,
-                            tom = tom,
-                            vedtakBegrunnelseSpesifikasjoner = listOf(
-                                VedtakBegrunnelseSpesifikasjon.INNVILGET_VURDERING_HELE_FAMILIEN_PLIKTIG_MEDLEM
-                            )
-                        )
-                    )
-                ),
-                lagAndelTilkjentYtelse(
-                    person = person2,
-                    fom = fom,
-                    tom = tom,
-                    prosent = BigDecimal(0),
-                    endretUtbetalingAndeler = listOf(
-                        lagEndretUtbetalingAndel(
-                            person = person2,
-                            fom = fom,
-                            tom = tom,
-                            vedtakBegrunnelseSpesifikasjoner = listOf(
-                                VedtakBegrunnelseSpesifikasjon.AVSLAG_BOR_HOS_SØKER
-                            )
-                        )
-                    )
-                )
-            )
-        val vedtak = lagVedtak()
-        val endredeUtbetalingsperioderMedBegrunnelser = hentVedtaksperioderMedBegrunnelserForEndredeUtbetalingsperioder(
-            vedtak = vedtak,
-            andelerTilkjentYtelse = andelTilkjentYtelser
-        )
-        val begrunnelser = endredeUtbetalingsperioderMedBegrunnelser
-            .single()
-            .begrunnelser
-
-        Assertions.assertEquals(2, begrunnelser.size)
-
-        val begrunnelsePerson1 =
-            begrunnelser
-                .find {
-                    it.vedtakBegrunnelseSpesifikasjon ==
-                        VedtakBegrunnelseSpesifikasjon.INNVILGET_VURDERING_HELE_FAMILIEN_PLIKTIG_MEDLEM
-                }
-
-        Assertions.assertEquals(
-            listOf(person1.aktør.aktivFødselsnummer()),
-            begrunnelsePerson1?.personIdenter
-        )
     }
 
     @Test
