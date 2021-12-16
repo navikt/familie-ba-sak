@@ -2,6 +2,8 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.omregning
 
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.task.OpprettTaskService
@@ -22,7 +24,8 @@ import java.time.LocalDate
 )
 class AutobrevTask(
     private val fagsakRepository: FagsakRepository,
-    private val opprettTaskService: OpprettTaskService
+    private val opprettTaskService: OpprettTaskService,
+    private val featureToggleService: FeatureToggleService
 ) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
@@ -35,6 +38,9 @@ class AutobrevTask(
                     alder = alder.toInt()
                 )
             }
+        }
+        if (featureToggleService.isEnabled(FeatureToggleConfig.AUTOBREV_OPPHØR_SMÅBARNSTILLEGG)) {
+            logger.info("Sending av autobrev ved opphør av småbarnstillegg er enabled.")
         }
     }
 
