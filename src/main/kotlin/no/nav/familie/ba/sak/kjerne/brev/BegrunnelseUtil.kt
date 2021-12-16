@@ -26,6 +26,7 @@ fun hentPersonidenterGjeldendeForBegrunnelse(
 ): List<String> {
 
     val erFortsattInnvilgetBegrunnelse = vedtakBegrunnelseType == VedtakBegrunnelseType.FORTSATT_INNVILGET
+    val erEndretUtbetalingBegrunnelse = vedtakBegrunnelseType == VedtakBegrunnelseType.ENDRET_UTBETALING
 
     return when {
         triggesAv.vilkår.contains(Vilkår.UTVIDET_BARNETRYGD) || triggesAv.småbarnstillegg ->
@@ -45,7 +46,7 @@ fun hentPersonidenterGjeldendeForBegrunnelse(
             else
                 error("Legg til opplysningsplikt ikke oppfylt begrunnelse men det er ikke person med det resultat")
 
-        erFortsattInnvilgetBegrunnelse -> identerMedUtbetalingPåPeriode
+        erFortsattInnvilgetBegrunnelse || erEndretUtbetalingBegrunnelse -> identerMedUtbetalingPåPeriode
 
         triggesAv.etterEndretUtbetaling ->
             hentPersonerForEtterEndretUtbetalingsperiode(

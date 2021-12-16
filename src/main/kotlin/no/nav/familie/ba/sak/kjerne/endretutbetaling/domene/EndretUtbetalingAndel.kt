@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.ekstern.restDomene.RestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.brev.UtvidetScenarioForEndringsperiode
+import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityVilkår
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilTriggesAv
@@ -21,7 +22,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifi
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.triggesAvSkalUtbetales
-import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertEndretUtbetalingAndel
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -180,10 +180,10 @@ fun hentPersonerForEtterEndretUtbetalingsperiode(
         endringsaarsaker.contains(endretUtbetalingAndel.årsak)
 }.mapNotNull { it.personIdent }
 
-fun EndretUtbetalingAndel.hentGyldigEndretBegrunnelser(
+fun EndretUtbetalingAndel.hentGyldigEndretBegrunnelse(
     sanityBegrunnelser: List<SanityBegrunnelse>,
-    utvidetScenario: UtvidetScenarioForEndringsperiode,
-): List<VedtakBegrunnelseSpesifikasjon> {
+    utvidetScenarioForEndringsperiode: UtvidetScenarioForEndringsperiode,
+): VedtakBegrunnelseSpesifikasjon {
     val gyldigeBegrunnelser = VedtakBegrunnelseSpesifikasjon.values()
         .filter { vedtakBegrunnelseSpesifikasjon ->
             vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType == VedtakBegrunnelseType.ENDRET_UTBETALING
@@ -195,7 +195,7 @@ fun EndretUtbetalingAndel.hentGyldigEndretBegrunnelser(
                 val triggesAv = sanityBegrunnelse.tilTriggesAv()
                 sanityBegrunnelse.oppfyllerKravForTriggereForEndretUtbetaling(
                     triggesAv,
-                    utvidetScenario,
+                    utvidetScenarioForEndringsperiode,
                     this
                 )
             } else false
@@ -208,7 +208,7 @@ fun EndretUtbetalingAndel.hentGyldigEndretBegrunnelser(
         )
     }
 
-    return gyldigeBegrunnelser
+    return gyldigeBegrunnelser.single()
 }
 
 private fun SanityBegrunnelse.oppfyllerKravForTriggereForEndretUtbetaling(

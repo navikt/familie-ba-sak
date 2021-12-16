@@ -250,7 +250,8 @@ class VedtaksperiodeService(
         return vedtaksperioderMedBegrunnelser.map {
             it.tilUtvidetVedtaksperiodeMedBegrunnelser(
                 andelerTilkjentYtelse = andelerTilkjentYtelse,
-                personopplysningGrunnlag = persongrunnlag
+                personopplysningGrunnlag = persongrunnlag,
+                sanityBegrunnelser = sanityBegrunnelser
             )
         }.map { utvidetVedtaksperiodeMedBegrunnelser ->
             val gyldigeBegrunnelser = when (utvidetVedtaksperiodeMedBegrunnelser.type) {

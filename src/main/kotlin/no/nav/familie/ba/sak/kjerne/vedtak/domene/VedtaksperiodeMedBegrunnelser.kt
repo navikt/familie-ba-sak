@@ -7,9 +7,11 @@ import no.nav.familie.ba.sak.common.NullablePeriode
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.hentAndelerForSegment
 import no.nav.familie.ba.sak.kjerne.beregning.domene.hentLøpendeAndelForVedtaksperiode
+import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtbetalingsperiodeDetalj
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.lagUtbetalingsperiodeDetaljer
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.utledSegmenter
@@ -104,12 +106,20 @@ data class VedtaksperiodeMedBegrunnelser(
 
     fun hentUtbetalingsperiodeDetaljer(
         andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
-        personopplysningGrunnlag: PersonopplysningGrunnlag
-    ) =
-        if (this.type == Vedtaksperiodetype.UTBETALING || this.type == Vedtaksperiodetype.ENDRET_UTBETALING || this.type == Vedtaksperiodetype.FORTSATT_INNVILGET) {
+        personopplysningGrunnlag: PersonopplysningGrunnlag,
+        sanityBegrunnelser: List<SanityBegrunnelse>
+    ): List<UtbetalingsperiodeDetalj> =
+        if (this.type == Vedtaksperiodetype.UTBETALING ||
+            this.type == Vedtaksperiodetype.ENDRET_UTBETALING ||
+            this.type == Vedtaksperiodetype.FORTSATT_INNVILGET
+        ) {
             val andelerForVedtaksperiodetype = andelerTilkjentYtelse.filter {
                 if (this.type == Vedtaksperiodetype.ENDRET_UTBETALING) {
-                    endretUtbetalingAndelSkalVæreMed(it)
+                    it.harEndretUtbetalingAndelerOgHørerTilVedtaksperiode(
+                        vedtaksperiodeMedBegrunnelser = this,
+                        sanityBegrunnelser = sanityBegrunnelser,
+                        andelerTilkjentYtelse = andelerTilkjentYtelse
+                    )
                 } else {
                     it.endretUtbetalingAndeler.isEmpty()
                 }
@@ -134,15 +144,6 @@ data class VedtaksperiodeMedBegrunnelser(
         .find { localDateSegment ->
             localDateSegment.fom == this.fom || localDateSegment.tom == this.tom
         } ?: throw Feil("Finner ikke segment for vedtaksperiode (${this.fom}, ${this.tom})")
-
-    fun endretUtbetalingAndelSkalVæreMed(andelTilkjentYtelse: AndelTilkjentYtelse) =
-        andelTilkjentYtelse.endretUtbetalingAndeler.isNotEmpty() && andelTilkjentYtelse.endretUtbetalingAndeler.all { endretUtbetalingAndel ->
-            this.begrunnelser.any { vedtaksbegrunnelse ->
-                vedtaksbegrunnelse.personIdenter.contains(
-                    endretUtbetalingAndel.person!!.personIdent.ident
-                )
-            }
-        }
 
     companion object {
         val comparator = BegrunnelseComparator()

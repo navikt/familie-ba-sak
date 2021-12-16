@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.common.tilfeldigSøker
 import no.nav.familie.ba.sak.dataGenerator.vedtak.lagVedtaksbegrunnelse
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPerson
+import no.nav.familie.ba.sak.kjerne.brev.hentSanityBegrunnelser
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -75,7 +76,8 @@ class UtvidetVedtaksperiodeMedBegrunnelserTest {
         val utvidetVedtaksperiodeMedBegrunnelser =
             vedtaksperiodeMedBegrunnelser.tilUtvidetVedtaksperiodeMedBegrunnelser(
                 personopplysningGrunnlag,
-                andelerTilkjentYtelse
+                andelerTilkjentYtelse,
+                sanityBegrunnelser = hentSanityBegrunnelser()
             )
 
         Assertions.assertEquals(1, utvidetVedtaksperiodeMedBegrunnelser.utbetalingsperiodeDetaljer.size)
@@ -140,7 +142,8 @@ class UtvidetVedtaksperiodeMedBegrunnelserTest {
         val utvidetVedtaksperiodeMedBegrunnelser =
             vedtaksperiodeMedBegrunnelser.tilUtvidetVedtaksperiodeMedBegrunnelser(
                 personopplysningGrunnlag,
-                andelerTilkjentYtelse
+                andelerTilkjentYtelse,
+                sanityBegrunnelser = hentSanityBegrunnelser()
             )
 
         Assertions.assertEquals(1, utvidetVedtaksperiodeMedBegrunnelser.utbetalingsperiodeDetaljer.size)

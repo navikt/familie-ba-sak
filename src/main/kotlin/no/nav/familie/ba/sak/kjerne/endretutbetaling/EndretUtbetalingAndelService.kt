@@ -12,7 +12,7 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValide
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.fraRestEndretUtbetalingAndel
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.hentGyldigEndretBegrunnelser
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.hentGyldigEndretBegrunnelse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import org.springframework.stereotype.Service
@@ -118,9 +118,11 @@ class EndretUtbetalingAndelService(
                 andelTilkjentYtelser.hentUtvidetScenarioForEndringsperiode(it.periode)
 
             it.vedtakBegrunnelseSpesifikasjoner =
-                it.hentGyldigEndretBegrunnelser(
-                    sanityService.hentSanityBegrunnelser(),
-                    utvidetScenario,
+                listOf(
+                    it.hentGyldigEndretBegrunnelse(
+                        sanityService.hentSanityBegrunnelser(),
+                        utvidetScenario,
+                    )
                 )
         }
 
