@@ -17,9 +17,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
 
-@SpringBootTest
 class VelgFagsystemIntegrasjonTest(
     @Autowired val stegService: StegService,
     @Autowired val persongrunnlagService: PersongrunnlagService,
@@ -54,6 +52,6 @@ class VelgFagsystemIntegrasjonTest(
             listOf(Stønad(opphørtFom = "012020")), emptyList()
         )
         assertEquals(FagsystemRegelVurdering.SEND_TIL_INFOTRYGD, velgFagSystemService.velgFagsystem(nyBehandling))
-        assertEquals(1.0, velgFagSystemService.foreslåttUtfallForValgAvFagsystem[fagsystemUtfallInfotrygd]!!.count())
+        assertEquals(1.0, velgFagSystemService.utfallForValgAvFagsystem[fagsystemUtfallInfotrygd]!!.count())
     }
 }
