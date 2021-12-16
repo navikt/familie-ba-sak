@@ -29,11 +29,11 @@ class VilkårTilTilkjentYtelseTest {
 
     @ParameterizedTest
     @CsvFileSource(
-        resources = ["/beregning/vilkår_til_tilkjent_ytelse/søker_med_ett_barn_inntil_to_perioder.csv"],
+        resources = ["/beregning/vilkår_til_tilkjent_ytelse/søker_med_ett_barn_inntil_tre_perioder.csv"],
         numLinesToSkip = 1,
         delimiter = ';'
     )
-    fun `test søker med ett barn, inntil to perioder`(
+    fun `test søker med ett barn, inntil tre perioder`(
         sakType: String,
         søkerPeriode1: String?,
         søkerVilkår1: String?,
@@ -47,6 +47,9 @@ class VilkårTilTilkjentYtelseTest {
         barn1Andel2Beløp: Int?,
         barn1Andel2Periode: String?,
         barn1Andel2Type: String?,
+        barn1Andel3Beløp: Int?,
+        barn1Andel3Periode: String?,
+        barn1Andel3Type: String?,
         erDeltBosted: Boolean?
     ) {
 
@@ -64,6 +67,7 @@ class VilkårTilTilkjentYtelseTest {
         val forventetTilkjentYtelse = TestTilkjentYtelseBuilder(vilkårsvurdering.behandling)
             .medAndelTilkjentYtelse(barn1, barn1Andel1Beløp?.div(delBeløp), barn1Andel1Periode, barn1Andel1Type)
             .medAndelTilkjentYtelse(barn1, barn1Andel2Beløp?.div(delBeløp), barn1Andel2Periode, barn1Andel2Type)
+            .medAndelTilkjentYtelse(barn1, barn1Andel3Beløp?.div(delBeløp), barn1Andel3Periode, barn1Andel3Type)
             .bygg()
 
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(vilkårsvurdering.behandling.id, søker, barn1)
@@ -326,7 +330,7 @@ data class TestPeriode(val fraOgMed: LocalDate, val tilOgMed: LocalDate?) {
 
         fun parse(s: String): TestPeriode {
             return prøvLocalDate(s) ?: prøvYearMonth(s)
-                ?: throw IllegalArgumentException("Kunne ikke parse periode '$s'")
+            ?: throw IllegalArgumentException("Kunne ikke parse periode '$s'")
         }
 
         private fun prøvLocalDate(s: String): TestPeriode? {
