@@ -30,7 +30,7 @@ class PersonidentService(
         return if (aktør?.harIdent(fødselsnummer = nyIdent.ident) == false) {
             logger.info("Legger til ny ident")
             secureLogger.info("Legger til ny ident ${nyIdent.ident} på aktør ${aktør.aktørId}")
-            opprettPersonIdent(aktør, nyIdent.ident, false)
+            opprettPersonIdent(aktør, nyIdent.ident)
         } else aktør
     }
 
@@ -102,7 +102,7 @@ class PersonidentService(
         }
     }
 
-    private fun opprettPersonIdent(aktør: Aktør, fødselsnummer: String, lagre: Boolean): Aktør {
+    private fun opprettPersonIdent(aktør: Aktør, fødselsnummer: String, lagre: Boolean = true): Aktør {
         aktør.personidenter.filter { it.aktiv }.map {
             it.aktiv = false
             it.gjelderTil = LocalDateTime.now()
