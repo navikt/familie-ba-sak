@@ -642,7 +642,7 @@ fun kjørStegprosessForFGB(
         return behandlingEtterPersongrunnlagSteg
 
     val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)!!
-    persongrunnlagService.hentAktiv(behandlingId = behandling.id)!!.barna.forEach { barn ->
+    persongrunnlagService.hentAktivThrows(behandlingId = behandling.id).barna.forEach { barn ->
         vurderVilkårsvurderingTilInnvilget(vilkårsvurdering, barn)
     }
     vilkårsvurderingService.oppdater(vilkårsvurdering)
