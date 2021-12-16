@@ -265,7 +265,7 @@ class VedtaksperiodeServiceUtilsTest {
             behandling = behandling,
             resultat = Resultat.OPPFYLT
         )
-        val identerMedUtbetaling = listOf(barn.aktør.aktivFødselsnummer())
+        val identerMedUtbetaling = listOf(barn.aktør.aktivFødselsnummer(), søker.aktør.aktivFødselsnummer())
 
         val personidenterForBegrunnelse = hentPersonidenterGjeldendeForBegrunnelse(
             triggesAv = triggesAv,
@@ -308,7 +308,7 @@ class VedtaksperiodeServiceUtilsTest {
             resultat = Resultat.OPPFYLT
         )
 
-        val identerMedUtbetaling = listOf(barn1.aktør.aktivFødselsnummer())
+        val identerMedUtbetaling = listOf(barn1.aktør.aktivFødselsnummer(), søker.aktør.aktivFødselsnummer())
         val endredeUtbetalingAndeler = listOf(
             lagEndretUtbetalingAndel(
                 person = barn2,
