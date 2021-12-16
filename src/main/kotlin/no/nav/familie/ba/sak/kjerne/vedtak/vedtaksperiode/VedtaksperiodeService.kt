@@ -411,8 +411,8 @@ class VedtaksperiodeService(
 
         val avslagsperioder = periodegrupperteAvslagsvilkår.map { (fellesPeriode, vilkårResultater) ->
 
-            val begrunnelserMedIdenter: Map<VedtakBegrunnelseSpesifikasjon, List<String>> =
-                begrunnelserMedIdentgrupper(vilkårResultater)
+            val vedtakBegrunnelseSpesifikasjoner =
+                vilkårResultater.map { it.vedtakBegrunnelseSpesifikasjoner }.flatten().toSet().toList()
 
             VedtaksperiodeMedBegrunnelser(
                 vedtak = vedtak,
@@ -422,11 +422,10 @@ class VedtaksperiodeService(
             )
                 .apply {
                     begrunnelser.addAll(
-                        begrunnelserMedIdenter.map { (begrunnelse, identer) ->
+                        vedtakBegrunnelseSpesifikasjoner.map { begrunnelse ->
                             Vedtaksbegrunnelse(
                                 vedtaksperiodeMedBegrunnelser = this,
-                                vedtakBegrunnelseSpesifikasjon = begrunnelse,
-                                personIdenter = identer
+                                vedtakBegrunnelseSpesifikasjon = begrunnelse
                             )
                         }
                     )
@@ -473,24 +472,5 @@ class VedtaksperiodeService(
                 }
             } else it
         }.toList()
-    }
-
-    private fun begrunnelserMedIdentgrupper(
-        vilkårResultater: List<VilkårResultat>
-    ): Map<VedtakBegrunnelseSpesifikasjon, List<String>> {
-        val begrunnelseOgIdentListe: List<Pair<VedtakBegrunnelseSpesifikasjon, String>> =
-            vilkårResultater
-                .map { vilkår ->
-                    val personIdent = vilkår.personResultat?.aktør?.aktivFødselsnummer()
-                        ?: throw Feil(
-                            "VilkårResultat ${vilkår.id} mangler PersonResultat ved sammenslåing av begrunnelser"
-                        )
-                    vilkår.vedtakBegrunnelseSpesifikasjoner.map { begrunnelse -> Pair(begrunnelse, personIdent) }
-                }
-                .flatten()
-
-        return begrunnelseOgIdentListe
-            .groupBy { (begrunnelse, _) -> begrunnelse }
-            .mapValues { (_, parGruppe) -> parGruppe.map { it.second } }
     }
 }
