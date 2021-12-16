@@ -10,6 +10,7 @@ enum class FiltreringsregelIkkeOppfylt(val beskrivelse: String, private val filt
     BARN_HAR_UGYLDIG_FNR("Barn har ugyldig fødselsnummer", Filtreringsregel.BARN_GYLDIG_FNR),
     MOR_ER_UNDER_18_ÅR("Mor er under 18 år.", Filtreringsregel.MOR_ER_OVER_18_ÅR),
     MOR_ER_UMYNDIG("Mor er umyndig.", Filtreringsregel.MOR_HAR_IKKE_VERGE),
+    MOR_MOTTAR_LØPENDE_UTVIDET("Mor mottar utvidet barnetrygd.", Filtreringsregel.MOR_MOTTAR_IKKE_LØPENDE_UTVIDET),
     MOR_LEVER_IKKE("Det er registrert dødsdato på mor.", Filtreringsregel.MOR_LEVER),
     BARNET_LEVER_IKKE("Det er registrert dødsdato på barnet.", Filtreringsregel.BARN_LEVER),
     MINDRE_ENN_5_MND_SIDEN_FORRIGE_BARN_UTFALL(

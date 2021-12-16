@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
@@ -55,23 +56,32 @@ class RegistrerPersongrunnlag(
                 Målform.NB
             )
         }
-        if (behandling.opprettetÅrsak == BehandlingÅrsak.ENDRE_MIGRERINGSDATO) {
-            vilkårService.genererVilkårsvurderingForMigreringsbehandlingMedÅrsakEndreMigreringsdato(
-                behandling = behandling,
-                forrigeBehandlingSomErVedtatt = behandlingService.hentForrigeBehandlingSomErVedtatt(behandling),
-                nyMigreringsdato = data.nyMigreringsdato!!
-            )
-        } else if (!(
-            behandling.opprettetÅrsak == BehandlingÅrsak.SØKNAD ||
-                behandling.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE
-            )
-        ) {
-            vilkårService.initierVilkårsvurderingForBehandling(
-                behandling = behandling,
-                bekreftEndringerViaFrontend = true,
-                forrigeBehandlingSomErVedtatt = behandlingService.hentForrigeBehandlingSomErVedtatt(
-                    behandling
+        when (behandling.opprettetÅrsak) {
+            BehandlingÅrsak.ENDRE_MIGRERINGSDATO -> {
+                vilkårService.genererVilkårsvurderingForMigreringsbehandlingMedÅrsakEndreMigreringsdato(
+                    behandling = behandling,
+                    forrigeBehandlingSomErVedtatt = behandlingService.hentForrigeBehandlingSomErVedtatt(behandling),
+                    nyMigreringsdato = data.nyMigreringsdato!!
                 )
+            }
+            BehandlingÅrsak.HELMANUELL_MIGRERING -> {
+                vilkårService.genererVilkårsvurderingForHelmanuellMigrering(
+                    behandling = behandling,
+                    nyMigreringsdato = data.nyMigreringsdato!!
+                )
+            }
+            !in listOf(BehandlingÅrsak.SØKNAD, BehandlingÅrsak.FØDSELSHENDELSE) -> {
+                vilkårService.initierVilkårsvurderingForBehandling(
+                    behandling = behandling,
+                    bekreftEndringerViaFrontend = true,
+                    forrigeBehandlingSomErVedtatt = behandlingService.hentForrigeBehandlingSomErVedtatt(
+                        behandling
+                    )
+                )
+            }
+            else -> logger.info(
+                "Perioder i vilkårsvurdering generer ikke automatisk for " +
+                    behandling.opprettetÅrsak.visningsnavn
             )
         }
 
@@ -80,6 +90,10 @@ class RegistrerPersongrunnlag(
 
     override fun stegType(): StegType {
         return StegType.REGISTRERE_PERSONGRUNNLAG
+    }
+
+    companion object {
+        private val logger = LoggerFactory.getLogger(this::class.java)
     }
 }
 

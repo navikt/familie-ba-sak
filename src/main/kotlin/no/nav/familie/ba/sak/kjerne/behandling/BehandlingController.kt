@@ -55,8 +55,10 @@ class BehandlingController(
         }
 
         if (BehandlingType.MIGRERING_FRA_INFOTRYGD == nyBehandling.behandlingType &&
-            BehandlingÅrsak.ENDRE_MIGRERINGSDATO == nyBehandling.behandlingÅrsak &&
-            nyBehandling.nyMigreringsdato == null
+            nyBehandling.behandlingÅrsak in listOf(
+                    BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
+                    BehandlingÅrsak.HELMANUELL_MIGRERING
+                ) && nyBehandling.nyMigreringsdato == null
         ) {
             throw FunksjonellFeil(
                 melding = "Du må sette ny migreringsdato før du kan fortsette videre",

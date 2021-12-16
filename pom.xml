@@ -17,7 +17,7 @@
 
     <properties>
         <java.version>11</java.version>
-        <kotlin.version>1.6.0</kotlin.version>
+        <kotlin.version>1.6.10</kotlin.version>
         <revision>1</revision>
         <sha1/>
         <changelist>-SNAPSHOT</changelist>
@@ -27,7 +27,7 @@
         <felles.version>1.20211202083100_64f46dd</felles.version>
         <felles-kontrakter.version>2.0_20211206094303_9d0455f</felles-kontrakter.version>
         <familie.kontrakter.saksstatistikk>2.0_20211026082237_0675986</familie.kontrakter.saksstatistikk>
-        <familie.kontrakter.stønadsstatistikk>2.0_20211122094116_2ba5372</familie.kontrakter.stønadsstatistikk>
+        <familie.kontrakter.stønadsstatistikk>2.0_20211213110639_d45ec56</familie.kontrakter.stønadsstatistikk>
         <familie.kontrakter.skatteetaten>2.0_20210920094114_9c74239</familie.kontrakter.skatteetaten>
         <mockk.version>1.12.1</mockk.version>
         <token-validation-spring.version>1.3.9</token-validation-spring.version>
@@ -128,7 +128,7 @@
         <dependency>
             <groupId>io.sentry</groupId>
             <artifactId>sentry-logback</artifactId>
-            <version>5.4.3</version>
+            <version>5.5.0</version>
         </dependency>
 
         <dependency>

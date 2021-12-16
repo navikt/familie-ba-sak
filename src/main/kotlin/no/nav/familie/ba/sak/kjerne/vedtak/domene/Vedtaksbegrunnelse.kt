@@ -63,6 +63,10 @@ class Vedtaksbegrunnelse(
         vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
         vedtakBegrunnelseSpesifikasjon = this.vedtakBegrunnelseSpesifikasjon,
     )
+
+    override fun toString(): String {
+        return "Vedtaksbegrunnelse(id=$id, standardbegrunnelse=$vedtakBegrunnelseSpesifikasjon)"
+    }
 }
 
 fun Vedtaksbegrunnelse.tilRestVedtaksbegrunnelse() = RestVedtaksbegrunnelse(
