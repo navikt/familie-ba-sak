@@ -233,7 +233,7 @@ class FagsakService(
     }
 
     fun hentFagsakDeltager(personIdent: String): List<RestFagsakDeltager> {
-        val aktør = personidentService.hentOgLagreAktør(personIdent, true)
+        val aktør = personidentService.hentOgLagreAktør(personIdent, false)
 
         val maskertDeltaker = runCatching {
             hentMaskertFagsakdeltakerVedManglendeTilgang(aktør)
