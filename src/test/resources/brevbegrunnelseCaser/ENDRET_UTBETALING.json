@@ -43,7 +43,7 @@
       "utbetalinger": [
         {
           "ytelseType": "ORDINÆR_BARNETRYGD",
-          "utbetaltPerMnd": 1054,
+          "utbetaltPerMnd": 0,
           "erPåvirketAvEndring": false,
           "prosent": 0
         }
@@ -62,7 +62,7 @@
     "fom": "1. september 2021",
     "tom": "til 31. desember 2021 ",
     "belop": 0,
-    "antallBarn": 1,
+    "antallBarn": null,
     "barnasFodselsdager": "20.01.19",
     "begrunnelser": [
       {
