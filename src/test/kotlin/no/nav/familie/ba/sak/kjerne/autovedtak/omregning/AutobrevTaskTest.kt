@@ -6,6 +6,7 @@ import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
@@ -17,10 +18,12 @@ internal class AutobrevTaskTest {
 
     val fagsakRepository = mockk<FagsakRepository>()
     val opprettTaskService = mockk<OpprettTaskService>()
+    val featureToggleService = mockk<FeatureToggleService>()
 
     private val autobrevTask = AutobrevTask(
         fagsakRepository = fagsakRepository,
-        opprettTaskService = opprettTaskService
+        opprettTaskService = opprettTaskService,
+        featureToggleService = featureToggleService
     )
 
     private val autoBrevTask = Task(
@@ -38,6 +41,7 @@ internal class AutobrevTaskTest {
 
         every { fagsakRepository.finnLøpendeFagsakMedBarnMedFødselsdatoInnenfor(any(), any()) } answers { fagsaker }
         every { opprettTaskService.opprettAutovedtakFor6Og18ÅrBarn(any(), any()) } just runs
+        every { featureToggleService.isEnabled(any()) } returns true
 
         autobrevTask.doTask(autoBrevTask)
 
