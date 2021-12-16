@@ -7,11 +7,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.lagVertikaleSegmenter
-import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
-import no.nav.familie.ba.sak.kjerne.brev.domene.tilTriggesAv
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import java.time.LocalDate
@@ -67,34 +63,6 @@ fun validerSatsendring(fom: LocalDate?, harBarnMedSeksårsdagPåFom: Boolean) {
             frontendFeilmelding = "Begrunnelsen stemmer ikke med satsendring. Vennligst velg en annen begrunnelse."
         )
     }
-}
-
-fun kastFeilmeldingForBegrunnelserMedFeil(
-    begrunnelserMedFeil: List<VedtakBegrunnelseSpesifikasjon>,
-    sanityBegrunnelser: List<SanityBegrunnelse>
-) {
-    throw FunksjonellFeil(
-        melding = "Begrunnelsen passer ikke til vilkårsvurderingen. For å rette opp, gå tilbake til " +
-            "vilkårsvurderingen eller velg en annen begrunnelse.",
-        frontendFeilmelding = "Begrunnelsen passer ikke til vilkårsvurderingen. For å rette opp, gå tilbake " +
-            "til vilkårsvurderingen eller velg en annen begrunnelse.\n" +
-            begrunnelserMedFeil.fold("") { acc, vedtakBegrunnelseSpesifikasjon ->
-                val sanityBegrunnelse =
-                    vedtakBegrunnelseSpesifikasjon
-                        .tilSanityBegrunnelse(sanityBegrunnelser)
-                        ?: error(
-                            "Finner ikke begrunnelse med apiNavn ${vedtakBegrunnelseSpesifikasjon.sanityApiNavn} " +
-                                "i Sanity"
-                        )
-
-                val vilkårsbeskrivelse =
-                    sanityBegrunnelse.tilTriggesAv().vilkår.first().beskrivelse
-                val tittel =
-                    sanityBegrunnelse.navnISystem
-
-                "$acc'$tittel' forventer vurdering på '$vilkårsbeskrivelse'"
-            }
-    )
 }
 
 fun validerVedtaksperiodeMedBegrunnelser(vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser) {
