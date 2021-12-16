@@ -16,7 +16,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifi
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.BegrunnelseData
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.MinimertPerson
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.MinimertRestPerson
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
@@ -51,7 +51,7 @@ data class BrevPeriodeTestPerson(
     val endredeUtbetalinger: List<EndretUtbetalingAndelPåPerson>,
     val utbetalinger: List<UtbetalingPåPerson>
 ) {
-    fun tilMinimertPerson() = MinimertPerson(personIdent = personIdent, fødselsdato = fødselsdato, type = type)
+    fun tilMinimertPerson() = MinimertRestPerson(personIdent = personIdent, fødselsdato = fødselsdato, type = type)
     fun tilUtbetalingsperiodeDetaljer() = utbetalinger.map {
         it.tilMinimertUtbetalingsperiodeDetalj(this.tilMinimertPerson())
     }
@@ -89,9 +89,9 @@ data class UtbetalingPåPerson(
     val erPåvirketAvEndring: Boolean = false,
     val prosent: BigDecimal = BigDecimal(100),
 ) {
-    fun tilMinimertUtbetalingsperiodeDetalj(minimertPerson: MinimertPerson) =
+    fun tilMinimertUtbetalingsperiodeDetalj(minimertRestPerson: MinimertRestPerson) =
         MinimertUtbetalingsperiodeDetalj(
-            person = minimertPerson,
+            person = minimertRestPerson,
             utbetaltPerMnd = this.utbetaltPerMnd,
             prosent = this.prosent,
             erPåvirketAvEndring = this.erPåvirketAvEndring,
@@ -104,7 +104,7 @@ data class EndretUtbetalingAndelPåPerson(
     val årsak: Årsak,
 ) {
     fun tilMinimertEndretUtbetalingAndel(personIdent: String) =
-        MinimertEndretUtbetalingAndel(
+        MinimertRestEndretAndel(
             personIdent = personIdent,
             periode = periode,
             årsak = årsak

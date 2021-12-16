@@ -13,7 +13,7 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
  * NB: Bør ikke brukes internt, men kun ut mot eksterne tjenester siden klassen
  * inneholder personIdent og ikke aktørId.
  */
-data class MinimertEndretUtbetalingAndel(
+data class MinimertRestEndretAndel(
     val periode: MånedPeriode,
     val personIdent: String,
     val årsak: Årsak,
@@ -35,10 +35,10 @@ data class MinimertEndretUtbetalingAndel(
     }
 }
 
-fun List<MinimertEndretUtbetalingAndel>.somOverlapper(nullableMånedPeriode: NullableMånedPeriode) =
+fun List<MinimertRestEndretAndel>.somOverlapper(nullableMånedPeriode: NullableMånedPeriode) =
     this.filter { it.erOverlappendeMed(nullableMånedPeriode) }
 
-fun EndretUtbetalingAndel.tilMinimertEndretUtbetalingAndel() = MinimertEndretUtbetalingAndel(
+fun EndretUtbetalingAndel.tilMinimertEndretUtbetalingAndel() = MinimertRestEndretAndel(
     periode = this.periode,
     personIdent = this.person?.personIdent?.ident ?: throw Feil(
         "Har ikke ident på endretUtbetalingsandel ${this.id} " +

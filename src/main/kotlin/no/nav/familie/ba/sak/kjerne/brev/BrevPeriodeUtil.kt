@@ -4,9 +4,9 @@ import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertUtbetalingsperiodeDetalj
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.MinimertPerson
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.MinimertRestPerson
 
-fun List<MinimertPerson>.tilBarnasFødselsdatoer(): String =
+fun List<MinimertRestPerson>.tilBarnasFødselsdatoer(): String =
     Utils.slåSammen(
         this
             .filter { it.type == PersonType.BARN }

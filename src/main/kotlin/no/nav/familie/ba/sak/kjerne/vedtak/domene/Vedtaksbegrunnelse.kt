@@ -90,7 +90,7 @@ data class FritekstBegrunnelse(val fritekst: String) : Begrunnelse
 
 fun BrevBegrunnelseGrunnlagMedPersoner.tilBrevBegrunnelse(
     vedtaksperiode: NullablePeriode,
-    personerIPersongrunnlag: List<MinimertPerson>,
+    personerIPersongrunnlag: List<MinimertRestPerson>,
     brevMålform: Målform,
     uregistrerteBarn: List<MinimertUregistrertBarn>,
     beløp: String

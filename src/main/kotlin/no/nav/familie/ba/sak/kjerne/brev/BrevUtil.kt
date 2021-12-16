@@ -57,7 +57,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifi
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.hjemlerTilhørendeFritekst
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Begrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.MinimertPerson
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.MinimertRestPerson
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilMinimertPerson
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
@@ -364,7 +364,7 @@ private fun BrevPeriodeGrunnlagMedPersoner.hentInnvilgelseBrevPeriode(
  */
 fun BrevPeriodeGrunnlagMedPersoner.finnBarnIInnvilgelsePeriode(
     brevGrunnlag: BrevGrunnlag,
-): List<MinimertPerson> {
+): List<MinimertRestPerson> {
     val identerFraSammenfallendeEndringsperioder = brevGrunnlag
         .minimerteEndredeUtbetalingAndeler
         .somOverlapper(

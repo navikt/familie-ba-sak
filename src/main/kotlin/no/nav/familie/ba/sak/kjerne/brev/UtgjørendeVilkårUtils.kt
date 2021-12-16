@@ -10,7 +10,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertPersonResultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertVilkårResultat
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.MinimertPerson
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.MinimertRestPerson
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 
@@ -31,10 +31,10 @@ fun hentPersonerForAlleUtgjørendeVilkår(
     minimertePersonResultater: List<MinimertPersonResultat>,
     vedtaksperiode: Periode,
     oppdatertBegrunnelseType: VedtakBegrunnelseType,
-    aktuellePersonerForVedtaksperiode: List<MinimertPerson>,
+    aktuellePersonerForVedtaksperiode: List<MinimertRestPerson>,
     triggesAv: TriggesAv,
     erFørsteVedtaksperiodePåFagsak: Boolean
-): Set<MinimertPerson> {
+): Set<MinimertRestPerson> {
     return triggesAv.vilkår.fold(mutableSetOf()) { acc, vilkår ->
         acc.addAll(
             hentPersonerMedUtgjørendeVilkår(
@@ -57,10 +57,10 @@ private fun hentPersonerMedUtgjørendeVilkår(
     vedtaksperiode: Periode,
     oppdatertBegrunnelseType: VedtakBegrunnelseType,
     utgjørendeVilkår: Vilkår?,
-    aktuellePersonerForVedtaksperiode: List<MinimertPerson>,
+    aktuellePersonerForVedtaksperiode: List<MinimertRestPerson>,
     triggesAv: TriggesAv,
     erFørsteVedtaksperiodePåFagsak: Boolean
-): List<MinimertPerson> {
+): List<MinimertRestPerson> {
 
     return minimertPersonResultater
         .fold(mutableListOf()) { acc, personResultat ->

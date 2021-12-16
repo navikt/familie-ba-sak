@@ -5,12 +5,12 @@ import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPerson
 import no.nav.familie.ba.sak.integrasjoner.økonomi.sats
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertUtbetalingsperiodeDetalj
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.MinimertPerson
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.MinimertRestPerson
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilMinimertPerson
 import java.math.BigDecimal
 
 fun lagMinimertUtbetalingsperiodeDetalj(
-    person: MinimertPerson = tilfeldigSøker().tilRestPerson().tilMinimertPerson(),
+    person: MinimertRestPerson = tilfeldigSøker().tilRestPerson().tilMinimertPerson(),
     ytelseType: YtelseType = YtelseType.ORDINÆR_BARNETRYGD,
     utbetaltPerMnd: Int = sats(YtelseType.ORDINÆR_BARNETRYGD),
     prosent: BigDecimal = BigDecimal.valueOf(100)

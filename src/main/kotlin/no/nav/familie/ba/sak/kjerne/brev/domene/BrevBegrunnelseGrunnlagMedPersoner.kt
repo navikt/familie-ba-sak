@@ -5,7 +5,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.MinimertPerson
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.MinimertRestPerson
 import java.time.LocalDate
 
 data class BrevBegrunnelseGrunnlagMedPersoner(
@@ -28,8 +28,8 @@ data class BrevBegrunnelseGrunnlagMedPersoner(
     fun hentBarnasFødselsdagerForBegrunnelse(
         uregistrerteBarn: List<MinimertUregistrertBarn>,
         erAvslagPåKunSøker: Boolean,
-        personerIBehandling: List<MinimertPerson>,
-        personerPåBegrunnelse: List<MinimertPerson>
+        personerIBehandling: List<MinimertRestPerson>,
+        personerPåBegrunnelse: List<MinimertRestPerson>
     ) = if (this.vedtakBegrunnelseSpesifikasjon == VedtakBegrunnelseSpesifikasjon.AVSLAG_UREGISTRERT_BARN)
         uregistrerteBarn.mapNotNull { it.fødselsdato }
     else if (erAvslagPåKunSøker) {

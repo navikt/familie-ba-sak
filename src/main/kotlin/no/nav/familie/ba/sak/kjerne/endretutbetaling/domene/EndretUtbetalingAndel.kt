@@ -11,7 +11,7 @@ import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.ekstern.restDomene.RestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.brev.UtvidetScenarioForEndringsperiode
-import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertEndretUtbetalingAndel
+import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertRestEndretAndel
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityVilkår
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilTriggesAv
@@ -171,7 +171,7 @@ fun EndretUtbetalingAndel.fraRestEndretUtbetalingAndel(
 }
 
 fun hentPersonerForEtterEndretUtbetalingsperiode(
-    minimerteEndredeUtbetalingAndeler: List<MinimertEndretUtbetalingAndel>,
+    minimerteEndredeUtbetalingAndeler: List<MinimertRestEndretAndel>,
     fom: LocalDate?,
     endringsaarsaker: Set<Årsak>
 ) = minimerteEndredeUtbetalingAndeler.filter { endretUtbetalingAndel ->

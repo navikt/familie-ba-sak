@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.brev.domene
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.NullablePeriode
 import no.nav.familie.ba.sak.kjerne.brev.hentPersonidenterGjeldendeForBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
@@ -26,6 +27,12 @@ data class BrevBegrunnelseGrunnlag(
             identerMedUtbetalingPåPeriode = identerMedUtbetalingPåPeriode,
             erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
         )
+
+        if (personidenterGjeldendeForBegrunnelse.isEmpty()) {
+            throw Feil(
+                "Begrunnelse '${this.vedtakBegrunnelseSpesifikasjon}' var ikke knyttet til noen personer."
+            )
+        }
 
         return BrevBegrunnelseGrunnlagMedPersoner(
             vedtakBegrunnelseSpesifikasjon = this.vedtakBegrunnelseSpesifikasjon,

@@ -11,7 +11,7 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.hentPersonerForEtter
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.MinimertPerson
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.MinimertRestPerson
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.barnMedSeksårsdagPåFom
 import no.nav.familie.ba.sak.kjerne.vedtak.hentPersonerForAlleUtgjørendeVilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
@@ -97,10 +97,10 @@ private fun hentPersonerForUtvidetOgSmåbarnstilleggBegrunnelse(
 }
 
 private fun hentAktuellePersonerForVedtaksperiode(
-    personerPåBehandling: List<MinimertPerson>,
+    personerPåBehandling: List<MinimertRestPerson>,
     vedtakBegrunnelseType: VedtakBegrunnelseType,
     identerMedUtbetalingPåPeriode: List<String>
-): List<MinimertPerson> = personerPåBehandling.filter { person ->
+): List<MinimertRestPerson> = personerPåBehandling.filter { person ->
     if (vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGET) {
         identerMedUtbetalingPåPeriode.contains(person.personIdent) || person.type == PersonType.SØKER
     } else true
