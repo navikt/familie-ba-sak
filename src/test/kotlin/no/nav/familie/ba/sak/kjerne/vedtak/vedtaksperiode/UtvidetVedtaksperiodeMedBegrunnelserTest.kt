@@ -22,6 +22,7 @@ class UtvidetVedtaksperiodeMedBegrunnelserTest {
     val barn1 = tilfeldigPerson(personType = PersonType.BARN)
     val barn2 = tilfeldigPerson(personType = PersonType.BARN)
     val søker = tilfeldigSøker()
+    val sanityBegrunnelser = hentSanityBegrunnelser()
 
     @Test
     fun `Skal kun legge på utbetalingsdetaljer som gjelder riktig andeler tilkjent ytelse for fortsatt innvilget`() {
@@ -75,8 +76,9 @@ class UtvidetVedtaksperiodeMedBegrunnelserTest {
 
         val utvidetVedtaksperiodeMedBegrunnelser =
             vedtaksperiodeMedBegrunnelser.tilUtvidetVedtaksperiodeMedBegrunnelser(
-                personopplysningGrunnlag,
-                andelerTilkjentYtelse
+                personopplysningGrunnlag = personopplysningGrunnlag,
+                andelerTilkjentYtelse = andelerTilkjentYtelse,
+                sanityBegrunnelser = sanityBegrunnelser
             )
 
         Assertions.assertEquals(1, utvidetVedtaksperiodeMedBegrunnelser.utbetalingsperiodeDetaljer.size)
@@ -141,7 +143,7 @@ class UtvidetVedtaksperiodeMedBegrunnelserTest {
             vedtaksperiodeMedBegrunnelser.tilUtvidetVedtaksperiodeMedBegrunnelser(
                 personopplysningGrunnlag,
                 andelerTilkjentYtelse,
-                sanityBegrunnelser = hentSanityBegrunnelser()
+                sanityBegrunnelser = sanityBegrunnelser
             )
 
         Assertions.assertEquals(1, utvidetVedtaksperiodeMedBegrunnelser.utbetalingsperiodeDetaljer.size)
@@ -207,7 +209,7 @@ class UtvidetVedtaksperiodeMedBegrunnelserTest {
             vedtaksperiodeMedBegrunnelser.tilUtvidetVedtaksperiodeMedBegrunnelser(
                 personopplysningGrunnlag,
                 andelerTilkjentYtelse,
-                sanityBegrunnelser = hentSanityBegrunnelser()
+                sanityBegrunnelser = sanityBegrunnelser
             )
 
         Assertions.assertEquals(1, utvidetVedtaksperiodeMedBegrunnelser.utbetalingsperiodeDetaljer.size)
