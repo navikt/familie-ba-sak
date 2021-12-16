@@ -306,6 +306,14 @@ class BehandleSmåbarnstilleggTest(
         val fagsak = fagsakService.hentFagsakPåPerson(aktør = søkersAktør)
         val aktivBehandling = behandlingService.hentAktivForFagsak(fagsakId = fagsak!!.id)!!
 
+        // Vedtaksperioder skal være slettet etter at den er blitt omgjort til manuell behandling
+        assertEquals(
+            0,
+            vedtaksperiodeService.hentPersisterteVedtaksperioder(
+                vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = aktivBehandling.id)
+            ).size
+        )
+
         verify(exactly = 1) {
             opprettTaskService.opprettOppgaveTask(
                 behandlingId = aktivBehandling.id,
