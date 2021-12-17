@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.omregning
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.førsteDagINesteMåned
+import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -18,6 +20,7 @@ import no.nav.familie.prosessering.domene.Task
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDate
 
 @Service
 class AutobrevOpphørSmåbarnstilleggService(
@@ -90,15 +93,18 @@ class AutobrevOpphørSmåbarnstilleggService(
         opprettTaskJournalførVedtaksbrev(vedtakId = opprettetVedtak.id)
     }
 
-    private fun overgangstønadOpphørerDenneMåneden(listePeriodeOvergangsstønadGrunnlag: List<PeriodeOvergangsstønadGrunnlag>): Boolean {
+    fun overgangstønadOpphørerDenneMåneden(listePeriodeOvergangsstønadGrunnlag: List<PeriodeOvergangsstønadGrunnlag>): Boolean =
+        listePeriodeOvergangsstønadGrunnlag.filter {
+            it.tom.isSameOrAfter(
+                LocalDate.now().withDayOfMonth(1)
+            ) && it.tom.isBefore(LocalDate.now().førsteDagINesteMåned())
+        }.isNotEmpty()
+
+    fun minsteBarnFylteTreÅrForrigeMåned(personopplysningGrunnlag: PersonopplysningGrunnlag): Boolean {
         TODO("Not yet implemented")
     }
 
-    private fun minsteBarnFylteTreÅrForrigeMåned(personopplysningGrunnlag: PersonopplysningGrunnlag): Boolean {
-        TODO("Not yet implemented")
-    }
-
-    private fun harBarnUnderTreÅr(personopplysningGrunnlag: PersonopplysningGrunnlag): Boolean {
+    fun harBarnUnderTreÅr(personopplysningGrunnlag: PersonopplysningGrunnlag): Boolean {
         TODO("Not yet implemented")
     }
 
