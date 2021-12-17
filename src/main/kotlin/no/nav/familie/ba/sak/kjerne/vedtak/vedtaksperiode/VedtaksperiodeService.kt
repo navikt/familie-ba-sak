@@ -601,4 +601,3 @@ class VedtaksperiodeService(
         val finnerIkkePersongrunnlagFeilmelding = "Finner ikke persongrunnlag"
     }
 }
-
