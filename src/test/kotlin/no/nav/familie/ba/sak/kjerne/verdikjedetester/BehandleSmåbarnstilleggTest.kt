@@ -322,7 +322,7 @@ class BehandleSmåbarnstilleggTest(
             )
         }
 
-        assertEquals(StegType.VURDER_TILBAKEKREVING, aktivBehandling.steg)
+        assertEquals(StegType.BEHANDLINGSRESULTAT, aktivBehandling.steg)
         assertEquals(BehandlingStatus.UTREDES, aktivBehandling.status)
 
         val behandlingEtterHenleggelse = stegService.håndterHenleggBehandling(

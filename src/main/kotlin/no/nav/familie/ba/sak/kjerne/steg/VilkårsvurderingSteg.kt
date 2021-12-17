@@ -5,7 +5,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
 import org.springframework.stereotype.Service
@@ -17,7 +16,7 @@ class VilkårsvurderingSteg(
     private val beregningService: BeregningService,
     private val persongrunnlagService: PersongrunnlagService,
     private val behandlingService: BehandlingService,
-    private val endretUtbetalingAndelService: EndretUtbetalingAndelService,
+    private val tilbakestillBehandlingService: TilbakestillBehandlingService
 ) : BehandlingSteg<String> {
 
     @Transactional
@@ -38,7 +37,7 @@ class VilkårsvurderingSteg(
             )
         }
 
-        endretUtbetalingAndelService.fjernKnytningTilAndelTilkjentYtelse(behandling.id)
+        tilbakestillBehandlingService.tilbakestillDataTilVilkårsvurderingssteg(behandling)
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
         return hentNesteStegForNormalFlyt(behandling)
     }
