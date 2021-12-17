@@ -596,7 +596,6 @@ class VedtaksperiodeService(
     }
 
     companion object {
-
         val logger = LoggerFactory.getLogger(VedtaksperiodeService::class.java)
         val finnerIkkePersongrunnlagFeilmelding = "Finner ikke persongrunnlag"
     }
