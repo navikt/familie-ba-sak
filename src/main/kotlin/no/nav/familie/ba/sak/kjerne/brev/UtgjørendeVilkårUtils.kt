@@ -76,8 +76,8 @@ private fun hentPersonerMedUtgjørendeVilkår(
                     when {
                         minimertVilkårResultat.vilkårType != utgjørendeVilkår -> false
 
-                        minimertVilkårResultat.periodeFom == null
-                            && oppdatertBegrunnelseType != VedtakBegrunnelseType.AVSLAG -> false
+                        minimertVilkårResultat.periodeFom == null &&
+                            oppdatertBegrunnelseType != VedtakBegrunnelseType.AVSLAG -> false
 
                         oppdatertBegrunnelseType == VedtakBegrunnelseType.INNVILGET -> {
                             triggereErOppfylt(triggesAv, minimertVilkårResultat) &&
