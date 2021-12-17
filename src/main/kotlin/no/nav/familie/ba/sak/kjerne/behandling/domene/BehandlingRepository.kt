@@ -99,17 +99,22 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
     fun finnFødselshendelserOpprettetIdag(): List<Behandling>
 
     @Query(
-        """
-        SELECT aty.behandlingId FROM AndelTilkjentYtelse aty
-            JOIN Behandling b ON aty.behandlingId = b.id
-            JOIN TilkjentYtelse ty ON b.id = ty.behandling.id
-        WHERE aty.type = 'SMÅBARNSTILLEGG'
-            AND aty.stønadTom = :måned
-            AND b.aktiv = true 
-            AND ty.utbetalingsoppdrag IS NOT NULL 
-        """
+        value = """
+        SELECT DISTINCT ON (b.fk_fagsak_id) aty.fk_behandling_id 
+        FROM andel_tilkjent_ytelse aty
+            JOIN behandling b ON aty.fk_behandling_id = b.id
+            JOIN tilkjent_ytelse ty ON b.id = ty.fk_behandling_id
+        WHERE 
+                aty.type = 'SMÅBARNSTILLEGG'
+            AND aty.stonad_tom >= :start
+            AND aty.stonad_tom <= :slutt
+            AND ty.utbetalingsoppdrag IS NOT NULL
+        ORDER BY b.fk_fagsak_id, b.opprettet_tid DESC
+        """,
+        nativeQuery = true
     )
-    fun finnAlleBehandlingsIderMedOpphørSmåbarnstilleggForMåned(
-        måned: YearMonth,
+    fun finnAlleBehandlingsIderMedOpphørSmåbarnstilleggIInterval(
+        start: LocalDateTime,
+        slutt: LocalDateTime
     ): List<Long>
 }

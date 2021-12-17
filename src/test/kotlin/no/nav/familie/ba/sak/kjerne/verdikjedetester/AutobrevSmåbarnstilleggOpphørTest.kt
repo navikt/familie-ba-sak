@@ -60,12 +60,17 @@ class AutobrevSmåbarnstilleggOpphørTest(
 
         val personScenario1: RestScenario = lagScenario(barnFødselsdato)
         val fagsak1: RestMinimalFagsak = lagFagsak(personScenario = personScenario1)
-        val behandling1: Behandling = fullførBehandling(
+        val fagsak1behanding1: Behandling = fullførBehandling(
             fagsak = fagsak1,
             personScenario = personScenario1,
             barnFødselsdato = barnFødselsdato,
         )
-        val behandling2: Behandling = fullførRevurderingMedOvergangstonad(
+        val fagsak1behandling2: Behandling = fullførRevurderingMedOvergangstonad(
+            fagsak = fagsak1,
+            personScenario = personScenario1,
+            barnFødselsdato = barnFødselsdato,
+        )
+        val fagsak1behandling3åpen: Behandling = startEnRevurderingNyeOpplysningerMenIkkeFullfør(
             fagsak = fagsak1,
             personScenario = personScenario1,
             barnFødselsdato = barnFødselsdato,
@@ -73,12 +78,12 @@ class AutobrevSmåbarnstilleggOpphørTest(
 
         val personScenario2: RestScenario = lagScenario(barnFødselsdato)
         val fagsak2: RestMinimalFagsak = lagFagsak(personScenario = personScenario2)
-        val behandling3: Behandling = fullførBehandling(
+        val fagsak2behandling1: Behandling = fullførBehandling(
             fagsak = fagsak2,
             personScenario = personScenario2,
             barnFødselsdato = barnFødselsdato,
         )
-        val behandling4: Behandling = fullførRevurderingMedOvergangstonad(
+        val fagsak2behandling2: Behandling = fullførRevurderingMedOvergangstonad(
             fagsak = fagsak2,
             personScenario = personScenario2,
             barnFødselsdato = barnFødselsdato,
@@ -89,9 +94,10 @@ class AutobrevSmåbarnstilleggOpphørTest(
                 måned = YearMonth.now().minusMonths(1)
             )
 
-        assertTrue(behandlinger.containsAll(listOf(behandling2.id, behandling4.id)))
-        assertFalse(behandlinger.contains(behandling1.id))
-        assertFalse(behandlinger.contains(behandling3.id))
+        assertTrue(behandlinger.containsAll(listOf(fagsak1behandling2.id, fagsak2behandling2.id)))
+        assertFalse(behandlinger.contains(fagsak1behanding1.id))
+        assertFalse(behandlinger.contains(fagsak2behandling1.id))
+        assertFalse(behandlinger.contains(fagsak1behandling3åpen.id))
     }
 
     fun lagScenario(barnFødselsdato: LocalDate): RestScenario = mockServerKlient().lagScenario(
@@ -206,6 +212,35 @@ class AutobrevSmåbarnstilleggOpphørTest(
                 )
             }
         }
+    }
+
+    private fun startEnRevurderingNyeOpplysningerMenIkkeFullfør(
+        fagsak: RestMinimalFagsak,
+        personScenario: RestScenario,
+        barnFødselsdato: LocalDate
+    ): Behandling {
+        val behandlingType = BehandlingType.REVURDERING
+        val behandlingÅrsak = BehandlingÅrsak.SMÅBARNSTILLEGG
+
+        every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns PerioderOvergangsstønadResponse(
+            perioder = listOf(
+                PeriodeOvergangsstønad(
+                    personIdent = personScenario.søker.ident!!,
+                    fomDato = barnFødselsdato.plusYears(1),
+                    tomDato = LocalDate.now().minusMonths(1).førsteDagIInneværendeMåned(),
+                    datakilde = PeriodeOvergangsstønad.Datakilde.EF
+                )
+            )
+        )
+
+        val restUtvidetBehandling: Ressurs<RestUtvidetBehandling> =
+            familieBaSakKlient().opprettBehandling(
+                søkersIdent = fagsak.søkerFødselsnummer,
+                behandlingUnderkategori = BehandlingUnderkategori.UTVIDET,
+                behandlingType = behandlingType,
+                behandlingÅrsak = behandlingÅrsak
+            )
+        return behandlingService.hent(restUtvidetBehandling.data!!.behandlingId)
     }
 
     fun fullførRestenAvBehandlingen(

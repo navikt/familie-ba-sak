@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.behandling
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
@@ -325,9 +327,12 @@ class BehandlingService(
 
     fun hentAlleBehandlingsIderMedOpphørSmåbarnstilleggIMåned(
         måned: YearMonth
-    ): List<Long> = behandlingRepository.finnAlleBehandlingsIderMedOpphørSmåbarnstilleggForMåned(
-        måned = måned
-    )
+    ): List<Long> {
+        return behandlingRepository.finnAlleBehandlingsIderMedOpphørSmåbarnstilleggIInterval(
+            start = måned.førsteDagIInneværendeMåned().atStartOfDay(),
+            slutt = måned.nesteMåned().førsteDagIInneværendeMåned().atStartOfDay()
+        )
+    }
 
     fun lagreNyOgDeaktiverGammelBehandling(behandling: Behandling): Behandling {
         val aktivBehandling = hentAktivForFagsak(behandling.fagsak.id)
