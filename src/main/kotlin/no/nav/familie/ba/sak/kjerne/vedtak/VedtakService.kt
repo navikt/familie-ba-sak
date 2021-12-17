@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.vedtak
 
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.dokument.DokumentService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
@@ -27,12 +26,11 @@ class VedtakService(
     }
 
     fun hentAktivForBehandling(behandlingId: Long): Vedtak? {
-        return vedtakRepository.findByBehandlingAndAktiv(behandlingId)
+        return vedtakRepository.findByBehandlingAndAktivOptional(behandlingId)
     }
 
     fun hentAktivForBehandlingThrows(behandlingId: Long): Vedtak {
         return vedtakRepository.findByBehandlingAndAktiv(behandlingId)
-            ?: throw Feil("Finner ikke aktivt vedtak på behandling $behandlingId")
     }
 
     fun oppdater(vedtak: Vedtak): Vedtak {

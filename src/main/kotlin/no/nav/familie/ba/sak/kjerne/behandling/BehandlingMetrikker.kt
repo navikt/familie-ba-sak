@@ -95,7 +95,7 @@ class BehandlingMetrikker(
 
     private fun økBegrunnelseMetrikk(behandling: Behandling) {
         if (!behandlingRepository.finnBehandling(behandling.id).erHenlagt()) {
-            val vedtak = vedtakRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
+            val vedtak = vedtakRepository.findByBehandlingAndAktivOptional(behandlingId = behandling.id)
                 ?: error("Finner ikke aktivt vedtak på behandling ${behandling.id}")
 
             val vedtaksperiodeMedBegrunnelser = vedtaksperiodeRepository.finnVedtaksperioderFor(vedtakId = vedtak.id)
