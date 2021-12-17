@@ -167,8 +167,8 @@ internal class Autobrev6og18ÅrServiceTest {
 
         return lagTestPersonopplysningGrunnlag(
             behandlingId = behandling.id,
-            søkerPersonIdent = søker.personIdent.ident,
-            barnasIdenter = listOf(barn.personIdent.ident),
+            søkerPersonIdent = søker.aktør.aktivFødselsnummer(),
+            barnasIdenter = listOf(barn.aktør.aktivFødselsnummer()),
             barnFødselsdato = LocalDate.now()
                 .minusYears(alder)
         )

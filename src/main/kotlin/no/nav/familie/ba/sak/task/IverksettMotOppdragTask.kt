@@ -3,6 +3,8 @@ package no.nav.familie.ba.sak.task
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask.Companion.TASK_STEP_TYPE
@@ -21,6 +23,7 @@ import java.util.Properties
 class IverksettMotOppdragTask(
     private val stegService: StegService,
     private val behandlingService: BehandlingService,
+    private val personidentService: PersonidentService,
     private val taskRepository: TaskRepositoryWrapper
 ) : AsyncTaskStep {
 
@@ -33,12 +36,15 @@ class IverksettMotOppdragTask(
     }
 
     override fun onCompletion(task: Task) {
+
         val iverksettingTask = objectMapper.readValue(task.payload, IverksettingTaskDTO::class.java)
+        val personIdent = personidentService.hentOgLagreAktør(iverksettingTask.personIdent).aktivFødselsnummer()
         val statusFraOppdragTask = Task(
             type = StatusFraOppdragTask.TASK_STEP_TYPE,
             payload = objectMapper.writeValueAsString(
                 StatusFraOppdragDTO(
-                    personIdent = iverksettingTask.personIdent,
+                    aktørId = iverksettingTask.personIdent,
+                    personIdent = personIdent,
                     fagsystem = FAGSYSTEM,
                     behandlingsId = iverksettingTask.behandlingsId,
                     vedtaksId = iverksettingTask.vedtaksId
@@ -62,26 +68,26 @@ class IverksettMotOppdragTask(
         fun opprettTask(behandling: Behandling, vedtak: Vedtak, saksbehandlerId: String): Task {
 
             return opprettTask(
-                behandling.fagsak.hentAktivIdent().ident,
+                behandling.fagsak.aktør,
                 behandling.id,
                 vedtak.id,
                 saksbehandlerId
             )
         }
 
-        fun opprettTask(personIdent: String, behandlingsId: Long, vedtaksId: Long, saksbehandlerId: String): Task {
+        fun opprettTask(aktør: Aktør, behandlingsId: Long, vedtaksId: Long, saksbehandlerId: String): Task {
             return Task(
                 type = TASK_STEP_TYPE,
                 payload = objectMapper.writeValueAsString(
                     IverksettingTaskDTO(
-                        personIdent = personIdent,
+                        personIdent = aktør.aktivFødselsnummer(),
                         behandlingsId = behandlingsId,
                         vedtaksId = vedtaksId,
                         saksbehandlerId = saksbehandlerId
                     )
                 ),
                 properties = Properties().apply {
-                    this["personIdent"] = personIdent
+                    this["personIdent"] = aktør.aktivFødselsnummer()
                     this["behandlingsId"] = behandlingsId.toString()
                     this["vedtakId"] = vedtaksId.toString()
                 }

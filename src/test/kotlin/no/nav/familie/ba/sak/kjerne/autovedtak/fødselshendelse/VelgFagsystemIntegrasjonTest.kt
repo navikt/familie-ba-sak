@@ -17,13 +17,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
 
-@SpringBootTest(
-    properties = [
-        "DAGLIG_KVOTE_FØDSELSHENDELSER: 0"
-    ],
-)
 class VelgFagsystemIntegrasjonTest(
     @Autowired val stegService: StegService,
     @Autowired val persongrunnlagService: PersongrunnlagService,
@@ -50,13 +44,6 @@ class VelgFagsystemIntegrasjonTest(
     }
 
     @Test
-    fun `skal velge ba-sak når mor ikke har noe løpende i Infotrygd, men daglig kvote er oppbrukt`() {
-        val nyBehandling = NyBehandlingHendelse(søkerFnr, listOf(søkerFnr))
-
-        assertEquals(FagsystemRegelVurdering.SEND_TIL_INFOTRYGD, velgFagSystemService.velgFagsystem(nyBehandling))
-    }
-
-    @Test
     fun `skal IKKE velge ba-sak når mor har stønadhistorikk i Infotrygd`() {
         val nyBehandling = NyBehandlingHendelse(søkerFnr, listOf(søkerFnr))
         val fagsystemUtfallInfotrygd = FagsystemUtfall.SAKER_I_INFOTRYGD_MEN_IKKE_LØPENDE_UTBETALINGER
@@ -65,6 +52,6 @@ class VelgFagsystemIntegrasjonTest(
             listOf(Stønad(opphørtFom = "012020")), emptyList()
         )
         assertEquals(FagsystemRegelVurdering.SEND_TIL_INFOTRYGD, velgFagSystemService.velgFagsystem(nyBehandling))
-        assertEquals(1.0, velgFagSystemService.foreslåttUtfallForValgAvFagsystem[fagsystemUtfallInfotrygd]!!.count())
+        assertEquals(1.0, velgFagSystemService.utfallForValgAvFagsystem[fagsystemUtfallInfotrygd]!!.count())
     }
 }

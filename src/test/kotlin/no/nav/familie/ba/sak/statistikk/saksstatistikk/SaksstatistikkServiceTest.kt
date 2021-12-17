@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.common.lagVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.common.tilfeldigSøker
+import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.integrasjoner.journalføring.JournalføringService
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.DbJournalpost
@@ -34,6 +35,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.domene.Totrinnskontroll
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
@@ -44,7 +46,6 @@ import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.journalpost.RelevantDato
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
-import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.within
@@ -83,6 +84,9 @@ internal class SaksstatistikkServiceTest(
     private val personopplysningerService: PersonopplysningerService,
 
     @MockK
+    private val personidentService: PersonidentService,
+
+    @MockK
     private val persongrunnlagService: PersongrunnlagService,
 
     @MockK
@@ -104,6 +108,7 @@ internal class SaksstatistikkServiceTest(
         vedtakService,
         fagsakService,
         personopplysningerService,
+        personidentService,
         persongrunnlagService,
         envService,
         vedtaksperiodeService,
@@ -122,7 +127,6 @@ internal class SaksstatistikkServiceTest(
             "4821",
             "NAV"
         )
-        every { envService.skalIverksetteBehandling() } returns true
     }
 
     @AfterAll
@@ -230,7 +234,7 @@ internal class SaksstatistikkServiceTest(
         every { persongrunnlagService.hentSøker(any()) } returns tilfeldigSøker()
         every { persongrunnlagService.hentBarna(any()) } returns listOf(
             tilfeldigPerson()
-                .copy(personIdent = PersonIdent("01010000001"))
+                .copy(aktør = randomAktørId("01010000001"))
         )
 
         every { vedtakService.hentAktivForBehandling(any()) } returns vedtak
@@ -282,14 +286,14 @@ internal class SaksstatistikkServiceTest(
     @Test
     fun `Skal mappe til sakDVH, ingen aktiv behandling, så kun aktør SØKER, bostedsadresse i Norge`() {
         every { fagsakService.hentPåFagsakId(any()) } answers {
-            val fagsak = Fagsak(status = FagsakStatus.OPPRETTET, aktør = Aktør("2"))
+            val fagsak = Fagsak(status = FagsakStatus.OPPRETTET, aktør = tilAktør("12345678910"))
             val fagsakPerson = FagsakPerson(personIdent = PersonIdent("12345678910"), fagsak = fagsak)
-            fagsak.copy(søkerIdenter = setOf(fagsakPerson))
+            fagsak.copy(søkerIdenter = mutableSetOf(fagsakPerson))
         }
 
-        every { personopplysningerService.hentOgLagreAktørId(Ident("12345678910")) } returns Aktør("1234567891011")
-        every { personopplysningerService.hentOgLagreAktørId(Ident("12345678911")) } returns Aktør("1234567891111")
-        every { personopplysningerService.hentPersoninfoEnkel("12345678910") } returns PersonInfo(
+        every { personidentService.hentOgLagreAktør("12345678910") } returns Aktør("1234567891000")
+        every { personidentService.hentOgLagreAktør("12345678911") } returns Aktør("1234567891100")
+        every { personopplysningerService.hentPersoninfoEnkel(tilAktør("12345678910")) } returns PersonInfo(
             fødselsdato = LocalDate.of(
                 2017,
                 3,
@@ -316,7 +320,7 @@ internal class SaksstatistikkServiceTest(
         val sakDvh = sakstatistikkService.mapTilSakDvh(1)
         println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(sakDvh))
 
-        assertThat(sakDvh?.aktorId).isEqualTo(1234567891011)
+        assertThat(sakDvh?.aktorId).isEqualTo(1234567891000)
         assertThat(sakDvh?.aktorer).hasSize(1).extracting("rolle").contains("SØKER")
         assertThat(sakDvh?.sakStatus).isEqualTo(FagsakStatus.OPPRETTET.name)
         assertThat(sakDvh?.avsender).isEqualTo("familie-ba-sak")
@@ -326,28 +330,29 @@ internal class SaksstatistikkServiceTest(
     @Test
     fun `Skal mappe til sakDVH, ingen aktiv behandling, så kun aktør SØKER, bostedsadresse i Utland`() {
         every { fagsakService.hentPåFagsakId(any()) } answers {
-            val fagsak = Fagsak(status = FagsakStatus.OPPRETTET, aktør = Aktør("2"))
+            val fagsak = Fagsak(status = FagsakStatus.OPPRETTET, aktør = tilAktør("12345678910"))
             val fagsakPerson = FagsakPerson(personIdent = PersonIdent("12345678910"), fagsak = fagsak)
-            fagsak.copy(søkerIdenter = setOf(fagsakPerson))
+            fagsak.copy(søkerIdenter = mutableSetOf(fagsakPerson))
         }
 
-        every { personopplysningerService.hentOgLagreAktørId(Ident("12345678910")) } returns Aktør("1234567891011")
-        every { personopplysningerService.hentOgLagreAktørId(Ident("12345678911")) } returns Aktør("1234567891111")
-        every { personopplysningerService.hentPersoninfoEnkel("12345678910") } returns PersonInfo(
+        every { personidentService.hentOgLagreAktør("12345678910") } returns Aktør("1234567891000")
+        every { personidentService.hentOgLagreAktør("12345678911") } returns Aktør("1234567891100")
+
+        every { personopplysningerService.hentPersoninfoEnkel(tilAktør("12345678910")) } returns PersonInfo(
             fødselsdato = LocalDate.of(
                 2017,
                 3,
                 1
             )
         )
-        every { personopplysningerService.hentLandkodeUtenlandskBostedsadresse("12345678910") } returns "SE"
+        every { personopplysningerService.hentLandkodeUtenlandskBostedsadresse(tilAktør("12345678910")) } returns "SE"
 
         every { behandlingService.hentAktivForFagsak(any()) } returns null
 
         val sakDvh = sakstatistikkService.mapTilSakDvh(1)
         println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(sakDvh))
 
-        assertThat(sakDvh?.aktorId).isEqualTo(1234567891011)
+        assertThat(sakDvh?.aktorId).isEqualTo(1234567891000)
         assertThat(sakDvh?.aktorer).hasSize(1).extracting("rolle").contains("SØKER")
         assertThat(sakDvh?.sakStatus).isEqualTo(FagsakStatus.OPPRETTET.name)
         assertThat(sakDvh?.avsender).isEqualTo("familie-ba-sak")
@@ -356,13 +361,14 @@ internal class SaksstatistikkServiceTest(
 
     @Test
     fun `Skal mappe til sakDVH, aktører har SØKER og BARN`() {
-        every { fagsakService.hentPåFagsakId(any()) } answers {
-            val fagsak = Fagsak(status = FagsakStatus.OPPRETTET, aktør = Aktør("2"))
-            val fagsakPerson = FagsakPerson(personIdent = PersonIdent("12345678910"), fagsak = fagsak)
-            fagsak.copy(søkerIdenter = setOf(fagsakPerson))
-        }
         val randomAktørId = randomAktørId()
-        every { personopplysningerService.hentOgLagreAktørId(any()) } returns randomAktørId
+        every { fagsakService.hentPåFagsakId(any()) } answers {
+            val fagsak = Fagsak(status = FagsakStatus.OPPRETTET, aktør = randomAktørId)
+            val fagsakPerson =
+                FagsakPerson(personIdent = PersonIdent(randomAktørId.aktivFødselsnummer()), fagsak = fagsak)
+            fagsak.copy(søkerIdenter = mutableSetOf(fagsakPerson))
+        }
+        every { personidentService.hentOgLagreAktør(any()) } returns randomAktørId
         every { personopplysningerService.hentLandkodeUtenlandskBostedsadresse(any()) } returns "SE"
 
         every { persongrunnlagService.hentAktiv(any()) } returns lagTestPersonopplysningGrunnlag(

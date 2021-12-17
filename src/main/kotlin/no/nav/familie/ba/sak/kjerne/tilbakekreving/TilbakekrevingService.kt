@@ -111,7 +111,7 @@ class TilbakekrevingService(
                 ),
                 fagsystem = Fagsystem.BA,
                 eksternFagsakId = vedtak.behandling.fagsak.id.toString(),
-                ident = persongrunnlag.søker.personIdent.ident,
+                ident = persongrunnlag.søker.aktør.aktivFødselsnummer(),
                 saksbehandlerIdent = SikkerhetContext.hentSaksbehandlerNavn()
             )
         )
@@ -148,7 +148,7 @@ class TilbakekrevingService(
             fagsystem = Fagsystem.BA,
             ytelsestype = Ytelsestype.BARNETRYGD,
             eksternFagsakId = behandling.fagsak.id.toString(),
-            personIdent = personopplysningGrunnlag.søker.personIdent.ident,
+            personIdent = personopplysningGrunnlag.søker.aktør.aktivFødselsnummer(),
             eksternId = behandling.id.toString(),
             behandlingstype = Behandlingstype.TILBAKEKREVING,
             // Manuelt opprettet er per nå ikke håndtert i familie-tilbake.

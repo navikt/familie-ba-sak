@@ -17,7 +17,6 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.task.JournalførVedtaksbrevTask
 import no.nav.familie.ba.sak.task.dto.Autobrev6og18ÅrDTO
@@ -84,7 +83,9 @@ class Autobrev6og18ÅrService(
 
         vedtaksperiodeService.oppdaterFortsattInnvilgetPeriodeMedAutobrevBegrunnelse(
             vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingEtterBehandlingsresultat.id),
-            vedtakBegrunnelseSpesifikasjon = finnAutobrevVedtakbegrunnelseReduksjonForAlder(autobrev6og18ÅrDTO.alder)
+            vedtakBegrunnelseSpesifikasjon = AutobrevUtils.hentGjeldendeVedtakbegrunnelseReduksjonForAlder(
+                autobrev6og18ÅrDTO.alder
+            )
         )
 
         val opprettetVedtak =
@@ -109,26 +110,6 @@ class Autobrev6og18ÅrService(
             else -> throw Feil("Alder må være oppgitt til enten 6 eller 18 år.")
         }
 
-    private fun finnAutobrevVedtakbegrunnelseReduksjonForAlder(alder: Int): VedtakBegrunnelseSpesifikasjon =
-        when (alder) {
-            Alder.SEKS.år -> VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR_AUTOVEDTAK
-            Alder.ATTEN.år -> VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR_AUTOVEDTAK
-            else -> throw Feil("Alder må være oppgitt til enten 6 eller 18 år.")
-        }
-
-    private fun finnVedtakbegrunnelseReduksjonForAlder(alder: Int): List<VedtakBegrunnelseSpesifikasjon> =
-        when (alder) {
-            Alder.SEKS.år -> listOf(
-                VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR_AUTOVEDTAK,
-                VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR
-            )
-            Alder.ATTEN.år -> listOf(
-                VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR_AUTOVEDTAK,
-                VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR
-            )
-            else -> throw Feil("Alder må være oppgitt til enten 6 eller 18 år.")
-        }
-
     private fun brevAlleredeSendt(autobrev6og18ÅrDTO: Autobrev6og18ÅrDTO): Boolean =
         behandlingService.hentBehandlinger(fagsakId = autobrev6og18ÅrDTO.fagsakId)
             .filter { it.status == BehandlingStatus.AVSLUTTET }
@@ -136,7 +117,8 @@ class Autobrev6og18ÅrService(
                 val vedtak = vedtakService.hentAktivForBehandlingThrows(behandling.id)
                 val vedtaksperioderMedBegrunnelser = vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak)
 
-                val vedtaksBegrunnelserForReduksjon = finnVedtakbegrunnelseReduksjonForAlder(autobrev6og18ÅrDTO.alder)
+                val vedtaksBegrunnelserForReduksjon =
+                    AutobrevUtils.hentStandardbegrunnelserReduksjonForAlder(autobrev6og18ÅrDTO.alder)
                 vedtaksperioderMedBegrunnelser.any { vedtaksperiodeMedBegrunnelser ->
                     vedtaksperiodeMedBegrunnelser.begrunnelser.map { it.vedtakBegrunnelseSpesifikasjon }
                         .any { vedtaksBegrunnelserForReduksjon.contains(it) }

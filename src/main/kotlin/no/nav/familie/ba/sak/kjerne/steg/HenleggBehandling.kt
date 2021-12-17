@@ -13,6 +13,8 @@ import no.nav.familie.ba.sak.kjerne.dokument.domene.ManueltBrevRequest
 import no.nav.familie.ba.sak.kjerne.dokument.domene.byggMottakerdata
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
 import org.springframework.stereotype.Service
 
 @Service
@@ -32,7 +34,7 @@ class HenleggBehandling(
                 behandling = behandling,
                 fagsakId = behandling.fagsak.id,
                 manueltBrevRequest = ManueltBrevRequest(
-                    mottakerIdent = behandling.fagsak.hentAktivIdent().ident,
+                    mottakerIdent = behandling.fagsak.aktør.aktivFødselsnummer(),
                     brevmal = BrevType.HENLEGGE_TRUKKET_SØKNAD,
                 ).byggMottakerdata(behandling, persongrunnlagService, arbeidsfordelingService)
             )
@@ -54,5 +56,14 @@ class HenleggBehandling(
 
     override fun stegType(): StegType {
         return StegType.HENLEGG_BEHANDLING
+    }
+
+    private fun opprettFerdigstillBehandling(behandlingsId: Long, aktør: Aktør) {
+        val ferdigstillBehandling =
+            FerdigstillBehandlingTask.opprettTask(
+                behandlingsId = behandlingsId,
+                søkerPersonIdent = aktør.aktivFødselsnummer()
+            )
+        taskRepository.save(ferdigstillBehandling)
     }
 }

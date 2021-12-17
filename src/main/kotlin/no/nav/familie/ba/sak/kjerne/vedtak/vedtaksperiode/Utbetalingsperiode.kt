@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPerson
@@ -58,11 +59,8 @@ fun hentUtbetalingsperiodeForVedtaksperiode(
         ?: throw Feil("Finner ikke gjeldende utbetalingsperiode ved fortsatt innvilget")
 }
 
-fun hentPersonIdenterFraUtbetalingsperioder(utbetalingsperioder: List<Utbetalingsperiode>): List<String> {
-    return hentUtbetalingsperiodeForVedtaksperiode(
-        utbetalingsperioder,
-        null
-    ).utbetalingsperiodeDetaljer.map { it.person.personIdent }
+fun hentPersonIdenterFraUtbetalingsperiode(utbetalingsperiode: Utbetalingsperiode): List<String> {
+    return utbetalingsperiode.utbetalingsperiodeDetaljer.map { it.person.personIdent }
 }
 
 fun mapTilUtbetalingsperioder(
@@ -76,11 +74,24 @@ fun mapTilUtbetalingsperioder(
             ytelseTyper = andelerForSegment.map(AndelTilkjentYtelse::type),
             utbetaltPerMnd = segment.value,
             antallBarn = andelerForSegment.count { andel ->
-                personopplysningGrunnlag.barna.any { barn -> barn.personIdent.ident == andel.personIdent }
+                personopplysningGrunnlag.barna.any { barn -> barn.aktør == andel.aktør }
             },
             utbetalingsperiodeDetaljer = andelerForSegment.lagUtbetalingsperiodeDetaljer(personopplysningGrunnlag)
         )
     }
+}
+
+fun hentbarnMedSeksårsdagPåPeriode(utbetalingsperiode: Utbetalingsperiode): List<String> {
+    val personerIPeriode = utbetalingsperiode.utbetalingsperiodeDetaljer.map { it.person }
+
+    val barnMed6ÅrsdagPåPeriode = personerIPeriode.filter {
+        it.fødselsdato?.plusYears(6)?.toYearMonth() == (
+            utbetalingsperiode.periodeFom.toYearMonth()
+                ?: TIDENES_ENDE.toYearMonth()
+            )
+    }
+
+    return barnMed6ÅrsdagPåPeriode.map { it.personIdent }
 }
 
 internal fun List<AndelTilkjentYtelse>.utledSegmenter(): List<LocalDateSegment<Int>> {
@@ -98,7 +109,7 @@ internal fun List<AndelTilkjentYtelse>.lagUtbetalingsperiodeDetaljer(
 ): List<UtbetalingsperiodeDetalj> =
     this.map { andel ->
         val personForAndel =
-            personopplysningGrunnlag.personer.find { person -> andel.personIdent == person.personIdent.ident }
+            personopplysningGrunnlag.personer.find { person -> andel.aktør == person.aktør }
                 ?: throw IllegalStateException("Fant ikke personopplysningsgrunnlag for andel")
 
         UtbetalingsperiodeDetalj(

@@ -101,7 +101,7 @@ class UtbetalingsoppdragGenerator(
             kodeEndring = aksjonskodePåOppdragsnivå,
             fagSystem = FAGSYSTEM,
             saksnummer = vedtak.behandling.fagsak.id.toString(),
-            aktoer = vedtak.behandling.fagsak.aktør.aktivIdent().fødselsnummer,
+            aktoer = vedtak.behandling.fagsak.aktør.aktivFødselsnummer(),
             utbetalingsperiode = listOf(opphøres, opprettes).flatten()
         )
     }
@@ -145,7 +145,7 @@ class UtbetalingsoppdragGenerator(
 
         val utbetalingsperioder = andeler.filter { kjede -> kjede.isNotEmpty() }
             .flatMap { kjede: List<AndelTilkjentYtelse> ->
-                val ident = kjede.first().personIdent
+                val ident = kjede.first().aktør.aktivFødselsnummer()
                 val ytelseType = kjede.first().type
                 var forrigeOffsetIKjede: Int? = null
                 if (!erFørsteBehandlingPåFagsak) {

@@ -15,7 +15,8 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
@@ -39,6 +40,7 @@ class FødselshendelseService(
     private val behandlingService: BehandlingService,
     private val vilkårsvurderingRepository: VilkårsvurderingRepository,
     private val persongrunnlagService: PersongrunnlagService,
+    private val personidentService: PersonidentService,
     private val stegService: StegService,
     private val vedtakService: VedtakService,
     private val vedtaksperiodeService: VedtaksperiodeService,
@@ -53,7 +55,8 @@ class FødselshendelseService(
     val passertFiltreringOgVilkårsvurderingCounter = Metrics.counter("familie.ba.sak.henvendelse.passert")
 
     fun behandleFødselshendelse(nyBehandling: NyBehandlingHendelse) {
-        val morsÅpneBehandling = hentÅpenBehandling(ident = nyBehandling.morsIdent)
+        val morsAktør = personidentService.hentOgLagreAktør(nyBehandling.morsIdent)
+        val morsÅpneBehandling = hentÅpenBehandling(aktør = morsAktør)
         if (morsÅpneBehandling != null) {
             val barnaPåÅpenBehandling =
                 persongrunnlagService.hentBarna(behandling = morsÅpneBehandling).map { it.personIdent.ident }
@@ -80,7 +83,7 @@ class FødselshendelseService(
         }
 
         val (barnSomSkalBehandlesForMor, alleBarnSomKanBehandles) = finnBarnSomSkalBehandlesForMor(
-            fagsak = fagsakService.hent(personIdent = PersonIdent(nyBehandling.morsIdent)),
+            fagsak = fagsakService.hent(aktør = morsAktør),
             nyBehandlingHendelse = nyBehandling
         )
 
@@ -140,8 +143,8 @@ class FødselshendelseService(
         }
     }
 
-    private fun hentÅpenBehandling(ident: String): Behandling? {
-        return fagsakService.hent(PersonIdent(ident))?.let {
+    private fun hentÅpenBehandling(aktør: Aktør): Behandling? {
+        return fagsakService.hent(aktør)?.let {
             behandlingService.hentAktivOgÅpenForFagsak(it.id)
         }
     }
@@ -150,13 +153,14 @@ class FødselshendelseService(
         fagsak: Fagsak?,
         nyBehandlingHendelse: NyBehandlingHendelse
     ): Pair<List<String>, List<String>> {
+        val morsAktør = personidentService.hentOgLagreAktør(nyBehandlingHendelse.morsIdent)
         val barnaTilMor = personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(
-            personIdent = nyBehandlingHendelse.morsIdent
+            aktør = morsAktør
         ).forelderBarnRelasjon.filter { it.relasjonsrolle == FORELDERBARNRELASJONROLLE.BARN }
 
         val barnaSomHarBlittBehandlet =
             if (fagsak != null) behandlingService.hentBehandlinger(fagsakId = fagsak.id).flatMap {
-                persongrunnlagService.hentBarna(behandling = it).map { barn -> barn.personIdent.ident }
+                persongrunnlagService.hentBarna(behandling = it).map { barn -> barn.aktør.aktivFødselsnummer() }
             }.distinct() else emptyList()
 
         return finnBarnSomSkalBehandlesForMor(
@@ -198,7 +202,7 @@ class FødselshendelseService(
         val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId)
         val behandling = behandlingService.hent(behandlingId)
         val søker = persongrunnlagService.hentSøker(behandling.id)
-        val søkerResultat = vilkårsvurdering?.personResultater?.find { it.personIdent == søker?.personIdent?.ident }
+        val søkerResultat = vilkårsvurdering?.personResultater?.find { it.aktør == søker?.aktør }
 
         val bosattIRiketResultat = søkerResultat?.vilkårResultater?.find { it.vilkårType == Vilkår.BOSATT_I_RIKET }
         if (bosattIRiketResultat?.resultat == Resultat.IKKE_OPPFYLT && bosattIRiketResultat.evalueringÅrsaker.any {
@@ -214,7 +218,7 @@ class FødselshendelseService(
 
         persongrunnlagService.hentBarna(behandling).forEach { barn ->
             val vilkårsresultat =
-                vilkårsvurdering?.personResultater?.find { it.personIdent == barn.personIdent.ident }?.vilkårResultater
+                vilkårsvurdering?.personResultater?.find { it.aktør == barn.aktør }?.vilkårResultater
 
             if (vilkårsresultat?.find { it.vilkårType == Vilkår.UNDER_18_ÅR }?.resultat == Resultat.IKKE_OPPFYLT) {
                 return "Barnet (fødselsdato: ${barn.fødselsdato.tilKortString()}) er over 18 år."

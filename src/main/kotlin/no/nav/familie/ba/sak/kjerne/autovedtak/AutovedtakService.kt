@@ -34,7 +34,7 @@ class AutovedtakService(
             NyBehandling(
                 behandlingType = behandlingType,
                 behandlingÅrsak = behandlingÅrsak,
-                søkersIdent = fagsak.hentAktivIdent().ident,
+                søkersIdent = fagsak.aktør.aktivFødselsnummer(),
                 skalBehandlesAutomatisk = true
             )
         )

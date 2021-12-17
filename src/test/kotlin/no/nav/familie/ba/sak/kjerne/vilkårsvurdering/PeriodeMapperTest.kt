@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.defaultFagsak
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
@@ -113,8 +114,8 @@ class PeriodeMapperTest {
     fun `Mapper tre PersonResultater til fire PeriodeResultater med rette vilkår og datoer for to personer`() {
         val fnr1 = randomFnr()
         val fnr2 = randomFnr()
-        val aktørId1 = randomAktørId()
-        val aktørId2 = randomAktørId()
+        val aktørId1 = tilAktør(fnr1)
+        val aktørId2 = tilAktør(fnr2)
         val personResultat1 =
             PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = fnr1, aktør = aktørId1)
         val personResultat2 =
@@ -176,14 +177,14 @@ class PeriodeMapperTest {
 
         // Person 1 første periode
         assert(periodeResultater[0].vilkårResultater.size == 1)
-        assert(periodeResultater[0].personIdent == fnr1)
+        assert(periodeResultater[0].aktør.aktivFødselsnummer() == fnr1)
         assert(periodeResultater[0].vilkårResultater.any { it.vilkårType == Vilkår.UNDER_18_ÅR })
         assert(periodeResultater[0].periodeFom!! == datoer[0])
         assert(periodeResultater[0].periodeTom!! == datoer[1].minusDays(1))
 
         // Person 1 andre periode (overlappende)
         assert(periodeResultater[1].vilkårResultater.size == 2)
-        assert(periodeResultater[1].personIdent == fnr1)
+        assert(periodeResultater[1].aktør.aktivFødselsnummer() == fnr1)
         assert(periodeResultater[1].vilkårResultater.any { it.vilkårType == Vilkår.UNDER_18_ÅR })
         assert(periodeResultater[1].vilkårResultater.any { it.vilkårType == Vilkår.BOSATT_I_RIKET })
         assert(periodeResultater[1].periodeFom!! == datoer[1])
@@ -191,14 +192,14 @@ class PeriodeMapperTest {
 
         // Person 1 tredje periode
         assert(periodeResultater[2].vilkårResultater.size == 1)
-        assert(periodeResultater[2].personIdent == fnr1)
+        assert(periodeResultater[2].aktør.aktivFødselsnummer() == fnr1)
         assert(periodeResultater[2].vilkårResultater.any { it.vilkårType == Vilkår.BOSATT_I_RIKET })
         assert(periodeResultater[2].periodeFom!! == datoer[2])
         assert(periodeResultater[2].periodeTom!! == datoer[3].minusDays(1))
 
         // Person 1 fjerde periode
         assert(periodeResultater[3].vilkårResultater.size == 2)
-        assert(periodeResultater[3].personIdent == fnr1)
+        assert(periodeResultater[3].aktør.aktivFødselsnummer() == fnr1)
         assert(periodeResultater[3].vilkårResultater.any { it.vilkårType == Vilkår.BOSATT_I_RIKET })
         assert(periodeResultater[3].vilkårResultater.any { it.vilkårType == Vilkår.LOVLIG_OPPHOLD })
         assert(periodeResultater[3].periodeFom!! == datoer[3])
@@ -206,14 +207,14 @@ class PeriodeMapperTest {
 
         // Person 1 femte periode
         assert(periodeResultater[4].vilkårResultater.size == 1)
-        assert(periodeResultater[4].personIdent == fnr1)
+        assert(periodeResultater[4].aktør.aktivFødselsnummer() == fnr1)
         assert(periodeResultater[4].vilkårResultater.any { it.vilkårType == Vilkår.BOSATT_I_RIKET })
         assert(periodeResultater[4].periodeFom!! == datoer[4])
         assert(periodeResultater[4].periodeTom!! == datoer[5].minusDays(1))
 
         // Person 2
         assert(periodeResultater[5].vilkårResultater.size == 1)
-        assert(periodeResultater[5].personIdent == fnr2)
+        assert(periodeResultater[5].aktør.aktivFødselsnummer() == fnr2)
         assert(periodeResultater[5].vilkårResultater.any { it.vilkårType == Vilkår.LOVLIG_OPPHOLD })
         assert(periodeResultater[5].periodeFom!! == datoer[1])
         assert(periodeResultater[5].periodeTom!! == datoer[4].minusDays(1))

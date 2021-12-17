@@ -2,8 +2,9 @@ package no.nav.familie.ba.sak.internal
 
 import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
-import no.nav.familie.ba.sak.kjerne.autovedtak.omregning.Autobrev6og18ÅrScheduler
+import no.nav.familie.ba.sak.kjerne.autovedtak.omregning.AutobrevScheduler
 import no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg.VedtakOmOvergangsstønadService
+import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.task.SatsendringTask
 import no.nav.familie.ba.sak.task.StartSatsendringForAlleBehandlingerTask
 import no.nav.familie.kontrakter.felles.PersonIdent
@@ -20,7 +21,8 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping(value = ["/internal", "/testverktoy"])
 class TestVerktøyController(
-    private val scheduler: Autobrev6og18ÅrScheduler,
+    private val scheduler: AutobrevScheduler,
+    private val personidentService: PersonidentService,
     private val envService: EnvService,
     private val vedtakOmOvergangsstønadService: VedtakOmOvergangsstønadService,
     private val taskRepository: TaskRepositoryWrapper
@@ -33,7 +35,7 @@ class TestVerktøyController(
             scheduler.opprettTask()
             ResponseEntity.ok(Ressurs.success("Laget task."))
         } else {
-            ResponseEntity.ok(Ressurs.success("Endepunktet gjør ingenting i prod."))
+            ResponseEntity.ok(Ressurs.success(MELDING))
         }
     }
 
@@ -44,7 +46,7 @@ class TestVerktøyController(
             SatsendringTask.opprettTask(behandlingId)
             ResponseEntity.ok(Ressurs.success("Trigget satsendring for behandling $behandlingId"))
         } else {
-            ResponseEntity.ok(Ressurs.success("Endepunktet gjør ingenting i prod."))
+            ResponseEntity.ok(Ressurs.success(MELDING))
         }
     }
 
@@ -55,7 +57,7 @@ class TestVerktøyController(
             taskRepository.save(StartSatsendringForAlleBehandlingerTask.opprettTask(1654))
             ResponseEntity.ok(Ressurs.success("Trigget satsendring for alle behandlinger"))
         } else {
-            ResponseEntity.ok(Ressurs.success("Endepunktet gjør ingenting i prod."))
+            ResponseEntity.ok(Ressurs.success(MELDING))
         }
     }
 
@@ -63,10 +65,15 @@ class TestVerktøyController(
     @Unprotected
     fun mottaHendelseOmVedtakOmOvergangsstønad(@RequestBody personIdent: PersonIdent): ResponseEntity<Ressurs<String>> {
         return if (envService.erPreprod() || envService.erDev()) {
-            val melding = vedtakOmOvergangsstønadService.håndterVedtakOmOvergangsstønad(personIdent = personIdent.ident)
+            val aktør = personidentService.hentOgLagreAktør(personIdent.ident)
+            val melding = vedtakOmOvergangsstønadService.håndterVedtakOmOvergangsstønad(aktør = aktør)
             ResponseEntity.ok(Ressurs.success(melding))
         } else {
-            ResponseEntity.ok(Ressurs.success("Endepunktet gjør ingenting i prod."))
+            ResponseEntity.ok(Ressurs.success(MELDING))
         }
+    }
+
+    companion object {
+        const val MELDING = "Endepunktet gjør ingenting i prod."
     }
 }

@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.integrasjoner.infotrygd
 
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.kontrakter.ba.infotrygd.InfotrygdSøkResponse
 import no.nav.familie.kontrakter.ba.infotrygd.Sak
 import no.nav.familie.kontrakter.ba.infotrygd.Stønad
@@ -15,15 +16,16 @@ class InfotrygdService(
     private val personopplysningerService: PersonopplysningerService
 ) {
 
-    fun hentInfotrygdsakerForSøker(ident: String): InfotrygdSøkResponse<Sak> {
-        return infotrygdBarnetrygdClient.hentSaker(listOf(ident), emptyList())
+    fun hentInfotrygdsakerForSøker(aktør: Aktør): InfotrygdSøkResponse<Sak> {
+        return infotrygdBarnetrygdClient.hentSaker(listOf(aktør.aktivFødselsnummer()), emptyList())
     }
 
-    fun hentMaskertRestInfotrygdsakerVedManglendeTilgang(personIdent: String): RestInfotrygdsaker? {
-        val harTilgang = integrasjonClient.sjekkTilgangTilPersoner(listOf(personIdent)).first().harTilgang
+    fun hentMaskertRestInfotrygdsakerVedManglendeTilgang(aktør: Aktør): RestInfotrygdsaker? {
+        val harTilgang =
+            integrasjonClient.sjekkTilgangTilPersoner(listOf(aktør.aktivFødselsnummer())).first().harTilgang
         return if (!harTilgang) {
             RestInfotrygdsaker(
-                adressebeskyttelsegradering = personopplysningerService.hentAdressebeskyttelseSomSystembruker(personIdent),
+                adressebeskyttelsegradering = personopplysningerService.hentAdressebeskyttelseSomSystembruker(aktør),
                 harTilgang = false
             )
         } else null
@@ -36,11 +38,14 @@ class InfotrygdService(
         return infotrygdBarnetrygdClient.hentStønader(søkerIdenter, emptyList(), historikk)
     }
 
-    fun hentMaskertRestInfotrygdstønaderVedManglendeTilgang(personIdent: String): RestInfotrygdstønader? {
-        val harTilgang = integrasjonClient.sjekkTilgangTilPersoner(listOf(personIdent)).first().harTilgang
+    fun hentMaskertRestInfotrygdstønaderVedManglendeTilgang(aktør: Aktør): RestInfotrygdstønader? {
+        val harTilgang =
+            integrasjonClient.sjekkTilgangTilPersoner(listOf(aktør.aktivFødselsnummer())).first().harTilgang
         return if (!harTilgang) {
             RestInfotrygdstønader(
-                adressebeskyttelsegradering = personopplysningerService.hentAdressebeskyttelseSomSystembruker(personIdent),
+                adressebeskyttelsegradering = personopplysningerService.hentAdressebeskyttelseSomSystembruker(
+                    aktør
+                ),
                 harTilgang = false
             )
         } else null

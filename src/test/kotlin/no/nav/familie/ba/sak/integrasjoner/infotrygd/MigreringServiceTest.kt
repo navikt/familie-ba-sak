@@ -20,6 +20,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.gjelderAlltidFraBarnetsFødselsdato
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext.SYSTEM_FORKORTELSE
@@ -126,8 +127,10 @@ class MigreringServiceTest(
         every { infotrygdBarnetrygdClient.harÅpenSakIInfotrygd(any(), any()) } returns false
 
         val slot = slot<String>()
-        every { pdlRestClient.hentForelderBarnRelasjon(capture(slot)) } answers {
-            infotrygdBarnetrygdClient.hentSaker(listOf(slot.captured)).bruker.first().stønad!!.barn.map {
+        val slotAktør = slot<Aktør>()
+
+        every { pdlRestClient.hentForelderBarnRelasjon(capture(slotAktør)) } answers {
+            infotrygdBarnetrygdClient.hentSaker(listOf(slotAktør.captured.aktivFødselsnummer())).bruker.first().stønad!!.barn.map {
                 ForelderBarnRelasjon(
                     relatertPersonsIdent = it.barnFnr!!,
                     relatertPersonsRolle = FORELDERBARNRELASJONROLLE.BARN
@@ -303,7 +306,7 @@ class MigreringServiceTest(
 
         val migreringServiceMock = MigreringService(
             mockk(), mockk(), mockk(), mockk(), mockk(), mockk(), mockk(), mockk(), mockk(), mockk(), mockk(),
-            env = mockk(relaxed = true), mockk()
+            mockk(), env = mockk(relaxed = true), mockk()
         ) // => env.erDev() = env.erE2E() = false
 
         listOf<Long>(0, 1).forEach { antallDagerEtterKjøredato ->

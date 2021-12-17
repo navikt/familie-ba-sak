@@ -68,7 +68,11 @@ data class AnnenVurdering(
     }
 
     override fun toString(): String {
-        return "AnnenVurdering(id=$id, type=$type, personident=${personResultat.personIdent})"
+        return "AnnenVurdering(id=$id, type=$type, personident=${personResultat.aktør.aktørId})"
+    }
+
+    fun toSecureString(): String {
+        return "AnnenVurdering(id=$id, type=$type, personident=${personResultat.aktør.aktivFødselsnummer()})"
     }
 }
 
