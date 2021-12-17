@@ -97,4 +97,24 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
 
     @Query("SELECT b FROM Behandling b WHERE b.opprettetÅrsak = 'FØDSELSHENDELSE' AND b.opprettetTidspunkt >= current_date")
     fun finnFødselshendelserOpprettetIdag(): List<Behandling>
+
+    @Query(
+        value = """
+        SELECT DISTINCT ON (b.fk_fagsak_id) aty.fk_behandling_id 
+        FROM andel_tilkjent_ytelse aty
+            JOIN behandling b ON aty.fk_behandling_id = b.id
+            JOIN tilkjent_ytelse ty ON b.id = ty.fk_behandling_id
+        WHERE 
+                aty.type = 'SMÅBARNSTILLEGG'
+            AND aty.stonad_tom >= :start
+            AND aty.stonad_tom < :slutt
+            AND ty.utbetalingsoppdrag IS NOT NULL
+        ORDER BY b.fk_fagsak_id, b.opprettet_tid DESC
+        """,
+        nativeQuery = true
+    )
+    fun finnAlleBehandlingsIderMedOpphørSmåbarnstilleggIInterval(
+        start: LocalDateTime,
+        slutt: LocalDateTime
+    ): List<Long>
 }
