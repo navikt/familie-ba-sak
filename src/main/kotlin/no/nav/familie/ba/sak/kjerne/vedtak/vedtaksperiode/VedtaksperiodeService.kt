@@ -41,6 +41,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilBegrunnelsePerson
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilVedtaksbegrunnelseFritekst
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.YearMonth
@@ -57,6 +58,7 @@ class VedtaksperiodeService(
     private val søknadGrunnlagService: SøknadGrunnlagService,
     private val endretUtbetalingAndelRepository: EndretUtbetalingAndelRepository
 ) {
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
     fun lagre(vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser): VedtaksperiodeMedBegrunnelser {
         validerVedtaksperiodeMedBegrunnelser(vedtaksperiodeMedBegrunnelser)
@@ -431,6 +433,8 @@ class VedtaksperiodeService(
             )
         )
 
+        logger.info("Genererer brevbegrunnelser for vedtaksperiode ${vedtaksperiode.id} på behandling $behandlingId")
+
         return utvidetVedtaksperiodeMedBegrunnelse.byggBegrunnelserOgFritekster(
             begrunnelsepersonerIBehandling = persongrunnlag.personer.map { it.tilBegrunnelsePerson() },
             målform = persongrunnlag.søker.målform,
@@ -593,6 +597,7 @@ class VedtaksperiodeService(
     }
 
     companion object {
+
         val finnerIkkePersongrunnlagFeilmelding = "Finner ikke persongrunnlag"
     }
 }
