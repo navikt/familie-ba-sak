@@ -107,7 +107,7 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
         WHERE 
                 aty.type = 'SMÅBARNSTILLEGG'
             AND aty.stonad_tom >= :start
-            AND aty.stonad_tom <= :slutt
+            AND aty.stonad_tom < :slutt
             AND ty.utbetalingsoppdrag IS NOT NULL
         ORDER BY b.fk_fagsak_id, b.opprettet_tid DESC
         """,
