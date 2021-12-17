@@ -58,7 +58,6 @@ class VedtaksperiodeService(
     private val søknadGrunnlagService: SøknadGrunnlagService,
     private val endretUtbetalingAndelRepository: EndretUtbetalingAndelRepository
 ) {
-    private val logger = LoggerFactory.getLogger(this::class.java)
 
     fun lagre(vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser): VedtaksperiodeMedBegrunnelser {
         validerVedtaksperiodeMedBegrunnelser(vedtaksperiodeMedBegrunnelser)
@@ -598,6 +597,8 @@ class VedtaksperiodeService(
 
     companion object {
 
+        val logger = LoggerFactory.getLogger(VedtaksperiodeService::class.java)
         val finnerIkkePersongrunnlagFeilmelding = "Finner ikke persongrunnlag"
     }
 }
+
