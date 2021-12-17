@@ -35,7 +35,9 @@ class SendMeldingTilBisysTask(
         val behandling = behandlingRepository.finnBehandling(task.payload.toLong())
 
         // Bisys vil kun ha rene manuelle opphør
-        if (behandling.resultat == BehandlingResultat.OPPHØRT) {
+        if (behandling.resultat == BehandlingResultat.OPPHØRT || behandling.resultat == BehandlingResultat.ENDRET ||
+            behandling.resultat == BehandlingResultat.ENDRET_OG_OPPHØRT
+        ) {
             val endretPerioder = finnEndretPerioder(behandling)
             val barnetrygdBisysMelding = BarnetrygdBisysMelding(
                 søker = behandling.fagsak.hentAktivIdent().ident,

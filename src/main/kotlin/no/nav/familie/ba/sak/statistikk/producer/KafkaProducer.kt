@@ -129,6 +129,7 @@ class DefaultKafkaProducer(val saksstatistikkMellomlagringRepository: Saksstatis
                             "$behandlingId er sendt. " +
                             "Fikk offset ${it?.recordMetadata?.offset()}"
                     )
+                    secureLogger.info("Send barnetrygd bisys melding $opphørBarnetrygdBisysMelding")
                 },
                 {
                     val feilmelding =
@@ -143,6 +144,7 @@ class DefaultKafkaProducer(val saksstatistikkMellomlagringRepository: Saksstatis
     companion object {
 
         private val logger = LoggerFactory.getLogger(DefaultKafkaProducer::class.java)
+        private val secureLogger = LoggerFactory.getLogger("secureLogger")
         private const val VEDTAK_TOPIC = "aapen-barnetrygd-vedtak-v1"
         private const val SAKSSTATISTIKK_BEHANDLING_TOPIC = "aapen-barnetrygd-saksstatistikk-behandling-v1"
         private const val SAKSSTATISTIKK_SAK_TOPIC = "aapen-barnetrygd-saksstatistikk-sak-v1"
