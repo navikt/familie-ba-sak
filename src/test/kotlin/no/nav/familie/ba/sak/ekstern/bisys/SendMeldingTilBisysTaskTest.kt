@@ -117,7 +117,7 @@ class SendMeldingTilBisysTaskTest {
 
         verify(exactly = 1) { kafkaProducer.kafkaAivenTemplate.send(any(), any(), any()) }
         val jsonMelding = objectMapper.readValue(meldingSlot.captured, BarnetrygdBisysMelding::class.java)
-        assertThat(jsonMelding.søker).isEqualTo(behandling[1].fagsak.hentAktivIdent().ident)
+        assertThat(jsonMelding.søker).isEqualTo(behandling[1].fagsak.aktør.aktivFødselsnummer())
         assertThat(jsonMelding.barn).hasSize(1)
         assertThat(jsonMelding.barn[0].ident).isEqualTo(barn1.personIdent.ident)
         assertThat(jsonMelding.barn[0].årsakskode.toString()).isEqualTo("RO")
@@ -170,7 +170,7 @@ class SendMeldingTilBisysTaskTest {
 
         verify(exactly = 1) { kafkaProducer.kafkaAivenTemplate.send(any(), any(), any()) }
         val jsonMelding = objectMapper.readValue(meldingSlot.captured, BarnetrygdBisysMelding::class.java)
-        assertThat(jsonMelding.søker).isEqualTo(behandling[1].fagsak.hentAktivIdent().ident)
+        assertThat(jsonMelding.søker).isEqualTo(behandling[1].fagsak.aktør.aktivFødselsnummer())
         assertThat(jsonMelding.barn).hasSize(1)
         assertThat(jsonMelding.barn[0].ident).isEqualTo(barn1.personIdent.ident)
         assertThat(jsonMelding.barn[0].årsakskode.toString()).isEqualTo("RR")
