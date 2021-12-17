@@ -40,7 +40,7 @@ class SendMeldingTilBisysTask(
         ) {
             val endretPerioder = finnEndretPerioder(behandling)
             val barnetrygdBisysMelding = BarnetrygdBisysMelding(
-                søker = behandling.fagsak.hentAktivIdent().ident,
+                søker = behandling.fagsak.aktør.aktivFødselsnummer(),
                 barn = endretPerioder.map {
                     val førstPeriod = it.value[0]
                     BarnEndretOpplysning(
