@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.vedtak
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.Periode
+import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.overlapperHeltEllerDelvisMed
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.toYearMonth
@@ -74,10 +75,13 @@ private fun hentPersonerMedUtgjørendeVilkår(
                         else 1L
                     when {
                         minimertVilkårResultat.vilkårType != utgjørendeVilkår -> false
-                        minimertVilkårResultat.periodeFom == null -> false
+
+                        minimertVilkårResultat.periodeFom == null
+                            && oppdatertBegrunnelseType != VedtakBegrunnelseType.AVSLAG -> false
+
                         oppdatertBegrunnelseType == VedtakBegrunnelseType.INNVILGET -> {
                             triggereErOppfylt(triggesAv, minimertVilkårResultat) &&
-                                minimertVilkårResultat.periodeFom.toYearMonth() == vedtaksperiode.fom.minusMonths(
+                                minimertVilkårResultat.periodeFom!!.toYearMonth() == vedtaksperiode.fom.minusMonths(
                                 1
                             )
                                 .toYearMonth() &&
@@ -102,9 +106,7 @@ private fun hentPersonerMedUtgjørendeVilkår(
                         }
 
                         oppdatertBegrunnelseType == VedtakBegrunnelseType.AVSLAG ->
-                            minimertVilkårResultat.periodeFom.toYearMonth() ==
-                                vedtaksperiode.fom.toYearMonth() &&
-                                minimertVilkårResultat.resultat == Resultat.IKKE_OPPFYLT
+                            vilkårResultatPasserForAvslagsperiode(minimertVilkårResultat, vedtaksperiode)
 
                         else -> throw Feil("Henting av personer med utgjørende vilkår when: Ikke implementert")
                     }
@@ -118,6 +120,20 @@ private fun hentPersonerMedUtgjørendeVilkår(
             }
             acc
         }
+}
+
+private fun vilkårResultatPasserForAvslagsperiode(
+    minimertVilkårResultat: MinimertVilkårResultat,
+    vedtaksperiode: Periode
+): Boolean {
+    val erAvslagUtenFomDato = minimertVilkårResultat.periodeFom == null
+
+    val fomVilkår =
+        if (erAvslagUtenFomDato) TIDENES_MORGEN.toYearMonth()
+        else minimertVilkårResultat.periodeFom!!.toYearMonth()
+
+    return fomVilkår == vedtaksperiode.fom.toYearMonth() &&
+        minimertVilkårResultat.resultat == Resultat.IKKE_OPPFYLT
 }
 
 fun erFørstePeriodeOgVilkårIkkeOppfylt(
