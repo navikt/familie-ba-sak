@@ -367,12 +367,12 @@ class VedtaksperiodeService(
                                         vilkårsvurdering = vilkårsvurdering,
                                         persongrunnlag = persongrunnlag,
                                         aktørerMedUtbetaling = personidentService.hentOgLagreAktørIder(
-                                            identerMedUtbetaling
-                                        ),
+                                                identerMedUtbetaling
+                                            ),
                                         triggesAv = triggesAv,
                                         endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(
-                                            behandling.id
-                                        ),
+                                                behandling.id
+                                            ),
                                         andelerTilkjentYtelse = andelerTilkjentYtelse,
                                     )
                                 ) {
