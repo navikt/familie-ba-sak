@@ -207,6 +207,30 @@ class VedtaksperiodeService(
                 )
             )
             lagre(vedtaksperiodeMedBegrunnelser)
+
+            /**
+             * Hvis barn(a) er født før desember påvirkes vedtaket av satsendring januar 2022
+             * og vi må derfor også automatisk begrunne satsendringen
+             */
+            if (fødselsmåned < YearMonth.of(
+                    2021,
+                    12
+                )
+            ) {
+                vedtaksperioderMedBegrunnelser.firstOrNull { it.fom?.toYearMonth() == YearMonth.of(2022, 1) }
+                    ?.also { satsendringsvedtaksperiode ->
+                        satsendringsvedtaksperiode.settBegrunnelser(
+                            listOf(
+                                Vedtaksbegrunnelse(
+                                    vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.INNVILGET_SATSENDRING,
+                                    vedtaksperiodeMedBegrunnelser = satsendringsvedtaksperiode,
+                                    personIdenter = barna.map { barn -> barn.personIdent.ident }
+                                )
+                            )
+                        )
+                        lagre(satsendringsvedtaksperiode)
+                    }
+            }
         }
     }
 
@@ -343,12 +367,12 @@ class VedtaksperiodeService(
                                         vilkårsvurdering = vilkårsvurdering,
                                         persongrunnlag = persongrunnlag,
                                         aktørerMedUtbetaling = personidentService.hentOgLagreAktørIder(
-                                                identerMedUtbetaling
-                                            ),
+                                            identerMedUtbetaling
+                                        ),
                                         triggesAv = triggesAv,
                                         endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(
-                                                behandling.id
-                                            ),
+                                            behandling.id
+                                        ),
                                         andelerTilkjentYtelse = andelerTilkjentYtelse,
                                     )
                                 ) {
