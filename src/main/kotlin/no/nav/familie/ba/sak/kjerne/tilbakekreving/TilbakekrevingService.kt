@@ -83,7 +83,7 @@ class TilbakekrevingService(
             handling = "hent forhåndsvisning av varselbrev for tilbakekreving"
         )
 
-        val vedtak = vedtakRepository.findByBehandlingAndAktiv(behandlingId)
+        val vedtak = vedtakRepository.findByBehandlingAndAktivOptional(behandlingId)
             ?: throw Feil(
                 "Fant ikke vedtak for behandling $behandlingId ved forhåndsvisning av varselbrev" +
                     " for tilbakekreving."
@@ -124,7 +124,7 @@ class TilbakekrevingService(
 
         val enhet = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandling.id)
 
-        val aktivtVedtak = vedtakRepository.findByBehandlingAndAktiv(behandling.id)
+        val aktivtVedtak = vedtakRepository.findByBehandlingAndAktivOptional(behandling.id)
             ?: throw Feil("Fant ikke aktivt vedtak på behandling ${behandling.id}")
 
         val totrinnskontroll = totrinnskontrollRepository.findByBehandlingAndAktiv(behandling.id)

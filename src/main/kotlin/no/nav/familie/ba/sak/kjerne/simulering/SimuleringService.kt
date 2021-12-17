@@ -96,7 +96,7 @@ class SimuleringService(
 
     @Transactional
     fun oppdaterSimuleringPåBehandling(behandling: Behandling): List<ØkonomiSimuleringMottaker> {
-        val aktivtVedtak = vedtakRepository.findByBehandlingAndAktiv(behandling.id)
+        val aktivtVedtak = vedtakRepository.findByBehandlingAndAktivOptional(behandling.id)
             ?: throw Feil("Fant ikke aktivt vedtak på behandling${behandling.id}")
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,

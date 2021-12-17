@@ -215,7 +215,7 @@ class BehandlingService(
             ?: throw error("Forsøker å initiere vedtak på steg ${behandling.steg}")
 
         val deaktivertVedtak =
-            vedtakRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
+            vedtakRepository.findByBehandlingAndAktivOptional(behandlingId = behandling.id)
                 ?.let { vedtakRepository.saveAndFlush(it.also { it.aktiv = false }) }
 
         val nyttVedtak = Vedtak(
