@@ -46,7 +46,7 @@ class PersonidentService(
             .filter { it.gruppe == "FOLKEREGISTERIDENT" }
             .map { it.ident }
 
-    fun hentOgLagreAktør(ident: String): Aktør {
+    fun hentOgLagreAktør(ident: String, lagre: Boolean = true): Aktør {
         // Noter at ident kan være både av typen aktørid eller fødselsnummer (d- og f nummer)
         val personident = personidentRepository.findByFødselsnummerOrNull(ident)
         if (personident != null) {
@@ -69,10 +69,10 @@ class PersonidentService(
 
         val aktørPersistert = aktørIdRepository.findByAktørIdOrNull(aktørIdStr)
         if (aktørPersistert != null) {
-            return opprettPersonIdent(aktørPersistert, fødselsnummerAktiv)
+            return opprettPersonIdent(aktørPersistert, fødselsnummerAktiv, lagre)
         }
 
-        return opprettAktørIdOgPersonident(aktørIdStr, fødselsnummerAktiv)
+        return opprettAktørIdOgPersonident(aktørIdStr, fødselsnummerAktiv, lagre)
     }
 
     fun hentOgLagreAktørIder(barnasFødselsnummer: List<String>): List<Aktør> {
@@ -88,26 +88,35 @@ class PersonidentService(
             ?: alleIdenter.first { it.aktiv }.fødselsnummer
     }
 
-    private fun opprettAktørIdOgPersonident(aktørIdStr: String, fødselsnummer: String): Aktør =
-        aktørIdRepository.saveAndFlush(
-            Aktør(aktørId = aktørIdStr).also {
-                it.personidenter.add(
-                    Personident(fødselsnummer = fødselsnummer, aktør = it)
-                )
-            }
-        )
+    private fun opprettAktørIdOgPersonident(aktørIdStr: String, fødselsnummer: String, lagre: Boolean): Aktør {
+        val aktør = Aktør(aktørId = aktørIdStr).also {
+            it.personidenter.add(
+                Personident(fødselsnummer = fødselsnummer, aktør = it)
+            )
+        }
 
-    private fun opprettPersonIdent(aktør: Aktør, fødselsnummer: String): Aktør {
+        return if (lagre) {
+            aktørIdRepository.saveAndFlush(aktør)
+        } else {
+            aktør
+        }
+    }
+
+    private fun opprettPersonIdent(aktør: Aktør, fødselsnummer: String, lagre: Boolean = true): Aktør {
         aktør.personidenter.filter { it.aktiv }.map {
             it.aktiv = false
             it.gjelderTil = LocalDateTime.now()
         }
         // Ekstra persistering eller kommer unique constraint feile.
-        aktørIdRepository.saveAndFlush(aktør)
+        if (lagre) aktørIdRepository.saveAndFlush(aktør)
         aktør.personidenter.add(
             Personident(fødselsnummer = fødselsnummer, aktør = aktør)
         )
-        return aktørIdRepository.saveAndFlush(aktør)
+        return if (lagre) {
+            aktørIdRepository.saveAndFlush(aktør)
+        } else {
+            aktør
+        }
     }
 
     private fun filtrerAktivtFødselsnummer(identerFraPdl: List<IdentInformasjon>) =
