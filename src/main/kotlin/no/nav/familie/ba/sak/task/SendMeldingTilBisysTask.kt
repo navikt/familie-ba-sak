@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
+import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.statistikk.producer.KafkaProducer
 import no.nav.familie.prosessering.AsyncTaskStep
@@ -61,6 +62,13 @@ class SendMeldingTilBisysTask(
         }
     }
 
+    private fun logTilkjentYtelse(ty: TilkjentYtelse) {
+        secureLogger.info("finnEndretPerioder(): tilkjentYtelse ${ty.id}")
+        ty.andelerTilkjentYtelse.forEach {
+            secureLogger.info("finnEndretPerioder(): andelerTilkjentYtelse for tilkjentYtelse(${ty.id}) ${it.periode.fom} ${it.periode.tom} ${it.prosent}")
+        }
+    }
+
     fun finnEndretPerioder(behandling: Behandling): Map<String, List<EndretPeriode>> {
         val iverksatteBehandlinger =
             behandlingRepository.finnIverksatteBehandlinger(fagsakId = behandling.fagsak.id)
@@ -71,6 +79,9 @@ class SendMeldingTilBisysTask(
 
         val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandling.id)
         val forrigeTilkjentYtelse = tilkjentYtelseRepository.findByBehandling(forrigeIverksatteBehandling.id)
+
+        logTilkjentYtelse(tilkjentYtelse)
+        logTilkjentYtelse(forrigeTilkjentYtelse)
 
         val endretPerioder: MutableMap<String, MutableList<EndretPeriode>> = mutableMapOf()
 
@@ -120,11 +131,17 @@ class SendMeldingTilBisysTask(
                 }
             }
         }
+        endretPerioder.keys.forEach { ident ->
+            endretPerioder[ident]!!.forEach {
+                secureLogger.info("finnEndretPerioder(): endretPerioder for $ident ${it.fom} ${it.tom} ${it.type}")
+            }
+        }
         return endretPerioder
     }
 
     companion object {
         const val TASK_STEP_TYPE = "sendMeldingOmOpphørTilBisys"
+        private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
         fun opprettTask(behandlingsId: Long): Task {
             return Task(
