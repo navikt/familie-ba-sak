@@ -166,7 +166,6 @@ class VedtaksperiodeService(
                                 Vedtaksbegrunnelse(
                                     vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.INNVILGET_SATSENDRING,
                                     vedtaksperiodeMedBegrunnelser = satsendringsvedtaksperiode,
-                                    personIdenter = barna.map { barn -> barn.personIdent.ident }
                                 )
                             )
                         )
