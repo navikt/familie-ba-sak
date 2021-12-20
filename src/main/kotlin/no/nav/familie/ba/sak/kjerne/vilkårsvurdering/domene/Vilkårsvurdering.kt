@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene
 
 import no.nav.familie.ba.sak.common.BaseEntitet
-import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.PeriodeResultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.personResultaterTilPeriodeResultater
@@ -92,11 +91,4 @@ data class Vilkårsvurdering(
         }.toSet()
         return nyVilkårsvurdering
     }
-
-    fun harPersonerManglerOpplysninger(): Boolean =
-        personResultater.any { personResultat ->
-            personResultat.andreVurderinger.any {
-                it.type == AnnenVurderingType.OPPLYSNINGSPLIKT && it.resultat == Resultat.IKKE_OPPFYLT
-            }
-        }
 }

@@ -1,25 +1,27 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
+import no.nav.familie.ba.sak.common.NullablePeriode
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagEndretUtbetalingAndel
 import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
-import no.nav.familie.ba.sak.common.lagUtbetalingsperiode
-import no.nav.familie.ba.sak.common.lagUtbetalingsperiodeDetalj
 import no.nav.familie.ba.sak.common.lagVedtak
-import no.nav.familie.ba.sak.common.lagVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPerson
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.brev.domene.BrevGrunnlag
+import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertEndretUtbetalingAndel
+import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertPersonResultat
+import no.nav.familie.ba.sak.kjerne.brev.hentPersonidenterGjeldendeForBegrunnelse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.periodeErOppyltForYtelseType
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilMinimertPerson
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -78,11 +80,6 @@ class VedtaksperiodeServiceUtilsTest {
             )
 
         Assertions.assertEquals(1, endredeUtbetalingsperioderMedBegrunnelser.size)
-
-        Assertions.assertEquals(
-            setOf(person2.aktør.aktivFødselsnummer(), person1.aktør.aktivFødselsnummer()),
-            endredeUtbetalingsperioderMedBegrunnelser.single().begrunnelser.single().personIdenter.toSet()
-        )
     }
 
     @Test
@@ -135,72 +132,6 @@ class VedtaksperiodeServiceUtilsTest {
             )
 
         Assertions.assertEquals(2, endredeUtbetalingsperioderMedBegrunnelser.size)
-    }
-
-    @Test
-    fun `skal ikke legge til personer på begrunnelse dersom begrunnelsen ikke tilhører dem`() {
-        val person1 = lagPerson()
-        val person2 = lagPerson()
-        val fom = YearMonth.now().minusMonths(1)
-        val tom = YearMonth.now()
-
-        val andelTilkjentYtelser =
-            listOf(
-                lagAndelTilkjentYtelse(
-                    person = person1,
-                    fom = fom,
-                    tom = tom,
-                    prosent = BigDecimal(0),
-                    endretUtbetalingAndeler = listOf(
-                        lagEndretUtbetalingAndel(
-                            person = person1,
-                            fom = fom,
-                            tom = tom,
-                            vedtakBegrunnelseSpesifikasjoner = listOf(
-                                VedtakBegrunnelseSpesifikasjon.INNVILGET_VURDERING_HELE_FAMILIEN_PLIKTIG_MEDLEM
-                            )
-                        )
-                    )
-                ),
-                lagAndelTilkjentYtelse(
-                    person = person2,
-                    fom = fom,
-                    tom = tom,
-                    prosent = BigDecimal(0),
-                    endretUtbetalingAndeler = listOf(
-                        lagEndretUtbetalingAndel(
-                            person = person2,
-                            fom = fom,
-                            tom = tom,
-                            vedtakBegrunnelseSpesifikasjoner = listOf(
-                                VedtakBegrunnelseSpesifikasjon.AVSLAG_BOR_HOS_SØKER
-                            )
-                        )
-                    )
-                )
-            )
-        val vedtak = lagVedtak()
-        val endredeUtbetalingsperioderMedBegrunnelser = hentVedtaksperioderMedBegrunnelserForEndredeUtbetalingsperioder(
-            vedtak = vedtak,
-            andelerTilkjentYtelse = andelTilkjentYtelser
-        )
-        val begrunnelser = endredeUtbetalingsperioderMedBegrunnelser
-            .single()
-            .begrunnelser
-
-        Assertions.assertEquals(2, begrunnelser.size)
-
-        val begrunnelsePerson1 =
-            begrunnelser
-                .find {
-                    it.vedtakBegrunnelseSpesifikasjon ==
-                        VedtakBegrunnelseSpesifikasjon.INNVILGET_VURDERING_HELE_FAMILIEN_PLIKTIG_MEDLEM
-                }
-
-        Assertions.assertEquals(
-            listOf(person1.aktør.aktivFødselsnummer()),
-            begrunnelsePerson1?.personIdenter
-        )
     }
 
     @Test
@@ -328,26 +259,25 @@ class VedtaksperiodeServiceUtilsTest {
         val persongrunnlag =
             lagTestPersonopplysningGrunnlag(behandlingId = behandling.id, personer = arrayOf(søker, barn))
         val triggesAv = TriggesAv(vilkår = setOf(Vilkår.UTVIDET_BARNETRYGD))
-        val vedtaksperiodeMedBegrunnelser = lagVedtaksperiodeMedBegrunnelser(type = Vedtaksperiodetype.UTBETALING)
         val vilkårsvurdering = lagVilkårsvurdering(
             søkerFnr = søker.aktør.aktivFødselsnummer(),
             søkerAktør = søker.aktør,
             behandling = behandling,
             resultat = Resultat.OPPFYLT
         )
-        val identerMedUtbetaling = listOf(barn.aktør.aktivFødselsnummer())
+        val identerMedUtbetaling = listOf(barn.aktør.aktivFødselsnummer(), søker.aktør.aktivFødselsnummer())
 
         val personidenterForBegrunnelse = hentPersonidenterGjeldendeForBegrunnelse(
             triggesAv = triggesAv,
             vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET,
-            vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
-            begrunnelseGrunnlag = BegrunnelseGrunnlag(
-                persongrunnlag = persongrunnlag,
-                vilkårsvurdering = vilkårsvurdering,
-                identerMedUtbetaling = identerMedUtbetaling,
-                endredeUtbetalingAndeler = emptyList(),
-                andelerTilkjentYtelse = emptyList()
-            )
+            periode = NullablePeriode(LocalDate.now().minusMonths(1), null),
+            brevGrunnlag = BrevGrunnlag(
+                minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
+                personerPåBehandling = persongrunnlag.personer.map { it.tilMinimertPerson() },
+                minimerteEndredeUtbetalingAndeler = emptyList(),
+            ),
+            identerMedUtbetalingPåPeriode = identerMedUtbetaling,
+            erFørsteVedtaksperiodePåFagsak = false
         )
 
         Assertions.assertEquals(
@@ -371,11 +301,6 @@ class VedtaksperiodeServiceUtilsTest {
         val persongrunnlag =
             lagTestPersonopplysningGrunnlag(behandlingId = behandling.id, personer = arrayOf(søker, barn2))
         val triggesAv = TriggesAv(vilkår = setOf(Vilkår.UTVIDET_BARNETRYGD))
-        val vedtaksperiodeMedBegrunnelser = lagVedtaksperiodeMedBegrunnelser(
-            type = Vedtaksperiodetype.UTBETALING,
-            fom = fom,
-            tom = tom,
-        )
         val vilkårsvurdering = lagVilkårsvurdering(
             søkerFnr = søker.aktør.aktivFødselsnummer(),
             søkerAktør = søker.aktør,
@@ -383,7 +308,7 @@ class VedtaksperiodeServiceUtilsTest {
             resultat = Resultat.OPPFYLT
         )
 
-        val identerMedUtbetaling = listOf(barn1.aktør.aktivFødselsnummer())
+        val identerMedUtbetaling = listOf(barn1.aktør.aktivFødselsnummer(), søker.aktør.aktivFødselsnummer())
         val endredeUtbetalingAndeler = listOf(
             lagEndretUtbetalingAndel(
                 person = barn2,
@@ -394,15 +319,16 @@ class VedtaksperiodeServiceUtilsTest {
 
         val personidenterForBegrunnelse = hentPersonidenterGjeldendeForBegrunnelse(
             triggesAv = triggesAv,
-            vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
+            periode = NullablePeriode(fom, tom),
             vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET,
-            begrunnelseGrunnlag = BegrunnelseGrunnlag(
-                vilkårsvurdering = vilkårsvurdering,
-                persongrunnlag = persongrunnlag,
-                identerMedUtbetaling = identerMedUtbetaling,
-                endredeUtbetalingAndeler = endredeUtbetalingAndeler,
-                andelerTilkjentYtelse = emptyList(),
+            brevGrunnlag = BrevGrunnlag(
+                minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
+                personerPåBehandling = persongrunnlag.personer.map { it.tilMinimertPerson() },
+                minimerteEndredeUtbetalingAndeler = endredeUtbetalingAndeler
+                    .map { it.tilMinimertEndretUtbetalingAndel() },
             ),
+            identerMedUtbetalingPåPeriode = identerMedUtbetaling,
+            erFørsteVedtaksperiodePåFagsak = false
         )
 
         Assertions.assertEquals(
@@ -622,39 +548,5 @@ class VedtaksperiodeServiceUtilsTest {
                 fomForPeriode = fom
             )
         )
-    }
-
-    @Test
-    fun `Skal gi riktig personer for autovedtakbegrunnelse for barn 6 og 18 år`() {
-        listOf<Pair<Long, VedtakBegrunnelseSpesifikasjon>>(
-            Pair(6, VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR_AUTOVEDTAK),
-            Pair(18, VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_18_ÅR_AUTOVEDTAK)
-        ).forEach { (år, begrunnelse) ->
-            val barn1 = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.now().minusYears(år))
-            val barn2 = lagPerson(
-                type = PersonType.BARN,
-                fødselsdato = LocalDate.now().minusYears(år + 1).plusMonths(11),
-            )
-            val barn3 = lagPerson(
-                type = PersonType.BARN,
-                fødselsdato = LocalDate.now().minusYears(år - 1).minusMonths(10),
-            )
-
-            val barna = listOf(barn1, barn2, barn3)
-            val utbetalingsperiodeDetaljer = barna.map { lagUtbetalingsperiodeDetalj(person = it.tilRestPerson()) }
-            val nåværendeUtbetalingsperiode = lagUtbetalingsperiode(
-                periodeFom = LocalDate.now(),
-                utbetalingsperiodeDetaljer = utbetalingsperiodeDetaljer
-            )
-
-            Assertions.assertEquals(
-                barn1.personIdent.ident,
-                hentPersonerForAutovedtakBegrunnelse(
-                    barna = barna,
-                    vedtakBegrunnelseSpesifikasjon = begrunnelse,
-                    nåværendeUtbetalingsperiode = nåværendeUtbetalingsperiode
-                ).single()
-            )
-        }
     }
 }

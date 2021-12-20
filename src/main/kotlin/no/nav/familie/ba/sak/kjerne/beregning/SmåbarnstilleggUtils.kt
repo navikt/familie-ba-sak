@@ -145,7 +145,6 @@ fun finnAktuellVedtaksperiodeOgLeggTilSmåbarnstilleggbegrunnelse(
         vedtaksperiodeSomSkalOppdateres.begrunnelser.toList() + listOf(
             Vedtaksbegrunnelse(
                 vedtaksperiodeMedBegrunnelser = vedtaksperiodeSomSkalOppdateres,
-                personIdenter = emptyList(),
                 vedtakBegrunnelseSpesifikasjon = vedtaksperiodeSomSkalOppdateresOgBegrunnelse.second
             )
         )
