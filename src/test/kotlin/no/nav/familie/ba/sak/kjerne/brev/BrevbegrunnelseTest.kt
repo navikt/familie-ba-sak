@@ -53,7 +53,7 @@ class BrevbegrunnelseTest {
                 minimertePersonResultater = behandlingsresultatPersonTestConfig.personerPåBehandling.map { it.tilMinimertePersonResultater() }
             )
 
-            val brevperiode: BrevPeriode? =
+            val brevperiode = try {
                 brevPeriodeGrunnlag.tilBrevPeriode(
                     brevGrunnlag = brevGrunnlag,
                     utvidetScenarioForEndringsperiode = behandlingsresultatPersonTestConfig.utvidetScenarioForEndringsperiode,
@@ -61,6 +61,14 @@ class BrevbegrunnelseTest {
                     erFørsteVedtaksperiodePåFagsak = behandlingsresultatPersonTestConfig.erFørsteVedtaksperiodePåFagsak,
                     brevMålform = behandlingsresultatPersonTestConfig.brevMålform,
                 )
+            } catch (e: Exception) {
+                testReporter.publishEntry(
+                    "Feil i test: $it" +
+                        "\nFil: ${e.stackTrace.first()}" +
+                        "\n-----------------------------------"
+                )
+                return@fold acc + 1
+            }
 
             val feil = erLike(
                 forventetOutput = behandlingsresultatPersonTestConfig.forventetOutput,
