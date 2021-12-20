@@ -9,7 +9,6 @@ import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
-import no.nav.familie.ba.sak.kjerne.beregning.domene.hentUtvidetScenarioForEndringsperiode
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Autovedtak6og18årOgSmåbarnstillegg
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.AutovedtakNyfødtBarnFraFør
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.AutovedtakNyfødtFørsteBarn
@@ -39,10 +38,8 @@ import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.erFørsteVedtaksperiodePåFagsak
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.sorter
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 
@@ -197,30 +194,13 @@ class BrevService(
             .sorter()
             .map { it.tilBrevPeriodeGrunnlag(sanityBegrunnelser) }
 
-        val brevperioder = brevPerioderGrunnlag
-            .mapNotNull {
-                val utvidetScenarioForEndringsperiode = andelerTilkjentYtelse
-                    .hentUtvidetScenarioForEndringsperiode(it.hentMånedPeriode())
-
-                try {
-                    it.tilBrevPeriode(
-                        brevGrunnlag = brevGrunnlag,
-                        uregistrerteBarn = uregistrerteBarn,
-                        utvidetScenarioForEndringsperiode = utvidetScenarioForEndringsperiode,
-                        erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak(andelerTilkjentYtelse, it.fom),
-                        brevMålform = grunnlagOgSignaturData.grunnlag.søker.målform,
-                    )
-                } catch (exception: Exception) {
-                    val feilmelding = "Feil ved generering av brevperioder med data (BrevPeriodeGrunnlag=${it}, " +
-                        "BrevGrunnlag=${brevGrunnlag}, " +
-                        "UtvidetScenarioForEndringsperiode = ${utvidetScenarioForEndringsperiode}, " +
-                        "ErFørsteVedtaksperiodePåFagsak = " +
-                        "${erFørsteVedtaksperiodePåFagsak(andelerTilkjentYtelse, it.fom)}" +
-                        "brevMålform=${grunnlagOgSignaturData.grunnlag.søker.målform})"
-                    secureLogger.error(feilmelding, exception)
-                    throw Feil(message = "Feil ved generering av brevperioder", throwable = exception)
-                }
-            }
+        val brevperioder = hentBrevPerioder(
+            brevPerioderGrunnlag = brevPerioderGrunnlag,
+            andelerTilkjentYtelse = andelerTilkjentYtelse,
+            brevGrunnlag = brevGrunnlag,
+            uregistrerteBarn = uregistrerteBarn,
+            målform = grunnlagOgSignaturData.grunnlag.søker.målform
+        )
 
         val hjemler = hentHjemmeltekst(brevPerioderGrunnlag, sanityBegrunnelser)
 
@@ -270,8 +250,4 @@ class BrevService(
         val beslutter: String,
         val enhet: String
     )
-
-    companion object {
-        private val secureLogger = LoggerFactory.getLogger("secureLogger")
-    }
 }
