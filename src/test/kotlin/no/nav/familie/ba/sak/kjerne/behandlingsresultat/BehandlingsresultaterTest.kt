@@ -15,7 +15,7 @@ import java.time.YearMonth
 
 data class BehandlingsresultatPersonTestConfig(
     val personer: List<BehandlingsresultatPerson>,
-    val uregistrerteBarn: List<UregistrertBarnEnkel> = emptyList(),
+    val uregistrerteBarn: List<MinimertUregistrertBarn> = emptyList(),
     val beskrivelse: String,
     val forventetResultat: BehandlingResultat,
     val inneværendeMåned: String,

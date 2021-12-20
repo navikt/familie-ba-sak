@@ -5,22 +5,27 @@ import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagEndretUtbetalingAndel
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
-import no.nav.familie.ba.sak.common.lagVedtaksbegrunnelse
 import no.nav.familie.ba.sak.common.lagVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.common.tilfeldigSøker
+import no.nav.familie.ba.sak.dataGenerator.vedtak.lagVedtaksbegrunnelse
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPerson
+import no.nav.familie.ba.sak.kjerne.brev.hentSanityBegrunnelser
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
+import java.math.BigDecimal
 import java.time.YearMonth
 
 class UtvidetVedtaksperiodeMedBegrunnelserTest {
 
     val barn1 = tilfeldigPerson(personType = PersonType.BARN)
     val barn2 = tilfeldigPerson(personType = PersonType.BARN)
+    val barn3 = tilfeldigPerson(personType = PersonType.BARN)
     val søker = tilfeldigSøker()
+    val sanityBegrunnelser = hentSanityBegrunnelser()
 
     @Test
     fun `Skal kun legge på utbetalingsdetaljer som gjelder riktig andeler tilkjent ytelse for fortsatt innvilget`() {
@@ -74,8 +79,9 @@ class UtvidetVedtaksperiodeMedBegrunnelserTest {
 
         val utvidetVedtaksperiodeMedBegrunnelser =
             vedtaksperiodeMedBegrunnelser.tilUtvidetVedtaksperiodeMedBegrunnelser(
-                personopplysningGrunnlag,
-                andelerTilkjentYtelse
+                personopplysningGrunnlag = personopplysningGrunnlag,
+                andelerTilkjentYtelse = andelerTilkjentYtelse,
+                sanityBegrunnelser = sanityBegrunnelser
             )
 
         Assertions.assertEquals(1, utvidetVedtaksperiodeMedBegrunnelser.utbetalingsperiodeDetaljer.size)
@@ -139,7 +145,8 @@ class UtvidetVedtaksperiodeMedBegrunnelserTest {
         val utvidetVedtaksperiodeMedBegrunnelser =
             vedtaksperiodeMedBegrunnelser.tilUtvidetVedtaksperiodeMedBegrunnelser(
                 personopplysningGrunnlag,
-                andelerTilkjentYtelse
+                andelerTilkjentYtelse,
+                sanityBegrunnelser = sanityBegrunnelser
             )
 
         Assertions.assertEquals(1, utvidetVedtaksperiodeMedBegrunnelser.utbetalingsperiodeDetaljer.size)
@@ -163,11 +170,21 @@ class UtvidetVedtaksperiodeMedBegrunnelserTest {
         val fom = YearMonth.of(2018, 6)
         val tom = YearMonth.of(2018, 8)
 
-        val endretUtbetalingAndel = lagEndretUtbetalingAndel(
+        val endretUtbetalingAndel1 = lagEndretUtbetalingAndel(
             behandlingId = behandling.id,
             fom = fom,
             tom = tom,
-            person = barn2
+            person = barn2,
+            prosent = BigDecimal.valueOf(100)
+        )
+
+        val endretUtbetalingAndel2 = lagEndretUtbetalingAndel(
+            behandlingId = behandling.id,
+            fom = fom,
+            tom = tom,
+            person = barn3,
+            prosent = BigDecimal.ZERO
+
         )
 
         val andelerTilkjentYtelse = listOf(
@@ -180,10 +197,17 @@ class UtvidetVedtaksperiodeMedBegrunnelserTest {
             ),
             lagAndelTilkjentYtelse(
                 behandling = behandling,
-                endretUtbetalingAndeler = listOf(endretUtbetalingAndel),
+                endretUtbetalingAndeler = listOf(endretUtbetalingAndel1),
                 fom = fom,
                 tom = tom,
                 person = barn2
+            ),
+            lagAndelTilkjentYtelse(
+                behandling = behandling,
+                endretUtbetalingAndeler = listOf(endretUtbetalingAndel2),
+                fom = fom,
+                tom = tom,
+                person = barn3
             ),
             lagAndelTilkjentYtelse(
                 behandling = behandling,
@@ -198,13 +222,14 @@ class UtvidetVedtaksperiodeMedBegrunnelserTest {
             fom = fom.førsteDagIInneværendeMåned(),
             tom = tom.sisteDagIInneværendeMåned(),
             type = Vedtaksperiodetype.ENDRET_UTBETALING,
-            begrunnelser = mutableSetOf(lagVedtaksbegrunnelse(personIdenter = listOf(barn2.aktør.aktivFødselsnummer())))
+            begrunnelser = mutableSetOf(lagVedtaksbegrunnelse(vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.ENDRET_UTBETALING_DELT_BOSTED_FULL_UTBETALING))
         )
 
         val utvidetVedtaksperiodeMedBegrunnelser =
             vedtaksperiodeMedBegrunnelser.tilUtvidetVedtaksperiodeMedBegrunnelser(
                 personopplysningGrunnlag,
-                andelerTilkjentYtelse
+                andelerTilkjentYtelse,
+                sanityBegrunnelser = sanityBegrunnelser
             )
 
         Assertions.assertEquals(1, utvidetVedtaksperiodeMedBegrunnelser.utbetalingsperiodeDetaljer.size)

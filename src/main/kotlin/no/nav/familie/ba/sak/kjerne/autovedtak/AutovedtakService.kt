@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak
 
+import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
@@ -8,6 +10,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
+import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
@@ -18,11 +21,12 @@ import org.springframework.stereotype.Service
 
 @Service
 class AutovedtakService(
-    private val opprettTaskService: OpprettTaskService,
+    private val stegService: StegService,
+    private val behandlingService: BehandlingService,
+    private val vedtakService: VedtakService,
     private val loggService: LoggService,
     private val totrinnskontrollService: TotrinnskontrollService,
-    private val vedtakService: VedtakService,
-    private val stegService: StegService
+    private val opprettTaskService: OpprettTaskService,
 ) {
 
     fun opprettAutomatiskBehandlingOgKjørTilBehandlingsresultat(
@@ -50,6 +54,15 @@ class AutovedtakService(
         val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
             ?: error("Fant ikke aktivt vedtak på behandling ${behandling.id}")
         return vedtakService.oppdaterVedtakMedStønadsbrev(vedtak = vedtak)
+    }
+
+    fun omgjørBehandlingTilManuellOgKjørSteg(behandling: Behandling, steg: StegType): Behandling {
+        val omgjortBehandling = behandlingService.omgjørTilManuellBehandling(behandling)
+
+        return when (steg) {
+            StegType.VILKÅRSVURDERING -> stegService.håndterVilkårsvurdering(omgjortBehandling)
+            else -> throw Feil("Steg $steg er ikke støttet ved omgjøring av automatisk behandling til manuell.")
+        }
     }
 
     fun opprettOppgaveForManuellBehandling(

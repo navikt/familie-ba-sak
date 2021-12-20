@@ -54,8 +54,7 @@ class SmåbarnstilleggService(
             tilkjentYtelseRepository.findByBehandling(behandlingId = sistIverksatteBehandling.id)
 
         val persongrunnlagFraSistIverksatteBehandling =
-            persongrunnlagService.hentAktiv(behandlingId = sistIverksatteBehandling.id)
-                ?: error("Finner ikke persongrunnlag")
+            persongrunnlagService.hentAktivThrows(behandlingId = sistIverksatteBehandling.id)
 
         val nyePerioderMedFullOvergangsstønad =
             hentPerioderMedFullOvergangsstønad(aktør = fagsak.aktør).map { it.tilInternPeriodeOvergangsstønad() }
