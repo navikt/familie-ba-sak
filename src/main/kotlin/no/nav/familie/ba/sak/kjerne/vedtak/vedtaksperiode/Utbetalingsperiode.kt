@@ -43,6 +43,9 @@ data class UtbetalingsperiodeDetalj(
     val prosent: BigDecimal,
 )
 
+fun List<UtbetalingsperiodeDetalj>.totaltUtbetalt(): Int =
+    this.sumOf { it.utbetaltPerMnd }
+
 fun hentUtbetalingsperiodeForVedtaksperiode(
     utbetalingsperioder: List<Utbetalingsperiode>,
     fom: LocalDate?

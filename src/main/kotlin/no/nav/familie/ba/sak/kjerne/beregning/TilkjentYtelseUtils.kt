@@ -286,7 +286,7 @@ object TilkjentYtelseUtils {
                 fraOgMed = periodeUnder6År.fom
             ),
             stønadTilOgMed = settRiktigStønadTom(tilOgMed = periodeUnder6År.tom),
-            maxSatsGyldigFraOgMed = SatsService.tilleggEndringSeptember2021,
+            maxSatsGyldigFraOgMed = SatsService.tilleggEndringJanuar2022,
         ) else emptyList()
 
         val satsperioderEtterFylte6År = if (periodeOver6år != null) SatsService.hentGyldigSatsFor(
@@ -300,7 +300,7 @@ object TilkjentYtelseUtils {
                 skalAvsluttesMånedenFør = oppfyltTomKommerFra18ÅrsVilkår,
                 tilOgMed = periodeOver6år.tom
             ),
-            maxSatsGyldigFraOgMed = SatsService.tilleggEndringSeptember2021,
+            maxSatsGyldigFraOgMed = SatsService.tilleggEndringJanuar2022,
         ) else emptyList()
 
         return listOf(satsperioderFørFylte6År, satsperioderEtterFylte6År).flatten()

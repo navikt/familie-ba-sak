@@ -123,7 +123,10 @@ fun BrevBegrunnelseGrunnlagMedPersoner.tilBrevBegrunnelse(
             )
         )
 
-    validerBrevbegrunnelse(gjelderSøker, barnasFødselsdatoer)
+    this.validerBrevbegrunnelse(
+        gjelderSøker = gjelderSøker,
+        barnasFødselsdatoer = barnasFødselsdatoer,
+    )
 
     return BegrunnelseData(
         gjelderSoker = gjelderSøker,
@@ -136,11 +139,11 @@ fun BrevBegrunnelseGrunnlagMedPersoner.tilBrevBegrunnelse(
     )
 }
 
-private fun validerBrevbegrunnelse(
+private fun BrevBegrunnelseGrunnlagMedPersoner.validerBrevbegrunnelse(
     gjelderSøker: Boolean,
-    barnasFødselsdatoer: List<LocalDate>
+    barnasFødselsdatoer: List<LocalDate>,
 ) {
-    if (!gjelderSøker && barnasFødselsdatoer.isEmpty()) {
+    if (!gjelderSøker && barnasFødselsdatoer.isEmpty() && !this.triggesAv.satsendring) {
         throw IllegalStateException("Ingen personer på brevbegrunnelse")
     }
 }

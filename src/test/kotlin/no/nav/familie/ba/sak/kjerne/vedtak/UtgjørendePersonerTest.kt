@@ -268,7 +268,6 @@ class UtgjørendePersonerTest {
         val barn1Fnr = randomFnr()
         val barn2Fnr = randomFnr()
 
-        val søkerAktørId = tilAktør(søkerFnr)
         val barn1AktørId = tilAktør(barn1Fnr)
         val barn2AktørId = tilAktør(barn2Fnr)
 
