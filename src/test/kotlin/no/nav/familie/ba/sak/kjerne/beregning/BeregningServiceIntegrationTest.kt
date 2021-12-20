@@ -207,15 +207,17 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
 
         Assertions.assertNotNull(tilkjentYtelse)
         Assertions.assertTrue(tilkjentYtelse.andelerTilkjentYtelse.isNotEmpty())
-        Assertions.assertEquals(2, andelBarn1.size)
-        Assertions.assertEquals(2, andelBarn2.size)
+        Assertions.assertEquals(3, andelBarn1.size)
+        Assertions.assertEquals(3, andelBarn2.size)
         tilkjentYtelse.andelerTilkjentYtelse.forEach {
             Assertions.assertEquals(tilkjentYtelse, it.tilkjentYtelse)
         }
         Assertions.assertEquals(1, andelBarn1.filter { it.kalkulertUtbetalingsbeløp == 1054 }.size)
         Assertions.assertEquals(1, andelBarn1.filter { it.kalkulertUtbetalingsbeløp == 1654 }.size)
+        Assertions.assertEquals(1, andelBarn1.filter { it.kalkulertUtbetalingsbeløp == 1676 }.size)
         Assertions.assertEquals(1, andelBarn2.filter { it.kalkulertUtbetalingsbeløp == 1054 }.size)
         Assertions.assertEquals(1, andelBarn2.filter { it.kalkulertUtbetalingsbeløp == 1654 }.size)
+        Assertions.assertEquals(1, andelBarn2.filter { it.kalkulertUtbetalingsbeløp == 1676 }.size)
     }
 
     private fun opprettTilkjentYtelse(behandling: Behandling) {

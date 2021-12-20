@@ -383,7 +383,7 @@ class UtbetalingssikkerhetTest {
     @Test
     fun `Korrekt maksbeløp gis for persontype`() {
         assertEquals(1054 + 660, TilkjentYtelseValidering.maksBeløp(personType = PersonType.SØKER))
-        assertEquals(1654, TilkjentYtelseValidering.maksBeløp(personType = PersonType.BARN))
+        assertEquals(1676, TilkjentYtelseValidering.maksBeløp(personType = PersonType.BARN))
         assertThrows<Feil> { TilkjentYtelseValidering.maksBeløp(personType = PersonType.ANNENPART) }
     }
 
