@@ -42,7 +42,7 @@ class SendMeldingTilBisysTask(
             val endretPerioder = finnEndretPerioder(behandling)
             val barnetrygdBisysMelding = BarnetrygdBisysMelding(
                 søker = behandling.fagsak.aktør.aktivFødselsnummer(),
-                barn = endretPerioder.map {
+                barn = endretPerioder.filter { it.value.isNotEmpty() }.map {
                     val førstPeriod = it.value[0]
                     BarnEndretOpplysning(
                         ident = it.key,
@@ -52,6 +52,11 @@ class SendMeldingTilBisysTask(
                     )
                 }
             )
+
+            if (barnetrygdBisysMelding.barn.isEmpty()) {
+                logger.info("Behandling endret men ikke reduksjon eller opphør. Send ikke melding til bisys")
+                return
+            }
 
             kafkaProducer.sendBarnetrygdBisysMelding(
                 behandling.id.toString(),
@@ -95,29 +100,31 @@ class SendMeldingTilBisysTask(
                 if (!endretPerioder.contains(it.personIdent)) {
                     endretPerioder[it.personIdent] = mutableListOf()
                 }
-                nyAndelerTilkjentYtelse.forEach {
-                    val intersectPerioder = forblePeriode!!.intersect(it.periode)
-                    if (intersectPerioder.first != null) {
-                        endretPerioder[it.personIdent]!!.add(
-                            EndretPeriode(
-                                fom = forblePeriode!!.fom,
-                                tom = it.periode.fom.minusMonths(1),
-                                type = EndretType.RO
+                run checkEndretPerioder@{
+                    nyAndelerTilkjentYtelse.forEach {
+                        val intersectPerioder = forblePeriode!!.intersect(it.periode)
+                        if (intersectPerioder.first != null) {
+                            endretPerioder[it.personIdent]!!.add(
+                                EndretPeriode(
+                                    fom = forblePeriode!!.fom,
+                                    tom = it.periode.fom.minusMonths(1),
+                                    type = EndretType.RO
+                                )
                             )
-                        )
-                    }
-                    if (intersectPerioder.second != null && it.prosent < prosent) {
-                        endretPerioder[it.personIdent]!!.add(
-                            EndretPeriode(
-                                fom = latest(it.periode.fom, forblePeriode!!.fom),
-                                tom = earlist(it.periode.tom, forblePeriode!!.tom),
-                                type = EndretType.RR
+                        }
+                        if (intersectPerioder.second != null && it.prosent < prosent) {
+                            endretPerioder[it.personIdent]!!.add(
+                                EndretPeriode(
+                                    fom = latest(it.periode.fom, forblePeriode!!.fom),
+                                    tom = earlist(it.periode.tom, forblePeriode!!.tom),
+                                    type = EndretType.RR
+                                )
                             )
-                        )
-                    }
-                    forblePeriode = intersectPerioder.third
-                    if (forblePeriode == null) {
-                        return@forEach
+                        }
+                        forblePeriode = intersectPerioder.third
+                        if (forblePeriode == null) {
+                            return@checkEndretPerioder
+                        }
                     }
                 }
                 if (forblePeriode != null && !forblePeriode!!.erTom()) {

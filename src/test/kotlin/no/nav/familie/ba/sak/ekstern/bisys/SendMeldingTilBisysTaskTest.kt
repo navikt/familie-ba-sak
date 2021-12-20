@@ -274,4 +274,41 @@ class SendMeldingTilBisysTaskTest {
         assertThat(barn3PeriodeReduser.fom).isEqualTo(YearMonth.of(2019, 5))
         assertThat(barn3PeriodeReduser.tom).isEqualTo(YearMonth.of(2019, 9))
     }
+
+    @Test
+    fun `Skal ikke sende melding til bisys hvis endring ikke er reduksjon eller opphøring`() {
+        val (behandlingRepository, kafkaProducer, tilkjentYtelseRepository, kafkaResult, behandling) = setupMocks()
+        val sendMeldingTilBisysTask =
+            SendMeldingTilBisysTask(kafkaProducer, tilkjentYtelseRepository, behandlingRepository)
+
+        val barn1 = lagPerson(type = PersonType.BARN)
+
+        every { tilkjentYtelseRepository.findByBehandling(behandling[0].id) } returns lagInitiellTilkjentYtelse().also {
+            it.andelerTilkjentYtelse.add(
+                lagAndelTilkjentYtelse(
+                    fom = YearMonth.of(2020, 1), tom = YearMonth.of(2021, 1), prosent = BigDecimal(100),
+                    person = barn1
+                )
+            )
+        }
+        every { tilkjentYtelseRepository.findByBehandling(behandling[1].id) } returns lagInitiellTilkjentYtelse().also {
+            // Barn1 legger til period fra 04/2022
+            it.andelerTilkjentYtelse.add(
+                lagAndelTilkjentYtelse(
+                    fom = YearMonth.of(2020, 1), tom = YearMonth.of(2022, 3), prosent = BigDecimal(100),
+                    person = barn1
+                )
+            )
+            it.andelerTilkjentYtelse.add(
+                lagAndelTilkjentYtelse(
+                    fom = YearMonth.of(2022, 4), tom = YearMonth.of(2037, 12), prosent = BigDecimal(100),
+                    person = barn1
+                )
+            )
+        }
+
+        sendMeldingTilBisysTask.doTask(SendMeldingTilBisysTask.opprettTask(behandling[1].id))
+
+        verify(exactly = 0) { kafkaProducer.kafkaAivenTemplate.send(any(), any(), any()) }
+    }
 }
