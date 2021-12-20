@@ -8,9 +8,11 @@ import no.nav.familie.ba.sak.common.lagVilkårResultat
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertPersonResultat
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilMinimertPerson
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
@@ -127,38 +129,40 @@ class UtgjørendePersonerTest {
 
         vilkårsvurdering.personResultater = setOf(søkerPersonResultat, barn1PersonResultat, barn2PersonResultat)
 
-        val personerMedUtgjørendeVilkårLovligOpphold = VedtakUtils.hentPersonerForAlleUtgjørendeVilkår(
-            vilkårsvurdering = vilkårsvurdering,
+        val personerMedUtgjørendeVilkårLovligOpphold = hentPersonerForAlleUtgjørendeVilkår(
+            minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
             vedtaksperiode = Periode(
                 fom = LocalDate.of(2010, 1, 1),
                 tom = LocalDate.of(2010, 6, 1)
             ),
             oppdatertBegrunnelseType = VedtakBegrunnelseType.INNVILGET,
             triggesAv = TriggesAv(setOf(Vilkår.LOVLIG_OPPHOLD)),
-            aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList(),
-            andelerTilkjentYtelse = emptyList()
+            aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList()
+                .map { it.tilMinimertPerson() },
+            erFørsteVedtaksperiodePåFagsak = false
         )
 
         assertEquals(2, personerMedUtgjørendeVilkårLovligOpphold.size)
         assertEquals(
             listOf(søkerFnr, barn1Fnr).sorted(),
-            personerMedUtgjørendeVilkårLovligOpphold.map { it.aktør.aktivFødselsnummer() }.sorted()
+            personerMedUtgjørendeVilkårLovligOpphold.map { it.personIdent }.sorted()
         )
 
-        val personerMedUtgjørendeVilkårBosattIRiket = VedtakUtils.hentPersonerForAlleUtgjørendeVilkår(
-            vilkårsvurdering = vilkårsvurdering,
+        val personerMedUtgjørendeVilkårBosattIRiket = hentPersonerForAlleUtgjørendeVilkår(
+            minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
             vedtaksperiode = Periode(
                 fom = LocalDate.of(2010, 1, 1),
                 tom = LocalDate.of(2010, 6, 1)
             ),
             oppdatertBegrunnelseType = VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET.vedtakBegrunnelseType,
             triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOSATT_I_RIKET)),
-            aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList(),
-            andelerTilkjentYtelse = emptyList()
+            aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList()
+                .map { it.tilMinimertPerson() },
+            erFørsteVedtaksperiodePåFagsak = false,
         )
 
         assertEquals(1, personerMedUtgjørendeVilkårBosattIRiket.size)
-        assertEquals(barn1Fnr, personerMedUtgjørendeVilkårBosattIRiket.first().aktør.aktivFødselsnummer())
+        assertEquals(barn1Fnr, personerMedUtgjørendeVilkårBosattIRiket.first().personIdent)
     }
 
     @Test
@@ -219,40 +223,42 @@ class UtgjørendePersonerTest {
 
         vilkårsvurdering.personResultater = setOf(barnPersonResultat, barn2PersonResultat)
 
-        val personerMedUtgjørendeVilkårBosattIRiket = VedtakUtils.hentPersonerForAlleUtgjørendeVilkår(
-            vilkårsvurdering = vilkårsvurdering,
+        val personerMedUtgjørendeVilkårBosattIRiket = hentPersonerForAlleUtgjørendeVilkår(
+            minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
             vedtaksperiode = Periode(
                 fom = LocalDate.of(2021, 2, 1),
                 tom = TIDENES_ENDE
             ),
             oppdatertBegrunnelseType = VedtakBegrunnelseSpesifikasjon.REDUKSJON_BOSATT_I_RIKTET.vedtakBegrunnelseType,
             triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOSATT_I_RIKET)),
-            aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList(),
-            andelerTilkjentYtelse = emptyList()
+            aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList()
+                .map { it.tilMinimertPerson() },
+            erFørsteVedtaksperiodePåFagsak = false,
         )
 
         assertEquals(1, personerMedUtgjørendeVilkårBosattIRiket.size)
         assertEquals(
             barn2Fnr,
-            personerMedUtgjørendeVilkårBosattIRiket.first().aktør.aktivFødselsnummer()
+            personerMedUtgjørendeVilkårBosattIRiket.first().personIdent
         )
 
-        val personerMedUtgjørendeVilkårBarnUtvandret = VedtakUtils.hentPersonerForAlleUtgjørendeVilkår(
-            vilkårsvurdering = vilkårsvurdering,
+        val personerMedUtgjørendeVilkårBarnUtvandret = hentPersonerForAlleUtgjørendeVilkår(
+            minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
             vedtaksperiode = Periode(
                 fom = LocalDate.of(2021, 4, 1),
                 tom = TIDENES_ENDE
             ),
             oppdatertBegrunnelseType = VedtakBegrunnelseSpesifikasjon.OPPHØR_UTVANDRET.vedtakBegrunnelseType,
             triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOSATT_I_RIKET)),
-            aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList(),
-            andelerTilkjentYtelse = emptyList(),
+            aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList()
+                .map { it.tilMinimertPerson() },
+            erFørsteVedtaksperiodePåFagsak = false,
         )
 
         assertEquals(1, personerMedUtgjørendeVilkårBarnUtvandret.size)
         assertEquals(
             barnFnr,
-            personerMedUtgjørendeVilkårBarnUtvandret.first().aktør.aktivFødselsnummer()
+            personerMedUtgjørendeVilkårBarnUtvandret.first().personIdent
         )
     }
 
@@ -307,40 +313,42 @@ class UtgjørendePersonerTest {
         vilkårsvurdering.personResultater =
             setOf(barn1PersonResultat, barn2PersonResultat)
 
-        val personerMedUtgjørendeVilkårBosattIRiketMedlemskap = VedtakUtils.hentPersonerForAlleUtgjørendeVilkår(
-            vilkårsvurdering = vilkårsvurdering,
+        val personerMedUtgjørendeVilkårBosattIRiketMedlemskap = hentPersonerForAlleUtgjørendeVilkår(
+            minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
             vedtaksperiode = Periode(
                 fom = LocalDate.of(2021, 12, 1),
                 tom = TIDENES_ENDE
             ),
             oppdatertBegrunnelseType = VedtakBegrunnelseType.INNVILGET,
             triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOSATT_I_RIKET), medlemskap = true),
-            aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList(),
-            andelerTilkjentYtelse = emptyList()
+            aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList()
+                .map { it.tilMinimertPerson() },
+            erFørsteVedtaksperiodePåFagsak = false,
         )
 
-        val personerMedUtgjørendeVilkårBosattIRiket = VedtakUtils.hentPersonerForAlleUtgjørendeVilkår(
-            vilkårsvurdering = vilkårsvurdering,
+        val personerMedUtgjørendeVilkårBosattIRiket = hentPersonerForAlleUtgjørendeVilkår(
+            minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
             vedtaksperiode = Periode(
                 fom = LocalDate.of(2021, 12, 1),
                 tom = TIDENES_ENDE
             ),
             oppdatertBegrunnelseType = VedtakBegrunnelseType.INNVILGET,
             triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOSATT_I_RIKET)),
-            aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList(),
-            andelerTilkjentYtelse = emptyList()
+            aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList()
+                .map { it.tilMinimertPerson() },
+            erFørsteVedtaksperiodePåFagsak = false,
         )
 
         assertEquals(1, personerMedUtgjørendeVilkårBosattIRiketMedlemskap.size)
         assertEquals(
             barn1Fnr,
-            personerMedUtgjørendeVilkårBosattIRiketMedlemskap.first().aktør.aktivFødselsnummer()
+            personerMedUtgjørendeVilkårBosattIRiketMedlemskap.first().personIdent
         )
 
         assertEquals(1, personerMedUtgjørendeVilkårBosattIRiket.size)
         assertEquals(
             barn2Fnr,
-            personerMedUtgjørendeVilkårBosattIRiket.first().aktør.aktivFødselsnummer()
+            personerMedUtgjørendeVilkårBosattIRiket.first().personIdent
         )
     }
 }

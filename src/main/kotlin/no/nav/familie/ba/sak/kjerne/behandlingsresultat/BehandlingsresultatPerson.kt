@@ -57,13 +57,13 @@ data class BehandlingsresultatPerson(
     }
 }
 
-data class UregistrertBarnEnkel(
+data class MinimertUregistrertBarn(
     val personIdent: String,
     val navn: String,
     val fødselsdato: LocalDate? = null
 )
 
-fun BarnMedOpplysninger.tilUregisrertBarnEnkel() = UregistrertBarnEnkel(
+fun BarnMedOpplysninger.tilMinimertUregisrertBarn() = MinimertUregistrertBarn(
     personIdent = this.ident,
     navn = this.navn,
     fødselsdato = this.fødselsdato

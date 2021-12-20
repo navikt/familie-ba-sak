@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.integrasjoner.sanity
 
-import no.nav.familie.ba.sak.kjerne.dokument.BrevKlient
-import no.nav.familie.ba.sak.kjerne.dokument.domene.SanityBegrunnelse
+import no.nav.familie.ba.sak.kjerne.brev.BrevKlient
+import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import org.springframework.core.env.Environment
 import org.springframework.stereotype.Service
 

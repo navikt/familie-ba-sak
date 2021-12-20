@@ -84,7 +84,7 @@ class BehandlingsresultatService(
             behandlingsresultatPersoner = behandlingsresultatPersoner,
             personidentService = personidentService,
             uregistrerteBarn = søknadGrunnlag?.hentUregistrerteBarn()?.map {
-                UregistrertBarnEnkel(
+                MinimertUregistrertBarn(
                     personIdent = it.ident,
                     navn = it.navn
                 )

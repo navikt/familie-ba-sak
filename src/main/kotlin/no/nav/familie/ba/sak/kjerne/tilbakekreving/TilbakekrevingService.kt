@@ -89,11 +89,7 @@ class TilbakekrevingService(
                     " for tilbakekreving."
             )
 
-        val persongrunnlag = persongrunnlagService.hentAktiv(behandlingId)
-            ?: throw Feil(
-                "Fant ikke aktivt persongrunnlag ved forhåndsvisning av varselbrev" +
-                    " for tilbakekreving."
-            )
+        val persongrunnlag = persongrunnlagService.hentAktivThrows(behandlingId)
         val arbeidsfordeling = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandlingId)
 
         return tilbakekrevingKlient.hentForhåndsvisningVarselbrev(
@@ -124,10 +120,7 @@ class TilbakekrevingService(
         tilbakekrevingKlient.opprettTilbakekrevingBehandling(lagOpprettTilbakekrevingRequest(behandling))
 
     fun lagOpprettTilbakekrevingRequest(behandling: Behandling): OpprettTilbakekrevingRequest {
-        val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = behandling.id) ?: throw Feil(
-            message = "Finner ikke personopplysningsgrunnlag på vedtak ${behandling.id} " +
-                "ved iverksetting av tilbakekreving mot familie-tilbake",
-        )
+        val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandlingId = behandling.id)
 
         val enhet = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandling.id)
 

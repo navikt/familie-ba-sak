@@ -98,13 +98,7 @@ class RestTemplateConfig(
 
     @Bean
     fun restTemplate(): RestTemplate {
-        return RestTemplate(
-            listOf(
-                StringHttpMessageConverter(StandardCharsets.UTF_8),
-                ByteArrayHttpMessageConverter(),
-                MappingJackson2HttpMessageConverter(objectMapper)
-            )
-        )
+        return restTemplate
     }
 
     @Bean
@@ -145,3 +139,11 @@ class RestTemplateConfig(
         }
     }
 }
+
+val restTemplate = RestTemplate(
+    listOf(
+        StringHttpMessageConverter(StandardCharsets.UTF_8),
+        ByteArrayHttpMessageConverter(),
+        MappingJackson2HttpMessageConverter(objectMapper)
+    )
+)
