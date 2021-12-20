@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
+import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
@@ -101,13 +102,12 @@ class FødselshendelseRevurderingTest(
         vurderteVilkårIDenneBehandlingen.forEach { assertEquals(revurderingsbarnSinFødselsdato, it.periodeFom) }
 
         val utbetalingsperioder = aktivBehandling.utbetalingsperioder
-        val førsteMånedMed2Barn = revurderingsbarnSinFødselsdato.plusMonths(1).toYearMonth()
-        val gjeldendeUtbetalingsperiode = utbetalingsperioder.sortedBy { it.periodeFom }.first {
-            it.periodeFom.toYearMonth() <= førsteMånedMed2Barn && førsteMånedMed2Barn <= it.periodeTom.toYearMonth()
+        val nesteMånedUtbetalingsperiode = utbetalingsperioder.sortedBy { it.periodeFom }.first {
+            it.periodeFom.toYearMonth() <= now().nesteMåned() && it.periodeTom.toYearMonth() >= now().nesteMåned()
         }
 
         assertUtbetalingsperiode(
-            gjeldendeUtbetalingsperiode,
+            nesteMånedUtbetalingsperiode,
             2,
             SatsService.tilleggOrdinærSatsNesteMånedTilTester.beløp * 2
         )

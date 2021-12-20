@@ -126,7 +126,6 @@ class MigreringServiceTest(
         databaseCleanupService.truncate()
         every { infotrygdBarnetrygdClient.harÅpenSakIInfotrygd(any(), any()) } returns false
 
-        val slot = slot<String>()
         val slotAktør = slot<Aktør>()
 
         every { pdlRestClient.hentForelderBarnRelasjon(capture(slotAktør)) } answers {
@@ -144,7 +143,7 @@ class MigreringServiceTest(
     fun `migrering happy case`() {
         every {
             infotrygdBarnetrygdClient.hentSaker(any(), any())
-        } returns InfotrygdSøkResponse(listOf(opprettSakMedBeløp(2708.0)), emptyList())
+        } returns InfotrygdSøkResponse(listOf(opprettSakMedBeløp(SAK_BELØP)), emptyList())
 
         val migreringResponseDto = migreringService.migrer(ClientMocks.søkerFnr[0])
 
@@ -186,7 +185,7 @@ class MigreringServiceTest(
     fun `skal sette periodeFom til barnas fødselsdatoer på vilkårene som skal gjelde fra fødselsdato`() {
         every {
             infotrygdBarnetrygdClient.hentSaker(any(), any())
-        } returns InfotrygdSøkResponse(listOf(opprettSakMedBeløp(2708.0)), emptyList())
+        } returns InfotrygdSøkResponse(listOf(opprettSakMedBeløp(SAK_BELØP)), emptyList())
 
         val responseDto = migreringService.migrer(ClientMocks.søkerFnr[0])
 
@@ -205,7 +204,7 @@ class MigreringServiceTest(
         val barnOver18 = fødselsnummerGenerator.foedselsnummer(LocalDate.now().minusYears(19)).asString
         every {
             infotrygdBarnetrygdClient.hentSaker(any(), any())
-        } returns InfotrygdSøkResponse(listOf(opprettSakMedBeløp(2708.0)), emptyList())
+        } returns InfotrygdSøkResponse(listOf(opprettSakMedBeløp(SAK_BELØP)), emptyList())
         every { pdlRestClient.hentForelderBarnRelasjon(any()) } returns
             listOf(
                 ForelderBarnRelasjon(
@@ -229,7 +228,7 @@ class MigreringServiceTest(
     fun `migrering skal feile dersom migrering av person allerede er påbegynt`() {
         every {
             infotrygdBarnetrygdClient.hentSaker(any(), any())
-        } returns InfotrygdSøkResponse(listOf(opprettSakMedBeløp(2708.0)), emptyList())
+        } returns InfotrygdSøkResponse(listOf(opprettSakMedBeløp(SAK_BELØP)), emptyList())
 
         migreringService.migrer(ClientMocks.søkerFnr[0])
 
@@ -257,7 +256,7 @@ class MigreringServiceTest(
     fun `migrering skal avbrytes med feilmelding dersom opprett behandling feiler`() {
         every {
             infotrygdBarnetrygdClient.hentSaker(any(), any())
-        } returns InfotrygdSøkResponse(listOf(opprettSakMedBeløp(2708.0)), emptyList())
+        } returns InfotrygdSøkResponse(listOf(opprettSakMedBeløp(SAK_BELØP)), emptyList())
         every {
             infotrygdBarnetrygdClient.harÅpenSakIInfotrygd(any(), any())
         } returns true
@@ -283,7 +282,7 @@ class MigreringServiceTest(
     @Test
     fun `migrering skal feile hvis saken fra Infotrygd inneholder mer enn ett beløp`() {
         every { infotrygdBarnetrygdClient.hentSaker(any(), any()) } returns
-            InfotrygdSøkResponse(listOf(opprettSakMedBeløp(2708.0, 660.0)), emptyList())
+            InfotrygdSøkResponse(listOf(opprettSakMedBeløp(SAK_BELØP, 660.0)), emptyList())
         assertThatThrownBy { migreringService.migrer(ClientMocks.søkerFnr[0]) }.isInstanceOf(KanIkkeMigrereException::class.java)
             .hasMessage(null)
             .extracting("feiltype").isEqualTo(MigreringsfeilType.UGYLDIG_ANTALL_DELYTELSER_I_INFOTRYGD)
@@ -292,7 +291,7 @@ class MigreringServiceTest(
     @Test
     fun `migrering skal feile hvis saken fra Infotrygd ikke er ordinær`() {
         every { infotrygdBarnetrygdClient.hentSaker(any(), any()) } returns
-            InfotrygdSøkResponse(listOf(opprettSakMedBeløp(2708.0).copy(valg = "UT")), emptyList())
+            InfotrygdSøkResponse(listOf(opprettSakMedBeløp(SAK_BELØP).copy(valg = "UT")), emptyList())
         assertThatThrownBy { migreringService.migrer(ClientMocks.søkerFnr[0]) }.isInstanceOf(KanIkkeMigrereException::class.java)
             .hasMessage(null)
             .extracting("feiltype").isEqualTo(MigreringsfeilType.IKKE_STØTTET_SAKSTYPE)
@@ -353,7 +352,7 @@ class MigreringServiceTest(
     @Test
     fun `fagsak og saksstatistikk mellomlagring skal rulles tilbake når migrering feiler`() {
         every { infotrygdBarnetrygdClient.hentSaker(any(), any()) } returns
-            InfotrygdSøkResponse(listOf(opprettSakMedBeløp(2708.0)), emptyList())
+            InfotrygdSøkResponse(listOf(opprettSakMedBeløp(SAK_BELØP)), emptyList())
 
         val antallStatistikkEventsFørVelykketMigrering = saksstatistikkMellomlagringRepository.count()
         migreringService.migrer(ClientMocks.søkerFnr[0])
@@ -432,5 +431,9 @@ class MigreringServiceTest(
             this.trySetAccessible()
             this.invoke(migreringService, YearMonth.now()) as LocalDate
         }
+    }
+
+    companion object {
+        const val SAK_BELØP = 2730.0
     }
 }

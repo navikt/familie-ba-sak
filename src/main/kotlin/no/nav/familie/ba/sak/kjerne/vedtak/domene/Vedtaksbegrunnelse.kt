@@ -15,6 +15,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.hentMånedOgÅrForBegrun
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilBrevTekst
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.RestVedtaksbegrunnelse
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
+import java.time.LocalDate
 import javax.persistence.Column
 import javax.persistence.Convert
 import javax.persistence.Entity
@@ -122,6 +123,11 @@ fun BrevBegrunnelseGrunnlagMedPersoner.tilBrevBegrunnelse(
             )
         )
 
+    this.validerBrevbegrunnelse(
+        gjelderSøker = gjelderSøker,
+        barnasFødselsdatoer = barnasFødselsdatoer,
+    )
+
     return BegrunnelseData(
         gjelderSoker = gjelderSøker,
         barnasFodselsdatoer = barnasFødselsdatoer.tilBrevTekst(),
@@ -131,4 +137,13 @@ fun BrevBegrunnelseGrunnlagMedPersoner.tilBrevBegrunnelse(
         apiNavn = this.vedtakBegrunnelseSpesifikasjon.sanityApiNavn,
         belop = beløp
     )
+}
+
+private fun BrevBegrunnelseGrunnlagMedPersoner.validerBrevbegrunnelse(
+    gjelderSøker: Boolean,
+    barnasFødselsdatoer: List<LocalDate>,
+) {
+    if (!gjelderSøker && barnasFødselsdatoer.isEmpty() && !this.triggesAv.satsendring) {
+        throw IllegalStateException("Ingen personer på brevbegrunnelse")
+    }
 }
