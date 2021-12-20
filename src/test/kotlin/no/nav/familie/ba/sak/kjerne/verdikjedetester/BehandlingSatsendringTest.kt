@@ -46,7 +46,7 @@ class BehandlingSatsendringTest(
         // Grunnen til at denne mockes er egentlig at den indirekte påvirker hva SatsService.hentGyldigSatsFor
         // returnerer. Det vi ønsker er at den sist tillagte satsendringen ikke kommer med slik at selve
         // satsendringen som skal kjøres senere faktisk utgjør en endring (slik at behandlingsresultatet blir ENDRET).
-        every { SatsService.tilleggEndringSeptember2021 } returns YearMonth.of(2020, 9)
+        every { SatsService.tilleggEndringJanuar2022 } returns YearMonth.of(2020, 9)
 
         every { mockLocalDateService.now() } returns LocalDate.now().minusYears(6) andThen LocalDate.now()
 

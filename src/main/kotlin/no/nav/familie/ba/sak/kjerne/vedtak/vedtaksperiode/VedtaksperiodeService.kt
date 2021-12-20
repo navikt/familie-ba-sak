@@ -149,6 +149,29 @@ class VedtaksperiodeService(
                 )
             )
             lagre(vedtaksperiodeMedBegrunnelser)
+
+            /**
+             * Hvis barn(a) er født før desember påvirkes vedtaket av satsendring januar 2022
+             * og vi må derfor også automatisk begrunne satsendringen
+             */
+            if (fødselsmåned < YearMonth.of(
+                    2021,
+                    12
+                )
+            ) {
+                vedtaksperioderMedBegrunnelser.firstOrNull { it.fom?.toYearMonth() == YearMonth.of(2022, 1) }
+                    ?.also { satsendringsvedtaksperiode ->
+                        satsendringsvedtaksperiode.settBegrunnelser(
+                            listOf(
+                                Vedtaksbegrunnelse(
+                                    vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.INNVILGET_SATSENDRING,
+                                    vedtaksperiodeMedBegrunnelser = satsendringsvedtaksperiode,
+                                )
+                            )
+                        )
+                        lagre(satsendringsvedtaksperiode)
+                    }
+            }
         }
     }
 

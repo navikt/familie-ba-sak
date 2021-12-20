@@ -11,7 +11,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService.sisteUtvidetSatsTilTester
-import no.nav.familie.ba.sak.kjerne.beregning.SatsService.tilleggOrdinærSatsTilTester
+import no.nav.familie.ba.sak.kjerne.beregning.SatsService.tilleggOrdinærSatsNesteMånedTilTester
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
@@ -314,7 +314,7 @@ class FødselshendelseHenleggelseTest(
 
         assertEquals(BehandlingUnderkategori.UTVIDET, behandling.underkategori)
         assertEquals(
-            tilleggOrdinærSatsTilTester.beløp + sisteUtvidetSatsTilTester.beløp,
+            tilleggOrdinærSatsNesteMånedTilTester.beløp + sisteUtvidetSatsTilTester.beløp,
             hentNåværendeEllerNesteMånedsUtbetaling(
                 behandling = utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandling.id)
             )
