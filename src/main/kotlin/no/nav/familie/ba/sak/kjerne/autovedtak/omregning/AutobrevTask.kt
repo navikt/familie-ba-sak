@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.task.OpprettTaskService
@@ -14,6 +15,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
+import java.time.YearMonth
 
 @Service
 @TaskStepBeskrivelse(
@@ -25,7 +27,8 @@ import java.time.LocalDate
 class AutobrevTask(
     private val fagsakRepository: FagsakRepository,
     private val opprettTaskService: OpprettTaskService,
-    private val featureToggleService: FeatureToggleService
+    private val featureToggleService: FeatureToggleService,
+    private val behandlingService: BehandlingService
 ) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
@@ -41,6 +44,12 @@ class AutobrevTask(
         }
         if (featureToggleService.isEnabled(FeatureToggleConfig.AUTOBREV_OPPHØR_SMÅBARNSTILLEGG)) {
             logger.info("Sending av autobrev ved opphør av småbarnstillegg er enabled.")
+            behandlingService.hentAlleBehandlingsIderMedOpphørSmåbarnstilleggIMåned(YearMonth.now().minusMonths(1))
+                .forEach { behandlingId: Long ->
+                    opprettTaskService.opprettAutovedtakForOpphørSmåbarnstilleggTask(
+                        behandlingId = behandlingId
+                    )
+                }
         }
     }
 
