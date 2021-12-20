@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.maler.InformasjonsbrevDeltBosted
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.InnhenteOpplysningerBrev
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.InnhenteOpplysningerData
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.SignaturDelmal
+import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Svartidsbrev
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VarselOmRevurderingBrev
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VarselOmRevurderingData
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.flettefelt
@@ -122,6 +123,12 @@ fun ManueltBrevRequest.tilBrevmal() = when (this.brevmal.malId) {
                     varselÅrsaker = this.multiselectVerdier,
                 )
             )
+        )
+    BrevType.SVARTIDSBREV.malId ->
+        Svartidsbrev(
+            navn = this.mottakerNavn,
+            fodselsnummer = this.mottakerIdent,
+            enhet = this.enhetNavn(),
         )
     else -> error(
         "Kan ikke mappe brevmal for ${
