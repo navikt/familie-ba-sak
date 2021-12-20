@@ -1,7 +1,12 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.omregning
 
+import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.runs
+import io.mockk.verify
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
+import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.tilfeldigPerson
@@ -12,6 +17,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Personopplysning
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.småbarnstillegg.PeriodeOvergangsstønadGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.småbarnstillegg.PeriodeOvergangsstønadGrunnlagRepository
+import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad
@@ -23,11 +29,11 @@ import java.time.LocalDate
 internal class AutobrevOpphørSmåbarnstilleggServiceTest {
     val personopplysningGrunnlagRepository = mockk<PersonopplysningGrunnlagRepository>()
     val behandlingService = mockk<BehandlingService>()
-    val vedtakService = mockk<VedtakService>()
-
-    val taskRepository = mockk<TaskRepositoryWrapper>()
+    val vedtakService = mockk<VedtakService>(relaxed = true)
+    val stegService = mockk<StegService>()
+    val taskRepository = mockk<TaskRepositoryWrapper>(relaxed = true)
     val vedtaksperiodeService = mockk<VedtaksperiodeService>()
-    val autovedtakService = mockk<AutovedtakService>()
+    val autovedtakService = mockk<AutovedtakService>(relaxed = true)
     val periodeOvergangsstønadGrunnlagRepository = mockk<PeriodeOvergangsstønadGrunnlagRepository>()
 
     private val autobrevOpphørSmåbarnstilleggService = AutobrevOpphørSmåbarnstilleggService(
@@ -39,6 +45,35 @@ internal class AutobrevOpphørSmåbarnstilleggServiceTest {
         autovedtakService = autovedtakService,
         periodeOvergangsstønadGrunnlagRepository = periodeOvergangsstønadGrunnlagRepository
     )
+
+    @Test
+    fun `Verifiser at løpende behandling med småbarnstillegg sender opphørsbrev måneden etter yngste barn ble 3 år`() {
+
+        val behandling = lagBehandling()
+        val barn3ForrigeMåned = tilfeldigPerson(fødselsdato = LocalDate.now().minusYears(3).minusMonths(1))
+        val personopplysningGrunnlag: PersonopplysningGrunnlag =
+            lagTestPersonopplysningGrunnlag(behandlingId = behandlingId, barn3ForrigeMåned)
+
+        every { behandlingService.hent(any()) } returns behandling
+        every { personopplysningGrunnlagRepository.findByBehandlingAndAktiv(any()) } returns personopplysningGrunnlag
+        every { periodeOvergangsstønadGrunnlagRepository.findByBehandlingId(any()) } returns emptyList()
+        every { stegService.håndterVilkårsvurdering(any()) } returns behandling
+        every { stegService.håndterNyBehandling(any()) } returns behandling
+        every { vedtaksperiodeService.oppdaterFortsattInnvilgetPeriodeMedAutobrevBegrunnelse(any(), any()) } just runs
+
+        autobrevOpphørSmåbarnstilleggService
+            .kjørBehandlingOgSendBrevForOpphørAvSmåbarnstillegg(behandlingId = behandling.id)
+
+        verify(exactly = 1) {
+            autovedtakService.opprettAutomatiskBehandlingOgKjørTilBehandlingsresultat(
+                any(),
+                any(),
+                any()
+            )
+        }
+
+        verify(exactly = 1) { taskRepository.save(any()) }
+    }
 
     /**
      * Tester overgangstønadOpphørerDenneMåneden
