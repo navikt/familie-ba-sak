@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.common.lagUtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertPersonResultat
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -45,7 +46,7 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
             VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET
                 .triggesForPeriode(
                     utvidetVedtaksperiodeMedBegrunnelser = utvidetVedtaksperiodeMedBegrunnelser,
-                    vilkårsvurdering = vilkårsvurdering,
+                    minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
                     persongrunnlag = personopplysningGrunnlag,
                     aktørerMedUtbetaling = aktørerMedUtbetaling,
                     triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOSATT_I_RIKET))
@@ -59,7 +60,7 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
             VedtakBegrunnelseSpesifikasjon.OPPHØR_UTVANDRET
                 .triggesForPeriode(
                     utvidetVedtaksperiodeMedBegrunnelser = utvidetVedtaksperiodeMedBegrunnelser,
-                    vilkårsvurdering = vilkårsvurdering,
+                    minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
                     persongrunnlag = personopplysningGrunnlag,
                     aktørerMedUtbetaling = aktørerMedUtbetaling,
                     triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOSATT_I_RIKET))
@@ -73,7 +74,7 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
             VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR
                 .triggesForPeriode(
                     utvidetVedtaksperiodeMedBegrunnelser = utvidetVedtaksperiodeMedBegrunnelser,
-                    vilkårsvurdering = vilkårsvurdering,
+                    minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
                     persongrunnlag = personopplysningGrunnlag,
                     aktørerMedUtbetaling = aktørerMedUtbetaling,
                     triggesAv = TriggesAv(barnMedSeksårsdag = true)
@@ -90,7 +91,7 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
             VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR
                 .triggesForPeriode(
                     utvidetVedtaksperiodeMedBegrunnelser = utvidetVedtaksperiodeMedBegrunnelser,
-                    vilkårsvurdering = vilkårsvurdering,
+                    minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
                     persongrunnlag = persongrunnlag,
                     aktørerMedUtbetaling = aktørerMedUtbetaling,
                     triggesAv = TriggesAv(barnMedSeksårsdag = true)
@@ -110,7 +111,7 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
             VedtakBegrunnelseSpesifikasjon.INNVILGET_SATSENDRING
                 .triggesForPeriode(
                     utvidetVedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelserSatsEndring,
-                    vilkårsvurdering = vilkårsvurdering,
+                    minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
                     persongrunnlag = personopplysningGrunnlag,
                     aktørerMedUtbetaling = aktørerMedUtbetaling,
                     triggesAv = TriggesAv(satsendring = true)
@@ -130,7 +131,7 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
             VedtakBegrunnelseSpesifikasjon.INNVILGET_SATSENDRING
                 .triggesForPeriode(
                     utvidetVedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelserSatsEndring,
-                    vilkårsvurdering = vilkårsvurdering,
+                    minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
                     persongrunnlag = personopplysningGrunnlag,
                     aktørerMedUtbetaling = aktørerMedUtbetaling,
                     triggesAv = TriggesAv(satsendring = true)
@@ -146,7 +147,7 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
             VedtakBegrunnelseSpesifikasjon.INNVILGET_LOVLIG_OPPHOLD_EØS_BORGER
                 .triggesForPeriode(
                     utvidetVedtaksperiodeMedBegrunnelser = utvidetVedtaksperiodeMedBegrunnelser,
-                    vilkårsvurdering = vilkårsvurdering,
+                    minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
                     persongrunnlag = personopplysningGrunnlag,
                     aktørerMedUtbetaling = aktørerMedUtbetaling,
                     triggesAv = TriggesAv(vilkår = setOf(Vilkår.LOVLIG_OPPHOLD), personTyper = setOf(PersonType.SØKER))
@@ -162,7 +163,7 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
             VedtakBegrunnelseSpesifikasjon.INNVILGET_LOVLIG_OPPHOLD_EØS_BORGER
                 .triggesForPeriode(
                     utvidetVedtaksperiodeMedBegrunnelser = utvidetVedtaksperiodeMedBegrunnelser,
-                    vilkårsvurdering = vilkårsvurdering,
+                    minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
                     persongrunnlag = personopplysningGrunnlag,
                     aktørerMedUtbetaling = aktørerMedUtbetaling,
                     triggesAv = TriggesAv(vilkår = setOf(Vilkår.LOVLIG_OPPHOLD), personTyper = setOf(PersonType.SØKER))
@@ -178,7 +179,7 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
             VedtakBegrunnelseSpesifikasjon.ETTER_ENDRET_UTBETALING_AVTALE_DELT_BOSTED_FØLGES
                 .triggesForPeriode(
                     persongrunnlag = personopplysningGrunnlag,
-                    vilkårsvurdering = vilkårsvurdering,
+                    minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
                     aktørerMedUtbetaling = aktørerMedUtbetaling,
                     utvidetVedtaksperiodeMedBegrunnelser = lagUtvidetVedtaksperiodeMedBegrunnelser(
                         type = Vedtaksperiodetype.UTBETALING,
@@ -208,7 +209,7 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
             VedtakBegrunnelseSpesifikasjon.ETTER_ENDRET_UTBETALING_AVTALE_DELT_BOSTED_FØLGES
                 .triggesForPeriode(
                     persongrunnlag = personopplysningGrunnlag,
-                    vilkårsvurdering = vilkårsvurdering,
+                    minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
                     aktørerMedUtbetaling = aktørerMedUtbetaling,
                     utvidetVedtaksperiodeMedBegrunnelser = lagUtvidetVedtaksperiodeMedBegrunnelser(
                         type = Vedtaksperiodetype.UTBETALING,

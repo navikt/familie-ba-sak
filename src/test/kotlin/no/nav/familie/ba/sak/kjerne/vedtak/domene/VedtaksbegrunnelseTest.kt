@@ -3,8 +3,9 @@ package no.nav.familie.ba.sak.kjerne.vedtak.domene
 import no.nav.familie.ba.sak.common.NullablePeriode
 import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagRestVedtaksbegrunnelse
+import no.nav.familie.ba.sak.dataGenerator.brev.lagBrevBegrunnelseGrunnlagMedPersoner
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
-import no.nav.familie.ba.sak.kjerne.behandlingsresultat.tilUregisrertBarnEnkel
+import no.nav.familie.ba.sak.kjerne.behandlingsresultat.tilMinimertUregisrertBarn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
@@ -22,13 +23,12 @@ class VedtaksbegrunnelseTest {
 
     val restVedtaksbegrunnelse = lagRestVedtaksbegrunnelse(
         vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET,
-        personIdenter = listOf(søker, barn1, barn2).map { it.personIdent.ident },
         vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
     )
 
     val vedtaksperiode = NullablePeriode(LocalDate.now().minusMonths(1), LocalDate.now())
 
-    val personerIPersongrunnlag = listOf(søker, barn1, barn2, barn3).map { it.tilBegrunnelsePerson() }
+    val personerIPersongrunnlag = listOf(søker, barn1, barn2, barn3).map { it.tilMinimertPerson() }
 
     val målform = Målform.NB
 
@@ -36,16 +36,16 @@ class VedtaksbegrunnelseTest {
 
     @Test
     fun `skal ta med alle barnas fødselsdatoer ved avslag på søker, men ikke inkludere dem i antall barn`() {
-        val restVedtaksbegrunnelseAvslag = lagRestVedtaksbegrunnelse(
+        val brevBegrunnelseGrunnlagMedPersoner = lagBrevBegrunnelseGrunnlagMedPersoner(
             vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.AVSLAG_BOR_HOS_SØKER,
             personIdenter = listOf(søker).map { it.personIdent.ident },
             vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
         )
 
-        val brevbegrunnelse = restVedtaksbegrunnelseAvslag.tilBrevBegrunnelse(
+        val brevbegrunnelse = brevBegrunnelseGrunnlagMedPersoner.tilBrevBegrunnelse(
             vedtaksperiode = vedtaksperiode,
-            begrunnelsepersonerIBehandling = personerIPersongrunnlag,
-            målform = målform,
+            personerIPersongrunnlag = personerIPersongrunnlag,
+            brevMålform = målform,
             uregistrerteBarn = emptyList(),
             beløp = beløp
         ) as BegrunnelseData
@@ -69,19 +69,19 @@ class VedtaksbegrunnelseTest {
             BarnMedOpplysninger(
                 ident = it.personIdent.ident,
                 fødselsdato = it.fødselsdato
-            ).tilUregisrertBarnEnkel()
+            ).tilMinimertUregisrertBarn()
         }
 
-        val restVedtaksbegrunnelseAvslag = lagRestVedtaksbegrunnelse(
+        val brevBegrunnelseGrunnlagMedPersoner = lagBrevBegrunnelseGrunnlagMedPersoner(
             vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.AVSLAG_UREGISTRERT_BARN,
             personIdenter = emptyList(),
             vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
         )
 
-        val brevbegrunnelse = restVedtaksbegrunnelseAvslag.tilBrevBegrunnelse(
+        val brevbegrunnelse = brevBegrunnelseGrunnlagMedPersoner.tilBrevBegrunnelse(
             vedtaksperiode = vedtaksperiode,
-            begrunnelsepersonerIBehandling = personerIPersongrunnlag,
-            målform = målform,
+            personerIPersongrunnlag = personerIPersongrunnlag,
+            brevMålform = målform,
             uregistrerteBarn = uregistrerteBarn,
             beløp = beløp
         ) as BegrunnelseData

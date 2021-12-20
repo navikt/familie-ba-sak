@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse
 
-import no.nav.familie.ba.sak.kjerne.dokument.domene.SanityBegrunnelse
-import no.nav.familie.ba.sak.kjerne.dokument.domene.SanityVilkår
+import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
+import no.nav.familie.ba.sak.kjerne.brev.domene.SanityVilkår
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.vedtakBegrunnelseTilRestVedtakBegrunnelseTilknyttetVilkår
 import org.junit.jupiter.api.Assertions

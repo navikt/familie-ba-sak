@@ -161,7 +161,7 @@ class FagsakService(
             tilbakekrevingsbehandlingService.hentRestTilbakekrevingsbehandlinger((fagsakId))
         val visningsbehandlinger = behandlingRepository.finnBehandlinger(fagsakId).map {
             it.tilRestVisningBehandling(
-                vedtaksdato = vedtakRepository.findByBehandlingAndAktiv(it.id)?.vedtaksdato
+                vedtaksdato = vedtakRepository.findByBehandlingAndAktivOptional(it.id)?.vedtaksdato
             )
         }
 

@@ -3,27 +3,50 @@
   "fom": "2021-09-01",
   "tom": null,
   "vedtaksperiodetype": "AVSLAG",
-  "utbetalingsperiodeDetaljer": [
-  ],
-  "standardbegrunnelser": [
-  ],
+  "begrunnelser": [],
   "fritekster": [
-    "Du får ikke barnetrygd fordi test"
+    "Du får ikke barnetrygd fordi test 1",
+    "Du får ikke barnetrygd fordi test 2",
+    "Du får ikke barnetrygd fordi test 3"
   ],
-  "begrunnelsepersoner": [
+  "utvidetScenario": "IKKE_UTVIDET_YTELSE",
+  "uregistrerteBarn": [],
+  "erFørsteVedtaksperiodePåFagsak": false,
+  "brevMålform": "NB",
+  "personerPåBehandling": [
     {
-      "personIdent": "20012011111",
       "fødselsdato": "2020-01-20",
-      "type": "BARN"
+      "type": "BARN",
+      "overstyrteVilkårresultater": [],
+      "andreVurderinger": [],
+      "endredeUtbetalinger": [],
+      "utbetalinger": [
+        {
+          "ytelseType": "ORDINÆR_BARNETRYGD",
+          "utbetaltPerMnd": 1054,
+          "erPåvirketAvEndring": false,
+          "prosent": 100
+        }
+      ]
     },
     {
-      "personIdent": "10089322222",
       "fødselsdato": "1993-08-10",
-      "type": "SØKER"
+      "type": "SØKER",
+      "overstyrteVilkårresultater": [
+        {
+          "vilkårType": "LOVLIG_OPPHOLD",
+          "resultat": "IKKE_OPPFYLT",
+          "periodeFom": "1993-08-10",
+          "periodeTom": null,
+          "utdypendeVilkårsvurderinger": [],
+          "erEksplisittAvslagPåSøknad": false
+        }
+      ],
+      "andreVurderinger": [],
+      "endredeUtbetalinger": [],
+      "utbetalinger": []
     }
   ],
-  "målform": "NB",
-  "uregistrerteBarn": [],
   "forventetOutput": {
     "fom": "1. september 2021",
     "tom": "",
@@ -32,7 +55,15 @@
     "barnasFodselsdager": null,
     "begrunnelser": [
       {
-        "fritekst": "Du får ikke barnetrygd fordi test",
+        "fritekst": "Du får ikke barnetrygd fordi test 1",
+        "type": "fritekst"
+      },
+      {
+        "fritekst": "Du får ikke barnetrygd fordi test 2",
+        "type": "fritekst"
+      },
+      {
+        "fritekst": "Du får ikke barnetrygd fordi test 3",
         "type": "fritekst"
       }
     ],

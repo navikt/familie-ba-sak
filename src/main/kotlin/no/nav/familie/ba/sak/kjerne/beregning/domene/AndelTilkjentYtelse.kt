@@ -1,14 +1,20 @@
 package no.nav.familie.ba.sak.kjerne.beregning.domene
 
 import no.nav.familie.ba.sak.common.BaseEntitet
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.YearMonthConverter
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
-import no.nav.familie.ba.sak.kjerne.dokument.UtvidetScenario
+import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.kjerne.brev.UtvidetScenarioForEndringsperiode
+import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.hentGyldigEndretBegrunnelse
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.erStartPåUtvidetSammeMåned
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.utledSegmenter
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.fpsak.tidsserie.LocalDateInterval
@@ -191,6 +197,22 @@ data class AndelTilkjentYtelse(
     fun harEndringsutbetalingIPerioden(fom: YearMonth?, tom: YearMonth?) =
         endretUtbetalingAndeler.any { it.fom == fom && it.tom == tom }
 
+    fun harEndretUtbetalingAndelerOgHørerTilVedtaksperiode(
+        vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser,
+        sanityBegrunnelser: List<SanityBegrunnelse>,
+        andelerTilkjentYtelse: List<AndelTilkjentYtelse>
+    ) = this.endretUtbetalingAndeler.isNotEmpty() &&
+        this.endretUtbetalingAndeler.all { endretUtbetalingAndel ->
+            val gyldigBegrunnelseForEndretUtbetalingAndel = endretUtbetalingAndel.hentGyldigEndretBegrunnelse(
+                sanityBegrunnelser,
+                andelerTilkjentYtelse.hentUtvidetScenarioForEndringsperiode(endretUtbetalingAndel.periode)
+            )
+
+            vedtaksperiodeMedBegrunnelser.begrunnelser.any {
+                it.vedtakBegrunnelseSpesifikasjon == gyldigBegrunnelseForEndretUtbetalingAndel
+            }
+        }
+
     companion object {
 
         /**
@@ -264,18 +286,22 @@ fun List<AndelTilkjentYtelse>.finnesUtvidetEndringsutbetalingIPerioden(
         andelTilkjentYtelse.harEndringsutbetalingIPerioden(fom, tom)
 }
 
-fun List<AndelTilkjentYtelse>.hentUtvidetYtelseScenario(
+/**
+ * Brukes for endringsperioder.
+ * Endringspeiroder påvirkes dersom det er en utvidet periode i samme tidsrom.
+ */
+fun List<AndelTilkjentYtelse>.hentUtvidetScenarioForEndringsperiode(
     månedPeriode: MånedPeriode,
-) = when {
+): UtvidetScenarioForEndringsperiode = when {
     !erStartPåUtvidetSammeMåned(
         this,
         månedPeriode.fom
-    ) -> UtvidetScenario.IKKE_UTVIDET_YTELSE
+    ) -> UtvidetScenarioForEndringsperiode.IKKE_UTVIDET_YTELSE
     this.finnesUtvidetEndringsutbetalingIPerioden(
         månedPeriode.fom,
         månedPeriode.tom,
-    ) -> UtvidetScenario.UTVIDET_YTELSE_ENDRET
-    else -> UtvidetScenario.UTVIDET_YTELSE_IKKE_ENDRET
+    ) -> UtvidetScenarioForEndringsperiode.UTVIDET_YTELSE_ENDRET
+    else -> UtvidetScenarioForEndringsperiode.UTVIDET_YTELSE_IKKE_ENDRET
 }
 
 fun List<AndelTilkjentYtelse>.erUlike(andreAndeler: List<AndelTilkjentYtelse>): Boolean {
@@ -290,4 +316,22 @@ enum class YtelseType(val klassifisering: String) {
     SMÅBARNSTILLEGG("BATRSMA"),
     EØS("BATR"),
     MANUELL_VURDERING("BATR")
+}
+
+fun List<AndelTilkjentYtelse>.hentLøpendeAndelForVedtaksperiode(): LocalDateSegment<Int> {
+    val sorterteSegmenter = this.utledSegmenter().sortedBy { it.fom }
+    return sorterteSegmenter.lastOrNull { it.fom.toYearMonth() <= inneværendeMåned() }
+        ?: sorterteSegmenter.firstOrNull()
+        ?: throw Feil("Finner ikke gjeldende segment ved fortsatt innvilget")
+}
+
+fun List<AndelTilkjentYtelse>.hentAndelerForSegment(
+    vertikaltSegmentForVedtaksperiode: LocalDateSegment<Int>
+) = this.filter {
+    vertikaltSegmentForVedtaksperiode.localDateInterval.overlaps(
+        LocalDateInterval(
+            it.stønadFom.førsteDagIInneværendeMåned(),
+            it.stønadTom.sisteDagIInneværendeMåned()
+        )
+    )
 }

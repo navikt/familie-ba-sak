@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.ekstern.tilbakekreving
 
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -47,8 +46,7 @@ class FagsystemsbehandlingService(
         behandling: Behandling
     ): HentFagsystemsbehandlingRespons {
         val behandlingId = behandling.id
-        val persongrunnlag = persongrunnlagService.hentAktiv(behandlingId)
-            ?: throw Feil("Fant ikke aktivt persongrunnlag for behandlingId=$behandlingId")
+        val persongrunnlag = persongrunnlagService.hentAktivThrows(behandlingId = behandlingId)
         val arbeidsfordeling = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandlingId)
         val aktivVedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId)
 

@@ -49,7 +49,7 @@ class UtvidetBehandlingService(
 
         val arbeidsfordeling = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandlingId = behandling.id)
 
-        val vedtak = vedtakRepository.findByBehandlingAndAktiv(behandling.id)
+        val vedtak = vedtakRepository.findByBehandlingAndAktivOptional(behandling.id)
 
         val personResultater = vilkårsvurderingService.hentAktivForBehandling(behandling.id)?.personResultater
 
