@@ -126,7 +126,6 @@ class MigreringServiceTest(
         databaseCleanupService.truncate()
         every { infotrygdBarnetrygdClient.harÅpenSakIInfotrygd(any(), any()) } returns false
 
-        val slot = slot<String>()
         val slotAktør = slot<Aktør>()
 
         every { pdlRestClient.hentForelderBarnRelasjon(capture(slotAktør)) } answers {
