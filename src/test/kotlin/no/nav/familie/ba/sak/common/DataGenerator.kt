@@ -1,8 +1,8 @@
 package no.nav.familie.ba.sak.common
 
-import io.mockk.mockk
 import no.nav.commons.foedselsnummer.testutils.FoedselsnummerGenerator
 import no.nav.familie.ba.sak.config.tilAktør
+import no.nav.familie.ba.sak.dataGenerator.vedtak.lagVedtaksbegrunnelse
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPerson
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
@@ -23,15 +23,15 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTil
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
-import no.nav.familie.ba.sak.kjerne.dokument.domene.EndretUtbetalingsperiodeDeltBostedTriggere
-import no.nav.familie.ba.sak.kjerne.dokument.domene.EndretUtbetalingsperiodeTrigger
-import no.nav.familie.ba.sak.kjerne.dokument.domene.RestSanityBegrunnelse
-import no.nav.familie.ba.sak.kjerne.dokument.domene.SanityBegrunnelse
-import no.nav.familie.ba.sak.kjerne.dokument.domene.SanityVilkår
-import no.nav.familie.ba.sak.kjerne.dokument.domene.VilkårRolle
-import no.nav.familie.ba.sak.kjerne.dokument.domene.VilkårTrigger
-import no.nav.familie.ba.sak.kjerne.dokument.domene.ØvrigTrigger
-import no.nav.familie.ba.sak.kjerne.dokument.hentBrevtype
+import no.nav.familie.ba.sak.kjerne.brev.domene.EndretUtbetalingsperiodeDeltBostedTriggere
+import no.nav.familie.ba.sak.kjerne.brev.domene.EndretUtbetalingsperiodeTrigger
+import no.nav.familie.ba.sak.kjerne.brev.domene.RestSanityBegrunnelse
+import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
+import no.nav.familie.ba.sak.kjerne.brev.domene.SanityVilkår
+import no.nav.familie.ba.sak.kjerne.brev.domene.VilkårRolle
+import no.nav.familie.ba.sak.kjerne.brev.domene.VilkårTrigger
+import no.nav.familie.ba.sak.kjerne.brev.domene.ØvrigTrigger
+import no.nav.familie.ba.sak.kjerne.brev.hentBrevtype
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
@@ -65,12 +65,12 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksbegrunnelseFritekst
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.RestVedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Utbetalingsperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtbetalingsperiodeDetalj
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.RestVedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurderingType
@@ -642,7 +642,7 @@ fun kjørStegprosessForFGB(
         return behandlingEtterPersongrunnlagSteg
 
     val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)!!
-    persongrunnlagService.hentAktiv(behandlingId = behandling.id)!!.barna.forEach { barn ->
+    persongrunnlagService.hentAktivThrows(behandlingId = behandling.id).barna.forEach { barn ->
         vurderVilkårsvurderingTilInnvilget(vilkårsvurdering, barn)
     }
     vilkårsvurderingService.oppdater(vilkårsvurdering)
@@ -883,17 +883,6 @@ fun lagUtbetalingsperiodeDetalj(
     prosent: BigDecimal = BigDecimal.valueOf(100)
 ) = UtbetalingsperiodeDetalj(person, ytelseType, utbetaltPerMnd, false, prosent)
 
-fun lagVedtaksbegrunnelse(
-    vedtakBegrunnelseSpesifikasjon: VedtakBegrunnelseSpesifikasjon =
-        VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_SØKER_OG_BARN_BOSATT_I_RIKET,
-    personIdenter: List<String> = listOf(tilfeldigPerson().aktør.aktivFødselsnummer()),
-    vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser = mockk()
-) = Vedtaksbegrunnelse(
-    vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
-    vedtakBegrunnelseSpesifikasjon = vedtakBegrunnelseSpesifikasjon,
-    personIdenter = personIdenter,
-)
-
 fun lagVedtaksperiodeMedBegrunnelser(
     vedtak: Vedtak = lagVedtak(),
     fom: LocalDate? = LocalDate.now().withDayOfMonth(1),
@@ -914,11 +903,9 @@ fun lagRestVedtaksbegrunnelse(
     vedtakBegrunnelseSpesifikasjon: VedtakBegrunnelseSpesifikasjon =
         VedtakBegrunnelseSpesifikasjon.FORTSATT_INNVILGET_SØKER_OG_BARN_BOSATT_I_RIKET,
     vedtakBegrunnelseType: VedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET,
-    personIdenter: List<String> = listOf(tilfeldigPerson().aktør.aktivFødselsnummer()),
 ) = RestVedtaksbegrunnelse(
     vedtakBegrunnelseSpesifikasjon = vedtakBegrunnelseSpesifikasjon,
     vedtakBegrunnelseType = vedtakBegrunnelseType,
-    personIdenter = personIdenter,
 )
 
 fun lagUtvidetVedtaksperiodeMedBegrunnelser(

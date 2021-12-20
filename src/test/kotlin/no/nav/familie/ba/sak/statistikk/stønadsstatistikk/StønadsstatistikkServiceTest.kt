@@ -114,7 +114,7 @@ internal class StønadsstatistikkServiceTest(
                     andelTilkjentYtelseSøker
                 )
             )
-        every { persongrunnlagService.hentAktiv(any()) } returns personopplysningGrunnlag
+        every { persongrunnlagService.hentAktivThrows(any()) } returns personopplysningGrunnlag
         every { vedtakService.hentAktivForBehandling(any()) } returns vedtak
         every { personopplysningerService.hentLandkodeUtenlandskBostedsadresse(any()) } returns "DK"
     }

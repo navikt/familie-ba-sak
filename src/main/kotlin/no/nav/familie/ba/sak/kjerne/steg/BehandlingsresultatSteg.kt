@@ -74,9 +74,7 @@ class BehandlingsresultatSteg(
         }
 
         val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandlingId = behandling.id)
-        val personopplysningGrunnlag = persongrunnlagService.hentAktiv(
-            behandlingId = behandling.id
-        )!!
+        val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandlingId = behandling.id)
 
         validerAtTilkjentYtelseHarFornuftigePerioderOgBeløp(
             tilkjentYtelse = tilkjentYtelse,

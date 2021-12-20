@@ -33,7 +33,7 @@ internal class PersongrunnlagServiceTest {
         )
 
         every { persongrunnlagService.hentAktiv(forrigeBehandling.id) } returns forrigeGrunnlag
-        every { persongrunnlagService.hentAktiv(behandling.id) } returns grunnlag
+        every { persongrunnlagService.hentAktivThrows(behandling.id) } returns grunnlag
         every { persongrunnlagService.finnNyeBarn(any(), any()) } answers { callOriginal() }
 
         val nye = persongrunnlagService.finnNyeBarn(forrigeBehandling = forrigeBehandling, behandling = behandling)

@@ -6,6 +6,10 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import java.time.LocalDate
 
+/**
+ * NB: Bør ikke brukes internt, men kun ut mot eksterne tjenester siden klassen
+ * inneholder aktiv personIdent og ikke aktørId.
+ */
 data class RestPerson(
     val type: PersonType,
     val fødselsdato: LocalDate?,
