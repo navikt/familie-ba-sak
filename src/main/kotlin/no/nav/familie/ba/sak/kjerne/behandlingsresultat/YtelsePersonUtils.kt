@@ -23,7 +23,7 @@ object YtelsePersonUtils {
      */
     fun utledYtelsePersonerMedResultat(
         behandlingsresultatPersoner: List<BehandlingsresultatPerson>,
-        uregistrerteBarn: List<UregistrertBarnEnkel> = emptyList(),
+        uregistrerteBarn: List<MinimertUregistrertBarn> = emptyList(),
         inneværendeMåned: YearMonth = YearMonth.now(),
         personidentService: PersonidentService,
     ): List<YtelsePerson> {

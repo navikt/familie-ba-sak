@@ -2,19 +2,24 @@ package no.nav.familie.ba.sak.kjerne.vedtak.domene
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import no.nav.familie.ba.sak.common.BaseEntitet
-import no.nav.familie.ba.sak.common.NullableMånedPeriode
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.NullablePeriode
-import no.nav.familie.ba.sak.common.Utils
+import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.kjerne.behandlingsresultat.UregistrertBarnEnkel
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.hentAndelerForSegment
+import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtvidetVedtaksperiodeMedBegrunnelser
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtbetalingsperiodeDetalj
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.utbetaltForPersonerIBegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.lagUtbetalingsperiodeDetaljer
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.utledSegmenter
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
+import no.nav.fpsak.tidsserie.LocalDateSegment
 import org.hibernate.annotations.SortComparator
+import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import javax.persistence.CascadeType
 import javax.persistence.Column
@@ -97,33 +102,78 @@ data class VedtaksperiodeMedBegrunnelser(
         return fritekster.isNotEmpty() && begrunnelser.isNotEmpty()
     }
 
-    fun hentNullableMånedPeriode() = NullableMånedPeriode(
-        fom = this.fom?.toYearMonth(),
-        tom = this.tom?.toYearMonth(),
+    fun hentNullablePeriode() = NullablePeriode(
+        fom = this.fom,
+        tom = this.tom,
     )
+
+    fun hentUtbetalingsperiodeDetaljer(
+        andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
+        personopplysningGrunnlag: PersonopplysningGrunnlag,
+        sanityBegrunnelser: List<SanityBegrunnelse>
+    ): List<UtbetalingsperiodeDetalj> =
+        if (this.type == Vedtaksperiodetype.UTBETALING ||
+            this.type == Vedtaksperiodetype.ENDRET_UTBETALING ||
+            this.type == Vedtaksperiodetype.FORTSATT_INNVILGET
+        ) {
+            val andelerForVedtaksperiodetype = andelerTilkjentYtelse.filter {
+                if (this.type == Vedtaksperiodetype.ENDRET_UTBETALING) {
+                    it.harEndretUtbetalingAndelerOgHørerTilVedtaksperiode(
+                        vedtaksperiodeMedBegrunnelser = this,
+                        sanityBegrunnelser = sanityBegrunnelser,
+                        andelerTilkjentYtelse = andelerTilkjentYtelse
+                    )
+                } else {
+                    it.endretUtbetalingAndeler.isEmpty()
+                }
+            }
+            if (andelerForVedtaksperiodetype.isEmpty()) emptyList()
+            else {
+                val vertikaltSegmentForVedtaksperiode =
+                    if (this.type == Vedtaksperiodetype.FORTSATT_INNVILGET)
+                        hentLøpendeAndelForVedtaksperiode(andelerForVedtaksperiodetype)
+                    else hentVertikaltSegmentForVedtaksperiode(andelerForVedtaksperiodetype)
+
+                if (vertikaltSegmentForVedtaksperiode == null) {
+                    LoggerFactory.getLogger(VedtaksperiodeMedBegrunnelser::class.java)
+                        .error("Finner ikke segment for vedtaksperiode $this. Se securelogger for mer informasjon.")
+                    LoggerFactory.getLogger("secureLogger")
+                        .info(
+                            "Finner ikke segment for vedtaksperiode $this.\n " +
+                                "Alle andeler=$andelerTilkjentYtelse.\n" +
+                                "AndelerForVedtaksperiode=$andelerForVedtaksperiodetype."
+                        )
+
+                    emptyList()
+                } else {
+                    val andelerForSegment =
+                        andelerForVedtaksperiodetype.hentAndelerForSegment(vertikaltSegmentForVedtaksperiode)
+
+                    andelerForSegment.lagUtbetalingsperiodeDetaljer(personopplysningGrunnlag)
+                }
+            }
+        } else {
+            emptyList()
+        }
+
+    fun hentVertikaltSegmentForVedtaksperiode(
+        andelerTilkjentYtelse: List<AndelTilkjentYtelse>
+    ) = andelerTilkjentYtelse
+        .utledSegmenter()
+        .find { localDateSegment ->
+            localDateSegment.fom == this.fom || localDateSegment.tom == this.tom
+        } ?: throw Feil("Finner ikke segment for vedtaksperiode (${this.fom}, ${this.tom})")
 
     companion object {
         val comparator = BegrunnelseComparator()
     }
 }
 
-fun UtvidetVedtaksperiodeMedBegrunnelser.byggBegrunnelserOgFritekster(
-    begrunnelsepersonerIBehandling: List<BegrunnelsePerson>,
-    målform: Målform,
-    uregistrerteBarn: List<UregistrertBarnEnkel> = emptyList(),
-): List<Begrunnelse> {
-    val begrunnelser =
-        this.begrunnelser.sortedBy { it.vedtakBegrunnelseType }.map {
-            it.tilBrevBegrunnelse(
-                vedtaksperiode = NullablePeriode(fom, tom),
-                begrunnelsepersonerIBehandling = begrunnelsepersonerIBehandling,
-                målform = målform,
-                uregistrerteBarn = uregistrerteBarn,
-                beløp = Utils.formaterBeløp(this.utbetaltForPersonerIBegrunnelse(it)),
-            )
-        }
-
-    return begrunnelser + fritekster.map { FritekstBegrunnelse(it) }
+private fun hentLøpendeAndelForVedtaksperiode(andelerTilkjentYtelse: List<AndelTilkjentYtelse>): LocalDateSegment<Int> {
+    val sorterteSegmenter = andelerTilkjentYtelse.utledSegmenter().sortedBy { it.fom }
+    return sorterteSegmenter.lastOrNull { it.fom.toYearMonth() <= inneværendeMåned() }
+        ?: sorterteSegmenter.firstOrNull()
+        ?: throw Feil("Finner ikke gjeldende segment ved fortsatt innvilget")
 }
 
 class BegrunnelseComparator : Comparator<Vedtaksbegrunnelse> {

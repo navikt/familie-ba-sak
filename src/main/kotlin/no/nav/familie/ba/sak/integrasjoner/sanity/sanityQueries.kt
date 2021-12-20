@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.dokument
+package no.nav.familie.ba.sak.kjerne.brev
 
 val hentDokumenter =
     "*[_type == \"begrunnelse\"]{" +
