@@ -3,11 +3,13 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.omregning
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
 import no.nav.familie.ba.sak.common.isSameOrAfter
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.småbarnstillegg.PeriodeOvergangsstønadGrunnlag
@@ -21,6 +23,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
+import java.time.YearMonth
 
 @Service
 class AutobrevOpphørSmåbarnstilleggService(
@@ -101,7 +104,11 @@ class AutobrevOpphørSmåbarnstilleggService(
         }.isNotEmpty()
 
     fun minsteBarnFylteTreÅrForrigeMåned(personopplysningGrunnlag: PersonopplysningGrunnlag): Boolean {
-        TODO("Not yet implemented")
+        val fødselsdatoer: List<YearMonth> = personopplysningGrunnlag.personer.filter { it.type === PersonType.BARN }
+            .map { it.fødselsdato.toYearMonth() }
+        if (fødselsdatoer.any { it.isAfter(YearMonth.now().minusYears(3).minusMonths(1)) }) return false
+        if (fødselsdatoer.any { it == YearMonth.now().minusYears(3).minusMonths(1) }) return true
+        return false
     }
 
     fun harBarnUnderTreÅr(personopplysningGrunnlag: PersonopplysningGrunnlag): Boolean {

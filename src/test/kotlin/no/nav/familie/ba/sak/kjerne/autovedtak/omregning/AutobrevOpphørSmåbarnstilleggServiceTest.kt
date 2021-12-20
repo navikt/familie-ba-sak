@@ -2,10 +2,13 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.omregning
 
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
+import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.randomAktørId
+import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.småbarnstillegg.PeriodeOvergangsstønadGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.småbarnstillegg.PeriodeOvergangsstønadGrunnlagRepository
@@ -91,6 +94,67 @@ internal class AutobrevOpphørSmåbarnstilleggServiceTest {
         val overgangstønadOpphørerDenneMåneden =
             autobrevOpphørSmåbarnstilleggService.overgangstønadOpphørerDenneMåneden(input)
         assertFalse(overgangstønadOpphørerDenneMåneden)
+    }
+
+    val behandlingId: Long = 1
+
+    @Test
+    fun `minsteBarnFylteTreÅrForrigeMåned - et barn som fylte tre forrige måned gir true`() {
+        val barn3ForrigeMåned = tilfeldigPerson(fødselsdato = LocalDate.now().minusYears(3).minusMonths(1))
+        val peronsopplysningGrunnalg: PersonopplysningGrunnlag =
+            lagTestPersonopplysningGrunnlag(behandlingId = behandlingId, barn3ForrigeMåned)
+
+        assertTrue(autobrevOpphørSmåbarnstilleggService.minsteBarnFylteTreÅrForrigeMåned(peronsopplysningGrunnalg))
+    }
+
+    @Test
+    fun `minsteBarnFylteTreÅrForrigeMåned - et barn som fylte tre forrige måned og et eldre gir true`() {
+        val barn3ForrigeMåned = tilfeldigPerson(fødselsdato = LocalDate.now().minusYears(3).minusMonths(1))
+        val barnOverTre = tilfeldigPerson(fødselsdato = LocalDate.now().minusYears(4))
+        val peronsopplysningGrunnalg: PersonopplysningGrunnlag =
+            lagTestPersonopplysningGrunnlag(behandlingId = behandlingId, barn3ForrigeMåned, barnOverTre)
+
+        assertTrue(autobrevOpphørSmåbarnstilleggService.minsteBarnFylteTreÅrForrigeMåned(peronsopplysningGrunnalg))
+    }
+
+    @Test
+    fun `minsteBarnFylteTreÅrForrigeMåned - to barn som fylte tre forrige måned gir true`() {
+        val barn3ForrigeMåned = tilfeldigPerson(fødselsdato = LocalDate.now().minusYears(3).minusMonths(1))
+        val ekstraBarn3ForrigeMåned = tilfeldigPerson(fødselsdato = LocalDate.now().minusYears(3).minusMonths(1))
+        val peronsopplysningGrunnalg: PersonopplysningGrunnlag =
+            lagTestPersonopplysningGrunnlag(behandlingId = behandlingId, barn3ForrigeMåned, ekstraBarn3ForrigeMåned)
+
+        assertTrue(autobrevOpphørSmåbarnstilleggService.minsteBarnFylteTreÅrForrigeMåned(peronsopplysningGrunnalg))
+    }
+
+    @Test
+    fun `minsteBarnFylteTreÅrForrigeMåned - to barn over tre gir false`() {
+        val barnOverTre = tilfeldigPerson(fødselsdato = LocalDate.now().minusYears(4))
+        val ekstraBarnOverTre = tilfeldigPerson(fødselsdato = LocalDate.now().minusYears(4))
+        val peronsopplysningGrunnalg: PersonopplysningGrunnlag =
+            lagTestPersonopplysningGrunnlag(behandlingId = behandlingId, barnOverTre, ekstraBarnOverTre)
+
+        assertFalse(autobrevOpphørSmåbarnstilleggService.minsteBarnFylteTreÅrForrigeMåned(peronsopplysningGrunnalg))
+    }
+
+    @Test
+    fun `minsteBarnFylteTreÅrForrigeMåned - to barn under tre gir false`() {
+        val barnUnderTre = tilfeldigPerson(fødselsdato = LocalDate.now().minusYears(2))
+        val ekstraBarnUnderTre = tilfeldigPerson(fødselsdato = LocalDate.now().minusYears(3))
+        val peronsopplysningGrunnalg: PersonopplysningGrunnlag =
+            lagTestPersonopplysningGrunnlag(behandlingId = behandlingId, barnUnderTre, ekstraBarnUnderTre)
+
+        assertFalse(autobrevOpphørSmåbarnstilleggService.minsteBarnFylteTreÅrForrigeMåned(peronsopplysningGrunnalg))
+    }
+
+    @Test
+    fun `minsteBarnFylteTreÅrForrigeMåned - et barn under tre og et barn 3 forrige måned gir false`() {
+        val barnUnderTre = tilfeldigPerson(fødselsdato = LocalDate.now().minusYears(2))
+        val barn3ForrigeMåned = tilfeldigPerson(fødselsdato = LocalDate.now().minusYears(3).minusMonths(1))
+        val peronsopplysningGrunnalg: PersonopplysningGrunnlag =
+            lagTestPersonopplysningGrunnlag(behandlingId = behandlingId, barnUnderTre, barn3ForrigeMåned)
+
+        assertFalse(autobrevOpphørSmåbarnstilleggService.minsteBarnFylteTreÅrForrigeMåned(peronsopplysningGrunnalg))
     }
 
     private fun lagPeriodeOvergangsstønadGrunnlag(
