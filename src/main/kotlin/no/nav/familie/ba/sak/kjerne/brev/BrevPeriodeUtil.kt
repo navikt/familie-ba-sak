@@ -78,12 +78,12 @@ fun hentBrevPerioder(
                 brevMålform = målform,
             )
         } catch (exception: Exception) {
-            val feilmelding = "Feil ved generering av brevperioder med data (BrevPeriodeGrunnlag=${it}, " +
-                "BrevGrunnlag=${brevGrunnlag}, " +
-                "UtvidetScenarioForEndringsperiode = ${utvidetScenarioForEndringsperiode}, " +
+            val feilmelding = "Feil ved generering av brevperioder med data (BrevPeriodeGrunnlag=$it, " +
+                "BrevGrunnlag=$brevGrunnlag, " +
+                "UtvidetScenarioForEndringsperiode = $utvidetScenarioForEndringsperiode, " +
                 "ErFørsteVedtaksperiodePåFagsak = " +
                 "${erFørsteVedtaksperiodePåFagsak(andelerTilkjentYtelse, it.fom)}" +
-                "brevMålform=${målform})"
+                "brevMålform=$målform)"
             secureLogger.error(feilmelding, exception)
             throw Feil(message = "Feil ved generering av brevperioder: ", throwable = exception)
         }

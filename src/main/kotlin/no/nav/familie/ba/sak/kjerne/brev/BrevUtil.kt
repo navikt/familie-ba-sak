@@ -206,5 +206,3 @@ fun hentHjemmeltekst(
 
     return hjemlerTilHjemmeltekst(sorterteHjemler)
 }
-
-
