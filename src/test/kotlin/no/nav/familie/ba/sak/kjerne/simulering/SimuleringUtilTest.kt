@@ -150,6 +150,12 @@ class SimuleringUtilTest {
             ),
         )
 
-        Assertions.assertEquals(BigDecimal.valueOf(200), hentEtterbetalingIPeriode(vedtaksimuleringPosteringer))
+        Assertions.assertEquals(
+            BigDecimal.valueOf(200),
+            hentEtterbetalingIPeriode(
+                vedtaksimuleringPosteringer,
+                now()
+            )
+        )
     }
 }

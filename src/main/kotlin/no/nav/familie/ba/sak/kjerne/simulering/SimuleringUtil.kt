@@ -10,7 +10,6 @@ import no.nav.familie.kontrakter.felles.simulering.SimuleringMottaker
 import no.nav.familie.kontrakter.felles.simulering.SimulertPostering
 import java.math.BigDecimal
 import java.time.LocalDate
-import java.time.LocalDate.now
 
 fun filterBortUrelevanteVedtakSimuleringPosteringer(
     økonomiSimuleringMottakere: List<ØkonomiSimuleringMottaker>
@@ -64,6 +63,8 @@ fun vedtakSimuleringMottakereTilSimuleringPerioder(
         }
     }
 
+    val tidSimuleringHentet = økonomiSimuleringMottakere.firstOrNull()?.opprettetTidspunkt?.toLocalDate()
+
     return simuleringPerioder.map { (fom, posteringListe) ->
         SimuleringsPeriode(
             fom,
@@ -73,7 +74,7 @@ fun vedtakSimuleringMottakereTilSimuleringPerioder(
             tidligereUtbetalt = hentTidligereUtbetaltIPeriode(posteringListe),
             resultat = hentResultatIPeriode(posteringListe),
             feilutbetaling = hentFeilbetalingIPeriode(posteringListe),
-            etterbetaling = hentEtterbetalingIPeriode(posteringListe)
+            etterbetaling = hentEtterbetalingIPeriode(posteringListe, tidSimuleringHentet)
         )
     }
 }
@@ -107,11 +108,16 @@ fun hentResultatIPeriode(periode: List<ØkonomiSimuleringPostering>) =
     } else
         periode.sumOf { it.beløp }
 
-fun hentEtterbetalingIPeriode(periode: List<ØkonomiSimuleringPostering>): BigDecimal {
+fun hentEtterbetalingIPeriode(
+    periode: List<ØkonomiSimuleringPostering>,
+    tidSimuleringHentet: LocalDate?
+): BigDecimal {
+
     val periodeHarPositivFeilutbetaling =
         periode.any { it.posteringType == PosteringType.FEILUTBETALING && it.beløp > BigDecimal.ZERO }
     val sumYtelser =
-        periode.filter { it.posteringType == PosteringType.YTELSE && it.forfallsdato <= now() }.sumOf { it.beløp }
+        periode.filter { it.posteringType == PosteringType.YTELSE && it.forfallsdato <= tidSimuleringHentet }
+            .sumOf { it.beløp }
     return when {
         periodeHarPositivFeilutbetaling ->
             BigDecimal.ZERO
