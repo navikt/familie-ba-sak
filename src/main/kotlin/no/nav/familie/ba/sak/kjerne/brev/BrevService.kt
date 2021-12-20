@@ -9,7 +9,6 @@ import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
-import no.nav.familie.ba.sak.kjerne.beregning.domene.hentUtvidetScenarioForEndringsperiode
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Autovedtak6og18årOgSmåbarnstillegg
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.AutovedtakNyfødtBarnFraFør
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.AutovedtakNyfødtFørsteBarn
@@ -39,7 +38,6 @@ import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.erFørsteVedtaksperiodePåFagsak
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.sorter
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import org.springframework.stereotype.Service
@@ -196,17 +194,13 @@ class BrevService(
             .sorter()
             .map { it.tilBrevPeriodeGrunnlag(sanityBegrunnelser) }
 
-        val brevperioder = brevPerioderGrunnlag
-            .mapNotNull {
-                it.tilBrevPeriode(
-                    brevGrunnlag = brevGrunnlag,
-                    uregistrerteBarn = uregistrerteBarn,
-                    utvidetScenarioForEndringsperiode = andelerTilkjentYtelse
-                        .hentUtvidetScenarioForEndringsperiode(it.hentMånedPeriode()),
-                    erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak(andelerTilkjentYtelse, it.fom),
-                    brevMålform = grunnlagOgSignaturData.grunnlag.søker.målform,
-                )
-            }
+        val brevperioder = hentBrevPerioder(
+            brevPerioderGrunnlag = brevPerioderGrunnlag,
+            andelerTilkjentYtelse = andelerTilkjentYtelse,
+            brevGrunnlag = brevGrunnlag,
+            uregistrerteBarn = uregistrerteBarn,
+            målform = grunnlagOgSignaturData.grunnlag.søker.målform
+        )
 
         val hjemler = hentHjemmeltekst(brevPerioderGrunnlag, sanityBegrunnelser)
 
