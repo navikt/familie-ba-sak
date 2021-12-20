@@ -32,11 +32,12 @@ class PersonController(
 
     @GetMapping
     fun hentPerson(@RequestHeader personIdent: String): ResponseEntity<Ressurs<RestPersonInfo>> {
-        val aktør = personidentService.hentOgLagreAktør(personIdent)
+        val aktør = personidentService.hentOgLagreAktør(ident = personIdent, lagre = false)
         val personinfo = integrasjonClient.hentMaskertPersonInfoVedManglendeTilgang(aktør)
             ?: personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(
                 personidentService.hentOgLagreAktør(
-                    personIdent
+                    ident = personIdent,
+                    lagre = false
                 )
             )
                 .tilRestPersonInfo(personIdent)
@@ -46,7 +47,12 @@ class PersonController(
     @GetMapping(path = ["/enkel"])
     @PersontilgangConstraint
     fun hentPersonEnkel(@RequestHeader personIdent: String): ResponseEntity<Ressurs<RestPersonInfo>> {
-        val personinfo = personopplysningerService.hentPersoninfoEnkel(personidentService.hentOgLagreAktør(personIdent))
+        val personinfo = personopplysningerService.hentPersoninfoEnkel(
+            personidentService.hentOgLagreAktør(
+                ident = personIdent,
+                lagre = false
+            )
+        )
         return ResponseEntity.ok(Ressurs.success(personinfo.tilRestPersonInfo(personIdent)))
     }
 

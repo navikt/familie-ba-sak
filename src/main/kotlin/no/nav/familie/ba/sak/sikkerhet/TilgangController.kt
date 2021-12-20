@@ -24,7 +24,7 @@ class TilgangController(
 
     @PostMapping(path = ["tilgang"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun hentTilgangOgDiskresjonskode(@RequestBody tilgangRequestDTO: TilgangRequestDTO): ResponseEntity<Ressurs<TilgangDTO>> {
-        val aktør = personidentService.hentOgLagreAktør(tilgangRequestDTO.brukerIdent)
+        val aktør = personidentService.hentOgLagreAktør(ident = tilgangRequestDTO.brukerIdent, lagre = false)
 
         val adressebeskyttelse = personopplysningerService.hentAdressebeskyttelseSomSystembruker(aktør)
         val tilgang =
