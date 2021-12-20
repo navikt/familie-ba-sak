@@ -40,6 +40,10 @@ internal class AutobrevOpphørSmåbarnstilleggServiceTest {
         periodeOvergangsstønadGrunnlagRepository = periodeOvergangsstønadGrunnlagRepository
     )
 
+    /**
+     * Tester overgangstønadOpphørerDenneMåneden
+     */
+
     @Test
     fun `overgangstønadOpphørerDenneMåneden - en periode med opphør denne måneden gir true`() {
         val fom = LocalDate.now().minusYears(1)
@@ -95,6 +99,10 @@ internal class AutobrevOpphørSmåbarnstilleggServiceTest {
             autobrevOpphørSmåbarnstilleggService.overgangstønadOpphørerDenneMåneden(input)
         assertFalse(overgangstønadOpphørerDenneMåneden)
     }
+
+    /**
+     * Tester minsteBarnFylteTreÅrForrigeMåned
+     */
 
     val behandlingId: Long = 1
 

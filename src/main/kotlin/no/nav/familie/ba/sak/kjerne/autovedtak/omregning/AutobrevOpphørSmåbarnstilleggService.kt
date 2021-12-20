@@ -49,15 +49,6 @@ class AutobrevOpphørSmåbarnstilleggService(
         val listePeriodeOvergangsstønadGrunnlag: List<PeriodeOvergangsstønadGrunnlag> =
             periodeOvergangsstønadGrunnlagRepository.findByBehandlingId(behandlingId)
 
-        val harBarnUnderTreÅr = harBarnUnderTreÅr(personopplysningGrunnlag = personopplysningGrunnlag)
-        if (harBarnUnderTreÅr) {
-            logger.info(
-                "Fagsak ${behandling.fagsak.id} har fortsatt barn under tre år. " +
-                    "Avbryter sending av autobrev for opphør av småbarnstillegg."
-            )
-            return
-        }
-
         val minsteBarnFylteTreÅrForrigeMåned =
             minsteBarnFylteTreÅrForrigeMåned(personopplysningGrunnlag = personopplysningGrunnlag)
 
@@ -85,7 +76,7 @@ class AutobrevOpphørSmåbarnstilleggService(
 
         vedtaksperiodeService.oppdaterFortsattInnvilgetPeriodeMedAutobrevBegrunnelse(
             vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingEtterBehandlingsresultat.id),
-            vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_FULL_OVERGANGSSTØNAD
+            vedtakBegrunnelseSpesifikasjon = vedtakBegrunnelseSpesifikasjon
         )
 
         val opprettetVedtak =
@@ -109,10 +100,6 @@ class AutobrevOpphørSmåbarnstilleggService(
         if (fødselsdatoer.any { it.isAfter(YearMonth.now().minusYears(3).minusMonths(1)) }) return false
         if (fødselsdatoer.any { it == YearMonth.now().minusYears(3).minusMonths(1) }) return true
         return false
-    }
-
-    fun harBarnUnderTreÅr(personopplysningGrunnlag: PersonopplysningGrunnlag): Boolean {
-        TODO("Not yet implemented")
     }
 
     private fun opprettTaskJournalførVedtaksbrev(vedtakId: Long) {
