@@ -38,7 +38,7 @@ class AutobrevOpphørSmåbarnstilleggService(
     @Transactional
     fun kjørBehandlingOgSendBrevForOpphørAvSmåbarnstillegg(behandlingId: Long) {
 
-        val behandling = behandlingService.hent(behandlingId)
+        val forrigeBehandling = behandlingService.hent(behandlingId)
 
         val personopplysningGrunnlag: PersonopplysningGrunnlag =
             personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId)
@@ -57,7 +57,7 @@ class AutobrevOpphørSmåbarnstilleggService(
 
         if (!minsteBarnFylteTreÅrForrigeMåned && !overgangstønadOpphørerDenneMåneden) {
             logger.info(
-                "For fagsak ${behandling.fagsak.id} ble verken yngste barn 3 år forrige måned eller har overgangsstønad som utløper denne måneden. " +
+                "For fagsak ${forrigeBehandling.fagsak.id} ble verken yngste barn 3 år forrige måned eller har overgangsstønad som utløper denne måneden. " +
                     "Avbryter sending av autobrev for opphør av småbarnstillegg."
             )
             return
@@ -65,7 +65,7 @@ class AutobrevOpphørSmåbarnstilleggService(
 
         val behandlingEtterBehandlingsresultat =
             autovedtakService.opprettAutomatiskBehandlingOgKjørTilBehandlingsresultat(
-                fagsak = behandling.fagsak,
+                fagsak = forrigeBehandling.fagsak,
                 behandlingType = BehandlingType.REVURDERING,
                 behandlingÅrsak = BehandlingÅrsak.SMÅBARNSTILLEGG
             )
