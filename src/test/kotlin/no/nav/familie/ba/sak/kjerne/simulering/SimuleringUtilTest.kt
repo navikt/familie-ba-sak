@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.time.LocalDate.now
 
 class SimuleringUtilTest {
 
@@ -132,5 +133,29 @@ class SimuleringUtilTest {
 
         Assertions.assertEquals(BigDecimal.valueOf(0), restSimulering.etterbetaling)
         Assertions.assertEquals(BigDecimal.valueOf(500), restSimulering.feilutbetaling)
+    }
+
+    @Test
+    fun `Test at bare perioder med passert forfalldato blir inludert i summeringen av etterbetaling`() {
+        val vedtaksimuleringPosteringer = listOf(
+            mockVedtakSimuleringPostering(
+                beløp = 100,
+                posteringType = PosteringType.YTELSE,
+                forfallsdato = now().plusDays(1)
+            ),
+            mockVedtakSimuleringPostering(
+                beløp = 200,
+                posteringType = PosteringType.YTELSE,
+                forfallsdato = now().minusDays(1)
+            ),
+        )
+
+        Assertions.assertEquals(
+            BigDecimal.valueOf(200),
+            hentEtterbetalingIPeriode(
+                vedtaksimuleringPosteringer,
+                now()
+            )
+        )
     }
 }

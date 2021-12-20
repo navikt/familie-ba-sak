@@ -35,6 +35,12 @@ enum class BrevType(
         Dokumenttype.BARNETRYGD_HENLEGGE_TRUKKET_SØKNAD,
         "henlegg trukket søknad",
         false
+    ),
+    SVARTIDSBREV(
+        "svartidsbrev",
+        Dokumenttype.BARNETRYGD_SVARTIDSBREV,
+        "svartidsbrev",
+        false
     );
 
     override fun toString(): String {
@@ -47,6 +53,7 @@ enum class BrevType(
             INFORMASJONSBREV_DELT_BOSTED -> Brevmal.INFORMASJONSBREV_DELT_BOSTED
             VARSEL_OM_REVURDERING -> Brevmal.VARSEL_OM_REVURDERING
             HENLEGGE_TRUKKET_SØKNAD -> Brevmal.HENLEGGE_TRUKKET_SØKNAD
+            SVARTIDSBREV -> Brevmal.SVARTIDSBREV
             VEDTAK -> throw Feil("Kan ikke oversette gammel brevtype til vedtak")
         }
 }
