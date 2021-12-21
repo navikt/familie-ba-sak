@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.ekstern.bisys
 
-import io.swagger.annotations.ApiModelProperty
-import io.swagger.annotations.ApiOperation
+import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.ArraySchema
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
@@ -10,7 +9,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses
 import no.nav.familie.ba.sak.common.EksternTjenesteFeil
 import no.nav.familie.ba.sak.common.EksternTjenesteFeilException
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.ekstern.bisys.BisysController.Companion.JAVA_LANG_STRING
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
@@ -27,9 +25,9 @@ import java.time.YearMonth
 @ProtectedWithClaims(issuer = "azuread")
 class BisysController(private val bisysService: BisysService) {
 
-    @ApiOperation(
-        """Tjeneste for BISYS for å hente utvidet barnetrygd og småbarnstillegg for en gitt person. 
-        """
+    @Operation(
+        description = "Tjeneste for BISYS for å hente utvidet barnetrygd og småbarnstillegg for en gitt person."
+
     )
     @ApiResponses(
         value = [
@@ -117,14 +115,14 @@ class BisysController(private val bisysService: BisysService) {
 
 data class BisysUtvidetBarnetrygdRequest(
     val personIdent: String,
-    @ApiModelProperty(dataType = JAVA_LANG_STRING, example = "2020-12-01") val fraDato: LocalDate
+    @Schema(implementation = String::class, example = "2020-12-01") val fraDato: LocalDate
 )
 
 class BisysUtvidetBarnetrygdResponse(val perioder: List<UtvidetBarnetrygdPeriode>)
 data class UtvidetBarnetrygdPeriode(
     val stønadstype: BisysStønadstype,
-    @ApiModelProperty(dataType = JAVA_LANG_STRING, example = "2020-01") val fomMåned: YearMonth,
-    @ApiModelProperty(dataType = JAVA_LANG_STRING, example = "2020-12") val tomMåned: YearMonth?,
+    @Schema(implementation = String::class, example = "2020-12") val fomMåned: YearMonth,
+    @Schema(implementation = String::class, example = "2020-12") val tomMåned: YearMonth?,
     val beløp: Double,
     val manueltBeregnet: Boolean,
     val deltBosted: Boolean? = null
