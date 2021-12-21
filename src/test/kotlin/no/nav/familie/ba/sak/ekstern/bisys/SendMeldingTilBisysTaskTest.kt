@@ -19,9 +19,9 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.statistikk.producer.DefaultKafkaProducer
 import no.nav.familie.ba.sak.statistikk.producer.DefaultKafkaProducer.Companion.OPPHOER_BARNETRYGD_BISYS_TOPIC
-import no.nav.familie.ba.sak.task.BarnetrygdBisysMelding
-import no.nav.familie.ba.sak.task.EndretType
 import no.nav.familie.ba.sak.task.SendMeldingTilBisysTask
+import no.nav.familie.eksterne.kontrakter.bisys.BarnetrygdBisysMelding
+import no.nav.familie.eksterne.kontrakter.bisys.BarnetrygdEndretType
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -245,32 +245,28 @@ class SendMeldingTilBisysTaskTest {
             )
         }
 
-        val endretPerioder = sendMeldingTilBisysTask.finnEndretPerioder(behandling[1])
+        val endretPerioder = sendMeldingTilBisysTask.finnBarnEndretOpplysning(behandling[1])
         val barn1Perioder = endretPerioder[barn1.personIdent.ident]
         val barn2Perioder = endretPerioder[barn2.personIdent.ident]
         val barn3Perioder = endretPerioder[barn3.personIdent.ident]
 
         assertThat(barn1Perioder).hasSize(1)
-        assertThat(barn1Perioder!![0].type).isEqualTo(EndretType.RO)
+        assertThat(barn1Perioder!![0].årsakskode).isEqualTo(BarnetrygdEndretType.RO)
         assertThat(barn1Perioder!![0].fom).isEqualTo(YearMonth.of(2022, 4))
-        assertThat(barn1Perioder!![0].tom).isEqualTo(YearMonth.of(2037, 12))
 
         assertThat(barn2Perioder).hasSize(1)
-        assertThat(barn2Perioder!![0].type).isEqualTo(EndretType.RR)
+        assertThat(barn2Perioder!![0].årsakskode).isEqualTo(BarnetrygdEndretType.RR)
         assertThat(barn2Perioder!![0].fom).isEqualTo(YearMonth.of(2026, 2))
-        assertThat(barn2Perioder!![0].tom).isEqualTo(YearMonth.of(2037, 12))
 
         assertThat(barn3Perioder).hasSize(2)
 
-        val barn3PeriodeOpphør = barn3Perioder!!.first { it.type == EndretType.RO }
-        assertThat(barn3PeriodeOpphør.type).isEqualTo(EndretType.RO)
+        val barn3PeriodeOpphør = barn3Perioder!!.first { it.årsakskode == BarnetrygdEndretType.RO }
+        assertThat(barn3PeriodeOpphør.årsakskode).isEqualTo(BarnetrygdEndretType.RO)
         assertThat(barn3PeriodeOpphør.fom).isEqualTo(YearMonth.of(2019, 10))
-        assertThat(barn3PeriodeOpphør.tom).isEqualTo(YearMonth.of(2036, 12))
 
-        val barn3PeriodeReduser = barn3Perioder!!.first { it.type == EndretType.RR }
-        assertThat(barn3PeriodeReduser.type).isEqualTo(EndretType.RR)
+        val barn3PeriodeReduser = barn3Perioder!!.first { it.årsakskode == BarnetrygdEndretType.RR }
+        assertThat(barn3PeriodeReduser.årsakskode).isEqualTo(BarnetrygdEndretType.RR)
         assertThat(barn3PeriodeReduser.fom).isEqualTo(YearMonth.of(2019, 5))
-        assertThat(barn3PeriodeReduser.tom).isEqualTo(YearMonth.of(2019, 9))
     }
 
     @Test

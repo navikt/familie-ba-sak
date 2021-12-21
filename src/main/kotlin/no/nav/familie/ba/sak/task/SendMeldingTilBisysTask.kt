@@ -7,9 +7,11 @@ import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
-import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.statistikk.producer.KafkaProducer
+import no.nav.familie.eksterne.kontrakter.bisys.BarnEndretOpplysning
+import no.nav.familie.eksterne.kontrakter.bisys.BarnetrygdBisysMelding
+import no.nav.familie.eksterne.kontrakter.bisys.BarnetrygdEndretType
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
@@ -39,17 +41,10 @@ class SendMeldingTilBisysTask(
         if (behandling.resultat == BehandlingResultat.OPPHØRT || behandling.resultat == BehandlingResultat.ENDRET ||
             behandling.resultat == BehandlingResultat.ENDRET_OG_OPPHØRT
         ) {
-            val endretPerioder = finnEndretPerioder(behandling)
+            val barnEndretOpplysning = finnBarnEndretOpplysning(behandling)
             val barnetrygdBisysMelding = BarnetrygdBisysMelding(
                 søker = behandling.fagsak.aktør.aktivFødselsnummer(),
-                barn = endretPerioder.filter { it.value.isNotEmpty() }.map {
-                    val førstPeriod = it.value[0]
-                    BarnEndretOpplysning(
-                        ident = it.key,
-                        årsakskode = førstPeriod.type,
-                        fom = førstPeriod.fom,
-                    )
-                }
+                barn = barnEndretOpplysning.filter { it.value.isNotEmpty() }.map { it.value.first() }
             )
 
             if (barnetrygdBisysMelding.barn.isEmpty()) {
@@ -62,18 +57,11 @@ class SendMeldingTilBisysTask(
                 barnetrygdBisysMelding
             )
         } else {
-            logger.info("Sender ikke melding til bisys siden resultat ikke er opphørt.")
+            logger.info("Sender ikke melding til bisys siden resultat ikke er opphør eller reduksjon.")
         }
     }
 
-    private fun logTilkjentYtelse(ty: TilkjentYtelse) {
-        secureLogger.info("finnEndretPerioder(): tilkjentYtelse ${ty.id}")
-        ty.andelerTilkjentYtelse.forEach {
-            secureLogger.info("finnEndretPerioder(): andelerTilkjentYtelse for tilkjentYtelse(${ty.id}) ${it.periode.fom} ${it.periode.tom} ${it.prosent}")
-        }
-    }
-
-    fun finnEndretPerioder(behandling: Behandling): Map<String, List<EndretPeriode>> {
+    fun finnBarnEndretOpplysning(behandling: Behandling): Map<String, List<BarnEndretOpplysning>> {
         val iverksatteBehandlinger =
             behandlingRepository.finnIverksatteBehandlinger(fagsakId = behandling.fagsak.id)
         val forrigeIverksatteBehandling = Behandlingutils.hentForrigeIverksatteBehandling(
@@ -84,10 +72,7 @@ class SendMeldingTilBisysTask(
         val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandling.id)
         val forrigeTilkjentYtelse = tilkjentYtelseRepository.findByBehandling(forrigeIverksatteBehandling.id)
 
-        logTilkjentYtelse(tilkjentYtelse)
-        logTilkjentYtelse(forrigeTilkjentYtelse)
-
-        val endretPerioder: MutableMap<String, MutableList<EndretPeriode>> = mutableMapOf()
+        val endretOpplysning: MutableMap<String, MutableList<BarnEndretOpplysning>> = mutableMapOf()
 
         forrigeTilkjentYtelse.andelerTilkjentYtelse.groupBy { it.personIdent }.entries.forEach { entry ->
             val nyAndelerTilkjentYtelse =
@@ -96,27 +81,28 @@ class SendMeldingTilBisysTask(
             entry.value.sortedBy { it.periode.fom }.forEach {
                 var forblePeriode: MånedPeriode? = it.periode
                 val prosent = it.prosent
-                if (!endretPerioder.contains(it.personIdent)) {
-                    endretPerioder[it.personIdent] = mutableListOf()
+                val barnIdent = it.personIdent
+                if (!endretOpplysning.contains(barnIdent)) {
+                    endretOpplysning[barnIdent] = mutableListOf()
                 }
                 run checkEndretPerioder@{
                     nyAndelerTilkjentYtelse.forEach {
                         val intersectPerioder = forblePeriode!!.intersect(it.periode)
                         if (intersectPerioder.first != null) {
-                            endretPerioder[it.personIdent]!!.add(
-                                EndretPeriode(
+                            endretOpplysning[it.personIdent]!!.add(
+                                BarnEndretOpplysning(
+                                    ident = barnIdent,
                                     fom = forblePeriode!!.fom,
-                                    tom = it.periode.fom.minusMonths(1),
-                                    type = EndretType.RO
+                                    årsakskode = BarnetrygdEndretType.RO,
                                 )
                             )
                         }
                         if (intersectPerioder.second != null && it.prosent < prosent) {
-                            endretPerioder[it.personIdent]!!.add(
-                                EndretPeriode(
+                            endretOpplysning[it.personIdent]!!.add(
+                                BarnEndretOpplysning(
+                                    ident = barnIdent,
                                     fom = latest(it.periode.fom, forblePeriode!!.fom),
-                                    tom = earlist(it.periode.tom, forblePeriode!!.tom),
-                                    type = EndretType.RR
+                                    årsakskode = BarnetrygdEndretType.RR
                                 )
                             )
                         }
@@ -127,22 +113,17 @@ class SendMeldingTilBisysTask(
                     }
                 }
                 if (forblePeriode != null && !forblePeriode!!.erTom()) {
-                    endretPerioder[it.personIdent]!!.add(
-                        EndretPeriode(
+                    endretOpplysning[it.personIdent]!!.add(
+                        BarnEndretOpplysning(
+                            ident = barnIdent,
                             fom = forblePeriode!!.fom,
-                            tom = forblePeriode!!.tom,
-                            type = EndretType.RO
+                            årsakskode = BarnetrygdEndretType.RO
                         )
                     )
                 }
             }
         }
-        endretPerioder.keys.forEach { ident ->
-            endretPerioder[ident]!!.forEach {
-                secureLogger.info("finnEndretPerioder(): endretPerioder for $ident ${it.fom} ${it.tom} ${it.type}")
-            }
-        }
-        return endretPerioder
+        return endretOpplysning
     }
 
     companion object {
@@ -160,18 +141,6 @@ class SendMeldingTilBisysTask(
         }
     }
 }
-
-enum class EndretType {
-    RO, // Revurdering og Opphør
-    RR, // Revurdering og Reduksjon
-    ØKT,
-}
-
-data class EndretPeriode(
-    val fom: YearMonth,
-    val tom: YearMonth,
-    val type: EndretType,
-)
 
 inline fun earlist(yearMonth1: YearMonth, yearMonth2: YearMonth): YearMonth {
     return if (yearMonth1.isSameOrBefore(yearMonth2)) yearMonth1 else yearMonth2
@@ -192,14 +161,3 @@ inline fun MånedPeriode.intersect(periode: MånedPeriode): Triple<MånedPeriode
 }
 
 inline fun MånedPeriode.erTom() = fom.isAfter(tom)
-
-data class BarnEndretOpplysning(
-    val ident: String,
-    val årsakskode: EndretType,
-    val fom: YearMonth,
-)
-
-data class BarnetrygdBisysMelding(
-    val søker: String,
-    val barn: List<BarnEndretOpplysning>
-)
