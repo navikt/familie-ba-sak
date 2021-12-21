@@ -128,7 +128,6 @@ class SendMeldingTilBisysTask(
 
     companion object {
         const val TASK_STEP_TYPE = "sendMeldingOmOpphørTilBisys"
-        private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
         fun opprettTask(behandlingsId: Long): Task {
             return Task(
