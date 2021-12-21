@@ -26,7 +26,7 @@ import java.time.LocalDate
 data class BrevPeriodeTestConfig(
     val beskrivelse: String,
 
-    val fom: LocalDate,
+    val fom: LocalDate?,
     val tom: LocalDate?,
     val vedtaksperiodetype: Vedtaksperiodetype,
     val begrunnelser: List<BrevBegrunnelseGrunnlagConfig>,
@@ -144,7 +144,7 @@ data class BegrunnelseDataTestConfig(
 }
 
 data class BrevPeriodeOutput(
-    val fom: String,
+    val fom: String?,
     val tom: String?,
     val belop: Int?,
     val antallBarn: String?,

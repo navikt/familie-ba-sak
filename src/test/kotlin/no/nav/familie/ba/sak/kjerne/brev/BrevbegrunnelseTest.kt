@@ -64,6 +64,7 @@ class BrevbegrunnelseTest {
             } catch (e: Exception) {
                 testReporter.publishEntry(
                     "Feil i test: $it" +
+                        "\nFeilmelding: ${e.message}" +
                         "\nFil: ${e.stackTrace.first()}" +
                         "\n-----------------------------------"
                 )

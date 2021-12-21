@@ -81,6 +81,8 @@ fun hentPersonidenterGjeldendeForBegrunnelse(
  * For eksempel om søker oppfyller vilkårene til delt bosted og utvidet barnetrygd, men barnetrygden allerede er
  * sendt ut til partner, og delt bosted er endret til at det ikke er noen utbetaling, ønsker vi fremdeles å ta med
  * barna uten utbetaling i begrunnelsen.
+ *
+ * Søker må med selv om det ikke er utbetaling på søker slik at det blir riktig ved avslag.
  */
 private fun hentPersonerForUtvidetOgSmåbarnstilleggBegrunnelse(
     identerMedUtbetaling: List<String>,
@@ -92,8 +94,12 @@ private fun hentPersonerForUtvidetOgSmåbarnstilleggBegrunnelse(
         .somOverlapper(periode.tilNullableMånedPeriode())
         .map { it.personIdent }
 
+    val søkersIdent = brevGrunnlag.personerPåBehandling.find { it.type == PersonType.SØKER }?.personIdent
+        ?: throw IllegalStateException("Søker mangler i brevgrunnlag")
+
     return identerMedUtbetaling +
-        identerFraSammenfallendeEndringsperioder
+        identerFraSammenfallendeEndringsperioder +
+        søkersIdent
 }
 
 private fun hentAktuellePersonerForVedtaksperiode(
