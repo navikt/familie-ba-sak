@@ -48,7 +48,6 @@ class SendMeldingTilBisysTask(
                         ident = it.key,
                         årsakskode = førstPeriod.type,
                         fom = førstPeriod.fom,
-                        tom = førstPeriod.tom
                     )
                 }
             )
@@ -198,7 +197,6 @@ data class BarnEndretOpplysning(
     val ident: String,
     val årsakskode: EndretType,
     val fom: YearMonth,
-    val tom: YearMonth
 )
 
 data class BarnetrygdBisysMelding(

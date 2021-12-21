@@ -122,7 +122,6 @@ class SendMeldingTilBisysTaskTest {
         assertThat(jsonMelding.barn[0].ident).isEqualTo(barn1.personIdent.ident)
         assertThat(jsonMelding.barn[0].årsakskode.toString()).isEqualTo("RO")
         assertThat(jsonMelding.barn[0].fom).isEqualTo(YearMonth.of(2022, 4))
-        assertThat(jsonMelding.barn[0].tom).isEqualTo(YearMonth.of(2037, 12))
     }
 
     @Test
@@ -175,7 +174,6 @@ class SendMeldingTilBisysTaskTest {
         assertThat(jsonMelding.barn[0].ident).isEqualTo(barn1.personIdent.ident)
         assertThat(jsonMelding.barn[0].årsakskode.toString()).isEqualTo("RR")
         assertThat(jsonMelding.barn[0].fom).isEqualTo(YearMonth.of(2022, 4))
-        assertThat(jsonMelding.barn[0].tom).isEqualTo(YearMonth.of(2037, 12))
     }
 
     @Test
