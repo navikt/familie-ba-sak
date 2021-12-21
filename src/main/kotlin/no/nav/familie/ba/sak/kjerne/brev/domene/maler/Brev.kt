@@ -16,6 +16,13 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
     HENLEGGE_TRUKKET_SØKNAD(false, "henleggeTrukketSoknad", "henlegge trukket søknad"),
     VARSEL_OM_REVURDERING(false, "varselOmRevurdering", "varsel om revurdering"),
     DØDSFALL(false, "dodsfall", "Dødsfall"),
+    SVARTIDSBREV(false, "svartidsbrev", "Svartidsbrev"),
+    INFORMASJONSBREV_FØDSEL_MINDREÅRIG(
+        false,
+        "informasjonsbrevFodselMindreaarig",
+        "Informasjonsbrev fødsel mindreårig"
+    ),
+    INFORMASJONSBREV_FØDSEL_UMYNDIG(false, "informasjonsbrevFodselUmyndig", "Informasjonsbrev fødsel umyndig"),
 
     VEDTAK_FØRSTEGANGSVEDTAK(true, "forstegangsvedtak", "Førstegangsvedtak"),
     VEDTAK_ENDRING(true, "vedtakEndring", "Vedtak endring"),
@@ -31,7 +38,6 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
     ),
     AUTOVEDTAK_NYFØDT_FØRSTE_BARN(true, "autovedtakNyfodtForsteBarn", "Autovedtak nyfødt - første barn"),
     AUTOVEDTAK_NYFØDT_BARN_FRA_FØR(true, "autovedtakNyfodtBarnFraFor", "Autovedtak nyfødt - barn fra før"),
-    SVARTIDSBREV(true, "svartidsbrev", "Svartidsbrev"),
 }
 
 interface BrevData {
