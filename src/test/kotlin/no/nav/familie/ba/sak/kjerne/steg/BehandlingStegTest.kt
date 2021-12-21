@@ -280,7 +280,7 @@ class BehandlingStegTest {
     }
 
     @Test
-    fun `Tester rekkefølgen på behandling av småbarnstillegg`() {
+    fun `Tester rekkefølgen til manuell behandling med årsak småbarnstillegg`() {
         var steg = FØRSTE_STEG
 
         listOf(
