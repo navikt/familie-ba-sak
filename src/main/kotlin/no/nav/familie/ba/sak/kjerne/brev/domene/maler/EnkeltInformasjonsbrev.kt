@@ -3,22 +3,24 @@ package no.nav.familie.ba.sak.kjerne.brev.domene.maler
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import java.time.LocalDate
 
-data class Svartidsbrev(
-    override val mal: Brevmal = Brevmal.SVARTIDSBREV,
-    override val data: SvartidsbrevData
+data class EnkeltInformasjonsbrev(
+    override val mal: Brevmal,
+    override val data: EnkeltInformasjonsbrevData
 ) : Brev {
 
     constructor(
         navn: String,
         fodselsnummer: String,
         enhet: String,
+        mal: Brevmal
     ) : this(
-        data = SvartidsbrevData(
-            flettefelter = SvartidsbrevData.Flettefelter(
+        mal = mal,
+        data = EnkeltInformasjonsbrevData(
+            flettefelter = EnkeltInformasjonsbrevData.Flettefelter(
                 navn = navn,
                 fodselsnummer = fodselsnummer,
             ),
-            delmalData = SvartidsbrevData.DelmalData(
+            delmalData = EnkeltInformasjonsbrevData.DelmalData(
                 SignaturDelmal(
                     enhet = enhet
                 )
@@ -27,7 +29,7 @@ data class Svartidsbrev(
     )
 }
 
-data class SvartidsbrevData(
+data class EnkeltInformasjonsbrevData(
     override val delmalData: DelmalData,
     override val flettefelter: Flettefelter,
 ) : BrevData {
