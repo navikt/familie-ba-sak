@@ -177,7 +177,7 @@ class SendMeldingTilBisysTaskTest {
     }
 
     @Test
-    fun `finnEndretPerioder() skal return riktig perioder som er endret`() {
+    fun `finnBarnEndretOpplysning() skal return riktig endret opplysning for barn`() {
         val (behandlingRepository, kafkaProducer, tilkjentYtelseRepository, kafkaResult, behandling) = setupMocks()
 
         val sendMeldingTilBisysTask =
