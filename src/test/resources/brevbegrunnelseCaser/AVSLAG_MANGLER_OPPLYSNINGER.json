@@ -5,12 +5,10 @@
   "vedtaksperiodetype": "AVSLAG",
   "begrunnelser": [
     {
-      "vedtakBegrunnelseSpesifikasjon": "AVSLAG_IKKE_FLYTTET_FRA_EKTEFELLE",
-      "vedtakBegrunnelseType": "AVSLAG"
+      "vedtakBegrunnelseSpesifikasjon": "AVSLAG_IKKE_FLYTTET_FRA_EKTEFELLE"
     },
     {
-      "vedtakBegrunnelseSpesifikasjon": "AVSLAG_FORELDRENE_BOR_SAMMEN",
-      "vedtakBegrunnelseType": "AVSLAG"
+      "vedtakBegrunnelseSpesifikasjon": "AVSLAG_FORELDRENE_BOR_SAMMEN"
     }
   ],
   "fritekster": [],

@@ -5,6 +5,10 @@ import no.nav.familie.ba.sak.common.NullablePeriode
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.kjerne.behandlingsresultat.MinimertUregistrertBarn
+import no.nav.familie.ba.sak.kjerne.brev.UtvidetScenarioForEndringsperiode
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilBrevPeriodeTestPerson
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import java.time.LocalDate
@@ -59,5 +63,32 @@ fun UtvidetVedtaksperiodeMedBegrunnelser.tilBrevPeriodeGrunnlag(
         fritekster = this.fritekster,
         minimerteUtbetalingsperiodeDetaljer = this.utbetalingsperiodeDetaljer.map { it.tilMinimertUtbetalingsperiodeDetalj() },
         begrunnelser = this.begrunnelser.map { it.tilBrevBegrunnelseGrunnlag(sanityBegrunnelser) }
+    )
+}
+
+fun BrevPeriodeGrunnlag.tilBrevPeriodeForLogging(
+    brevGrunnlag: BrevGrunnlag,
+    utvidetScenarioForEndringsperiode: UtvidetScenarioForEndringsperiode = UtvidetScenarioForEndringsperiode.IKKE_UTVIDET_YTELSE,
+    uregistrerteBarn: List<MinimertUregistrertBarn> = emptyList(),
+    erFørsteVedtaksperiodePåFagsak: Boolean = false,
+    brevMålform: Målform
+): BrevPeriodeForLogging {
+
+    return BrevPeriodeForLogging(
+        fom = this.fom,
+        tom = this.tom,
+        vedtaksperiodetype = this.type,
+        begrunnelser = this.begrunnelser.map { it.tilBrevBegrunnelseGrunnlagForLogging() },
+        fritekster = this.fritekster,
+        personerPåBehandling = brevGrunnlag.personerPåBehandling.map {
+            it.tilBrevPeriodeTestPerson(
+                brevPeriodeGrunnlag = this,
+                brevGrunnlag = brevGrunnlag
+            )
+        },
+        utvidetScenarioForEndringsperiode = utvidetScenarioForEndringsperiode,
+        uregistrerteBarn = uregistrerteBarn,
+        erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
+        brevMålform = brevMålform,
     )
 }
