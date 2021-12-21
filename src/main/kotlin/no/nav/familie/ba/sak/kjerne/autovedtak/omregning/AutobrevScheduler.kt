@@ -20,7 +20,7 @@ class AutobrevScheduler(val taskRepository: TaskRepositoryWrapper) {
      */
     @Transactional
     @Scheduled(cron = "0 0 $KLOKKETIME_SCHEDULER_TRIGGES 1 * *")
-    fun opprettTask() {
+    fun opprettAutobrevTask() {
         when (LeaderClient.isLeader()) {
             true -> {
                 // Timen for triggertid økes med en. Det er nødvendig å sette klokkeslettet litt frem dersom den 1. i
