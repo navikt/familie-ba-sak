@@ -32,9 +32,18 @@ object Behandlingutils {
         iverksatteBehandlinger: List<Behandling>,
         behandlingFørFølgende: Behandling
     ): Behandling? {
+        return hentIverksatteBehandlinger(
+            iverksatteBehandlinger,
+            behandlingFørFølgende
+        ).maxByOrNull { it.opprettetTidspunkt }
+    }
+
+    fun hentIverksatteBehandlinger(
+        iverksatteBehandlinger: List<Behandling>,
+        behandlingFørFølgende: Behandling
+    ): List<Behandling> {
         return iverksatteBehandlinger
             .filter { it.opprettetTidspunkt.isBefore(behandlingFørFølgende.opprettetTidspunkt) && it.steg == StegType.BEHANDLING_AVSLUTTET }
-            .maxByOrNull { it.opprettetTidspunkt }
     }
 
     fun bestemKategori(

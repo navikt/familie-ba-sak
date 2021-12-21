@@ -994,6 +994,7 @@ class UtbetalingsoppdragIntegrasjonTest(
         )
 
         assertEquals(1, utbetalingsoppdrag.utbetalingsperiode.single() { it.opphør == null }.forrigePeriodeId)
+        assertEquals(2, utbetalingsoppdrag.utbetalingsperiode.single() { it.opphør == null }.periodeId)
     }
 
     @Test

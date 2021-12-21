@@ -299,6 +299,16 @@ class BehandlingService(
         return Behandlingutils.hentForrigeIverksatteBehandling(iverksatteBehandlinger, behandling)
     }
 
+    /**
+     * Henter iverksatte behandlinger FØR en gitt behandling.
+     * Bør kun brukes i forbindelse med oppdrag mot økonomisystemet
+     * eller ved behandlingsresultat.
+     */
+    fun hentBehandlingerSomErIverksatt(behandling: Behandling): List<Behandling> {
+        val iverksatteBehandlinger = hentIverksatteBehandlinger(behandling.fagsak.id)
+        return Behandlingutils.hentIverksatteBehandlinger(iverksatteBehandlinger, behandling)
+    }
+
     fun hentSisteBehandlingSomErVedtatt(fagsakId: Long): Behandling? {
         return behandlingRepository.finnBehandlinger(fagsakId)
             .filter { !it.erHenlagt() && it.status == AVSLUTTET }

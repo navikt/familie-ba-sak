@@ -136,16 +136,14 @@ class ØkonomiService(
     }
 
     fun hentSisteOffsetPåFagsak(behandling: Behandling): Int? =
-        behandlingService.hentForrigeBehandlingSomErIverksatt(behandling = behandling)
-            ?.let { forrigeIverksattBehandling ->
+        behandlingService.hentBehandlingerSomErIverksatt(behandling = behandling).map { iverksattBehandling ->
 
-                beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(forrigeIverksattBehandling.id)
-                    .takeIf { it.isNotEmpty() }
-                    ?.let { andelerTilkjentYtelse ->
-                        andelerTilkjentYtelse.maxByOrNull { it.periodeOffset!! }?.periodeOffset?.toInt()
-                    }
-                    ?: hentSisteOffsetPåFagsak(forrigeIverksattBehandling)
-            }
+            beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(iverksattBehandling.id)
+                .takeIf { it.isNotEmpty() }
+                ?.let { andelerTilkjentYtelse ->
+                    andelerTilkjentYtelse.maxByOrNull { it.periodeOffset!! }?.periodeOffset?.toInt()
+                }
+        }.filter { it != null }.maxByOrNull { it!! }
 
     private fun validerOpphørsoppdrag(utbetalingsoppdrag: Utbetalingsoppdrag) {
         val (opphørsperioder, annet) = utbetalingsoppdrag.utbetalingsperiode.partition { it.opphør != null }
