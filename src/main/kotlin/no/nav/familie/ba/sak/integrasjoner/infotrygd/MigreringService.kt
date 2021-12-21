@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.integrasjoner.infotrygd
 
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
-import no.nav.commons.foedselsnummer.FoedselsNr
 import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
@@ -144,13 +143,11 @@ class MigreringService(
         val barnasIdenter = barnasAktør.map { it.aktivFødselsnummer() }
 
         val listeBarnFraPdl = pdlRestClient.hentForelderBarnRelasjon(personAktør)
-            .filter {
-                it.relatertPersonsRolle == FORELDERBARNRELASJONROLLE.BARN &&
-                    FoedselsNr(it.relatertPersonsIdent).foedselsdato.isAfter(LocalDate.now().minusYears(18))
-            }.map { it.relatertPersonsIdent }
-        if (barnasAktør.size != listeBarnFraPdl.size || !listeBarnFraPdl.containsAll(barnasIdenter)) {
+            .filter { it.relatertPersonsRolle == FORELDERBARNRELASJONROLLE.BARN }
+            .map { it.relatertPersonsIdent }
+        if (!listeBarnFraPdl.containsAll(barnasIdenter)) {
             secureLog.info(
-                "Kan ikke migrere person ${personAktør.aktivFødselsnummer()} fordi barn fra PDL ikke samsvarer med løpende barnetrygdbarn fra Infotrygd.\n" +
+                "Kan ikke migrere person ${personAktør.aktivFødselsnummer()} fordi barn fra PDL IKKE inneholder alle løpende barnetrygdbarn fra Infotrygd.\n" +
                     "Barn fra PDL: ${listeBarnFraPdl}\n Barn fra Infotrygd: $barnasIdenter"
             )
             kastOgTellMigreringsFeil(MigreringsfeilType.DIFF_BARN_INFOTRYGD_OG_PDL)

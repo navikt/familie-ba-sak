@@ -202,7 +202,7 @@ class MigreringServiceTest(
     }
 
     @Test
-    fun `migrering skal feile dersom PDL returnerer andre barn enn Infotrygd på person`() {
+    fun `migrering skal feile dersom PDL returnerer mangelfull liste over barn fra Infotrygd på person`() {
         val barnUnder18 = fødselsnummerGenerator.foedselsnummer(LocalDate.now()).asString
         val barnOver18 = fødselsnummerGenerator.foedselsnummer(LocalDate.now().minusYears(19)).asString
         every {

@@ -6,6 +6,8 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.BrevType.HENLEGGE_TRUKKET_SØKNA
 import no.nav.familie.ba.sak.kjerne.brev.domene.BrevType.INFORMASJONSBREV_DELT_BOSTED
 import no.nav.familie.ba.sak.kjerne.brev.domene.BrevType.INNHENTE_OPPLYSNINGER
 import no.nav.familie.ba.sak.kjerne.brev.domene.BrevType.VARSEL_OM_REVURDERING
+import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
+import no.nav.familie.ba.sak.kjerne.brev.domene.maler.EnkeltInformasjonsbrev
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.FlettefelterForDokumentImpl
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.HenleggeTrukketSøknadBrev
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.HenleggeTrukketSøknadData
@@ -122,6 +124,27 @@ fun ManueltBrevRequest.tilBrevmal() = when (this.brevmal.malId) {
                     varselÅrsaker = this.multiselectVerdier,
                 )
             )
+        )
+    BrevType.SVARTIDSBREV.malId ->
+        EnkeltInformasjonsbrev(
+            navn = this.mottakerNavn,
+            fodselsnummer = this.mottakerIdent,
+            enhet = this.enhetNavn(),
+            mal = Brevmal.SVARTIDSBREV
+        )
+    BrevType.INFORMASJONSBREV_FØDSEL_MINDREÅRIG.malId ->
+        EnkeltInformasjonsbrev(
+            navn = this.mottakerNavn,
+            fodselsnummer = this.mottakerIdent,
+            enhet = this.enhetNavn(),
+            mal = Brevmal.INFORMASJONSBREV_FØDSEL_MINDREÅRIG
+        )
+    BrevType.INFORMASJONSBREV_FØDSEL_UMYNDIG.malId ->
+        EnkeltInformasjonsbrev(
+            navn = this.mottakerNavn,
+            fodselsnummer = this.mottakerIdent,
+            enhet = this.enhetNavn(),
+            mal = Brevmal.INFORMASJONSBREV_FØDSEL_UMYNDIG
         )
     else -> error(
         "Kan ikke mappe brevmal for ${
