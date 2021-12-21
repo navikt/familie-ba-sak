@@ -5,6 +5,7 @@ object DevLauncher {
 
     @JvmStatic
     fun main(args: Array<String>) {
+        System.setProperty("spring.profiles.active", "dev")
         val app = SpringApplicationBuilder(ApplicationConfig::class.java)
             .profiles(
                 "dev",
