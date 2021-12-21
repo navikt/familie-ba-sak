@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.integrasjoner.økonomi
 
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.FeatureToggleService
+import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.gjeldendeForrigeOffsetForKjede
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.kjedeinndelteAndeler
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.oppdaterBeståendeAndelerMedOffset
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -83,8 +84,9 @@ class ØkonomiService(
 
             val forrigeTilstand =
                 beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(forrigeBehandling.id)
-            // TODO: Her bør det legges til sjekk om personident er endret. Hvis endret bør dette mappes i forrigeTilstand som benyttes videre.
             val forrigeKjeder = kjedeinndelteAndeler(forrigeTilstand)
+
+            val sisteOffsetPerIdent = hentSisteOffsetPerIdent(forrigeBehandling.fagsak.id)
 
             val sisteOffsetPåFagsak = hentSisteOffsetPåFagsak(behandling = oppdatertBehandling)
 
@@ -99,6 +101,7 @@ class ØkonomiService(
                 vedtak = vedtak,
                 erFørsteBehandlingPåFagsak = erFørsteIverksatteBehandlingPåFagsak,
                 forrigeKjeder = forrigeKjeder,
+                sisteOffsetPerIdent = sisteOffsetPerIdent,
                 sisteOffsetPåFagsak = sisteOffsetPåFagsak,
                 oppdaterteKjeder = oppdaterteKjeder,
                 erSimulering = erSimulering,
@@ -120,6 +123,16 @@ class ØkonomiService(
         }
 
         return utbetalingsoppdrag.also { it.valider(vedtak.behandling.resultat) }
+    }
+
+    private fun hentSisteOffsetPerIdent(fagsakId: Long): Map<String, Int> {
+        val alleAndelerTilkjentYtelserIverksattMotØkonomi =
+            beregningService.hentTilkjentYtelseForBehandlingerIverksattMotØkonomi(fagsakId)
+                .flatMap { it.andelerTilkjentYtelse }
+        val alleTideligereKjederIverksattMotØkonomi =
+            kjedeinndelteAndeler(alleAndelerTilkjentYtelserIverksattMotØkonomi)
+
+        return gjeldendeForrigeOffsetForKjede(alleTideligereKjederIverksattMotØkonomi)
     }
 
     fun hentSisteOffsetPåFagsak(behandling: Behandling): Int? =
