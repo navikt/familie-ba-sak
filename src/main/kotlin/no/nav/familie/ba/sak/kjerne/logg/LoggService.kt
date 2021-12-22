@@ -200,8 +200,8 @@ class LoggService(
         lagre(
             Logg(
                 behandlingId = behandling.id,
-                type = LoggType.SEND_TIL_BESLUTTER,
-                tittel = "Sendt til beslutter",
+                type = if (behandling.erManuellMigrering()) LoggType.SEND_TIL_SYSTEM else LoggType.SEND_TIL_BESLUTTER,
+                tittel = if (behandling.erManuellMigrering()) "Sendt til system" else "Sendt til beslutter",
                 rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
                     rolleConfig,
                     BehandlerRolle.SAKSBEHANDLER
@@ -215,8 +215,10 @@ class LoggService(
         lagre(
             Logg(
                 behandlingId = behandling.id,
-                type = LoggType.GODKJENNE_VEDTAK,
-                tittel = if (beslutning.erGodkjent()) "Vedtak godkjent " else "Vedtak underkjent",
+                type = if (behandling.erManuellMigrering()) LoggType.MIGRERING_BEKREFTET else LoggType.GODKJENNE_VEDTAK,
+                tittel = if (beslutning.erGodkjent()) {
+                    if (behandling.erManuellMigrering()) "Migrering bekreftet" else "Vedtak godkent"
+                } else "Vedtak underkjent",
                 rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(rolleConfig, BehandlerRolle.BESLUTTER),
                 tekst = if (!beslutning.erGodkjent()) "Begrunnelse: $begrunnelse" else "",
                 opprettetAv = if (behandling.erManuellMigrering()) SikkerhetContext.SYSTEM_NAVN else
