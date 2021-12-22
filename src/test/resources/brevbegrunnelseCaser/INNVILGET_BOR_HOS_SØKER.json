@@ -5,8 +5,7 @@
   "vedtaksperiodetype": "UTBETALING",
   "begrunnelser": [
     {
-      "vedtakBegrunnelseSpesifikasjon": "INNVILGET_BOR_HOS_SØKER",
-      "vedtakBegrunnelseType": "INNVILGET"
+      "vedtakBegrunnelseSpesifikasjon": "INNVILGET_BOR_HOS_SØKER"
     }
   ],
   "fritekster": [],
