@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.integrasjoner.pdl
 
 import com.github.tomakehurst.wiremock.client.WireMock
 import io.mockk.every
-import io.mockk.mockk
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.tilAktør
@@ -46,7 +45,6 @@ internal class PersonopplysningerServiceTest(
                 SystemOnlyPdlRestClient(
                     URI.create(wireMockServer.baseUrl() + "/api"),
                     restTemplate,
-                    mockk(),
                     personidentService
                 ),
                 mockIntegrasjonClient,

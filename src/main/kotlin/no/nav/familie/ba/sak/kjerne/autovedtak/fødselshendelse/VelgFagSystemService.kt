@@ -23,7 +23,6 @@ import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
-import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
@@ -68,11 +67,11 @@ class VelgFagSystemService(
     }
 
     internal fun morEllerBarnHarLøpendeSakIInfotrygd(morsIdent: String, barnasIdenter: List<String>): Boolean {
-        val morsIdenter = personopplysningerService.hentIdenter(Ident(morsIdent))
+        val morsIdenter = personopplysningerService.hentIdenter(morsIdent, false)
             .filter { it.gruppe == "FOLKEREGISTERIDENT" }
             .map { it.ident }
         val alleBarnasIdenter = barnasIdenter.flatMap {
-            personopplysningerService.hentIdenter(Ident(it))
+            personopplysningerService.hentIdenter(it, false)
                 .filter { identinfo -> identinfo.gruppe == "FOLKEREGISTERIDENT" }
                 .map { identinfo -> identinfo.ident }
         }

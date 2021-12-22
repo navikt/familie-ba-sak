@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component
 @Component
 class CachedSanityKlient {
 
-    @Cacheable("sanitybegrunnelser")
+    @Cacheable("sanitybegrunnelser", cacheManager = "shortCache")
     fun hentSanityBegrunnelserCached(): List<SanityBegrunnelse> {
         return hentSanityBegrunnelser()
     }

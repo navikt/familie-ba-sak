@@ -341,6 +341,7 @@ class StegService(
     ): Behandling {
         try {
             logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} håndterer ${behandlingSteg.stegType()} på behandling ${behandling.id}")
+            tilgangService.validerTilgangTilBehandling(behandlingId = behandling.id)
             tilgangService.verifiserHarTilgangTilHandling(
                 minimumBehandlerRolle = behandlingSteg.stegType().tillattFor.minByOrNull { it.nivå }
                     ?: throw Feil("${SikkerhetContext.hentSaksbehandlerNavn()} prøver å utføre steg ${behandlingSteg.stegType()} som ikke er tillatt av noen."),

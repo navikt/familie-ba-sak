@@ -19,7 +19,6 @@ import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMell
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMellomlagringType.SAK
 import no.nav.familie.eksterne.kontrakter.saksstatistikk.BehandlingDVH
 import no.nav.familie.eksterne.kontrakter.saksstatistikk.SakDVH
-import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeAll
@@ -62,8 +61,8 @@ class SaksstatistikkTest(
         val fnr = "12345678910"
 
         every {
-            mockPersonopplysningerService.hentIdenter(Ident(fnr))
-        } returns listOf(IdentInformasjon(ident = fnr, historisk = true, gruppe = "FOLKEREGISTERIDENT"))
+            mockPersonopplysningerService.hentIdenter(fnr, true)
+        } returns listOf(IdentInformasjon(ident = fnr, historisk = false, gruppe = "FOLKEREGISTERIDENT"))
 
         val fagsakId = fagsakController.hentEllerOpprettFagsak(FagsakRequest(personIdent = fnr)).body!!.data!!.id
 
@@ -111,8 +110,8 @@ class SaksstatistikkTest(
         val fnr = "12345678910"
 
         every {
-            mockPersonopplysningerService.hentIdenter(Ident(fnr))
-        } returns listOf(IdentInformasjon(ident = fnr, historisk = true, gruppe = "FOLKEREGISTERIDENT"))
+            mockPersonopplysningerService.hentIdenter(fnr, true)
+        } returns listOf(IdentInformasjon(ident = fnr, historisk = false, gruppe = "FOLKEREGISTERIDENT"))
 
         fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr, false)
         val behandling = behandlingService.opprettBehandling(

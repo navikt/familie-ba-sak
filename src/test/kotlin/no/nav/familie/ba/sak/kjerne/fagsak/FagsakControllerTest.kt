@@ -23,7 +23,6 @@ import no.nav.familie.ba.sak.kjerne.personident.Personident
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentRepository
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeEach
@@ -76,8 +75,8 @@ class FagsakControllerTest(
         val fnr = randomFnr()
 
         every {
-            mockPersonopplysningerService.hentIdenter(Ident(fnr))
-        } returns listOf(IdentInformasjon(ident = fnr, historisk = true, gruppe = "FOLKEREGISTERIDENT"))
+            mockPersonopplysningerService.hentIdenter(fnr, true)
+        } returns listOf(IdentInformasjon(ident = fnr, historisk = false, gruppe = "FOLKEREGISTERIDENT"))
 
         fagsakController.hentEllerOpprettFagsak(FagsakRequest(personIdent = fnr))
         assertEquals(fnr, fagsakService.hent(tilAktør(fnr))?.aktør?.aktivFødselsnummer())
@@ -102,8 +101,8 @@ class FagsakControllerTest(
         val fnr = randomFnr()
 
         every {
-            mockPersonopplysningerService.hentIdenter(Ident(fnr))
-        } returns listOf(IdentInformasjon(ident = fnr, historisk = true, gruppe = "FOLKEREGISTERIDENT"))
+            mockPersonopplysningerService.hentIdenter(fnr, true)
+        } returns listOf(IdentInformasjon(ident = fnr, historisk = false, gruppe = "FOLKEREGISTERIDENT"))
 
         val fagsak = fagsakController.hentEllerOpprettFagsak(FagsakRequest(personIdent = fnr))
 
@@ -116,9 +115,9 @@ class FagsakControllerTest(
         val fnr = randomFnr()
 
         every {
-            mockPersonopplysningerService.hentIdenter(Ident(fnr))
+            mockPersonopplysningerService.hentIdenter(fnr, true)
         } returns listOf(
-            IdentInformasjon(ident = fnr, historisk = true, gruppe = "FOLKEREGISTERIDENT")
+            IdentInformasjon(ident = fnr, historisk = false, gruppe = "FOLKEREGISTERIDENT")
         )
 
         val nyRestFagsak = fagsakController.hentEllerOpprettFagsak(FagsakRequest(personIdent = fnr))

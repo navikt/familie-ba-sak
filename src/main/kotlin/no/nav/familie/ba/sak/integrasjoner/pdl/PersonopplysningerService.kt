@@ -11,7 +11,6 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.internal.VergeData
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
-import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import no.nav.familie.kontrakter.felles.personopplysning.Opphold
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import org.springframework.stereotype.Service
@@ -20,9 +19,9 @@ import org.springframework.web.context.annotation.ApplicationScope
 @Service
 @ApplicationScope
 class PersonopplysningerService(
-    val pdlRestClient: PdlRestClient,
-    val systemOnlyPdlRestClient: SystemOnlyPdlRestClient,
-    val integrasjonClient: IntegrasjonClient,
+    private val pdlRestClient: PdlRestClient,
+    private val systemOnlyPdlRestClient: SystemOnlyPdlRestClient,
+    private val integrasjonClient: IntegrasjonClient,
 ) {
 
     fun hentPersoninfoMedRelasjonerOgRegisterinformasjon(aktør: Aktør): PersonInfo {
@@ -65,10 +64,6 @@ class PersonopplysningerService(
 
     private fun hentPersoninfoMedQuery(aktør: Aktør, personInfoQuery: PersonInfoQuery): PersonInfo {
         return pdlRestClient.hentPerson(aktør, personInfoQuery)
-    }
-
-    fun hentIdenter(ident: Ident): List<IdentInformasjon> {
-        return hentIdenter(ident.ident, true)
     }
 
     fun hentIdenter(personIdent: String, historikk: Boolean): List<IdentInformasjon> {

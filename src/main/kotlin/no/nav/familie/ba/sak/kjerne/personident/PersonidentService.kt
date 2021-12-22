@@ -4,7 +4,6 @@ import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.IdentInformasjon
 import no.nav.familie.kontrakter.felles.PersonIdent
-import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -42,7 +41,7 @@ class PersonidentService(
     }
 
     fun hentAlleFødselsnummerForEnAktør(aktør: Aktør) =
-        personopplysningerService.hentIdenter(Ident(aktør.aktivFødselsnummer()))
+        personopplysningerService.hentIdenter(aktør.aktivFødselsnummer(), true)
             .filter { it.gruppe == "FOLKEREGISTERIDENT" }
             .map { it.ident }
 

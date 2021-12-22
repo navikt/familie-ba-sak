@@ -24,6 +24,7 @@ import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.core.NestedExceptionUtils
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
@@ -45,6 +46,7 @@ class PdlRestClient(
 
     private val hentIdenterQuery = hentGraphqlQuery("hentIdenter")
 
+    @Cacheable("personopplysninger", cacheManager = "shortCache")
     fun hentPerson(aktør: Aktør, personInfoQuery: PersonInfoQuery): PersonInfo {
 
         val pdlPersonRequest = PdlPersonRequest(
@@ -119,6 +121,7 @@ class PdlRestClient(
         }
     }
 
+    @Cacheable("identer", cacheManager = "shortCache")
     fun hentIdenter(personIdent: String): PdlHentIdenterResponse {
         val pdlPersonRequest = PdlPersonRequest(
             variables = PdlPersonRequestVariables(personIdent),
@@ -138,6 +141,7 @@ class PdlRestClient(
         )
     }
 
+    @Cacheable("dødsfall", cacheManager = "shortCache")
     fun hentDødsfall(aktør: Aktør): List<Doedsfall> {
         val pdlPersonRequest = PdlPersonRequest(
             variables = PdlPersonRequestVariables(aktør.aktivFødselsnummer()),
@@ -162,6 +166,7 @@ class PdlRestClient(
         )
     }
 
+    @Cacheable("vergedata", cacheManager = "shortCache")
     fun hentVergemaalEllerFremtidsfullmakt(aktør: Aktør): List<VergemaalEllerFremtidsfullmakt> {
         val pdlPersonRequest = PdlPersonRequest(
             variables = PdlPersonRequestVariables(aktør.aktivFødselsnummer()),

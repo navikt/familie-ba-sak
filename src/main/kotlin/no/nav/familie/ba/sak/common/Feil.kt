@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.common
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonPropertyOrder
-import no.nav.familie.ba.sak.integrasjoner.infotrygd.MigreringsfeilType
 import org.springframework.http.HttpStatus
 import java.time.LocalDateTime
 
@@ -34,22 +33,9 @@ class UtbetalingsikkerhetFeil(
 
 class RolleTilgangskontrollFeil(
     melding: String,
-    override val frontendFeilmelding: String,
+    override val frontendFeilmelding: String = melding,
     override val httpStatus: HttpStatus = HttpStatus.OK,
     override val throwable: Throwable? = null
-) : FunksjonellFeil(
-    melding,
-    frontendFeilmelding,
-    httpStatus,
-    throwable
-)
-
-class MigreringsFeil(
-    melding: String,
-    override val frontendFeilmelding: String,
-    override val httpStatus: HttpStatus = HttpStatus.OK,
-    override val throwable: Throwable? = null,
-    val migreringsfeilType: MigreringsfeilType
 ) : FunksjonellFeil(
     melding,
     frontendFeilmelding,

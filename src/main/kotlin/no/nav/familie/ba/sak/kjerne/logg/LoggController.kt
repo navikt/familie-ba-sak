@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.logg
 
 import no.nav.familie.ba.sak.common.RessursUtils.badRequest
-import no.nav.familie.ba.sak.sikkerhet.validering.BehandlingstilgangConstraint
+import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.ResponseEntity
@@ -16,14 +16,16 @@ import org.springframework.web.bind.annotation.RestController
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class LoggController(
+    private val tilgangService: TilgangService,
     private val loggService: LoggService
 ) {
 
     @GetMapping(path = ["/{behandlingId}"])
     fun hentLoggForBehandling(
-        @PathVariable @BehandlingstilgangConstraint
+        @PathVariable
         behandlingId: Long
     ): ResponseEntity<Ressurs<List<Logg>>> {
+        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId)
         return Result.runCatching { loggService.hentLoggForBehandling(behandlingId) }
             .fold(
                 onSuccess = { ResponseEntity.ok(Ressurs.success(it)) },

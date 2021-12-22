@@ -36,7 +36,6 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.mockSøkerAutoma
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.mockSøkerAutomatiskBehandlingAktør
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.mockSøkerAutomatiskBehandlingFnr
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.success
@@ -50,7 +49,6 @@ import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
-import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import no.nav.familie.kontrakter.felles.personopplysning.Matrikkeladresse
 import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
 import no.nav.familie.kontrakter.felles.personopplysning.Opphold
@@ -141,7 +139,7 @@ class ClientMocks {
         )
 
         every {
-            mockPersonopplysningerService.hentIdenter(any())
+            mockPersonopplysningerService.hentIdenter(any(), true)
         } answers {
             listOf(IdentInformasjon("123", false, "FOLKEREGISTERIDENT"))
         }
@@ -296,12 +294,12 @@ class ClientMocks {
                 )
             }
 
-            val identSlot = slot<Ident>()
+            val identSlot = slot<String>()
             every {
-                mockPersonopplysningerService.hentIdenter(capture(identSlot))
+                mockPersonopplysningerService.hentIdenter(capture(identSlot), true)
             } answers {
                 listOf(
-                    IdentInformasjon(identSlot.captured.ident, false, "FOLKEREGISTERIDENT"),
+                    IdentInformasjon(identSlot.captured, false, "FOLKEREGISTERIDENT"),
                     IdentInformasjon(randomFnr(), true, "FOLKEREGISTERIDENT")
                 )
             }
@@ -569,8 +567,6 @@ class ClientMocks {
                 else
                     listOf(Tilgang(true, null))
             }
-
-            every { mockIntegrasjonClient.hentPersonIdent(any()) } returns PersonIdent(søkerFnr[0])
 
             every { mockIntegrasjonClient.hentArbeidsforhold(any(), any()) } returns emptyList()
 

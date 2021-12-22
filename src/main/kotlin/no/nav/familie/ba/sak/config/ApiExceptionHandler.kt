@@ -37,7 +37,7 @@ class ApiExceptionHandler {
     }
 
     @ExceptionHandler(RolleTilgangskontrollFeil::class)
-    fun handleFunksjonellFeil(rolleTilgangskontrollFeil: RolleTilgangskontrollFeil): ResponseEntity<Ressurs<Nothing>> {
+    fun handleRolleTilgangskontrollFeil(rolleTilgangskontrollFeil: RolleTilgangskontrollFeil): ResponseEntity<Ressurs<Nothing>> {
         return rolleTilgangResponse(rolleTilgangskontrollFeil)
     }
 

@@ -9,15 +9,21 @@ object SikkerhetContext {
     const val SYSTEM_FORKORTELSE = "VL"
     const val SYSTEM_NAVN = "System"
 
-    fun hentSaksbehandler(): String {
-        return Result.runCatching { SpringTokenValidationContextHolder().tokenValidationContext }
+    /**
+     * @param strict hvis true - skal kaste feil hvis token ikke inneholder saksbehandler
+     */
+    fun hentSaksbehandler(strict: Boolean = false): String {
+        val saksbehandler = Result.runCatching { SpringTokenValidationContextHolder().tokenValidationContext }
             .fold(
                 onSuccess = { it.getClaims("azuread")?.get("preferred_username")?.toString() ?: SYSTEM_FORKORTELSE },
                 onFailure = { SYSTEM_FORKORTELSE }
             )
-    }
 
-    fun erSystemKontekst() = hentSaksbehandler() == SYSTEM_FORKORTELSE
+        if (strict && saksbehandler == SYSTEM_FORKORTELSE) {
+            error("Finner ikke NAVident i token")
+        }
+        return saksbehandler
+    }
 
     fun hentSaksbehandlerNavn(): String {
         return Result.runCatching { SpringTokenValidationContextHolder().tokenValidationContext }
@@ -27,7 +33,7 @@ object SikkerhetContext {
             )
     }
 
-    private fun hentGrupper(): List<String> {
+    fun hentGrupper(): List<String> {
         return Result.runCatching { SpringTokenValidationContextHolder().tokenValidationContext }
             .fold(
                 onSuccess = {
@@ -38,7 +44,10 @@ object SikkerhetContext {
             )
     }
 
-    fun hentRolletilgangFraSikkerhetscontext(rolleConfig: RolleConfig, lavesteSikkerhetsnivå: BehandlerRolle?): BehandlerRolle {
+    fun hentRolletilgangFraSikkerhetscontext(
+        rolleConfig: RolleConfig,
+        lavesteSikkerhetsnivå: BehandlerRolle?
+    ): BehandlerRolle {
         if (hentSaksbehandler() == SYSTEM_FORKORTELSE) return BehandlerRolle.SYSTEM
 
         val grupper = hentGrupper()
