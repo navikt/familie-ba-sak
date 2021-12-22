@@ -91,7 +91,9 @@ class UtvidetBehandlingService(
             tilbakekreving = tilbakekreving?.tilRestTilbakekreving(),
             vedtak = vedtak?.tilRestVedtak(
                 vedtaksperiodeService.hentUtvidetVedtaksperiodeMedBegrunnelser(vedtak = vedtak),
-                behandlingenErAvsluttet = behandling.status == BehandlingStatus.AVSLUTTET
+                skalMinimeres = behandling.status == BehandlingStatus.AVSLUTTET ||
+                    behandling.status == BehandlingStatus.FATTER_VEDTAK ||
+                    behandling.status == BehandlingStatus.IVERKSETTER_VEDTAK
             ),
             totrinnskontroll = totrinnskontroll?.tilRestTotrinnskontroll(),
         )
