@@ -19,10 +19,17 @@ data class RestVedtakBegrunnelseTilknyttetVilkår(
     val vilkår: Vilkår?
 )
 
-fun Vedtak.tilRestVedtak(vedtaksperioderMedBegrunnelser: List<UtvidetVedtaksperiodeMedBegrunnelser>) =
+fun Vedtak.tilRestVedtak(
+    vedtaksperioderMedBegrunnelser: List<UtvidetVedtaksperiodeMedBegrunnelser>,
+    behandlingenErAvsluttet: Boolean,
+) =
     RestVedtak(
         aktiv = this.aktiv,
         vedtaksdato = this.vedtaksdato,
         id = this.id,
-        vedtaksperioderMedBegrunnelser = vedtaksperioderMedBegrunnelser,
+        vedtaksperioderMedBegrunnelser = if (behandlingenErAvsluttet) {
+            vedtaksperioderMedBegrunnelser.filter { it.begrunnelser.isNotEmpty() }
+        } else {
+            vedtaksperioderMedBegrunnelser
+        },
     )
