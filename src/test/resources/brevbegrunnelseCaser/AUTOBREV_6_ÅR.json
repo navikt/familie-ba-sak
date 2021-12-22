@@ -5,8 +5,7 @@
   "vedtaksperiodetype": "UTBETALING",
   "begrunnelser": [
     {
-      "vedtakBegrunnelseSpesifikasjon": "REDUKSJON_UNDER_6_ÅR_AUTOVEDTAK",
-      "vedtakBegrunnelseType": "REDUKSJON"
+      "vedtakBegrunnelseSpesifikasjon": "REDUKSJON_UNDER_6_ÅR_AUTOVEDTAK"
     }
   ],
   "fritekster": [],
