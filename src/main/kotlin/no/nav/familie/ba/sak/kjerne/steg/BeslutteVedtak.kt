@@ -114,8 +114,11 @@ class BeslutteVedtak(
 
     private fun opprettTaskFerdigstillGodkjenneVedtak(behandling: Behandling, beslutning: RestBeslutningPåVedtak) {
         loggService.opprettBeslutningOmVedtakLogg(behandling, beslutning.beslutning, beslutning.begrunnelse)
-        val ferdigstillGodkjenneVedtakTask = FerdigstillOppgave.opprettTask(behandling.id, Oppgavetype.GodkjenneVedtak)
-        taskRepository.save(ferdigstillGodkjenneVedtakTask)
+        if (!behandling.erManuellMigrering()) {
+            val ferdigstillGodkjenneVedtakTask =
+                FerdigstillOppgave.opprettTask(behandling.id, Oppgavetype.GodkjenneVedtak)
+            taskRepository.save(ferdigstillGodkjenneVedtakTask)
+        }
     }
 
     private fun opprettTaskIverksettMotOppdrag(behandling: Behandling, vedtak: Vedtak) {

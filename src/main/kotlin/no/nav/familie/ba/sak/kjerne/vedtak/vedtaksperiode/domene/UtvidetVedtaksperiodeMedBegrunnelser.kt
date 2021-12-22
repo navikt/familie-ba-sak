@@ -1,17 +1,24 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
+import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.convertDataClassToJson
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.MinimertUregistrertBarn
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.BrevGrunnlag
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
+import no.nav.familie.ba.sak.kjerne.brev.domene.tilBrevPeriodeForLogging
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilBrevPeriodeGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.Begrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilRestVedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.RestVedtaksbegrunnelse
+import org.slf4j.LoggerFactory
 import java.time.LocalDate
+
+private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
 data class UtvidetVedtaksperiodeMedBegrunnelser(
     val id: Long,
@@ -29,17 +36,36 @@ data class UtvidetVedtaksperiodeMedBegrunnelser(
         erFørsteVedtaksperiodePåFagsak: Boolean,
         uregistrerteBarn: List<MinimertUregistrertBarn>,
         brevMålform: Målform,
-    ) = this
-        .tilBrevPeriodeGrunnlag(sanityBegrunnelser)
-        .tilBrevPeriodeGrunnlagMedPersoner(
-            brevGrunnlag = brevGrunnlag,
-            erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak
-        )
-        .byggBegrunnelserOgFritekster(
-            brevGrunnlag = brevGrunnlag,
-            uregistrerteBarn = uregistrerteBarn,
-            brevMålform = brevMålform
-        )
+    ): List<Begrunnelse> {
+        val brevPeriodeGrunnlag = this
+            .tilBrevPeriodeGrunnlag(sanityBegrunnelser)
+        return try {
+            brevPeriodeGrunnlag
+                .tilBrevPeriodeGrunnlagMedPersoner(
+                    brevGrunnlag = brevGrunnlag,
+                    erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak
+                )
+                .byggBegrunnelserOgFritekster(
+                    brevGrunnlag = brevGrunnlag,
+                    uregistrerteBarn = uregistrerteBarn,
+                    brevMålform = brevMålform
+                )
+        } catch (exception: Exception) {
+            val brevPeriodeForLogging = brevPeriodeGrunnlag.tilBrevPeriodeForLogging(
+                brevGrunnlag = brevGrunnlag,
+                uregistrerteBarn = uregistrerteBarn,
+                brevMålform = brevMålform,
+            )
+
+            secureLogger.error(
+                "Feil ved generering av brevbegrunnelse. Data som ble sendt inn var: ${
+                brevPeriodeForLogging.convertDataClassToJson()
+                }",
+                exception
+            )
+            throw Feil(message = "Feil ved generering av brevbegrunnelse: ", throwable = exception)
+        }
+    }
 }
 
 fun List<UtvidetVedtaksperiodeMedBegrunnelser>.sorter(): List<UtvidetVedtaksperiodeMedBegrunnelser> {

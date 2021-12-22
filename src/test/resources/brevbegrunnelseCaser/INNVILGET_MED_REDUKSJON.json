@@ -5,12 +5,10 @@
   "vedtaksperiodetype": "UTBETALING",
   "begrunnelser": [
     {
-      "vedtakBegrunnelseSpesifikasjon": "REDUKSJON_FLYTTET_BARN",
-      "vedtakBegrunnelseType": "REDUKSJON"
+      "vedtakBegrunnelseSpesifikasjon": "REDUKSJON_FLYTTET_BARN"
     },
     {
-      "vedtakBegrunnelseSpesifikasjon": "INNVILGET_BOR_HOS_SØKER",
-      "vedtakBegrunnelseType": "INNVILGET"
+      "vedtakBegrunnelseSpesifikasjon": "INNVILGET_BOR_HOS_SØKER"
     }
   ],
   "fritekster": [],

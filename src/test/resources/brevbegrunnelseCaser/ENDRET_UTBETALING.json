@@ -5,8 +5,7 @@
   "vedtaksperiodetype": "ENDRET_UTBETALING",
   "begrunnelser": [
     {
-      "vedtakBegrunnelseSpesifikasjon": "ENDRET_UTBETALING_DELT_BOSTED_INGEN_UTBETALING",
-      "vedtakBegrunnelseType": "ENDRET_UTBETALING"
+      "vedtakBegrunnelseSpesifikasjon": "ENDRET_UTBETALING_DELT_BOSTED_INGEN_UTBETALING"
     }
   ],
   "fritekster": [],
