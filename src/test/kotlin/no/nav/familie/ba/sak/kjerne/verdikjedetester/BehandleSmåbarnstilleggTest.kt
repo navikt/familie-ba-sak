@@ -99,12 +99,7 @@ class BehandleSmåbarnstilleggTest(
         )
     }
 
-    @Test
-    @Order(1)
-    fun `Skal behandle utvidet nasjonal sak med småbarnstillegg`() {
-        every { featureToggleService.isEnabled(any()) } returns true
-
-        val søkersIdent = scenario.søker.ident!!
+    private fun settOppefSakMockForDeFørste2Testene(søkersIdent: String) {
 
         every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns PerioderOvergangsstønadResponse(
             perioder = listOf(
@@ -116,6 +111,14 @@ class BehandleSmåbarnstilleggTest(
                 )
             )
         )
+    }
+
+    @Test
+    @Order(1)
+    fun `Skal behandle utvidet nasjonal sak med småbarnstillegg`() {
+        every { featureToggleService.isEnabled(any()) } returns true
+        val søkersIdent = scenario.søker.ident!!
+        settOppefSakMockForDeFørste2Testene(søkersIdent)
 
         val fagsak = familieBaSakKlient().opprettFagsak(søkersIdent = søkersIdent)
         val restBehandling = familieBaSakKlient().opprettBehandling(
@@ -217,7 +220,8 @@ class BehandleSmåbarnstilleggTest(
         )
 
         val vedtaksperiodeId =
-            restUtvidetBehandlingEtterVurderTilbakekreving.data!!.vedtak!!.vedtaksperioderMedBegrunnelser.first()
+            restUtvidetBehandlingEtterVurderTilbakekreving.data!!.vedtak!!.vedtaksperioderMedBegrunnelser.sortedBy { it.fom }
+                .first()
         familieBaSakKlient().oppdaterVedtaksperiodeMedStandardbegrunnelser(
             vedtaksperiodeId = vedtaksperiodeId.id,
             restPutVedtaksperiodeMedStandardbegrunnelser = RestPutVedtaksperiodeMedStandardbegrunnelser(
@@ -274,6 +278,8 @@ class BehandleSmåbarnstilleggTest(
     @Order(2)
     fun `Skal ikke opprette behandling når det ikke finnes endringer på perioder med full overgangsstønad`() {
         val søkersIdent = scenario.søker.ident!!
+        settOppefSakMockForDeFørste2Testene(søkersIdent)
+
         val søkersAktør = personidentService.hentOgLagreAktør(søkersIdent)
         vedtakOmOvergangsstønadService.håndterVedtakOmOvergangsstønad(aktør = søkersAktør)
         val fagsak = fagsakService.hentFagsakPåPerson(aktør = søkersAktør)

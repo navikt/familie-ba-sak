@@ -34,7 +34,7 @@ class AutomatiskVilkårsvurderingIntegrasjonTest(
     @Autowired val persongrunnlagService: PersongrunnlagService,
     @Autowired val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
     @Autowired val databaseCleanupService: DatabaseCleanupService,
-) : AbstractSpringIntegrationTest(mockPersonopplysningerService) {
+) : AbstractSpringIntegrationTest() {
 
     @BeforeEach
     fun truncate() {

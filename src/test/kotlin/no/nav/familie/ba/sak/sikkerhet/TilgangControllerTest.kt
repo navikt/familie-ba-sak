@@ -20,7 +20,7 @@ class TilgangControllerTest(
 
     @Autowired
     private val mockIntegrasjonClient: IntegrasjonClient
-) : AbstractSpringIntegrationTest(personopplysningerService = mockPersonopplysningerService) {
+) : AbstractSpringIntegrationTest() {
 
     @Test
     fun testHarTilgangTilKode6Person() {

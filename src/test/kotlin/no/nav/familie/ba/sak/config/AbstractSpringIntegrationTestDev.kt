@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.config
 
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
-import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Tag
 import org.springframework.boot.test.context.SpringBootTest
@@ -22,9 +21,7 @@ import org.springframework.test.context.ActiveProfiles
     "mock-brev-klient"
 )
 @Tag("integration")
-abstract class AbstractSpringIntegrationTestDev(
-    personopplysningerService: PersonopplysningerService? = null
-) : AbstractMockkSpringRunner(personopplysningerService) {
+abstract class AbstractSpringIntegrationTestDev : AbstractMockkSpringRunner() {
     protected final val wireMockServer = WireMockServer(WireMockConfiguration.wireMockConfig().dynamicPort())
 
     init {

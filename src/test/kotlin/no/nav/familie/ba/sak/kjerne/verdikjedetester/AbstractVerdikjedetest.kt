@@ -54,7 +54,7 @@ class VerdikjedetesterPropertyOverrideContextInitializer :
 abstract class AbstractVerdikjedetest(
     efSakRestClient: EfSakRestClient? = null,
     økonomiKlient: ØkonomiKlient? = null
-) : WebSpringAuthTestRunner(efSakRestClient = efSakRestClient, økonomiKlient = økonomiKlient) {
+) : WebSpringAuthTestRunner() {
 
     @Autowired
     lateinit var restOperations: RestOperations

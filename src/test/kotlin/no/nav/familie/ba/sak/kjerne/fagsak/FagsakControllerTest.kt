@@ -62,7 +62,7 @@ class FagsakControllerTest(
 
     @Autowired
     private val databaseCleanupService: DatabaseCleanupService,
-) : AbstractSpringIntegrationTest(mockPersonopplysningerService) {
+) : AbstractSpringIntegrationTest() {
 
     @BeforeEach
     fun init() {

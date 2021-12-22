@@ -33,7 +33,7 @@ internal class PersonopplysningerServiceTest(
     @Autowired
     private val personidentService: PersonidentService
 
-) : AbstractSpringIntegrationTest(integrasjonClient = mockIntegrasjonClient) {
+) : AbstractSpringIntegrationTest() {
 
     lateinit var personopplysningerService: PersonopplysningerService
 

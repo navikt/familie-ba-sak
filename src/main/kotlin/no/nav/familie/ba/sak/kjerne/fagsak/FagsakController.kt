@@ -42,7 +42,11 @@ class FagsakController(
     @PostMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
     fun hentEllerOpprettFagsak(@RequestBody fagsakRequest: FagsakRequest): ResponseEntity<Ressurs<RestMinimalFagsak>> {
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} henter eller oppretter ny fagsak")
-        tilgangService.validerTilgangTilPersoner(personIdenter = listOf(fagsakRequest.personIdent!!))
+        if (fagsakRequest.personIdent != null) tilgangService.validerTilgangTilPersoner(
+            personIdenter = listOf(
+                fagsakRequest.personIdent
+            )
+        )
         tilgangService.verifiserHarTilgangTilHandling(BehandlerRolle.SAKSBEHANDLER, "opprette fagsak")
 
         return Result.runCatching { fagsakService.hentEllerOpprettFagsak(fagsakRequest) }

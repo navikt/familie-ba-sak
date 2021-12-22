@@ -4,8 +4,6 @@ import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.config.AbstractMockkSpringRunner
 import no.nav.familie.ba.sak.config.ApplicationConfig
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
-import no.nav.familie.ba.sak.integrasjoner.`ef-sak`.EfSakRestClient
-import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext.SYSTEM_FORKORTELSE
 import no.nav.security.mock.oauth2.MockOAuth2Server
@@ -37,10 +35,7 @@ import org.springframework.web.client.RestTemplate
 @EnableMockOAuth2Server
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
 @Tag("integration")
-abstract class WebSpringAuthTestRunner(
-    efSakRestClient: EfSakRestClient? = null,
-    økonomiKlient: ØkonomiKlient? = null
-) : AbstractMockkSpringRunner(efSakRestClient = efSakRestClient, økonomiKlient = økonomiKlient) {
+abstract class WebSpringAuthTestRunner : AbstractMockkSpringRunner() {
 
     @Autowired
     lateinit var databaseCleanupService: DatabaseCleanupService

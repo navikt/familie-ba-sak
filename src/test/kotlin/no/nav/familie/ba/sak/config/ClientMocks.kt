@@ -213,12 +213,7 @@ class ClientMocks {
     fun mockFeatureToggleService(): FeatureToggleService {
         val mockFeatureToggleService = mockk<FeatureToggleService>(relaxed = true)
 
-        val featureSlot = slot<String>()
-        every {
-            mockFeatureToggleService.isEnabled(capture(featureSlot))
-        } answers {
-            true
-        }
+        clearFeatureToggleMocks(mockFeatureToggleService)
 
         return mockFeatureToggleService
     }
@@ -250,7 +245,18 @@ class ClientMocks {
     }
 
     companion object {
-        fun clearPdlMocks(
+        fun clearFeatureToggleMocks(
+            mockFeatureToggleService: FeatureToggleService
+        ) {
+            val featureSlot = slot<String>()
+            every {
+                mockFeatureToggleService.isEnabled(capture(featureSlot))
+            } answers {
+                true
+            }
+        }
+
+        fun clearPersonidentMocks(
             mockPersonidentService: PersonidentService
         ) {
             clearMocks(mockPersonidentService)

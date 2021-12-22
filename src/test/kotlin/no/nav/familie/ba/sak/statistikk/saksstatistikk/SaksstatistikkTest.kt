@@ -96,7 +96,7 @@ class SaksstatistikkTest(
         } throws RuntimeException("Testen skal feile")
 
         assertThatThrownBy {
-            fagsakController.hentEllerOpprettFagsak(FagsakRequest(personIdent = fnr))
+            fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = fnr))
         }.hasMessage("Testen skal feile")
 
         val mellomlagredeStatistikkHendelser = saksstatistikkMellomlagringRepository.finnMeldingerKlarForSending()

@@ -118,7 +118,7 @@ class BehandlingIntegrationTest(
 
     @Autowired
     private val personidentService: PersonidentService
-) : AbstractSpringIntegrationTest(mockPersonopplysningerService) {
+) : AbstractSpringIntegrationTest() {
 
     @BeforeEach
     fun truncate() {

@@ -33,7 +33,7 @@ class RegistrerPersongrunnlagTest(
 
     @Autowired
     private val databaseCleanupService: DatabaseCleanupService
-) : AbstractSpringIntegrationTest(mockPersonopplysningerService) {
+) : AbstractSpringIntegrationTest() {
 
     @BeforeAll
     fun truncate() {

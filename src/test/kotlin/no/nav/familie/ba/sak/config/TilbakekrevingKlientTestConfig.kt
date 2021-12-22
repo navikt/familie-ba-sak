@@ -17,14 +17,20 @@ class TilbakekrevingKlientTestConfig {
     fun mockTilbakekrevingKlient(): TilbakekrevingKlient {
         val tilbakekrevingKlient: TilbakekrevingKlient = mockk()
 
-        every { tilbakekrevingKlient.hentForhåndsvisningVarselbrev(any()) } returns TEST_PDF
-
-        every { tilbakekrevingKlient.opprettTilbakekrevingBehandling(any()) } returns "id1"
-
-        every { tilbakekrevingKlient.harÅpenTilbakekrevingsbehandling(any()) } returns false
-
-        every { tilbakekrevingKlient.hentTilbakekrevingsbehandlinger(any()) } returns emptyList()
+        clearMocks(tilbakekrevingKlient)
 
         return tilbakekrevingKlient
+    }
+
+    companion object {
+        fun clearMocks(mockTilbakekrevingKlient: TilbakekrevingKlient) {
+            every { mockTilbakekrevingKlient.hentForhåndsvisningVarselbrev(any()) } returns TEST_PDF
+
+            every { mockTilbakekrevingKlient.opprettTilbakekrevingBehandling(any()) } returns "id1"
+
+            every { mockTilbakekrevingKlient.harÅpenTilbakekrevingsbehandling(any()) } returns false
+
+            every { mockTilbakekrevingKlient.hentTilbakekrevingsbehandlinger(any()) } returns emptyList()
+        }
     }
 }

@@ -17,8 +17,15 @@ class LocalDateServiceTestConfig {
     @Primary
     fun mockLocalDateService(): LocalDateService {
         val mockLocalDateService = mockk<LocalDateService>()
-        every { mockLocalDateService.now() } returns LocalDate.now()
+
+        clearMocks(mockLocalDateService)
 
         return mockLocalDateService
+    }
+
+    companion object {
+        fun clearMocks(mockLocalDateService: LocalDateService) {
+            every { mockLocalDateService.now() } returns LocalDate.now()
+        }
     }
 }
