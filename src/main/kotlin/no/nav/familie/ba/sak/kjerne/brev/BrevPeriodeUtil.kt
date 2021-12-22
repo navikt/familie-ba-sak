@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.brev
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.Utils
+import no.nav.familie.ba.sak.common.convertDataClassToJson
 import no.nav.familie.ba.sak.common.erSenereEnnInneværendeMåned
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import no.nav.familie.ba.sak.common.tilKortString
@@ -21,6 +22,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.EndretUtbetal
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.FortsattInnvilgetBrevPeriode
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.InnvilgelseBrevPeriode
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.OpphørBrevPeriode
+import no.nav.familie.ba.sak.kjerne.brev.domene.tilBrevPeriodeForLogging
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertPersonResultat
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
@@ -68,7 +70,6 @@ fun hentBrevPerioder(
     .mapNotNull {
         val utvidetScenarioForEndringsperiode = andelerTilkjentYtelse
             .hentUtvidetScenarioForEndringsperiode(it.hentMånedPeriode())
-
         try {
             it.tilBrevPeriode(
                 brevGrunnlag = brevGrunnlag,
@@ -78,13 +79,20 @@ fun hentBrevPerioder(
                 brevMålform = målform,
             )
         } catch (exception: Exception) {
-            val feilmelding = "Feil ved generering av brevperioder med data (BrevPeriodeGrunnlag=$it, " +
-                "BrevGrunnlag=$brevGrunnlag, " +
-                "UtvidetScenarioForEndringsperiode = $utvidetScenarioForEndringsperiode, " +
-                "ErFørsteVedtaksperiodePåFagsak = " +
-                "${erFørsteVedtaksperiodePåFagsak(andelerTilkjentYtelse, it.fom)}" +
-                "brevMålform=$målform)"
-            secureLogger.error(feilmelding, exception)
+            val brevPeriodeForLogging = it.tilBrevPeriodeForLogging(
+                brevGrunnlag = brevGrunnlag,
+                uregistrerteBarn = uregistrerteBarn,
+                utvidetScenarioForEndringsperiode = utvidetScenarioForEndringsperiode,
+                erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak(andelerTilkjentYtelse, it.fom),
+                brevMålform = målform,
+            )
+
+            secureLogger.error(
+                "Feil ved generering av brevbegrunnelse. Data som ble sendt inn var: ${
+                brevPeriodeForLogging.convertDataClassToJson()
+                }",
+                exception
+            )
             throw Feil(message = "Feil ved generering av brevperioder: ", throwable = exception)
         }
     }
