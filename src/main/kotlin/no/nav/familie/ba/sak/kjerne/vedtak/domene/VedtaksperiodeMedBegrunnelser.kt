@@ -19,7 +19,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.utledSegmenter
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import org.hibernate.annotations.SortComparator
-import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import javax.persistence.CascadeType
 import javax.persistence.Column
@@ -134,18 +133,7 @@ data class VedtaksperiodeMedBegrunnelser(
                         hentLøpendeAndelForVedtaksperiode(andelerForVedtaksperiodetype)
                     else hentVertikaltSegmentForVedtaksperiode(andelerForVedtaksperiodetype)
 
-                if (vertikaltSegmentForVedtaksperiode == null) {
-                    LoggerFactory.getLogger(VedtaksperiodeMedBegrunnelser::class.java)
-                        .error("Finner ikke segment for vedtaksperiode $this. Se securelogger for mer informasjon.")
-                    LoggerFactory.getLogger("secureLogger")
-                        .info(
-                            "Finner ikke segment for vedtaksperiode $this.\n " +
-                                "Alle andeler=$andelerTilkjentYtelse.\n" +
-                                "AndelerForVedtaksperiode=$andelerForVedtaksperiodetype."
-                        )
-
-                    emptyList()
-                } else {
+                run {
                     val andelerForSegment =
                         andelerForVedtaksperiodetype.hentAndelerForSegment(vertikaltSegmentForVedtaksperiode)
 

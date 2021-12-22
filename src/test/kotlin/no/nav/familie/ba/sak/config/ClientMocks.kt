@@ -558,6 +558,16 @@ class ClientMocks {
             every { mockIntegrasjonClient.hentDokument(any(), any()) } returns
                 success("mock data".toByteArray())
 
+            val idSlotPersonMedRelasjoner = slot<String>()
+            every {
+                mockIntegrasjonClient.sjekkTilgangTilPersonMedRelasjoner(capture(idSlotPersonMedRelasjoner))
+            } answers {
+                if (idSlotPersonMedRelasjoner.captured.isNotEmpty() && idSlotPersonMedRelasjoner.captured == BARN_DET_IKKE_GIS_TILGANG_TIL_FNR)
+                    Tilgang(false, null)
+                else
+                    Tilgang(true, null)
+            }
+
             val idSlot = slot<List<String>>()
             every {
                 mockIntegrasjonClient.sjekkTilgangTilPersoner(capture(idSlot))

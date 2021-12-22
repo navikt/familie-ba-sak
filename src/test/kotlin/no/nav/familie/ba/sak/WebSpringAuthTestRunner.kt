@@ -31,7 +31,6 @@ import org.springframework.web.client.RestTemplate
         "rolle.veileder: VEILDER",
         "rolle.saksbehandler: SAKSBEHANDLER",
         "rolle.beslutter: BESLUTTER",
-        "ENVIRONMENT_NAME: integrationtest",
     ],
 )
 @ExtendWith(SpringExtension::class)
