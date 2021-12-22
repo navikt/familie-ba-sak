@@ -68,7 +68,7 @@ class TilgangService(
 
     fun validerTilgangTilBehandling(behandlingId: Long) {
         val harTilgang = harSaksbehandlerTilgang("validerTilgangTilBehandling", behandlingId) {
-            val personIdent = behandlingService.hent(behandlingId).fagsak.aktør.aktivFødselsnummer()
+            val personIdent = behandlingService.hentAktør(behandlingId).aktivFødselsnummer()
             harTilgangTilPersonMedRelasjoner(personIdent)
         }
         if (!harTilgang) {
@@ -80,7 +80,7 @@ class TilgangService(
     }
 
     fun validerTilgangTilFagsak(fagsakId: Long) {
-        val personIdent = fagsakService.hentPåFagsakId(fagsakId).aktør.aktivFødselsnummer()
+        val personIdent = fagsakService.hentAktør(fagsakId).aktivFødselsnummer()
         validerTilgangTilPersonMedBarn(personIdent)
     }
 

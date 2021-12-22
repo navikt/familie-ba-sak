@@ -28,9 +28,9 @@ import org.springframework.web.client.RestTemplate
     properties = [
         "no.nav.security.jwt.issuer.azuread.discoveryUrl: http://localhost:\${mock-oauth2-server.port}/azuread/.well-known/openid-configuration",
         "no.nav.security.jwt.issuer.azuread.accepted_audience: some-audience",
-        "VEILEDER_ROLLE: VEILDER",
-        "SAKSBEHANDLER_ROLLE: SAKSBEHANDLER",
-        "BESLUTTER_ROLLE: BESLUTTER",
+        "rolle.veileder: VEILDER",
+        "rolle.saksbehandler: SAKSBEHANDLER",
+        "rolle.beslutter: BESLUTTER",
         "ENVIRONMENT_NAME: integrationtest",
     ],
 )

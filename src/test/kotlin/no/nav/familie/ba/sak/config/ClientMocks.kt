@@ -563,9 +563,9 @@ class ClientMocks {
                 mockIntegrasjonClient.sjekkTilgangTilPersoner(capture(idSlot))
             } answers {
                 if (idSlot.captured.isNotEmpty() && idSlot.captured.contains(BARN_DET_IKKE_GIS_TILGANG_TIL_FNR))
-                    listOf(Tilgang(false, null))
+                    Tilgang(false, null)
                 else
-                    listOf(Tilgang(true, null))
+                    Tilgang(true, null)
             }
 
             every { mockIntegrasjonClient.hentArbeidsforhold(any(), any()) } returns emptyList()

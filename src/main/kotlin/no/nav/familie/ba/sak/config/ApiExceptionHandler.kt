@@ -23,7 +23,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.client.HttpClientErrorException
 import java.io.PrintWriter
 import java.io.StringWriter
-import javax.validation.ConstraintViolationException
 
 @ControllerAdvice
 class ApiExceptionHandler {
@@ -39,12 +38,6 @@ class ApiExceptionHandler {
     @ExceptionHandler(RolleTilgangskontrollFeil::class)
     fun handleRolleTilgangskontrollFeil(rolleTilgangskontrollFeil: RolleTilgangskontrollFeil): ResponseEntity<Ressurs<Nothing>> {
         return rolleTilgangResponse(rolleTilgangskontrollFeil)
-    }
-
-    // Disse kastes av FagsaktilgangConstraint og persontilgangConstraint
-    @ExceptionHandler(ConstraintViolationException::class)
-    fun handleThrowable(constraintViolationException: ConstraintViolationException): ResponseEntity<Ressurs<Nothing>> {
-        return forbidden("Ikke tilgang")
     }
 
     @ExceptionHandler(Throwable::class)

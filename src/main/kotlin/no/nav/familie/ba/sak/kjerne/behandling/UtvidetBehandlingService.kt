@@ -21,12 +21,10 @@ import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
-import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import org.springframework.stereotype.Service
 
 @Service
 class UtvidetBehandlingService(
-    private val tilgangService: TilgangService,
     private val arbeidsfordelingService: ArbeidsfordelingService,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val persongrunnlagService: PersongrunnlagService,
@@ -42,8 +40,6 @@ class UtvidetBehandlingService(
 ) {
 
     fun lagRestUtvidetBehandling(behandlingId: Long): RestUtvidetBehandling {
-        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId)
-
         val behandling = behandlingRepository.finnBehandling(behandlingId)
 
         val søknadsgrunnlag = søknadGrunnlagService.hentAktiv(behandlingId = behandling.id)

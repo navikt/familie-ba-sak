@@ -30,8 +30,7 @@ class PersonopplysningerService(
         val forelderBarnRelasjon = personinfo.forelderBarnRelasjon.mapNotNull {
             val harTilgang =
                 integrasjonClient.sjekkTilgangTilPersoner(listOf(it.aktør.aktivFødselsnummer()))
-                    .firstOrNull()?.harTilgang
-                    ?: error("Fikk ikke svar på tilgang til person.")
+                    .harTilgang
             if (harTilgang) {
                 val relasjonsinfo = hentPersoninfoEnkel(it.aktør)
                 ForelderBarnRelasjon(

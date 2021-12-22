@@ -56,10 +56,10 @@ internal class PersonopplysningerServiceTest(
 
         every {
             mockIntegrasjonClient.sjekkTilgangTilPersoner(listOf(ID_BARN_1))
-        } returns listOf(Tilgang(true, null))
+        } returns Tilgang(true, null)
         every {
             mockIntegrasjonClient.sjekkTilgangTilPersoner(listOf(ID_BARN_2))
-        } returns listOf(Tilgang(false, null))
+        } returns Tilgang(false, null)
 
         val personInfo = personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(tilAktør(ID_MOR))
 
