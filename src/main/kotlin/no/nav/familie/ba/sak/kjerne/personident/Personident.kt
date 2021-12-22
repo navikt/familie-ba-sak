@@ -12,6 +12,7 @@ import javax.persistence.Id
 import javax.persistence.JoinColumn
 import javax.persistence.ManyToOne
 import javax.persistence.Table
+import javax.validation.constraints.Pattern
 
 @EntityListeners(RollestyringMotDatabase::class)
 @Entity(name = "Personident")
@@ -20,6 +21,8 @@ data class Personident(
     @Id
     @Column(name = "foedselsnummer", nullable = false)
     // Lovlige typer er fnr, dnr eller npid
+    // Validator kommer virke først i Spring 3.0 grunnet at hibernate tatt i bruke Jakarta.
+    @Pattern(regexp = Personident.VALID_FØDSELSNUMMER)
     val fødselsnummer: String,
 
     @JsonIgnore
@@ -34,6 +37,12 @@ data class Personident(
     var gjelderTil: LocalDateTime? = null,
 
 ) : BaseEntitet() {
+
+    init {
+        require(VALID.matcher(fødselsnummer).matches()) {
+            "Ugyldig fødselsnummer, støtter kun 11 siffer.)"
+        }
+    }
 
     override fun toString(): String {
         return """Personident(aktørId=${aktør.aktørId},
@@ -51,5 +60,11 @@ data class Personident(
 
     override fun hashCode(): Int {
         return Objects.hash(fødselsnummer)
+    }
+
+    companion object {
+        private const val VALID_FØDSELSNUMMER = "^\\d{11}$"
+        private val VALID =
+            java.util.regex.Pattern.compile(VALID_FØDSELSNUMMER)
     }
 }

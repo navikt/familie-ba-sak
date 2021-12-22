@@ -478,15 +478,15 @@ class BeregningServiceTest {
         Assertions.assertEquals(tilleggFom!!.forrigeMåned(), andelerBarn1[0].stønadTom)
         Assertions.assertEquals(1054, andelerBarn1[0].kalkulertUtbetalingsbeløp)
 
-        // Barn 1 - første periode (etter sept 2020 satsendring, før fylte 6 år)
+        // Barn 1 - første periode (etter sept 2020 satsendring og før sept 2021 satsendring, før fylte 6 år)
         Assertions.assertEquals(tilleggFom.toYearMonth(), andelerBarn1[1].stønadFom)
         Assertions.assertEquals(periode1Tom.toYearMonth(), andelerBarn1[1].stønadTom)
         Assertions.assertEquals(1354, andelerBarn1[1].kalkulertUtbetalingsbeløp)
 
-        // Barn 1 - andre periode (etter sept 2021 satsendring, før fylte 6 år)
+        // Barn 1 - andre periode (etter siste satsendring, før fylte 6 år)
         Assertions.assertEquals(periode3Fom.nesteMåned(), andelerBarn1[2].stønadFom)
         Assertions.assertEquals(barnFødselsdato.plusYears(6).forrigeMåned(), andelerBarn1[2].stønadTom)
-        Assertions.assertEquals(1654, andelerBarn1[2].kalkulertUtbetalingsbeløp)
+        Assertions.assertEquals(1676, andelerBarn1[2].kalkulertUtbetalingsbeløp)
 
         // Barn 1 - andre periode (etter fylte 6 år)
         Assertions.assertEquals(barnFødselsdato.plusYears(6).toYearMonth(), andelerBarn1[3].stønadFom)
@@ -496,7 +496,7 @@ class BeregningServiceTest {
         // Barn 2 sin eneste periode (etter siste satsendring)
         Assertions.assertEquals(periode3Fom.nesteMåned(), andelerBarn2[0].stønadFom)
         Assertions.assertEquals(periode3Midt.toYearMonth(), andelerBarn2[0].stønadTom)
-        Assertions.assertEquals(1654, andelerBarn2[0].kalkulertUtbetalingsbeløp)
+        Assertions.assertEquals(1676, andelerBarn2[0].kalkulertUtbetalingsbeløp)
     }
 
     @Test

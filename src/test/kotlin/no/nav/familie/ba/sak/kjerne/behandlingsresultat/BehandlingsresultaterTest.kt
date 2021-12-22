@@ -3,8 +3,7 @@ package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.slot
-import no.nav.familie.ba.sak.config.tilAktør
+import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -16,7 +15,7 @@ import java.time.YearMonth
 
 data class BehandlingsresultatPersonTestConfig(
     val personer: List<BehandlingsresultatPerson>,
-    val uregistrerteBarn: List<UregistrertBarnEnkel> = emptyList(),
+    val uregistrerteBarn: List<MinimertUregistrertBarn> = emptyList(),
     val beskrivelse: String,
     val forventetResultat: BehandlingResultat,
     val inneværendeMåned: String,
@@ -27,8 +26,7 @@ class BehandlingsresultaterTest {
 
     @BeforeEach
     fun init() {
-        val fnr = slot<String>()
-        every { personidentService.hentOgLagreAktør(capture(fnr)) } answers { tilAktør(fnr.captured) }
+        every { personidentService.hentOgLagreAktør(any()) } answers { randomAktørId() }
     }
 
     @Test

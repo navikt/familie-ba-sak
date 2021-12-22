@@ -7,10 +7,10 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.HenleggÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.RestHenleggBehandlingInfo
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.dokument.DokumentService
-import no.nav.familie.ba.sak.kjerne.dokument.domene.BrevType
-import no.nav.familie.ba.sak.kjerne.dokument.domene.ManueltBrevRequest
-import no.nav.familie.ba.sak.kjerne.dokument.domene.byggMottakerdata
+import no.nav.familie.ba.sak.kjerne.brev.DokumentService
+import no.nav.familie.ba.sak.kjerne.brev.domene.BrevType
+import no.nav.familie.ba.sak.kjerne.brev.domene.ManueltBrevRequest
+import no.nav.familie.ba.sak.kjerne.brev.domene.byggMottakerdata
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
@@ -50,8 +50,6 @@ class HenleggBehandling(
         behandling.leggTilHenleggStegOmDetIkkeFinnesFraFør()
 
         behandlingService.lagreEllerOppdater(behandling)
-
-        opprettFerdigstillBehandling(behandling.id, behandling.fagsak.aktør)
 
         return hentNesteStegForNormalFlyt(behandling)
     }

@@ -70,6 +70,9 @@ management:
           autotime:
             enabled: true
 
+springdoc:
+  packagesToScan: "no.nav.familie.ba.sak.ekstern.bisys"
+
 FAMILIE_EF_SAK_API_URL_SCOPE: api://dev-gcp.teamfamilie.familie-ef-sak/.default
 FAMILIE_EF_SAK_API_URL: https://familie-ef-sak.dev.intern.nav.no/api
 

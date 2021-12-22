@@ -5,14 +5,15 @@ import no.nav.familie.ba.sak.common.NullablePeriode
 import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.common.StringListConverter
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
-import no.nav.familie.ba.sak.kjerne.behandlingsresultat.UregistrertBarnEnkel
+import no.nav.familie.ba.sak.kjerne.behandlingsresultat.MinimertUregistrertBarn
+import no.nav.familie.ba.sak.kjerne.brev.domene.BrevBegrunnelseGrunnlagMedPersoner
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.hentMånedOgÅrForBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilBrevTekst
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.RestVedtaksbegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.RestVedtaksbegrunnelse
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.time.LocalDate
 import javax.persistence.Column
@@ -50,6 +51,10 @@ class Vedtaksbegrunnelse(
     @Column(name = "vedtak_begrunnelse_spesifikasjon", updatable = false)
     val vedtakBegrunnelseSpesifikasjon: VedtakBegrunnelseSpesifikasjon,
 
+    @Deprecated(
+        "Skal ikke brukes. Personidenter settes ved opprettelse av brev i " +
+            "BrevPeriodeGrunnlag.tilBrevPeriode funksjonen"
+    )
     @Column(name = "person_identer", columnDefinition = "TEXT")
     @Convert(converter = StringListConverter::class)
     val personIdenter: List<String> = emptyList(),
@@ -58,14 +63,16 @@ class Vedtaksbegrunnelse(
     fun kopier(vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser): Vedtaksbegrunnelse = Vedtaksbegrunnelse(
         vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
         vedtakBegrunnelseSpesifikasjon = this.vedtakBegrunnelseSpesifikasjon,
-        personIdenter = this.personIdenter
     )
+
+    override fun toString(): String {
+        return "Vedtaksbegrunnelse(id=$id, standardbegrunnelse=$vedtakBegrunnelseSpesifikasjon)"
+    }
 }
 
 fun Vedtaksbegrunnelse.tilRestVedtaksbegrunnelse() = RestVedtaksbegrunnelse(
     vedtakBegrunnelseSpesifikasjon = this.vedtakBegrunnelseSpesifikasjon,
     vedtakBegrunnelseType = this.vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType,
-    personIdenter = this.personIdenter
 )
 
 interface Begrunnelse
@@ -82,30 +89,30 @@ data class BegrunnelseData(
 
 data class FritekstBegrunnelse(val fritekst: String) : Begrunnelse
 
-fun RestVedtaksbegrunnelse.tilBrevBegrunnelse(
+fun BrevBegrunnelseGrunnlagMedPersoner.tilBrevBegrunnelse(
     vedtaksperiode: NullablePeriode,
-    begrunnelsepersonerIBehandling: List<BegrunnelsePerson>,
-    målform: Målform,
-    uregistrerteBarn: List<UregistrertBarnEnkel>,
-    beløp: String,
+    personerIPersongrunnlag: List<MinimertRestPerson>,
+    brevMålform: Målform,
+    uregistrerteBarn: List<MinimertUregistrertBarn>,
+    beløp: String
 ): Begrunnelse {
-    val begrunnelsepersonerPåBegrunnelse =
-        begrunnelsepersonerIBehandling.filter { person -> this.personIdenter.contains(person.personIdent) }
+    val personerPåBegrunnelse =
+        personerIPersongrunnlag.filter { person -> this.personIdenter.contains(person.personIdent) }
 
-    val gjelderSøker = begrunnelsepersonerPåBegrunnelse.any { it.type == PersonType.SØKER }
+    val gjelderSøker = personerPåBegrunnelse.any { it.type == PersonType.SØKER }
 
     val erAvslagPåKunSøker = gjelderSøker &&
-        begrunnelsepersonerPåBegrunnelse.size == 1 &&
+        personerPåBegrunnelse.size == 1 &&
         this.vedtakBegrunnelseType == VedtakBegrunnelseType.AVSLAG
 
-    val barnasFødselsdatoer = hentBarnasFødselsdagerForBegrunnelse(
+    val barnasFødselsdatoer = this.hentBarnasFødselsdagerForBegrunnelse(
         uregistrerteBarn = uregistrerteBarn,
         erAvslagPåKunSøker = erAvslagPåKunSøker,
-        begrunnelsepersonerIBehandling = begrunnelsepersonerIBehandling,
-        begrunnelspersonerPåBegrunnelse = begrunnelsepersonerPåBegrunnelse
+        personerIBehandling = personerIPersongrunnlag,
+        personerPåBegrunnelse = personerPåBegrunnelse
     )
 
-    val antallBarn = hentAntallBarnForBegrunnelse(uregistrerteBarn, erAvslagPåKunSøker, barnasFødselsdatoer)
+    val antallBarn = this.hentAntallBarnForBegrunnelse(uregistrerteBarn, erAvslagPåKunSøker, barnasFødselsdatoer)
 
     val månedOgÅrBegrunnelsenGjelderFor =
         if (vedtaksperiode.fom == null) null
@@ -116,37 +123,27 @@ fun RestVedtaksbegrunnelse.tilBrevBegrunnelse(
             )
         )
 
+    this.validerBrevbegrunnelse(
+        gjelderSøker = gjelderSøker,
+        barnasFødselsdatoer = barnasFødselsdatoer,
+    )
+
     return BegrunnelseData(
         gjelderSoker = gjelderSøker,
         barnasFodselsdatoer = barnasFødselsdatoer.tilBrevTekst(),
         antallBarn = antallBarn,
         maanedOgAarBegrunnelsenGjelderFor = månedOgÅrBegrunnelsenGjelderFor,
-        maalform = målform.tilSanityFormat(),
+        maalform = brevMålform.tilSanityFormat(),
         apiNavn = this.vedtakBegrunnelseSpesifikasjon.sanityApiNavn,
         belop = beløp
     )
 }
 
-private fun RestVedtaksbegrunnelse.hentAntallBarnForBegrunnelse(
-    uregistrerteBarn: List<UregistrertBarnEnkel>,
-    erAvslagPåKunSøker: Boolean,
-    barnasFødselsdatoer: List<LocalDate>
-) = if (this.vedtakBegrunnelseSpesifikasjon == VedtakBegrunnelseSpesifikasjon.AVSLAG_UREGISTRERT_BARN)
-    uregistrerteBarn.size
-else if (erAvslagPåKunSøker)
-    0
-else
-    barnasFødselsdatoer.size
-
-private fun RestVedtaksbegrunnelse.hentBarnasFødselsdagerForBegrunnelse(
-    uregistrerteBarn: List<UregistrertBarnEnkel>,
-    erAvslagPåKunSøker: Boolean,
-    begrunnelsepersonerIBehandling: List<BegrunnelsePerson>,
-    begrunnelspersonerPåBegrunnelse: List<BegrunnelsePerson>
-) = if (this.vedtakBegrunnelseSpesifikasjon == VedtakBegrunnelseSpesifikasjon.AVSLAG_UREGISTRERT_BARN)
-    uregistrerteBarn.mapNotNull { it.fødselsdato }
-else if (erAvslagPåKunSøker) {
-    begrunnelsepersonerIBehandling.filter { it.type == PersonType.BARN }
-        .map { it.fødselsdato } + uregistrerteBarn.mapNotNull { it.fødselsdato }
-} else
-    begrunnelspersonerPåBegrunnelse.filter { it.type == PersonType.BARN }.map { it.fødselsdato }
+private fun BrevBegrunnelseGrunnlagMedPersoner.validerBrevbegrunnelse(
+    gjelderSøker: Boolean,
+    barnasFødselsdatoer: List<LocalDate>,
+) {
+    if (!gjelderSøker && barnasFødselsdatoer.isEmpty() && !this.triggesAv.satsendring) {
+        throw IllegalStateException("Ingen personer på brevbegrunnelse")
+    }
+}

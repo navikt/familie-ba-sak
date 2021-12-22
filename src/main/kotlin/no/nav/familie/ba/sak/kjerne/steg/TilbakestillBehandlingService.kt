@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.steg
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
@@ -17,7 +18,8 @@ class TilbakestillBehandlingService(
     private val beregningService: BeregningService,
     private val vedtaksperiodeService: VedtaksperiodeService,
     private val vedtakRepository: VedtakRepository,
-    private val tilbakekrevingService: TilbakekrevingService
+    private val tilbakekrevingService: TilbakekrevingService,
+    private val endretUtbetalingAndelService: EndretUtbetalingAndelService
 ) {
 
     @Transactional
@@ -34,7 +36,6 @@ class TilbakestillBehandlingService(
         )
 
         val vedtak = vedtakRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
-            ?: error("Fant ikke aktivt vedtak for behandling")
 
         beregningService.slettTilkjentYtelseForBehandling(behandlingId = behandling.id)
         vedtaksperiodeService.slettVedtaksperioderFor(vedtak = vedtak)
@@ -46,5 +47,11 @@ class TilbakestillBehandlingService(
         tilbakekrevingService.slettTilbakekrevingPåBehandling(behandling.id)
 
         vedtakRepository.saveAndFlush(vedtak)
+    }
+
+    @Transactional
+    fun tilbakestillDataTilVilkårsvurderingssteg(behandling: Behandling) {
+        endretUtbetalingAndelService.fjernKnytningTilAndelTilkjentYtelse(behandling.id)
+        vedtaksperiodeService.slettVedtaksperioderFor(vedtak = vedtakRepository.findByBehandlingAndAktiv(behandlingId = behandling.id))
     }
 }

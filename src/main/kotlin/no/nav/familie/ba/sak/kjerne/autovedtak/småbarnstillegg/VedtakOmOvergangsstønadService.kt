@@ -17,6 +17,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.finnAktuellVedtaksperiodeOgLeggTil
 import no.nav.familie.ba.sak.kjerne.beregning.hentInnvilgedeOgReduserteAndelerSmåbarnstillegg
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
@@ -173,9 +174,12 @@ class VedtakOmOvergangsstønadService(
         meldingIOppgave: String
     ): String {
         metric.increment()
-        behandlingService.omgjørTilManuellBehandling(behandling)
-        return autovedtakService.opprettOppgaveForManuellBehandling(
+        val omgjortBehandling = autovedtakService.omgjørBehandlingTilManuellOgKjørSteg(
             behandling = behandling,
+            steg = StegType.VILKÅRSVURDERING
+        )
+        return autovedtakService.opprettOppgaveForManuellBehandling(
+            behandling = omgjortBehandling,
             begrunnelse = meldingIOppgave,
             oppgavetype = Oppgavetype.VurderLivshendelse,
             opprettLogginnslag = true

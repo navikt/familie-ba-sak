@@ -290,9 +290,9 @@ class FiltreringsregelForFlereBarnTest {
         )
 
         return FiltreringsreglerFakta(
-            mor,
-            barn,
-            restenAvBarna,
+            mor = mor,
+            barnaFraHendelse = barn,
+            restenAvBarna = restenAvBarna,
             morLever = true,
             barnaLever = true,
             morHarVerge = false,

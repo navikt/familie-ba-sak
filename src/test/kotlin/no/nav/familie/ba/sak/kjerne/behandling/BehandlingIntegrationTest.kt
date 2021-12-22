@@ -375,25 +375,32 @@ class BehandlingIntegrationTest(
                     { restPersonMedAndeler -> restPersonMedAndeler.ytelsePerioder.sortedBy { it.stønadFom } }
                 )
 
-        val satsEndringDato2020 = SatsService.hentDatoForSatsendring(SatsType.TILLEGG_ORBA, 1354)!!.toYearMonth()
-        val satsEndringDato2121 = SatsService.hentDatoForSatsendring(SatsType.TILLEGG_ORBA, 1654)!!.toYearMonth()
+        val satsEndringDatoSeptember2020 =
+            SatsService.hentDatoForSatsendring(SatsType.TILLEGG_ORBA, 1354)!!.toYearMonth()
+        val satsEndringDatoSeptember2021 =
+            SatsService.hentDatoForSatsendring(SatsType.TILLEGG_ORBA, 1654)!!.toYearMonth()
+        val satsEndringDatoJanuar2022 = SatsService.hentDatoForSatsendring(SatsType.TILLEGG_ORBA, 1676)!!.toYearMonth()
         assertEquals(2, restVedtakBarnMap.size)
 
         // Barn 1
         val barn1Perioder = restVedtakBarnMap[barn1Fnr]!!.sortedBy { it.stønadFom }
         assertEquals(1054, barn1Perioder[0].beløp)
         assertEquals(januar2020, barn1Perioder[0].stønadFom)
-        assertEquals(satsEndringDato2020.minusMonths(1), barn1Perioder[0].stønadTom)
+        assertEquals(satsEndringDatoSeptember2020.minusMonths(1), barn1Perioder[0].stønadTom)
         assertEquals(YtelseType.ORDINÆR_BARNETRYGD, barn1Perioder[0].ytelseType)
         assertEquals(1354, barn1Perioder[1].beløp)
-        assertEquals(satsEndringDato2020, barn1Perioder[1].stønadFom)
-        assertEquals(satsEndringDato2121.minusMonths(1), barn1Perioder[1].stønadTom)
+        assertEquals(satsEndringDatoSeptember2020, barn1Perioder[1].stønadFom)
+        assertEquals(satsEndringDatoSeptember2021.minusMonths(1), barn1Perioder[1].stønadTom)
         assertEquals(YtelseType.ORDINÆR_BARNETRYGD, barn1Perioder[1].ytelseType)
         assertEquals(1654, barn1Perioder[2].beløp)
-        assertEquals(satsEndringDato2121, barn1Perioder[2].stønadFom)
+        assertEquals(satsEndringDatoSeptember2021, barn1Perioder[2].stønadFom)
         assertTrue(januar2020 < barn1Perioder[2].stønadTom)
         assertEquals(YtelseType.ORDINÆR_BARNETRYGD, barn1Perioder[2].ytelseType)
-        assertEquals(1054, barn1Perioder[3].beløp)
+        assertEquals(1676, barn1Perioder[3].beløp)
+        assertEquals(satsEndringDatoJanuar2022, barn1Perioder[3].stønadFom)
+        assertTrue(januar2020 < barn1Perioder[3].stønadTom)
+        assertEquals(YtelseType.ORDINÆR_BARNETRYGD, barn1Perioder[3].ytelseType)
+        assertEquals(1054, barn1Perioder[4].beløp)
 
         // Barn 2
         val barn2Perioder = restVedtakBarnMap[barn2Fnr]!!.sortedBy { it.stønadFom }
@@ -402,10 +409,14 @@ class BehandlingIntegrationTest(
         assertTrue(oktober2020 < barn2Perioder[0].stønadTom)
         assertEquals(YtelseType.ORDINÆR_BARNETRYGD, barn2Perioder[0].ytelseType)
         assertEquals(1654, barn2Perioder[1].beløp)
-        assertEquals(satsEndringDato2121, barn2Perioder[1].stønadFom)
+        assertEquals(satsEndringDatoSeptember2021, barn2Perioder[1].stønadFom)
         assertTrue(januar2020 < barn2Perioder[1].stønadTom)
         assertEquals(YtelseType.ORDINÆR_BARNETRYGD, barn2Perioder[1].ytelseType)
-        assertEquals(1054, barn2Perioder[2].beløp)
+        assertEquals(1676, barn2Perioder[2].beløp)
+        assertEquals(satsEndringDatoJanuar2022, barn2Perioder[2].stønadFom)
+        assertTrue(januar2020 < barn2Perioder[2].stønadTom)
+        assertEquals(YtelseType.ORDINÆR_BARNETRYGD, barn2Perioder[2].ytelseType)
+        assertEquals(1054, barn2Perioder[3].beløp)
     }
 
     @Test
@@ -472,7 +483,9 @@ class BehandlingIntegrationTest(
         )
         vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = behandlingResultat2)
 
-        val satsEndringDato = SatsService.hentDatoForSatsendring(SatsType.TILLEGG_ORBA, 1654)!!.toYearMonth()
+        val satsEndringDatoSeptember2021 =
+            SatsService.hentDatoForSatsendring(SatsType.TILLEGG_ORBA, 1654)!!.toYearMonth()
+        val satsEndringDatoJanuar2022 = SatsService.hentDatoForSatsendring(SatsType.TILLEGG_ORBA, 1676)!!.toYearMonth()
 
         val tilkjentYtelse = beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
         val restVedtakBarnMap =
@@ -486,25 +499,29 @@ class BehandlingIntegrationTest(
 
         // Barn 1
         val barn1Perioder = restVedtakBarnMap[barn1Fnr]!!.sortedBy { it.stønadFom }
-        assertEquals(3, barn1Perioder.size)
+        assertEquals(4, barn1Perioder.size)
         assertEquals(1354, barn1Perioder[0].beløp)
         assertEquals(januar2021, barn1Perioder[0].stønadFom)
-        assertEquals(satsEndringDato.minusMonths(1), barn1Perioder[0].stønadTom)
+        assertEquals(satsEndringDatoSeptember2021.minusMonths(1), barn1Perioder[0].stønadTom)
         assertEquals(1654, barn1Perioder[1].beløp)
-        assertEquals(satsEndringDato, barn1Perioder[1].stønadFom)
-        assertEquals(1054, barn1Perioder[2].beløp)
-        assertTrue(stønadTom >= barn1Perioder[2].stønadTom)
+        assertEquals(satsEndringDatoSeptember2021, barn1Perioder[1].stønadFom)
+        assertEquals(1676, barn1Perioder[2].beløp)
+        assertEquals(satsEndringDatoJanuar2022, barn1Perioder[2].stønadFom)
+        assertEquals(1054, barn1Perioder[3].beløp)
+        assertTrue(stønadTom >= barn1Perioder[3].stønadTom)
 
         // Barn 3
         val barn3perioder = restVedtakBarnMap[barn3Fnr]!!.sortedBy { it.stønadFom }
-        assertEquals(3, barn3perioder.size)
+        assertEquals(4, barn3perioder.size)
         assertEquals(1354, barn3perioder[0].beløp)
         assertEquals(januar2021, barn3perioder[0].stønadFom)
-        assertEquals(satsEndringDato.minusMonths(1), barn3perioder[0].stønadTom)
+        assertEquals(satsEndringDatoSeptember2021.minusMonths(1), barn3perioder[0].stønadTom)
         assertEquals(1654, barn3perioder[1].beløp)
-        assertEquals(satsEndringDato, barn3perioder[1].stønadFom)
-        assertEquals(1054, barn3perioder[2].beløp)
-        assertTrue(stønadTom >= barn3perioder[2].stønadTom)
+        assertEquals(satsEndringDatoSeptember2021, barn3perioder[1].stønadFom)
+        assertEquals(1676, barn3perioder[2].beløp)
+        assertEquals(satsEndringDatoJanuar2022, barn3perioder[2].stønadFom)
+        assertEquals(1054, barn3perioder[3].beløp)
+        assertTrue(stønadTom >= barn3perioder[3].stønadTom)
     }
 
     @Test
