@@ -1,5 +1,3 @@
-package no.nav.familie.ba.sak.kjerne.brev.domene
-
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import no.nav.familie.ba.sak.common.MånedPeriode
@@ -9,11 +7,17 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.MinimertUregistrertBarn
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.brev.UtvidetScenarioForEndringsperiode
+import no.nav.familie.ba.sak.kjerne.brev.domene.BrevBegrunnelseGrunnlag
+import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertRestEndretAndel
+import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertRestPersonResultat
+import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertUtbetalingsperiodeDetalj
+import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertVilkårResultat
+import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
+import no.nav.familie.ba.sak.kjerne.brev.domene.tilTriggesAv
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.BegrunnelseData
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.MinimertRestPerson
@@ -155,11 +159,9 @@ data class BrevPeriodeOutput(
 
 data class BrevBegrunnelseGrunnlagConfig(
     val vedtakBegrunnelseSpesifikasjon: VedtakBegrunnelseSpesifikasjon,
-    val vedtakBegrunnelseType: VedtakBegrunnelseType,
 ) {
     fun tilBrevBegrunnelseGrunnlag(sanityBegrunnelser: List<SanityBegrunnelse>) = BrevBegrunnelseGrunnlag(
         vedtakBegrunnelseSpesifikasjon = this.vedtakBegrunnelseSpesifikasjon,
-        vedtakBegrunnelseType = this.vedtakBegrunnelseType,
         triggesAv = this.vedtakBegrunnelseSpesifikasjon.tilSanityBegrunnelse(sanityBegrunnelser)!!.tilTriggesAv()
     )
 }

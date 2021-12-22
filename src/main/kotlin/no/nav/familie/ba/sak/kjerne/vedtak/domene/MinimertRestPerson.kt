@@ -6,6 +6,11 @@ import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPerson
+import no.nav.familie.ba.sak.kjerne.brev.domene.BrevGrunnlag
+import no.nav.familie.ba.sak.kjerne.brev.domene.BrevPeriodeGrunnlag
+import no.nav.familie.ba.sak.kjerne.brev.domene.BrevPeriodePersonForLogging
+import no.nav.familie.ba.sak.kjerne.brev.domene.EndretUtbetalingAndelPåPersonForLogging
+import no.nav.familie.ba.sak.kjerne.brev.domene.UtbetalingPåPersonForLogging
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import java.time.LocalDate
@@ -67,3 +72,37 @@ fun List<MinimertRestPerson>.tilBarnasFødselsdatoer(): String =
                 person.fødselsdato.tilKortString() ?: ""
             }
     )
+
+fun MinimertRestPerson.tilBrevPeriodeTestPerson(
+    brevPeriodeGrunnlag: BrevPeriodeGrunnlag,
+    brevGrunnlag: BrevGrunnlag,
+): BrevPeriodePersonForLogging {
+    val minimertePersonResultater =
+        brevGrunnlag.minimertePersonResultater.firstOrNull { it.personIdent == this.personIdent }!!
+    val minimerteEndretUtbetalingAndelPåPerson =
+        brevGrunnlag.minimerteEndredeUtbetalingAndeler.filter { it.personIdent == this.personIdent }
+    val minimerteUtbetalingsperiodeDetaljer = brevPeriodeGrunnlag.minimerteUtbetalingsperiodeDetaljer.filter {
+        it.person.personIdent == this.personIdent
+    }
+
+    return BrevPeriodePersonForLogging(
+        fødselsdato = this.fødselsdato,
+        type = this.type,
+        overstyrteVilkårresultater = minimertePersonResultater.minimerteVilkårResultater,
+        andreVurderinger = minimertePersonResultater.andreVurderinger,
+        endredeUtbetalinger = minimerteEndretUtbetalingAndelPåPerson.map {
+            EndretUtbetalingAndelPåPersonForLogging(
+                periode = it.periode,
+                årsak = it.årsak
+            )
+        },
+        utbetalinger = minimerteUtbetalingsperiodeDetaljer.map {
+            UtbetalingPåPersonForLogging(
+                it.ytelseType,
+                it.utbetaltPerMnd,
+                it.erPåvirketAvEndring,
+                it.prosent
+            )
+        },
+    )
+}
