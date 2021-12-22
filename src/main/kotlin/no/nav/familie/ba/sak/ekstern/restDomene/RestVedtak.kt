@@ -28,7 +28,9 @@ fun Vedtak.tilRestVedtak(
         vedtaksdato = this.vedtaksdato,
         id = this.id,
         vedtaksperioderMedBegrunnelser = if (skalMinimeres) {
-            vedtaksperioderMedBegrunnelser.filter { it.begrunnelser.isNotEmpty() }
+            vedtaksperioderMedBegrunnelser
+                .filter { it.begrunnelser.isNotEmpty() }
+                .map { it.copy(gyldigeBegrunnelser = emptyList()) }
         } else {
             vedtaksperioderMedBegrunnelser
         },
