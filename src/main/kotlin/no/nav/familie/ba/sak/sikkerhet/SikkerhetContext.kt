@@ -9,20 +9,12 @@ object SikkerhetContext {
     const val SYSTEM_FORKORTELSE = "VL"
     const val SYSTEM_NAVN = "System"
 
-    /**
-     * @param strict hvis true - skal kaste feil hvis token ikke inneholder saksbehandler
-     */
-    fun hentSaksbehandler(strict: Boolean = false): String {
-        val saksbehandler = Result.runCatching { SpringTokenValidationContextHolder().tokenValidationContext }
+    fun hentSaksbehandler(): String {
+        return Result.runCatching { SpringTokenValidationContextHolder().tokenValidationContext }
             .fold(
                 onSuccess = { it.getClaims("azuread")?.get("preferred_username")?.toString() ?: SYSTEM_FORKORTELSE },
                 onFailure = { SYSTEM_FORKORTELSE }
             )
-
-        if (strict && saksbehandler == SYSTEM_FORKORTELSE) {
-            error("Finner ikke NAVident i token")
-        }
-        return saksbehandler
     }
 
     fun hentSaksbehandlerNavn(): String {

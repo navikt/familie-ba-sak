@@ -92,7 +92,7 @@ class TilgangService(
      */
     private fun <T> harSaksbehandlerTilgang(cacheName: String, verdi: T, hentVerdi: () -> Boolean): Boolean {
         val cache = cacheManager.getCache(cacheName) ?: error("Finner ikke cache=$cacheName")
-        return cache.get(Pair(verdi, SikkerhetContext.hentSaksbehandler(true))) {
+        return cache.get(Pair(verdi, SikkerhetContext.hentSaksbehandler())) {
             hentVerdi()
         } ?: error("Finner ikke verdi fra cache=$cacheName")
     }
