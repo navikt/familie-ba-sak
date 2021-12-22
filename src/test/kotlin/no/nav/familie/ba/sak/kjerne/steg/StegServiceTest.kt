@@ -376,6 +376,75 @@ class StegServiceTest(
         assertEquals(SikkerhetContext.SYSTEM_FORKORTELSE, totrinnskontroll.beslutterId)
     }
 
+    @Test
+    fun `skal kjøre gjennom steg for helmanuell migrering`() {
+        val søkerFnr = randomFnr()
+        val barnFnr = ClientMocks.barnFnr[0]
+        val barnasIdenter = listOf(barnFnr)
+
+        fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
+        val behandling = stegService.håndterNyBehandling(
+            NyBehandling(
+                kategori = BehandlingKategori.NASJONAL,
+                underkategori = BehandlingUnderkategori.ORDINÆR,
+                behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
+                behandlingÅrsak = BehandlingÅrsak.HELMANUELL_MIGRERING,
+                søkersIdent = søkerFnr,
+                barnasIdenter = barnasIdenter,
+                nyMigreringsdato = LocalDate.now().minusMonths(6)
+            )
+        )
+        assertEquals(StegType.VILKÅRSVURDERING, behandling.steg)
+        assertTrue {
+            behandling.behandlingStegTilstand.any {
+                it.behandlingSteg == StegType.REGISTRERE_PERSONGRUNNLAG &&
+                    it.behandlingStegStatus == BehandlingStegStatus.UTFØRT
+            }
+        }
+        assertNotNull(vilkårsvurderingService.hentAktivForBehandling(behandling.id))
+
+        val behandlingEtterVilkårsvurdering = stegService.håndterVilkårsvurdering(behandling)
+        assertEquals(StegType.BEHANDLINGSRESULTAT, behandlingEtterVilkårsvurdering.steg)
+
+        val behandlingEtterBehandlingsresultatSteg =
+            stegService.håndterBehandlingsresultat(behandlingEtterVilkårsvurdering)
+        assertEquals(StegType.VURDER_TILBAKEKREVING, behandlingEtterBehandlingsresultatSteg.steg)
+
+        val behandlingEtterTilbakekrevingSteg = stegService.håndterVurderTilbakekreving(
+            behandlingEtterBehandlingsresultatSteg,
+            RestTilbakekreving(
+                valg = Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING,
+                begrunnelse = "ignorer tilbakekreving"
+            )
+        )
+        assertEquals(StegType.SEND_TIL_BESLUTTER, behandlingEtterTilbakekrevingSteg.steg)
+
+        val behandlingEtterBesultterSteg = stegService.håndterSendTilBeslutter(
+            behandlingEtterTilbakekrevingSteg,
+            "1234"
+        )
+        assertEquals(StegType.IVERKSETT_MOT_OPPDRAG, behandlingEtterBesultterSteg.steg)
+        assertTrue {
+            behandlingEtterBesultterSteg.behandlingStegTilstand.any {
+                it.behandlingSteg == StegType.SEND_TIL_BESLUTTER &&
+                    it.behandlingStegStatus == BehandlingStegStatus.UTFØRT
+            }
+        }
+        assertTrue {
+            behandlingEtterBesultterSteg.behandlingStegTilstand.any {
+                it.behandlingSteg == StegType.BESLUTTE_VEDTAK &&
+                    it.behandlingStegStatus == BehandlingStegStatus.UTFØRT
+            }
+        }
+        val totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(behandling.id)
+        assertNotNull(totrinnskontroll)
+        assertEquals(true, totrinnskontroll!!.godkjent)
+        assertEquals(SikkerhetContext.hentSaksbehandlerNavn(), totrinnskontroll.saksbehandler)
+        assertEquals(SikkerhetContext.hentSaksbehandler(), totrinnskontroll.saksbehandlerId)
+        assertEquals(SikkerhetContext.SYSTEM_NAVN, totrinnskontroll.beslutter)
+        assertEquals(SikkerhetContext.SYSTEM_FORKORTELSE, totrinnskontroll.beslutterId)
+    }
+
     private fun kjørGjennomStegInkludertVurderTilbakekreving(): Behandling {
         val søkerFnr = randomFnr()
         val barnFnr = ClientMocks.barnFnr[0]

@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.integrasjoner.infotrygd
 
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
-import no.nav.commons.foedselsnummer.FoedselsNr
 import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
@@ -44,8 +43,11 @@ import java.time.LocalDate
 import java.time.Month.APRIL
 import java.time.Month.AUGUST
 import java.time.Month.DECEMBER
+import java.time.Month.FEBRUARY
+import java.time.Month.JANUARY
 import java.time.Month.JULY
 import java.time.Month.JUNE
+import java.time.Month.MARCH
 import java.time.Month.MAY
 import java.time.Month.NOVEMBER
 import java.time.Month.OCTOBER
@@ -141,13 +143,11 @@ class MigreringService(
         val barnasIdenter = barnasAktør.map { it.aktivFødselsnummer() }
 
         val listeBarnFraPdl = pdlRestClient.hentForelderBarnRelasjon(personAktør)
-            .filter {
-                it.relatertPersonsRolle == FORELDERBARNRELASJONROLLE.BARN &&
-                    FoedselsNr(it.relatertPersonsIdent).foedselsdato.isAfter(LocalDate.now().minusYears(18))
-            }.map { it.relatertPersonsIdent }
-        if (barnasAktør.size != listeBarnFraPdl.size || !listeBarnFraPdl.containsAll(barnasIdenter)) {
+            .filter { it.relatertPersonsRolle == FORELDERBARNRELASJONROLLE.BARN }
+            .map { it.relatertPersonsIdent }
+        if (!listeBarnFraPdl.containsAll(barnasIdenter)) {
             secureLog.info(
-                "Kan ikke migrere person ${personAktør.aktivFødselsnummer()} fordi barn fra PDL ikke samsvarer med løpende barnetrygdbarn fra Infotrygd.\n" +
+                "Kan ikke migrere person ${personAktør.aktivFødselsnummer()} fordi barn fra PDL IKKE inneholder alle løpende barnetrygdbarn fra Infotrygd.\n" +
                     "Barn fra PDL: ${listeBarnFraPdl}\n Barn fra Infotrygd: $barnasIdenter"
             )
             kastOgTellMigreringsFeil(MigreringsfeilType.DIFF_BARN_INFOTRYGD_OG_PDL)
@@ -253,25 +253,27 @@ class MigreringService(
 
     private fun infotrygdKjøredato(yearMonth: YearMonth): LocalDate {
         yearMonth.run {
-            if (this.year != 2021) {
-                kastOgTellMigreringsFeil(
-                    MigreringsfeilType.IKKE_GYLDIG_KJØREDATO,
-                    "Kopien av Infotrygds kjøreplan er utdatert."
-                )
+            if (this.year == 2021 || this.year == 2022) {
+                return when (this.month) {
+                    JANUARY -> 18
+                    FEBRUARY -> 15
+                    MARCH -> 18
+                    APRIL -> 19
+                    MAY -> 16
+                    JUNE -> 17
+                    JULY -> 18
+                    AUGUST -> 18
+                    SEPTEMBER -> 19
+                    OCTOBER -> 18
+                    NOVEMBER -> 17
+                    DECEMBER -> 5
+                }.run { yearMonth.atDay(this) }
             }
-            return when (this.month) {
-                APRIL -> 19
-                MAY -> 14
-                JUNE -> 17
-                JULY -> 19
-                AUGUST -> 18
-                SEPTEMBER -> 17
-                OCTOBER -> 18
-                NOVEMBER -> 17
-                DECEMBER -> 6
-                else -> 19
-            }.run { yearMonth.atDay(this) }
         }
+        kastOgTellMigreringsFeil(
+            MigreringsfeilType.IKKE_GYLDIG_KJØREDATO,
+            "Kopien av Infotrygds kjøreplan er utdatert."
+        )
     }
 
     private fun finnFørsteUtbetalingsperiode(behandlingId: Long): LocalDateSegment<Int> {

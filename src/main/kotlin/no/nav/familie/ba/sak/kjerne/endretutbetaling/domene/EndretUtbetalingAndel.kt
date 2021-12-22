@@ -4,19 +4,17 @@ import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.MånedPeriode
-import no.nav.familie.ba.sak.common.NullableMånedPeriode
-import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.YearMonthConverter
 import no.nav.familie.ba.sak.common.erDagenFør
 import no.nav.familie.ba.sak.common.overlapperHeltEllerDelvisMed
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
-import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.ekstern.restDomene.RestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
-import no.nav.familie.ba.sak.kjerne.dokument.UtvidetScenario
-import no.nav.familie.ba.sak.kjerne.dokument.domene.SanityBegrunnelse
-import no.nav.familie.ba.sak.kjerne.dokument.domene.SanityVilkår
-import no.nav.familie.ba.sak.kjerne.dokument.domene.tilTriggesAv
+import no.nav.familie.ba.sak.kjerne.brev.UtvidetScenarioForEndringsperiode
+import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertRestEndretAndel
+import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
+import no.nav.familie.ba.sak.kjerne.brev.domene.SanityVilkår
+import no.nav.familie.ba.sak.kjerne.brev.domene.tilTriggesAv
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
@@ -24,7 +22,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifi
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.triggesAvSkalUtbetales
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -135,19 +132,6 @@ data class EndretUtbetalingAndel(
             vedtakBegrunnelseSpesifikasjon
         )
 
-    fun erOverlappendeMed(nullableMånedPeriode: NullableMånedPeriode): Boolean {
-        if (this.fom == null || nullableMånedPeriode.fom == null) {
-            throw Feil("Fom ble null ved sjekk av overlapp av periode til endretUtbetalingAndel")
-        }
-
-        return MånedPeriode(this.fom!!, this.tom ?: TIDENES_ENDE.toYearMonth()).overlapperHeltEllerDelvisMed(
-            MånedPeriode(
-                nullableMånedPeriode.fom,
-                nullableMånedPeriode.tom ?: TIDENES_ENDE.toYearMonth()
-            )
-        )
-    }
-
     fun årsakErDeltBosted() = this.årsak == Årsak.DELT_BOSTED
 }
 
@@ -187,19 +171,19 @@ fun EndretUtbetalingAndel.fraRestEndretUtbetalingAndel(
 }
 
 fun hentPersonerForEtterEndretUtbetalingsperiode(
-    endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
-    vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser,
+    minimerteEndredeUtbetalingAndeler: List<MinimertRestEndretAndel>,
+    fom: LocalDate?,
     endringsaarsaker: Set<Årsak>
-) = endretUtbetalingAndeler.filter { endretUtbetalingAndel ->
-    endretUtbetalingAndel.tom!!.sisteDagIInneværendeMåned()
-        .erDagenFør(vedtaksperiodeMedBegrunnelser.fom) &&
+) = minimerteEndredeUtbetalingAndeler.filter { endretUtbetalingAndel ->
+    endretUtbetalingAndel.periode.tom.sisteDagIInneværendeMåned()
+        .erDagenFør(fom) &&
         endringsaarsaker.contains(endretUtbetalingAndel.årsak)
-}.mapNotNull { it.person }
+}.mapNotNull { it.personIdent }
 
-fun EndretUtbetalingAndel.hentGyldigEndretBegrunnelser(
+fun EndretUtbetalingAndel.hentGyldigEndretBegrunnelse(
     sanityBegrunnelser: List<SanityBegrunnelse>,
-    utvidetScenario: UtvidetScenario,
-): List<VedtakBegrunnelseSpesifikasjon> {
+    utvidetScenarioForEndringsperiode: UtvidetScenarioForEndringsperiode,
+): VedtakBegrunnelseSpesifikasjon {
     val gyldigeBegrunnelser = VedtakBegrunnelseSpesifikasjon.values()
         .filter { vedtakBegrunnelseSpesifikasjon ->
             vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType == VedtakBegrunnelseType.ENDRET_UTBETALING
@@ -211,7 +195,7 @@ fun EndretUtbetalingAndel.hentGyldigEndretBegrunnelser(
                 val triggesAv = sanityBegrunnelse.tilTriggesAv()
                 sanityBegrunnelse.oppfyllerKravForTriggereForEndretUtbetaling(
                     triggesAv,
-                    utvidetScenario,
+                    utvidetScenarioForEndringsperiode,
                     this
                 )
             } else false
@@ -224,20 +208,17 @@ fun EndretUtbetalingAndel.hentGyldigEndretBegrunnelser(
         )
     }
 
-    return gyldigeBegrunnelser
+    return gyldigeBegrunnelser.single()
 }
 
 private fun SanityBegrunnelse.oppfyllerKravForTriggereForEndretUtbetaling(
     triggesAv: TriggesAv,
-    utvidetScenario: UtvidetScenario,
+    utvidetScenario: UtvidetScenarioForEndringsperiode,
     endretUtbetalingAndel: EndretUtbetalingAndel
 ): Boolean {
     val skalUtbetalesKrav = triggesAvSkalUtbetales(listOf(endretUtbetalingAndel), triggesAv)
-    val utvidetKrav = (utvidetScenario == UtvidetScenario.UTVIDET_YTELSE_IKKE_ENDRET) ==
+    val utvidetKrav = (utvidetScenario == UtvidetScenarioForEndringsperiode.UTVIDET_YTELSE_IKKE_ENDRET) ==
         (this.vilkaar?.contains(SanityVilkår.UTVIDET_BARNETRYGD) ?: false)
 
     return skalUtbetalesKrav && utvidetKrav
 }
-
-fun List<EndretUtbetalingAndel>.somOverlapper(nullableMånedPeriode: NullableMånedPeriode) =
-    this.filter { it.erOverlappendeMed(nullableMånedPeriode) }

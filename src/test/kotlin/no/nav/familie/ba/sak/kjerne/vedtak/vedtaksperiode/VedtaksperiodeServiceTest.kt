@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
@@ -222,35 +221,6 @@ class VedtaksperiodeServiceTest(
             vedtaksperioderMedOverskrevneBegrunnelser.first().begrunnelser.first().vedtakBegrunnelseSpesifikasjon
         )
         assertEquals(0, vedtaksperioderMedOverskrevneBegrunnelser.first().fritekster.size)
-    }
-
-    @Test
-    fun `Skal kaste feil når begrunnelser som ikke samsvarer med vilkårsvurdering blir valgt`() {
-        val behandling = kjørStegprosessForFGB(
-            tilSteg = StegType.BEHANDLINGSRESULTAT,
-            søkerFnr = randomFnr(),
-            barnasIdenter = listOf(barn2Fnr),
-            fagsakService = fagsakService,
-            vedtakService = vedtakService,
-            persongrunnlagService = persongrunnlagService,
-            vilkårsvurderingService = vilkårsvurderingService,
-            stegService = stegService,
-            vedtaksperiodeService = vedtaksperiodeService,
-        )
-
-        val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = behandling.id)
-        val vedtaksperioder = vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak)
-
-        val funksjonellFeil = assertThrows<FunksjonellFeil> {
-            vedtaksperiodeService.oppdaterVedtaksperiodeMedStandardbegrunnelser(
-                vedtaksperiodeId = vedtaksperioder.first().id,
-                standardbegrunnelserFraFrontend = listOf(VedtakBegrunnelseSpesifikasjon.REDUKSJON_BOSATT_I_RIKTET)
-            )
-        }
-        assertTrue(
-            funksjonellFeil.frontendFeilmelding
-                ?.contains("'Barn har flyttet fra Norge' forventer vurdering på 'Bosatt i riket'") == true
-        )
     }
 
     @Test

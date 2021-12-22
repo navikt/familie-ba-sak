@@ -61,16 +61,6 @@ data class PersonopplysningGrunnlag(
             .toYearMonth() == (fom?.toYearMonth() ?: TIDENES_ENDE.toYearMonth())
     }
 
-    fun barnMedSeksårsdagPåFom(fom: LocalDate?): List<Person> {
-        return this.barna
-            .filter { person ->
-                person.hentSeksårsdag().toYearMonth() == (
-                    fom?.toYearMonth()
-                        ?: TIDENES_ENDE.toYearMonth()
-                    )
-            }
-    }
-
     override fun toString(): String {
         val sb = StringBuilder("PersonopplysningGrunnlagEntitet{")
         sb.append("id=").append(id)

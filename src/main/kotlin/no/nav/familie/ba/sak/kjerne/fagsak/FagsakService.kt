@@ -161,7 +161,7 @@ class FagsakService(
             tilbakekrevingsbehandlingService.hentRestTilbakekrevingsbehandlinger((fagsakId))
         val visningsbehandlinger = behandlingRepository.finnBehandlinger(fagsakId).map {
             it.tilRestVisningBehandling(
-                vedtaksdato = vedtakRepository.findByBehandlingAndAktiv(it.id)?.vedtaksdato
+                vedtaksdato = vedtakRepository.findByBehandlingAndAktivOptional(it.id)?.vedtaksdato
             )
         }
 
@@ -232,9 +232,8 @@ class FagsakService(
         return fagsakRepository.finnLøpendeFagsaker()
     }
 
-    @Transactional
     fun hentFagsakDeltager(personIdent: String): List<RestFagsakDeltager> {
-        val aktør = personidentService.hentOgLagreAktør(personIdent)
+        val aktør = personidentService.hentOgLagreAktør(personIdent, false)
 
         val maskertDeltaker = runCatching {
             hentMaskertFagsakdeltakerVedManglendeTilgang(aktør)

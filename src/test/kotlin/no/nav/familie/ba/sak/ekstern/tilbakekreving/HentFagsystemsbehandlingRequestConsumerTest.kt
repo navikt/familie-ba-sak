@@ -78,7 +78,7 @@ internal class HentFagsystemsbehandlingRequestConsumerTest {
         every { acknowledgment.acknowledge() } returns Unit
 
         every { behandlingService.hent(any()) } returns behandling
-        every { persongrunnlagService.hentAktiv(any()) } returns lagTestPersonopplysningGrunnlag(
+        every { persongrunnlagService.hentAktivThrows(any()) } returns lagTestPersonopplysningGrunnlag(
             behandling.id,
             tilfeldigPerson(personType = PersonType.BARN),
             tilfeldigPerson(personType = PersonType.SØKER)
