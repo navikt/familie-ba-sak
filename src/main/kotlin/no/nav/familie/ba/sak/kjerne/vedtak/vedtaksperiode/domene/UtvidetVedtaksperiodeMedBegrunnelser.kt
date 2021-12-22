@@ -57,9 +57,11 @@ data class UtvidetVedtaksperiodeMedBegrunnelser(
                 brevMålform = brevMålform,
             )
 
-            val data = brevPeriodeForLogging.convertDataClassToJson()
-
-            secureLogger.error("Feil ved generering av brevbegrunnelse. Data som ble sendt inn var: $data", exception)
+            secureLogger.error(
+                "Feil ved generering av brevbegrunnelse. Data som ble sendt inn var: ${
+                    brevPeriodeForLogging.convertDataClassToJson()
+                }", exception
+            )
             throw Feil(message = "Feil ved generering av brevbegrunnelse: ", throwable = exception)
         }
     }

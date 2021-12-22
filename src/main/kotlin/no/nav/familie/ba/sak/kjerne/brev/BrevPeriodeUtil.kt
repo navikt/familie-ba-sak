@@ -87,9 +87,11 @@ fun hentBrevPerioder(
                 brevMålform = målform,
             )
 
-            val data = brevPeriodeForLogging.convertDataClassToJson()
-
-            secureLogger.error("Feil ved generering av brevperioder med data: $data", exception)
+            secureLogger.error(
+                "Feil ved generering av brevbegrunnelse. Data som ble sendt inn var: ${
+                    brevPeriodeForLogging.convertDataClassToJson()
+                }", exception
+            )
             throw Feil(message = "Feil ved generering av brevperioder: ", throwable = exception)
         }
     }
