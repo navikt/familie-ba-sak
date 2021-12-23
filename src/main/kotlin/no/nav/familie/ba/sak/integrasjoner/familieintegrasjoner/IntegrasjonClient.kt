@@ -21,6 +21,7 @@ import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.dokarkiv.ArkiverDokumentResponse
 import no.nav.familie.kontrakter.felles.dokarkiv.Dokumenttype
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.ArkiverDokumentRequest
@@ -545,7 +546,7 @@ class IntegrasjonClient(
             tilgangPersonUri,
             personIdenter,
             HttpHeaders().also {
-                it.set(HEADER_NAV_TEMA, HEADER_NAV_TEMA_BA)
+                it.set(HEADER_NAV_TEMA, HEADER_NAV_TEMA_BAR)
             }
         ).single()
     }
@@ -554,7 +555,7 @@ class IntegrasjonClient(
         return postForEntity(
             tilgangRelasjonerUri, PersonIdent(personIdent),
             HttpHeaders().also {
-                it.set(HEADER_NAV_TEMA, HEADER_NAV_TEMA_BA)
+                it.set(HEADER_NAV_TEMA, HEADER_NAV_TEMA_BAR)
             }
         )
     }
@@ -596,7 +597,7 @@ class IntegrasjonClient(
         private const val PATH_TILGANG_RELASJONER = "tilgang/person-med-relasjoner"
         private const val PATH_TILGANG_PERSON = "tilgang/v2/personer"
         private const val HEADER_NAV_TEMA = "Nav-Tema"
-        private const val HEADER_NAV_TEMA_BA = "BAR"
+        private val HEADER_NAV_TEMA_BAR = Tema.BAR.name
 
         fun hentVedlegg(vedleggsnavn: String): ByteArray? {
             val inputStream = this::class.java.classLoader.getResourceAsStream("dokumenter/$vedleggsnavn")
