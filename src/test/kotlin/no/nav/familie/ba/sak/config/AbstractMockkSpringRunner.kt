@@ -25,7 +25,7 @@ abstract class AbstractMockkSpringRunner {
     private lateinit var mockPersonopplysningerService: PersonopplysningerService
 
     @Autowired
-    private lateinit var mockPdlRestClient: PdlIdentRestClient
+    private lateinit var mockPdlIdentRestClient: PdlIdentRestClient
 
     @Autowired
     private lateinit var mockIntegrasjonClient: IntegrasjonClient
@@ -77,8 +77,8 @@ abstract class AbstractMockkSpringRunner {
             ClientMocks.clearPdlMocks(mockPersonopplysningerService)
         }
 
-        if (isMockKMock(mockPdlRestClient)) {
-            ClientMocks.clearPdlIdentRestClient(mockPdlRestClient)
+        if (isMockKMock(mockPdlIdentRestClient)) {
+            ClientMocks.clearPdlIdentRestClient(mockPdlIdentRestClient)
         }
 
         IntegrasjonClientMock.clearIntegrasjonMocks(mockIntegrasjonClient)

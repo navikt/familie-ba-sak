@@ -10,6 +10,7 @@ import no.nav.security.mock.oauth2.MockOAuth2Server
 import no.nav.security.mock.oauth2.token.DefaultOAuth2TokenCallback
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import org.junit.jupiter.api.Tag
+import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -34,6 +35,7 @@ import org.springframework.web.client.RestTemplate
 @ExtendWith(SpringExtension::class)
 @EnableMockOAuth2Server
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Tag("integration")
 abstract class WebSpringAuthTestRunner : AbstractMockkSpringRunner() {
 
