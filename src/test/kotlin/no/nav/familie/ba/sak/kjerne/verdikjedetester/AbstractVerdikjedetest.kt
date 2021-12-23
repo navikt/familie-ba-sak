@@ -1,8 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
 import no.nav.familie.ba.sak.WebSpringAuthTestRunner
-import no.nav.familie.ba.sak.integrasjoner.`ef-sak`.EfSakRestClient
-import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.MockserverKlient
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContextInitializer
@@ -51,10 +49,7 @@ class VerdikjedetesterPropertyOverrideContextInitializer :
     "mock-task-service"
 )
 @ContextConfiguration(initializers = [VerdikjedetesterPropertyOverrideContextInitializer::class])
-abstract class AbstractVerdikjedetest(
-    efSakRestClient: EfSakRestClient? = null,
-    økonomiKlient: ØkonomiKlient? = null
-) : WebSpringAuthTestRunner(efSakRestClient = efSakRestClient, økonomiKlient = økonomiKlient) {
+abstract class AbstractVerdikjedetest : WebSpringAuthTestRunner() {
 
     @Autowired
     lateinit var restOperations: RestOperations

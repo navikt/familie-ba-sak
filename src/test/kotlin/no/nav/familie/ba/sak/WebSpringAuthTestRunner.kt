@@ -4,14 +4,13 @@ import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.config.AbstractMockkSpringRunner
 import no.nav.familie.ba.sak.config.ApplicationConfig
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
-import no.nav.familie.ba.sak.integrasjoner.`ef-sak`.EfSakRestClient
-import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext.SYSTEM_FORKORTELSE
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import no.nav.security.mock.oauth2.token.DefaultOAuth2TokenCallback
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import org.junit.jupiter.api.Tag
+import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -28,20 +27,17 @@ import org.springframework.web.client.RestTemplate
     properties = [
         "no.nav.security.jwt.issuer.azuread.discoveryUrl: http://localhost:\${mock-oauth2-server.port}/azuread/.well-known/openid-configuration",
         "no.nav.security.jwt.issuer.azuread.accepted_audience: some-audience",
-        "VEILEDER_ROLLE: VEILDER",
-        "SAKSBEHANDLER_ROLLE: SAKSBEHANDLER",
-        "BESLUTTER_ROLLE: BESLUTTER",
-        "ENVIRONMENT_NAME: integrationtest",
+        "rolle.veileder: VEILDER",
+        "rolle.saksbehandler: SAKSBEHANDLER",
+        "rolle.beslutter: BESLUTTER",
     ],
 )
 @ExtendWith(SpringExtension::class)
 @EnableMockOAuth2Server
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Tag("integration")
-abstract class WebSpringAuthTestRunner(
-    efSakRestClient: EfSakRestClient? = null,
-    økonomiKlient: ØkonomiKlient? = null
-) : AbstractMockkSpringRunner(efSakRestClient = efSakRestClient, økonomiKlient = økonomiKlient) {
+abstract class WebSpringAuthTestRunner : AbstractMockkSpringRunner() {
 
     @Autowired
     lateinit var databaseCleanupService: DatabaseCleanupService

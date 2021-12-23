@@ -20,7 +20,7 @@ class TilgangControllerTest(
 
     @Autowired
     private val mockIntegrasjonClient: IntegrasjonClient
-) : AbstractSpringIntegrationTest(personopplysningerService = mockPersonopplysningerService) {
+) : AbstractSpringIntegrationTest() {
 
     @Test
     fun testHarTilgangTilKode6Person() {
@@ -30,7 +30,7 @@ class TilgangControllerTest(
         } returns ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG
         every {
             mockIntegrasjonClient.sjekkTilgangTilPersoner(listOf(fnr))
-        } returns listOf(Tilgang(harTilgang = true))
+        } returns Tilgang(harTilgang = true)
 
         val response = tilgangController.hentTilgangOgDiskresjonskode(TilgangRequestDTO(fnr))
         val tilgangDTO = response.body?.data ?: error("Fikk ikke forventet respons")

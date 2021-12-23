@@ -42,6 +42,12 @@ class FagsakController(
     @PostMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
     fun hentEllerOpprettFagsak(@RequestBody fagsakRequest: FagsakRequest): ResponseEntity<Ressurs<RestMinimalFagsak>> {
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} henter eller oppretter ny fagsak")
+        if (fagsakRequest.personIdent != null) tilgangService.validerTilgangTilPersoner(
+            personIdenter = listOf(
+                fagsakRequest.personIdent
+            )
+        )
+        tilgangService.verifiserHarTilgangTilHandling(BehandlerRolle.SAKSBEHANDLER, "opprette fagsak")
 
         return Result.runCatching { fagsakService.hentEllerOpprettFagsak(fagsakRequest) }
             .fold(
@@ -53,6 +59,7 @@ class FagsakController(
     @GetMapping(path = ["/{fagsakId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun hentRestFagsak(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<RestFagsak>> {
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} henter fagsak med id $fagsakId")
+        tilgangService.validerTilgangTilFagsak(fagsakId = fagsakId)
 
         val fagsak = fagsakService.hentRestFagsak(fagsakId)
         return ResponseEntity.ok().body(fagsak)
@@ -61,6 +68,7 @@ class FagsakController(
     @GetMapping(path = ["/minimal/{fagsakId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun hentMinimalFagsak(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<RestMinimalFagsak>> {
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} henter minimal fagsak med id $fagsakId")
+        tilgangService.validerTilgangTilFagsak(fagsakId = fagsakId)
 
         val fagsak = fagsakService.hentRestMinimalFagsak(fagsakId)
         return ResponseEntity.ok().body(fagsak)
@@ -68,6 +76,7 @@ class FagsakController(
 
     @PostMapping(path = ["/hent-fagsak-paa-person"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun hentMinimalFagsakForPerson(@RequestBody request: RestHentFagsakForPerson): ResponseEntity<Ressurs<RestMinimalFagsak>> {
+        tilgangService.validerTilgangTilPersonMedBarn(personIdent = request.personIdent)
 
         return Result.runCatching {
             val aktør = personidentService.hentOgLagreAktør(request.personIdent)

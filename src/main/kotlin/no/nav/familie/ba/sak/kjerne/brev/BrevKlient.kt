@@ -29,7 +29,7 @@ class BrevKlient(
         return response.body ?: error("Klarte ikke generere brev med familie-brev")
     }
 
-    @Cacheable("begrunnelsestekster-for-nedtreksmeny")
+    @Cacheable("begrunnelsestekster-for-nedtreksmeny", cacheManager = "shortCache")
     fun hentSanityBegrunnelser(): List<SanityBegrunnelse> {
         val url = URI.create("$familieBrevUri/ba-sak/begrunnelser")
         logger.info("Henter begrunnelser fra sanity via familie brev")
@@ -43,7 +43,7 @@ class BrevKlient(
         return restSanityBegrunnelser.map { it.tilSanityBegrunnelse() }
     }
 
-    @Cacheable("begrunnelsestekst")
+    @Cacheable("begrunnelsestekst", cacheManager = "shortCache")
     fun hentBegrunnelsestekst(begrunnelseData: BegrunnelseData): String {
         val url = URI.create("$familieBrevUri/ba-sak/begrunnelser/${begrunnelseData.apiNavn}/tekst/")
         secureLogger.info("Kaller familie brev($url) med data $begrunnelseData")

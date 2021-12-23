@@ -14,14 +14,14 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.tilAdressebeskyttelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.brev.hentOverstyrtDokumenttittel
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
-import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.OpprettTaskService.Companion.RETRY_BACKOFF_5000MS
 import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.kontrakter.felles.Fagsystem
+import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.dokarkiv.ArkiverDokumentResponse
 import no.nav.familie.kontrakter.felles.dokarkiv.Dokumenttype
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.ArkiverDokumentRequest
@@ -43,7 +43,7 @@ import no.nav.familie.kontrakter.felles.tilgangskontroll.Tilgang
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.core.env.Environment
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.http.HttpHeaders
 import org.springframework.retry.annotation.Backoff
 import org.springframework.retry.annotation.Retryable
@@ -63,38 +63,11 @@ const val DEFAULT_JOURNALFØRENDE_ENHET = "9999"
 class IntegrasjonClient(
     @Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val integrasjonUri: URI,
     @Qualifier("jwtBearer") restOperations: RestOperations,
-    private val environment: Environment,
     private val systemOnlyPdlRestClient: SystemOnlyPdlRestClient
 ) :
     AbstractRestClient(restOperations, "integrasjon") {
 
-    fun hentPersonIdent(aktørId: String?): PersonIdent? {
-        if (aktørId == null || aktørId.isEmpty()) {
-            throw IntegrasjonException("Ved henting av personident er aktørId null eller tom")
-        }
-        val uri = URI.create("$integrasjonUri/aktoer/v1/fraaktorid")
-        log.info("Henter fnr fra $uri")
-
-        return try {
-            val response: Ressurs<Map<*, *>> = getForEntity(uri, HttpHeaders().medAktørId(aktørId))
-            assertGenerelleSuksessKriterier(response)
-
-            secureLogger.info(
-                "Vekslet inn aktørId: {} til fnr: {}",
-                aktørId,
-                response.data!!["personIdent"]
-            )
-            val personIdent = response.data!!["personIdent"].toString()
-            if (personIdent.isEmpty()) {
-                throw IntegrasjonException("Personident fra integrasjonstjenesten er tom")
-            } else {
-                PersonIdent(personIdent)
-            }
-        } catch (e: RestClientException) {
-            throw IntegrasjonException("Kall mot integrasjon feilet ved uthenting av personIdent", e, uri, aktørId)
-        }
-    }
-
+    @Cacheable("alle-eøs-land", cacheManager = "kodeverkCache")
     fun hentAlleEØSLand(): KodeverkDto {
         val uri = URI.create("$integrasjonUri/kodeverk/landkoder/eea")
 
@@ -105,6 +78,7 @@ class IntegrasjonClient(
         }
     }
 
+    @Cacheable("land", cacheManager = "kodeverkCache")
     fun hentLand(landkode: String): String {
         val uri = URI.create("$integrasjonUri/kodeverk/landkoder/$landkode")
 
@@ -562,6 +536,42 @@ class IntegrasjonClient(
         }
     }
 
+    val tilgangRelasjonerUri: URI =
+        UriComponentsBuilder.fromUri(integrasjonUri).pathSegment(PATH_TILGANG_RELASJONER).build().toUri()
+    val tilgangPersonUri: URI =
+        UriComponentsBuilder.fromUri(integrasjonUri).pathSegment(PATH_TILGANG_PERSON).build().toUri()
+
+    fun sjekkTilgangTilPersoner(personIdenter: List<String>): Tilgang {
+        return postForEntity<List<Tilgang>>(
+            tilgangPersonUri,
+            personIdenter,
+            HttpHeaders().also {
+                it.set(HEADER_NAV_TEMA, HEADER_NAV_TEMA_BAR)
+            }
+        ).single()
+    }
+
+    fun sjekkTilgangTilPersonMedRelasjoner(personIdent: String): Tilgang {
+        return postForEntity(
+            tilgangRelasjonerUri, PersonIdent(personIdent),
+            HttpHeaders().also {
+                it.set(HEADER_NAV_TEMA, HEADER_NAV_TEMA_BAR)
+            }
+        )
+    }
+
+    fun hentMaskertPersonInfoVedManglendeTilgang(aktør: Aktør): RestPersonInfo? {
+        val harTilgang = sjekkTilgangTilPersoner(listOf(aktør.aktivFødselsnummer())).harTilgang
+        return if (!harTilgang) {
+            val adressebeskyttelse = systemOnlyPdlRestClient.hentAdressebeskyttelse(aktør).tilAdressebeskyttelse()
+            RestPersonInfo(
+                personIdent = aktør.aktivFødselsnummer(),
+                adressebeskyttelseGradering = adressebeskyttelse,
+                harTilgang = false
+            )
+        } else null
+    }
+
     private inline fun <reified T> exchange(
         networkRequest: () -> Ressurs<T>?,
         onFailure: (Throwable) -> RuntimeException
@@ -579,33 +589,15 @@ class IntegrasjonClient(
         return ressurs!!.data ?: error("Henting av ressurs feilet med status ${ressurs.status} i response")
     }
 
-    val tilgangUri = UriComponentsBuilder.fromUri(integrasjonUri).pathSegment(PATH_TILGANGER).build().toUri()
-
-    fun sjekkTilgangTilPersoner(personIdenter: List<String>): List<Tilgang> {
-        if (SikkerhetContext.erSystemKontekst()) {
-            return personIdenter.map { Tilgang(true, null) }
-        }
-        return postForEntity(tilgangUri, personIdenter)
-    }
-
-    fun hentMaskertPersonInfoVedManglendeTilgang(aktør: Aktør): RestPersonInfo? {
-        val harTilgang = sjekkTilgangTilPersoner(listOf(aktør.aktivFødselsnummer())).first().harTilgang
-        return if (!harTilgang) {
-            val adressebeskyttelse = systemOnlyPdlRestClient.hentAdressebeskyttelse(aktør).tilAdressebeskyttelse()
-            RestPersonInfo(
-                personIdent = aktør.aktivFødselsnummer(),
-                adressebeskyttelseGradering = adressebeskyttelse,
-                harTilgang = false
-            )
-        } else null
-    }
-
     companion object {
 
         private val logger = LoggerFactory.getLogger(IntegrasjonClient::class.java)
         const val VEDTAK_VEDLEGG_FILNAVN = "NAV_33-0005bm-10.2016.pdf"
         const val VEDTAK_VEDLEGG_TITTEL = "Stønadsmottakerens rettigheter og plikter (Barnetrygd)"
-        private const val PATH_TILGANGER = "tilgang/personer"
+        private const val PATH_TILGANG_RELASJONER = "tilgang/person-med-relasjoner"
+        private const val PATH_TILGANG_PERSON = "tilgang/v2/personer"
+        private const val HEADER_NAV_TEMA = "Nav-Tema"
+        private val HEADER_NAV_TEMA_BAR = Tema.BAR.name
 
         fun hentVedlegg(vedleggsnavn: String): ByteArray? {
             val inputStream = this::class.java.classLoader.getResourceAsStream("dokumenter/$vedleggsnavn")

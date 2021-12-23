@@ -78,7 +78,6 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTestDev() {
         integrasjonClient = IntegrasjonClient(
             URI.create(wireMockServer.baseUrl() + "/api"),
             restOperations,
-            mockk(relaxed = true),
             mockk(relaxed = true)
         )
     }
@@ -303,28 +302,6 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTestDev() {
         val enhet = integrasjonClient.hentBehandlendeEnhet("1")
         assertThat(enhet).isNotEmpty
         assertThat(enhet.first().enhetId).isEqualTo("2")
-    }
-
-    @Test
-    @Tag("integration")
-    fun `hentPersonIdent returnerer OK`() {
-        wireMockServer.stubFor(
-            get("/api/aktoer/v1/fraaktorid").willReturn(
-                okJson(
-                    objectMapper.writeValueAsString(
-                        success(mapOf("personIdent" to 1L))
-                    )
-                )
-            )
-        )
-
-        val personIdent = integrasjonClient.hentPersonIdent("12")
-        assertThat(personIdent?.ident).isEqualTo("1")
-
-        wireMockServer.verify(
-            getRequestedFor(urlEqualTo("/api/aktoer/v1/fraaktorid"))
-                .withHeader("Nav-Aktorid", equalTo("12"))
-        )
     }
 
     @Test
