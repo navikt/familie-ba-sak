@@ -5,6 +5,8 @@ import io.mockk.unmockkAll
 import no.nav.familie.ba.sak.common.LocalDateService
 import no.nav.familie.ba.sak.integrasjoner.`ef-sak`.EfSakRestClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
+import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClientMock
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlIdentRestClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
@@ -42,6 +44,9 @@ abstract class AbstractMockkSpringRunner {
 
     @Autowired
     private lateinit var mockLocalDateService: LocalDateService
+
+    @Autowired
+    private lateinit var mockInfotrygdBarnetrygdClient: InfotrygdBarnetrygdClient
 
     @Autowired
     private lateinit var applicationContext: ConfigurableApplicationContext
@@ -96,6 +101,10 @@ abstract class AbstractMockkSpringRunner {
 
         if (isMockKMock(mockLocalDateService)) {
             LocalDateServiceTestConfig.clearLocalDateServiceMocks(mockLocalDateService)
+        }
+
+        if (isMockKMock(mockInfotrygdBarnetrygdClient)) {
+            InfotrygdBarnetrygdClientMock.clearInfotrygdBarnetrygdMocks(mockInfotrygdBarnetrygdClient)
         }
     }
 

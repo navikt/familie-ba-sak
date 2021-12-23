@@ -16,7 +16,7 @@ class InfotrygdBarnetrygdClientMock {
     @Profile("mock-infotrygd-barnetrygd")
     @Primary
     fun mockInfotrygdBarnetrygd(): InfotrygdBarnetrygdClient {
-        val mockInfotrygdBarnetrygdClient = mockk<InfotrygdBarnetrygdClient>(relaxed = false)
+        val mockInfotrygdBarnetrygdClient = mockk<InfotrygdBarnetrygdClient>(relaxed = true)
 
         clearInfotrygdBarnetrygdMocks(mockInfotrygdBarnetrygdClient)
 
