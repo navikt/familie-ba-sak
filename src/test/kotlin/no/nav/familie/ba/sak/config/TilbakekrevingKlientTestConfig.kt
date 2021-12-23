@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.config
 
+import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingKlient
@@ -17,13 +18,15 @@ class TilbakekrevingKlientTestConfig {
     fun mockTilbakekrevingKlient(): TilbakekrevingKlient {
         val tilbakekrevingKlient: TilbakekrevingKlient = mockk()
 
-        clearMocks(tilbakekrevingKlient)
+        clearTilbakekrevingKlientMocks(tilbakekrevingKlient)
 
         return tilbakekrevingKlient
     }
 
     companion object {
-        fun clearMocks(mockTilbakekrevingKlient: TilbakekrevingKlient) {
+        fun clearTilbakekrevingKlientMocks(mockTilbakekrevingKlient: TilbakekrevingKlient) {
+            clearMocks(mockTilbakekrevingKlient)
+
             every { mockTilbakekrevingKlient.hentForhåndsvisningVarselbrev(any()) } returns TEST_PDF
 
             every { mockTilbakekrevingKlient.opprettTilbakekrevingBehandling(any()) } returns "id1"

@@ -4,6 +4,7 @@ import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Tag
+import org.junit.jupiter.api.TestInstance
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
 
@@ -13,6 +14,7 @@ import org.springframework.test.context.ActiveProfiles
     "mock-rest-template-config",
     "mock-oauth",
     "mock-pdl",
+    "mock-integrasjoner",
     "mock-task-repository",
     "mock-tilbakekreving-klient",
     "mock-infotrygd-barnetrygd",
@@ -20,6 +22,7 @@ import org.springframework.test.context.ActiveProfiles
     "mock-økonomi",
     "mock-brev-klient"
 )
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Tag("integration")
 abstract class AbstractSpringIntegrationTestDev : AbstractMockkSpringRunner() {
     protected final val wireMockServer = WireMockServer(WireMockConfiguration.wireMockConfig().dynamicPort())

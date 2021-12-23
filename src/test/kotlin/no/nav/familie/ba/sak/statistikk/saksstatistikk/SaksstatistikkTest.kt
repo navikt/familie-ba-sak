@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.common.Utils.hentPropertyFraMaven
 import no.nav.familie.ba.sak.common.nyOrdinærBehandling
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.IdentInformasjon
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -38,10 +39,14 @@ class SaksstatistikkTest(
     private val mockPersonopplysningerService: PersonopplysningerService,
 
     @Autowired
+    private val mockIntegrasjonClient: IntegrasjonClient,
+
+    @Autowired
     private val behandlingService: BehandlingService,
 
     @Autowired
     private val databaseCleanupService: DatabaseCleanupService,
+
     @Autowired
     private val saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository,
 ) : AbstractSpringIntegrationTest() {

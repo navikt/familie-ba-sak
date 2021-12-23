@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.config
 
 import io.mockk.isMockKMock
-import io.mockk.unmockkAll
 import no.nav.familie.ba.sak.common.LocalDateService
 import no.nav.familie.ba.sak.integrasjoner.`ef-sak`.EfSakRestClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
@@ -9,12 +8,11 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingKlient
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.cache.CacheManager
+import org.springframework.context.ConfigurableApplicationContext
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 abstract class AbstractMockkSpringRunner {
     /**
      * Tjenester vi mocker ved bruk av every
@@ -40,6 +38,9 @@ abstract class AbstractMockkSpringRunner {
     @Autowired
     private lateinit var mockLocalDateService: LocalDateService
 
+    @Autowired
+    private lateinit var applicationContext: ConfigurableApplicationContext
+
     /**
      * Cachemanagere
      */
@@ -61,14 +62,11 @@ abstract class AbstractMockkSpringRunner {
     }
 
     private fun clearMocks() {
-        unmockkAll()
         if (isMockKMock(mockPersonopplysningerService)) {
             ClientMocks.clearPdlMocks(mockPersonopplysningerService)
         }
 
-        if (isMockKMock(mockIntegrasjonClient)) {
-            ClientMocks.clearIntegrasjonMocks(mockIntegrasjonClient)
-        }
+        IntegrasjonClientMock.clearIntegrasjonMocks(mockIntegrasjonClient)
 
         if (isMockKMock(mockFeatureToggleService)) {
             ClientMocks.clearFeatureToggleMocks(mockFeatureToggleService)
@@ -83,11 +81,11 @@ abstract class AbstractMockkSpringRunner {
         }
 
         if (isMockKMock(mockTilbakekrevingKlient)) {
-            TilbakekrevingKlientTestConfig.clearMocks(mockTilbakekrevingKlient)
+            TilbakekrevingKlientTestConfig.clearTilbakekrevingKlientMocks(mockTilbakekrevingKlient)
         }
 
         if (isMockKMock(mockLocalDateService)) {
-            LocalDateServiceTestConfig.clearMocks(mockLocalDateService)
+            LocalDateServiceTestConfig.clearLocalDateServiceMocks(mockLocalDateService)
         }
     }
 

@@ -5,6 +5,7 @@ import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import no.nav.familie.ba.sak.common.DbContainerInitializer
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Tag
+import org.junit.jupiter.api.TestInstance
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
@@ -14,6 +15,7 @@ import org.springframework.test.context.ContextConfiguration
     "postgres",
     "mock-økonomi",
     "mock-pdl",
+    "mock-integrasjoner",
     "mock-task-repository",
     "mock-infotrygd-barnetrygd",
     "mock-tilbakekreving-klient",
@@ -23,6 +25,7 @@ import org.springframework.test.context.ContextConfiguration
     "mock-rest-template-config",
 )
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Tag("integration")
 abstract class AbstractSpringIntegrationTest : AbstractMockkSpringRunner() {
     protected final val wireMockServer = WireMockServer(WireMockConfiguration.wireMockConfig().dynamicPort())

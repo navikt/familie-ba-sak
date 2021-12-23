@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
-import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
@@ -22,8 +21,7 @@ class JournalførVedtaksbrev(
     private val vedtakService: VedtakService,
     private val integrasjonClient: IntegrasjonClient,
     private val arbeidsfordelingService: ArbeidsfordelingService,
-    private val taskRepository: TaskRepositoryWrapper,
-    private val envService: EnvService
+    private val taskRepository: TaskRepositoryWrapper
 ) : BehandlingSteg<JournalførVedtaksbrevDTO> {
 
     override fun utførStegOgAngiNeste(
