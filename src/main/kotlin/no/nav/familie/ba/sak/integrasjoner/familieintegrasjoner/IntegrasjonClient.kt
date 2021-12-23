@@ -443,7 +443,7 @@ class IntegrasjonClient(
         )
         logger.info(
             "Journalfører vedtaksbrev for behandling ${vedtak.behandling.id} med tittel ${
-            hentOverstyrtDokumenttittel(vedtak.behandling)
+                hentOverstyrtDokumenttittel(vedtak.behandling)
             }"
         )
         val vedlegg = listOf(
@@ -593,8 +593,8 @@ class IntegrasjonClient(
         private val logger = LoggerFactory.getLogger(IntegrasjonClient::class.java)
         const val VEDTAK_VEDLEGG_FILNAVN = "NAV_33-0005bm-10.2016.pdf"
         const val VEDTAK_VEDLEGG_TITTEL = "Stønadsmottakerens rettigheter og plikter (Barnetrygd)"
-        private const val PATH_TILGANG_RELASJONER = "api/tilgang/person-med-relasjoner"
-        private const val PATH_TILGANG_PERSON = "api/tilgang/v2/personer"
+        private const val PATH_TILGANG_RELASJONER = "tilgang/person-med-relasjoner"
+        private const val PATH_TILGANG_PERSON = "tilgang/v2/personer"
         private const val HEADER_NAV_TEMA = "Nav-Tema"
         private const val HEADER_NAV_TEMA_BA = "BAR"
 
