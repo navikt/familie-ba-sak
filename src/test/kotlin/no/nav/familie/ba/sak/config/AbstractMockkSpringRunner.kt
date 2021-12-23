@@ -4,6 +4,7 @@ import io.mockk.isMockKMock
 import no.nav.familie.ba.sak.common.LocalDateService
 import no.nav.familie.ba.sak.integrasjoner.`ef-sak`.EfSakRestClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.integrasjoner.pdl.PdlIdentRestClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingKlient
@@ -19,6 +20,9 @@ abstract class AbstractMockkSpringRunner {
      */
     @Autowired
     private lateinit var mockPersonopplysningerService: PersonopplysningerService
+
+    @Autowired
+    private lateinit var mockPdlRestClient: PdlIdentRestClient
 
     @Autowired
     private lateinit var mockIntegrasjonClient: IntegrasjonClient
@@ -64,6 +68,10 @@ abstract class AbstractMockkSpringRunner {
     private fun clearMocks() {
         if (isMockKMock(mockPersonopplysningerService)) {
             ClientMocks.clearPdlMocks(mockPersonopplysningerService)
+        }
+
+        if (isMockKMock(mockPdlRestClient)) {
+            ClientMocks.clearPdlIdentRestClient(mockPdlRestClient)
         }
 
         IntegrasjonClientMock.clearIntegrasjonMocks(mockIntegrasjonClient)

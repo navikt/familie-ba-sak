@@ -6,10 +6,10 @@ import io.mockk.mockk
 import io.mockk.slot
 import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.guttenBarnesenFødselsdato
-import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.tilddMMyy
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonException
+import no.nav.familie.ba.sak.integrasjoner.pdl.PdlIdentRestClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.VergeResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.DødsfallData
@@ -29,7 +29,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.mockSøkerAutoma
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.mockSøkerAutomatiskBehandlingFnr
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
+import no.nav.familie.ba.sak.kjerne.personident.Personident
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
@@ -63,11 +63,21 @@ class ClientMocks {
     }
 
     @Bean
+    @Profile("mock-ident-client")
+    @Primary
+    fun mockPdlIdentRestClient(): PdlIdentRestClient {
+        val mockPdlIdentRestClient = mockk<PdlIdentRestClient>(relaxed = false)
+
+        clearPdlIdentRestClient(mockPdlIdentRestClient)
+
+        return mockPdlIdentRestClient
+    }
+
+    @Bean
     @Primary
     @Profile("mock-pdl-test-søk")
     fun mockPDL(): PersonopplysningerService {
         val mockPersonopplysningerService = mockk<PersonopplysningerService>()
-        val mockPersonidentService = mockk<PersonidentService>()
 
         val farId = "12345678910"
         val morId = "21345678910"
@@ -108,34 +118,6 @@ class ClientMocks {
                 )
             )
         )
-
-        every {
-            mockPersonopplysningerService.hentIdenter(any(), true)
-        } answers {
-            listOf(IdentInformasjon("123", false, "FOLKEREGISTERIDENT"))
-        }
-
-        val identSlot = slot<String>()
-        every {
-            mockPersonopplysningerService.hentIdenter(capture(identSlot), false)
-        } answers {
-            listOf(
-                IdentInformasjon(
-                    identSlot.captured.substring(0, min(11, identSlot.captured.length)), false, "FOLKEREGISTERIDENT"
-                ),
-                IdentInformasjon(
-                    identSlot.captured.substring(0, min(11, identSlot.captured.length)) + "00",
-                    false,
-                    "AKTORID"
-                ),
-            )
-        }
-
-        every {
-            mockPersonidentService.hentOgLagreAktør(any())
-        } answers {
-            randomAktørId()
-        }
 
         every {
             mockPersonopplysningerService.hentGjeldendeStatsborgerskap(any())
@@ -229,21 +211,37 @@ class ClientMocks {
             }
         }
 
-        fun clearPersonidentMocks(
-            mockPersonidentService: PersonidentService
+        fun clearPdlIdentRestClient(
+            mockPdlIdentRestClient: PdlIdentRestClient
         ) {
-            clearMocks(mockPersonidentService)
+            clearMocks(mockPdlIdentRestClient)
 
+            val identSlot = slot<String>()
             every {
-                mockPersonidentService.hentOgLagreAktør(any())
+                mockPdlIdentRestClient.hentIdenter(capture(identSlot), true)
             } answers {
-                randomAktørId()
+                listOf(
+                    IdentInformasjon(identSlot.captured, false, "FOLKEREGISTERIDENT"),
+                    IdentInformasjon(randomFnr(), true, "FOLKEREGISTERIDENT")
+                )
             }
 
+            val identSlot2 = slot<String>()
             every {
-                mockPersonidentService.hentOgLagreAktør(any())
+                mockPdlIdentRestClient.hentIdenter(capture(identSlot2), false)
             } answers {
-                randomAktørId()
+                listOf(
+                    IdentInformasjon(
+                        identSlot2.captured.substring(0, min(11, identSlot2.captured.length)),
+                        false,
+                        "FOLKEREGISTERIDENT"
+                    ),
+                    IdentInformasjon(
+                        identSlot2.captured.substring(0, min(11, identSlot2.captured.length)) + "00",
+                        false,
+                        "AKTORID"
+                    ),
+                )
             }
         }
 
@@ -273,36 +271,9 @@ class ClientMocks {
                 )
             }
 
-            val identSlot = slot<String>()
-            every {
-                mockPersonopplysningerService.hentIdenter(capture(identSlot), true)
-            } answers {
-                listOf(
-                    IdentInformasjon(identSlot.captured, false, "FOLKEREGISTERIDENT"),
-                    IdentInformasjon(randomFnr(), true, "FOLKEREGISTERIDENT")
-                )
-            }
-
             every {
                 mockPersonopplysningerService.hentDødsfall(any())
             } returns DødsfallData(false, null)
-            val identSlot2 = slot<String>()
-            every {
-                mockPersonopplysningerService.hentIdenter(capture(identSlot2), false)
-            } answers {
-                listOf(
-                    IdentInformasjon(
-                        identSlot2.captured.substring(0, min(11, identSlot2.captured.length)),
-                        false,
-                        "FOLKEREGISTERIDENT"
-                    ),
-                    IdentInformasjon(
-                        identSlot2.captured.substring(0, min(11, identSlot2.captured.length)) + "00",
-                        false,
-                        "AKTORID"
-                    ),
-                )
-            }
 
             every {
                 mockPersonopplysningerService.hentDødsfall(any())
@@ -614,7 +585,7 @@ fun mockHentPersoninfoForMedIdenter(
 }
 
 fun tilAktør(fnr: String) = Aktør(fnr + "00").also {
-    it.personidenter.add(no.nav.familie.ba.sak.kjerne.personident.Personident(fnr, aktør = it))
+    it.personidenter.add(Personident(fnr, aktør = it))
 }
 
 val TEST_PDF = ClientMocks::class.java.getResource("/dokument/mockvedtak.pdf").readBytes()

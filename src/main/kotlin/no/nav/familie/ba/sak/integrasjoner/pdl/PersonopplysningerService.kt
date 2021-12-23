@@ -5,7 +5,6 @@ import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClien
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.DødsfallData
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.ForelderBarnRelasjonMaskert
-import no.nav.familie.ba.sak.integrasjoner.pdl.internal.IdentInformasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PersonInfo
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.VergeData
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
@@ -61,16 +60,6 @@ class PersonopplysningerService(
 
     private fun hentPersoninfoMedQuery(aktør: Aktør, personInfoQuery: PersonInfoQuery): PersonInfo {
         return pdlRestClient.hentPerson(aktør, personInfoQuery)
-    }
-
-    fun hentIdenter(personIdent: String, historikk: Boolean): List<IdentInformasjon> {
-        val hentIdenter = pdlRestClient.hentIdenter(personIdent)
-
-        return if (historikk) {
-            hentIdenter.data.pdlIdenter!!.identer.map { it }
-        } else {
-            hentIdenter.data.pdlIdenter!!.identer.filter { !it.historisk }.map { it }
-        }
     }
 
     fun hentDødsfall(aktør: Aktør): DødsfallData {

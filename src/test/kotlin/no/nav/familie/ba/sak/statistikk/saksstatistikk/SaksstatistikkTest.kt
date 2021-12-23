@@ -5,14 +5,13 @@ import no.nav.familie.ba.sak.common.Utils.hentPropertyFraMaven
 import no.nav.familie.ba.sak.common.nyOrdinærBehandling
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
-import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.IdentInformasjon
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakController
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRequest
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.statistikk.producer.MockKafkaProducer
 import no.nav.familie.ba.sak.statistikk.producer.MockKafkaProducer.Companion.sendteMeldinger
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMellomlagringRepository
@@ -36,10 +35,7 @@ class SaksstatistikkTest(
     private val fagsakController: FagsakController,
 
     @Autowired
-    private val mockPersonopplysningerService: PersonopplysningerService,
-
-    @Autowired
-    private val mockIntegrasjonClient: IntegrasjonClient,
+    private val mockPersonidentService: PersonidentService,
 
     @Autowired
     private val behandlingService: BehandlingService,
@@ -66,7 +62,7 @@ class SaksstatistikkTest(
         val fnr = "12345678910"
 
         every {
-            mockPersonopplysningerService.hentIdenter(fnr, true)
+            mockPersonidentService.hentIdenter(fnr, true)
         } returns listOf(IdentInformasjon(ident = fnr, historisk = false, gruppe = "FOLKEREGISTERIDENT"))
 
         val fagsakId = fagsakController.hentEllerOpprettFagsak(FagsakRequest(personIdent = fnr)).body!!.data!!.id
@@ -97,7 +93,7 @@ class SaksstatistikkTest(
         val fnr = "12345678912"
 
         every {
-            mockPersonopplysningerService.hentIdenter(fnr, false)
+            mockPersonidentService.hentIdenter(fnr, false)
         } throws RuntimeException("Testen skal feile")
 
         assertThatThrownBy {
@@ -115,7 +111,7 @@ class SaksstatistikkTest(
         val fnr = "12345678910"
 
         every {
-            mockPersonopplysningerService.hentIdenter(fnr, true)
+            mockPersonidentService.hentIdenter(fnr, true)
         } returns listOf(IdentInformasjon(ident = fnr, historisk = false, gruppe = "FOLKEREGISTERIDENT"))
 
         fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr, false)

@@ -33,7 +33,7 @@ import java.time.LocalDateTime
 import java.time.YearMonth
 import java.time.temporal.ChronoUnit
 
-@ActiveProfiles("postgres", "mock-pdl", "mock-oauth", "mock-brev-klient")
+@ActiveProfiles("postgres", "mock-pdl", "mock-ident-client", "mock-oauth", "mock-brev-klient")
 class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
 
     // Trenger fast port for at klienten i ba-sak kan kalle wiremock'en
@@ -139,7 +139,7 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
                 .withRequestBody(
                     equalToJson(
                         """{"personIdent":"$fnr", "fraDato":"${
-                        YearMonth.now().minusYears(4)
+                            YearMonth.now().minusYears(4)
                         }" }"""
                     )
                 )
@@ -170,7 +170,7 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
                 .withRequestBody(
                     equalToJson(
                         """{"personIdent":"$fnr", "fraDato":"${
-                        YearMonth.now().minusYears(4)
+                            YearMonth.now().minusYears(4)
                         }" }"""
                     )
                 )
@@ -230,7 +230,7 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
                 .withRequestBody(
                     equalToJson(
                         """{"personIdent":"$fnr", "fraDato":"${
-                        YearMonth.now().minusYears(4)
+                            YearMonth.now().minusYears(4)
                         }" }"""
                     )
                 )

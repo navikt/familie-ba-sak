@@ -67,7 +67,7 @@ import java.time.format.DateTimeFormatter
     "postgres",
     "mock-økonomi",
     "mock-pdl",
-    "mock-pdl-client",
+    "mock-ident-client",
     "mock-infotrygd-barnetrygd",
     "mock-tilbakekreving-klient",
     "mock-brev-klient",

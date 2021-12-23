@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.integrasjoner.infotrygd
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.kontrakter.ba.infotrygd.InfotrygdSøkResponse
 import no.nav.familie.kontrakter.ba.infotrygd.Sak
 import no.nav.familie.kontrakter.ba.infotrygd.Stønad
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service
 class InfotrygdService(
     private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
     private val integrasjonClient: IntegrasjonClient,
+    private val personidentService: PersonidentService,
     private val personopplysningerService: PersonopplysningerService
 ) {
 
@@ -31,7 +33,7 @@ class InfotrygdService(
     }
 
     fun hentInfotrygdstønaderForSøker(ident: String, historikk: Boolean = false): InfotrygdSøkResponse<Stønad> {
-        val søkerIdenter = personopplysningerService.hentIdenter(ident, true)
+        val søkerIdenter = personidentService.hentIdenter(ident, true)
             .filter { it.gruppe == "FOLKEREGISTERIDENT" }
             .map { it.ident }
         return infotrygdBarnetrygdClient.hentStønader(søkerIdenter, emptyList(), historikk)

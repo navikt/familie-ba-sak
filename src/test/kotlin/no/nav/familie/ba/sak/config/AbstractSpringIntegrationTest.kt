@@ -15,7 +15,7 @@ import org.springframework.test.context.ContextConfiguration
     "postgres",
     "mock-økonomi",
     "mock-pdl",
-    "mock-integrasjoner",
+    "mock-ident-client",
     "mock-task-repository",
     "mock-infotrygd-barnetrygd",
     "mock-tilbakekreving-klient",

@@ -12,7 +12,6 @@ import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
 import no.nav.familie.kontrakter.felles.tilgangskontroll.Tilgang
 import org.apache.commons.lang3.StringUtils
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -31,7 +30,7 @@ internal class PersonopplysningerServiceTest(
     private val mockIntegrasjonClient: IntegrasjonClient,
 
     @Autowired
-    private val personidentService: PersonidentService
+    private val mockPersonidentService: PersonidentService
 
 ) : AbstractSpringIntegrationTest() {
 
@@ -41,14 +40,15 @@ internal class PersonopplysningerServiceTest(
     fun setUp() {
         personopplysningerService =
             PersonopplysningerService(
-                PdlRestClient(URI.create(wireMockServer.baseUrl() + "/api"), restTemplate, personidentService),
+                PdlRestClient(URI.create(wireMockServer.baseUrl() + "/api"), restTemplate, mockPersonidentService),
                 SystemOnlyPdlRestClient(
                     URI.create(wireMockServer.baseUrl() + "/api"),
                     restTemplate,
-                    personidentService
+                    mockPersonidentService
                 ),
                 mockIntegrasjonClient,
             )
+        lagMockForPersoner()
     }
 
     @Test
@@ -154,8 +154,7 @@ internal class PersonopplysningerServiceTest(
         )
     }
 
-    @BeforeAll
-    fun lagMockForPersoner() {
+    private fun lagMockForPersoner() {
         lagMockForPdl(
             "hentperson-med-relasjoner-og-registerinformasjon.graphql",
             "PdlIntegrasjon/gyldigRequestForMorMedXXXStatsborgerskap.json",

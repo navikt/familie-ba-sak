@@ -14,7 +14,7 @@ import org.springframework.test.context.ActiveProfiles
     "mock-rest-template-config",
     "mock-oauth",
     "mock-pdl",
-    "mock-integrasjoner",
+    "mock-ident-client",
     "mock-task-repository",
     "mock-tilbakekreving-klient",
     "mock-infotrygd-barnetrygd",

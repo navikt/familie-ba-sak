@@ -9,7 +9,7 @@ import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.config.tilAktør
-import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
+import no.nav.familie.ba.sak.integrasjoner.pdl.PdlIdentRestClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.IdentInformasjon
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -31,25 +31,25 @@ internal class PersonidentServiceTest {
     private val aktørIdAktiv = tilAktør(personidentAktiv)
     private val personidentHistorisk = randomFnr()
 
-    private val personopplysningerService: PersonopplysningerService = mockk(relaxed = true)
+    private val pdlIdentRestClient: PdlIdentRestClient = mockk(relaxed = true)
     private val personidentRepository: PersonidentRepository = mockk()
     private val aktørIdRepository: AktørIdRepository = mockk()
     private val personIdentSlot = slot<Personident>()
     private val aktørSlot = slot<Aktør>()
     private val personidentService = PersonidentService(
-        personidentRepository, aktørIdRepository, personopplysningerService, mockk()
+        personidentRepository, aktørIdRepository, pdlIdentRestClient, mockk()
     )
 
     @BeforeAll
     fun init() {
 
-        every { personopplysningerService.hentIdenter(personidentAktiv, false) } answers {
+        every { pdlIdentRestClient.hentIdenter(personidentAktiv, false) } answers {
             listOf(
                 IdentInformasjon(aktørIdAktiv.aktørId, false, "AKTORID"),
                 IdentInformasjon(personidentAktiv, false, "FOLKEREGISTERIDENT"),
             )
         }
-        every { personopplysningerService.hentIdenter(personidentHistorisk, false) } answers {
+        every { pdlIdentRestClient.hentIdenter(personidentHistorisk, false) } answers {
             listOf(
                 IdentInformasjon(aktørIdAktiv.aktørId, false, "AKTORID"),
                 IdentInformasjon(personidentAktiv, false, "FOLKEREGISTERIDENT"),
@@ -83,14 +83,14 @@ internal class PersonidentServiceTest {
             )
         )
 
-        every { personopplysningerService.hentIdenter(personIdentSomFinnes, false) } answers {
+        every { pdlIdentRestClient.hentIdenter(personIdentSomFinnes, false) } answers {
             listOf(
                 IdentInformasjon(aktørIdSomFinnes.aktørId, false, "AKTORID"),
                 IdentInformasjon(personIdentSomFinnes, false, "FOLKEREGISTERIDENT"),
             )
         }
 
-        every { personopplysningerService.hentIdenter(personIdentSomSkalLeggesTil, false) } answers {
+        every { pdlIdentRestClient.hentIdenter(personIdentSomSkalLeggesTil, false) } answers {
             listOf(
                 IdentInformasjon(aktørIdSomFinnes.aktørId, false, "AKTORID"),
                 IdentInformasjon(personIdentSomSkalLeggesTil, false, "FOLKEREGISTERIDENT"),
@@ -106,7 +106,7 @@ internal class PersonidentServiceTest {
         }
 
         val personidentService = PersonidentService(
-            personidentRepository, aktørIdRepository, personopplysningerService, mockk()
+            personidentRepository, aktørIdRepository, pdlIdentRestClient, mockk()
         )
 
         val aktør = personidentService.håndterNyIdent(nyIdent = PersonIdent(personIdentSomSkalLeggesTil))
@@ -122,7 +122,7 @@ internal class PersonidentServiceTest {
     fun `Skal opprette task for håndtering av ny ident`() {
         val taskRepositoryMock = mockk<TaskRepositoryWrapper>(relaxed = true)
         val personidentService = PersonidentService(
-            personidentRepository, aktørIdRepository, personopplysningerService, taskRepositoryMock
+            personidentRepository, aktørIdRepository, pdlIdentRestClient, taskRepositoryMock
         )
 
         val slot = slot<Task>()
@@ -140,7 +140,7 @@ internal class PersonidentServiceTest {
         val personIdentSomSkalLeggesTil = randomFnr()
         val aktørIdSomIkkeFinnes = randomAktørId()
 
-        every { personopplysningerService.hentIdenter(personIdentSomSkalLeggesTil, false) } answers {
+        every { pdlIdentRestClient.hentIdenter(personIdentSomSkalLeggesTil, false) } answers {
             listOf(
                 IdentInformasjon(aktørIdSomIkkeFinnes.aktørId, false, "AKTORID"),
                 IdentInformasjon(personIdentSomSkalLeggesTil, false, "FOLKEREGISTERIDENT"),
@@ -152,7 +152,7 @@ internal class PersonidentServiceTest {
         every { aktørIdRepository.findByAktørIdOrNull(aktørIdSomIkkeFinnes.aktørId) }.answers { null }
 
         val personidentService = PersonidentService(
-            personidentRepository, aktørIdRepository, personopplysningerService, mockk()
+            personidentRepository, aktørIdRepository, pdlIdentRestClient, mockk()
         )
 
         val aktør = personidentService.håndterNyIdent(nyIdent = PersonIdent(personIdentSomSkalLeggesTil))
@@ -173,7 +173,7 @@ internal class PersonidentServiceTest {
             )
         )
 
-        every { personopplysningerService.hentIdenter(personIdentSomFinnes, false) } answers {
+        every { pdlIdentRestClient.hentIdenter(personIdentSomFinnes, false) } answers {
             listOf(
                 IdentInformasjon(aktørIdSomFinnes.aktørId, false, "AKTORID"),
                 IdentInformasjon(personIdentSomFinnes, false, "FOLKEREGISTERIDENT"),
@@ -183,7 +183,7 @@ internal class PersonidentServiceTest {
         every { aktørIdRepository.findByAktørIdOrNull(aktørIdSomFinnes.aktørId) }.answers { aktørIdSomFinnes }
 
         val personidentService = PersonidentService(
-            personidentRepository, aktørIdRepository, personopplysningerService, mockk()
+            personidentRepository, aktørIdRepository, pdlIdentRestClient, mockk()
         )
 
         val aktør = personidentService.håndterNyIdent(nyIdent = PersonIdent(personIdentSomFinnes))

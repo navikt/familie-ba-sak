@@ -4,7 +4,6 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.Doedsfall
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PdlDødsfallResponse
-import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PdlHentIdenterResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PdlHentPersonRelasjonerResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PdlHentPersonResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PdlOppholdResponse
@@ -43,8 +42,6 @@ class PdlRestClient(
     AbstractRestClient(restTemplate, "pdl.personinfo") {
 
     protected val pdlUri = UriUtil.uri(pdlBaseUrl, PATH_GRAPHQL)
-
-    private val hentIdenterQuery = hentGraphqlQuery("hentIdenter")
 
     @Cacheable("personopplysninger", cacheManager = "shortCache")
     fun hentPerson(aktør: Aktør, personInfoQuery: PersonInfoQuery): PersonInfo {
@@ -119,26 +116,6 @@ class PdlRestClient(
                 )
             }
         }
-    }
-
-    @Cacheable("identer", cacheManager = "shortCache")
-    fun hentIdenter(personIdent: String): PdlHentIdenterResponse {
-        val pdlPersonRequest = PdlPersonRequest(
-            variables = PdlPersonRequestVariables(personIdent),
-            query = hentIdenterQuery
-        )
-        val response = postForEntity<PdlHentIdenterResponse>(
-            pdlUri,
-            pdlPersonRequest,
-            httpHeaders()
-        )
-
-        if (!response.harFeil()) return response
-        throw Feil(
-            message = "Fant ikke identer for person: ${response.errorMessages()}",
-            frontendFeilmelding = "Fant ikke identer for person $personIdent: ${response.errorMessages()}",
-            httpStatus = HttpStatus.NOT_FOUND
-        )
     }
 
     @Cacheable("dødsfall", cacheManager = "shortCache")
@@ -260,7 +237,7 @@ class PdlRestClient(
         } catch (e: Exception) {
             throw Feil(
                 message = "Feil ved oppslag på utenlandsk bostedsadresse. Gav feil: ${
-                NestedExceptionUtils.getMostSpecificCause(e).message
+                    NestedExceptionUtils.getMostSpecificCause(e).message
                 }",
                 frontendFeilmelding = "Feil oppsto ved oppslag på utenlandsk bostedsadresse ${aktør.aktivFødselsnummer()}",
                 httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,

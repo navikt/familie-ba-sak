@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.personident
 
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
-import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
+import no.nav.familie.ba.sak.integrasjoner.pdl.PdlIdentRestClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.IdentInformasjon
 import no.nav.familie.kontrakter.felles.PersonIdent
 import org.slf4j.LoggerFactory
@@ -13,15 +13,19 @@ import java.time.LocalDateTime
 class PersonidentService(
     private val personidentRepository: PersonidentRepository,
     private val aktørIdRepository: AktørIdRepository,
-    private val personopplysningerService: PersonopplysningerService,
+    private val pdlIdentRestClient: PdlIdentRestClient,
     private val taskRepository: TaskRepositoryWrapper,
 ) {
+
+    fun hentIdenter(personIdent: String, historikk: Boolean): List<IdentInformasjon> {
+        return pdlIdentRestClient.hentIdenter(personIdent, historikk)
+    }
 
     @Transactional
     fun håndterNyIdent(nyIdent: PersonIdent): Aktør? {
         logger.info("Håndterer ny ident")
         secureLogger.info("Håndterer ny ident ${nyIdent.ident}")
-        val identerFraPdl = personopplysningerService.hentIdenter(nyIdent.ident, false)
+        val identerFraPdl = hentIdenter(nyIdent.ident, false)
         val aktørId = filtrerAktørId(identerFraPdl)
 
         val aktør = aktørIdRepository.findByAktørIdOrNull(aktørId)
@@ -41,7 +45,7 @@ class PersonidentService(
     }
 
     fun hentAlleFødselsnummerForEnAktør(aktør: Aktør) =
-        personopplysningerService.hentIdenter(aktør.aktivFødselsnummer(), true)
+        hentIdenter(aktør.aktivFødselsnummer(), true)
             .filter { it.gruppe == "FOLKEREGISTERIDENT" }
             .map { it.ident }
 
@@ -57,7 +61,7 @@ class PersonidentService(
             return aktørIdent
         }
 
-        val identerFraPdl = personopplysningerService.hentIdenter(ident, false)
+        val identerFraPdl = hentIdenter(ident, false)
         val fødselsnummerAktiv = filtrerAktivtFødselsnummer(identerFraPdl)
         val aktørIdStr = filtrerAktørId(identerFraPdl)
 

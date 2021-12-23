@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.config
 
 import io.mockk.clearMocks
 import io.mockk.every
+import io.mockk.isMockKMock
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
@@ -26,7 +27,6 @@ import no.nav.familie.kontrakter.felles.tilgangskontroll.Tilgang
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Primary
-import org.springframework.context.annotation.Profile
 import java.time.LocalDate
 import java.time.Month
 import java.util.UUID
@@ -35,7 +35,6 @@ import java.util.UUID
 class IntegrasjonClientMock {
 
     @Bean
-    @Profile("mock-integrasjoner")
     @Primary
     fun mockIntegrasjonClient(): IntegrasjonClient {
         val mockIntegrasjonClient = mockk<IntegrasjonClient>(relaxed = false)
@@ -47,7 +46,14 @@ class IntegrasjonClientMock {
 
     companion object {
         fun clearIntegrasjonMocks(mockIntegrasjonClient: IntegrasjonClient) {
-            clearMocks(mockIntegrasjonClient)
+            /**
+             * Mulig årsak til at appen må bruke dirties i testene.
+             * Denne bønna blir initialisert av mockk, men etter noen av testene
+             * er det ikke lenger en mockk bønne!
+             */
+            if (isMockKMock(mockIntegrasjonClient)) {
+                clearMocks(mockIntegrasjonClient)
+            }
 
             every {
                 mockIntegrasjonClient.hentMaskertPersonInfoVedManglendeTilgang(any())
