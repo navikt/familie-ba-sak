@@ -443,7 +443,7 @@ class IntegrasjonClient(
         )
         logger.info(
             "Journalfører vedtaksbrev for behandling ${vedtak.behandling.id} med tittel ${
-            hentOverstyrtDokumenttittel(vedtak.behandling)
+                hentOverstyrtDokumenttittel(vedtak.behandling)
             }"
         )
         val vedlegg = listOf(
@@ -545,7 +545,7 @@ class IntegrasjonClient(
             tilgangPersonUri,
             personIdenter,
             HttpHeaders().also {
-                it.set(HEADER_NAV_TEMA, HEADER_NAV_TEMA_ENF)
+                it.set(HEADER_NAV_TEMA, HEADER_NAV_TEMA_BA)
             }
         ).single()
     }
@@ -554,7 +554,7 @@ class IntegrasjonClient(
         return postForEntity(
             tilgangRelasjonerUri, PersonIdent(personIdent),
             HttpHeaders().also {
-                it.set(HEADER_NAV_TEMA, HEADER_NAV_TEMA_ENF)
+                it.set(HEADER_NAV_TEMA, HEADER_NAV_TEMA_BA)
             }
         )
     }
@@ -596,7 +596,7 @@ class IntegrasjonClient(
         private const val PATH_TILGANG_RELASJONER = "api/tilgang/person-med-relasjoner"
         private const val PATH_TILGANG_PERSON = "api/tilgang/v2/personer"
         private const val HEADER_NAV_TEMA = "Nav-Tema"
-        private const val HEADER_NAV_TEMA_ENF = "BA"
+        private const val HEADER_NAV_TEMA_BA = "BAR"
 
         fun hentVedlegg(vedleggsnavn: String): ByteArray? {
             val inputStream = this::class.java.classLoader.getResourceAsStream("dokumenter/$vedleggsnavn")
