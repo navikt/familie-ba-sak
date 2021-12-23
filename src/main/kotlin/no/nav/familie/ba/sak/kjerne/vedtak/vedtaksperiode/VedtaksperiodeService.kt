@@ -13,8 +13,10 @@ import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertPersonResultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilTriggesAv
@@ -276,60 +278,14 @@ class VedtaksperiodeService(
                 sanityBegrunnelser = sanityBegrunnelser
             )
         }.map { utvidetVedtaksperiodeMedBegrunnelser ->
-            val gyldigeBegrunnelser = when (utvidetVedtaksperiodeMedBegrunnelser.type) {
-                Vedtaksperiodetype.FORTSATT_INNVILGET -> {
-                    VedtakBegrunnelseSpesifikasjon.values()
-                        .filter { it.vedtakBegrunnelseType == VedtakBegrunnelseType.FORTSATT_INNVILGET }
-                }
-                Vedtaksperiodetype.AVSLAG -> {
-                    VedtakBegrunnelseSpesifikasjon.values()
-                        .filter { it.vedtakBegrunnelseType == VedtakBegrunnelseType.AVSLAG }
-                }
-                else -> {
-                    val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id)
-                        ?: error("Finner ikke vilkårsvurdering ved begrunning av vedtak")
-
-                    val identerMedUtbetaling =
-                        utvidetVedtaksperiodeMedBegrunnelser.utbetalingsperiodeDetaljer.map { it.person.personIdent }
-
-                    val standardbegrunnelser: MutableSet<VedtakBegrunnelseSpesifikasjon> =
-                        VedtakBegrunnelseSpesifikasjon.values()
-                            .filter { vedtakBegrunnelseSpesifikasjon ->
-                                vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType != VedtakBegrunnelseType.AVSLAG &&
-                                    vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType != VedtakBegrunnelseType.FORTSATT_INNVILGET
-                            }
-                            .fold(mutableSetOf()) { acc, standardBegrunnelse ->
-                                val triggesAv =
-                                    standardBegrunnelse.tilSanityBegrunnelse(sanityBegrunnelser)
-                                        ?.tilTriggesAv() ?: return@fold acc
-
-                                if (standardBegrunnelse.triggesForPeriode(
-                                        utvidetVedtaksperiodeMedBegrunnelser = utvidetVedtaksperiodeMedBegrunnelser,
-                                        minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
-                                        persongrunnlag = persongrunnlag,
-                                        aktørerMedUtbetaling = personidentService.hentOgLagreAktørIder(
-                                                identerMedUtbetaling
-                                            ),
-                                        triggesAv = triggesAv,
-                                        endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(
-                                                behandling.id
-                                            ),
-                                        andelerTilkjentYtelse = andelerTilkjentYtelse,
-                                    )
-                                ) {
-                                    acc.add(standardBegrunnelse)
-                                }
-
-                                acc
-                            }
-                    if (utvidetVedtaksperiodeMedBegrunnelser.type == Vedtaksperiodetype.UTBETALING &&
-                        standardbegrunnelser.isEmpty()
-                    ) {
-                        VedtakBegrunnelseSpesifikasjon.values()
-                            .filter { it.vedtakBegrunnelseType == VedtakBegrunnelseType.FORTSATT_INNVILGET }
-                    } else standardbegrunnelser
-                }
-            }
+            val gyldigeBegrunnelser =
+                if (behandling.status == BehandlingStatus.UTREDES) hentGyldigeBegrunnelserForVedtaksperiode(
+                    utvidetVedtaksperiodeMedBegrunnelser,
+                    behandling,
+                    sanityBegrunnelser,
+                    persongrunnlag,
+                    andelerTilkjentYtelse
+                ) else emptyList()
 
             utvidetVedtaksperiodeMedBegrunnelser.copy(
                 gyldigeBegrunnelser = gyldigeBegrunnelser.filter {
@@ -337,6 +293,67 @@ class VedtaksperiodeService(
                     sanityBegrunnelse?.tilTriggesAv()?.valgbar ?: false
                 }.toList()
             )
+        }
+    }
+
+    private fun hentGyldigeBegrunnelserForVedtaksperiode(
+        utvidetVedtaksperiodeMedBegrunnelser: UtvidetVedtaksperiodeMedBegrunnelser,
+        behandling: Behandling,
+        sanityBegrunnelser: List<SanityBegrunnelse>,
+        persongrunnlag: PersonopplysningGrunnlag,
+        andelerTilkjentYtelse: List<AndelTilkjentYtelse>
+    ) = when (utvidetVedtaksperiodeMedBegrunnelser.type) {
+        Vedtaksperiodetype.FORTSATT_INNVILGET -> {
+            VedtakBegrunnelseSpesifikasjon.values()
+                .filter { it.vedtakBegrunnelseType == VedtakBegrunnelseType.FORTSATT_INNVILGET }
+        }
+        Vedtaksperiodetype.AVSLAG -> {
+            VedtakBegrunnelseSpesifikasjon.values()
+                .filter { it.vedtakBegrunnelseType == VedtakBegrunnelseType.AVSLAG }
+        }
+        else -> {
+            val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id)
+                ?: error("Finner ikke vilkårsvurdering ved begrunning av vedtak")
+
+            val identerMedUtbetaling =
+                utvidetVedtaksperiodeMedBegrunnelser.utbetalingsperiodeDetaljer.map { it.person.personIdent }
+
+            val standardbegrunnelser: MutableSet<VedtakBegrunnelseSpesifikasjon> =
+                VedtakBegrunnelseSpesifikasjon.values()
+                    .filter { vedtakBegrunnelseSpesifikasjon ->
+                        vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType != VedtakBegrunnelseType.AVSLAG &&
+                            vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType != VedtakBegrunnelseType.FORTSATT_INNVILGET
+                    }
+                    .fold(mutableSetOf()) { acc, standardBegrunnelse ->
+                        val triggesAv =
+                            standardBegrunnelse.tilSanityBegrunnelse(sanityBegrunnelser)
+                                ?.tilTriggesAv() ?: return@fold acc
+
+                        if (standardBegrunnelse.triggesForPeriode(
+                                utvidetVedtaksperiodeMedBegrunnelser = utvidetVedtaksperiodeMedBegrunnelser,
+                                minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
+                                persongrunnlag = persongrunnlag,
+                                aktørerMedUtbetaling = personidentService.hentOgLagreAktørIder(
+                                        identerMedUtbetaling
+                                    ),
+                                triggesAv = triggesAv,
+                                endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(
+                                        behandling.id
+                                    ),
+                                andelerTilkjentYtelse = andelerTilkjentYtelse,
+                            )
+                        ) {
+                            acc.add(standardBegrunnelse)
+                        }
+
+                        acc
+                    }
+            if (utvidetVedtaksperiodeMedBegrunnelser.type == Vedtaksperiodetype.UTBETALING &&
+                standardbegrunnelser.isEmpty()
+            ) {
+                VedtakBegrunnelseSpesifikasjon.values()
+                    .filter { it.vedtakBegrunnelseType == VedtakBegrunnelseType.FORTSATT_INNVILGET }
+            } else standardbegrunnelser
         }
     }
 
