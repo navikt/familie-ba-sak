@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.integrasjoner.infotrygd
 
+import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.kontrakter.ba.infotrygd.InfotrygdSøkResponse
@@ -15,11 +16,26 @@ class InfotrygdBarnetrygdClientMock {
     @Profile("mock-infotrygd-barnetrygd")
     @Primary
     fun mockInfotrygdBarnetrygd(): InfotrygdBarnetrygdClient {
-        val mockk = mockk<InfotrygdBarnetrygdClient>(relaxed = true)
-        every { mockk.harLøpendeSakIInfotrygd(any(), any()) } returns false
-        every { mockk.hentSaker(any(), any()) } returns InfotrygdSøkResponse(emptyList(), emptyList())
-        every { mockk.hentStønader(any(), any()) } returns InfotrygdSøkResponse(emptyList(), emptyList())
+        val mockInfotrygdBarnetrygdClient = mockk<InfotrygdBarnetrygdClient>(relaxed = false)
 
-        return mockk
+        clearInfotrygdBarnetrygdMocks(mockInfotrygdBarnetrygdClient)
+
+        return mockInfotrygdBarnetrygdClient
+    }
+
+    companion object {
+        fun clearInfotrygdBarnetrygdMocks(mockInfotrygdBarnetrygdClient: InfotrygdBarnetrygdClient) {
+            clearMocks(mockInfotrygdBarnetrygdClient)
+
+            every { mockInfotrygdBarnetrygdClient.harLøpendeSakIInfotrygd(any(), any()) } returns false
+            every { mockInfotrygdBarnetrygdClient.hentSaker(any(), any()) } returns InfotrygdSøkResponse(
+                emptyList(),
+                emptyList()
+            )
+            every { mockInfotrygdBarnetrygdClient.hentStønader(any(), any()) } returns InfotrygdSøkResponse(
+                emptyList(),
+                emptyList()
+            )
+        }
     }
 }

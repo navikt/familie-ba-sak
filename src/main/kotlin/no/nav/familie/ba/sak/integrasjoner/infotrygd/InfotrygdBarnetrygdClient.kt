@@ -16,7 +16,6 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.core.env.Environment
 import org.springframework.http.HttpStatus
 import org.springframework.retry.annotation.Backoff
 import org.springframework.retry.annotation.Retryable
@@ -29,8 +28,7 @@ import java.time.YearMonth
 @Component
 class InfotrygdBarnetrygdClient(
     @Value("\${FAMILIE_BA_INFOTRYGD_API_URL}") private val clientUri: URI,
-    @Qualifier("jwtBearerMedLangTimeout") restOperations: RestOperations,
-    private val environment: Environment
+    @Qualifier("jwtBearerMedLangTimeout") restOperations: RestOperations
 ) : AbstractRestClient(restOperations, "infotrygd") {
 
     fun harLøpendeSakIInfotrygd(søkersIdenter: List<String>, barnasIdenter: List<String> = emptyList()): Boolean {

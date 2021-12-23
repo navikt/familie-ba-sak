@@ -148,7 +148,7 @@ fun defaultFagsak() = Fagsak(
         mutableSetOf(
             FagsakPerson(
                 fagsak = it,
-                personIdent = PersonIdent(randomFnr()),
+                personIdent = PersonIdent(it.aktør.aktivFødselsnummer()),
                 opprettetTidspunkt = LocalDateTime.now()
             )
         )
@@ -184,7 +184,7 @@ fun tilfeldigPerson(
     Person(
         id = nestePersonId(),
         aktør = aktør,
-        personIdent = personIdent,
+        personIdent = PersonIdent(aktør.aktivFødselsnummer()),
         fødselsdato = fødselsdato,
         type = personType,
         personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 0),
@@ -203,7 +203,7 @@ fun tilfeldigSøker(
     Person(
         id = nestePersonId(),
         aktør = aktør,
-        personIdent = personIdent,
+        personIdent = PersonIdent(aktør.aktivFødselsnummer()),
         fødselsdato = fødselsdato,
         type = personType,
         personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 0),

@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.config
 
 import io.mockk.isMockKMock
+import io.mockk.unmockkAll
 import no.nav.familie.ba.sak.common.LocalDateService
 import no.nav.familie.ba.sak.integrasjoner.`ef-sak`.EfSakRestClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
@@ -66,6 +67,7 @@ abstract class AbstractMockkSpringRunner {
     }
 
     private fun clearMocks() {
+        unmockkAll()
         if (isMockKMock(mockPersonopplysningerService)) {
             ClientMocks.clearPdlMocks(mockPersonopplysningerService)
         }

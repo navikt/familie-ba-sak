@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.fagsak
 
-import io.mockk.every
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.nyOrdinærBehandling
 import no.nav.familie.ba.sak.common.randomAktørId
@@ -12,7 +11,6 @@ import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.ekstern.restDomene.FagsakDeltagerRolle
 import no.nav.familie.ba.sak.ekstern.restDomene.RestSøkParam
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
-import no.nav.familie.ba.sak.integrasjoner.pdl.internal.IdentInformasjon
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -70,10 +68,6 @@ class FagsakControllerTest(
     fun `Skal opprette fagsak`() {
         val fnr = randomFnr()
 
-        every {
-            mockPersonidentService.hentIdenter(fnr, true)
-        } returns listOf(IdentInformasjon(ident = fnr, historisk = false, gruppe = "FOLKEREGISTERIDENT"))
-
         fagsakController.hentEllerOpprettFagsak(FagsakRequest(personIdent = fnr))
         assertEquals(fnr, fagsakService.hent(tilAktør(fnr))?.aktør?.aktivFødselsnummer())
     }
@@ -96,10 +90,6 @@ class FagsakControllerTest(
     fun `Skal opprette skyggesak i Sak`() {
         val fnr = randomFnr()
 
-        every {
-            mockPersonidentService.hentIdenter(fnr, true)
-        } returns listOf(IdentInformasjon(ident = fnr, historisk = false, gruppe = "FOLKEREGISTERIDENT"))
-
         val fagsak = fagsakController.hentEllerOpprettFagsak(FagsakRequest(personIdent = fnr))
 
         verify(exactly = 1) { mockIntegrasjonClient.opprettSkyggesak(any(), fagsak.body?.data?.id!!) }
@@ -109,12 +99,6 @@ class FagsakControllerTest(
     @Tag("integration")
     fun `Skal returnere eksisterende fagsak på person som allerede finnes`() {
         val fnr = randomFnr()
-
-        every {
-            mockPersonidentService.hentIdenter(fnr, true)
-        } returns listOf(
-            IdentInformasjon(ident = fnr, historisk = false, gruppe = "FOLKEREGISTERIDENT")
-        )
 
         val nyRestFagsak = fagsakController.hentEllerOpprettFagsak(FagsakRequest(personIdent = fnr))
         assertEquals(Ressurs.Status.SUKSESS, nyRestFagsak.body?.status)
