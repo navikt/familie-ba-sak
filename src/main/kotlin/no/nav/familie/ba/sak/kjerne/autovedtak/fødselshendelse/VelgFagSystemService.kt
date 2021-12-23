@@ -55,7 +55,7 @@ class VelgFagSystemService(
     internal fun morHarLøpendeEllerTidligereUtbetalinger(fagsak: Fagsak?): Boolean {
         return if (fagsak == null) false
         else if (behandlingService.hentBehandlinger(fagsakId = fagsak.id)
-            .any { it.status == BehandlingStatus.UTREDES }
+                .any { it.status == BehandlingStatus.UTREDES }
         ) true
         else behandlingService.hentSisteBehandlingSomErIverksatt(fagsakId = fagsak.id) != null
     }
@@ -67,11 +67,11 @@ class VelgFagSystemService(
     }
 
     internal fun morEllerBarnHarLøpendeSakIInfotrygd(morsIdent: String, barnasIdenter: List<String>): Boolean {
-        val morsIdenter = personidentService.hentIdenter(morsIdent, false)
+        val morsIdenter = personidentService.hentIdenter(personIdent = morsIdent, historikk = false)
             .filter { it.gruppe == "FOLKEREGISTERIDENT" }
             .map { it.ident }
         val alleBarnasIdenter = barnasIdenter.flatMap {
-            personidentService.hentIdenter(it, false)
+            personidentService.hentIdenter(personIdent = it, historikk = false)
                 .filter { identinfo -> identinfo.gruppe == "FOLKEREGISTERIDENT" }
                 .map { identinfo -> identinfo.ident }
         }

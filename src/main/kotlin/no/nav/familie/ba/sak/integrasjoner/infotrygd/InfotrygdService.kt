@@ -33,7 +33,7 @@ class InfotrygdService(
     }
 
     fun hentInfotrygdstønaderForSøker(ident: String, historikk: Boolean = false): InfotrygdSøkResponse<Stønad> {
-        val søkerIdenter = personidentService.hentIdenter(ident, true)
+        val søkerIdenter = personidentService.hentIdenter(personIdent = ident, historikk = true)
             .filter { it.gruppe == "FOLKEREGISTERIDENT" }
             .map { it.ident }
         return infotrygdBarnetrygdClient.hentStønader(søkerIdenter, emptyList(), historikk)
