@@ -91,6 +91,12 @@ class TilgangService(
      * @param verdi verdiet som man ønsket å hente cache for, eks behandlingId, eller personIdent
      */
     private fun <T> harSaksbehandlerTilgang(cacheName: String, verdi: T, hentVerdi: () -> Boolean): Boolean {
+        if (SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
+                rolleConfig,
+                null
+            ) == BehandlerRolle.SYSTEM
+        ) return true
+
         val cache = cacheManager.getCache(cacheName) ?: error("Finner ikke cache=$cacheName")
         return cache.get(Pair(verdi, SikkerhetContext.hentSaksbehandler())) {
             hentVerdi()
