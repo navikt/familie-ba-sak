@@ -16,6 +16,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.brev.hentOverstyrtDokumenttittel
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
+import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.OpprettTaskService.Companion.RETRY_BACKOFF_5000MS
 import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.kontrakter.felles.Fagsystem
@@ -542,6 +543,10 @@ class IntegrasjonClient(
         UriComponentsBuilder.fromUri(integrasjonUri).pathSegment(PATH_TILGANG_PERSON).build().toUri()
 
     fun sjekkTilgangTilPersoner(personIdenter: List<String>): Tilgang {
+        if (SikkerhetContext.erSystemKontekst()) {
+            return Tilgang(true, null)
+        }
+
         return postForEntity<List<Tilgang>>(
             tilgangPersonUri,
             personIdenter,
@@ -552,6 +557,10 @@ class IntegrasjonClient(
     }
 
     fun sjekkTilgangTilPersonMedRelasjoner(personIdent: String): Tilgang {
+        if (SikkerhetContext.erSystemKontekst()) {
+            return Tilgang(true, null)
+        }
+
         return postForEntity(
             tilgangRelasjonerUri, PersonIdent(personIdent),
             HttpHeaders().also {

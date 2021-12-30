@@ -9,6 +9,8 @@ object SikkerhetContext {
     const val SYSTEM_FORKORTELSE = "VL"
     const val SYSTEM_NAVN = "System"
 
+    fun erSystemKontekst() = hentSaksbehandler() == SYSTEM_FORKORTELSE
+
     fun hentSaksbehandler(): String {
         return Result.runCatching { SpringTokenValidationContextHolder().tokenValidationContext }
             .fold(
