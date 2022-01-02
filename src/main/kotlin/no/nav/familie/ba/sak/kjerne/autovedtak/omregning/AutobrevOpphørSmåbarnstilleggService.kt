@@ -16,6 +16,8 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.småbarnstillegg.PeriodeOvergangsst
 import no.nav.familie.ba.sak.kjerne.grunnlag.småbarnstillegg.PeriodeOvergangsstønadGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksbegrunnelseRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.task.JournalførVedtaksbrevTask
 import no.nav.familie.prosessering.domene.Task
@@ -33,12 +35,35 @@ class AutobrevOpphørSmåbarnstilleggService(
     private val taskRepository: TaskRepositoryWrapper,
     private val vedtaksperiodeService: VedtaksperiodeService,
     private val autovedtakService: AutovedtakService,
-    private val periodeOvergangsstønadGrunnlagRepository: PeriodeOvergangsstønadGrunnlagRepository
+    private val periodeOvergangsstønadGrunnlagRepository: PeriodeOvergangsstønadGrunnlagRepository,
+    private val vedtaksbegrunnelseRepository: VedtaksbegrunnelseRepository
 ) {
     @Transactional
     fun kjørBehandlingOgSendBrevForOpphørAvSmåbarnstillegg(behandlingId: Long) {
 
         val forrigeBehandling = behandlingService.hent(behandlingId)
+
+        val alleVedtakbegrunnelserPåForrigeBehandling: List<Vedtaksbegrunnelse> =
+            vedtaksbegrunnelseRepository.hentAlleVedtakbegrunnelserPåBehandling(forrigeBehandling.id)
+
+        val opphørSmåbarnstilleggErAlleredeBegrunnet: Boolean =
+            alleVedtakbegrunnelserPåForrigeBehandling.fold(false) { acc, curr ->
+                if (
+                    curr.vedtakBegrunnelseSpesifikasjon == VedtakBegrunnelseSpesifikasjon.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_FULL_OVERGANGSSTØNAD ||
+                    curr.vedtakBegrunnelseSpesifikasjon == VedtakBegrunnelseSpesifikasjon.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_BARN_UNDER_TRE_ÅR
+                ) {
+                    true
+                } else {
+                    acc
+                }
+            }
+
+        if (opphørSmåbarnstilleggErAlleredeBegrunnet) {
+            logger.info(
+                "For fagsak ${forrigeBehandling.fagsak.id} og behandlingsId ${forrigeBehandling.id} er opphør av småbarnstillegg allerede begrunnet."
+            )
+            return
+        }
 
         val personopplysningGrunnlag: PersonopplysningGrunnlag =
             personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId)
