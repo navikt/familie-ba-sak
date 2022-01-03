@@ -446,7 +446,7 @@ class IntegrasjonClient(
         )
         logger.info(
             "Journalfører vedtaksbrev for behandling ${vedtak.behandling.id} med tittel ${
-                hentOverstyrtDokumenttittel(vedtak.behandling)
+            hentOverstyrtDokumenttittel(vedtak.behandling)
             }"
         )
         val vedlegg = listOf(
