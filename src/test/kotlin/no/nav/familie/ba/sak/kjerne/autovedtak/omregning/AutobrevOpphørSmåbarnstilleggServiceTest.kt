@@ -8,9 +8,11 @@ import io.mockk.verify
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
+import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
+import no.nav.familie.ba.sak.dataGenerator.vedtak.lagVedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
@@ -19,7 +21,10 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.småbarnstillegg.PeriodeOvergangsst
 import no.nav.familie.ba.sak.kjerne.grunnlag.småbarnstillegg.PeriodeOvergangsstønadGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -74,6 +79,48 @@ internal class AutobrevOpphørSmåbarnstilleggServiceTest {
         }
 
         verify(exactly = 1) { taskRepository.save(any()) }
+    }
+
+    @Test
+    fun `Verifiser at det ikke vil bli sendt brev hvis opphør småbarnstillegg allerede begrunnet i forrige behandling`() {
+
+        val behandling = lagBehandling()
+        val barn = tilfeldigPerson(fødselsdato = LocalDate.now().minusYears(3).minusMonths(1))
+        val personopplysningGrunnlag: PersonopplysningGrunnlag =
+            lagTestPersonopplysningGrunnlag(behandlingId = behandlingId, barn)
+
+        every { behandlingService.hent(any()) } returns behandling
+        every { personopplysningGrunnlagRepository.findByBehandlingAndAktiv(any()) } returns personopplysningGrunnlag
+        every { periodeOvergangsstønadGrunnlagRepository.findByBehandlingId(any()) } returns emptyList()
+        every { stegService.håndterVilkårsvurdering(any()) } returns behandling
+        every { stegService.håndterNyBehandling(any()) } returns behandling
+        every { vedtaksperiodeService.oppdaterFortsattInnvilgetPeriodeMedAutobrevBegrunnelse(any(), any()) } just runs
+
+        every { vedtaksperiodeService.hentPersisterteVedtaksperioder(any()) } returns listOf(
+            VedtaksperiodeMedBegrunnelser(
+                vedtak = lagVedtak(behandling = behandling),
+                fom = LocalDate.now().minusMonths(12).withDayOfMonth(1),
+                tom = LocalDate.now().minusMonths(1).let { it.withDayOfMonth(it.lengthOfMonth()) },
+                type = Vedtaksperiodetype.FORTSATT_INNVILGET,
+                begrunnelser = mutableSetOf(
+                    lagVedtaksbegrunnelse(vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_FULL_OVERGANGSSTØNAD)
+                ),
+                fritekster = mutableListOf(),
+            )
+        )
+
+        autobrevOpphørSmåbarnstilleggService
+            .kjørBehandlingOgSendBrevForOpphørAvSmåbarnstillegg(behandlingId = behandling.id)
+
+        verify(exactly = 0) {
+            autovedtakService.opprettAutomatiskBehandlingOgKjørTilBehandlingsresultat(
+                any(),
+                any(),
+                any()
+            )
+        }
+
+        verify(exactly = 0) { taskRepository.save(any()) }
     }
 
     @Test
