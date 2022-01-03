@@ -7,7 +7,6 @@ import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import org.springframework.stereotype.Service
 import java.time.YearMonth
-import java.util.Properties
 
 @Service
 @TaskStepBeskrivelse(
@@ -34,11 +33,7 @@ class StartSatsendringForAlleBehandlingerTask(
         fun opprettTask(gammelSats: Long): Task {
             return Task(
                 type = TASK_STEP_TYPE,
-                payload = gammelSats.toString(),
-                properties = Properties().apply {
-                    this["måned"] = YearMonth.now()
-                    this["gammelSats"] = gammelSats.toString()
-                }
+                payload = gammelSats.toString()
             )
         }
     }
