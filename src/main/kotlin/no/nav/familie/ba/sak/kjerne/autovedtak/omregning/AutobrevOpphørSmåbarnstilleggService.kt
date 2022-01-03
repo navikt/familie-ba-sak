@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.omregning
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.common.førsteDagINesteMåned
 import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
@@ -115,8 +114,8 @@ class AutobrevOpphørSmåbarnstilleggService(
     fun overgangstønadOpphørerDenneMåneden(listePeriodeOvergangsstønadGrunnlag: List<PeriodeOvergangsstønadGrunnlag>): Boolean =
         listePeriodeOvergangsstønadGrunnlag.filter {
             it.tom.isSameOrAfter(
-                LocalDate.now().withDayOfMonth(1)
-            ) && it.tom.isBefore(LocalDate.now().førsteDagINesteMåned())
+                LocalDate.now().minusMonths(1).withDayOfMonth(1)
+            ) && it.tom.isBefore(LocalDate.now().withDayOfMonth(1))
         }.isNotEmpty()
 
     fun minsteBarnFylteTreÅrForrigeMåned(personopplysningGrunnlag: PersonopplysningGrunnlag): Boolean {

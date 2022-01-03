@@ -19,6 +19,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.småbarnstillegg.PeriodeOvergangsst
 import no.nav.familie.ba.sak.kjerne.grunnlag.småbarnstillegg.PeriodeOvergangsstønadGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksbegrunnelseRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -35,6 +36,7 @@ internal class AutobrevOpphørSmåbarnstilleggServiceTest {
     val vedtaksperiodeService = mockk<VedtaksperiodeService>()
     val autovedtakService = mockk<AutovedtakService>(relaxed = true)
     val periodeOvergangsstønadGrunnlagRepository = mockk<PeriodeOvergangsstønadGrunnlagRepository>()
+    val vedtaksbegrunnelseRepository = mockk<VedtaksbegrunnelseRepository>()
 
     private val autobrevOpphørSmåbarnstilleggService = AutobrevOpphørSmåbarnstilleggService(
         personopplysningGrunnlagRepository = personopplysningGrunnlagRepository,
@@ -43,7 +45,8 @@ internal class AutobrevOpphørSmåbarnstilleggServiceTest {
         taskRepository = taskRepository,
         vedtaksperiodeService = vedtaksperiodeService,
         autovedtakService = autovedtakService,
-        periodeOvergangsstønadGrunnlagRepository = periodeOvergangsstønadGrunnlagRepository
+        periodeOvergangsstønadGrunnlagRepository = periodeOvergangsstønadGrunnlagRepository,
+        vedtaksbegrunnelseRepository = vedtaksbegrunnelseRepository
     )
 
     @Test
@@ -60,6 +63,7 @@ internal class AutobrevOpphørSmåbarnstilleggServiceTest {
         every { stegService.håndterVilkårsvurdering(any()) } returns behandling
         every { stegService.håndterNyBehandling(any()) } returns behandling
         every { vedtaksperiodeService.oppdaterFortsattInnvilgetPeriodeMedAutobrevBegrunnelse(any(), any()) } just runs
+        every { vedtaksbegrunnelseRepository.hentAlleVedtakbegrunnelserPåBehandling(any()) } returns emptyList()
 
         autobrevOpphørSmåbarnstilleggService
             .kjørBehandlingOgSendBrevForOpphørAvSmåbarnstillegg(behandlingId = behandling.id)
@@ -75,10 +79,11 @@ internal class AutobrevOpphørSmåbarnstilleggServiceTest {
         verify(exactly = 1) { taskRepository.save(any()) }
     }
 
+    // Opphørsmåneden er denne måneden. Tom'en til overgangsstonad er da i forrige måned.
     @Test
-    fun `overgangstønadOpphørerDenneMåneden - en periode med opphør denne måneden gir true`() {
+    fun `en periode med opphør av overgangsstonad denne måneden gir true`() {
         val fom = LocalDate.now().minusYears(1)
-        val tom = LocalDate.now()
+        val tom = LocalDate.now().minusMonths(1)
         val input: List<PeriodeOvergangsstønadGrunnlag> = listOf(
             lagPeriodeOvergangsstønadGrunnlag(fom, tom)
         )
@@ -88,7 +93,7 @@ internal class AutobrevOpphørSmåbarnstilleggServiceTest {
     }
 
     @Test
-    fun `overgangstønadOpphørerDenneMåneden - tom liste gir false`() {
+    fun `tom liste gir false`() {
         val input: List<PeriodeOvergangsstønadGrunnlag> = emptyList()
         val overgangstønadOpphørerDenneMåneden =
             autobrevOpphørSmåbarnstilleggService.overgangstønadOpphørerDenneMåneden(input)
@@ -96,9 +101,9 @@ internal class AutobrevOpphørSmåbarnstilleggServiceTest {
     }
 
     @Test
-    fun `overgangstønadOpphørerDenneMåneden - neste måned gir false`() {
+    fun `opphør av overgangsstønad neste måned gir false`() {
         val fom = LocalDate.now().minusYears(1)
-        val tom = LocalDate.now().førsteDagINesteMåned()
+        val tom = LocalDate.now().førsteDagINesteMåned().minusMonths(1)
         val input: List<PeriodeOvergangsstønadGrunnlag> = listOf(
             lagPeriodeOvergangsstønadGrunnlag(fom, tom)
         )
@@ -108,9 +113,9 @@ internal class AutobrevOpphørSmåbarnstilleggServiceTest {
     }
 
     @Test
-    fun `overgangstønadOpphørerDenneMåneden - forrige måned gir false`() {
+    fun `opphør av overgangsstonad forrige måned gir false`() {
         val fom = LocalDate.now().minusYears(1)
-        val tom = LocalDate.now().minusMonths(1)
+        val tom = LocalDate.now().minusMonths(2)
         val input: List<PeriodeOvergangsstønadGrunnlag> = listOf(
             lagPeriodeOvergangsstønadGrunnlag(fom, tom)
         )
@@ -120,8 +125,8 @@ internal class AutobrevOpphørSmåbarnstilleggServiceTest {
     }
 
     @Test
-    fun `overgangstønadOpphørerDenneMåneden - ett år siden gir false`() {
-        val fom = LocalDate.now().minusYears(1)
+    fun `ett år siden gir false`() {
+        val fom = LocalDate.now().minusYears(2)
         val tom = LocalDate.now().minusYears(1)
         val input: List<PeriodeOvergangsstønadGrunnlag> = listOf(
             lagPeriodeOvergangsstønadGrunnlag(fom, tom)
