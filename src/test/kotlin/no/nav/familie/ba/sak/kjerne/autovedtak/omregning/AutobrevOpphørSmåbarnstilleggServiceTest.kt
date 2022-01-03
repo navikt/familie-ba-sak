@@ -19,7 +19,6 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.småbarnstillegg.PeriodeOvergangsst
 import no.nav.familie.ba.sak.kjerne.grunnlag.småbarnstillegg.PeriodeOvergangsstønadGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksbegrunnelseRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -36,7 +35,6 @@ internal class AutobrevOpphørSmåbarnstilleggServiceTest {
     val vedtaksperiodeService = mockk<VedtaksperiodeService>()
     val autovedtakService = mockk<AutovedtakService>(relaxed = true)
     val periodeOvergangsstønadGrunnlagRepository = mockk<PeriodeOvergangsstønadGrunnlagRepository>()
-    val vedtaksbegrunnelseRepository = mockk<VedtaksbegrunnelseRepository>()
 
     private val autobrevOpphørSmåbarnstilleggService = AutobrevOpphørSmåbarnstilleggService(
         personopplysningGrunnlagRepository = personopplysningGrunnlagRepository,
@@ -45,8 +43,7 @@ internal class AutobrevOpphørSmåbarnstilleggServiceTest {
         taskRepository = taskRepository,
         vedtaksperiodeService = vedtaksperiodeService,
         autovedtakService = autovedtakService,
-        periodeOvergangsstønadGrunnlagRepository = periodeOvergangsstønadGrunnlagRepository,
-        vedtaksbegrunnelseRepository = vedtaksbegrunnelseRepository
+        periodeOvergangsstønadGrunnlagRepository = periodeOvergangsstønadGrunnlagRepository
     )
 
     @Test
@@ -62,8 +59,8 @@ internal class AutobrevOpphørSmåbarnstilleggServiceTest {
         every { periodeOvergangsstønadGrunnlagRepository.findByBehandlingId(any()) } returns emptyList()
         every { stegService.håndterVilkårsvurdering(any()) } returns behandling
         every { stegService.håndterNyBehandling(any()) } returns behandling
+        every { vedtaksperiodeService.hentPersisterteVedtaksperioder(any()) } returns emptyList()
         every { vedtaksperiodeService.oppdaterFortsattInnvilgetPeriodeMedAutobrevBegrunnelse(any(), any()) } just runs
-        every { vedtaksbegrunnelseRepository.hentAlleVedtakbegrunnelserPåBehandling(any()) } returns emptyList()
 
         autobrevOpphørSmåbarnstilleggService
             .kjørBehandlingOgSendBrevForOpphørAvSmåbarnstillegg(behandlingId = behandling.id)
@@ -79,7 +76,6 @@ internal class AutobrevOpphørSmåbarnstilleggServiceTest {
         verify(exactly = 1) { taskRepository.save(any()) }
     }
 
-    // Opphørsmåneden er denne måneden. Tom'en til overgangsstonad er da i forrige måned.
     @Test
     fun `en periode med opphør av overgangsstonad denne måneden gir true`() {
         val fom = LocalDate.now().minusYears(1)
@@ -90,6 +86,18 @@ internal class AutobrevOpphørSmåbarnstilleggServiceTest {
         val overgangstønadOpphørerDenneMåneden =
             autobrevOpphørSmåbarnstilleggService.overgangstønadOpphørerDenneMåneden(input)
         assertTrue(overgangstønadOpphørerDenneMåneden)
+    }
+
+    @Test
+    fun `tom første dag i inneværende måned gir opphør neste måned`() {
+        val fom = LocalDate.now().minusYears(1)
+        val tom = LocalDate.now().withDayOfMonth(1)
+        val input: List<PeriodeOvergangsstønadGrunnlag> = listOf(
+            lagPeriodeOvergangsstønadGrunnlag(fom, tom)
+        )
+        val overgangstønadOpphørerDenneMåneden =
+            autobrevOpphørSmåbarnstilleggService.overgangstønadOpphørerDenneMåneden(input)
+        assertFalse(overgangstønadOpphørerDenneMåneden)
     }
 
     @Test

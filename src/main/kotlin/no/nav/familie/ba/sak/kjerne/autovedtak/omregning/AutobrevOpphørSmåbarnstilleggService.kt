@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -16,8 +17,6 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.småbarnstillegg.PeriodeOvergangsst
 import no.nav.familie.ba.sak.kjerne.grunnlag.småbarnstillegg.PeriodeOvergangsstønadGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksbegrunnelseRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.task.JournalførVedtaksbrevTask
 import no.nav.familie.prosessering.domene.Task
@@ -34,28 +33,15 @@ class AutobrevOpphørSmåbarnstilleggService(
     private val taskRepository: TaskRepositoryWrapper,
     private val vedtaksperiodeService: VedtaksperiodeService,
     private val autovedtakService: AutovedtakService,
-    private val periodeOvergangsstønadGrunnlagRepository: PeriodeOvergangsstønadGrunnlagRepository,
-    private val vedtaksbegrunnelseRepository: VedtaksbegrunnelseRepository
+    private val periodeOvergangsstønadGrunnlagRepository: PeriodeOvergangsstønadGrunnlagRepository
 ) {
     @Transactional
     fun kjørBehandlingOgSendBrevForOpphørAvSmåbarnstillegg(behandlingId: Long) {
 
-        val forrigeBehandling = behandlingService.hent(behandlingId)
-
-        val alleVedtakbegrunnelserPåForrigeBehandling: List<Vedtaksbegrunnelse> =
-            vedtaksbegrunnelseRepository.hentAlleVedtakbegrunnelserPåBehandling(forrigeBehandling.id)
+        val forrigeBehandling: Behandling = behandlingService.hent(behandlingId)
 
         val opphørSmåbarnstilleggErAlleredeBegrunnet: Boolean =
-            alleVedtakbegrunnelserPåForrigeBehandling.fold(false) { acc, curr ->
-                if (
-                    curr.vedtakBegrunnelseSpesifikasjon == VedtakBegrunnelseSpesifikasjon.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_FULL_OVERGANGSSTØNAD ||
-                    curr.vedtakBegrunnelseSpesifikasjon == VedtakBegrunnelseSpesifikasjon.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_BARN_UNDER_TRE_ÅR
-                ) {
-                    true
-                } else {
-                    acc
-                }
-            }
+            opphørSmåbarnstilleggAlleredeBegrunnet(forrigeBehandling)
 
         if (opphørSmåbarnstilleggErAlleredeBegrunnet) {
             logger.info(
@@ -111,6 +97,9 @@ class AutobrevOpphørSmåbarnstilleggService(
         opprettTaskJournalførVedtaksbrev(vedtakId = opprettetVedtak.id)
     }
 
+    /**
+     * Med opphør av overgangsstønad denne måneden menes det at til og med dato for periode er i forrige måned
+     */
     fun overgangstønadOpphørerDenneMåneden(listePeriodeOvergangsstønadGrunnlag: List<PeriodeOvergangsstønadGrunnlag>): Boolean =
         listePeriodeOvergangsstønadGrunnlag.filter {
             it.tom.isSameOrAfter(YearMonth.now().minusMonths(1).atDay(1)) &&
@@ -131,6 +120,21 @@ class AutobrevOpphørSmåbarnstilleggService(
             "$vedtakId"
         )
         taskRepository.save(task)
+    }
+
+    private fun opphørSmåbarnstilleggAlleredeBegrunnet(behandling: Behandling): Boolean {
+        val vedtak = vedtakService.hentAktivForBehandlingThrows(behandling.id)
+        val vedtaksperioderMedBegrunnelser = vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak)
+
+        val vedtaksBegrunnelserForOpphør = listOf(
+            VedtakBegrunnelseSpesifikasjon.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_BARN_UNDER_TRE_ÅR,
+            VedtakBegrunnelseSpesifikasjon.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_FULL_OVERGANGSSTØNAD
+        )
+
+        return vedtaksperioderMedBegrunnelser.any { vedtaksperiodeMedBegrunnelser ->
+            vedtaksperiodeMedBegrunnelser.begrunnelser.map { it.vedtakBegrunnelseSpesifikasjon }
+                .any { vedtaksBegrunnelserForOpphør.contains(it) }
+        }
     }
 
     companion object {
