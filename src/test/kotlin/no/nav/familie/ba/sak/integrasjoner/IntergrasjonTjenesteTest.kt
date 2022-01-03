@@ -16,6 +16,7 @@ import com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.status
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import io.mockk.mockk
+import no.nav.familie.ba.sak.common.MDCOperations
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.common.randomAktørId
@@ -164,14 +165,24 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTestDev() {
         val vedtak = lagVedtak(lagBehandling())
         vedtak.stønadBrevPdF = mockPdf
 
-        val journalPostId = integrasjonClient.journalførVedtaksbrev(MOCK_FNR, MOCK_FAGSAK_ID, vedtak, "1")
+        val journalPostId =
+            integrasjonClient.journalførVedtaksbrev(MOCK_FNR, vedtak.behandling.fagsak.id.toString(), vedtak, "1")
 
         assertThat(journalPostId).isEqualTo(MOCK_JOURNALPOST_FOR_VEDTAK_ID)
         wireMockServer.verify(
             anyRequestedFor(anyUrl())
                 .withHeader(NavHttpHeaders.NAV_CALL_ID.asString(), equalTo("journalfør"))
                 .withHeader(NavHttpHeaders.NAV_CONSUMER_ID.asString(), equalTo("familie-ba-sak"))
-                .withRequestBody(equalToJson(objectMapper.writeValueAsString(forventetRequestArkiverDokument())))
+                .withRequestBody(
+                    equalToJson(
+                        objectMapper.writeValueAsString(
+                            forventetRequestArkiverDokument(
+                                fagsakId = vedtak.behandling.fagsak.id,
+                                behandlingId = vedtak.behandling.id
+                            )
+                        )
+                    )
+                )
         )
     }
 
@@ -443,7 +454,7 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTestDev() {
         return success(ArkiverDokumentResponse(MOCK_JOURNALPOST_FOR_VEDTAK_ID, true))
     }
 
-    private fun forventetRequestArkiverDokument(): ArkiverDokumentRequest {
+    private fun forventetRequestArkiverDokument(fagsakId: Long, behandlingId: Long): ArkiverDokumentRequest {
         val vedleggPdf = hentVedlegg(VEDTAK_VEDLEGG_FILNAVN)
         val brev = listOf(
             Dokument(
@@ -464,10 +475,11 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTestDev() {
         return ArkiverDokumentRequest(
             fnr = MOCK_FNR,
             forsøkFerdigstill = true,
-            fagsakId = MOCK_FAGSAK_ID,
+            fagsakId = fagsakId.toString(),
             journalførendeEnhet = "1",
             hoveddokumentvarianter = brev,
-            vedleggsdokumenter = vedlegg
+            vedleggsdokumenter = vedlegg,
+            eksternReferanseId = "${fagsakId}_${behandlingId}_${MDCOperations.getCallId()}"
         )
     }
 
