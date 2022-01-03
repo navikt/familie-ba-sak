@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.annotation.DirtiesContext
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.time.YearMonth
 
 @DirtiesContext
 class EndretUtbetalingAndelTest(
@@ -32,11 +33,8 @@ class EndretUtbetalingAndelTest(
     fun `Skal teste at endret utbetalingsandel overskriver eksisterende utbetalingsandel`() {
         val (scenario, restUtvidetBehandling) = genererBehandlingsresultat()
 
-        val andelerTilkjentYtelse =
-            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = restUtvidetBehandling.data!!.behandlingId)
-
-        val endretFom = andelerTilkjentYtelse.minOf { it.stønadFom }
-        val endretTom = andelerTilkjentYtelse.minOf { it.stønadTom }.minusMonths(1)
+        val endretFom = YearMonth.of(2021, 9)
+        val endretTom = YearMonth.of(2021, 11)
 
         val restEndretUtbetalingAndel = RestEndretUtbetalingAndel(
             id = null,
@@ -62,26 +60,24 @@ class EndretUtbetalingAndelTest(
             andelerTilkjentYtelseMedEndretPeriode.single { it.kalkulertUtbetalingsbeløp == 0 }
 
         Assertions.assertEquals(
+            endretFom,
             endretAndeleTilkjentYtelse.stønadFom,
-            endretFom
         )
 
         Assertions.assertEquals(
+            endretTom,
             endretAndeleTilkjentYtelse.stønadTom,
-            endretTom
         )
 
         val utbetalingAndeleTilkjentYtelse =
             andelerTilkjentYtelseMedEndretPeriode.filter { it.kalkulertUtbetalingsbeløp != 0 }
 
-        Assertions.assertEquals(
-            utbetalingAndeleTilkjentYtelse.minOf { it.stønadFom },
-            endretTom.plusMonths(1)
+        Assertions.assertNotNull(
+            utbetalingAndeleTilkjentYtelse.firstOrNull { it.stønadTom == endretFom.minusMonths(1) }
         )
 
-        Assertions.assertEquals(
-            utbetalingAndeleTilkjentYtelse.minOf { it.stønadTom },
-            endretTom.plusMonths(1)
+        Assertions.assertNotNull(
+            utbetalingAndeleTilkjentYtelse.firstOrNull { it.stønadFom == endretTom.plusMonths(1) }
         )
     }
 
@@ -89,11 +85,8 @@ class EndretUtbetalingAndelTest(
     fun `Skal teste at fjernet endret utbetalingsandel oppretter tidligere eksisterende utbetalingsandel`() {
         val (scenario, restUtvidetBehandling) = genererBehandlingsresultat()
 
-        val andelerTilkjentYtelse =
-            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = restUtvidetBehandling.data!!.behandlingId)
-
-        val endretFom = andelerTilkjentYtelse.minOf { it.stønadFom }
-        val endretTom = andelerTilkjentYtelse.minOf { it.stønadTom }.minusMonths(1)
+        val endretFom = YearMonth.of(2021, 9)
+        val endretTom = YearMonth.of(2021, 11)
 
         val restEndretUtbetalingAndel = RestEndretUtbetalingAndel(
             id = null,
@@ -124,19 +117,17 @@ class EndretUtbetalingAndelTest(
         val andelerTilkjentYtelseEtterFjeringAvEndretUtbetaling =
             andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = restUtvidetBehandling.data!!.behandlingId)
 
-        Assertions.assertEquals(
-            endretFom,
-            andelerTilkjentYtelseEtterFjeringAvEndretUtbetaling.minOf { it.stønadFom }
+        Assertions.assertNotNull(
+            andelerTilkjentYtelseEtterFjeringAvEndretUtbetaling.firstOrNull { it.stønadFom == endretFom },
         )
 
-        Assertions.assertEquals(
-            endretTom.plusMonths(1),
-            andelerTilkjentYtelseEtterFjeringAvEndretUtbetaling.minOf { it.stønadTom },
+        Assertions.assertNotNull(
+            andelerTilkjentYtelseEtterFjeringAvEndretUtbetaling.firstOrNull { it.stønadTom == YearMonth.of(2021, 12) },
         )
     }
 
     private fun genererBehandlingsresultat(): Pair<RestScenario, Ressurs<RestUtvidetBehandling>> {
-        val barnFødselsdato = LocalDate.now().minusYears(3)
+        val barnFødselsdato = LocalDate.of(2020, 1, 3)
 
         val scenario = mockServerKlient().lagScenario(
             RestScenario(
