@@ -53,6 +53,12 @@ enum class BrevType(
         Dokumenttype.BARNETRYGD_INFORMASJONSBREV_FØDSEL_MINDREÅRIG,
         "informasjonsbrev fødsel mindreårig",
         false
+    ),
+    INFORMASJONSBREV_KAN_SØKE(
+        "informasjonsbrev-kan-soke",
+        Dokumenttype.BARNETRYGD_INFORMASJONSBREV_KAN_SØKE,
+        "informasjonsbrev kan søke",
+        false
     );
 
     override fun toString(): String {
@@ -68,6 +74,7 @@ enum class BrevType(
             SVARTIDSBREV -> Brevmal.SVARTIDSBREV
             INFORMASJONSBREV_FØDSEL_MINDREÅRIG -> Brevmal.INFORMASJONSBREV_FØDSEL_MINDREÅRIG
             INFORMASJONSBREV_FØDSEL_UMYNDIG -> Brevmal.INFORMASJONSBREV_FØDSEL_UMYNDIG
+            INFORMASJONSBREV_KAN_SØKE -> Brevmal.INFORMASJONSBREV_KAN_SØKE
             VEDTAK -> throw Feil("Kan ikke oversette gammel brevtype til vedtak")
         }
 }

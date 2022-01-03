@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.maler.HenleggeTrukketSøknadBrev
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.HenleggeTrukketSøknadData
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.InformasjonsbrevDeltBostedBrev
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.InformasjonsbrevDeltBostedData
+import no.nav.familie.ba.sak.kjerne.brev.domene.maler.InformasjonsbrevKanSøke
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.InnhenteOpplysningerBrev
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.InnhenteOpplysningerData
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.SignaturDelmal
@@ -145,6 +146,13 @@ fun ManueltBrevRequest.tilBrevmal() = when (this.brevmal.malId) {
             fodselsnummer = this.mottakerIdent,
             enhet = this.enhetNavn(),
             mal = Brevmal.INFORMASJONSBREV_FØDSEL_UMYNDIG
+        )
+    BrevType.INFORMASJONSBREV_KAN_SØKE.malId ->
+        InformasjonsbrevKanSøke(
+            navn = this.mottakerNavn,
+            fodselsnummer = this.mottakerIdent,
+            enhet = this.enhetNavn(),
+            dokumentliste = this.multiselectVerdier
         )
     else -> error(
         "Kan ikke mappe brevmal for ${
