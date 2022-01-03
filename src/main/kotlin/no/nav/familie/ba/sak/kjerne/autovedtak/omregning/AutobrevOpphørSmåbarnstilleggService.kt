@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.omregning
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.isSameOrAfter
+import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
@@ -23,7 +24,6 @@ import no.nav.familie.prosessering.domene.Task
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.time.LocalDate
 import java.time.YearMonth
 
 @Service
@@ -113,9 +113,8 @@ class AutobrevOpphørSmåbarnstilleggService(
 
     fun overgangstønadOpphørerDenneMåneden(listePeriodeOvergangsstønadGrunnlag: List<PeriodeOvergangsstønadGrunnlag>): Boolean =
         listePeriodeOvergangsstønadGrunnlag.filter {
-            it.tom.isSameOrAfter(
-                LocalDate.now().minusMonths(1).withDayOfMonth(1)
-            ) && it.tom.isBefore(LocalDate.now().withDayOfMonth(1))
+            it.tom.isSameOrAfter(YearMonth.now().minusMonths(1).atDay(1)) &&
+                it.tom.isSameOrBefore(YearMonth.now().minusMonths(1).atEndOfMonth())
         }.isNotEmpty()
 
     fun minsteBarnFylteTreÅrForrigeMåned(personopplysningGrunnlag: PersonopplysningGrunnlag): Boolean {
