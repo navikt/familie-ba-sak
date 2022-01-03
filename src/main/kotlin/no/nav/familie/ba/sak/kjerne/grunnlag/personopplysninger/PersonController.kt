@@ -38,8 +38,6 @@ class PersonController(
         @RequestHeader personIdent: String,
         @RequestBody personIdentBody: PersonIdent?
     ): ResponseEntity<Ressurs<RestPersonInfo>> {
-        tilgangService.validerTilgangTilPersonMedBarn(personIdent = personIdent)
-
         val aktør = personidentService.hentOgLagreAktør(personIdent)
         val personinfo = integrasjonClient.hentMaskertPersonInfoVedManglendeTilgang(aktør)
             ?: personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(
@@ -56,8 +54,6 @@ class PersonController(
         @RequestHeader personIdent: String,
         @RequestBody personIdentBody: PersonIdent?
     ): ResponseEntity<Ressurs<RestPersonInfo>> {
-        tilgangService.validerTilgangTilPersonMedBarn(personIdent = personIdent)
-
         val personinfo = personopplysningerService.hentPersoninfoEnkel(personidentService.hentOgLagreAktør(personIdent))
         return ResponseEntity.ok(Ressurs.success(personinfo.tilRestPersonInfo(personIdent)))
     }

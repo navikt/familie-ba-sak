@@ -76,7 +76,7 @@ class FagsakController(
 
     @PostMapping(path = ["/hent-fagsak-paa-person"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun hentMinimalFagsakForPerson(@RequestBody request: RestHentFagsakForPerson): ResponseEntity<Ressurs<RestMinimalFagsak>> {
-        tilgangService.validerTilgangTilPersonMedBarn(personIdent = request.personIdent)
+        tilgangService.validerTilgangTilPersoner(personIdenter = listOf(request.personIdent))
 
         return Result.runCatching {
             val aktør = personidentService.hentOgLagreAktør(request.personIdent)
