@@ -49,7 +49,7 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
                             select sisteIverksatte.fagsakId
                             from sisteIverksatte
                                      inner join tilkjent_ytelse ty on sisteIverksatte.behandlingId = ty.fk_behandling_id
-                            where ty.stonad_tom < now())""",
+                            where ty.stonad_tom <= date_trunc('month', now()))""",
         nativeQuery = true
     )
     fun finnFagsakerSomSkalAvsluttes(): List<Long>
