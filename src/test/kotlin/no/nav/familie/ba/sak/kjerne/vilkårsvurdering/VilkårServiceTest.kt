@@ -67,7 +67,7 @@ class VilkårServiceTest(
     @Autowired
     private val personidentService: PersonidentService,
 
-) : AbstractSpringIntegrationTest() {
+    ) : AbstractSpringIntegrationTest() {
 
     @BeforeAll
     fun init() {
@@ -641,12 +641,12 @@ class VilkårServiceTest(
         val fnr = randomFnr()
         val barnFnr = randomFnr()
         val forrigeVilkårsdato = LocalDate.of(2021, 8, 1)
-        val barnetsFødselsdato = LocalDate.now().minusYears(1)
+        val nyMigreringsdato = LocalDate.of(2021, 1, 1)
+        val barnetsFødselsdato = LocalDate.now().minusYears((LocalDate.now().year - nyMigreringsdato.year + 1).toLong())
 
         val behandlinger = lagMigreringsbehandling(fnr, barnFnr, barnetsFødselsdato, forrigeVilkårsdato)
         val behandling = behandlinger.second
 
-        val nyMigreringsdato = LocalDate.of(2021, 1, 1)
         val vilkårsvurdering = vilkårService.genererVilkårsvurderingForMigreringsbehandlingMedÅrsakEndreMigreringsdato(
             behandling = behandling,
             forrigeBehandlingSomErVedtatt = behandlinger.first,
