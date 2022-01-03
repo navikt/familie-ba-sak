@@ -67,7 +67,7 @@ class VilkårServiceTest(
     @Autowired
     private val personidentService: PersonidentService,
 
-    ) : AbstractSpringIntegrationTest() {
+) : AbstractSpringIntegrationTest() {
 
     @BeforeAll
     fun init() {
