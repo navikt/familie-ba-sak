@@ -4,6 +4,8 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
+import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
+import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
@@ -22,7 +24,8 @@ import org.springframework.web.bind.annotation.RestController
 class ArbeidsfordelingController(
     private val behandlingService: BehandlingService,
     private val utvidetBehandlingService: UtvidetBehandlingService,
-    private val arbeidsfordelingService: ArbeidsfordelingService
+    private val arbeidsfordelingService: ArbeidsfordelingService,
+    private val tilgangService: TilgangService
 ) {
 
     @PutMapping(path = ["{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -31,6 +34,12 @@ class ArbeidsfordelingController(
         @RequestBody
         endreBehandlendeEnhet: RestEndreBehandlendeEnhet
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
+            handling = "Endre behandlende enhet"
+        )
+        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId)
+
         if (endreBehandlendeEnhet.begrunnelse.isBlank()) throw FunksjonellFeil(
             melding = "Begrunnelse kan ikke være tom",
             frontendFeilmelding = "Du må skrive en begrunnelse for endring av enhet"

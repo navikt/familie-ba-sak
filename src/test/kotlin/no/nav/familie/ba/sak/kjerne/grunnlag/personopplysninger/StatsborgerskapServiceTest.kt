@@ -2,10 +2,10 @@ package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger
 
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.config.ClientMocks
-import no.nav.familie.ba.sak.config.ClientMocks.Companion.FOM_1990
-import no.nav.familie.ba.sak.config.ClientMocks.Companion.FOM_2008
-import no.nav.familie.ba.sak.config.ClientMocks.Companion.TOM_2010
+import no.nav.familie.ba.sak.config.IntegrasjonClientMock
+import no.nav.familie.ba.sak.config.IntegrasjonClientMock.Companion.FOM_1990
+import no.nav.familie.ba.sak.config.IntegrasjonClientMock.Companion.FOM_2008
+import no.nav.familie.ba.sak.config.IntegrasjonClientMock.Companion.TOM_2010
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.StatsborgerskapService
@@ -27,7 +27,7 @@ internal class StatsborgerskapServiceTest {
     @BeforeEach
     fun setUp() {
         statsborgerskapService = StatsborgerskapService(integrasjonClient, personopplysningerService)
-        ClientMocks.initEuKodeverk(integrasjonClient)
+        IntegrasjonClientMock.initEuKodeverk(integrasjonClient)
     }
 
     @Test

@@ -5,8 +5,7 @@
   "vedtaksperiodetype": "UTBETALING",
   "begrunnelser": [
     {
-      "vedtakBegrunnelseSpesifikasjon": "INNVILGET_FØDSELSHENDELSE_NYFØDT_BARN_FØRSTE",
-      "vedtakBegrunnelseType": "INNVILGET"
+      "vedtakBegrunnelseSpesifikasjon": "INNVILGET_FØDSELSHENDELSE_NYFØDT_BARN_FØRSTE"
     }
   ],
   "fritekster": [],

@@ -114,7 +114,6 @@ class SaksstatistikkService(
 
     fun mapTilSakDvh(sakId: Long): SakDVH? {
         val fagsak = fagsakService.hentPåFagsakId(sakId)
-        val søkerIdent = fagsak.aktør.aktivFødselsnummer()
         val aktivBehandling = behandlingService.hentAktivForFagsak(fagsakId = fagsak.id)
 
         var landkodeSøker: String = PersonopplysningerService.UKJENT_LANDKODE

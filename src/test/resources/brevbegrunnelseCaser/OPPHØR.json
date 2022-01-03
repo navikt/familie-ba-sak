@@ -5,8 +5,7 @@
   "vedtaksperiodetype": "OPPHØR",
   "begrunnelser": [
     {
-      "vedtakBegrunnelseSpesifikasjon": "OPPHØR_BARN_FLYTTET_FRA_SØKER",
-      "vedtakBegrunnelseType": "OPPHØR"
+      "vedtakBegrunnelseSpesifikasjon": "OPPHØR_BARN_FLYTTET_FRA_SØKER"
     }
   ],
   "fritekster": [],

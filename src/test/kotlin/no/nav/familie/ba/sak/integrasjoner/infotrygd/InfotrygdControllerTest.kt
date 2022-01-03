@@ -49,7 +49,7 @@ class InfotrygdControllerTest {
         val fnr = "12345678910"
 
         every { personidentService.hentOgLagreAktør(fnr) } returns tilAktør(fnr)
-        every { integrasjonClient.sjekkTilgangTilPersoner(any()) } returns listOf(Tilgang(true))
+        every { integrasjonClient.sjekkTilgangTilPersoner(any()) } returns Tilgang(true)
         every {
             infotrygdBarnetrygdClient.hentSaker(
                 any(),
@@ -68,7 +68,7 @@ class InfotrygdControllerTest {
         val fnr = "12345678910"
 
         every { personidentService.hentOgLagreAktør(fnr) } returns tilAktør(fnr)
-        every { integrasjonClient.sjekkTilgangTilPersoner(any()) } returns listOf(Tilgang(false))
+        every { integrasjonClient.sjekkTilgangTilPersoner(any()) } returns Tilgang(false)
         every { personopplysningerService.hentAdressebeskyttelseSomSystembruker(any()) } returns ADRESSEBESKYTTELSEGRADERING.FORTROLIG
 
         val respons = infotrygdController.hentInfotrygdsakerForSøker(Personident(fnr))

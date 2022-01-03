@@ -24,14 +24,11 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
-import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingsbehandlingService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
-import no.nav.familie.ba.sak.sikkerhet.TilgangService
-import no.nav.familie.ba.sak.sikkerhet.validering.FagsaktilgangConstraint
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
 import no.nav.familie.ba.sak.task.BehandleAnnullerFødselDto
 import no.nav.familie.ba.sak.task.BehandleAnnullertFødselTask
@@ -58,7 +55,6 @@ class FagsakService(
     private val integrasjonClient: IntegrasjonClient,
     private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
     private val skyggesakService: SkyggesakService,
-    private val tilgangService: TilgangService,
     private val vedtaksperiodeService: VedtaksperiodeService,
     private val tilbakekrevingsbehandlingService: TilbakekrevingsbehandlingService,
     private val taskRepository: TaskRepository,
@@ -100,7 +96,6 @@ class FagsakService(
         val aktør = personidentService.hentOgLagreAktør(personIdent)
         var fagsak = fagsakRepository.finnFagsakForAktør(aktør)
         if (fagsak == null) {
-            tilgangService.verifiserHarTilgangTilHandling(BehandlerRolle.SAKSBEHANDLER, "opprette fagsak")
 
             // TODO: robustgjøring dnr/fnr fjern opprettelse av fagsak person ved contract.
             fagsak = Fagsak(aktør = aktør).also {
@@ -183,7 +178,7 @@ class FagsakService(
         return restBaseFagsak.tilRestFagsak(utvidedeBehandlinger, tilbakekrevingsbehandlinger)
     }
 
-    private fun lagRestBaseFagsak(@FagsaktilgangConstraint fagsakId: Long): RestBaseFagsak {
+    private fun lagRestBaseFagsak(fagsakId: Long): RestBaseFagsak {
         val fagsak = fagsakRepository.finnFagsak(fagsakId)
             ?: throw FunksjonellFeil(
                 melding = "Finner ikke fagsak med id $fagsakId",
@@ -222,6 +217,10 @@ class FagsakService(
 
     fun hentPåFagsakId(fagsakId: Long): Fagsak {
         return fagsakRepository.finnFagsak(fagsakId) ?: error("Finner ikke fagsak med id $fagsakId")
+    }
+
+    fun hentAktør(fagsakId: Long): Aktør {
+        return hentPåFagsakId(fagsakId).aktør
     }
 
     fun hentFagsakPåPerson(aktør: Aktør): Fagsak? {
@@ -383,7 +382,7 @@ class FagsakService(
 
     private fun hentMaskertFagsakdeltakerVedManglendeTilgang(aktør: Aktør): RestFagsakDeltager? {
         val harTilgang =
-            integrasjonClient.sjekkTilgangTilPersoner(listOf(aktør.aktivFødselsnummer())).first().harTilgang
+            integrasjonClient.sjekkTilgangTilPersoner(listOf(aktør.aktivFødselsnummer())).harTilgang
         return if (!harTilgang) {
             val adressebeskyttelse = personopplysningerService.hentAdressebeskyttelseSomSystembruker(aktør)
             RestFagsakDeltager(

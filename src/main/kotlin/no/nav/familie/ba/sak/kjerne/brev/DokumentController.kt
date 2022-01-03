@@ -14,7 +14,6 @@ import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
-import no.nav.familie.ba.sak.sikkerhet.validering.VedtaktilgangConstraint
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.slf4j.LoggerFactory
@@ -43,7 +42,7 @@ class DokumentController(
 ) {
 
     @PostMapping(path = ["vedtaksbrev/{vedtakId}"])
-    fun genererVedtaksbrev(@PathVariable @VedtaktilgangConstraint vedtakId: Long): Ressurs<ByteArray> {
+    fun genererVedtaksbrev(@PathVariable vedtakId: Long): Ressurs<ByteArray> {
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} generer vedtaksbrev")
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
@@ -51,6 +50,7 @@ class DokumentController(
         )
 
         val vedtak = vedtakService.hent(vedtakId)
+        tilgangService.validerTilgangTilBehandling(behandlingId = vedtak.behandling.id)
 
         return dokumentService.genererBrevForVedtak(vedtak).let {
             vedtak.stønadBrevPdF = it
@@ -60,7 +60,7 @@ class DokumentController(
     }
 
     @GetMapping(path = ["vedtaksbrev/{vedtakId}"])
-    fun hentVedtaksbrev(@PathVariable @VedtaktilgangConstraint vedtakId: Long): Ressurs<ByteArray> {
+    fun hentVedtaksbrev(@PathVariable vedtakId: Long): Ressurs<ByteArray> {
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} henter vedtaksbrev")
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.VEILEDER,
@@ -68,6 +68,7 @@ class DokumentController(
         )
 
         val vedtak = vedtakService.hent(vedtakId)
+        tilgangService.validerTilgangTilBehandling(behandlingId = vedtak.behandling.id)
 
         return dokumentService.hentBrevForVedtak(vedtak)
     }
@@ -78,6 +79,7 @@ class DokumentController(
         @RequestBody manueltBrevRequest: ManueltBrevRequest
     ): Ressurs<ByteArray> {
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} henter forhåndsvisning av brev for mal: ${manueltBrevRequest.brevmal}")
+        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "hente forhåndsvisning brev"
@@ -101,6 +103,7 @@ class DokumentController(
         @RequestBody manueltBrevRequest: ManueltBrevRequest
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} genererer og sender brev: ${manueltBrevRequest.brevmal}")
+        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "sende brev"
@@ -126,6 +129,7 @@ class DokumentController(
         @RequestBody manueltBrevRequest: ManueltBrevRequest
     ): Ressurs<ByteArray> {
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} henter forhåndsvisning av brev på fagsak $fagsakId for mal: ${manueltBrevRequest.brevmal}")
+        tilgangService.validerTilgangTilFagsak(fagsakId = fagsakId)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "hente forhåndsvisning brev"
@@ -143,6 +147,7 @@ class DokumentController(
         @RequestBody manueltBrevRequest: ManueltBrevRequest
     ): ResponseEntity<Ressurs<RestMinimalFagsak>> {
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} genererer og sender brev på fagsak $fagsakId: ${manueltBrevRequest.brevmal}")
+        tilgangService.validerTilgangTilFagsak(fagsakId = fagsakId)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "sende brev"

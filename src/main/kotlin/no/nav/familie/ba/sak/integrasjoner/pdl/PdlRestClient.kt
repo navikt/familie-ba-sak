@@ -4,7 +4,6 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.Doedsfall
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PdlDødsfallResponse
-import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PdlHentIdenterResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PdlHentPersonRelasjonerResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PdlHentPersonResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PdlOppholdResponse
@@ -24,6 +23,7 @@ import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.core.NestedExceptionUtils
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
@@ -43,8 +43,7 @@ class PdlRestClient(
 
     protected val pdlUri = UriUtil.uri(pdlBaseUrl, PATH_GRAPHQL)
 
-    private val hentIdenterQuery = hentGraphqlQuery("hentIdenter")
-
+    @Cacheable("personopplysninger", cacheManager = "shortCache")
     fun hentPerson(aktør: Aktør, personInfoQuery: PersonInfoQuery): PersonInfo {
 
         val pdlPersonRequest = PdlPersonRequest(
@@ -119,25 +118,7 @@ class PdlRestClient(
         }
     }
 
-    fun hentIdenter(personIdent: String): PdlHentIdenterResponse {
-        val pdlPersonRequest = PdlPersonRequest(
-            variables = PdlPersonRequestVariables(personIdent),
-            query = hentIdenterQuery
-        )
-        val response = postForEntity<PdlHentIdenterResponse>(
-            pdlUri,
-            pdlPersonRequest,
-            httpHeaders()
-        )
-
-        if (!response.harFeil()) return response
-        throw Feil(
-            message = "Fant ikke identer for person: ${response.errorMessages()}",
-            frontendFeilmelding = "Fant ikke identer for person $personIdent: ${response.errorMessages()}",
-            httpStatus = HttpStatus.NOT_FOUND
-        )
-    }
-
+    @Cacheable("dødsfall", cacheManager = "shortCache")
     fun hentDødsfall(aktør: Aktør): List<Doedsfall> {
         val pdlPersonRequest = PdlPersonRequest(
             variables = PdlPersonRequestVariables(aktør.aktivFødselsnummer()),
@@ -162,6 +143,7 @@ class PdlRestClient(
         )
     }
 
+    @Cacheable("vergedata", cacheManager = "shortCache")
     fun hentVergemaalEllerFremtidsfullmakt(aktør: Aktør): List<VergemaalEllerFremtidsfullmakt> {
         val pdlPersonRequest = PdlPersonRequest(
             variables = PdlPersonRequestVariables(aktør.aktivFødselsnummer()),

@@ -7,13 +7,15 @@ import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClien
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
-import no.nav.familie.ba.sak.sikkerhet.validering.PersontilgangConstraint
+import no.nav.familie.ba.sak.sikkerhet.TilgangService
+import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
@@ -27,11 +29,17 @@ class PersonController(
     private val persongrunnlagService: PersongrunnlagService,
     private val personidentService: PersonidentService,
     private val integrasjonClient: IntegrasjonClient,
-    private val utvidetBehandlingService: UtvidetBehandlingService
+    private val utvidetBehandlingService: UtvidetBehandlingService,
+    private val tilgangService: TilgangService
 ) {
 
     @GetMapping
-    fun hentPerson(@RequestHeader personIdent: String): ResponseEntity<Ressurs<RestPersonInfo>> {
+    fun hentPerson(
+        @RequestHeader personIdent: String,
+        @RequestBody personIdentBody: PersonIdent?
+    ): ResponseEntity<Ressurs<RestPersonInfo>> {
+        tilgangService.validerTilgangTilPersonMedBarn(personIdent = personIdent)
+
         val aktør = personidentService.hentOgLagreAktør(personIdent)
         val personinfo = integrasjonClient.hentMaskertPersonInfoVedManglendeTilgang(aktør)
             ?: personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(
@@ -44,14 +52,20 @@ class PersonController(
     }
 
     @GetMapping(path = ["/enkel"])
-    @PersontilgangConstraint
-    fun hentPersonEnkel(@RequestHeader personIdent: String): ResponseEntity<Ressurs<RestPersonInfo>> {
+    fun hentPersonEnkel(
+        @RequestHeader personIdent: String,
+        @RequestBody personIdentBody: PersonIdent?
+    ): ResponseEntity<Ressurs<RestPersonInfo>> {
+        tilgangService.validerTilgangTilPersonMedBarn(personIdent = personIdent)
+
         val personinfo = personopplysningerService.hentPersoninfoEnkel(personidentService.hentOgLagreAktør(personIdent))
         return ResponseEntity.ok(Ressurs.success(personinfo.tilRestPersonInfo(personIdent)))
     }
 
     @GetMapping(path = ["/oppdater-registeropplysninger/{behandlingId}"])
     fun hentOgOppdaterRegisteropplysninger(@PathVariable behandlingId: Long): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId)
+
         val personopplysningGrunnlag = persongrunnlagService.oppdaterRegisteropplysninger(behandlingId)
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = personopplysningGrunnlag.behandlingId)))
     }

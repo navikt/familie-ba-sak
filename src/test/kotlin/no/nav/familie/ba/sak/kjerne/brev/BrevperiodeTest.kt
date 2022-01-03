@@ -1,20 +1,20 @@
 package no.nav.familie.ba.sak.kjerne.brev
 
+import BegrunnelseDataTestConfig
+import BrevPeriodeOutput
+import BrevPeriodeTestConfig
+import FritekstBegrunnelseTestConfig
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ba.sak.common.Utils.formaterBeløp
-import no.nav.familie.ba.sak.kjerne.brev.domene.BegrunnelseDataTestConfig
 import no.nav.familie.ba.sak.kjerne.brev.domene.BrevGrunnlag
 import no.nav.familie.ba.sak.kjerne.brev.domene.BrevPeriodeGrunnlag
-import no.nav.familie.ba.sak.kjerne.brev.domene.BrevPeriodeOutput
-import no.nav.familie.ba.sak.kjerne.brev.domene.BrevPeriodeTestConfig
-import no.nav.familie.ba.sak.kjerne.brev.domene.FritekstBegrunnelseTestConfig
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.BrevPeriode
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestReporter
 import java.io.File
 
-class BrevbegrunnelseTest {
+class BrevperiodeTest {
 
     @Test
     fun test(testReporter: TestReporter) {
@@ -64,6 +64,7 @@ class BrevbegrunnelseTest {
             } catch (e: Exception) {
                 testReporter.publishEntry(
                     "Feil i test: $it" +
+                        "\nFeilmelding: ${e.message}" +
                         "\nFil: ${e.stackTrace.first()}" +
                         "\n-----------------------------------"
                 )

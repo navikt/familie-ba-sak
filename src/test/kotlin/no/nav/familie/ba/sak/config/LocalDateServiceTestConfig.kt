@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.config
 
+import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.LocalDateService
@@ -17,8 +18,17 @@ class LocalDateServiceTestConfig {
     @Primary
     fun mockLocalDateService(): LocalDateService {
         val mockLocalDateService = mockk<LocalDateService>()
-        every { mockLocalDateService.now() } returns LocalDate.now()
+
+        clearLocalDateServiceMocks(mockLocalDateService)
 
         return mockLocalDateService
+    }
+
+    companion object {
+        fun clearLocalDateServiceMocks(mockLocalDateService: LocalDateService) {
+            clearMocks(mockLocalDateService)
+
+            every { mockLocalDateService.now() } returns LocalDate.now()
+        }
     }
 }

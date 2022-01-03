@@ -23,7 +23,7 @@ import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
@@ -51,7 +51,7 @@ class UtbetalingsoppdragIntegrasjonTest(
 
     lateinit var utbetalingsoppdragGenerator: UtbetalingsoppdragGenerator
 
-    @BeforeAll
+    @BeforeEach
     fun setUp() {
         databaseCleanupService.truncate()
         utbetalingsoppdragGenerator = UtbetalingsoppdragGenerator(beregningService)

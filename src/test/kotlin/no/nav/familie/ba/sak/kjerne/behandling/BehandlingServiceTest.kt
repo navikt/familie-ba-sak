@@ -59,7 +59,7 @@ class BehandlingServiceTest(
 
     @Autowired
     private val mockPersonopplysningerService: PersonopplysningerService
-) : AbstractSpringIntegrationTest(personopplysningerService = mockPersonopplysningerService) {
+) : AbstractSpringIntegrationTest() {
 
     @BeforeAll
     fun init() {
@@ -128,7 +128,7 @@ class BehandlingServiceTest(
         val forrigeBehandling =
             behandlingService.hentForrigeBehandlingSomErVedtatt(behandling = revurderingInnvilgetBehandling)
         Assertions.assertNotNull(forrigeBehandling)
-        Assertions.assertEquals(behandling.id, forrigeBehandling?.id)
+        assertEquals(behandling.id, forrigeBehandling?.id)
     }
 
     @Test
@@ -158,7 +158,7 @@ class BehandlingServiceTest(
         )
         personopplysningGrunnlagRepository.save(testPersonopplysningsGrunnlag)
 
-        Assertions.assertEquals(
+        assertEquals(
             0,
             behandlingService.finnBarnFraBehandlingMedTilkjentYtsele(behandlingId = behandling.id).size
         )
