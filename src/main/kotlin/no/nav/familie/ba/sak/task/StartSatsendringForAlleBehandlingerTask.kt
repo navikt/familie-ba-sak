@@ -37,7 +37,7 @@ class StartSatsendringForAlleBehandlingerTask(
                 payload = gammelSats.toString(),
                 properties = Properties().apply {
                     this["måned"] = YearMonth.now()
-                    this["gammelSats"] = gammelSats
+                    this["gammelSats"] = gammelSats.toString()
                 }
             )
         }
