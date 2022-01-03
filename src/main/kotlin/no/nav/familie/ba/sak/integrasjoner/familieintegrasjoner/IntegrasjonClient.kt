@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner
 
+import no.nav.familie.ba.sak.common.MDCOperations
 import no.nav.familie.ba.sak.common.assertGenerelleSuksessKriterier
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonInfo
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfordelingsenhet
@@ -445,7 +446,7 @@ class IntegrasjonClient(
         )
         logger.info(
             "Journalfører vedtaksbrev for behandling ${vedtak.behandling.id} med tittel ${
-            hentOverstyrtDokumenttittel(vedtak.behandling)
+                hentOverstyrtDokumenttittel(vedtak.behandling)
             }"
         )
         val vedlegg = listOf(
@@ -455,7 +456,14 @@ class IntegrasjonClient(
                 tittel = VEDTAK_VEDLEGG_TITTEL
             )
         )
-        return lagJournalpostForBrev(fnr, fagsakId, journalførendeEnhet, brev, vedlegg)
+        return lagJournalpostForBrev(
+            fnr = fnr,
+            fagsakId = fagsakId,
+            journalførendeEnhet = journalførendeEnhet,
+            brev = brev,
+            vedlegg = vedlegg,
+            behandlingId = vedtak.behandling.id
+        )
     }
 
     fun journalførManueltBrev(
@@ -470,14 +478,14 @@ class IntegrasjonClient(
             fnr = fnr,
             fagsakId = fagsakId,
             journalførendeEnhet = journalførendeEnhet,
-            førsteside = førsteside,
             brev = listOf(
                 Dokument(
                     dokument = brev,
                     filtype = Filtype.PDFA,
                     dokumenttype = dokumenttype
                 )
-            )
+            ),
+            førsteside = førsteside,
         )
     }
 
@@ -487,7 +495,8 @@ class IntegrasjonClient(
         journalførendeEnhet: String? = null,
         brev: List<Dokument>,
         vedlegg: List<Dokument> = emptyList(),
-        førsteside: Førsteside? = null
+        førsteside: Førsteside? = null,
+        behandlingId: Long? = null
     ): String {
         val uri = URI.create("$integrasjonUri/arkiv/v4")
         logger.info("Sender pdf til DokArkiv: $uri")
@@ -504,8 +513,10 @@ class IntegrasjonClient(
                 vedleggsdokumenter = vedlegg,
                 fagsakId = fagsakId,
                 journalførendeEnhet = journalførendeEnhet,
-                førsteside = førsteside
+                førsteside = førsteside,
+                eksternReferanseId = "${fagsakId}_${behandlingId}_${MDCOperations.getCallId()}"
             )
+
             postForEntity<Ressurs<ArkiverDokumentResponse>>(uri, arkiverDokumentRequest).also {
                 assertGenerelleSuksessKriterier(it)
             }
