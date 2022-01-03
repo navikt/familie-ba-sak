@@ -111,7 +111,7 @@ class IntegrasjonClientMock {
             } returns "journalpostId"
 
             every {
-                mockIntegrasjonClient.lagJournalpostForBrev(any(), any(), any(), any(), any(), any())
+                mockIntegrasjonClient.lagJournalpostForBrev(any(), any(), any(), any(), any(), any(), null)
             } returns "journalpostId"
 
             every {
