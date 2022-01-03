@@ -46,6 +46,7 @@ data class VurderPersonErBosattIRiket(
             )
         }
 
+        if (adresser.isEmpty()) return Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.BOR_IKKE_I_RIKET)
         if (harPersonKunAdresserUtenFom(adresser)) return Evaluering.oppfylt(VilkårOppfyltÅrsak.BOR_I_RIKET_KUN_ADRESSER_UTEN_FOM)
         else if (harPersonBoddPåSisteAdresseMinstFraVurderingstidspunkt(adresser, vurderFra)) return Evaluering.oppfylt(
             VilkårOppfyltÅrsak.BOR_I_RIKET
