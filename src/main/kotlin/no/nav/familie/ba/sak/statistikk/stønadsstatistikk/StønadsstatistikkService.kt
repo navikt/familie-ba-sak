@@ -12,7 +12,6 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse.Companion.sisteAdresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
@@ -170,7 +169,7 @@ class StønadsstatistikkService(
         listOf(personopplysningerService.hentGjeldendeStatsborgerskap(person.aktør).land)
     }
 
-    private fun hentLandkode(person: Person): String = if (person.bostedsadresser.sisteAdresse() != null) "NO" else {
+    private fun hentLandkode(person: Person): String = if (person.bostedsadresser.isNotEmpty()) "NO" else {
         val landKode = personopplysningerService.hentLandkodeUtenlandskBostedsadresse(person.aktør)
 
         if (landKode == PersonopplysningerService.UKJENT_LANDKODE) {
