@@ -57,8 +57,11 @@ class TilgangService(
 
     fun validerTilgangTilBehandling(behandlingId: Long) {
         val harTilgang = harSaksbehandlerTilgang("validerTilgangTilBehandling", behandlingId) {
+            val behandling = behandlingService.hent(behandlingId)
             val personIdenter =
-                persongrunnlagService.hentAktivThrows(behandlingId = behandlingId).personer.map { it.personIdent.ident }
+                persongrunnlagService.hentAktiv(behandlingId = behandlingId)?.personer?.map { it.personIdent.ident }
+                    ?: listOf(behandling.fagsak.aktør.aktivFødselsnummer())
+
             harTilgangTilPersoner(personIdenter)
         }
         if (!harTilgang) {
