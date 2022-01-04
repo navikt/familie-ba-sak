@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController
 class TilgangController(
     private val personopplysningerService: PersonopplysningerService,
     private val personidentService: PersonidentService,
-    private val integrasjonClient: IntegrasjonClient
+    private val integrasjonClient: IntegrasjonClient,
 ) {
 
     @PostMapping(path = ["tilgang"], produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -28,7 +28,7 @@ class TilgangController(
 
         val adressebeskyttelse = personopplysningerService.hentAdressebeskyttelseSomSystembruker(aktør)
         val tilgang =
-            integrasjonClient.sjekkTilgangTilPersoner(listOf(tilgangRequestDTO.brukerIdent)).first().harTilgang
+            integrasjonClient.sjekkTilgangTilPersoner(listOf(tilgangRequestDTO.brukerIdent)).harTilgang
         return ResponseEntity.ok(
             Ressurs.success(
                 data = TilgangDTO(

@@ -44,8 +44,7 @@ class InfotrygdBarnetrygdClientTest : AbstractSpringIntegrationTestDev() {
     fun setUp() {
         client = InfotrygdBarnetrygdClient(
             URI.create(wireMockServer.baseUrl() + "/api"),
-            restOperations,
-            environment
+            restOperations
         )
     }
 

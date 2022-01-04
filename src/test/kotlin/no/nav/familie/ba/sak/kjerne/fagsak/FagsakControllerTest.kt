@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.fagsak
 
-import io.mockk.every
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.nyOrdinærBehandling
 import no.nav.familie.ba.sak.common.randomAktørId
@@ -12,8 +11,6 @@ import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.ekstern.restDomene.FagsakDeltagerRolle
 import no.nav.familie.ba.sak.ekstern.restDomene.RestSøkParam
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
-import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
-import no.nav.familie.ba.sak.integrasjoner.pdl.internal.IdentInformasjon
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -23,7 +20,6 @@ import no.nav.familie.ba.sak.kjerne.personident.Personident
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentRepository
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.kontrakter.felles.personopplysning.Ident
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeEach
@@ -41,9 +37,6 @@ class FagsakControllerTest(
     private val fagsakController: FagsakController,
 
     @Autowired
-    private val mockPersonopplysningerService: PersonopplysningerService,
-
-    @Autowired
     private val behandlingService: BehandlingService,
 
     @Autowired
@@ -53,7 +46,7 @@ class FagsakControllerTest(
     private val persongrunnlagService: PersongrunnlagService,
 
     @Autowired
-    private val personidentService: PersonidentService,
+    private val mockPersonidentService: PersonidentService,
 
     @Autowired
     private val aktørIdRepository: AktørIdRepository,
@@ -63,7 +56,7 @@ class FagsakControllerTest(
 
     @Autowired
     private val databaseCleanupService: DatabaseCleanupService,
-) : AbstractSpringIntegrationTest(mockPersonopplysningerService) {
+) : AbstractSpringIntegrationTest() {
 
     @BeforeEach
     fun init() {
@@ -74,10 +67,6 @@ class FagsakControllerTest(
     @Tag("integration")
     fun `Skal opprette fagsak`() {
         val fnr = randomFnr()
-
-        every {
-            mockPersonopplysningerService.hentIdenter(Ident(fnr))
-        } returns listOf(IdentInformasjon(ident = fnr, historisk = true, gruppe = "FOLKEREGISTERIDENT"))
 
         fagsakController.hentEllerOpprettFagsak(FagsakRequest(personIdent = fnr))
         assertEquals(fnr, fagsakService.hent(tilAktør(fnr))?.aktør?.aktivFødselsnummer())
@@ -101,10 +90,6 @@ class FagsakControllerTest(
     fun `Skal opprette skyggesak i Sak`() {
         val fnr = randomFnr()
 
-        every {
-            mockPersonopplysningerService.hentIdenter(Ident(fnr))
-        } returns listOf(IdentInformasjon(ident = fnr, historisk = true, gruppe = "FOLKEREGISTERIDENT"))
-
         val fagsak = fagsakController.hentEllerOpprettFagsak(FagsakRequest(personIdent = fnr))
 
         verify(exactly = 1) { mockIntegrasjonClient.opprettSkyggesak(any(), fagsak.body?.data?.id!!) }
@@ -114,12 +99,6 @@ class FagsakControllerTest(
     @Tag("integration")
     fun `Skal returnere eksisterende fagsak på person som allerede finnes`() {
         val fnr = randomFnr()
-
-        every {
-            mockPersonopplysningerService.hentIdenter(Ident(fnr))
-        } returns listOf(
-            IdentInformasjon(ident = fnr, historisk = true, gruppe = "FOLKEREGISTERIDENT")
-        )
 
         val nyRestFagsak = fagsakController.hentEllerOpprettFagsak(FagsakRequest(personIdent = fnr))
         assertEquals(Ressurs.Status.SUKSESS, nyRestFagsak.body?.status)
@@ -185,7 +164,7 @@ class FagsakControllerTest(
 
     @Test
     fun `Skal oppgi person med fagsak som fagsakdeltaker`() {
-        val personAktør = personidentService.hentOgLagreAktør(randomFnr())
+        val personAktør = mockPersonidentService.hentOgLagreAktør(randomFnr())
 
         fagsakService.hentEllerOpprettFagsak(personAktør.aktivFødselsnummer())
             .also { fagsakService.oppdaterStatus(it, FagsakStatus.LØPENDE) }
@@ -198,9 +177,9 @@ class FagsakControllerTest(
 
     @Test
     fun `Skal oppgi det første barnet i listen som fagsakdeltaker`() {
-        val personAktør = personidentService.hentOgLagreAktør(randomFnr())
-        val søkerAktør = personidentService.hentOgLagreAktør(ClientMocks.søkerFnr[0])
-        val barnaAktør = personidentService.hentOgLagreAktørIder(ClientMocks.barnFnr.toList().subList(0, 1))
+        val personAktør = mockPersonidentService.hentOgLagreAktør(randomFnr())
+        val søkerAktør = mockPersonidentService.hentOgLagreAktør(ClientMocks.søkerFnr[0])
+        val barnaAktør = mockPersonidentService.hentOgLagreAktørIder(ClientMocks.barnFnr.toList().subList(0, 1))
 
         fagsakService.hentEllerOpprettFagsak(søkerAktør.aktivFødselsnummer())
 

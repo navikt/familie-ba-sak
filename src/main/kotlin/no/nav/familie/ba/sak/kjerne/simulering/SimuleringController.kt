@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.simulering
 
 import no.nav.familie.ba.sak.kjerne.simulering.domene.RestSimulering
-import no.nav.familie.ba.sak.sikkerhet.validering.BehandlingstilgangConstraint
+import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.ResponseEntity
@@ -14,13 +14,15 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/api/behandlinger")
 @ProtectedWithClaims(issuer = "azuread")
 class SimuleringController(
-    private val simuleringService: SimuleringService
+    private val simuleringService: SimuleringService,
+    private val tilgangService: TilgangService
 ) {
 
     @GetMapping(path = ["/{behandlingId}/simulering"])
     fun hentSimulering(
-        @PathVariable @BehandlingstilgangConstraint behandlingId: Long
+        @PathVariable behandlingId: Long
     ): ResponseEntity<Ressurs<RestSimulering>> {
+        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId)
         val vedtakSimuleringMottaker = simuleringService.oppdaterSimuleringPåBehandlingVedBehov(behandlingId)
         val restSimulering = vedtakSimuleringMottakereTilRestSimulering(vedtakSimuleringMottaker)
         return ResponseEntity.ok(Ressurs.success(restSimulering))

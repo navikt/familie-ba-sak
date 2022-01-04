@@ -30,7 +30,7 @@ class LoggServiceTest(
 
     @Autowired
     private val mockPersonopplysningerService: PersonopplysningerService,
-) : AbstractSpringIntegrationTestDev(personopplysningerService = mockPersonopplysningerService) {
+) : AbstractSpringIntegrationTestDev() {
 
     @Test
     fun `Skal lage noen logginnslag på forskjellige behandlinger og hente dem fra databasen`() {

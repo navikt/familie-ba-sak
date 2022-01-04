@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.behandling
 
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
-import no.nav.familie.ba.sak.sikkerhet.validering.BehandlingstilgangConstraint
+import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
@@ -15,11 +15,14 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/api/behandlinger")
 @ProtectedWithClaims(issuer = "azuread")
 class UtvidetBehandlingController(
-    private val utvidetBehandlingService: UtvidetBehandlingService
+    private val utvidetBehandlingService: UtvidetBehandlingService,
+    private val tilgangService: TilgangService
 ) {
 
     @GetMapping(path = ["/{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun hentUtvidetBehandling(@PathVariable @BehandlingstilgangConstraint behandlingId: Long): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+    fun hentUtvidetBehandling(@PathVariable behandlingId: Long): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId)
+
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }
 }

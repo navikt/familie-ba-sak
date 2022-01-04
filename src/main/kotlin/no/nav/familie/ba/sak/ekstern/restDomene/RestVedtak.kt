@@ -19,10 +19,19 @@ data class RestVedtakBegrunnelseTilknyttetVilkår(
     val vilkår: Vilkår?
 )
 
-fun Vedtak.tilRestVedtak(vedtaksperioderMedBegrunnelser: List<UtvidetVedtaksperiodeMedBegrunnelser>) =
+fun Vedtak.tilRestVedtak(
+    vedtaksperioderMedBegrunnelser: List<UtvidetVedtaksperiodeMedBegrunnelser>,
+    skalMinimeres: Boolean,
+) =
     RestVedtak(
         aktiv = this.aktiv,
         vedtaksdato = this.vedtaksdato,
         id = this.id,
-        vedtaksperioderMedBegrunnelser = vedtaksperioderMedBegrunnelser,
+        vedtaksperioderMedBegrunnelser = if (skalMinimeres) {
+            vedtaksperioderMedBegrunnelser
+                .filter { it.begrunnelser.isNotEmpty() }
+                .map { it.copy(gyldigeBegrunnelser = emptyList()) }
+        } else {
+            vedtaksperioderMedBegrunnelser
+        },
     )

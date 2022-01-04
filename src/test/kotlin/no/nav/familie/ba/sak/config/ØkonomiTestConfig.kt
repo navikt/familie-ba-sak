@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.config
 
+import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
@@ -35,6 +36,8 @@ class ØkonomiTestConfig {
 
     companion object {
         fun clearØkonomiMocks(økonomiKlient: ØkonomiKlient) {
+            clearMocks(økonomiKlient)
+
             val iverksettRespons =
                 Ressurs("Mocksvar fra Økonomi-klient", Ressurs.Status.SUKSESS, "", "", null)
             every { økonomiKlient.iverksettOppdrag(any()) } returns iverksettRespons

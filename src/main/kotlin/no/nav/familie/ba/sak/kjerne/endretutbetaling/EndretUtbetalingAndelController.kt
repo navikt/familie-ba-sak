@@ -37,6 +37,7 @@ class EndretUtbetalingAndelController(
         @PathVariable endretUtbetalingAndelId: Long,
         @RequestBody restEndretUtbetalingAndel: RestEndretUtbetalingAndel
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "Oppdater endretutbetalingandel"
@@ -59,6 +60,7 @@ class EndretUtbetalingAndelController(
         @PathVariable behandlingId: Long,
         @PathVariable endretUtbetalingAndelId: Long,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "Oppdater endretutbetalingandel"
@@ -79,6 +81,7 @@ class EndretUtbetalingAndelController(
     fun lagreEndretUtbetalingAndelOgOppdaterTilkjentYtelse(
         @PathVariable behandlingId: Long,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "Opprett endretutbetalingandel"

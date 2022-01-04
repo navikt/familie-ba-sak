@@ -4,7 +4,9 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingService
+import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.ResponseEntity
@@ -21,7 +23,8 @@ class GrunnlagController(
     private val behandlingService: BehandlingService,
     private val utvidetBehandlingService: UtvidetBehandlingService,
     private val persongrunnlagService: PersongrunnlagService,
-    private val tilbakestillService: TilbakestillBehandlingService
+    private val tilbakestillService: TilbakestillBehandlingService,
+    private val tilgangService: TilgangService
 ) {
 
     @PostMapping(path = ["/{behandlingId}/legg-til-barn"])
@@ -30,6 +33,12 @@ class GrunnlagController(
         @RequestBody
         leggTilBarnDto: LeggTilBarnDto
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId)
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
+            handling = "legge til barn"
+        )
+
         val behandling = behandlingService.hent(behandlingId = behandlingId)
         persongrunnlagService.leggTilBarnIPersonopplysningsgrunnlag(
             behandling = behandling,

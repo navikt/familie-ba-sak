@@ -181,6 +181,17 @@ class FødselshendelseHenleggelseTest(
                                 kommunenummer = "2231"
                             )
                         ),
+                        Bostedsadresse(
+                            angittFlyttedato = now(),
+                            gyldigTilOgMed = null,
+                            matrikkeladresse = Matrikkeladresse(
+                                matrikkelId = 123L,
+                                bruksenhetsnummer = "H301",
+                                tilleggsnavn = "navn",
+                                postnummer = "0202",
+                                kommunenummer = "2231"
+                            )
+                        ),
                     )
                 ),
                 barna = listOf(
