@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.isBetween
 import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.isSameOrBefore
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Evaluering
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurdering.utfall.VilkårIkkeOppfyltÅrsak
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurdering.utfall.VilkårKanskjeOppfyltÅrsak
@@ -35,16 +36,6 @@ data class VurderPersonErBosattIRiket(
 ) : Vilkårsregel {
 
     override fun vurder(): Evaluering {
-        if (adresser.size == 1 && !adresser.single().harGyldigFom()) {
-            /**
-             * Bruker har kun en adresse og den er uten fom som betyr at vedkommende har bodd på samme
-             * adresse hele livet.
-             */
-            return Evaluering.oppfylt(VilkårOppfyltÅrsak.BOR_I_RIKET_EN_ADRESSE_HELE_LIVET)
-        } else if (adresser.filter { !it.harGyldigFom() }.size > 1) {
-            return Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.BOR_IKKE_I_RIKET_FLERE_ADRESSER_UTEN_FOM)
-        }
-
         if (adresser.any { !it.harGyldigFom() }) {
             val person = adresser.first().person
             secureLogger.info(
@@ -54,6 +45,13 @@ data class VurderPersonErBosattIRiket(
                 }"
             )
         }
+
+        if (adresser.isEmpty()) return Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.BOR_IKKE_I_RIKET)
+        if (harPersonKunAdresserUtenFom(adresser)) return Evaluering.oppfylt(VilkårOppfyltÅrsak.BOR_I_RIKET_KUN_ADRESSER_UTEN_FOM)
+        else if (harPersonBoddPåSisteAdresseMinstFraVurderingstidspunkt(adresser, vurderFra)) return Evaluering.oppfylt(
+            VilkårOppfyltÅrsak.BOR_I_RIKET
+        )
+        else if (adresser.filter { !it.harGyldigFom() }.size > 1) return Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.BOR_IKKE_I_RIKET_FLERE_ADRESSER_UTEN_FOM)
 
         val adresserMedGyldigFom = adresser.filter { it.harGyldigFom() }
 
@@ -69,6 +67,25 @@ data class VurderPersonErBosattIRiket(
         )
             Evaluering.oppfylt(VilkårOppfyltÅrsak.BOR_I_RIKET)
         else Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.BOR_IKKE_I_RIKET)
+    }
+
+    /**
+     * Bruker har kun adresser uten fom som betyr at vedkommende har bodd på samme
+     * adresse hele livet eller flyttet før man innførte fom ved flytting.
+     */
+    private fun harPersonKunAdresserUtenFom(adresser: List<GrBostedsadresse>): Boolean =
+        adresser.all { !it.harGyldigFom() }
+
+    private fun harPersonBoddPåSisteAdresseMinstFraVurderingstidspunkt(
+        adresser: List<GrBostedsadresse>,
+        vurderFra: LocalDate
+    ): Boolean {
+        val sisteAdresse = adresser
+            .filter { it.harGyldigFom() }
+            .maxByOrNull { it.periode?.fom!! } ?: return false
+
+        return sisteAdresse.periode?.fom!!.toYearMonth()
+            .isBefore(vurderFra.toYearMonth()) && sisteAdresse.periode?.tom == null
     }
 
     private fun erPersonBosattFraVurderingstidspunktet(adresser: List<GrBostedsadresse>, vurderFra: LocalDate) =

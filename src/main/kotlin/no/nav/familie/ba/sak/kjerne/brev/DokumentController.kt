@@ -129,7 +129,6 @@ class DokumentController(
         @RequestBody manueltBrevRequest: ManueltBrevRequest
     ): Ressurs<ByteArray> {
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} henter forhåndsvisning av brev på fagsak $fagsakId for mal: ${manueltBrevRequest.brevmal}")
-        tilgangService.validerTilgangTilFagsak(fagsakId = fagsakId)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "hente forhåndsvisning brev"
@@ -147,7 +146,6 @@ class DokumentController(
         @RequestBody manueltBrevRequest: ManueltBrevRequest
     ): ResponseEntity<Ressurs<RestMinimalFagsak>> {
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} genererer og sender brev på fagsak $fagsakId: ${manueltBrevRequest.brevmal}")
-        tilgangService.validerTilgangTilFagsak(fagsakId = fagsakId)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "sende brev"

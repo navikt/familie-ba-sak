@@ -261,7 +261,7 @@ class BosattIRiketVilkårTest {
         ).vurder()
 
         assertEquals(Resultat.OPPFYLT, evaluering.resultat)
-        assertEquals(VilkårOppfyltÅrsak.BOR_I_RIKET_EN_ADRESSE_HELE_LIVET, evaluering.evalueringÅrsaker.single())
+        assertEquals(VilkårOppfyltÅrsak.BOR_I_RIKET_KUN_ADRESSER_UTEN_FOM, evaluering.evalueringÅrsaker.single())
     }
 
     @Test
@@ -284,7 +284,7 @@ class BosattIRiketVilkårTest {
                 ),
                 GrBostedsadresse.fraBostedsadresse(
                     defaultAdresse.copy(
-                        angittFlyttedato = LocalDate.now().minusMonths(7),
+                        angittFlyttedato = LocalDate.now().minusMonths(3),
                     ),
                     søker
                 ),
