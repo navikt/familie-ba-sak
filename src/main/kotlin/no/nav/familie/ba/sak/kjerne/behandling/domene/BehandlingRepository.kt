@@ -91,7 +91,7 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
     @Query("SELECT DISTINCT aty.behandlingId FROM AndelTilkjentYtelse aty WHERE aty.behandlingId in :iverksatteLøpende AND aty.sats = :gammelSats AND aty.stønadTom >= :månedÅrForEndring")
     fun finnBehadlingerForSatsendring(
         iverksatteLøpende: List<Long>,
-        gammelSats: Long,
+        gammelSats: Int,
         månedÅrForEndring: YearMonth
     ): List<Long>
 
