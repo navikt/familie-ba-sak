@@ -558,13 +558,15 @@ class IntegrasjonClient(
             return Tilgang(true, null)
         }
 
-        return postForEntity<List<Tilgang>>(
+        val tilganger = postForEntity<List<Tilgang>>(
             tilgangPersonUri,
             personIdenter,
             HttpHeaders().also {
                 it.set(HEADER_NAV_TEMA, HEADER_NAV_TEMA_BAR)
             }
-        ).single()
+        )
+
+        return tilganger.firstOrNull { !it.harTilgang } ?: tilganger.first()
     }
 
     fun sjekkTilgangTilPersonMedRelasjoner(personIdent: String): Tilgang {
