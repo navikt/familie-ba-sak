@@ -50,8 +50,6 @@ class SendMeldingTilBisysTaskTest {
 
         val forrigeBehandling = lagBehandling(defaultFagsak(), førsteSteg = StegType.BEHANDLING_AVSLUTTET)
 
-        Thread.sleep(100)
-
         val nyBehandling = lagBehandling(
             forrigeBehandling.fagsak,
             resultat = BehandlingResultat.OPPHØRT,
