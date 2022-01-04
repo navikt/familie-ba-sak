@@ -129,7 +129,7 @@ class BehandlingSatsendringTest(
 
         val scenario = mockServerKlient().lagScenario(
             RestScenario(
-                søker = RestScenarioPerson(fødselsdato = "1993-01-12", fornavn = "Mor", etternavn = "Søker").copy(
+                søker = RestScenarioPerson(fødselsdato = "1992-01-12", fornavn = "Mor", etternavn = "Søker").copy(
                     bostedsadresser = mutableListOf(
                         Bostedsadresse(
                             angittFlyttedato = LocalDate.now().minusYears(10),
@@ -185,6 +185,7 @@ class BehandlingSatsendringTest(
         // Fjerner mocking slik at den siste satsendringen vi fjernet via mocking nå skal komme med.
         unmockkObject(SatsService)
         satsendringService.finnBehandlingerForSatsendring(1054, YearMonth.of(2022, 1))
+            .filter { it == behandling.id } // kjør kun satsendring for behandlingen vi tester i dette testcaset
             .forEach { satsendringService.utførSatsendring(it) }
 
         val satsendingBehandling = behandlingService.hentAktivForFagsak(fagsakId = behandling.fagsak.id)
