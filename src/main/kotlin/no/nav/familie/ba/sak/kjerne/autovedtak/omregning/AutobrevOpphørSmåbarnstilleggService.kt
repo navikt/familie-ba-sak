@@ -41,7 +41,7 @@ class AutobrevOpphørSmåbarnstilleggService(
         val forrigeBehandling: Behandling = behandlingService.hent(behandlingId)
 
         val opphørSmåbarnstilleggErAlleredeBegrunnet: Boolean =
-            opphørSmåbarnstilleggAlleredeBegrunnet(forrigeBehandling)
+            opphørSmåbarnstilleggAlleredeBegrunnetIForrigeBehandling(forrigeBehandling)
 
         if (opphørSmåbarnstilleggErAlleredeBegrunnet) {
             logger.info(
@@ -122,8 +122,13 @@ class AutobrevOpphørSmåbarnstilleggService(
         taskRepository.save(task)
     }
 
-    private fun opphørSmåbarnstilleggAlleredeBegrunnet(behandling: Behandling): Boolean {
-        val vedtak = vedtakService.hentAktivForBehandlingThrows(behandling.id)
+    /**
+     * FORBEDRING:
+     * Mangler sjekk på om det faktisk er det/de barna det reduseres for som tidligere har blitt begrunnet.
+     * Det holder ikke å sjekke kun forrige behandling for å finne ut om nøyaktig dette opphøret av småbarnstillegg er tidligere begrunnet i brev.
+     */
+    private fun opphørSmåbarnstilleggAlleredeBegrunnetIForrigeBehandling(forrigeBehandling: Behandling): Boolean {
+        val vedtak = vedtakService.hentAktivForBehandlingThrows(forrigeBehandling.id)
         val vedtaksperioderMedBegrunnelser = vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak)
 
         val vedtaksBegrunnelserForOpphør = listOf(
