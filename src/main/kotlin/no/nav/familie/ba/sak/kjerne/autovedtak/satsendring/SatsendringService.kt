@@ -43,7 +43,7 @@ class SatsendringService(
             månedÅrForEndring = satsendringMåned
         )
 
-        return behandlinger.subList(0, minOf(100, behandlinger.size - 1))
+        return behandlinger.subList(0, minOf(100, behandlinger.size))
     }
 
     /**
