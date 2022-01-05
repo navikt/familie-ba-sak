@@ -55,7 +55,8 @@ class TilgangServiceTest {
     internal fun setUp() {
         mockBrukerContext("A")
         every { fagsakService.hentAktør(fagsak.id) } returns fagsak.aktør
-        every { persongrunnlagService.hentAktivThrows(any()) } returns personopplysningGrunnlag
+        every { behandlingService.hent(any()) } returns behandling
+        every { persongrunnlagService.hentAktiv(any()) } returns personopplysningGrunnlag
     }
 
     @AfterEach

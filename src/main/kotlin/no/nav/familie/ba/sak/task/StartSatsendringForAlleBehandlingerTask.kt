@@ -20,7 +20,7 @@ class StartSatsendringForAlleBehandlingerTask(
 ) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
-        val gammelSats = task.payload.toLong()
+        val gammelSats = task.payload.toInt()
         satsendringService.finnBehandlingerForSatsendring(gammelSats, YearMonth.now()).forEach {
             taskRepository.save(SatsendringTask.opprettTask(it))
         }
@@ -30,7 +30,7 @@ class StartSatsendringForAlleBehandlingerTask(
 
         const val TASK_STEP_TYPE = "startsatsendringforallebehandlinger"
 
-        fun opprettTask(gammelSats: Long): Task {
+        fun opprettTask(gammelSats: Int): Task {
             return Task(
                 type = TASK_STEP_TYPE,
                 payload = gammelSats.toString()
