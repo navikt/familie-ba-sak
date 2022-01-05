@@ -41,7 +41,7 @@ class SatsendringService(
             iverksatteLøpende = behandlingRepository.finnSisteIverksatteBehandlingFraLøpendeFagsaker(),
             gammelSats = gammelSats,
             månedÅrForEndring = satsendringMåned
-        )
+        ).subList(0, 100)
 
     /**
      * Gjennomfører og commiter revurderingsbehandling
