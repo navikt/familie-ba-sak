@@ -27,22 +27,27 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 internal class AutobrevOpphørSmåbarnstilleggServiceTest {
-    val persongrunnlagService = mockk<PersongrunnlagService>()
-    val behandlingService = mockk<BehandlingService>()
-    val vedtakService = mockk<VedtakService>(relaxed = true)
-    val stegService = mockk<StegService>()
-    val taskRepository = mockk<TaskRepositoryWrapper>(relaxed = true)
-    val vedtaksperiodeService = mockk<VedtaksperiodeService>()
-    val autovedtakService = mockk<AutovedtakService>(relaxed = true)
-    val periodeOvergangsstønadGrunnlagRepository = mockk<PeriodeOvergangsstønadGrunnlagRepository>()
+    private val autovedtakService = mockk<AutovedtakService>(relaxed = true)
+    private val persongrunnlagService = mockk<PersongrunnlagService>()
+    private val behandlingService = mockk<BehandlingService>()
+    private val stegService = mockk<StegService>()
+    private val vedtakService = mockk<VedtakService>(relaxed = true)
+    private val taskRepository = mockk<TaskRepositoryWrapper>(relaxed = true)
+    private val vedtaksperiodeService = mockk<VedtaksperiodeService>()
+    private val periodeOvergangsstønadGrunnlagRepository = mockk<PeriodeOvergangsstønadGrunnlagRepository>()
+
+    private val autobrevService = AutobrevService(
+        behandlingService = behandlingService,
+        autovedtakService = autovedtakService,
+        vedtakService = vedtakService,
+        vedtaksperiodeService = vedtaksperiodeService,
+        taskRepository = taskRepository,
+    )
 
     private val autobrevOpphørSmåbarnstilleggService = AutobrevOpphørSmåbarnstilleggService(
         persongrunnlagService = persongrunnlagService,
         behandlingService = behandlingService,
-        vedtakService = vedtakService,
-        taskRepository = taskRepository,
-        vedtaksperiodeService = vedtaksperiodeService,
-        autovedtakService = autovedtakService,
+        autobrevService = autobrevService,
         periodeOvergangsstønadGrunnlagRepository = periodeOvergangsstønadGrunnlagRepository
     )
 

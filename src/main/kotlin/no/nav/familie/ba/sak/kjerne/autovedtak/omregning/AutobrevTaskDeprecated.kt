@@ -2,8 +2,6 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.omregning
 
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
-import no.nav.familie.ba.sak.config.FeatureToggleService
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.task.OpprettTaskService
@@ -26,8 +24,6 @@ import java.time.LocalDate
 class AutobrevTaskDeprecated(
     private val fagsakRepository: FagsakRepository,
     private val opprettTaskService: OpprettTaskService,
-    private val featureToggleService: FeatureToggleService,
-    private val behandlingService: BehandlingService
 ) : AsyncTaskStep {
 
     override fun doTask(task: Task) {

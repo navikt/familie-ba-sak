@@ -315,7 +315,10 @@ enum class BehandlingÅrsak(val visningsnavn: String) {
     SMÅBARNSTILLEGG("Småbarnstillegg"),
     MIGRERING("Migrering"),
     ENDRE_MIGRERINGSDATO("Endre migreringsdato"),
-    HELMANUELL_MIGRERING("Manuell migrering")
+    HELMANUELL_MIGRERING("Manuell migrering");
+
+    fun erOmregningsårsak(): Boolean =
+        this == OMREGNING_6ÅR || this == OMREGNING_18ÅR || this == OMREGNING_SMÅBARNSTILLEGG
 }
 
 enum class BehandlingType(val visningsnavn: String) {

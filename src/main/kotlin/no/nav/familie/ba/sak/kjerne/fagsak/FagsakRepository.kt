@@ -54,7 +54,12 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
     )
     fun finnFagsakerSomSkalAvsluttes(): List<Long>
 
-    // Tror denne blir feil for fagsak hvor yngste barn blir 18 fordi da vil fagsaken være avsluttet før autobrev-tasken kjører
+    /**
+     * Denne skal plukke fagsaker som løper _og_ har barn født innenfor anngitt tidsintervall.
+     * Brukes til å sende ut automatiske brev ved reduksjon 6 og 18 år blant annet.
+     * Ved 18 år og dersom hele fagsaken opphører så skal det ikke sendes ut brev og derfor sjekker
+     * vi kun løpende fagsaker.
+     */
     @Query(
         value = """
         SELECT f FROM Fagsak f
@@ -111,7 +116,7 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
             WHERE
                     aty.type = 'SMÅBARNSTILLEGG'
                 AND b.status = 'AVSLUTTET'
-                AND aty.stonad_tom = :opphørsmåned
+                AND date_trunc('month', aty.stonad_tom) = date_trunc('month', 'date' :opphørsmåned)
                 AND ty.utbetalingsoppdrag IS NOT NULL
             ORDER BY b.fk_fagsak_id, b.opprettet_tid DESC
         """,

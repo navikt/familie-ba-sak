@@ -1,12 +1,9 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.omregning
 
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
-import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakUtils
@@ -15,9 +12,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
-import no.nav.familie.ba.sak.task.JournalførVedtaksbrevTask
 import no.nav.familie.ba.sak.task.dto.Autobrev6og18ÅrDTO
-import no.nav.familie.prosessering.domene.Task
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -28,31 +23,30 @@ class Autobrev6og18ÅrService(
     private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
     private val behandlingService: BehandlingService,
     private val vedtakService: VedtakService,
-    private val taskRepository: TaskRepositoryWrapper,
     private val vedtaksperiodeService: VedtaksperiodeService,
-    private val autovedtakService: AutovedtakService
+    private val autobrevService: AutobrevService
 ) {
 
     @Transactional
     fun opprettOmregningsoppgaveForBarnIBrytingsalder(autobrev6og18ÅrDTO: Autobrev6og18ÅrDTO) {
-
         logger.info("opprettOmregningsoppgaveForBarnIBrytingsalder for fagsak ${autobrev6og18ÅrDTO.fagsakId}")
 
         val behandling =
             behandlingService.hentAktivForFagsak(autobrev6og18ÅrDTO.fagsakId) ?: error("Fant ikke aktiv behandling")
 
-        if (behandling.fagsak.status != FagsakStatus.LØPENDE) {
-            logger.info("Fagsak ${behandling.fagsak.id} har ikke status løpende, og derfor prosesseres den ikke videre.")
+        val behandlingsårsak = finnBehandlingÅrsakForAlder(
+            autobrev6og18ÅrDTO.alder
+        )
+        if (!autobrevService.skalAutobrevBehandlingOpprettes(
+                fagsakId = autobrev6og18ÅrDTO.fagsakId,
+                behandlingsårsak = behandlingsårsak
+            )
+        ) {
             return
         }
 
-        if (behandlingService.harBehandlingsårsakAlleredeKjørt(
-                fagsakId = autobrev6og18ÅrDTO.fagsakId,
-                behandlingÅrsak = finnBehandlingÅrsakForAlder(autobrev6og18ÅrDTO.alder),
-                måned = YearMonth.now()
-            )
-        ) {
-            logger.info("Fagsak ${behandling.fagsak.id} ${autobrev6og18ÅrDTO.alder} års omregningsbrev brev allerede sendt")
+        if (behandling.fagsak.status != FagsakStatus.LØPENDE) {
+            logger.info("Fagsak ${behandling.fagsak.id} har ikke status løpende, og derfor prosesseres den ikke videre.")
             return
         }
 
@@ -71,7 +65,7 @@ class Autobrev6og18ÅrService(
         }
 
         if (barnetrygdOpphører(autobrev6og18ÅrDTO, behandling)) {
-            logger.info("Fagsak ${behandling.fagsak.id} har ikke barn under 18 år og vil opphøre.")
+            logger.info("Fagsak ${behandling.fagsak.id} har ikke løpende utbetalinger for barn under 18 år og vil opphøre.")
             return
         }
 
@@ -79,28 +73,13 @@ class Autobrev6og18ÅrService(
             error("Kan ikke opprette ny behandling for fagsak ${behandling.fagsak.id} ettersom den allerede har en åpen behanding.")
         }
 
-        val behandlingEtterBehandlingsresultat =
-            autovedtakService.opprettAutomatiskBehandlingOgKjørTilBehandlingsresultat(
-                fagsak = behandling.fagsak,
-                behandlingType = BehandlingType.REVURDERING,
-                behandlingÅrsak = finnBehandlingÅrsakForAlder(
-                    autobrev6og18ÅrDTO.alder
-                )
-            )
-
-        vedtaksperiodeService.oppdaterFortsattInnvilgetPeriodeMedAutobrevBegrunnelse(
-            vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingEtterBehandlingsresultat.id),
-            vedtakBegrunnelseSpesifikasjon = AutobrevUtils.hentGjeldendeVedtakbegrunnelseReduksjonForAlder(
+        autobrevService.opprettOgKjørOmregningsbehandling(
+            behandling = behandling,
+            behandlingsårsak = behandlingsårsak,
+            standardbegrunnelse = AutobrevUtils.hentGjeldendeVedtakbegrunnelseReduksjonForAlder(
                 autobrev6og18ÅrDTO.alder
             )
         )
-
-        val opprettetVedtak =
-            autovedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(
-                behandlingEtterBehandlingsresultat
-            )
-
-        opprettTaskJournalførVedtaksbrev(vedtakId = opprettetVedtak.id)
     }
 
     private fun barnetrygdOpphører(
@@ -143,14 +122,6 @@ class Autobrev6og18ÅrService(
     private fun barnUnder18årInneværendeMånedEksisterer(behandlingId: Long): Boolean =
         personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandlingId)?.personer
             ?.any { it.type == PersonType.BARN && it.erYngreEnnInneværendeMåned(Alder.ATTEN.år) } ?: false
-
-    private fun opprettTaskJournalførVedtaksbrev(vedtakId: Long) {
-        val task = Task(
-            JournalførVedtaksbrevTask.TASK_STEP_TYPE,
-            "$vedtakId"
-        )
-        taskRepository.save(task)
-    }
 
     companion object {
 
