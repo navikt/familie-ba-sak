@@ -56,7 +56,7 @@ internal class HentFagsystemsbehandlingRequestConsumerTest {
     private val keySlot = slot<String>()
     private val behandlingIdSlot = slot<String>()
 
-    val behandling = lagBehandling(årsak = BehandlingÅrsak.FØDSELSHENDELSE, automatiskOpprettelse = true).also {
+    val behandling = lagBehandling(årsak = BehandlingÅrsak.FØDSELSHENDELSE, skalBehandlesAutomatisk = true).also {
         it.resultat = BehandlingResultat.INNVILGET
     }
 

@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.config.RolleConfig
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import org.springframework.cache.CacheManager
 import org.springframework.stereotype.Service
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service
 class TilgangService(
     private val fagsakService: FagsakService,
     private val behandlingService: BehandlingService,
+    private val persongrunnlagService: PersongrunnlagService,
     private val rolleConfig: RolleConfig,
     private val integrasjonClient: IntegrasjonClient,
     private val cacheManager: CacheManager
@@ -37,8 +39,7 @@ class TilgangService(
     }
 
     fun validerTilgangTilPersoner(personIdenter: List<String>) {
-        val harTilgang = integrasjonClient.sjekkTilgangTilPersoner(personIdenter).harTilgang
-        if (!harTilgang) {
+        if (!harTilgangTilPersoner(personIdenter)) {
             throw RolleTilgangskontrollFeil(
                 melding = "Saksbehandler ${SikkerhetContext.hentSaksbehandler()} " +
                     "har ikke tilgang.",
@@ -48,28 +49,20 @@ class TilgangService(
         }
     }
 
-    fun validerTilgangTilPersonMedBarn(personIdent: String) {
-        val harTilgang = harTilgangTilPersonMedRelasjoner(personIdent)
-        if (!harTilgang) {
-            throw RolleTilgangskontrollFeil(
-                melding = "Saksbehandler ${SikkerhetContext.hentSaksbehandler()} " +
-                    "har ikke tilgang.",
-                frontendFeilmelding = "Saksbehandler ${SikkerhetContext.hentSaksbehandler()} " +
-                    "har ikke tilgang til $personIdent eller dets barn"
-            )
-        }
-    }
-
-    private fun harTilgangTilPersonMedRelasjoner(personIdent: String): Boolean {
-        return harSaksbehandlerTilgang("validerTilgangTilPersonMedBarn", personIdent) {
-            integrasjonClient.sjekkTilgangTilPersonMedRelasjoner(personIdent).harTilgang
+    private fun harTilgangTilPersoner(personIdenter: List<String>): Boolean {
+        return harSaksbehandlerTilgang("validerTilgangTilPersoner", personIdenter) {
+            integrasjonClient.sjekkTilgangTilPersoner(personIdenter).harTilgang
         }
     }
 
     fun validerTilgangTilBehandling(behandlingId: Long) {
         val harTilgang = harSaksbehandlerTilgang("validerTilgangTilBehandling", behandlingId) {
-            val personIdent = behandlingService.hentAktør(behandlingId).aktivFødselsnummer()
-            harTilgangTilPersonMedRelasjoner(personIdent)
+            val behandling = behandlingService.hent(behandlingId)
+            val personIdenter =
+                persongrunnlagService.hentAktiv(behandlingId = behandlingId)?.personer?.map { it.personIdent.ident }
+                    ?: listOf(behandling.fagsak.aktør.aktivFødselsnummer())
+
+            harTilgangTilPersoner(personIdenter)
         }
         if (!harTilgang) {
             throw RolleTilgangskontrollFeil(
@@ -81,7 +74,7 @@ class TilgangService(
 
     fun validerTilgangTilFagsak(fagsakId: Long) {
         val personIdent = fagsakService.hentAktør(fagsakId).aktivFødselsnummer()
-        validerTilgangTilPersonMedBarn(personIdent)
+        validerTilgangTilPersoner(listOf(personIdent))
     }
 
     /**
