@@ -80,6 +80,16 @@ management:
 springdoc:
   packagesToScan: "no.nav.familie.ba.sak.ekstern.bisys"
 
+prosessering:
+  continuousRunning.enabled: true
+  maxantall: 5
+  fixedDelayString:
+    in:
+      milliseconds: 5000
+  delete:
+    after:
+      weeks: 4
+
 FAMILIE_EF_SAK_API_URL_SCOPE: api://dev-gcp.teamfamilie.familie-ef-sak/.default
 FAMILIE_EF_SAK_API_URL: https://familie-ef-sak.dev.intern.nav.no/api
 
