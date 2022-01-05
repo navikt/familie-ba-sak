@@ -36,12 +36,15 @@ class SatsendringService(
     fun finnBehandlingerForSatsendring(
         gammelSats: Int,
         satsendringMåned: YearMonth
-    ): List<Long> =
-        behandlingRepository.finnBehadlingerForSatsendring(
+    ): List<Long> {
+        val behandlinger = behandlingRepository.finnBehadlingerForSatsendring(
             iverksatteLøpende = behandlingRepository.finnSisteIverksatteBehandlingFraLøpendeFagsaker(),
             gammelSats = gammelSats,
             månedÅrForEndring = satsendringMåned
-        ).subList(0, 100)
+        )
+
+        return behandlinger.subList(0, minOf(100, behandlinger.size - 1))
+    }
 
     /**
      * Gjennomfører og commiter revurderingsbehandling
