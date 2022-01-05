@@ -13,8 +13,8 @@ import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.småbarnstillegg.PeriodeOvergangsstønadGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.småbarnstillegg.PeriodeOvergangsstønadGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.steg.StegService
@@ -27,7 +27,7 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 internal class AutobrevOpphørSmåbarnstilleggServiceTest {
-    val personopplysningGrunnlagRepository = mockk<PersonopplysningGrunnlagRepository>()
+    val persongrunnlagService = mockk<PersongrunnlagService>()
     val behandlingService = mockk<BehandlingService>()
     val vedtakService = mockk<VedtakService>(relaxed = true)
     val stegService = mockk<StegService>()
@@ -37,7 +37,7 @@ internal class AutobrevOpphørSmåbarnstilleggServiceTest {
     val periodeOvergangsstønadGrunnlagRepository = mockk<PeriodeOvergangsstønadGrunnlagRepository>()
 
     private val autobrevOpphørSmåbarnstilleggService = AutobrevOpphørSmåbarnstilleggService(
-        personopplysningGrunnlagRepository = personopplysningGrunnlagRepository,
+        persongrunnlagService = persongrunnlagService,
         behandlingService = behandlingService,
         vedtakService = vedtakService,
         taskRepository = taskRepository,
@@ -47,22 +47,23 @@ internal class AutobrevOpphørSmåbarnstilleggServiceTest {
     )
 
     @Test
-    fun `Verifiser at løpende behandling med småbarnstillegg sender opphørsbrev måneden etter yngste barn ble 3 år`() {
+    fun `Verifiser at løpende fagsak med småbarnstillegg sender opphørsbrev måneden etter yngste barn ble 3 år`() {
 
         val behandling = lagBehandling()
-        val barn3ForrigeMåned = tilfeldigPerson(fødselsdato = LocalDate.now().minusYears(3).minusMonths(1))
+        val barn3ÅrForrigeMåned = tilfeldigPerson(fødselsdato = LocalDate.now().minusYears(3).minusMonths(1))
         val personopplysningGrunnlag: PersonopplysningGrunnlag =
-            lagTestPersonopplysningGrunnlag(behandlingId = behandlingId, barn3ForrigeMåned)
+            lagTestPersonopplysningGrunnlag(behandlingId = behandlingId, barn3ÅrForrigeMåned)
 
-        every { behandlingService.hent(any()) } returns behandling
-        every { personopplysningGrunnlagRepository.findByBehandlingAndAktiv(any()) } returns personopplysningGrunnlag
+        every { behandlingService.hentAktivForFagsak(any()) } returns behandling
+        every { behandlingService.harBehandlingsårsakAlleredeKjørt(any(), any(), any()) } returns false
+        every { persongrunnlagService.hentAktivThrows(any()) } returns personopplysningGrunnlag
         every { periodeOvergangsstønadGrunnlagRepository.findByBehandlingId(any()) } returns emptyList()
         every { stegService.håndterVilkårsvurdering(any()) } returns behandling
         every { stegService.håndterNyBehandling(any()) } returns behandling
         every { vedtaksperiodeService.oppdaterFortsattInnvilgetPeriodeMedAutobrevBegrunnelse(any(), any()) } just runs
 
         autobrevOpphørSmåbarnstilleggService
-            .kjørBehandlingOgSendBrevForOpphørAvSmåbarnstillegg(behandlingId = behandling.id)
+            .kjørBehandlingOgSendBrevForOpphørAvSmåbarnstillegg(fagsakId = behandling.fagsak.id)
 
         verify(exactly = 1) {
             autovedtakService.opprettAutomatiskBehandlingOgKjørTilBehandlingsresultat(
@@ -76,59 +77,89 @@ internal class AutobrevOpphørSmåbarnstilleggServiceTest {
     }
 
     @Test
-    fun `overgangstønadOpphørerDenneMåneden - en periode med opphør denne måneden gir true`() {
+    fun `Verifiser at behandling ikke blir opprettet om behandling allerede har kjørt`() {
+
+        val behandling = lagBehandling()
+        val barn3ÅrForrigeMåned = tilfeldigPerson(fødselsdato = LocalDate.now().minusYears(3).minusMonths(1))
+        val personopplysningGrunnlag: PersonopplysningGrunnlag =
+            lagTestPersonopplysningGrunnlag(behandlingId = behandlingId, barn3ÅrForrigeMåned)
+
+        every { behandlingService.hentAktivForFagsak(any()) } returns behandling
+        every { behandlingService.harBehandlingsårsakAlleredeKjørt(any(), any(), any()) } returns true
+        every { persongrunnlagService.hentAktivThrows(any()) } returns personopplysningGrunnlag
+        every { periodeOvergangsstønadGrunnlagRepository.findByBehandlingId(any()) } returns emptyList()
+        every { stegService.håndterVilkårsvurdering(any()) } returns behandling
+        every { stegService.håndterNyBehandling(any()) } returns behandling
+        every { vedtaksperiodeService.oppdaterFortsattInnvilgetPeriodeMedAutobrevBegrunnelse(any(), any()) } just runs
+
+        autobrevOpphørSmåbarnstilleggService
+            .kjørBehandlingOgSendBrevForOpphørAvSmåbarnstillegg(fagsakId = behandling.fagsak.id)
+
+        verify(exactly = 0) {
+            autovedtakService.opprettAutomatiskBehandlingOgKjørTilBehandlingsresultat(
+                any(),
+                any(),
+                any()
+            )
+        }
+
+        verify(exactly = 0) { taskRepository.save(any()) }
+    }
+
+    @Test
+    fun `overgangstønadOpphørteForrigeMåned - en periode med opphør denne måneden gir false`() {
         val fom = LocalDate.now().minusYears(1)
         val tom = LocalDate.now()
         val input: List<PeriodeOvergangsstønadGrunnlag> = listOf(
             lagPeriodeOvergangsstønadGrunnlag(fom, tom)
         )
-        val overgangstønadOpphørerDenneMåneden =
-            autobrevOpphørSmåbarnstilleggService.overgangstønadOpphørerDenneMåneden(input)
-        assertTrue(overgangstønadOpphørerDenneMåneden)
+        val overgangstønadOpphørteForrigeMåned =
+            autobrevOpphørSmåbarnstilleggService.overgangstønadOpphørteForrigeMåned(input)
+        assertFalse(overgangstønadOpphørteForrigeMåned)
     }
 
     @Test
-    fun `overgangstønadOpphørerDenneMåneden - tom liste gir false`() {
+    fun `overgangstønadOpphørteForrigeMåned - tom liste gir false`() {
         val input: List<PeriodeOvergangsstønadGrunnlag> = emptyList()
-        val overgangstønadOpphørerDenneMåneden =
-            autobrevOpphørSmåbarnstilleggService.overgangstønadOpphørerDenneMåneden(input)
-        assertFalse(overgangstønadOpphørerDenneMåneden)
+        val overgangstønadOpphørteForrigeMåned =
+            autobrevOpphørSmåbarnstilleggService.overgangstønadOpphørteForrigeMåned(input)
+        assertFalse(overgangstønadOpphørteForrigeMåned)
     }
 
     @Test
-    fun `overgangstønadOpphørerDenneMåneden - neste måned gir false`() {
+    fun `overgangstønadOpphørteForrigeMåned - neste måned gir false`() {
         val fom = LocalDate.now().minusYears(1)
         val tom = LocalDate.now().førsteDagINesteMåned()
         val input: List<PeriodeOvergangsstønadGrunnlag> = listOf(
             lagPeriodeOvergangsstønadGrunnlag(fom, tom)
         )
-        val overgangstønadOpphørerDenneMåneden =
-            autobrevOpphørSmåbarnstilleggService.overgangstønadOpphørerDenneMåneden(input)
-        assertFalse(overgangstønadOpphørerDenneMåneden)
+        val overgangstønadOpphørteForrigeMåned =
+            autobrevOpphørSmåbarnstilleggService.overgangstønadOpphørteForrigeMåned(input)
+        assertFalse(overgangstønadOpphørteForrigeMåned)
     }
 
     @Test
-    fun `overgangstønadOpphørerDenneMåneden - forrige måned gir false`() {
+    fun `overgangstønadOpphørteForrigeMåned - forrige måned gir true`() {
         val fom = LocalDate.now().minusYears(1)
         val tom = LocalDate.now().minusMonths(1)
         val input: List<PeriodeOvergangsstønadGrunnlag> = listOf(
             lagPeriodeOvergangsstønadGrunnlag(fom, tom)
         )
-        val overgangstønadOpphørerDenneMåneden =
-            autobrevOpphørSmåbarnstilleggService.overgangstønadOpphørerDenneMåneden(input)
-        assertFalse(overgangstønadOpphørerDenneMåneden)
+        val overgangstønadOpphørteForrigeMåned =
+            autobrevOpphørSmåbarnstilleggService.overgangstønadOpphørteForrigeMåned(input)
+        assertTrue(overgangstønadOpphørteForrigeMåned)
     }
 
     @Test
-    fun `overgangstønadOpphørerDenneMåneden - ett år siden gir false`() {
+    fun `overgangstønadOpphørteForrigeMåned - ett år siden gir false`() {
         val fom = LocalDate.now().minusYears(1)
         val tom = LocalDate.now().minusYears(1)
         val input: List<PeriodeOvergangsstønadGrunnlag> = listOf(
             lagPeriodeOvergangsstønadGrunnlag(fom, tom)
         )
-        val overgangstønadOpphørerDenneMåneden =
-            autobrevOpphørSmåbarnstilleggService.overgangstønadOpphørerDenneMåneden(input)
-        assertFalse(overgangstønadOpphørerDenneMåneden)
+        val overgangstønadOpphørteForrigeMåned =
+            autobrevOpphørSmåbarnstilleggService.overgangstønadOpphørteForrigeMåned(input)
+        assertFalse(overgangstønadOpphørteForrigeMåned)
     }
 
     val behandlingId: Long = 1
@@ -139,7 +170,7 @@ internal class AutobrevOpphørSmåbarnstilleggServiceTest {
         val peronsopplysningGrunnalg: PersonopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(behandlingId = behandlingId, barn3ForrigeMåned)
 
-        assertTrue(autobrevOpphørSmåbarnstilleggService.minsteBarnFylteTreÅrForrigeMåned(peronsopplysningGrunnalg))
+        assertTrue(autobrevOpphørSmåbarnstilleggService.yngsteBarnFylteTreÅrForrigeMåned(peronsopplysningGrunnalg))
     }
 
     @Test
@@ -149,7 +180,7 @@ internal class AutobrevOpphørSmåbarnstilleggServiceTest {
         val peronsopplysningGrunnalg: PersonopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(behandlingId = behandlingId, barn3ForrigeMåned, barnOverTre)
 
-        assertTrue(autobrevOpphørSmåbarnstilleggService.minsteBarnFylteTreÅrForrigeMåned(peronsopplysningGrunnalg))
+        assertTrue(autobrevOpphørSmåbarnstilleggService.yngsteBarnFylteTreÅrForrigeMåned(peronsopplysningGrunnalg))
     }
 
     @Test
@@ -159,7 +190,7 @@ internal class AutobrevOpphørSmåbarnstilleggServiceTest {
         val peronsopplysningGrunnalg: PersonopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(behandlingId = behandlingId, barn3ForrigeMåned, ekstraBarn3ForrigeMåned)
 
-        assertTrue(autobrevOpphørSmåbarnstilleggService.minsteBarnFylteTreÅrForrigeMåned(peronsopplysningGrunnalg))
+        assertTrue(autobrevOpphørSmåbarnstilleggService.yngsteBarnFylteTreÅrForrigeMåned(peronsopplysningGrunnalg))
     }
 
     @Test
@@ -169,7 +200,7 @@ internal class AutobrevOpphørSmåbarnstilleggServiceTest {
         val peronsopplysningGrunnalg: PersonopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(behandlingId = behandlingId, barnOverTre, ekstraBarnOverTre)
 
-        assertFalse(autobrevOpphørSmåbarnstilleggService.minsteBarnFylteTreÅrForrigeMåned(peronsopplysningGrunnalg))
+        assertFalse(autobrevOpphørSmåbarnstilleggService.yngsteBarnFylteTreÅrForrigeMåned(peronsopplysningGrunnalg))
     }
 
     @Test
@@ -179,7 +210,7 @@ internal class AutobrevOpphørSmåbarnstilleggServiceTest {
         val peronsopplysningGrunnalg: PersonopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(behandlingId = behandlingId, barnUnderTre, ekstraBarnUnderTre)
 
-        assertFalse(autobrevOpphørSmåbarnstilleggService.minsteBarnFylteTreÅrForrigeMåned(peronsopplysningGrunnalg))
+        assertFalse(autobrevOpphørSmåbarnstilleggService.yngsteBarnFylteTreÅrForrigeMåned(peronsopplysningGrunnalg))
     }
 
     @Test
@@ -189,7 +220,7 @@ internal class AutobrevOpphørSmåbarnstilleggServiceTest {
         val peronsopplysningGrunnalg: PersonopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(behandlingId = behandlingId, barnUnderTre, barn3ForrigeMåned)
 
-        assertFalse(autobrevOpphørSmåbarnstilleggService.minsteBarnFylteTreÅrForrigeMåned(peronsopplysningGrunnalg))
+        assertFalse(autobrevOpphørSmåbarnstilleggService.yngsteBarnFylteTreÅrForrigeMåned(peronsopplysningGrunnalg))
     }
 
     private fun lagPeriodeOvergangsstønadGrunnlag(

@@ -1,17 +1,13 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.omregning
 
-import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.common.førsteDagINesteMåned
-import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.småbarnstillegg.PeriodeOvergangsstønadGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.småbarnstillegg.PeriodeOvergangsstønadGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
@@ -22,12 +18,11 @@ import no.nav.familie.prosessering.domene.Task
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.time.LocalDate
 import java.time.YearMonth
 
 @Service
 class AutobrevOpphørSmåbarnstilleggService(
-    private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
+    private val persongrunnlagService: PersongrunnlagService,
     private val behandlingService: BehandlingService,
     private val vedtakService: VedtakService,
     private val taskRepository: TaskRepositoryWrapper,
@@ -36,47 +31,53 @@ class AutobrevOpphørSmåbarnstilleggService(
     private val periodeOvergangsstønadGrunnlagRepository: PeriodeOvergangsstønadGrunnlagRepository
 ) {
     @Transactional
-    fun kjørBehandlingOgSendBrevForOpphørAvSmåbarnstillegg(behandlingId: Long) {
+    fun kjørBehandlingOgSendBrevForOpphørAvSmåbarnstillegg(fagsakId: Long) {
 
-        val forrigeBehandling = behandlingService.hent(behandlingId)
+        val behandling =
+            behandlingService.hentAktivForFagsak(fagsakId = fagsakId) ?: error("Fant ikke aktiv behandling")
 
         val personopplysningGrunnlag: PersonopplysningGrunnlag =
-            personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId)
-                ?: throw FunksjonellFeil(
-                    melding = "personopplysningGrunnlag er null for behandlingId: $behandlingId",
-                )
+            persongrunnlagService.hentAktivThrows(behandling.id)
 
         val listePeriodeOvergangsstønadGrunnlag: List<PeriodeOvergangsstønadGrunnlag> =
-            periodeOvergangsstønadGrunnlagRepository.findByBehandlingId(behandlingId)
+            periodeOvergangsstønadGrunnlagRepository.findByBehandlingId(behandlingId = behandling.id)
 
-        val minsteBarnFylteTreÅrForrigeMåned =
-            minsteBarnFylteTreÅrForrigeMåned(personopplysningGrunnlag = personopplysningGrunnlag)
+        val yngsteBarnFylteTreÅrForrigeMåned =
+            yngsteBarnFylteTreÅrForrigeMåned(personopplysningGrunnlag = personopplysningGrunnlag)
 
-        val overgangstønadOpphørerDenneMåneden =
-            overgangstønadOpphørerDenneMåneden(listePeriodeOvergangsstønadGrunnlag = listePeriodeOvergangsstønadGrunnlag)
+        val overgangstønadOpphørteForrigeMåned =
+            overgangstønadOpphørteForrigeMåned(listePeriodeOvergangsstønadGrunnlag = listePeriodeOvergangsstønadGrunnlag)
 
-        if (!minsteBarnFylteTreÅrForrigeMåned && !overgangstønadOpphørerDenneMåneden) {
+        if (!yngsteBarnFylteTreÅrForrigeMåned && !overgangstønadOpphørteForrigeMåned) {
             logger.info(
-                "For fagsak ${forrigeBehandling.fagsak.id} ble verken yngste barn 3 år forrige måned eller har overgangsstønad som utløper denne måneden. " +
+                "For fagsak $fagsakId ble verken yngste barn 3 år forrige måned eller har overgangsstønad som utløper denne måneden. " +
                     "Avbryter sending av autobrev for opphør av småbarnstillegg."
             )
             return
         }
 
+        val behandlingsårsak = BehandlingÅrsak.OMREGNING_SMÅBARNSTILLEGG
+        if (behandlingService.harBehandlingsårsakAlleredeKjørt(
+                fagsakId = fagsakId,
+                behandlingÅrsak = behandlingsårsak,
+                måned = YearMonth.now()
+            )
+        ) {
+            logger.info("Brev for omregning småbarnstillegg har allerede kjørt for $fagsakId")
+            return
+        }
+
         val behandlingEtterBehandlingsresultat =
             autovedtakService.opprettAutomatiskBehandlingOgKjørTilBehandlingsresultat(
-                fagsak = forrigeBehandling.fagsak,
+                fagsak = behandling.fagsak,
                 behandlingType = BehandlingType.REVURDERING,
-                behandlingÅrsak = BehandlingÅrsak.SMÅBARNSTILLEGG
+                behandlingÅrsak = behandlingsårsak
             )
-
-        val vedtakBegrunnelseSpesifikasjon =
-            if (minsteBarnFylteTreÅrForrigeMåned) VedtakBegrunnelseSpesifikasjon.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_BARN_UNDER_TRE_ÅR
-            else VedtakBegrunnelseSpesifikasjon.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_FULL_OVERGANGSSTØNAD
 
         vedtaksperiodeService.oppdaterFortsattInnvilgetPeriodeMedAutobrevBegrunnelse(
             vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingEtterBehandlingsresultat.id),
-            vedtakBegrunnelseSpesifikasjon = vedtakBegrunnelseSpesifikasjon
+            vedtakBegrunnelseSpesifikasjon = if (yngsteBarnFylteTreÅrForrigeMåned) VedtakBegrunnelseSpesifikasjon.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_BARN_UNDER_TRE_ÅR
+            else VedtakBegrunnelseSpesifikasjon.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_FULL_OVERGANGSSTØNAD
         )
 
         val opprettetVedtak =
@@ -87,19 +88,15 @@ class AutobrevOpphørSmåbarnstilleggService(
         opprettTaskJournalførVedtaksbrev(vedtakId = opprettetVedtak.id)
     }
 
-    fun overgangstønadOpphørerDenneMåneden(listePeriodeOvergangsstønadGrunnlag: List<PeriodeOvergangsstønadGrunnlag>): Boolean =
-        listePeriodeOvergangsstønadGrunnlag.filter {
-            it.tom.isSameOrAfter(
-                LocalDate.now().withDayOfMonth(1)
-            ) && it.tom.isBefore(LocalDate.now().førsteDagINesteMåned())
-        }.isNotEmpty()
+    fun overgangstønadOpphørteForrigeMåned(listePeriodeOvergangsstønadGrunnlag: List<PeriodeOvergangsstønadGrunnlag>): Boolean =
+        listePeriodeOvergangsstønadGrunnlag.maxOfOrNull { it.tom }?.toYearMonth() == YearMonth.now().minusMonths(1)
 
-    fun minsteBarnFylteTreÅrForrigeMåned(personopplysningGrunnlag: PersonopplysningGrunnlag): Boolean {
-        val fødselsdatoer: List<YearMonth> = personopplysningGrunnlag.personer.filter { it.type === PersonType.BARN }
-            .map { it.fødselsdato.toYearMonth() }
-        if (fødselsdatoer.any { it.isAfter(YearMonth.now().minusYears(3).minusMonths(1)) }) return false
-        if (fødselsdatoer.any { it == YearMonth.now().minusYears(3).minusMonths(1) }) return true
-        return false
+    fun yngsteBarnFylteTreÅrForrigeMåned(personopplysningGrunnlag: PersonopplysningGrunnlag): Boolean {
+        val yngsteBarnSinFødselsdato: YearMonth =
+            personopplysningGrunnlag.barna
+                .maxOf { it.fødselsdato.toYearMonth() }
+
+        return yngsteBarnSinFødselsdato.plusYears(3) == YearMonth.now().minusMonths(1)
     }
 
     private fun opprettTaskJournalførVedtaksbrev(vedtakId: Long) {

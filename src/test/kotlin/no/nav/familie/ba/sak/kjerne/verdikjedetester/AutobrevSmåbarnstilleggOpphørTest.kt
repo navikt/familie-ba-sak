@@ -10,7 +10,6 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.integrasjoner.`ef-sak`.EfSakRestClient
-import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -18,6 +17,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.kjerne.steg.StegService
@@ -45,11 +45,11 @@ import java.time.YearMonth
 @TestMethodOrder(MethodOrderer.OrderAnnotation::class)
 class AutobrevSmåbarnstilleggOpphørTest(
     @Autowired private val fagsakService: FagsakService,
+    @Autowired private val fagsakRepository: FagsakRepository,
     @Autowired private val behandlingService: BehandlingService,
     @Autowired private val vedtakService: VedtakService,
     @Autowired private val stegService: StegService,
     @Autowired private val efSakRestClient: EfSakRestClient,
-    @Autowired private val økonomiKlient: ØkonomiKlient,
 ) : AbstractVerdikjedetest() {
 
     private val barnFødselsdato: LocalDate = LocalDate.now().minusYears(2)
@@ -89,15 +89,15 @@ class AutobrevSmåbarnstilleggOpphørTest(
             barnFødselsdato = barnFødselsdato,
         )
 
-        val behandlinger: List<Long> =
-            behandlingService.hentAlleBehandlingsIderMedOpphørSmåbarnstilleggIMåned(
-                måned = YearMonth.now().minusMonths(1)
+        val fagsaker: List<Long> =
+            fagsakRepository.finnAlleFagsakerMedOpphørSmåbarnstilleggIMåned(
+                opphørsmåned = YearMonth.now().minusMonths(1)
             )
 
-        assertTrue(behandlinger.containsAll(listOf(fagsak1behandling2.id, fagsak2behandling2.id)))
-        assertFalse(behandlinger.contains(fagsak1behanding1.id))
-        assertFalse(behandlinger.contains(fagsak2behandling1.id))
-        assertFalse(behandlinger.contains(fagsak1behandling3åpen.id))
+        assertTrue(fagsaker.containsAll(listOf(fagsak1behandling2.id, fagsak2behandling2.id)))
+        assertFalse(fagsaker.contains(fagsak1behanding1.id))
+        assertFalse(fagsaker.contains(fagsak2behandling1.id))
+        assertFalse(fagsaker.contains(fagsak1behandling3åpen.id))
     }
 
     fun lagScenario(barnFødselsdato: LocalDate): RestScenario = mockServerKlient().lagScenario(

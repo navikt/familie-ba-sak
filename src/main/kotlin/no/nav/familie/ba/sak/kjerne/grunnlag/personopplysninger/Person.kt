@@ -2,6 +2,10 @@ package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import no.nav.familie.ba.sak.common.BaseEntitet
+import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.isSameOrAfter
+import no.nav.familie.ba.sak.common.isSameOrBefore
+import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.arbeidsforhold.GrArbeidsforhold
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
@@ -14,6 +18,7 @@ import no.nav.familie.kontrakter.felles.Språkkode
 import org.hibernate.annotations.Fetch
 import org.hibernate.annotations.FetchMode
 import java.time.LocalDate
+import java.time.LocalDate.now
 import java.time.Period
 import java.util.Objects
 import javax.persistence.AttributeOverride
@@ -127,6 +132,15 @@ data class Person(
     fun hentAlder(): Int = Period.between(fødselsdato, LocalDate.now()).years
 
     fun hentSeksårsdag(): LocalDate = fødselsdato.plusYears(6)
+
+    fun fyllerAntallÅrInneværendeMåned(år: Int): Boolean {
+        return this.fødselsdato.isSameOrAfter(now().minusYears(år.toLong()).førsteDagIInneværendeMåned()) &&
+            this.fødselsdato.isSameOrBefore(now().minusYears(år.toLong()).sisteDagIMåned())
+    }
+
+    fun erYngreEnnInneværendeMåned(år: Int): Boolean {
+        return this.fødselsdato.isAfter(now().minusYears(år.toLong()).sisteDagIMåned())
+    }
 }
 
 enum class Kjønn {

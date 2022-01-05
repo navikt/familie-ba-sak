@@ -1,10 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.omregning
 
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
-import no.nav.familie.ba.sak.common.isSameOrAfter
-import no.nav.familie.ba.sak.common.isSameOrBefore
-import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -13,6 +9,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakUtils
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
@@ -24,7 +21,7 @@ import no.nav.familie.prosessering.domene.Task
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.time.LocalDate.now
+import java.time.YearMonth
 
 @Service
 class Autobrev6og18ÅrService(
@@ -49,7 +46,17 @@ class Autobrev6og18ÅrService(
             return
         }
 
-        if (brevAlleredeSendt(autobrev6og18ÅrDTO)) {
+        if (behandlingService.harBehandlingsårsakAlleredeKjørt(
+                fagsakId = autobrev6og18ÅrDTO.fagsakId,
+                behandlingÅrsak = finnBehandlingÅrsakForAlder(autobrev6og18ÅrDTO.alder),
+                måned = YearMonth.now()
+            )
+        ) {
+            logger.info("Fagsak ${behandling.fagsak.id} ${autobrev6og18ÅrDTO.alder} års omregningsbrev brev allerede sendt")
+            return
+        }
+
+        if (barnAlleredeBegrunnetPåFagsak(autobrev6og18ÅrDTO)) {
             logger.info("Fagsak ${behandling.fagsak.id} ${autobrev6og18ÅrDTO.alder} års omregningsbrev brev allerede sendt")
             return
         }
@@ -110,20 +117,21 @@ class Autobrev6og18ÅrService(
             else -> throw Feil("Alder må være oppgitt til enten 6 eller 18 år.")
         }
 
-    private fun brevAlleredeSendt(autobrev6og18ÅrDTO: Autobrev6og18ÅrDTO): Boolean =
-        behandlingService.hentBehandlinger(fagsakId = autobrev6og18ÅrDTO.fagsakId)
-            .filter { it.status == BehandlingStatus.AVSLUTTET }
-            .any { behandling ->
-                val vedtak = vedtakService.hentAktivForBehandlingThrows(behandling.id)
-                val vedtaksperioderMedBegrunnelser = vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak)
+    private fun barnAlleredeBegrunnetPåFagsak(autobrev6og18ÅrDTO: Autobrev6og18ÅrDTO): Boolean {
+        val vedtaksBegrunnelserForReduksjon =
+            AutobrevUtils.hentStandardbegrunnelserReduksjonForAlder(autobrev6og18ÅrDTO.alder)
 
-                val vedtaksBegrunnelserForReduksjon =
-                    AutobrevUtils.hentStandardbegrunnelserReduksjonForAlder(autobrev6og18ÅrDTO.alder)
-                vedtaksperioderMedBegrunnelser.any { vedtaksperiodeMedBegrunnelser ->
-                    vedtaksperiodeMedBegrunnelser.begrunnelser.map { it.vedtakBegrunnelseSpesifikasjon }
-                        .any { vedtaksBegrunnelserForReduksjon.contains(it) }
-                }
-            }
+        return FagsakUtils.fagsakBegrunnetMedBegrunnelse(
+            vedtaksperiodeMedBegrunnelser = behandlingService.hentBehandlinger(fagsakId = autobrev6og18ÅrDTO.fagsakId)
+                .filter { it.status == BehandlingStatus.AVSLUTTET }
+                .flatMap { behandling ->
+                    val vedtak = vedtakService.hentAktivForBehandlingThrows(behandling.id)
+                    vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak)
+                },
+            standardbegrunnelser = vedtaksBegrunnelserForReduksjon,
+            måned = YearMonth.now()
+        )
+    }
 
     private fun barnMedAngittAlderInneværendeMånedEksisterer(behandlingId: Long, alder: Int): Boolean =
         barnMedAngittAlderInneværendeMåned(behandlingId, alder).isNotEmpty()
@@ -142,15 +150,6 @@ class Autobrev6og18ÅrService(
             "$vedtakId"
         )
         taskRepository.save(task)
-    }
-
-    fun Person.fyllerAntallÅrInneværendeMåned(år: Int): Boolean {
-        return this.fødselsdato.isSameOrAfter(now().minusYears(år.toLong()).førsteDagIInneværendeMåned()) &&
-            this.fødselsdato.isSameOrBefore(now().minusYears(år.toLong()).sisteDagIMåned())
-    }
-
-    fun Person.erYngreEnnInneværendeMåned(år: Int): Boolean {
-        return this.fødselsdato.isAfter(now().minusYears(år.toLong()).sisteDagIMåned())
     }
 
     companion object {

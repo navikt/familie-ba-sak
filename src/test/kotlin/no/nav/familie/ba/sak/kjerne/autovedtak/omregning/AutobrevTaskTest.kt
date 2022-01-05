@@ -25,8 +25,7 @@ internal class AutobrevTaskTest {
     private val autobrevTask = AutobrevTask(
         fagsakRepository = fagsakRepository,
         opprettTaskService = opprettTaskService,
-        featureToggleService = featureToggleService,
-        behandlingService = behandlingService
+        featureToggleService = featureToggleService
     )
 
     private val autoBrevTask = Task(
@@ -35,7 +34,7 @@ internal class AutobrevTaskTest {
     )
 
     @Test
-    fun `oppretter 2 SendAutobrev tasker for 6 år og 2 for 18 år`() {
+    fun `oppretter autobrev tasker for 6 år, 2 for 18 år og 1 for småbarnstillegg`() {
 
         val fagsaker = setOf(
             Fagsak(1, aktør = tilAktør(randomFnr())),
@@ -43,10 +42,10 @@ internal class AutobrevTaskTest {
         )
 
         every { fagsakRepository.finnLøpendeFagsakMedBarnMedFødselsdatoInnenfor(any(), any()) } answers { fagsaker }
+        every { fagsakRepository.finnAlleFagsakerMedOpphørSmåbarnstilleggIMåned(any()) } returns listOf(1L)
         every { opprettTaskService.opprettAutovedtakFor6Og18ÅrBarn(any(), any()) } just runs
         every { opprettTaskService.opprettAutovedtakForOpphørSmåbarnstilleggTask(any()) } just runs
         every { featureToggleService.isEnabled(any()) } returns true
-        every { behandlingService.hentAlleBehandlingsIderMedOpphørSmåbarnstilleggIMåned(any()) } returns listOf(1L)
 
         autobrevTask.doTask(autoBrevTask)
 

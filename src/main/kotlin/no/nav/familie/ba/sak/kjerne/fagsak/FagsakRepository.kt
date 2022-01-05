@@ -54,6 +54,7 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
     )
     fun finnFagsakerSomSkalAvsluttes(): List<Long>
 
+    // Tror denne blir feil for fagsak hvor yngste barn blir 18 fordi da vil fagsaken være avsluttet før autobrev-tasken kjører
     @Query(
         value = """
         SELECT f FROM Fagsak f
@@ -100,4 +101,23 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
     )
     @Timed
     fun finnFagsakerMedUtvidetBarnetrygdInnenfor(fom: YearMonth, tom: YearMonth): List<Pair<Fagsak, LocalDate>>
+
+    @Query(
+        value = """
+            SELECT DISTINCT ON (b.fk_fagsak_id) b.fk_fagsak_id
+            FROM andel_tilkjent_ytelse aty
+                JOIN behandling b ON aty.fk_behandling_id = b.id
+                JOIN tilkjent_ytelse ty ON b.id = ty.fk_behandling_id
+            WHERE
+                    aty.type = 'SMÅBARNSTILLEGG'
+                AND b.status = 'AVSLUTTET'
+                AND aty.stonad_tom = :opphørsmåned
+                AND ty.utbetalingsoppdrag IS NOT NULL
+            ORDER BY b.fk_fagsak_id, b.opprettet_tid DESC
+        """,
+        nativeQuery = true
+    )
+    fun finnAlleFagsakerMedOpphørSmåbarnstilleggIMåned(
+        opphørsmåned: YearMonth,
+    ): List<Long>
 }
