@@ -12,6 +12,8 @@ import javax.persistence.ManyToOne
 import javax.persistence.Table
 import javax.validation.constraints.Pattern
 
+// Fjernet RollestyringMotDatabase ettersom det kan være nødvendig å oppdatere tabell
+// når man skal se på fagsak eller behandling.
 @Entity(name = "Personident")
 @Table(name = "PERSONIDENT")
 data class Personident(
