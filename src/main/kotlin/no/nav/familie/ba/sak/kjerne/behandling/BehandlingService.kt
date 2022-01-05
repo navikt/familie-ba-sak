@@ -249,10 +249,6 @@ class BehandlingService(
         return behandlingRepository.finnBehandling(behandlingId)
     }
 
-    fun hentAktør(behandlingId: Long): Aktør {
-        return hent(behandlingId).fagsak.aktør
-    }
-
     fun hentSisteIverksatteBehandlingerFraLøpendeFagsaker(): List<Long> =
         behandlingRepository.finnSisteIverksatteBehandlingFraLøpendeFagsaker()
 
