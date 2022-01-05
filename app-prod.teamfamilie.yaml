@@ -28,7 +28,7 @@ spec:
         mountPath: /var/run/secrets/srvfamilie-ba-sak
   replicas:
     min: 2
-    max: 2
+    max: 4
     cpuThresholdPercentage: 50
   resources:
     limits:
