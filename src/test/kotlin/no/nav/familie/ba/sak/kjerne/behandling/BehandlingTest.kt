@@ -4,6 +4,8 @@ import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
@@ -138,5 +140,16 @@ class BehandlingTest {
             årsak = BehandlingÅrsak.SATSENDRING
         )
         assertFalse { behandling.erBehandlingMedVedtaksbrevutsending() }
+    }
+
+    @Test
+    fun `Skal svare med overstyrt dokumenttittel på alle behandlinger som er definert som omgjøringsårsaker`() {
+        BehandlingÅrsak.values().forEach {
+            if (it.erOmregningsårsak()) {
+                assertNotNull(it.hentOverstyrtDokumenttittelForOmregningsbehandling())
+            } else {
+                assertNull(it.hentOverstyrtDokumenttittelForOmregningsbehandling())
+            }
+        }
     }
 }

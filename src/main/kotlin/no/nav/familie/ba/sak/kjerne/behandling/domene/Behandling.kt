@@ -319,6 +319,15 @@ enum class BehandlingÅrsak(val visningsnavn: String) {
 
     fun erOmregningsårsak(): Boolean =
         this == OMREGNING_6ÅR || this == OMREGNING_18ÅR || this == OMREGNING_SMÅBARNSTILLEGG
+
+    fun hentOverstyrtDokumenttittelForOmregningsbehandling(): String? {
+        return when (this) {
+            OMREGNING_6ÅR -> "Vedtak om endret barnetrygd - barn 6 år"
+            OMREGNING_18ÅR -> "Vedtak om endret barnetrygd - barn 18 år"
+            OMREGNING_SMÅBARNSTILLEGG -> "Vedtak om endret barnetrygd - småbarnstillegg"
+            else -> null
+        }
+    }
 }
 
 enum class BehandlingType(val visningsnavn: String) {
