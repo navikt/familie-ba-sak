@@ -49,6 +49,7 @@ internal class AutobrevTaskTest {
         every { opprettTaskService.opprettAutovedtakFor6Og18ÅrBarn(any(), any()) } just runs
         every { opprettTaskService.opprettAutovedtakForOpphørSmåbarnstilleggTask(any()) } just runs
         every { featureToggleService.isEnabled(any()) } returns true
+        every { behandlingRepository.finnSisteIverksatteBehandlingFraLøpendeFagsaker() } returns emptyList()
 
         autobrevTask.doTask(autoBrevTask)
 
