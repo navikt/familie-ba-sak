@@ -5,12 +5,10 @@
   "vedtaksperiodetype": "FORTSATT_INNVILGET",
   "begrunnelser": [
     {
-      "vedtakBegrunnelseSpesifikasjon": "FORTSATT_INNVILGET_SØKER_OG_BARN_BOSATT_I_RIKET",
-      "vedtakBegrunnelseType": "FORTSATT_INNVILGET"
+      "vedtakBegrunnelseSpesifikasjon": "FORTSATT_INNVILGET_SØKER_OG_BARN_BOSATT_I_RIKET"
     },
     {
-      "vedtakBegrunnelseSpesifikasjon": "FORTSATT_INNVILGET_BOR_MED_SØKER",
-      "vedtakBegrunnelseType": "FORTSATT_INNVILGET"
+      "vedtakBegrunnelseSpesifikasjon": "FORTSATT_INNVILGET_BOR_MED_SØKER"
     }
   ],
   "fritekster": [],

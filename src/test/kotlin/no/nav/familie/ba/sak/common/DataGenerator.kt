@@ -108,19 +108,6 @@ fun randomAktørId(fnr: String = randomFnr()): Aktør =
             randomPersonident(it, fnr)
         )
     }
-/*fun randomAktørId(personIdenter: List<String> = emptyList()): Aktør = Aktør(
-    aktørId = Random.nextLong(1000_000_000_000, 31_121_299_99999).toString(),
-).also {
-    it.personidenter.addAll(
-        personIdenter.map { personIdent ->
-            Personident(
-                aktiv = true,
-                fødselsnummer = personIdent,
-                aktør = it
-            )
-        }
-    )
-}*/
 
 private var gjeldendeVedtakId: Long = abs(Random.nextLong(10000000))
 private var gjeldendeVedtakBegrunnelseId: Long = abs(Random.nextLong(10000000))
@@ -161,7 +148,7 @@ fun defaultFagsak() = Fagsak(
         mutableSetOf(
             FagsakPerson(
                 fagsak = it,
-                personIdent = PersonIdent(randomFnr()),
+                personIdent = PersonIdent(it.aktør.aktivFødselsnummer()),
                 opprettetTidspunkt = LocalDateTime.now()
             )
         )
@@ -172,14 +159,14 @@ fun lagBehandling(
     behandlingKategori: BehandlingKategori = BehandlingKategori.NASJONAL,
     behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
     årsak: BehandlingÅrsak = BehandlingÅrsak.SØKNAD,
-    automatiskOpprettelse: Boolean = false,
+    skalBehandlesAutomatisk: Boolean = false,
     førsteSteg: StegType = FØRSTE_STEG,
     resultat: BehandlingResultat = BehandlingResultat.IKKE_VURDERT
 ) =
     Behandling(
         id = nesteBehandlingId(),
         fagsak = fagsak,
-        skalBehandlesAutomatisk = automatiskOpprettelse,
+        skalBehandlesAutomatisk = skalBehandlesAutomatisk,
         type = behandlingType,
         kategori = behandlingKategori,
         underkategori = BehandlingUnderkategori.ORDINÆR,
@@ -199,7 +186,7 @@ fun tilfeldigPerson(
     Person(
         id = nestePersonId(),
         aktør = aktør,
-        personIdent = personIdent,
+        personIdent = PersonIdent(aktør.aktivFødselsnummer()),
         fødselsdato = fødselsdato,
         type = personType,
         personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 0),
@@ -218,7 +205,7 @@ fun tilfeldigSøker(
     Person(
         id = nestePersonId(),
         aktør = aktør,
-        personIdent = personIdent,
+        personIdent = PersonIdent(aktør.aktivFødselsnummer()),
         fødselsdato = fødselsdato,
         type = personType,
         personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 0),

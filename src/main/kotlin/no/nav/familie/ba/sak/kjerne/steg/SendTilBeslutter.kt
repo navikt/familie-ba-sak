@@ -48,13 +48,15 @@ class SendTilBeslutter(
         loggService.opprettSendTilBeslutterLogg(behandling)
         totrinnskontrollService.opprettTotrinnskontrollMedSaksbehandler(behandling)
 
-        val godkjenneVedtakTask = OpprettOppgaveTask.opprettTask(
-            behandlingId = behandling.id,
-            oppgavetype = Oppgavetype.GodkjenneVedtak,
-            fristForFerdigstillelse = LocalDate.now()
-        )
-        taskRepository.save(godkjenneVedtakTask)
-
+        // oppretter ikke GodkjenneVedtak task for manuell migrering
+        if (!behandling.erManuellMigrering()) {
+            val godkjenneVedtakTask = OpprettOppgaveTask.opprettTask(
+                behandlingId = behandling.id,
+                oppgavetype = Oppgavetype.GodkjenneVedtak,
+                fristForFerdigstillelse = LocalDate.now()
+            )
+            taskRepository.save(godkjenneVedtakTask)
+        }
         opprettFerdigstillOppgaveTasker(behandling)
 
         behandlingService.sendBehandlingTilBeslutter(behandling)

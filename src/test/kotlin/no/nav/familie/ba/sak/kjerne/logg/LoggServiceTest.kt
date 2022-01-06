@@ -8,9 +8,16 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.steg.StegService
-import org.junit.jupiter.api.Assertions
+import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
@@ -23,7 +30,7 @@ class LoggServiceTest(
 
     @Autowired
     private val mockPersonopplysningerService: PersonopplysningerService,
-) : AbstractSpringIntegrationTestDev(personopplysningerService = mockPersonopplysningerService) {
+) : AbstractSpringIntegrationTestDev() {
 
     @Test
     fun `Skal lage noen logginnslag på forskjellige behandlinger og hente dem fra databasen`() {
@@ -58,10 +65,10 @@ class LoggServiceTest(
         loggService.lagre(logg3)
 
         val loggForBehandling = loggService.hentLoggForBehandling(behandling.id)
-        Assertions.assertEquals(2, loggForBehandling.size)
+        assertEquals(2, loggForBehandling.size)
 
         val loggForBehandling1 = loggService.hentLoggForBehandling(behandling1.id)
-        Assertions.assertEquals(1, loggForBehandling1.size)
+        assertEquals(1, loggForBehandling1.size)
     }
 
     @Test
@@ -79,10 +86,10 @@ class LoggServiceTest(
         )
 
         val loggForBehandling = loggService.hentLoggForBehandling(behandlingId = behandling.id)
-        Assertions.assertEquals(2, loggForBehandling.size)
-        Assertions.assertTrue(loggForBehandling.any { it.type == LoggType.LIVSHENDELSE })
-        Assertions.assertTrue(loggForBehandling.any { it.type == LoggType.BEHANDLING_OPPRETTET })
-        Assertions.assertTrue(loggForBehandling.none { it.rolle != BehandlerRolle.SYSTEM })
+        assertEquals(2, loggForBehandling.size)
+        assertTrue(loggForBehandling.any { it.type == LoggType.LIVSHENDELSE })
+        assertTrue(loggForBehandling.any { it.type == LoggType.BEHANDLING_OPPRETTET })
+        assertTrue(loggForBehandling.none { it.rolle != BehandlerRolle.SYSTEM })
     }
 
     @Test
@@ -94,8 +101,8 @@ class LoggServiceTest(
             nyttBehandlingResultat = BehandlingResultat.INNVILGET
         )
 
-        Assertions.assertNotNull(vilkårsvurderingLogg)
-        Assertions.assertEquals("Vilkårsvurdering gjennomført", vilkårsvurderingLogg!!.tittel)
+        assertNotNull(vilkårsvurderingLogg)
+        assertEquals("Vilkårsvurdering gjennomført", vilkårsvurderingLogg!!.tittel)
 
         behandling.resultat = BehandlingResultat.INNVILGET
         val nyVilkårsvurderingLogg =
@@ -105,11 +112,11 @@ class LoggServiceTest(
                 nyttBehandlingResultat = BehandlingResultat.AVSLÅTT
             )
 
-        Assertions.assertNotNull(nyVilkårsvurderingLogg)
-        Assertions.assertEquals("Vilkårsvurdering endret", nyVilkårsvurderingLogg!!.tittel)
+        assertNotNull(nyVilkårsvurderingLogg)
+        assertEquals("Vilkårsvurdering endret", nyVilkårsvurderingLogg!!.tittel)
 
         val logger = loggService.hentLoggForBehandling(behandlingId = behandling.id)
-        Assertions.assertEquals(2, logger.size)
+        assertEquals(2, logger.size)
     }
 
     @Test
@@ -120,6 +127,52 @@ class LoggServiceTest(
             nyttBehandlingResultat = BehandlingResultat.FORTSATT_INNVILGET
         )
 
-        Assertions.assertNull(vilkårsvurderingLogg)
+        assertNull(vilkårsvurderingLogg)
+    }
+
+    @Test
+    fun `Skal lage noen logginnslag på helmanuell migrering`() {
+        val behandling = lagBehandling(
+            behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
+            årsak = BehandlingÅrsak.HELMANUELL_MIGRERING
+        )
+        loggService.opprettBehandlingLogg(behandling)
+        loggService.opprettVilkårsvurderingLogg(behandling, behandling.resultat, BehandlingResultat.INNVILGET)
+        loggService.opprettSendTilBeslutterLogg(behandling)
+        loggService.opprettBeslutningOmVedtakLogg(behandling, Beslutning.GODKJENT, "begrunnelse")
+        loggService.opprettFerdigstillBehandling(behandling)
+
+        val logger = loggService.hentLoggForBehandling(behandling.id)
+        assertEquals(5, logger.size)
+        assertTrue {
+            logger.any {
+                it.type == LoggType.BEHANDLING_OPPRETTET && it.tittel == "Migrering fra infotrygd opprettet"
+            }
+        }
+        assertTrue {
+            logger.any {
+                it.type == LoggType.VILKÅRSVURDERING &&
+                    it.tittel == "Vilkårsvurdering gjennomført" && it.tekst == "Resultat ble innvilget"
+            }
+        }
+        assertTrue {
+            logger.any {
+                it.type == LoggType.SEND_TIL_SYSTEM &&
+                    it.tittel == "Sendt til system"
+            }
+        }
+        assertTrue {
+            logger.any {
+                it.type == LoggType.MIGRERING_BEKREFTET &&
+                    it.tittel == "Migrering bekreftet" &&
+                    it.opprettetAv == SikkerhetContext.SYSTEM_NAVN
+            }
+        }
+        assertTrue {
+            logger.any {
+                it.type == LoggType.FERDIGSTILLE_BEHANDLING &&
+                    it.tittel == "Ferdigstilt behandling"
+            }
+        }
     }
 }

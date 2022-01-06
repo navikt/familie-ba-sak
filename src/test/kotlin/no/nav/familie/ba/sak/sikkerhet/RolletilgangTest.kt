@@ -25,6 +25,7 @@ import org.springframework.web.client.postForEntity
 @ActiveProfiles(
     "postgres",
     "mock-pdl",
+    "mock-ident-client",
     "mock-infotrygd-barnetrygd",
     "mock-tilbakekreving-klient",
     "mock-brev-klient",
@@ -75,7 +76,7 @@ class RolletilgangTest(
         assertEquals(HttpStatus.FORBIDDEN, error.statusCode)
         assertEquals(Ressurs.Status.IKKE_TILGANG, ressurs.status)
         assertEquals(
-            "Mock McMockface med rolle VEILEDER har ikke skrivetilgang til databasen.",
+            "Mock McMockface med rolle VEILEDER har ikke tilgang til å opprette fagsak. Krever SAKSBEHANDLER.",
             ressurs.melding
         )
     }

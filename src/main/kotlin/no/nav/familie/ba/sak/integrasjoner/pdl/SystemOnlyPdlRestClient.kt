@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.integrasjoner.pdl
 
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PdlAdressebeskyttelseResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PdlPersonRequest
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PdlPersonRequestVariables
@@ -11,6 +10,7 @@ import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADE
 import no.nav.familie.kontrakter.felles.personopplysning.Adressebeskyttelse
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.client.RestOperations
@@ -20,11 +20,10 @@ import java.net.URI
 class SystemOnlyPdlRestClient(
     @Value("\${PDL_URL}") pdlBaseUrl: URI,
     @Qualifier("jwtBearerClientCredentials") override val restTemplate: RestOperations,
-    val featureToggleService: FeatureToggleService,
     override val personidentService: PersonidentService,
-) :
-    PdlRestClient(pdlBaseUrl, restTemplate, personidentService) {
+) : PdlRestClient(pdlBaseUrl, restTemplate, personidentService) {
 
+    @Cacheable("adressebeskyttelse", cacheManager = "shortCache")
     fun hentAdressebeskyttelse(aktør: Aktør): List<Adressebeskyttelse> {
         val pdlPersonRequest = PdlPersonRequest(
             variables = PdlPersonRequestVariables(aktør.aktivFødselsnummer()),

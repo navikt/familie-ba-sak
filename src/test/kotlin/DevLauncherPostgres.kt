@@ -1,8 +1,6 @@
 import no.nav.familie.ba.sak.config.ApplicationConfig
 import org.springframework.boot.builder.SpringApplicationBuilder
 
-class DevLauncherPostgres
-
 fun main(args: Array<String>) {
     SpringApplicationBuilder(ApplicationConfig::class.java).profiles(
         "postgres",
@@ -11,6 +9,7 @@ fun main(args: Array<String>) {
         "mock-infotrygd-feed",
         "mock-infotrygd-barnetrygd",
         "mock-pdl",
+        "mock-ident-client",
         "mock-tilbakekreving-klient",
         "task-scheduling"
     ).run(*args)

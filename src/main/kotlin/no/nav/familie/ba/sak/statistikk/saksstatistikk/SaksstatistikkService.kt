@@ -17,7 +17,6 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse.Companion.sisteAdresse
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
@@ -114,7 +113,6 @@ class SaksstatistikkService(
 
     fun mapTilSakDvh(sakId: Long): SakDVH? {
         val fagsak = fagsakService.hentPåFagsakId(sakId)
-        val søkerIdent = fagsak.aktør.aktivFødselsnummer()
         val aktivBehandling = behandlingService.hentAktivForFagsak(fagsakId = fagsak.id)
 
         var landkodeSøker: String = PersonopplysningerService.UKJENT_LANDKODE
@@ -152,7 +150,7 @@ class SaksstatistikkService(
     }
 
     private fun hentLandkode(person: Person): String {
-        return if (person.bostedsadresser.sisteAdresse() != null) "NO" else {
+        return if (person.bostedsadresser.isNotEmpty()) "NO" else {
             personopplysningerService.hentLandkodeUtenlandskBostedsadresse(
                 person.aktør
             )

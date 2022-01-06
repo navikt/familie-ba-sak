@@ -48,6 +48,7 @@ class VilkårController(
         @PathVariable vilkaarId: Long,
         @RequestBody restPersonResultat: RestPersonResultat
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "endre vilkår"
@@ -69,6 +70,7 @@ class VilkårController(
         @PathVariable annenVurderingId: Long,
         @RequestBody restAnnenVurdering: RestAnnenVurdering
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "Annen vurdering"
@@ -88,9 +90,10 @@ class VilkårController(
         @PathVariable vilkaarId: Long,
         @RequestBody personIdent: String
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-            handling = "slette vilkår"
+            handling = "slette vilkårsperiode"
         )
 
         val aktør = personidentService.hentOgLagreAktør(personIdent)
@@ -110,6 +113,7 @@ class VilkårController(
         @PathVariable behandlingId: Long,
         @RequestBody restSlettVilkår: RestSlettVilkår
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "slette vilkår"
@@ -124,6 +128,7 @@ class VilkårController(
     @PostMapping(path = ["/{behandlingId}"])
     fun nyttVilkår(@PathVariable behandlingId: Long, @RequestBody restNyttVilkår: RestNyttVilkår):
         ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "legge til vilkår"

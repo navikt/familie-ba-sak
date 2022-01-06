@@ -53,6 +53,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
@@ -68,6 +69,7 @@ import java.time.format.DateTimeFormatter
     "mock-økonomi",
     "mock-pdl",
     "mock-pdl-client",
+    "mock-ident-client",
     "mock-infotrygd-barnetrygd",
     "mock-tilbakekreving-klient",
     "mock-brev-klient",
@@ -76,6 +78,7 @@ import java.time.format.DateTimeFormatter
     "mock-rest-template-config"
 )
 @Tag("integration")
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 class MigreringServiceTest(
     @Autowired
     private val databaseCleanupService: DatabaseCleanupService,
@@ -117,7 +120,7 @@ class MigreringServiceTest(
     private val pdlRestClient: PdlRestClient,
 
     @Autowired
-    private val env: EnvService,
+    private val envService: EnvService
 ) : AbstractMockkSpringRunner() {
 
     @BeforeEach
@@ -136,7 +139,7 @@ class MigreringServiceTest(
                 )
             }
         }
-        every { env.erPreprod() } returns false
+        every { envService.erPreprod() } returns false
     }
 
     @Test

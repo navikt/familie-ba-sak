@@ -64,12 +64,12 @@ class ArbeidsfordelingIntegrationTest(
 
     @Autowired
     private val mockPersonopplysningerService: PersonopplysningerService
-) : AbstractSpringIntegrationTest(
-    personopplysningerService = mockPersonopplysningerService,
-    integrasjonClient = integrasjonClient
-) {
+) : AbstractSpringIntegrationTest() {
 
-    init {
+    @BeforeEach
+    fun init() {
+        databaseCleanupService.truncate()
+
         val now = now()
 
         every {
@@ -157,11 +157,6 @@ class ArbeidsfordelingIntegrationTest(
             adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG,
             bostedsadresser = mutableListOf(søkerBostedsadresse)
         )
-    }
-
-    @BeforeEach
-    fun init() {
-        databaseCleanupService.truncate()
 
         every { integrasjonClient.hentBehandlendeEnhet(SØKER_FNR) } returns listOf(
             Arbeidsfordelingsenhet(

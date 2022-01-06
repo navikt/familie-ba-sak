@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.brev
 
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
-import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.RolleConfig
@@ -32,7 +31,6 @@ import no.nav.familie.ba.sak.task.DistribuerDokumentDTO
 import no.nav.familie.ba.sak.task.DistribuerDokumentTask
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.Førsteside
-import org.springframework.core.env.Environment
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import java.util.Properties
@@ -47,9 +45,7 @@ class DokumentService(
     private val brevKlient: BrevKlient,
     private val brevService: BrevService,
     private val vilkårsvurderingService: VilkårsvurderingService,
-    private val environment: Environment,
-    private val rolleConfig: RolleConfig,
-    private val envService: EnvService
+    private val rolleConfig: RolleConfig
 ) {
 
     private val antallBrevSendt: Map<Brevmal, Counter> = mutableListOf<Brevmal>().plus(Brevmal.values()).associateWith {

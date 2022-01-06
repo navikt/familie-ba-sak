@@ -34,14 +34,17 @@ class SatsendringService(
      * man sjekke om den inaktive behandlingen blir etterfulgt av revurdering som fjerner behovet.
      */
     fun finnBehandlingerForSatsendring(
-        gammelSats: Long,
+        gammelSats: Int,
         satsendringMåned: YearMonth
-    ): List<Long> =
-        behandlingRepository.finnBehadlingerForSatsendring(
+    ): List<Long> {
+        val behandlinger = behandlingRepository.finnBehadlingerForSatsendring(
             iverksatteLøpende = behandlingRepository.finnSisteIverksatteBehandlingFraLøpendeFagsaker(),
             gammelSats = gammelSats,
             månedÅrForEndring = satsendringMåned
         )
+
+        return behandlinger.subList(0, minOf(100, behandlinger.size))
+    }
 
     /**
      * Gjennomfører og commiter revurderingsbehandling

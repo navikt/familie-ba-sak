@@ -42,6 +42,7 @@ class BehandlingController(
 
     @PostMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
     fun opprettBehandling(@RequestBody nyBehandling: NyBehandling): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+        tilgangService.validerTilgangTilPersoner(personIdenter = listOf(nyBehandling.søkersIdent))
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "opprette behandling"
@@ -68,6 +69,8 @@ class BehandlingController(
 
         val behandling = stegService.håndterNyBehandlingOgSendInfotrygdFeed(nyBehandling)
 
+        // Basert på hvilke personer som ble hentet inn på behandlingen kan saksbehandler ha mistet tilgangen til behandlingen
+        tilgangService.validerTilgangTilBehandling(behandlingId = behandling.id)
         return ResponseEntity.ok(
             Ressurs.success(
                 utvidetBehandlingService
@@ -101,6 +104,12 @@ class BehandlingController(
         @RequestBody
         endreBehandling: RestEndreBehandlingstema
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId)
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
+            handling = "endre behandlingstema"
+        )
+
         val behandling = behandlingsService.oppdaterBehandlingstema(
             behandling = behandlingsService.hent(behandlingId),
             nyUnderkategori = endreBehandling.behandlingUnderkategori,

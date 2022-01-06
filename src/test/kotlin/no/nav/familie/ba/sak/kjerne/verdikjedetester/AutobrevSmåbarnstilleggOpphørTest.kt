@@ -50,7 +50,7 @@ class AutobrevSmåbarnstilleggOpphørTest(
     @Autowired private val stegService: StegService,
     @Autowired private val efSakRestClient: EfSakRestClient,
     @Autowired private val økonomiKlient: ØkonomiKlient,
-) : AbstractVerdikjedetest(efSakRestClient = efSakRestClient, økonomiKlient = økonomiKlient) {
+) : AbstractVerdikjedetest() {
 
     private val barnFødselsdato: LocalDate = LocalDate.now().minusYears(2)
 
@@ -269,7 +269,8 @@ class AutobrevSmåbarnstilleggOpphørTest(
             )
 
         val vedtaksperiodeId =
-            restUtvidetBehandlingEtterVurderTilbakekreving.data!!.vedtak!!.vedtaksperioderMedBegrunnelser.first()
+            restUtvidetBehandlingEtterVurderTilbakekreving.data!!.vedtak!!.vedtaksperioderMedBegrunnelser.sortedBy { it.fom }
+                .first()
         familieBaSakKlient().oppdaterVedtaksperiodeMedStandardbegrunnelser(
             vedtaksperiodeId = vedtaksperiodeId.id,
             restPutVedtaksperiodeMedStandardbegrunnelser = RestPutVedtaksperiodeMedStandardbegrunnelser(

@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.integrasjoner.pdl
 
 import com.github.tomakehurst.wiremock.client.WireMock
 import io.mockk.every
-import io.mockk.mockk
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.tilAktør
@@ -13,7 +12,6 @@ import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
 import no.nav.familie.kontrakter.felles.tilgangskontroll.Tilgang
 import org.apache.commons.lang3.StringUtils
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -32,9 +30,9 @@ internal class PersonopplysningerServiceTest(
     private val mockIntegrasjonClient: IntegrasjonClient,
 
     @Autowired
-    private val personidentService: PersonidentService
+    private val mockPersonidentService: PersonidentService
 
-) : AbstractSpringIntegrationTest(integrasjonClient = mockIntegrasjonClient) {
+) : AbstractSpringIntegrationTest() {
 
     lateinit var personopplysningerService: PersonopplysningerService
 
@@ -42,15 +40,15 @@ internal class PersonopplysningerServiceTest(
     fun setUp() {
         personopplysningerService =
             PersonopplysningerService(
-                PdlRestClient(URI.create(wireMockServer.baseUrl() + "/api"), restTemplate, personidentService),
+                PdlRestClient(URI.create(wireMockServer.baseUrl() + "/api"), restTemplate, mockPersonidentService),
                 SystemOnlyPdlRestClient(
                     URI.create(wireMockServer.baseUrl() + "/api"),
                     restTemplate,
-                    mockk(),
-                    personidentService
+                    mockPersonidentService
                 ),
                 mockIntegrasjonClient,
             )
+        lagMockForPersoner()
     }
 
     @Test
@@ -58,10 +56,10 @@ internal class PersonopplysningerServiceTest(
 
         every {
             mockIntegrasjonClient.sjekkTilgangTilPersoner(listOf(ID_BARN_1))
-        } returns listOf(Tilgang(true, null))
+        } returns Tilgang(true, null)
         every {
             mockIntegrasjonClient.sjekkTilgangTilPersoner(listOf(ID_BARN_2))
-        } returns listOf(Tilgang(false, null))
+        } returns Tilgang(false, null)
 
         val personInfo = personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(tilAktør(ID_MOR))
 
@@ -156,8 +154,7 @@ internal class PersonopplysningerServiceTest(
         )
     }
 
-    @BeforeAll
-    fun lagMockForPersoner() {
+    private fun lagMockForPersoner() {
         lagMockForPdl(
             "hentperson-med-relasjoner-og-registerinformasjon.graphql",
             "PdlIntegrasjon/gyldigRequestForMorMedXXXStatsborgerskap.json",

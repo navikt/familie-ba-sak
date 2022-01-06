@@ -5,8 +5,7 @@
   "vedtaksperiodetype": "UTBETALING",
   "begrunnelser": [
     {
-      "vedtakBegrunnelseSpesifikasjon": "INNVILGET_SATSENDRING",
-      "vedtakBegrunnelseType": "INNVILGET"
+      "vedtakBegrunnelseSpesifikasjon": "INNVILGET_SATSENDRING"
     }
   ],
   "fritekster": [],

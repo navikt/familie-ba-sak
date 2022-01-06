@@ -5,12 +5,10 @@ import no.nav.familie.ba.sak.common.NullablePeriode
 import no.nav.familie.ba.sak.kjerne.brev.hentPersonidenterGjeldendeForBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.RestVedtaksbegrunnelse
 
 data class BrevBegrunnelseGrunnlag(
     val vedtakBegrunnelseSpesifikasjon: VedtakBegrunnelseSpesifikasjon,
-    val vedtakBegrunnelseType: VedtakBegrunnelseType,
     val triggesAv: TriggesAv,
 ) {
     fun tilBrevBegrunnelseGrunnlagMedPersoner(
@@ -21,7 +19,7 @@ data class BrevBegrunnelseGrunnlag(
     ): BrevBegrunnelseGrunnlagMedPersoner {
         val personidenterGjeldendeForBegrunnelse: List<String> = hentPersonidenterGjeldendeForBegrunnelse(
             triggesAv = this.triggesAv,
-            vedtakBegrunnelseType = this.vedtakBegrunnelseType,
+            vedtakBegrunnelseType = this.vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType,
             periode = periode,
             brevGrunnlag = brevGrunnlag,
             identerMedUtbetalingPåPeriode = identerMedUtbetalingPåPeriode,
@@ -36,11 +34,15 @@ data class BrevBegrunnelseGrunnlag(
 
         return BrevBegrunnelseGrunnlagMedPersoner(
             vedtakBegrunnelseSpesifikasjon = this.vedtakBegrunnelseSpesifikasjon,
-            vedtakBegrunnelseType = this.vedtakBegrunnelseType,
+            vedtakBegrunnelseType = this.vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType,
             triggesAv = this.triggesAv,
             personIdenter = personidenterGjeldendeForBegrunnelse
         )
     }
+
+    fun tilBrevBegrunnelseGrunnlagForLogging() = BrevBegrunnelseGrunnlagForLogging(
+        vedtakBegrunnelseSpesifikasjon = this.vedtakBegrunnelseSpesifikasjon,
+    )
 }
 
 fun RestVedtaksbegrunnelse.tilBrevBegrunnelseGrunnlag(
@@ -48,7 +50,6 @@ fun RestVedtaksbegrunnelse.tilBrevBegrunnelseGrunnlag(
 ): BrevBegrunnelseGrunnlag {
     return BrevBegrunnelseGrunnlag(
         vedtakBegrunnelseSpesifikasjon = this.vedtakBegrunnelseSpesifikasjon,
-        vedtakBegrunnelseType = this.vedtakBegrunnelseType,
         triggesAv = sanityBegrunnelser
             .firstOrNull { it.apiNavn == this.vedtakBegrunnelseSpesifikasjon.sanityApiNavn }!!
             .tilTriggesAv()
