@@ -2,10 +2,8 @@ package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import no.nav.familie.ba.sak.common.BaseEntitet
-import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
-import no.nav.familie.ba.sak.common.isSameOrAfter
-import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.common.sisteDagIMåned
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.arbeidsforhold.GrArbeidsforhold
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
@@ -129,18 +127,15 @@ data class Person(
         return Objects.hash(aktør, fødselsdato)
     }
 
-    fun hentAlder(): Int = Period.between(fødselsdato, LocalDate.now()).years
+    fun hentAlder(): Int = Period.between(fødselsdato, now()).years
 
     fun hentSeksårsdag(): LocalDate = fødselsdato.plusYears(6)
 
-    fun fyllerAntallÅrInneværendeMåned(år: Int): Boolean {
-        return this.fødselsdato.isSameOrAfter(now().minusYears(år.toLong()).førsteDagIInneværendeMåned()) &&
-            this.fødselsdato.isSameOrBefore(now().minusYears(år.toLong()).sisteDagIMåned())
-    }
+    fun fyllerAntallÅrInneværendeMåned(år: Int): Boolean =
+        this.fødselsdato.toYearMonth() == now().minusYears(år.toLong()).toYearMonth()
 
-    fun erYngreEnnInneværendeMåned(år: Int): Boolean {
-        return this.fødselsdato.isAfter(now().minusYears(år.toLong()).sisteDagIMåned())
-    }
+    fun erYngreEnnInneværendeMåned(år: Int): Boolean =
+        this.fødselsdato.isAfter(now().minusYears(år.toLong()).sisteDagIMåned())
 }
 
 enum class Kjønn {
