@@ -60,17 +60,17 @@ class OpprettTaskService(
         )
     }
 
-    fun opprettAutovedtakForOpphørSmåbarnstilleggTask(behandlingId: Long) {
+    fun opprettAutovedtakForOpphørSmåbarnstilleggTask(fagsakId: Long) {
         taskRepository.save(
             Task(
                 type = SendAutobrevOpphørSmåbarnstilleggTask.TASK_STEP_TYPE,
                 payload = objectMapper.writeValueAsString(
                     AutobrevOpphørSmåbarnstilleggDTO(
-                        behandlingId = behandlingId
+                        fagsakId = fagsakId
                     )
                 ),
                 properties = Properties().apply {
-                    this["behandlingId"] = behandlingId.toString()
+                    this["fagsakId"] = fagsakId.toString()
                     this["callId"] = IdUtils.generateId()
                 }
             )
