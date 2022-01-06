@@ -138,11 +138,10 @@ object YtelsePersonUtils {
         behandlingsresultatPerson: BehandlingsresultatPerson
     ): Boolean =
         behandlingsresultatPerson.forrigeAndeler.any { gammelAndel ->
-            val nyAndelSomOverlapper =
-                behandlingsresultatPerson.andeler.find { gammelAndel.periode.overlapperHeltEllerDelvisMed(it.periode) }
-
-            nyAndelSomOverlapper != null &&
-                gammelAndel.kalkulertUtbetalingsbeløp != nyAndelSomOverlapper.kalkulertUtbetalingsbeløp
+            behandlingsresultatPerson.andeler.any {
+                gammelAndel.periode.overlapperHeltEllerDelvisMed(it.periode) &&
+                    gammelAndel.kalkulertUtbetalingsbeløp != it.kalkulertUtbetalingsbeløp
+            }
         }
 
     private fun avslagPåNyPerson(
