@@ -236,7 +236,7 @@ data class Behandling(
     fun erManuellMigrering() = erManuellMigreringForEndreMigreringsdato() || erHelmanuellMigrering()
 
     private fun erOmregning() =
-        this.opprettetÅrsak == BehandlingÅrsak.OMREGNING_6ÅR || this.opprettetÅrsak == BehandlingÅrsak.OMREGNING_18ÅR || this.opprettetÅrsak == BehandlingÅrsak.OMREGNING_SMÅBARNSTILLEGG
+        this.opprettetÅrsak.erOmregningsårsak()
 
     private fun erFødselshendelse() = this.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE
 
