@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
+import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagPersonResultaterForSøkerOgToBarn
@@ -7,12 +8,14 @@ import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.sisteDagIForrigeMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
+import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
@@ -22,6 +25,7 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
+import java.time.YearMonth
 
 class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
 
@@ -69,6 +73,18 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
             tomBarn2
         )
 
+        leggTilAndelTilkjentYtelsePåTilkjentYtelse(
+            behandling,
+            fomBarn1.toYearMonth(),
+            tomBarn1.toYearMonth()
+        )
+
+        leggTilAndelTilkjentYtelsePåTilkjentYtelse(
+            behandling,
+            fomBarn2.toYearMonth(),
+            tomBarn2.toYearMonth()
+        )
+
         val tilkjentYtelse =
             beregningService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(behandling, utbetalingsoppdrag)
 
@@ -102,6 +118,18 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
             fomBarn2,
             tomBarn2,
             opphørsDato
+        )
+
+        leggTilAndelTilkjentYtelsePåTilkjentYtelse(
+            behandling,
+            fomBarn1.toYearMonth(),
+            tomBarn1.toYearMonth()
+        )
+
+        leggTilAndelTilkjentYtelsePåTilkjentYtelse(
+            behandling,
+            fomBarn2.toYearMonth(),
+            tomBarn2.toYearMonth()
         )
 
         val tilkjentYtelse =
@@ -148,6 +176,18 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
             revurderingFomBarn2,
             fomDatoBarn2,
             tomDatoBarn2
+        )
+
+        leggTilAndelTilkjentYtelsePåTilkjentYtelse(
+            behandling,
+            revurderingFomBarn1.toYearMonth(),
+            tomDatoBarn1.toYearMonth()
+        )
+
+        leggTilAndelTilkjentYtelsePåTilkjentYtelse(
+            behandling,
+            revurderingFomBarn2.toYearMonth(),
+            tomDatoBarn2.toYearMonth()
         )
 
         val tilkjentYtelse =
@@ -221,6 +261,25 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
     }
 
     private fun opprettTilkjentYtelse(behandling: Behandling) {
-        tilkjentYtelseRepository.save(lagInitiellTilkjentYtelse(behandling))
+        tilkjentYtelseRepository.saveAndFlush(lagInitiellTilkjentYtelse(behandling))
+    }
+
+    private fun leggTilAndelTilkjentYtelsePåTilkjentYtelse(behandling: Behandling, fom: YearMonth, tom: YearMonth) {
+        val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandling.id)
+        val tilfeldigperson = tilfeldigPerson()
+        personidentService.hentOgLagreAktør(tilfeldigperson.personIdent.ident)
+
+        val andelTilkjentYtelse = lagAndelTilkjentYtelse(
+            fom,
+            tom,
+            YtelseType.ORDINÆR_BARNETRYGD,
+            1054,
+            behandling,
+            tilkjentYtelse = tilkjentYtelse,
+            aktør = tilfeldigperson.aktør
+        )
+
+        tilkjentYtelse.andelerTilkjentYtelse.add(andelTilkjentYtelse)
+        tilkjentYtelseRepository.saveAndFlush(tilkjentYtelse)
     }
 }
