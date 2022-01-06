@@ -58,9 +58,9 @@ class SatsendringService(
      *
      */
     @Transactional
-    fun utførSatsendring(sistIverksatteBehandling: Long) {
+    fun utførSatsendring(sistIverksatteBehandlingId: Long) {
 
-        val behandling = behandlingRepository.finnBehandling(behandlingId = sistIverksatteBehandling)
+        val behandling = behandlingRepository.finnBehandling(behandlingId = sistIverksatteBehandlingId)
         val aktivOgÅpenBehandling = behandlingRepository.findByFagsakAndAktivAndOpen(fagsakId = behandling.fagsak.id)
         val søkerAktør = behandling.fagsak.aktør
 
