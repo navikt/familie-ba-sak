@@ -202,8 +202,8 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
 
         val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandling.id)
-        val andelBarn1 = tilkjentYtelse.andelerTilkjentYtelse.filter { it.personIdent == barn1Id }
-        val andelBarn2 = tilkjentYtelse.andelerTilkjentYtelse.filter { it.personIdent == barn2Id }
+        val andelBarn1 = tilkjentYtelse.andelerTilkjentYtelse.filter { it.aktør.aktivFødselsnummer() == barn1Id }
+        val andelBarn2 = tilkjentYtelse.andelerTilkjentYtelse.filter { it.aktør.aktivFødselsnummer() == barn2Id }
 
         Assertions.assertNotNull(tilkjentYtelse)
         Assertions.assertTrue(tilkjentYtelse.andelerTilkjentYtelse.isNotEmpty())

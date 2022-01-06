@@ -98,9 +98,8 @@ data class SmåbarnstilleggBarnetrygdGenerator(
                 AndelTilkjentYtelse(
                     behandlingId = behandlingId,
                     tilkjentYtelse = tilkjentYtelse,
-                    personIdent = søkerAktør?.aktivFødselsnummer()
+                    aktør = søkerAktør
                         ?: error("Genererer andeler for småbarnstillegg uten noen perioder med full overgangsstønad"),
-                    aktør = søkerAktør,
                     stønadFom = it.fom.toYearMonth(),
                     stønadTom = it.tom.toYearMonth(),
                     kalkulertUtbetalingsbeløp = ordinærSatsForPeriode,
@@ -119,7 +118,7 @@ data class SmåbarnstilleggBarnetrygdGenerator(
             barnasIdenterOgFødselsdatoer.map { (ident, fødselsdato) ->
                 val barnetsMånedPeriodeAndeler = LocalDateTimeline(
                     barnasAndeler
-                        .filter { andel -> andel.personIdent == ident }
+                        .filter { andel -> andel.aktør.aktivFødselsnummer() == ident }
                         .map { andel ->
                             LocalDateSegment(
                                 andel.stønadFom.førsteDagIInneværendeMåned(),

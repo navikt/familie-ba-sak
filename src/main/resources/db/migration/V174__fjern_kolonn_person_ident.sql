@@ -1,7 +1,7 @@
 drop table FAGSAK_PERSON;
 
---alter table ANDEL_TILKJENT_YTELSE
-    --drop column PERSON_IDENT;
+alter table ANDEL_TILKJENT_YTELSE
+    drop column PERSON_IDENT;
 
 --alter table PERSON_RESULTAT
     --drop column PERSON_IDENT;

@@ -113,7 +113,8 @@ internal class BisysServiceTest {
         every { mockPersonidentService.hentOgLagreAktør(any()) } answers { behandling.fagsak.aktør }
         every { mockPersonidentService.hentAlleFødselsnummerForEnAktør(any()) } answers { listOf(behandling.fagsak.aktør.aktivFødselsnummer()) }
 
-        val response = bisysService.hentUtvidetBarnetrygd(andelTilkjentYtelse.personIdent, LocalDate.of(2021, 1, 1))
+        val response =
+            bisysService.hentUtvidetBarnetrygd(andelTilkjentYtelse.aktør.aktivFødselsnummer(), LocalDate.of(2021, 1, 1))
 
         assertThat(response.perioder).hasSize(1)
         assertThat(response.perioder.first().beløp).isEqualTo(660.0)
@@ -163,7 +164,8 @@ internal class BisysServiceTest {
         every { mockBehandlingService.hentSisteBehandlingSomErIverksatt(behandling.fagsak.id) } returns behandling
         every { mockTilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(behandling.id) } returns andelTilkjentYtelse.tilkjentYtelse
 
-        val response = bisysService.hentUtvidetBarnetrygd(andelTilkjentYtelse.personIdent, LocalDate.of(2019, 1, 1))
+        val response =
+            bisysService.hentUtvidetBarnetrygd(andelTilkjentYtelse.aktør.aktivFødselsnummer(), LocalDate.of(2019, 1, 1))
 
         assertThat(response.perioder).hasSize(1)
         assertThat(response.perioder.first().beløp).isEqualTo(660.0)
@@ -202,7 +204,7 @@ internal class BisysServiceTest {
         )
         every {
             mockInfotrygdClient.hentUtvidetBarnetrygd(
-                andelTilkjentYtelse.personIdent,
+                andelTilkjentYtelse.aktør.aktivFødselsnummer(),
                 any()
             )
         } returns BisysUtvidetBarnetrygdResponse(
@@ -213,7 +215,8 @@ internal class BisysServiceTest {
         every { mockBehandlingService.hentSisteBehandlingSomErIverksatt(behandling.fagsak.id) } returns behandling
         every { mockTilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(behandling.id) } returns andelTilkjentYtelse.tilkjentYtelse
 
-        val response = bisysService.hentUtvidetBarnetrygd(andelTilkjentYtelse.personIdent, LocalDate.of(2019, 1, 1))
+        val response =
+            bisysService.hentUtvidetBarnetrygd(andelTilkjentYtelse.aktør.aktivFødselsnummer(), LocalDate.of(2019, 1, 1))
 
         assertThat(response.perioder).hasSize(2)
         assertThat(response.perioder.first().beløp).isEqualTo(660.0)

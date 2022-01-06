@@ -90,7 +90,6 @@ data class UtvidetBarnetrygdGenerator(
                 AndelTilkjentYtelse(
                     behandlingId = behandlingId,
                     tilkjentYtelse = tilkjentYtelse,
-                    personIdent = søkerAktør.aktivFødselsnummer(),
                     aktør = søkerAktør,
                     stønadFom = it.fom.toYearMonth(),
                     stønadTom = it.tom.toYearMonth(),

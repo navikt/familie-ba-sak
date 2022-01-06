@@ -471,7 +471,7 @@ class BeregningServiceTest {
         Assertions.assertEquals(5, slot.captured.andelerTilkjentYtelse.size)
         val andelerTilkjentYtelse = slot.captured.andelerTilkjentYtelse.sortedBy { it.stønadTom }
 
-        val (andelerBarn1, andelerBarn2) = andelerTilkjentYtelse.partition { it.personIdent == barn1Fnr }
+        val (andelerBarn1, andelerBarn2) = andelerTilkjentYtelse.partition { it.aktør.aktivFødselsnummer() == barn1Fnr }
 
         // Barn 1 - første periode (før satsendring)
         Assertions.assertEquals(periode1Fom.nesteMåned(), andelerBarn1[0].stønadFom)

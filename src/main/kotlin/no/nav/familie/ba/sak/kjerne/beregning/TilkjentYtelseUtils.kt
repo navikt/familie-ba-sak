@@ -76,8 +76,6 @@ object TilkjentYtelseUtils {
                             AndelTilkjentYtelse(
                                 behandlingId = vilkårsvurdering.behandling.id,
                                 tilkjentYtelse = tilkjentYtelse,
-                                // TODO: Robustgjøring dnr/fnr fjern ved contract.
-                                personIdent = person.aktør.aktivFødselsnummer(),
                                 aktør = person.aktør,
                                 stønadFom = beløpsperiode.fraOgMed,
                                 stønadTom = beløpsperiode.tilOgMed,

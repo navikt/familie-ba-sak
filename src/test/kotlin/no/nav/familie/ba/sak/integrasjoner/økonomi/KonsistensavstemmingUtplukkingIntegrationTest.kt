@@ -266,7 +266,6 @@ class KonsistensavstemmingUtplukkingIntegrationTest : AbstractSpringIntegrationT
         personFnr: String = randomFnr(),
         aktør: Aktør = randomAktørId(),
     ) = AndelTilkjentYtelse(
-        personIdent = personFnr,
         behandlingId = tilkjentYtelse.behandling.id,
         tilkjentYtelse = tilkjentYtelse,
         kalkulertUtbetalingsbeløp = 1054,

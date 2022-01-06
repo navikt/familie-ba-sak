@@ -27,7 +27,7 @@ interface AndelTilkjentYtelseRepository : JpaRepository<AndelTilkjentYtelse, Lon
         value = """WITH qualified AS (
     SELECT *
     FROM ((
-              SELECT aty.person_ident       ident,
+              SELECT p.foedselsnummer       ident,
                      aty.stonad_fom         fom,
                      aty.stonad_tom         tom,
                      aty.prosent            prosent,

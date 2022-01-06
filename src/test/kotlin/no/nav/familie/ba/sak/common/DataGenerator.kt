@@ -225,7 +225,6 @@ fun lagAndelTilkjentYtelse(
 ): AndelTilkjentYtelse {
 
     return AndelTilkjentYtelse(
-        personIdent = aktør.aktivFødselsnummer(),
         aktør = aktør,
         behandlingId = behandling.id,
         tilkjentYtelse = tilkjentYtelse ?: lagInitiellTilkjentYtelse(behandling),
@@ -254,7 +253,6 @@ fun lagAndelTilkjentYtelseUtvidet(
 ): AndelTilkjentYtelse {
 
     return AndelTilkjentYtelse(
-        personIdent = person.aktør.aktivFødselsnummer(),
         aktør = person.aktør,
         behandlingId = behandling.id,
         tilkjentYtelse = tilkjentYtelse ?: lagInitiellTilkjentYtelse(behandling),
