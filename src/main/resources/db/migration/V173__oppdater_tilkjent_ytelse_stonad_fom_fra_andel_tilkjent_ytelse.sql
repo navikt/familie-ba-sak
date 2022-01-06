@@ -1,5 +1,5 @@
-with ny_stonad_tom (tilkjent_ytelse_id, stonad_tom, ny_stonad_tom) as (
-	select ty.id, ty.stonad_tom, max(aty.stonad_tom)  
+with ny_stonad_tom (tilkjent_ytelse_id, ny_stonad_tom) as (
+	select ty.id, max(aty.stonad_tom)
 	from andel_tilkjent_ytelse aty
 	join tilkjent_ytelse ty on ty.id = aty.tilkjent_ytelse_id
 	where  ty.stonad_tom < aty.stonad_tom
@@ -12,8 +12,8 @@ update tilkjent_ytelse ty
     where st.tilkjent_ytelse_id = ty.id
 ;
 
-with ny_stonad_fom (tilkjent_ytelse_id, stonad_fom, ny_stonad_fom) as (
-	select ty.id, ty.stonad_fom, min(aty.stonad_fom)
+with ny_stonad_fom (tilkjent_ytelse_id, ny_stonad_fom) as (
+	select ty.id, min(aty.stonad_fom)
 	from andel_tilkjent_ytelse aty
 	join tilkjent_ytelse ty on ty.id = aty.tilkjent_ytelse_id
 	where  ty.stonad_fom > aty.stonad_fom
