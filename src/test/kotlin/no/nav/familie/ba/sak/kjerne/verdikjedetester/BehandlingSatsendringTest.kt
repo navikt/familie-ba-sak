@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
@@ -183,21 +184,23 @@ class BehandlingSatsendringTest(
             personidentService = personidentService,
         )!!
 
+        // Opprett revurdering som blir liggende igjen som åpen og på behandlingsresultatsteget
         val revurdering = familieBaSakKlient().opprettBehandling(
             søkersIdent = scenario.søker.ident,
-            behandlingType = BehandlingType.REVURDERING
+            behandlingType = BehandlingType.REVURDERING,
+            behandlingÅrsak = BehandlingÅrsak.NYE_OPPLYSNINGER
         )
+        val revurderingEtterVilkårsvurdering =
+            familieBaSakKlient().validerVilkårsvurdering(behandlingId = revurdering.data!!.behandlingId)
+        assertEquals(StegType.BEHANDLINGSRESULTAT, revurderingEtterVilkårsvurdering.data!!.steg)
 
         // Fjerner mocking slik at den siste satsendringen vi fjernet via mocking nå skal komme med.
         unmockkObject(SatsService)
         satsendringService.utførSatsendring(behandling.id)
 
-        val satsendingBehandling = behandlingService.hentAktivForFagsak(fagsakId = behandling.fagsak.id)
-        assertEquals(BehandlingResultat.ENDRET, satsendingBehandling?.resultat)
-        assertEquals(StegType.IVERKSETT_MOT_OPPDRAG, satsendingBehandling?.steg)
-
-        val satsendingsvedtak = vedtakService.hentAktivForBehandling(behandlingId = satsendingBehandling!!.id)
-        assertNull(satsendingsvedtak!!.stønadBrevPdF)
+        val åpenBehandling = behandlingService.hentAktivForFagsak(fagsakId = behandling.fagsak.id)
+        assertEquals(revurdering.data!!.behandlingId, åpenBehandling!!.id)
+        assertEquals(StegType.VILKÅRSVURDERING, åpenBehandling.steg)
     }
 
     @Test

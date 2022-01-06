@@ -1,7 +1,9 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingService
@@ -47,6 +49,21 @@ class TilbakestillBehandlingService(
         tilbakekrevingService.slettTilbakekrevingPåBehandling(behandling.id)
 
         vedtakRepository.saveAndFlush(vedtak)
+    }
+
+    @Transactional
+    fun tilbakestillBehandlingTilVilkårsvurdering(behandling: Behandling) {
+        if (behandling.status.erLåstMenIkkeAvsluttet() || behandling.status == BehandlingStatus.AVSLUTTET) throw Feil("Prøver å tilbakestille $behandling, men den er avsluttet eller låst for endringer")
+
+        endretUtbetalingAndelService.fjernKnytningTilAndelTilkjentYtelse(behandling.id)
+        beregningService.slettTilkjentYtelseForBehandling(behandlingId = behandling.id)
+        vedtaksperiodeService.slettVedtaksperioderFor(vedtak = vedtakRepository.findByBehandlingAndAktiv(behandlingId = behandling.id))
+        tilbakekrevingService.slettTilbakekrevingPåBehandling(behandling.id)
+
+        behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(
+            behandlingId = behandling.id,
+            steg = StegType.VILKÅRSVURDERING
+        )
     }
 
     @Transactional

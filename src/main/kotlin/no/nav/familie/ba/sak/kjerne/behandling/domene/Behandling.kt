@@ -365,7 +365,7 @@ enum class BehandlingStatus {
     IVERKSETTER_VEDTAK,
     AVSLUTTET;
 
-    fun erUnderUtredning() = this == OPPRETTET || this == UTREDES
+    fun erLåstMenIkkeAvsluttet() = this == FATTER_VEDTAK || this == IVERKSETTER_VEDTAK
 }
 
 fun BehandlingStatus.erÅpen(): Boolean {
