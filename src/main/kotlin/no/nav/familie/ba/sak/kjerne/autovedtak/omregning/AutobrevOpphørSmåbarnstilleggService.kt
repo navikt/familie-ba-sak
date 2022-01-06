@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.omregning
 
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
@@ -51,21 +50,6 @@ class AutobrevOpphørSmåbarnstilleggService(
         if (!autobrevService.skalAutobrevBehandlingOpprettes(
                 fagsakId = fagsakId,
                 behandlingsårsak = behandlingsårsak,
-                vedtaksperioderMedBegrunnelser = behandlingService.hentBehandlinger(fagsakId = fagsakId)
-                    .filter { behandling ->
-                        val vedtaksmåned =
-                            vedtakService.hentAktivForBehandlingThrows(behandlingId = behandling.id).vedtaksdato?.toLocalDate()
-                                ?.toYearMonth()
-
-                        behandling.status == BehandlingStatus.AVSLUTTET && (
-                            vedtaksmåned == YearMonth.now() || vedtaksmåned == YearMonth.now()
-                                .minusMonths(1)
-                            )
-                    }
-                    .flatMap { behandling ->
-                        val vedtak = vedtakService.hentAktivForBehandlingThrows(behandling.id)
-                        vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak)
-                    },
                 standardbegrunnelser = listOf(standardbegrunnelse)
             )
         ) {

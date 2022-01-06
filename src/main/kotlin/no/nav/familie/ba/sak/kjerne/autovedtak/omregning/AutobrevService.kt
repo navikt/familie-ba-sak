@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
@@ -30,7 +31,6 @@ class AutobrevService(
     fun skalAutobrevBehandlingOpprettes(
         fagsakId: Long,
         behandlingsårsak: BehandlingÅrsak,
-        vedtaksperioderMedBegrunnelser: List<VedtaksperiodeMedBegrunnelser>,
         standardbegrunnelser: List<VedtakBegrunnelseSpesifikasjon>
     ): Boolean {
         if (!behandlingsårsak.erOmregningsårsak()) {
@@ -48,7 +48,14 @@ class AutobrevService(
         }
 
         if (barnAlleredeBegrunnet(
-                vedtaksperioderMedBegrunnelser = vedtaksperioderMedBegrunnelser,
+                vedtaksperioderMedBegrunnelser = behandlingService.hentBehandlinger(fagsakId = fagsakId)
+                    .filter { behandling ->
+                        behandling.status == BehandlingStatus.AVSLUTTET && !behandling.erHenlagt()
+                    }
+                    .flatMap { behandling ->
+                        val vedtak = vedtakService.hentAktivForBehandlingThrows(behandling.id)
+                        vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak)
+                    },
                 standardbegrunnelser = standardbegrunnelser
             )
         ) {

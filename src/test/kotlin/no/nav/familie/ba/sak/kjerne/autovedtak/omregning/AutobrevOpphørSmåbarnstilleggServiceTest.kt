@@ -5,21 +5,28 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.verify
+import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
+import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.småbarnstillegg.PeriodeOvergangsstønadGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.småbarnstillegg.PeriodeOvergangsstønadGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -48,7 +55,9 @@ internal class AutobrevOpphørSmåbarnstilleggServiceTest {
         persongrunnlagService = persongrunnlagService,
         behandlingService = behandlingService,
         autobrevService = autobrevService,
-        periodeOvergangsstønadGrunnlagRepository = periodeOvergangsstønadGrunnlagRepository
+        periodeOvergangsstønadGrunnlagRepository = periodeOvergangsstønadGrunnlagRepository,
+        vedtakService = vedtakService,
+        vedtaksperiodeService = vedtaksperiodeService
     )
 
     @Test
@@ -79,6 +88,59 @@ internal class AutobrevOpphørSmåbarnstilleggServiceTest {
         }
 
         verify(exactly = 1) { taskRepository.save(any()) }
+    }
+
+    @Test
+    fun `Skal ikke sende lage autobrevbehandling om det i forrige måned ble vedtatt en reduksjon på småbarnstillegg`() {
+        val behandling = lagBehandling().apply {
+            status = BehandlingStatus.AVSLUTTET
+        }
+        val vedtak = lagVedtak(behandling = behandling)
+
+        val barn3ÅrForrigeMåned = tilfeldigPerson(fødselsdato = LocalDate.now().minusYears(3).minusMonths(1))
+        val personopplysningGrunnlag: PersonopplysningGrunnlag =
+            lagTestPersonopplysningGrunnlag(behandlingId = behandlingId, barn3ÅrForrigeMåned)
+
+        val vedtaksperioder = listOf(
+            VedtaksperiodeMedBegrunnelser(
+                fom = LocalDate.now().førsteDagIInneværendeMåned(),
+                vedtak = vedtak,
+                type = Vedtaksperiodetype.UTBETALING
+            ).apply {
+                begrunnelser.addAll(
+                    listOf(
+                        VedtakBegrunnelseSpesifikasjon.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_BARN_UNDER_TRE_ÅR
+                    ).map { begrunnelse ->
+                        Vedtaksbegrunnelse(
+                            vedtaksperiodeMedBegrunnelser = this,
+                            vedtakBegrunnelseSpesifikasjon = begrunnelse
+                        )
+                    }
+                )
+            }
+        )
+
+        every { behandlingService.hentAktivForFagsak(any()) } returns behandling
+        every { behandlingService.hentBehandlinger(behandling.fagsak.id) } returns listOf(behandling)
+        every { vedtaksperiodeService.hentPersisterteVedtaksperioder(any()) } returns vedtaksperioder
+        every { behandlingService.harBehandlingsårsakAlleredeKjørt(any(), any(), any()) } returns false
+        every { persongrunnlagService.hentAktivThrows(any()) } returns personopplysningGrunnlag
+        every { periodeOvergangsstønadGrunnlagRepository.findByBehandlingId(any()) } returns listOf(
+            lagPeriodeOvergangsstønadGrunnlag(LocalDate.now().minusYears(1), LocalDate.now().plusYears(1))
+        )
+
+        autobrevOpphørSmåbarnstilleggService
+            .kjørBehandlingOgSendBrevForOpphørAvSmåbarnstillegg(fagsakId = behandling.fagsak.id)
+
+        verify(exactly = 0) {
+            autovedtakService.opprettAutomatiskBehandlingOgKjørTilBehandlingsresultat(
+                any(),
+                any(),
+                any()
+            )
+        }
+
+        verify(exactly = 0) { taskRepository.save(any()) }
     }
 
     @Test

@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.erAlleredeBegrunnetMedBegrunne
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 import java.time.YearMonth
 
 class VedtaksperiodeMedBegrunnelseTest {
@@ -112,5 +113,98 @@ class VedtaksperiodeMedBegrunnelseTest {
         )
 
         assertFalse(fagsakErBegrunnet)
+    }
+
+    @Test
+    fun `Skal være begrunnet med reduksjon 3 år småbarnstillegg fra før`() {
+        val vedtak = lagVedtak()
+
+        val vedtaksperioder = listOf(
+            VedtaksperiodeMedBegrunnelser(
+                fom = LocalDate.now().førsteDagIInneværendeMåned(),
+                vedtak = vedtak,
+                type = Vedtaksperiodetype.UTBETALING
+            ).apply {
+                begrunnelser.addAll(
+                    listOf(
+                        VedtakBegrunnelseSpesifikasjon.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_BARN_UNDER_TRE_ÅR,
+                    ).map { begrunnelse ->
+                        Vedtaksbegrunnelse(
+                            vedtaksperiodeMedBegrunnelser = this,
+                            vedtakBegrunnelseSpesifikasjon = begrunnelse
+                        )
+                    }
+                )
+            }
+        )
+
+        val fagsakErBegrunnet = vedtaksperioder.erAlleredeBegrunnetMedBegrunnelse(
+            standardbegrunnelser = listOf(VedtakBegrunnelseSpesifikasjon.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_BARN_UNDER_TRE_ÅR),
+            måned = YearMonth.now()
+        )
+
+        assertTrue(fagsakErBegrunnet)
+    }
+
+    @Test
+    fun `Skal være begrunnet med reduksjon 3 år småbarnstillegg for 1 år siden, men sende ut brev for neste barn som fyller 3 år`() {
+        val vedtak = lagVedtak()
+
+        val vedtaksperioder = listOf(
+            VedtaksperiodeMedBegrunnelser(
+                fom = LocalDate.now().minusYears(1).førsteDagIInneværendeMåned(),
+                vedtak = vedtak,
+                type = Vedtaksperiodetype.UTBETALING
+            ).apply {
+                begrunnelser.addAll(
+                    listOf(
+                        VedtakBegrunnelseSpesifikasjon.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_BARN_UNDER_TRE_ÅR,
+                    ).map { begrunnelse ->
+                        Vedtaksbegrunnelse(
+                            vedtaksperiodeMedBegrunnelser = this,
+                            vedtakBegrunnelseSpesifikasjon = begrunnelse
+                        )
+                    }
+                )
+            }
+        )
+
+        val fagsakErBegrunnet = vedtaksperioder.erAlleredeBegrunnetMedBegrunnelse(
+            standardbegrunnelser = listOf(VedtakBegrunnelseSpesifikasjon.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_BARN_UNDER_TRE_ÅR),
+            måned = YearMonth.now()
+        )
+
+        assertFalse(fagsakErBegrunnet)
+    }
+
+    @Test
+    fun `Skal være begrunnet med reduksjon ikke lenger full OS`() {
+        val vedtak = lagVedtak()
+
+        val vedtaksperioder = listOf(
+            VedtaksperiodeMedBegrunnelser(
+                fom = LocalDate.now().førsteDagIInneværendeMåned(),
+                vedtak = vedtak,
+                type = Vedtaksperiodetype.UTBETALING
+            ).apply {
+                begrunnelser.addAll(
+                    listOf(
+                        VedtakBegrunnelseSpesifikasjon.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_FULL_OVERGANGSSTØNAD,
+                    ).map { begrunnelse ->
+                        Vedtaksbegrunnelse(
+                            vedtaksperiodeMedBegrunnelser = this,
+                            vedtakBegrunnelseSpesifikasjon = begrunnelse
+                        )
+                    }
+                )
+            }
+        )
+
+        val fagsakErBegrunnet = vedtaksperioder.erAlleredeBegrunnetMedBegrunnelse(
+            standardbegrunnelser = listOf(VedtakBegrunnelseSpesifikasjon.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_FULL_OVERGANGSSTØNAD),
+            måned = YearMonth.now()
+        )
+
+        assertTrue(fagsakErBegrunnet)
     }
 }

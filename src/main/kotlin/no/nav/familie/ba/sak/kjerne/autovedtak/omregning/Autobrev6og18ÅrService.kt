@@ -39,12 +39,6 @@ class Autobrev6og18ÅrService(
         if (!autobrevService.skalAutobrevBehandlingOpprettes(
                 fagsakId = autobrev6og18ÅrDTO.fagsakId,
                 behandlingsårsak = behandlingsårsak,
-                vedtaksperioderMedBegrunnelser = behandlingService.hentBehandlinger(fagsakId = autobrev6og18ÅrDTO.fagsakId)
-                    .filter { it.status == BehandlingStatus.AVSLUTTET }
-                    .flatMap { behandling ->
-                        val vedtak = vedtakService.hentAktivForBehandlingThrows(behandling.id)
-                        vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak)
-                    },
                 standardbegrunnelser = AutobrevUtils.hentStandardbegrunnelserReduksjonForAlder(autobrev6og18ÅrDTO.alder)
             )
         ) {
