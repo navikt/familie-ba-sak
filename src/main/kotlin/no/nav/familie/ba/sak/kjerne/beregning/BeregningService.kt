@@ -202,11 +202,9 @@ class BeregningService(
 
         return tilkjentYtelse.apply {
             this.utbetalingsoppdrag = objectMapper.writeValueAsString(utbetalingsoppdrag)
-            this.stønadTom =
-                utbetalingsoppdrag.utbetalingsperiode.maxByOrNull { it.vedtakdatoTom }!!.vedtakdatoTom.toYearMonth()
-            this.stønadFom = if (erRentOpphør) null else utbetalingsoppdrag.utbetalingsperiode
-                .filter { !it.erEndringPåEksisterendePeriode }
-                .minByOrNull { it.vedtakdatoFom }!!.vedtakdatoFom.toYearMonth()
+            this.stønadTom = tilkjentYtelse.andelerTilkjentYtelse.maxOfOrNull { it.stønadTom }
+            this.stønadFom =
+                if (erRentOpphør) null else tilkjentYtelse.andelerTilkjentYtelse.minOfOrNull { it.stønadFom }
             this.endretDato = LocalDate.now()
             this.opphørFom = opphørsdato?.toYearMonth()
         }
