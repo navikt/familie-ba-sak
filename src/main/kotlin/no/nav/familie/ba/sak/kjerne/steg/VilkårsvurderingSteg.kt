@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
-import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
@@ -41,16 +41,16 @@ class VilkårsvurderingSteg(
         if (behandling.erHelmanuellMigrering()) {
             val vilkårsvurdering = vilkårService.hentVilkårsvurdering(behandling.id)
                 ?: throw IllegalStateException("Fant ikke aktiv vilkårsvurdering for behandling ${behandling.id}")
-            val finnesDelBosted = vilkårsvurdering.personResultater.any {
+            val finnesDeltBosted = vilkårsvurdering.personResultater.any {
                 it.vilkårResultater.filter { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.BOR_MED_SØKER }
                     .any { borMedSøker ->
                         borMedSøker.utdypendeVilkårsvurderinger
                             .contains(UtdypendeVilkårsvurdering.DELT_BOSTED)
                     }
             }
-            if (!finnesDelBosted) {
-                throw Feil(
-                    message = "Behandling ${behandling.id} kan ikke fortsettes uten delt bosted i vilkårsvurdering " +
+            if (!finnesDeltBosted) {
+                throw FunksjonellFeil(
+                    melding = "Behandling ${behandling.id} kan ikke fortsettes uten delt bosted i vilkårsvurdering " +
                         "for minst ett av barna",
                     frontendFeilmelding = "Det må legges inn delt bosted i vilkårsvurderingen for minst ett av barna " +
                         "før du kan fortsette behandlingen"
