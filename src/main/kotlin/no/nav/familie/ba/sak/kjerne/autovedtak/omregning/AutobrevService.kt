@@ -9,6 +9,8 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.erAlleredeBegrunnetMedBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.task.JournalførVedtaksbrevTask
 import no.nav.familie.prosessering.domene.Task
@@ -25,7 +27,12 @@ class AutobrevService(
     private val taskRepository: TaskRepositoryWrapper
 ) {
 
-    fun skalAutobrevBehandlingOpprettes(fagsakId: Long, behandlingsårsak: BehandlingÅrsak): Boolean {
+    fun skalAutobrevBehandlingOpprettes(
+        fagsakId: Long,
+        behandlingsårsak: BehandlingÅrsak,
+        vedtaksperioderMedBegrunnelser: List<VedtaksperiodeMedBegrunnelser>,
+        standardbegrunnelser: List<VedtakBegrunnelseSpesifikasjon>
+    ): Boolean {
         if (!behandlingsårsak.erOmregningsårsak()) {
             throw Feil("Sjekk om autobrevbehandling skal opprettes sjekker på årsak som ikke er omregning.")
         }
@@ -37,6 +44,15 @@ class AutobrevService(
             )
         ) {
             logger.info("Brev for ${behandlingsårsak.visningsnavn} har allerede kjørt for $fagsakId")
+            return false
+        }
+
+        if (barnAlleredeBegrunnet(
+                vedtaksperioderMedBegrunnelser = vedtaksperioderMedBegrunnelser,
+                standardbegrunnelser = standardbegrunnelser
+            )
+        ) {
+            logger.info("Begrunnelser $standardbegrunnelser for ${behandlingsårsak.visningsnavn} har allerede kjørt for $fagsakId")
             return false
         }
 
@@ -66,6 +82,16 @@ class AutobrevService(
             )
 
         opprettTaskJournalførVedtaksbrev(vedtakId = opprettetVedtak.id)
+    }
+
+    private fun barnAlleredeBegrunnet(
+        vedtaksperioderMedBegrunnelser: List<VedtaksperiodeMedBegrunnelser>,
+        standardbegrunnelser: List<VedtakBegrunnelseSpesifikasjon>
+    ): Boolean {
+        return vedtaksperioderMedBegrunnelser.erAlleredeBegrunnetMedBegrunnelse(
+            standardbegrunnelser = standardbegrunnelser,
+            måned = YearMonth.now()
+        )
     }
 
     private fun opprettTaskJournalførVedtaksbrev(vedtakId: Long) {

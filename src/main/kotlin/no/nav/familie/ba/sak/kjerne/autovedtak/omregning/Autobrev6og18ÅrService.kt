@@ -6,7 +6,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakUtils
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
@@ -16,7 +15,6 @@ import no.nav.familie.ba.sak.task.dto.Autobrev6og18ÅrDTO
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.time.YearMonth
 
 @Service
 class Autobrev6og18ÅrService(
@@ -37,9 +35,17 @@ class Autobrev6og18ÅrService(
         val behandlingsårsak = finnBehandlingÅrsakForAlder(
             autobrev6og18ÅrDTO.alder
         )
+
         if (!autobrevService.skalAutobrevBehandlingOpprettes(
                 fagsakId = autobrev6og18ÅrDTO.fagsakId,
-                behandlingsårsak = behandlingsårsak
+                behandlingsårsak = behandlingsårsak,
+                vedtaksperioderMedBegrunnelser = behandlingService.hentBehandlinger(fagsakId = autobrev6og18ÅrDTO.fagsakId)
+                    .filter { it.status == BehandlingStatus.AVSLUTTET }
+                    .flatMap { behandling ->
+                        val vedtak = vedtakService.hentAktivForBehandlingThrows(behandling.id)
+                        vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak)
+                    },
+                standardbegrunnelser = AutobrevUtils.hentStandardbegrunnelserReduksjonForAlder(autobrev6og18ÅrDTO.alder)
             )
         ) {
             return
@@ -47,11 +53,6 @@ class Autobrev6og18ÅrService(
 
         if (behandling.fagsak.status != FagsakStatus.LØPENDE) {
             logger.info("Fagsak ${behandling.fagsak.id} har ikke status løpende, og derfor prosesseres den ikke videre.")
-            return
-        }
-
-        if (barnAlleredeBegrunnetPåFagsak(autobrev6og18ÅrDTO)) {
-            logger.info("Fagsak ${behandling.fagsak.id} ${autobrev6og18ÅrDTO.alder} års omregningsbrev brev allerede sendt")
             return
         }
 
@@ -95,22 +96,6 @@ class Autobrev6og18ÅrService(
             Alder.ATTEN.år -> BehandlingÅrsak.OMREGNING_18ÅR
             else -> throw Feil("Alder må være oppgitt til enten 6 eller 18 år.")
         }
-
-    private fun barnAlleredeBegrunnetPåFagsak(autobrev6og18ÅrDTO: Autobrev6og18ÅrDTO): Boolean {
-        val vedtaksBegrunnelserForReduksjon =
-            AutobrevUtils.hentStandardbegrunnelserReduksjonForAlder(autobrev6og18ÅrDTO.alder)
-
-        return FagsakUtils.fagsakBegrunnetMedBegrunnelse(
-            vedtaksperiodeMedBegrunnelser = behandlingService.hentBehandlinger(fagsakId = autobrev6og18ÅrDTO.fagsakId)
-                .filter { it.status == BehandlingStatus.AVSLUTTET }
-                .flatMap { behandling ->
-                    val vedtak = vedtakService.hentAktivForBehandlingThrows(behandling.id)
-                    vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak)
-                },
-            standardbegrunnelser = vedtaksBegrunnelserForReduksjon,
-            måned = YearMonth.now()
-        )
-    }
 
     private fun barnMedAngittAlderInneværendeMånedEksisterer(behandlingId: Long, alder: Int): Boolean =
         barnMedAngittAlderInneværendeMåned(behandlingId, alder).isNotEmpty()
