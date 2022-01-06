@@ -79,44 +79,11 @@ object YtelsePersonUtils {
                 behandlingsresultatPerson.andeler.maxByOrNull { it.stønadTom }?.stønadTom
                     ?: throw Feil("Finnes andel uten tom-dato") else TIDENES_MORGEN.toYearMonth()
 
-            if (behandlingsresultatPerson.søktForPerson) {
-                val beløpRedusert = (segmenterLagtTil + segmenterFjernet).isEmpty() &&
-                    (behandlingsresultatPerson.forrigeAndeler.sumOf { it.sumForPeriode() } - behandlingsresultatPerson.andeler.sumOf { it.sumForPeriode() }) > 0
+            val erEndring =
+                erEndring(behandlingsresultatPerson, segmenterLagtTil, segmenterFjernet, ytelsePerson, inneværendeMåned)
 
-                val finnesReduksjonerTilbakeITid = ytelsePerson.erFramstiltKravForITidligereBehandling() &&
-                    finnesEndretSegmentTilbakeITid(segmenterFjernet)
-
-                if (finnesReduksjonerTilbakeITid || beløpRedusert) {
-                    resultater.add(YtelsePersonResultat.ENDRET)
-                }
-            } else {
-                val beløpEndret = erBeløpEndret(behandlingsresultatPerson)
-
-                val enesteEndringErLøpendeTilOpphørt =
-                    enesteEndringErLøpendeTilOpphørt(
-                        segmenterLagtTil = segmenterLagtTil,
-                        segmenterFjernet = segmenterFjernet,
-                        sisteAndelPåPerson = behandlingsresultatPerson.andeler.maxByOrNull { it.stønadFom },
-                        inneværendeMåned = inneværendeMåned,
-                        beløpEndret = beløpEndret
-                    )
-
-                val finnesEndringerTilbakeITid = finnesEndringTilbakeITid(
-                    personSomSjekkes = ytelsePerson,
-                    segmenterLagtTil = segmenterLagtTil,
-                    segmenterFjernet = segmenterFjernet
-                )
-
-                val harGåttFraOpphørtTilLøpende =
-                    harGåttFraOpphørtTilLøpende(
-                        forrigeTilstandForPerson = behandlingsresultatPerson.forrigeAndeler,
-                        oppdatertTilstandForPerson = behandlingsresultatPerson.andeler,
-                        inneværendeMåned = inneværendeMåned
-                    )
-
-                if ((beløpEndret || finnesEndringerTilbakeITid || harGåttFraOpphørtTilLøpende) && !enesteEndringErLøpendeTilOpphørt) {
-                    resultater.add(YtelsePersonResultat.ENDRET)
-                }
+            if (erEndring) {
+                resultater.add(YtelsePersonResultat.ENDRET)
             }
 
             ytelsePerson.copy(
@@ -132,6 +99,48 @@ object YtelsePersonUtils {
                 kravOpprinnelse = listOf(KravOpprinnelse.INNEVÆRENDE)
             )
         }
+    }
+
+    private fun erEndring(
+        behandlingsresultatPerson: BehandlingsresultatPerson,
+        segmenterLagtTil: LocalDateTimeline<BehandlingsresultatAndelTilkjentYtelse>,
+        segmenterFjernet: LocalDateTimeline<BehandlingsresultatAndelTilkjentYtelse>,
+        ytelsePerson: YtelsePerson,
+        inneværendeMåned: YearMonth
+    ) = if (behandlingsresultatPerson.søktForPerson) {
+        val beløpRedusert = (segmenterLagtTil + segmenterFjernet).isEmpty() &&
+            (behandlingsresultatPerson.forrigeAndeler.sumOf { it.sumForPeriode() } - behandlingsresultatPerson.andeler.sumOf { it.sumForPeriode() }) > 0
+
+        val finnesReduksjonerTilbakeITid = ytelsePerson.erFramstiltKravForITidligereBehandling() &&
+            finnesEndretSegmentTilbakeITid(segmenterFjernet)
+
+        finnesReduksjonerTilbakeITid || beløpRedusert
+    } else {
+        val beløpEndret = erBeløpEndret(behandlingsresultatPerson)
+
+        val enesteEndringErLøpendeTilOpphørt =
+            enesteEndringErLøpendeTilOpphørt(
+                segmenterLagtTil = segmenterLagtTil,
+                segmenterFjernet = segmenterFjernet,
+                sisteAndelPåPerson = behandlingsresultatPerson.andeler.maxByOrNull { it.stønadFom },
+                inneværendeMåned = inneværendeMåned,
+                beløpEndret = beløpEndret
+            )
+
+        val finnesEndringerTilbakeITid = finnesEndringTilbakeITid(
+            personSomSjekkes = ytelsePerson,
+            segmenterLagtTil = segmenterLagtTil,
+            segmenterFjernet = segmenterFjernet
+        )
+
+        val harGåttFraOpphørtTilLøpende =
+            harGåttFraOpphørtTilLøpende(
+                forrigeTilstandForPerson = behandlingsresultatPerson.forrigeAndeler,
+                oppdatertTilstandForPerson = behandlingsresultatPerson.andeler,
+                inneværendeMåned = inneværendeMåned
+            )
+
+        (beløpEndret || finnesEndringerTilbakeITid || harGåttFraOpphørtTilLøpende) && !enesteEndringErLøpendeTilOpphørt
     }
 
     private fun erBeløpEndret(
