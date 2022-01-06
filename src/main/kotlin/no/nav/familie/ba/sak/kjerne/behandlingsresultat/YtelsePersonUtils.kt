@@ -116,7 +116,10 @@ object YtelsePersonUtils {
 
         finnesReduksjonerTilbakeITid || beløpRedusert
     } else {
-        val beløpEndret = erBeløpEndret(behandlingsresultatPerson)
+        val erAndelMedEndretBeløp = erAndelMedEndretBeløp(
+            forrigeAndeler = behandlingsresultatPerson.forrigeAndeler,
+            andeler = behandlingsresultatPerson.andeler
+        )
 
         val enesteEndringErLøpendeTilOpphørt =
             enesteEndringErLøpendeTilOpphørt(
@@ -124,7 +127,7 @@ object YtelsePersonUtils {
                 segmenterFjernet = segmenterFjernet,
                 sisteAndelPåPerson = behandlingsresultatPerson.andeler.maxByOrNull { it.stønadFom },
                 inneværendeMåned = inneværendeMåned,
-                beløpEndret = beløpEndret
+                erAndelMedEndretBeløp = erAndelMedEndretBeløp
             )
 
         val finnesEndringerTilbakeITid = finnesEndringTilbakeITid(
@@ -140,14 +143,15 @@ object YtelsePersonUtils {
                 inneværendeMåned = inneværendeMåned
             )
 
-        (beløpEndret || finnesEndringerTilbakeITid || harGåttFraOpphørtTilLøpende) && !enesteEndringErLøpendeTilOpphørt
+        (erAndelMedEndretBeløp || finnesEndringerTilbakeITid || harGåttFraOpphørtTilLøpende) && !enesteEndringErLøpendeTilOpphørt
     }
 
-    private fun erBeløpEndret(
-        behandlingsresultatPerson: BehandlingsresultatPerson
+    fun erAndelMedEndretBeløp(
+        forrigeAndeler: List<BehandlingsresultatAndelTilkjentYtelse>,
+        andeler: List<BehandlingsresultatAndelTilkjentYtelse>
     ): Boolean =
-        behandlingsresultatPerson.forrigeAndeler.any { gammelAndel ->
-            behandlingsresultatPerson.andeler.any {
+        forrigeAndeler.any { gammelAndel ->
+            andeler.any {
                 gammelAndel.periode.overlapperHeltEllerDelvisMed(it.periode) &&
                     gammelAndel.kalkulertUtbetalingsbeløp != it.kalkulertUtbetalingsbeløp
             }
@@ -196,7 +200,7 @@ object YtelsePersonUtils {
         segmenterFjernet: LocalDateTimeline<BehandlingsresultatAndelTilkjentYtelse>,
         sisteAndelPåPerson: BehandlingsresultatAndelTilkjentYtelse?,
         inneværendeMåned: YearMonth,
-        beløpEndret: Boolean,
+        erAndelMedEndretBeløp: Boolean,
     ): Boolean {
         if (sisteAndelPåPerson == null) return true
 
@@ -209,7 +213,7 @@ object YtelsePersonUtils {
                 ingenFjernetFørStønadslutt &&
                 sisteForrigeAndel != null &&
                 sisteForrigeAndel.tom.toYearMonth() >= inneværendeMåned &&
-                !beløpEndret
+                !erAndelMedEndretBeløp
         } else {
             false
         }
