@@ -36,7 +36,6 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAnde
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakPerson
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
@@ -143,16 +142,7 @@ fun nesteUtvidetVedtaksperiodeId(): Long {
 
 fun defaultFagsak() = Fagsak(
     1, aktør = tilAktør(randomFnr())
-).also {
-    it.søkerIdenter =
-        mutableSetOf(
-            FagsakPerson(
-                fagsak = it,
-                personIdent = PersonIdent(it.aktør.aktivFødselsnummer()),
-                opprettetTidspunkt = LocalDateTime.now()
-            )
-        )
-}
+)
 
 fun lagBehandling(
     fagsak: Fagsak = defaultFagsak(),

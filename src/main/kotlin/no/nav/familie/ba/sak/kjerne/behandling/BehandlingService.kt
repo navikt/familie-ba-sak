@@ -358,7 +358,7 @@ class BehandlingService(
     }
 
     private fun harAktivInfotrygdSak(behandling: Behandling): Boolean {
-        val søkerIdenter = behandling.fagsak.søkerIdenter.map { it.personIdent.ident }
+        val søkerIdenter = behandling.fagsak.aktør.personidenter.map { it.fødselsnummer }
         return infotrygdService.harÅpenSakIInfotrygd(søkerIdenter) ||
             !behandling.erMigrering() && infotrygdService.harLøpendeSakIInfotrygd(søkerIdenter)
     }

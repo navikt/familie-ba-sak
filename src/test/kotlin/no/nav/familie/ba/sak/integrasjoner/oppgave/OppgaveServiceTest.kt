@@ -25,8 +25,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakPerson
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.FØRSTE_STEG
@@ -175,9 +173,7 @@ class OppgaveServiceTest {
 
     private fun lagTestBehandling(aktørId: String = "1234567891000"): Behandling {
         return Behandling(
-            fagsak = Fagsak(id = FAGSAK_ID, aktør = Aktør(aktørId)).also {
-                it.søkerIdenter = mutableSetOf(FagsakPerson(personIdent = PersonIdent(ident = FNR), fagsak = it))
-            },
+            fagsak = Fagsak(id = FAGSAK_ID, aktør = Aktør(aktørId)),
             type = BehandlingType.FØRSTEGANGSBEHANDLING,
             kategori = BehandlingKategori.NASJONAL,
             underkategori = BehandlingUnderkategori.ORDINÆR,

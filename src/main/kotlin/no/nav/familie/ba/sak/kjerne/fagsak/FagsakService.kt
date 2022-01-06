@@ -21,7 +21,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonRepository
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
@@ -97,12 +96,7 @@ class FagsakService(
         var fagsak = fagsakRepository.finnFagsakForAktør(aktør)
         if (fagsak == null) {
 
-            // TODO: robustgjøring dnr/fnr fjern opprettelse av fagsak person ved contract.
-            fagsak = Fagsak(aktør = aktør).also {
-                it.søkerIdenter =
-                    mutableSetOf(FagsakPerson(personIdent = PersonIdent(aktør.aktivFødselsnummer()), fagsak = it))
-                lagre(it)
-            }
+            fagsak = lagre(Fagsak(aktør = aktør))
             if (fraAutomatiskBehandling) {
                 antallFagsakerOpprettetFraAutomatisk.increment()
             } else {
