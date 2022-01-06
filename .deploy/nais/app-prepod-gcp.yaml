@@ -25,9 +25,11 @@ spec:
     enabled: false
   gcp: # Database
     sqlInstances:
-      - type: POSTGRES_12
+      - type: POSTGRES_12 # IF This is changed, all data will be lost. Read on nais.io how to upgrade
         name: familie-ba-sak
         autoBackupTime: "02:00"
+        diskAutoresize: true
+        highAvailability: true
         databases:
           - name: familie-ba-sak
             envVarPrefix: DB
@@ -35,9 +37,8 @@ spec:
     inbound:
       rules:
         - application: familie-ba-sak-frontend
-        - application: familie-ba-sak-frontend
-          cluster: dev-gcp
         - application: familie-ba-mottak
+          cluster: dev-fss
         - application: familie-prosessering
           cluster: dev-gcp
         - application: familie-ba-skatteetaten-api
@@ -55,8 +56,11 @@ spec:
         - application: familie-brev
           cluster: dev-gcp
         - application: familie-integrasjoner
+          cluster: dev-fss
         - application: familie-ba-infotrygd-feed
+          cluster: dev-fss
         - application: familie-ba-infotrygd
+          cluster: dev-fss
         - application: familie-ef-sak
           cluster: dev-gcp
   replicas:
