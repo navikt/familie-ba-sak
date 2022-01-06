@@ -3,21 +3,21 @@ with ny_stonad_tom (tilkjent_ytelse_id, stonad_tom, ny_stonad_tom) as (
 	from andel_tilkjent_ytelse aty
 	join tilkjent_ytelse ty on ty.id = aty.tilkjent_ytelse_id
 	where  ty.stonad_tom < aty.stonad_tom
-	group by ty.id, ty.stonad_tom
+	group by ty.id
 )
 
 update tilkjent_ytelse ty
     set stonad_tom = st.ny_stonad_tom
     from ny_stonad_tom st
-    where st.tilkjent_ytelse_id = ty.id	
+    where st.tilkjent_ytelse_id = ty.id
 ;
 
 with ny_stonad_fom (tilkjent_ytelse_id, stonad_fom, ny_stonad_fom) as (
-	select ty.id, ty.stonad_fom, min(aty.stonad_fom)  
+	select ty.id, ty.stonad_fom, min(aty.stonad_fom)
 	from andel_tilkjent_ytelse aty
 	join tilkjent_ytelse ty on ty.id = aty.tilkjent_ytelse_id
 	where  ty.stonad_fom > aty.stonad_fom
-	group by ty.id, ty.stonad_fom
+	group by ty.id
 )
 
 update tilkjent_ytelse ty
