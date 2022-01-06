@@ -115,7 +115,7 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
                 JOIN TilkjentYtelse ty ON b.id = ty.behandling.id
             WHERE
                     b.id in :iverksatteLøpendeBehandlinger
-                AND b.fagsak.id NOT IN (SELECT b.fagsak.id from Behandling b2 where b2.fagsak.id = b.fagsak.id AND b2.status <> 'AVSLUTTET')
+                AND NOT EXISTS (SELECT b2 from Behandling b2 where b2.fagsak.id = b.fagsak.id AND b2.status <> 'AVSLUTTET')
                 AND aty.type = 'SMÅBARNSTILLEGG'
                 AND aty.stønadTom = :stønadTom
         """,
