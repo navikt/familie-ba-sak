@@ -1,11 +1,14 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -33,6 +36,26 @@ class VilkårsvurderingSteg(
                     behandling
                 )
             )
+        }
+        // midlertidig validering for helmanuell migrering
+        if (behandling.erHelmanuellMigrering()) {
+            val vilkårsvurdering = vilkårService.hentVilkårsvurdering(behandling.id)
+                ?: throw IllegalStateException("Fant ikke aktiv vilkårsvurdering for behandling ${behandling.id}")
+            val finnesDelBosted = vilkårsvurdering.personResultater.any {
+                it.vilkårResultater.filter { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.BOR_MED_SØKER }
+                    .any { borMedSøker ->
+                        borMedSøker.utdypendeVilkårsvurderinger
+                            .contains(UtdypendeVilkårsvurdering.DELT_BOSTED)
+                    }
+            }
+            if (!finnesDelBosted) {
+                throw Feil(
+                    message = "Behandling ${behandling.id} kan ikke fortsettes uten delt bosted i vilkårsvurdering " +
+                        "for minst ett av barna",
+                    frontendFeilmelding = "Det må legges inn delt bosted i vilkårsvurderingen for minst ett av barna " +
+                        "før du kan fortsette behandlingen"
+                )
+            }
         }
 
         tilbakestillBehandlingService.tilbakestillDataTilVilkårsvurderingssteg(behandling)
