@@ -108,21 +108,20 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
     fun finnFagsakerMedUtvidetBarnetrygdInnenfor(fom: YearMonth, tom: YearMonth): List<Pair<Fagsak, LocalDate>>
 
     @Query(
-        value = """
-            SELECT DISTINCT ON (b.fk_fagsak_id) b.fk_fagsak_id
-            FROM andel_tilkjent_ytelse aty
-                JOIN behandling b ON aty.fk_behandling_id = b.id
-                JOIN tilkjent_ytelse ty ON b.id = ty.fk_behandling_id
+        """
+            SELECT DISTINCT b.fagsak.id
+            FROM AndelTilkjentYtelse aty
+                JOIN Behandling b ON b.id = aty.behandlingId
+                JOIN TilkjentYtelse ty ON b.id = ty.behandling.id
             WHERE
-                    aty.type = 'SMÅBARNSTILLEGG'
-                AND b.status = 'AVSLUTTET'
-                AND date_trunc('month', aty.stonad_tom) = date_trunc('month', 'date' :opphørsmåned)
-                AND ty.utbetalingsoppdrag IS NOT NULL
-            ORDER BY b.fk_fagsak_id, b.opprettet_tid DESC
+                    b.id in :iverksatteLøpendeBehandlinger
+                AND b.fagsak.id NOT IN (SELECT b.fagsak.id from Behandling b2 where b2.fagsak.id = b.fagsak.id AND b2.status <> 'AVSLUTTET')
+                AND aty.type = 'SMÅBARNSTILLEGG'
+                AND aty.stønadTom = :stønadTom
         """,
-        nativeQuery = true
     )
     fun finnAlleFagsakerMedOpphørSmåbarnstilleggIMåned(
-        opphørsmåned: YearMonth,
+        iverksatteLøpendeBehandlinger: List<Long>,
+        stønadTom: YearMonth = YearMonth.now().minusMonths(1),
     ): List<Long>
 }

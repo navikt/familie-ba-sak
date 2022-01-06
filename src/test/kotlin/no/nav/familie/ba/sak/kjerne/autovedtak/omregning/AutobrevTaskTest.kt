@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.task.OpprettTaskService
@@ -21,9 +22,11 @@ internal class AutobrevTaskTest {
     val opprettTaskService = mockk<OpprettTaskService>()
     val featureToggleService = mockk<FeatureToggleService>()
     val behandlingService = mockk<BehandlingService>()
+    val behandlingRepository = mockk<BehandlingRepository>()
 
     private val autobrevTask = AutobrevTask(
         fagsakRepository = fagsakRepository,
+        behandlingRepository = behandlingRepository,
         opprettTaskService = opprettTaskService,
         featureToggleService = featureToggleService
     )

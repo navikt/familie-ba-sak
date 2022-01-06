@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.task.OpprettTaskService
@@ -14,7 +15,6 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
-import java.time.YearMonth
 
 @Service
 @TaskStepBeskrivelse(
@@ -25,6 +25,7 @@ import java.time.YearMonth
 )
 class AutobrevTask(
     private val fagsakRepository: FagsakRepository,
+    private val behandlingRepository: BehandlingRepository,
     private val opprettTaskService: OpprettTaskService,
     private val featureToggleService: FeatureToggleService
 ) : AsyncTaskStep {
@@ -50,7 +51,9 @@ class AutobrevTask(
     private fun opprettTaskerForReduksjonSmåbarnstillegg() {
         if (featureToggleService.isEnabled(FeatureToggleConfig.AUTOBREV_OPPHØR_SMÅBARNSTILLEGG)) {
             logger.info("Sending av autobrev ved opphør av småbarnstillegg er enabled.")
-            fagsakRepository.finnAlleFagsakerMedOpphørSmåbarnstilleggIMåned(YearMonth.now().minusMonths(1))
+            fagsakRepository.finnAlleFagsakerMedOpphørSmåbarnstilleggIMåned(
+                iverksatteLøpendeBehandlinger = behandlingRepository.finnSisteIverksatteBehandlingFraLøpendeFagsaker(),
+            )
                 .forEach { fagsakId ->
                     opprettTaskService.opprettAutovedtakForOpphørSmåbarnstilleggTask(
                         fagsakId = fagsakId

@@ -52,12 +52,10 @@ internal class AutobrevOpphørSmåbarnstilleggServiceTest {
     )
 
     private val autobrevOpphørSmåbarnstilleggService = AutobrevOpphørSmåbarnstilleggService(
+        autobrevService = autobrevService,
         persongrunnlagService = persongrunnlagService,
         behandlingService = behandlingService,
-        autobrevService = autobrevService,
-        periodeOvergangsstønadGrunnlagRepository = periodeOvergangsstønadGrunnlagRepository,
-        vedtakService = vedtakService,
-        vedtaksperiodeService = vedtaksperiodeService
+        periodeOvergangsstønadGrunnlagRepository = periodeOvergangsstønadGrunnlagRepository
     )
 
     @Test
@@ -69,6 +67,7 @@ internal class AutobrevOpphørSmåbarnstilleggServiceTest {
             lagTestPersonopplysningGrunnlag(behandlingId = behandlingId, barn3ÅrForrigeMåned)
 
         every { behandlingService.hentAktivForFagsak(any()) } returns behandling
+        every { behandlingService.hentBehandlinger(any()) } returns listOf(behandling)
         every { behandlingService.harBehandlingsårsakAlleredeKjørt(any(), any(), any()) } returns false
         every { persongrunnlagService.hentAktivThrows(any()) } returns personopplysningGrunnlag
         every { periodeOvergangsstønadGrunnlagRepository.findByBehandlingId(any()) } returns emptyList()
