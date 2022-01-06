@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.task.OpprettTaskService
@@ -21,12 +22,13 @@ internal class AutobrevTaskTest {
     val opprettTaskService = mockk<OpprettTaskService>()
     val featureToggleService = mockk<FeatureToggleService>()
     val behandlingService = mockk<BehandlingService>()
+    val behandlingRepository = mockk<BehandlingRepository>()
 
     private val autobrevTask = AutobrevTask(
         fagsakRepository = fagsakRepository,
+        behandlingRepository = behandlingRepository,
         opprettTaskService = opprettTaskService,
-        featureToggleService = featureToggleService,
-        behandlingService = behandlingService
+        featureToggleService = featureToggleService
     )
 
     private val autoBrevTask = Task(
@@ -35,7 +37,7 @@ internal class AutobrevTaskTest {
     )
 
     @Test
-    fun `oppretter 2 SendAutobrev tasker for 6 år og 2 for 18 år`() {
+    fun `oppretter autobrev tasker for 6 år, 2 for 18 år og 1 for småbarnstillegg`() {
 
         val fagsaker = setOf(
             Fagsak(1, aktør = tilAktør(randomFnr())),
@@ -43,10 +45,11 @@ internal class AutobrevTaskTest {
         )
 
         every { fagsakRepository.finnLøpendeFagsakMedBarnMedFødselsdatoInnenfor(any(), any()) } answers { fagsaker }
+        every { fagsakRepository.finnAlleFagsakerMedOpphørSmåbarnstilleggIMåned(any()) } returns listOf(1L)
         every { opprettTaskService.opprettAutovedtakFor6Og18ÅrBarn(any(), any()) } just runs
         every { opprettTaskService.opprettAutovedtakForOpphørSmåbarnstilleggTask(any()) } just runs
         every { featureToggleService.isEnabled(any()) } returns true
-        every { behandlingService.hentAlleBehandlingsIderMedOpphørSmåbarnstilleggIMåned(any()) } returns listOf(1L)
+        every { behandlingRepository.finnSisteIverksatteBehandlingFraLøpendeFagsaker() } returns emptyList()
 
         autobrevTask.doTask(autoBrevTask)
 

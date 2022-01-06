@@ -93,10 +93,6 @@ data class Behandling(
         return "Behandling(id=$id, fagsak=${fagsak.id}, kategori=$kategori, underkategori=$underkategori, steg=$steg)"
     }
 
-    fun erUnderUtredning() = this.steg.rekkefølge < StegType.BESLUTTE_VEDTAK.rekkefølge
-
-    fun erLåstForEndinger() = this.steg.rekkefølge < StegType.BESLUTTE_VEDTAK.rekkefølge
-
     fun låstForEndringerTidspunkt(): LocalDateTime? = this.behandlingStegTilstand
         .filter { it.behandlingSteg.rekkefølge >= StegType.BESLUTTE_VEDTAK.rekkefølge }
         .minOfOrNull { it.opprettetTidspunkt }
@@ -154,6 +150,8 @@ data class Behandling(
         resultat == BehandlingResultat.HENLAGT_FEILAKTIG_OPPRETTET ||
             resultat == BehandlingResultat.HENLAGT_SØKNAD_TRUKKET ||
             resultat == BehandlingResultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE
+
+    fun erVedtatt() = status == BehandlingStatus.AVSLUTTET && !erHenlagt()
 
     fun leggTilBehandlingStegTilstand(nesteSteg: StegType): Behandling {
         if (nesteSteg != StegType.HENLEGG_BEHANDLING) {
@@ -240,7 +238,7 @@ data class Behandling(
     fun erManuellMigrering() = erManuellMigreringForEndreMigreringsdato() || erHelmanuellMigrering()
 
     private fun erOmregning() =
-        this.opprettetÅrsak == BehandlingÅrsak.OMREGNING_6ÅR || this.opprettetÅrsak == BehandlingÅrsak.OMREGNING_18ÅR
+        this.opprettetÅrsak.erOmregningsårsak()
 
     private fun erFødselshendelse() = this.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE
 
@@ -314,11 +312,24 @@ enum class BehandlingÅrsak(val visningsnavn: String) {
     KORREKSJON_VEDTAKSBREV("Korrigere vedtak med egen brevmal"),
     OMREGNING_6ÅR("Omregning 6 år"),
     OMREGNING_18ÅR("Omregning 18 år"),
+    OMREGNING_SMÅBARNSTILLEGG("Omregning småbarnstillegg"),
     SATSENDRING("Satsendring"),
     SMÅBARNSTILLEGG("Småbarnstillegg"),
     MIGRERING("Migrering"),
     ENDRE_MIGRERINGSDATO("Endre migreringsdato"),
-    HELMANUELL_MIGRERING("Manuell migrering")
+    HELMANUELL_MIGRERING("Manuell migrering");
+
+    fun erOmregningsårsak(): Boolean =
+        this == OMREGNING_6ÅR || this == OMREGNING_18ÅR || this == OMREGNING_SMÅBARNSTILLEGG
+
+    fun hentOverstyrtDokumenttittelForOmregningsbehandling(): String? {
+        return when (this) {
+            OMREGNING_6ÅR -> "Vedtak om endret barnetrygd - barn 6 år"
+            OMREGNING_18ÅR -> "Vedtak om endret barnetrygd - barn 18 år"
+            OMREGNING_SMÅBARNSTILLEGG -> "Vedtak om endret barnetrygd - småbarnstillegg"
+            else -> null
+        }
+    }
 }
 
 enum class BehandlingType(val visningsnavn: String) {
