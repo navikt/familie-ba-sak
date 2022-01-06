@@ -68,7 +68,9 @@ class AutobrevOpphørSmåbarnstilleggService(
     }
 
     fun overgangstønadOpphørteForrigeMåned(listePeriodeOvergangsstønadGrunnlag: List<PeriodeOvergangsstønadGrunnlag>): Boolean =
-        listePeriodeOvergangsstønadGrunnlag.maxOfOrNull { it.tom }?.toYearMonth() == YearMonth.now().minusMonths(1)
+        listePeriodeOvergangsstønadGrunnlag.any { periodeOvergangsstønadGrunnlag ->
+            periodeOvergangsstønadGrunnlag.tom.toYearMonth() == YearMonth.now().minusMonths(1)
+        }
 
     fun yngsteBarnFylteTreÅrForrigeMåned(personopplysningGrunnlag: PersonopplysningGrunnlag): Boolean {
         val yngsteBarnSinFødselsdato: YearMonth =
