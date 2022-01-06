@@ -54,6 +54,12 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
     )
     fun finnFagsakerSomSkalAvsluttes(): List<Long>
 
+    /**
+     * Denne skal plukke fagsaker som løper _og_ har barn født innenfor anngitt tidsintervall.
+     * Brukes til å sende ut automatiske brev ved reduksjon 6 og 18 år blant annet.
+     * Ved 18 år og dersom hele fagsaken opphører så skal det ikke sendes ut brev og derfor sjekker
+     * vi kun løpende fagsaker.
+     */
     @Query(
         value = """
         SELECT f FROM Fagsak f
@@ -100,4 +106,22 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
     )
     @Timed
     fun finnFagsakerMedUtvidetBarnetrygdInnenfor(fom: YearMonth, tom: YearMonth): List<Pair<Fagsak, LocalDate>>
+
+    @Query(
+        """
+            SELECT DISTINCT b.fagsak.id
+            FROM AndelTilkjentYtelse aty
+                JOIN Behandling b ON b.id = aty.behandlingId
+                JOIN TilkjentYtelse ty ON b.id = ty.behandling.id
+            WHERE
+                    b.id in :iverksatteLøpendeBehandlinger
+                AND NOT EXISTS (SELECT b2 from Behandling b2 where b2.fagsak.id = b.fagsak.id AND b2.status <> 'AVSLUTTET')
+                AND aty.type = 'SMÅBARNSTILLEGG'
+                AND aty.stønadTom = :stønadTom
+        """,
+    )
+    fun finnAlleFagsakerMedOpphørSmåbarnstilleggIMåned(
+        iverksatteLøpendeBehandlinger: List<Long>,
+        stønadTom: YearMonth = YearMonth.now().minusMonths(1),
+    ): List<Long>
 }

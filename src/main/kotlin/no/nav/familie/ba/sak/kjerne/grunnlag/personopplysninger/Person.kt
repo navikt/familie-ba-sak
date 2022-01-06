@@ -2,6 +2,8 @@ package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import no.nav.familie.ba.sak.common.BaseEntitet
+import no.nav.familie.ba.sak.common.sisteDagIMåned
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.arbeidsforhold.GrArbeidsforhold
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
@@ -14,6 +16,7 @@ import no.nav.familie.kontrakter.felles.Språkkode
 import org.hibernate.annotations.Fetch
 import org.hibernate.annotations.FetchMode
 import java.time.LocalDate
+import java.time.LocalDate.now
 import java.time.Period
 import java.util.Objects
 import javax.persistence.AttributeOverride
@@ -124,9 +127,15 @@ data class Person(
         return Objects.hash(aktør, fødselsdato)
     }
 
-    fun hentAlder(): Int = Period.between(fødselsdato, LocalDate.now()).years
+    fun hentAlder(): Int = Period.between(fødselsdato, now()).years
 
     fun hentSeksårsdag(): LocalDate = fødselsdato.plusYears(6)
+
+    fun fyllerAntallÅrInneværendeMåned(år: Int): Boolean =
+        this.fødselsdato.toYearMonth() == now().minusYears(år.toLong()).toYearMonth()
+
+    fun erYngreEnnInneværendeMåned(år: Int): Boolean =
+        this.fødselsdato.isAfter(now().minusYears(år.toLong()).sisteDagIMåned())
 }
 
 enum class Kjønn {
