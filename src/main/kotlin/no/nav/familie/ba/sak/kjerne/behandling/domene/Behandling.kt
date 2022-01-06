@@ -151,6 +151,8 @@ data class Behandling(
             resultat == BehandlingResultat.HENLAGT_SØKNAD_TRUKKET ||
             resultat == BehandlingResultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE
 
+    fun erVedtatt() = status == BehandlingStatus.AVSLUTTET && !erHenlagt()
+
     fun leggTilBehandlingStegTilstand(nesteSteg: StegType): Behandling {
         if (nesteSteg != StegType.HENLEGG_BEHANDLING) {
             fjernAlleSenereSteg(nesteSteg)

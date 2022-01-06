@@ -47,15 +47,17 @@ class AutobrevService(
             return false
         }
 
+        val vedtaksperioderForVedtatteBehandlinger = behandlingService.hentBehandlinger(fagsakId = fagsakId)
+            .filter { behandling ->
+                behandling.erVedtatt()
+            }
+            .flatMap { behandling ->
+                val vedtak = vedtakService.hentAktivForBehandlingThrows(behandling.id)
+                vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak)
+            }
+
         if (barnAlleredeBegrunnet(
-                vedtaksperioderMedBegrunnelser = behandlingService.hentBehandlinger(fagsakId = fagsakId)
-                    .filter { behandling ->
-                        behandling.status == BehandlingStatus.AVSLUTTET && !behandling.erHenlagt()
-                    }
-                    .flatMap { behandling ->
-                        val vedtak = vedtakService.hentAktivForBehandlingThrows(behandling.id)
-                        vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak)
-                    },
+                vedtaksperioderMedBegrunnelser = vedtaksperioderForVedtatteBehandlinger,
                 standardbegrunnelser = standardbegrunnelser
             )
         ) {
