@@ -2,12 +2,15 @@ package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 
 import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.tilfeldigPerson
+import no.nav.familie.ba.sak.kjerne.behandlingsresultat.YtelsePersonUtils.erAndelMedEndretBeløp
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import java.time.YearMonth
 
 class YtelsePersonUtilsTest {
 
@@ -169,6 +172,63 @@ class YtelsePersonUtilsTest {
                     KravOpprinnelse.INNEVÆRENDE
                 ) && it.erFramstiltKravForIInneværendeBehandling()
             }
+        )
+    }
+
+    @Test
+    fun `Skal gi false dersom det ikke er en andel som får beløpet sitt endret`() {
+        val beløp1 = 1054
+        val beløp2 = 527
+
+        val måned1 = YearMonth.of(2020, 1)
+        val måned2 = YearMonth.of(2020, 2)
+        val måned3 = YearMonth.of(2020, 3)
+        val måned4 = YearMonth.of(2020, 4)
+
+        Assertions.assertFalse(
+            erAndelMedEndretBeløp(
+                listOf(BehandlingsresultatAndelTilkjentYtelse(måned1, måned2, beløp1)),
+                listOf(BehandlingsresultatAndelTilkjentYtelse(måned3, måned4, beløp2))
+            )
+        )
+
+        Assertions.assertFalse(
+            erAndelMedEndretBeløp(
+                listOf(BehandlingsresultatAndelTilkjentYtelse(måned1, måned2, beløp1)),
+                listOf(BehandlingsresultatAndelTilkjentYtelse(måned1, måned3, beløp1))
+            )
+        )
+    }
+
+    @Test
+    fun `Skal gi true dersom det er en andel som får beløpet sitt endret`() {
+        val beløp1 = 1054
+        val beløp2 = 527
+
+        val måned1 = YearMonth.of(2020, 1)
+        val måned2 = YearMonth.of(2020, 2)
+        val måned3 = YearMonth.of(2020, 3)
+        val måned4 = YearMonth.of(2020, 4)
+
+        Assertions.assertTrue(
+            erAndelMedEndretBeløp(
+                listOf(BehandlingsresultatAndelTilkjentYtelse(måned1, måned2, beløp1)),
+                listOf(BehandlingsresultatAndelTilkjentYtelse(måned1, måned2, beløp2))
+            )
+        )
+
+        Assertions.assertTrue(
+            erAndelMedEndretBeløp(
+                listOf(BehandlingsresultatAndelTilkjentYtelse(måned1, måned4, beløp1)),
+                listOf(BehandlingsresultatAndelTilkjentYtelse(måned2, måned3, beløp2))
+            )
+        )
+
+        Assertions.assertTrue(
+            erAndelMedEndretBeløp(
+                listOf(BehandlingsresultatAndelTilkjentYtelse(måned2, måned3, beløp1)),
+                listOf(BehandlingsresultatAndelTilkjentYtelse(måned1, måned4, beløp2))
+            )
         )
     }
 }
