@@ -93,6 +93,8 @@ data class Behandling(
         return "Behandling(id=$id, fagsak=${fagsak.id}, kategori=$kategori, underkategori=$underkategori, steg=$steg)"
     }
 
+    fun erUnderUtredning() = this.steg.rekkefølge < StegType.BESLUTTE_VEDTAK.rekkefølge
+
     fun erLåstForEndinger() = this.steg.rekkefølge < StegType.BESLUTTE_VEDTAK.rekkefølge
 
     fun låstForEndringerTidspunkt(): LocalDateTime? = this.behandlingStegTilstand
@@ -361,7 +363,9 @@ enum class BehandlingStatus {
     UTREDES,
     FATTER_VEDTAK,
     IVERKSETTER_VEDTAK,
-    AVSLUTTET,
+    AVSLUTTET;
+
+    fun erUnderUtredning() = this == OPPRETTET || this == UTREDES
 }
 
 fun BehandlingStatus.erÅpen(): Boolean {

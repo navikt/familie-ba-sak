@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.SatsendringService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
@@ -104,6 +105,88 @@ class BehandlingSatsendringTest(
             stegService = stegService,
             personidentService = personidentService,
         )!!
+
+        // Fjerner mocking slik at den siste satsendringen vi fjernet via mocking nå skal komme med.
+        unmockkObject(SatsService)
+        satsendringService.utførSatsendring(behandling.id)
+
+        val satsendingBehandling = behandlingService.hentAktivForFagsak(fagsakId = behandling.fagsak.id)
+        assertEquals(BehandlingResultat.ENDRET, satsendingBehandling?.resultat)
+        assertEquals(StegType.IVERKSETT_MOT_OPPDRAG, satsendingBehandling?.steg)
+
+        val satsendingsvedtak = vedtakService.hentAktivForBehandling(behandlingId = satsendingBehandling!!.id)
+        assertNull(satsendingsvedtak!!.stønadBrevPdF)
+    }
+
+    @Test
+    fun `Skal tilbakestille åpen behandling ved kjøring av satsendring`() {
+        mockkObject(SatsService)
+        // Grunnen til at denne mockes er egentlig at den indirekte påvirker hva SatsService.hentGyldigSatsFor
+        // returnerer. Det vi ønsker er at den sist tillagte satsendringen ikke kommer med slik at selve
+        // satsendringen som skal kjøres senere faktisk utgjør en endring (slik at behandlingsresultatet blir ENDRET).
+        every { SatsService.tilleggEndringJanuar2022 } returns YearMonth.of(2020, 9)
+
+        every { mockLocalDateService.now() } returns LocalDate.now().minusYears(6) andThen LocalDate.now()
+
+        val scenario = mockServerKlient().lagScenario(
+            RestScenario(
+                søker = RestScenarioPerson(fødselsdato = "1993-01-12", fornavn = "Mor", etternavn = "Søker").copy(
+                    bostedsadresser = mutableListOf(
+                        Bostedsadresse(
+                            angittFlyttedato = LocalDate.now().minusYears(10),
+                            gyldigTilOgMed = null,
+                            matrikkeladresse = Matrikkeladresse(
+                                matrikkelId = 123L,
+                                bruksenhetsnummer = "H301",
+                                tilleggsnavn = "navn",
+                                postnummer = "0202",
+                                kommunenummer = "2231"
+                            )
+                        )
+                    )
+                ),
+                barna = listOf(
+                    RestScenarioPerson(
+                        fødselsdato = LocalDate.now()
+                            .minusYears(6)
+                            .toString(),
+                        fornavn = "Barn",
+                        etternavn = "Barnesen"
+                    ).copy(
+                        bostedsadresser = mutableListOf(
+                            Bostedsadresse(
+                                angittFlyttedato = LocalDate.now().minusYears(6),
+                                gyldigTilOgMed = null,
+                                matrikkeladresse = Matrikkeladresse(
+                                    matrikkelId = 123L,
+                                    bruksenhetsnummer = "H301",
+                                    tilleggsnavn = "navn",
+                                    postnummer = "0202",
+                                    kommunenummer = "2231"
+                                )
+                            )
+                        )
+                    ),
+                )
+            )
+        )
+        val behandling = behandleFødselshendelse(
+            nyBehandlingHendelse = NyBehandlingHendelse(
+                morsIdent = scenario.søker.ident!!,
+                barnasIdenter = listOf(scenario.barna.first().ident!!)
+            ),
+            behandleFødselshendelseTask = behandleFødselshendelseTask,
+            fagsakService = fagsakService,
+            behandlingService = behandlingService,
+            vedtakService = vedtakService,
+            stegService = stegService,
+            personidentService = personidentService,
+        )!!
+
+        val revurdering = familieBaSakKlient().opprettBehandling(
+            søkersIdent = scenario.søker.ident,
+            behandlingType = BehandlingType.REVURDERING
+        )
 
         // Fjerner mocking slik at den siste satsendringen vi fjernet via mocking nå skal komme med.
         unmockkObject(SatsService)

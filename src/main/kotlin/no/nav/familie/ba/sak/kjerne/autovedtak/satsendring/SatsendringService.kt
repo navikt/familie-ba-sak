@@ -5,10 +5,10 @@ import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
+import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
@@ -21,7 +21,8 @@ import java.time.YearMonth
 class SatsendringService(
     private val taskRepository: TaskRepositoryWrapper,
     private val behandlingRepository: BehandlingRepository,
-    private val autovedtakService: AutovedtakService
+    private val autovedtakService: AutovedtakService,
+    private val tilbakestillBehandlingService: TilbakestillBehandlingService
 ) {
 
     /**
@@ -62,7 +63,12 @@ class SatsendringService(
         logger.info("Kjører satsendring på $behandling")
         secureLogger.info("Kjører satsendring på $behandling for ${søkerAktør.aktivFødselsnummer()}")
         if (behandling.fagsak.status != FagsakStatus.LØPENDE) throw Feil("Forsøker å utføre satsendring på ikke løpende fagsak ${behandling.fagsak.id}")
-        if (behandling.status != BehandlingStatus.AVSLUTTET) throw Feil("Forsøker å utføre satsendring på behandling ${behandling.id} som ikke er avsluttet")
+
+        if (behandling.status.erUnderUtredning()) {
+            tilbakestillBehandlingService.tilbakestillDataTilVilkårsvurderingssteg(behandling)
+            logger.info("Tilbakestiller fagsak ${behandling.fagsak} til vilkårsvurderingen")
+            return
+        }
 
         val behandlingEtterBehandlingsresultat =
             autovedtakService.opprettAutomatiskBehandlingOgKjørTilBehandlingsresultat(
