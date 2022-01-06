@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
@@ -74,6 +75,8 @@ data class BehandlingsresultatAndelTilkjentYtelse(
     val stønadTom: YearMonth,
     val kalkulertUtbetalingsbeløp: Int,
 ) {
+    val periode
+        get() = MånedPeriode(stønadFom, stønadTom)
 
     fun erLøpende(inneværendeMåned: YearMonth): Boolean {
         return this.stønadTom > inneværendeMåned

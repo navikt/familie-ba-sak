@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.overlapperHeltEllerDelvisMed
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toLocalDate
 import no.nav.familie.ba.sak.common.toYearMonth
@@ -89,15 +90,15 @@ object YtelsePersonUtils {
                     resultater.add(YtelsePersonResultat.ENDRET)
                 }
             } else {
-                val beløpEndret = (segmenterLagtTil + segmenterFjernet).isEmpty() &&
-                    behandlingsresultatPerson.forrigeAndeler.sumOf { it.sumForPeriode() } != behandlingsresultatPerson.andeler.sumOf { it.sumForPeriode() }
+                val beløpEndret = erBeløpEndret(behandlingsresultatPerson)
 
                 val enesteEndringErLøpendeTilOpphørt =
                     enesteEndringErLøpendeTilOpphørt(
                         segmenterLagtTil = segmenterLagtTil,
                         segmenterFjernet = segmenterFjernet,
                         sisteAndelPåPerson = behandlingsresultatPerson.andeler.maxByOrNull { it.stønadFom },
-                        inneværendeMåned = inneværendeMåned
+                        inneværendeMåned = inneværendeMåned,
+                        beløpEndret = beløpEndret
                     )
 
                 val finnesEndringerTilbakeITid = finnesEndringTilbakeITid(
@@ -132,6 +133,17 @@ object YtelsePersonUtils {
             )
         }
     }
+
+    private fun erBeløpEndret(
+        behandlingsresultatPerson: BehandlingsresultatPerson
+    ): Boolean =
+        behandlingsresultatPerson.forrigeAndeler.any { gammelAndel ->
+            val nyAndelSomOverlapper =
+                behandlingsresultatPerson.andeler.find { gammelAndel.periode.overlapperHeltEllerDelvisMed(it.periode) }
+
+            nyAndelSomOverlapper != null &&
+                gammelAndel.kalkulertUtbetalingsbeløp != nyAndelSomOverlapper.kalkulertUtbetalingsbeløp
+        }
 
     private fun avslagPåNyPerson(
         personSomSjekkes: YtelsePerson,
@@ -175,7 +187,8 @@ object YtelsePersonUtils {
         segmenterLagtTil: LocalDateTimeline<BehandlingsresultatAndelTilkjentYtelse>,
         segmenterFjernet: LocalDateTimeline<BehandlingsresultatAndelTilkjentYtelse>,
         sisteAndelPåPerson: BehandlingsresultatAndelTilkjentYtelse?,
-        inneværendeMåned: YearMonth
+        inneværendeMåned: YearMonth,
+        beløpEndret: Boolean,
     ): Boolean {
         if (sisteAndelPåPerson == null) return true
 
@@ -184,7 +197,11 @@ object YtelsePersonUtils {
             val opphører = stønadSlutt.isBefore(inneværendeMåned.plusMonths(1))
             val sisteForrigeAndel = segmenterFjernet.maxByOrNull { it.fom }
             val ingenFjernetFørStønadslutt = segmenterFjernet.none { it.fom.isBefore(stønadSlutt.toLocalDate()) }
-            opphører && ingenFjernetFørStønadslutt && sisteForrigeAndel != null && sisteForrigeAndel.tom.toYearMonth() >= inneværendeMåned
+            opphører &&
+                ingenFjernetFørStønadslutt &&
+                sisteForrigeAndel != null &&
+                sisteForrigeAndel.tom.toYearMonth() >= inneværendeMåned &&
+                !beløpEndret
         } else {
             false
         }
