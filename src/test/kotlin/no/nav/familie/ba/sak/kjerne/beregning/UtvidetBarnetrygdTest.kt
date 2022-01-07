@@ -10,7 +10,6 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
@@ -47,7 +46,7 @@ internal class UtvidetBarnetrygdTest {
         val vilkårsvurdering = Vilkårsvurdering(behandling = behandling)
 
         val søkerResultat =
-            PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = søker.ident, aktør = søker.aktør)
+            PersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = søker.aktør)
                 .apply {
                     vilkårResultater.addAll(
                         oppfylteVilkårFor(
@@ -68,7 +67,7 @@ internal class UtvidetBarnetrygdTest {
                     )
                 }
         val barnResultater = listOf(barnA, barnB).map {
-            PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = it.ident, aktør = it.aktør)
+            PersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = it.aktør)
                 .apply {
                     vilkårResultater.addAll(
                         oppfylteVilkårFor(
@@ -136,7 +135,7 @@ internal class UtvidetBarnetrygdTest {
         val vilkårsvurdering = Vilkårsvurdering(behandling = behandling)
 
         val søkerResultat =
-            PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = søker.ident, aktør = søker.aktør)
+            PersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = søker.aktør)
                 .apply {
                     vilkårResultater.addAll(
                         oppfylteVilkårFor(
@@ -158,7 +157,6 @@ internal class UtvidetBarnetrygdTest {
                 }
         val barnResultater = PersonResultat(
             vilkårsvurdering = vilkårsvurdering,
-            personIdent = oppfyltBarn.ident,
             aktør = oppfyltBarn.aktør
         )
             .apply {
@@ -217,7 +215,6 @@ internal class UtvidetBarnetrygdTest {
         val vilkårsvurdering = Vilkårsvurdering(behandling = behandling)
         val søkerResultat = PersonResultat(
             vilkårsvurdering = vilkårsvurdering,
-            personIdent = søkerOrdinær.ident,
             aktør = søkerOrdinær.aktør
         )
             .apply {
@@ -243,7 +240,6 @@ internal class UtvidetBarnetrygdTest {
         val barnResultater =
             PersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
-                personIdent = barnOppfylt.ident,
                 aktør = barnOppfylt.aktør
             )
                 .apply {
@@ -298,7 +294,6 @@ internal class UtvidetBarnetrygdTest {
         val vilkårsvurdering = Vilkårsvurdering(behandling = behandling)
         val søkerResultat = PersonResultat(
             vilkårsvurdering = vilkårsvurdering,
-            personIdent = søkerOrdinær.ident,
             aktør = søkerOrdinær.aktør
         )
             .apply {
@@ -324,7 +319,6 @@ internal class UtvidetBarnetrygdTest {
         val barnResultater =
             PersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
-                personIdent = barnOppfylt.ident,
                 aktør = barnOppfylt.aktør
             )
                 .apply {
@@ -380,7 +374,6 @@ internal class UtvidetBarnetrygdTest {
         val vilkårsvurdering = Vilkårsvurdering(behandling = behandling)
         val søkerResultat = PersonResultat(
             vilkårsvurdering = vilkårsvurdering,
-            personIdent = søkerOrdinær.ident,
             aktør = søkerOrdinær.aktør
         )
             .apply {
@@ -406,7 +399,6 @@ internal class UtvidetBarnetrygdTest {
         val barnResultater =
             PersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
-                personIdent = barnOppfylt.ident,
                 aktør = barnOppfylt.aktør
             )
                 .apply {
@@ -460,7 +452,6 @@ internal class UtvidetBarnetrygdTest {
         val vilkårsvurdering = Vilkårsvurdering(behandling = behandling)
         val søkerResultat = PersonResultat(
             vilkårsvurdering = vilkårsvurdering,
-            personIdent = søkerOrdinær.ident,
             aktør = søkerOrdinær.aktør
         )
             .apply {
@@ -501,7 +492,6 @@ internal class UtvidetBarnetrygdTest {
         val barnResultater =
             PersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
-                personIdent = barnOppfylt.ident,
                 aktør = barnOppfylt.aktør
             )
                 .apply {
@@ -556,7 +546,6 @@ internal class UtvidetBarnetrygdTest {
         val vilkårsvurdering = Vilkårsvurdering(behandling = behandling)
         val søkerResultat = PersonResultat(
             vilkårsvurdering = vilkårsvurdering,
-            personIdent = søkerOrdinær.ident,
             aktør = søkerOrdinær.aktør
         )
             .apply {
@@ -597,7 +586,6 @@ internal class UtvidetBarnetrygdTest {
         val barnResultater =
             PersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
-                personIdent = barnOppfylt.ident,
                 aktør = barnOppfylt.aktør
             )
                 .apply {
@@ -687,7 +675,6 @@ internal class UtvidetBarnetrygdTest {
     ): List<Person> = this.map {
         Person(
             aktør = tilAktør(it.ident),
-            personIdent = PersonIdent(it.ident),
             type = it.rolle,
             personopplysningGrunnlag = personopplysningGrunnlag,
             fødselsdato = fødselsdato,

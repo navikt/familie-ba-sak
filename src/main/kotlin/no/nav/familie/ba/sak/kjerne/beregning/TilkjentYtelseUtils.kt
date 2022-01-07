@@ -114,7 +114,7 @@ object TilkjentYtelseUtils {
                     andelerTilkjentYtelse = andelerTilkjentYtelseSøker + andelerTilkjentYtelseBarna,
                     barnasIdenterOgFødselsdatoer = personopplysningGrunnlag.barna.map {
                         Pair(
-                            it.personIdent.ident,
+                            it.aktør.aktørId,
                             it.fødselsdato
                         )
                     },

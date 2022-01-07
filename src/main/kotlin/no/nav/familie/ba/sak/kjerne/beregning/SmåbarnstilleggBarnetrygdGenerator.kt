@@ -118,7 +118,7 @@ data class SmåbarnstilleggBarnetrygdGenerator(
             barnasIdenterOgFødselsdatoer.map { (ident, fødselsdato) ->
                 val barnetsMånedPeriodeAndeler = LocalDateTimeline(
                     barnasAndeler
-                        .filter { andel -> andel.aktør.aktivFødselsnummer() == ident }
+                        .filter { andel -> andel.aktør.aktørId == ident }
                         .map { andel ->
                             LocalDateSegment(
                                 andel.stønadFom.førsteDagIInneværendeMåned(),

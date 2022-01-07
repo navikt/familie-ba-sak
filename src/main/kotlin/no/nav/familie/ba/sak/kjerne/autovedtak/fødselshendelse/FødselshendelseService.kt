@@ -57,12 +57,14 @@ class FødselshendelseService(
     fun behandleFødselshendelse(nyBehandling: NyBehandlingHendelse) {
         val morsAktør = personidentService.hentOgLagreAktør(nyBehandling.morsIdent)
         val morsÅpneBehandling = hentÅpenBehandling(aktør = morsAktør)
+        val barnsIdenter = personidentService.hentOgLagreAktørIder(nyBehandling.barnasIdenter)
+
         if (morsÅpneBehandling != null) {
             val barnaPåÅpenBehandling =
-                persongrunnlagService.hentBarna(behandling = morsÅpneBehandling).map { it.personIdent.ident }
+                persongrunnlagService.hentBarna(behandling = morsÅpneBehandling).map { it.aktør }
 
             if (barnPåHendelseBlirAlleredeBehandletIÅpenBehandling(
-                    barnaPåHendelse = nyBehandling.barnasIdenter,
+                    barnaPåHendelse = barnsIdenter,
                     barnaPåÅpenBehandling = barnaPåÅpenBehandling
                 )
             ) {

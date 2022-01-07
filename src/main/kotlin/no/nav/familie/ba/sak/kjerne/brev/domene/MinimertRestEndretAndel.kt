@@ -40,7 +40,7 @@ fun List<MinimertRestEndretAndel>.somOverlapper(nullableMånedPeriode: NullableM
 
 fun EndretUtbetalingAndel.tilMinimertEndretUtbetalingAndel() = MinimertRestEndretAndel(
     periode = this.periode,
-    personIdent = this.person?.personIdent?.ident ?: throw Feil(
+    personIdent = this.person?.aktør?.aktivFødselsnummer() ?: throw Feil(
         "Har ikke ident på endretUtbetalingsandel ${this.id} " +
             "ved konvertering til minimertEndretUtbetalingsandel"
     ),

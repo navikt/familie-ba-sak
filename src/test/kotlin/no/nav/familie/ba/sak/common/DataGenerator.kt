@@ -174,7 +174,6 @@ fun tilfeldigPerson(
     Person(
         id = nestePersonId(),
         aktør = aktør,
-        personIdent = PersonIdent(aktør.aktivFødselsnummer()),
         fødselsdato = fødselsdato,
         type = personType,
         personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 0),
@@ -193,7 +192,6 @@ fun tilfeldigSøker(
     Person(
         id = nestePersonId(),
         aktør = aktør,
-        personIdent = PersonIdent(aktør.aktivFødselsnummer()),
         fødselsdato = fødselsdato,
         type = personType,
         personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 0),
@@ -318,7 +316,6 @@ fun lagTestPersonopplysningGrunnlag(
 
     val søker = Person(
         aktør = søkerAktør,
-        personIdent = PersonIdent(søkerPersonIdent),
         type = PersonType.SØKER,
         personopplysningGrunnlag = personopplysningGrunnlag,
         fødselsdato = LocalDate.of(2019, 1, 1),
@@ -340,7 +337,6 @@ fun lagTestPersonopplysningGrunnlag(
     barnasIdenter.map {
         personopplysningGrunnlag.personer.add(
             Person(
-                personIdent = PersonIdent(it),
                 aktør = barnAktør.first { aktørId ->
                     aktørId.personidenter.map { personident -> personident.fødselsnummer }
                         .any { fødselsnummer -> fødselsnummer == it }
@@ -466,7 +462,6 @@ fun lagPersonResultat(
 ): PersonResultat {
     val personResultat = PersonResultat(
         vilkårsvurdering = vilkårsvurdering,
-        personIdent = fnr,
         aktør = aktør
     )
 
@@ -533,7 +528,6 @@ fun lagVilkårsvurdering(
     )
     val personResultat = PersonResultat(
         vilkårsvurdering = vilkårsvurdering,
-        personIdent = søkerFnr,
         aktør = søkerAktør
     )
     personResultat.setSortedVilkårResultater(
@@ -978,7 +972,6 @@ fun lagPerson(
     kjønn: Kjønn = Kjønn.KVINNE
 ) = Person(
     aktør = aktør,
-    personIdent = personIdent,
     type = type,
     personopplysningGrunnlag = personopplysningGrunnlag,
     fødselsdato = fødselsdato,

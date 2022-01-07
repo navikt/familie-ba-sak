@@ -68,7 +68,7 @@ class SmåbarnstilleggService(
             forrigeAndelerTilkjentYtelse = tilkjentYtelseFraSistIverksatteBehandling.andelerTilkjentYtelse.toList(),
             barnasIdenterOgFødselsdatoer = persongrunnlagFraSistIverksatteBehandling.barna.map {
                 Pair(
-                    it.personIdent.ident,
+                    it.aktør.aktørId,
                     it.fødselsdato
                 )
             },

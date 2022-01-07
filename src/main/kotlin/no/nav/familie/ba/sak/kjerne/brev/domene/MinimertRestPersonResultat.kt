@@ -17,7 +17,7 @@ data class MinimertRestPersonResultat(
 
 fun PersonResultat.tilMinimertPersonResultat() =
     MinimertRestPersonResultat(
-        personIdent = this.personIdent,
+        personIdent = this.aktør.aktivFødselsnummer(),
         minimerteVilkårResultater = this.vilkårResultater.map { it.tilMinimertVilkårResultat() },
         andreVurderinger = this.andreVurderinger.toList()
     )

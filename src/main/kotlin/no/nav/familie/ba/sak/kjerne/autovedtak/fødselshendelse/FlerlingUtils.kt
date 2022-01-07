@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse
 
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import org.slf4j.Logger
 
 fun finnBarnSomSkalBehandlesForMor(
@@ -39,8 +40,8 @@ fun finnBarnSomSkalBehandlesForMor(
 }
 
 fun barnPåHendelseBlirAlleredeBehandletIÅpenBehandling(
-    barnaPåHendelse: List<String>,
-    barnaPåÅpenBehandling: List<String>
+    barnaPåHendelse: List<Aktør>,
+    barnaPåÅpenBehandling: List<Aktør>
 ): Boolean {
     return barnaPåHendelse.all { barnaPåÅpenBehandling.contains(it) }
 }

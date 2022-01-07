@@ -245,7 +245,7 @@ class TestVilkårsvurderingBuilder(sakType: String) {
         val ident = person.aktør.aktivFødselsnummer()
         val aktørId = person.aktør
         val personResultat =
-            identPersonResultatMap.getOrPut(ident) { PersonResultat(0, vilkårsvurdering, ident, aktørId) }
+            identPersonResultatMap.getOrPut(ident) { PersonResultat(0, vilkårsvurdering, aktørId) }
 
         val testperiode = TestPeriode.parse(periode)
 
