@@ -19,7 +19,7 @@ class SatsendringTask(
 
     override fun doTask(task: Task) {
         val behandlingId = task.payload.toLong()
-        satsendringService.utførSatsendring(behandlingId)
+        satsendringService.utførSatsendring(sistIverksatteBehandlingId = behandlingId)
     }
 
     companion object {

@@ -160,6 +160,19 @@ fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType): StegTyp
     val behandlingType = behandling.type
     val behandlingÅrsak = behandling.opprettetÅrsak
 
+    if (behandlingÅrsak.erOmregningsårsak()) {
+        return when (utførendeStegType) {
+            REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
+            VILKÅRSVURDERING -> BEHANDLINGSRESULTAT
+            BEHANDLINGSRESULTAT -> JOURNALFØR_VEDTAKSBREV
+            JOURNALFØR_VEDTAKSBREV -> DISTRIBUER_VEDTAKSBREV
+            DISTRIBUER_VEDTAKSBREV -> FERDIGSTILLE_BEHANDLING
+            FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET
+            BEHANDLING_AVSLUTTET -> BEHANDLING_AVSLUTTET
+            else -> throw IllegalStateException("Stegtype ${utførendeStegType.displayName()} er ikke implementert for behandling med årsak $behandlingÅrsak og type $behandlingType.")
+        }
+    }
+
     return when (behandlingÅrsak) {
         BehandlingÅrsak.TEKNISK_OPPHØR -> throw Feil("Teknisk opphør er ikke mulig å behandle lenger")
         BehandlingÅrsak.MIGRERING -> {
@@ -234,18 +247,6 @@ fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType): StegTyp
                 IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
                 VENTE_PÅ_STATUS_FRA_ØKONOMI -> IVERKSETT_MOT_FAMILIE_TILBAKE
                 IVERKSETT_MOT_FAMILIE_TILBAKE -> JOURNALFØR_VEDTAKSBREV
-                JOURNALFØR_VEDTAKSBREV -> DISTRIBUER_VEDTAKSBREV
-                DISTRIBUER_VEDTAKSBREV -> FERDIGSTILLE_BEHANDLING
-                FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET
-                BEHANDLING_AVSLUTTET -> BEHANDLING_AVSLUTTET
-                else -> throw IllegalStateException("Stegtype ${utførendeStegType.displayName()} er ikke implementert for behandling med årsak $behandlingÅrsak og type $behandlingType.")
-            }
-        }
-        BehandlingÅrsak.OMREGNING_18ÅR, BehandlingÅrsak.OMREGNING_6ÅR -> {
-            when (utførendeStegType) {
-                REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
-                VILKÅRSVURDERING -> BEHANDLINGSRESULTAT
-                BEHANDLINGSRESULTAT -> JOURNALFØR_VEDTAKSBREV
                 JOURNALFØR_VEDTAKSBREV -> DISTRIBUER_VEDTAKSBREV
                 DISTRIBUER_VEDTAKSBREV -> FERDIGSTILLE_BEHANDLING
                 FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET
