@@ -33,6 +33,11 @@ spec:
         databases:
           - name: familie-ba-sak
             envVarPrefix: DB
+  azure:
+    application:
+      claims:
+        extra:
+          - "NAVident"
   accessPolicy:
     inbound:
       rules:
