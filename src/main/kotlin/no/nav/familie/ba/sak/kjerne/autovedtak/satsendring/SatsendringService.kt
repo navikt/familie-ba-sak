@@ -52,6 +52,30 @@ class SatsendringService(
     }
 
     /**
+     * Finner behandlinger som trenger satsendring.
+     * Se https://github.com/navikt/familie-ba-sak/pull/1361 for eksempel på scheduler.
+     *
+     * Obs! Denne utplukkingen plukker ut siste iverksatte behandling.
+     * Siden den siste iverksatte ikke nødvendigvis er den aktive kan det være
+     * åpne behandlinger på fagsaken det kjøres satsendring for. Dette skal bli håndtert i kjøringen
+     * av satsendringsbehandlingen.
+     */
+    fun finnBehandlingerForSatsendring(
+        gammelSats: Int,
+        satsendringMåned: YearMonth
+    ): List<Long> {
+        val behandlinger = behandlingRepository.finnBehandlingerForSatsendring(
+            iverksatteLøpende = behandlingRepository.finnSisteIverksatteBehandlingFraLøpendeFagsaker(),
+            gammelSats = gammelSats,
+            månedÅrForEndring = satsendringMåned
+        )
+
+        logger.info("Oppretter ${behandlinger.size} tasker på saker som trenger satsendring.")
+
+        return behandlinger
+    }
+
+    /**
      * Gjennomfører og commiter revurderingsbehandling
      * med årsak satsendring og uten endring i vilkår.
      *
@@ -115,30 +139,6 @@ class SatsendringService(
             )
         }
         taskRepository.save(task)
-    }
-
-    /**
-     * Finner behandlinger som trenger satsendring.
-     * Se https://github.com/navikt/familie-ba-sak/pull/1361 for eksempel på scheduler.
-     *
-     * Obs! Denne utplukkingen plukker ut siste iverksatte behandling.
-     * Siden den siste iverksatte ikke nødvendigvis er den aktive kan det være
-     * åpne behandlinger på fagsaken det kjøres satsendring for. Dette skal bli håndtert i kjøringen
-     * av satsendringsbehandlingen.
-     */
-    private fun finnBehandlingerForSatsendring(
-        gammelSats: Int,
-        satsendringMåned: YearMonth
-    ): List<Long> {
-        val behandlinger = behandlingRepository.finnBehandlingerForSatsendring(
-            iverksatteLøpende = behandlingRepository.finnSisteIverksatteBehandlingFraLøpendeFagsaker(),
-            gammelSats = gammelSats,
-            månedÅrForEndring = satsendringMåned
-        )
-
-        logger.info("Oppretter ${behandlinger.size} tasker på saker som trenger satsendring.")
-
-        return behandlinger
     }
 
     companion object {
