@@ -23,7 +23,7 @@ class SendAutobrevOpphørSmåbarnstilleggTask(
     override fun doTask(task: Task) {
         val autobrevDTO = objectMapper.readValue(task.payload, AutobrevOpphørSmåbarnstilleggDTO::class.java)
 
-        autobrevOpphørSmåbarnstilleggService.kjørBehandlingOgSendBrevForOpphørAvSmåbarnstillegg(behandlingId = autobrevDTO.behandlingId)
+        autobrevOpphørSmåbarnstilleggService.kjørBehandlingOgSendBrevForOpphørAvSmåbarnstillegg(fagsakId = autobrevDTO.fagsakId)
     }
 
     companion object {

@@ -10,14 +10,15 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.integrasjoner.`ef-sak`.EfSakRestClient
-import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.kjerne.steg.StegService
@@ -29,12 +30,10 @@ import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad
 import no.nav.familie.kontrakter.felles.ef.PerioderOvergangsstønadResponse
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.MethodOrderer
-import org.junit.jupiter.api.Order
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestMethodOrder
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
 import org.springframework.test.annotation.DirtiesContext
@@ -42,20 +41,19 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 @DirtiesContext
-@TestMethodOrder(MethodOrderer.OrderAnnotation::class)
 class AutobrevSmåbarnstilleggOpphørTest(
     @Autowired private val fagsakService: FagsakService,
+    @Autowired private val fagsakRepository: FagsakRepository,
     @Autowired private val behandlingService: BehandlingService,
     @Autowired private val vedtakService: VedtakService,
     @Autowired private val stegService: StegService,
     @Autowired private val efSakRestClient: EfSakRestClient,
-    @Autowired private val økonomiKlient: ØkonomiKlient,
+    @Autowired private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository
 ) : AbstractVerdikjedetest() {
 
     private val barnFødselsdato: LocalDate = LocalDate.now().minusYears(2)
 
     @Test
-    @Order(1)
     fun `Plukk riktige behandlinger - skal være nyeste, løpende med opphør i småbarnstillegg for valgt måned`() {
 
         val personScenario1: RestScenario = lagScenario(barnFødselsdato)
@@ -89,15 +87,23 @@ class AutobrevSmåbarnstilleggOpphørTest(
             barnFødselsdato = barnFødselsdato,
         )
 
-        val behandlinger: List<Long> =
-            behandlingService.hentAlleBehandlingsIderMedOpphørSmåbarnstilleggIMåned(
-                måned = YearMonth.now().minusMonths(1)
+        val andelerForSmåbarnstilleggFagsak1Behandling2 =
+            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = fagsak2behandling2.id)
+        val førsteDagIStønadTomMåned = YearMonth.now().minusMonths(1)
+        assertEquals(
+            førsteDagIStønadTomMåned,
+            andelerForSmåbarnstilleggFagsak1Behandling2.maxByOrNull {
+                it.stønadTom == YearMonth.now().minusMonths(1) && it.erSmåbarnstillegg()
+            }?.stønadTom
+        )
+
+        val fagsaker: List<Long> =
+            fagsakRepository.finnAlleFagsakerMedOpphørSmåbarnstilleggIMåned(
+                iverksatteLøpendeBehandlinger = listOf(fagsak1behandling2.id, fagsak2behandling2.id),
             )
 
-        assertTrue(behandlinger.containsAll(listOf(fagsak1behandling2.id, fagsak2behandling2.id)))
-        assertFalse(behandlinger.contains(fagsak1behanding1.id))
-        assertFalse(behandlinger.contains(fagsak2behandling1.id))
-        assertFalse(behandlinger.contains(fagsak1behandling3åpen.id))
+        assertTrue(fagsaker.containsAll(listOf(fagsak2.id)))
+        assertFalse(fagsaker.contains(fagsak1.id))
     }
 
     fun lagScenario(barnFødselsdato: LocalDate): RestScenario = mockServerKlient().lagScenario(

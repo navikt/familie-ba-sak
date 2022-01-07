@@ -35,7 +35,7 @@ fun nesteGyldigeTriggertidForBehandlingIHverdager(
     return date
 }
 
-private fun LocalDateTime.erHverdag(plusDays: Long): Boolean {
+fun LocalDateTime.erHverdag(plusDays: Long): Boolean {
     return when (this.plusDays(plusDays).dayOfWeek) {
         DayOfWeek.MONDAY -> true
         DayOfWeek.TUESDAY -> true

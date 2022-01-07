@@ -18,6 +18,7 @@ import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
 import no.nav.familie.kontrakter.felles.simulering.SimuleringMottaker
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -50,6 +51,7 @@ class SimuleringService(
 
             return økonomiKlient.hentSimulering(utbetalingsoppdrag)?.data
         } catch (feil: Throwable) {
+            secureLogger.error("Henting av simuleringsresultat feilet: ${feil.stackTraceToString()}")
             if (feil is FunksjonellFeil) throw feil
             else throw Feil("Henting av simuleringsresultat feilet: ${feil.message}")
         }
@@ -136,5 +138,10 @@ class SimuleringService(
 
     fun hentFeilutbetaling(økonomiSimuleringMottakere: List<ØkonomiSimuleringMottaker>): BigDecimal {
         return vedtakSimuleringMottakereTilRestSimulering(økonomiSimuleringMottakere).feilutbetaling
+    }
+
+    companion object {
+
+        private val secureLogger = LoggerFactory.getLogger("secureLogger")
     }
 }

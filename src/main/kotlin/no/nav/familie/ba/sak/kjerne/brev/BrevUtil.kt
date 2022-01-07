@@ -66,7 +66,8 @@ private fun hentAutomatiskVedtaksbrevtype(behandlingÅrsak: BehandlingÅrsak, fa
         }
         BehandlingÅrsak.OMREGNING_6ÅR,
         BehandlingÅrsak.OMREGNING_18ÅR,
-        BehandlingÅrsak.SMÅBARNSTILLEGG -> Brevmal.AUTOVEDTAK_BARN_6_OG_18_ÅR_OG_SMÅBARNSTILLEGG
+        BehandlingÅrsak.SMÅBARNSTILLEGG,
+        BehandlingÅrsak.OMREGNING_SMÅBARNSTILLEGG -> Brevmal.AUTOVEDTAK_BARN_6_OG_18_ÅR_OG_SMÅBARNSTILLEGG
         else -> throw Feil("Det er ikke laget funksjonalitet for automatisk behandling for $behandlingÅrsak")
     }
 
@@ -156,9 +157,7 @@ fun hentSaksbehandlerOgBeslutter(behandling: Behandling, totrinnskontroll: Totri
 
 fun hentOverstyrtDokumenttittel(behandling: Behandling): String? {
     return if (behandling.type == BehandlingType.REVURDERING) {
-        when {
-            behandling.opprettetÅrsak == BehandlingÅrsak.OMREGNING_6ÅR -> "Vedtak om endret barnetrygd - barn 6 år"
-            behandling.opprettetÅrsak == BehandlingÅrsak.OMREGNING_18ÅR -> "Vedtak om endret barnetrygd - barn 18 år"
+        behandling.opprettetÅrsak.hentOverstyrtDokumenttittelForOmregningsbehandling() ?: when {
             listOf(
                 INNVILGET,
                 DELVIS_INNVILGET,
