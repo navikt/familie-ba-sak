@@ -96,6 +96,7 @@ class IntegrasjonClient(
         maxAttempts = 3,
         backoff = Backoff(delayExpression = RETRY_BACKOFF_5000MS)
     )
+    @Cacheable("behandlendeEnhet", cacheManager = "kodeverkCache")
     fun hentBehandlendeEnhet(ident: String): List<Arbeidsfordelingsenhet> {
         val uri = UriComponentsBuilder.fromUri(integrasjonUri)
             .pathSegment("arbeidsfordeling", "enhet", "BAR")

@@ -158,14 +158,14 @@ class ArbeidsfordelingIntegrationTest(
             bostedsadresser = mutableListOf(søkerBostedsadresse)
         )
 
-        every { integrasjonClient.hentBehandlendeEnhet(SØKER_FNR) } returns listOf(
+        every { integrasjonClient.hentBehandlendeEnhet(eq(SØKER_FNR)) } returns listOf(
             Arbeidsfordelingsenhet(
                 enhetId = IKKE_FORTROLIG_ENHET,
                 enhetNavn = "vanlig enhet"
             )
         )
 
-        every { integrasjonClient.hentBehandlendeEnhet(BARN_MED_DISKRESJONSKODE) } returns listOf(
+        every { integrasjonClient.hentBehandlendeEnhet(eq(BARN_MED_DISKRESJONSKODE)) } returns listOf(
             Arbeidsfordelingsenhet(
                 enhetId = FORTROLIG_ENHET,
                 enhetNavn = "Diskresjonsenhet"
