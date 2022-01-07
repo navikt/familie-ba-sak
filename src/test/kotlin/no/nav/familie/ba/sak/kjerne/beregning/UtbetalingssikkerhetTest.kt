@@ -23,24 +23,9 @@ import java.time.LocalDateTime
 class UtbetalingssikkerhetTest {
 
     @Test
-    fun `Skal kaste feil ved endring av tilkjent ytelse andel som er mer enn 3 år tilbake i tid`() {
+    fun `Skal kaste feil ved etterbetaling som er mer enn 3 år tilbake i tid`() {
         val person1 = tilfeldigPerson()
         val person2 = tilfeldigPerson()
-
-        val andel = listOf(
-            lagAndelTilkjentYtelse(
-                fom = inneværendeMåned().minusYears(4),
-                tom = inneværendeMåned(),
-                beløp = 2108,
-                person = person1
-            ),
-            lagAndelTilkjentYtelse(
-                fom = inneværendeMåned().minusYears(4),
-                tom = inneværendeMåned(),
-                beløp = 2108,
-                person = person2
-            ),
-        )
 
         val forrigeAndel = listOf(
             lagAndelTilkjentYtelse(
@@ -57,26 +42,33 @@ class UtbetalingssikkerhetTest {
             ),
         )
 
+        val andel = listOf(
+            lagAndelTilkjentYtelse(
+                fom = inneværendeMåned().minusYears(4),
+                tom = inneværendeMåned(),
+                beløp = 2108,
+                person = person1
+            ),
+            lagAndelTilkjentYtelse(
+                fom = inneværendeMåned().minusYears(4),
+                tom = inneværendeMåned(),
+                beløp = 2108,
+                person = person2
+            ),
+        )
+
         assertThrows<UtbetalingsikkerhetFeil> {
             TilkjentYtelseValidering.validerAtTilkjentYtelseHarGyldigEtterbetalingsperiode(
-                andelerTilkjentYtelse = andel,
                 forrigeAndelerTilkjentYtelse = forrigeAndel,
-                opprettetTidspunkt = LocalDateTime.now()
-            )
-        }
-
-        assertThrows<UtbetalingsikkerhetFeil> {
-            TilkjentYtelseValidering.validerAtTilkjentYtelseHarGyldigEtterbetalingsperiode(
                 andelerTilkjentYtelse = andel,
-                forrigeAndelerTilkjentYtelse = emptyList(),
                 opprettetTidspunkt = LocalDateTime.now()
             )
         }
 
         assertThrows<UtbetalingsikkerhetFeil> {
             TilkjentYtelseValidering.validerAtTilkjentYtelseHarGyldigEtterbetalingsperiode(
+                forrigeAndelerTilkjentYtelse = forrigeAndel,
                 andelerTilkjentYtelse = emptyList(),
-                forrigeAndelerTilkjentYtelse = forrigeAndel,
                 opprettetTidspunkt = LocalDateTime.now()
             )
         }
@@ -86,7 +78,7 @@ class UtbetalingssikkerhetTest {
     fun `Skal ikke kaste feil ved uendret tilkjent ytelse andel mer enn 3 år tilbake`() {
         val person1 = tilfeldigPerson()
 
-        val andel = listOf(
+        val forrigeAndel = listOf(
             lagAndelTilkjentYtelse(
                 fom = inneværendeMåned().minusYears(4),
                 tom = inneværendeMåned(),
@@ -95,7 +87,7 @@ class UtbetalingssikkerhetTest {
             ),
         )
 
-        val forrigeAndel = listOf(
+        val andel = listOf(
             lagAndelTilkjentYtelse(
                 fom = inneværendeMåned().minusYears(4),
                 tom = inneværendeMåned(),
@@ -106,8 +98,47 @@ class UtbetalingssikkerhetTest {
 
         assertDoesNotThrow {
             TilkjentYtelseValidering.validerAtTilkjentYtelseHarGyldigEtterbetalingsperiode(
-                andelerTilkjentYtelse = andel,
                 forrigeAndelerTilkjentYtelse = forrigeAndel,
+                andelerTilkjentYtelse = andel,
+                opprettetTidspunkt = LocalDateTime.now()
+            )
+        }
+    }
+
+    @Test
+    fun `Skal ikke kaste feil ved reduksjon av beløp mer enn 3 år tilbake`() {
+        val person1 = tilfeldigPerson()
+
+        val forrigeAndel = listOf(
+            lagAndelTilkjentYtelse(
+                fom = inneværendeMåned().minusYears(4),
+                tom = inneværendeMåned(),
+                beløp = 2108,
+                person = person1
+            ),
+        )
+
+        val andel = listOf(
+            lagAndelTilkjentYtelse(
+                fom = inneværendeMåned().minusYears(4),
+                tom = inneværendeMåned(),
+                beløp = 1054,
+                person = person1
+            ),
+        )
+
+        assertDoesNotThrow {
+            TilkjentYtelseValidering.validerAtTilkjentYtelseHarGyldigEtterbetalingsperiode(
+                forrigeAndelerTilkjentYtelse = forrigeAndel,
+                andelerTilkjentYtelse = andel,
+                opprettetTidspunkt = LocalDateTime.now()
+            )
+        }
+
+        assertDoesNotThrow {
+            TilkjentYtelseValidering.validerAtTilkjentYtelseHarGyldigEtterbetalingsperiode(
+                forrigeAndelerTilkjentYtelse = forrigeAndel,
+                andelerTilkjentYtelse = emptyList(),
                 opprettetTidspunkt = LocalDateTime.now()
             )
         }
@@ -117,15 +148,6 @@ class UtbetalingssikkerhetTest {
     fun `Skal ikke kaste feil ved endring av tilkjent ytelse andel som er mindre enn 3 år tilbake i tid`() {
         val person1 = tilfeldigPerson()
 
-        val andel = listOf(
-            lagAndelTilkjentYtelse(
-                fom = inneværendeMåned().minusYears(4),
-                tom = inneværendeMåned().minusYears(2),
-                beløp = 2108,
-                person = person1
-            ),
-        )
-
         val forrigeAndel = listOf(
             lagAndelTilkjentYtelse(
                 fom = inneværendeMåned().minusYears(4),
@@ -135,26 +157,35 @@ class UtbetalingssikkerhetTest {
             ),
         )
 
+        val andel = listOf(
+            lagAndelTilkjentYtelse(
+                fom = inneværendeMåned().minusYears(4),
+                tom = inneværendeMåned().minusYears(2),
+                beløp = 2108,
+                person = person1
+            ),
+        )
+
         assertDoesNotThrow {
             TilkjentYtelseValidering.validerAtTilkjentYtelseHarGyldigEtterbetalingsperiode(
-                andelerTilkjentYtelse = andel,
                 forrigeAndelerTilkjentYtelse = forrigeAndel,
+                andelerTilkjentYtelse = andel,
                 opprettetTidspunkt = LocalDateTime.now().minusYears(2)
             )
         }
 
         assertDoesNotThrow {
             TilkjentYtelseValidering.validerAtTilkjentYtelseHarGyldigEtterbetalingsperiode(
-                andelerTilkjentYtelse = andel,
                 forrigeAndelerTilkjentYtelse = emptyList(),
+                andelerTilkjentYtelse = andel,
                 opprettetTidspunkt = LocalDateTime.now().minusYears(2)
             )
         }
 
         assertDoesNotThrow {
             TilkjentYtelseValidering.validerAtTilkjentYtelseHarGyldigEtterbetalingsperiode(
-                andelerTilkjentYtelse = emptyList(),
                 forrigeAndelerTilkjentYtelse = forrigeAndel,
+                andelerTilkjentYtelse = emptyList(),
                 opprettetTidspunkt = LocalDateTime.now().minusYears(2)
             )
         }

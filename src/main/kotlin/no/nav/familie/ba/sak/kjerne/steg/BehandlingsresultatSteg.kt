@@ -87,8 +87,8 @@ class BehandlingsresultatSteg(
             forrigeBehandling?.let { beregningService.hentOptionalTilkjentYtelseForBehandling(behandlingId = it.id) }
 
         validerAtTilkjentYtelseHarGyldigEtterbetalingsperiode(
-            andelerTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelse.toList(),
             forrigeAndelerTilkjentYtelse = forrigeTilkjentYtelse?.andelerTilkjentYtelse?.toList(),
+            andelerTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelse.toList(),
             opprettetTidspunkt = tilkjentYtelse.behandling.opprettetTidspunkt
         )
 

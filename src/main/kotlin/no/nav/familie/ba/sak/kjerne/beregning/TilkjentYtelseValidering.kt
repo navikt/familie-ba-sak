@@ -43,8 +43,8 @@ fun hentBarnasAndeler(andeler: List<AndelTilkjentYtelse>, barna: List<Person>) =
 object TilkjentYtelseValidering {
 
     fun validerAtTilkjentYtelseHarGyldigEtterbetalingsperiode(
-        andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
         forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>?,
+        andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
         opprettetTidspunkt: LocalDateTime,
     ) {
         val gyldigEtterbetalingFom = hentGyldigEtterbetalingFom(opprettetTidspunkt)
@@ -101,34 +101,33 @@ object TilkjentYtelseValidering {
             hentTidslinjeForAndelerTilkjentYtelse(forrigeAndelerTilkjentYtelseForPerson?.toList())
         val andelerTidslinje = hentTidslinjeForAndelerTilkjentYtelse(andelerTilkjentYtelseForPerson.toList())
 
-        val erAndelTilkjentYtelseMedEndretBeløpMerEnn3ÅrTilbake =
-            erAndelTilkjentYtelseMedEndretBeløpMerEnn3ÅrTilbake(
+        val erAndelTilkjentYtelseMedØktBeløpMerEnn3ÅrTilbake =
+            erAndelTilkjentYtelseMedØktBeløpMerEnn3ÅrTilbake(
                 andelerTidslinje = andelerTidslinje,
                 forrigeAndelerTidslinje = forrigeAndelerTidslinje,
                 gyldigEtterbetalingFom = gyldigEtterbetalingFom
             )
 
-        val erLagtTilEllerFjernetSegmentMerEnn3ÅrTilbake =
-            erLagtTilEllerFjernetSegmentMerEnn3ÅrTilbake(
+        val erLagtTilSegmentMerEnn3ÅrTilbake =
+            erLagtTilSegmentMerEnn3ÅrTilbake(
                 andelerTidslinje,
                 forrigeAndelerTidslinje,
                 gyldigEtterbetalingFom
             )
 
-        return erAndelTilkjentYtelseMedEndretBeløpMerEnn3ÅrTilbake || erLagtTilEllerFjernetSegmentMerEnn3ÅrTilbake
+        return erAndelTilkjentYtelseMedØktBeløpMerEnn3ÅrTilbake || erLagtTilSegmentMerEnn3ÅrTilbake
     }
 
-    private fun erLagtTilEllerFjernetSegmentMerEnn3ÅrTilbake(
+    private fun erLagtTilSegmentMerEnn3ÅrTilbake(
         andelerTidslinje: LocalDateTimeline<AndelTilkjentYtelse>,
         forrigeAndelerTidslinje: LocalDateTimeline<AndelTilkjentYtelse>,
         gyldigEtterbetalingFom: YearMonth?
     ): Boolean {
         val segmenterLagtTil = andelerTidslinje.disjoint(forrigeAndelerTidslinje)
-        val segmenterFjernet = forrigeAndelerTidslinje.disjoint(andelerTidslinje)
-        return (segmenterLagtTil + segmenterFjernet).any { it.value.stønadFom < gyldigEtterbetalingFom }
+        return (segmenterLagtTil).any { it.value.stønadFom < gyldigEtterbetalingFom }
     }
 
-    private fun erAndelTilkjentYtelseMedEndretBeløpMerEnn3ÅrTilbake(
+    private fun erAndelTilkjentYtelseMedØktBeløpMerEnn3ÅrTilbake(
         andelerTidslinje: LocalDateTimeline<AndelTilkjentYtelse>,
         forrigeAndelerTidslinje: LocalDateTimeline<AndelTilkjentYtelse>,
         gyldigEtterbetalingFom: YearMonth?
@@ -141,7 +140,7 @@ object TilkjentYtelseValidering {
                 val tidligereAndelTilkjentYtelse = forrigeAndelerTidslinje.find { it.fom == andelTilkjentYtelse.fom }!!
 
                 tidligereAndelTilkjentYtelse
-                    .value.kalkulertUtbetalingsbeløp != andelTilkjentYtelse.value.kalkulertUtbetalingsbeløp
+                    .value.kalkulertUtbetalingsbeløp < andelTilkjentYtelse.value.kalkulertUtbetalingsbeløp
             }
     }
 
