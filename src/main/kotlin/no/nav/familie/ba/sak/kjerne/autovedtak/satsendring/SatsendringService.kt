@@ -13,8 +13,11 @@ import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
+import no.nav.familie.ba.sak.task.SatsendringTask
+import no.nav.familie.ba.sak.task.erHverdag
 import no.nav.familie.prosessering.error.RekjørSenereException
 import org.slf4j.LoggerFactory
+import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
@@ -27,6 +30,29 @@ class SatsendringService(
     private val autovedtakService: AutovedtakService,
     private val tilbakestillBehandlingService: TilbakestillBehandlingService
 ) {
+
+    /**
+     * Forsøk å opprett tasker for behandlinger som har gammel sats hver morgen i hele januar.
+     * Dette gjør vi for å plukke opp eventuelle førstegangsbehandlinger som blir iverksatt med gammel sats.
+     */
+    @Scheduled(cron = "0 0 7 * * *")
+    fun scheduledFinnOgOpprettTaskerForSatsendring() {
+        // Vi ønsker kun å opprette tasker i inneværende satsendringsmåned som nå er januar 2022
+        if (YearMonth.now() != YearMonth.of(2022, 1)) {
+            logger.info("Dropper å lage satsendringsbehandlinger fordi måneden vi er i er ikke en satsendringsmåned")
+        } else if (!LocalDateTime.now().erHverdag(0)) {
+            logger.info("Dropper å lage satsendringsbehandlinger fordi det ikke er hverdag")
+        } else {
+            finnOgOpprettTaskerForSatsendring(1654)
+        }
+    }
+
+    @Transactional
+    fun finnOgOpprettTaskerForSatsendring(gammelSats: Int) {
+        finnBehandlingerForSatsendring(gammelSats, YearMonth.now()).forEach {
+            taskRepository.save(SatsendringTask.opprettTask(it))
+        }
+    }
 
     /**
      * Finner behandlinger som trenger satsendring.
