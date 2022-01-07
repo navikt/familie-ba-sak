@@ -117,7 +117,7 @@ class SendMeldingTilBisysTaskTest {
         val jsonMelding = objectMapper.readValue(meldingSlot.captured, BarnetrygdBisysMelding::class.java)
         assertThat(jsonMelding.søker).isEqualTo(behandling[1].fagsak.aktør.aktivFødselsnummer())
         assertThat(jsonMelding.barn).hasSize(1)
-        assertThat(jsonMelding.barn[0].ident).isEqualTo(barn1.aktør.aktivFødselsnummer())
+        assertThat(jsonMelding.barn[0].ident).isEqualTo(barn1.aktør.aktørId)
         assertThat(jsonMelding.barn[0].årsakskode.toString()).isEqualTo("RO")
         assertThat(jsonMelding.barn[0].fom).isEqualTo(YearMonth.of(2022, 4))
     }
@@ -169,7 +169,7 @@ class SendMeldingTilBisysTaskTest {
         val jsonMelding = objectMapper.readValue(meldingSlot.captured, BarnetrygdBisysMelding::class.java)
         assertThat(jsonMelding.søker).isEqualTo(behandling[1].fagsak.aktør.aktivFødselsnummer())
         assertThat(jsonMelding.barn).hasSize(1)
-        assertThat(jsonMelding.barn[0].ident).isEqualTo(barn1.aktør.aktivFødselsnummer())
+        assertThat(jsonMelding.barn[0].ident).isEqualTo(barn1.aktør.aktørId)
         assertThat(jsonMelding.barn[0].årsakskode.toString()).isEqualTo("RR")
         assertThat(jsonMelding.barn[0].fom).isEqualTo(YearMonth.of(2022, 4))
     }
@@ -244,9 +244,9 @@ class SendMeldingTilBisysTaskTest {
         }
 
         val endretPerioder = sendMeldingTilBisysTask.finnBarnEndretOpplysning(behandling[1])
-        val barn1Perioder = endretPerioder[barn1.aktør.aktivFødselsnummer()]
-        val barn2Perioder = endretPerioder[barn2.aktør.aktivFødselsnummer()]
-        val barn3Perioder = endretPerioder[barn3.aktør.aktivFødselsnummer()]
+        val barn1Perioder = endretPerioder[barn1.aktør.aktørId]
+        val barn2Perioder = endretPerioder[barn2.aktør.aktørId]
+        val barn3Perioder = endretPerioder[barn3.aktør.aktørId]
 
         assertThat(barn1Perioder).hasSize(1)
         assertThat(barn1Perioder!![0].årsakskode).isEqualTo(BarnetrygdEndretType.RO)
