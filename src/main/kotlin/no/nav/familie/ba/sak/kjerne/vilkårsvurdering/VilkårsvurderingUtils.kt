@@ -234,11 +234,13 @@ object VilkårsvurderingUtils {
                 if (personsVilkårOppdatert.none { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD } &&
                     oppfylteUtvidetVilkårPåForrigeBehandling != null && oppfylteUtvidetVilkårPåForrigeBehandling.isNotEmpty()
                 ) {
-                    personsVilkårOppdatert.addAll(oppfylteUtvidetVilkårPåForrigeBehandling.map {
-                        it.kopierMedParent(
-                            personTilOppdatert
-                        )
-                    })
+                    personsVilkårOppdatert.addAll(
+                        oppfylteUtvidetVilkårPåForrigeBehandling.map {
+                            it.kopierMedParent(
+                                personTilOppdatert
+                            )
+                        }
+                    )
                     personsVilkårAktivt.removeAll(oppfylteUtvidetVilkårPåForrigeBehandling)
                 }
 
