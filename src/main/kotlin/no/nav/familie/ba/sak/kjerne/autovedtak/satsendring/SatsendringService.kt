@@ -43,7 +43,7 @@ class SatsendringService(
         } else if (!LocalDateTime.now().erHverdag(0)) {
             logger.info("Dropper å lage satsendringsbehandlinger fordi det ikke er hverdag")
         } else {
-            finnBehandlingerForSatsendring(1654, YearMonth.now())
+            finnOgOpprettTaskerForSatsendring(1654)
         }
     }
 
