@@ -67,7 +67,6 @@ class VilkårsvurderingStegTest {
         val vikårsvurdering = Vilkårsvurdering(behandling = behandling)
         val søkerPersonResultat = lagPersonResultat(
             vilkårsvurdering = vikårsvurdering,
-            fnr = søkerPersonIdent,
             aktør = søkerAktørId,
             resultat = Resultat.OPPFYLT,
             periodeFom = LocalDate.of(1984, 1, 1),
@@ -78,7 +77,6 @@ class VilkårsvurderingStegTest {
         )
         val barnPersonResultat = lagPersonResultat(
             vilkårsvurdering = vikårsvurdering,
-            fnr = barnIdent,
             aktør = barnAktørId,
             resultat = Resultat.OPPFYLT,
             periodeFom = LocalDate.of(2019, 1, 1),
@@ -103,7 +101,6 @@ class VilkårsvurderingStegTest {
         val vikårsvurdering = Vilkårsvurdering(behandling = behandling)
         val søkerPersonResultat = lagPersonResultat(
             vilkårsvurdering = vikårsvurdering,
-            fnr = søkerPersonIdent,
             aktør = søkerAktørId,
             resultat = Resultat.OPPFYLT,
             periodeFom = LocalDate.of(1984, 1, 1),
@@ -114,7 +111,6 @@ class VilkårsvurderingStegTest {
         )
         val barnPersonResultat = lagPersonResultat(
             vilkårsvurdering = vikårsvurdering,
-            fnr = barnIdent,
             aktør = barnAktørId,
             resultat = Resultat.OPPFYLT,
             periodeFom = LocalDate.of(2019, 1, 1),

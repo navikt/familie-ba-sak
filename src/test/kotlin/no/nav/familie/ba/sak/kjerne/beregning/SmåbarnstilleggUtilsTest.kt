@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.common.nesteMåned
+import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.tilfeldigPerson
@@ -15,7 +16,6 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -31,21 +31,24 @@ class SmåbarnstilleggUtilsTest {
 
     @Test
     fun `Skal generere periode med rett til småbarnstillegg for 1 barn`() {
-        val personIdent = randomFnr()
+        val aktør = randomAktørId()
 
         val småbarnstilleggBarnetrygdGenerator = SmåbarnstilleggBarnetrygdGenerator(
             behandlingId = 1L,
             tilkjentYtelse = mockk()
         )
 
-        val barnasIdenterOgFødselsdatoer = listOf(Pair(personIdent, LocalDate.now().minusYears(4)))
+        val barnasIdenterOgFødselsdatoer = listOf(Pair(aktør.aktørId, LocalDate.now().minusYears(4)))
 
         val barnasAndeler = listOf(
             lagAndelTilkjentYtelse(
                 fom = YearMonth.now().minusMonths(20),
                 tom = YearMonth.now().plusMonths(6),
                 ytelseType = YtelseType.UTVIDET_BARNETRYGD,
-                person = tilfeldigPerson(personIdent = PersonIdent(personIdent), personType = PersonType.BARN)
+                person = tilfeldigPerson(
+                    aktør = tilAktør(aktør.aktivFødselsnummer()),
+                    personType = PersonType.BARN
+                )
             )
         )
 
@@ -78,7 +81,7 @@ class SmåbarnstilleggUtilsTest {
                 fom = YearMonth.now().minusMonths(20),
                 tom = YearMonth.now().plusMonths(6),
                 ytelseType = YtelseType.UTVIDET_BARNETRYGD,
-                person = tilfeldigPerson(personIdent = PersonIdent(barnOver3År), personType = PersonType.BARN)
+                person = tilfeldigPerson(aktør = tilAktør(barnOver3År), personType = PersonType.BARN)
             )
         )
 
@@ -109,7 +112,7 @@ class SmåbarnstilleggUtilsTest {
                 fom = YearMonth.now().minusMonths(15),
                 tom = YearMonth.now().plusMonths(6),
                 ytelseType = YtelseType.UTVIDET_BARNETRYGD,
-                person = tilfeldigPerson(personIdent = PersonIdent(barnUnder3År), personType = PersonType.BARN)
+                person = tilfeldigPerson(aktør = tilAktør(barnUnder3År), personType = PersonType.BARN)
             )
         )
 
@@ -146,19 +149,19 @@ class SmåbarnstilleggUtilsTest {
                     fom = YearMonth.now().minusMonths(10),
                     tom = YearMonth.now().plusMonths(6),
                     ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                    person = tilfeldigPerson(personIdent = PersonIdent(barnIdent))
+                    person = tilfeldigPerson(aktør = tilAktør(barnIdent))
                 ),
                 lagAndelTilkjentYtelse(
                     fom = YearMonth.now().minusMonths(10),
                     tom = YearMonth.now().plusMonths(6),
                     ytelseType = YtelseType.UTVIDET_BARNETRYGD,
-                    person = tilfeldigPerson(personIdent = PersonIdent(personIdent))
+                    person = tilfeldigPerson(aktør = tilAktør(personIdent))
                 ),
                 lagAndelTilkjentYtelse(
                     fom = YearMonth.now().minusMonths(10),
                     tom = YearMonth.now().plusMonths(6),
                     ytelseType = YtelseType.SMÅBARNSTILLEGG,
-                    person = tilfeldigPerson(personIdent = PersonIdent(personIdent))
+                    person = tilfeldigPerson(aktør = tilAktør(personIdent))
                 )
             ),
             barnasIdenterOgFødselsdatoer = listOf(Pair(barnIdent, LocalDate.now().minusYears(2))),
@@ -191,21 +194,21 @@ class SmåbarnstilleggUtilsTest {
                     fom = YearMonth.now().minusMonths(10),
                     tom = YearMonth.now().plusMonths(6),
                     ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                    person = tilfeldigPerson(personIdent = PersonIdent(barnIdent)),
+                    person = tilfeldigPerson(aktør = tilAktør(barnIdent)),
                     aktør = barnAktør,
                 ),
                 lagAndelTilkjentYtelse(
                     fom = YearMonth.now().minusMonths(10),
                     tom = YearMonth.now().plusMonths(6),
                     ytelseType = YtelseType.UTVIDET_BARNETRYGD,
-                    person = tilfeldigPerson(personIdent = PersonIdent(personIdent)),
+                    person = tilfeldigPerson(aktør = tilAktør(personIdent)),
                     aktør = søkerAktør,
                 ),
                 lagAndelTilkjentYtelse(
                     fom = YearMonth.now().minusMonths(10),
                     tom = YearMonth.now().plusMonths(6),
                     ytelseType = YtelseType.SMÅBARNSTILLEGG,
-                    person = tilfeldigPerson(personIdent = PersonIdent(personIdent)),
+                    person = tilfeldigPerson(aktør = tilAktør(personIdent)),
                     aktør = søkerAktør,
                 )
             ),

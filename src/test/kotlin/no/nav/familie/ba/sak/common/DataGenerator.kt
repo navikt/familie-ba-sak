@@ -170,8 +170,7 @@ fun tilfeldigPerson(
     fødselsdato: LocalDate = LocalDate.now(),
     personType: PersonType = PersonType.BARN,
     kjønn: Kjønn = Kjønn.MANN,
-    personIdent: PersonIdent = PersonIdent(randomFnr()),
-    aktør: Aktør = tilAktør(personIdent.ident),
+    aktør: Aktør = randomAktørId(),
 ) =
     Person(
         id = nestePersonId(),
@@ -188,8 +187,7 @@ fun tilfeldigSøker(
     fødselsdato: LocalDate = LocalDate.now(),
     personType: PersonType = PersonType.SØKER,
     kjønn: Kjønn = Kjønn.MANN,
-    personIdent: PersonIdent = PersonIdent(randomFnr()),
-    aktør: Aktør = tilAktør(personIdent.ident),
+    aktør: Aktør = randomAktørId(),
 ) =
     Person(
         id = nestePersonId(),
@@ -417,7 +415,6 @@ fun lagPersonResultaterForSøkerOgToBarn(
     return setOf(
         lagPersonResultat(
             vilkårsvurdering = vilkårsvurdering,
-            fnr = søkerFnr,
             aktør = søkerAktør,
             resultat = Resultat.OPPFYLT,
             periodeFom = stønadFom,
@@ -427,7 +424,6 @@ fun lagPersonResultaterForSøkerOgToBarn(
         ),
         lagPersonResultat(
             vilkårsvurdering = vilkårsvurdering,
-            fnr = barn1Fnr,
             aktør = barn1Aktør,
             resultat = Resultat.OPPFYLT,
             periodeFom = stønadFom,
@@ -438,7 +434,6 @@ fun lagPersonResultaterForSøkerOgToBarn(
         ),
         lagPersonResultat(
             vilkårsvurdering = vilkårsvurdering,
-            fnr = barn2Fnr,
             aktør = barn2Aktør,
             resultat = Resultat.OPPFYLT,
             periodeFom = stønadFom,
@@ -452,7 +447,6 @@ fun lagPersonResultaterForSøkerOgToBarn(
 
 fun lagPersonResultat(
     vilkårsvurdering: Vilkårsvurdering,
-    fnr: String,
     aktør: Aktør,
     resultat: Resultat,
     periodeFom: LocalDate?,

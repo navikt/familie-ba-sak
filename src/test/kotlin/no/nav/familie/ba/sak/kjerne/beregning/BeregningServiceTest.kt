@@ -101,7 +101,6 @@ class BeregningServiceTest {
         val periodeTom = LocalDate.of(2020, 7, 1)
         val personResultatBarn = lagPersonResultat(
             vilkårsvurdering = vilkårsvurdering,
-            fnr = barn1Fnr,
             aktør = barn1AktørId,
             resultat = Resultat.OPPFYLT,
             periodeFom = periodeFom,
@@ -112,7 +111,6 @@ class BeregningServiceTest {
 
         val personResultatSøker = lagPersonResultat(
             vilkårsvurdering = vilkårsvurdering,
-            fnr = søkerFnr,
             aktør = søkerAktørId,
             resultat = Resultat.OPPFYLT,
             periodeFom = periodeFom,
@@ -166,7 +164,6 @@ class BeregningServiceTest {
         val periodeTom = LocalDate.of(2020, 7, 1)
         val personResultatBarn = lagPersonResultat(
             vilkårsvurdering = vilkårsvurdering,
-            fnr = barn1Fnr,
             aktør = barn1AktørId,
             resultat = Resultat.OPPFYLT,
             periodeFom = periodeFom,
@@ -177,7 +174,6 @@ class BeregningServiceTest {
 
         val personResultatSøker = lagPersonResultat(
             vilkårsvurdering = vilkårsvurdering,
-            fnr = søkerFnr,
             aktør = søkerAktørId,
             resultat = Resultat.OPPFYLT,
             periodeFom = periodeFom,
@@ -228,7 +224,7 @@ class BeregningServiceTest {
         val behandling = lagBehandling()
         val barn = tilfeldigPerson(personType = PersonType.BARN)
         val søkerFnr = randomFnr()
-        val søkerAktørId = tilAktør(søkerFnr)
+        // val søkerAktørId = tilAktør(søkerFnr)
         val vilkårsvurdering =
             Vilkårsvurdering(behandling = behandling)
 
@@ -238,7 +234,6 @@ class BeregningServiceTest {
         val søkandtidspunkt = LocalDate.of(2018, 9, 1)
         val personResultatBarn = lagPersonResultat(
             vilkårsvurdering = vilkårsvurdering,
-            fnr = barn.aktør.aktivFødselsnummer(),
             aktør = barn.aktør,
             resultat = Resultat.OPPFYLT,
             periodeFom = periodeFom,
@@ -247,10 +242,15 @@ class BeregningServiceTest {
             personType = PersonType.BARN
         )
 
+        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
+            behandlingId = behandling.id,
+            søkerPersonIdent = søkerFnr,
+            barnasIdenter = listOf(barn.aktør.aktivFødselsnummer())
+        )
+
         val personResultatSøker = lagPersonResultat(
             vilkårsvurdering = vilkårsvurdering,
-            fnr = søkerFnr,
-            aktør = søkerAktørId,
+            aktør = personopplysningGrunnlag.søker.aktør,
             resultat = Resultat.OPPFYLT,
             periodeFom = periodeFom,
             periodeTom = periodeTom,
@@ -259,11 +259,6 @@ class BeregningServiceTest {
         )
         vilkårsvurdering.personResultater = setOf(personResultatBarn, personResultatSøker)
 
-        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
-            behandlingId = behandling.id,
-            søkerPersonIdent = søkerFnr,
-            barnasIdenter = listOf(barn.aktør.aktivFødselsnummer())
-        )
         val slot = slot<TilkjentYtelse>()
 
         every { behandlingResultatRepository.findByBehandlingAndAktiv(any()) } answers { vilkårsvurdering }
@@ -323,7 +318,6 @@ class BeregningServiceTest {
         val periodeTom = LocalDate.of(2020, 11, 1)
         val personResultatBarn = lagPersonResultat(
             vilkårsvurdering = vilkårsvurdering,
-            fnr = barn1Fnr,
             aktør = barn1AktørId,
             resultat = Resultat.OPPFYLT,
             periodeFom = periodeFom,
@@ -332,7 +326,6 @@ class BeregningServiceTest {
 
         val personResultatSøker = lagPersonResultat(
             vilkårsvurdering = vilkårsvurdering,
-            fnr = søkerFnr,
             aktør = søkerAktørId,
             resultat = Resultat.IKKE_OPPFYLT,
             periodeFom = periodeFom,
@@ -394,7 +387,6 @@ class BeregningServiceTest {
         val personResultat = mutableSetOf(
             lagPersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
-                fnr = søkerFnr,
                 aktør = søkerAktørId,
                 resultat = Resultat.OPPFYLT,
                 periodeFom = periode1Fom,
@@ -404,7 +396,6 @@ class BeregningServiceTest {
             ),
             lagPersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
-                fnr = søkerFnr,
                 aktør = søkerAktørId,
                 resultat = Resultat.IKKE_OPPFYLT,
                 periodeFom = periode2Fom,
@@ -414,7 +405,6 @@ class BeregningServiceTest {
             ),
             lagPersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
-                fnr = søkerFnr,
                 aktør = søkerAktørId,
                 resultat = Resultat.OPPFYLT,
                 periodeFom = periode3Fom,
@@ -424,7 +414,6 @@ class BeregningServiceTest {
             ),
             lagPersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
-                fnr = barn1Fnr,
                 aktør = barn1AktørId,
                 resultat = Resultat.OPPFYLT,
                 periodeFom = periode1Fom.minusYears(1),
@@ -434,7 +423,6 @@ class BeregningServiceTest {
             ),
             lagPersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
-                fnr = barn2Fnr,
                 aktør = barn2AktørId,
                 resultat = Resultat.OPPFYLT,
                 periodeFom = periode2Midt,
@@ -590,7 +578,6 @@ class BeregningServiceTest {
         val personResultat = mutableSetOf(
             lagPersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
-                fnr = søkerFnr,
                 aktør = søkerAktørId,
                 resultat = Resultat.OPPFYLT,
                 periodeFom = førstePeriodeFomForBarnet,
@@ -600,7 +587,6 @@ class BeregningServiceTest {
             ),
             lagPersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
-                fnr = barn1Fnr,
                 aktør = barn1AktørId,
                 resultat = Resultat.OPPFYLT,
                 periodeFom = førstePeriodeFomForBarnet,
@@ -611,7 +597,6 @@ class BeregningServiceTest {
             ),
             lagPersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
-                fnr = barn1Fnr,
                 aktør = barn1AktørId,
                 resultat = Resultat.OPPFYLT,
                 periodeFom = andrePeriodeFomForBarnet,
