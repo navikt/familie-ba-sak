@@ -32,10 +32,10 @@ class SatsendringService(
      * Finner behandlinger som trenger satsendring.
      * Se https://github.com/navikt/familie-ba-sak/pull/1361 for eksempel på scheduler.
      *
-     * Obs! Denne utplukkingen tar også med inaktive behandlinger, siden den aktive behandlingen ikke nødvendigvis
-     * iverksatte (f.eks. omregning eller henleggelse). Dette betyr at man potensielt får med fagsaker hvor
-     * behovet for revurdering i ettertid har blitt fjernet. Dersom man ønsker å filtrere bort disse må
-     * man sjekke om den inaktive behandlingen blir etterfulgt av revurdering som fjerner behovet.
+     * Obs! Denne utplukkingen plukker ut siste iverksatte behandling.
+     * Siden den siste iverksatte ikke nødvendigvis er den aktive kan det være
+     * åpne behandlinger på fagsaken det kjøres satsendring for. Dette skal bli håndtert i kjøringen
+     * av satsendringsbehandlingen.
      */
     fun finnBehandlingerForSatsendring(
         gammelSats: Int,
@@ -47,7 +47,9 @@ class SatsendringService(
             månedÅrForEndring = satsendringMåned
         )
 
-        return behandlinger.subList(0, minOf(100, behandlinger.size))
+        logger.info("Oppretter ${behandlinger.size} tasker på saker som trenger satsendring.")
+
+        return behandlinger
     }
 
     /**
