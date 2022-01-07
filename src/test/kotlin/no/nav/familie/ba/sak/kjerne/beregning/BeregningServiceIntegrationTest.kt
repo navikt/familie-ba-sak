@@ -267,7 +267,7 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
     private fun leggTilAndelTilkjentYtelsePåTilkjentYtelse(behandling: Behandling, fom: YearMonth, tom: YearMonth) {
         val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandling.id)
         val tilfeldigperson = tilfeldigPerson()
-        personidentService.hentOgLagreAktør(tilfeldigperson.personIdent.ident)
+        personidentService.hentOgLagreAktør(tilfeldigperson.aktør.aktivFødselsnummer())
 
         val andelTilkjentYtelse = lagAndelTilkjentYtelse(
             fom,

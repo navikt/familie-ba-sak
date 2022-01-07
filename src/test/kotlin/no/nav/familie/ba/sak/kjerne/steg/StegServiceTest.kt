@@ -404,11 +404,12 @@ class StegServiceTest(
         }
         assertNotNull(vilkårsvurderingService.hentAktivForBehandling(behandling.id))
         val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandling.id)!!
-        val barnPersonResultat = vilkårsvurdering.personResultater.first { it.personIdent == barnFnr }.apply {
-            vilkårResultater.first { it.vilkårType == Vilkår.BOR_MED_SØKER }
-                .apply { utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED) }
-        }
-        val søkerPersonResultat = vilkårsvurdering.personResultater.first { it.personIdent == søkerFnr }
+        val barnPersonResultat =
+            vilkårsvurdering.personResultater.first { it.aktør.aktivFødselsnummer() == barnFnr }.apply {
+                vilkårResultater.first { it.vilkårType == Vilkår.BOR_MED_SØKER }
+                    .apply { utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED) }
+            }
+        val søkerPersonResultat = vilkårsvurdering.personResultater.first { it.aktør.aktivFødselsnummer() == søkerFnr }
         vilkårsvurdering.personResultater = setOf(søkerPersonResultat, barnPersonResultat)
         vilkårsvurderingService.oppdater(vilkårsvurdering)
 

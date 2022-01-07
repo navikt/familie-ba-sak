@@ -74,14 +74,14 @@ class SendMeldingTilBisysTask(
 
         val endretOpplysning: MutableMap<String, MutableList<BarnEndretOpplysning>> = mutableMapOf()
 
-        forrigeTilkjentYtelse.andelerTilkjentYtelse.groupBy { it.personIdent }.entries.forEach { entry ->
+        forrigeTilkjentYtelse.andelerTilkjentYtelse.groupBy { it.aktør.aktørId }.entries.forEach { entry ->
             val nyAndelerTilkjentYtelse =
-                tilkjentYtelse.andelerTilkjentYtelse.filter { it.personIdent == entry.key }
+                tilkjentYtelse.andelerTilkjentYtelse.filter { it.aktør.aktørId == entry.key }
                     .sortedBy { it.stønadFom }
             entry.value.sortedBy { it.periode.fom }.forEach {
                 var forblePeriode: MånedPeriode? = it.periode
                 val prosent = it.prosent
-                val barnIdent = it.personIdent
+                val barnIdent = it.aktør.aktørId
                 if (!endretOpplysning.contains(barnIdent)) {
                     endretOpplysning[barnIdent] = mutableListOf()
                 }
@@ -89,7 +89,7 @@ class SendMeldingTilBisysTask(
                     nyAndelerTilkjentYtelse.forEach {
                         val intersectPerioder = forblePeriode!!.intersect(it.periode)
                         if (intersectPerioder.first != null) {
-                            endretOpplysning[it.personIdent]!!.add(
+                            endretOpplysning[it.aktør.aktørId]!!.add(
                                 BarnEndretOpplysning(
                                     ident = barnIdent,
                                     fom = forblePeriode!!.fom,
@@ -98,7 +98,7 @@ class SendMeldingTilBisysTask(
                             )
                         }
                         if (intersectPerioder.second != null && it.prosent < prosent) {
-                            endretOpplysning[it.personIdent]!!.add(
+                            endretOpplysning[it.aktør.aktørId]!!.add(
                                 BarnEndretOpplysning(
                                     ident = barnIdent,
                                     fom = latest(it.periode.fom, forblePeriode!!.fom),
@@ -113,7 +113,7 @@ class SendMeldingTilBisysTask(
                     }
                 }
                 if (forblePeriode != null && !forblePeriode!!.erTom()) {
-                    endretOpplysning[it.personIdent]!!.add(
+                    endretOpplysning[it.aktør.aktørId]!!.add(
                         BarnEndretOpplysning(
                             ident = barnIdent,
                             fom = forblePeriode!!.fom,
