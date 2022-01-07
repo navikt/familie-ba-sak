@@ -74,6 +74,17 @@ object TilkjentYtelseValidering {
         }
     }
 
+    @Deprecated("Bruk validerAtTilkjentYtelseHarGyldigEtterbetalingsperiode har gåt gjennom QA")
+    fun validerAtTilkjentYtelseHarGyldigEtterbetalingsperiodeGammel(tilkjentYtelse: TilkjentYtelse) {
+        val gyldigEtterbetalingFom = hentGyldigEtterbetalingFom(tilkjentYtelse.behandling.opprettetTidspunkt)
+        if (tilkjentYtelse.andelerTilkjentYtelse.any { it.stønadFom < gyldigEtterbetalingFom }) {
+            throw UtbetalingsikkerhetFeil(
+                melding = "Utbetalingsperioder for en eller flere av partene/personene går mer enn 3 år tilbake i tid.",
+                frontendFeilmelding = "Utbetalingsperioder for en eller flere av partene/personene går mer enn 3 år tilbake i tid. Vennligst endre på datoene, eller ta kontakt med teamet for hjelp."
+            )
+        }
+    }
+
     private fun hentAndelerPerPerson(
         andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
         forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>?

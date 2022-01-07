@@ -3,6 +3,8 @@ package no.nav.familie.ba.sak.kjerne.steg
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import no.nav.familie.ba.sak.common.toPeriode
+import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.TILLAT_ENDRING_MER_ENN_TRE_ÅR_IKKE_ETTERUTBETALING
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -14,6 +16,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering.validerAtBarnIkkeFårFlereUtbetalingerSammePeriode
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering.validerAtTilkjentYtelseHarFornuftigePerioderOgBeløp
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering.validerAtTilkjentYtelseHarGyldigEtterbetalingsperiode
+import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering.validerAtTilkjentYtelseHarGyldigEtterbetalingsperiodeGammel
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerAtAlleOpprettedeEndringerErUtfylt
@@ -40,6 +43,7 @@ class BehandlingsresultatSteg(
     private val persongrunnlagService: PersongrunnlagService,
     private val beregningService: BeregningService,
     private val endretUtbetalingAndelService: EndretUtbetalingAndelService,
+    private val featureToggleService: FeatureToggleService
 ) : BehandlingSteg<String> {
 
     override fun preValiderSteg(behandling: Behandling, stegService: StegService?) {
@@ -86,11 +90,15 @@ class BehandlingsresultatSteg(
         val forrigeTilkjentYtelse: TilkjentYtelse? =
             forrigeBehandling?.let { beregningService.hentOptionalTilkjentYtelseForBehandling(behandlingId = it.id) }
 
-        validerAtTilkjentYtelseHarGyldigEtterbetalingsperiode(
-            forrigeAndelerTilkjentYtelse = forrigeTilkjentYtelse?.andelerTilkjentYtelse?.toList(),
-            andelerTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelse.toList(),
-            opprettetTidspunkt = tilkjentYtelse.behandling.opprettetTidspunkt
-        )
+        if (featureToggleService.isEnabled(TILLAT_ENDRING_MER_ENN_TRE_ÅR_IKKE_ETTERUTBETALING)) {
+            validerAtTilkjentYtelseHarGyldigEtterbetalingsperiode(
+                forrigeAndelerTilkjentYtelse = forrigeTilkjentYtelse?.andelerTilkjentYtelse?.toList(),
+                andelerTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelse.toList(),
+                opprettetTidspunkt = tilkjentYtelse.behandling.opprettetTidspunkt
+            )
+        } else {
+            validerAtTilkjentYtelseHarGyldigEtterbetalingsperiodeGammel(tilkjentYtelse)
+        }
 
         val barnMedAndreRelevanteTilkjentYtelser = personopplysningGrunnlag.barna.map {
             Pair(
