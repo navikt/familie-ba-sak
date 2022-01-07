@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
@@ -10,6 +11,7 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 class BehandlingStegTest {
 
@@ -357,6 +359,36 @@ class BehandlingStegTest {
                 ).copy(resultat = BehandlingResultat.ENDRET),
                 utførendeStegType = it
             )
+        }
+    }
+
+    @Test
+    fun `Tester at man ikke får lov til å komme videre etter behandlingsresultat om resultatet ikke er ENDRET på satsendring`() {
+        var steg = FØRSTE_STEG
+
+        listOf(
+            StegType.REGISTRERE_PERSONGRUNNLAG,
+            StegType.VILKÅRSVURDERING,
+            StegType.BEHANDLINGSRESULTAT,
+        ).forEach {
+            assertEquals(it, steg)
+            if (it == StegType.BEHANDLINGSRESULTAT) {
+                assertThrows<Feil> {
+                    hentNesteSteg(
+                        behandling = lagBehandling(
+                            årsak = BehandlingÅrsak.SATSENDRING,
+                        ).copy(resultat = BehandlingResultat.AVSLÅTT_OG_ENDRET),
+                        utførendeStegType = it
+                    )
+                }
+            } else {
+                steg = hentNesteSteg(
+                    behandling = lagBehandling(
+                        årsak = BehandlingÅrsak.SATSENDRING,
+                    ).copy(resultat = BehandlingResultat.AVSLÅTT_OG_ENDRET),
+                    utførendeStegType = it
+                )
+            }
         }
     }
 
