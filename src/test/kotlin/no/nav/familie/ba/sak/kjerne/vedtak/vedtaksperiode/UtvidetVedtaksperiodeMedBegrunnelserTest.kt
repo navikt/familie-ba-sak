@@ -34,7 +34,9 @@ class UtvidetVedtaksperiodeMedBegrunnelserTest {
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
             behandlingId = behandling.id,
             barnasIdenter = listOf(barn1.aktør.aktivFødselsnummer(), barn2.aktør.aktivFødselsnummer()),
-            søkerPersonIdent = søker.aktør.aktivFødselsnummer()
+            søkerPersonIdent = søker.aktør.aktivFødselsnummer(),
+            søkerAktør = søker.aktør,
+            barnAktør = listOf(barn1.aktør, barn2.aktør)
         )
 
         val fom = YearMonth.of(2018, 6)
@@ -99,7 +101,9 @@ class UtvidetVedtaksperiodeMedBegrunnelserTest {
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
             behandlingId = behandling.id,
             barnasIdenter = listOf(barn1.aktør.aktivFødselsnummer(), barn2.aktør.aktivFødselsnummer()),
-            søkerPersonIdent = søker.aktør.aktivFødselsnummer()
+            søkerPersonIdent = søker.aktør.aktivFødselsnummer(),
+            barnAktør = listOf(barn1.aktør, barn2.aktør),
+            søkerAktør = søker.aktør
         )
 
         val fom = YearMonth.of(2018, 6)
@@ -164,7 +168,9 @@ class UtvidetVedtaksperiodeMedBegrunnelserTest {
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
             behandlingId = behandling.id,
             barnasIdenter = listOf(barn1.aktør.aktivFødselsnummer(), barn2.aktør.aktivFødselsnummer()),
-            søkerPersonIdent = søker.aktør.aktivFødselsnummer()
+            søkerPersonIdent = søker.aktør.aktivFødselsnummer(),
+            søkerAktør = søker.aktør,
+            barnAktør = listOf(barn1.aktør, barn2.aktør)
         )
 
         val fom = YearMonth.of(2018, 6)

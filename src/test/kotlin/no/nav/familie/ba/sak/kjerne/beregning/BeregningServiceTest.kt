@@ -224,7 +224,7 @@ class BeregningServiceTest {
         val behandling = lagBehandling()
         val barn = tilfeldigPerson(personType = PersonType.BARN)
         val søkerFnr = randomFnr()
-        // val søkerAktørId = tilAktør(søkerFnr)
+        val søkerAktør = tilAktør(søkerFnr)
         val vilkårsvurdering =
             Vilkårsvurdering(behandling = behandling)
 
@@ -232,20 +232,23 @@ class BeregningServiceTest {
         val periodeTom = LocalDate.of(2018, 7, 1)
         val avtaletidspunktDeltBosted = LocalDate.of(2018, 7, 1)
         val søkandtidspunkt = LocalDate.of(2018, 9, 1)
+
+        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
+            behandlingId = behandling.id,
+            søkerPersonIdent = søkerFnr,
+            barnasIdenter = listOf(barn.aktør.aktivFødselsnummer()),
+            barnAktør = listOf(barn.aktør),
+            søkerAktør = søkerAktør
+        )
+
         val personResultatBarn = lagPersonResultat(
             vilkårsvurdering = vilkårsvurdering,
-            aktør = barn.aktør,
+            aktør = personopplysningGrunnlag.barna.first().aktør,
             resultat = Resultat.OPPFYLT,
             periodeFom = periodeFom,
             periodeTom = periodeTom,
             lagFullstendigVilkårResultat = true,
             personType = PersonType.BARN
-        )
-
-        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
-            behandlingId = behandling.id,
-            søkerPersonIdent = søkerFnr,
-            barnasIdenter = listOf(barn.aktør.aktivFødselsnummer())
         )
 
         val personResultatSøker = lagPersonResultat(

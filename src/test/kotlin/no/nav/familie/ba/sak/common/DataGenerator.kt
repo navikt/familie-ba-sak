@@ -334,13 +334,10 @@ fun lagTestPersonopplysningGrunnlag(
     }
     personopplysningGrunnlag.personer.add(søker)
 
-    barnasIdenter.map {
+    barnAktør.map {
         personopplysningGrunnlag.personer.add(
             Person(
-                aktør = barnAktør.first { aktørId ->
-                    aktørId.personidenter.map { personident -> personident.fødselsnummer }
-                        .any { fødselsnummer -> fødselsnummer == it }
-                },
+                aktør = it,
                 type = PersonType.BARN,
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 fødselsdato = barnFødselsdato,
