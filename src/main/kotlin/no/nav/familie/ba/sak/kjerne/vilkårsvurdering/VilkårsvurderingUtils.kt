@@ -224,21 +224,22 @@ object VilkårsvurderingUtils {
                         personsVilkårAktivt.removeAll(vilkårSomFinnes)
                     }
                 }
-                val eksistererOppfyltUtvidetVilkårPåForrigeBehandling =
+                val oppfylteUtvidetVilkårPåForrigeBehandling =
                     forrigeBehandlingVilkårsvurdering?.personResultater
                         ?.firstOrNull { it.aktør == personFraInit.aktør }
                         ?.vilkårResultater
-                        ?.any { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD && it.resultat == Resultat.OPPFYLT } ?: false
+                        ?.filter { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
+                        ?.filtrerVilkårÅKopiere(kopieringSkjerFraForrigeBehandling = true)
 
                 if (personsVilkårOppdatert.none { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD } &&
-                    (eksistererOppfyltUtvidetVilkårPåForrigeBehandling || løpendeUnderkategori == BehandlingUnderkategori.UTVIDET)
+                    oppfylteUtvidetVilkårPåForrigeBehandling != null && oppfylteUtvidetVilkårPåForrigeBehandling.isNotEmpty()
                 ) {
-                    val utvidetVilkår =
-                        personenSomFinnes.vilkårResultater.filter { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
-                    if (utvidetVilkår.isNotEmpty()) {
-                        personsVilkårOppdatert.addAll(utvidetVilkår.map { it.kopierMedParent(personTilOppdatert) })
-                        personsVilkårAktivt.removeAll(utvidetVilkår)
-                    }
+                    personsVilkårOppdatert.addAll(oppfylteUtvidetVilkårPåForrigeBehandling.map {
+                        it.kopierMedParent(
+                            personTilOppdatert
+                        )
+                    })
+                    personsVilkårAktivt.removeAll(oppfylteUtvidetVilkårPåForrigeBehandling)
                 }
 
                 personTilOppdatert.setSortedVilkårResultater(personsVilkårOppdatert.toSet())
