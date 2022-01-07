@@ -4,13 +4,11 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.SMÅBARNSTILLEGG_SUFFIX
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.andelerTilOpphørMedDato
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.andelerTilOpprettelse
-import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.gjeldendeForrigeOffsetForKjede
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.sisteAndelPerKjede
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.sisteBeståendeAndelPerKjede
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
-import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.task.dto.FAGSYSTEM
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
@@ -21,7 +19,6 @@ import java.time.YearMonth
 @Component
 class UtbetalingsoppdragGenerator(
     private val beregningService: BeregningService,
-    private val personidentService: PersonidentService,
 ) {
 
     /**
@@ -32,6 +29,7 @@ class UtbetalingsoppdragGenerator(
      * @param[vedtak] for å hente fagsakid, behandlingid, vedtaksdato, ident, og evt opphørsdato
      * @param[erFørsteBehandlingPåFagsak] for å sette aksjonskode på oppdragsnivå og bestemme om vi skal telle fra start
      * @param[forrigeKjeder] Et sett med kjeder som var gjeldende for forrige behandling på fagsaken
+     * @param[sisteOffsetPerIdent] Siste iverksatte offset mot økonomi per ident.
      * @param[oppdaterteKjeder] Et sett med andeler knyttet til en person (dvs en kjede), hvor andeler er helt nye,
      * @param[erSimulering] flag for om beregnet er en simulering, da skal komplett nytt betlaingsoppdrag generes
      *                      og ny tilkjentytelse skal ikke persisteres,
@@ -47,12 +45,12 @@ class UtbetalingsoppdragGenerator(
         vedtak: Vedtak,
         erFørsteBehandlingPåFagsak: Boolean,
         forrigeKjeder: Map<String, List<AndelTilkjentYtelse>> = emptyMap(),
+        sisteOffsetPerIdent: Map<String, Int> = emptyMap(),
         sisteOffsetPåFagsak: Int? = null,
         oppdaterteKjeder: Map<String, List<AndelTilkjentYtelse>> = emptyMap(),
         erSimulering: Boolean = false,
         endretMigreringsDato: YearMonth? = null,
     ): Utbetalingsoppdrag {
-
         // Hos økonomi skiller man på endring på oppdragsnivå 110 og på linjenivå 150 (periodenivå).
         // Da de har opplevd å motta
         // UEND på oppdrag som skulle vært ENDR anbefaler de at kun ENDR brukes når sak
@@ -85,7 +83,7 @@ class UtbetalingsoppdragGenerator(
                 andeler = andelerTilOpprettelse,
                 erFørsteBehandlingPåFagsak = erFørsteBehandlingPåFagsak,
                 vedtak = vedtak,
-                sisteOffsetIKjedeOversikt = gjeldendeForrigeOffsetForKjede(forrigeKjeder),
+                sisteOffsetIKjedeOversikt = sisteOffsetPerIdent,
                 sisteOffsetPåFagsak = sisteOffsetPåFagsak,
                 skalOppdatereTilkjentYtelse = !erSimulering,
             ) else emptyList()

@@ -6,7 +6,6 @@ import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import org.springframework.stereotype.Service
-import java.time.YearMonth
 
 @Service
 @TaskStepBeskrivelse(
@@ -21,9 +20,7 @@ class StartSatsendringForAlleBehandlingerTask(
 
     override fun doTask(task: Task) {
         val gammelSats = task.payload.toInt()
-        satsendringService.finnBehandlingerForSatsendring(gammelSats, YearMonth.now()).forEach {
-            taskRepository.save(SatsendringTask.opprettTask(it))
-        }
+        satsendringService.finnOgOpprettTaskerForSatsendring(gammelSats)
     }
 
     companion object {
