@@ -16,10 +16,9 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Personopplysning
 import java.math.BigDecimal
 import java.time.LocalDateTime
 
-// 3 år (krav i loven) og 2 måneder (på grunn av behandlingstid)
+// 3 år (krav i loven)
 fun hentGyldigEtterbetalingFom(kravDato: LocalDateTime) =
     kravDato.minusYears(3)
-        .minusMonths(2)
         .toLocalDate()
         .toYearMonth()
 
