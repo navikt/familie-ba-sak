@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.statistikk.saksstatistikk
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMellomlagring
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMellomlagringRepository
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMellomlagringType
@@ -15,40 +14,32 @@ import org.springframework.stereotype.Component
 class SaksstatistikkEventListener(
     private val saksstatistikkService: SaksstatistikkService,
     private val saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository,
-    private val behandlingService: BehandlingService
 ) : ApplicationListener<SaksstatistikkEvent> {
 
     override fun onApplicationEvent(event: SaksstatistikkEvent) {
         if (event.behandlingId != null) {
-            val behandling = behandlingService.hent(event.behandlingId)
-            if (!behandling.erManuellMigrering()) {
-                saksstatistikkService.mapTilBehandlingDVH(event.behandlingId)?.also {
-                    saksstatistikkMellomlagringRepository.save(
-                        SaksstatistikkMellomlagring(
-                            funksjonellId = it.funksjonellId,
-                            kontraktVersjon = it.versjon,
-                            json = sakstatistikkObjectMapper.writeValueAsString(it),
-                            type = SaksstatistikkMellomlagringType.BEHANDLING,
-                            typeId = event.behandlingId
-                        )
+            saksstatistikkService.mapTilBehandlingDVH(event.behandlingId)?.also {
+                saksstatistikkMellomlagringRepository.save(
+                    SaksstatistikkMellomlagring(
+                        funksjonellId = it.funksjonellId,
+                        kontraktVersjon = it.versjon,
+                        json = sakstatistikkObjectMapper.writeValueAsString(it),
+                        type = SaksstatistikkMellomlagringType.BEHANDLING,
+                        typeId = event.behandlingId
                     )
-                }
+                )
             }
         } else if (event.fagsakId != null) {
-            val behandling = behandlingService.hentAktivForFagsak(event.fagsakId)
-            val erManuellMigrering = behandling?.erManuellMigrering() ?: false
-            if (!erManuellMigrering) {
-                saksstatistikkService.mapTilSakDvh(event.fagsakId)?.also {
-                    saksstatistikkMellomlagringRepository.save(
-                        SaksstatistikkMellomlagring(
-                            funksjonellId = it.funksjonellId,
-                            kontraktVersjon = it.versjon,
-                            json = sakstatistikkObjectMapper.writeValueAsString(it),
-                            type = SaksstatistikkMellomlagringType.SAK,
-                            typeId = event.fagsakId
-                        )
+            saksstatistikkService.mapTilSakDvh(event.fagsakId)?.also {
+                saksstatistikkMellomlagringRepository.save(
+                    SaksstatistikkMellomlagring(
+                        funksjonellId = it.funksjonellId,
+                        kontraktVersjon = it.versjon,
+                        json = sakstatistikkObjectMapper.writeValueAsString(it),
+                        type = SaksstatistikkMellomlagringType.SAK,
+                        typeId = event.fagsakId
                     )
-                }
+                )
             }
         }
     }

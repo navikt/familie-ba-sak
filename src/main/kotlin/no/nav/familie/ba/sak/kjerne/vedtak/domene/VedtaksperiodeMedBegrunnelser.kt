@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.kjerne.vedtak.domene
 import com.fasterxml.jackson.annotation.JsonIgnore
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.NullablePeriode
 import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
@@ -11,6 +10,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.hentAndelerForSegment
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtbetalingsperiodeDetalj
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
@@ -20,6 +20,7 @@ import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import org.hibernate.annotations.SortComparator
 import java.time.LocalDate
+import java.time.YearMonth
 import javax.persistence.CascadeType
 import javax.persistence.Column
 import javax.persistence.Entity
@@ -101,11 +102,6 @@ data class VedtaksperiodeMedBegrunnelser(
         return fritekster.isNotEmpty() && begrunnelser.isNotEmpty()
     }
 
-    fun hentNullablePeriode() = NullablePeriode(
-        fom = this.fom,
-        tom = this.tom,
-    )
-
     fun hentUtbetalingsperiodeDetaljer(
         andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
         personopplysningGrunnlag: PersonopplysningGrunnlag,
@@ -154,6 +150,15 @@ data class VedtaksperiodeMedBegrunnelser(
 
     companion object {
         val comparator = BegrunnelseComparator()
+    }
+}
+
+fun List<VedtaksperiodeMedBegrunnelser>.erAlleredeBegrunnetMedBegrunnelse(
+    standardbegrunnelser: List<VedtakBegrunnelseSpesifikasjon>,
+    måned: YearMonth
+): Boolean {
+    return this.any {
+        it.fom?.toYearMonth() == måned && it.begrunnelser.any { standardbegrunnelse -> standardbegrunnelse.vedtakBegrunnelseSpesifikasjon in standardbegrunnelser }
     }
 }
 

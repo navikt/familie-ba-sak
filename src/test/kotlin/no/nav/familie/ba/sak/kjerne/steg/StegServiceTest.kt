@@ -32,6 +32,7 @@ import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
@@ -402,6 +403,14 @@ class StegServiceTest(
             }
         }
         assertNotNull(vilkårsvurderingService.hentAktivForBehandling(behandling.id))
+        val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandling.id)!!
+        val barnPersonResultat = vilkårsvurdering.personResultater.first { it.personIdent == barnFnr }.apply {
+            vilkårResultater.first { it.vilkårType == Vilkår.BOR_MED_SØKER }
+                .apply { utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED) }
+        }
+        val søkerPersonResultat = vilkårsvurdering.personResultater.first { it.personIdent == søkerFnr }
+        vilkårsvurdering.personResultater = setOf(søkerPersonResultat, barnPersonResultat)
+        vilkårsvurderingService.oppdater(vilkårsvurdering)
 
         val behandlingEtterVilkårsvurdering = stegService.håndterVilkårsvurdering(behandling)
         assertEquals(StegType.BEHANDLINGSRESULTAT, behandlingEtterVilkårsvurdering.steg)
