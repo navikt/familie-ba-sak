@@ -35,6 +35,7 @@ spec:
             envVarPrefix: DB
   azure:
     application:
+      enabled: true
       claims:
         extra:
           - "NAVident"
