@@ -75,7 +75,7 @@ spec:
       memory: 512Mi
       cpu: 500m
   ingresses:
-    - https://barnetrygd.dev.intern.nav.no
+    - https://familie-ba-sak.dev.intern.nav.no
   secureLogs:
     enabled: true
   env:
