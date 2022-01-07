@@ -224,14 +224,14 @@ object VilkårsvurderingUtils {
                         personsVilkårAktivt.removeAll(vilkårSomFinnes)
                     }
                 }
-                val eksistererUtvidetVilkårPåForrigeBehandling =
+                val eksistererOppfyltUtvidetVilkårPåForrigeBehandling =
                     forrigeBehandlingVilkårsvurdering?.personResultater
                         ?.firstOrNull { it.aktør == personFraInit.aktør }
                         ?.vilkårResultater
-                        ?.any { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD } ?: false
+                        ?.any { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD && it.resultat == Resultat.OPPFYLT } ?: false
 
                 if (personsVilkårOppdatert.none { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD } &&
-                    (eksistererUtvidetVilkårPåForrigeBehandling || løpendeUnderkategori == BehandlingUnderkategori.UTVIDET)
+                    (eksistererOppfyltUtvidetVilkårPåForrigeBehandling || løpendeUnderkategori == BehandlingUnderkategori.UTVIDET)
                 ) {
                     val utvidetVilkår =
                         personenSomFinnes.vilkårResultater.filter { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
