@@ -13,8 +13,10 @@ import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
+import no.nav.familie.ba.sak.task.SatsendringTask
 import no.nav.familie.prosessering.error.RekjørSenereException
 import org.slf4j.LoggerFactory
+import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
@@ -29,27 +31,24 @@ class SatsendringService(
 ) {
 
     /**
-     * Finner behandlinger som trenger satsendring.
-     * Se https://github.com/navikt/familie-ba-sak/pull/1361 for eksempel på scheduler.
-     *
-     * Obs! Denne utplukkingen plukker ut siste iverksatte behandling.
-     * Siden den siste iverksatte ikke nødvendigvis er den aktive kan det være
-     * åpne behandlinger på fagsaken det kjøres satsendring for. Dette skal bli håndtert i kjøringen
-     * av satsendringsbehandlingen.
+     * Forsøk å opprett tasker for behandlinger som har gammel sats hver morgen i hele januar.
+     * Dette gjør vi for å plukke opp eventuelle førstegangsbehandlinger som blir iverksatt med gammel sats.
      */
-    fun finnBehandlingerForSatsendring(
-        gammelSats: Int,
-        satsendringMåned: YearMonth
-    ): List<Long> {
-        val behandlinger = behandlingRepository.finnBehandlingerForSatsendring(
-            iverksatteLøpende = behandlingRepository.finnSisteIverksatteBehandlingFraLøpendeFagsaker(),
-            gammelSats = gammelSats,
-            månedÅrForEndring = satsendringMåned
-        )
+    @Scheduled(cron = "0 0 7 * * *")
+    fun scheduledFinnOgOpprettTaskerForSatsendring() {
+        // Vi ønsker kun å opprette tasker i inneværende satsendringsmåned som nå er januar 2022
+        if (YearMonth.now() != YearMonth.of(2022, 1)) {
+            logger.info("Dropper å lage satsendringsbehandlinger fordi måneden vi er i er ikke en satsendringsmåned")
+        } else {
+            finnBehandlingerForSatsendring(1654, YearMonth.now())
+        }
+    }
 
-        logger.info("Oppretter ${behandlinger.size} tasker på saker som trenger satsendring.")
-
-        return behandlinger
+    @Transactional
+    fun finnOgOpprettTaskerForSatsendring(gammelSats: Int) {
+        finnBehandlingerForSatsendring(gammelSats, YearMonth.now()).forEach {
+            taskRepository.save(SatsendringTask.opprettTask(it))
+        }
     }
 
     /**
@@ -116,6 +115,30 @@ class SatsendringService(
             )
         }
         taskRepository.save(task)
+    }
+
+    /**
+     * Finner behandlinger som trenger satsendring.
+     * Se https://github.com/navikt/familie-ba-sak/pull/1361 for eksempel på scheduler.
+     *
+     * Obs! Denne utplukkingen plukker ut siste iverksatte behandling.
+     * Siden den siste iverksatte ikke nødvendigvis er den aktive kan det være
+     * åpne behandlinger på fagsaken det kjøres satsendring for. Dette skal bli håndtert i kjøringen
+     * av satsendringsbehandlingen.
+     */
+    private fun finnBehandlingerForSatsendring(
+        gammelSats: Int,
+        satsendringMåned: YearMonth
+    ): List<Long> {
+        val behandlinger = behandlingRepository.finnBehandlingerForSatsendring(
+            iverksatteLøpende = behandlingRepository.finnSisteIverksatteBehandlingFraLøpendeFagsaker(),
+            gammelSats = gammelSats,
+            månedÅrForEndring = satsendringMåned
+        )
+
+        logger.info("Oppretter ${behandlinger.size} tasker på saker som trenger satsendring.")
+
+        return behandlinger
     }
 
     companion object {
