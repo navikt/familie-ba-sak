@@ -86,11 +86,10 @@ class BehandlingsresultatSteg(
             personopplysningGrunnlag = personopplysningGrunnlag
         )
 
-        val forrigeBehandling = behandlingService.hentForrigeBehandlingSomErIverksatt(behandling)
-        val forrigeTilkjentYtelse: TilkjentYtelse? =
-            forrigeBehandling?.let { beregningService.hentOptionalTilkjentYtelseForBehandling(behandlingId = it.id) }
-
         if (featureToggleService.isEnabled(TILLAT_ENDRING_MER_ENN_TRE_ÅR_IKKE_ETTERUTBETALING)) {
+            val forrigeBehandling = behandlingService.hentForrigeBehandlingSomErIverksatt(behandling)
+            val forrigeTilkjentYtelse: TilkjentYtelse? =
+                forrigeBehandling?.let { beregningService.hentOptionalTilkjentYtelseForBehandling(behandlingId = it.id) }
             validerAtTilkjentYtelseHarGyldigEtterbetalingsperiode(
                 forrigeAndelerTilkjentYtelse = forrigeTilkjentYtelse?.andelerTilkjentYtelse?.toList(),
                 andelerTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelse.toList(),
