@@ -8,7 +8,6 @@ import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.tilfeldigPerson
-import no.nav.familie.ba.sak.common.årMnd
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -21,48 +20,6 @@ import org.junit.jupiter.api.assertThrows
 import java.math.BigDecimal
 
 class UtbetalingssikkerhetTest {
-
-    @Test
-    fun `Skal kaste feil når tilkjent ytelse går mer enn 3 år og 2 mnd tilbake i tid`() {
-        val person = tilfeldigPerson()
-
-        val tilkjentYtelse = lagInitiellTilkjentYtelse()
-
-        val andel = lagAndelTilkjentYtelse(
-            inneværendeMåned().minusYears(4),
-            årMnd("2020-01"),
-            YtelseType.ORDINÆR_BARNETRYGD,
-            1054,
-            person = person
-        )
-
-        tilkjentYtelse.andelerTilkjentYtelse.add(andel)
-
-        assertThrows<UtbetalingsikkerhetFeil> {
-            TilkjentYtelseValidering.validerAtTilkjentYtelseHarGyldigEtterbetalingsperiode(tilkjentYtelse)
-        }
-    }
-
-    @Test
-    fun `Skal ikke kaste feil når tilkjent ytelse går mindre enn 3 år og 2 mnd tilbake i tid`() {
-        val person = tilfeldigPerson()
-
-        val tilkjentYtelse = lagInitiellTilkjentYtelse()
-
-        val andel = lagAndelTilkjentYtelse(
-            inneværendeMåned().minusYears(3),
-            årMnd("2020-01"),
-            YtelseType.ORDINÆR_BARNETRYGD,
-            1054,
-            person = person
-        )
-
-        tilkjentYtelse.andelerTilkjentYtelse.add(andel)
-
-        assertDoesNotThrow {
-            TilkjentYtelseValidering.validerAtTilkjentYtelseHarGyldigEtterbetalingsperiode(tilkjentYtelse)
-        }
-    }
 
     @Test
     fun `Skal kaste feil når en periode har flere andeler enn det som er tillatt`() {
