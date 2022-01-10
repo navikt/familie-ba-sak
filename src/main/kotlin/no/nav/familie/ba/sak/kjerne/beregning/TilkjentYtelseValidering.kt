@@ -3,19 +3,17 @@ package no.nav.familie.ba.sak.kjerne.beregning
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.KONTAKT_TEAMET_SUFFIX
 import no.nav.familie.ba.sak.common.UtbetalingsikkerhetFeil
-import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
-import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering.maksBeløp
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.hentTidslinjeForAndelerTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjeMedAndeler
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
-import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
 import java.math.BigDecimal
 import java.time.LocalDateTime
@@ -103,8 +101,8 @@ object TilkjentYtelseValidering {
         gyldigEtterbetalingFom: YearMonth?
     ): Boolean {
         val forrigeAndelerTidslinje =
-            hentTidslinjeForAndelerTilkjentYtelse(forrigeAndelerTilkjentYtelseForPerson?.toList())
-        val andelerTidslinje = hentTidslinjeForAndelerTilkjentYtelse(andelerTilkjentYtelseForPerson.toList())
+            forrigeAndelerTilkjentYtelseForPerson?.toList().hentTidslinjeForAndelerTilkjentYtelse()
+        val andelerTidslinje = andelerTilkjentYtelseForPerson.toList().hentTidslinjeForAndelerTilkjentYtelse()
 
         val erAndelTilkjentYtelseMedØktBeløpMerEnn3ÅrTilbake =
             erAndelTilkjentYtelseMedØktBeløpMerEnn3ÅrTilbake(
@@ -148,17 +146,6 @@ object TilkjentYtelseValidering {
                     .value.kalkulertUtbetalingsbeløp < andelTilkjentYtelse.value.kalkulertUtbetalingsbeløp
             }
     }
-
-    private fun hentTidslinjeForAndelerTilkjentYtelse(andelerTilkjentYtelse: List<AndelTilkjentYtelse>?) =
-        LocalDateTimeline(
-            andelerTilkjentYtelse?.map {
-                LocalDateSegment(
-                    it.stønadFom.førsteDagIInneværendeMåned(),
-                    it.stønadTom.sisteDagIInneværendeMåned(),
-                    it
-                )
-            }
-        )
 
     fun validerAtTilkjentYtelseHarFornuftigePerioderOgBeløp(
         tilkjentYtelse: TilkjentYtelse,
