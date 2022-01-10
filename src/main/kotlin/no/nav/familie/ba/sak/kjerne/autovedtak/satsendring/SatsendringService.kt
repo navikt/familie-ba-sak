@@ -7,6 +7,8 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.beregning.SatsService.sisteTilleggOrdinærSats
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingService
@@ -29,6 +31,7 @@ class SatsendringService(
     private val taskRepository: TaskRepositoryWrapper,
     private val behandlingRepository: BehandlingRepository,
     private val autovedtakService: AutovedtakService,
+    private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val tilbakestillBehandlingService: TilbakestillBehandlingService
 ) {
 
@@ -107,8 +110,12 @@ class SatsendringService(
                     årsak = behandlingLåstMelding
                 )
             } else if (aktivOgÅpenBehandling.steg.rekkefølge > StegType.VILKÅRSVURDERING.rekkefølge) {
-                tilbakestillBehandlingService.tilbakestillBehandlingTilVilkårsvurdering(aktivOgÅpenBehandling)
-                logger.info("Tilbakestiller behandling $aktivOgÅpenBehandling til vilkårsvurderingen")
+                if (harAlleredeNySats(behandlingId = aktivOgÅpenBehandling.id)) {
+                    logger.info("Åpen behandling har allerede siste sats og vi lar den ligge.")
+                } else {
+                    tilbakestillBehandlingService.tilbakestillBehandlingTilVilkårsvurdering(aktivOgÅpenBehandling)
+                    logger.info("Tilbakestiller behandling $aktivOgÅpenBehandling til vilkårsvurderingen")
+                }
             } else {
                 logger.info("Behandling $aktivOgÅpenBehandling er under utredning, men er allerede i riktig tilstand.")
             }
@@ -145,6 +152,15 @@ class SatsendringService(
             )
         }
         taskRepository.save(task)
+    }
+
+    private fun harAlleredeNySats(behandlingId: Long): Boolean {
+        val andeler =
+            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = behandlingId)
+
+        return andeler.any {
+            it.sats == sisteTilleggOrdinærSats.beløp
+        }
     }
 
     companion object {
