@@ -137,9 +137,9 @@ object TilkjentYtelseValidering {
         forrigeAndelerTidslinje: LocalDateTimeline<AndelTilkjentYtelse>,
         gyldigEtterbetalingFom: YearMonth?
     ): Boolean {
-        val overlappendeAndeler = andelerTidslinje.intersection(forrigeAndelerTidslinje)
+        val andelerISammePeriode = andelerTidslinje.intersection(forrigeAndelerTidslinje)
 
-        return overlappendeAndeler
+        return andelerISammePeriode
             .filter { it.value.stønadFom < gyldigEtterbetalingFom }
             .any { andelTilkjentYtelse ->
                 val tidligereAndelTilkjentYtelse = forrigeAndelerTidslinje.find { it.fom == andelTilkjentYtelse.fom }!!
