@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.beregning
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.KONTAKT_TEAMET_SUFFIX
 import no.nav.familie.ba.sak.common.UtbetalingsikkerhetFeil
+import no.nav.familie.ba.sak.common.overlapperHeltEllerDelvisMed
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering.maksBeløp
@@ -43,9 +44,9 @@ object TilkjentYtelseValidering {
     fun validerAtTilkjentYtelseHarGyldigEtterbetalingsperiode(
         forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>?,
         andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
-        behandlingOpprettetTidspunkt: LocalDateTime,
+        kravDato: LocalDateTime,
     ) {
-        val gyldigEtterbetalingFom = hentGyldigEtterbetalingFom(behandlingOpprettetTidspunkt)
+        val gyldigEtterbetalingFom = hentGyldigEtterbetalingFom(kravDato)
 
         val aktørIder =
             hentAktørIderForDenneOgForrigeBehandling(andelerTilkjentYtelse, forrigeAndelerTilkjentYtelse)
@@ -103,31 +104,46 @@ object TilkjentYtelseValidering {
         val forrigeAndelerTidslinje = forrigeAndelerTilkjentYtelseForPerson?.toList().hentTidslinje()
         val andelerTidslinje = andelerTilkjentYtelseForPerson.toList().hentTidslinje()
 
-        val erAndelTilkjentYtelseMedØktBeløpMerEnn3ÅrTilbake =
-            erAndelTilkjentYtelseMedØktBeløpMerEnn3ÅrTilbake(
+        val erAndelMedØktBeløpFørGyldigEtterbetalingsdato =
+            erAndelMedØktBeløpFørDato(
+                forrigeAndeler = forrigeAndelerTilkjentYtelseForPerson,
+                andeler = andelerTilkjentYtelseForPerson,
+                måned = gyldigEtterbetalingFom
+            )
+
+        val erLagtTilSegmentFørGyldigEtterbetalingsdato =
+            erLagtTilSegmentFørDato(
                 andelerTidslinje = andelerTidslinje,
                 forrigeAndelerTidslinje = forrigeAndelerTidslinje,
-                gyldigEtterbetalingFom = gyldigEtterbetalingFom
+                måned = gyldigEtterbetalingFom
             )
 
-        val erLagtTilSegmentMerEnn3ÅrTilbake =
-            erLagtTilSegmentMerEnn3ÅrTilbake(
-                andelerTidslinje,
-                forrigeAndelerTidslinje,
-                gyldigEtterbetalingFom
-            )
-
-        return erAndelTilkjentYtelseMedØktBeløpMerEnn3ÅrTilbake || erLagtTilSegmentMerEnn3ÅrTilbake
+        return erAndelMedØktBeløpFørGyldigEtterbetalingsdato || erLagtTilSegmentFørGyldigEtterbetalingsdato
     }
 
-    private fun erLagtTilSegmentMerEnn3ÅrTilbake(
+    private fun erLagtTilSegmentFørDato(
         andelerTidslinje: LocalDateTimeline<AndelTilkjentYtelse>,
         forrigeAndelerTidslinje: LocalDateTimeline<AndelTilkjentYtelse>,
-        gyldigEtterbetalingFom: YearMonth?
+        måned: YearMonth?
     ): Boolean {
         val segmenterLagtTil = andelerTidslinje.disjoint(forrigeAndelerTidslinje)
-        return (segmenterLagtTil).any { it.value.stønadFom < gyldigEtterbetalingFom }
+        return (segmenterLagtTil).any { it.value.stønadFom < måned }
     }
+
+    fun erAndelMedØktBeløpFørDato(
+        forrigeAndeler: List<AndelTilkjentYtelse>?,
+        andeler: List<AndelTilkjentYtelse>,
+        måned: YearMonth?
+    ): Boolean = andeler
+        .filter { it.stønadFom < måned }
+        .any { andel ->
+            val andelerFraForrigeBehandlingISammePeriode =
+                forrigeAndeler?.filter { it.periode.overlapperHeltEllerDelvisMed(andel.periode) } ?: emptyList()
+
+            andelerFraForrigeBehandlingISammePeriode.any {
+                it.kalkulertUtbetalingsbeløp < andel.kalkulertUtbetalingsbeløp
+            }
+        }
 
     private fun erAndelTilkjentYtelseMedØktBeløpMerEnn3ÅrTilbake(
         andelerTidslinje: LocalDateTimeline<AndelTilkjentYtelse>,
