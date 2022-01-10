@@ -34,7 +34,7 @@ class SatsendringService(
     private val taskRepository: TaskRepositoryWrapper,
     private val behandlingRepository: BehandlingRepository,
     private val autovedtakService: AutovedtakService,
-    private val stegService: StegService
+    private val stegService: StegService,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val tilbakestillBehandlingService: TilbakestillBehandlingService
 ) {
