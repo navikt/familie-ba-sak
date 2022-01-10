@@ -138,8 +138,8 @@ class VilkårService(
             Vilkår.UTVIDET_BARNETRYGD != restSlettVilkår.vilkårType ||
             finnesUtvidetBarnetrydIForrigeBehandling(behandling, restSlettVilkår.personIdent)
         ) {
-            throw Feil(
-                message = "Vilkår ${restSlettVilkår.vilkårType.beskrivelse} kan ikke slettes " +
+            throw FunksjonellFeil(
+                melding = "Vilkår ${restSlettVilkår.vilkårType.beskrivelse} kan ikke slettes " +
                     "for behandling $behandlingId",
                 frontendFeilmelding = "Vilkår ${restSlettVilkår.vilkårType.beskrivelse} kan ikke slettes " +
                     "for behandling $behandlingId",
@@ -184,8 +184,8 @@ class VilkårService(
         val behandling = behandlingService.hent(behandlingId)
         if (Vilkår.UTVIDET_BARNETRYGD == restNyttVilkår.vilkårType) {
             if (!behandling.erManuellMigrering()) {
-                throw Feil(
-                    message = "${restNyttVilkår.vilkårType.beskrivelse} kan ikke legges til for behandling $behandlingId " +
+                throw FunksjonellFeil(
+                    melding = "${restNyttVilkår.vilkårType.beskrivelse} kan ikke legges til for behandling $behandlingId " +
                         "med behandlingType ${behandling.type.visningsnavn}",
                     frontendFeilmelding = "${restNyttVilkår.vilkårType.beskrivelse} kan ikke legges til " +
                         "for behandling $behandlingId med behandlingType ${behandling.type.visningsnavn}",
@@ -196,8 +196,8 @@ class VilkårService(
             if (personopplysningGrunnlag.personer
                 .single { it.aktør == personidentService.hentOgLagreAktør(restNyttVilkår.personIdent) }.type != PersonType.SØKER
             ) {
-                throw Feil(
-                    message = "${Vilkår.UTVIDET_BARNETRYGD.beskrivelse} kan ikke legges til for BARN",
+                throw FunksjonellFeil(
+                    melding = "${Vilkår.UTVIDET_BARNETRYGD.beskrivelse} kan ikke legges til for BARN",
                     frontendFeilmelding = "${Vilkår.UTVIDET_BARNETRYGD.beskrivelse} kan ikke legges til for BARN",
                 )
             }
