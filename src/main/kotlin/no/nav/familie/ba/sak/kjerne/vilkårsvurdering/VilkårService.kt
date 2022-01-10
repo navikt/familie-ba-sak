@@ -188,7 +188,7 @@ class VilkårService(
             val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
                 ?: throw IllegalStateException("Fant ikke personopplysninggrunnlag for behandling ${behandling.id}")
             if (personopplysningGrunnlag.personer
-                .single { it.personIdent.ident == restNyttVilkår.personIdent }.type != PersonType.SØKER
+                    .single { it.personIdent.ident == restNyttVilkår.personIdent }.type != PersonType.SØKER
             ) {
                 throw Feil(
                     message = "${Vilkår.UTVIDET_BARNETRYGD.beskrivelse} kan ikke legges til for BARN",
@@ -266,7 +266,7 @@ class VilkårService(
         initiellVilkårsvurdering: Vilkårsvurdering
     ): Vilkårsvurdering {
 
-        val annenVilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = annenBehandling.id)
+        val annenVilkårsvurdering = hentVilkårsvurdering(behandlingId = annenBehandling.id)
             ?: throw Feil(message = "Finner ikke vilkårsvurdering fra annen behandling.")
 
         val annenBehandlingErHenlagt = behandlingService.hent(annenBehandling.id).erHenlagt()
@@ -277,7 +277,7 @@ class VilkårService(
             aktivVilkårsvurdering = annenVilkårsvurdering,
             initiellVilkårsvurdering = initiellVilkårsvurdering,
             løpendeUnderkategori = behandlingService.hentLøpendeUnderkategori(initiellVilkårsvurdering.behandling.fagsak.id),
-            forrigeBehandlingVilkårsvurdering = hentVilkårsvurdering(annenBehandling.id)
+            forrigeBehandlingVilkårsvurdering = annenVilkårsvurdering
         )
         return oppdatert
     }
