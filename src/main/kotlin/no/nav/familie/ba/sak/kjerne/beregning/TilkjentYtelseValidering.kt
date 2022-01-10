@@ -100,8 +100,7 @@ object TilkjentYtelseValidering {
         andelerTilkjentYtelseForPerson: List<AndelTilkjentYtelse>,
         gyldigEtterbetalingFom: YearMonth?
     ): Boolean {
-        val forrigeAndelerTidslinje =
-            forrigeAndelerTilkjentYtelseForPerson?.toList().hentTidslinje()
+        val forrigeAndelerTidslinje = forrigeAndelerTilkjentYtelseForPerson?.toList().hentTidslinje()
         val andelerTidslinje = andelerTilkjentYtelseForPerson.toList().hentTidslinje()
 
         val erAndelTilkjentYtelseMedØktBeløpMerEnn3ÅrTilbake =
