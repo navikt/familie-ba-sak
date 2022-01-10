@@ -62,6 +62,14 @@ class GyldigEtterbetalingsperiodeTest {
                 kravDato = LocalDateTime.now()
             )
         }
+
+        assertThrows<UtbetalingsikkerhetFeil> {
+            TilkjentYtelseValidering.validerAtTilkjentYtelseHarGyldigEtterbetalingsperiode(
+                forrigeAndelerTilkjentYtelse = null,
+                andelerTilkjentYtelse = andeler,
+                kravDato = LocalDateTime.now()
+            )
+        }
     }
 
     @Test
@@ -123,6 +131,14 @@ class GyldigEtterbetalingsperiodeTest {
                 kravDato = LocalDateTime.now()
             )
         }
+
+        assertDoesNotThrow {
+            TilkjentYtelseValidering.validerAtTilkjentYtelseHarGyldigEtterbetalingsperiode(
+                forrigeAndelerTilkjentYtelse = forrigeAndeler,
+                andelerTilkjentYtelse = emptyList(),
+                kravDato = LocalDateTime.now()
+            )
+        }
     }
 
     @Test
@@ -165,6 +181,14 @@ class GyldigEtterbetalingsperiodeTest {
 
         assertDoesNotThrow {
             TilkjentYtelseValidering.validerAtTilkjentYtelseHarGyldigEtterbetalingsperiode(
+                forrigeAndelerTilkjentYtelse = null,
+                andelerTilkjentYtelse = andeler,
+                kravDato = LocalDateTime.now().minusYears(2)
+            )
+        }
+
+        assertDoesNotThrow {
+            TilkjentYtelseValidering.validerAtTilkjentYtelseHarGyldigEtterbetalingsperiode(
                 forrigeAndelerTilkjentYtelse = forrigeAndeler,
                 andelerTilkjentYtelse = emptyList(),
                 kravDato = LocalDateTime.now().minusYears(2)
@@ -176,34 +200,17 @@ class GyldigEtterbetalingsperiodeTest {
     fun `Skal ikke kaste feil forskjellige typer ytelse`() {
         val person1 = tilfeldigPerson()
 
-        val forrigeAndeler = listOf(
-            lagAndelTilkjentYtelse(
-                fom = inneværendeMåned().minusYears(4),
-                tom = inneværendeMåned().minusYears(2),
-                beløp = 2108,
-                person = person1,
-                ytelseType = YtelseType.ORDINÆR_BARNETRYGD
-            ),
-            lagAndelTilkjentYtelse(
-                fom = inneværendeMåned().minusYears(4),
-                tom = inneværendeMåned().minusYears(2),
-                beløp = 660,
-                person = person1,
-                ytelseType = YtelseType.SMÅBARNSTILLEGG
-            ),
-        )
-
         val andeler = listOf(
             lagAndelTilkjentYtelse(
                 fom = inneværendeMåned().minusYears(4),
-                tom = inneværendeMåned().minusYears(2),
+                tom = inneværendeMåned(),
                 beløp = 2108,
                 person = person1,
                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD
             ),
             lagAndelTilkjentYtelse(
                 fom = inneværendeMåned().minusYears(4),
-                tom = inneværendeMåned().minusYears(2),
+                tom = inneværendeMåned(),
                 beløp = 660,
                 person = person1,
                 ytelseType = YtelseType.SMÅBARNSTILLEGG,
@@ -212,25 +219,9 @@ class GyldigEtterbetalingsperiodeTest {
 
         assertDoesNotThrow {
             TilkjentYtelseValidering.validerAtTilkjentYtelseHarGyldigEtterbetalingsperiode(
-                forrigeAndelerTilkjentYtelse = forrigeAndeler,
+                forrigeAndelerTilkjentYtelse = andeler,
                 andelerTilkjentYtelse = andeler,
-                kravDato = LocalDateTime.now().minusYears(2)
-            )
-        }
-
-        assertDoesNotThrow {
-            TilkjentYtelseValidering.validerAtTilkjentYtelseHarGyldigEtterbetalingsperiode(
-                forrigeAndelerTilkjentYtelse = emptyList(),
-                andelerTilkjentYtelse = andeler,
-                kravDato = LocalDateTime.now().minusYears(2)
-            )
-        }
-
-        assertDoesNotThrow {
-            TilkjentYtelseValidering.validerAtTilkjentYtelseHarGyldigEtterbetalingsperiode(
-                forrigeAndelerTilkjentYtelse = forrigeAndeler,
-                andelerTilkjentYtelse = emptyList(),
-                kravDato = LocalDateTime.now().minusYears(2)
+                kravDato = LocalDateTime.now()
             )
         }
     }
