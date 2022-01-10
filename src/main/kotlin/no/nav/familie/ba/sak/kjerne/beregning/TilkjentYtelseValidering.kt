@@ -48,7 +48,7 @@ object TilkjentYtelseValidering {
         val gyldigEtterbetalingFom = hentGyldigEtterbetalingFom(behandlingOpprettetTidspunkt)
 
         val aktørIder =
-            hentAktørIderForDenneOgForrigeAndeler(andelerTilkjentYtelse, forrigeAndelerTilkjentYtelse)
+            hentAktørIderForDenneOgForrigeBehandling(andelerTilkjentYtelse, forrigeAndelerTilkjentYtelse)
 
         val erUgyldigEtterbetaling =
             aktørIder.any { aktørId ->
@@ -85,7 +85,7 @@ object TilkjentYtelseValidering {
         }
     }
 
-    private fun hentAktørIderForDenneOgForrigeAndeler(
+    private fun hentAktørIderForDenneOgForrigeBehandling(
         andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
         forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>?
     ): Set<String> {
