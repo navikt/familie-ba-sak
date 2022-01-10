@@ -15,7 +15,6 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjeMedAndeler
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
-import no.nav.fpsak.tidsserie.LocalDateTimeline
 import java.math.BigDecimal
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -126,29 +125,16 @@ object TilkjentYtelseValidering {
         .filter { it.stønadFom < måned }
         .any { andel ->
             val andelerFraForrigeBehandlingISammePeriode =
-                forrigeAndeler?.filter { it.periode.overlapperHeltEllerDelvisMed(andel.periode) } ?: emptyList()
+                forrigeAndeler?.filter {
+                    it.periode.overlapperHeltEllerDelvisMed(andel.periode) &&
+                        it.type == andel.type
+                }
+                    ?: emptyList()
 
             andelerFraForrigeBehandlingISammePeriode.any {
                 it.kalkulertUtbetalingsbeløp < andel.kalkulertUtbetalingsbeløp
             }
         }
-
-    private fun erAndelTilkjentYtelseMedØktBeløpMerEnn3ÅrTilbake(
-        andelerTidslinje: LocalDateTimeline<AndelTilkjentYtelse>,
-        forrigeAndelerTidslinje: LocalDateTimeline<AndelTilkjentYtelse>,
-        gyldigEtterbetalingFom: YearMonth?
-    ): Boolean {
-        val andelerISammePeriode = andelerTidslinje.intersection(forrigeAndelerTidslinje)
-
-        return andelerISammePeriode
-            .filter { it.value.stønadFom < gyldigEtterbetalingFom }
-            .any { andelTilkjentYtelse ->
-                val tidligereAndelTilkjentYtelse = forrigeAndelerTidslinje.find { it.fom == andelTilkjentYtelse.fom }!!
-
-                tidligereAndelTilkjentYtelse
-                    .value.kalkulertUtbetalingsbeløp < andelTilkjentYtelse.value.kalkulertUtbetalingsbeløp
-            }
-    }
 
     fun validerAtTilkjentYtelseHarFornuftigePerioderOgBeløp(
         tilkjentYtelse: TilkjentYtelse,
