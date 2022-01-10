@@ -115,6 +115,12 @@ object YtelsePersonUtils {
         val stønadSlutt =
             behandlingsresultatPerson.andeler.maxByOrNull { it.stønadFom }?.stønadTom ?: TIDENES_MORGEN.toYearMonth()
 
+        val forrigeStønadSlutt =
+            behandlingsresultatPerson
+                .forrigeAndeler
+                .maxByOrNull { it.stønadFom }
+                ?.stønadTom ?: TIDENES_MORGEN.toYearMonth()
+
         val opphører = stønadSlutt.isBefore(inneværendeMåned.plusMonths(1))
 
         val erAndelMedEndretBeløp = erAndelMedEndretBeløp(
@@ -128,9 +134,12 @@ object YtelsePersonUtils {
         val erFjernetSegmenter =
             segmenterFjernet.harSegmentMedTomFør(if (opphører) stønadSlutt else inneværendeMåned)
 
+        val opphørsdatoErSattSenere = stønadSlutt.isAfter(forrigeStønadSlutt)
+
         erAndelMedEndretBeløp ||
             erLagtTilSegmenterPåPersonFraTidligereBehandling ||
-            erFjernetSegmenter
+            erFjernetSegmenter ||
+            opphørsdatoErSattSenere
     }
 
     fun erAndelMedEndretBeløp(
