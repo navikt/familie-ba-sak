@@ -124,16 +124,11 @@ object TilkjentYtelseValidering {
     ): Boolean = andeler
         .filter { it.stønadFom < måned }
         .any { andel ->
-            val andelerFraForrigeBehandlingISammePeriode =
-                forrigeAndeler?.filter {
-                    it.periode.overlapperHeltEllerDelvisMed(andel.periode) &&
-                        it.type == andel.type
-                }
-                    ?: emptyList()
-
-            andelerFraForrigeBehandlingISammePeriode.any {
-                it.kalkulertUtbetalingsbeløp < andel.kalkulertUtbetalingsbeløp
-            }
+            forrigeAndeler?.any {
+                it.periode.overlapperHeltEllerDelvisMed(andel.periode) &&
+                    it.type == andel.type &&
+                    it.kalkulertUtbetalingsbeløp < andel.kalkulertUtbetalingsbeløp
+            } ?: false
         }
 
     fun validerAtTilkjentYtelseHarFornuftigePerioderOgBeløp(
