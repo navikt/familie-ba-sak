@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering.maksBelø
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.hentTidslinje
 import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjeMedAndeler
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
@@ -96,25 +97,30 @@ object TilkjentYtelseValidering {
     }
 
     private fun erUgyldigEtterbetalingPåPerson(
-        forrigeAndelerTilkjentYtelseForPerson: List<AndelTilkjentYtelse>?,
-        andelerTilkjentYtelseForPerson: List<AndelTilkjentYtelse>,
+        forrigeAndelerForPerson: List<AndelTilkjentYtelse>?,
+        andelerForPerson: List<AndelTilkjentYtelse>,
         gyldigEtterbetalingFom: YearMonth?
     ): Boolean {
-        val forrigeAndelerTidslinje = forrigeAndelerTilkjentYtelseForPerson?.toList().hentTidslinje()
-        val andelerTidslinje = andelerTilkjentYtelseForPerson.toList().hentTidslinje()
+        return YtelseType.values().any { ytelseType ->
+            val forrigeAndelerForPersonOgType = forrigeAndelerForPerson?.filter { it.type == ytelseType }
+            val andelerForPersonOgType = andelerForPerson.filter { it.type == ytelseType }
 
-        val erAndelMedØktBeløpFørGyldigEtterbetalingsdato =
-            erAndelMedØktBeløpFørDato(
-                forrigeAndeler = forrigeAndelerTilkjentYtelseForPerson,
-                andeler = andelerTilkjentYtelseForPerson,
-                måned = gyldigEtterbetalingFom
-            )
+            val forrigeAndelerTidslinje = forrigeAndelerForPersonOgType?.toList().hentTidslinje()
+            val andelerTidslinje = andelerForPersonOgType.toList().hentTidslinje()
 
-        val segmenterLagtTil = andelerTidslinje.disjoint(forrigeAndelerTidslinje)
-        val erLagtTilSegmentFørGyldigEtterbetalingsdato =
-            segmenterLagtTil.any { it.value.stønadFom < gyldigEtterbetalingFom }
+            val erAndelMedØktBeløpFørGyldigEtterbetalingsdato =
+                erAndelMedØktBeløpFørDato(
+                    forrigeAndeler = forrigeAndelerForPersonOgType,
+                    andeler = andelerForPersonOgType,
+                    måned = gyldigEtterbetalingFom
+                )
 
-        return erAndelMedØktBeløpFørGyldigEtterbetalingsdato || erLagtTilSegmentFørGyldigEtterbetalingsdato
+            val segmenterLagtTil = andelerTidslinje.disjoint(forrigeAndelerTidslinje)
+            val erLagtTilSegmentFørGyldigEtterbetalingsdato =
+                segmenterLagtTil.any { it.value.stønadFom < gyldigEtterbetalingFom }
+
+            return erAndelMedØktBeløpFørGyldigEtterbetalingsdato || erLagtTilSegmentFørGyldigEtterbetalingsdato
+        }
     }
 
     fun erAndelMedØktBeløpFørDato(
@@ -126,7 +132,6 @@ object TilkjentYtelseValidering {
         .any { andel ->
             forrigeAndeler?.any {
                 it.periode.overlapperHeltEllerDelvisMed(andel.periode) &&
-                    it.type == andel.type &&
                     it.kalkulertUtbetalingsbeløp < andel.kalkulertUtbetalingsbeløp
             } ?: false
         }
