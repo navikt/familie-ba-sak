@@ -43,9 +43,9 @@ object TilkjentYtelseValidering {
     fun validerAtTilkjentYtelseHarGyldigEtterbetalingsperiode(
         forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>?,
         andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
-        opprettetTidspunkt: LocalDateTime,
+        behandlingOpprettetTidspunkt: LocalDateTime,
     ) {
-        val gyldigEtterbetalingFom = hentGyldigEtterbetalingFom(opprettetTidspunkt)
+        val gyldigEtterbetalingFom = hentGyldigEtterbetalingFom(behandlingOpprettetTidspunkt)
 
         val aktørIder =
             hentAktørIderForDenneOgForrigeAndeler(andelerTilkjentYtelse, forrigeAndelerTilkjentYtelse)

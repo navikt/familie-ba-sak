@@ -61,7 +61,7 @@ class UtbetalingssikkerhetTest {
             TilkjentYtelseValidering.validerAtTilkjentYtelseHarGyldigEtterbetalingsperiode(
                 forrigeAndelerTilkjentYtelse = forrigeAndeler,
                 andelerTilkjentYtelse = andeler,
-                opprettetTidspunkt = LocalDateTime.now()
+                behandlingOpprettetTidspunkt = LocalDateTime.now()
             )
         }
 
@@ -69,7 +69,7 @@ class UtbetalingssikkerhetTest {
             TilkjentYtelseValidering.validerAtTilkjentYtelseHarGyldigEtterbetalingsperiode(
                 forrigeAndelerTilkjentYtelse = emptyList(),
                 andelerTilkjentYtelse = andeler,
-                opprettetTidspunkt = LocalDateTime.now()
+                behandlingOpprettetTidspunkt = LocalDateTime.now()
             )
         }
     }
@@ -100,7 +100,7 @@ class UtbetalingssikkerhetTest {
             TilkjentYtelseValidering.validerAtTilkjentYtelseHarGyldigEtterbetalingsperiode(
                 forrigeAndelerTilkjentYtelse = forrigeAndeler,
                 andelerTilkjentYtelse = andeler,
-                opprettetTidspunkt = LocalDateTime.now()
+                behandlingOpprettetTidspunkt = LocalDateTime.now()
             )
         }
     }
@@ -131,7 +131,7 @@ class UtbetalingssikkerhetTest {
             TilkjentYtelseValidering.validerAtTilkjentYtelseHarGyldigEtterbetalingsperiode(
                 forrigeAndelerTilkjentYtelse = forrigeAndeler,
                 andelerTilkjentYtelse = andeler,
-                opprettetTidspunkt = LocalDateTime.now()
+                behandlingOpprettetTidspunkt = LocalDateTime.now()
             )
         }
 
@@ -139,7 +139,7 @@ class UtbetalingssikkerhetTest {
             TilkjentYtelseValidering.validerAtTilkjentYtelseHarGyldigEtterbetalingsperiode(
                 forrigeAndelerTilkjentYtelse = forrigeAndeler,
                 andelerTilkjentYtelse = emptyList(),
-                opprettetTidspunkt = LocalDateTime.now()
+                behandlingOpprettetTidspunkt = LocalDateTime.now()
             )
         }
     }
@@ -170,7 +170,7 @@ class UtbetalingssikkerhetTest {
             TilkjentYtelseValidering.validerAtTilkjentYtelseHarGyldigEtterbetalingsperiode(
                 forrigeAndelerTilkjentYtelse = forrigeAndeler,
                 andelerTilkjentYtelse = andeler,
-                opprettetTidspunkt = LocalDateTime.now().minusYears(2)
+                behandlingOpprettetTidspunkt = LocalDateTime.now().minusYears(2)
             )
         }
 
@@ -178,7 +178,7 @@ class UtbetalingssikkerhetTest {
             TilkjentYtelseValidering.validerAtTilkjentYtelseHarGyldigEtterbetalingsperiode(
                 forrigeAndelerTilkjentYtelse = emptyList(),
                 andelerTilkjentYtelse = andeler,
-                opprettetTidspunkt = LocalDateTime.now().minusYears(2)
+                behandlingOpprettetTidspunkt = LocalDateTime.now().minusYears(2)
             )
         }
 
@@ -186,7 +186,7 @@ class UtbetalingssikkerhetTest {
             TilkjentYtelseValidering.validerAtTilkjentYtelseHarGyldigEtterbetalingsperiode(
                 forrigeAndelerTilkjentYtelse = forrigeAndeler,
                 andelerTilkjentYtelse = emptyList(),
-                opprettetTidspunkt = LocalDateTime.now().minusYears(2)
+                behandlingOpprettetTidspunkt = LocalDateTime.now().minusYears(2)
             )
         }
     }
