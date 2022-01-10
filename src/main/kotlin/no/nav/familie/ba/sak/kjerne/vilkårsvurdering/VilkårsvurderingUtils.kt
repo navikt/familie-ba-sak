@@ -172,6 +172,9 @@ object VilkårsvurderingUtils {
      *
      * @param initiellVilkårsvurdering - Vilkårsvurdering med vilkår basert på siste behandlignsgrunnlag. Skal bli neste aktive.
      * @param aktivVilkårsvurdering -  Vilkårsvurdering med vilkår basert på forrige behandlingsgrunnlag
+     * @param forrigeBehandlingVilkårsvurdering - Vilkårsvurdering fra forrige behandling (om den eksisterer).
+     *                                            Brukes for å sjekke om utvidet-vilkåret skal kopieres med videre.
+     * @param løpendeUnderkategori - Den løpende underkategorien for fagsaken. Brukes for å sjekke om utvidet-vilkåret skal kopieres med videre.
      * @return oppdaterte versjoner av initieltResultat og aktivtResultat:
      * initieltResultat (neste aktivt) med vilkår som skal benyttes videre
      * aktivtResultat med hvilke vilkår som ikke skal benyttes videre
@@ -230,13 +233,18 @@ object VilkårsvurderingUtils {
                         ?.vilkårResultater
                         ?.any { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD } ?: false
 
+                // Hvis forrige behandling inneholdt utvidet-vilkåret eller underkategorien er utvidet skal
+                // utvidet-vilkåret kopieres med videre uansett nåværende underkategori
                 if (personsVilkårOppdatert.none { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD } &&
                     (eksistererUtvidetVilkårPåForrigeBehandling || løpendeUnderkategori == BehandlingUnderkategori.UTVIDET)
                 ) {
                     val utvidetVilkår =
                         personenSomFinnes.vilkårResultater.filter { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
                     if (utvidetVilkår.isNotEmpty()) {
-                        personsVilkårOppdatert.addAll(utvidetVilkår.map { it.kopierMedParent(personTilOppdatert) })
+                        personsVilkårOppdatert.addAll(
+                            utvidetVilkår.filtrerVilkårÅKopiere(kopieringSkjerFraForrigeBehandling = initiellVilkårsvurdering.behandling.id != aktivVilkårsvurdering.behandling.id)
+                                .map { it.kopierMedParent(personTilOppdatert) }
+                        )
                         personsVilkårAktivt.removeAll(utvidetVilkår)
                     }
                 }
@@ -317,7 +325,7 @@ fun vedtakBegrunnelseTilRestVedtakBegrunnelseTilknyttetVilkår(
 }
 
 private fun List<VilkårResultat>.filtrerVilkårÅKopiere(kopieringSkjerFraForrigeBehandling: Boolean): List<VilkårResultat> {
-    return if (kopieringSkjerFraForrigeBehandling && this.any { it.resultat == Resultat.OPPFYLT }) {
+    return if (kopieringSkjerFraForrigeBehandling) {
         this.filter { it.resultat == Resultat.OPPFYLT }
     } else {
         this

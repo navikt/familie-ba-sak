@@ -54,6 +54,11 @@ class VilkårService(
         behandlingId = behandlingId
     )
 
+    companion object {
+        const val fantIkkeAktivVilkårsvurderingFeilmelding = "Fant ikke aktiv vilkårsvurdering"
+        const val fantIkkeVilkårsvurderingForPersonFeilmelding = "Fant ikke vilkårsvurdering for person"
+    }
+
     @Transactional
     fun endreVilkår(
         behandlingId: Long,
@@ -72,7 +77,7 @@ class VilkårService(
         val vilkårsvurdering = hentVilkårsvurdering(behandlingId = behandlingId)
             ?: throw Feil(
                 message = "Fant ikke aktiv vilkårsvurdering ved endring på vilkår",
-                frontendFeilmelding = "Fant ikke aktiv vilkårsvurdering"
+                frontendFeilmelding = fantIkkeAktivVilkårsvurderingFeilmelding
             )
 
         val restVilkårResultat = restPersonResultat.vilkårResultater.singleOrNull { it.id == vilkårId }
@@ -80,7 +85,7 @@ class VilkårService(
         val personResultat =
             vilkårsvurdering.personResultater.singleOrNull { it.aktør.aktivFødselsnummer() == restPersonResultat.personIdent }
                 ?: throw Feil(
-                    message = "Fant ikke vilkårsvurdering for person",
+                    message = fantIkkeVilkårsvurderingForPersonFeilmelding,
                     frontendFeilmelding = "Fant ikke vilkårsvurdering for person med ident '${restPersonResultat.personIdent}"
                 )
 
@@ -101,12 +106,12 @@ class VilkårService(
         val vilkårsvurdering = hentVilkårsvurdering(behandlingId = behandlingId)
             ?: throw Feil(
                 message = "Fant ikke aktiv vilkårsvurdering ved sletting av vilkår",
-                frontendFeilmelding = "Fant ikke aktiv vilkårsvurdering"
+                frontendFeilmelding = fantIkkeAktivVilkårsvurderingFeilmelding
             )
 
         val personResultat = vilkårsvurdering.personResultater.find { it.aktør == aktør }
             ?: throw Feil(
-                message = "Fant ikke vilkårsvurdering for person",
+                message = fantIkkeVilkårsvurderingForPersonFeilmelding,
                 frontendFeilmelding = "Fant ikke vilkårsvurdering for person med ident '${aktør.aktivFødselsnummer()}"
             )
 
@@ -120,11 +125,11 @@ class VilkårService(
         val vilkårsvurdering = hentVilkårsvurdering(behandlingId = behandlingId)
             ?: throw Feil(
                 message = "Fant ikke aktiv vilkårsvurdering ved sletting av vilkår",
-                frontendFeilmelding = "Fant ikke aktiv vilkårsvurdering"
+                frontendFeilmelding = fantIkkeAktivVilkårsvurderingFeilmelding
             )
         val personResultat = vilkårsvurdering.personResultater.find { it.personIdent == restSlettVilkår.personIdent }
             ?: throw Feil(
-                message = "Fant ikke vilkårsvurdering for person",
+                message = fantIkkeVilkårsvurderingForPersonFeilmelding,
                 frontendFeilmelding = "Fant ikke vilkårsvurdering for person med ident '${restSlettVilkår.personIdent}"
             )
         val behandling = behandlingService.hent(behandlingId)
@@ -150,13 +155,13 @@ class VilkårService(
         val vilkårsvurdering = hentVilkårsvurdering(behandlingId = behandlingId)
             ?: throw Feil(
                 message = "Fant ikke aktiv vilkårsvurdering ved opprettelse av vilkårsperiode",
-                frontendFeilmelding = "Fant ikke aktiv vilkårsvurdering"
+                frontendFeilmelding = fantIkkeAktivVilkårsvurderingFeilmelding
             )
 
         val personResultat =
             vilkårsvurdering.personResultater.find { it.aktør.aktivFødselsnummer() == restNyttVilkår.personIdent }
                 ?: throw Feil(
-                    message = "Fant ikke vilkårsvurdering for person",
+                    message = fantIkkeVilkårsvurderingForPersonFeilmelding,
                     frontendFeilmelding =
                     "Fant ikke vilkårsvurdering for person med ident '${restNyttVilkår.personIdent}"
                 )
@@ -266,7 +271,7 @@ class VilkårService(
         initiellVilkårsvurdering: Vilkårsvurdering
     ): Vilkårsvurdering {
 
-        val annenVilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = annenBehandling.id)
+        val annenVilkårsvurdering = hentVilkårsvurdering(behandlingId = annenBehandling.id)
             ?: throw Feil(message = "Finner ikke vilkårsvurdering fra annen behandling.")
 
         val annenBehandlingErHenlagt = behandlingService.hent(annenBehandling.id).erHenlagt()
@@ -277,7 +282,7 @@ class VilkårService(
             aktivVilkårsvurdering = annenVilkårsvurdering,
             initiellVilkårsvurdering = initiellVilkårsvurdering,
             løpendeUnderkategori = behandlingService.hentLøpendeUnderkategori(initiellVilkårsvurdering.behandling.fagsak.id),
-            forrigeBehandlingVilkårsvurdering = hentVilkårsvurdering(annenBehandling.id)
+            forrigeBehandlingVilkårsvurdering = annenVilkårsvurdering
         )
         return oppdatert
     }
