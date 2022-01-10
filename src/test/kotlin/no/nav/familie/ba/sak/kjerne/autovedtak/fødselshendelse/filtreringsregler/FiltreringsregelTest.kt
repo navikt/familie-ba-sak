@@ -4,11 +4,11 @@ import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.common.tilfeldigSøker
+import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PersonInfo
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Evaluering
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.erOppfylt
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -205,9 +205,9 @@ internal class FiltreringsregelTest {
     @Test
     fun `Mor er under 18`() {
         val søkerPerson =
-            tilfeldigSøker(fødselsdato = LocalDate.parse("2020-10-23"), personIdent = PersonIdent("04086226621"))
+            tilfeldigSøker(fødselsdato = LocalDate.parse("2020-10-23"), aktør = tilAktør("04086226621"))
         val barn1Person =
-            tilfeldigPerson(fødselsdato = LocalDate.parse("2019-10-23"), personIdent = PersonIdent("21111777001"))
+            tilfeldigPerson(fødselsdato = LocalDate.parse("2019-10-23"), aktør = tilAktør("21111777001"))
         val barn2PersonInfo = PersonInfo(fødselsdato = LocalDate.parse("2020-09-23"))
 
         val evalueringer =
@@ -227,9 +227,9 @@ internal class FiltreringsregelTest {
     @Test
     fun `Barn med mindre mellomrom enn 5mnd`() {
         val søkerPerson =
-            tilfeldigSøker(fødselsdato = LocalDate.parse("1962-10-23"), personIdent = PersonIdent("04086226621"))
+            tilfeldigSøker(fødselsdato = LocalDate.parse("1962-10-23"), aktør = tilAktør("04086226621"))
         val barn1Person =
-            tilfeldigPerson(fødselsdato = LocalDate.parse("2020-10-23"), personIdent = PersonIdent("21111777001"))
+            tilfeldigPerson(fødselsdato = LocalDate.parse("2020-10-23"), aktør = tilAktør("21111777001"))
         val barn2PersonInfo = PersonInfo(fødselsdato = LocalDate.parse("2020-09-23"))
 
         val evalueringer =
@@ -249,9 +249,9 @@ internal class FiltreringsregelTest {
     @Test
     fun `Tvillinger født på samme dag skal gi oppfylt`() {
         val mor =
-            tilfeldigSøker(fødselsdato = LocalDate.parse("1962-10-23"), personIdent = PersonIdent(randomFnr()))
+            tilfeldigSøker(fødselsdato = LocalDate.parse("1962-10-23"), aktør = tilAktør(randomFnr()))
         val barn1Person =
-            tilfeldigPerson(fødselsdato = LocalDate.parse("2020-10-23"), personIdent = PersonIdent(randomFnr()))
+            tilfeldigPerson(fødselsdato = LocalDate.parse("2020-10-23"), aktør = tilAktør(randomFnr()))
         val barn2PersonInfo = PersonInfo(fødselsdato = LocalDate.parse("2020-10-23"))
 
         val evaluering = Filtreringsregel.MER_ENN_5_MND_SIDEN_FORRIGE_BARN.vurder(
@@ -270,9 +270,9 @@ internal class FiltreringsregelTest {
     @Test
     fun `Mor lever ikke`() {
         val søkerPerson =
-            tilfeldigSøker(fødselsdato = LocalDate.parse("1962-10-23"), personIdent = PersonIdent("04086226621"))
+            tilfeldigSøker(fødselsdato = LocalDate.parse("1962-10-23"), aktør = tilAktør("04086226621"))
         val barn1Person =
-            tilfeldigPerson(fødselsdato = LocalDate.parse("2020-10-23"), personIdent = PersonIdent("21111777001"))
+            tilfeldigPerson(fødselsdato = LocalDate.parse("2020-10-23"), aktør = tilAktør("21111777001"))
         val barn2PersonInfo = PersonInfo(fødselsdato = LocalDate.parse("2018-09-23"))
 
         val evalueringer =
@@ -292,9 +292,9 @@ internal class FiltreringsregelTest {
     @Test
     fun `Barnet lever ikke`() {
         val søkerPerson =
-            tilfeldigSøker(fødselsdato = LocalDate.parse("1962-10-23"), personIdent = PersonIdent("04086226621"))
+            tilfeldigSøker(fødselsdato = LocalDate.parse("1962-10-23"), aktør = tilAktør("04086226621"))
         val barn1Person =
-            tilfeldigPerson(fødselsdato = LocalDate.parse("2020-10-23"), personIdent = PersonIdent("21111777001"))
+            tilfeldigPerson(fødselsdato = LocalDate.parse("2020-10-23"), aktør = tilAktør("21111777001"))
         val barn2PersonInfo = PersonInfo(fødselsdato = LocalDate.parse("2018-09-23"))
 
         val evalueringer =
@@ -314,9 +314,9 @@ internal class FiltreringsregelTest {
     @Test
     fun `Mor har verge`() {
         val søkerPerson =
-            tilfeldigSøker(fødselsdato = LocalDate.parse("1962-10-23"), personIdent = PersonIdent("04086226621"))
+            tilfeldigSøker(fødselsdato = LocalDate.parse("1962-10-23"), aktør = tilAktør("04086226621"))
         val barn1Person =
-            tilfeldigPerson(fødselsdato = LocalDate.parse("2020-10-23"), personIdent = PersonIdent("21111777001"))
+            tilfeldigPerson(fødselsdato = LocalDate.parse("2020-10-23"), aktør = tilAktør("21111777001"))
         val barn2PersonInfo = PersonInfo(fødselsdato = LocalDate.parse("2018-09-23"))
 
         val evalueringer =
@@ -336,9 +336,9 @@ internal class FiltreringsregelTest {
     @Test
     fun `Mor er død og er umyndig`() {
         val søkerPerson =
-            tilfeldigSøker(fødselsdato = LocalDate.parse("1962-10-23"), personIdent = PersonIdent("04086226621"))
+            tilfeldigSøker(fødselsdato = LocalDate.parse("1962-10-23"), aktør = tilAktør("04086226621"))
         val barn1Person =
-            tilfeldigPerson(fødselsdato = LocalDate.parse("2020-10-23"), personIdent = PersonIdent("21111777001"))
+            tilfeldigPerson(fødselsdato = LocalDate.parse("2020-10-23"), aktør = tilAktør("21111777001"))
         val barn2PersonInfo = PersonInfo(fødselsdato = LocalDate.parse("2018-09-23"))
 
         val evalueringer =
@@ -359,11 +359,11 @@ internal class FiltreringsregelTest {
     fun `Flere barn født`() {
         val nyligFødselsdato = LocalDate.now().minusDays(2)
         val søkerPerson =
-            tilfeldigSøker(fødselsdato = LocalDate.parse("1962-10-23"), personIdent = PersonIdent("04086226621"))
+            tilfeldigSøker(fødselsdato = LocalDate.parse("1962-10-23"), aktør = tilAktør("04086226621"))
         val barn1Person =
-            tilfeldigPerson(fødselsdato = nyligFødselsdato, personIdent = PersonIdent("21111777001"))
+            tilfeldigPerson(fødselsdato = nyligFødselsdato, aktør = tilAktør("21111777001"))
         val barn2Person =
-            tilfeldigPerson(fødselsdato = nyligFødselsdato, personIdent = PersonIdent("23128438785"))
+            tilfeldigPerson(fødselsdato = nyligFødselsdato, aktør = tilAktør("23128438785"))
         val barn3PersonInfo = PersonInfo(fødselsdato = LocalDate.parse("2018-09-23"))
 
         val evalueringer =
@@ -383,9 +383,9 @@ internal class FiltreringsregelTest {
     @Test
     fun `Mor har ugyldig fødselsnummer`() {
         val søkerPerson =
-            tilfeldigSøker(fødselsdato = LocalDate.parse("1962-10-23"), personIdent = PersonIdent("23456789111"))
+            tilfeldigSøker(fødselsdato = LocalDate.parse("1962-10-23"), aktør = tilAktør("23456789111"))
         val barn1Person =
-            tilfeldigPerson(fødselsdato = LocalDate.parse("2020-10-23"), personIdent = PersonIdent("21111777001"))
+            tilfeldigPerson(fødselsdato = LocalDate.parse("2020-10-23"), aktør = tilAktør("21111777001"))
         val barn3PersonInfo = PersonInfo(fødselsdato = LocalDate.parse("2018-09-23"))
 
         val evalueringer =
@@ -405,11 +405,11 @@ internal class FiltreringsregelTest {
     @Test
     fun `Barn med ugyldig fødselsnummer`() {
         val søkerPerson =
-            tilfeldigSøker(fødselsdato = LocalDate.parse("1962-10-23"), personIdent = PersonIdent("04086226621"))
+            tilfeldigSøker(fødselsdato = LocalDate.parse("1962-10-23"), aktør = tilAktør("04086226621"))
         val barn1Person =
-            tilfeldigPerson(fødselsdato = LocalDate.parse("2020-10-23"), personIdent = PersonIdent("23102000000"))
+            tilfeldigPerson(fødselsdato = LocalDate.parse("2020-10-23"), aktør = tilAktør("23102000000"))
         val barn2Person =
-            tilfeldigPerson(fødselsdato = LocalDate.parse("2018-09-23"), personIdent = PersonIdent("23091823456"))
+            tilfeldigPerson(fødselsdato = LocalDate.parse("2018-09-23"), aktør = tilAktør("23091823456"))
 
         val evalueringer =
             evaluerFiltreringsregler(
@@ -430,9 +430,9 @@ internal class FiltreringsregelTest {
         val fødselsdatoIDenneMåned = LocalDate.now().withDayOfMonth(1)
 
         val søkerPerson =
-            tilfeldigSøker(fødselsdato = LocalDate.parse("1962-10-23"), personIdent = PersonIdent("04086226621"))
+            tilfeldigSøker(fødselsdato = LocalDate.parse("1962-10-23"), aktør = tilAktør("04086226621"))
         val barn1Person =
-            tilfeldigPerson(fødselsdato = fødselsdatoIDenneMåned, personIdent = PersonIdent("23091823456"))
+            tilfeldigPerson(fødselsdato = fødselsdatoIDenneMåned, aktør = tilAktør("23091823456"))
 
         val evalueringer =
             evaluerFiltreringsregler(

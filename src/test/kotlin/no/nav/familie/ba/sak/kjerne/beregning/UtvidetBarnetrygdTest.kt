@@ -10,7 +10,6 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
@@ -47,7 +46,7 @@ internal class UtvidetBarnetrygdTest {
         val vilkårsvurdering = Vilkårsvurdering(behandling = behandling)
 
         val søkerResultat =
-            PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = søker.ident, aktør = søker.aktør)
+            PersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = søker.aktør)
                 .apply {
                     vilkårResultater.addAll(
                         oppfylteVilkårFor(
@@ -68,7 +67,7 @@ internal class UtvidetBarnetrygdTest {
                     )
                 }
         val barnResultater = listOf(barnA, barnB).map {
-            PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = it.ident, aktør = it.aktør)
+            PersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = it.aktør)
                 .apply {
                     vilkårResultater.addAll(
                         oppfylteVilkårFor(
@@ -103,22 +102,22 @@ internal class UtvidetBarnetrygdTest {
         val andelUtvidetA = andeler[2]
         val andelUtvidetB = andeler[3]
 
-        assertEquals(barnA.ident, andelBarnA.personIdent)
+        assertEquals(barnA.ident, andelBarnA.aktør.aktivFødselsnummer())
         assertEquals(barnA.fom.nesteMåned(), andelBarnA.stønadFom)
         assertEquals(barnA.tom.toYearMonth(), andelBarnA.stønadTom)
         assertEquals(527, andelBarnA.kalkulertUtbetalingsbeløp)
 
-        assertEquals(barnB.ident, andelBarnB.personIdent)
+        assertEquals(barnB.ident, andelBarnB.aktør.aktivFødselsnummer())
         assertEquals(barnB.fom.nesteMåned(), andelBarnB.stønadFom)
         assertEquals(barnB.tom.toYearMonth(), andelBarnB.stønadTom)
         assertEquals(1054, andelBarnB.kalkulertUtbetalingsbeløp)
 
-        assertEquals(søker.ident, andelUtvidetA.personIdent)
+        assertEquals(søker.ident, andelUtvidetA.aktør.aktivFødselsnummer())
         assertEquals(søker.fom.nesteMåned(), andelUtvidetA.stønadFom)
         assertEquals(barnB.tom.toYearMonth(), andelUtvidetA.stønadTom)
         assertEquals(andelBarnB.kalkulertUtbetalingsbeløp, andelUtvidetA.kalkulertUtbetalingsbeløp)
 
-        assertEquals(søker.ident, andelUtvidetB.personIdent)
+        assertEquals(søker.ident, andelUtvidetB.aktør.aktivFødselsnummer())
         assertEquals(barnB.tom.nesteMåned(), andelUtvidetB.stønadFom)
         assertEquals(søker.tom.toYearMonth(), andelUtvidetB.stønadTom)
         assertEquals(andelBarnA.kalkulertUtbetalingsbeløp, andelUtvidetB.kalkulertUtbetalingsbeløp)
@@ -136,7 +135,7 @@ internal class UtvidetBarnetrygdTest {
         val vilkårsvurdering = Vilkårsvurdering(behandling = behandling)
 
         val søkerResultat =
-            PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = søker.ident, aktør = søker.aktør)
+            PersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = søker.aktør)
                 .apply {
                     vilkårResultater.addAll(
                         oppfylteVilkårFor(
@@ -158,7 +157,6 @@ internal class UtvidetBarnetrygdTest {
                 }
         val barnResultater = PersonResultat(
             vilkårsvurdering = vilkårsvurdering,
-            personIdent = oppfyltBarn.ident,
             aktør = oppfyltBarn.aktør
         )
             .apply {
@@ -193,12 +191,12 @@ internal class UtvidetBarnetrygdTest {
         val andelBarn = andeler[0]
         val andelUtvidet = andeler[1]
 
-        assertEquals(oppfyltBarn.ident, andelBarn.personIdent)
+        assertEquals(oppfyltBarn.ident, andelBarn.aktør.aktivFødselsnummer())
         assertEquals(oppfyltBarn.fom.nesteMåned(), andelBarn.stønadFom)
         assertEquals(oppfyltBarn.tom.toYearMonth(), andelBarn.stønadTom)
         assertEquals(1354, andelBarn.kalkulertUtbetalingsbeløp)
 
-        assertEquals(søker.ident, andelUtvidet.personIdent)
+        assertEquals(søker.ident, andelUtvidet.aktør.aktivFødselsnummer())
         assertEquals(søker.fom.nesteMåned(), andelUtvidet.stønadFom)
         assertEquals(søker.tom.toYearMonth(), andelUtvidet.stønadTom)
         assertEquals(1054, andelUtvidet.kalkulertUtbetalingsbeløp)
@@ -217,7 +215,6 @@ internal class UtvidetBarnetrygdTest {
         val vilkårsvurdering = Vilkårsvurdering(behandling = behandling)
         val søkerResultat = PersonResultat(
             vilkårsvurdering = vilkårsvurdering,
-            personIdent = søkerOrdinær.ident,
             aktør = søkerOrdinær.aktør
         )
             .apply {
@@ -243,7 +240,6 @@ internal class UtvidetBarnetrygdTest {
         val barnResultater =
             PersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
-                personIdent = barnOppfylt.ident,
                 aktør = barnOppfylt.aktør
             )
                 .apply {
@@ -276,11 +272,11 @@ internal class UtvidetBarnetrygdTest {
         val andelBarn = andeler[0]
         val andelUtvidet = andeler[1]
 
-        assertEquals(barnOppfylt.ident, andelBarn.personIdent)
+        assertEquals(barnOppfylt.ident, andelBarn.aktør.aktivFødselsnummer())
         assertEquals(barnOppfylt.fom.nesteMåned(), andelBarn.stønadFom)
         assertEquals(barnOppfylt.tom.toYearMonth(), andelBarn.stønadTom)
 
-        assertEquals(søkerUtvidet.ident, andelUtvidet.personIdent)
+        assertEquals(søkerUtvidet.ident, andelUtvidet.aktør.aktivFødselsnummer())
         assertEquals(søkerUtvidet.fom.nesteMåned(), andelUtvidet.stønadFom)
         assertEquals(søkerUtvidet.tom.toYearMonth(), andelUtvidet.stønadTom)
     }
@@ -298,7 +294,6 @@ internal class UtvidetBarnetrygdTest {
         val vilkårsvurdering = Vilkårsvurdering(behandling = behandling)
         val søkerResultat = PersonResultat(
             vilkårsvurdering = vilkårsvurdering,
-            personIdent = søkerOrdinær.ident,
             aktør = søkerOrdinær.aktør
         )
             .apply {
@@ -324,7 +319,6 @@ internal class UtvidetBarnetrygdTest {
         val barnResultater =
             PersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
-                personIdent = barnOppfylt.ident,
                 aktør = barnOppfylt.aktør
             )
                 .apply {
@@ -357,11 +351,11 @@ internal class UtvidetBarnetrygdTest {
         val andelBarn = andeler[0]
         val andelUtvidet = andeler[1]
 
-        assertEquals(barnOppfylt.ident, andelBarn.personIdent)
+        assertEquals(barnOppfylt.ident, andelBarn.aktør.aktivFødselsnummer())
         assertEquals(barnOppfylt.fom.nesteMåned(), andelBarn.stønadFom)
         assertEquals(barnOppfylt.tom.toYearMonth(), andelBarn.stønadTom)
 
-        assertEquals(søkerUtvidet.ident, andelUtvidet.personIdent)
+        assertEquals(søkerUtvidet.ident, andelUtvidet.aktør.aktivFødselsnummer())
         assertEquals(barnOppfylt.fom.nesteMåned(), andelUtvidet.stønadFom)
         assertEquals(barnOppfylt.tom.toYearMonth(), andelUtvidet.stønadTom)
     }
@@ -380,7 +374,6 @@ internal class UtvidetBarnetrygdTest {
         val vilkårsvurdering = Vilkårsvurdering(behandling = behandling)
         val søkerResultat = PersonResultat(
             vilkårsvurdering = vilkårsvurdering,
-            personIdent = søkerOrdinær.ident,
             aktør = søkerOrdinær.aktør
         )
             .apply {
@@ -406,7 +399,6 @@ internal class UtvidetBarnetrygdTest {
         val barnResultater =
             PersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
-                personIdent = barnOppfylt.ident,
                 aktør = barnOppfylt.aktør
             )
                 .apply {
@@ -439,10 +431,10 @@ internal class UtvidetBarnetrygdTest {
         val andelBarn = andeler[0]
         val andelUtvidet = andeler[1]
 
-        assertEquals(barnOppfylt.ident, andelBarn.personIdent)
+        assertEquals(barnOppfylt.ident, andelBarn.aktør.aktivFødselsnummer())
         assertEquals(barnOppfylt.tom.toYearMonth(), andelBarn.stønadTom)
 
-        assertEquals(søkerUtvidet.ident, andelUtvidet.personIdent)
+        assertEquals(søkerUtvidet.ident, andelUtvidet.aktør.aktivFødselsnummer())
         assertEquals(søkerUtvidet.tom.toYearMonth(), andelUtvidet.stønadTom)
     }
 
@@ -460,7 +452,6 @@ internal class UtvidetBarnetrygdTest {
         val vilkårsvurdering = Vilkårsvurdering(behandling = behandling)
         val søkerResultat = PersonResultat(
             vilkårsvurdering = vilkårsvurdering,
-            personIdent = søkerOrdinær.ident,
             aktør = søkerOrdinær.aktør
         )
             .apply {
@@ -501,7 +492,6 @@ internal class UtvidetBarnetrygdTest {
         val barnResultater =
             PersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
-                personIdent = barnOppfylt.ident,
                 aktør = barnOppfylt.aktør
             )
                 .apply {
@@ -534,10 +524,10 @@ internal class UtvidetBarnetrygdTest {
         val andelBarn = andeler[0]
         val andelUtvidet = andeler[1]
 
-        assertEquals(barnOppfylt.ident, andelBarn.personIdent)
+        assertEquals(barnOppfylt.ident, andelBarn.aktør.aktivFødselsnummer())
         assertEquals(barnOppfylt.tom.toYearMonth(), andelBarn.stønadTom)
 
-        assertEquals(søkerOrdinær.ident, andelUtvidet.personIdent)
+        assertEquals(søkerOrdinær.ident, andelUtvidet.aktør.aktivFødselsnummer())
         assertEquals(søkerOrdinær.fom.plusMonths(1).toYearMonth(), andelUtvidet.stønadFom)
         assertEquals(søkerOrdinær.tom.toYearMonth(), andelUtvidet.stønadTom)
     }
@@ -556,7 +546,6 @@ internal class UtvidetBarnetrygdTest {
         val vilkårsvurdering = Vilkårsvurdering(behandling = behandling)
         val søkerResultat = PersonResultat(
             vilkårsvurdering = vilkårsvurdering,
-            personIdent = søkerOrdinær.ident,
             aktør = søkerOrdinær.aktør
         )
             .apply {
@@ -597,7 +586,6 @@ internal class UtvidetBarnetrygdTest {
         val barnResultater =
             PersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
-                personIdent = barnOppfylt.ident,
                 aktør = barnOppfylt.aktør
             )
                 .apply {
@@ -631,13 +619,13 @@ internal class UtvidetBarnetrygdTest {
         val andelUtvidet1 = andeler[1]
         val andelUtvidet2 = andeler[2]
 
-        assertEquals(barnOppfylt.ident, andelBarn.personIdent)
+        assertEquals(barnOppfylt.ident, andelBarn.aktør.aktivFødselsnummer())
         assertEquals(barnOppfylt.tom.toYearMonth(), andelBarn.stønadTom)
 
-        assertEquals(søkerOrdinær.ident, andelUtvidet1.personIdent)
+        assertEquals(søkerOrdinær.ident, andelUtvidet1.aktør.aktivFødselsnummer())
         assertEquals(utvidetFørstePeriodeTom.toYearMonth(), andelUtvidet1.stønadTom)
 
-        assertEquals(søkerOrdinær.ident, andelUtvidet2.personIdent)
+        assertEquals(søkerOrdinær.ident, andelUtvidet2.aktør.aktivFødselsnummer())
         assertEquals(utvidetAndrePeriodeFom.plusMonths(1).toYearMonth(), andelUtvidet2.stønadFom)
     }
 
@@ -687,7 +675,6 @@ internal class UtvidetBarnetrygdTest {
     ): List<Person> = this.map {
         Person(
             aktør = tilAktør(it.ident),
-            personIdent = PersonIdent(it.ident),
             type = it.rolle,
             personopplysningGrunnlag = personopplysningGrunnlag,
             fødselsdato = fødselsdato,

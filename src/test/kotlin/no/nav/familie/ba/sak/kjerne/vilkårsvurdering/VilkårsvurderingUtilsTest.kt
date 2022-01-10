@@ -25,7 +25,6 @@ class VilkårsvurderingUtilsTest {
     fun `feil kastes når det finnes løpende oppfylt ved forsøk på å legge til avslag uten periode`() {
         val personResultat = PersonResultat(
             vilkårsvurdering = uvesentligVilkårsvurdering,
-            personIdent = randomFnr(),
             aktør = randomAktørId()
         )
         val løpendeOppfylt = VilkårResultat(
@@ -64,7 +63,6 @@ class VilkårsvurderingUtilsTest {
     fun `feil kastes når det finnes avslag uten periode ved forsøk på å legge til løpende oppfylt`() {
         val personResultat = PersonResultat(
             vilkårsvurdering = uvesentligVilkårsvurdering,
-            personIdent = randomFnr(),
             aktør = randomAktørId()
         )
         val avslagUtenPeriode = VilkårResultat(
@@ -103,7 +101,6 @@ class VilkårsvurderingUtilsTest {
     fun `feil kastes ikke når når ingen periode er løpende`() {
         val personResultat = PersonResultat(
             vilkårsvurdering = uvesentligVilkårsvurdering,
-            personIdent = randomFnr(),
             aktør = randomAktørId()
         )
         val avslagUtenPeriode = VilkårResultat(

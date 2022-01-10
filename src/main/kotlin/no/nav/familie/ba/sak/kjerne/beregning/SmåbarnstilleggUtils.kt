@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
 import no.nav.familie.ba.sak.kjerne.beregning.domene.erUlike
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
@@ -37,14 +38,14 @@ fun vedtakOmOvergangsstønadPåvirkerFagsak(
     småbarnstilleggBarnetrygdGenerator: SmåbarnstilleggBarnetrygdGenerator,
     nyePerioderMedFullOvergangsstønad: List<InternPeriodeOvergangsstønad>,
     forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>,
-    barnasIdenterOgFødselsdatoer: List<Pair<String, LocalDate>>,
+    barnasAktørerOgFødselsdatoer: List<Pair<Aktør, LocalDate>>,
 ): Boolean {
     val (forrigeSøkersSmåbarnstilleggAndeler, forrigeSøkersAndreAndeler) = forrigeAndelerTilkjentYtelse.partition { it.erSmåbarnstillegg() }
 
     val nyeSmåbarnstilleggAndeler = småbarnstilleggBarnetrygdGenerator.lagSmåbarnstilleggAndeler(
         perioderMedFullOvergangsstønad = nyePerioderMedFullOvergangsstønad,
         andelerTilkjentYtelse = forrigeSøkersAndreAndeler,
-        barnasIdenterOgFødselsdatoer = barnasIdenterOgFødselsdatoer,
+        barnasAktørerOgFødselsdatoer = barnasAktørerOgFødselsdatoer,
     )
 
     return forrigeSøkersSmåbarnstilleggAndeler.erUlike(nyeSmåbarnstilleggAndeler)

@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.common.nesteMåned
+import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.tilfeldigPerson
@@ -15,7 +16,6 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -31,27 +31,30 @@ class SmåbarnstilleggUtilsTest {
 
     @Test
     fun `Skal generere periode med rett til småbarnstillegg for 1 barn`() {
-        val personIdent = randomFnr()
+        val aktør = randomAktørId()
 
         val småbarnstilleggBarnetrygdGenerator = SmåbarnstilleggBarnetrygdGenerator(
             behandlingId = 1L,
             tilkjentYtelse = mockk()
         )
 
-        val barnasIdenterOgFødselsdatoer = listOf(Pair(personIdent, LocalDate.now().minusYears(4)))
+        val barnasIdenterOgFødselsdatoer = listOf(Pair(aktør, LocalDate.now().minusYears(4)))
 
         val barnasAndeler = listOf(
             lagAndelTilkjentYtelse(
                 fom = YearMonth.now().minusMonths(20),
                 tom = YearMonth.now().plusMonths(6),
                 ytelseType = YtelseType.UTVIDET_BARNETRYGD,
-                person = tilfeldigPerson(personIdent = PersonIdent(personIdent), personType = PersonType.BARN)
+                person = tilfeldigPerson(
+                    aktør = aktør,
+                    personType = PersonType.BARN
+                )
             )
         )
 
         val perioderHvorBarnPåvirkerRettenTilSmåbarnstillegg =
             småbarnstilleggBarnetrygdGenerator.lagPerioderMedBarnSomGirRettTilSmåbarnstillegg(
-                barnasIdenterOgFødselsdatoer = barnasIdenterOgFødselsdatoer,
+                barnasAktørOgFødselsdatoer = barnasIdenterOgFødselsdatoer,
                 barnasAndeler = barnasAndeler
             )
 
@@ -62,8 +65,8 @@ class SmåbarnstilleggUtilsTest {
 
     @Test
     fun `Skal ikke generere periode med rett til småbarnstillegg for 2 barn hvor kun 1 får utbetalinger`() {
-        val barnUnder3År = randomFnr()
-        val barnOver3År = randomFnr()
+        val barnUnder3ÅrAktør = tilAktør(randomFnr())
+        val barnOver3ÅrAktør = tilAktør(randomFnr())
 
         val småbarnstilleggBarnetrygdGenerator = SmåbarnstilleggBarnetrygdGenerator(
             behandlingId = 1L,
@@ -71,20 +74,23 @@ class SmåbarnstilleggUtilsTest {
         )
 
         val barnasIdenterOgFødselsdatoer =
-            listOf(Pair(barnOver3År, LocalDate.now().minusYears(10)), Pair(barnUnder3År, LocalDate.now().minusYears(2)))
+            listOf(
+                Pair(barnOver3ÅrAktør, LocalDate.now().minusYears(10)),
+                Pair(barnUnder3ÅrAktør, LocalDate.now().minusYears(2))
+            )
 
         val barnasAndeler = listOf(
             lagAndelTilkjentYtelse(
                 fom = YearMonth.now().minusMonths(20),
                 tom = YearMonth.now().plusMonths(6),
                 ytelseType = YtelseType.UTVIDET_BARNETRYGD,
-                person = tilfeldigPerson(personIdent = PersonIdent(barnOver3År), personType = PersonType.BARN)
+                person = tilfeldigPerson(aktør = barnOver3ÅrAktør, personType = PersonType.BARN)
             )
         )
 
         val perioderHvorBarnPåvirkerRettenTilSmåbarnstillegg =
             småbarnstilleggBarnetrygdGenerator.lagPerioderMedBarnSomGirRettTilSmåbarnstillegg(
-                barnasIdenterOgFødselsdatoer = barnasIdenterOgFødselsdatoer,
+                barnasAktørOgFødselsdatoer = barnasIdenterOgFødselsdatoer,
                 barnasAndeler = barnasAndeler
             )
 
@@ -93,8 +99,8 @@ class SmåbarnstilleggUtilsTest {
 
     @Test
     fun `Skal generere periode med rett til småbarnstillegg for 2 barn hvor kun 1 får utbetalinger`() {
-        val barnUnder3År = randomFnr()
-        val barnOver3År = randomFnr()
+        val barnUnder3År = randomAktørId()
+        val barnOver3År = randomAktørId()
 
         val småbarnstilleggBarnetrygdGenerator = SmåbarnstilleggBarnetrygdGenerator(
             behandlingId = 1L,
@@ -102,20 +108,23 @@ class SmåbarnstilleggUtilsTest {
         )
 
         val barnasIdenterOgFødselsdatoer =
-            listOf(Pair(barnOver3År, LocalDate.now().minusYears(10)), Pair(barnUnder3År, LocalDate.now().minusYears(2)))
+            listOf(
+                Pair(barnOver3År, LocalDate.now().minusYears(10)),
+                Pair(barnUnder3År, LocalDate.now().minusYears(2))
+            )
 
         val barnasAndeler = listOf(
             lagAndelTilkjentYtelse(
                 fom = YearMonth.now().minusMonths(15),
                 tom = YearMonth.now().plusMonths(6),
                 ytelseType = YtelseType.UTVIDET_BARNETRYGD,
-                person = tilfeldigPerson(personIdent = PersonIdent(barnUnder3År), personType = PersonType.BARN)
+                person = tilfeldigPerson(aktør = barnUnder3År, personType = PersonType.BARN)
             )
         )
 
         val perioderHvorBarnPåvirkerRettenTilSmåbarnstillegg =
             småbarnstilleggBarnetrygdGenerator.lagPerioderMedBarnSomGirRettTilSmåbarnstillegg(
-                barnasIdenterOgFødselsdatoer = barnasIdenterOgFødselsdatoer,
+                barnasAktørOgFødselsdatoer = barnasIdenterOgFødselsdatoer,
                 barnasAndeler = barnasAndeler
             )
 
@@ -127,7 +136,7 @@ class SmåbarnstilleggUtilsTest {
     @Test
     fun `Skal svare true om at nye perioder med full OS påvirker behandling`() {
         val personIdent = randomFnr()
-        val barnIdent = randomFnr()
+        val barnAktør = tilAktør(randomFnr())
 
         val påvirkerFagsak = vedtakOmOvergangsstønadPåvirkerFagsak(
             småbarnstilleggBarnetrygdGenerator = SmåbarnstilleggBarnetrygdGenerator(
@@ -146,22 +155,22 @@ class SmåbarnstilleggUtilsTest {
                     fom = YearMonth.now().minusMonths(10),
                     tom = YearMonth.now().plusMonths(6),
                     ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                    person = tilfeldigPerson(personIdent = PersonIdent(barnIdent))
+                    person = tilfeldigPerson(aktør = barnAktør)
                 ),
                 lagAndelTilkjentYtelse(
                     fom = YearMonth.now().minusMonths(10),
                     tom = YearMonth.now().plusMonths(6),
                     ytelseType = YtelseType.UTVIDET_BARNETRYGD,
-                    person = tilfeldigPerson(personIdent = PersonIdent(personIdent))
+                    person = tilfeldigPerson(aktør = tilAktør(personIdent))
                 ),
                 lagAndelTilkjentYtelse(
                     fom = YearMonth.now().minusMonths(10),
                     tom = YearMonth.now().plusMonths(6),
                     ytelseType = YtelseType.SMÅBARNSTILLEGG,
-                    person = tilfeldigPerson(personIdent = PersonIdent(personIdent))
+                    person = tilfeldigPerson(aktør = tilAktør(personIdent))
                 )
             ),
-            barnasIdenterOgFødselsdatoer = listOf(Pair(barnIdent, LocalDate.now().minusYears(2))),
+            barnasAktørerOgFødselsdatoer = listOf(Pair(barnAktør, LocalDate.now().minusYears(2))),
         )
 
         assertTrue(påvirkerFagsak)
@@ -169,10 +178,8 @@ class SmåbarnstilleggUtilsTest {
 
     @Test
     fun `Skal svare false om at nye perioder med full OS påvirker behandling`() {
-        val personIdent = randomFnr()
-        val barnIdent = randomFnr()
-        val søkerAktør = tilAktør(personIdent)
-        val barnAktør = tilAktør(barnIdent)
+        val personIdent = randomAktørId()
+        val barnIdent = randomAktørId()
 
         val påvirkerFagsak = vedtakOmOvergangsstønadPåvirkerFagsak(
             småbarnstilleggBarnetrygdGenerator = SmåbarnstilleggBarnetrygdGenerator(
@@ -181,7 +188,7 @@ class SmåbarnstilleggUtilsTest {
             ),
             nyePerioderMedFullOvergangsstønad = listOf(
                 InternPeriodeOvergangsstønad(
-                    personIdent = personIdent,
+                    personIdent = personIdent.aktørId,
                     fomDato = LocalDate.now().minusMonths(10),
                     tomDato = LocalDate.now().plusMonths(6),
                 )
@@ -191,25 +198,25 @@ class SmåbarnstilleggUtilsTest {
                     fom = YearMonth.now().minusMonths(10),
                     tom = YearMonth.now().plusMonths(6),
                     ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                    person = tilfeldigPerson(personIdent = PersonIdent(barnIdent)),
-                    aktør = barnAktør,
+                    person = tilfeldigPerson(aktør = barnIdent),
+                    aktør = barnIdent,
                 ),
                 lagAndelTilkjentYtelse(
                     fom = YearMonth.now().minusMonths(10),
                     tom = YearMonth.now().plusMonths(6),
                     ytelseType = YtelseType.UTVIDET_BARNETRYGD,
-                    person = tilfeldigPerson(personIdent = PersonIdent(personIdent)),
-                    aktør = søkerAktør,
+                    person = tilfeldigPerson(aktør = personIdent),
+                    aktør = personIdent,
                 ),
                 lagAndelTilkjentYtelse(
                     fom = YearMonth.now().minusMonths(10),
                     tom = YearMonth.now().plusMonths(6),
                     ytelseType = YtelseType.SMÅBARNSTILLEGG,
-                    person = tilfeldigPerson(personIdent = PersonIdent(personIdent)),
-                    aktør = søkerAktør,
+                    person = tilfeldigPerson(aktør = personIdent),
+                    aktør = personIdent,
                 )
             ),
-            barnasIdenterOgFødselsdatoer = listOf(Pair(barnIdent, LocalDate.now().minusYears(2))),
+            barnasAktørerOgFødselsdatoer = listOf(Pair(barnIdent, LocalDate.now().minusYears(2))),
         )
 
         assertFalse(påvirkerFagsak)

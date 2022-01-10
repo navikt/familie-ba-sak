@@ -4,14 +4,15 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.beregning.SatsService.sisteTilleggOrdinærSats
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
+import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
-import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
 import no.nav.familie.ba.sak.task.SatsendringTask
 import no.nav.familie.ba.sak.task.erHverdag
@@ -29,6 +30,8 @@ class SatsendringService(
     private val taskRepository: TaskRepositoryWrapper,
     private val behandlingRepository: BehandlingRepository,
     private val autovedtakService: AutovedtakService,
+    private val stegService: StegService,
+    private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val tilbakestillBehandlingService: TilbakestillBehandlingService
 ) {
 
@@ -107,8 +110,12 @@ class SatsendringService(
                     årsak = behandlingLåstMelding
                 )
             } else if (aktivOgÅpenBehandling.steg.rekkefølge > StegType.VILKÅRSVURDERING.rekkefølge) {
-                tilbakestillBehandlingService.tilbakestillBehandlingTilVilkårsvurdering(aktivOgÅpenBehandling)
-                logger.info("Tilbakestiller behandling $aktivOgÅpenBehandling til vilkårsvurderingen")
+                if (harAlleredeNySats(behandlingId = aktivOgÅpenBehandling.id)) {
+                    logger.info("Åpen behandling har allerede siste sats og vi lar den ligge.")
+                } else {
+                    tilbakestillBehandlingService.tilbakestillBehandlingTilVilkårsvurdering(aktivOgÅpenBehandling)
+                    logger.info("Tilbakestiller behandling $aktivOgÅpenBehandling til vilkårsvurderingen")
+                }
             } else {
                 logger.info("Behandling $aktivOgÅpenBehandling er under utredning, men er allerede i riktig tilstand.")
             }
@@ -123,28 +130,26 @@ class SatsendringService(
                 behandlingÅrsak = BehandlingÅrsak.SATSENDRING
             )
 
-        if (behandlingEtterBehandlingsresultat.resultat == BehandlingResultat.FORTSATT_INNVILGET) {
-            throw Feil("Satsendringsbehandling på fagsak ${behandlingEtterBehandlingsresultat.fagsak} blir ikke iverksatt fordi resultatet ble fortsatt innvilget.")
-        }
-
         val opprettetVedtak =
             autovedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(
                 behandlingEtterBehandlingsresultat
             )
 
-        val task = if (behandlingEtterBehandlingsresultat.resultat == BehandlingResultat.ENDRET) {
-            IverksettMotOppdragTask.opprettTask(
-                behandlingEtterBehandlingsresultat,
-                opprettetVedtak,
-                SikkerhetContext.hentSaksbehandler()
-            )
-        } else {
-            FerdigstillBehandlingTask.opprettTask(
-                søkerPersonIdent = søkerAktør.aktivFødselsnummer(),
-                behandlingsId = behandlingEtterBehandlingsresultat.id
-            )
-        }
+        val task = IverksettMotOppdragTask.opprettTask(
+            behandlingEtterBehandlingsresultat,
+            opprettetVedtak,
+            SikkerhetContext.hentSaksbehandler()
+        )
         taskRepository.save(task)
+    }
+
+    private fun harAlleredeNySats(behandlingId: Long): Boolean {
+        val andeler =
+            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = behandlingId)
+
+        return andeler.any {
+            it.sats == sisteTilleggOrdinærSats.beløp
+        }
     }
 
     companion object {

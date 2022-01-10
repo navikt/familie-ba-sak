@@ -158,7 +158,6 @@ class ØkonomiIntegrasjonTest(
         vilkårsvurdering.personResultater = setOf(
             lagPersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
-                fnr = søkerFnr,
                 aktør = søkerAktør,
                 resultat = Resultat.OPPFYLT,
                 periodeFom = stønadFom,
@@ -168,7 +167,6 @@ class ØkonomiIntegrasjonTest(
             ),
             lagPersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
-                fnr = barnFnr,
                 aktør = barnAktør,
                 resultat = Resultat.OPPFYLT,
                 periodeFom = stønadFom,

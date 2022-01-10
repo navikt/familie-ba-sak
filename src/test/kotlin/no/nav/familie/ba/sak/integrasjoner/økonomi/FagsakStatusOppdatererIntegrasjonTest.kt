@@ -122,7 +122,6 @@ class FagsakStatusOppdatererIntegrasjonTest : AbstractSpringIntegrationTest() {
         periodeOffset: Long,
         aktør: Aktør = randomAktørId()
     ) = AndelTilkjentYtelse(
-        personIdent = randomFnr(),
         aktør = aktør,
         behandlingId = tilkjentYtelse.behandling.id,
         tilkjentYtelse = tilkjentYtelse,

@@ -336,7 +336,6 @@ class BehandlingIntegrationTest(
         vilkårsvurdering.personResultater = setOf(
             lagPersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
-                fnr = søkerFnr,
                 aktør = søkerAktørId,
                 resultat = Resultat.OPPFYLT,
                 periodeFom = januar2020.minusMonths(1).toLocalDate(),
@@ -346,7 +345,6 @@ class BehandlingIntegrationTest(
             ),
             lagPersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
-                fnr = barn1Fnr,
                 aktør = barn1AktørId,
                 resultat = Resultat.OPPFYLT,
                 periodeFom = januar2020.minusMonths(1).toLocalDate(),
@@ -356,7 +354,6 @@ class BehandlingIntegrationTest(
             ),
             lagPersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
-                fnr = barn2Fnr,
                 aktør = barn2AktørId,
                 resultat = Resultat.OPPFYLT,
                 periodeFom = oktober2020.minusMonths(1).toLocalDate(),

@@ -19,6 +19,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.utledSegmenter
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.fpsak.tidsserie.LocalDateInterval
 import no.nav.fpsak.tidsserie.LocalDateSegment
+import no.nav.fpsak.tidsserie.LocalDateTimeline
 import java.math.BigDecimal
 import java.time.YearMonth
 import java.util.Objects
@@ -60,10 +61,6 @@ data class AndelTilkjentYtelse(
     @ManyToOne
     @JoinColumn(name = "tilkjent_ytelse_id", nullable = false, updatable = false)
     var tilkjentYtelse: TilkjentYtelse,
-
-    @Column(name = "person_ident", nullable = false, updatable = false)
-    // TODO: Robustgjøring dnr/fnr, fjern ved contract.
-    val personIdent: String,
 
     @OneToOne(optional = false) @JoinColumn(name = "fk_aktoer_id", nullable = false, updatable = false)
     val aktør: Aktør,
@@ -131,7 +128,6 @@ data class AndelTilkjentYtelse(
             Objects.equals(kalkulertUtbetalingsbeløp, annen.kalkulertUtbetalingsbeløp) &&
             Objects.equals(stønadFom, annen.stønadFom) &&
             Objects.equals(stønadTom, annen.stønadTom) &&
-            Objects.equals(personIdent, annen.personIdent) &&
             Objects.equals(aktør, annen.aktør)
     }
 
@@ -143,7 +139,6 @@ data class AndelTilkjentYtelse(
             kalkulertUtbetalingsbeløp,
             stønadFom,
             stønadTom,
-            personIdent,
             aktør
         )
     }
@@ -155,8 +150,7 @@ data class AndelTilkjentYtelse(
 
     fun erTilsvarendeForUtbetaling(other: AndelTilkjentYtelse): Boolean {
         return (
-            this.personIdent == other.personIdent &&
-                this.aktør == other.aktør &&
+            this.aktør == other.aktør &&
                 this.stønadFom == other.stønadFom &&
                 this.stønadTom == other.stønadTom &&
                 this.kalkulertUtbetalingsbeløp == other.kalkulertUtbetalingsbeløp &&
@@ -247,7 +241,7 @@ fun List<AndelTilkjentYtelse>.slåSammenBack2BackAndelsperioderMedSammeBeløp():
         andel = andel ?: andelTilkjentYtelse
         val back2BackAndelsperiodeMedSammeBeløp = this.singleOrNull {
             andel!!.stønadTom.plusMonths(1).equals(it.stønadFom) &&
-                andel!!.personIdent == it.personIdent &&
+                andel!!.aktør == it.aktør &&
                 andel!!.kalkulertUtbetalingsbeløp == it.kalkulertUtbetalingsbeløp &&
                 andel!!.type == it.type
         }
@@ -335,3 +329,14 @@ fun List<AndelTilkjentYtelse>.hentAndelerForSegment(
         )
     )
 }
+
+fun List<AndelTilkjentYtelse>?.hentTidslinje() =
+    LocalDateTimeline(
+        this?.map {
+            LocalDateSegment(
+                it.stønadFom.førsteDagIInneværendeMåned(),
+                it.stønadTom.sisteDagIInneværendeMåned(),
+                it
+            )
+        } ?: emptyList()
+    )

@@ -101,7 +101,6 @@ class BeregningServiceTest {
         val periodeTom = LocalDate.of(2020, 7, 1)
         val personResultatBarn = lagPersonResultat(
             vilkårsvurdering = vilkårsvurdering,
-            fnr = barn1Fnr,
             aktør = barn1AktørId,
             resultat = Resultat.OPPFYLT,
             periodeFom = periodeFom,
@@ -112,7 +111,6 @@ class BeregningServiceTest {
 
         val personResultatSøker = lagPersonResultat(
             vilkårsvurdering = vilkårsvurdering,
-            fnr = søkerFnr,
             aktør = søkerAktørId,
             resultat = Resultat.OPPFYLT,
             periodeFom = periodeFom,
@@ -166,7 +164,6 @@ class BeregningServiceTest {
         val periodeTom = LocalDate.of(2020, 7, 1)
         val personResultatBarn = lagPersonResultat(
             vilkårsvurdering = vilkårsvurdering,
-            fnr = barn1Fnr,
             aktør = barn1AktørId,
             resultat = Resultat.OPPFYLT,
             periodeFom = periodeFom,
@@ -177,7 +174,6 @@ class BeregningServiceTest {
 
         val personResultatSøker = lagPersonResultat(
             vilkårsvurdering = vilkårsvurdering,
-            fnr = søkerFnr,
             aktør = søkerAktørId,
             resultat = Resultat.OPPFYLT,
             periodeFom = periodeFom,
@@ -228,7 +224,7 @@ class BeregningServiceTest {
         val behandling = lagBehandling()
         val barn = tilfeldigPerson(personType = PersonType.BARN)
         val søkerFnr = randomFnr()
-        val søkerAktørId = tilAktør(søkerFnr)
+        val søkerAktør = tilAktør(søkerFnr)
         val vilkårsvurdering =
             Vilkårsvurdering(behandling = behandling)
 
@@ -236,10 +232,18 @@ class BeregningServiceTest {
         val periodeTom = LocalDate.of(2018, 7, 1)
         val avtaletidspunktDeltBosted = LocalDate.of(2018, 7, 1)
         val søkandtidspunkt = LocalDate.of(2018, 9, 1)
+
+        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
+            behandlingId = behandling.id,
+            søkerPersonIdent = søkerFnr,
+            barnasIdenter = listOf(barn.aktør.aktivFødselsnummer()),
+            barnAktør = listOf(barn.aktør),
+            søkerAktør = søkerAktør
+        )
+
         val personResultatBarn = lagPersonResultat(
             vilkårsvurdering = vilkårsvurdering,
-            fnr = barn.aktør.aktivFødselsnummer(),
-            aktør = barn.aktør,
+            aktør = personopplysningGrunnlag.barna.first().aktør,
             resultat = Resultat.OPPFYLT,
             periodeFom = periodeFom,
             periodeTom = periodeTom,
@@ -249,8 +253,7 @@ class BeregningServiceTest {
 
         val personResultatSøker = lagPersonResultat(
             vilkårsvurdering = vilkårsvurdering,
-            fnr = søkerFnr,
-            aktør = søkerAktørId,
+            aktør = personopplysningGrunnlag.søker.aktør,
             resultat = Resultat.OPPFYLT,
             periodeFom = periodeFom,
             periodeTom = periodeTom,
@@ -259,11 +262,6 @@ class BeregningServiceTest {
         )
         vilkårsvurdering.personResultater = setOf(personResultatBarn, personResultatSøker)
 
-        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
-            behandlingId = behandling.id,
-            søkerPersonIdent = søkerFnr,
-            barnasIdenter = listOf(barn.aktør.aktivFødselsnummer())
-        )
         val slot = slot<TilkjentYtelse>()
 
         every { behandlingResultatRepository.findByBehandlingAndAktiv(any()) } answers { vilkårsvurdering }
@@ -323,7 +321,6 @@ class BeregningServiceTest {
         val periodeTom = LocalDate.of(2020, 11, 1)
         val personResultatBarn = lagPersonResultat(
             vilkårsvurdering = vilkårsvurdering,
-            fnr = barn1Fnr,
             aktør = barn1AktørId,
             resultat = Resultat.OPPFYLT,
             periodeFom = periodeFom,
@@ -332,7 +329,6 @@ class BeregningServiceTest {
 
         val personResultatSøker = lagPersonResultat(
             vilkårsvurdering = vilkårsvurdering,
-            fnr = søkerFnr,
             aktør = søkerAktørId,
             resultat = Resultat.IKKE_OPPFYLT,
             periodeFom = periodeFom,
@@ -394,7 +390,6 @@ class BeregningServiceTest {
         val personResultat = mutableSetOf(
             lagPersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
-                fnr = søkerFnr,
                 aktør = søkerAktørId,
                 resultat = Resultat.OPPFYLT,
                 periodeFom = periode1Fom,
@@ -404,7 +399,6 @@ class BeregningServiceTest {
             ),
             lagPersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
-                fnr = søkerFnr,
                 aktør = søkerAktørId,
                 resultat = Resultat.IKKE_OPPFYLT,
                 periodeFom = periode2Fom,
@@ -414,7 +408,6 @@ class BeregningServiceTest {
             ),
             lagPersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
-                fnr = søkerFnr,
                 aktør = søkerAktørId,
                 resultat = Resultat.OPPFYLT,
                 periodeFom = periode3Fom,
@@ -424,7 +417,6 @@ class BeregningServiceTest {
             ),
             lagPersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
-                fnr = barn1Fnr,
                 aktør = barn1AktørId,
                 resultat = Resultat.OPPFYLT,
                 periodeFom = periode1Fom.minusYears(1),
@@ -434,7 +426,6 @@ class BeregningServiceTest {
             ),
             lagPersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
-                fnr = barn2Fnr,
                 aktør = barn2AktørId,
                 resultat = Resultat.OPPFYLT,
                 periodeFom = periode2Midt,
@@ -471,7 +462,7 @@ class BeregningServiceTest {
         Assertions.assertEquals(5, slot.captured.andelerTilkjentYtelse.size)
         val andelerTilkjentYtelse = slot.captured.andelerTilkjentYtelse.sortedBy { it.stønadTom }
 
-        val (andelerBarn1, andelerBarn2) = andelerTilkjentYtelse.partition { it.personIdent == barn1Fnr }
+        val (andelerBarn1, andelerBarn2) = andelerTilkjentYtelse.partition { it.aktør.aktivFødselsnummer() == barn1Fnr }
 
         // Barn 1 - første periode (før satsendring)
         Assertions.assertEquals(periode1Fom.nesteMåned(), andelerBarn1[0].stønadFom)
@@ -590,7 +581,6 @@ class BeregningServiceTest {
         val personResultat = mutableSetOf(
             lagPersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
-                fnr = søkerFnr,
                 aktør = søkerAktørId,
                 resultat = Resultat.OPPFYLT,
                 periodeFom = førstePeriodeFomForBarnet,
@@ -600,7 +590,6 @@ class BeregningServiceTest {
             ),
             lagPersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
-                fnr = barn1Fnr,
                 aktør = barn1AktørId,
                 resultat = Resultat.OPPFYLT,
                 periodeFom = førstePeriodeFomForBarnet,
@@ -611,7 +600,6 @@ class BeregningServiceTest {
             ),
             lagPersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
-                fnr = barn1Fnr,
                 aktør = barn1AktørId,
                 resultat = Resultat.OPPFYLT,
                 periodeFom = andrePeriodeFomForBarnet,

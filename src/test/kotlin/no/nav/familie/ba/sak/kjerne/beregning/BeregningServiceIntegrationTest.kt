@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
+import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
@@ -18,6 +19,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
+import no.nav.familie.ba.sak.kjerne.personident.AktørIdRepository
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
@@ -49,6 +51,9 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
 
     @Autowired
     private lateinit var personidentService: PersonidentService
+
+    @Autowired
+    private lateinit var aktørIdRepository: AktørIdRepository
 
     @Test
     fun skalLagreRiktigTilkjentYtelseForFGBMedToBarn() {
@@ -242,8 +247,8 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
 
         val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandling.id)
-        val andelBarn1 = tilkjentYtelse.andelerTilkjentYtelse.filter { it.personIdent == barn1Id }
-        val andelBarn2 = tilkjentYtelse.andelerTilkjentYtelse.filter { it.personIdent == barn2Id }
+        val andelBarn1 = tilkjentYtelse.andelerTilkjentYtelse.filter { it.aktør.aktivFødselsnummer() == barn1Id }
+        val andelBarn2 = tilkjentYtelse.andelerTilkjentYtelse.filter { it.aktør.aktivFødselsnummer() == barn2Id }
 
         Assertions.assertNotNull(tilkjentYtelse)
         Assertions.assertTrue(tilkjentYtelse.andelerTilkjentYtelse.isNotEmpty())
@@ -266,8 +271,8 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
 
     private fun leggTilAndelTilkjentYtelsePåTilkjentYtelse(behandling: Behandling, fom: YearMonth, tom: YearMonth) {
         val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandling.id)
-        val tilfeldigperson = tilfeldigPerson()
-        personidentService.hentOgLagreAktør(tilfeldigperson.personIdent.ident)
+        val tilfeldigperson = tilfeldigPerson(aktør = tilAktør(randomFnr()))
+        aktørIdRepository.saveAndFlush(tilfeldigperson.aktør)
 
         val andelTilkjentYtelse = lagAndelTilkjentYtelse(
             fom,

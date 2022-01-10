@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering.validerAtBarnIkkeFårFlereUtbetalingerSammePeriode
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering.validerAtTilkjentYtelseHarFornuftigePerioderOgBeløp
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering.validerAtTilkjentYtelseHarGyldigEtterbetalingsperiode
+import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerAtAlleOpprettedeEndringerErUtfylt
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerAtEndringerErTilknyttetAndelTilkjentYtelse
@@ -81,7 +82,14 @@ class BehandlingsresultatSteg(
             personopplysningGrunnlag = personopplysningGrunnlag
         )
 
-        validerAtTilkjentYtelseHarGyldigEtterbetalingsperiode(tilkjentYtelse)
+        val forrigeBehandling = behandlingService.hentForrigeBehandlingSomErIverksatt(behandling)
+        val forrigeTilkjentYtelse: TilkjentYtelse? =
+            forrigeBehandling?.let { beregningService.hentOptionalTilkjentYtelseForBehandling(behandlingId = it.id) }
+        validerAtTilkjentYtelseHarGyldigEtterbetalingsperiode(
+            forrigeAndelerTilkjentYtelse = forrigeTilkjentYtelse?.andelerTilkjentYtelse?.toList(),
+            andelerTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelse.toList(),
+            kravDato = tilkjentYtelse.behandling.opprettetTidspunkt
+        )
 
         val barnMedAndreRelevanteTilkjentYtelser = personopplysningGrunnlag.barna.map {
             Pair(

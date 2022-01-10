@@ -219,7 +219,6 @@ class KonsistensavstemmingUtplukkingIntegrationTest : AbstractSpringIntegrationT
                     tilkjentYtelse = tilkjentYtelse,
                     kildeBehandlingId = it.kilde ?: behandling.id,
                     periodeOffset = it.offset,
-                    personFnr = personFnr,
                     aktør = aktør,
                 )
             )
@@ -243,7 +242,6 @@ class KonsistensavstemmingUtplukkingIntegrationTest : AbstractSpringIntegrationT
                     tilkjentYtelse = tilkjentYtelse,
                     kildeBehandlingId = it.kilde ?: behandling.id,
                     periodeOffset = it.offset,
-                    personFnr = personFnr,
                     aktør = aktør,
                 )
             )
@@ -263,10 +261,8 @@ class KonsistensavstemmingUtplukkingIntegrationTest : AbstractSpringIntegrationT
         tilkjentYtelse: TilkjentYtelse,
         kildeBehandlingId: Long,
         periodeOffset: Long,
-        personFnr: String = randomFnr(),
         aktør: Aktør = randomAktørId(),
     ) = AndelTilkjentYtelse(
-        personIdent = personFnr,
         behandlingId = tilkjentYtelse.behandling.id,
         tilkjentYtelse = tilkjentYtelse,
         kalkulertUtbetalingsbeløp = 1054,

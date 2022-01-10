@@ -8,7 +8,6 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.arbeidsforhold.GrArbeidsforhold
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import org.assertj.core.api.Assertions.assertThat
@@ -21,7 +20,6 @@ class MorHarJobbetINorgeSiste5ÅrTest {
         val fnr = randomFnr()
         return Person(
             aktør = tilAktør(fnr),
-            personIdent = PersonIdent(fnr),
             type = PersonType.SØKER,
             personopplysningGrunnlag = PersonopplysningGrunnlag(0, 0, mutableSetOf(), true),
             fødselsdato = LocalDate.of(1991, 1, 1),

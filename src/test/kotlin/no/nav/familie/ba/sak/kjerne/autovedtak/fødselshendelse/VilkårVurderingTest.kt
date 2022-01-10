@@ -23,7 +23,6 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.arbeidsforhold.G
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrUkjentBosted
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrVegadresse
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
@@ -149,7 +148,6 @@ class VilkårVurderingTest(
     ): Person {
         val fnr = randomFnr()
         return Person(
-            personIdent = PersonIdent(fnr),
             aktør = randomAktørId(fnr),
             type = type,
             personopplysningGrunnlag = personopplysningGrunnlag,
