@@ -15,6 +15,7 @@ import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
 import no.nav.familie.ba.sak.task.SatsendringTask
 import no.nav.familie.ba.sak.task.erHverdag
+import no.nav.familie.leader.LeaderClient
 import no.nav.familie.prosessering.error.RekjørSenereException
 import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
@@ -37,6 +38,8 @@ class SatsendringService(
      */
     @Scheduled(cron = "0 0 7 * * *")
     fun scheduledFinnOgOpprettTaskerForSatsendring() {
+        if (LeaderClient.isLeader() == false) return
+
         // Vi ønsker kun å opprette tasker i inneværende satsendringsmåned som nå er januar 2022
         if (YearMonth.now() != YearMonth.of(2022, 1)) {
             logger.info("Dropper å lage satsendringsbehandlinger fordi måneden vi er i er ikke en satsendringsmåned")
