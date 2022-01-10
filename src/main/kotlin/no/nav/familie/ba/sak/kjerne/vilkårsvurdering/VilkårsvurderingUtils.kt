@@ -243,7 +243,8 @@ object VilkårsvurderingUtils {
                     if (utvidetVilkår.isNotEmpty()) {
                         personsVilkårOppdatert.addAll(
                             utvidetVilkår.filtrerVilkårÅKopiere(kopieringSkjerFraForrigeBehandling = initiellVilkårsvurdering.behandling.id != aktivVilkårsvurdering.behandling.id)
-                                .map { it.kopierMedParent(personTilOppdatert) })
+                                .map { it.kopierMedParent(personTilOppdatert) }
+                        )
                         personsVilkårAktivt.removeAll(utvidetVilkår)
                     }
                 }
