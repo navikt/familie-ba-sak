@@ -1,8 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.behandling
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
-import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
@@ -20,6 +18,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus.AVSLUTTET
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus.FATTER_VEDTAK
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.domene.initStatus
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatUtils
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
@@ -299,6 +298,16 @@ class BehandlingService(
         return Behandlingutils.hentForrigeIverksatteBehandling(iverksatteBehandlinger, behandling)
     }
 
+    /**
+     * Henter iverksatte behandlinger FØR en gitt behandling.
+     * Bør kun brukes i forbindelse med oppdrag mot økonomisystemet
+     * eller ved behandlingsresultat.
+     */
+    fun hentBehandlingerSomErIverksatt(behandling: Behandling): List<Behandling> {
+        val iverksatteBehandlinger = hentIverksatteBehandlinger(behandling.fagsak.id)
+        return Behandlingutils.hentIverksatteBehandlinger(iverksatteBehandlinger, behandling)
+    }
+
     fun hentSisteBehandlingSomErVedtatt(fagsakId: Long): Behandling? {
         return behandlingRepository.finnBehandlinger(fagsakId)
             .filter { !it.erHenlagt() && it.status == AVSLUTTET }
@@ -319,19 +328,6 @@ class BehandlingService(
                 sendTilDvh(it)
             }
         }
-    }
-
-    fun hentDagensFødselshendelser(): List<Behandling> {
-        return behandlingRepository.finnFødselshendelserOpprettetIdag()
-    }
-
-    fun hentAlleBehandlingsIderMedOpphørSmåbarnstilleggIMåned(
-        måned: YearMonth
-    ): List<Long> {
-        return behandlingRepository.finnAlleBehandlingsIderMedOpphørSmåbarnstilleggIInterval(
-            start = måned.førsteDagIInneværendeMåned().atStartOfDay(),
-            slutt = måned.nesteMåned().førsteDagIInneværendeMåned().atStartOfDay()
-        )
     }
 
     fun lagreNyOgDeaktiverGammelBehandling(behandling: Behandling): Behandling {
@@ -413,6 +409,14 @@ class BehandlingService(
     fun hentLøpendeUnderkategori(fagsakId: Long): BehandlingUnderkategori? {
         val forrigeAndeler = hentForrigeAndeler(fagsakId)
         return if (forrigeAndeler != null) utledLøpendeUnderkategori(forrigeAndeler) else null
+    }
+
+    fun harBehandlingsårsakAlleredeKjørt(fagsakId: Long, behandlingÅrsak: BehandlingÅrsak, måned: YearMonth): Boolean {
+        return Behandlingutils.harBehandlingsårsakAlleredeKjørt(
+            behandlinger = hentBehandlinger(fagsakId = fagsakId),
+            behandlingÅrsak = behandlingÅrsak,
+            måned = måned,
+        )
     }
 
     companion object {

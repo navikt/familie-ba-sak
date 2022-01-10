@@ -30,22 +30,29 @@ import java.time.LocalDate
 
 internal class Autobrev6og18ÅrServiceTest {
 
-    val personopplysningGrunnlagRepository = mockk<PersonopplysningGrunnlagRepository>()
-    val persongrunnlagService = mockk<PersongrunnlagService>()
-    val behandlingService = mockk<BehandlingService>()
-    val stegService = mockk<StegService>()
-    val vedtakService = mockk<VedtakService>(relaxed = true)
-    val autovedtakService = mockk<AutovedtakService>(relaxed = true)
+    private val autovedtakService = mockk<AutovedtakService>(relaxed = true)
+    private val personopplysningGrunnlagRepository = mockk<PersonopplysningGrunnlagRepository>()
+    private val persongrunnlagService = mockk<PersongrunnlagService>()
+    private val behandlingService = mockk<BehandlingService>(relaxed = true)
+    private val stegService = mockk<StegService>()
+    private val vedtakService = mockk<VedtakService>(relaxed = true)
     private val taskRepository = mockk<TaskRepositoryWrapper>(relaxed = true)
-    val vedtaksperiodeService = mockk<VedtaksperiodeService>()
+    private val vedtaksperiodeService = mockk<VedtaksperiodeService>()
+
+    private val autobrevService = AutobrevService(
+        behandlingService = behandlingService,
+        autovedtakService = autovedtakService,
+        vedtakService = vedtakService,
+        vedtaksperiodeService = vedtaksperiodeService,
+        taskRepository = taskRepository,
+    )
 
     private val autobrev6og18ÅrService = Autobrev6og18ÅrService(
         personopplysningGrunnlagRepository = personopplysningGrunnlagRepository,
         behandlingService = behandlingService,
         vedtakService = vedtakService,
-        taskRepository = taskRepository,
         vedtaksperiodeService = vedtaksperiodeService,
-        autovedtakService = autovedtakService
+        autobrevService = autobrevService
     )
 
     @Test

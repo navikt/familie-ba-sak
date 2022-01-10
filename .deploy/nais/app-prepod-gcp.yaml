@@ -1,0 +1,83 @@
+apiVersion: "nais.io/v1alpha1"
+kind: "Application"
+metadata:
+  name: familie-ba-sak
+  namespace: teamfamilie
+  labels:
+    team: teamfamilie
+
+spec:
+  image: { { image } }
+  port: 8089
+  leaderElection: true
+  liveness:
+    path: /internal/status/isAlive
+    initialDelay: 30
+    failureThreshold: 10
+  readiness:
+    path: /internal/status/isAlive
+    initialDelay: 30
+    failureThreshold: 10
+  prometheus:
+    enabled: true
+    path: /internal/prometheus
+  vault:
+    enabled: false
+  gcp: # Database
+    sqlInstances:
+      - type: POSTGRES_12 # IF This is changed, all data will be lost. Read on nais.io how to upgrade
+        name: familie-ba-sak
+        autoBackupTime: "02:00"
+        diskAutoresize: true
+        highAvailability: true
+        databases:
+          - name: familie-ba-sak
+            envVarPrefix: DB
+  accessPolicy:
+    inbound:
+      rules:
+        - application: familie-ba-sak-frontend
+        - application: familie-ba-mottak
+          cluster: dev-fss
+        - application: familie-prosessering
+          cluster: dev-gcp
+        - application: familie-ba-skatteetaten-api
+          cluster: dev-gcp
+        - application: familie-ba-migrering
+          cluster: dev-gcp
+        - application: bidrag-grunnlag-feature
+          namespace: bidrag
+          cluster: dev-gcp
+        - application: bidrag-grunnlag
+          namespace: bidrag
+          cluster: dev-gcp
+    outbound:
+      rules:
+        - application: familie-brev
+          cluster: dev-gcp
+        - application: familie-integrasjoner
+          cluster: dev-fss
+        - application: familie-ba-infotrygd-feed
+          cluster: dev-fss
+        - application: familie-ba-infotrygd
+          cluster: dev-fss
+        - application: familie-ef-sak
+          cluster: dev-gcp
+  replicas:
+    min: 2
+    max: 4
+    cpuThresholdPercentage: 50
+  resources:
+    limits:
+      memory: 1024Mi
+      cpu: "1"
+    requests:
+      memory: 512Mi
+      cpu: 500m
+  ingresses:
+    - https://barnetrygd.dev.intern.nav.no
+  secureLogs:
+    enabled: true
+  env:
+    - name: SPRING_PROFILES_ACTIVE
+      value: preprod

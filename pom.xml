@@ -28,12 +28,12 @@
         <eksterne-kontrakter-bisys.version>2.0_20211221122007_2c5c69d</eksterne-kontrakter-bisys.version>
         <felles-kontrakter.version>2.0_20220105124543_5666f57</felles-kontrakter.version>
         <familie.kontrakter.saksstatistikk>2.0_20211026082237_0675986</familie.kontrakter.saksstatistikk>
-        <familie.kontrakter.stønadsstatistikk>2.0_20211213110639_d45ec56</familie.kontrakter.stønadsstatistikk>
+        <familie.kontrakter.stønadsstatistikk>2.0_20220106092651_8730ac3</familie.kontrakter.stønadsstatistikk>
         <familie.kontrakter.skatteetaten>2.0_20210920094114_9c74239</familie.kontrakter.skatteetaten>
         <mockk.version>1.12.2</mockk.version>
         <token-validation-spring.version>1.3.9</token-validation-spring.version>
         <nav-foedselsnummer.version>1.0-SNAPSHOT.6</nav-foedselsnummer.version>
-        <springdoc.version>1.6.2</springdoc.version>
+        <springdoc.version>1.6.4</springdoc.version>
 
         <!-- Må settes for å kunne kjøre opp mock-oauth2-server i unit-tester -->
         <okhttp3.version>4.9.0</okhttp3.version>
