@@ -121,7 +121,36 @@ class OppdaterVilkårsvurderingTest {
     }
 
     @Test
-    fun `Skal beholde vilkår om utvidet barnetrygd når det eksisterer løpende sak med utvidet`() {
+    fun `Skal beholde vilkår om utvidet barnetrygd når forrige behandling inneholdt utvidet-vilkåret, men inneværende behandling er ordinær`() {
+        val søkerFnr = randomFnr()
+        val søkerAktørId = randomAktørId()
+        val behandling = lagBehandling()
+
+        val initUtenUtvidetVilkår =
+            lagVilkårsvurderingMedForskjelligeTyperVilkår(søkerFnr, søkerAktørId, behandling, listOf())
+        val aktivMedUtvidetVilkår =
+            lagVilkårsvurderingMedForskjelligeTyperVilkår(
+                søkerFnr,
+                søkerAktørId,
+                behandling,
+                listOf(Vilkår.UTVIDET_BARNETRYGD)
+            )
+
+        val (nyInit, nyAktiv) = flyttResultaterTilInitielt(
+            initiellVilkårsvurdering = initUtenUtvidetVilkår,
+            aktivVilkårsvurdering = aktivMedUtvidetVilkår,
+            forrigeBehandlingVilkårsvurdering = aktivMedUtvidetVilkår
+        )
+
+        val nyInitInnholderUtvidetVilkår =
+            nyInit.personResultater.first().vilkårResultater.any { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
+
+        Assertions.assertTrue(nyInitInnholderUtvidetVilkår)
+        Assertions.assertTrue(nyAktiv.personResultater.isEmpty())
+    }
+
+    @Test
+    fun `Skal beholde vilkår om utvidet barnetrygd når det eksisterer løpende sak med utvidet, men inneværende behandling er ordinær`() {
         val søkerFnr = randomFnr()
         val søkerAktørId = randomAktørId()
         val behandling = lagBehandling()
@@ -150,7 +179,7 @@ class OppdaterVilkårsvurderingTest {
     }
 
     @Test
-    fun `Skal fjerne vilkår om utvidet barnetrygd når det ikke eksisterer løpende sak med utvidet`() {
+    fun `Skal fjerne vilkår om utvidet barnetrygd når den inneværende behandlingen gjelder ordinær, og det ikke eksisterer løpende sak med utvidet, eller utvidet-vilkåret var på forrige behandling`() {
         val søkerFnr = randomFnr()
         val søkerAktørId = randomAktørId()
         val behandling = lagBehandling()
@@ -168,8 +197,10 @@ class OppdaterVilkårsvurderingTest {
         val (nyInit, nyAktiv) = flyttResultaterTilInitielt(
             initiellVilkårsvurdering = initUtenUtvidetVilkår,
             aktivVilkårsvurdering = aktivMedUtvidetVilkår,
-            løpendeUnderkategori = BehandlingUnderkategori.ORDINÆR
+            løpendeUnderkategori = BehandlingUnderkategori.ORDINÆR,
+            forrigeBehandlingVilkårsvurdering = initUtenUtvidetVilkår
         )
+
         val nyInitInnholderIkkeUtvidetVilkår =
             nyInit.personResultater.first().vilkårResultater.none { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
         val nyAktivInneholderUtvidetVilkår =
@@ -177,6 +208,158 @@ class OppdaterVilkårsvurderingTest {
 
         Assertions.assertTrue(nyInitInnholderIkkeUtvidetVilkår)
         Assertions.assertTrue(nyAktivInneholderUtvidetVilkår)
+    }
+
+    @Test
+    fun `Skal kun kopiere over oppfylte utvidet-vilkår ved opprettelse av ny behandling, men slette alle fra aktiv`() {
+        val søkerFnr = randomFnr()
+        val søkerAktørId = randomAktørId()
+        val nyBehandling = lagBehandling()
+        val forrigeBehandling = lagBehandling()
+
+        val initUtenUtvidetVilkår =
+            lagVilkårsvurderingMedForskjelligeTyperVilkår(søkerFnr, søkerAktørId, nyBehandling, listOf())
+
+        val aktivVilkårsvurderingMedUtvidet = Vilkårsvurdering(behandling = forrigeBehandling)
+        val personResultat =
+            PersonResultat(
+                vilkårsvurdering = aktivVilkårsvurderingMedUtvidet,
+                personIdent = søkerFnr,
+                aktør = søkerAktørId
+            )
+        val utvidetVilkårResultater =
+            setOf(
+                lagVilkårResultat(
+                    vilkårType = Vilkår.UTVIDET_BARNETRYGD,
+                    personResultat = personResultat,
+                    resultat = Resultat.IKKE_OPPFYLT,
+                    periodeFom = LocalDate.now().minusYears(2),
+                    periodeTom = LocalDate.now().minusYears(1)
+                ),
+                lagVilkårResultat(
+                    vilkårType = Vilkår.UTVIDET_BARNETRYGD,
+                    personResultat = personResultat,
+                    resultat = Resultat.OPPFYLT,
+                    periodeFom = LocalDate.now().minusYears(1),
+                    periodeTom = LocalDate.now()
+                )
+            )
+        personResultat.setSortedVilkårResultater(utvidetVilkårResultater)
+        aktivVilkårsvurderingMedUtvidet.personResultater = setOf(personResultat)
+
+        val (nyInit, nyAktiv) = flyttResultaterTilInitielt(
+            initiellVilkårsvurdering = initUtenUtvidetVilkår,
+            aktivVilkårsvurdering = aktivVilkårsvurderingMedUtvidet,
+            løpendeUnderkategori = BehandlingUnderkategori.UTVIDET,
+            forrigeBehandlingVilkårsvurdering = aktivVilkårsvurderingMedUtvidet
+        )
+
+        val nyInitUtvidetVilkår =
+            nyInit.personResultater.first().vilkårResultater.single { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
+
+        Assertions.assertTrue(nyInitUtvidetVilkår.resultat == Resultat.OPPFYLT)
+        Assertions.assertTrue(nyAktiv.personResultater.isEmpty())
+    }
+
+    @Test
+    fun `Skal kopiere over alle utvidet-vilkår fra aktiv vilkårsvurdering hvis den aktive vilkårsvurderingen er fra den inneværende behandlingen`() {
+        val søkerFnr = randomFnr()
+        val søkerAktørId = randomAktørId()
+        val behandling = lagBehandling()
+
+        val initUtenUtvidetVilkår =
+            lagVilkårsvurderingMedForskjelligeTyperVilkår(søkerFnr, søkerAktørId, behandling, listOf())
+
+        val aktivVilkårsvurderingMedUtvidet = Vilkårsvurdering(behandling = behandling)
+        val personResultat =
+            PersonResultat(
+                vilkårsvurdering = aktivVilkårsvurderingMedUtvidet,
+                personIdent = søkerFnr,
+                aktør = søkerAktørId
+            )
+        val utvidetVilkårResultater =
+            setOf(
+                lagVilkårResultat(
+                    vilkårType = Vilkår.UTVIDET_BARNETRYGD,
+                    personResultat = personResultat,
+                    resultat = Resultat.IKKE_OPPFYLT,
+                    periodeFom = LocalDate.now().minusYears(2),
+                    periodeTom = LocalDate.now().minusYears(1)
+                ),
+                lagVilkårResultat(
+                    vilkårType = Vilkår.UTVIDET_BARNETRYGD,
+                    personResultat = personResultat,
+                    resultat = Resultat.OPPFYLT,
+                    periodeFom = LocalDate.now().minusYears(1),
+                    periodeTom = LocalDate.now()
+                )
+            )
+        personResultat.setSortedVilkårResultater(utvidetVilkårResultater)
+        aktivVilkårsvurderingMedUtvidet.personResultater = setOf(personResultat)
+
+        val (nyInit, nyAktiv) = flyttResultaterTilInitielt(
+            initiellVilkårsvurdering = initUtenUtvidetVilkår,
+            aktivVilkårsvurdering = aktivVilkårsvurderingMedUtvidet,
+            løpendeUnderkategori = BehandlingUnderkategori.UTVIDET,
+            forrigeBehandlingVilkårsvurdering = aktivVilkårsvurderingMedUtvidet
+        )
+
+        val nyInitUtvidetVilkår =
+            nyInit.personResultater.first().vilkårResultater.filter { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
+
+        Assertions.assertTrue(nyInitUtvidetVilkår.size == 2)
+        Assertions.assertTrue(nyAktiv.personResultater.isEmpty())
+    }
+
+    @Test
+    fun `Skal ikke legge til utvidet vilkåret hvis det kun eksisterer ikke-oppfylte perioder, men fortsatt slette fra aktiv`() {
+        val søkerFnr = randomFnr()
+        val søkerAktørId = randomAktørId()
+        val nyBehandling = lagBehandling()
+        val forrigeBehandling = lagBehandling()
+
+        val initUtenUtvidetVilkår =
+            lagVilkårsvurderingMedForskjelligeTyperVilkår(søkerFnr, søkerAktørId, nyBehandling, listOf())
+
+        val aktivVilkårsvurderingMedUtvidetIkkeOppfylt = Vilkårsvurdering(behandling = forrigeBehandling)
+        val personResultat =
+            PersonResultat(
+                vilkårsvurdering = aktivVilkårsvurderingMedUtvidetIkkeOppfylt,
+                personIdent = søkerFnr,
+                aktør = søkerAktørId
+            )
+        val utvidetVilkårResultater =
+            setOf(
+                lagVilkårResultat(
+                    vilkårType = Vilkår.UTVIDET_BARNETRYGD,
+                    personResultat = personResultat,
+                    resultat = Resultat.IKKE_OPPFYLT,
+                    periodeFom = LocalDate.now().minusYears(2),
+                    periodeTom = LocalDate.now().minusYears(1)
+                ),
+                lagVilkårResultat(
+                    vilkårType = Vilkår.UTVIDET_BARNETRYGD,
+                    personResultat = personResultat,
+                    resultat = Resultat.IKKE_OPPFYLT,
+                    periodeFom = LocalDate.now().minusYears(1),
+                    periodeTom = LocalDate.now()
+                )
+            )
+        personResultat.setSortedVilkårResultater(utvidetVilkårResultater)
+        aktivVilkårsvurderingMedUtvidetIkkeOppfylt.personResultater = setOf(personResultat)
+
+        val (nyInit, nyAktiv) = flyttResultaterTilInitielt(
+            initiellVilkårsvurdering = initUtenUtvidetVilkår,
+            aktivVilkårsvurdering = aktivVilkårsvurderingMedUtvidetIkkeOppfylt,
+            løpendeUnderkategori = BehandlingUnderkategori.UTVIDET,
+            forrigeBehandlingVilkårsvurdering = aktivVilkårsvurderingMedUtvidetIkkeOppfylt
+        )
+
+        val nyInitInneholderIkkeUtvidetVilkår =
+            nyInit.personResultater.first().vilkårResultater.none { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
+
+        Assertions.assertTrue(nyInitInneholderIkkeUtvidetVilkår)
+        Assertions.assertTrue(nyAktiv.personResultater.isEmpty())
     }
 
     fun lagVilkårsvurderingMedForskjelligeTyperVilkår(
