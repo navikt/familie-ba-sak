@@ -1,5 +1,5 @@
 {
-  "beskrivelse": "RV: Vi har motatt nye opplysninger om søker og barn. Vi opphører hele ytelsen fra ny dato.",
+  "beskrivelse": "RV: Vi har mottatt nye opplysninger om delt bosted og deler barnetrygden for barnet på 2. Vi opphører også hele ytelsen fra Mai. Forventer behandlingsresultat Endret og opphørt",
   "inneværendeMåned": "2021-09",
   "personer": [
     {
@@ -12,16 +12,16 @@
       "eksplisittAvslått": false,
       "forrigeAndeler": [
         {
-          "stønadFom": "2021-03",
-          "stønadTom": "2021-09",
+          "stønadFom": "2021-01",
+          "stønadTom": "2030-09",
           "kalkulertUtbetalingsbeløp": 1054
         }
       ],
       "andeler": [
         {
-          "stønadFom": "2021-03",
+          "stønadFom": "2021-01",
           "stønadTom": "2021-05",
-          "kalkulertUtbetalingsbeløp": 1355
+          "kalkulertUtbetalingsbeløp": 1054
         }
       ]
     },
@@ -36,7 +36,7 @@
       "forrigeAndeler": [
         {
           "stønadFom": "2021-01",
-          "stønadTom": "2021-09",
+          "stønadTom": "2030-09",
           "kalkulertUtbetalingsbeløp": 1354
         }
       ],
@@ -44,10 +44,10 @@
         {
           "stønadFom": "2021-01",
           "stønadTom": "2021-05",
-          "kalkulertUtbetalingsbeløp": 1355
+          "kalkulertUtbetalingsbeløp": 677
         }
       ]
     }
   ],
-  "forventetResultat": "OPPHØRT"
+  "forventetResultat": "ENDRET_OG_OPPHØRT"
 }

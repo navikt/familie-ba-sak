@@ -1,14 +1,13 @@
 package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
-import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import no.nav.fpsak.tidsserie.LocalDateSegment
 import java.time.LocalDate
 import java.time.Period
 import java.time.YearMonth
@@ -74,6 +73,8 @@ data class BehandlingsresultatAndelTilkjentYtelse(
     val stønadTom: YearMonth,
     val kalkulertUtbetalingsbeløp: Int,
 ) {
+    val periode
+        get() = MånedPeriode(stønadFom, stønadTom)
 
     fun erLøpende(inneværendeMåned: YearMonth): Boolean {
         return this.stønadTom > inneværendeMåned
@@ -89,9 +90,6 @@ data class BehandlingsresultatAndelTilkjentYtelse(
         return antallMåneder * kalkulertUtbetalingsbeløp
     }
 }
-
-fun LocalDateSegment<BehandlingsresultatAndelTilkjentYtelse>.erLøpende() =
-    this.tom > inneværendeMåned().sisteDagIInneværendeMåned()
 
 fun lagBehandlingsresultatAndelTilkjentYtelse(
     fom: String,
