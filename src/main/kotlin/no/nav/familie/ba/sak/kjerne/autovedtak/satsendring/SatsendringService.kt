@@ -3,11 +3,7 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.satsendring
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
-import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils
-import no.nav.familie.ba.sak.kjerne.behandling.HenleggÅrsak
-import no.nav.familie.ba.sak.kjerne.behandling.RestHenleggBehandlingInfo
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService.sisteTilleggOrdinærSats
@@ -38,35 +34,6 @@ class SatsendringService(
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val tilbakestillBehandlingService: TilbakestillBehandlingService
 ) {
-
-    @Scheduled(initialDelay = 120000, fixedDelay = Long.MAX_VALUE)
-    @Transactional
-    fun fiksLåstBehandling() {
-        logger.info("Starter oppretting av låst behandling")
-        val låstBehandling = behandlingRepository.finnBehandling(behandlingId = 1112286)
-        logger.info("Låst behandling $låstBehandling")
-        if (låstBehandling.status == BehandlingStatus.AVSLUTTET) {
-            logger.info("$låstBehandling er ferdig behandlet")
-            return
-        }
-
-        val iverksatteBehandlingPåLåstFagsak =
-            behandlingRepository.finnIverksatteBehandlinger(fagsakId = låstBehandling.fagsak.id)
-        // Hent dette først i tilfelle det feiler og vi ikke klarer å rulle tilbake den henlagte behandlingen.
-        val sistIverksatteBehandlingPåFagsakForLåstBehandling =
-            Behandlingutils.hentSisteBehandlingSomErIverksatt(iverksatteBehandlingPåLåstFagsak)
-                ?: error("Finner ikke sist iverksatt behandling på fagsak ${låstBehandling.fagsak} ")
-
-        val henlagtBehandling = stegService.håndterHenleggBehandling(
-            låstBehandling,
-            RestHenleggBehandlingInfo(
-                årsak = HenleggÅrsak.FEILAKTIG_OPPRETTET,
-                begrunnelse = "Behandling fikk feil resultat fordi utvidet vilkår ble feilaktig tatt med i satsendringsbehandling"
-            )
-        )
-        logger.info("Henlagt behandling $henlagtBehandling. Oppretter task på sist iverksatte behandling $sistIverksatteBehandlingPåFagsakForLåstBehandling")
-        taskRepository.save(SatsendringTask.opprettTask(behandlingsId = sistIverksatteBehandlingPåFagsakForLåstBehandling.id))
-    }
 
     /**
      * Forsøk å opprett tasker for behandlinger som har gammel sats hver morgen i hele januar.
