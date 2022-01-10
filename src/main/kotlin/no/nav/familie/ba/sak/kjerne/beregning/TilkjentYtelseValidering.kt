@@ -49,12 +49,14 @@ object TilkjentYtelseValidering {
     ) {
         val gyldigEtterbetalingFom = hentGyldigEtterbetalingFom(opprettetTidspunkt)
 
-        val andelerPåPersoner: Map<String, Pair<List<AndelTilkjentYtelse>, List<AndelTilkjentYtelse>?>> =
-            hentAndelerPerPerson(andelerTilkjentYtelse, forrigeAndelerTilkjentYtelse)
+        val aktørIder =
+            hentAktørIderForDenneOgForrigeAndeler(andelerTilkjentYtelse, forrigeAndelerTilkjentYtelse)
 
         val erUgyldigEtterbetaling =
-            andelerPåPersoner.any { (_, andelPåPerson: Pair<List<AndelTilkjentYtelse>, List<AndelTilkjentYtelse>?>) ->
-                val (andelerTilkjentYtelseForPerson, forrigeAndelerTilkjentYtelseForPerson) = andelPåPerson
+            aktørIder.any { aktørId ->
+                val andelerTilkjentYtelseForPerson = andelerTilkjentYtelse.filter { it.aktør.aktørId == aktørId }
+                val forrigeAndelerTilkjentYtelseForPerson =
+                    forrigeAndelerTilkjentYtelse?.filter { it.aktør.aktørId == aktørId }
 
                 erUgyldigEtterbetalingPåPerson(
                     forrigeAndelerTilkjentYtelseForPerson,
@@ -85,22 +87,14 @@ object TilkjentYtelseValidering {
         }
     }
 
-    private fun hentAndelerPerPerson(
+    private fun hentAktørIderForDenneOgForrigeAndeler(
         andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
         forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>?
-    ): Map<String, Pair<List<AndelTilkjentYtelse>, List<AndelTilkjentYtelse>?>> {
+    ): Set<String> {
+
         val aktørIderFraAndeler = andelerTilkjentYtelse.map { it.aktør.aktørId }
         val aktøerIderFraForrigeAndeler = forrigeAndelerTilkjentYtelse?.map { it.aktør.aktørId } ?: emptyList()
-        val aktørIder = (aktørIderFraAndeler + aktøerIderFraForrigeAndeler).toSet()
-
-        val andelerPåPersoner: Map<String, Pair<List<AndelTilkjentYtelse>, List<AndelTilkjentYtelse>?>> =
-            aktørIder.associateWith { aktørId ->
-                Pair(
-                    andelerTilkjentYtelse.filter { it.aktør.aktørId == aktørId },
-                    forrigeAndelerTilkjentYtelse?.filter { it.aktør.aktørId == aktørId },
-                )
-            }
-        return andelerPåPersoner
+        return (aktørIderFraAndeler + aktøerIderFraForrigeAndeler).toSet()
     }
 
     private fun erUgyldigEtterbetalingPåPerson(
