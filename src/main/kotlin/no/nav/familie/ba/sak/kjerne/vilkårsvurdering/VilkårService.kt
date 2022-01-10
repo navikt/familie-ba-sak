@@ -56,6 +56,7 @@ class VilkårService(
 
     companion object {
         const val fantIkkeAktivVilkårsvurderingFeilmelding = "Fant ikke aktiv vilkårsvurdering"
+        const val fantIkkeVilkårsvurderingForPersonFeilmelding = "Fant ikke vilkårsvurdering for person"
     }
 
     @Transactional
@@ -84,7 +85,7 @@ class VilkårService(
         val personResultat =
             vilkårsvurdering.personResultater.singleOrNull { it.aktør.aktivFødselsnummer() == restPersonResultat.personIdent }
                 ?: throw Feil(
-                    message = "Fant ikke vilkårsvurdering for person",
+                    message = fantIkkeVilkårsvurderingForPersonFeilmelding,
                     frontendFeilmelding = "Fant ikke vilkårsvurdering for person med ident '${restPersonResultat.personIdent}"
                 )
 
@@ -110,7 +111,7 @@ class VilkårService(
 
         val personResultat = vilkårsvurdering.personResultater.find { it.aktør == aktør }
             ?: throw Feil(
-                message = "Fant ikke vilkårsvurdering for person",
+                message = fantIkkeVilkårsvurderingForPersonFeilmelding,
                 frontendFeilmelding = "Fant ikke vilkårsvurdering for person med ident '${aktør.aktivFødselsnummer()}"
             )
 
@@ -128,7 +129,7 @@ class VilkårService(
             )
         val personResultat = vilkårsvurdering.personResultater.find { it.personIdent == restSlettVilkår.personIdent }
             ?: throw Feil(
-                message = "Fant ikke vilkårsvurdering for person",
+                message = fantIkkeVilkårsvurderingForPersonFeilmelding,
                 frontendFeilmelding = "Fant ikke vilkårsvurdering for person med ident '${restSlettVilkår.personIdent}"
             )
         val behandling = behandlingService.hent(behandlingId)
@@ -160,7 +161,7 @@ class VilkårService(
         val personResultat =
             vilkårsvurdering.personResultater.find { it.aktør.aktivFødselsnummer() == restNyttVilkår.personIdent }
                 ?: throw Feil(
-                    message = "Fant ikke vilkårsvurdering for person",
+                    message = fantIkkeVilkårsvurderingForPersonFeilmelding,
                     frontendFeilmelding =
                     "Fant ikke vilkårsvurdering for person med ident '${restNyttVilkår.personIdent}"
                 )
