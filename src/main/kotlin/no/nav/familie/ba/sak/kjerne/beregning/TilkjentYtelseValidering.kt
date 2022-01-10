@@ -9,7 +9,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering.maksBelø
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
-import no.nav.familie.ba.sak.kjerne.beregning.domene.hentTidslinjeForAndelerTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.hentTidslinje
 import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjeMedAndeler
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -101,8 +101,8 @@ object TilkjentYtelseValidering {
         gyldigEtterbetalingFom: YearMonth?
     ): Boolean {
         val forrigeAndelerTidslinje =
-            forrigeAndelerTilkjentYtelseForPerson?.toList().hentTidslinjeForAndelerTilkjentYtelse()
-        val andelerTidslinje = andelerTilkjentYtelseForPerson.toList().hentTidslinjeForAndelerTilkjentYtelse()
+            forrigeAndelerTilkjentYtelseForPerson?.toList().hentTidslinje()
+        val andelerTidslinje = andelerTilkjentYtelseForPerson.toList().hentTidslinje()
 
         val erAndelTilkjentYtelseMedØktBeløpMerEnn3ÅrTilbake =
             erAndelTilkjentYtelseMedØktBeløpMerEnn3ÅrTilbake(

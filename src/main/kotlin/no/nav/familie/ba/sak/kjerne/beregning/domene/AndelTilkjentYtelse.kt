@@ -337,7 +337,7 @@ fun List<AndelTilkjentYtelse>.hentAndelerForSegment(
     )
 }
 
-fun List<AndelTilkjentYtelse>?.hentTidslinjeForAndelerTilkjentYtelse() =
+fun List<AndelTilkjentYtelse>?.hentTidslinje() =
     LocalDateTimeline(
         this?.map {
             LocalDateSegment(
