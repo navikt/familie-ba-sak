@@ -111,23 +111,11 @@ object TilkjentYtelseValidering {
                 måned = gyldigEtterbetalingFom
             )
 
+        val segmenterLagtTil = andelerTidslinje.disjoint(forrigeAndelerTidslinje)
         val erLagtTilSegmentFørGyldigEtterbetalingsdato =
-            erLagtTilSegmentFørDato(
-                andelerTidslinje = andelerTidslinje,
-                forrigeAndelerTidslinje = forrigeAndelerTidslinje,
-                måned = gyldigEtterbetalingFom
-            )
+            segmenterLagtTil.any { it.value.stønadFom < gyldigEtterbetalingFom }
 
         return erAndelMedØktBeløpFørGyldigEtterbetalingsdato || erLagtTilSegmentFørGyldigEtterbetalingsdato
-    }
-
-    private fun erLagtTilSegmentFørDato(
-        andelerTidslinje: LocalDateTimeline<AndelTilkjentYtelse>,
-        forrigeAndelerTidslinje: LocalDateTimeline<AndelTilkjentYtelse>,
-        måned: YearMonth?
-    ): Boolean {
-        val segmenterLagtTil = andelerTidslinje.disjoint(forrigeAndelerTidslinje)
-        return (segmenterLagtTil).any { it.value.stønadFom < måned }
     }
 
     fun erAndelMedØktBeløpFørDato(
