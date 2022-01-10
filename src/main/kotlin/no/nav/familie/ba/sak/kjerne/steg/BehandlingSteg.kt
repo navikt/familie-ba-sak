@@ -281,7 +281,7 @@ fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType): StegTyp
                 VILKÅRSVURDERING -> BEHANDLINGSRESULTAT
                 BEHANDLINGSRESULTAT -> if (behandling.resultat == BehandlingResultat.ENDRET)
                     IVERKSETT_MOT_OPPDRAG
-                else throw Feil("Resultat ${behandling.resultat} er ikke støttet etter behnadlingsresultat for satsendringsbehandling.")
+                else throw Feil("Resultat ${behandling.resultat} er ikke støttet etter behandlingsresultat for satsendringsbehandling.")
                 IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
                 VENTE_PÅ_STATUS_FRA_ØKONOMI -> FERDIGSTILLE_BEHANDLING
                 FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET
