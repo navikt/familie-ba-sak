@@ -93,7 +93,7 @@ class BehandlingsresultatSteg(
             validerAtTilkjentYtelseHarGyldigEtterbetalingsperiode(
                 forrigeAndelerTilkjentYtelse = forrigeTilkjentYtelse?.andelerTilkjentYtelse?.toList(),
                 andelerTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelse.toList(),
-                behandlingOpprettetTidspunkt = tilkjentYtelse.behandling.opprettetTidspunkt
+                kravDato = tilkjentYtelse.behandling.opprettetTidspunkt
             )
         } else {
             validerAtTilkjentYtelseHarGyldigEtterbetalingsperiodeGammel(tilkjentYtelse)
