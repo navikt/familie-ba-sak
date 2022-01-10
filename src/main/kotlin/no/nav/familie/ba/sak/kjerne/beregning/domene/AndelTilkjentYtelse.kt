@@ -19,6 +19,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.utledSegmenter
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.fpsak.tidsserie.LocalDateInterval
 import no.nav.fpsak.tidsserie.LocalDateSegment
+import no.nav.fpsak.tidsserie.LocalDateTimeline
 import java.math.BigDecimal
 import java.time.YearMonth
 import java.util.Objects
@@ -328,3 +329,14 @@ fun List<AndelTilkjentYtelse>.hentAndelerForSegment(
         )
     )
 }
+
+fun List<AndelTilkjentYtelse>?.hentTidslinje() =
+    LocalDateTimeline(
+        this?.map {
+            LocalDateSegment(
+                it.stønadFom.førsteDagIInneværendeMåned(),
+                it.stønadTom.sisteDagIInneværendeMåned(),
+                it
+            )
+        } ?: emptyList()
+    )

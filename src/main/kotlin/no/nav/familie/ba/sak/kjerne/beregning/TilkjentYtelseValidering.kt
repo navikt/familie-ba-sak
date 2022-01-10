@@ -3,23 +3,26 @@ package no.nav.familie.ba.sak.kjerne.beregning
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.KONTAKT_TEAMET_SUFFIX
 import no.nav.familie.ba.sak.common.UtbetalingsikkerhetFeil
+import no.nav.familie.ba.sak.common.overlapperHeltEllerDelvisMed
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering.maksBeløp
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.beregning.domene.hentTidslinje
 import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjeMedAndeler
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import java.math.BigDecimal
 import java.time.LocalDateTime
+import java.time.YearMonth
 
-// 3 år (krav i loven) og 2 måneder (på grunn av behandlingstid)
+// 3 år (krav i loven)
 fun hentGyldigEtterbetalingFom(kravDato: LocalDateTime) =
     kravDato.minusYears(3)
-        .minusMonths(2)
         .toLocalDate()
         .toYearMonth()
 
@@ -38,7 +41,42 @@ fun hentBarnasAndeler(andeler: List<AndelTilkjentYtelse>, barna: List<Person>) =
  */
 object TilkjentYtelseValidering {
 
-    fun validerAtTilkjentYtelseHarGyldigEtterbetalingsperiode(tilkjentYtelse: TilkjentYtelse) {
+    fun validerAtTilkjentYtelseHarGyldigEtterbetalingsperiode(
+        forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>?,
+        andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
+        kravDato: LocalDateTime,
+    ) {
+        val gyldigEtterbetalingFom = hentGyldigEtterbetalingFom(kravDato)
+
+        val aktørIder =
+            hentAktørIderForDenneOgForrigeBehandling(andelerTilkjentYtelse, forrigeAndelerTilkjentYtelse)
+
+        val erUgyldigEtterbetaling =
+            aktørIder.any { aktørId ->
+                val andelerTilkjentYtelseForPerson = andelerTilkjentYtelse.filter { it.aktør.aktørId == aktørId }
+                val forrigeAndelerTilkjentYtelseForPerson =
+                    forrigeAndelerTilkjentYtelse?.filter { it.aktør.aktørId == aktørId }
+
+                erUgyldigEtterbetalingPåPerson(
+                    forrigeAndelerTilkjentYtelseForPerson,
+                    andelerTilkjentYtelseForPerson,
+                    gyldigEtterbetalingFom
+                )
+            }
+
+        if (erUgyldigEtterbetaling) {
+            throw UtbetalingsikkerhetFeil(
+                melding = "Endring i utbetalingsperioder for en eller flere av partene/personene " +
+                    "går mer enn 3 år tilbake i tid.",
+                frontendFeilmelding =
+                "Endring i utbetalingsperioder for en eller flere av partene/personene " +
+                    "går mer enn 3 år tilbake i tid. Vennligst endre på datoene, eller ta kontakt med teamet for hjelp."
+            )
+        }
+    }
+
+    @Deprecated("Bruk validerAtTilkjentYtelseHarGyldigEtterbetalingsperiode har gåt gjennom QA")
+    fun validerAtTilkjentYtelseHarGyldigEtterbetalingsperiodeGammel(tilkjentYtelse: TilkjentYtelse) {
         val gyldigEtterbetalingFom = hentGyldigEtterbetalingFom(tilkjentYtelse.behandling.opprettetTidspunkt)
         if (tilkjentYtelse.andelerTilkjentYtelse.any { it.stønadFom < gyldigEtterbetalingFom }) {
             throw UtbetalingsikkerhetFeil(
@@ -47,6 +85,56 @@ object TilkjentYtelseValidering {
             )
         }
     }
+
+    private fun hentAktørIderForDenneOgForrigeBehandling(
+        andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
+        forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>?
+    ): Set<String> {
+
+        val aktørIderFraAndeler = andelerTilkjentYtelse.map { it.aktør.aktørId }
+        val aktøerIderFraForrigeAndeler = forrigeAndelerTilkjentYtelse?.map { it.aktør.aktørId } ?: emptyList()
+        return (aktørIderFraAndeler + aktøerIderFraForrigeAndeler).toSet()
+    }
+
+    private fun erUgyldigEtterbetalingPåPerson(
+        forrigeAndelerForPerson: List<AndelTilkjentYtelse>?,
+        andelerForPerson: List<AndelTilkjentYtelse>,
+        gyldigEtterbetalingFom: YearMonth?
+    ): Boolean {
+        return YtelseType.values().any { ytelseType ->
+            val forrigeAndelerForPersonOgType = forrigeAndelerForPerson?.filter { it.type == ytelseType }
+            val andelerForPersonOgType = andelerForPerson.filter { it.type == ytelseType }
+
+            val forrigeAndelerTidslinje = forrigeAndelerForPersonOgType?.toList().hentTidslinje()
+            val andelerTidslinje = andelerForPersonOgType.toList().hentTidslinje()
+
+            val erAndelMedØktBeløpFørGyldigEtterbetalingsdato =
+                erAndelMedØktBeløpFørDato(
+                    forrigeAndeler = forrigeAndelerForPersonOgType,
+                    andeler = andelerForPersonOgType,
+                    måned = gyldigEtterbetalingFom
+                )
+
+            val segmenterLagtTil = andelerTidslinje.disjoint(forrigeAndelerTidslinje)
+            val erLagtTilSegmentFørGyldigEtterbetalingsdato =
+                segmenterLagtTil.any { it.value.stønadFom < gyldigEtterbetalingFom }
+
+            return erAndelMedØktBeløpFørGyldigEtterbetalingsdato || erLagtTilSegmentFørGyldigEtterbetalingsdato
+        }
+    }
+
+    fun erAndelMedØktBeløpFørDato(
+        forrigeAndeler: List<AndelTilkjentYtelse>?,
+        andeler: List<AndelTilkjentYtelse>,
+        måned: YearMonth?
+    ): Boolean = andeler
+        .filter { it.stønadFom < måned }
+        .any { andel ->
+            forrigeAndeler?.any {
+                it.periode.overlapperHeltEllerDelvisMed(andel.periode) &&
+                    it.kalkulertUtbetalingsbeløp < andel.kalkulertUtbetalingsbeløp
+            } ?: false
+        }
 
     fun validerAtTilkjentYtelseHarFornuftigePerioderOgBeløp(
         tilkjentYtelse: TilkjentYtelse,
