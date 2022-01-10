@@ -7,7 +7,7 @@ metadata:
     team: teamfamilie
 
 spec:
-  image: { { image } }
+  image: {{image}}
   port: 8089
   leaderElection: true
   liveness:
@@ -33,6 +33,12 @@ spec:
         databases:
           - name: familie-ba-sak
             envVarPrefix: DB
+  azure:
+    application:
+      enabled: true
+      claims:
+        extra:
+          - "NAVident"
   accessPolicy:
     inbound:
       rules:
@@ -75,7 +81,7 @@ spec:
       memory: 512Mi
       cpu: 500m
   ingresses:
-    - https://barnetrygd.dev.intern.nav.no
+    - https://familie-ba-sak.dev.intern.nav.no
   secureLogs:
     enabled: true
   env:
