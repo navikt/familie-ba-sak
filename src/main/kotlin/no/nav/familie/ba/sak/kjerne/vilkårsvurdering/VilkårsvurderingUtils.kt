@@ -324,7 +324,7 @@ fun vedtakBegrunnelseTilRestVedtakBegrunnelseTilknyttetVilkår(
 }
 
 private fun List<VilkårResultat>.filtrerVilkårÅKopiere(kopieringSkjerFraForrigeBehandling: Boolean): List<VilkårResultat> {
-    return if (kopieringSkjerFraForrigeBehandling && this.any { it.resultat == Resultat.OPPFYLT }) {
+    return if (kopieringSkjerFraForrigeBehandling) {
         this.filter { it.resultat == Resultat.OPPFYLT }
     } else {
         this
