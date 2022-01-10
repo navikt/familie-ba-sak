@@ -81,7 +81,7 @@ class SendMeldingTilBisysTask(
             entry.value.sortedBy { it.periode.fom }.forEach {
                 var forblePeriode: MånedPeriode? = it.periode
                 val prosent = it.prosent
-                val barnIdent = it.aktør.aktørId
+                val barnIdent = it.aktør.aktivFødselsnummer()
                 if (!endretOpplysning.contains(barnIdent)) {
                     endretOpplysning[barnIdent] = mutableListOf()
                 }
@@ -89,7 +89,7 @@ class SendMeldingTilBisysTask(
                     nyAndelerTilkjentYtelse.forEach {
                         val intersectPerioder = forblePeriode!!.intersect(it.periode)
                         if (intersectPerioder.first != null) {
-                            endretOpplysning[it.aktør.aktørId]!!.add(
+                            endretOpplysning[it.aktør.aktivFødselsnummer()]!!.add(
                                 BarnEndretOpplysning(
                                     ident = barnIdent,
                                     fom = forblePeriode!!.fom,
@@ -98,7 +98,7 @@ class SendMeldingTilBisysTask(
                             )
                         }
                         if (intersectPerioder.second != null && it.prosent < prosent) {
-                            endretOpplysning[it.aktør.aktørId]!!.add(
+                            endretOpplysning[it.aktør.aktivFødselsnummer()]!!.add(
                                 BarnEndretOpplysning(
                                     ident = barnIdent,
                                     fom = latest(it.periode.fom, forblePeriode!!.fom),
@@ -113,7 +113,7 @@ class SendMeldingTilBisysTask(
                     }
                 }
                 if (forblePeriode != null && !forblePeriode!!.erTom()) {
-                    endretOpplysning[it.aktør.aktørId]!!.add(
+                    endretOpplysning[it.aktør.aktivFødselsnummer()]!!.add(
                         BarnEndretOpplysning(
                             ident = barnIdent,
                             fom = forblePeriode!!.fom,
