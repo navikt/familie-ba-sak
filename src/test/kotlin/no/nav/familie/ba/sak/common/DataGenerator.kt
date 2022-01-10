@@ -36,7 +36,6 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAnde
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakPerson
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
@@ -143,16 +142,7 @@ fun nesteUtvidetVedtaksperiodeId(): Long {
 
 fun defaultFagsak() = Fagsak(
     1, aktør = tilAktør(randomFnr())
-).also {
-    it.søkerIdenter =
-        mutableSetOf(
-            FagsakPerson(
-                fagsak = it,
-                personIdent = PersonIdent(it.aktør.aktivFødselsnummer()),
-                opprettetTidspunkt = LocalDateTime.now()
-            )
-        )
-}
+)
 
 fun lagBehandling(
     fagsak: Fagsak = defaultFagsak(),
@@ -180,13 +170,11 @@ fun tilfeldigPerson(
     fødselsdato: LocalDate = LocalDate.now(),
     personType: PersonType = PersonType.BARN,
     kjønn: Kjønn = Kjønn.MANN,
-    personIdent: PersonIdent = PersonIdent(randomFnr()),
-    aktør: Aktør = tilAktør(personIdent.ident),
+    aktør: Aktør = randomAktørId(),
 ) =
     Person(
         id = nestePersonId(),
         aktør = aktør,
-        personIdent = PersonIdent(aktør.aktivFødselsnummer()),
         fødselsdato = fødselsdato,
         type = personType,
         personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 0),
@@ -199,13 +187,11 @@ fun tilfeldigSøker(
     fødselsdato: LocalDate = LocalDate.now(),
     personType: PersonType = PersonType.SØKER,
     kjønn: Kjønn = Kjønn.MANN,
-    personIdent: PersonIdent = PersonIdent(randomFnr()),
-    aktør: Aktør = tilAktør(personIdent.ident),
+    aktør: Aktør = randomAktørId(),
 ) =
     Person(
         id = nestePersonId(),
         aktør = aktør,
-        personIdent = PersonIdent(aktør.aktivFødselsnummer()),
         fødselsdato = fødselsdato,
         type = personType,
         personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 0),
@@ -237,7 +223,6 @@ fun lagAndelTilkjentYtelse(
 ): AndelTilkjentYtelse {
 
     return AndelTilkjentYtelse(
-        personIdent = aktør.aktivFødselsnummer(),
         aktør = aktør,
         behandlingId = behandling.id,
         tilkjentYtelse = tilkjentYtelse ?: lagInitiellTilkjentYtelse(behandling),
@@ -266,7 +251,6 @@ fun lagAndelTilkjentYtelseUtvidet(
 ): AndelTilkjentYtelse {
 
     return AndelTilkjentYtelse(
-        personIdent = person.aktør.aktivFødselsnummer(),
         aktør = person.aktør,
         behandlingId = behandling.id,
         tilkjentYtelse = tilkjentYtelse ?: lagInitiellTilkjentYtelse(behandling),
@@ -332,7 +316,6 @@ fun lagTestPersonopplysningGrunnlag(
 
     val søker = Person(
         aktør = søkerAktør,
-        personIdent = PersonIdent(søkerPersonIdent),
         type = PersonType.SØKER,
         personopplysningGrunnlag = personopplysningGrunnlag,
         fødselsdato = LocalDate.of(2019, 1, 1),
@@ -351,14 +334,10 @@ fun lagTestPersonopplysningGrunnlag(
     }
     personopplysningGrunnlag.personer.add(søker)
 
-    barnasIdenter.map {
+    barnAktør.map {
         personopplysningGrunnlag.personer.add(
             Person(
-                personIdent = PersonIdent(it),
-                aktør = barnAktør.first { aktørId ->
-                    aktørId.personidenter.map { personident -> personident.fødselsnummer }
-                        .any { fødselsnummer -> fødselsnummer == it }
-                },
+                aktør = it,
                 type = PersonType.BARN,
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 fødselsdato = barnFødselsdato,
@@ -433,7 +412,6 @@ fun lagPersonResultaterForSøkerOgToBarn(
     return setOf(
         lagPersonResultat(
             vilkårsvurdering = vilkårsvurdering,
-            fnr = søkerFnr,
             aktør = søkerAktør,
             resultat = Resultat.OPPFYLT,
             periodeFom = stønadFom,
@@ -443,7 +421,6 @@ fun lagPersonResultaterForSøkerOgToBarn(
         ),
         lagPersonResultat(
             vilkårsvurdering = vilkårsvurdering,
-            fnr = barn1Fnr,
             aktør = barn1Aktør,
             resultat = Resultat.OPPFYLT,
             periodeFom = stønadFom,
@@ -454,7 +431,6 @@ fun lagPersonResultaterForSøkerOgToBarn(
         ),
         lagPersonResultat(
             vilkårsvurdering = vilkårsvurdering,
-            fnr = barn2Fnr,
             aktør = barn2Aktør,
             resultat = Resultat.OPPFYLT,
             periodeFom = stønadFom,
@@ -468,7 +444,6 @@ fun lagPersonResultaterForSøkerOgToBarn(
 
 fun lagPersonResultat(
     vilkårsvurdering: Vilkårsvurdering,
-    fnr: String,
     aktør: Aktør,
     resultat: Resultat,
     periodeFom: LocalDate?,
@@ -480,7 +455,6 @@ fun lagPersonResultat(
 ): PersonResultat {
     val personResultat = PersonResultat(
         vilkårsvurdering = vilkårsvurdering,
-        personIdent = fnr,
         aktør = aktør
     )
 
@@ -547,7 +521,6 @@ fun lagVilkårsvurdering(
     )
     val personResultat = PersonResultat(
         vilkårsvurdering = vilkårsvurdering,
-        personIdent = søkerFnr,
         aktør = søkerAktør
     )
     personResultat.setSortedVilkårResultater(
@@ -992,7 +965,6 @@ fun lagPerson(
     kjønn: Kjønn = Kjønn.KVINNE
 ) = Person(
     aktør = aktør,
-    personIdent = personIdent,
     type = type,
     personopplysningGrunnlag = personopplysningGrunnlag,
     fødselsdato = fødselsdato,

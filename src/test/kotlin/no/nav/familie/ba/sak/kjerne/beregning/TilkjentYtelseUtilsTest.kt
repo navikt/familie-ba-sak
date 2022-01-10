@@ -19,7 +19,6 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
@@ -532,7 +531,7 @@ internal class TilkjentYtelseUtilsTest {
         )
 
         val barnResultat =
-            PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = barnFnr, aktør = barnAktørId)
+            PersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = barnAktørId)
         barnResultat.setSortedVilkårResultater(
             setOf(
                 VilkårResultat(
@@ -592,7 +591,6 @@ internal class TilkjentYtelseUtilsTest {
 
         val barn = Person(
             aktør = tilAktør(barnFnr),
-            personIdent = PersonIdent(barnFnr),
             type = PersonType.BARN,
             personopplysningGrunnlag = personopplysningGrunnlag,
             fødselsdato = barnFødselsdato,
@@ -602,7 +600,6 @@ internal class TilkjentYtelseUtilsTest {
             .apply { sivilstander = listOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this)) }
         val søker = Person(
             aktør = tilAktør(søkerFnr),
-            personIdent = PersonIdent(søkerFnr),
             type = PersonType.SØKER,
             personopplysningGrunnlag = personopplysningGrunnlag,
             fødselsdato = barnFødselsdato.minusYears(20),

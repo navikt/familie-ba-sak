@@ -60,7 +60,7 @@ class PeriodeMapperTest {
     @Test
     fun `Kombinert tidslinje returnerer rette rette vilkårsresultater for tidsintervaller`() {
         val personResultat =
-            PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = "", aktør = randomAktørId())
+            PersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = randomAktørId())
 
         val tidslinje1 = LocalDateTimeline(
             listOf(
@@ -117,9 +117,9 @@ class PeriodeMapperTest {
         val aktørId1 = tilAktør(fnr1)
         val aktørId2 = tilAktør(fnr2)
         val personResultat1 =
-            PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = fnr1, aktør = aktørId1)
+            PersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = aktørId1)
         val personResultat2 =
-            PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = fnr2, aktør = aktørId2)
+            PersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = aktørId2)
         personResultat1.setSortedVilkårResultater(
             setOf(
                 VilkårResultat(
@@ -225,7 +225,7 @@ class PeriodeMapperTest {
         // Periode med fom-dato medio mai og tom-dato medio juni skal bli hele mai og juni
 
         val personResultat =
-            PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = randomFnr(), aktør = randomAktørId())
+            PersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = randomAktørId())
         personResultat.setSortedVilkårResultater(
             setOf(
                 VilkårResultat(
@@ -253,7 +253,7 @@ class PeriodeMapperTest {
         val periodeTom18ÅrsVilkår = LocalDate.of(2038, 5, 15)
 
         val personResultat =
-            PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = barnFnr, aktør = randomAktørId())
+            PersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = randomAktørId())
         personResultat.setSortedVilkårResultater(
             setOf(
                 VilkårResultat(

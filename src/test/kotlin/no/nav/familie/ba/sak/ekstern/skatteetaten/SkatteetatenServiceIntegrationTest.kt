@@ -364,7 +364,6 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
                     AndelTilkjentYtelse(
                         behandlingId = it.behandling.id,
                         tilkjentYtelse = it,
-                        personIdent = tilkjentYtelse.fnr,
                         aktør = tilkjentYtelse.aktør,
                         kalkulertUtbetalingsbeløp = 1000,
                         stønadFom = YearMonth.of(p.first.year, p.first.month),

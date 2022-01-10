@@ -35,10 +35,6 @@ data class FødselshendelsePreLansering(
     @Column(name = "fk_behandling_id", nullable = false, updatable = false)
     val behandlingId: Long,
 
-    @Column(name = "person_ident", nullable = false, updatable = false)
-    // TODO: Robustgjøring dnr/fnr, fjern ved contract.
-    val personIdent: String,
-
     @OneToOne(optional = false) @JoinColumn(name = "fk_aktoer_id", nullable = false, updatable = false)
     val aktør: Aktør,
 

@@ -384,7 +384,8 @@ class UtbetalingsoppdragIntegrasjonTest(
             )
         )
         val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling)
-        val person = tilfeldigPerson()
+        val aktør = personidentService.hentOgLagreAktør(randomFnr())
+        val person = tilfeldigPerson(aktør = aktør)
         val vedtak = lagVedtak(behandling)
         val andelerFørstegangsbehandling = listOf(
             lagAndelTilkjentYtelse(
@@ -395,7 +396,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                 behandling,
                 periodeIdOffset = 0,
                 person = person,
-                aktør = personidentService.hentOgLagreAktør(person.aktør.aktivFødselsnummer()),
+                aktør = aktør,
                 tilkjentYtelse = tilkjentYtelse
             ),
             lagAndelTilkjentYtelse(
@@ -406,7 +407,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                 behandling,
                 periodeIdOffset = 1,
                 person = person,
-                aktør = personidentService.hentOgLagreAktør(person.aktør.aktivFødselsnummer()),
+                aktør = aktør,
                 tilkjentYtelse = tilkjentYtelse
             )
         )
@@ -424,7 +425,8 @@ class UtbetalingsoppdragIntegrasjonTest(
 
         val behandling2 = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
         val tilkjentYtelse2 = lagInitiellTilkjentYtelse(behandling2)
-        val nyPerson = tilfeldigPerson()
+        val nyAktør = personidentService.hentOgLagreAktør(randomFnr())
+        val nyPerson = tilfeldigPerson(aktør = nyAktør)
         val vedtak2 = lagVedtak(behandling2)
         val andelerRevurdering = listOf(
             lagAndelTilkjentYtelse(
@@ -435,7 +437,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                 behandling2,
                 periodeIdOffset = 2,
                 person = nyPerson,
-                aktør = personidentService.hentOgLagreAktør(nyPerson.aktør.aktivFødselsnummer()),
+                aktør = nyAktør,
                 tilkjentYtelse = tilkjentYtelse2
             ),
             lagAndelTilkjentYtelse(

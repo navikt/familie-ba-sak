@@ -295,7 +295,6 @@ internal class AutobrevOpphørSmåbarnstilleggServiceTest {
     ) = PeriodeOvergangsstønadGrunnlag(
         id = 1,
         behandlingId = 1,
-        personIdent = "1234",
         aktør = randomAktørId(),
         fom = fom,
         tom = tom,

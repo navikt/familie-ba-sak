@@ -24,7 +24,6 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
@@ -238,7 +237,6 @@ class FiltreringsregelForFlereBarnTest {
     ): Person {
         return Person(
             aktør = aktør,
-            personIdent = PersonIdent(aktør.aktivFødselsnummer()),
             type = type,
             personopplysningGrunnlag = personopplysningGrunnlag,
             fødselsdato = fødselsDato ?: LocalDate.of(1991, 1, 1),

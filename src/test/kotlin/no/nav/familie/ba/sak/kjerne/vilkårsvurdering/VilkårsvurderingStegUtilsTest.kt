@@ -49,7 +49,6 @@ class VilkårsvurderingStegUtilsTest {
 
         personResultat = PersonResultat(
             vilkårsvurdering = vilkårsvurdering,
-            personIdent = personIdent,
             aktør = personAktørId,
         )
 
@@ -315,7 +314,6 @@ class VilkårsvurderingStegUtilsTest {
     fun `Skal nullstille periode hvis det kun finnes en periode`() {
         val mockPersonResultat = PersonResultat(
             vilkårsvurdering = vilkårsvurdering,
-            personIdent = randomFnr(),
             aktør = randomAktørId(),
         )
 
@@ -478,7 +476,6 @@ class VilkårsvurderingStegUtilsTest {
         var månedsteller = 0L
         val personResultat = PersonResultat(
             vilkårsvurdering = vilkårsvurdering,
-            personIdent = søkerFnr,
             aktør = søkerAktør
         )
         personResultat.setSortedVilkårResultater(

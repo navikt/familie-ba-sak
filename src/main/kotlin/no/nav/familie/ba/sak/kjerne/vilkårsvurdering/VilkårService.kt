@@ -127,7 +127,8 @@ class VilkårService(
                 message = "Fant ikke aktiv vilkårsvurdering ved sletting av vilkår",
                 frontendFeilmelding = fantIkkeAktivVilkårsvurderingFeilmelding
             )
-        val personResultat = vilkårsvurdering.personResultater.find { it.personIdent == restSlettVilkår.personIdent }
+        val aktørÅSlette = personidentService.hentOgLagreAktør(restSlettVilkår.personIdent)
+        val personResultat = vilkårsvurdering.personResultater.find { it.aktør == aktørÅSlette }
             ?: throw Feil(
                 message = fantIkkeVilkårsvurderingForPersonFeilmelding,
                 frontendFeilmelding = "Fant ikke vilkårsvurdering for person med ident '${restSlettVilkår.personIdent}"
@@ -193,7 +194,7 @@ class VilkårService(
             val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
                 ?: throw IllegalStateException("Fant ikke personopplysninggrunnlag for behandling ${behandling.id}")
             if (personopplysningGrunnlag.personer
-                .single { it.personIdent.ident == restNyttVilkår.personIdent }.type != PersonType.SØKER
+                .single { it.aktør == personidentService.hentOgLagreAktør(restNyttVilkår.personIdent) }.type != PersonType.SØKER
             ) {
                 throw FunksjonellFeil(
                     melding = "${Vilkår.UTVIDET_BARNETRYGD.beskrivelse} kan ikke legges til for BARN",
@@ -345,7 +346,6 @@ class VilkårService(
         return personopplysningGrunnlag.personer.map { person ->
             val personResultat = PersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
-                personIdent = person.aktør.aktivFødselsnummer(),
                 aktør = person.aktør
             )
 
@@ -376,7 +376,6 @@ class VilkårService(
         return personopplysningGrunnlag.personer.map { person ->
             val personResultat = PersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
-                personIdent = person.aktør.aktivFødselsnummer(),
                 aktør = person.aktør
             )
 
@@ -443,7 +442,6 @@ class VilkårService(
         return personopplysningGrunnlag.personer.map { person ->
             val personResultat = PersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
-                personIdent = person.aktør.aktivFødselsnummer(),
                 aktør = person.aktør
             )
 
@@ -501,7 +499,6 @@ class VilkårService(
         return personopplysningGrunnlag.personer.filter { it.type != PersonType.ANNENPART }.map { person ->
             val personResultat = PersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
-                personIdent = person.aktør.aktivFødselsnummer(),
                 aktør = person.aktør
             )
 
@@ -554,12 +551,11 @@ class VilkårService(
         return personopplysningGrunnlag.personer.filter { it.type != PersonType.ANNENPART }.map { person ->
             val personResultat = PersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
-                personIdent = person.aktør.aktivFødselsnummer(),
                 aktør = person.aktør
             )
 
             val vilkårTyperForPerson = forrigeBehandlingsvilkårsvurdering.personResultater
-                .single { it.personIdent == person.personIdent.ident }.vilkårResultater.map { it.vilkårType }
+                .single { it.aktør == person.aktør }.vilkårResultater.map { it.vilkårType }
 
             val vilkårResultater = vilkårTyperForPerson.map { vilkår ->
                 val fom = utledPeriodeFom(forrigeBehandlingsvilkårsvurdering, vilkår, person, nyMigreringsdato)
@@ -605,7 +601,6 @@ class VilkårService(
         return personopplysningGrunnlag.personer.filter { it.type != PersonType.ANNENPART }.map { person ->
             val personResultat = PersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
-                personIdent = person.aktør.aktivFødselsnummer(),
                 aktør = person.aktør
             )
 
@@ -656,7 +651,8 @@ class VilkårService(
                     message = "Forrige behandling $${forrigeBehandlingSomErVedtatt.id} " +
                         "har ikke en aktiv vilkårsvurdering"
                 )
-            return forrigeBehandlingsvilkårsvurdering.personResultater.single { it.personIdent == personIdent }
+            val aktør = personidentService.hentOgLagreAktør(personIdent)
+            return forrigeBehandlingsvilkårsvurdering.personResultater.single { it.aktør == aktør }
                 .vilkårResultater.any { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
         }
         return false

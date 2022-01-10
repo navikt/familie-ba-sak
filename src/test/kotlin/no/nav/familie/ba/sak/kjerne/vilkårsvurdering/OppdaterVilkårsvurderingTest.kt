@@ -224,7 +224,6 @@ class OppdaterVilkårsvurderingTest {
         val personResultat =
             PersonResultat(
                 vilkårsvurdering = aktivVilkårsvurderingMedUtvidet,
-                personIdent = søkerFnr,
                 aktør = søkerAktørId
             )
         val utvidetVilkårResultater =
@@ -274,7 +273,6 @@ class OppdaterVilkårsvurderingTest {
         val personResultat =
             PersonResultat(
                 vilkårsvurdering = aktivVilkårsvurderingMedUtvidet,
-                personIdent = søkerFnr,
                 aktør = søkerAktørId
             )
         val utvidetVilkårResultater =
@@ -325,7 +323,6 @@ class OppdaterVilkårsvurderingTest {
         val personResultat =
             PersonResultat(
                 vilkårsvurdering = aktivVilkårsvurderingMedUtvidetIkkeOppfylt,
-                personIdent = søkerFnr,
                 aktør = søkerAktørId
             )
         val utvidetVilkårResultater =
@@ -370,7 +367,7 @@ class OppdaterVilkårsvurderingTest {
     ): Vilkårsvurdering {
         val vilkårsvurdering = Vilkårsvurdering(behandling = behandling)
         val personResultat =
-            PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = søkerFnr, aktør = søkerAktør)
+            PersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = søkerAktør)
         val vilkårResultater =
             vilkår.map { lagVilkårResultat(vilkårType = it, personResultat = personResultat) }.toSet()
         personResultat.setSortedVilkårResultater(vilkårResultater)
@@ -386,7 +383,6 @@ class OppdaterVilkårsvurderingTest {
         vilkårsvurdering.personResultater = fnrAktør.map {
             val personResultat = PersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
-                personIdent = it.first,
                 aktør = it.second
             )
 
@@ -427,7 +423,6 @@ class OppdaterVilkårsvurderingTest {
         vilkårsvurdering.personResultater = fnrAktør.map {
             val personResultat = PersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
-                personIdent = it.first,
                 aktør = it.second
             )
 

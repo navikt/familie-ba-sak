@@ -3,17 +3,14 @@ package no.nav.familie.ba.sak.kjerne.fagsak
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import java.util.Objects
-import javax.persistence.CascadeType
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.EnumType
 import javax.persistence.Enumerated
-import javax.persistence.FetchType
 import javax.persistence.GeneratedValue
 import javax.persistence.GenerationType
 import javax.persistence.Id
 import javax.persistence.JoinColumn
-import javax.persistence.OneToMany
 import javax.persistence.OneToOne
 import javax.persistence.SequenceGenerator
 import javax.persistence.Table
@@ -40,14 +37,6 @@ data class Fagsak(
 
     @Column(name = "arkivert", nullable = false)
     var arkivert: Boolean = false,
-
-    @OneToMany(
-        fetch = FetchType.EAGER,
-        mappedBy = "fagsak",
-        cascade = [CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE],
-        orphanRemoval = false
-    )
-    var søkerIdenter: MutableSet<FagsakPerson> = mutableSetOf()
 ) : BaseEntitet() {
 
     override fun hashCode(): Int {
