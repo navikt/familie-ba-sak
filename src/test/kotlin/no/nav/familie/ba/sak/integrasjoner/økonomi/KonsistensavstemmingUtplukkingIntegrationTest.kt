@@ -219,7 +219,6 @@ class KonsistensavstemmingUtplukkingIntegrationTest : AbstractSpringIntegrationT
                     tilkjentYtelse = tilkjentYtelse,
                     kildeBehandlingId = it.kilde ?: behandling.id,
                     periodeOffset = it.offset,
-                    personFnr = personFnr,
                     aktør = aktør,
                 )
             )
@@ -243,7 +242,6 @@ class KonsistensavstemmingUtplukkingIntegrationTest : AbstractSpringIntegrationT
                     tilkjentYtelse = tilkjentYtelse,
                     kildeBehandlingId = it.kilde ?: behandling.id,
                     periodeOffset = it.offset,
-                    personFnr = personFnr,
                     aktør = aktør,
                 )
             )
@@ -263,7 +261,6 @@ class KonsistensavstemmingUtplukkingIntegrationTest : AbstractSpringIntegrationT
         tilkjentYtelse: TilkjentYtelse,
         kildeBehandlingId: Long,
         periodeOffset: Long,
-        personFnr: String = randomFnr(),
         aktør: Aktør = randomAktørId(),
     ) = AndelTilkjentYtelse(
         behandlingId = tilkjentYtelse.behandling.id,

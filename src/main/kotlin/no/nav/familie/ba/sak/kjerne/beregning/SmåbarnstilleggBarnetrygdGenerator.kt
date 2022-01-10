@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstøn
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
 import no.nav.fpsak.tidsserie.StandardCombinators
@@ -27,7 +28,7 @@ data class SmåbarnstilleggBarnetrygdGenerator(
     fun lagSmåbarnstilleggAndeler(
         perioderMedFullOvergangsstønad: List<InternPeriodeOvergangsstønad>,
         andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
-        barnasIdenterOgFødselsdatoer: List<Pair<String, LocalDate>>,
+        barnasAktørerOgFødselsdatoer: List<Pair<Aktør, LocalDate>>,
     ): List<AndelTilkjentYtelse> {
         val (søkersAndeler, barnasAndeler) = andelerTilkjentYtelse.partition { it.erSøkersAndel() }
 
@@ -58,7 +59,7 @@ data class SmåbarnstilleggBarnetrygdGenerator(
 
         val perioderMedBarnSomGirRettTilSmåbarnstillegg = LocalDateTimeline(
             lagPerioderMedBarnSomGirRettTilSmåbarnstillegg(
-                barnasIdenterOgFødselsdatoer = barnasIdenterOgFødselsdatoer,
+                barnasAktørOgFødselsdatoer = barnasAktørerOgFødselsdatoer,
                 barnasAndeler = barnasAndeler
             ).map {
                 LocalDateSegment(
@@ -111,14 +112,14 @@ data class SmåbarnstilleggBarnetrygdGenerator(
     }
 
     fun lagPerioderMedBarnSomGirRettTilSmåbarnstillegg(
-        barnasIdenterOgFødselsdatoer: List<Pair<String, LocalDate>>,
+        barnasAktørOgFødselsdatoer: List<Pair<Aktør, LocalDate>>,
         barnasAndeler: List<AndelTilkjentYtelse>
     ): List<MånedPeriode> {
         return slåSammenOverlappendePerioder(
-            barnasIdenterOgFødselsdatoer.map { (ident, fødselsdato) ->
+            barnasAktørOgFødselsdatoer.map { (aktør, fødselsdato) ->
                 val barnetsMånedPeriodeAndeler = LocalDateTimeline(
                     barnasAndeler
-                        .filter { andel -> andel.aktør.aktørId == ident }
+                        .filter { andel -> andel.aktør == aktør }
                         .map { andel ->
                             LocalDateSegment(
                                 andel.stønadFom.førsteDagIInneværendeMåned(),

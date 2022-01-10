@@ -112,9 +112,9 @@ object TilkjentYtelseUtils {
                 .lagSmåbarnstilleggAndeler(
                     perioderMedFullOvergangsstønad = perioderMedFullOvergangsstønad,
                     andelerTilkjentYtelse = andelerTilkjentYtelseSøker + andelerTilkjentYtelseBarna,
-                    barnasIdenterOgFødselsdatoer = personopplysningGrunnlag.barna.map {
+                    barnasAktørerOgFødselsdatoer = personopplysningGrunnlag.barna.map {
                         Pair(
-                            it.aktør.aktørId,
+                            it.aktør,
                             it.fødselsdato
                         )
                     },

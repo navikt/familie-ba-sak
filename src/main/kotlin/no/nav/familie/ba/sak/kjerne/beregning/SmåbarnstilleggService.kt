@@ -66,9 +66,9 @@ class SmåbarnstilleggService(
             ),
             nyePerioderMedFullOvergangsstønad = nyePerioderMedFullOvergangsstønad,
             forrigeAndelerTilkjentYtelse = tilkjentYtelseFraSistIverksatteBehandling.andelerTilkjentYtelse.toList(),
-            barnasIdenterOgFødselsdatoer = persongrunnlagFraSistIverksatteBehandling.barna.map {
+            barnasAktørerOgFødselsdatoer = persongrunnlagFraSistIverksatteBehandling.barna.map {
                 Pair(
-                    it.aktør.aktørId,
+                    it.aktør,
                     it.fødselsdato
                 )
             },

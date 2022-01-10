@@ -27,17 +27,17 @@ interface AndelTilkjentYtelseRepository : JpaRepository<AndelTilkjentYtelse, Lon
         value = """WITH qualified AS (
     SELECT *
     FROM ((
-              SELECT p.foedselsnummer       ident,
-                     aty.stonad_fom         fom,
-                     aty.stonad_tom         tom,
-                     aty.prosent            prosent,
-                     aty.tilkjent_ytelse_id aty_tyid,
+              SELECT personident.foedselsnummer       ident,
+                     aty.stonad_fom                     fom,
+                     aty.stonad_tom                     tom,
+                     aty.prosent                    prosent,
+                     aty.tilkjent_ytelse_id         aty_tyid,
                      aty.id
               FROM andel_tilkjent_ytelse aty
-              JOIN personident p on p.fk_aktoer_id = aty.fk_aktoer_id
+              JOIN personident personident on personident.fk_aktoer_id = aty.fk_aktoer_id
               WHERE aty.type = 'UTVIDET_BARNETRYGD'
-                AND p.foedselsnummer IN :personIdenter
-                AND p.aktiv = true
+                AND personident.foedselsnummer IN :personIdenter
+                AND personident.aktiv = true
                 AND aty.stonad_fom <= :tom
                 AND aty.stonad_tom >= :fom
           ) AS qualified_aty
