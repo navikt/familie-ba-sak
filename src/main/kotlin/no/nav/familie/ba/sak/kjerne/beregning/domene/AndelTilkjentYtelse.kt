@@ -345,5 +345,5 @@ fun List<AndelTilkjentYtelse>?.hentTidslinje() =
                 it.stønadTom.sisteDagIInneværendeMåned(),
                 it
             )
-        }
+        } ?: emptyList()
     )
