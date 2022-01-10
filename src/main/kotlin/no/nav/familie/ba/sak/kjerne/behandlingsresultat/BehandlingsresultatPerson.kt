@@ -93,8 +93,9 @@ data class BehandlingsresultatAndelTilkjentYtelse(
     }
 }
 
-fun LocalDateSegment<BehandlingsresultatAndelTilkjentYtelse>.erLøpende() =
-    this.tom > inneværendeMåned().sisteDagIInneværendeMåned()
+fun LocalDateSegment<BehandlingsresultatAndelTilkjentYtelse>.erLøpende(
+    inneværendeMåned: YearMonth = inneværendeMåned()
+) = this.tom > inneværendeMåned.sisteDagIInneværendeMåned()
 
 fun lagBehandlingsresultatAndelTilkjentYtelse(
     fom: String,

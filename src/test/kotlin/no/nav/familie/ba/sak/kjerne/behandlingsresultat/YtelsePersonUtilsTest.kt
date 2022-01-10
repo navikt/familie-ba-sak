@@ -5,7 +5,6 @@ import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.YtelsePersonUtils.erAndelMedEndretBeløp
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -185,14 +184,14 @@ class YtelsePersonUtilsTest {
         val måned3 = YearMonth.of(2020, 3)
         val måned4 = YearMonth.of(2020, 4)
 
-        Assertions.assertFalse(
+        assertFalse(
             erAndelMedEndretBeløp(
                 listOf(BehandlingsresultatAndelTilkjentYtelse(måned1, måned2, beløp1)),
                 listOf(BehandlingsresultatAndelTilkjentYtelse(måned3, måned4, beløp2))
             )
         )
 
-        Assertions.assertFalse(
+        assertFalse(
             erAndelMedEndretBeløp(
                 listOf(BehandlingsresultatAndelTilkjentYtelse(måned1, måned2, beløp1)),
                 listOf(BehandlingsresultatAndelTilkjentYtelse(måned1, måned3, beløp1))
@@ -210,21 +209,21 @@ class YtelsePersonUtilsTest {
         val måned3 = YearMonth.of(2020, 3)
         val måned4 = YearMonth.of(2020, 4)
 
-        Assertions.assertTrue(
+        assertTrue(
             erAndelMedEndretBeløp(
                 listOf(BehandlingsresultatAndelTilkjentYtelse(måned1, måned2, beløp1)),
                 listOf(BehandlingsresultatAndelTilkjentYtelse(måned1, måned2, beløp2))
             )
         )
 
-        Assertions.assertTrue(
+        assertTrue(
             erAndelMedEndretBeløp(
                 listOf(BehandlingsresultatAndelTilkjentYtelse(måned1, måned4, beløp1)),
                 listOf(BehandlingsresultatAndelTilkjentYtelse(måned2, måned3, beløp2))
             )
         )
 
-        Assertions.assertTrue(
+        assertTrue(
             erAndelMedEndretBeløp(
                 listOf(BehandlingsresultatAndelTilkjentYtelse(måned2, måned3, beløp1)),
                 listOf(BehandlingsresultatAndelTilkjentYtelse(måned1, måned4, beløp2))
