@@ -54,6 +54,10 @@ class VilkårService(
         behandlingId = behandlingId
     )
 
+    companion object {
+        const val fantIkkeAktivVilkårsvurderingFeilmelding = "Fant ikke aktiv vilkårsvurdering"
+    }
+
     @Transactional
     fun endreVilkår(
         behandlingId: Long,
@@ -72,7 +76,7 @@ class VilkårService(
         val vilkårsvurdering = hentVilkårsvurdering(behandlingId = behandlingId)
             ?: throw Feil(
                 message = "Fant ikke aktiv vilkårsvurdering ved endring på vilkår",
-                frontendFeilmelding = "Fant ikke aktiv vilkårsvurdering"
+                frontendFeilmelding = fantIkkeAktivVilkårsvurderingFeilmelding
             )
 
         val restVilkårResultat = restPersonResultat.vilkårResultater.singleOrNull { it.id == vilkårId }
@@ -101,7 +105,7 @@ class VilkårService(
         val vilkårsvurdering = hentVilkårsvurdering(behandlingId = behandlingId)
             ?: throw Feil(
                 message = "Fant ikke aktiv vilkårsvurdering ved sletting av vilkår",
-                frontendFeilmelding = "Fant ikke aktiv vilkårsvurdering"
+                frontendFeilmelding = fantIkkeAktivVilkårsvurderingFeilmelding
             )
 
         val personResultat = vilkårsvurdering.personResultater.find { it.aktør == aktør }
@@ -120,7 +124,7 @@ class VilkårService(
         val vilkårsvurdering = hentVilkårsvurdering(behandlingId = behandlingId)
             ?: throw Feil(
                 message = "Fant ikke aktiv vilkårsvurdering ved sletting av vilkår",
-                frontendFeilmelding = "Fant ikke aktiv vilkårsvurdering"
+                frontendFeilmelding = fantIkkeAktivVilkårsvurderingFeilmelding
             )
         val personResultat = vilkårsvurdering.personResultater.find { it.personIdent == restSlettVilkår.personIdent }
             ?: throw Feil(
@@ -150,7 +154,7 @@ class VilkårService(
         val vilkårsvurdering = hentVilkårsvurdering(behandlingId = behandlingId)
             ?: throw Feil(
                 message = "Fant ikke aktiv vilkårsvurdering ved opprettelse av vilkårsperiode",
-                frontendFeilmelding = "Fant ikke aktiv vilkårsvurdering"
+                frontendFeilmelding = fantIkkeAktivVilkårsvurderingFeilmelding
             )
 
         val personResultat =
@@ -188,7 +192,7 @@ class VilkårService(
             val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
                 ?: throw IllegalStateException("Fant ikke personopplysninggrunnlag for behandling ${behandling.id}")
             if (personopplysningGrunnlag.personer
-                .single { it.personIdent.ident == restNyttVilkår.personIdent }.type != PersonType.SØKER
+                    .single { it.personIdent.ident == restNyttVilkår.personIdent }.type != PersonType.SØKER
             ) {
                 throw Feil(
                     message = "${Vilkår.UTVIDET_BARNETRYGD.beskrivelse} kan ikke legges til for BARN",
