@@ -11,7 +11,6 @@ import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.time.LocalDate
 import java.util.SortedSet
 import javax.persistence.CascadeType
-import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.EntityListeners
 import javax.persistence.FetchType
@@ -41,10 +40,6 @@ class PersonResultat(
     @JsonIgnore
     @ManyToOne @JoinColumn(name = "fk_vilkaarsvurdering_id", nullable = false, updatable = false)
     var vilkårsvurdering: Vilkårsvurdering,
-
-    @Column(name = "person_ident", nullable = false, updatable = false)
-    // TODO: Robustgjøring dnr/fnr, fjern ved contract.
-    val personIdent: String,
 
     @OneToOne(optional = false) @JoinColumn(name = "fk_aktoer_id", nullable = false, updatable = false)
     val aktør: Aktør,
@@ -115,7 +110,6 @@ class PersonResultat(
     ): PersonResultat {
         val nyttPersonResultat = PersonResultat(
             vilkårsvurdering = vilkårsvurdering,
-            personIdent = personIdent,
             aktør = aktør
         )
         val kopierteVilkårResultater: SortedSet<VilkårResultat> =

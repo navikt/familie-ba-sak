@@ -142,22 +142,22 @@ class EndretUtbetalingAndelMedUtvidetAndelTest(
             andelerTilkjentYtelseMedEndretPeriode.filter { it.kalkulertUtbetalingsbeløp == 0 }
 
         Assertions.assertEquals(
-            endredeAndelerTilkjentYtelse.single { it.personIdent == scenario.barna.first().ident }.stønadFom,
+            endredeAndelerTilkjentYtelse.single { it.aktør.aktivFødselsnummer() == scenario.barna.first().ident }.stønadFom,
             endretFom
         )
 
         Assertions.assertEquals(
-            endredeAndelerTilkjentYtelse.single { it.personIdent == scenario.barna.first().ident }.stønadTom,
+            endredeAndelerTilkjentYtelse.single { it.aktør.aktivFødselsnummer() == scenario.barna.first().ident }.stønadTom,
             endretTom
         )
 
         Assertions.assertEquals(
-            endredeAndelerTilkjentYtelse.single { it.personIdent == scenario.søker.ident }.stønadFom,
+            endredeAndelerTilkjentYtelse.single { it.aktør.aktivFødselsnummer() == scenario.søker.ident }.stønadFom,
             endretFom
         )
 
         Assertions.assertEquals(
-            endredeAndelerTilkjentYtelse.single { it.personIdent == scenario.søker.ident }.stønadTom,
+            endredeAndelerTilkjentYtelse.single { it.aktør.aktivFødselsnummer() == scenario.søker.ident }.stønadTom,
             endretTom
         )
     }

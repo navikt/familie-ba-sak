@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse
 
+import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.ForelderBarnRelasjon
@@ -252,8 +253,8 @@ class FlerlingUtilsTest {
 
     @Test
     fun `Skal lage oppgave fordi barnet i hendelse ikke behandles på åpen behandling`() {
-        val barn = randomFnr()
-        val barn2 = randomFnr()
+        val barn = randomAktørId()
+        val barn2 = randomAktørId()
 
         assertFalse(
             barnPåHendelseBlirAlleredeBehandletIÅpenBehandling(
@@ -265,8 +266,8 @@ class FlerlingUtilsTest {
 
     @Test
     fun `Skal ignorere hendelse fordi barnet i hendelse behandles på åpen behandling`() {
-        val barn = randomFnr()
-        val barn2 = randomFnr()
+        val barn = randomAktørId()
+        val barn2 = randomAktørId()
 
         assertTrue(
             barnPåHendelseBlirAlleredeBehandletIÅpenBehandling(
@@ -278,9 +279,9 @@ class FlerlingUtilsTest {
 
     @Test
     fun `Skal ignorere hendelse fordi barna i hendelse behandles på åpen behandling`() {
-        val barn = randomFnr()
-        val barn2 = randomFnr()
-        val barn3 = randomFnr()
+        val barn = randomAktørId()
+        val barn2 = randomAktørId()
+        val barn3 = randomAktørId()
 
         assertTrue(
             barnPåHendelseBlirAlleredeBehandletIÅpenBehandling(
@@ -292,9 +293,9 @@ class FlerlingUtilsTest {
 
     @Test
     fun `Skal lage oppgave fordi kun 1 av barna i hendelse behandles på åpen behandling`() {
-        val barn = randomFnr()
-        val barn2 = randomFnr()
-        val barn3 = randomFnr()
+        val barn = randomAktørId()
+        val barn2 = randomAktørId()
+        val barn3 = randomAktørId()
 
         assertFalse(
             barnPåHendelseBlirAlleredeBehandletIÅpenBehandling(

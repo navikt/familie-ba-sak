@@ -76,8 +76,6 @@ object TilkjentYtelseUtils {
                             AndelTilkjentYtelse(
                                 behandlingId = vilkårsvurdering.behandling.id,
                                 tilkjentYtelse = tilkjentYtelse,
-                                // TODO: Robustgjøring dnr/fnr fjern ved contract.
-                                personIdent = person.aktør.aktivFødselsnummer(),
                                 aktør = person.aktør,
                                 stønadFom = beløpsperiode.fraOgMed,
                                 stønadTom = beløpsperiode.tilOgMed,
@@ -114,9 +112,9 @@ object TilkjentYtelseUtils {
                 .lagSmåbarnstilleggAndeler(
                     perioderMedFullOvergangsstønad = perioderMedFullOvergangsstønad,
                     andelerTilkjentYtelse = andelerTilkjentYtelseSøker + andelerTilkjentYtelseBarna,
-                    barnasIdenterOgFødselsdatoer = personopplysningGrunnlag.barna.map {
+                    barnasAktørerOgFødselsdatoer = personopplysningGrunnlag.barna.map {
                         Pair(
-                            it.personIdent.ident,
+                            it.aktør,
                             it.fødselsdato
                         )
                     },

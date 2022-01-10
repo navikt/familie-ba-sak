@@ -38,7 +38,7 @@ class VedtaksbegrunnelseTest {
     fun `skal ta med alle barnas fødselsdatoer ved avslag på søker, men ikke inkludere dem i antall barn`() {
         val brevBegrunnelseGrunnlagMedPersoner = lagBrevBegrunnelseGrunnlagMedPersoner(
             vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.AVSLAG_BOR_HOS_SØKER,
-            personIdenter = listOf(søker).map { it.personIdent.ident },
+            personIdenter = listOf(søker).map { it.aktør.aktivFødselsnummer() },
             vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
         )
 
@@ -67,7 +67,7 @@ class VedtaksbegrunnelseTest {
             lagPerson(type = PersonType.BARN)
         ).map {
             BarnMedOpplysninger(
-                ident = it.personIdent.ident,
+                ident = it.aktør.aktivFødselsnummer(),
                 fødselsdato = it.fødselsdato
             ).tilMinimertUregisrertBarn()
         }

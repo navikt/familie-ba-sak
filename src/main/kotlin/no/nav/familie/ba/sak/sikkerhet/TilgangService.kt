@@ -59,7 +59,7 @@ class TilgangService(
         val harTilgang = harSaksbehandlerTilgang("validerTilgangTilBehandling", behandlingId) {
             val behandling = behandlingService.hent(behandlingId)
             val personIdenter =
-                persongrunnlagService.hentAktiv(behandlingId = behandlingId)?.personer?.map { it.personIdent.ident }
+                persongrunnlagService.hentAktiv(behandlingId = behandlingId)?.personer?.map { it.aktør.aktivFødselsnummer() }
                     ?: listOf(behandling.fagsak.aktør.aktivFødselsnummer())
 
             harTilgangTilPersoner(personIdenter)

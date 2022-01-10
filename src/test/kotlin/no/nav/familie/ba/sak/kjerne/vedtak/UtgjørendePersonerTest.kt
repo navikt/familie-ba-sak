@@ -42,7 +42,7 @@ class UtgjørendePersonerTest {
         )
 
         val søkerPersonResultat =
-            PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = søkerFnr, aktør = søkerAktørId)
+            PersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = søkerAktørId)
         søkerPersonResultat.setSortedVilkårResultater(
             setOf(
                 VilkårResultat(
@@ -67,7 +67,7 @@ class UtgjørendePersonerTest {
         )
 
         val barn1PersonResultat =
-            PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = barn1Fnr, aktør = barn1AktørId)
+            PersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = barn1AktørId)
 
         barn1PersonResultat.setSortedVilkårResultater(
             setOf(
@@ -102,7 +102,7 @@ class UtgjørendePersonerTest {
         )
 
         val barn2PersonResultat =
-            PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = barn1Fnr, aktør = barn1AktørId)
+            PersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = barn1AktørId)
 
         barn2PersonResultat.setSortedVilkårResultater(
             setOf(
@@ -188,7 +188,7 @@ class UtgjørendePersonerTest {
         )
 
         val barnPersonResultat =
-            PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = barnFnr, aktør = barnAktørId)
+            PersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = barnAktørId)
 
         barnPersonResultat.setSortedVilkårResultater(
             setOf(
@@ -205,7 +205,7 @@ class UtgjørendePersonerTest {
         )
 
         val barn2PersonResultat =
-            PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = barn2Fnr, aktør = barn2AktørId)
+            PersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = barn2AktørId)
 
         barn2PersonResultat.setSortedVilkårResultater(
             setOf(
@@ -284,9 +284,9 @@ class UtgjørendePersonerTest {
         )
 
         val barn1PersonResultat =
-            PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = barn1Fnr, aktør = barn1AktørId)
+            PersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = barn1AktørId)
         val barn2PersonResultat =
-            PersonResultat(vilkårsvurdering = vilkårsvurdering, personIdent = barn2Fnr, aktør = barn2AktørId)
+            PersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = barn2AktørId)
 
         barn1PersonResultat.setSortedVilkårResultater(
             setOf(
