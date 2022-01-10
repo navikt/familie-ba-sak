@@ -224,7 +224,6 @@ class OppdaterVilkårsvurderingTest {
         val personResultat =
             PersonResultat(
                 vilkårsvurdering = aktivVilkårsvurderingMedUtvidet,
-                personIdent = søkerFnr,
                 aktør = søkerAktørId
             )
         val utvidetVilkårResultater =
@@ -274,7 +273,6 @@ class OppdaterVilkårsvurderingTest {
         val personResultat =
             PersonResultat(
                 vilkårsvurdering = aktivVilkårsvurderingMedUtvidet,
-                personIdent = søkerFnr,
                 aktør = søkerAktørId
             )
         val utvidetVilkårResultater =
@@ -325,7 +323,6 @@ class OppdaterVilkårsvurderingTest {
         val personResultat =
             PersonResultat(
                 vilkårsvurdering = aktivVilkårsvurderingMedUtvidetIkkeOppfylt,
-                personIdent = søkerFnr,
                 aktør = søkerAktørId
             )
         val utvidetVilkårResultater =
