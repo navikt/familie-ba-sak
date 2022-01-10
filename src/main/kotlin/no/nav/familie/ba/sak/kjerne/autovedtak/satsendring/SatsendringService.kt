@@ -7,6 +7,8 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.beregning.SatsService.sisteTilleggOrdinærSats
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingService
@@ -15,6 +17,7 @@ import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
 import no.nav.familie.ba.sak.task.SatsendringTask
 import no.nav.familie.ba.sak.task.erHverdag
+import no.nav.familie.leader.LeaderClient
 import no.nav.familie.prosessering.error.RekjørSenereException
 import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
@@ -28,6 +31,7 @@ class SatsendringService(
     private val taskRepository: TaskRepositoryWrapper,
     private val behandlingRepository: BehandlingRepository,
     private val autovedtakService: AutovedtakService,
+    private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val tilbakestillBehandlingService: TilbakestillBehandlingService
 ) {
 
@@ -37,6 +41,8 @@ class SatsendringService(
      */
     @Scheduled(cron = "0 0 7 * * *")
     fun scheduledFinnOgOpprettTaskerForSatsendring() {
+        if (LeaderClient.isLeader() == false) return
+
         // Vi ønsker kun å opprette tasker i inneværende satsendringsmåned som nå er januar 2022
         if (YearMonth.now() != YearMonth.of(2022, 1)) {
             logger.info("Dropper å lage satsendringsbehandlinger fordi måneden vi er i er ikke en satsendringsmåned")
@@ -104,8 +110,12 @@ class SatsendringService(
                     årsak = behandlingLåstMelding
                 )
             } else if (aktivOgÅpenBehandling.steg.rekkefølge > StegType.VILKÅRSVURDERING.rekkefølge) {
-                tilbakestillBehandlingService.tilbakestillBehandlingTilVilkårsvurdering(aktivOgÅpenBehandling)
-                logger.info("Tilbakestiller behandling $aktivOgÅpenBehandling til vilkårsvurderingen")
+                if (harAlleredeNySats(behandlingId = aktivOgÅpenBehandling.id)) {
+                    logger.info("Åpen behandling har allerede siste sats og vi lar den ligge.")
+                } else {
+                    tilbakestillBehandlingService.tilbakestillBehandlingTilVilkårsvurdering(aktivOgÅpenBehandling)
+                    logger.info("Tilbakestiller behandling $aktivOgÅpenBehandling til vilkårsvurderingen")
+                }
             } else {
                 logger.info("Behandling $aktivOgÅpenBehandling er under utredning, men er allerede i riktig tilstand.")
             }
@@ -142,6 +152,15 @@ class SatsendringService(
             )
         }
         taskRepository.save(task)
+    }
+
+    private fun harAlleredeNySats(behandlingId: Long): Boolean {
+        val andeler =
+            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = behandlingId)
+
+        return andeler.any {
+            it.sats == sisteTilleggOrdinærSats.beløp
+        }
     }
 
     companion object {
