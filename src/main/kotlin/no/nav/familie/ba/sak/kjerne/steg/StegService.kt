@@ -70,8 +70,8 @@ class StegService(
             }
             nyBehandling.behandlingÅrsak == BehandlingÅrsak.HELMANUELL_MIGRERING -> {
                 if (behandlingService.hentSisteBehandlingSomErVedtatt(behandling.fagsak.id) != null) {
-                    throw Feil(
-                        message = "Det finnes allerede en vedtatt behandling på fagsak ${behandling.fagsak.id}." +
+                    throw FunksjonellFeil(
+                        melding = "Det finnes allerede en vedtatt behandling på fagsak ${behandling.fagsak.id}." +
                             "Behandling kan ikke opprettes med årsak " +
                             BehandlingÅrsak.HELMANUELL_MIGRERING.visningsnavn,
                         frontendFeilmelding = "Det finnes allerede en vedtatt behandling på fagsak." +
@@ -353,12 +353,12 @@ class StegService(
             }
 
             if (behandlingSteg.stegType().erSaksbehandlerSteg() && behandlingSteg.stegType()
-                .kommerEtter(behandling.steg)
+                    .kommerEtter(behandling.steg)
             ) {
                 error(
                     "${SikkerhetContext.hentSaksbehandlerNavn()} prøver å utføre steg '${
-                    behandlingSteg.stegType()
-                        .displayName()
+                        behandlingSteg.stegType()
+                            .displayName()
                     }', men behandlingen er på steg '${behandling.steg.displayName()}'"
                 )
             }
