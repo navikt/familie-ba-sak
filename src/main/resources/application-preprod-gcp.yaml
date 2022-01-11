@@ -134,6 +134,11 @@ logging:
     root: INFO
 
 funksjonsbrytere:
+  enabled: true
+  unleash:
+    uri: https://unleash.nais.io/api/
+    cluster: ${NAIS_CLUSTER_NAME}
+    applicationName: ${NAIS_APP_NAME}
   kafka:
     producer:
       enabled: false
