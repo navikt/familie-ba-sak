@@ -1,4 +1,4 @@
-name: Build-Deploy-Preprod
+name: Build-Deploy-Preprod-GCP
 on:
   workflow_dispatch:
 
@@ -35,9 +35,9 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Push Docker image
         run: docker push $IMAGE
-      - name: Deploy til dev-fss
+      - name: Deploy til dev-gcp
         uses: nais/deploy/actions/deploy@v1
         env:
           APIKEY: ${{ secrets.GITHUB_ACCESS_TOKEN }}
-          CLUSTER: dev-fss
-          RESOURCE: app-preprod.teamfamilie.yaml
+          CLUSTER: dev-gcp
+          RESOURCE: .deploy/nais/app-preprod-gcp.yaml
