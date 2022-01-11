@@ -90,7 +90,16 @@ data class Behandling(
     }
 
     override fun toString(): String {
-        return "Behandling(id=$id, fagsak=${fagsak.id}, kategori=$kategori, underkategori=$underkategori, steg=$steg)"
+        return "Behandling(" +
+            "id=$id, " +
+            "fagsak=${fagsak.id}, " +
+            "type=$type, " +
+            "kategori=$kategori, " +
+            "underkategori=$underkategori, " +
+            "automatisk=$skalBehandlesAutomatisk, " +
+            "status=$status, " +
+            "resultat=$resultat, " +
+            "steg=$steg)"
     }
 
     fun låstForEndringerTidspunkt(): LocalDateTime? = this.behandlingStegTilstand
