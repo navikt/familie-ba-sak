@@ -124,6 +124,8 @@ no.nav.security.jwt:
           client-auth-method: client_secret_basic
 
 spring:
+  flyway:
+    enabled: false
   datasource:
     url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/familie-ba-sak
     username: ${DB_USERNAME}
