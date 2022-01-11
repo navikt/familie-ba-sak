@@ -1,4 +1,4 @@
-name: Build-Deploy-Preprod
+name: Build-Deploy-Preprod-GCP
 on:
   workflow_dispatch:
 
