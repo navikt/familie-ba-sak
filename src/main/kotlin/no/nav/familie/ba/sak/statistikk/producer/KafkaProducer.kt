@@ -1,7 +1,10 @@
 package no.nav.familie.ba.sak.statistikk.producer
 
+import com.fasterxml.jackson.annotation.JsonInclude
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.PUBLISER_VEDTAK_TIL_AIVEN
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMellomlagring
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMellomlagringRepository
 import no.nav.familie.eksterne.kontrakter.VedtakDVH
@@ -43,7 +46,10 @@ interface KafkaProducer {
     matchIfMissing = false
 )
 @Primary
-class DefaultKafkaProducer(val saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository) :
+class DefaultKafkaProducer(
+    val saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository,
+    val featureToggleService: FeatureToggleService,
+) :
     KafkaProducer {
 
     private val vedtakCounter = Metrics.counter(COUNTER_NAME, "type", "vedtak")
@@ -57,8 +63,16 @@ class DefaultKafkaProducer(val saksstatistikkMellomlagringRepository: Saksstatis
     lateinit var kafkaAivenTemplate: KafkaTemplate<String, String>
 
     override fun sendMessageForTopicVedtak(vedtak: VedtakDVH): Long {
+        if (featureToggleService.isEnabled(PUBLISER_VEDTAK_TIL_AIVEN, false)) {
+            val mapper = objectMapper.copy().setSerializationInclusion(JsonInclude.Include.NON_NULL)
+            val response = kafkaAivenTemplate.send(VEDTAK_TOPIC, vedtak.funksjonellId!!, mapper.writeValueAsString(vedtak)).get()
+            logger.info(
+                "teamfamilie.$VEDTAK_TOPIC -> message sent (behandlingId ${vedtak.behandlingsId}) -> " +
+                    response.recordMetadata.offset().toString()
+            )
+        }
         val response = kafkaTemplate.send(VEDTAK_TOPIC, vedtak.funksjonellId!!, vedtak).get()
-        logger.info("$VEDTAK_TOPIC -> message sent -> ${response.recordMetadata.offset()}")
+        logger.info("$VEDTAK_TOPIC -> message sent (behandlingId ${vedtak.behandlingsId}) -> ${response.recordMetadata.offset()}")
         vedtakCounter.increment()
         return response.recordMetadata.offset()
     }

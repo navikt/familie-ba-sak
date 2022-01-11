@@ -9,15 +9,15 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2.4.0
-      - name: Deploy bisys_opphoer_av_barnetrygd_topic til dev
+      - name: Deploy dvh_vedtak_topic til dev
         uses: nais/deploy/actions/deploy@v1
         env:
           APIKEY: ${{ secrets.GITHUB_ACCESS_TOKEN }}
           CLUSTER: dev-gcp
-          RESOURCE: .deploy/nais/kafka/dev/bisys_opphoer_av_barnetrygd.yaml
-      - name: Deploy bisys_opphoer_av_barnetrygd_topic til prod
+          RESOURCE: .deploy/nais/kafka/dev/dvh_vedtak_topic.yaml
+      - name: Deploy dvh_vedtak_topic til prod
         uses: nais/deploy/actions/deploy@v1
         env:
           APIKEY: ${{ secrets.GITHUB_ACCESS_TOKEN }}
           CLUSTER: prod-gcp
-          RESOURCE: .deploy/nais/kafka/prod/bisys_opphoer_av_barnetrygd.yaml
+          RESOURCE: .deploy/nais/kafka/prod/dvh_vedtak_topic.yaml
