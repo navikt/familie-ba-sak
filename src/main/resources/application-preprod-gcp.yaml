@@ -133,16 +133,6 @@ logging:
   level:
     root: INFO
 
-funksjonsbrytere:
-  enabled: true
-  unleash:
-    uri: https://unleash.nais.io/api/
-    cluster: ${NAIS_CLUSTER_NAME}
-    applicationName: ${NAIS_APP_NAME}
-  kafka:
-    producer:
-      enabled: false
-
 SANITY_DATASET: "ba-brev"
 
 PDL_URL: http://pdl-api-q1.pdl
