@@ -149,7 +149,8 @@ data class Behandling(
     fun erHenlagt() =
         resultat == BehandlingResultat.HENLAGT_FEILAKTIG_OPPRETTET ||
             resultat == BehandlingResultat.HENLAGT_SØKNAD_TRUKKET ||
-            resultat == BehandlingResultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE
+            resultat == BehandlingResultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE ||
+            resultat == BehandlingResultat.HENLAGT_TEKNISK_VEDLIKEHOLD
 
     fun erVedtatt() = status == BehandlingStatus.AVSLUTTET && !erHenlagt()
 

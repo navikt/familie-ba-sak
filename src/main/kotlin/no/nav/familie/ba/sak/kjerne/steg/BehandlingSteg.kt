@@ -57,7 +57,10 @@ enum class StegType(
     HENLEGG_BEHANDLING(
         rekkefølge = 0,
         tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
-        gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES)
+        gyldigIKombinasjonMedStatus = listOf(
+            BehandlingStatus.UTREDES,
+            BehandlingStatus.IVERKSETTER_VEDTAK
+        )
     ),
     REGISTRERE_PERSONGRUNNLAG(
         rekkefølge = 1,

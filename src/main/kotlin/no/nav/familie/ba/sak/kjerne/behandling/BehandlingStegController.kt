@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
+import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils.validerBehandlingIkkeSendtTilEksterneTjenester
 import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils.validerhenleggelsestype
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
@@ -145,7 +146,7 @@ class BehandlingStegController(
             behandlingId = behandling.id,
         )
 
-        behandlingService.validerBehandlingIkkeSendtTilEksterneTjenester(behandling = behandling)
+        validerBehandlingIkkeSendtTilEksterneTjenester(behandling = behandling)
 
         stegService.håndterHenleggBehandling(behandling, henleggInfo)
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandling.id)))
@@ -167,6 +168,6 @@ enum class HenleggÅrsak(val beskrivelse: String) {
         FEILAKTIG_OPPRETTET -> BehandlingResultat.HENLAGT_FEILAKTIG_OPPRETTET
         SØKNAD_TRUKKET -> BehandlingResultat.HENLAGT_SØKNAD_TRUKKET
         FØDSELSHENDELSE_UGYLDIG_UTFALL -> BehandlingResultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE
-        TEKNISK_VEDLIKEHOLD -> BehandlingResultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE
+        TEKNISK_VEDLIKEHOLD -> BehandlingResultat.HENLAGT_TEKNISK_VEDLIKEHOLD
     }
 }

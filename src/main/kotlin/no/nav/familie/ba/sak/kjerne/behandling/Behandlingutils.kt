@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.behandling
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
@@ -99,6 +100,18 @@ object Behandlingutils {
                 "Teknisk vedlikehold henleggele er ikke påslått for " +
                     "${SikkerhetContext.hentSaksbehandlerNavn()}. Kan ikke henlegge behandling $behandlingId."
             )
+        }
+    }
+
+    fun validerBehandlingIkkeSendtTilEksterneTjenester(behandling: Behandling) {
+        if (behandling.harUtførtSteg(StegType.IVERKSETT_MOT_OPPDRAG)) {
+            throw FunksjonellFeil("Kan ikke henlegge behandlingen. Den er allerede sendt til økonomi.")
+        }
+        if (behandling.harUtførtSteg(StegType.DISTRIBUER_VEDTAKSBREV)) {
+            throw FunksjonellFeil("Kan ikke henlegge behandlingen. Brev er allerede distribuert.")
+        }
+        if (behandling.harUtførtSteg(StegType.JOURNALFØR_VEDTAKSBREV)) {
+            throw FunksjonellFeil("Kan ikke henlegge behandlingen. Brev er allerede journalført.")
         }
     }
 }
