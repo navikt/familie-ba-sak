@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.behandling
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
@@ -8,6 +9,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.steg.StegType
+import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import java.time.YearMonth
 
 object Behandlingutils {
@@ -88,6 +90,15 @@ object Behandlingutils {
     ): Boolean {
         return behandlinger.any {
             it.opprettetTidspunkt.toLocalDate().toYearMonth() == måned && it.opprettetÅrsak == behandlingÅrsak
+        }
+    }
+
+    fun validerhenleggelsestype(henleggÅrsak: HenleggÅrsak, tekniksVedlikeholdToggel: Boolean, behandlingId: Long) {
+        if (!tekniksVedlikeholdToggel && henleggÅrsak == HenleggÅrsak.TEKNISK_VEDLIKEHOLD) {
+            throw Feil(
+                "Teknisk vedlikehold henleggele er ikke påslått for " +
+                    "${SikkerhetContext.hentSaksbehandlerNavn()}. Kan ikke henlegge behandling $behandlingId."
+            )
         }
     }
 }

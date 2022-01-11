@@ -1,8 +1,11 @@
 package no.nav.familie.ba.sak.kjerne.behandling
 
+import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.TEKNISK_VEDLIKEHOLD_HENLEGGELSE
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
+import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils.validerhenleggelsestype
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
@@ -27,7 +30,8 @@ class BehandlingStegController(
     private val behandlingService: BehandlingService,
     private val utvidetBehandlingService: UtvidetBehandlingService,
     private val stegService: StegService,
-    private val tilgangService: TilgangService
+    private val tilgangService: TilgangService,
+    private val featureToggleService: FeatureToggleService,
 ) {
 
     @PostMapping(
@@ -134,6 +138,15 @@ class BehandlingStegController(
         )
 
         val behandling = behandlingService.hent(behandlingId)
+
+        validerhenleggelsestype(
+            henleggÅrsak = henleggInfo.årsak,
+            tekniksVedlikeholdToggel = featureToggleService.isEnabled(TEKNISK_VEDLIKEHOLD_HENLEGGELSE),
+            behandlingId = behandling.id,
+        )
+
+        behandlingService.validerBehandlingIkkeSendtTilEksterneTjenester(behandling = behandling)
+
         stegService.håndterHenleggBehandling(behandling, henleggInfo)
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandling.id)))
     }
@@ -147,11 +160,13 @@ class RestHenleggBehandlingInfo(
 enum class HenleggÅrsak(val beskrivelse: String) {
     SØKNAD_TRUKKET("Søknad trukket"),
     FEILAKTIG_OPPRETTET("Behandling feilaktig opprettet"),
-    FØDSELSHENDELSE_UGYLDIG_UTFALL("Behandlingen er automatisk henlagt");
+    FØDSELSHENDELSE_UGYLDIG_UTFALL("Behandlingen er automatisk henlagt"),
+    TEKNISK_VEDLIKEHOLD("Teknisk vedlikehold");
 
     fun tilBehandlingsresultat() = when (this) {
         FEILAKTIG_OPPRETTET -> BehandlingResultat.HENLAGT_FEILAKTIG_OPPRETTET
         SØKNAD_TRUKKET -> BehandlingResultat.HENLAGT_SØKNAD_TRUKKET
         FØDSELSHENDELSE_UGYLDIG_UTFALL -> BehandlingResultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE
+        TEKNISK_VEDLIKEHOLD -> BehandlingResultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE
     }
 }

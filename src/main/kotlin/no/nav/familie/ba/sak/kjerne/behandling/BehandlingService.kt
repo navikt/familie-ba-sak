@@ -419,6 +419,18 @@ class BehandlingService(
         )
     }
 
+    fun validerBehandlingIkkeSendtTilEksterneTjenester(behandling: Behandling) {
+        if (behandling.harUtførtSteg(StegType.IVERKSETT_MOT_OPPDRAG)) {
+            throw FunksjonellFeil("Behandlingen er allerede sendt til økonomi")
+        }
+        if (behandling.harUtførtSteg(StegType.DISTRIBUER_VEDTAKSBREV)) {
+            throw FunksjonellFeil("Brev er allerede distribuert")
+        }
+        if (behandling.harUtførtSteg(StegType.JOURNALFØR_VEDTAKSBREV)) {
+            throw FunksjonellFeil("Brev er allerede journalført")
+        }
+    }
+
     companion object {
 
         private val logger: Logger = LoggerFactory.getLogger(BehandlingService::class.java)
