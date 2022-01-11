@@ -70,8 +70,8 @@ class StegService(
             }
             nyBehandling.behandlingÅrsak == BehandlingÅrsak.HELMANUELL_MIGRERING -> {
                 if (behandlingService.hentSisteBehandlingSomErVedtatt(behandling.fagsak.id) != null) {
-                    throw Feil(
-                        message = "Det finnes allerede en vedtatt behandling på fagsak ${behandling.fagsak.id}." +
+                    throw FunksjonellFeil(
+                        melding = "Det finnes allerede en vedtatt behandling på fagsak ${behandling.fagsak.id}." +
                             "Behandling kan ikke opprettes med årsak " +
                             BehandlingÅrsak.HELMANUELL_MIGRERING.visningsnavn,
                         frontendFeilmelding = "Det finnes allerede en vedtatt behandling på fagsak." +
