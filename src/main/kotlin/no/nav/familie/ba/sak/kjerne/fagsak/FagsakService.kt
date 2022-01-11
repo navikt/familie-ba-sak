@@ -92,7 +92,7 @@ class FagsakService(
 
     @Transactional
     fun hentEllerOpprettFagsak(personIdent: String, fraAutomatiskBehandling: Boolean = false): Fagsak {
-        val aktør = personidentService.hentOgLagreAktør(personIdent)
+        val aktør = personidentService.hentOgLagreAktør(personIdent, true)
         var fagsak = fagsakRepository.finnFagsakForAktør(aktør)
         if (fagsak == null) {
 
@@ -226,7 +226,7 @@ class FagsakService(
     }
 
     fun hentFagsakDeltager(personIdent: String): List<RestFagsakDeltager> {
-        val aktør = personidentService.hentOgLagreAktør(personIdent, false)
+        val aktør = personidentService.hentOgLagreAktør(personIdent)
 
         val maskertDeltaker = runCatching {
             hentMaskertFagsakdeltakerVedManglendeTilgang(aktør)

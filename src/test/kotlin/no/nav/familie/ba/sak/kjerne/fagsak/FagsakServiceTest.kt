@@ -322,7 +322,7 @@ class FagsakServiceTest(
         val fagsakMor = fagsakService.hentEllerOpprettFagsakForPersonIdent(mor)
         val behandlingMor = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsakMor))
 
-        val barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr))
+        val barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr), true)
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
             behandlingMor.id, mor, listOf(barnFnr),
             søkerAktør = fagsakMor.aktør, barnAktør = barnAktør
