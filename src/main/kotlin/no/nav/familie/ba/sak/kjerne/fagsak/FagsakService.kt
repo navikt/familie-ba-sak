@@ -173,11 +173,8 @@ class FagsakService(
     }
 
     private fun lagRestBaseFagsak(fagsakId: Long): RestBaseFagsak {
-        val fagsak = fagsakRepository.finnFagsak(fagsakId)
-            ?: throw FunksjonellFeil(
-                melding = "Finner ikke fagsak med id $fagsakId",
-                frontendFeilmelding = "Finner ikke fagsak med id $fagsakId"
-            )
+        val fagsak = hentPåFagsakId(fagsakId = fagsakId)
+
         val aktivBehandling = behandlingRepository.findByFagsakAndAktiv(fagsakId)
 
         val sistIverksatteBehandling =
@@ -210,7 +207,10 @@ class FagsakService(
     fun hent(aktør: Aktør): Fagsak? = fagsakRepository.finnFagsakForAktør(aktør)
 
     fun hentPåFagsakId(fagsakId: Long): Fagsak {
-        return fagsakRepository.finnFagsak(fagsakId) ?: error("Finner ikke fagsak med id $fagsakId")
+        return fagsakRepository.finnFagsak(fagsakId) ?: throw FunksjonellFeil(
+            melding = "Finner ikke fagsak med id $fagsakId",
+            frontendFeilmelding = "Finner ikke fagsak med id $fagsakId"
+        )
     }
 
     fun hentAktør(fagsakId: Long): Aktør {
