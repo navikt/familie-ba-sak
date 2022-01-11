@@ -364,8 +364,14 @@ class StegService(
             }
 
             // TODO: Det bør sees på en ytterligere robustgjøring for alle steg som SB kan utføre.
-            if (behandling.steg == StegType.BESLUTTE_VEDTAK && behandlingSteg.stegType() != StegType.BESLUTTE_VEDTAK) {
-                error("Behandlingen er på steg '${behandling.steg.displayName()}', og er da låst for alle andre type endringer.")
+            if (behandling.steg == StegType.BESLUTTE_VEDTAK &&
+                behandlingSteg.stegType() != StegType.BESLUTTE_VEDTAK &&
+                behandlingSteg.stegType() != StegType.HENLEGG_BEHANDLING
+            ) {
+                error(
+                    "Behandlingen er på steg '${behandling.steg.displayName()}', og er da låst for alle andre " +
+                        "type endringer utenom henleggelse for teknisk vedlikehold."
+                )
             }
 
             behandlingSteg.preValiderSteg(behandling, this)
