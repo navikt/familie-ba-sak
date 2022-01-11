@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
@@ -191,7 +192,12 @@ fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType): StegTyp
             when (utførendeStegType) {
                 REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
                 VILKÅRSVURDERING -> BEHANDLINGSRESULTAT
-                BEHANDLINGSRESULTAT -> VURDER_TILBAKEKREVING
+                BEHANDLINGSRESULTAT -> if (behandling.resultat != BehandlingResultat.FORTSATT_INNVILGET)
+                    VURDER_TILBAKEKREVING
+                else throw FunksjonellFeil(
+                    melding = "Resultat ${behandling.resultat} er ikke støttet etter behandlingsresultat for manuell migreringsbehandling.",
+                    frontendFeilmelding = "Du har fått behandlingsresultatet \"fortsatt innvilget\" som betyr at det ikke er gjort endring i denne migreringen. Gå til vilkårsvurderingen eller henlegg behandlingen."
+                )
                 VURDER_TILBAKEKREVING -> SEND_TIL_BESLUTTER
                 SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
                 BESLUTTE_VEDTAK -> IVERKSETT_MOT_OPPDRAG
