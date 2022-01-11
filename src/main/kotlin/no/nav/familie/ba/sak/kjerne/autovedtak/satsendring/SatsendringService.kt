@@ -9,7 +9,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService.sisteTilleggOrdinærSats
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
-import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
@@ -30,7 +29,6 @@ class SatsendringService(
     private val taskRepository: TaskRepositoryWrapper,
     private val behandlingRepository: BehandlingRepository,
     private val autovedtakService: AutovedtakService,
-    private val stegService: StegService,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val tilbakestillBehandlingService: TilbakestillBehandlingService
 ) {
