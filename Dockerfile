@@ -1,4 +1,4 @@
-FROM navikt/java:17-appdynamics
+FROM navikt/java:17
 
 ENV APPD_ENABLED=true
 ENV APP_NAME=familie-ba-sak
