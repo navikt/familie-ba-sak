@@ -99,7 +99,9 @@ class SatsendringService(
         if (behandling.fagsak.status != FagsakStatus.LØPENDE) throw Feil("Forsøker å utføre satsendring på ikke løpende fagsak ${behandling.fagsak.id}")
 
         if (aktivOgÅpenBehandling != null) {
-            if (aktivOgÅpenBehandling.status.erLåstMenIkkeAvsluttet()) {
+            if (harAlleredeNySats(behandlingId = aktivOgÅpenBehandling.id)) {
+                logger.info("Åpen behandling har allerede siste sats og vi lar den ligge.")
+            } else if (aktivOgÅpenBehandling.status.erLåstMenIkkeAvsluttet()) {
                 val behandlingLåstMelding =
                     "Behandling $aktivOgÅpenBehandling er låst for endringer og satsendring vil bli forsøkt rekjørt neste dag."
                 logger.info(behandlingLåstMelding)
@@ -108,12 +110,8 @@ class SatsendringService(
                     årsak = behandlingLåstMelding
                 )
             } else if (aktivOgÅpenBehandling.steg.rekkefølge > StegType.VILKÅRSVURDERING.rekkefølge) {
-                if (harAlleredeNySats(behandlingId = aktivOgÅpenBehandling.id)) {
-                    logger.info("Åpen behandling har allerede siste sats og vi lar den ligge.")
-                } else {
-                    tilbakestillBehandlingService.tilbakestillBehandlingTilVilkårsvurdering(aktivOgÅpenBehandling)
-                    logger.info("Tilbakestiller behandling $aktivOgÅpenBehandling til vilkårsvurderingen")
-                }
+                tilbakestillBehandlingService.tilbakestillBehandlingTilVilkårsvurdering(aktivOgÅpenBehandling)
+                logger.info("Tilbakestiller behandling $aktivOgÅpenBehandling til vilkårsvurderingen")
             } else {
                 logger.info("Behandling $aktivOgÅpenBehandling er under utredning, men er allerede i riktig tilstand.")
             }
