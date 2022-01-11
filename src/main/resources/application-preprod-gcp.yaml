@@ -133,6 +133,10 @@ logging:
   level:
     root: INFO
 
+funksjonsbrytere:
+  kafka:
+    producer:
+      enabled: false
 
 SANITY_DATASET: "ba-brev"
 
