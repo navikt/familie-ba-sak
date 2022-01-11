@@ -43,7 +43,7 @@ class StatusFraOppdrag(
             if (oppdragStatus == OppdragStatus.LAGT_PÅ_KØ) {
                 throw RekjørSenereException(
                     årsak = "Mottok lagt på kø kvittering fra oppdrag.",
-                    triggerTid = nesteGyldigeTriggertidForBehandlingIHverdager(minutesToAdd = 15)
+                    triggerTid = nesteGyldigeTriggertidForBehandlingIHverdager(minutesToAdd = if (behandling.erMigrering()) 1 else 15)
                 )
             } else {
                 taskRepository.save(task.copy(status = Status.MANUELL_OPPFØLGING))
