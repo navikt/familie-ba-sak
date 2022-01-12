@@ -63,9 +63,10 @@ class DefaultKafkaProducer(
     lateinit var kafkaAivenTemplate: KafkaTemplate<String, String>
 
     override fun sendMessageForTopicVedtak(vedtak: VedtakDVH): Long {
+        val melding = objectMapper.copy().setSerializationInclusion(JsonInclude.Include.NON_NULL).writeValueAsString(vedtak)
+        secureLogger.info("sendMessageForTopicVedtak: $melding")
         if (featureToggleService.isEnabled(PUBLISER_VEDTAK_TIL_AIVEN, false)) {
-            val mapper = objectMapper.copy().setSerializationInclusion(JsonInclude.Include.NON_NULL)
-            val response = kafkaAivenTemplate.send(VEDTAK_TOPIC, vedtak.funksjonellId!!, mapper.writeValueAsString(vedtak)).get()
+            val response = kafkaAivenTemplate.send(VEDTAK_TOPIC, vedtak.funksjonellId!!, melding).get()
             logger.info(
                 "teamfamilie.$VEDTAK_TOPIC -> message sent (behandlingId ${vedtak.behandlingsId}) -> " +
                     response.recordMetadata.offset().toString()
