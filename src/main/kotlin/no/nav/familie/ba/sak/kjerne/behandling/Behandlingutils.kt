@@ -94,8 +94,8 @@ object Behandlingutils {
         }
     }
 
-    fun validerhenleggelsestype(henleggÅrsak: HenleggÅrsak, tekniksVedlikeholdToggel: Boolean, behandlingId: Long) {
-        if (!tekniksVedlikeholdToggel && henleggÅrsak == HenleggÅrsak.TEKNISK_VEDLIKEHOLD) {
+    fun validerhenleggelsestype(henleggÅrsak: HenleggÅrsak, tekniskVedlikeholdToggel: Boolean, behandlingId: Long) {
+        if (!tekniskVedlikeholdToggel && henleggÅrsak == HenleggÅrsak.TEKNISK_VEDLIKEHOLD) {
             throw Feil(
                 "Teknisk vedlikehold henleggele er ikke påslått for " +
                     "${SikkerhetContext.hentSaksbehandlerNavn()}. Kan ikke henlegge behandling $behandlingId."

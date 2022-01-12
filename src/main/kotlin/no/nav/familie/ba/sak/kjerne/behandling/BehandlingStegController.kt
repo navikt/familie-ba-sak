@@ -142,7 +142,7 @@ class BehandlingStegController(
 
         validerhenleggelsestype(
             henleggÅrsak = henleggInfo.årsak,
-            tekniksVedlikeholdToggel = featureToggleService.isEnabled(TEKNISK_VEDLIKEHOLD_HENLEGGELSE),
+            tekniskVedlikeholdToggel = featureToggleService.isEnabled(TEKNISK_VEDLIKEHOLD_HENLEGGELSE),
             behandlingId = behandling.id,
         )
 
