@@ -4,7 +4,6 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.Utils.storForbokstavIHvertOrd
-import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
@@ -134,8 +133,9 @@ class BrevService(
                         // Selv om det er feil å anta at alle navn er på dette formatet er det ønskelig å skrive
                         // det slik, da uppercase kan oppleves som skrikende i et brev som skal være skånsomt
                         navnAvdode = data.grunnlag.søker.navn.storForbokstavIHvertOrd(),
-                        virkningstidspunkt = vedtaksperiodeService.hentUtbetalingsperioder(vedtak.behandling)
-                            .maxByOrNull { it.periodeTom }?.periodeTom?.nesteMåned()
+                        virkningstidspunkt = vedtaksperiodeService
+                            .hentOpphørsperioder(vedtak.behandling)
+                            .maxOfOrNull { it.periodeFom }
                             ?.tilMånedÅr()
                             ?: throw Feil("Fant ikke opphørdato ved generering av dødsfallbrev")
                     )
