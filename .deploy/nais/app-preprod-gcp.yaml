@@ -11,11 +11,11 @@ spec:
   port: 8089
   leaderElection: true
   liveness:
-    path: /internal/status/isAlive
+    path: /internal/health
     initialDelay: 30
     failureThreshold: 10
   readiness:
-    path: /internal/status/isAlive
+    path: /internal/health
     initialDelay: 30
     failureThreshold: 10
   prometheus:
