@@ -145,6 +145,7 @@ class ArbeidsfordelingService(
         begrunnelse: String = ""
     ) {
         logger.info("Fastsatt behandlende enhet ${if (manuellOppdatering) "manuelt" else "automatisk"} på behandling ${behandling.id}: $oppdatertArbeidsfordelingPåBehandling")
+        secureLogger.info("Fastsatt behandlende enhet ${if (manuellOppdatering) "manuelt" else "automatisk"} på behandling ${behandling.id}: ${oppdatertArbeidsfordelingPåBehandling.toSecureString()}")
 
         if (forrigeArbeidsfordelingsenhet != null && forrigeArbeidsfordelingsenhet.enhetId != oppdatertArbeidsfordelingPåBehandling.behandlendeEnhetId) {
             loggService.opprettBehandlendeEnhetEndret(
@@ -215,6 +216,7 @@ class ArbeidsfordelingService(
 
     companion object {
 
+        private val secureLogger = LoggerFactory.getLogger("secureLogger")
         private val logger = LoggerFactory.getLogger(ArbeidsfordelingService::class.java)
     }
 }
