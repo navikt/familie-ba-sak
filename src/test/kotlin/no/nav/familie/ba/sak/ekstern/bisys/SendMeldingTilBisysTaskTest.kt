@@ -44,7 +44,7 @@ class SendMeldingTilBisysTaskTest {
 
     fun setupMocks(): Mocks {
         val tilkjentYtelseRepositoryMock = mockk<TilkjentYtelseRepository>()
-        val kafkaProducer = DefaultKafkaProducer(mockk())
+        val kafkaProducer = DefaultKafkaProducer(mockk(), mockk())
         val listenableFutureMock = mockk<ListenableFuture<SendResult<String, String>>>()
         val behandlingRepositoryMock = mockk<BehandlingRepository>()
 
