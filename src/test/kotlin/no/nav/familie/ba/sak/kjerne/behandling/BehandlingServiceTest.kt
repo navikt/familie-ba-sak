@@ -148,7 +148,7 @@ class BehandlingServiceTest(
             )
         )
 
-        val barnAktør = personidentService.hentOgLagreAktørIder(listOf(barn))
+        val barnAktør = personidentService.hentOgLagreAktørIder(listOf(barn), true)
         val testPersonopplysningsGrunnlag = lagTestPersonopplysningGrunnlag(
             behandlingId = behandling.id,
             søkerPersonIdent = søker,

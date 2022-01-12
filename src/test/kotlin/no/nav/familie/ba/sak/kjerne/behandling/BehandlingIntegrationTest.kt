@@ -321,7 +321,7 @@ class BehandlingIntegrationTest(
         fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = søkerFnr))
         val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(søkerFnr))
 
-        val barnAktør = personidentService.hentOgLagreAktørIder(listOf(barn1Fnr, barn2Fnr))
+        val barnAktør = personidentService.hentOgLagreAktørIder(listOf(barn1Fnr, barn2Fnr), true)
         val personopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(
                 behandling.id, søkerFnr, listOf(barn1Fnr, barn2Fnr),
@@ -424,10 +424,10 @@ class BehandlingIntegrationTest(
         val barn2Fnr = randomFnr()
         val barn3Fnr = randomFnr()
 
-        val søkerAktørId = personidentService.hentOgLagreAktør(søkerFnr)
-        val barn1AktørId = personidentService.hentOgLagreAktør(barn1Fnr)
-        val barn2AktørId = personidentService.hentOgLagreAktør(barn2Fnr)
-        val barn3AktørId = personidentService.hentOgLagreAktør(barn3Fnr)
+        val søkerAktørId = personidentService.hentOgLagreAktør(søkerFnr, true)
+        val barn1AktørId = personidentService.hentOgLagreAktør(barn1Fnr, true)
+        val barn2AktørId = personidentService.hentOgLagreAktør(barn2Fnr, true)
+        val barn3AktørId = personidentService.hentOgLagreAktør(barn3Fnr, true)
 
         val januar2020 = YearMonth.of(2020, 1)
         val januar2021 = YearMonth.of(2021, 1)
@@ -436,7 +436,7 @@ class BehandlingIntegrationTest(
         fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = søkerFnr))
         val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(søkerFnr))
 
-        val barnAktør = personidentService.hentOgLagreAktørIder(listOf(barn1Fnr, barn2Fnr, barn3Fnr))
+        val barnAktør = personidentService.hentOgLagreAktørIder(listOf(barn1Fnr, barn2Fnr, barn3Fnr), true)
         val personopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(
                 behandling.id, søkerFnr, listOf(barn1Fnr, barn2Fnr, barn3Fnr),
@@ -634,9 +634,9 @@ class BehandlingIntegrationTest(
         fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = søkerFnr))
         val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(søkerFnr))
 
-        val søkerAktør = personidentService.hentOgLagreAktør(søkerFnr)
-        val barn1Aktør = personidentService.hentOgLagreAktør(barn1Fnr)
-        val barn2Aktør = personidentService.hentOgLagreAktør(barn2Fnr)
+        val søkerAktør = personidentService.hentOgLagreAktør(søkerFnr, true)
+        val barn1Aktør = personidentService.hentOgLagreAktør(barn1Fnr, true)
+        val barn2Aktør = personidentService.hentOgLagreAktør(barn2Fnr, true)
 
         persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(
             søkerAktør,
@@ -680,8 +680,8 @@ class BehandlingIntegrationTest(
 
     @Test
     fun `Skal filtrere ut bostedsadresse uten verdier når de mappes inn`() {
-        val søkerAktør = personidentService.hentOgLagreAktør(randomFnr())
-        val barn1Aktør = personidentService.hentOgLagreAktør(randomFnr())
+        val søkerAktør = personidentService.hentOgLagreAktør(randomFnr(), true)
+        val barn1Aktør = personidentService.hentOgLagreAktør(randomFnr(), true)
 
         every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(søkerAktør) } returns PersonInfo(
             fødselsdato = LocalDate.of(1990, 1, 1),

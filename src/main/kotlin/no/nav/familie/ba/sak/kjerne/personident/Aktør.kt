@@ -1,10 +1,12 @@
 package no.nav.familie.ba.sak.kjerne.personident
 
 import no.nav.familie.ba.sak.common.BaseEntitet
+import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.util.Objects
 import javax.persistence.CascadeType
 import javax.persistence.Column
 import javax.persistence.Entity
+import javax.persistence.EntityListeners
 import javax.persistence.FetchType
 import javax.persistence.Id
 import javax.persistence.OneToMany
@@ -15,8 +17,7 @@ import javax.validation.constraints.Pattern
  * Id som genereres fra NAV Aktør Register. Denne iden benyttes til interne forhold i Nav og vil ikke endres f.eks. dersom bruker
  * går fra DNR til FNR i Folkeregisteret. Tilsvarende vil den kunne referere personer som har ident fra et utenlandsk system.
  */
-// Fjernet RollestyringMotDatabase ettersom det kan være nødvendig å oppdatere tabell
-// når man skal se på fagsak eller behandling.
+@EntityListeners(RollestyringMotDatabase::class)
 @Entity(name = "Aktør")
 @Table(name = "AKTOER")
 data class Aktør(

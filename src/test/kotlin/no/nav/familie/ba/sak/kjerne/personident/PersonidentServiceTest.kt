@@ -248,7 +248,7 @@ internal class PersonidentServiceTest {
 
         every { aktørIdRepository.findByAktørIdOrNull(aktørIdAktiv.aktørId) } answers { aktørIdAktiv }
 
-        val aktør = personidentService.hentOgLagreAktør(personidentHistorisk)
+        val aktør = personidentService.hentOgLagreAktør(personidentHistorisk, true)
 
         verify(exactly = 2) { aktørIdRepository.saveAndFlush(any()) }
         verify(exactly = 0) { personidentRepository.saveAndFlush(any()) }
@@ -264,7 +264,7 @@ internal class PersonidentServiceTest {
 
         every { aktørIdRepository.findByAktørIdOrNull(aktørIdAktiv.aktørId) } answers { null }
 
-        val aktør = personidentService.hentOgLagreAktør(personidentAktiv)
+        val aktør = personidentService.hentOgLagreAktør(personidentAktiv, true)
 
         verify(exactly = 1) { aktørIdRepository.saveAndFlush(any()) }
         verify(exactly = 0) { personidentRepository.saveAndFlush(any()) }
