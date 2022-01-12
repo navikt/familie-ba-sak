@@ -46,7 +46,7 @@ class OppgaveIntegrationTest : AbstractSpringIntegrationTest() {
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(SØKER_FNR)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
-        val barnAktør = personidentService.hentOgLagreAktørIder(listOf(BARN_FNR))
+        val barnAktør = personidentService.hentOgLagreAktørIder(listOf(BARN_FNR), true)
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
             behandling.id, SØKER_FNR, listOf(BARN_FNR),
             søkerAktør = fagsak.aktør, barnAktør = barnAktør
