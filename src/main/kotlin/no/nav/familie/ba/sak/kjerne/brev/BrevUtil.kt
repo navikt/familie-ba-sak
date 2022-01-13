@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.brev
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.Utils
+import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat.AVSLÅTT
@@ -32,6 +33,7 @@ import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.domene.Totrinnskontroll
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.hjemlerTilhørendeFritekst
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Opphørsperiode
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 
 fun hentBrevtype(behandling: Behandling): Brevmal =
@@ -205,3 +207,10 @@ fun hentHjemmeltekst(
 
     return hjemlerTilHjemmeltekst(sorterteHjemler)
 }
+
+fun hentVirkningstidspunkt(opphørsperioder: List<Opphørsperiode>) = (
+    opphørsperioder
+        .maxOfOrNull { it.periodeFom }
+        ?.tilMånedÅr()
+        ?: throw Feil("Fant ikke opphørdato ved generering av dødsfallbrev")
+    )
