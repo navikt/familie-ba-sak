@@ -49,7 +49,7 @@ class PersonidentService(
             .filter { it.gruppe == "FOLKEREGISTERIDENT" }
             .map { it.ident }
 
-    fun hentOgLagreAktør(ident: String, lagre: Boolean = true): Aktør {
+    fun hentOgLagreAktør(ident: String, lagre: Boolean = false): Aktør {
         // Noter at ident kan være både av typen aktørid eller fødselsnummer (d- og f nummer)
         val personident = personidentRepository.findByFødselsnummerOrNull(ident)
         if (personident != null) {
@@ -78,8 +78,8 @@ class PersonidentService(
         return opprettAktørIdOgPersonident(aktørIdStr, fødselsnummerAktiv, lagre)
     }
 
-    fun hentOgLagreAktørIder(barnasFødselsnummer: List<String>): List<Aktør> {
-        return barnasFødselsnummer.map { hentOgLagreAktør(it) }
+    fun hentOgLagreAktørIder(barnasFødselsnummer: List<String>, lagre: Boolean = false): List<Aktør> {
+        return barnasFødselsnummer.map { hentOgLagreAktør(it, lagre) }
     }
 
     // TODO: Skriv test for denne metoden når den tas i bruk.

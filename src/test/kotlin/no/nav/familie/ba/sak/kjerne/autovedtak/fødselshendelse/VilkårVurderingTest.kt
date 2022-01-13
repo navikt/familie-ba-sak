@@ -107,8 +107,8 @@ class VilkårVurderingTest(
                 behandling.id,
                 fnr,
                 listOf(barnFnr),
-                søkerAktør = personidentService.hentOgLagreAktør(fnr),
-                barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr))
+                søkerAktør = personidentService.hentOgLagreAktør(fnr, true),
+                barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr), true)
             )
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 

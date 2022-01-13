@@ -64,7 +64,7 @@ class ØkonomiIntegrasjonTest(
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
-        val barnAktørId = personidentService.hentOgLagreAktør(barnFnr)
+        val barnAktørId = personidentService.hentOgLagreAktør(barnFnr, true)
 
         val vilkårsvurdering =
             lagBehandlingResultat(behandling, fnr, barnFnr, fagsak.aktør, barnAktørId, stønadFom, stønadTom)
@@ -115,7 +115,7 @@ class ØkonomiIntegrasjonTest(
             vedtaksdato = LocalDateTime.of(2020, 1, 1, 4, 35)
         )
 
-        val barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr))
+        val barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr), true)
         val personopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(
                 behandling.id,
