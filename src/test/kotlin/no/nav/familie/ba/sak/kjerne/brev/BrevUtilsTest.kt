@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.common.lagRestVedtaksbegrunnelse
 import no.nav.familie.ba.sak.common.lagSanityBegrunnelse
 import no.nav.familie.ba.sak.common.lagUtbetalingsperiodeDetalj
 import no.nav.familie.ba.sak.common.lagUtvidetVedtaksperiodeMedBegrunnelser
+import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.dataGenerator.brev.lagBrevPeriodeGrunnlagMedPersoner
 import no.nav.familie.ba.sak.dataGenerator.brev.lagMinimertUtbetalingsperiodeDetalj
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
@@ -20,12 +21,14 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.domene.Totrinnskontroll
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Opphørsperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.math.BigDecimal
+import java.time.LocalDate
 
 internal class BrevUtilsTest {
 
@@ -498,5 +501,27 @@ internal class BrevUtilsTest {
             EndretUtbetalingBarnetrygdType.DELT_UTVIDET_NB.navn + " ",
             deltBostedEndringFullUtbetalingTilkjentYtelseUtenEndring.typeBarnetrygd?.single()
         )
+    }
+
+    @Test
+    fun `Skal gi riktig dato for opphørstester`() {
+        val sisteFom = LocalDate.now().minusMonths(2)
+
+        val opphørsperioder = listOf(
+            Opphørsperiode(
+                periodeFom = LocalDate.now().minusYears(1),
+                periodeTom = LocalDate.now().minusYears(1).plusMonths(2)
+            ),
+            Opphørsperiode(
+                periodeFom = LocalDate.now().minusMonths(5),
+                periodeTom = LocalDate.now().minusMonths(4)
+            ),
+            Opphørsperiode(
+                periodeFom = sisteFom,
+                periodeTom = LocalDate.now()
+            ),
+        )
+
+        Assertions.assertEquals(sisteFom.tilMånedÅr(), hentVirkningstidspunkt(opphørsperioder))
     }
 }
