@@ -12,6 +12,7 @@ jobs:
       - uses: actions/checkout@v2
       - name: Bygg Docker image
         run: |
+          cd .deploy/ba-sak-proxy
           docker build -t ${IMAGE} .
       - name: Login to GitHub Container Registry
         uses: docker/login-action@42d299face0c5c43a0487c477f595ac9cf22f1a7
