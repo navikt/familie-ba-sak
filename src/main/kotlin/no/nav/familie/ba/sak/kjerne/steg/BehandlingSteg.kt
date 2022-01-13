@@ -199,7 +199,7 @@ fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType): StegTyp
                     VURDER_TILBAKEKREVING
                 else throw FunksjonellFeil(
                     melding = "Resultat ${behandling.resultat} er ikke støttet etter behandlingsresultat for manuell migreringsbehandling.",
-                    frontendFeilmelding = "Du har fått behandlingsresultatet \"fortsatt innvilget\" som betyr at det ikke er gjort endring i denne migreringen. Gå til vilkårsvurderingen eller henlegg behandlingen."
+                    frontendFeilmelding = "Du har ikke gjort noen endring i migreringsdatoen. Endre vilkårsvurderingen eller henlegg behandlingen."
                 )
                 VURDER_TILBAKEKREVING -> SEND_TIL_BESLUTTER
                 SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
