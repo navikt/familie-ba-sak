@@ -17,6 +17,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
@@ -67,7 +68,7 @@ class VilkårServiceTest(
     @Autowired
     private val personidentService: PersonidentService,
 
-) : AbstractSpringIntegrationTest() {
+    ) : AbstractSpringIntegrationTest() {
 
     @BeforeAll
     fun init() {
@@ -866,7 +867,7 @@ class VilkårServiceTest(
         assertTrue { vilkårsvurdering.personResultater.isNotEmpty() }
         assertTrue { vilkårsvurdering.personResultater.any { it.aktør.aktivFødselsnummer() == fnr } }
         assertTrue { vilkårsvurdering.personResultater.find { it.aktør.aktivFødselsnummer() == fnr }!!.vilkårResultater.size == 2 }
-        vilkårService.postVilkårUtvidetBarnetrygd(
+        vilkårService.postVilkår(
             nåVærendeBehandling.id,
             RestNyttVilkår(
                 personIdent = fnr,
@@ -874,6 +875,7 @@ class VilkårServiceTest(
             )
         )
         vilkårsvurdering = vilkårService.hentVilkårsvurdering(nåVærendeBehandling.id)!!
+        assertEquals(BehandlingUnderkategori.UTVIDET, vilkårsvurdering.behandling.underkategori)
         assertTrue { vilkårsvurdering.personResultater.find { it.aktør.aktivFødselsnummer() == fnr }!!.vilkårResultater.size == 3 }
         val personResultat = vilkårsvurdering.personResultater.find { it.aktør.aktivFødselsnummer() == fnr }!!
         assertTrue { personResultat.vilkårResultater.any { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD } }
@@ -906,7 +908,7 @@ class VilkårServiceTest(
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
         vilkårService.initierVilkårsvurderingForBehandling(behandling, false)
         val exception = assertThrows<RuntimeException> {
-            vilkårService.postVilkårUtvidetBarnetrygd(
+            vilkårService.postVilkår(
                 behandling.id,
                 RestNyttVilkår(
                     personIdent = fnr,
@@ -941,7 +943,7 @@ class VilkårServiceTest(
         assertTrue { vilkårsvurdering.personResultater.any { it.aktør.aktivFødselsnummer() == fnr } }
         assertTrue { vilkårsvurdering.personResultater.find { it.aktør.aktivFødselsnummer() == fnr }!!.vilkårResultater.size == 2 }
         val exception = assertThrows<RuntimeException> {
-            vilkårService.postVilkårUtvidetBarnetrygd(
+            vilkårService.postVilkår(
                 nåVærendeBehandling.id,
                 RestNyttVilkår(
                     personIdent = barnFnr,
@@ -1107,13 +1109,16 @@ class VilkårServiceTest(
             RestNyttVilkår(personIdent = fnr, vilkårType = Vilkår.UTVIDET_BARNETRYGD)
         )
 
+        val vilkårsvurderingFørSlett = vilkårService.hentVilkårsvurdering(behandling.id)!!
+
+        assertEquals(BehandlingUnderkategori.UTVIDET, vilkårsvurderingFørSlett.behandling.underkategori)
         assertTrue {
-            vilkårService.hentVilkårsvurdering(behandling.id)!!
+            vilkårsvurderingFørSlett
                 .personResultater.first { it.aktør.aktivFødselsnummer() == fnr }.vilkårResultater.size == 3
         }
 
         assertTrue {
-            vilkårService.hentVilkårsvurdering(behandling.id)!!
+            vilkårsvurderingFørSlett
                 .personResultater.first { it.aktør.aktivFødselsnummer() == fnr }
                 .vilkårResultater.any { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
         }
@@ -1126,13 +1131,16 @@ class VilkårServiceTest(
             )
         )
 
+        val vilkårsvurderingEtterSlett = vilkårService.hentVilkårsvurdering(behandling.id)!!
+
+        assertEquals(BehandlingUnderkategori.ORDINÆR, vilkårsvurderingEtterSlett.behandling.underkategori)
         assertTrue {
-            vilkårService.hentVilkårsvurdering(behandling.id)!!
+            vilkårsvurderingEtterSlett
                 .personResultater.first { it.aktør.aktivFødselsnummer() == fnr }.vilkårResultater.size == 2
         }
 
         assertTrue {
-            vilkårService.hentVilkårsvurdering(behandling.id)!!
+            vilkårsvurderingEtterSlett
                 .personResultater.first { it.aktør.aktivFødselsnummer() == fnr }
                 .vilkårResultater.none { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
         }
