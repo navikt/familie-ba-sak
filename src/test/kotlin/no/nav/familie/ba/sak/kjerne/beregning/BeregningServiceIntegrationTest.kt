@@ -233,9 +233,6 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
         val vilkårsvurdering = Vilkårsvurdering(behandling = behandling)
         vilkårsvurdering.personResultater = lagPersonResultaterForSøkerOgToBarn(
             vilkårsvurdering,
-            søkerFnr,
-            barn1Fnr,
-            barn2Fnr,
             søkerAktørId,
             barn1AktørId,
             barn2AktørId,

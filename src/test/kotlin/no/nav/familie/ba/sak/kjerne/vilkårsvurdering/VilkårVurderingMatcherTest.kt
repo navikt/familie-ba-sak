@@ -25,7 +25,7 @@ class VilkårVurderingMatcherTest {
 
     @Test
     fun `Kopierte vilkår matches og returneres som par`() {
-        val vilkårsvurderingOriginal = lagVilkårsvurdering(søkerFnr, søkerAktørId, randomBehandling, Resultat.OPPFYLT)
+        val vilkårsvurderingOriginal = lagVilkårsvurdering(søkerAktørId, randomBehandling, Resultat.OPPFYLT)
         val vilkårsvurderingKopi = vilkårsvurderingOriginal.kopier()
         val vilkårPar = VilkårsvurderingService.matchVilkårResultater(vilkårsvurderingOriginal, vilkårsvurderingKopi)
         assertTrue(vilkårPar.all { likeVilkårResultater(it.first, it.second) })
@@ -33,8 +33,8 @@ class VilkårVurderingMatcherTest {
 
     @Test
     fun `Vilkår som kun finnes i den ene vilkårsvurderingen returneres alene`() {
-        val vilkårsvurderingOriginal = lagVilkårsvurdering(søkerFnr, søkerAktørId, randomBehandling, Resultat.OPPFYLT)
-        val vilkårsvurderingUlik = lagVilkårsvurdering(søkerFnr, søkerAktørId, randomBehandling, Resultat.IKKE_OPPFYLT)
+        val vilkårsvurderingOriginal = lagVilkårsvurdering(søkerAktørId, randomBehandling, Resultat.OPPFYLT)
+        val vilkårsvurderingUlik = lagVilkårsvurdering(søkerAktørId, randomBehandling, Resultat.IKKE_OPPFYLT)
         val vilkårPar = VilkårsvurderingService.matchVilkårResultater(vilkårsvurderingOriginal, vilkårsvurderingUlik)
         assertTrue(vilkårPar.any { it.first == null && it.second != null })
         assertTrue(vilkårPar.any { it.first != null && it.second == null })

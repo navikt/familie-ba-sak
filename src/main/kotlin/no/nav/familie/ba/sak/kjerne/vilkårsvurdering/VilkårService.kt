@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType.MIGRERING_FRA_INFOTRYGD
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
@@ -145,6 +146,15 @@ class VilkårService(
                     "for behandling $behandlingId",
             )
         }
+
+        if (restSlettVilkår.vilkårType == Vilkår.UTVIDET_BARNETRYGD) {
+            behandlingService.oppdaterBehandlingstema(
+                behandling = behandling,
+                nyKategori = behandling.kategori,
+                nyUnderkategori = BehandlingUnderkategori.ORDINÆR,
+            )
+        }
+
         personResultat.vilkårResultater.filter { it.vilkårType == restSlettVilkår.vilkårType }
             .forEach { personResultat.removeVilkårResultat(it.id) }
 
@@ -158,6 +168,17 @@ class VilkårService(
                 message = "Fant ikke aktiv vilkårsvurdering ved opprettelse av vilkårsperiode",
                 frontendFeilmelding = fantIkkeAktivVilkårsvurderingFeilmelding
             )
+        val behandling = vilkårsvurdering.behandling
+
+        if (restNyttVilkår.vilkårType == Vilkår.UTVIDET_BARNETRYGD) {
+            validerFørLeggeTilUtvidetBarnetrygd(behandling, restNyttVilkår)
+
+            behandlingService.oppdaterBehandlingstema(
+                behandling = behandling,
+                nyKategori = behandling.kategori,
+                nyUnderkategori = BehandlingUnderkategori.UTVIDET,
+            )
+        }
 
         val personResultat =
             vilkårsvurdering.personResultater.find { it.aktør.aktivFødselsnummer() == restNyttVilkår.personIdent }
@@ -172,35 +193,28 @@ class VilkårService(
         return vilkårsvurderingService.oppdater(vilkårsvurdering).personResultater.map { it.tilRestPersonResultat() }
     }
 
-    fun postVilkårUtvidetBarnetrygd(behandlingId: Long, restNyttVilkår: RestNyttVilkår): List<RestPersonResultat> {
-        validerFørLeggeTilUtvidetBarnetrygd(behandlingId, restNyttVilkår)
-        return postVilkår(behandlingId, restNyttVilkår)
-    }
-
     private fun validerFørLeggeTilUtvidetBarnetrygd(
-        behandlingId: Long,
+        behandling: Behandling,
         restNyttVilkår: RestNyttVilkår
     ) {
-        val behandling = behandlingService.hent(behandlingId)
-        if (Vilkår.UTVIDET_BARNETRYGD == restNyttVilkår.vilkårType) {
-            if (!behandling.erManuellMigrering()) {
-                throw FunksjonellFeil(
-                    melding = "${restNyttVilkår.vilkårType.beskrivelse} kan ikke legges til for behandling $behandlingId " +
-                        "med behandlingType ${behandling.type.visningsnavn}",
-                    frontendFeilmelding = "${restNyttVilkår.vilkårType.beskrivelse} kan ikke legges til " +
-                        "for behandling $behandlingId med behandlingType ${behandling.type.visningsnavn}",
-                )
-            }
-            val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
-                ?: throw IllegalStateException("Fant ikke personopplysninggrunnlag for behandling ${behandling.id}")
-            if (personopplysningGrunnlag.personer
-                .single { it.aktør == personidentService.hentOgLagreAktør(restNyttVilkår.personIdent) }.type != PersonType.SØKER
-            ) {
-                throw FunksjonellFeil(
-                    melding = "${Vilkår.UTVIDET_BARNETRYGD.beskrivelse} kan ikke legges til for BARN",
-                    frontendFeilmelding = "${Vilkår.UTVIDET_BARNETRYGD.beskrivelse} kan ikke legges til for BARN",
-                )
-            }
+        if (!behandling.erManuellMigrering()) {
+            throw FunksjonellFeil(
+                melding = "${restNyttVilkår.vilkårType.beskrivelse} kan ikke legges til for behandling ${behandling.id} " +
+                    "med behandlingType ${behandling.type.visningsnavn}",
+                frontendFeilmelding = "${restNyttVilkår.vilkårType.beskrivelse} kan ikke legges til " +
+                    "for behandling ${behandling.id} med behandlingType ${behandling.type.visningsnavn}",
+            )
+        }
+
+        val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
+            ?: throw IllegalStateException("Fant ikke personopplysninggrunnlag for behandling ${behandling.id}")
+        if (personopplysningGrunnlag.personer
+            .single { it.aktør == personidentService.hentOgLagreAktør(restNyttVilkår.personIdent) }.type != PersonType.SØKER
+        ) {
+            throw FunksjonellFeil(
+                melding = "${Vilkår.UTVIDET_BARNETRYGD.beskrivelse} kan ikke legges til for BARN",
+                frontendFeilmelding = "${Vilkår.UTVIDET_BARNETRYGD.beskrivelse} kan ikke legges til for BARN",
+            )
         }
     }
 

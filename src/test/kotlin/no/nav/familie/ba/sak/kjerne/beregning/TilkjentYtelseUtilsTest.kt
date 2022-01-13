@@ -522,7 +522,6 @@ internal class TilkjentYtelseUtilsTest {
         val behandling = lagBehandling()
 
         val vilkårsvurdering = lagVilkårsvurdering(
-            søkerFnr = søkerFnr,
             søkerAktør = søkerAktørId,
             behandling = behandling,
             resultat = Resultat.OPPFYLT,

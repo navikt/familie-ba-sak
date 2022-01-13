@@ -163,7 +163,7 @@ class OppgaveService(
             ""
         } +
             "----- Opprettet av familie-ba-sak ${LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME)} --- \n" +
-            "https://barnetrygd.nais.adeo.no/fagsak/$fagsakId"
+            "https://barnetrygd.intern.nav.no/fagsak/$fagsakId"
     }
 
     fun hentOppgaver(finnOppgaveRequest: FinnOppgaveRequest): FinnOppgaveResponseDto {

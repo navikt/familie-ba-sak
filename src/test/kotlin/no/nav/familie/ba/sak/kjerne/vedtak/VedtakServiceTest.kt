@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.FeatureToggleService
+import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
@@ -98,6 +99,9 @@ class VedtakServiceTest(
 
     @Autowired
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
+
+    @Autowired
+    private val taskRepository: TaskRepositoryWrapper
 ) : AbstractSpringIntegrationTest() {
 
     lateinit var behandlingService: BehandlingService
@@ -126,10 +130,10 @@ class VedtakServiceTest(
             infotrygdService,
             vedtaksperiodeService,
             personidentService,
-            featureToggleService
+            featureToggleService,
+            taskRepository
         )
 
-        val personIdent = randomFnr()
         val personAktørId = randomAktørId()
 
         behandling = lagBehandling()
@@ -137,7 +141,7 @@ class VedtakServiceTest(
         vilkår = Vilkår.LOVLIG_OPPHOLD
         resultat = Resultat.OPPFYLT
 
-        vilkårsvurdering = lagVilkårsvurdering(personIdent, personAktørId, behandling, resultat)
+        vilkårsvurdering = lagVilkårsvurdering(personAktørId, behandling, resultat)
 
         personResultat = PersonResultat(
             vilkårsvurdering = vilkårsvurdering,
@@ -180,7 +184,7 @@ class VedtakServiceTest(
 
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
 
-        val vilkårsvurdering = lagVilkårsvurdering(fnr, fnrAktørNr, behandling, Resultat.OPPFYLT)
+        val vilkårsvurdering = lagVilkårsvurdering(fnrAktørNr, behandling, Resultat.OPPFYLT)
 
         vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering)
 
