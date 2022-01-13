@@ -244,7 +244,7 @@ class DokumentServiceTest(
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
 
-        val barnAktør = personidentService.hentOgLagreAktørIder(listOf(barn1Fnr, barn2Fnr))
+        val barnAktør = personidentService.hentOgLagreAktørIder(listOf(barn1Fnr, barn2Fnr), true)
         val personopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(
                 behandling.id, fnr, listOf(barn1Fnr, barn2Fnr),

@@ -75,8 +75,8 @@ class RevurderingMedEndredeUtbetalingandelerTest(
         persongrunnlagService.lagreOgDeaktiverGammel(
             lagTestPersonopplysningGrunnlag(
                 behandling.id, fnr, listOf(barnFnr),
-                søkerAktør = personidentService.hentOgLagreAktør(fnr),
-                barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr))
+                søkerAktør = personidentService.hentOgLagreAktør(fnr, true),
+                barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr), true)
             )
         )
 
@@ -151,8 +151,8 @@ class RevurderingMedEndredeUtbetalingandelerTest(
         persongrunnlagService.lagreOgDeaktiverGammel(
             lagTestPersonopplysningGrunnlag(
                 behandlingRevurdering.id, fnr, listOf(barnFnr),
-                søkerAktør = personidentService.hentOgLagreAktør(fnr),
-                barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr))
+                søkerAktør = personidentService.hentOgLagreAktør(fnr, true),
+                barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr), true)
             )
         )
 

@@ -29,8 +29,8 @@ class RegistrerPersongrunnlag(
         val forrigeBehandlingSomErVedtatt = behandlingService.hentForrigeBehandlingSomErVedtatt(
             behandling
         )
-        val aktør = personidentService.hentOgLagreAktør(data.ident)
-        val barnaAktør = personidentService.hentOgLagreAktørIder(data.barnasIdenter)
+        val aktør = personidentService.hentOgLagreAktør(data.ident, true)
+        val barnaAktør = personidentService.hentOgLagreAktørIder(data.barnasIdenter, true)
 
         if (behandling.type == BehandlingType.REVURDERING && forrigeBehandlingSomErVedtatt != null) {
             val forrigePersongrunnlagBarna =

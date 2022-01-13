@@ -177,9 +177,9 @@ class FagsakControllerTest(
 
     @Test
     fun `Skal oppgi det første barnet i listen som fagsakdeltaker`() {
-        val personAktør = mockPersonidentService.hentOgLagreAktør(randomFnr())
-        val søkerAktør = mockPersonidentService.hentOgLagreAktør(ClientMocks.søkerFnr[0])
-        val barnaAktør = mockPersonidentService.hentOgLagreAktørIder(ClientMocks.barnFnr.toList().subList(0, 1))
+        val personAktør = mockPersonidentService.hentOgLagreAktør(randomFnr(), true)
+        val søkerAktør = mockPersonidentService.hentOgLagreAktør(ClientMocks.søkerFnr[0], true)
+        val barnaAktør = mockPersonidentService.hentOgLagreAktørIder(ClientMocks.barnFnr.toList().subList(0, 1), true)
 
         fagsakService.hentEllerOpprettFagsak(søkerAktør.aktivFødselsnummer())
 

@@ -100,7 +100,7 @@ class PersongrunnlagService(
         nyttBarnIdent: String,
         behandling: Behandling
     ) {
-        val nyttbarnAktør = personidentService.hentOgLagreAktør(nyttBarnIdent)
+        val nyttbarnAktør = personidentService.hentOgLagreAktør(nyttBarnIdent, true)
 
         val personopplysningGrunnlag = hentAktivThrows(behandlingId = behandling.id)
 
@@ -138,10 +138,10 @@ class PersongrunnlagService(
         behandling: Behandling,
         forrigeBehandlingSomErVedtatt: Behandling? = null
     ) {
-        val søkerAktør = personidentService.hentOgLagreAktør(søknadDTO.søkerMedOpplysninger.ident)
+        val søkerAktør = personidentService.hentOgLagreAktør(søknadDTO.søkerMedOpplysninger.ident, true)
         val valgteBarnsAktør =
             søknadDTO.barnaMedOpplysninger.filter { it.inkludertISøknaden && it.erFolkeregistrert }
-                .map { barn -> personidentService.hentOgLagreAktør(barn.ident) }
+                .map { barn -> personidentService.hentOgLagreAktør(barn.ident, true) }
 
         if (behandling.type == BehandlingType.REVURDERING && forrigeBehandlingSomErVedtatt != null) {
             val forrigePersongrunnlag = hentAktiv(behandlingId = forrigeBehandlingSomErVedtatt.id)
