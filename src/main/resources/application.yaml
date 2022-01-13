@@ -28,6 +28,8 @@ spring:
           use_jdbc_metadata_defaults: false
   flyway:
     enabled: true
+    placeholders:
+      ignoreIfFss:
   kafka:
     client-id: familie-ba-sak
     properties:
