@@ -399,9 +399,6 @@ fun lagSøknadDTO(
 
 fun lagPersonResultaterForSøkerOgToBarn(
     vilkårsvurdering: Vilkårsvurdering,
-    søkerFnr: String,
-    barn1Fnr: String,
-    barn2Fnr: String,
     søkerAktør: Aktør,
     barn1Aktør: Aktør,
     barn2Aktør: Aktør,
@@ -509,7 +506,6 @@ fun vurderVilkårsvurderingTilInnvilget(vilkårsvurdering: Vilkårsvurdering, ba
 }
 
 fun lagVilkårsvurdering(
-    søkerFnr: String,
     søkerAktør: Aktør,
     behandling: Behandling,
     resultat: Resultat,

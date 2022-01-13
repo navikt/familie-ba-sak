@@ -452,9 +452,6 @@ class BehandlingIntegrationTest(
             Vilkårsvurdering(behandling = behandling)
         behandlingResultat1.personResultater = lagPersonResultaterForSøkerOgToBarn(
             behandlingResultat1,
-            søkerFnr,
-            barn1Fnr,
-            barn2Fnr,
             søkerAktørId,
             barn1AktørId,
             barn2AktørId,
@@ -469,9 +466,6 @@ class BehandlingIntegrationTest(
             Vilkårsvurdering(behandling = behandling)
         behandlingResultat2.personResultater = lagPersonResultaterForSøkerOgToBarn(
             behandlingResultat2,
-            søkerFnr,
-            barn1Fnr,
-            barn3Fnr,
             søkerAktørId,
             barn1AktørId,
             barn3AktørId,

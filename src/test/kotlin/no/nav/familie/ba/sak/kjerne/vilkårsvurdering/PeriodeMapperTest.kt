@@ -54,7 +54,7 @@ class PeriodeMapperTest {
             it.behandlingStegTilstand.add(BehandlingStegTilstand(0, it, FØRSTE_STEG))
         }
 
-        vilkårsvurdering = lagVilkårsvurdering("", randomAktørId(), behandling, Resultat.IKKE_VURDERT)
+        vilkårsvurdering = lagVilkårsvurdering(randomAktørId(), behandling, Resultat.IKKE_VURDERT)
     }
 
     @Test
@@ -247,7 +247,6 @@ class PeriodeMapperTest {
 
     @Test
     fun `Perioderesultat skal gi riktig svar for samlet vilkårsresultat for barn`() {
-        val barnFnr = randomFnr()
         val periodeFom = LocalDate.of(2020, 4, 8)
         val periodeFom18ÅrsVilkår = LocalDate.of(2020, 5, 15)
         val periodeTom18ÅrsVilkår = LocalDate.of(2038, 5, 15)

@@ -231,7 +231,6 @@ class StegServiceTest(
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
         vilkårsvurderingService.lagreNyOgDeaktiverGammel(
             lagVilkårsvurdering(
-                søkerFnr,
                 søkerAktørId,
                 behandling,
                 Resultat.OPPFYLT

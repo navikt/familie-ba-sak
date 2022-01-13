@@ -12,7 +12,6 @@ import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.LogiskVedleggRe
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.OppdaterJournalpostRequest
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.Sakstype.FAGSAK
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.Sakstype.GENERELL_SAK
-import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -22,8 +21,8 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
-import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
+import no.nav.familie.ba.sak.task.OpprettOppgaveTask
 import no.nav.familie.kontrakter.felles.BrukerIdType
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.Tema
@@ -43,9 +42,7 @@ import javax.transaction.Transactional
 class JournalføringService(
     private val integrasjonClient: IntegrasjonClient,
     private val fagsakService: FagsakService,
-    private val personidentService: PersonidentService,
     private val behandlingService: BehandlingService,
-    private val oppgaveService: OppgaveService,
     private val journalføringRepository: JournalføringRepository,
     private val loggService: LoggService,
     private val stegService: StegService,
@@ -148,7 +145,7 @@ class JournalføringService(
 
         val tilknyttedeBehandlingIder: MutableList<String> = request.tilknyttedeBehandlingIder.toMutableList()
 
-        val nyBehandling: Behandling? = if (request.opprettOgKnyttTilNyBehandling) {
+        if (request.opprettOgKnyttTilNyBehandling) {
             val nyBehandling =
                 opprettBehandlingOgEvtFagsakForJournalføring(
                     personIdent = request.bruker.id,
@@ -159,8 +156,7 @@ class JournalføringService(
                     underkategori = request.underkategori
                 )
             tilknyttedeBehandlingIder.add(nyBehandling.id.toString())
-            nyBehandling
-        } else null
+        }
 
         val (sak, behandlinger) = lagreJournalpostOgKnyttFagsakTilJournalpost(tilknyttedeBehandlingIder, journalpostId)
 
@@ -176,10 +172,6 @@ class JournalføringService(
         )
 
         journalføringMetrikk.tellManuellJournalføringsmetrikker(journalpost.data, request, behandlinger)
-        if (nyBehandling != null) {
-            opprettOppgaveFor(nyBehandling, request.navIdent)
-        }
-
         return sak.fagsakId ?: ""
     }
 
@@ -269,11 +261,11 @@ class JournalføringService(
     }
 
     private fun opprettOppgaveFor(behandling: Behandling, navIdent: String) {
-        oppgaveService.opprettOppgave(
+        OpprettOppgaveTask.opprettTask(
             behandlingId = behandling.id,
             oppgavetype = Oppgavetype.BehandleSak,
             fristForFerdigstillelse = LocalDate.now(),
-            tilordnetNavIdent = navIdent
+            tilordnetRessurs = navIdent
         )
     }
 
