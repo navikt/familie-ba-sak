@@ -3,7 +3,9 @@ package no.nav.familie.ba.sak.kjerne.steg
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
@@ -16,6 +18,7 @@ class IverksettMotOppdrag(
     private val økonomiService: ØkonomiService,
     private val totrinnskontrollService: TotrinnskontrollService,
     private val vedtakService: VedtakService,
+    private val behandlingService: BehandlingService,
     private val taskRepository: TaskRepositoryWrapper,
 ) : BehandlingSteg<IverksettingTaskDTO> {
 
@@ -55,13 +58,17 @@ class IverksettMotOppdrag(
             saksbehandlerId = data.saksbehandlerId
         )
 
-        taskRepository.save(
-            SendVedtakTilInfotrygdTask.opprettTask(
-                hentFnrStoenadsmottaker(behandling.fagsak),
-                behandling.id
+        val forrigeIverksatteBehandling = behandlingService.hentForrigeBehandlingSomErIverksatt(behandling)
+        if (forrigeIverksatteBehandling == null ||
+            forrigeIverksatteBehandling.type == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT
+        ) {
+            taskRepository.save(
+                SendVedtakTilInfotrygdTask.opprettTask(
+                    hentFnrStoenadsmottaker(behandling.fagsak),
+                    behandling.id
+                )
             )
-        )
-
+        }
         return hentNesteStegForNormalFlyt(behandling)
     }
 

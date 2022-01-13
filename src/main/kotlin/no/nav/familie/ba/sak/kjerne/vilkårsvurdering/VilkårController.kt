@@ -12,7 +12,6 @@ import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -134,12 +133,7 @@ class VilkårController(
             handling = "legge til vilkår"
         )
 
-        if (restNyttVilkår.vilkårType == Vilkår.UTVIDET_BARNETRYGD) {
-            vilkårService.postVilkårUtvidetBarnetrygd(
-                behandlingId,
-                restNyttVilkår
-            )
-        } else vilkårService.postVilkår(behandlingId, restNyttVilkår)
+        vilkårService.postVilkår(behandlingId, restNyttVilkår)
 
         vedtakService.resettStegVedEndringPåVilkår(behandlingId)
         return ResponseEntity.ok(
