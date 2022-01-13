@@ -365,7 +365,10 @@ class StegService(
 
             // TODO: Det bør sees på en ytterligere robustgjøring for alle steg som SB kan utføre.
             if (behandling.steg == StegType.BESLUTTE_VEDTAK && behandlingSteg.stegType() != StegType.BESLUTTE_VEDTAK) {
-                error("Behandlingen er på steg '${behandling.steg.displayName()}', og er da låst for alle andre type endringer.")
+                error(
+                    "Behandlingen er på steg '${behandling.steg.displayName()}', " +
+                        "og er da låst for alle andre type endringer."
+                )
             }
 
             behandlingSteg.preValiderSteg(behandling, this)

@@ -1,18 +1,24 @@
 package no.nav.familie.ba.sak.kjerne.behandling
 
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils.validerBehandlingIkkeSendtTilEksterneTjenester
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.steg.BehandlingStegStatus
+import no.nav.familie.ba.sak.kjerne.steg.StegType
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
@@ -199,5 +205,47 @@ class BehandlingUtilsTest {
         )
 
         assertFalse(behandlingsårsakHarAlleredeKjørt)
+    }
+
+    @Test
+    fun `Skal kaste feil etter at vedtaksbrev er distribuert`() {
+        val fgb = lagBehandling()
+        fgb.behandlingStegTilstand.add(
+            BehandlingStegTilstand(
+                behandlingSteg = StegType.DISTRIBUER_VEDTAKSBREV,
+                behandlingStegStatus = BehandlingStegStatus.UTFØRT,
+                behandling = fgb
+            )
+        )
+
+        assertThrows<FunksjonellFeil> { validerBehandlingIkkeSendtTilEksterneTjenester(fgb) }
+    }
+
+    @Test
+    fun `Skal kaste feil etter iverksetting mot økonomi`() {
+        val fgb = lagBehandling()
+        fgb.behandlingStegTilstand.add(
+            BehandlingStegTilstand(
+                behandlingSteg = StegType.IVERKSETT_MOT_OPPDRAG,
+                behandlingStegStatus = BehandlingStegStatus.UTFØRT,
+                behandling = fgb
+            )
+        )
+
+        assertThrows<FunksjonellFeil> { validerBehandlingIkkeSendtTilEksterneTjenester(fgb) }
+    }
+
+    @Test
+    fun `Skal kaste feil etter at brev er journalført`() {
+        val fgb = lagBehandling()
+        fgb.behandlingStegTilstand.add(
+            BehandlingStegTilstand(
+                behandlingSteg = StegType.JOURNALFØR_VEDTAKSBREV,
+                behandlingStegStatus = BehandlingStegStatus.UTFØRT,
+                behandling = fgb
+            )
+        )
+
+        assertThrows<FunksjonellFeil> { validerBehandlingIkkeSendtTilEksterneTjenester(fgb) }
     }
 }
