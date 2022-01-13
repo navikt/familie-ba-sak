@@ -209,7 +209,7 @@ class VilkårService(
         val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
             ?: throw IllegalStateException("Fant ikke personopplysninggrunnlag for behandling ${behandling.id}")
         if (personopplysningGrunnlag.personer
-                .single { it.aktør == personidentService.hentOgLagreAktør(restNyttVilkår.personIdent) }.type != PersonType.SØKER
+            .single { it.aktør == personidentService.hentOgLagreAktør(restNyttVilkår.personIdent) }.type != PersonType.SØKER
         ) {
             throw FunksjonellFeil(
                 melding = "${Vilkår.UTVIDET_BARNETRYGD.beskrivelse} kan ikke legges til for BARN",
