@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.integrasjoner
 
+import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.DEFAULT_JOURNALFØRENDE_ENHET
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.Sakstype
 import no.nav.familie.ba.sak.task.dto.FAGSYSTEM
@@ -95,7 +96,7 @@ fun lagTestOppgaveDTO(
 ): Oppgave {
     return Oppgave(
         id = oppgaveId,
-        aktoerId = "1234",
+        aktoerId = randomAktørId().aktørId,
         identer = listOf(OppgaveIdentV2("11111111111", IdentGruppe.FOLKEREGISTERIDENT)),
         journalpostId = "1234",
         tildeltEnhetsnr = tildeltEnhetsnr,

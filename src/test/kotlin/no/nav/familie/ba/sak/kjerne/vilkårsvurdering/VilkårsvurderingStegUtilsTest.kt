@@ -5,7 +5,6 @@ import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.randomAktørId
-import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.toPeriode
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
@@ -37,7 +36,6 @@ class VilkårsvurderingStegUtilsTest {
 
     @BeforeEach
     fun init() {
-        val personIdent = randomFnr()
         val personAktørId = randomAktørId()
 
         behandling = lagBehandling()
@@ -45,7 +43,7 @@ class VilkårsvurderingStegUtilsTest {
         vilkår = Vilkår.BOR_MED_SØKER
         resultat = Resultat.OPPFYLT
 
-        vilkårsvurdering = lagVilkårsvurdering(personIdent, personAktørId, behandling, resultat)
+        vilkårsvurdering = lagVilkårsvurdering(personAktørId, behandling, resultat)
 
         personResultat = PersonResultat(
             vilkårsvurdering = vilkårsvurdering,
@@ -378,15 +376,13 @@ class VilkårsvurderingStegUtilsTest {
 
     @Test
     fun `flyttResultaterTilInitielt filtrer ikke bort ikke oppfylte perioder når det gjelder samme behandling`() {
-        val søker = randomFnr()
         val søkerAktørId = randomAktørId()
         val behandling = lagBehandling()
 
         val initiellVilkårvurdering =
-            lagVilkårsvurderingMedForskelligeResultat(søker, søkerAktørId, behandling, listOf(Resultat.OPPFYLT))
+            lagVilkårsvurderingMedForskelligeResultat(søkerAktørId, behandling, listOf(Resultat.OPPFYLT))
         val aktivVilkårsvurdering =
             lagVilkårsvurderingMedForskelligeResultat(
-                søker,
                 søkerAktørId,
                 behandling,
                 listOf(Resultat.IKKE_OPPFYLT, Resultat.OPPFYLT)
@@ -409,16 +405,14 @@ class VilkårsvurderingStegUtilsTest {
 
     @Test
     fun `flyttResultaterTilInitielt filtrer ikke oppfylt om oppfylt finnes ved kopiering fra forrige behandling`() {
-        val søker = randomFnr()
         val søkerAktørId = randomAktørId()
         val behandling = lagBehandling()
         val behandling2 = lagBehandling()
 
         val initiellVilkårvurdering =
-            lagVilkårsvurderingMedForskelligeResultat(søker, søkerAktørId, behandling, listOf(Resultat.OPPFYLT))
+            lagVilkårsvurderingMedForskelligeResultat(søkerAktørId, behandling, listOf(Resultat.OPPFYLT))
         val aktivVilkårsvurdering =
             lagVilkårsvurderingMedForskelligeResultat(
-                søker,
                 søkerAktørId,
                 behandling2,
                 listOf(Resultat.IKKE_OPPFYLT, Resultat.OPPFYLT)
@@ -438,15 +432,13 @@ class VilkårsvurderingStegUtilsTest {
 
     @Test
     fun `flyttResultaterTilInitielt filtrer ikke ikke oppfylt om oppfylt ikke finnes`() {
-        val søker = randomFnr()
         val søkerAktørId = randomAktørId()
         val behandling = lagBehandling()
 
         val initiellVilkårsvurdering =
-            lagVilkårsvurderingMedForskelligeResultat(søker, søkerAktørId, behandling, listOf(Resultat.OPPFYLT))
+            lagVilkårsvurderingMedForskelligeResultat(søkerAktørId, behandling, listOf(Resultat.OPPFYLT))
         val activeVilkårvurdering =
             lagVilkårsvurderingMedForskelligeResultat(
-                søker,
                 søkerAktørId,
                 behandling,
                 listOf(Resultat.IKKE_OPPFYLT, Resultat.IKKE_OPPFYLT)
@@ -465,7 +457,6 @@ class VilkårsvurderingStegUtilsTest {
     }
 
     fun lagVilkårsvurderingMedForskelligeResultat(
-        søkerFnr: String,
         søkerAktør: Aktør,
         behandling: Behandling,
         resultater: List<Resultat>

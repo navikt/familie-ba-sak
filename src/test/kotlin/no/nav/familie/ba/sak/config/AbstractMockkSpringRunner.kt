@@ -11,6 +11,8 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.PdlIdentRestClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingKlient
+import no.nav.familie.ba.sak.task.OpprettTaskService
+import no.nav.familie.ba.sak.task.TaskRepositoryTestConfig
 import org.junit.jupiter.api.AfterEach
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
@@ -47,6 +49,12 @@ abstract class AbstractMockkSpringRunner {
 
     @Autowired
     private lateinit var mockInfotrygdBarnetrygdClient: InfotrygdBarnetrygdClient
+
+    @Autowired
+    private lateinit var mockTaskRepository: TaskRepositoryWrapper
+
+    @Autowired
+    private lateinit var mockOpprettTaskService: OpprettTaskService
 
     @Autowired
     private lateinit var applicationContext: ConfigurableApplicationContext
@@ -105,6 +113,14 @@ abstract class AbstractMockkSpringRunner {
 
         if (isMockKMock(mockInfotrygdBarnetrygdClient)) {
             InfotrygdBarnetrygdClientMock.clearInfotrygdBarnetrygdMocks(mockInfotrygdBarnetrygdClient)
+        }
+
+        if (isMockKMock(mockTaskRepository)) {
+            TaskRepositoryTestConfig.clearMockTaskRepository(mockTaskRepository)
+        }
+
+        if (isMockKMock(mockOpprettTaskService)) {
+            TaskRepositoryTestConfig.clearMockTaskService(mockOpprettTaskService)
         }
     }
 

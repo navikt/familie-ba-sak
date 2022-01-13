@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.behandling
 
 import io.mockk.every
+import io.mockk.verify
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagPersonResultat
 import no.nav.familie.ba.sak.common.lagPersonResultaterForSøkerOgToBarn
@@ -11,10 +12,10 @@ import no.nav.familie.ba.sak.common.toLocalDate
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
+import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonerMedAndeler
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
-import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PersonInfo
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
@@ -49,7 +50,6 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMellomlagringRepository
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMellomlagringType
-import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.Matrikkeladresse
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
@@ -61,7 +61,6 @@ import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -108,16 +107,16 @@ class BehandlingIntegrationTest(
     private val databaseCleanupService: DatabaseCleanupService,
 
     @Autowired
-    private val oppgaveService: OppgaveService,
-
-    @Autowired
     private val saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository,
 
     @Autowired
     private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
 
     @Autowired
-    private val personidentService: PersonidentService
+    private val personidentService: PersonidentService,
+
+    @Autowired
+    private val taskRepository: TaskRepositoryWrapper
 ) : AbstractSpringIntegrationTest() {
 
     @BeforeEach
@@ -209,14 +208,11 @@ class BehandlingIntegrationTest(
         val fnr = randomFnr()
 
         fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
-        val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(fnr))
+        behandlingService.opprettBehandling(nyOrdinærBehandling(fnr))
 
-        assertNotNull(
-            oppgaveService.hentOppgaveSomIkkeErFerdigstilt(
-                oppgavetype = Oppgavetype.BehandleSak,
-                behandling = behandling
-            )
-        )
+        verify(exactly = 1) {
+            taskRepository.save(any())
+        }
     }
 
     @Test
@@ -234,7 +230,7 @@ class BehandlingIntegrationTest(
         val fnr = randomFnr()
 
         fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
-        val behandling = behandlingService.opprettBehandling(
+        behandlingService.opprettBehandling(
             NyBehandling(
                 kategori = BehandlingKategori.NASJONAL,
                 underkategori = BehandlingUnderkategori.ORDINÆR,
@@ -244,12 +240,9 @@ class BehandlingIntegrationTest(
             )
         )
 
-        assertNull(
-            oppgaveService.hentOppgaveSomIkkeErFerdigstilt(
-                oppgavetype = Oppgavetype.BehandleSak,
-                behandling = behandling
-            )
-        )
+        verify(exactly = 0) {
+            taskRepository.save(any())
+        }
     }
 
     @Test
@@ -452,9 +445,6 @@ class BehandlingIntegrationTest(
             Vilkårsvurdering(behandling = behandling)
         behandlingResultat1.personResultater = lagPersonResultaterForSøkerOgToBarn(
             behandlingResultat1,
-            søkerFnr,
-            barn1Fnr,
-            barn2Fnr,
             søkerAktørId,
             barn1AktørId,
             barn2AktørId,
@@ -469,9 +459,6 @@ class BehandlingIntegrationTest(
             Vilkårsvurdering(behandling = behandling)
         behandlingResultat2.personResultater = lagPersonResultaterForSøkerOgToBarn(
             behandlingResultat2,
-            søkerFnr,
-            barn1Fnr,
-            barn3Fnr,
             søkerAktørId,
             barn1AktørId,
             barn3AktørId,

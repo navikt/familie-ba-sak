@@ -89,7 +89,7 @@ class FerdigstillBehandlingTaskTest : AbstractSpringIntegrationTest() {
         )
 
         return if (resultat == Resultat.IKKE_OPPFYLT) {
-            val vilkårsvurdering = lagVilkårsvurdering(fnr, aktørId, behandling, resultat)
+            val vilkårsvurdering = lagVilkårsvurdering(aktørId, behandling, resultat)
 
             vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering)
             val behandlingEtterVilkårsvurdering = stegService.håndterVilkårsvurdering(behandling)

@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.behandling
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
+import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
@@ -36,6 +37,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
+import no.nav.familie.ba.sak.task.OpprettOppgaveTask
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -60,7 +62,8 @@ class BehandlingService(
     private val infotrygdService: InfotrygdService,
     private val vedtaksperiodeService: VedtaksperiodeService,
     private val personidentService: PersonidentService,
-    private val featureToggleService: FeatureToggleService
+    private val featureToggleService: FeatureToggleService,
+    private val taskRepository: TaskRepositoryWrapper
 ) {
 
     @Transactional
@@ -111,11 +114,17 @@ class BehandlingService(
 
             loggService.opprettBehandlingLogg(lagretBehandling)
             if (lagretBehandling.opprettBehandleSakOppgave()) {
-                oppgaveService.opprettOppgave(
-                    behandlingId = lagretBehandling.id,
-                    oppgavetype = Oppgavetype.BehandleSak,
-                    fristForFerdigstillelse = LocalDate.now(),
-                    tilordnetNavIdent = nyBehandling.navIdent
+                /**
+                 * Oppretter oppgave via task slik at dersom noe feiler i forbindelse med opprettelse
+                 * av behandling så rulles også tasken tilbake og vi forhindrer å opprette oppgave
+                 */
+                taskRepository.save(
+                    OpprettOppgaveTask.opprettTask(
+                        behandlingId = lagretBehandling.id,
+                        oppgavetype = Oppgavetype.BehandleSak,
+                        fristForFerdigstillelse = LocalDate.now(),
+                        tilordnetRessurs = nyBehandling.navIdent
+                    )
                 )
             }
 

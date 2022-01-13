@@ -58,7 +58,7 @@ class AutobrevSmåbarnstilleggOpphørTest(
 
         val personScenario1: RestScenario = lagScenario(barnFødselsdato)
         val fagsak1: RestMinimalFagsak = lagFagsak(personScenario = personScenario1)
-        val fagsak1behanding1: Behandling = fullførBehandling(
+        fullførBehandling(
             fagsak = fagsak1,
             personScenario = personScenario1,
             barnFødselsdato = barnFødselsdato,
@@ -68,7 +68,7 @@ class AutobrevSmåbarnstilleggOpphørTest(
             personScenario = personScenario1,
             barnFødselsdato = barnFødselsdato,
         )
-        val fagsak1behandling3åpen: Behandling = startEnRevurderingNyeOpplysningerMenIkkeFullfør(
+        startEnRevurderingNyeOpplysningerMenIkkeFullfør(
             fagsak = fagsak1,
             personScenario = personScenario1,
             barnFødselsdato = barnFødselsdato,
@@ -76,7 +76,7 @@ class AutobrevSmåbarnstilleggOpphørTest(
 
         val personScenario2: RestScenario = lagScenario(barnFødselsdato)
         val fagsak2: RestMinimalFagsak = lagFagsak(personScenario = personScenario2)
-        val fagsak2behandling1: Behandling = fullførBehandling(
+        fullførBehandling(
             fagsak = fagsak2,
             personScenario = personScenario2,
             barnFødselsdato = barnFødselsdato,
