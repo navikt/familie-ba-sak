@@ -203,7 +203,7 @@ class MigreringService(
         if (!(sak.valg == "OR" && sak.undervalg == "OS")) {
             kastOgTellMigreringsFeil(MigreringsfeilType.IKKE_STØTTET_SAKSTYPE)
         }
-        when (sak.stønad!!.delytelse.size) {
+        when (sak.stønad!!.delytelse.filter { it.tom == null }.size) {
             1 -> return
             else -> {
                 kastOgTellMigreringsFeil(MigreringsfeilType.UGYLDIG_ANTALL_DELYTELSER_I_INFOTRYGD)
@@ -295,7 +295,7 @@ class MigreringService(
         infotrygdStønad: Stønad,
     ) {
         val beløpFraInfotrygd =
-            infotrygdStønad.delytelse.singleOrNull()?.beløp?.toInt()
+            infotrygdStønad.delytelse.filter { it.tom == null }.singleOrNull()?.beløp?.toInt()
                 ?: kastOgTellMigreringsFeil(MigreringsfeilType.FLERE_DELYTELSER_I_INFOTRYGD)
 
         if (førsteUtbetalingsbeløp != beløpFraInfotrygd) {
