@@ -1,7 +1,7 @@
 no.nav.security.jwt:
   issuer.azuread:
     discoveryurl: ${AZURE_APP_WELL_KNOWN_URL}
-    accepted_audience: ${BA_SAK_CLIENT_ID}, ${AZURE_APP_CLIENT_ID}
+    accepted_audience: ${AZURE_APP_CLIENT_ID}
     cookie_name: azure_token
   client:
     registration:
