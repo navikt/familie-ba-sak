@@ -2,7 +2,6 @@ no.nav.security.jwt:
   issuer.azuread:
     discoveryurl: ${AZURE_APP_WELL_KNOWN_URL}
     accepted_audience: ${AZURE_APP_CLIENT_ID}
-    proxyurl: http://webproxy-nais.nav.no:8088
     cookie_name: azure_token
   client:
     registration:
@@ -126,14 +125,13 @@ no.nav.security.jwt:
 
 spring:
   datasource:
-    url: jdbc:postgresql://b27dbvl009.preprod.local:5432/familie-ba-sak
-  kafka:
-    bootstrap-servers: b27apvl00045.preprod.local:8443,b27apvl00046.preprod.local:8443,b27apvl00047.preprod.local:8443
+    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/familie-ba-sak
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
 
 logging:
   level:
     root: INFO
-
 
 SANITY_DATASET: "ba-brev"
 
@@ -144,5 +142,8 @@ NORG2_BASE_URL: https://app-q1.adeo.no/norg2
 FAMILIE_BREV_API_URL: https://familie-brev.dev.intern.nav.no
 FAMILIE_INTEGRASJONER_API_URL: http://familie-integrasjoner-q1.teamfamilie/api
 FAMILIE_TILBAKE_API_URL: https://familie-tilbake.dev.intern.nav.no/api
+FAMILIE_TILBAKE_API_URL_SCOPE: api://dev-gcp.teamfamilie.familie-tilbake/.default
+FAMILIE_BA_INFOTRYGD_FEED_SCOPE: api://dev-fss.teamfamilie.familie-ba-infotrygd-feed/.default
+FAMILIE_BA_INFOTRYGD_SCOPE: api://dev-fss:teamfamilie:familie-ba-infotrygd/:default
 
 ENVIRONMENT_NAME: q2
