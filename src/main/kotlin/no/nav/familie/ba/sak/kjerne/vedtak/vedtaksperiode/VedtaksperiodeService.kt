@@ -16,9 +16,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
-import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
-import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertPersonResultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilTriggesAv
 import no.nav.familie.ba.sak.kjerne.brev.hentVedtaksbrevmal
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
@@ -29,10 +27,8 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilVedtaksbegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.triggesForPeriode
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeRepository
@@ -265,9 +261,13 @@ class VedtaksperiodeService(
         val andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(
             behandlingId = behandling.id
         )
-
         val persongrunnlag =
             persongrunnlagService.hentAktivThrows(behandling.id)
+        val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id)
+            ?: error("Finner ikke vilkårsvurdering ved begrunning av vedtak")
+        val endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(
+            behandling.id
+        )
 
         val sanityBegrunnelser = sanityService.hentSanityBegrunnelser()
 
@@ -278,14 +278,22 @@ class VedtaksperiodeService(
                 sanityBegrunnelser = sanityBegrunnelser
             )
         }.map { utvidetVedtaksperiodeMedBegrunnelser ->
+            val aktørerMedUtbetaling = personidentService.hentOgLagreAktørIder(
+                utvidetVedtaksperiodeMedBegrunnelser.utbetalingsperiodeDetaljer.map { it.person.personIdent }
+            )
+
             val gyldigeBegrunnelser =
-                if (behandling.status == BehandlingStatus.UTREDES) hentGyldigeBegrunnelserForVedtaksperiode(
-                    utvidetVedtaksperiodeMedBegrunnelser,
-                    behandling,
-                    sanityBegrunnelser,
-                    persongrunnlag,
-                    andelerTilkjentYtelse
-                ) else emptyList()
+                if (behandling.status == BehandlingStatus.UTREDES)
+                    hentGyldigeBegrunnelserForVedtaksperiode(
+                        utvidetVedtaksperiodeMedBegrunnelser = utvidetVedtaksperiodeMedBegrunnelser,
+                        sanityBegrunnelser = sanityBegrunnelser,
+                        persongrunnlag = persongrunnlag,
+                        andelerTilkjentYtelse = andelerTilkjentYtelse,
+                        vilkårsvurdering = vilkårsvurdering,
+                        aktørerMedUtbetaling = aktørerMedUtbetaling,
+                        endretUtbetalingAndeler = endretUtbetalingAndeler,
+                    )
+                else emptyList()
 
             utvidetVedtaksperiodeMedBegrunnelser.copy(
                 gyldigeBegrunnelser = gyldigeBegrunnelser.filter {
@@ -293,67 +301,6 @@ class VedtaksperiodeService(
                     sanityBegrunnelse?.tilTriggesAv()?.valgbar ?: false
                 }.toList()
             )
-        }
-    }
-
-    private fun hentGyldigeBegrunnelserForVedtaksperiode(
-        utvidetVedtaksperiodeMedBegrunnelser: UtvidetVedtaksperiodeMedBegrunnelser,
-        behandling: Behandling,
-        sanityBegrunnelser: List<SanityBegrunnelse>,
-        persongrunnlag: PersonopplysningGrunnlag,
-        andelerTilkjentYtelse: List<AndelTilkjentYtelse>
-    ) = when (utvidetVedtaksperiodeMedBegrunnelser.type) {
-        Vedtaksperiodetype.FORTSATT_INNVILGET -> {
-            VedtakBegrunnelseSpesifikasjon.values()
-                .filter { it.vedtakBegrunnelseType == VedtakBegrunnelseType.FORTSATT_INNVILGET }
-        }
-        Vedtaksperiodetype.AVSLAG -> {
-            VedtakBegrunnelseSpesifikasjon.values()
-                .filter { it.vedtakBegrunnelseType == VedtakBegrunnelseType.AVSLAG }
-        }
-        else -> {
-            val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id)
-                ?: error("Finner ikke vilkårsvurdering ved begrunning av vedtak")
-
-            val identerMedUtbetaling =
-                utvidetVedtaksperiodeMedBegrunnelser.utbetalingsperiodeDetaljer.map { it.person.personIdent }
-
-            val standardbegrunnelser: MutableSet<VedtakBegrunnelseSpesifikasjon> =
-                VedtakBegrunnelseSpesifikasjon.values()
-                    .filter { vedtakBegrunnelseSpesifikasjon ->
-                        vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType != VedtakBegrunnelseType.AVSLAG &&
-                            vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType != VedtakBegrunnelseType.FORTSATT_INNVILGET
-                    }
-                    .fold(mutableSetOf()) { acc, standardBegrunnelse ->
-                        val triggesAv =
-                            standardBegrunnelse.tilSanityBegrunnelse(sanityBegrunnelser)
-                                ?.tilTriggesAv() ?: return@fold acc
-
-                        if (standardBegrunnelse.triggesForPeriode(
-                                utvidetVedtaksperiodeMedBegrunnelser = utvidetVedtaksperiodeMedBegrunnelser,
-                                minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
-                                persongrunnlag = persongrunnlag,
-                                aktørerMedUtbetaling = personidentService.hentOgLagreAktørIder(
-                                        identerMedUtbetaling
-                                    ),
-                                triggesAv = triggesAv,
-                                endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(
-                                        behandling.id
-                                    ),
-                                andelerTilkjentYtelse = andelerTilkjentYtelse,
-                            )
-                        ) {
-                            acc.add(standardBegrunnelse)
-                        }
-
-                        acc
-                    }
-            if (utvidetVedtaksperiodeMedBegrunnelser.type == Vedtaksperiodetype.UTBETALING &&
-                standardbegrunnelser.isEmpty()
-            ) {
-                VedtakBegrunnelseSpesifikasjon.values()
-                    .filter { it.vedtakBegrunnelseType == VedtakBegrunnelseType.FORTSATT_INNVILGET }
-            } else standardbegrunnelser
         }
     }
 

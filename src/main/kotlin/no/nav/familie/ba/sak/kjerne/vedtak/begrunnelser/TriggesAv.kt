@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser
 
+import no.nav.familie.ba.sak.kjerne.brev.UtvidetScenarioForEndringsperiode
+import no.nav.familie.ba.sak.kjerne.brev.domene.SanityVilkår
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -39,4 +41,40 @@ fun triggesAvSkalUtbetales(
     } else {
         inneholderAndelSomIkkeSkalUtbetales
     }
+}
+
+fun EndretUtbetalingAndel.oppfyllerSkalUtbetalesTrigger(
+    triggesAv: TriggesAv
+): Boolean {
+    val inneholderAndelSomSkalUtbetales = this.prosent!! != BigDecimal.ZERO
+    return triggesAv.endretUtbetaingSkalUtbetales == inneholderAndelSomSkalUtbetales
+}
+
+fun TriggesAv.erTriggereOppfyltForEndretUtbetaling(
+    vilkår: List<SanityVilkår>?,
+    utvidetScenario: UtvidetScenarioForEndringsperiode,
+    endretUtbetalingAndel: EndretUtbetalingAndel
+): Boolean {
+    val hørerTilEtterEndretUtbetaling = this.etterEndretUtbetaling
+
+    val oppfyllerSkalUtbetalesTrigger = endretUtbetalingAndel.oppfyllerSkalUtbetalesTrigger(this)
+
+    val oppfyllerUtvidetScenario = oppfyllerUtvidetScenario(utvidetScenario, vilkår)
+
+    return !hørerTilEtterEndretUtbetaling &&
+        oppfyllerSkalUtbetalesTrigger &&
+        oppfyllerUtvidetScenario
+}
+
+private fun oppfyllerUtvidetScenario(
+    utvidetScenario: UtvidetScenarioForEndringsperiode,
+    vilkår: List<SanityVilkår>?
+): Boolean {
+    val erUtvidetYtelseUtenEndring =
+        utvidetScenario == UtvidetScenarioForEndringsperiode.UTVIDET_YTELSE_IKKE_ENDRET
+
+    val begrunnelseSkalVisesVedutvidetYtelseUtenEndring =
+        vilkår?.contains(SanityVilkår.UTVIDET_BARNETRYGD) ?: false
+
+    return erUtvidetYtelseUtenEndring == begrunnelseSkalVisesVedutvidetYtelseUtenEndring
 }

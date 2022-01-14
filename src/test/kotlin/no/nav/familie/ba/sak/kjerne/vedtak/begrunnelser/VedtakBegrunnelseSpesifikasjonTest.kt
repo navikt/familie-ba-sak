@@ -11,20 +11,22 @@ import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertPersonResultat
+import no.nav.familie.ba.sak.kjerne.brev.hentSanityBegrunnelser
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class VedtakBegrunnelseSpesifikasjonTest {
 
     private val behandling = lagBehandling()
@@ -40,16 +42,18 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
 
     private val aktørerMedUtbetaling = listOf(søker.aktør, barn.aktør)
 
+    private val sanityBegrunnelser = hentSanityBegrunnelser()
+
     @Test
     fun `Oppfyller vilkår skal gi true`() {
         assertTrue(
             VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET
                 .triggesForPeriode(
+                    sanityBegrunnelser = sanityBegrunnelser,
                     utvidetVedtaksperiodeMedBegrunnelser = utvidetVedtaksperiodeMedBegrunnelser,
                     minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
                     persongrunnlag = personopplysningGrunnlag,
                     aktørerMedUtbetaling = aktørerMedUtbetaling,
-                    triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOSATT_I_RIKET))
                 )
         )
     }
@@ -59,11 +63,11 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
         assertFalse(
             VedtakBegrunnelseSpesifikasjon.OPPHØR_UTVANDRET
                 .triggesForPeriode(
+                    sanityBegrunnelser = sanityBegrunnelser,
                     utvidetVedtaksperiodeMedBegrunnelser = utvidetVedtaksperiodeMedBegrunnelser,
                     minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
                     persongrunnlag = personopplysningGrunnlag,
                     aktørerMedUtbetaling = aktørerMedUtbetaling,
-                    triggesAv = TriggesAv(vilkår = setOf(Vilkår.BOSATT_I_RIKET))
                 )
         )
     }
@@ -73,11 +77,11 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
         assertFalse(
             VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR
                 .triggesForPeriode(
+                    sanityBegrunnelser = sanityBegrunnelser,
                     utvidetVedtaksperiodeMedBegrunnelser = utvidetVedtaksperiodeMedBegrunnelser,
                     minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
                     persongrunnlag = personopplysningGrunnlag,
                     aktørerMedUtbetaling = aktørerMedUtbetaling,
-                    triggesAv = TriggesAv(barnMedSeksårsdag = true)
                 )
         )
     }
@@ -90,11 +94,11 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
         assertTrue(
             VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR
                 .triggesForPeriode(
+                    sanityBegrunnelser = sanityBegrunnelser,
                     utvidetVedtaksperiodeMedBegrunnelser = utvidetVedtaksperiodeMedBegrunnelser,
                     minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
                     persongrunnlag = persongrunnlag,
                     aktørerMedUtbetaling = aktørerMedUtbetaling,
-                    triggesAv = TriggesAv(barnMedSeksårsdag = true)
                 )
         )
     }
@@ -110,11 +114,11 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
         assertTrue(
             VedtakBegrunnelseSpesifikasjon.INNVILGET_SATSENDRING
                 .triggesForPeriode(
+                    sanityBegrunnelser = sanityBegrunnelser,
                     utvidetVedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelserSatsEndring,
                     minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
                     persongrunnlag = personopplysningGrunnlag,
                     aktørerMedUtbetaling = aktørerMedUtbetaling,
-                    triggesAv = TriggesAv(satsendring = true)
                 )
         )
     }
@@ -130,11 +134,11 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
         assertFalse(
             VedtakBegrunnelseSpesifikasjon.INNVILGET_SATSENDRING
                 .triggesForPeriode(
+                    sanityBegrunnelser = sanityBegrunnelser,
                     utvidetVedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelserSatsEndring,
                     minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
                     persongrunnlag = personopplysningGrunnlag,
                     aktørerMedUtbetaling = aktørerMedUtbetaling,
-                    triggesAv = TriggesAv(satsendring = true)
                 )
         )
     }
@@ -146,11 +150,11 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
         assertFalse(
             VedtakBegrunnelseSpesifikasjon.INNVILGET_LOVLIG_OPPHOLD_EØS_BORGER
                 .triggesForPeriode(
+                    sanityBegrunnelser = sanityBegrunnelser,
                     utvidetVedtaksperiodeMedBegrunnelser = utvidetVedtaksperiodeMedBegrunnelser,
                     minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
                     persongrunnlag = personopplysningGrunnlag,
                     aktørerMedUtbetaling = aktørerMedUtbetaling,
-                    triggesAv = TriggesAv(vilkår = setOf(Vilkår.LOVLIG_OPPHOLD), personTyper = setOf(PersonType.SØKER))
                 )
         )
     }
@@ -162,11 +166,11 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
         assertTrue(
             VedtakBegrunnelseSpesifikasjon.INNVILGET_LOVLIG_OPPHOLD_EØS_BORGER
                 .triggesForPeriode(
+                    sanityBegrunnelser = sanityBegrunnelser,
                     utvidetVedtaksperiodeMedBegrunnelser = utvidetVedtaksperiodeMedBegrunnelser,
                     minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
                     persongrunnlag = personopplysningGrunnlag,
                     aktørerMedUtbetaling = aktørerMedUtbetaling,
-                    triggesAv = TriggesAv(vilkår = setOf(Vilkår.LOVLIG_OPPHOLD), personTyper = setOf(PersonType.SØKER))
                 )
         )
     }
@@ -178,6 +182,7 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
         assertTrue(
             VedtakBegrunnelseSpesifikasjon.ETTER_ENDRET_UTBETALING_AVTALE_DELT_BOSTED_FØLGES
                 .triggesForPeriode(
+                    sanityBegrunnelser = sanityBegrunnelser,
                     persongrunnlag = personopplysningGrunnlag,
                     minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
                     aktørerMedUtbetaling = aktørerMedUtbetaling,
@@ -186,7 +191,6 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
                         fom = LocalDate.of(2021, 10, 1),
                         tom = LocalDate.of(2021, 10, 31)
                     ),
-                    triggesAv = TriggesAv(etterEndretUtbetaling = true, endringsaarsaker = setOf(Årsak.DELT_BOSTED)),
                     endretUtbetalingAndeler = listOf(
                         EndretUtbetalingAndel(
                             prosent = BigDecimal.ZERO,
@@ -208,6 +212,7 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
         assertFalse(
             VedtakBegrunnelseSpesifikasjon.ETTER_ENDRET_UTBETALING_AVTALE_DELT_BOSTED_FØLGES
                 .triggesForPeriode(
+                    sanityBegrunnelser = sanityBegrunnelser,
                     persongrunnlag = personopplysningGrunnlag,
                     minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
                     aktørerMedUtbetaling = aktørerMedUtbetaling,
@@ -215,10 +220,6 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
                         type = Vedtaksperiodetype.UTBETALING,
                         fom = LocalDate.of(2021, 10, 1),
                         tom = LocalDate.of(2021, 10, 31)
-                    ),
-                    triggesAv = TriggesAv(
-                        etterEndretUtbetaling = true,
-                        endringsaarsaker = setOf(Årsak.DELT_BOSTED),
                     ),
                     endretUtbetalingAndeler = listOf(
                         EndretUtbetalingAndel(
@@ -237,42 +238,29 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
     @Test
     fun `Oppfyller skal utbetales gir false`() {
         assertFalse(
-            triggesAvSkalUtbetales(
+            lagEndretUtbetalingAndel(prosent = BigDecimal.ZERO, person = barn).oppfyllerSkalUtbetalesTrigger(
                 triggesAv = TriggesAv(endretUtbetaingSkalUtbetales = true),
-                endretUtbetalingAndeler = listOf(
-                    lagEndretUtbetalingAndel(prosent = BigDecimal.ZERO, person = barn)
-                ),
             )
         )
 
         assertFalse(
-            triggesAvSkalUtbetales(
+            lagEndretUtbetalingAndel(prosent = BigDecimal.valueOf(100), person = barn).oppfyllerSkalUtbetalesTrigger(
                 triggesAv = TriggesAv(endretUtbetaingSkalUtbetales = false),
-                endretUtbetalingAndeler = listOf(
-                    lagEndretUtbetalingAndel(prosent = BigDecimal.valueOf(100), person = barn)
-                ),
             )
         )
     }
 
     @Test
     fun `Oppfyller skal utbetales gir true`() {
-        val endretUtbetalingAndeler = listOf(
-            lagEndretUtbetalingAndel(prosent = BigDecimal.ZERO, person = barn),
-            lagEndretUtbetalingAndel(prosent = BigDecimal.valueOf(100), person = barn)
-        )
-
         assertTrue(
-            triggesAvSkalUtbetales(
+            lagEndretUtbetalingAndel(prosent = BigDecimal.ZERO, person = barn).oppfyllerSkalUtbetalesTrigger(
                 triggesAv = TriggesAv(endretUtbetaingSkalUtbetales = false),
-                endretUtbetalingAndeler = endretUtbetalingAndeler,
             )
         )
 
         assertTrue(
-            triggesAvSkalUtbetales(
+            lagEndretUtbetalingAndel(prosent = BigDecimal.valueOf(100), person = barn).oppfyllerSkalUtbetalesTrigger(
                 triggesAv = TriggesAv(endretUtbetaingSkalUtbetales = true),
-                endretUtbetalingAndeler = endretUtbetalingAndeler,
             )
         )
     }

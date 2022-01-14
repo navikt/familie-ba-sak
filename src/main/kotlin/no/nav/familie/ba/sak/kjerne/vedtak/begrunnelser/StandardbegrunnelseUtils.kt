@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
@@ -8,12 +9,15 @@ import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.erDagenFør
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.tilKortString
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.beregning.fomErPåSatsendring
+import no.nav.familie.ba.sak.kjerne.brev.UtvidetScenarioForEndringsperiode
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertRestPersonResultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.harPersonerSomManglerOpplysninger
+import no.nav.familie.ba.sak.kjerne.brev.domene.tilTriggesAv
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -35,10 +39,14 @@ fun VedtakBegrunnelseSpesifikasjon.triggesForPeriode(
     minimertePersonResultater: List<MinimertRestPersonResultat>,
     persongrunnlag: PersonopplysningGrunnlag,
     aktørerMedUtbetaling: List<Aktør>,
-    triggesAv: TriggesAv,
     endretUtbetalingAndeler: List<EndretUtbetalingAndel> = emptyList(),
     andelerTilkjentYtelse: List<AndelTilkjentYtelse> = emptyList(),
+    sanityBegrunnelser: List<SanityBegrunnelse>
 ): Boolean {
+
+    val triggesAv =
+        this.tilSanityBegrunnelse(sanityBegrunnelser)
+            ?.tilTriggesAv() ?: return false
 
     val aktuellePersoner = persongrunnlag.personer
         .filter { person -> triggesAv.personTyper.contains(person.type) }
@@ -48,22 +56,15 @@ fun VedtakBegrunnelseSpesifikasjon.triggesForPeriode(
             } else true
         }
 
-    val erEtterEndretPeriode = erEtterEndretPeriodeAvSammeÅrsak(
-        endretUtbetalingAndeler,
-        utvidetVedtaksperiodeMedBegrunnelser,
-        aktuellePersoner,
-        triggesAv
-    )
     val ytelseTyperForPeriode = utvidetVedtaksperiodeMedBegrunnelser
         .utbetalingsperiodeDetaljer.map { it.ytelseType }
 
-    val begrunnelseErRiktigType =
-        utvidetVedtaksperiodeMedBegrunnelser.type.tillatteBegrunnelsestyper.contains(this.vedtakBegrunnelseType)
+    val sanityBegrunnelse = this.tilSanityBegrunnelse(sanityBegrunnelser)!!
+
     return when {
         !triggesAv.valgbar -> false
-        !begrunnelseErRiktigType -> false
 
-        triggesAv.vilkår.contains(Vilkår.UTVIDET_BARNETRYGD) -> this.periodeErOppyltForYtelseType(
+        triggesAv.vilkår.contains(Vilkår.UTVIDET_BARNETRYGD) -> this.vedtakBegrunnelseType.periodeErOppyltForYtelseType(
             ytelseType = if (triggesAv.småbarnstillegg) YtelseType.SMÅBARNSTILLEGG else YtelseType.UTVIDET_BARNETRYGD,
             ytelseTyperForPeriode = ytelseTyperForPeriode,
             andelerTilkjentYtelse = andelerTilkjentYtelse,
@@ -74,10 +75,13 @@ fun VedtakBegrunnelseSpesifikasjon.triggesForPeriode(
             persongrunnlag.harBarnMedSeksårsdagPåFom(utvidetVedtaksperiodeMedBegrunnelser.fom)
         triggesAv.satsendring -> fomErPåSatsendring(utvidetVedtaksperiodeMedBegrunnelser.fom ?: TIDENES_MORGEN)
 
-        triggesAv.erEndret() ->
-            erEtterEndretPeriode &&
-                triggesAv.etterEndretUtbetaling &&
-                utvidetVedtaksperiodeMedBegrunnelser.type != Vedtaksperiodetype.ENDRET_UTBETALING
+        triggesAv.erEndret() -> erEndretTriggerErOppfylt(
+            triggesAv = triggesAv,
+            endretUtbetalingAndeler = endretUtbetalingAndeler,
+            utvidetVedtaksperiodeMedBegrunnelser = utvidetVedtaksperiodeMedBegrunnelser,
+            aktuellePersoner = aktuellePersoner,
+            sanityBegrunnelse = sanityBegrunnelse
+        )
 
         else -> hentPersonerForAlleUtgjørendeVilkår(
             minimertePersonResultater = minimertePersonResultater,
@@ -94,6 +98,46 @@ fun VedtakBegrunnelseSpesifikasjon.triggesForPeriode(
             )
         ).isNotEmpty()
     }
+}
+
+private fun erEndretTriggerErOppfylt(
+    triggesAv: TriggesAv,
+    endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
+    utvidetVedtaksperiodeMedBegrunnelser: UtvidetVedtaksperiodeMedBegrunnelser,
+    aktuellePersoner: List<Person>,
+    sanityBegrunnelse: SanityBegrunnelse
+): Boolean =
+    if (triggesAv.etterEndretUtbetaling) {
+        utvidetVedtaksperiodeMedBegrunnelser.type != Vedtaksperiodetype.ENDRET_UTBETALING &&
+            erEtterEndretPeriodeAvSammeÅrsak(
+                endretUtbetalingAndeler,
+                utvidetVedtaksperiodeMedBegrunnelser,
+                aktuellePersoner,
+                triggesAv
+            )
+    } else {
+        val endredeAndelerSomOverlapperVedtaksperiode = utvidetVedtaksperiodeMedBegrunnelser
+            .finnEndredeAndelerISammePeriode(endretUtbetalingAndeler)
+
+        utvidetVedtaksperiodeMedBegrunnelser.type == Vedtaksperiodetype.ENDRET_UTBETALING &&
+            endredeAndelerSomOverlapperVedtaksperiode.any {
+                triggesAv.erTriggereOppfyltForEndretUtbetaling(
+                    vilkår = sanityBegrunnelse.vilkaar,
+                    utvidetScenario = UtvidetScenarioForEndringsperiode.UTVIDET_YTELSE_ENDRET,
+                    endretUtbetalingAndel = it
+                )
+            }
+    }
+
+private fun UtvidetVedtaksperiodeMedBegrunnelser.finnEndredeAndelerISammePeriode(
+    endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
+) = endretUtbetalingAndeler.filter {
+    it.overlapperMed(
+        MånedPeriode(
+            (this.fom ?: TIDENES_MORGEN).toYearMonth(),
+            (this.tom ?: TIDENES_ENDE).toYearMonth()
+        )
+    )
 }
 
 private fun erEtterEndretPeriodeAvSammeÅrsak(
@@ -140,13 +184,13 @@ fun VedtakBegrunnelseSpesifikasjon.tilVedtaksbegrunnelse(
     )
 }
 
-fun VedtakBegrunnelseSpesifikasjon.periodeErOppyltForYtelseType(
+fun VedtakBegrunnelseType.periodeErOppyltForYtelseType(
     ytelseType: YtelseType,
     ytelseTyperForPeriode: List<YtelseType>,
     andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
     fomForPeriode: LocalDate?,
 ): Boolean {
-    return when (this.vedtakBegrunnelseType) {
+    return when (this) {
         VedtakBegrunnelseType.INNVILGET -> ytelseTyperForPeriode.contains(ytelseType)
         VedtakBegrunnelseType.REDUKSJON -> !ytelseTyperForPeriode.contains(ytelseType) &&
             ytelseOppfyltForrigeMåned(ytelseType, andelerTilkjentYtelse, fomForPeriode)

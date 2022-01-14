@@ -7,9 +7,18 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.lagVertikaleSegmenter
+import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
+import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertPersonResultat
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.triggesForPeriode
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import java.time.LocalDate
 
 fun hentVedtaksperioderMedBegrunnelserForEndredeUtbetalingsperioder(
@@ -101,4 +110,59 @@ fun erFørsteVedtaksperiodePåFagsak(
     it.stønadFom.isBefore(
         periodeFom?.toYearMonth() ?: TIDENES_MORGEN.toYearMonth()
     )
+}
+
+fun hentGyldigeBegrunnelserForVedtaksperiode(
+    utvidetVedtaksperiodeMedBegrunnelser: UtvidetVedtaksperiodeMedBegrunnelser,
+    sanityBegrunnelser: List<SanityBegrunnelse>,
+    persongrunnlag: PersonopplysningGrunnlag,
+    andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
+    vilkårsvurdering: Vilkårsvurdering,
+    aktørerMedUtbetaling: List<Aktør>,
+    endretUtbetalingAndeler: List<EndretUtbetalingAndel>
+): List<VedtakBegrunnelseSpesifikasjon> {
+    val tillateBegrunnelserForVedtakstype = VedtakBegrunnelseSpesifikasjon.values()
+        .filter {
+            utvidetVedtaksperiodeMedBegrunnelser
+                .type
+                .tillatteBegrunnelsestyper
+                .contains(it.vedtakBegrunnelseType)
+        }
+
+    return when (utvidetVedtaksperiodeMedBegrunnelser.type) {
+        Vedtaksperiodetype.FORTSATT_INNVILGET -> tillateBegrunnelserForVedtakstype
+        Vedtaksperiodetype.AVSLAG -> tillateBegrunnelserForVedtakstype
+        else -> {
+            val standardbegrunnelser: MutableSet<VedtakBegrunnelseSpesifikasjon> =
+                tillateBegrunnelserForVedtakstype
+                    .filter { it.vedtakBegrunnelseType != VedtakBegrunnelseType.FORTSATT_INNVILGET }
+                    .fold(mutableSetOf()) { acc, standardBegrunnelse ->
+                        if (standardBegrunnelse.triggesForPeriode(
+                                utvidetVedtaksperiodeMedBegrunnelser = utvidetVedtaksperiodeMedBegrunnelser,
+                                minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
+                                persongrunnlag = persongrunnlag,
+                                aktørerMedUtbetaling = aktørerMedUtbetaling,
+                                endretUtbetalingAndeler = endretUtbetalingAndeler,
+                                andelerTilkjentYtelse = andelerTilkjentYtelse,
+                                sanityBegrunnelser = sanityBegrunnelser
+                            )
+                        ) {
+                            acc.add(standardBegrunnelse)
+                        }
+
+                        acc
+                    }
+
+            val fantIngenbegrunnelserOgSkalDerforBrukeFortsattInnvilget =
+                utvidetVedtaksperiodeMedBegrunnelser.type == Vedtaksperiodetype.UTBETALING &&
+                    standardbegrunnelser.isEmpty()
+
+            if (fantIngenbegrunnelserOgSkalDerforBrukeFortsattInnvilget) {
+                tillateBegrunnelserForVedtakstype
+                    .filter { it.vedtakBegrunnelseType == VedtakBegrunnelseType.FORTSATT_INNVILGET }
+            } else {
+                standardbegrunnelser.toList()
+            }
+        }
+    }
 }
