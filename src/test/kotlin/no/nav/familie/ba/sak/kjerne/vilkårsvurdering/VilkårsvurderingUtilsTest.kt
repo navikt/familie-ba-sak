@@ -4,7 +4,6 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.randomAktørId
-import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
@@ -19,7 +18,7 @@ import java.time.LocalDateTime
 class VilkårsvurderingUtilsTest {
 
     private val uvesentligVilkårsvurdering =
-        lagVilkårsvurdering(randomFnr(), randomAktørId(), lagBehandling(), Resultat.IKKE_VURDERT)
+        lagVilkårsvurdering(randomAktørId(), lagBehandling(), Resultat.IKKE_VURDERT)
 
     @Test
     fun `feil kastes når det finnes løpende oppfylt ved forsøk på å legge til avslag uten periode`() {

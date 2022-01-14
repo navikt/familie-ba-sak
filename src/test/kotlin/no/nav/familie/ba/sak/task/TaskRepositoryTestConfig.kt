@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.task
 
+import io.mockk.clearMocks
 import io.mockk.mockk
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import org.springframework.boot.test.context.TestConfiguration
@@ -14,7 +15,7 @@ class TaskRepositoryTestConfig {
     @Profile("mock-task-repository")
     fun mockTaskRepository(): TaskRepositoryWrapper {
 
-        return mockk(relaxed = true)
+        return clearMockTaskRepository(mockk(relaxed = true))
     }
 
     @Bean
@@ -22,6 +23,20 @@ class TaskRepositoryTestConfig {
     @Primary
     fun mockTaskService(): OpprettTaskService {
 
-        return mockk(relaxed = true)
+        return clearMockTaskService(mockk(relaxed = true))
+    }
+
+    companion object {
+        fun clearMockTaskRepository(mockTaskRepository: TaskRepositoryWrapper): TaskRepositoryWrapper {
+            clearMocks(mockTaskRepository)
+
+            return mockTaskRepository
+        }
+
+        fun clearMockTaskService(mockTaskService: OpprettTaskService): OpprettTaskService {
+            clearMocks(mockTaskService)
+
+            return mockTaskService
+        }
     }
 }
