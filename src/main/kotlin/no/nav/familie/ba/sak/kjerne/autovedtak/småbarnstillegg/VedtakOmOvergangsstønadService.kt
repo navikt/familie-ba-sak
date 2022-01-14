@@ -21,6 +21,8 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.erAlleredeBegrunnetMedBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
@@ -30,6 +32,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.YearMonth
 
 @Service
 class VedtakOmOvergangsstønadService(
@@ -144,11 +147,35 @@ class VedtakOmOvergangsstønadService(
     @Scheduled(cron = "0 0 7 1 * *")
     @Transactional
     fun scheduledFinnRestartetSmåbarnstilleggOgOpprettOppgave() {
-        fagsakRepository.finnAlleFagsakerMedOppstartSmåbarnstilleggIMåned(
-            iverksatteLøpendeBehandlinger = behandlingRepository.finnSisteIverksatteBehandlingFraLøpendeFagsaker()
-        ).forEach { fagsakId ->
+        finnAlleFagsakerMedRestartetSmåbarnstillegg().forEach { fagsakId ->
             //Opprett oppgave for fagsak
         }
+    }
+
+    private fun finnAlleFagsakerMedRestartetSmåbarnstillegg(): List<Long> {
+        return fagsakRepository.finnAlleFagsakerMedOppstartSmåbarnstilleggIMåned(
+            iverksatteLøpendeBehandlinger = behandlingRepository.finnSisteIverksatteBehandlingFraLøpendeFagsaker()
+        ).filter { fagsakId ->
+            !periodeMedRestartetSmåbarnstilleggErAlleredeBegrunnet(fagsakId = fagsakId)
+        }
+    }
+
+    private fun periodeMedRestartetSmåbarnstilleggErAlleredeBegrunnet(fagsakId: Long): Boolean {
+        val vedtaksperioderForVedtatteBehandlinger = behandlingService.hentBehandlinger(fagsakId = fagsakId)
+            .filter { behandling ->
+                behandling.erVedtatt()
+            }
+            .flatMap { behandling ->
+                val vedtak = vedtakService.hentAktivForBehandlingThrows(behandling.id)
+                vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak)
+            }
+
+        val standardbegrunnelser = listOf(VedtakBegrunnelseSpesifikasjon.INNVILGET_SMÅBARNSTILLEGG)
+
+        return vedtaksperioderForVedtatteBehandlinger.erAlleredeBegrunnetMedBegrunnelse(
+            standardbegrunnelser = standardbegrunnelser,
+            måned = YearMonth.now()
+        )
     }
 
     private fun begrunnAutovedtakForSmåbarnstillegg(
