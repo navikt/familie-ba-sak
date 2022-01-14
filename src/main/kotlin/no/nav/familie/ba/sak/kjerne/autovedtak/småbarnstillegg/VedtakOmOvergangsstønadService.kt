@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
@@ -15,6 +16,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.SmåbarnstilleggService
 import no.nav.familie.ba.sak.kjerne.beregning.finnAktuellVedtaksperiodeOgLeggTilSmåbarnstilleggbegrunnelse
 import no.nav.familie.ba.sak.kjerne.beregning.hentInnvilgedeOgReduserteAndelerSmåbarnstillegg
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.steg.StegType
@@ -25,6 +27,7 @@ import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.slf4j.LoggerFactory
+import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -38,7 +41,9 @@ class VedtakOmOvergangsstønadService(
     private val taskRepository: TaskRepository,
     private val featureToggleService: FeatureToggleService,
     private val beregningService: BeregningService,
-    private val autovedtakService: AutovedtakService
+    private val autovedtakService: AutovedtakService,
+    private val fagsakRepository: FagsakRepository,
+    private val behandlingRepository: BehandlingRepository
 ) {
 
     private val antallVedtakOmOvergangsstønad: Counter =
@@ -130,6 +135,19 @@ class VedtakOmOvergangsstønadService(
             antallVedtakOmOvergangsstønadPåvirkerIkkeFagsak.increment()
 
             "påvirker ikke fagsak"
+        }
+    }
+
+    /**
+     * Opprette "vurder livshendelse"-oppgave når det oppstår en restart av småbarnstillegg, første dag hver måned
+     */
+    @Scheduled(cron = "0 0 1 * * *")
+    @Transactional
+    fun scheduledFinnRestartetSmåbarnstilleggOgOpprettOppgave() {
+        fagsakRepository.finnAlleFagsakerMedOppstartSmåbarnstilleggIMåned(
+            iverksatteLøpendeBehandlinger = behandlingRepository.finnSisteIverksatteBehandlingFraLøpendeFagsaker()
+        ).forEach { fagsakId ->
+            //Opprett oppgave for fagsak
         }
     }
 
