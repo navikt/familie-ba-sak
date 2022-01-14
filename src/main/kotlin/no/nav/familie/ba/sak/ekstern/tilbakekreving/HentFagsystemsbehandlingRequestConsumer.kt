@@ -6,7 +6,6 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.HentFagsystemsbehandlingR
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.slf4j.LoggerFactory
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
-import org.springframework.context.annotation.Profile
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.support.Acknowledgment
 import org.springframework.stereotype.Service
@@ -18,7 +17,6 @@ import java.util.concurrent.CountDownLatch
     havingValue = "true",
     matchIfMissing = false
 )
-@Profile("!preprod-gcp")
 class HentFagsystemsbehandlingRequestConsumer(private val fagsystemsbehandlingService: FagsystemsbehandlingService) {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
