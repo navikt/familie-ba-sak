@@ -135,7 +135,7 @@ class RestTemplateConfig(
 
     private fun trengerProxy(): Boolean {
         return !environment.activeProfiles.any {
-            listOf("dev", "postgres").contains(it.trim(' '))
+            listOf("dev", "postgres", "preprod").contains(it.trim(' '))
         }
     }
 }
