@@ -141,7 +141,7 @@ class VedtakOmOvergangsstønadService(
     /**
      * Opprette "vurder livshendelse"-oppgave når det oppstår en restart av småbarnstillegg, første dag hver måned
      */
-    @Scheduled(cron = "0 0 1 * * *")
+    @Scheduled(cron = "0 0 7 1 * *")
     @Transactional
     fun scheduledFinnRestartetSmåbarnstilleggOgOpprettOppgave() {
         fagsakRepository.finnAlleFagsakerMedOppstartSmåbarnstilleggIMåned(
