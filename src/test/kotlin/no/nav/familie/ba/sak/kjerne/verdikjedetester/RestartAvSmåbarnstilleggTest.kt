@@ -18,6 +18,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
@@ -51,6 +52,7 @@ class RestartAvSmåbarnstilleggTest(
     fun `Skal finne alle fagsaker hvor småbarnstillegg starter opp igjen inneværende måned, og ikke er begrunnet`() {
         val restartSmåbarnstilleggMåned = LocalDate.now().plusMonths(4)
 
+        // Fagsak 1 - har åpen behandling og skal ikke tas med
         val personScenario1: RestScenario = lagScenario(barnFødselsdato)
         val fagsak1: RestMinimalFagsak = lagFagsak(personScenario = personScenario1)
         fullførBehandling(
@@ -58,7 +60,8 @@ class RestartAvSmåbarnstilleggTest(
             personScenario = personScenario1,
             barnFødselsdato = barnFødselsdato,
         )
-        val fagsak1behandling2: Behandling = fullførRevurderingMedOvergangstonad(
+
+        fullførRevurderingMedOvergangstonad(
             fagsak = fagsak1,
             personScenario = personScenario1,
             barnFødselsdato = barnFødselsdato,
@@ -83,6 +86,7 @@ class RestartAvSmåbarnstilleggTest(
             barnFødselsdato = barnFødselsdato,
         )
 
+        // Fagsak 2 - har restart av småbarnstillegg som ikke er begrunnet og skal være med i listen
         val personScenario2: RestScenario = lagScenario(barnFødselsdato)
         val fagsak2: RestMinimalFagsak = lagFagsak(personScenario = personScenario2)
         fullførBehandling(
@@ -90,7 +94,7 @@ class RestartAvSmåbarnstilleggTest(
             personScenario = personScenario2,
             barnFødselsdato = barnFødselsdato,
         )
-        val fagsak2behandling2: Behandling = fullførRevurderingMedOvergangstonad(
+        fullførRevurderingMedOvergangstonad(
             fagsak = fagsak2,
             personScenario = personScenario2,
             barnFødselsdato = barnFødselsdato,
@@ -110,11 +114,41 @@ class RestartAvSmåbarnstilleggTest(
             )
         )
 
+        // Fagsak 3 - har restart av småbarnstillegg som allerede er begrunnet, skal ikke være med i listen
+        val personScenario3: RestScenario = lagScenario(barnFødselsdato)
+        val fagsak3: RestMinimalFagsak = lagFagsak(personScenario = personScenario3)
+        fullførBehandling(
+            fagsak = fagsak3,
+            personScenario = personScenario3,
+            barnFødselsdato = barnFødselsdato,
+        )
+        fullførRevurderingMedOvergangstonad(
+            fagsak = fagsak3,
+            personScenario = personScenario3,
+            barnFødselsdato = barnFødselsdato,
+            skalBegrunneSmåbarnstillegg = true,
+            mockPerioderMedOvergangsstønad = listOf(
+                PeriodeOvergangsstønad(
+                    personIdent = personScenario3.søker.ident!!,
+                    fomDato = barnFødselsdato.plusYears(1),
+                    tomDato = LocalDate.now().minusMonths(1).førsteDagIInneværendeMåned(),
+                    datakilde = PeriodeOvergangsstønad.Datakilde.EF
+                ),
+                PeriodeOvergangsstønad(
+                    personIdent = personScenario3.søker.ident,
+                    fomDato = restartSmåbarnstilleggMåned.førsteDagIInneværendeMåned(),
+                    tomDato = LocalDate.now().plusYears(3).førsteDagIInneværendeMåned(),
+                    datakilde = PeriodeOvergangsstønad.Datakilde.EF
+                )
+            )
+        )
+
         val fagsaker: List<Long> =
             restartAvSmåbarnstilleggService.finnAlleFagsakerMedRestartetSmåbarnstilleggIMåned(måned = restartSmåbarnstilleggMåned.toYearMonth())
 
         Assertions.assertTrue(fagsaker.containsAll(listOf(fagsak2.id)))
         Assertions.assertFalse(fagsaker.contains(fagsak1.id))
+        Assertions.assertFalse(fagsaker.contains(fagsak3.id))
     }
 
     fun lagScenario(barnFødselsdato: LocalDate): RestScenario = mockServerKlient().lagScenario(
@@ -186,7 +220,8 @@ class RestartAvSmåbarnstilleggTest(
                 tomDato = LocalDate.now().minusMonths(1).førsteDagIInneværendeMåned(),
                 datakilde = PeriodeOvergangsstønad.Datakilde.EF
             )
-        )
+        ),
+        skalBegrunneSmåbarnstillegg: Boolean = false
     ): Behandling {
 
         val behandlingType = BehandlingType.REVURDERING
@@ -207,7 +242,8 @@ class RestartAvSmåbarnstilleggTest(
         return fullførRestenAvBehandlingen(
             restUtvidetBehandling = restUtvidetBehandling.data!!,
             personScenario = personScenario,
-            fagsak = fagsak
+            fagsak = fagsak,
+            skalBegrunneSmåbarnstillegg = skalBegrunneSmåbarnstillegg
         )
     }
 
@@ -264,7 +300,8 @@ class RestartAvSmåbarnstilleggTest(
     fun fullførRestenAvBehandlingen(
         restUtvidetBehandling: RestUtvidetBehandling,
         personScenario: RestScenario,
-        fagsak: RestMinimalFagsak
+        fagsak: RestMinimalFagsak,
+        skalBegrunneSmåbarnstillegg: Boolean = false
     ): Behandling {
         settAlleVilkårTilOppfylt(
             restUtvidetBehandling = restUtvidetBehandling,
@@ -297,6 +334,25 @@ class RestartAvSmåbarnstilleggTest(
                 )
             )
         )
+        if (skalBegrunneSmåbarnstillegg) {
+            val småbarnstilleggVedtaksperioder =
+                restUtvidetBehandlingEtterVurderTilbakekreving.data!!.vedtak!!.vedtaksperioderMedBegrunnelser.filter {
+                    it.utbetalingsperiodeDetaljer.filter { utbetalingsperiodeDetalj -> utbetalingsperiodeDetalj.ytelseType == YtelseType.SMÅBARNSTILLEGG }
+                        .isNotEmpty()
+                }
+
+            småbarnstilleggVedtaksperioder.forEach { periode ->
+                familieBaSakKlient().oppdaterVedtaksperiodeMedStandardbegrunnelser(
+                    vedtaksperiodeId = periode.id,
+                    restPutVedtaksperiodeMedStandardbegrunnelser = RestPutVedtaksperiodeMedStandardbegrunnelser(
+                        standardbegrunnelser = listOf(
+                            VedtakBegrunnelseSpesifikasjon.INNVILGET_SMÅBARNSTILLEGG
+                        )
+                    )
+                )
+            }
+        }
+
         val restUtvidetBehandlingEtterSendTilBeslutter =
             familieBaSakKlient().sendTilBeslutter(behandlingId = restUtvidetBehandlingEtterVurderTilbakekreving.data!!.behandlingId)
 
