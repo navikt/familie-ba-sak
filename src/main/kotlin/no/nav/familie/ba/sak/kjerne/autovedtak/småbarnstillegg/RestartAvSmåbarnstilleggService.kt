@@ -39,7 +39,7 @@ class RestartAvSmåbarnstilleggService(
                 opprettTaskService.opprettOppgaveTask(
                     behandlingId = sisteIverksatteBehandling.id,
                     oppgavetype = Oppgavetype.VurderLivshendelse,
-                    beskrivelse = "Småbarnstillegg har startet opp igjen denne måneden"
+                    beskrivelse = "Småbarnstillegg: endring i overgangsstønad må behandles manuelt"
                 )
             }
         }
