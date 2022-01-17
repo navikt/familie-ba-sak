@@ -38,7 +38,7 @@ class VedtakOmOvergangsstønadService(
     private val taskRepository: TaskRepository,
     private val featureToggleService: FeatureToggleService,
     private val beregningService: BeregningService,
-    private val autovedtakService: AutovedtakService,
+    private val autovedtakService: AutovedtakService
 ) {
 
     private val antallVedtakOmOvergangsstønad: Counter =
