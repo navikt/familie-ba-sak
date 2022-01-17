@@ -80,6 +80,8 @@ class MigreringService(
     @Transactional
     fun migrer(personIdent: String): MigreringResponseDto {
         try {
+            validerAtIdentErAktiv(personIdent)
+
             val løpendeSak = hentLøpendeSakFraInfotrygd(personIdent)
 
             kastFeilDersomSakIkkeErOrdinær(løpendeSak)
@@ -136,6 +138,16 @@ class MigreringService(
         } catch (e: Exception) {
             if (e is KanIkkeMigrereException) throw e
             kastOgTellMigreringsFeil(MigreringsfeilType.UKJENT, e.message, e)
+        }
+    }
+
+    private fun validerAtIdentErAktiv(personIdent: String) {
+        val søkerIdenter = personidentService.hentIdenter(personIdent = personIdent, historikk = true)
+            .filter { it.gruppe == "FOLKEREGISTERIDENT" }
+
+        if (søkerIdenter.filter { it.ident == personIdent }.single().historisk) {
+            secureLog.warn("Personident $personIdent er historisk, og kan ikke brukes til å migrere$søkerIdenter")
+            kastOgTellMigreringsFeil(MigreringsfeilType.IDENT_IKKE_LENGER_AKTIV)
         }
     }
 
@@ -344,6 +356,7 @@ enum class MigreringsfeilType(val beskrivelse: String) {
     UGYLDIG_ANTALL_DELYTELSER_I_INFOTRYGD("Kan kun migrere ordinære saker med nøyaktig ett utbetalingsbeløp"),
     UKJENT("Ukjent migreringsfeil"),
     ÅPEN_SAK_INFOTRYGD("Bruker har åpen behandling i Infotrygd"),
+    IDENT_IKKE_LENGER_AKTIV("Ident ikke lenger aktiv"),
 }
 
 open class KanIkkeMigrereException(
