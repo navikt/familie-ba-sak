@@ -38,7 +38,7 @@ import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 
 fun hentBrevtype(behandling: Behandling): Brevmal =
     when (behandling.opprettetÅrsak) {
-        BehandlingÅrsak.DØDSFALL_BRUKER -> Brevmal.DØDSFALL
+        BehandlingÅrsak.DØDSFALL_BRUKER -> Brevmal.VEDTAK_OPPHØR_DØDSFALL
         BehandlingÅrsak.KORREKSJON_VEDTAKSBREV -> Brevmal.VEDTAK_KORREKSJON_VEDTAKSBREV
         else -> hentVedtaksbrevmal(behandling)
     }
