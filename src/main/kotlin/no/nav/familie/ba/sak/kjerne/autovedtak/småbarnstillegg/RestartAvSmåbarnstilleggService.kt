@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg
 
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
@@ -51,11 +50,11 @@ class RestartAvSmåbarnstilleggService(
             iverksatteLøpendeBehandlinger = behandlingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker(),
             stønadFom = måned
         ).filter { fagsakId ->
-            !periodeMedRestartetSmåbarnstilleggErAlleredeBegrunnet(fagsakId = fagsakId)
+            !periodeMedRestartetSmåbarnstilleggErAlleredeBegrunnet(fagsakId = fagsakId, måned = måned)
         }
     }
 
-    private fun periodeMedRestartetSmåbarnstilleggErAlleredeBegrunnet(fagsakId: Long): Boolean {
+    private fun periodeMedRestartetSmåbarnstilleggErAlleredeBegrunnet(fagsakId: Long, måned: YearMonth): Boolean {
         val vedtaksperioderForVedtatteBehandlinger = behandlingService.hentBehandlinger(fagsakId = fagsakId)
             .filter { behandling ->
                 behandling.erVedtatt()
@@ -69,7 +68,7 @@ class RestartAvSmåbarnstilleggService(
 
         return vedtaksperioderForVedtatteBehandlinger.erAlleredeBegrunnetMedBegrunnelse(
             standardbegrunnelser = standardbegrunnelser,
-            måned = YearMonth.now()
+            måned = måned
         )
     }
 
