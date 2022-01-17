@@ -7,7 +7,6 @@ import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
@@ -16,23 +15,18 @@ import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.SmåbarnstilleggService
 import no.nav.familie.ba.sak.kjerne.beregning.finnAktuellVedtaksperiodeOgLeggTilSmåbarnstilleggbegrunnelse
 import no.nav.familie.ba.sak.kjerne.beregning.hentInnvilgedeOgReduserteAndelerSmåbarnstillegg
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.erAlleredeBegrunnetMedBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.slf4j.LoggerFactory
-import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.time.YearMonth
 
 @Service
 class VedtakOmOvergangsstønadService(
@@ -45,8 +39,6 @@ class VedtakOmOvergangsstønadService(
     private val featureToggleService: FeatureToggleService,
     private val beregningService: BeregningService,
     private val autovedtakService: AutovedtakService,
-    private val fagsakRepository: FagsakRepository,
-    private val behandlingRepository: BehandlingRepository
 ) {
 
     private val antallVedtakOmOvergangsstønad: Counter =
@@ -139,43 +131,6 @@ class VedtakOmOvergangsstønadService(
 
             "påvirker ikke fagsak"
         }
-    }
-
-    /**
-     * Opprette "vurder livshendelse"-oppgave når det oppstår en restart av småbarnstillegg, første dag hver måned
-     */
-    @Scheduled(cron = "0 0 7 1 * *")
-    @Transactional
-    fun scheduledFinnRestartetSmåbarnstilleggOgOpprettOppgave() {
-        finnAlleFagsakerMedRestartetSmåbarnstillegg().forEach { fagsakId ->
-            //Opprett oppgave for fagsak
-        }
-    }
-
-    private fun finnAlleFagsakerMedRestartetSmåbarnstillegg(): List<Long> {
-        return fagsakRepository.finnAlleFagsakerMedOppstartSmåbarnstilleggIMåned(
-            iverksatteLøpendeBehandlinger = behandlingRepository.finnSisteIverksatteBehandlingFraLøpendeFagsaker()
-        ).filter { fagsakId ->
-            !periodeMedRestartetSmåbarnstilleggErAlleredeBegrunnet(fagsakId = fagsakId)
-        }
-    }
-
-    private fun periodeMedRestartetSmåbarnstilleggErAlleredeBegrunnet(fagsakId: Long): Boolean {
-        val vedtaksperioderForVedtatteBehandlinger = behandlingService.hentBehandlinger(fagsakId = fagsakId)
-            .filter { behandling ->
-                behandling.erVedtatt()
-            }
-            .flatMap { behandling ->
-                val vedtak = vedtakService.hentAktivForBehandlingThrows(behandling.id)
-                vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak)
-            }
-
-        val standardbegrunnelser = listOf(VedtakBegrunnelseSpesifikasjon.INNVILGET_SMÅBARNSTILLEGG)
-
-        return vedtaksperioderForVedtatteBehandlinger.erAlleredeBegrunnetMedBegrunnelse(
-            standardbegrunnelser = standardbegrunnelser,
-            måned = YearMonth.now()
-        )
     }
 
     private fun begrunnAutovedtakForSmåbarnstillegg(
