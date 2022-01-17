@@ -342,17 +342,8 @@ class StegService(
         try {
             logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} håndterer ${behandlingSteg.stegType()} på behandling ${behandling.id}")
             tilgangService.validerTilgangTilBehandling(behandlingId = behandling.id)
-            if (behandling.erManuellMigrering()) {
-                val minsteTillatFor = behandlingSteg.stegType().tillattFor.minByOrNull { it.nivå }
-                val minsteNivå = if (minsteTillatFor != null) minOf(
-                    BehandlerRolle.SAKSBEHANDLER,
-                    minsteTillatFor,
-                    comparator = { rolle1, rolle2 -> rolle1.nivå - rolle2.nivå }) else null
-                tilgangService.verifiserHarTilgangTilHandling(
-                    minimumBehandlerRolle = minsteNivå
-                        ?: throw Feil("${SikkerhetContext.hentSaksbehandlerNavn()} prøver å utføre steg ${behandlingSteg.stegType()} som ikke er tillatt av noen."),
-                    handling = "utføre steg ${behandlingSteg.stegType().displayName()}"
-                )
+            if (behandling.erManuellMigrering() && behandlingSteg.stegType() == StegType.BESLUTTE_VEDTAK) {
+                verifiserBeslutteVedtakForHelmanuellMigrering(behandlingSteg)
             } else {
                 tilgangService.verifiserHarTilgangTilHandling(
                     minimumBehandlerRolle = behandlingSteg.stegType().tillattFor.minByOrNull { it.nivå }
@@ -429,6 +420,19 @@ class StegService(
 
             throw exception
         }
+    }
+
+    private fun verifiserBeslutteVedtakForHelmanuellMigrering(behandlingSteg: BehandlingSteg<*>) {
+        val minsteTillatFor = behandlingSteg.stegType().tillattFor.minByOrNull { it.nivå }
+        val minsteNivå = if (minsteTillatFor != null) minOf(
+            BehandlerRolle.SAKSBEHANDLER,
+            minsteTillatFor,
+            comparator = { rolle1, rolle2 -> rolle1.nivå - rolle2.nivå }) else null
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = minsteNivå
+                ?: throw Feil("${SikkerhetContext.hentSaksbehandlerNavn()} prøver å utføre steg ${behandlingSteg.stegType()} som ikke er tillatt av noen."),
+            handling = "utføre steg ${behandlingSteg.stegType().displayName()}"
+        )
     }
 
     fun hentBehandlingSteg(stegType: StegType): BehandlingSteg<*>? {

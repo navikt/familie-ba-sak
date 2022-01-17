@@ -40,7 +40,7 @@ object RessursUtils {
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
             .body(
                 Ressurs.ikkeTilgang<T>(rolleTilgangskontrollFeil.melding)
-                    .copy(frontendFeilmelding = rolleTilgangskontrollFeil.melding.ifBlank { "Mangler tilgang til opplysningene" })
+                    .copy(frontendFeilmelding = rolleTilgangskontrollFeil.frontendFeilmelding.ifBlank { "Mangler tilgang" })
             )
     }
 
