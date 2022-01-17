@@ -357,12 +357,12 @@ class StegService(
             }
 
             if (behandlingSteg.stegType().erSaksbehandlerSteg() && behandlingSteg.stegType()
-                    .kommerEtter(behandling.steg)
+                .kommerEtter(behandling.steg)
             ) {
                 error(
                     "${SikkerhetContext.hentSaksbehandlerNavn()} prøver å utføre steg '${
-                        behandlingSteg.stegType()
-                            .displayName()
+                    behandlingSteg.stegType()
+                        .displayName()
                     }', men behandlingen er på steg '${behandling.steg.displayName()}'"
                 )
             }
@@ -427,7 +427,8 @@ class StegService(
         val minsteNivå = if (minsteTillatFor != null) minOf(
             BehandlerRolle.SAKSBEHANDLER,
             minsteTillatFor,
-            comparator = { rolle1, rolle2 -> rolle1.nivå - rolle2.nivå }) else null
+            comparator = { rolle1, rolle2 -> rolle1.nivå - rolle2.nivå }
+        ) else null
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = minsteNivå
                 ?: throw Feil("${SikkerhetContext.hentSaksbehandlerNavn()} prøver å utføre steg ${behandlingSteg.stegType()} som ikke er tillatt av noen."),
