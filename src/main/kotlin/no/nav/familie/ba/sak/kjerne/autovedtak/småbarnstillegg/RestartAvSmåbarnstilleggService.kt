@@ -18,7 +18,6 @@ import java.time.YearMonth
 @Service
 class RestartAvSmåbarnstilleggService(
     private val fagsakRepository: FagsakRepository,
-    private val behandlingRepository: BehandlingRepository,
     private val opprettTaskService: OpprettTaskService,
     private val vedtakService: VedtakService,
     private val vedtaksperiodeService: VedtaksperiodeService,
@@ -32,7 +31,7 @@ class RestartAvSmåbarnstilleggService(
     @Scheduled(cron = "0 0 7 1 * *")
     @Transactional
     fun scheduledFinnRestartetSmåbarnstilleggOgOpprettOppgave() {
-        finnAlleFagsakerMedRestartetSmåbarnstillegg().forEach { fagsakId ->
+        finnAlleFagsakerMedRestartetSmåbarnstilleggIMåned().forEach { fagsakId ->
             logger.info("Oppretter 'vurder livshendelse'-oppgave på fagsak $fagsakId fordi småbarnstillegg har startet opp igjen denne måneden")
 
             val sisteIverksatteBehandling = behandlingService.hentSisteBehandlingSomErIverksatt(fagsakId = fagsakId)
@@ -47,9 +46,10 @@ class RestartAvSmåbarnstilleggService(
         }
     }
 
-    private fun finnAlleFagsakerMedRestartetSmåbarnstillegg(): List<Long> {
+    fun finnAlleFagsakerMedRestartetSmåbarnstilleggIMåned(måned: YearMonth = YearMonth.now()): List<Long> {
         return fagsakRepository.finnAlleFagsakerMedOppstartSmåbarnstilleggIMåned(
-            iverksatteLøpendeBehandlinger = behandlingRepository.finnSisteIverksatteBehandlingFraLøpendeFagsaker()
+            iverksatteLøpendeBehandlinger = behandlingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker(),
+            stønadFom = måned
         ).filter { fagsakId ->
             !periodeMedRestartetSmåbarnstilleggErAlleredeBegrunnet(fagsakId = fagsakId)
         }
