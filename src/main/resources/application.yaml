@@ -30,6 +30,11 @@ spring:
     enabled: true
   kafka:
     client-id: familie-ba-sak
+    properties:
+      security.protocol: SASL_SSL
+      sasl:
+        mechanism: PLAIN
+        jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="${CREDENTIAL_USERNAME}" password="${CREDENTIAL_PASSWORD}";
     producer:
       group-id: srvfamilie-ba-sak
       acks: 1
