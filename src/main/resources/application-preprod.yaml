@@ -146,6 +146,7 @@ FAMILIE_TILBAKE_API_URL_SCOPE: api://dev-gcp.teamfamilie.familie-tilbake/.defaul
 FAMILIE_BA_INFOTRYGD_FEED_SCOPE: api://dev-fss.teamfamilie.familie-ba-infotrygd-feed/.default
 FAMILIE_BA_INFOTRYGD_SCOPE: api://dev-fss.teamfamilie.familie-ba-infotrygd/.default
 FAMILIE_BA_INFOTRYGD_API_URL: https://familie-ba-infotrygd.dev-fss-pub.nais.io
-#FAMILIE_BA_INFOTRYGD_FEED_API_URL: http://familie-ba-infotrygd-feed/api
+FAMILIE_OPPDRAG_API_URL: https://familie-oppdrag.dev-fss-pub.nais.io/api
+FAMILIE_BA_INFOTRYGD_FEED_API_URL: https://familie-ba-infotrygd-feed.dev-fss-pub.nais.io/api
 
 ENVIRONMENT_NAME: q2
