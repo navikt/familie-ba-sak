@@ -15,7 +15,6 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
     INNHENTE_OPPLYSNINGER(false, "innhenteOpplysninger", "innhente opplysninger"),
     HENLEGGE_TRUKKET_SØKNAD(false, "henleggeTrukketSoknad", "henlegge trukket søknad"),
     VARSEL_OM_REVURDERING(false, "varselOmRevurdering", "varsel om revurdering"),
-    DØDSFALL(false, "dodsfall", "Dødsfall"),
     SVARTIDSBREV(false, "svartidsbrev", "Svartidsbrev"),
     INFORMASJONSBREV_FØDSEL_MINDREÅRIG(
         false,
@@ -32,6 +31,8 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
     VEDTAK_AVSLAG(true, "vedtakAvslag", "Avslag"),
     VEDTAK_FORTSATT_INNVILGET(true, "vedtakFortsattInnvilget", "Vedtak fortstatt innvilget"),
     VEDTAK_KORREKSJON_VEDTAKSBREV(true, "korrigertVedtakEgenBrevmal", "Korrigere vedtak med egen brevmal"),
+    VEDTAK_OPPHØR_DØDSFALL(true, "dodsfall", "Dødsfall"),
+
     AUTOVEDTAK_BARN_6_OG_18_ÅR_OG_SMÅBARNSTILLEGG(
         true,
         "autovedtakBarn6AarOg18AarOgSmaabarnstillegg",
