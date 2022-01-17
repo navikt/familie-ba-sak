@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.erAlleredeBegrunnetMedBegrunne
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
+import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -25,12 +26,15 @@ class RestartAvSmåbarnstilleggService(
 ) {
 
     /**
-     * Opprette "vurder livshendelse"-oppgave når det oppstår en restart av småbarnstillegg, første dag hver måned
+     * Første dag hver måned sjekkes det om noen fagsaker har oppstart av småbarnstillegg inneværende måned, etter å ha
+     * hatt et opphold. Hvis perioden ikke allerede er begrunnet, skal det opprettes en "vurder livshendelse"-oppgave
      */
     @Scheduled(cron = "0 0 7 1 * *")
     @Transactional
     fun scheduledFinnRestartetSmåbarnstilleggOgOpprettOppgave() {
         finnAlleFagsakerMedRestartetSmåbarnstillegg().forEach { fagsakId ->
+            logger.info("Oppretter 'vurder livshendelse'-oppgave på fagsak $fagsakId fordi småbarnstillegg har startet opp igjen denne måneden")
+
             val sisteIverksatteBehandling = behandlingService.hentSisteBehandlingSomErIverksatt(fagsakId = fagsakId)
 
             if (sisteIverksatteBehandling != null) {
@@ -67,5 +71,9 @@ class RestartAvSmåbarnstilleggService(
             standardbegrunnelser = standardbegrunnelser,
             måned = YearMonth.now()
         )
+    }
+
+    companion object {
+        private val logger = LoggerFactory.getLogger(RestartAvSmåbarnstilleggService::class.java)
     }
 }
