@@ -16,7 +16,6 @@ import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
 import no.nav.familie.ba.sak.task.SatsendringTask
 import no.nav.familie.ba.sak.task.erHverdag
 import no.nav.familie.leader.LeaderClient
-import no.nav.familie.prosessering.error.RekjørSenereException
 import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
@@ -102,13 +101,7 @@ class SatsendringService(
             if (harAlleredeNySats(behandlingId = aktivOgÅpenBehandling.id)) {
                 logger.info("Åpen behandling har allerede siste sats og vi lar den ligge.")
             } else if (aktivOgÅpenBehandling.status.erLåstMenIkkeAvsluttet()) {
-                val behandlingLåstMelding =
-                    "Behandling $aktivOgÅpenBehandling er låst for endringer og satsendring vil bli forsøkt rekjørt neste dag."
-                logger.info(behandlingLåstMelding)
-                throw RekjørSenereException(
-                    triggerTid = LocalDateTime.now().plusDays(1),
-                    årsak = behandlingLåstMelding
-                )
+                logger.info("Behandling $aktivOgÅpenBehandling er låst for endringer og satsendring vil bli trigget neste virkedag.")
             } else if (aktivOgÅpenBehandling.steg.rekkefølge > StegType.VILKÅRSVURDERING.rekkefølge) {
                 tilbakestillBehandlingService.tilbakestillBehandlingTilVilkårsvurdering(aktivOgÅpenBehandling)
                 logger.info("Tilbakestiller behandling $aktivOgÅpenBehandling til vilkårsvurderingen")
