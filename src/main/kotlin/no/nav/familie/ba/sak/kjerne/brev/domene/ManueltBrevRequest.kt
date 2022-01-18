@@ -147,6 +147,13 @@ fun ManueltBrevRequest.tilBrevmal() = when (this.brevmal.malId) {
             enhet = this.enhetNavn(),
             mal = Brevmal.INFORMASJONSBREV_FØDSEL_UMYNDIG
         )
+    BrevType.INFORMASJONSBREV_FØDSEL_GENERELL.malId ->
+        EnkeltInformasjonsbrev(
+            navn = this.mottakerNavn,
+            fodselsnummer = this.mottakerIdent,
+            enhet = this.enhetNavn(),
+            mal = Brevmal.INFORMASJONSBREV_FØDSEL_GENERELL
+        )
     BrevType.INFORMASJONSBREV_KAN_SØKE.malId ->
         InformasjonsbrevKanSøke(
             navn = this.mottakerNavn,
