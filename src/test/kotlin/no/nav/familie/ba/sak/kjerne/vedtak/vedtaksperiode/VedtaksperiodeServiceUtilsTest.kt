@@ -13,14 +13,14 @@ import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.brev.domene.BrevGrunnlag
-import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertPersonResultat
+import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertRestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.brev.hentPersonidenterGjeldendeForBegrunnelse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.periodeErOppyltForYtelseType
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.periodeErOppyltForYtelseTypeGammel
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilMinimertPerson
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import org.junit.jupiter.api.Assertions
@@ -323,7 +323,7 @@ class VedtaksperiodeServiceUtilsTest {
                 minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
                 personerPåBehandling = persongrunnlag.personer.map { it.tilMinimertPerson() },
                 minimerteEndredeUtbetalingAndeler = endredeUtbetalingAndeler
-                    .map { it.tilMinimertEndretUtbetalingAndel() },
+                    .map { it.tilMinimertRestEndretUtbetalingAndel() },
             ),
             identerMedUtbetalingPåPeriode = identerMedUtbetaling,
             erFørsteVedtaksperiodePåFagsak = false
@@ -347,7 +347,7 @@ class VedtaksperiodeServiceUtilsTest {
 
         Assertions.assertEquals(
             true,
-            VedtakBegrunnelseType.INNVILGET.periodeErOppyltForYtelseType(
+            VedtakBegrunnelseType.INNVILGET.periodeErOppyltForYtelseTypeGammel(
                 ytelseType = YtelseType.SMÅBARNSTILLEGG,
                 ytelseTyperForPeriode = ytelseTyperSmåbarnstillegg,
                 andelerTilkjentYtelse = emptyList(),
@@ -357,7 +357,7 @@ class VedtaksperiodeServiceUtilsTest {
 
         Assertions.assertEquals(
             false,
-            VedtakBegrunnelseType.INNVILGET.periodeErOppyltForYtelseType(
+            VedtakBegrunnelseType.INNVILGET.periodeErOppyltForYtelseTypeGammel(
                 ytelseType = YtelseType.SMÅBARNSTILLEGG,
                 ytelseTyperForPeriode = ytelseTyperUtvidetOgOrdinær,
                 andelerTilkjentYtelse = emptyList(),
@@ -396,7 +396,7 @@ class VedtaksperiodeServiceUtilsTest {
 
         Assertions.assertEquals(
             true,
-            VedtakBegrunnelseType.REDUKSJON.periodeErOppyltForYtelseType(
+            VedtakBegrunnelseType.REDUKSJON.periodeErOppyltForYtelseTypeGammel(
                 ytelseType = YtelseType.SMÅBARNSTILLEGG,
                 ytelseTyperForPeriode = ytelseTyperUtvidetOgOrdinær,
                 andelerTilkjentYtelse = andelerTilkjentYtelseMedSmåbarnstilleggDagenFør,
@@ -406,7 +406,7 @@ class VedtaksperiodeServiceUtilsTest {
 
         Assertions.assertEquals(
             false,
-            VedtakBegrunnelseType.REDUKSJON.periodeErOppyltForYtelseType(
+            VedtakBegrunnelseType.REDUKSJON.periodeErOppyltForYtelseTypeGammel(
                 ytelseType = YtelseType.SMÅBARNSTILLEGG,
                 ytelseTyperForPeriode = ytelseTyperSmåbarnstillegg,
                 andelerTilkjentYtelse = andelerTilkjentYtelseMedSmåbarnstilleggDagenFør,
@@ -416,7 +416,7 @@ class VedtaksperiodeServiceUtilsTest {
 
         Assertions.assertEquals(
             false,
-            VedtakBegrunnelseType.REDUKSJON.periodeErOppyltForYtelseType(
+            VedtakBegrunnelseType.REDUKSJON.periodeErOppyltForYtelseTypeGammel(
                 ytelseType = YtelseType.SMÅBARNSTILLEGG,
                 ytelseTyperForPeriode = ytelseTyperUtvidetOgOrdinær,
                 andelerTilkjentYtelse = andelerTilkjentYtelseMedOrdinærYtelseDagenFør,
@@ -426,7 +426,7 @@ class VedtaksperiodeServiceUtilsTest {
 
         Assertions.assertEquals(
             false,
-            VedtakBegrunnelseType.REDUKSJON.periodeErOppyltForYtelseType(
+            VedtakBegrunnelseType.REDUKSJON.periodeErOppyltForYtelseTypeGammel(
                 ytelseType = YtelseType.SMÅBARNSTILLEGG,
                 ytelseTyperForPeriode = ytelseTyperUtvidetOgOrdinær,
                 andelerTilkjentYtelse = andelerTilkjentYtelseMedSmåbarnstilleggIkkeDagenFør,
@@ -440,7 +440,7 @@ class VedtaksperiodeServiceUtilsTest {
 
         Assertions.assertEquals(
             false,
-            VedtakBegrunnelseType.AVSLAG.periodeErOppyltForYtelseType(
+            VedtakBegrunnelseType.AVSLAG.periodeErOppyltForYtelseTypeGammel(
                 ytelseType = YtelseType.SMÅBARNSTILLEGG,
                 ytelseTyperForPeriode = ytelseTyperSmåbarnstillegg,
                 andelerTilkjentYtelse = emptyList(),
@@ -453,7 +453,7 @@ class VedtaksperiodeServiceUtilsTest {
     fun `Skal gi riktig svar for utvidet-trigger ved innvilget`() {
         Assertions.assertEquals(
             true,
-            VedtakBegrunnelseType.INNVILGET.periodeErOppyltForYtelseType(
+            VedtakBegrunnelseType.INNVILGET.periodeErOppyltForYtelseTypeGammel(
                 ytelseType = YtelseType.UTVIDET_BARNETRYGD,
                 ytelseTyperForPeriode = ytelseTyperUtvidetOgOrdinær,
                 andelerTilkjentYtelse = emptyList(),
@@ -463,7 +463,7 @@ class VedtaksperiodeServiceUtilsTest {
 
         Assertions.assertEquals(
             false,
-            VedtakBegrunnelseType.INNVILGET.periodeErOppyltForYtelseType(
+            VedtakBegrunnelseType.INNVILGET.periodeErOppyltForYtelseTypeGammel(
                 ytelseType = YtelseType.UTVIDET_BARNETRYGD,
                 ytelseTyperForPeriode = ytelseTyperOrdinær,
                 andelerTilkjentYtelse = emptyList(),
@@ -502,7 +502,7 @@ class VedtaksperiodeServiceUtilsTest {
 
         Assertions.assertEquals(
             true,
-            VedtakBegrunnelseType.REDUKSJON.periodeErOppyltForYtelseType(
+            VedtakBegrunnelseType.REDUKSJON.periodeErOppyltForYtelseTypeGammel(
                 ytelseType = YtelseType.UTVIDET_BARNETRYGD,
                 ytelseTyperForPeriode = ytelseTyperOrdinær,
                 andelerTilkjentYtelse = andelerTilkjentYtelseMedUtvidetBarnetrygdDagenFør,
@@ -512,7 +512,7 @@ class VedtaksperiodeServiceUtilsTest {
 
         Assertions.assertEquals(
             false,
-            VedtakBegrunnelseType.REDUKSJON.periodeErOppyltForYtelseType(
+            VedtakBegrunnelseType.REDUKSJON.periodeErOppyltForYtelseTypeGammel(
                 ytelseType = YtelseType.UTVIDET_BARNETRYGD,
                 ytelseTyperForPeriode = ytelseTyperUtvidetOgOrdinær,
                 andelerTilkjentYtelse = andelerTilkjentYtelseMedUtvidetBarnetrygdDagenFør,
@@ -522,7 +522,7 @@ class VedtaksperiodeServiceUtilsTest {
 
         Assertions.assertEquals(
             false,
-            VedtakBegrunnelseType.REDUKSJON.periodeErOppyltForYtelseType(
+            VedtakBegrunnelseType.REDUKSJON.periodeErOppyltForYtelseTypeGammel(
                 ytelseType = YtelseType.UTVIDET_BARNETRYGD,
                 ytelseTyperForPeriode = ytelseTyperOrdinær,
                 andelerTilkjentYtelse = andelerTilkjentYtelseMedOrdinærYtelseDagenFør,
@@ -532,7 +532,7 @@ class VedtaksperiodeServiceUtilsTest {
 
         Assertions.assertEquals(
             false,
-            VedtakBegrunnelseType.REDUKSJON.periodeErOppyltForYtelseType(
+            VedtakBegrunnelseType.REDUKSJON.periodeErOppyltForYtelseTypeGammel(
                 ytelseType = YtelseType.UTVIDET_BARNETRYGD,
                 ytelseTyperForPeriode = ytelseTyperOrdinær,
                 andelerTilkjentYtelse = andelerTilkjentYtelseMedUtvidetBarnetrygdIkkeDagenFør,

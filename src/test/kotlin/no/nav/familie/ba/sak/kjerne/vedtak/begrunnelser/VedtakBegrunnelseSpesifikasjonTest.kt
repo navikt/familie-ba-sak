@@ -10,12 +10,15 @@ import no.nav.familie.ba.sak.common.lagUtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertPersonResultat
 import no.nav.familie.ba.sak.kjerne.brev.hentSanityBegrunnelser
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.tilMinimertVedtaksperiode
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.tilMinimertePersoner
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -50,10 +53,12 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
             VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET
                 .triggesForPeriode(
                     sanityBegrunnelser = sanityBegrunnelser,
-                    utvidetVedtaksperiodeMedBegrunnelser = utvidetVedtaksperiodeMedBegrunnelser,
+                    minimertVedtaksperiode = utvidetVedtaksperiodeMedBegrunnelser.tilMinimertVedtaksperiode(),
                     minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
-                    persongrunnlag = personopplysningGrunnlag,
-                    aktørerMedUtbetaling = aktørerMedUtbetaling,
+                    minimertePersoner = personopplysningGrunnlag.tilMinimertePersoner(),
+                    aktørIderMedUtbetaling = aktørerMedUtbetaling.map { it.aktørId },
+                    erFørsteVedtaksperiodePåFagsak = false,
+                    ytelserForSøkerForrigeMåned = emptyList(),
                 )
         )
     }
@@ -64,10 +69,12 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
             VedtakBegrunnelseSpesifikasjon.OPPHØR_UTVANDRET
                 .triggesForPeriode(
                     sanityBegrunnelser = sanityBegrunnelser,
-                    utvidetVedtaksperiodeMedBegrunnelser = utvidetVedtaksperiodeMedBegrunnelser,
+                    minimertVedtaksperiode = utvidetVedtaksperiodeMedBegrunnelser.tilMinimertVedtaksperiode(),
                     minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
-                    persongrunnlag = personopplysningGrunnlag,
-                    aktørerMedUtbetaling = aktørerMedUtbetaling,
+                    minimertePersoner = personopplysningGrunnlag.tilMinimertePersoner(),
+                    aktørIderMedUtbetaling = aktørerMedUtbetaling.map { it.aktørId },
+                    erFørsteVedtaksperiodePåFagsak = false,
+                    ytelserForSøkerForrigeMåned = emptyList(),
                 )
         )
     }
@@ -78,10 +85,12 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
             VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR
                 .triggesForPeriode(
                     sanityBegrunnelser = sanityBegrunnelser,
-                    utvidetVedtaksperiodeMedBegrunnelser = utvidetVedtaksperiodeMedBegrunnelser,
+                    minimertVedtaksperiode = utvidetVedtaksperiodeMedBegrunnelser.tilMinimertVedtaksperiode(),
                     minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
-                    persongrunnlag = personopplysningGrunnlag,
-                    aktørerMedUtbetaling = aktørerMedUtbetaling,
+                    minimertePersoner = personopplysningGrunnlag.tilMinimertePersoner(),
+                    aktørIderMedUtbetaling = aktørerMedUtbetaling.map { it.aktørId },
+                    erFørsteVedtaksperiodePåFagsak = false,
+                    ytelserForSøkerForrigeMåned = emptyList(),
                 )
         )
     }
@@ -95,10 +104,12 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
             VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR
                 .triggesForPeriode(
                     sanityBegrunnelser = sanityBegrunnelser,
-                    utvidetVedtaksperiodeMedBegrunnelser = utvidetVedtaksperiodeMedBegrunnelser,
+                    minimertVedtaksperiode = utvidetVedtaksperiodeMedBegrunnelser.tilMinimertVedtaksperiode(),
                     minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
-                    persongrunnlag = persongrunnlag,
-                    aktørerMedUtbetaling = aktørerMedUtbetaling,
+                    minimertePersoner = persongrunnlag.tilMinimertePersoner(),
+                    aktørIderMedUtbetaling = aktørerMedUtbetaling.map { it.aktørId },
+                    erFørsteVedtaksperiodePåFagsak = false,
+                    ytelserForSøkerForrigeMåned = emptyList(),
                 )
         )
     }
@@ -115,10 +126,12 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
             VedtakBegrunnelseSpesifikasjon.INNVILGET_SATSENDRING
                 .triggesForPeriode(
                     sanityBegrunnelser = sanityBegrunnelser,
-                    utvidetVedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelserSatsEndring,
+                    minimertVedtaksperiode = vedtaksperiodeMedBegrunnelserSatsEndring.tilMinimertVedtaksperiode(),
                     minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
-                    persongrunnlag = personopplysningGrunnlag,
-                    aktørerMedUtbetaling = aktørerMedUtbetaling,
+                    minimertePersoner = personopplysningGrunnlag.tilMinimertePersoner(),
+                    aktørIderMedUtbetaling = aktørerMedUtbetaling.map { it.aktørId },
+                    erFørsteVedtaksperiodePåFagsak = false,
+                    ytelserForSøkerForrigeMåned = emptyList(),
                 )
         )
     }
@@ -135,10 +148,12 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
             VedtakBegrunnelseSpesifikasjon.INNVILGET_SATSENDRING
                 .triggesForPeriode(
                     sanityBegrunnelser = sanityBegrunnelser,
-                    utvidetVedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelserSatsEndring,
+                    minimertVedtaksperiode = vedtaksperiodeMedBegrunnelserSatsEndring.tilMinimertVedtaksperiode(),
                     minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
-                    persongrunnlag = personopplysningGrunnlag,
-                    aktørerMedUtbetaling = aktørerMedUtbetaling,
+                    minimertePersoner = personopplysningGrunnlag.tilMinimertePersoner(),
+                    aktørIderMedUtbetaling = aktørerMedUtbetaling.map { it.aktørId },
+                    erFørsteVedtaksperiodePåFagsak = false,
+                    ytelserForSøkerForrigeMåned = emptyList(),
                 )
         )
     }
@@ -151,10 +166,12 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
             VedtakBegrunnelseSpesifikasjon.INNVILGET_LOVLIG_OPPHOLD_EØS_BORGER
                 .triggesForPeriode(
                     sanityBegrunnelser = sanityBegrunnelser,
-                    utvidetVedtaksperiodeMedBegrunnelser = utvidetVedtaksperiodeMedBegrunnelser,
+                    minimertVedtaksperiode = utvidetVedtaksperiodeMedBegrunnelser.tilMinimertVedtaksperiode(),
                     minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
-                    persongrunnlag = personopplysningGrunnlag,
-                    aktørerMedUtbetaling = aktørerMedUtbetaling,
+                    minimertePersoner = personopplysningGrunnlag.tilMinimertePersoner(),
+                    aktørIderMedUtbetaling = aktørerMedUtbetaling.map { it.aktørId },
+                    erFørsteVedtaksperiodePåFagsak = false,
+                    ytelserForSøkerForrigeMåned = emptyList(),
                 )
         )
     }
@@ -167,10 +184,12 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
             VedtakBegrunnelseSpesifikasjon.INNVILGET_LOVLIG_OPPHOLD_EØS_BORGER
                 .triggesForPeriode(
                     sanityBegrunnelser = sanityBegrunnelser,
-                    utvidetVedtaksperiodeMedBegrunnelser = utvidetVedtaksperiodeMedBegrunnelser,
+                    minimertVedtaksperiode = utvidetVedtaksperiodeMedBegrunnelser.tilMinimertVedtaksperiode(),
                     minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
-                    persongrunnlag = personopplysningGrunnlag,
-                    aktørerMedUtbetaling = aktørerMedUtbetaling,
+                    minimertePersoner = personopplysningGrunnlag.tilMinimertePersoner(),
+                    aktørIderMedUtbetaling = aktørerMedUtbetaling.map { it.aktørId },
+                    erFørsteVedtaksperiodePåFagsak = false,
+                    ytelserForSøkerForrigeMåned = emptyList(),
                 )
         )
     }
@@ -183,15 +202,15 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
             VedtakBegrunnelseSpesifikasjon.ETTER_ENDRET_UTBETALING_AVTALE_DELT_BOSTED_FØLGES
                 .triggesForPeriode(
                     sanityBegrunnelser = sanityBegrunnelser,
-                    persongrunnlag = personopplysningGrunnlag,
+                    minimertePersoner = personopplysningGrunnlag.tilMinimertePersoner(),
                     minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
-                    aktørerMedUtbetaling = aktørerMedUtbetaling,
-                    utvidetVedtaksperiodeMedBegrunnelser = lagUtvidetVedtaksperiodeMedBegrunnelser(
+                    aktørIderMedUtbetaling = aktørerMedUtbetaling.map { it.aktørId },
+                    minimertVedtaksperiode = lagUtvidetVedtaksperiodeMedBegrunnelser(
                         type = Vedtaksperiodetype.UTBETALING,
                         fom = LocalDate.of(2021, 10, 1),
                         tom = LocalDate.of(2021, 10, 31)
-                    ),
-                    endretUtbetalingAndeler = listOf(
+                    ).tilMinimertVedtaksperiode(),
+                    minimerteEndredeUtbetalingAndeler = listOf(
                         EndretUtbetalingAndel(
                             prosent = BigDecimal.ZERO,
                             behandlingId = behandling.id,
@@ -200,7 +219,9 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
                             tom = YearMonth.of(2021, 9),
                             årsak = Årsak.DELT_BOSTED
                         )
-                    )
+                    ).map { it.tilMinimertEndretUtbetalingAndel() },
+                    erFørsteVedtaksperiodePåFagsak = false,
+                    ytelserForSøkerForrigeMåned = emptyList(),
                 )
         )
     }
@@ -213,15 +234,15 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
             VedtakBegrunnelseSpesifikasjon.ETTER_ENDRET_UTBETALING_AVTALE_DELT_BOSTED_FØLGES
                 .triggesForPeriode(
                     sanityBegrunnelser = sanityBegrunnelser,
-                    persongrunnlag = personopplysningGrunnlag,
+                    minimertePersoner = personopplysningGrunnlag.tilMinimertePersoner(),
                     minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
-                    aktørerMedUtbetaling = aktørerMedUtbetaling,
-                    utvidetVedtaksperiodeMedBegrunnelser = lagUtvidetVedtaksperiodeMedBegrunnelser(
+                    aktørIderMedUtbetaling = aktørerMedUtbetaling.map { it.aktørId },
+                    minimertVedtaksperiode = lagUtvidetVedtaksperiodeMedBegrunnelser(
                         type = Vedtaksperiodetype.UTBETALING,
                         fom = LocalDate.of(2021, 10, 1),
                         tom = LocalDate.of(2021, 10, 31)
-                    ),
-                    endretUtbetalingAndeler = listOf(
+                    ).tilMinimertVedtaksperiode(),
+                    minimerteEndredeUtbetalingAndeler = listOf(
                         EndretUtbetalingAndel(
                             prosent = BigDecimal.ZERO,
                             behandlingId = behandling.id,
@@ -230,7 +251,9 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
                             tom = YearMonth.of(2021, 10),
                             årsak = Årsak.DELT_BOSTED
                         )
-                    )
+                    ).map { it.tilMinimertEndretUtbetalingAndel() },
+                    erFørsteVedtaksperiodePåFagsak = false,
+                    ytelserForSøkerForrigeMåned = emptyList(),
                 )
         )
     }
