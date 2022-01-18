@@ -18,7 +18,7 @@ import java.util.concurrent.CountDownLatch
     havingValue = "true",
     matchIfMissing = false
 )
-@Profile("!prod-gcp")
+@Profile("!preprod-gcp & !prod-gcp")
 class HentFagsystemsbehandlingRequestConsumer(private val fagsystemsbehandlingService: FagsystemsbehandlingService) {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
