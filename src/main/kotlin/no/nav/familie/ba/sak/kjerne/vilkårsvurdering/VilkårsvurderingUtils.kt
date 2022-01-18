@@ -208,6 +208,9 @@ object VilkårsvurderingUtils {
                 personFraInit.vilkårResultater.forEach { vilkårFraInit ->
                     val vilkårSomFinnes =
                         personenSomFinnes.vilkårResultater.filter { it.vilkårType == vilkårFraInit.vilkårType }
+                            .filtrerVilkårÅKopiere(
+                                kopieringSkjerFraForrigeBehandling = initiellVilkårsvurdering.behandling.id != aktivVilkårsvurdering.behandling.id
+                            )
 
                     if (vilkårSomFinnes.isEmpty()) {
                         // Legg til nytt vilkår på person
@@ -218,10 +221,7 @@ object VilkårsvurderingUtils {
                             periode eksisterer. */
 
                         personsVilkårOppdatert.addAll(
-                            vilkårSomFinnes
-                                .filtrerVilkårÅKopiere(
-                                    kopieringSkjerFraForrigeBehandling = initiellVilkårsvurdering.behandling.id != aktivVilkårsvurdering.behandling.id
-                                ).map { it.kopierMedParent(personTilOppdatert) }
+                            vilkårSomFinnes.map { it.kopierMedParent(personTilOppdatert) }
                         )
                         personsVilkårAktivt.removeAll(vilkårSomFinnes)
                     }
