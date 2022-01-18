@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser
 
 import no.nav.familie.ba.sak.kjerne.brev.UtvidetScenarioForEndringsperiode
+import no.nav.familie.ba.sak.kjerne.brev.domene.IMinimertEndretAndel
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityVilkår
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
@@ -42,18 +43,10 @@ fun triggesAvSkalUtbetales(
         inneholderAndelSomIkkeSkalUtbetales
     }
 }
-
-fun EndretUtbetalingAndel.oppfyllerSkalUtbetalesTrigger(
-    triggesAv: TriggesAv
-): Boolean {
-    val inneholderAndelSomSkalUtbetales = this.prosent!! != BigDecimal.ZERO
-    return triggesAv.endretUtbetaingSkalUtbetales == inneholderAndelSomSkalUtbetales
-}
-
 fun TriggesAv.erTriggereOppfyltForEndretUtbetaling(
     vilkår: List<SanityVilkår>?,
     utvidetScenario: UtvidetScenarioForEndringsperiode,
-    endretUtbetalingAndel: EndretUtbetalingAndel
+    endretUtbetalingAndel: IMinimertEndretAndel
 ): Boolean {
     val hørerTilEtterEndretUtbetaling = this.etterEndretUtbetaling
 
@@ -64,6 +57,13 @@ fun TriggesAv.erTriggereOppfyltForEndretUtbetaling(
     return !hørerTilEtterEndretUtbetaling &&
         oppfyllerSkalUtbetalesTrigger &&
         oppfyllerUtvidetScenario
+}
+
+fun IMinimertEndretAndel.oppfyllerSkalUtbetalesTrigger(
+    triggesAv: TriggesAv
+): Boolean {
+    val inneholderAndelSomSkalUtbetales = this.prosent!! != BigDecimal.ZERO
+    return triggesAv.endretUtbetaingSkalUtbetales == inneholderAndelSomSkalUtbetales
 }
 
 private fun oppfyllerUtvidetScenario(

@@ -21,6 +21,8 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseReposito
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertPersonResultat
+import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertEndretUtbetalingAndel
+import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertPersonResultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilTriggesAv
 import no.nav.familie.ba.sak.kjerne.brev.hentVedtaksbrevmal
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
@@ -32,6 +34,8 @@ import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.tilMinimertVedtaksperiode
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.tilMinimertePersoner
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilVedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.triggesForPeriodeGammel
@@ -293,13 +297,22 @@ class VedtaksperiodeService(
                 if (behandling.status == BehandlingStatus.UTREDES)
                     if (featureToggleService.isEnabled(FeatureToggleConfig.ENDRET_UTBETALING_VEDTAKSSIDEN))
                         hentGyldigeBegrunnelserForVedtaksperiode(
-                            utvidetVedtaksperiodeMedBegrunnelser = utvidetVedtaksperiodeMedBegrunnelser,
+                            minimertVedtaksperiode = utvidetVedtaksperiodeMedBegrunnelser.tilMinimertVedtaksperiode(),
                             sanityBegrunnelser = sanityBegrunnelser,
-                            persongrunnlag = persongrunnlag,
-                            andelerTilkjentYtelse = andelerTilkjentYtelse,
-                            vilkårsvurdering = vilkårsvurdering,
-                            aktørerMedUtbetaling = aktørerMedUtbetaling,
-                            endretUtbetalingAndeler = endretUtbetalingAndeler,
+                            minimertePersoner = persongrunnlag.tilMinimertePersoner(),
+                            minimertePersonresultater = vilkårsvurdering.personResultater
+                                .map { it.tilMinimertPersonResultat() },
+                            aktørIderMedUtbetaling = aktørerMedUtbetaling.map { it.aktørId },
+                            minimerteEndredeUtbetalingAndeler = endretUtbetalingAndeler
+                                .map { it.tilMinimertEndretUtbetalingAndel() },
+                            erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak(
+                                andelerTilkjentYtelse,
+                                utvidetVedtaksperiodeMedBegrunnelser.fom
+                            ),
+                            ytelserForSøkerForrigeMåned = hentYtelserForSøkerForrigeMåned(
+                                andelerTilkjentYtelse,
+                                utvidetVedtaksperiodeMedBegrunnelser
+                            )
                         )
                     else
                         hentGyldigeBegrunnelserForVedtaksperiode(

@@ -2,23 +2,25 @@ package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
+import no.nav.familie.ba.sak.common.erDagenFør
+import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.lagVertikaleSegmenter
+import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertEndretAndel
+import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertRestPersonResultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
-import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertPersonResultat
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
-import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.MinimertPerson
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.MinimertVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.triggesForPeriode
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import java.time.LocalDate
 
 fun hentVedtaksperioderMedBegrunnelserForEndredeUtbetalingsperioder(
@@ -113,23 +115,24 @@ fun erFørsteVedtaksperiodePåFagsak(
 }
 
 fun hentGyldigeBegrunnelserForVedtaksperiode(
-    utvidetVedtaksperiodeMedBegrunnelser: UtvidetVedtaksperiodeMedBegrunnelser,
+    minimertVedtaksperiode: MinimertVedtaksperiode,
     sanityBegrunnelser: List<SanityBegrunnelse>,
-    persongrunnlag: PersonopplysningGrunnlag,
-    andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
-    vilkårsvurdering: Vilkårsvurdering,
-    aktørerMedUtbetaling: List<Aktør>,
-    endretUtbetalingAndeler: List<EndretUtbetalingAndel>
+    minimertePersoner: List<MinimertPerson>,
+    minimertePersonresultater: List<MinimertRestPersonResultat>,
+    aktørIderMedUtbetaling: List<String>,
+    minimerteEndredeUtbetalingAndeler: List<MinimertEndretAndel>,
+    erFørsteVedtaksperiodePåFagsak: Boolean,
+    ytelserForSøkerForrigeMåned: List<YtelseType>,
 ): List<VedtakBegrunnelseSpesifikasjon> {
     val tillateBegrunnelserForVedtakstype = VedtakBegrunnelseSpesifikasjon.values()
         .filter {
-            utvidetVedtaksperiodeMedBegrunnelser
+            minimertVedtaksperiode
                 .type
                 .tillatteBegrunnelsestyper
                 .contains(it.vedtakBegrunnelseType)
         }
 
-    return when (utvidetVedtaksperiodeMedBegrunnelser.type) {
+    return when (minimertVedtaksperiode.type) {
         Vedtaksperiodetype.FORTSATT_INNVILGET -> tillateBegrunnelserForVedtakstype
         Vedtaksperiodetype.AVSLAG -> tillateBegrunnelserForVedtakstype
         else -> {
@@ -138,13 +141,14 @@ fun hentGyldigeBegrunnelserForVedtaksperiode(
                     .filter { it.vedtakBegrunnelseType != VedtakBegrunnelseType.FORTSATT_INNVILGET }
                     .fold(mutableSetOf()) { acc, standardBegrunnelse ->
                         if (standardBegrunnelse.triggesForPeriode(
-                                utvidetVedtaksperiodeMedBegrunnelser = utvidetVedtaksperiodeMedBegrunnelser,
-                                minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
-                                persongrunnlag = persongrunnlag,
-                                aktørerMedUtbetaling = aktørerMedUtbetaling,
-                                endretUtbetalingAndeler = endretUtbetalingAndeler,
-                                andelerTilkjentYtelse = andelerTilkjentYtelse,
-                                sanityBegrunnelser = sanityBegrunnelser
+                                minimertVedtaksperiode = minimertVedtaksperiode,
+                                minimertePersonResultater = minimertePersonresultater,
+                                minimertePersoner = minimertePersoner,
+                                aktørIderMedUtbetaling = aktørIderMedUtbetaling,
+                                minimerteEndredeUtbetalingAndeler = minimerteEndredeUtbetalingAndeler,
+                                sanityBegrunnelser = sanityBegrunnelser,
+                                erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
+                                ytelserForSøkerForrigeMåned = ytelserForSøkerForrigeMåned,
                             )
                         ) {
                             acc.add(standardBegrunnelse)
@@ -154,7 +158,7 @@ fun hentGyldigeBegrunnelserForVedtaksperiode(
                     }
 
             val fantIngenbegrunnelserOgSkalDerforBrukeFortsattInnvilget =
-                utvidetVedtaksperiodeMedBegrunnelser.type == Vedtaksperiodetype.UTBETALING &&
+                minimertVedtaksperiode.type == Vedtaksperiodetype.UTBETALING &&
                     standardbegrunnelser.isEmpty()
 
             if (fantIngenbegrunnelserOgSkalDerforBrukeFortsattInnvilget) {
@@ -166,3 +170,12 @@ fun hentGyldigeBegrunnelserForVedtaksperiode(
         }
     }
 }
+
+fun hentYtelserForSøkerForrigeMåned(
+    andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
+    utvidetVedtaksperiodeMedBegrunnelser: UtvidetVedtaksperiodeMedBegrunnelser
+) = andelerTilkjentYtelse.filter {
+    it.type.erKnyttetTilSøker() &&
+        it.stønadTom.sisteDagIInneværendeMåned()
+            .erDagenFør(utvidetVedtaksperiodeMedBegrunnelser.fom)
+}.map { it.type }

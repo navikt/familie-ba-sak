@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.ekstern.restDomene.RestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.brev.UtvidetScenarioForEndringsperiode
+import no.nav.familie.ba.sak.kjerne.brev.domene.IMinimertEndretAndel
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertRestEndretAndel
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilTriggesAv
@@ -59,19 +60,19 @@ data class EndretUtbetalingAndel(
     var person: Person? = null,
 
     @Column(name = "prosent")
-    var prosent: BigDecimal? = null,
+    override var prosent: BigDecimal? = null,
 
     @Column(name = "fom", columnDefinition = "DATE")
     @Convert(converter = YearMonthConverter::class)
-    var fom: YearMonth? = null,
+    override var fom: YearMonth? = null,
 
     @Column(name = "tom", columnDefinition = "DATE")
     @Convert(converter = YearMonthConverter::class)
-    var tom: YearMonth? = null,
+    override var tom: YearMonth? = null,
 
     @Enumerated(EnumType.STRING)
     @Column(name = "aarsak")
-    var årsak: Årsak? = null,
+    override var årsak: Årsak? = null,
 
     @Column(name = "avtaletidspunkt_delt_bosted")
     var avtaletidspunktDeltBosted: LocalDate? = null,
@@ -88,7 +89,7 @@ data class EndretUtbetalingAndel(
     @Column(name = "vedtak_begrunnelse_spesifikasjoner")
     @Convert(converter = VedtakBegrunnelseSpesifikasjonListConverter::class)
     var vedtakBegrunnelseSpesifikasjoner: List<VedtakBegrunnelseSpesifikasjon> = emptyList()
-) : BaseEntitet() {
+) : BaseEntitet(), IMinimertEndretAndel {
 
     fun overlapperMed(periode: MånedPeriode) = periode.overlapperHeltEllerDelvisMed(this.periode)
 

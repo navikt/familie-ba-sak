@@ -23,8 +23,8 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.FortsattInnvi
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.InnvilgelseBrevPeriode
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.OpphørBrevPeriode
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilBrevPeriodeForLogging
-import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertPersonResultat
+import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertRestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -268,6 +268,6 @@ fun hentBrevGrunnlag(
     return BrevGrunnlag(
         personerPåBehandling = persongrunnlag.personer.map { it.tilMinimertPerson() },
         minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
-        minimerteEndredeUtbetalingAndeler = endredeUtbetalingAndeler.map { it.tilMinimertEndretUtbetalingAndel() },
+        minimerteEndredeUtbetalingAndeler = endredeUtbetalingAndeler.map { it.tilMinimertRestEndretUtbetalingAndel() },
     )
 }
