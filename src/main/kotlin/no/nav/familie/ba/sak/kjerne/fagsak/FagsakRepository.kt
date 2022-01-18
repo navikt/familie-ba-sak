@@ -124,4 +124,22 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
         iverksatteLøpendeBehandlinger: List<Long>,
         stønadTom: YearMonth = YearMonth.now().minusMonths(1),
     ): List<Long>
+
+    @Query(
+        """
+            SELECT DISTINCT b.fagsak.id
+            FROM AndelTilkjentYtelse aty
+                JOIN Behandling b ON b.id = aty.behandlingId
+                JOIN TilkjentYtelse ty ON b.id = ty.behandling.id
+            WHERE
+                    b.id in :iverksatteLøpendeBehandlinger
+                AND NOT EXISTS (SELECT b2 from Behandling b2 where b2.fagsak.id = b.fagsak.id AND b2.status <> 'AVSLUTTET')
+                AND aty.type = 'SMÅBARNSTILLEGG'
+                AND aty.stønadFom = :stønadFom
+        """
+    )
+    fun finnAlleFagsakerMedOppstartSmåbarnstilleggIMåned(
+        iverksatteLøpendeBehandlinger: List<Long>,
+        stønadFom: YearMonth = YearMonth.now()
+    ): List<Long>
 }

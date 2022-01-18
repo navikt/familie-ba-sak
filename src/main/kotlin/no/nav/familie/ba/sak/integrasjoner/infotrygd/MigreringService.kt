@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.MigreringResponseDto
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestClient
+import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -34,6 +35,7 @@ import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
 import no.nav.familie.kontrakter.ba.infotrygd.Sak
 import no.nav.familie.kontrakter.ba.infotrygd.Stønad
+import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import org.slf4j.LoggerFactory
@@ -58,20 +60,21 @@ private const val NULLDATO = "000000"
 
 @Service
 class MigreringService(
-    private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
-    private val fagsakService: FagsakService,
-    private val behandlingService: BehandlingService,
-    private val personidentService: PersonidentService,
-    private val stegService: StegService,
-    private val vedtakService: VedtakService,
-    private val taskRepository: TaskRepositoryWrapper,
-    private val vilkårService: VilkårService,
-    private val vilkårsvurderingService: VilkårsvurderingService,
     private val behandlingRepository: BehandlingRepository,
+    private val behandlingService: BehandlingService,
+    private val env: EnvService?,
+    private val fagsakService: FagsakService,
+    private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
+    private val pdlRestClient: PdlRestClient,
+    private val personidentService: PersonidentService,
+    private val personopplysningerService: PersonopplysningerService,
+    private val stegService: StegService,
+    private val taskRepository: TaskRepositoryWrapper,
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
     private val totrinnskontrollService: TotrinnskontrollService,
-    private val env: EnvService?,
-    private val pdlRestClient: PdlRestClient
+    private val vedtakService: VedtakService,
+    private val vilkårService: VilkårService,
+    private val vilkårsvurderingService: VilkårsvurderingService
 ) {
 
     private val secureLog = LoggerFactory.getLogger("secureLogger")
@@ -91,6 +94,8 @@ class MigreringService(
 
             val personAktør = personidentService.hentOgLagreAktør(personIdent)
             val barnasAktør = personidentService.hentOgLagreAktørIder(barnasIdenter)
+
+            validerStøttetGradering(personAktør) // Midlertidig skrudd av støtte for kode 6 inntil det kan behandles
 
             validerAtBarnErIRelasjonMedPersonident(personAktør, barnasAktør)
 
@@ -138,6 +143,13 @@ class MigreringService(
         } catch (e: Exception) {
             if (e is KanIkkeMigrereException) throw e
             kastOgTellMigreringsFeil(MigreringsfeilType.UKJENT, e.message, e)
+        }
+    }
+
+    private fun validerStøttetGradering(personAktør: Aktør) {
+        val adressebeskyttelse = personopplysningerService.hentAdressebeskyttelseSomSystembruker(personAktør)
+        if (adressebeskyttelse == ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG) {
+            kastOgTellMigreringsFeil(MigreringsfeilType.IKKE_STØTTET_GRADERING)
         }
     }
 
@@ -326,7 +338,7 @@ class MigreringService(
             "${MigreringsfeilType.IVERKSETT_BEHANDLING_UTEN_VEDTAK.beskrivelse} ${behandling.id}"
         )
         if (env!!.erPreprod()) {
-            vedtak.vedtaksdato = LocalDate.of(2021, 7, 1).atStartOfDay()
+            vedtak.vedtaksdato = LocalDate.of(2022, 1, 1).atStartOfDay()
         }
         vedtakService.oppdater(vedtak)
         behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.IVERKSETTER_VEDTAK)
@@ -343,7 +355,9 @@ enum class MigreringsfeilType(val beskrivelse: String) {
     FAGSAK_AVSLUTTET_UTEN_MIGRERING("Personen er allerede migrert"),
     FLERE_DELYTELSER_I_INFOTRYGD("Finnes flere delytelser på sak"),
     FLERE_LØPENDE_SAKER_INFOTRYGD("Fant mer enn én aktiv sak på bruker i infotrygd"),
+    IDENT_IKKE_LENGER_AKTIV("Ident ikke lenger aktiv"),
     IKKE_GYLDIG_KJØREDATO("Ikke gyldig kjøredato"),
+    IKKE_STØTTET_GRADERING("Personen har ikke støttet gradering"),
     IKKE_STØTTET_SAKSTYPE("Kan kun migrere ordinære saker (OR, OS)"),
     INGEN_BARN_MED_LØPENDE_STØNAD_I_INFOTRYGD("Fant ingen barn med løpende stønad på sak"),
     INGEN_LØPENDE_SAK_INFOTRYGD("Personen har ikke løpende sak i infotrygd"),
@@ -356,7 +370,6 @@ enum class MigreringsfeilType(val beskrivelse: String) {
     UGYLDIG_ANTALL_DELYTELSER_I_INFOTRYGD("Kan kun migrere ordinære saker med nøyaktig ett utbetalingsbeløp"),
     UKJENT("Ukjent migreringsfeil"),
     ÅPEN_SAK_INFOTRYGD("Bruker har åpen behandling i Infotrygd"),
-    IDENT_IKKE_LENGER_AKTIV("Ident ikke lenger aktiv"),
 }
 
 open class KanIkkeMigrereException(
