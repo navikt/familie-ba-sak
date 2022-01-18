@@ -136,6 +136,9 @@ spring:
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
 
+prosessering:
+  enabled: false
+
 SANITY_DATASET: "ba-brev"
 
 NORG2_BASE_URL: https://app.adeo.no/norg2
