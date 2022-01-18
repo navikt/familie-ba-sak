@@ -2,14 +2,17 @@ package no.nav.familie.ba.sak.kjerne.endretutbetaling
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.ekstern.restDomene.RestEndretUtbetalingAndel
+import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.beregning.domene.hentUtvidetScenarioForEndringsperiode
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerIngenOverlappendeEndring
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerPeriodeInnenforTilkjentytelse
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.fraRestEndretUtbetalingAndel
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.hentGyldigEndretBegrunnelse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import org.springframework.stereotype.Service
@@ -22,6 +25,7 @@ class EndretUtbetalingAndelService(
     private val beregningService: BeregningService,
     private val persongrunnlagService: PersongrunnlagService,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
+    private val sanityService: SanityService,
 ) {
 
     @Transactional
@@ -102,5 +106,26 @@ class EndretUtbetalingAndelService(
         hentForBehandling(behandlingId).filter { it.andelTilkjentYtelser.isNotEmpty() }.forEach {
             it.andelTilkjentYtelser.clear()
         }
+    }
+
+    @Transactional
+    fun oppdaterEndreteUtbetalingsandelerMedBegrunnelser(behandling: Behandling): MutableList<EndretUtbetalingAndel> {
+        val endredeUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(behandling.id)
+        val andelTilkjentYtelser = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id)
+
+        endredeUtbetalingAndeler.forEach {
+            val utvidetScenario =
+                andelTilkjentYtelser.hentUtvidetScenarioForEndringsperiode(it.periode)
+
+            it.vedtakBegrunnelseSpesifikasjoner =
+                listOf(
+                    it.hentGyldigEndretBegrunnelse(
+                        sanityService.hentSanityBegrunnelser(),
+                        utvidetScenario,
+                    )
+                )
+        }
+
+        return endretUtbetalingAndelRepository.saveAll(endredeUtbetalingAndeler)
     }
 }

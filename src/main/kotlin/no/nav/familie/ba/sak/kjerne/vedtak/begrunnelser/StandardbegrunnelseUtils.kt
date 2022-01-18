@@ -34,6 +34,73 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 
+@Deprecated("Skal bort. Bruk VedtakBegrunnelseSpesifikasjon.triggesForPeriode")
+fun VedtakBegrunnelseSpesifikasjon.triggesForPeriodeGammel(
+    utvidetVedtaksperiodeMedBegrunnelser: UtvidetVedtaksperiodeMedBegrunnelser,
+    minimertePersonResultater: List<MinimertRestPersonResultat>,
+    persongrunnlag: PersonopplysningGrunnlag,
+    aktørerMedUtbetaling: List<Aktør>,
+    triggesAv: TriggesAv,
+    endretUtbetalingAndeler: List<EndretUtbetalingAndel> = emptyList(),
+    andelerTilkjentYtelse: List<AndelTilkjentYtelse> = emptyList(),
+): Boolean {
+
+    val aktuellePersoner = persongrunnlag.personer
+        .filter { person -> triggesAv.personTyper.contains(person.type) }
+        .filter { person ->
+            if (this.vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGET) {
+                aktørerMedUtbetaling.contains(person.aktør) || person.type == PersonType.SØKER
+            } else true
+        }
+
+    val erEtterEndretPeriode = erEtterEndretPeriodeAvSammeÅrsak(
+        endretUtbetalingAndeler,
+        utvidetVedtaksperiodeMedBegrunnelser,
+        aktuellePersoner,
+        triggesAv
+    )
+    val ytelseTyperForPeriode = utvidetVedtaksperiodeMedBegrunnelser
+        .utbetalingsperiodeDetaljer.map { it.ytelseType }
+
+    val begrunnelseErRiktigType =
+        utvidetVedtaksperiodeMedBegrunnelser.type.tillatteBegrunnelsestyper.contains(this.vedtakBegrunnelseType)
+    return when {
+        !triggesAv.valgbar -> false
+        !begrunnelseErRiktigType -> false
+
+        triggesAv.vilkår.contains(Vilkår.UTVIDET_BARNETRYGD) -> this.periodeErOppyltForYtelseType(
+            ytelseType = if (triggesAv.småbarnstillegg) YtelseType.SMÅBARNSTILLEGG else YtelseType.UTVIDET_BARNETRYGD,
+            ytelseTyperForPeriode = ytelseTyperForPeriode,
+            andelerTilkjentYtelse = andelerTilkjentYtelse,
+            fomForPeriode = utvidetVedtaksperiodeMedBegrunnelser.fom
+        )
+        triggesAv.personerManglerOpplysninger -> minimertePersonResultater.harPersonerSomManglerOpplysninger()
+        triggesAv.barnMedSeksårsdag ->
+            persongrunnlag.harBarnMedSeksårsdagPåFom(utvidetVedtaksperiodeMedBegrunnelser.fom)
+        triggesAv.satsendring -> fomErPåSatsendring(utvidetVedtaksperiodeMedBegrunnelser.fom ?: TIDENES_MORGEN)
+
+        triggesAv.erEndret() ->
+            erEtterEndretPeriode &&
+                triggesAv.etterEndretUtbetaling &&
+                utvidetVedtaksperiodeMedBegrunnelser.type != Vedtaksperiodetype.ENDRET_UTBETALING
+
+        else -> hentPersonerForAlleUtgjørendeVilkår(
+            minimertePersonResultater = minimertePersonResultater,
+            vedtaksperiode = Periode(
+                fom = utvidetVedtaksperiodeMedBegrunnelser.fom ?: TIDENES_MORGEN,
+                tom = utvidetVedtaksperiodeMedBegrunnelser.tom ?: TIDENES_ENDE
+            ),
+            oppdatertBegrunnelseType = this.vedtakBegrunnelseType,
+            aktuellePersonerForVedtaksperiode = aktuellePersoner.map { it.tilMinimertPerson() },
+            triggesAv = triggesAv,
+            erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak(
+                andelerTilkjentYtelse,
+                utvidetVedtaksperiodeMedBegrunnelser.fom
+            )
+        ).isNotEmpty()
+    }
+}
+
 fun VedtakBegrunnelseSpesifikasjon.triggesForPeriode(
     utvidetVedtaksperiodeMedBegrunnelser: UtvidetVedtaksperiodeMedBegrunnelser,
     minimertePersonResultater: List<MinimertRestPersonResultat>,
@@ -182,6 +249,21 @@ fun VedtakBegrunnelseSpesifikasjon.tilVedtaksbegrunnelse(
         vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
         vedtakBegrunnelseSpesifikasjon = this,
     )
+}
+
+@Deprecated("Bruk VedtakBegrunnelseType.tilVedtaksbegrunnelse")
+fun VedtakBegrunnelseSpesifikasjon.periodeErOppyltForYtelseType(
+    ytelseType: YtelseType,
+    ytelseTyperForPeriode: List<YtelseType>,
+    andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
+    fomForPeriode: LocalDate?,
+): Boolean {
+    return when (this.vedtakBegrunnelseType) {
+        VedtakBegrunnelseType.INNVILGET -> ytelseTyperForPeriode.contains(ytelseType)
+        VedtakBegrunnelseType.REDUKSJON -> !ytelseTyperForPeriode.contains(ytelseType) &&
+            ytelseOppfyltForrigeMåned(ytelseType, andelerTilkjentYtelse, fomForPeriode)
+        else -> false
+    }
 }
 
 fun VedtakBegrunnelseType.periodeErOppyltForYtelseType(

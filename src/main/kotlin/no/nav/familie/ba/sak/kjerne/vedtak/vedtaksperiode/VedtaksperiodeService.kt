@@ -6,6 +6,8 @@ import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedFritekster
 import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
@@ -16,7 +18,9 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
+import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertPersonResultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilTriggesAv
 import no.nav.familie.ba.sak.kjerne.brev.hentVedtaksbrevmal
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
@@ -27,8 +31,10 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilVedtaksbegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.triggesForPeriodeGammel
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeRepository
@@ -50,6 +56,7 @@ class VedtaksperiodeService(
     private val sanityService: SanityService,
     private val søknadGrunnlagService: SøknadGrunnlagService,
     private val endretUtbetalingAndelRepository: EndretUtbetalingAndelRepository,
+    private val featureToggleService: FeatureToggleService,
 ) {
 
     fun lagre(vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser): VedtaksperiodeMedBegrunnelser {
@@ -284,15 +291,24 @@ class VedtaksperiodeService(
 
             val gyldigeBegrunnelser =
                 if (behandling.status == BehandlingStatus.UTREDES)
-                    hentGyldigeBegrunnelserForVedtaksperiode(
-                        utvidetVedtaksperiodeMedBegrunnelser = utvidetVedtaksperiodeMedBegrunnelser,
-                        sanityBegrunnelser = sanityBegrunnelser,
-                        persongrunnlag = persongrunnlag,
-                        andelerTilkjentYtelse = andelerTilkjentYtelse,
-                        vilkårsvurdering = vilkårsvurdering,
-                        aktørerMedUtbetaling = aktørerMedUtbetaling,
-                        endretUtbetalingAndeler = endretUtbetalingAndeler,
-                    )
+                    if (featureToggleService.isEnabled(FeatureToggleConfig.ENDRET_UTBETALING_VEDTAKSSIDEN))
+                        hentGyldigeBegrunnelserForVedtaksperiode(
+                            utvidetVedtaksperiodeMedBegrunnelser = utvidetVedtaksperiodeMedBegrunnelser,
+                            sanityBegrunnelser = sanityBegrunnelser,
+                            persongrunnlag = persongrunnlag,
+                            andelerTilkjentYtelse = andelerTilkjentYtelse,
+                            vilkårsvurdering = vilkårsvurdering,
+                            aktørerMedUtbetaling = aktørerMedUtbetaling,
+                            endretUtbetalingAndeler = endretUtbetalingAndeler,
+                        )
+                    else
+                        hentGyldigeBegrunnelserForVedtaksperiode(
+                            utvidetVedtaksperiodeMedBegrunnelser,
+                            behandling,
+                            sanityBegrunnelser,
+                            persongrunnlag,
+                            andelerTilkjentYtelse
+                        )
                 else emptyList()
 
             utvidetVedtaksperiodeMedBegrunnelser.copy(
@@ -301,6 +317,68 @@ class VedtaksperiodeService(
                     sanityBegrunnelse?.tilTriggesAv()?.valgbar ?: false
                 }.toList()
             )
+        }
+    }
+
+    @Deprecated("Skal ikke brukes lenger. Bruk VedtaksperiodeUtil.hentGyldigeBegrunnelserForVedtaksperiode")
+    private fun hentGyldigeBegrunnelserForVedtaksperiode(
+        utvidetVedtaksperiodeMedBegrunnelser: UtvidetVedtaksperiodeMedBegrunnelser,
+        behandling: Behandling,
+        sanityBegrunnelser: List<SanityBegrunnelse>,
+        persongrunnlag: PersonopplysningGrunnlag,
+        andelerTilkjentYtelse: List<AndelTilkjentYtelse>
+    ) = when (utvidetVedtaksperiodeMedBegrunnelser.type) {
+        Vedtaksperiodetype.FORTSATT_INNVILGET -> {
+            VedtakBegrunnelseSpesifikasjon.values()
+                .filter { it.vedtakBegrunnelseType == VedtakBegrunnelseType.FORTSATT_INNVILGET }
+        }
+        Vedtaksperiodetype.AVSLAG -> {
+            VedtakBegrunnelseSpesifikasjon.values()
+                .filter { it.vedtakBegrunnelseType == VedtakBegrunnelseType.AVSLAG }
+        }
+        else -> {
+            val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id)
+                ?: error("Finner ikke vilkårsvurdering ved begrunning av vedtak")
+
+            val identerMedUtbetaling =
+                utvidetVedtaksperiodeMedBegrunnelser.utbetalingsperiodeDetaljer.map { it.person.personIdent }
+
+            val standardbegrunnelser: MutableSet<VedtakBegrunnelseSpesifikasjon> =
+                VedtakBegrunnelseSpesifikasjon.values()
+                    .filter { vedtakBegrunnelseSpesifikasjon ->
+                        vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType != VedtakBegrunnelseType.AVSLAG &&
+                            vedtakBegrunnelseSpesifikasjon.vedtakBegrunnelseType != VedtakBegrunnelseType.FORTSATT_INNVILGET
+                    }
+                    .fold(mutableSetOf()) { acc, standardBegrunnelse ->
+                        val triggesAv =
+                            standardBegrunnelse.tilSanityBegrunnelse(sanityBegrunnelser)
+                                ?.tilTriggesAv() ?: return@fold acc
+
+                        if (standardBegrunnelse.triggesForPeriodeGammel(
+                                utvidetVedtaksperiodeMedBegrunnelser = utvidetVedtaksperiodeMedBegrunnelser,
+                                minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
+                                persongrunnlag = persongrunnlag,
+                                aktørerMedUtbetaling = personidentService.hentOgLagreAktørIder(
+                                        identerMedUtbetaling
+                                    ),
+                                triggesAv = triggesAv,
+                                endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(
+                                        behandling.id
+                                    ),
+                                andelerTilkjentYtelse = andelerTilkjentYtelse,
+                            )
+                        ) {
+                            acc.add(standardBegrunnelse)
+                        }
+
+                        acc
+                    }
+            if (utvidetVedtaksperiodeMedBegrunnelser.type == Vedtaksperiodetype.UTBETALING &&
+                standardbegrunnelser.isEmpty()
+            ) {
+                VedtakBegrunnelseSpesifikasjon.values()
+                    .filter { it.vedtakBegrunnelseType == VedtakBegrunnelseType.FORTSATT_INNVILGET }
+            } else standardbegrunnelser
         }
     }
 
