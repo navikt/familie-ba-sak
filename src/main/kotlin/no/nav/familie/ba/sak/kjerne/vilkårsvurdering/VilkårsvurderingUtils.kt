@@ -14,12 +14,15 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilTriggesAv
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand.Companion.sisteSivilstand
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
+import java.time.LocalDate
 
 object VilkårsvurderingUtils {
 
@@ -208,11 +211,14 @@ object VilkårsvurderingUtils {
                 personFraInit.vilkårResultater.forEach { vilkårFraInit ->
                     val vilkårSomFinnes =
                         personenSomFinnes.vilkårResultater.filter { it.vilkårType == vilkårFraInit.vilkårType }
-                            .filtrerVilkårÅKopiere(
-                                kopieringSkjerFraForrigeBehandling = initiellVilkårsvurdering.behandling.id != aktivVilkårsvurdering.behandling.id
-                            )
 
-                    if (vilkårSomFinnes.isEmpty()) {
+                    val vilkårSomSkalKopieresOver = vilkårSomFinnes.filtrerVilkårÅKopiere(
+                        kopieringSkjerFraForrigeBehandling = initiellVilkårsvurdering.behandling.id != aktivVilkårsvurdering.behandling.id
+                    )
+                    val vilkårSomSkalFjernesFraAktivt = vilkårSomFinnes - vilkårSomSkalKopieresOver
+                    personsVilkårAktivt.removeAll(vilkårSomSkalFjernesFraAktivt)
+
+                    if (vilkårSomSkalKopieresOver.isEmpty()) {
                         // Legg til nytt vilkår på person
                         personsVilkårOppdatert.add(vilkårFraInit.kopierMedParent(personTilOppdatert))
                     } else {
@@ -221,9 +227,9 @@ object VilkårsvurderingUtils {
                             periode eksisterer. */
 
                         personsVilkårOppdatert.addAll(
-                            vilkårSomFinnes.map { it.kopierMedParent(personTilOppdatert) }
+                            vilkårSomSkalKopieresOver.map { it.kopierMedParent(personTilOppdatert) }
                         )
-                        personsVilkårAktivt.removeAll(vilkårSomFinnes)
+                        personsVilkårAktivt.removeAll(vilkårSomSkalKopieresOver)
                     }
                 }
                 val eksistererUtvidetVilkårPåForrigeBehandling =
@@ -329,4 +335,57 @@ private fun List<VilkårResultat>.filtrerVilkårÅKopiere(kopieringSkjerFraForri
     } else {
         this
     }
+}
+
+fun genererPersonResultatForPerson(
+    vilkårsvurdering: Vilkårsvurdering,
+    person: Person
+): PersonResultat {
+    val personResultat = PersonResultat(
+        vilkårsvurdering = vilkårsvurdering,
+        aktør = person.aktør
+    )
+
+    val vilkårForPerson = Vilkår.hentVilkårFor(
+        personType = person.type,
+        ytelseType = vilkårsvurdering.behandling.hentYtelseTypeTilVilkår()
+    )
+
+    val vilkårResultater = vilkårForPerson.map { vilkår ->
+        val fom = if (vilkår.gjelderAlltidFraBarnetsFødselsdato()) person.fødselsdato else null
+
+        val tom: LocalDate? =
+            if (vilkår == Vilkår.UNDER_18_ÅR) {
+                person.fødselsdato.plusYears(18).minusDays(1)
+            } else null
+
+        VilkårResultat(
+            personResultat = personResultat,
+            erAutomatiskVurdert = when (vilkår) {
+                Vilkår.UNDER_18_ÅR, Vilkår.GIFT_PARTNERSKAP -> true
+                else -> false
+            },
+            resultat = when (vilkår) {
+                Vilkår.UNDER_18_ÅR -> Resultat.OPPFYLT
+                Vilkår.GIFT_PARTNERSKAP -> if (person.sivilstander.isEmpty() || person.sivilstander.sisteSivilstand()?.type?.somForventetHosBarn() == true)
+                    Resultat.OPPFYLT else Resultat.IKKE_VURDERT
+                else -> Resultat.IKKE_VURDERT
+            },
+            vilkårType = vilkår,
+            periodeFom = fom,
+            periodeTom = tom,
+            begrunnelse = when (vilkår) {
+                Vilkår.UNDER_18_ÅR -> "Vurdert og satt automatisk"
+                Vilkår.GIFT_PARTNERSKAP -> if (person.sivilstander.sisteSivilstand()?.type?.somForventetHosBarn() == false)
+                    "Vilkåret er forsøkt behandlet automatisk, men barnet er registrert som gift i " +
+                        "folkeregisteret. Vurder hvilke konsekvenser dette skal ha for behandlingen" else ""
+                else -> ""
+            },
+            behandlingId = personResultat.vilkårsvurdering.behandling.id
+        )
+    }.toSortedSet(VilkårResultat.VilkårResultatComparator)
+
+    personResultat.setSortedVilkårResultater(vilkårResultater)
+
+    return personResultat
 }

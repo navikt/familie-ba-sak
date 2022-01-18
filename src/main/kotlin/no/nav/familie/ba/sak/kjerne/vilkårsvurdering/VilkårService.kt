@@ -209,7 +209,7 @@ class VilkårService(
         val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
             ?: throw IllegalStateException("Fant ikke personopplysninggrunnlag for behandling ${behandling.id}")
         if (personopplysningGrunnlag.personer
-            .single { it.aktør == personidentService.hentOgLagreAktør(restNyttVilkår.personIdent) }.type != PersonType.SØKER
+                .single { it.aktør == personidentService.hentOgLagreAktør(restNyttVilkår.personIdent) }.type != PersonType.SØKER
         ) {
             throw FunksjonellFeil(
                 melding = "${Vilkår.UTVIDET_BARNETRYGD.beskrivelse} kan ikke legges til for BARN",
@@ -388,53 +388,7 @@ class VilkårService(
                 ?: throw Feil(message = "Fant ikke personopplysninggrunnlag for behandling ${vilkårsvurdering.behandling.id}")
 
         return personopplysningGrunnlag.personer.map { person ->
-            val personResultat = PersonResultat(
-                vilkårsvurdering = vilkårsvurdering,
-                aktør = person.aktør
-            )
-
-            val vilkårForPerson = Vilkår.hentVilkårFor(
-                personType = person.type,
-                ytelseType = vilkårsvurdering.behandling.hentYtelseTypeTilVilkår()
-            )
-
-            val vilkårResultater = vilkårForPerson.map { vilkår ->
-                val fom = if (vilkår.gjelderAlltidFraBarnetsFødselsdato()) person.fødselsdato else null
-
-                val tom: LocalDate? =
-                    if (vilkår == Vilkår.UNDER_18_ÅR) {
-                        person.fødselsdato.plusYears(18).minusDays(1)
-                    } else null
-
-                VilkårResultat(
-                    personResultat = personResultat,
-                    erAutomatiskVurdert = when (vilkår) {
-                        Vilkår.UNDER_18_ÅR, Vilkår.GIFT_PARTNERSKAP -> true
-                        else -> false
-                    },
-                    resultat = when (vilkår) {
-                        Vilkår.UNDER_18_ÅR -> Resultat.OPPFYLT
-                        Vilkår.GIFT_PARTNERSKAP -> if (person.sivilstander.isEmpty() || person.sivilstander.sisteSivilstand()?.type?.somForventetHosBarn() == true)
-                            Resultat.OPPFYLT else Resultat.IKKE_VURDERT
-                        else -> Resultat.IKKE_VURDERT
-                    },
-                    vilkårType = vilkår,
-                    periodeFom = fom,
-                    periodeTom = tom,
-                    begrunnelse = when (vilkår) {
-                        Vilkår.UNDER_18_ÅR -> "Vurdert og satt automatisk"
-                        Vilkår.GIFT_PARTNERSKAP -> if (person.sivilstander.sisteSivilstand()?.type?.somForventetHosBarn() == false)
-                            "Vilkåret er forsøkt behandlet automatisk, men barnet er registrert som gift i " +
-                                "folkeregisteret. Vurder hvilke konsekvenser dette skal ha for behandlingen" else ""
-                        else -> ""
-                    },
-                    behandlingId = personResultat.vilkårsvurdering.behandling.id
-                )
-            }.toSortedSet(VilkårResultatComparator)
-
-            personResultat.setSortedVilkårResultater(vilkårResultater)
-
-            personResultat
+            genererPersonResultatForPerson(vilkårsvurdering, person)
         }.toSet()
     }
 
