@@ -33,6 +33,12 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
     VEDTAK_KORREKSJON_VEDTAKSBREV(true, "korrigertVedtakEgenBrevmal", "Korrigere vedtak med egen brevmal"),
     VEDTAK_OPPHØR_DØDSFALL(true, "dodsfall", "Dødsfall"),
 
+    @Deprecated(
+        "Brukes ikke lenger. Må ha denne for å kunne få gjennom tasker med gammelt enum-navn." +
+            "Kan fjernes når de har kjørt."
+    )
+    DØDSFALL(true, "dodsfall", "Dødsfall"),
+
     AUTOVEDTAK_BARN_6_OG_18_ÅR_OG_SMÅBARNSTILLEGG(
         true,
         "autovedtakBarn6AarOg18AarOgSmaabarnstillegg",
