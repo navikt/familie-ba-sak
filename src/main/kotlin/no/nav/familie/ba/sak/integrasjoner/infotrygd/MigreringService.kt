@@ -338,7 +338,7 @@ class MigreringService(
             "${MigreringsfeilType.IVERKSETT_BEHANDLING_UTEN_VEDTAK.beskrivelse} ${behandling.id}"
         )
         if (env!!.erPreprod()) {
-            vedtak.vedtaksdato = LocalDate.of(2021, 7, 1).atStartOfDay()
+            vedtak.vedtaksdato = LocalDate.of(2022, 1, 1).atStartOfDay()
         }
         vedtakService.oppdater(vedtak)
         behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.IVERKSETTER_VEDTAK)
