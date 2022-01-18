@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.AbstractMockkSpringRunner
 import no.nav.familie.ba.sak.config.ClientMocks
+import no.nav.familie.ba.sak.config.ClientMocks.Companion.BARN_DET_IKKE_GIS_TILGANG_TIL_FNR
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestClient
@@ -123,7 +124,8 @@ class MigreringServiceTest(
     private val pdlRestClient: PdlRestClient,
 
     @Autowired
-    private val envService: EnvService
+    private val envService: EnvService,
+
 ) : AbstractMockkSpringRunner() {
 
     @BeforeEach
@@ -310,8 +312,8 @@ class MigreringServiceTest(
         virkningsdatoUtleder.trySetAccessible()
 
         val migreringServiceMock = MigreringService(
-            mockk(), mockk(), mockk(), mockk(), mockk(), mockk(), mockk(), mockk(), mockk(), mockk(), mockk(),
-            mockk(), env = mockk(relaxed = true), mockk()
+            mockk(), mockk(), env = mockk(relaxed = true), mockk(), mockk(), mockk(), mockk(), mockk(), mockk(), mockk(),
+            mockk(), mockk(), mockk(), mockk(), mockk()
         ) // => env.erDev() = env.erE2E() = false
 
         listOf<Long>(0, 1).forEach { antallDagerEtterKjøredato ->
@@ -417,9 +419,10 @@ class MigreringServiceTest(
             mockk(),
             mockk(),
             mockk(),
+            mockk(),
+            mockk(),
+            mockk(),
             mockkPersonidentService,
-            mockk(),
-            mockk(),
             mockk(),
             mockk(),
             mockk(),
@@ -444,6 +447,19 @@ class MigreringServiceTest(
         }.isInstanceOf(KanIkkeMigrereException::class.java)
             .hasMessage(null)
             .extracting("feiltype").isEqualTo(MigreringsfeilType.IDENT_IKKE_LENGER_AKTIV)
+    }
+
+    @Test
+    fun `migrering skal feile med kode 6 person`() {
+        every {
+            infotrygdBarnetrygdClient.hentSaker(any(), any())
+        } returns InfotrygdSøkResponse(listOf(opprettSakMedBeløp(SAK_BELØP)), emptyList())
+
+        assertThatThrownBy {
+            val migreringResponseDto = migreringService.migrer(BARN_DET_IKKE_GIS_TILGANG_TIL_FNR)
+        }.isInstanceOf(KanIkkeMigrereException::class.java)
+            .hasMessage(null)
+            .extracting("feiltype").isEqualTo(MigreringsfeilType.IKKE_STØTTET_GRADERING)
     }
 
     private fun opprettSakMedBeløp(vararg beløp: Double) = Sak(
