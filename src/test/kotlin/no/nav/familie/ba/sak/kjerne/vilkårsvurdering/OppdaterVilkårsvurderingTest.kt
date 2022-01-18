@@ -149,7 +149,7 @@ class OppdaterVilkårsvurderingTest {
                     vilkårType = Vilkår.BOSATT_I_RIKET,
                     personResultat = personResultat,
                     resultat = Resultat.IKKE_OPPFYLT,
-                    periodeFom = LocalDate.now().minusYears(5),
+                    periodeFom = LocalDate.now().minusYears(2),
                     periodeTom = LocalDate.now().minusYears(1)
                 )
             )
@@ -162,11 +162,65 @@ class OppdaterVilkårsvurderingTest {
         )
 
         val nyInitBosattIRiketVilkår =
-            nyInit.personResultater.find { personResultat -> personResultat.aktør == søkerAktørId }?.vilkårResultater?.filter { it.vilkårType == Vilkår.BOSATT_I_RIKET }
+            nyInit.personResultater.find { it.aktør == søkerAktørId }?.vilkårResultater?.filter { it.vilkårType == Vilkår.BOSATT_I_RIKET }
                 ?: emptyList()
 
         Assertions.assertTrue(nyInitBosattIRiketVilkår.isNotEmpty())
-        Assertions.assertTrue(nyInitBosattIRiketVilkår.first().resultat == Resultat.IKKE_VURDERT)
+        Assertions.assertTrue(nyInitBosattIRiketVilkår.single().resultat == Resultat.IKKE_VURDERT)
+        Assertions.assertTrue(nyAktiv.personResultater.isEmpty())
+    }
+
+    @Test
+    fun `Skal ha med oppfylte perioder fra vilkår på person hvis vilkåret ble både avslått og innvilget forrige behandling`() {
+        val søkerAktørId = randomAktørId()
+        val nyBehandling = lagBehandling()
+        val forrigeBehandling = lagBehandling()
+
+        val init =
+            lagBasicVilkårsvurdering(
+                behandling = nyBehandling,
+                personer = listOf(
+                    lagPerson(type = PersonType.SØKER, aktør = søkerAktørId),
+                    lagPerson(type = PersonType.BARN)
+                )
+            )
+        val aktivMedBosattIRiketDelvisIkkeOppfylt = Vilkårsvurdering(behandling = forrigeBehandling)
+        val personResultat =
+            PersonResultat(
+                vilkårsvurdering = aktivMedBosattIRiketDelvisIkkeOppfylt,
+                aktør = søkerAktørId
+            )
+        val bosattIRiketVilkårResultater =
+            setOf(
+                lagVilkårResultat(
+                    vilkårType = Vilkår.BOSATT_I_RIKET,
+                    personResultat = personResultat,
+                    resultat = Resultat.IKKE_OPPFYLT,
+                    periodeFom = LocalDate.now().minusYears(2),
+                    periodeTom = LocalDate.now().minusYears(1)
+                ),
+                lagVilkårResultat(
+                    vilkårType = Vilkår.BOSATT_I_RIKET,
+                    personResultat = personResultat,
+                    resultat = Resultat.OPPFYLT,
+                    periodeFom = LocalDate.now(),
+                    periodeTom = LocalDate.now().plusYears(1),
+                )
+            )
+        personResultat.setSortedVilkårResultater(bosattIRiketVilkårResultater)
+        aktivMedBosattIRiketDelvisIkkeOppfylt.personResultater = setOf(personResultat)
+
+        val (nyInit, nyAktiv) = flyttResultaterTilInitielt(
+            initiellVilkårsvurdering = init,
+            aktivVilkårsvurdering = aktivMedBosattIRiketDelvisIkkeOppfylt
+        )
+
+        val nyInitBosattIRiketVilkår =
+            nyInit.personResultater.find { it.aktør == søkerAktørId }?.vilkårResultater?.filter { it.vilkårType == Vilkår.BOSATT_I_RIKET }
+                ?: emptyList()
+
+        Assertions.assertTrue(nyInitBosattIRiketVilkår.isNotEmpty())
+        Assertions.assertTrue(nyInitBosattIRiketVilkår.single().resultat == Resultat.OPPFYLT)
         Assertions.assertTrue(nyAktiv.personResultater.isEmpty())
     }
 
