@@ -22,7 +22,7 @@ import org.springframework.kafka.core.ProducerFactory
 import org.springframework.kafka.listener.ContainerProperties
 
 @Configuration
-@Profile("!prod-gcp")
+@Profile("!preprod-gcp & !prod-gcp")
 class KafkaAivenConfig(val environment: Environment) {
 
     @Bean

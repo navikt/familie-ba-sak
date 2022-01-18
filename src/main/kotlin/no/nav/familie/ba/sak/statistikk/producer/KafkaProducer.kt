@@ -44,7 +44,7 @@ interface KafkaProducer {
     matchIfMissing = false
 )
 @Primary
-@Profile("!prod-gcp")
+@Profile("!preprod-gcp & !prod-gcp")
 class DefaultKafkaProducer(val saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository) :
     KafkaProducer {
 

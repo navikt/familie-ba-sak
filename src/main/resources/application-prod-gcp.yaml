@@ -136,6 +136,9 @@ spring:
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
 
+prosessering:
+  enabled: false
+
 SANITY_DATASET: "ba-brev"
 
 NORG2_BASE_URL: https://app.adeo.no/norg2
@@ -150,7 +153,8 @@ FAMILIE_BA_INFOTRYGD_SCOPE: api://prod-fss.teamfamilie.familie-ba-infotrygd/.def
 FAMILIE_BA_INFOTRYGD_API_URL: https://familie-ba-infotrygd.prod-fss-pub.nais.io
 FAMILIE_OPPDRAG_API_URL: https://familie-oppdrag.prod-fss-pub.nais.io/api
 FAMILIE_BA_INFOTRYGD_FEED_API_URL: https://familie-ba-infotrygd-feed.prod-fss-pub.nais.io/api
-PDL_URL: https://pdl-api-q1.dev-fss-pub.nais.io
-PDL_SCOPE: api://dev-fss.pdl.pdl-api-q1/.default
+
+PDL_URL: https://pdl-api.prod-fss-pub.nais.io
+PDL_SCOPE: api://prod-fss.pdl.pdl-api/.default
 
 ENVIRONMENT_NAME: p
