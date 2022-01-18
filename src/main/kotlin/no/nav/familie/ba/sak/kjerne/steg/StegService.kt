@@ -343,7 +343,7 @@ class StegService(
             logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} håndterer ${behandlingSteg.stegType()} på behandling ${behandling.id}")
             tilgangService.validerTilgangTilBehandling(behandlingId = behandling.id)
             if (behandling.erManuellMigrering() && behandlingSteg.stegType() == StegType.BESLUTTE_VEDTAK) {
-                verifiserBeslutteVedtakForHelmanuellMigrering(behandlingSteg)
+                verifiserBeslutteVedtakForManuellMigrering(behandlingSteg)
             } else {
                 tilgangService.verifiserHarTilgangTilHandling(
                     minimumBehandlerRolle = behandlingSteg.stegType().tillattFor.minByOrNull { it.nivå }
@@ -422,7 +422,7 @@ class StegService(
         }
     }
 
-    private fun verifiserBeslutteVedtakForHelmanuellMigrering(behandlingSteg: BehandlingSteg<*>) {
+    private fun verifiserBeslutteVedtakForManuellMigrering(behandlingSteg: BehandlingSteg<*>) {
         val minsteTillatFor = behandlingSteg.stegType().tillattFor.minByOrNull { it.nivå }
         val minsteNivå = if (minsteTillatFor != null) minOf(
             BehandlerRolle.SAKSBEHANDLER,
