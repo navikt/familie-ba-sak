@@ -423,15 +423,8 @@ class StegService(
     }
 
     private fun verifiserBeslutteVedtakForManuellMigrering(behandlingSteg: BehandlingSteg<*>) {
-        val minsteTillatFor = behandlingSteg.stegType().tillattFor.minByOrNull { it.nivå }
-        val minsteNivå = if (minsteTillatFor != null) minOf(
-            BehandlerRolle.SAKSBEHANDLER,
-            minsteTillatFor,
-            comparator = { rolle1, rolle2 -> rolle1.nivå - rolle2.nivå }
-        ) else null
         tilgangService.verifiserHarTilgangTilHandling(
-            minimumBehandlerRolle = minsteNivå
-                ?: throw Feil("${SikkerhetContext.hentSaksbehandlerNavn()} prøver å utføre steg ${behandlingSteg.stegType()} som ikke er tillatt av noen."),
+            minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "utføre steg ${behandlingSteg.stegType().displayName()}"
         )
     }
