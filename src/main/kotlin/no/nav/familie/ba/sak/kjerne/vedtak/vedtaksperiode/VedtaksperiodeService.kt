@@ -18,9 +18,9 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.beregning.domene.hentUtvidetScenarioForEndringsperiode
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
-import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertPersonResultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertPersonResultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilTriggesAv
@@ -274,11 +274,6 @@ class VedtaksperiodeService(
         )
         val persongrunnlag =
             persongrunnlagService.hentAktivThrows(behandling.id)
-        val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id)
-            ?: error("Finner ikke vilkårsvurdering ved begrunning av vedtak")
-        val endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(
-            behandling.id
-        )
 
         val sanityBegrunnelser = sanityService.hentSanityBegrunnelser()
 
@@ -294,9 +289,15 @@ class VedtaksperiodeService(
             )
 
             val gyldigeBegrunnelser =
-                if (behandling.status == BehandlingStatus.UTREDES)
+                if (behandling.status == BehandlingStatus.UTREDES) {
+                    val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id)
+                        ?: error("Finner ikke vilkårsvurdering ved begrunning av vedtak")
+                    val endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(
+                        behandling.id
+                    )
+
                     if (featureToggleService.isEnabled(FeatureToggleConfig.ENDRET_UTBETALING_VEDTAKSSIDEN))
-                        hentGyldigeBegrunnelserForVedtaksperiode(
+                        hentGyldigeBegrunnelserForVedtaksperiodeGammel(
                             minimertVedtaksperiode = utvidetVedtaksperiodeMedBegrunnelser.tilMinimertVedtaksperiode(),
                             sanityBegrunnelser = sanityBegrunnelser,
                             minimertePersoner = persongrunnlag.tilMinimertePersoner(),
@@ -312,17 +313,21 @@ class VedtaksperiodeService(
                             ytelserForSøkerForrigeMåned = hentYtelserForSøkerForrigeMåned(
                                 andelerTilkjentYtelse,
                                 utvidetVedtaksperiodeMedBegrunnelser
-                            )
+                            ),
+                            utvidetScenarioForEndringsperiode = andelerTilkjentYtelse
+                                .hentUtvidetScenarioForEndringsperiode(
+                                    utvidetVedtaksperiodeMedBegrunnelser.hentMånedPeriode()
+                                )
                         )
                     else
-                        hentGyldigeBegrunnelserForVedtaksperiode(
+                        hentGyldigeBegrunnelserForVedtaksperiodeGammel(
                             utvidetVedtaksperiodeMedBegrunnelser,
                             behandling,
                             sanityBegrunnelser,
                             persongrunnlag,
                             andelerTilkjentYtelse
                         )
-                else emptyList()
+                } else emptyList()
 
             utvidetVedtaksperiodeMedBegrunnelser.copy(
                 gyldigeBegrunnelser = gyldigeBegrunnelser.filter {
@@ -334,7 +339,7 @@ class VedtaksperiodeService(
     }
 
     @Deprecated("Skal ikke brukes lenger. Bruk VedtaksperiodeUtil.hentGyldigeBegrunnelserForVedtaksperiode")
-    private fun hentGyldigeBegrunnelserForVedtaksperiode(
+    private fun hentGyldigeBegrunnelserForVedtaksperiodeGammel(
         utvidetVedtaksperiodeMedBegrunnelser: UtvidetVedtaksperiodeMedBegrunnelser,
         behandling: Behandling,
         sanityBegrunnelser: List<SanityBegrunnelse>,

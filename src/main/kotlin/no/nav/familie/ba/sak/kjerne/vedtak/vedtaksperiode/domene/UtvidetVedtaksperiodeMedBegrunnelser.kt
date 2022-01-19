@@ -1,10 +1,14 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.MånedPeriode
+import no.nav.familie.ba.sak.common.TIDENES_ENDE
+import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.convertDataClassToJson
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.MinimertUregistrertBarn
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
-import no.nav.familie.ba.sak.kjerne.brev.domene.BrevGrunnlag
+import no.nav.familie.ba.sak.kjerne.brev.domene.RestBehandlingsgrunnlagForBrev
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilBrevPeriodeForLogging
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilBrevPeriodeGrunnlag
@@ -30,8 +34,13 @@ data class UtvidetVedtaksperiodeMedBegrunnelser(
     val gyldigeBegrunnelser: List<VedtakBegrunnelseSpesifikasjon> = emptyList(),
     val utbetalingsperiodeDetaljer: List<UtbetalingsperiodeDetalj> = emptyList(),
 ) {
+    fun hentMånedPeriode() = MånedPeriode(
+        (this.fom ?: TIDENES_MORGEN).toYearMonth(),
+        (this.tom ?: TIDENES_ENDE).toYearMonth()
+    )
+
     fun hentBegrunnelserOgFritekster(
-        brevGrunnlag: BrevGrunnlag,
+        restBehandlingsgrunnlagForBrev: RestBehandlingsgrunnlagForBrev,
         sanityBegrunnelser: List<SanityBegrunnelse>,
         erFørsteVedtaksperiodePåFagsak: Boolean,
         uregistrerteBarn: List<MinimertUregistrertBarn>,
@@ -42,17 +51,17 @@ data class UtvidetVedtaksperiodeMedBegrunnelser(
         return try {
             brevPeriodeGrunnlag
                 .tilBrevPeriodeGrunnlagMedPersoner(
-                    brevGrunnlag = brevGrunnlag,
+                    restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev,
                     erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak
                 )
                 .byggBegrunnelserOgFritekster(
-                    brevGrunnlag = brevGrunnlag,
+                    restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev,
                     uregistrerteBarn = uregistrerteBarn,
                     brevMålform = brevMålform
                 )
         } catch (exception: Exception) {
             val brevPeriodeForLogging = brevPeriodeGrunnlag.tilBrevPeriodeForLogging(
-                brevGrunnlag = brevGrunnlag,
+                restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev,
                 uregistrerteBarn = uregistrerteBarn,
                 brevMålform = brevMålform,
             )

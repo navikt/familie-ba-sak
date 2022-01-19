@@ -6,8 +6,8 @@ import BrevPeriodeTestConfig
 import FritekstBegrunnelseTestConfig
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ba.sak.common.Utils.formaterBeløp
-import no.nav.familie.ba.sak.kjerne.brev.domene.BrevGrunnlag
 import no.nav.familie.ba.sak.kjerne.brev.domene.BrevPeriodeGrunnlag
+import no.nav.familie.ba.sak.kjerne.brev.domene.RestBehandlingsgrunnlagForBrev
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.BrevPeriode
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.junit.jupiter.api.Test
@@ -47,7 +47,7 @@ class BrevperiodeTest {
                         .flatMap { it.tilUtbetalingsperiodeDetaljer() }
                 )
 
-            val brevGrunnlag = BrevGrunnlag(
+            val restBehandlingsgrunnlagForBrev = RestBehandlingsgrunnlagForBrev(
                 personerPåBehandling = behandlingsresultatPersonTestConfig.personerPåBehandling.map { it.tilMinimertPerson() },
                 minimerteEndredeUtbetalingAndeler = behandlingsresultatPersonTestConfig.personerPåBehandling.flatMap { it.tilMinimerteEndredeUtbetalingAndeler() },
                 minimertePersonResultater = behandlingsresultatPersonTestConfig.personerPåBehandling.map { it.tilMinimertePersonResultater() }
@@ -55,7 +55,7 @@ class BrevperiodeTest {
 
             val brevperiode = try {
                 brevPeriodeGrunnlag.tilBrevPeriode(
-                    brevGrunnlag = brevGrunnlag,
+                    restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev,
                     utvidetScenarioForEndringsperiode = behandlingsresultatPersonTestConfig.utvidetScenarioForEndringsperiode,
                     uregistrerteBarn = behandlingsresultatPersonTestConfig.uregistrerteBarn,
                     erFørsteVedtaksperiodePåFagsak = behandlingsresultatPersonTestConfig.erFørsteVedtaksperiodePåFagsak,

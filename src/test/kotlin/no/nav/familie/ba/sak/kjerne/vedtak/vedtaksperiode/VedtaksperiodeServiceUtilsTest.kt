@@ -12,7 +12,7 @@ import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
-import no.nav.familie.ba.sak.kjerne.brev.domene.BrevGrunnlag
+import no.nav.familie.ba.sak.kjerne.brev.domene.RestBehandlingsgrunnlagForBrev
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertPersonResultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertRestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.brev.hentPersonidenterGjeldendeForBegrunnelse
@@ -270,7 +270,7 @@ class VedtaksperiodeServiceUtilsTest {
             triggesAv = triggesAv,
             vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET,
             periode = NullablePeriode(LocalDate.now().minusMonths(1), null),
-            brevGrunnlag = BrevGrunnlag(
+            restBehandlingsgrunnlagForBrev = RestBehandlingsgrunnlagForBrev(
                 minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
                 personerPåBehandling = persongrunnlag.personer.map { it.tilMinimertPerson() },
                 minimerteEndredeUtbetalingAndeler = emptyList(),
@@ -319,7 +319,7 @@ class VedtaksperiodeServiceUtilsTest {
             triggesAv = triggesAv,
             periode = NullablePeriode(fom, tom),
             vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET,
-            brevGrunnlag = BrevGrunnlag(
+            restBehandlingsgrunnlagForBrev = RestBehandlingsgrunnlagForBrev(
                 minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
                 personerPåBehandling = persongrunnlag.personer.map { it.tilMinimertPerson() },
                 minimerteEndredeUtbetalingAndeler = endredeUtbetalingAndeler

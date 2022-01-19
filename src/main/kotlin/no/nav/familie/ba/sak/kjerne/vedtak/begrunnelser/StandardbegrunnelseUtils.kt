@@ -70,7 +70,7 @@ fun VedtakBegrunnelseSpesifikasjon.triggesForPeriodeGammel(
         !triggesAv.valgbar -> false
         !begrunnelseErRiktigType -> false
 
-        triggesAv.vilkår.contains(Vilkår.UTVIDET_BARNETRYGD) -> this.periodeErOppyltForYtelseType(
+        triggesAv.vilkår.contains(Vilkår.UTVIDET_BARNETRYGD) -> this.vedtakBegrunnelseType.periodeErOppyltForYtelseTypeGammel(
             ytelseType = if (triggesAv.småbarnstillegg) YtelseType.SMÅBARNSTILLEGG else YtelseType.UTVIDET_BARNETRYGD,
             ytelseTyperForPeriode = ytelseTyperForPeriode,
             andelerTilkjentYtelse = andelerTilkjentYtelse,
@@ -112,6 +112,7 @@ fun VedtakBegrunnelseSpesifikasjon.triggesForPeriode(
     sanityBegrunnelser: List<SanityBegrunnelse>,
     erFørsteVedtaksperiodePåFagsak: Boolean,
     ytelserForSøkerForrigeMåned: List<YtelseType>,
+    utvidetScenarioForEndringsperiode: UtvidetScenarioForEndringsperiode,
 ): Boolean {
 
     val triggesAv =
@@ -148,7 +149,8 @@ fun VedtakBegrunnelseSpesifikasjon.triggesForPeriode(
             minimerteEndredeUtbetalingAndeler = minimerteEndredeUtbetalingAndeler,
             minimertVedtaksperiode = minimertVedtaksperiode,
             aktuellePersoner = aktuellePersoner,
-            sanityBegrunnelse = sanityBegrunnelse
+            sanityBegrunnelse = sanityBegrunnelse,
+            utvidetScenarioForEndringsperiode = utvidetScenarioForEndringsperiode
         )
 
         else -> hentPersonerForAlleUtgjørendeVilkår(
@@ -170,7 +172,8 @@ private fun erEndretTriggerErOppfylt(
     minimerteEndredeUtbetalingAndeler: List<MinimertEndretAndel>,
     minimertVedtaksperiode: MinimertVedtaksperiode,
     aktuellePersoner: List<MinimertPerson>,
-    sanityBegrunnelse: SanityBegrunnelse
+    sanityBegrunnelse: SanityBegrunnelse,
+    utvidetScenarioForEndringsperiode: UtvidetScenarioForEndringsperiode,
 ): Boolean =
     if (triggesAv.etterEndretUtbetaling) {
         minimertVedtaksperiode.type != Vedtaksperiodetype.ENDRET_UTBETALING &&
@@ -188,8 +191,8 @@ private fun erEndretTriggerErOppfylt(
             endredeAndelerSomOverlapperVedtaksperiode.any {
                 triggesAv.erTriggereOppfyltForEndretUtbetaling(
                     vilkår = sanityBegrunnelse.vilkaar,
-                    utvidetScenario = UtvidetScenarioForEndringsperiode.UTVIDET_YTELSE_ENDRET,
-                    endretUtbetalingAndel = it
+                    utvidetScenario = utvidetScenarioForEndringsperiode,
+                    minimertEndretAndel = it
                 )
             }
     }
@@ -252,13 +255,13 @@ fun VedtakBegrunnelseSpesifikasjon.tilVedtaksbegrunnelse(
 }
 
 @Deprecated("Bruk VedtakBegrunnelseType.tilVedtaksbegrunnelse")
-fun VedtakBegrunnelseSpesifikasjon.periodeErOppyltForYtelseType(
+fun VedtakBegrunnelseType.periodeErOppyltForYtelseTypeGammel(
     ytelseType: YtelseType,
     ytelseTyperForPeriode: List<YtelseType>,
     andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
     fomForPeriode: LocalDate?,
 ): Boolean {
-    return when (this.vedtakBegrunnelseType) {
+    return when (this) {
         VedtakBegrunnelseType.INNVILGET -> ytelseTyperForPeriode.contains(ytelseType)
         VedtakBegrunnelseType.REDUKSJON -> !ytelseTyperForPeriode.contains(ytelseType) &&
             ytelseOppfyltForrigeMånedGammel(ytelseType, andelerTilkjentYtelse, fomForPeriode)
