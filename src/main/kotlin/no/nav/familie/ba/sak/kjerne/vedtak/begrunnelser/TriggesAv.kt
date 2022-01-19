@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser
 
 import no.nav.familie.ba.sak.kjerne.brev.UtvidetScenarioForEndringsperiode
-import no.nav.familie.ba.sak.kjerne.brev.domene.IMinimertEndretAndel
+import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertEndretAndel
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityVilkår
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
@@ -46,11 +46,11 @@ fun triggesAvSkalUtbetales(
 fun TriggesAv.erTriggereOppfyltForEndretUtbetaling(
     vilkår: List<SanityVilkår>?,
     utvidetScenario: UtvidetScenarioForEndringsperiode,
-    endretUtbetalingAndel: IMinimertEndretAndel
+    minimertEndretAndel: MinimertEndretAndel
 ): Boolean {
     val hørerTilEtterEndretUtbetaling = this.etterEndretUtbetaling
 
-    val oppfyllerSkalUtbetalesTrigger = endretUtbetalingAndel.oppfyllerSkalUtbetalesTrigger(this)
+    val oppfyllerSkalUtbetalesTrigger = minimertEndretAndel.oppfyllerSkalUtbetalesTrigger(this)
 
     val oppfyllerUtvidetScenario = oppfyllerUtvidetScenario(utvidetScenario, vilkår)
 
@@ -59,7 +59,7 @@ fun TriggesAv.erTriggereOppfyltForEndretUtbetaling(
         oppfyllerUtvidetScenario
 }
 
-fun IMinimertEndretAndel.oppfyllerSkalUtbetalesTrigger(
+fun MinimertEndretAndel.oppfyllerSkalUtbetalesTrigger(
     triggesAv: TriggesAv
 ): Boolean {
     val inneholderAndelSomSkalUtbetales = this.prosent!! != BigDecimal.ZERO

@@ -1,8 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser
 
-import io.mockk.mockk
-import no.nav.familie.ba.sak.common.lagEndretUtbetalingAndel
 import no.nav.familie.ba.sak.common.lagTriggesAv
+import no.nav.familie.ba.sak.dataGenerator.endretUtbetaling.lagMinimertEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.brev.UtvidetScenarioForEndringsperiode
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityVilkår
 import org.junit.jupiter.api.Assertions
@@ -18,9 +17,13 @@ class TriggesAvTest {
     val utvidetScenarioIkkeUtvidet = UtvidetScenarioForEndringsperiode.IKKE_UTVIDET_YTELSE
 
     val endretUtbetalingAndelNull =
-        lagEndretUtbetalingAndel(person = mockk(relaxed = true), prosent = BigDecimal.ZERO)
+        lagMinimertEndretUtbetalingAndel(
+            prosent = BigDecimal.ZERO
+        )
     val endretUtbetalingAndelIkkeNull =
-        lagEndretUtbetalingAndel(person = mockk(relaxed = true), prosent = BigDecimal.ONE)
+        lagMinimertEndretUtbetalingAndel(
+            prosent = BigDecimal.ONE
+        )
 
     val tiggesAvEtterEndretUtbetaling = lagTriggesAv(etterEndretUtbetaling = true, endretUtbetaingSkalUtbetales = true)
 
@@ -33,7 +36,7 @@ class TriggesAvTest {
         val erEtterEndretUbetaling = tiggesAvEtterEndretUtbetaling.erTriggereOppfyltForEndretUtbetaling(
             vilkår = vilkårMedUtvidetBarnetrygd,
             utvidetScenario = utvidetScenarioErUtvidetIkkeEndret,
-            endretUtbetalingAndel = endretUtbetalingAndelIkkeNull
+            minimertEndretAndel = endretUtbetalingAndelIkkeNull
         )
 
         Assertions.assertFalse(erEtterEndretUbetaling)
@@ -44,25 +47,25 @@ class TriggesAvTest {
         val skalUtbetalesMedUtbetaling = tiggesAvSkalUtbetales.erTriggereOppfyltForEndretUtbetaling(
             vilkår = vilkårMedUtvidetBarnetrygd,
             utvidetScenario = utvidetScenarioErUtvidetIkkeEndret,
-            endretUtbetalingAndel = endretUtbetalingAndelIkkeNull
+            minimertEndretAndel = endretUtbetalingAndelIkkeNull
         )
 
         val skalUtbetalesUtenUtbetaling = tiggesAvSkalUtbetales.erTriggereOppfyltForEndretUtbetaling(
             vilkår = vilkårMedUtvidetBarnetrygd,
             utvidetScenario = utvidetScenarioErUtvidetIkkeEndret,
-            endretUtbetalingAndel = endretUtbetalingAndelNull
+            minimertEndretAndel = endretUtbetalingAndelNull
         )
 
         val skalIkkeUtbetalesUtenUtbetaling = tiggesIkkeAvSkalUtbetales.erTriggereOppfyltForEndretUtbetaling(
             vilkår = vilkårMedUtvidetBarnetrygd,
             utvidetScenario = utvidetScenarioErUtvidetIkkeEndret,
-            endretUtbetalingAndel = endretUtbetalingAndelNull
+            minimertEndretAndel = endretUtbetalingAndelNull
         )
 
         val skalIkkeUtbetalesMedUtbetaling = tiggesIkkeAvSkalUtbetales.erTriggereOppfyltForEndretUtbetaling(
             vilkår = vilkårMedUtvidetBarnetrygd,
             utvidetScenario = utvidetScenarioErUtvidetIkkeEndret,
-            endretUtbetalingAndel = endretUtbetalingAndelIkkeNull
+            minimertEndretAndel = endretUtbetalingAndelIkkeNull
         )
 
         Assertions.assertTrue(skalUtbetalesMedUtbetaling)
@@ -76,22 +79,22 @@ class TriggesAvTest {
         val utvidetScenarioUtvidetVilkår = tiggesAvSkalUtbetales.erTriggereOppfyltForEndretUtbetaling(
             vilkår = vilkårMedUtvidetBarnetrygd,
             utvidetScenario = utvidetScenarioErUtvidetIkkeEndret,
-            endretUtbetalingAndel = endretUtbetalingAndelIkkeNull
+            minimertEndretAndel = endretUtbetalingAndelIkkeNull
         )
         val utvidetScenarioIkkeUtvidetVilkår = tiggesAvSkalUtbetales.erTriggereOppfyltForEndretUtbetaling(
             vilkår = vilkårMedUtvidetBarnetrygd,
             utvidetScenario = utvidetScenarioIkkeUtvidet,
-            endretUtbetalingAndel = endretUtbetalingAndelIkkeNull
+            minimertEndretAndel = endretUtbetalingAndelIkkeNull
         )
         val ikkeUtvidetScenarioIkkeUtvidetVilkår = tiggesAvSkalUtbetales.erTriggereOppfyltForEndretUtbetaling(
             vilkår = vilkårUtenUtvidetBarnetrygd,
             utvidetScenario = utvidetScenarioIkkeUtvidet,
-            endretUtbetalingAndel = endretUtbetalingAndelIkkeNull
+            minimertEndretAndel = endretUtbetalingAndelIkkeNull
         )
         val ikkeUtvidetScenarioUtvidetVilkår = tiggesAvSkalUtbetales.erTriggereOppfyltForEndretUtbetaling(
             vilkår = vilkårUtenUtvidetBarnetrygd,
             utvidetScenario = utvidetScenarioErUtvidetIkkeEndret,
-            endretUtbetalingAndel = endretUtbetalingAndelIkkeNull
+            minimertEndretAndel = endretUtbetalingAndelIkkeNull
         )
 
         Assertions.assertTrue(utvidetScenarioUtvidetVilkår)

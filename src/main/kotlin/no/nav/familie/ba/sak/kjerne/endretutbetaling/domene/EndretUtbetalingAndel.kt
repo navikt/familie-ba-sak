@@ -11,9 +11,9 @@ import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.ekstern.restDomene.RestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.brev.UtvidetScenarioForEndringsperiode
-import no.nav.familie.ba.sak.kjerne.brev.domene.IMinimertEndretAndel
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertRestEndretAndel
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
+import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilTriggesAv
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
@@ -60,19 +60,19 @@ data class EndretUtbetalingAndel(
     var person: Person? = null,
 
     @Column(name = "prosent")
-    override var prosent: BigDecimal? = null,
+    var prosent: BigDecimal? = null,
 
     @Column(name = "fom", columnDefinition = "DATE")
     @Convert(converter = YearMonthConverter::class)
-    override var fom: YearMonth? = null,
+    var fom: YearMonth? = null,
 
     @Column(name = "tom", columnDefinition = "DATE")
     @Convert(converter = YearMonthConverter::class)
-    override var tom: YearMonth? = null,
+    var tom: YearMonth? = null,
 
     @Enumerated(EnumType.STRING)
     @Column(name = "aarsak")
-    override var årsak: Årsak? = null,
+    var årsak: Årsak? = null,
 
     @Column(name = "avtaletidspunkt_delt_bosted")
     var avtaletidspunktDeltBosted: LocalDate? = null,
@@ -89,7 +89,7 @@ data class EndretUtbetalingAndel(
     @Column(name = "vedtak_begrunnelse_spesifikasjoner")
     @Convert(converter = VedtakBegrunnelseSpesifikasjonListConverter::class)
     var vedtakBegrunnelseSpesifikasjoner: List<VedtakBegrunnelseSpesifikasjon> = emptyList()
-) : BaseEntitet(), IMinimertEndretAndel {
+) : BaseEntitet() {
 
     fun overlapperMed(periode: MånedPeriode) = periode.overlapperHeltEllerDelvisMed(this.periode)
 
@@ -194,8 +194,8 @@ fun EndretUtbetalingAndel.hentGyldigEndretBegrunnelse(
                 val triggesAv = sanityBegrunnelse.tilTriggesAv()
                 triggesAv.erTriggereOppfyltForEndretUtbetaling(
                     vilkår = sanityBegrunnelse.vilkaar,
-                    utvidetScenario = UtvidetScenarioForEndringsperiode.UTVIDET_YTELSE_ENDRET,
-                    endretUtbetalingAndel = this
+                    utvidetScenario = utvidetScenarioForEndringsperiode,
+                    minimertEndretAndel = this.tilMinimertEndretUtbetalingAndel()
                 )
             } else false
         }
