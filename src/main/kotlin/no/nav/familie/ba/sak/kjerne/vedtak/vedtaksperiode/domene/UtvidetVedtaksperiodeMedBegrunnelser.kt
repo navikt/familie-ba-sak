@@ -2,8 +2,10 @@ package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.MånedPeriode
-import no.nav.familie.ba.sak.common.Periode
+import no.nav.familie.ba.sak.common.TIDENES_ENDE
+import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.convertDataClassToJson
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.MinimertUregistrertBarn
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.RestBehandlingsgrunnlagForBrev
@@ -32,10 +34,10 @@ data class UtvidetVedtaksperiodeMedBegrunnelser(
     val gyldigeBegrunnelser: List<VedtakBegrunnelseSpesifikasjon> = emptyList(),
     val utbetalingsperiodeDetaljer: List<UtbetalingsperiodeDetalj> = emptyList(),
 ) {
-
-    fun hentPeriodeThrows() = Periode(fom!!, tom!!)
-
-    fun hentMånedPeriodeThrows(): MånedPeriode = this.hentPeriodeThrows().tilMånedPeriode()
+    fun hentMånedPeriode() = MånedPeriode(
+        (this.fom ?: TIDENES_MORGEN).toYearMonth(),
+        (this.tom ?: TIDENES_ENDE).toYearMonth()
+    )
 
     fun hentBegrunnelserOgFritekster(
         restBehandlingsgrunnlagForBrev: RestBehandlingsgrunnlagForBrev,

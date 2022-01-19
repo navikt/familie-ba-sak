@@ -315,7 +315,7 @@ class VedtaksperiodeService(
                             ),
                             utvidetScenarioForEndringsperiode = andelerTilkjentYtelse
                                 .hentUtvidetScenarioForEndringsperiode(
-                                    utvidetVedtaksperiodeMedBegrunnelser.hentMånedPeriodeThrows()
+                                    utvidetVedtaksperiodeMedBegrunnelser.hentMånedPeriode()
                                 )
                         )
                     else
