@@ -9,10 +9,10 @@ import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.MinimertUregistrertBarn
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.hentUtvidetScenarioForEndringsperiode
-import no.nav.familie.ba.sak.kjerne.brev.domene.BrevGrunnlag
 import no.nav.familie.ba.sak.kjerne.brev.domene.BrevPeriodeGrunnlag
 import no.nav.familie.ba.sak.kjerne.brev.domene.BrevPeriodeGrunnlagMedPersoner
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertUtbetalingsperiodeDetalj
+import no.nav.familie.ba.sak.kjerne.brev.domene.RestBehandlingsgrunnlagForBrev
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.EndretUtbetalingBrevPeriodeType
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.AvslagBrevPeriode
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.AvslagUtenPeriodeBrevPeriode
@@ -63,7 +63,7 @@ fun List<MinimertUtbetalingsperiodeDetalj>.totaltUtbetalt(): Int =
 fun hentBrevPerioder(
     brevPerioderGrunnlag: List<BrevPeriodeGrunnlag>,
     andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
-    brevGrunnlag: BrevGrunnlag,
+    restBehandlingsgrunnlagForBrev: RestBehandlingsgrunnlagForBrev,
     uregistrerteBarn: List<MinimertUregistrertBarn>,
     målform: Målform,
 ) = brevPerioderGrunnlag
@@ -72,7 +72,7 @@ fun hentBrevPerioder(
             .hentUtvidetScenarioForEndringsperiode(it.hentMånedPeriode())
         try {
             it.tilBrevPeriode(
-                brevGrunnlag = brevGrunnlag,
+                restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev,
                 uregistrerteBarn = uregistrerteBarn,
                 utvidetScenarioForEndringsperiode = utvidetScenarioForEndringsperiode,
                 erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak(andelerTilkjentYtelse, it.fom),
@@ -80,7 +80,7 @@ fun hentBrevPerioder(
             )
         } catch (exception: Exception) {
             val brevPeriodeForLogging = it.tilBrevPeriodeForLogging(
-                brevGrunnlag = brevGrunnlag,
+                restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev,
                 uregistrerteBarn = uregistrerteBarn,
                 utvidetScenarioForEndringsperiode = utvidetScenarioForEndringsperiode,
                 erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak(andelerTilkjentYtelse, it.fom),
@@ -104,18 +104,18 @@ enum class UtvidetScenarioForEndringsperiode {
 }
 
 fun BrevPeriodeGrunnlag.tilBrevPeriode(
-    brevGrunnlag: BrevGrunnlag,
+    restBehandlingsgrunnlagForBrev: RestBehandlingsgrunnlagForBrev,
     utvidetScenarioForEndringsperiode: UtvidetScenarioForEndringsperiode = UtvidetScenarioForEndringsperiode.IKKE_UTVIDET_YTELSE,
     uregistrerteBarn: List<MinimertUregistrertBarn> = emptyList(),
     erFørsteVedtaksperiodePåFagsak: Boolean,
     brevMålform: Målform
 ): BrevPeriode? {
     val brevPeriodeGrunnlagMedPersoner =
-        this.tilBrevPeriodeGrunnlagMedPersoner(brevGrunnlag, erFørsteVedtaksperiodePåFagsak)
+        this.tilBrevPeriodeGrunnlagMedPersoner(restBehandlingsgrunnlagForBrev, erFørsteVedtaksperiodePåFagsak)
 
     val begrunnelserOgFritekster = brevPeriodeGrunnlagMedPersoner.byggBegrunnelserOgFritekster(
         uregistrerteBarn = uregistrerteBarn,
-        brevGrunnlag = brevGrunnlag,
+        restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev,
         brevMålform = brevMålform
     )
 
@@ -135,7 +135,7 @@ fun BrevPeriodeGrunnlag.tilBrevPeriode(
         Vedtaksperiodetype.UTBETALING -> brevPeriodeGrunnlagMedPersoner.hentInnvilgelseBrevPeriode(
             tomDato = tomDato,
             begrunnelserOgFritekster = begrunnelserOgFritekster,
-            personerPåBehandling = brevGrunnlag.personerPåBehandling,
+            personerPåBehandling = restBehandlingsgrunnlagForBrev.personerPåBehandling,
         )
 
         Vedtaksperiodetype.ENDRET_UTBETALING -> brevPeriodeGrunnlagMedPersoner.hentEndretUtbetalingBrevPeriode(
@@ -259,13 +259,13 @@ private fun BrevPeriodeGrunnlagMedPersoner.hentFortsattInnvilgetBrevPeriode(
     )
 }
 
-fun hentBrevGrunnlag(
+fun hentRestBehandlingsgrunnlagForBrev(
     persongrunnlag: PersonopplysningGrunnlag,
     vilkårsvurdering: Vilkårsvurdering,
     endredeUtbetalingAndeler: List<EndretUtbetalingAndel>
-): BrevGrunnlag {
+): RestBehandlingsgrunnlagForBrev {
 
-    return BrevGrunnlag(
+    return RestBehandlingsgrunnlagForBrev(
         personerPåBehandling = persongrunnlag.personer.map { it.tilMinimertPerson() },
         minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
         minimerteEndredeUtbetalingAndeler = endredeUtbetalingAndeler.map { it.tilMinimertRestEndretUtbetalingAndel() },

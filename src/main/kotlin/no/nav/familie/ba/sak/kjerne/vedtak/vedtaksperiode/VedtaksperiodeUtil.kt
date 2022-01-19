@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.SatsService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.lagVertikaleSegmenter
+import no.nav.familie.ba.sak.kjerne.brev.UtvidetScenarioForEndringsperiode
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertEndretAndel
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertRestPersonResultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
@@ -114,7 +115,7 @@ fun erFørsteVedtaksperiodePåFagsak(
     )
 }
 
-fun hentGyldigeBegrunnelserForVedtaksperiode(
+fun hentGyldigeBegrunnelserForVedtaksperiodeGammel(
     minimertVedtaksperiode: MinimertVedtaksperiode,
     sanityBegrunnelser: List<SanityBegrunnelse>,
     minimertePersoner: List<MinimertPerson>,
@@ -123,6 +124,7 @@ fun hentGyldigeBegrunnelserForVedtaksperiode(
     minimerteEndredeUtbetalingAndeler: List<MinimertEndretAndel>,
     erFørsteVedtaksperiodePåFagsak: Boolean,
     ytelserForSøkerForrigeMåned: List<YtelseType>,
+    utvidetScenarioForEndringsperiode: UtvidetScenarioForEndringsperiode,
 ): List<VedtakBegrunnelseSpesifikasjon> {
     val tillateBegrunnelserForVedtakstype = VedtakBegrunnelseSpesifikasjon.values()
         .filter {
@@ -149,6 +151,7 @@ fun hentGyldigeBegrunnelserForVedtaksperiode(
                                 sanityBegrunnelser = sanityBegrunnelser,
                                 erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
                                 ytelserForSøkerForrigeMåned = ytelserForSøkerForrigeMåned,
+                                utvidetScenarioForEndringsperiode = utvidetScenarioForEndringsperiode
                             )
                         ) {
                             acc.add(standardBegrunnelse)
