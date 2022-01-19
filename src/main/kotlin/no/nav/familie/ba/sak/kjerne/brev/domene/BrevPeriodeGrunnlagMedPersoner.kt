@@ -21,7 +21,7 @@ data class BrevPeriodeGrunnlagMedPersoner(
     val erFørsteVedtaksperiodePåFagsak: Boolean,
 ) {
     fun byggBegrunnelserOgFritekster(
-        brevGrunnlag: BrevGrunnlag,
+        restBehandlingsgrunnlagForBrev: RestBehandlingsgrunnlagForBrev,
         uregistrerteBarn: List<MinimertUregistrertBarn> = emptyList(),
         brevMålform: Målform
     ): List<Begrunnelse> {
@@ -31,7 +31,7 @@ data class BrevPeriodeGrunnlagMedPersoner(
             .map {
                 it.tilBrevBegrunnelse(
                     vedtaksperiode = NullablePeriode(this.fom, this.tom),
-                    personerIPersongrunnlag = brevGrunnlag.personerPåBehandling,
+                    personerIPersongrunnlag = restBehandlingsgrunnlagForBrev.personerPåBehandling,
                     brevMålform = brevMålform,
                     uregistrerteBarn = uregistrerteBarn,
                     beløp = Utils.formaterBeløp(this.beløpUtbetaltFor(it.personIdenter)),
