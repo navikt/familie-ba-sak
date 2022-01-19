@@ -101,16 +101,6 @@
             <artifactId>spring-vault-core</artifactId>
             <version>${spring.vault.version}</version>
         </dependency>
-        <!--<dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-bootstrap</artifactId>
-            <version>${spring.cloud.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-vault-config-databases</artifactId>
-            <version>${spring.cloud.version}</version>
-        </dependency>-->
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-contract-wiremock</artifactId>
