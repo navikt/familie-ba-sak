@@ -55,8 +55,9 @@ object YtelsePersonUtils {
                 resultater.add(YtelsePersonResultat.OPPHØRT)
             }
 
-            if (finnesInnvilget(personSomSjekkes = ytelsePerson, segmenterLagtTil = segmenterLagtTil) || finnesØkning(
-                    behandlingsresultatPerson = behandlingsresultatPerson
+            if (finnesInnvilget(
+                    behandlingsresultatPerson = behandlingsresultatPerson,
+                    segmenterLagtTil = segmenterLagtTil
                 )
             ) {
                 resultater.add(YtelsePersonResultat.INNVILGET)
@@ -152,18 +153,18 @@ object YtelsePersonUtils {
         andelerMedEndretBeløp(
             forrigeAndeler = forrigeAndeler,
             andeler = andeler
-        ).any { andel -> andel.any { it != 0 } }
+        ).isNotEmpty()
 
     private fun andelerMedEndretBeløp(
         forrigeAndeler: List<BehandlingsresultatAndelTilkjentYtelse>,
         andeler: List<BehandlingsresultatAndelTilkjentYtelse>
-    ): List<List<Int>> = andeler.map { andel ->
+    ): List<Int> = andeler.flatMap { andel ->
         val andelerFraForrigeBehandlingISammePeriode =
             forrigeAndeler.filter { it.periode.overlapperHeltEllerDelvisMed(andel.periode) }
 
         andelerFraForrigeBehandlingISammePeriode.map {
             andel.kalkulertUtbetalingsbeløp - it.kalkulertUtbetalingsbeløp
-        }
+        }.filter { it != 0 }
     }
 
     private fun avslagPåNyPerson(
@@ -173,19 +174,16 @@ object YtelsePersonUtils {
         personSomSjekkes.kravOpprinnelse == listOf(KravOpprinnelse.INNEVÆRENDE) && segmenterLagtTil.isEmpty
 
     private fun finnesInnvilget(
-        personSomSjekkes: YtelsePerson,
+        behandlingsresultatPerson: BehandlingsresultatPerson,
         segmenterLagtTil: LocalDateTimeline<BehandlingsresultatAndelTilkjentYtelse>
     ) =
-        personSomSjekkes.erFramstiltKravForIInneværendeBehandling() && !segmenterLagtTil.isEmpty
-
-    private fun finnesØkning(
-        behandlingsresultatPerson: BehandlingsresultatPerson,
-    ) =
         behandlingsresultatPerson.utledYtelsePerson()
-            .erFramstiltKravForIInneværendeBehandling() && andelerMedEndretBeløp(
-            forrigeAndeler = behandlingsresultatPerson.forrigeAndeler,
-            andeler = behandlingsresultatPerson.andeler
-        ).any { andel -> andel.any { it > 0 } }
+            .erFramstiltKravForIInneværendeBehandling() && (
+            !segmenterLagtTil.isEmpty || andelerMedEndretBeløp(
+                forrigeAndeler = behandlingsresultatPerson.forrigeAndeler,
+                andeler = behandlingsresultatPerson.andeler
+            ).any { it > 0 }
+            )
 
     private fun erYtelsenOpphørt(
         andeler: List<BehandlingsresultatAndelTilkjentYtelse>,
