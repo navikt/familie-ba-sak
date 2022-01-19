@@ -1,6 +1,8 @@
 name: Build-Deploy-Prod-GCP
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - 'master'
 env:
   IMAGE: ghcr.io/navikt/familie-ba-sak:${{ github.sha }}
   IMAGE_LATEST: ghcr.io/navikt/familie-ba-sak:latest
