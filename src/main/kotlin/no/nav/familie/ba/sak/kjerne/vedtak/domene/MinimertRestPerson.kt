@@ -6,10 +6,10 @@ import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPerson
-import no.nav.familie.ba.sak.kjerne.brev.domene.BrevGrunnlag
 import no.nav.familie.ba.sak.kjerne.brev.domene.BrevPeriodeGrunnlag
 import no.nav.familie.ba.sak.kjerne.brev.domene.BrevPeriodePersonForLogging
 import no.nav.familie.ba.sak.kjerne.brev.domene.EndretUtbetalingAndelPåPersonForLogging
+import no.nav.familie.ba.sak.kjerne.brev.domene.RestBehandlingsgrunnlagForBrev
 import no.nav.familie.ba.sak.kjerne.brev.domene.UtbetalingPåPersonForLogging
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -75,12 +75,12 @@ fun List<MinimertRestPerson>.tilBarnasFødselsdatoer(): String =
 
 fun MinimertRestPerson.tilBrevPeriodeTestPerson(
     brevPeriodeGrunnlag: BrevPeriodeGrunnlag,
-    brevGrunnlag: BrevGrunnlag,
+    restBehandlingsgrunnlagForBrev: RestBehandlingsgrunnlagForBrev,
 ): BrevPeriodePersonForLogging {
     val minimertePersonResultater =
-        brevGrunnlag.minimertePersonResultater.firstOrNull { it.personIdent == this.personIdent }!!
+        restBehandlingsgrunnlagForBrev.minimertePersonResultater.firstOrNull { it.personIdent == this.personIdent }!!
     val minimerteEndretUtbetalingAndelPåPerson =
-        brevGrunnlag.minimerteEndredeUtbetalingAndeler.filter { it.personIdent == this.personIdent }
+        restBehandlingsgrunnlagForBrev.minimerteEndredeUtbetalingAndeler.filter { it.personIdent == this.personIdent }
     val minimerteUtbetalingsperiodeDetaljer = brevPeriodeGrunnlag.minimerteUtbetalingsperiodeDetaljer.filter {
         it.person.personIdent == this.personIdent
     }

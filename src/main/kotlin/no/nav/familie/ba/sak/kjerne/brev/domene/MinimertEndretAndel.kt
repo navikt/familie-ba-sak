@@ -8,24 +8,26 @@ import no.nav.familie.ba.sak.common.overlapperHeltEllerDelvisMed
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
+import java.math.BigDecimal
+import java.time.YearMonth
 
-/**
- * NB: Bør ikke brukes internt, men kun ut mot eksterne tjenester siden klassen
- * inneholder personIdent og ikke aktørId.
- */
-data class MinimertRestEndretAndel(
-    val periode: MånedPeriode,
-    val personIdent: String,
-    val årsak: Årsak,
+class MinimertEndretAndel(
+    val aktørId: String,
+    val fom: YearMonth?,
+    val tom: YearMonth?,
+    val årsak: Årsak?,
+    val prosent: BigDecimal?
 ) {
+    fun månedPeriode() = MånedPeriode(fom!!, tom!!)
+
     fun erOverlappendeMed(nullableMånedPeriode: NullableMånedPeriode): Boolean {
         if (nullableMånedPeriode.fom == null) {
             throw Feil("Fom ble null ved sjekk av overlapp av periode til endretUtbetalingAndel")
         }
 
         return MånedPeriode(
-            this.periode.fom,
-            this.periode.tom
+            this.fom!!,
+            this.tom!!,
         ).overlapperHeltEllerDelvisMed(
             MånedPeriode(
                 nullableMånedPeriode.fom,
@@ -35,17 +37,19 @@ data class MinimertRestEndretAndel(
     }
 }
 
-fun List<MinimertRestEndretAndel>.somOverlapper(nullableMånedPeriode: NullableMånedPeriode) =
+fun List<MinimertEndretAndel>.somOverlapper(nullableMånedPeriode: NullableMånedPeriode) =
     this.filter { it.erOverlappendeMed(nullableMånedPeriode) }
 
-fun EndretUtbetalingAndel.tilMinimertRestEndretUtbetalingAndel() = MinimertRestEndretAndel(
-    periode = this.periode,
-    personIdent = this.person?.aktør?.aktivFødselsnummer() ?: throw Feil(
-        "Har ikke ident på endretUtbetalingsandel ${this.id} " +
-            "ved konvertering til minimertRestEndretUtbetalingsandel"
+fun EndretUtbetalingAndel.tilMinimertEndretUtbetalingAndel() = MinimertEndretAndel(
+    fom = this.fom!!,
+    tom = this.tom!!,
+    aktørId = this.person?.aktør?.aktørId ?: throw Feil(
+        "Finner ikke aktørId på endretUtbetalingsandel ${this.id} " +
+            "ved konvertering til minimertEndretUtbetalingsandel"
     ),
     årsak = this.årsak ?: throw Feil(
         "Har ikke årsak på endretUtbetalingsandel ${this.id} " +
-            "ved konvertering til minimertRestEndretUtbetalingsandel"
-    )
+            "ved konvertering til minimertEndretUtbetalingsandel"
+    ),
+    prosent = this.prosent
 )

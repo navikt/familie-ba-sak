@@ -109,6 +109,8 @@ class FeatureToggleConfig(
         const val KAN_BEHANDLE_EØS = "familie-ba-sak.behandling.eos"
         const val IKKE_STOPP_MIGRERINGSBEHANDLING = "familie-ba-sak.ikke.stopp.migeringsbehandling"
         const val AUTOBREV_OPPHØR_SMÅBARNSTILLEGG = "familie-ba-sak.autobrev-opphor-smaabarnstillegg"
+        const val ENDRET_UTBETALING_VEDTAKSSIDEN = "familie-ba-sak.endret-utbetaling-vedtakssiden.utgivelse"
+
         const val TEKNISK_VEDLIKEHOLD_HENLEGGELSE = "familie-ba-sak.teknisk-vedlikehold-henleggelse.tilgangsstyring"
 
         private val logger = LoggerFactory.getLogger(FeatureToggleConfig::class.java)

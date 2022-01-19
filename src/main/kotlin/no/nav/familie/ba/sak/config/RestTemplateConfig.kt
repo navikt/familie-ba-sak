@@ -46,9 +46,6 @@ class RestTemplateConfig(
                 ByteArrayHttpMessageConverter(),
                 MappingJackson2HttpMessageConverter(objectMapper)
             )
-            .also {
-                if (trengerProxy()) it.additionalCustomizers(NaisProxyCustomizer())
-            }
             .build()
     }
 
@@ -67,9 +64,6 @@ class RestTemplateConfig(
                 ByteArrayHttpMessageConverter(),
                 MappingJackson2HttpMessageConverter(objectMapper)
             )
-            .also {
-                if (trengerProxy()) it.additionalCustomizers(NaisProxyCustomizer())
-            }
             .build()
     }
 
@@ -90,9 +84,6 @@ class RestTemplateConfig(
                 ByteArrayHttpMessageConverter(),
                 MappingJackson2HttpMessageConverter(objectMapper)
             )
-            .also {
-                if (trengerProxy()) it.additionalCustomizers(NaisProxyCustomizer())
-            }
             .build()
     }
 
@@ -120,23 +111,10 @@ class RestTemplateConfig(
         consumerIdClientInterceptor: ConsumerIdClientInterceptor,
         mdcValuesPropagatingClientInterceptor: MdcValuesPropagatingClientInterceptor
     ): RestTemplateBuilder {
-        val restTemplateBuilder = RestTemplateBuilder()
+        return RestTemplateBuilder()
             .setConnectTimeout(Duration.ofSeconds(5))
             .setReadTimeout(Duration.ofSeconds(5))
             .additionalInterceptors(consumerIdClientInterceptor, mdcValuesPropagatingClientInterceptor)
-
-        return if (trengerProxy()) {
-            restTemplateBuilder
-                .additionalCustomizers(NaisProxyCustomizer())
-        } else {
-            restTemplateBuilder
-        }
-    }
-
-    private fun trengerProxy(): Boolean {
-        return !environment.activeProfiles.any {
-            listOf("dev", "postgres").contains(it.trim(' '))
-        }
     }
 }
 
