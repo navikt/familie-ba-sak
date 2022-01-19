@@ -203,7 +203,8 @@ class BrevService(
         val hjemler = hentHjemmeltekst(
             brevPeriodeGrunnlag = brevPerioderGrunnlag,
             sanityBegrunnelser = sanityBegrunnelser,
-            opplysningspliktVilkår = vilkårsvurdering.personResultater.single { it.erSøkersResultater() }.andreVurderinger.singleOrNull { it.type == AnnenVurderingType.OPPLYSNINGSPLIKT })
+            opplysningspliktVilkår = vilkårsvurdering.personResultater.single { it.erSøkersResultater() }.andreVurderinger.singleOrNull { it.type == AnnenVurderingType.OPPLYSNINGSPLIKT }
+        )
 
         return VedtakFellesfelter(
             enhet = grunnlagOgSignaturData.enhet,
