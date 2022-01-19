@@ -7,53 +7,41 @@ metadata:
     team: teamfamilie
 
 spec:
+  envFrom:
+    - secret: familie-ba-sak
   image: {{image}}
   port: 8089
   leaderElection: true
   liveness:
     path: /internal/health
-    initialDelay: 20
+    initialDelay: 30
     failureThreshold: 10
   readiness:
     path: /internal/health
-    initialDelay: 20
+    initialDelay: 30
     failureThreshold: 10
   prometheus:
     enabled: true
     path: /internal/prometheus
   vault:
-    enabled: true
-    paths:
-      - kvPath: /serviceuser/data/prod/srvfamilie-ba-sak
-        mountPath: /var/run/secrets/srvfamilie-ba-sak
-  replicas:
-    min: 2
-    max: 4
-    cpuThresholdPercentage: 50
-  resources:
-    limits:
-      memory: 2048Mi
-      cpu: "1"
-    requests:
-      memory: 1024Mi
-      cpu: 200m
-  secureLogs:
-    enabled: true
-  kafka:
-    pool: nav-prod
-  ingresses: # Optional. List of ingress URLs that will route HTTP traffic to the application.
-    - https://familie-ba-sak.nais.adeo.no
-    - https://familie-ba-sak.prod-fss-pub.nais.io
-  env:
-    - name: SPRING_PROFILES_ACTIVE
-      value: prod
-    - name: SRVUSER_BA_SAK_SECRET
-      value: /var/run/secrets/srvfamilie-ba-sak/password
+    enabled: false
+  gcp: # Database
+    sqlInstances:
+      - type: POSTGRES_12 # IF This is changed, all data will be lost. Read on nais.io how to upgrade
+        name: familie-ba-sak
+        autoBackupTime: "02:00"
+        diskAutoresize: true
+        highAvailability: true
+        databases:
+          - name: familie-ba-sak
+            envVarPrefix: DB
   azure:
     application:
       enabled: true
       allowAllUsers: false
       claims:
+        extra:
+          - "NAVident"
         groups:
           - id: "87190cf3-b278-457d-8ab7-1a5c55a9edd7"  # Group_87190cf3-b278-457d-8ab7-1a5c55a9edd7 tilgang til prosessering
           - id: "199c2b39-e535-4ae8-ac59-8ccbee7991ae"  # VEILEDER_ROLLE
@@ -63,25 +51,50 @@ spec:
     inbound:
       rules:
         - application: familie-ba-sak-frontend
-        - application: familie-ba-sak-frontend
           cluster: prod-gcp
         - application: familie-ba-mottak
+          cluster: prod-fss
         - application: familie-prosessering
           cluster: prod-gcp
         - application: familie-ba-skatteetaten-api
           cluster: prod-gcp
         - application: familie-ba-migrering
           cluster: prod-gcp
-        - application: bidrag-grunnlag
-          cluster: prod-gcp
+        - application: bidrag-grunnlag-feature
           namespace: bidrag
+          cluster: prod-gcp
+        - application: bidrag-grunnlag
+          namespace: bidrag
+          cluster: prod-gcp
     outbound:
       rules:
         - application: familie-brev
           cluster: prod-gcp
         - application: familie-integrasjoner
+          cluster: prod-fss
         - application: familie-ba-infotrygd-feed
+          cluster: prod-fss
         - application: familie-ba-infotrygd
+          cluster: prod-fss
         - application: familie-ef-sak
           cluster: prod-gcp
-
+  replicas:
+    min: 2
+    max: 4
+    cpuThresholdPercentage: 50
+  resources:
+    limits:
+      memory: 1024Mi
+      cpu: "1"
+    requests:
+      memory: 512Mi
+      cpu: 500m
+  ingresses:
+    - https://familie-ba-sak.intern.nav.no
+  secureLogs:
+    enabled: true
+  env:
+    - name: SPRING_PROFILES_ACTIVE
+      value: prod
+  kafka:
+    pool: nav-prod

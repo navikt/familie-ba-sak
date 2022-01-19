@@ -1,11 +1,7 @@
-FAMILIE_EF_SAK_API_URL_SCOPE: api://prod-gcp.teamfamilie.familie-ef-sak/.default
-FAMILIE_EF_SAK_API_URL: https://familie-ef-sak.intern.nav.no/api
-
 no.nav.security.jwt:
   issuer.azuread:
     discoveryurl: ${AZURE_APP_WELL_KNOWN_URL}
     accepted_audience: ${AZURE_APP_CLIENT_ID}
-    proxyurl: http://webproxy-nais.nav.no:8088
     cookie_name: azure_token
   client:
     registration:
@@ -22,7 +18,7 @@ no.nav.security.jwt:
         resource-url: ${PDL_URL}
         token-endpoint-url: ${AZURE_OPENID_CONFIG_TOKEN_ENDPOINT}
         grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
-        scope: api://prod-fss.pdl.pdl-api/.default
+        scope: ${PDL_SCOPE}
         authentication:
           client-id: ${AZURE_APP_CLIENT_ID}
           client-secret: ${AZURE_APP_CLIENT_SECRET}
@@ -31,7 +27,7 @@ no.nav.security.jwt:
         resource-url: ${PDL_URL}
         token-endpoint-url: ${AZURE_OPENID_CONFIG_TOKEN_ENDPOINT}
         grant-type: client_credentials
-        scope: api://prod-fss.pdl.pdl-api/.default
+        scope: ${PDL_SCOPE}
         authentication:
           client-id: ${AZURE_APP_CLIENT_ID}
           client-secret: ${AZURE_APP_CLIENT_SECRET}
@@ -136,19 +132,28 @@ rolle:
 
 spring:
   datasource:
-    url: jdbc:postgresql://A01DBVL010.adeo.no:5432/familie-ba-sak
+    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/familie-ba-sak
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
   kafka:
     bootstrap-servers: a01apvl00145.adeo.no:8443,a01apvl00146.adeo.no:8443,a01apvl00147.adeo.no:8443,a01apvl00148.adeo.no:8443,a01apvl00149.adeo.no:8443,a01apvl00150.adeo.no:8443
 
-# Appdynamics
-APPDYNAMICS_CONTROLLER_HOST_NAME: appdynamics.adeo.no
-APPDYNAMICS_CONTROLLER_PORT: 443
-APPDYNAMICS_CONTROLLER_SSL_ENABLED: true
-APPDYNAMICS_AGENT_ACCOUNT_NAME: PROD
 SANITY_DATASET: "ba-brev"
 
 NORG2_BASE_URL: https://app.adeo.no/norg2
 FAMILIE_BREV_API_URL: https://familie-brev.intern.nav.no
 FAMILIE_TILBAKE_API_URL: https://familie-tilbake.intern.nav.no/api
+FAMILIE_TILBAKE_API_URL_SCOPE: api://prod-gcp.teamfamilie.familie-tilbake/.default
+FAMILIE_EF_SAK_API_URL_SCOPE: api://prod-gcp.teamfamilie.familie-ef-sak/.default
+FAMILIE_EF_SAK_API_URL: https://familie-ef-sak.intern.nav.no/api
+FAMILIE_INTEGRASJONER_API_URL: https://familie-integrasjoner.prod-fss-pub.nais.io/api
+FAMILIE_BA_INFOTRYGD_FEED_SCOPE: api://prod-fss.teamfamilie.familie-ba-infotrygd-feed/.default
+FAMILIE_BA_INFOTRYGD_SCOPE: api://prod-fss.teamfamilie.familie-ba-infotrygd/.default
+FAMILIE_BA_INFOTRYGD_API_URL: https://familie-ba-infotrygd.prod-fss-pub.nais.io
+FAMILIE_OPPDRAG_API_URL: https://familie-oppdrag.prod-fss-pub.nais.io/api
+FAMILIE_BA_INFOTRYGD_FEED_API_URL: https://familie-ba-infotrygd-feed.prod-fss-pub.nais.io/api
+
+PDL_URL: https://pdl-api.prod-fss-pub.nais.io
+PDL_SCOPE: api://prod-fss.pdl.pdl-api/.default
 
 ENVIRONMENT_NAME: p

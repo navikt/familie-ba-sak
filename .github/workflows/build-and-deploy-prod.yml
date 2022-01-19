@@ -1,4 +1,4 @@
-name: Build-Deploy-Prod
+name: Build-Deploy-Prod-GCP
 on:
   push:
     branches:
@@ -8,7 +8,7 @@ env:
   IMAGE_LATEST: ghcr.io/navikt/familie-ba-sak:latest
 jobs:
   deploy-to-prod:
-    name: Bygg app/image, push til github, deploy til prod-fss og dev-fss
+    name: Bygg app/image, push til github, deploy til prod-gcp
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -37,9 +37,9 @@ jobs:
         run: docker push ${IMAGE}
       - name: Push Docker image med 'latest' tag
         run: docker push ${IMAGE_LATEST}
-      - name: Deploy til prod-fss
+      - name: Deploy til prod-gcp
         uses: nais/deploy/actions/deploy@v1
         env:
           APIKEY: ${{ secrets.GITHUB_ACCESS_TOKEN }}
-          CLUSTER: prod-fss
-          RESOURCE: app-prod.teamfamilie.yaml
+          CLUSTER: prod-gcp
+          RESOURCE: .deploy/nais/app-prod.yaml
