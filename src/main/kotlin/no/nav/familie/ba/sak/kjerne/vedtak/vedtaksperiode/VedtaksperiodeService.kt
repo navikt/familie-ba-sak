@@ -274,11 +274,6 @@ class VedtaksperiodeService(
         )
         val persongrunnlag =
             persongrunnlagService.hentAktivThrows(behandling.id)
-        val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id)
-            ?: error("Finner ikke vilkårsvurdering ved begrunning av vedtak")
-        val endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(
-            behandling.id
-        )
 
         val sanityBegrunnelser = sanityService.hentSanityBegrunnelser()
 
@@ -294,7 +289,13 @@ class VedtaksperiodeService(
             )
 
             val gyldigeBegrunnelser =
-                if (behandling.status == BehandlingStatus.UTREDES)
+                if (behandling.status == BehandlingStatus.UTREDES) {
+                    val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id)
+                        ?: error("Finner ikke vilkårsvurdering ved begrunning av vedtak")
+                    val endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(
+                        behandling.id
+                    )
+                    
                     if (featureToggleService.isEnabled(FeatureToggleConfig.ENDRET_UTBETALING_VEDTAKSSIDEN))
                         hentGyldigeBegrunnelserForVedtaksperiodeGammel(
                             minimertVedtaksperiode = utvidetVedtaksperiodeMedBegrunnelser.tilMinimertVedtaksperiode(),
@@ -326,7 +327,7 @@ class VedtaksperiodeService(
                             persongrunnlag,
                             andelerTilkjentYtelse
                         )
-                else emptyList()
+                } else emptyList()
 
             utvidetVedtaksperiodeMedBegrunnelser.copy(
                 gyldigeBegrunnelser = gyldigeBegrunnelser.filter {
