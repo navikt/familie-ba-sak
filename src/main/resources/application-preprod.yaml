@@ -143,7 +143,7 @@ PDL_SCOPE: api://dev-fss.pdl.pdl-api-q1/.default
 NORG2_BASE_URL: https://app-q1.adeo.no/norg2
 FAMILIE_BREV_API_URL: http://familie-brev
 FAMILIE_INTEGRASJONER_API_URL: https://familie-integrasjoner-q1.dev-fss-pub.nais.io/api
-FAMILIE_TILBAKE_API_URL: https://familie-tilbake.dev.intern.nav.no/api
+FAMILIE_TILBAKE_API_URL: http://familie-tilbake/api
 FAMILIE_TILBAKE_API_URL_SCOPE: api://dev-gcp.teamfamilie.familie-tilbake/.default
 FAMILIE_BA_INFOTRYGD_FEED_SCOPE: api://dev-fss.teamfamilie.familie-ba-infotrygd-feed/.default
 FAMILIE_BA_INFOTRYGD_SCOPE: api://dev-fss.teamfamilie.familie-ba-infotrygd/.default
