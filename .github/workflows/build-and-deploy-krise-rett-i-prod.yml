@@ -45,5 +45,5 @@ jobs:
         uses: nais/deploy/actions/deploy@v1
         env:
           APIKEY: ${{ secrets.GITHUB_ACCESS_TOKEN }}
-          CLUSTER: prod-fss
-          RESOURCE: app-prod.teamfamilie.yaml
+          CLUSTER: prod-gcp
+          RESOURCE: .deploy/nais/app-prod.yaml
