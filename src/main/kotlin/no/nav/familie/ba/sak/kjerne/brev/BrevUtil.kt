@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.tilMånedÅr
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat.AVSLÅTT
@@ -34,6 +35,7 @@ import no.nav.familie.ba.sak.kjerne.totrinnskontroll.domene.Totrinnskontroll
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.hjemlerTilhørendeFritekst
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Opphørsperiode
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurdering
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 
 fun hentBrevtype(behandling: Behandling): Brevmal =
@@ -194,10 +196,18 @@ fun hjemlerTilHjemmeltekst(hjemler: List<String>): String {
 
 fun hentHjemmeltekst(
     brevPeriodeGrunnlag: List<BrevPeriodeGrunnlag>,
-    sanityBegrunnelser: List<SanityBegrunnelse>
+    sanityBegrunnelser: List<SanityBegrunnelse>,
+    opplysningspliktVilkår: AnnenVurdering? = null
 ): String {
     val hjemler =
         hentHjemlerIVedtaksperioderFraSanity(brevPeriodeGrunnlag, sanityBegrunnelser).toMutableSet()
+
+    val opplysningspliktOppfylt = opplysningspliktVilkår?.resultat == Resultat.OPPFYLT
+    val hjemlerNårOpplysningspliktIkkeOppfylt = listOf("17", "18")
+
+    if (opplysningspliktVilkår != null && !opplysningspliktOppfylt) {
+        hjemler.addAll(hjemlerNårOpplysningspliktIkkeOppfylt)
+    }
 
     if (brevPeriodeGrunnlag.flatMap { it.fritekster }.isNotEmpty()) {
         hjemler.addAll(hjemlerTilhørendeFritekst.map { it.toString() }.toSet())

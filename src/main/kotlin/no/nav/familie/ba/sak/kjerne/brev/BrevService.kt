@@ -38,6 +38,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.sorter
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurderingType
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 
@@ -199,7 +200,10 @@ class BrevService(
             målform = grunnlagOgSignaturData.grunnlag.søker.målform
         )
 
-        val hjemler = hentHjemmeltekst(brevPerioderGrunnlag, sanityBegrunnelser)
+        val hjemler = hentHjemmeltekst(
+            brevPeriodeGrunnlag = brevPerioderGrunnlag,
+            sanityBegrunnelser = sanityBegrunnelser,
+            opplysningspliktVilkår = vilkårsvurdering.personResultater.single { it.erSøkersResultater() }.andreVurderinger.singleOrNull { it.type == AnnenVurderingType.OPPLYSNINGSPLIKT })
 
         return VedtakFellesfelter(
             enhet = grunnlagOgSignaturData.enhet,
