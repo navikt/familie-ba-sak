@@ -342,11 +342,15 @@ class StegService(
         try {
             logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} håndterer ${behandlingSteg.stegType()} på behandling ${behandling.id}")
             tilgangService.validerTilgangTilBehandling(behandlingId = behandling.id)
-            tilgangService.verifiserHarTilgangTilHandling(
-                minimumBehandlerRolle = behandlingSteg.stegType().tillattFor.minByOrNull { it.nivå }
-                    ?: throw Feil("${SikkerhetContext.hentSaksbehandlerNavn()} prøver å utføre steg ${behandlingSteg.stegType()} som ikke er tillatt av noen."),
-                handling = "utføre steg ${behandlingSteg.stegType().displayName()}"
-            )
+            if (behandling.erManuellMigrering() && behandlingSteg.stegType() == StegType.BESLUTTE_VEDTAK) {
+                verifiserBeslutteVedtakForManuellMigrering(behandlingSteg)
+            } else {
+                tilgangService.verifiserHarTilgangTilHandling(
+                    minimumBehandlerRolle = behandlingSteg.stegType().tillattFor.minByOrNull { it.nivå }
+                        ?: throw Feil("${SikkerhetContext.hentSaksbehandlerNavn()} prøver å utføre steg ${behandlingSteg.stegType()} som ikke er tillatt av noen."),
+                    handling = "utføre steg ${behandlingSteg.stegType().displayName()}"
+                )
+            }
 
             if (behandling.steg == SISTE_STEG) {
                 error("Behandling med id ${behandling.id} er avsluttet og stegprosessen kan ikke gjenåpnes")
@@ -416,6 +420,13 @@ class StegService(
 
             throw exception
         }
+    }
+
+    private fun verifiserBeslutteVedtakForManuellMigrering(behandlingSteg: BehandlingSteg<*>) {
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
+            handling = "utføre steg ${behandlingSteg.stegType().displayName()}"
+        )
     }
 
     fun hentBehandlingSteg(stegType: StegType): BehandlingSteg<*>? {
