@@ -1,20 +1,19 @@
 package no.nav.familie.ba.sak.config
 
 import org.flywaydb.core.api.configuration.FluentConfiguration
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.boot.autoconfigure.flyway.FlywayConfigurationCustomizer
+import org.springframework.boot.context.properties.ConstructorBinding
 import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Profile
 
-@Configuration
 @Profile("!dev")
+@ConstructorBinding
 @ConditionalOnProperty("spring.flyway.enabled")
-class FlywayConfiguration {
+data class FlywayConfiguration(private val role: String) {
 
     @Bean
-    fun flywayConfig(@Value("\${spring.cloud.vault.database.role}") role: String): FlywayConfigurationCustomizer {
+    fun flywayConfig(): FlywayConfigurationCustomizer {
         return FlywayConfigurationCustomizer { c: FluentConfiguration ->
             c.initSql("SET ROLE \"$role\"")
         }

@@ -181,7 +181,7 @@ class BrevService(
         val grunnlagOgSignaturData = hentGrunnlagOgSignaturData(vedtak)
         val andelerTilkjentYtelse =
             andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(vedtak.behandling.id)
-        val brevGrunnlag = hentBrevGrunnlag(
+        val restBehandlingsgrunnlagForBrev = hentRestBehandlingsgrunnlagForBrev(
             vilkårsvurdering = vilkårsvurdering,
             endredeUtbetalingAndeler = endredeUtbetalingAndeler,
             persongrunnlag = grunnlagOgSignaturData.grunnlag
@@ -195,7 +195,7 @@ class BrevService(
         val brevperioder = hentBrevPerioder(
             brevPerioderGrunnlag = brevPerioderGrunnlag,
             andelerTilkjentYtelse = andelerTilkjentYtelse,
-            brevGrunnlag = brevGrunnlag,
+            restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev,
             uregistrerteBarn = uregistrerteBarn,
             målform = grunnlagOgSignaturData.grunnlag.søker.målform
         )

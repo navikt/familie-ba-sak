@@ -8,13 +8,16 @@ server:
 
 spring:
   autoconfigure.exclude: org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration
-  main.banner-mode: "off"
+  main:
+    allow-bean-definition-overriding: true
+    banner-mode: "off"
   datasource:
     hikari:
       maximum-pool-size: 10
       connection-test-query: "select 1"
       max-lifetime: 30000
       minimum-idle: 1
+      data-source-properties.stringtype: unspecified # Nødvendig for å kunde sende en String til et json-felt i PostgresSql
   jpa:
     hibernate:
       ddl-auto: none

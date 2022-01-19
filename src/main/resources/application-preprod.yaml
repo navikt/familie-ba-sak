@@ -2,7 +2,6 @@ no.nav.security.jwt:
   issuer.azuread:
     discoveryurl: ${AZURE_APP_WELL_KNOWN_URL}
     accepted_audience: ${AZURE_APP_CLIENT_ID}
-    proxyurl: http://webproxy-nais.nav.no:8088
     cookie_name: azure_token
   client:
     registration:
@@ -126,7 +125,9 @@ no.nav.security.jwt:
 
 spring:
   datasource:
-    url: jdbc:postgresql://b27dbvl009.preprod.local:5432/familie-ba-sak
+    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/familie-ba-sak
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
   kafka:
     bootstrap-servers: b27apvl00045.preprod.local:8443,b27apvl00046.preprod.local:8443,b27apvl00047.preprod.local:8443
 
@@ -134,15 +135,20 @@ logging:
   level:
     root: INFO
 
-
 SANITY_DATASET: "ba-brev"
 
-PDL_URL: http://pdl-api-q1.pdl
+PDL_URL: https://pdl-api-q1.dev-fss-pub.nais.io
 PDL_SCOPE: api://dev-fss.pdl.pdl-api-q1/.default
 
 NORG2_BASE_URL: https://app-q1.adeo.no/norg2
-FAMILIE_BREV_API_URL: https://familie-brev.dev.intern.nav.no
-FAMILIE_INTEGRASJONER_API_URL: http://familie-integrasjoner-q1.teamfamilie/api
-FAMILIE_TILBAKE_API_URL: https://familie-tilbake.dev.intern.nav.no/api
+FAMILIE_BREV_API_URL: http://familie-brev
+FAMILIE_INTEGRASJONER_API_URL: https://familie-integrasjoner-q1.dev-fss-pub.nais.io/api
+FAMILIE_TILBAKE_API_URL: http://familie-tilbake/api
+FAMILIE_TILBAKE_API_URL_SCOPE: api://dev-gcp.teamfamilie.familie-tilbake/.default
+FAMILIE_BA_INFOTRYGD_FEED_SCOPE: api://dev-fss.teamfamilie.familie-ba-infotrygd-feed/.default
+FAMILIE_BA_INFOTRYGD_SCOPE: api://dev-fss.teamfamilie.familie-ba-infotrygd/.default
+FAMILIE_BA_INFOTRYGD_API_URL: https://familie-ba-infotrygd.dev-fss-pub.nais.io
+FAMILIE_OPPDRAG_API_URL: https://familie-oppdrag.dev-fss-pub.nais.io/api
+FAMILIE_BA_INFOTRYGD_FEED_API_URL: https://familie-ba-infotrygd-feed.dev-fss-pub.nais.io/api
 
 ENVIRONMENT_NAME: q2
