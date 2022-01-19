@@ -6,9 +6,11 @@ import no.nav.familie.ba.sak.common.lagRestVedtaksbegrunnelse
 import no.nav.familie.ba.sak.common.lagSanityBegrunnelse
 import no.nav.familie.ba.sak.common.lagUtbetalingsperiodeDetalj
 import no.nav.familie.ba.sak.common.lagUtvidetVedtaksperiodeMedBegrunnelser
+import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.dataGenerator.brev.lagBrevPeriodeGrunnlagMedPersoner
 import no.nav.familie.ba.sak.dataGenerator.brev.lagMinimertUtbetalingsperiodeDetalj
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
@@ -23,6 +25,10 @@ import no.nav.familie.ba.sak.kjerne.totrinnskontroll.domene.Totrinnskontroll
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Opphørsperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurdering
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurderingType
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
@@ -357,6 +363,152 @@ internal class BrevUtilsTest {
                         hjemler = listOf("10"),
                     )
                 )
+            )
+        )
+    }
+
+    @Test
+    fun `hentHjemmeltekst skal ikke inkludere hjemmel 17 og 18 hvis opplysningsplikt er oppfylt`() {
+        val utvidetVedtaksperioderMedBegrunnelser = listOf(
+            lagUtvidetVedtaksperiodeMedBegrunnelser(
+                begrunnelser = listOf(
+                    lagRestVedtaksbegrunnelse(
+                        vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET
+                    )
+                ),
+                utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj())
+            ),
+            lagUtvidetVedtaksperiodeMedBegrunnelser(
+                begrunnelser = listOf(
+                    lagRestVedtaksbegrunnelse(
+                        vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.INNVILGET_SATSENDRING
+                    )
+                ),
+                utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj())
+            )
+        )
+
+        Assertions.assertEquals(
+            "§§ 2, 4, 10 og 11",
+            hentHjemmeltekst(
+                brevPeriodeGrunnlag = utvidetVedtaksperioderMedBegrunnelser.map {
+                    it.tilBrevPeriodeGrunnlag(
+                        hentSanityBegrunnelser()
+                    )
+                },
+                sanityBegrunnelser = listOf(
+                    lagSanityBegrunnelse(
+                        apiNavn = VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET.sanityApiNavn,
+                        hjemler = listOf("11", "4", "2", "10"),
+                    ),
+                    lagSanityBegrunnelse(
+                        apiNavn = VedtakBegrunnelseSpesifikasjon.INNVILGET_SATSENDRING.sanityApiNavn,
+                        hjemler = listOf("10"),
+                    )
+                ),
+                opplysningspliktVilkår = AnnenVurdering(
+                    resultat = Resultat.OPPFYLT,
+                    type = AnnenVurderingType.OPPLYSNINGSPLIKT,
+                    personResultat = PersonResultat(
+                        vilkårsvurdering = Vilkårsvurdering(behandling = lagBehandling()),
+                        aktør = randomAktørId()
+                    )
+                )
+            )
+        )
+    }
+
+    @Test
+    fun `hentHjemmeltekst skal inkludere hjemmel 17 og 18 hvis opplysningsplikt ikke er oppfylt`() {
+        val utvidetVedtaksperioderMedBegrunnelser = listOf(
+            lagUtvidetVedtaksperiodeMedBegrunnelser(
+                begrunnelser = listOf(
+                    lagRestVedtaksbegrunnelse(
+                        vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET
+                    )
+                ),
+                utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj())
+            ),
+            lagUtvidetVedtaksperiodeMedBegrunnelser(
+                begrunnelser = listOf(
+                    lagRestVedtaksbegrunnelse(
+                        vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.INNVILGET_SATSENDRING
+                    )
+                ),
+                utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj())
+            )
+        )
+
+        Assertions.assertEquals(
+            "§§ 2, 4, 10, 11, 17 og 18",
+            hentHjemmeltekst(
+                brevPeriodeGrunnlag = utvidetVedtaksperioderMedBegrunnelser.map {
+                    it.tilBrevPeriodeGrunnlag(
+                        hentSanityBegrunnelser()
+                    )
+                },
+                sanityBegrunnelser = listOf(
+                    lagSanityBegrunnelse(
+                        apiNavn = VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET.sanityApiNavn,
+                        hjemler = listOf("11", "4", "2", "10"),
+                    ),
+                    lagSanityBegrunnelse(
+                        apiNavn = VedtakBegrunnelseSpesifikasjon.INNVILGET_SATSENDRING.sanityApiNavn,
+                        hjemler = listOf("10"),
+                    )
+                ),
+                opplysningspliktVilkår = AnnenVurdering(
+                    resultat = Resultat.IKKE_OPPFYLT,
+                    type = AnnenVurderingType.OPPLYSNINGSPLIKT,
+                    personResultat = PersonResultat(
+                        vilkårsvurdering = Vilkårsvurdering(behandling = lagBehandling()),
+                        aktør = randomAktørId()
+                    )
+                )
+            )
+        )
+    }
+
+    @Test
+    fun `hentHjemmeltekst skal ikke inkludere hjemmel 17 og 18 hvis opplysningsplikt ikke er et vilkår på behandlingen`() {
+        val utvidetVedtaksperioderMedBegrunnelser = listOf(
+            lagUtvidetVedtaksperiodeMedBegrunnelser(
+                begrunnelser = listOf(
+                    lagRestVedtaksbegrunnelse(
+                        vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET
+                    )
+                ),
+                utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj())
+            ),
+            lagUtvidetVedtaksperiodeMedBegrunnelser(
+                begrunnelser = listOf(
+                    lagRestVedtaksbegrunnelse(
+                        vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.INNVILGET_SATSENDRING
+                    )
+                ),
+                utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj())
+            )
+        )
+
+        Assertions.assertEquals(
+            "§§ 2, 4, 10 og 11",
+            hentHjemmeltekst(
+                brevPeriodeGrunnlag = utvidetVedtaksperioderMedBegrunnelser.map {
+                    it.tilBrevPeriodeGrunnlag(
+                        hentSanityBegrunnelser()
+                    )
+                },
+                sanityBegrunnelser = listOf(
+                    lagSanityBegrunnelse(
+                        apiNavn = VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET.sanityApiNavn,
+                        hjemler = listOf("11", "4", "2", "10"),
+                    ),
+                    lagSanityBegrunnelse(
+                        apiNavn = VedtakBegrunnelseSpesifikasjon.INNVILGET_SATSENDRING.sanityApiNavn,
+                        hjemler = listOf("10"),
+                    )
+                ),
+                opplysningspliktVilkår = null
             )
         )
     }
