@@ -309,7 +309,9 @@ enum class YtelseType(val klassifisering: String) {
     UTVIDET_BARNETRYGD("BATR"),
     SMÅBARNSTILLEGG("BATRSMA"),
     EØS("BATR"),
-    MANUELL_VURDERING("BATR")
+    MANUELL_VURDERING("BATR");
+
+    fun erKnyttetTilSøker() = this == SMÅBARNSTILLEGG || this == UTVIDET_BARNETRYGD
 }
 
 fun List<AndelTilkjentYtelse>.hentLøpendeAndelForVedtaksperiode(): LocalDateSegment<Int> {

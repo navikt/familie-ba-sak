@@ -22,7 +22,7 @@ data class BrevPeriodeGrunnlag(
     val minimerteUtbetalingsperiodeDetaljer: List<MinimertUtbetalingsperiodeDetalj> = emptyList(),
 ) {
     fun tilBrevPeriodeGrunnlagMedPersoner(
-        brevGrunnlag: BrevGrunnlag,
+        restBehandlingsgrunnlagForBrev: RestBehandlingsgrunnlagForBrev,
         erFørsteVedtaksperiodePåFagsak: Boolean
     ): BrevPeriodeGrunnlagMedPersoner {
         return BrevPeriodeGrunnlagMedPersoner(
@@ -35,7 +35,7 @@ data class BrevPeriodeGrunnlag(
                         fom = this.fom,
                         tom = this.tom
                     ),
-                    brevGrunnlag = brevGrunnlag,
+                    restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev,
                     identerMedUtbetalingPåPeriode = this.minimerteUtbetalingsperiodeDetaljer
                         .map { utbetalingsperiodeDetalj -> utbetalingsperiodeDetalj.person.personIdent },
                     erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak
@@ -67,7 +67,7 @@ fun UtvidetVedtaksperiodeMedBegrunnelser.tilBrevPeriodeGrunnlag(
 }
 
 fun BrevPeriodeGrunnlag.tilBrevPeriodeForLogging(
-    brevGrunnlag: BrevGrunnlag,
+    restBehandlingsgrunnlagForBrev: RestBehandlingsgrunnlagForBrev,
     utvidetScenarioForEndringsperiode: UtvidetScenarioForEndringsperiode = UtvidetScenarioForEndringsperiode.IKKE_UTVIDET_YTELSE,
     uregistrerteBarn: List<MinimertUregistrertBarn> = emptyList(),
     erFørsteVedtaksperiodePåFagsak: Boolean = false,
@@ -80,10 +80,10 @@ fun BrevPeriodeGrunnlag.tilBrevPeriodeForLogging(
         vedtaksperiodetype = this.type,
         begrunnelser = this.begrunnelser.map { it.tilBrevBegrunnelseGrunnlagForLogging() },
         fritekster = this.fritekster,
-        personerPåBehandling = brevGrunnlag.personerPåBehandling.map {
+        personerPåBehandling = restBehandlingsgrunnlagForBrev.personerPåBehandling.map {
             it.tilBrevPeriodeTestPerson(
                 brevPeriodeGrunnlag = this,
-                brevGrunnlag = brevGrunnlag
+                restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev
             )
         },
         utvidetScenarioForEndringsperiode = utvidetScenarioForEndringsperiode,

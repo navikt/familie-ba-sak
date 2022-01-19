@@ -3,6 +3,8 @@ package no.nav.familie.ba.sak.kjerne.steg
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import no.nav.familie.ba.sak.common.toPeriode
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -40,6 +42,7 @@ class BehandlingsresultatSteg(
     private val persongrunnlagService: PersongrunnlagService,
     private val beregningService: BeregningService,
     private val endretUtbetalingAndelService: EndretUtbetalingAndelService,
+    private val featureToggleService: FeatureToggleService,
 ) : BehandlingSteg<String> {
 
     override fun preValiderSteg(behandling: Behandling, stegService: StegService?) {
@@ -118,7 +121,9 @@ class BehandlingsresultatSteg(
     @Transactional
     override fun utførStegOgAngiNeste(behandling: Behandling, data: String): StegType {
 
-        endretUtbetalingAndelService.oppdaterEndreteUtbetalingsandelerMedBegrunnelser(behandling)
+        if (!featureToggleService.isEnabled(FeatureToggleConfig.ENDRET_UTBETALING_VEDTAKSSIDEN)) {
+            endretUtbetalingAndelService.oppdaterEndreteUtbetalingsandelerMedBegrunnelser(behandling)
+        }
 
         val behandlingMedResultat = if (behandling.erMigrering() && behandling.skalBehandlesAutomatisk) {
             settBehandlingResultat(behandling, BehandlingResultat.INNVILGET)
