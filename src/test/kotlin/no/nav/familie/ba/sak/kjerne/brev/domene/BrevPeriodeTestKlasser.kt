@@ -52,7 +52,7 @@ data class BrevPeriodeTestPerson(
     val type: PersonType,
     val overstyrteVilkårresultater: List<MinimertVilkårResultat>,
     val andreVurderinger: List<AnnenVurdering>,
-    val endredeUtbetalinger: List<EndretUtbetalingAndelPåPerson>,
+    val endredeUtbetalinger: List<EndretRestUtbetalingAndelPåPerson>,
     val utbetalinger: List<UtbetalingPåPerson>
 ) {
     fun tilMinimertPerson() = MinimertRestPerson(personIdent = personIdent, fødselsdato = fødselsdato, type = type)
@@ -61,7 +61,7 @@ data class BrevPeriodeTestPerson(
     }
 
     fun tilMinimerteEndredeUtbetalingAndeler() =
-        endredeUtbetalinger.map { it.tilMinimertEndretUtbetalingAndel(this.personIdent) }
+        endredeUtbetalinger.map { it.tilMinimertRestEndretUtbetalingAndel(this.personIdent) }
 
     fun tilMinimertePersonResultater(): MinimertRestPersonResultat {
         return MinimertRestPersonResultat(
@@ -103,11 +103,11 @@ data class UtbetalingPåPerson(
         )
 }
 
-data class EndretUtbetalingAndelPåPerson(
+data class EndretRestUtbetalingAndelPåPerson(
     val periode: MånedPeriode,
     val årsak: Årsak,
 ) {
-    fun tilMinimertEndretUtbetalingAndel(personIdent: String) =
+    fun tilMinimertRestEndretUtbetalingAndel(personIdent: String) =
         MinimertRestEndretAndel(
             personIdent = personIdent,
             periode = periode,

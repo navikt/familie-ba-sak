@@ -1,0 +1,46 @@
+{
+  "beskrivelse": "Innvilget. Barn bor med søker.",
+  "fom": "2021-02-01",
+  "tom": "2021-12-31",
+  "vedtaksperiodetype": "ENDRET_UTBETALING",
+  "ytelserForSøkerForrigeMåned": [],
+  "ytelserForBarnOgSøkerIPeriode": [],
+  "personerPåBehandling": [
+    {
+      "endredeUtbetalinger": [
+        {
+          "fom": "2021-02",
+          "tom": "2021-12",
+          "årsak": "DELT_BOSTED",
+          "prosent": 100
+        }
+      ],
+      "type": "BARN",
+      "fødselsdato": "2017-09-03",
+      "overstyrteVilkårresultater": [
+        {
+          "vilkårType": "BOR_MED_SØKER",
+          "resultat": "OPPFYLT",
+          "periodeFom": "2021-01-01",
+          "periodeTom": null,
+          "utdypendeVilkårsvurderinger": [
+            "DELT_BOSTED"
+          ],
+          "erEksplisittAvslagPåSøknad": false
+        }
+      ],
+      "andreVurderinger": []
+    },
+    {
+      "fødselsdato": "1993-08-10",
+      "type": "SØKER",
+      "harUtbetalingKnyttetTilSegIPerioden": false,
+      "overstyrteVilkårresultater": [],
+      "andreVurderinger": [],
+      "endredeUtbetalinger": []
+    }
+  ],
+  "forventetOutput": [
+    "ENDRET_UTBETALING_DELT_BOSTED_FULL_UTBETALING"
+  ]
+}

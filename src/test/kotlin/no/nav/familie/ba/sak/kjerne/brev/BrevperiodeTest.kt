@@ -18,12 +18,12 @@ class BrevperiodeTest {
 
     @Test
     fun test(testReporter: TestReporter) {
-        val testmappe = File("./src/test/resources/brevbegrunnelseCaser")
+        val testmappe = File("./src/test/resources/brevperiodeCaser")
 
         val sanityBegrunnelser = hentSanityBegrunnelser()
 
         val antallFeil = testmappe.list()?.fold(0) { acc, it ->
-            val fil = File("./src/test/resources/brevbegrunnelseCaser/$it")
+            val fil = File("$testmappe/$it")
 
             val behandlingsresultatPersonTestConfig =
                 try {

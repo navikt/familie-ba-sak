@@ -1,0 +1,41 @@
+{
+  "beskrivelse": "Innvilget. Barn bor med søker.",
+  "fom": "2021-09-01",
+  "tom": null,
+  "vedtaksperiodetype": "OPPHØR",
+  "ytelserForSøkerForrigeMåned": [],
+  "ytelserForBarnOgSøkerIPeriode": [
+    "ORDINÆR_BARNETRYGD"
+  ],
+  "personerPåBehandling": [
+    {
+      "type": "BARN",
+      "fødselsdato": "2017-09-03",
+      "overstyrteVilkårresultater": [
+        {
+          "vilkårType": "BOR_MED_SØKER",
+          "resultat": "OPPFYLT",
+          "periodeFom": "2020-01-20",
+          "periodeTom": "2021-08-01",
+          "utdypendeVilkårsvurderinger": [],
+          "erEksplisittAvslagPåSøknad": false
+        }
+      ],
+      "andreVurderinger": [],
+      "endredeUtbetalinger": []
+    },
+    {
+      "fødselsdato": "1993-08-10",
+      "type": "SØKER",
+      "harUtbetalingKnyttetTilSegIPerioden": false,
+      "overstyrteVilkårresultater": [],
+      "andreVurderinger": [],
+      "endredeUtbetalinger": []
+    }
+  ],
+  "forventetOutput": [
+    "OPPHØR_BARN_FLYTTET_FRA_SØKER",
+    "OPPHØR_BARN_DØD",
+    "OPPHØR_FLERE_BARN_DØD"
+  ]
+}
