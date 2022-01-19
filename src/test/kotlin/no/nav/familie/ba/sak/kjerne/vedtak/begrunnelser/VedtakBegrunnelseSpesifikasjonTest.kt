@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.common.lagUtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.brev.UtvidetScenarioForEndringsperiode
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertPersonResultat
 import no.nav.familie.ba.sak.kjerne.brev.hentSanityBegrunnelser
@@ -59,6 +60,7 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
                     aktørIderMedUtbetaling = aktørerMedUtbetaling.map { it.aktørId },
                     erFørsteVedtaksperiodePåFagsak = false,
                     ytelserForSøkerForrigeMåned = emptyList(),
+                    utvidetScenarioForEndringsperiode = UtvidetScenarioForEndringsperiode.IKKE_UTVIDET_YTELSE,
                 )
         )
     }
@@ -75,6 +77,7 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
                     aktørIderMedUtbetaling = aktørerMedUtbetaling.map { it.aktørId },
                     erFørsteVedtaksperiodePåFagsak = false,
                     ytelserForSøkerForrigeMåned = emptyList(),
+                    utvidetScenarioForEndringsperiode = UtvidetScenarioForEndringsperiode.IKKE_UTVIDET_YTELSE,
                 )
         )
     }
@@ -91,6 +94,7 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
                     aktørIderMedUtbetaling = aktørerMedUtbetaling.map { it.aktørId },
                     erFørsteVedtaksperiodePåFagsak = false,
                     ytelserForSøkerForrigeMåned = emptyList(),
+                    utvidetScenarioForEndringsperiode = UtvidetScenarioForEndringsperiode.IKKE_UTVIDET_YTELSE,
                 )
         )
     }
@@ -110,6 +114,7 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
                     aktørIderMedUtbetaling = aktørerMedUtbetaling.map { it.aktørId },
                     erFørsteVedtaksperiodePåFagsak = false,
                     ytelserForSøkerForrigeMåned = emptyList(),
+                    utvidetScenarioForEndringsperiode = UtvidetScenarioForEndringsperiode.IKKE_UTVIDET_YTELSE,
                 )
         )
     }
@@ -132,6 +137,7 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
                     aktørIderMedUtbetaling = aktørerMedUtbetaling.map { it.aktørId },
                     erFørsteVedtaksperiodePåFagsak = false,
                     ytelserForSøkerForrigeMåned = emptyList(),
+                    utvidetScenarioForEndringsperiode = UtvidetScenarioForEndringsperiode.IKKE_UTVIDET_YTELSE,
                 )
         )
     }
@@ -154,6 +160,7 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
                     aktørIderMedUtbetaling = aktørerMedUtbetaling.map { it.aktørId },
                     erFørsteVedtaksperiodePåFagsak = false,
                     ytelserForSøkerForrigeMåned = emptyList(),
+                    utvidetScenarioForEndringsperiode = UtvidetScenarioForEndringsperiode.IKKE_UTVIDET_YTELSE,
                 )
         )
     }
@@ -172,6 +179,7 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
                     aktørIderMedUtbetaling = aktørerMedUtbetaling.map { it.aktørId },
                     erFørsteVedtaksperiodePåFagsak = false,
                     ytelserForSøkerForrigeMåned = emptyList(),
+                    utvidetScenarioForEndringsperiode = UtvidetScenarioForEndringsperiode.IKKE_UTVIDET_YTELSE,
                 )
         )
     }
@@ -190,6 +198,7 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
                     aktørIderMedUtbetaling = aktørerMedUtbetaling.map { it.aktørId },
                     erFørsteVedtaksperiodePåFagsak = false,
                     ytelserForSøkerForrigeMåned = emptyList(),
+                    utvidetScenarioForEndringsperiode = UtvidetScenarioForEndringsperiode.IKKE_UTVIDET_YTELSE,
                 )
         )
     }
@@ -222,6 +231,7 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
                     ).map { it.tilMinimertEndretUtbetalingAndel() },
                     erFørsteVedtaksperiodePåFagsak = false,
                     ytelserForSøkerForrigeMåned = emptyList(),
+                    utvidetScenarioForEndringsperiode = UtvidetScenarioForEndringsperiode.IKKE_UTVIDET_YTELSE,
                 )
         )
     }
@@ -254,6 +264,7 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
                     ).map { it.tilMinimertEndretUtbetalingAndel() },
                     erFørsteVedtaksperiodePåFagsak = false,
                     ytelserForSøkerForrigeMåned = emptyList(),
+                    utvidetScenarioForEndringsperiode = UtvidetScenarioForEndringsperiode.IKKE_UTVIDET_YTELSE,
                 )
         )
     }
@@ -261,30 +272,38 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
     @Test
     fun `Oppfyller skal utbetales gir false`() {
         assertFalse(
-            lagEndretUtbetalingAndel(prosent = BigDecimal.ZERO, person = barn).oppfyllerSkalUtbetalesTrigger(
-                triggesAv = TriggesAv(endretUtbetaingSkalUtbetales = true),
-            )
+            lagEndretUtbetalingAndel(prosent = BigDecimal.ZERO, person = barn)
+                .tilMinimertEndretUtbetalingAndel()
+                .oppfyllerSkalUtbetalesTrigger(
+                    triggesAv = TriggesAv(endretUtbetaingSkalUtbetales = true),
+                )
         )
 
         assertFalse(
-            lagEndretUtbetalingAndel(prosent = BigDecimal.valueOf(100), person = barn).oppfyllerSkalUtbetalesTrigger(
-                triggesAv = TriggesAv(endretUtbetaingSkalUtbetales = false),
-            )
+            lagEndretUtbetalingAndel(prosent = BigDecimal.valueOf(100), person = barn)
+                .tilMinimertEndretUtbetalingAndel()
+                .oppfyllerSkalUtbetalesTrigger(
+                    triggesAv = TriggesAv(endretUtbetaingSkalUtbetales = false),
+                )
         )
     }
 
     @Test
     fun `Oppfyller skal utbetales gir true`() {
         assertTrue(
-            lagEndretUtbetalingAndel(prosent = BigDecimal.ZERO, person = barn).oppfyllerSkalUtbetalesTrigger(
-                triggesAv = TriggesAv(endretUtbetaingSkalUtbetales = false),
-            )
+            lagEndretUtbetalingAndel(prosent = BigDecimal.ZERO, person = barn)
+                .tilMinimertEndretUtbetalingAndel()
+                .oppfyllerSkalUtbetalesTrigger(
+                    triggesAv = TriggesAv(endretUtbetaingSkalUtbetales = false),
+                )
         )
 
         assertTrue(
-            lagEndretUtbetalingAndel(prosent = BigDecimal.valueOf(100), person = barn).oppfyllerSkalUtbetalesTrigger(
-                triggesAv = TriggesAv(endretUtbetaingSkalUtbetales = true),
-            )
+            lagEndretUtbetalingAndel(prosent = BigDecimal.valueOf(100), person = barn)
+                .tilMinimertEndretUtbetalingAndel()
+                .oppfyllerSkalUtbetalesTrigger(
+                    triggesAv = TriggesAv(endretUtbetaingSkalUtbetales = true),
+                )
         )
     }
 
