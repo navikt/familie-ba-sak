@@ -295,7 +295,7 @@ class VedtaksperiodeService(
                     val endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(
                         behandling.id
                     )
-                    
+
                     if (featureToggleService.isEnabled(FeatureToggleConfig.ENDRET_UTBETALING_VEDTAKSSIDEN))
                         hentGyldigeBegrunnelserForVedtaksperiodeGammel(
                             minimertVedtaksperiode = utvidetVedtaksperiodeMedBegrunnelser.tilMinimertVedtaksperiode(),
