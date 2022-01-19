@@ -11,20 +11,13 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import java.math.BigDecimal
 import java.time.YearMonth
 
-interface IMinimertEndretAndel {
-    var fom: YearMonth?
-    var tom: YearMonth?
-    var årsak: Årsak?
-    var prosent: BigDecimal?
-}
-
 class MinimertEndretAndel(
     val aktørId: String,
-    override var fom: YearMonth?,
-    override var tom: YearMonth?,
-    override var årsak: Årsak?,
-    override var prosent: BigDecimal?
-) : IMinimertEndretAndel {
+    val fom: YearMonth?,
+    val tom: YearMonth?,
+    val årsak: Årsak?,
+    val prosent: BigDecimal?
+) {
     fun månedPeriode() = MånedPeriode(fom!!, tom!!)
 
     fun erOverlappendeMed(nullableMånedPeriode: NullableMånedPeriode): Boolean {
