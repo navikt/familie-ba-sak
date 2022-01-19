@@ -14,7 +14,7 @@ import org.springframework.kafka.core.ProducerFactory
 import org.springframework.kafka.support.serializer.JsonSerializer
 
 @Configuration
-@Profile("!preprod-gcp")
+@Profile("!preprod-gcp & !prod-gcp")
 class KafkaConfig {
 
     @Bean
