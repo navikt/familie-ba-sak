@@ -5,6 +5,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
@@ -21,6 +22,7 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.assertThrows
 import java.time.LocalDateTime
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -104,6 +106,9 @@ internal class PersonidentServiceTest {
         every { aktørIdRepository.findByAktørIdOrNull(aktørIdSomFinnes.aktørId) }.answers {
             aktørIdSomFinnes
         }
+        every { personidentRepository.findByFødselsnummerOrNull(personIdentSomSkalLeggesTil) }.answers {
+            null
+        }
 
         val personidentService = PersonidentService(
             personidentRepository, aktørIdRepository, pdlIdentRestClient, mockk()
@@ -181,6 +186,11 @@ internal class PersonidentServiceTest {
         }
 
         every { aktørIdRepository.findByAktørIdOrNull(aktørIdSomFinnes.aktørId) }.answers { aktørIdSomFinnes }
+        every { personidentRepository.findByFødselsnummerOrNull(personIdentSomFinnes) }.answers {
+            tilAktør(
+                personIdentSomFinnes
+            ).personidenter.first()
+        }
 
         val personidentService = PersonidentService(
             personidentRepository, aktørIdRepository, pdlIdentRestClient, mockk()
@@ -286,5 +296,32 @@ internal class PersonidentServiceTest {
         verify(exactly = 0) { personidentRepository.saveAndFlush(any()) }
         assertEquals(aktørIdAktiv.aktørId, aktør.aktørId)
         assertEquals(personidentAktiv, aktør.personidenter.single().fødselsnummer)
+    }
+
+    @Test
+    fun `Ident som allerede er persistert på annen aktør id er en merget id og skal derfor feile`() {
+        val mergedPersonident = randomFnr()
+        val mergetTilAktørId = tilAktør(mergedPersonident)
+
+        every { pdlIdentRestClient.hentIdenter(mergedPersonident, false) } answers {
+            listOf(
+                IdentInformasjon(mergetTilAktørId.aktørId, false, "AKTORID"),
+                IdentInformasjon(mergedPersonident, false, "FOLKEREGISTERIDENT"),
+            )
+        }
+
+        every { aktørIdRepository.findByAktørIdOrNull(mergetTilAktørId.aktørId) }.answers { null }
+        every { personidentRepository.findByFødselsnummerOrNull(mergedPersonident) }.answers {
+            tilAktør(
+                mergedPersonident,
+                "11"
+            ).personidenter.first()
+        }
+
+        val personidentService = PersonidentService(
+            personidentRepository, aktørIdRepository, pdlIdentRestClient, mockk()
+        )
+
+        assertThrows<Feil> { personidentService.håndterNyIdent(nyIdent = PersonIdent(mergedPersonident)) }
     }
 }
