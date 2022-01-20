@@ -40,4 +40,4 @@ jobs:
         env:
           APIKEY: ${{ secrets.GITHUB_ACCESS_TOKEN }}
           CLUSTER: dev-gcp
-          RESOURCE: .deploy/nais/app-preprod-gcp.yaml
+          RESOURCE: .deploy/nais/app-preprod.yaml

@@ -32,7 +32,13 @@ enum class Vedtaksperiodetype(val tillatteBegrunnelsestyper: List<VedtakBegrunne
     OPPHØR(listOf(VedtakBegrunnelseType.OPPHØR)),
     AVSLAG(listOf(VedtakBegrunnelseType.AVSLAG)),
     FORTSATT_INNVILGET(listOf(VedtakBegrunnelseType.FORTSATT_INNVILGET)),
-    ENDRET_UTBETALING(listOf(VedtakBegrunnelseType.INNVILGET, VedtakBegrunnelseType.REDUKSJON))
+    ENDRET_UTBETALING(
+        listOf(
+            VedtakBegrunnelseType.INNVILGET,
+            VedtakBegrunnelseType.REDUKSJON,
+            VedtakBegrunnelseType.ENDRET_UTBETALING
+        )
+    )
 }
 
 fun Vedtaksperiode.tilVedtaksperiodeMedBegrunnelse(

@@ -4,7 +4,7 @@ import no.nav.familie.ba.sak.common.NullablePeriode
 import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
-import no.nav.familie.ba.sak.kjerne.brev.domene.BrevGrunnlag
+import no.nav.familie.ba.sak.kjerne.brev.domene.RestBehandlingsgrunnlagForBrev
 import no.nav.familie.ba.sak.kjerne.brev.domene.harPersonerSomManglerOpplysninger
 import no.nav.familie.ba.sak.kjerne.brev.domene.somOverlapper
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.hentPersonerForEtterEndretUtbetalingsperiode
@@ -20,7 +20,7 @@ fun hentPersonidenterGjeldendeForBegrunnelse(
     triggesAv: TriggesAv,
     periode: NullablePeriode,
     vedtakBegrunnelseType: VedtakBegrunnelseType,
-    brevGrunnlag: BrevGrunnlag,
+    restBehandlingsgrunnlagForBrev: RestBehandlingsgrunnlagForBrev,
     identerMedUtbetalingPåPeriode: List<String>,
     erFørsteVedtaksperiodePåFagsak: Boolean,
 ): List<String> {
@@ -32,16 +32,16 @@ fun hentPersonidenterGjeldendeForBegrunnelse(
         triggesAv.vilkår.contains(Vilkår.UTVIDET_BARNETRYGD) || triggesAv.småbarnstillegg ->
             hentPersonerForUtvidetOgSmåbarnstilleggBegrunnelse(
                 identerMedUtbetaling = identerMedUtbetalingPåPeriode,
-                brevGrunnlag = brevGrunnlag,
+                restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev,
                 periode = periode,
             )
 
         triggesAv.barnMedSeksårsdag ->
-            brevGrunnlag.personerPåBehandling.barnMedSeksårsdagPåFom(periode.fom)
+            restBehandlingsgrunnlagForBrev.personerPåBehandling.barnMedSeksårsdagPåFom(periode.fom)
                 .map { person -> person.personIdent }
 
         triggesAv.personerManglerOpplysninger ->
-            if (brevGrunnlag.minimertePersonResultater.harPersonerSomManglerOpplysninger())
+            if (restBehandlingsgrunnlagForBrev.minimertePersonResultater.harPersonerSomManglerOpplysninger())
                 emptyList()
             else
                 error("Legg til opplysningsplikt ikke oppfylt begrunnelse men det er ikke person med det resultat")
@@ -50,21 +50,21 @@ fun hentPersonidenterGjeldendeForBegrunnelse(
 
         triggesAv.etterEndretUtbetaling ->
             hentPersonerForEtterEndretUtbetalingsperiode(
-                minimerteEndredeUtbetalingAndeler = brevGrunnlag.minimerteEndredeUtbetalingAndeler,
+                minimerteEndredeUtbetalingAndeler = restBehandlingsgrunnlagForBrev.minimerteEndredeUtbetalingAndeler,
                 fom = periode.fom,
                 endringsaarsaker = triggesAv.endringsaarsaker
             )
 
         else ->
             hentPersonerForAlleUtgjørendeVilkår(
-                minimertePersonResultater = brevGrunnlag.minimertePersonResultater,
+                minimertePersonResultater = restBehandlingsgrunnlagForBrev.minimertePersonResultater,
                 vedtaksperiode = Periode(
                     fom = periode.fom ?: TIDENES_MORGEN,
                     tom = periode.tom ?: TIDENES_ENDE
                 ),
                 oppdatertBegrunnelseType = vedtakBegrunnelseType,
                 aktuellePersonerForVedtaksperiode = hentAktuellePersonerForVedtaksperiode(
-                    brevGrunnlag.personerPåBehandling,
+                    restBehandlingsgrunnlagForBrev.personerPåBehandling,
                     vedtakBegrunnelseType,
                     identerMedUtbetalingPåPeriode
                 ),
@@ -86,16 +86,17 @@ fun hentPersonidenterGjeldendeForBegrunnelse(
  */
 private fun hentPersonerForUtvidetOgSmåbarnstilleggBegrunnelse(
     identerMedUtbetaling: List<String>,
-    brevGrunnlag: BrevGrunnlag,
+    restBehandlingsgrunnlagForBrev: RestBehandlingsgrunnlagForBrev,
     periode: NullablePeriode
 ): List<String> {
-    val identerFraSammenfallendeEndringsperioder = brevGrunnlag
+    val identerFraSammenfallendeEndringsperioder = restBehandlingsgrunnlagForBrev
         .minimerteEndredeUtbetalingAndeler
         .somOverlapper(periode.tilNullableMånedPeriode())
         .map { it.personIdent }
 
-    val søkersIdent = brevGrunnlag.personerPåBehandling.find { it.type == PersonType.SØKER }?.personIdent
-        ?: throw IllegalStateException("Søker mangler i brevgrunnlag")
+    val søkersIdent =
+        restBehandlingsgrunnlagForBrev.personerPåBehandling.find { it.type == PersonType.SØKER }?.personIdent
+            ?: throw IllegalStateException("Søker mangler i behandlingsgrunnlag for brev")
 
     return identerMedUtbetaling +
         identerFraSammenfallendeEndringsperioder +

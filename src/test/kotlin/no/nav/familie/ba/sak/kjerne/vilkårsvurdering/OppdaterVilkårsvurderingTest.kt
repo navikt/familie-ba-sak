@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
 import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagVilkårResultat
 import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
@@ -8,6 +9,8 @@ import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingUtils.flyttResultaterTilInitielt
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingUtils.lagFjernAdvarsel
@@ -118,6 +121,107 @@ class OppdaterVilkårsvurderingTest {
                 "   - " + fjernedeVilkår[1].vilkårType.beskrivelse + "\n",
             generertAdvarsel
         )
+    }
+
+    @Test
+    fun `Skal ha med tomt vilkår på person hvis vilkåret ble avslått forrige behandling`() {
+        val søkerAktørId = randomAktørId()
+        val nyBehandling = lagBehandling()
+        val forrigeBehandling = lagBehandling()
+
+        val init =
+            lagBasicVilkårsvurdering(
+                behandling = nyBehandling,
+                personer = listOf(
+                    lagPerson(type = PersonType.SØKER, aktør = søkerAktørId),
+                    lagPerson(type = PersonType.BARN)
+                )
+            )
+        val aktivMedBosattIRiketIkkeOppfylt = Vilkårsvurdering(behandling = forrigeBehandling)
+        val personResultat =
+            PersonResultat(
+                vilkårsvurdering = aktivMedBosattIRiketIkkeOppfylt,
+                aktør = søkerAktørId
+            )
+        val bosattIRiketVilkårResultater =
+            setOf(
+                lagVilkårResultat(
+                    vilkårType = Vilkår.BOSATT_I_RIKET,
+                    personResultat = personResultat,
+                    resultat = Resultat.IKKE_OPPFYLT,
+                    periodeFom = LocalDate.now().minusYears(2),
+                    periodeTom = LocalDate.now().minusYears(1)
+                )
+            )
+        personResultat.setSortedVilkårResultater(bosattIRiketVilkårResultater)
+        aktivMedBosattIRiketIkkeOppfylt.personResultater = setOf(personResultat)
+
+        val (nyInit, nyAktiv) = flyttResultaterTilInitielt(
+            initiellVilkårsvurdering = init,
+            aktivVilkårsvurdering = aktivMedBosattIRiketIkkeOppfylt
+        )
+
+        val nyInitBosattIRiketVilkår =
+            nyInit.personResultater.find { it.aktør == søkerAktørId }?.vilkårResultater?.filter { it.vilkårType == Vilkår.BOSATT_I_RIKET }
+                ?: emptyList()
+
+        Assertions.assertTrue(nyInitBosattIRiketVilkår.isNotEmpty())
+        Assertions.assertTrue(nyInitBosattIRiketVilkår.single().resultat == Resultat.IKKE_VURDERT)
+        Assertions.assertTrue(nyAktiv.personResultater.isEmpty())
+    }
+
+    @Test
+    fun `Skal ha med oppfylte perioder fra vilkår på person hvis vilkåret ble både avslått og innvilget forrige behandling`() {
+        val søkerAktørId = randomAktørId()
+        val nyBehandling = lagBehandling()
+        val forrigeBehandling = lagBehandling()
+
+        val init =
+            lagBasicVilkårsvurdering(
+                behandling = nyBehandling,
+                personer = listOf(
+                    lagPerson(type = PersonType.SØKER, aktør = søkerAktørId),
+                    lagPerson(type = PersonType.BARN)
+                )
+            )
+        val aktivMedBosattIRiketDelvisIkkeOppfylt = Vilkårsvurdering(behandling = forrigeBehandling)
+        val personResultat =
+            PersonResultat(
+                vilkårsvurdering = aktivMedBosattIRiketDelvisIkkeOppfylt,
+                aktør = søkerAktørId
+            )
+        val bosattIRiketVilkårResultater =
+            setOf(
+                lagVilkårResultat(
+                    vilkårType = Vilkår.BOSATT_I_RIKET,
+                    personResultat = personResultat,
+                    resultat = Resultat.IKKE_OPPFYLT,
+                    periodeFom = LocalDate.now().minusYears(2),
+                    periodeTom = LocalDate.now().minusYears(1)
+                ),
+                lagVilkårResultat(
+                    vilkårType = Vilkår.BOSATT_I_RIKET,
+                    personResultat = personResultat,
+                    resultat = Resultat.OPPFYLT,
+                    periodeFom = LocalDate.now(),
+                    periodeTom = LocalDate.now().plusYears(1),
+                )
+            )
+        personResultat.setSortedVilkårResultater(bosattIRiketVilkårResultater)
+        aktivMedBosattIRiketDelvisIkkeOppfylt.personResultater = setOf(personResultat)
+
+        val (nyInit, nyAktiv) = flyttResultaterTilInitielt(
+            initiellVilkårsvurdering = init,
+            aktivVilkårsvurdering = aktivMedBosattIRiketDelvisIkkeOppfylt
+        )
+
+        val nyInitBosattIRiketVilkår =
+            nyInit.personResultater.find { it.aktør == søkerAktørId }?.vilkårResultater?.filter { it.vilkårType == Vilkår.BOSATT_I_RIKET }
+                ?: emptyList()
+
+        Assertions.assertTrue(nyInitBosattIRiketVilkår.isNotEmpty())
+        Assertions.assertTrue(nyInitBosattIRiketVilkår.single().resultat == Resultat.OPPFYLT)
+        Assertions.assertTrue(nyAktiv.personResultater.isEmpty())
     }
 
     @Test
@@ -459,6 +563,23 @@ class OppdaterVilkårsvurderingTest {
             )
             personResultat
         }.toSet()
+
+        return vilkårsvurdering
+    }
+
+    fun lagBasicVilkårsvurdering(behandling: Behandling, personer: List<Person>): Vilkårsvurdering {
+        val vilkårsvurdering = Vilkårsvurdering(
+            behandling = behandling
+        )
+
+        val personResultater = personer.map { person ->
+            genererPersonResultatForPerson(
+                vilkårsvurdering = vilkårsvurdering,
+                person = person
+            )
+        }.toSet()
+
+        vilkårsvurdering.personResultater = personResultater
 
         return vilkårsvurdering
     }
