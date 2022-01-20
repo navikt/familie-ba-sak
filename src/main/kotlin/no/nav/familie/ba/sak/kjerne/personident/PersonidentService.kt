@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.personident
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlIdentRestClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.IdentInformasjon
@@ -27,6 +28,8 @@ class PersonidentService(
         secureLogger.info("Håndterer ny ident ${nyIdent.ident}")
         val identerFraPdl = hentIdenter(nyIdent.ident, false)
         val aktørId = filtrerAktørId(identerFraPdl)
+
+        validerOmAktørIdErMerget(nyIdent.ident, aktørId)
 
         val aktør = aktørIdRepository.findByAktørIdOrNull(aktørId)
 
@@ -89,6 +92,17 @@ class PersonidentService(
         return alleIdenter.filter { it.gjelderTil?.isAfter(tidspunkt) ?: false }
             .minByOrNull { it.gjelderTil!! }?.fødselsnummer
             ?: alleIdenter.first { it.aktiv }.fødselsnummer
+    }
+
+    private fun validerOmAktørIdErMerget(ident: String, aktørId: String) {
+        val persistertAktør = personidentRepository.findByFødselsnummerOrNull(ident)?.aktør
+
+        if (persistertAktør != null && persistertAktør.aktørId != aktørId) {
+            throw Feil(
+                message = "Aktør med id $aktørId er merget med Aktør med id $persistertAktør, " +
+                    "korriger datamodel om rekjør task."
+            )
+        }
     }
 
     private fun opprettAktørIdOgPersonident(aktørIdStr: String, fødselsnummer: String, lagre: Boolean): Aktør {
