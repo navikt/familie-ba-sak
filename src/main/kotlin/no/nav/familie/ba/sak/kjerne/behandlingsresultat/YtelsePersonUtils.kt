@@ -107,43 +107,50 @@ object YtelsePersonUtils {
         segmenterFjernet: LocalDateTimeline<BehandlingsresultatAndelTilkjentYtelse>,
         ytelsePerson: YtelsePerson,
         inneværendeMåned: YearMonth
-    ) = if (behandlingsresultatPerson.søktForPerson) {
-        val beløpRedusert = (segmenterLagtTil + segmenterFjernet).isEmpty() &&
-            (behandlingsresultatPerson.forrigeAndeler.sumOf { it.sumForPeriode() } - behandlingsresultatPerson.andeler.sumOf { it.sumForPeriode() }) > 0
+    ): Boolean {
+        if (behandlingsresultatPerson.søktForPerson) {
+            val beløpRedusert = (segmenterLagtTil + segmenterFjernet).isEmpty() &&
+                (behandlingsresultatPerson.forrigeAndeler.sumOf { it.sumForPeriode() } - behandlingsresultatPerson.andeler.sumOf { it.sumForPeriode() }) > 0
 
-        val finnesReduksjonerTilbakeITid = ytelsePerson.erFramstiltKravForITidligereBehandling() &&
-            segmenterFjernet.harSegmentMedTomFør(inneværendeMåned)
+            val finnesReduksjonerTilbakeITid = ytelsePerson.erFramstiltKravForITidligereBehandling() &&
+                segmenterFjernet.harSegmentMedTomFør(inneværendeMåned)
 
-        finnesReduksjonerTilbakeITid || beløpRedusert
-    } else {
-        val stønadSlutt =
-            behandlingsresultatPerson.andeler.maxByOrNull { it.stønadFom }?.stønadTom ?: TIDENES_MORGEN.toYearMonth()
+            return finnesReduksjonerTilbakeITid || beløpRedusert
+        } else {
+            // Hvis det ikke finnes noen forrige andeler kan det aldri bety endring
+            if (behandlingsresultatPerson.forrigeAndeler.isEmpty()) return false
 
-        val forrigeStønadSlutt =
-            behandlingsresultatPerson
-                .forrigeAndeler
-                .maxByOrNull { it.stønadFom }
-                ?.stønadTom ?: TIDENES_MORGEN.toYearMonth()
+            val stønadSlutt =
+                behandlingsresultatPerson.andeler.maxByOrNull { it.stønadFom }?.stønadTom
+                    ?: TIDENES_MORGEN.toYearMonth()
 
-        val opphører = stønadSlutt.isBefore(inneværendeMåned.plusMonths(1))
+            val forrigeStønadSlutt =
+                behandlingsresultatPerson
+                    .forrigeAndeler
+                    .maxByOrNull { it.stønadFom }
+                    ?.stønadTom ?: TIDENES_MORGEN.toYearMonth()
 
-        val erAndelMedEndretBeløp = erAndelMedEndretBeløp(
-            forrigeAndeler = behandlingsresultatPerson.forrigeAndeler,
-            andeler = behandlingsresultatPerson.andeler
-        )
+            val opphører = stønadSlutt.isBefore(inneværendeMåned.plusMonths(1))
 
-        val erLagtTilSegmenterPåPersonFraTidligereBehandling = ytelsePerson.erFramstiltKravForITidligereBehandling() &&
-            segmenterLagtTil.harSegmentMedTomFør(if (opphører) stønadSlutt else inneværendeMåned)
+            val erAndelMedEndretBeløp = erAndelMedEndretBeløp(
+                forrigeAndeler = behandlingsresultatPerson.forrigeAndeler,
+                andeler = behandlingsresultatPerson.andeler
+            )
 
-        val erFjernetSegmenter =
-            segmenterFjernet.harSegmentMedTomFør(if (opphører) stønadSlutt else inneværendeMåned)
+            val erLagtTilSegmenterPåPersonFraTidligereBehandling =
+                ytelsePerson.erFramstiltKravForITidligereBehandling() &&
+                    segmenterLagtTil.harSegmentMedTomFør(if (opphører) stønadSlutt else inneværendeMåned)
 
-        val opphørsdatoErSattSenere = stønadSlutt.isAfter(forrigeStønadSlutt)
+            val erFjernetSegmenter =
+                segmenterFjernet.harSegmentMedTomFør(if (opphører) stønadSlutt else inneværendeMåned)
 
-        erAndelMedEndretBeløp ||
-            erLagtTilSegmenterPåPersonFraTidligereBehandling ||
-            erFjernetSegmenter ||
-            opphørsdatoErSattSenere
+            val opphørsdatoErSattSenere = stønadSlutt.isAfter(forrigeStønadSlutt)
+
+            return erAndelMedEndretBeløp ||
+                erLagtTilSegmenterPåPersonFraTidligereBehandling ||
+                erFjernetSegmenter ||
+                opphørsdatoErSattSenere
+        }
     }
 
     fun erAndelMedEndretBeløp(
