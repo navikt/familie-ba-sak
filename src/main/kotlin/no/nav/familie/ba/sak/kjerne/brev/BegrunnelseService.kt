@@ -39,7 +39,7 @@ class BegrunnelseService(
             søknadGrunnlagService.hentAktiv(behandlingId = behandlingId)?.hentUregistrerteBarn()
                 ?.map { it.tilMinimertUregisrertBarn() } ?: emptyList()
 
-        val brevGrunnlag = hentBrevGrunnlag(
+        val restBehandlingsgrunnlagForBrev = hentRestBehandlingsgrunnlagForBrev(
             vilkårsvurdering = vilkårsvurdering,
             endredeUtbetalingAndeler = endredeUtbetalingAndeler,
             persongrunnlag = personopplysningGrunnlag
@@ -56,7 +56,7 @@ class BegrunnelseService(
         val andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId)
 
         return utvidetVedtaksperiodeMedBegrunnelse.hentBegrunnelserOgFritekster(
-            brevGrunnlag = brevGrunnlag,
+            restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev,
             sanityBegrunnelser = sanityBegrunnelser,
             uregistrerteBarn = uregistrerteBarn,
             erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak(

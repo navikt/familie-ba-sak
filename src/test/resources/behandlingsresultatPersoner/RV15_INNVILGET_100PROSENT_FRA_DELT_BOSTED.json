@@ -1,0 +1,154 @@
+{
+  "beskrivelse": "RV: Det har blitt søkt om full ordinær på 3 av 4 barn tilbake i tid. Forventer behandlingsresultat Innvilget",
+  "inneværendeMåned": "2022-01",
+  "personer": [
+    {
+      "personType": "BARN",
+      "aktør": {
+        "fødselsnummer": "12345678911",
+        "aktørId": "1234567891100"
+      },
+      "søktForPerson": true,
+      "eksplisittAvslått": false,
+      "forrigeAndeler": [
+        {
+          "stønadFom": "2021-10",
+          "stønadTom": "2025-08",
+          "kalkulertUtbetalingsbeløp": 527
+        }
+      ],
+      "andeler": [
+        {
+          "stønadFom": "2021-10",
+          "stønadTom": "2021-10",
+          "kalkulertUtbetalingsbeløp": 527
+        },
+        {
+          "stønadFom": "2021-11",
+          "stønadTom": "2025-08",
+          "kalkulertUtbetalingsbeløp": 1054
+        }
+      ]
+    },
+    {
+      "personType": "BARN",
+      "aktør": {
+        "fødselsnummer": "12345678912",
+        "aktørId": "1234567891100"
+      },
+      "søktForPerson": true,
+      "eksplisittAvslått": false,
+      "forrigeAndeler": [
+        {
+          "stønadFom": "2022-02",
+          "stønadTom": "2034-01",
+          "kalkulertUtbetalingsbeløp": 527
+        },
+        {
+          "stønadFom": "2021-10",
+          "stønadTom": "2021-12",
+          "kalkulertUtbetalingsbeløp": 827
+        },
+        {
+          "stønadFom": "2022-01",
+          "stønadTom": "2022-01",
+          "kalkulertUtbetalingsbeløp": 838
+        }
+      ],
+      "andeler": [
+        {
+          "stønadFom": "2022-01",
+          "stønadTom": "2022-01",
+          "kalkulertUtbetalingsbeløp": 1676
+        },
+        {
+          "stønadFom": "2021-11",
+          "stønadTom": "2021-12",
+          "kalkulertUtbetalingsbeløp": 1654
+        },
+        {
+          "stønadFom": "2022-02",
+          "stønadTom": "2034-01",
+          "kalkulertUtbetalingsbeløp": 1054
+        },
+        {
+          "stønadFom": "2021-10",
+          "stønadTom": "2021-10",
+          "kalkulertUtbetalingsbeløp": 827
+        }
+      ]
+    },
+    {
+      "personType": "BARN",
+      "aktør": {
+        "fødselsnummer": "12345678913",
+        "aktørId": "1234567891100"
+      },
+      "søktForPerson": false,
+      "eksplisittAvslag": false,
+      "forrigeAndeler": [
+        {
+          "stønadFom": "2021-10",
+          "stønadTom": "2021-12",
+          "kalkulertUtbetalingsbeløp": 1654
+        },
+        {
+          "stønadFom": "2027-04",
+          "stønadTom": "2039-03",
+          "kalkulertUtbetalingsbeløp": 1054
+        },
+        {
+          "stønadFom": "2022-01",
+          "stønadTom": "2027-03",
+          "kalkulertUtbetalingsbeløp": 1676
+        }
+      ],
+      "andeler": [
+        {
+          "stønadFom": "2021-10",
+          "stønadTom": "2021-12",
+          "kalkulertUtbetalingsbeløp": 1654
+        },
+        {
+          "stønadFom": "2027-04",
+          "stønadTom": "2039-03",
+          "kalkulertUtbetalingsbeløp": 1054
+        },
+        {
+          "stønadFom": "2022-01",
+          "stønadTom": "2027-03",
+          "kalkulertUtbetalingsbeløp": 1676
+        }
+      ]
+    },
+    {
+      "personType": "BARN",
+      "aktør": {
+        "fødselsnummer": "12345678914",
+        "aktørId": "1234567891100"
+      },
+      "søktForPerson": true,
+      "eksplisittAvslag": false,
+      "forrigeAndeler": [
+        {
+          "stønadFom": "2021-10",
+          "stønadTom": "2029-03",
+          "kalkulertUtbetalingsbeløp": 527
+        }
+      ],
+      "andeler": [
+        {
+          "stønadFom": "2021-11",
+          "stønadTom": "2029-03",
+          "kalkulertUtbetalingsbeløp": 1054
+        },
+        {
+          "stønadFom": "2021-10",
+          "stønadTom": "2021-10",
+          "kalkulertUtbetalingsbeløp": 527
+        }
+      ]
+    }
+  ],
+  "forventetResultat": "INNVILGET"
+}
