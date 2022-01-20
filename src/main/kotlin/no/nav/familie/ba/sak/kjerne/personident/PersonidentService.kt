@@ -95,12 +95,20 @@ class PersonidentService(
     }
 
     private fun validerOmAktørIdErMerget(ident: String, aktørId: String) {
+        // Lokikken i denne metoden skal håndtere fallet når to aktørider blir merget.
+        // En viktig antakelse er at aktør iden til (som etter merge blir) den gjeldende identen 
+        // er den aktøriden som blir fjernet. En melding blir da sent med kvarvarende aktørid 
+        // og den gjeldende identen.
+        // Fagsaken må arkiveres og personidenterne fjernes til aktøriden som er fjernet og
+        // En ny revurderingsbehandling må opprettes på fagsak til kvarvarende aktørid hvor 
+        // barne fra den arkiverte fagsaken bli behandlet. 
         val persistertAktør = personidentRepository.findByFødselsnummerOrNull(ident)?.aktør
 
         if (persistertAktør != null && persistertAktør.aktørId != aktørId) {
             throw Feil(
-                message = "Aktør med id $aktørId er merget med Aktør med id $persistertAktør, " +
-                    "korriger datamodel og rekjør task."
+                message = "Aktør med id $aktørId er merget med Aktør med id $persistertAktør. " +
+                    "Arkiver fagsak og fjern personidenter til $aktørId. Revurder behandling for $persistertAktør" +
+                    " og legg til barna fra fagsak til $aktørId."
             )
         }
     }
