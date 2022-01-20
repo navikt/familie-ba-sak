@@ -78,7 +78,11 @@ class BehandlingsresultatService(
             )
         } ?: emptyList()
 
-        secureLogger.info("Behandlingsresultatpersoner: ${behandlingsresultatPersoner.convertDataClassToJson()}")
+        secureLogger.info(
+            "Behandlingsresultatpersoner: ${
+            behandlingsresultatPersoner.map { it.settUgyldigAktør() }.convertDataClassToJson()
+            }"
+        )
 
         val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(
             behandlingsresultatPersoner = behandlingsresultatPersoner,
