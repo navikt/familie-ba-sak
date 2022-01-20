@@ -100,7 +100,7 @@ class PersonidentService(
         if (persistertAktør != null && persistertAktør.aktørId != aktørId) {
             throw Feil(
                 message = "Aktør med id $aktørId er merget med Aktør med id $persistertAktør, " +
-                    "korriger datamodel om rekjør task."
+                    "korriger datamodel og rekjør task."
             )
         }
     }
