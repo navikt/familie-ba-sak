@@ -312,8 +312,21 @@ class MigreringServiceTest(
         virkningsdatoUtleder.trySetAccessible()
 
         val migreringServiceMock = MigreringService(
-            mockk(), mockk(), env = mockk(relaxed = true), mockk(), mockk(), mockk(), mockk(), mockk(), mockk(), mockk(),
-            mockk(), mockk(), mockk(), mockk(), mockk()
+            mockk(),
+            mockk(),
+            env = mockk(relaxed = true),
+            mockk(),
+            mockk(),
+            mockk(),
+            mockk(),
+            mockk(),
+            mockk(),
+            mockk(),
+            mockk(),
+            mockk(),
+            mockk(),
+            mockk(),
+            mockk()
         ) // => env.erDev() = env.erE2E() = false
 
         listOf<Long>(0, 1).forEach { antallDagerEtterKjøredato ->
@@ -456,7 +469,7 @@ class MigreringServiceTest(
         } returns InfotrygdSøkResponse(listOf(opprettSakMedBeløp(SAK_BELØP)), emptyList())
 
         assertThatThrownBy {
-            val migreringResponseDto = migreringService.migrer(BARN_DET_IKKE_GIS_TILGANG_TIL_FNR)
+            migreringService.migrer(BARN_DET_IKKE_GIS_TILGANG_TIL_FNR)
         }.isInstanceOf(KanIkkeMigrereException::class.java)
             .hasMessage(null)
             .extracting("feiltype").isEqualTo(MigreringsfeilType.IKKE_STØTTET_GRADERING)
