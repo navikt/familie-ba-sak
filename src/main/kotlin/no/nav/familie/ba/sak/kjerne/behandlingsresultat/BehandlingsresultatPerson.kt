@@ -73,12 +73,6 @@ data class BehandlingsresultatPerson(
             "forrigeAndeler=$forrigeAndeler, " +
             "andeler=$andeler)"
     }
-
-    fun settUgyldigAktør() = this.copy(aktør = defaultUgyldigAktør)
-
-    companion object {
-        val defaultUgyldigAktør: Aktør = Aktør(aktørId = "")
-    }
 }
 
 data class MinimertUregistrertBarn(

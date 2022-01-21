@@ -80,7 +80,7 @@ class BehandlingsresultatService(
 
         secureLogger.info(
             "Behandlingsresultatpersoner: ${
-            behandlingsresultatPersoner.map { it.settUgyldigAktør() }.convertDataClassToJson()
+            behandlingsresultatPersoner.convertDataClassToJson()
             }"
         )
 
