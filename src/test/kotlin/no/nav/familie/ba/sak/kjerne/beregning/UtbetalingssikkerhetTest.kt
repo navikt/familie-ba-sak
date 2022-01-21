@@ -8,7 +8,6 @@ import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.tilfeldigPerson
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -232,7 +231,6 @@ class UtbetalingssikkerhetTest {
                 behandlendeBehandlingTilkjentYtelse = tilkjentYtelse2,
                 barnMedAndreRelevanteTilkjentYtelser = listOf(Pair(barn, listOf(tilkjentYtelse))),
                 personopplysningGrunnlag = personopplysningGrunnlag2,
-                behandlingÅrsak = BehandlingÅrsak.SØKNAD
             )
         }
 
@@ -289,7 +287,6 @@ class UtbetalingssikkerhetTest {
             behandlendeBehandlingTilkjentYtelse = tilkjentYtelse2,
             barnMedAndreRelevanteTilkjentYtelser = listOf(Pair(barn, listOf(tilkjentYtelse))),
             personopplysningGrunnlag = personopplysningGrunnlag2,
-            behandlingÅrsak = BehandlingÅrsak.SØKNAD
         )
     }
 
@@ -336,7 +333,6 @@ class UtbetalingssikkerhetTest {
                 behandlendeBehandlingTilkjentYtelse = tilkjentYtelse2,
                 barnMedAndreRelevanteTilkjentYtelser = listOf(Pair(barn, listOf(tilkjentYtelse))),
                 personopplysningGrunnlag = personopplysningGrunnlag2,
-                behandlingÅrsak = BehandlingÅrsak.SØKNAD
             )
         }
     }

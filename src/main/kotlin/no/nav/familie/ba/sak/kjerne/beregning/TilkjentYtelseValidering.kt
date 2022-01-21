@@ -151,7 +151,6 @@ object TilkjentYtelseValidering {
         behandlendeBehandlingTilkjentYtelse: TilkjentYtelse,
         barnMedAndreRelevanteTilkjentYtelser: List<Pair<Person, List<TilkjentYtelse>>>,
         personopplysningGrunnlag: PersonopplysningGrunnlag,
-        behandlingÅrsak: BehandlingÅrsak
     ) {
         val barna = personopplysningGrunnlag.barna.sortedBy { it.fødselsdato }
 
@@ -169,7 +168,7 @@ object TilkjentYtelseValidering {
                 barnsAndelerFraAndreBehandlinger = barnsAndelerFraAndreBehandlinger,
                 behandlendeBehandlingTilkjentYtelse = behandlendeBehandlingTilkjentYtelse,
                 barn = barn,
-                behandlingÅrsak = behandlingÅrsak
+                behandlingÅrsak = behandlendeBehandlingTilkjentYtelse.behandling.opprettetÅrsak
             )
         }
     }

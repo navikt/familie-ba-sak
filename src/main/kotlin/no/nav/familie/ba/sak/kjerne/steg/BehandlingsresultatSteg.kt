@@ -110,7 +110,6 @@ class BehandlingsresultatSteg(
             behandlendeBehandlingTilkjentYtelse = tilkjentYtelse,
             barnMedAndreRelevanteTilkjentYtelser = barnMedAndreRelevanteTilkjentYtelser,
             personopplysningGrunnlag = personopplysningGrunnlag,
-            behandlingÅrsak = behandling.opprettetÅrsak
         )
 
         validerDeltBostedEndringerIkkeKrysserUtvidetYtelse(
