@@ -195,7 +195,7 @@ fun hjemlerTilHjemmeltekst(hjemler: List<String>): String {
 fun hentHjemmeltekst(
     brevPeriodeGrunnlag: List<BrevPeriodeGrunnlag>,
     sanityBegrunnelser: List<SanityBegrunnelse>,
-    opplysningspliktHjemlerSkalMedIBrev: Boolean
+    opplysningspliktHjemlerSkalMedIBrev: Boolean = false
 ): String {
     val hjemler =
         hentHjemlerIVedtaksperioderFraSanity(brevPeriodeGrunnlag, sanityBegrunnelser).toMutableSet()
