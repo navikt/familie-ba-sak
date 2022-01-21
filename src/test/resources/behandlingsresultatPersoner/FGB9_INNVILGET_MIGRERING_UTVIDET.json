@@ -1,0 +1,73 @@
+{
+  "beskrivelse": "FGB: Manuell migrering hvor man også innvilger utvidet. søktFor blir kun true for søker ved årsak søknad.",
+  "inneværendeMåned": "2022-01",
+  "personer": [
+    {
+      "personType": "SØKER",
+      "aktør": {
+        "fødselsnummer": "12345678911",
+        "aktørId": "1234567891100"
+      },
+      "søktForPerson": false,
+      "eksplisittAvslag": false,
+      "forrigeAndeler": [],
+      "andeler": [
+        {
+          "stønadFom": "2022-01",
+          "stønadTom": "2023-08",
+          "kalkulertUtbetalingsbeløp": 1714
+        },
+        {
+          "stønadFom": "2023-09",
+          "stønadTom": "2038-07",
+          "kalkulertUtbetalingsbeløp": 1054
+        }
+      ]
+    },
+    {
+      "personType": "BARN",
+      "aktør": {
+        "fødselsnummer": "12345678912",
+        "aktørId": "1234567891100"
+      },
+      "søktForPerson": true,
+      "eksplisittAvslag": false,
+      "forrigeAndeler": [],
+      "andeler": [
+        {
+          "stønadFom": "2026-08",
+          "stønadTom": "2038-07",
+          "kalkulertUtbetalingsbeløp": 1054
+        },
+        {
+          "stønadFom": "2022-01",
+          "stønadTom": "2026-07",
+          "kalkulertUtbetalingsbeløp": 1676
+        }
+      ]
+    },
+    {
+      "personType": "BARN",
+      "aktør": {
+        "fødselsnummer": "12345678913",
+        "aktørId": "1234567891100"
+      },
+      "søktForPerson": true,
+      "eksplisittAvslag": false,
+      "forrigeAndeler": [],
+      "andeler": [
+        {
+          "stønadFom": "2022-01",
+          "stønadTom": "2023-04",
+          "kalkulertUtbetalingsbeløp": 838
+        },
+        {
+          "stønadFom": "2023-05",
+          "stønadTom": "2035-04",
+          "kalkulertUtbetalingsbeløp": 527
+        }
+      ]
+    }
+  ],
+  "forventetResultat": "INNVILGET"
+}
