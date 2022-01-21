@@ -28,6 +28,7 @@ spec:
   gcp: # Database
     sqlInstances:
       - type: POSTGRES_12 # IF This is changed, all data will be lost. Read on nais.io how to upgrade
+        tier: db-custom-4-3840
         name: familie-ba-sak
         autoBackupTime: "02:00"
         diskAutoresize: true

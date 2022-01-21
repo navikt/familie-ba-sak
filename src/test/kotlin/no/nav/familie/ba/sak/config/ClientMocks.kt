@@ -584,7 +584,7 @@ fun mockHentPersoninfoForMedIdenter(
     } returns PersonInfo(fødselsdato = LocalDate.of(1990, 2, 19), kjønn = Kjønn.KVINNE, navn = "Mor Moresen")
 }
 
-fun tilAktør(fnr: String) = Aktør(fnr + "00").also {
+fun tilAktør(fnr: String, toSisteSiffrer: String = "00") = Aktør(fnr + toSisteSiffrer).also {
     it.personidenter.add(Personident(fnr, aktør = it))
 }
 
