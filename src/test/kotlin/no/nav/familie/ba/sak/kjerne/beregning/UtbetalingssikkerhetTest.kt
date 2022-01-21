@@ -228,9 +228,9 @@ class UtbetalingssikkerhetTest {
 
         val feil = assertThrows<UtbetalingsikkerhetFeil> {
             TilkjentYtelseValidering.validerAtBarnIkkeFårFlereUtbetalingerSammePeriode(
-                tilkjentYtelse2,
-                listOf(Pair(barn, listOf(tilkjentYtelse))),
-                personopplysningGrunnlag2
+                behandlendeBehandlingTilkjentYtelse = tilkjentYtelse2,
+                barnMedAndreRelevanteTilkjentYtelser = listOf(Pair(barn, listOf(tilkjentYtelse))),
+                personopplysningGrunnlag = personopplysningGrunnlag2,
             )
         }
 
@@ -284,9 +284,9 @@ class UtbetalingssikkerhetTest {
         )
 
         TilkjentYtelseValidering.validerAtBarnIkkeFårFlereUtbetalingerSammePeriode(
-            tilkjentYtelse2,
-            listOf(Pair(barn, listOf(tilkjentYtelse))),
-            personopplysningGrunnlag2
+            behandlendeBehandlingTilkjentYtelse = tilkjentYtelse2,
+            barnMedAndreRelevanteTilkjentYtelser = listOf(Pair(barn, listOf(tilkjentYtelse))),
+            personopplysningGrunnlag = personopplysningGrunnlag2,
         )
     }
 
@@ -330,9 +330,9 @@ class UtbetalingssikkerhetTest {
 
         assertDoesNotThrow {
             TilkjentYtelseValidering.validerAtBarnIkkeFårFlereUtbetalingerSammePeriode(
-                tilkjentYtelse2,
-                listOf(Pair(barn, listOf(tilkjentYtelse))),
-                personopplysningGrunnlag2
+                behandlendeBehandlingTilkjentYtelse = tilkjentYtelse2,
+                barnMedAndreRelevanteTilkjentYtelser = listOf(Pair(barn, listOf(tilkjentYtelse))),
+                personopplysningGrunnlag = personopplysningGrunnlag2,
             )
         }
     }
