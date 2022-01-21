@@ -54,6 +54,25 @@ data class BehandlingsresultatPerson(
             else -> listOf(KravOpprinnelse.INNEVÆRENDE)
         }
     }
+
+    override fun toString(): String {
+        return "BehandlingsresultatPerson(" +
+            "personType=$personType, " +
+            "søktForPerson=$søktForPerson, " +
+            "eksplisittAvslag=$eksplisittAvslag, " +
+            "forrigeAndeler=$forrigeAndeler, " +
+            "andeler=$andeler)"
+    }
+
+    fun toSecureString(): String {
+        return "BehandlingsresultatPerson(" +
+            "aktør=$aktør, " +
+            "personType=$personType, " +
+            "søktForPerson=$søktForPerson, " +
+            "eksplisittAvslag=$eksplisittAvslag, " +
+            "forrigeAndeler=$forrigeAndeler, " +
+            "andeler=$andeler)"
+    }
 }
 
 data class MinimertUregistrertBarn(

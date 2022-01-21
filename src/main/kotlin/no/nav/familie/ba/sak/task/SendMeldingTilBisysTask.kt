@@ -141,15 +141,15 @@ class SendMeldingTilBisysTask(
     }
 }
 
-inline fun earlist(yearMonth1: YearMonth, yearMonth2: YearMonth): YearMonth {
+fun earlist(yearMonth1: YearMonth, yearMonth2: YearMonth): YearMonth {
     return if (yearMonth1.isSameOrBefore(yearMonth2)) yearMonth1 else yearMonth2
 }
 
-inline fun latest(yearMonth1: YearMonth, yearMonth2: YearMonth): YearMonth {
+fun latest(yearMonth1: YearMonth, yearMonth2: YearMonth): YearMonth {
     return if (yearMonth1.isSameOrAfter(yearMonth2)) yearMonth1 else yearMonth2
 }
 
-inline fun MånedPeriode.intersect(periode: MånedPeriode): Triple<MånedPeriode?, MånedPeriode?, MånedPeriode?> {
+fun MånedPeriode.intersect(periode: MånedPeriode): Triple<MånedPeriode?, MånedPeriode?, MånedPeriode?> {
     val overlappetFom = latest(this.fom, periode.fom)
     val overlappetTom = earlist(this.tom, periode.tom)
     return Triple(
@@ -159,4 +159,4 @@ inline fun MånedPeriode.intersect(periode: MånedPeriode): Triple<MånedPeriode
     )
 }
 
-inline fun MånedPeriode.erTom() = fom.isAfter(tom)
+fun MånedPeriode.erTom() = fom.isAfter(tom)

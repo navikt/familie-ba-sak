@@ -176,7 +176,7 @@ class SendMeldingTilBisysTaskTest {
 
     @Test
     fun `finnBarnEndretOpplysning() skal return riktig endret opplysning for barn`() {
-        val (behandlingRepository, kafkaProducer, tilkjentYtelseRepository, kafkaResult, behandling) = setupMocks()
+        val (behandlingRepository, kafkaProducer, tilkjentYtelseRepository, _, behandling) = setupMocks()
 
         val sendMeldingTilBisysTask =
             SendMeldingTilBisysTask(kafkaProducer, tilkjentYtelseRepository, behandlingRepository)
@@ -250,11 +250,11 @@ class SendMeldingTilBisysTaskTest {
 
         assertThat(barn1Perioder).hasSize(1)
         assertThat(barn1Perioder!![0].årsakskode).isEqualTo(BarnetrygdEndretType.RO)
-        assertThat(barn1Perioder!![0].fom).isEqualTo(YearMonth.of(2022, 4))
+        assertThat(barn1Perioder[0].fom).isEqualTo(YearMonth.of(2022, 4))
 
         assertThat(barn2Perioder).hasSize(1)
         assertThat(barn2Perioder!![0].årsakskode).isEqualTo(BarnetrygdEndretType.RR)
-        assertThat(barn2Perioder!![0].fom).isEqualTo(YearMonth.of(2026, 2))
+        assertThat(barn2Perioder[0].fom).isEqualTo(YearMonth.of(2026, 2))
 
         assertThat(barn3Perioder).hasSize(2)
 
@@ -262,14 +262,14 @@ class SendMeldingTilBisysTaskTest {
         assertThat(barn3PeriodeOpphør.årsakskode).isEqualTo(BarnetrygdEndretType.RO)
         assertThat(barn3PeriodeOpphør.fom).isEqualTo(YearMonth.of(2019, 10))
 
-        val barn3PeriodeReduser = barn3Perioder!!.first { it.årsakskode == BarnetrygdEndretType.RR }
+        val barn3PeriodeReduser = barn3Perioder.first { it.årsakskode == BarnetrygdEndretType.RR }
         assertThat(barn3PeriodeReduser.årsakskode).isEqualTo(BarnetrygdEndretType.RR)
         assertThat(barn3PeriodeReduser.fom).isEqualTo(YearMonth.of(2019, 5))
     }
 
     @Test
     fun `Skal ikke sende melding til bisys hvis endring ikke er reduksjon eller opphøring`() {
-        val (behandlingRepository, kafkaProducer, tilkjentYtelseRepository, kafkaResult, behandling) = setupMocks()
+        val (behandlingRepository, kafkaProducer, tilkjentYtelseRepository, _, behandling) = setupMocks()
         val sendMeldingTilBisysTask =
             SendMeldingTilBisysTask(kafkaProducer, tilkjentYtelseRepository, behandlingRepository)
 
