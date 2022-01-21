@@ -306,10 +306,6 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
         override val sanityApiNavn = "reduksjonFastOmsorgForBarn"
     },
-    REDUKSJON_MANGLENDE_OPPLYSNINGER {
-        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
-        override val sanityApiNavn = "reduksjonManglendeOpplysninger"
-    },
     REDUKSJON_UNDER_18_ÅR {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
         override val sanityApiNavn = "reduksjonUnder18Aar"
@@ -513,10 +509,6 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
     AVSLAG_IKKE_AVTALE_OM_DELT_BOSTED {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
         override val sanityApiNavn = "avslagIkkeAvtaleOmDeltBosted"
-    },
-    AVSLAG_OPPLYSNINGSPLIKT {
-        override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
-        override val sanityApiNavn = "avslagOpplysningsplikt"
     },
     AVSLAG_SÆRKULLSBARN {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
@@ -729,10 +721,6 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
     OPPHØR_HAR_IKKE_OPPHOLDSTILLATELSE {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
         override val sanityApiNavn = "opphorHarIkkeOppholdstillatelse"
-    },
-    OPPHØR_IKKE_MOTTATT_OPPLYSNINGER {
-        override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
-        override val sanityApiNavn = "opphorIkkeMottattOpplysninger"
     },
     OPPHØR_DELT_BOSTED_OPPHØRT_ENIGHET {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
