@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.common.UtbetalingsikkerhetFeil
 import no.nav.familie.ba.sak.common.overlapperHeltEllerDelvisMed
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering.maksBeløp
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
@@ -149,7 +150,8 @@ object TilkjentYtelseValidering {
     fun validerAtBarnIkkeFårFlereUtbetalingerSammePeriode(
         behandlendeBehandlingTilkjentYtelse: TilkjentYtelse,
         barnMedAndreRelevanteTilkjentYtelser: List<Pair<Person, List<TilkjentYtelse>>>,
-        personopplysningGrunnlag: PersonopplysningGrunnlag
+        personopplysningGrunnlag: PersonopplysningGrunnlag,
+        behandlingÅrsak: BehandlingÅrsak
     ) {
         val barna = personopplysningGrunnlag.barna.sortedBy { it.fødselsdato }
 
@@ -163,10 +165,11 @@ object TilkjentYtelseValidering {
                     .filter { it.aktør == barn.aktør }
 
             validerIngenOverlappAvAndeler(
-                andeler,
-                barnsAndelerFraAndreBehandlinger,
-                behandlendeBehandlingTilkjentYtelse,
-                barn
+                andeler = andeler,
+                barnsAndelerFraAndreBehandlinger = barnsAndelerFraAndreBehandlinger,
+                behandlendeBehandlingTilkjentYtelse = behandlendeBehandlingTilkjentYtelse,
+                barn = barn,
+                behandlingÅrsak = behandlingÅrsak
             )
         }
     }
@@ -175,7 +178,8 @@ object TilkjentYtelseValidering {
         andeler: List<AndelTilkjentYtelse>,
         barnsAndelerFraAndreBehandlinger: List<AndelTilkjentYtelse>,
         behandlendeBehandlingTilkjentYtelse: TilkjentYtelse,
-        barn: Person
+        barn: Person,
+        behandlingÅrsak: BehandlingÅrsak
     ) {
         andeler.forEach { andelTilkjentYtelse ->
             if (barnsAndelerFraAndreBehandlinger.any
@@ -184,10 +188,12 @@ object TilkjentYtelseValidering {
                         andelTilkjentYtelse.prosent + it.prosent > BigDecimal(100)
                 }
             ) {
-                throw UtbetalingsikkerhetFeil(
-                    melding = "Vi finner flere utbetalinger for barn på behandling ${behandlendeBehandlingTilkjentYtelse.behandling.id}",
-                    frontendFeilmelding = "Det er allerede innvilget utbetaling av barnetrygd for ${barn.aktør.aktivFødselsnummer()} i perioden ${andelTilkjentYtelse.stønadFom.tilKortString()} - ${andelTilkjentYtelse.stønadTom.tilKortString()}."
-                )
+                if (behandlingÅrsak != BehandlingÅrsak.ENDRE_MIGRERINGSDATO) {
+                    throw UtbetalingsikkerhetFeil(
+                        melding = "Vi finner flere utbetalinger for barn på behandling ${behandlendeBehandlingTilkjentYtelse.behandling.id}",
+                        frontendFeilmelding = "Det er allerede innvilget utbetaling av barnetrygd for ${barn.aktør.aktivFødselsnummer()} i perioden ${andelTilkjentYtelse.stønadFom.tilKortString()} - ${andelTilkjentYtelse.stønadTom.tilKortString()}."
+                    )
+                }
             }
         }
     }
