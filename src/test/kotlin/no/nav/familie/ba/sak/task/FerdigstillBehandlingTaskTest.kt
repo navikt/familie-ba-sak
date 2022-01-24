@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.task
 
-import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.randomFnr
@@ -27,7 +26,9 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.test.annotation.DirtiesContext
 
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 class FerdigstillBehandlingTaskTest : AbstractSpringIntegrationTest() {
 
     @Autowired
@@ -56,9 +57,6 @@ class FerdigstillBehandlingTaskTest : AbstractSpringIntegrationTest() {
 
     @Autowired
     lateinit var saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository
-
-    @Autowired
-    lateinit var envService: EnvService
 
     @Autowired
     lateinit var vedtaksperiodeService: VedtaksperiodeService
