@@ -286,6 +286,14 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
         override val sanityApiNavn = "innvilgetSmaabarnstillegg"
     },
+    INNVILGET_ANNEN_FORELDER_IKKE_SØKT_DELT_BARNETRYGD_ENKELTBARN {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetAnnenForelderIkkeSoktDeltBarnetrygdEnkeltbarn"
+    },
+    INNVILGET_ANNEN_FORELDER_IKKE_SØKT_DELT_BARNETRYGD_ALLE_BARNA {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetAnnenForelderIkkeSoktDeltBarnetrygdAlleBarna"
+    },
     REDUKSJON_BOSATT_I_RIKTET {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
         override val sanityApiNavn = "reduksjonBosattIRiket"
@@ -469,6 +477,10 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
     REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_FULL_OVERGANGSSTØNAD {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
         override val sanityApiNavn = "reduksjonSmaabarnstilleggIkkeLengerFullOvergangsstonad"
+    },
+    REDUKSJON_DELT_BARNETRYGD_ANNEN_FORELDER_SØKT {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "reduksjonDeltBarnetrygdAnnenForelderSokt"
     },
     AVSLAG_BOSATT_I_RIKET {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
