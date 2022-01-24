@@ -109,6 +109,19 @@ object YtelsePersonUtils {
         ytelsePerson: YtelsePerson,
         inneværendeMåned: YearMonth
     ): Boolean {
+        val nesteMåned = inneværendeMåned.nesteMåned()
+        val stønadSlutt =
+            behandlingsresultatPerson.andeler.maxByOrNull { it.stønadFom }?.stønadTom
+                ?: TIDENES_MORGEN.toYearMonth()
+
+        val forrigeStønadSlutt =
+            behandlingsresultatPerson
+                .forrigeAndeler
+                .maxByOrNull { it.stønadFom }
+                ?.stønadTom ?: TIDENES_MORGEN.toYearMonth()
+
+        val opphører = stønadSlutt.isBefore(nesteMåned)
+
         if (behandlingsresultatPerson.søktForPerson) {
             val beløpRedusert = (segmenterLagtTil + segmenterFjernet).isEmpty() &&
                 (behandlingsresultatPerson.forrigeAndeler.sumOf { it.sumForPeriode() } - behandlingsresultatPerson.andeler.sumOf { it.sumForPeriode() }) > 0
@@ -116,30 +129,18 @@ object YtelsePersonUtils {
             val finnesReduksjonerTilbakeITid = ytelsePerson.erFramstiltKravForITidligereBehandling() &&
                 segmenterFjernet.harSegmentFør(inneværendeMåned)
 
-            return finnesReduksjonerTilbakeITid || beløpRedusert
+            return !opphører && finnesReduksjonerTilbakeITid || beløpRedusert
         } else {
             // Hvis det ikke finnes noen forrige andeler kan det aldri bety endring
             if (behandlingsresultatPerson.forrigeAndeler.isEmpty()) return false
-
-            val nesteMåned = inneværendeMåned.nesteMåned()
-            val stønadSlutt =
-                behandlingsresultatPerson.andeler.maxByOrNull { it.stønadFom }?.stønadTom
-                    ?: TIDENES_MORGEN.toYearMonth()
-
-            val forrigeStønadSlutt =
-                behandlingsresultatPerson
-                    .forrigeAndeler
-                    .maxByOrNull { it.stønadFom }
-                    ?.stønadTom ?: TIDENES_MORGEN.toYearMonth()
-
-            val opphører = stønadSlutt.isBefore(nesteMåned)
 
             val erAndelMedEndretBeløp = erAndelMedEndretBeløp(
                 forrigeAndeler = behandlingsresultatPerson.forrigeAndeler,
                 andeler = behandlingsresultatPerson.andeler
             )
 
-            val erLagtTilSegmenter = segmenterLagtTil.harSegmentFør(if (opphører) stønadSlutt else nesteMåned)
+            val erLagtTilSegmenter =
+                ytelsePerson.erFramstiltKravForITidligereBehandling() && segmenterLagtTil.harSegmentFør(if (opphører) stønadSlutt else nesteMåned)
 
             val erFjernetSegmenter =
                 segmenterFjernet.harSegmentFør(if (opphører) stønadSlutt else nesteMåned)
