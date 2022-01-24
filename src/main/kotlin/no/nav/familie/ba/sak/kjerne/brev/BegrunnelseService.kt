@@ -50,7 +50,6 @@ class BegrunnelseService(
             andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(
                 behandlingId
             ),
-            sanityBegrunnelser = sanityBegrunnelser
         )
 
         val andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId)

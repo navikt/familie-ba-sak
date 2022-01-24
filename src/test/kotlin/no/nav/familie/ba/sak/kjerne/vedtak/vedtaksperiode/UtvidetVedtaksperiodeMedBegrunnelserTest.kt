@@ -85,7 +85,6 @@ class UtvidetVedtaksperiodeMedBegrunnelserTest {
             vedtaksperiodeMedBegrunnelser.tilUtvidetVedtaksperiodeMedBegrunnelser(
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 andelerTilkjentYtelse = andelerTilkjentYtelse,
-                sanityBegrunnelser = sanityBegrunnelser
             )
 
         Assertions.assertEquals(1, utvidetVedtaksperiodeMedBegrunnelser.utbetalingsperiodeDetaljer.size)
@@ -152,7 +151,6 @@ class UtvidetVedtaksperiodeMedBegrunnelserTest {
             vedtaksperiodeMedBegrunnelser.tilUtvidetVedtaksperiodeMedBegrunnelser(
                 personopplysningGrunnlag,
                 andelerTilkjentYtelse,
-                sanityBegrunnelser = sanityBegrunnelser
             )
 
         Assertions.assertEquals(1, utvidetVedtaksperiodeMedBegrunnelser.utbetalingsperiodeDetaljer.size)
@@ -237,7 +235,6 @@ class UtvidetVedtaksperiodeMedBegrunnelserTest {
             vedtaksperiodeMedBegrunnelser.tilUtvidetVedtaksperiodeMedBegrunnelser(
                 personopplysningGrunnlag,
                 andelerTilkjentYtelse,
-                sanityBegrunnelser = sanityBegrunnelser
             )
 
         Assertions.assertEquals(1, utvidetVedtaksperiodeMedBegrunnelser.utbetalingsperiodeDetaljer.size)
