@@ -7,6 +7,7 @@
   "ytelserForBarnOgSøkerIPeriode": [
     "ORDINÆR_BARNETRYGD"
   ],
+  "utvidetScenarioForEndringsperiode": "IKKE_UTVIDET_YTELSE",
   "personerPåBehandling": [
     {
       "type": "BARN",

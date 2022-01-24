@@ -66,7 +66,7 @@ class BrevperiodeTest {
                     "Feil i test: $it" +
                         "\nFeilmelding: ${e.message}" +
                         "\nFil: ${e.stackTrace.first()}" +
-                        "\n-----------------------------------"
+                        "\n-----------------------------------\n"
                 )
                 return@fold acc + 1
             }
@@ -81,7 +81,7 @@ class BrevperiodeTest {
                     it,
                     "${behandlingsresultatPersonTestConfig.beskrivelse}\n\n" +
                         feil.joinToString("\n\n") +
-                        "\n-----------------------------------"
+                        "\n-----------------------------------\n"
                 )
                 acc + 1
             } else {

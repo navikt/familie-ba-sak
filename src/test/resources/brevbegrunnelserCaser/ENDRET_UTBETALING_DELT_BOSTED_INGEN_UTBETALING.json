@@ -1,10 +1,11 @@
 {
-  "beskrivelse": "Innvilget. Barn bor med søker.",
+  "beskrivelse": "Endret utbetaling. Delt bosted ingen utbetaling. Fra starten av perioden. ",
   "fom": "2021-02-01",
   "tom": "2021-12-31",
   "vedtaksperiodetype": "ENDRET_UTBETALING",
   "ytelserForSøkerForrigeMåned": [],
   "ytelserForBarnOgSøkerIPeriode": [],
+  "utvidetScenarioForEndringsperiode": "IKKE_UTVIDET_YTELSE",
   "personerPåBehandling": [
     {
       "endredeUtbetalinger": [
@@ -41,6 +42,14 @@
     }
   ],
   "forventetOutput": [
+    "INNVILGET_OMSORG_FOR_BARN",
+    "INNVILGET_BOR_HOS_SØKER",
+    "INNVILGET_ENIGHET_OM_OPPHØR_AV_AVTALE_OM_DELT_BOSTED",
+    "INNVILGET_UENIGHET_OM_OPPHØR_AV_AVTALE_OM_DELT_BOSTED",
+    "INNVILGET_AVTALE_DELT_BOSTED_FÅR_FRA_FLYTTETIDSPUNKT",
+    "INNVILGET_AVTALE_DELT_BOSTED_FÅR_FRA_AVTALETIDSPUNKT",
+    "INNVILGET_VURDERING_AVTALE_DELT_BOSTED_FØLGES",
+    "INNVILGET_RETTSAVGJØRELSE_DELT_BOSTED",
     "ENDRET_UTBETALING_DELT_BOSTED_INGEN_UTBETALING"
   ]
 }

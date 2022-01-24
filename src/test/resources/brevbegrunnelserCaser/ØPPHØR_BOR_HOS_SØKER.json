@@ -4,9 +4,8 @@
   "tom": null,
   "vedtaksperiodetype": "OPPHØR",
   "ytelserForSøkerForrigeMåned": [],
-  "ytelserForBarnOgSøkerIPeriode": [
-    "ORDINÆR_BARNETRYGD"
-  ],
+  "ytelserForBarnOgSøkerIPeriode": [],
+  "utvidetScenarioForEndringsperiode": "IKKE_UTVIDET_YTELSE",
   "personerPåBehandling": [
     {
       "type": "BARN",
