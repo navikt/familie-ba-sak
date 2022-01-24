@@ -55,7 +55,11 @@ object YtelsePersonUtils {
                 resultater.add(YtelsePersonResultat.OPPHØRT)
             }
 
-            if (finnesInnvilget(personSomSjekkes = ytelsePerson, segmenterLagtTil = segmenterLagtTil)) {
+            if (finnesInnvilget(
+                    behandlingsresultatPerson = behandlingsresultatPerson,
+                    segmenterLagtTil = segmenterLagtTil
+                )
+            ) {
                 resultater.add(YtelsePersonResultat.INNVILGET)
             }
 
@@ -103,55 +107,71 @@ object YtelsePersonUtils {
         segmenterFjernet: LocalDateTimeline<BehandlingsresultatAndelTilkjentYtelse>,
         ytelsePerson: YtelsePerson,
         inneværendeMåned: YearMonth
-    ) = if (behandlingsresultatPerson.søktForPerson) {
-        val beløpRedusert = (segmenterLagtTil + segmenterFjernet).isEmpty() &&
-            (behandlingsresultatPerson.forrigeAndeler.sumOf { it.sumForPeriode() } - behandlingsresultatPerson.andeler.sumOf { it.sumForPeriode() }) > 0
+    ): Boolean {
+        if (behandlingsresultatPerson.søktForPerson) {
+            val beløpRedusert = (segmenterLagtTil + segmenterFjernet).isEmpty() &&
+                (behandlingsresultatPerson.forrigeAndeler.sumOf { it.sumForPeriode() } - behandlingsresultatPerson.andeler.sumOf { it.sumForPeriode() }) > 0
 
-        val finnesReduksjonerTilbakeITid = ytelsePerson.erFramstiltKravForITidligereBehandling() &&
-            segmenterFjernet.harSegmentMedTomFør(inneværendeMåned)
+            val finnesReduksjonerTilbakeITid = ytelsePerson.erFramstiltKravForITidligereBehandling() &&
+                segmenterFjernet.harSegmentMedTomFør(inneværendeMåned)
 
-        finnesReduksjonerTilbakeITid || beløpRedusert
-    } else {
-        val stønadSlutt =
-            behandlingsresultatPerson.andeler.maxByOrNull { it.stønadFom }?.stønadTom ?: TIDENES_MORGEN.toYearMonth()
+            return finnesReduksjonerTilbakeITid || beløpRedusert
+        } else {
+            // Hvis det ikke finnes noen forrige andeler kan det aldri bety endring
+            if (behandlingsresultatPerson.forrigeAndeler.isEmpty()) return false
 
-        val forrigeStønadSlutt =
-            behandlingsresultatPerson
-                .forrigeAndeler
-                .maxByOrNull { it.stønadFom }
-                ?.stønadTom ?: TIDENES_MORGEN.toYearMonth()
+            val stønadSlutt =
+                behandlingsresultatPerson.andeler.maxByOrNull { it.stønadFom }?.stønadTom
+                    ?: TIDENES_MORGEN.toYearMonth()
 
-        val opphører = stønadSlutt.isBefore(inneværendeMåned.plusMonths(1))
+            val forrigeStønadSlutt =
+                behandlingsresultatPerson
+                    .forrigeAndeler
+                    .maxByOrNull { it.stønadFom }
+                    ?.stønadTom ?: TIDENES_MORGEN.toYearMonth()
 
-        val erAndelMedEndretBeløp = erAndelMedEndretBeløp(
-            forrigeAndeler = behandlingsresultatPerson.forrigeAndeler,
-            andeler = behandlingsresultatPerson.andeler
-        )
+            val opphører = stønadSlutt.isBefore(inneværendeMåned.plusMonths(1))
 
-        val erLagtTilSegmenterPåPersonFraTidligereBehandling = ytelsePerson.erFramstiltKravForITidligereBehandling() &&
-            segmenterLagtTil.harSegmentMedTomFør(if (opphører) stønadSlutt else inneværendeMåned)
+            val erAndelMedEndretBeløp = erAndelMedEndretBeløp(
+                forrigeAndeler = behandlingsresultatPerson.forrigeAndeler,
+                andeler = behandlingsresultatPerson.andeler
+            )
 
-        val erFjernetSegmenter =
-            segmenterFjernet.harSegmentMedTomFør(if (opphører) stønadSlutt else inneværendeMåned)
+            val erLagtTilSegmenterPåPersonFraTidligereBehandling =
+                ytelsePerson.erFramstiltKravForITidligereBehandling() &&
+                    segmenterLagtTil.harSegmentMedTomFør(if (opphører) stønadSlutt else inneværendeMåned)
 
-        val opphørsdatoErSattSenere = stønadSlutt.isAfter(forrigeStønadSlutt)
+            val erFjernetSegmenter =
+                segmenterFjernet.harSegmentMedTomFør(if (opphører) stønadSlutt else inneværendeMåned)
 
-        erAndelMedEndretBeløp ||
-            erLagtTilSegmenterPåPersonFraTidligereBehandling ||
-            erFjernetSegmenter ||
-            opphørsdatoErSattSenere
+            val opphørsdatoErSattSenere = stønadSlutt.isAfter(forrigeStønadSlutt)
+
+            return erAndelMedEndretBeløp ||
+                erLagtTilSegmenterPåPersonFraTidligereBehandling ||
+                erFjernetSegmenter ||
+                opphørsdatoErSattSenere
+        }
     }
 
     fun erAndelMedEndretBeløp(
         forrigeAndeler: List<BehandlingsresultatAndelTilkjentYtelse>,
         andeler: List<BehandlingsresultatAndelTilkjentYtelse>
-    ): Boolean = andeler.any { andel ->
+    ): Boolean =
+        andelerMedEndretBeløp(
+            forrigeAndeler = forrigeAndeler,
+            andeler = andeler
+        ).isNotEmpty()
+
+    private fun andelerMedEndretBeløp(
+        forrigeAndeler: List<BehandlingsresultatAndelTilkjentYtelse>,
+        andeler: List<BehandlingsresultatAndelTilkjentYtelse>
+    ): List<Int> = andeler.flatMap { andel ->
         val andelerFraForrigeBehandlingISammePeriode =
             forrigeAndeler.filter { it.periode.overlapperHeltEllerDelvisMed(andel.periode) }
 
-        andelerFraForrigeBehandlingISammePeriode.any {
-            it.kalkulertUtbetalingsbeløp != andel.kalkulertUtbetalingsbeløp
-        }
+        andelerFraForrigeBehandlingISammePeriode.map {
+            andel.kalkulertUtbetalingsbeløp - it.kalkulertUtbetalingsbeløp
+        }.filter { it != 0 }
     }
 
     private fun avslagPåNyPerson(
@@ -161,10 +181,16 @@ object YtelsePersonUtils {
         personSomSjekkes.kravOpprinnelse == listOf(KravOpprinnelse.INNEVÆRENDE) && segmenterLagtTil.isEmpty
 
     private fun finnesInnvilget(
-        personSomSjekkes: YtelsePerson,
+        behandlingsresultatPerson: BehandlingsresultatPerson,
         segmenterLagtTil: LocalDateTimeline<BehandlingsresultatAndelTilkjentYtelse>
     ) =
-        personSomSjekkes.erFramstiltKravForIInneværendeBehandling() && !segmenterLagtTil.isEmpty
+        behandlingsresultatPerson.utledYtelsePerson()
+            .erFramstiltKravForIInneværendeBehandling() && (
+            !segmenterLagtTil.isEmpty || andelerMedEndretBeløp(
+                forrigeAndeler = behandlingsresultatPerson.forrigeAndeler,
+                andeler = behandlingsresultatPerson.andeler
+            ).any { it > 0 }
+            )
 
     private fun erYtelsenOpphørt(
         andeler: List<BehandlingsresultatAndelTilkjentYtelse>,
