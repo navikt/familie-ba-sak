@@ -111,7 +111,7 @@ data class VedtaksperiodeMedBegrunnelser(
         ) {
             val andelerForVedtaksperiodetype = andelerTilkjentYtelse.filter {
                 if (this.type == Vedtaksperiodetype.ENDRET_UTBETALING) {
-                    it.harEndretUtbetalingAndelerOgHørerTilVedtaksperiode(this,)
+                    it.harEndretUtbetalingAndelerOgHørerTilVedtaksperiode(this)
                 } else {
                     it.endretUtbetalingAndeler.isEmpty()
                 }
