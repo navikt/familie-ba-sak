@@ -37,7 +37,7 @@ fun vedtakSimuleringMottakereTilRestSimulering(økonomiSimuleringMottakere: List
         perioder.filter { nestePeriode == null || it.fom < nestePeriode.fom }.maxOfOrNull { it.tom }
 
     return RestSimulering(
-        perioder = vedtakSimuleringMottakereTilSimuleringPerioder(økonomiSimuleringMottakere),
+        perioder = perioder,
         fomDatoNestePeriode = nestePeriode?.fom,
         etterbetaling = hentTotalEtterbetaling(perioder, nestePeriode?.fom),
         feilutbetaling = hentTotalFeilutbetaling(perioder, nestePeriode?.fom)
@@ -73,7 +73,7 @@ fun vedtakSimuleringMottakereTilSimuleringPerioder(
             nyttBeløp = hentNyttBeløpIPeriode(posteringListe),
             tidligereUtbetalt = hentTidligereUtbetaltIPeriode(posteringListe),
             resultat = hentResultatIPeriode(posteringListe),
-            feilutbetaling = hentFeilbetalingIPeriode(posteringListe),
+            feilutbetaling = hentPositivFeilbetalingIPeriode(posteringListe),
             etterbetaling = hentEtterbetalingIPeriode(posteringListe, tidSimuleringHentet)
         )
     }
@@ -90,6 +90,12 @@ fun hentNyttBeløpIPeriode(periode: List<ØkonomiSimuleringPostering>): BigDecim
 fun hentFeilbetalingIPeriode(periode: List<ØkonomiSimuleringPostering>) =
     periode.filter { postering ->
         postering.posteringType == PosteringType.FEILUTBETALING
+    }.sumOf { it.beløp }
+
+fun hentPositivFeilbetalingIPeriode(periode: List<ØkonomiSimuleringPostering>) =
+    periode.filter { postering ->
+        postering.posteringType == PosteringType.FEILUTBETALING &&
+            postering.beløp > BigDecimal.ZERO
     }.sumOf { it.beløp }
 
 fun hentTidligereUtbetaltIPeriode(periode: List<ØkonomiSimuleringPostering>): BigDecimal {

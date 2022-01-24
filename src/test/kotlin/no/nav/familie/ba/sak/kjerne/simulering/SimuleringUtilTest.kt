@@ -163,12 +163,12 @@ class SimuleringUtilTest {
             mockVedtakSimuleringPostering(
                 beløp = 100,
                 posteringType = PosteringType.YTELSE,
-                forfallsdato = now().plusDays(1)
+                forfallsdato = LocalDate.now().plusDays(1)
             ),
             mockVedtakSimuleringPostering(
                 beløp = 200,
                 posteringType = PosteringType.YTELSE,
-                forfallsdato = now().minusDays(1)
+                forfallsdato = LocalDate.now().minusDays(1)
             ),
         )
 
@@ -176,7 +176,7 @@ class SimuleringUtilTest {
             BigDecimal.valueOf(200),
             hentEtterbetalingIPeriode(
                 vedtaksimuleringPosteringer,
-                now()
+                LocalDate.now()
             )
         )
     }
@@ -206,7 +206,7 @@ class SimuleringUtilTest {
                 beløp = 8_000,
                 posteringType = PosteringType.FEILUTBETALING,
                 betalingType = BetalingType.DEBIT
-            ), //Feilutbetaling
+            ), // Feilutbetaling
             mockVedtakSimuleringPostering(
                 beløp = -8_000,
                 posteringType = PosteringType.MOTP,
@@ -345,18 +345,18 @@ class SimuleringUtilTest {
     @Test
     fun `revurdering 22 nov`() {
         val revurering_22_nov =
-            //Forrige ytelse
+            // Forrige ytelse
             mockVedtakSimuleringPosteringer(YearMonth.of(2021, 2), 3, -17_153, PosteringType.YTELSE) +
                 mockVedtakSimuleringPosteringer(YearMonth.of(2021, 5), 6, -18_195, PosteringType.YTELSE) +
-                //Ny ytelse
+                // Ny ytelse
                 mockVedtakSimuleringPosteringer(YearMonth.of(2021, 2), 3, 17_153, PosteringType.YTELSE) +
                 mockVedtakSimuleringPosteringer(YearMonth.of(2021, 5), 4, 17_257, PosteringType.YTELSE) +
                 mockVedtakSimuleringPosteringer(YearMonth.of(2021, 9), 2, 18_195, PosteringType.YTELSE) +
-                //Feilutbetaling
+                // Feilutbetaling
                 mockVedtakSimuleringPosteringer(YearMonth.of(2021, 5), 4, 938, PosteringType.FEILUTBETALING) +
-                //Motpost feilutbetaling
+                // Motpost feilutbetaling
                 mockVedtakSimuleringPosteringer(YearMonth.of(2021, 5), 4, -938, PosteringType.MOTP) +
-                //Teknisk postering
+                // Teknisk postering
                 mockVedtakSimuleringPosteringer(YearMonth.of(2021, 5), 4, 938, PosteringType.YTELSE)
 
         val økonomiSimuleringMottakere =
@@ -370,18 +370,18 @@ class SimuleringUtilTest {
     @Test
     fun `revurdering 23 nov`() {
         val revurdering_23_nov =
-            //Forrige ytelse
+            // Forrige ytelse
             mockVedtakSimuleringPosteringer(YearMonth.of(2021, 2), 3, -17_153, PosteringType.YTELSE) +
                 mockVedtakSimuleringPosteringer(YearMonth.of(2021, 5), 4, -17_257, PosteringType.YTELSE) +
                 mockVedtakSimuleringPosteringer(YearMonth.of(2021, 9), 2, -18_195, PosteringType.YTELSE) +
-                //Ny ytelse
+                // Ny ytelse
                 mockVedtakSimuleringPosteringer(YearMonth.of(2021, 2), 3, 17_341, PosteringType.YTELSE) +
                 mockVedtakSimuleringPosteringer(YearMonth.of(2021, 5), 7, 18_382, PosteringType.YTELSE) +
-                //Teknisk postering
+                // Teknisk postering
                 mockVedtakSimuleringPosteringer(YearMonth.of(2021, 5), 4, -938, PosteringType.YTELSE) +
-                //Reduser feilutbetaling til null
+                // Reduser feilutbetaling til null
                 mockVedtakSimuleringPosteringer(YearMonth.of(2021, 5), 4, -938, PosteringType.FEILUTBETALING) +
-                //Motpost feilutbetaling
+                // Motpost feilutbetaling
                 mockVedtakSimuleringPosteringer(YearMonth.of(2021, 5), 4, 938, PosteringType.MOTP)
 
         val økonomiSimuleringMottakere =
