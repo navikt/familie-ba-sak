@@ -132,7 +132,7 @@ class IntegrasjonClientMock {
                 listOf(Arbeidsfordelingsenhet("4833", "NAV Familie- og pensjonsytelser Oslo 1"))
 
             every { mockIntegrasjonClient.hentDokument(any(), any()) } returns
-                success("mock data".toByteArray())
+                success(TEST_PDF)
 
             val idSlotPersonMedRelasjoner = slot<String>()
             every {

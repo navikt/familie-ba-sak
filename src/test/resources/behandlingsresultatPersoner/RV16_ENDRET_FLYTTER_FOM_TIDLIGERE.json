@@ -1,0 +1,30 @@
+{
+  "beskrivelse": "RV: Vi har migrert en sak og flytter fom én måned tilbake i endre migreringsdato revurdering",
+  "inneværendeMåned": "2022-01",
+  "personer": [
+    {
+      "personType": "BARN",
+      "aktør": {
+        "fødselsnummer": "12345678911",
+        "aktørId": "1234567891100"
+      },
+      "søktForPerson": false,
+      "eksplisittAvslått": false,
+      "forrigeAndeler": [
+        {
+          "stønadFom": "2022-02",
+          "stønadTom": "2031-05",
+          "kalkulertUtbetalingsbeløp": 1054
+        }
+      ],
+      "andeler": [
+        {
+          "stønadFom": "2022-01",
+          "stønadTom": "2031-05",
+          "kalkulertUtbetalingsbeløp": 1054
+        }
+      ]
+    }
+  ],
+  "forventetResultat": "ENDRET"
+}
