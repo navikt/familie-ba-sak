@@ -231,10 +231,9 @@ class OppdaterVilkårsvurderingTest {
         val behandling = lagBehandling()
 
         val initUtenUtvidetVilkår =
-            lagVilkårsvurderingMedForskjelligeTyperVilkår(søkerFnr, søkerAktørId, behandling, listOf())
+            lagVilkårsvurderingMedForskjelligeTyperVilkår(søkerAktørId, behandling, listOf())
         val aktivMedUtvidetVilkår =
             lagVilkårsvurderingMedForskjelligeTyperVilkår(
-                søkerFnr,
                 søkerAktørId,
                 behandling,
                 listOf(Vilkår.UTVIDET_BARNETRYGD)
@@ -260,10 +259,9 @@ class OppdaterVilkårsvurderingTest {
         val behandling = lagBehandling()
 
         val initUtenUtvidetVilkår =
-            lagVilkårsvurderingMedForskjelligeTyperVilkår(søkerFnr, søkerAktørId, behandling, listOf())
+            lagVilkårsvurderingMedForskjelligeTyperVilkår(søkerAktørId, behandling, listOf())
         val aktivMedUtvidetVilkår =
             lagVilkårsvurderingMedForskjelligeTyperVilkår(
-                søkerFnr,
                 søkerAktørId,
                 behandling,
                 listOf(Vilkår.UTVIDET_BARNETRYGD)
@@ -289,10 +287,9 @@ class OppdaterVilkårsvurderingTest {
         val behandling = lagBehandling()
 
         val initUtenUtvidetVilkår =
-            lagVilkårsvurderingMedForskjelligeTyperVilkår(søkerFnr, søkerAktørId, behandling, listOf())
+            lagVilkårsvurderingMedForskjelligeTyperVilkår(søkerAktørId, behandling, listOf())
         val aktivMedUtvidetVilkår =
             lagVilkårsvurderingMedForskjelligeTyperVilkår(
-                søkerFnr,
                 søkerAktørId,
                 behandling,
                 listOf(Vilkår.UTVIDET_BARNETRYGD)
@@ -322,7 +319,7 @@ class OppdaterVilkårsvurderingTest {
         val forrigeBehandling = lagBehandling()
 
         val initUtenUtvidetVilkår =
-            lagVilkårsvurderingMedForskjelligeTyperVilkår(søkerFnr, søkerAktørId, nyBehandling, listOf())
+            lagVilkårsvurderingMedForskjelligeTyperVilkår(søkerAktørId, nyBehandling, listOf())
 
         val aktivVilkårsvurderingMedUtvidet = Vilkårsvurdering(behandling = forrigeBehandling)
         val personResultat =
@@ -371,7 +368,7 @@ class OppdaterVilkårsvurderingTest {
         val behandling = lagBehandling()
 
         val initUtenUtvidetVilkår =
-            lagVilkårsvurderingMedForskjelligeTyperVilkår(søkerFnr, søkerAktørId, behandling, listOf())
+            lagVilkårsvurderingMedForskjelligeTyperVilkår(søkerAktørId, behandling, listOf())
 
         val aktivVilkårsvurderingMedUtvidet = Vilkårsvurdering(behandling = behandling)
         val personResultat =
@@ -421,7 +418,7 @@ class OppdaterVilkårsvurderingTest {
         val forrigeBehandling = lagBehandling()
 
         val initUtenUtvidetVilkår =
-            lagVilkårsvurderingMedForskjelligeTyperVilkår(søkerFnr, søkerAktørId, nyBehandling, listOf())
+            lagVilkårsvurderingMedForskjelligeTyperVilkår(søkerAktørId, nyBehandling, listOf())
 
         val aktivVilkårsvurderingMedUtvidetIkkeOppfylt = Vilkårsvurdering(behandling = forrigeBehandling)
         val personResultat =
@@ -464,7 +461,6 @@ class OppdaterVilkårsvurderingTest {
     }
 
     fun lagVilkårsvurderingMedForskjelligeTyperVilkår(
-        søkerFnr: String,
         søkerAktør: Aktør,
         behandling: Behandling,
         vilkår: List<Vilkår>
