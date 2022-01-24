@@ -26,7 +26,8 @@ import java.time.LocalDate
 
 fun hentVedtaksperioderMedBegrunnelserForEndredeUtbetalingsperioder(
     andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
-    vedtak: Vedtak
+    vedtak: Vedtak,
+    endretUtbetalingVedtakssidenToggle: Boolean = false,
 ) = andelerTilkjentYtelse.filter { it.endretUtbetalingAndeler.isNotEmpty() }.groupBy { it.prosent }
     .flatMap { (_, andeler) ->
         andeler.lagVertikaleSegmenter()
@@ -37,17 +38,19 @@ fun hentVedtaksperioderMedBegrunnelserForEndredeUtbetalingsperioder(
                     vedtak = vedtak,
                     type = Vedtaksperiodetype.ENDRET_UTBETALING
                 ).also { vedtaksperiodeMedBegrunnelse ->
-                    val endretUtbetalingAndeler = andelerForSegment.flatMap { it.endretUtbetalingAndeler }
-                    vedtaksperiodeMedBegrunnelse.begrunnelser.addAll(
-                        endretUtbetalingAndeler
-                            .flatMap { it.vedtakBegrunnelseSpesifikasjoner }.toSet()
-                            .map { vedtakBegrunnelseSpesifikasjon ->
-                                Vedtaksbegrunnelse(
-                                    vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelse,
-                                    vedtakBegrunnelseSpesifikasjon = vedtakBegrunnelseSpesifikasjon,
-                                )
-                            }
-                    )
+                    if (!endretUtbetalingVedtakssidenToggle) {
+                        val endretUtbetalingAndeler = andelerForSegment.flatMap { it.endretUtbetalingAndeler }
+                        vedtaksperiodeMedBegrunnelse.begrunnelser.addAll(
+                            endretUtbetalingAndeler
+                                .flatMap { it.vedtakBegrunnelseSpesifikasjoner }.toSet()
+                                .map { vedtakBegrunnelseSpesifikasjon ->
+                                    Vedtaksbegrunnelse(
+                                        vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelse,
+                                        vedtakBegrunnelseSpesifikasjon = vedtakBegrunnelseSpesifikasjon,
+                                    )
+                                }
+                        )
+                    }
                 }
             }
     }
@@ -115,7 +118,7 @@ fun erFørsteVedtaksperiodePåFagsak(
     )
 }
 
-fun hentGyldigeBegrunnelserForVedtaksperiodeGammel(
+fun hentGyldigeBegrunnelserForVedtaksperiode(
     minimertVedtaksperiode: MinimertVedtaksperiode,
     sanityBegrunnelser: List<SanityBegrunnelse>,
     minimertePersoner: List<MinimertPerson>,
