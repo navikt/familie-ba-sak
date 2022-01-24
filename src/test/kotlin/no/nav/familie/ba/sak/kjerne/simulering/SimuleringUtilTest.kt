@@ -93,20 +93,6 @@ class SimuleringUtilTest {
         Assertions.assertEquals(BigDecimal.valueOf(3), hentResultatIPeriode(økonomiSimuleringPosteringer))
     }
 
-    @Test
-    fun `Test '2nytt beløp', 'tidligere utbetalt' og 'resultat' for simuleringsperiode med reduksjon i feilutbetaling`() {
-        val økonomiSimuleringPosteringer = listOf(
-            mockVedtakSimuleringPostering(beløp = -3000, posteringType = PosteringType.YTELSE),
-            mockVedtakSimuleringPostering(beløp = 12000, posteringType = PosteringType.YTELSE),
-            mockVedtakSimuleringPostering(beløp = -7000, posteringType = PosteringType.FEILUTBETALING),
-            mockVedtakSimuleringPostering(beløp = -7000, posteringType = PosteringType.YTELSE),
-        )
-
-        Assertions.assertEquals(BigDecimal.valueOf(12000), hentNyttBeløpIPeriode(økonomiSimuleringPosteringer))
-        Assertions.assertEquals(BigDecimal.valueOf(3000), hentTidligereUtbetaltIPeriode(økonomiSimuleringPosteringer))
-        Assertions.assertEquals(BigDecimal.valueOf(9000), hentResultatIPeriode(økonomiSimuleringPosteringer))
-    }
-
     private val økonomiSimuleringPosteringerMedNegativFeilutbetaling = listOf(
         mockVedtakSimuleringPostering(beløp = -500, posteringType = PosteringType.FEILUTBETALING),
         mockVedtakSimuleringPostering(beløp = -2000, posteringType = PosteringType.YTELSE),
