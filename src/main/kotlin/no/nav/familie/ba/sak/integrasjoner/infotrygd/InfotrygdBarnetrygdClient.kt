@@ -133,6 +133,26 @@ class InfotrygdBarnetrygdClient(
         }
     }
 
+    fun harNyligSendtBrevFor(personIdent: String, brevkoder: List<InfotrygdBrevkode>): Boolean {
+        val uri = URI.create("$clientUri/infotrygd/barnetrygd/brev")
+        return try {
+            postForEntity(
+                uri, SendtBrevRequest(personIdent, brevkoder.map { it.kode })
+            )
+        } catch (ex: Exception) {
+            loggFeil(ex, uri)
+            throw RuntimeException(
+                "Sjekk mot infotrygd for å sjekke om brev er sendt feilet . Gav feil: ${ex.message}",
+                ex
+            )
+        }
+    }
+
+    class SendtBrevRequest(
+        val personIdent: String,
+        val brevkoder: List<String>
+    )
+
     private fun loggFeil(ex: Exception, uri: URI) {
         when (ex) {
             is HttpClientErrorException -> secureLogger.error(
@@ -148,4 +168,15 @@ class InfotrygdBarnetrygdClient(
 
         private val logger: Logger = LoggerFactory.getLogger(InfotrygdBarnetrygdClient::class.java)
     }
+}
+
+enum class InfotrygdBrevkode(val kode: String) {
+    BREV_BATCH_OPPHØR_SMÅBARNSTILLLEGG("BA04"),
+    BREV_BATCH_INNVILGET_SMÅBARNSTILLEGG("BA05"),
+    BREV_BATCH_OMREGNING_BARN_18_ÅR("BA37"),
+    BREV_BATCH_OMREGNING_BARN_6_ÅR("BA18"),
+    BREV_MANUELL_OPPHØR_SMÅBARNSTILLLEGG("B001"),
+    BREV_MANUELL_INNVILGET_SMÅBARNSTILLEGG("B002"),
+    BREV_MANUELL_OMREGNING_BARN_18_ÅR("B003"),
+    BREV_MANUELL_OMREGNING_BARN_6_ÅR("BA19")
 }
