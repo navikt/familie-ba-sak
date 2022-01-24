@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.NullablePeriode
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
@@ -126,9 +127,34 @@ class VedtaksperiodeService(
             }
         )
 
+        if (
+            standardbegrunnelserFraFrontend.map { it.vedtakBegrunnelseType }
+                .contains(VedtakBegrunnelseType.ENDRET_UTBETALING) &&
+            featureToggleService.isEnabled(FeatureToggleConfig.ENDRET_UTBETALING_VEDTAKSSIDEN)
+        ) {
+            val andelerTilkjentYtelse =
+                andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = behandling.id)
+
+            validerEndretUtbetalingsbegrunnelse(vedtaksperiodeMedBegrunnelser, andelerTilkjentYtelse, persongrunnlag)
+        }
+
         lagre(vedtaksperiodeMedBegrunnelser)
 
         return vedtaksperiodeMedBegrunnelser.vedtak
+    }
+
+    private fun validerEndretUtbetalingsbegrunnelse(
+        vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser,
+        andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
+        persongrunnlag: PersonopplysningGrunnlag
+    ) {
+        try {
+            vedtaksperiodeMedBegrunnelser.hentUtbetalingsperiodeDetaljer(andelerTilkjentYtelse, persongrunnlag)
+        } catch (e: Exception) {
+            throw FunksjonellFeil(
+                "Begrunnelse for endret utbetaling er ikke gyldig for vedtaksperioden"
+            )
+        }
     }
 
     fun oppdaterVedtaksperioderForBarnVurdertIFødselshendelse(vedtak: Vedtak, barnaSomVurderes: List<String>) {
@@ -281,7 +307,6 @@ class VedtaksperiodeService(
             it.tilUtvidetVedtaksperiodeMedBegrunnelser(
                 andelerTilkjentYtelse = andelerTilkjentYtelse,
                 personopplysningGrunnlag = persongrunnlag,
-                sanityBegrunnelser = sanityBegrunnelser
             )
         }.map { utvidetVedtaksperiodeMedBegrunnelser ->
             val aktørerMedUtbetaling = personidentService.hentOgLagreAktørIder(
@@ -297,7 +322,7 @@ class VedtaksperiodeService(
                     )
 
                     if (featureToggleService.isEnabled(FeatureToggleConfig.ENDRET_UTBETALING_VEDTAKSSIDEN))
-                        hentGyldigeBegrunnelserForVedtaksperiodeGammel(
+                        hentGyldigeBegrunnelserForVedtaksperiode(
                             minimertVedtaksperiode = utvidetVedtaksperiodeMedBegrunnelser.tilMinimertVedtaksperiode(),
                             sanityBegrunnelser = sanityBegrunnelser,
                             minimertePersoner = persongrunnlag.tilMinimertePersoner(),
