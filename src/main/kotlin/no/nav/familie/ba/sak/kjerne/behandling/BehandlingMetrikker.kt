@@ -15,6 +15,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifi
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeRepository
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
@@ -27,10 +28,22 @@ class BehandlingMetrikker(
     private val sanityService: SanityService
 ) {
     private var sanityBegrunnelser: List<SanityBegrunnelse> = emptyList()
+    private var antallBrevBegrunnelseSpesifikasjon: Map<VedtakBegrunnelseSpesifikasjon, Counter> = emptyMap()
 
     init {
         Result.runCatching {
             sanityBegrunnelser = sanityService.hentSanityBegrunnelser()
+            antallBrevBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.values().associateWith {
+                val tittel = it.tilSanityBegrunnelse(sanityBegrunnelser)?.navnISystem ?: it.name
+
+                Metrics.counter(
+                    "brevbegrunnelse",
+                    "type", it.name,
+                    "beskrivelse", tittel
+                )
+            }
+        }.onFailure {
+            logger.warn("Klarte ikke å bygge tellere for begrunnelser")
         }
     }
 
@@ -51,17 +64,6 @@ class BehandlingMetrikker(
                 "behandling.resultat",
                 "type", it.name,
                 "beskrivelse", it.displayName
-            )
-        }
-
-    private val antallBrevBegrunnelseSpesifikasjon: Map<VedtakBegrunnelseSpesifikasjon, Counter> =
-        VedtakBegrunnelseSpesifikasjon.values().associateWith {
-            val tittel = it.tilSanityBegrunnelse(sanityBegrunnelser)?.navnISystem ?: it.name
-
-            Metrics.counter(
-                "brevbegrunnelse",
-                "type", it.name,
-                "beskrivelse", tittel
             )
         }
 
@@ -133,5 +135,9 @@ class BehandlingMetrikker(
                 it.visningsnavn
             )
         }
+    }
+
+    companion object {
+        val logger = LoggerFactory.getLogger(BehandlingMetrikker::class.java)
     }
 }
