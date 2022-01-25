@@ -173,7 +173,10 @@ class ØkonomiService(
             ?.toYearMonth()
             ?.plusMonths(1)
 
-        return if (forrigeTilstandFraDato != null && forrigeTilstandFraDato.isAfter(nyttTilstandFraDato)) {
+        return if (forrigeTilstandFraDato != null &&
+            nyttTilstandFraDato != null &&
+            forrigeTilstandFraDato.isAfter(nyttTilstandFraDato)
+        ) {
             nyttTilstandFraDato
         } else {
             null
