@@ -29,7 +29,7 @@ Obs! Husk å sette VM Options til `-Dspring.profiles.active=postgres`.
 
 For å kalle applikasjonen fra fontend må du sette miljøvariablene BA_SAK_CLIENT_ID og CLIENT_SECRET. Dette kan gjøres
 under `Edit Configurations -> Environment Variables`. Miljøvariablene kan hentes fra `azuread-familie-ba-sak-lokal` i
-cluster ved å kjøre kommandoen:
+dev-gcp clusteret ved å kjøre kommandoen:
 
 `kubectl -n teamfamilie get secret azuread-familie-ba-sak-lokal -o json | jq '.data | map_values(@base64d)'`.
 
