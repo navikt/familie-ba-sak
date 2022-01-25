@@ -26,10 +26,12 @@ class BehandlingMetrikker(
     private val vedtaksperiodeRepository: VedtaksperiodeRepository,
     private val sanityService: SanityService
 ) {
-    private val sanityBegrunnelser: List<SanityBegrunnelse>
+    private var sanityBegrunnelser: List<SanityBegrunnelse> = emptyList()
 
     init {
-        sanityBegrunnelser = sanityService.hentSanityBegrunnelser()
+        Result.runCatching {
+            sanityBegrunnelser = sanityService.hentSanityBegrunnelser()
+        }
     }
 
     private val antallManuelleBehandlinger: Counter =
