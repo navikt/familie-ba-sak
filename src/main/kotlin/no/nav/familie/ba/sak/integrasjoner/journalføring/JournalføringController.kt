@@ -7,6 +7,7 @@ import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.getDataOrThrow
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import org.springframework.core.io.InputStreamResource
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
@@ -53,8 +54,13 @@ class JournalføringController(
     fun hentDokumentBytearray(
         @PathVariable journalpostId: String,
         @PathVariable dokumentInfoId: String
-    ): ResponseEntity<ByteArray> {
-        return ResponseEntity.ok(journalføringService.hentDokument(journalpostId, dokumentInfoId).getDataOrThrow())
+    ): ResponseEntity<InputStreamResource> {
+        val dokument = journalføringService.hentDokument(journalpostId, dokumentInfoId).getDataOrThrow()
+
+        return ResponseEntity.ok()
+            .contentType(MediaType.APPLICATION_PDF)
+            .contentLength(dokument.size.toLong())
+            .body(InputStreamResource(dokument.inputStream()))
     }
 
     @PostMapping(path = ["/{journalpostId}/journalfør/{oppgaveId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
