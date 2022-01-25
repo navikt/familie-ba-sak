@@ -17,7 +17,7 @@ import javax.validation.constraints.Pattern
 @EntityListeners(RollestyringMotDatabase::class)
 @Entity(name = "Personident")
 @Table(name = "PERSONIDENT")
-data class Personident(
+data class  Personident(
     @Id
     @Column(name = "foedselsnummer", nullable = false)
     // Lovlige typer er fnr, dnr eller npid

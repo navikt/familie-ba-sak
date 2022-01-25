@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.common.tilfeldigSøker
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
+import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -34,6 +35,7 @@ internal class Autobrev6og18ÅrServiceTest {
     private val personopplysningGrunnlagRepository = mockk<PersonopplysningGrunnlagRepository>()
     private val persongrunnlagService = mockk<PersongrunnlagService>()
     private val behandlingService = mockk<BehandlingService>(relaxed = true)
+    private val infotrygdService = mockk<InfotrygdService>(relaxed = true)
     private val stegService = mockk<StegService>()
     private val vedtakService = mockk<VedtakService>(relaxed = true)
     private val taskRepository = mockk<TaskRepositoryWrapper>(relaxed = true)
@@ -43,6 +45,7 @@ internal class Autobrev6og18ÅrServiceTest {
         behandlingService = behandlingService,
         autovedtakService = autovedtakService,
         vedtakService = vedtakService,
+        infotrygdService = infotrygdService,
         vedtaksperiodeService = vedtaksperiodeService,
         taskRepository = taskRepository,
     )

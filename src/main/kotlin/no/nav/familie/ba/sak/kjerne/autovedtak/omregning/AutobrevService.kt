@@ -2,6 +2,9 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.omregning
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
+import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
+import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBrevkode
+import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -24,7 +27,8 @@ class AutobrevService(
     private val autovedtakService: AutovedtakService,
     private val vedtakService: VedtakService,
     private val vedtaksperiodeService: VedtaksperiodeService,
-    private val taskRepository: TaskRepositoryWrapper
+    private val taskRepository: TaskRepositoryWrapper,
+    private val infotrygdService: InfotrygdService
 ) {
 
     fun skalAutobrevBehandlingOpprettes(
@@ -89,6 +93,15 @@ class AutobrevService(
                 behandlingEtterBehandlingsresultat
             )
 
+        val harSendtBrev = infotrygdService.harSendtbrev(behandling.fagsak.aktør.personidenter.map { it.fødselsnummer }, behandlingsårsak.tilBrevkoder())
+        if (harSendtBrev) {
+            logger.info("Har sendt autobrev fra infotrygd, dropper å sende fra ba-sak")
+            //opprettTaskFerdigstillBehandling()
+        } else {
+            logger.info("Har ikke sendt autobrev fra infotrygd på migrert sak")
+            //opprettTaskJournalførVedtaksbrev(vedtakId = opprettetVedtak.id)
+        }
+
         opprettTaskJournalførVedtaksbrev(vedtakId = opprettetVedtak.id)
     }
 
@@ -112,5 +125,14 @@ class AutobrevService(
 
     companion object {
         val logger = LoggerFactory.getLogger(AutobrevService::class.java)
+    }
+}
+
+private fun BehandlingÅrsak.tilBrevkoder(): List<InfotrygdBrevkode> {
+    return when (this) {
+        BehandlingÅrsak.OMREGNING_6ÅR -> listOf(InfotrygdBrevkode.BREV_BATCH_OMREGNING_BARN_6_ÅR, InfotrygdBrevkode.BREV_MANUELL_OMREGNING_BARN_6_ÅR)
+        BehandlingÅrsak.OMREGNING_18ÅR -> listOf(InfotrygdBrevkode.BREV_BATCH_OMREGNING_BARN_18_ÅR, InfotrygdBrevkode.BREV_MANUELL_OMREGNING_BARN_18_ÅR)
+        BehandlingÅrsak.OMREGNING_SMÅBARNSTILLEGG -> listOf(InfotrygdBrevkode.BREV_BATCH_OPPHØR_SMÅBARNSTILLLEGG, InfotrygdBrevkode.BREV_MANUELL_OPPHØR_SMÅBARNSTILLLEGG)
+        else -> emptyList()
     }
 }

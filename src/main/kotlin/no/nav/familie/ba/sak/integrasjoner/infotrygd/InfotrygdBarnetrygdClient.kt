@@ -134,11 +134,11 @@ class InfotrygdBarnetrygdClient(
         }
     }
 
-    fun harNyligSendtBrevFor(personidenter: List<String>, brevkoder: List<InfotrygdBrevkode>): SendtBrevResponse {
+    fun harNyligSendtBrevFor(søkersIdenter: List<String>, brevkoder: List<InfotrygdBrevkode>): SendtBrevResponse {
         val uri = URI.create("$clientUri/infotrygd/barnetrygd/brev")
         return try {
             postForEntity(
-                uri, SendtBrevRequest(personidenter, brevkoder.map { it.kode })
+                uri, SendtBrevRequest(søkersIdenter, brevkoder.map { it.kode })
             )
         } catch (ex: Exception) {
             loggFeil(ex, uri)
