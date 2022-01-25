@@ -128,8 +128,8 @@ class VedtaksperiodeService(
         )
 
         if (
-            standardbegrunnelserFraFrontend.map { it.vedtakBegrunnelseType }
-                .contains(VedtakBegrunnelseType.ENDRET_UTBETALING) &&
+            standardbegrunnelserFraFrontend
+                .any { it.vedtakBegrunnelseType == VedtakBegrunnelseType.ENDRET_UTBETALING } &&
             featureToggleService.isEnabled(FeatureToggleConfig.ENDRET_UTBETALING_VEDTAKSSIDEN)
         ) {
             val andelerTilkjentYtelse =
