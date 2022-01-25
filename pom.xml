@@ -26,7 +26,7 @@
         <prosessering.version>1.20211125150647_a7c6f64</prosessering.version>
         <felles.version>1.20211217154554_3bb883e</felles.version>
         <eksterne-kontrakter-bisys.version>2.0_20211221122007_2c5c69d</eksterne-kontrakter-bisys.version>
-        <felles-kontrakter.version>2.0_20220118083803_d09946d</felles-kontrakter.version>
+        <felles-kontrakter.version>2.0_20220120144339_cc21190</felles-kontrakter.version>
         <familie.kontrakter.saksstatistikk>2.0_20211026082237_0675986</familie.kontrakter.saksstatistikk>
         <familie.kontrakter.stønadsstatistikk>2.0_20220106092651_8730ac3</familie.kontrakter.stønadsstatistikk>
         <familie.kontrakter.skatteetaten>2.0_20210920094114_9c74239</familie.kontrakter.skatteetaten>
@@ -131,7 +131,7 @@
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>postgresql</artifactId>
-            <version>1.16.2</version>
+            <version>1.16.3</version>
             <scope>test</scope>
         </dependency>
 

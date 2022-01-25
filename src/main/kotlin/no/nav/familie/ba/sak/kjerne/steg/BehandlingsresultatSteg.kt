@@ -109,7 +109,7 @@ class BehandlingsresultatSteg(
         validerAtBarnIkkeFårFlereUtbetalingerSammePeriode(
             behandlendeBehandlingTilkjentYtelse = tilkjentYtelse,
             barnMedAndreRelevanteTilkjentYtelser = barnMedAndreRelevanteTilkjentYtelser,
-            personopplysningGrunnlag = personopplysningGrunnlag
+            personopplysningGrunnlag = personopplysningGrunnlag,
         )
 
         validerDeltBostedEndringerIkkeKrysserUtvidetYtelse(
