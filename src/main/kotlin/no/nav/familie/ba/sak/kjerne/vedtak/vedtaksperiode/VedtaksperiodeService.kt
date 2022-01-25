@@ -361,6 +361,12 @@ class VedtaksperiodeService(
             val identerMedUtbetaling =
                 utvidetVedtaksperiodeMedBegrunnelser.utbetalingsperiodeDetaljer.map { it.person.personIdent }
 
+            val aktørerMedUtbetaling = personidentService.hentOgLagreAktørIder(
+                identerMedUtbetaling
+            )
+            val endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(
+                behandling.id
+            )
             val standardbegrunnelser: MutableSet<VedtakBegrunnelseSpesifikasjon> =
                 VedtakBegrunnelseSpesifikasjon.values()
                     .filter { vedtakBegrunnelseSpesifikasjon ->
@@ -376,13 +382,9 @@ class VedtaksperiodeService(
                                 utvidetVedtaksperiodeMedBegrunnelser = utvidetVedtaksperiodeMedBegrunnelser,
                                 minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
                                 persongrunnlag = persongrunnlag,
-                                aktørerMedUtbetaling = personidentService.hentOgLagreAktørIder(
-                                        identerMedUtbetaling
-                                    ),
+                                aktørerMedUtbetaling = aktørerMedUtbetaling,
                                 triggesAv = triggesAv,
-                                endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(
-                                        behandling.id
-                                    ),
+                                endretUtbetalingAndeler = endretUtbetalingAndeler,
                                 andelerTilkjentYtelse = andelerTilkjentYtelse,
                             )
                         ) {
