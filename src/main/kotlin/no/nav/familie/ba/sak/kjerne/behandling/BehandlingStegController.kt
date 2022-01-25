@@ -10,12 +10,15 @@ import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils.validerhenleggels
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
+import no.nav.familie.ba.sak.kjerne.steg.BehandlingsresultatSteg
 import no.nav.familie.ba.sak.kjerne.steg.StegService
+import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
@@ -65,6 +68,29 @@ class BehandlingStegController(
         stegService.håndterVilkårsvurdering(behandling)
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandling.id)))
+    }
+
+    @GetMapping(path = ["behandlingsresultat/valider"])
+    fun validerBehandlingsresultat(@PathVariable behandlingId: Long): ResponseEntity<Ressurs<Boolean>> {
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
+            handling = "validere behandlingsresultat"
+        )
+
+        val behandling = behandlingService.hent(behandlingId)
+        val behandlingSteg: BehandlingsresultatSteg =
+            stegService.hentBehandlingSteg(StegType.BEHANDLINGSRESULTAT) as BehandlingsresultatSteg
+
+        behandlingSteg.preValiderSteg(
+            behandling = behandling,
+            stegService = stegService
+        )
+
+        return ResponseEntity.ok(
+            Ressurs.success(
+                true
+            )
+        )
     }
 
     @PostMapping(path = ["behandlingsresultat"])
