@@ -30,23 +30,6 @@ class BehandlingMetrikker(
     private var sanityBegrunnelser: List<SanityBegrunnelse> = emptyList()
     private var antallBrevBegrunnelseSpesifikasjon: Map<VedtakBegrunnelseSpesifikasjon, Counter> = emptyMap()
 
-    init {
-        Result.runCatching {
-            sanityBegrunnelser = sanityService.hentSanityBegrunnelser()
-            antallBrevBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.values().associateWith {
-                val tittel = it.tilSanityBegrunnelse(sanityBegrunnelser)?.navnISystem ?: it.name
-
-                Metrics.counter(
-                    "brevbegrunnelse",
-                    "type", it.name,
-                    "beskrivelse", tittel
-                )
-            }
-        }.onFailure {
-            logger.warn("Klarte ikke å bygge tellere for begrunnelser")
-        }
-    }
-
     private val antallManuelleBehandlinger: Counter =
         Metrics.counter("behandling.behandlinger", "saksbehandling", "manuell")
     private val antallAutomatiskeBehandlinger: Counter =
@@ -68,6 +51,23 @@ class BehandlingMetrikker(
         }
 
     private val behandlingstid: DistributionSummary = Metrics.summary("behandling.tid")
+
+    fun hentBegrunnelserOgByggMetrikker() {
+        Result.runCatching {
+            sanityBegrunnelser = sanityService.hentSanityBegrunnelser()
+            antallBrevBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.values().associateWith {
+                val tittel = it.tilSanityBegrunnelse(sanityBegrunnelser)?.navnISystem ?: it.name
+
+                Metrics.counter(
+                    "brevbegrunnelse",
+                    "type", it.name,
+                    "beskrivelse", tittel
+                )
+            }
+        }.onFailure {
+            logger.warn("Klarte ikke å bygge tellere for begrunnelser")
+        }
+    }
 
     fun tellNøkkelTallVedOpprettelseAvBehandling(behandling: Behandling) {
         if (behandling.skalBehandlesAutomatisk) {
@@ -98,11 +98,14 @@ class BehandlingMetrikker(
     }
 
     private fun økBegrunnelseMetrikk(behandling: Behandling) {
+        if (antallBrevBegrunnelseSpesifikasjon.isEmpty()) hentBegrunnelserOgByggMetrikker()
+
         if (!behandlingRepository.finnBehandling(behandling.id).erHenlagt()) {
             val vedtak = vedtakRepository.findByBehandlingAndAktivOptional(behandlingId = behandling.id)
                 ?: error("Finner ikke aktivt vedtak på behandling ${behandling.id}")
 
-            val vedtaksperiodeMedBegrunnelser = vedtaksperiodeRepository.finnVedtaksperioderFor(vedtakId = vedtak.id)
+            val vedtaksperiodeMedBegrunnelser =
+                vedtaksperiodeRepository.finnVedtaksperioderFor(vedtakId = vedtak.id)
 
             vedtaksperiodeMedBegrunnelser.forEach {
                 it.begrunnelser.forEach { vedtaksbegrunnelse: Vedtaksbegrunnelse ->
