@@ -166,17 +166,17 @@ class InfotrygdBarnetrygdClientTest : AbstractSpringIntegrationTestDev() {
     fun `harNyligSendtBrevFor skal returnerer true for personIdent`() {
         wireMockServer.stubFor(
             post(brevURL).willReturn(
-                okJson("true")
+                okJson(objectMapper.writeValueAsString(InfotrygdBarnetrygdClient.SendtBrevResponse(true, emptyList())))
             )
         )
 
         val søkersIdenter = ClientMocks.søkerFnr.toList()
 
         val harNyligSendtBrev = client.harNyligSendtBrevFor(
-            søkersIdenter[0],
+            søkersIdenter,
             listOf(InfotrygdBrevkode.BREV_BATCH_INNVILGET_SMÅBARNSTILLEGG)
         )
 
-        Assertions.assertEquals(true, harNyligSendtBrev)
+        Assertions.assertEquals(true, harNyligSendtBrev.harSendtBrev)
     }
 }

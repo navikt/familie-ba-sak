@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.integrasjoner.infotrygd
 
+import no.nav.commons.foedselsnummer.FoedselsNr
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.ekstern.bisys.BisysUtvidetBarnetrygdResponse
 import no.nav.familie.ba.sak.task.OpprettTaskService.Companion.RETRY_BACKOFF_5000MS
@@ -133,11 +134,11 @@ class InfotrygdBarnetrygdClient(
         }
     }
 
-    fun harNyligSendtBrevFor(personIdent: String, brevkoder: List<InfotrygdBrevkode>): Boolean {
+    fun harNyligSendtBrevFor(personidenter: List<String>, brevkoder: List<InfotrygdBrevkode>): SendtBrevResponse {
         val uri = URI.create("$clientUri/infotrygd/barnetrygd/brev")
         return try {
             postForEntity(
-                uri, SendtBrevRequest(personIdent, brevkoder.map { it.kode })
+                uri, SendtBrevRequest(personidenter, brevkoder.map { it.kode })
             )
         } catch (ex: Exception) {
             loggFeil(ex, uri)
@@ -149,8 +150,25 @@ class InfotrygdBarnetrygdClient(
     }
 
     class SendtBrevRequest(
-        val personIdent: String,
+        val personidenter: List<String>,
         val brevkoder: List<String>
+    )
+
+    class SendtBrevResponse(
+        val harSendtBrev: Boolean,
+        val listeBrevhendelser: List<InfotrygdHendelse> = emptyList()
+    )
+
+    data class InfotrygdHendelse(
+        val id: Long,
+        val personKey: Long,
+        val saksblokk: String,
+        val saksnummer: String,
+        val aksjonsdatoSeq: Long,
+        val tekstKode1: String,
+        val fnr: FoedselsNr,
+        val tkNr: String,
+        val region: String
     )
 
     private fun loggFeil(ex: Exception, uri: URI) {
