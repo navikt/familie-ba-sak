@@ -15,6 +15,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifi
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeRepository
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
@@ -26,11 +27,8 @@ class BehandlingMetrikker(
     private val vedtaksperiodeRepository: VedtaksperiodeRepository,
     private val sanityService: SanityService
 ) {
-    private val sanityBegrunnelser: List<SanityBegrunnelse>
-
-    init {
-        sanityBegrunnelser = sanityService.hentSanityBegrunnelser()
-    }
+    private var sanityBegrunnelser: List<SanityBegrunnelse> = emptyList()
+    private var antallBrevBegrunnelseSpesifikasjon: Map<VedtakBegrunnelseSpesifikasjon, Counter> = emptyMap()
 
     private val antallManuelleBehandlinger: Counter =
         Metrics.counter("behandling.behandlinger", "saksbehandling", "manuell")
@@ -52,18 +50,24 @@ class BehandlingMetrikker(
             )
         }
 
-    private val antallBrevBegrunnelseSpesifikasjon: Map<VedtakBegrunnelseSpesifikasjon, Counter> =
-        VedtakBegrunnelseSpesifikasjon.values().associateWith {
-            val tittel = it.tilSanityBegrunnelse(sanityBegrunnelser)?.navnISystem ?: it.name
-
-            Metrics.counter(
-                "brevbegrunnelse",
-                "type", it.name,
-                "beskrivelse", tittel
-            )
-        }
-
     private val behandlingstid: DistributionSummary = Metrics.summary("behandling.tid")
+
+    fun hentBegrunnelserOgByggMetrikker() {
+        Result.runCatching {
+            sanityBegrunnelser = sanityService.hentSanityBegrunnelser()
+            antallBrevBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.values().associateWith {
+                val tittel = it.tilSanityBegrunnelse(sanityBegrunnelser)?.navnISystem ?: it.name
+
+                Metrics.counter(
+                    "brevbegrunnelse",
+                    "type", it.name,
+                    "beskrivelse", tittel
+                )
+            }
+        }.onFailure {
+            logger.warn("Klarte ikke å bygge tellere for begrunnelser")
+        }
+    }
 
     fun tellNøkkelTallVedOpprettelseAvBehandling(behandling: Behandling) {
         if (behandling.skalBehandlesAutomatisk) {
@@ -94,11 +98,14 @@ class BehandlingMetrikker(
     }
 
     private fun økBegrunnelseMetrikk(behandling: Behandling) {
+        if (antallBrevBegrunnelseSpesifikasjon.isEmpty()) hentBegrunnelserOgByggMetrikker()
+
         if (!behandlingRepository.finnBehandling(behandling.id).erHenlagt()) {
             val vedtak = vedtakRepository.findByBehandlingAndAktivOptional(behandlingId = behandling.id)
                 ?: error("Finner ikke aktivt vedtak på behandling ${behandling.id}")
 
-            val vedtaksperiodeMedBegrunnelser = vedtaksperiodeRepository.finnVedtaksperioderFor(vedtakId = vedtak.id)
+            val vedtaksperiodeMedBegrunnelser =
+                vedtaksperiodeRepository.finnVedtaksperioderFor(vedtakId = vedtak.id)
 
             vedtaksperiodeMedBegrunnelser.forEach {
                 it.begrunnelser.forEach { vedtaksbegrunnelse: Vedtaksbegrunnelse ->
@@ -131,5 +138,9 @@ class BehandlingMetrikker(
                 it.visningsnavn
             )
         }
+    }
+
+    companion object {
+        val logger = LoggerFactory.getLogger(BehandlingMetrikker::class.java)
     }
 }
