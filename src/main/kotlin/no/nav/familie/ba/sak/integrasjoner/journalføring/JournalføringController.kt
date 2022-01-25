@@ -47,7 +47,7 @@ class JournalføringController(
     }
 
     @GetMapping(
-        value = ["/{journalpostId}/dokument/{dokumentInfoId}"],
+        path = ["/{journalpostId}/dokument/{dokumentInfoId}"],
         produces = [MediaType.APPLICATION_PDF_VALUE]
     )
     fun hentDokumentBytearray(
