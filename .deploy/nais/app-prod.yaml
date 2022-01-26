@@ -81,6 +81,8 @@ spec:
           cluster: prod-gcp
         - application: familie-tilbake
           cluster: dev-gcp
+        - application: familie-ba-migrering
+          cluster: dev-gcp
   replicas:
     min: 2
     max: 4

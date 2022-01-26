@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.common.førsteDagINesteMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.MigreringResponseDto
+import no.nav.familie.ba.sak.integrasjoner.migrering.MigreringRestClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -74,9 +75,11 @@ class MigreringService(
     private val totrinnskontrollService: TotrinnskontrollService,
     private val vedtakService: VedtakService,
     private val vilkårService: VilkårService,
-    private val vilkårsvurderingService: VilkårsvurderingService
+    private val vilkårsvurderingService: VilkårsvurderingService,
+    private val migreringRestClient: MigreringRestClient
 ) {
 
+    private val logger = LoggerFactory.getLogger(MigreringService::class.java)
     private val secureLog = LoggerFactory.getLogger("secureLogger")
     private val migrertCounter = Metrics.counter("migrering.ok")
 
@@ -139,6 +142,15 @@ class MigreringService(
                 infotrygdRegion = løpendeSak.region
             )
             secureLog.info("Ferdig migrert $personIdent. Response til familie-ba-migrering: $migreringResponseDto")
+
+            if (!SikkerhetContext.erSystemKontekst() && !env!!.erDev()) {
+                logger.info("Sender manuelt trigget migrering til familie-ba-migrering")
+                Result.runCatching {
+                    migreringRestClient.migrertAvSaksbehandler(personIdent, migreringResponseDto)
+                }.onFailure {
+                    logger.warn("Klarte ikke sende migrert av saksbehandler til familie-ba-migrering. $migreringResponseDto")
+                }
+            }
             return migreringResponseDto
         } catch (e: Exception) {
             if (e is KanIkkeMigrereException) throw e
