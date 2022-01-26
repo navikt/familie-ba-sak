@@ -9,9 +9,7 @@ import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.brev.UtvidetScenarioForEndringsperiode
-import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.hentGyldigEndretBegrunnelse
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.erStartPåUtvidetSammeMåned
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
@@ -193,14 +191,10 @@ data class AndelTilkjentYtelse(
 
     fun harEndretUtbetalingAndelerOgHørerTilVedtaksperiode(
         vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser,
-        sanityBegrunnelser: List<SanityBegrunnelse>,
-        andelerTilkjentYtelse: List<AndelTilkjentYtelse>
     ) = this.endretUtbetalingAndeler.isNotEmpty() &&
         this.endretUtbetalingAndeler.all { endretUtbetalingAndel ->
-            val gyldigBegrunnelseForEndretUtbetalingAndel = endretUtbetalingAndel.hentGyldigEndretBegrunnelse(
-                sanityBegrunnelser,
-                andelerTilkjentYtelse.hentUtvidetScenarioForEndringsperiode(endretUtbetalingAndel.periode)
-            )
+            val gyldigBegrunnelseForEndretUtbetalingAndel =
+                endretUtbetalingAndel.vedtakBegrunnelseSpesifikasjoner.single()
 
             vedtaksperiodeMedBegrunnelser.begrunnelser.any {
                 it.vedtakBegrunnelseSpesifikasjon == gyldigBegrunnelseForEndretUtbetalingAndel

@@ -27,13 +27,12 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifi
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeRepository
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.dao.DataIntegrityViolationException
 
 class VedtaksperiodeServiceTest(
     @Autowired
@@ -143,7 +142,7 @@ class VedtaksperiodeServiceTest(
     }
 
     @Test
-    fun `Skal ikke kunne lagre flere vedtaksperioder med samme periode og type`() {
+    fun `Skal kunne lagre flere vedtaksperioder av typen endret utbetaling med samme periode`() {
         val behandling = kjørStegprosessForFGB(
             tilSteg = StegType.REGISTRERE_SØKNAD,
             søkerFnr = randomFnr(),
@@ -159,7 +158,7 @@ class VedtaksperiodeServiceTest(
 
         val fom = inneværendeMåned().minusMonths(12).førsteDagIInneværendeMåned()
         val tom = inneværendeMåned().sisteDagIInneværendeMåned()
-        val type = Vedtaksperiodetype.FORTSATT_INNVILGET
+        val type = Vedtaksperiodetype.ENDRET_UTBETALING
         val vedtaksperiode = VedtaksperiodeMedBegrunnelser(
             vedtak = vedtak,
             fom = fom,
@@ -174,9 +173,10 @@ class VedtaksperiodeServiceTest(
             tom = tom,
             type = type
         )
-        val feil =
-            assertThrows<DataIntegrityViolationException> { vedtaksperiodeRepository.save(vedtaksperiodeMedSammePeriode) }
-        assertTrue(feil.message!!.contains("constraint [vedtaksperiode_fk_vedtak_id_fom_tom_type_key]"))
+
+        Assertions.assertDoesNotThrow {
+            vedtaksperiodeRepository.save(vedtaksperiodeMedSammePeriode)
+        }
     }
 
     @Test

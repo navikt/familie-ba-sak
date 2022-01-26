@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.Utils.storForbokstavIHvertOrd
 import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Autovedtak6og18årOgSmåbarnstillegg
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.AutovedtakNyfødtBarnFraFør
@@ -199,7 +200,11 @@ class BrevService(
             målform = grunnlagOgSignaturData.grunnlag.søker.målform
         )
 
-        val hjemler = hentHjemmeltekst(brevPerioderGrunnlag, sanityBegrunnelser)
+        val hjemler = hentHjemmeltekst(
+            brevPeriodeGrunnlag = brevPerioderGrunnlag,
+            sanityBegrunnelser = sanityBegrunnelser,
+            opplysningspliktHjemlerSkalMedIBrev = vilkårsvurdering.finnOpplysningspliktVilkår()?.resultat == Resultat.IKKE_OPPFYLT
+        )
 
         return VedtakFellesfelter(
             enhet = grunnlagOgSignaturData.enhet,

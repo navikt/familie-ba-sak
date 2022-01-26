@@ -18,12 +18,12 @@ class BrevperiodeTest {
 
     @Test
     fun test(testReporter: TestReporter) {
-        val testmappe = File("./src/test/resources/brevbegrunnelseCaser")
+        val testmappe = File("./src/test/resources/brevperiodeCaser")
 
         val sanityBegrunnelser = hentSanityBegrunnelser()
 
         val antallFeil = testmappe.list()?.fold(0) { acc, it ->
-            val fil = File("./src/test/resources/brevbegrunnelseCaser/$it")
+            val fil = File("$testmappe/$it")
 
             val behandlingsresultatPersonTestConfig =
                 try {
@@ -66,7 +66,7 @@ class BrevperiodeTest {
                     "Feil i test: $it" +
                         "\nFeilmelding: ${e.message}" +
                         "\nFil: ${e.stackTrace.first()}" +
-                        "\n-----------------------------------"
+                        "\n-----------------------------------\n"
                 )
                 return@fold acc + 1
             }
@@ -81,7 +81,7 @@ class BrevperiodeTest {
                     it,
                     "${behandlingsresultatPersonTestConfig.beskrivelse}\n\n" +
                         feil.joinToString("\n\n") +
-                        "\n-----------------------------------"
+                        "\n-----------------------------------\n"
                 )
                 acc + 1
             } else {

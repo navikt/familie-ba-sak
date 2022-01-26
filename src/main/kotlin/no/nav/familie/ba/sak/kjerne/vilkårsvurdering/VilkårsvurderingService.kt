@@ -79,8 +79,8 @@ class VilkårsvurderingService(
         val vilkårVurdering = hentAktivForBehandling(behandlingId = behandlingId)
 
         if (vilkårVurdering != null) {
-            vilkårVurdering.personResultater
-                .forEach { it.leggTilBlankAnnenVurdering(annenVurderingType = AnnenVurderingType.OPPLYSNINGSPLIKT) }
+            val søkersResultater = vilkårVurdering.personResultater.single { it.erSøkersResultater() }
+            søkersResultater.leggTilBlankAnnenVurdering(annenVurderingType = AnnenVurderingType.OPPLYSNINGSPLIKT)
 
             oppdater(vilkårVurdering)
         }
