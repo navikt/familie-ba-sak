@@ -176,17 +176,17 @@ class IntegrasjonClientMock {
             val beskrivelseTyskland = BeskrivelseDto("DEU", "")
             val betydningTyskland =
                 BetydningDto(FOM_1900, TOM_9999, mapOf(KodeverkSpråk.BOKMÅL.kode to beskrivelseTyskland))
-            val beskrivelseDanmark = BeskrivelseDto("DEN", "")
+            val beskrivelseDanmark = BeskrivelseDto("DNK", "")
             val betydningDanmark =
                 BetydningDto(FOM_1990, TOM_9999, mapOf(KodeverkSpråk.BOKMÅL.kode to beskrivelseDanmark))
             val beskrivelseUK = BeskrivelseDto("GBR", "")
             val betydningUK = BetydningDto(FOM_1900, TOM_2010, mapOf(KodeverkSpråk.BOKMÅL.kode to beskrivelseUK))
 
             val kodeverkLand = KodeverkDto(
-                mapOf(
+                betydninger = mapOf(
                     "POL" to listOf(betydningPolen),
                     "DEU" to listOf(betydningTyskland),
-                    "DEN" to listOf(betydningDanmark),
+                    "DNK" to listOf(betydningDanmark),
                     "GBR" to listOf(betydningUK)
                 )
             )

@@ -596,7 +596,7 @@ internal class TilkjentYtelseUtilsTest {
             navn = "Barn",
             kjønn = Kjønn.MANN
         )
-            .apply { sivilstander = listOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this)) }
+            .apply { sivilstander = mutableListOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this)) }
         val søker = Person(
             aktør = tilAktør(søkerFnr),
             type = PersonType.SØKER,
@@ -605,7 +605,7 @@ internal class TilkjentYtelseUtilsTest {
             navn = "Barn",
             kjønn = Kjønn.MANN
         )
-            .apply { sivilstander = listOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this)) }
+            .apply { sivilstander = mutableListOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this)) }
         personopplysningGrunnlag.personer.add(søker)
         personopplysningGrunnlag.personer.add(barn)
 

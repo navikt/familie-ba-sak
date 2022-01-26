@@ -111,7 +111,9 @@ class VelgFagSystemService(
                 SAKER_I_INFOTRYGD_MEN_IKKE_LØPENDE_UTBETALINGER,
                 SEND_TIL_INFOTRYGD
             )
-            !harMorGyldigNorskstatsborger(morsAktør) -> Pair(
+            !featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_TREDJELANDSBORGERE_AUTOMATISK) && !harMorGyldigNorskstatsborger(
+                morsAktør
+            ) -> Pair(
                 MOR_IKKE_NORSK_STATSBORGER,
                 SEND_TIL_INFOTRYGD
             )

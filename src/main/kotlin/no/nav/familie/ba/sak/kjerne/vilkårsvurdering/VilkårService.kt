@@ -435,7 +435,13 @@ class VilkårService(
         personResultat: PersonResultat,
         vilkår: Vilkår
     ): VilkårResultat {
-        val automatiskVurderingResultat = vilkår.vurderVilkår(person, eldsteBarnSinFødselsdato)
+        val automatiskVurderingResultat = vilkår.vurderVilkår(
+            person = person,
+            featureToggleOmLovligOppholdSkalVurderes = featureToggleService.isEnabled(
+                FeatureToggleConfig.KAN_BEHANDLE_TREDJELANDSBORGERE_AUTOMATISK,
+            ),
+            vurderFra = eldsteBarnSinFødselsdato
+        )
 
         val fom = if (eldsteBarnSinFødselsdato >= person.fødselsdato) eldsteBarnSinFødselsdato else person.fødselsdato
 

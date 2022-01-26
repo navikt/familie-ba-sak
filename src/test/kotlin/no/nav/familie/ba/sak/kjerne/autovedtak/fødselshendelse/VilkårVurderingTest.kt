@@ -8,8 +8,6 @@ import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
-import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurdering.finnNåværendeMedlemskap
-import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurdering.finnSterkesteMedlemskap
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -158,7 +156,7 @@ class VilkårVurderingTest(
         )
             .apply {
                 this.sivilstander =
-                    listOf(GrSivilstand(type = sivilstand, person = this, fom = LocalDate.of(1991, 1, 1)))
+                    mutableListOf(GrSivilstand(type = sivilstand, person = this, fom = LocalDate.of(1991, 1, 1)))
             }
     }
 
@@ -285,7 +283,7 @@ class VilkårVurderingTest(
     fun `Negativ vurdering - barn har vært gift`() {
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 6)
         val barn = genererPerson(PersonType.BARN, personopplysningGrunnlag, sivilstand = SIVILSTAND.GIFT).apply {
-            sivilstander = listOf(
+            sivilstander = mutableListOf(
                 GrSivilstand(fom = LocalDate.now().minusMonths(2), type = SIVILSTAND.GIFT, person = this),
                 GrSivilstand(fom = LocalDate.now().minusMonths(1), type = SIVILSTAND.UGIFT, person = this)
             )
@@ -416,7 +414,7 @@ class VilkårVurderingTest(
         val person = genererPerson(PersonType.BARN, personopplysningGrunnlag, sivilstand = SIVILSTAND.GIFT)
             .also {
                 it.statsborgerskap =
-                    listOf(
+                    mutableListOf(
                         GrStatsborgerskap(
                             gyldigPeriode = DatoIntervallEntitet(
                                 tom = null,
@@ -433,64 +431,12 @@ class VilkårVurderingTest(
     }
 
     @Test
-    fun `Lovlig opphold - valider at alle gjeldende medlemskap blir returnert`() {
-        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 6)
-        val person = genererPerson(PersonType.BARN, personopplysningGrunnlag, sivilstand = SIVILSTAND.GIFT)
-            .also {
-                it.statsborgerskap =
-                    listOf(
-                        GrStatsborgerskap(
-                            gyldigPeriode = DatoIntervallEntitet(tom = null, fom = null),
-                            landkode = "DNK",
-                            medlemskap = Medlemskap.NORDEN,
-                            person = it
-                        ),
-                        GrStatsborgerskap(
-                            gyldigPeriode = DatoIntervallEntitet(
-                                tom = null,
-                                fom = LocalDate.now().minusYears(1)
-                            ),
-                            landkode = "DEU",
-                            medlemskap = Medlemskap.EØS,
-                            person = it
-                        ),
-                        GrStatsborgerskap(
-                            gyldigPeriode = DatoIntervallEntitet(
-                                tom = LocalDate.now().minusYears(2),
-                                fom = LocalDate.now().minusYears(2)
-                            ),
-                            landkode = "POL",
-                            medlemskap = Medlemskap.EØS,
-                            person = it
-                        )
-                    )
-            }
-
-        val medlemskap = finnNåværendeMedlemskap(person.statsborgerskap)
-
-        assertEquals(2, medlemskap.size)
-        assertEquals(Medlemskap.NORDEN, medlemskap[0])
-        assertEquals(Medlemskap.EØS, medlemskap[1])
-    }
-
-    @Test
-    fun `Lovlig opphold - valider at sterkeste medlemskap blir returnert`() {
-        val medlemskapNorden = listOf(Medlemskap.TREDJELANDSBORGER, Medlemskap.NORDEN, Medlemskap.UKJENT)
-        val medlemskapUkjent = listOf(Medlemskap.UKJENT)
-        val medlemskapIngen = emptyList<Medlemskap>()
-
-        assertEquals(Medlemskap.NORDEN, finnSterkesteMedlemskap(medlemskapNorden))
-        assertEquals(Medlemskap.UKJENT, finnSterkesteMedlemskap(medlemskapUkjent))
-        assertEquals(null, finnSterkesteMedlemskap(medlemskapIngen))
-    }
-
-    @Test
     @Disabled
     fun `Mor er fra EØS og har et løpende arbeidsforhold - lovlig opphold, skal evalueres til Ja`() {
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 6)
         val person = genererPerson(PersonType.SØKER, personopplysningGrunnlag, sivilstand = SIVILSTAND.GIFT)
             .also {
-                it.statsborgerskap = listOf(
+                it.statsborgerskap = mutableListOf(
                     GrStatsborgerskap(
                         gyldigPeriode = DatoIntervallEntitet(LocalDate.now().minusYears(1)),
                         landkode = "BEL",
@@ -519,7 +465,7 @@ class VilkårVurderingTest(
             sivilstand = SIVILSTAND.GIFT
         )
             .also {
-                it.statsborgerskap = listOf(
+                it.statsborgerskap = mutableListOf(
                     GrStatsborgerskap(
                         gyldigPeriode = DatoIntervallEntitet(LocalDate.now().minusYears(1)),
                         landkode = "BEL",
@@ -551,7 +497,7 @@ class VilkårVurderingTest(
             sivilstand = SIVILSTAND.GIFT
         )
             .also {
-                it.statsborgerskap = listOf(
+                it.statsborgerskap = mutableListOf(
                     GrStatsborgerskap(
                         gyldigPeriode = DatoIntervallEntitet(LocalDate.now().minusYears(1)),
                         landkode = "BEL",
@@ -587,7 +533,7 @@ class VilkårVurderingTest(
             sivilstand = SIVILSTAND.GIFT
         )
             .also {
-                it.statsborgerskap = listOf(
+                it.statsborgerskap = mutableListOf(
                     GrStatsborgerskap(
                         gyldigPeriode = DatoIntervallEntitet(LocalDate.now().minusYears(1)),
                         landkode = "BEL",
@@ -622,7 +568,7 @@ class VilkårVurderingTest(
             sivilstand = SIVILSTAND.GIFT
         )
             .also {
-                it.statsborgerskap = listOf(
+                it.statsborgerskap = mutableListOf(
                     GrStatsborgerskap(
                         gyldigPeriode = DatoIntervallEntitet(LocalDate.now().minusYears(1)),
                         landkode = "BEL",
@@ -655,7 +601,7 @@ class VilkårVurderingTest(
             sivilstand = SIVILSTAND.GIFT
         )
             .also {
-                it.statsborgerskap = listOf(
+                it.statsborgerskap = mutableListOf(
                     GrStatsborgerskap(
                         gyldigPeriode = DatoIntervallEntitet(LocalDate.now().minusYears(1)),
                         landkode = "LOL",
@@ -668,7 +614,7 @@ class VilkårVurderingTest(
             }
     }
 
-    private fun løpendeArbeidsforhold(person: Person) = listOf(
+    private fun løpendeArbeidsforhold(person: Person) = mutableListOf(
         GrArbeidsforhold(
             periode = DatoIntervallEntitet(
                 LocalDate.now()

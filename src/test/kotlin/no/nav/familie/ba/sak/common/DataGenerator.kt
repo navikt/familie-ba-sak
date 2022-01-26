@@ -181,7 +181,7 @@ fun tilfeldigPerson(
         navn = "",
         kjønn = kjønn,
         målform = Målform.NB
-    ).apply { sivilstander = listOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this)) }
+    ).apply { sivilstander = mutableListOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this)) }
 
 fun tilfeldigSøker(
     fødselsdato: LocalDate = LocalDate.now(),
@@ -198,7 +198,7 @@ fun tilfeldigSøker(
         navn = "",
         kjønn = kjønn,
         målform = Målform.NB
-    ).apply { sivilstander = listOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this)) }
+    ).apply { sivilstander = mutableListOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this)) }
 
 fun lagVedtak(behandling: Behandling = lagBehandling()) =
     Vedtak(
@@ -323,9 +323,9 @@ fun lagTestPersonopplysningGrunnlag(
         kjønn = Kjønn.KVINNE,
     ).also { søker ->
         søker.statsborgerskap =
-            listOf(GrStatsborgerskap(landkode = "NOR", medlemskap = Medlemskap.NORDEN, person = søker))
+            mutableListOf(GrStatsborgerskap(landkode = "NOR", medlemskap = Medlemskap.NORDEN, person = søker))
         søker.bostedsadresser = mutableListOf(bostedsadresse.apply { person = søker })
-        søker.sivilstander = listOf(
+        søker.sivilstander = mutableListOf(
             GrSivilstand(
                 type = SIVILSTAND.GIFT,
                 person = søker
@@ -345,9 +345,9 @@ fun lagTestPersonopplysningGrunnlag(
                 kjønn = Kjønn.MANN
             ).also { barn ->
                 barn.statsborgerskap =
-                    listOf(GrStatsborgerskap(landkode = "NOR", medlemskap = Medlemskap.NORDEN, person = barn))
+                    mutableListOf(GrStatsborgerskap(landkode = "NOR", medlemskap = Medlemskap.NORDEN, person = barn))
                 barn.bostedsadresser = mutableListOf(bostedsadresse.apply { person = barn })
-                barn.sivilstander = listOf(
+                barn.sivilstander = mutableListOf(
                     GrSivilstand(
                         type = SIVILSTAND.UGIFT,
                         person = barn

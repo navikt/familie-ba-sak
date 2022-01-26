@@ -85,7 +85,11 @@ enum class Vilkår(
         }
     }
 
-    fun vurderVilkår(person: Person, vurderFra: LocalDate = LocalDate.now()): AutomatiskVurdering {
+    fun vurderVilkår(
+        person: Person,
+        vurderFra: LocalDate = LocalDate.now(),
+        featureToggleOmLovligOppholdSkalVurderes: Boolean = true,
+    ): AutomatiskVurdering {
         val vilkårsregel = when (this) {
             UNDER_18_ÅR -> VurderBarnErUnder18(
                 alder = person.hentAlder()
@@ -101,7 +105,12 @@ enum class Vilkår(
                 adresser = person.bostedsadresser,
                 vurderFra = vurderFra
             )
-            LOVLIG_OPPHOLD -> VurderPersonHarLovligOpphold()
+            LOVLIG_OPPHOLD -> VurderPersonHarLovligOpphold(
+                featureToggleOmLovligOppholdSkalVurderes = featureToggleOmLovligOppholdSkalVurderes,
+                personType = person.type,
+                statsborgerskap = person.statsborgerskap,
+                opphold = person.opphold
+            )
             UTVIDET_BARNETRYGD -> throw Feil("Ikke støtte for å automatisk vurdere vilkåret ${this.beskrivelse}")
         }
 
