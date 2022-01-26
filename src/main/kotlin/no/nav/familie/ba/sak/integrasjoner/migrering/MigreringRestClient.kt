@@ -17,7 +17,7 @@ import java.net.URI
 @Component
 class MigreringRestClient(
     @Value("\${FAMILIE_BA_MIGRERING_API_URL}") private val clientUri: URI,
-    @Qualifier("jwtBearer") restOperations: RestOperations
+    @Qualifier("jwtBearerClientCredentials") restOperations: RestOperations
 ) : AbstractRestClient(restOperations, "infotrygd") {
 
     @Retryable(
