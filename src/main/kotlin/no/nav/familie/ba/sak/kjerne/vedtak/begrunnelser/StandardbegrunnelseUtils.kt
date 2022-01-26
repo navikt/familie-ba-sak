@@ -160,7 +160,7 @@ fun VedtakBegrunnelseSpesifikasjon.triggesForPeriode(
                 tom = minimertVedtaksperiode.tom ?: TIDENES_ENDE
             ),
             oppdatertBegrunnelseType = this.vedtakBegrunnelseType,
-            aktuellePersonerForVedtaksperiode = minimertePersoner.map { it.tilMinimertRestPerson() },
+            aktuellePersonerForVedtaksperiode = aktuellePersoner.map { it.tilMinimertRestPerson() },
             triggesAv = triggesAv,
             erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak
         ).isNotEmpty()

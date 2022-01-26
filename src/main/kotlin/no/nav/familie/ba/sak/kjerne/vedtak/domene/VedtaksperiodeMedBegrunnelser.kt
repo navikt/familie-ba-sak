@@ -7,7 +7,6 @@ import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.hentAndelerForSegment
-import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
@@ -105,7 +104,6 @@ data class VedtaksperiodeMedBegrunnelser(
     fun hentUtbetalingsperiodeDetaljer(
         andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
         personopplysningGrunnlag: PersonopplysningGrunnlag,
-        sanityBegrunnelser: List<SanityBegrunnelse>
     ): List<UtbetalingsperiodeDetalj> =
         if (this.type == Vedtaksperiodetype.UTBETALING ||
             this.type == Vedtaksperiodetype.ENDRET_UTBETALING ||
@@ -113,11 +111,7 @@ data class VedtaksperiodeMedBegrunnelser(
         ) {
             val andelerForVedtaksperiodetype = andelerTilkjentYtelse.filter {
                 if (this.type == Vedtaksperiodetype.ENDRET_UTBETALING) {
-                    it.harEndretUtbetalingAndelerOgHørerTilVedtaksperiode(
-                        vedtaksperiodeMedBegrunnelser = this,
-                        sanityBegrunnelser = sanityBegrunnelser,
-                        andelerTilkjentYtelse = andelerTilkjentYtelse
-                    )
+                    it.harEndretUtbetalingAndelerOgHørerTilVedtaksperiode(this)
                 } else {
                     it.endretUtbetalingAndeler.isEmpty()
                 }

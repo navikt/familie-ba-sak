@@ -85,13 +85,11 @@ fun List<UtvidetVedtaksperiodeMedBegrunnelser>.sorter(): List<UtvidetVedtaksperi
 fun VedtaksperiodeMedBegrunnelser.tilUtvidetVedtaksperiodeMedBegrunnelser(
     personopplysningGrunnlag: PersonopplysningGrunnlag,
     andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
-    sanityBegrunnelser: List<SanityBegrunnelse>
 ): UtvidetVedtaksperiodeMedBegrunnelser {
 
     val utbetalingsperiodeDetaljer = hentUtbetalingsperiodeDetaljer(
         andelerTilkjentYtelse = andelerTilkjentYtelse,
         personopplysningGrunnlag = personopplysningGrunnlag,
-        sanityBegrunnelser = sanityBegrunnelser
     )
 
     return UtvidetVedtaksperiodeMedBegrunnelser(
