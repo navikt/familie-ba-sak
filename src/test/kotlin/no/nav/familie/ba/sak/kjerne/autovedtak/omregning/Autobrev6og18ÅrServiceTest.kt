@@ -155,6 +155,41 @@ internal class Autobrev6og18ÅrServiceTest {
         verify(exactly = 1) { taskRepository.save(any()) }
     }
 
+    @Test
+    fun `Verifiser at vi ikke oppretter behandling hvis brev er sendt fra infotrygd`() {
+        val behandling = initMock(alder = 6)
+
+        val autobrev6og18ÅrDTO = Autobrev6og18ÅrDTO(
+            fagsakId = behandling.fagsak.id,
+            alder = Alder.SEKS.år,
+            årMåned = inneværendeMåned()
+        )
+
+        every { infotrygdService.harSendtbrev(any(), any()) } returns true
+        every { stegService.håndterVilkårsvurdering(any()) } returns behandling
+        every { stegService.håndterNyBehandling(any()) } returns behandling
+        every { persongrunnlagService.hentSøker(any()) } returns tilfeldigSøker()
+        every { vedtaksperiodeService.oppdaterFortsattInnvilgetPeriodeMedAutobrevBegrunnelse(any(), any()) } just runs
+        every { taskRepository.save(any()) } returns Task(type = "test", payload = "")
+        autobrev6og18ÅrService.opprettOmregningsoppgaveForBarnIBrytingsalder(autobrev6og18ÅrDTO)
+
+        verify(exactly = 0) {
+            autovedtakService.opprettAutomatiskBehandlingOgKjørTilBehandlingsresultat(
+                any(),
+                any(),
+                any()
+            )
+        }
+        verify(exactly = 0) {
+            vedtaksperiodeService.oppdaterFortsattInnvilgetPeriodeMedAutobrevBegrunnelse(
+                any(),
+                any()
+            )
+        }
+        verify(exactly = 0) { autovedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(any()) }
+        verify(exactly = 0) { taskRepository.save(any()) }
+    }
+
     private fun initMock(
         behandlingStatus: BehandlingStatus = BehandlingStatus.AVSLUTTET,
         fagsakStatus: FagsakStatus = FagsakStatus.LØPENDE,
@@ -167,6 +202,7 @@ internal class Autobrev6og18ÅrServiceTest {
 
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(alder = alder, behandling)
 
+        every { infotrygdService.harSendtbrev(any(), any()) } returns false
         every { behandlingService.hentAktivForFagsak(behandling.fagsak.id) } returns behandling
         every { behandlingService.opprettBehandling(any()) } returns behandling
         every { behandlingService.hentBehandlinger(any()) } returns emptyList()
