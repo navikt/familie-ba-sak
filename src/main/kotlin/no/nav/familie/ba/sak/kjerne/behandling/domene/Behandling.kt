@@ -346,7 +346,6 @@ enum class BehandlingÅrsak(val visningsnavn: String) {
             else -> null
         }
     }
-
 }
 
 enum class BehandlingType(val visningsnavn: String) {

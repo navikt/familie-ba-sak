@@ -64,7 +64,7 @@ class InfotrygdService(
     }
 
     fun harSendtbrev(søkerIdenter: List<String>, brevkoder: List<InfotrygdBrevkode>): Boolean {
-        if(brevkoder.isEmpty()) {
+        if (brevkoder.isEmpty()) {
             return false
         }
 
