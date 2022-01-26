@@ -1,5 +1,6 @@
 {
   "beskrivelse": "Endret utbetaling. Delt bosted ingen utbetaling. Fra starten av perioden. ",
+  "kommentar": "Endret utbetaling velges ikke fra vedtakssiden akkurat nå.",
   "fom": "2021-02-01",
   "tom": "2021-12-31",
   "vedtaksperiodetype": "ENDRET_UTBETALING",
