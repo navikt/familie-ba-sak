@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestJournalføring
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.getDataOrThrow
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
@@ -43,6 +44,17 @@ class JournalføringController(
         @PathVariable dokumentInfoId: String
     ): ResponseEntity<Ressurs<ByteArray>> {
         return ResponseEntity.ok(journalføringService.hentDokument(journalpostId, dokumentInfoId))
+    }
+
+    @GetMapping(
+        path = ["/{journalpostId}/dokument/{dokumentInfoId}"],
+        produces = [MediaType.APPLICATION_PDF_VALUE]
+    )
+    fun hentDokumentBytearray(
+        @PathVariable journalpostId: String,
+        @PathVariable dokumentInfoId: String
+    ): ResponseEntity<ByteArray> {
+        return ResponseEntity.ok(journalføringService.hentDokument(journalpostId, dokumentInfoId).getDataOrThrow())
     }
 
     @PostMapping(path = ["/{journalpostId}/journalfør/{oppgaveId}"], produces = [MediaType.APPLICATION_JSON_VALUE])

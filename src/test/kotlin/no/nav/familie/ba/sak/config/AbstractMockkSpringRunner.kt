@@ -13,7 +13,7 @@ import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingKlient
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.ba.sak.task.TaskRepositoryTestConfig
-import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.cache.CacheManager
@@ -73,7 +73,7 @@ abstract class AbstractMockkSpringRunner {
     @Qualifier("shortCache")
     private lateinit var shortCacheManager: CacheManager
 
-    @AfterEach
+    @BeforeEach
     fun reset() {
         clearCaches()
         clearMocks()
