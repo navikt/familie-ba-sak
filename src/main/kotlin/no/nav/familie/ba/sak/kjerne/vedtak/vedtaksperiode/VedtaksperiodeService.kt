@@ -25,11 +25,13 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertPersonResultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilTriggesAv
 import no.nav.familie.ba.sak.kjerne.brev.hentVedtaksbrevmal
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
@@ -272,6 +274,9 @@ class VedtaksperiodeService(
         val andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(
             behandlingId = behandling.id
         )
+        val endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(
+            behandling.id
+        )
         val persongrunnlag =
             persongrunnlagService.hentAktivThrows(behandling.id)
 
@@ -284,16 +289,14 @@ class VedtaksperiodeService(
                 sanityBegrunnelser = sanityBegrunnelser
             )
         }.map { utvidetVedtaksperiodeMedBegrunnelser ->
-            val aktørerMedUtbetaling = personidentService.hentOgLagreAktørIder(
-                utvidetVedtaksperiodeMedBegrunnelser.utbetalingsperiodeDetaljer.map { it.person.personIdent }
-            )
 
             val gyldigeBegrunnelser =
                 if (behandling.status == BehandlingStatus.UTREDES) {
                     val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id)
                         ?: error("Finner ikke vilkårsvurdering ved begrunning av vedtak")
-                    val endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(
-                        behandling.id
+
+                    val aktørerMedUtbetaling = personidentService.hentOgLagreAktørIder(
+                        utvidetVedtaksperiodeMedBegrunnelser.utbetalingsperiodeDetaljer.map { it.person.personIdent }
                     )
 
                     if (featureToggleService.isEnabled(FeatureToggleConfig.ENDRET_UTBETALING_VEDTAKSSIDEN))
@@ -321,11 +324,13 @@ class VedtaksperiodeService(
                         )
                     else
                         hentGyldigeBegrunnelserForVedtaksperiodeGammel(
-                            utvidetVedtaksperiodeMedBegrunnelser,
-                            behandling,
-                            sanityBegrunnelser,
-                            persongrunnlag,
-                            andelerTilkjentYtelse
+                            utvidetVedtaksperiodeMedBegrunnelser = utvidetVedtaksperiodeMedBegrunnelser,
+                            behandling = behandling,
+                            sanityBegrunnelser = sanityBegrunnelser,
+                            persongrunnlag = persongrunnlag,
+                            andelerTilkjentYtelse = andelerTilkjentYtelse,
+                            aktørerMedUtbetaling = aktørerMedUtbetaling,
+                            endretUtbetalingAndeler = endretUtbetalingAndeler
                         )
                 } else emptyList()
 
@@ -344,7 +349,9 @@ class VedtaksperiodeService(
         behandling: Behandling,
         sanityBegrunnelser: List<SanityBegrunnelse>,
         persongrunnlag: PersonopplysningGrunnlag,
-        andelerTilkjentYtelse: List<AndelTilkjentYtelse>
+        andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
+        aktørerMedUtbetaling: List<Aktør>,
+        endretUtbetalingAndeler: List<EndretUtbetalingAndel>
     ) = when (utvidetVedtaksperiodeMedBegrunnelser.type) {
         Vedtaksperiodetype.FORTSATT_INNVILGET -> {
             VedtakBegrunnelseSpesifikasjon.values()
@@ -357,9 +364,6 @@ class VedtaksperiodeService(
         else -> {
             val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id)
                 ?: error("Finner ikke vilkårsvurdering ved begrunning av vedtak")
-
-            val identerMedUtbetaling =
-                utvidetVedtaksperiodeMedBegrunnelser.utbetalingsperiodeDetaljer.map { it.person.personIdent }
 
             val standardbegrunnelser: MutableSet<VedtakBegrunnelseSpesifikasjon> =
                 VedtakBegrunnelseSpesifikasjon.values()
@@ -376,13 +380,9 @@ class VedtaksperiodeService(
                                 utvidetVedtaksperiodeMedBegrunnelser = utvidetVedtaksperiodeMedBegrunnelser,
                                 minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
                                 persongrunnlag = persongrunnlag,
-                                aktørerMedUtbetaling = personidentService.hentOgLagreAktørIder(
-                                        identerMedUtbetaling
-                                    ),
+                                aktørerMedUtbetaling = aktørerMedUtbetaling,
                                 triggesAv = triggesAv,
-                                endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(
-                                        behandling.id
-                                    ),
+                                endretUtbetalingAndeler = endretUtbetalingAndeler,
                                 andelerTilkjentYtelse = andelerTilkjentYtelse,
                             )
                         ) {
