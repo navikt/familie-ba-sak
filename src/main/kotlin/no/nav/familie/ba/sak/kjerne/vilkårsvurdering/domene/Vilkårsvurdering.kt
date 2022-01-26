@@ -91,4 +91,9 @@ data class Vilkårsvurdering(
         }.toSet()
         return nyVilkårsvurdering
     }
+
+    fun finnOpplysningspliktVilkår(): AnnenVurdering? {
+        return personResultater.single { it.erSøkersResultater() }
+            .andreVurderinger.singleOrNull { it.type == AnnenVurderingType.OPPLYSNINGSPLIKT }
+    }
 }
