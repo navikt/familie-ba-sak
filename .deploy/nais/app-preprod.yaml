@@ -79,6 +79,8 @@ spec:
           cluster: dev-fss
         - application: familie-ef-sak
           cluster: dev-gcp
+        - application: familie-tilbake
+          cluster: dev-gcp
   replicas:
     min: 2
     max: 4
