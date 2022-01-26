@@ -585,4 +585,7 @@ class VedtaksperiodeService(
             } else it
         }.toList()
     }
+
+    fun hent(vedtaksperiodeId: Long): VedtaksperiodeMedBegrunnelser =
+        vedtaksperiodeRepository.hentVedtaksperiode(vedtaksperiodeId = vedtaksperiodeId)
 }

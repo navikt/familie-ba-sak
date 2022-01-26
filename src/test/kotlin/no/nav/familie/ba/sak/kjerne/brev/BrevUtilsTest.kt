@@ -362,6 +362,94 @@ internal class BrevUtilsTest {
     }
 
     @Test
+    fun `hentHjemmeltekst skal ikke inkludere hjemmel 17 og 18 hvis opplysningsplikt er oppfylt`() {
+        val utvidetVedtaksperioderMedBegrunnelser = listOf(
+            lagUtvidetVedtaksperiodeMedBegrunnelser(
+                begrunnelser = listOf(
+                    lagRestVedtaksbegrunnelse(
+                        vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET
+                    )
+                ),
+                utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj())
+            ),
+            lagUtvidetVedtaksperiodeMedBegrunnelser(
+                begrunnelser = listOf(
+                    lagRestVedtaksbegrunnelse(
+                        vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.INNVILGET_SATSENDRING
+                    )
+                ),
+                utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj())
+            )
+        )
+
+        Assertions.assertEquals(
+            "§§ 2, 4, 10 og 11",
+            hentHjemmeltekst(
+                brevPeriodeGrunnlag = utvidetVedtaksperioderMedBegrunnelser.map {
+                    it.tilBrevPeriodeGrunnlag(
+                        hentSanityBegrunnelser()
+                    )
+                },
+                sanityBegrunnelser = listOf(
+                    lagSanityBegrunnelse(
+                        apiNavn = VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET.sanityApiNavn,
+                        hjemler = listOf("11", "4", "2", "10"),
+                    ),
+                    lagSanityBegrunnelse(
+                        apiNavn = VedtakBegrunnelseSpesifikasjon.INNVILGET_SATSENDRING.sanityApiNavn,
+                        hjemler = listOf("10"),
+                    )
+                ),
+                opplysningspliktHjemlerSkalMedIBrev = false
+            )
+        )
+    }
+
+    @Test
+    fun `hentHjemmeltekst skal inkludere hjemmel 17 og 18 hvis opplysningsplikt ikke er oppfylt`() {
+        val utvidetVedtaksperioderMedBegrunnelser = listOf(
+            lagUtvidetVedtaksperiodeMedBegrunnelser(
+                begrunnelser = listOf(
+                    lagRestVedtaksbegrunnelse(
+                        vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET
+                    )
+                ),
+                utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj())
+            ),
+            lagUtvidetVedtaksperiodeMedBegrunnelser(
+                begrunnelser = listOf(
+                    lagRestVedtaksbegrunnelse(
+                        vedtakBegrunnelseSpesifikasjon = VedtakBegrunnelseSpesifikasjon.INNVILGET_SATSENDRING
+                    )
+                ),
+                utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj())
+            )
+        )
+
+        Assertions.assertEquals(
+            "§§ 2, 4, 10, 11, 17 og 18",
+            hentHjemmeltekst(
+                brevPeriodeGrunnlag = utvidetVedtaksperioderMedBegrunnelser.map {
+                    it.tilBrevPeriodeGrunnlag(
+                        hentSanityBegrunnelser()
+                    )
+                },
+                sanityBegrunnelser = listOf(
+                    lagSanityBegrunnelse(
+                        apiNavn = VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET.sanityApiNavn,
+                        hjemler = listOf("11", "4", "2", "10"),
+                    ),
+                    lagSanityBegrunnelse(
+                        apiNavn = VedtakBegrunnelseSpesifikasjon.INNVILGET_SATSENDRING.sanityApiNavn,
+                        hjemler = listOf("10"),
+                    )
+                ),
+                opplysningspliktHjemlerSkalMedIBrev = true
+            )
+        )
+    }
+
+    @Test
     fun `hentEndretUtbetalingBrevPeriode skal gi riktig periodetype`() {
         val utvidetVedtaksperiodMedBegrunnelserFullUtbetaling =
             lagBrevPeriodeGrunnlagMedPersoner(
