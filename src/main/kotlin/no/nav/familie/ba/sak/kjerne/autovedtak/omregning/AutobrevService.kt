@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.omregning
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
-import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBrevkode
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
@@ -10,6 +9,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
@@ -24,6 +24,7 @@ import java.time.YearMonth
 @Service
 class AutobrevService(
     private val behandlingService: BehandlingService,
+    private val fagsakService: FagsakService,
     private val autovedtakService: AutovedtakService,
     private val vedtakService: VedtakService,
     private val vedtaksperiodeService: VedtaksperiodeService,
@@ -38,6 +39,10 @@ class AutobrevService(
     ): Boolean {
         if (!behandlingsårsak.erOmregningsårsak()) {
             throw Feil("Sjekk om autobrevbehandling skal opprettes sjekker på årsak som ikke er omregning.")
+        }
+
+        if (harSendtBrevFraInfotrygd(fagsakId, behandlingsårsak)) {
+            return false
         }
 
         if (behandlingService.harBehandlingsårsakAlleredeKjørt(
@@ -71,6 +76,18 @@ class AutobrevService(
         return true
     }
 
+    fun harSendtBrevFraInfotrygd(fagsakId: Long, behandlingsårsak: BehandlingÅrsak): Boolean {
+        val personidenter = fagsakService.hentAktør(fagsakId).personidenter
+        val harSendtBrev = infotrygdService.harSendtbrev(personidenter.map { it.fødselsnummer }, behandlingsårsak.tilBrevkoder())
+        if (harSendtBrev) {
+            logger.info("Har sendt autobrev fra infotrygd, dropper å lage behandling for å sende brev fra ba-sak")
+            return true
+        } else {
+            logger.info("Har ikke sendt autobrev fra infotrygd på migrert sak, lager ny behandling og sender brev på vanlig måte")
+            return false
+        }
+    }
+
     fun opprettOgKjørOmregningsbehandling(
         behandling: Behandling,
         behandlingsårsak: BehandlingÅrsak,
@@ -92,15 +109,6 @@ class AutobrevService(
             autovedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(
                 behandlingEtterBehandlingsresultat
             )
-
-        val harSendtBrev = infotrygdService.harSendtbrev(behandling.fagsak.aktør.personidenter.map { it.fødselsnummer }, behandlingsårsak.tilBrevkoder())
-        if (harSendtBrev) {
-            logger.info("Har sendt autobrev fra infotrygd, dropper å sende fra ba-sak")
-            //opprettTaskFerdigstillBehandling()
-        } else {
-            logger.info("Har ikke sendt autobrev fra infotrygd på migrert sak")
-            //opprettTaskJournalførVedtaksbrev(vedtakId = opprettetVedtak.id)
-        }
 
         opprettTaskJournalførVedtaksbrev(vedtakId = opprettetVedtak.id)
     }

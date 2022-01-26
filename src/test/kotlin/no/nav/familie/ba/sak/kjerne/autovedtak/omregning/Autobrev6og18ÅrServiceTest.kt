@@ -16,6 +16,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
@@ -35,6 +36,7 @@ internal class Autobrev6og18ÅrServiceTest {
     private val personopplysningGrunnlagRepository = mockk<PersonopplysningGrunnlagRepository>()
     private val persongrunnlagService = mockk<PersongrunnlagService>()
     private val behandlingService = mockk<BehandlingService>(relaxed = true)
+    private val fagsakService = mockk<FagsakService>(relaxed = true)
     private val infotrygdService = mockk<InfotrygdService>(relaxed = true)
     private val stegService = mockk<StegService>()
     private val vedtakService = mockk<VedtakService>(relaxed = true)
@@ -43,6 +45,7 @@ internal class Autobrev6og18ÅrServiceTest {
 
     private val autobrevService = AutobrevService(
         behandlingService = behandlingService,
+        fagsakService = fagsakService,
         autovedtakService = autovedtakService,
         vedtakService = vedtakService,
         infotrygdService = infotrygdService,

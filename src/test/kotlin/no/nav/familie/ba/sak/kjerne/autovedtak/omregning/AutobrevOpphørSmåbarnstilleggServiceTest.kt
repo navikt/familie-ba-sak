@@ -17,6 +17,7 @@ import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.småbarnstillegg.PeriodeOvergangsstønadGrunnlag
@@ -36,6 +37,7 @@ import java.time.LocalDate
 
 internal class AutobrevOpphørSmåbarnstilleggServiceTest {
     private val autovedtakService = mockk<AutovedtakService>(relaxed = true)
+    private val fagsakService = mockk<FagsakService>(relaxed = true)
     private val persongrunnlagService = mockk<PersongrunnlagService>()
     private val behandlingService = mockk<BehandlingService>()
     private val infotrygdService = mockk<InfotrygdService>(relaxed = true)
@@ -46,6 +48,7 @@ internal class AutobrevOpphørSmåbarnstilleggServiceTest {
     private val periodeOvergangsstønadGrunnlagRepository = mockk<PeriodeOvergangsstønadGrunnlagRepository>()
 
     private val autobrevService = AutobrevService(
+        fagsakService = fagsakService,
         behandlingService = behandlingService,
         infotrygdService = infotrygdService,
         autovedtakService = autovedtakService,
