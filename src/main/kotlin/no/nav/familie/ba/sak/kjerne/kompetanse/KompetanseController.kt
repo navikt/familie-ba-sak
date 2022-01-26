@@ -35,7 +35,7 @@ class KompetanseController(
     }
 
     @PutMapping(path = ["{behandlingId}/{kompetanseId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun endreBehandlendeEnhet(
+    fun oppdaterKompetanse(
         @PathVariable behandlingId: Long,
         @PathVariable kompetanseId: Long,
         @RequestBody kompetanse: Kompetanse
