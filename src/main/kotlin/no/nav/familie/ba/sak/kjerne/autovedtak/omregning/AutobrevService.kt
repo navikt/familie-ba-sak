@@ -78,12 +78,13 @@ class AutobrevService(
 
     fun harSendtBrevFraInfotrygd(fagsakId: Long, behandlingsårsak: BehandlingÅrsak): Boolean {
         val personidenter = fagsakService.hentAktør(fagsakId).personidenter
-        val harSendtBrev = infotrygdService.harSendtbrev(personidenter.map { it.fødselsnummer }, behandlingsårsak.tilBrevkoder())
+        val harSendtBrev =
+            infotrygdService.harSendtbrev(personidenter.map { it.fødselsnummer }, behandlingsårsak.tilBrevkoder())
         if (harSendtBrev) {
             logger.info("Har sendt autobrev fra infotrygd, dropper å lage behandling for å sende brev fra ba-sak")
             return true
         } else {
-            logger.info("Har ikke sendt autobrev fra infotrygd på migrert sak, lager ny behandling og sender brev på vanlig måte")
+            logger.info("Har ikke sendt autobrev fra infotrygd, lager ny behandling og sender brev på vanlig måte")
             return false
         }
     }
@@ -138,9 +139,18 @@ class AutobrevService(
 
 private fun BehandlingÅrsak.tilBrevkoder(): List<InfotrygdBrevkode> {
     return when (this) {
-        BehandlingÅrsak.OMREGNING_6ÅR -> listOf(InfotrygdBrevkode.BREV_BATCH_OMREGNING_BARN_6_ÅR, InfotrygdBrevkode.BREV_MANUELL_OMREGNING_BARN_6_ÅR)
-        BehandlingÅrsak.OMREGNING_18ÅR -> listOf(InfotrygdBrevkode.BREV_BATCH_OMREGNING_BARN_18_ÅR, InfotrygdBrevkode.BREV_MANUELL_OMREGNING_BARN_18_ÅR)
-        BehandlingÅrsak.OMREGNING_SMÅBARNSTILLEGG -> listOf(InfotrygdBrevkode.BREV_BATCH_OPPHØR_SMÅBARNSTILLLEGG, InfotrygdBrevkode.BREV_MANUELL_OPPHØR_SMÅBARNSTILLLEGG)
+        BehandlingÅrsak.OMREGNING_6ÅR -> listOf(
+            InfotrygdBrevkode.BREV_BATCH_OMREGNING_BARN_6_ÅR,
+            InfotrygdBrevkode.BREV_MANUELL_OMREGNING_BARN_6_ÅR
+        )
+        BehandlingÅrsak.OMREGNING_18ÅR -> listOf(
+            InfotrygdBrevkode.BREV_BATCH_OMREGNING_BARN_18_ÅR,
+            InfotrygdBrevkode.BREV_MANUELL_OMREGNING_BARN_18_ÅR
+        )
+        BehandlingÅrsak.OMREGNING_SMÅBARNSTILLEGG -> listOf(
+            InfotrygdBrevkode.BREV_BATCH_OPPHØR_SMÅBARNSTILLLEGG,
+            InfotrygdBrevkode.BREV_MANUELL_OPPHØR_SMÅBARNSTILLLEGG
+        )
         else -> emptyList()
     }
 }
