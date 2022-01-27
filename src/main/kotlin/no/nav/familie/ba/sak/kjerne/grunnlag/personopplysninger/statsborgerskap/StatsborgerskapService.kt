@@ -133,6 +133,9 @@ fun Statsborgerskap.iTredjeland() = this.land != StatsborgerskapService.LANDKODE
 
 fun Statsborgerskap.erStatsløs() = this.land == StatsborgerskapService.LANDKODE_STATSLØS
 
+/**
+ * Norge, Sverige, Finland, Danmark, Island, Grønland, Færøyene og Åland
+ */
 enum class Norden {
     NOR,
     SWE,

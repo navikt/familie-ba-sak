@@ -216,6 +216,8 @@ class FødselshendelseService(
             return "Mor har flere bostedsadresser uten fra- og med dato"
         } else if (bosattIRiketResultat?.resultat == Resultat.IKKE_OPPFYLT) {
             return "Mor er ikke bosatt i riket."
+        } else if (søkerResultat?.vilkårResultater?.any { it.vilkårType == Vilkår.LOVLIG_OPPHOLD && it.resultat != Resultat.OPPFYLT } == true) {
+            return "Mor har ikke lovlig opphold"
         }
 
         persongrunnlagService.hentBarna(behandling).forEach { barn ->
