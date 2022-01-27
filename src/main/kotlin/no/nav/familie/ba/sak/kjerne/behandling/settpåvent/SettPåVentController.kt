@@ -1,7 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.behandling.settpåvent
 
 import no.nav.familie.ba.sak.ekstern.restDomene.RestSettPåVent
-import no.nav.familie.ba.sak.ekstern.restDomene.tilRestSettPåVent
+import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
+import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -20,44 +21,44 @@ import org.springframework.web.bind.annotation.RestController
 class SettPåVentController(
     private val tilgangService: TilgangService,
     private val settPåVentService: SettPåVentService,
+    private val utvidetBehandlingService: UtvidetBehandlingService,
 ) {
     @PostMapping(path = ["{behandlingId}"])
     fun settBehandlingPåVent(
         @PathVariable behandlingId: Long,
         @RequestBody restSettPåVent: RestSettPåVent,
-    ): ResponseEntity<Ressurs<RestSettPåVent>> {
+    ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "Sett behandling på vent"
         )
+        settPåVentService.settBehandlingPåVent(behandlingId, restSettPåVent.frist, restSettPåVent.årsak)
 
-        val setPåVent = settPåVentService.settbehandlingPåVent(behandlingId, restSettPåVent.frist, restSettPåVent.årsak)
-        return ResponseEntity.ok(Ressurs.success(setPåVent.tilRestSettPåVent()))
+        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }
 
     @PutMapping(path = ["{behandlingId}"])
     fun oppdaterSettBehandlingPåVent(
         @PathVariable behandlingId: Long,
         @RequestBody restSettPåVent: RestSettPåVent,
-    ): ResponseEntity<Ressurs<RestSettPåVent>> {
+    ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "Sett behandling på vent"
         )
+        settPåVentService.oppdaterSettBehandlingPåVent(behandlingId, restSettPåVent.frist, restSettPåVent.årsak)
 
-        val setPåVent =
-            settPåVentService.oppdaterSettbehandlingPåVent(behandlingId, restSettPåVent.frist, restSettPåVent.årsak)
-        return ResponseEntity.ok(Ressurs.success(setPåVent.tilRestSettPåVent()))
+        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }
 
     @PutMapping(path = ["{behandlingId}/fortsettbehandling"])
-    fun fjernSettBehandlingPåVent(@PathVariable behandlingId: Long): ResponseEntity<Ressurs<RestSettPåVent>> {
+    fun fjernSettBehandlingPåVent(@PathVariable behandlingId: Long): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "Sett behandling på vent"
         )
+        settPåVentService.deaktiverSettBehandlingPåVent(behandlingId)
 
-        val setPåVent = settPåVentService.deaktiverSettBehandlingPåVent(behandlingId)
-        return ResponseEntity.ok(Ressurs.success(setPåVent.tilRestSettPåVent()))
+        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }
 }

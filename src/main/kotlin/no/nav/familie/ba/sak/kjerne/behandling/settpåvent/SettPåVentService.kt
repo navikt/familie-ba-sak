@@ -14,7 +14,7 @@ class SettPåVentService(
         return settPåVentRepository.findByBehandlingIdAndAktiv(behandlingId, true)
     }
 
-    fun settbehandlingPåVent(behandlingId: Long, frist: LocalDate, årsak: SettPåVentÅrsak): SettPåVent {
+    fun settBehandlingPåVent(behandlingId: Long, frist: LocalDate, årsak: SettPåVentÅrsak): SettPåVent {
         if (finnAktivSettPåVentPåBehandling(behandlingId) != null) {
             throw FunksjonellFeil(
                 melding = "Behandling $behandlingId er allerede satt på vent.",
@@ -27,7 +27,7 @@ class SettPåVentService(
         return settPåVentRepository.save(SettPåVent(behandling = behandling, frist = frist, årsak = årsak))
     }
 
-    fun oppdaterSettbehandlingPåVent(behandlingId: Long, frist: LocalDate, årsak: SettPåVentÅrsak): SettPåVent {
+    fun oppdaterSettBehandlingPåVent(behandlingId: Long, frist: LocalDate, årsak: SettPåVentÅrsak): SettPåVent {
         val aktivSettPåVent = finnAktivSettPåVentPåBehandling(behandlingId)
             ?: throw FunksjonellFeil(
                 melding = "Behandling $behandlingId er ikke satt på vent.",
