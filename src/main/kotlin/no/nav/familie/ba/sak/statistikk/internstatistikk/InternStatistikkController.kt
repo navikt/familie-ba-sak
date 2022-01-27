@@ -43,10 +43,5 @@ data class InternStatistikkResponse(
     val antallFagsakerTotalt: Long,
     val antallFagsakerLøpende: Long,
     val antallBehandlingerIkkeFerdigstilt: Long,
-    val antallBehandlingerPerÅrsak: List<BehandlingerPerÅrsak>
-)
-
-class BehandlingerPerÅrsak(
-    val behandlingsårsak: BehandlingÅrsak,
-    val antall: Long
+    val antallBehandlingerPerÅrsak: Map<BehandlingÅrsak, Long>
 )
