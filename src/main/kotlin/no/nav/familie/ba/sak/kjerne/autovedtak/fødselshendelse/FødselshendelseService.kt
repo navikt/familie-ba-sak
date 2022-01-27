@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.FiltreringsreglerService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurdering.utfall.VilkårIkkeOppfyltÅrsak
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurdering.utfall.VilkårKanskjeOppfyltÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.HenleggÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
@@ -218,7 +219,14 @@ class FødselshendelseService(
         } else if (bosattIRiketResultat?.resultat == Resultat.IKKE_OPPFYLT) {
             return "Mor er ikke bosatt i riket."
         } else if (lovligOppholdResultat?.resultat != Resultat.OPPFYLT) {
-            return lovligOppholdResultat?.begrunnelse ?: "Mor har ikke lovlig opphold"
+            return lovligOppholdResultat?.evalueringÅrsaker?.joinToString("\n") {
+                when (lovligOppholdResultat.resultat) {
+                    Resultat.IKKE_OPPFYLT -> VilkårIkkeOppfyltÅrsak.valueOf(it).beskrivelse
+                    Resultat.IKKE_VURDERT -> VilkårKanskjeOppfyltÅrsak.valueOf(it).beskrivelse
+                    else -> ""
+                }
+            }
+                ?: "Mor har ikke lovlig opphold"
         }
 
         persongrunnlagService.hentBarna(behandling).forEach { barn ->
