@@ -35,7 +35,7 @@ data class SettPåVent(
     val årsak: SettPåVentÅrsak,
 
     @Column(name = "behandling_steg_status", nullable = false)
-    val aktiv: Boolean,
+    val aktiv: Boolean = true,
 ) : BaseEntitet()
 
 enum class SettPåVentÅrsak {
