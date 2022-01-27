@@ -28,6 +28,7 @@ data class PersonInfo(
     val sivilstander: List<Sivilstand> = emptyList(),
     val opphold: List<Opphold>? = emptyList(),
     val statsborgerskap: List<Statsborgerskap>? = emptyList(),
+    val dødsfall: DødsfallData? = null
 )
 
 fun List<Bostedsadresse>.filtrerUtKunNorskeBostedsadresser() =

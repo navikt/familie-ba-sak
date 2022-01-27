@@ -48,9 +48,11 @@ class PersonopplysningerService(
                 adressebeskyttelseGradering = hentAdressebeskyttelseSomSystembruker(it.first)
             )
         }.toSet()
+        val dødsfall = hentDødsfall(aktør = aktør)
         return personinfo.copy(
             forelderBarnRelasjon = forelderBarnRelasjon,
-            forelderBarnRelasjonMaskert = forelderBarnRelasjonMaskert
+            forelderBarnRelasjonMaskert = forelderBarnRelasjonMaskert,
+            dødsfall = dødsfall
         )
     }
 
