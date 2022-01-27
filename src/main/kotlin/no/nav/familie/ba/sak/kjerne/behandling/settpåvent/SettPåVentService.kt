@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.behandling.settpåvent
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import org.springframework.stereotype.Service
@@ -14,11 +15,23 @@ class SettPåVentService(
         return settPåVentRepository.findByBehandlingIdAndAktiv(behandlingId, true)
     }
 
+    fun finnAktivSettPåVentPåBehandlingThrows(behandlingId: Long): SettPåVent {
+        return finnAktivSettPåVentPåBehandling(behandlingId)
+            ?: throw Feil("Behandling $behandlingId er ikke satt på vent.",)
+    }
+
     fun settBehandlingPåVent(behandlingId: Long, frist: LocalDate, årsak: SettPåVentÅrsak): SettPåVent {
         if (finnAktivSettPåVentPåBehandling(behandlingId) != null) {
+            throw Feil(
+                "Behandling $behandlingId er allerede satt på vent."
+
+            )
+        }
+
+        if (frist.isBefore(LocalDate.now())) {
             throw FunksjonellFeil(
-                melding = "Behandling $behandlingId er allerede satt på vent.",
-                frontendFeilmelding = "Behandling er allerede satt på vent.",
+                melding = "Frist for å vente på behandling $behandlingId er satt før dagens dato.",
+                frontendFeilmelding = "Fristen er satt før dagens dato.",
             )
         }
 
@@ -28,22 +41,14 @@ class SettPåVentService(
     }
 
     fun oppdaterSettBehandlingPåVent(behandlingId: Long, frist: LocalDate, årsak: SettPåVentÅrsak): SettPåVent {
-        val aktivSettPåVent = finnAktivSettPåVentPåBehandling(behandlingId)
-            ?: throw FunksjonellFeil(
-                melding = "Behandling $behandlingId er ikke satt på vent.",
-                frontendFeilmelding = "Behandling er ikke satt på vent.",
-            )
+        val aktivSettPåVent = finnAktivSettPåVentPåBehandlingThrows(behandlingId)
 
         return settPåVentRepository.save(aktivSettPåVent.copy(frist = frist, årsak = årsak))
     }
 
-    fun deaktiverSettBehandlingPåVent(behandlingId: Long): SettPåVent {
-        val aktivSettPåVent = finnAktivSettPåVentPåBehandling(behandlingId)
-            ?: throw FunksjonellFeil(
-                melding = "Behandling $behandlingId er ikke satt på vent.",
-                frontendFeilmelding = "Behandling er ikke satt på vent.",
-            )
+    fun deaktiverSettBehandlingPåVent(behandlingId: Long, nå: LocalDate = LocalDate.now()): SettPåVent {
+        val aktivSettPåVent = finnAktivSettPåVentPåBehandlingThrows(behandlingId)
 
-        return settPåVentRepository.save(aktivSettPåVent.copy(aktiv = false))
+        return settPåVentRepository.save(aktivSettPåVent.copy(aktiv = false, tidTattAvVent = nå))
     }
 }
