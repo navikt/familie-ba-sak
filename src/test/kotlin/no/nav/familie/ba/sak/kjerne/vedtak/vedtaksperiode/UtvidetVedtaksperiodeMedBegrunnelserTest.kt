@@ -85,7 +85,6 @@ class UtvidetVedtaksperiodeMedBegrunnelserTest {
             vedtaksperiodeMedBegrunnelser.tilUtvidetVedtaksperiodeMedBegrunnelser(
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 andelerTilkjentYtelse = andelerTilkjentYtelse,
-                sanityBegrunnelser = sanityBegrunnelser
             )
 
         Assertions.assertEquals(1, utvidetVedtaksperiodeMedBegrunnelser.utbetalingsperiodeDetaljer.size)
@@ -152,7 +151,6 @@ class UtvidetVedtaksperiodeMedBegrunnelserTest {
             vedtaksperiodeMedBegrunnelser.tilUtvidetVedtaksperiodeMedBegrunnelser(
                 personopplysningGrunnlag,
                 andelerTilkjentYtelse,
-                sanityBegrunnelser = sanityBegrunnelser
             )
 
         Assertions.assertEquals(1, utvidetVedtaksperiodeMedBegrunnelser.utbetalingsperiodeDetaljer.size)
@@ -183,7 +181,8 @@ class UtvidetVedtaksperiodeMedBegrunnelserTest {
             fom = fom,
             tom = tom,
             person = barn2,
-            prosent = BigDecimal.valueOf(100)
+            prosent = BigDecimal.valueOf(100),
+            vedtakBegrunnelseSpesifikasjoner = listOf(VedtakBegrunnelseSpesifikasjon.ENDRET_UTBETALING_DELT_BOSTED_FULL_UTBETALING)
         )
 
         val endretUtbetalingAndel2 = lagEndretUtbetalingAndel(
@@ -191,8 +190,8 @@ class UtvidetVedtaksperiodeMedBegrunnelserTest {
             fom = fom,
             tom = tom,
             person = barn3,
-            prosent = BigDecimal.ZERO
-
+            prosent = BigDecimal.ZERO,
+            vedtakBegrunnelseSpesifikasjoner = listOf(VedtakBegrunnelseSpesifikasjon.ENDRET_UTBETALING_DELT_BOSTED_INGEN_UTBETALING)
         )
 
         val andelerTilkjentYtelse = listOf(
@@ -237,7 +236,6 @@ class UtvidetVedtaksperiodeMedBegrunnelserTest {
             vedtaksperiodeMedBegrunnelser.tilUtvidetVedtaksperiodeMedBegrunnelser(
                 personopplysningGrunnlag,
                 andelerTilkjentYtelse,
-                sanityBegrunnelser = sanityBegrunnelser
             )
 
         Assertions.assertEquals(1, utvidetVedtaksperiodeMedBegrunnelser.utbetalingsperiodeDetaljer.size)

@@ -194,10 +194,16 @@ fun hjemlerTilHjemmeltekst(hjemler: List<String>): String {
 
 fun hentHjemmeltekst(
     brevPeriodeGrunnlag: List<BrevPeriodeGrunnlag>,
-    sanityBegrunnelser: List<SanityBegrunnelse>
+    sanityBegrunnelser: List<SanityBegrunnelse>,
+    opplysningspliktHjemlerSkalMedIBrev: Boolean = false
 ): String {
     val hjemler =
         hentHjemlerIVedtaksperioderFraSanity(brevPeriodeGrunnlag, sanityBegrunnelser).toMutableSet()
+
+    if (opplysningspliktHjemlerSkalMedIBrev) {
+        val hjemlerNårOpplysningspliktIkkeOppfylt = listOf("17", "18")
+        hjemler.addAll(hjemlerNårOpplysningspliktIkkeOppfylt)
+    }
 
     if (brevPeriodeGrunnlag.flatMap { it.fritekster }.isNotEmpty()) {
         hjemler.addAll(hjemlerTilhørendeFritekst.map { it.toString() }.toSet())

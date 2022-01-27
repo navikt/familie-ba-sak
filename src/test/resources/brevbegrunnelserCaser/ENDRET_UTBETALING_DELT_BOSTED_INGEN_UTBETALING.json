@@ -1,0 +1,57 @@
+{
+  "beskrivelse": "Endret utbetaling. Delt bosted ingen utbetaling. Fra starten av perioden. ",
+  "fom": "2021-02-01",
+  "tom": "2021-12-31",
+  "vedtaksperiodetype": "ENDRET_UTBETALING",
+  "ytelserForSøkerForrigeMåned": [],
+  "ytelserForBarnOgSøkerIPeriode": [],
+  "utvidetScenarioForEndringsperiode": "IKKE_UTVIDET_YTELSE",
+  "personerPåBehandling": [
+    {
+      "endredeUtbetalinger": [
+        {
+          "fom": "2021-02",
+          "tom": "2021-12",
+          "årsak": "DELT_BOSTED",
+          "prosent": 0
+        }
+      ],
+      "type": "BARN",
+      "fødselsdato": "2017-09-03",
+      "overstyrteVilkårresultater": [
+        {
+          "vilkårType": "BOR_MED_SØKER",
+          "resultat": "OPPFYLT",
+          "periodeFom": "2021-01-01",
+          "periodeTom": null,
+          "utdypendeVilkårsvurderinger": [
+            "DELT_BOSTED"
+          ],
+          "erEksplisittAvslagPåSøknad": false
+        }
+      ],
+      "andreVurderinger": []
+    },
+    {
+      "fødselsdato": "1993-08-10",
+      "type": "SØKER",
+      "harUtbetalingKnyttetTilSegIPerioden": false,
+      "overstyrteVilkårresultater": [],
+      "andreVurderinger": [],
+      "endredeUtbetalinger": []
+    }
+  ],
+  "forventetOutput": [
+    "INNVILGET_OMSORG_FOR_BARN",
+    "INNVILGET_BOR_HOS_SØKER",
+    "INNVILGET_ENIGHET_OM_OPPHØR_AV_AVTALE_OM_DELT_BOSTED",
+    "INNVILGET_UENIGHET_OM_OPPHØR_AV_AVTALE_OM_DELT_BOSTED",
+    "INNVILGET_AVTALE_DELT_BOSTED_FÅR_FRA_FLYTTETIDSPUNKT",
+    "INNVILGET_AVTALE_DELT_BOSTED_FÅR_FRA_AVTALETIDSPUNKT",
+    "INNVILGET_VURDERING_AVTALE_DELT_BOSTED_FØLGES",
+    "INNVILGET_RETTSAVGJØRELSE_DELT_BOSTED",
+    "INNVILGET_ANNEN_FORELDER_IKKE_SØKT_DELT_BARNETRYGD_ENKELTBARN",
+    "INNVILGET_ANNEN_FORELDER_IKKE_SØKT_DELT_BARNETRYGD_ALLE_BARNA",
+    "ENDRET_UTBETALING_DELT_BOSTED_INGEN_UTBETALING"
+  ]
+}
