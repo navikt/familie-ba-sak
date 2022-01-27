@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.tilRestBehandlingStegTilstand
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestFødselshendelsefiltreringResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonerMedAndeler
+import no.nav.familie.ba.sak.ekstern.restDomene.tilRestSettPåVent
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestTotrinnskontroll
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestVedtak
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
@@ -95,7 +96,8 @@ class UtvidetBehandlingService(
                 skalMinimeres = behandling.status != BehandlingStatus.UTREDES
             ),
             totrinnskontroll = totrinnskontroll?.tilRestTotrinnskontroll(),
-            settPåVent = settPåVentService.finnAktivSettPåVentPåBehandling(behandlingId = behandlingId),
+            settPåVent = settPåVentService.finnAktivSettPåVentPåBehandling(behandlingId = behandlingId)
+                ?.tilRestSettPåVent(),
         )
     }
 }

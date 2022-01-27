@@ -6,7 +6,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
-import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVent
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Utbetalingsperiode
 import java.time.LocalDateTime
@@ -35,5 +34,5 @@ data class RestUtvidetBehandling(
     val tilbakekreving: RestTilbakekreving?,
     val vedtak: RestVedtak?,
     val totrinnskontroll: RestTotrinnskontroll?,
-    val settPåVent: SettPåVent?,
+    val settPåVent: RestSettPåVent?,
 )
