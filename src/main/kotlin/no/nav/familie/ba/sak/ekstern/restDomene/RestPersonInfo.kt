@@ -59,11 +59,7 @@ fun PersonInfo.tilRestPersonInfo(personIdent: String): RestPersonInfo {
         else -> null
     } ?: "ukjent"
 
-    println(this.dødsfall)
-
     val dødsfallDato = if (this.dødsfall != null && this.dødsfall.erDød) this.dødsfall.dødsdato else null
-
-    println(dødsfallDato)
 
     return RestPersonInfo(
         personIdent = personIdent,
