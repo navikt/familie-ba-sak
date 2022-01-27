@@ -30,11 +30,17 @@ data class SettPåVent(
     @Column(name = "frist", nullable = false)
     val frist: LocalDate,
 
+    @Column(name = "tid_tatt_av_vent", nullable = true)
+    val tidTattAvVent: LocalDate? = null,
+
+    @Column(name = "tid_satt_paa_vent", nullable = false)
+    val tidSattPåVent: LocalDate = LocalDate.now(),
+
     @Enumerated(EnumType.STRING)
     @Column(name = "aarsak", nullable = false)
     val årsak: SettPåVentÅrsak,
 
-    @Column(name = "behandling_steg_status", nullable = false)
+    @Column(name = "aktiv", nullable = false)
     val aktiv: Boolean = true,
 ) : BaseEntitet()
 
