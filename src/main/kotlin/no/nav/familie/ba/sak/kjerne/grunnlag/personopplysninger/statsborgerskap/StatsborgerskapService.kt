@@ -34,7 +34,8 @@ class StatsborgerskapService(
             )
         }
 
-        val alleEØSLandInkludertHistoriske = integrasjonClient.hentAlleEØSLand().betydninger[statsborgerskap.land]
+        val alleEØSLandInkludertHistoriske =
+            integrasjonClient.hentAlleEØSLand().betydninger[statsborgerskap.land] ?: emptyList()
         val grStatsborgerskap = ArrayList<GrStatsborgerskap>()
         var datoFra = statsborgerskap.gyldigFraOgMed
 
@@ -78,22 +79,22 @@ class StatsborgerskapService(
     }
 
     private fun hentMedlemskapsIntervaller(
-        eøsLand: List<BetydningDto>?,
+        eøsLand: List<BetydningDto>,
         fra: LocalDate?,
         til: LocalDate?
     ): List<LocalDate> =
-        eøsLand?.flatMap {
+        eøsLand.flatMap {
             listOf(it.gyldigFra, it.gyldigTil.plusDays(1))
-        }?.filter { datoForEndringIMedlemskap ->
+        }.filter { datoForEndringIMedlemskap ->
             erInnenforDatoerSomBetegnerUendelighetIKodeverk(datoForEndringIMedlemskap)
-        }?.filter { datoForEndringIMedlemskap ->
+        }.filter { datoForEndringIMedlemskap ->
             (fra == null || datoForEndringIMedlemskap.isAfter(fra)) &&
                 (til == null || datoForEndringIMedlemskap.isBefore(til))
-        } ?: emptyList()
+        }
 
     private fun finnMedlemskap(
         statsborgerskap: Statsborgerskap,
-        perioderEØSLand: List<BetydningDto>?,
+        perioderEØSLand: List<BetydningDto>,
         gyldigFraOgMed: LocalDate?
     ): Medlemskap =
         when {
@@ -105,15 +106,15 @@ class StatsborgerskapService(
         }
 
     private fun erEØS(
-        perioderEØSLand: List<BetydningDto>?,
+        perioderEØSLand: List<BetydningDto>,
         fraDato: LocalDate?
     ): Boolean =
-        perioderEØSLand?.any {
+        perioderEØSLand.any {
             fraDato == null || (
                 it.gyldigFra <= fraDato &&
                     it.gyldigTil >= fraDato
                 )
-        } ?: false
+        }
 
     private fun erInnenforDatoerSomBetegnerUendelighetIKodeverk(dato: LocalDate) =
         dato.isAfter(TIDLIGSTE_DATO_I_KODEVERK) && dato.isBefore(SENESTE_DATO_I_KODEVERK)
