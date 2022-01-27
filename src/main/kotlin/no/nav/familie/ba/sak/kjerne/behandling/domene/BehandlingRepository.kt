@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.behandling.domene
 
+import no.nav.familie.ba.sak.statistikk.internstatistikk.BehandlingerPerÅrsak
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Lock
 import org.springframework.data.jpa.repository.Query
@@ -94,4 +95,10 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
         gammelSats: Int,
         månedÅrForEndring: YearMonth
     ): List<Long>
+
+    @Query(
+        """SELECT b.opprettet_aarsak as behandlingsårsak, count(*) as antall from behandling b group by b.opprettet_aarsak""",
+        nativeQuery = true
+    )
+    fun finnAntallBehandlingerPerÅrsak(): List<BehandlingerPerÅrsak>
 }

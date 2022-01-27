@@ -12,4 +12,5 @@ class InternStatistikkService(
     fun finnAntallFagsakerTotalt() = fagsakRepository.finnAntallFagsakerTotalt()
     fun finnAntallFagsakerLøpende() = fagsakRepository.finnAntallFagsakerLøpende()
     fun finnAntallBehandlingerIkkeErAvsluttet() = behandlingRepository.finnAntallBehandlingerIkkeAvsluttet()
+    fun finnAntallBehandlingerPerÅrsak() = behandlingRepository.finnAntallBehandlingerPerÅrsak()
 }

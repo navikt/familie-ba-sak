@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.statistikk.internstatistikk
 
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -26,7 +27,8 @@ class InternStatistikkController(
         val internstatistikk = InternStatistikkResponse(
             antallFagsakerTotalt = internStatistikkService.finnAntallFagsakerTotalt(),
             antallFagsakerLøpende = internStatistikkService.finnAntallFagsakerLøpende(),
-            antallBehandlingerIkkeFerdigstilt = internStatistikkService.finnAntallBehandlingerIkkeErAvsluttet()
+            antallBehandlingerIkkeFerdigstilt = internStatistikkService.finnAntallBehandlingerIkkeErAvsluttet(),
+            antallBehandlingerPerÅrsak = internStatistikkService.finnAntallBehandlingerPerÅrsak()
         )
         return ResponseEntity.ok(Ressurs.Companion.success(internstatistikk))
     }
@@ -41,4 +43,10 @@ data class InternStatistikkResponse(
     val antallFagsakerTotalt: Long,
     val antallFagsakerLøpende: Long,
     val antallBehandlingerIkkeFerdigstilt: Long,
+    val antallBehandlingerPerÅrsak: List<BehandlingerPerÅrsak>
+)
+
+class BehandlingerPerÅrsak(
+    val behandlingsårsak: BehandlingÅrsak,
+    val antall: Long
 )
