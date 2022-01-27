@@ -24,7 +24,7 @@ class StatsborgerskapService(
             return listOf(
                 GrStatsborgerskap(
                     gyldigPeriode = DatoIntervallEntitet(
-                        fom = statsborgerskap.gyldigFraOgMed,
+                        fom = statsborgerskap.hentFom(),
                         tom = statsborgerskap.gyldigTilOgMed
                     ),
                     landkode = statsborgerskap.land,
@@ -37,11 +37,11 @@ class StatsborgerskapService(
         val alleEØSLandInkludertHistoriske =
             integrasjonClient.hentAlleEØSLand().betydninger[statsborgerskap.land] ?: emptyList()
         val grStatsborgerskap = ArrayList<GrStatsborgerskap>()
-        var datoFra = statsborgerskap.gyldigFraOgMed
+        var datoFra = statsborgerskap.hentFom()
 
         hentMedlemskapsIntervaller(
             alleEØSLandInkludertHistoriske,
-            statsborgerskap.gyldigFraOgMed,
+            statsborgerskap.hentFom(),
             statsborgerskap.gyldigTilOgMed
         )
             .forEach {
@@ -127,6 +127,8 @@ class StatsborgerskapService(
         val SENESTE_DATO_I_KODEVERK: LocalDate = LocalDate.parse("9990-01-01")
     }
 }
+
+fun Statsborgerskap.hentFom() = this.bekreftelsesdato ?: this.gyldigFraOgMed
 
 fun Statsborgerskap.iNordiskLand() = Norden.values().map { it.name }.contains(this.land)
 
