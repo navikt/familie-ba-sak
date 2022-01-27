@@ -178,6 +178,7 @@ data class VurderPersonHarLovligOpphold(
                     Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.TREDJELANDSBORGER_UTEN_LOVLIG_OPPHOLD)
                 } else Evaluering.oppfylt(VilkårOppfyltÅrsak.TREDJELANDSBORGER_MED_LOVLIG_OPPHOLD)
             }
+            Medlemskap.EØS -> Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.EØS_IKKE_STØTTET_I_LØSNINGEN)
             Medlemskap.UKJENT, Medlemskap.STATSLØS -> {
                 val nåværendeOpphold = opphold.singleOrNull { it.gjeldendeNå() }
                 if (nåværendeOpphold == null || nåværendeOpphold.type == OPPHOLDSTILLATELSE.OPPLYSNING_MANGLER) {

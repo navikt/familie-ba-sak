@@ -42,6 +42,11 @@ enum class VilkårIkkeOppfyltÅrsak(val beskrivelse: String, val metrikkBeskrive
         metrikkBeskrivelse = "Mor statsløs eller mangler statsborgerskap",
         vilkår = Vilkår.LOVLIG_OPPHOLD
     ),
+    EØS_IKKE_STØTTET_I_LØSNINGEN(
+        beskrivelse = "Mor har ikke lovlig opphold - EØS borgere kan ikke automatisk vurderes.",
+        metrikkBeskrivelse = "Mor statsløs eller mangler statsborgerskap",
+        vilkår = Vilkår.LOVLIG_OPPHOLD
+    ),
     EØS_IKKE_REGISTRERT_MEDFORELDER_OG_MOR_IKKE_INNFRIDD_BOTIDSKRAV(
         beskrivelse = "Mor har ikke lovlig opphold - EØS borger. Mor er ikke registrert med arbeidsforhold. Det er ikke registrert medforelder på barnet. Mor har ikke hatt bostedsadresse i Norge i mer enn fem år.",
         metrikkBeskrivelse = "Mor EØS. Ikke arb. MF ikke reg. Mor ikke bosatt 5 år",

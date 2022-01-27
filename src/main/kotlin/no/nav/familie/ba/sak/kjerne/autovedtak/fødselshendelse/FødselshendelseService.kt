@@ -207,6 +207,7 @@ class FødselshendelseService(
         val søkerResultat = vilkårsvurdering?.personResultater?.find { it.aktør == søker?.aktør }
 
         val bosattIRiketResultat = søkerResultat?.vilkårResultater?.find { it.vilkårType == Vilkår.BOSATT_I_RIKET }
+        val lovligOppholdResultat = søkerResultat?.vilkårResultater?.find { it.vilkårType == Vilkår.LOVLIG_OPPHOLD }
         if (bosattIRiketResultat?.resultat == Resultat.IKKE_OPPFYLT && bosattIRiketResultat.evalueringÅrsaker.any {
             VilkårIkkeOppfyltÅrsak.valueOf(
                     it
@@ -216,13 +217,13 @@ class FødselshendelseService(
             return "Mor har flere bostedsadresser uten fra- og med dato"
         } else if (bosattIRiketResultat?.resultat == Resultat.IKKE_OPPFYLT) {
             return "Mor er ikke bosatt i riket."
-        } else if (søkerResultat?.vilkårResultater?.any { it.vilkårType == Vilkår.LOVLIG_OPPHOLD && it.resultat != Resultat.OPPFYLT } == true) {
-            return "Mor har ikke lovlig opphold"
+        } else if (lovligOppholdResultat?.resultat != Resultat.OPPFYLT) {
+            return lovligOppholdResultat?.begrunnelse ?: "Mor har ikke lovlig opphold"
         }
 
         persongrunnlagService.hentBarna(behandling).forEach { barn ->
             val vilkårsresultat =
-                vilkårsvurdering?.personResultater?.find { it.aktør == barn.aktør }?.vilkårResultater
+                vilkårsvurdering.personResultater.find { it.aktør == barn.aktør }?.vilkårResultater
 
             if (vilkårsresultat?.find { it.vilkårType == Vilkår.UNDER_18_ÅR }?.resultat == Resultat.IKKE_OPPFYLT) {
                 return "Barnet (fødselsdato: ${barn.fødselsdato.tilKortString()}) er over 18 år."
