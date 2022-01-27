@@ -42,7 +42,7 @@ class PersongrunnlagService(
 ) {
 
     fun mapTilRestPersonMedStatsborgerskapLand(person: Person): RestPerson {
-        val restPerson = person.tilRestPerson()
+        val restPerson = person.tilRestPerson(dødsfallData = personopplysningerService.hentDødsfall(person.aktør))
         restPerson.registerhistorikk?.statsborgerskap
             ?.forEach { lagret ->
                 val landkode = lagret.verdi
