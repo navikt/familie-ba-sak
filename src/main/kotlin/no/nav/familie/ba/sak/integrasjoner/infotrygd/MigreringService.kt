@@ -82,6 +82,8 @@ class MigreringService(
     private val logger = LoggerFactory.getLogger(MigreringService::class.java)
     private val secureLog = LoggerFactory.getLogger("secureLogger")
     private val migrertCounter = Metrics.counter("migrering.ok")
+    private val migrertAvSaksbehandler = Metrics.counter("migrering.saksbehandler")
+    private val migrertAvSaksbehandlerNotificationFeil = Metrics.counter("migrering.saksbehandler.send.feilet")
 
     @Transactional
     fun migrer(personIdent: String): MigreringResponseDto {
@@ -146,9 +148,12 @@ class MigreringService(
             if (!SikkerhetContext.erSystemKontekst() && !env!!.erDev()) {
                 logger.info("Sender manuelt trigget migrering til familie-ba-migrering")
                 Result.runCatching {
+                    migrertAvSaksbehandler.increment()
                     migreringRestClient.migrertAvSaksbehandler(personIdent, migreringResponseDto)
                 }.onFailure {
+                    // logg og fortsett siden dette ikke er kritisk
                     logger.warn("Klarte ikke sende migrert av saksbehandler til familie-ba-migrering. $migreringResponseDto")
+                    migrertAvSaksbehandlerNotificationFeil.increment()
                 }
             }
             return migreringResponseDto

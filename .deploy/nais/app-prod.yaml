@@ -80,9 +80,9 @@ spec:
         - application: familie-ef-sak
           cluster: prod-gcp
         - application: familie-tilbake
-          cluster: dev-gcp
+          cluster: prod-gcp
         - application: familie-ba-migrering
-          cluster: dev-gcp
+          cluster: prod-gcp
   replicas:
     min: 2
     max: 4
