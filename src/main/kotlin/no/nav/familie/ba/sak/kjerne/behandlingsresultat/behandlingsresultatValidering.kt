@@ -23,14 +23,14 @@ fun validerSøkerBosattIRiketTomdato(
     if (søkerBorIRiketTom == null) {
         throw FunksjonellFeil(
             "Ved behandlingsårsak \"Dødsfall Bruker\" må bosatt i riket vilkåret avsluttes " +
-                "på søkers fødselsdato, men bosatt i riket vilkåret har ingen til og med dato"
+                "dagen søker døde, men bosatt i riket vilkåret har ingen til og med dato"
         )
     }
 
     if (søkerBorIRiketTom.isAfter(LocalDate.now())) {
         throw FunksjonellFeil(
             "Ved behandlingsårsak \"Dødsfall Bruker\" må bosatt i riket vilkåret avsluttes " +
-                "på søkers fødselsdato, men til og med datoen er satt til ${søkerBorIRiketTom.tilKortString()} "
+                "dagen søker døde, men til og med datoen er satt til ${søkerBorIRiketTom.tilKortString()} "
         )
     }
 }
