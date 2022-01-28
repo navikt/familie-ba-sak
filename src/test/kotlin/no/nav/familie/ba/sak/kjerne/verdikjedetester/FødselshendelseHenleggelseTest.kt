@@ -30,7 +30,6 @@ import no.nav.familie.kontrakter.ba.infotrygd.InfotrygdSøkResponse
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.Matrikkeladresse
-import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
@@ -268,8 +267,8 @@ class FødselshendelseHenleggelseTest(
                 behandlingId = behandling!!.id,
                 oppgavetype = Oppgavetype.VurderLivshendelse,
                 beskrivelse = "Fødselshendelse: Barnet (fødselsdato: ${
-                LocalDate.parse(scenario.barna.first().fødselsdato)
-                    .tilKortString()
+                    LocalDate.parse(scenario.barna.first().fødselsdato)
+                        .tilKortString()
                 }) er ikke bosatt med mor."
             )
         }
@@ -354,59 +353,6 @@ class FødselshendelseHenleggelseTest(
                 behandlingId = revurdering!!.id,
                 oppgavetype = Oppgavetype.VurderLivshendelse,
                 beskrivelse = "Fødselshendelse: Mor mottar utvidet barnetrygd."
-            )
-        }
-    }
-
-    @Test
-    fun `Skal henlegge fødselshendelse på grunn av at mor er EØS borger (vilkårsregel)`() {
-        val søkerFødselsdato = now().minusYears(26)
-        val scenario = mockServerKlient().lagScenario(
-            RestScenario(
-                søker = RestScenarioPerson(
-                    fødselsdato = søkerFødselsdato.toString(),
-                    fornavn = "Mor",
-                    etternavn = "Søker",
-                    statsborgerskap = listOf(
-                        Statsborgerskap(
-                            land = "POL",
-                            gyldigFraOgMed = søkerFødselsdato,
-                            bekreftelsesdato = søkerFødselsdato,
-                            gyldigTilOgMed = null
-                        )
-                    )
-                ),
-                barna = listOf(
-                    RestScenarioPerson(
-                        fødselsdato = now().minusMonths(2).toString(),
-                        fornavn = "Barn",
-                        etternavn = "Barnesen",
-                    )
-                )
-            )
-        )
-
-        val behandling = behandleFødselshendelse(
-            nyBehandlingHendelse = NyBehandlingHendelse(
-                morsIdent = scenario.søker.ident!!,
-                barnasIdenter = listOf(scenario.barna.single().ident!!)
-            ),
-            behandleFødselshendelseTask = behandleFødselshendelseTask,
-            fagsakService = fagsakService,
-            behandlingService = behandlingService,
-            personidentService = personidentService,
-            vedtakService = vedtakService,
-            stegService = stegService
-        )
-
-        assertEquals(BehandlingResultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE, behandling?.resultat)
-        assertEquals(StegType.BEHANDLING_AVSLUTTET, behandling?.steg)
-
-        verify(exactly = 1) {
-            opprettTaskService.opprettOppgaveTask(
-                behandlingId = behandling!!.id,
-                oppgavetype = Oppgavetype.VurderLivshendelse,
-                beskrivelse = "Fødselshendelse: Mor har ikke lovlig opphold - EØS borgere kan ikke automatisk vurderes."
             )
         }
     }
