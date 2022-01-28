@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.behandlingsresultat.validerSøkerBosattIRiketTomdato
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
@@ -37,10 +38,18 @@ class VilkårsvurderingSteg(
                 )
             )
         }
+
+        if (behandling.opprettetÅrsak == BehandlingÅrsak.DØDSFALL_BRUKER) {
+            val vilkårsvurdering = vilkårService.hentVilkårsvurderingThrows(behandling.id)
+            validerSøkerBosattIRiketTomdato(
+                personopplysningGrunnlag = personopplysningGrunnlag,
+                vilkårsvurdering = vilkårsvurdering
+            )
+        }
+
         // midlertidig validering for helmanuell migrering
         if (behandling.erHelmanuellMigrering()) {
-            val vilkårsvurdering = vilkårService.hentVilkårsvurdering(behandling.id)
-                ?: throw IllegalStateException("Fant ikke aktiv vilkårsvurdering for behandling ${behandling.id}")
+            val vilkårsvurdering = vilkårService.hentVilkårsvurderingThrows(behandling.id)
             val finnesDeltBosted = vilkårsvurdering.personResultater.any {
                 it.vilkårResultater.filter { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.BOR_MED_SØKER }
                     .any { borMedSøker ->
