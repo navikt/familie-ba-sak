@@ -1,7 +1,7 @@
 create TABLE po_doedsfall
 (
     id                      bigint                                      PRIMARY KEY,
-    fk_po_person_id         bigint       REFERENCES PO-PERSON (id)      NOT NULL,
+    fk_po_person_id         bigint       REFERENCES PO_PERSON (id)      NOT NULL,
     versjon                 bigint       DEFAULT 0                      NOT NULL,
     doedsfall_dato          TIMESTAMP(3)                                NOT NULL,
     adresse                 VARCHAR      DEFAULT null,
