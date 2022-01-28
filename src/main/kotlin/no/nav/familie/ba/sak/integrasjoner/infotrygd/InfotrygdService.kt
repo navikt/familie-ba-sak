@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.kontrakter.ba.infotrygd.InfotrygdSøkResponse
 import no.nav.familie.kontrakter.ba.infotrygd.Sak
 import no.nav.familie.kontrakter.ba.infotrygd.Stønad
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
@@ -16,6 +17,8 @@ class InfotrygdService(
     private val personidentService: PersonidentService,
     private val personopplysningerService: PersonopplysningerService
 ) {
+
+    private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
     fun hentInfotrygdsakerForSøker(aktør: Aktør): InfotrygdSøkResponse<Sak> {
         return infotrygdBarnetrygdClient.hentSaker(listOf(aktør.aktivFødselsnummer()), emptyList())
@@ -58,5 +61,15 @@ class InfotrygdService(
 
     fun harLøpendeSakIInfotrygd(søkerIdenter: List<String>, barnasIdenter: List<String> = emptyList()): Boolean {
         return infotrygdBarnetrygdClient.harLøpendeSakIInfotrygd(søkerIdenter, barnasIdenter)
+    }
+
+    fun harSendtbrev(søkerIdenter: List<String>, brevkoder: List<InfotrygdBrevkode>): Boolean {
+        if (brevkoder.isEmpty()) {
+            return false
+        }
+
+        val infotrygdbrevrespons = infotrygdBarnetrygdClient.harNyligSendtBrevFor(søkerIdenter, brevkoder)
+        secureLogger.info("InfotrygdBrevRespons  $infotrygdbrevrespons")
+        return infotrygdbrevrespons.harSendtBrev
     }
 }
