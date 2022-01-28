@@ -5,7 +5,8 @@ metadata:
   namespace: teamfamilie
   labels:
     team: teamfamilie
-
+  annotations:
+    config.linkerd.io/terminationGracePeriodSeconds: 30
 spec:
   envFrom:
     - secret: familie-ba-sak
