@@ -6,7 +6,7 @@ metadata:
   labels:
     team: teamfamilie
   annotations:
-    config.linkerd.io/terminationGracePeriodSeconds: 30
+    config.linkerd.io/terminationGracePeriodSeconds: "30"
 spec:
   envFrom:
     - secret: familie-ba-sak
