@@ -78,6 +78,42 @@ class StatsborgerskapService(
         return grStatsborgerskap
     }
 
+    fun hentSterkesteMedlemskap(statsborgerskap: Statsborgerskap): Medlemskap? {
+        if (statsborgerskap.iNordiskLand()) {
+            return Medlemskap.NORDEN
+        }
+
+        val alleEØSLandInkludertHistoriske =
+            integrasjonClient.hentAlleEØSLand().betydninger[statsborgerskap.land] ?: emptyList()
+        var datoFra = statsborgerskap.hentFom()
+
+        val alleMedlemskap = hentMedlemskapsIntervaller(
+            alleEØSLandInkludertHistoriske,
+            statsborgerskap.hentFom(),
+            statsborgerskap.gyldigTilOgMed
+        ).fold(mutableSetOf<Medlemskap>()) { acc, dato ->
+            acc.add(
+                finnMedlemskap(
+                    statsborgerskap,
+                    alleEØSLandInkludertHistoriske,
+                    datoFra
+                )
+            )
+            datoFra = dato
+            acc
+        }
+
+        alleMedlemskap.add(
+            finnMedlemskap(
+                statsborgerskap,
+                alleEØSLandInkludertHistoriske,
+                datoFra
+            )
+        )
+
+        return finnSterkesteMedlemskap(alleMedlemskap.toList())
+    }
+
     private fun hentMedlemskapsIntervaller(
         eøsLand: List<BetydningDto>,
         fra: LocalDate?,
