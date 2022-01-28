@@ -5,10 +5,12 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.BrevBegrunnelserTestConfig
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.hentGyldigeBegrunnelserForVedtaksperiode
 import no.nav.familie.kontrakter.felles.objectMapper
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestReporter
 import java.io.File
 
+@Disabled
 class BrevBegrunnelseTest {
     @Test
     fun test(testReporter: TestReporter) {
