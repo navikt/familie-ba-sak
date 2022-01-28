@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.integrasjoner.pdl
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.Doedsfall
+import no.nav.familie.ba.sak.integrasjoner.pdl.internal.DødsfallData
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PdlDødsfallResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PdlHentPersonRelasjonerResponse
@@ -82,7 +83,8 @@ class PdlRestClient(
                             bostedsadresser = it.bostedsadresse,
                             statsborgerskap = it.statsborgerskap,
                             opphold = it.opphold,
-                            sivilstander = it.sivilstand
+                            sivilstander = it.sivilstand,
+                            dødsfall = hentDødsfallDataFraListeMedDødsfall(it.doedsfall)
                         )
                     }
                 }.fold(
@@ -116,6 +118,16 @@ class PdlRestClient(
                 )
             }
         }
+    }
+
+    private fun hentDødsfallDataFraListeMedDødsfall(doedsfall: List<Doedsfall>): DødsfallData {
+        return DødsfallResponse(
+            erDød = doedsfall.isNotEmpty(),
+            dødsdato = doedsfall.filter { it.doedsdato != null }
+                .map { it.doedsdato }
+                .firstOrNull()
+        )
+            .let { DødsfallData(erDød = it.erDød, dødsdato = it.dødsdato) }
     }
 
     @Cacheable("dødsfall", cacheManager = "shortCache")

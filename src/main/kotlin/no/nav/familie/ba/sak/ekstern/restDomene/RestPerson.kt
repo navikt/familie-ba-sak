@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.ekstern.restDomene
 
-import no.nav.familie.ba.sak.integrasjoner.pdl.internal.DødsfallData
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
@@ -19,10 +18,10 @@ data class RestPerson(
     val kjønn: Kjønn,
     val registerhistorikk: RestRegisterhistorikk? = null,
     val målform: Målform,
-    val dødsfallDato: String? = null
+    val dødsfallDato: LocalDate? = null
 )
 
-fun Person.tilRestPerson(dødsfallData: DødsfallData? = null) = RestPerson(
+fun Person.tilRestPerson() = RestPerson(
     type = this.type,
     fødselsdato = this.fødselsdato,
     personIdent = this.aktør.aktivFødselsnummer(),
@@ -30,5 +29,5 @@ fun Person.tilRestPerson(dødsfallData: DødsfallData? = null) = RestPerson(
     kjønn = this.kjønn,
     registerhistorikk = this.tilRestRegisterhistorikk(),
     målform = this.målform,
-    dødsfallDato = if (dødsfallData != null && dødsfallData.erDød) dødsfallData.dødsdato else null
+    dødsfallDato = this.dødsfallDato
 )

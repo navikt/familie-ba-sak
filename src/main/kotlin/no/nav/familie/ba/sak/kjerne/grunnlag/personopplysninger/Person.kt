@@ -93,6 +93,9 @@ data class Person(
     // Workaround før Hibernatebug https://hibernate.atlassian.net/browse/HHH-1718
     @Fetch(value = FetchMode.SUBSELECT)
     var sivilstander: List<GrSivilstand> = emptyList(),
+
+    @Column(name = "doesfall_dato")
+    var dødsfallDato: LocalDate? = null
 ) : BaseEntitet() {
 
     override fun toString(): String {

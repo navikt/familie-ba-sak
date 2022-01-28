@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.integrasjoner.pdl
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.integrasjoner.pdl.internal.Doedsfall
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.DødsfallData
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.ForelderBarnRelasjonMaskert
@@ -48,11 +49,9 @@ class PersonopplysningerService(
                 adressebeskyttelseGradering = hentAdressebeskyttelseSomSystembruker(it.first)
             )
         }.toSet()
-        val dødsfall = hentDødsfall(aktør = aktør)
         return personinfo.copy(
             forelderBarnRelasjon = forelderBarnRelasjon,
             forelderBarnRelasjonMaskert = forelderBarnRelasjonMaskert,
-            dødsfall = dødsfall
         )
     }
 
@@ -66,6 +65,10 @@ class PersonopplysningerService(
 
     fun hentDødsfall(aktør: Aktør): DødsfallData {
         val doedsfall = pdlRestClient.hentDødsfall(aktør)
+        return hentDødsfallDataFraListeMedDødsfall(doedsfall)
+    }
+
+    private fun hentDødsfallDataFraListeMedDødsfall(doedsfall: List<Doedsfall>): DødsfallData {
         return DødsfallResponse(
             erDød = doedsfall.isNotEmpty(),
             dødsdato = doedsfall.filter { it.doedsdato != null }

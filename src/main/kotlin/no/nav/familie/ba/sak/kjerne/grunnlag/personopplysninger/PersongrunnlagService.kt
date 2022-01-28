@@ -27,6 +27,7 @@ import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublis
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDate
 
 @Service
 class PersongrunnlagService(
@@ -42,7 +43,7 @@ class PersongrunnlagService(
 ) {
 
     fun mapTilRestPersonMedStatsborgerskapLand(person: Person): RestPerson {
-        val restPerson = person.tilRestPerson(dødsfallData = personopplysningerService.hentDødsfall(person.aktør))
+        val restPerson = person.tilRestPerson()
         restPerson.registerhistorikk?.statsborgerskap
             ?.forEach { lagret ->
                 val landkode = lagret.verdi
@@ -234,7 +235,8 @@ class PersongrunnlagService(
             aktør = aktør,
             navn = personinfo.navn ?: "",
             kjønn = personinfo.kjønn ?: Kjønn.UKJENT,
-            målform = målform
+            målform = målform,
+            dødsfallDato = LocalDate.parse(personinfo.dødsfall?.dødsdato) // TODO kanskje fikse på
         ).also { person ->
             person.opphold = personinfo.opphold?.map { GrOpphold.fraOpphold(it, person) } ?: emptyList()
             person.statsborgerskap =

@@ -41,4 +41,7 @@ query($ident: ID!) {person: hentPerson(ident: $ident) {
         gyldigFraOgMed
         type
     }
+    doedsfall {
+        doedsdato
+    }
 }}
