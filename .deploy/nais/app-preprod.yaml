@@ -21,6 +21,7 @@ spec:
     path: /internal/health
     initialDelay: 30
     failureThreshold: 10
+  preStopHookPath: /internal/stop
   prometheus:
     enabled: true
     path: /internal/prometheus
@@ -29,11 +30,11 @@ spec:
   gcp: # Database
     sqlInstances:
       - type: POSTGRES_12 # IF This is changed, all data will be lost. Read on nais.io how to upgrade
-        tier: db-custom-4-3840
+        tier: db-custom-1-3840
         name: familie-ba-sak
         autoBackupTime: "02:00"
         diskAutoresize: true
-        highAvailability: true
+        highAvailability: false
         databases:
           - name: familie-ba-sak
             envVarPrefix: DB
