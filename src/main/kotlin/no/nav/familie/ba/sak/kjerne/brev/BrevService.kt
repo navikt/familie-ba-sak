@@ -134,7 +134,8 @@ class BrevService(
                         // det slik, da uppercase kan oppleves som skrikende i et brev som skal være skånsomt
                         navnAvdode = data.grunnlag.søker.navn.storForbokstavIHvertOrd(),
                         virkningstidspunkt = hentVirkningstidspunkt(
-                            vedtaksperiodeService.hentOpphørsperioder(vedtak.behandling)
+                            opphørsperioder = vedtaksperiodeService.hentOpphørsperioder(vedtak.behandling),
+                            behandlingId = vedtak.behandling.id
                         )
                     )
                 )
