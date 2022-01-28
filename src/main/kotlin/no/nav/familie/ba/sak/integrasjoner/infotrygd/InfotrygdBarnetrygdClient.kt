@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.integrasjoner.infotrygd
 
+import no.nav.commons.foedselsnummer.FoedselsNr
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.ekstern.bisys.BisysUtvidetBarnetrygdResponse
 import no.nav.familie.ba.sak.task.OpprettTaskService.Companion.RETRY_BACKOFF_5000MS
@@ -133,6 +134,43 @@ class InfotrygdBarnetrygdClient(
         }
     }
 
+    fun harNyligSendtBrevFor(søkersIdenter: List<String>, brevkoder: List<InfotrygdBrevkode>): SendtBrevResponse {
+        val uri = URI.create("$clientUri/infotrygd/barnetrygd/brev")
+        return try {
+            postForEntity(
+                uri, SendtBrevRequest(søkersIdenter, brevkoder.map { it.kode })
+            )
+        } catch (ex: Exception) {
+            loggFeil(ex, uri)
+            throw RuntimeException(
+                "Sjekk mot infotrygd for å sjekke om brev er sendt feilet . Gav feil: ${ex.message}",
+                ex
+            )
+        }
+    }
+
+    class SendtBrevRequest(
+        val personidenter: List<String>,
+        val brevkoder: List<String>
+    )
+
+    class SendtBrevResponse(
+        val harSendtBrev: Boolean,
+        val listeBrevhendelser: List<InfotrygdHendelse> = emptyList()
+    )
+
+    data class InfotrygdHendelse(
+        val id: Long,
+        val personKey: Long,
+        val saksblokk: String,
+        val saksnummer: String,
+        val aksjonsdatoSeq: Long,
+        val tekstKode1: String,
+        val fnr: FoedselsNr,
+        val tkNr: String,
+        val region: String
+    )
+
     private fun loggFeil(ex: Exception, uri: URI) {
         when (ex) {
             is HttpClientErrorException -> secureLogger.error(
@@ -148,4 +186,15 @@ class InfotrygdBarnetrygdClient(
 
         private val logger: Logger = LoggerFactory.getLogger(InfotrygdBarnetrygdClient::class.java)
     }
+}
+
+enum class InfotrygdBrevkode(val kode: String) {
+    BREV_BATCH_OPPHØR_SMÅBARNSTILLLEGG("BA04"),
+    BREV_BATCH_INNVILGET_SMÅBARNSTILLEGG("BA05"),
+    BREV_BATCH_OMREGNING_BARN_18_ÅR("BA37"),
+    BREV_BATCH_OMREGNING_BARN_6_ÅR("BA18"),
+    BREV_MANUELL_OPPHØR_SMÅBARNSTILLLEGG("B001"),
+    BREV_MANUELL_INNVILGET_SMÅBARNSTILLEGG("B002"),
+    BREV_MANUELL_OMREGNING_BARN_18_ÅR("B003"),
+    BREV_MANUELL_OMREGNING_BARN_6_ÅR("BA19")
 }

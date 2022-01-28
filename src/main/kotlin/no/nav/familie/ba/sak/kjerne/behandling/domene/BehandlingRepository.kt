@@ -94,4 +94,7 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
         gammelSats: Int,
         månedÅrForEndring: YearMonth
     ): List<Long>
+
+    @Query("SELECT new kotlin.Pair(b.opprettetÅrsak, count(*)) from Behandling b group by b.opprettetÅrsak")
+    fun finnAntallBehandlingerPerÅrsak(): List<Pair<BehandlingÅrsak, Long>>
 }
