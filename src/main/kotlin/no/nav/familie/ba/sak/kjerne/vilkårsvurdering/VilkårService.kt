@@ -170,7 +170,7 @@ class VilkårService(
         val behandling = vilkårsvurdering.behandling
 
         if (restNyttVilkår.vilkårType == Vilkår.UTVIDET_BARNETRYGD) {
-            validerFørLeggeTilUtvidetBarnetrygd(behandling, restNyttVilkår)
+            validerFørLeggeTilUtvidetBarnetrygd(behandling, restNyttVilkår, vilkårsvurdering)
 
             behandlingService.oppdaterBehandlingstema(
                 behandling = behandling,
@@ -194,9 +194,10 @@ class VilkårService(
 
     private fun validerFørLeggeTilUtvidetBarnetrygd(
         behandling: Behandling,
-        restNyttVilkår: RestNyttVilkår
+        restNyttVilkår: RestNyttVilkår,
+        vilkårsvurdering: Vilkårsvurdering
     ) {
-        if (!behandling.erManuellMigrering()) {
+        if (!behandling.erManuellMigrering() && !harUtvidetVilkår(vilkårsvurdering)) {
             throw FunksjonellFeil(
                 melding = "${restNyttVilkår.vilkårType.beskrivelse} kan ikke legges til for behandling ${behandling.id} " +
                     "med behandlingType ${behandling.type.visningsnavn}",
@@ -216,6 +217,9 @@ class VilkårService(
             )
         }
     }
+
+    private fun harUtvidetVilkår(vilkårsvurdering: Vilkårsvurdering): Boolean =
+        vilkårsvurdering.personResultater.find { it.erSøkersResultater() }?.vilkårResultater?.any { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD } == true
 
     fun initierVilkårsvurderingForBehandling(
         behandling: Behandling,

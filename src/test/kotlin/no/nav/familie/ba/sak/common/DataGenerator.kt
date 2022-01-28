@@ -151,7 +151,8 @@ fun lagBehandling(
     årsak: BehandlingÅrsak = BehandlingÅrsak.SØKNAD,
     skalBehandlesAutomatisk: Boolean = false,
     førsteSteg: StegType = FØRSTE_STEG,
-    resultat: BehandlingResultat = BehandlingResultat.IKKE_VURDERT
+    resultat: BehandlingResultat = BehandlingResultat.IKKE_VURDERT,
+    underkategori: BehandlingUnderkategori = BehandlingUnderkategori.ORDINÆR
 ) =
     Behandling(
         id = nesteBehandlingId(),
@@ -159,7 +160,7 @@ fun lagBehandling(
         skalBehandlesAutomatisk = skalBehandlesAutomatisk,
         type = behandlingType,
         kategori = behandlingKategori,
-        underkategori = BehandlingUnderkategori.ORDINÆR,
+        underkategori = underkategori,
         opprettetÅrsak = årsak,
         resultat = resultat
     ).also {
