@@ -41,6 +41,7 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
@@ -921,6 +922,67 @@ class VilkårServiceTest(
                 "${behandling.id} med behandlingType ${behandling.type.visningsnavn}",
             exception.message
         )
+    }
+
+    @Test
+    fun `skal kunne legge til utvidet barnetrygd vilkår for ordinær behandling dersom det er utvidet på vilkårsvurderingen allerede`() {
+        val fnr = randomFnr()
+        val barnFnr = randomFnr()
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(
+            lagBehandling(
+                fagsak = fagsak,
+                behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                underkategori = BehandlingUnderkategori.UTVIDET,
+                årsak = BehandlingÅrsak.SØKNAD,
+            )
+        )
+        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
+            behandling.id,
+            fnr, listOf(barnFnr),
+            LocalDate.now().minusYears(1),
+            personidentService.hentOgLagreAktør(fnr, true),
+            personidentService.hentOgLagreAktørIder(listOf(barnFnr), true)
+        )
+        persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
+        val vilkårsvurdering = vilkårService.initierVilkårsvurderingForBehandling(behandling, false)
+        assertEquals(
+            1,
+            vilkårsvurdering.personResultater.find { it.erSøkersResultater() }?.vilkårResultater?.filter { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD }?.size
+        )
+
+        val utvidetVilkår =
+            vilkårsvurdering.personResultater.find { it.erSøkersResultater() }?.vilkårResultater?.single { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
+        vilkårService.endreVilkår(
+            behandlingId = behandling.id,
+            vilkårId = utvidetVilkår!!.id,
+            restPersonResultat = RestPersonResultat(
+                personIdent = fnr,
+                vilkårResultater = listOf(
+                    RestVilkårResultat(
+                        id = utvidetVilkår.id,
+                        vilkårType = utvidetVilkår.vilkårType,
+                        resultat = Resultat.OPPFYLT,
+                        periodeFom = LocalDate.now().minusYears(2),
+                        periodeTom = null,
+                        begrunnelse = "",
+                        endretAv = "",
+                        endretTidspunkt = LocalDateTime.now(),
+                        behandlingId = behandling.id
+                    )
+                )
+            )
+        )
+
+        assertDoesNotThrow {
+            vilkårService.postVilkår(
+                behandling.id,
+                RestNyttVilkår(
+                    personIdent = fnr,
+                    vilkårType = Vilkår.UTVIDET_BARNETRYGD
+                )
+            )
+        }
     }
 
     @Test
