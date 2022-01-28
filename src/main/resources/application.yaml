@@ -5,8 +5,11 @@ server:
   servlet:
     context-path: /
   port: 8089
+  shutdown: graceful
 
 spring:
+  lifecycle:
+    timeout-per-shutdown-phase: 20s
   autoconfigure.exclude: org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration
   main:
     allow-bean-definition-overriding: true
