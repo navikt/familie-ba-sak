@@ -30,6 +30,7 @@ class InfotrygdBarnetrygdClientTest : AbstractSpringIntegrationTestDev() {
     val løpendeBarnetrygdURL = "/api/infotrygd/barnetrygd/lopende-barnetrygd"
     val sakerURL = "/api/infotrygd/barnetrygd/saker"
     val stønaderURL = "/api/infotrygd/barnetrygd/stonad?historikk=false"
+    val brevURL = "/api/infotrygd/barnetrygd/brev"
 
     @Autowired
     @Qualifier("jwtBearer")
@@ -159,5 +160,23 @@ class InfotrygdBarnetrygdClientTest : AbstractSpringIntegrationTestDev() {
         assertThrows<HttpClientErrorException> {
             client.harLøpendeSakIInfotrygd(ClientMocks.søkerFnr.toList(), ClientMocks.barnFnr.toList())
         }
+    }
+
+    @Test
+    fun `harNyligSendtBrevFor skal returnerer true for personIdent`() {
+        wireMockServer.stubFor(
+            post(brevURL).willReturn(
+                okJson(objectMapper.writeValueAsString(InfotrygdBarnetrygdClient.SendtBrevResponse(true, emptyList())))
+            )
+        )
+
+        val søkersIdenter = ClientMocks.søkerFnr.toList()
+
+        val harNyligSendtBrev = client.harNyligSendtBrevFor(
+            søkersIdenter,
+            listOf(InfotrygdBrevkode.BREV_BATCH_INNVILGET_SMÅBARNSTILLEGG)
+        )
+
+        Assertions.assertEquals(true, harNyligSendtBrev.harSendtBrev)
     }
 }
