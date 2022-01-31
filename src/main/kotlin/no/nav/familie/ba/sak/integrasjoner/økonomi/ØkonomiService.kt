@@ -50,7 +50,7 @@ class ØkonomiService(
                 e.statusCode == HttpStatus.CONFLICT &&
                 featureToggleService.isEnabled(FeatureToggleConfig.TEKNISK_IVERKSETT_MOT_OPPDRAG_ALLEREDE_SENDT)
             ) {
-                // Mulighet å bypasse 409 feil. 
+                // Mulighet å bypasse 409 feil.
                 logger.info("Bypasset feil med HttpKode 409 ved iverksetting mot økonomi for fagsak ${utbetalingsoppdrag.saksnummer}")
                 return
             }
