@@ -17,6 +17,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
@@ -43,6 +44,7 @@ class StegService(
     private val skyggesakService: SkyggesakService,
     private val tilgangService: TilgangService,
     private val infotrygdFeedService: InfotrygdFeedService,
+    private val settPåVentService: SettPåVentService,
 ) {
 
     private val stegSuksessMetrics: Map<StegType, Counter> = initStegMetrikker("suksess")
@@ -352,6 +354,8 @@ class StegService(
                 )
             }
 
+            validerBehandlingIkkeSattPåVent(behandling, behandlingSteg)
+
             if (behandling.steg == SISTE_STEG) {
                 error("Behandling med id ${behandling.id} er avsluttet og stegprosessen kan ikke gjenåpnes")
             }
@@ -419,6 +423,19 @@ class StegService(
             }
 
             throw exception
+        }
+    }
+
+    private fun validerBehandlingIkkeSattPåVent(
+        behandling: Behandling,
+        behandlingSteg: BehandlingSteg<*>
+    ) {
+        if (settPåVentService.finnAktivSettPåVentPåBehandling(behandlingId = behandling.id) != null) {
+            throw Feil(
+                "${SikkerhetContext.hentSaksbehandlerNavn()} prøver å utføre steg " +
+                    behandlingSteg.stegType() +
+                    " på behandling ${behandling.id} som er på vent."
+            )
         }
     }
 
