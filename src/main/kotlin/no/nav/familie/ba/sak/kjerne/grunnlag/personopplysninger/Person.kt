@@ -31,6 +31,7 @@ import javax.persistence.Id
 import javax.persistence.JoinColumn
 import javax.persistence.ManyToOne
 import javax.persistence.OneToMany
+import javax.persistence.OneToOne
 import javax.persistence.SequenceGenerator
 import javax.persistence.Table
 
@@ -94,8 +95,8 @@ data class Person(
     @Fetch(value = FetchMode.SUBSELECT)
     var sivilstander: List<GrSivilstand> = emptyList(),
 
-    @Column(name = "doesfall_dato")
-    var dødsfallDato: LocalDate? = null
+    @OneToOne(mappedBy = "person", cascade = [CascadeType.ALL], fetch = FetchType.LAZY, optional = true)
+    var dødsfall: Dødsfall? = null
 ) : BaseEntitet() {
 
     override fun toString(): String {
