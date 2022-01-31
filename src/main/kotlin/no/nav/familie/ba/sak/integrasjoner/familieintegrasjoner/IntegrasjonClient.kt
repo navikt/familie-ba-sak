@@ -92,7 +92,7 @@ class IntegrasjonClient(
     }
 
     @Retryable(
-        value = [IntegrasjonException::class],
+        value = [Exception::class],
         maxAttempts = 3,
         backoff = Backoff(delayExpression = RETRY_BACKOFF_5000MS)
     )
@@ -116,7 +116,7 @@ class IntegrasjonClient(
     }
 
     @Retryable(
-        value = [IntegrasjonException::class],
+        value = [Exception::class],
         maxAttempts = 3,
         backoff = Backoff(delayExpression = RETRY_BACKOFF_5000MS)
     )
@@ -296,7 +296,7 @@ class IntegrasjonClient(
     }
 
     @Retryable(
-        value = [IntegrasjonException::class],
+        value = [Exception::class],
         maxAttempts = 3,
         backoff = Backoff(delayExpression = RETRY_BACKOFF_5000MS)
     )
@@ -328,7 +328,7 @@ class IntegrasjonClient(
     }
 
     @Retryable(
-        value = [IntegrasjonException::class],
+        value = [Exception::class],
         maxAttempts = 3,
         backoff = Backoff(delayExpression = RETRY_BACKOFF_5000MS)
     )
