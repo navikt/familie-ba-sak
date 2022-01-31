@@ -236,7 +236,6 @@ class PersongrunnlagService(
             navn = personinfo.navn ?: "",
             kjønn = personinfo.kjønn ?: Kjønn.UKJENT,
             målform = målform,
-            dødsfallDato = LocalDate.parse(personinfo.dødsfall?.dødsdato) // TODO kanskje fikse på
         ).also { person ->
             person.opphold = personinfo.opphold?.map { GrOpphold.fraOpphold(it, person) } ?: emptyList()
             person.statsborgerskap =
@@ -246,6 +245,7 @@ class PersongrunnlagService(
                     .map { GrBostedsadresse.fraBostedsadresse(it, person) }
                     .toMutableList()
             person.sivilstander = personinfo.sivilstander.map { GrSivilstand.fraSivilstand(it, person) }
+            person.dødsfall = lagDødsfall(person = person, dødsfallDatoFraPdl = LocalDate.parse(personinfo.dødsfall?.dødsdato), dødsfallAdresseFraPdl = personinfo.kontaktinformasjonForDoedsbo)
         }
     }
 
