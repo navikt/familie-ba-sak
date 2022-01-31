@@ -50,7 +50,7 @@ fun kjørStegprosessForRevurdering(
     behandlingÅrsak: BehandlingÅrsak = BehandlingÅrsak.SØKNAD,
     overstyrendeVilkårsvurdering: Vilkårsvurdering,
     behandlingstype: BehandlingType,
-    
+
     vilkårsvurderingService: VilkårsvurderingService,
     stegService: StegService,
     vedtaksperiodeService: VedtaksperiodeService,
