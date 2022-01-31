@@ -230,7 +230,7 @@ class DokumentServiceTest(
             dokumentService.genererBrevForVedtak(vedtak)
         }
         assertEquals(
-            "Klarte ikke generere vedtaksbrev: Ikke tillatt å generere brev etter at behandlingen er sendt fra beslutter",
+            "Klarte ikke generere vedtaksbrev på behandling med behandlingsid ${behandlingEtterVedtakBesluttet.id}: Ikke tillatt å generere brev etter at behandlingen er sendt fra beslutter",
             feil.message
         )
     }
