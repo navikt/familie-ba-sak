@@ -29,5 +29,5 @@ fun Person.tilRestPerson() = RestPerson(
     kjønn = this.kjønn,
     registerhistorikk = this.tilRestRegisterhistorikk(),
     målform = this.målform,
-    dødsfallDato = this.dødsfallDato
+    dødsfallDato = this.dødsfall?.dødsfallDato
 )

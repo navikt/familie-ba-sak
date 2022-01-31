@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Dødsfall
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
@@ -28,7 +29,8 @@ data class PersonInfo(
     val sivilstander: List<Sivilstand> = emptyList(),
     val opphold: List<Opphold>? = emptyList(),
     val statsborgerskap: List<Statsborgerskap>? = emptyList(),
-    val dødsfall: DødsfallData? = null
+    val dødsfall: DødsfallData? = null,
+    val kontaktinformasjonForDoedsbo: PdlKontaktinformasjonForDødsbo? = null
 )
 
 fun List<Bostedsadresse>.filtrerUtKunNorskeBostedsadresser() =
@@ -66,6 +68,12 @@ data class Personident(
 data class DødsfallData(
     val erDød: Boolean,
     val dødsdato: String?
+)
+
+data class PdlKontaktinformasjonForDødsbo(
+    val adresselinje1: String,
+    val poststedsnavn: String,
+    val postnummer: String
 )
 
 data class VergeData(val harVerge: Boolean)
