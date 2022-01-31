@@ -66,11 +66,11 @@ class VelgFagSystemService(
     }
 
     internal fun morEllerBarnHarLøpendeSakIInfotrygd(morsIdent: String, barnasIdenter: List<String>): Boolean {
-        val morsIdenter = personidentService.hentIdenter(personIdent = morsIdent, historikk = false)
+        val morsIdenter = personidentService.hentIdenter(personIdent = morsIdent, historikk = true)
             .filter { it.gruppe == "FOLKEREGISTERIDENT" }
             .map { it.ident }
         val alleBarnasIdenter = barnasIdenter.flatMap {
-            personidentService.hentIdenter(personIdent = it, historikk = false)
+            personidentService.hentIdenter(personIdent = it, historikk = true)
                 .filter { identinfo -> identinfo.gruppe == "FOLKEREGISTERIDENT" }
                 .map { identinfo -> identinfo.ident }
         }
