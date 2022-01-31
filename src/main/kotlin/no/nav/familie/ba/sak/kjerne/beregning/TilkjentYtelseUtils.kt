@@ -225,6 +225,10 @@ object TilkjentYtelseUtils {
         return oppdatertListeMedAndeler
     }
 
+    /**
+     * Slår sammen andeler for barn når beløpet er nedjuster til 0kr som er blitt splittet av
+     * for eksempel satsendring.
+     */
     private fun skalAndelerSlåsSammen(
         førsteAndel: AndelTilkjentYtelse,
         nesteAndel: AndelTilkjentYtelse
