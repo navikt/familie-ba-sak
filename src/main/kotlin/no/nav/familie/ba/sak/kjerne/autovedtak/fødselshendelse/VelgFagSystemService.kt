@@ -61,8 +61,7 @@ class VelgFagSystemService(
     }
 
     internal fun morHarSakerMenIkkeLøpendeIInfotrygd(morsIdent: String): Boolean {
-        val stønader = infotrygdService.hentInfotrygdstønaderForSøker(morsIdent, historikk = true).bruker
-        if (stønader.any { it.opphørtFom == INFOTRYGD_NULLDATO }) throw IllegalStateException("Mor har løpende stønad i Infotrygd")
+        val stønader = infotrygdService.hentInfotrygdstønaderForSøker(morsIdent, historikk = false).bruker
         return stønader.isNotEmpty()
     }
 
