@@ -2,9 +2,11 @@ package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger
 
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PdlKontaktinformasjonForDødsbo
+import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.time.LocalDate
 import javax.persistence.Column
 import javax.persistence.Entity
+import javax.persistence.EntityListeners
 import javax.persistence.GeneratedValue
 import javax.persistence.GenerationType
 import javax.persistence.Id
@@ -13,6 +15,7 @@ import javax.persistence.OneToOne
 import javax.persistence.SequenceGenerator
 import javax.persistence.Table
 
+@EntityListeners(RollestyringMotDatabase::class)
 @Entity(name = "Dødsfall")
 @Table(name = "po_doedsfall")
 data class Dødsfall(
