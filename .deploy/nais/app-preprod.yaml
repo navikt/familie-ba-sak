@@ -5,8 +5,6 @@ metadata:
   namespace: teamfamilie
   labels:
     team: teamfamilie
-  annotations:
-    config.linkerd.io/wait-before-exit-seconds: "30"
 spec:
   envFrom:
     - secret: familie-ba-sak
