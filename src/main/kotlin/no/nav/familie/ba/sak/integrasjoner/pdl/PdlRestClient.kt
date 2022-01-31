@@ -84,7 +84,8 @@ class PdlRestClient(
                             statsborgerskap = it.statsborgerskap,
                             opphold = it.opphold,
                             sivilstander = it.sivilstand,
-                            dødsfall = hentDødsfallDataFraListeMedDødsfall(it.doedsfall)
+                            dødsfall = hentDødsfallDataFraListeMedDødsfall(it.doedsfall),
+                            kontaktinformasjonForDoedsbo = it.kontaktinformasjonForDoedsbo.firstOrNull()
                         )
                     }
                 }.fold(
