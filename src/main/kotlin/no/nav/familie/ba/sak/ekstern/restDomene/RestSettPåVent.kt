@@ -4,7 +4,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVent
 import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentÅrsak
 import java.time.LocalDate
 
-open class RestSettPåVent(
+data class RestSettPåVent(
     open val frist: LocalDate,
     open val årsak: SettPåVentÅrsak,
 )
