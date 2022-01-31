@@ -58,4 +58,11 @@ query($ident: ID!) {person: hentPerson(ident: $ident) {
     doedsfall {
         doedsdato
     }
+    kontaktinformasjonForDoedsbo(historikk: false) {
+        adresse {
+            adresselinje1
+            poststedsnavn
+            postnummer
+        }
+    }
 }}
