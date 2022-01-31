@@ -78,7 +78,6 @@ management:
           include: db
     shutdown:
       enabled: true
-    health.show-details: always
   endpoints.web:
     exposure.include: info, health, metrics, prometheus, shutdown
     base-path: "/internal"
