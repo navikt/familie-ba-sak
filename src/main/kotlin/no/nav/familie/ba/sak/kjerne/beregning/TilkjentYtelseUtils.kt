@@ -232,6 +232,7 @@ object TilkjentYtelseUtils {
         førsteAndel.stønadTom.sisteDagIInneværendeMåned()
             .erDagenFør(nesteAndel.stønadFom.førsteDagIInneværendeMåned()) &&
             førsteAndel.prosent == BigDecimal(0) && nesteAndel.prosent == BigDecimal(0) &&
+            førsteAndel.sats == nesteAndel.sats &&
             førsteAndel.kalkulertUtbetalingsbeløp == nesteAndel.kalkulertUtbetalingsbeløp &&
             førsteAndel.endretUtbetalingAndeler.isNotEmpty() &&
             førsteAndel.endretUtbetalingAndeler.singleOrNull() == nesteAndel.endretUtbetalingAndeler.singleOrNull()

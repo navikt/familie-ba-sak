@@ -116,6 +116,7 @@ data class UtvidetBarnetrygdGenerator(
     ): Boolean =
         førsteAndel.stønadTom.sisteDagIInneværendeMåned()
             .erDagenFør(nesteAndel.stønadFom.førsteDagIInneværendeMåned()) &&
+            førsteAndel.sats == nesteAndel.sats &&
             førsteAndel.kalkulertUtbetalingsbeløp == nesteAndel.kalkulertUtbetalingsbeløp
 
     private fun kombinerTidslinjer(
