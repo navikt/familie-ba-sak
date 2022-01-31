@@ -48,7 +48,7 @@ class VelgFagsystemIntegrasjonTest(
         val nyBehandling = NyBehandlingHendelse(søkerFnr, listOf(søkerFnr))
         val fagsystemUtfallInfotrygd = FagsystemUtfall.SAKER_I_INFOTRYGD_MEN_IKKE_LØPENDE_UTBETALINGER
 
-        every { infotrygdBarnetrygdClient.hentStønader(any(), any(), historikk = true) } returns InfotrygdSøkResponse(
+        every { infotrygdBarnetrygdClient.hentStønader(any(), any(), any()) } returns InfotrygdSøkResponse(
             listOf(Stønad(opphørtFom = "012020")), emptyList()
         )
         assertEquals(FagsystemRegelVurdering.SEND_TIL_INFOTRYGD, velgFagSystemService.velgFagsystem(nyBehandling))
