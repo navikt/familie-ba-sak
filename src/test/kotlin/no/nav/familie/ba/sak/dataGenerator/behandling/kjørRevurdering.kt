@@ -97,15 +97,15 @@ fun kjørStegprosessForRevurdering(
     if (tilSteg == StegType.VURDER_TILBAKEKREVING) return behandlingEtterSimuleringSteg
 
     val behandlingEtterSendTilBeslutter =
-        håndterSendtTIlBeslutterSteg(
-            behandlingEtterSimuleringSteg,
-            vedtakService,
-            vedtaksperiodeService,
-            stegService,
-            persongrunnlagService,
-            andelTilkjentYtelseRepository,
-            endretUtbetalingAndelService,
-            hentSanityBegrunnelser()
+        håndterSendtTilBeslutterSteg(
+            behandlingEtterSimuleringSteg = behandlingEtterSimuleringSteg,
+            vedtakService = vedtakService,
+            vedtaksperiodeService = vedtaksperiodeService,
+            stegService = stegService,
+            persongrunnlagService = persongrunnlagService,
+            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
+            endretUtbetalingAndelService = endretUtbetalingAndelService,
+            sanityBegrunnelser = hentSanityBegrunnelser()
         )
     if (tilSteg == StegType.SEND_TIL_BESLUTTER) return behandlingEtterSendTilBeslutter
 
@@ -154,7 +154,7 @@ private fun håndterSøknadSteg(
     )
 )
 
-private fun håndterSendtTIlBeslutterSteg(
+private fun håndterSendtTilBeslutterSteg(
     behandlingEtterSimuleringSteg: Behandling,
     vedtakService: VedtakService,
     vedtaksperiodeService: VedtaksperiodeService,
