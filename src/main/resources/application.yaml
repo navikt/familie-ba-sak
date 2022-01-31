@@ -69,14 +69,25 @@ funksjonsbrytere:
 
 management:
   endpoint:
+    health:
+      show-details: always
+      group:
+        readyness:
+          include: db
+        liveness:
+          include: db
     shutdown:
       enabled: true
     health.show-details: always
   endpoints.web:
-    exposure.include: info, health, metrics, prometheus, stop
+    exposure.include: info, health, metrics, prometheus, shutdown
     base-path: "/internal"
   metrics.export.prometheus.enabled: true
   health:
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true
     db:
       enabled: true
   metrics:
