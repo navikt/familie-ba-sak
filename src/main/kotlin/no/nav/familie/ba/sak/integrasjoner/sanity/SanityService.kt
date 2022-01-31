@@ -7,7 +7,6 @@ import org.springframework.core.env.Environment
 import org.springframework.retry.annotation.Backoff
 import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Service
-import java.io.IOException
 
 @Service
 class SanityService(
@@ -17,7 +16,7 @@ class SanityService(
 ) {
 
     @Retryable(
-        value = [IOException::class],
+        value = [Exception::class],
         maxAttempts = 3,
         backoff = Backoff(delayExpression = RETRY_BACKOFF_5000MS),
     )
