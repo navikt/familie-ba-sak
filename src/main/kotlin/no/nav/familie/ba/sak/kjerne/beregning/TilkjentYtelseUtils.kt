@@ -230,9 +230,11 @@ object TilkjentYtelseUtils {
         nesteAndel: AndelTilkjentYtelse
     ): Boolean =
         førsteAndel.stønadTom.sisteDagIInneværendeMåned()
-            .erDagenFør(nesteAndel.stønadFom.førsteDagIInneværendeMåned()) && førsteAndel.prosent == BigDecimal(0) && nesteAndel.prosent == BigDecimal(
-            0
-        ) && førsteAndel.endretUtbetalingAndeler.isNotEmpty() && førsteAndel.endretUtbetalingAndeler.singleOrNull() == nesteAndel.endretUtbetalingAndeler.singleOrNull()
+            .erDagenFør(nesteAndel.stønadFom.førsteDagIInneværendeMåned()) &&
+            førsteAndel.prosent == BigDecimal(0) && nesteAndel.prosent == BigDecimal(0) &&
+            førsteAndel.kalkulertUtbetalingsbeløp == nesteAndel.kalkulertUtbetalingsbeløp &&
+            førsteAndel.endretUtbetalingAndeler.isNotEmpty() &&
+            førsteAndel.endretUtbetalingAndeler.singleOrNull() == nesteAndel.endretUtbetalingAndeler.singleOrNull()
 
     private fun beregnBeløpsperioder(
         overlappendePerioderesultatSøker: PeriodeResultat,
