@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak
 
-import no.nav.familie.ba.sak.config.ApplicationConfig
 import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.SpringBootApplication
 
@@ -8,5 +7,5 @@ import org.springframework.boot.autoconfigure.SpringBootApplication
 class FamilieBaSakApplication
 
 fun main(args: Array<String>) {
-    SpringApplication(ApplicationConfig::class.java)
+    SpringApplication.run(FamilieBaSakApplication::class.java, *args)
 }
