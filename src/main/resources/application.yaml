@@ -76,10 +76,8 @@ management:
           include: db
         liveness:
           include: db
-    shutdown:
-      enabled: true
   endpoints.web:
-    exposure.include: info, health, metrics, prometheus, shutdown
+    exposure.include: info, health, metrics, prometheus
     base-path: "/internal"
   metrics.export.prometheus.enabled: true
   health:
