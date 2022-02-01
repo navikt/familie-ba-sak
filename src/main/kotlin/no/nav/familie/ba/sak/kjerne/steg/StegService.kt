@@ -30,6 +30,7 @@ import no.nav.familie.ba.sak.task.dto.IverksettingTaskDTO
 import no.nav.familie.prosessering.error.RekjørSenereException
 import org.hibernate.exception.ConstraintViolationException
 import org.slf4j.LoggerFactory
+import org.springframework.core.NestedExceptionUtils
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
@@ -361,12 +362,12 @@ class StegService(
             }
 
             if (behandlingSteg.stegType().erSaksbehandlerSteg() && behandlingSteg.stegType()
-                .kommerEtter(behandling.steg)
+                    .kommerEtter(behandling.steg)
             ) {
                 error(
                     "${SikkerhetContext.hentSaksbehandlerNavn()} prøver å utføre steg '${
-                    behandlingSteg.stegType()
-                        .displayName()
+                        behandlingSteg.stegType()
+                            .displayName()
                     }', men behandlingen er på steg '${behandling.steg.displayName()}'"
                 )
             }
@@ -403,26 +404,27 @@ class StegService(
             }
             return returBehandling
         } catch (exception: Exception) {
-            when (exception) {
+            val mostSpecificException = NestedExceptionUtils.getMostSpecificCause(exception)
+            when (mostSpecificException) {
                 is RekjørSenereException -> {
                     stegFunksjonellFeilMetrics[behandlingSteg.stegType()]?.increment()
-                    logger.info("Steg '${behandlingSteg.stegType()}' har trigget rekjøring senere på behandling $behandling. Årsak: ${exception.årsak}")
+                    logger.info("Steg '${behandlingSteg.stegType()}' har trigget rekjøring senere på behandling $behandling. Årsak: ${mostSpecificException.årsak}")
                 }
                 is FunksjonellFeil -> {
                     stegFunksjonellFeilMetrics[behandlingSteg.stegType()]?.increment()
-                    logger.info("Håndtering av stegtype '${behandlingSteg.stegType()}' feilet på grunn av funksjonell feil på behandling $behandling. Melding: ${exception.melding}")
+                    logger.info("Håndtering av stegtype '${behandlingSteg.stegType()}' feilet på grunn av funksjonell feil på behandling $behandling. Melding: ${mostSpecificException.melding}")
                 }
                 else -> {
                     stegFeiletMetrics[behandlingSteg.stegType()]?.increment()
                     logger.error("Håndtering av stegtype '${behandlingSteg.stegType()}' feilet på behandling $behandling.")
                     secureLogger.error(
                         "Håndtering av stegtype '${behandlingSteg.stegType()}' feilet på behandling $behandling.",
-                        exception
+                        mostSpecificException
                     )
                 }
             }
 
-            throw exception
+            throw mostSpecificException
         }
     }
 
