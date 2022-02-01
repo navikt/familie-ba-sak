@@ -17,6 +17,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.beregnUtbetalingsperioderUtenKlassifisering
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
@@ -63,7 +64,7 @@ private const val NULLDATO = "000000"
 class MigreringService(
     private val behandlingRepository: BehandlingRepository,
     private val behandlingService: BehandlingService,
-    private val env: EnvService?,
+    private val env: EnvService,
     private val fagsakService: FagsakService,
     private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
     private val pdlRestClient: PdlRestClient,
@@ -92,7 +93,9 @@ class MigreringService(
 
             val løpendeSak = hentLøpendeSakFraInfotrygd(personIdent)
 
-            kastFeilDersomSakIkkeErOrdinær(løpendeSak)
+            val underkategori = kastFeilEllerHentUnderkategori(løpendeSak)
+            kastfeilHvisIkkeEnDelytelseIInfotrygd(løpendeSak)
+
             secureLog.info("Migrering: fant løpende sak for $personIdent sak=${løpendeSak.id} stønad=${løpendeSak.stønad?.id}")
 
             val barnasIdenter = finnBarnMedLøpendeStønad(løpendeSak)
@@ -114,6 +117,7 @@ class MigreringService(
                         behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
                         behandlingÅrsak = BehandlingÅrsak.MIGRERING,
                         skalBehandlesAutomatisk = true,
+                        underkategori = underkategori,
                         barnasIdenter = barnasIdenter
                     )
                 )
@@ -240,10 +244,22 @@ class MigreringService(
         return ikkeOpphørteSaker.first()
     }
 
-    private fun kastFeilDersomSakIkkeErOrdinær(sak: Sak) {
-        if (!(sak.valg == "OR" && sak.undervalg == "OS")) {
-            kastOgTellMigreringsFeil(MigreringsfeilType.IKKE_STØTTET_SAKSTYPE)
+    private fun kastFeilEllerHentUnderkategori(sak: Sak): BehandlingUnderkategori {
+
+        return when {
+            (sak.valg == "OR" && sak.undervalg == "OS") -> {
+                BehandlingUnderkategori.ORDINÆR
+            }
+            (sak.valg == "UT" && sak.undervalg == "EF" && !env.erProd()) -> {
+                BehandlingUnderkategori.UTVIDET
+            }
+            else -> {
+                kastOgTellMigreringsFeil(MigreringsfeilType.IKKE_STØTTET_SAKSTYPE)
+            }
         }
+    }
+
+    private fun kastfeilHvisIkkeEnDelytelseIInfotrygd(sak: Sak) {
         when (sak.stønad!!.delytelse.filter { it.tom == null }.size) {
             1 -> return
             else -> {
