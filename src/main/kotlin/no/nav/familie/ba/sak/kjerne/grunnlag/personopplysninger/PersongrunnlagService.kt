@@ -27,7 +27,6 @@ import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublis
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.time.LocalDate
 
 @Service
 class PersongrunnlagService(
@@ -245,7 +244,7 @@ class PersongrunnlagService(
                     .map { GrBostedsadresse.fraBostedsadresse(it, person) }
                     .toMutableList()
             person.sivilstander = personinfo.sivilstander.map { GrSivilstand.fraSivilstand(it, person) }
-            person.dødsfall = lagDødsfall(person = person, dødsfallDatoFraPdl = LocalDate.parse(personinfo.dødsfall?.dødsdato), dødsfallAdresseFraPdl = personinfo.kontaktinformasjonForDoedsbo)
+            person.dødsfall = lagDødsfall(person = person, dødsfallDatoFraPdl = personinfo.dødsfall?.dødsdato, dødsfallAdresseFraPdl = personinfo.kontaktinformasjonForDoedsbo)
         }
     }
 

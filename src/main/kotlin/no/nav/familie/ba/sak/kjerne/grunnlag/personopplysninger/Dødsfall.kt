@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger
 
-import no.nav.familie.ba.sak.common.BaseEntitet
+import no.nav.familie.ba.sak.ekstern.restDomene.RestRegisteropplysning
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PdlKontaktinformasjonForDødsbo
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.time.LocalDate
@@ -39,7 +39,7 @@ data class Dødsfall(
 
     @Column(name = "doedsfall_poststed", nullable = true)
     val dødsfallPoststed: String?,
-) : BaseEntitet() {
+) {
     fun hentAdresseToString(): String { return """$dødsfallAdresse, $dødsfallPostnummer $dødsfallPoststed""" }
 
     fun tilRestRegisteropplysning() = RestRegisteropplysning(
@@ -49,10 +49,13 @@ data class Dødsfall(
     )
 }
 
-fun lagDødsfall(person: Person, dødsfallDatoFraPdl: LocalDate, dødsfallAdresseFraPdl: PdlKontaktinformasjonForDødsbo?): Dødsfall {
+fun lagDødsfall(person: Person, dødsfallDatoFraPdl: String?, dødsfallAdresseFraPdl: PdlKontaktinformasjonForDødsbo?): Dødsfall? {
+    if (dødsfallDatoFraPdl == null || dødsfallDatoFraPdl == "") {
+        return null
+    }
     return Dødsfall(
         person = person,
-        dødsfallDato = dødsfallDatoFraPdl,
+        dødsfallDato = LocalDate.parse(dødsfallDatoFraPdl),
         dødsfallAdresse = dødsfallAdresseFraPdl?.adresselinje1,
         dødsfallPostnummer = dødsfallAdresseFraPdl?.postnummer,
         dødsfallPoststed = dødsfallAdresseFraPdl?.poststedsnavn
