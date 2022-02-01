@@ -43,7 +43,6 @@ class PdlRestClient(
 
     @Cacheable("personopplysninger", cacheManager = "shortCache")
     fun hentPerson(aktør: Aktør, personInfoQuery: PersonInfoQuery): PersonInfo {
-
         val pdlPersonRequest = PdlPersonRequest(
             variables = PdlPersonRequestVariables(aktør.aktivFødselsnummer()),
             query = personInfoQuery.graphQL
@@ -53,6 +52,7 @@ class PdlRestClient(
             pdlPersonRequest,
             httpHeaders()
         )
+
         return feilsjekkOgReturnerData(
             ident = aktør.aktivFødselsnummer(),
             pdlResponse = pdlResponse
@@ -95,6 +95,7 @@ class PdlRestClient(
             query = hentGraphqlQuery("doedsfall")
         )
         val pdlResponse: PdlBaseResponse<PdlDødsfallResponse> = postForEntity(pdlUri, pdlPersonRequest, httpHeaders())
+
         return feilsjekkOgReturnerData(
             ident = aktør.aktivFødselsnummer(),
             pdlResponse = pdlResponse
@@ -110,6 +111,7 @@ class PdlRestClient(
             query = hentGraphqlQuery("verge")
         )
         val pdlResponse: PdlBaseResponse<PdlVergeResponse> = postForEntity(pdlUri, pdlPersonRequest, httpHeaders())
+
         return feilsjekkOgReturnerData(
             ident = aktør.aktivFødselsnummer(),
             pdlResponse = pdlResponse
@@ -119,13 +121,13 @@ class PdlRestClient(
     }
 
     fun hentStatsborgerskapUtenHistorikk(aktør: Aktør): List<Statsborgerskap> {
-
         val pdlPersonRequest = PdlPersonRequest(
             variables = PdlPersonRequestVariables(aktør.aktivFødselsnummer()),
             query = hentGraphqlQuery("statsborgerskap-uten-historikk")
         )
         val pdlResponse: PdlBaseResponse<PdlStatsborgerskapResponse> =
             postForEntity(pdlUri, pdlPersonRequest, httpHeaders())
+
         return feilsjekkOgReturnerData(
             ident = aktør.aktivFødselsnummer(),
             pdlResponse = pdlResponse
@@ -140,6 +142,7 @@ class PdlRestClient(
             query = hentGraphqlQuery("opphold-uten-historikk")
         )
         val pdlResponse: PdlBaseResponse<PdlOppholdResponse> = postForEntity(pdlUri, pdlPersonRequest, httpHeaders())
+
         return feilsjekkOgReturnerData(
             ident = aktør.aktivFødselsnummer(),
             pdlResponse = pdlResponse
@@ -155,12 +158,14 @@ class PdlRestClient(
         )
         val pdlResponse: PdlBaseResponse<PdlUtenlandskAdressseResponse> =
             postForEntity(pdlUri, pdlPersonRequest, httpHeaders())
-        return feilsjekkOgReturnerData(
+
+        val bostedsadresser = feilsjekkOgReturnerData(
             ident = aktør.aktivFødselsnummer(),
             pdlResponse = pdlResponse
         ) {
-            it.person!!.bostedsadresse.firstOrNull { bostedsadresse -> bostedsadresse.utenlandskAdresse != null }?.utenlandskAdresse
+            it.person!!.bostedsadresse
         }
+        return bostedsadresser.firstOrNull { bostedsadresse -> bostedsadresse.utenlandskAdresse != null }?.utenlandskAdresse
     }
 
     /**
@@ -174,6 +179,7 @@ class PdlRestClient(
         )
         val pdlResponse: PdlBaseResponse<PdlHentPersonRelasjonerResponse> =
             postForEntity(pdlUri, pdlPersonRequest, httpHeaders())
+
         return feilsjekkOgReturnerData(
             ident = aktør.aktivFødselsnummer(),
             pdlResponse = pdlResponse

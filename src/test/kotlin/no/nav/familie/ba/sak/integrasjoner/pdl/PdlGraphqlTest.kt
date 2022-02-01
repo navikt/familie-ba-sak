@@ -1,7 +1,9 @@
 package no.nav.familie.ba.sak.integrasjoner.pdl
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlAdressebeskyttelseResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlBaseResponse
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlHentPersonRelasjonerResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlHentPersonResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlNavn
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -43,8 +45,8 @@ class PdlGraphqlTest {
     }
 
     @Test
-    fun testForelderBsrnRelasjon() {
-        val resp = mapper.readValue<PdlBaseResponse<PdlHentPersonResponse>>(
+    fun testForelderBarnRelasjon() {
+        val resp = mapper.readValue<PdlBaseResponse<PdlHentPersonRelasjonerResponse>>(
             File(getFile("pdl/pdlForelderBarnRelasjonResponse.json"))
         )
         assertThat(resp.data.person!!.forelderBarnRelasjon.first().relatertPersonsRolle).isEqualTo(
@@ -71,7 +73,7 @@ class PdlGraphqlTest {
 
     @Test
     fun testAdressebeskyttelse() {
-        val resp = mapper.readValue<PdlBaseResponse<PdlHentPersonResponse>>(
+        val resp = mapper.readValue<PdlBaseResponse<PdlAdressebeskyttelseResponse>>(
             File(getFile("pdl/pdlAdressebeskyttelseResponse.json"))
         )
         assertThat(resp.data.person!!.adressebeskyttelse.first().gradering).isEqualTo(ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG)
@@ -83,6 +85,7 @@ class PdlGraphqlTest {
             mapper.readValue<PdlBaseResponse<PdlHentPersonResponse>>(File(getFile("pdl/pdlPersonIkkeFunnetResponse.json")))
         assertThat(resp.harFeil()).isTrue
         assertThat(resp.errorMessages()).contains("Fant ikke person", "Ikke tilgang")
+        assertThat(resp.errors!!.any { it.extensions?.notFound() == true }).isTrue
     }
 
     @Test

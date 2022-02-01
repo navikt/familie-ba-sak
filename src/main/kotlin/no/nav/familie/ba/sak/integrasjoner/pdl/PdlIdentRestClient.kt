@@ -47,6 +47,7 @@ class PdlIdentRestClient(
             pdlPersonRequest,
             httpHeaders()
         )
+
         return feilsjekkOgReturnerData(
             ident = personIdent,
             pdlResponse = pdlResponse
