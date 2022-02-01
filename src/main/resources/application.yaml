@@ -5,8 +5,11 @@ server:
   servlet:
     context-path: /
   port: 8089
+  shutdown: graceful
 
 spring:
+  lifecycle:
+    timeout-per-shutdown-phase: 20s
   autoconfigure.exclude: org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration
   main:
     allow-bean-definition-overriding: true
@@ -65,12 +68,23 @@ funksjonsbrytere:
       enabled: true
 
 management:
-  endpoint.health.show-details: always
+  endpoint:
+    health:
+      show-details: always
+      group:
+        readyness:
+          include: db
+        liveness:
+          include: db
   endpoints.web:
     exposure.include: info, health, metrics, prometheus
     base-path: "/internal"
   metrics.export.prometheus.enabled: true
   health:
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true
     db:
       enabled: true
   metrics:
