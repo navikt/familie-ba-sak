@@ -95,7 +95,7 @@ data class Person(
     @Fetch(value = FetchMode.SUBSELECT)
     var sivilstander: MutableList<GrSivilstand> = mutableListOf(),
 
-    @OneToOne(mappedBy = "person", cascade = [CascadeType.ALL], fetch = FetchType.LAZY, optional = true)
+    @OneToOne(mappedBy = "person", cascade = [CascadeType.ALL], fetch = FetchType.EAGER, optional = true)
     var dødsfall: Dødsfall? = null
 ) : BaseEntitet() {
 
