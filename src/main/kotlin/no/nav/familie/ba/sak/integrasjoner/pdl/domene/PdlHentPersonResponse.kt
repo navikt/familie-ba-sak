@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.integrasjoner.pdl.internal
+package no.nav.familie.ba.sak.integrasjoner.pdl.domene
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
@@ -9,13 +9,7 @@ import no.nav.familie.kontrakter.felles.personopplysning.Opphold
 import no.nav.familie.kontrakter.felles.personopplysning.Sivilstand
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 
-data class PdlHentPersonResponse(
-    val data: PdlPerson,
-    override val errors: List<PdlError>?
-) :
-    PdlBaseResponse(errors)
-
-data class PdlPerson(val person: PdlPersonData?)
+data class PdlHentPersonResponse(val person: PdlPersonData?)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class PdlPersonData(
@@ -34,9 +28,6 @@ data class PdlPersonData(
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class PdlFødselsDato(val foedselsdato: String?)
-
-@JsonIgnoreProperties(ignoreUnknown = true)
-data class PdlError(val message: String)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class PdlNavn(

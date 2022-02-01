@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.integrasjoner.pdl
 
 import com.github.tomakehurst.wiremock.client.WireMock
 import io.mockk.every
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
@@ -17,6 +16,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestOperations
 import java.net.URI
 import java.time.LocalDate
@@ -114,7 +114,13 @@ internal class PersonopplysningerServiceTest(
 
     @Test
     fun `hentadressebeskyttelse feiler`() {
-        assertThrows<Feil> { personopplysningerService.hentAdressebeskyttelseSomSystembruker(tilAktør(ID_MOR)) }
+        assertThrows<HttpClientErrorException> {
+            personopplysningerService.hentAdressebeskyttelseSomSystembruker(
+                tilAktør(
+                    ID_MOR
+                )
+            )
+        }
     }
 
     companion object {

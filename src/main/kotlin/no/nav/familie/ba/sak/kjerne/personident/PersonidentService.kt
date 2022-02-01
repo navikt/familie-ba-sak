@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.kjerne.personident
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlIdentRestClient
-import no.nav.familie.ba.sak.integrasjoner.pdl.internal.IdentInformasjon
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.IdentInformasjon
 import no.nav.familie.kontrakter.felles.PersonIdent
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
