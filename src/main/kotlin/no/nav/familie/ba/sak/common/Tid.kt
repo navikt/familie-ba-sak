@@ -163,7 +163,7 @@ fun lagOgValiderPeriodeFraVilkår(
             )
         }
         else -> {
-            throw Feil("Ugyldig periode. Periode må ha t.o.m.-dato eller være et avslag uten datoer.")
+            throw FunksjonellFeil("Ugyldig periode. Periode må ha t.o.m.-dato eller være et avslag uten datoer.")
         }
     }
 }

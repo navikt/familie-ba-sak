@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.integrasjoner.pdl.internal
+package no.nav.familie.ba.sak.integrasjoner.pdl.domene
 
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.DeserializationContext
