@@ -359,7 +359,7 @@ class MigreringService(
             kastOgTellMigreringsFeil(
                 MigreringsfeilType.BEREGNET_BELØP_FOR_UTBETALING_ULIKT_BELØP_FRA_INFOTRYGD,
                 MigreringsfeilType.BEREGNET_BELØP_FOR_UTBETALING_ULIKT_BELØP_FRA_INFOTRYGD.beskrivelse +
-                    "($førsteUtbetalingsbeløp ≠ $beløpFraInfotrygd)"
+                    "($førsteUtbetalingsbeløp(ba-sak) ≠ $beløpFraInfotrygd(infotrygd))"
             )
         }
     }
