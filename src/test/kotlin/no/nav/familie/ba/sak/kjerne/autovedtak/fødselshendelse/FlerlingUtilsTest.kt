@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse
 import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.tilAktør
-import no.nav.familie.ba.sak.integrasjoner.pdl.internal.ForelderBarnRelasjon
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import org.junit.jupiter.api.Assertions.assertEquals
