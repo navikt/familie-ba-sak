@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType.MIGRERING_FRA_INFOTRYGD
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -472,8 +473,13 @@ class VilkårService(
                 vilkårsvurdering = vilkårsvurdering,
                 aktør = person.aktør
             )
+            // NB Dette må gjøres om når vi skal begynne å migrere EØS-saker
+            val ytelseType = if (person.type == PersonType.SØKER) when (vilkårsvurdering.behandling.underkategori) {
+                BehandlingUnderkategori.UTVIDET -> YtelseType.UTVIDET_BARNETRYGD
+                BehandlingUnderkategori.ORDINÆR -> YtelseType.ORDINÆR_BARNETRYGD
+            } else YtelseType.ORDINÆR_BARNETRYGD
 
-            val vilkårTyperForPerson = Vilkår.hentVilkårFor(person.type)
+            val vilkårTyperForPerson = Vilkår.hentVilkårFor(person.type, ytelseType = ytelseType)
 
             val vilkårResultater = vilkårTyperForPerson.map { vilkår ->
                 val fom = if (vilkår.gjelderAlltidFraBarnetsFødselsdato()) person.fødselsdato else null

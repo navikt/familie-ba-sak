@@ -128,7 +128,7 @@ class MigreringService(
                 vilkårsvurderingService.oppdater(this)
             } ?: kastOgTellMigreringsFeil(MigreringsfeilType.MANGLER_VILKÅRSVURDERING)
 
-            val behandlingEtterVilkårsvurdering = stegService.håndterVilkårsvurdering(behandling)
+            val behandlingEtterVilkårsvurdering = stegService.håndterVilkårsvurdering(behandling) // Se funksjonen lagVilkårsvurderingForMigreringsbehandling i VilkårService
 
             val førsteUtbetalingsperiode = finnFørsteUtbetalingsperiode(behandling.id)
 
