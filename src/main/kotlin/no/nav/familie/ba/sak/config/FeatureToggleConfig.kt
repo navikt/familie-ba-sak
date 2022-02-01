@@ -113,6 +113,9 @@ class FeatureToggleConfig(
 
         const val TEKNISK_VEDLIKEHOLD_HENLEGGELSE = "familie-ba-sak.teknisk-vedlikehold-henleggelse.tilgangsstyring"
 
+        const val TEKNISK_IVERKSETT_MOT_OPPDRAG_ALLEREDE_SENDT =
+            "familie-ba-sak.teknisk-iverksett-mot-oppdrag-allerede-sendt"
+
         private val logger = LoggerFactory.getLogger(FeatureToggleConfig::class.java)
     }
 }
