@@ -8,19 +8,26 @@ import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.FagsystemRegelVurdering.SEND_TIL_BA
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.FagsystemRegelVurdering.SEND_TIL_INFOTRYGD
-import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.FagsystemUtfall.DAGLIG_KVOTE
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.FagsystemUtfall.FAGSAK_UTEN_IVERKSATTE_BEHANDLINGER_I_BA_SAK
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.FagsystemUtfall.IVERKSATTE_BEHANDLINGER_I_BA_SAK
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.FagsystemUtfall.LØPENDE_SAK_I_INFOTRYGD
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.FagsystemUtfall.MOR_IKKE_GYLDIG_MEDLEMSKAP_FOR_AUTOMATISK_VURDERING
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.FagsystemUtfall.MOR_IKKE_NORSK_STATSBORGER
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.FagsystemUtfall.SAKER_I_INFOTRYGD_MEN_IKKE_LØPENDE_UTBETALINGER
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.FagsystemUtfall.STANDARDUTFALL_INFOTRYGD
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.FagsystemUtfall.STØTTET_I_BA_SAK
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.FagsystemUtfall.values
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Medlemskap.EØS
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Medlemskap.NORDEN
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Medlemskap.STATSLØS
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Medlemskap.TREDJELANDSBORGER
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Medlemskap.UKJENT
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.StatsborgerskapService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import org.slf4j.LoggerFactory
@@ -35,7 +42,8 @@ class VelgFagSystemService(
     private val personidentService: PersonidentService,
     private val behandlingService: BehandlingService,
     private val personopplysningerService: PersonopplysningerService,
-    private val featureToggleService: FeatureToggleService
+    private val featureToggleService: FeatureToggleService,
+    private val statsborgerskapService: StatsborgerskapService
 ) {
 
     val utfallForValgAvFagsystem = mutableMapOf<FagsystemUtfall, Counter>()
@@ -85,7 +93,22 @@ class VelgFagSystemService(
         return gjeldendeStatsborgerskap.land == "NOR"
     }
 
-    fun velgFagsystem(nyBehandlingHendelse: NyBehandlingHendelse): FagsystemRegelVurdering {
+    internal fun harMorGyldigStatsborgerskapForAutomatiskVurdering(morsAktør: Aktør): Boolean {
+        val gjeldendeStatsborgerskap = personopplysningerService.hentGjeldendeStatsborgerskap(morsAktør)
+        val medlemskap = statsborgerskapService.hentSterkesteMedlemskap(statsborgerskap = gjeldendeStatsborgerskap)
+
+        secureLogger.info(
+            "Gjeldende statsborgerskap for ${morsAktør.aktivFødselsnummer()}=" +
+                "(${gjeldendeStatsborgerskap.land}, bekreftelsesdato=${gjeldendeStatsborgerskap.bekreftelsesdato}, gyldigFom=${gjeldendeStatsborgerskap.gyldigFraOgMed}, gyldigTom=${gjeldendeStatsborgerskap.gyldigTilOgMed}), " +
+                "medlemskap=$medlemskap"
+        )
+        return when (medlemskap) {
+            NORDEN, TREDJELANDSBORGER, STATSLØS -> true
+            EØS, UKJENT, null -> false
+        }
+    }
+
+    fun velgFagsystem(nyBehandlingHendelse: NyBehandlingHendelse): Pair<FagsystemRegelVurdering, FagsystemUtfall> {
         val morsAktør = personidentService.hentOgLagreAktør(nyBehandlingHendelse.morsIdent)
 
         val fagsak = fagsakService.hent(morsAktør)
@@ -110,12 +133,20 @@ class VelgFagSystemService(
                 SAKER_I_INFOTRYGD_MEN_IKKE_LØPENDE_UTBETALINGER,
                 SEND_TIL_INFOTRYGD
             )
-            !harMorGyldigNorskstatsborger(morsAktør) -> Pair(
+            !featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_TREDJELANDSBORGERE_AUTOMATISK) && !harMorGyldigNorskstatsborger(
+                morsAktør
+            ) -> Pair(
                 MOR_IKKE_NORSK_STATSBORGER,
                 SEND_TIL_INFOTRYGD
             )
+            featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_TREDJELANDSBORGERE_AUTOMATISK) && !harMorGyldigStatsborgerskapForAutomatiskVurdering(
+                morsAktør
+            ) -> Pair(
+                MOR_IKKE_GYLDIG_MEDLEMSKAP_FOR_AUTOMATISK_VURDERING,
+                SEND_TIL_INFOTRYGD
+            )
             kanBehandleINyttSystem() -> Pair(
-                DAGLIG_KVOTE,
+                STØTTET_I_BA_SAK,
                 SEND_TIL_BA
             )
 
@@ -124,7 +155,7 @@ class VelgFagSystemService(
 
         secureLogger.info("Sender fødselshendelse for ${nyBehandlingHendelse.morsIdent} til $fagsystem med utfall $fagsystemUtfall")
         utfallForValgAvFagsystem[fagsystemUtfall]?.increment()
-        return fagsystem
+        return Pair(fagsystem, fagsystemUtfall)
     }
 
     private fun kanBehandleINyttSystem(): Boolean {
@@ -153,6 +184,7 @@ enum class FagsystemUtfall(val beskrivelse: String) {
     FAGSAK_UTEN_IVERKSATTE_BEHANDLINGER_I_BA_SAK("Mor har fagsak uten iverksatte behandlinger"),
     SAKER_I_INFOTRYGD_MEN_IKKE_LØPENDE_UTBETALINGER("Mor har saker i infotrygd, men ikke løpende utbetalinger"),
     MOR_IKKE_NORSK_STATSBORGER("Mor har ikke gyldig norsk statsborgerskap"),
-    DAGLIG_KVOTE("Daglig kvote er ikke nådd"),
+    MOR_IKKE_GYLDIG_MEDLEMSKAP_FOR_AUTOMATISK_VURDERING("Mor har ikke gyldig medlemskap for automatisk vurdering"),
+    STØTTET_I_BA_SAK("Person kan automatisk vurderes i ba-sak"),
     STANDARDUTFALL_INFOTRYGD("Ingen av de tidligere reglene slo til, sender til Infotrygd")
 }

@@ -34,8 +34,8 @@ class MorHarJobbetINorgeSiste5ÅrTest {
                     arbeidsgiverId = null,
                     arbeidsgiverType = null
                 )
-            } ?: emptyList()
-            person.sivilstander = listOf(GrSivilstand(type = SIVILSTAND.GIFT, person = person))
+            }?.toMutableList() ?: mutableListOf()
+            person.sivilstander = mutableListOf(GrSivilstand(type = SIVILSTAND.GIFT, person = person))
         }
     }
 

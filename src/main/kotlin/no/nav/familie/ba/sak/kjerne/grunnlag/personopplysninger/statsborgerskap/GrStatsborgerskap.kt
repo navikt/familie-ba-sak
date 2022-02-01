@@ -3,12 +3,13 @@ package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap
 import com.fasterxml.jackson.annotation.JsonIgnore
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
-import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.erInnenfor
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegisteropplysning
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Medlemskap
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
+import java.time.LocalDate
 import javax.persistence.Column
 import javax.persistence.Embedded
 import javax.persistence.Entity
@@ -51,6 +52,11 @@ data class GrStatsborgerskap(
     val person: Person
 ) : BaseEntitet() {
 
+    fun gjeldendeNå(): Boolean {
+        if (gyldigPeriode == null) return true
+        return gyldigPeriode.erInnenfor(LocalDate.now())
+    }
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
@@ -74,27 +80,26 @@ data class GrStatsborgerskap(
         tom = this.gyldigPeriode?.tom,
         verdi = this.landkode
     )
-
-    companion object {
-
-        fun fraStatsborgerskap(statsborgerskap: Statsborgerskap, person: Person) =
-            GrStatsborgerskap(
-                gyldigPeriode = DatoIntervallEntitet(
-                    fom = statsborgerskap.gyldigFraOgMed,
-                    tom = statsborgerskap.gyldigTilOgMed
-                ),
-                landkode = statsborgerskap.land,
-                person = person
-            )
-        // TODO: Håndtere medlemsskap
-    }
 }
 
 fun Statsborgerskap.fom() = this.gyldigFraOgMed ?: this.bekreftelsesdato
 
-fun List<Statsborgerskap>.sisteStatsborgerskap(): Statsborgerskap? {
-    if (this.none { it.fom() != null } && this.size > 1) throw Feil("Bruker har flere statsborgerskap uten gyldigFraOgMed eller bekreftelsesdato")
+fun List<GrStatsborgerskap>.filtrerGjeldendeNå(): List<GrStatsborgerskap> {
+    return this.filter { it.gjeldendeNå() }
+}
 
-    return if (this.size == 1) this.firstOrNull()
-    else this.sortedBy { it.fom() }.lastOrNull()
+fun finnNåværendeMedlemskap(statsborgerskap: List<GrStatsborgerskap>?): List<Medlemskap> =
+    statsborgerskap?.filtrerGjeldendeNå()?.map { it.medlemskap } ?: emptyList()
+
+fun finnSterkesteMedlemskap(medlemskap: List<Medlemskap>): Medlemskap? {
+    return with(medlemskap) {
+        when {
+            contains(Medlemskap.NORDEN) -> Medlemskap.NORDEN
+            contains(Medlemskap.EØS) -> Medlemskap.EØS
+            contains(Medlemskap.TREDJELANDSBORGER) -> Medlemskap.TREDJELANDSBORGER
+            contains(Medlemskap.STATSLØS) -> Medlemskap.STATSLØS
+            contains(Medlemskap.UKJENT) -> Medlemskap.UKJENT
+            else -> null
+        }
+    }
 }

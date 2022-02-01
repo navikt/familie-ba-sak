@@ -11,11 +11,9 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
-@Disabled
 class LovligOppholdVilkårTest {
 
     @Test
@@ -48,14 +46,16 @@ class LovligOppholdVilkårTest {
     fun `Lovlig opphold vurdert på bakgrunn av status for statsløs søker`() {
         var evaluering = vilkår.vurderVilkår(
             statsløsPerson.copy().apply {
-                opphold = listOf(GrOpphold(gyldigPeriode = null, type = OPPHOLDSTILLATELSE.MIDLERTIDIG, person = this))
+                opphold =
+                    mutableListOf(GrOpphold(gyldigPeriode = null, type = OPPHOLDSTILLATELSE.MIDLERTIDIG, person = this))
             }
         ).evaluering
         assertThat(evaluering.resultat).isEqualTo(Resultat.OPPFYLT)
 
         evaluering = vilkår.vurderVilkår(
             ukjentStatsborger.copy().apply {
-                opphold = listOf(GrOpphold(gyldigPeriode = null, type = OPPHOLDSTILLATELSE.MIDLERTIDIG, person = this))
+                opphold =
+                    mutableListOf(GrOpphold(gyldigPeriode = null, type = OPPHOLDSTILLATELSE.MIDLERTIDIG, person = this))
             }
         ).evaluering
         assertThat(evaluering.resultat).isEqualTo(Resultat.OPPFYLT)
@@ -63,7 +63,13 @@ class LovligOppholdVilkårTest {
         evaluering = vilkår.vurderVilkår(
             statsløsPerson.copy().apply {
                 opphold =
-                    listOf(GrOpphold(gyldigPeriode = null, type = OPPHOLDSTILLATELSE.OPPLYSNING_MANGLER, person = this))
+                    mutableListOf(
+                        GrOpphold(
+                            gyldigPeriode = null,
+                            type = OPPHOLDSTILLATELSE.OPPLYSNING_MANGLER,
+                            person = this
+                        )
+                    )
             }
         ).evaluering
         assertThat(evaluering.resultat).isEqualTo(Resultat.IKKE_OPPFYLT)
@@ -73,12 +79,12 @@ class LovligOppholdVilkårTest {
     fun `Ikke lovlig opphold dersom utenfor gyldig periode`() {
         var evaluering = vilkår.vurderVilkår(
             tredjelandsborger.copy(
-                statsborgerskap = listOf(
+                statsborgerskap = mutableListOf(
                     GrStatsborgerskap(
                         landkode = "ANG", medlemskap = Medlemskap.TREDJELANDSBORGER, person = tredjelandsborger
                     )
                 ),
-                opphold = listOf(
+                opphold = mutableListOf(
                     GrOpphold(
                         gyldigPeriode = DatoIntervallEntitet(
                             fom = LocalDate.now().minusYears(10),
@@ -93,7 +99,7 @@ class LovligOppholdVilkårTest {
 
         evaluering = vilkår.vurderVilkår(
             statsløsPerson.copy().apply {
-                opphold = listOf(
+                opphold = mutableListOf(
                     GrOpphold(
                         gyldigPeriode = DatoIntervallEntitet(
                             fom = LocalDate.now().minusYears(10),
@@ -111,12 +117,12 @@ class LovligOppholdVilkårTest {
     fun `Lovlig opphold dersom status med gjeldende periode`() {
         var evaluering = vilkår.vurderVilkår(
             tredjelandsborger.copy(
-                statsborgerskap = listOf(
+                statsborgerskap = mutableListOf(
                     GrStatsborgerskap(
                         landkode = "ANG", medlemskap = Medlemskap.TREDJELANDSBORGER, person = tredjelandsborger
                     )
                 ),
-                opphold = listOf(
+                opphold = mutableListOf(
                     GrOpphold(
                         gyldigPeriode = DatoIntervallEntitet(
                             fom = LocalDate.now().minusYears(10),
@@ -138,7 +144,7 @@ class LovligOppholdVilkårTest {
 
         evaluering = vilkår.vurderVilkår(
             statsløsPerson.copy().apply {
-                opphold = listOf(
+                opphold = mutableListOf(
                     GrOpphold(
                         gyldigPeriode = DatoIntervallEntitet(
                             fom = LocalDate.now().minusYears(10),
@@ -167,12 +173,18 @@ class LovligOppholdVilkårTest {
 
     private fun faktaPerson(oppholdstillatelse: OPPHOLDSTILLATELSE, periode: DatoIntervallEntitet?): Person {
         return tredjelandsborger.copy(
-            statsborgerskap = listOf(
+            statsborgerskap = mutableListOf(
                 GrStatsborgerskap(
                     landkode = "ANG", medlemskap = Medlemskap.TREDJELANDSBORGER, person = tredjelandsborger
                 )
             ),
-            opphold = listOf(GrOpphold(gyldigPeriode = periode, type = oppholdstillatelse, person = tredjelandsborger))
+            opphold = mutableListOf(
+                GrOpphold(
+                    gyldigPeriode = periode,
+                    type = oppholdstillatelse,
+                    person = tredjelandsborger
+                )
+            )
         )
     }
 
@@ -180,21 +192,21 @@ class LovligOppholdVilkårTest {
 
         val vilkår = Vilkår.LOVLIG_OPPHOLD
         val tredjelandsborger = tilfeldigPerson(personType = PersonType.SØKER).apply {
-            statsborgerskap = listOf(
+            statsborgerskap = mutableListOf(
                 GrStatsborgerskap(
                     landkode = "ANG", medlemskap = Medlemskap.TREDJELANDSBORGER, person = this
                 )
             )
         }
         val statsløsPerson = tilfeldigPerson(personType = PersonType.SØKER).apply {
-            statsborgerskap = listOf(
+            statsborgerskap = mutableListOf(
                 GrStatsborgerskap(
                     landkode = "XXX", medlemskap = Medlemskap.STATSLØS, person = this
                 )
             )
         }
         val ukjentStatsborger = tilfeldigPerson(personType = PersonType.SØKER).apply {
-            statsborgerskap = listOf(
+            statsborgerskap = mutableListOf(
                 GrStatsborgerskap(
                     landkode = "XUK", medlemskap = Medlemskap.UKJENT, person = this
                 )
