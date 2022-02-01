@@ -56,8 +56,6 @@ internal class Autobrev6og18ÅrServiceTest {
     private val autobrev6og18ÅrService = Autobrev6og18ÅrService(
         personopplysningGrunnlagRepository = personopplysningGrunnlagRepository,
         behandlingService = behandlingService,
-        vedtakService = vedtakService,
-        vedtaksperiodeService = vedtaksperiodeService,
         autobrevService = autobrevService
     )
 

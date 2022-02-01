@@ -78,22 +78,22 @@ data class Person(
     @OneToMany(mappedBy = "person", cascade = [CascadeType.ALL], fetch = FetchType.EAGER)
     // Workaround før Hibernatebug https://hibernate.atlassian.net/browse/HHH-1718
     @Fetch(value = FetchMode.SUBSELECT)
-    var statsborgerskap: List<GrStatsborgerskap> = emptyList(),
+    var statsborgerskap: MutableList<GrStatsborgerskap> = mutableListOf(),
 
     @OneToMany(mappedBy = "person", cascade = [CascadeType.ALL], fetch = FetchType.EAGER)
     // Workaround før Hibernatebug https://hibernate.atlassian.net/browse/HHH-1718
     @Fetch(value = FetchMode.SUBSELECT)
-    var opphold: List<GrOpphold> = emptyList(),
+    var opphold: MutableList<GrOpphold> = mutableListOf(),
 
     @OneToMany(mappedBy = "person", cascade = [CascadeType.ALL], fetch = FetchType.EAGER)
     // Workaround før Hibernatebug https://hibernate.atlassian.net/browse/HHH-1718
     @Fetch(value = FetchMode.SUBSELECT)
-    var arbeidsforhold: List<GrArbeidsforhold> = emptyList(),
+    var arbeidsforhold: MutableList<GrArbeidsforhold> = mutableListOf(),
 
     @OneToMany(mappedBy = "person", cascade = [CascadeType.ALL], fetch = FetchType.EAGER)
     // Workaround før Hibernatebug https://hibernate.atlassian.net/browse/HHH-1718
     @Fetch(value = FetchMode.SUBSELECT)
-    var sivilstander: List<GrSivilstand> = emptyList(),
+    var sivilstander: MutableList<GrSivilstand> = mutableListOf(),
 
     @OneToOne(mappedBy = "person", cascade = [CascadeType.ALL], fetch = FetchType.LAZY, optional = true)
     var dødsfall: Dødsfall? = null
