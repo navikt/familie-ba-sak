@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.vedtak
+package no.nav.familie.ba.sak.kjerne.brev
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.Periode

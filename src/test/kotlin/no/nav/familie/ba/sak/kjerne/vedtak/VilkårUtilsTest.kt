@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.kjerne.vedtak
 import no.nav.familie.ba.sak.common.lagUtbetalingsperiodeDetalj
 import no.nav.familie.ba.sak.common.lagUtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.sorter
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.sorter
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.LocalDate

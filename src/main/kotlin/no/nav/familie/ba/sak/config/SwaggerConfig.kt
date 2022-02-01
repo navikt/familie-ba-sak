@@ -11,8 +11,6 @@ import org.springframework.context.annotation.Configuration
 @Configuration
 class SwaggerConfig {
 
-    private val bearer = "Bearer"
-
     @Bean
     fun openApi(): OpenAPI {
         return OpenAPI().info(Info().title("Bisys"))

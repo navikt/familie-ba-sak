@@ -174,7 +174,7 @@ class MigreringService(
         val søkerIdenter = personidentService.hentIdenter(personIdent = personIdent, historikk = true)
             .filter { it.gruppe == "FOLKEREGISTERIDENT" }
 
-        if (søkerIdenter.filter { it.ident == personIdent }.single().historisk) {
+        if (søkerIdenter.single { it.ident == personIdent }.historisk) {
             secureLog.warn("Personident $personIdent er historisk, og kan ikke brukes til å migrere$søkerIdenter")
             kastOgTellMigreringsFeil(MigreringsfeilType.IDENT_IKKE_LENGER_AKTIV)
         }
@@ -209,10 +209,8 @@ class MigreringService(
                         kastOgTellMigreringsFeil(MigreringsfeilType.ALLEREDE_MIGRERT)
                     }
                     FagsakStatus.AVSLUTTET -> {
-                        val behandling = behandlinger.find { it.opprettetTidspunkt.isAfter(this.opprettetTidspunkt) }
-                        if (behandling == null) {
-                            kastOgTellMigreringsFeil(MigreringsfeilType.FAGSAK_AVSLUTTET_UTEN_MIGRERING)
-                        }
+                        behandlinger.find { it.opprettetTidspunkt.isAfter(this.opprettetTidspunkt) }
+                            ?: kastOgTellMigreringsFeil(MigreringsfeilType.FAGSAK_AVSLUTTET_UTEN_MIGRERING)
                     }
                 }
             } ?: kastOgTellMigreringsFeil(MigreringsfeilType.AKTIV_BEHANDLING)
@@ -336,7 +334,7 @@ class MigreringService(
         infotrygdStønad: Stønad,
     ) {
         val beløpFraInfotrygd =
-            infotrygdStønad.delytelse.filter { it.tom == null }.singleOrNull()?.beløp?.toInt()
+            infotrygdStønad.delytelse.singleOrNull { it.tom == null }?.beløp?.toInt()
                 ?: kastOgTellMigreringsFeil(MigreringsfeilType.FLERE_DELYTELSER_I_INFOTRYGD)
 
         if (førsteUtbetalingsbeløp != beløpFraInfotrygd) {
