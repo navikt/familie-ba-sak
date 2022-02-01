@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.integrasjoner.pdl.domene
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.JsonNode
@@ -69,6 +70,7 @@ data class DødsfallData(
     val dødsdato: String?
 )
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class PdlKontaktinformasjonForDødsbo(
     val adresselinje1: String,
     val poststedsnavn: String,
