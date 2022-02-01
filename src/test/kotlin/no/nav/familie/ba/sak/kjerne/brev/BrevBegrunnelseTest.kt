@@ -13,7 +13,7 @@ import java.io.File
 @Disabled
 class BrevBegrunnelseTest {
     @Test
-    fun test(testReporter: TestReporter) {
+    fun `Tester begrunnelser knyttet til brev`(testReporter: TestReporter) {
         val testmappe = File("./src/test/resources/brevbegrunnelserCaser")
 
         val sanityBegrunnelser = hentSanityBegrunnelser()

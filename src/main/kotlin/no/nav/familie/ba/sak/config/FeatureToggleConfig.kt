@@ -110,6 +110,7 @@ class FeatureToggleConfig(
         const val IKKE_STOPP_MIGRERINGSBEHANDLING = "familie-ba-sak.ikke.stopp.migeringsbehandling"
         const val AUTOBREV_OPPHØR_SMÅBARNSTILLEGG = "familie-ba-sak.autobrev-opphor-smaabarnstillegg"
         const val ENDRET_UTBETALING_VEDTAKSSIDEN = "familie-ba-sak.endret-utbetaling-vedtakssiden.utgivelse"
+        const val KAN_BEHANDLE_TREDJELANDSBORGERE_AUTOMATISK = "familie-ba-sak.behandling.automatisk.tredjelandsborgere"
 
         const val TEKNISK_VEDLIKEHOLD_HENLEGGELSE = "familie-ba-sak.teknisk-vedlikehold-henleggelse.tilgangsstyring"
 

@@ -53,7 +53,7 @@ class IntegrasjonClientMock {
              */
             if (isMockKMock(mockIntegrasjonClient)) {
                 clearMocks(mockIntegrasjonClient)
-            }
+            } else return
 
             every {
                 mockIntegrasjonClient.hentMaskertPersonInfoVedManglendeTilgang(any())
@@ -167,32 +167,33 @@ class IntegrasjonClientMock {
 
             every { mockIntegrasjonClient.hentLand(any()) } returns "Testland"
 
-            initEuKodeverk(mockIntegrasjonClient)
+            every { mockIntegrasjonClient.hentAlleEØSLand() } returns hentKodeverkLand()
         }
 
         fun initEuKodeverk(integrasjonClient: IntegrasjonClient) {
+            every { integrasjonClient.hentAlleEØSLand() } returns hentKodeverkLand()
+        }
+
+        private fun hentKodeverkLand(): KodeverkDto {
             val beskrivelsePolen = BeskrivelseDto("POL", "")
             val betydningPolen = BetydningDto(FOM_2004, TOM_9999, mapOf(KodeverkSpråk.BOKMÅL.kode to beskrivelsePolen))
             val beskrivelseTyskland = BeskrivelseDto("DEU", "")
             val betydningTyskland =
                 BetydningDto(FOM_1900, TOM_9999, mapOf(KodeverkSpråk.BOKMÅL.kode to beskrivelseTyskland))
-            val beskrivelseDanmark = BeskrivelseDto("DEN", "")
+            val beskrivelseDanmark = BeskrivelseDto("DNK", "")
             val betydningDanmark =
                 BetydningDto(FOM_1990, TOM_9999, mapOf(KodeverkSpråk.BOKMÅL.kode to beskrivelseDanmark))
             val beskrivelseUK = BeskrivelseDto("GBR", "")
             val betydningUK = BetydningDto(FOM_1900, TOM_2010, mapOf(KodeverkSpråk.BOKMÅL.kode to beskrivelseUK))
 
-            val kodeverkLand = KodeverkDto(
-                mapOf(
+            return KodeverkDto(
+                betydninger = mapOf(
                     "POL" to listOf(betydningPolen),
                     "DEU" to listOf(betydningTyskland),
-                    "DEN" to listOf(betydningDanmark),
+                    "DNK" to listOf(betydningDanmark),
                     "GBR" to listOf(betydningUK)
                 )
             )
-
-            every { integrasjonClient.hentAlleEØSLand() }
-                .returns(kodeverkLand)
         }
 
         val FOM_1900 = LocalDate.of(1900, Month.JANUARY, 1)
@@ -202,4 +203,8 @@ class IntegrasjonClientMock {
         val TOM_2010 = LocalDate.of(2009, Month.DECEMBER, 31)
         val TOM_9999 = LocalDate.of(9999, Month.DECEMBER, 31)
     }
+}
+
+fun KodeverkDto.toString(): String {
+    return "KodeverkDTO(${this.betydninger})"
 }
