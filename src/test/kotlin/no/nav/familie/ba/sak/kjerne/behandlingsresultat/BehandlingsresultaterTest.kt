@@ -43,7 +43,6 @@ class BehandlingsresultaterTest {
                     behandlingsresultatPersoner = behandlingsresultatPersonTestConfig.personer,
                     uregistrerteBarn = behandlingsresultatPersonTestConfig.uregistrerteBarn,
                     inneværendeMåned = YearMonth.parse(behandlingsresultatPersonTestConfig.inneværendeMåned),
-                    personidentService,
                 )
 
             val behandlingsresultat =
