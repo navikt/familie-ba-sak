@@ -17,7 +17,6 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseReposito
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.opphold.GrOpphold
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.StatsborgerskapService
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
@@ -234,16 +233,22 @@ class PersongrunnlagService(
             aktør = aktør,
             navn = personinfo.navn ?: "",
             kjønn = personinfo.kjønn ?: Kjønn.UKJENT,
-            målform = målform
+            målform = målform,
         ).also { person ->
-            person.opphold = personinfo.opphold?.map { GrOpphold.fraOpphold(it, person) } ?: emptyList()
-            person.statsborgerskap =
-                personinfo.statsborgerskap?.map { GrStatsborgerskap.fraStatsborgerskap(it, person) } ?: emptyList()
+            person.opphold =
+                personinfo.opphold?.map { GrOpphold.fraOpphold(it, person) }?.toMutableList() ?: mutableListOf()
             person.bostedsadresser =
                 personinfo.bostedsadresser.filtrerUtKunNorskeBostedsadresser()
                     .map { GrBostedsadresse.fraBostedsadresse(it, person) }
                     .toMutableList()
-            person.sivilstander = personinfo.sivilstander.map { GrSivilstand.fraSivilstand(it, person) }
+            person.sivilstander = personinfo.sivilstander.map { GrSivilstand.fraSivilstand(it, person) }.toMutableList()
+            person.statsborgerskap =
+                personinfo.statsborgerskap?.flatMap {
+                    statsborgerskapService.hentStatsborgerskapMedMedlemskap(
+                        statsborgerskap = it,
+                        person = person
+                    )
+                }?.sortedBy { it.gyldigPeriode?.fom }?.toMutableList() ?: mutableListOf()
         }
     }
 

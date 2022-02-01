@@ -244,7 +244,7 @@ class FiltreringsregelForFlereBarnTest {
             kjønn = kjønn,
             bostedsadresser = grBostedsadresse?.let { mutableListOf(grBostedsadresse) } ?: mutableListOf()
         )
-            .apply { this.sivilstander = listOf(GrSivilstand(type = sivilstand, person = this)) }
+            .apply { this.sivilstander = mutableListOf(GrSivilstand(type = sivilstand, person = this)) }
     }
 
     private fun generePersonInfoMedBarn(

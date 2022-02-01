@@ -52,7 +52,7 @@ class BehandleFødselshendelseTask(
             dagerSidenBarnBleFødt.record(dagerSidenBarnetBleFødt.toDouble())
         }
 
-        when (velgFagsystemService.velgFagsystem(nyBehandling)) {
+        when (velgFagsystemService.velgFagsystem(nyBehandling).first) {
             FagsystemRegelVurdering.SEND_TIL_BA -> fødselshendelseService.behandleFødselshendelse(nyBehandling = nyBehandling)
             FagsystemRegelVurdering.SEND_TIL_INFOTRYGD -> {
                 infotrygdFeedService.sendTilInfotrygdFeed(nyBehandling.barnasIdenter)

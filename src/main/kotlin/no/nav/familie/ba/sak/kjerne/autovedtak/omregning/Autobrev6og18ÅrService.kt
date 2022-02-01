@@ -9,8 +9,6 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
-import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.task.dto.Autobrev6og18ÅrDTO
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -20,8 +18,6 @@ import org.springframework.transaction.annotation.Transactional
 class Autobrev6og18ÅrService(
     private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
     private val behandlingService: BehandlingService,
-    private val vedtakService: VedtakService,
-    private val vedtaksperiodeService: VedtaksperiodeService,
     private val autobrevService: AutobrevService
 ) {
 
