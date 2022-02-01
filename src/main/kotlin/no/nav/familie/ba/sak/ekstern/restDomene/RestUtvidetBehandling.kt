@@ -34,5 +34,5 @@ data class RestUtvidetBehandling(
     val tilbakekreving: RestTilbakekreving?,
     val vedtak: RestVedtak?,
     val totrinnskontroll: RestTotrinnskontroll?,
-    val settPåVent: RestSettPåVent?,
+    val aktivSettPåVent: RestSettPåVent?,
 )

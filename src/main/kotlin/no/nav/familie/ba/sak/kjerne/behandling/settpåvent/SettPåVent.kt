@@ -28,20 +28,20 @@ data class SettPåVent(
     val behandling: Behandling,
 
     @Column(name = "frist", nullable = false)
-    val frist: LocalDate,
+    var frist: LocalDate,
 
     @Column(name = "tid_tatt_av_vent", nullable = true)
-    val tidTattAvVent: LocalDate? = null,
+    var tidTattAvVent: LocalDate? = null,
 
     @Column(name = "tid_satt_paa_vent", nullable = false)
-    val tidSattPåVent: LocalDate = LocalDate.now(),
+    var tidSattPåVent: LocalDate = LocalDate.now(),
 
     @Enumerated(EnumType.STRING)
     @Column(name = "aarsak", nullable = false)
-    val årsak: SettPåVentÅrsak,
+    var årsak: SettPåVentÅrsak,
 
     @Column(name = "aktiv", nullable = false)
-    val aktiv: Boolean = true,
+    var aktiv: Boolean = true,
 ) : BaseEntitet()
 
 enum class SettPåVentÅrsak {
