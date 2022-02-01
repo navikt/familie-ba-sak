@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger
 
+import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegisteropplysning
 import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PdlKontaktinformasjonForDødsbo
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
@@ -39,7 +40,7 @@ data class Dødsfall(
 
     @Column(name = "doedsfall_poststed", nullable = true)
     val dødsfallPoststed: String?,
-) {
+) : BaseEntitet() {
     fun hentAdresseToString(): String { return """$dødsfallAdresse, $dødsfallPostnummer $dødsfallPoststed""" }
 
     fun tilRestRegisteropplysning() = RestRegisteropplysning(
