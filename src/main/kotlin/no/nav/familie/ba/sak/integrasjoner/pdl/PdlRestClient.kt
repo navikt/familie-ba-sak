@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.integrasjoner.pdl
 
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.Doedsfall
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.DødsfallData
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlBaseResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlDødsfallResponse
@@ -15,12 +16,6 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlUtenlandskAdressseRespo
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlVergeResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.VergemaalEllerFremtidsfullmakt
-import no.nav.familie.ba.sak.integrasjoner.pdl.internal.ForelderBarnRelasjon
-import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PdlBaseResponse
-import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PdlHentPersonResponse
-import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PdlPersonRequest
-import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PdlPersonRequestVariables
-import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PersonInfo
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.http.client.AbstractRestClient
