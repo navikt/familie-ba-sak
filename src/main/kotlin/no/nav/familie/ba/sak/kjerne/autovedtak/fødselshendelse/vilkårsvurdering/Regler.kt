@@ -17,8 +17,11 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse.Companion.sisteAdresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.opphold.GrOpphold
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.finnNåværendeMedlemskap
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.finnSterkesteMedlemskap
 import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import org.slf4j.LoggerFactory
@@ -152,61 +155,41 @@ data class VurderBarnErUgift(
 }
 
 data class VurderPersonHarLovligOpphold(
-    val fakta: String = "Alltid oppfylt inntil videre"
+    val featureToggleOmLovligOppholdSkalVurderes: Boolean,
+    val personType: PersonType,
+    val statsborgerskap: List<GrStatsborgerskap>,
+    val opphold: List<GrOpphold>
 ) : Vilkårsregel {
 
-    override fun vurder(): Evaluering = Evaluering.oppfylt(VilkårOppfyltÅrsak.NORDISK_STATSBORGER)
+    override fun vurder(): Evaluering {
+        if (!featureToggleOmLovligOppholdSkalVurderes) return Evaluering.oppfylt(VilkårOppfyltÅrsak.NORDISK_STATSBORGER)
+
+        if (personType == PersonType.BARN) {
+            return Evaluering.oppfylt(VilkårOppfyltÅrsak.AUTOMATISK_VURDERING_BARN_LOVLIG_OPPHOLD)
+        }
+
+        val nåværendeMedlemskap = finnNåværendeMedlemskap(statsborgerskap)
+
+        return when (finnSterkesteMedlemskap(nåværendeMedlemskap)) {
+            Medlemskap.NORDEN -> Evaluering.oppfylt(VilkårOppfyltÅrsak.NORDISK_STATSBORGER)
+            Medlemskap.TREDJELANDSBORGER -> {
+                val nåværendeOpphold = opphold.singleOrNull { it.gjeldendeNå() }
+                if (nåværendeOpphold == null || nåværendeOpphold.type == OPPHOLDSTILLATELSE.OPPLYSNING_MANGLER) {
+                    Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.TREDJELANDSBORGER_UTEN_LOVLIG_OPPHOLD)
+                } else Evaluering.oppfylt(VilkårOppfyltÅrsak.TREDJELANDSBORGER_MED_LOVLIG_OPPHOLD)
+            }
+            Medlemskap.UKJENT, Medlemskap.STATSLØS -> {
+                val nåværendeOpphold = opphold.singleOrNull { it.gjeldendeNå() }
+                if (nåværendeOpphold == null || nåværendeOpphold.type == OPPHOLDSTILLATELSE.OPPLYSNING_MANGLER) {
+                    Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.STATSLØS)
+                } else Evaluering.oppfylt(VilkårOppfyltÅrsak.UKJENT_STATSBORGERSKAP_MED_LOVLIG_OPPHOLD)
+            }
+            else -> Evaluering.ikkeVurdert(VilkårKanskjeOppfyltÅrsak.LOVLIG_OPPHOLD_IKKE_MULIG_Å_FASTSETTE)
+        }
+    }
 }
 
 // Fra gammel implementasjon
-internal fun lovligOpphold(person: Person): Evaluering {
-    if (person.type == PersonType.BARN) {
-        return Evaluering.oppfylt(VilkårOppfyltÅrsak.AUTOMATISK_VURDERING_BARN_LOVLIG_OPPHOLD)
-    }
-
-    val nåværendeMedlemskap = finnNåværendeMedlemskap(person.statsborgerskap)
-
-    return when (finnSterkesteMedlemskap(nåværendeMedlemskap)) {
-        Medlemskap.NORDEN -> Evaluering.oppfylt(VilkårOppfyltÅrsak.NORDISK_STATSBORGER)
-        Medlemskap.EØS -> {
-            sjekkLovligOppholdForEØSBorger(person)
-        }
-        Medlemskap.TREDJELANDSBORGER -> {
-            val nåværendeOpphold = person.opphold.singleOrNull { it.gjeldendeNå() }
-            if (nåværendeOpphold == null || nåværendeOpphold.type == OPPHOLDSTILLATELSE.OPPLYSNING_MANGLER) {
-                Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.TREDJELANDSBORGER_UTEN_LOVLIG_OPPHOLD)
-            } else Evaluering.oppfylt(VilkårOppfyltÅrsak.TREDJELANDSBORGER_MED_LOVLIG_OPPHOLD)
-        }
-        Medlemskap.UKJENT, Medlemskap.STATSLØS -> {
-            val nåværendeOpphold = person.opphold.singleOrNull { it.gjeldendeNå() }
-            if (nåværendeOpphold == null || nåværendeOpphold.type == OPPHOLDSTILLATELSE.OPPLYSNING_MANGLER) {
-                Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.STATSLØS)
-            } else Evaluering.oppfylt(VilkårOppfyltÅrsak.UKJENT_STATSBORGERSKAP_MED_LOVLIG_OPPHOLD)
-        }
-        else -> Evaluering.ikkeVurdert(VilkårKanskjeOppfyltÅrsak.LOVLIG_OPPHOLD_IKKE_MULIG_Å_FASTSETTE)
-    }
-}
-
-fun finnNåværendeMedlemskap(statsborgerskap: List<GrStatsborgerskap>?): List<Medlemskap> =
-    statsborgerskap?.filter {
-        it.gyldigPeriode?.fom?.isBefore(LocalDate.now()) ?: true &&
-            it.gyldigPeriode?.tom?.isAfter(LocalDate.now()) ?: true
-    }
-        ?.map { it.medlemskap } ?: emptyList()
-
-fun finnSterkesteMedlemskap(medlemskap: List<Medlemskap>): Medlemskap? {
-    return with(medlemskap) {
-        when {
-            contains(Medlemskap.NORDEN) -> Medlemskap.NORDEN
-            contains(Medlemskap.EØS) -> Medlemskap.EØS
-            contains(Medlemskap.TREDJELANDSBORGER) -> Medlemskap.TREDJELANDSBORGER
-            contains(Medlemskap.STATSLØS) -> Medlemskap.STATSLØS
-            contains(Medlemskap.UKJENT) -> Medlemskap.UKJENT
-            else -> null
-        }
-    }
-}
-
 private fun sjekkLovligOppholdForEØSBorger(person: Person): Evaluering {
     return if (personHarLøpendeArbeidsforhold(person)) {
         Evaluering.oppfylt(VilkårOppfyltÅrsak.EØS_MED_LØPENDE_ARBEIDSFORHOLD)
