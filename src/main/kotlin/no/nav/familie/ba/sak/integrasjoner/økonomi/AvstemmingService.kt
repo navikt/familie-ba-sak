@@ -31,7 +31,7 @@ class AvstemmingService(
 
     fun konsistensavstemOppdrag(avstemmingsdato: LocalDateTime) {
 
-        val perioderTilAvstemming = hentDataForKonsistensavstemming()
+        val perioderTilAvstemming = hentDataForKonsistensavstemming(avstemmingsdato)
 
         logger.info("Utfører konsisensavstemming for ${perioderTilAvstemming.size} løpende saker")
 
@@ -47,13 +47,14 @@ class AvstemmingService(
             )
     }
 
-    private fun hentDataForKonsistensavstemming(): List<PerioderForBehandling> {
+    private fun hentDataForKonsistensavstemming(avstemmingstidspunkt: LocalDateTime): List<PerioderForBehandling> {
         val relevanteBehandlinger = behandlingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker()
         return relevanteBehandlinger
             .chunked(1000)
             .map { chunk ->
                 val relevanteAndeler = beregningService.hentLøpendeAndelerTilkjentYtelseMedUtbetalingerForBehandlinger(
-                    behandlingIder = chunk
+                    behandlingIder = chunk,
+                    avstemmingstidspunkt = avstemmingstidspunkt
                 )
                 relevanteAndeler.groupBy { it.kildeBehandlingId }
                     .map { (kildeBehandlingId, andeler) ->

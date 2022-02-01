@@ -122,16 +122,6 @@ class SimuleringService(
         return hentFeilutbetaling(vedtakSimuleringMottakere)
     }
 
-    fun autovedtakVedSmåbarnstilleggKanAutomatiskIverksettes(behandling: Behandling): Boolean {
-        if (!behandling.skalBehandlesAutomatisk) return false
-
-        return behandling.erSmåbarnstillegg() &&
-            (
-                hentEtterbetaling(behandlingId = behandling.id) == BigDecimal(0) ||
-                    hentFeilutbetaling(behandlingId = behandling.id) == BigDecimal(0)
-                )
-    }
-
     fun hentEtterbetaling(økonomiSimuleringMottakere: List<ØkonomiSimuleringMottaker>): BigDecimal {
         return vedtakSimuleringMottakereTilRestSimulering(økonomiSimuleringMottakere).etterbetaling
     }
