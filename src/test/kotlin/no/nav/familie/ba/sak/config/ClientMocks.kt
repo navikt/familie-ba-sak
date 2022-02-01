@@ -276,10 +276,6 @@ class ClientMocks {
             } returns DødsfallData(false, null)
 
             every {
-                mockPersonopplysningerService.hentDødsfall(any())
-            } returns DødsfallData(false, null)
-
-            every {
                 mockPersonopplysningerService.hentVergeData(any())
             } returns VergeData(false)
 
@@ -480,8 +476,8 @@ class ClientMocks {
                 sivilstander = sivilstandHistorisk,
                 statsborgerskap = listOf(
                     Statsborgerskap(
-                        land = "DEN",
-                        bekreftelsesdato = null,
+                        land = "DNK",
+                        bekreftelsesdato = LocalDate.now().minusYears(1),
                         gyldigFraOgMed = null,
                         gyldigTilOgMed = null
                     )

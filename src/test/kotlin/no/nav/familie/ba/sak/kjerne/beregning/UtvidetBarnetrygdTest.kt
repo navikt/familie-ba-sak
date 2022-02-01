@@ -682,7 +682,7 @@ internal class UtvidetBarnetrygdTest {
             kjønn = Kjønn.KVINNE
         )
             .apply {
-                sivilstander = listOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this))
+                sivilstander = mutableListOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this))
             }
     }
 }
