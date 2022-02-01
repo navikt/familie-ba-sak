@@ -128,7 +128,8 @@ class MigreringService(
                 vilkårsvurderingService.oppdater(this)
             } ?: kastOgTellMigreringsFeil(MigreringsfeilType.MANGLER_VILKÅRSVURDERING)
 
-            val behandlingEtterVilkårsvurdering = stegService.håndterVilkårsvurdering(behandling) // Se funksjonen lagVilkårsvurderingForMigreringsbehandling i VilkårService
+            val behandlingEtterVilkårsvurdering =
+                stegService.håndterVilkårsvurdering(behandling) // Se funksjonen lagVilkårsvurderingForMigreringsbehandling i VilkårService
 
             val førsteUtbetalingsperiode = finnFørsteUtbetalingsperiode(behandling.id)
 
@@ -294,7 +295,7 @@ class MigreringService(
     private fun virkningsdatoFra(kjøredato: LocalDate): LocalDate {
         LocalDate.now().run {
             return when {
-                env?.erPreprod() ?: false -> LocalDate.of(2021, 7, 1)
+                env?.erPreprod() ?: false -> LocalDate.of(2022, 1, 1)
                 this.isBefore(kjøredato) -> this.førsteDagIInneværendeMåned()
                 this.isAfter(kjøredato.plusDays(1)) -> this.førsteDagINesteMåned()
                 env!!.erDev() -> this.førsteDagINesteMåned()
