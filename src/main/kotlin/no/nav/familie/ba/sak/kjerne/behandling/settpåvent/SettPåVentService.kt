@@ -40,7 +40,7 @@ class SettPåVentService(
         val aktivSettPåVent = finnAktivSettPåVentPåBehandlingThrows(behandlingId)
 
         aktivSettPåVent.aktiv = false
-        aktivSettPåVent.frist = nå
+        aktivSettPåVent.tidTattAvVent = nå
 
         return settPåVentRepository.save(aktivSettPåVent)
     }
