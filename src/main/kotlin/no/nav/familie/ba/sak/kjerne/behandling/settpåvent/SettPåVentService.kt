@@ -30,12 +30,18 @@ class SettPåVentService(
     fun oppdaterSettBehandlingPåVent(behandlingId: Long, frist: LocalDate, årsak: SettPåVentÅrsak): SettPåVent {
         val aktivSettPåVent = finnAktivSettPåVentPåBehandlingThrows(behandlingId)
 
-        return settPåVentRepository.save(aktivSettPåVent.copy(frist = frist, årsak = årsak))
+        aktivSettPåVent.frist = frist
+        aktivSettPåVent.årsak = årsak
+
+        return settPåVentRepository.save(aktivSettPåVent)
     }
 
     fun deaktiverSettBehandlingPåVent(behandlingId: Long, nå: LocalDate = LocalDate.now()): SettPåVent {
         val aktivSettPåVent = finnAktivSettPåVentPåBehandlingThrows(behandlingId)
 
-        return settPåVentRepository.save(aktivSettPåVent.copy(aktiv = false, tidTattAvVent = nå))
+        aktivSettPåVent.aktiv = false
+        aktivSettPåVent.frist = nå
+
+        return settPåVentRepository.save(aktivSettPåVent)
     }
 }
