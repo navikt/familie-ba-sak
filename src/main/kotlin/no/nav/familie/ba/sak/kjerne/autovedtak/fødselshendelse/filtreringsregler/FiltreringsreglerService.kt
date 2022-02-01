@@ -95,8 +95,8 @@ class FiltreringsreglerService(
             morMottarLøpendeUtvidet = behandling.underkategori == BehandlingUnderkategori.UTVIDET,
             barnaFraHendelse = barnaFraHendelse,
             restenAvBarna = finnRestenAvBarnasPersonInfo(morsAktørId, barnaFraHendelse),
-            morLever = !personopplysningerService.hentDødsfall(morsAktørId).erDød, // TODO: Bruke dødsfalldato på grunnlaget direkte
-            barnaLever = barnasAktørId.none { personopplysningerService.hentDødsfall(it).erDød },
+            morLever = !personopplysningGrunnlag.søker.erDød(),
+            barnaLever = personopplysningGrunnlag.barna.none { it.erDød() },
             morHarVerge = personopplysningerService.harVerge(morsAktørId).harVerge,
             dagensDato = localDateService.now()
         )

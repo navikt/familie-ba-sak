@@ -126,6 +126,8 @@ data class Person(
 
     fun erYngreEnnInneværendeMåned(år: Int): Boolean =
         this.fødselsdato.isAfter(now().minusYears(år.toLong()).sisteDagIMåned())
+
+    fun erDød(): Boolean = dødsfall != null
 }
 
 enum class Kjønn {
