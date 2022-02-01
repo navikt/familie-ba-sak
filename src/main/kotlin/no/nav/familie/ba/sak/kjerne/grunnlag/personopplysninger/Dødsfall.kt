@@ -41,6 +41,12 @@ data class Dødsfall(
     val dødsfallPoststed: String?,
 ) : BaseEntitet() {
     fun hentAdresseToString(): String { return """$dødsfallAdresse, $dødsfallPostnummer $dødsfallPoststed""" }
+
+    fun tilRestRegisteropplysning() = RestRegisteropplysning(
+        fom = this.dødsfallDato,
+        tom = null,
+        verdi = hentAdresseToString()
+    )
 }
 
 fun lagDødsfall(person: Person, dødsfallDatoFraPdl: LocalDate, dødsfallAdresseFraPdl: PdlKontaktinformasjonForDødsbo?): Dødsfall {
