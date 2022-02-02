@@ -67,6 +67,28 @@ internal class PersonopplysningerServiceTest(
         assertThat(personInfo.adressebeskyttelseGradering).isEqualTo(ADRESSEBESKYTTELSEGRADERING.UGRADERT)
         assertThat(personInfo.forelderBarnRelasjon.size).isEqualTo(1)
         assertThat(personInfo.forelderBarnRelasjonMaskert.size).isEqualTo(1)
+        assertThat(personInfo.kontaktinformasjonForDoedsbo).isNull()
+        assertThat(personInfo.dødsfall).isNull()
+    }
+
+    @Test
+    fun `hentPersoninfoMedRelasjonerOgRegisterinformasjon() skal returnere riktig personinfo for død person`() {
+        every {
+            mockIntegrasjonClient.sjekkTilgangTilPersoner(listOf(ID_BARN_1))
+        } returns Tilgang(true, null)
+        every {
+            mockIntegrasjonClient.sjekkTilgangTilPersoner(listOf(ID_BARN_2))
+        } returns Tilgang(false, null)
+
+        val personInfo = personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(
+            tilAktør(
+                ID_DØD_MOR
+            )
+        )
+
+        assertThat(personInfo.dødsfall?.erDød).isTrue
+        assertThat(personInfo.dødsfall?.dødsdato).isEqualTo("2020-04-04")
+        assertThat(personInfo.kontaktinformasjonForDoedsbo?.adresse?.postnummer).isEqualTo("1234")
     }
 
     @Test
@@ -127,6 +149,7 @@ internal class PersonopplysningerServiceTest(
 
         const val ID_MOR = "22345678901"
         const val ID_MOR_MED_TOM_BOSTEDSADRESSE = "22345678903"
+        const val ID_DØD_MOR = "44556612345"
         const val ID_BARN_1 = "32345678901"
         const val ID_BARN_2 = "32345678902"
         const val ID_UGRADERT_PERSON = "32345678903"
@@ -175,6 +198,11 @@ internal class PersonopplysningerServiceTest(
         lagMockForPdl(
             "hentperson-enkel.graphql", "PdlIntegrasjon/gyldigRequestForBarn2.json",
             readfile("PdlIntegrasjon/personinfoResponseForBarnMedAdressebeskyttelse.json")
+        )
+
+        lagMockForPdl(
+            "hentperson-med-relasjoner-og-registerinformasjon.graphql", "PdlIntegrasjon/gyldigRequestForDødMor.json",
+            readfile("PdlIntegrasjon/personinfoResponseForDødMor.json")
         )
 
         lagMockForPdl(
