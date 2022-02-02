@@ -40,7 +40,9 @@
         {
           "gradering": "UGRADERT"
         }
-      ]
+      ],
+      "doedsfall": [],
+      "kontaktinformasjonForDoedsbo": []
     }
   }
 }
