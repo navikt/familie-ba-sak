@@ -72,6 +72,10 @@ data class DødsfallData(
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class PdlKontaktinformasjonForDødsbo(
+    val adresse: PdlKontaktinformasjonForDødsboAdresse
+)
+
+data class PdlKontaktinformasjonForDødsboAdresse(
     val adresselinje1: String,
     val poststedsnavn: String,
     val postnummer: String

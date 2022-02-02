@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger
 import com.fasterxml.jackson.annotation.JsonIgnore
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegisteropplysning
-import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlKontaktinformasjonForDødsbo
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlKontaktinformasjonForDødsboAdresse
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.time.LocalDate
 import javax.persistence.Column
@@ -52,7 +52,7 @@ data class Dødsfall(
     )
 }
 
-fun lagDødsfall(person: Person, dødsfallDatoFraPdl: String?, dødsfallAdresseFraPdl: PdlKontaktinformasjonForDødsbo?): Dødsfall? {
+fun lagDødsfall(person: Person, dødsfallDatoFraPdl: String?, dødsfallAdresseFraPdl: PdlKontaktinformasjonForDødsboAdresse?): Dødsfall? {
     if (dødsfallDatoFraPdl == null || dødsfallDatoFraPdl == "") {
         return null
     }

@@ -11,7 +11,7 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.VergeResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.DødsfallData
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjon
-import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlKontaktinformasjonForDødsbo
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlKontaktinformasjonForDødsboAdresse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.erOppfylt
@@ -251,7 +251,7 @@ class FiltreringsregelForFlereBarnTest {
             .apply {
                 this.sivilstander = mutableListOf(GrSivilstand(type = sivilstand, person = this))
                 if (dødsfallDato != null) {
-                    this.dødsfall = lagDødsfall(person = this, dødsfallDatoFraPdl = dødsfallDato, dødsfallAdresseFraPdl = PdlKontaktinformasjonForDødsbo(adresselinje1 = "Gate 1", postnummer = "1234", poststedsnavn = "Oslo"))
+                    this.dødsfall = lagDødsfall(person = this, dødsfallDatoFraPdl = dødsfallDato, dødsfallAdresseFraPdl = PdlKontaktinformasjonForDødsboAdresse(adresselinje1 = "Gate 1", postnummer = "1234", poststedsnavn = "Oslo"))
                 }
             }
     }
