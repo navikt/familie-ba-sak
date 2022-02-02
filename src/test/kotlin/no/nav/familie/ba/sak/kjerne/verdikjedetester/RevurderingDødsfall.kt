@@ -157,7 +157,7 @@ class RevurderingDødsfall(
 
         assertThrows<FunksjonellFeil> {
             kjørStegprosessForRevurdering(
-                tilSteg = StegType.BEHANDLING_AVSLUTTET,
+                tilSteg = StegType.BEHANDLINGSRESULTAT,
                 søkerFnr = scenario.søker.ident,
                 barnasIdenter = listOf(scenario.barna.first().ident!!),
                 underkategori = BehandlingUnderkategori.ORDINÆR,
