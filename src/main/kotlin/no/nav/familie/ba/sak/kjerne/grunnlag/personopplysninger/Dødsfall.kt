@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegisteropplysning
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlKontaktinformasjonForDødsbo
@@ -25,6 +26,7 @@ data class Dødsfall(
     @SequenceGenerator(name = "po_doedsfall_seq_generator", sequenceName = "po_doedsfall_seq", allocationSize = 50)
     val id: Long = 0,
 
+    @JsonIgnore
     @OneToOne
     @JoinColumn(name = "fk_po_person_id", referencedColumnName = "id", nullable = false)
     val person: Person,
