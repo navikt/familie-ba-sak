@@ -10,7 +10,6 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import
 import org.springframework.context.annotation.Profile
-import org.springframework.core.env.Environment
 import org.springframework.http.converter.ByteArrayHttpMessageConverter
 import org.springframework.http.converter.StringHttpMessageConverter
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
@@ -27,9 +26,7 @@ import java.time.Duration
     BearerTokenClientCredentialsClientInterceptor::class
 )
 @Profile("!mock-rest-template-config")
-class RestTemplateConfig(
-    private val environment: Environment
-) {
+class RestTemplateConfig {
 
     @Bean("jwtBearerClientCredentials")
     fun restTemplateJwtBearerClientCredentials(
@@ -115,6 +112,10 @@ class RestTemplateConfig(
             .setConnectTimeout(Duration.ofSeconds(5))
             .setReadTimeout(Duration.ofSeconds(5))
             .additionalInterceptors(consumerIdClientInterceptor, mdcValuesPropagatingClientInterceptor)
+    }
+
+    companion object {
+        const val RETRY_BACKOFF_500MS = "\${retry.backoff.delay:500}"
     }
 }
 
