@@ -43,7 +43,7 @@ data class BrevPeriodeGrunnlagMedPersoner(
         return begrunnelser + fritekster
     }
 
-    fun beløpUtbetaltFor(personIdenter: List<String>) =
+    private fun beløpUtbetaltFor(personIdenter: List<String>) =
         this.minimerteUtbetalingsperiodeDetaljer
             .filter { utbetalingsperiodeDetalj -> personIdenter.contains(utbetalingsperiodeDetalj.person.personIdent) }
             .totaltUtbetalt()

@@ -126,11 +126,6 @@ data class EndretUtbetalingAndel(
         return true
     }
 
-    fun harVedtakBegrunnelseSpesifikasjon(vedtakBegrunnelseSpesifikasjon: VedtakBegrunnelseSpesifikasjon) =
-        this.vedtakBegrunnelseSpesifikasjoner.contains(
-            vedtakBegrunnelseSpesifikasjon
-        )
-
     fun årsakErDeltBosted() = this.årsak == Årsak.DELT_BOSTED
 }
 
@@ -177,7 +172,7 @@ fun hentPersonerForEtterEndretUtbetalingsperiode(
     endretUtbetalingAndel.periode.tom.sisteDagIInneværendeMåned()
         .erDagenFør(fom) &&
         endringsaarsaker.contains(endretUtbetalingAndel.årsak)
-}.mapNotNull { it.personIdent }
+}.map { it.personIdent }
 
 fun EndretUtbetalingAndel.hentGyldigEndretBegrunnelse(
     sanityBegrunnelser: List<SanityBegrunnelse>,

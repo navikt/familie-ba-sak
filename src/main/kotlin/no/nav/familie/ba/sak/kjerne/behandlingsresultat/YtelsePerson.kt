@@ -7,7 +7,7 @@ import java.util.Objects
 
 /**
  * Representer en person det er framstilt krav for nå eller tidligere
- * @property personIdent Personens ident
+ * @property aktør Personens aktør, dummyAktør ved uregistrert barn
  * @property ytelseType Typen ytelse
  * @property kravOpprinnelse Om krav for person er framstilt nå, ligger på behandling fra tidligere, eller begge deler
  * @property resultater Hvilke konsekvenser _denne_ behandlingen har for personen

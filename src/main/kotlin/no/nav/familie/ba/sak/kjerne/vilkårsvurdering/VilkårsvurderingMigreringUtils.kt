@@ -8,17 +8,6 @@ import java.time.LocalDate
 
 object VilkårsvurderingMigreringUtils {
 
-    fun hentForrigeVilkårsvurderingVilkårResultater(
-        forrigeBehandlingsvilkårsvurdering: Vilkårsvurdering,
-        vilkår: Vilkår,
-        person: Person
-    ): List<VilkårResultat> {
-        val personResultat = forrigeBehandlingsvilkårsvurdering.personResultater
-            .first { it.aktør == person.aktør }
-        return personResultat.vilkårResultater
-            .filter { it.vilkårType == vilkår }
-    }
-
     fun utledPeriodeFom(
         forrigeBehandlingsvilkårsvurdering: Vilkårsvurdering,
         vilkår: Vilkår,
@@ -71,5 +60,16 @@ object VilkårsvurderingMigreringUtils {
             )
         }
         return manglendeVilkårResultater
+    }
+
+    private fun hentForrigeVilkårsvurderingVilkårResultater(
+        forrigeBehandlingsvilkårsvurdering: Vilkårsvurdering,
+        vilkår: Vilkår,
+        person: Person
+    ): List<VilkårResultat> {
+        val personResultat = forrigeBehandlingsvilkårsvurdering.personResultater
+            .first { it.aktør == person.aktør }
+        return personResultat.vilkårResultater
+            .filter { it.vilkårType == vilkår }
     }
 }
