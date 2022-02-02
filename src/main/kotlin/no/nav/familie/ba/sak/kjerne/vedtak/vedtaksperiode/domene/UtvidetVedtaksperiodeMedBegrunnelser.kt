@@ -53,7 +53,8 @@ data class UtvidetVedtaksperiodeMedBegrunnelser(
             brevPeriodeGrunnlag
                 .tilBrevPeriodeGrunnlagMedPersoner(
                     restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev,
-                    erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak
+                    erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
+                    erUregistrerteBarnPåbehandling = uregistrerteBarn.isNotEmpty(),
                 )
                 .byggBegrunnelserOgFritekster(
                     restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev,
