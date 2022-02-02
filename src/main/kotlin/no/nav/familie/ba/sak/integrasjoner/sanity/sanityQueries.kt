@@ -1,6 +1,6 @@
-package no.nav.familie.ba.sak.kjerne.brev
+package no.nav.familie.ba.sak.integrasjoner.sanity
 
-val hentDokumenter =
+const val hentDokumenter =
     "*[_type == \"begrunnelse\"]{" +
         "apiNavn," +
         "navnISystem," +

@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.common.førsteDagINesteMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.MigreringResponseDto
+import no.nav.familie.ba.sak.integrasjoner.migrering.MigreringRestClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -16,6 +17,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.beregnUtbetalingsperioderUtenKlassifisering
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
@@ -62,7 +64,7 @@ private const val NULLDATO = "000000"
 class MigreringService(
     private val behandlingRepository: BehandlingRepository,
     private val behandlingService: BehandlingService,
-    private val env: EnvService?,
+    private val env: EnvService,
     private val fagsakService: FagsakService,
     private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
     private val pdlRestClient: PdlRestClient,
@@ -74,11 +76,15 @@ class MigreringService(
     private val totrinnskontrollService: TotrinnskontrollService,
     private val vedtakService: VedtakService,
     private val vilkårService: VilkårService,
-    private val vilkårsvurderingService: VilkårsvurderingService
+    private val vilkårsvurderingService: VilkårsvurderingService,
+    private val migreringRestClient: MigreringRestClient
 ) {
 
+    private val logger = LoggerFactory.getLogger(MigreringService::class.java)
     private val secureLog = LoggerFactory.getLogger("secureLogger")
     private val migrertCounter = Metrics.counter("migrering.ok")
+    private val migrertAvSaksbehandler = Metrics.counter("migrering.saksbehandler")
+    private val migrertAvSaksbehandlerNotificationFeil = Metrics.counter("migrering.saksbehandler.send.feilet")
 
     @Transactional
     fun migrer(personIdent: String): MigreringResponseDto {
@@ -87,7 +93,9 @@ class MigreringService(
 
             val løpendeSak = hentLøpendeSakFraInfotrygd(personIdent)
 
-            kastFeilDersomSakIkkeErOrdinær(løpendeSak)
+            val underkategori = kastFeilEllerHentUnderkategori(løpendeSak)
+            kastfeilHvisIkkeEnDelytelseIInfotrygd(løpendeSak)
+
             secureLog.info("Migrering: fant løpende sak for $personIdent sak=${løpendeSak.id} stønad=${løpendeSak.stønad?.id}")
 
             val barnasIdenter = finnBarnMedLøpendeStønad(løpendeSak)
@@ -109,6 +117,7 @@ class MigreringService(
                         behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
                         behandlingÅrsak = BehandlingÅrsak.MIGRERING,
                         skalBehandlesAutomatisk = true,
+                        underkategori = underkategori,
                         barnasIdenter = barnasIdenter
                     )
                 )
@@ -119,7 +128,8 @@ class MigreringService(
                 vilkårsvurderingService.oppdater(this)
             } ?: kastOgTellMigreringsFeil(MigreringsfeilType.MANGLER_VILKÅRSVURDERING)
 
-            val behandlingEtterVilkårsvurdering = stegService.håndterVilkårsvurdering(behandling)
+            val behandlingEtterVilkårsvurdering =
+                stegService.håndterVilkårsvurdering(behandling) // Se funksjonen lagVilkårsvurderingForMigreringsbehandling i VilkårService
 
             val førsteUtbetalingsperiode = finnFørsteUtbetalingsperiode(behandling.id)
 
@@ -139,6 +149,18 @@ class MigreringService(
                 infotrygdRegion = løpendeSak.region
             )
             secureLog.info("Ferdig migrert $personIdent. Response til familie-ba-migrering: $migreringResponseDto")
+
+            if (!SikkerhetContext.erSystemKontekst() && !env!!.erDev()) {
+                logger.info("Sender manuelt trigget migrering til familie-ba-migrering")
+                Result.runCatching {
+                    migrertAvSaksbehandler.increment()
+                    migreringRestClient.migrertAvSaksbehandler(personIdent, migreringResponseDto)
+                }.onFailure {
+                    // logg og fortsett siden dette ikke er kritisk
+                    logger.warn("Klarte ikke sende migrert av saksbehandler til familie-ba-migrering. $migreringResponseDto")
+                    migrertAvSaksbehandlerNotificationFeil.increment()
+                }
+            }
             return migreringResponseDto
         } catch (e: Exception) {
             if (e is KanIkkeMigrereException) throw e
@@ -157,7 +179,7 @@ class MigreringService(
         val søkerIdenter = personidentService.hentIdenter(personIdent = personIdent, historikk = true)
             .filter { it.gruppe == "FOLKEREGISTERIDENT" }
 
-        if (søkerIdenter.filter { it.ident == personIdent }.single().historisk) {
+        if (søkerIdenter.single { it.ident == personIdent }.historisk) {
             secureLog.warn("Personident $personIdent er historisk, og kan ikke brukes til å migrere$søkerIdenter")
             kastOgTellMigreringsFeil(MigreringsfeilType.IDENT_IKKE_LENGER_AKTIV)
         }
@@ -192,10 +214,8 @@ class MigreringService(
                         kastOgTellMigreringsFeil(MigreringsfeilType.ALLEREDE_MIGRERT)
                     }
                     FagsakStatus.AVSLUTTET -> {
-                        val behandling = behandlinger.find { it.opprettetTidspunkt.isAfter(this.opprettetTidspunkt) }
-                        if (behandling == null) {
-                            kastOgTellMigreringsFeil(MigreringsfeilType.FAGSAK_AVSLUTTET_UTEN_MIGRERING)
-                        }
+                        behandlinger.find { it.opprettetTidspunkt.isAfter(this.opprettetTidspunkt) }
+                            ?: kastOgTellMigreringsFeil(MigreringsfeilType.FAGSAK_AVSLUTTET_UTEN_MIGRERING)
                     }
                 }
             } ?: kastOgTellMigreringsFeil(MigreringsfeilType.AKTIV_BEHANDLING)
@@ -223,10 +243,22 @@ class MigreringService(
         return ikkeOpphørteSaker.first()
     }
 
-    private fun kastFeilDersomSakIkkeErOrdinær(sak: Sak) {
-        if (!(sak.valg == "OR" && sak.undervalg == "OS")) {
-            kastOgTellMigreringsFeil(MigreringsfeilType.IKKE_STØTTET_SAKSTYPE)
+    private fun kastFeilEllerHentUnderkategori(sak: Sak): BehandlingUnderkategori {
+
+        return when {
+            (sak.valg == "OR" && sak.undervalg == "OS") -> {
+                BehandlingUnderkategori.ORDINÆR
+            }
+            (sak.valg == "UT" && sak.undervalg == "EF" && !env.erProd()) -> {
+                BehandlingUnderkategori.UTVIDET
+            }
+            else -> {
+                kastOgTellMigreringsFeil(MigreringsfeilType.IKKE_STØTTET_SAKSTYPE)
+            }
         }
+    }
+
+    private fun kastfeilHvisIkkeEnDelytelseIInfotrygd(sak: Sak) {
         when (sak.stønad!!.delytelse.filter { it.tom == null }.size) {
             1 -> return
             else -> {
@@ -261,7 +293,7 @@ class MigreringService(
     private fun virkningsdatoFra(kjøredato: LocalDate): LocalDate {
         LocalDate.now().run {
             return when {
-                env?.erPreprod() ?: false -> LocalDate.of(2021, 7, 1)
+                env?.erPreprod() ?: false -> LocalDate.of(2022, 1, 1)
                 this.isBefore(kjøredato) -> this.førsteDagIInneværendeMåned()
                 this.isAfter(kjøredato.plusDays(1)) -> this.førsteDagINesteMåned()
                 env!!.erDev() -> this.førsteDagINesteMåned()
@@ -319,14 +351,14 @@ class MigreringService(
         infotrygdStønad: Stønad,
     ) {
         val beløpFraInfotrygd =
-            infotrygdStønad.delytelse.filter { it.tom == null }.singleOrNull()?.beløp?.toInt()
+            infotrygdStønad.delytelse.singleOrNull { it.tom == null }?.beløp?.toInt()
                 ?: kastOgTellMigreringsFeil(MigreringsfeilType.FLERE_DELYTELSER_I_INFOTRYGD)
 
         if (førsteUtbetalingsbeløp != beløpFraInfotrygd) {
             kastOgTellMigreringsFeil(
                 MigreringsfeilType.BEREGNET_BELØP_FOR_UTBETALING_ULIKT_BELØP_FRA_INFOTRYGD,
                 MigreringsfeilType.BEREGNET_BELØP_FOR_UTBETALING_ULIKT_BELØP_FRA_INFOTRYGD.beskrivelse +
-                    "($førsteUtbetalingsbeløp ≠ $beløpFraInfotrygd)"
+                    "($førsteUtbetalingsbeløp(ba-sak) ≠ $beløpFraInfotrygd(infotrygd))"
             )
         }
     }

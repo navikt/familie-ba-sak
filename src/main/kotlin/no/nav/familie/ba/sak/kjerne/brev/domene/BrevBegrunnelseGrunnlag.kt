@@ -16,6 +16,7 @@ data class BrevBegrunnelseGrunnlag(
         restBehandlingsgrunnlagForBrev: RestBehandlingsgrunnlagForBrev,
         identerMedUtbetalingPåPeriode: List<String>,
         erFørsteVedtaksperiodePåFagsak: Boolean,
+        erUregistrerteBarnPåbehandling: Boolean,
     ): BrevBegrunnelseGrunnlagMedPersoner {
         val personidenterGjeldendeForBegrunnelse: List<String> = hentPersonidenterGjeldendeForBegrunnelse(
             triggesAv = this.triggesAv,
@@ -26,7 +27,11 @@ data class BrevBegrunnelseGrunnlag(
             erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
         )
 
-        if (personidenterGjeldendeForBegrunnelse.isEmpty() && !this.triggesAv.satsendring) {
+        if (
+            personidenterGjeldendeForBegrunnelse.isEmpty() &&
+            !erUregistrerteBarnPåbehandling &&
+            !this.triggesAv.satsendring
+        ) {
             throw Feil(
                 "Begrunnelse '${this.vedtakBegrunnelseSpesifikasjon}' var ikke knyttet til noen personer."
             )

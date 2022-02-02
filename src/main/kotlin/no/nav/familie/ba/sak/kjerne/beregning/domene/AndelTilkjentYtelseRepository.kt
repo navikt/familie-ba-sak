@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import java.time.LocalDateTime
+import java.time.YearMonth
 
 interface AndelTilkjentYtelseRepository : JpaRepository<AndelTilkjentYtelse, Long> {
 
@@ -18,8 +19,11 @@ interface AndelTilkjentYtelseRepository : JpaRepository<AndelTilkjentYtelse, Lon
     @Query(value = "SELECT aty FROM AndelTilkjentYtelse aty WHERE aty.behandlingId = :behandlingId AND aty.aktør = :barnAktør")
     fun finnAndelerTilkjentYtelseForBehandlingOgBarn(behandlingId: Long, barnAktør: Aktør): List<AndelTilkjentYtelse>
 
-    @Query(value = "SELECT aty FROM AndelTilkjentYtelse aty WHERE aty.behandlingId IN :behandlingIder AND aty.stønadTom >= DATE_TRUNC('month', CURRENT_TIMESTAMP)")
-    fun finnLøpendeAndelerTilkjentYtelseForBehandlinger(behandlingIder: List<Long>): List<AndelTilkjentYtelse>
+    @Query(value = "SELECT aty FROM AndelTilkjentYtelse aty WHERE aty.behandlingId IN :behandlingIder AND aty.stønadTom >= :avstemmingstidspunkt")
+    fun finnLøpendeAndelerTilkjentYtelseForBehandlinger(
+        behandlingIder: List<Long>,
+        avstemmingstidspunkt: YearMonth
+    ): List<AndelTilkjentYtelse>
 
     // The query only returns the periods that overlap with the given year. Any periods that are
     // totally out of the year scope will be ignored.

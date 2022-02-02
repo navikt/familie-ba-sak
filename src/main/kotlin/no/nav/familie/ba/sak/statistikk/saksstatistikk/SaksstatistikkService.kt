@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.statistikk.saksstatistikk
 
-import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.Utils.hentPropertyFraMaven
 import no.nav.familie.ba.sak.integrasjoner.journalføring.JournalføringService
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.DbJournalpostType
@@ -18,7 +17,6 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
@@ -43,9 +41,7 @@ class SaksstatistikkService(
     private val vedtakService: VedtakService,
     private val fagsakService: FagsakService,
     private val personopplysningerService: PersonopplysningerService,
-    private val personidentService: PersonidentService,
     private val persongrunnlagService: PersongrunnlagService,
-    private val envService: EnvService,
     private val vedtaksperiodeService: VedtaksperiodeService,
 ) {
 

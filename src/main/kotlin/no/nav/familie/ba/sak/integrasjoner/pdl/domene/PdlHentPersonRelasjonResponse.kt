@@ -1,15 +1,9 @@
-package no.nav.familie.ba.sak.integrasjoner.pdl.internal
+package no.nav.familie.ba.sak.integrasjoner.pdl.domene
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import no.nav.familie.kontrakter.felles.personopplysning.ForelderBarnRelasjon
 
-data class PdlHentPersonRelasjonerResponse(
-    val data: PdlPersonRelasjon,
-    override val errors: List<PdlError>?
-) :
-    PdlBaseResponse(errors)
-
-data class PdlPersonRelasjon(val person: PdlPersonRelasjonData?)
+class PdlHentPersonRelasjonerResponse(val person: PdlPersonRelasjonData?)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class PdlPersonRelasjonData(

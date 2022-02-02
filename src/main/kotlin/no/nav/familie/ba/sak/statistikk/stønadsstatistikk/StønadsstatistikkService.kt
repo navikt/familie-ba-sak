@@ -12,7 +12,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.filtrerGjeldendeNå
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.eksterne.kontrakter.BehandlingOpprinnelse
@@ -163,10 +163,9 @@ class StønadsstatistikkService(
         )
     }
 
-    private fun hentStatsborgerskap(person: Person): List<String> = if (person.statsborgerskap.isNotEmpty()) {
-        person.statsborgerskap.map { grStatsborgerskap: GrStatsborgerskap -> grStatsborgerskap.landkode }
-    } else {
-        listOf(personopplysningerService.hentGjeldendeStatsborgerskap(person.aktør).land)
+    private fun hentStatsborgerskap(person: Person): List<String> {
+        return if (person.statsborgerskap.isNotEmpty()) person.statsborgerskap.filtrerGjeldendeNå().map { it.landkode }
+        else listOf(personopplysningerService.hentGjeldendeStatsborgerskap(person.aktør).land)
     }
 
     private fun hentLandkode(person: Person): String = if (person.bostedsadresser.isNotEmpty()) "NO" else {

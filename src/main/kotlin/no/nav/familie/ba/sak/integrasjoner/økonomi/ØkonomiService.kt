@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.integrasjoner.økonomi
 
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.gjeldendeForrigeOffsetForKjede
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.kjedeinndelteAndeler
@@ -16,8 +17,11 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRe
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragId
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragStatus
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
+import org.slf4j.LoggerFactory
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.web.client.HttpClientErrorException
 import java.time.YearMonth
 
 @Service
@@ -42,6 +46,15 @@ class ØkonomiService(
         try {
             økonomiKlient.iverksettOppdrag(utbetalingsoppdrag)
         } catch (e: Exception) {
+            if ((e is HttpClientErrorException) &&
+                e.statusCode == HttpStatus.CONFLICT &&
+                featureToggleService.isEnabled(FeatureToggleConfig.TEKNISK_IVERKSETT_MOT_OPPDRAG_ALLEREDE_SENDT)
+            ) {
+                // Mulighet å bypasse 409 feil.
+                logger.info("Bypasset feil med HttpKode 409 ved iverksetting mot økonomi for fagsak ${utbetalingsoppdrag.saksnummer}")
+                return
+            }
+
             throw Exception("Iverksetting mot oppdrag feilet", e)
         }
     }
@@ -136,14 +149,14 @@ class ØkonomiService(
     }
 
     fun hentSisteOffsetPåFagsak(behandling: Behandling): Int? =
-        behandlingService.hentBehandlingerSomErIverksatt(behandling = behandling).map { iverksattBehandling ->
+        behandlingService.hentBehandlingerSomErIverksatt(behandling = behandling).mapNotNull { iverksattBehandling ->
 
             beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(iverksattBehandling.id)
                 .takeIf { it.isNotEmpty() }
                 ?.let { andelerTilkjentYtelse ->
                     andelerTilkjentYtelse.maxByOrNull { it.periodeOffset!! }?.periodeOffset?.toInt()
                 }
-        }.filter { it != null }.maxByOrNull { it!! }
+        }.maxByOrNull { it }
 
     private fun validerOpphørsoppdrag(utbetalingsoppdrag: Utbetalingsoppdrag) {
         val (opphørsperioder, annet) = utbetalingsoppdrag.utbetalingsperiode.partition { it.opphør != null }
@@ -181,5 +194,10 @@ class ØkonomiService(
         } else {
             null
         }
+    }
+
+    companion object {
+
+        val logger = LoggerFactory.getLogger(ØkonomiService::class.java)
     }
 }

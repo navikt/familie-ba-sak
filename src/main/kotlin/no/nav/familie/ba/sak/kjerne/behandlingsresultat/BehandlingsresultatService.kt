@@ -86,7 +86,6 @@ class BehandlingsresultatService(
 
         val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(
             behandlingsresultatPersoner = behandlingsresultatPersoner,
-            personidentService = personidentService,
             uregistrerteBarn = søknadGrunnlag?.hentUregistrerteBarn()?.map {
                 MinimertUregistrertBarn(
                     personIdent = it.ident,
@@ -127,7 +126,7 @@ class BehandlingsresultatService(
         forrigeBehandling: Behandling?
     ): List<Aktør> {
         val barnFraSøknad = søknadDTO?.barnaMedOpplysninger
-            ?.filter { it.inkludertISøknaden }
+            ?.filter { it.inkludertISøknaden && it.erFolkeregistrert }
             ?.map { personidentService.hentOgLagreAktør(it.ident) }
             ?: emptyList()
 

@@ -1,13 +1,10 @@
 package no.nav.familie.ba.sak.kjerne.beregning.domene
 
 import no.nav.familie.ba.sak.common.BaseEntitet
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.YearMonthConverter
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
-import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
-import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.brev.UtvidetScenarioForEndringsperiode
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.erStartPåUtvidetSammeMåned
@@ -306,13 +303,6 @@ enum class YtelseType(val klassifisering: String) {
     MANUELL_VURDERING("BATR");
 
     fun erKnyttetTilSøker() = this == SMÅBARNSTILLEGG || this == UTVIDET_BARNETRYGD
-}
-
-fun List<AndelTilkjentYtelse>.hentLøpendeAndelForVedtaksperiode(): LocalDateSegment<Int> {
-    val sorterteSegmenter = this.utledSegmenter().sortedBy { it.fom }
-    return sorterteSegmenter.lastOrNull { it.fom.toYearMonth() <= inneværendeMåned() }
-        ?: sorterteSegmenter.firstOrNull()
-        ?: throw Feil("Finner ikke gjeldende segment ved fortsatt innvilget")
 }
 
 fun List<AndelTilkjentYtelse>.hentAndelerForSegment(

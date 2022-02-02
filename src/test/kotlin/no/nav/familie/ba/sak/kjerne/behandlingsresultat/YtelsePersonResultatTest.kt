@@ -7,7 +7,9 @@ import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
+import no.nav.familie.ba.sak.kjerne.personident.dummyAktør
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 class YtelsePersonResultatTest {
@@ -24,7 +26,6 @@ class YtelsePersonResultatTest {
     @Test
     fun `Skal utelede INNVILGET første gang krav for et barn fremstilles med løpende periode`() {
         val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(
-            personidentService = personidentService,
             behandlingsresultatPersoner = listOf(
                 BehandlingsresultatPerson(
                     aktør = barn1.aktør,
@@ -64,7 +65,6 @@ class YtelsePersonResultatTest {
         )
 
         val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(
-            personidentService = personidentService,
             behandlingsresultatPersoner = listOf(
                 BehandlingsresultatPerson(
                     aktør = barn1.aktør,
@@ -109,7 +109,6 @@ class YtelsePersonResultatTest {
         )
 
         val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(
-            personidentService = personidentService,
             behandlingsresultatPersoner = listOf(
                 BehandlingsresultatPerson(
                     aktør = barn1.aktør,
@@ -159,7 +158,6 @@ class YtelsePersonResultatTest {
         )
 
         val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(
-            personidentService = personidentService,
             behandlingsresultatPersoner = listOf(
                 BehandlingsresultatPerson(
                     aktør = barn1.aktør,
@@ -212,7 +210,6 @@ class YtelsePersonResultatTest {
         )
 
         val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(
-            personidentService = personidentService,
             behandlingsresultatPersoner = listOf(
                 BehandlingsresultatPerson(
                     aktør = barn1.aktør,
@@ -254,7 +251,6 @@ class YtelsePersonResultatTest {
         )
 
         val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(
-            personidentService = personidentService,
             behandlingsresultatPersoner = listOf(
                 BehandlingsresultatPerson(
                     aktør = barn1.aktør,
@@ -291,7 +287,6 @@ class YtelsePersonResultatTest {
         )
 
         val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(
-            personidentService = personidentService,
             behandlingsresultatPersoner = listOf(
                 BehandlingsresultatPerson(
                     aktør = barn1.aktør,
@@ -314,9 +309,8 @@ class YtelsePersonResultatTest {
      * AVSLÅTT
      */
     @Test
-    fun `Skal utelede AVSLÅTT første gang krav for barn fremstilles`() {
+    fun `Skal utlede AVSLÅTT første gang krav for barn fremstilles`() {
         val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(
-            personidentService = personidentService,
             behandlingsresultatPersoner = listOf(
                 BehandlingsresultatPerson(
                     aktør = barn1.aktør,
@@ -336,6 +330,33 @@ class YtelsePersonResultatTest {
     }
 
     @Test
+    fun `Skal utelede AVSLÅTT første gang krav for uregistrert barn fremstilles`() {
+        val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(
+            behandlingsresultatPersoner = emptyList(),
+            uregistrerteBarn = listOf(
+                MinimertUregistrertBarn(
+                    personIdent = "",
+                    navn = "",
+                    fødselsdato = null
+                ),
+                MinimertUregistrertBarn(
+                    personIdent = "",
+                    navn = "",
+                    fødselsdato = null
+                )
+            )
+        )
+
+        assertEquals(
+            2,
+            ytelsePersonerMedResultat.filter { it.aktør == dummyAktør }.size
+        )
+        assertTrue(
+            ytelsePersonerMedResultat.all { it.resultater == setOf(YtelsePersonResultat.AVSLÅTT) }
+        )
+    }
+
+    @Test
     fun `Skal utlede AVSLÅTT og OPPHØRT på søknad for nytt barn i revurdering`() {
         val forrigeAndelBarn1 = lagBehandlingsresultatAndelTilkjentYtelse(
             inneværendeMåned().minusYears(4).toString(),
@@ -344,7 +365,6 @@ class YtelsePersonResultatTest {
         )
 
         val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(
-            personidentService = personidentService,
             behandlingsresultatPersoner = listOf(
                 BehandlingsresultatPerson(
                     aktør = barn1.aktør,
@@ -388,7 +408,6 @@ class YtelsePersonResultatTest {
         )
 
         val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(
-            personidentService = personidentService,
             behandlingsresultatPersoner = listOf(
                 BehandlingsresultatPerson(
                     aktør = barn1.aktør,
@@ -427,7 +446,6 @@ class YtelsePersonResultatTest {
         )
 
         val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(
-            personidentService = personidentService,
             behandlingsresultatPersoner = listOf(
                 BehandlingsresultatPerson(
                     aktør = barn1.aktør,
@@ -464,7 +482,6 @@ class YtelsePersonResultatTest {
         )
 
         val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(
-            personidentService = personidentService,
             behandlingsresultatPersoner = listOf(
                 BehandlingsresultatPerson(
                     aktør = barn1.aktør,
@@ -503,7 +520,6 @@ class YtelsePersonResultatTest {
         )
 
         val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(
-            personidentService = personidentService,
             behandlingsresultatPersoner = listOf(
                 BehandlingsresultatPerson(
                     aktør = barn1.aktør,
@@ -547,7 +563,6 @@ class YtelsePersonResultatTest {
         )
 
         val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(
-            personidentService = personidentService,
             behandlingsresultatPersoner = listOf(
                 BehandlingsresultatPerson(
                     aktør = barn1.aktør,
@@ -579,7 +594,6 @@ class YtelsePersonResultatTest {
         )
 
         val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(
-            personidentService = personidentService,
             behandlingsresultatPersoner = listOf(
                 BehandlingsresultatPerson(
                     aktør = barn1.aktør,
@@ -622,7 +636,6 @@ class YtelsePersonResultatTest {
         )
 
         val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(
-            personidentService = personidentService,
             behandlingsresultatPersoner = listOf(
                 BehandlingsresultatPerson(
                     aktør = barn1.aktør,
@@ -656,7 +669,6 @@ class YtelsePersonResultatTest {
         )
 
         val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(
-            personidentService = personidentService,
             behandlingsresultatPersoner = listOf(
                 BehandlingsresultatPerson(
                     aktør = barn1.aktør,
@@ -695,7 +707,6 @@ class YtelsePersonResultatTest {
         )
 
         val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(
-            personidentService = personidentService,
             behandlingsresultatPersoner = listOf(
                 BehandlingsresultatPerson(
                     aktør = barn1.aktør,
@@ -733,7 +744,6 @@ class YtelsePersonResultatTest {
         )
 
         val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(
-            personidentService = personidentService,
             behandlingsresultatPersoner = listOf(
                 BehandlingsresultatPerson(
                     aktør = barn1.aktør,
@@ -778,7 +788,6 @@ class YtelsePersonResultatTest {
         )
 
         val ytelsePersonerMedResultat = YtelsePersonUtils.utledYtelsePersonerMedResultat(
-            personidentService = personidentService,
             behandlingsresultatPersoner = listOf(
                 BehandlingsresultatPerson(
                     aktør = barn1.aktør,

@@ -12,12 +12,12 @@ import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonExcep
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlIdentRestClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.VergeResponse
-import no.nav.familie.ba.sak.integrasjoner.pdl.internal.DødsfallData
-import no.nav.familie.ba.sak.integrasjoner.pdl.internal.ForelderBarnRelasjon
-import no.nav.familie.ba.sak.integrasjoner.pdl.internal.ForelderBarnRelasjonMaskert
-import no.nav.familie.ba.sak.integrasjoner.pdl.internal.IdentInformasjon
-import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PersonInfo
-import no.nav.familie.ba.sak.integrasjoner.pdl.internal.VergeData
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.DødsfallData
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjon
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjonMaskert
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.IdentInformasjon
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.VergeData
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.mockBarnAutomatiskBehandling
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.mockBarnAutomatiskBehandling2
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.mockBarnAutomatiskBehandling2Fnr
@@ -276,10 +276,6 @@ class ClientMocks {
             } returns DødsfallData(false, null)
 
             every {
-                mockPersonopplysningerService.hentDødsfall(any())
-            } returns DødsfallData(false, null)
-
-            every {
                 mockPersonopplysningerService.hentVergeData(any())
             } returns VergeData(false)
 
@@ -480,8 +476,8 @@ class ClientMocks {
                 sivilstander = sivilstandHistorisk,
                 statsborgerskap = listOf(
                     Statsborgerskap(
-                        land = "DEN",
-                        bekreftelsesdato = null,
+                        land = "DNK",
+                        bekreftelsesdato = LocalDate.now().minusYears(1),
                         gyldigFraOgMed = null,
                         gyldigTilOgMed = null
                     )

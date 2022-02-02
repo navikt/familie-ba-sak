@@ -43,6 +43,9 @@ class RolleTilgangskontrollFeil(
     throwable
 )
 
+class PdlRequestException(message: String) : Feil(message)
+class PdlNotFoundException : FunksjonellFeil("Fant ikke person")
+
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 @JsonPropertyOrder(value = ["melding", "path", "timestamp", "status", "exception", "stackTrace"])
 data class EksternTjenesteFeil(

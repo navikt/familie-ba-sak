@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.EksternTjenesteFeil
 import no.nav.familie.ba.sak.common.EksternTjenesteFeilException
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.PdlNotFoundException
 import no.nav.familie.ba.sak.common.RessursUtils.forbidden
 import no.nav.familie.ba.sak.common.RessursUtils.frontendFeil
 import no.nav.familie.ba.sak.common.RessursUtils.funksjonellFeil
@@ -65,6 +66,13 @@ class ApiExceptionHandler {
     @ExceptionHandler(FunksjonellFeil::class)
     fun handleFunksjonellFeil(funksjonellFeil: FunksjonellFeil): ResponseEntity<Ressurs<Nothing>> {
         return funksjonellFeil(funksjonellFeil)
+    }
+
+    @ExceptionHandler(PdlNotFoundException::class)
+    fun handleThrowable(feil: PdlNotFoundException): ResponseEntity<Ressurs<Nothing>> {
+        logger.warn("Finner ikke personen i PDL")
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+            .body(Ressurs.failure(frontendFeilmelding = "Fant ikke person"))
     }
 
     @ExceptionHandler(EksternTjenesteFeilException::class)
