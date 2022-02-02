@@ -21,6 +21,7 @@ import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 @Service
 class BeregningService(
@@ -37,8 +38,14 @@ class BeregningService(
         tilkjentYtelseRepository.findByBehandlingOptional(behandlingId)
             ?.let { tilkjentYtelseRepository.delete(it) }
 
-    fun hentLøpendeAndelerTilkjentYtelseMedUtbetalingerForBehandlinger(behandlingIder: List<Long>): List<AndelTilkjentYtelse> =
-        andelTilkjentYtelseRepository.finnLøpendeAndelerTilkjentYtelseForBehandlinger(behandlingIder)
+    fun hentLøpendeAndelerTilkjentYtelseMedUtbetalingerForBehandlinger(
+        behandlingIder: List<Long>,
+        avstemmingstidspunkt: LocalDateTime
+    ): List<AndelTilkjentYtelse> =
+        andelTilkjentYtelseRepository.finnLøpendeAndelerTilkjentYtelseForBehandlinger(
+            behandlingIder,
+            avstemmingstidspunkt
+        )
             .filter { it.erAndelSomSkalSendesTilOppdrag() }
 
     fun hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(behandlingId: Long): List<AndelTilkjentYtelse> =
