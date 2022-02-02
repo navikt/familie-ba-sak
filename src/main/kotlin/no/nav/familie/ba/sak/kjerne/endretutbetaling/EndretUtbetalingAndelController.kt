@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.endretutbetaling
 
+import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.ekstern.restDomene.RestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -37,7 +38,7 @@ class EndretUtbetalingAndelController(
         @PathVariable endretUtbetalingAndelId: Long,
         @RequestBody restEndretUtbetalingAndel: RestEndretUtbetalingAndel
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
-        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId)
+        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.UPDATE)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "Oppdater endretutbetalingandel"
@@ -52,7 +53,12 @@ class EndretUtbetalingAndelController(
         )
 
         vedtakService.resettStegVedEndringPåEndredeUtbetalingsperioder(behandlingId = behandling.id)
-        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandling.id)))
+        return ResponseEntity.ok(
+            Ressurs.success(
+                utvidetBehandlingService
+                    .lagRestUtvidetBehandling(behandlingId = behandling.id)
+            )
+        )
     }
 
     @DeleteMapping(path = ["{behandlingId}/{endretUtbetalingAndelId}"])
@@ -60,7 +66,7 @@ class EndretUtbetalingAndelController(
         @PathVariable behandlingId: Long,
         @PathVariable endretUtbetalingAndelId: Long,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
-        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId)
+        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.DELETE)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "Oppdater endretutbetalingandel"
@@ -74,14 +80,19 @@ class EndretUtbetalingAndelController(
         )
 
         vedtakService.resettStegVedEndringPåEndredeUtbetalingsperioder(behandlingId = behandling.id)
-        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandling.id)))
+        return ResponseEntity.ok(
+            Ressurs.success(
+                utvidetBehandlingService
+                    .lagRestUtvidetBehandling(behandlingId = behandling.id)
+            )
+        )
     }
 
     @PostMapping(path = ["/{behandlingId}"])
     fun lagreEndretUtbetalingAndelOgOppdaterTilkjentYtelse(
         @PathVariable behandlingId: Long,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
-        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId)
+        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.UPDATE)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "Opprett endretutbetalingandel"
@@ -91,6 +102,11 @@ class EndretUtbetalingAndelController(
         endretUtbetalingAndelService.opprettTomEndretUtbetalingAndelOgOppdaterTilkjentYtelse(behandling)
 
         vedtakService.resettStegVedEndringPåEndredeUtbetalingsperioder(behandlingId = behandling.id)
-        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandling.id)))
+        return ResponseEntity.ok(
+            Ressurs.success(
+                utvidetBehandlingService
+                    .lagRestUtvidetBehandling(behandlingId = behandling.id)
+            )
+        )
     }
 }

@@ -7,6 +7,8 @@ import no.nav.familie.ba.sak.common.RolleTilgangskontrollFeil
 import no.nav.familie.ba.sak.common.defaultFagsak
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
+import no.nav.familie.ba.sak.config.AuditLogger
+import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.RolleConfig
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -15,10 +17,12 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagSe
 import no.nav.familie.ba.sak.util.BrukerContextUtil.clearBrukerContext
 import no.nav.familie.ba.sak.util.BrukerContextUtil.mockBrukerContext
 import no.nav.familie.kontrakter.felles.tilgangskontroll.Tilgang
+import no.nav.familie.log.mdc.MDCConstants
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.slf4j.MDC
 import org.springframework.cache.concurrent.ConcurrentMapCacheManager
 
 class TilgangServiceTest {
@@ -31,6 +35,7 @@ class TilgangServiceTest {
     private val kode6Gruppe = "kode6"
     private val kode7Gruppe = "kode7"
     private val rolleConfig = RolleConfig("", "", "", KODE6 = kode6Gruppe, KODE7 = kode7Gruppe)
+    private val auditLogger = AuditLogger("familie-ba-sak")
     private val tilgangService =
         TilgangService(
             integrasjonClient = integrasjonClient,
@@ -38,7 +43,8 @@ class TilgangServiceTest {
             persongrunnlagService = persongrunnlagService,
             fagsakService = fagsakService,
             rolleConfig = rolleConfig,
-            cacheManager = cacheManager
+            cacheManager = cacheManager,
+            auditLogger = auditLogger
         )
 
     private val fagsak = defaultFagsak()
@@ -53,6 +59,7 @@ class TilgangServiceTest {
 
     @BeforeEach
     internal fun setUp() {
+        MDC.put(MDCConstants.MDC_CALL_ID, "00001111")
         mockBrukerContext("A")
         every { fagsakService.hentAktør(fagsak.id) } returns fagsak.aktør
         every { behandlingService.hent(any()) } returns behandling
@@ -68,28 +75,38 @@ class TilgangServiceTest {
     internal fun `skal kaste RolleTilgangskontrollFeil dersom saksbehandler ikke har tilgang til person eller dets barn`() {
         every { integrasjonClient.sjekkTilgangTilPersoner(any()) } returns Tilgang(false)
 
-        assertThrows<RolleTilgangskontrollFeil> { tilgangService.validerTilgangTilPersoner(listOf(aktør.aktivFødselsnummer())) }
+        assertThrows<RolleTilgangskontrollFeil> {
+            tilgangService.validerTilgangTilPersoner(
+                listOf(aktør.aktivFødselsnummer()),
+                AuditLoggerEvent.ACCESS
+            )
+        }
     }
 
     @Test
     internal fun `skal ikke feile når saksbehandler har tilgang til person og dets barn`() {
         every { integrasjonClient.sjekkTilgangTilPersoner(any()) } returns Tilgang(true)
 
-        tilgangService.validerTilgangTilPersoner(listOf(aktør.aktivFødselsnummer()))
+        tilgangService.validerTilgangTilPersoner(listOf(aktør.aktivFødselsnummer()), AuditLoggerEvent.ACCESS)
     }
 
     @Test
     internal fun `skal kaste RolleTilgangskontrollFeil dersom saksbehandler ikke har tilgang til behandling`() {
         every { integrasjonClient.sjekkTilgangTilPersoner(any()) } returns Tilgang(false)
 
-        assertThrows<RolleTilgangskontrollFeil> { tilgangService.validerTilgangTilBehandling(behandling.id) }
+        assertThrows<RolleTilgangskontrollFeil> {
+            tilgangService.validerTilgangTilBehandling(
+                behandling.id,
+                AuditLoggerEvent.ACCESS
+            )
+        }
     }
 
     @Test
     internal fun `skal ikke feile når saksbehandler har tilgang til behandling`() {
         every { integrasjonClient.sjekkTilgangTilPersoner(any()) } returns Tilgang(true)
 
-        tilgangService.validerTilgangTilBehandling(behandling.id)
+        tilgangService.validerTilgangTilBehandling(behandling.id, AuditLoggerEvent.ACCESS)
     }
 
     @Test
@@ -97,8 +114,8 @@ class TilgangServiceTest {
         every { integrasjonClient.sjekkTilgangTilPersoner(any()) } returns Tilgang(true)
 
         mockBrukerContext("A")
-        tilgangService.validerTilgangTilPersoner(listOf(olaIdent))
-        tilgangService.validerTilgangTilPersoner(listOf(olaIdent))
+        tilgangService.validerTilgangTilPersoner(listOf(olaIdent), AuditLoggerEvent.ACCESS)
+        tilgangService.validerTilgangTilPersoner(listOf(olaIdent), AuditLoggerEvent.ACCESS)
         verify(exactly = 1) {
             integrasjonClient.sjekkTilgangTilPersoner(any())
         }
@@ -109,9 +126,9 @@ class TilgangServiceTest {
         every { integrasjonClient.sjekkTilgangTilPersoner(any()) } returns Tilgang(true)
 
         mockBrukerContext("A")
-        tilgangService.validerTilgangTilPersoner(listOf(olaIdent))
+        tilgangService.validerTilgangTilPersoner(listOf(olaIdent), AuditLoggerEvent.ACCESS)
         mockBrukerContext("B")
-        tilgangService.validerTilgangTilPersoner(listOf(olaIdent))
+        tilgangService.validerTilgangTilPersoner(listOf(olaIdent), AuditLoggerEvent.ACCESS)
 
         verify(exactly = 2) {
             integrasjonClient.sjekkTilgangTilPersoner(any())
@@ -124,8 +141,8 @@ class TilgangServiceTest {
 
         mockBrukerContext("A")
 
-        tilgangService.validerTilgangTilBehandling(behandling.id)
-        tilgangService.validerTilgangTilBehandling(behandling.id)
+        tilgangService.validerTilgangTilBehandling(behandling.id, AuditLoggerEvent.ACCESS)
+        tilgangService.validerTilgangTilBehandling(behandling.id, AuditLoggerEvent.ACCESS)
 
         verify(exactly = 1) {
             integrasjonClient.sjekkTilgangTilPersoner(any())
@@ -137,9 +154,9 @@ class TilgangServiceTest {
         every { integrasjonClient.sjekkTilgangTilPersoner(any()) } returns Tilgang(true)
 
         mockBrukerContext("A")
-        tilgangService.validerTilgangTilBehandling(behandling.id)
+        tilgangService.validerTilgangTilBehandling(behandling.id, AuditLoggerEvent.ACCESS)
         mockBrukerContext("B")
-        tilgangService.validerTilgangTilBehandling(behandling.id)
+        tilgangService.validerTilgangTilBehandling(behandling.id, AuditLoggerEvent.ACCESS)
 
         verify(exactly = 2) {
             integrasjonClient.sjekkTilgangTilPersoner(any())

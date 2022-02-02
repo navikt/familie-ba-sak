@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.fagsak
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.RessursUtils.illegalState
+import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsakDeltager
 import no.nav.familie.ba.sak.ekstern.restDomene.RestHentFagsakForPerson
@@ -45,7 +46,8 @@ class FagsakController(
         if (fagsakRequest.personIdent != null) tilgangService.validerTilgangTilPersoner(
             personIdenter = listOf(
                 fagsakRequest.personIdent
-            )
+            ),
+            event = AuditLoggerEvent.CREATE
         )
         tilgangService.verifiserHarTilgangTilHandling(BehandlerRolle.SAKSBEHANDLER, "opprette fagsak")
 
@@ -59,7 +61,7 @@ class FagsakController(
     @GetMapping(path = ["/{fagsakId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun hentRestFagsak(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<RestFagsak>> {
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} henter fagsak med id $fagsakId")
-        tilgangService.validerTilgangTilFagsak(fagsakId = fagsakId)
+        tilgangService.validerTilgangTilFagsak(fagsakId = fagsakId, event = AuditLoggerEvent.ACCESS)
 
         val fagsak = fagsakService.hentRestFagsak(fagsakId)
         return ResponseEntity.ok().body(fagsak)
@@ -68,7 +70,7 @@ class FagsakController(
     @GetMapping(path = ["/minimal/{fagsakId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun hentMinimalFagsak(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<RestMinimalFagsak>> {
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} henter minimal fagsak med id $fagsakId")
-        tilgangService.validerTilgangTilFagsak(fagsakId = fagsakId)
+        tilgangService.validerTilgangTilFagsak(fagsakId = fagsakId, event = AuditLoggerEvent.ACCESS)
 
         val fagsak = fagsakService.hentRestMinimalFagsak(fagsakId)
         return ResponseEntity.ok().body(fagsak)
@@ -76,7 +78,10 @@ class FagsakController(
 
     @PostMapping(path = ["/hent-fagsak-paa-person"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun hentMinimalFagsakForPerson(@RequestBody request: RestHentFagsakForPerson): ResponseEntity<Ressurs<RestMinimalFagsak>> {
-        tilgangService.validerTilgangTilPersoner(personIdenter = listOf(request.personIdent))
+        tilgangService.validerTilgangTilPersoner(
+            personIdenter = listOf(request.personIdent),
+            event = AuditLoggerEvent.ACCESS
+        )
 
         return Result.runCatching {
             val aktør = personidentService.hentOgLagreAktør(request.personIdent)
