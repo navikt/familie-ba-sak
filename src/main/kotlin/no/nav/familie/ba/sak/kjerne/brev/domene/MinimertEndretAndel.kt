@@ -37,9 +37,6 @@ class MinimertEndretAndel(
     }
 }
 
-fun List<MinimertEndretAndel>.somOverlapper(nullableMånedPeriode: NullableMånedPeriode) =
-    this.filter { it.erOverlappendeMed(nullableMånedPeriode) }
-
 fun EndretUtbetalingAndel.tilMinimertEndretUtbetalingAndel() = MinimertEndretAndel(
     fom = this.fom!!,
     tom = this.tom!!,

@@ -106,11 +106,6 @@ class BisysController(private val bisysService: BisysService) {
             )
         }
     }
-
-    companion object {
-
-        const val JAVA_LANG_STRING = "java.lang.String"
-    }
 }
 
 data class BisysUtvidetBarnetrygdRequest(

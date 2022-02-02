@@ -134,7 +134,7 @@ data class VedtaksperiodeMedBegrunnelser(
             emptyList()
         }
 
-    fun hentVertikaltSegmentForVedtaksperiode(
+    private fun hentVertikaltSegmentForVedtaksperiode(
         andelerTilkjentYtelse: List<AndelTilkjentYtelse>
     ) = andelerTilkjentYtelse
         .utledSegmenter()

@@ -16,7 +16,7 @@ class SettPåVentService(
 
     fun finnAktivSettPåVentPåBehandlingThrows(behandlingId: Long): SettPåVent {
         return finnAktivSettPåVentPåBehandling(behandlingId)
-            ?: throw Feil("Behandling $behandlingId er ikke satt på vent.",)
+            ?: throw Feil("Behandling $behandlingId er ikke satt på vent.")
     }
 
     fun settBehandlingPåVent(behandlingId: Long, frist: LocalDate, årsak: SettPåVentÅrsak): SettPåVent {

@@ -106,9 +106,7 @@ internal class SaksstatistikkServiceTest(
         vedtakService,
         fagsakService,
         personopplysningerService,
-        personidentService,
         persongrunnlagService,
-        envService,
         vedtaksperiodeService,
     )
 

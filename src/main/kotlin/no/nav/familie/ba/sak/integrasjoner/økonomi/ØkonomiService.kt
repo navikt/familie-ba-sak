@@ -149,14 +149,14 @@ class ØkonomiService(
     }
 
     fun hentSisteOffsetPåFagsak(behandling: Behandling): Int? =
-        behandlingService.hentBehandlingerSomErIverksatt(behandling = behandling).map { iverksattBehandling ->
+        behandlingService.hentBehandlingerSomErIverksatt(behandling = behandling).mapNotNull { iverksattBehandling ->
 
             beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(iverksattBehandling.id)
                 .takeIf { it.isNotEmpty() }
                 ?.let { andelerTilkjentYtelse ->
                     andelerTilkjentYtelse.maxByOrNull { it.periodeOffset!! }?.periodeOffset?.toInt()
                 }
-        }.filter { it != null }.maxByOrNull { it!! }
+        }.maxByOrNull { it }
 
     private fun validerOpphørsoppdrag(utbetalingsoppdrag: Utbetalingsoppdrag) {
         val (opphørsperioder, annet) = utbetalingsoppdrag.utbetalingsperiode.partition { it.opphør != null }

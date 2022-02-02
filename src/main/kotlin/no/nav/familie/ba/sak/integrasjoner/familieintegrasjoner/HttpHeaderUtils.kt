@@ -7,8 +7,3 @@ fun HttpHeaders.medContentTypeJsonUTF8(): HttpHeaders {
     this.acceptCharset = listOf(Charsets.UTF_8)
     return this
 }
-
-fun HttpHeaders.medAktørId(aktørId: String): HttpHeaders {
-    this.add("Nav-Aktorid", aktørId)
-    return this
-}

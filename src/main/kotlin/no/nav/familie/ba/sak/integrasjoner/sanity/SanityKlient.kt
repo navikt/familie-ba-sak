@@ -1,7 +1,8 @@
-package no.nav.familie.ba.sak.kjerne.brev
+package no.nav.familie.ba.sak.integrasjoner.sanity
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.config.restTemplate
+import no.nav.familie.ba.sak.kjerne.brev.BrevKlient
 import no.nav.familie.ba.sak.kjerne.brev.domene.RestSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import org.slf4j.LoggerFactory
