@@ -27,17 +27,6 @@ object SikkerhetContext {
             )
     }
 
-    fun hentGrupper(): List<String> {
-        return Result.runCatching { SpringTokenValidationContextHolder().tokenValidationContext }
-            .fold(
-                onSuccess = {
-                    @Suppress("UNCHECKED_CAST")
-                    it.getClaims("azuread")?.get("groups") as List<String>? ?: emptyList()
-                },
-                onFailure = { emptyList() }
-            )
-    }
-
     fun hentRolletilgangFraSikkerhetscontext(
         rolleConfig: RolleConfig,
         lavesteSikkerhetsnivå: BehandlerRolle?
@@ -70,5 +59,16 @@ object SikkerhetContext {
             grupper.contains(rolleConfig.VEILEDER_ROLLE) -> BehandlerRolle.VEILEDER
             else -> BehandlerRolle.UKJENT
         }
+    }
+
+    private fun hentGrupper(): List<String> {
+        return Result.runCatching { SpringTokenValidationContextHolder().tokenValidationContext }
+            .fold(
+                onSuccess = {
+                    @Suppress("UNCHECKED_CAST")
+                    it.getClaims("azuread")?.get("groups") as List<String>? ?: emptyList()
+                },
+                onFailure = { emptyList() }
+            )
     }
 }

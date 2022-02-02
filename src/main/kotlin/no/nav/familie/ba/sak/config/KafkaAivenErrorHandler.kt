@@ -28,8 +28,6 @@ class KafkaAivenErrorHandler : ContainerStoppingErrorHandler() {
         consumer: Consumer<*, *>,
         container: MessageListenerContainer
     ) {
-        Thread.sleep(1000)
-
         if (records.isNullOrEmpty()) {
             logger.error("Feil ved konsumering av melding. Ingen records. ${consumer.subscription()}", e)
             scheduleRestart(
@@ -81,7 +79,12 @@ class KafkaAivenErrorHandler : ContainerStoppingErrorHandler() {
             }
         }
         logger.warn("Stopper kafka container for $topic i ${Duration.ofMillis(stopTime)}")
-        super.handle(Exception("Sjekk securelogs for mer info - ${e::class.java.simpleName}"), records, consumer, container)
+        super.handle(
+            Exception("Sjekk securelogs for mer info - ${e::class.java.simpleName}"),
+            records,
+            consumer,
+            container
+        )
     }
 
     companion object {

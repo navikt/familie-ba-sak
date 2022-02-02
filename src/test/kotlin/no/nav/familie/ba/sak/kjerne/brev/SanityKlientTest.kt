@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.brev
 
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
+import no.nav.familie.ba.sak.integrasjoner.sanity.hentSanityBegrunnelser
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
