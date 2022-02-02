@@ -89,7 +89,7 @@ fun BrevPeriodeGrunnlag.tilBrevPeriodeForLogging(
             )
         },
         utvidetScenarioForEndringsperiode = utvidetScenarioForEndringsperiode,
-        uregistrerteBarn = uregistrerteBarn,
+        uregistrerteBarn = uregistrerteBarn.map { it.copy(personIdent = "", navn = "") },
         erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
         brevMålform = brevMålform,
     )
