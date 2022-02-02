@@ -60,7 +60,7 @@ class TilgangServiceTest {
     @BeforeEach
     internal fun setUp() {
         MDC.put(MDCConstants.MDC_CALL_ID, "00001111")
-        mockBrukerContext("A")
+        mockBrukerContext()
         every { fagsakService.hentAktør(fagsak.id) } returns fagsak.aktør
         every { behandlingService.hent(any()) } returns behandling
         every { persongrunnlagService.hentAktiv(any()) } returns personopplysningGrunnlag
