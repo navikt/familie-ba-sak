@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.behandlingsresultat
+package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.Utils
