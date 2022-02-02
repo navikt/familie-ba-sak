@@ -6,7 +6,7 @@ import no.nav.familie.ba.sak.common.lagTriggesAv
 import no.nav.familie.ba.sak.common.lagVilkårResultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertVilkårResultat
-import no.nav.familie.ba.sak.kjerne.vedtak.erFørstePeriodeOgVilkårIkkeOppfylt
+import no.nav.familie.ba.sak.kjerne.brev.erFørstePeriodeOgVilkårIkkeOppfylt
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test

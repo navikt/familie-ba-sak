@@ -13,7 +13,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.tilRestMinimalFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestVisningBehandling
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
-import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PersonInfo
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.integrasjoner.skyggesak.SkyggesakService
 import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService

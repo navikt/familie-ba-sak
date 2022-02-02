@@ -73,9 +73,9 @@ object RessursUtils {
         secureLogger.error(
             "$className En håndtert feil har oppstått(${feil.httpStatus}): " +
                 "${feil.frontendFeilmelding}, ${feil.stackTrace}",
-            throwable
+            feil
         )
-        logger.error("$className En håndtert feil har oppstått(${feil.httpStatus}): ${feil.message} ")
+        logger.error("$className En håndtert feil har oppstått(${feil.httpStatus}): ${feil.message} ", feil)
 
         return ResponseEntity.status(feil.httpStatus).body(
             Ressurs.failure(

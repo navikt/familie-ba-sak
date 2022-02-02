@@ -33,8 +33,6 @@ import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
-private const val INFOTRYGD_NULLDATO = "000000"
-
 @Service
 class VelgFagSystemService(
     private val fagsakService: FagsakService,

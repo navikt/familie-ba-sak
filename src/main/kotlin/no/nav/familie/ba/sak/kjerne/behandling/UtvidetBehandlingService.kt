@@ -96,7 +96,7 @@ class UtvidetBehandlingService(
                 skalMinimeres = behandling.status != BehandlingStatus.UTREDES
             ),
             totrinnskontroll = totrinnskontroll?.tilRestTotrinnskontroll(),
-            settPåVent = settPåVentService.finnAktivSettPåVentPåBehandling(behandlingId = behandlingId)
+            aktivSettPåVent = settPåVentService.finnAktivSettPåVentPåBehandling(behandlingId = behandlingId)
                 ?.tilRestSettPåVent(),
         )
     }

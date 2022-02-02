@@ -111,7 +111,11 @@ fun BrevPeriodeGrunnlag.tilBrevPeriode(
     brevMålform: Målform
 ): BrevPeriode? {
     val brevPeriodeGrunnlagMedPersoner =
-        this.tilBrevPeriodeGrunnlagMedPersoner(restBehandlingsgrunnlagForBrev, erFørsteVedtaksperiodePåFagsak)
+        this.tilBrevPeriodeGrunnlagMedPersoner(
+            restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev,
+            erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
+            erUregistrerteBarnPåbehandling = uregistrerteBarn.isNotEmpty(),
+        )
 
     val begrunnelserOgFritekster = brevPeriodeGrunnlagMedPersoner.byggBegrunnelserOgFritekster(
         uregistrerteBarn = uregistrerteBarn,

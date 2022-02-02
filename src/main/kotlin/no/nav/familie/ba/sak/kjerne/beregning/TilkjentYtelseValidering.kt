@@ -113,19 +113,6 @@ object TilkjentYtelseValidering {
         }
     }
 
-    fun erAndelMedØktBeløpFørDato(
-        forrigeAndeler: List<AndelTilkjentYtelse>?,
-        andeler: List<AndelTilkjentYtelse>,
-        måned: YearMonth?
-    ): Boolean = andeler
-        .filter { it.stønadFom < måned }
-        .any { andel ->
-            forrigeAndeler?.any {
-                it.periode.overlapperHeltEllerDelvisMed(andel.periode) &&
-                    it.kalkulertUtbetalingsbeløp < andel.kalkulertUtbetalingsbeløp
-            } ?: false
-        }
-
     fun validerAtTilkjentYtelseHarFornuftigePerioderOgBeløp(
         tilkjentYtelse: TilkjentYtelse,
         personopplysningGrunnlag: PersonopplysningGrunnlag
@@ -173,6 +160,22 @@ object TilkjentYtelseValidering {
         }
     }
 
+    fun maksBeløp(personType: PersonType): Int {
+        val satser = SatsService.hentAllesatser()
+        val småbarnsTillegg = satser.filter { it.type == SatsType.SMA }
+        val ordinærMedTillegg = satser.filter { it.type == SatsType.TILLEGG_ORBA }
+        val ordinær = satser.filter { it.type == SatsType.ORBA }
+        if (småbarnsTillegg.isEmpty() || ordinærMedTillegg.isEmpty() || ordinær.isEmpty()) error("Fant ikke satser ved validering")
+        val maksSmåbarnstillegg = småbarnsTillegg.maxByOrNull { it.beløp }!!.beløp
+        val maksOrdinærMedTillegg = ordinærMedTillegg.maxByOrNull { it.beløp }!!.beløp
+        val maksOrdinær = ordinær.maxByOrNull { it.beløp }!!.beløp
+        return when (personType) {
+            PersonType.BARN -> maksOrdinærMedTillegg
+            PersonType.SØKER -> maksOrdinær + maksSmåbarnstillegg
+            else -> throw Feil("Ikke støtte for å utbetale til persontype ${personType.name}")
+        }
+    }
+
     private fun validerIngenOverlappAvAndeler(
         andeler: List<AndelTilkjentYtelse>,
         barnsAndelerFraAndreBehandlinger: List<AndelTilkjentYtelse>,
@@ -197,21 +200,18 @@ object TilkjentYtelseValidering {
         }
     }
 
-    fun maksBeløp(personType: PersonType): Int {
-        val satser = SatsService.hentAllesatser()
-        val småbarnsTillegg = satser.filter { it.type == SatsType.SMA }
-        val ordinærMedTillegg = satser.filter { it.type == SatsType.TILLEGG_ORBA }
-        val ordinær = satser.filter { it.type == SatsType.ORBA }
-        if (småbarnsTillegg.isEmpty() || ordinærMedTillegg.isEmpty() || ordinær.isEmpty()) error("Fant ikke satser ved validering")
-        val maksSmåbarnstillegg = småbarnsTillegg.maxByOrNull { it.beløp }!!.beløp
-        val maksOrdinærMedTillegg = ordinærMedTillegg.maxByOrNull { it.beløp }!!.beløp
-        val maksOrdinær = ordinær.maxByOrNull { it.beløp }!!.beløp
-        return when (personType) {
-            PersonType.BARN -> maksOrdinærMedTillegg
-            PersonType.SØKER -> maksOrdinær + maksSmåbarnstillegg
-            else -> throw Feil("Ikke støtte for å utbetale til persontype ${personType.name}")
+    private fun erAndelMedØktBeløpFørDato(
+        forrigeAndeler: List<AndelTilkjentYtelse>?,
+        andeler: List<AndelTilkjentYtelse>,
+        måned: YearMonth?
+    ): Boolean = andeler
+        .filter { it.stønadFom < måned }
+        .any { andel ->
+            forrigeAndeler?.any {
+                it.periode.overlapperHeltEllerDelvisMed(andel.periode) &&
+                    it.kalkulertUtbetalingsbeløp < andel.kalkulertUtbetalingsbeløp
+            } ?: false
         }
-    }
 }
 
 private fun validerAtBeløpForPartStemmerMedSatser(

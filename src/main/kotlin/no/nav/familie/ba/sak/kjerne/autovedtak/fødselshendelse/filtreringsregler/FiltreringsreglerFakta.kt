@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler
 
 import com.fasterxml.jackson.annotation.JsonIgnore
-import no.nav.familie.ba.sak.integrasjoner.pdl.internal.PersonInfo
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import java.time.LocalDate
 

@@ -128,9 +128,7 @@ fun Periode.kanFlytteTom(other: Periode): Boolean {
     return this.fom.isBetween(other) && this.tom.isSameOrAfter(other.tom)
 }
 
-data class Periode(val fom: LocalDate, val tom: LocalDate) {
-    fun tilMånedPeriode() = MånedPeriode(fom.toYearMonth(), tom.toYearMonth())
-}
+data class Periode(val fom: LocalDate, val tom: LocalDate)
 
 data class MånedPeriode(val fom: YearMonth, val tom: YearMonth)
 data class NullablePeriode(val fom: LocalDate?, val tom: LocalDate?) {
@@ -163,7 +161,7 @@ fun lagOgValiderPeriodeFraVilkår(
             )
         }
         else -> {
-            throw Feil("Ugyldig periode. Periode må ha t.o.m.-dato eller være et avslag uten datoer.")
+            throw FunksjonellFeil("Ugyldig periode. Periode må ha t.o.m.-dato eller være et avslag uten datoer.")
         }
     }
 }
