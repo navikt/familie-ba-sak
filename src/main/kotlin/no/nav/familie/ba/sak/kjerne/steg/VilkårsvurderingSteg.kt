@@ -4,7 +4,7 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
-import no.nav.familie.ba.sak.kjerne.behandlingsresultat.validerSøkerBosattIRiketTomdato
+import no.nav.familie.ba.sak.kjerne.behandlingsresultat.validerIngenVilkårSattEtterSøkersDød
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
@@ -22,6 +22,18 @@ class VilkårsvurderingSteg(
     private val tilbakestillBehandlingService: TilbakestillBehandlingService
 ) : BehandlingSteg<String> {
 
+    override fun preValiderSteg(behandling: Behandling, stegService: StegService?) {
+        val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandling.id)
+
+        if (behandling.opprettetÅrsak == BehandlingÅrsak.DØDSFALL_BRUKER) {
+            val vilkårsvurdering = vilkårService.hentVilkårsvurderingThrows(behandling.id)
+            validerIngenVilkårSattEtterSøkersDød(
+                personopplysningGrunnlag = personopplysningGrunnlag,
+                vilkårsvurdering = vilkårsvurdering
+            )
+        }
+    }
+
     @Transactional
     override fun utførStegOgAngiNeste(
         behandling: Behandling,
@@ -36,14 +48,6 @@ class VilkårsvurderingSteg(
                 forrigeBehandlingSomErVedtatt = behandlingService.hentForrigeBehandlingSomErVedtatt(
                     behandling
                 )
-            )
-        }
-
-        if (behandling.opprettetÅrsak == BehandlingÅrsak.DØDSFALL_BRUKER) {
-            val vilkårsvurdering = vilkårService.hentVilkårsvurderingThrows(behandling.id)
-            validerSøkerBosattIRiketTomdato(
-                personopplysningGrunnlag = personopplysningGrunnlag,
-                vilkårsvurdering = vilkårsvurdering
             )
         }
 
