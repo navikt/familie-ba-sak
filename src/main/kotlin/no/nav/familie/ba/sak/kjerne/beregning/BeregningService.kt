@@ -44,7 +44,7 @@ class BeregningService(
     ): List<AndelTilkjentYtelse> =
         andelTilkjentYtelseRepository.finnLøpendeAndelerTilkjentYtelseForBehandlinger(
             behandlingIder,
-            avstemmingstidspunkt
+            avstemmingstidspunkt.toLocalDate().toYearMonth()
         )
             .filter { it.erAndelSomSkalSendesTilOppdrag() }
 
