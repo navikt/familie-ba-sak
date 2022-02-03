@@ -442,9 +442,6 @@ class VilkårService(
     ): VilkårResultat {
         val automatiskVurderingResultat = vilkår.vurderVilkår(
             person = person,
-            featureToggleOmLovligOppholdSkalVurderes = featureToggleService.isEnabled(
-                FeatureToggleConfig.KAN_BEHANDLE_TREDJELANDSBORGERE_AUTOMATISK,
-            ),
             vurderFra = eldsteBarnSinFødselsdato
         )
 
