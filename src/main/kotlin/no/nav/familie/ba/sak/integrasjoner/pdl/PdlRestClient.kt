@@ -92,14 +92,13 @@ class PdlRestClient(
     }
 
     private fun hentDødsfallDataFraListeMedDødsfall(doedsfall: List<Doedsfall>): DødsfallData? {
-        if (doedsfall.isEmpty()) {
-            return null
-        }
-
         val dødsdato = doedsfall.filter { it.doedsdato != null }
             .map { it.doedsdato }
             .firstOrNull()
 
+        if (doedsfall.isEmpty() || dødsdato == null) {
+            return null
+        }
         return DødsfallData(erDød = true, dødsdato = dødsdato)
     }
 
