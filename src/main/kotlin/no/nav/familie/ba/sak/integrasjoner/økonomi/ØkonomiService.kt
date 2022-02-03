@@ -22,6 +22,8 @@ import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.client.HttpClientErrorException
+import java.math.BigDecimal
+import java.time.LocalDate
 import java.time.YearMonth
 
 @Service
@@ -158,11 +160,12 @@ class ØkonomiService(
                 }
         }.maxByOrNull { it }
 
-    private fun validerOpphørsoppdrag(utbetalingsoppdrag: Utbetalingsoppdrag) {
-        val (opphørsperioder, annet) = utbetalingsoppdrag.utbetalingsperiode.partition { it.opphør != null }
-        if (annet.size > opphørsperioder.size)
-            error("Generert utbetalingsoppdrag for opphør inneholder flere nye oppdragsperioder enn det finnes opphørsperioder.")
-        if (opphørsperioder.isEmpty())
+    fun validerOpphørsoppdrag(utbetalingsoppdrag: Utbetalingsoppdrag) {
+        if (utbetalingsoppdrag.harLøpendeUtbetaling()) {
+            error("Generert utbetalingsoppdrag for opphør inneholder oppdragsperioder med løpende utbetaling.")
+        }
+
+        if (utbetalingsoppdrag.utbetalingsperiode.filter { it.opphør != null }.isEmpty())
             error("Generert utbetalingsoppdrag for opphør mangler opphørsperioder.")
     }
 
@@ -201,3 +204,6 @@ class ØkonomiService(
         val logger = LoggerFactory.getLogger(ØkonomiService::class.java)
     }
 }
+
+fun Utbetalingsoppdrag.harLøpendeUtbetaling() =
+    this.utbetalingsperiode.any { it.opphør == null && it.sats > BigDecimal.ZERO && it.vedtakdatoTom > LocalDate.now() }
