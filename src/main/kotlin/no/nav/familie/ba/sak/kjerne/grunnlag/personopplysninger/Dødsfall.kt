@@ -48,7 +48,7 @@ data class Dødsfall(
     fun tilRestRegisteropplysning() = RestRegisteropplysning(
         fom = this.dødsfallDato,
         tom = null,
-        verdi = hentAdresseToString()
+        verdi = if (dødsfallAdresse == null) "-" else hentAdresseToString()
     )
 }
 
