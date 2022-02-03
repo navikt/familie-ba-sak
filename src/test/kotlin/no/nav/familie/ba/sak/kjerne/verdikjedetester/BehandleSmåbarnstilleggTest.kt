@@ -251,7 +251,7 @@ class BehandleSmåbarnstilleggTest(
                                 "groups" to listOf("SAKSBEHANDLER", "BESLUTTER"),
                                 "azp" to "azp-test",
                                 "name" to "Mock McMockface Beslutter",
-                                "preferred_username" to "mock.mcmockface.beslutter@nav.no"
+                                "NAVident" to "Z0000"
                             )
                         )
                     )

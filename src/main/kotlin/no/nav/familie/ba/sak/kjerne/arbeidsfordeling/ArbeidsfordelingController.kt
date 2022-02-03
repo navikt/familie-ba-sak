@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.arbeidsfordeling
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
@@ -38,7 +39,7 @@ class ArbeidsfordelingController(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "Endre behandlende enhet"
         )
-        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId)
+        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.UPDATE)
 
         if (endreBehandlendeEnhet.begrunnelse.isBlank()) throw FunksjonellFeil(
             melding = "Begrunnelse kan ikke være tom",
