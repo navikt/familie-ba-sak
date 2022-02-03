@@ -298,7 +298,7 @@ class LoggService(
         )
     }
 
-    fun opprettTaAvVentLogg(behandling: Behandling) {
+    fun gjenopptaBehandlingLogg(behandling: Behandling) {
         lagre(
             Logg(
                 behandlingId = behandling.id,

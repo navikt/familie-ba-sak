@@ -47,7 +47,7 @@ class SettPåVentService(
         aktivSettPåVent.aktiv = false
         aktivSettPåVent.tidTattAvVent = nå
 
-        loggService.opprettTaAvVentLogg(behandling)
+        loggService.gjenopptaBehandlingLogg(behandling)
 
         return settPåVentRepository.save(aktivSettPåVent)
     }
