@@ -38,18 +38,18 @@ data class UtvidetBarnetrygdGenerator(
 
         val søkerAktør = utvidetVilkår.first().personResultat?.aktør ?: error("Vilkår mangler PersonResultat")
 
-        val utvidaTidslinje = LocalDateTimeline(
-            utvidetVilkår
-                .filter { it.resultat == Resultat.OPPFYLT }
-                .map {
-                    if (it.periodeFom == null) throw Feil("Fom må være satt på søkers periode ved utvida barnetrygd")
-                    LocalDateSegment(
-                        it.periodeFom!!.førsteDagINesteMåned(),
-                        finnTilOgMedDatoForUtvidetSegment(tilOgMed = it.periodeTom, vilkårResultater = utvidetVilkår),
-                        listOf(PeriodeData(aktør = søkerAktør, rolle = PersonType.SØKER))
-                    )
-                }
-        )
+        val datoSegmenter = utvidetVilkår
+            .filter { it.resultat == Resultat.OPPFYLT }
+            .map {
+                if (it.periodeFom == null) throw Feil("Fom må være satt på søkers periode ved utvida barnetrygd")
+                LocalDateSegment(
+                    it.periodeFom!!.førsteDagINesteMåned(),
+                    finnTilOgMedDatoForUtvidetSegment(tilOgMed = it.periodeTom, vilkårResultater = utvidetVilkår),
+                    listOf(PeriodeData(aktør = søkerAktør, rolle = PersonType.SØKER))
+                )
+            }
+
+        val utvidaTidslinje = LocalDateTimeline(datoSegmenter)
 
         val barnasTidslinjer: List<LocalDateTimeline<List<PeriodeData>>> = andelerBarna
             .groupBy { it.aktør }
@@ -138,7 +138,9 @@ data class UtvidetBarnetrygdGenerator(
         tilOgMed: LocalDate?,
         vilkårResultater: List<VilkårResultat>
     ): LocalDate {
-        if (tilOgMed == null) return TIDENES_ENDE
+        // LocalDateTimeline krasjer i isTimelineOutsideInterval funksjonen dersom vi sender med TIDENES_ENDE,
+        // så bruker tidenes ende minus én dag.
+        if (tilOgMed == null) return TIDENES_ENDE.minusDays(1)
         val utvidetSkalVidereføresEnMndEkstra = vilkårResultater.any { vilkårResultat ->
             erBack2BackIMånedsskifte(
                 tilOgMed = tilOgMed,
