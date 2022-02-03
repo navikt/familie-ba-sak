@@ -91,14 +91,16 @@ class PdlRestClient(
         }
     }
 
-    private fun hentDødsfallDataFraListeMedDødsfall(doedsfall: List<Doedsfall>): DødsfallData {
-        return DødsfallResponse(
-            erDød = doedsfall.isNotEmpty(),
-            dødsdato = doedsfall.filter { it.doedsdato != null }
-                .map { it.doedsdato }
-                .firstOrNull()
-        )
-            .let { DødsfallData(erDød = it.erDød, dødsdato = it.dødsdato) }
+    private fun hentDødsfallDataFraListeMedDødsfall(doedsfall: List<Doedsfall>): DødsfallData? {
+        if (doedsfall.isEmpty()) {
+            return null
+        }
+
+        val dødsdato = doedsfall.filter { it.doedsdato != null }
+            .map { it.doedsdato }
+            .firstOrNull()
+
+        return DødsfallData(erDød = true, dødsdato = dødsdato)
     }
 
     @Cacheable("dødsfall", cacheManager = "shortCache")
