@@ -44,7 +44,7 @@ class TilgangService(
     }
 
     fun validerTilgangTilPersoner(personIdenter: List<String>, event: AuditLoggerEvent) {
-        auditLogger.log(Sporingsdata(event, personIdenter.joinToString(separator = ",")))
+        personIdenter.forEach { auditLogger.log(Sporingsdata(event, it)) }
         if (!harTilgangTilPersoner(personIdenter)) {
             throw RolleTilgangskontrollFeil(
                 melding = "Saksbehandler ${SikkerhetContext.hentSaksbehandler()} " +
@@ -67,13 +67,15 @@ class TilgangService(
             val personIdenter =
                 persongrunnlagService.hentAktiv(behandlingId = behandlingId)?.personer?.map { it.aktør.aktivFødselsnummer() }
                     ?: listOf(behandling.fagsak.aktør.aktivFødselsnummer())
-            auditLogger.log(
-                Sporingsdata(
-                    event = event,
-                    personIdent = personIdenter.joinToString(","),
-                    custom1 = CustomKeyValue("behandling", behandlingId.toString())
+            personIdenter.forEach {
+                auditLogger.log(
+                    Sporingsdata(
+                        event = event,
+                        personIdent = it,
+                        custom1 = CustomKeyValue("behandling", behandlingId.toString())
+                    )
                 )
-            )
+            }
             harTilgangTilPersoner(personIdenter)
         }
         if (!harTilgang) {
@@ -85,14 +87,15 @@ class TilgangService(
     }
 
     fun validerTilgangTilFagsak(fagsakId: Long, event: AuditLoggerEvent) {
-        val personIdent = fagsakService.hentAktør(fagsakId).aktivFødselsnummer()
-        auditLogger.log(
+        val aktør = fagsakService.hentAktør(fagsakId)
+        val personIdent = aktør.aktivFødselsnummer()
+        aktør.personidenter.forEach {
             Sporingsdata(
                 event = event,
-                personIdent = fagsakService.hentAktør(fagsakId).personidenter.joinToString(","),
+                personIdent = it.fødselsnummer,
                 custom1 = CustomKeyValue("fagsak", fagsakId.toString())
             )
-        )
+        }
         val personIdenter = listOf(personIdent)
         if (!harTilgangTilPersoner(personIdenter)) {
             throw RolleTilgangskontrollFeil(
