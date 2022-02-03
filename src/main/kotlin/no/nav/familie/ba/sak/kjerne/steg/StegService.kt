@@ -85,7 +85,6 @@ class StegService(
                     if (nyBehandling.behandlingType == BehandlingType.MIGRERING_FRA_INFOTRYGD) {
                         validerMigreringFraInfotrygd(nyBehandling)
                     }
-
                     hentBarnFraForrigeAvsluttedeBehandling(behandling)
                 }
                 else -> throw Feil(hentUkjentBehandlingTypeOgÅrsakFeilMelding(nyBehandling))
