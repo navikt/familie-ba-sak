@@ -82,7 +82,7 @@ abstract class WebSpringAuthTestRunner : AbstractMockkSpringRunner() {
                     "groups" to (groups ?: listOf(BehandlerRolle.SAKSBEHANDLER.name)),
                     "azp" to "azp-test",
                     "name" to "Mock McMockface",
-                    "preferred_username" to "mock.mcmockface@nav.no"
+                    "NAVident" to "Z0000"
                 )
             )
         )

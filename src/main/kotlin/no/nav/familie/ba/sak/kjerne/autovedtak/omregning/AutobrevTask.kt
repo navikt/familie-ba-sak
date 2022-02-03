@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.omregning
 
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
@@ -49,17 +48,14 @@ class AutobrevTask(
     }
 
     private fun opprettTaskerForReduksjonSmåbarnstillegg() {
-        if (featureToggleService.isEnabled(FeatureToggleConfig.AUTOBREV_OPPHØR_SMÅBARNSTILLEGG)) {
-            logger.info("Sending av autobrev ved opphør av småbarnstillegg er enabled.")
-            fagsakRepository.finnAlleFagsakerMedOpphørSmåbarnstilleggIMåned(
-                iverksatteLøpendeBehandlinger = behandlingRepository.finnSisteIverksatteBehandlingFraLøpendeFagsaker(),
-            )
-                .forEach { fagsakId ->
-                    opprettTaskService.opprettAutovedtakForOpphørSmåbarnstilleggTask(
-                        fagsakId = fagsakId
-                    )
-                }
-        }
+        fagsakRepository.finnAlleFagsakerMedOpphørSmåbarnstilleggIMåned(
+            iverksatteLøpendeBehandlinger = behandlingRepository.finnSisteIverksatteBehandlingFraLøpendeFagsaker(),
+        )
+            .forEach { fagsakId ->
+                opprettTaskService.opprettAutovedtakForOpphørSmåbarnstilleggTask(
+                    fagsakId = fagsakId
+                )
+            }
     }
 
     private fun finnAlleBarnMedFødselsdagInneværendeMåned(alder: Long): Set<Fagsak> =

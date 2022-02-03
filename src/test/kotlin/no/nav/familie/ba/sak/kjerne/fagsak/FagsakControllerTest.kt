@@ -19,12 +19,17 @@ import no.nav.familie.ba.sak.kjerne.personident.AktørIdRepository
 import no.nav.familie.ba.sak.kjerne.personident.Personident
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentRepository
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
+import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
+import no.nav.familie.ba.sak.util.BrukerContextUtil
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.log.mdc.MDCConstants
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
+import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 
@@ -60,7 +65,14 @@ class FagsakControllerTest(
 
     @BeforeEach
     fun init() {
+        MDC.put(MDCConstants.MDC_CALL_ID, "00001111")
+        BrukerContextUtil.mockBrukerContext(SikkerhetContext.SYSTEM_FORKORTELSE)
         databaseCleanupService.truncate()
+    }
+
+    @AfterEach
+    fun tearDown() {
+        BrukerContextUtil.clearBrukerContext()
     }
 
     @Test
