@@ -11,10 +11,17 @@ object SikkerhetContext {
 
     fun erSystemKontekst() = hentSaksbehandler() == SYSTEM_FORKORTELSE
 
+    fun erMaskinTilMaskinToken(): Boolean {
+        val claims = SpringTokenValidationContextHolder().tokenValidationContext.getClaims("azuread")
+        return claims.get("oid") != null &&
+            claims.get("oid") == claims.get("sub") &&
+            claims.getAsList("roles").contains("access_as_application")
+    }
+
     fun hentSaksbehandler(): String {
         return Result.runCatching { SpringTokenValidationContextHolder().tokenValidationContext }
             .fold(
-                onSuccess = { it.getClaims("azuread")?.get("preferred_username")?.toString() ?: SYSTEM_FORKORTELSE },
+                onSuccess = { it.getClaims("azuread")?.get("NAVident")?.toString() ?: SYSTEM_FORKORTELSE },
                 onFailure = { SYSTEM_FORKORTELSE }
             )
     }

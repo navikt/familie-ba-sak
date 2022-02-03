@@ -4,6 +4,7 @@ import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.ekstern.restDomene.writeValueAsString
@@ -343,13 +344,16 @@ class StegService(
     ): Behandling {
         try {
             logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} håndterer ${behandlingSteg.stegType()} på behandling ${behandling.id}")
-            tilgangService.validerTilgangTilBehandling(behandlingId = behandling.id)
+            tilgangService.validerTilgangTilBehandling(behandlingId = behandling.id, event = AuditLoggerEvent.UPDATE)
             if (behandling.erManuellMigrering() && behandlingSteg.stegType() == StegType.BESLUTTE_VEDTAK) {
                 verifiserBeslutteVedtakForManuellMigrering(behandlingSteg)
             } else {
                 tilgangService.verifiserHarTilgangTilHandling(
                     minimumBehandlerRolle = behandlingSteg.stegType().tillattFor.minByOrNull { it.nivå }
-                        ?: throw Feil("${SikkerhetContext.hentSaksbehandlerNavn()} prøver å utføre steg ${behandlingSteg.stegType()} som ikke er tillatt av noen."),
+                        ?: throw Feil(
+                            "${SikkerhetContext.hentSaksbehandlerNavn()} prøver " +
+                                "å utføre steg ${behandlingSteg.stegType()} som ikke er tillatt av noen."
+                        ),
                     handling = "utføre steg ${behandlingSteg.stegType().displayName()}"
                 )
             }

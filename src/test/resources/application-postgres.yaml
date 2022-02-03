@@ -176,3 +176,4 @@ CREDENTIAL_PASSWORD: not-a-real-pw
 KAFKA_BROKERS: http://localhost:9092
 
 retry.backoff.delay: 5
+NAIS_APP_NAME: familie-ba-sak
