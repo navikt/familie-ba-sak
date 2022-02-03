@@ -87,6 +87,12 @@ class RevurderingDødsfall(
                 periodeFom = LocalDate.parse(scenario.søker.fødselsdato),
                 periodeTom = LocalDate.now().minusMonths(1),
                 personResultat = mockk(relaxed = true),
+            ),
+            lagVilkårResultat(
+                vilkårType = Vilkår.LOVLIG_OPPHOLD,
+                periodeFom = LocalDate.parse(scenario.søker.fødselsdato),
+                periodeTom = LocalDate.now().minusMonths(1),
+                personResultat = mockk(relaxed = true),
             )
         )
 
