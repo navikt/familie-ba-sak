@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.RessursUtils.illegalState
 import no.nav.familie.ba.sak.common.RessursUtils.ok
+import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
@@ -42,7 +43,10 @@ class BehandlingController(
 
     @PostMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
     fun opprettBehandling(@RequestBody nyBehandling: NyBehandling): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
-        tilgangService.validerTilgangTilPersoner(personIdenter = listOf(nyBehandling.søkersIdent))
+        tilgangService.validerTilgangTilPersoner(
+            personIdenter = listOf(nyBehandling.søkersIdent),
+            event = AuditLoggerEvent.CREATE
+        )
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "opprette behandling"
@@ -70,7 +74,7 @@ class BehandlingController(
         val behandling = stegService.håndterNyBehandlingOgSendInfotrygdFeed(nyBehandling)
 
         // Basert på hvilke personer som ble hentet inn på behandlingen kan saksbehandler ha mistet tilgangen til behandlingen
-        tilgangService.validerTilgangTilBehandling(behandlingId = behandling.id)
+        tilgangService.validerTilgangTilBehandling(behandlingId = behandling.id, AuditLoggerEvent.UPDATE)
         return ResponseEntity.ok(
             Ressurs.success(
                 utvidetBehandlingService
@@ -104,7 +108,7 @@ class BehandlingController(
         @RequestBody
         endreBehandling: RestEndreBehandlingstema
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
-        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId)
+        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.UPDATE)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "endre behandlingstema"

@@ -6,7 +6,7 @@ env:
   IMAGE: ghcr.io/navikt/familie-ba-sak:${{ github.sha }}
 jobs:
   deploy-to-dev:
-    name: Bygg app/image, push til github, deploy til dev-fss
+    name: Bygg app/image, push til github, deploy til dev-gcp
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2

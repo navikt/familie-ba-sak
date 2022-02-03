@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg
 
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -72,9 +71,6 @@ class VedtakOmOvergangsstønadService(
 
     @Transactional
     fun håndterVedtakOmOvergangsstønad(aktør: Aktør): String {
-        if (!featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_SMÅBARNSTILLEGG_AUTOMATISK))
-            return "automatisk behandling av småbarnstillegg er ikke påskrudd"
-
         antallVedtakOmOvergangsstønad.increment()
 
         val fagsak = fagsakService.hent(aktør = aktør) ?: return "har ikke fagsak i systemet"

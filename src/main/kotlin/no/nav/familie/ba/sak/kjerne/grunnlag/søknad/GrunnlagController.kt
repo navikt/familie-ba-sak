@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.grunnlag.søknad
 
+import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
@@ -33,7 +34,7 @@ class GrunnlagController(
         @RequestBody
         leggTilBarnDto: LeggTilBarnDto
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
-        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId)
+        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.UPDATE)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "legge til barn"
@@ -45,7 +46,12 @@ class GrunnlagController(
             nyttBarnIdent = leggTilBarnDto.barnIdent
         )
         tilbakestillService.initierOgSettBehandlingTilVilårsvurdering(behandling)
-        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandling.id)))
+        return ResponseEntity.ok(
+            Ressurs.success(
+                utvidetBehandlingService
+                    .lagRestUtvidetBehandling(behandlingId = behandling.id)
+            )
+        )
     }
 
     class LeggTilBarnDto(val barnIdent: String)

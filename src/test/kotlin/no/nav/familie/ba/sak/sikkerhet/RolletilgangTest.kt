@@ -51,7 +51,7 @@ class RolletilgangTest(
                 mapOf(
                     "groups" to listOf("VEILDER"),
                     "name" to "Mock McMockface",
-                    "preferred_username" to "mock.mcmockface@nav.no"
+                    "NAVident" to "Z0000"
                 )
             )
         )
@@ -92,7 +92,7 @@ class RolletilgangTest(
                 mapOf(
                     "groups" to listOf("VEILDER", "SAKSBEHANDLER"),
                     "name" to "Mock McMockface",
-                    "preferred_username" to "mock.mcmockface@nav.no"
+                    "NAVident" to "Z0000"
                 )
             )
         )
@@ -125,7 +125,7 @@ class RolletilgangTest(
                 mapOf(
                     "groups" to listOf("VEILDER"),
                     "name" to "Mock McMockface",
-                    "preferred_username" to "mock.mcmockface@nav.no"
+                    "NAVident" to "Z0000"
                 )
             )
         )
