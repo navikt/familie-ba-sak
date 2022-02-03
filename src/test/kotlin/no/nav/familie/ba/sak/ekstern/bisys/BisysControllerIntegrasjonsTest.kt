@@ -320,7 +320,7 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
         mapOf(
             "groups" to listOf("SAKSBEHANDLER"),
             "name" to "Mock McMockface",
-            "preferred_username" to "mock.mcmockface@nav.no"
+            "NAVident" to "Z0000"
         ),
         clientId = "dummy"
     )
