@@ -283,6 +283,36 @@ class LoggService(
         )
     }
 
+    fun opprettSettPåVentLogg(behandling: Behandling, årsak: String) {
+        lagre(
+            Logg(
+                behandlingId = behandling.id,
+                type = LoggType.BEHANDLIG_SATT_PÅ_VENT,
+                tittel = LoggType.BEHANDLIG_SATT_PÅ_VENT.visningsnavn,
+                rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
+                    rolleConfig,
+                    BehandlerRolle.SAKSBEHANDLER
+                ),
+                tekst = "Årsak: $årsak"
+            )
+        )
+    }
+
+    fun opprettTaAvVentLogg(behandling: Behandling) {
+        lagre(
+            Logg(
+                behandlingId = behandling.id,
+                type = LoggType.BEHANDLIG_GJENOPPTATT,
+                tittel = LoggType.BEHANDLIG_GJENOPPTATT.visningsnavn,
+                rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
+                    rolleConfig,
+                    BehandlerRolle.SAKSBEHANDLER
+                ),
+                tekst = ""
+            )
+        )
+    }
+
     fun lagre(logg: Logg): Logg {
         metrikkPerLoggType[logg.type]?.increment()
 

@@ -91,7 +91,7 @@ class SettPåVentServiceTest(
 
         val nå = LocalDate.now()
 
-        val settPåVent = settPåVentService.deaktiverSettBehandlingPåVent(
+        val settPåVent = settPåVentService.gjenopptaBehandling(
             behandlingId = behandlingEtterVilkårsvurderingSteg.id,
             nå = nå
         )
