@@ -1,7 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.`ef-sak`.EfSakRestClient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
@@ -20,7 +18,6 @@ import org.springframework.stereotype.Service
 class SmåbarnstilleggService(
     private val efSakRestClient: EfSakRestClient,
     private val periodeOvergangsstønadGrunnlagRepository: PeriodeOvergangsstønadGrunnlagRepository,
-    private val featureToggleService: FeatureToggleService,
     private val behandlingService: BehandlingService,
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
     private val persongrunnlagService: PersongrunnlagService,
@@ -30,20 +27,18 @@ class SmåbarnstilleggService(
         aktør: Aktør,
         behandlingId: Long
     ): List<InternPeriodeOvergangsstønad> {
-        return if (featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_SMÅBARNSTILLEGG)) {
-            val periodeOvergangsstønad = hentPerioderMedFullOvergangsstønad(aktør)
+        val periodeOvergangsstønad = hentPerioderMedFullOvergangsstønad(aktør)
 
-            periodeOvergangsstønadGrunnlagRepository.deleteByBehandlingId(behandlingId)
-            periodeOvergangsstønadGrunnlagRepository.saveAll(
-                periodeOvergangsstønad.map {
-                    it.tilPeriodeOvergangsstønadGrunnlag(
-                        behandlingId, aktør
-                    )
-                }
-            )
+        periodeOvergangsstønadGrunnlagRepository.deleteByBehandlingId(behandlingId)
+        periodeOvergangsstønadGrunnlagRepository.saveAll(
+            periodeOvergangsstønad.map {
+                it.tilPeriodeOvergangsstønadGrunnlag(
+                    behandlingId, aktør
+                )
+            }
+        )
 
-            periodeOvergangsstønad.map { it.tilInternPeriodeOvergangsstønad() }.slåSammenSammenhengendePerioder()
-        } else emptyList()
+        return periodeOvergangsstønad.map { it.tilInternPeriodeOvergangsstønad() }.slåSammenSammenhengendePerioder()
     }
 
     fun vedtakOmOvergangsstønadPåvirkerFagsak(fagsak: Fagsak): Boolean {
