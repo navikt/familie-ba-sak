@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.integrasjoner.økonomi
 
+import no.nav.familie.ba.sak.common.førsteDagINesteMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
@@ -206,4 +207,8 @@ class ØkonomiService(
 }
 
 fun Utbetalingsoppdrag.harLøpendeUtbetaling() =
-    this.utbetalingsperiode.any { it.opphør == null && it.sats > BigDecimal.ZERO && it.vedtakdatoTom > LocalDate.now() }
+    this.utbetalingsperiode.any {
+        it.opphør == null &&
+            it.sats > BigDecimal.ZERO &&
+            it.vedtakdatoTom > LocalDate.now().plusMonths(1).førsteDagINesteMåned()
+    }
