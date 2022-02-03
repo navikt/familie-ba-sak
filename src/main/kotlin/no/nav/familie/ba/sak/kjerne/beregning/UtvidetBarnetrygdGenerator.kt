@@ -100,12 +100,10 @@ data class UtvidetBarnetrygdGenerator(
                 )
             }
 
-        val utvidetAndelerEtterSammenslåing = slåSammenPerioderSomIkkeSkulleHaVærtSplittet(
+        return slåSammenPerioderSomIkkeSkulleHaVærtSplittet(
             andelerTilkjentYtelse = utvidetAndeler.toMutableList(),
             skalAndelerSlåsSammen = ::skalUtvidetAndelerSlåsSammen
         )
-
-        return utvidetAndelerEtterSammenslåing
     }
 
     private data class PeriodeData(val aktør: Aktør, val rolle: PersonType, val prosent: BigDecimal = BigDecimal.ZERO)

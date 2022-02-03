@@ -9,8 +9,8 @@ import no.nav.familie.ba.sak.kjerne.behandlingsresultat.MinimertUregistrertBarn
 import no.nav.familie.ba.sak.kjerne.brev.UtvidetScenarioForEndringsperiode
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilBrevPeriodeTestPerson
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.UtvidetVedtaksperiodeMedBegrunnelser
 import java.time.LocalDate
 
 data class BrevPeriodeGrunnlag(
@@ -23,7 +23,8 @@ data class BrevPeriodeGrunnlag(
 ) {
     fun tilBrevPeriodeGrunnlagMedPersoner(
         restBehandlingsgrunnlagForBrev: RestBehandlingsgrunnlagForBrev,
-        erFørsteVedtaksperiodePåFagsak: Boolean
+        erFørsteVedtaksperiodePåFagsak: Boolean,
+        erUregistrerteBarnPåbehandling: Boolean,
     ): BrevPeriodeGrunnlagMedPersoner {
         return BrevPeriodeGrunnlagMedPersoner(
             fom = this.fom,
@@ -38,7 +39,8 @@ data class BrevPeriodeGrunnlag(
                     restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev,
                     identerMedUtbetalingPåPeriode = this.minimerteUtbetalingsperiodeDetaljer
                         .map { utbetalingsperiodeDetalj -> utbetalingsperiodeDetalj.person.personIdent },
-                    erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak
+                    erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
+                    erUregistrerteBarnPåbehandling = erUregistrerteBarnPåbehandling
                 )
             },
             fritekster = this.fritekster,
@@ -87,7 +89,7 @@ fun BrevPeriodeGrunnlag.tilBrevPeriodeForLogging(
             )
         },
         utvidetScenarioForEndringsperiode = utvidetScenarioForEndringsperiode,
-        uregistrerteBarn = uregistrerteBarn,
+        uregistrerteBarn = uregistrerteBarn.map { it.copy(personIdent = "", navn = "") },
         erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
         brevMålform = brevMålform,
     )
