@@ -9,7 +9,6 @@ import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.VergeResponse
-import no.nav.familie.ba.sak.integrasjoner.pdl.domene.DødsfallData
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlKontaktinformasjonForDødsboAdresse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
@@ -113,18 +112,6 @@ class FiltreringsregelForFlereBarnTest {
                     )
                 )
             }
-        every { personopplysningerServiceMock.hentDødsfall(gyldigAktør) } returns DødsfallData(
-            erDød = false,
-            dødsdato = null
-        )
-        every { personopplysningerServiceMock.hentDødsfall(barnAktør0) } returns DødsfallData(
-            erDød = false,
-            dødsdato = null
-        )
-        every { personopplysningerServiceMock.hentDødsfall(barnAktør1) } returns DødsfallData(
-            erDød = true,
-            dødsdato = null
-        )
 
         every { personopplysningerServiceMock.hentPersoninfoMedRelasjonerOgRegisterinformasjon(gyldigAktør) } returns personInfo
 
@@ -186,18 +173,6 @@ class FiltreringsregelForFlereBarnTest {
                     )
                 )
             }
-        every { personopplysningerServiceMock.hentDødsfall(gyldigAktør) } returns DødsfallData(
-            erDød = false,
-            dødsdato = null
-        )
-        every { personopplysningerServiceMock.hentDødsfall(barnAktør0) } returns DødsfallData(
-            erDød = false,
-            dødsdato = null
-        )
-        every { personopplysningerServiceMock.hentDødsfall(barnAktør1) } returns DødsfallData(
-            erDød = false,
-            dødsdato = null
-        )
 
         every { personopplysningerServiceMock.hentPersoninfoMedRelasjonerOgRegisterinformasjon(gyldigAktør) } returns personInfo
 

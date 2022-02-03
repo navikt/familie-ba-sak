@@ -63,11 +63,6 @@ class PersonopplysningerService(
         return pdlRestClient.hentPerson(aktør, personInfoQuery)
     }
 
-    fun hentDødsfall(aktør: Aktør): DødsfallData {
-        val doedsfall = pdlRestClient.hentDødsfall(aktør)
-        return hentDødsfallDataFraListeMedDødsfall(doedsfall)
-    }
-
     private fun hentDødsfallDataFraListeMedDødsfall(doedsfall: List<Doedsfall>): DødsfallData {
         return DødsfallResponse(
             erDød = doedsfall.isNotEmpty(),
