@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.config
 
 import no.nav.familie.ba.sak.common.http.interceptor.RolletilgangInterceptor
-import no.nav.familie.http.interceptor.InternLoggerInterceptor
 import no.nav.familie.sikkerhet.OIDCUtil
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import
@@ -16,7 +15,6 @@ class WebConfig(
 ) : WebMvcConfigurer {
 
     override fun addInterceptors(registry: InterceptorRegistry) {
-        registry.addInterceptor(InternLoggerInterceptor(oidcUtil))
         registry.addInterceptor(RolletilgangInterceptor(rolleConfig))
             .excludePathPatterns("/api/task/**")
             .excludePathPatterns("/api/v2/task/**")

@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.brev
 
+import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.ekstern.restDomene.RestMinimalFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
@@ -50,7 +51,7 @@ class DokumentController(
         )
 
         val vedtak = vedtakService.hent(vedtakId)
-        tilgangService.validerTilgangTilBehandling(behandlingId = vedtak.behandling.id)
+        tilgangService.validerTilgangTilBehandling(behandlingId = vedtak.behandling.id, event = AuditLoggerEvent.UPDATE)
 
         return dokumentService.genererBrevForVedtak(vedtak).let {
             vedtak.stønadBrevPdF = it
@@ -68,7 +69,7 @@ class DokumentController(
         )
 
         val vedtak = vedtakService.hent(vedtakId)
-        tilgangService.validerTilgangTilBehandling(behandlingId = vedtak.behandling.id)
+        tilgangService.validerTilgangTilBehandling(behandlingId = vedtak.behandling.id, event = AuditLoggerEvent.ACCESS)
 
         return dokumentService.hentBrevForVedtak(vedtak)
     }
@@ -78,8 +79,11 @@ class DokumentController(
         @PathVariable behandlingId: Long,
         @RequestBody manueltBrevRequest: ManueltBrevRequest
     ): Ressurs<ByteArray> {
-        logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} henter forhåndsvisning av brev for mal: ${manueltBrevRequest.brevmal}")
-        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId)
+        logger.info(
+            "${SikkerhetContext.hentSaksbehandlerNavn()} henter forhåndsvisning av brev " +
+                "for mal: ${manueltBrevRequest.brevmal}"
+        )
+        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.ACCESS)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "hente forhåndsvisning brev"
@@ -103,7 +107,7 @@ class DokumentController(
         @RequestBody manueltBrevRequest: ManueltBrevRequest
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} genererer og sender brev: ${manueltBrevRequest.brevmal}")
-        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId)
+        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.UPDATE)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "sende brev"
@@ -120,7 +124,12 @@ class DokumentController(
             behandling = behandling,
             fagsakId = behandling.fagsak.id
         )
-        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
+        return ResponseEntity.ok(
+            Ressurs.success(
+                utvidetBehandlingService
+                    .lagRestUtvidetBehandling(behandlingId = behandlingId)
+            )
+        )
     }
 
     @PostMapping(path = ["/fagsak/{fagsakId}/forhaandsvis-brev"])
@@ -128,7 +137,10 @@ class DokumentController(
         @PathVariable fagsakId: Long,
         @RequestBody manueltBrevRequest: ManueltBrevRequest
     ): Ressurs<ByteArray> {
-        logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} henter forhåndsvisning av brev på fagsak $fagsakId for mal: ${manueltBrevRequest.brevmal}")
+        logger.info(
+            "${SikkerhetContext.hentSaksbehandlerNavn()} henter forhåndsvisning av brev på fagsak $fagsakId " +
+                "for mal: ${manueltBrevRequest.brevmal}"
+        )
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "hente forhåndsvisning brev"

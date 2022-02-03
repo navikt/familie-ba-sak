@@ -1,7 +1,11 @@
 package no.nav.familie.ba.sak.sikkerhet
 
 import no.nav.familie.ba.sak.common.RolleTilgangskontrollFeil
+import no.nav.familie.ba.sak.config.AuditLogger
+import no.nav.familie.ba.sak.config.AuditLoggerEvent
+import no.nav.familie.ba.sak.config.CustomKeyValue
 import no.nav.familie.ba.sak.config.RolleConfig
+import no.nav.familie.ba.sak.config.Sporingsdata
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -17,7 +21,8 @@ class TilgangService(
     private val persongrunnlagService: PersongrunnlagService,
     private val rolleConfig: RolleConfig,
     private val integrasjonClient: IntegrasjonClient,
-    private val cacheManager: CacheManager
+    private val cacheManager: CacheManager,
+    private val auditLogger: AuditLogger
 ) {
 
     /**
@@ -29,16 +34,17 @@ class TilgangService(
      */
     fun verifiserHarTilgangTilHandling(minimumBehandlerRolle: BehandlerRolle, handling: String) {
         val høyesteRolletilgang = SikkerhetContext.hentHøyesteRolletilgangForInnloggetBruker(rolleConfig)
-
         if (minimumBehandlerRolle.nivå > høyesteRolletilgang.nivå) {
             throw RolleTilgangskontrollFeil(
-                melding = "${SikkerhetContext.hentSaksbehandlerNavn()} med rolle $høyesteRolletilgang har ikke tilgang til å $handling. Krever $minimumBehandlerRolle.",
+                melding = "${SikkerhetContext.hentSaksbehandlerNavn()} med rolle $høyesteRolletilgang " +
+                    "har ikke tilgang til å $handling. Krever $minimumBehandlerRolle.",
                 frontendFeilmelding = "Du har ikke tilgang til å $handling."
             )
         }
     }
 
-    fun validerTilgangTilPersoner(personIdenter: List<String>) {
+    fun validerTilgangTilPersoner(personIdenter: List<String>, event: AuditLoggerEvent) {
+        personIdenter.forEach { auditLogger.log(Sporingsdata(event, it)) }
         if (!harTilgangTilPersoner(personIdenter)) {
             throw RolleTilgangskontrollFeil(
                 melding = "Saksbehandler ${SikkerhetContext.hentSaksbehandler()} " +
@@ -55,13 +61,21 @@ class TilgangService(
         }
     }
 
-    fun validerTilgangTilBehandling(behandlingId: Long) {
+    fun validerTilgangTilBehandling(behandlingId: Long, event: AuditLoggerEvent) {
         val harTilgang = harSaksbehandlerTilgang("validerTilgangTilBehandling", behandlingId) {
             val behandling = behandlingService.hent(behandlingId)
             val personIdenter =
                 persongrunnlagService.hentAktiv(behandlingId = behandlingId)?.personer?.map { it.aktør.aktivFødselsnummer() }
                     ?: listOf(behandling.fagsak.aktør.aktivFødselsnummer())
-
+            personIdenter.forEach {
+                auditLogger.log(
+                    Sporingsdata(
+                        event = event,
+                        personIdent = it,
+                        custom1 = CustomKeyValue("behandling", behandlingId.toString())
+                    )
+                )
+            }
             harTilgangTilPersoner(personIdenter)
         }
         if (!harTilgang) {
@@ -72,9 +86,25 @@ class TilgangService(
         }
     }
 
-    fun validerTilgangTilFagsak(fagsakId: Long) {
-        val personIdent = fagsakService.hentAktør(fagsakId).aktivFødselsnummer()
-        validerTilgangTilPersoner(listOf(personIdent))
+    fun validerTilgangTilFagsak(fagsakId: Long, event: AuditLoggerEvent) {
+        val aktør = fagsakService.hentAktør(fagsakId)
+        val personIdent = aktør.aktivFødselsnummer()
+        aktør.personidenter.forEach {
+            Sporingsdata(
+                event = event,
+                personIdent = it.fødselsnummer,
+                custom1 = CustomKeyValue("fagsak", fagsakId.toString())
+            )
+        }
+        val personIdenter = listOf(personIdent)
+        if (!harTilgangTilPersoner(personIdenter)) {
+            throw RolleTilgangskontrollFeil(
+                melding = "Saksbehandler ${SikkerhetContext.hentSaksbehandler()} " +
+                    "har ikke tilgang til fagsak=$fagsakId.",
+                frontendFeilmelding = "Saksbehandler ${SikkerhetContext.hentSaksbehandler()} " +
+                    "har ikke tilgang til fagsak=$fagsakId."
+            )
+        }
     }
 
     /**

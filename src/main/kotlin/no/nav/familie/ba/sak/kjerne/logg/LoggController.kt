@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.logg
 
 import no.nav.familie.ba.sak.common.RessursUtils.badRequest
+import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -25,7 +26,7 @@ class LoggController(
         @PathVariable
         behandlingId: Long
     ): ResponseEntity<Ressurs<List<Logg>>> {
-        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId)
+        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.ACCESS)
         return Result.runCatching { loggService.hentLoggForBehandling(behandlingId) }
             .fold(
                 onSuccess = { ResponseEntity.ok(Ressurs.success(it)) },
