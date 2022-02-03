@@ -4,7 +4,6 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.domene.Doedsfall
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.DødsfallData
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlBaseResponse
-import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlDødsfallResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlHentPersonRelasjonerResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlHentPersonResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlOppholdResponse
@@ -100,22 +99,6 @@ class PdlRestClient(
             return null
         }
         return DødsfallData(erDød = true, dødsdato = dødsdato)
-    }
-
-    @Cacheable("dødsfall", cacheManager = "shortCache")
-    fun hentDødsfall(aktør: Aktør): List<Doedsfall> {
-        val pdlPersonRequest = PdlPersonRequest(
-            variables = PdlPersonRequestVariables(aktør.aktivFødselsnummer()),
-            query = hentGraphqlQuery("doedsfall")
-        )
-        val pdlResponse: PdlBaseResponse<PdlDødsfallResponse> = postForEntity(pdlUri, pdlPersonRequest, httpHeaders())
-
-        return feilsjekkOgReturnerData(
-            ident = aktør.aktivFødselsnummer(),
-            pdlResponse = pdlResponse
-        ) {
-            it.person!!.doedsfall
-        }
     }
 
     @Cacheable("vergedata", cacheManager = "shortCache")
