@@ -1209,6 +1209,73 @@ class VilkårServiceTest(
     }
 
     @Test
+    fun `skal slette utvidet barnetrygd vilkår for helmanuell migrering`() {
+        val fnr = randomFnr()
+        val barnFnr = randomFnr()
+        val barnetsFødselsdato = LocalDate.of(2020, 8, 15)
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(
+            lagBehandling(
+                fagsak = fagsak,
+                behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
+                årsak = BehandlingÅrsak.HELMANUELL_MIGRERING
+            )
+        )
+        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
+            behandling.id,
+            fnr, listOf(barnFnr),
+            barnetsFødselsdato,
+            personidentService.hentOgLagreAktør(fnr, true),
+            personidentService.hentOgLagreAktørIder(listOf(barnFnr), true)
+        )
+        persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
+
+        val nyMigreringsdato = LocalDate.of(2021, 1, 1)
+        val vilkårsvurdering = vilkårService.genererVilkårsvurderingForHelmanuellMigrering(behandling, nyMigreringsdato)
+
+        vilkårService.postVilkår(
+            behandling.id,
+            RestNyttVilkår(personIdent = fnr, vilkårType = Vilkår.UTVIDET_BARNETRYGD)
+        )
+
+        val vilkårsvurderingFørSlett = vilkårService.hentVilkårsvurdering(behandling.id)!!
+
+        assertEquals(BehandlingUnderkategori.UTVIDET, vilkårsvurderingFørSlett.behandling.underkategori)
+        assertTrue {
+            vilkårsvurderingFørSlett
+                .personResultater.first { it.aktør.aktivFødselsnummer() == fnr }.vilkårResultater.size == 3
+        }
+
+        assertTrue {
+            vilkårsvurderingFørSlett
+                .personResultater.first { it.aktør.aktivFødselsnummer() == fnr }
+                .vilkårResultater.any { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
+        }
+
+        vilkårService.deleteVilkår(
+            behandling.id,
+            RestSlettVilkår(
+                personIdent = fnr,
+                vilkårType = Vilkår.UTVIDET_BARNETRYGD
+            )
+        )
+
+        val vilkårsvurderingEtterSlett = vilkårService.hentVilkårsvurdering(behandling.id)!!
+
+        assertEquals(BehandlingUnderkategori.ORDINÆR, vilkårsvurderingEtterSlett.behandling.underkategori)
+        assertTrue {
+            vilkårsvurderingEtterSlett
+                .personResultater.first { it.aktør.aktivFødselsnummer() == fnr }.vilkårResultater.size == 2
+        }
+
+        assertTrue {
+            vilkårsvurderingEtterSlett
+                .personResultater.first { it.aktør.aktivFødselsnummer() == fnr }
+                .vilkårResultater.none { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
+        }
+    }
+
+    @Test
     fun `skal lage vilkårsvurderingsperiode for helmanuell migrering`() {
         val fnr = randomFnr()
         val barnFnr = randomFnr()
