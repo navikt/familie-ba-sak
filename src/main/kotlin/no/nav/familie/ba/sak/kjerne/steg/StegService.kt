@@ -67,36 +67,29 @@ class StegService(
     @Transactional
     fun håndterNyBehandling(nyBehandling: NyBehandling): Behandling {
         val behandling = behandlingService.opprettBehandling(nyBehandling)
-        val barnasIdenter: List<String> = when {
-            nyBehandling.behandlingÅrsak in listOf(BehandlingÅrsak.MIGRERING, BehandlingÅrsak.FØDSELSHENDELSE) -> {
-                nyBehandling.barnasIdenter
-            }
-            nyBehandling.behandlingÅrsak == BehandlingÅrsak.HELMANUELL_MIGRERING -> {
-                if (behandlingService.hentSisteBehandlingSomErVedtatt(behandling.fagsak.id) != null) {
-                    throw FunksjonellFeil(
-                        melding = "Det finnes allerede en vedtatt behandling på fagsak ${behandling.fagsak.id}." +
-                            "Behandling kan ikke opprettes med årsak " +
-                            BehandlingÅrsak.HELMANUELL_MIGRERING.visningsnavn,
-                        frontendFeilmelding = "Det finnes allerede en vedtatt behandling på fagsak." +
-                            "Behandling kan ikke opprettes med årsak " +
-                            BehandlingÅrsak.HELMANUELL_MIGRERING.visningsnavn
-                    )
+
+        val barnasIdenter: List<String> = when (nyBehandling.behandlingÅrsak) {
+            BehandlingÅrsak.MIGRERING,
+            BehandlingÅrsak.FØDSELSHENDELSE,
+            BehandlingÅrsak.HELMANUELL_MIGRERING -> {
+                if (nyBehandling.behandlingÅrsak == BehandlingÅrsak.HELMANUELL_MIGRERING) {
+                    validerHelmanuelMigrering(behandling)
                 }
                 nyBehandling.barnasIdenter
             }
-            nyBehandling.behandlingType == BehandlingType.FØRSTEGANGSBEHANDLING -> {
-                emptyList()
-            }
-            nyBehandling.behandlingType in listOf(
+            else -> when (nyBehandling.behandlingType) {
+                BehandlingType.FØRSTEGANGSBEHANDLING -> emptyList()
                 BehandlingType.REVURDERING,
-                BehandlingType.TEKNISK_ENDRING
-            ) || nyBehandling.behandlingType == BehandlingType.MIGRERING_FRA_INFOTRYGD &&
-                nyBehandling.behandlingÅrsak == BehandlingÅrsak.ENDRE_MIGRERINGSDATO -> {
-                val sisteBehandling = hentSisteAvsluttetBehandling(behandling)
-                behandlingService.finnBarnFraBehandlingMedTilkjentYtsele(sisteBehandling.id)
-                    .map { it.aktivFødselsnummer() }
+                BehandlingType.TEKNISK_ENDRING,
+                BehandlingType.MIGRERING_FRA_INFOTRYGD -> {
+                    if (nyBehandling.behandlingType == BehandlingType.MIGRERING_FRA_INFOTRYGD) {
+                        validerMigreringFraInfotrygd(nyBehandling)
+                    }
+
+                    hentBarnFraForrigeAvsluttedeBehandling(behandling)
+                }
+                else -> throw Feil(hentUkjentBehandlingTypeOgÅrsakFeilMelding(nyBehandling))
             }
-            else -> throw Feil("Ukjent oppførsel ved opprettelse av behandling.")
         }
 
         return håndterPersongrunnlag(
@@ -107,6 +100,31 @@ class StegService(
                 nyMigreringsdato = nyBehandling.nyMigreringsdato
             )
         )
+    }
+
+    private fun validerMigreringFraInfotrygd(nyBehandling: NyBehandling) {
+        if (nyBehandling.behandlingÅrsak != BehandlingÅrsak.ENDRE_MIGRERINGSDATO) {
+            throw Feil(hentUkjentBehandlingTypeOgÅrsakFeilMelding(nyBehandling))
+        }
+    }
+
+    private fun validerHelmanuelMigrering(behandling: Behandling) {
+        if (behandlingService.hentSisteBehandlingSomErVedtatt(behandling.fagsak.id) != null) {
+            throw FunksjonellFeil(
+                melding = "Det finnes allerede en vedtatt behandling på fagsak ${behandling.fagsak.id}." +
+                    "Behandling kan ikke opprettes med årsak " +
+                    BehandlingÅrsak.HELMANUELL_MIGRERING.visningsnavn,
+                frontendFeilmelding = "Det finnes allerede en vedtatt behandling på fagsak." +
+                    "Behandling kan ikke opprettes med årsak " +
+                    BehandlingÅrsak.HELMANUELL_MIGRERING.visningsnavn
+            )
+        }
+    }
+
+    private fun hentBarnFraForrigeAvsluttedeBehandling(behandling: Behandling): List<String> {
+        val sisteBehandling = hentSisteAvsluttetBehandling(behandling)
+        return behandlingService.finnBarnFraBehandlingMedTilkjentYtsele(sisteBehandling.id)
+            .map { it.aktivFødselsnummer() }
     }
 
     @Transactional
@@ -480,5 +498,10 @@ class StegService(
 
         private val logger = LoggerFactory.getLogger(StegService::class.java)
         private val secureLogger = LoggerFactory.getLogger("secureLogger")
+
+        private fun hentUkjentBehandlingTypeOgÅrsakFeilMelding(nyBehandling: NyBehandling) =
+            "Ukjent oppførsel ved opprettelse av ny behandling med årsak " +
+                "${nyBehandling.behandlingÅrsak.visningsnavn} og " +
+                "type ${nyBehandling.behandlingType.visningsnavn}."
     }
 }
