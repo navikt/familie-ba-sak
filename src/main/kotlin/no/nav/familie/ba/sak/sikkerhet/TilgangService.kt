@@ -70,7 +70,7 @@ class TilgangService(
             auditLogger.log(
                 Sporingsdata(
                     event = event,
-                    personIdent = behandling.fagsak.aktør.aktivFødselsnummer(),
+                    personIdent = personIdenter.joinToString(","),
                     custom1 = CustomKeyValue("behandling", behandlingId.toString())
                 )
             )
@@ -89,7 +89,7 @@ class TilgangService(
         auditLogger.log(
             Sporingsdata(
                 event = event,
-                personIdent = personIdent,
+                personIdent = fagsakService.hentAktør(fagsakId).personidenter.joinToString(","),
                 custom1 = CustomKeyValue("fagsak", fagsakId.toString())
             )
         )
