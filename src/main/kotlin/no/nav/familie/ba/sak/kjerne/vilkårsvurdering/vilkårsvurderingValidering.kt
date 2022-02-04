@@ -13,15 +13,15 @@ fun validerIngenVilkårSattEtterSøkersDød(
 ) {
     val vilkårResultaterSøker =
         vilkårsvurdering.hentPersonResultaterTil(personopplysningGrunnlag.søker.aktør.aktørId)
+    val søkersDød = personopplysningGrunnlag.søker.dødsfall?.dødsfallDato ?: LocalDate.now()
+
     val vilkårSomEnderEtterSøkersDød =
         vilkårResultaterSøker
             .groupBy { it.vilkårType }
             .mapNotNull { (vilkårType, vilkårResultater) ->
                 vilkårType.takeIf {
                     vilkårResultater.any {
-                        it.periodeTom?.isAfter(
-                            LocalDate.now()
-                        ) ?: true
+                        it.periodeTom?.isAfter(søkersDød) ?: true
                     }
                 }
             }
