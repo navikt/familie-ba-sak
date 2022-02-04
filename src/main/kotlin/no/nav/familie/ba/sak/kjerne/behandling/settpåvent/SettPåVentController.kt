@@ -52,12 +52,12 @@ class SettPåVentController(
     }
 
     @PutMapping(path = ["{behandlingId}/fortsettbehandling"])
-    fun fjernSettBehandlingPåVent(@PathVariable behandlingId: Long): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+    fun gjenopptaBehandling(@PathVariable behandlingId: Long): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "Sett behandling på vent"
         )
-        settPåVentService.deaktiverSettBehandlingPåVent(behandlingId)
+        settPåVentService.gjenopptaBehandling(behandlingId)
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }

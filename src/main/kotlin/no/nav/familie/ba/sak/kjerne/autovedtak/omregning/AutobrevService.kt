@@ -81,10 +81,10 @@ class AutobrevService(
         val harSendtBrev =
             infotrygdService.harSendtbrev(personidenter.map { it.fødselsnummer }, behandlingsårsak.tilBrevkoder())
         return if (harSendtBrev) {
-            logger.info("Har sendt autobrev fra infotrygd, dropper å lage behandling for å sende brev fra ba-sak")
+            logger.info("Har sendt autobrev fra infotrygd, dropper å lage behandling for å sende brev fra ba-sak. fagsakId=$fagsakId")
             true
         } else {
-            logger.info("Har ikke sendt autobrev fra infotrygd, lager ny behandling og sender brev på vanlig måte")
+            logger.info("Har ikke sendt autobrev fra infotrygd, lager ny behandling og sender brev på vanlig måte. fagsakId=$fagsakId")
             false
         }
     }
