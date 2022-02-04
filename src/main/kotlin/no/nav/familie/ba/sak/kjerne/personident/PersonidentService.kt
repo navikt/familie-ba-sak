@@ -22,6 +22,15 @@ class PersonidentService(
         return pdlIdentRestClient.hentIdenter(personIdent, historikk)
     }
 
+    fun identSkalLeggesTil(nyIdent: PersonIdent): Boolean {
+        val identerFraPdl = hentIdenter(nyIdent.ident, false)
+        val aktørId = filtrerAktørId(identerFraPdl)
+
+        val aktør = aktørIdRepository.findByAktørIdOrNull(aktørId)
+
+        return aktør?.harIdent(fødselsnummer = nyIdent.ident) == false
+    }
+
     @Transactional
     fun håndterNyIdent(nyIdent: PersonIdent): Aktør? {
         logger.info("Håndterer ny ident")
@@ -42,9 +51,13 @@ class PersonidentService(
 
     @Transactional
     fun opprettTaskForIdentHendelse(nyIdent: PersonIdent) {
-        logger.info("Oppretter task for senere håndterering av ny ident")
-        secureLogger.info("Oppretter task for senere håndterering av ny ident ${nyIdent.ident}")
-        taskRepository.save(IdentHendelseTask.opprettTask(nyIdent))
+        if (identSkalLeggesTil(nyIdent)) {
+            logger.info("Oppretter task for senere håndterering av ny ident")
+            secureLogger.info("Oppretter task for senere håndterering av ny ident ${nyIdent.ident}")
+            taskRepository.save(IdentHendelseTask.opprettTask(nyIdent))
+        } else {
+            logger.info("Ident er ikke knyttet til noen av aktørene våre, ignorerer hendelse.")
+        }
     }
 
     fun hentAlleFødselsnummerForEnAktør(aktør: Aktør) =
@@ -152,11 +165,9 @@ class PersonidentService(
                 ?: throw Error("Finner ikke aktiv ident i Pdl")
             )
 
-    private fun filtrerAktørId(identerFraPdl: List<IdentInformasjon>) =
-        (
-            identerFraPdl.singleOrNull { it.gruppe == "AKTORID" }?.ident
-                ?: throw Error("Finner ikke aktørId i Pdl")
-            )
+    private fun filtrerAktørId(identerFraPdl: List<IdentInformasjon>): String =
+        identerFraPdl.singleOrNull { it.gruppe == "AKTORID" }?.ident
+            ?: throw Error("Finner ikke aktørId i Pdl")
 
     companion object {
         val logger = LoggerFactory.getLogger(PersonidentService::class.java)
