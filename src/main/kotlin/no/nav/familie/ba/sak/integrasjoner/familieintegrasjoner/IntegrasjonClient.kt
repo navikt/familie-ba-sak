@@ -181,10 +181,10 @@ class IntegrasjonClient(
     fun hentEnhet(enhetId: String?): NavKontorEnhet {
         val uri = URI.create("$integrasjonUri/arbeidsfordeling/nav-kontor/$enhetId")
 
-        try {
-            return getForEntity(uri)
+        return try {
+            return getForEntity<Ressurs<NavKontorEnhet>>(uri).getDataOrThrow()
         } catch (e: Exception) {
-            throw RuntimeException("Kall mot integrasjon feilet ved henting av enhet.", e)
+            throw IntegrasjonException("Kall mot integrasjon feilet ved henting av enhet.", e)
         }
     }
 
