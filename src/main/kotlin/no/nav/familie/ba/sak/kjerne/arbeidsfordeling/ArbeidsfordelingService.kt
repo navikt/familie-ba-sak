@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.kjerne.arbeidsfordeling
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfordelingsenhet
-import no.nav.familie.ba.sak.integrasjoner.norg2.Norg2RestClient
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandling
@@ -25,7 +24,6 @@ class ArbeidsfordelingService(
     private val personidentService: PersonidentService,
     private val oppgaveService: OppgaveService,
     private val loggService: LoggService,
-    private val norg2RestClient: Norg2RestClient,
     private val integrasjonClient: IntegrasjonClient,
     private val personopplysningerService: PersonopplysningerService,
     private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher
@@ -44,7 +42,7 @@ class ArbeidsfordelingService(
         val oppdatertArbeidsfordelingPåBehandling = arbeidsfordelingPåBehandlingRepository.save(
             aktivArbeidsfordelingPåBehandling.copy(
                 behandlendeEnhetId = endreBehandlendeEnhet.enhetId,
-                behandlendeEnhetNavn = norg2RestClient.hentEnhet(endreBehandlendeEnhet.enhetId).navn,
+                behandlendeEnhetNavn = integrasjonClient.hentEnhet(endreBehandlendeEnhet.enhetId).navn,
                 manueltOverstyrt = true
             )
         )
