@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.integrasjoner.journalføring
 
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.ekstern.restDomene.RestJournalføring
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
@@ -68,6 +69,10 @@ class JournalføringController(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "journalføre"
         )
+
+        if (request.dokumenter.any { it.dokumentTittel == null }) {
+            throw FunksjonellFeil("Minst ett av dokumentene mangler dokumenttittel.")
+        }
 
         val fagsakId = journalføringService.journalfør(request, journalpostId, journalførendeEnhet, oppgaveId)
         return ResponseEntity.ok(Ressurs.success(fagsakId, "Journalpost $journalpostId Journalført"))
