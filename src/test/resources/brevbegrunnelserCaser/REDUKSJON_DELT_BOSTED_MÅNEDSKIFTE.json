@@ -1,0 +1,116 @@
+{
+  "beskrivelse": "Reduksjon delt bosted måndeskifte",
+  "fom": "2022-02-01",
+  "tom": "2027-01-31",
+  "vedtaksperiodetype": "UTBETALING",
+  "ytelserForSøkerForrigeMåned": [],
+  "ytelserForBarnOgSøkerIPeriode": [
+    "ORDINÆR_BARNETRYGD"
+  ],
+  "utvidetScenarioForEndringsperiode": "UTVIDET_YTELSE_IKKE_ENDRET",
+  "personerPåBehandling": [
+    {
+      "fødselsdato": "1990-02-19",
+      "type": "SØKER",
+      "overstyrteVilkårresultater": [
+        {
+          "vilkårType": "BOSATT_I_RIKET",
+          "periodeFom": "2001-01-01",
+          "periodeTom": null,
+          "resultat": "OPPFYLT",
+          "utdypendeVilkårsvurderinger": [],
+          "erEksplisittAvslagPåSøknad": false
+        },
+        {
+          "vilkårType": "LOVLIG_OPPHOLD",
+          "periodeFom": "2001-01-01",
+          "periodeTom": null,
+          "resultat": "OPPFYLT",
+          "utdypendeVilkårsvurderinger": [],
+          "erEksplisittAvslagPåSøknad": false
+        },
+        {
+          "vilkårType": "UTVIDET_BARNETRYGD",
+          "periodeFom": "2022-01-01",
+          "periodeTom": null,
+          "resultat": "OPPFYLT",
+          "utdypendeVilkårsvurderinger": [],
+          "erEksplisittAvslagPåSøknad": false
+        }
+      ],
+      "andreVurderinger": [],
+      "endredeUtbetalinger": []
+    },
+    {
+      "fødselsdato": "2016-02-10",
+      "type": "BARN",
+      "overstyrteVilkårresultater": [
+        {
+          "vilkårType": "BOR_MED_SØKER",
+          "periodeFom": "2022-01-01",
+          "periodeTom": null,
+          "resultat": "OPPFYLT",
+          "utdypendeVilkårsvurderinger": [
+            "DELT_BOSTED"
+          ],
+          "erEksplisittAvslagPåSøknad": false
+        },
+        {
+          "vilkårType": "BOR_MED_SØKER",
+          "periodeFom": "2016-02-10",
+          "periodeTom": "2021-12-31",
+          "resultat": "OPPFYLT",
+          "utdypendeVilkårsvurderinger": [],
+          "erEksplisittAvslagPåSøknad": false
+        },
+        {
+          "vilkårType": "BOSATT_I_RIKET",
+          "periodeFom": "2016-02-10",
+          "periodeTom": null,
+          "resultat": "OPPFYLT",
+          "utdypendeVilkårsvurderinger": [],
+          "erEksplisittAvslagPåSøknad": false
+        },
+        {
+          "vilkårType": "GIFT_PARTNERSKAP",
+          "periodeFom": "2016-02-10",
+          "periodeTom": null,
+          "resultat": "OPPFYLT",
+          "utdypendeVilkårsvurderinger": [],
+          "erEksplisittAvslagPåSøknad": null
+        },
+        {
+          "vilkårType": "UNDER_18_ÅR",
+          "periodeFom": "2016-02-10",
+          "periodeTom": "2034-02-09",
+          "resultat": "OPPFYLT",
+          "utdypendeVilkårsvurderinger": [],
+          "erEksplisittAvslagPåSøknad": null
+        },
+        {
+          "vilkårType": "LOVLIG_OPPHOLD",
+          "periodeFom": "2020-02-10",
+          "periodeTom": null,
+          "resultat": "OPPFYLT",
+          "utdypendeVilkårsvurderinger": [],
+          "erEksplisittAvslagPåSøknad": false
+        }
+      ],
+      "andreVurderinger": [],
+      "endredeUtbetalinger": []
+    }
+  ],
+  "forventetOutput": [
+    "REDUKSJON_FLYTTET_BARN",
+    "REDUKSJON_BARN_DØD",
+    "REDUKSJON_UNDER_6_ÅR",
+    "INNVILGET_OMSORG_FOR_BARN",
+    "INNVILGET_BOR_HOS_SØKER",
+    "INNVILGET_ENIGHET_OM_OPPHØR_AV_AVTALE_OM_DELT_BOSTED",
+    "INNVILGET_UENIGHET_OM_OPPHØR_AV_AVTALE_OM_DELT_BOSTED",
+    "INNVILGET_AVTALE_DELT_BOSTED_FÅR_FRA_FLYTTETIDSPUNKT",
+    "INNVILGET_AVTALE_DELT_BOSTED_FÅR_FRA_AVTALETIDSPUNKT",
+    "INNVILGET_VURDERING_AVTALE_DELT_BOSTED_FØLGES",
+    "INNVILGET_RETTSAVGJØRELSE_DELT_BOSTED"
+  ]
+}
