@@ -38,6 +38,8 @@ class PdlRestClientTestConfig {
             ),
             adressebeskyttelseGradering = null,
             sivilstander = listOf(Sivilstand(type = SIVILSTAND.UGIFT)),
+            dødsfall = null,
+            kontaktinformasjonForDoedsbo = null
         )
         return klient
     }

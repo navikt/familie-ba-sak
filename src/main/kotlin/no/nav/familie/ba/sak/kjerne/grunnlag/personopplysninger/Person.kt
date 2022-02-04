@@ -31,6 +31,7 @@ import javax.persistence.Id
 import javax.persistence.JoinColumn
 import javax.persistence.ManyToOne
 import javax.persistence.OneToMany
+import javax.persistence.OneToOne
 import javax.persistence.SequenceGenerator
 import javax.persistence.Table
 
@@ -93,6 +94,9 @@ data class Person(
     // Workaround før Hibernatebug https://hibernate.atlassian.net/browse/HHH-1718
     @Fetch(value = FetchMode.SUBSELECT)
     var sivilstander: MutableList<GrSivilstand> = mutableListOf(),
+
+    @OneToOne(mappedBy = "person", cascade = [CascadeType.ALL], fetch = FetchType.EAGER, optional = true)
+    var dødsfall: Dødsfall? = null
 ) : BaseEntitet() {
 
     override fun toString(): String {
@@ -122,6 +126,8 @@ data class Person(
 
     fun erYngreEnnInneværendeMåned(år: Int): Boolean =
         this.fødselsdato.isAfter(now().minusYears(år.toLong()).sisteDagIMåned())
+
+    fun erDød(): Boolean = dødsfall != null
 }
 
 enum class Kjønn {

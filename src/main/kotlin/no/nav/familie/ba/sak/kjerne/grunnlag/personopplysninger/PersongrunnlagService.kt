@@ -249,6 +249,7 @@ class PersongrunnlagService(
                         person = person
                     )
                 }?.sortedBy { it.gyldigPeriode?.fom }?.toMutableList() ?: mutableListOf()
+            person.dødsfall = lagDødsfall(person = person, dødsfallDatoFraPdl = personinfo.dødsfall?.dødsdato, dødsfallAdresseFraPdl = personinfo.kontaktinformasjonForDoedsbo?.adresse)
         }
     }
 
