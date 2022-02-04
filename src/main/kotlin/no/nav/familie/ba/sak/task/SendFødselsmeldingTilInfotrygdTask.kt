@@ -37,7 +37,7 @@ class SendFødselsmeldingTilInfotrygdTask(
         private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
         fun opprettTask(fnrBarn: List<String>): Task {
-            secureLogger.info("Send fødselsmelding for $fnrBarn til Infotrygd.")
+            secureLogger.info("Oppretter task for å sende fødselsmelding for $fnrBarn til Infotrygd.")
 
             val metadata = Properties().apply {
                 this["personIdenterBarn"] = fnrBarn.toString()
