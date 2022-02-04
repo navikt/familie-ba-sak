@@ -179,7 +179,7 @@ class IntegrasjonClient(
 
     @Cacheable("enhet", cacheManager = "kodeverkCache")
     fun hentEnhet(enhetId: String?): NavKontorEnhet {
-        val uri = URI.create("$integrasjonUri/v1/enhet/$enhetId")
+        val uri = URI.create("$integrasjonUri/arbeidsfordeling/nav-kontor/$enhetId")
 
         try {
             return getForEntity(uri)
