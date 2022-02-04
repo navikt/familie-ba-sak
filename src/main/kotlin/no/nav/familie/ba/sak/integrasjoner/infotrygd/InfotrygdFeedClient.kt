@@ -56,9 +56,9 @@ class InfotrygdFeedClient(
 
     private fun loggOgKastException(e: Exception) {
         if (e is HttpClientErrorException) {
-            logger.error("Http feil mot infotrygd feed: httpkode: ${e.statusCode}, feilmelding ${e.message}", e)
+            logger.warn("Http feil mot infotrygd feed: httpkode: ${e.statusCode}, feilmelding ${e.message}", e)
         } else {
-            logger.error("Feil mot infotrygd feed; melding ${e.message}", e)
+            logger.warn("Feil mot infotrygd feed; melding ${e.message}", e)
         }
 
         throw e

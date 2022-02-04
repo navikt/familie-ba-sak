@@ -33,16 +33,17 @@
         <encoder class="net.logstash.logback.encoder.LogstashEncoder"/>
     </appender>
 
-    <appender name="Sentry" class="io.sentry.logback.SentryAppender">
-        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-            <level>WARN</level>
-        </filter>
+    <appender name="SENTRY" class="io.sentry.logback.SentryAppender">
+        <options>
+            <!-- NOTE: Trenger dsn her også for å kunne logge feil som oppstår før spring er satt opp -->
+            <dsn>https://dd9a6107bdda4edeb51ece7283f37af4@sentry.gc.nav.no/112</dsn>
+        </options>
     </appender>
 
     <root level="${ROOT_LOG_LEVEL:-INFO}">
         <!-- nais+local -->
         <appender-ref ref="stdout_json"/>
-        <!-- <appender-ref ref="Sentry" /> -->
+        <Appender-ref ref="SENTRY"/>
     </root>
 
     <logger name="no.nav" level="WARN"/>
