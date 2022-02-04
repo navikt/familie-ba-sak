@@ -81,7 +81,9 @@
           "oppholdFra": "2010-01-20",
           "oppholdTil": "2022-01-20"
         }
-      ]
+      ],
+      "doedsfall": [],
+      "kontaktinformasjonForDoedsbo": []
     }
   }
 }
