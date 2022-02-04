@@ -64,7 +64,9 @@
           "gyldigFraOgMed": "2019-01-20",
           "gyldigTilOgMed": null
         }
-      ]
+      ],
+      "doedsfall": [],
+      "kontaktinformasjonForDoedsbo": []
     }
   }
 }

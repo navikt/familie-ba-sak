@@ -135,7 +135,7 @@ class VilkårService(
                 frontendFeilmelding = "Fant ikke vilkårsvurdering for person med ident '${restSlettVilkår.personIdent}"
             )
         val behandling = behandlingService.hent(behandlingId)
-        if (!behandling.erManuellMigreringForEndreMigreringsdato() ||
+        if (!behandling.erManuellMigrering() ||
             Vilkår.UTVIDET_BARNETRYGD != restSlettVilkår.vilkårType ||
             finnesUtvidetBarnetrydIForrigeBehandling(behandling, restSlettVilkår.personIdent)
         ) {
@@ -442,9 +442,6 @@ class VilkårService(
     ): VilkårResultat {
         val automatiskVurderingResultat = vilkår.vurderVilkår(
             person = person,
-            featureToggleOmLovligOppholdSkalVurderes = featureToggleService.isEnabled(
-                FeatureToggleConfig.KAN_BEHANDLE_TREDJELANDSBORGERE_AUTOMATISK,
-            ),
             vurderFra = eldsteBarnSinFødselsdato
         )
 

@@ -2,8 +2,6 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse
 
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.FagsystemRegelVurdering.SEND_TIL_BA
@@ -12,9 +10,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.FagsystemUtfall.
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.FagsystemUtfall.IVERKSATTE_BEHANDLINGER_I_BA_SAK
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.FagsystemUtfall.LØPENDE_SAK_I_INFOTRYGD
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.FagsystemUtfall.MOR_IKKE_GYLDIG_MEDLEMSKAP_FOR_AUTOMATISK_VURDERING
-import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.FagsystemUtfall.MOR_IKKE_NORSK_STATSBORGER
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.FagsystemUtfall.SAKER_I_INFOTRYGD_MEN_IKKE_LØPENDE_UTBETALINGER
-import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.FagsystemUtfall.STANDARDUTFALL_INFOTRYGD
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.FagsystemUtfall.STØTTET_I_BA_SAK
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.FagsystemUtfall.values
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -40,7 +36,6 @@ class VelgFagSystemService(
     private val personidentService: PersonidentService,
     private val behandlingService: BehandlingService,
     private val personopplysningerService: PersonopplysningerService,
-    private val featureToggleService: FeatureToggleService,
     private val statsborgerskapService: StatsborgerskapService
 ) {
 
@@ -84,13 +79,6 @@ class VelgFagSystemService(
         return infotrygdService.harLøpendeSakIInfotrygd(morsIdenter, alleBarnasIdenter)
     }
 
-    internal fun harMorGyldigNorskstatsborger(morsAktør: Aktør): Boolean {
-        val gjeldendeStatsborgerskap = personopplysningerService.hentGjeldendeStatsborgerskap(morsAktør)
-
-        secureLogger.info("Gjeldende statsborgerskap for ${morsAktør.aktivFødselsnummer()}=(${gjeldendeStatsborgerskap.land}, bekreftelsesdato=${gjeldendeStatsborgerskap.bekreftelsesdato}, gyldigFom=${gjeldendeStatsborgerskap.gyldigFraOgMed}, gyldigTom=${gjeldendeStatsborgerskap.gyldigTilOgMed})")
-        return gjeldendeStatsborgerskap.land == "NOR"
-    }
-
     internal fun harMorGyldigStatsborgerskapForAutomatiskVurdering(morsAktør: Aktør): Boolean {
         val gjeldendeStatsborgerskap = personopplysningerService.hentGjeldendeStatsborgerskap(morsAktør)
         val medlemskap = statsborgerskapService.hentSterkesteMedlemskap(statsborgerskap = gjeldendeStatsborgerskap)
@@ -131,37 +119,21 @@ class VelgFagSystemService(
                 SAKER_I_INFOTRYGD_MEN_IKKE_LØPENDE_UTBETALINGER,
                 SEND_TIL_INFOTRYGD
             )
-            !featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_TREDJELANDSBORGERE_AUTOMATISK) && !harMorGyldigNorskstatsborger(
-                morsAktør
-            ) -> Pair(
-                MOR_IKKE_NORSK_STATSBORGER,
-                SEND_TIL_INFOTRYGD
-            )
-            featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_TREDJELANDSBORGERE_AUTOMATISK) && !harMorGyldigStatsborgerskapForAutomatiskVurdering(
+            !harMorGyldigStatsborgerskapForAutomatiskVurdering(
                 morsAktør
             ) -> Pair(
                 MOR_IKKE_GYLDIG_MEDLEMSKAP_FOR_AUTOMATISK_VURDERING,
                 SEND_TIL_INFOTRYGD
             )
-            kanBehandleINyttSystem() -> Pair(
+            else -> Pair(
                 STØTTET_I_BA_SAK,
                 SEND_TIL_BA
             )
-
-            else -> Pair(STANDARDUTFALL_INFOTRYGD, SEND_TIL_INFOTRYGD)
         }
 
         secureLogger.info("Sender fødselshendelse for ${nyBehandlingHendelse.morsIdent} til $fagsystem med utfall $fagsystemUtfall")
         utfallForValgAvFagsystem[fagsystemUtfall]?.increment()
         return Pair(fagsystem, fagsystemUtfall)
-    }
-
-    private fun kanBehandleINyttSystem(): Boolean {
-        val gradualRolloutFødselshendelser =
-            featureToggleService.isEnabled(FeatureToggleConfig.AUTOMATISK_FØDSELSHENDELSE_GRADUAL_ROLLOUT)
-        logger.info("Toggle for gradvis utrulling er $gradualRolloutFødselshendelser")
-
-        return gradualRolloutFødselshendelser
     }
 
     companion object {

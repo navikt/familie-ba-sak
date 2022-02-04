@@ -155,15 +155,12 @@ data class VurderBarnErUgift(
 }
 
 data class VurderPersonHarLovligOpphold(
-    val featureToggleOmLovligOppholdSkalVurderes: Boolean,
     val personType: PersonType,
     val statsborgerskap: List<GrStatsborgerskap>,
     val opphold: List<GrOpphold>
 ) : Vilkårsregel {
 
     override fun vurder(): Evaluering {
-        if (!featureToggleOmLovligOppholdSkalVurderes) return Evaluering.oppfylt(VilkårOppfyltÅrsak.NORDISK_STATSBORGER)
-
         if (personType == PersonType.BARN) {
             return Evaluering.oppfylt(VilkårOppfyltÅrsak.AUTOMATISK_VURDERING_BARN_LOVLIG_OPPHOLD)
         }

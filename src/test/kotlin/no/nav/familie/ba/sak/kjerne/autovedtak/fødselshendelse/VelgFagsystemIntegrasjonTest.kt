@@ -4,8 +4,6 @@ import io.mockk.every
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
@@ -33,7 +31,6 @@ class VelgFagsystemIntegrasjonTest(
     @Autowired val infotrygdService: InfotrygdService,
     @Autowired val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
     @Autowired val databaseCleanupService: DatabaseCleanupService,
-    @Autowired val featureToggleService: FeatureToggleService
 ) : AbstractSpringIntegrationTest() {
 
     val søkerFnr = randomFnr()
@@ -93,40 +90,6 @@ class VelgFagsystemIntegrasjonTest(
         )
         val (fagsystemRegelVurdering, faktiskFagsystemUtfall) = velgFagSystemService.velgFagsystem(nyBehandling)
         assertEquals(FagsystemRegelVurdering.SEND_TIL_BA, fagsystemRegelVurdering)
-        assertEquals(fagsystemUtfall, faktiskFagsystemUtfall)
-    }
-
-    @Test
-    fun `skal velge ba-sak når mor er norsk og featuretoggle er av`() {
-        val nyBehandling = NyBehandlingHendelse(søkerFnr, listOf(søkerFnr))
-        val fagsystemUtfall = FagsystemUtfall.STØTTET_I_BA_SAK
-
-        every { featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_TREDJELANDSBORGERE_AUTOMATISK) } returns false
-        every { mockPersonopplysningerService.hentGjeldendeStatsborgerskap(any()) } returns Statsborgerskap(
-            land = "NOR",
-            gyldigFraOgMed = LocalDate.now().minusYears(2),
-            gyldigTilOgMed = null,
-            bekreftelsesdato = null
-        )
-        val (fagsystemRegelVurdering, faktiskFagsystemUtfall) = velgFagSystemService.velgFagsystem(nyBehandling)
-        assertEquals(FagsystemRegelVurdering.SEND_TIL_BA, fagsystemRegelVurdering)
-        assertEquals(fagsystemUtfall, faktiskFagsystemUtfall)
-    }
-
-    @Test
-    fun `skal ikke velge ba-sak når mor er tredjelandsborger og featuretoggle er av`() {
-        val nyBehandling = NyBehandlingHendelse(søkerFnr, listOf(søkerFnr))
-        val fagsystemUtfall = FagsystemUtfall.MOR_IKKE_NORSK_STATSBORGER
-
-        every { featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_TREDJELANDSBORGERE_AUTOMATISK) } returns false
-        every { mockPersonopplysningerService.hentGjeldendeStatsborgerskap(any()) } returns Statsborgerskap(
-            land = "USA",
-            gyldigFraOgMed = LocalDate.now().minusYears(2),
-            gyldigTilOgMed = null,
-            bekreftelsesdato = null
-        )
-        val (fagsystemRegelVurdering, faktiskFagsystemUtfall) = velgFagSystemService.velgFagsystem(nyBehandling)
-        assertEquals(FagsystemRegelVurdering.SEND_TIL_INFOTRYGD, fagsystemRegelVurdering)
         assertEquals(fagsystemUtfall, faktiskFagsystemUtfall)
     }
 }

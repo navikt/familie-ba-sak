@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.integrasjoner.pdl.domene
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.JsonNode
@@ -28,6 +29,8 @@ data class PersonInfo(
     val sivilstander: List<Sivilstand> = emptyList(),
     val opphold: List<Opphold>? = emptyList(),
     val statsborgerskap: List<Statsborgerskap>? = emptyList(),
+    val dødsfall: DødsfallData? = null,
+    val kontaktinformasjonForDoedsbo: PdlKontaktinformasjonForDødsbo? = null
 )
 
 fun List<Bostedsadresse>.filtrerUtKunNorskeBostedsadresser() =
@@ -65,6 +68,17 @@ data class Personident(
 data class DødsfallData(
     val erDød: Boolean,
     val dødsdato: String?
+)
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class PdlKontaktinformasjonForDødsbo(
+    val adresse: PdlKontaktinformasjonForDødsboAdresse
+)
+
+data class PdlKontaktinformasjonForDødsboAdresse(
+    val adresselinje1: String,
+    val poststedsnavn: String,
+    val postnummer: String
 )
 
 data class VergeData(val harVerge: Boolean)

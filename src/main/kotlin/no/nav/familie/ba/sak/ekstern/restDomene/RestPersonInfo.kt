@@ -18,6 +18,7 @@ data class RestPersonInfo(
     val forelderBarnRelasjon: List<RestForelderBarnRelasjon> = emptyList(),
     val forelderBarnRelasjonMaskert: List<RestForelderBarnRelasjonnMaskert> = emptyList(),
     val kommunenummer: String = "ukjent",
+    val dødsfallDato: String? = null
 )
 
 data class RestForelderBarnRelasjon(
@@ -58,6 +59,8 @@ fun PersonInfo.tilRestPersonInfo(personIdent: String): RestPersonInfo {
         else -> null
     } ?: "ukjent"
 
+    val dødsfallDato = if (this.dødsfall != null && this.dødsfall.erDød) this.dødsfall.dødsdato else null
+
     return RestPersonInfo(
         personIdent = personIdent,
         fødselsdato = this.fødselsdato,
@@ -66,6 +69,7 @@ fun PersonInfo.tilRestPersonInfo(personIdent: String): RestPersonInfo {
         adressebeskyttelseGradering = this.adressebeskyttelseGradering,
         forelderBarnRelasjon = this.forelderBarnRelasjon.map { it.tilRestForelderBarnRelasjon() },
         forelderBarnRelasjonMaskert = this.forelderBarnRelasjonMaskert.map { it.tilRestForelderBarnRelasjonMaskert() },
-        kommunenummer = kommunenummer
+        kommunenummer = kommunenummer,
+        dødsfallDato = dødsfallDato
     )
 }
