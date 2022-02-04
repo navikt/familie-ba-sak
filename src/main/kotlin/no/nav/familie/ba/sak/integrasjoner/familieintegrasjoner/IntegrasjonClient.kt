@@ -35,6 +35,7 @@ import no.nav.familie.kontrakter.felles.getDataOrThrow
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.journalpost.JournalposterForBrukerRequest
 import no.nav.familie.kontrakter.felles.kodeverk.KodeverkDto
+import no.nav.familie.kontrakter.felles.navkontor.NavKontorEnhet
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
 import no.nav.familie.kontrakter.felles.oppgave.IdentGruppe
@@ -173,6 +174,17 @@ class IntegrasjonClient(
             assertGenerelleSuksessKriterier(response)
         }.onFailure {
             throw IntegrasjonException("Kan ikke ferdigstille $oppgaveId. response=${responseBody(it)}", it, uri)
+        }
+    }
+
+    @Cacheable("enhet", cacheManager = "kodeverkCache")
+    fun hentEnhet(enhetId: String?): NavKontorEnhet {
+        val uri = URI.create("$integrasjonUri/v1/enhet/$enhetId")
+
+        try {
+            return getForEntity(uri)
+        } catch (e: Exception) {
+            throw RuntimeException("Kall mot integrasjon feilet ved henting av enhet.", e)
         }
     }
 
