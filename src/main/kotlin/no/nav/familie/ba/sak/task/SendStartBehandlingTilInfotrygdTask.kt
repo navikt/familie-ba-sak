@@ -34,7 +34,7 @@ class SendStartBehandlingTilInfotrygdTask(
         private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
         fun opprettTask(aktørStoenadsmottaker: Aktør): Task {
-            secureLogger.info("Send startBehandling for ${aktørStoenadsmottaker.aktivFødselsnummer()} til Infotrygd.")
+            secureLogger.info("Oppretter task for å sende StartBehandling for ${aktørStoenadsmottaker.aktivFødselsnummer()} til Infotrygd.")
 
             val metadata = Properties().apply {
                 this["personIdenter"] = aktørStoenadsmottaker.aktivFødselsnummer()

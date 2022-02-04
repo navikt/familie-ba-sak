@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.arbeidsfordeling
 
 import io.mockk.every
+import io.mockk.slot
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.lagSøknadDTO
@@ -22,6 +23,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
+import no.nav.familie.kontrakter.felles.navkontor.NavKontorEnhet
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
@@ -171,6 +173,15 @@ class ArbeidsfordelingIntegrationTest(
                 enhetNavn = "Diskresjonsenhet"
             )
         )
+        val hentEnhetSlot = slot<String>()
+        every { integrasjonClient.hentEnhet(capture(hentEnhetSlot)) } answers {
+            NavKontorEnhet(
+                enhetId = hentEnhetSlot.captured.toInt(),
+                navn = "${hentEnhetSlot.captured}, NAV Familie- og pensjonsytelser Oslo 1",
+                enhetNr = "4848",
+                status = "aktiv"
+            )
+        }
     }
 
     @Test

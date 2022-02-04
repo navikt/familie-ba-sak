@@ -154,7 +154,7 @@ class InfotrygdBarnetrygdClient(
         val brevkoder: List<String>
     )
 
-    class SendtBrevResponse(
+    data class SendtBrevResponse(
         val harSendtBrev: Boolean,
         val listeBrevhendelser: List<InfotrygdHendelse> = emptyList()
     )

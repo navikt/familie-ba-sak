@@ -150,7 +150,6 @@ SANITY_DATASET: "ba-brev"
 PDL_URL: https://pdl-api-q1.dev-fss-pub.nais.io
 PDL_SCOPE: api://dev-fss.pdl.pdl-api-q1/.default
 
-NORG2_BASE_URL: https://app-q1.adeo.no/norg2
 FAMILIE_BREV_API_URL: http://familie-brev
 FAMILIE_INTEGRASJONER_API_URL: https://familie-integrasjoner-q1.dev-fss-pub.nais.io/api
 FAMILIE_TILBAKE_API_URL: http://familie-tilbake/api
