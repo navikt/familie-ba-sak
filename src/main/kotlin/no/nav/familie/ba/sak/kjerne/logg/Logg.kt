@@ -69,4 +69,6 @@ enum class LoggType(val visningsnavn: String) {
     DISTRIBUERE_BREV("Distribuere brev"),
     FERDIGSTILLE_BEHANDLING("Ferdigstille behandling"),
     HENLEGG_BEHANDLING("Henlegg behandling"),
+    BEHANDLIG_SATT_PÅ_VENT("Behandlingen er satt på vent"),
+    BEHANDLIG_GJENOPPTATT("Behandling gjenopptatt"),
 }

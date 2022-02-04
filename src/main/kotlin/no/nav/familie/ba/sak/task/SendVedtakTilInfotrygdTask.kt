@@ -58,7 +58,7 @@ class SendVedtakTilInfotrygdTask(
         private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
         fun opprettTask(fnrStoenadsmottaker: String, behandlingId: Long): Task {
-            secureLogger.info("Send vedtaksmelding for $fnrStoenadsmottaker til Infotrygd.")
+            secureLogger.info("Oppretter task for å sende vedtaksmelding for $fnrStoenadsmottaker til Infotrygd.")
 
             val metadata = Properties().apply {
                 this["fnrStoenadsmottaker"] = fnrStoenadsmottaker

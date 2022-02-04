@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.integrasjoner.pdl
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
-import no.nav.familie.ba.sak.integrasjoner.pdl.domene.DødsfallData
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjonMaskert
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
@@ -50,7 +49,7 @@ class PersonopplysningerService(
         }.toSet()
         return personinfo.copy(
             forelderBarnRelasjon = forelderBarnRelasjon,
-            forelderBarnRelasjonMaskert = forelderBarnRelasjonMaskert
+            forelderBarnRelasjonMaskert = forelderBarnRelasjonMaskert,
         )
     }
 
@@ -60,17 +59,6 @@ class PersonopplysningerService(
 
     private fun hentPersoninfoMedQuery(aktør: Aktør, personInfoQuery: PersonInfoQuery): PersonInfo {
         return pdlRestClient.hentPerson(aktør, personInfoQuery)
-    }
-
-    fun hentDødsfall(aktør: Aktør): DødsfallData {
-        val doedsfall = pdlRestClient.hentDødsfall(aktør)
-        return DødsfallResponse(
-            erDød = doedsfall.isNotEmpty(),
-            dødsdato = doedsfall.filter { it.doedsdato != null }
-                .map { it.doedsdato }
-                .firstOrNull()
-        )
-            .let { DødsfallData(erDød = it.erDød, dødsdato = it.dødsdato) }
     }
 
     fun hentVergeData(aktør: Aktør): VergeData {

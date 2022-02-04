@@ -9,8 +9,8 @@ import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.VergeResponse
-import no.nav.familie.ba.sak.integrasjoner.pdl.domene.DødsfallData
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjon
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlKontaktinformasjonForDødsboAdresse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.erOppfylt
@@ -24,6 +24,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.lagDødsfall
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
@@ -101,7 +102,8 @@ class FiltreringsregelForFlereBarnTest {
                         ),
                         genererPerson(
                             type = PersonType.BARN, personopplysningGrunnlag = this, aktør = barnAktør0,
-                            fødselsDato = LocalDate.now().minusMonths(1)
+                            fødselsDato = LocalDate.now().minusMonths(1),
+                            dødsfallDato = LocalDate.now().toString()
                         ),
                         genererPerson(
                             type = PersonType.BARN, personopplysningGrunnlag = this, aktør = barnAktør1,
@@ -110,18 +112,6 @@ class FiltreringsregelForFlereBarnTest {
                     )
                 )
             }
-        every { personopplysningerServiceMock.hentDødsfall(gyldigAktør) } returns DødsfallData(
-            erDød = false,
-            dødsdato = null
-        )
-        every { personopplysningerServiceMock.hentDødsfall(barnAktør0) } returns DødsfallData(
-            erDød = false,
-            dødsdato = null
-        )
-        every { personopplysningerServiceMock.hentDødsfall(barnAktør1) } returns DødsfallData(
-            erDød = true,
-            dødsdato = null
-        )
 
         every { personopplysningerServiceMock.hentPersoninfoMedRelasjonerOgRegisterinformasjon(gyldigAktør) } returns personInfo
 
@@ -183,18 +173,6 @@ class FiltreringsregelForFlereBarnTest {
                     )
                 )
             }
-        every { personopplysningerServiceMock.hentDødsfall(gyldigAktør) } returns DødsfallData(
-            erDød = false,
-            dødsdato = null
-        )
-        every { personopplysningerServiceMock.hentDødsfall(barnAktør0) } returns DødsfallData(
-            erDød = false,
-            dødsdato = null
-        )
-        every { personopplysningerServiceMock.hentDødsfall(barnAktør1) } returns DødsfallData(
-            erDød = false,
-            dødsdato = null
-        )
 
         every { personopplysningerServiceMock.hentPersoninfoMedRelasjonerOgRegisterinformasjon(gyldigAktør) } returns personInfo
 
@@ -233,7 +211,8 @@ class FiltreringsregelForFlereBarnTest {
         fødselsDato: LocalDate? = null,
         grBostedsadresse: GrBostedsadresse? = null,
         kjønn: Kjønn = Kjønn.KVINNE,
-        sivilstand: SIVILSTAND = SIVILSTAND.UGIFT
+        sivilstand: SIVILSTAND = SIVILSTAND.UGIFT,
+        dødsfallDato: String? = null
     ): Person {
         return Person(
             aktør = aktør,
@@ -242,9 +221,14 @@ class FiltreringsregelForFlereBarnTest {
             fødselsdato = fødselsDato ?: LocalDate.of(1991, 1, 1),
             navn = "navn",
             kjønn = kjønn,
-            bostedsadresser = grBostedsadresse?.let { mutableListOf(grBostedsadresse) } ?: mutableListOf()
+            bostedsadresser = grBostedsadresse?.let { mutableListOf(grBostedsadresse) } ?: mutableListOf(),
         )
-            .apply { this.sivilstander = mutableListOf(GrSivilstand(type = sivilstand, person = this)) }
+            .apply {
+                this.sivilstander = mutableListOf(GrSivilstand(type = sivilstand, person = this))
+                if (dødsfallDato != null) {
+                    this.dødsfall = lagDødsfall(person = this, dødsfallDatoFraPdl = dødsfallDato, dødsfallAdresseFraPdl = PdlKontaktinformasjonForDødsboAdresse(adresselinje1 = "Gate 1", postnummer = "1234", poststedsnavn = "Oslo"))
+                }
+            }
     }
 
     private fun generePersonInfoMedBarn(

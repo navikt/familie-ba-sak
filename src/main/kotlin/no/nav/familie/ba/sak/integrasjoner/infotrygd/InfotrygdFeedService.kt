@@ -13,13 +13,11 @@ class InfotrygdFeedService(
 
     @Transactional
     fun sendTilInfotrygdFeed(barnsIdenter: List<String>) {
-        logger.info("Send ${barnsIdenter.size} av fødselsmeldinger til Infotrygd.")
         opprettTaskService.opprettSendFeedTilInfotrygdTask(barnsIdenter)
     }
 
     @Transactional
     fun sendStartBehandlingTilInfotrygdFeed(aktørStoenadsmottaker: Aktør) {
-        logger.info("Send startBehandling til Infotrygd.")
         opprettTaskService.opprettSendStartBehandlingTilInfotrygdTask(aktørStoenadsmottaker)
     }
 

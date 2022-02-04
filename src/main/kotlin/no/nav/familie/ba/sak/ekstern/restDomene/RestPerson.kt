@@ -17,7 +17,8 @@ data class RestPerson(
     val navn: String,
     val kjønn: Kjønn,
     val registerhistorikk: RestRegisterhistorikk? = null,
-    val målform: Målform
+    val målform: Målform,
+    val dødsfallDato: LocalDate? = null
 )
 
 fun Person.tilRestPerson() = RestPerson(
@@ -27,5 +28,6 @@ fun Person.tilRestPerson() = RestPerson(
     navn = this.navn,
     kjønn = this.kjønn,
     registerhistorikk = this.tilRestRegisterhistorikk(),
-    målform = this.målform
+    målform = this.målform,
+    dødsfallDato = this.dødsfall?.dødsfallDato
 )
