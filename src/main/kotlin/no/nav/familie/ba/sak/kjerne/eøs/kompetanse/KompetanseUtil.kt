@@ -1,6 +1,6 @@
-package no.nav.familie.ba.sak.kjerne.kompetanse
+package no.nav.familie.ba.sak.kjerne.eøs.kompetanse
 
-import no.nav.familie.ba.sak.kjerne.kompetanse.domene.Kompetanse
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 
 object KompetanseUtil {
     fun finnRestKompetanser(gammelKompetanse: Kompetanse, nyKompetanse: Kompetanse): Collection<Kompetanse> {

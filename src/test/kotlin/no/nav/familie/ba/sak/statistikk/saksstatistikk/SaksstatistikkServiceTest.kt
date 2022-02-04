@@ -25,6 +25,7 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
@@ -227,7 +228,7 @@ internal class SaksstatistikkServiceTest(
 
         every { behandlingService.hent(any()) } returns behandling
         every { persongrunnlagService.hentSøker(any()) } returns tilfeldigSøker()
-        every { persongrunnlagService.hentBarna(any()) } returns listOf(
+        every { persongrunnlagService.hentBarna(any<Behandling>()) } returns listOf(
             tilfeldigPerson()
                 .copy(aktør = randomAktørId("01010000001"))
         )
