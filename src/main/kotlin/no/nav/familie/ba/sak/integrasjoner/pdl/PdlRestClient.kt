@@ -1,9 +1,9 @@
 package no.nav.familie.ba.sak.integrasjoner.pdl
 
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.Doedsfall
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.DødsfallData
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlBaseResponse
-import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlDødsfallResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlHentPersonRelasjonerResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlHentPersonResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlOppholdResponse
@@ -82,26 +82,23 @@ class PdlRestClient(
                     bostedsadresser = it.bostedsadresse,
                     statsborgerskap = it.statsborgerskap,
                     opphold = it.opphold,
-                    sivilstander = it.sivilstand
+                    sivilstander = it.sivilstand,
+                    dødsfall = hentDødsfallDataFraListeMedDødsfall(it.doedsfall),
+                    kontaktinformasjonForDoedsbo = it.kontaktinformasjonForDoedsbo.firstOrNull()
                 )
             }
         }
     }
 
-    @Cacheable("dødsfall", cacheManager = "shortCache")
-    fun hentDødsfall(aktør: Aktør): List<Doedsfall> {
-        val pdlPersonRequest = PdlPersonRequest(
-            variables = PdlPersonRequestVariables(aktør.aktivFødselsnummer()),
-            query = hentGraphqlQuery("doedsfall")
-        )
-        val pdlResponse: PdlBaseResponse<PdlDødsfallResponse> = postForEntity(pdlUri, pdlPersonRequest, httpHeaders())
+    private fun hentDødsfallDataFraListeMedDødsfall(doedsfall: List<Doedsfall>): DødsfallData? {
+        val dødsdato = doedsfall.filter { it.doedsdato != null }
+            .map { it.doedsdato }
+            .firstOrNull()
 
-        return feilsjekkOgReturnerData(
-            ident = aktør.aktivFødselsnummer(),
-            pdlResponse = pdlResponse
-        ) {
-            it.person!!.doedsfall
+        if (doedsfall.isEmpty() || dødsdato == null) {
+            return null
         }
+        return DødsfallData(erDød = true, dødsdato = dødsdato)
     }
 
     @Cacheable("vergedata", cacheManager = "shortCache")

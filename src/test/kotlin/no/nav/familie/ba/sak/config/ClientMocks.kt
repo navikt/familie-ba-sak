@@ -12,7 +12,6 @@ import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonExcep
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlIdentRestClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.VergeResponse
-import no.nav.familie.ba.sak.integrasjoner.pdl.domene.DødsfallData
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjonMaskert
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.IdentInformasjon
@@ -270,10 +269,6 @@ class ClientMocks {
                     oppholdTil = LocalDate.of(2499, 1, 1)
                 )
             }
-
-            every {
-                mockPersonopplysningerService.hentDødsfall(any())
-            } returns DødsfallData(false, null)
 
             every {
                 mockPersonopplysningerService.hentVergeData(any())

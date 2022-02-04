@@ -6,7 +6,6 @@ import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.config.tilAktør
@@ -16,7 +15,6 @@ import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.domene.Task
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
@@ -125,15 +123,42 @@ internal class PersonidentServiceTest {
 
     @Test
     fun `Skal opprette task for håndtering av ny ident`() {
+        val personIdentSomFinnes = randomFnr()
+        val personIdentSomSkalLeggesTil = randomFnr()
+        val aktørIdSomFinnes = tilAktør(personIdentSomFinnes)
+        aktørIdSomFinnes.personidenter.add(
+            Personident(
+                fødselsnummer = personIdentSomFinnes,
+                aktør = aktørIdSomFinnes
+            )
+        )
+
         val taskRepositoryMock = mockk<TaskRepositoryWrapper>(relaxed = true)
         val personidentService = PersonidentService(
             personidentRepository, aktørIdRepository, pdlIdentRestClient, taskRepositoryMock
         )
 
+        every { pdlIdentRestClient.hentIdenter(personIdentSomFinnes, false) } answers {
+            listOf(
+                IdentInformasjon(aktørIdSomFinnes.aktørId, false, "AKTORID"),
+                IdentInformasjon(personIdentSomFinnes, false, "FOLKEREGISTERIDENT"),
+            )
+        }
+
+        every { pdlIdentRestClient.hentIdenter(personIdentSomSkalLeggesTil, false) } answers {
+            listOf(
+                IdentInformasjon(aktørIdSomFinnes.aktørId, false, "AKTORID"),
+                IdentInformasjon(personIdentSomSkalLeggesTil, false, "FOLKEREGISTERIDENT"),
+            )
+        }
+        every { aktørIdRepository.findByAktørIdOrNull(aktørIdSomFinnes.aktørId) }.answers {
+            aktørIdSomFinnes
+        }
+
         val slot = slot<Task>()
         every { taskRepositoryMock.save(capture(slot)) } answers { slot.captured }
 
-        val ident = PersonIdent("123")
+        val ident = PersonIdent(personIdentSomSkalLeggesTil)
         personidentService.opprettTaskForIdentHendelse(ident)
 
         verify(exactly = 1) { taskRepositoryMock.save(any()) }
@@ -141,30 +166,47 @@ internal class PersonidentServiceTest {
     }
 
     @Test
-    fun `Skal ikke legge til ny ident på aktør som ikke finnes i systemet`() {
+    fun `Skal ikke opprette task for håndtering av ny ident når ident ikke er tilknyttet noen aktører i systemet`() {
+        val personIdentSomFinnes = randomFnr()
         val personIdentSomSkalLeggesTil = randomFnr()
-        val aktørIdSomIkkeFinnes = randomAktørId()
+        val aktørIdIkkeIBaSak = tilAktør(personIdentSomSkalLeggesTil)
+        val aktørIdSomFinnes = tilAktør(personIdentSomFinnes)
+        aktørIdSomFinnes.personidenter.add(
+            Personident(
+                fødselsnummer = personIdentSomFinnes,
+                aktør = aktørIdSomFinnes
+            )
+        )
 
-        every { pdlIdentRestClient.hentIdenter(personIdentSomSkalLeggesTil, false) } answers {
+        val taskRepositoryMock = mockk<TaskRepositoryWrapper>(relaxed = true)
+        val personidentService = PersonidentService(
+            personidentRepository, aktørIdRepository, pdlIdentRestClient, taskRepositoryMock
+        )
+
+        every { pdlIdentRestClient.hentIdenter(personIdentSomFinnes, false) } answers {
             listOf(
-                IdentInformasjon(aktørIdSomIkkeFinnes.aktørId, false, "AKTORID"),
-                IdentInformasjon(personIdentSomSkalLeggesTil, false, "FOLKEREGISTERIDENT"),
+                IdentInformasjon(aktørIdSomFinnes.aktørId, false, "AKTORID"),
+                IdentInformasjon(personIdentSomFinnes, false, "FOLKEREGISTERIDENT"),
             )
         }
 
-        every { personidentRepository.findByFødselsnummerOrNull(personIdentSomSkalLeggesTil) }.answers { null }
+        every { pdlIdentRestClient.hentIdenter(personIdentSomSkalLeggesTil, false) } answers {
+            listOf(
+                IdentInformasjon(aktørIdIkkeIBaSak.aktørId, false, "AKTORID"),
+                IdentInformasjon(personIdentSomSkalLeggesTil, false, "FOLKEREGISTERIDENT"),
+            )
+        }
+        every { aktørIdRepository.findByAktørIdOrNull(aktørIdIkkeIBaSak.aktørId) }.answers {
+            aktørIdIkkeIBaSak
+        }
 
-        every { aktørIdRepository.findByAktørIdOrNull(aktørIdSomIkkeFinnes.aktørId) }.answers { null }
+        val slot = slot<Task>()
+        every { taskRepositoryMock.save(capture(slot)) } answers { slot.captured }
 
-        val personidentService = PersonidentService(
-            personidentRepository, aktørIdRepository, pdlIdentRestClient, mockk()
-        )
+        val ident = PersonIdent(personIdentSomSkalLeggesTil)
+        personidentService.opprettTaskForIdentHendelse(ident)
 
-        val aktør = personidentService.håndterNyIdent(nyIdent = PersonIdent(personIdentSomSkalLeggesTil))
-
-        assertNull(aktør)
-        verify(exactly = 0) { aktørIdRepository.save(any()) }
-        verify(exactly = 0) { personidentRepository.save(any()) }
+        verify(exactly = 0) { taskRepositoryMock.save(any()) }
     }
 
     @Test
