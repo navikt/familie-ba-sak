@@ -250,13 +250,10 @@ class VedtaksperiodeService(
 
         val utbetalingsperioder =
             hentVedtaksperioderMedBegrunnelserForUtbetalingsperioder(andelerTilkjentYtelse, vedtak)
-
-        val endretUtbetalingVedtakssidenToggle =
-            featureToggleService.isEnabled(FeatureToggleConfig.ENDRET_UTBETALING_VEDTAKSSIDEN)
+        
         val endredeUtbetalingsperioder = hentVedtaksperioderMedBegrunnelserForEndredeUtbetalingsperioder(
             andelerTilkjentYtelse = andelerTilkjentYtelse,
             vedtak = vedtak,
-            endretUtbetalingVedtakssidenToggle = endretUtbetalingVedtakssidenToggle
         )
 
         val opphørsperioder =
