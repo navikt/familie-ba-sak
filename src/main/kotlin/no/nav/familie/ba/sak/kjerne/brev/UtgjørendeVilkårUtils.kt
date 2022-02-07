@@ -167,7 +167,7 @@ private fun erReduksjonResultatUtgjøreneForPeriode(
         ) 0L
         else 1L
 
-    val erReduksjonDeltBosted =
+    val erStartPåDeltBosted =
         minimertVilkårResultat.vilkårType == Vilkår.BOR_MED_SØKER &&
             !minimertVilkårResultat.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.DELT_BOSTED) &&
             triggesAv.deltbosted
@@ -175,11 +175,11 @@ private fun erReduksjonResultatUtgjøreneForPeriode(
     return triggereForUtdypendeVilkårsvurderingErOppfylt(
         triggesAv = triggesAv,
         vilkårResultat = minimertVilkårResultat,
-        erReduksjon = true
+        erReduksjonStartPåDeltBosted = erStartPåDeltBosted
     ) &&
         minimertVilkårResultat.periodeTom != null &&
         minimertVilkårResultat.resultat == Resultat.OPPFYLT &&
-        minimertVilkårResultat.periodeTom.plusDays(if (erReduksjonDeltBosted) 1 else 0)
+        minimertVilkårResultat.periodeTom.plusDays(if (erStartPåDeltBosted) 1 else 0)
         .toYearMonth() == vedtaksperiode.fom.minusMonths(
         oppfyltTomMånedEtter
     ).toYearMonth()
@@ -234,14 +234,14 @@ fun erFørstePeriodeOgVilkårIkkeOppfylt(
 private fun triggereForUtdypendeVilkårsvurderingErOppfylt(
     triggesAv: TriggesAv,
     vilkårResultat: MinimertVilkårResultat,
-    erReduksjon: Boolean = false,
+    erReduksjonStartPåDeltBosted: Boolean = false,
 ): Boolean {
 
     val resultatInneholderDeltBosted =
         vilkårResultat.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.DELT_BOSTED)
     val erDeltBostedOppfylt =
         triggesAv.deltbosted &&
-            erReduksjon != resultatInneholderDeltBosted ||
+            erReduksjonStartPåDeltBosted != resultatInneholderDeltBosted ||
             !triggesAv.deltbosted
 
     val resultatInneholderVurderingAnnetGrunnlag =
