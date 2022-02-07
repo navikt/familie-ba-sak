@@ -49,14 +49,10 @@ class StatusFraOppdragTask(
 
     override fun onCompletion(task: Task) {
         val statusFraOppdragDTO = objectMapper.readValue(task.payload, StatusFraOppdragDTO::class.java)
-        val behandling = behandlingService.hent(statusFraOppdragDTO.behandlingsId)
-        // Sender ikke informasjon til dvh for manuell migrering
-        if (!behandling.erManuellMigrering()) {
-            val personIdent = personidentService.hentOgLagreAktør(statusFraOppdragDTO.aktørId).aktivFødselsnummer()
+        val personIdent = personidentService.hentOgLagreAktør(statusFraOppdragDTO.aktørId).aktivFødselsnummer()
 
-            val nyTask = PubliserVedtakTask.opprettTask(personIdent, statusFraOppdragDTO.behandlingsId)
-            taskRepository.save(nyTask)
-        }
+        val nyTask = PubliserVedtakTask.opprettTask(personIdent, statusFraOppdragDTO.behandlingsId)
+        taskRepository.save(nyTask)
     }
 
     companion object {
