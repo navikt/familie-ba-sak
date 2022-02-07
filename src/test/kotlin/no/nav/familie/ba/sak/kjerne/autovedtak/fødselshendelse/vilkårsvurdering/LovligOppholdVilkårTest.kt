@@ -301,7 +301,7 @@ class LovligOppholdVilkårTest {
         ).evaluering
         assertEquals(Resultat.IKKE_OPPFYLT, evaluering.resultat)
         assertEquals(
-            listOf(VilkårIkkeOppfyltÅrsak.ANNEN_FORELDER_EØS_MEN_IKKE_MED_LØPENDE_ARBEIDSFORHOLD),
+            listOf(VilkårIkkeOppfyltÅrsak.EØS_ANNEN_FORELDER_EØS_MEN_IKKE_MED_LØPENDE_ARBEIDSFORHOLD),
             evaluering.evalueringÅrsaker
         )
     }

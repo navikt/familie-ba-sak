@@ -27,11 +27,6 @@ enum class VilkårIkkeOppfyltÅrsak(val beskrivelse: String, val metrikkBeskrive
     ),
 
     // Lovlig opphold
-    STATSBORGERSKAP_ANNEN_FORELDER_UKLART(
-        beskrivelse = "Statsborgerskap for annen forelder kan ikke avgjøres.",
-        metrikkBeskrivelse = "Statsborgerskap for annen forelder kan ikke avgjøres.",
-        vilkår = Vilkår.LOVLIG_OPPHOLD
-    ),
     TREDJELANDSBORGER_UTEN_LOVLIG_OPPHOLD(
         beskrivelse = "Mor har ikke lovlig opphold - tredjelandsborger.",
         metrikkBeskrivelse = "Mor tredjelandsborger",
@@ -42,18 +37,18 @@ enum class VilkårIkkeOppfyltÅrsak(val beskrivelse: String, val metrikkBeskrive
         metrikkBeskrivelse = "Mor statsløs eller mangler statsborgerskap",
         vilkår = Vilkår.LOVLIG_OPPHOLD
     ),
-    EØS_UKJENT_ANNEN_FORELDER(
-        beskrivelse = "Mor er EØS-borger og har ikke løpende arbeidsforhold i Norge. Finner ikke annen forelder.",
-        metrikkBeskrivelse = "Mor er EØS-borger, finner ikke annen forelder.",
+    EØS_STATSBORGERSKAP_ANNEN_FORELDER_UKLART(
+        beskrivelse = "Mor har ikke lovlig opphold - annen forelder kan ikke avgjøres.",
+        metrikkBeskrivelse = "Statsborgerskap for annen forelder kan ikke avgjøres.",
         vilkår = Vilkår.LOVLIG_OPPHOLD
     ),
     EØS_BOR_IKKE_SAMMEN_MED_ANNEN_FORELDER(
-        beskrivelse = "Mor er EØS-borger og har ikke løpende arbeidsforhold i Norge. Finner ikke annen forelder.",
-        metrikkBeskrivelse = "Mor er EØS-borger, finner ikke annen forelder.",
+        beskrivelse = "Mor har ikke lovlig opphold - EØS borger. Bor ikke med annen forelder",
+        metrikkBeskrivelse = "Mor har ikke lovlig opphold - bor ikke med annen forelder",
         vilkår = Vilkår.LOVLIG_OPPHOLD
     ),
-    ANNEN_FORELDER_EØS_MEN_IKKE_MED_LØPENDE_ARBEIDSFORHOLD(
-        beskrivelse = "Annen forelder er fra EØS, men har ikke et løpende arbeidsforhold i Norge.",
+    EØS_ANNEN_FORELDER_EØS_MEN_IKKE_MED_LØPENDE_ARBEIDSFORHOLD(
+        beskrivelse = "Mor har ikke lovlig opphold - EØS borger. Annen forelder er fra EØS, men har ikke et løpende arbeidsforhold i Norge.",
         metrikkBeskrivelse = "Annen forelder er fra EØS, men har ikke et løpende arbeidsforhold i Norge.",
         vilkår = Vilkår.LOVLIG_OPPHOLD
     ),

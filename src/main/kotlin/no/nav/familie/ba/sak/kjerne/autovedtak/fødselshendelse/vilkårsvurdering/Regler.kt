@@ -195,7 +195,7 @@ private fun vurderLovligOppholdForEØSBorger(
     }
 
     if (annenForelderLovligOppholdFaktaEØS == null) {
-        return Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.EØS_UKJENT_ANNEN_FORELDER)
+        return Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.EØS_STATSBORGERSKAP_ANNEN_FORELDER_UKLART)
     }
 
     if (!vurderOmPersonerBorSammen(
@@ -212,7 +212,7 @@ private fun vurderLovligOppholdForEØSBorger(
             if (annenForelderLovligOppholdFaktaEØS.arbeidsforhold.harLøpendeArbeidsforhold()) {
                 Evaluering.oppfylt(VilkårOppfyltÅrsak.ANNEN_FORELDER_EØS_MEN_MED_LØPENDE_ARBEIDSFORHOLD)
             } else {
-                Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.ANNEN_FORELDER_EØS_MEN_IKKE_MED_LØPENDE_ARBEIDSFORHOLD)
+                Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.EØS_ANNEN_FORELDER_EØS_MEN_IKKE_MED_LØPENDE_ARBEIDSFORHOLD)
             }
         }
         Medlemskap.TREDJELANDSBORGER -> Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.EØS_MEDFORELDER_TREDJELANDSBORGER)
