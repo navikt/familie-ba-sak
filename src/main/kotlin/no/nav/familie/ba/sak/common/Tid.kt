@@ -115,8 +115,12 @@ fun Periode.kanErstatte(other: Periode): Boolean {
     return this.fom.isSameOrBefore(other.fom) && this.tom.isSameOrAfter(other.tom)
 }
 
+fun LocalDate.erMellomIkkeLik(other: Periode): Boolean {
+    return this.isAfter(other.fom) && this.isBefore(other.tom)
+}
+
 fun Periode.kanSplitte(other: Periode): Boolean {
-    return this.fom.isBetween(other) && this.tom.isBetween(other) &&
+    return this.fom.erMellomIkkeLik(other) && this.tom.erMellomIkkeLik(other) &&
         (this.tom != TIDENES_ENDE || other.tom != TIDENES_ENDE)
 }
 
