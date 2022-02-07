@@ -1,10 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger
 
 import io.mockk.every
-import io.mockk.mockk
 import io.mockk.verify
-import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.nyOrdinærBehandling
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
@@ -51,35 +48,6 @@ class PersongrunnlagIntegrationTest(
     @Autowired
     private val behandlingService: BehandlingService,
 ) : AbstractSpringIntegrationTest() {
-
-    @Test
-    fun `Returnerer nytt barn fra personopplysningsgrunnlag`() {
-        val søker = randomFnr()
-        val barn = randomFnr()
-        val nyttbarn = randomFnr()
-
-        val forrigeBehandling = lagBehandling()
-        val forrigeGrunnlag = lagTestPersonopplysningGrunnlag(
-            behandlingId = forrigeBehandling.id,
-            søkerPersonIdent = søker,
-            barnasIdenter = listOf(barn)
-        )
-
-        val behandling = lagBehandling()
-        val grunnlag = lagTestPersonopplysningGrunnlag(
-            behandlingId = behandling.id,
-            søkerPersonIdent = søker,
-            barnasIdenter = listOf(barn, nyttbarn)
-        )
-        val mockPersongrunnlagService = mockk<PersongrunnlagService>(relaxed = false)
-
-        every { mockPersongrunnlagService.hentAktiv(forrigeBehandling.id) } returns forrigeGrunnlag
-        every { mockPersongrunnlagService.hentAktivThrows(behandling.id) } returns grunnlag
-        every { mockPersongrunnlagService.finnNyeBarn(any(), any()) } answers { callOriginal() }
-
-        val nye = persongrunnlagService.finnNyeBarn(forrigeBehandling = forrigeBehandling, behandling = behandling)
-        assertEquals(nyttbarn, nye.singleOrNull()!!.aktør.aktivFødselsnummer())
-    }
 
     @Test
     fun `Skal lagre dødsfall på person når person er død`() {
