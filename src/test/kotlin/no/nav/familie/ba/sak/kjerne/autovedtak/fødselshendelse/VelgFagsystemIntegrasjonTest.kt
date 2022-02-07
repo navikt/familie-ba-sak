@@ -4,6 +4,8 @@ import io.mockk.every
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
@@ -31,6 +33,7 @@ class VelgFagsystemIntegrasjonTest(
     @Autowired val infotrygdService: InfotrygdService,
     @Autowired val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
     @Autowired val databaseCleanupService: DatabaseCleanupService,
+    @Autowired val featureToggleService: FeatureToggleService
 ) : AbstractSpringIntegrationTest() {
 
     val søkerFnr = randomFnr()
@@ -73,8 +76,13 @@ class VelgFagsystemIntegrasjonTest(
             bekreftelsesdato = null
         )
         val (fagsystemRegelVurdering, faktiskFagsystemUtfall) = velgFagSystemService.velgFagsystem(nyBehandling)
-        assertEquals(FagsystemRegelVurdering.SEND_TIL_INFOTRYGD, fagsystemRegelVurdering)
-        assertEquals(fagsystemUtfall, faktiskFagsystemUtfall)
+        if (featureToggleService.isEnabled(FeatureToggleConfig.KAN_AUTOMATISK_BEHANDLE_EØS)) {
+            assertEquals(FagsystemRegelVurdering.SEND_TIL_BA, fagsystemRegelVurdering)
+            assertEquals(FagsystemUtfall.STØTTET_I_BA_SAK, faktiskFagsystemUtfall)
+        } else {
+            assertEquals(FagsystemRegelVurdering.SEND_TIL_INFOTRYGD, fagsystemRegelVurdering)
+            assertEquals(fagsystemUtfall, faktiskFagsystemUtfall)
+        }
     }
 
     @Test
