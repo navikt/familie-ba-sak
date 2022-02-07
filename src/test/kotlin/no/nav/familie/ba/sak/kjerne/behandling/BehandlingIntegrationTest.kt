@@ -754,7 +754,7 @@ class BehandlingIntegrationTest(
 
         val personopplysningGrunnlag = persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(
             aktør = søkerAktør,
-            barnasAktør = listOf(barn1Aktør),
+            barnFraInneværendeBehandling = listOf(barn1Aktør),
             behandling = behandling,
             målform = Målform.NB
         )

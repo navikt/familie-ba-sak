@@ -43,8 +43,8 @@ data class VurderPersonErBosattIRiket(
             val person = adresser.first().person
             secureLogger.info(
                 "Har ugyldige adresser på person (${person?.aktør?.aktivFødselsnummer()}, ${person?.type}): ${
-                adresser.filter { !it.harGyldigFom() }
-                    .map { "(${it.periode?.fom}, ${it.periode?.tom}): ${it.toSecureString()}" }
+                    adresser.filter { !it.harGyldigFom() }
+                        .map { "(${it.periode?.fom}, ${it.periode?.tom}): ${it.toSecureString()}" }
                 }"
             )
         }
@@ -120,18 +120,18 @@ data class VurderBarnErBosattMedSøker(
 
     override fun vurder(): Evaluering {
         return if (barnAdresser.isNotEmpty() && barnAdresser.all {
-            søkerAdresser.any { søkerAdresse ->
-                val søkerAdresseFom = søkerAdresse.periode?.fom ?: TIDENES_MORGEN
-                val søkerAdresseTom = søkerAdresse.periode?.tom ?: TIDENES_ENDE
+                søkerAdresser.any { søkerAdresse ->
+                    val søkerAdresseFom = søkerAdresse.periode?.fom ?: TIDENES_MORGEN
+                    val søkerAdresseTom = søkerAdresse.periode?.tom ?: TIDENES_ENDE
 
-                val barnAdresseFom = it.periode?.fom ?: TIDENES_MORGEN
-                val barnAdresseTom = it.periode?.tom ?: TIDENES_ENDE
+                    val barnAdresseFom = it.periode?.fom ?: TIDENES_MORGEN
+                    val barnAdresseTom = it.periode?.tom ?: TIDENES_ENDE
 
-                søkerAdresseFom.isSameOrBefore(barnAdresseFom) &&
-                    søkerAdresseTom.isSameOrAfter(barnAdresseTom) &&
-                    GrBostedsadresse.erSammeAdresse(søkerAdresse, it)
+                    søkerAdresseFom.isSameOrBefore(barnAdresseFom) &&
+                        søkerAdresseTom.isSameOrAfter(barnAdresseTom) &&
+                        GrBostedsadresse.erSammeAdresse(søkerAdresse, it)
+                }
             }
-        }
         ) Evaluering.oppfylt(VilkårOppfyltÅrsak.BARNET_BOR_MED_MOR)
         else Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.BARNET_BOR_IKKE_MED_MOR)
     }
@@ -175,7 +175,7 @@ data class VurderPersonHarLovligOpphold(
                     Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.TREDJELANDSBORGER_UTEN_LOVLIG_OPPHOLD)
                 } else Evaluering.oppfylt(VilkårOppfyltÅrsak.TREDJELANDSBORGER_MED_LOVLIG_OPPHOLD)
             }
-            Medlemskap.UKJENT, Medlemskap.STATSLØS -> {
+            Medlemskap.STATSLØS -> {
                 val nåværendeOpphold = opphold.singleOrNull { it.gjeldendeNå() }
                 if (nåværendeOpphold == null || nåværendeOpphold.type == OPPHOLDSTILLATELSE.OPPLYSNING_MANGLER) {
                     Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.STATSLØS)
