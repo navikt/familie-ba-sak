@@ -17,9 +17,6 @@ import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonerMedAndeler
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
-import no.nav.familie.ba.sak.integrasjoner.pdl.domene.DødsfallData
-import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlKontaktinformasjonForDødsbo
-import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlKontaktinformasjonForDødsboAdresse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
@@ -47,7 +44,6 @@ import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlingStegStatus
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
-import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.defaultBostedsadresseHistorikk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
@@ -63,7 +59,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -667,106 +662,6 @@ class BehandlingIntegrationTest(
                 }
             }
         }
-    }
-
-    @Test
-    fun `Skal filtrere ut bostedsadresse uten verdier når de mappes inn`() {
-        val søkerAktør = personidentService.hentOgLagreAktør(randomFnr(), true)
-        val barn1Aktør = personidentService.hentOgLagreAktør(randomFnr(), true)
-
-        every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(søkerAktør) } returns PersonInfo(
-            fødselsdato = LocalDate.of(1990, 1, 1),
-            adressebeskyttelseGradering = null,
-            navn = "Mor",
-            kjønn = Kjønn.KVINNE,
-            forelderBarnRelasjon = emptySet(),
-            bostedsadresser = mutableListOf(Bostedsadresse()) + defaultBostedsadresseHistorikk,
-            sivilstander = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT)),
-        )
-
-        every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(barn1Aktør) } returns PersonInfo(
-            fødselsdato = LocalDate.of(2009, 1, 1),
-            adressebeskyttelseGradering = null,
-            navn = "Gutt",
-            kjønn = Kjønn.MANN,
-            forelderBarnRelasjon = emptySet(),
-            bostedsadresser = mutableListOf(Bostedsadresse()) + defaultBostedsadresseHistorikk,
-            sivilstander = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT)),
-        )
-
-        fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = søkerAktør.aktivFødselsnummer()))
-        val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(søkerAktør.aktivFødselsnummer()))
-
-        val personopplysningGrunnlag = persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(
-            søkerAktør,
-            listOf(barn1Aktør),
-            behandling,
-            Målform.NB
-        )
-
-        personopplysningGrunnlag.personer.forEach {
-            assertEquals(defaultBostedsadresseHistorikk.size, it.bostedsadresser.size)
-        }
-    }
-
-    @Test
-    fun `Skal lagre dødsfall på person når person er død`() {
-        val søkerAktør = personidentService.hentOgLagreAktør(randomFnr(), true)
-        val barn1Aktør = personidentService.hentOgLagreAktør(randomFnr(), true)
-
-        val dødsdato = "2020-04-04"
-        val adresselinje1 = "Gatenavn 1"
-        val poststedsnavn = "Oslo"
-        val postnummer = "1234"
-
-        every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(søkerAktør) } returns PersonInfo(
-            fødselsdato = LocalDate.of(1990, 1, 1),
-            adressebeskyttelseGradering = null,
-            navn = "Mor",
-            kjønn = Kjønn.KVINNE,
-            forelderBarnRelasjon = emptySet(),
-            bostedsadresser = mutableListOf(Bostedsadresse()) + defaultBostedsadresseHistorikk,
-            sivilstander = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT)),
-            dødsfall = DødsfallData(erDød = true, dødsdato = dødsdato),
-            kontaktinformasjonForDoedsbo = PdlKontaktinformasjonForDødsbo(
-                adresse = PdlKontaktinformasjonForDødsboAdresse(
-                    adresselinje1 = adresselinje1,
-                    poststedsnavn = poststedsnavn,
-                    postnummer = postnummer,
-                )
-            )
-        )
-
-        every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(barn1Aktør) } returns PersonInfo(
-            fødselsdato = LocalDate.of(2009, 1, 1),
-            adressebeskyttelseGradering = null,
-            navn = "Gutt",
-            kjønn = Kjønn.MANN,
-            forelderBarnRelasjon = emptySet(),
-            bostedsadresser = mutableListOf(Bostedsadresse()) + defaultBostedsadresseHistorikk,
-            sivilstander = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT)),
-            dødsfall = null,
-            kontaktinformasjonForDoedsbo = null
-        )
-
-        fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = søkerAktør.aktivFødselsnummer()))
-        val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(søkerAktør.aktivFødselsnummer()))
-
-        val personopplysningGrunnlag = persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(
-            aktør = søkerAktør,
-            barnFraInneværendeBehandling = listOf(barn1Aktør),
-            behandling = behandling,
-            målform = Målform.NB
-        )
-
-        assertTrue(personopplysningGrunnlag.søker.erDød())
-        assertEquals(LocalDate.parse(dødsdato), personopplysningGrunnlag.søker.dødsfall?.dødsfallDato)
-        assertEquals(adresselinje1, personopplysningGrunnlag.søker.dødsfall?.dødsfallAdresse)
-        assertEquals(postnummer, personopplysningGrunnlag.søker.dødsfall?.dødsfallPostnummer)
-        assertEquals(poststedsnavn, personopplysningGrunnlag.søker.dødsfall?.dødsfallPoststed)
-
-        assertFalse(personopplysningGrunnlag.barna.single().erDød())
-        assertEquals(null, personopplysningGrunnlag.barna.single().dødsfall)
     }
 
     @Test
