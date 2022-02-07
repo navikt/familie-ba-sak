@@ -57,26 +57,6 @@ enum class VilkårIkkeOppfyltÅrsak(val beskrivelse: String, val metrikkBeskrive
         metrikkBeskrivelse = "Annen forelder er fra EØS, men har ikke et løpende arbeidsforhold i Norge.",
         vilkår = Vilkår.LOVLIG_OPPHOLD
     ),
-    EØS_IKKE_REGISTRERT_MEDFORELDER_OG_MOR_IKKE_INNFRIDD_BOTIDSKRAV(
-        beskrivelse = "Mor har ikke lovlig opphold - EØS borger. Mor er ikke registrert med arbeidsforhold. Det er ikke registrert medforelder på barnet. Mor har ikke hatt bostedsadresse i Norge i mer enn fem år.",
-        metrikkBeskrivelse = "Mor EØS. Ikke arb. MF ikke reg. Mor ikke bosatt 5 år",
-        vilkår = Vilkår.LOVLIG_OPPHOLD
-    ),
-    EØS_IKKE_REGISTRERT_MEDFORELDER_OG_MOR_IKKE_INNFRIDD_ARBEIDSMENGDE(
-        beskrivelse = "Mor har ikke lovlig opphold - EØS borger. Mor er ikke registrert med arbeidsforhold. Det er ikke registrert medforelder på barnet. Mor har ikke hatt arbeidsforhold i Norge de siste fem årene.",
-        metrikkBeskrivelse = "Mor EØS. Ikke arb. MF ikke reg. Mor ikke arbeid 5 år",
-        vilkår = Vilkår.LOVLIG_OPPHOLD
-    ),
-    EØS_BOR_IKKE_SAMMEN_MED_MEDFORELDER_OG_MOR_IKKE_INNFRIDD_BOTIDSKRAV(
-        beskrivelse = "Mor har ikke lovlig opphold - EØS borger. Mor er ikke registrert med arbeidsforhold. Barnets mor og medforelder har ikke felles bostedsadresse. Mor har ikke hatt bostedsadresse i Norge i mer enn fem år.",
-        metrikkBeskrivelse = "Mor EØS. Ikke arb. Bor ikke med MF. Mor ikke bosatt 5 år",
-        vilkår = Vilkår.LOVLIG_OPPHOLD
-    ),
-    EØS_BOR_IKKE_SAMMEN_MED_MEDFORELDER_OG_MOR_IKKE_INNFRIDD_ARBEIDSMENGDE(
-        beskrivelse = "Mor har ikke lovlig opphold - EØS borger. Mor er ikke registrert med arbeidsforhold. Barnets mor og medforelder har ikke felles bostedsadresse. Mor har ikke hatt arbeidsforhold i Norge de siste fem årene.",
-        metrikkBeskrivelse = "Mor EØS. Ikke arb. Bor ikke med MF. Mor ikke arbeid 5 år",
-        vilkår = Vilkår.LOVLIG_OPPHOLD
-    ),
     EØS_MEDFORELDER_TREDJELANDSBORGER(
         beskrivelse = "Mor har ikke lovlig opphold - EØS borger. Mor er ikke registrert med arbeidsforhold. Medforelder er tredjelandsborger.",
         metrikkBeskrivelse = "Mor EØS. Ikke arb. MF tredjelandsborger",
@@ -85,21 +65,6 @@ enum class VilkårIkkeOppfyltÅrsak(val beskrivelse: String, val metrikkBeskrive
     EØS_MEDFORELDER_STATSLØS(
         beskrivelse = "Mor har ikke lovlig opphold - EØS borger. Mor er ikke registrert med arbeidsforhold. Medforelder er statsløs.",
         metrikkBeskrivelse = "Mor EØS. Ikke arb. MF statsløs",
-        vilkår = Vilkår.LOVLIG_OPPHOLD
-    ),
-    EØS_MEDFORELDER_STATSBORGERSKAP_UKJENT(
-        beskrivelse = "Mor har ikke lovlig opphold - EØS borger. Mor er ikke registrert med arbeidsforhold. Medforelder er statsløs.",
-        metrikkBeskrivelse = "Mor EØS. Ikke arb. MF statsløs",
-        vilkår = Vilkår.LOVLIG_OPPHOLD
-    ),
-    EØS_MEDFORELDER_IKKE_I_ARBEID_OG_MOR_IKKE_INNFRIDD_BOTIDSKRAV(
-        beskrivelse = "Mor har ikke lovlig opphold - EØS borger. Mor er ikke registrert med arbeidsforhold. Medforelder er ikke registrert med arbeidsforhold i Norge. Mor har ikke hatt bostedsadresse i Norge i mer enn fem år.",
-        metrikkBeskrivelse = "Mor EØS. Ikke arb. MF EØS ikke arbeid. Mor ikke bosatt 5 år",
-        vilkår = Vilkår.LOVLIG_OPPHOLD
-    ),
-    EØS_MEDFORELDER_IKKE_I_ARBEID_OG_MOR_IKKE_INNFRIDD_ARBEIDSMENGDE(
-        beskrivelse = "Mor har ikke lovlig opphold - EØS borger. Mor er ikke registrert med arbeidsforhold. Medforelder er ikke registrert med arbeidsforhold i Norge. Mor har ikke hatt arbeidsforhold i Norge de siste fem årene.",
-        metrikkBeskrivelse = "Mor EØS. Ikke arb. MF EØS ikke arbeid. Mor ikke arbeid 5 år",
         vilkår = Vilkår.LOVLIG_OPPHOLD
     );
 
