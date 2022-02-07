@@ -7,36 +7,12 @@
   "ytelserForBarnOgSøkerIPeriode": [
     "ORDINÆR_BARNETRYGD"
   ],
-  "utvidetScenarioForEndringsperiode": "UTVIDET_YTELSE_IKKE_ENDRET",
+  "utvidetScenarioForEndringsperiode": "IKKE_UTVIDET_YTELSE",
   "personerPåBehandling": [
     {
       "fødselsdato": "1990-02-19",
       "type": "SØKER",
       "overstyrteVilkårresultater": [
-        {
-          "vilkårType": "BOSATT_I_RIKET",
-          "periodeFom": "2001-01-01",
-          "periodeTom": null,
-          "resultat": "OPPFYLT",
-          "utdypendeVilkårsvurderinger": [],
-          "erEksplisittAvslagPåSøknad": false
-        },
-        {
-          "vilkårType": "LOVLIG_OPPHOLD",
-          "periodeFom": "2001-01-01",
-          "periodeTom": null,
-          "resultat": "OPPFYLT",
-          "utdypendeVilkårsvurderinger": [],
-          "erEksplisittAvslagPåSøknad": false
-        },
-        {
-          "vilkårType": "UTVIDET_BARNETRYGD",
-          "periodeFom": "2022-01-01",
-          "periodeTom": null,
-          "resultat": "OPPFYLT",
-          "utdypendeVilkårsvurderinger": [],
-          "erEksplisittAvslagPåSøknad": false
-        }
       ],
       "andreVurderinger": [],
       "endredeUtbetalinger": []
