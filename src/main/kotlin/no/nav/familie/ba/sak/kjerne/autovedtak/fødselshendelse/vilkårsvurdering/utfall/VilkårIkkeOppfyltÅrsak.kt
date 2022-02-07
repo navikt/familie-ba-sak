@@ -42,6 +42,21 @@ enum class VilkårIkkeOppfyltÅrsak(val beskrivelse: String, val metrikkBeskrive
         metrikkBeskrivelse = "Mor statsløs eller mangler statsborgerskap",
         vilkår = Vilkår.LOVLIG_OPPHOLD
     ),
+    EØS_UKJENT_ANNEN_FORELDER(
+        beskrivelse = "Mor er EØS-borger og har ikke løpende arbeidsforhold i Norge. Finner ikke annen forelder.",
+        metrikkBeskrivelse = "Mor er EØS-borger, finner ikke annen forelder.",
+        vilkår = Vilkår.LOVLIG_OPPHOLD
+    ),
+    EØS_BOR_IKKE_SAMMEN_MED_ANNEN_FORELDER(
+        beskrivelse = "Mor er EØS-borger og har ikke løpende arbeidsforhold i Norge. Finner ikke annen forelder.",
+        metrikkBeskrivelse = "Mor er EØS-borger, finner ikke annen forelder.",
+        vilkår = Vilkår.LOVLIG_OPPHOLD
+    ),
+    ANNEN_FORELDER_EØS_MEN_IKKE_MED_LØPENDE_ARBEIDSFORHOLD(
+        beskrivelse = "Annen forelder er fra EØS, men har ikke et løpende arbeidsforhold i Norge.",
+        metrikkBeskrivelse = "Annen forelder er fra EØS, men har ikke et løpende arbeidsforhold i Norge.",
+        vilkår = Vilkår.LOVLIG_OPPHOLD
+    ),
     EØS_IKKE_REGISTRERT_MEDFORELDER_OG_MOR_IKKE_INNFRIDD_BOTIDSKRAV(
         beskrivelse = "Mor har ikke lovlig opphold - EØS borger. Mor er ikke registrert med arbeidsforhold. Det er ikke registrert medforelder på barnet. Mor har ikke hatt bostedsadresse i Norge i mer enn fem år.",
         metrikkBeskrivelse = "Mor EØS. Ikke arb. MF ikke reg. Mor ikke bosatt 5 år",
@@ -68,6 +83,11 @@ enum class VilkårIkkeOppfyltÅrsak(val beskrivelse: String, val metrikkBeskrive
         vilkår = Vilkår.LOVLIG_OPPHOLD
     ),
     EØS_MEDFORELDER_STATSLØS(
+        beskrivelse = "Mor har ikke lovlig opphold - EØS borger. Mor er ikke registrert med arbeidsforhold. Medforelder er statsløs.",
+        metrikkBeskrivelse = "Mor EØS. Ikke arb. MF statsløs",
+        vilkår = Vilkår.LOVLIG_OPPHOLD
+    ),
+    EØS_MEDFORELDER_STATSBORGERSKAP_UKJENT(
         beskrivelse = "Mor har ikke lovlig opphold - EØS borger. Mor er ikke registrert med arbeidsforhold. Medforelder er statsløs.",
         metrikkBeskrivelse = "Mor EØS. Ikke arb. MF statsløs",
         vilkår = Vilkår.LOVLIG_OPPHOLD

@@ -2,26 +2,23 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurderi
 
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
 import no.nav.familie.ba.sak.common.Periode
-import no.nav.familie.ba.sak.common.TIDENES_ENDE
-import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.isBetween
-import no.nav.familie.ba.sak.common.isSameOrAfter
-import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Evaluering
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurdering.utfall.VilkårIkkeOppfyltÅrsak
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurdering.utfall.VilkårKanskjeOppfyltÅrsak
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurdering.utfall.VilkårOppfyltÅrsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Medlemskap
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.arbeidsforhold.GrArbeidsforhold
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.arbeidsforhold.harLøpendeArbeidsforhold
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse.Companion.sisteAdresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.filtrerGjeldendeNå
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.vurderOmPersonerBorSammen
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.opphold.GrOpphold
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.finnNåværendeMedlemskap
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.finnSterkesteMedlemskap
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.hentSterkesteMedlemskap
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import org.slf4j.LoggerFactory
@@ -43,8 +40,8 @@ data class VurderPersonErBosattIRiket(
             val person = adresser.first().person
             secureLogger.info(
                 "Har ugyldige adresser på person (${person?.aktør?.aktivFødselsnummer()}, ${person?.type}): ${
-                    adresser.filter { !it.harGyldigFom() }
-                        .map { "(${it.periode?.fom}, ${it.periode?.tom}): ${it.toSecureString()}" }
+                adresser.filter { !it.harGyldigFom() }
+                    .map { "(${it.periode?.fom}, ${it.periode?.tom}): ${it.toSecureString()}" }
                 }"
             )
         }
@@ -119,19 +116,10 @@ data class VurderBarnErBosattMedSøker(
 ) : Vilkårsregel {
 
     override fun vurder(): Evaluering {
-        return if (barnAdresser.isNotEmpty() && barnAdresser.all {
-                søkerAdresser.any { søkerAdresse ->
-                    val søkerAdresseFom = søkerAdresse.periode?.fom ?: TIDENES_MORGEN
-                    val søkerAdresseTom = søkerAdresse.periode?.tom ?: TIDENES_ENDE
-
-                    val barnAdresseFom = it.periode?.fom ?: TIDENES_MORGEN
-                    val barnAdresseTom = it.periode?.tom ?: TIDENES_ENDE
-
-                    søkerAdresseFom.isSameOrBefore(barnAdresseFom) &&
-                        søkerAdresseTom.isSameOrAfter(barnAdresseTom) &&
-                        GrBostedsadresse.erSammeAdresse(søkerAdresse, it)
-                }
-            }
+        return if (vurderOmPersonerBorSammen(
+                adresser = barnAdresser,
+                andreAdresser = søkerAdresser
+            )
         ) Evaluering.oppfylt(VilkårOppfyltÅrsak.BARNET_BOR_MED_MOR)
         else Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.BARNET_BOR_IKKE_MED_MOR)
     }
@@ -154,20 +142,28 @@ data class VurderBarnErUgift(
     }
 }
 
-data class VurderPersonHarLovligOpphold(
-    val personType: PersonType,
+data class VurderBarnHarLovligOpphold(
+    val aktør: Aktør
+) : Vilkårsregel {
+    override fun vurder(): Evaluering {
+        return Evaluering.oppfylt(VilkårOppfyltÅrsak.AUTOMATISK_VURDERING_BARN_LOVLIG_OPPHOLD)
+    }
+}
+
+data class LovligOppholdFaktaEØS(
+    val arbeidsforhold: List<GrArbeidsforhold>,
+    val bostedsadresser: List<GrBostedsadresse>,
     val statsborgerskap: List<GrStatsborgerskap>,
+)
+
+data class VurderPersonHarLovligOpphold(
+    val morLovligOppholdFaktaEØS: LovligOppholdFaktaEØS,
+    val annenForelderLovligOppholdFaktaEØS: LovligOppholdFaktaEØS?,
     val opphold: List<GrOpphold>
 ) : Vilkårsregel {
 
     override fun vurder(): Evaluering {
-        if (personType == PersonType.BARN) {
-            return Evaluering.oppfylt(VilkårOppfyltÅrsak.AUTOMATISK_VURDERING_BARN_LOVLIG_OPPHOLD)
-        }
-
-        val nåværendeMedlemskap = finnNåværendeMedlemskap(statsborgerskap)
-
-        return when (finnSterkesteMedlemskap(nåværendeMedlemskap)) {
+        return when (morLovligOppholdFaktaEØS.statsborgerskap.hentSterkesteMedlemskap()) {
             Medlemskap.NORDEN -> Evaluering.oppfylt(VilkårOppfyltÅrsak.NORDISK_STATSBORGER)
             Medlemskap.TREDJELANDSBORGER -> {
                 val nåværendeOpphold = opphold.singleOrNull { it.gjeldendeNå() }
@@ -175,7 +171,11 @@ data class VurderPersonHarLovligOpphold(
                     Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.TREDJELANDSBORGER_UTEN_LOVLIG_OPPHOLD)
                 } else Evaluering.oppfylt(VilkårOppfyltÅrsak.TREDJELANDSBORGER_MED_LOVLIG_OPPHOLD)
             }
-            Medlemskap.STATSLØS -> {
+            Medlemskap.EØS -> vurderLovligOppholdForEØSBorger(
+                morLovligOppholdFaktaEØS,
+                annenForelderLovligOppholdFaktaEØS
+            )
+            Medlemskap.STATSLØS, Medlemskap.UKJENT -> {
                 val nåværendeOpphold = opphold.singleOrNull { it.gjeldendeNå() }
                 if (nåværendeOpphold == null || nåværendeOpphold.type == OPPHOLDSTILLATELSE.OPPLYSNING_MANGLER) {
                     Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.STATSLØS)
@@ -186,140 +186,39 @@ data class VurderPersonHarLovligOpphold(
     }
 }
 
-// Fra gammel implementasjon
-private fun sjekkLovligOppholdForEØSBorger(person: Person): Evaluering {
-    return if (personHarLøpendeArbeidsforhold(person)) {
-        Evaluering.oppfylt(VilkårOppfyltÅrsak.EØS_MED_LØPENDE_ARBEIDSFORHOLD)
-    } else {
-        if (annenForelderRegistrert(person)) {
-            if (annenForelderBorMedMor(person)) {
-                val annenForelderSterkerteStatsborgerskap =
-                    finnSterkesteMedlemskap(statsborgerskapAnnenForelder(person))
-                        ?: throw error("Ukjent medlemskap annen forelder")
-                sjekkLovligOppholdForEØSBorgerSomBorMedPartner(annenForelderSterkerteStatsborgerskap, person)
-            } else {
-                sjekkMorsHistoriskeBostedsadresseOgArbeidsforhold(
-                    person,
-                    VilkårIkkeOppfyltÅrsak.EØS_BOR_IKKE_SAMMEN_MED_MEDFORELDER_OG_MOR_IKKE_INNFRIDD_ARBEIDSMENGDE,
-                    VilkårIkkeOppfyltÅrsak.EØS_BOR_IKKE_SAMMEN_MED_MEDFORELDER_OG_MOR_IKKE_INNFRIDD_BOTIDSKRAV
-                )
-            }
-        } else {
-            sjekkMorsHistoriskeBostedsadresseOgArbeidsforhold(
-                person,
-                VilkårIkkeOppfyltÅrsak.EØS_IKKE_REGISTRERT_MEDFORELDER_OG_MOR_IKKE_INNFRIDD_ARBEIDSMENGDE,
-                VilkårIkkeOppfyltÅrsak.EØS_IKKE_REGISTRERT_MEDFORELDER_OG_MOR_IKKE_INNFRIDD_BOTIDSKRAV
-            )
-        }
+private fun vurderLovligOppholdForEØSBorger(
+    morLovligOppholdFaktaEØS: LovligOppholdFaktaEØS,
+    annenForelderLovligOppholdFaktaEØS: LovligOppholdFaktaEØS?
+): Evaluering {
+    if (morLovligOppholdFaktaEØS.arbeidsforhold.harLøpendeArbeidsforhold()) {
+        return Evaluering.oppfylt(VilkårOppfyltÅrsak.EØS_MED_LØPENDE_ARBEIDSFORHOLD)
     }
-}
 
-private fun sjekkLovligOppholdForEØSBorgerSomBorMedPartner(
-    annenForelderSterkesteStatsborgerskap: Medlemskap,
-    person: Person
-) =
-    when (annenForelderSterkesteStatsborgerskap) {
-        Medlemskap.NORDEN -> Evaluering.oppfylt(VilkårOppfyltÅrsak.ANNEN_FORELDER_NORDISK)
+    if (annenForelderLovligOppholdFaktaEØS == null) {
+        return Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.EØS_UKJENT_ANNEN_FORELDER)
+    }
+
+    if (!vurderOmPersonerBorSammen(
+            adresser = morLovligOppholdFaktaEØS.bostedsadresser.filtrerGjeldendeNå(),
+            andreAdresser = annenForelderLovligOppholdFaktaEØS.bostedsadresser.filtrerGjeldendeNå()
+        )
+    ) {
+        return Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.EØS_BOR_IKKE_SAMMEN_MED_ANNEN_FORELDER)
+    }
+
+    return when (annenForelderLovligOppholdFaktaEØS.statsborgerskap.hentSterkesteMedlemskap()) {
+        Medlemskap.NORDEN -> return Evaluering.oppfylt(VilkårOppfyltÅrsak.ANNEN_FORELDER_NORDISK)
         Medlemskap.EØS -> {
-            if (personHarLøpendeArbeidsforhold(hentAnnenForelder(person))) {
+            if (annenForelderLovligOppholdFaktaEØS.arbeidsforhold.harLøpendeArbeidsforhold()) {
                 Evaluering.oppfylt(VilkårOppfyltÅrsak.ANNEN_FORELDER_EØS_MEN_MED_LØPENDE_ARBEIDSFORHOLD)
             } else {
-                sjekkMorsHistoriskeBostedsadresseOgArbeidsforhold(
-                    person,
-                    VilkårIkkeOppfyltÅrsak.EØS_MEDFORELDER_IKKE_I_ARBEID_OG_MOR_IKKE_INNFRIDD_ARBEIDSMENGDE,
-                    VilkårIkkeOppfyltÅrsak.EØS_MEDFORELDER_IKKE_I_ARBEID_OG_MOR_IKKE_INNFRIDD_BOTIDSKRAV
-                )
+                Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.ANNEN_FORELDER_EØS_MEN_IKKE_MED_LØPENDE_ARBEIDSFORHOLD)
             }
         }
-        Medlemskap.TREDJELANDSBORGER -> {
-            sjekkMorsHistoriskeBostedsadresseOgArbeidsforhold(
-                person,
-                VilkårIkkeOppfyltÅrsak.EØS_MEDFORELDER_TREDJELANDSBORGER,
-                VilkårIkkeOppfyltÅrsak.EØS_MEDFORELDER_TREDJELANDSBORGER
-            )
-        }
-        Medlemskap.STATSLØS -> {
-            sjekkMorsHistoriskeBostedsadresseOgArbeidsforhold(
-                person,
-                VilkårIkkeOppfyltÅrsak.EØS_MEDFORELDER_STATSLØS,
-                VilkårIkkeOppfyltÅrsak.EØS_MEDFORELDER_STATSLØS
-            )
-        }
-        Medlemskap.UKJENT -> {
-            sjekkMorsHistoriskeBostedsadresseOgArbeidsforhold(
-                person,
-                VilkårIkkeOppfyltÅrsak.STATSBORGERSKAP_ANNEN_FORELDER_UKLART,
-                VilkårIkkeOppfyltÅrsak.STATSBORGERSKAP_ANNEN_FORELDER_UKLART
-            )
-        }
+        Medlemskap.TREDJELANDSBORGER -> Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.EØS_MEDFORELDER_TREDJELANDSBORGER)
+        Medlemskap.STATSLØS, Medlemskap.UKJENT -> Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.EØS_MEDFORELDER_STATSLØS)
+        else -> Evaluering.ikkeVurdert(VilkårKanskjeOppfyltÅrsak.LOVLIG_OPPHOLD_ANNEN_FORELDER_IKKE_MULIG_Å_FASTSETTE)
     }
-
-private fun sjekkMorsHistoriskeBostedsadresseOgArbeidsforhold(
-    person: Person,
-    arbeidsforholdAvslag: VilkårIkkeOppfyltÅrsak,
-    bosettelseAvslag: VilkårIkkeOppfyltÅrsak
-): Evaluering {
-    return if (morHarBoddINorgeSiste5År(person)) {
-        if (morHarJobbetINorgeSiste5År(person)) {
-            Evaluering.oppfylt(VilkårOppfyltÅrsak.MOR_BODD_OG_JOBBET_I_NORGE_SISTE_5_ÅR)
-        } else {
-            Evaluering.ikkeOppfylt(arbeidsforholdAvslag)
-        }
-    } else {
-        Evaluering.ikkeOppfylt(bosettelseAvslag)
-    }
-}
-
-fun personHarLøpendeArbeidsforhold(personForVurdering: Person): Boolean = personForVurdering.arbeidsforhold.any {
-    it.periode?.tom == null || it.periode.tom >= LocalDate.now()
-}
-
-fun annenForelderRegistrert(person: Person): Boolean {
-    val annenForelder = person.personopplysningGrunnlag.annenForelder
-    return annenForelder != null
-}
-
-fun annenForelderBorMedMor(person: Person): Boolean {
-    val annenForelder = hentAnnenForelder(person)
-    return GrBostedsadresse.erSammeAdresse(
-        person.bostedsadresser.sisteAdresse(),
-        annenForelder.bostedsadresser.sisteAdresse()
-    )
-}
-
-fun statsborgerskapAnnenForelder(person: Person): List<Medlemskap> {
-    val annenForelder =
-        hentAnnenForelder(person)
-    return finnNåværendeMedlemskap(annenForelder.statsborgerskap)
-}
-
-private fun hentAnnenForelder(person: Person): Person {
-    return person.personopplysningGrunnlag.annenForelder
-        ?: error("Persongrunnlag mangler annen forelder")
-}
-
-fun morHarBoddINorgeSiste5År(person: Person): Boolean {
-    val perioder = person.bostedsadresser.mapNotNull {
-        it.periode
-    }
-
-    if (perioder.any { it.fom == null }) {
-        return false
-    }
-
-    return hentMaxAvstandAvDagerMellomPerioder(perioder, LocalDate.now().minusYears(5), LocalDate.now()) <= 0
-}
-
-fun morHarJobbetINorgeSiste5År(person: Person): Boolean {
-    val perioder = person.arbeidsforhold.mapNotNull {
-        it.periode
-    }
-
-    if (perioder.any { it.fom == null }) {
-        return false
-    }
-
-    return hentMaxAvstandAvDagerMellomPerioder(perioder, LocalDate.now().minusYears(5), LocalDate.now()) <= 90
 }
 
 private fun hentMaxAvstandAvDagerMellomPerioder(
