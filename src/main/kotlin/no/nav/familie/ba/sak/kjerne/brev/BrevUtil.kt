@@ -214,9 +214,9 @@ fun hentHjemmeltekst(
     return hjemlerTilHjemmeltekst(sorterteHjemler)
 }
 
-fun hentVirkningstidspunkt(opphørsperioder: List<Opphørsperiode>) = (
+fun hentVirkningstidspunkt(opphørsperioder: List<Opphørsperiode>, behandlingId: Long) = (
     opphørsperioder
         .maxOfOrNull { it.periodeFom }
         ?.tilMånedÅr()
-        ?: throw Feil("Fant ikke opphørdato ved generering av dødsfallbrev")
+        ?: throw Feil("Fant ikke opphørdato ved generering av dødsfallbrev på behandling $behandlingId")
     )

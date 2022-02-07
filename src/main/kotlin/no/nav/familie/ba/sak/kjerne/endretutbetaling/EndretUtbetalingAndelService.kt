@@ -27,6 +27,8 @@ class EndretUtbetalingAndelService(
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val sanityService: SanityService,
 ) {
+    fun hentEndredeUtbetalingAndeler(behandlingId: Long) =
+        endretUtbetalingAndelRepository.findByBehandlingId(behandlingId)
 
     @Transactional
     fun oppdaterEndretUtbetalingAndelOgOppdaterTilkjentYtelse(

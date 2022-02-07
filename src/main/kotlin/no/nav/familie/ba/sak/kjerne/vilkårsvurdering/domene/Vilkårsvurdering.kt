@@ -96,4 +96,8 @@ data class Vilkårsvurdering(
         return personResultater.single { it.erSøkersResultater() }
             .andreVurderinger.singleOrNull { it.type == AnnenVurderingType.OPPLYSNINGSPLIKT }
     }
+
+    fun hentPersonResultaterTil(aktørId: String): List<VilkårResultat> =
+        personResultater.find { it.aktør.aktørId == aktørId }?.vilkårResultater?.toList()
+            ?: throw IllegalStateException("Fant ikke personresultat for $aktørId")
 }
