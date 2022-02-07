@@ -148,7 +148,7 @@ private fun erOpphørResultatUtgjøreneForPeriode(
         ) 0L
         else 1L
 
-    return triggereErOppfylt(triggesAv, minimertVilkårResultat) &&
+    return triggereForUtdypendeVilkårsvurderingErOppfylt(triggesAv, minimertVilkårResultat) &&
         minimertVilkårResultat.periodeTom != null &&
         minimertVilkårResultat.resultat == Resultat.OPPFYLT &&
         minimertVilkårResultat.periodeTom.toYearMonth() == vedtaksperiode.fom.minusMonths(
@@ -167,14 +167,19 @@ private fun erReduksjonResultatUtgjøreneForPeriode(
         ) 0L
         else 1L
 
-    val erDeltBosted =
+    val erReduksjonDeltBosted =
         minimertVilkårResultat.vilkårType == Vilkår.BOR_MED_SØKER &&
-            minimertVilkårResultat.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.DELT_BOSTED)
+            !minimertVilkårResultat.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.DELT_BOSTED) &&
+            triggesAv.deltbosted
 
-    return triggereErOppfylt(triggesAv, minimertVilkårResultat) &&
+    return triggereForUtdypendeVilkårsvurderingErOppfylt(
+        triggesAv = triggesAv,
+        vilkårResultat = minimertVilkårResultat,
+        erReduksjon = true
+    ) &&
         minimertVilkårResultat.periodeTom != null &&
         minimertVilkårResultat.resultat == Resultat.OPPFYLT &&
-        minimertVilkårResultat.periodeTom.plusDays(if (erDeltBosted) 1 else 0)
+        minimertVilkårResultat.periodeTom.plusDays(if (erReduksjonDeltBosted) 1 else 0)
         .toYearMonth() == vedtaksperiode.fom.minusMonths(
         oppfyltTomMånedEtter
     ).toYearMonth()
@@ -188,7 +193,7 @@ private fun erInnvilgetVilkårResultatUtgjørende(
     val vilkårResultatFomMåned = minimertVilkårResultat.periodeFom!!.toYearMonth()
     val vedtaksperiodeFomMåned = vedtaksperiode.fom.toYearMonth()
 
-    return triggereErOppfylt(triggesAv, minimertVilkårResultat) &&
+    return triggereForUtdypendeVilkårsvurderingErOppfylt(triggesAv, minimertVilkårResultat) &&
         vilkårResultatFomMåned == vedtaksperiodeFomMåned.minusMonths(1) &&
         minimertVilkårResultat.resultat == Resultat.OPPFYLT
 }
@@ -222,30 +227,34 @@ fun erFørstePeriodeOgVilkårIkkeOppfylt(
             vedtaksperiode.tom.toYearMonth() == vilkårResultat.periodeFom!!.toYearMonth()
 
     return erFørsteVedtaksperiodePåFagsak &&
-        triggereErOppfylt(triggesAv, vilkårResultat) &&
+        triggereForUtdypendeVilkårsvurderingErOppfylt(triggesAv, vilkårResultat) &&
         (vilkårIkkeOppfyltForPeriode || vilkårOppfyltRettEtterPeriode)
 }
 
-private fun triggereErOppfylt(
+private fun triggereForUtdypendeVilkårsvurderingErOppfylt(
     triggesAv: TriggesAv,
-    vilkårResultat: MinimertVilkårResultat
+    vilkårResultat: MinimertVilkårResultat,
+    erReduksjon: Boolean = false,
 ): Boolean {
 
+    val resultatInneholderDeltBosted =
+        vilkårResultat.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.DELT_BOSTED)
     val erDeltBostedOppfylt =
         triggesAv.deltbosted &&
-            vilkårResultat.utdypendeVilkårsvurderinger.contains(
-                UtdypendeVilkårsvurdering.DELT_BOSTED
-            ) || !triggesAv.deltbosted
+            erReduksjon != resultatInneholderDeltBosted ||
+            !triggesAv.deltbosted
 
+    val resultatInneholderVurderingAnnetGrunnlag =
+        vilkårResultat.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.VURDERING_ANNET_GRUNNLAG)
     val erSkjønnsmessigVurderingOppfylt =
         triggesAv.vurderingAnnetGrunnlag &&
-            vilkårResultat.utdypendeVilkårsvurderinger.contains(
-                UtdypendeVilkårsvurdering.VURDERING_ANNET_GRUNNLAG
-            ) || !triggesAv.vurderingAnnetGrunnlag
+            resultatInneholderVurderingAnnetGrunnlag ||
+            !triggesAv.vurderingAnnetGrunnlag
 
+    val resultatInneholderMedlemsskap =
+        vilkårResultat.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP)
     val erMedlemskapOppfylt =
-        triggesAv.medlemskap ==
-            vilkårResultat.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP)
+        triggesAv.medlemskap == resultatInneholderMedlemsskap
 
     return erDeltBostedOppfylt && erSkjønnsmessigVurderingOppfylt && erMedlemskapOppfylt
 }
