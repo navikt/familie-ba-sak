@@ -99,39 +99,45 @@ private fun erVilkårResultatUtgjørende(
     vedtaksperiode: Periode,
     erFørsteVedtaksperiodePåFagsak: Boolean,
 ): Boolean {
+    if (minimertVilkårResultat.periodeFom == null && begrunnelseType != VedtakBegrunnelseType.AVSLAG) {
+        return false
+    }
 
-    return when {
-        minimertVilkårResultat.periodeFom == null &&
-            begrunnelseType != VedtakBegrunnelseType.AVSLAG -> false
-
-        begrunnelseType == VedtakBegrunnelseType.INNVILGET ->
+    return when (begrunnelseType) {
+        VedtakBegrunnelseType.INNVILGET ->
             erInnvilgetVilkårResultatUtgjørende(triggesAv, minimertVilkårResultat, vedtaksperiode)
 
-        begrunnelseType == VedtakBegrunnelseType.OPPHØR && triggesAv.gjelderFørstePeriode
-        -> erFørstePeriodeOgVilkårIkkeOppfylt(
-            erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
-            vedtaksperiode = vedtaksperiode,
-            triggesAv = triggesAv,
-            vilkårResultat = minimertVilkårResultat
-        )
-
-        begrunnelseType == VedtakBegrunnelseType.REDUKSJON ||
-            begrunnelseType == VedtakBegrunnelseType.OPPHØR -> {
-            erReduksjonEllerOpphørResultatUtgjøreneForPeriode(
+        VedtakBegrunnelseType.OPPHØR -> if (triggesAv.gjelderFørstePeriode) {
+            erFørstePeriodeOgVilkårIkkeOppfylt(
+                erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
+                vedtaksperiode = vedtaksperiode,
+                triggesAv = triggesAv,
+                vilkårResultat = minimertVilkårResultat
+            )
+        } else {
+            erOpphørResultatUtgjøreneForPeriode(
                 minimertVilkårResultat = minimertVilkårResultat,
                 triggesAv = triggesAv,
                 vedtaksperiode = vedtaksperiode
             )
         }
 
-        begrunnelseType == VedtakBegrunnelseType.AVSLAG ->
+        VedtakBegrunnelseType.REDUKSJON -> {
+            erReduksjonResultatUtgjøreneForPeriode(
+                minimertVilkårResultat = minimertVilkårResultat,
+                triggesAv = triggesAv,
+                vedtaksperiode = vedtaksperiode
+            )
+        }
+
+        VedtakBegrunnelseType.AVSLAG ->
             vilkårResultatPasserForAvslagsperiode(minimertVilkårResultat, vedtaksperiode)
 
         else -> throw Feil("Henting av personer med utgjørende vilkår when: Ikke implementert")
     }
 }
 
-private fun erReduksjonEllerOpphørResultatUtgjøreneForPeriode(
+private fun erOpphørResultatUtgjøreneForPeriode(
     minimertVilkårResultat: MinimertVilkårResultat,
     triggesAv: TriggesAv,
     vedtaksperiode: Periode
@@ -145,10 +151,33 @@ private fun erReduksjonEllerOpphørResultatUtgjøreneForPeriode(
     return triggereErOppfylt(triggesAv, minimertVilkårResultat) &&
         minimertVilkårResultat.periodeTom != null &&
         minimertVilkårResultat.resultat == Resultat.OPPFYLT &&
-        minimertVilkårResultat.periodeTom.plusDays(1).toYearMonth() == vedtaksperiode.fom.minusMonths(
+        minimertVilkårResultat.periodeTom.toYearMonth() == vedtaksperiode.fom.minusMonths(
         oppfyltTomMånedEtter
-    )
-        .toYearMonth()
+    ).toYearMonth()
+}
+
+private fun erReduksjonResultatUtgjøreneForPeriode(
+    minimertVilkårResultat: MinimertVilkårResultat,
+    triggesAv: TriggesAv,
+    vedtaksperiode: Periode
+): Boolean {
+    val oppfyltTomMånedEtter =
+        if (minimertVilkårResultat.vilkårType == Vilkår.UNDER_18_ÅR &&
+            minimertVilkårResultat.periodeTom != minimertVilkårResultat.periodeTom?.sisteDagIMåned()
+        ) 0L
+        else 1L
+
+    val erDeltBosted =
+        minimertVilkårResultat.vilkårType == Vilkår.BOR_MED_SØKER &&
+            minimertVilkårResultat.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.DELT_BOSTED)
+
+    return triggereErOppfylt(triggesAv, minimertVilkårResultat) &&
+        minimertVilkårResultat.periodeTom != null &&
+        minimertVilkårResultat.resultat == Resultat.OPPFYLT &&
+        minimertVilkårResultat.periodeTom.plusDays(if (erDeltBosted) 1 else 0)
+        .toYearMonth() == vedtaksperiode.fom.minusMonths(
+        oppfyltTomMånedEtter
+    ).toYearMonth()
 }
 
 private fun erInnvilgetVilkårResultatUtgjørende(
