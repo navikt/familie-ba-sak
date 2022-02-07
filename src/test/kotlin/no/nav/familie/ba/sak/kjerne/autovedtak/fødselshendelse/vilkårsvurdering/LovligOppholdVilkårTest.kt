@@ -197,7 +197,7 @@ class LovligOppholdVilkårTest {
             annenForelder = null
         ).evaluering
         assertEquals(Resultat.IKKE_OPPFYLT, evaluering.resultat)
-        assertEquals(listOf(VilkårIkkeOppfyltÅrsak.EØS_UKJENT_ANNEN_FORELDER), evaluering.evalueringÅrsaker)
+        assertEquals(listOf(VilkårIkkeOppfyltÅrsak.EØS_STATSBORGERSKAP_ANNEN_FORELDER_UKLART), evaluering.evalueringÅrsaker)
     }
 
     @Test
