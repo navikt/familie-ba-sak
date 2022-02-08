@@ -62,9 +62,9 @@ class StønadsstatistikkController(
                 logger.info("Ettersender stønadstatistikk for $it")
                 val vedtakDVH = stønadsstatistikkService.hentVedtak(it)
                 if (!dryRun) {
-                    secureLogger.info("Oppretter task for å publisere vedtak $vedtakDVH.person.personIdent")
-                    // val task = PubliserVedtakTask.opprettTask(vedtakDVH.person.personIdent, it)
-                    // taskRepository.save(task)
+                    secureLogger.info("Oppretter task for å ettersende vedtak $vedtakDVH.person.personIdent")
+                    val task = PubliserVedtakTask.opprettTask(vedtakDVH.person.personIdent, it)
+                    taskRepository.save(task)
                 }
             }
         }
