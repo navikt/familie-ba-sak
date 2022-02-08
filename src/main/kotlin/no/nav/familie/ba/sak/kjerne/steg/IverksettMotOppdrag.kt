@@ -27,6 +27,9 @@ class IverksettMotOppdrag(
             stegService?.hentBehandlingSteg(StegType.BEHANDLINGSRESULTAT) as BehandlingsresultatSteg
         behandlingsresultatSteg.preValiderSteg(behandling)
 
+        val beslutteVedtakSteg: BeslutteVedtak = stegService.hentBehandlingSteg(StegType.BESLUTTE_VEDTAK) as BeslutteVedtak
+        beslutteVedtakSteg.postValiderSteg(behandling)
+
         val totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(behandlingId = behandling.id)
             ?: throw Feil(
                 message = "Mangler totrinnskontroll ved iverksetting",
