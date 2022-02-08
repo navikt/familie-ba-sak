@@ -13,6 +13,8 @@ import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.DbJournalpostTy
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.JournalføringRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
+import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentÅrsak
 import no.nav.familie.ba.sak.kjerne.brev.domene.BrevType.INNHENTE_OPPLYSNINGER
 import no.nav.familie.ba.sak.kjerne.brev.domene.BrevType.VARSEL_OM_REVURDERING
 import no.nav.familie.ba.sak.kjerne.brev.domene.ManueltBrevRequest
@@ -33,6 +35,8 @@ import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.Førsteside
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDate
 import java.util.Properties
 
 @Service
@@ -45,7 +49,8 @@ class DokumentService(
     private val brevKlient: BrevKlient,
     private val brevService: BrevService,
     private val vilkårsvurderingService: VilkårsvurderingService,
-    private val rolleConfig: RolleConfig
+    private val rolleConfig: RolleConfig,
+    private val settPåVentService: SettPåVentService,
 ) {
 
     private val antallBrevSendt: Map<Brevmal, Counter> = mutableListOf<Brevmal>().plus(Brevmal.values()).associateWith {
@@ -116,6 +121,7 @@ class DokumentService(
         )
     }
 
+    @Transactional
     fun sendManueltBrev(
         manueltBrevRequest: ManueltBrevRequest,
         behandling: Behandling? = null,
@@ -160,6 +166,17 @@ class DokumentService(
             vilkårsvurderingService.opprettOglagreBlankAnnenVurdering(
                 annenVurderingType = AnnenVurderingType.OPPLYSNINGSPLIKT,
                 behandlingId = behandling.id
+            )
+        }
+
+        if (
+            behandling != null &&
+            listOf(INNHENTE_OPPLYSNINGER, VARSEL_OM_REVURDERING).contains(manueltBrevRequest.brevmal)
+        ) {
+            settPåVentService.settBehandlingPåVent(
+                behandlingId = behandling.id,
+                frist = LocalDate.now().plusWeeks(3),
+                årsak = SettPåVentÅrsak.AVVENTER_DOKUMENTASJON
             )
         }
 
