@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.common.RessursUtils.illegalState
 import no.nav.familie.ba.sak.common.RessursUtils.rolleTilgangResponse
 import no.nav.familie.ba.sak.common.RessursUtils.unauthorized
 import no.nav.familie.ba.sak.common.RolleTilgangskontrollFeil
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonException
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.KanIkkeMigrereException
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.spring.validation.interceptor.JwtTokenUnauthorizedException
@@ -53,6 +54,13 @@ class ApiExceptionHandler {
         val mostSpecificThrowable = NestedExceptionUtils.getMostSpecificCause(foriddenException)
 
         return forbidden(mostSpecificThrowable.message ?: "Ikke tilgang")
+    }
+
+    @ExceptionHandler(IntegrasjonException::class)
+    fun handleThrowable(integrasjonException: IntegrasjonException): ResponseEntity<Ressurs<Nothing>> {
+        val mostSpecificThrowable = NestedExceptionUtils.getMostSpecificCause(integrasjonException)
+
+        return illegalState(mostSpecificThrowable.message.toString(), mostSpecificThrowable)
     }
 
     @ExceptionHandler(Feil::class)
