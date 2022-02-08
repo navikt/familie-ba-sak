@@ -7,11 +7,10 @@ import no.nav.familie.ba.sak.common.erSenereEnnInneværendeMåned
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.MinimertUregistrertBarn
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
-import no.nav.familie.ba.sak.kjerne.beregning.domene.hentUtvidetScenarioForEndringsperiode
-import no.nav.familie.ba.sak.kjerne.brev.domene.BrevPeriodeGrunnlag
 import no.nav.familie.ba.sak.kjerne.brev.domene.BrevPeriodeGrunnlagMedPersoner
+import no.nav.familie.ba.sak.kjerne.brev.domene.BrevperiodeData
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertUtbetalingsperiodeDetalj
+import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.brev.domene.RestBehandlingsgrunnlagForBrev
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.EndretUtbetalingBrevPeriodeType
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.AvslagBrevPeriode
@@ -22,7 +21,6 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.EndretUtbetal
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.FortsattInnvilgetBrevPeriode
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.InnvilgelseBrevPeriode
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.OpphørBrevPeriode
-import no.nav.familie.ba.sak.kjerne.brev.domene.tilBrevPeriodeForLogging
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertPersonResultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertRestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
@@ -35,7 +33,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.Begrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.MinimertRestPerson
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilMinimertPerson
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.erFørsteVedtaksperiodePåFagsak
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import org.slf4j.LoggerFactory
 import java.math.BigDecimal
@@ -61,31 +58,19 @@ fun List<MinimertUtbetalingsperiodeDetalj>.totaltUtbetalt(): Int =
     this.sumOf { it.utbetaltPerMnd }
 
 fun hentBrevPerioder(
-    brevPerioderGrunnlag: List<BrevPeriodeGrunnlag>,
-    andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
-    restBehandlingsgrunnlagForBrev: RestBehandlingsgrunnlagForBrev,
-    uregistrerteBarn: List<MinimertUregistrertBarn>,
-    målform: Målform,
-) = brevPerioderGrunnlag
+    brevperioderData: List<BrevperiodeData>
+) = brevperioderData
     .mapNotNull {
-        val utvidetScenarioForEndringsperiode = andelerTilkjentYtelse
-            .hentUtvidetScenarioForEndringsperiode(it.hentMånedPeriode())
         try {
-            it.tilBrevPeriode(
-                restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev,
-                uregistrerteBarn = uregistrerteBarn,
-                utvidetScenarioForEndringsperiode = utvidetScenarioForEndringsperiode,
-                erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak(andelerTilkjentYtelse, it.fom),
-                brevMålform = målform,
+            it.minimertVedtaksperiode.tilBrevPeriode(
+                restBehandlingsgrunnlagForBrev = it.restBehandlingsgrunnlagForBrev,
+                uregistrerteBarn = it.uregistrerteBarn,
+                utvidetScenarioForEndringsperiode = it.utvidetScenarioForEndringsperiode,
+                erFørsteVedtaksperiodePåFagsak = it.erFørsteVedtaksperiodePåFagsak,
+                brevMålform = it.brevMålform,
             )
         } catch (exception: Exception) {
-            val brevPeriodeForLogging = it.tilBrevPeriodeForLogging(
-                restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev,
-                uregistrerteBarn = uregistrerteBarn,
-                utvidetScenarioForEndringsperiode = utvidetScenarioForEndringsperiode,
-                erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak(andelerTilkjentYtelse, it.fom),
-                brevMålform = målform,
-            )
+            val brevPeriodeForLogging = it.tilBrevperiodeForLogging()
 
             secureLogger.error(
                 "Feil ved generering av brevbegrunnelse. Data som ble sendt inn var: ${
@@ -103,7 +88,7 @@ enum class UtvidetScenarioForEndringsperiode {
     UTVIDET_YTELSE_IKKE_ENDRET
 }
 
-fun BrevPeriodeGrunnlag.tilBrevPeriode(
+fun MinimertVedtaksperiode.tilBrevPeriode(
     restBehandlingsgrunnlagForBrev: RestBehandlingsgrunnlagForBrev,
     utvidetScenarioForEndringsperiode: UtvidetScenarioForEndringsperiode = UtvidetScenarioForEndringsperiode.IKKE_UTVIDET_YTELSE,
     uregistrerteBarn: List<MinimertUregistrertBarn> = emptyList(),
