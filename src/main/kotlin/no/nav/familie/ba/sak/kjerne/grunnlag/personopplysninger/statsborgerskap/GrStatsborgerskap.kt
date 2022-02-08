@@ -88,6 +88,11 @@ fun List<GrStatsborgerskap>.filtrerGjeldendeNå(): List<GrStatsborgerskap> {
     return this.filter { it.gjeldendeNå() }
 }
 
+fun List<GrStatsborgerskap>.hentSterkesteMedlemskap(): Medlemskap? {
+    val nåværendeMedlemskap = finnNåværendeMedlemskap(this)
+    return finnSterkesteMedlemskap(nåværendeMedlemskap)
+}
+
 fun finnNåværendeMedlemskap(statsborgerskap: List<GrStatsborgerskap>?): List<Medlemskap> =
     statsborgerskap?.filtrerGjeldendeNå()?.map { it.medlemskap } ?: emptyList()
 
