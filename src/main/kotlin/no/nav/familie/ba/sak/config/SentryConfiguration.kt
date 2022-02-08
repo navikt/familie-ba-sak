@@ -5,14 +5,19 @@ import io.sentry.SentryOptions
 import io.sentry.protocol.User
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.NestedExceptionUtils
 
 @Configuration
-class SentryConfiguration {
+class SentryConfiguration(
+    @Value("\${sentry.environment}") val environment: String,
+    @Value("\${sentry.dsn}") val dsn: String,
+) {
     init {
         Sentry.init { options ->
-            options.dsn = "https://dd9a6107bdda4edeb51ece7283f37af4@sentry.gc.nav.no/112"
+            options.dsn = dsn
+            options.environment = environment
             options.beforeSend = SentryOptions.BeforeSendCallback { event, _ ->
                 Sentry.configureScope { scope ->
                     scope.user = User().apply {
