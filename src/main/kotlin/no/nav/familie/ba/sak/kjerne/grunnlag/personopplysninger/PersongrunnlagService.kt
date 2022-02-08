@@ -8,12 +8,14 @@ import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPerson
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.filtrerUtKunNorskeBostedsadresser
+import no.nav.familie.ba.sak.integrasjoner.pdl.secureLogger
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.arbeidsforhold.ArbeidsforholdService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.opphold.GrOpphold
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
@@ -23,6 +25,7 @@ import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
+import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -38,6 +41,7 @@ class PersongrunnlagService(
     private val behandlingRepository: BehandlingRepository,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val loggService: LoggService,
+    private val arbeidsforholdService: ArbeidsforholdService
 ) {
 
     fun mapTilRestPersonMedStatsborgerskapLand(person: Person): RestPerson {
@@ -85,7 +89,7 @@ class PersongrunnlagService(
         if (behandling.status != BehandlingStatus.UTREDES) throw Feil("BehandlingStatus må være UTREDES for å manuelt oppdatere registeropplysninger")
         return hentOgLagreSøkerOgBarnINyttGrunnlag(
             aktør = nåværendeGrunnlag.søker.aktør,
-            barnasAktør = nåværendeGrunnlag.barna.map { it.aktør },
+            barnFraInneværendeBehandling = nåværendeGrunnlag.barna.map { it.aktør },
             behandling = behandling,
             målform = nåværendeGrunnlag.søker.målform
         )
@@ -111,10 +115,10 @@ class PersongrunnlagService(
         )
 
         val oppdatertGrunnlag = hentOgLagreSøkerOgBarnINyttGrunnlag(
-            personopplysningGrunnlag.søker.aktør,
-            barnIGrunnlag.plus(nyttbarnAktør).toList(),
-            behandling,
-            personopplysningGrunnlag.søker.målform
+            aktør = personopplysningGrunnlag.søker.aktør,
+            barnFraInneværendeBehandling = barnIGrunnlag.plus(nyttbarnAktør).toList(),
+            behandling = behandling,
+            målform = personopplysningGrunnlag.søker.målform
         )
 
         val barnLagtTil = oppdatertGrunnlag.barna.singleOrNull { nyttbarnAktør == it.aktør }
@@ -149,23 +153,22 @@ class PersongrunnlagService(
                     andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(
                         forrigeBehandlingSomErVedtatt.id,
                         it
-                    )
-                        .isNotEmpty()
+                    ).isNotEmpty()
                 } ?: emptyList()
 
             hentOgLagreSøkerOgBarnINyttGrunnlag(
-                søkerAktør,
-                valgteBarnsAktør.union(forrigePersongrunnlagBarna)
-                    .toList(),
-                behandling,
-                søknadDTO.søkerMedOpplysninger.målform
+                aktør = søkerAktør,
+                barnFraInneværendeBehandling = valgteBarnsAktør,
+                barnFraForrigeBehandling = forrigePersongrunnlagBarna,
+                behandling = behandling,
+                målform = søknadDTO.søkerMedOpplysninger.målform,
             )
         } else {
             hentOgLagreSøkerOgBarnINyttGrunnlag(
-                søkerAktør,
-                valgteBarnsAktør,
-                behandling,
-                søknadDTO.søkerMedOpplysninger.målform
+                aktør = søkerAktør,
+                barnFraInneværendeBehandling = valgteBarnsAktør,
+                behandling = behandling,
+                målform = søknadDTO.søkerMedOpplysninger.målform
             )
         }
     }
@@ -176,24 +179,25 @@ class PersongrunnlagService(
     @Transactional
     fun hentOgLagreSøkerOgBarnINyttGrunnlag(
         aktør: Aktør,
-        barnasAktør: List<Aktør>,
+        barnFraInneværendeBehandling: List<Aktør>,
         behandling: Behandling,
-        målform: Målform
+        målform: Målform,
+        barnFraForrigeBehandling: List<Aktør> = emptyList(),
     ): PersonopplysningGrunnlag {
         val personopplysningGrunnlag = lagreOgDeaktiverGammel(PersonopplysningGrunnlag(behandlingId = behandling.id))
 
         val enkelPersonInfo = behandling.erMigrering() || behandling.erSatsendring()
-        personopplysningGrunnlag.personer.add(
-            hentPerson(
-                aktør = aktør,
-                personopplysningGrunnlag = personopplysningGrunnlag,
-                målform = målform,
-                personType = PersonType.SØKER,
-                enkelPersonInfo = enkelPersonInfo
-            )
+        val søker = hentPerson(
+            aktør = aktør,
+            personopplysningGrunnlag = personopplysningGrunnlag,
+            målform = målform,
+            personType = PersonType.SØKER,
+            enkelPersonInfo = enkelPersonInfo,
+            hentArbeidsforhold = behandling.skalBehandlesAutomatisk
         )
-        barnasAktør.forEach { barnsAktør ->
+        personopplysningGrunnlag.personer.add(søker)
 
+        barnFraInneværendeBehandling.union(barnFraForrigeBehandling).forEach { barnsAktør ->
             personopplysningGrunnlag.personer.add(
                 hentPerson(
                     aktør = barnsAktør,
@@ -203,6 +207,21 @@ class PersongrunnlagService(
                     enkelPersonInfo = enkelPersonInfo
                 )
             )
+        }
+
+        if (søker.hentSterkesteMedlemskap() == Medlemskap.EØS && behandling.skalBehandlesAutomatisk) {
+            hentFarEllerMedmorAktør(barnFraInneværendeBehandling)?.also { farEllerMedmor ->
+                personopplysningGrunnlag.personer.add(
+                    hentPerson(
+                        aktør = farEllerMedmor,
+                        personopplysningGrunnlag = personopplysningGrunnlag,
+                        målform = målform,
+                        personType = PersonType.ANNENPART,
+                        enkelPersonInfo = enkelPersonInfo,
+                        hentArbeidsforhold = true
+                    )
+                )
+            }
         }
 
         return personopplysningGrunnlagRepository.save(personopplysningGrunnlag).also {
@@ -220,7 +239,8 @@ class PersongrunnlagService(
         personopplysningGrunnlag: PersonopplysningGrunnlag,
         målform: Målform,
         personType: PersonType,
-        enkelPersonInfo: Boolean = false
+        enkelPersonInfo: Boolean = false,
+        hentArbeidsforhold: Boolean = false
     ): Person {
         val personinfo =
             if (enkelPersonInfo) personopplysningerService.hentPersoninfoEnkel(aktør)
@@ -249,7 +269,31 @@ class PersongrunnlagService(
                         person = person
                     )
                 }?.sortedBy { it.gyldigPeriode?.fom }?.toMutableList() ?: mutableListOf()
-            person.dødsfall = lagDødsfall(person = person, dødsfallDatoFraPdl = personinfo.dødsfall?.dødsdato, dødsfallAdresseFraPdl = personinfo.kontaktinformasjonForDoedsbo?.adresse)
+            person.dødsfall = lagDødsfall(
+                person = person,
+                dødsfallDatoFraPdl = personinfo.dødsfall?.dødsdato,
+                dødsfallAdresseFraPdl = personinfo.kontaktinformasjonForDoedsbo?.adresse
+            )
+            if (person.hentSterkesteMedlemskap() == Medlemskap.EØS && hentArbeidsforhold) {
+                person.arbeidsforhold = arbeidsforholdService.hentArbeidsforhold(
+                    person = person
+                ).toMutableList()
+            }
+        }
+    }
+
+    private fun hentFarEllerMedmorAktør(barna: List<Aktør>): Aktør? {
+        val barnasFarEllerMedmorAktører =
+            barna.map { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(aktør = it) }
+                .flatMap { barn ->
+                    barn.forelderBarnRelasjon.filter { it.relasjonsrolle == FORELDERBARNRELASJONROLLE.FAR || it.relasjonsrolle == FORELDERBARNRELASJONROLLE.MEDMOR }
+                }.map { it.aktør }.toSet()
+
+        return barnasFarEllerMedmorAktører.singleOrNull().also {
+            if (it == null) {
+                logger.warn("Finner flere eller ingen fedre/medmødre på barna som behandles i fødselshendelse. Se securelogger for mer informasjon.")
+                secureLogger.info("Finner flere eller ingen fedre/medmødre på barna som behandles i fødselshendelse: $barnasFarEllerMedmorAktører")
+            }
         }
     }
 

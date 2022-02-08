@@ -26,6 +26,14 @@ object SikkerhetContext {
             )
     }
 
+    fun hentSaksbehandlerEpost(): String {
+        return Result.runCatching { SpringTokenValidationContextHolder().tokenValidationContext }
+            .fold(
+                onSuccess = { it.getClaims("azuread")?.get("preferred_username")?.toString() ?: SYSTEM_FORKORTELSE },
+                onFailure = { SYSTEM_FORKORTELSE }
+            )
+    }
+
     fun hentSaksbehandlerNavn(): String {
         return Result.runCatching { SpringTokenValidationContextHolder().tokenValidationContext }
             .fold(

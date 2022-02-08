@@ -373,6 +373,7 @@ class MigreringServiceTest(
             mockk(),
             mockk(),
             mockk(),
+            mockk(relaxed = true),
             mockk(relaxed = true)
         ) // => env.erDev() = env.erE2E() = false
 
@@ -491,6 +492,7 @@ class MigreringServiceTest(
             mockk(),
             mockk(),
             mockk(),
+            mockk(relaxed = true),
             mockk(relaxed = true)
         )
 
