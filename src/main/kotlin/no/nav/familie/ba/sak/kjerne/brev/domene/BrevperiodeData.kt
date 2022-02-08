@@ -42,13 +42,12 @@ data class BrevperiodeData(
         }
     }
 
-    fun tilBrevperiodeForLogging() {
+    fun tilBrevperiodeForLogging() =
         minimertVedtaksperiode.tilBrevPeriodeForLogging(
             restBehandlingsgrunnlagForBrev = this.restBehandlingsgrunnlagForBrev,
             uregistrerteBarn = this.uregistrerteBarn,
             brevMålform = this.brevMålform,
         )
-    }
 
     companion object {
 

@@ -73,9 +73,8 @@ fun hentBrevPerioder(
             val brevPeriodeForLogging = it.tilBrevperiodeForLogging()
 
             secureLogger.error(
-                "Feil ved generering av brevbegrunnelse. Data som ble sendt inn var: ${
-                brevPeriodeForLogging.convertDataClassToJson()
-                }",
+                "Feil ved generering av brevbegrunnelse. Data som ble sendt inn var: " +
+                    brevPeriodeForLogging.convertDataClassToJson(),
                 exception
             )
             throw Feil(message = "Feil ved generering av brevperioder: ", throwable = exception)

@@ -11,7 +11,6 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurdering
 import java.math.BigDecimal
 import java.time.LocalDate
 
@@ -34,7 +33,7 @@ data class BrevPeriodePersonForLogging(
     val fødselsdato: LocalDate,
     val type: PersonType,
     val overstyrteVilkårresultater: List<MinimertVilkårResultat>,
-    val andreVurderinger: List<AnnenVurdering>,
+    val minimerteAndreVurderinger: List<MinimertAnnenVurdering>,
     val endredeUtbetalinger: List<EndretUtbetalingAndelPåPersonForLogging>,
     val utbetalinger: List<UtbetalingPåPersonForLogging>
 )

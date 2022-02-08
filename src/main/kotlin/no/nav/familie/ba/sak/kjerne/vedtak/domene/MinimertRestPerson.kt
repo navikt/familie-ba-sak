@@ -64,7 +64,7 @@ fun MinimertRestPerson.tilBrevPeriodeTestPerson(
         fødselsdato = this.fødselsdato,
         type = this.type,
         overstyrteVilkårresultater = minimertePersonResultater.minimerteVilkårResultater,
-        andreVurderinger = minimertePersonResultater.andreVurderinger,
+        minimerteAndreVurderinger = minimertePersonResultater.minimerteAndreVurderinger,
         endredeUtbetalinger = minimerteEndretUtbetalingAndelPåPerson.map {
             EndretUtbetalingAndelPåPersonForLogging(
                 periode = it.periode,

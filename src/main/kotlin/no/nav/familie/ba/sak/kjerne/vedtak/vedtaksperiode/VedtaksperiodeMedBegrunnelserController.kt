@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.convertDataClassToJson
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedFritekster
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedStandardbegrunnelser
@@ -16,6 +15,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeRepository
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
@@ -90,12 +90,19 @@ class VedtaksperiodeMedBegrunnelserController(
                 is FritekstBegrunnelse -> it.fritekst
                 is BegrunnelseData -> try {
                     brevKlient.hentBegrunnelsestekst(it)
-                } catch (e: Exception) {
-                    val feilmelding = hentFeilmeldingMedBrevperiodeData(vedtaksperiodeId, e)
-                    when (e) {
-                        is FunksjonellFeil -> throw FunksjonellFeil(melding = feilmelding, throwable = e)
-                        else -> throw Feil(message = feilmelding, throwable = e)
-                    }
+                } catch (exception: Exception) {
+                    val feilmelding = "Feil ved generering av brevbegrunnelse mot familie-brev på behandling: " +
+                        vedtaksperiodeRepository.hentVedtaksperiode(vedtaksperiodeId).vedtak.behandling
+
+                    val brevPeriodeForLogging =
+                        brevPeriodeService.hentBrevperiodeData(vedtaksperiodeId).tilBrevperiodeForLogging()
+
+                    secureLogger.error(
+                        "$feilmelding. Data for vedtaksperiode var: " + brevPeriodeForLogging.convertDataClassToJson(),
+                        exception
+                    )
+
+                    throw Feil(message = feilmelding, throwable = exception)
                 }
                 else -> throw Feil("Ukjent begrunnelsestype")
             }
@@ -104,18 +111,8 @@ class VedtaksperiodeMedBegrunnelserController(
         return ResponseEntity.ok(Ressurs.Companion.success(begrunnelser))
     }
 
-    private fun hentFeilmeldingMedBrevperiodeData(vedtaksperiodeId: Long, e: Exception): String =
-        "Kunne ikke hente brevbegrunnelser for vedtaksperiode " +
-            "på behandling ${vedtaksperiodeRepository.hentVedtaksperiode(vedtaksperiodeId).vedtak.behandling}. " +
-            "Feilmelding: ${e.message}" +
-            "Data for brevperiode var" +
-            brevPeriodeService
-                .hentBrevperiodeData(vedtaksperiodeId)
-                .tilBrevperiodeForLogging()
-                .convertDataClassToJson()
-
     companion object {
-
+        private val secureLogger = LoggerFactory.getLogger("secureLogger")
         const val OPPDATERE_BEGRUNNELSER_HANDLING = "oppdatere vedtaksperiode med begrunnelser"
     }
 }
