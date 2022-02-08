@@ -250,7 +250,7 @@ class VedtaksperiodeService(
 
         val utbetalingsperioder =
             hentVedtaksperioderMedBegrunnelserForUtbetalingsperioder(andelerTilkjentYtelse, vedtak)
-        
+
         val endredeUtbetalingsperioder = hentVedtaksperioderMedBegrunnelserForEndredeUtbetalingsperioder(
             andelerTilkjentYtelse = andelerTilkjentYtelse,
             vedtak = vedtak,
