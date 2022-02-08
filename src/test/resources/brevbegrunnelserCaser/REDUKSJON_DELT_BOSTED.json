@@ -1,0 +1,66 @@
+{
+  "beskrivelse": "Reduksjon delt bosted",
+  "fom": "2021-12-01",
+  "tom": "2027-01-31",
+  "vedtaksperiodetype": "UTBETALING",
+  "ytelserForSøkerForrigeMåned": [],
+  "ytelserForBarnOgSøkerIPeriode": [
+    "ORDINÆR_BARNETRYGD"
+  ],
+  "utvidetScenarioForEndringsperiode": "IKKE_UTVIDET_YTELSE",
+  "personerPåBehandling": [
+    {
+      "fødselsdato": "1990-02-19",
+      "type": "SØKER",
+      "overstyrteVilkårresultater": [],
+      "andreVurderinger": [],
+      "endredeUtbetalinger": []
+    },
+    {
+      "fødselsdato": "2016-02-10",
+      "type": "BARN",
+      "overstyrteVilkårresultater": [
+        {
+          "vilkårType": "BOR_MED_SØKER",
+          "periodeFom": "2021-11-11",
+          "periodeTom": null,
+          "resultat": "OPPFYLT",
+          "utdypendeVilkårsvurderinger": [
+            "DELT_BOSTED"
+          ],
+          "erEksplisittAvslagPåSøknad": false
+        },
+        {
+          "vilkårType": "BOR_MED_SØKER",
+          "periodeFom": "2016-02-10",
+          "periodeTom": "2021-11-10",
+          "resultat": "OPPFYLT",
+          "utdypendeVilkårsvurderinger": [],
+          "erEksplisittAvslagPåSøknad": false
+        }
+      ],
+      "andreVurderinger": [],
+      "endredeUtbetalinger": []
+    }
+  ],
+  "forventetOutput": [
+    "REDUKSJON_DELT_BOSTED_ENIGHET",
+    "REDUKSJON_DELT_BOSTED_UENIGHET",
+    "REDUKSJON_AVTALE_FAST_BOSTED",
+    "REDUKSJON_VURDERING_FORELDRENE_BOR_SAMMEN",
+    "REDUKSJON_FORELDRENE_BOR_SAMMEN",
+    "REDUKSJON_RETTSAVGJØRELSE_FAST_BOSTED",
+    "REDUKSJON_IKKE_AVTALE_DELT_BOSTED",
+    "REDUKSJON_DELT_BARNETRYGD_ANNEN_FORELDER_SØKT",
+    "REDUKSJON_FLYTTET_BARN",
+    "REDUKSJON_BARN_DØD",
+    "INNVILGET_OMSORG_FOR_BARN",
+    "INNVILGET_BOR_HOS_SØKER",
+    "INNVILGET_ENIGHET_OM_OPPHØR_AV_AVTALE_OM_DELT_BOSTED",
+    "INNVILGET_UENIGHET_OM_OPPHØR_AV_AVTALE_OM_DELT_BOSTED",
+    "INNVILGET_AVTALE_DELT_BOSTED_FÅR_FRA_FLYTTETIDSPUNKT",
+    "INNVILGET_AVTALE_DELT_BOSTED_FÅR_FRA_AVTALETIDSPUNKT",
+    "INNVILGET_VURDERING_AVTALE_DELT_BOSTED_FØLGES",
+    "INNVILGET_RETTSAVGJØRELSE_DELT_BOSTED"
+  ]
+}
