@@ -4,9 +4,11 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.convertDataClassToJson
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Evaluering
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurdering.LovligOppholdFaktaEØS
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurdering.VurderBarnErBosattMedSøker
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurdering.VurderBarnErUgift
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurdering.VurderBarnErUnder18
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurdering.VurderBarnHarLovligOpphold
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurdering.VurderPersonErBosattIRiket
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurdering.VurderPersonHarLovligOpphold
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
@@ -88,6 +90,7 @@ enum class Vilkår(
     fun vurderVilkår(
         person: Person,
         vurderFra: LocalDate = LocalDate.now(),
+        annenForelder: Person? = null,
     ): AutomatiskVurdering {
         val vilkårsregel = when (this) {
             UNDER_18_ÅR -> VurderBarnErUnder18(
@@ -104,9 +107,21 @@ enum class Vilkår(
                 adresser = person.bostedsadresser,
                 vurderFra = vurderFra
             )
-            LOVLIG_OPPHOLD -> VurderPersonHarLovligOpphold(
-                personType = person.type,
-                statsborgerskap = person.statsborgerskap,
+            LOVLIG_OPPHOLD -> if (person.type == BARN) VurderBarnHarLovligOpphold(
+                aktør = person.aktør
+            )
+            else VurderPersonHarLovligOpphold(
+                morLovligOppholdFaktaEØS = LovligOppholdFaktaEØS(
+                    arbeidsforhold = person.arbeidsforhold,
+                    bostedsadresser = person.bostedsadresser,
+                    statsborgerskap = person.statsborgerskap
+                ),
+                annenForelderLovligOppholdFaktaEØS = if (annenForelder != null)
+                    LovligOppholdFaktaEØS(
+                        arbeidsforhold = annenForelder.arbeidsforhold,
+                        bostedsadresser = annenForelder.bostedsadresser,
+                        statsborgerskap = annenForelder.statsborgerskap
+                    ) else null,
                 opphold = person.opphold
             )
             UTVIDET_BARNETRYGD -> throw Feil("Ikke støtte for å automatisk vurdere vilkåret ${this.beskrivelse}")
