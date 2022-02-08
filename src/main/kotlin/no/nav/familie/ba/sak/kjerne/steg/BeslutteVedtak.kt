@@ -66,23 +66,6 @@ class BeslutteVedtak(
         )
 
         return if (data.beslutning.erGodkjent()) {
-            val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandlingId = behandling.id)
-
-            val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandlingId = behandling.id)
-
-            val barnMedAndreRelevanteTilkjentYtelser = personopplysningGrunnlag.barna.map {
-                Pair(
-                    it,
-                    beregningService.hentRelevanteTilkjentYtelserForBarn(it.aktør, behandling.fagsak.id)
-                )
-            }
-
-            TilkjentYtelseValidering.validerAtBarnIkkeFårFlereUtbetalingerSammePeriode(
-                behandlendeBehandlingTilkjentYtelse = tilkjentYtelse,
-                barnMedAndreRelevanteTilkjentYtelser = barnMedAndreRelevanteTilkjentYtelser,
-                personopplysningGrunnlag = personopplysningGrunnlag,
-            )
-
             val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
                 ?: error("Fant ikke aktivt vedtak på behandling ${behandling.id}")
 
@@ -127,6 +110,29 @@ class BeslutteVedtak(
             )
             taskRepository.save(behandleUnderkjentVedtakTask)
             StegType.SEND_TIL_BESLUTTER
+        }
+    }
+
+    override fun postValiderSteg(behandling: Behandling) {
+        val totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(behandling.id)
+
+        if (totrinnskontroll?.godkjent == true) {
+            val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandlingId = behandling.id)
+
+            val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandlingId = behandling.id)
+
+            val barnMedAndreRelevanteTilkjentYtelser = personopplysningGrunnlag.barna.map {
+                Pair(
+                    it,
+                    beregningService.hentRelevanteTilkjentYtelserForBarn(it.aktør, behandling.fagsak.id)
+                )
+            }
+
+            TilkjentYtelseValidering.validerAtBarnIkkeFårFlereUtbetalingerSammePeriode(
+                behandlendeBehandlingTilkjentYtelse = tilkjentYtelse,
+                barnMedAndreRelevanteTilkjentYtelser = barnMedAndreRelevanteTilkjentYtelser,
+                personopplysningGrunnlag = personopplysningGrunnlag,
+            )
         }
     }
 
