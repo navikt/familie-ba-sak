@@ -103,7 +103,7 @@ class IntegrasjonClient(
             .pathSegment("arbeidsfordeling", "enhet", "BAR")
             .build().toUri()
 
-        return try {
+        return Result.runCatching {
             val response =
                 postForEntity<Ressurs<List<Arbeidsfordelingsenhet>>>(uri, mapOf("ident" to ident))
             response.data ?: throw IntegrasjonException(
@@ -111,9 +111,16 @@ class IntegrasjonClient(
                 null,
                 uri
             )
-        } catch (e: RestClientException) {
-            throw IntegrasjonException("Kall mot integrasjon feilet ved henting av arbeidsfordelingsenhet", e, uri)
-        }
+        }.fold(
+            onSuccess = { it },
+            onFailure = {
+                throw IntegrasjonException(
+                    "Kall mot integrasjon feilet ved henting av arbeidsfordelingsenhet",
+                    it,
+                    uri
+                )
+            }
+        )
     }
 
     @Retryable(
@@ -182,7 +189,7 @@ class IntegrasjonClient(
         val uri = URI.create("$integrasjonUri/arbeidsfordeling/nav-kontor/$enhetId")
 
         return try {
-            return getForEntity<Ressurs<NavKontorEnhet>>(uri).getDataOrThrow()
+            getForEntity<Ressurs<NavKontorEnhet>>(uri).getDataOrThrow()
         } catch (e: Exception) {
             throw IntegrasjonException("Kall mot integrasjon feilet ved henting av enhet.", e)
         }
