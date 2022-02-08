@@ -35,7 +35,6 @@ class PersongrunnlagTest {
         every { persongrunnlagService.hentAktiv(forrigeBehandling.id) } returns forrigeGrunnlag
         every { persongrunnlagService.hentAktivThrows(behandling.id) } returns grunnlag
         every { persongrunnlagService.finnNyeBarn(any(), any()) } answers { callOriginal() }
-        every { persongrunnlagService.finnNyeBarnIPersongrunnlag(any(), any()) } answers { callOriginal() }
 
         val nye = persongrunnlagService.finnNyeBarn(forrigeBehandling = forrigeBehandling, behandling = behandling)
         Assertions.assertEquals(nyttbarn, nye.singleOrNull()!!.aktør.aktivFødselsnummer())

@@ -127,18 +127,8 @@ class PersongrunnlagService(
     }
 
     fun finnNyeBarn(behandling: Behandling, forrigeBehandling: Behandling?): List<Person> {
-        return finnNyeBarnIPersongrunnlag(
-            persongrunnlag = hentAktivThrows(behandlingId = behandling.id),
-            forrigePersongrunnlag = forrigeBehandling?.let { hentAktiv(behandlingId = it.id) }
-        )
-    }
-
-    fun finnNyeBarnIPersongrunnlag(
-        persongrunnlag: PersonopplysningGrunnlag,
-        forrigePersongrunnlag: PersonopplysningGrunnlag?
-    ): List<Person> {
-        val barnIForrigeGrunnlag = forrigePersongrunnlag?.barna ?: emptyList()
-        val barnINyttGrunnlag = persongrunnlag.barna
+        val barnIForrigeGrunnlag = forrigeBehandling?.let { hentAktiv(behandlingId = it.id)?.barna } ?: emptySet()
+        val barnINyttGrunnlag = behandling.let { hentAktivThrows(behandlingId = it.id).barna }
 
         return barnINyttGrunnlag.filter { barn -> barnIForrigeGrunnlag.none { barn.aktør == it.aktør } }
     }
@@ -297,13 +287,14 @@ class PersongrunnlagService(
             barna.map { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(aktør = it) }
                 .flatMap { barn ->
                     barn.forelderBarnRelasjon.filter { it.relasjonsrolle == FORELDERBARNRELASJONROLLE.FAR || it.relasjonsrolle == FORELDERBARNRELASJONROLLE.MEDMOR }
-                }.toSet().map { it.aktør }
+                }.map { it.aktør }.toSet()
 
-        return if (barnasFarEllerMedmorAktører.size != 1) {
-            logger.warn("Finner flere eller ingen fedre/medmødre på barna som behandles i fødselshendelse. Se securelogger for mer informasjon.")
-            secureLogger.info("Finner flere eller ingen fedre/medmødre på barna som behandles i fødselshendelse: $barnasFarEllerMedmorAktører")
-            null
-        } else barnasFarEllerMedmorAktører.single()
+        return barnasFarEllerMedmorAktører.singleOrNull().also {
+            if (it == null) {
+                logger.warn("Finner flere eller ingen fedre/medmødre på barna som behandles i fødselshendelse. Se securelogger for mer informasjon.")
+                secureLogger.info("Finner flere eller ingen fedre/medmødre på barna som behandles i fødselshendelse: $barnasFarEllerMedmorAktører")
+            }
+        }
     }
 
     fun lagreOgDeaktiverGammel(personopplysningGrunnlag: PersonopplysningGrunnlag): PersonopplysningGrunnlag {
