@@ -142,17 +142,13 @@ private fun erOpphørResultatUtgjøreneForPeriode(
     triggesAv: TriggesAv,
     vedtaksperiode: Periode
 ): Boolean {
-    val oppfyltTomMånedEtter =
-        if (minimertVilkårResultat.vilkårType == Vilkår.UNDER_18_ÅR &&
-            minimertVilkårResultat.periodeTom != minimertVilkårResultat.periodeTom?.sisteDagIMåned()
-        ) 0L
-        else 1L
+    val erOppfyltTomMånedEtter = erOppfyltTomMånedEtter(minimertVilkårResultat)
 
     return triggereForUtdypendeVilkårsvurderingErOppfylt(triggesAv, minimertVilkårResultat) &&
         minimertVilkårResultat.periodeTom != null &&
         minimertVilkårResultat.resultat == Resultat.OPPFYLT &&
         minimertVilkårResultat.periodeTom.toYearMonth() == vedtaksperiode.fom.minusMonths(
-        oppfyltTomMånedEtter
+        if (erOppfyltTomMånedEtter) 1L else 0L
     ).toYearMonth()
 }
 
@@ -161,11 +157,7 @@ private fun erReduksjonResultatUtgjøreneForPeriode(
     triggesAv: TriggesAv,
     vedtaksperiode: Periode
 ): Boolean {
-    val oppfyltTomMånedEtter =
-        if (minimertVilkårResultat.vilkårType == Vilkår.UNDER_18_ÅR &&
-            minimertVilkårResultat.periodeTom != minimertVilkårResultat.periodeTom?.sisteDagIMåned()
-        ) 0L
-        else 1L
+    val erOppfyltTomMånedEtter = erOppfyltTomMånedEtter(minimertVilkårResultat)
 
     val erStartPåDeltBosted =
         minimertVilkårResultat.vilkårType == Vilkår.BOR_MED_SØKER &&
@@ -181,9 +173,13 @@ private fun erReduksjonResultatUtgjøreneForPeriode(
         minimertVilkårResultat.resultat == Resultat.OPPFYLT &&
         minimertVilkårResultat.periodeTom.plusDays(if (erStartPåDeltBosted) 1 else 0)
         .toYearMonth() == vedtaksperiode.fom.minusMonths(
-        oppfyltTomMånedEtter
+        if (erOppfyltTomMånedEtter) 1L else 0L
     ).toYearMonth()
 }
+
+private fun erOppfyltTomMånedEtter(minimertVilkårResultat: MinimertVilkårResultat) =
+    minimertVilkårResultat.vilkårType != Vilkår.UNDER_18_ÅR ||
+        minimertVilkårResultat.periodeTom == minimertVilkårResultat.periodeTom?.sisteDagIMåned()
 
 private fun erInnvilgetVilkårResultatUtgjørende(
     triggesAv: TriggesAv,
