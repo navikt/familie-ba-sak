@@ -4,9 +4,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.KONTAKT_TEAMET_SUFFIX
 import no.nav.familie.ba.sak.common.UtbetalingsikkerhetFeil
 import no.nav.familie.ba.sak.common.overlapperHeltEllerDelvisMed
-import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering.maksBeløp
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
@@ -17,6 +15,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjeMedAndeler
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilBrevTekst
 import java.math.BigDecimal
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -143,6 +142,7 @@ object TilkjentYtelseValidering {
 
         val barnasAndeler = hentBarnasAndeler(behandlendeBehandlingTilkjentYtelse.andelerTilkjentYtelse.toList(), barna)
 
+        val barnMedUtbetalingsikkerhetFeil = mutableListOf<Person>()
         barnasAndeler.forEach { (barn, andeler) ->
             val barnsAndelerFraAndreBehandlinger =
                 barnMedAndreRelevanteTilkjentYtelser.filter { it.first.aktør == barn.aktør }
@@ -150,12 +150,18 @@ object TilkjentYtelseValidering {
                     .flatMap { it.andelerTilkjentYtelse }
                     .filter { it.aktør == barn.aktør }
 
-            validerIngenOverlappAvAndeler(
-                andeler = andeler,
-                barnsAndelerFraAndreBehandlinger = barnsAndelerFraAndreBehandlinger,
-                behandlendeBehandlingTilkjentYtelse = behandlendeBehandlingTilkjentYtelse,
-                barn = barn,
-                behandlingÅrsak = behandlendeBehandlingTilkjentYtelse.behandling.opprettetÅrsak
+            if (!validerIngenOverlappAvAndeler(
+                    andeler = andeler,
+                    barnsAndelerFraAndreBehandlinger = barnsAndelerFraAndreBehandlinger
+                )
+            ) {
+                barnMedUtbetalingsikkerhetFeil.add(barn)
+            }
+        }
+        if (barnMedUtbetalingsikkerhetFeil.isNotEmpty()) {
+            throw UtbetalingsikkerhetFeil(
+                melding = "Vi finner utbetalinger som overstiger 100% på hvert av barna: ${barnMedUtbetalingsikkerhetFeil.map { it.fødselsdato }.tilBrevTekst()}",
+                frontendFeilmelding = "Du kan ikke godkjenne dette vedtaket fordi det vil betales ut mer enn 100% for barn født ${barnMedUtbetalingsikkerhetFeil.map { it.fødselsdato }.tilBrevTekst()}. Reduksjonsvedtak til annen person må være sendt til godkjenning før du kan gå videre."
             )
         }
     }
@@ -179,10 +185,7 @@ object TilkjentYtelseValidering {
     private fun validerIngenOverlappAvAndeler(
         andeler: List<AndelTilkjentYtelse>,
         barnsAndelerFraAndreBehandlinger: List<AndelTilkjentYtelse>,
-        behandlendeBehandlingTilkjentYtelse: TilkjentYtelse,
-        barn: Person,
-        behandlingÅrsak: BehandlingÅrsak
-    ) {
+    ): Boolean {
         andeler.forEach { andelTilkjentYtelse ->
             if (barnsAndelerFraAndreBehandlinger.any
                 {
@@ -190,14 +193,10 @@ object TilkjentYtelseValidering {
                         andelTilkjentYtelse.prosent + it.prosent > BigDecimal(100)
                 }
             ) {
-                if (behandlingÅrsak != BehandlingÅrsak.ENDRE_MIGRERINGSDATO) {
-                    throw UtbetalingsikkerhetFeil(
-                        melding = "Vi finner flere utbetalinger for barn på behandling ${behandlendeBehandlingTilkjentYtelse.behandling.id}",
-                        frontendFeilmelding = "Det er allerede innvilget utbetaling av barnetrygd for ${barn.aktør.aktivFødselsnummer()} i perioden ${andelTilkjentYtelse.stønadFom.tilKortString()} - ${andelTilkjentYtelse.stønadTom.tilKortString()}."
-                    )
-                }
+                return false
             }
         }
+        return true
     }
 
     private fun erAndelMedØktBeløpFørDato(
