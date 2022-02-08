@@ -4,7 +4,7 @@ import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonInfo
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonInfo
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
@@ -29,7 +29,7 @@ class PersonController(
     private val personopplysningerService: PersonopplysningerService,
     private val persongrunnlagService: PersongrunnlagService,
     private val personidentService: PersonidentService,
-    private val integrasjonClient: IntegrasjonClient,
+    private val familieIntegrasjonerTilgangskontrollClient: FamilieIntegrasjonerTilgangskontrollClient,
     private val utvidetBehandlingService: UtvidetBehandlingService,
     private val tilgangService: TilgangService
 ) {
@@ -40,7 +40,7 @@ class PersonController(
         @RequestBody personIdentBody: PersonIdent?
     ): ResponseEntity<Ressurs<RestPersonInfo>> {
         val aktør = personidentService.hentOgLagreAktør(personIdent)
-        val personinfo = integrasjonClient.hentMaskertPersonInfoVedManglendeTilgang(aktør)
+        val personinfo = familieIntegrasjonerTilgangskontrollClient.hentMaskertPersonInfoVedManglendeTilgang(aktør)
             ?: personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(
                 personidentService.hentOgLagreAktør(
                     personIdent

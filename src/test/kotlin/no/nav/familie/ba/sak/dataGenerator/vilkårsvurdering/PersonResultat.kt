@@ -20,7 +20,7 @@ fun lagPersonResultatAvOverstyrteResultater(
         aktør = person.aktør
     )
 
-    val erUtvidet = overstyrendeVilkårResultater.any { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD } ?: false
+    val erUtvidet = overstyrendeVilkårResultater.any { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
 
     val vilkårResultater = Vilkår.hentVilkårFor(
         personType = person.type,

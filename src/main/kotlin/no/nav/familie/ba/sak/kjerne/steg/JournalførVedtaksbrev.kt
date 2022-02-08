@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.integrasjoner.journalføring.JournalføringService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.brev.hentBrevtype
@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.task.DistribuerDokumentDTO
 import no.nav.familie.ba.sak.task.DistribuerDokumentTask
 import no.nav.familie.prosessering.domene.Task
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 data class JournalførVedtaksbrevDTO(
@@ -19,7 +20,7 @@ data class JournalførVedtaksbrevDTO(
 @Service
 class JournalførVedtaksbrev(
     private val vedtakService: VedtakService,
-    private val integrasjonClient: IntegrasjonClient,
+    private val journalføringService: JournalføringService,
     private val arbeidsfordelingService: ArbeidsfordelingService,
     private val taskRepository: TaskRepositoryWrapper
 ) : BehandlingSteg<JournalførVedtaksbrevDTO> {
@@ -36,7 +37,7 @@ class JournalførVedtaksbrev(
         val behanlendeEnhet =
             arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandlingId = behandling.id).behandlendeEnhetId
 
-        val journalpostId = integrasjonClient.journalførVedtaksbrev(
+        val journalpostId = journalføringService.journalførVedtaksbrev(
             fnr = fnr,
             fagsakId = fagsakId,
             vedtak = vedtak,
@@ -60,5 +61,9 @@ class JournalførVedtaksbrev(
 
     override fun stegType(): StegType {
         return StegType.JOURNALFØR_VEDTAKSBREV
+    }
+
+    companion object {
+        val logger = LoggerFactory.getLogger(JournalførVedtaksbrev::class.java)
     }
 }

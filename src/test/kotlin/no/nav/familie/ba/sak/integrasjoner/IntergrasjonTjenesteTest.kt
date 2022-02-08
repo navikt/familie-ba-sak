@@ -15,7 +15,6 @@ import com.github.tomakehurst.wiremock.client.WireMock.post
 import com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.status
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
-import io.mockk.mockk
 import no.nav.familie.ba.sak.common.MDCOperations
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagVedtak
@@ -78,8 +77,7 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTestDev() {
     fun setUp() {
         integrasjonClient = IntegrasjonClient(
             URI.create(wireMockServer.baseUrl() + "/api"),
-            restOperations,
-            mockk(relaxed = true)
+            restOperations
         )
     }
 
@@ -101,7 +99,7 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTestDev() {
 
         val request = lagTestOppgave()
 
-        val opprettOppgaveResponse = integrasjonClient.opprettOppgave(request)
+        val opprettOppgaveResponse = integrasjonClient.opprettOppgave(request).oppgaveId.toString()
 
         assertThat(opprettOppgaveResponse).isEqualTo("1234")
         wireMockServer.verify(
@@ -166,7 +164,13 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTestDev() {
         vedtak.stønadBrevPdF = mockPdf
 
         val journalPostId =
-            integrasjonClient.journalførVedtaksbrev(MOCK_FNR, vedtak.behandling.fagsak.id.toString(), vedtak, "1")
+            integrasjonClient.journalførDokument(
+                fnr = MOCK_FNR,
+                fagsakId = vedtak.behandling.fagsak.id.toString(),
+                brev = emptyList(),
+                vedlegg = emptyList(),
+                behandlingId = vedtak.behandling.id
+            )
 
         assertThat(journalPostId).isEqualTo(MOCK_JOURNALPOST_FOR_VEDTAK_ID)
         wireMockServer.verify(
@@ -357,9 +361,9 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTestDev() {
         )
 
         val oppgave = integrasjonClient.hentJournalpost(journalpostId)
-        assertThat(oppgave.data).isNotNull
-        assertThat(oppgave.data?.journalpostId).isEqualTo(journalpostId)
-        assertThat(oppgave.data?.bruker?.id).isEqualTo(fnr)
+        assertThat(oppgave).isNotNull
+        assertThat(oppgave.journalpostId).isEqualTo(journalpostId)
+        assertThat(oppgave.bruker?.id).isEqualTo(fnr)
 
         wireMockServer.verify(getRequestedFor(urlEqualTo("/api/journalpost?journalpostId=$journalpostId")))
     }
