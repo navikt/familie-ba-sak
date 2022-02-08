@@ -9,6 +9,8 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.G
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.opphold.GrOpphold
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.finnNåværendeMedlemskap
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.finnSterkesteMedlemskap
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.familie.kontrakter.felles.Språkkode
@@ -128,6 +130,11 @@ data class Person(
         this.fødselsdato.isAfter(now().minusYears(år.toLong()).sisteDagIMåned())
 
     fun erDød(): Boolean = dødsfall != null
+
+    fun hentSterkesteMedlemskap(): Medlemskap? {
+        val nåværendeMedlemskap = finnNåværendeMedlemskap(statsborgerskap)
+        return finnSterkesteMedlemskap(nåværendeMedlemskap)
+    }
 }
 
 enum class Kjønn {

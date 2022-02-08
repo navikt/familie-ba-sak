@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
+import java.time.LocalDate
 import javax.persistence.Column
 import javax.persistence.Embedded
 import javax.persistence.Entity
@@ -44,3 +45,7 @@ data class GrArbeidsforhold(
     @JoinColumn(name = "fk_po_person_id", nullable = false, updatable = false)
     val person: Person
 ) : BaseEntitet()
+
+fun List<GrArbeidsforhold>.harLøpendeArbeidsforhold(): Boolean = this.any {
+    it.periode?.tom == null || it.periode.tom >= LocalDate.now()
+}
