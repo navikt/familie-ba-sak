@@ -40,8 +40,8 @@ data class VurderPersonErBosattIRiket(
             val person = adresser.first().person
             secureLogger.info(
                 "Har ugyldige adresser på person (${person?.aktør?.aktivFødselsnummer()}, ${person?.type}): ${
-                adresser.filter { !it.harGyldigFom() }
-                    .map { "(${it.periode?.fom}, ${it.periode?.tom}): ${it.toSecureString()}" }
+                    adresser.filter { !it.harGyldigFom() }
+                        .map { "(${it.periode?.fom}, ${it.periode?.tom}): ${it.toSecureString()}" }
                 }"
             )
         }
@@ -207,7 +207,7 @@ private fun vurderLovligOppholdForEØSBorger(
     }
 
     return when (annenForelderLovligOppholdFaktaEØS.statsborgerskap.hentSterkesteMedlemskap()) {
-        Medlemskap.NORDEN -> return Evaluering.oppfylt(VilkårOppfyltÅrsak.ANNEN_FORELDER_NORDISK)
+        Medlemskap.NORDEN -> Evaluering.oppfylt(VilkårOppfyltÅrsak.ANNEN_FORELDER_NORDISK)
         Medlemskap.EØS -> {
             if (annenForelderLovligOppholdFaktaEØS.arbeidsforhold.harLøpendeArbeidsforhold()) {
                 Evaluering.oppfylt(VilkårOppfyltÅrsak.ANNEN_FORELDER_EØS_MEN_MED_LØPENDE_ARBEIDSFORHOLD)
