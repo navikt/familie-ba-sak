@@ -131,6 +131,15 @@ no.nav.security.jwt:
           client-id: ${AZURE_APP_CLIENT_ID}
           client-secret: ${AZURE_APP_CLIENT_SECRET}
           client-auth-method: client_secret_basic
+      familie-statistikk-clientcredentials:
+        resource-url: ${FAMILIE_STATISTIKK_URL}
+        token-endpoint-url: https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/v2.0/token
+        grant-type: client_credentials
+        scope: api://dev-fss.teamfamilie.familie-ba-statistikk/.default
+        authentication:
+          client-id: ${AZURE_APP_CLIENT_ID}
+          client-secret: ${AZURE_APP_CLIENT_SECRET}
+          client-auth-method: client_secret_basic
 
 spring:
   datasource:
@@ -159,5 +168,6 @@ FAMILIE_BA_INFOTRYGD_SCOPE: api://dev-fss.teamfamilie.familie-ba-infotrygd/.defa
 FAMILIE_BA_INFOTRYGD_API_URL: https://familie-ba-infotrygd.dev-fss-pub.nais.io
 FAMILIE_OPPDRAG_API_URL: https://familie-oppdrag.dev-fss-pub.nais.io/api
 FAMILIE_BA_INFOTRYGD_FEED_API_URL: https://familie-ba-infotrygd-feed.dev-fss-pub.nais.io/api
+FAMILIE_STATISTIKK_URL: https://familie-ba-statistikk.dev-fss-pub.nais.io/api
 
 ENVIRONMENT_NAME: q2
