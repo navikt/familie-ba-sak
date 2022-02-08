@@ -158,6 +158,10 @@ private fun erReduksjonResultatUtgjøreneForPeriode(
     triggesAv: TriggesAv,
     vedtaksperiode: Periode
 ): Boolean {
+    if (minimertVilkårResultat.periodeTom == null) {
+        return false
+    }
+
     val erOppfyltTomMånedEtter = erOppfyltTomMånedEtter(minimertVilkårResultat)
 
     val erStartPåDeltBosted =
@@ -165,19 +169,17 @@ private fun erReduksjonResultatUtgjøreneForPeriode(
             !minimertVilkårResultat.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.DELT_BOSTED) &&
             triggesAv.deltbosted
 
-    val vilkårsluttForForrigePeriode =
-        vedtaksperiode.fom
-            .minusMonths(if (erOppfyltTomMånedEtter) 1 else 0)
-            .minusDays(if (erStartPåDeltBosted) 1 else 0)
+    val startNestePeriodeEtterVilkår = minimertVilkårResultat.periodeTom
+        .plusMonths(if (erOppfyltTomMånedEtter) 1 else 0)
+        .plusDays(if (erStartPåDeltBosted) 1 else 0)
 
     return triggereForUtdypendeVilkårsvurderingErOppfylt(
         triggesAv = triggesAv,
         vilkårResultat = minimertVilkårResultat,
         erReduksjonStartPåDeltBosted = erStartPåDeltBosted
     ) &&
-        minimertVilkårResultat.periodeTom != null &&
         minimertVilkårResultat.resultat == Resultat.OPPFYLT &&
-        minimertVilkårResultat.periodeTom.toYearMonth() == vilkårsluttForForrigePeriode.toYearMonth()
+        startNestePeriodeEtterVilkår.toYearMonth() == vedtaksperiode.fom.toYearMonth()
 }
 
 private fun erOppfyltTomMånedEtter(minimertVilkårResultat: MinimertVilkårResultat) =
