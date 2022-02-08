@@ -72,7 +72,7 @@ object RessursUtils {
 
         secureLogger.error(
             "$className En håndtert feil har oppstått(${feil.httpStatus}): " +
-                "${feil.frontendFeilmelding}, ${feil.stackTrace}",
+                "${feil.message}, ${feil.frontendFeilmelding}",
             feil
         )
         logger.error("$className En håndtert feil har oppstått(${feil.httpStatus}): ${feil.message} ", feil)

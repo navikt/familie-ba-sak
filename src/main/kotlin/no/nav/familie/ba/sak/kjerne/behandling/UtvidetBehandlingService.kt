@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.behandling
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestBehandlingStegTilstand
@@ -64,6 +65,9 @@ class UtvidetBehandlingService(
 
         val tilbakekreving = tilbakekrevingRepository.findByBehandlingId(behandling.id)
 
+        if (behandling.id == 999951L) {
+            throw Feil("test 123")
+        }
         return RestUtvidetBehandling(
             behandlingId = behandling.id,
             steg = behandling.steg,
