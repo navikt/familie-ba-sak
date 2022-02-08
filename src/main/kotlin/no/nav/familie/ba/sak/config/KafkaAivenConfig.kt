@@ -78,8 +78,6 @@ class KafkaAivenConfig(val environment: Environment) {
             ConsumerConfig.GROUP_ID_CONFIG to "familie-ba-sak",
             ConsumerConfig.CLIENT_ID_CONFIG to "consumer-familie-ba-sak-1",
             ConsumerConfig.AUTO_OFFSET_RESET_CONFIG to "latest",
-            CommonClientConfigs.RETRIES_CONFIG to 10,
-            CommonClientConfigs.RETRY_BACKOFF_MS_CONFIG to 100
         )
         if (environment.activeProfiles.none { it.contains("dev") || it.contains("postgres") }) {
             return consumerConfigs + securityConfig()
