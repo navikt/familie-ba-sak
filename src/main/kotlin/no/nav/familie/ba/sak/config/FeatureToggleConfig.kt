@@ -81,7 +81,7 @@ class FeatureToggleConfig(
         override fun isEnabled(parameters: MutableMap<String, String>): Boolean {
             if (parameters.isEmpty()) return false
 
-            return parameters["saksbehandler"]?.contains(SikkerhetContext.hentSaksbehandler()) ?: false
+            return parameters["saksbehandler"]?.contains(SikkerhetContext.hentSaksbehandlerEpost()) ?: false
         }
 
         override fun getName(): String = "byAnsvarligSaksbehandler"

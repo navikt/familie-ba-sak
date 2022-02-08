@@ -376,7 +376,7 @@ class VedtaksperiodeService(
     }
 
     @Deprecated("Skal ikke brukes lenger. Bruk VedtaksperiodeUtil.hentGyldigeBegrunnelserForVedtaksperiode")
-    private fun hentGyldigeBegrunnelserForVedtaksperiodeGammel(
+    fun hentGyldigeBegrunnelserForVedtaksperiodeGammel(
         utvidetVedtaksperiodeMedBegrunnelser: UtvidetVedtaksperiodeMedBegrunnelser,
         behandling: Behandling,
         sanityBegrunnelser: List<SanityBegrunnelse>,

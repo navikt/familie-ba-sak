@@ -611,6 +611,6 @@ internal class BrevUtilsTest {
             ),
         )
 
-        Assertions.assertEquals(sisteFom.tilMånedÅr(), hentVirkningstidspunkt(opphørsperioder))
+        Assertions.assertEquals(sisteFom.tilMånedÅr(), hentVirkningstidspunkt(opphørsperioder, 0L))
     }
 }

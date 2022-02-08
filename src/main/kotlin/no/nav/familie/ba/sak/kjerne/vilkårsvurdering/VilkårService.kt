@@ -55,6 +55,10 @@ class VilkårService(
         behandlingId = behandlingId
     )
 
+    fun hentVilkårsvurderingThrows(behandlingId: Long): Vilkårsvurdering =
+        hentVilkårsvurdering(behandlingId = behandlingId)
+            ?: throw IllegalStateException("Fant ikke aktiv vilkårsvurdering for behandling $behandlingId")
+
     companion object {
         const val fantIkkeAktivVilkårsvurderingFeilmelding = "Fant ikke aktiv vilkårsvurdering"
         const val fantIkkeVilkårsvurderingForPersonFeilmelding = "Fant ikke vilkårsvurdering for person"
