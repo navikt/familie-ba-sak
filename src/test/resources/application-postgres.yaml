@@ -132,7 +132,7 @@ credential:
 logging:
   config: "classpath:logback-test.xml"
 sentry.environment: local
-sentry.logging.enabled: true
+sentry.logging.enabled: false
 
 funksjonsbrytere:
   enabled: false

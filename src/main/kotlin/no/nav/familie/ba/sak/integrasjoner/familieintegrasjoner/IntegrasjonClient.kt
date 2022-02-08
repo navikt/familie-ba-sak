@@ -138,7 +138,7 @@ class IntegrasjonClient(
             val response =
                 postForEntity<Ressurs<List<Arbeidsforhold>>>(uri, ArbeidsforholdRequest(ident, ansettelsesperiodeFom))
             response.getDataOrThrow()
-        } catch (e: RestClientException) {
+        } catch (e: Exception) {
             var feilmelding = "Kall mot integrasjon feilet ved henting av arbeidsforhold."
             if (e is HttpStatusCodeException && e.responseBodyAsString.isNotEmpty()) {
                 feilmelding += " body=${e.responseBodyAsString}"
@@ -466,7 +466,7 @@ class IntegrasjonClient(
         )
         logger.info(
             "Journalfører vedtaksbrev for behandling ${vedtak.behandling.id} med tittel ${
-            hentOverstyrtDokumenttittel(vedtak.behandling)
+                hentOverstyrtDokumenttittel(vedtak.behandling)
             }"
         )
         val vedlegg = listOf(
@@ -559,7 +559,7 @@ class IntegrasjonClient(
 
         try {
             postForEntity<Ressurs<Unit>>(uri, Skyggesak(aktør.aktørId, fagsakId.toString()))
-        } catch (e: RestClientException) {
+        } catch (e: Exception) {
             throw IntegrasjonException(
                 "Kall mot integrasjon feilet ved oppretting av skyggesak i Sak for fagsak=$fagsakId",
                 e,
