@@ -40,20 +40,18 @@ class RegistrerPersongrunnlag(
                 persongrunnlagService.hentSøkersMålform(behandlingId = forrigeBehandlingSomErVedtatt.id)
 
             persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(
-                aktør,
-                barnaAktør.union(
-                    forrigePersongrunnlagBarna
-                )
-                    .toList(),
-                behandling,
-                forrigeMålform
+                aktør = aktør,
+                barnFraInneværendeBehandling = barnaAktør,
+                barnFraForrigeBehandling = forrigePersongrunnlagBarna,
+                behandling = behandling,
+                målform = forrigeMålform
             )
         } else {
             persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(
-                aktør,
-                barnaAktør,
-                behandling,
-                Målform.NB
+                aktør = aktør,
+                barnFraInneværendeBehandling = barnaAktør,
+                behandling = behandling,
+                målform = Målform.NB
             )
         }
         when (behandling.opprettetÅrsak) {
