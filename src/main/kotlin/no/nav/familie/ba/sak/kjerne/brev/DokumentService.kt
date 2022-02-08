@@ -14,7 +14,6 @@ import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.JournalføringR
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
-import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentÅrsak
 import no.nav.familie.ba.sak.kjerne.brev.domene.BrevType.INNHENTE_OPPLYSNINGER
 import no.nav.familie.ba.sak.kjerne.brev.domene.BrevType.VARSEL_OM_REVURDERING
 import no.nav.familie.ba.sak.kjerne.brev.domene.ManueltBrevRequest
@@ -171,12 +170,12 @@ class DokumentService(
 
         if (
             behandling != null &&
-            listOf(INNHENTE_OPPLYSNINGER, VARSEL_OM_REVURDERING).contains(manueltBrevRequest.brevmal)
+            manueltBrevRequest.brevmal.setterBehandlingPåVent()
         ) {
             settPåVentService.settBehandlingPåVent(
                 behandlingId = behandling.id,
-                frist = LocalDate.now().plusWeeks(3),
-                årsak = SettPåVentÅrsak.AVVENTER_DOKUMENTASJON
+                frist = LocalDate.now().plusDays(manueltBrevRequest.brevmal.ventefristDager()),
+                årsak = manueltBrevRequest.brevmal.venteårsak()
             )
         }
 
