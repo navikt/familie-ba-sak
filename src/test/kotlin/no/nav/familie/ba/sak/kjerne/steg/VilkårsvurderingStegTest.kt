@@ -86,7 +86,7 @@ class VilkårsvurderingStegTest {
             erDeltBosted = false
         )
         vikårsvurdering.personResultater = setOf(søkerPersonResultat, barnPersonResultat)
-        every { vilkårService.hentVilkårsvurdering(behandling.id) } returns vikårsvurdering
+        every { vilkårService.hentVilkårsvurderingThrows(behandling.id) } returns vikårsvurdering
 
         val exception = assertThrows<RuntimeException> { vilkårsvurderingSteg.utførStegOgAngiNeste(behandling, "") }
         assertEquals(
@@ -120,7 +120,7 @@ class VilkårsvurderingStegTest {
             erDeltBosted = true
         )
         vikårsvurdering.personResultater = setOf(søkerPersonResultat, barnPersonResultat)
-        every { vilkårService.hentVilkårsvurdering(behandling.id) } returns vikårsvurdering
+        every { vilkårService.hentVilkårsvurderingThrows(behandling.id) } returns vikårsvurdering
 
         assertDoesNotThrow { vilkårsvurderingSteg.utførStegOgAngiNeste(behandling, "") }
     }

@@ -83,7 +83,7 @@ class DokumentService(
             if (feil is FunksjonellFeil) throw feil
 
             throw Feil(
-                message = "Klarte ikke generere vedtaksbrev: ${feil.message}",
+                message = "Klarte ikke generere vedtaksbrev på behandling ${vedtak.behandling}: ${feil.message}",
                 frontendFeilmelding = "Det har skjedd en feil, og brevet er ikke sendt. Prøv igjen, og ta kontakt med brukerstøtte hvis problemet vedvarer.",
                 httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
                 throwable = feil
