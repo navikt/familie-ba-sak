@@ -2,6 +2,8 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse
 
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.FagsystemRegelVurdering.SEND_TIL_BA
@@ -36,7 +38,8 @@ class VelgFagSystemService(
     private val personidentService: PersonidentService,
     private val behandlingService: BehandlingService,
     private val personopplysningerService: PersonopplysningerService,
-    private val statsborgerskapService: StatsborgerskapService
+    private val statsborgerskapService: StatsborgerskapService,
+    private val featureToggleService: FeatureToggleService
 ) {
 
     val utfallForValgAvFagsystem = mutableMapOf<FagsystemUtfall, Counter>()
@@ -88,6 +91,9 @@ class VelgFagSystemService(
                 "(${gjeldendeStatsborgerskap.land}, bekreftelsesdato=${gjeldendeStatsborgerskap.bekreftelsesdato}, gyldigFom=${gjeldendeStatsborgerskap.gyldigFraOgMed}, gyldigTom=${gjeldendeStatsborgerskap.gyldigTilOgMed}), " +
                 "medlemskap=$medlemskap"
         )
+
+        if (featureToggleService.isEnabled(FeatureToggleConfig.KAN_AUTOMATISK_BEHANDLE_EØS) && medlemskap == EØS) return true
+
         return when (medlemskap) {
             NORDEN, TREDJELANDSBORGER, STATSLØS -> true
             EØS, UKJENT, null -> false

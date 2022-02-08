@@ -1,12 +1,12 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurdering
 
 import no.nav.familie.ba.sak.common.tilfeldigPerson
+import no.nav.familie.ba.sak.dataGenerator.grunnlag.opprettAdresse
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrVegadresse
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
@@ -85,24 +85,5 @@ class BarnBorMedSøkerVilkårTest {
         val adresseAttrBarn = opprettAdresse(adressenavn = "Fågelveien", husnummer = "123", postnummer = "0245")
         val adresseAttrSøker = opprettAdresse(adressenavn = "Fågelveien", husnummer = "123", postnummer = "0245")
         val adresseAttr2Søker = opprettAdresse(adressenavn = "Fågelveien", husnummer = "11", postnummer = "0245")
-
-        private fun opprettAdresse(
-            matrikkelId: Long? = null,
-            bruksenhetsnummer: String? = null,
-            adressenavn: String? = null,
-            husnummer: String? = null,
-            husbokstav: String? = null,
-            postnummer: String? = null
-        ) =
-            GrVegadresse(
-                matrikkelId = matrikkelId,
-                husnummer = husnummer,
-                husbokstav = husbokstav,
-                bruksenhetsnummer = bruksenhetsnummer,
-                adressenavn = adressenavn,
-                kommunenummer = null,
-                tilleggsnavn = null,
-                postnummer = postnummer
-            )
     }
 }

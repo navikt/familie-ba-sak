@@ -5,12 +5,12 @@ import io.mockk.mockk
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.randomFnr
-import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
-internal class PersongrunnlagServiceTest {
+class PersongrunnlagTest {
 
-    private val persongrunnlagService = mockk<PersongrunnlagService>()
+    val persongrunnlagService = mockk<PersongrunnlagService>()
 
     @Test
     fun `Returnerer nytt barn fra personopplysningsgrunnlag`() {
@@ -37,6 +37,6 @@ internal class PersongrunnlagServiceTest {
         every { persongrunnlagService.finnNyeBarn(any(), any()) } answers { callOriginal() }
 
         val nye = persongrunnlagService.finnNyeBarn(forrigeBehandling = forrigeBehandling, behandling = behandling)
-        assertEquals(nyttbarn, nye.singleOrNull()!!.aktør.aktivFødselsnummer())
+        Assertions.assertEquals(nyttbarn, nye.singleOrNull()!!.aktør.aktivFødselsnummer())
     }
 }
