@@ -33,6 +33,7 @@ import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.oppgave.IdentGruppe
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveIdentV2
+import no.nav.familie.kontrakter.felles.oppgave.OppgaveResponse
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgaveRequest
 import org.assertj.core.api.Assertions.assertThat
@@ -94,7 +95,7 @@ class OppgaveServiceTest {
         )
 
         val slot = slot<OpprettOppgaveRequest>()
-        every { integrasjonClient.opprettOppgave(capture(slot)) } returns OPPGAVE_ID
+        every { integrasjonClient.opprettOppgave(capture(slot)) } returns OppgaveResponse(OPPGAVE_ID.toLong())
 
         oppgaveService.opprettOppgave(BEHANDLING_ID, Oppgavetype.BehandleSak, FRIST_FERDIGSTILLELSE_BEH_SAK)
 
@@ -134,7 +135,12 @@ class OppgaveServiceTest {
     fun `Fordel oppgave skal tildele oppgave til saksbehandler`() {
         val oppgaveSlot = slot<Long>()
         val saksbehandlerSlot = slot<String>()
-        every { integrasjonClient.fordelOppgave(capture(oppgaveSlot), capture(saksbehandlerSlot)) } returns OPPGAVE_ID
+        every {
+            integrasjonClient.fordelOppgave(
+                capture(oppgaveSlot),
+                capture(saksbehandlerSlot)
+            )
+        } returns OppgaveResponse(OPPGAVE_ID.toLong())
         every { integrasjonClient.finnOppgaveMedId(any()) } returns Oppgave()
 
         oppgaveService.fordelOppgave(OPPGAVE_ID.toLong(), SAKSBEHANDLER_ID)
@@ -148,7 +154,12 @@ class OppgaveServiceTest {
         val oppgaveSlot = slot<Long>()
         val saksbehandlerSlot = slot<String>()
         val saksbehandler = "Test Testersen"
-        every { integrasjonClient.fordelOppgave(capture(oppgaveSlot), capture(saksbehandlerSlot)) } returns OPPGAVE_ID
+        every {
+            integrasjonClient.fordelOppgave(
+                capture(oppgaveSlot),
+                capture(saksbehandlerSlot)
+            )
+        } returns OppgaveResponse(OPPGAVE_ID.toLong())
         every { integrasjonClient.finnOppgaveMedId(any()) } returns Oppgave(tilordnetRessurs = saksbehandler)
 
         val funksjonellFeil =
@@ -161,7 +172,12 @@ class OppgaveServiceTest {
     fun `Tilbakestill oppgave skal nullstille tildeling på oppgave`() {
         val fordelOppgaveSlot = slot<Long>()
         val finnOppgaveSlot = slot<Long>()
-        every { integrasjonClient.fordelOppgave(capture(fordelOppgaveSlot), any()) } returns OPPGAVE_ID
+        every {
+            integrasjonClient.fordelOppgave(
+                capture(fordelOppgaveSlot),
+                any()
+            )
+        } returns OppgaveResponse(OPPGAVE_ID.toLong())
         every { integrasjonClient.finnOppgaveMedId(capture(finnOppgaveSlot)) } returns Oppgave()
 
         oppgaveService.tilbakestillFordelingPåOppgave(OPPGAVE_ID.toLong())

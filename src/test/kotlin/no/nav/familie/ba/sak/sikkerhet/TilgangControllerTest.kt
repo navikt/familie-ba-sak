@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.sikkerhet
 
 import io.mockk.every
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.kontrakter.felles.tilgangskontroll.Tilgang
@@ -19,7 +19,7 @@ class TilgangControllerTest(
     private val mockPersonopplysningerService: PersonopplysningerService,
 
     @Autowired
-    private val mockIntegrasjonClient: IntegrasjonClient
+    private val mockFamilieIntegrasjonerTilgangskontrollClient: FamilieIntegrasjonerTilgangskontrollClient
 ) : AbstractSpringIntegrationTest() {
 
     @Test
@@ -29,7 +29,7 @@ class TilgangControllerTest(
             mockPersonopplysningerService.hentAdressebeskyttelseSomSystembruker(any())
         } returns ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG
         every {
-            mockIntegrasjonClient.sjekkTilgangTilPersoner(listOf(fnr))
+            mockFamilieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(listOf(fnr))
         } returns Tilgang(harTilgang = true)
 
         val response = tilgangController.hentTilgangOgDiskresjonskode(TilgangRequestDTO(fnr))
