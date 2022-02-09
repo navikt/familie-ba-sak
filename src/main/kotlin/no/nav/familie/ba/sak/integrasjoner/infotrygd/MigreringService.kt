@@ -299,10 +299,10 @@ class MigreringService(
     private fun virkningsdatoFra(kjøredato: LocalDate): LocalDate {
         LocalDate.now().run {
             return when {
-                env.erPreprod() -> LocalDate.of(2022, 1, 1)
+                env?.erPreprod() ?: false -> LocalDate.of(2022, 1, 1)
                 this.isBefore(kjøredato) -> this.førsteDagIInneværendeMåned()
                 this.isAfter(kjøredato.plusDays(1)) -> this.førsteDagINesteMåned()
-                env.erDev() -> this.førsteDagINesteMåned()
+                env!!.erDev() -> this.førsteDagINesteMåned()
                 else -> {
                     kastOgTellMigreringsFeil(
                         MigreringsfeilType.IKKE_GYLDIG_KJØREDATO,
