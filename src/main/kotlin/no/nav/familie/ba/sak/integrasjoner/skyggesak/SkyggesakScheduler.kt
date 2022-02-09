@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.integrasjoner.skyggesak
 
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.leader.LeaderClient
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Pageable
@@ -11,7 +12,7 @@ import java.time.LocalDateTime
 @Component
 class SkyggesakScheduler(
     val skyggesakRepository: SkyggesakRepository,
-    val skyggesakService: SkyggesakService
+    val integrasjonClient: IntegrasjonClient
 ) {
 
     @Scheduled(fixedDelay = 60000)
@@ -27,7 +28,7 @@ class SkyggesakScheduler(
 
         for (skyggesak in skyggesaker) {
             try {
-                skyggesakService.opprettSkyggesak(skyggesak.fagsak.aktør, skyggesak.fagsak.id)
+                integrasjonClient.opprettSkyggesak(skyggesak.fagsak.aktør, skyggesak.fagsak.id)
                 skyggesakRepository.save(skyggesak.copy(sendtTidspunkt = LocalDateTime.now()))
             } catch (e: Exception) {
                 logger.warn("Kunne ikke opprette skyggesak for fagsak ${skyggesak.fagsak.id}")

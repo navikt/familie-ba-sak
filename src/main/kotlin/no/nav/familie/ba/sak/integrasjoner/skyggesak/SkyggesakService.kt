@@ -1,15 +1,13 @@
 package no.nav.familie.ba.sak.integrasjoner.skyggesak
 
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
-import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import org.springframework.stereotype.Service
 
 @Service
 class SkyggesakService(
-    private val integrasjonClient: IntegrasjonClient
+    private val skyggesakRepository: SkyggesakRepository
 ) {
-
-    fun opprettSkyggesak(aktør: Aktør, fagsakId: Long) {
-        integrasjonClient.opprettSkyggesak(aktør, fagsakId)
+    fun opprettSkyggesak(fagsak: Fagsak) {
+        skyggesakRepository.save(Skyggesak(fagsak = fagsak))
     }
 }
