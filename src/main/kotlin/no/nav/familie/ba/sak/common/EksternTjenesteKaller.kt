@@ -17,18 +17,14 @@ inline fun <reified Data> kallEksternTjeneste(
     val eksternTjenesteKallerMelding = "[tjeneste=$tjeneste, uri=$uri]"
     logger.info("$eksternTjenesteKallerMelding $formål")
 
-    return Result.runCatching {
-        eksterntKall().also { assertGenerelleSuksessKriterier(it) }.getDataOrThrow()
-    }.fold(
-        onSuccess = {
+    return try {
+        eksterntKall().also { assertGenerelleSuksessKriterier(it) }.getDataOrThrow().also {
             logger.info("$eksternTjenesteKallerMelding Kall ok")
-            it
-        },
-        onFailure = {
-            logger.info("$eksternTjenesteKallerMelding Kall feilet: ${it.message}")
-            if (it is HttpClientErrorException.Forbidden) throw it
-
-            throw IntegrasjonException("Kall mot $tjeneste feilet: ${it.message}", it)
         }
-    )
+    } catch (exception: Exception) {
+        logger.info("$eksternTjenesteKallerMelding Kall feilet: ${exception.message}")
+        if (exception is HttpClientErrorException.Forbidden) throw exception
+
+        throw IntegrasjonException("Kall mot $tjeneste feilet: ${exception.message}", exception)
+    }
 }
