@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.common
 
+import io.sentry.Sentry
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
@@ -53,6 +54,8 @@ object RessursUtils {
 
         secureLogger.error("$className En feil har oppstått: $errorMessage", throwable)
         logger.error("$className En feil har oppstått: $errorMessage")
+
+        throwable?.also { Sentry.captureException(it, "errorResponse") }
         return ResponseEntity.status(httpStatus).body(Ressurs.failure(errorMessage))
     }
 
@@ -77,6 +80,7 @@ object RessursUtils {
         )
         logger.error("$className En håndtert feil har oppstått(${feil.httpStatus}): ${feil.message} ", feil)
 
+        Sentry.captureException(feil)
         return ResponseEntity.status(feil.httpStatus).body(
             Ressurs.failure(
                 frontendFeilmelding = feil.frontendFeilmelding,
