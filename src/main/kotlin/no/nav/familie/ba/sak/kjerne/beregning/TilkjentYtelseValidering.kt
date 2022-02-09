@@ -150,7 +150,7 @@ object TilkjentYtelseValidering {
                     .flatMap { it.andelerTilkjentYtelse }
                     .filter { it.aktør == barn.aktør }
 
-            if (!validerIngenOverlappAvAndeler(
+            if (erOverlappAvAndeler(
                     andeler = andeler,
                     barnsAndelerFraAndreBehandlinger = barnsAndelerFraAndreBehandlinger
                 )
@@ -182,21 +182,16 @@ object TilkjentYtelseValidering {
         }
     }
 
-    private fun validerIngenOverlappAvAndeler(
+    private fun erOverlappAvAndeler(
         andeler: List<AndelTilkjentYtelse>,
         barnsAndelerFraAndreBehandlinger: List<AndelTilkjentYtelse>,
     ): Boolean {
-        andeler.forEach { andelTilkjentYtelse ->
-            if (barnsAndelerFraAndreBehandlinger.any
-                {
-                    andelTilkjentYtelse.overlapperMed(it) &&
-                        andelTilkjentYtelse.prosent + it.prosent > BigDecimal(100)
-                }
-            ) {
-                return false
+        return andeler.any { andelTilkjentYtelse ->
+            barnsAndelerFraAndreBehandlinger.any {
+                andelTilkjentYtelse.overlapperMed(it) &&
+                    andelTilkjentYtelse.prosent + it.prosent > BigDecimal(100)
             }
         }
-        return true
     }
 
     private fun erAndelMedØktBeløpFørDato(
