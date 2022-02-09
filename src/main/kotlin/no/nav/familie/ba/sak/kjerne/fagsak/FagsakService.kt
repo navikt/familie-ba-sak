@@ -85,9 +85,7 @@ class FagsakService(
             )
         }
         val fagsak = hentEllerOpprettFagsak(personident)
-        return hentRestMinimalFagsak(fagsakId = fagsak.id).also {
-            skyggesakService.opprettSkyggesak(fagsak.aktør, fagsak.id)
-        }
+        return hentRestMinimalFagsak(fagsakId = fagsak.id)
     }
 
     @Transactional
@@ -102,6 +100,7 @@ class FagsakService(
             } else {
                 antallFagsakerOpprettetFraManuell.increment()
             }
+            skyggesakService.opprettSkyggesak(fagsak)
         }
         return fagsak
     }
