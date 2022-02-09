@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner
 
 import no.nav.familie.ba.sak.common.MDCOperations
 import no.nav.familie.ba.sak.common.kallEksternTjeneste
+import no.nav.familie.ba.sak.common.kallEksternTjenesteUtenRespons
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsforhold
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.ArbeidsforholdRequest
@@ -40,7 +41,6 @@ import org.springframework.http.HttpHeaders
 import org.springframework.retry.annotation.Backoff
 import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Component
-import org.springframework.web.client.RestClientResponseException
 import org.springframework.web.client.RestOperations
 import org.springframework.web.util.UriComponentsBuilder
 import java.net.URI
@@ -52,8 +52,7 @@ const val DEFAULT_JOURNALFØRENDE_ENHET = "9999"
 class IntegrasjonClient(
     @Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val integrasjonUri: URI,
     @Qualifier("jwtBearer") restOperations: RestOperations
-) :
-    AbstractRestClient(restOperations, "integrasjon") {
+) : AbstractRestClient(restOperations, "integrasjon") {
 
     @Cacheable("alle-eøs-land", cacheManager = "kodeverkCache")
     fun hentAlleEØSLand(): KodeverkDto {
@@ -123,7 +122,7 @@ class IntegrasjonClient(
     fun distribuerBrev(journalpostId: String): String {
         val uri = URI.create("$integrasjonUri/dist/v1")
 
-        return kallEksternTjeneste(
+        val resultat: String = kallEksternTjeneste(
             tjeneste = "dokdist",
             uri = uri,
             formål = "Distribuer brev"
@@ -133,12 +132,15 @@ class IntegrasjonClient(
             )
             postForEntity(uri, journalpostRequest, HttpHeaders().medContentTypeJsonUTF8())
         }
+
+        if (resultat.isBlank()) error("BestillingsId fra integrasjonstjenesten mot dokdist er tom")
+        return resultat
     }
 
     fun ferdigstillOppgave(oppgaveId: Long) {
         val uri = URI.create("$integrasjonUri/oppgave/$oppgaveId/ferdigstill")
 
-        kallEksternTjeneste(
+        kallEksternTjenesteUtenRespons(
             tjeneste = "oppgave",
             uri = uri,
             formål = "Ferdigstill oppgave"
@@ -158,10 +160,6 @@ class IntegrasjonClient(
         ) {
             getForEntity(uri)
         }
-    }
-
-    private fun responseBody(it: Throwable): String {
-        return if (it is RestClientResponseException) it.responseBodyAsString else ""
     }
 
     fun opprettOppgave(opprettOppgave: OpprettOppgaveRequest): OppgaveResponse {
@@ -281,7 +279,7 @@ class IntegrasjonClient(
         val uri =
             URI.create("$integrasjonUri/arkiv/v2/$journalpostId/ferdigstill?journalfoerendeEnhet=$journalførendeEnhet")
 
-        kallEksternTjeneste(
+        kallEksternTjenesteUtenRespons(
             tjeneste = "dokarkiv",
             uri = uri,
             formål = "Hent journalposter for bruker"
@@ -403,7 +401,7 @@ class IntegrasjonClient(
     fun opprettSkyggesak(aktør: Aktør, fagsakId: Long) {
         val uri = URI.create("$integrasjonUri/skyggesak/v1")
 
-        kallEksternTjeneste<Ressurs<Unit>>(
+        kallEksternTjenesteUtenRespons<Unit>(
             tjeneste = "skyggesak",
             uri = uri,
             formål = "Opprett skyggesak på fagsak $fagsakId"

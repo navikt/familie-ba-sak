@@ -14,17 +14,53 @@ inline fun <reified Data> kallEksternTjeneste(
     formål: String,
     eksterntKall: () -> Ressurs<Data>,
 ): Data {
-    val eksternTjenesteKallerMelding = "[tjeneste=$tjeneste, uri=$uri]"
-    logger.info("$eksternTjenesteKallerMelding $formål")
+    loggEksternKall(tjeneste, uri, formål)
 
     return try {
-        eksterntKall().also { assertGenerelleSuksessKriterier(it) }.getDataOrThrow().also {
-            logger.info("$eksternTjenesteKallerMelding Kall ok")
+        eksterntKall().getDataOrThrow().also {
+            logger.info("${lagEksternKallPreMelding(tjeneste, uri)} Kall ok")
         }
     } catch (exception: Exception) {
-        logger.info("$eksternTjenesteKallerMelding Kall feilet: ${exception.message}")
-        if (exception is HttpClientErrorException.Forbidden) throw exception
-
-        throw IntegrasjonException("Kall mot $tjeneste feilet: ${exception.message}", exception)
+        throw handleException(exception, tjeneste, uri)
     }
+}
+
+inline fun <reified Data> kallEksternTjenesteUtenRespons(
+    tjeneste: String,
+    uri: URI,
+    formål: String,
+    eksterntKall: () -> Ressurs<Data>,
+) {
+    loggEksternKall(tjeneste, uri, formål)
+
+    try {
+        eksterntKall().also {
+            logger.info("${lagEksternKallPreMelding(tjeneste, uri)} Kall ok")
+        }
+    } catch (exception: Exception) {
+        throw handleException(exception, tjeneste, uri)
+    }
+}
+
+fun lagEksternKallPreMelding(
+    tjeneste: String,
+    uri: URI
+) = "[tjeneste=$tjeneste, uri=$uri]"
+
+fun loggEksternKall(
+    tjeneste: String,
+    uri: URI,
+    formål: String
+) {
+    logger.info("${lagEksternKallPreMelding(tjeneste, uri)} $formål")
+}
+
+fun handleException(
+    exception: Exception,
+    tjeneste: String,
+    uri: URI,
+): Exception {
+    logger.info("${lagEksternKallPreMelding(tjeneste, uri)} Kall feilet: ${exception.message}")
+    return if (exception is HttpClientErrorException.Forbidden) exception
+    else IntegrasjonException("Kall mot $tjeneste feilet: ${exception.message}", exception)
 }

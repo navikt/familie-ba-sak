@@ -50,8 +50,8 @@ import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveResponse
 import no.nav.familie.log.NavHttpHeaders
 import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
@@ -121,10 +121,8 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTestDev() {
             )
         )
 
-        assertThatThrownBy {
-            integrasjonClient.opprettOppgave(lagTestOppgave())
-        }.isInstanceOf(IntegrasjonException::class.java)
-            .hasMessageContaining("Kall mot integrasjon feilet ved opprett oppgave")
+        val feil = assertThrows<IntegrasjonException> { integrasjonClient.opprettOppgave(lagTestOppgave()) }
+        assertTrue(feil.message?.contains("oppgave") == true)
     }
 
     @Test
@@ -167,8 +165,22 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTestDev() {
             integrasjonClient.journalførDokument(
                 fnr = MOCK_FNR,
                 fagsakId = vedtak.behandling.fagsak.id.toString(),
-                brev = emptyList(),
-                vedlegg = emptyList(),
+                brev = listOf(
+                    Dokument(
+                        dokument = mockPdf,
+                        filtype = Filtype.PDFA,
+                        dokumenttype = Dokumenttype.BARNETRYGD_VEDTAK_INNVILGELSE
+                    )
+                ),
+                journalførendeEnhet = "1",
+                vedlegg = listOf(
+                    Dokument(
+                        dokument = hentVedlegg(VEDTAK_VEDLEGG_FILNAVN)!!,
+                        filtype = Filtype.PDFA,
+                        dokumenttype = Dokumenttype.BARNETRYGD_VEDLEGG,
+                        tittel = VEDTAK_VEDLEGG_TITTEL
+                    )
+                ),
                 behandlingId = vedtak.behandling.id
             )
 
@@ -236,7 +248,8 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTestDev() {
                 .willReturn(okJson(objectMapper.writeValueAsString(failure<Any>(""))))
         )
 
-        assertThrows<IllegalStateException> { integrasjonClient.distribuerBrev("123456789") }
+        val feil = assertThrows<IntegrasjonException> { integrasjonClient.distribuerBrev("123456789") }
+        assertTrue(feil.message?.contains("dokdist") == true)
     }
 
     @Test
@@ -289,10 +302,9 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTestDev() {
                 )
         )
 
-        assertThatThrownBy {
-            integrasjonClient.ferdigstillOppgave(123)
-        }.isInstanceOf(IntegrasjonException::class.java)
-            .hasMessageContaining("Kan ikke ferdigstille 123")
+        val feil =
+            assertThrows<IntegrasjonException> { integrasjonClient.ferdigstillOppgave(123) }
+        assertTrue(feil.message?.contains("oppgave") == true)
     }
 
     @Test
@@ -409,10 +421,8 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTestDev() {
 
         wireMockServer.stubFor(post("/api/aareg/arbeidsforhold").willReturn(status(500)))
 
-        assertThatThrownBy {
-            integrasjonClient.hentArbeidsforhold(fnr, LocalDate.now())
-        }.isInstanceOf(IntegrasjonException::class.java)
-            .hasMessageContaining("Kall mot integrasjon feilet ved henting av arbeidsforhold.")
+        val feil = assertThrows<IntegrasjonException> { integrasjonClient.hentArbeidsforhold(fnr, LocalDate.now()) }
+        assertTrue(feil.message?.contains("aareg") == true)
     }
 
     @Test
@@ -448,10 +458,9 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTestDev() {
 
         wireMockServer.stubFor(post("/api/skyggesak/v1").willReturn(status(500)))
 
-        assertThatThrownBy {
-            integrasjonClient.opprettSkyggesak(aktørId, MOCK_FAGSAK_ID.toLong())
-        }.isInstanceOf(IntegrasjonException::class.java)
-            .hasMessageContaining("Kall mot integrasjon feilet ved oppretting av skyggesak i Sak for fagsak=$MOCK_FAGSAK_ID")
+        val feil =
+            assertThrows<IntegrasjonException> { integrasjonClient.opprettSkyggesak(aktørId, MOCK_FAGSAK_ID.toLong()) }
+        assertTrue(feil.message?.contains("skyggesak") == true)
     }
 
     private fun journalpostOkResponse(): Ressurs<ArkiverDokumentResponse> {

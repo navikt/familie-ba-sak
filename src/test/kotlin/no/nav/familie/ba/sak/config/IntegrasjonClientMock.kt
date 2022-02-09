@@ -108,7 +108,7 @@ class IntegrasjonClientMock {
             } returns "journalpostId"
 
             every {
-                mockIntegrasjonClient.journalførDokument(any(), any(), any(), any(), any(), any(), null)
+                mockIntegrasjonClient.journalførDokument(any(), any(), any(), any(), any(), any(), any())
             } returns "journalpostId"
 
             every {

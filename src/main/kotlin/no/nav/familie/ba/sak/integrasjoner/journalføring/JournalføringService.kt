@@ -4,9 +4,6 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.ekstern.restDomene.RestJournalføring
 import no.nav.familie.ba.sak.ekstern.restDomene.RestOppdaterJournalpost
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient.Companion.VEDTAK_VEDLEGG_FILNAVN
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient.Companion.VEDTAK_VEDLEGG_TITTEL
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.tilDokumenttype
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.DbJournalpost
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.DbJournalpostType
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.FagsakSystem
@@ -22,17 +19,12 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
-import no.nav.familie.ba.sak.kjerne.brev.hentOverstyrtDokumenttittel
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
-import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.task.OpprettOppgaveTask
 import no.nav.familie.kontrakter.felles.BrukerIdType
 import no.nav.familie.kontrakter.felles.Tema
-import no.nav.familie.kontrakter.felles.dokarkiv.Dokumenttype
-import no.nav.familie.kontrakter.felles.dokarkiv.v2.Dokument
-import no.nav.familie.kontrakter.felles.dokarkiv.v2.Filtype
 import no.nav.familie.kontrakter.felles.journalpost.Bruker
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.journalpost.JournalposterForBrukerRequest
@@ -181,40 +173,6 @@ class JournalføringService(
         return sak.fagsakId ?: ""
     }
 
-    fun journalførVedtaksbrev(fnr: String, fagsakId: String, vedtak: Vedtak, journalførendeEnhet: String): String {
-        val vedleggPdf =
-            hentVedlegg(VEDTAK_VEDLEGG_FILNAVN) ?: error("Klarte ikke hente vedlegg $VEDTAK_VEDLEGG_FILNAVN")
-
-        val brev = listOf(
-            Dokument(
-                vedtak.stønadBrevPdF!!,
-                filtype = Filtype.PDFA,
-                dokumenttype = vedtak.behandling.resultat.tilDokumenttype(),
-                tittel = hentOverstyrtDokumenttittel(vedtak.behandling)
-            )
-        )
-        logger.info(
-            "Journalfører vedtaksbrev for behandling ${vedtak.behandling.id} med tittel ${
-            hentOverstyrtDokumenttittel(vedtak.behandling)
-            }"
-        )
-        val vedlegg = listOf(
-            Dokument(
-                vedleggPdf, filtype = Filtype.PDFA,
-                dokumenttype = Dokumenttype.BARNETRYGD_VEDLEGG,
-                tittel = VEDTAK_VEDLEGG_TITTEL
-            )
-        )
-        return integrasjonClient.journalførDokument(
-            fnr = fnr,
-            fagsakId = fagsakId,
-            journalførendeEnhet = journalførendeEnhet,
-            brev = brev,
-            vedlegg = vedlegg,
-            behandlingId = vedtak.behandling.id
-        )
-    }
-
     fun lagreJournalpostOgKnyttFagsakTilJournalpost(
         tilknyttedeBehandlingIder: List<String>,
         journalpostId: String
@@ -339,10 +297,5 @@ class JournalføringService(
     companion object {
 
         private val logger = LoggerFactory.getLogger(JournalføringService::class.java)
-
-        fun hentVedlegg(vedleggsnavn: String): ByteArray? {
-            val inputStream = this::class.java.classLoader.getResourceAsStream("dokumenter/$vedleggsnavn")
-            return inputStream?.readAllBytes()
-        }
     }
 }
