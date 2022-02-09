@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.brev
 
+import no.nav.familie.ba.sak.common.convertDataClassToJson
 import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.tilMinimertUregisrertBarn
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
@@ -13,6 +14,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilUtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.erFørsteVedtaksperiodePåFagsak
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
@@ -26,7 +28,7 @@ class BrevPeriodeService(
     private val endretUtbetalingAndelService: EndretUtbetalingAndelService,
 ) {
 
-    fun hentBrevperiodeData(vedtaksperiodeId: Long): BrevperiodeData {
+    fun hentBrevperiodeData(vedtaksperiodeId: Long, skalLogge: Boolean = true): BrevperiodeData {
         val vedtaksperiodeMedBegrunnelser = vedtaksperiodeRepository.hentVedtaksperiode(vedtaksperiodeId)
 
         val behandlingId = vedtaksperiodeMedBegrunnelser.vedtak.behandling.id
@@ -59,7 +61,7 @@ class BrevPeriodeService(
 
         val minimertVedtaksperiode = utvidetVedtaksperiodeMedBegrunnelse.tilMinimertVedtaksperiode(sanityBegrunnelser)
 
-        return BrevperiodeData(
+        val brevperiodeData = BrevperiodeData(
             minimertVedtaksperiode = minimertVedtaksperiode,
             restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev,
             uregistrerteBarn = uregistrerteBarn,
@@ -69,10 +71,23 @@ class BrevPeriodeService(
                 utvidetVedtaksperiodeMedBegrunnelse.fom
             )
         )
+
+        if (skalLogge) {
+            secureLogger.info(
+                "Data for brevperiode: " +
+                    brevperiodeData.tilBrevperiodeForLogging().convertDataClassToJson()
+            )
+        }
+
+        return brevperiodeData
     }
 
     fun genererBrevBegrunnelserForPeriode(vedtaksperiodeId: Long): List<Begrunnelse> {
         val begrunnelseDataForVedtaksperiode = hentBrevperiodeData(vedtaksperiodeId)
         return begrunnelseDataForVedtaksperiode.hentBegrunnelserOgFritekster()
+    }
+
+    companion object {
+        private val secureLogger = LoggerFactory.getLogger("secureLogger")
     }
 }

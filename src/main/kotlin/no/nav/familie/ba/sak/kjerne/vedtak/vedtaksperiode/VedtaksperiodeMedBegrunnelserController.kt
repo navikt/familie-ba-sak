@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.convertDataClassToJson
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedFritekster
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedStandardbegrunnelser
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
@@ -15,7 +14,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeRepository
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
-import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
@@ -88,22 +86,7 @@ class VedtaksperiodeMedBegrunnelserController(
         val begrunnelser = brevPeriodeService.genererBrevBegrunnelserForPeriode(vedtaksperiodeId).map {
             when (it) {
                 is FritekstBegrunnelse -> it.fritekst
-                is BegrunnelseData -> try {
-                    brevKlient.hentBegrunnelsestekst(it)
-                } catch (exception: Exception) {
-                    val feilmelding = "Feil ved generering av brevbegrunnelse mot familie-brev på behandling: " +
-                        vedtaksperiodeRepository.hentVedtaksperiode(vedtaksperiodeId).vedtak.behandling
-
-                    val brevPeriodeForLogging =
-                        brevPeriodeService.hentBrevperiodeData(vedtaksperiodeId).tilBrevperiodeForLogging()
-
-                    secureLogger.error(
-                        "$feilmelding. Data for vedtaksperiode var: " + brevPeriodeForLogging.convertDataClassToJson(),
-                        exception
-                    )
-
-                    throw Feil(message = feilmelding, throwable = exception)
-                }
+                is BegrunnelseData -> brevKlient.hentBegrunnelsestekst(it)
                 else -> throw Feil("Ukjent begrunnelsestype")
             }
         }
@@ -112,7 +95,6 @@ class VedtaksperiodeMedBegrunnelserController(
     }
 
     companion object {
-        private val secureLogger = LoggerFactory.getLogger("secureLogger")
         const val OPPDATERE_BEGRUNNELSER_HANDLING = "oppdatere vedtaksperiode med begrunnelser"
     }
 }
