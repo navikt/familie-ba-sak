@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
@@ -20,15 +21,11 @@ class IverksettMotOppdrag(
     private val vedtakService: VedtakService,
     private val behandlingService: BehandlingService,
     private val taskRepository: TaskRepositoryWrapper,
+    private val tilkjentYtelseValideringService: TilkjentYtelseValideringService
 ) : BehandlingSteg<IverksettingTaskDTO> {
 
     override fun preValiderSteg(behandling: Behandling, stegService: StegService?) {
-        val behandlingsresultatSteg: BehandlingsresultatSteg =
-            stegService?.hentBehandlingSteg(StegType.BEHANDLINGSRESULTAT) as BehandlingsresultatSteg
-        behandlingsresultatSteg.preValiderSteg(behandling)
-
-        val beslutteVedtakSteg: BeslutteVedtak = stegService.hentBehandlingSteg(StegType.BESLUTTE_VEDTAK) as BeslutteVedtak
-        beslutteVedtakSteg.postValiderSteg(behandling)
+        tilkjentYtelseValideringService.validerAtIngenUtbetalingerOverstiger100Prosent(behandling)
 
         val totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(behandlingId = behandling.id)
             ?: throw Feil(
