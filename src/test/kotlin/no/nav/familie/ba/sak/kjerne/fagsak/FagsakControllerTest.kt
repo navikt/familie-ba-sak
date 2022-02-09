@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.fagsak
 
-import io.mockk.verify
 import no.nav.familie.ba.sak.common.nyOrdinærBehandling
 import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
@@ -11,6 +10,7 @@ import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.ekstern.restDomene.FagsakDeltagerRolle
 import no.nav.familie.ba.sak.ekstern.restDomene.RestSøkParam
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.integrasjoner.skyggesak.SkyggesakRepository
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -31,6 +31,7 @@ import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.domain.Pageable
 import org.springframework.http.HttpStatus
 
 // Todo. Bruker every. Dette endrer funksjonalliteten for alle klasser.
@@ -61,6 +62,9 @@ class FagsakControllerTest(
 
     @Autowired
     private val databaseCleanupService: DatabaseCleanupService,
+
+    @Autowired
+    private val skyggesakRepository: SkyggesakRepository
 ) : AbstractSpringIntegrationTest() {
 
     @BeforeEach
@@ -102,9 +106,10 @@ class FagsakControllerTest(
     fun `Skal opprette skyggesak i Sak`() {
         val fnr = randomFnr()
 
-        val fagsak = fagsakController.hentEllerOpprettFagsak(FagsakRequest(personIdent = fnr))
+        val fagsak = fagsakController.hentEllerOpprettFagsak(FagsakRequest(personIdent = fnr)).body?.data
 
-        verify(exactly = 1) { mockIntegrasjonClient.opprettSkyggesak(any(), fagsak.body?.data?.id!!) }
+        val skyggesak = skyggesakRepository.finnSkyggesakerKlareForSending(Pageable.unpaged())
+        assertEquals(skyggesak.filter { it.fagsak.id == fagsak?.id }.size, 1)
     }
 
     @Test

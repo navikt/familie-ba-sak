@@ -251,12 +251,9 @@ class VedtaksperiodeService(
         val utbetalingsperioder =
             hentVedtaksperioderMedBegrunnelserForUtbetalingsperioder(andelerTilkjentYtelse, vedtak)
 
-        val endretUtbetalingVedtakssidenToggle =
-            featureToggleService.isEnabled(FeatureToggleConfig.ENDRET_UTBETALING_VEDTAKSSIDEN)
         val endredeUtbetalingsperioder = hentVedtaksperioderMedBegrunnelserForEndredeUtbetalingsperioder(
             andelerTilkjentYtelse = andelerTilkjentYtelse,
             vedtak = vedtak,
-            endretUtbetalingVedtakssidenToggle = endretUtbetalingVedtakssidenToggle
         )
 
         val opphørsperioder =
@@ -376,7 +373,7 @@ class VedtaksperiodeService(
     }
 
     @Deprecated("Skal ikke brukes lenger. Bruk VedtaksperiodeUtil.hentGyldigeBegrunnelserForVedtaksperiode")
-    private fun hentGyldigeBegrunnelserForVedtaksperiodeGammel(
+    fun hentGyldigeBegrunnelserForVedtaksperiodeGammel(
         utvidetVedtaksperiodeMedBegrunnelser: UtvidetVedtaksperiodeMedBegrunnelser,
         behandling: Behandling,
         sanityBegrunnelser: List<SanityBegrunnelse>,

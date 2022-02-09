@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.MigreringResponseDto
 import no.nav.familie.ba.sak.integrasjoner.migrering.MigreringRestClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
+import no.nav.familie.ba.sak.integrasjoner.skyggesak.SkyggesakService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -77,7 +78,8 @@ class MigreringService(
     private val vedtakService: VedtakService,
     private val vilkårService: VilkårService,
     private val vilkårsvurderingService: VilkårsvurderingService,
-    private val migreringRestClient: MigreringRestClient
+    private val migreringRestClient: MigreringRestClient,
+    private val skyggesakService: SkyggesakService
 ) {
 
     private val logger = LoggerFactory.getLogger(MigreringService::class.java)
@@ -107,7 +109,7 @@ class MigreringService(
 
             validerAtBarnErIRelasjonMedPersonident(personAktør, barnasAktør)
 
-            fagsakService.hentEllerOpprettFagsakForPersonIdent(personIdent)
+            val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(personIdent)
                 .also { kastFeilDersomAlleredeMigrert(it) }
 
             val behandling = runCatching {

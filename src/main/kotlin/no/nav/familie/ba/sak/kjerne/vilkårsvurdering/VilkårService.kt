@@ -55,6 +55,10 @@ class VilkårService(
         behandlingId = behandlingId
     )
 
+    fun hentVilkårsvurderingThrows(behandlingId: Long): Vilkårsvurdering =
+        hentVilkårsvurdering(behandlingId = behandlingId)
+            ?: throw IllegalStateException("Fant ikke aktiv vilkårsvurdering for behandling $behandlingId")
+
     companion object {
         const val fantIkkeAktivVilkårsvurderingFeilmelding = "Fant ikke aktiv vilkårsvurdering"
         const val fantIkkeVilkårsvurderingForPersonFeilmelding = "Fant ikke vilkårsvurdering for person"
@@ -406,6 +410,7 @@ class VilkårService(
             personopplysningGrunnlagRepository.findByBehandlingAndAktiv(vilkårsvurdering.behandling.id)
                 ?: throw Feil(message = "Fant ikke personopplysninggrunnlag for behandling ${vilkårsvurdering.behandling.id}")
 
+        val annenForelder = personopplysningGrunnlag.annenForelder
         val eldsteBarnSomVurderesSinFødselsdato =
             personopplysningGrunnlag.barna.filter { !barnaAktørSomAlleredeErVurdert.contains(it.aktør) }
                 .maxByOrNull { it.fødselsdato }?.fødselsdato
@@ -421,10 +426,11 @@ class VilkårService(
 
             val vilkårResultater = vilkårForPerson.map { vilkår ->
                 genererVilkårResultatForEtVilkårPåEnPerson(
-                    person,
-                    eldsteBarnSomVurderesSinFødselsdato,
-                    personResultat,
-                    vilkår
+                    person = person,
+                    annenForelder = annenForelder,
+                    eldsteBarnSinFødselsdato = eldsteBarnSomVurderesSinFødselsdato,
+                    personResultat = personResultat,
+                    vilkår = vilkår
                 )
             }
 
@@ -438,10 +444,12 @@ class VilkårService(
         person: Person,
         eldsteBarnSinFødselsdato: LocalDate,
         personResultat: PersonResultat,
-        vilkår: Vilkår
+        vilkår: Vilkår,
+        annenForelder: Person? = null,
     ): VilkårResultat {
         val automatiskVurderingResultat = vilkår.vurderVilkår(
             person = person,
+            annenForelder = annenForelder,
             vurderFra = eldsteBarnSinFødselsdato
         )
 

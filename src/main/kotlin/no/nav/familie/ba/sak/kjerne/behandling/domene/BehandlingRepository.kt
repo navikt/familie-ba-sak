@@ -97,4 +97,7 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
 
     @Query("SELECT new kotlin.Pair(b.opprettetÅrsak, count(*)) from Behandling b group by b.opprettetÅrsak")
     fun finnAntallBehandlingerPerÅrsak(): List<Pair<BehandlingÅrsak, Long>>
+
+    @Query("SELECT b.id from Behandling b where b.opprettetÅrsak in (:opprettetÅrsak)")
+    fun finnBehandlingIdMedOpprettetÅrsak(opprettetÅrsak: List<BehandlingÅrsak>): List<Long>
 }

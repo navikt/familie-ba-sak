@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagSe
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.validerIngenVilkårSattEtterSøkersDød
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -20,6 +21,18 @@ class VilkårsvurderingSteg(
     private val behandlingService: BehandlingService,
     private val tilbakestillBehandlingService: TilbakestillBehandlingService
 ) : BehandlingSteg<String> {
+
+    override fun preValiderSteg(behandling: Behandling, stegService: StegService?) {
+        val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandling.id)
+
+        if (behandling.opprettetÅrsak == BehandlingÅrsak.DØDSFALL_BRUKER) {
+            val vilkårsvurdering = vilkårService.hentVilkårsvurderingThrows(behandling.id)
+            validerIngenVilkårSattEtterSøkersDød(
+                personopplysningGrunnlag = personopplysningGrunnlag,
+                vilkårsvurdering = vilkårsvurdering
+            )
+        }
+    }
 
     @Transactional
     override fun utførStegOgAngiNeste(
@@ -37,10 +50,10 @@ class VilkårsvurderingSteg(
                 )
             )
         }
+
         // midlertidig validering for helmanuell migrering
         if (behandling.erHelmanuellMigrering()) {
-            val vilkårsvurdering = vilkårService.hentVilkårsvurdering(behandling.id)
-                ?: throw IllegalStateException("Fant ikke aktiv vilkårsvurdering for behandling ${behandling.id}")
+            val vilkårsvurdering = vilkårService.hentVilkårsvurderingThrows(behandling.id)
             val finnesDeltBosted = vilkårsvurdering.personResultater.any {
                 it.vilkårResultater.filter { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.BOR_MED_SØKER }
                     .any { borMedSøker ->

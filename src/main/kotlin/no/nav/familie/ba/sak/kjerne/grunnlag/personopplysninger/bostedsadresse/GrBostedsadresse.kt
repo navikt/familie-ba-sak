@@ -4,6 +4,11 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.TIDENES_ENDE
+import no.nav.familie.ba.sak.common.TIDENES_MORGEN
+import no.nav.familie.ba.sak.common.erInnenfor
+import no.nav.familie.ba.sak.common.isSameOrAfter
+import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegisteropplysning
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
@@ -52,6 +57,11 @@ abstract class GrBostedsadresse(
 
     abstract fun tilFrontendString(): String
 
+    fun gjeldendeNå(): Boolean {
+        if (periode == null) return true
+        return periode!!.erInnenfor(LocalDate.now())
+    }
+
     fun tilRestRegisteropplysning() = RestRegisteropplysning(
         fom = this.periode?.fom.takeIf { it != fregManglendeFlytteDato },
         tom = this.periode?.tom,
@@ -96,6 +106,26 @@ abstract class GrBostedsadresse(
             return adresse != null &&
                 adresse !is GrUkjentBosted &&
                 adresse == andreAdresse
+        }
+    }
+}
+
+fun List<GrBostedsadresse>.filtrerGjeldendeNå(): List<GrBostedsadresse> {
+    return this.filter { it.gjeldendeNå() }
+}
+
+fun vurderOmPersonerBorSammen(adresser: List<GrBostedsadresse>, andreAdresser: List<GrBostedsadresse>): Boolean {
+    return adresser.isNotEmpty() && adresser.any {
+        andreAdresser.any { søkerAdresse ->
+            val søkerAdresseFom = søkerAdresse.periode?.fom ?: TIDENES_MORGEN
+            val søkerAdresseTom = søkerAdresse.periode?.tom ?: TIDENES_ENDE
+
+            val barnAdresseFom = it.periode?.fom ?: TIDENES_MORGEN
+            val barnAdresseTom = it.periode?.tom ?: TIDENES_ENDE
+
+            søkerAdresseFom.isSameOrBefore(barnAdresseFom) &&
+                søkerAdresseTom.isSameOrAfter(barnAdresseTom) &&
+                GrBostedsadresse.erSammeAdresse(søkerAdresse, it)
         }
     }
 }

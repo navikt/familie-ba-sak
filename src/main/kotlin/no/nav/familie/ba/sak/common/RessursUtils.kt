@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.common
 
+import io.sentry.Sentry
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
@@ -17,7 +18,7 @@ object RessursUtils {
         errorResponse(HttpStatus.BAD_REQUEST, errorMessage, throwable)
 
     fun <T> forbidden(errorMessage: String): ResponseEntity<Ressurs<T>> =
-        ikkeTilgangResponse(errorMessage, null)
+        ikkeTilgangResponse(errorMessage)
 
     fun <T> illegalState(errorMessage: String, throwable: Throwable): ResponseEntity<Ressurs<T>> =
         errorResponse(HttpStatus.INTERNAL_SERVER_ERROR, errorMessage, throwable)
@@ -53,30 +54,30 @@ object RessursUtils {
 
         secureLogger.error("$className En feil har oppstått: $errorMessage", throwable)
         logger.error("$className En feil har oppstått: $errorMessage")
+
+        throwable?.also { Sentry.captureException(it, "errorResponse") }
         return ResponseEntity.status(httpStatus).body(Ressurs.failure(errorMessage))
     }
 
     private fun <T> ikkeTilgangResponse(
         errorMessage: String,
-        throwable: Throwable?
     ): ResponseEntity<Ressurs<T>> {
-        val className = if (throwable != null) "[${throwable::class.java.name}] " else ""
-
-        secureLogger.warn("$className Saksbehandler har ikke tilgang: $errorMessage", throwable)
-        logger.warn("$className Saksbehandler har ikke tilgang: $errorMessage")
+        secureLogger.warn("Saksbehandler har ikke tilgang: $errorMessage")
+        logger.warn("Saksbehandler har ikke tilgang: $errorMessage")
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Ressurs.ikkeTilgang(errorMessage))
     }
 
     private fun <T> frontendErrorResponse(feil: Feil, throwable: Throwable?): ResponseEntity<Ressurs<T>> {
         val className = if (throwable != null) "[${throwable::class.java.name}] " else ""
 
-        secureLogger.error(
+        secureLogger.info(
             "$className En håndtert feil har oppstått(${feil.httpStatus}): " +
-                "${feil.frontendFeilmelding}, ${feil.stackTrace}",
+                "${feil.message}, ${feil.frontendFeilmelding}",
             feil
         )
         logger.error("$className En håndtert feil har oppstått(${feil.httpStatus}): ${feil.message} ", feil)
 
+        Sentry.captureException(feil)
         return ResponseEntity.status(feil.httpStatus).body(
             Ressurs.failure(
                 frontendFeilmelding = feil.frontendFeilmelding,

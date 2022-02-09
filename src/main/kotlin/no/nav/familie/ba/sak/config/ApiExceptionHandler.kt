@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.common.RessursUtils.illegalState
 import no.nav.familie.ba.sak.common.RessursUtils.rolleTilgangResponse
 import no.nav.familie.ba.sak.common.RessursUtils.unauthorized
 import no.nav.familie.ba.sak.common.RolleTilgangskontrollFeil
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonException
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.KanIkkeMigrereException
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.spring.validation.interceptor.JwtTokenUnauthorizedException
@@ -41,38 +42,43 @@ class ApiExceptionHandler {
         return rolleTilgangResponse(rolleTilgangskontrollFeil)
     }
 
-    @ExceptionHandler(Throwable::class)
-    fun handleThrowable(throwable: Throwable): ResponseEntity<Ressurs<Nothing>> {
-        val mostSpecificThrowable = NestedExceptionUtils.getMostSpecificCause(throwable)
+    @ExceptionHandler(Exception::class)
+    fun handleException(exception: Exception): ResponseEntity<Ressurs<Nothing>> {
+        val mostSpecificCause = NestedExceptionUtils.getMostSpecificCause(exception)
 
-        return illegalState(mostSpecificThrowable.message.toString(), mostSpecificThrowable)
+        return illegalState(mostSpecificCause.message.toString(), mostSpecificCause)
     }
 
     @ExceptionHandler(HttpClientErrorException.Forbidden::class)
     fun handleForbidden(foriddenException: HttpClientErrorException.Forbidden): ResponseEntity<Ressurs<Nothing>> {
-        val mostSpecificThrowable = NestedExceptionUtils.getMostSpecificCause(foriddenException)
+        val mostSpecificCause = NestedExceptionUtils.getMostSpecificCause(foriddenException)
 
-        return forbidden(mostSpecificThrowable.message ?: "Ikke tilgang")
+        return forbidden(mostSpecificCause.message ?: "Ikke tilgang")
+    }
+
+    @ExceptionHandler(IntegrasjonException::class)
+    fun handleIntegrasjonException(integrasjonException: IntegrasjonException): ResponseEntity<Ressurs<Nothing>> {
+        return illegalState(integrasjonException.message.toString(), integrasjonException)
+    }
+
+    @ExceptionHandler(PdlNotFoundException::class)
+    fun handlePdlNotFoundException(feil: PdlNotFoundException): ResponseEntity<Ressurs<Nothing>> {
+        logger.warn("Finner ikke personen i PDL")
+        return ResponseEntity.ok()
+            .body(Ressurs.failure(frontendFeilmelding = "Fant ikke person"))
     }
 
     @ExceptionHandler(Feil::class)
-    fun handleFunksjonellFeil(feil: Feil): ResponseEntity<Ressurs<Nothing>> {
-        val mostSpecificThrowable =
+    fun handleFeil(feil: Feil): ResponseEntity<Ressurs<Nothing>> {
+        val mostSpecificCause =
             if (feil.throwable != null) NestedExceptionUtils.getMostSpecificCause(feil.throwable!!) else null
 
-        return frontendFeil(feil, mostSpecificThrowable)
+        return frontendFeil(feil, mostSpecificCause)
     }
 
     @ExceptionHandler(FunksjonellFeil::class)
     fun handleFunksjonellFeil(funksjonellFeil: FunksjonellFeil): ResponseEntity<Ressurs<Nothing>> {
         return funksjonellFeil(funksjonellFeil)
-    }
-
-    @ExceptionHandler(PdlNotFoundException::class)
-    fun handleThrowable(feil: PdlNotFoundException): ResponseEntity<Ressurs<Nothing>> {
-        logger.warn("Finner ikke personen i PDL")
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-            .body(Ressurs.failure(frontendFeilmelding = "Fant ikke person"))
     }
 
     @ExceptionHandler(EksternTjenesteFeilException::class)

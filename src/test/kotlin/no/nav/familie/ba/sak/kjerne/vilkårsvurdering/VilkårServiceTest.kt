@@ -1231,7 +1231,7 @@ class VilkårServiceTest(
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
         val nyMigreringsdato = LocalDate.of(2021, 1, 1)
-        val vilkårsvurdering = vilkårService.genererVilkårsvurderingForHelmanuellMigrering(behandling, nyMigreringsdato)
+        vilkårService.genererVilkårsvurderingForHelmanuellMigrering(behandling, nyMigreringsdato)
 
         vilkårService.postVilkår(
             behandling.id,

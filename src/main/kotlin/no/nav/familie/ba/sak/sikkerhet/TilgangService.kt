@@ -6,7 +6,7 @@ import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.CustomKeyValue
 import no.nav.familie.ba.sak.config.RolleConfig
 import no.nav.familie.ba.sak.config.Sporingsdata
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollClient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -20,7 +20,7 @@ class TilgangService(
     private val behandlingService: BehandlingService,
     private val persongrunnlagService: PersongrunnlagService,
     private val rolleConfig: RolleConfig,
-    private val integrasjonClient: IntegrasjonClient,
+    private val familieIntegrasjonerTilgangskontrollClient: FamilieIntegrasjonerTilgangskontrollClient,
     private val cacheManager: CacheManager,
     private val auditLogger: AuditLogger
 ) {
@@ -57,7 +57,7 @@ class TilgangService(
 
     private fun harTilgangTilPersoner(personIdenter: List<String>): Boolean {
         return harSaksbehandlerTilgang("validerTilgangTilPersoner", personIdenter) {
-            integrasjonClient.sjekkTilgangTilPersoner(personIdenter).harTilgang
+            familieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(personIdenter).harTilgang
         }
     }
 
