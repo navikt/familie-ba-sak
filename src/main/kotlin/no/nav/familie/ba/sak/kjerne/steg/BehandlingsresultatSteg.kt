@@ -84,11 +84,13 @@ class BehandlingsresultatSteg(
         val forrigeBehandling = behandlingService.hentForrigeBehandlingSomErIverksatt(behandling)
         val forrigeTilkjentYtelse: TilkjentYtelse? =
             forrigeBehandling?.let { beregningService.hentOptionalTilkjentYtelseForBehandling(behandlingId = it.id) }
-        validerAtTilkjentYtelseHarGyldigEtterbetalingsperiode(
-            forrigeAndelerTilkjentYtelse = forrigeTilkjentYtelse?.andelerTilkjentYtelse?.toList(),
-            andelerTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelse.toList(),
-            kravDato = tilkjentYtelse.behandling.opprettetTidspunkt
-        )
+        if (behandling.type != BehandlingType.MIGRERING_FRA_INFOTRYGD) {
+            validerAtTilkjentYtelseHarGyldigEtterbetalingsperiode(
+                forrigeAndelerTilkjentYtelse = forrigeTilkjentYtelse?.andelerTilkjentYtelse?.toList(),
+                andelerTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelse.toList(),
+                kravDato = tilkjentYtelse.behandling.opprettetTidspunkt
+            )
+        }
 
         val endretUtbetalingAndeler = endretUtbetalingAndelService.hentForBehandling(behandling.id)
         validerAtAlleOpprettedeEndringerErUtfylt(endretUtbetalingAndeler)
