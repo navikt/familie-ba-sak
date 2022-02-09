@@ -18,6 +18,8 @@ class SkyggesakScheduler(
     val integrasjonClient: IntegrasjonClient
 ) {
 
+    private val logger = LoggerFactory.getLogger(SkyggesakScheduler::class.java)
+
     @Scheduled(fixedDelay = 60000)
     fun opprettSkyggesaker() {
         if (LeaderClient.isLeader() == true) {
@@ -32,6 +34,7 @@ class SkyggesakScheduler(
         for (skyggesak in skyggesaker) {
             try {
                 MDC.put(MDCConstants.MDC_CALL_ID, UUID.randomUUID().toString())
+                logger.info("Opprettet skyggesak for fagsak ${skyggesak.fagsak.id}")
                 integrasjonClient.opprettSkyggesak(skyggesak.fagsak.aktør, skyggesak.fagsak.id)
                 skyggesakRepository.save(skyggesak.copy(sendtTidspunkt = LocalDateTime.now()))
             } catch (e: Exception) {
