@@ -114,6 +114,7 @@ class BeslutteVedtak(
     }
 
     override fun postValiderSteg(behandling: Behandling) {
+        if (behandling.erMigrering()) return
         val totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(behandling.id)
 
         if (totrinnskontroll?.godkjent == true) {
