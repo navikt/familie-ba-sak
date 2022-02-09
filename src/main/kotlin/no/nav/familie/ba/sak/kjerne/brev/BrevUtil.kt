@@ -25,7 +25,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat.INNVILG
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat.OPPHØRT
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
-import no.nav.familie.ba.sak.kjerne.brev.domene.BrevPeriodeGrunnlag
+import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
@@ -175,7 +175,7 @@ fun hentOverstyrtDokumenttittel(behandling: Behandling): String? {
 }
 
 fun hentHjemlerIVedtaksperioderFraSanity(
-    brevPeriodeGrunnlag: List<BrevPeriodeGrunnlag>,
+    brevPeriodeGrunnlag: List<MinimertVedtaksperiode>,
     sanityBegrunnelser: List<SanityBegrunnelse>
 ): List<String> =
     brevPeriodeGrunnlag.flatMap { periode ->
@@ -193,19 +193,19 @@ fun hjemlerTilHjemmeltekst(hjemler: List<String>): String {
 }
 
 fun hentHjemmeltekst(
-    brevPeriodeGrunnlag: List<BrevPeriodeGrunnlag>,
+    minimerteVedtaksperioder: List<MinimertVedtaksperiode>,
     sanityBegrunnelser: List<SanityBegrunnelse>,
     opplysningspliktHjemlerSkalMedIBrev: Boolean = false
 ): String {
     val hjemler =
-        hentHjemlerIVedtaksperioderFraSanity(brevPeriodeGrunnlag, sanityBegrunnelser).toMutableSet()
+        hentHjemlerIVedtaksperioderFraSanity(minimerteVedtaksperioder, sanityBegrunnelser).toMutableSet()
 
     if (opplysningspliktHjemlerSkalMedIBrev) {
         val hjemlerNårOpplysningspliktIkkeOppfylt = listOf("17", "18")
         hjemler.addAll(hjemlerNårOpplysningspliktIkkeOppfylt)
     }
 
-    if (brevPeriodeGrunnlag.flatMap { it.fritekster }.isNotEmpty()) {
+    if (minimerteVedtaksperioder.flatMap { it.fritekster }.isNotEmpty()) {
         hjemler.addAll(hjemlerTilhørendeFritekst.map { it.toString() }.toSet())
     }
 

@@ -1,8 +1,11 @@
 package no.nav.familie.ba.sak.kjerne.brev
 
+import no.nav.familie.ba.sak.common.convertDataClassToJson
 import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.tilMinimertUregisrertBarn
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.brev.domene.BrevperiodeData
+import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
@@ -11,10 +14,11 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilUtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.erFørsteVedtaksperiodePåFagsak
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
-class BegrunnelseService(
+class BrevPeriodeService(
     private val persongrunnlagService: PersongrunnlagService,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val vedtaksperiodeRepository: VedtaksperiodeRepository,
@@ -23,7 +27,8 @@ class BegrunnelseService(
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val endretUtbetalingAndelService: EndretUtbetalingAndelService,
 ) {
-    fun genererBrevBegrunnelserForPeriode(vedtaksperiodeId: Long): List<Begrunnelse> {
+
+    fun hentBrevperiodeData(vedtaksperiodeId: Long, skalLogge: Boolean = true): BrevperiodeData {
         val vedtaksperiodeMedBegrunnelser = vedtaksperiodeRepository.hentVedtaksperiode(vedtaksperiodeId)
 
         val behandlingId = vedtaksperiodeMedBegrunnelser.vedtak.behandling.id
@@ -54,15 +59,35 @@ class BegrunnelseService(
 
         val andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId)
 
-        return utvidetVedtaksperiodeMedBegrunnelse.hentBegrunnelserOgFritekster(
+        val minimertVedtaksperiode = utvidetVedtaksperiodeMedBegrunnelse.tilMinimertVedtaksperiode(sanityBegrunnelser)
+
+        val brevperiodeData = BrevperiodeData(
+            minimertVedtaksperiode = minimertVedtaksperiode,
             restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev,
-            sanityBegrunnelser = sanityBegrunnelser,
             uregistrerteBarn = uregistrerteBarn,
+            brevMålform = personopplysningGrunnlag.søker.målform,
             erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak(
                 andelerTilkjentYtelse,
                 utvidetVedtaksperiodeMedBegrunnelse.fom
-            ),
-            brevMålform = personopplysningGrunnlag.søker.målform,
+            )
         )
+
+        if (skalLogge) {
+            secureLogger.info(
+                "Data for brevperiode: " +
+                    brevperiodeData.tilBrevperiodeForLogging().convertDataClassToJson()
+            )
+        }
+
+        return brevperiodeData
+    }
+
+    fun genererBrevBegrunnelserForPeriode(vedtaksperiodeId: Long): List<Begrunnelse> {
+        val begrunnelseDataForVedtaksperiode = hentBrevperiodeData(vedtaksperiodeId)
+        return begrunnelseDataForVedtaksperiode.hentBegrunnelserOgFritekster()
+    }
+
+    companion object {
+        private val secureLogger = LoggerFactory.getLogger("secureLogger")
     }
 }

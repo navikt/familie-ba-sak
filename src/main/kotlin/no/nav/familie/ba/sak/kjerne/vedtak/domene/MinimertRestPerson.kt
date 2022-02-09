@@ -4,9 +4,9 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPerson
-import no.nav.familie.ba.sak.kjerne.brev.domene.BrevPeriodeGrunnlag
 import no.nav.familie.ba.sak.kjerne.brev.domene.BrevPeriodePersonForLogging
 import no.nav.familie.ba.sak.kjerne.brev.domene.EndretUtbetalingAndelPåPersonForLogging
+import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.brev.domene.RestBehandlingsgrunnlagForBrev
 import no.nav.familie.ba.sak.kjerne.brev.domene.UtbetalingPåPersonForLogging
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
@@ -49,7 +49,7 @@ fun Person.tilMinimertPerson() = MinimertRestPerson(
 )
 
 fun MinimertRestPerson.tilBrevPeriodeTestPerson(
-    brevPeriodeGrunnlag: BrevPeriodeGrunnlag,
+    brevPeriodeGrunnlag: MinimertVedtaksperiode,
     restBehandlingsgrunnlagForBrev: RestBehandlingsgrunnlagForBrev,
 ): BrevPeriodePersonForLogging {
     val minimertePersonResultater =
@@ -64,7 +64,7 @@ fun MinimertRestPerson.tilBrevPeriodeTestPerson(
         fødselsdato = this.fødselsdato,
         type = this.type,
         overstyrteVilkårresultater = minimertePersonResultater.minimerteVilkårResultater,
-        andreVurderinger = minimertePersonResultater.andreVurderinger,
+        minimerteAndreVurderinger = minimertePersonResultater.minimerteAndreVurderinger,
         endredeUtbetalinger = minimerteEndretUtbetalingAndelPåPerson.map {
             EndretUtbetalingAndelPåPersonForLogging(
                 periode = it.periode,

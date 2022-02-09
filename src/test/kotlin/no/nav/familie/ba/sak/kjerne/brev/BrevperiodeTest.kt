@@ -7,7 +7,7 @@ import FritekstBegrunnelseTestConfig
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ba.sak.common.Utils.formaterBeløp
 import no.nav.familie.ba.sak.integrasjoner.sanity.hentSanityBegrunnelser
-import no.nav.familie.ba.sak.kjerne.brev.domene.BrevPeriodeGrunnlag
+import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.brev.domene.RestBehandlingsgrunnlagForBrev
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.BrevPeriode
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -35,8 +35,8 @@ class BrevperiodeTest {
                     return@fold acc + 1
                 }
 
-            val brevPeriodeGrunnlag =
-                BrevPeriodeGrunnlag(
+            val minimertVedtaksperiode =
+                MinimertVedtaksperiode(
                     fom = behandlingsresultatPersonTestConfig.fom,
                     tom = behandlingsresultatPersonTestConfig.tom,
                     type = behandlingsresultatPersonTestConfig.vedtaksperiodetype,
@@ -55,7 +55,7 @@ class BrevperiodeTest {
             )
 
             val brevperiode = try {
-                brevPeriodeGrunnlag.tilBrevPeriode(
+                minimertVedtaksperiode.tilBrevPeriode(
                     restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev,
                     utvidetScenarioForEndringsperiode = behandlingsresultatPersonTestConfig.utvidetScenarioForEndringsperiode,
                     uregistrerteBarn = behandlingsresultatPersonTestConfig.uregistrerteBarn,
