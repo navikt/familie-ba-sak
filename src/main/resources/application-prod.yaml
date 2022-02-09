@@ -135,7 +135,7 @@ no.nav.security.jwt:
         resource-url: ${FAMILIE_STATISTIKK_URL}
         token-endpoint-url: https://login.microsoftonline.com/navno.onmicrosoft.com/oauth2/v2.0/token
         grant-type: client_credentials
-        scope: api://prod-gcp.teamfamilie.familie-ba-statistikk/.default
+        scope: api://prod-fss.teamfamilie.familie-ba-statistikk/.default
         authentication:
           client-id: ${AZURE_APP_CLIENT_ID}
           client-secret: ${AZURE_APP_CLIENT_SECRET}

@@ -1,0 +1,59 @@
+{
+  "beskrivelse": "Reduksjon slutt på delt bosted måndeskifte",
+  "fom": "2022-02-01",
+  "tom": "2027-01-31",
+  "vedtaksperiodetype": "UTBETALING",
+  "ytelserForSøkerForrigeMåned": [],
+  "ytelserForBarnOgSøkerIPeriode": [
+    "ORDINÆR_BARNETRYGD"
+  ],
+  "utvidetScenarioForEndringsperiode": "IKKE_UTVIDET_YTELSE",
+  "personerPåBehandling": [
+    {
+      "fødselsdato": "1990-02-19",
+      "type": "SØKER",
+      "overstyrteVilkårresultater": [
+      ],
+      "andreVurderinger": [],
+      "endredeUtbetalinger": []
+    },
+    {
+      "fødselsdato": "2016-06-10",
+      "type": "BARN",
+      "overstyrteVilkårresultater": [
+        {
+          "vilkårType": "BOR_MED_SØKER",
+          "periodeFom": "2016-02-10",
+          "periodeTom": "2022-01-01",
+          "resultat": "OPPFYLT",
+          "utdypendeVilkårsvurderinger": [
+            "DELT_BOSTED"
+          ],
+          "erEksplisittAvslagPåSøknad": false
+        }
+      ],
+      "andreVurderinger": [],
+      "endredeUtbetalinger": []
+    },
+    {
+      "fødselsdato": "2016-02-10",
+      "type": "BARN",
+      "overstyrteVilkårresultater": [],
+      "andreVurderinger": [],
+      "endredeUtbetalinger": []
+    }
+  ],
+  "forventetOutput": [
+    "REDUKSJON_DELT_BOSTED_ENIGHET",
+    "REDUKSJON_DELT_BOSTED_UENIGHET",
+    "REDUKSJON_AVTALE_FAST_BOSTED",
+    "REDUKSJON_VURDERING_FORELDRENE_BOR_SAMMEN",
+    "REDUKSJON_FORELDRENE_BOR_SAMMEN",
+    "REDUKSJON_RETTSAVGJØRELSE_FAST_BOSTED",
+    "REDUKSJON_IKKE_AVTALE_DELT_BOSTED",
+    "REDUKSJON_DELT_BARNETRYGD_ANNEN_FORELDER_SØKT",
+    "REDUKSJON_FLYTTET_BARN",
+    "REDUKSJON_BARN_DØD",
+    "REDUKSJON_UNDER_6_ÅR"
+  ]
+}

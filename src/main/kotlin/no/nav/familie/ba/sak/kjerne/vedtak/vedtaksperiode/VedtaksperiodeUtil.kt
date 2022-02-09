@@ -28,7 +28,6 @@ import java.time.LocalDate
 fun hentVedtaksperioderMedBegrunnelserForEndredeUtbetalingsperioder(
     andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
     vedtak: Vedtak,
-    endretUtbetalingVedtakssidenToggle: Boolean = false,
 ) = andelerTilkjentYtelse.filter { it.endretUtbetalingAndeler.isNotEmpty() }.groupBy { it.prosent }
     .flatMap { (_, andeler) ->
         andeler.lagVertikaleSegmenter()
@@ -39,19 +38,17 @@ fun hentVedtaksperioderMedBegrunnelserForEndredeUtbetalingsperioder(
                     vedtak = vedtak,
                     type = Vedtaksperiodetype.ENDRET_UTBETALING
                 ).also { vedtaksperiodeMedBegrunnelse ->
-                    if (!endretUtbetalingVedtakssidenToggle) {
-                        val endretUtbetalingAndeler = andelerForSegment.flatMap { it.endretUtbetalingAndeler }
-                        vedtaksperiodeMedBegrunnelse.begrunnelser.addAll(
-                            endretUtbetalingAndeler
-                                .flatMap { it.vedtakBegrunnelseSpesifikasjoner }.toSet()
-                                .map { vedtakBegrunnelseSpesifikasjon ->
-                                    Vedtaksbegrunnelse(
-                                        vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelse,
-                                        vedtakBegrunnelseSpesifikasjon = vedtakBegrunnelseSpesifikasjon,
-                                    )
-                                }
-                        )
-                    }
+                    val endretUtbetalingAndeler = andelerForSegment.flatMap { it.endretUtbetalingAndeler }
+                    vedtaksperiodeMedBegrunnelse.begrunnelser.addAll(
+                        endretUtbetalingAndeler
+                            .flatMap { it.vedtakBegrunnelseSpesifikasjoner }.toSet()
+                            .map { vedtakBegrunnelseSpesifikasjon ->
+                                Vedtaksbegrunnelse(
+                                    vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelse,
+                                    vedtakBegrunnelseSpesifikasjon = vedtakBegrunnelseSpesifikasjon,
+                                )
+                            }
+                    )
                 }
             }
     }
