@@ -11,7 +11,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifi
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.MinimertPerson
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.MinimertVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -54,7 +53,7 @@ data class BrevbegrunnelserTestPerson(
     val type: PersonType,
     val fødselsdato: LocalDate,
     val overstyrteVilkårresultater: List<MinimertVilkårResultat>,
-    val andreVurderinger: List<AnnenVurdering>,
+    val minimerteAndreVurderinger: List<MinimertAnnenVurdering>,
     val endredeUtbetalinger: List<EndretUtbetalingAndelPåPerson>,
 ) {
     fun tilMinimertPerson() = MinimertPerson(
@@ -70,7 +69,7 @@ data class BrevbegrunnelserTestPerson(
     fun tilMinimertePersonResultater() = MinimertRestPersonResultat(
         personIdent = this.personIdent,
         minimerteVilkårResultater = hentVilkårForPerson(),
-        andreVurderinger = this.andreVurderinger,
+        minimerteAndreVurderinger = this.minimerteAndreVurderinger,
     )
 
     private fun hentVilkårForPerson() =
