@@ -167,7 +167,6 @@ class MigreringService(
                     migrertAvSaksbehandlerNotificationFeil.increment()
                 }
             }
-            skyggesakService.opprettSkyggesak(fagsak.aktør, fagsak.id)
             return migreringResponseDto
         } catch (e: Exception) {
             if (e is KanIkkeMigrereException) throw e
