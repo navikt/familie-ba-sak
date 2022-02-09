@@ -2,7 +2,7 @@
     "beskrivelse": "Innvilget. Barn bor med søker.",
     "fom": "2021-02-01",
     "tom": null,
-    "vedtaksperiodetype": "ENDRET_UTBETALING",
+    "vedtaksperiodetype": "UTBETALING",
     "ytelserForSøkerForrigeMåned": [],
     "ytelserForBarnOgSøkerIPeriode": [
         "ORDINÆR_BARNETRYGD"
@@ -51,6 +51,9 @@
         "INNVILGET_AVTALE_DELT_BOSTED_FÅR_FRA_FLYTTETIDSPUNKT",
         "INNVILGET_AVTALE_DELT_BOSTED_FÅR_FRA_AVTALETIDSPUNKT",
         "INNVILGET_VURDERING_AVTALE_DELT_BOSTED_FØLGES",
-        "INNVILGET_RETTSAVGJØRELSE_DELT_BOSTED"
+        "INNVILGET_RETTSAVGJØRELSE_DELT_BOSTED",
+        "ETTER_ENDRET_UTBETALING_RETTSAVGJØRELSE_DELT_BOSTED",
+        "ETTER_ENDRET_UTBETALING_AVTALE_DELT_BOSTED_FØLGES",
+        "ETTER_ENDRET_UTBETALING_HAR_AVTALE_DELT_BOSTED"
     ]
 }
