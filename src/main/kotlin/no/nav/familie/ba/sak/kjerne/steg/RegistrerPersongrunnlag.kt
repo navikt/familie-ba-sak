@@ -61,12 +61,16 @@ class RegistrerPersongrunnlag(
                     forrigeBehandlingSomErVedtatt = behandlingService.hentForrigeBehandlingSomErVedtatt(behandling),
                     nyMigreringsdato = data.nyMigreringsdato!!
                 )
+                // Lagre ned migreringsdato
+                behandlingService.lagreNedMigreringsdato(data.nyMigreringsdato, behandling)
             }
             BehandlingÅrsak.HELMANUELL_MIGRERING -> {
                 vilkårService.genererVilkårsvurderingForHelmanuellMigrering(
                     behandling = behandling,
                     nyMigreringsdato = data.nyMigreringsdato!!
                 )
+                // Lagre ned migreringsdato
+                behandlingService.lagreNedMigreringsdato(data.nyMigreringsdato, behandling)
             }
             !in listOf(BehandlingÅrsak.SØKNAD, BehandlingÅrsak.FØDSELSHENDELSE) -> {
                 vilkårService.initierVilkårsvurderingForBehandling(
@@ -91,6 +95,7 @@ class RegistrerPersongrunnlag(
     }
 
     companion object {
+
         private val logger = LoggerFactory.getLogger(this::class.java)
     }
 }

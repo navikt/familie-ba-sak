@@ -313,6 +313,7 @@ class StegServiceTest(
             vedtaksperiodeService = vedtaksperiodeService,
         )
 
+        val nyMigreringsdato = LocalDate.now().minusMonths(6)
         fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
         val behandling = stegService.håndterNyBehandling(
             NyBehandling(
@@ -322,7 +323,7 @@ class StegServiceTest(
                 behandlingÅrsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
                 søkersIdent = søkerFnr,
                 barnasIdenter = barnasIdenter,
-                nyMigreringsdato = LocalDate.now().minusMonths(6)
+                nyMigreringsdato = nyMigreringsdato
             )
         )
         assertEquals(StegType.VILKÅRSVURDERING, behandling.steg)
@@ -332,6 +333,7 @@ class StegServiceTest(
                     it.behandlingStegStatus == BehandlingStegStatus.UTFØRT
             }
         }
+        assertMigreringsdato(nyMigreringsdato, behandling)
         assertNotNull(vilkårsvurderingService.hentAktivForBehandling(behandling.id))
 
         val behandlingEtterVilkårsvurdering = stegService.håndterVilkårsvurdering(behandling)
@@ -383,6 +385,7 @@ class StegServiceTest(
         val barnasIdenter = listOf(barnFnr)
 
         fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
+        val migreringsdato = LocalDate.now().minusMonths(6)
         val behandling = stegService.håndterNyBehandling(
             NyBehandling(
                 kategori = BehandlingKategori.NASJONAL,
@@ -391,7 +394,7 @@ class StegServiceTest(
                 behandlingÅrsak = BehandlingÅrsak.HELMANUELL_MIGRERING,
                 søkersIdent = søkerFnr,
                 barnasIdenter = barnasIdenter,
-                nyMigreringsdato = LocalDate.now().minusMonths(6)
+                nyMigreringsdato = migreringsdato
             )
         )
         assertEquals(StegType.VILKÅRSVURDERING, behandling.steg)
@@ -401,6 +404,7 @@ class StegServiceTest(
                     it.behandlingStegStatus == BehandlingStegStatus.UTFØRT
             }
         }
+        assertMigreringsdato(migreringsdato, behandling)
         assertNotNull(vilkårsvurderingService.hentAktivForBehandling(behandling.id))
         val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandling.id)!!
         val barnPersonResultat =
@@ -469,5 +473,9 @@ class StegServiceTest(
             stegService = stegService,
             vedtaksperiodeService = vedtaksperiodeService,
         )
+    }
+
+    private fun assertMigreringsdato(migreringsdato: LocalDate, behandling: Behandling) {
+        assertEquals(migreringsdato, behandlingService.hentMigreringsdatoIBehandling(behandling.id))
     }
 }

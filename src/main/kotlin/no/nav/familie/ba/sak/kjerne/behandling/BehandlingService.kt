@@ -13,6 +13,8 @@ import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils.utledLøpendeKate
 import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils.utledLøpendeUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingMigreringsinfo
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingMigreringsinfoRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
@@ -63,7 +65,8 @@ class BehandlingService(
     private val vedtaksperiodeService: VedtaksperiodeService,
     private val personidentService: PersonidentService,
     private val featureToggleService: FeatureToggleService,
-    private val taskRepository: TaskRepositoryWrapper
+    private val taskRepository: TaskRepositoryWrapper,
+    private val behandlingMigreringsinfoRepository: BehandlingMigreringsinfoRepository
 ) {
 
     @Transactional
@@ -426,6 +429,20 @@ class BehandlingService(
             behandlingÅrsak = behandlingÅrsak,
             måned = måned,
         )
+    }
+
+    @Transactional
+    fun lagreNedMigreringsdato(migreringsdato: LocalDate, behandling: Behandling) {
+        val behandlingMigreringsinfo = BehandlingMigreringsinfo(behandling = behandling, migreringsdato = migreringsdato)
+        behandlingMigreringsinfoRepository.save(behandlingMigreringsinfo)
+    }
+
+    fun hentMigreringsdatoIBehandling(behandlingId: Long): LocalDate {
+        return behandlingMigreringsinfoRepository.findByBehandlingId(behandlingId)
+    }
+
+    fun hentMigreringsdatoPåFagsak(fagsakId: Long): LocalDate {
+        return behandlingMigreringsinfoRepository.finnSisteMigreringsdatoPåFagsak(fagsakId)
     }
 
     companion object {
