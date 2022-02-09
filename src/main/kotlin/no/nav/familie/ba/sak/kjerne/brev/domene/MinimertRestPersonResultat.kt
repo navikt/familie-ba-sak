@@ -12,19 +12,28 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 data class MinimertRestPersonResultat(
     val personIdent: String,
     val minimerteVilkårResultater: List<MinimertVilkårResultat>,
-    val andreVurderinger: List<AnnenVurdering>
+    val minimerteAndreVurderinger: List<MinimertAnnenVurdering>
 )
+
+data class MinimertAnnenVurdering(
+    val type: AnnenVurderingType,
+    val resultat: Resultat
+)
+
+fun AnnenVurdering.tilMinimertAnnenVurdering(): MinimertAnnenVurdering {
+    return MinimertAnnenVurdering(type = this.type, resultat = this.resultat)
+}
 
 fun PersonResultat.tilMinimertPersonResultat() =
     MinimertRestPersonResultat(
         personIdent = this.aktør.aktivFødselsnummer(),
         minimerteVilkårResultater = this.vilkårResultater.map { it.tilMinimertVilkårResultat() },
-        andreVurderinger = this.andreVurderinger.toList()
+        minimerteAndreVurderinger = this.andreVurderinger.map { it.tilMinimertAnnenVurdering() }
     )
 
 fun List<MinimertRestPersonResultat>.harPersonerSomManglerOpplysninger(): Boolean =
     this.any { personResultat ->
-        personResultat.andreVurderinger.any {
+        personResultat.minimerteAndreVurderinger.any {
             it.type == AnnenVurderingType.OPPLYSNINGSPLIKT && it.resultat == Resultat.IKKE_OPPFYLT
         }
     }

@@ -13,7 +13,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.UtvidetVedtaksperiodeMedBegrunnelser
 import java.time.LocalDate
 
-data class BrevPeriodeGrunnlag(
+data class MinimertVedtaksperiode(
     val fom: LocalDate?,
     val tom: LocalDate?,
     val type: Vedtaksperiodetype,
@@ -55,10 +55,10 @@ data class BrevPeriodeGrunnlag(
     )
 }
 
-fun UtvidetVedtaksperiodeMedBegrunnelser.tilBrevPeriodeGrunnlag(
+fun UtvidetVedtaksperiodeMedBegrunnelser.tilMinimertVedtaksperiode(
     sanityBegrunnelser: List<SanityBegrunnelse>
-): BrevPeriodeGrunnlag {
-    return BrevPeriodeGrunnlag(
+): MinimertVedtaksperiode {
+    return MinimertVedtaksperiode(
         fom = this.fom,
         tom = this.tom,
         type = this.type,
@@ -68,7 +68,7 @@ fun UtvidetVedtaksperiodeMedBegrunnelser.tilBrevPeriodeGrunnlag(
     )
 }
 
-fun BrevPeriodeGrunnlag.tilBrevPeriodeForLogging(
+fun MinimertVedtaksperiode.tilBrevPeriodeForLogging(
     restBehandlingsgrunnlagForBrev: RestBehandlingsgrunnlagForBrev,
     utvidetScenarioForEndringsperiode: UtvidetScenarioForEndringsperiode = UtvidetScenarioForEndringsperiode.IKKE_UTVIDET_YTELSE,
     uregistrerteBarn: List<MinimertUregistrertBarn> = emptyList(),

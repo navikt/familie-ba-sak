@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.kjerne.behandlingsresultat.MinimertUregistrertBarn
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.brev.UtvidetScenarioForEndringsperiode
 import no.nav.familie.ba.sak.kjerne.brev.domene.BrevBegrunnelseGrunnlag
+import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertAnnenVurdering
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertRestEndretAndel
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertRestPersonResultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertUtbetalingsperiodeDetalj
@@ -22,7 +23,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.BegrunnelseData
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.MinimertRestPerson
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -51,7 +51,7 @@ data class BrevPeriodeTestPerson(
     val fødselsdato: LocalDate,
     val type: PersonType,
     val overstyrteVilkårresultater: List<MinimertVilkårResultat>,
-    val andreVurderinger: List<AnnenVurdering>,
+    val andreVurderinger: List<MinimertAnnenVurdering>,
     val endredeUtbetalinger: List<EndretRestUtbetalingAndelPåPerson>,
     val utbetalinger: List<UtbetalingPåPerson>
 ) {
@@ -67,7 +67,7 @@ data class BrevPeriodeTestPerson(
         return MinimertRestPersonResultat(
             personIdent = this.personIdent,
             minimerteVilkårResultater = hentVilkårForPerson(),
-            andreVurderinger = this.andreVurderinger,
+            minimerteAndreVurderinger = this.andreVurderinger,
         )
     }
 

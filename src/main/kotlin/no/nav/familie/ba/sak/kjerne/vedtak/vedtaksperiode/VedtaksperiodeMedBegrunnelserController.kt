@@ -1,14 +1,16 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedFritekster
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedStandardbegrunnelser
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
-import no.nav.familie.ba.sak.kjerne.brev.BegrunnelseService
 import no.nav.familie.ba.sak.kjerne.brev.BrevKlient
+import no.nav.familie.ba.sak.kjerne.brev.BrevPeriodeService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.BegrunnelseData
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.FritekstBegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeRepository
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -30,7 +32,8 @@ class VedtaksperiodeMedBegrunnelserController(
     private val tilgangService: TilgangService,
     private val brevKlient: BrevKlient,
     private val utvidetBehandlingService: UtvidetBehandlingService,
-    private val begrunnelseService: BegrunnelseService,
+    private val brevPeriodeService: BrevPeriodeService,
+    private val vedtaksperiodeRepository: VedtaksperiodeRepository,
 ) {
 
     @PutMapping("/standardbegrunnelser/{vedtaksperiodeId}")
@@ -80,11 +83,11 @@ class VedtaksperiodeMedBegrunnelserController(
             handling = "hente genererte begrunnelser"
         )
 
-        val begrunnelser = begrunnelseService.genererBrevBegrunnelserForPeriode(vedtaksperiodeId).map {
+        val begrunnelser = brevPeriodeService.genererBrevBegrunnelserForPeriode(vedtaksperiodeId).map {
             when (it) {
                 is FritekstBegrunnelse -> it.fritekst
                 is BegrunnelseData -> brevKlient.hentBegrunnelsestekst(it)
-                else -> error("Ukjent begrunnelsestype")
+                else -> throw Feil("Ukjent begrunnelsestype")
             }
         }
 
@@ -92,7 +95,6 @@ class VedtaksperiodeMedBegrunnelserController(
     }
 
     companion object {
-
         const val OPPDATERE_BEGRUNNELSER_HANDLING = "oppdatere vedtaksperiode med begrunnelser"
     }
 }

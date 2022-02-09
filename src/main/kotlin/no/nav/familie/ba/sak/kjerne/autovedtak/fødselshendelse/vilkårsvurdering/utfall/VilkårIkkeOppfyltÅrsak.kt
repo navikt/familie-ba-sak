@@ -38,27 +38,27 @@ enum class VilkårIkkeOppfyltÅrsak(val beskrivelse: String, val metrikkBeskrive
         vilkår = Vilkår.LOVLIG_OPPHOLD
     ),
     EØS_STATSBORGERSKAP_ANNEN_FORELDER_UKLART(
-        beskrivelse = "Mor har ikke lovlig opphold - annen forelder kan ikke avgjøres.",
+        beskrivelse = "Mor EØS borger uten oppholdsrett",
         metrikkBeskrivelse = "Statsborgerskap for annen forelder kan ikke avgjøres.",
         vilkår = Vilkår.LOVLIG_OPPHOLD
     ),
     EØS_BOR_IKKE_SAMMEN_MED_ANNEN_FORELDER(
-        beskrivelse = "Mor har ikke lovlig opphold - EØS borger. Bor ikke med annen forelder",
+        beskrivelse = "Mor EØS borger uten oppholdsrett",
         metrikkBeskrivelse = "Mor har ikke lovlig opphold - bor ikke med annen forelder",
         vilkår = Vilkår.LOVLIG_OPPHOLD
     ),
     EØS_ANNEN_FORELDER_EØS_MEN_IKKE_MED_LØPENDE_ARBEIDSFORHOLD(
-        beskrivelse = "Mor har ikke lovlig opphold - EØS borger. Annen forelder er fra EØS, men har ikke et løpende arbeidsforhold i Norge.",
+        beskrivelse = "Mor EØS borger uten oppholdsrett",
         metrikkBeskrivelse = "Annen forelder er fra EØS, men har ikke et løpende arbeidsforhold i Norge.",
         vilkår = Vilkår.LOVLIG_OPPHOLD
     ),
     EØS_MEDFORELDER_TREDJELANDSBORGER(
-        beskrivelse = "Mor har ikke lovlig opphold - EØS borger. Mor er ikke registrert med arbeidsforhold. Medforelder er tredjelandsborger.",
+        beskrivelse = "Mor EØS borger uten oppholdsrett",
         metrikkBeskrivelse = "Mor EØS. Ikke arb. MF tredjelandsborger",
         vilkår = Vilkår.LOVLIG_OPPHOLD
     ),
     EØS_MEDFORELDER_STATSLØS(
-        beskrivelse = "Mor har ikke lovlig opphold - EØS borger. Mor er ikke registrert med arbeidsforhold. Medforelder er statsløs.",
+        beskrivelse = "Mor EØS borger uten oppholdsrett",
         metrikkBeskrivelse = "Mor EØS. Ikke arb. MF statsløs",
         vilkår = Vilkår.LOVLIG_OPPHOLD
     );
