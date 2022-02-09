@@ -17,7 +17,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.EndretUtbetalingBrevPeriodeType
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.EndretUtbetalingBarnetrygdType
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.flettefelt
-import no.nav.familie.ba.sak.kjerne.brev.domene.tilBrevPeriodeGrunnlag
+import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.domene.Totrinnskontroll
@@ -347,7 +347,7 @@ internal class BrevUtilsTest {
         Assertions.assertEquals(
             "§§ 2, 4, 10 og 11",
             hentHjemmeltekst(
-                utvidetVedtaksperioderMedBegrunnelser.map { it.tilBrevPeriodeGrunnlag(hentSanityBegrunnelser()) },
+                utvidetVedtaksperioderMedBegrunnelser.map { it.tilMinimertVedtaksperiode(hentSanityBegrunnelser()) },
                 listOf(
                     lagSanityBegrunnelse(
                         apiNavn = VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET.sanityApiNavn,
@@ -386,8 +386,8 @@ internal class BrevUtilsTest {
         Assertions.assertEquals(
             "§§ 2, 4, 10 og 11",
             hentHjemmeltekst(
-                brevPeriodeGrunnlag = utvidetVedtaksperioderMedBegrunnelser.map {
-                    it.tilBrevPeriodeGrunnlag(
+                minimerteVedtaksperioder = utvidetVedtaksperioderMedBegrunnelser.map {
+                    it.tilMinimertVedtaksperiode(
                         hentSanityBegrunnelser()
                     )
                 },
@@ -430,8 +430,8 @@ internal class BrevUtilsTest {
         Assertions.assertEquals(
             "§§ 2, 4, 10, 11, 17 og 18",
             hentHjemmeltekst(
-                brevPeriodeGrunnlag = utvidetVedtaksperioderMedBegrunnelser.map {
-                    it.tilBrevPeriodeGrunnlag(
+                minimerteVedtaksperioder = utvidetVedtaksperioderMedBegrunnelser.map {
+                    it.tilMinimertVedtaksperiode(
                         hentSanityBegrunnelser()
                     )
                 },

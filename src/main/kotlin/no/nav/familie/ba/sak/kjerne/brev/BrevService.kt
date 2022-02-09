@@ -7,7 +7,7 @@ import no.nav.familie.ba.sak.common.Utils.storForbokstavIHvertOrd
 import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Autovedtak6og18årOgSmåbarnstillegg
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.AutovedtakNyfødtBarnFraFør
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.AutovedtakNyfødtFørsteBarn
@@ -28,16 +28,12 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.maler.SignaturVedtak
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VedtakEndring
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VedtakFellesfelter
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Vedtaksbrev
-import no.nav.familie.ba.sak.kjerne.brev.domene.tilBrevPeriodeGrunnlag
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
-import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.sorter
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
@@ -49,11 +45,10 @@ class BrevService(
     private val arbeidsfordelingService: ArbeidsfordelingService,
     private val simuleringService: SimuleringService,
     private val vedtaksperiodeService: VedtaksperiodeService,
-    private val søknadGrunnlagService: SøknadGrunnlagService,
+    private val brevPeriodeService: BrevPeriodeService,
     private val sanityService: SanityService,
-    private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val vilkårsvurderingService: VilkårsvurderingService,
-    private val endretUtbetalingAndelService: EndretUtbetalingAndelService,
+
 ) {
 
     fun hentVedtaksbrevData(vedtak: Vedtak): Vedtaksbrev {
@@ -174,37 +169,14 @@ class BrevService(
             )
         }
 
-        val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = vedtak.behandling.id)
-            ?: error("Finner ikke vilkårsvurdering ved begrunning av vedtak")
-        val endredeUtbetalingAndeler =
-            endretUtbetalingAndelService.hentForBehandling(behandlingId = vedtak.behandling.id)
-        val sanityBegrunnelser = sanityService.hentSanityBegrunnelser()
         val grunnlagOgSignaturData = hentGrunnlagOgSignaturData(vedtak)
-        val andelerTilkjentYtelse =
-            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(vedtak.behandling.id)
-        val restBehandlingsgrunnlagForBrev = hentRestBehandlingsgrunnlagForBrev(
-            vilkårsvurdering = vilkårsvurdering,
-            endredeUtbetalingAndeler = endredeUtbetalingAndeler,
-            persongrunnlag = grunnlagOgSignaturData.grunnlag
-        )
-        val uregistrerteBarn = søknadGrunnlagService.hentMinimerteUregistrerteBarn(vedtak.behandling.id)
+        val brevPerioderData =
+            utvidetVedtaksperioderMedBegrunnelser.map { brevPeriodeService.hentBrevperiodeData(it.id) }
+        val brevperioder = hentBrevPerioder(brevPerioderData)
 
-        val brevPerioderGrunnlag = utvidetVedtaksperioderMedBegrunnelser
-            .sorter()
-            .map { it.tilBrevPeriodeGrunnlag(sanityBegrunnelser) }
-
-        val brevperioder = hentBrevPerioder(
-            brevPerioderGrunnlag = brevPerioderGrunnlag,
-            andelerTilkjentYtelse = andelerTilkjentYtelse,
-            restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev,
-            uregistrerteBarn = uregistrerteBarn,
-            målform = grunnlagOgSignaturData.grunnlag.søker.målform
-        )
-
-        val hjemler = hentHjemmeltekst(
-            brevPeriodeGrunnlag = brevPerioderGrunnlag,
-            sanityBegrunnelser = sanityBegrunnelser,
-            opplysningspliktHjemlerSkalMedIBrev = vilkårsvurdering.finnOpplysningspliktVilkår()?.resultat == Resultat.IKKE_OPPFYLT
+        val hjemler = hentHjemler(
+            behandlingId = vedtak.behandling.id,
+            minimerteVedtaksperioder = brevPerioderData.map { it.minimertVedtaksperiode }
         )
 
         return VedtakFellesfelter(
@@ -215,6 +187,23 @@ class BrevService(
             søkerNavn = grunnlagOgSignaturData.grunnlag.søker.navn,
             søkerFødselsnummer = grunnlagOgSignaturData.grunnlag.søker.aktør.aktivFødselsnummer(),
             perioder = brevperioder
+        )
+    }
+
+    private fun hentHjemler(
+        behandlingId: Long,
+        minimerteVedtaksperioder: List<MinimertVedtaksperiode>
+    ): String {
+        val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandlingId)
+            ?: error("Finner ikke vilkårsvurdering ved begrunning av vedtak")
+
+        val opplysningspliktHjemlerSkalMedIBrev =
+            vilkårsvurdering.finnOpplysningspliktVilkår()?.resultat == Resultat.IKKE_OPPFYLT
+
+        return hentHjemmeltekst(
+            minimerteVedtaksperioder = minimerteVedtaksperioder,
+            sanityBegrunnelser = sanityService.hentSanityBegrunnelser(),
+            opplysningspliktHjemlerSkalMedIBrev = opplysningspliktHjemlerSkalMedIBrev
         )
     }
 
