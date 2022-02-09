@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.secureLogger
 import no.nav.familie.ba.sak.integrasjoner.statistikk.StatistikkClient
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.task.PubliserVedtakTask
 import no.nav.familie.eksterne.kontrakter.VedtakDVH
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -22,7 +23,8 @@ class StønadsstatistikkController(
     private val stønadsstatistikkService: StønadsstatistikkService,
     private val taskRepository: TaskRepositoryWrapper,
     private val behandlingRepository: BehandlingRepository,
-    private val statistikkClient: StatistikkClient
+    private val statistikkClient: StatistikkClient,
+    private val tilkjentYtelseRepository: TilkjentYtelseRepository
 ) {
 
     private val logger = LoggerFactory.getLogger(StønadsstatistikkController::class.java)
@@ -58,8 +60,8 @@ class StønadsstatistikkController(
         )
 
         manuelleMigreringer.forEach {
-            if (!statistikkClient.harSendtVedtaksmeldingForBehandling(it)) {
-                logger.info("Ettersender stønadstatistikk for $it")
+            if (!statistikkClient.harSendtVedtaksmeldingForBehandling(it) && erIverksattBehandling(it)) {
+                logger.info("Ettersender stønadstatistikk for behandlingId=$it dryRun=$dryRun")
                 val vedtakDVH = stønadsstatistikkService.hentVedtak(it)
                 if (!dryRun) {
                     secureLogger.info("Oppretter task for å ettersende vedtak $vedtakDVH.person.personIdent")
@@ -68,5 +70,13 @@ class StønadsstatistikkController(
                 }
             }
         }
+    }
+
+    private fun erIverksattBehandling(behandlingId: Long): Boolean {
+        val tilkjentYtelse = tilkjentYtelseRepository.findByBehandlingOptional(behandlingId)
+
+        return if (tilkjentYtelse != null) {
+            tilkjentYtelse.utbetalingsoppdrag != null
+        } else false
     }
 }
