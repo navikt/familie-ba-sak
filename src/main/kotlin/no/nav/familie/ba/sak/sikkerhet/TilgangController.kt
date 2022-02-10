@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.sikkerhet
 
 import no.nav.familie.ba.sak.ekstern.restDomene.TilgangDTO
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController
 class TilgangController(
     private val personopplysningerService: PersonopplysningerService,
     private val personidentService: PersonidentService,
-    private val integrasjonClient: IntegrasjonClient,
+    private val familieIntegrasjonerTilgangskontrollClient: FamilieIntegrasjonerTilgangskontrollClient,
 ) {
 
     @PostMapping(path = ["tilgang"], produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -28,7 +28,7 @@ class TilgangController(
 
         val adressebeskyttelse = personopplysningerService.hentAdressebeskyttelseSomSystembruker(aktør)
         val tilgang =
-            integrasjonClient.sjekkTilgangTilPersoner(listOf(tilgangRequestDTO.brukerIdent)).harTilgang
+            familieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(listOf(tilgangRequestDTO.brukerIdent)).harTilgang
         return ResponseEntity.ok(
             Ressurs.success(
                 data = TilgangDTO(
