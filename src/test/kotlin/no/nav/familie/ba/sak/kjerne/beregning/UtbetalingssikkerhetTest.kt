@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilBrevTekst
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -234,7 +235,7 @@ class UtbetalingssikkerhetTest {
             )
         }
 
-        assertTrue(feil.frontendFeilmelding?.contains("Det er allerede innvilget utbetaling av barnetrygd for ${barn.aktør.aktivFødselsnummer()}")!!)
+        assertTrue(feil.frontendFeilmelding?.contains("Du kan ikke godkjenne dette vedtaket fordi det vil betales ut mer enn 100% for barn født ${listOf(barn.fødselsdato).tilBrevTekst()}")!!)
     }
 
     @Test

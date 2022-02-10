@@ -170,8 +170,8 @@ private fun erReduksjonResultatUtgjøreneForPeriode(
             triggesAv.deltbosted
 
     val startNestePeriodeEtterVilkår = minimertVilkårResultat.periodeTom
-        .plusMonths(if (erOppfyltTomMånedEtter) 1 else 0)
         .plusDays(if (erStartPåDeltBosted) 1 else 0)
+        .plusMonths(if (erOppfyltTomMånedEtter) 1 else 0)
 
     return triggereForUtdypendeVilkårsvurderingErOppfylt(
         triggesAv = triggesAv,
