@@ -16,11 +16,10 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
-import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
+import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
 import no.nav.familie.ba.sak.kjerne.brev.DokumentService
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.domene.Totrinnskontroll
@@ -45,8 +44,7 @@ class BeslutteVedtakTest {
     private lateinit var dokumentService: DokumentService
     private lateinit var vilkårsvurderingService: VilkårsvurderingService
     private lateinit var featureToggleService: FeatureToggleService
-    private lateinit var beregningService: BeregningService
-    private lateinit var persongrunnlagService: PersongrunnlagService
+    private lateinit var tilkjentYtelseValideringService: TilkjentYtelseValideringService
 
     private val randomVilkårsvurdering = Vilkårsvurdering(behandling = lagBehandling())
 
@@ -59,8 +57,7 @@ class BeslutteVedtakTest {
         behandlingService = mockk()
         vilkårsvurderingService = mockk()
         featureToggleService = mockk()
-        beregningService = mockk()
-        persongrunnlagService = mockk()
+        tilkjentYtelseValideringService = mockk()
 
         val loggService = mockk<LoggService>()
 
@@ -91,8 +88,7 @@ class BeslutteVedtakTest {
             loggService,
             vilkårsvurderingService,
             featureToggleService,
-            beregningService,
-            persongrunnlagService
+            tilkjentYtelseValideringService
         )
     }
 
