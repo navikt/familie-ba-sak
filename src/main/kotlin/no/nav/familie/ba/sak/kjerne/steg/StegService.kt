@@ -373,13 +373,13 @@ class StegService(
             validerBehandlingIkkeSattPåVent(behandling, behandlingSteg)
 
             if (behandling.steg == SISTE_STEG) {
-                error("Behandling med id ${behandling.id} er avsluttet og stegprosessen kan ikke gjenåpnes")
+                throw FunksjonellFeil("Behandling med id ${behandling.id} er avsluttet og stegprosessen kan ikke gjenåpnes")
             }
 
             if (behandlingSteg.stegType().erSaksbehandlerSteg() && behandlingSteg.stegType()
                 .kommerEtter(behandling.steg)
             ) {
-                error(
+                throw FunksjonellFeil(
                     "${SikkerhetContext.hentSaksbehandlerNavn()} prøver å utføre steg '${
                     behandlingSteg.stegType()
                         .displayName()
@@ -389,7 +389,7 @@ class StegService(
 
             // TODO: Det bør sees på en ytterligere robustgjøring for alle steg som SB kan utføre.
             if (behandling.steg == StegType.BESLUTTE_VEDTAK && behandlingSteg.stegType() != StegType.BESLUTTE_VEDTAK) {
-                error(
+                throw FunksjonellFeil(
                     "Behandlingen er på steg '${behandling.steg.displayName()}', " +
                         "og er da låst for alle andre type endringer."
                 )
@@ -403,7 +403,7 @@ class StegService(
             stegSuksessMetrics[behandlingSteg.stegType()]?.increment()
 
             if (!nesteSteg.erGyldigIKombinasjonMedStatus(behandlingEtterUtførtSteg.status)) {
-                error("Steg '${nesteSteg.displayName()}' kan ikke settes på behandling i kombinasjon med status ${behandlingEtterUtførtSteg.status}")
+                throw Feil("Steg '${nesteSteg.displayName()}' kan ikke settes på behandling i kombinasjon med status ${behandlingEtterUtførtSteg.status}")
             }
 
             val returBehandling =
@@ -430,8 +430,8 @@ class StegService(
                 }
                 else -> {
                     stegFeiletMetrics[behandlingSteg.stegType()]?.increment()
-                    logger.error("Håndtering av stegtype '${behandlingSteg.stegType()}' feilet på behandling $behandling.")
-                    secureLogger.error(
+                    logger.info("Håndtering av stegtype '${behandlingSteg.stegType()}' feilet på behandling $behandling.")
+                    secureLogger.info(
                         "Håndtering av stegtype '${behandlingSteg.stegType()}' feilet på behandling $behandling.",
                         exception
                     )
@@ -447,7 +447,7 @@ class StegService(
         behandlingSteg: BehandlingSteg<*>
     ) {
         if (settPåVentService.finnAktivSettPåVentPåBehandling(behandlingId = behandling.id) != null) {
-            throw Feil(
+            throw FunksjonellFeil(
                 "${SikkerhetContext.hentSaksbehandlerNavn()} prøver å utføre steg " +
                     behandlingSteg.stegType() +
                     " på behandling ${behandling.id} som er på vent."

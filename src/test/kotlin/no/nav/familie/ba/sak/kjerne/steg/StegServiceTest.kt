@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
 import no.nav.familie.ba.sak.common.kjørStegprosessForRevurderingÅrligKontroll
 import no.nav.familie.ba.sak.common.lagBehandling
@@ -153,7 +154,7 @@ class StegServiceTest(
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
         assertEquals(FØRSTE_STEG, behandling.steg)
 
-        assertThrows<IllegalStateException> {
+        assertThrows<FunksjonellFeil> {
             stegService.håndterVilkårsvurdering(behandling)
         }
     }
@@ -172,7 +173,7 @@ class StegServiceTest(
 
         behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BEHANDLING_AVSLUTTET))
         behandling.status = BehandlingStatus.AVSLUTTET
-        val feil = assertThrows<IllegalStateException> {
+        val feil = assertThrows<FunksjonellFeil> {
             stegService.håndterSendTilBeslutter(behandling, "1234")
         }
         assertEquals(
@@ -195,7 +196,7 @@ class StegServiceTest(
 
         behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BESLUTTE_VEDTAK))
         behandling.status = BehandlingStatus.FATTER_VEDTAK
-        assertThrows<IllegalStateException> {
+        assertThrows<FunksjonellFeil> {
             stegService.håndterSendTilBeslutter(behandling, "1234")
         }
     }
@@ -210,7 +211,7 @@ class StegServiceTest(
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
         behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BESLUTTE_VEDTAK))
         behandling.status = BehandlingStatus.IVERKSETTER_VEDTAK
-        assertThrows<IllegalStateException> {
+        assertThrows<FunksjonellFeil> {
             stegService.håndterBeslutningForVedtak(
                 behandling,
                 RestBeslutningPåVedtak(beslutning = Beslutning.GODKJENT, begrunnelse = null)
@@ -284,7 +285,7 @@ class StegServiceTest(
 
         val behandlingEtterSendTilBeslutter = behandlingService.hent(behandlingId = vilkårsvurdertBehandling.id)
 
-        assertThrows<IllegalStateException> {
+        assertThrows<FunksjonellFeil> {
             stegService.håndterHenleggBehandling(
                 behandlingEtterSendTilBeslutter,
                 RestHenleggBehandlingInfo(
