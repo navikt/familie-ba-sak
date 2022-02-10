@@ -13,5 +13,6 @@ data class FiltreringsreglerFakta(
     val morLever: Boolean,
     val barnaLever: Boolean,
     val morHarVerge: Boolean,
+    val løperIkkeBarnetrygdForBarnet: Boolean,
     @JsonIgnore val dagensDato: LocalDate = LocalDate.now()
 )

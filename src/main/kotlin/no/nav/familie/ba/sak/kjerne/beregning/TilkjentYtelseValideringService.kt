@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import org.springframework.stereotype.Service
@@ -32,6 +33,12 @@ class TilkjentYtelseValideringService(
                 barnMedAndreRelevanteTilkjentYtelser = barnMedAndreRelevanteTilkjentYtelser,
                 personopplysningGrunnlag = personopplysningGrunnlag,
             )
+        }
+    }
+
+    fun validerAtBarnetrygdIkkeLøperForAnnenForelder(behandling: Behandling, barna: List<Person>): Boolean {
+        return barna.all {
+            beregningService.hentRelevanteTilkjentYtelserForBarn(barnAktør = it.aktør, fagsakId = behandling.fagsak.id).isEmpty()
         }
     }
 }
