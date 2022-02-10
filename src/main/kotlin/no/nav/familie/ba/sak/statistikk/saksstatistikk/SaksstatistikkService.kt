@@ -55,7 +55,7 @@ class SaksstatistikkService(
                 val journalpost = journalføringRepository
                     .findByBehandlingId(behandlingId)
                     .filter { it.type == DbJournalpostType.I }
-                journalpost.mapNotNull { journalføringService.hentJournalpost(it.journalpostId).data }
+                journalpost.map { journalføringService.hentJournalpost(it.journalpostId) }
                     .filter { it.tittel != null && it.tittel!!.contains("søknad", ignoreCase = true) }
                     .mapNotNull { it.datoMottatt }
                     .minOrNull() ?: behandling.opprettetTidspunkt

@@ -5,7 +5,6 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestJournalføring
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.kontrakter.felles.getDataOrThrow
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
@@ -31,12 +30,12 @@ class JournalføringController(
 
     @GetMapping(path = ["/{journalpostId}/hent"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun hentJournalpost(@PathVariable journalpostId: String): ResponseEntity<Ressurs<Journalpost>> {
-        return ResponseEntity.ok(journalføringService.hentJournalpost(journalpostId))
+        return ResponseEntity.ok(Ressurs.success(journalføringService.hentJournalpost(journalpostId)))
     }
 
     @GetMapping(path = ["/for-bruker/{brukerId}"])
     fun hentJournalposterForBruker(@PathVariable brukerId: String): ResponseEntity<Ressurs<List<Journalpost>>> {
-        return ResponseEntity.ok(journalføringService.hentJournalposterForBruker(brukerId))
+        return ResponseEntity.ok(Ressurs.success(journalføringService.hentJournalposterForBruker(brukerId)))
     }
 
     @GetMapping("/{journalpostId}/hent/{dokumentInfoId}")
@@ -44,7 +43,7 @@ class JournalføringController(
         @PathVariable journalpostId: String,
         @PathVariable dokumentInfoId: String
     ): ResponseEntity<Ressurs<ByteArray>> {
-        return ResponseEntity.ok(journalføringService.hentDokument(journalpostId, dokumentInfoId))
+        return ResponseEntity.ok(Ressurs.success(journalføringService.hentDokument(journalpostId, dokumentInfoId)))
     }
 
     @GetMapping(
@@ -55,7 +54,7 @@ class JournalføringController(
         @PathVariable journalpostId: String,
         @PathVariable dokumentInfoId: String
     ): ResponseEntity<ByteArray> {
-        return ResponseEntity.ok(journalføringService.hentDokument(journalpostId, dokumentInfoId).getDataOrThrow())
+        return ResponseEntity.ok(journalføringService.hentDokument(journalpostId, dokumentInfoId))
     }
 
     @PostMapping(path = ["/{journalpostId}/journalfør/{oppgaveId}"], produces = [MediaType.APPLICATION_JSON_VALUE])

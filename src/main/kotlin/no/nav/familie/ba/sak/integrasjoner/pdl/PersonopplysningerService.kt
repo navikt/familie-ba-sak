@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.integrasjoner.pdl
 
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjonMaskert
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service
 class PersonopplysningerService(
     private val pdlRestClient: PdlRestClient,
     private val systemOnlyPdlRestClient: SystemOnlyPdlRestClient,
-    private val integrasjonClient: IntegrasjonClient,
+    private val familieIntegrasjonerTilgangskontrollClient: FamilieIntegrasjonerTilgangskontrollClient,
 ) {
 
     fun hentPersoninfoMedRelasjonerOgRegisterinformasjon(aktør: Aktør): PersonInfo {
@@ -25,7 +25,7 @@ class PersonopplysningerService(
         val identerMedAdressebeskyttelse = mutableSetOf<Pair<Aktør, FORELDERBARNRELASJONROLLE>>()
         val forelderBarnRelasjon = personinfo.forelderBarnRelasjon.mapNotNull {
             val harTilgang =
-                integrasjonClient.sjekkTilgangTilPersoner(listOf(it.aktør.aktivFødselsnummer()))
+                familieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(listOf(it.aktør.aktivFødselsnummer()))
                     .harTilgang
             if (harTilgang) {
                 val relasjonsinfo = hentPersoninfoEnkel(it.aktør)
@@ -98,10 +98,5 @@ class PersonopplysningerService(
         const val UKJENT_LANDKODE = "ZZ"
     }
 }
-
-data class DødsfallResponse(
-    val erDød: Boolean,
-    val dødsdato: String?
-)
 
 data class VergeResponse(val harVerge: Boolean)

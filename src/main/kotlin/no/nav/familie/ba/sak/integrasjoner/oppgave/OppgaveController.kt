@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.integrasjoner.oppgave
 
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.RessursUtils.illegalState
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonInfo
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
@@ -12,7 +11,6 @@ import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.kontrakter.felles.getDataOrThrow
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
@@ -109,38 +107,20 @@ class OppgaveController(
             minimalFagsak = minimalFagsak
         )
 
-        val journalpost: Ressurs<Journalpost>? =
+        val journalpost: Journalpost? =
             if (oppgave.journalpostId == null) null else integrasjonClient.hentJournalpost(oppgave.journalpostId!!)
 
-        return when {
-            journalpost == null -> {
+        return when (journalpost) {
+            null -> {
                 ResponseEntity.ok(Ressurs.success(dataForManuellJournalføring))
             }
-            journalpost.status == Ressurs.Status.SUKSESS -> {
-                ResponseEntity.ok(
-                    Ressurs.success(
-                        dataForManuellJournalføring.copy(
-                            journalpost = journalpost.getDataOrThrow()
-                        )
+            else -> ResponseEntity.ok(
+                Ressurs.success(
+                    dataForManuellJournalføring.copy(
+                        journalpost = journalpost
                     )
                 )
-            }
-            journalpost.status == Ressurs.Status.FEILET -> ResponseEntity.ok(Ressurs.failure(journalpost.melding))
-            journalpost.status == Ressurs.Status.FUNKSJONELL_FEIL -> ResponseEntity.ok(
-                Ressurs.funksjonellFeil(
-                    journalpost.melding
-                )
             )
-            journalpost.status == Ressurs.Status.IKKE_TILGANG -> ResponseEntity.ok(
-                Ressurs(
-                    data = null,
-                    stacktrace = null,
-                    status = Ressurs.Status.IKKE_TILGANG,
-                    melding = journalpost.melding,
-                    frontendFeilmelding = "Ikke tilgang til journalpost"
-                )
-            )
-            else -> throw Feil("Ukjent status fra journalpost: ${journalpost.status}")
         }
     }
 }
