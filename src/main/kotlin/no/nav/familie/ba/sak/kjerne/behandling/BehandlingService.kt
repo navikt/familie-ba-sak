@@ -433,15 +433,16 @@ class BehandlingService(
 
     @Transactional
     fun lagreNedMigreringsdato(migreringsdato: LocalDate, behandling: Behandling) {
-        val behandlingMigreringsinfo = BehandlingMigreringsinfo(behandling = behandling, migreringsdato = migreringsdato)
+        val behandlingMigreringsinfo =
+            BehandlingMigreringsinfo(behandling = behandling, migreringsdato = migreringsdato)
         behandlingMigreringsinfoRepository.save(behandlingMigreringsinfo)
     }
 
-    fun hentMigreringsdatoIBehandling(behandlingId: Long): LocalDate {
-        return behandlingMigreringsinfoRepository.findByBehandlingId(behandlingId)
+    fun hentMigreringsdatoIBehandling(behandlingId: Long): LocalDate? {
+        return behandlingMigreringsinfoRepository.findByBehandlingId(behandlingId)?.migreringsdato
     }
 
-    fun hentMigreringsdatoPåFagsak(fagsakId: Long): LocalDate {
+    fun hentMigreringsdatoPåFagsak(fagsakId: Long): LocalDate? {
         return behandlingMigreringsinfoRepository.finnSisteMigreringsdatoPåFagsak(fagsakId)
     }
 

@@ -46,6 +46,8 @@ class RegistrerPersongrunnlag(
                 behandling = behandling,
                 målform = forrigeMålform
             )
+            // Lagre ned migreringsdato
+            kopierOgLagreNedMigeringsdatoFraSisteVedtattBehandling(forrigeBehandlingSomErVedtatt, behandling)
         } else {
             persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(
                 aktør = aktør,
@@ -88,6 +90,18 @@ class RegistrerPersongrunnlag(
         }
 
         return hentNesteStegForNormalFlyt(behandling)
+    }
+
+    private fun kopierOgLagreNedMigeringsdatoFraSisteVedtattBehandling(
+        forrigeBehandlingSomErVedtatt: Behandling,
+        behandling: Behandling
+    ) {
+        if (forrigeBehandlingSomErVedtatt.erMigrering()) {
+            val migreringsdato = behandlingService.hentMigreringsdatoIBehandling(forrigeBehandlingSomErVedtatt.id)
+            if (migreringsdato != null) {
+                behandlingService.lagreNedMigreringsdato(migreringsdato, behandling)
+            }
+        }
     }
 
     override fun stegType(): StegType {

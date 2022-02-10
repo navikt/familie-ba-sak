@@ -9,11 +9,11 @@ interface BehandlingMigreringsinfoRepository : JpaRepository<BehandlingMigrering
     @Query(
         """SELECT MAX(bm.migreringsdato) FROM BehandlingMigreringsinfo bm 
             INNER JOIN Behandling b ON bm.behandling.id = b.id 
-            INNER JOIN Fagsak f ON b.id = f.id 
+            INNER JOIN Fagsak f ON b.fagsak.id = f.id 
             WHERE f.id=:fagsakId"""
     )
-    fun finnSisteMigreringsdatoPåFagsak(fagsakId: Long): LocalDate
+    fun finnSisteMigreringsdatoPåFagsak(fagsakId: Long): LocalDate?
 
-    @Query("SELECT bm.migreringsdato FROM BehandlingMigreringsinfo bm INNER JOIN Behandling b ON bm.behandling.id = b.id ")
-    fun findByBehandlingId(behandlingId: Long): LocalDate
+    @Query("SELECT bm FROM BehandlingMigreringsinfo bm INNER JOIN Behandling b ON bm.behandling.id = b.id ")
+    fun findByBehandlingId(behandlingId: Long): BehandlingMigreringsinfo?
 }
