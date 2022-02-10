@@ -153,20 +153,6 @@ class IntegrasjonClientMock {
                 mockFamilieIntegrasjonerTilgangskontrollClient.hentMaskertPersonInfoVedManglendeTilgang(any())
             } returns null
 
-            val idSlotPersonMedRelasjoner = slot<String>()
-            every {
-                mockFamilieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersonMedRelasjoner(
-                    capture(
-                        idSlotPersonMedRelasjoner
-                    )
-                )
-            } answers {
-                if (idSlotPersonMedRelasjoner.captured.isNotEmpty() && idSlotPersonMedRelasjoner.captured == BARN_DET_IKKE_GIS_TILGANG_TIL_FNR)
-                    Tilgang(false, null)
-                else
-                    Tilgang(true, null)
-            }
-
             val idSlot = slot<List<String>>()
             every {
                 mockFamilieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(capture(idSlot))

@@ -1,12 +1,12 @@
 package no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner
 
+import no.nav.familie.ba.sak.common.kallEksternTjeneste
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonInfo
 import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.tilAdressebeskyttelse
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.http.client.AbstractRestClient
-import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.tilgangskontroll.Tilgang
 import org.springframework.beans.factory.annotation.Qualifier
@@ -24,8 +24,6 @@ class FamilieIntegrasjonerTilgangskontrollClient(
     private val systemOnlyPdlRestClient: SystemOnlyPdlRestClient
 ) : AbstractRestClient(restOperations, "integrasjon-tilgangskontroll") {
 
-    val tilgangRelasjonerUri: URI =
-        UriComponentsBuilder.fromUri(integrasjonUri).pathSegment(PATH_TILGANG_RELASJONER).build().toUri()
     val tilgangPersonUri: URI =
         UriComponentsBuilder.fromUri(integrasjonUri).pathSegment(PATH_TILGANG_PERSON).build().toUri()
 
@@ -34,28 +32,21 @@ class FamilieIntegrasjonerTilgangskontrollClient(
             return Tilgang(true, null)
         }
 
-        val tilganger = postForEntity<List<Tilgang>>(
-            tilgangPersonUri,
-            personIdenter,
-            HttpHeaders().also {
-                it.set(HEADER_NAV_TEMA, HEADER_NAV_TEMA_BAR)
-            }
-        )
-
-        return tilganger.firstOrNull { !it.harTilgang } ?: tilganger.first()
-    }
-
-    fun sjekkTilgangTilPersonMedRelasjoner(personIdent: String): Tilgang {
-        if (SikkerhetContext.erSystemKontekst()) {
-            return Tilgang(true, null)
+        val tilganger = kallEksternTjeneste<List<Tilgang>>(
+            tjeneste = "tilgangskontroll",
+            uri = tilgangPersonUri,
+            formål = "Sjekk tilgang til personer"
+        ) {
+            postForEntity(
+                tilgangPersonUri,
+                personIdenter,
+                HttpHeaders().also {
+                    it.set(HEADER_NAV_TEMA, HEADER_NAV_TEMA_BAR)
+                }
+            )
         }
 
-        return postForEntity(
-            tilgangRelasjonerUri, PersonIdent(personIdent),
-            HttpHeaders().also {
-                it.set(HEADER_NAV_TEMA, HEADER_NAV_TEMA_BAR)
-            }
-        )
+        return tilganger.firstOrNull { !it.harTilgang } ?: tilganger.first()
     }
 
     fun hentMaskertPersonInfoVedManglendeTilgang(aktør: Aktør): RestPersonInfo? {
@@ -72,7 +63,6 @@ class FamilieIntegrasjonerTilgangskontrollClient(
 
     companion object {
 
-        private const val PATH_TILGANG_RELASJONER = "tilgang/person-med-relasjoner"
         private const val PATH_TILGANG_PERSON = "tilgang/v2/personer"
         private const val HEADER_NAV_TEMA = "Nav-Tema"
         private val HEADER_NAV_TEMA_BAR = Tema.BAR.name
