@@ -11,7 +11,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatService
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
-import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering.validerAtBarnIkkeFårFlereUtbetalingerSammePeriode
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering.validerAtTilkjentYtelseHarFornuftigePerioderOgBeløp
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering.validerAtTilkjentYtelseHarGyldigEtterbetalingsperiode
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
@@ -92,23 +91,11 @@ class BehandlingsresultatSteg(
                 kravDato = tilkjentYtelse.behandling.opprettetTidspunkt
             )
         }
-        val barnMedAndreRelevanteTilkjentYtelser = personopplysningGrunnlag.barna.map {
-            Pair(
-                it,
-                beregningService.hentRelevanteTilkjentYtelserForBarn(it.aktør, behandling.fagsak.id)
-            )
-        }
 
         val endretUtbetalingAndeler = endretUtbetalingAndelService.hentForBehandling(behandling.id)
         validerAtAlleOpprettedeEndringerErUtfylt(endretUtbetalingAndeler)
         validerAtEndringerErTilknyttetAndelTilkjentYtelse(endretUtbetalingAndeler)
         validerAtDetFinnesDeltBostedEndringerMedSammeProsentForUtvidedeEndringer(endretUtbetalingAndeler)
-
-        validerAtBarnIkkeFårFlereUtbetalingerSammePeriode(
-            behandlendeBehandlingTilkjentYtelse = tilkjentYtelse,
-            barnMedAndreRelevanteTilkjentYtelser = barnMedAndreRelevanteTilkjentYtelser,
-            personopplysningGrunnlag = personopplysningGrunnlag,
-        )
 
         validerDeltBostedEndringerIkkeKrysserUtvidetYtelse(
             endretUtbetalingAndeler,
