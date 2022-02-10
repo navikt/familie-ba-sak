@@ -262,7 +262,13 @@ class YearMonthIterator(
 
     private var gjeldendeMåned = startMåned
 
-    override fun hasNext() = gjeldendeMåned.plusMonths(hoppMåneder) <= tilOgMedMåned
+    override fun hasNext() =
+        if (hoppMåneder > 0)
+            gjeldendeMåned.plusMonths(hoppMåneder) <= tilOgMedMåned.plusMonths(1)
+        else if (hoppMåneder < 0)
+            gjeldendeMåned.plusMonths(hoppMåneder) >= tilOgMedMåned.plusMonths(-1)
+        else
+            throw IllegalStateException("Steglengde kan ikke være null")
 
     override fun next(): YearMonth {
         val next = gjeldendeMåned

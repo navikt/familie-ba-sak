@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.eøs
 
 // ktlint-disable no-wildcard-imports
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.eøs.TestUtil.jan
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.MAX_MÅNED
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.MIN_MÅNED
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.RegelverkMåned
@@ -17,12 +18,12 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.YearMonth
 
-internal class EøsServiceTest {
+internal class EøsPeriodeTest {
 
     @Test
     fun skalFinneEøsPerioderKomplisertCase() {
 
-        VilkårsvurderingTester(YearMonth.of(2021, 1))
+        VilkårsvurderingTester(jan(2021))
             .medVilkår("----------------     ", UNDER_18_ÅR)
             .medVilkår("   EEE NNNN  EEEE--- ", BOSATT_I_RIKET)
             .medVilkår("     EEENNEEEEEEEEE  ", LOVLIG_OPPHOLD)
@@ -34,7 +35,7 @@ internal class EøsServiceTest {
     @Test
     fun skalFinneEøsPerioderÅpentCase() {
 
-        VilkårsvurderingTester(YearMonth.of(2021, 1))
+        VilkårsvurderingTester(jan(2021))
             .medVilkår("--------->", UNDER_18_ÅR)
             .medVilkår(" EEEE--EE>", BOSATT_I_RIKET)
             .medVilkår("EEEEEEEEE>", LOVLIG_OPPHOLD)
@@ -46,13 +47,13 @@ internal class EøsServiceTest {
     @Test
     fun skalFinneEøsPerioderÅpentToveisCase() {
 
-        VilkårsvurderingTester(YearMonth.of(2021, 1))
-            .medVilkår("<--------->", UNDER_18_ÅR)
-            .medVilkår("<EEEE--EE> ", BOSATT_I_RIKET)
+        VilkårsvurderingTester(jan(2021))
+            .medVilkår("---------->", UNDER_18_ÅR)
+            .medVilkår("EEEEE--EE> ", BOSATT_I_RIKET)
             .medVilkår(" E>        ", LOVLIG_OPPHOLD)
-            .medVilkår("<E>        ", BOR_MED_SØKER)
-            .medVilkår("<--------->", GIFT_PARTNERSKAP)
-            .harUtfall("  EEE?? E>")
+            .medVilkår("EE>        ", BOR_MED_SØKER)
+            .medVilkår("---------->", GIFT_PARTNERSKAP)
+            .harUtfall("  EEE?? EE>")
     }
 }
 

@@ -1,16 +1,17 @@
 package no.nav.familie.ba.sak.kjerne.eøs
 
-import no.nav.familie.ba.sak.common.rangeTo
+import no.nav.familie.ba.sak.common.NullableMånedPeriode
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.eøs.RegelverkPeriodeUtil.lagVilkårResultatMåneder
+import no.nav.familie.ba.sak.kjerne.eøs.RegelverkPeriodeUtil.slåSammenRegelverkMåneder
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.MAX_MÅNED
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.MIN_MÅNED
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.RegelverkMåned
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.RegelverkPeriode
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.VilkårResultatMåned
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.ekspanderÅpnePerioder
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
-import java.time.LocalDate
-import java.time.YearMonth
 
 object EøsUtil {
 
@@ -28,26 +29,21 @@ object EøsUtil {
         Vilkår.BOSATT_I_RIKET
     )
 
-    fun utledEøsPerioder(vilkårsresultater: List<VilkårResultat>) {
-        utledMånederMedRegelverk(
-            vilkårsresultater.flatMap {
-                splittPeriode(it.periodeFom, it.periodeTom)
-            }
-        )
+    fun utledEøsPerioder(vilkårsresultater: Collection<VilkårResultat>) =
+        utledRegelverkPerioder(vilkårsresultater)
+            .filter { it.vurderesEtter == Regelverk.EØS_FORORDNINGEN }
+            .map { NullableMånedPeriode(fom = it.fom, tom = it.tom) }
+
+    fun utledRegelverkPerioder(vilkårsresultater: Collection<VilkårResultat>): List<RegelverkPeriode> {
+        val vilkårResultatMåneder = lagVilkårResultatMåneder(vilkårsresultater)
+        val regelverkMåneder = utledMånederMedRegelverk(vilkårResultatMåneder)
+        return slåSammenRegelverkMåneder(regelverkMåneder)
     }
 
-    private fun splittPeriode(periodeFom: LocalDate?, periodeTom: LocalDate?): List<VilkårResultatMåned> {
-        return emptyList()
-    }
-
-    fun utledEøsPerioderFraMåneder(vilkårsresultater: List<VilkårResultatMåned>) {
-        utledMånederMedRegelverk(vilkårsresultater)
-    }
-
-    fun utledMånederMedRegelverk(vilkårsresultater: List<VilkårResultatMåned>): List<RegelverkMåned> {
-        val regelverkMåneder = vilkårsresultater
-            // Fyll opp med perioder slik at alle vilkårsperioder er like lange
-            .ekspanderMaksOgMin()
+    fun utledMånederMedRegelverk(vilkårsresultatMåneder: Collection<VilkårResultatMåned>): List<RegelverkMåned> {
+        val regelverkMåneder = vilkårsresultatMåneder
+            // Fyll opp med perioder slik at alle vilkårsperioder som sammenliknes er like lange, om mulig
+            .ekspanderÅpnePerioder()
             // Ta kun med oppfylte vilkår
             .filter { it.resultat == Resultat.OPPFYLT }
             // Ta bort vilkår som ikke er relevante
@@ -84,16 +80,6 @@ object EøsUtil {
                     (index > 0 && harMånedMedRegelverkRettFør(regelverkMåned, regelverkMåneder[index - 1]))
             }
     }
-
-    private fun Collection<VilkårResultatMåned>.ekspanderMaksOgMin(): Collection<VilkårResultatMåned> {
-
-        return this.groupBy { it.vilkårType }
-            .mapValues { (_, resultater) ->
-                resultater +
-                    ekspanderMaks(resultater, sisteFørMaks()?.måned) +
-                    ekspanderMin(resultater, førsteEtterMin()?.måned)
-            }.flatMap { (_, resultater) -> resultater }
-    }
 }
 
 private fun harMånedMedRegelverkRettFør(regelverkMåned: RegelverkMåned, forrigeRegelverkMåned: RegelverkMåned) =
@@ -102,35 +88,3 @@ private fun harMånedMedRegelverkRettFør(regelverkMåned: RegelverkMåned, forr
             forrigeRegelverkMåned.måned == regelverkMåned.måned.minusMonths(1) ||
                 regelverkMåned.måned == MAX_MÅNED
             )
-
-private fun Collection<VilkårResultatMåned>.sisteFørMaks(): VilkårResultatMåned? =
-    this.filter { it.måned != MAX_MÅNED && it.måned != MIN_MÅNED }
-        .maxByOrNull { it.måned }
-
-private fun Collection<VilkårResultatMåned>.førsteEtterMin(): VilkårResultatMåned? =
-    this.filter { it.måned != MAX_MÅNED && it.måned != MIN_MÅNED }
-        .minByOrNull { it.måned }
-
-private fun ekspanderMaks(
-    resultater: Collection<VilkårResultatMåned>,
-    oppTil: YearMonth?
-): Collection<VilkårResultatMåned> {
-    val sisteResultat = resultater.sisteFørMaks()
-    return if (resultater.firstOrNull { it.måned == MAX_MÅNED } == null || oppTil == null || sisteResultat == null) {
-        emptyList()
-    } else {
-        (sisteResultat.måned..oppTil).map { sisteResultat.copy(måned = it) }
-    }
-}
-
-private fun ekspanderMin(
-    resultater: Collection<VilkårResultatMåned>,
-    nedTil: YearMonth?
-): Collection<VilkårResultatMåned> {
-    val førsteResultat = resultater.førsteEtterMin()
-    return if (resultater.firstOrNull { it.måned == MIN_MÅNED } == null || nedTil == null || førsteResultat == null) {
-        emptyList()
-    } else {
-        (nedTil..førsteResultat.måned).map { førsteResultat.copy(måned = it) }
-    }
-}

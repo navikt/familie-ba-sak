@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.eøs
 
-import no.nav.familie.ba.sak.common.Periode
+import no.nav.familie.ba.sak.common.NullableMånedPeriode
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -20,7 +20,7 @@ class EøsController(val eøsService: EøsService) {
     @GetMapping(path = ["{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun utledEøsPerioder(
         @PathVariable behandlingId: Long
-    ): ResponseEntity<Ressurs<Map<Person, Periode>>> {
+    ): ResponseEntity<Ressurs<Map<Person, List<NullableMånedPeriode>>>> {
         return ResponseEntity.ok(Ressurs.success(eøsService.utledEøsPerioder(behandlingId)))
     }
 }
