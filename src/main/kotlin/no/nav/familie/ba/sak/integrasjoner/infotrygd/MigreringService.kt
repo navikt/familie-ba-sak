@@ -194,7 +194,7 @@ class MigreringService(
     private fun validerAtBarnErIRelasjonMedPersonident(personAktør: Aktør, barnasAktør: List<Aktør>) {
         val barnasIdenter = barnasAktør.map { it.aktivFødselsnummer() }
 
-        val listeBarnFraPdl = pdlRestClient.hentForelderBarnRelasjon(personAktør)
+        val listeBarnFraPdl = pdlRestClient.hentForelderBarnRelasjoner(personAktør)
             .filter { it.relatertPersonsRolle == FORELDERBARNRELASJONROLLE.BARN }
             .map { it.relatertPersonsIdent }
         if (!listeBarnFraPdl.containsAll(barnasIdenter)) {

@@ -24,9 +24,7 @@ import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.task.OpprettOppgaveTask
 import no.nav.familie.kontrakter.felles.BrukerIdType
-import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.Tema
-import no.nav.familie.kontrakter.felles.getDataOrThrow
 import no.nav.familie.kontrakter.felles.journalpost.Bruker
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.journalpost.JournalposterForBrukerRequest
@@ -49,15 +47,15 @@ class JournalføringService(
     private val journalføringMetrikk: JournalføringMetrikk
 ) {
 
-    fun hentDokument(journalpostId: String, dokumentInfoId: String): Ressurs<ByteArray> {
+    fun hentDokument(journalpostId: String, dokumentInfoId: String): ByteArray {
         return integrasjonClient.hentDokument(dokumentInfoId, journalpostId)
     }
 
-    fun hentJournalpost(journalpostId: String): Ressurs<Journalpost> {
+    fun hentJournalpost(journalpostId: String): Journalpost {
         return integrasjonClient.hentJournalpost(journalpostId)
     }
 
-    fun hentJournalposterForBruker(brukerId: String): Ressurs<List<Journalpost>> {
+    fun hentJournalposterForBruker(brukerId: String): List<Journalpost> {
         return integrasjonClient.hentJournalposterForBruker(
             JournalposterForBrukerRequest(
                 antall = 1000,
@@ -171,7 +169,7 @@ class JournalføringService(
             behandlinger = behandlinger
         )
 
-        journalføringMetrikk.tellManuellJournalføringsmetrikker(journalpost.data, request, behandlinger)
+        journalføringMetrikk.tellManuellJournalføringsmetrikker(journalpost, request, behandlinger)
         return sak.fagsakId ?: ""
     }
 
@@ -184,7 +182,7 @@ class JournalføringService(
             behandlingService.hent(it.toLong())
         }
 
-        val journalpost = hentJournalpost(journalpostId).getDataOrThrow()
+        val journalpost = hentJournalpost(journalpostId)
         behandlinger.forEach {
             journalføringRepository.save(
                 DbJournalpost(
@@ -223,7 +221,7 @@ class JournalføringService(
         val nyeVedlegg = request.logiskeVedlegg.partition { request.eksisterendeLogiskeVedlegg.contains(it) }.second
 
         val dokumentInfoId = request.dokumentInfoId.takeIf { it.isNotEmpty() }
-            ?: hentJournalpost(journalpostId).data?.dokumenter?.first()?.dokumentInfoId
+            ?: hentJournalpost(journalpostId).dokumenter?.first()?.dokumentInfoId
             ?: error("Fant ikke dokumentInfoId på journalpost")
 
         fjernedeVedlegg.forEach {
@@ -250,7 +248,7 @@ class JournalføringService(
             )
             integrasjonClient.ferdigstillOppgave(oppgaveId = oppgaveId.toLong())
         }.onFailure {
-            hentJournalpost(journalpostId).data?.journalstatus.apply {
+            hentJournalpost(journalpostId).journalstatus.apply {
                 if (this == FERDIGSTILT) {
                     integrasjonClient.ferdigstillOppgave(oppgaveId = oppgaveId.toLong())
                 } else {
@@ -271,7 +269,7 @@ class JournalføringService(
 
     private fun genererOgOpprettLogg(journalpostId: String, behandlinger: List<Behandling>) {
         val journalpost = hentJournalpost(journalpostId)
-        val loggTekst = journalpost.data?.dokumenter?.fold("") { loggTekst, dokumentInfo ->
+        val loggTekst = journalpost.dokumenter?.fold("") { loggTekst, dokumentInfo ->
             loggTekst +
                 "${dokumentInfo.tittel}" +
                 dokumentInfo.logiskeVedlegg?.fold("") { logiskeVedleggTekst, logiskVedlegg ->
@@ -283,7 +281,7 @@ class JournalføringService(
             frontendFeilmelding = "Noe gikk galt. Prøv igjen eller kontakt brukerstøtte hvis problemet vedvarer."
         )
 
-        val datoMottatt = journalpost.data?.datoMottatt ?: throw FunksjonellFeil(
+        val datoMottatt = journalpost.datoMottatt ?: throw FunksjonellFeil(
             "Fant ingen dokumenter",
             frontendFeilmelding = "Noe gikk galt. Prøv igjen eller kontakt brukerstøtte hvis problemet vedvarer."
         )

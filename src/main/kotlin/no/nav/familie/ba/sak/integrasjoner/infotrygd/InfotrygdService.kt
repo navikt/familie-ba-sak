@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.integrasjoner.infotrygd
 
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service
 @Service
 class InfotrygdService(
     private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
-    private val integrasjonClient: IntegrasjonClient,
+    private val familieIntegrasjonerTilgangskontrollClient: FamilieIntegrasjonerTilgangskontrollClient,
     private val personidentService: PersonidentService,
     private val personopplysningerService: PersonopplysningerService
 ) {
@@ -26,7 +26,7 @@ class InfotrygdService(
 
     fun hentMaskertRestInfotrygdsakerVedManglendeTilgang(aktør: Aktør): RestInfotrygdsaker? {
         val harTilgang =
-            integrasjonClient.sjekkTilgangTilPersoner(listOf(aktør.aktivFødselsnummer())).harTilgang
+            familieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(listOf(aktør.aktivFødselsnummer())).harTilgang
         return if (!harTilgang) {
             RestInfotrygdsaker(
                 adressebeskyttelsegradering = personopplysningerService.hentAdressebeskyttelseSomSystembruker(aktør),
@@ -44,7 +44,7 @@ class InfotrygdService(
 
     fun hentMaskertRestInfotrygdstønaderVedManglendeTilgang(aktør: Aktør): RestInfotrygdstønader? {
         val harTilgang =
-            integrasjonClient.sjekkTilgangTilPersoner(listOf(aktør.aktivFødselsnummer())).harTilgang
+            familieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(listOf(aktør.aktivFødselsnummer())).harTilgang
         return if (!harTilgang) {
             RestInfotrygdstønader(
                 adressebeskyttelsegradering = personopplysningerService.hentAdressebeskyttelseSomSystembruker(

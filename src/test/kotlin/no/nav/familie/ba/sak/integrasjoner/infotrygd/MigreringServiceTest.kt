@@ -136,7 +136,7 @@ class MigreringServiceTest(
 
         val slotAktør = slot<Aktør>()
 
-        every { pdlRestClient.hentForelderBarnRelasjon(capture(slotAktør)) } answers {
+        every { pdlRestClient.hentForelderBarnRelasjoner(capture(slotAktør)) } answers {
             infotrygdBarnetrygdClient.hentSaker(listOf(slotAktør.captured.aktivFødselsnummer())).bruker.first().stønad!!.barn.map {
                 ForelderBarnRelasjon(
                     relatertPersonsIdent = it.barnFnr!!,
@@ -259,7 +259,7 @@ class MigreringServiceTest(
         every {
             infotrygdBarnetrygdClient.hentSaker(any(), any())
         } returns InfotrygdSøkResponse(listOf(opprettSakMedBeløp(SAK_BELØP_2_BARN_1_UNDER_6)), emptyList())
-        every { pdlRestClient.hentForelderBarnRelasjon(any()) } returns
+        every { pdlRestClient.hentForelderBarnRelasjoner(any()) } returns
             listOf(
                 ForelderBarnRelasjon(
                     relatertPersonsIdent = barnUnder18,

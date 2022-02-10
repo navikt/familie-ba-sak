@@ -5,7 +5,7 @@ import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import no.nav.familie.ba.sak.config.tilAktør
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.kontrakter.ba.infotrygd.InfotrygdSøkResponse
@@ -26,7 +26,7 @@ class InfotrygdControllerTest {
     lateinit var personopplysningerService: PersonopplysningerService
 
     @MockK
-    lateinit var integrasjonClient: IntegrasjonClient
+    lateinit var mockFamilieIntegrasjonerTilgangskontrollClient: FamilieIntegrasjonerTilgangskontrollClient
 
     @MockK
     lateinit var infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient
@@ -49,7 +49,7 @@ class InfotrygdControllerTest {
         val fnr = "12345678910"
 
         every { personidentService.hentOgLagreAktør(fnr) } returns tilAktør(fnr)
-        every { integrasjonClient.sjekkTilgangTilPersoner(any()) } returns Tilgang(true)
+        every { mockFamilieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(any()) } returns Tilgang(true)
         every {
             infotrygdBarnetrygdClient.hentSaker(
                 any(),
@@ -68,7 +68,7 @@ class InfotrygdControllerTest {
         val fnr = "12345678910"
 
         every { personidentService.hentOgLagreAktør(fnr) } returns tilAktør(fnr)
-        every { integrasjonClient.sjekkTilgangTilPersoner(any()) } returns Tilgang(false)
+        every { mockFamilieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(any()) } returns Tilgang(false)
         every { personopplysningerService.hentAdressebeskyttelseSomSystembruker(any()) } returns ADRESSEBESKYTTELSEGRADERING.FORTROLIG
 
         val respons = infotrygdController.hentInfotrygdsakerForSøker(Personident(fnr))

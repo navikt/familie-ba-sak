@@ -4,7 +4,8 @@ import com.github.tomakehurst.wiremock.client.WireMock
 import io.mockk.every
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.tilAktør
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollClient
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonException
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
@@ -16,7 +17,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
-import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestOperations
 import java.net.URI
 import java.time.LocalDate
@@ -27,7 +27,7 @@ internal class PersonopplysningerServiceTest(
     private val restTemplate: RestOperations,
 
     @Autowired
-    private val mockIntegrasjonClient: IntegrasjonClient,
+    private val mockFamilieIntegrasjonerTilgangskontrollClient: FamilieIntegrasjonerTilgangskontrollClient,
 
     @Autowired
     private val mockPersonidentService: PersonidentService
@@ -46,7 +46,7 @@ internal class PersonopplysningerServiceTest(
                     restTemplate,
                     mockPersonidentService
                 ),
-                mockIntegrasjonClient,
+                mockFamilieIntegrasjonerTilgangskontrollClient,
             )
         lagMockForPersoner()
     }
@@ -55,10 +55,10 @@ internal class PersonopplysningerServiceTest(
     fun `hentPersoninfoMedRelasjonerOgRegisterinformasjon() skal return riktig personinfo`() {
 
         every {
-            mockIntegrasjonClient.sjekkTilgangTilPersoner(listOf(ID_BARN_1))
+            mockFamilieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(listOf(ID_BARN_1))
         } returns Tilgang(true, null)
         every {
-            mockIntegrasjonClient.sjekkTilgangTilPersoner(listOf(ID_BARN_2))
+            mockFamilieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(listOf(ID_BARN_2))
         } returns Tilgang(false, null)
 
         val personInfo = personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(tilAktør(ID_MOR))
@@ -74,10 +74,10 @@ internal class PersonopplysningerServiceTest(
     @Test
     fun `hentPersoninfoMedRelasjonerOgRegisterinformasjon() skal returnere riktig personinfo for død person`() {
         every {
-            mockIntegrasjonClient.sjekkTilgangTilPersoner(listOf(ID_BARN_1))
+            mockFamilieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(listOf(ID_BARN_1))
         } returns Tilgang(true, null)
         every {
-            mockIntegrasjonClient.sjekkTilgangTilPersoner(listOf(ID_BARN_2))
+            mockFamilieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(listOf(ID_BARN_2))
         } returns Tilgang(false, null)
 
         val personInfo = personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(
@@ -136,7 +136,7 @@ internal class PersonopplysningerServiceTest(
 
     @Test
     fun `hentadressebeskyttelse feiler`() {
-        assertThrows<HttpClientErrorException> {
+        assertThrows<IntegrasjonException> {
             personopplysningerService.hentAdressebeskyttelseSomSystembruker(
                 tilAktør(
                     ID_MOR

@@ -8,7 +8,7 @@ import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsakDeltager
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
@@ -61,7 +61,7 @@ class FagsakServiceTest(
     private val saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository,
 
     @Autowired
-    private val integrasjonClient: IntegrasjonClient
+    private val mockFamilieIntegrasjonerTilgangskontrollClient: FamilieIntegrasjonerTilgangskontrollClient
 ) : AbstractSpringIntegrationTest() {
 
     @BeforeAll
@@ -348,7 +348,7 @@ class FagsakServiceTest(
     // Satte XX for at dette testet skal kjøre sist.
     fun `XX Søk på fnr som ikke finnes i PDL skal vi tom liste`() {
         every {
-            integrasjonClient.sjekkTilgangTilPersoner(any())
+            mockFamilieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(any())
         } answers {
             throw HttpServerErrorException(
                 HttpStatus.INTERNAL_SERVER_ERROR,

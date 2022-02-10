@@ -16,6 +16,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
+import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
 import no.nav.familie.ba.sak.kjerne.brev.DokumentService
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
@@ -43,6 +44,7 @@ class BeslutteVedtakTest {
     private lateinit var dokumentService: DokumentService
     private lateinit var vilkårsvurderingService: VilkårsvurderingService
     private lateinit var featureToggleService: FeatureToggleService
+    private lateinit var tilkjentYtelseValideringService: TilkjentYtelseValideringService
 
     private val randomVilkårsvurdering = Vilkårsvurdering(behandling = lagBehandling())
 
@@ -55,6 +57,7 @@ class BeslutteVedtakTest {
         behandlingService = mockk()
         vilkårsvurderingService = mockk()
         featureToggleService = mockk()
+        tilkjentYtelseValideringService = mockk()
 
         val loggService = mockk<LoggService>()
 
@@ -85,6 +88,7 @@ class BeslutteVedtakTest {
             loggService,
             vilkårsvurderingService,
             featureToggleService,
+            tilkjentYtelseValideringService
         )
     }
 
