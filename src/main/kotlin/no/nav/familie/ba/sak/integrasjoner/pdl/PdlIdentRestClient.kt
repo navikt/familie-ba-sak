@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.integrasjoner.pdl
 
+import no.nav.familie.ba.sak.common.kallEksternTjeneste
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.IdentInformasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlBaseResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlHentIdenterResponse
@@ -42,11 +43,17 @@ class PdlIdentRestClient(
             variables = PdlPersonRequestVariables(personIdent),
             query = hentIdenterQuery
         )
-        val pdlResponse: PdlBaseResponse<PdlHentIdenterResponse> = postForEntity(
-            pdlUri,
-            pdlPersonRequest,
-            httpHeaders()
-        )
+        val pdlResponse: PdlBaseResponse<PdlHentIdenterResponse> = kallEksternTjeneste(
+            tjeneste = "pdl",
+            uri = pdlUri,
+            formål = "Hent identer"
+        ) {
+            postForEntity(
+                pdlUri,
+                pdlPersonRequest,
+                httpHeaders()
+            )
+        }
 
         return feilsjekkOgReturnerData(
             ident = personIdent,

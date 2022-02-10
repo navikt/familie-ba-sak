@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.integrasjoner.pdl
 
+import no.nav.familie.ba.sak.common.kallEksternTjeneste
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlAdressebeskyttelseResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlBaseResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlPersonRequest
@@ -29,8 +30,14 @@ class SystemOnlyPdlRestClient(
             query = hentGraphqlQuery("hent-adressebeskyttelse")
         )
 
-        val pdlResponse: PdlBaseResponse<PdlAdressebeskyttelseResponse> =
+        val pdlResponse: PdlBaseResponse<PdlAdressebeskyttelseResponse> = kallEksternTjeneste(
+            tjeneste = "pdl",
+            uri = pdlUri,
+            formål = "Hent adressebeskyttelse"
+        ) {
             postForEntity(pdlUri, pdlPersonRequest, httpHeaders())
+        }
+
         return feilsjekkOgReturnerData(
             ident = aktør.aktivFødselsnummer(),
             pdlResponse = pdlResponse

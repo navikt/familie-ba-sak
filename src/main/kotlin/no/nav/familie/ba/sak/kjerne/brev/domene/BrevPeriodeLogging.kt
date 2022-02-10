@@ -33,7 +33,7 @@ data class BrevPeriodePersonForLogging(
     val fødselsdato: LocalDate,
     val type: PersonType,
     val overstyrteVilkårresultater: List<MinimertVilkårResultat>,
-    val minimerteAndreVurderinger: List<MinimertAnnenVurdering>,
+    val andreVurderinger: List<MinimertAnnenVurdering>,
     val endredeUtbetalinger: List<EndretUtbetalingAndelPåPersonForLogging>,
     val utbetalinger: List<UtbetalingPåPersonForLogging>
 )
