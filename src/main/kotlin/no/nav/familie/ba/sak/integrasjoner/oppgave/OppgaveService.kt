@@ -77,7 +77,7 @@ class OppgaveService(
                 behandlingstype = behandling.kategori.tilBehandlingstype().value,
                 tilordnetRessurs = tilordnetNavIdent
             )
-            val opprettetOppgaveId = integrasjonClient.opprettOppgave(opprettOppgave)
+            val opprettetOppgaveId = integrasjonClient.opprettOppgave(opprettOppgave).oppgaveId.toString()
 
             val oppgave = DbOppgave(gsakId = opprettetOppgaveId, behandling = behandling, type = oppgavetype)
             oppgaveRepository.save(oppgave)
@@ -118,7 +118,7 @@ class OppgaveService(
             }
         }
 
-        return integrasjonClient.fordelOppgave(oppgaveId, saksbehandler)
+        return integrasjonClient.fordelOppgave(oppgaveId, saksbehandler).oppgaveId.toString()
     }
 
     fun tilbakestillFordelingPåOppgave(oppgaveId: Long): Oppgave {

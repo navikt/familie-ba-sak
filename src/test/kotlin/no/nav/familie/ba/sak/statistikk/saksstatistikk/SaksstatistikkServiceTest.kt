@@ -40,7 +40,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext.SYSTEM_FORKORTELSE
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext.SYSTEM_NAVN
-import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.journalpost.RelevantDato
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
@@ -256,7 +255,7 @@ internal class SaksstatistikkServiceTest(
                 )
             )
         )
-        every { journalføringService.hentJournalpost(any()) } returns Ressurs.Companion.success(jp)
+        every { journalføringService.hentJournalpost(any()) } returns jp
 
         val behandlingDvh = sakstatistikkService.mapTilBehandlingDVH(2)
         println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(behandlingDvh))
