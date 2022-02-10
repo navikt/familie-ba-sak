@@ -15,11 +15,11 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.G
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.filtrerGjeldendeNå
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.vurderOmPersonerBorSammen
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.opphold.GrOpphold
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.opphold.gyldigGjeldendeOppholdstillatelseFødselshendelse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.hentSterkesteMedlemskap
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import org.slf4j.LoggerFactory
 import java.time.Duration
@@ -40,8 +40,8 @@ data class VurderPersonErBosattIRiket(
             val person = adresser.first().person
             secureLogger.info(
                 "Har ugyldige adresser på person (${person?.aktør?.aktivFødselsnummer()}, ${person?.type}): ${
-                adresser.filter { !it.harGyldigFom() }
-                    .map { "(${it.periode?.fom}, ${it.periode?.tom}): ${it.toSecureString()}" }
+                    adresser.filter { !it.harGyldigFom() }
+                        .map { "(${it.periode?.fom}, ${it.periode?.tom}): ${it.toSecureString()}" }
                 }"
             )
         }
@@ -166,20 +166,18 @@ data class VurderPersonHarLovligOpphold(
         return when (morLovligOppholdFaktaEØS.statsborgerskap.hentSterkesteMedlemskap()) {
             Medlemskap.NORDEN -> Evaluering.oppfylt(VilkårOppfyltÅrsak.NORDISK_STATSBORGER)
             Medlemskap.TREDJELANDSBORGER -> {
-                val nåværendeOpphold = opphold.singleOrNull { it.gjeldendeNå() }
-                if (nåværendeOpphold == null || nåværendeOpphold.type == OPPHOLDSTILLATELSE.OPPLYSNING_MANGLER) {
-                    Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.TREDJELANDSBORGER_UTEN_LOVLIG_OPPHOLD)
-                } else Evaluering.oppfylt(VilkårOppfyltÅrsak.TREDJELANDSBORGER_MED_LOVLIG_OPPHOLD)
+                if (opphold.gyldigGjeldendeOppholdstillatelseFødselshendelse()) {
+                    Evaluering.oppfylt(VilkårOppfyltÅrsak.TREDJELANDSBORGER_MED_LOVLIG_OPPHOLD)
+                } else Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.TREDJELANDSBORGER_UTEN_LOVLIG_OPPHOLD)
             }
             Medlemskap.EØS -> vurderLovligOppholdForEØSBorger(
                 morLovligOppholdFaktaEØS,
                 annenForelderLovligOppholdFaktaEØS
             )
             Medlemskap.STATSLØS, Medlemskap.UKJENT -> {
-                val nåværendeOpphold = opphold.singleOrNull { it.gjeldendeNå() }
-                if (nåværendeOpphold == null || nåværendeOpphold.type == OPPHOLDSTILLATELSE.OPPLYSNING_MANGLER) {
-                    Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.STATSLØS)
-                } else Evaluering.oppfylt(VilkårOppfyltÅrsak.UKJENT_STATSBORGERSKAP_MED_LOVLIG_OPPHOLD)
+                if (opphold.gyldigGjeldendeOppholdstillatelseFødselshendelse()) {
+                    Evaluering.oppfylt(VilkårOppfyltÅrsak.UKJENT_STATSBORGERSKAP_MED_LOVLIG_OPPHOLD)
+                } else Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.STATSLØS)
             }
             else -> Evaluering.ikkeVurdert(VilkårKanskjeOppfyltÅrsak.LOVLIG_OPPHOLD_IKKE_MULIG_Å_FASTSETTE)
         }
