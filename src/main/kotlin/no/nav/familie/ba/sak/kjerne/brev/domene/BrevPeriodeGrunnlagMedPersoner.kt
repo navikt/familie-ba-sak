@@ -26,8 +26,8 @@ data class BrevPeriodeGrunnlagMedPersoner(
 
         val begrunnelser = this.begrunnelser
             .sortedBy { it.vedtakBegrunnelseType }
-            .map { brevBegrunnelseGrunnlagMedPersoner ->
-                brevBegrunnelseGrunnlagMedPersoner.tilBrevBegrunnelse(
+            .map {
+                it.tilBrevBegrunnelse(
                     vedtaksperiode = NullablePeriode(this.fom, this.tom),
                     personerIPersongrunnlag = restBehandlingsgrunnlagForBrev.personerPåBehandling,
                     brevMålform = brevMålform,
