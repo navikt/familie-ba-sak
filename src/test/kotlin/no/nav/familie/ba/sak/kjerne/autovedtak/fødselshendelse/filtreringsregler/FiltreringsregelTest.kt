@@ -467,6 +467,28 @@ internal class FiltreringsregelTest {
         Assertions.assertTrue(evalueringer.erOppfylt())
     }
 
+    @Test
+    fun `Skal returnere ikke oppfylt for regelevaluering når det allerede løper barnetrygd for barnet på annen forelder`() {
+        val søkerPerson =
+            tilfeldigSøker(fødselsdato = LocalDate.parse("1962-10-23"), aktør = tilAktør("04086226621"))
+        val barn1Person =
+            tilfeldigPerson(fødselsdato = LocalDate.parse("2020-10-23"), aktør = tilAktør("23102000000"))
+
+        val evalueringer =
+            evaluerFiltreringsregler(
+                FiltreringsreglerFakta(
+                    mor = søkerPerson,
+                    barnaFraHendelse = listOf(barn1Person),
+                    restenAvBarna = listOf(),
+                    morLever = true,
+                    barnaLever = true,
+                    morHarVerge = false,
+                    løperIkkeBarnetrygdForBarnet = false
+                )
+            )
+        Assertions.assertTrue(!evalueringer.erOppfylt())
+    }
+
     private fun assertEnesteRegelMedResultatNei(evalueringer: List<Evaluering>, filtreringsRegel: Filtreringsregel) {
         assertThat(1).isEqualTo(evalueringer.filter { it.resultat == Resultat.IKKE_OPPFYLT }.size)
         assertThat(filtreringsRegel.name)
