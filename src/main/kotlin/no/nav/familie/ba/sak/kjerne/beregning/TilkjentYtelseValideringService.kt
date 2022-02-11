@@ -36,9 +36,9 @@ class TilkjentYtelseValideringService(
         }
     }
 
-    fun validerAtBarnetrygdIkkeLøperForAnnenForelder(behandling: Behandling, barna: List<Person>): Boolean {
-        return barna.all {
-            beregningService.hentRelevanteTilkjentYtelserForBarn(barnAktør = it.aktør, fagsakId = behandling.fagsak.id).isEmpty()
+    fun barnetrygdLøperForAnnenForelder(behandling: Behandling, barna: List<Person>): Boolean {
+        return barna.any {
+            beregningService.hentRelevanteTilkjentYtelserForBarn(barnAktør = it.aktør, fagsakId = behandling.fagsak.id).isNotEmpty()
         }
     }
 }

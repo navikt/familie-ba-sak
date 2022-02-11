@@ -132,7 +132,7 @@ class FiltreringsregelForFlereBarnTest {
             )
         } returns listOf(barnAktør0, barnAktør1)
 
-        every { tilkjentYtelseValideringServiceMock.validerAtBarnetrygdIkkeLøperForAnnenForelder(any(), any()) } returns true
+        every { tilkjentYtelseValideringServiceMock.barnetrygdLøperForAnnenForelder(any(), any()) } returns false
 
         val fødselshendelsefiltreringResultater = filtreringsreglerService.kjørFiltreringsregler(
             NyBehandlingHendelse(
@@ -195,7 +195,7 @@ class FiltreringsregelForFlereBarnTest {
             )
         } returns listOf(barnAktør0, barnAktør1)
 
-        every { tilkjentYtelseValideringServiceMock.validerAtBarnetrygdIkkeLøperForAnnenForelder(any(), any()) } returns true
+        every { tilkjentYtelseValideringServiceMock.barnetrygdLøperForAnnenForelder(any(), any()) } returns false
 
         val fødselshendelsefiltreringResultater = filtreringsreglerService.kjørFiltreringsregler(
             NyBehandlingHendelse(
@@ -286,7 +286,7 @@ class FiltreringsregelForFlereBarnTest {
             barnaLever = true,
             morHarVerge = false,
             dagensDato = LocalDate.now(),
-            løperIkkeBarnetrygdForBarnet = true
+            løperBarnetrygdForBarnetPåAnnenForelder = true
         )
     }
 }

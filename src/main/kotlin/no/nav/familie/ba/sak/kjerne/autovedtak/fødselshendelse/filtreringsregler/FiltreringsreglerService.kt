@@ -101,7 +101,7 @@ class FiltreringsreglerService(
             barnaLever = personopplysningGrunnlag.barna.none { it.erDød() },
             morHarVerge = personopplysningerService.harVerge(morsAktørId).harVerge,
             dagensDato = localDateService.now(),
-            løperIkkeBarnetrygdForBarnet = tilkjentYtelseValideringService.validerAtBarnetrygdIkkeLøperForAnnenForelder(
+            løperBarnetrygdForBarnetPåAnnenForelder = tilkjentYtelseValideringService.barnetrygdLøperForAnnenForelder(
                 behandling = behandling,
                 barna = barnaFraHendelse
             )

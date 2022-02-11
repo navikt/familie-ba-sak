@@ -39,9 +39,9 @@ class TilkjentYtelseValideringServiceTest {
     }
 
     @Test
-    fun `Skal returnere true hvis ingen barn allerede mottar barnetrygd`() {
-        Assertions.assertTrue(
-            tilkjentYtelseValideringService.validerAtBarnetrygdIkkeLøperForAnnenForelder(
+    fun `Skal returnere false hvis ingen barn allerede mottar barnetrygd`() {
+        Assertions.assertFalse(
+            tilkjentYtelseValideringService.barnetrygdLøperForAnnenForelder(
                 behandling = lagBehandling(),
                 barna = listOf(barn1, barn2)
             )
@@ -49,9 +49,9 @@ class TilkjentYtelseValideringServiceTest {
     }
 
     @Test
-    fun `Skal returnere false hvis det løper barnetrygd for minst ett barn`() {
-        Assertions.assertFalse(
-            tilkjentYtelseValideringService.validerAtBarnetrygdIkkeLøperForAnnenForelder(
+    fun `Skal returnere true hvis det løper barnetrygd for minst ett barn`() {
+        Assertions.assertTrue(
+            tilkjentYtelseValideringService.barnetrygdLøperForAnnenForelder(
                 behandling = lagBehandling(),
                 barna = listOf(barn1, barn3MedUtbetalinger)
             )
