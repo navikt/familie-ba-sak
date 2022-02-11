@@ -16,25 +16,48 @@ data class BrevBegrunnelseGrunnlagMedPersoner(
 ) {
     fun hentAntallBarnForBegrunnelse(
         uregistrerteBarn: List<MinimertUregistrertBarn>,
-        erAvslagPåKunSøker: Boolean,
-        barnasFødselsdatoer: List<LocalDate>
-    ) = if (this.vedtakBegrunnelseSpesifikasjon == VedtakBegrunnelseSpesifikasjon.AVSLAG_UREGISTRERT_BARN)
-        uregistrerteBarn.size
-    else if (erAvslagPåKunSøker)
-        0
-    else
-        barnasFødselsdatoer.size
+        gjelderSøker: Boolean,
+        barnasFødselsdatoer: List<LocalDate>,
+    ): Int {
+        val erAvslagUregistrerteBarn =
+            this.vedtakBegrunnelseSpesifikasjon == VedtakBegrunnelseSpesifikasjon.AVSLAG_UREGISTRERT_BARN
+
+        return when {
+            erAvslagUregistrerteBarn -> uregistrerteBarn.size
+            gjelderSøker && this.vedtakBegrunnelseType == VedtakBegrunnelseType.AVSLAG -> 0
+            else -> barnasFødselsdatoer.size
+        }
+    }
 
     fun hentBarnasFødselsdagerForBegrunnelse(
         uregistrerteBarn: List<MinimertUregistrertBarn>,
-        erAvslagPåKunSøker: Boolean,
+        gjelderSøker: Boolean,
         personerIBehandling: List<MinimertRestPerson>,
-        personerPåBegrunnelse: List<MinimertRestPerson>
-    ) = if (this.vedtakBegrunnelseSpesifikasjon == VedtakBegrunnelseSpesifikasjon.AVSLAG_UREGISTRERT_BARN)
-        uregistrerteBarn.mapNotNull { it.fødselsdato }
-    else if (erAvslagPåKunSøker) {
-        personerIBehandling.filter { it.type == PersonType.BARN }
-            .map { it.fødselsdato } + uregistrerteBarn.mapNotNull { it.fødselsdato }
-    } else
-        personerPåBegrunnelse.filter { it.type == PersonType.BARN }.map { it.fødselsdato }
+        personerPåBegrunnelse: List<MinimertRestPerson>,
+        personerMedUtbetaling: List<MinimertRestPerson>,
+    ) = when {
+        this.vedtakBegrunnelseSpesifikasjon == VedtakBegrunnelseSpesifikasjon.AVSLAG_UREGISTRERT_BARN ->
+            uregistrerteBarn.mapNotNull { it.fødselsdato }
+
+        gjelderSøker -> {
+            if (this.vedtakBegrunnelseType == VedtakBegrunnelseType.AVSLAG) {
+                personerIBehandling
+                    .filter { it.type == PersonType.BARN }
+                    .map { it.fødselsdato } +
+                    uregistrerteBarn.mapNotNull { it.fødselsdato }
+            } else {
+                (personerMedUtbetaling + personerPåBegrunnelse).toSet()
+                    .filter { it.type == PersonType.BARN }
+                    .map { it.fødselsdato }
+            }
+        }
+        else ->
+            personerPåBegrunnelse
+                .filter { it.type == PersonType.BARN }
+                .map { it.fødselsdato }
+    }
+
+    fun gjelderKunSøker(
+        restBehandlingsgrunnlagForBrev: RestBehandlingsgrunnlagForBrev
+    ) = this.personIdenter.any { it == restBehandlingsgrunnlagForBrev.finnSøker()?.personIdent }
 }
