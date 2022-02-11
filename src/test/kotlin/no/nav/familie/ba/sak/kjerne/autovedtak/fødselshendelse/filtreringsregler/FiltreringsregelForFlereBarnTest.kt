@@ -132,6 +132,8 @@ class FiltreringsregelForFlereBarnTest {
             )
         } returns listOf(barnAktør0, barnAktør1)
 
+        every { tilkjentYtelseValideringServiceMock.validerAtBarnetrygdIkkeLøperForAnnenForelder(any(), any()) } returns true
+
         val fødselshendelsefiltreringResultater = filtreringsreglerService.kjørFiltreringsregler(
             NyBehandlingHendelse(
                 morsIdent = gyldigAktør.aktivFødselsnummer(),
@@ -192,6 +194,8 @@ class FiltreringsregelForFlereBarnTest {
                 )
             )
         } returns listOf(barnAktør0, barnAktør1)
+
+        every { tilkjentYtelseValideringServiceMock.validerAtBarnetrygdIkkeLøperForAnnenForelder(any(), any()) } returns true
 
         val fødselshendelsefiltreringResultater = filtreringsreglerService.kjørFiltreringsregler(
             NyBehandlingHendelse(

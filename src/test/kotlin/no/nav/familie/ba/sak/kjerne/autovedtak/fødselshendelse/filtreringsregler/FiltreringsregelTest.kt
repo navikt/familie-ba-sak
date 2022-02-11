@@ -505,7 +505,8 @@ internal class FiltreringsregelTest {
             Filtreringsregel.MER_ENN_5_MND_SIDEN_FORRIGE_BARN,
             Filtreringsregel.MOR_ER_OVER_18_ÅR,
             Filtreringsregel.MOR_HAR_IKKE_VERGE,
-            Filtreringsregel.MOR_MOTTAR_IKKE_LØPENDE_UTVIDET
+            Filtreringsregel.MOR_MOTTAR_IKKE_LØPENDE_UTVIDET,
+            Filtreringsregel.LØPER_IKKE_BARNETRYGD_FOR_BARNET
         )
         assertThat(Filtreringsregel.values().size).isEqualTo(fagbestemtFiltreringsregelrekkefølge.size)
         assertThat(
