@@ -109,7 +109,7 @@ class FagsakControllerTest(
         val fagsak = fagsakController.hentEllerOpprettFagsak(FagsakRequest(personIdent = fnr)).body?.data
 
         val skyggesak = skyggesakRepository.finnSkyggesakerKlareForSending(Pageable.unpaged())
-        assertEquals(skyggesak.filter { it.fagsak.id == fagsak?.id }.size, 1)
+        assertEquals(skyggesak.filter { it.fagsakId == fagsak?.id }.size, 1)
     }
 
     @Test
