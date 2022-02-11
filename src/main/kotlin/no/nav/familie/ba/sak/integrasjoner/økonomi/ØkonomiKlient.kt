@@ -71,4 +71,53 @@ class ØkonomiKlient(
                 perioderForBehandlinger = perioderTilAvstemming
             )
         ).also { assertGenerelleSuksessKriterier(it) }
+
+    fun konsistensavstemOppdragStart(
+        avstemmingsdato: LocalDateTime,
+        transaksjonsId: String
+    ): Ressurs<String> =
+        postForEntity<Ressurs<String>>(
+            uri = URI.create(
+                """$familieOppdragUri/v2/konsistensavstemming?sendStartmelding=true&
+                    sendAvsluttmelding=false&transaksjonsId=$transaksjonsId"""
+            ),
+            KonsistensavstemmingRequestV2(
+                fagsystem = FAGSYSTEM,
+                avstemmingstidspunkt = avstemmingsdato,
+                perioderForBehandlinger = emptyList()
+            )
+        ).also { assertGenerelleSuksessKriterier(it) }
+
+    fun konsistensavstemOppdragData(
+        avstemmingsdato: LocalDateTime,
+        perioderTilAvstemming: List<PerioderForBehandling>,
+        transaksjonsId: String,
+    ): Ressurs<String> =
+        postForEntity<Ressurs<String>>(
+            uri = URI.create(
+                """$familieOppdragUri/v2/konsistensavstemming?sendStartmelding=false&
+                    sendAvsluttmelding=false&transaksjonsId=$transaksjonsId"""
+            ),
+            KonsistensavstemmingRequestV2(
+                fagsystem = FAGSYSTEM,
+                avstemmingstidspunkt = avstemmingsdato,
+                perioderForBehandlinger = perioderTilAvstemming
+            )
+        ).also { assertGenerelleSuksessKriterier(it) }
+
+    fun konsistensavstemOppdragAvslutt(
+        avstemmingsdato: LocalDateTime,
+        transaksjonsId: String
+    ): Ressurs<String> =
+        postForEntity<Ressurs<String>>(
+            uri = URI.create(
+                """$familieOppdragUri/v2/konsistensavstemming?sendStartmelding=false&
+                    sendAvsluttmelding=true&transaksjonsId=$transaksjonsId"""
+            ),
+            KonsistensavstemmingRequestV2(
+                fagsystem = FAGSYSTEM,
+                avstemmingstidspunkt = avstemmingsdato,
+                perioderForBehandlinger = emptyList()
+            )
+        ).also { assertGenerelleSuksessKriterier(it) }
 }
