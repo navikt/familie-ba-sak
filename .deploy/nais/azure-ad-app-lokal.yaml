@@ -16,7 +16,7 @@ metadata:
 spec:
   preAuthorizedApplications:
     - application: familie-ba-sak-frontend-lokal
-      cluster: dev-fss
+      cluster: dev-gcp
       namespace: teamfamilie
   tenant: trygdeetaten.no
   secretName: azuread-familie-ba-sak-lokal
