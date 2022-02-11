@@ -18,7 +18,7 @@ enum class FiltreringsregelIkkeOppfylt(val beskrivelse: String, private val filt
         Filtreringsregel.MER_ENN_5_MND_SIDEN_FORRIGE_BARN
     ),
     LØPER_ALLEREDE_FOR_ANNEN_FORELDER(
-        "Det løper allerede barnetrygd for annen forelder",
+        "Annen mottaker har barnetrygd for barnet",
         Filtreringsregel.LØPER_IKKE_BARNETRYGD_FOR_BARNET
     );
 
