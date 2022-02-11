@@ -69,7 +69,7 @@ class PdlRestClient(
                     PersonInfoQuery.MED_RELASJONER_OG_REGISTERINFORMASJON -> {
                         pdlPerson.person!!.forelderBarnRelasjon.map { relasjon ->
                             val relatertAktør =
-                                personidentService.hentOgLagreAktør(relasjon.relatertPersonsIdent)
+                                personidentService.hentOgLagreAktør(ident = relasjon.relatertPersonsIdent, lagre = true)
                             ForelderBarnRelasjon(
                                 aktør = relatertAktør,
                                 relasjonsrolle = relasjon.relatertPersonsRolle
