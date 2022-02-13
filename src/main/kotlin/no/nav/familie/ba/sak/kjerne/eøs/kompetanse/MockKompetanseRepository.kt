@@ -7,9 +7,9 @@ import java.time.YearMonth
 @Repository
 class MockKompetanseRepository {
 
-    val barn1 = 111111L
-    val barn2 = 222222L
-    val barn3 = 333333L
+    val barn1 = "111111"
+    val barn2 = "222222"
+    val barn3 = "333333"
 
     private val malKompetanse = Kompetanse(
         id = 1L,
@@ -42,5 +42,9 @@ class MockKompetanseRepository {
             kompetanser[nyId] = kompetanse.copy(id = nyId)
             return kompetanser[nyId]!!
         }
+    }
+
+    fun delete(tilSletting: List<Kompetanse>) {
+        tilSletting.forEach { kompetanser.remove(it.id) }
     }
 }
