@@ -64,7 +64,8 @@ class BehandlingsresultatService(
                     vilkårsvurdering.personResultater
                         .flatMap { personResultat -> personResultat.vilkårResultater }
                         .any { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
-                else -> true
+                PersonType.BARN -> true
+                PersonType.ANNENPART -> false
             }
         }?.map {
             BehandlingsresultatUtils.utledBehandlingsresultatDataForPerson(
