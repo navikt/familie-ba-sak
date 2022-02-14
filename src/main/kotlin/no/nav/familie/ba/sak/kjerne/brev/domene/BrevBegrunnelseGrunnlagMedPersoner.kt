@@ -56,8 +56,4 @@ data class BrevBegrunnelseGrunnlagMedPersoner(
                 .filter { it.type == PersonType.BARN }
                 .map { it.fødselsdato }
     }
-
-    fun gjelderKunSøker(
-        restBehandlingsgrunnlagForBrev: RestBehandlingsgrunnlagForBrev
-    ) = this.personIdenter.any { it == restBehandlingsgrunnlagForBrev.finnSøker()?.personIdent }
 }
