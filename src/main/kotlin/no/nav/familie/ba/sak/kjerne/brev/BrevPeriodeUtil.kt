@@ -9,9 +9,9 @@ import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.MinimertUregistrertBarn
 import no.nav.familie.ba.sak.kjerne.brev.domene.BrevPeriodeGrunnlagMedPersoner
 import no.nav.familie.ba.sak.kjerne.brev.domene.BrevperiodeData
-import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertUtbetalingsperiodeDetalj
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.brev.domene.RestBehandlingsgrunnlagForBrev
+import no.nav.familie.ba.sak.kjerne.brev.domene.antallBarn
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.EndretUtbetalingBrevPeriodeType
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.AvslagBrevPeriode
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.AvslagUtenPeriodeBrevPeriode
@@ -23,6 +23,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.InnvilgelseBr
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.OpphørBrevPeriode
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertPersonResultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertRestEndretUtbetalingAndel
+import no.nav.familie.ba.sak.kjerne.brev.domene.totaltUtbetalt
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -50,12 +51,6 @@ fun List<MinimertRestPerson>.tilBarnasFødselsdatoer(): String =
                 person.fødselsdato.tilKortString()
             }
     )
-
-fun List<MinimertUtbetalingsperiodeDetalj>.antallBarn(): Int =
-    this.filter { it.person.type == PersonType.BARN }.size
-
-fun List<MinimertUtbetalingsperiodeDetalj>.totaltUtbetalt(): Int =
-    this.sumOf { it.utbetaltPerMnd }
 
 fun hentBrevPerioder(
     brevperioderData: List<BrevperiodeData>
