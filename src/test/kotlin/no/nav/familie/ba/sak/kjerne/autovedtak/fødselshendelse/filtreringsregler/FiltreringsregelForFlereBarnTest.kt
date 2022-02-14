@@ -286,7 +286,7 @@ class FiltreringsregelForFlereBarnTest {
             barnaLever = true,
             morHarVerge = false,
             dagensDato = LocalDate.now(),
-            løperBarnetrygdForBarnetPåAnnenForelder = true
+            løperBarnetrygdForBarnetPåAnnenForelder = false
         )
     }
 }
