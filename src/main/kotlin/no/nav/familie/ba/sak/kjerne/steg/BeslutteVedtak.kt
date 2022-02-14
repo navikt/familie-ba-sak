@@ -42,9 +42,9 @@ class BeslutteVedtak(
         data: RestBeslutningPåVedtak
     ): StegType {
         if (behandling.status == BehandlingStatus.IVERKSETTER_VEDTAK) {
-            error("Behandlingen er allerede sendt til oppdrag og venter på kvittering")
+            throw FunksjonellFeil("Behandlingen er allerede sendt til oppdrag og venter på kvittering")
         } else if (behandling.status == BehandlingStatus.AVSLUTTET) {
-            error("Behandlingen er allerede avsluttet")
+            throw FunksjonellFeil("Behandlingen er allerede avsluttet")
         } else if (behandling.opprettetÅrsak == BehandlingÅrsak.KORREKSJON_VEDTAKSBREV &&
             !featureToggleService.isEnabled(FeatureToggleConfig.KAN_MANUELT_KORRIGERE_MED_VEDTAKSBREV)
         )
