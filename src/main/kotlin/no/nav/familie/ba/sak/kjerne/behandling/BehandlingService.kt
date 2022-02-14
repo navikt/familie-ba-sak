@@ -446,6 +446,12 @@ class BehandlingService(
         return behandlingMigreringsinfoRepository.finnSisteMigreringsdatoPåFagsak(fagsakId)
     }
 
+    @Transactional
+    fun deleteMigreringsdatoVedHenleggelse(behandlingId: Long) {
+        behandlingMigreringsinfoRepository.findByBehandlingId(behandlingId)
+            ?.let { behandlingMigreringsinfoRepository.delete(it) }
+    }
+
     companion object {
 
         private val logger: Logger = LoggerFactory.getLogger(BehandlingService::class.java)
