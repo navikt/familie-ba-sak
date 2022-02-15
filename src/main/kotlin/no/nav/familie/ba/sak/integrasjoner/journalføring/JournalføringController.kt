@@ -69,7 +69,7 @@ class JournalføringController(
             handling = "journalføre"
         )
 
-        if (request.dokumenter.any { it.dokumentTittel == null }) {
+        if (request.dokumenter.any { it.dokumentTittel == null || it.dokumentTittel == "" }) {
             throw FunksjonellFeil("Minst ett av dokumentene mangler dokumenttittel.")
         }
 
