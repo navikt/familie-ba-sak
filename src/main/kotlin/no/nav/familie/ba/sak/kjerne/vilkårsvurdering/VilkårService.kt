@@ -104,7 +104,6 @@ class VilkårService(
             it.vedtakBegrunnelseSpesifikasjoner = restVilkårResultat.avslagBegrunnelser ?: emptyList()
         }
 
-        // valider migreringsdato i vilkårsvurdering for migreringsbehandlinger før oppdatering
         validerVilkårStarterIkkeFørMigreringsdatoForMigreringsbehandling(vilkårsvurdering, vilkårResultat)
 
         return vilkårsvurderingService.oppdater(vilkårsvurdering).personResultater.map { it.tilRestPersonResultat() }
