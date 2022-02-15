@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.eøs.kompetanse
 
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseSkjema
 import org.springframework.stereotype.Repository
 import java.time.YearMonth
 
@@ -15,7 +16,8 @@ class MockKompetanseRepository {
         id = 1L,
         fom = YearMonth.of(2021, 2),
         tom = YearMonth.of(2021, 11),
-        barn = setOf(barn1, barn2, barn3)
+        barn = setOf(barn1, barn2, barn3),
+        skjema = KompetanseSkjema()
     )
 
     private val kompetanser = mutableMapOf(
