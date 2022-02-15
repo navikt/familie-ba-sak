@@ -84,7 +84,7 @@ class VilkårsvurderingMetrics(
             ?: error("Finner ikke aktivt persongrunnlag ved telling av metrikker")
 
         vilkårsvurdering.personResultater.forEach { personResultat ->
-            val person = persongrunnlag.personer.firstOrNull { it.aktør == personResultat.aktør }
+            val person = persongrunnlag.søkerOgBarn.firstOrNull { it.aktør == personResultat.aktør }
                 ?: error("Finner ikke person")
 
             val negativeVilkår = personResultat.vilkårResultater.filter { vilkårResultat ->
@@ -138,7 +138,7 @@ class VilkårsvurderingMetrics(
         vilkår: Vilkår
     ): List<Pair<Person, VilkårResultat?>> {
         val personer =
-            personopplysningGrunnlagRepository.findByBehandlingAndAktiv(vilkårsvurdering.behandling.id)?.personer
+            personopplysningGrunnlagRepository.findByBehandlingAndAktiv(vilkårsvurdering.behandling.id)?.søkerOgBarn
                 ?: error("Finner ikke persongrunnlag på behandling ${vilkårsvurdering.behandling.id}")
 
         return personer.map { person ->
@@ -155,7 +155,7 @@ class VilkårsvurderingMetrics(
 
     private fun økTellerForFørsteUtfallVilkårVedAutomatiskSaksbehandling(vilkårResultat: VilkårResultat) {
         val behandlingId = vilkårResultat.personResultat?.vilkårsvurdering?.behandling?.id!!
-        val personer = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId)?.personer
+        val personer = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId)?.søkerOgBarn
             ?: error("Finner ikke aktivt persongrunnlag ved telling av metrikker")
 
         val person = personer.firstOrNull { it.aktør == vilkårResultat.personResultat?.aktør }

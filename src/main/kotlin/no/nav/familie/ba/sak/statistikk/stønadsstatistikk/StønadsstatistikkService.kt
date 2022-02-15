@@ -132,7 +132,7 @@ class StønadsstatistikkService(
             utbetaltPerMnd = segment.value,
             utbetalingsDetaljer = andelerForSegment.map { andel ->
                 val personForAndel =
-                    personopplysningGrunnlag.personer.find { person -> andel.aktør == person.aktør }
+                    personopplysningGrunnlag.søkerOgBarn.find { person -> andel.aktør == person.aktør }
                         ?: throw IllegalStateException("Fant ikke personopplysningsgrunnlag for andel")
                 UtbetalingsDetaljDVH(
                     person = lagPersonDVH(
