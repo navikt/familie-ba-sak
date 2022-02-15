@@ -125,10 +125,14 @@ class MigreringService(
                 )
             }.getOrElse { kastOgTellMigreringsFeil(MigreringsfeilType.KAN_IKKE_OPPRETTE_BEHANDLING, it.message, it) }
 
+            val migreringsdato = virkningsdatoFra(infotrygdKjøredato(YearMonth.now()))
             vilkårService.hentVilkårsvurdering(behandlingId = behandling.id)?.apply {
-                forsøkSettPerioderFomTilpassetInfotrygdKjøreplan(this)
+                forsøkSettPerioderFomTilpassetInfotrygdKjøreplan(this, migreringsdato)
                 vilkårsvurderingService.oppdater(this)
             } ?: kastOgTellMigreringsFeil(MigreringsfeilType.MANGLER_VILKÅRSVURDERING)
+
+            // Lagre ned migreringsdato
+            behandlingService.lagreNedMigreringsdato(migreringsdato, behandling)
 
             val behandlingEtterVilkårsvurdering =
                 stegService.håndterVilkårsvurdering(behandling) // Se funksjonen lagVilkårsvurderingForMigreringsbehandling i VilkårService
@@ -283,11 +287,10 @@ class MigreringService(
         return barnasIdenter
     }
 
-    private fun forsøkSettPerioderFomTilpassetInfotrygdKjøreplan(vilkårsvurdering: Vilkårsvurdering) {
-        val inneværendeMåned = YearMonth.now()
+    private fun forsøkSettPerioderFomTilpassetInfotrygdKjøreplan(vilkårsvurdering: Vilkårsvurdering, migreringsdato: LocalDate) {
         vilkårsvurdering.personResultater.forEach { personResultat ->
             personResultat.vilkårResultater.forEach {
-                it.periodeFom = it.periodeFom ?: virkningsdatoFra(infotrygdKjøredato(inneværendeMåned))
+                it.periodeFom = it.periodeFom ?: migreringsdato
             }
         }
     }

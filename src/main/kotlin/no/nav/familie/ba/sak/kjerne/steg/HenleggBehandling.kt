@@ -49,6 +49,9 @@ class HenleggBehandling(
 
         behandlingService.lagreEllerOppdater(behandling)
 
+        // Slett migreringsdato
+        behandlingService.deleteMigreringsdatoVedHenleggelse(behandling.id)
+
         return hentNesteStegForNormalFlyt(behandling)
     }
 
