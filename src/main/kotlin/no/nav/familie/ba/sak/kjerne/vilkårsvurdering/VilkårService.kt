@@ -105,12 +105,12 @@ class VilkårService(
         }
 
         // valider migreringsdato i vilkårsvurdering for migreringsbehandlinger før oppdatering
-        validerFørEndreVilkårsvurderingForMigreringsbehandling(vilkårsvurdering, vilkårResultat)
+        validerVilkårStarterIkkeFørMigreringsdatoForMigreringsbehandling(vilkårsvurdering, vilkårResultat)
 
         return vilkårsvurderingService.oppdater(vilkårsvurdering).personResultater.map { it.tilRestPersonResultat() }
     }
 
-    private fun validerFørEndreVilkårsvurderingForMigreringsbehandling(
+    private fun validerVilkårStarterIkkeFørMigreringsdatoForMigreringsbehandling(
         vilkårsvurdering: Vilkårsvurdering,
         vilkårResultat: VilkårResultat,
     ) {
@@ -249,6 +249,13 @@ class VilkårService(
             )
         }
 
+        validerUtvidetVilkårIkkeFørMigreringsdato(behandling, vilkårsvurdering)
+    }
+
+    private fun validerUtvidetVilkårIkkeFørMigreringsdato(
+        behandling: Behandling,
+        vilkårsvurdering: Vilkårsvurdering
+    ) {
         val migreringsdato = behandlingService.hentMigreringsdatoIBehandling(behandling.id)
         if (migreringsdato != null &&
             vilkårsvurdering.personResultater.any {
