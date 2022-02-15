@@ -84,7 +84,7 @@ class FagsakController(
         )
 
         return Result.runCatching {
-            val aktør = personidentService.hentOgLagreAktør(request.personIdent)
+            val aktør = personidentService.hentAktør(request.personIdent)
             fagsakService.hentMinimalFagsakForPerson(aktør)
         }.fold(
             onSuccess = { return ResponseEntity.ok().body(it) },
@@ -103,8 +103,8 @@ class FagsakController(
     @PostMapping(path = ["/sok/fagsakdeltagere"])
     fun oppgiFagsakdeltagere(@RequestBody restSøkParam: RestSøkParam): ResponseEntity<Ressurs<List<RestFagsakDeltager>>> {
         return Result.runCatching {
-            val aktør = personidentService.hentOgLagreAktør(restSøkParam.personIdent)
-            val barnsAktørId = personidentService.hentOgLagreAktørIder(restSøkParam.barnasIdenter)
+            val aktør = personidentService.hentAktør(restSøkParam.personIdent)
+            val barnsAktørId = personidentService.hentAktørIder(restSøkParam.barnasIdenter)
 
             fagsakService.oppgiFagsakdeltagere(aktør, barnsAktørId)
         }

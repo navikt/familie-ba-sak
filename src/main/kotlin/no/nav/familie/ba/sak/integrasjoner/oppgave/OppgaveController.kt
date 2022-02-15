@@ -92,7 +92,7 @@ class OppgaveController(
     fun hentDataForManuellJournalføring(@PathVariable(name = "oppgaveId") oppgaveId: Long): ResponseEntity<Ressurs<DataForManuellJournalføring>> {
 
         val oppgave = oppgaveService.hentOppgave(oppgaveId)
-        val aktør = oppgave.aktoerId?.let { personidentService.hentOgLagreAktør(it) }
+        val aktør = oppgave.aktoerId?.let { personidentService.hentAktør(it) }
             ?: error("Ved henting av personident er aktørId null eller tom")
 
         val minimalFagsak = fagsakService.hentMinimalFagsakForPerson(aktør).data

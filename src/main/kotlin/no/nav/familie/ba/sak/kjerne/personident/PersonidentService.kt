@@ -65,7 +65,18 @@ class PersonidentService(
             .filter { it.gruppe == "FOLKEREGISTERIDENT" }
             .map { it.ident }
 
-    fun hentOgLagreAktør(ident: String, lagre: Boolean = false): Aktør {
+    fun hentAktør(identEllerAktørId: String): Aktør {
+        val aktør = hentOgLagreAktør(ident = identEllerAktørId, lagre = false)
+
+        if (aktør.personidenter.find { it.aktiv } == null) {
+            secureLogger.warn("Fant ikke aktiv ident for aktør med id ${aktør.aktørId} for ident $identEllerAktørId")
+            throw Feil("Fant ikke aktiv ident for aktør")
+        }
+
+        return aktør
+    }
+
+    fun hentOgLagreAktør(ident: String, lagre: Boolean): Aktør {
         // Noter at ident kan være både av typen aktørid eller fødselsnummer (d- og f nummer)
         val personident = personidentRepository.findByFødselsnummerOrNull(ident)
         if (personident != null) {
@@ -94,8 +105,12 @@ class PersonidentService(
         return opprettAktørIdOgPersonident(aktørIdStr, fødselsnummerAktiv, lagre)
     }
 
-    fun hentOgLagreAktørIder(barnasFødselsnummer: List<String>, lagre: Boolean = false): List<Aktør> {
+    fun hentOgLagreAktørIder(barnasFødselsnummer: List<String>, lagre: Boolean): List<Aktør> {
         return barnasFødselsnummer.map { hentOgLagreAktør(it, lagre) }
+    }
+
+    fun hentAktørIder(barnasFødselsnummer: List<String>): List<Aktør> {
+        return barnasFødselsnummer.map { hentAktør(it) }
     }
 
     // TODO: Skriv test for denne metoden når den tas i bruk.

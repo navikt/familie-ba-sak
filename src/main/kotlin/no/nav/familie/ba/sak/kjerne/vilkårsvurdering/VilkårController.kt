@@ -96,7 +96,7 @@ class VilkårController(
             handling = "slette vilkårsperiode"
         )
 
-        val aktør = personidentService.hentOgLagreAktør(personIdent)
+        val aktør = personidentService.hentAktør(personIdent)
         val behandling = behandlingService.hent(behandlingId)
         vilkårService.deleteVilkårsperiode(
             behandlingId = behandling.id,

@@ -64,7 +64,7 @@ class PersongrunnlagService(
     }
 
     fun hentPersonerPåBehandling(identer: List<String>, behandling: Behandling): List<Person> {
-        val aktørIder = personidentService.hentOgLagreAktørIder(identer)
+        val aktørIder = personidentService.hentAktørIder(identer)
 
         val grunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
             ?: throw Feil("Finner ikke personopplysningsgrunnlag på behandling ${behandling.id}")

@@ -156,7 +156,7 @@ class VilkårService(
                 message = "Fant ikke aktiv vilkårsvurdering ved sletting av vilkår",
                 frontendFeilmelding = fantIkkeAktivVilkårsvurderingFeilmelding
             )
-        val aktørÅSlette = personidentService.hentOgLagreAktør(restSlettVilkår.personIdent)
+        val aktørÅSlette = personidentService.hentAktør(restSlettVilkår.personIdent)
         val personResultat = vilkårsvurdering.personResultater.find { it.aktør == aktørÅSlette }
             ?: throw Feil(
                 message = fantIkkeVilkårsvurderingForPersonFeilmelding,
@@ -238,7 +238,7 @@ class VilkårService(
         val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
             ?: throw IllegalStateException("Fant ikke personopplysninggrunnlag for behandling ${behandling.id}")
         if (personopplysningGrunnlag.søkerOgBarn
-            .single { it.aktør == personidentService.hentOgLagreAktør(restNyttVilkår.personIdent) }.type != PersonType.SØKER
+            .single { it.aktør == personidentService.hentAktør(restNyttVilkår.personIdent) }.type != PersonType.SØKER
         ) {
             throw FunksjonellFeil(
                 melding = "${Vilkår.UTVIDET_BARNETRYGD.beskrivelse} kan ikke legges til for BARN",
@@ -453,7 +453,7 @@ class VilkårService(
         vilkårsvurdering: Vilkårsvurdering,
         barnaSomAlleredeErVurdert: List<String>
     ): Set<PersonResultat> {
-        val barnaAktørSomAlleredeErVurdert = personidentService.hentOgLagreAktørIder(barnaSomAlleredeErVurdert)
+        val barnaAktørSomAlleredeErVurdert = personidentService.hentAktørIder(barnaSomAlleredeErVurdert)
 
         val personopplysningGrunnlag =
             personopplysningGrunnlagRepository.findByBehandlingAndAktiv(vilkårsvurdering.behandling.id)
@@ -688,7 +688,7 @@ class VilkårService(
                     message = "Forrige behandling $${forrigeBehandlingSomErVedtatt.id} " +
                         "har ikke en aktiv vilkårsvurdering"
                 )
-            val aktør = personidentService.hentOgLagreAktør(personIdent)
+            val aktør = personidentService.hentAktør(personIdent)
             return forrigeBehandlingsvilkårsvurdering.personResultater.single { it.aktør == aktør }
                 .vilkårResultater.any { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
         }

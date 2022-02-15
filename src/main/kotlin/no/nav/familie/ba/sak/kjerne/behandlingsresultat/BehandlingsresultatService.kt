@@ -128,7 +128,7 @@ class BehandlingsresultatService(
     ): List<Aktør> {
         val barnFraSøknad = søknadDTO?.barnaMedOpplysninger
             ?.filter { it.inkludertISøknaden && it.erFolkeregistrert }
-            ?.map { personidentService.hentOgLagreAktør(it.ident) }
+            ?.map { personidentService.hentAktør(it.ident) }
             ?: emptyList()
 
         val utvidetBarnetrygdSøker =
