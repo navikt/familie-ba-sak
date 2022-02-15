@@ -56,13 +56,11 @@ class PersongrunnlagService(
     }
 
     fun hentSøker(behandlingId: Long): Person? {
-        return personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId)!!.personer
-            .find { person -> person.type == PersonType.SØKER }
+        return personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId)!!.søker
     }
 
     fun hentBarna(behandling: Behandling): List<Person> {
-        return personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)!!.personer
-            .filter { person -> person.type == PersonType.BARN }
+        return personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)!!.barna
     }
 
     fun hentPersonerPåBehandling(identer: List<String>, behandling: Behandling): List<Person> {
@@ -70,7 +68,7 @@ class PersongrunnlagService(
 
         val grunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
             ?: throw Feil("Finner ikke personopplysningsgrunnlag på behandling ${behandling.id}")
-        return grunnlag.personer.filter { person -> aktørIder.contains(person.aktør) }
+        return grunnlag.søkerOgBarn.filter { person -> aktørIder.contains(person.aktør) }
     }
 
     fun hentAktiv(behandlingId: Long): PersonopplysningGrunnlag? {
