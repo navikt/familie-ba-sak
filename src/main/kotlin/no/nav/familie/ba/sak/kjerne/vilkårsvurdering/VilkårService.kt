@@ -213,7 +213,7 @@ class VilkårService(
 
         val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
             ?: throw IllegalStateException("Fant ikke personopplysninggrunnlag for behandling ${behandling.id}")
-        if (personopplysningGrunnlag.personer
+        if (personopplysningGrunnlag.søkerOgBarn
             .single { it.aktør == personidentService.hentOgLagreAktør(restNyttVilkår.personIdent) }.type != PersonType.SØKER
         ) {
             throw FunksjonellFeil(
@@ -235,8 +235,7 @@ class VilkårService(
             ?: throw IllegalStateException("Fant ikke personopplysninggrunnlag for behandling ${behandling.id}")
 
         if (behandling.skalBehandlesAutomatisk) {
-            val barna = personopplysningGrunnlag.personer.filter { person -> person.type == PersonType.BARN }
-            if (barna.isEmpty()) {
+            if (personopplysningGrunnlag.barna.isEmpty()) {
                 throw IllegalStateException("PersonopplysningGrunnlag for fødselshendelse skal inneholde minst ett barn")
             }
         }
@@ -365,7 +364,7 @@ class VilkårService(
             personopplysningGrunnlagRepository.findByBehandlingAndAktiv(vilkårsvurdering.behandling.id)
                 ?: throw Feil(message = "Fant ikke personopplysninggrunnlag for behandling ${vilkårsvurdering.behandling.id}")
 
-        return personopplysningGrunnlag.personer.map { person ->
+        return personopplysningGrunnlag.søkerOgBarn.map { person ->
             val personResultat = PersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
                 aktør = person.aktør
@@ -395,7 +394,7 @@ class VilkårService(
             personopplysningGrunnlagRepository.findByBehandlingAndAktiv(vilkårsvurdering.behandling.id)
                 ?: throw Feil(message = "Fant ikke personopplysninggrunnlag for behandling ${vilkårsvurdering.behandling.id}")
 
-        return personopplysningGrunnlag.personer.map { person ->
+        return personopplysningGrunnlag.søkerOgBarn.map { person ->
             genererPersonResultatForPerson(vilkårsvurdering, person)
         }.toSet()
     }
@@ -416,7 +415,7 @@ class VilkårService(
                 .maxByOrNull { it.fødselsdato }?.fødselsdato
                 ?: throw Feil("Finner ingen barn på persongrunnlag")
 
-        return personopplysningGrunnlag.personer.map { person ->
+        return personopplysningGrunnlag.søkerOgBarn.map { person ->
             val personResultat = PersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
                 aktør = person.aktør
@@ -479,7 +478,7 @@ class VilkårService(
             personopplysningGrunnlagRepository.findByBehandlingAndAktiv(vilkårsvurdering.behandling.id)
                 ?: throw Feil(message = "Fant ikke personopplysninggrunnlag for behandling ${vilkårsvurdering.behandling.id}")
 
-        return personopplysningGrunnlag.personer.filter { it.type != PersonType.ANNENPART }.map { person ->
+        return personopplysningGrunnlag.søkerOgBarn.map { person ->
             val personResultat = PersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
                 aktør = person.aktør
@@ -536,7 +535,7 @@ class VilkårService(
                         "for behandling ${vilkårsvurdering.behandling.id}"
                 )
 
-        return personopplysningGrunnlag.personer.filter { it.type != PersonType.ANNENPART }.map { person ->
+        return personopplysningGrunnlag.søkerOgBarn.map { person ->
             val personResultat = PersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
                 aktør = person.aktør
@@ -586,7 +585,7 @@ class VilkårService(
                     message = "Fant ikke personopplysninggrunnlag " +
                         "for behandling ${vilkårsvurdering.behandling.id}"
                 )
-        return personopplysningGrunnlag.personer.filter { it.type != PersonType.ANNENPART }.map { person ->
+        return personopplysningGrunnlag.søkerOgBarn.map { person ->
             val personResultat = PersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
                 aktør = person.aktør

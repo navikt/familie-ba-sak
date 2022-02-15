@@ -49,7 +49,7 @@ class UtvidetBehandlingService(
 
         val søknadsgrunnlag = søknadGrunnlagService.hentAktiv(behandlingId = behandling.id)
         val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = behandling.id)
-        val personer = personopplysningGrunnlag?.personer
+        val personer = personopplysningGrunnlag?.søkerOgBarn
 
         val arbeidsfordeling = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandlingId = behandling.id)
 
