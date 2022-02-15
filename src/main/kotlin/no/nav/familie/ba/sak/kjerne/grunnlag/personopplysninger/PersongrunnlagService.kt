@@ -293,6 +293,8 @@ class PersongrunnlagService(
             if (it == null) {
                 logger.warn("Finner flere eller ingen fedre/medmødre på barna som behandles i fødselshendelse. Se securelogger for mer informasjon.")
                 secureLogger.info("Finner flere eller ingen fedre/medmødre på barna som behandles i fødselshendelse: $barnasFarEllerMedmorAktører")
+            } else {
+                personidentService.hentOgLagreAktør(ident = it.aktørId, lagre = true)
             }
         }
     }
