@@ -9,9 +9,9 @@ data class Kompetanse(
     val fom: YearMonth?,
     val tom: YearMonth?,
     val barn: Set<String>,
-    val skjema: KompetanseSkjema? = null,
+    val status: KompetanseStatus? = null,
     @JsonUnwrapped
-    val status: KompetanseStatus? = null
+    val skjema: KompetanseSkjema? = null
 )
 
 data class KompetanseSkjema(
