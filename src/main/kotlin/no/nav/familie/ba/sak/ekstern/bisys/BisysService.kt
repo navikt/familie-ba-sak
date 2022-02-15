@@ -20,7 +20,7 @@ class BisysService(
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
 ) {
     fun hentUtvidetBarnetrygd(personIdent: String, fraDato: LocalDate): BisysUtvidetBarnetrygdResponse {
-        val aktør = personidentService.hentOgLagreAktør(personIdent)
+        val aktør = personidentService.hentAktør(personIdent)
 
         val samledeUtvidetBarnetrygdPerioder = mutableListOf<UtvidetBarnetrygdPeriode>()
         samledeUtvidetBarnetrygdPerioder.addAll(hentBisysPerioderFraInfotrygd(aktør, fraDato))

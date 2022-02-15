@@ -68,7 +68,7 @@ class TestVerktøyController(
     @Unprotected
     fun mottaHendelseOmVedtakOmOvergangsstønad(@RequestBody personIdent: PersonIdent): ResponseEntity<Ressurs<String>> {
         return if (envService.erPreprod() || envService.erDev()) {
-            val aktør = personidentService.hentOgLagreAktør(personIdent.ident)
+            val aktør = personidentService.hentAktør(personIdent.ident)
             val melding = vedtakOmOvergangsstønadService.håndterVedtakOmOvergangsstønad(aktør = aktør)
             ResponseEntity.ok(Ressurs.success(melding))
         } else {

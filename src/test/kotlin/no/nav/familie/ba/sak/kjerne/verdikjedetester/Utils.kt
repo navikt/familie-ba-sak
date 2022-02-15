@@ -113,7 +113,7 @@ fun behandleFødselshendelse(
     stegService: StegService,
 ): Behandling? {
     val søkerFnr = nyBehandlingHendelse.morsIdent
-    val søkerAktør = personidentService.hentOgLagreAktør(søkerFnr)
+    val søkerAktør = personidentService.hentAktør(søkerFnr)
 
     behandleFødselshendelseTask.doTask(
         BehandleFødselshendelseTask.opprettTask(

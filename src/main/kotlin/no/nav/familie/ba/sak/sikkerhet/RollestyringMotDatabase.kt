@@ -29,6 +29,6 @@ class RollestyringMotDatabase {
         }
     }
 
-    private fun harSkrivetilgang(høyesteRolletilgang: BehandlerRolle) =
-        høyesteRolletilgang.nivå >= BehandlerRolle.SAKSBEHANDLER.nivå
+    private fun harSkrivetilgang(høyesteRolletilgang: BehandlerRolle) = false
+    // høyesteRolletilgang.nivå >= BehandlerRolle.SAKSBEHANDLER.nivå
 }

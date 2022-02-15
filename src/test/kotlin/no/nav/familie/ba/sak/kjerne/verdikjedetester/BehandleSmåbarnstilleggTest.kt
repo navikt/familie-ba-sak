@@ -278,7 +278,7 @@ class BehandleSmåbarnstilleggTest(
         val søkersIdent = scenario.søker.ident!!
         settOppefSakMockForDeFørste2Testene(søkersIdent)
 
-        val søkersAktør = personidentService.hentOgLagreAktør(søkersIdent)
+        val søkersAktør = personidentService.hentAktør(søkersIdent)
         vedtakOmOvergangsstønadService.håndterVedtakOmOvergangsstønad(aktør = søkersAktør)
         val fagsak = fagsakService.hentFagsakPåPerson(aktør = søkersAktør)
         val aktivBehandling = behandlingService.hentAktivForFagsak(fagsakId = fagsak!!.id)!!
@@ -292,7 +292,7 @@ class BehandleSmåbarnstilleggTest(
     fun `Skal stoppe automatisk behandling som må fortsette manuelt pga tilbakekreving`() {
         EfSakRestClientMock.clearEfSakRestMocks(efSakRestClient)
 
-        val søkersAktør = personidentService.hentOgLagreAktør(scenario.søker.aktørId!!)
+        val søkersAktør = personidentService.hentAktør(scenario.søker.aktørId!!)
 
         val periodeOvergangsstønadTom = LocalDate.now().minusMonths(3)
         every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns PerioderOvergangsstønadResponse(
@@ -345,7 +345,7 @@ class BehandleSmåbarnstilleggTest(
         EfSakRestClientMock.clearEfSakRestMocks(efSakRestClient)
 
         val søkersIdent = scenario.søker.ident!!
-        val søkersAktør = personidentService.hentOgLagreAktør(søkersIdent)
+        val søkersAktør = personidentService.hentAktør(søkersIdent)
 
         val periodeOvergangsstønadTom = LocalDate.now()
         every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns PerioderOvergangsstønadResponse(

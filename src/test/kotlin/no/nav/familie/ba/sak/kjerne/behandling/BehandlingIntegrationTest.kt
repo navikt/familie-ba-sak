@@ -302,9 +302,9 @@ class BehandlingIntegrationTest(
         val barn1Fnr = randomFnr()
         val barn2Fnr = randomFnr()
 
-        val søkerAktørId = personidentService.hentOgLagreAktør(søkerFnr)
-        val barn1AktørId = personidentService.hentOgLagreAktør(barn1Fnr)
-        val barn2AktørId = personidentService.hentOgLagreAktør(barn2Fnr)
+        val søkerAktørId = personidentService.hentAktør(søkerFnr)
+        val barn1AktørId = personidentService.hentAktør(barn1Fnr)
+        val barn2AktørId = personidentService.hentAktør(barn2Fnr)
 
         val januar2020 = YearMonth.of(2020, 1)
         val oktober2020 = YearMonth.of(2020, 10)
