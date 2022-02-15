@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestNyttVilkår
@@ -103,7 +104,33 @@ class VilkårService(
             it.vedtakBegrunnelseSpesifikasjoner = restVilkårResultat.avslagBegrunnelser ?: emptyList()
         }
 
+        // valider migreringsdato i vilkårsvurdering for migreringsbehandlinger før oppdatering
+        validerFørEndreVilkårsvurderingForMigreringsbehandling(vilkårsvurdering, vilkårResultat)
+
         return vilkårsvurderingService.oppdater(vilkårsvurdering).personResultater.map { it.tilRestPersonResultat() }
+    }
+
+    private fun validerFørEndreVilkårsvurderingForMigreringsbehandling(
+        vilkårsvurdering: Vilkårsvurdering,
+        vilkårResultat: VilkårResultat,
+    ) {
+        val behandling = vilkårsvurdering.behandling
+        if (behandling.erMigrering()) {
+            val migreringsdato = behandlingService.hentMigreringsdatoIBehandling(behandling.id)
+            if (migreringsdato != null &&
+                vilkårResultat.vilkårType !in listOf(Vilkår.UNDER_18_ÅR, Vilkår.GIFT_PARTNERSKAP) &&
+                vilkårResultat.periodeFom?.isBefore(migreringsdato) == true
+            ) {
+                throw FunksjonellFeil(
+                    melding = "${vilkårResultat.vilkårType} kan ikke endres før $migreringsdato " +
+                        "for behandling=${behandling.id}",
+                    frontendFeilmelding = "F.o.m. kan ikke settes tidligere " +
+                        "enn migreringsdato ${migreringsdato.tilKortString()} " +
+                        "Ved behov for vurdering før dette, må behandlingen henlegges, " +
+                        "og migreringstidspunktet endres ved å opprette en ny migreringsbehandling."
+                )
+            }
+        }
     }
 
     @Transactional
@@ -219,6 +246,25 @@ class VilkårService(
             throw FunksjonellFeil(
                 melding = "${Vilkår.UTVIDET_BARNETRYGD.beskrivelse} kan ikke legges til for BARN",
                 frontendFeilmelding = "${Vilkår.UTVIDET_BARNETRYGD.beskrivelse} kan ikke legges til for BARN",
+            )
+        }
+
+        val migreringsdato = behandlingService.hentMigreringsdatoIBehandling(behandling.id)
+        if (migreringsdato != null &&
+            vilkårsvurdering.personResultater.any {
+                it.vilkårResultater.any { vilkårResultat ->
+                    vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD &&
+                        vilkårResultat.periodeFom?.isBefore(migreringsdato) == true
+                }
+            }
+        ) {
+            throw FunksjonellFeil(
+                melding = "${Vilkår.UTVIDET_BARNETRYGD} kan ikke endres før $migreringsdato " +
+                    "for behandling=${behandling.id}",
+                frontendFeilmelding = "F.o.m. kan ikke settes tidligere " +
+                    "enn migreringsdato ${migreringsdato.tilKortString()} " +
+                    "Ved behov for vurdering før dette, må behandlingen henlegges, " +
+                    "og migreringstidspunktet endres ved å opprette en ny migreringsbehandling."
             )
         }
     }
