@@ -58,7 +58,7 @@ class BehandlingsresultatService(
                 forrigeBehandling = forrigeBehandling
             )
 
-        val behandlingsresultatPersoner = persongrunnlagService.hentAktiv(behandling.id)?.personer?.filter {
+        val behandlingsresultatPersoner = persongrunnlagService.hentAktiv(behandling.id)?.søkerOgBarn?.filter {
             when (it.type) {
                 PersonType.SØKER ->
                     vilkårsvurdering.personResultater
