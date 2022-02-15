@@ -47,7 +47,7 @@ fun VedtakBegrunnelseSpesifikasjon.triggesForPeriodeGammel(
     andelerTilkjentYtelse: List<AndelTilkjentYtelse> = emptyList(),
 ): Boolean {
 
-    val aktuellePersoner = persongrunnlag.personer
+    val aktuellePersoner = persongrunnlag.søkerOgBarn
         .filter { person -> triggesAv.personTyper.contains(person.type) }
         .filter { person ->
             if (this.vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGET) {
