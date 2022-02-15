@@ -284,7 +284,7 @@ internal class PersonidentServiceTest {
             )
         }
 
-        val aktør = personidentService.hentAktør(personidentAktiv)
+        val aktør = personidentService.hentOgLagreAktør(personidentAktiv, false)
 
         verify(exactly = 0) { aktørIdRepository.saveAndFlush(any()) }
         verify(exactly = 0) { personidentRepository.saveAndFlush(any()) }
