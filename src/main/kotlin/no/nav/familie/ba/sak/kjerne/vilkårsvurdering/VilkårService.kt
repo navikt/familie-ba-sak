@@ -585,7 +585,7 @@ class VilkårService(
                     message = "Fant ikke personopplysninggrunnlag " +
                         "for behandling ${vilkårsvurdering.behandling.id}"
                 )
-        return personopplysningGrunnlag.søkerOgBarn.filter { it.type != PersonType.ANNENPART }.map { person ->
+        return personopplysningGrunnlag.søkerOgBarn.map { person ->
             val personResultat = PersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
                 aktør = person.aktør
