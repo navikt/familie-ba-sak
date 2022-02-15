@@ -76,7 +76,7 @@
       {
         "gjelderSoker": true,
         "barnasFodselsdatoer": "02.06.13 og 26.09.17",
-        "antallBarn": 2,
+        "antallBarn": 0,
         "maanedOgAarBegrunnelsenGjelderFor": null,
         "maalform": "bokmaal",
         "apiNavn": "avslagIkkeMeklingsattest",
