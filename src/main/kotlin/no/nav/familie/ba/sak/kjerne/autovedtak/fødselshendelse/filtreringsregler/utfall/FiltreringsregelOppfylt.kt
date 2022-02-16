@@ -19,6 +19,10 @@ enum class FiltreringsregelOppfylt(val beskrivelse: String, private val filtreri
     MER_ENN_5_MND_SIDEN_FORRIGE_BARN_UTFALL(
         "Det har gått mer enn fem måneder siden forrige barn ble født.",
         Filtreringsregel.MER_ENN_5_MND_SIDEN_FORRIGE_BARN
+    ),
+    LØPER_IKKE_BARNETRYGD_FOR_BARNET(
+        "Det løper ikke barnetrygd for barnet på annen forelder",
+        Filtreringsregel.LØPER_IKKE_BARNETRYGD_FOR_BARNET
     );
 
     override fun hentBeskrivelse(): String {
