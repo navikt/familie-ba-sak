@@ -50,6 +50,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.UtvidetVedtaksp
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilUtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.YearMonth
@@ -175,7 +176,18 @@ class VedtaksperiodeService(
         vurderteBarnSomPersoner.map { it.fødselsdato.toYearMonth() }.toSet().forEach { fødselsmåned ->
             val vedtaksperiodeMedBegrunnelser = vedtaksperioderMedBegrunnelser.firstOrNull {
                 fødselsmåned.plusMonths(1).equals(it.fom?.toYearMonth() ?: TIDENES_ENDE)
-            } ?: throw Feil("Finner ikke vedtaksperiode å begrunne for barn fra hendelse")
+            }
+
+            if (vedtaksperiodeMedBegrunnelser == null) {
+                val vilkårsvurdering =
+                    vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId = vedtak.behandling.id)
+                secureLogger.info(
+                    vilkårsvurdering?.personResultater?.map {
+                        "Fødselsnummer: ${it.aktør.aktivFødselsnummer()}.  Resultater: ${it.vilkårResultater}"
+                    }?.joinToString("\n")
+                )
+                throw Feil("Finner ikke vedtaksperiode å begrunne for barn fra hendelse")
+            }
 
             vedtaksperiodeMedBegrunnelser.settBegrunnelser(
                 listOf(
@@ -587,4 +599,9 @@ class VedtaksperiodeService(
 
     fun hent(vedtaksperiodeId: Long): VedtaksperiodeMedBegrunnelser =
         vedtaksperiodeRepository.hentVedtaksperiode(vedtaksperiodeId = vedtaksperiodeId)
+
+    companion object {
+
+        private val secureLogger = LoggerFactory.getLogger("secureLogger")
+    }
 }
