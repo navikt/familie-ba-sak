@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.erOppfylt
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.domene.FødselshendelsefiltreringResultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.domene.FødselshendelsefiltreringResultatRepository
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
@@ -22,6 +23,7 @@ import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 
 @Service
 class FiltreringsreglerService(
@@ -30,7 +32,8 @@ class FiltreringsreglerService(
     private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
     private val localDateService: LocalDateService,
     private val fødselshendelsefiltreringResultatRepository: FødselshendelsefiltreringResultatRepository,
-    private val tilkjentYtelseValideringService: TilkjentYtelseValideringService
+    private val behandlingService: BehandlingService,
+    private val tilkjentYtelseValideringService: TilkjentYtelseValideringService,
 ) {
 
     val filtreringsreglerMetrics = mutableMapOf<String, Counter>()
@@ -92,6 +95,11 @@ class FiltreringsreglerService(
             ?: throw IllegalStateException("Fant ikke personopplysninggrunnlag for behandling ${behandling.id}")
         val barnaFraHendelse = personopplysningGrunnlag.barna.filter { barnasAktørId.contains(it.aktør) }
 
+        val migreringsdatoForFagsak =
+            behandlingService.hentBehandlinger(behandling.fagsak.id).mapNotNull {
+                behandlingService.hentMigreringsdatoIBehandling(it.id)
+            }.singleOrNull()
+
         val fakta = FiltreringsreglerFakta(
             mor = personopplysningGrunnlag.søker,
             morMottarLøpendeUtvidet = behandling.underkategori == BehandlingUnderkategori.UTVIDET,
@@ -101,6 +109,10 @@ class FiltreringsreglerService(
             barnaLever = personopplysningGrunnlag.barna.none { it.erDød() },
             morHarVerge = personopplysningerService.harVerge(morsAktørId).harVerge,
             dagensDato = localDateService.now(),
+            erFagsakenMigrertEtterBarnFødt = erSakenMigrertEtterBarnFødt(
+                barnaFraHendelse,
+                migreringsdatoForFagsak
+            ),
             løperBarnetrygdForBarnetPåAnnenForelder = tilkjentYtelseValideringService.barnetrygdLøperForAnnenForelder(
                 behandling = behandling,
                 barna = barnaFraHendelse
@@ -120,6 +132,11 @@ class FiltreringsreglerService(
             fakta = fakta
         )
     }
+
+    private fun erSakenMigrertEtterBarnFødt(
+        barnaFraHendelse: List<Person>,
+        migreringsdatoForFagsak: LocalDate?,
+    ): Boolean = migreringsdatoForFagsak?.isAfter(barnaFraHendelse.minOf { it.fødselsdato }) == true
 
     private fun finnRestenAvBarnasPersonInfo(morsAktørId: Aktør, barnaFraHendelse: List<Person>): List<PersonInfo> {
         return personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(morsAktørId).forelderBarnRelasjon.filter {
