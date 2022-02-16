@@ -31,7 +31,7 @@ data class DataChunk(
     val transaksjonsId: UUID,
 
     @Column(name = "chunk_nr", nullable = false)
-    val chunk_nr: Int,
+    val chunkNr: Int,
 
     @Column(name = "er_sendt", nullable = false)
     var erSendt: Boolean = false
