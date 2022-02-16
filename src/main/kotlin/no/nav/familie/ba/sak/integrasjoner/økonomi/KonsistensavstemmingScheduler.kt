@@ -40,6 +40,7 @@ class KonsistensavstemmingScheduler(
                     type = KonsistensavstemMotOppdragStart.TASK_STEP_TYPE,
                     payload = objectMapper.writeValueAsString(
                         KonsistensavstemmingStartTaskDTO(
+                            batchId = plukketBatch.id,
                             avstemmingdato = LocalDateTime.now(),
                         )
                     )

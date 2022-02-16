@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service
 )
 class KonsistensavstemMotOppdragData(
     val avstemmingService: AvstemmingService,
-    val repository: TaskKonsistensavstemmingRepository
 ) :
     AsyncTaskStep {
 
@@ -27,7 +26,8 @@ class KonsistensavstemMotOppdragData(
         avstemmingService.konsistensavstemOppdragData(
             avstemmingsdato = konsistensavstemmingDataTask.avstemmingdato,
             perioderTilAvstemming = konsistensavstemmingDataTask.perioderForBehandling,
-            transaksjonsId = konsistensavstemmingDataTask.transaksjonsId
+            transaksjonsId = konsistensavstemmingDataTask.transaksjonsId,
+            chunkNr = konsistensavstemmingDataTask.chunkNr,
         )
     }
 

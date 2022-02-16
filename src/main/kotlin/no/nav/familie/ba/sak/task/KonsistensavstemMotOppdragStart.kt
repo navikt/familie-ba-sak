@@ -23,6 +23,7 @@ class KonsistensavstemMotOppdragStart(val avstemmingService: AvstemmingService) 
         val transaksjonsId = UUID.randomUUID()
 
         avstemmingService.konsistensavstemOppdragStart(
+            batchId = konsistensavstemmingTask.batchId,
             avstemmingsdato = konsistensavstemmingTask.avstemmingdato,
             transaksjonsId = transaksjonsId
         )

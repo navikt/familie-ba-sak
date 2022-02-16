@@ -23,6 +23,8 @@ class AvstemmingService(
     val behandlingService: BehandlingService,
     val beregningService: BeregningService,
     val taskRepository: TaskRepository,
+    val batchRepository: BatchRepository,
+    val dataChunkRepository: DataChunkRepository,
 ) {
     fun grensesnittavstemOppdrag(fraDato: LocalDateTime, tilDato: LocalDateTime) {
 
@@ -58,42 +60,51 @@ class AvstemmingService(
     }
 
     @Transactional
-    fun konsistensavstemOppdragStart(avstemmingsdato: LocalDateTime, transaksjonsId: UUID) {
+    fun konsistensavstemOppdragStart(batchId: Long, avstemmingsdato: LocalDateTime, transaksjonsId: UUID) {
         val batchStorlek = 1000
         // TODO: legg in paging eller streaming.
         val perioderTilAvstemming = hentDataForKonsistensavstemming(avstemmingsdato)
+        val batch = batchRepository.getById(batchId)
 
         logger.info("Oppretter konsisensavstemmingstasker for ${perioderTilAvstemming.size} løpende saker")
 
+        var chunkNr = 0
         perioderTilAvstemming.chunked(batchStorlek) {
             val konsistensavstemmingDataTask = Task(
                 type = KonsistensavstemMotOppdragData.TASK_STEP_TYPE,
                 payload = objectMapper.writeValueAsString(
                     KonsistensavstemmingDataTaskDTO(
-                        transaksjonsId,
-                        avstemmingsdato,
-                        it,
+                        transaksjonsId = transaksjonsId,
+                        chunkNr = ++chunkNr,
+                        avstemmingdato = avstemmingsdato,
+                        perioderForBehandling = it,
                     )
                 )
             )
             taskRepository.save(konsistensavstemmingDataTask)
+            dataChunkRepository.save(DataChunk(batch = batch, transaksjonsId = transaksjonsId, chunkNr = chunkNr))
         }
 
         val konsistensavstemmingAvsluttTask = Task(
             type = KonsistensavstemMotOppdragAvslutt.TASK_STEP_TYPE,
             payload = objectMapper.writeValueAsString(
                 KonsistensavstemmingAvsluttTaskDTO(
-                    transaksjonsId,
-                    avstemmingsdato,
+                    batchId = batchId,
+                    transaksjonsId = transaksjonsId,
+                    avstemmingsdato = avstemmingsdato,
                 )
             )
         )
         taskRepository.save(konsistensavstemmingAvsluttTask)
-
-        Result.runCatching { økonomiKlient.konsistensavstemOppdragStart(avstemmingsdato, transaksjonsId) }
+        val dataChunk = dataChunkRepository.Result.runCatching {
+            økonomiKlient.konsistensavstemOppdragStart(
+                avstemmingsdato,
+                transaksjonsId
+            )
+        }
             .fold(
                 onSuccess = {
-                    logger.debug("Konsistensavstemming mot oppdrag startet.")
+                    dataChunkRepository.logger.debug("Konsistensavstemming mot oppdrag startet.")
                 },
                 onFailure = {
                     logger.error("Starting av konsistensavstemming mot oppdrag feilet", it)
@@ -106,9 +117,10 @@ class AvstemmingService(
         avstemmingsdato: LocalDateTime,
         perioderTilAvstemming: List<PerioderForBehandling>,
         transaksjonsId: UUID,
+        chunkNr: Int,
     ) {
         logger.info("Utfører konsisensavstemming: Sender perioder for transaksjonsId $transaksjonsId")
-
+        val dataChunk = dataChunkRepository.findByTransaksjonsIdAndChunkNr(transaksjonsId, chunkNr)
         Result.runCatching {
             økonomiKlient.konsistensavstemOppdragData(
                 avstemmingsdato,
@@ -118,6 +130,7 @@ class AvstemmingService(
         }
             .fold(
                 onSuccess = {
+                    dataChunkRepository.save(dataChunk.also { it.erSendt = true })
                     logger.debug("Perioder til konsistensavstemming mot oppdrag utført.")
                 },
                 onFailure = {
