@@ -101,7 +101,7 @@ class VelgFagSystemService(
     }
 
     fun velgFagsystem(nyBehandlingHendelse: NyBehandlingHendelse): Pair<FagsystemRegelVurdering, FagsystemUtfall> {
-        val morsAktør = personidentService.hentOgLagreAktør(nyBehandlingHendelse.morsIdent)
+        val morsAktør = personidentService.hentAktør(nyBehandlingHendelse.morsIdent)
 
         val fagsak = fagsakService.hent(morsAktør)
 

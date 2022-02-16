@@ -17,7 +17,9 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.erOppfylt
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.domene.FødselshendelsefiltreringResultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.domene.FødselshendelsefiltreringResultatRepository
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.domene.erOppfylt
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
+import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -48,12 +50,16 @@ class FiltreringsregelForFlereBarnTest {
     val personidentService = mockk<PersonidentService>()
     val localDateServiceMock = mockk<LocalDateService>()
     val fødselshendelsefiltreringResultatRepository = mockk<FødselshendelsefiltreringResultatRepository>(relaxed = true)
+    val behandlingServiceMock = mockk<BehandlingService>(relaxed = true)
+    val tilkjentYtelseValideringServiceMock = mockk<TilkjentYtelseValideringService>()
     val filtreringsreglerService = FiltreringsreglerService(
-        personopplysningerServiceMock,
-        personidentService,
-        personopplysningGrunnlagRepositoryMock,
-        localDateServiceMock,
-        fødselshendelsefiltreringResultatRepository
+        personopplysningerService = personopplysningerServiceMock,
+        personidentService = personidentService,
+        personopplysningGrunnlagRepository = personopplysningGrunnlagRepositoryMock,
+        localDateService = localDateServiceMock,
+        fødselshendelsefiltreringResultatRepository = fødselshendelsefiltreringResultatRepository,
+        behandlingService = behandlingServiceMock,
+        tilkjentYtelseValideringService = tilkjentYtelseValideringServiceMock,
     )
 
     init {
@@ -119,15 +125,17 @@ class FiltreringsregelForFlereBarnTest {
 
         every { localDateServiceMock.now() } returns LocalDate.now().withDayOfMonth(15)
 
-        every { personidentService.hentOgLagreAktør(gyldigAktør.aktivFødselsnummer()) } returns gyldigAktør
+        every { personidentService.hentAktør(gyldigAktør.aktivFødselsnummer()) } returns gyldigAktør
         every {
-            personidentService.hentOgLagreAktørIder(
+            personidentService.hentAktørIder(
                 listOf(
                     barnAktør0.aktivFødselsnummer(),
                     barnAktør1.aktivFødselsnummer()
                 )
             )
         } returns listOf(barnAktør0, barnAktør1)
+
+        every { tilkjentYtelseValideringServiceMock.barnetrygdLøperForAnnenForelder(any(), any()) } returns false
 
         val fødselshendelsefiltreringResultater = filtreringsreglerService.kjørFiltreringsregler(
             NyBehandlingHendelse(
@@ -180,15 +188,17 @@ class FiltreringsregelForFlereBarnTest {
 
         every { localDateServiceMock.now() } returns LocalDate.now().withDayOfMonth(20)
 
-        every { personidentService.hentOgLagreAktør(gyldigAktør.aktivFødselsnummer()) } returns gyldigAktør
+        every { personidentService.hentAktør(gyldigAktør.aktivFødselsnummer()) } returns gyldigAktør
         every {
-            personidentService.hentOgLagreAktørIder(
+            personidentService.hentAktørIder(
                 listOf(
                     barnAktør0.aktivFødselsnummer(),
                     barnAktør1.aktivFødselsnummer()
                 )
             )
         } returns listOf(barnAktør0, barnAktør1)
+
+        every { tilkjentYtelseValideringServiceMock.barnetrygdLøperForAnnenForelder(any(), any()) } returns false
 
         val fødselshendelsefiltreringResultater = filtreringsreglerService.kjørFiltreringsregler(
             NyBehandlingHendelse(
@@ -278,7 +288,9 @@ class FiltreringsregelForFlereBarnTest {
             morLever = true,
             barnaLever = true,
             morHarVerge = false,
-            dagensDato = LocalDate.now()
+            dagensDato = LocalDate.now(),
+            erFagsakenMigrertEtterBarnFødt = false,
+            løperBarnetrygdForBarnetPåAnnenForelder = false,
         )
     }
 }

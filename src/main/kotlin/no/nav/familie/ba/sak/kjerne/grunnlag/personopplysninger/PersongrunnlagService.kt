@@ -67,7 +67,7 @@ class PersongrunnlagService(
         .findByBehandlingAndAktiv(behandlingId)!!.barna
 
     fun hentPersonerPåBehandling(identer: List<String>, behandling: Behandling): List<Person> {
-        val aktørIder = personidentService.hentOgLagreAktørIder(identer)
+        val aktørIder = personidentService.hentAktørIder(identer)
 
         val grunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
             ?: throw Feil("Finner ikke personopplysningsgrunnlag på behandling ${behandling.id}")
@@ -294,6 +294,8 @@ class PersongrunnlagService(
             if (it == null) {
                 logger.warn("Finner flere eller ingen fedre/medmødre på barna som behandles i fødselshendelse. Se securelogger for mer informasjon.")
                 secureLogger.info("Finner flere eller ingen fedre/medmødre på barna som behandles i fødselshendelse: $barnasFarEllerMedmorAktører")
+            } else {
+                personidentService.hentOgLagreAktør(ident = it.aktørId, lagre = true)
             }
         }
     }

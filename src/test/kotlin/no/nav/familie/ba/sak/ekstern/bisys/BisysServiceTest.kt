@@ -46,7 +46,7 @@ internal class BisysServiceTest {
         val fnr = randomFnr()
         val aktør = tilAktør(fnr)
 
-        every { mockPersonidentService.hentOgLagreAktør(any()) } answers { aktør }
+        every { mockPersonidentService.hentAktør(any()) } answers { aktør }
         every { mockPersonidentService.hentAlleFødselsnummerForEnAktør(any()) } answers { listOf(aktør.aktivFødselsnummer()) }
 
         every { mockInfotrygdClient.hentUtvidetBarnetrygd(fnr, any()) } returns BisysUtvidetBarnetrygdResponse(
@@ -65,7 +65,7 @@ internal class BisysServiceTest {
         val fnr = randomFnr()
         val aktør = tilAktør(fnr)
 
-        every { mockPersonidentService.hentOgLagreAktør(any()) } answers { aktør }
+        every { mockPersonidentService.hentAktør(any()) } answers { aktør }
         every { mockPersonidentService.hentAlleFødselsnummerForEnAktør(any()) } answers { listOf(aktør.aktivFødselsnummer()) }
 
         val periodeInfotrygd = UtvidetBarnetrygdPeriode(
@@ -110,7 +110,7 @@ internal class BisysServiceTest {
         every { mockFagsakRepository.finnFagsakForAktør(any()) } returns behandling.fagsak
         every { mockBehandlingService.hentSisteBehandlingSomErIverksatt(behandling.fagsak.id) } returns behandling
         every { mockTilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(behandling.id) } returns andelTilkjentYtelse.tilkjentYtelse
-        every { mockPersonidentService.hentOgLagreAktør(any()) } answers { behandling.fagsak.aktør }
+        every { mockPersonidentService.hentAktør(any()) } answers { behandling.fagsak.aktør }
         every { mockPersonidentService.hentAlleFødselsnummerForEnAktør(any()) } answers { listOf(behandling.fagsak.aktør.aktivFødselsnummer()) }
 
         val response =
@@ -139,7 +139,7 @@ internal class BisysServiceTest {
                 beløp = 660
             )
         tilkjentYtelse.andelerTilkjentYtelse.add(andelTilkjentYtelse)
-        every { mockPersonidentService.hentOgLagreAktør(any()) } answers { andelTilkjentYtelse.aktør }
+        every { mockPersonidentService.hentAktør(any()) } answers { andelTilkjentYtelse.aktør }
         every { mockPersonidentService.hentAlleFødselsnummerForEnAktør(any()) } answers { listOf(andelTilkjentYtelse.aktør.aktivFødselsnummer()) }
 
         val periodeInfotrygd = UtvidetBarnetrygdPeriode(
@@ -191,7 +191,7 @@ internal class BisysServiceTest {
             )
         tilkjentYtelse.andelerTilkjentYtelse.add(andelTilkjentYtelse)
 
-        every { mockPersonidentService.hentOgLagreAktør(any()) } answers { andelTilkjentYtelse.aktør }
+        every { mockPersonidentService.hentAktør(any()) } answers { andelTilkjentYtelse.aktør }
         every { mockPersonidentService.hentAlleFødselsnummerForEnAktør(any()) } answers { listOf(andelTilkjentYtelse.aktør.aktivFødselsnummer()) }
 
         val periodeInfotrygd = UtvidetBarnetrygdPeriode(

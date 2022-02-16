@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.NullableMånedPeriode
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
+import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.overlapperHeltEllerDelvisMed
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
@@ -19,16 +20,12 @@ data class MinimertRestEndretAndel(
     val årsak: Årsak,
 ) {
     fun erOverlappendeMed(nullableMånedPeriode: NullableMånedPeriode): Boolean {
-        if (nullableMånedPeriode.fom == null) {
-            throw Feil("Fom ble null ved sjekk av overlapp av periode til endretUtbetalingAndel")
-        }
-
         return MånedPeriode(
             this.periode.fom,
             this.periode.tom
         ).overlapperHeltEllerDelvisMed(
             MånedPeriode(
-                nullableMånedPeriode.fom,
+                nullableMånedPeriode.fom ?: TIDENES_MORGEN.toYearMonth(),
                 nullableMånedPeriode.tom ?: TIDENES_ENDE.toYearMonth()
             )
         )

@@ -71,7 +71,7 @@ class BehandlingService(
 
     @Transactional
     fun opprettBehandling(nyBehandling: NyBehandling): Behandling {
-        val søkersAktør = personidentService.hentOgLagreAktør(nyBehandling.søkersIdent)
+        val søkersAktør = personidentService.hentAktør(nyBehandling.søkersIdent)
 
         val fagsak = fagsakRepository.finnFagsakForAktør(søkersAktør)
             ?: throw FunksjonellFeil(
@@ -244,7 +244,7 @@ class BehandlingService(
         vedtakRepository.save(nyttVedtak)
     }
 
-    private fun sendTilDvh(behandling: Behandling) {
+    fun sendTilDvh(behandling: Behandling) {
         saksstatistikkEventPublisher.publiserBehandlingsstatistikk(behandling.id)
     }
 
