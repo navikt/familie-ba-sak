@@ -8,6 +8,6 @@ class SkyggesakService(
     private val skyggesakRepository: SkyggesakRepository
 ) {
     fun opprettSkyggesak(fagsak: Fagsak) {
-        skyggesakRepository.save(Skyggesak(fagsak = fagsak))
+        skyggesakRepository.save(Skyggesak(fagsakId = fagsak.id))
     }
 }
