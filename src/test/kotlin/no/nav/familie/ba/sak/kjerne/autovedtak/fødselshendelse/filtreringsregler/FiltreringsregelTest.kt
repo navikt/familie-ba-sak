@@ -466,21 +466,20 @@ internal class FiltreringsregelTest {
         val søkerPerson =
             tilfeldigSøker(fødselsdato = LocalDate.parse("1962-10-23"), aktør = tilAktør("04086226621"))
         val barn1Person =
-            tilfeldigPerson(fødselsdato = LocalDate.parse("2020-10-23"), aktør = tilAktør("23102000000"))
-        val barn2Person =
-            tilfeldigPerson(fødselsdato = LocalDate.parse("2018-09-23"), aktør = tilAktør("23091823456"))
+            tilfeldigPerson(fødselsdato = LocalDate.parse("2020-09-23"), aktør = tilAktør("23092023456"))
 
         val evalueringer =
             evaluerFiltreringsregler(
                 FiltreringsreglerFakta(
                     mor = søkerPerson,
-                    barnaFraHendelse = listOf(barn1Person, barn2Person),
+                    barnaFraHendelse = listOf(barn1Person),
                     restenAvBarna = listOf(),
                     morLever = true,
                     barnaLever = true,
                     morHarVerge = false,
                     erFagsakenMigrertEtterBarnFødt = true,
                     løperBarnetrygdForBarnetPåAnnenForelder = false,
+                    dagensDato = LocalDate.parse("2020-10-23")
                 )
             )
         assertIkkeOppfyltFiltreringsregel(
