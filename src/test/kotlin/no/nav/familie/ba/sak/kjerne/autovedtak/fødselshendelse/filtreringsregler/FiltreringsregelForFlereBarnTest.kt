@@ -53,13 +53,13 @@ class FiltreringsregelForFlereBarnTest {
     val behandlingServiceMock = mockk<BehandlingService>(relaxed = true)
     val tilkjentYtelseValideringServiceMock = mockk<TilkjentYtelseValideringService>()
     val filtreringsreglerService = FiltreringsreglerService(
-        personopplysningerServiceMock,
-        personidentService,
-        personopplysningGrunnlagRepositoryMock,
-        localDateServiceMock,
-        fødselshendelsefiltreringResultatRepository,
-        tilkjentYtelseValideringServiceMock,
-        behandlingServiceMock,
+        personopplysningerService = personopplysningerServiceMock,
+        personidentService = personidentService,
+        personopplysningGrunnlagRepository = personopplysningGrunnlagRepositoryMock,
+        localDateService = localDateServiceMock,
+        fødselshendelsefiltreringResultatRepository = fødselshendelsefiltreringResultatRepository,
+        behandlingService = behandlingServiceMock,
+        tilkjentYtelseValideringService = tilkjentYtelseValideringServiceMock,
     )
 
     init {

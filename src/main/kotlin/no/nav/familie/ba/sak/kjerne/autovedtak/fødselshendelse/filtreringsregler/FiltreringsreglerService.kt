@@ -113,7 +113,6 @@ class FiltreringsreglerService(
                 barnaFraHendelse,
                 migreringsdatoForFagsak
             ),
-            dagensDato = localDateService.now(),
             løperBarnetrygdForBarnetPåAnnenForelder = tilkjentYtelseValideringService.barnetrygdLøperForAnnenForelder(
                 behandling = behandling,
                 barna = barnaFraHendelse

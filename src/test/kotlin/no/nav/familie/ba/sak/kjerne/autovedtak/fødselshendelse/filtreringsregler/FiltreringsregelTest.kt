@@ -105,7 +105,7 @@ internal class FiltreringsregelTest {
                 morLever = true,
                 barnaLever = true,
                 morHarVerge = false,
-                løperBarnetrygdForBarnetPåAnnenForelder = false
+                løperBarnetrygdForBarnetPåAnnenForelder = false,
                 erFagsakenMigrertEtterBarnFødt = false,
             )
         )
@@ -480,6 +480,7 @@ internal class FiltreringsregelTest {
                     barnaLever = true,
                     morHarVerge = false,
                     erFagsakenMigrertEtterBarnFødt = true,
+                    løperBarnetrygdForBarnetPåAnnenForelder = false,
                 )
             )
         assertIkkeOppfyltFiltreringsregel(
@@ -529,7 +530,8 @@ internal class FiltreringsregelTest {
                     morLever = true,
                     barnaLever = true,
                     morHarVerge = false,
-                    løperBarnetrygdForBarnetPåAnnenForelder = true
+                    løperBarnetrygdForBarnetPåAnnenForelder = true,
+                    erFagsakenMigrertEtterBarnFødt = false,
                 )
             )
         Assertions.assertTrue(!evalueringer.erOppfylt())
