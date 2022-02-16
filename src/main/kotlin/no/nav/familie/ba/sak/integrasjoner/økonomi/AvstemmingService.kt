@@ -96,7 +96,8 @@ class AvstemmingService(
             )
         )
         taskRepository.save(konsistensavstemmingAvsluttTask)
-        val dataChunk = dataChunkRepository.Result.runCatching {
+
+        runCatching {
             økonomiKlient.konsistensavstemOppdragStart(
                 avstemmingsdato,
                 transaksjonsId
@@ -104,7 +105,7 @@ class AvstemmingService(
         }
             .fold(
                 onSuccess = {
-                    dataChunkRepository.logger.debug("Konsistensavstemming mot oppdrag startet.")
+                    logger.debug("Konsistensavstemming mot oppdrag startet.")
                 },
                 onFailure = {
                     logger.error("Starting av konsistensavstemming mot oppdrag feilet", it)
