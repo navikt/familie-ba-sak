@@ -1,9 +1,9 @@
 package no.nav.familie.ba.sak.kjerne.eøs.kompetanse
 
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseSkjema
 import org.springframework.stereotype.Repository
 import java.time.YearMonth
+import java.util.concurrent.atomic.AtomicLong
 
 @Repository
 class MockKompetanseRepository {
@@ -12,18 +12,20 @@ class MockKompetanseRepository {
     val barn2 = "222222"
     val barn3 = "333333"
 
+    val løpenummer = AtomicLong()
+    fun AtomicLong.neste() = this.addAndGet(1)
+
     private val malKompetanse = Kompetanse(
         id = 1L,
         fom = YearMonth.of(2021, 2),
         tom = YearMonth.of(2021, 11),
         barn = setOf(barn1, barn2, barn3),
-        skjema = KompetanseSkjema()
     )
 
     private val kompetanser = mutableMapOf(
         Pair(
             1L,
-            malKompetanse.copy(id = 1)
+            malKompetanse.copy(id = løpenummer.neste())
         )
     )
 
@@ -40,7 +42,7 @@ class MockKompetanseRepository {
             kompetanser[kompetanse.id] = kompetanse
             return kompetanse
         } else {
-            val nyId = kompetanser.keys.maxOf { it } + 1
+            val nyId = løpenummer.neste()
             kompetanser[nyId] = kompetanse.copy(id = nyId)
             return kompetanser[nyId]!!
         }

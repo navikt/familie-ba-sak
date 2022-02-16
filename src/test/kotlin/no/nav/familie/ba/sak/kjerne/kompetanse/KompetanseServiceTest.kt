@@ -18,9 +18,10 @@ internal class KompetanseServiceTest {
             tom = kompetanse.tom!!.minusMonths(2)
         )
 
-        val kompetanserEtterOppdatering = kompetanseService.oppdaterKompetanse(oppdatertKompetanse)
+        val kompetanserEtterOppdatering = kompetanseService.oppdaterKompetanse(oppdatertKompetanse).toList()
         assertEquals(3, kompetanserEtterOppdatering.size)
 
-        assertEquals(1, kompetanser.size)
+        val kompetanserEtterSletting = kompetanseService.slettKompetamse(kompetanserEtterOppdatering[0].id)
+        assertEquals(1, kompetanserEtterSletting.size)
     }
 }

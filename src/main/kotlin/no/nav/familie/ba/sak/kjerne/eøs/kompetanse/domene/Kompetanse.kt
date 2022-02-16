@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene
 
-import com.fasterxml.jackson.annotation.JsonUnwrapped
 import java.time.YearMonth
 
 data class Kompetanse(
@@ -9,12 +8,7 @@ data class Kompetanse(
     val fom: YearMonth?,
     val tom: YearMonth?,
     val barn: Set<String>,
-    val status: KompetanseStatus? = null,
-    @JsonUnwrapped
-    val skjema: KompetanseSkjema? = null
-)
-
-data class KompetanseSkjema(
+    val status: KompetanseStatus? = KompetanseStatus.IKKE_UTFYLT,
     val søkersAktivitet: String? = null,
     val annenForeldersAktivitet: String? = null,
     val barnetsBostedsland: String? = null,
@@ -28,4 +22,11 @@ enum class KompetanseStatus {
     OK
 }
 
-fun Kompetanse.blankUt() = this.copy(skjema = null, status = KompetanseStatus.IKKE_UTFYLT)
+fun Kompetanse.blankUt() = this.copy(
+    søkersAktivitet = null,
+    annenForeldersAktivitet = null,
+    barnetsBostedsland = null,
+    primærland = null,
+    sekundærland = null,
+    status = KompetanseStatus.IKKE_UTFYLT
+)

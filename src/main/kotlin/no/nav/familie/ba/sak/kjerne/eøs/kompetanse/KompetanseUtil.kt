@@ -29,13 +29,15 @@ object KompetanseUtil {
             .map { it.copy(id = 0L) }
     }
 
+    fun revurderStatus(kompetanser: List<Kompetanse>): List<Kompetanse> =
+        kompetanser.map { revurderStatus(it) }
+
     fun revurderStatus(kompetanse: Kompetanse): Kompetanse {
-        val skjema = kompetanse.skjema
-        val sum = (skjema?.annenForeldersAktivitet?.let { 1 } ?: 0) +
-            (skjema?.barnetsBostedsland?.let { 1 } ?: 0) +
-            (skjema?.primærland?.let { 1 } ?: 0) +
-            (skjema?.sekundærland?.let { 1 } ?: 0) +
-            (skjema?.søkersAktivitet?.let { 1 } ?: 0)
+        val sum = (kompetanse.annenForeldersAktivitet?.let { 1 } ?: 0) +
+            (kompetanse.barnetsBostedsland?.let { 1 } ?: 0) +
+            (kompetanse.primærland?.let { 1 } ?: 0) +
+            (kompetanse.sekundærland?.let { 1 } ?: 0) +
+            (kompetanse.søkersAktivitet?.let { 1 } ?: 0)
 
         val nyStatus = when (sum) {
             5 -> KompetanseStatus.OK
@@ -52,7 +54,7 @@ object KompetanseUtil {
 
     private fun mergeBarn(kompetanser: List<Kompetanse>): List<Kompetanse> {
         return kompetanser
-            .groupBy { it.copy(barn = emptySet()) }
+            .groupBy { it.copy(id = 0L, barn = emptySet()) }
             .mapValues { (_, kompetanser) ->
                 kompetanser
                     .reduce { acc, neste ->
@@ -64,8 +66,9 @@ object KompetanseUtil {
     private fun mergePerioder(
         kompetanser: Collection<Kompetanse>
     ): List<Kompetanse> {
-        return kompetanser
-            .groupBy { it.copy(fom = null, tom = null) }
+        val nøytralisertePerioder = kompetanser
+            .groupBy { it.copy(id = 0L, fom = null, tom = null) }
+        return nøytralisertePerioder
             .mapValues { (_, kompetanser) ->
                 kompetanser
                     .filter { it.fom != null }

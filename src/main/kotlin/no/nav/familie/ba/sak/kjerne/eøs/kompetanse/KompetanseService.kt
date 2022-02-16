@@ -19,8 +19,11 @@ class KompetanseService(val kompetanseRepository: MockKompetanseRepository = Moc
         val gammelKompetanse = kompetanseRepository.hentKompetanse(oppdatertKompetanse.id)
         val restKompetanser = KompetanseUtil.finnRestKompetanser(gammelKompetanse, oppdatertKompetanse)
 
-        val revurdertKompetanse = revurderStatus(oppdatertKompetanse)
-        kompetanseRepository.save(listOf(revurdertKompetanse) + restKompetanser)
+        val nyeKompetanser =
+            mergeKompetanser(restKompetanser + oppdatertKompetanse)
+
+        val revurderteKompetanser = revurderStatus(nyeKompetanser)
+        kompetanseRepository.save(revurderteKompetanser)
         return hentKompetanser(oppdatertKompetanse.behandlingId)
     }
 
@@ -28,16 +31,17 @@ class KompetanseService(val kompetanseRepository: MockKompetanseRepository = Moc
     fun slettKompetamse(kompetanseId: Long): Collection<Kompetanse> {
         val gammelKompetanse = kompetanseRepository.hentKompetanse(kompetanseId)
         val behandlingId = gammelKompetanse.behandlingId
-        val blankKompetamse = gammelKompetanse.blankUt()
         val eksisterendeKompetanser = hentKompetanser(behandlingId)
+        val blankKompetamse = gammelKompetanse.blankUt()
 
-        val nyeKompetanser =
+        val oppdaterteKompetanser =
             mergeKompetanser(eksisterendeKompetanser.minus(gammelKompetanse).plus(blankKompetamse))
 
-        val tilSletting = eksisterendeKompetanser.minus(nyeKompetanser)
+        val tilSletting = eksisterendeKompetanser.minus(oppdaterteKompetanser)
+        val revurderteKompetanser = revurderStatus(oppdaterteKompetanser)
 
         kompetanseRepository.delete(tilSletting)
-        kompetanseRepository.save(nyeKompetanser)
+        kompetanseRepository.save(revurderteKompetanser)
 
         return hentKompetanser(behandlingId)
     }
