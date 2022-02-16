@@ -17,6 +17,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.erOppfylt
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.domene.FødselshendelsefiltreringResultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.domene.FødselshendelsefiltreringResultatRepository
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.domene.erOppfylt
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
@@ -48,12 +49,14 @@ class FiltreringsregelForFlereBarnTest {
     val personidentService = mockk<PersonidentService>()
     val localDateServiceMock = mockk<LocalDateService>()
     val fødselshendelsefiltreringResultatRepository = mockk<FødselshendelsefiltreringResultatRepository>(relaxed = true)
+    val behandlingServiceMock = mockk<BehandlingService>(relaxed = true)
     val filtreringsreglerService = FiltreringsreglerService(
         personopplysningerServiceMock,
         personidentService,
         personopplysningGrunnlagRepositoryMock,
         localDateServiceMock,
-        fødselshendelsefiltreringResultatRepository
+        fødselshendelsefiltreringResultatRepository,
+        behandlingServiceMock,
     )
 
     init {
@@ -278,7 +281,9 @@ class FiltreringsregelForFlereBarnTest {
             morLever = true,
             barnaLever = true,
             morHarVerge = false,
-            dagensDato = LocalDate.now()
+            dagensDato = LocalDate.now(),
+            erFagsakenMigrertEtterBarnFødt = false,
+
         )
     }
 }

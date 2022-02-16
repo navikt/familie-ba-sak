@@ -16,7 +16,7 @@ enum class Filtreringsregel(val vurder: FiltreringsreglerFakta.() -> Evaluering)
     MOR_ER_OVER_18_ÅR(vurder = { morErOver18år(this) }),
     MOR_HAR_IKKE_VERGE(vurder = { morHarIkkeVerge(this) }),
     MOR_MOTTAR_IKKE_LØPENDE_UTVIDET(vurder = { morMottarIkkeLøpendeUtvidet(this) }),
-    FAGSAK_IKKE_MIGRERT_UT_AV_INFOTRYGD_ETTER_BARN_FØDT(vurder = { fagsakMigrertEtterBarnBleFødt(this) });
+    FAGSAK_IKKE_MIGRERT_UT_AV_INFOTRYGD_ETTER_BARN_FØDT(vurder = { fagsakIkkeMigrertEtterBarnBleFødt(this) });
 }
 
 fun evaluerFiltreringsregler(fakta: FiltreringsreglerFakta) = Filtreringsregel.values()
@@ -82,7 +82,7 @@ fun morMottarIkkeLøpendeUtvidet(fakta: FiltreringsreglerFakta): Evaluering =
         FiltreringsregelIkkeOppfylt.MOR_MOTTAR_LØPENDE_UTVIDET
     )
 
-fun fagsakMigrertEtterBarnBleFødt(fakta: FiltreringsreglerFakta): Evaluering =
+fun fagsakIkkeMigrertEtterBarnBleFødt(fakta: FiltreringsreglerFakta): Evaluering =
     if (!fakta.erFagsakenMigrertEtterBarnFødt) Evaluering.oppfylt(
         FiltreringsregelOppfylt.FAGSAK_IKKE_MIGRERT_UT_AV_INFOTRYGD_ETTER_BARN_FØDT
     ) else Evaluering.ikkeOppfylt(
