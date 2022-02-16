@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.behandling.settpåvent
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import org.slf4j.Logger
@@ -39,6 +40,10 @@ class SettPåVentService(
 
     fun oppdaterSettBehandlingPåVent(behandlingId: Long, frist: LocalDate, årsak: SettPåVentÅrsak): SettPåVent {
         val aktivSettPåVent = finnAktivSettPåVentPåBehandlingThrows(behandlingId)
+
+        if (frist == aktivSettPåVent.frist && årsak == aktivSettPåVent.årsak) {
+            throw FunksjonellFeil("Behandlingen er allerede satt på vent med frist $frist og årsak $årsak.")
+        }
 
         logger.info("Oppdater sett på vent behandling $behandlingId med frist $frist og årsak $årsak")
 
