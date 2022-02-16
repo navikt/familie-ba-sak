@@ -1401,6 +1401,83 @@ class VilkårServiceTest(
         }
     }
 
+    @Test
+    fun `skal ikke endre vilkårsvurderingsperiode før migreringsdato for migreringsbehandling`() {
+        val fnr = randomFnr()
+        val barnFnr = randomFnr()
+        val barnetsFødselsdato = LocalDate.of(2020, 8, 1)
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(
+            lagBehandling(
+                fagsak = fagsak,
+                behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
+                årsak = BehandlingÅrsak.HELMANUELL_MIGRERING
+            )
+        )
+        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
+            behandling.id,
+            fnr, listOf(barnFnr),
+            barnetsFødselsdato,
+            personidentService.hentOgLagreAktør(fnr, true),
+            personidentService.hentOgLagreAktørIder(listOf(barnFnr), true)
+        )
+        persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
+
+        val nyMigreringsdato = LocalDate.of(2021, 1, 1)
+        behandlingService.lagreNedMigreringsdato(nyMigreringsdato, behandling)
+        val vilkårsvurdering = vilkårService.genererVilkårsvurderingForHelmanuellMigrering(behandling, nyMigreringsdato)
+
+        assertTrue { vilkårsvurdering.personResultater.isNotEmpty() }
+        assertTrue { vilkårsvurdering.personResultater.size == 2 }
+
+        val søkerPersonResultat = vilkårsvurdering.personResultater.first { it.aktør.aktivFødselsnummer() == fnr }
+        assertTrue { søkerPersonResultat.vilkårResultater.isNotEmpty() }
+        assertTrue { søkerPersonResultat.vilkårResultater.size == 2 }
+        assertTrue {
+            søkerPersonResultat.vilkårResultater.all {
+                it.periodeTom == null &&
+                    it.periodeFom == nyMigreringsdato
+            }
+        }
+
+        val barnPersonResultat = vilkårsvurdering.personResultater.first { it.aktør.aktivFødselsnummer() == barnFnr }
+        assertTrue { barnPersonResultat.vilkårResultater.isNotEmpty() }
+        assertTrue { barnPersonResultat.vilkårResultater.size == 5 }
+        assertTrue {
+            barnPersonResultat.vilkårResultater.filter { !it.vilkårType.gjelderAlltidFraBarnetsFødselsdato() }.all {
+                it.periodeTom == null &&
+                    it.periodeFom == nyMigreringsdato
+            }
+        }
+
+        val vilkårId = barnPersonResultat.vilkårResultater.single { it.vilkårType == Vilkår.BOR_MED_SØKER }.id
+        val restVilkårResultat = RestVilkårResultat(
+            id = vilkårId,
+            vilkårType = Vilkår.BOR_MED_SØKER,
+            resultat = Resultat.OPPFYLT,
+            periodeFom = LocalDate.of(2020, 10, 1),
+            periodeTom = null,
+            begrunnelse = "Migrering",
+            endretAv = "",
+            endretTidspunkt = LocalDateTime.now(),
+            behandlingId = behandling.id
+        )
+        val exception = assertThrows<RuntimeException> {
+            vilkårService.endreVilkår(
+                behandling.id, vilkårId,
+                RestPersonResultat(
+                    barnFnr,
+                    listOf(restVilkårResultat)
+                )
+            )
+        }
+        assertEquals(
+            "${Vilkår.BOR_MED_SØKER} kan ikke endres før $nyMigreringsdato " +
+                "for behandling=${behandling.id}",
+            exception.message
+        )
+    }
+
     private fun lagMigreringsbehandling(
         fnr: String,
         barnFnr: String,

@@ -79,7 +79,7 @@ class SøknadGrunnlagTest(
     fun `Skal lagre ned og hente søknadsgrunnlag`() {
         val søkerIdent = randomFnr()
         val barnIdent = randomFnr()
-        val søkerAktør = personidentService.hentOgLagreAktør(søkerIdent)
+        val søkerAktør = personidentService.hentAktør(søkerIdent)
 
         fagsakService.hentEllerOpprettFagsak(søkerAktør.aktivFødselsnummer())
         val behandling = stegService.håndterNyBehandling(
@@ -110,7 +110,7 @@ class SøknadGrunnlagTest(
     fun `Skal sjekke at det kun kan være et aktivt grunnlag for en behandling`() {
         val søkerIdent = randomFnr()
         val barnIdent = randomFnr()
-        val søkerAktør = personidentService.hentOgLagreAktør(søkerIdent)
+        val søkerAktør = personidentService.hentAktør(søkerIdent)
 
         fagsakService.hentEllerOpprettFagsak(søkerAktør.aktivFødselsnummer())
         val behandling = stegService.håndterNyBehandling(
@@ -152,7 +152,7 @@ class SøknadGrunnlagTest(
         val folkeregistrertBarn = ClientMocks.barnFnr[0]
         val uregistrertBarn = randomFnr()
 
-        val søkerAktør = personidentService.hentOgLagreAktør(søkerIdent)
+        val søkerAktør = personidentService.hentAktør(søkerIdent)
 
         val søknadDTO = SøknadDTO(
             underkategori = BehandlingUnderkategori.ORDINÆR,

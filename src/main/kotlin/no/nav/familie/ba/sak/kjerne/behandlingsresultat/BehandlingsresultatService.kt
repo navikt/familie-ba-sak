@@ -58,7 +58,7 @@ class BehandlingsresultatService(
                 forrigeBehandling = forrigeBehandling
             )
 
-        val behandlingsresultatPersoner = persongrunnlagService.hentAktiv(behandling.id)?.personer?.filter {
+        val behandlingsresultatPersoner = persongrunnlagService.hentAktiv(behandling.id)?.søkerOgBarn?.filter {
             when (it.type) {
                 PersonType.SØKER ->
                     vilkårsvurdering.personResultater
@@ -128,7 +128,7 @@ class BehandlingsresultatService(
     ): List<Aktør> {
         val barnFraSøknad = søknadDTO?.barnaMedOpplysninger
             ?.filter { it.inkludertISøknaden && it.erFolkeregistrert }
-            ?.map { personidentService.hentOgLagreAktør(it.ident) }
+            ?.map { personidentService.hentAktør(it.ident) }
             ?: emptyList()
 
         val utvidetBarnetrygdSøker =
