@@ -85,8 +85,8 @@ class FiltreringsreglerService(
         nyBehandlingHendelse: NyBehandlingHendelse,
         behandling: Behandling
     ): List<FødselshendelsefiltreringResultat> {
-        val morsAktørId = personidentService.hentOgLagreAktør(nyBehandlingHendelse.morsIdent)
-        val barnasAktørId = personidentService.hentOgLagreAktørIder(nyBehandlingHendelse.barnasIdenter)
+        val morsAktørId = personidentService.hentAktør(nyBehandlingHendelse.morsIdent)
+        val barnasAktørId = personidentService.hentAktørIder(nyBehandlingHendelse.barnasIdenter)
 
         val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
             ?: throw IllegalStateException("Fant ikke personopplysninggrunnlag for behandling ${behandling.id}")

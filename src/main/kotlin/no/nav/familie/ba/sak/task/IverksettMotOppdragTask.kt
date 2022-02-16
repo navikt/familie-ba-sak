@@ -38,7 +38,7 @@ class IverksettMotOppdragTask(
     override fun onCompletion(task: Task) {
 
         val iverksettingTask = objectMapper.readValue(task.payload, IverksettingTaskDTO::class.java)
-        val personIdent = personidentService.hentOgLagreAktør(iverksettingTask.personIdent).aktivFødselsnummer()
+        val personIdent = personidentService.hentAktør(iverksettingTask.personIdent).aktivFødselsnummer()
         val statusFraOppdragTask = Task(
             type = StatusFraOppdragTask.TASK_STEP_TYPE,
             payload = objectMapper.writeValueAsString(

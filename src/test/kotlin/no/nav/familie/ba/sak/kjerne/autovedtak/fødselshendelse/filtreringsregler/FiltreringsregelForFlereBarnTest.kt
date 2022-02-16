@@ -122,9 +122,9 @@ class FiltreringsregelForFlereBarnTest {
 
         every { localDateServiceMock.now() } returns LocalDate.now().withDayOfMonth(15)
 
-        every { personidentService.hentOgLagreAktør(gyldigAktør.aktivFødselsnummer()) } returns gyldigAktør
+        every { personidentService.hentAktør(gyldigAktør.aktivFødselsnummer()) } returns gyldigAktør
         every {
-            personidentService.hentOgLagreAktørIder(
+            personidentService.hentAktørIder(
                 listOf(
                     barnAktør0.aktivFødselsnummer(),
                     barnAktør1.aktivFødselsnummer()
@@ -185,9 +185,9 @@ class FiltreringsregelForFlereBarnTest {
 
         every { localDateServiceMock.now() } returns LocalDate.now().withDayOfMonth(20)
 
-        every { personidentService.hentOgLagreAktør(gyldigAktør.aktivFødselsnummer()) } returns gyldigAktør
+        every { personidentService.hentAktør(gyldigAktør.aktivFødselsnummer()) } returns gyldigAktør
         every {
-            personidentService.hentOgLagreAktørIder(
+            personidentService.hentAktørIder(
                 listOf(
                     barnAktør0.aktivFødselsnummer(),
                     barnAktør1.aktivFødselsnummer()

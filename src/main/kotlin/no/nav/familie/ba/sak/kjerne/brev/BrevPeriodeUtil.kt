@@ -249,7 +249,7 @@ fun hentRestBehandlingsgrunnlagForBrev(
 ): RestBehandlingsgrunnlagForBrev {
 
     return RestBehandlingsgrunnlagForBrev(
-        personerPåBehandling = persongrunnlag.personer.map { it.tilMinimertPerson() },
+        personerPåBehandling = persongrunnlag.søkerOgBarn.map { it.tilMinimertPerson() },
         minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
         minimerteEndredeUtbetalingAndeler = endredeUtbetalingAndeler.map { it.tilMinimertRestEndretUtbetalingAndel() },
     )

@@ -162,7 +162,7 @@ class VedtaksperiodeService(
     }
 
     fun oppdaterVedtaksperioderForBarnVurdertIFødselshendelse(vedtak: Vedtak, barnaSomVurderes: List<String>) {
-        val barnaAktørSomVurderes = personidentService.hentOgLagreAktørIder(barnaSomVurderes)
+        val barnaAktørSomVurderes = personidentService.hentAktørIder(barnaSomVurderes)
 
         val vedtaksperioderMedBegrunnelser = vedtaksperiodeRepository.finnVedtaksperioderFor(vedtakId = vedtak.id)
         val persongrunnlag = persongrunnlagService.hentAktivThrows(behandlingId = vedtak.behandling.id)
@@ -324,7 +324,7 @@ class VedtaksperiodeService(
                     val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id)
                         ?: error("Finner ikke vilkårsvurdering ved begrunning av vedtak")
 
-                    val aktørerMedUtbetaling = personidentService.hentOgLagreAktørIder(
+                    val aktørerMedUtbetaling = personidentService.hentAktørIder(
                         utvidetVedtaksperiodeMedBegrunnelser.utbetalingsperiodeDetaljer.map { it.person.personIdent }
                     )
 

@@ -39,12 +39,10 @@ class PersonController(
         @RequestHeader personIdent: String,
         @RequestBody personIdentBody: PersonIdent?
     ): ResponseEntity<Ressurs<RestPersonInfo>> {
-        val aktør = personidentService.hentOgLagreAktør(personIdent)
+        val aktør = personidentService.hentAktør(personIdent)
         val personinfo = familieIntegrasjonerTilgangskontrollClient.hentMaskertPersonInfoVedManglendeTilgang(aktør)
             ?: personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(
-                personidentService.hentOgLagreAktør(
-                    personIdent
-                )
+                personidentService.hentAktør(personIdent)
             )
                 .tilRestPersonInfo(personIdent)
         return ResponseEntity.ok(Ressurs.success(personinfo))
@@ -55,7 +53,7 @@ class PersonController(
         @RequestHeader personIdent: String,
         @RequestBody personIdentBody: PersonIdent?
     ): ResponseEntity<Ressurs<RestPersonInfo>> {
-        val personinfo = personopplysningerService.hentPersoninfoEnkel(personidentService.hentOgLagreAktør(personIdent))
+        val personinfo = personopplysningerService.hentPersoninfoEnkel(personidentService.hentAktør(personIdent))
         return ResponseEntity.ok(Ressurs.success(personinfo.tilRestPersonInfo(personIdent)))
     }
 
