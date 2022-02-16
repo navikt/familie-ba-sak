@@ -26,7 +26,7 @@ class BehandlingsresultaterTest {
 
     @BeforeEach
     fun init() {
-        every { personidentService.hentOgLagreAktør(any()) } answers { randomAktørId() }
+        every { personidentService.hentAktør(any()) } answers { randomAktørId() }
     }
 
     @Test

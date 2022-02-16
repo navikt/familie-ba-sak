@@ -55,6 +55,9 @@ data class PersonopplysningGrunnlag(
     val annenForelder: Person?
         get() = personer.singleOrNull { it.type == PersonType.ANNENPART }
 
+    val søkerOgBarn: List<Person>
+        get() = personer.filter { it.type == PersonType.SØKER || it.type == PersonType.BARN }
+
     fun harBarnMedSeksårsdagPåFom(fom: LocalDate?) = personer.any { person ->
         person
             .hentSeksårsdag()

@@ -183,7 +183,7 @@ class VedtakServiceTest(
         val fnr = randomFnr()
         val barnFnr = randomFnr()
 
-        val fnrAktørNr = personidentService.hentOgLagreAktør(fnr)
+        val fnrAktørNr = personidentService.hentAktør(fnr)
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
 

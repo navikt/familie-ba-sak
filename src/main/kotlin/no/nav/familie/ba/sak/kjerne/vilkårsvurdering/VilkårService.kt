@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestNyttVilkår
@@ -103,7 +104,30 @@ class VilkårService(
             it.vedtakBegrunnelseSpesifikasjoner = restVilkårResultat.avslagBegrunnelser ?: emptyList()
         }
 
+        validerVilkårStarterIkkeFørMigreringsdatoForMigreringsbehandling(vilkårsvurdering, vilkårResultat)
+
         return vilkårsvurderingService.oppdater(vilkårsvurdering).personResultater.map { it.tilRestPersonResultat() }
+    }
+
+    private fun validerVilkårStarterIkkeFørMigreringsdatoForMigreringsbehandling(
+        vilkårsvurdering: Vilkårsvurdering,
+        vilkårResultat: VilkårResultat,
+    ) {
+        val behandling = vilkårsvurdering.behandling
+        val migreringsdato = behandlingService.hentMigreringsdatoIBehandling(behandling.id)
+        if (migreringsdato != null &&
+            vilkårResultat.vilkårType !in listOf(Vilkår.UNDER_18_ÅR, Vilkår.GIFT_PARTNERSKAP) &&
+            vilkårResultat.periodeFom?.isBefore(migreringsdato) == true
+        ) {
+            throw FunksjonellFeil(
+                melding = "${vilkårResultat.vilkårType} kan ikke endres før $migreringsdato " +
+                    "for behandling=${behandling.id}",
+                frontendFeilmelding = "F.o.m. kan ikke settes tidligere " +
+                    "enn migreringsdato ${migreringsdato.tilKortString()} " +
+                    "Ved behov for vurdering før dette, må behandlingen henlegges, " +
+                    "og migreringstidspunktet endres ved å opprette en ny migreringsbehandling."
+            )
+        }
     }
 
     @Transactional
@@ -132,7 +156,7 @@ class VilkårService(
                 message = "Fant ikke aktiv vilkårsvurdering ved sletting av vilkår",
                 frontendFeilmelding = fantIkkeAktivVilkårsvurderingFeilmelding
             )
-        val aktørÅSlette = personidentService.hentOgLagreAktør(restSlettVilkår.personIdent)
+        val aktørÅSlette = personidentService.hentAktør(restSlettVilkår.personIdent)
         val personResultat = vilkårsvurdering.personResultater.find { it.aktør == aktørÅSlette }
             ?: throw Feil(
                 message = fantIkkeVilkårsvurderingForPersonFeilmelding,
@@ -213,12 +237,38 @@ class VilkårService(
 
         val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
             ?: throw IllegalStateException("Fant ikke personopplysninggrunnlag for behandling ${behandling.id}")
-        if (personopplysningGrunnlag.personer
-            .single { it.aktør == personidentService.hentOgLagreAktør(restNyttVilkår.personIdent) }.type != PersonType.SØKER
+        if (personopplysningGrunnlag.søkerOgBarn
+            .single { it.aktør == personidentService.hentAktør(restNyttVilkår.personIdent) }.type != PersonType.SØKER
         ) {
             throw FunksjonellFeil(
                 melding = "${Vilkår.UTVIDET_BARNETRYGD.beskrivelse} kan ikke legges til for BARN",
                 frontendFeilmelding = "${Vilkår.UTVIDET_BARNETRYGD.beskrivelse} kan ikke legges til for BARN",
+            )
+        }
+
+        validerUtvidetVilkårIkkeFørMigreringsdato(behandling, vilkårsvurdering)
+    }
+
+    private fun validerUtvidetVilkårIkkeFørMigreringsdato(
+        behandling: Behandling,
+        vilkårsvurdering: Vilkårsvurdering
+    ) {
+        val migreringsdato = behandlingService.hentMigreringsdatoIBehandling(behandling.id)
+        if (migreringsdato != null &&
+            vilkårsvurdering.personResultater.any {
+                it.vilkårResultater.any { vilkårResultat ->
+                    vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD &&
+                        vilkårResultat.periodeFom?.isBefore(migreringsdato) == true
+                }
+            }
+        ) {
+            throw FunksjonellFeil(
+                melding = "${Vilkår.UTVIDET_BARNETRYGD} kan ikke endres før $migreringsdato " +
+                    "for behandling=${behandling.id}",
+                frontendFeilmelding = "F.o.m. kan ikke settes tidligere " +
+                    "enn migreringsdato ${migreringsdato.tilKortString()} " +
+                    "Ved behov for vurdering før dette, må behandlingen henlegges, " +
+                    "og migreringstidspunktet endres ved å opprette en ny migreringsbehandling."
             )
         }
     }
@@ -235,8 +285,7 @@ class VilkårService(
             ?: throw IllegalStateException("Fant ikke personopplysninggrunnlag for behandling ${behandling.id}")
 
         if (behandling.skalBehandlesAutomatisk) {
-            val barna = personopplysningGrunnlag.personer.filter { person -> person.type == PersonType.BARN }
-            if (barna.isEmpty()) {
+            if (personopplysningGrunnlag.barna.isEmpty()) {
                 throw IllegalStateException("PersonopplysningGrunnlag for fødselshendelse skal inneholde minst ett barn")
             }
         }
@@ -365,7 +414,7 @@ class VilkårService(
             personopplysningGrunnlagRepository.findByBehandlingAndAktiv(vilkårsvurdering.behandling.id)
                 ?: throw Feil(message = "Fant ikke personopplysninggrunnlag for behandling ${vilkårsvurdering.behandling.id}")
 
-        return personopplysningGrunnlag.personer.map { person ->
+        return personopplysningGrunnlag.søkerOgBarn.map { person ->
             val personResultat = PersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
                 aktør = person.aktør
@@ -395,7 +444,7 @@ class VilkårService(
             personopplysningGrunnlagRepository.findByBehandlingAndAktiv(vilkårsvurdering.behandling.id)
                 ?: throw Feil(message = "Fant ikke personopplysninggrunnlag for behandling ${vilkårsvurdering.behandling.id}")
 
-        return personopplysningGrunnlag.personer.map { person ->
+        return personopplysningGrunnlag.søkerOgBarn.map { person ->
             genererPersonResultatForPerson(vilkårsvurdering, person)
         }.toSet()
     }
@@ -404,7 +453,7 @@ class VilkårService(
         vilkårsvurdering: Vilkårsvurdering,
         barnaSomAlleredeErVurdert: List<String>
     ): Set<PersonResultat> {
-        val barnaAktørSomAlleredeErVurdert = personidentService.hentOgLagreAktørIder(barnaSomAlleredeErVurdert)
+        val barnaAktørSomAlleredeErVurdert = personidentService.hentAktørIder(barnaSomAlleredeErVurdert)
 
         val personopplysningGrunnlag =
             personopplysningGrunnlagRepository.findByBehandlingAndAktiv(vilkårsvurdering.behandling.id)
@@ -416,7 +465,7 @@ class VilkårService(
                 .maxByOrNull { it.fødselsdato }?.fødselsdato
                 ?: throw Feil("Finner ingen barn på persongrunnlag")
 
-        return personopplysningGrunnlag.personer.map { person ->
+        return personopplysningGrunnlag.søkerOgBarn.map { person ->
             val personResultat = PersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
                 aktør = person.aktør
@@ -479,7 +528,7 @@ class VilkårService(
             personopplysningGrunnlagRepository.findByBehandlingAndAktiv(vilkårsvurdering.behandling.id)
                 ?: throw Feil(message = "Fant ikke personopplysninggrunnlag for behandling ${vilkårsvurdering.behandling.id}")
 
-        return personopplysningGrunnlag.personer.filter { it.type != PersonType.ANNENPART }.map { person ->
+        return personopplysningGrunnlag.søkerOgBarn.map { person ->
             val personResultat = PersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
                 aktør = person.aktør
@@ -536,7 +585,7 @@ class VilkårService(
                         "for behandling ${vilkårsvurdering.behandling.id}"
                 )
 
-        return personopplysningGrunnlag.personer.filter { it.type != PersonType.ANNENPART }.map { person ->
+        return personopplysningGrunnlag.søkerOgBarn.map { person ->
             val personResultat = PersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
                 aktør = person.aktør
@@ -586,7 +635,7 @@ class VilkårService(
                     message = "Fant ikke personopplysninggrunnlag " +
                         "for behandling ${vilkårsvurdering.behandling.id}"
                 )
-        return personopplysningGrunnlag.personer.filter { it.type != PersonType.ANNENPART }.map { person ->
+        return personopplysningGrunnlag.søkerOgBarn.map { person ->
             val personResultat = PersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
                 aktør = person.aktør
@@ -639,7 +688,7 @@ class VilkårService(
                     message = "Forrige behandling $${forrigeBehandlingSomErVedtatt.id} " +
                         "har ikke en aktiv vilkårsvurdering"
                 )
-            val aktør = personidentService.hentOgLagreAktør(personIdent)
+            val aktør = personidentService.hentAktør(personIdent)
             return forrigeBehandlingsvilkårsvurdering.personResultater.single { it.aktør == aktør }
                 .vilkårResultater.any { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
         }

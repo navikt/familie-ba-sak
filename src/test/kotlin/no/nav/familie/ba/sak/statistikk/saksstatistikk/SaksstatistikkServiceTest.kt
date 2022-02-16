@@ -284,8 +284,8 @@ internal class SaksstatistikkServiceTest(
             Fagsak(status = FagsakStatus.OPPRETTET, aktør = tilAktør("12345678910"))
         }
 
-        every { personidentService.hentOgLagreAktør("12345678910") } returns Aktør("1234567891000")
-        every { personidentService.hentOgLagreAktør("12345678911") } returns Aktør("1234567891100")
+        every { personidentService.hentAktør("12345678910") } returns Aktør("1234567891000")
+        every { personidentService.hentAktør("12345678911") } returns Aktør("1234567891100")
         every { personopplysningerService.hentPersoninfoEnkel(tilAktør("12345678910")) } returns PersonInfo(
             fødselsdato = LocalDate.of(
                 2017,
@@ -326,8 +326,8 @@ internal class SaksstatistikkServiceTest(
             Fagsak(status = FagsakStatus.OPPRETTET, aktør = tilAktør("12345678910"))
         }
 
-        every { personidentService.hentOgLagreAktør("12345678910") } returns Aktør("1234567891000")
-        every { personidentService.hentOgLagreAktør("12345678911") } returns Aktør("1234567891100")
+        every { personidentService.hentAktør("12345678910") } returns Aktør("1234567891000")
+        every { personidentService.hentAktør("12345678911") } returns Aktør("1234567891100")
 
         every { personopplysningerService.hentPersoninfoEnkel(tilAktør("12345678910")) } returns PersonInfo(
             fødselsdato = LocalDate.of(
@@ -356,7 +356,7 @@ internal class SaksstatistikkServiceTest(
         every { fagsakService.hentPåFagsakId(any()) } answers {
             Fagsak(status = FagsakStatus.OPPRETTET, aktør = randomAktørId)
         }
-        every { personidentService.hentOgLagreAktør(any()) } returns randomAktørId
+        every { personidentService.hentAktør(any()) } returns randomAktørId
         every { personopplysningerService.hentLandkodeUtenlandskBostedsadresse(any()) } returns "SE"
 
         every { persongrunnlagService.hentAktiv(any()) } returns lagTestPersonopplysningGrunnlag(

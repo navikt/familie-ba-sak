@@ -224,7 +224,7 @@ class StegServiceTest(
         val søkerFnr = randomFnr()
         val barnFnr = randomFnr()
 
-        val søkerAktørId = personidentService.hentOgLagreAktør(søkerFnr)
+        val søkerAktørId = personidentService.hentAktør(søkerFnr)
 
         mockHentPersoninfoForMedIdenter(mockPersonopplysningerService, søkerFnr, barnFnr)
 

@@ -56,9 +56,9 @@ class FødselshendelseService(
     val passertFiltreringOgVilkårsvurderingCounter = Metrics.counter("familie.ba.sak.henvendelse.passert")
 
     fun behandleFødselshendelse(nyBehandling: NyBehandlingHendelse) {
-        val morsAktør = personidentService.hentOgLagreAktør(nyBehandling.morsIdent)
+        val morsAktør = personidentService.hentAktør(nyBehandling.morsIdent)
         val morsÅpneBehandling = hentÅpenBehandling(aktør = morsAktør)
-        val barnsAktører = personidentService.hentOgLagreAktørIder(nyBehandling.barnasIdenter)
+        val barnsAktører = personidentService.hentAktørIder(nyBehandling.barnasIdenter)
 
         if (morsÅpneBehandling != null) {
             val barnaPåÅpenBehandling =
@@ -156,7 +156,7 @@ class FødselshendelseService(
         fagsak: Fagsak?,
         nyBehandlingHendelse: NyBehandlingHendelse
     ): Pair<List<String>, List<String>> {
-        val morsAktør = personidentService.hentOgLagreAktør(nyBehandlingHendelse.morsIdent)
+        val morsAktør = personidentService.hentAktør(nyBehandlingHendelse.morsIdent)
         val barnaTilMor = personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(
             aktør = morsAktør
         ).forelderBarnRelasjon.filter { it.relasjonsrolle == FORELDERBARNRELASJONROLLE.BARN }
