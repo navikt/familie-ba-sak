@@ -93,10 +93,10 @@ class FiltreringsreglerService(
             ?: throw IllegalStateException("Fant ikke personopplysninggrunnlag for behandling ${behandling.id}")
         val barnaFraHendelse = personopplysningGrunnlag.barna.filter { barnasAktørId.contains(it.aktør) }
 
-        val migreringsdatoForrigeBehandling =
-            behandlingService.hentForrigeBehandlingSomErVedtatt(behandling)?.let {
+        val migreringsdatoForFagsak =
+            behandlingService.hentBehandlinger(behandling.fagsak.id).mapNotNull {
                 behandlingService.hentMigreringsdatoIBehandling(it.id)
-            }
+            }.singleOrNull()
 
         val fakta = FiltreringsreglerFakta(
             mor = personopplysningGrunnlag.søker,
@@ -109,7 +109,7 @@ class FiltreringsreglerService(
             dagensDato = localDateService.now(),
             erFagsakenMigrertEtterBarnFødt = erSakenMigrertEtterBarnFødt(
                 barnaFraHendelse,
-                migreringsdatoForrigeBehandling
+                migreringsdatoForFagsak
             ),
         )
         val evalueringer = evaluerFiltreringsregler(fakta)
@@ -129,8 +129,8 @@ class FiltreringsreglerService(
 
     private fun erSakenMigrertEtterBarnFødt(
         barnaFraHendelse: List<Person>,
-        migreringsdatoForrigeBehandling: LocalDate?,
-    ): Boolean = migreringsdatoForrigeBehandling?.isAfter(barnaFraHendelse.minOf { it.fødselsdato }) == true
+        migreringsdatoForFagsak: LocalDate?,
+    ): Boolean = migreringsdatoForFagsak?.isAfter(barnaFraHendelse.minOf { it.fødselsdato }) == true
 
     private fun finnRestenAvBarnasPersonInfo(morsAktørId: Aktør, barnaFraHendelse: List<Person>): List<PersonInfo> {
         return personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(morsAktørId).forelderBarnRelasjon.filter {
