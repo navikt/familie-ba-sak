@@ -7,6 +7,7 @@ import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import org.springframework.stereotype.Service
+import java.util.UUID
 
 @Service
 @TaskStepBeskrivelse(
@@ -19,8 +20,12 @@ class KonsistensavstemMotOppdragStart(val avstemmingService: AvstemmingService) 
     override fun doTask(task: Task) {
         val konsistensavstemmingTask =
             objectMapper.readValue(task.payload, KonsistensavstemmingStartTaskDTO::class.java)
+        val transaksjonsId = UUID.randomUUID()
 
-        avstemmingService.konsistensavstemOppdragStart(avstemmingsdato = konsistensavstemmingTask.avstemmingdato)
+        avstemmingService.konsistensavstemOppdragStart(
+            avstemmingsdato = konsistensavstemmingTask.avstemmingdato,
+            transaksjonsId = transaksjonsId
+        )
     }
 
     companion object {

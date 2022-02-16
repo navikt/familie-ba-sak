@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.task.KonsistensavstemMotOppdrag
 import no.nav.familie.ba.sak.task.KonsistensavstemMotOppdragStart
+import no.nav.familie.ba.sak.task.dto.KonsistensavstemmingStartTaskDTO
 import no.nav.familie.ba.sak.task.dto.KonsistensavstemmingTaskDTO
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.domene.Task
@@ -33,20 +34,27 @@ class KonsistensavstemmingScheduler(
 
         logger.info("Kjører konsistensavstemming for $inneværendeMåned")
 
-        val type = if (featureToggleService.isEnabled(FeatureToggleConfig.KONSISTENSAVSTEMMING_SPLITT_BATCH)) {
-            KonsistensavstemMotOppdragStart.TASK_STEP_TYPE
-        } else {
-            KonsistensavstemMotOppdrag.TASK_STEP_TYPE
-        }
-
-        val konsistensavstemmingTask = Task(
-            type = type,
-            payload = objectMapper.writeValueAsString(
-                KonsistensavstemmingTaskDTO(
-                    LocalDateTime.now()
+        val konsistensavstemmingTask =
+            if (featureToggleService.isEnabled(FeatureToggleConfig.KONSISTENSAVSTEMMING_SPLITT_BATCH)) {
+                Task(
+                    type = KonsistensavstemMotOppdragStart.TASK_STEP_TYPE,
+                    payload = objectMapper.writeValueAsString(
+                        KonsistensavstemmingStartTaskDTO(
+                            avstemmingdato = LocalDateTime.now(),
+                        )
+                    )
                 )
-            )
-        )
+            } else {
+                Task(
+                    type = KonsistensavstemMotOppdrag.TASK_STEP_TYPE,
+                    payload = objectMapper.writeValueAsString(
+                        KonsistensavstemmingTaskDTO(
+                            LocalDateTime.now()
+                        )
+                    )
+                )
+            }
+
         taskRepository.save(konsistensavstemmingTask)
 
         batchService.lagreNyStatus(plukketBatch, KjøreStatus.FERDIG)

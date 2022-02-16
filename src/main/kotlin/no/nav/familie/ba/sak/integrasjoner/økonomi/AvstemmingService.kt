@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.integrasjoner.økonomi
 
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
+import no.nav.familie.ba.sak.task.KonsistensavstemMotOppdragAvslutt
 import no.nav.familie.ba.sak.task.KonsistensavstemMotOppdragData
 import no.nav.familie.ba.sak.task.dto.KonsistensavstemmingAvsluttTaskDTO
 import no.nav.familie.ba.sak.task.dto.KonsistensavstemmingDataTaskDTO
@@ -23,7 +24,6 @@ class AvstemmingService(
     val beregningService: BeregningService,
     val taskRepository: TaskRepository,
 ) {
-
     fun grensesnittavstemOppdrag(fraDato: LocalDateTime, tilDato: LocalDateTime) {
 
         Result.runCatching { økonomiKlient.grensesnittavstemOppdrag(fraDato, tilDato) }
@@ -58,9 +58,9 @@ class AvstemmingService(
     }
 
     @Transactional
-    fun konsistensavstemOppdragStart(avstemmingsdato: LocalDateTime) {
+    fun konsistensavstemOppdragStart(avstemmingsdato: LocalDateTime, transaksjonsId: UUID) {
         val batchStorlek = 1000
-        val transaksjonsId = UUID.randomUUID().toString()
+        // TODO: legg in paging eller streaming.
         val perioderTilAvstemming = hentDataForKonsistensavstemming(avstemmingsdato)
 
         logger.info("Oppretter konsisensavstemmingstasker for ${perioderTilAvstemming.size} løpende saker")
@@ -80,7 +80,7 @@ class AvstemmingService(
         }
 
         val konsistensavstemmingAvsluttTask = Task(
-            type = KonsistensavstemMotOppdragData.TASK_STEP_TYPE,
+            type = KonsistensavstemMotOppdragAvslutt.TASK_STEP_TYPE,
             payload = objectMapper.writeValueAsString(
                 KonsistensavstemmingAvsluttTaskDTO(
                     transaksjonsId,
@@ -105,7 +105,7 @@ class AvstemmingService(
     fun konsistensavstemOppdragData(
         avstemmingsdato: LocalDateTime,
         perioderTilAvstemming: List<PerioderForBehandling>,
-        transaksjonsId: String,
+        transaksjonsId: UUID,
     ) {
         logger.info("Utfører konsisensavstemming: Sender perioder for transaksjonsId $transaksjonsId")
 
@@ -127,7 +127,7 @@ class AvstemmingService(
             )
     }
 
-    fun konsistensavstemOppdragAvslutt(avstemmingsdato: LocalDateTime, transaksjonsId: String) {
+    fun konsistensavstemOppdragAvslutt(avstemmingsdato: LocalDateTime, transaksjonsId: UUID) {
         logger.info("Avslutter konsistensavstemming for $transaksjonsId")
 
         Result.runCatching { økonomiKlient.konsistensavstemOppdragAvslutt(avstemmingsdato, transaksjonsId) }

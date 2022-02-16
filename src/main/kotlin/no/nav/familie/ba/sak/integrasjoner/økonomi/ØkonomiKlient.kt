@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service
 import org.springframework.web.client.RestOperations
 import java.net.URI
 import java.time.LocalDateTime
+import java.util.UUID
 
 @Service
 class ØkonomiKlient(
@@ -74,12 +75,12 @@ class ØkonomiKlient(
 
     fun konsistensavstemOppdragStart(
         avstemmingsdato: LocalDateTime,
-        transaksjonsId: String
+        transaksjonsId: UUID
     ): Ressurs<String> =
         postForEntity<Ressurs<String>>(
             uri = URI.create(
                 """$familieOppdragUri/v2/konsistensavstemming?sendStartmelding=true&
-                    sendAvsluttmelding=false&transaksjonsId=$transaksjonsId"""
+                    sendAvsluttmelding=false&transaksjonsId=$transaksjonsId}"""
             ),
             KonsistensavstemmingRequestV2(
                 fagsystem = FAGSYSTEM,
@@ -91,7 +92,7 @@ class ØkonomiKlient(
     fun konsistensavstemOppdragData(
         avstemmingsdato: LocalDateTime,
         perioderTilAvstemming: List<PerioderForBehandling>,
-        transaksjonsId: String,
+        transaksjonsId: UUID,
     ): Ressurs<String> =
         postForEntity<Ressurs<String>>(
             uri = URI.create(
@@ -107,7 +108,7 @@ class ØkonomiKlient(
 
     fun konsistensavstemOppdragAvslutt(
         avstemmingsdato: LocalDateTime,
-        transaksjonsId: String
+        transaksjonsId: UUID
     ): Ressurs<String> =
         postForEntity<Ressurs<String>>(
             uri = URI.create(
