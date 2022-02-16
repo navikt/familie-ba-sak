@@ -53,7 +53,7 @@ data class BrevbegrunnelserTestPerson(
     val type: PersonType,
     val fødselsdato: LocalDate,
     val overstyrteVilkårresultater: List<MinimertVilkårResultat>,
-    val minimerteAndreVurderinger: List<MinimertAnnenVurdering>,
+    val andreVurderinger: List<MinimertAnnenVurdering>,
     val endredeUtbetalinger: List<EndretUtbetalingAndelPåPerson>,
 ) {
     fun tilMinimertPerson() = MinimertPerson(
@@ -69,7 +69,7 @@ data class BrevbegrunnelserTestPerson(
     fun tilMinimertePersonResultater() = MinimertRestPersonResultat(
         personIdent = this.personIdent,
         minimerteVilkårResultater = hentVilkårForPerson(),
-        minimerteAndreVurderinger = this.minimerteAndreVurderinger,
+        minimerteAndreVurderinger = this.andreVurderinger,
     )
 
     private fun hentVilkårForPerson() =

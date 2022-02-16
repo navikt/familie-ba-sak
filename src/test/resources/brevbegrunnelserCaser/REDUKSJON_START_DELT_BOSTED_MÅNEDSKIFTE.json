@@ -1,7 +1,7 @@
 {
   "beskrivelse": "Reduksjon start på delt bosted måndeskifte",
-  "fom": "2022-02-01",
-  "tom": "2027-01-31",
+  "fom": "2021-04-01",
+  "tom": "2023-09-30",
   "vedtaksperiodetype": "UTBETALING",
   "ytelserForSøkerForrigeMåned": [],
   "ytelserForBarnOgSøkerIPeriode": [
@@ -22,7 +22,7 @@
       "overstyrteVilkårresultater": [
         {
           "vilkårType": "BOR_MED_SØKER",
-          "periodeFom": "2022-01-01",
+          "periodeFom": "2021-03-01",
           "periodeTom": null,
           "resultat": "OPPFYLT",
           "utdypendeVilkårsvurderinger": [
@@ -32,8 +32,8 @@
         },
         {
           "vilkårType": "BOR_MED_SØKER",
-          "periodeFom": "2016-02-10",
-          "periodeTom": "2021-12-31",
+          "periodeFom": "2020-09-01",
+          "periodeTom": "2021-02-28",
           "resultat": "OPPFYLT",
           "utdypendeVilkårsvurderinger": [],
           "erEksplisittAvslagPåSøknad": false
@@ -59,7 +59,6 @@
     "INNVILGET_AVTALE_DELT_BOSTED_FÅR_FRA_FLYTTETIDSPUNKT",
     "INNVILGET_AVTALE_DELT_BOSTED_FÅR_FRA_AVTALETIDSPUNKT",
     "INNVILGET_VURDERING_AVTALE_DELT_BOSTED_FØLGES",
-    "INNVILGET_RETTSAVGJØRELSE_DELT_BOSTED",
-    "REDUKSJON_UNDER_6_ÅR"
+    "INNVILGET_RETTSAVGJØRELSE_DELT_BOSTED"
   ]
 }

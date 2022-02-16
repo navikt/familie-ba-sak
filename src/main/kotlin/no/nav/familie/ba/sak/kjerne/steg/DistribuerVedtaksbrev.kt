@@ -28,7 +28,7 @@ class DistribuerVedtaksbrev(
             loggBehandlerRolle = BehandlerRolle.SYSTEM,
             brevMal = data.brevmal
         )
-        val aktør = personidentService.hentOgLagreAktør(data.personIdent)
+        val aktør = personidentService.hentAktør(data.personIdent)
 
         val ferdigstillBehandlingTask = FerdigstillBehandlingTask.opprettTask(
             søkerPersonIdent = aktør.aktivFødselsnummer(),

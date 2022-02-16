@@ -91,11 +91,11 @@ class Autobrev6og18ÅrService(
         barnMedAngittAlderInneværendeMåned(behandlingId, alder).isNotEmpty()
 
     private fun barnMedAngittAlderInneværendeMåned(behandlingId: Long, alder: Int): List<Person> =
-        personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandlingId)?.personer
+        personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandlingId)?.barna
             ?.filter { it.type == PersonType.BARN && it.fyllerAntallÅrInneværendeMåned(alder) }?.toList() ?: listOf()
 
     private fun barnUnder18årInneværendeMånedEksisterer(behandlingId: Long): Boolean =
-        personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandlingId)?.personer
+        personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandlingId)?.barna
             ?.any { it.type == PersonType.BARN && it.erYngreEnnInneværendeMåned(Alder.ATTEN.år) } ?: false
 
     companion object {

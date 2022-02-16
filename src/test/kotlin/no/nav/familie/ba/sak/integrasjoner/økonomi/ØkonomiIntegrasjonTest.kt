@@ -72,7 +72,7 @@ class ØkonomiIntegrasjonTest(
         vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering)
         Assertions.assertNotNull(behandling.fagsak.id)
 
-        val barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr))
+        val barnAktør = personidentService.hentAktørIder(listOf(barnFnr))
         val personopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(
                 behandling.id,
@@ -108,7 +108,7 @@ class ØkonomiIntegrasjonTest(
         // Lag fagsak med behandling og personopplysningsgrunnlag og Iverksett.
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
-        val barnAktørId = personidentService.hentOgLagreAktør(barnFnr)
+        val barnAktørId = personidentService.hentAktør(barnFnr)
 
         val vedtak = Vedtak(
             behandling = behandling,

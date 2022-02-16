@@ -48,7 +48,7 @@ class InfotrygdControllerTest {
     fun `hentInfotrygdsakerForSøker skal returnere ok dersom saksbehandler har tilgang`() {
         val fnr = "12345678910"
 
-        every { personidentService.hentOgLagreAktør(fnr) } returns tilAktør(fnr)
+        every { personidentService.hentAktør(fnr) } returns tilAktør(fnr)
         every { mockFamilieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(any()) } returns Tilgang(true)
         every {
             infotrygdBarnetrygdClient.hentSaker(
@@ -67,7 +67,7 @@ class InfotrygdControllerTest {
     fun `hentInfotrygdsakerForSøker skal returnere ok, men ha gradering satt, dersom saksbehandler ikke har tilgang`() {
         val fnr = "12345678910"
 
-        every { personidentService.hentOgLagreAktør(fnr) } returns tilAktør(fnr)
+        every { personidentService.hentAktør(fnr) } returns tilAktør(fnr)
         every { mockFamilieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(any()) } returns Tilgang(false)
         every { personopplysningerService.hentAdressebeskyttelseSomSystembruker(any()) } returns ADRESSEBESKYTTELSEGRADERING.FORTROLIG
 

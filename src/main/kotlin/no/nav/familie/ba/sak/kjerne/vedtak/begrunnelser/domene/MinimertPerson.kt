@@ -23,7 +23,7 @@ class MinimertPerson(
 }
 
 fun PersonopplysningGrunnlag.tilMinimertePersoner(): List<MinimertPerson> =
-    this.personer.map {
+    this.søkerOgBarn.map {
         MinimertPerson(
             it.type,
             it.fødselsdato,

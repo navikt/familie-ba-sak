@@ -1,14 +1,10 @@
-package no.nav.familie.ba.sak.kjerne.behandling
+package no.nav.familie.ba.sak.kjerne.behandling.settpåvent
 
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
-import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentRepository
-import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
-import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
@@ -64,7 +60,7 @@ class SettPåVentServiceTest(
             årsak = SettPåVentÅrsak.AVVENTER_DOKUMENTASJON
         )
 
-        assertThrows<Feil> {
+        assertThrows<FunksjonellFeil> {
             stegService.håndterBehandlingsresultat(behandlingEtterVilkårsvurderingSteg)
         }
     }

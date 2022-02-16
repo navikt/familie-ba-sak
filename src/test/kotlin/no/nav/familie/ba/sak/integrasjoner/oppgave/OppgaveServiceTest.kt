@@ -80,7 +80,7 @@ class OppgaveServiceTest {
                 any<Behandling>()
             )
         } returns null
-        every { personidentService.hentOgLagreAktør(any()) } returns Aktør(AKTØR_ID_FAGSAK)
+        every { personidentService.hentAktør(any()) } returns Aktør(AKTØR_ID_FAGSAK)
 
         every { arbeidsfordelingService.hentAbeidsfordelingPåBehandling(any()) } returns ArbeidsfordelingPåBehandling(
             behandlingId = 1,

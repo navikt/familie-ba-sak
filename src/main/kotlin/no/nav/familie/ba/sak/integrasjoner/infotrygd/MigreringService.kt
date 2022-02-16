@@ -102,8 +102,8 @@ class MigreringService(
 
             val barnasIdenter = finnBarnMedLøpendeStønad(løpendeSak)
 
-            val personAktør = personidentService.hentOgLagreAktør(personIdent)
-            val barnasAktør = personidentService.hentOgLagreAktørIder(barnasIdenter)
+            val personAktør = personidentService.hentAktør(personIdent)
+            val barnasAktør = personidentService.hentAktørIder(barnasIdenter)
 
             validerStøttetGradering(personAktør) // Midlertidig skrudd av støtte for kode 6 inntil det kan behandles
 
@@ -125,10 +125,14 @@ class MigreringService(
                 )
             }.getOrElse { kastOgTellMigreringsFeil(MigreringsfeilType.KAN_IKKE_OPPRETTE_BEHANDLING, it.message, it) }
 
+            val migreringsdato = virkningsdatoFra(infotrygdKjøredato(YearMonth.now()))
             vilkårService.hentVilkårsvurdering(behandlingId = behandling.id)?.apply {
-                forsøkSettPerioderFomTilpassetInfotrygdKjøreplan(this)
+                forsøkSettPerioderFomTilpassetInfotrygdKjøreplan(this, migreringsdato)
                 vilkårsvurderingService.oppdater(this)
             } ?: kastOgTellMigreringsFeil(MigreringsfeilType.MANGLER_VILKÅRSVURDERING)
+
+            // Lagre ned migreringsdato
+            behandlingService.lagreNedMigreringsdato(migreringsdato, behandling)
 
             val behandlingEtterVilkårsvurdering =
                 stegService.håndterVilkårsvurdering(behandling) // Se funksjonen lagVilkårsvurderingForMigreringsbehandling i VilkårService
@@ -190,7 +194,7 @@ class MigreringService(
     private fun validerAtBarnErIRelasjonMedPersonident(personAktør: Aktør, barnasAktør: List<Aktør>) {
         val barnasIdenter = barnasAktør.map { it.aktivFødselsnummer() }
 
-        val listeBarnFraPdl = pdlRestClient.hentForelderBarnRelasjon(personAktør)
+        val listeBarnFraPdl = pdlRestClient.hentForelderBarnRelasjoner(personAktør)
             .filter { it.relatertPersonsRolle == FORELDERBARNRELASJONROLLE.BARN }
             .map { it.relatertPersonsIdent }
         if (!listeBarnFraPdl.containsAll(barnasIdenter)) {
@@ -283,11 +287,10 @@ class MigreringService(
         return barnasIdenter
     }
 
-    private fun forsøkSettPerioderFomTilpassetInfotrygdKjøreplan(vilkårsvurdering: Vilkårsvurdering) {
-        val inneværendeMåned = YearMonth.now()
+    private fun forsøkSettPerioderFomTilpassetInfotrygdKjøreplan(vilkårsvurdering: Vilkårsvurdering, migreringsdato: LocalDate) {
         vilkårsvurdering.personResultater.forEach { personResultat ->
             personResultat.vilkårResultater.forEach {
-                it.periodeFom = it.periodeFom ?: virkningsdatoFra(infotrygdKjøredato(inneværendeMåned))
+                it.periodeFom = it.periodeFom ?: migreringsdato
             }
         }
     }

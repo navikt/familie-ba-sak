@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.LogiskVedleggRe
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.OppdaterJournalpostRequest
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.Sakstype.FAGSAK
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.Sakstype.GENERELL_SAK
+import no.nav.familie.ba.sak.integrasjoner.pdl.secureLogger
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -240,8 +241,10 @@ class JournalføringService(
         behandlinger: List<Behandling>
     ) {
         runCatching {
+            secureLogger.info("Oppdaterer journalpost $journalpostId med $request")
             integrasjonClient.oppdaterJournalpost(request, journalpostId)
             genererOgOpprettLogg(journalpostId, behandlinger)
+            secureLogger.info("Ferdigstiller journalpost $journalpostId")
             integrasjonClient.ferdigstillJournalpost(
                 journalpostId = journalpostId,
                 journalførendeEnhet = behandlendeEnhet

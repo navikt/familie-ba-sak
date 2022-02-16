@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner
 
 import no.nav.familie.ba.sak.common.MDCOperations
-import no.nav.familie.ba.sak.common.kallEksternTjeneste
+import no.nav.familie.ba.sak.common.kallEksternTjenesteRessurs
 import no.nav.familie.ba.sak.common.kallEksternTjenesteUtenRespons
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsforhold
@@ -58,7 +58,7 @@ class IntegrasjonClient(
     fun hentAlleEØSLand(): KodeverkDto {
         val uri = URI.create("$integrasjonUri/kodeverk/landkoder/eea")
 
-        return kallEksternTjeneste(
+        return kallEksternTjenesteRessurs(
             tjeneste = "kodeverk",
             uri = uri,
             formål = "Hent EØS land"
@@ -71,7 +71,7 @@ class IntegrasjonClient(
     fun hentLand(landkode: String): String {
         val uri = URI.create("$integrasjonUri/kodeverk/landkoder/$landkode")
 
-        return kallEksternTjeneste(
+        return kallEksternTjenesteRessurs(
             tjeneste = "kodeverk",
             uri = uri,
             formål = "Hent landkoder for $landkode"
@@ -91,7 +91,7 @@ class IntegrasjonClient(
             .pathSegment("arbeidsfordeling", "enhet", "BAR")
             .build().toUri()
 
-        return kallEksternTjeneste(
+        return kallEksternTjenesteRessurs(
             tjeneste = "arbeidsfordeling",
             uri = uri,
             formål = "Hent behandlende enhet"
@@ -110,7 +110,7 @@ class IntegrasjonClient(
             .pathSegment("aareg", "arbeidsforhold")
             .build().toUri()
 
-        return kallEksternTjeneste(
+        return kallEksternTjenesteRessurs(
             tjeneste = "aareg",
             uri = uri,
             formål = "Hent arbeidsforhold"
@@ -122,7 +122,7 @@ class IntegrasjonClient(
     fun distribuerBrev(journalpostId: String): String {
         val uri = URI.create("$integrasjonUri/dist/v1")
 
-        val resultat: String = kallEksternTjeneste(
+        val resultat: String = kallEksternTjenesteRessurs(
             tjeneste = "dokdist",
             uri = uri,
             formål = "Distribuer brev"
@@ -153,7 +153,7 @@ class IntegrasjonClient(
     fun hentEnhet(enhetId: String?): NavKontorEnhet {
         val uri = URI.create("$integrasjonUri/arbeidsfordeling/nav-kontor/$enhetId")
 
-        return kallEksternTjeneste(
+        return kallEksternTjenesteRessurs(
             tjeneste = "arbeidsfordeling",
             uri = uri,
             formål = "Hent nav kontor for enhet $enhetId"
@@ -165,7 +165,7 @@ class IntegrasjonClient(
     fun opprettOppgave(opprettOppgave: OpprettOppgaveRequest): OppgaveResponse {
         val uri = URI.create("$integrasjonUri/oppgave/opprett")
 
-        return kallEksternTjeneste(
+        return kallEksternTjenesteRessurs(
             tjeneste = "oppgave",
             uri = uri,
             formål = "Opprett oppgave"
@@ -181,7 +181,7 @@ class IntegrasjonClient(
     fun patchOppgave(patchOppgave: Oppgave): OppgaveResponse {
         val uri = URI.create("$integrasjonUri/oppgave/${patchOppgave.id}/oppdater")
 
-        return kallEksternTjeneste(
+        return kallEksternTjenesteRessurs(
             tjeneste = "oppgave",
             uri = uri,
             formål = "Patch oppgave"
@@ -201,7 +201,7 @@ class IntegrasjonClient(
         else
             UriComponentsBuilder.fromUri(baseUri).queryParam("saksbehandler", saksbehandler).build().toUri()
 
-        return kallEksternTjeneste(
+        return kallEksternTjenesteRessurs(
             tjeneste = "oppgave",
             uri = uri,
             formål = "Fordel oppgave"
@@ -216,7 +216,7 @@ class IntegrasjonClient(
     fun finnOppgaveMedId(oppgaveId: Long): Oppgave {
         val uri = URI.create("$integrasjonUri/oppgave/$oppgaveId")
 
-        return kallEksternTjeneste(
+        return kallEksternTjenesteRessurs(
             tjeneste = "oppgave",
             uri = uri,
             formål = "Finn oppgave med id $oppgaveId"
@@ -233,7 +233,7 @@ class IntegrasjonClient(
     fun hentJournalpost(journalpostId: String): Journalpost {
         val uri = URI.create("$integrasjonUri/journalpost?journalpostId=$journalpostId")
 
-        return kallEksternTjeneste(
+        return kallEksternTjenesteRessurs(
             tjeneste = "dokarkiv",
             uri = uri,
             formål = "Hent journalpost id $journalpostId"
@@ -250,7 +250,7 @@ class IntegrasjonClient(
     fun hentJournalposterForBruker(journalposterForBrukerRequest: JournalposterForBrukerRequest): List<Journalpost> {
         val uri = URI.create("$integrasjonUri/journalpost")
 
-        return kallEksternTjeneste(
+        return kallEksternTjenesteRessurs(
             tjeneste = "dokarkiv",
             uri = uri,
             formål = "Hent journalposter for bruker"
@@ -262,7 +262,7 @@ class IntegrasjonClient(
     fun hentOppgaver(finnOppgaveRequest: FinnOppgaveRequest): FinnOppgaveResponseDto {
         val uri = URI.create("$integrasjonUri/oppgave/v4")
 
-        return kallEksternTjeneste(
+        return kallEksternTjenesteRessurs(
             tjeneste = "oppgave",
             uri = uri,
             formål = "Hent oppgaver"
@@ -291,7 +291,7 @@ class IntegrasjonClient(
     fun oppdaterJournalpost(request: OppdaterJournalpostRequest, journalpostId: String): OppdaterJournalpostResponse {
         val uri = URI.create("$integrasjonUri/arkiv/v2/$journalpostId")
 
-        return kallEksternTjeneste(
+        return kallEksternTjenesteRessurs(
             tjeneste = "dokarkiv",
             uri = uri,
             formål = "Oppdater journalpost"
@@ -303,7 +303,7 @@ class IntegrasjonClient(
     fun leggTilLogiskVedlegg(request: LogiskVedleggRequest, dokumentinfoId: String): LogiskVedleggResponse {
         val uri = URI.create("$integrasjonUri/arkiv/dokument/$dokumentinfoId/logiskVedlegg")
 
-        return kallEksternTjeneste(
+        return kallEksternTjenesteRessurs(
             tjeneste = "dokarkiv",
             uri = uri,
             formål = "Legg til logisk vedlegg på dokument $dokumentinfoId"
@@ -314,7 +314,7 @@ class IntegrasjonClient(
 
     fun slettLogiskVedlegg(logiskVedleggId: String, dokumentinfoId: String): LogiskVedleggResponse {
         val uri = URI.create("$integrasjonUri/arkiv/dokument/$dokumentinfoId/logiskVedlegg/$logiskVedleggId")
-        return kallEksternTjeneste(
+        return kallEksternTjenesteRessurs(
             tjeneste = "dokarkiv",
             uri = uri,
             formål = "Slett logisk vedlegg på dokument $dokumentinfoId"
@@ -326,7 +326,7 @@ class IntegrasjonClient(
     fun hentDokument(dokumentInfoId: String, journalpostId: String): ByteArray {
         val uri = URI.create("$integrasjonUri/journalpost/hentdokument/$journalpostId/$dokumentInfoId")
 
-        return kallEksternTjeneste(
+        return kallEksternTjenesteRessurs(
             tjeneste = "dokarkiv",
             uri = uri,
             formål = "Hent dokument $dokumentInfoId"
@@ -373,7 +373,7 @@ class IntegrasjonClient(
         if (journalførendeEnhet == DEFAULT_JOURNALFØRENDE_ENHET) {
             logger.warn("Informasjon om enhet mangler på bruker og er satt til fallback-verdi, $DEFAULT_JOURNALFØRENDE_ENHET")
         }
-        val journalpost = kallEksternTjeneste(
+        val journalpost = kallEksternTjenesteRessurs(
             tjeneste = "dokarkiv",
             uri = uri,
             formål = "Journalfør dokument på fagsak $fagsakId",

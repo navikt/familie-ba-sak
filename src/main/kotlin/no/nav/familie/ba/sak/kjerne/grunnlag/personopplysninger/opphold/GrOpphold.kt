@@ -90,3 +90,6 @@ data class GrOpphold(
             )
     }
 }
+
+fun List<GrOpphold>.gyldigGjeldendeOppholdstillatelseFødselshendelse() =
+    this.any { it.gjeldendeNå() && it.type != OPPHOLDSTILLATELSE.OPPLYSNING_MANGLER }
