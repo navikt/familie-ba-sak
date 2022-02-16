@@ -16,7 +16,8 @@ enum class Filtreringsregel(val vurder: FiltreringsreglerFakta.() -> Evaluering)
     MOR_ER_OVER_18_ÅR(vurder = { morErOver18år(this) }),
     MOR_HAR_IKKE_VERGE(vurder = { morHarIkkeVerge(this) }),
     MOR_MOTTAR_IKKE_LØPENDE_UTVIDET(vurder = { morMottarIkkeLøpendeUtvidet(this) }),
-    FAGSAK_IKKE_MIGRERT_UT_AV_INFOTRYGD_ETTER_BARN_FØDT(vurder = { fagsakIkkeMigrertEtterBarnBleFødt(this) });
+    FAGSAK_IKKE_MIGRERT_UT_AV_INFOTRYGD_ETTER_BARN_FØDT(vurder = { fagsakIkkeMigrertEtterBarnBleFødt(this) }),
+    LØPER_IKKE_BARNETRYGD_FOR_BARNET(vurder = { løperIkkeBarnetrygdPåAnnenForelder(this) });
 }
 
 fun evaluerFiltreringsregler(fakta: FiltreringsreglerFakta) = Filtreringsregel.values()
@@ -87,6 +88,13 @@ fun fagsakIkkeMigrertEtterBarnBleFødt(fakta: FiltreringsreglerFakta): Evaluerin
         FiltreringsregelOppfylt.FAGSAK_IKKE_MIGRERT_UT_AV_INFOTRYGD_ETTER_BARN_FØDT
     ) else Evaluering.ikkeOppfylt(
         FiltreringsregelIkkeOppfylt.FAGSAK_MIGRERT_UT_AV_INFOTRYGD_ETTER_BARN_FØDT
+    )
+
+fun løperIkkeBarnetrygdPåAnnenForelder(fakta: FiltreringsreglerFakta): Evaluering =
+    if (!fakta.løperBarnetrygdForBarnetPåAnnenForelder) Evaluering.oppfylt(
+        FiltreringsregelOppfylt.LØPER_IKKE_BARNETRYGD_FOR_BARNET
+    ) else Evaluering.ikkeOppfylt(
+        FiltreringsregelIkkeOppfylt.LØPER_ALLEREDE_FOR_ANNEN_FORELDER
     )
 
 fun merEnn5mndEllerMindreEnnFemDagerSidenForrigeBarn(fakta: FiltreringsreglerFakta): Evaluering {

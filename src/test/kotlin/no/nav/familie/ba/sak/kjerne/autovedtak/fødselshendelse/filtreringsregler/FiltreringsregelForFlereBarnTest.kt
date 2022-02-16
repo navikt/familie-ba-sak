@@ -19,6 +19,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregle
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.domene.erOppfylt
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
+import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -50,12 +51,14 @@ class FiltreringsregelForFlereBarnTest {
     val localDateServiceMock = mockk<LocalDateService>()
     val fødselshendelsefiltreringResultatRepository = mockk<FødselshendelsefiltreringResultatRepository>(relaxed = true)
     val behandlingServiceMock = mockk<BehandlingService>(relaxed = true)
+    val tilkjentYtelseValideringServiceMock = mockk<TilkjentYtelseValideringService>()
     val filtreringsreglerService = FiltreringsreglerService(
         personopplysningerServiceMock,
         personidentService,
         personopplysningGrunnlagRepositoryMock,
         localDateServiceMock,
         fødselshendelsefiltreringResultatRepository,
+        tilkjentYtelseValideringServiceMock,
         behandlingServiceMock,
     )
 
@@ -132,6 +135,8 @@ class FiltreringsregelForFlereBarnTest {
             )
         } returns listOf(barnAktør0, barnAktør1)
 
+        every { tilkjentYtelseValideringServiceMock.barnetrygdLøperForAnnenForelder(any(), any()) } returns false
+
         val fødselshendelsefiltreringResultater = filtreringsreglerService.kjørFiltreringsregler(
             NyBehandlingHendelse(
                 morsIdent = gyldigAktør.aktivFødselsnummer(),
@@ -192,6 +197,8 @@ class FiltreringsregelForFlereBarnTest {
                 )
             )
         } returns listOf(barnAktør0, barnAktør1)
+
+        every { tilkjentYtelseValideringServiceMock.barnetrygdLøperForAnnenForelder(any(), any()) } returns false
 
         val fødselshendelsefiltreringResultater = filtreringsreglerService.kjørFiltreringsregler(
             NyBehandlingHendelse(
@@ -283,7 +290,7 @@ class FiltreringsregelForFlereBarnTest {
             morHarVerge = false,
             dagensDato = LocalDate.now(),
             erFagsakenMigrertEtterBarnFødt = false,
-
+            løperBarnetrygdForBarnetPåAnnenForelder = false,
         )
     }
 }

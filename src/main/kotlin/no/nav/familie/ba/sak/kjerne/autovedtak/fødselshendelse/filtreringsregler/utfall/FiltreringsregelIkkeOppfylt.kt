@@ -20,6 +20,10 @@ enum class FiltreringsregelIkkeOppfylt(val beskrivelse: String, private val filt
     FAGSAK_MIGRERT_UT_AV_INFOTRYGD_ETTER_BARN_FØDT(
         "Fagsaken ble migrert fra infotrygd etter barn ble født.",
         Filtreringsregel.MER_ENN_5_MND_SIDEN_FORRIGE_BARN
+    ),
+    LØPER_ALLEREDE_FOR_ANNEN_FORELDER(
+        "Annen mottaker har barnetrygd for barnet",
+        Filtreringsregel.LØPER_IKKE_BARNETRYGD_FOR_BARNET
     );
 
     override fun hentBeskrivelse(): String {

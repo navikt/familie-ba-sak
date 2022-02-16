@@ -15,6 +15,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
+import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
@@ -32,6 +33,7 @@ class FiltreringsreglerService(
     private val localDateService: LocalDateService,
     private val fødselshendelsefiltreringResultatRepository: FødselshendelsefiltreringResultatRepository,
     private val behandlingService: BehandlingService,
+    private val tilkjentYtelseValideringService: TilkjentYtelseValideringService,
 ) {
 
     val filtreringsreglerMetrics = mutableMapOf<String, Counter>()
@@ -111,6 +113,11 @@ class FiltreringsreglerService(
                 barnaFraHendelse,
                 migreringsdatoForFagsak
             ),
+            dagensDato = localDateService.now(),
+            løperBarnetrygdForBarnetPåAnnenForelder = tilkjentYtelseValideringService.barnetrygdLøperForAnnenForelder(
+                behandling = behandling,
+                barna = barnaFraHendelse
+            )
         )
         val evalueringer = evaluerFiltreringsregler(fakta)
         oppdaterMetrikker(evalueringer)
