@@ -181,7 +181,7 @@ class FagsakControllerTest(
 
     @Test
     fun `Skal oppgi person med fagsak som fagsakdeltaker`() {
-        val personAktør = mockPersonidentService.hentOgLagreAktør(randomFnr())
+        val personAktør = mockPersonidentService.hentAktør(randomFnr())
 
         fagsakService.hentEllerOpprettFagsak(personAktør.aktivFødselsnummer())
             .also { fagsakService.oppdaterStatus(it, FagsakStatus.LØPENDE) }

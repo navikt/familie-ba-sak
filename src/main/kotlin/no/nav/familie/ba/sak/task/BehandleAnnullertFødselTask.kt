@@ -34,7 +34,7 @@ class BehandleAnnullertFødselTask(
 
     override fun doTask(task: Task) {
         val dto = objectMapper.readValue(task.payload, BehandleAnnullerFødselDto::class.java)
-        val barnasAktørIder = personidentService.hentOgLagreAktørIder(dto.barnasIdenter)
+        val barnasAktørIder = personidentService.hentAktørIder(dto.barnasIdenter)
 
         val tasker = taskRepositoryForAnnullertFødsel.hentTaskForTidligereHendelse(dto.tidligereHendelseId)
         if (tasker.isEmpty()) {

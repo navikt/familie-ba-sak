@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.domene
 
 import no.nav.familie.ba.sak.common.NullablePeriode
+import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagRestVedtaksbegrunnelse
 import no.nav.familie.ba.sak.dataGenerator.brev.lagBrevBegrunnelseGrunnlagMedPersoner
@@ -47,7 +48,7 @@ class VedtaksbegrunnelseTest {
             personerIPersongrunnlag = personerIPersongrunnlag,
             brevMålform = målform,
             uregistrerteBarn = emptyList(),
-            beløp = beløp
+            minimerteUtbetalingsperiodeDetaljer = emptyList(),
         ) as BegrunnelseData
 
         Assertions.assertEquals(true, brevbegrunnelse.gjelderSoker)
@@ -57,7 +58,7 @@ class VedtaksbegrunnelseTest {
         )
         Assertions.assertEquals(0, brevbegrunnelse.antallBarn)
         Assertions.assertEquals(målform.tilSanityFormat(), brevbegrunnelse.maalform)
-        Assertions.assertEquals(beløp, brevbegrunnelse.belop)
+        Assertions.assertEquals(Utils.formaterBeløp(0), brevbegrunnelse.belop)
     }
 
     @Test
@@ -83,7 +84,7 @@ class VedtaksbegrunnelseTest {
             personerIPersongrunnlag = personerIPersongrunnlag,
             brevMålform = målform,
             uregistrerteBarn = uregistrerteBarn,
-            beløp = beløp
+            minimerteUtbetalingsperiodeDetaljer = emptyList(),
         ) as BegrunnelseData
 
         Assertions.assertEquals(false, brevbegrunnelse.gjelderSoker)
@@ -93,6 +94,6 @@ class VedtaksbegrunnelseTest {
         )
         Assertions.assertEquals(2, brevbegrunnelse.antallBarn)
         Assertions.assertEquals(målform.tilSanityFormat(), brevbegrunnelse.maalform)
-        Assertions.assertEquals(beløp, brevbegrunnelse.belop)
+        Assertions.assertEquals(Utils.formaterBeløp(0), brevbegrunnelse.belop)
     }
 }

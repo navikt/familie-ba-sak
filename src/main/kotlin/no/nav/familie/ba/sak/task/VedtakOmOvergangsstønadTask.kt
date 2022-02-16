@@ -25,7 +25,7 @@ class VedtakOmOvergangsstønadTask(
         logger.info("Håndterer vedtak om overgangsstønad. Se secureLog for detaljer")
         secureLogger.info("Håndterer vedtak om overgangsstønad for person $personIdent.")
 
-        val aktør = personidentService.hentOgLagreAktør(personIdent)
+        val aktør = personidentService.hentAktør(personIdent)
 
         val responeFraService = vedtakOmOvergangsstønadService.håndterVedtakOmOvergangsstønad(
             aktør

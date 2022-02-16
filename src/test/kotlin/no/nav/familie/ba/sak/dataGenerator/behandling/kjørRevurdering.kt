@@ -343,7 +343,7 @@ fun leggTilAlleGyldigeBegrunnelserPåVedtaksperiodeIBehandling(
         utvidetVedtaksperiodeMedBegrunnelser
             .utbetalingsperiodeDetaljer
             .map { personMedUtbetaling ->
-                personopplysningGrunnlag.personer.find {
+                personopplysningGrunnlag.søkerOgBarn.find {
                     it.aktør.aktivFødselsnummer() == personMedUtbetaling.person.personIdent
                 }!!.aktør
             }
