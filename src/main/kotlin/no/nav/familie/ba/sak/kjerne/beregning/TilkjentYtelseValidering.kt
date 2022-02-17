@@ -66,11 +66,10 @@ object TilkjentYtelseValidering {
 
         if (erUgyldigEtterbetaling) {
             throw UtbetalingsikkerhetFeil(
-                melding = "Endring i utbetalingsperioder for en eller flere av partene/personene " +
-                    "går mer enn 3 år tilbake i tid.",
+                melding = "Utbetalingsperioder for en eller flere personer går mer enn 3 år tilbake i tid.",
                 frontendFeilmelding =
-                "Endring i utbetalingsperioder for en eller flere av partene/personene " +
-                    "går mer enn 3 år tilbake i tid. Vennligst endre på datoene, eller ta kontakt med teamet for hjelp."
+                "Utbetalingsperioder for en eller flere personer går mer enn 3 år tilbake i tid. Du må henlegge " +
+                    "behandlingen og behandle saken i Infotrygd."
             )
         }
     }
