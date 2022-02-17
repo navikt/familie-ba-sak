@@ -246,7 +246,7 @@ class BehandlingService(
         vedtakRepository.save(nyttVedtak)
     }
 
-    private fun sendTilDvh(behandling: Behandling) {
+    fun sendTilDvh(behandling: Behandling) {
         saksstatistikkEventPublisher.publiserBehandlingsstatistikk(behandling.id)
     }
 

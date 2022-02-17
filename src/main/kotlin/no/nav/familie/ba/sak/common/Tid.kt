@@ -253,3 +253,41 @@ fun List<DatoIntervallEntitet>.slåSammenSammenhengendePerioder(): List<DatoInte
             } else sammenslåttePerioder.apply { add(nestePeriode) }
         }
 }
+
+class YearMonthIterator(
+    startMåned: YearMonth,
+    val tilOgMedMåned: YearMonth,
+    val hoppMåneder: Long
+) : Iterator<YearMonth> {
+
+    private var gjeldendeMåned = startMåned
+
+    override fun hasNext() =
+        if (hoppMåneder > 0)
+            gjeldendeMåned.plusMonths(hoppMåneder) <= tilOgMedMåned.plusMonths(1)
+        else if (hoppMåneder < 0)
+            gjeldendeMåned.plusMonths(hoppMåneder) >= tilOgMedMåned.plusMonths(-1)
+        else
+            throw IllegalStateException("Steglengde kan ikke være null")
+
+    override fun next(): YearMonth {
+        val next = gjeldendeMåned
+        gjeldendeMåned = gjeldendeMåned.plusMonths(hoppMåneder)
+        return next
+    }
+}
+
+class YearMonthProgression(
+    override val start: YearMonth,
+    override val endInclusive: YearMonth,
+    val hoppMåneder: Long = 1
+) : Iterable<YearMonth>,
+    ClosedRange<YearMonth> {
+
+    override fun iterator(): Iterator<YearMonth> =
+        YearMonthIterator(start, endInclusive, hoppMåneder)
+
+    infix fun step(måneder: Long) = YearMonthProgression(start, endInclusive, måneder)
+}
+
+operator fun YearMonth.rangeTo(andre: YearMonth) = YearMonthProgression(this, andre)

@@ -1,6 +1,6 @@
-package no.nav.familie.ba.sak.kjerne.kompetanse
+package no.nav.familie.ba.sak.kjerne.eøs.kompetanse
 
-import no.nav.familie.ba.sak.kjerne.kompetanse.domene.Kompetanse
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import org.springframework.stereotype.Repository
 import java.time.YearMonth
 
