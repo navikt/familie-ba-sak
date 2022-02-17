@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.brev.domene
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentÅrsak
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
 import no.nav.familie.kontrakter.felles.dokarkiv.Dokumenttype
 
@@ -83,5 +84,26 @@ enum class BrevType(
             INFORMASJONSBREV_KAN_SØKE -> Brevmal.INFORMASJONSBREV_KAN_SØKE
             INFORMASJONSBREV_FØDSEL_GENERELL -> Brevmal.INFORMASJONSBREV_FØDSEL_GENERELL
             VEDTAK -> throw Feil("Kan ikke oversette gammel brevtype til vedtak")
+        }
+
+    fun setterBehandlingPåVent(): Boolean =
+        when (this) {
+            INNHENTE_OPPLYSNINGER,
+            VARSEL_OM_REVURDERING -> true
+            else -> false
+        }
+
+    fun ventefristDager(): Long =
+        when (this) {
+            INNHENTE_OPPLYSNINGER,
+            VARSEL_OM_REVURDERING -> 3 * 7
+            else -> throw Feil("Ventefrist ikke definert for brevtype $this")
+        }
+
+    fun venteårsak() =
+        when (this) {
+            INNHENTE_OPPLYSNINGER,
+            VARSEL_OM_REVURDERING -> SettPåVentÅrsak.AVVENTER_DOKUMENTASJON
+            else -> throw Feil("Venteårsak ikke definert for brevtype $this")
         }
 }
