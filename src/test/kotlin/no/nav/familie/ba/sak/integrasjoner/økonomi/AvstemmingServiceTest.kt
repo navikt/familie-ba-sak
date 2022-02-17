@@ -8,15 +8,16 @@ import junit.framework.Assert.assertEquals
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
-import no.nav.familie.ba.sak.task.KonsistensavstemMotOppdragAvslutt
-import no.nav.familie.ba.sak.task.KonsistensavstemMotOppdragData
+import no.nav.familie.ba.sak.task.KonsistensavstemMotOppdragAvsluttTask
+import no.nav.familie.ba.sak.task.KonsistensavstemMotOppdragDataTask
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
-import org.springframework.data.domain.Slice
+import java.math.BigInteger
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -45,15 +46,12 @@ class AvstemmingServiceTest {
 
     @BeforeEach
     fun setUp() {
-        val sliceFirst = mockk<Slice<Long>>()
-        val sliceSecond = mockk<Slice<Long>>()
-        val page = Pageable.ofSize(1000)
-        every { behandlingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker(page) } returns sliceFirst
-        every { behandlingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker(page.next()) } returns sliceSecond
-        every { sliceFirst.hasContent() } returns true
-        every { sliceFirst.content } returns listOf(1L)
-        every { sliceFirst.nextPageable() } returns page.next()
-        every { sliceSecond.hasContent() } returns false
+        val page = mockk<Page<BigInteger>>()
+        val pageable = Pageable.ofSize(AvstemmingService.KONSISTENSAVSTEMMING_DATA_CHUNK_STORLEK)
+        every { behandlingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker(pageable) } returns page
+        every { page.totalPages } returns 1
+        every { page.content } returns listOf(BigInteger.ONE)
+        every { page.nextPageable() } returns pageable
 
         every {
             beregningService.hentLøpendeAndelerTilkjentYtelseMedUtbetalingerForBehandlinger(
@@ -107,8 +105,8 @@ class AvstemmingServiceTest {
         assertEquals(1, dataChunkSlot.captured.chunkNr)
         assertEquals(transaksjonsId, dataChunkSlot.captured.transaksjonsId)
 
-        assertEquals(KonsistensavstemMotOppdragData.TASK_STEP_TYPE, taskSlots[0].type)
-        assertEquals(KonsistensavstemMotOppdragAvslutt.TASK_STEP_TYPE, taskSlots[1].type)
+        assertEquals(KonsistensavstemMotOppdragDataTask.TASK_STEP_TYPE, taskSlots[0].type)
+        assertEquals(KonsistensavstemMotOppdragAvsluttTask.TASK_STEP_TYPE, taskSlots[1].type)
     }
 
     @Test

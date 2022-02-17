@@ -11,11 +11,12 @@ import java.util.UUID
 
 @Service
 @TaskStepBeskrivelse(
-    taskStepType = KonsistensavstemMotOppdrag.TASK_STEP_TYPE,
-    beskrivelse = "Konsistensavstemming mot oppdrag",
+    taskStepType = KonsistensavstemMotOppdragStartTask
+        .TASK_STEP_TYPE,
+    beskrivelse = "Start Konsistensavstemming mot oppdrag",
     maxAntallFeil = 3
 )
-class KonsistensavstemMotOppdragStart(val avstemmingService: AvstemmingService) : AsyncTaskStep {
+class KonsistensavstemMotOppdragStartTask(val avstemmingService: AvstemmingService) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
         val konsistensavstemmingTask =

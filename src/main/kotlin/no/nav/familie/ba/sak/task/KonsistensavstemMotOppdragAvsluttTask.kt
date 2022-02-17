@@ -13,11 +13,11 @@ import java.time.LocalDateTime
 
 @Service
 @TaskStepBeskrivelse(
-    taskStepType = KonsistensavstemMotOppdrag.TASK_STEP_TYPE,
-    beskrivelse = "Konsistensavstemming mot oppdrag",
+    taskStepType = KonsistensavstemMotOppdragAvsluttTask.TASK_STEP_TYPE,
+    beskrivelse = "Avslutt Konsistensavstemming mot oppdrag",
     maxAntallFeil = 3
 )
-class KonsistensavstemMotOppdragAvslutt(
+class KonsistensavstemMotOppdragAvsluttTask(
     val avstemmingService: AvstemmingService,
     val dataChunkRepository: DataChunkRepository,
 ) : AsyncTaskStep {

@@ -79,8 +79,7 @@ class ØkonomiKlient(
     ): Ressurs<String> =
         postForEntity<Ressurs<String>>(
             uri = URI.create(
-                """$familieOppdragUri/v2/konsistensavstemming?sendStartmelding=true&
-                    sendAvsluttmelding=false&transaksjonsId=$transaksjonsId}"""
+                """$familieOppdragUri/v2/konsistensavstemming?sendStartmelding=true&sendAvsluttmelding=false&transaksjonsId=$transaksjonsId"""
             ),
             KonsistensavstemmingRequestV2(
                 fagsystem = FAGSYSTEM,
@@ -96,8 +95,7 @@ class ØkonomiKlient(
     ): Ressurs<String> =
         postForEntity<Ressurs<String>>(
             uri = URI.create(
-                """$familieOppdragUri/v2/konsistensavstemming?sendStartmelding=false&
-                    sendAvsluttmelding=false&transaksjonsId=$transaksjonsId"""
+                """$familieOppdragUri/v2/konsistensavstemming?sendStartmelding=false&sendAvsluttmelding=false&transaksjonsId=$transaksjonsId"""
             ),
             KonsistensavstemmingRequestV2(
                 fagsystem = FAGSYSTEM,
@@ -112,8 +110,7 @@ class ØkonomiKlient(
     ): Ressurs<String> =
         postForEntity<Ressurs<String>>(
             uri = URI.create(
-                """$familieOppdragUri/v2/konsistensavstemming?sendStartmelding=false&
-                    sendAvsluttmelding=true&transaksjonsId=$transaksjonsId"""
+                """$familieOppdragUri/v2/konsistensavstemming?sendStartmelding=false&sendAvsluttmelding=true&transaksjonsId=$transaksjonsId"""
             ),
             KonsistensavstemmingRequestV2(
                 fagsystem = FAGSYSTEM,

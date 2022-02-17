@@ -10,11 +10,11 @@ import org.springframework.stereotype.Service
 
 @Service
 @TaskStepBeskrivelse(
-    taskStepType = KonsistensavstemMotOppdrag.TASK_STEP_TYPE,
-    beskrivelse = "Konsistensavstemming mot oppdrag",
+    taskStepType = KonsistensavstemMotOppdragDataTask.TASK_STEP_TYPE,
+    beskrivelse = "Send batcher av Konsistensavstemming mot oppdrag",
     maxAntallFeil = 3
 )
-class KonsistensavstemMotOppdragData(
+class KonsistensavstemMotOppdragDataTask(
     val avstemmingService: AvstemmingService,
 ) :
     AsyncTaskStep {

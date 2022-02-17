@@ -1,10 +1,11 @@
 package no.nav.familie.ba.sak.kjerne.behandling.domene
 
+import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
-import org.springframework.data.domain.Slice
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Lock
 import org.springframework.data.jpa.repository.Query
+import java.math.BigInteger
 import java.time.LocalDateTime
 import java.time.YearMonth
 import javax.persistence.LockModeType
@@ -75,7 +76,7 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
                         SELECT behandlingid FROM sisteiverksattebehandlingfraløpendefagsak""",
         nativeQuery = true
     )
-    fun finnSisteIverksatteBehandlingFraLøpendeFagsaker(page: Pageable): Slice<Long>
+    fun finnSisteIverksatteBehandlingFraLøpendeFagsaker(page: Pageable): Page<BigInteger>
 
     @Query(
         """select b from Behandling b
