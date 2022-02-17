@@ -1,8 +1,11 @@
 package no.nav.familie.ba.sak.kjerne.behandling.settpåvent
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 
@@ -23,32 +26,54 @@ class SettPåVentService(
 
     fun settBehandlingPåVent(behandlingId: Long, frist: LocalDate, årsak: SettPåVentÅrsak): SettPåVent {
         val behandling = behandlingService.hent(behandlingId)
-        val settPåVent: SettPåVent? = finnAktivSettPåVentPåBehandling(behandlingId)
-        validerBehandlingKanSettesPåVent(settPåVent, frist, behandling)
+        val gammelSettPåVent: SettPåVent? = finnAktivSettPåVentPåBehandling(behandlingId)
+        validerBehandlingKanSettesPåVent(gammelSettPåVent, frist, behandling)
 
         loggService.opprettSettPåVentLogg(behandling, årsak.visningsnavn)
+        logger.info("Sett på vent behandling $behandlingId med frist $frist og årsak $årsak")
 
-        return settPåVentRepository.save(SettPåVent(behandling = behandling, frist = frist, årsak = årsak))
+        val settPåVent = settPåVentRepository.save(SettPåVent(behandling = behandling, frist = frist, årsak = årsak))
+        behandlingService.sendTilDvh(behandling)
+
+        return settPåVent
     }
 
     fun oppdaterSettBehandlingPåVent(behandlingId: Long, frist: LocalDate, årsak: SettPåVentÅrsak): SettPåVent {
         val aktivSettPåVent = finnAktivSettPåVentPåBehandlingThrows(behandlingId)
 
+        if (frist == aktivSettPåVent.frist && årsak == aktivSettPåVent.årsak) {
+            throw FunksjonellFeil("Behandlingen er allerede satt på vent med frist $frist og årsak $årsak.")
+        }
+
+        logger.info("Oppdater sett på vent behandling $behandlingId med frist $frist og årsak $årsak")
+
         aktivSettPåVent.frist = frist
         aktivSettPåVent.årsak = årsak
+        val settPåVent = settPåVentRepository.save(aktivSettPåVent)
 
-        return settPåVentRepository.save(aktivSettPåVent)
+        behandlingService.sendTilDvh(behandlingService.hent(behandlingId))
+
+        return settPåVent
     }
 
     fun gjenopptaBehandling(behandlingId: Long, nå: LocalDate = LocalDate.now()): SettPåVent {
         val behandling = behandlingService.hent(behandlingId)
         val aktivSettPåVent = finnAktivSettPåVentPåBehandlingThrows(behandlingId)
 
+        loggService.gjenopptaBehandlingLogg(behandling)
+        logger.info("Gjenopptar behandling $behandlingId")
+
         aktivSettPåVent.aktiv = false
         aktivSettPåVent.tidTattAvVent = nå
+        val settPåVent = settPåVentRepository.save(aktivSettPåVent)
 
-        loggService.gjenopptaBehandlingLogg(behandling)
+        behandlingService.sendTilDvh(behandling)
 
-        return settPåVentRepository.save(aktivSettPåVent)
+        return settPåVent
+    }
+
+    companion object {
+        val logger: Logger = LoggerFactory.getLogger(SettPåVentService::class.java)
+        val secureLogger: Logger = LoggerFactory.getLogger("secureLogger")
     }
 }
