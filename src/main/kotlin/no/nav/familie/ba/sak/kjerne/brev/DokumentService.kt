@@ -4,6 +4,8 @@ import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.SETT_PÅ_VENT
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.RolleConfig
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.DEFAULT_JOURNALFØRENDE_ENHET
@@ -50,6 +52,7 @@ class DokumentService(
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val rolleConfig: RolleConfig,
     private val settPåVentService: SettPåVentService,
+    private val featureToggleService: FeatureToggleService,
 ) {
 
     private val antallBrevSendt: Map<Brevmal, Counter> = mutableListOf<Brevmal>().plus(Brevmal.values()).associateWith {
@@ -170,7 +173,8 @@ class DokumentService(
 
         if (
             behandling != null &&
-            manueltBrevRequest.brevmal.setterBehandlingPåVent()
+            manueltBrevRequest.brevmal.setterBehandlingPåVent() &&
+            featureToggleService.isEnabled(SETT_PÅ_VENT)
         ) {
             settPåVentService.settBehandlingPåVent(
                 behandlingId = behandling.id,
