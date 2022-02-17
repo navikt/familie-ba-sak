@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.kompetanse.domene
+package no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene
 
 import java.time.YearMonth
 

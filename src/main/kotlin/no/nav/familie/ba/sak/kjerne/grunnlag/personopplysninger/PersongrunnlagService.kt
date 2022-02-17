@@ -60,8 +60,11 @@ class PersongrunnlagService(
     }
 
     fun hentBarna(behandling: Behandling): List<Person> {
-        return personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)!!.barna
+        return hentBarna(behandling.id)
     }
+
+    fun hentBarna(behandlingId: Long): List<Person> = personopplysningGrunnlagRepository
+        .findByBehandlingAndAktiv(behandlingId)!!.barna
 
     fun hentPersonerPåBehandling(identer: List<String>, behandling: Behandling): List<Person> {
         val aktørIder = personidentService.hentAktørIder(identer)
