@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.behandling.domene
 
+import org.springframework.data.domain.Pageable
+import org.springframework.data.domain.Slice
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Lock
 import org.springframework.data.jpa.repository.Query
@@ -58,6 +60,22 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
         nativeQuery = true
     )
     fun finnSisteIverksatteBehandlingFraLøpendeFagsaker(): List<Long>
+
+    @Query(
+        value = """WITH sisteiverksattebehandlingfraløpendefagsak AS (
+                            SELECT f.id AS fagsakid, MAX(b.id) AS behandlingid
+                            FROM behandling b
+                                   INNER JOIN fagsak f ON f.id = b.fk_fagsak_id
+                                   INNER JOIN tilkjent_ytelse ty ON b.id = ty.fk_behandling_id
+                            WHERE f.status = 'LØPENDE'
+                              AND ty.utbetalingsoppdrag IS NOT NULL
+                              AND f.arkivert = false
+                            GROUP BY fagsakid)
+                        
+                        SELECT behandlingid FROM sisteiverksattebehandlingfraløpendefagsak""",
+        nativeQuery = true
+    )
+    fun finnSisteIverksatteBehandlingFraLøpendeFagsaker(page: Pageable): Slice<Long>
 
     @Query(
         """select b from Behandling b

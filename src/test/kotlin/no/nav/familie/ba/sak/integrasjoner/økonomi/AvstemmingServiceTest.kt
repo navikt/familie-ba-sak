@@ -15,6 +15,8 @@ import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.springframework.data.domain.Pageable
+import org.springframework.data.domain.Slice
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -43,7 +45,16 @@ class AvstemmingServiceTest {
 
     @BeforeEach
     fun setUp() {
-        every { behandlingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker() } returns listOf(111L)
+        val sliceFirst = mockk<Slice<Long>>()
+        val sliceSecond = mockk<Slice<Long>>()
+        val page = Pageable.ofSize(1000)
+        every { behandlingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker(page) } returns sliceFirst
+        every { behandlingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker(page.next()) } returns sliceSecond
+        every { sliceFirst.hasContent() } returns true
+        every { sliceFirst.content } returns listOf(1L)
+        every { sliceFirst.nextPageable() } returns page.next()
+        every { sliceSecond.hasContent() } returns false
+
         every {
             beregningService.hentLøpendeAndelerTilkjentYtelseMedUtbetalingerForBehandlinger(
                 any(),

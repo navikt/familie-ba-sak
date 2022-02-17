@@ -43,6 +43,8 @@ import no.nav.familie.ba.sak.task.OpprettOppgaveTask
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.data.domain.Pageable
+import org.springframework.data.domain.Slice
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
@@ -259,6 +261,9 @@ class BehandlingService(
     fun hent(behandlingId: Long): Behandling {
         return behandlingRepository.finnBehandling(behandlingId)
     }
+
+    fun hentSisteIverksatteBehandlingerFraLøpendeFagsaker(page: Pageable): Slice<Long> =
+        behandlingRepository.finnSisteIverksatteBehandlingFraLøpendeFagsaker(page)
 
     fun hentSisteIverksatteBehandlingerFraLøpendeFagsaker(): List<Long> =
         behandlingRepository.finnSisteIverksatteBehandlingFraLøpendeFagsaker()
