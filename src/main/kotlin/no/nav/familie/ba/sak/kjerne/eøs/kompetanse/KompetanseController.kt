@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.eøs.kompetanse
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
@@ -29,10 +30,10 @@ class KompetanseController(
     fun hentKompetanser(
         @PathVariable behandlingId: Long
     ): ResponseEntity<Ressurs<Collection<Kompetanse>>> {
-        if (featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS))
-            return ResponseEntity.ok(Ressurs.success(kompetanseService.hentKompetanser(behandlingId)))
-        else
+        if (!featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS))
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build()
+
+        return ResponseEntity.ok(Ressurs.success(kompetanseService.hentKompetanser(behandlingId)))
     }
 
     @PutMapping(path = ["{behandlingId}/{kompetanseId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -41,10 +42,17 @@ class KompetanseController(
         @PathVariable kompetanseId: Long,
         @RequestBody kompetanse: Kompetanse
     ): ResponseEntity<Ressurs<Collection<Kompetanse>>> {
-        if (featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS))
-            return ResponseEntity.ok(Ressurs.success(kompetanseService.oppdaterKompetanse(kompetanse)))
-        else
+        if (!featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS))
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build()
+
+        if (kompetanse.fom == null) {
+            throw Feil(
+                message = "Fra-og-med-dato kan ikke være null",
+                frontendFeilmelding = "Klarte ikke å oppdatere kompetansen. Mangler fra-og-med-dato."
+            )
+        }
+
+        return ResponseEntity.ok(Ressurs.success(kompetanseService.oppdaterKompetanse(kompetanse)))
     }
 
     @DeleteMapping(path = ["{behandlingId}/{kompetanseId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -52,9 +60,9 @@ class KompetanseController(
         @PathVariable behandlingId: Long,
         @PathVariable kompetanseId: Long
     ): ResponseEntity<Ressurs<Collection<Kompetanse>>> {
-        if (featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS))
-            return ResponseEntity.ok(Ressurs.success(kompetanseService.slettKompetamse(kompetanseId)))
-        else
+        if (!featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS))
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build()
+
+        return ResponseEntity.ok(Ressurs.success(kompetanseService.slettKompetamse(kompetanseId)))
     }
 }
