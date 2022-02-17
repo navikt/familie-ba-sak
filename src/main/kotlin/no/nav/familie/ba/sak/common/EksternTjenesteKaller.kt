@@ -79,12 +79,13 @@ fun handleException(
 ): Exception {
     return if (exception is HttpClientErrorException.Forbidden) exception
     else IntegrasjonException(
-        "${
+        msg = "${
         lagEksternKallPreMelding(
             tjeneste,
             uri
         )
         } Kall mot $tjeneste feilet: ${exception.message}",
-        exception
+        uri = uri,
+        throwable = exception
     )
 }
