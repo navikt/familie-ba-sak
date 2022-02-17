@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedStandardbegrunnelser
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
 import no.nav.familie.ba.sak.kjerne.brev.BrevService
 import no.nav.familie.ba.sak.kjerne.brev.DokumentService
 import no.nav.familie.ba.sak.kjerne.brev.domene.BrevType
@@ -35,7 +36,8 @@ class OpplysningspliktTest(
     @Autowired private val persongrunnlagService: PersongrunnlagService,
     @Autowired private val vedtaksperiodeService: VedtaksperiodeService,
     @Autowired private val dokumentService: DokumentService,
-    @Autowired private val brevService: BrevService
+    @Autowired private val brevService: BrevService,
+    @Autowired private val settPåVentService: SettPåVentService
 ) : AbstractVerdikjedetest() {
 
     @Test
@@ -75,6 +77,8 @@ class OpplysningspliktTest(
             ),
             behandling = behandling
         )
+
+        settPåVentService.gjenopptaBehandling(behandling.id)
 
         val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)
 
