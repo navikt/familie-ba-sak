@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.kompetanse
 
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.MockKompetanseRepository
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
