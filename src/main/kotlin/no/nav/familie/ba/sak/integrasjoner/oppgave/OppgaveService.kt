@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.Period
 import java.time.format.DateTimeFormatter
 
 @Service
@@ -153,6 +154,22 @@ class OppgaveService(
 
             oppgave.erFerdigstilt = true
             oppgaveRepository.save(oppgave)
+        }
+    }
+
+    fun oppdaterOppgavefrist(behandlingId: Long, forlengelse: Period) {
+        val dbOppgaver = oppgaveRepository.findByBehandlingIdAndIkkeFerdigstilt(behandlingId)
+
+        dbOppgaver.forEach { dbOppgave ->
+            val gammelOppgave = hentOppgave(dbOppgave.gsakId.toLong())
+
+            if (gammelOppgave.id == null) {
+                logger.warn("Finner ikke oppgave ${dbOppgave.gsakId} ved oppdatering av frist")
+            } else {
+                val nyOppgave =
+                    gammelOppgave.copy(fristFerdigstillelse = gammelOppgave.fristFerdigstillelse.plus(forlengelse))
+                integrasjonClient.oppdaterOppgave(nyOppgave.id!!, nyOppgave)
+            }
         }
     }
 
