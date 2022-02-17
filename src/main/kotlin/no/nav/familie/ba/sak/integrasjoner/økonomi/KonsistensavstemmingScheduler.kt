@@ -6,7 +6,7 @@ import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.task.KonsistensavstemMotOppdrag
-import no.nav.familie.ba.sak.task.KonsistensavstemMotOppdragStart
+import no.nav.familie.ba.sak.task.KonsistensavstemMotOppdragStartTask
 import no.nav.familie.ba.sak.task.dto.KonsistensavstemmingStartTaskDTO
 import no.nav.familie.ba.sak.task.dto.KonsistensavstemmingTaskDTO
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -37,7 +37,7 @@ class KonsistensavstemmingScheduler(
         val konsistensavstemmingTask =
             if (featureToggleService.isEnabled(FeatureToggleConfig.KONSISTENSAVSTEMMING_SPLITT_BATCH)) {
                 Task(
-                    type = KonsistensavstemMotOppdragStart.TASK_STEP_TYPE,
+                    type = KonsistensavstemMotOppdragStartTask.TASK_STEP_TYPE,
                     payload = objectMapper.writeValueAsString(
                         KonsistensavstemmingStartTaskDTO(
                             batchId = plukketBatch.id,
