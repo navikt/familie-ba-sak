@@ -108,7 +108,7 @@ class FiltreringsreglerService(
             dagensDato = localDateService.now(),
             erFagsakenMigrertEtterBarnFødt = erSakenMigrertEtterBarnFødt(
                 barnaFraHendelse,
-                migreringsdatoForFagsak
+                migreringsdatoPåFagsak
             ),
             løperBarnetrygdForBarnetPåAnnenForelder = tilkjentYtelseValideringService.barnetrygdLøperForAnnenForelder(
                 behandling = behandling,
