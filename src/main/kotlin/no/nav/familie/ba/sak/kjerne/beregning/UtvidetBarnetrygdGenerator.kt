@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.Utils.avrundetHeltallAvProsent
 import no.nav.familie.ba.sak.common.erDagenFør
@@ -42,9 +43,12 @@ data class UtvidetBarnetrygdGenerator(
             .filter { it.resultat == Resultat.OPPFYLT }
             .map {
                 if (it.periodeFom == null) throw Feil("Fom må være satt på søkers periode ved utvida barnetrygd")
+                val fraOgMedDato = it.periodeFom!!.førsteDagINesteMåned()
+                val tilOgMedDato = finnTilOgMedDatoForUtvidetSegment(tilOgMed = it.periodeTom, vilkårResultater = utvidetVilkår)
+                if (tilOgMedDato.toYearMonth() == fraOgMedDato.toYearMonth().minusMonths(1)) throw FunksjonellFeil("Du kan ikke legge inn fom. og tom. innenfor samme kalendermåned.")
                 LocalDateSegment(
-                    it.periodeFom!!.førsteDagINesteMåned(),
-                    finnTilOgMedDatoForUtvidetSegment(tilOgMed = it.periodeTom, vilkårResultater = utvidetVilkår),
+                    fraOgMedDato,
+                    tilOgMedDato,
                     listOf(PeriodeData(aktør = søkerAktør, rolle = PersonType.SØKER))
                 )
             }
