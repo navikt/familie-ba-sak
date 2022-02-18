@@ -1,10 +1,9 @@
 package no.nav.familie.ba.sak.kjerne.tilbakekreving
 
-import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.assertGenerelleSuksessKriterier
+import no.nav.familie.ba.sak.common.kallEksternTjeneste
+import no.nav.familie.ba.sak.common.kallEksternTjenesteRessurs
 import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.kontrakter.felles.Fagsystem
-import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.tilbakekreving.Behandling
 import no.nav.familie.kontrakter.felles.tilbakekreving.ForhåndsvisVarselbrevRequest
 import no.nav.familie.kontrakter.felles.tilbakekreving.KanBehandlingOpprettesManueltRespons
@@ -30,112 +29,76 @@ class TilbakekrevingKlient(
 ) : AbstractRestClient(restOperations, "Tilbakekreving") {
 
     fun hentForhåndsvisningVarselbrev(forhåndsvisVarselbrevRequest: ForhåndsvisVarselbrevRequest): ByteArray {
-        return postForEntity(
-            uri = URI.create("$familieTilbakeUri/dokument/forhandsvis-varselbrev"),
-            payload = forhåndsvisVarselbrevRequest,
-            httpHeaders = HttpHeaders().apply {
-                accept = listOf(MediaType.APPLICATION_PDF)
-            }
-        )
+        val uri = URI.create("$familieTilbakeUri/dokument/forhandsvis-varselbrev")
+
+        return kallEksternTjeneste(
+            tjeneste = "familie-tilbake",
+            uri = uri,
+            formål = "Henter forhåndsvisning av varselbrev",
+        ) {
+            postForEntity(
+                uri = uri,
+                payload = forhåndsvisVarselbrevRequest,
+                httpHeaders = HttpHeaders().apply {
+                    accept = listOf(MediaType.APPLICATION_PDF)
+                }
+            )
+        }
     }
 
     fun opprettTilbakekrevingBehandling(opprettTilbakekrevingRequest: OpprettTilbakekrevingRequest): TilbakekrevingId {
-        val response: Ressurs<String> =
-            postForEntity(URI.create("$familieTilbakeUri/behandling/v1"), opprettTilbakekrevingRequest)
+        val uri = URI.create("$familieTilbakeUri/behandling/v1")
 
-        assertGenerelleSuksessKriterier(response)
-
-        return response.data ?: throw Feil("Klarte ikke opprette tilbakekrevingsbehandling mot familie-tilbake")
+        return kallEksternTjenesteRessurs(
+            tjeneste = "familie-tilbake",
+            uri = uri,
+            formål = "Henter forhåndsvisning av varselbrev",
+        ) {
+            postForEntity(uri, opprettTilbakekrevingRequest)
+        }
     }
 
     fun harÅpenTilbakekrevingsbehandling(fagsakId: Long): Boolean {
         val uri = URI.create("$familieTilbakeUri/fagsystem/${Fagsystem.BA}/fagsak/$fagsakId/finnesApenBehandling/v1")
 
-        val response: Ressurs<FinnesBehandlingsresponsDto> = getForEntity(uri)
+        val finnesBehandlingsresponsDto: FinnesBehandlingsresponsDto = kallEksternTjenesteRessurs(
+            tjeneste = "familie-tilbake",
+            uri = uri,
+            formål = "Sjekk om en fagsak har åpen tilbakekrevingsbehandling",
+        ) { getForEntity(uri) }
 
-        assertGenerelleSuksessKriterier(response)
-
-        return response.data?.finnesÅpenBehandling
-            ?: throw Feil("Finner ikke om tilbakekrevingsbehandling allerede er opprettet")
+        return finnesBehandlingsresponsDto.finnesÅpenBehandling
     }
 
     fun hentTilbakekrevingsbehandlinger(fagsakId: Long): List<Behandling> {
-        try {
-            val uri = URI.create("$familieTilbakeUri/fagsystem/${Fagsystem.BA}/fagsak/$fagsakId/behandlinger/v1")
+        val uri = URI.create("$familieTilbakeUri/fagsystem/${Fagsystem.BA}/fagsak/$fagsakId/behandlinger/v1")
 
-            val response: Ressurs<List<Behandling>> = getForEntity(uri)
-
-            assertGenerelleSuksessKriterier(response)
-
-            return if (response.status == Ressurs.Status.SUKSESS) {
-                response.data!!
-            } else {
-                log.error(
-                    "Kallet for å hente tilbakekrevingsbehandlinger feilet! Feilmelding: ",
-                    response.frontendFeilmelding
-                )
-                emptyList()
-            }
-        } catch (e: Exception) {
-            secureLogger.error("Trøbbel mot tilbakekreving", e)
-            log.error("Exception når kallet for å hente tilbakekrevingsbehandlinger vart kjørt.")
-            return emptyList()
-        }
+        return kallEksternTjenesteRessurs(
+            tjeneste = "familie-tilbake",
+            uri = uri,
+            formål = "Henter tilbakekrevingsbehandlinger på fagsak",
+        ) { getForEntity(uri) }
     }
 
     fun kanTilbakekrevingsbehandlingOpprettesManuelt(fagsakId: Long): KanBehandlingOpprettesManueltRespons {
-        try {
-            val uri =
-                URI.create("$familieTilbakeUri/ytelsestype/${Ytelsestype.BARNETRYGD}/fagsak/$fagsakId/kanBehandlingOpprettesManuelt/v1")
+        val uri = URI.create(
+            "$familieTilbakeUri/ytelsestype/${Ytelsestype.BARNETRYGD}/fagsak/$fagsakId/kanBehandlingOpprettesManuelt/v1"
+        )
 
-            val response: Ressurs<KanBehandlingOpprettesManueltRespons> = getForEntity(uri)
-
-            assertGenerelleSuksessKriterier(response)
-
-            return if (response.status == Ressurs.Status.SUKSESS) {
-                response.data!!
-            } else {
-                log.error(
-                    "Kallet for å sjekke om tilbakekrevingsbehandling kan opprettes feilet! Feilmelding: ",
-                    response.frontendFeilmelding
-                )
-                KanBehandlingOpprettesManueltRespons(
-                    kanBehandlingOpprettes = false,
-                    melding = "Teknisk feil. Feilen er logget"
-                )
-            }
-        } catch (e: Exception) {
-            secureLogger.error("Trøbbel mot tilbakekreving", e)
-            log.error("Exception når kallet for  å sjekke om tilbakekrevingsbehandling kan opprettes vart kjørt.")
-            return KanBehandlingOpprettesManueltRespons(
-                kanBehandlingOpprettes = false,
-                melding = "Tilbakekreving kan ikke opprettes på nåverende tidspunkt. Prøv igjen senere. Kontakt brukerstøtte dersom feilen vedvarer"
-            )
-        }
+        return kallEksternTjenesteRessurs(
+            tjeneste = "familie-tilbake",
+            uri = uri,
+            formål = "Sjekker om tilbakekrevingsbehandling kan opprettes manuelt",
+        ) { getForEntity(uri) }
     }
 
-    fun opprettTilbakekrevingsbehandlingManuelt(request: OpprettManueltTilbakekrevingRequest): Boolean {
-        try {
-            val uri = URI.create("$familieTilbakeUri/behandling/manuelt/task/v1")
+    fun opprettTilbakekrevingsbehandlingManuelt(request: OpprettManueltTilbakekrevingRequest): String {
+        val uri = URI.create("$familieTilbakeUri/behandling/manuelt/task/v1")
 
-            val response: Ressurs<String> = postForEntity(uri, request)
-
-            assertGenerelleSuksessKriterier(response)
-
-            return if (response.status == Ressurs.Status.SUKSESS) {
-                log.debug("Respons fra familie-tilbake: ${response.data}")
-                true
-            } else {
-                log.error(
-                    "Kallet for å opprette tilbakekrevingsbehandling feilet! Feilmelding: ",
-                    response.frontendFeilmelding
-                )
-                false
-            }
-        } catch (e: Exception) {
-            secureLogger.error("Trøbbel mot tilbakekreving", e)
-            log.error("Exception når kallet for å opprette tilbakekrevingsbehandling vart kjørt.")
-            return false
-        }
+        return kallEksternTjenesteRessurs(
+            tjeneste = "familie-tilbake",
+            uri = uri,
+            formål = "Oppretter tilbakekrevingsbehandling manuelt",
+        ) { postForEntity(uri, request) }
     }
 }
