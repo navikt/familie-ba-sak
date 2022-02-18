@@ -7,14 +7,13 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import java.time.LocalDate
 
 fun validerBehandlingKanSettesPåVent(
-    settPåVent: SettPåVent?,
+    gammelSettPåVent: SettPåVent?,
     frist: LocalDate,
     behandling: Behandling
 ) {
-    if (settPåVent != null) {
+    if (gammelSettPåVent != null) {
         throw Feil(
             "Behandling ${behandling.id} er allerede satt på vent."
-
         )
     }
 
