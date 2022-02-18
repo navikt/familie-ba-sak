@@ -1,7 +1,10 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.common.lagVilkårResultat
 import no.nav.familie.ba.sak.common.nesteMåned
+import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.tilAktør
@@ -20,7 +23,9 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
+import java.time.YearMonth
 
 internal class UtvidetBarnetrygdTest {
 
@@ -627,6 +632,18 @@ internal class UtvidetBarnetrygdTest {
 
         assertEquals(søkerOrdinær.ident, andelUtvidet2.aktør.aktivFødselsnummer())
         assertEquals(utvidetAndrePeriodeFom.plusMonths(1).toYearMonth(), andelUtvidet2.stønadFom)
+    }
+
+    @Test
+    fun `Skal kaste feil hvis fom og tom er satt i samme måned`() {
+        val utvidetVilkårResultat = lagVilkårResultat(vilkår = Vilkår.UTVIDET_BARNETRYGD, fom = YearMonth.of(2022, 2), tom = YearMonth.of(2022, 2))
+
+        assertThrows<FunksjonellFeil> {
+            utvidetVilkårResultat.tilDatoSegment(
+                utvidetVilkår = listOf(utvidetVilkårResultat),
+                søkerAktør = randomAktørId()
+            )
+        }
     }
 
     private data class OppfyltPeriode(
