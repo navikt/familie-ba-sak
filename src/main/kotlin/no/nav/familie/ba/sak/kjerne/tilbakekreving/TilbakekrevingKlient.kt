@@ -64,7 +64,7 @@ class TilbakekrevingKlient(
         val finnesBehandlingsresponsDto: FinnesBehandlingsresponsDto = kallEksternTjenesteRessurs(
             tjeneste = "familie-tilbake",
             uri = uri,
-            formål = "Sjekk om en fagsak har åpen tilbakekrevingsbehandling",
+            formål = "Sjekker om en fagsak har åpen tilbakekrevingsbehandling",
         ) { getForEntity(uri) }
 
         return finnesBehandlingsresponsDto.finnesÅpenBehandling
