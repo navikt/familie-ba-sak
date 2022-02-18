@@ -216,6 +216,6 @@ class AvstemmingService(
     companion object {
         private val logger: Logger = LoggerFactory.getLogger(AvstemmingService::class.java)
 
-        const val KONSISTENSAVSTEMMING_DATA_CHUNK_STORLEK = 500
+        const val KONSISTENSAVSTEMMING_DATA_CHUNK_STORLEK = 50
     }
 }
