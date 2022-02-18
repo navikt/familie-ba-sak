@@ -109,7 +109,7 @@ prosessering:
       weeks: 4
 
 FAMILIE_EF_SAK_API_URL_SCOPE: api://dev-gcp.teamfamilie.familie-ef-sak/.default
-FAMILIE_EF_SAK_API_URL: https://familie-ef-sak.dev.intern.nav.no/api
+FAMILIE_EF_SAK_API_URL: http://familie-ef-sak/api
 
 PDL_SCOPE: api://dev-fss.pdl.pdl-api/.default
 SANITY_DATASET: "ba-brev"
@@ -119,7 +119,7 @@ BA_MOTTAK_CLIENT_ID: "dummy"
 FAMILIE_PROSESSERING_CLIENT_ID: "dummy"
 BA_SKATTEETATEN_CLIENT_ID: "dummy"
 
-FAMILIE_BREV_API_URL: http://localhost:8001
+FAMILIE_BREV_API_URL: http://familie-brev
 FAMILIE_BA_INFOTRYGD_FEED_API_URL: http://familie-ba-infotrygd-feed/api
 FAMILIE_BA_INFOTRYGD_API_URL: http://familie-ba-infotrygd
 FAMILIE_TILBAKE_API_URL: http://familie-tilbake/api
