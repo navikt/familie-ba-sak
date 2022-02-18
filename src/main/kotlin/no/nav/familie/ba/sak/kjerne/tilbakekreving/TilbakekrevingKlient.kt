@@ -52,7 +52,7 @@ class TilbakekrevingKlient(
         return kallEksternTjenesteRessurs(
             tjeneste = "familie-tilbake",
             uri = uri,
-            formål = "Henter forhåndsvisning av varselbrev",
+            formål = "Oppretter behandling for tilbakekreving",
         ) {
             postForEntity(uri, opprettTilbakekrevingRequest)
         }
