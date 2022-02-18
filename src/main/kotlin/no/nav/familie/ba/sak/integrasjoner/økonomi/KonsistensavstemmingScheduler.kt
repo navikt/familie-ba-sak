@@ -27,7 +27,7 @@ class KonsistensavstemmingScheduler(
     val featureToggleService: FeatureToggleService,
 ) {
 
-    @Scheduled(cron = "0 8 9 * * *")
+    @Scheduled(cron = "0 55 9 * * *")
     fun utførKonsistensavstemming() {
         val inneværendeMåned = YearMonth.from(now())
         val plukketBatch = batchService.plukkLedigeBatchKjøringerFor(dato = now()) ?: return

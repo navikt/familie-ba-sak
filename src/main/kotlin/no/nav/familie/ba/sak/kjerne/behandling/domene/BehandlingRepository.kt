@@ -74,6 +74,17 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
                             GROUP BY fagsakid)
                         
                         SELECT behandlingid FROM sisteiverksattebehandlingfraløpendefagsak""",
+        countQuery = """WITH sisteiverksattebehandlingfraløpendefagsak AS (
+                            SELECT f.id AS fagsakid, MAX(b.id) AS behandlingid
+                            FROM behandling b
+                                   INNER JOIN fagsak f ON f.id = b.fk_fagsak_id
+                                   INNER JOIN tilkjent_ytelse ty ON b.id = ty.fk_behandling_id
+                            WHERE f.status = 'LØPENDE'
+                              AND ty.utbetalingsoppdrag IS NOT NULL
+                              AND f.arkivert = false
+                            GROUP BY fagsakid)
+                        
+                        SELECT count(behandlingid) FROM sisteiverksattebehandlingfraløpendefagsak""",
         nativeQuery = true
     )
     fun finnSisteIverksatteBehandlingFraLøpendeFagsaker(page: Pageable): Page<BigInteger>
