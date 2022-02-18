@@ -160,16 +160,12 @@ sentry.environment: prod
 
 SANITY_DATASET: "ba-brev"
 
-FAMILIE_BREV_API_URL: http://familie-brev
-
 PDL_URL: https://pdl-api.prod-fss-pub.nais.io
 PDL_SCOPE: api://prod-fss.pdl.pdl-api/.default
 
-FAMILIE_TILBAKE_API_URL: http://familie-tilbake/api
 FAMILIE_TILBAKE_API_URL_SCOPE: api://prod-gcp.teamfamilie.familie-tilbake/.default
 
 FAMILIE_EF_SAK_API_URL_SCOPE: api://prod-gcp.teamfamilie.familie-ef-sak/.default
-FAMILIE_EF_SAK_API_URL: http://familie-ef-sak/api
 
 FAMILIE_INTEGRASJONER_API_URL: https://familie-integrasjoner.prod-fss-pub.nais.io/api
 
