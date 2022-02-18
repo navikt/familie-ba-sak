@@ -109,7 +109,7 @@ prosessering:
       weeks: 4
 
 FAMILIE_EF_SAK_API_URL_SCOPE: api://dev-gcp.teamfamilie.familie-ef-sak/.default
-FAMILIE_EF_SAK_API_URL: https://familie-ef-sak.dev.intern.nav.no/api
+FAMILIE_EF_SAK_API_URL: http://familie-ef-sak/api
 
 PDL_SCOPE: api://dev-fss.pdl.pdl-api/.default
 SANITY_DATASET: "ba-brev"
