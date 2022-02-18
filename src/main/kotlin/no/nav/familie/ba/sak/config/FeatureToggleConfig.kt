@@ -112,6 +112,7 @@ class FeatureToggleConfig(
 
         const val TEKNISK_IVERKSETT_MOT_OPPDRAG_ALLEREDE_SENDT =
             "familie-ba-sak.teknisk-iverksett-mot-oppdrag-allerede-sendt"
+        const val KONSISTENSAVSTEMMING_SPLITT_BATCH = "familie-ba-sak.teknisk-konsistensavstemming-splitt-batch"
 
         private val logger = LoggerFactory.getLogger(FeatureToggleConfig::class.java)
     }
