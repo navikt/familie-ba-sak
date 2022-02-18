@@ -165,9 +165,11 @@ class OppgaveService(
 
             if (gammelOppgave.id == null) {
                 logger.warn("Finner ikke oppgave ${dbOppgave.gsakId} ved oppdatering av frist")
+            } else if (gammelOppgave.fristFerdigstillelse == null) {
+                logger.warn("Oppgave ${dbOppgave.gsakId} har ingen oppgavefrist ved oppdatering av frist")
             } else {
-                val nyOppgave =
-                    gammelOppgave.copy(fristFerdigstillelse = gammelOppgave.fristFerdigstillelse.plus(forlengelse))
+                val nyFrist = LocalDate.parse(gammelOppgave.fristFerdigstillelse!!).plus(forlengelse)
+                val nyOppgave = gammelOppgave.copy(fristFerdigstillelse = nyFrist?.toString())
                 integrasjonClient.oppdaterOppgave(nyOppgave.id!!, nyOppgave)
             }
         }
