@@ -54,10 +54,12 @@ class SettPåVentServiceTest(
             vedtaksperiodeService = vedtaksperiodeService,
         )
 
-        settPåVentService.settBehandlingPåVent(
-            behandlingId = behandlingEtterVilkårsvurderingSteg.id,
-            frist = LocalDate.now().plusDays(21),
-            årsak = SettPåVentÅrsak.AVVENTER_DOKUMENTASJON
+        settPåVentRepository.save(
+            SettPåVent(
+                behandling = behandlingEtterVilkårsvurderingSteg,
+                frist = LocalDate.now().plusDays(21),
+                årsak = SettPåVentÅrsak.AVVENTER_DOKUMENTASJON
+            )
         )
 
         assertThrows<FunksjonellFeil> {
@@ -79,10 +81,12 @@ class SettPåVentServiceTest(
             vedtaksperiodeService = vedtaksperiodeService,
         )
 
-        settPåVentService.settBehandlingPåVent(
-            behandlingId = behandlingEtterVilkårsvurderingSteg.id,
-            frist = LocalDate.now().plusDays(21),
-            årsak = SettPåVentÅrsak.AVVENTER_DOKUMENTASJON
+        settPåVentRepository.save(
+            SettPåVent(
+                behandling = behandlingEtterVilkårsvurderingSteg,
+                frist = LocalDate.now().plusDays(21),
+                årsak = SettPåVentÅrsak.AVVENTER_DOKUMENTASJON
+            )
         )
 
         val nå = LocalDate.now()
@@ -142,20 +146,21 @@ class SettPåVentServiceTest(
         val behandlingId = behandlingEtterVilkårsvurderingSteg.id
 
         val frist1 = LocalDate.now().plusDays(21)
-        settPåVentService.settBehandlingPåVent(
-            behandlingId = behandlingId,
-            frist = frist1,
-            årsak = SettPåVentÅrsak.AVVENTER_DOKUMENTASJON
+
+        val settPåVent = settPåVentRepository.save(
+            SettPåVent(
+                behandling = behandlingEtterVilkårsvurderingSteg,
+                frist = frist1,
+                årsak = SettPåVentÅrsak.AVVENTER_DOKUMENTASJON
+            )
         )
 
         Assertions.assertEquals(frist1, settPåVentService.finnAktivSettPåVentPåBehandlingThrows(behandlingId).frist)
 
         val frist2 = LocalDate.now().plusDays(9)
-        settPåVentService.oppdaterSettBehandlingPåVent(
-            behandlingId = behandlingId,
-            frist = frist2,
-            årsak = SettPåVentÅrsak.AVVENTER_DOKUMENTASJON
-        )
+
+        settPåVent.frist = frist2
+        settPåVentRepository.save(settPåVent)
 
         Assertions.assertEquals(frist2, settPåVentService.finnAktivSettPåVentPåBehandlingThrows(behandlingId).frist)
     }
