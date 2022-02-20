@@ -3,30 +3,38 @@ package no.nav.familie.ba.sak.kjerne.eøs.kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import org.springframework.stereotype.Repository
 import java.time.YearMonth
+import java.util.concurrent.atomic.AtomicLong
 
 @Repository
 class MockKompetanseRepository {
 
-    val barn1 = 111111L
-    val barn2 = 222222L
-    val barn3 = 333333L
+    val barn1 = "111111"
+    val barn2 = "222222"
+    val barn3 = "333333"
+
+    val kompetanseLøpenummer = AtomicLong()
+    fun AtomicLong.neste() = this.addAndGet(1)
 
     private val malKompetanse = Kompetanse(
-        id = 1L,
         fom = YearMonth.of(2021, 2),
         tom = YearMonth.of(2021, 11),
-        barn = setOf(barn1, barn2, barn3)
+        barn = setOf(barn1, barn2, barn3),
     )
 
-    private val kompetanser = mutableMapOf(
-        Pair(
-            1L,
-            malKompetanse.copy(id = 1)
-        )
-    )
+    private val kompetanser = mutableMapOf<Long, Kompetanse>()
 
-    fun hentKompetanser(behandlingId: Long): Collection<Kompetanse> = kompetanser.values
-        .map { it.copy(behandlingId = behandlingId) }
+    fun hentKompetanser(behandlingId: Long): Collection<Kompetanse> {
+
+        val kompetanserForBehandling = kompetanser.values.filter { it.behandlingId == behandlingId }
+        if (kompetanserForBehandling.size == 0) {
+            val kompetanse = malKompetanse.copy(id = kompetanseLøpenummer.neste(), behandlingId = behandlingId)
+            kompetanser[kompetanse.id] = kompetanse
+        }
+
+        return kompetanser.values
+            .filter { it.behandlingId == behandlingId }
+            .sortedBy { it.id }
+    }
 
     fun hentKompetanse(kompetanseId: Long): Kompetanse =
         kompetanser[kompetanseId] ?: throw IllegalArgumentException("Finner ikke kompetanse for id $kompetanseId")
@@ -38,9 +46,13 @@ class MockKompetanseRepository {
             kompetanser[kompetanse.id] = kompetanse
             return kompetanse
         } else {
-            val nyId = kompetanser.keys.maxOf { it } + 1
+            val nyId = kompetanseLøpenummer.neste()
             kompetanser[nyId] = kompetanse.copy(id = nyId)
             return kompetanser[nyId]!!
         }
+    }
+
+    fun delete(tilSletting: List<Kompetanse>) {
+        tilSletting.forEach { kompetanser.remove(it.id) }
     }
 }
