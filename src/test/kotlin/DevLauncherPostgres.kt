@@ -1,8 +1,10 @@
+import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.config.ApplicationConfig
 import org.springframework.boot.builder.SpringApplicationBuilder
 
 fun main(args: Array<String>) {
-    SpringApplicationBuilder(ApplicationConfig::class.java).profiles(
+    val springBuilder = SpringApplicationBuilder(ApplicationConfig::class.java).profiles(
+        "dev",
         "postgres",
         "mock-brev-klient",
         "mock-økonomi",
@@ -12,5 +14,10 @@ fun main(args: Array<String>) {
         "mock-ident-client",
         "mock-tilbakekreving-klient",
         "task-scheduling"
-    ).run(*args)
+    )
+
+    if (args.contains("--dbcontainer"))
+        springBuilder.initializers(DbContainerInitializer())
+
+    springBuilder.run(*args)
 }
