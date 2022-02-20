@@ -1,9 +1,12 @@
 package no.nav.familie.ba.sak.kjerne.eøs.kompetanse
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseUtil.mergeKompetanser
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseUtil.revurderStatus
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.blankUt
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.erPraktiskLik
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -17,13 +20,20 @@ class KompetanseService(val kompetanseRepository: MockKompetanseRepository = Moc
     @Transactional
     fun oppdaterKompetanse(oppdatertKompetanse: Kompetanse): Collection<Kompetanse> {
         val gammelKompetanse = kompetanseRepository.hentKompetanse(oppdatertKompetanse.id)
+
+        validerOppdatering(oppdatertKompetanse, gammelKompetanse)
+
         val restKompetanser = KompetanseUtil.finnRestKompetanser(gammelKompetanse, oppdatertKompetanse)
 
-        val nyeKompetanser =
-            mergeKompetanser(restKompetanser + oppdatertKompetanse)
+        val revurderteKompetanser = revurderStatus(restKompetanser + oppdatertKompetanse)
 
-        val revurderteKompetanser = revurderStatus(nyeKompetanser)
-        kompetanseRepository.save(revurderteKompetanser)
+        val tilLagring = mergeKompetanser(revurderteKompetanser)
+        val tilSletting = listOf(gammelKompetanse).minus(tilLagring)
+
+        if (!tilLagring.erPraktiskLik(tilSletting)) {
+            kompetanseRepository.delete(tilSletting)
+            kompetanseRepository.save(tilLagring)
+        }
         return hentKompetanser(oppdatertKompetanse.behandlingId)
     }
 
@@ -35,14 +45,29 @@ class KompetanseService(val kompetanseRepository: MockKompetanseRepository = Moc
         val blankKompetamse = gammelKompetanse.blankUt()
 
         val oppdaterteKompetanser =
-            mergeKompetanser(eksisterendeKompetanser.minus(gammelKompetanse).plus(blankKompetamse))
+            eksisterendeKompetanser.minus(gammelKompetanse).plus(blankKompetamse)
 
-        val tilSletting = eksisterendeKompetanser.minus(oppdaterteKompetanser)
-        val revurderteKompetanser = revurderStatus(oppdaterteKompetanser)
+        val tilLagring = mergeKompetanser(revurderStatus(oppdaterteKompetanser))
+        val tilSletting = eksisterendeKompetanser.minus(tilLagring)
 
-        kompetanseRepository.delete(tilSletting)
-        kompetanseRepository.save(revurderteKompetanser)
+        if (!tilLagring.erPraktiskLik(tilSletting)) {
+            kompetanseRepository.delete(tilSletting)
+            kompetanseRepository.save(tilLagring)
+        }
 
         return hentKompetanser(behandlingId)
+    }
+
+    private fun validerOppdatering(oppdatertKompetanse: Kompetanse, gammelKompetanse: Kompetanse) {
+        if (oppdatertKompetanse.fom == null)
+            throw Feil("Manglende fra-og-med", httpStatus = HttpStatus.BAD_REQUEST)
+        if (oppdatertKompetanse.fom > oppdatertKompetanse.tom)
+            throw Feil("Fra-og-med er etter til-og-med", httpStatus = HttpStatus.BAD_REQUEST)
+        if (oppdatertKompetanse.barn.size == 0)
+            throw Feil("Mangler barn", httpStatus = HttpStatus.BAD_REQUEST)
+        if (oppdatertKompetanse.fom < gammelKompetanse.fom)
+            throw Feil("Setter fra-og-med tidligere", httpStatus = HttpStatus.BAD_REQUEST)
+        if (!gammelKompetanse.barn.containsAll(oppdatertKompetanse.barn))
+            throw Feil("Oppdaterer barn som ikke er knyttet til kompetansen", httpStatus = HttpStatus.BAD_REQUEST)
     }
 }

@@ -12,25 +12,29 @@ class MockKompetanseRepository {
     val barn2 = "222222"
     val barn3 = "333333"
 
-    val løpenummer = AtomicLong()
+    val kompetanseLøpenummer = AtomicLong()
     fun AtomicLong.neste() = this.addAndGet(1)
 
     private val malKompetanse = Kompetanse(
-        id = 1L,
         fom = YearMonth.of(2021, 2),
         tom = YearMonth.of(2021, 11),
         barn = setOf(barn1, barn2, barn3),
     )
 
-    private val kompetanser = mutableMapOf(
-        Pair(
-            1L,
-            malKompetanse.copy(id = løpenummer.neste())
-        )
-    )
+    private val kompetanser = mutableMapOf<Long, Kompetanse>()
 
-    fun hentKompetanser(behandlingId: Long): Collection<Kompetanse> = kompetanser.values
-        .map { it.copy(behandlingId = behandlingId) }
+    fun hentKompetanser(behandlingId: Long): Collection<Kompetanse> {
+
+        val kompetanserForBehandling = kompetanser.values.filter { it.behandlingId == behandlingId }
+        if (kompetanserForBehandling.size == 0) {
+            val kompetanse = malKompetanse.copy(id = kompetanseLøpenummer.neste(), behandlingId = behandlingId)
+            kompetanser[kompetanse.id] = kompetanse
+        }
+
+        return kompetanser.values
+            .filter { it.behandlingId == behandlingId }
+            .sortedBy { it.id }
+    }
 
     fun hentKompetanse(kompetanseId: Long): Kompetanse =
         kompetanser[kompetanseId] ?: throw IllegalArgumentException("Finner ikke kompetanse for id $kompetanseId")
@@ -42,7 +46,7 @@ class MockKompetanseRepository {
             kompetanser[kompetanse.id] = kompetanse
             return kompetanse
         } else {
-            val nyId = løpenummer.neste()
+            val nyId = kompetanseLøpenummer.neste()
             kompetanser[nyId] = kompetanse.copy(id = nyId)
             return kompetanser[nyId]!!
         }

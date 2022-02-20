@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test
 internal class KompetanseServiceTest {
 
     @Test
-    fun test() {
+    fun `bare endring av periode skal ikke ha effekt`() {
         val kompetanseService = KompetanseService(MockKompetanseRepository())
 
         val kompetanser = kompetanseService.hentKompetanser(1L)
@@ -17,7 +17,25 @@ internal class KompetanseServiceTest {
         val kompetanse = kompetanser.first()
         val oppdatertKompetanse = kompetanse.copy(
             fom = kompetanse.fom!!.plusMonths(2),
-            tom = kompetanse.tom!!.minusMonths(2)
+            tom = kompetanse.tom!!.minusMonths(2),
+        )
+
+        val kompetanserEtterOppdatering = kompetanseService.oppdaterKompetanse(oppdatertKompetanse).toList()
+        assertEquals(1, kompetanserEtterOppdatering.size)
+    }
+
+    @Test
+    fun `oppdatering som splitter kompetanse fulgt av sletting skal returnere til utgangspunktet`() {
+        val kompetanseService = KompetanseService(MockKompetanseRepository())
+
+        val kompetanser = kompetanseService.hentKompetanser(1L)
+        assertEquals(1, kompetanser.size)
+
+        val kompetanse = kompetanser.first()
+        val oppdatertKompetanse = kompetanse.copy(
+            fom = kompetanse.fom!!.plusMonths(2),
+            tom = kompetanse.tom!!.minusMonths(2),
+            søkersAktivitet = "Jobb"
         )
 
         val kompetanserEtterOppdatering = kompetanseService.oppdaterKompetanse(oppdatertKompetanse).toList()

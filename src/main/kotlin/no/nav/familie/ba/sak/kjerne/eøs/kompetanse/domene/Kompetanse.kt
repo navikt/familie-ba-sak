@@ -30,3 +30,6 @@ fun Kompetanse.blankUt() = this.copy(
     sekundærland = null,
     status = KompetanseStatus.IKKE_UTFYLT
 )
+
+fun Iterable<Kompetanse>.erPraktiskLik(andre: Iterable<Kompetanse>) =
+    this.map { it.copy(id = 0) } == andre.map { it.copy(id = 0) }
