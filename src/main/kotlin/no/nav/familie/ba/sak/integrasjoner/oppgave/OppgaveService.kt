@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.integrasjoner.oppgave
 
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.DbOppgave
@@ -157,19 +158,34 @@ class OppgaveService(
         }
     }
 
-    fun oppdaterOppgavefrist(behandlingId: Long, forlengelse: Period) {
+    fun forlengOppgavefristerPåBehandling(behandlingId: Long, forlengelse: Period) {
         val dbOppgaver = oppgaveRepository.findByBehandlingIdAndIkkeFerdigstilt(behandlingId)
 
         dbOppgaver.forEach { dbOppgave ->
             val gammelOppgave = hentOppgave(dbOppgave.gsakId.toLong())
 
             if (gammelOppgave.id == null) {
-                logger.warn("Finner ikke oppgave ${dbOppgave.gsakId} ved oppdatering av frist")
+                throw Feil("Finner ikke oppgave ${dbOppgave.gsakId} ved oppdatering av frist")
             } else if (gammelOppgave.fristFerdigstillelse == null) {
                 logger.warn("Oppgave ${dbOppgave.gsakId} har ingen oppgavefrist ved oppdatering av frist")
             } else {
                 val nyFrist = LocalDate.parse(gammelOppgave.fristFerdigstillelse!!).plus(forlengelse)
                 val nyOppgave = gammelOppgave.copy(fristFerdigstillelse = nyFrist?.toString())
+                integrasjonClient.oppdaterOppgave(nyOppgave.id!!, nyOppgave)
+            }
+        }
+    }
+
+    fun settOppgavefristerPåBehanldingTil(behandlingId: Long, nyFrist: LocalDate) {
+        val dbOppgaver = oppgaveRepository.findByBehandlingIdAndIkkeFerdigstilt(behandlingId)
+
+        dbOppgaver.forEach { dbOppgave ->
+            val gammelOppgave = hentOppgave(dbOppgave.gsakId.toLong())
+
+            if (gammelOppgave.id == null) {
+                throw Feil("Finner ikke oppgave ${dbOppgave.gsakId} ved oppdatering av frist")
+            } else {
+                val nyOppgave = gammelOppgave.copy(fristFerdigstillelse = nyFrist.toString())
                 integrasjonClient.oppdaterOppgave(nyOppgave.id!!, nyOppgave)
             }
         }
