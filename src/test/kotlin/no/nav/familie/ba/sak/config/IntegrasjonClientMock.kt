@@ -144,6 +144,8 @@ class IntegrasjonClientMock {
             every { mockIntegrasjonClient.hentLand(any()) } returns "Testland"
 
             every { mockIntegrasjonClient.hentAlleEØSLand() } returns hentKodeverkLand()
+
+            every { mockIntegrasjonClient.oppdaterOppgave(any(), any()) } just runs
         }
 
         fun clearMockFamilieIntegrasjonerTilgangskontrollClient(mockFamilieIntegrasjonerTilgangskontrollClient: FamilieIntegrasjonerTilgangskontrollClient) {

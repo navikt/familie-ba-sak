@@ -17,6 +17,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 import java.time.LocalDateTime
 
 @Service
@@ -294,6 +295,31 @@ class LoggService(
                     BehandlerRolle.SAKSBEHANDLER
                 ),
                 tekst = "Årsak: $årsak"
+            )
+        )
+    }
+
+    fun opprettOppdaterVentingLogg(behandling: Behandling, endretÅrsak: String?, endretFrist: LocalDate?) {
+        val tekst = if (endretFrist != null && endretÅrsak != null) {
+            "Frist og årsak er endret til \"${endretÅrsak}\" og ${endretFrist.tilKortString()}"
+        } else if (endretFrist != null) {
+            "Frist er endret til ${endretFrist.tilKortString()}"
+        } else if (endretÅrsak != null) {
+            "Årsak er endret til \"${endretÅrsak}\""
+        } else {
+            return
+        }
+
+        lagre(
+            Logg(
+                behandlingId = behandling.id,
+                type = LoggType.VENTENDE_BEHANDLING_ENDRET,
+                tittel = LoggType.VENTENDE_BEHANDLING_ENDRET.visningsnavn,
+                rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
+                    rolleConfig,
+                    BehandlerRolle.SAKSBEHANDLER
+                ),
+                tekst = tekst
             )
         )
     }

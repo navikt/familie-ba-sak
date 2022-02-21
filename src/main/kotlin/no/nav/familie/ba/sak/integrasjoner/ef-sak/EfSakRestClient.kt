@@ -22,7 +22,7 @@ class EfSakRestClient(
 
     fun hentPerioderMedFullOvergangsstønad(personIdent: String): PerioderOvergangsstønadResponse {
 
-        val uri = UriUtil.uri(efSakBaseUrl, "/ekstern/perioder/full-overgangsstonad")
+        val uri = UriUtil.uri(efSakBaseUrl, "ekstern/perioder/full-overgangsstonad")
 
         return kallEksternTjeneste<Ressurs<PerioderOvergangsstønadResponse>>(
             tjeneste = "ef-sak overgangsstønad",
