@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.integrasjoner.oppgave
 
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.DbOppgave
@@ -165,7 +164,7 @@ class OppgaveService(
             val gammelOppgave = hentOppgave(dbOppgave.gsakId.toLong())
 
             if (gammelOppgave.id == null) {
-                throw Feil("Finner ikke oppgave ${dbOppgave.gsakId} ved oppdatering av frist")
+                logger.warn("Finner ikke oppgave ${dbOppgave.gsakId} ved oppdatering av frist")
             } else if (gammelOppgave.fristFerdigstillelse == null) {
                 logger.warn("Oppgave ${dbOppgave.gsakId} har ingen oppgavefrist ved oppdatering av frist")
             } else {
@@ -183,7 +182,7 @@ class OppgaveService(
             val gammelOppgave = hentOppgave(dbOppgave.gsakId.toLong())
 
             if (gammelOppgave.id == null) {
-                throw Feil("Finner ikke oppgave ${dbOppgave.gsakId} ved oppdatering av frist")
+                logger.warn("Finner ikke oppgave ${dbOppgave.gsakId} ved oppdatering av frist")
             } else {
                 val nyOppgave = gammelOppgave.copy(fristFerdigstillelse = nyFrist.toString())
                 integrasjonClient.oppdaterOppgave(nyOppgave.id!!, nyOppgave)
