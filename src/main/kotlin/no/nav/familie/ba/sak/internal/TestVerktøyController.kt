@@ -92,7 +92,7 @@ class TestVerktøyController(
 
     @GetMapping(path = ["/ta-behandlinger-etter-ventefrist-av-vent"])
     @Unprotected
-    fun taBehanldingerEtteVentefristAvVent(): ResponseEntity<Ressurs<String>> {
+    fun taBehandlingerEtterVentefristAvVent(): ResponseEntity<Ressurs<String>> {
         return if (envService.erPreprod() || envService.erDev()) {
             val taBehandlingerEtterVentefristAvVentTask =
                 Task(type = TaBehandlingerEtterVentefristAvVentTask.TASK_STEP_TYPE, payload = "")

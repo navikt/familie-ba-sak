@@ -175,7 +175,7 @@ class OppgaveService(
         }
     }
 
-    fun settOppgavefristerPåBehanldingTil(behandlingId: Long, nyFrist: LocalDate) {
+    fun settOppgavefristerPåBehandlingTil(behandlingId: Long, nyFrist: LocalDate) {
         val dbOppgaver = oppgaveRepository.findByBehandlingIdAndIkkeFerdigstilt(behandlingId)
 
         dbOppgaver.forEach { dbOppgave ->

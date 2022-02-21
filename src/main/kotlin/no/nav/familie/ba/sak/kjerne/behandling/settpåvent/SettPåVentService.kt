@@ -102,7 +102,7 @@ class SettPåVentService(
         behandlingService.sendTilDvh(behandling)
 
         if (toggleService.isEnabled(SETT_PÅ_VENT)) {
-            oppgaveService.settOppgavefristerPåBehanldingTil(
+            oppgaveService.settOppgavefristerPåBehandlingTil(
                 behandlingId = behandlingId,
                 nyFrist = LocalDate.now().plusDays(1)
             )
