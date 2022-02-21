@@ -26,7 +26,7 @@ class SettPåVentService(
         return settPåVentRepository.findByBehandlingIdAndAktiv(behandlingId, true)
     }
 
-    fun finnAktivSettPåVent(): List<SettPåVent> = settPåVentRepository.findByAktivTrue()
+    fun finnAktiveSettPåVent(): List<SettPåVent> = settPåVentRepository.findByAktivTrue()
 
     fun finnAktivSettPåVentPåBehandlingThrows(behandlingId: Long): SettPåVent {
         return finnAktivSettPåVentPåBehandling(behandlingId)
