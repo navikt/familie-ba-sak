@@ -149,6 +149,18 @@ class IntegrasjonClient(
         }
     }
 
+    fun oppdaterOppgave(oppgaveId: Long, oppdatertOppgave: Oppgave) {
+        val uri = URI.create("$integrasjonUri/oppgave/$oppgaveId/oppdater")
+
+        kallEksternTjenesteUtenRespons(
+            tjeneste = "oppgave",
+            uri = uri,
+            formål = "Oppdater oppgave"
+        ) {
+            patchForEntity<Ressurs<OppgaveResponse>>(uri, oppdatertOppgave)
+        }
+    }
+
     @Cacheable("enhet", cacheManager = "kodeverkCache")
     fun hentEnhet(enhetId: String?): NavKontorEnhet {
         val uri = URI.create("$integrasjonUri/arbeidsfordeling/nav-kontor/$enhetId")
