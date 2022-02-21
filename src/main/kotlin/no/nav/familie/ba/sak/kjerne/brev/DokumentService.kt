@@ -189,7 +189,7 @@ class DokumentService(
         ).also {
             taskRepository.save(it)
         }
-        
+
         if (
             behandling != null &&
             manueltBrevRequest.brevmal.setterBehandlingPåVent() &&
