@@ -11,7 +11,7 @@ import java.time.LocalDate
 @Service
 @TaskStepBeskrivelse(
     taskStepType = TaBehandlingerEtterVentefristAvVentTask.TASK_STEP_TYPE,
-    beskrivelse = "Tar behandlinger der ventefristen har gått ut av vent",
+    beskrivelse = "Gjennopptar behandlinger der ventefristen har gått",
     maxAntallFeil = 3,
     triggerTidVedFeilISekunder = 60
 )
