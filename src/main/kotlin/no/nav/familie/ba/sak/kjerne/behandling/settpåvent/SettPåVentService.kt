@@ -26,6 +26,8 @@ class SettPåVentService(
         return settPåVentRepository.findByBehandlingIdAndAktiv(behandlingId, true)
     }
 
+    fun finnAktivSettPåVent(): List<SettPåVent> = settPåVentRepository.findByAktivTrue()
+
     fun finnAktivSettPåVentPåBehandlingThrows(behandlingId: Long): SettPåVent {
         return finnAktivSettPåVentPåBehandling(behandlingId)
             ?: throw Feil("Behandling $behandlingId er ikke satt på vent.")
@@ -44,7 +46,7 @@ class SettPåVentService(
         behandlingService.sendTilDvh(behandling)
 
         if (toggleService.isEnabled(SETT_PÅ_VENT)) {
-            oppgaveService.oppdaterOppgavefrist(
+            oppgaveService.forlengOppgavefristerPåBehandling(
                 behandlingId = behandling.id,
                 forlengelse = Period.between(LocalDate.now(), frist)
             )
@@ -55,12 +57,18 @@ class SettPåVentService(
 
     @Transactional
     fun oppdaterSettBehandlingPåVent(behandlingId: Long, frist: LocalDate, årsak: SettPåVentÅrsak): SettPåVent {
+        val behandling = behandlingService.hent(behandlingId)
         val aktivSettPåVent = finnAktivSettPåVentPåBehandlingThrows(behandlingId)
 
         if (frist == aktivSettPåVent.frist && årsak == aktivSettPåVent.årsak) {
             throw FunksjonellFeil("Behandlingen er allerede satt på vent med frist $frist og årsak $årsak.")
         }
 
+        loggService.opprettOppdaterVentingLogg(
+            behandling = behandling,
+            endretÅrsak = if (årsak != aktivSettPåVent.årsak) årsak.visningsnavn else null,
+            endretFrist = if (frist != aktivSettPåVent.frist) frist else null,
+        )
         logger.info("Oppdater sett på vent behandling $behandlingId med frist $frist og årsak $årsak")
 
         val gammelFrist = aktivSettPåVent.frist
@@ -71,7 +79,7 @@ class SettPåVentService(
         behandlingService.sendTilDvh(behandlingService.hent(behandlingId))
 
         if (toggleService.isEnabled(SETT_PÅ_VENT)) {
-            oppgaveService.oppdaterOppgavefrist(
+            oppgaveService.forlengOppgavefristerPåBehandling(
                 behandlingId = behandlingId,
                 forlengelse = Period.between(gammelFrist, frist)
             )
@@ -92,6 +100,13 @@ class SettPåVentService(
         val settPåVent = settPåVentRepository.save(aktivSettPåVent)
 
         behandlingService.sendTilDvh(behandling)
+
+        if (toggleService.isEnabled(SETT_PÅ_VENT)) {
+            oppgaveService.settOppgavefristerPåBehanldingTil(
+                behandlingId = behandlingId,
+                nyFrist = LocalDate.now().plusDays(1)
+            )
+        }
 
         return settPåVent
     }
