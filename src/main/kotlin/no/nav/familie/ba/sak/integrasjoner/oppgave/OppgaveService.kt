@@ -157,7 +157,7 @@ class OppgaveService(
         }
     }
 
-    fun oppdaterOppgavefrist(behandlingId: Long, forlengelse: Period) {
+    fun forlengOppgavefristerPåBehandling(behandlingId: Long, forlengelse: Period) {
         val dbOppgaver = oppgaveRepository.findByBehandlingIdAndIkkeFerdigstilt(behandlingId)
 
         dbOppgaver.forEach { dbOppgave ->
@@ -170,6 +170,21 @@ class OppgaveService(
             } else {
                 val nyFrist = LocalDate.parse(gammelOppgave.fristFerdigstillelse!!).plus(forlengelse)
                 val nyOppgave = gammelOppgave.copy(fristFerdigstillelse = nyFrist?.toString())
+                integrasjonClient.oppdaterOppgave(nyOppgave.id!!, nyOppgave)
+            }
+        }
+    }
+
+    fun settOppgavefristerPåBehandlingTil(behandlingId: Long, nyFrist: LocalDate) {
+        val dbOppgaver = oppgaveRepository.findByBehandlingIdAndIkkeFerdigstilt(behandlingId)
+
+        dbOppgaver.forEach { dbOppgave ->
+            val gammelOppgave = hentOppgave(dbOppgave.gsakId.toLong())
+
+            if (gammelOppgave.id == null) {
+                logger.warn("Finner ikke oppgave ${dbOppgave.gsakId} ved oppdatering av frist")
+            } else {
+                val nyOppgave = gammelOppgave.copy(fristFerdigstillelse = nyFrist.toString())
                 integrasjonClient.oppdaterOppgave(nyOppgave.id!!, nyOppgave)
             }
         }
