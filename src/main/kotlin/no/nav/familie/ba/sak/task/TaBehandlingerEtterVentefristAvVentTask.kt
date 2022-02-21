@@ -18,7 +18,7 @@ import java.time.LocalDate
 class TaBehandlingerEtterVentefristAvVentTask(val settPåVentService: SettPåVentService) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
-        val sakerPåVent = settPåVentService.finnAktivSettPåVent()
+        val sakerPåVent = settPåVentService.finnAktiveSettPåVent()
 
         sakerPåVent.forEach {
             if (it.frist.isBefore(LocalDate.now())) {
