@@ -921,7 +921,7 @@ fun lagVilkårResultat(
 )
 
 fun lagVilkårResultat(
-    personResultat: PersonResultat,
+    personResultat: PersonResultat? = null,
     vilkårType: Vilkår = Vilkår.BOSATT_I_RIKET,
     resultat: Resultat = Resultat.OPPFYLT,
     periodeFom: LocalDate = LocalDate.of(2009, 12, 24),

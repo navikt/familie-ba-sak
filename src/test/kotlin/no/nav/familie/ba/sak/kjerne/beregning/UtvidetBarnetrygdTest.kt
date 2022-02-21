@@ -23,6 +23,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 import java.time.YearMonth
@@ -641,6 +642,18 @@ internal class UtvidetBarnetrygdTest {
         assertThrows<FunksjonellFeil> {
             utvidetVilkårResultat.tilDatoSegment(
                 utvidetVilkår = listOf(utvidetVilkårResultat),
+                søkerAktør = randomAktørId()
+            )
+        }
+    }
+
+    @Test
+    fun `Skal ikke kaste feil hvis fom og tom er i samme måned, men tom er siste dag i mnd og nytt utvidet-vilkår starter første dag i neste mnd`() {
+        val utvidetVilkårResultat = lagVilkårResultat(vilkårType = Vilkår.UTVIDET_BARNETRYGD, periodeFom = LocalDate.of(2022, 2, 1), periodeTom = LocalDate.of(2022, 2, 28))
+
+        assertDoesNotThrow {
+            utvidetVilkårResultat.tilDatoSegment(
+                utvidetVilkår = listOf(utvidetVilkårResultat, lagVilkårResultat(vilkårType = Vilkår.UTVIDET_BARNETRYGD, periodeFom = LocalDate.of(2022, 3, 1), periodeTom = null)),
                 søkerAktør = randomAktørId()
             )
         }
