@@ -5,6 +5,7 @@ import io.mockk.mockk
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTestDev
+import no.nav.familie.ba.sak.config.RolleConfig
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
@@ -20,6 +21,8 @@ class DokumentControllerTest(
     private val dokumentService: DokumentService,
     @Autowired
     private val behandlingService: BehandlingService,
+    @Autowired
+    private val rolleConfig: RolleConfig,
 ) : AbstractSpringIntegrationTestDev() {
 
     private val mockDokumentService: DokumentService = mockk()
@@ -28,14 +31,15 @@ class DokumentControllerTest(
     private val tilgangService: TilgangService = mockk(relaxed = true)
     val mockDokumentController =
         DokumentController(
-            mockDokumentService,
-            vedtakService,
-            behandlingService,
-            fagsakService,
-            tilgangService,
-            mockk(relaxed = true),
-            mockk(relaxed = true),
-            mockk(relaxed = true)
+            dokumentService = mockDokumentService,
+            vedtakService = vedtakService,
+            behandlingService = behandlingService,
+            fagsakService = fagsakService,
+            tilgangService = tilgangService,
+            persongrunnlagService = mockk(relaxed = true),
+            arbeidsfordelingService = mockk(relaxed = true),
+            utvidetBehandlingService = mockk(relaxed = true),
+            rolleConfig = rolleConfig,
         )
 
     @Test
@@ -51,7 +55,7 @@ class DokumentControllerTest(
     @Test
     @Tag("integration")
     fun `Test hent pdf vedtak`() {
-        every { vedtakService.hent(any()) } returns lagVedtak()
+        every { vedtakService.hent(any()) } returns lagVedtak(stønadBrevPdF = "pdf".toByteArray())
         every { mockDokumentService.hentBrevForVedtak(any()) } returns Ressurs.success("pdf".toByteArray())
 
         val response = mockDokumentController.hentVedtaksbrev(1)
