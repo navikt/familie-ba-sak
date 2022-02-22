@@ -347,8 +347,9 @@ fun leggTilAlleGyldigeBegrunnelserPåVedtaksperiodeIBehandling(
     val vedtaksperiode = perisisterteVedtaksperioder.first()
 
     val utvidetVedtaksperiodeMedBegrunnelser = vedtaksperiode.tilUtvidetVedtaksperiodeMedBegrunnelser(
-        personopplysningGrunnlag,
-        andelerTilkjentYtelse,
+        personopplysningGrunnlag = personopplysningGrunnlag,
+        andelerTilkjentYtelse = andelerTilkjentYtelse,
+        erIngenOverlappVedtaksperiodeTogglePå = false
     )
 
     val aktørerMedUtbetaling =

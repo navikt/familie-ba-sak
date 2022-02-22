@@ -11,7 +11,6 @@ import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.common.tilfeldigSøker
 import no.nav.familie.ba.sak.dataGenerator.vedtak.lagVedtaksbegrunnelse
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPerson
-import no.nav.familie.ba.sak.integrasjoner.sanity.hentSanityBegrunnelser
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilUtvidetVedtaksperiodeMedBegrunnelser
@@ -28,7 +27,6 @@ class UtvidetVedtaksperiodeMedBegrunnelserTest {
     val barn2 = tilfeldigPerson(personType = PersonType.BARN)
     val barn3 = tilfeldigPerson(personType = PersonType.BARN)
     val søker = tilfeldigSøker()
-    val sanityBegrunnelser = hentSanityBegrunnelser()
 
     @Test
     fun `Skal kun legge på utbetalingsdetaljer som gjelder riktig andeler tilkjent ytelse for fortsatt innvilget`() {
@@ -86,6 +84,7 @@ class UtvidetVedtaksperiodeMedBegrunnelserTest {
             vedtaksperiodeMedBegrunnelser.tilUtvidetVedtaksperiodeMedBegrunnelser(
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 andelerTilkjentYtelse = andelerTilkjentYtelse,
+                erIngenOverlappVedtaksperiodeTogglePå = false,
             )
 
         Assertions.assertEquals(1, utvidetVedtaksperiodeMedBegrunnelser.utbetalingsperiodeDetaljer.size)
@@ -152,6 +151,7 @@ class UtvidetVedtaksperiodeMedBegrunnelserTest {
             vedtaksperiodeMedBegrunnelser.tilUtvidetVedtaksperiodeMedBegrunnelser(
                 personopplysningGrunnlag,
                 andelerTilkjentYtelse,
+                erIngenOverlappVedtaksperiodeTogglePå = false,
             )
 
         Assertions.assertEquals(1, utvidetVedtaksperiodeMedBegrunnelser.utbetalingsperiodeDetaljer.size)
@@ -237,6 +237,7 @@ class UtvidetVedtaksperiodeMedBegrunnelserTest {
             vedtaksperiodeMedBegrunnelser.tilUtvidetVedtaksperiodeMedBegrunnelser(
                 personopplysningGrunnlag,
                 andelerTilkjentYtelse,
+                erIngenOverlappVedtaksperiodeTogglePå = false,
             )
 
         Assertions.assertEquals(1, utvidetVedtaksperiodeMedBegrunnelser.utbetalingsperiodeDetaljer.size)
