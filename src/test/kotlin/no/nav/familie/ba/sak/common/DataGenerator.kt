@@ -202,11 +202,12 @@ fun tilfeldigSøker(
         målform = Målform.NB
     ).apply { sivilstander = mutableListOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this)) }
 
-fun lagVedtak(behandling: Behandling = lagBehandling()) =
+fun lagVedtak(behandling: Behandling = lagBehandling(), stønadBrevPdF: ByteArray? = null) =
     Vedtak(
         id = nesteVedtakId(),
         behandling = behandling,
-        vedtaksdato = LocalDateTime.now()
+        vedtaksdato = LocalDateTime.now(),
+        stønadBrevPdF = stønadBrevPdF,
     )
 
 fun lagAndelTilkjentYtelse(
