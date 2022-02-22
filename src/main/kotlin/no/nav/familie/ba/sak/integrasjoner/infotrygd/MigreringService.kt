@@ -100,8 +100,8 @@ class MigreringService(
 
             val barnasIdenter = finnBarnMedLøpendeStønad(løpendeSak)
 
-            val personAktør = personidentService.hentAktør(personIdent)
-            val barnasAktør = personidentService.hentAktørIder(barnasIdenter)
+            val personAktør = personidentService.hentOgLagreAktør(personIdent, true)
+            val barnasAktør = personidentService.hentOgLagreAktørIder(barnasIdenter, true)
 
             validerStøttetGradering(personAktør) // Midlertidig skrudd av støtte for kode 6 inntil det kan behandles
 
