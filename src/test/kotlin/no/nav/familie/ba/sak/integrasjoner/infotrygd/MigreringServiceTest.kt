@@ -374,7 +374,6 @@ class MigreringServiceTest(
             mockk(),
             mockk(),
             mockk(relaxed = true),
-            mockk(relaxed = true)
         ) // => env.erDev() = env.erE2E() = false
 
         listOf<Long>(0, 1).forEach { antallDagerEtterKjøredato ->
@@ -493,7 +492,6 @@ class MigreringServiceTest(
             mockk(),
             mockk(),
             mockk(relaxed = true),
-            mockk(relaxed = true)
         )
 
         val aktivFnr = randomFnr()
