@@ -12,6 +12,9 @@ import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
+import no.nav.familie.ba.sak.task.TaBehandlingerEtterVentefristAvVentTask
+import no.nav.familie.prosessering.domene.Task
+import no.nav.familie.prosessering.domene.TaskRepository
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Tag
@@ -33,6 +36,8 @@ class SettPåVentServiceTest(
     @Autowired private val vilkårsvurderingService: VilkårsvurderingService,
     @Autowired private val vedtaksperiodeService: VedtaksperiodeService,
     @Autowired private val settPåVentRepository: SettPåVentRepository,
+    @Autowired private val taskRepository: TaskRepository,
+    @Autowired private val taBehandlingerEtterVentefristAvVentTask: TaBehandlingerEtterVentefristAvVentTask,
 ) : AbstractSpringIntegrationTest() {
 
     @BeforeAll
@@ -163,5 +168,58 @@ class SettPåVentServiceTest(
         settPåVentRepository.save(settPåVent)
 
         Assertions.assertEquals(frist2, settPåVentService.finnAktivSettPåVentPåBehandlingThrows(behandlingId).frist)
+    }
+
+    @Test
+    fun `Skal gjennopta behandlinger etter ventefristen`() {
+        val behandling1 = kjørStegprosessForFGB(
+            tilSteg = StegType.VILKÅRSVURDERING,
+            søkerFnr = randomFnr(),
+            barnasIdenter = listOf(randomFnr()),
+            fagsakService = fagsakService,
+            vedtakService = vedtakService,
+            persongrunnlagService = persongrunnlagService,
+            vilkårsvurderingService = vilkårsvurderingService,
+            stegService = stegService,
+            vedtaksperiodeService = vedtaksperiodeService,
+        )
+
+        val behandling2 = kjørStegprosessForFGB(
+            tilSteg = StegType.VILKÅRSVURDERING,
+            søkerFnr = randomFnr(),
+            barnasIdenter = listOf(randomFnr()),
+            fagsakService = fagsakService,
+            vedtakService = vedtakService,
+            persongrunnlagService = persongrunnlagService,
+            vilkårsvurderingService = vilkårsvurderingService,
+            stegService = stegService,
+            vedtaksperiodeService = vedtaksperiodeService,
+        )
+
+        settPåVentRepository.save(
+            SettPåVent(
+                behandling = behandling1,
+                frist = LocalDate.now().minusDays(1),
+                årsak = SettPåVentÅrsak.AVVENTER_DOKUMENTASJON
+            )
+        )
+
+        settPåVentRepository.save(
+            SettPåVent(
+                behandling = behandling2,
+                frist = LocalDate.now().plusDays(21),
+                årsak = SettPåVentÅrsak.AVVENTER_DOKUMENTASJON
+            )
+        )
+
+        taBehandlingerEtterVentefristAvVentTask.doTask(
+            Task(
+                type = TaBehandlingerEtterVentefristAvVentTask.TASK_STEP_TYPE,
+                payload = ""
+            )
+        )
+
+        Assertions.assertNull(settPåVentRepository.findByBehandlingIdAndAktiv(behandling1.id, true))
+        Assertions.assertNotNull(settPåVentRepository.findByBehandlingIdAndAktiv(behandling2.id, true))
     }
 }
