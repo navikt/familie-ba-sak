@@ -105,12 +105,14 @@ class FeatureToggleConfig(
         const val KAN_BEHANDLE_EØS = "familie-ba-sak.behandling.eos"
         const val KAN_AUTOMATISK_BEHANDLE_EØS = "familie-ba-sak.behandling.automatisk.eos"
         const val IKKE_STOPP_MIGRERINGSBEHANDLING = "familie-ba-sak.ikke.stopp.migeringsbehandling"
-        const val ENDRET_UTBETALING_VEDTAKSSIDEN = "familie-ba-sak.endret-utbetaling-vedtakssiden.utgivelse"
+        const val SETT_PÅ_VENT = "familie-ba-sak.sett-paa-vent.utgivelse"
+        const val INGEN_OVERLAPP_VEDTAKSPERIODER = "familie-ba-sak.ingen-overlapp-vedtaksperioder.utgivelse"
 
         const val TEKNISK_VEDLIKEHOLD_HENLEGGELSE = "familie-ba-sak.teknisk-vedlikehold-henleggelse.tilgangsstyring"
 
         const val TEKNISK_IVERKSETT_MOT_OPPDRAG_ALLEREDE_SENDT =
             "familie-ba-sak.teknisk-iverksett-mot-oppdrag-allerede-sendt"
+        const val KONSISTENSAVSTEMMING_SPLITT_BATCH = "familie-ba-sak.teknisk-konsistensavstemming-splitt-batch"
 
         private val logger = LoggerFactory.getLogger(FeatureToggleConfig::class.java)
     }

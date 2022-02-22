@@ -49,7 +49,7 @@ class StatusFraOppdragTask(
 
     override fun onCompletion(task: Task) {
         val statusFraOppdragDTO = objectMapper.readValue(task.payload, StatusFraOppdragDTO::class.java)
-        val personIdent = personidentService.hentOgLagreAktør(statusFraOppdragDTO.aktørId).aktivFødselsnummer()
+        val personIdent = personidentService.hentAktør(statusFraOppdragDTO.aktørId).aktivFødselsnummer()
 
         val nyTask = PubliserVedtakTask.opprettTask(personIdent, statusFraOppdragDTO.behandlingsId)
         taskRepository.save(nyTask)

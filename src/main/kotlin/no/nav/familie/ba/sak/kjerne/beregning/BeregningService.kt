@@ -91,8 +91,12 @@ class BeregningService(
 
             if (behandlingSomErSendtTilGodkjenning != null) behandlingSomErSendtTilGodkjenning
             else {
-                val iverksatteBehandlinger = behandlingRepository.finnIverksatteBehandlinger(fagsakId = fagsak.id)
-                Behandlingutils.hentSisteBehandlingSomErIverksatt(iverksatteBehandlinger)
+                val godkjenteBehandlingerSomIkkeErIverksattEnda = behandlingRepository.finnGodkjenteBehandlingerSomHolderPåÅIverksettes(fagsakId = fagsak.id).singleOrNull()
+                if (godkjenteBehandlingerSomIkkeErIverksattEnda != null) godkjenteBehandlingerSomIkkeErIverksattEnda
+                else {
+                    val iverksatteBehandlinger = behandlingRepository.finnIverksatteBehandlinger(fagsakId = fagsak.id)
+                    Behandlingutils.hentSisteBehandlingSomErIverksatt(iverksatteBehandlinger)
+                }
             }
         }.map {
             hentTilkjentYtelseForBehandling(behandlingId = it.id)

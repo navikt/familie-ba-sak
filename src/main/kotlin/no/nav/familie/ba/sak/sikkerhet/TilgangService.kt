@@ -65,7 +65,7 @@ class TilgangService(
         val harTilgang = harSaksbehandlerTilgang("validerTilgangTilBehandling", behandlingId) {
             val behandling = behandlingService.hent(behandlingId)
             val personIdenter =
-                persongrunnlagService.hentAktiv(behandlingId = behandlingId)?.personer?.map { it.aktør.aktivFødselsnummer() }
+                persongrunnlagService.hentAktiv(behandlingId = behandlingId)?.søkerOgBarn?.map { it.aktør.aktivFødselsnummer() }
                     ?: listOf(behandling.fagsak.aktør.aktivFødselsnummer())
             personIdenter.forEach {
                 auditLogger.log(

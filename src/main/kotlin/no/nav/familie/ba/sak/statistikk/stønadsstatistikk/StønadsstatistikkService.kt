@@ -132,7 +132,7 @@ class StønadsstatistikkService(
             utbetaltPerMnd = segment.value,
             utbetalingsDetaljer = andelerForSegment.map { andel ->
                 val personForAndel =
-                    personopplysningGrunnlag.personer.find { person -> andel.aktør == person.aktør }
+                    personopplysningGrunnlag.søkerOgBarn.find { person -> andel.aktør == person.aktør }
                         ?: throw IllegalStateException("Fant ikke personopplysningsgrunnlag for andel")
                 UtbetalingsDetaljDVH(
                     person = lagPersonDVH(
@@ -168,7 +168,9 @@ class StønadsstatistikkService(
         else listOf(personopplysningerService.hentGjeldendeStatsborgerskap(person.aktør).land)
     }
 
-    private fun hentLandkode(person: Person): String = if (person.bostedsadresser.isNotEmpty()) "NO" else {
+    private fun hentLandkode(person: Person): String = if (person.bostedsadresser.isNotEmpty()) "NO"
+    else if (personopplysningerService.hentPersoninfoEnkel(person.aktør).bostedsadresser.isNotEmpty()) "NO" else {
+
         val landKode = personopplysningerService.hentLandkodeUtenlandskBostedsadresse(person.aktør)
 
         if (landKode == PersonopplysningerService.UKJENT_LANDKODE) {

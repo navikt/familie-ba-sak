@@ -25,7 +25,7 @@ class InfotrygdController(
 
     @PostMapping(path = ["/hent-infotrygdsaker-for-soker"])
     fun hentInfotrygdsakerForSøker(@RequestBody personIdent: Personident): ResponseEntity<Ressurs<RestInfotrygdsaker>> {
-        val aktør = personidentService.hentOgLagreAktør(personIdent.ident)
+        val aktør = personidentService.hentAktør(personIdent.ident)
         val infotrygdsaker = infotrygdService.hentMaskertRestInfotrygdsakerVedManglendeTilgang(aktør)
             ?: RestInfotrygdsaker(infotrygdService.hentInfotrygdsakerForSøker(aktør).bruker)
 
@@ -34,7 +34,7 @@ class InfotrygdController(
 
     @PostMapping(path = ["/hent-infotrygdstonader-for-soker"])
     fun hentInfotrygdstønaderForSøker(@RequestBody personIdent: Personident): ResponseEntity<Ressurs<RestInfotrygdstønader>> {
-        val aktør = personidentService.hentOgLagreAktør(personIdent.ident)
+        val aktør = personidentService.hentAktør(personIdent.ident)
         val infotrygdstønader = infotrygdService.hentMaskertRestInfotrygdstønaderVedManglendeTilgang(aktør)
             ?: RestInfotrygdstønader(infotrygdService.hentInfotrygdstønaderForSøker(personIdent.ident).bruker)
 

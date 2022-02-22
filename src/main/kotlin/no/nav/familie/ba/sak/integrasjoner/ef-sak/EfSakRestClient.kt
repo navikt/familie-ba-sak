@@ -1,7 +1,8 @@
 package no.nav.familie.ba.sak.integrasjoner.`ef-sak`
 
-import no.nav.familie.ba.sak.common.convertDataClassToJson
+import no.nav.familie.ba.sak.common.kallEksternTjeneste
 import no.nav.familie.http.client.AbstractRestClient
+import no.nav.familie.http.util.UriUtil
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.ef.PerioderOvergangsstønadResponse
@@ -11,7 +12,6 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestOperations
-import org.springframework.web.util.UriComponentsBuilder
 import java.net.URI
 
 @Component
@@ -21,20 +21,14 @@ class EfSakRestClient(
 ) : AbstractRestClient(restTemplate, "ef-sak") {
 
     fun hentPerioderMedFullOvergangsstønad(personIdent: String): PerioderOvergangsstønadResponse {
-        val uri =
-            UriComponentsBuilder.fromUri(efSakBaseUrl)
-                .path("/ekstern/perioder/full-overgangsstonad")
-                .build()
-                .toUri()
 
-        try {
-            val response = postForEntity<Ressurs<PerioderOvergangsstønadResponse>>(uri, PersonIdent(personIdent))
-            secureLogger.info("Response fra ef-sak ved henting av perioder med full overgangsstønad på person $personIdent: ${response.toSecureString()}, ${response.data?.convertDataClassToJson()}")
+        val uri = UriUtil.uri(efSakBaseUrl, "ekstern/perioder/full-overgangsstonad")
 
-            return response.getDataOrThrow()
-        } catch (e: Exception) {
-            throw RuntimeException("Feil ved henting av full overgangsstønadsperioder fra ef-sak", e)
-        }
+        return kallEksternTjeneste<Ressurs<PerioderOvergangsstønadResponse>>(
+            tjeneste = "ef-sak overgangsstønad",
+            uri = uri,
+            formål = "Hente perioder med full overgangsstønad"
+        ) { postForEntity(uri, PersonIdent(personIdent)) }.getDataOrThrow()
     }
 
     companion object {

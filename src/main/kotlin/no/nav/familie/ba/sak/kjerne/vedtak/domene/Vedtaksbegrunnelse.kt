@@ -5,8 +5,12 @@ import no.nav.familie.ba.sak.common.NullablePeriode
 import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.common.StringListConverter
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
+import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.MinimertUregistrertBarn
 import no.nav.familie.ba.sak.kjerne.brev.domene.BrevBegrunnelseGrunnlagMedPersoner
+import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertUtbetalingsperiodeDetalj
+import no.nav.familie.ba.sak.kjerne.brev.domene.beløpUtbetaltFor
+import no.nav.familie.ba.sak.kjerne.brev.domene.totaltUtbetalt
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
@@ -94,25 +98,26 @@ fun BrevBegrunnelseGrunnlagMedPersoner.tilBrevBegrunnelse(
     personerIPersongrunnlag: List<MinimertRestPerson>,
     brevMålform: Målform,
     uregistrerteBarn: List<MinimertUregistrertBarn>,
-    beløp: String
+    minimerteUtbetalingsperiodeDetaljer: List<MinimertUtbetalingsperiodeDetalj>
 ): Begrunnelse {
     val personerPåBegrunnelse =
         personerIPersongrunnlag.filter { person -> this.personIdenter.contains(person.personIdent) }
 
     val gjelderSøker = personerPåBegrunnelse.any { it.type == PersonType.SØKER }
 
-    val erAvslagPåKunSøker = gjelderSøker &&
-        personerPåBegrunnelse.size == 1 &&
-        this.vedtakBegrunnelseType == VedtakBegrunnelseType.AVSLAG
-
     val barnasFødselsdatoer = this.hentBarnasFødselsdagerForBegrunnelse(
         uregistrerteBarn = uregistrerteBarn,
-        erAvslagPåKunSøker = erAvslagPåKunSøker,
         personerIBehandling = personerIPersongrunnlag,
-        personerPåBegrunnelse = personerPåBegrunnelse
+        personerPåBegrunnelse = personerPåBegrunnelse,
+        personerMedUtbetaling = minimerteUtbetalingsperiodeDetaljer.map { it.person },
+        gjelderSøker = gjelderSøker
     )
 
-    val antallBarn = this.hentAntallBarnForBegrunnelse(uregistrerteBarn, erAvslagPåKunSøker, barnasFødselsdatoer)
+    val antallBarn = this.hentAntallBarnForBegrunnelse(
+        uregistrerteBarn = uregistrerteBarn,
+        gjelderSøker = gjelderSøker,
+        barnasFødselsdatoer = barnasFødselsdatoer,
+    )
 
     val månedOgÅrBegrunnelsenGjelderFor =
         if (vedtaksperiode.fom == null) null
@@ -122,6 +127,8 @@ fun BrevBegrunnelseGrunnlagMedPersoner.tilBrevBegrunnelse(
                 tom = vedtaksperiode.tom ?: TIDENES_ENDE
             )
         )
+
+    val beløp = this.hentBeløp(gjelderSøker, minimerteUtbetalingsperiodeDetaljer)
 
     this.validerBrevbegrunnelse(
         gjelderSøker = gjelderSøker,
@@ -135,7 +142,7 @@ fun BrevBegrunnelseGrunnlagMedPersoner.tilBrevBegrunnelse(
         maanedOgAarBegrunnelsenGjelderFor = månedOgÅrBegrunnelsenGjelderFor,
         maalform = brevMålform.tilSanityFormat(),
         apiNavn = this.vedtakBegrunnelseSpesifikasjon.sanityApiNavn,
-        belop = beløp
+        belop = Utils.formaterBeløp(beløp)
     )
 }
 
@@ -146,4 +153,19 @@ private fun BrevBegrunnelseGrunnlagMedPersoner.validerBrevbegrunnelse(
     if (!gjelderSøker && barnasFødselsdatoer.isEmpty() && !this.triggesAv.satsendring) {
         throw IllegalStateException("Ingen personer på brevbegrunnelse")
     }
+}
+
+private fun BrevBegrunnelseGrunnlagMedPersoner.hentBeløp(
+    gjelderSøker: Boolean,
+    minimerteUtbetalingsperiodeDetaljer: List<MinimertUtbetalingsperiodeDetalj>
+) = if (gjelderSøker) {
+    if (this.vedtakBegrunnelseType == VedtakBegrunnelseType.AVSLAG ||
+        this.vedtakBegrunnelseType == VedtakBegrunnelseType.OPPHØR
+    ) {
+        0
+    } else {
+        minimerteUtbetalingsperiodeDetaljer.totaltUtbetalt()
+    }
+} else {
+    minimerteUtbetalingsperiodeDetaljer.beløpUtbetaltFor(this.personIdenter)
 }

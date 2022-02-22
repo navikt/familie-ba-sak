@@ -11,7 +11,6 @@ import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.MigreringResponseDto
 import no.nav.familie.ba.sak.integrasjoner.migrering.MigreringRestClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
-import no.nav.familie.ba.sak.integrasjoner.skyggesak.SkyggesakService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -78,8 +77,7 @@ class MigreringService(
     private val vedtakService: VedtakService,
     private val vilkårService: VilkårService,
     private val vilkårsvurderingService: VilkårsvurderingService,
-    private val migreringRestClient: MigreringRestClient,
-    private val skyggesakService: SkyggesakService
+    private val migreringRestClient: MigreringRestClient
 ) {
 
     private val logger = LoggerFactory.getLogger(MigreringService::class.java)
@@ -102,8 +100,8 @@ class MigreringService(
 
             val barnasIdenter = finnBarnMedLøpendeStønad(løpendeSak)
 
-            val personAktør = personidentService.hentOgLagreAktør(personIdent)
-            val barnasAktør = personidentService.hentOgLagreAktørIder(barnasIdenter)
+            val personAktør = personidentService.hentOgLagreAktør(personIdent, true)
+            val barnasAktør = personidentService.hentOgLagreAktørIder(barnasIdenter, true)
 
             validerStøttetGradering(personAktør) // Midlertidig skrudd av støtte for kode 6 inntil det kan behandles
 
@@ -125,10 +123,14 @@ class MigreringService(
                 )
             }.getOrElse { kastOgTellMigreringsFeil(MigreringsfeilType.KAN_IKKE_OPPRETTE_BEHANDLING, it.message, it) }
 
+            val migreringsdato = virkningsdatoFra(infotrygdKjøredato(YearMonth.now()))
             vilkårService.hentVilkårsvurdering(behandlingId = behandling.id)?.apply {
-                forsøkSettPerioderFomTilpassetInfotrygdKjøreplan(this)
+                forsøkSettPerioderFomTilpassetInfotrygdKjøreplan(this, migreringsdato)
                 vilkårsvurderingService.oppdater(this)
             } ?: kastOgTellMigreringsFeil(MigreringsfeilType.MANGLER_VILKÅRSVURDERING)
+
+            // Lagre ned migreringsdato
+            behandlingService.lagreNedMigreringsdato(migreringsdato, behandling)
 
             val behandlingEtterVilkårsvurdering =
                 stegService.håndterVilkårsvurdering(behandling) // Se funksjonen lagVilkårsvurderingForMigreringsbehandling i VilkårService
@@ -251,7 +253,7 @@ class MigreringService(
             (sak.valg == "OR" && sak.undervalg == "OS") -> {
                 BehandlingUnderkategori.ORDINÆR
             }
-            (sak.valg == "UT" && sak.undervalg == "EF" && !env.erProd()) -> {
+            (sak.valg == "UT" && sak.undervalg == "EF") -> {
                 BehandlingUnderkategori.UTVIDET
             }
             else -> {
@@ -283,11 +285,13 @@ class MigreringService(
         return barnasIdenter
     }
 
-    private fun forsøkSettPerioderFomTilpassetInfotrygdKjøreplan(vilkårsvurdering: Vilkårsvurdering) {
-        val inneværendeMåned = YearMonth.now()
+    private fun forsøkSettPerioderFomTilpassetInfotrygdKjøreplan(
+        vilkårsvurdering: Vilkårsvurdering,
+        migreringsdato: LocalDate
+    ) {
         vilkårsvurdering.personResultater.forEach { personResultat ->
             personResultat.vilkårResultater.forEach {
-                it.periodeFom = it.periodeFom ?: virkningsdatoFra(infotrygdKjøredato(inneværendeMåned))
+                it.periodeFom = it.periodeFom ?: migreringsdato
             }
         }
     }
@@ -392,7 +396,7 @@ enum class MigreringsfeilType(val beskrivelse: String) {
     IDENT_IKKE_LENGER_AKTIV("Ident ikke lenger aktiv"),
     IKKE_GYLDIG_KJØREDATO("Ikke gyldig kjøredato"),
     IKKE_STØTTET_GRADERING("Personen har ikke støttet gradering"),
-    IKKE_STØTTET_SAKSTYPE("Kan kun migrere ordinære saker (OR, OS)"),
+    IKKE_STØTTET_SAKSTYPE("Kan kun migrere ordinære(OR OS) og utvidet(UT EF) saker"),
     INGEN_BARN_MED_LØPENDE_STØNAD_I_INFOTRYGD("Fant ingen barn med løpende stønad på sak"),
     INGEN_LØPENDE_SAK_INFOTRYGD("Personen har ikke løpende sak i infotrygd"),
     IVERKSETT_BEHANDLING_UTEN_VEDTAK("Fant ikke aktivt vedtak på behandling"),

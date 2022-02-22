@@ -31,6 +31,7 @@ class UtvidetBehandlingService(
     private val arbeidsfordelingService: ArbeidsfordelingService,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val persongrunnlagService: PersongrunnlagService,
+    private val behandlingService: BehandlingService,
     private val behandlingRepository: BehandlingRepository,
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val vedtakRepository: VedtakRepository,
@@ -48,7 +49,7 @@ class UtvidetBehandlingService(
 
         val søknadsgrunnlag = søknadGrunnlagService.hentAktiv(behandlingId = behandling.id)
         val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = behandling.id)
-        val personer = personopplysningGrunnlag?.personer
+        val personer = personopplysningGrunnlag?.søkerOgBarn
 
         val arbeidsfordeling = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandlingId = behandling.id)
 
@@ -98,6 +99,7 @@ class UtvidetBehandlingService(
             totrinnskontroll = totrinnskontroll?.tilRestTotrinnskontroll(),
             aktivSettPåVent = settPåVentService.finnAktivSettPåVentPåBehandling(behandlingId = behandlingId)
                 ?.tilRestSettPåVent(),
+            migreringsdato = behandlingService.hentMigreringsdatoIBehandling(behandlingId = behandlingId)
         )
     }
 }

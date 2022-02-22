@@ -15,6 +15,7 @@ import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasj
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.integrasjoner.skyggesak.SkyggesakService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
@@ -49,6 +50,7 @@ class FagsakService(
     private val personidentService: PersonidentService,
     private val behandlingRepository: BehandlingRepository,
     private val utvidetBehandlingService: UtvidetBehandlingService,
+    private val behandlingService: BehandlingService,
     private val vedtakRepository: VedtakRepository,
     private val personopplysningerService: PersonopplysningerService,
     private val familieIntegrasjonerTilgangskontrollClient: FamilieIntegrasjonerTilgangskontrollClient,
@@ -152,10 +154,11 @@ class FagsakService(
                 vedtaksdato = vedtakRepository.findByBehandlingAndAktivOptional(it.id)?.vedtaksdato
             )
         }
-
+        val migreringsdato = behandlingService.hentMigreringsdatoPåFagsak(fagsakId)
         return restBaseFagsak.tilRestMinimalFagsak(
             restVisningBehandlinger = visningsbehandlinger,
             tilbakekrevingsbehandlinger = tilbakekrevingsbehandlinger,
+            migreringsdato = migreringsdato
         )
     }
 
@@ -225,7 +228,7 @@ class FagsakService(
     }
 
     fun hentFagsakDeltager(personIdent: String): List<RestFagsakDeltager> {
-        val aktør = personidentService.hentOgLagreAktør(personIdent)
+        val aktør = personidentService.hentAktør(personIdent)
 
         val maskertDeltaker = runCatching {
             hentMaskertFagsakdeltakerVedManglendeTilgang(aktør)

@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.integrasjoner.skyggesak
 
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.leader.LeaderClient
 import no.nav.familie.log.mdc.MDCConstants
 import org.slf4j.LoggerFactory
@@ -15,6 +16,7 @@ import java.util.UUID
 @Component
 class SkyggesakScheduler(
     val skyggesakRepository: SkyggesakRepository,
+    val fagsakRepository: FagsakRepository,
     val integrasjonClient: IntegrasjonClient
 ) {
 
@@ -27,6 +29,13 @@ class SkyggesakScheduler(
         }
     }
 
+    @Scheduled(cron = "0 0 6 * * *")
+    fun ryddOppISendteSkyggesaker() {
+        if (LeaderClient.isLeader() == true) {
+            fjernGamleSkyggesakInnslag()
+        }
+    }
+
     @Transactional
     fun sendSkyggesaker() {
         val skyggesaker = skyggesakRepository.finnSkyggesakerKlareForSending(Pageable.ofSize(400))
@@ -34,19 +43,32 @@ class SkyggesakScheduler(
         for (skyggesak in skyggesaker) {
             try {
                 MDC.put(MDCConstants.MDC_CALL_ID, UUID.randomUUID().toString())
-                logger.info("Opprettet skyggesak for fagsak ${skyggesak.fagsak.id}")
-                integrasjonClient.opprettSkyggesak(skyggesak.fagsak.aktør, skyggesak.fagsak.id)
+                val fagsak = fagsakRepository.finnFagsak(skyggesak.fagsakId)!!
+                logger.info("Opprettet skyggesak for fagsak ${fagsak.id}")
+                integrasjonClient.opprettSkyggesak(fagsak.aktør, fagsak.id)
                 skyggesakRepository.save(skyggesak.copy(sendtTidspunkt = LocalDateTime.now()))
             } catch (e: Exception) {
-                logger.warn("Kunne ikke opprette skyggesak for fagsak ${skyggesak.fagsak.id}")
-                secureLogger.warn("Kunne ikke opprette skyggesak for fagsak ${skyggesak.fagsak.id}", e)
+                logger.warn("Kunne ikke opprette skyggesak for fagsak ${skyggesak.fagsakId}")
+                secureLogger.warn("Kunne ikke opprette skyggesak for fagsak ${skyggesak.fagsakId}", e)
             } finally {
                 MDC.clear()
             }
         }
     }
 
+    @Transactional
+    fun fjernGamleSkyggesakInnslag() {
+        skyggesakRepository.finnSkyggesakerSomErSendt()
+            .filter { it.sendtTidspunkt!!.isBefore(LocalDateTime.now().minusDays(SKYGGESAK_RETENTION.toLong())) }
+            .run {
+                logger.info("Fjerner ${this.size} rader fra Skyggesak, sendt for mer enn $SKYGGESAK_RETENTION dager siden")
+                secureLogger.info("Fjerner følgende rader eldre enn $SKYGGESAK_RETENTION fra Skyggesak:\n$this ")
+                skyggesakRepository.deleteAll(this)
+            }
+    }
+
     companion object {
+        private const val SKYGGESAK_RETENTION = 14
 
         private val logger = LoggerFactory.getLogger(SkyggesakScheduler::class.java)
         private val secureLogger = LoggerFactory.getLogger("secureLogger")

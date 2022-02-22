@@ -53,10 +53,24 @@ fun hentVedtaksperioderMedBegrunnelserForEndredeUtbetalingsperioder(
             }
     }
 
-fun hentVedtaksperioderMedBegrunnelserForUtbetalingsperioder(
+@Deprecated("Bruk hentVedtaksperioderMedBegrunnelserForEndredeUtbetalingsperioder")
+fun hentVedtaksperioderMedBegrunnelserForUtbetalingsperioderGammel(
     andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
     vedtak: Vedtak
 ) = andelerTilkjentYtelse.filter { it.endretUtbetalingAndeler.isEmpty() }.lagVertikaleSegmenter()
+    .map { (segmenter, _) ->
+        VedtaksperiodeMedBegrunnelser(
+            fom = segmenter.fom,
+            tom = segmenter.tom,
+            vedtak = vedtak,
+            type = Vedtaksperiodetype.UTBETALING
+        )
+    }
+
+fun hentVedtaksperioderMedBegrunnelserForUtbetalingsperioder(
+    andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
+    vedtak: Vedtak
+) = andelerTilkjentYtelse.lagVertikaleSegmenter()
     .map { (segmenter, _) ->
         VedtaksperiodeMedBegrunnelser(
             fom = segmenter.fom,

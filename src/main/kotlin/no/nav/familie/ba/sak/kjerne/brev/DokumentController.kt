@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.brev
 
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
+import no.nav.familie.ba.sak.config.RolleConfig
 import no.nav.familie.ba.sak.ekstern.restDomene.RestMinimalFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
@@ -15,6 +16,7 @@ import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
+import no.nav.familie.ba.sak.sikkerhet.validerBrevGenerert
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.slf4j.LoggerFactory
@@ -39,7 +41,8 @@ class DokumentController(
     private val tilgangService: TilgangService,
     private val persongrunnlagService: PersongrunnlagService,
     private val arbeidsfordelingService: ArbeidsfordelingService,
-    private val utvidetBehandlingService: UtvidetBehandlingService
+    private val utvidetBehandlingService: UtvidetBehandlingService,
+    private val rolleConfig: RolleConfig,
 ) {
 
     @PostMapping(path = ["vedtaksbrev/{vedtakId}"])
@@ -69,7 +72,11 @@ class DokumentController(
         )
 
         val vedtak = vedtakService.hent(vedtakId)
+
         tilgangService.validerTilgangTilBehandling(behandlingId = vedtak.behandling.id, event = AuditLoggerEvent.ACCESS)
+
+        val rolletilgang = SikkerhetContext.hentHøyesteRolletilgangForInnloggetBruker(rolleConfig).nivå
+        validerBrevGenerert(vedtak, rolletilgang)
 
         return dokumentService.hentBrevForVedtak(vedtak)
     }

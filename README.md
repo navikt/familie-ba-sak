@@ -10,6 +10,8 @@ gjøres ved å sette
 på `localhost:8089`. Se [databasekapittelet](#database) for hvordan du setter opp databasen. For å tillate kall fra
 frontend, se [Autentisering](#autentisering).
 
+Du kan også kjøre med en embedded database. Da må du sette `--dbcontainer` under `Edit Configurations -> VM Options`
+
 ### Database
 
 Dersom man vil kjøre med postgres, kan man bytte til Spring-profilen `postgres`. Da må man sette opp postgres-databasen,
@@ -85,6 +87,72 @@ Master-branchen blir automatisk bygget ved merge og deployet til prod.
 Kafka kø må opprettes manuelt i hver miljø, en gang. Detter gjørs som beskrevet
 i [Opprett kø](https://confluence.adeo.no/display/AURA/Kafka#Kafka-NavngivningavTopic)
 bruk topic definisjon og konfigurasjon som beskrevet i resources/kafka/topic-<env>.json
+
+## Testing i Postman
+
+Det kan være praktisk å teste ut api'et i et verktøy som Postman. Da må vi late som vi er familie-ba-sak-frontend.
+
+Oppsettet består av tre deler:
+
+* Conf'e BA-sak riktig
+* Få tak i et gyldig token
+* Sende en request med et token'et
+
+### Conf'e BA-sak riktig
+
+Vi trenger å sette tre miljøvariable i familie-ba-sak:
+
+* `BA_SAK_CLIENT_ID`: Id'en til familie-ba-sak
+* `CLIENT_SECRET`: Hemmeligheten til familie-ba-sak
+* `BA_SAK_FRONTEND_CLIENT_ID`: Id'en til frontend-app'en
+
+Se [Autentisering](#autentisering) for de to første
+
+Verdien for `BA_SAK_FRONTEND_CLIENT_ID` får du tilsvarende med følgende kall:
+
+```
+kubectl -n teamfamilie get secret azuread-familie-ba-sak-frontend-lokal -o json | jq '.data | map_values(@base64d)'
+```
+
+`AZURE_APP_CLIENT_ID` inneholder client-id'en
+
+### Få tak i et gyldig token (dev-fss)
+
+I postman lagrer du følgende request, som gir deg et token som familie-ba-sak-frontend for å kalle familie-ba-sak:
+
+* Verb: `GET`
+* Url: `https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/v2.0/token`
+
+Under *Body*, sjekk av for `x-www-form-urlencoded`, og legg inn følgende key-value-par:
+
+* `grant_type`: `client_credentials`
+* `client_id`: <`AZURE_APP_CLIENT_ID` for familie-ba-sak-frontend>
+* `client_secret`: <`AZURE_APP_CLIENT_SECRET` for familie-ba-sak-frontend>
+* `scope`: `api://dev-fss.teamfamilie.familie-ba-sak-lokal/.default`
+
+Under *Tests*, legg inn følgende script:
+
+```
+pm.test("Lagre token", function () {
+    var jsonData = pm.response.json();
+    pm.globals.set("azure-familie-ba-sak", jsonData.access_token);
+});
+```
+
+Lagre gjerne request'en med et hyggelig navn, f.eks 'Token familie-ba-sak-frontend -> familie-ba-sak'
+
+### Sende en request med et token'et
+
+1. `Headers`: Her MÅ du ha `Authorization=Bearer {{azure-familie-ba-sak}}`, altså referanse til token'et som ble lagret
+   i scriptet over
+2. `Verb`: F.eks `GET`
+3. `Url`: F.eks `localhost:8089/api/kompetanse``
+   Lagre gjerne request'en med et hyggelig navn, f.eks 'GET kompetanse'
+
+Kjør så:
+
+* 'Token familie-ba-sak-frontend -> familie-ba-sak', for å få token
+* 'GET kompetanse' (f.eks) for å gjøre det du VIL gjøre
 
 ## Kontaktinformasjon
 

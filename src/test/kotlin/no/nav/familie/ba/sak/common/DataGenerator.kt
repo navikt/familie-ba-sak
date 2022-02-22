@@ -74,6 +74,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurderingType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
@@ -201,11 +202,12 @@ fun tilfeldigSøker(
         målform = Målform.NB
     ).apply { sivilstander = mutableListOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this)) }
 
-fun lagVedtak(behandling: Behandling = lagBehandling()) =
+fun lagVedtak(behandling: Behandling = lagBehandling(), stønadBrevPdF: ByteArray? = null) =
     Vedtak(
         id = nesteVedtakId(),
         behandling = behandling,
-        vedtaksdato = LocalDateTime.now()
+        vedtaksdato = LocalDateTime.now(),
+        stønadBrevPdF = stønadBrevPdF,
     )
 
 fun lagAndelTilkjentYtelse(
@@ -904,7 +906,23 @@ fun leggTilBegrunnelsePåVedtaksperiodeIBehandling(
 }
 
 fun lagVilkårResultat(
-    personResultat: PersonResultat,
+    vilkår: Vilkår,
+    regelverk: Regelverk? = null,
+    fom: YearMonth? = null,
+    tom: YearMonth? = null
+) = VilkårResultat(
+    personResultat = null,
+    vilkårType = vilkår,
+    resultat = Resultat.OPPFYLT,
+    periodeFom = fom?.toLocalDate(),
+    periodeTom = tom?.toLocalDate(),
+    begrunnelse = "",
+    behandlingId = 0,
+    vurderesEtter = regelverk
+)
+
+fun lagVilkårResultat(
+    personResultat: PersonResultat? = null,
     vilkårType: Vilkår = Vilkår.BOSATT_I_RIKET,
     resultat: Resultat = Resultat.OPPFYLT,
     periodeFom: LocalDate = LocalDate.of(2009, 12, 24),

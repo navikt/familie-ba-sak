@@ -13,6 +13,8 @@ import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils.utledLøpendeKate
 import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils.utledLøpendeUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingMigreringsinfo
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingMigreringsinfoRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
@@ -41,8 +43,11 @@ import no.nav.familie.ba.sak.task.OpprettOppgaveTask
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.math.BigInteger
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -63,12 +68,13 @@ class BehandlingService(
     private val vedtaksperiodeService: VedtaksperiodeService,
     private val personidentService: PersonidentService,
     private val featureToggleService: FeatureToggleService,
-    private val taskRepository: TaskRepositoryWrapper
+    private val taskRepository: TaskRepositoryWrapper,
+    private val behandlingMigreringsinfoRepository: BehandlingMigreringsinfoRepository
 ) {
 
     @Transactional
     fun opprettBehandling(nyBehandling: NyBehandling): Behandling {
-        val søkersAktør = personidentService.hentOgLagreAktør(nyBehandling.søkersIdent)
+        val søkersAktør = personidentService.hentAktør(nyBehandling.søkersIdent)
 
         val fagsak = fagsakRepository.finnFagsakForAktør(søkersAktør)
             ?: throw FunksjonellFeil(
@@ -241,7 +247,7 @@ class BehandlingService(
         vedtakRepository.save(nyttVedtak)
     }
 
-    private fun sendTilDvh(behandling: Behandling) {
+    fun sendTilDvh(behandling: Behandling) {
         saksstatistikkEventPublisher.publiserBehandlingsstatistikk(behandling.id)
     }
 
@@ -256,6 +262,9 @@ class BehandlingService(
     fun hent(behandlingId: Long): Behandling {
         return behandlingRepository.finnBehandling(behandlingId)
     }
+
+    fun hentSisteIverksatteBehandlingerFraLøpendeFagsaker(page: Pageable): Page<BigInteger> =
+        behandlingRepository.finnSisteIverksatteBehandlingFraLøpendeFagsaker(page)
 
     fun hentSisteIverksatteBehandlingerFraLøpendeFagsaker(): List<Long> =
         behandlingRepository.finnSisteIverksatteBehandlingFraLøpendeFagsaker()
@@ -426,6 +435,27 @@ class BehandlingService(
             behandlingÅrsak = behandlingÅrsak,
             måned = måned,
         )
+    }
+
+    @Transactional
+    fun lagreNedMigreringsdato(migreringsdato: LocalDate, behandling: Behandling) {
+        val behandlingMigreringsinfo =
+            BehandlingMigreringsinfo(behandling = behandling, migreringsdato = migreringsdato)
+        behandlingMigreringsinfoRepository.save(behandlingMigreringsinfo)
+    }
+
+    fun hentMigreringsdatoIBehandling(behandlingId: Long): LocalDate? {
+        return behandlingMigreringsinfoRepository.findByBehandlingId(behandlingId)?.migreringsdato
+    }
+
+    fun hentMigreringsdatoPåFagsak(fagsakId: Long): LocalDate? {
+        return behandlingMigreringsinfoRepository.finnSisteMigreringsdatoPåFagsak(fagsakId)
+    }
+
+    @Transactional
+    fun deleteMigreringsdatoVedHenleggelse(behandlingId: Long) {
+        behandlingMigreringsinfoRepository.findByBehandlingId(behandlingId)
+            ?.let { behandlingMigreringsinfoRepository.delete(it) }
     }
 
     companion object {
