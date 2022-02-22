@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.INGEN_OVERLAPP_VEDTAKSPERIODER
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedFritekster
@@ -128,7 +129,8 @@ class VedtaksperiodeService(
         )
 
         if (
-            standardbegrunnelserFraFrontend.any { it.vedtakBegrunnelseType == VedtakBegrunnelseType.ENDRET_UTBETALING }
+            standardbegrunnelserFraFrontend.any { it.vedtakBegrunnelseType == VedtakBegrunnelseType.ENDRET_UTBETALING } &&
+            !featureToggleService.isEnabled(INGEN_OVERLAPP_VEDTAKSPERIODER)
         ) {
             val andelerTilkjentYtelse =
                 andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = behandling.id)
@@ -147,7 +149,11 @@ class VedtaksperiodeService(
         persongrunnlag: PersonopplysningGrunnlag
     ) {
         try {
-            vedtaksperiodeMedBegrunnelser.hentUtbetalingsperiodeDetaljer(andelerTilkjentYtelse, persongrunnlag)
+            vedtaksperiodeMedBegrunnelser.hentUtbetalingsperiodeDetaljer(
+                andelerTilkjentYtelse = andelerTilkjentYtelse,
+                personopplysningGrunnlag = persongrunnlag,
+                erIngenOverlappVedtaksperiodeTogglePå = false,
+            )
         } catch (e: Exception) {
             throw FunksjonellFeil(
                 "Begrunnelse for endret utbetaling er ikke gyldig for vedtaksperioden"
@@ -253,13 +259,23 @@ class VedtaksperiodeService(
         val andelerTilkjentYtelse =
             andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = vedtak.behandling.id)
 
-        val utbetalingsperioder =
-            hentVedtaksperioderMedBegrunnelserForUtbetalingsperioder(andelerTilkjentYtelse, vedtak)
+        val erIngenOverlappVedtaksperiodeTogglePå = featureToggleService.isEnabled(INGEN_OVERLAPP_VEDTAKSPERIODER)
 
-        val endredeUtbetalingsperioder = hentVedtaksperioderMedBegrunnelserForEndredeUtbetalingsperioder(
-            andelerTilkjentYtelse = andelerTilkjentYtelse,
-            vedtak = vedtak,
+        val utbetalingsperioder = if (!erIngenOverlappVedtaksperiodeTogglePå) {
+            hentVedtaksperioderMedBegrunnelserForUtbetalingsperioderGammel(
+                andelerTilkjentYtelse,
+                vedtak
+            )
+        } else hentVedtaksperioderMedBegrunnelserForUtbetalingsperioder(
+            andelerTilkjentYtelse,
+            vedtak
         )
+
+        val endredeUtbetalingsperioder =
+            if (!erIngenOverlappVedtaksperiodeTogglePå) hentVedtaksperioderMedBegrunnelserForEndredeUtbetalingsperioder(
+                andelerTilkjentYtelse = andelerTilkjentYtelse,
+                vedtak = vedtak,
+            ) else emptyList()
 
         val opphørsperioder =
             hentOpphørsperioder(vedtak.behandling).map { it.tilVedtaksperiodeMedBegrunnelse(vedtak) }
@@ -317,10 +333,13 @@ class VedtaksperiodeService(
 
         val sanityBegrunnelser = sanityService.hentSanityBegrunnelser()
 
+        val erIngenOverlappVedtaksperiodeTogglePå = featureToggleService.isEnabled(INGEN_OVERLAPP_VEDTAKSPERIODER)
+
         return vedtaksperioderMedBegrunnelser.map {
             it.tilUtvidetVedtaksperiodeMedBegrunnelser(
                 andelerTilkjentYtelse = andelerTilkjentYtelse,
                 personopplysningGrunnlag = persongrunnlag,
+                erIngenOverlappVedtaksperiodeTogglePå = erIngenOverlappVedtaksperiodeTogglePå
             )
         }.map { utvidetVedtaksperiodeMedBegrunnelser ->
 
