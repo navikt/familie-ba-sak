@@ -121,6 +121,7 @@ class BehandlingService(
                 if (nyBehandling.søknadMottattDato != null) {
                     lagreNedSøknadMottattDato(nyBehandling.søknadMottattDato, behandling)
                 }
+                sendTilDvh(it)
             }
             opprettOgInitierNyttVedtakForBehandling(behandling = lagretBehandling)
 
