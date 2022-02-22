@@ -344,7 +344,7 @@ class VedtaksperiodeService(
             )
         }
 
-        return if (behandling.status == BehandlingStatus.UTREDES) {
+        return if (behandling.status == BehandlingStatus.UTREDES && utvidetVedtaksperiodeMedBegrunnelser.isNotEmpty()) {
             val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id)
                 ?: error("Finner ikke vilkårsvurdering ved begrunning av vedtak")
 
