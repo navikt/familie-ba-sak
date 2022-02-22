@@ -218,7 +218,7 @@ class LoggService(
                 behandlingId = behandling.id,
                 type = if (behandling.erManuellMigrering()) LoggType.MIGRERING_BEKREFTET else LoggType.GODKJENNE_VEDTAK,
                 tittel = if (beslutning.erGodkjent()) {
-                    if (behandling.erManuellMigrering()) "Migrering bekreftet" else "Vedtak godkent"
+                    if (behandling.erManuellMigrering()) "Migrering bekreftet" else "Vedtak godkjent"
                 } else "Vedtak underkjent",
                 rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(rolleConfig, BehandlerRolle.BESLUTTER),
                 tekst = if (!beslutning.erGodkjent()) "Begrunnelse: $begrunnelse" else "",
