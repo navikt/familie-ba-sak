@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
 import no.nav.familie.ba.sak.common.NullablePeriode
-import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagEndretUtbetalingAndel
@@ -20,7 +19,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.periodeErOppyltForYtelseTypeGammel
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.periodeErOppyltForYtelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilMinimertPerson
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import org.junit.jupiter.api.Assertions
@@ -336,101 +335,69 @@ class VedtaksperiodeServiceUtilsTest {
     }
 
     val ytelseTyperSmåbarnstillegg =
-        listOf(YtelseType.SMÅBARNSTILLEGG, YtelseType.UTVIDET_BARNETRYGD, YtelseType.ORDINÆR_BARNETRYGD)
+        setOf(YtelseType.SMÅBARNSTILLEGG, YtelseType.UTVIDET_BARNETRYGD, YtelseType.ORDINÆR_BARNETRYGD)
     val ytelseTyperUtvidetOgOrdinær =
-        listOf(YtelseType.UTVIDET_BARNETRYGD, YtelseType.ORDINÆR_BARNETRYGD)
+        setOf(YtelseType.UTVIDET_BARNETRYGD, YtelseType.ORDINÆR_BARNETRYGD)
     val ytelseTyperOrdinær =
-        listOf(YtelseType.ORDINÆR_BARNETRYGD)
+        setOf(YtelseType.ORDINÆR_BARNETRYGD)
 
     @Test
     fun `Skal gi riktig svar for småbarnstillegg-trigger ved innvilget VedtakBegrunnelseType`() {
 
         Assertions.assertEquals(
             true,
-            VedtakBegrunnelseType.INNVILGET.periodeErOppyltForYtelseTypeGammel(
+            VedtakBegrunnelseType.INNVILGET.periodeErOppyltForYtelseType(
                 ytelseType = YtelseType.SMÅBARNSTILLEGG,
                 ytelseTyperForPeriode = ytelseTyperSmåbarnstillegg,
-                andelerTilkjentYtelse = emptyList(),
-                fomForPeriode = LocalDate.now()
+                ytelserGjeldeneForSøkerForrigeMåned = emptyList(),
             )
         )
 
         Assertions.assertEquals(
             false,
-            VedtakBegrunnelseType.INNVILGET.periodeErOppyltForYtelseTypeGammel(
+            VedtakBegrunnelseType.INNVILGET.periodeErOppyltForYtelseType(
                 ytelseType = YtelseType.SMÅBARNSTILLEGG,
                 ytelseTyperForPeriode = ytelseTyperUtvidetOgOrdinær,
-                andelerTilkjentYtelse = emptyList(),
-                fomForPeriode = LocalDate.now()
+                ytelserGjeldeneForSøkerForrigeMåned = emptyList(),
             )
         )
     }
 
     @Test
     fun `Skal gi riktig svar for småbarnstillegg-trigger når VedtakBegrunnelseType er reduksjon`() {
-        val fom = LocalDate.now().førsteDagIInneværendeMåned()
-
-        val andelerTilkjentYtelseMedSmåbarnstilleggIkkeDagenFør = listOf(
-            lagAndelTilkjentYtelse(
-                fom = fom.minusMonths(5).toYearMonth(),
-                tom = fom.minusMonths(5).toYearMonth(),
-                ytelseType = YtelseType.SMÅBARNSTILLEGG
-            )
-        )
-
-        val andelerTilkjentYtelseMedOrdinærYtelseDagenFør = listOf(
-            lagAndelTilkjentYtelse(
-                fom = fom.minusMonths(1).toYearMonth(),
-                tom = fom.minusMonths(1).toYearMonth(),
-                ytelseType = YtelseType.ORDINÆR_BARNETRYGD
-            )
-        )
-
-        val andelerTilkjentYtelseMedSmåbarnstilleggDagenFør = listOf(
-            lagAndelTilkjentYtelse(
-                fom = fom.minusMonths(1).toYearMonth(),
-                tom = fom.minusMonths(1).toYearMonth(),
-                ytelseType = YtelseType.SMÅBARNSTILLEGG
-            )
-        )
-
         Assertions.assertEquals(
             true,
-            VedtakBegrunnelseType.REDUKSJON.periodeErOppyltForYtelseTypeGammel(
+            VedtakBegrunnelseType.REDUKSJON.periodeErOppyltForYtelseType(
                 ytelseType = YtelseType.SMÅBARNSTILLEGG,
                 ytelseTyperForPeriode = ytelseTyperUtvidetOgOrdinær,
-                andelerTilkjentYtelse = andelerTilkjentYtelseMedSmåbarnstilleggDagenFør,
-                fomForPeriode = fom
+                ytelserGjeldeneForSøkerForrigeMåned = listOf(YtelseType.SMÅBARNSTILLEGG),
             )
         )
 
         Assertions.assertEquals(
             false,
-            VedtakBegrunnelseType.REDUKSJON.periodeErOppyltForYtelseTypeGammel(
+            VedtakBegrunnelseType.REDUKSJON.periodeErOppyltForYtelseType(
                 ytelseType = YtelseType.SMÅBARNSTILLEGG,
                 ytelseTyperForPeriode = ytelseTyperSmåbarnstillegg,
-                andelerTilkjentYtelse = andelerTilkjentYtelseMedSmåbarnstilleggDagenFør,
-                fomForPeriode = fom
+                ytelserGjeldeneForSøkerForrigeMåned = listOf(YtelseType.SMÅBARNSTILLEGG),
             )
         )
 
         Assertions.assertEquals(
             false,
-            VedtakBegrunnelseType.REDUKSJON.periodeErOppyltForYtelseTypeGammel(
+            VedtakBegrunnelseType.REDUKSJON.periodeErOppyltForYtelseType(
                 ytelseType = YtelseType.SMÅBARNSTILLEGG,
                 ytelseTyperForPeriode = ytelseTyperUtvidetOgOrdinær,
-                andelerTilkjentYtelse = andelerTilkjentYtelseMedOrdinærYtelseDagenFør,
-                fomForPeriode = fom
+                ytelserGjeldeneForSøkerForrigeMåned = listOf(YtelseType.ORDINÆR_BARNETRYGD),
             )
         )
 
         Assertions.assertEquals(
             false,
-            VedtakBegrunnelseType.REDUKSJON.periodeErOppyltForYtelseTypeGammel(
+            VedtakBegrunnelseType.REDUKSJON.periodeErOppyltForYtelseType(
                 ytelseType = YtelseType.SMÅBARNSTILLEGG,
                 ytelseTyperForPeriode = ytelseTyperUtvidetOgOrdinær,
-                andelerTilkjentYtelse = andelerTilkjentYtelseMedSmåbarnstilleggIkkeDagenFør,
-                fomForPeriode = fom
+                ytelserGjeldeneForSøkerForrigeMåned = listOf()
             )
         )
     }
@@ -440,11 +407,10 @@ class VedtaksperiodeServiceUtilsTest {
 
         Assertions.assertEquals(
             false,
-            VedtakBegrunnelseType.AVSLAG.periodeErOppyltForYtelseTypeGammel(
+            VedtakBegrunnelseType.AVSLAG.periodeErOppyltForYtelseType(
                 ytelseType = YtelseType.SMÅBARNSTILLEGG,
                 ytelseTyperForPeriode = ytelseTyperSmåbarnstillegg,
-                andelerTilkjentYtelse = emptyList(),
-                fomForPeriode = LocalDate.now()
+                ytelserGjeldeneForSøkerForrigeMåned = emptyList()
             )
         )
     }
@@ -453,90 +419,58 @@ class VedtaksperiodeServiceUtilsTest {
     fun `Skal gi riktig svar for utvidet-trigger ved innvilget`() {
         Assertions.assertEquals(
             true,
-            VedtakBegrunnelseType.INNVILGET.periodeErOppyltForYtelseTypeGammel(
+            VedtakBegrunnelseType.INNVILGET.periodeErOppyltForYtelseType(
                 ytelseType = YtelseType.UTVIDET_BARNETRYGD,
                 ytelseTyperForPeriode = ytelseTyperUtvidetOgOrdinær,
-                andelerTilkjentYtelse = emptyList(),
-                fomForPeriode = LocalDate.now()
+                ytelserGjeldeneForSøkerForrigeMåned = emptyList(),
             )
         )
 
         Assertions.assertEquals(
             false,
-            VedtakBegrunnelseType.INNVILGET.periodeErOppyltForYtelseTypeGammel(
+            VedtakBegrunnelseType.INNVILGET.periodeErOppyltForYtelseType(
                 ytelseType = YtelseType.UTVIDET_BARNETRYGD,
                 ytelseTyperForPeriode = ytelseTyperOrdinær,
-                andelerTilkjentYtelse = emptyList(),
-                fomForPeriode = LocalDate.now()
+                ytelserGjeldeneForSøkerForrigeMåned = emptyList(),
             )
         )
     }
 
     @Test
     fun `Skal gi riktig svar for utvidet barnetrygd-trigger når VedtakBegrunnelseType er reduksjon`() {
-        val fom = LocalDate.now().førsteDagIInneværendeMåned()
-
-        val andelerTilkjentYtelseMedUtvidetBarnetrygdIkkeDagenFør = listOf(
-            lagAndelTilkjentYtelse(
-                fom = fom.minusMonths(5).toYearMonth(),
-                tom = fom.minusMonths(5).toYearMonth(),
-                ytelseType = YtelseType.UTVIDET_BARNETRYGD
-            )
-        )
-
-        val andelerTilkjentYtelseMedOrdinærYtelseDagenFør = listOf(
-            lagAndelTilkjentYtelse(
-                fom = fom.minusMonths(1).toYearMonth(),
-                tom = fom.minusMonths(1).toYearMonth(),
-                ytelseType = YtelseType.ORDINÆR_BARNETRYGD
-            )
-        )
-
-        val andelerTilkjentYtelseMedUtvidetBarnetrygdDagenFør = listOf(
-            lagAndelTilkjentYtelse(
-                fom = fom.minusMonths(1).toYearMonth(),
-                tom = fom.minusMonths(1).toYearMonth(),
-                ytelseType = YtelseType.UTVIDET_BARNETRYGD
-            )
-        )
-
         Assertions.assertEquals(
             true,
-            VedtakBegrunnelseType.REDUKSJON.periodeErOppyltForYtelseTypeGammel(
+            VedtakBegrunnelseType.REDUKSJON.periodeErOppyltForYtelseType(
                 ytelseType = YtelseType.UTVIDET_BARNETRYGD,
                 ytelseTyperForPeriode = ytelseTyperOrdinær,
-                andelerTilkjentYtelse = andelerTilkjentYtelseMedUtvidetBarnetrygdDagenFør,
-                fomForPeriode = fom
+                ytelserGjeldeneForSøkerForrigeMåned = listOf(YtelseType.UTVIDET_BARNETRYGD),
             )
         )
 
         Assertions.assertEquals(
             false,
-            VedtakBegrunnelseType.REDUKSJON.periodeErOppyltForYtelseTypeGammel(
+            VedtakBegrunnelseType.REDUKSJON.periodeErOppyltForYtelseType(
                 ytelseType = YtelseType.UTVIDET_BARNETRYGD,
                 ytelseTyperForPeriode = ytelseTyperUtvidetOgOrdinær,
-                andelerTilkjentYtelse = andelerTilkjentYtelseMedUtvidetBarnetrygdDagenFør,
-                fomForPeriode = fom
+                ytelserGjeldeneForSøkerForrigeMåned = listOf(YtelseType.UTVIDET_BARNETRYGD),
             )
         )
 
         Assertions.assertEquals(
             false,
-            VedtakBegrunnelseType.REDUKSJON.periodeErOppyltForYtelseTypeGammel(
+            VedtakBegrunnelseType.REDUKSJON.periodeErOppyltForYtelseType(
                 ytelseType = YtelseType.UTVIDET_BARNETRYGD,
                 ytelseTyperForPeriode = ytelseTyperOrdinær,
-                andelerTilkjentYtelse = andelerTilkjentYtelseMedOrdinærYtelseDagenFør,
-                fomForPeriode = fom
+                ytelserGjeldeneForSøkerForrigeMåned = listOf(YtelseType.ORDINÆR_BARNETRYGD),
             )
         )
 
         Assertions.assertEquals(
             false,
-            VedtakBegrunnelseType.REDUKSJON.periodeErOppyltForYtelseTypeGammel(
+            VedtakBegrunnelseType.REDUKSJON.periodeErOppyltForYtelseType(
                 ytelseType = YtelseType.UTVIDET_BARNETRYGD,
                 ytelseTyperForPeriode = ytelseTyperOrdinær,
-                andelerTilkjentYtelse = andelerTilkjentYtelseMedUtvidetBarnetrygdIkkeDagenFør,
-                fomForPeriode = fom
+                ytelserGjeldeneForSøkerForrigeMåned = listOf(),
             )
         )
     }
