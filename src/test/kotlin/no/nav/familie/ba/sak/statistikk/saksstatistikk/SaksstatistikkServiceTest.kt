@@ -13,7 +13,9 @@ import no.nav.familie.ba.sak.common.lagVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.common.tilfeldigSøker
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.tilAktør
+import no.nav.familie.ba.sak.dataGenerator.SettPåVent.lagSettPåVent
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.integrasjoner.journalføring.JournalføringService
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.DbJournalpost
@@ -25,8 +27,11 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
+import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
@@ -94,6 +99,12 @@ internal class SaksstatistikkServiceTest(
 
     @MockK
     private val vedtaksperiodeService: VedtaksperiodeService,
+
+    @MockK
+    private val featureToggleService: FeatureToggleService,
+
+    @MockK
+    private val settPåVentService: SettPåVentService,
 ) {
 
     private val sakstatistikkService = SaksstatistikkService(
@@ -107,6 +118,8 @@ internal class SaksstatistikkServiceTest(
         personopplysningerService,
         persongrunnlagService,
         vedtaksperiodeService,
+        featureToggleService,
+        settPåVentService,
     )
 
     @BeforeAll
@@ -122,6 +135,8 @@ internal class SaksstatistikkServiceTest(
             "4821",
             "NAV"
         )
+
+        every { settPåVentService.finnAktivSettPåVentPåBehandling(any()) } returns lagSettPåVent()
     }
 
     @AfterAll
@@ -227,7 +242,7 @@ internal class SaksstatistikkServiceTest(
 
         every { behandlingService.hent(any()) } returns behandling
         every { persongrunnlagService.hentSøker(any()) } returns tilfeldigSøker()
-        every { persongrunnlagService.hentBarna(any()) } returns listOf(
+        every { persongrunnlagService.hentBarna(any<Behandling>()) } returns listOf(
             tilfeldigPerson()
                 .copy(aktør = randomAktørId("01010000001"))
         )
@@ -257,6 +272,16 @@ internal class SaksstatistikkServiceTest(
         )
         every { journalføringService.hentJournalpost(any()) } returns jp
 
+        every { featureToggleService.isEnabled(any()) } returns true
+
+        val tidSattPåVent = LocalDate.now()
+        val frist = LocalDate.now().plusWeeks(3)
+        every { settPåVentService.finnAktivSettPåVentPåBehandling(any()) } returns lagSettPåVent(
+            tidSattPåVent = tidSattPåVent,
+            årsak = SettPåVentÅrsak.AVVENTER_DOKUMENTASJON,
+            frist = frist
+        )
+
         val behandlingDvh = sakstatistikkService.mapTilBehandlingDVH(2)
         println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(behandlingDvh))
 
@@ -276,6 +301,11 @@ internal class SaksstatistikkServiceTest(
         assertThat(behandlingDvh?.beslutter).isEqualTo("beslutterId")
         assertThat(behandlingDvh?.avsender).isEqualTo("familie-ba-sak")
         assertThat(behandlingDvh?.versjon).isNotEmpty
+        assertThat(behandlingDvh?.settPaaVent?.tidSattPaaVent)
+            .isEqualTo(tidSattPåVent.atStartOfDay(SaksstatistikkService.TIMEZONE))
+        assertThat(behandlingDvh?.settPaaVent?.aarsak).isEqualTo(SettPåVentÅrsak.AVVENTER_DOKUMENTASJON.name)
+        assertThat(behandlingDvh?.settPaaVent?.frist)
+            .isEqualTo(frist.atStartOfDay(SaksstatistikkService.TIMEZONE))
     }
 
     @Test
@@ -284,8 +314,8 @@ internal class SaksstatistikkServiceTest(
             Fagsak(status = FagsakStatus.OPPRETTET, aktør = tilAktør("12345678910"))
         }
 
-        every { personidentService.hentOgLagreAktør("12345678910") } returns Aktør("1234567891000")
-        every { personidentService.hentOgLagreAktør("12345678911") } returns Aktør("1234567891100")
+        every { personidentService.hentAktør("12345678910") } returns Aktør("1234567891000")
+        every { personidentService.hentAktør("12345678911") } returns Aktør("1234567891100")
         every { personopplysningerService.hentPersoninfoEnkel(tilAktør("12345678910")) } returns PersonInfo(
             fødselsdato = LocalDate.of(
                 2017,
@@ -326,8 +356,8 @@ internal class SaksstatistikkServiceTest(
             Fagsak(status = FagsakStatus.OPPRETTET, aktør = tilAktør("12345678910"))
         }
 
-        every { personidentService.hentOgLagreAktør("12345678910") } returns Aktør("1234567891000")
-        every { personidentService.hentOgLagreAktør("12345678911") } returns Aktør("1234567891100")
+        every { personidentService.hentAktør("12345678910") } returns Aktør("1234567891000")
+        every { personidentService.hentAktør("12345678911") } returns Aktør("1234567891100")
 
         every { personopplysningerService.hentPersoninfoEnkel(tilAktør("12345678910")) } returns PersonInfo(
             fødselsdato = LocalDate.of(
@@ -356,7 +386,7 @@ internal class SaksstatistikkServiceTest(
         every { fagsakService.hentPåFagsakId(any()) } answers {
             Fagsak(status = FagsakStatus.OPPRETTET, aktør = randomAktørId)
         }
-        every { personidentService.hentOgLagreAktør(any()) } returns randomAktørId
+        every { personidentService.hentAktør(any()) } returns randomAktørId
         every { personopplysningerService.hentLandkodeUtenlandskBostedsadresse(any()) } returns "SE"
 
         every { persongrunnlagService.hentAktiv(any()) } returns lagTestPersonopplysningGrunnlag(

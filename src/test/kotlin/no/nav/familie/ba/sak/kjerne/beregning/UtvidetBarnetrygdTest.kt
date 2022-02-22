@@ -1,11 +1,19 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
+import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
+import no.nav.familie.ba.sak.common.lagVilkårResultat
+import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.nesteMåned
+import no.nav.familie.ba.sak.common.randomAktørId
 import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -20,7 +28,11 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
+import org.junit.jupiter.api.assertThrows
+import java.math.BigDecimal
 import java.time.LocalDate
+import java.time.YearMonth
 
 internal class UtvidetBarnetrygdTest {
 
@@ -627,6 +639,68 @@ internal class UtvidetBarnetrygdTest {
 
         assertEquals(søkerOrdinær.ident, andelUtvidet2.aktør.aktivFødselsnummer())
         assertEquals(utvidetAndrePeriodeFom.plusMonths(1).toYearMonth(), andelUtvidet2.stønadFom)
+    }
+
+    @Test
+    fun `Skal kaste feil hvis fom og tom er satt i samme måned`() {
+        val utvidetVilkårResultat = lagVilkårResultat(vilkår = Vilkår.UTVIDET_BARNETRYGD, fom = YearMonth.of(2022, 2), tom = YearMonth.of(2022, 2))
+
+        assertThrows<FunksjonellFeil> {
+            utvidetVilkårResultat.tilDatoSegment(
+                utvidetVilkår = listOf(utvidetVilkårResultat),
+                søkerAktør = randomAktørId()
+            )
+        }
+    }
+
+    @Test
+    fun `Skal ikke kaste feil hvis fom og tom er i samme måned, men tom er siste dag i mnd og nytt utvidet-vilkår starter første dag i neste mnd`() {
+        val utvidetVilkårResultat = lagVilkårResultat(vilkårType = Vilkår.UTVIDET_BARNETRYGD, periodeFom = LocalDate.of(2022, 2, 1), periodeTom = LocalDate.of(2022, 2, 28))
+
+        assertDoesNotThrow {
+            utvidetVilkårResultat.tilDatoSegment(
+                utvidetVilkår = listOf(utvidetVilkårResultat, lagVilkårResultat(vilkårType = Vilkår.UTVIDET_BARNETRYGD, periodeFom = LocalDate.of(2022, 3, 1), periodeTom = null)),
+                søkerAktør = randomAktørId()
+            )
+        }
+    }
+
+    @Test
+    fun `Skal kaste feil hvis utvidet-andeler ikke overlapper med noen av barnas andeler`() {
+        val behandling = lagBehandling()
+        val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling = behandling)
+        val søkerAktør = randomAktørId()
+
+        val utvidetVilkår = lagVilkårResultat(vilkårType = Vilkår.UTVIDET_BARNETRYGD, periodeFom = LocalDate.of(2018, 2, 1), periodeTom = LocalDate.of(2019, 2, 28), personResultat = PersonResultat(aktør = søkerAktør, vilkårsvurdering = lagVilkårsvurdering(søkerAktør = søkerAktør, behandling = behandling, resultat = Resultat.OPPFYLT)))
+
+        val barnasAndeler = listOf(
+            lagAndelTilkjentYtelse(
+                fom = YearMonth.of(2021, 10),
+                tom = YearMonth.of(2022, 2),
+                person = tilfeldigPerson(personType = PersonType.BARN),
+                prosent = BigDecimal(100),
+                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                tilkjentYtelse = tilkjentYtelse
+            ),
+            lagAndelTilkjentYtelse(
+                fom = YearMonth.of(2021, 10),
+                tom = YearMonth.of(2022, 1),
+                person = tilfeldigPerson(personType = PersonType.BARN),
+                prosent = BigDecimal(100),
+                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                tilkjentYtelse = tilkjentYtelse
+            )
+        )
+
+        assertThrows<FunksjonellFeil> {
+            UtvidetBarnetrygdGenerator(
+                behandlingId = behandling.id,
+                tilkjentYtelse = tilkjentYtelse
+            ).lagUtvidetBarnetrygdAndeler(
+                utvidetVilkår = listOf(utvidetVilkår),
+                andelerBarna = barnasAndeler
+            )
+        }
     }
 
     private data class OppfyltPeriode(

@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Utbetalingsperiode
+import java.time.LocalDate
 import java.time.LocalDateTime
 
 data class RestUtvidetBehandling(
@@ -35,4 +36,5 @@ data class RestUtvidetBehandling(
     val vedtak: RestVedtak?,
     val totrinnskontroll: RestTotrinnskontroll?,
     val aktivSettPåVent: RestSettPåVent?,
+    val migreringsdato: LocalDate?
 )

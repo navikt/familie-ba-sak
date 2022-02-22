@@ -6,6 +6,7 @@ import io.mockk.verify
 import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.config.AbstractMockkSpringRunner
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -48,11 +49,20 @@ class KonsistensavstemmingSchedulerTest : AbstractMockkSpringRunner() {
     @Autowired
     private lateinit var databaseCleanupService: DatabaseCleanupService
 
+    @Autowired
+    private lateinit var featureToggleService: FeatureToggleService
+
     @BeforeEach
     fun setUp() {
         databaseCleanupService.truncate()
         konsistensavstemmingScheduler =
-            KonsistensavstemmingScheduler(batchService, behandlingService, fagsakService, taskRepository)
+            KonsistensavstemmingScheduler(
+                batchService,
+                behandlingService,
+                fagsakService,
+                taskRepository,
+                featureToggleService
+            )
         taskRepository = spyk(taskRepository)
     }
 

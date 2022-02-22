@@ -1,9 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.brev.domene
 
 import no.nav.familie.ba.sak.common.NullablePeriode
-import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.MinimertUregistrertBarn
-import no.nav.familie.ba.sak.kjerne.brev.totaltUtbetalt
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Begrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.FritekstBegrunnelse
@@ -34,7 +32,7 @@ data class BrevPeriodeGrunnlagMedPersoner(
                     personerIPersongrunnlag = restBehandlingsgrunnlagForBrev.personerPåBehandling,
                     brevMålform = brevMålform,
                     uregistrerteBarn = uregistrerteBarn,
-                    beløp = Utils.formaterBeløp(this.beløpUtbetaltFor(it.personIdenter)),
+                    minimerteUtbetalingsperiodeDetaljer = this.minimerteUtbetalingsperiodeDetaljer,
                 )
             }
 
@@ -42,9 +40,4 @@ data class BrevPeriodeGrunnlagMedPersoner(
 
         return begrunnelser + fritekster
     }
-
-    private fun beløpUtbetaltFor(personIdenter: List<String>) =
-        this.minimerteUtbetalingsperiodeDetaljer
-            .filter { utbetalingsperiodeDetalj -> personIdenter.contains(utbetalingsperiodeDetalj.person.personIdent) }
-            .totaltUtbetalt()
 }

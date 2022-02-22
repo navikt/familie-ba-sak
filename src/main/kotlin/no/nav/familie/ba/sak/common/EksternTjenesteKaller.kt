@@ -12,6 +12,23 @@ inline fun <reified Data> kallEksternTjeneste(
     tjeneste: String,
     uri: URI,
     formål: String,
+    eksterntKall: () -> Data,
+): Data {
+    loggEksternKall(tjeneste, uri, formål)
+
+    return try {
+        eksterntKall().also {
+            logger.info("${lagEksternKallPreMelding(tjeneste, uri)} Kall ok")
+        }
+    } catch (exception: Exception) {
+        throw handleException(exception, tjeneste, uri)
+    }
+}
+
+inline fun <reified Data> kallEksternTjenesteRessurs(
+    tjeneste: String,
+    uri: URI,
+    formål: String,
     eksterntKall: () -> Ressurs<Data>,
 ): Data {
     loggEksternKall(tjeneste, uri, formål)
@@ -60,7 +77,15 @@ fun handleException(
     tjeneste: String,
     uri: URI,
 ): Exception {
-    logger.info("${lagEksternKallPreMelding(tjeneste, uri)} Kall feilet: ${exception.message}")
     return if (exception is HttpClientErrorException.Forbidden) exception
-    else IntegrasjonException("Kall mot $tjeneste feilet: ${exception.message}", exception)
+    else IntegrasjonException(
+        msg = "${
+        lagEksternKallPreMelding(
+            tjeneste,
+            uri
+        )
+        } Kall mot $tjeneste feilet: ${exception.message}",
+        uri = uri,
+        throwable = exception
+    )
 }

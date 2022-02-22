@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
 import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
@@ -32,7 +33,8 @@ class BeslutteVedtak(
     private val taskRepository: TaskRepositoryWrapper,
     private val loggService: LoggService,
     private val vilkårsvurderingService: VilkårsvurderingService,
-    private val featureToggleService: FeatureToggleService
+    private val featureToggleService: FeatureToggleService,
+    private val tilkjentYtelseValideringService: TilkjentYtelseValideringService
 ) : BehandlingSteg<RestBeslutningPåVedtak> {
 
     override fun utførStegOgAngiNeste(
@@ -40,9 +42,9 @@ class BeslutteVedtak(
         data: RestBeslutningPåVedtak
     ): StegType {
         if (behandling.status == BehandlingStatus.IVERKSETTER_VEDTAK) {
-            error("Behandlingen er allerede sendt til oppdrag og venter på kvittering")
+            throw FunksjonellFeil("Behandlingen er allerede sendt til oppdrag og venter på kvittering")
         } else if (behandling.status == BehandlingStatus.AVSLUTTET) {
-            error("Behandlingen er allerede avsluttet")
+            throw FunksjonellFeil("Behandlingen er allerede avsluttet")
         } else if (behandling.opprettetÅrsak == BehandlingÅrsak.KORREKSJON_VEDTAKSBREV &&
             !featureToggleService.isEnabled(FeatureToggleConfig.KAN_MANUELT_KORRIGERE_MED_VEDTAKSBREV)
         )
@@ -106,6 +108,10 @@ class BeslutteVedtak(
             taskRepository.save(behandleUnderkjentVedtakTask)
             StegType.SEND_TIL_BESLUTTER
         }
+    }
+
+    override fun postValiderSteg(behandling: Behandling) {
+        tilkjentYtelseValideringService.validerAtIngenUtbetalingerOverstiger100Prosent(behandling)
     }
 
     override fun stegType(): StegType {

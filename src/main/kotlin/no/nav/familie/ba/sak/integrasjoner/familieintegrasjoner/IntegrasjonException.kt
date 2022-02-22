@@ -17,14 +17,8 @@ class IntegrasjonException(
     init {
         val message = if (throwable is RestClientResponseException) throwable.responseBodyAsString else ""
 
-        secureLogger.info(
-            "Ukjent feil ved integrasjon mot {}. ident={} {} {}",
-            uri,
-            ident,
-            message,
-            throwable
-        )
-        logger.warn("Ukjent feil ved integrasjon mot '{}'.", uri)
+        secureLogger.info("Ukjent feil ved integrasjon mot $uri. ident=$ident $message $throwable")
+        logger.warn("Ukjent feil ved integrasjon mot '$uri'.")
     }
 
     companion object {

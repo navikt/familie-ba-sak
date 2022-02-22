@@ -9,9 +9,11 @@ import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.task.BehandleFødselshendelseTask
 import no.nav.familie.ba.sak.task.SatsendringTask
 import no.nav.familie.ba.sak.task.StartSatsendringForAlleBehandlingerTask
+import no.nav.familie.ba.sak.task.TaBehandlingerEtterVentefristAvVentTask
 import no.nav.familie.ba.sak.task.dto.BehandleFødselshendelseTaskDTO
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.prosessering.domene.Task
 import no.nav.security.token.support.core.api.Unprotected
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
@@ -68,7 +70,7 @@ class TestVerktøyController(
     @Unprotected
     fun mottaHendelseOmVedtakOmOvergangsstønad(@RequestBody personIdent: PersonIdent): ResponseEntity<Ressurs<String>> {
         return if (envService.erPreprod() || envService.erDev()) {
-            val aktør = personidentService.hentOgLagreAktør(personIdent.ident)
+            val aktør = personidentService.hentAktør(personIdent.ident)
             val melding = vedtakOmOvergangsstønadService.håndterVedtakOmOvergangsstønad(aktør = aktør)
             ResponseEntity.ok(Ressurs.success(melding))
         } else {
@@ -83,6 +85,19 @@ class TestVerktøyController(
             val task = BehandleFødselshendelseTask.opprettTask(BehandleFødselshendelseTaskDTO(nyBehandlingHendelse))
             taskRepository.save(task)
             ResponseEntity.ok(Ressurs.success("Task for behandling av fødselshendelse på ${nyBehandlingHendelse.morsIdent} er opprettet"))
+        } else {
+            ResponseEntity.ok(Ressurs.success(MELDING))
+        }
+    }
+
+    @GetMapping(path = ["/ta-behandlinger-etter-ventefrist-av-vent"])
+    @Unprotected
+    fun taBehandlingerEtterVentefristAvVent(): ResponseEntity<Ressurs<String>> {
+        return if (envService.erPreprod() || envService.erDev()) {
+            val taBehandlingerEtterVentefristAvVentTask =
+                Task(type = TaBehandlingerEtterVentefristAvVentTask.TASK_STEP_TYPE, payload = "")
+            taskRepository.save(taBehandlingerEtterVentefristAvVentTask)
+            ResponseEntity.ok(Ressurs.success("Task for å ta behandlinger av vent etter at fristen har gått ut er opprettet"))
         } else {
             ResponseEntity.ok(Ressurs.success(MELDING))
         }

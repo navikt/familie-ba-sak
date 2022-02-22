@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.Utils.avrundetHeltallAvProsent
 import no.nav.familie.ba.sak.common.erDagenFør
@@ -41,12 +42,7 @@ data class UtvidetBarnetrygdGenerator(
         val datoSegmenter = utvidetVilkår
             .filter { it.resultat == Resultat.OPPFYLT }
             .map {
-                if (it.periodeFom == null) throw Feil("Fom må være satt på søkers periode ved utvida barnetrygd")
-                LocalDateSegment(
-                    it.periodeFom!!.førsteDagINesteMåned(),
-                    finnTilOgMedDatoForUtvidetSegment(tilOgMed = it.periodeTom, vilkårResultater = utvidetVilkår),
-                    listOf(PeriodeData(aktør = søkerAktør, rolle = PersonType.SØKER))
-                )
+                it.tilDatoSegment(utvidetVilkår, søkerAktør)
             }
 
         val utvidaTidslinje = LocalDateTimeline(datoSegmenter)
@@ -100,13 +96,20 @@ data class UtvidetBarnetrygdGenerator(
                 )
             }
 
+        if (utvidetAndeler.isEmpty()) {
+            throw FunksjonellFeil(
+                "Du har lagt til utvidet barnetrygd for en periode der det ikke er rett til barnetrygd for " +
+                    "noen av barna. Hvis du trenger hjelp, ta kontakt med team familie."
+            )
+        }
+
         return slåSammenPerioderSomIkkeSkulleHaVærtSplittet(
             andelerTilkjentYtelse = utvidetAndeler.toMutableList(),
             skalAndelerSlåsSammen = ::skalUtvidetAndelerSlåsSammen
         )
     }
 
-    private data class PeriodeData(val aktør: Aktør, val rolle: PersonType, val prosent: BigDecimal = BigDecimal.ZERO)
+    data class PeriodeData(val aktør: Aktør, val rolle: PersonType, val prosent: BigDecimal = BigDecimal.ZERO)
 
     private fun skalUtvidetAndelerSlåsSammen(
         førsteAndel: AndelTilkjentYtelse,
@@ -133,23 +136,40 @@ data class UtvidetBarnetrygdGenerator(
             }
         )
     }
+}
 
-    private fun finnTilOgMedDatoForUtvidetSegment(
-        tilOgMed: LocalDate?,
-        vilkårResultater: List<VilkårResultat>
-    ): LocalDate {
-        // LocalDateTimeline krasjer i isTimelineOutsideInterval funksjonen dersom vi sender med TIDENES_ENDE,
-        // så bruker tidenes ende minus én dag.
-        if (tilOgMed == null) return TIDENES_ENDE.minusDays(1)
-        val utvidetSkalVidereføresEnMndEkstra = vilkårResultater.any { vilkårResultat ->
-            erBack2BackIMånedsskifte(
-                tilOgMed = tilOgMed,
-                fraOgMed = vilkårResultat.periodeFom
-            )
-        }
+fun VilkårResultat.tilDatoSegment(
+    utvidetVilkår: List<VilkårResultat>,
+    søkerAktør: Aktør
+): LocalDateSegment<List<UtvidetBarnetrygdGenerator.PeriodeData>> {
+    if (this.periodeFom == null) throw Feil("Fom må være satt på søkers periode ved utvida barnetrygd")
+    val fraOgMedDato = this.periodeFom!!.førsteDagINesteMåned()
+    val tilOgMedDato = finnTilOgMedDatoForUtvidetSegment(tilOgMed = this.periodeTom, vilkårResultater = utvidetVilkår)
+    if (tilOgMedDato.toYearMonth() == fraOgMedDato.toYearMonth()
+        .minusMonths(1)
+    ) throw FunksjonellFeil("Du kan ikke legge inn fom. og tom. innenfor samme kalendermåned.")
+    return LocalDateSegment(
+        fraOgMedDato,
+        tilOgMedDato,
+        listOf(UtvidetBarnetrygdGenerator.PeriodeData(aktør = søkerAktør, rolle = PersonType.SØKER))
+    )
+}
 
-        return if (utvidetSkalVidereføresEnMndEkstra) {
-            tilOgMed.plusMonths(1).sisteDagIMåned()
-        } else tilOgMed.sisteDagIMåned()
+private fun finnTilOgMedDatoForUtvidetSegment(
+    tilOgMed: LocalDate?,
+    vilkårResultater: List<VilkårResultat>
+): LocalDate {
+    // LocalDateTimeline krasjer i isTimelineOutsideInterval funksjonen dersom vi sender med TIDENES_ENDE,
+    // så bruker tidenes ende minus én dag.
+    if (tilOgMed == null) return TIDENES_ENDE.minusDays(1)
+    val utvidetSkalVidereføresEnMndEkstra = vilkårResultater.any { vilkårResultat ->
+        erBack2BackIMånedsskifte(
+            tilOgMed = tilOgMed,
+            fraOgMed = vilkårResultat.periodeFom
+        )
     }
+
+    return if (utvidetSkalVidereføresEnMndEkstra) {
+        tilOgMed.plusMonths(1).sisteDagIMåned()
+    } else tilOgMed.sisteDagIMåned()
 }

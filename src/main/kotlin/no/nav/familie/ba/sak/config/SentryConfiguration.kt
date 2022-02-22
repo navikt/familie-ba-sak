@@ -5,6 +5,7 @@ import io.sentry.SentryOptions
 import io.sentry.protocol.User
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import org.slf4j.LoggerFactory
+import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.NestedExceptionUtils
@@ -32,6 +33,8 @@ class SentryConfiguration(
 
                 event.setTag("metodeSomFeier", metodeSomFeiler)
                 event.setTag("bruker", SikkerhetContext.hentSaksbehandlerEpost())
+                event.setTag("kibanalenke", hentKibanalenke(MDC.get("callId")))
+
                 event.fingerprints = listOf(
                     "{{ default }}",
                     event.transaction,
@@ -42,6 +45,9 @@ class SentryConfiguration(
             }
         }
     }
+
+    private fun hentKibanalenke(callId: String) =
+        "https://logs.adeo.no/app/discover#/?_g=(time:(from:now-1M,to:now))&_a=(filters:!((query:(match_phrase:(x_callId:'$callId')))))"
 
     fun finnMetodeSomFeiler(e: Throwable?): String {
         val firstElement = e?.stackTrace?.firstOrNull {

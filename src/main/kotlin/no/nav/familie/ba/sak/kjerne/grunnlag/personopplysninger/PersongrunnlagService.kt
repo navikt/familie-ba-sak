@@ -56,21 +56,22 @@ class PersongrunnlagService(
     }
 
     fun hentSøker(behandlingId: Long): Person? {
-        return personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId)!!.personer
-            .find { person -> person.type == PersonType.SØKER }
+        return personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId)!!.søker
     }
 
     fun hentBarna(behandling: Behandling): List<Person> {
-        return personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)!!.personer
-            .filter { person -> person.type == PersonType.BARN }
+        return hentBarna(behandling.id)
     }
 
+    fun hentBarna(behandlingId: Long): List<Person> = personopplysningGrunnlagRepository
+        .findByBehandlingAndAktiv(behandlingId)!!.barna
+
     fun hentPersonerPåBehandling(identer: List<String>, behandling: Behandling): List<Person> {
-        val aktørIder = personidentService.hentOgLagreAktørIder(identer)
+        val aktørIder = personidentService.hentAktørIder(identer)
 
         val grunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
             ?: throw Feil("Finner ikke personopplysningsgrunnlag på behandling ${behandling.id}")
-        return grunnlag.personer.filter { person -> aktørIder.contains(person.aktør) }
+        return grunnlag.søkerOgBarn.filter { person -> aktørIder.contains(person.aktør) }
     }
 
     fun hentAktiv(behandlingId: Long): PersonopplysningGrunnlag? {
@@ -293,6 +294,8 @@ class PersongrunnlagService(
             if (it == null) {
                 logger.warn("Finner flere eller ingen fedre/medmødre på barna som behandles i fødselshendelse. Se securelogger for mer informasjon.")
                 secureLogger.info("Finner flere eller ingen fedre/medmødre på barna som behandles i fødselshendelse: $barnasFarEllerMedmorAktører")
+            } else {
+                personidentService.hentOgLagreAktør(ident = it.aktørId, lagre = true)
             }
         }
     }

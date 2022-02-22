@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
 import no.nav.familie.ba.sak.common.kjørStegprosessForRevurderingÅrligKontroll
 import no.nav.familie.ba.sak.common.lagBehandling
@@ -153,7 +154,7 @@ class StegServiceTest(
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
         assertEquals(FØRSTE_STEG, behandling.steg)
 
-        assertThrows<IllegalStateException> {
+        assertThrows<FunksjonellFeil> {
             stegService.håndterVilkårsvurdering(behandling)
         }
     }
@@ -172,7 +173,7 @@ class StegServiceTest(
 
         behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BEHANDLING_AVSLUTTET))
         behandling.status = BehandlingStatus.AVSLUTTET
-        val feil = assertThrows<IllegalStateException> {
+        val feil = assertThrows<FunksjonellFeil> {
             stegService.håndterSendTilBeslutter(behandling, "1234")
         }
         assertEquals(
@@ -195,7 +196,7 @@ class StegServiceTest(
 
         behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BESLUTTE_VEDTAK))
         behandling.status = BehandlingStatus.FATTER_VEDTAK
-        assertThrows<IllegalStateException> {
+        assertThrows<FunksjonellFeil> {
             stegService.håndterSendTilBeslutter(behandling, "1234")
         }
     }
@@ -210,7 +211,7 @@ class StegServiceTest(
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
         behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BESLUTTE_VEDTAK))
         behandling.status = BehandlingStatus.IVERKSETTER_VEDTAK
-        assertThrows<IllegalStateException> {
+        assertThrows<FunksjonellFeil> {
             stegService.håndterBeslutningForVedtak(
                 behandling,
                 RestBeslutningPåVedtak(beslutning = Beslutning.GODKJENT, begrunnelse = null)
@@ -223,7 +224,7 @@ class StegServiceTest(
         val søkerFnr = randomFnr()
         val barnFnr = randomFnr()
 
-        val søkerAktørId = personidentService.hentOgLagreAktør(søkerFnr)
+        val søkerAktørId = personidentService.hentAktør(søkerFnr)
 
         mockHentPersoninfoForMedIdenter(mockPersonopplysningerService, søkerFnr, barnFnr)
 
@@ -284,7 +285,7 @@ class StegServiceTest(
 
         val behandlingEtterSendTilBeslutter = behandlingService.hent(behandlingId = vilkårsvurdertBehandling.id)
 
-        assertThrows<IllegalStateException> {
+        assertThrows<FunksjonellFeil> {
             stegService.håndterHenleggBehandling(
                 behandlingEtterSendTilBeslutter,
                 RestHenleggBehandlingInfo(
@@ -313,6 +314,7 @@ class StegServiceTest(
             vedtaksperiodeService = vedtaksperiodeService,
         )
 
+        val nyMigreringsdato = LocalDate.now().minusMonths(6)
         fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
         val behandling = stegService.håndterNyBehandling(
             NyBehandling(
@@ -322,7 +324,7 @@ class StegServiceTest(
                 behandlingÅrsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
                 søkersIdent = søkerFnr,
                 barnasIdenter = barnasIdenter,
-                nyMigreringsdato = LocalDate.now().minusMonths(6)
+                nyMigreringsdato = nyMigreringsdato
             )
         )
         assertEquals(StegType.VILKÅRSVURDERING, behandling.steg)
@@ -332,6 +334,7 @@ class StegServiceTest(
                     it.behandlingStegStatus == BehandlingStegStatus.UTFØRT
             }
         }
+        assertMigreringsdato(nyMigreringsdato, behandling)
         assertNotNull(vilkårsvurderingService.hentAktivForBehandling(behandling.id))
 
         val behandlingEtterVilkårsvurdering = stegService.håndterVilkårsvurdering(behandling)
@@ -383,6 +386,7 @@ class StegServiceTest(
         val barnasIdenter = listOf(barnFnr)
 
         fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
+        val migreringsdato = LocalDate.now().minusMonths(6)
         val behandling = stegService.håndterNyBehandling(
             NyBehandling(
                 kategori = BehandlingKategori.NASJONAL,
@@ -391,7 +395,7 @@ class StegServiceTest(
                 behandlingÅrsak = BehandlingÅrsak.HELMANUELL_MIGRERING,
                 søkersIdent = søkerFnr,
                 barnasIdenter = barnasIdenter,
-                nyMigreringsdato = LocalDate.now().minusMonths(6)
+                nyMigreringsdato = migreringsdato
             )
         )
         assertEquals(StegType.VILKÅRSVURDERING, behandling.steg)
@@ -401,6 +405,7 @@ class StegServiceTest(
                     it.behandlingStegStatus == BehandlingStegStatus.UTFØRT
             }
         }
+        assertMigreringsdato(migreringsdato, behandling)
         assertNotNull(vilkårsvurderingService.hentAktivForBehandling(behandling.id))
         val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandling.id)!!
         val barnPersonResultat =
@@ -469,5 +474,9 @@ class StegServiceTest(
             stegService = stegService,
             vedtaksperiodeService = vedtaksperiodeService,
         )
+    }
+
+    private fun assertMigreringsdato(migreringsdato: LocalDate, behandling: Behandling) {
+        assertEquals(migreringsdato, behandlingService.hentMigreringsdatoIBehandling(behandling.id))
     }
 }

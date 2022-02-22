@@ -144,6 +144,8 @@ class IntegrasjonClientMock {
             every { mockIntegrasjonClient.hentLand(any()) } returns "Testland"
 
             every { mockIntegrasjonClient.hentAlleEØSLand() } returns hentKodeverkLand()
+
+            every { mockIntegrasjonClient.oppdaterOppgave(any(), any()) } just runs
         }
 
         fun clearMockFamilieIntegrasjonerTilgangskontrollClient(mockFamilieIntegrasjonerTilgangskontrollClient: FamilieIntegrasjonerTilgangskontrollClient) {
@@ -152,20 +154,6 @@ class IntegrasjonClientMock {
             every {
                 mockFamilieIntegrasjonerTilgangskontrollClient.hentMaskertPersonInfoVedManglendeTilgang(any())
             } returns null
-
-            val idSlotPersonMedRelasjoner = slot<String>()
-            every {
-                mockFamilieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersonMedRelasjoner(
-                    capture(
-                        idSlotPersonMedRelasjoner
-                    )
-                )
-            } answers {
-                if (idSlotPersonMedRelasjoner.captured.isNotEmpty() && idSlotPersonMedRelasjoner.captured == BARN_DET_IKKE_GIS_TILGANG_TIL_FNR)
-                    Tilgang(false, null)
-                else
-                    Tilgang(true, null)
-            }
 
             val idSlot = slot<List<String>>()
             every {

@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.domene.RestTilbakekrevingsbehandling
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Utbetalingsperiode
+import java.time.LocalDate
 import java.time.LocalDateTime
 
 open class RestBaseFagsak(
@@ -68,18 +69,20 @@ data class RestMinimalFagsak(
     override val gjeldendeUtbetalingsperioder: List<Utbetalingsperiode>,
     val behandlinger: List<RestVisningBehandling>,
     val tilbakekrevingsbehandlinger: List<RestTilbakekrevingsbehandling>,
+    val migreringsdato: LocalDate? = null
 ) : RestBaseFagsak(
     opprettetTidspunkt = opprettetTidspunkt,
     id = id,
     søkerFødselsnummer = søkerFødselsnummer,
     status = status,
     underBehandling = underBehandling,
-    gjeldendeUtbetalingsperioder = gjeldendeUtbetalingsperioder
+    gjeldendeUtbetalingsperioder = gjeldendeUtbetalingsperioder,
 )
 
 fun RestBaseFagsak.tilRestMinimalFagsak(
     restVisningBehandlinger: List<RestVisningBehandling>,
-    tilbakekrevingsbehandlinger: List<RestTilbakekrevingsbehandling>
+    tilbakekrevingsbehandlinger: List<RestTilbakekrevingsbehandling>,
+    migreringsdato: LocalDate?
 ) = RestMinimalFagsak(
     opprettetTidspunkt = this.opprettetTidspunkt,
     id = this.id,
@@ -89,4 +92,5 @@ fun RestBaseFagsak.tilRestMinimalFagsak(
     gjeldendeUtbetalingsperioder = this.gjeldendeUtbetalingsperioder,
     behandlinger = restVisningBehandlinger,
     tilbakekrevingsbehandlinger = tilbakekrevingsbehandlinger,
+    migreringsdato = migreringsdato
 )

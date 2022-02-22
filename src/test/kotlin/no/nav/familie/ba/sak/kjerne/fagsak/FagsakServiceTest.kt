@@ -97,12 +97,12 @@ class FagsakServiceTest(
         val barn2Fnr = randomFnr()
         val barn3Fnr = randomFnr()
 
-        val søker1Aktør = personidentService.hentOgLagreAktør(søker1Fnr)
-        val søker2Aktør = personidentService.hentOgLagreAktør(søker2Fnr)
-        val søker3Aktør = personidentService.hentOgLagreAktør(søker3Fnr)
-        val barn1Aktør = personidentService.hentOgLagreAktør(barn1Fnr)
-        val barn2Aktør = personidentService.hentOgLagreAktør(barn2Fnr)
-        val barn3Aktør = personidentService.hentOgLagreAktør(barn3Fnr)
+        val søker1Aktør = personidentService.hentAktør(søker1Fnr)
+        val søker2Aktør = personidentService.hentAktør(søker2Fnr)
+        val søker3Aktør = personidentService.hentAktør(søker3Fnr)
+        val barn1Aktør = personidentService.hentAktør(barn1Fnr)
+        val barn2Aktør = personidentService.hentAktør(barn2Fnr)
+        val barn3Aktør = personidentService.hentAktør(barn3Fnr)
 
         every {
             mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(eq(barn1Aktør))

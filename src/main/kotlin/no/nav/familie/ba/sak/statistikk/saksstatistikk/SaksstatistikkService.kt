@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.statistikk.saksstatistikk
 
 import no.nav.familie.ba.sak.common.Utils.hentPropertyFraMaven
+import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.SETT_PÅ_VENT
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.journalføring.JournalføringService
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.DbJournalpostType
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.JournalføringRepository
@@ -12,6 +14,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat.HENLAGT
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat.HENLAGT_SØKNAD_TRUKKET
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -25,6 +28,7 @@ import no.nav.familie.eksterne.kontrakter.saksstatistikk.AktørDVH
 import no.nav.familie.eksterne.kontrakter.saksstatistikk.BehandlingDVH
 import no.nav.familie.eksterne.kontrakter.saksstatistikk.ResultatBegrunnelseDVH
 import no.nav.familie.eksterne.kontrakter.saksstatistikk.SakDVH
+import no.nav.familie.eksterne.kontrakter.saksstatistikk.SettPåVent
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.ZoneId
@@ -43,6 +47,8 @@ class SaksstatistikkService(
     private val personopplysningerService: PersonopplysningerService,
     private val persongrunnlagService: PersongrunnlagService,
     private val vedtaksperiodeService: VedtaksperiodeService,
+    private val featureToggleService: FeatureToggleService,
+    private val settPåVentService: SettPåVentService,
 ) {
 
     fun mapTilBehandlingDVH(behandlingId: Long): BehandlingDVH? {
@@ -71,6 +77,10 @@ class SaksstatistikkService(
         val totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(behandlingId)
 
         val now = ZonedDateTime.now()
+        val settPaaVentDVH: SettPåVent? =
+            if (featureToggleService.isEnabled(SETT_PÅ_VENT))
+                hentSettPåVentDVH(behandlingId)
+            else null
         return BehandlingDVH(
             funksjonellTid = now,
             tekniskTid = now,
@@ -103,7 +113,17 @@ class SaksstatistikkService(
             behandlingOpprettetType = "saksbehandlerId",
             behandlingOpprettetTypeBeskrivelse = "saksbehandlerId. VL ved automatisk behandling",
             beslutter = totrinnskontroll?.beslutterId,
-            saksbehandler = totrinnskontroll?.saksbehandlerId
+            saksbehandler = totrinnskontroll?.saksbehandlerId,
+            settPaaVent = settPaaVentDVH,
+        )
+    }
+
+    private fun hentSettPåVentDVH(behandlingId: Long): SettPåVent? {
+        val settPåVent = settPåVentService.finnAktivSettPåVentPåBehandling(behandlingId) ?: return null
+        return SettPåVent(
+            frist = settPåVent.frist.atStartOfDay(TIMEZONE),
+            tidSattPaaVent = settPåVent.tidSattPåVent.atStartOfDay(TIMEZONE),
+            aarsak = settPåVent.årsak.name
         )
     }
 
@@ -114,7 +134,7 @@ class SaksstatistikkService(
         var landkodeSøker: String = PersonopplysningerService.UKJENT_LANDKODE
 
         val deltagere = if (aktivBehandling != null) {
-            val personer = persongrunnlagService.hentAktiv(behandlingId = aktivBehandling.id)?.personer ?: emptySet()
+            val personer = persongrunnlagService.hentAktiv(behandlingId = aktivBehandling.id)?.søkerOgBarn ?: emptySet()
             personer.map {
                 if (it.type == PersonType.SØKER) {
                     landkodeSøker = hentLandkode(it)
