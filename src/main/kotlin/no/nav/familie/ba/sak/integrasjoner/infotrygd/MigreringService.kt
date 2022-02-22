@@ -100,8 +100,8 @@ class MigreringService(
 
             val barnasIdenter = finnBarnMedLøpendeStønad(løpendeSak)
 
-            val personAktør = personidentService.hentAktør(personIdent)
-            val barnasAktør = personidentService.hentAktørIder(barnasIdenter)
+            val personAktør = personidentService.hentOgLagreAktør(personIdent, true)
+            val barnasAktør = personidentService.hentOgLagreAktørIder(barnasIdenter, true)
 
             validerStøttetGradering(personAktør) // Midlertidig skrudd av støtte for kode 6 inntil det kan behandles
 
@@ -396,7 +396,7 @@ enum class MigreringsfeilType(val beskrivelse: String) {
     IDENT_IKKE_LENGER_AKTIV("Ident ikke lenger aktiv"),
     IKKE_GYLDIG_KJØREDATO("Ikke gyldig kjøredato"),
     IKKE_STØTTET_GRADERING("Personen har ikke støttet gradering"),
-    IKKE_STØTTET_SAKSTYPE("Kan kun migrere ordinære saker (OR, OS)"),
+    IKKE_STØTTET_SAKSTYPE("Kan kun migrere ordinære(OR OS) og utvidet(UT EF) saker"),
     INGEN_BARN_MED_LØPENDE_STØNAD_I_INFOTRYGD("Fant ingen barn med løpende stønad på sak"),
     INGEN_LØPENDE_SAK_INFOTRYGD("Personen har ikke løpende sak i infotrygd"),
     IVERKSETT_BEHANDLING_UTEN_VEDTAK("Fant ikke aktivt vedtak på behandling"),
