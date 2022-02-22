@@ -140,12 +140,13 @@ fun hentGyldigeBegrunnelserForVedtaksperiode(
     erFørsteVedtaksperiodePåFagsak: Boolean,
     ytelserForSøkerForrigeMåned: List<YtelseType>,
     utvidetScenarioForEndringsperiode: UtvidetScenarioForEndringsperiode,
+    erIngenOverlappVedtaksperiodeToggelPå: Boolean,
 ): List<VedtakBegrunnelseSpesifikasjon> {
     val tillateBegrunnelserForVedtakstype = VedtakBegrunnelseSpesifikasjon.values()
         .filter {
             minimertVedtaksperiode
                 .type
-                .tillatteBegrunnelsestyper
+                .tillatteBegrunnelsestyper(erIngenOverlappVedtaksperiodeToggelPå)
                 .contains(it.vedtakBegrunnelseType)
         }
 
@@ -166,7 +167,8 @@ fun hentGyldigeBegrunnelserForVedtaksperiode(
                                 sanityBegrunnelser = sanityBegrunnelser,
                                 erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
                                 ytelserForSøkerForrigeMåned = ytelserForSøkerForrigeMåned,
-                                utvidetScenarioForEndringsperiode = utvidetScenarioForEndringsperiode
+                                utvidetScenarioForEndringsperiode = utvidetScenarioForEndringsperiode,
+                                erIngenOverlappVedtaksperiodeToggelPå = erIngenOverlappVedtaksperiodeToggelPå,
                             )
                         ) {
                             acc.add(standardBegrunnelse)
