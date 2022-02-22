@@ -11,8 +11,6 @@ import no.nav.familie.ba.sak.kjerne.steg.FØRSTE_STEG
 import no.nav.familie.ba.sak.kjerne.steg.SISTE_STEG
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
-import no.nav.familie.kontrakter.felles.Behandlingstema
-import no.nav.familie.kontrakter.felles.oppgave.Behandlingstype
 import org.hibernate.annotations.SortComparator
 import java.time.LocalDateTime
 import javax.persistence.CascadeType
@@ -30,6 +28,8 @@ import javax.persistence.ManyToOne
 import javax.persistence.OneToMany
 import javax.persistence.SequenceGenerator
 import javax.persistence.Table
+import no.nav.familie.kontrakter.felles.Behandlingstema as OppgaveBehandlingTema
+import no.nav.familie.kontrakter.felles.oppgave.Behandlingstype as OppgaveBehandlingType
 
 @EntityListeners(RollestyringMotDatabase::class)
 @Entity(name = "Behandling")
@@ -361,10 +361,10 @@ enum class BehandlingKategori(val visningsnavn: String) {
     EØS("EØS"),
     NASJONAL("Nasjonal");
 
-    fun tilBehandlingstype(): Behandlingstype {
+    fun tilOppgavebehandlingType(): OppgaveBehandlingType {
         return when (this) {
-            EØS -> Behandlingstype.EØS
-            NASJONAL -> Behandlingstype.NASJONAL
+            EØS -> OppgaveBehandlingType.EØS
+            NASJONAL -> OppgaveBehandlingType.NASJONAL
         }
     }
 }
@@ -373,10 +373,10 @@ enum class BehandlingUnderkategori(val visningsnavn: String) {
     UTVIDET("Utvidet"),
     ORDINÆR("Ordinær");
 
-    fun tilBehandlingstema(): Behandlingstema {
+    fun tilOppgaveBehandlingTema(): OppgaveBehandlingTema {
         return when (this) {
-            UTVIDET -> Behandlingstema.UtvidetBarnetrygd
-            ORDINÆR -> Behandlingstema.OrdinærBarnetrygd
+            UTVIDET -> OppgaveBehandlingTema.UtvidetBarnetrygd
+            ORDINÆR -> OppgaveBehandlingTema.OrdinærBarnetrygd
         }
     }
 }

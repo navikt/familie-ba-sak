@@ -18,12 +18,12 @@ import no.nav.familie.ba.sak.kjerne.eøs.TestUtil.sep
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.MAX_MÅNED
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.RegelverkMåned
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.RegelverkPeriode
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk.EØS_FORORDNINGEN
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk.NASJONALE_REGLER
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.BOR_MED_SØKER
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.BOSATT_I_RIKET
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.LOVLIG_OPPHOLD
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårRegelverk
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårRegelverk.EØS_FORORDNINGEN
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårRegelverk.NASJONALE_REGLER
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.jupiter.api.Test
@@ -150,6 +150,6 @@ internal class RegelverkPeriodeUtilTest {
         )
     }
 
-    private fun lagRegelverkMåneder(regelverk: Regelverk, vararg måneder: YearMonth) =
-        måneder.map { RegelverkMåned(it, regelverk) }
+    private fun lagRegelverkMåneder(vilkårRegelverk: VilkårRegelverk, vararg måneder: YearMonth) =
+        måneder.map { RegelverkMåned(it, vilkårRegelverk) }
 }

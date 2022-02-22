@@ -86,7 +86,7 @@ class VilkårResultat(
 
     @Enumerated(EnumType.STRING)
     @Column(name = "vurderes_etter")
-    var vurderesEtter: Regelverk? = vilkårType.defaultRegelverk(),
+    var vurderesEtter: VilkårRegelverk? = vilkårType.defaultRegelverk(),
 
     @Column(name = "utdypende_vilkarsvurderinger")
     @Convert(converter = UtdypendeVilkårsvurderingerConverter::class)
@@ -174,6 +174,6 @@ class VilkårResultat(
     }
 }
 
-enum class Regelverk {
+enum class VilkårRegelverk {
     NASJONALE_REGLER, EØS_FORORDNINGEN
 }
