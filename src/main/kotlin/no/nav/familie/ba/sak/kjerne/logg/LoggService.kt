@@ -17,6 +17,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 import java.time.LocalDateTime
 
 @Service
@@ -217,7 +218,7 @@ class LoggService(
                 behandlingId = behandling.id,
                 type = if (behandling.erManuellMigrering()) LoggType.MIGRERING_BEKREFTET else LoggType.GODKJENNE_VEDTAK,
                 tittel = if (beslutning.erGodkjent()) {
-                    if (behandling.erManuellMigrering()) "Migrering bekreftet" else "Vedtak godkent"
+                    if (behandling.erManuellMigrering()) "Migrering bekreftet" else "Vedtak godkjent"
                 } else "Vedtak underkjent",
                 rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(rolleConfig, BehandlerRolle.BESLUTTER),
                 tekst = if (!beslutning.erGodkjent()) "Begrunnelse: $begrunnelse" else "",
@@ -294,6 +295,31 @@ class LoggService(
                     BehandlerRolle.SAKSBEHANDLER
                 ),
                 tekst = "Årsak: $årsak"
+            )
+        )
+    }
+
+    fun opprettOppdaterVentingLogg(behandling: Behandling, endretÅrsak: String?, endretFrist: LocalDate?) {
+        val tekst = if (endretFrist != null && endretÅrsak != null) {
+            "Frist og årsak er endret til \"${endretÅrsak}\" og ${endretFrist.tilKortString()}"
+        } else if (endretFrist != null) {
+            "Frist er endret til ${endretFrist.tilKortString()}"
+        } else if (endretÅrsak != null) {
+            "Årsak er endret til \"${endretÅrsak}\""
+        } else {
+            return
+        }
+
+        lagre(
+            Logg(
+                behandlingId = behandling.id,
+                type = LoggType.VENTENDE_BEHANDLING_ENDRET,
+                tittel = LoggType.VENTENDE_BEHANDLING_ENDRET.visningsnavn,
+                rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
+                    rolleConfig,
+                    BehandlerRolle.SAKSBEHANDLER
+                ),
+                tekst = tekst
             )
         )
     }
