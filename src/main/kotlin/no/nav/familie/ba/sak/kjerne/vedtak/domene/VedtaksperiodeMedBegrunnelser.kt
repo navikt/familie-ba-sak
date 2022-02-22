@@ -104,18 +104,24 @@ data class VedtaksperiodeMedBegrunnelser(
     fun hentUtbetalingsperiodeDetaljer(
         andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
         personopplysningGrunnlag: PersonopplysningGrunnlag,
+        erIngenOverlappVedtaksperiodeTogglePå: Boolean,
     ): List<UtbetalingsperiodeDetalj> =
         if (this.type == Vedtaksperiodetype.UTBETALING ||
             this.type == Vedtaksperiodetype.ENDRET_UTBETALING ||
             this.type == Vedtaksperiodetype.FORTSATT_INNVILGET
         ) {
-            val andelerForVedtaksperiodetype = andelerTilkjentYtelse.filter {
-                if (this.type == Vedtaksperiodetype.ENDRET_UTBETALING) {
-                    it.harEndretUtbetalingAndelerOgHørerTilVedtaksperiode(this)
+            val andelerForVedtaksperiodetype =
+                if (!erIngenOverlappVedtaksperiodeTogglePå) {
+                    andelerTilkjentYtelse.filter {
+                        if (this.type == Vedtaksperiodetype.ENDRET_UTBETALING) {
+                            it.harEndretUtbetalingAndelerOgHørerTilVedtaksperiode(this)
+                        } else {
+                            it.endretUtbetalingAndeler.isEmpty()
+                        }
+                    }
                 } else {
-                    it.endretUtbetalingAndeler.isEmpty()
+                    andelerTilkjentYtelse
                 }
-            }
             if (andelerForVedtaksperiodetype.isEmpty()) emptyList()
             else {
                 val vertikaltSegmentForVedtaksperiode =

@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.brev
 
 import no.nav.familie.ba.sak.common.convertDataClassToJson
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.tilMinimertUregisrertBarn
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
@@ -26,6 +28,7 @@ class BrevPeriodeService(
     private val søknadGrunnlagService: SøknadGrunnlagService,
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val endretUtbetalingAndelService: EndretUtbetalingAndelService,
+    private val featureToggleService: FeatureToggleService,
 ) {
 
     fun hentBrevperiodeData(vedtaksperiodeId: Long, skalLogge: Boolean = true): BrevperiodeData {
@@ -55,6 +58,7 @@ class BrevPeriodeService(
             andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(
                 behandlingId
             ),
+            erIngenOverlappVedtaksperiodeTogglePå = featureToggleService.isEnabled(FeatureToggleConfig.INGEN_OVERLAPP_VEDTAKSPERIODER)
         )
 
         val andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId)
