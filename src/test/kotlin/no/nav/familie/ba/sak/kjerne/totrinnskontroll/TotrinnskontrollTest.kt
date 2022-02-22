@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.totrinnskontroll
 
 import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.common.nyOrdinærBehandling
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
@@ -47,8 +48,8 @@ class TotrinnskontrollTest(
     fun `Skal godkjenne 2 trinnskontroll`() {
         val fnr = randomFnr()
 
-        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
-        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
+        val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(fnr))
 
         behandlingService.sendBehandlingTilBeslutter(behandling)
         assertEquals(BehandlingStatus.FATTER_VEDTAK, behandlingService.hent(behandling.id).status)
@@ -97,8 +98,8 @@ class TotrinnskontrollTest(
     fun `Skal underkjenne 2 trinnskontroll`() {
         val fnr = randomFnr()
 
-        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
-        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
+        val behandling = behandlingService.opprettBehandling(nyOrdinærBehandling(fnr))
 
         behandlingService.sendBehandlingTilBeslutter(behandling)
         assertEquals(BehandlingStatus.FATTER_VEDTAK, behandlingService.hent(behandling.id).status)
