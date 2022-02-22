@@ -171,18 +171,6 @@ class DokumentService(
             )
         }
 
-        if (
-            behandling != null &&
-            manueltBrevRequest.brevmal.setterBehandlingPåVent() &&
-            featureToggleService.isEnabled(SETT_PÅ_VENT)
-        ) {
-            settPåVentService.settBehandlingPåVent(
-                behandlingId = behandling.id,
-                frist = LocalDate.now().plusDays(manueltBrevRequest.brevmal.ventefristDager()),
-                årsak = manueltBrevRequest.brevmal.venteårsak()
-            )
-        }
-
         DistribuerDokumentTask.opprettDistribuerDokumentTask(
             distribuerDokumentDTO = DistribuerDokumentDTO(
                 personIdent = manueltBrevRequest.mottakerIdent,
@@ -200,6 +188,18 @@ class DokumentService(
             }
         ).also {
             taskRepository.save(it)
+        }
+
+        if (
+            behandling != null &&
+            manueltBrevRequest.brevmal.setterBehandlingPåVent() &&
+            featureToggleService.isEnabled(SETT_PÅ_VENT)
+        ) {
+            settPåVentService.settBehandlingPåVent(
+                behandlingId = behandling.id,
+                frist = LocalDate.now().plusDays(manueltBrevRequest.brevmal.ventefristDager()),
+                årsak = manueltBrevRequest.brevmal.venteårsak()
+            )
         }
     }
 

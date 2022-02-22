@@ -105,7 +105,6 @@ class FeatureToggleConfig(
         const val KAN_BEHANDLE_EØS = "familie-ba-sak.behandling.eos"
         const val KAN_AUTOMATISK_BEHANDLE_EØS = "familie-ba-sak.behandling.automatisk.eos"
         const val IKKE_STOPP_MIGRERINGSBEHANDLING = "familie-ba-sak.ikke.stopp.migeringsbehandling"
-        const val ENDRET_UTBETALING_VEDTAKSSIDEN = "familie-ba-sak.endret-utbetaling-vedtakssiden.utgivelse"
         const val SETT_PÅ_VENT = "familie-ba-sak.sett-paa-vent.utgivelse"
 
         const val TEKNISK_VEDLIKEHOLD_HENLEGGELSE = "familie-ba-sak.teknisk-vedlikehold-henleggelse.tilgangsstyring"
