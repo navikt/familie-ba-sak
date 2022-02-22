@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.brev
 
+import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.kallEksternTjeneste
 import no.nav.familie.ba.sak.kjerne.brev.domene.RestSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brev
@@ -22,33 +24,42 @@ class BrevKlient(
 ) {
 
     fun genererBrev(målform: String, brev: Brev): ByteArray {
-        val url = URI.create("$familieBrevUri/api/$sanityDataset/dokument/$målform/${brev.mal.apiNavn}/pdf")
-        secureLogger.info("Kaller familie brev($url) med data ${brev.data.toBrevString()}")
-        logger.info("Kaller familie brev med url: $url}")
-        val response = restTemplate.postForEntity<ByteArray>(url, brev.data)
-        return response.body ?: error("Klarte ikke generere brev med familie-brev")
+        val uri = URI.create("$familieBrevUri/api/$sanityDataset/dokument/$målform/${brev.mal.apiNavn}/pdf")
+
+        secureLogger.info("Kaller familie brev($uri) med data ${brev.data.toBrevString()}")
+        val response = kallEksternTjeneste("famile-brev", uri, "Hente pdf for vedtaksbrev") {
+            restTemplate.postForEntity<ByteArray>(uri, brev.data)
+        }
+
+        return response.body ?: throw Feil("Klarte ikke generere brev med familie-brev")
     }
 
     @Cacheable("begrunnelsestekster-for-nedtreksmeny", cacheManager = "shortCache")
     fun hentSanityBegrunnelser(): List<SanityBegrunnelse> {
-        val url = URI.create("$familieBrevUri/ba-sak/begrunnelser")
-        logger.info("Henter begrunnelser fra sanity via familie brev")
-        val response = restTemplate.exchange(
-            url,
-            HttpMethod.GET,
-            null,
-            object : ParameterizedTypeReference<List<RestSanityBegrunnelse>>() {},
-        )
-        val restSanityBegrunnelser = response.body ?: error("Klarte ikke hente begrunnelsene fra familie-brev.")
+        val uri = URI.create("$familieBrevUri/ba-sak/begrunnelser")
+
+        val restSanityBegrunnelser =
+            kallEksternTjeneste("famile-brev", uri, "Henter begrunnelser fra sanity via familie brev") {
+                restTemplate.exchange(
+                    uri,
+                    HttpMethod.GET,
+                    null,
+                    object : ParameterizedTypeReference<List<RestSanityBegrunnelse>>() {},
+                ).body ?: throw Feil("Klarte ikke hente begrunnelsene fra familie-brev.")
+            }
+
         return restSanityBegrunnelser.map { it.tilSanityBegrunnelse() }
     }
 
     @Cacheable("begrunnelsestekst", cacheManager = "shortCache")
     fun hentBegrunnelsestekst(begrunnelseData: BegrunnelseData): String {
-        val url = URI.create("$familieBrevUri/ba-sak/begrunnelser/${begrunnelseData.apiNavn}/tekst/")
-        secureLogger.info("Kaller familie brev($url) med data $begrunnelseData")
-        logger.info("Kaller familie brev med url: $url}")
-        val response = restTemplate.postForEntity<String>(url, begrunnelseData)
+        val uri = URI.create("$familieBrevUri/ba-sak/begrunnelser/${begrunnelseData.apiNavn}/tekst/")
+        secureLogger.info("Kaller familie brev($uri) med data $begrunnelseData")
+
+        val response = kallEksternTjeneste("famile-brev", uri, "Henter begrunnelsestekst") {
+            restTemplate.postForEntity<String>(uri, begrunnelseData)
+        }
+
         return response.body ?: error("Klarte ikke å hente begrunnelsestekst fra familie-brev.")
     }
 
