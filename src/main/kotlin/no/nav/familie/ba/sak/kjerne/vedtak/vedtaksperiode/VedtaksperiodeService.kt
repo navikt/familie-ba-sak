@@ -30,6 +30,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
@@ -335,24 +336,24 @@ class VedtaksperiodeService(
 
         val erIngenOverlappVedtaksperiodeTogglePå = featureToggleService.isEnabled(INGEN_OVERLAPP_VEDTAKSPERIODER)
 
-        return vedtaksperioderMedBegrunnelser.map {
+        val utvidetVedtaksperiodeMedBegrunnelser = vedtaksperioderMedBegrunnelser.map {
             it.tilUtvidetVedtaksperiodeMedBegrunnelser(
                 andelerTilkjentYtelse = andelerTilkjentYtelse,
                 personopplysningGrunnlag = persongrunnlag,
                 erIngenOverlappVedtaksperiodeTogglePå = erIngenOverlappVedtaksperiodeTogglePå
             )
-        }.map { utvidetVedtaksperiodeMedBegrunnelser ->
+        }
 
-            val gyldigeBegrunnelser =
-                if (behandling.status == BehandlingStatus.UTREDES) {
-                    val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id)
-                        ?: error("Finner ikke vilkårsvurdering ved begrunning av vedtak")
+        return if (behandling.status == BehandlingStatus.UTREDES) {
+            val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id)
+                ?: error("Finner ikke vilkårsvurdering ved begrunning av vedtak")
 
-                    val aktørerMedUtbetaling = personidentService.hentAktørIder(
-                        utvidetVedtaksperiodeMedBegrunnelser.utbetalingsperiodeDetaljer.map { it.person.personIdent }
-                    )
+            utvidetVedtaksperiodeMedBegrunnelser.map { utvidetVedtaksperiodeMedBegrunnelser ->
+                val aktørerMedUtbetaling =
+                    hentAktørerMedUtbetaling(utvidetVedtaksperiodeMedBegrunnelser, persongrunnlag)
 
-                    hentGyldigeBegrunnelserForVedtaksperiode(
+                utvidetVedtaksperiodeMedBegrunnelser.copy(
+                    gyldigeBegrunnelser = hentGyldigeBegrunnelserForVedtaksperiode(
                         minimertVedtaksperiode = utvidetVedtaksperiodeMedBegrunnelser.tilMinimertVedtaksperiode(),
                         sanityBegrunnelser = sanityBegrunnelser,
                         minimertePersoner = persongrunnlag.tilMinimertePersoner(),
@@ -374,16 +375,21 @@ class VedtaksperiodeService(
                                 utvidetVedtaksperiodeMedBegrunnelser.hentMånedPeriode()
                             )
                     )
-                } else emptyList()
-
-            utvidetVedtaksperiodeMedBegrunnelser.copy(
-                gyldigeBegrunnelser = gyldigeBegrunnelser.filter {
-                    val sanityBegrunnelse = it.tilSanityBegrunnelse(sanityBegrunnelser)
-                    sanityBegrunnelse?.tilTriggesAv()?.valgbar ?: false
-                }.toList()
-            )
-        }
+                )
+            }
+        } else utvidetVedtaksperiodeMedBegrunnelser
     }
+
+    private fun hentAktørerMedUtbetaling(
+        utvidetVedtaksperiodeMedBegrunnelser: UtvidetVedtaksperiodeMedBegrunnelser,
+        persongrunnlag: PersonopplysningGrunnlag
+    ): List<Aktør> = utvidetVedtaksperiodeMedBegrunnelser
+        .utbetalingsperiodeDetaljer
+        .map { utbetalingsperiodeDetalj ->
+            val ident = utbetalingsperiodeDetalj.person.personIdent
+            persongrunnlag.personer.find { it.aktør.aktivFødselsnummer() == ident }?.aktør
+                ?: personidentService.hentAktør(ident)
+        }
 
     fun oppdaterFortsattInnvilgetPeriodeMedAutobrevBegrunnelse(
         vedtak: Vedtak,
