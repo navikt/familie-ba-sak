@@ -346,6 +346,8 @@ enum class BehandlingÅrsak(val visningsnavn: String) {
             else -> null
         }
     }
+
+    fun erManuellMigreringsårsak(): Boolean = this == HELMANUELL_MIGRERING || this == ENDRE_MIGRERINGSDATO
 }
 
 enum class BehandlingType(val visningsnavn: String) {

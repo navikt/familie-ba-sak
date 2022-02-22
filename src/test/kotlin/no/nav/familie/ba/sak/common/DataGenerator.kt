@@ -371,14 +371,16 @@ fun nyOrdinærBehandling(søkersIdent: String, årsak: BehandlingÅrsak = Behand
         behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
         kategori = BehandlingKategori.NASJONAL,
         underkategori = BehandlingUnderkategori.ORDINÆR,
-        behandlingÅrsak = årsak
+        behandlingÅrsak = årsak,
+        søknadMottattDato = if (årsak == BehandlingÅrsak.SØKNAD) LocalDate.now() else null
     )
 
 fun nyRevurdering(søkersIdent: String): NyBehandling = NyBehandling(
     søkersIdent = søkersIdent,
     behandlingType = BehandlingType.REVURDERING,
     kategori = BehandlingKategori.NASJONAL,
-    underkategori = BehandlingUnderkategori.ORDINÆR
+    underkategori = BehandlingUnderkategori.ORDINÆR,
+    søknadMottattDato = LocalDate.now()
 )
 
 fun lagSøknadDTO(
@@ -583,6 +585,7 @@ fun kjørStegprosessForFGB(
             behandlingÅrsak = BehandlingÅrsak.SØKNAD,
             søkersIdent = søkerFnr,
             barnasIdenter = barnasIdenter,
+            søknadMottattDato = LocalDate.now()
         )
     )
 

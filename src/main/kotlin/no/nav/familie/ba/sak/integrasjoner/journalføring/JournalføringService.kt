@@ -113,13 +113,14 @@ class JournalføringService(
         }
     }
 
-    fun opprettBehandlingOgEvtFagsakForJournalføring(
+    private fun opprettBehandlingOgEvtFagsakForJournalføring(
         personIdent: String,
         navIdent: String,
         type: BehandlingType,
         årsak: BehandlingÅrsak,
         kategori: BehandlingKategori? = null,
-        underkategori: BehandlingUnderkategori? = null
+        underkategori: BehandlingUnderkategori? = null,
+        søknadMottattDato: LocalDate? = null
     ): Behandling {
         fagsakService.hentEllerOpprettFagsak(personIdent)
         return stegService.håndterNyBehandlingOgSendInfotrygdFeed(
@@ -130,6 +131,7 @@ class JournalføringService(
                 behandlingType = type,
                 behandlingÅrsak = årsak,
                 navIdent = navIdent,
+                søknadMottattDato = søknadMottattDato
             )
         )
     }
@@ -152,7 +154,8 @@ class JournalføringService(
                     type = request.nyBehandlingstype,
                     årsak = request.nyBehandlingsårsak,
                     kategori = request.kategori,
-                    underkategori = request.underkategori
+                    underkategori = request.underkategori,
+                    søknadMottattDato = request.datoMottatt?.toLocalDate()
                 )
             tilknyttedeBehandlingIder.add(nyBehandling.id.toString())
         }
