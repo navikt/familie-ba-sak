@@ -123,13 +123,15 @@ class MigreringService(
                     )
                 )
             }.getOrElse { kastOgTellMigreringsFeil(MigreringsfeilType.KAN_IKKE_OPPRETTE_BEHANDLING, it.message, it) }
-
+            secureLog.info("Migrering: opprettet behandling for $personIdent behandling=${behandling.id}")
             val migreringsdato = virkningsdatoFra(infotrygdKjøredato(YearMonth.now()))
             vilkårService.hentVilkårsvurdering(behandlingId = behandling.id)?.apply {
+                secureLog.info("Migrering: vilkårsvurdering for behandling=${behandling.id} vilkårsvurdering=$this migreringsdato=$migreringsdato")
                 forsøkSettPerioderFomTilpassetInfotrygdKjøreplan(this, migreringsdato)
+                secureLog.info("Forsøkt å sette periode")
                 vilkårsvurderingService.oppdater(this)
             } ?: kastOgTellMigreringsFeil(MigreringsfeilType.MANGLER_VILKÅRSVURDERING)
-
+            secureLog.info("Migrering: opprettet vilkårsvurdering for behandlingId=${behandling.id}")
             // Lagre ned migreringsdato
             behandlingService.lagreNedMigreringsdato(migreringsdato, behandling)
 
@@ -172,6 +174,7 @@ class MigreringService(
             }
             return migreringResponseDto
         } catch (e: Exception) {
+            secureLog.info("Migrering feilet for $personIdent. ${e.message}", e)
             if (e is KanIkkeMigrereException) throw e
             kastOgTellMigreringsFeil(MigreringsfeilType.UKJENT, e.message, e)
         }
@@ -205,7 +208,7 @@ class MigreringService(
                 "Kan ikke migrere person ${personAktør.aktivFødselsnummer()} fordi barn fra PDL IKKE inneholder alle løpende barnetrygdbarn fra Infotrygd.\n" +
                     "Barn fra PDL: ${listeBarnFraPdl}\n Barn fra Infotrygd: $barnasIdenter"
             )
-            kastOgTellMigreringsFeil(MigreringsfeilType.DIFF_BARN_INFOTRYGD_OG_PDL)
+            // kastOgTellMigreringsFeil(MigreringsfeilType.DIFF_BARN_INFOTRYGD_OG_PDL)
         }
     }
 
@@ -295,6 +298,7 @@ class MigreringService(
         migreringsdato: LocalDate
     ) {
         vilkårsvurdering.personResultater.forEach { personResultat ->
+            secureLog.info("Forsøker å sette perioder fom og til for ${personResultat.id} ${personResultat.vilkårResultater}")
             personResultat.vilkårResultater.forEach {
                 it.periodeFom = it.periodeFom ?: migreringsdato
             }

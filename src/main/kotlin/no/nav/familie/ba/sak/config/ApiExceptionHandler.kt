@@ -112,7 +112,7 @@ class ApiExceptionHandler {
             frontendFeilmelding = feilmelding,
             error = mostSpecificThrowable
         ).copy(data = feil.feiltype.name)
-        secureLogger.warn("Feil ved migrering. feiltype=${feil.feiltype} melding=$feilmelding", feil)
+        secureLogger.warn("Feil ved migrering. feiltype=${feil.feiltype} melding=$feilmelding", feil.throwable)
         logger.warn("Feil ved migrering. feiltype=${feil.feiltype} melding=$feilmelding")
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(

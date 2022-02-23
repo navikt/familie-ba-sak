@@ -260,7 +260,7 @@ class VilkårService(
             ?: throw IllegalStateException("Fant ikke personopplysninggrunnlag for behandling ${behandling.id}")
 
         if (behandling.skalBehandlesAutomatisk) {
-            if (personopplysningGrunnlag.barna.isEmpty()) {
+            if (personopplysningGrunnlag.barna.isEmpty() && !behandling.erMigrering()) {
                 throw IllegalStateException("PersonopplysningGrunnlag for fødselshendelse skal inneholde minst ett barn")
             }
         }
