@@ -189,12 +189,7 @@ class ArbeidsfordelingIntegrationTest(
         val søkerAktør = personidentService.hentAktør(SØKER_FNR)
         fagsakService.hentEllerOpprettFagsak(søkerAktør.aktivFødselsnummer())
         val behandling = stegService.håndterNyBehandling(
-            NyBehandling(
-                BehandlingKategori.NASJONAL,
-                BehandlingUnderkategori.ORDINÆR,
-                SØKER_FNR,
-                BehandlingType.FØRSTEGANGSBEHANDLING
-            )
+            lagNyBehandling()
         )
 
         val arbeidsfordelingPåBehandling =
@@ -208,12 +203,7 @@ class ArbeidsfordelingIntegrationTest(
         val søkerAktør = personidentService.hentAktør(SØKER_FNR)
         fagsakService.hentEllerOpprettFagsak(søkerAktør.aktivFødselsnummer())
         val behandling = stegService.håndterNyBehandling(
-            NyBehandling(
-                BehandlingKategori.NASJONAL,
-                BehandlingUnderkategori.ORDINÆR,
-                SØKER_FNR,
-                BehandlingType.FØRSTEGANGSBEHANDLING
-            )
+            lagNyBehandling()
         )
 
         val arbeidsfordelingPåBehandling =
@@ -241,12 +231,7 @@ class ArbeidsfordelingIntegrationTest(
         val søkerAktør = personidentService.hentAktør(SØKER_FNR)
         fagsakService.hentEllerOpprettFagsak(søkerAktør.aktivFødselsnummer())
         val behandling = stegService.håndterNyBehandling(
-            NyBehandling(
-                BehandlingKategori.NASJONAL,
-                BehandlingUnderkategori.ORDINÆR,
-                SØKER_FNR,
-                BehandlingType.FØRSTEGANGSBEHANDLING
-            )
+            lagNyBehandling()
         )
 
         val arbeidsfordelingPåBehandling =
@@ -274,12 +259,7 @@ class ArbeidsfordelingIntegrationTest(
         val søkerAktør = personidentService.hentAktør(SØKER_FNR)
         fagsakService.hentEllerOpprettFagsak(søkerAktør.aktivFødselsnummer())
         val behandling = stegService.håndterNyBehandling(
-            NyBehandling(
-                BehandlingKategori.NASJONAL,
-                BehandlingUnderkategori.ORDINÆR,
-                SØKER_FNR,
-                BehandlingType.FØRSTEGANGSBEHANDLING
-            )
+            lagNyBehandling()
         )
 
         val arbeidsfordelingPåBehandling =
@@ -331,12 +311,7 @@ class ArbeidsfordelingIntegrationTest(
         val søkerAktør = personidentService.hentAktør(SØKER_FNR)
         fagsakService.hentEllerOpprettFagsak(søkerAktør.aktivFødselsnummer())
         val behandling = stegService.håndterNyBehandling(
-            NyBehandling(
-                BehandlingKategori.NASJONAL,
-                BehandlingUnderkategori.ORDINÆR,
-                SØKER_FNR,
-                BehandlingType.FØRSTEGANGSBEHANDLING
-            )
+            lagNyBehandling()
         )
 
         val arbeidsfordelingPåBehandling =
@@ -372,12 +347,7 @@ class ArbeidsfordelingIntegrationTest(
         val søkerAktør = personidentService.hentAktør(SØKER_FNR)
         fagsakService.hentEllerOpprettFagsak(søkerAktør.aktivFødselsnummer())
         val behandling = stegService.håndterNyBehandling(
-            NyBehandling(
-                BehandlingKategori.NASJONAL,
-                BehandlingUnderkategori.ORDINÆR,
-                SØKER_FNR,
-                BehandlingType.FØRSTEGANGSBEHANDLING
-            )
+            lagNyBehandling()
         )
 
         val arbeidsfordelingPåBehandling =
@@ -408,6 +378,14 @@ class ArbeidsfordelingIntegrationTest(
             arbeidsfordelingPåBehandlingEtterSøknadsregistreringUtenDiskresjonskode.behandlendeEnhetId
         )
     }
+
+    private fun lagNyBehandling() = NyBehandling(
+        kategori = BehandlingKategori.NASJONAL,
+        underkategori = BehandlingUnderkategori.ORDINÆR,
+        søkersIdent = SØKER_FNR,
+        behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+        søknadMottattDato = now()
+    )
 
     companion object {
 

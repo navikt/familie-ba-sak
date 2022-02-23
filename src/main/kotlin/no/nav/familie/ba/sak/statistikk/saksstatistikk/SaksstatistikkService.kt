@@ -3,9 +3,6 @@ package no.nav.familie.ba.sak.statistikk.saksstatistikk
 import no.nav.familie.ba.sak.common.Utils.hentPropertyFraMaven
 import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.SETT_PÅ_VENT
 import no.nav.familie.ba.sak.config.FeatureToggleService
-import no.nav.familie.ba.sak.integrasjoner.journalføring.JournalføringService
-import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.DbJournalpostType
-import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.JournalføringRepository
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -38,8 +35,6 @@ import java.util.UUID
 @Service
 class SaksstatistikkService(
     private val behandlingService: BehandlingService,
-    private val journalføringRepository: JournalføringRepository,
-    private val journalføringService: JournalføringService,
     private val arbeidsfordelingService: ArbeidsfordelingService,
     private val totrinnskontrollService: TotrinnskontrollService,
     private val vedtakService: VedtakService,
@@ -58,13 +53,7 @@ class SaksstatistikkService(
 
         val datoMottatt = when (behandling.opprettetÅrsak) {
             BehandlingÅrsak.SØKNAD -> {
-                val journalpost = journalføringRepository
-                    .findByBehandlingId(behandlingId)
-                    .filter { it.type == DbJournalpostType.I }
-                journalpost.map { journalføringService.hentJournalpost(it.journalpostId) }
-                    .filter { it.tittel != null && it.tittel!!.contains("søknad", ignoreCase = true) }
-                    .mapNotNull { it.datoMottatt }
-                    .minOrNull() ?: behandling.opprettetTidspunkt
+                behandlingService.hentSøknadMottattDato(behandlingId) ?: behandling.opprettetTidspunkt
             }
             else -> behandling.opprettetTidspunkt
         }

@@ -26,6 +26,7 @@ import no.nav.familie.kontrakter.felles.Ressurs
 import org.springframework.http.HttpHeaders
 import org.springframework.web.client.RestOperations
 import java.net.URI
+import java.time.LocalDate
 
 class FamilieBaSakKlient(
     private val baSakUrl: String,
@@ -113,7 +114,8 @@ class FamilieBaSakKlient(
                 underkategori = behandlingUnderkategori,
                 søkersIdent = søkersIdent,
                 behandlingType = behandlingType,
-                behandlingÅrsak = behandlingÅrsak
+                behandlingÅrsak = behandlingÅrsak,
+                søknadMottattDato = if (behandlingÅrsak == BehandlingÅrsak.SØKNAD) LocalDate.now() else null
             ),
             headers
         )
