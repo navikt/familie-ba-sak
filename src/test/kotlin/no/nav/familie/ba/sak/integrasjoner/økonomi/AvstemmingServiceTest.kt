@@ -157,13 +157,15 @@ class AvstemmingServiceTest {
             avstemmingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker()
 
         for (chunkNr in 1..relevanteBehandlinger.totalPages) {
-            relevanteBehandlinger = avstemmingService.opprettKonsistensavstemmingDataTask(
+            avstemmingService.opprettKonsistensavstemmingDataTask(
                 avstemmingsdato,
                 relevanteBehandlinger,
                 batchId,
                 transaksjonsId,
                 chunkNr
             )
+            relevanteBehandlinger =
+                avstemmingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker(relevanteBehandlinger.nextPageable())
         }
 
         avstemmingService.opprettKonsistensavstemmingAvsluttTask(batchId, transaksjonsId, avstemmingsdato)
