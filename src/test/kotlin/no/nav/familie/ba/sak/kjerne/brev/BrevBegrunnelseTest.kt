@@ -4,7 +4,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ba.sak.integrasjoner.sanity.hentSanityBegrunnelser
 import no.nav.familie.ba.sak.kjerne.brev.domene.BrevBegrunnelserTestConfig
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.hentGyldigeBegrunnelserForVedtaksperiode
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.hentGyldigeBegrunnelserForVedtaksperiodeMinimert
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
@@ -32,7 +32,7 @@ class BrevBegrunnelseTest {
                 }
 
             val begrunnelser = try {
-                hentGyldigeBegrunnelserForVedtaksperiode(
+                hentGyldigeBegrunnelserForVedtaksperiodeMinimert(
                     minimertVedtaksperiode = brevBegrunnelserTestConfig.hentMinimertVedtaksperiode(),
                     sanityBegrunnelser = sanityBegrunnelser,
                     minimertePersoner = brevBegrunnelserTestConfig.hentMinimertePersoner(),
