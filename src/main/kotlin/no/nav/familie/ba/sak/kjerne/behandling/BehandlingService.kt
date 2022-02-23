@@ -192,10 +192,10 @@ class BehandlingService(
 
         return lagreEllerOppdater(behandling).also { lagretBehandling ->
             oppgaveService.patchOppgaverForBehandling(lagretBehandling) {
-                if (it.behandlingstema != lagretBehandling.underkategori.tilBehandlingstema().value || it.behandlingstype != lagretBehandling.kategori.tilBehandlingstype().value) {
+                if (it.behandlingstema != lagretBehandling.underkategori.tilOppgaveBehandlingTema().value || it.behandlingstype != lagretBehandling.kategori.tilOppgavebehandlingType().value) {
                     it.copy(
-                        behandlingstema = lagretBehandling.underkategori.tilBehandlingstema().value,
-                        behandlingstype = lagretBehandling.kategori.tilBehandlingstype().value
+                        behandlingstema = lagretBehandling.underkategori.tilOppgaveBehandlingTema().value,
+                        behandlingstype = lagretBehandling.kategori.tilOppgavebehandlingType().value
                     )
                 } else null
             }
