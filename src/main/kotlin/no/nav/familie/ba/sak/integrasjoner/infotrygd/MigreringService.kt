@@ -83,6 +83,7 @@ class MigreringService(
     private val logger = LoggerFactory.getLogger(MigreringService::class.java)
     private val secureLog = LoggerFactory.getLogger("secureLogger")
     private val migrertCounter = Metrics.counter("migrering.ok")
+    private val migrertUtvidetCounter = Metrics.counter("migrering.utvidet.ok")
     private val migrertAvSaksbehandler = Metrics.counter("migrering.saksbehandler")
     private val migrertAvSaksbehandlerNotificationFeil = Metrics.counter("migrering.saksbehandler.send.feilet")
 
@@ -140,7 +141,11 @@ class MigreringService(
             sammenlignFørsteUtbetalingsbeløpMedBeløpFraInfotrygd(førsteUtbetalingsperiode.value, løpendeSak.stønad!!)
 
             iverksett(behandlingEtterVilkårsvurdering)
-            migrertCounter.increment()
+
+            when (underkategori) {
+                BehandlingUnderkategori.ORDINÆR -> migrertCounter.increment()
+                BehandlingUnderkategori.UTVIDET -> migrertUtvidetCounter.increment()
+            }
             val migreringResponseDto = MigreringResponseDto(
                 fagsakId = behandlingEtterVilkårsvurdering.fagsak.id,
                 behandlingId = behandlingEtterVilkårsvurdering.id,
