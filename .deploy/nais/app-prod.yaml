@@ -101,5 +101,8 @@ spec:
   env:
     - name: SPRING_PROFILES_ACTIVE
       value: prod
+
+    - name: JAVA_OPTS
+      value: "-XX:MinRAMPercentage=25.0 -XX:MaxRAMPercentage=75.0 -XX:+HeapDumpOnOutOfMemoryError"
   kafka:
     pool: nav-prod
