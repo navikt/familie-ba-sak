@@ -17,6 +17,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingMigreringsinfoRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfoRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
@@ -105,7 +106,10 @@ class VedtakServiceTest(
     private val taskRepository: TaskRepositoryWrapper,
 
     @Autowired
-    private val behandlingMigreringsinfoRepository: BehandlingMigreringsinfoRepository
+    private val behandlingMigreringsinfoRepository: BehandlingMigreringsinfoRepository,
+
+    @Autowired
+    private val behandlingSøknadsinfoRepository: BehandlingSøknadsinfoRepository
 ) : AbstractSpringIntegrationTest() {
 
     lateinit var behandlingService: BehandlingService
@@ -136,7 +140,8 @@ class VedtakServiceTest(
             personidentService,
             featureToggleService,
             taskRepository,
-            behandlingMigreringsinfoRepository
+            behandlingMigreringsinfoRepository,
+            behandlingSøknadsinfoRepository
         )
 
         val personAktørId = randomAktørId()

@@ -17,11 +17,6 @@ import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.dataGenerator.SettPåVent.lagSettPåVent
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfordelingsenhet
-import no.nav.familie.ba.sak.integrasjoner.journalføring.JournalføringService
-import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.DbJournalpost
-import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.DbJournalpostType
-import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.JournalføringRepository
-import no.nav.familie.ba.sak.integrasjoner.lagTestJournalpost
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
@@ -45,7 +40,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext.SYSTEM_FORKORTELSE
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext.SYSTEM_NAVN
-import no.nav.familie.kontrakter.felles.journalpost.RelevantDato
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse
@@ -66,12 +60,6 @@ import java.time.temporal.ChronoUnit
 internal class SaksstatistikkServiceTest(
     @MockK(relaxed = true)
     private val behandlingService: BehandlingService,
-
-    @MockK
-    private val journalføringRepository: JournalføringRepository,
-
-    @MockK
-    private val journalføringService: JournalføringService,
 
     @MockK
     private val arbeidsfordelingService: ArbeidsfordelingService,
@@ -109,8 +97,6 @@ internal class SaksstatistikkServiceTest(
 
     private val sakstatistikkService = SaksstatistikkService(
         behandlingService,
-        journalføringRepository,
-        journalføringService,
         arbeidsfordelingService,
         totrinnskontrollService,
         vedtakService,
@@ -251,26 +237,9 @@ internal class SaksstatistikkServiceTest(
         every { vedtaksperiodeService.hentPersisterteVedtaksperioder(any()) } returns listOf(
             vedtaksperiodeMedBegrunnelser
         )
-        every { journalføringRepository.findByBehandlingId(any()) } returns listOf(
-            DbJournalpost(
-                1,
-                "foo",
-                LocalDateTime.now(),
-                behandling,
-                "123",
-                DbJournalpostType.I
-            )
-        )
-        val mottattDato = LocalDateTime.of(2019, 12, 20, 10, 0, 0)
-        val jp = lagTestJournalpost("123", "123").copy(
-            relevanteDatoer = listOf(
-                RelevantDato(
-                    mottattDato,
-                    "DATO_REGISTRERT"
-                )
-            )
-        )
-        every { journalføringService.hentJournalpost(any()) } returns jp
+
+        val mottattDato = LocalDateTime.now()
+        every { behandlingService.hentSøknadMottattDato(any()) } returns mottattDato
 
         every { featureToggleService.isEnabled(any()) } returns true
 
@@ -287,8 +256,12 @@ internal class SaksstatistikkServiceTest(
 
         assertThat(behandlingDvh?.funksjonellTid).isCloseTo(ZonedDateTime.now(), within(1, ChronoUnit.MINUTES))
         assertThat(behandlingDvh?.tekniskTid).isCloseTo(ZonedDateTime.now(), within(1, ChronoUnit.MINUTES))
-        assertThat(behandlingDvh?.mottattDato).isEqualTo(mottattDato.atZone(SaksstatistikkService.TIMEZONE))
-        assertThat(behandlingDvh?.registrertDato).isEqualTo(mottattDato.atZone(SaksstatistikkService.TIMEZONE))
+        assertThat(behandlingDvh?.mottattDato).isEqualTo(
+            mottattDato.atZone(SaksstatistikkService.TIMEZONE)
+        )
+        assertThat(behandlingDvh?.registrertDato).isEqualTo(
+            mottattDato.atZone(SaksstatistikkService.TIMEZONE)
+        )
         assertThat(behandlingDvh?.vedtaksDato).isEqualTo(vedtak.vedtaksdato?.toLocalDate())
         assertThat(behandlingDvh?.behandlingId).isEqualTo(behandling.id.toString())
         assertThat(behandlingDvh?.relatertBehandlingId).isNull()

@@ -51,26 +51,7 @@ class BehandlingController(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "opprette behandling"
         )
-
-        if (nyBehandling.søkersIdent.isBlank()) {
-            throw Feil(
-                message = "Søkers ident kan ikke være blank",
-                frontendFeilmelding = "Klarte ikke å opprette behandling. Mangler ident på bruker."
-            )
-        }
-
-        if (BehandlingType.MIGRERING_FRA_INFOTRYGD == nyBehandling.behandlingType &&
-            nyBehandling.behandlingÅrsak in listOf(
-                    BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
-                    BehandlingÅrsak.HELMANUELL_MIGRERING
-                ) && nyBehandling.nyMigreringsdato == null
-        ) {
-            throw FunksjonellFeil(
-                melding = "Du må sette ny migreringsdato før du kan fortsette videre",
-                frontendFeilmelding = "Du må sette ny migreringsdato før du kan fortsette videre"
-            )
-        }
-
+        // Basert på hvilke personer som ble hentet inn på behandlingen kan saksbehandler ha mistet tilgangen til behandlingen
         val behandling = stegService.håndterNyBehandlingOgSendInfotrygdFeed(nyBehandling)
 
         // Basert på hvilke personer som ble hentet inn på behandlingen kan saksbehandler ha mistet tilgangen til behandlingen
@@ -135,13 +116,38 @@ data class NyBehandling(
     val underkategori: BehandlingUnderkategori? = null,
     val søkersIdent: String,
     val behandlingType: BehandlingType,
-    val journalpostID: String? = null,
     val behandlingÅrsak: BehandlingÅrsak = BehandlingÅrsak.SØKNAD,
     val skalBehandlesAutomatisk: Boolean = false,
     val navIdent: String? = null,
     val barnasIdenter: List<String> = emptyList(),
-    val nyMigreringsdato: LocalDate? = null
-)
+    val nyMigreringsdato: LocalDate? = null,
+    val søknadMottattDato: LocalDate? = null
+) {
+    init { // Initiell validering på request
+        when {
+            søkersIdent.isBlank() -> throw Feil(
+                message = "Søkers ident kan ikke være blank",
+                frontendFeilmelding = "Klarte ikke å opprette behandling. Mangler ident på bruker."
+            )
+            BehandlingType.MIGRERING_FRA_INFOTRYGD == behandlingType &&
+                behandlingÅrsak.erManuellMigreringsårsak() &&
+                nyMigreringsdato == null -> {
+                throw FunksjonellFeil(
+                    melding = "Du må sette ny migreringsdato før du kan fortsette videre",
+                    frontendFeilmelding = "Du må sette ny migreringsdato før du kan fortsette videre"
+                )
+            }
+            behandlingType in listOf(BehandlingType.FØRSTEGANGSBEHANDLING, BehandlingType.REVURDERING) &&
+                behandlingÅrsak == BehandlingÅrsak.SØKNAD &&
+                søknadMottattDato == null -> {
+                throw FunksjonellFeil(
+                    melding = "Du må sette søknads mottatt dato før du kan fortsette videre",
+                    frontendFeilmelding = "Du må sette søknads mottatt dato før du kan fortsette videre"
+                )
+            }
+        }
+    }
+}
 
 data class NyBehandlingHendelse(
     val morsIdent: String,

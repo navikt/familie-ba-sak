@@ -172,10 +172,11 @@ class FagsakServiceTest(
 
         val førsteBehandling = stegService.håndterNyBehandling(
             NyBehandling(
-                BehandlingKategori.NASJONAL,
-                BehandlingUnderkategori.ORDINÆR,
-                søker1Fnr,
-                BehandlingType.FØRSTEGANGSBEHANDLING
+                kategori = BehandlingKategori.NASJONAL,
+                underkategori = BehandlingUnderkategori.ORDINÆR,
+                søkersIdent = søker1Fnr,
+                behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                søknadMottattDato = LocalDate.now()
             )
         )
         stegService.håndterPersongrunnlag(
@@ -187,10 +188,11 @@ class FagsakServiceTest(
 
         val andreBehandling = stegService.håndterNyBehandling(
             NyBehandling(
-                BehandlingKategori.NASJONAL,
-                BehandlingUnderkategori.ORDINÆR,
-                søker1Fnr,
-                BehandlingType.FØRSTEGANGSBEHANDLING
+                kategori = BehandlingKategori.NASJONAL,
+                underkategori = BehandlingUnderkategori.ORDINÆR,
+                søkersIdent = søker1Fnr,
+                behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                søknadMottattDato = LocalDate.now()
             )
         )
         stegService.håndterPersongrunnlag(
@@ -203,10 +205,11 @@ class FagsakServiceTest(
 
         val tredjeBehandling = stegService.håndterNyBehandling(
             NyBehandling(
-                BehandlingKategori.NASJONAL,
-                BehandlingUnderkategori.ORDINÆR,
-                søker2Fnr,
-                BehandlingType.FØRSTEGANGSBEHANDLING
+                kategori = BehandlingKategori.NASJONAL,
+                underkategori = BehandlingUnderkategori.ORDINÆR,
+                søkersIdent = søker2Fnr,
+                behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                søknadMottattDato = LocalDate.now()
             )
         )
         stegService.håndterPersongrunnlag(
@@ -268,10 +271,11 @@ class FagsakServiceTest(
 
         stegService.håndterNyBehandling(
             NyBehandling(
-                BehandlingKategori.NASJONAL,
-                BehandlingUnderkategori.ORDINÆR,
-                søker1Fnr,
-                BehandlingType.FØRSTEGANGSBEHANDLING
+                kategori = BehandlingKategori.NASJONAL,
+                underkategori = BehandlingUnderkategori.ORDINÆR,
+                søkersIdent = søker1Fnr,
+                behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                søknadMottattDato = LocalDate.now()
             )
         )
 

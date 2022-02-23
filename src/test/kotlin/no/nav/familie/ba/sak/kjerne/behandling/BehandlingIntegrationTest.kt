@@ -24,6 +24,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService
@@ -233,9 +234,10 @@ class BehandlingIntegrationTest(
             NyBehandling(
                 kategori = BehandlingKategori.NASJONAL,
                 underkategori = BehandlingUnderkategori.ORDINÆR,
+                søkersIdent = fnr,
                 behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                 skalBehandlesAutomatisk = true,
-                søkersIdent = fnr
+                søknadMottattDato = LocalDate.now()
             )
         )
 
@@ -266,7 +268,7 @@ class BehandlingIntegrationTest(
                     BehandlingUnderkategori.ORDINÆR,
                     morId,
                     BehandlingType.REVURDERING,
-                    null
+                    BehandlingÅrsak.SØKNAD
                 )
             )
         }
@@ -283,11 +285,12 @@ class BehandlingIntegrationTest(
 
         behandlingService.opprettBehandling(
             NyBehandling(
-                BehandlingKategori.NASJONAL,
-                BehandlingUnderkategori.ORDINÆR,
-                morId,
-                BehandlingType.REVURDERING,
-                null
+                kategori = BehandlingKategori.NASJONAL,
+                underkategori = BehandlingUnderkategori.ORDINÆR,
+                søkersIdent = morId,
+                behandlingType = BehandlingType.REVURDERING,
+                behandlingÅrsak = BehandlingÅrsak.SØKNAD,
+                søknadMottattDato = LocalDate.now()
             )
         )
 
