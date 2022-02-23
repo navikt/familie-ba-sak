@@ -74,8 +74,8 @@ class OppgaveService(
                 fristFerdigstillelse = fristForFerdigstillelse,
                 beskrivelse = lagOppgaveTekst(fagsakId, beskrivelse),
                 enhetsnummer = arbeidsfordelingsenhet?.behandlendeEnhetId,
-                behandlingstema = behandling.underkategori.tilBehandlingstema().value,
-                behandlingstype = behandling.kategori.tilBehandlingstype().value,
+                behandlingstema = behandling.underkategori.tilOppgaveBehandlingTema().value,
+                behandlingstype = behandling.kategori.tilOppgavebehandlingType().value,
                 tilordnetRessurs = tilordnetNavIdent
             )
             val opprettetOppgaveId = integrasjonClient.opprettOppgave(opprettOppgave).oppgaveId.toString()

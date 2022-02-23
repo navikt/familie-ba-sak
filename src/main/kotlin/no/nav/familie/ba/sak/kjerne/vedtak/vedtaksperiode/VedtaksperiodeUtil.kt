@@ -9,22 +9,22 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.beregning.domene.hentUtvidetScenarioForEndringsperiode
 import no.nav.familie.ba.sak.kjerne.beregning.domene.lagVertikaleSegmenter
 import no.nav.familie.ba.sak.kjerne.brev.UtvidetScenarioForEndringsperiode
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertEndretAndel
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertRestPersonResultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
-import no.nav.familie.ba.sak.kjerne.brev.domene.tilTriggesAv
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.MinimertPerson
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.MinimertVedtaksperiode
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.triggesForPeriode
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.UtvidetVedtaksperiodeMedBegrunnelser
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import java.time.LocalDate
 
 fun hentVedtaksperioderMedBegrunnelserForEndredeUtbetalingsperioder(
@@ -133,6 +133,37 @@ fun erFørsteVedtaksperiodePåFagsak(
 }
 
 fun hentGyldigeBegrunnelserForVedtaksperiode(
+    utvidetVedtaksperiodeMedBegrunnelser: UtvidetVedtaksperiodeMedBegrunnelser,
+    sanityBegrunnelser: List<SanityBegrunnelse>,
+    persongrunnlag: PersonopplysningGrunnlag,
+    vilkårsvurdering: Vilkårsvurdering,
+    aktørIderMedUtbetaling: List<String>,
+    endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
+    andelerTilkjentYtelse: List<AndelTilkjentYtelse>
+) = hentGyldigeBegrunnelserForVedtaksperiodeMinimert(
+    minimertVedtaksperiode = utvidetVedtaksperiodeMedBegrunnelser.tilMinimertVedtaksperiode(),
+    sanityBegrunnelser = sanityBegrunnelser,
+    minimertePersoner = persongrunnlag.tilMinimertePersoner(),
+    minimertePersonresultater = vilkårsvurdering.personResultater
+        .map { it.tilMinimertPersonResultat() },
+    aktørIderMedUtbetaling = aktørIderMedUtbetaling,
+    minimerteEndredeUtbetalingAndeler = endretUtbetalingAndeler
+        .map { it.tilMinimertEndretUtbetalingAndel() },
+    erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak(
+        andelerTilkjentYtelse,
+        utvidetVedtaksperiodeMedBegrunnelser.fom
+    ),
+    ytelserForSøkerForrigeMåned = hentYtelserForSøkerForrigeMåned(
+        andelerTilkjentYtelse,
+        utvidetVedtaksperiodeMedBegrunnelser
+    ),
+    utvidetScenarioForEndringsperiode = andelerTilkjentYtelse
+        .hentUtvidetScenarioForEndringsperiode(
+            utvidetVedtaksperiodeMedBegrunnelser.hentMånedPeriode()
+        )
+)
+
+fun hentGyldigeBegrunnelserForVedtaksperiodeMinimert(
     minimertVedtaksperiode: MinimertVedtaksperiode,
     sanityBegrunnelser: List<SanityBegrunnelse>,
     minimertePersoner: List<MinimertPerson>,

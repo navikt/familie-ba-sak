@@ -74,9 +74,9 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurderingType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårRegelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.task.DistribuerDokumentDTO
@@ -371,14 +371,16 @@ fun nyOrdinærBehandling(søkersIdent: String, årsak: BehandlingÅrsak = Behand
         behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
         kategori = BehandlingKategori.NASJONAL,
         underkategori = BehandlingUnderkategori.ORDINÆR,
-        behandlingÅrsak = årsak
+        behandlingÅrsak = årsak,
+        søknadMottattDato = if (årsak == BehandlingÅrsak.SØKNAD) LocalDate.now() else null
     )
 
 fun nyRevurdering(søkersIdent: String): NyBehandling = NyBehandling(
     søkersIdent = søkersIdent,
     behandlingType = BehandlingType.REVURDERING,
     kategori = BehandlingKategori.NASJONAL,
-    underkategori = BehandlingUnderkategori.ORDINÆR
+    underkategori = BehandlingUnderkategori.ORDINÆR,
+    søknadMottattDato = LocalDate.now()
 )
 
 fun lagSøknadDTO(
@@ -583,6 +585,7 @@ fun kjørStegprosessForFGB(
             behandlingÅrsak = BehandlingÅrsak.SØKNAD,
             søkersIdent = søkerFnr,
             barnasIdenter = barnasIdenter,
+            søknadMottattDato = LocalDate.now()
         )
     )
 
@@ -907,7 +910,7 @@ fun leggTilBegrunnelsePåVedtaksperiodeIBehandling(
 
 fun lagVilkårResultat(
     vilkår: Vilkår,
-    regelverk: Regelverk? = null,
+    vilkårRegelverk: VilkårRegelverk? = null,
     fom: YearMonth? = null,
     tom: YearMonth? = null
 ) = VilkårResultat(
@@ -918,7 +921,7 @@ fun lagVilkårResultat(
     periodeTom = tom?.toLocalDate(),
     begrunnelse = "",
     behandlingId = 0,
-    vurderesEtter = regelverk
+    vurderesEtter = vilkårRegelverk
 )
 
 fun lagVilkårResultat(

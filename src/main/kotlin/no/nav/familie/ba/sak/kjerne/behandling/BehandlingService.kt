@@ -20,6 +20,8 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus.AVSLUTTET
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus.FATTER_VEDTAK
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfo
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfoRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.domene.initStatus
@@ -69,7 +71,8 @@ class BehandlingService(
     private val personidentService: PersonidentService,
     private val featureToggleService: FeatureToggleService,
     private val taskRepository: TaskRepositoryWrapper,
-    private val behandlingMigreringsinfoRepository: BehandlingMigreringsinfoRepository
+    private val behandlingMigreringsinfoRepository: BehandlingMigreringsinfoRepository,
+    private val behandlingSøknadsinfoRepository: BehandlingSøknadsinfoRepository
 ) {
 
     @Transactional
@@ -114,8 +117,12 @@ class BehandlingService(
             behandling.validerBehandlingstype(
                 sisteBehandlingSomErVedtatt = sisteBehandlingSomErVedtatt
             )
-
-            val lagretBehandling = lagreNyOgDeaktiverGammelBehandling(behandling)
+            val lagretBehandling = lagreNyOgDeaktiverGammelBehandling(behandling).also {
+                if (nyBehandling.søknadMottattDato != null) {
+                    lagreNedSøknadMottattDato(nyBehandling.søknadMottattDato, behandling)
+                }
+                sendTilDvh(it)
+            }
             opprettOgInitierNyttVedtakForBehandling(behandling = lagretBehandling)
 
             loggService.opprettBehandlingLogg(lagretBehandling)
@@ -185,10 +192,10 @@ class BehandlingService(
 
         return lagreEllerOppdater(behandling).also { lagretBehandling ->
             oppgaveService.patchOppgaverForBehandling(lagretBehandling) {
-                if (it.behandlingstema != lagretBehandling.underkategori.tilBehandlingstema().value || it.behandlingstype != lagretBehandling.kategori.tilBehandlingstype().value) {
+                if (it.behandlingstema != lagretBehandling.underkategori.tilOppgaveBehandlingTema().value || it.behandlingstype != lagretBehandling.kategori.tilOppgavebehandlingType().value) {
                     it.copy(
-                        behandlingstema = lagretBehandling.underkategori.tilBehandlingstema().value,
-                        behandlingstype = lagretBehandling.kategori.tilBehandlingstype().value
+                        behandlingstema = lagretBehandling.underkategori.tilOppgaveBehandlingTema().value,
+                        behandlingstype = lagretBehandling.kategori.tilOppgavebehandlingType().value
                     )
                 } else null
             }
@@ -364,7 +371,6 @@ class BehandlingService(
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} oppretter behandling $behandling")
         return lagreEllerOppdater(behandling, false).also {
             arbeidsfordelingService.fastsettBehandlendeEnhet(it, hentSisteBehandlingSomErIverksatt(it.fagsak.id))
-            sendTilDvh(it)
             if (it.versjon == 0L) {
                 behandlingMetrikker.tellNøkkelTallVedOpprettelseAvBehandling(it)
             }
@@ -456,6 +462,19 @@ class BehandlingService(
     fun deleteMigreringsdatoVedHenleggelse(behandlingId: Long) {
         behandlingMigreringsinfoRepository.findByBehandlingId(behandlingId)
             ?.let { behandlingMigreringsinfoRepository.delete(it) }
+    }
+
+    @Transactional
+    fun lagreNedSøknadMottattDato(mottattDato: LocalDate, behandling: Behandling) {
+        val behandlingSøknadsinfo = BehandlingSøknadsinfo(
+            behandling = behandling,
+            mottattDato = mottattDato.atStartOfDay()
+        )
+        behandlingSøknadsinfoRepository.save(behandlingSøknadsinfo)
+    }
+
+    fun hentSøknadMottattDato(behandlingId: Long): LocalDateTime? {
+        return behandlingSøknadsinfoRepository.findByBehandlingId(behandlingId)?.mottattDato
     }
 
     companion object {

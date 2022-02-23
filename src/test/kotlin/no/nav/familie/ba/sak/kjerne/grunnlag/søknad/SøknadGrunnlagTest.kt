@@ -34,6 +34,7 @@ import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.dao.EmptyResultDataAccessException
+import java.time.LocalDate
 
 class SøknadGrunnlagTest(
     @Autowired
@@ -83,12 +84,7 @@ class SøknadGrunnlagTest(
 
         fagsakService.hentEllerOpprettFagsak(søkerAktør.aktivFødselsnummer())
         val behandling = stegService.håndterNyBehandling(
-            NyBehandling(
-                BehandlingKategori.NASJONAL,
-                BehandlingUnderkategori.ORDINÆR,
-                søkerIdent,
-                BehandlingType.FØRSTEGANGSBEHANDLING
-            )
+            lagNyBehandling(søkerIdent)
         )
 
         val søknadDTO = lagSøknadDTO(søkerIdent = søkerIdent, barnasIdenter = listOf(barnIdent))
@@ -114,12 +110,7 @@ class SøknadGrunnlagTest(
 
         fagsakService.hentEllerOpprettFagsak(søkerAktør.aktivFødselsnummer())
         val behandling = stegService.håndterNyBehandling(
-            NyBehandling(
-                BehandlingKategori.NASJONAL,
-                BehandlingUnderkategori.ORDINÆR,
-                søkerIdent,
-                BehandlingType.FØRSTEGANGSBEHANDLING
-            )
+            lagNyBehandling(søkerIdent)
         )
         val søknadDTO = lagSøknadDTO(søkerIdent = søkerIdent, barnasIdenter = listOf(barnIdent))
 
@@ -173,12 +164,7 @@ class SøknadGrunnlagTest(
 
         fagsakService.hentEllerOpprettFagsak(søkerAktør.aktivFødselsnummer())
         val behandling = stegService.håndterNyBehandling(
-            NyBehandling(
-                BehandlingKategori.NASJONAL,
-                BehandlingUnderkategori.ORDINÆR,
-                søkerIdent,
-                BehandlingType.FØRSTEGANGSBEHANDLING
-            )
+            lagNyBehandling(søkerIdent)
         )
 
         stegService.håndterSøknad(
@@ -195,6 +181,14 @@ class SøknadGrunnlagTest(
         assertTrue(persongrunnlag.barna.any { it.aktør.aktivFødselsnummer() == folkeregistrertBarn })
         assertTrue(persongrunnlag.barna.none { it.aktør.aktivFødselsnummer() == uregistrertBarn })
     }
+
+    private fun lagNyBehandling(søkerIdent: String) = NyBehandling(
+        kategori = BehandlingKategori.NASJONAL,
+        underkategori = BehandlingUnderkategori.ORDINÆR,
+        søkersIdent = søkerIdent,
+        behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+        søknadMottattDato = LocalDate.now()
+    )
 
     @Test
     fun `Skal tilbakestille behandling ved endring på søknadsregistrering`() {

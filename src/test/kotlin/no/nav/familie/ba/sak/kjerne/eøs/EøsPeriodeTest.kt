@@ -7,13 +7,13 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.MAX_MÅNED
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.MIN_MÅNED
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.RegelverkMåned
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.VilkårResultatMåned
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.BOR_MED_SØKER
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.BOSATT_I_RIKET
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.GIFT_PARTNERSKAP
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.LOVLIG_OPPHOLD
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.UNDER_18_ÅR
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårRegelverk
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.YearMonth
@@ -131,10 +131,10 @@ internal class VilkårsvurderingTester(
             else -> false
         }
 
-    private fun finnRegelverk(gjeldendeTegn: Char?): Regelverk? =
+    private fun finnRegelverk(gjeldendeTegn: Char?): VilkårRegelverk? =
         when (gjeldendeTegn) {
-            'E' -> Regelverk.EØS_FORORDNINGEN
-            'N' -> Regelverk.NASJONALE_REGLER
+            'E' -> VilkårRegelverk.EØS_FORORDNINGEN
+            'N' -> VilkårRegelverk.NASJONALE_REGLER
             else -> null
         }
 
