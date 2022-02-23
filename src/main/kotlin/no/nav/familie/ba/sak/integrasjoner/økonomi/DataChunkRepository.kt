@@ -8,4 +8,5 @@ import java.util.UUID
 interface DataChunkRepository : JpaRepository<DataChunk, Long> {
     fun findByTransaksjonsIdAndChunkNr(transaksjonsId: UUID, chunkNr: Int): DataChunk
     fun findByTransaksjonsId(transaksjonsId: UUID): List<DataChunk>
+    fun findByErSendt(erSendt: Boolean): List<DataChunk>
 }

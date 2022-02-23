@@ -23,10 +23,27 @@ class KonsistensavstemMotOppdragStartTask(val avstemmingService: AvstemmingServi
             objectMapper.readValue(task.payload, KonsistensavstemmingStartTaskDTO::class.java)
         val transaksjonsId = UUID.randomUUID()
 
-        avstemmingService.konsistensavstemOppdragStart(
-            batchId = konsistensavstemmingTask.batchId,
-            avstemmingsdato = konsistensavstemmingTask.avstemmingdato,
-            transaksjonsId = transaksjonsId
+        avstemmingService.nullstillDataChunk()
+        avstemmingService.sendKonsistensavstemmingStart(konsistensavstemmingTask.avstemmingdato, transaksjonsId)
+
+        var relevanteBehandlinger = avstemmingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker()
+
+        for (chunkNr in 1..relevanteBehandlinger.totalPages) {
+            avstemmingService.opprettKonsistensavstemmingDataTask(
+                konsistensavstemmingTask.avstemmingdato,
+                relevanteBehandlinger,
+                konsistensavstemmingTask.batchId,
+                transaksjonsId,
+                chunkNr
+            )
+            relevanteBehandlinger =
+                avstemmingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker(relevanteBehandlinger.nextPageable())
+        }
+
+        avstemmingService.opprettKonsistensavstemmingAvsluttTask(
+            konsistensavstemmingTask.batchId,
+            transaksjonsId,
+            konsistensavstemmingTask.avstemmingdato
         )
     }
 
