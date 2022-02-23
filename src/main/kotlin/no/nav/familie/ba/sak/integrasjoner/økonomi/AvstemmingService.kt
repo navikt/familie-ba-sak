@@ -12,9 +12,12 @@ import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
+import java.math.BigInteger
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -61,11 +64,7 @@ class AvstemmingService(
             )
     }
 
-    @Transactional
-    fun konsistensavstemOppdragStart(batchId: Long, avstemmingsdato: LocalDateTime, transaksjonsId: UUID) {
-        opprettKonsistensavstemmingDataTasker(avstemmingsdato, batchId, transaksjonsId)
-        opprettKonsistensavstemmingAvsluttTask(batchId, transaksjonsId, avstemmingsdato)
-
+    fun sendKonsistensavstemmingStart(avstemmingsdato: LocalDateTime, transaksjonsId: UUID) {
         runCatching {
             økonomiKlient.konsistensavstemOppdragStart(
                 avstemmingsdato,
@@ -86,6 +85,13 @@ class AvstemmingService(
             )
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    fun nullstillDataChunk() {
+        dataChunkRepository.saveAllAndFlush(
+            dataChunkRepository.findByErSendt(false).map { dataChunk -> dataChunk.also { it.erSendt = true } }
+        )
+    }
+
     fun konsistensavstemOppdragData(
         avstemmingsdato: LocalDateTime,
         perioderTilAvstemming: List<PerioderForBehandling>,
@@ -94,6 +100,12 @@ class AvstemmingService(
     ) {
         logger.info("Utfører konsisensavstemming: Sender perioder for transaksjonsId $transaksjonsId og chunk nr $chunkNr")
         val dataChunk = dataChunkRepository.findByTransaksjonsIdAndChunkNr(transaksjonsId, chunkNr)
+
+        if (dataChunk.erSendt) {
+            logger.info("Utfører konsisensavstemming: Perioder for transaksjonsId $transaksjonsId og chunk nr $chunkNr er allerede sendt.")
+            return
+        }
+
         Result.runCatching {
             økonomiKlient.konsistensavstemOppdragData(
                 avstemmingsdato,
@@ -128,7 +140,8 @@ class AvstemmingService(
             )
     }
 
-    private fun opprettKonsistensavstemmingAvsluttTask(
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    fun opprettKonsistensavstemmingAvsluttTask(
         batchId: Long,
         transaksjonsId: UUID,
         avstemmingsdato: LocalDateTime
@@ -147,44 +160,44 @@ class AvstemmingService(
         taskRepository.save(konsistensavstemmingAvsluttTask)
     }
 
-    private fun opprettKonsistensavstemmingDataTasker(
+    fun hentSisteIverksatteBehandlingerFraLøpendeFagsaker() =
+        behandlingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker(
+            Pageable.ofSize(
+                KONSISTENSAVSTEMMING_DATA_CHUNK_STORLEK
+            ),
+        )
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    fun opprettKonsistensavstemmingDataTask(
         avstemmingsdato: LocalDateTime,
+        relevanteBehandlinger: Page<BigInteger>,
         batchId: Long,
-        transaksjonsId: UUID
-    ) {
-        var relevanteBehandlinger =
-            behandlingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker(
-                Pageable.ofSize(
-                    KONSISTENSAVSTEMMING_DATA_CHUNK_STORLEK
+        transaksjonsId: UUID,
+        chunkNr: Int
+    ): Page<BigInteger> {
+        val perioderTilAvstemming =
+            hentDataForKonsistensavstemming(
+                avstemmingsdato,
+                relevanteBehandlinger.content.map { it.toLong() }
+            )
+        val batch = batchRepository.getById(batchId)
+
+        logger.info("Oppretter konsisensavstemmingstasker for transaksjonsId $transaksjonsId og chunk $chunkNr med ${perioderTilAvstemming.size} løpende saker")
+        val konsistensavstemmingDataTask = Task(
+            type = KonsistensavstemMotOppdragDataTask.TASK_STEP_TYPE,
+            payload = objectMapper.writeValueAsString(
+                KonsistensavstemmingDataTaskDTO(
+                    transaksjonsId = transaksjonsId,
+                    chunkNr = chunkNr,
+                    avstemmingdato = avstemmingsdato,
+                    perioderForBehandling = perioderTilAvstemming,
                 )
             )
+        )
+        taskRepository.save(konsistensavstemmingDataTask)
+        dataChunkRepository.save(DataChunk(batch = batch, transaksjonsId = transaksjonsId, chunkNr = chunkNr))
 
-        for (chunkNr in 1..relevanteBehandlinger.totalPages) {
-            val perioderTilAvstemming =
-                hentDataForKonsistensavstemming(
-                    avstemmingsdato,
-                    relevanteBehandlinger.content.map { it.toLong() }
-                )
-            val batch = batchRepository.getById(batchId)
-
-            logger.info("Oppretter konsisensavstemmingstasker for transaksjonsId $transaksjonsId og chunk $chunkNr med ${perioderTilAvstemming.size} løpende saker")
-            val konsistensavstemmingDataTask = Task(
-                type = KonsistensavstemMotOppdragDataTask.TASK_STEP_TYPE,
-                payload = objectMapper.writeValueAsString(
-                    KonsistensavstemmingDataTaskDTO(
-                        transaksjonsId = transaksjonsId,
-                        chunkNr = chunkNr,
-                        avstemmingdato = avstemmingsdato,
-                        perioderForBehandling = perioderTilAvstemming,
-                    )
-                )
-            )
-            taskRepository.save(konsistensavstemmingDataTask)
-            dataChunkRepository.save(DataChunk(batch = batch, transaksjonsId = transaksjonsId, chunkNr = chunkNr))
-
-            relevanteBehandlinger =
-                behandlingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker(relevanteBehandlinger.nextPageable())
-        }
+        return behandlingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker(relevanteBehandlinger.nextPageable())
     }
 
     private fun hentDataForKonsistensavstemming(
