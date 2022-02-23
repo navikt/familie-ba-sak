@@ -321,13 +321,9 @@ class VedtaksperiodeService(
         val andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(
             behandlingId = behandling.id
         )
-        val endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(
-            behandling.id
-        )
+
         val persongrunnlag =
             persongrunnlagService.hentAktivThrows(behandling.id)
-
-        val sanityBegrunnelser = sanityService.hentSanityBegrunnelser()
 
         val erIngenOverlappVedtaksperiodeTogglePå = featureToggleService.isEnabled(INGEN_OVERLAPP_VEDTAKSPERIODER)
 
@@ -343,26 +339,46 @@ class VedtaksperiodeService(
             behandling.status == BehandlingStatus.UTREDES && utvidedeVedtaksperioderMedBegrunnelser.isNotEmpty()
 
         return if (skalSendeMedGyldigeBegrunnelser) {
-            val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id)
-                ?: error("Finner ikke vilkårsvurdering ved begrunning av vedtak")
-
-            utvidedeVedtaksperioderMedBegrunnelser.map { utvidetVedtaksperiodeMedBegrunnelser ->
-                val aktørIderMedUtbetaling =
-                    hentAktørerMedUtbetaling(utvidetVedtaksperiodeMedBegrunnelser, persongrunnlag).map { it.aktørId }
-
-                utvidetVedtaksperiodeMedBegrunnelser.copy(
-                    gyldigeBegrunnelser = hentGyldigeBegrunnelserForVedtaksperiode(
-                        utvidetVedtaksperiodeMedBegrunnelser = utvidetVedtaksperiodeMedBegrunnelser,
-                        sanityBegrunnelser = sanityBegrunnelser,
-                        persongrunnlag = persongrunnlag,
-                        vilkårsvurdering = vilkårsvurdering,
-                        aktørIderMedUtbetaling = aktørIderMedUtbetaling,
-                        endretUtbetalingAndeler = endretUtbetalingAndeler,
-                        andelerTilkjentYtelse = andelerTilkjentYtelse
-                    )
-                )
-            }
+            hentUtvidedeVedtaksperioderMedBegrunnelserOgGyldigeBegrunnelser(
+                behandling = behandling,
+                utvidedeVedtaksperioderMedBegrunnelser = utvidedeVedtaksperioderMedBegrunnelser,
+                persongrunnlag = persongrunnlag,
+                andelerTilkjentYtelse = andelerTilkjentYtelse
+            )
         } else utvidedeVedtaksperioderMedBegrunnelser
+    }
+
+    private fun hentUtvidedeVedtaksperioderMedBegrunnelserOgGyldigeBegrunnelser(
+        behandling: Behandling,
+        utvidedeVedtaksperioderMedBegrunnelser: List<UtvidetVedtaksperiodeMedBegrunnelser>,
+        persongrunnlag: PersonopplysningGrunnlag,
+        andelerTilkjentYtelse: List<AndelTilkjentYtelse>
+    ): List<UtvidetVedtaksperiodeMedBegrunnelser> {
+        val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id)
+            ?: error("Finner ikke vilkårsvurdering ved begrunning av vedtak")
+
+        val sanityBegrunnelser = sanityService.hentSanityBegrunnelser()
+
+        val endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(
+            behandling.id
+        )
+
+        return utvidedeVedtaksperioderMedBegrunnelser.map { utvidetVedtaksperiodeMedBegrunnelser ->
+            val aktørIderMedUtbetaling =
+                hentAktørerMedUtbetaling(utvidetVedtaksperiodeMedBegrunnelser, persongrunnlag).map { it.aktørId }
+
+            utvidetVedtaksperiodeMedBegrunnelser.copy(
+                gyldigeBegrunnelser = hentGyldigeBegrunnelserForVedtaksperiode(
+                    utvidetVedtaksperiodeMedBegrunnelser = utvidetVedtaksperiodeMedBegrunnelser,
+                    sanityBegrunnelser = sanityBegrunnelser,
+                    persongrunnlag = persongrunnlag,
+                    vilkårsvurdering = vilkårsvurdering,
+                    aktørIderMedUtbetaling = aktørIderMedUtbetaling,
+                    endretUtbetalingAndeler = endretUtbetalingAndeler,
+                    andelerTilkjentYtelse = andelerTilkjentYtelse
+                )
+            )
+        }
     }
 
     private fun hentAktørerMedUtbetaling(
