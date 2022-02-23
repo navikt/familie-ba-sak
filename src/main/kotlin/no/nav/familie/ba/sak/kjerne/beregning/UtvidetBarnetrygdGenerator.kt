@@ -142,12 +142,12 @@ fun VilkårResultat.tilDatoSegment(
     utvidetVilkår: List<VilkårResultat>,
     søkerAktør: Aktør
 ): LocalDateSegment<List<UtvidetBarnetrygdGenerator.PeriodeData>> {
-    if (this.periodeFom == null) throw Feil("Fom må være satt på søkers periode ved utvida barnetrygd")
+    if (this.periodeFom == null) throw Feil("Fom må være satt på søkers periode ved utvidet barnetrygd")
     val fraOgMedDato = this.periodeFom!!.førsteDagINesteMåned()
     val tilOgMedDato = finnTilOgMedDatoForUtvidetSegment(tilOgMed = this.periodeTom, vilkårResultater = utvidetVilkår)
     if (tilOgMedDato.toYearMonth() == fraOgMedDato.toYearMonth()
         .minusMonths(1)
-    ) throw FunksjonellFeil("Du kan ikke legge inn fom. og tom. innenfor samme kalendermåned.")
+    ) throw FunksjonellFeil("Du kan ikke legge inn fom. og tom. innenfor samme kalendermåned.Gå til utvidet barnetrygd vilkåret for å endre.")
     return LocalDateSegment(
         fraOgMedDato,
         tilOgMedDato,
