@@ -327,7 +327,7 @@ class VedtaksperiodeService(
 
         val erIngenOverlappVedtaksperiodeTogglePå = featureToggleService.isEnabled(INGEN_OVERLAPP_VEDTAKSPERIODER)
 
-        val utvidedeVedtaksperioderMedBegrunnelser = vedtaksperioderMedBegrunnelser.map {
+        val utvidetVedtaksperioderMedBegrunnelser = vedtaksperioderMedBegrunnelser.map {
             it.tilUtvidetVedtaksperiodeMedBegrunnelser(
                 andelerTilkjentYtelse = andelerTilkjentYtelse,
                 personopplysningGrunnlag = persongrunnlag,
@@ -336,19 +336,19 @@ class VedtaksperiodeService(
         }
 
         val skalSendeMedGyldigeBegrunnelser =
-            behandling.status == BehandlingStatus.UTREDES && utvidedeVedtaksperioderMedBegrunnelser.isNotEmpty()
+            behandling.status == BehandlingStatus.UTREDES && utvidetVedtaksperioderMedBegrunnelser.isNotEmpty()
 
         return if (skalSendeMedGyldigeBegrunnelser) {
-            hentUtvidedeVedtaksperioderMedBegrunnelserOgGyldigeBegrunnelser(
+            hentUtvidetVedtaksperioderMedBegrunnelserOgGyldigeBegrunnelser(
                 behandling = behandling,
-                utvidedeVedtaksperioderMedBegrunnelser = utvidedeVedtaksperioderMedBegrunnelser,
+                utvidedeVedtaksperioderMedBegrunnelser = utvidetVedtaksperioderMedBegrunnelser,
                 persongrunnlag = persongrunnlag,
                 andelerTilkjentYtelse = andelerTilkjentYtelse
             )
-        } else utvidedeVedtaksperioderMedBegrunnelser
+        } else utvidetVedtaksperioderMedBegrunnelser
     }
 
-    private fun hentUtvidedeVedtaksperioderMedBegrunnelserOgGyldigeBegrunnelser(
+    private fun hentUtvidetVedtaksperioderMedBegrunnelserOgGyldigeBegrunnelser(
         behandling: Behandling,
         utvidedeVedtaksperioderMedBegrunnelser: List<UtvidetVedtaksperiodeMedBegrunnelser>,
         persongrunnlag: PersonopplysningGrunnlag,
