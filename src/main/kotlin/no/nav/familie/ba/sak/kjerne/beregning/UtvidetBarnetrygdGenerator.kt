@@ -147,7 +147,7 @@ fun VilkårResultat.tilDatoSegment(
     val tilOgMedDato = finnTilOgMedDatoForUtvidetSegment(tilOgMed = this.periodeTom, vilkårResultater = utvidetVilkår)
     if (tilOgMedDato.toYearMonth() == fraOgMedDato.toYearMonth()
         .minusMonths(1)
-    ) throw FunksjonellFeil("Du kan ikke legge inn fom. og tom. innenfor samme kalendermåned.Gå til utvidet barnetrygd vilkåret for å endre.")
+    ) throw FunksjonellFeil("Du kan ikke legge inn fom. og tom. innenfor samme kalendermåned. Gå til utvidet barnetrygd vilkåret for å endre.")
     return LocalDateSegment(
         fraOgMedDato,
         tilOgMedDato,
