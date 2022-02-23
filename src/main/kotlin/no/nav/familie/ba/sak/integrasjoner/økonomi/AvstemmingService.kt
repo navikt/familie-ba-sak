@@ -160,12 +160,10 @@ class AvstemmingService(
         taskRepository.save(konsistensavstemmingAvsluttTask)
     }
 
-    fun hentSisteIverksatteBehandlingerFraLøpendeFagsaker() =
-        behandlingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker(
-            Pageable.ofSize(
-                KONSISTENSAVSTEMMING_DATA_CHUNK_STORLEK
-            ),
-        )
+    fun hentSisteIverksatteBehandlingerFraLøpendeFagsaker(
+        pageable: Pageable = Pageable.ofSize(KONSISTENSAVSTEMMING_DATA_CHUNK_STORLEK)
+    ) =
+        behandlingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker(pageable)
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     fun opprettKonsistensavstemmingDataTask(
@@ -174,7 +172,7 @@ class AvstemmingService(
         batchId: Long,
         transaksjonsId: UUID,
         chunkNr: Int
-    ): Page<BigInteger> {
+    ) {
         val perioderTilAvstemming =
             hentDataForKonsistensavstemming(
                 avstemmingsdato,
@@ -196,8 +194,6 @@ class AvstemmingService(
         )
         taskRepository.save(konsistensavstemmingDataTask)
         dataChunkRepository.save(DataChunk(batch = batch, transaksjonsId = transaksjonsId, chunkNr = chunkNr))
-
-        return behandlingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker(relevanteBehandlinger.nextPageable())
     }
 
     private fun hentDataForKonsistensavstemming(

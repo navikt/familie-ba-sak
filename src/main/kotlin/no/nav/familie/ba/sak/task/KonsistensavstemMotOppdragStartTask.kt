@@ -29,13 +29,15 @@ class KonsistensavstemMotOppdragStartTask(val avstemmingService: AvstemmingServi
         var relevanteBehandlinger = avstemmingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker()
 
         for (chunkNr in 1..relevanteBehandlinger.totalPages) {
-            relevanteBehandlinger = avstemmingService.opprettKonsistensavstemmingDataTask(
+            avstemmingService.opprettKonsistensavstemmingDataTask(
                 konsistensavstemmingTask.avstemmingdato,
                 relevanteBehandlinger,
                 konsistensavstemmingTask.batchId,
                 transaksjonsId,
                 chunkNr
             )
+            relevanteBehandlinger =
+                avstemmingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker(relevanteBehandlinger.nextPageable())
         }
 
         avstemmingService.opprettKonsistensavstemmingAvsluttTask(
