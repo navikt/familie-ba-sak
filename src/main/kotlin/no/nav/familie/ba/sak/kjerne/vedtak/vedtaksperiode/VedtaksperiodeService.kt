@@ -365,6 +365,8 @@ class VedtaksperiodeService(
             behandling.id
         )
 
+        val erIngenOverlappVedtaksperiodeToggelPå = featureToggleService.isEnabled(INGEN_OVERLAPP_VEDTAKSPERIODER)
+
         return utvidedeVedtaksperioderMedBegrunnelser.map { utvidetVedtaksperiodeMedBegrunnelser ->
             val aktørIderMedUtbetaling =
                 hentAktørerMedUtbetaling(utvidetVedtaksperiodeMedBegrunnelser, persongrunnlag).map { it.aktørId }
@@ -377,7 +379,8 @@ class VedtaksperiodeService(
                     vilkårsvurdering = vilkårsvurdering,
                     aktørIderMedUtbetaling = aktørIderMedUtbetaling,
                     endretUtbetalingAndeler = endretUtbetalingAndeler,
-                    andelerTilkjentYtelse = andelerTilkjentYtelse
+                    andelerTilkjentYtelse = andelerTilkjentYtelse,
+                    erIngenOverlappVedtaksperiodeToggelPå = erIngenOverlappVedtaksperiodeToggelPå
                 )
             )
         }
