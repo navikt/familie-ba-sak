@@ -83,7 +83,7 @@ class AvstemmingServiceTest {
             )
         } returns Ressurs.Companion.success("")
 
-        avstemmingService.konsistensavstemOppdragStart(
+        konsistensavstemOppdragStart(
             batchId = batchId,
             avstemmingsdato = avstemmingsdato,
             transaksjonsId = transaksjonsId
@@ -146,5 +146,28 @@ class AvstemmingServiceTest {
         assertEquals(1, dataChunkSlot.captured.chunkNr)
         assertEquals(transaksjonsId, dataChunkSlot.captured.transaksjonsId)
         assertEquals(true, dataChunkSlot.captured.erSendt)
+    }
+
+    private fun konsistensavstemOppdragStart(batchId: Long, avstemmingsdato: LocalDateTime, transaksjonsId: UUID) {
+        avstemmingService.nullstillDataChunk()
+
+        avstemmingService.sendKonsistensavstemmingStart(avstemmingsdato, transaksjonsId)
+
+        var relevanteBehandlinger =
+            avstemmingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker()
+
+        for (chunkNr in 1..relevanteBehandlinger.totalPages) {
+            avstemmingService.opprettKonsistensavstemmingDataTask(
+                avstemmingsdato,
+                relevanteBehandlinger,
+                batchId,
+                transaksjonsId,
+                chunkNr
+            )
+            relevanteBehandlinger =
+                avstemmingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker(relevanteBehandlinger.nextPageable())
+        }
+
+        avstemmingService.opprettKonsistensavstemmingAvsluttTask(batchId, transaksjonsId, avstemmingsdato)
     }
 }
