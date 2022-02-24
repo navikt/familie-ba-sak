@@ -93,18 +93,15 @@ class OppgaveController(
 
         val oppgave = oppgaveService.hentOppgave(oppgaveId)
         val aktør = oppgave.aktoerId?.let { personidentService.hentAktør(it) }
-            ?: error("Ved henting av personident er aktørId null eller tom")
-
-        val minimalFagsak = fagsakService.hentMinimalFagsakForPerson(aktør).data
 
         val dataForManuellJournalføring = DataForManuellJournalføring(
             oppgave = oppgave,
             journalpost = null,
-            person = aktør.let {
+            person = aktør?.let {
                 personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(it)
                     .tilRestPersonInfo(it.aktivFødselsnummer())
             },
-            minimalFagsak = minimalFagsak
+            minimalFagsak = if (aktør != null) fagsakService.hentMinimalFagsakForPerson(aktør).data else null
         )
 
         val journalpost: Journalpost? =
