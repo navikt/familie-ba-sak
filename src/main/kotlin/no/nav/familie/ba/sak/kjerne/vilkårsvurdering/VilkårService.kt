@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType.MIGRERING_FRA_INFOTRYGD
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType.REVURDERING
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
@@ -308,6 +309,12 @@ class VilkårService(
                     annenBehandling = forrigeBehandlingSomErVedtatt
                 )
 
+            if (behandling.type == REVURDERING && behandling.opprettetÅrsak == BehandlingÅrsak.DØDSFALL_BRUKER) {
+                vilkårsvurdering.personResultater.single { it.erSøkersResultater() }.vilkårResultater.forEach {
+                    vilkårResultat ->
+                    vilkårResultat.periodeTom = personopplysningGrunnlag.søker.dødsfall?.dødsfallDato
+                }
+            }
             endretUtbetalingAndelService.kopierEndretUtbetalingAndelFraForrigeBehandling(
                 behandling,
                 forrigeBehandlingSomErVedtatt
