@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.erStartPåUtvidetSammeMåne
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.utledSegmenter
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.fpsak.tidsserie.LocalDateInterval
 import no.nav.fpsak.tidsserie.LocalDateSegment
@@ -103,8 +104,12 @@ data class AndelTilkjentYtelse(
     var periodeOffset: Long? = null, // Brukes for å koble seg på tidligere kjeder sendt til økonomi
 
     @Column(name = "forrige_periode_offset")
-    var forrigePeriodeOffset: Long? = null
+    var forrigePeriodeOffset: Long? = null,
 
+    // TODO: Fjern optional, den skal settes til enten nasjonal eller eøs.
+    @Enumerated(EnumType.STRING)
+    @Column(name = "vurdert_etter")
+    var vurdertEtter: Regelverk? = null
 ) : BaseEntitet() {
 
     val periode
@@ -120,6 +125,7 @@ data class AndelTilkjentYtelse(
         val annen = other as AndelTilkjentYtelse
         return Objects.equals(behandlingId, annen.behandlingId) &&
             Objects.equals(type, annen.type) &&
+            Objects.equals(vurdertEtter, annen.vurdertEtter) &&
             Objects.equals(kalkulertUtbetalingsbeløp, annen.kalkulertUtbetalingsbeløp) &&
             Objects.equals(stønadFom, annen.stønadFom) &&
             Objects.equals(stønadTom, annen.stønadTom) &&
@@ -131,6 +137,7 @@ data class AndelTilkjentYtelse(
             id,
             behandlingId,
             type,
+            vurdertEtter,
             kalkulertUtbetalingsbeløp,
             stønadFom,
             stønadTom,
@@ -139,7 +146,7 @@ data class AndelTilkjentYtelse(
     }
 
     override fun toString(): String {
-        return "AndelTilkjentYtelse(id = $id, behandling = $behandlingId, " +
+        return "AndelTilkjentYtelse(id = $id, behandling = $behandlingId, type=$type, vurdertEtter=$vurdertEtter," +
             "beløp = $kalkulertUtbetalingsbeløp, stønadFom = $stønadFom, stønadTom = $stønadTom, periodeOffset = $periodeOffset)"
     }
 
@@ -149,12 +156,14 @@ data class AndelTilkjentYtelse(
                 this.stønadFom == other.stønadFom &&
                 this.stønadTom == other.stønadTom &&
                 this.kalkulertUtbetalingsbeløp == other.kalkulertUtbetalingsbeløp &&
+                this.vurdertEtter == other.vurdertEtter &&
                 this.type == other.type
             )
     }
 
     fun overlapperMed(andelFraAnnenBehandling: AndelTilkjentYtelse): Boolean {
-        return this.type == andelFraAnnenBehandling.type &&
+        return this.vurdertEtter == andelFraAnnenBehandling.vurdertEtter &&
+            this.type == andelFraAnnenBehandling.type &&
             this.overlapperPeriode(andelFraAnnenBehandling.periode)
     }
 
@@ -164,7 +173,7 @@ data class AndelTilkjentYtelse(
 
     fun stønadsPeriode() = MånedPeriode(this.stønadFom, this.stønadTom)
 
-    fun erEøs() = this.type == YtelseType.EØS
+    fun erEøs() = this.vurdertEtter == Regelverk.EØS_FORORDNINGEN
 
     fun erUtvidet() = this.type == YtelseType.UTVIDET_BARNETRYGD
 
@@ -234,6 +243,7 @@ fun List<AndelTilkjentYtelse>.slåSammenBack2BackAndelsperioderMedSammeBeløp():
             andel!!.stønadTom.plusMonths(1).equals(it.stønadFom) &&
                 andel!!.aktør == it.aktør &&
                 andel!!.kalkulertUtbetalingsbeløp == it.kalkulertUtbetalingsbeløp &&
+                andel!!.vurdertEtter == it.vurdertEtter &&
                 andel!!.type == it.type
         }
         andel = if (back2BackAndelsperiodeMedSammeBeløp != null) {
@@ -299,7 +309,6 @@ enum class YtelseType(val klassifisering: String) {
     ORDINÆR_BARNETRYGD("BATR"),
     UTVIDET_BARNETRYGD("BATR"),
     SMÅBARNSTILLEGG("BATRSMA"),
-    EØS("BATR"),
     MANUELL_VURDERING("BATR");
 
     fun erKnyttetTilSøker() = this == SMÅBARNSTILLEGG || this == UTVIDET_BARNETRYGD

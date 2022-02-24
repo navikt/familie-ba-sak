@@ -9,7 +9,11 @@ object YtelseSatsMapper {
 
     fun map(ytelseType: YtelseType, barnetsAlder: Int? = null): SatsType? {
 
-        return if ((barnetsAlder ?: Int.MAX_VALUE) <= MAX_ALDER_TILLEGG_ORDINÆR_BARNETRYGD && ytelseType == YtelseType.ORDINÆR_BARNETRYGD) {
+        return if ((
+            barnetsAlder
+                ?: Int.MAX_VALUE
+            ) <= MAX_ALDER_TILLEGG_ORDINÆR_BARNETRYGD && ytelseType == YtelseType.ORDINÆR_BARNETRYGD
+        ) {
             SatsType.TILLEGG_ORBA
         } else {
             map(ytelseType)
@@ -21,7 +25,6 @@ object YtelseSatsMapper {
             YtelseType.ORDINÆR_BARNETRYGD -> SatsType.ORBA
             YtelseType.UTVIDET_BARNETRYGD -> SatsType.ORBA
             YtelseType.SMÅBARNSTILLEGG -> SatsType.SMA
-            YtelseType.EØS -> null
             YtelseType.MANUELL_VURDERING -> null
         }
     }

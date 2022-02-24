@@ -32,8 +32,8 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingUtils.mut
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingUtils.muterPersonResultatPost
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingUtils.muterPersonVilkårResultaterPut
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårRegelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat.Companion.VilkårResultatComparator
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
@@ -74,7 +74,7 @@ class VilkårService(
     ): List<RestPersonResultat> {
 
         if (!featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS)) {
-            if (restPersonResultat.vilkårResultater.any { it.vurderesEtter == VilkårRegelverk.EØS_FORORDNINGEN })
+            if (restPersonResultat.vilkårResultater.any { it.vurderesEtter == Regelverk.EØS_FORORDNINGEN })
                 throw Feil(
                     message = "EØS er ikke togglet på",
                     frontendFeilmelding = "Funksjonalitet for EØS er ikke lansert."
@@ -310,8 +310,7 @@ class VilkårService(
                 )
 
             if (behandling.type == REVURDERING && behandling.opprettetÅrsak == BehandlingÅrsak.DØDSFALL_BRUKER) {
-                vilkårsvurdering.personResultater.single { it.erSøkersResultater() }.vilkårResultater.forEach {
-                    vilkårResultat ->
+                vilkårsvurdering.personResultater.single { it.erSøkersResultater() }.vilkårResultater.forEach { vilkårResultat ->
                     vilkårResultat.periodeTom = personopplysningGrunnlag.søker.dødsfall?.dødsfallDato
                 }
             }
