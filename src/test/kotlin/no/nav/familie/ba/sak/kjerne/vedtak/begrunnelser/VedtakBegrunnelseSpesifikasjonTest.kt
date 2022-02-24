@@ -13,7 +13,6 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.brev.UtvidetScenarioForEndringsperiode
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertPersonResultat
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.tilMinimertVedtaksperiode
@@ -221,7 +220,7 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
                         tom = LocalDate.of(2021, 10, 31)
                     ).tilMinimertVedtaksperiode(),
                     minimerteEndredeUtbetalingAndeler = listOf(
-                        EndretUtbetalingAndel(
+                        lagEndretUtbetalingAndel(
                             prosent = BigDecimal.ZERO,
                             behandlingId = behandling.id,
                             person = barn,
@@ -254,7 +253,7 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
                         tom = LocalDate.of(2021, 10, 31)
                     ).tilMinimertVedtaksperiode(),
                     minimerteEndredeUtbetalingAndeler = listOf(
-                        EndretUtbetalingAndel(
+                        lagEndretUtbetalingAndel(
                             prosent = BigDecimal.ZERO,
                             behandlingId = behandling.id,
                             person = barn,
