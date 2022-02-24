@@ -50,6 +50,7 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
         assertTrue(
             VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET
                 .triggesForPeriode(
+                    erIngenOverlappVedtaksperiodeToggelPå = false,
                     sanityBegrunnelser = sanityBegrunnelser,
                     minimertVedtaksperiode = utvidetVedtaksperiodeMedBegrunnelser.tilMinimertVedtaksperiode(),
                     minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
@@ -67,6 +68,7 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
         assertFalse(
             VedtakBegrunnelseSpesifikasjon.OPPHØR_UTVANDRET
                 .triggesForPeriode(
+                    erIngenOverlappVedtaksperiodeToggelPå = false,
                     sanityBegrunnelser = sanityBegrunnelser,
                     minimertVedtaksperiode = utvidetVedtaksperiodeMedBegrunnelser.tilMinimertVedtaksperiode(),
                     minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
@@ -84,6 +86,7 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
         assertFalse(
             VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR
                 .triggesForPeriode(
+                    erIngenOverlappVedtaksperiodeToggelPå = false,
                     sanityBegrunnelser = sanityBegrunnelser,
                     minimertVedtaksperiode = utvidetVedtaksperiodeMedBegrunnelser.tilMinimertVedtaksperiode(),
                     minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
@@ -107,6 +110,7 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
         assertTrue(
             VedtakBegrunnelseSpesifikasjon.REDUKSJON_UNDER_6_ÅR
                 .triggesForPeriode(
+                    erIngenOverlappVedtaksperiodeToggelPå = false,
                     sanityBegrunnelser = sanityBegrunnelser,
                     minimertVedtaksperiode = utvidetVedtaksperiodeMedBegrunnelser.tilMinimertVedtaksperiode(),
                     minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
@@ -130,6 +134,7 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
         assertTrue(
             VedtakBegrunnelseSpesifikasjon.INNVILGET_SATSENDRING
                 .triggesForPeriode(
+                    erIngenOverlappVedtaksperiodeToggelPå = false,
                     sanityBegrunnelser = sanityBegrunnelser,
                     minimertVedtaksperiode = vedtaksperiodeMedBegrunnelserSatsEndring.tilMinimertVedtaksperiode(),
                     minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
@@ -153,6 +158,7 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
         assertFalse(
             VedtakBegrunnelseSpesifikasjon.INNVILGET_SATSENDRING
                 .triggesForPeriode(
+                    erIngenOverlappVedtaksperiodeToggelPå = false,
                     sanityBegrunnelser = sanityBegrunnelser,
                     minimertVedtaksperiode = vedtaksperiodeMedBegrunnelserSatsEndring.tilMinimertVedtaksperiode(),
                     minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
@@ -172,6 +178,7 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
         assertFalse(
             VedtakBegrunnelseSpesifikasjon.INNVILGET_LOVLIG_OPPHOLD_EØS_BORGER
                 .triggesForPeriode(
+                    erIngenOverlappVedtaksperiodeToggelPå = false,
                     sanityBegrunnelser = sanityBegrunnelser,
                     minimertVedtaksperiode = utvidetVedtaksperiodeMedBegrunnelser.tilMinimertVedtaksperiode(),
                     minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
@@ -191,6 +198,7 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
         assertTrue(
             VedtakBegrunnelseSpesifikasjon.INNVILGET_LOVLIG_OPPHOLD_EØS_BORGER
                 .triggesForPeriode(
+                    erIngenOverlappVedtaksperiodeToggelPå = false,
                     sanityBegrunnelser = sanityBegrunnelser,
                     minimertVedtaksperiode = utvidetVedtaksperiodeMedBegrunnelser.tilMinimertVedtaksperiode(),
                     minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
@@ -210,6 +218,7 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
         assertTrue(
             VedtakBegrunnelseSpesifikasjon.ETTER_ENDRET_UTBETALING_AVTALE_DELT_BOSTED_FØLGES
                 .triggesForPeriode(
+                    erIngenOverlappVedtaksperiodeToggelPå = false,
                     sanityBegrunnelser = sanityBegrunnelser,
                     minimertePersoner = personopplysningGrunnlag.tilMinimertePersoner(),
                     minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
@@ -243,6 +252,7 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
         assertFalse(
             VedtakBegrunnelseSpesifikasjon.ETTER_ENDRET_UTBETALING_AVTALE_DELT_BOSTED_FØLGES
                 .triggesForPeriode(
+                    erIngenOverlappVedtaksperiodeToggelPå = false,
                     sanityBegrunnelser = sanityBegrunnelser,
                     minimertePersoner = personopplysningGrunnlag.tilMinimertePersoner(),
                     minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },

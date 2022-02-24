@@ -147,7 +147,8 @@ fun hentGyldigeBegrunnelserForVedtaksperiode(
     vilkårsvurdering: Vilkårsvurdering,
     aktørIderMedUtbetaling: List<String>,
     endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
-    andelerTilkjentYtelse: List<AndelTilkjentYtelse>
+    andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
+    erIngenOverlappVedtaksperiodeToggelPå: Boolean,
 ) = hentGyldigeBegrunnelserForVedtaksperiodeMinimert(
     minimertVedtaksperiode = utvidetVedtaksperiodeMedBegrunnelser.tilMinimertVedtaksperiode(),
     sanityBegrunnelser = sanityBegrunnelser,
@@ -168,7 +169,8 @@ fun hentGyldigeBegrunnelserForVedtaksperiode(
     utvidetScenarioForEndringsperiode = andelerTilkjentYtelse
         .hentUtvidetScenarioForEndringsperiode(
             utvidetVedtaksperiodeMedBegrunnelser.hentMånedPeriode()
-        )
+        ),
+    erIngenOverlappVedtaksperiodeToggelPå = erIngenOverlappVedtaksperiodeToggelPå
 )
 
 fun hentGyldigeBegrunnelserForVedtaksperiodeMinimert(
@@ -181,12 +183,13 @@ fun hentGyldigeBegrunnelserForVedtaksperiodeMinimert(
     erFørsteVedtaksperiodePåFagsak: Boolean,
     ytelserForSøkerForrigeMåned: List<YtelseType>,
     utvidetScenarioForEndringsperiode: UtvidetScenarioForEndringsperiode,
+    erIngenOverlappVedtaksperiodeToggelPå: Boolean,
 ): List<VedtakBegrunnelseSpesifikasjon> {
     val tillateBegrunnelserForVedtakstype = VedtakBegrunnelseSpesifikasjon.values()
         .filter {
             minimertVedtaksperiode
                 .type
-                .tillatteBegrunnelsestyper
+                .tillatteBegrunnelsestyper(erIngenOverlappVedtaksperiodeToggelPå)
                 .contains(it.vedtakBegrunnelseType)
         }
 
@@ -208,7 +211,8 @@ fun hentGyldigeBegrunnelserForVedtaksperiodeMinimert(
                                 sanityBegrunnelser = sanityBegrunnelser,
                                 erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
                                 ytelserForSøkerForrigeMåned = ytelserForSøkerForrigeMåned,
-                                utvidetScenarioForEndringsperiode = utvidetScenarioForEndringsperiode
+                                utvidetScenarioForEndringsperiode = utvidetScenarioForEndringsperiode,
+                                erIngenOverlappVedtaksperiodeToggelPå = erIngenOverlappVedtaksperiodeToggelPå,
                             )
                         ) {
                             acc.add(standardBegrunnelse)
