@@ -42,6 +42,7 @@ class BrevBegrunnelseTest {
                     erFørsteVedtaksperiodePåFagsak = brevBegrunnelserTestConfig.erFørsteVedtaksperiodePåFagsak,
                     ytelserForSøkerForrigeMåned = brevBegrunnelserTestConfig.ytelserForSøkerForrigeMåned,
                     utvidetScenarioForEndringsperiode = brevBegrunnelserTestConfig.utvidetScenarioForEndringsperiode,
+                    erIngenOverlappVedtaksperiodeToggelPå = false,
                 )
             } catch (e: Exception) {
                 testReporter.publishEntry(

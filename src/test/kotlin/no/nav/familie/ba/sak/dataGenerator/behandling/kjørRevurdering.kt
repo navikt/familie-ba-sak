@@ -381,7 +381,8 @@ fun leggTilAlleGyldigeBegrunnelserPåVedtaksperiodeIBehandling(
         utvidetScenarioForEndringsperiode = andelerTilkjentYtelse
             .hentUtvidetScenarioForEndringsperiode(
                 utvidetVedtaksperiodeMedBegrunnelser.hentMånedPeriode()
-            )
+            ),
+        erIngenOverlappVedtaksperiodeToggelPå = false
     )
 
     vedtaksperiodeService.oppdaterVedtaksperiodeMedStandardbegrunnelser(

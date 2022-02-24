@@ -38,6 +38,7 @@ fun VedtakBegrunnelseSpesifikasjon.triggesForPeriode(
     erFørsteVedtaksperiodePåFagsak: Boolean,
     ytelserForSøkerForrigeMåned: List<YtelseType>,
     utvidetScenarioForEndringsperiode: UtvidetScenarioForEndringsperiode,
+    erIngenOverlappVedtaksperiodeToggelPå: Boolean,
 ): Boolean {
 
     val triggesAv =
@@ -75,7 +76,8 @@ fun VedtakBegrunnelseSpesifikasjon.triggesForPeriode(
             minimertVedtaksperiode = minimertVedtaksperiode,
             aktuellePersoner = aktuellePersoner,
             sanityBegrunnelse = sanityBegrunnelse,
-            utvidetScenarioForEndringsperiode = utvidetScenarioForEndringsperiode
+            utvidetScenarioForEndringsperiode = utvidetScenarioForEndringsperiode,
+            erIngenOverlappVedtaksperiodeToggelPå = erIngenOverlappVedtaksperiodeToggelPå,
         )
 
         else -> hentPersonerForAlleUtgjørendeVilkår(
@@ -99,6 +101,7 @@ private fun erEndretTriggerErOppfylt(
     aktuellePersoner: List<MinimertPerson>,
     sanityBegrunnelse: SanityBegrunnelse,
     utvidetScenarioForEndringsperiode: UtvidetScenarioForEndringsperiode,
+    erIngenOverlappVedtaksperiodeToggelPå: Boolean
 ): Boolean =
     if (triggesAv.etterEndretUtbetaling) {
         minimertVedtaksperiode.type != Vedtaksperiodetype.ENDRET_UTBETALING &&
@@ -112,7 +115,7 @@ private fun erEndretTriggerErOppfylt(
         val endredeAndelerSomOverlapperVedtaksperiode = minimertVedtaksperiode
             .finnEndredeAndelerISammePeriode(minimerteEndredeUtbetalingAndeler)
 
-        minimertVedtaksperiode.type == Vedtaksperiodetype.ENDRET_UTBETALING &&
+        (erIngenOverlappVedtaksperiodeToggelPå || minimertVedtaksperiode.type == Vedtaksperiodetype.ENDRET_UTBETALING) &&
             endredeAndelerSomOverlapperVedtaksperiode.any {
                 triggesAv.erTriggereOppfyltForEndretUtbetaling(
                     vilkår = sanityBegrunnelse.vilkaar,
@@ -150,8 +153,13 @@ fun List<LocalDate>.tilBrevTekst(): String = Utils.slåSammen(this.sorted().map 
 
 fun VedtakBegrunnelseSpesifikasjon.tilVedtaksbegrunnelse(
     vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser,
+    erIngenOverlappVedtaksperiodeToggelPå: Boolean,
 ): Vedtaksbegrunnelse {
-    if (!vedtaksperiodeMedBegrunnelser.type.tillatteBegrunnelsestyper.contains(this.vedtakBegrunnelseType)) {
+    if (!vedtaksperiodeMedBegrunnelser
+        .type
+        .tillatteBegrunnelsestyper(erIngenOverlappVedtaksperiodeToggelPå)
+        .contains(this.vedtakBegrunnelseType)
+    ) {
         throw Feil(
             "Begrunnelsestype ${this.vedtakBegrunnelseType} passer ikke med " +
                 "typen '${vedtaksperiodeMedBegrunnelser.type}' som er satt på perioden."
