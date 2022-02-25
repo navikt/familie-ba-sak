@@ -1,11 +1,14 @@
 package no.nav.familie.ba.sak.kjerne.behandling
 
+import no.nav.familie.ba.sak.common.TIDENES_ENDE
+import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.PeriodeResultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.PeriodeVilkår
 import no.nav.familie.ba.sak.kjerne.beregning.domene.lagVertikaleSegmenter
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
+import no.nav.fpsak.tidsserie.LocalDateSegment
 import java.time.LocalDate
 
 fun finnEndringstidspunkt(
@@ -24,25 +27,55 @@ fun finnEndringstidspunkt(
     val gamleVilkårsperioder =
         gammelVilkårsvurdering.hentInnvilgedePerioder(gammeltPersonopplysningGrunnlag).let { it.first + it.second }
 
-    val eldsteEndringVilkår: LocalDate? = nyeVilkårsperioder
-        .sortedBy { it.periodeFom }
-        .firstOrNull { nyeVilkårresultaterIPeriode ->
-            !gamleVilkårsperioder.any { it.erFunksjoneltLik(nyeVilkårresultaterIPeriode) }
-        }?.periodeFom
+    val eldsteEndringVilkår = finnEldsteEndringIVilkår(nyeVilkårsperioder, gamleVilkårsperioder)
 
-    val eldsteEndringAndeler = nyeAndelSegmenter.keys.sortedBy { it.fom }.firstOrNull { nyAndelPeriode ->
+    val eldsteEndringAndeler = finnEldsteEndringIAndelTilkjentYtelse(nyeAndelSegmenter, gamleAndelSegmenter)
+
+    return minsteNullableDato(eldsteEndringAndeler, eldsteEndringVilkår)
+}
+
+private fun finnEldsteEndringIAndelTilkjentYtelse(
+    nyeAndelSegmenter: Map<LocalDateSegment<Int>, List<AndelTilkjentYtelse>>,
+    gamleAndelSegmenter: Map<LocalDateSegment<Int>, List<AndelTilkjentYtelse>>
+): LocalDate? {
+    val fomDatoerIkkeINyeVilkår =
+        gamleAndelSegmenter.keys
+            .map { it.fom ?: TIDENES_MORGEN }
+            .filter { gammelAndelsperiode ->
+                !nyeAndelSegmenter.keys.any { it.fom == gammelAndelsperiode }
+            }
+    val minsteFomdatoIkkeINyeAndeler = fomDatoerIkkeINyeVilkår.minOfOrNull { it }
+
+    val førsteDiffFraNyeAndeler = nyeAndelSegmenter.keys.sortedBy { it.fom }.firstOrNull { nyAndelPeriode ->
         val nyeAndelerIPeriode = nyeAndelSegmenter[nyAndelPeriode]!!
         val gamleAndelerIPeriode = gamleAndelSegmenter[nyAndelPeriode] ?: return nyAndelPeriode.fom
 
         nyeAndelerIPeriode.erFunksjoneltLik(gamleAndelerIPeriode)
     }?.fom
 
-    return when {
-        eldsteEndringAndeler == null && eldsteEndringVilkår == null -> null
-        eldsteEndringAndeler == null -> eldsteEndringVilkår
-        eldsteEndringVilkår == null -> eldsteEndringAndeler
-        else -> minOf(eldsteEndringAndeler, eldsteEndringVilkår)
-    }
+    return minsteNullableDato(førsteDiffFraNyeAndeler, minsteFomdatoIkkeINyeAndeler)
+}
+
+private fun finnEldsteEndringIVilkår(
+    nyeVilkårsperioder: List<PeriodeResultat>,
+    gamleVilkårsperioder: List<PeriodeResultat>
+): LocalDate? {
+    val fomDatoerIkkeINyeVilkår =
+        gamleVilkårsperioder
+            .map { it.periodeFom ?: TIDENES_MORGEN }
+            .filter { gammelVilkårsperiode ->
+                !nyeVilkårsperioder.any { it.periodeFom == gammelVilkårsperiode }
+            }
+    val minsteFomdatoIkkeINyeVilkår = fomDatoerIkkeINyeVilkår.minOfOrNull { it }
+
+    val førsteDiffFraNyeVilkår = nyeVilkårsperioder
+        .sortedBy { it.periodeFom }
+        .filter { (it.periodeFom ?: TIDENES_MORGEN).isBefore(minsteFomdatoIkkeINyeVilkår ?: TIDENES_ENDE) }
+        .firstOrNull { nyeVilkårresultaterIPeriode ->
+            !gamleVilkårsperioder.any { it.erFunksjoneltLik(nyeVilkårresultaterIPeriode) }
+        }?.periodeFom
+
+    return minsteNullableDato(førsteDiffFraNyeVilkår, minsteFomdatoIkkeINyeVilkår)
 }
 
 private fun PeriodeResultat.erFunksjoneltLik(annenPeriode: PeriodeResultat): Boolean {
@@ -72,4 +105,14 @@ private fun List<AndelTilkjentYtelse>.erFunksjoneltLik(andreAndelerTilkjentYtels
         this.all { andelTilkjentYtelse ->
             andreAndelerTilkjentYtelse.any { it.erFunksjoneltLik(andelTilkjentYtelse) }
         }
+}
+
+private fun minsteNullableDato(
+    dato1: LocalDate?,
+    dato2: LocalDate?
+) = when {
+    dato1 == null && dato2 == null -> null
+    dato1 == null -> dato2
+    dato2 == null -> dato1
+    else -> minOf(dato1, dato2)
 }
