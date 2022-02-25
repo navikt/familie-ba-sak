@@ -89,8 +89,7 @@ class RevurderingMedEndredeUtbetalingandelerTest(
         vilkårsvurdering.personResultater.map { personResultat ->
             personResultat.tilRestPersonResultat().vilkårResultater.map {
                 vilkårService.endreVilkår(
-                    behandlingId = behandling.id, vilkårId = it.id,
-                    restPersonResultat =
+                    behandling.id, it.id,
                     RestPersonResultat(
                         personIdent = personResultat.aktør.aktivFødselsnummer(),
                         vilkårResultater = listOf(

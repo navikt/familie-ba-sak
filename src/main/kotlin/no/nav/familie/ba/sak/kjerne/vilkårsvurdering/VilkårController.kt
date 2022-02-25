@@ -64,6 +64,26 @@ class VilkårController(
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }
 
+    @PutMapping(path = ["/{behandlingId}"])
+    fun endreFlereVilkår(
+        @PathVariable behandlingId: Long,
+        @RequestBody restPersonResultat: RestPersonResultat
+    ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.UPDATE)
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
+            handling = "endre vilkår"
+        )
+
+        val behandling = behandlingService.hent(behandlingId)
+        vilkårService.endreFlereVilkår(
+            behandlingId = behandling.id,
+            endringPersonResultat = restPersonResultat
+        )
+        vedtakService.resettStegVedEndringPåVilkår(behandling.id)
+        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
+    }
+
     @PutMapping(path = ["/{behandlingId}/annenvurdering/{annenVurderingId}"])
     fun endreAnnenVurdering(
         @PathVariable behandlingId: Long,

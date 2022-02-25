@@ -138,9 +138,8 @@ class VilkårServiceTest(
 
         val endretVilkårsvurdering: List<RestPersonResultat> =
             vilkårService.endreVilkår(
-                behandlingId = behandling.id,
-                vilkårId = under18ÅrVilkårForBarn!!.id,
-                restPersonResultat =
+                behandling.id,
+                under18ÅrVilkårForBarn!!.id,
                 RestPersonResultat(
                     personIdent = barnFnr,
                     vilkårResultater = listOf(
@@ -292,8 +291,7 @@ class VilkårServiceTest(
         vilkårsvurdering.personResultater.map { personResultat ->
             personResultat.tilRestPersonResultat().vilkårResultater.map {
                 vilkårService.endreVilkår(
-                    behandlingId = behandling.id, vilkårId = it.id,
-                    restPersonResultat =
+                    behandling.id, it.id,
                     RestPersonResultat(
                         personIdent = personResultat.aktør.aktivFødselsnummer(),
                         vilkårResultater = listOf(
@@ -494,9 +492,8 @@ class VilkårServiceTest(
 
         val endretVilkårsvurdering: List<RestPersonResultat> =
             vilkårService.endreVilkår(
-                behandlingId = behandling.id,
-                vilkårId = under18ÅrVilkårForBarn!!.id,
-                restPersonResultat =
+                behandling.id,
+                under18ÅrVilkårForBarn!!.id,
                 RestPersonResultat(
                     personIdent = barnFnr,
                     vilkårResultater = listOf(
@@ -954,9 +951,9 @@ class VilkårServiceTest(
         val utvidetVilkår =
             vilkårsvurdering.personResultater.find { it.erSøkersResultater() }?.vilkårResultater?.single { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
         vilkårService.endreVilkår(
-            behandlingId = behandling.id,
-            vilkårId = utvidetVilkår!!.id,
-            restPersonResultat = RestPersonResultat(
+            behandling.id,
+            utvidetVilkår!!.id,
+            RestPersonResultat(
                 personIdent = fnr,
                 vilkårResultater = listOf(
                     RestVilkårResultat(

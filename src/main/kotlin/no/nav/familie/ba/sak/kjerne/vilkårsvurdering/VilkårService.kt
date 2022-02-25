@@ -23,6 +23,13 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårServiceValidering.EØS_SKRUDD_AV
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårServiceValidering.MANGLER_PERSONOPPLYSNINGSGRUNNLAG_FOR_BEHANDLING
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårServiceValidering.MANGLER_VILKÅRSVURDERING_FOR_BEHANDLING
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårServiceValidering.MANGLER_VILKÅRSVURDERING_FOR_PERSON
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårServiceValidering.MANGLER_VILKÅRSVURDERING_VED_ENDRING_AV_VILKÅR
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårServiceValidering.MANGLER_VILKÅRSVURDERING_VED_OPPRETTELSE_AV_VILKÅRSPERIODE
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårServiceValidering.MANGLER_VILKÅRSVURDERING_VED_SLETTING_AV_VILKÅR
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingMigreringUtils.kopiManglendePerioderFraForrigeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingMigreringUtils.utledPeriodeFom
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingMigreringUtils.utledPeriodeTom
@@ -59,12 +66,7 @@ class VilkårService(
 
     fun hentVilkårsvurderingThrows(behandlingId: Long): Vilkårsvurdering =
         hentVilkårsvurdering(behandlingId = behandlingId)
-            ?: throw IllegalStateException("Fant ikke aktiv vilkårsvurdering for behandling $behandlingId")
-
-    companion object {
-        const val fantIkkeAktivVilkårsvurderingFeilmelding = "Fant ikke aktiv vilkårsvurdering"
-        const val fantIkkeVilkårsvurderingForPersonFeilmelding = "Fant ikke vilkårsvurdering for person"
-    }
+            ?: throw MANGLER_VILKÅRSVURDERING_FOR_BEHANDLING(behandlingId)
 
     @Transactional
     fun endreVilkår(
@@ -73,56 +75,82 @@ class VilkårService(
         restPersonResultat: RestPersonResultat
     ): List<RestPersonResultat> {
 
-        if (!featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS)) {
-            if (restPersonResultat.vilkårResultater.any { it.vurderesEtter == VilkårRegelverk.EØS_FORORDNINGEN })
-                throw Feil(
-                    message = "EØS er ikke togglet på",
-                    frontendFeilmelding = "Funksjonalitet for EØS er ikke lansert."
-                )
+        if (!featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS) &&
+            restPersonResultat.vilkårResultater.any { it.vurderesEtter == VilkårRegelverk.EØS_FORORDNINGEN }
+        ) {
+            throw EØS_SKRUDD_AV
         }
 
         val vilkårsvurdering = hentVilkårsvurdering(behandlingId = behandlingId)
-            ?: throw Feil(
-                message = "Fant ikke aktiv vilkårsvurdering ved endring på vilkår",
-                frontendFeilmelding = fantIkkeAktivVilkårsvurderingFeilmelding
-            )
+            ?: throw MANGLER_VILKÅRSVURDERING_VED_ENDRING_AV_VILKÅR
+
+        val personResultat =
+            vilkårsvurdering.personResultater.singleOrNull { it.aktør.aktivFødselsnummer() == restPersonResultat.personIdent }
+                ?: throw MANGLER_VILKÅRSVURDERING_FOR_PERSON(restPersonResultat.personIdent)
 
         val restVilkårResultat = restPersonResultat.vilkårResultater.singleOrNull { it.id == vilkårId }
             ?: throw Feil("Fant ikke vilkårResultat med id $vilkårId ved opppdatering av vikår")
-        val personResultat =
-            vilkårsvurdering.personResultater.singleOrNull { it.aktør.aktivFødselsnummer() == restPersonResultat.personIdent }
-                ?: throw Feil(
-                    message = fantIkkeVilkårsvurderingForPersonFeilmelding,
-                    frontendFeilmelding = "Fant ikke vilkårsvurdering for person med ident '${restPersonResultat.personIdent}"
-                )
-
-        muterPersonVilkårResultaterPut(personResultat, restVilkårResultat)
 
         val vilkårResultat = personResultat.vilkårResultater.singleOrNull { it.id == vilkårId }
-            ?: error("Finner ikke vilkår med vilkårId $vilkårId på personResultat ${personResultat.id}")
+            ?: throw Feil("Finner ikke vilkår med vilkårId $vilkårId på personResultat ${personResultat.id}")
+
+        muterPersonVilkårResultaterPut(personResultat, restVilkårResultat)
 
         vilkårResultat.also {
             it.vedtakBegrunnelseSpesifikasjoner = restVilkårResultat.avslagBegrunnelser ?: emptyList()
         }
 
-        validerVilkårStarterIkkeFørMigreringsdatoForMigreringsbehandling(vilkårsvurdering, vilkårResultat)
+        validerVilkårStarterIkkeFørMigreringsdatoForMigreringsbehandling(behandlingId, vilkårResultat)
 
         return vilkårsvurderingService.oppdater(vilkårsvurdering).personResultater.map { it.tilRestPersonResultat() }
     }
 
+    @Transactional
+    fun endreFlereVilkår(
+        behandlingId: Long,
+        endringPersonResultat: RestPersonResultat
+    ): List<RestPersonResultat> {
+
+        if (!featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS) &&
+            endringPersonResultat.vilkårResultater.any { it.vurderesEtter == VilkårRegelverk.EØS_FORORDNINGEN }
+        ) {
+            throw EØS_SKRUDD_AV
+        }
+
+        val gjeldendeVilkårsvurdering = hentVilkårsvurdering(behandlingId = behandlingId)
+            ?: throw MANGLER_VILKÅRSVURDERING_VED_ENDRING_AV_VILKÅR
+
+        val gjeldendePersonResultat =
+            gjeldendeVilkårsvurdering.personResultater.singleOrNull { it.aktør.aktivFødselsnummer() == endringPersonResultat.personIdent }
+                ?: throw MANGLER_VILKÅRSVURDERING_FOR_PERSON(endringPersonResultat.personIdent)
+
+        val endringVilkårResultaterMap = endringPersonResultat.vilkårResultater
+            .associateBy { it.id }
+
+        endringVilkårResultaterMap.values.forEach {
+            muterPersonVilkårResultaterPut(gjeldendePersonResultat, it)
+        }
+
+        gjeldendePersonResultat.vilkårResultater.forEach {
+            it.vedtakBegrunnelseSpesifikasjoner = endringVilkårResultaterMap[it.id]?.avslagBegrunnelser ?: emptyList()
+            validerVilkårStarterIkkeFørMigreringsdatoForMigreringsbehandling(behandlingId, it)
+        }
+
+        return vilkårsvurderingService.oppdater(gjeldendeVilkårsvurdering).personResultater.map { it.tilRestPersonResultat() }
+    }
+
     private fun validerVilkårStarterIkkeFørMigreringsdatoForMigreringsbehandling(
-        vilkårsvurdering: Vilkårsvurdering,
+        behandlingId: Long,
         vilkårResultat: VilkårResultat,
     ) {
-        val behandling = vilkårsvurdering.behandling
-        val migreringsdato = behandlingService.hentMigreringsdatoIBehandling(behandling.id)
+        val migreringsdato = behandlingService.hentMigreringsdatoIBehandling(behandlingId)
         if (migreringsdato != null &&
             vilkårResultat.vilkårType !in listOf(Vilkår.UNDER_18_ÅR, Vilkår.GIFT_PARTNERSKAP) &&
             vilkårResultat.periodeFom?.isBefore(migreringsdato) == true
         ) {
             throw FunksjonellFeil(
                 melding = "${vilkårResultat.vilkårType} kan ikke endres før $migreringsdato " +
-                    "for behandling=${behandling.id}",
+                    "for behandling=$behandlingId",
                 frontendFeilmelding = "F.o.m. kan ikke settes tidligere " +
                     "enn migreringsdato ${migreringsdato.tilKortString()} " +
                     "Ved behov for vurdering før dette, må behandlingen henlegges, " +
@@ -134,16 +162,10 @@ class VilkårService(
     @Transactional
     fun deleteVilkårsperiode(behandlingId: Long, vilkårId: Long, aktør: Aktør): List<RestPersonResultat> {
         val vilkårsvurdering = hentVilkårsvurdering(behandlingId = behandlingId)
-            ?: throw Feil(
-                message = "Fant ikke aktiv vilkårsvurdering ved sletting av vilkår",
-                frontendFeilmelding = fantIkkeAktivVilkårsvurderingFeilmelding
-            )
+            ?: throw MANGLER_VILKÅRSVURDERING_VED_SLETTING_AV_VILKÅR
 
         val personResultat = vilkårsvurdering.personResultater.find { it.aktør == aktør }
-            ?: throw Feil(
-                message = fantIkkeVilkårsvurderingForPersonFeilmelding,
-                frontendFeilmelding = "Fant ikke vilkårsvurdering for person med ident '${aktør.aktivFødselsnummer()}"
-            )
+            ?: throw MANGLER_VILKÅRSVURDERING_FOR_PERSON(aktør.aktivFødselsnummer())
 
         muterPersonResultatDelete(personResultat, vilkårId)
 
@@ -153,16 +175,12 @@ class VilkårService(
     @Transactional
     fun deleteVilkår(behandlingId: Long, restSlettVilkår: RestSlettVilkår): List<RestPersonResultat> {
         val vilkårsvurdering = hentVilkårsvurdering(behandlingId = behandlingId)
-            ?: throw Feil(
-                message = "Fant ikke aktiv vilkårsvurdering ved sletting av vilkår",
-                frontendFeilmelding = fantIkkeAktivVilkårsvurderingFeilmelding
-            )
+            ?: throw MANGLER_VILKÅRSVURDERING_VED_SLETTING_AV_VILKÅR
+
         val aktørÅSlette = personidentService.hentAktør(restSlettVilkår.personIdent)
         val personResultat = vilkårsvurdering.personResultater.find { it.aktør == aktørÅSlette }
-            ?: throw Feil(
-                message = fantIkkeVilkårsvurderingForPersonFeilmelding,
-                frontendFeilmelding = "Fant ikke vilkårsvurdering for person med ident '${restSlettVilkår.personIdent}"
-            )
+            ?: throw MANGLER_VILKÅRSVURDERING_FOR_PERSON(restSlettVilkår.personIdent)
+
         val behandling = behandlingService.hent(behandlingId)
         if (!behandling.erManuellMigrering() ||
             Vilkår.UTVIDET_BARNETRYGD != restSlettVilkår.vilkårType ||
@@ -193,10 +211,8 @@ class VilkårService(
     @Transactional
     fun postVilkår(behandlingId: Long, restNyttVilkår: RestNyttVilkår): List<RestPersonResultat> {
         val vilkårsvurdering = hentVilkårsvurdering(behandlingId = behandlingId)
-            ?: throw Feil(
-                message = "Fant ikke aktiv vilkårsvurdering ved opprettelse av vilkårsperiode",
-                frontendFeilmelding = fantIkkeAktivVilkårsvurderingFeilmelding
-            )
+            ?: throw MANGLER_VILKÅRSVURDERING_VED_OPPRETTELSE_AV_VILKÅRSPERIODE
+
         val behandling = vilkårsvurdering.behandling
 
         if (restNyttVilkår.vilkårType == Vilkår.UTVIDET_BARNETRYGD) {
@@ -211,11 +227,7 @@ class VilkårService(
 
         val personResultat =
             vilkårsvurdering.personResultater.find { it.aktør.aktivFødselsnummer() == restNyttVilkår.personIdent }
-                ?: throw Feil(
-                    message = fantIkkeVilkårsvurderingForPersonFeilmelding,
-                    frontendFeilmelding =
-                    "Fant ikke vilkårsvurdering for person med ident '${restNyttVilkår.personIdent}"
-                )
+                ?: throw MANGLER_VILKÅRSVURDERING_FOR_PERSON(restNyttVilkår.personIdent)
 
         muterPersonResultatPost(personResultat, restNyttVilkår.vilkårType)
 
@@ -237,7 +249,7 @@ class VilkårService(
         }
 
         val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
-            ?: throw IllegalStateException("Fant ikke personopplysninggrunnlag for behandling ${behandling.id}")
+            ?: throw MANGLER_PERSONOPPLYSNINGSGRUNNLAG_FOR_BEHANDLING(behandling.id)
         if (personopplysningGrunnlag.søkerOgBarn
             .single { it.aktør == personidentService.hentAktør(restNyttVilkår.personIdent) }.type != PersonType.SØKER
         ) {
@@ -283,7 +295,7 @@ class VilkårService(
         forrigeBehandlingSomErVedtatt: Behandling? = null
     ): Vilkårsvurdering {
         val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
-            ?: throw IllegalStateException("Fant ikke personopplysninggrunnlag for behandling ${behandling.id}")
+            ?: throw MANGLER_PERSONOPPLYSNINGSGRUNNLAG_FOR_BEHANDLING(behandling.id)
 
         if (behandling.skalBehandlesAutomatisk) {
             if (personopplysningGrunnlag.barna.isEmpty()) {
@@ -310,8 +322,7 @@ class VilkårService(
                 )
 
             if (behandling.type == REVURDERING && behandling.opprettetÅrsak == BehandlingÅrsak.DØDSFALL_BRUKER) {
-                vilkårsvurdering.personResultater.single { it.erSøkersResultater() }.vilkårResultater.forEach {
-                    vilkårResultat ->
+                vilkårsvurdering.personResultater.single { it.erSøkersResultater() }.vilkårResultater.forEach { vilkårResultat ->
                     vilkårResultat.periodeTom = personopplysningGrunnlag.søker.dødsfall?.dødsfallDato
                 }
             }
@@ -419,7 +430,7 @@ class VilkårService(
     private fun lagTomVilkårsvurdering(vilkårsvurdering: Vilkårsvurdering): Set<PersonResultat> {
         val personopplysningGrunnlag =
             personopplysningGrunnlagRepository.findByBehandlingAndAktiv(vilkårsvurdering.behandling.id)
-                ?: throw Feil(message = "Fant ikke personopplysninggrunnlag for behandling ${vilkårsvurdering.behandling.id}")
+                ?: throw MANGLER_PERSONOPPLYSNINGSGRUNNLAG_FOR_BEHANDLING(vilkårsvurdering.behandling.id)
 
         return personopplysningGrunnlag.søkerOgBarn.map { person ->
             val personResultat = PersonResultat(
@@ -449,7 +460,7 @@ class VilkårService(
     private fun lagManuellVilkårsvurdering(vilkårsvurdering: Vilkårsvurdering): Set<PersonResultat> {
         val personopplysningGrunnlag =
             personopplysningGrunnlagRepository.findByBehandlingAndAktiv(vilkårsvurdering.behandling.id)
-                ?: throw Feil(message = "Fant ikke personopplysninggrunnlag for behandling ${vilkårsvurdering.behandling.id}")
+                ?: throw MANGLER_PERSONOPPLYSNINGSGRUNNLAG_FOR_BEHANDLING(vilkårsvurdering.behandling.id)
 
         return personopplysningGrunnlag.søkerOgBarn.map { person ->
             genererPersonResultatForPerson(vilkårsvurdering, person)
@@ -464,7 +475,7 @@ class VilkårService(
 
         val personopplysningGrunnlag =
             personopplysningGrunnlagRepository.findByBehandlingAndAktiv(vilkårsvurdering.behandling.id)
-                ?: throw Feil(message = "Fant ikke personopplysninggrunnlag for behandling ${vilkårsvurdering.behandling.id}")
+                ?: throw MANGLER_PERSONOPPLYSNINGSGRUNNLAG_FOR_BEHANDLING(vilkårsvurdering.behandling.id)
 
         val annenForelder = personopplysningGrunnlag.annenForelder
         val eldsteBarnSomVurderesSinFødselsdato =
@@ -533,7 +544,7 @@ class VilkårService(
     private fun lagVilkårsvurderingForMigreringsbehandling(vilkårsvurdering: Vilkårsvurdering): Set<PersonResultat> {
         val personopplysningGrunnlag =
             personopplysningGrunnlagRepository.findByBehandlingAndAktiv(vilkårsvurdering.behandling.id)
-                ?: throw Feil(message = "Fant ikke personopplysninggrunnlag for behandling ${vilkårsvurdering.behandling.id}")
+                ?: throw MANGLER_PERSONOPPLYSNINGSGRUNNLAG_FOR_BEHANDLING(vilkårsvurdering.behandling.id)
 
         return personopplysningGrunnlag.søkerOgBarn.map { person ->
             val personResultat = PersonResultat(
@@ -587,10 +598,7 @@ class VilkårService(
             )
         val personopplysningGrunnlag =
             personopplysningGrunnlagRepository.findByBehandlingAndAktiv(vilkårsvurdering.behandling.id)
-                ?: throw Feil(
-                    message = "Fant ikke personopplysninggrunnlag " +
-                        "for behandling ${vilkårsvurdering.behandling.id}"
-                )
+                ?: throw MANGLER_PERSONOPPLYSNINGSGRUNNLAG_FOR_BEHANDLING(vilkårsvurdering.behandling.id)
 
         return personopplysningGrunnlag.søkerOgBarn.map { person ->
             val personResultat = PersonResultat(
@@ -638,10 +646,8 @@ class VilkårService(
     ): Set<PersonResultat> {
         val personopplysningGrunnlag =
             personopplysningGrunnlagRepository.findByBehandlingAndAktiv(vilkårsvurdering.behandling.id)
-                ?: throw Feil(
-                    message = "Fant ikke personopplysninggrunnlag " +
-                        "for behandling ${vilkårsvurdering.behandling.id}"
-                )
+                ?: throw MANGLER_PERSONOPPLYSNINGSGRUNNLAG_FOR_BEHANDLING(vilkårsvurdering.behandling.id)
+
         return personopplysningGrunnlag.søkerOgBarn.map { person ->
             val personResultat = PersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
