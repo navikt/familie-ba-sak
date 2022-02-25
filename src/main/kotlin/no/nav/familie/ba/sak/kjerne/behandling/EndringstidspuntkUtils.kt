@@ -46,12 +46,14 @@ private fun finnEldsteEndringIAndelTilkjentYtelse(
             }
     val minsteFomdatoIkkeINyeAndeler = fomDatoerIkkeINyeVilkår.minOfOrNull { it }
 
-    val førsteDiffFraNyeAndeler = nyeAndelSegmenter.keys.sortedBy { it.fom }.firstOrNull { nyAndelPeriode ->
-        val nyeAndelerIPeriode = nyeAndelSegmenter[nyAndelPeriode]!!
-        val gamleAndelerIPeriode = gamleAndelSegmenter[nyAndelPeriode] ?: return nyAndelPeriode.fom
+    val førsteDiffFraNyeAndeler = nyeAndelSegmenter.keys
+        .sortedBy { it.fom }
+        .firstOrNull { nyAndelPeriode ->
+            val nyeAndelerIPeriode = nyeAndelSegmenter[nyAndelPeriode]!!
+            val gamleAndelerIPeriode = gamleAndelSegmenter[nyAndelPeriode] ?: return nyAndelPeriode.fom
 
-        nyeAndelerIPeriode.erFunksjoneltLik(gamleAndelerIPeriode)
-    }?.fom
+            !nyeAndelerIPeriode.erFunksjoneltLik(gamleAndelerIPeriode)
+        }?.fom
 
     return minsteNullableDato(førsteDiffFraNyeAndeler, minsteFomdatoIkkeINyeAndeler)
 }
