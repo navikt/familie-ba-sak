@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.hentUtvidetScenarioForEndringsperiode
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerIngenOverlappendeEndring
@@ -49,10 +50,20 @@ class EndretUtbetalingAndelService(
 
         endretUtbetalingAndel.fraRestEndretUtbetalingAndel(restEndretUtbetalingAndel, person)
 
+        val andreEndredeAndelerPåBehandling = endretUtbetalingAndelRepository.findByBehandlingId(behandling.id)
+            .filter { it.id != endretUtbetalingAndelId }
+
+        if (endretUtbetalingAndel.tom == null) {
+            beregnTomHvisDenIkkeErSatt(
+                andreEndredeAndelerPåBehandling = andreEndredeAndelerPåBehandling,
+                endretUtbetalingAndel = endretUtbetalingAndel,
+                andelTilkjentYtelser = andelTilkjentYtelser
+            )
+        }
+
         validerIngenOverlappendeEndring(
-            endretUtbetalingAndel,
-            endretUtbetalingAndelRepository.findByBehandlingId(behandling.id)
-                .filter { it.id != endretUtbetalingAndelId }
+            endretUtbetalingAndel = endretUtbetalingAndel,
+            eksisterendeEndringerPåBehandling = andreEndredeAndelerPåBehandling
         )
 
         validerPeriodeInnenforTilkjentytelse(endretUtbetalingAndel, andelTilkjentYtelser)
@@ -60,6 +71,27 @@ class EndretUtbetalingAndelService(
         beregningService.oppdaterBehandlingMedBeregning(
             behandling, personopplysningGrunnlag, endretUtbetalingAndel
         )
+    }
+
+    private fun beregnTomHvisDenIkkeErSatt(
+        andreEndredeAndelerPåBehandling: List<EndretUtbetalingAndel>,
+        endretUtbetalingAndel: EndretUtbetalingAndel,
+        andelTilkjentYtelser: List<AndelTilkjentYtelse>
+    ) {
+        val førsteEndringEtterDenneEndringen = andreEndredeAndelerPåBehandling.filter {
+            it.fom?.isAfter(endretUtbetalingAndel.fom)
+                ?: false
+        }.sortedBy { it.fom }.firstOrNull()
+
+        if (førsteEndringEtterDenneEndringen != null) {
+            endretUtbetalingAndel.tom = førsteEndringEtterDenneEndringen.fom?.minusMonths(1)
+        } else {
+            val sisteTomAndeler = andelTilkjentYtelser.filter {
+                it.aktør == endretUtbetalingAndel.person?.aktør
+            }.maxOf { it.stønadTom }
+
+            endretUtbetalingAndel.tom = sisteTomAndeler
+        }
     }
 
     @Transactional
