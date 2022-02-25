@@ -26,6 +26,11 @@ class VilkårsvurderingService(
         return vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId)
     }
 
+    fun hentAktivForBehandlingThrows(behandlingId: Long): Vilkårsvurdering {
+        return vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId)
+            ?: throw FANT_IKKE_VILKÅRSVURDERING_FOR_BEHANDLING(behandlingId)
+    }
+
     fun hentBehandlingResultatForBehandling(behandlingId: Long): List<Vilkårsvurdering> {
         return vilkårsvurderingRepository.finnBehandlingResultater(behandlingId = behandlingId)
     }
@@ -92,6 +97,9 @@ class VilkårsvurderingService(
     companion object {
 
         private val logger = LoggerFactory.getLogger(VilkårsvurderingService::class.java)
+
+        private fun FANT_IKKE_VILKÅRSVURDERING_FOR_BEHANDLING(behandlingId: Long) =
+            Feil("Fant ikke vilkårsvurdering for behandling $behandlingId")
 
         fun matchVilkårResultater(
             vilkårsvurdering1: Vilkårsvurdering,

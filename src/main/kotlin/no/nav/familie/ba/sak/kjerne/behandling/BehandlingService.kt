@@ -29,6 +29,7 @@ import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatUtils
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
@@ -38,6 +39,7 @@ import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
@@ -72,7 +74,9 @@ class BehandlingService(
     private val featureToggleService: FeatureToggleService,
     private val taskRepository: TaskRepositoryWrapper,
     private val behandlingMigreringsinfoRepository: BehandlingMigreringsinfoRepository,
-    private val behandlingSøknadsinfoRepository: BehandlingSøknadsinfoRepository
+    private val behandlingSøknadsinfoRepository: BehandlingSøknadsinfoRepository,
+    private val vilkårsvurderingService: VilkårsvurderingService,
+    private val persongrunnlagService: PersongrunnlagService,
 ) {
 
     @Transactional
@@ -475,6 +479,33 @@ class BehandlingService(
 
     fun hentSøknadMottattDato(behandlingId: Long): LocalDateTime? {
         return behandlingSøknadsinfoRepository.findByBehandlingId(behandlingId)?.mottattDato
+    }
+
+    fun finnEndringstidpunkForbehandling(behandlingId: Long): LocalDate? {
+        val nyBehandling = hent(behandlingId)
+        val gammelBehandling = hentSisteBehandlingSomErIverksatt(fagsakId = nyBehandling.fagsak.id) ?: return null
+
+        val nyVilkårsvurdering = vilkårsvurderingService.hentAktivForBehandlingThrows(behandlingId = behandlingId)
+        val gammelVilkårsvurdering =
+            vilkårsvurderingService.hentAktivForBehandlingThrows(behandlingId = gammelBehandling.id)
+
+        val nyeAndelerTilkjentYtelse = andelTilkjentYtelseRepository
+            .finnAndelerTilkjentYtelseForBehandling(behandlingId = behandlingId)
+
+        val gamleAndelerTilkjentYtelse = andelTilkjentYtelseRepository
+            .finnAndelerTilkjentYtelseForBehandling(behandlingId = gammelBehandling.id)
+
+        val nyttPersonopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandlingId = behandlingId)
+        val gammeltPersonopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandlingId = gammelBehandling.id)
+
+        return finnEndringstidspunkt(
+            nyVilkårsvurdering = nyVilkårsvurdering,
+            gammelVilkårsvurdering = gammelVilkårsvurdering,
+            nyeAndelerTilkjentYtelse = nyeAndelerTilkjentYtelse,
+            gamleAndelerTilkjentYtelse = gamleAndelerTilkjentYtelse,
+            nyttPersonopplysningGrunnlag = nyttPersonopplysningGrunnlag,
+            gammeltPersonopplysningGrunnlag = gammeltPersonopplysningGrunnlag,
+        )
     }
 
     companion object {

@@ -126,6 +126,15 @@ data class EndretUtbetalingAndel(
         return true
     }
 
+    fun erFunksjoneltLik(annenEndretUtbetalingAndel: EndretUtbetalingAndel): Boolean =
+        this.person?.aktør?.aktørId == annenEndretUtbetalingAndel.person?.aktør?.aktørId &&
+            this.prosent == annenEndretUtbetalingAndel.prosent &&
+            this.fom == annenEndretUtbetalingAndel.fom &&
+            this.tom == annenEndretUtbetalingAndel.tom &&
+            this.årsak == annenEndretUtbetalingAndel.årsak &&
+            this.avtaletidspunktDeltBosted == annenEndretUtbetalingAndel.avtaletidspunktDeltBosted &&
+            this.søknadstidspunkt == annenEndretUtbetalingAndel.søknadstidspunkt
+
     fun årsakErDeltBosted() = this.årsak == Årsak.DELT_BOSTED
 }
 
@@ -203,4 +212,11 @@ fun EndretUtbetalingAndel.hentGyldigEndretBegrunnelse(
     }
 
     return gyldigeBegrunnelser.single()
+}
+
+fun List<EndretUtbetalingAndel>.erFunksjoneltLik(andreEndretUtbetalingAndel: List<EndretUtbetalingAndel>): Boolean {
+    return this.size == andreEndretUtbetalingAndel.size &&
+        this.all { endretUtbetalingAndel ->
+            andreEndretUtbetalingAndel.any { it.erFunksjoneltLik(endretUtbetalingAndel) }
+        }
 }

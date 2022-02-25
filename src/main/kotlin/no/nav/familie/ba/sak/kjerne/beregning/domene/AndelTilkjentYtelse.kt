@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.kjerne.brev.UtvidetScenarioForEndringsperiode
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.erFunksjoneltLik
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.erStartPåUtvidetSammeMåned
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
@@ -197,6 +198,16 @@ data class AndelTilkjentYtelse(
                 it.vedtakBegrunnelseSpesifikasjon == gyldigBegrunnelseForEndretUtbetalingAndel
             }
         }
+
+    fun erFunksjoneltLik(annenAndelTilkjentYtelse: AndelTilkjentYtelse): Boolean =
+        this.aktør.aktørId == annenAndelTilkjentYtelse.aktør.aktørId &&
+            this.kalkulertUtbetalingsbeløp == annenAndelTilkjentYtelse.kalkulertUtbetalingsbeløp &&
+            this.stønadFom == annenAndelTilkjentYtelse.stønadFom &&
+            this.stønadTom == annenAndelTilkjentYtelse.stønadTom &&
+            this.type == annenAndelTilkjentYtelse.type &&
+            this.sats == annenAndelTilkjentYtelse.sats &&
+            this.prosent == annenAndelTilkjentYtelse.prosent &&
+            this.endretUtbetalingAndeler.erFunksjoneltLik(annenAndelTilkjentYtelse.endretUtbetalingAndeler)
 
     companion object {
 
