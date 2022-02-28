@@ -17,7 +17,7 @@ object VilkårsvurderingMigreringUtils {
         val forrigeVilkårsPeriodeFom = hentForrigeVilkårsvurderingVilkårResultater(
             forrigeBehandlingsvilkårsvurdering,
             vilkår, person
-        ).minOf { it.periodeFom!! }
+        ).filter { it.periodeFom != null }.minOf { it.periodeFom!! }
         return when {
             person.fødselsdato.isAfter(nyMigreringsdato) ||
                 vilkår.gjelderAlltidFraBarnetsFødselsdato() -> person.fødselsdato
