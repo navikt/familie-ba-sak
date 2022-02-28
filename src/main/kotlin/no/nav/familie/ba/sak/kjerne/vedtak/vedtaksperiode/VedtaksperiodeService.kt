@@ -5,6 +5,9 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.NullablePeriode
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.isSameOrAfter
+import no.nav.familie.ba.sak.common.isSameOrBefore
+import no.nav.familie.ba.sak.common.sisteDagIForrigeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.INGEN_OVERLAPP_VEDTAKSPERIODER
@@ -19,6 +22,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.beregning.domene.hentTidslinje
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilTriggesAv
 import no.nav.familie.ba.sak.kjerne.brev.hentVedtaksbrevmal
@@ -280,7 +284,12 @@ class VedtaksperiodeService(
 
         val avslagsperioder = hentAvslagsperioderMedBegrunnelser(vedtak)
 
-        return utbetalingsperioder + endredeUtbetalingsperioder + opphørsperioder + avslagsperioder
+        val reduksjonsperioder = hentReduksjonsperioder(vedtak)
+
+        val oppdatertUtbetalingsperiode =
+            finnOgOppdaterOverlappendeUtbetalingsperiode(utbetalingsperioder, reduksjonsperioder)
+
+        return oppdatertUtbetalingsperiode + endredeUtbetalingsperioder + opphørsperioder + avslagsperioder + reduksjonsperioder
     }
 
     fun kopierOverVedtaksperioder(deaktivertVedtak: Vedtak, aktivtVedtak: Vedtak) {
@@ -323,7 +332,6 @@ class VedtaksperiodeService(
         val andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(
             behandlingId = behandling.id
         )
-
         val persongrunnlag =
             persongrunnlagService.hentAktivThrows(behandling.id)
 
@@ -475,6 +483,74 @@ class VedtaksperiodeService(
         )
     }
 
+    fun hentReduksjonsperioder(vedtak: Vedtak): List<VedtaksperiodeMedBegrunnelser> {
+        val behandling = vedtak.behandling
+        if (behandling.resultat != BehandlingResultat.ENDRET) return emptyList()
+
+        val forrigeIverksatteBehandling: Behandling? = hentForrigeIverksatteBehandling(behandling)
+        val forrigePersonopplysningGrunnlag: PersonopplysningGrunnlag? =
+            forrigeIverksatteBehandling?.let { persongrunnlagService.hentAktivThrows(it.id) }
+        val forrigeAndelTilkjentYtelsePerBarn = forrigePersonopplysningGrunnlag?.barna?.associate {
+            it.aktør to andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(
+                forrigeIverksatteBehandling.id,
+                it.aktør
+            )
+        } ?: emptyMap()
+
+        val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandling.id)
+        val andelTilkjentYtelsePerBarn = personopplysningGrunnlag.barna.associate {
+            it.aktør to
+                andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(behandling.id, it.aktør)
+        }
+
+        val vedtaksperiodeMedBegrunnelser = mutableListOf<VedtaksperiodeMedBegrunnelser>()
+        if (forrigeAndelTilkjentYtelsePerBarn.isEmpty() || andelTilkjentYtelsePerBarn.isEmpty()) return emptyList()
+        andelTilkjentYtelsePerBarn.forEach { (barn, andelTilkjentYtelse) ->
+            if (forrigeAndelTilkjentYtelsePerBarn.containsKey(barn)) {
+                val førsteUtbetalingsdatoIForrigeBehandling =
+                    forrigeAndelTilkjentYtelsePerBarn[barn].hentTidslinje().minLocalDate
+                val førsteUtbetalingsdatoIBehandling = andelTilkjentYtelse.hentTidslinje().minLocalDate
+                if (!førsteUtbetalingsdatoIForrigeBehandling.equals(førsteUtbetalingsdatoIBehandling)) {
+                    vedtaksperiodeMedBegrunnelser.add(
+                        VedtaksperiodeMedBegrunnelser(
+                            vedtak = vedtak,
+                            fom = førsteUtbetalingsdatoIForrigeBehandling,
+                            tom = andelTilkjentYtelse.hentTidslinje().localDateIntervals.first().fomDato.sisteDagIForrigeMåned(),
+                            type = Vedtaksperiodetype.REDUKSJON,
+                        )
+                    )
+                }
+            }
+        }
+
+        return vedtaksperiodeMedBegrunnelser
+    }
+
+    private fun finnOgOppdaterOverlappendeUtbetalingsperiode(
+        utbetalingsperioder: List<VedtaksperiodeMedBegrunnelser>,
+        reduksjonsperioder: List<VedtaksperiodeMedBegrunnelser>
+    ): List<VedtaksperiodeMedBegrunnelser> {
+        val overlappendePerioder =
+            utbetalingsperioder.filter {
+                reduksjonsperioder.any { rd ->
+                    rd.fom!!.isSameOrAfter(it.fom!!) && rd.tom!!.isSameOrBefore(
+                        it.tom!!
+                    )
+                }
+            }
+        val oppdatertUtbetalingsperioder = mutableListOf<VedtaksperiodeMedBegrunnelser>()
+        utbetalingsperioder.forEach {
+            val overlappendePeriode = overlappendePerioder.singleOrNull { o -> it.fom == o.fom && it.tom == o.tom }
+            if (overlappendePeriode != null) {
+                val reduksjonsperiode = reduksjonsperioder.single { rd -> rd.tom == overlappendePeriode.tom }
+                oppdatertUtbetalingsperioder.add(it.copy(tom = reduksjonsperiode.fom!!.sisteDagIForrigeMåned()))
+            } else {
+                oppdatertUtbetalingsperioder.add(it)
+            }
+        }
+        return oppdatertUtbetalingsperioder.sortedBy { it.fom }
+    }
+
     private fun hentAvslagsperioderMedBegrunnelser(vedtak: Vedtak): List<VedtaksperiodeMedBegrunnelser> {
         val behandling = vedtak.behandling
         val vilkårsvurdering =
@@ -555,6 +631,17 @@ class VedtaksperiodeService(
 
     fun hent(vedtaksperiodeId: Long): VedtaksperiodeMedBegrunnelser =
         vedtaksperiodeRepository.hentVedtaksperiode(vedtaksperiodeId = vedtaksperiodeId)
+
+    private fun hentForrigeIverksatteBehandling(behandling: Behandling): Behandling? {
+        val iverksatteBehandlinger =
+            behandlingRepository.finnIverksatteBehandlinger(fagsakId = behandling.fagsak.id)
+
+        val forrigeIverksatteBehandling: Behandling? = Behandlingutils.hentForrigeIverksatteBehandling(
+            iverksatteBehandlinger = iverksatteBehandlinger,
+            behandlingFørFølgende = behandling
+        )
+        return forrigeIverksatteBehandling
+    }
 
     companion object {
 

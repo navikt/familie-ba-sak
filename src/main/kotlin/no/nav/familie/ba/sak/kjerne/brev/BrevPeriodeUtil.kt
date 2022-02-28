@@ -120,6 +120,11 @@ fun MinimertVedtaksperiode.tilBrevPeriode(
             begrunnelserOgFritekster = begrunnelserOgFritekster,
             personerPåBehandling = restBehandlingsgrunnlagForBrev.personerPåBehandling,
         )
+        Vedtaksperiodetype.REDUKSJON -> brevPeriodeGrunnlagMedPersoner.hentReduksjonBrevPeriode(
+            tomDato = tomDato,
+            begrunnelserOgFritekster = begrunnelserOgFritekster,
+            personerPåBehandling = restBehandlingsgrunnlagForBrev.personerPåBehandling,
+        )
 
         Vedtaksperiodetype.ENDRET_UTBETALING -> brevPeriodeGrunnlagMedPersoner.hentEndretUtbetalingBrevPeriode(
             tomDato = tomDato,
@@ -202,11 +207,47 @@ private fun BrevPeriodeGrunnlagMedPersoner.hentInnvilgelseBrevPeriode(
     )
 }
 
+private fun BrevPeriodeGrunnlagMedPersoner.hentReduksjonBrevPeriode(
+    tomDato: String?,
+    begrunnelserOgFritekster: List<Begrunnelse>,
+    personerPåBehandling: List<MinimertRestPerson>,
+): InnvilgelseBrevPeriode {
+    val barnIPeriode = this.finnBarnIReduksjonPeriode(personerPåBehandling)
+
+    return InnvilgelseBrevPeriode(
+        fom = this.fom!!.tilDagMånedÅr(),
+        tom = tomDato,
+        belop = Utils.formaterBeløp(this.minimerteUtbetalingsperiodeDetaljer.totaltUtbetalt()),
+        antallBarn = barnIPeriode.size.toString(),
+        barnasFodselsdager = barnIPeriode.tilBarnasFødselsdatoer(),
+        begrunnelser = begrunnelserOgFritekster
+    )
+}
+
 fun BrevPeriodeGrunnlagMedPersoner.finnBarnIInnvilgelsePeriode(
     personerPåBehandling: List<MinimertRestPerson>,
 ): List<MinimertRestPerson> {
     val identerIBegrunnelene = this.begrunnelser
         .filter { it.vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGET }
+        .flatMap { it.personIdenter }
+
+    val identerMedUtbetaling = this.minimerteUtbetalingsperiodeDetaljer.map { it.person.personIdent }
+
+    val barnIPeriode = (identerIBegrunnelene + identerMedUtbetaling)
+        .toSet()
+        .mapNotNull { personIdent ->
+            personerPåBehandling.find { it.personIdent == personIdent }
+        }
+        .filter { it.type == PersonType.BARN }
+
+    return barnIPeriode
+}
+
+fun BrevPeriodeGrunnlagMedPersoner.finnBarnIReduksjonPeriode(
+    personerPåBehandling: List<MinimertRestPerson>,
+): List<MinimertRestPerson> {
+    val identerIBegrunnelene = this.begrunnelser
+        .filter { it.vedtakBegrunnelseType == VedtakBegrunnelseType.REDUKSJON }
         .flatMap { it.personIdenter }
 
     val identerMedUtbetaling = this.minimerteUtbetalingsperiodeDetaljer.map { it.person.personIdent }

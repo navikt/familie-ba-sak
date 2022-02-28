@@ -148,7 +148,7 @@ fun hentGyldigeBegrunnelserForVedtaksperiode(
     aktørIderMedUtbetaling: List<String>,
     endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
     andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
-    erIngenOverlappVedtaksperiodeToggelPå: Boolean,
+    erIngenOverlappVedtaksperiodeToggelPå: Boolean
 ) = hentGyldigeBegrunnelserForVedtaksperiodeMinimert(
     minimertVedtaksperiode = utvidetVedtaksperiodeMedBegrunnelser.tilMinimertVedtaksperiode(),
     sanityBegrunnelser = sanityBegrunnelser,
@@ -194,8 +194,9 @@ fun hentGyldigeBegrunnelserForVedtaksperiodeMinimert(
         }
 
     return when (minimertVedtaksperiode.type) {
-        Vedtaksperiodetype.FORTSATT_INNVILGET -> tillateBegrunnelserForVedtakstype
-        Vedtaksperiodetype.AVSLAG -> tillateBegrunnelserForVedtakstype
+        Vedtaksperiodetype.FORTSATT_INNVILGET,
+        Vedtaksperiodetype.AVSLAG,
+        Vedtaksperiodetype.REDUKSJON -> tillateBegrunnelserForVedtakstype
         else -> {
             val standardbegrunnelser: MutableSet<VedtakBegrunnelseSpesifikasjon> =
                 tillateBegrunnelserForVedtakstype
