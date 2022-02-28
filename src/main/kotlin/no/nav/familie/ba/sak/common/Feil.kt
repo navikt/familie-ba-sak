@@ -9,21 +9,25 @@ open class Feil(
     message: String,
     open val frontendFeilmelding: String? = null,
     open val httpStatus: HttpStatus = HttpStatus.OK,
-    open val throwable: Throwable? = null
+    open val throwable: Throwable? = null,
+    override val cause: Throwable? = throwable
+
 ) : RuntimeException(message)
 
 open class FunksjonellFeil(
     open val melding: String,
     open val frontendFeilmelding: String? = melding,
     open val httpStatus: HttpStatus = HttpStatus.OK,
-    open val throwable: Throwable? = null
+    open val throwable: Throwable? = null,
+    override val cause: Throwable? = throwable
 ) : RuntimeException(melding)
 
 class UtbetalingsikkerhetFeil(
     melding: String,
     override val frontendFeilmelding: String? = null,
     override val httpStatus: HttpStatus = HttpStatus.OK,
-    override val throwable: Throwable? = null
+    override val throwable: Throwable? = null,
+    override val cause: Throwable? = throwable
 ) : FunksjonellFeil(
     melding,
     frontendFeilmelding,
@@ -35,7 +39,8 @@ class RolleTilgangskontrollFeil(
     melding: String,
     override val frontendFeilmelding: String = melding,
     override val httpStatus: HttpStatus = HttpStatus.OK,
-    override val throwable: Throwable? = null
+    override val throwable: Throwable? = null,
+    override val cause: Throwable? = throwable
 ) : FunksjonellFeil(
     melding,
     frontendFeilmelding,

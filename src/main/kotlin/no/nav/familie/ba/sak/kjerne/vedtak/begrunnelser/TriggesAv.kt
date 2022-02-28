@@ -18,6 +18,7 @@ data class TriggesAv(
     val vurderingAnnetGrunnlag: Boolean = false,
     val medlemskap: Boolean = false,
     val deltbosted: Boolean = false,
+    val deltBostedSkalIkkeDeles: Boolean = false,
     val valgbar: Boolean = true,
     val endringsaarsaker: Set<Årsak> = emptySet(),
     val etterEndretUtbetaling: Boolean = false,

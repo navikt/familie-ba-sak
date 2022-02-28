@@ -7,7 +7,8 @@ import javax.persistence.Converter
 enum class UtdypendeVilkårsvurdering(val tekst: String) {
     VURDERING_ANNET_GRUNNLAG(tekst = "Vurdering annet grunnlag"),
     VURDERT_MEDLEMSKAP(tekst = "Vurdert medlemskap"),
-    DELT_BOSTED(tekst = "Delt bosted"),
+    DELT_BOSTED(tekst = "Delt bosted: skal deles"),
+    DELT_BOSTED_SKAL_IKKE_DELES(tekst = "Delt bosted: skal ikke deles")
 }
 
 @Converter

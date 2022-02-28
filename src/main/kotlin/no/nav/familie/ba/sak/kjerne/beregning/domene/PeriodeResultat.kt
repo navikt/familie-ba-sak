@@ -48,7 +48,7 @@ data class PeriodeResultat(
             (periodeTom == null || annetPeriodeResultat.periodeFom == null || periodeTom >= annetPeriodeResultat.periodeFom)
     }
 
-    fun erDeltBosted() =
+    fun erDeltBostedSomSkalDeles() =
         vilkårResultater.firstOrNull { it.vilkårType == Vilkår.BOR_MED_SØKER }?.utdypendeVilkårsvurderinger?.contains(
             UtdypendeVilkårsvurdering.DELT_BOSTED
         ) ?: false

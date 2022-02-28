@@ -105,6 +105,8 @@ class VedtaksperiodeService(
 
         val sanityBegrunnelser = sanityService.hentSanityBegrunnelser()
 
+        val erIngenOverlappVedtaksperiodeToggelPå = featureToggleService.isEnabled(INGEN_OVERLAPP_VEDTAKSPERIODER)
+
         vedtaksperiodeMedBegrunnelser.settBegrunnelser(
             standardbegrunnelserFraFrontend.mapNotNull {
 
@@ -120,7 +122,7 @@ class VedtaksperiodeService(
                     )
                 }
 
-                it.tilVedtaksbegrunnelse(vedtaksperiodeMedBegrunnelser)
+                it.tilVedtaksbegrunnelse(vedtaksperiodeMedBegrunnelser, erIngenOverlappVedtaksperiodeToggelPå)
             }
         )
 
@@ -363,6 +365,8 @@ class VedtaksperiodeService(
             behandling.id
         )
 
+        val erIngenOverlappVedtaksperiodeToggelPå = featureToggleService.isEnabled(INGEN_OVERLAPP_VEDTAKSPERIODER)
+
         return utvidedeVedtaksperioderMedBegrunnelser.map { utvidetVedtaksperiodeMedBegrunnelser ->
             val aktørIderMedUtbetaling =
                 hentAktørerMedUtbetaling(utvidetVedtaksperiodeMedBegrunnelser, persongrunnlag).map { it.aktørId }
@@ -375,7 +379,8 @@ class VedtaksperiodeService(
                     vilkårsvurdering = vilkårsvurdering,
                     aktørIderMedUtbetaling = aktørIderMedUtbetaling,
                     endretUtbetalingAndeler = endretUtbetalingAndeler,
-                    andelerTilkjentYtelse = andelerTilkjentYtelse
+                    andelerTilkjentYtelse = andelerTilkjentYtelse,
+                    erIngenOverlappVedtaksperiodeToggelPå = erIngenOverlappVedtaksperiodeToggelPå
                 )
             )
         }
