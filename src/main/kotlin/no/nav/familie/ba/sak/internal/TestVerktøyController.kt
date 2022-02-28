@@ -107,7 +107,7 @@ class TestVerktøyController(
 
     @GetMapping(path = ["/test-endingstidspukt/{behandlingId}"])
     @Unprotected
-    fun hentEndringstidspukt(@PathVariable behandlingId: Long): ResponseEntity<String?> {
+    fun hentEndringstidspuktForBehandling(@PathVariable behandlingId: Long): ResponseEntity<String?> {
 
         return if (envService.erPreprod() || envService.erDev()) {
             val endringstidspunkt =
