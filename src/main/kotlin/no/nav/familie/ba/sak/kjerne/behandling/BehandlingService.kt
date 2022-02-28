@@ -481,7 +481,7 @@ class BehandlingService(
         return behandlingSøknadsinfoRepository.findByBehandlingId(behandlingId)?.mottattDato
     }
 
-    fun finnEndringstidpunkForbehandling(behandlingId: Long): LocalDate? {
+    fun finnEndringstidpunkForBehandling(behandlingId: Long): LocalDate? {
         val nyBehandling = hent(behandlingId)
         val gammelBehandling = hentSisteBehandlingSomErIverksatt(fagsakId = nyBehandling.fagsak.id) ?: return null
 
