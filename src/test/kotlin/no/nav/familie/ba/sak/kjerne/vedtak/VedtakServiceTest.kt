@@ -125,23 +125,25 @@ class VedtakServiceTest(
     @BeforeEach
     fun setup() {
         behandlingService = BehandlingService(
-            behandlingRepository,
-            personopplysningGrunnlagRepository,
-            andelTilkjentYtelseRepository,
-            behandlingMetrikker,
-            fagsakRepository,
-            vedtakRepository,
-            loggService,
-            arbeidsfordelingService,
-            saksstatistikkEventPublisher,
-            oppgaveService,
-            infotrygdService,
-            vedtaksperiodeService,
-            personidentService,
-            featureToggleService,
-            taskRepository,
-            behandlingMigreringsinfoRepository,
-            behandlingSøknadsinfoRepository
+            behandlingRepository = behandlingRepository,
+            personopplysningGrunnlagRepository = personopplysningGrunnlagRepository,
+            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
+            behandlingMetrikker = behandlingMetrikker,
+            fagsakRepository = fagsakRepository,
+            vedtakRepository = vedtakRepository,
+            loggService = loggService,
+            arbeidsfordelingService = arbeidsfordelingService,
+            saksstatistikkEventPublisher = saksstatistikkEventPublisher,
+            oppgaveService = oppgaveService,
+            infotrygdService = infotrygdService,
+            vedtaksperiodeService = vedtaksperiodeService,
+            personidentService = personidentService,
+            featureToggleService = featureToggleService,
+            taskRepository = taskRepository,
+            behandlingMigreringsinfoRepository = behandlingMigreringsinfoRepository,
+            behandlingSøknadsinfoRepository = behandlingSøknadsinfoRepository,
+            vilkårsvurderingService = vilkårsvurderingService,
+            persongrunnlagService = persongrunnlagService,
         )
 
         val personAktørId = randomAktørId()
