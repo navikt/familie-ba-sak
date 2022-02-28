@@ -310,8 +310,7 @@ class VilkårService(
                 )
 
             if (behandling.type == REVURDERING && behandling.opprettetÅrsak == BehandlingÅrsak.DØDSFALL_BRUKER) {
-                vilkårsvurdering.personResultater.single { it.erSøkersResultater() }.vilkårResultater.forEach {
-                    vilkårResultat ->
+                vilkårsvurdering.personResultater.single { it.erSøkersResultater() }.vilkårResultater.forEach { vilkårResultat ->
                     vilkårResultat.periodeTom = personopplysningGrunnlag.søker.dødsfall?.dødsfallDato
                 }
             }
@@ -599,7 +598,9 @@ class VilkårService(
             )
 
             val vilkårTyperForPerson = forrigeBehandlingsvilkårsvurdering.personResultater
-                .single { it.aktør == person.aktør }.vilkårResultater.map { it.vilkårType }
+                .single { it.aktør == person.aktør }.vilkårResultater
+                .filter { it.resultat == Resultat.OPPFYLT }
+                .map { it.vilkårType }
 
             val vilkårResultater = vilkårTyperForPerson.map { vilkår ->
                 val fom = utledPeriodeFom(forrigeBehandlingsvilkårsvurdering, vilkår, person, nyMigreringsdato)
