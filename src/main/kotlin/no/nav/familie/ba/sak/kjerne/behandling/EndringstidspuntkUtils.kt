@@ -2,13 +2,14 @@ package no.nav.familie.ba.sak.kjerne.behandling
 
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
+import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.PeriodeResultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.PeriodeVilkår
-import no.nav.familie.ba.sak.kjerne.beregning.domene.lagVertikaleSegmenter
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
-import no.nav.fpsak.tidsserie.LocalDateSegment
 import java.time.LocalDate
 
 fun finnEndringstidspunkt(
@@ -19,102 +20,186 @@ fun finnEndringstidspunkt(
     nyttPersonopplysningGrunnlag: PersonopplysningGrunnlag,
     gammeltPersonopplysningGrunnlag: PersonopplysningGrunnlag
 ): LocalDate? {
-    val nyeAndelSegmenter = nyeAndelerTilkjentYtelse.lagVertikaleSegmenter()
-    val gamleAndelSegmenter = gamleAndelerTilkjentYtelse.lagVertikaleSegmenter()
 
     val nyeVilkårsperioder =
         nyVilkårsvurdering.hentInnvilgedePerioder(nyttPersonopplysningGrunnlag).let { it.first + it.second }
     val gamleVilkårsperioder =
         gammelVilkårsvurdering.hentInnvilgedePerioder(gammeltPersonopplysningGrunnlag).let { it.first + it.second }
 
-    val eldsteEndringVilkår = finnEldsteEndringIVilkår(nyeVilkårsperioder, gamleVilkårsperioder)
+    val tidligesteEndringIVilkår = finnTidligesteEndringIVilkår(nyeVilkårsperioder, gamleVilkårsperioder)
 
-    val eldsteEndringAndeler = finnEldsteEndringIAndelTilkjentYtelse(nyeAndelSegmenter, gamleAndelSegmenter)
+    val tidligesteEndringIAndeler =
+        finnTidligesteEndringIAndelTilkjentYtelse(nyeAndelerTilkjentYtelse, gamleAndelerTilkjentYtelse)
 
-    return minsteNullableDato(eldsteEndringAndeler, eldsteEndringVilkår)
+    val tidligesteEndringEndretUtbetalinger =
+        finnTidligesteEndringIEndredeUtbetalinger(
+            nyeAndelerTilkjentYtelse.flatMap { it.endretUtbetalingAndeler },
+            gamleAndelerTilkjentYtelse.flatMap { it.endretUtbetalingAndeler }
+        )
+
+    return listOfNotNull(
+        tidligesteEndringIAndeler,
+        tidligesteEndringIVilkår,
+        tidligesteEndringEndretUtbetalinger
+    ).minByOrNull { it }
 }
 
-private fun finnEldsteEndringIAndelTilkjentYtelse(
-    nyeAndelSegmenter: Map<LocalDateSegment<Int>, List<AndelTilkjentYtelse>>,
-    gamleAndelSegmenter: Map<LocalDateSegment<Int>, List<AndelTilkjentYtelse>>
+private fun finnTidligesteEndringIAndelTilkjentYtelse(
+    nyeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>,
+    gamleAndelerTilkjentYtelse: List<AndelTilkjentYtelse>,
 ): LocalDate? {
-    val fomDatoerIkkeINyeVilkår =
-        gamleAndelSegmenter.keys
-            .map { it.fom ?: TIDENES_MORGEN }
-            .filter { gammelAndelsperiode ->
-                !nyeAndelSegmenter.keys.any { it.fom == gammelAndelsperiode }
-            }
-    val minsteFomdatoIkkeINyeAndeler = fomDatoerIkkeINyeVilkår.minOfOrNull { it }
+    val eldsteDiffFraGamleAndeler = gamleAndelerTilkjentYtelse.finnTidligesteForskjell(nyeAndelerTilkjentYtelse)
 
-    val førsteDiffFraNyeAndeler = nyeAndelSegmenter.keys
-        .sortedBy { it.fom }
-        .firstOrNull { nyAndelPeriode ->
-            val nyeAndelerIPeriode = nyeAndelSegmenter[nyAndelPeriode]!!
-            val gamleAndelerIPeriode = gamleAndelSegmenter[nyAndelPeriode] ?: return nyAndelPeriode.fom
+    val eldsteDiffFraNyeAndeler =
+        nyeAndelerTilkjentYtelse.finnTidligesteForskjell(
+            andreAndeler = gamleAndelerTilkjentYtelse,
+            før = eldsteDiffFraGamleAndeler ?: TIDENES_ENDE,
+        )
 
-            !nyeAndelerIPeriode.erFunksjoneltLik(gamleAndelerIPeriode)
-        }?.fom
-
-    return minsteNullableDato(førsteDiffFraNyeAndeler, minsteFomdatoIkkeINyeAndeler)
+    return listOfNotNull(eldsteDiffFraNyeAndeler, eldsteDiffFraGamleAndeler).minByOrNull { it }
 }
 
-private fun finnEldsteEndringIVilkår(
+private fun List<AndelTilkjentYtelse>.finnTidligesteForskjell(
+    andreAndeler: List<AndelTilkjentYtelse>,
+    før: LocalDate? = TIDENES_ENDE
+) = this
+    .sortedBy { it.stønadFom }
+    .filter { it.stønadFom.førsteDagIInneværendeMåned().isBefore((før)) }
+    .firstNotNullOfOrNull { andel ->
+        when {
+            !andreAndeler.any { it.erFunksjoneltLikUtenomTomDato(andel) } ->
+                andel.stønadFom.førsteDagIInneværendeMåned()
+            !andreAndeler.any { it.erFunksjoneltLik(andel) } ->
+                andel.stønadTom.sisteDagIInneværendeMåned()
+            else -> null
+        }
+    }
+
+private fun finnTidligesteEndringIEndredeUtbetalinger(
+    nyeEndretUtbetalingsandeler: List<EndretUtbetalingAndel>,
+    gamleEndretUtbetalingsandeler: List<EndretUtbetalingAndel>,
+): LocalDate? {
+    val eldsteDiffFraGamleAndeler = gamleEndretUtbetalingsandeler.finnTidligesteForskjell(nyeEndretUtbetalingsandeler)
+
+    val eldsteDiffFraNyeAndeler =
+        nyeEndretUtbetalingsandeler.finnTidligesteForskjell(
+            andreEndretUtbetalinger = gamleEndretUtbetalingsandeler,
+            før = eldsteDiffFraGamleAndeler ?: TIDENES_ENDE,
+        )
+
+    return listOfNotNull(eldsteDiffFraNyeAndeler, eldsteDiffFraGamleAndeler).minByOrNull { it }
+}
+
+@JvmName("finnTidligesteForskjellEndretUtbetalingAndel")
+private fun List<EndretUtbetalingAndel>.finnTidligesteForskjell(
+    andreEndretUtbetalinger: List<EndretUtbetalingAndel>,
+    før: LocalDate = TIDENES_ENDE
+) = this
+    .sortedBy { it.fom }
+    .filter { it.fom!!.førsteDagIInneværendeMåned().isBefore((før)) }
+    .firstNotNullOfOrNull { andel ->
+        when {
+            !andreEndretUtbetalinger.any { it.erFunksjoneltLikUtenomTomDato(andel) } ->
+                andel.fom!!.førsteDagIInneværendeMåned()
+            !andreEndretUtbetalinger.any { it.erFunksjoneltLik(andel) } ->
+                andel.tom!!.sisteDagIInneværendeMåned()
+            else -> null
+        }
+    }
+
+private fun finnTidligesteEndringIVilkår(
     nyeVilkårsperioder: List<PeriodeResultat>,
     gamleVilkårsperioder: List<PeriodeResultat>
 ): LocalDate? {
-    val fomDatoerIkkeINyeVilkår =
-        gamleVilkårsperioder
-            .map { it.periodeFom ?: TIDENES_MORGEN }
-            .filter { gammelVilkårsperiode ->
-                !nyeVilkårsperioder.any { it.periodeFom == gammelVilkårsperiode }
-            }
-    val minsteFomdatoIkkeINyeVilkår = fomDatoerIkkeINyeVilkår.minOfOrNull { it }
+    val tidligesteDiffFraGamleVilkårsperioder = gamleVilkårsperioder.finnTidligesteForskjell(nyeVilkårsperioder)
 
-    val førsteDiffFraNyeVilkår = nyeVilkårsperioder
-        .sortedBy { it.periodeFom }
-        .filter { (it.periodeFom ?: TIDENES_MORGEN).isBefore(minsteFomdatoIkkeINyeVilkår ?: TIDENES_ENDE) }
-        .firstOrNull { nyeVilkårresultaterIPeriode ->
-            !gamleVilkårsperioder.any { it.erFunksjoneltLik(nyeVilkårresultaterIPeriode) }
-        }?.periodeFom
+    val tidligesteDiffFranyeVilkårsperioder =
+        nyeVilkårsperioder.finnTidligesteForskjell(
+            andrePerioderesultater = gamleVilkårsperioder,
+            før = tidligesteDiffFraGamleVilkårsperioder ?: TIDENES_ENDE,
+        )
 
-    return minsteNullableDato(førsteDiffFraNyeVilkår, minsteFomdatoIkkeINyeVilkår)
+    // Andeler tilkjent ytelse er forskøvet en månde etter vilkårene. Legger derfor til en måned.
+    return listOfNotNull(tidligesteDiffFranyeVilkårsperioder, tidligesteDiffFraGamleVilkårsperioder)
+        .minByOrNull { it }
+        ?.plusMonths(1)
 }
+
+@JvmName("finnTidligesteForskjellPeriodeResultat")
+private fun List<PeriodeResultat>.finnTidligesteForskjell(
+    andrePerioderesultater: List<PeriodeResultat>,
+    før: LocalDate = TIDENES_ENDE
+) = this
+    .sortedBy { it.periodeFom }
+    .filter { it.periodeFom!!.førsteDagIInneværendeMåned().isBefore((før)) }
+    .firstNotNullOfOrNull { andel ->
+        when {
+            !andrePerioderesultater.any { it.erFunksjoneltLikUtenomTomDato(andel) } ->
+                andel.periodeFom ?: TIDENES_MORGEN
+            !andrePerioderesultater.any { it.erFunksjoneltLik(andel) } ->
+                andel.periodeTom
+            else -> null
+        }
+    }
+
+private fun Set<PeriodeVilkår>.erFunksjoneltLikUtenomDatoer(andrePeriodeVilkårResultater: Set<PeriodeVilkår>): Boolean {
+    return this.size == andrePeriodeVilkårResultater.size &&
+        this.all { periodeVilkårResultat ->
+            andrePeriodeVilkårResultater.any { it.erFunksjoneltLikUtenomDatoer(periodeVilkårResultat) }
+        }
+}
+
+private fun PeriodeVilkår.erFunksjoneltLikUtenomDatoer(annenPeriodeVilkår: PeriodeVilkår): Boolean {
+    return this.vilkårType == annenPeriodeVilkår.vilkårType &&
+        this.resultat == annenPeriodeVilkår.resultat &&
+        this.utdypendeVilkårsvurderinger.all { annenPeriodeVilkår.utdypendeVilkårsvurderinger.contains(it) }
+}
+
+fun AndelTilkjentYtelse.erFunksjoneltLik(annenAndelTilkjentYtelse: AndelTilkjentYtelse): Boolean =
+    this.aktør.aktørId == annenAndelTilkjentYtelse.aktør.aktørId &&
+        this.kalkulertUtbetalingsbeløp == annenAndelTilkjentYtelse.kalkulertUtbetalingsbeløp &&
+        this.stønadFom == annenAndelTilkjentYtelse.stønadFom &&
+        this.stønadTom == annenAndelTilkjentYtelse.stønadTom &&
+        this.type == annenAndelTilkjentYtelse.type &&
+        this.sats == annenAndelTilkjentYtelse.sats &&
+        this.prosent == annenAndelTilkjentYtelse.prosent
+
+fun AndelTilkjentYtelse.erFunksjoneltLikUtenomTomDato(annenAndelTilkjentYtelse: AndelTilkjentYtelse): Boolean =
+    this.aktør.aktørId == annenAndelTilkjentYtelse.aktør.aktørId &&
+        this.kalkulertUtbetalingsbeløp == annenAndelTilkjentYtelse.kalkulertUtbetalingsbeløp &&
+        this.stønadFom == annenAndelTilkjentYtelse.stønadFom &&
+        this.type == annenAndelTilkjentYtelse.type &&
+        this.sats == annenAndelTilkjentYtelse.sats &&
+        this.prosent == annenAndelTilkjentYtelse.prosent
 
 private fun PeriodeResultat.erFunksjoneltLik(annenPeriode: PeriodeResultat): Boolean {
     return this.periodeFom == annenPeriode.periodeFom &&
         this.periodeTom == annenPeriode.periodeTom &&
         this.aktør.aktørId == annenPeriode.aktør.aktørId &&
-        this.vilkårResultater.erFunksjoneltLik(annenPeriode.vilkårResultater)
+        // Har allerede tatt høyde for datoer i PeriodeResultat sin periode
+        this.vilkårResultater.erFunksjoneltLikUtenomDatoer(annenPeriode.vilkårResultater)
 }
 
-private fun Set<PeriodeVilkår>.erFunksjoneltLik(andrePeriodeVilkårResultater: Set<PeriodeVilkår>): Boolean {
-    return this.size == andrePeriodeVilkårResultater.size &&
-        this.all { periodeVilkårResultat ->
-            andrePeriodeVilkårResultater.any { it.erFunksjoneltLik(periodeVilkårResultat) }
-        }
+private fun PeriodeResultat.erFunksjoneltLikUtenomTomDato(annenPeriode: PeriodeResultat): Boolean {
+    return this.periodeFom == annenPeriode.periodeFom &&
+        this.aktør.aktørId == annenPeriode.aktør.aktørId &&
+        // Har allerede tatt høyde for fom datoer i PeriodeResultat sin periode
+        this.vilkårResultater.erFunksjoneltLikUtenomDatoer(annenPeriode.vilkårResultater)
 }
 
-private fun PeriodeVilkår.erFunksjoneltLik(annenPeriodeVilkår: PeriodeVilkår): Boolean {
-    return this.vilkårType == annenPeriodeVilkår.vilkårType &&
-        this.resultat == annenPeriodeVilkår.resultat &&
-        this.utdypendeVilkårsvurderinger.all { annenPeriodeVilkår.utdypendeVilkårsvurderinger.contains(it) } &&
-        this.periodeFom == annenPeriodeVilkår.periodeFom &&
-        this.periodeTom == annenPeriodeVilkår.periodeTom
-}
+fun EndretUtbetalingAndel.erFunksjoneltLik(annenEndretUtbetalingAndel: EndretUtbetalingAndel): Boolean =
+    this.person?.aktør?.aktørId == annenEndretUtbetalingAndel.person?.aktør?.aktørId &&
+        this.prosent == annenEndretUtbetalingAndel.prosent &&
+        this.fom == annenEndretUtbetalingAndel.fom &&
+        this.tom == annenEndretUtbetalingAndel.tom &&
+        this.årsak == annenEndretUtbetalingAndel.årsak &&
+        this.avtaletidspunktDeltBosted == annenEndretUtbetalingAndel.avtaletidspunktDeltBosted &&
+        this.søknadstidspunkt == annenEndretUtbetalingAndel.søknadstidspunkt
 
-private fun List<AndelTilkjentYtelse>.erFunksjoneltLik(andreAndelerTilkjentYtelse: List<AndelTilkjentYtelse>): Boolean {
-    return this.size == andreAndelerTilkjentYtelse.size &&
-        this.all { andelTilkjentYtelse ->
-            andreAndelerTilkjentYtelse.any { it.erFunksjoneltLik(andelTilkjentYtelse) }
-        }
-}
-
-private fun minsteNullableDato(
-    dato1: LocalDate?,
-    dato2: LocalDate?
-) = when {
-    dato1 == null && dato2 == null -> null
-    dato1 == null -> dato2
-    dato2 == null -> dato1
-    else -> minOf(dato1, dato2)
-}
+fun EndretUtbetalingAndel.erFunksjoneltLikUtenomTomDato(annenEndretUtbetalingAndel: EndretUtbetalingAndel): Boolean =
+    this.person?.aktør?.aktørId == annenEndretUtbetalingAndel.person?.aktør?.aktørId &&
+        this.prosent == annenEndretUtbetalingAndel.prosent &&
+        this.fom == annenEndretUtbetalingAndel.fom &&
+        this.årsak == annenEndretUtbetalingAndel.årsak &&
+        this.avtaletidspunktDeltBosted == annenEndretUtbetalingAndel.avtaletidspunktDeltBosted &&
+        this.søknadstidspunkt == annenEndretUtbetalingAndel.søknadstidspunkt
