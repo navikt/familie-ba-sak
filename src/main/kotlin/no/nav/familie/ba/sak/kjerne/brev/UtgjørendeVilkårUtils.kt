@@ -245,6 +245,13 @@ private fun triggereForUtdypendeVilkårsvurderingErOppfylt(
             erReduksjonStartPåDeltBosted != resultatInneholderDeltBosted ||
             !triggesAv.deltbosted
 
+    val erDeltBostedSkalIkkDelesOppfylt =
+        (
+            triggesAv.deltBostedSkalIkkeDeles && vilkårResultat.utdypendeVilkårsvurderinger.contains(
+                UtdypendeVilkårsvurdering.DELT_BOSTED_SKAL_IKKE_DELES
+            )
+            ) || !triggesAv.deltBostedSkalIkkeDeles
+
     val resultatInneholderVurderingAnnetGrunnlag =
         vilkårResultat.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.VURDERING_ANNET_GRUNNLAG)
     val erSkjønnsmessigVurderingOppfylt =
@@ -257,5 +264,5 @@ private fun triggereForUtdypendeVilkårsvurderingErOppfylt(
     val erMedlemskapOppfylt =
         triggesAv.medlemskap == resultatInneholderMedlemsskap
 
-    return erDeltBostedOppfylt && erSkjønnsmessigVurderingOppfylt && erMedlemskapOppfylt
+    return erDeltBostedOppfylt && erSkjønnsmessigVurderingOppfylt && erMedlemskapOppfylt && erDeltBostedSkalIkkDelesOppfylt
 }

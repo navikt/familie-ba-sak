@@ -72,7 +72,7 @@ object TilkjentYtelseUtils {
                                 person
                             )
                         beløpsperioder.map { beløpsperiode ->
-                            val prosent = if (periodeResultatBarn.erDeltBosted()) BigDecimal(50) else BigDecimal(100)
+                            val prosent = if (periodeResultatBarn.erDeltBostedSomSkalDeles()) BigDecimal(50) else BigDecimal(100)
                             AndelTilkjentYtelse(
                                 behandlingId = vilkårsvurdering.behandling.id,
                                 tilkjentYtelse = tilkjentYtelse,

@@ -133,6 +133,7 @@ enum class VilkårTrigger {
     VURDERING_ANNET_GRUNNLAG,
     MEDLEMSKAP,
     DELT_BOSTED,
+    DELT_BOSTED_SKAL_IKKE_DELES
 }
 
 enum class ØvrigTrigger {
@@ -184,6 +185,7 @@ fun SanityBegrunnelse.tilTriggesAv(): TriggesAv {
             ),
         medlemskap = this.inneholderBosattIRiketTrigger(VilkårTrigger.MEDLEMSKAP),
         deltbosted = this.inneholderBorMedSøkerTrigger(VilkårTrigger.DELT_BOSTED),
+        deltBostedSkalIkkeDeles = this.inneholderBorMedSøkerTrigger(VilkårTrigger.DELT_BOSTED_SKAL_IKKE_DELES),
         valgbar = !this.inneholderØvrigTrigger(ØvrigTrigger.ALLTID_AUTOMATISK),
         etterEndretUtbetaling = this.endretUtbetalingsperiodeTriggere
             ?.contains(EndretUtbetalingsperiodeTrigger.ETTER_ENDRET_UTBETALINGSPERIODE) ?: false,
