@@ -167,6 +167,7 @@ spring:
 FAMILIE_INTEGRASJONER_SCOPE: "dummy"
 SANITY_DATASET: "ba-test"
 
+FAMILIE_BREV_API_URL: http://localhost:8001
 FAMILIE_OPPDRAG_API_URL: http://localhost:8087/api
 FAMILIE_INTEGRASJONER_API_URL: http://localhost:28085/api
 FAMILIE_TILBAKE_API_URL: http://localhost:8030/api
