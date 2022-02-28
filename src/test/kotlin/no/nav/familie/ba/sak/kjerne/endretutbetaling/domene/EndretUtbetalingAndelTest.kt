@@ -126,13 +126,13 @@ internal class EndretUtbetalingAndelTest {
             )
         )
 
-        beregnTomHvisDenIkkeErSatt(
+        val nyTom = beregnTomHvisDenIkkeErSatt(
             andelTilkjentYtelser = andelTilkjentYtelser,
             endretUtbetalingAndel = endretUtbetalingAndel,
             andreEndredeAndelerPåBehandling = emptyList()
         )
 
-        assertEquals(sisteTomPåAndeler, endretUtbetalingAndel.tom)
+        assertEquals(sisteTomPåAndeler, nyTom)
     }
 
     @Test
@@ -173,12 +173,12 @@ internal class EndretUtbetalingAndelTest {
             )
         )
 
-        beregnTomHvisDenIkkeErSatt(
+        val nyTom = beregnTomHvisDenIkkeErSatt(
             andelTilkjentYtelser = andelTilkjentYtelser,
             endretUtbetalingAndel = endretUtbetalingAndel,
             andreEndredeAndelerPåBehandling = listOf(annenEndretAndel)
         )
 
-        assertEquals(annenEndretAndel.fom!!.minusMonths(1), endretUtbetalingAndel.tom)
+        assertEquals(annenEndretAndel.fom!!.minusMonths(1), nyTom)
     }
 }

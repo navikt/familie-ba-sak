@@ -14,19 +14,19 @@ fun beregnTomHvisDenIkkeErSatt(
     andreEndredeAndelerPåBehandling: List<EndretUtbetalingAndel>,
     endretUtbetalingAndel: EndretUtbetalingAndel,
     andelTilkjentYtelser: List<AndelTilkjentYtelse>
-) {
+): YearMonth? {
     val førsteEndringEtterDenneEndringen = andreEndredeAndelerPåBehandling.filter {
         it.fom?.isAfter(endretUtbetalingAndel.fom)
             ?: false
     }.sortedBy { it.fom }.firstOrNull()
 
     if (førsteEndringEtterDenneEndringen != null) {
-        endretUtbetalingAndel.tom = førsteEndringEtterDenneEndringen.fom?.minusMonths(1)
+        return førsteEndringEtterDenneEndringen.fom?.minusMonths(1)
     } else {
         val sisteTomAndeler = andelTilkjentYtelser.filter {
             it.aktør == endretUtbetalingAndel.person?.aktør
         }.maxOf { it.stønadTom }
 
-        endretUtbetalingAndel.tom = sisteTomAndeler
+        return sisteTomAndeler
     }
 }

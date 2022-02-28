@@ -53,7 +53,7 @@ class EndretUtbetalingAndelService(
             .filter { it.id != endretUtbetalingAndelId }
 
         if (endretUtbetalingAndel.tom == null) {
-            beregnTomHvisDenIkkeErSatt(
+            endretUtbetalingAndel.tom = beregnTomHvisDenIkkeErSatt(
                 andreEndredeAndelerPåBehandling = andreEndredeAndelerPåBehandling,
                 endretUtbetalingAndel = endretUtbetalingAndel,
                 andelTilkjentYtelser = andelTilkjentYtelser
