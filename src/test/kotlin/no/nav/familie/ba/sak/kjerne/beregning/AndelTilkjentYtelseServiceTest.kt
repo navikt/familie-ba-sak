@@ -7,13 +7,11 @@ import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagVilkårResultat
 import no.nav.familie.ba.sak.common.tilfeldigPerson
-import no.nav.familie.ba.sak.kjerne.eøs.TestUtil
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
@@ -29,7 +27,7 @@ class AndelTilkjentYtelseServiceTest {
 
     val andelTilkjentYtelse = lagAndelTilkjentYtelse(
         behandling = behandling,
-        person = søkerPerson,
+        person = barnPerson,
         fom = YearMonth.now().minusMonths(4),
         tom = YearMonth.now().plusMonths(1)
     )
@@ -41,19 +39,6 @@ class AndelTilkjentYtelseServiceTest {
         vilkårsvurdering = vilkårsvurdering,
         aktør = barnPerson.aktør
     )
-
-    @BeforeEach
-    fun setUp() {
-        personResultat.vilkårResultater.addAll(
-            listOf(
-                lagVilkårResultat(Vilkår.BOSATT_I_RIKET, Regelverk.EØS_FORORDNINGEN, TestUtil.feb(2022), null),
-                lagVilkårResultat(Vilkår.LOVLIG_OPPHOLD, Regelverk.EØS_FORORDNINGEN, TestUtil.apr(2022), null),
-                lagVilkårResultat(Vilkår.BOR_MED_SØKER, Regelverk.EØS_FORORDNINGEN, TestUtil.aug(2022), null),
-            )
-        )
-
-        vilkårsvurdering.personResultater = setOf(personResultat)
-    }
 
     @Test
     fun `EØS-forordning om alle relevante vilkår er satt til regelverk EØS forordning`() {

@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
@@ -23,11 +24,16 @@ class AndelTilkjentYtelseService(
         }
     }
 
-    fun finnRelevanteVilkårsresulaterForRegelverk(andeltilkjentYtesle: AndelTilkjentYtelse): List<VilkårResultat> =
-        vilkårsvurderingService.hentAktivForBehandling(andeltilkjentYtesle.behandlingId)
+    fun finnRelevanteVilkårsresulaterForRegelverk(andeltilkjentYtelse: AndelTilkjentYtelse): List<VilkårResultat> =
+        vilkårsvurderingService.hentAktivForBehandling(andeltilkjentYtelse.behandlingId)
             ?.personResultater
             ?.filter { !it.erSøkersResultater() }
+            ?.filter { andeltilkjentYtelse.aktør == it.aktør }
             ?.flatMap { it.vilkårResultater }
+            ?.filter {
+                andeltilkjentYtelse.stønadFom > it.periodeFom?.toYearMonth() &&
+                    (it.periodeTom == null || andeltilkjentYtelse.stønadFom <= it.periodeTom?.toYearMonth())
+            }
             ?.filter { vilkårResultat ->
                 regelverkavhenigeVilkår().any { it == vilkårResultat.vilkårType }
             } ?: emptyList()
