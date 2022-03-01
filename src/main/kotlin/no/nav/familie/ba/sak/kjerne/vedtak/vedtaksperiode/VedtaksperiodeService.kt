@@ -543,7 +543,10 @@ class VedtaksperiodeService(
             val overlappendePeriode = overlappendePerioder.singleOrNull { o -> it.fom == o.fom && it.tom == o.tom }
             if (overlappendePeriode != null) {
                 val reduksjonsperiode = reduksjonsperioder.single { rd -> rd.tom == overlappendePeriode.tom }
-                oppdatertUtbetalingsperioder.add(it.copy(tom = reduksjonsperiode.fom!!.sisteDagIForrigeMåned()))
+                val nyUtbetalingsperiode = it.copy(tom = reduksjonsperiode.fom!!.sisteDagIForrigeMåned())
+                if (nyUtbetalingsperiode.fom!!.isBefore(nyUtbetalingsperiode.tom)) {
+                    oppdatertUtbetalingsperioder.add(nyUtbetalingsperiode)
+                }
             } else {
                 oppdatertUtbetalingsperioder.add(it)
             }
