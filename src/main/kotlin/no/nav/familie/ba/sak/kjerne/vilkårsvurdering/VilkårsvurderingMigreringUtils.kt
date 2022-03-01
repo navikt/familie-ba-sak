@@ -14,14 +14,17 @@ object VilkårsvurderingMigreringUtils {
         person: Person,
         nyMigreringsdato: LocalDate
     ): LocalDate {
-        val forrigeVilkårsPeriodeFom = hentForrigeVilkårsvurderingVilkårResultater(
+        val forrigeVilkårResultat = hentForrigeVilkårsvurderingVilkårResultater(
             forrigeBehandlingsvilkårsvurdering,
             vilkår, person
-        ).minOf { it.periodeFom!! }
+        ).filter { it.periodeFom != null }
+        val forrigeVilkårsPeriodeFom =
+            if (forrigeVilkårResultat.isNotEmpty()) forrigeVilkårResultat.minOf { it.periodeFom!! } else null
         return when {
             person.fødselsdato.isAfter(nyMigreringsdato) ||
                 vilkår.gjelderAlltidFraBarnetsFødselsdato() -> person.fødselsdato
-            forrigeVilkårsPeriodeFom.isBefore(nyMigreringsdato) -> forrigeVilkårsPeriodeFom
+            forrigeVilkårsPeriodeFom != null &&
+                forrigeVilkårsPeriodeFom.isBefore(nyMigreringsdato) -> forrigeVilkårsPeriodeFom
             else -> nyMigreringsdato
         }
     }
