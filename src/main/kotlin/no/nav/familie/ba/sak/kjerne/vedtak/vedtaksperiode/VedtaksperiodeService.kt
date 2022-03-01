@@ -19,7 +19,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
-import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
+import no.nav.familie.ba.sak.kjerne.beregning.EndringstidspunktSerivce
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
@@ -61,7 +61,7 @@ class VedtaksperiodeService(
     private val sanityService: SanityService,
     private val søknadGrunnlagService: SøknadGrunnlagService,
     private val endretUtbetalingAndelRepository: EndretUtbetalingAndelRepository,
-    private val beregningService: BeregningService,
+    private val endringstidspunktSerivce: EndringstidspunktSerivce,
     private val featureToggleService: FeatureToggleService,
 ) {
 
@@ -286,7 +286,7 @@ class VedtaksperiodeService(
 
         val endringstidspunkt =
             if (featureToggleService.isEnabled(FØRSTE_ENDRINGSTIDSPUNKT))
-                beregningService.finnEndringstidpunkForBehandling(behandlingId = vedtak.behandling.id)
+                endringstidspunktSerivce.finnEndringstidpunkForBehandling(behandlingId = vedtak.behandling.id)
             else TIDENES_MORGEN
 
         return (utbetalingsperioder + endredeUtbetalingsperioder + opphørsperioder + avslagsperioder).filter {
