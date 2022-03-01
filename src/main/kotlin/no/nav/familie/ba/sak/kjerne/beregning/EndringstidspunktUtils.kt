@@ -2,65 +2,62 @@ package no.nav.familie.ba.sak.kjerne.beregning
 
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
-import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
 import no.nav.fpsak.tidsserie.StandardCombinators
-import java.time.YearMonth
 
-data class EndringstidspunktData(
+enum class BehandlingAlder {
+    NY,
+    GAMMEL,
+}
+
+data class AndelTilkjentYtelseEndringData(
     val aktør: Aktør,
-    val kalkulertBeløp: Int
+    val kalkulertBeløp: Int,
+    val behandlingAlder: BehandlingAlder,
 )
 
-fun førsteEndringstidspunkt(
-    andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
+fun List<AndelTilkjentYtelse>.hentPerioderMedEndringer(
     forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>,
-): YearMonth? {
-    val forrigeAndelerTidslinje = LocalDateTimeline(
-        forrigeAndelerTilkjentYtelse.map {
-            LocalDateSegment(
-                it.stønadFom.førsteDagIInneværendeMåned(),
-                it.stønadTom.sisteDagIInneværendeMåned(),
-                EndringstidspunktData(
-                    aktør = it.aktør,
-                    kalkulertBeløp = it.kalkulertUtbetalingsbeløp
-                )
-            )
-        }
-    )
-    val andelerTidslinje = LocalDateTimeline(
-        andelerTilkjentYtelse.map {
-            LocalDateSegment(
-                it.stønadFom.førsteDagIInneværendeMåned(),
-                it.stønadTom.sisteDagIInneværendeMåned(),
-                EndringstidspunktData(
-                    aktør = it.aktør,
-                    kalkulertBeløp = it.kalkulertUtbetalingsbeløp
-                )
-            )
-        }
-    )
+): LocalDateTimeline<List<AndelTilkjentYtelseEndringData>> {
+    val andelerTidslinje = this.hentTidslinje(BehandlingAlder.NY)
+    val forrigeAndelerTidslinje = forrigeAndelerTilkjentYtelse.hentTidslinje(BehandlingAlder.GAMMEL)
 
-    val a = andelerTidslinje.combine(
+    val kombinertTidslinje = andelerTidslinje.combine(
         forrigeAndelerTidslinje,
         StandardCombinators::bothValues,
         LocalDateTimeline.JoinStyle.CROSS_JOIN
-    ) as LocalDateTimeline<List<EndringstidspunktData>>
+    ) as LocalDateTimeline<List<AndelTilkjentYtelseEndringData>>
 
-    val b = a.toSegments()
-        .filter {
-            it.value.groupBy { v -> v.aktør.aktørId }.any { a ->
-                if (a.value.size == 1) true
-                else {
-                    val nySum = a.value[0].kalkulertBeløp
-                    val forrigeSumD = a.value[1].kalkulertBeløp
-                    (nySum - forrigeSumD) != 0
-                }
+    return LocalDateTimeline(kombinertTidslinje.toSegments().filter { it.harEnEndring() })
+}
+
+private fun LocalDateSegment<List<AndelTilkjentYtelseEndringData>>.harEnEndring() =
+    this.value
+        .groupBy { endringsdata -> endringsdata.aktør.aktørId }
+        .any { (_, nyOgGammelDataPåBrukerISegmentet) ->
+            if (nyOgGammelDataPåBrukerISegmentet.size == 1) {
+                true
+            } else {
+                val nySum = nyOgGammelDataPåBrukerISegmentet[0].kalkulertBeløp
+                val forrigeSum = nyOgGammelDataPåBrukerISegmentet[1].kalkulertBeløp
+                (nySum - forrigeSum) != 0
             }
         }
 
-    return b.minOfOrNull { it.fom }?.toYearMonth()
-}
+private fun List<AndelTilkjentYtelse>.hentTidslinje(behandlingAlder: BehandlingAlder):
+    LocalDateTimeline<AndelTilkjentYtelseEndringData> = LocalDateTimeline(
+    this.map {
+        LocalDateSegment(
+            it.stønadFom.førsteDagIInneværendeMåned(),
+            it.stønadTom.sisteDagIInneværendeMåned(),
+            AndelTilkjentYtelseEndringData(
+                aktør = it.aktør,
+                kalkulertBeløp = it.kalkulertUtbetalingsbeløp,
+                behandlingAlder = behandlingAlder,
+            )
+        )
+    }
+)
