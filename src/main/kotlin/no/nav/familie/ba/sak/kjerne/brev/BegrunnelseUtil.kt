@@ -13,12 +13,14 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.MinimertRestPerson
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.barnMedSeksårsdagPåFom
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 
 fun hentPersonidenterGjeldendeForBegrunnelse(
     triggesAv: TriggesAv,
     periode: NullablePeriode,
     vedtakBegrunnelseType: VedtakBegrunnelseType,
+    vedtaksperiodetype: Vedtaksperiodetype,
     restBehandlingsgrunnlagForBrev: RestBehandlingsgrunnlagForBrev,
     identerMedUtbetalingPåPeriode: List<String>,
     erFørsteVedtaksperiodePåFagsak: Boolean,
@@ -26,6 +28,8 @@ fun hentPersonidenterGjeldendeForBegrunnelse(
 
     val erFortsattInnvilgetBegrunnelse = vedtakBegrunnelseType == VedtakBegrunnelseType.FORTSATT_INNVILGET
     val erEndretUtbetalingBegrunnelse = vedtakBegrunnelseType == VedtakBegrunnelseType.ENDRET_UTBETALING
+    val erReduksjonBegrunnelse = vedtaksperiodetype == Vedtaksperiodetype.REDUKSJON &&
+        vedtakBegrunnelseType == VedtakBegrunnelseType.REDUKSJON
 
     return when {
         triggesAv.vilkår.contains(Vilkår.UTVIDET_BARNETRYGD) || triggesAv.småbarnstillegg ->
@@ -46,7 +50,8 @@ fun hentPersonidenterGjeldendeForBegrunnelse(
                 error("Legg til opplysningsplikt ikke oppfylt begrunnelse men det er ikke person med det resultat")
 
         erFortsattInnvilgetBegrunnelse ||
-            erEndretUtbetalingBegrunnelse -> identerMedUtbetalingPåPeriode
+            erEndretUtbetalingBegrunnelse ||
+            erReduksjonBegrunnelse -> identerMedUtbetalingPåPeriode
 
         triggesAv.etterEndretUtbetaling ->
             hentPersonerForEtterEndretUtbetalingsperiode(
