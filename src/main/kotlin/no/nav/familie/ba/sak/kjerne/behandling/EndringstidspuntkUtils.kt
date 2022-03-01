@@ -26,40 +26,40 @@ fun finnEndringstidspunkt(
     val gamleVilkårsperioder =
         gammelVilkårsvurdering.hentInnvilgedePerioder(gammeltPersonopplysningGrunnlag).let { it.first + it.second }
 
-    val tidligesteEndringIVilkår = finnTidligesteEndringIVilkår(nyeVilkårsperioder, gamleVilkårsperioder)
+    val tidligsteEndringIVilkår = finntidligsteEndringIVilkår(nyeVilkårsperioder, gamleVilkårsperioder)
 
-    val tidligesteEndringIAndeler =
-        finnTidligesteEndringIAndelTilkjentYtelse(nyeAndelerTilkjentYtelse, gamleAndelerTilkjentYtelse)
+    val tidligsteEndringIAndeler =
+        finntidligsteEndringIAndelTilkjentYtelse(nyeAndelerTilkjentYtelse, gamleAndelerTilkjentYtelse)
 
-    val tidligesteEndringEndretUtbetalinger =
-        finnTidligesteEndringIEndredeUtbetalinger(
+    val tidligsteEndringEndretUtbetalinger =
+        finntidligsteEndringIEndredeUtbetalinger(
             nyeAndelerTilkjentYtelse.flatMap { it.endretUtbetalingAndeler },
             gamleAndelerTilkjentYtelse.flatMap { it.endretUtbetalingAndeler }
         )
 
     return listOfNotNull(
-        tidligesteEndringIAndeler,
-        tidligesteEndringIVilkår,
-        tidligesteEndringEndretUtbetalinger
+        tidligsteEndringIAndeler,
+        tidligsteEndringIVilkår,
+        tidligsteEndringEndretUtbetalinger
     ).minByOrNull { it } ?: TIDENES_ENDE
 }
 
-private fun finnTidligesteEndringIAndelTilkjentYtelse(
+private fun finntidligsteEndringIAndelTilkjentYtelse(
     nyeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>,
     gamleAndelerTilkjentYtelse: List<AndelTilkjentYtelse>,
 ): LocalDate? {
-    val eldsteDiffFraGamleAndeler = gamleAndelerTilkjentYtelse.finnTidligesteForskjell(nyeAndelerTilkjentYtelse)
+    val tidligsteDiffFraGamleAndeler = gamleAndelerTilkjentYtelse.finnTidligsteForskjell(nyeAndelerTilkjentYtelse)
 
-    val eldsteDiffFraNyeAndeler =
-        nyeAndelerTilkjentYtelse.finnTidligesteForskjell(
+    val tidligsteDiffFraNyeAndeler =
+        nyeAndelerTilkjentYtelse.finnTidligsteForskjell(
             andreAndeler = gamleAndelerTilkjentYtelse,
-            før = eldsteDiffFraGamleAndeler ?: TIDENES_ENDE,
+            før = tidligsteDiffFraGamleAndeler ?: TIDENES_ENDE,
         )
 
-    return listOfNotNull(eldsteDiffFraNyeAndeler, eldsteDiffFraGamleAndeler).minByOrNull { it }
+    return listOfNotNull(tidligsteDiffFraNyeAndeler, tidligsteDiffFraGamleAndeler).minByOrNull { it }
 }
 
-private fun List<AndelTilkjentYtelse>.finnTidligesteForskjell(
+private fun List<AndelTilkjentYtelse>.finnTidligsteForskjell(
     andreAndeler: List<AndelTilkjentYtelse>,
     før: LocalDate? = TIDENES_ENDE
 ) = this
@@ -75,23 +75,23 @@ private fun List<AndelTilkjentYtelse>.finnTidligesteForskjell(
         }
     }
 
-private fun finnTidligesteEndringIEndredeUtbetalinger(
+private fun finntidligsteEndringIEndredeUtbetalinger(
     nyeEndretUtbetalingsandeler: List<EndretUtbetalingAndel>,
     gamleEndretUtbetalingsandeler: List<EndretUtbetalingAndel>,
 ): LocalDate? {
-    val eldsteDiffFraGamleAndeler = gamleEndretUtbetalingsandeler.finnTidligesteForskjell(nyeEndretUtbetalingsandeler)
+    val tidligsteDiffFraGamleAndeler = gamleEndretUtbetalingsandeler.finnTidligsteForskjell(nyeEndretUtbetalingsandeler)
 
-    val eldsteDiffFraNyeAndeler =
-        nyeEndretUtbetalingsandeler.finnTidligesteForskjell(
+    val tidligsteDiffFraNyeAndeler =
+        nyeEndretUtbetalingsandeler.finnTidligsteForskjell(
             andreEndretUtbetalinger = gamleEndretUtbetalingsandeler,
-            før = eldsteDiffFraGamleAndeler ?: TIDENES_ENDE,
+            før = tidligsteDiffFraGamleAndeler ?: TIDENES_ENDE,
         )
 
-    return listOfNotNull(eldsteDiffFraNyeAndeler, eldsteDiffFraGamleAndeler).minByOrNull { it }
+    return listOfNotNull(tidligsteDiffFraNyeAndeler, tidligsteDiffFraGamleAndeler).minByOrNull { it }
 }
 
-@JvmName("finnTidligesteForskjellEndretUtbetalingAndel")
-private fun List<EndretUtbetalingAndel>.finnTidligesteForskjell(
+@JvmName("finntidligsteForskjellEndretUtbetalingAndel")
+private fun List<EndretUtbetalingAndel>.finnTidligsteForskjell(
     andreEndretUtbetalinger: List<EndretUtbetalingAndel>,
     før: LocalDate = TIDENES_ENDE
 ) = this
@@ -107,26 +107,26 @@ private fun List<EndretUtbetalingAndel>.finnTidligesteForskjell(
         }
     }
 
-private fun finnTidligesteEndringIVilkår(
+private fun finntidligsteEndringIVilkår(
     nyeVilkårsperioder: List<PeriodeResultat>,
     gamleVilkårsperioder: List<PeriodeResultat>
 ): LocalDate? {
-    val tidligesteDiffFraGamleVilkårsperioder = gamleVilkårsperioder.finnTidligesteForskjell(nyeVilkårsperioder)
+    val tidligsteDiffFraGamleVilkårsperioder = gamleVilkårsperioder.finnTidligsteForskjell(nyeVilkårsperioder)
 
-    val tidligesteDiffFranyeVilkårsperioder =
-        nyeVilkårsperioder.finnTidligesteForskjell(
+    val tidligsteDiffFranyeVilkårsperioder =
+        nyeVilkårsperioder.finnTidligsteForskjell(
             andrePerioderesultater = gamleVilkårsperioder,
-            før = tidligesteDiffFraGamleVilkårsperioder ?: TIDENES_ENDE,
+            før = tidligsteDiffFraGamleVilkårsperioder ?: TIDENES_ENDE,
         )
 
     // Andeler tilkjent ytelse er forskøvet en månde etter vilkårene. Legger derfor til en måned.
-    return listOfNotNull(tidligesteDiffFranyeVilkårsperioder, tidligesteDiffFraGamleVilkårsperioder)
+    return listOfNotNull(tidligsteDiffFranyeVilkårsperioder, tidligsteDiffFraGamleVilkårsperioder)
         .minByOrNull { it }
         ?.plusMonths(1)
 }
 
-@JvmName("finnTidligesteForskjellPeriodeResultat")
-private fun List<PeriodeResultat>.finnTidligesteForskjell(
+@JvmName("finntidligsteForskjellPeriodeResultat")
+private fun List<PeriodeResultat>.finnTidligsteForskjell(
     andrePerioderesultater: List<PeriodeResultat>,
     før: LocalDate = TIDENES_ENDE
 ) = this
