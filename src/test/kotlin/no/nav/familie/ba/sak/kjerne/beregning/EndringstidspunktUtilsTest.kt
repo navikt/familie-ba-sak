@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test
 class EndringstidspunktUtilsTest {
 
     @Test
-    fun testTest() {
+    fun `Skal finne endringer i beløp`() {
         val person1 = lagPerson()
         val person2 = lagPerson()
 
@@ -51,7 +51,7 @@ class EndringstidspunktUtilsTest {
     }
 
     @Test
-    fun testTest2() {
+    fun `Skal finne reduksjon i fomdato`() {
         val person1 = lagPerson()
         val person2 = lagPerson()
 
@@ -91,9 +91,9 @@ class EndringstidspunktUtilsTest {
         )
         assertEquals(inneværendeMåned().minusYears(1).minusMonths(2), førsteEndringstidspunkt)
     }
-
+    
     @Test
-    fun testTest3() {
+    fun `Skal oppdage perioder som forsvinner`() {
         val person1 = lagPerson()
         val person2 = lagPerson()
 
@@ -141,7 +141,7 @@ class EndringstidspunktUtilsTest {
     }
 
     @Test
-    fun testTest4() {
+    fun `Skal oppdage nye perioder`() {
         val person1 = lagPerson()
         val person2 = lagPerson()
 
@@ -189,7 +189,7 @@ class EndringstidspunktUtilsTest {
     }
 
     @Test
-    fun testTest5() {
+    fun `Skal oppdage dersom vi har samme beløp, men på forskjellige personer`() {
         val person1 = lagPerson()
         val person2 = lagPerson()
 
