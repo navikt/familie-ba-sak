@@ -5,8 +5,10 @@ import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
 import no.nav.familie.ba.sak.common.kjørStegprosessForRevurderingÅrligKontroll
+import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
@@ -14,25 +16,35 @@ import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.SøkerMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
+import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
+import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
-import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeRepository
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
+import java.time.LocalDate
 
 class VedtaksperiodeServiceTest(
     @Autowired
@@ -45,6 +57,9 @@ class VedtaksperiodeServiceTest(
     private val vedtaksperiodeRepository: VedtaksperiodeRepository,
 
     @Autowired
+    private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
+
+    @Autowired
     private val persongrunnlagService: PersongrunnlagService,
 
     @Autowired
@@ -54,10 +69,16 @@ class VedtaksperiodeServiceTest(
     private val vilkårsvurderingService: VilkårsvurderingService,
 
     @Autowired
-    private val tilbakekrevingService: TilbakekrevingService,
+    private val beregningService: BeregningService,
 
     @Autowired
     private val vedtaksperiodeService: VedtaksperiodeService,
+
+    @Autowired
+    private val behandlingService: BehandlingService,
+
+    @Autowired
+    private val økonomiService: ØkonomiService,
 
     @Autowired
     private val databaseCleanupService: DatabaseCleanupService
@@ -239,5 +260,71 @@ class VedtaksperiodeServiceTest(
             "Begrunnelsestype INNVILGET passer ikke med typen 'FORTSATT_INNVILGET' som er satt på perioden.",
             feil.message
         )
+    }
+
+    @Test
+    fun `skal lage redusert vedtaksperioder`() {
+        val behandling = førstegangsbehandling!!
+        val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandling.id)!!
+        val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandling.id)
+        val periodeFom = LocalDate.of(2021, 2, 15)
+        personopplysningGrunnlag.barna.forEach {
+            vurderVilkårsvurderingTilInnvilget(vilkårsvurdering, it, periodeFom)
+        }
+        vilkårsvurderingService.oppdater(vilkårsvurdering)
+        beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
+        var vedtak = vedtakService.hentAktivForBehandlingThrows(behandling.id)
+        vedtaksperiodeService.lagre(vedtaksperiodeService.genererVedtaksperioderMedBegrunnelser(vedtak))
+        økonomiService.oppdaterTilkjentYtelseMedUtbetalingsoppdragOgIverksett(vedtak, "1234")
+
+        var andelTilkjentYtelser = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id)
+        assertNotNull(andelTilkjentYtelser)
+        assertTrue { andelTilkjentYtelser.any { it.stønadFom == periodeFom.nesteMåned() } }
+
+        val revurdering = revurdering!!
+        val revVilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(revurdering.id)!!
+        val revPersonopplysningGrunnlag = persongrunnlagService.hentAktivThrows(revurdering.id)
+        val nyPeriode = LocalDate.of(2021, 5, 17)
+        revPersonopplysningGrunnlag.barna.forEach {
+            vurderVilkårsvurderingTilInnvilget(revVilkårsvurdering, it, nyPeriode)
+        }
+        vilkårsvurderingService.oppdater(revVilkårsvurdering)
+        beregningService.oppdaterBehandlingMedBeregning(revurdering, revPersonopplysningGrunnlag)
+        behandlingService.oppdaterResultatPåBehandling(revurdering.id, BehandlingResultat.ENDRET)
+
+        vedtak = vedtakService.hentAktivForBehandlingThrows(revurdering.id)
+        vedtaksperiodeService.lagre(vedtaksperiodeService.genererVedtaksperioderMedBegrunnelser(vedtak))
+
+        andelTilkjentYtelser = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(revurdering.id)
+        assertNotNull(andelTilkjentYtelser)
+        assertTrue { andelTilkjentYtelser.any { it.stønadFom == nyPeriode.nesteMåned() } }
+
+        val vedtaksperioder = vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak)
+        assertNotNull(vedtaksperioder)
+        assertTrue { vedtaksperioder.any { it.type == Vedtaksperiodetype.REDUKSJON } }
+        val redusertPeriode = vedtaksperioder.single { it.type == Vedtaksperiodetype.REDUKSJON }
+        assertTrue {
+            redusertPeriode.fom == periodeFom.nesteMåned().førsteDagIInneværendeMåned() &&
+                redusertPeriode.tom == nyPeriode.sisteDagIMåned()
+        }
+    }
+
+    private fun vurderVilkårsvurderingTilInnvilget(
+        vilkårsvurdering: Vilkårsvurdering,
+        barn: Person,
+        periodeFom: LocalDate
+    ) {
+        vilkårsvurdering.personResultater.forEach { personResultat ->
+            personResultat.vilkårResultater.forEach {
+                if (it.vilkårType == Vilkår.UNDER_18_ÅR) {
+                    it.resultat = Resultat.OPPFYLT
+                    it.periodeFom = barn.fødselsdato
+                    it.periodeTom = barn.fødselsdato.plusYears(18)
+                } else {
+                    it.resultat = Resultat.OPPFYLT
+                    it.periodeFom = periodeFom
+                }
+            }
+        }
     }
 }
