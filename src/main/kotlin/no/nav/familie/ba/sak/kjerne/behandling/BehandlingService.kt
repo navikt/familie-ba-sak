@@ -481,33 +481,6 @@ class BehandlingService(
         return behandlingSøknadsinfoRepository.findByBehandlingId(behandlingId)?.mottattDato
     }
 
-    fun finnEndringstidpunkForBehandling(behandlingId: Long): LocalDate? {
-        val nyBehandling = hent(behandlingId)
-        val gammelBehandling = hentSisteBehandlingSomErIverksatt(fagsakId = nyBehandling.fagsak.id) ?: return null
-
-        val nyVilkårsvurdering = vilkårsvurderingService.hentAktivForBehandlingThrows(behandlingId = behandlingId)
-        val gammelVilkårsvurdering =
-            vilkårsvurderingService.hentAktivForBehandlingThrows(behandlingId = gammelBehandling.id)
-
-        val nyeAndelerTilkjentYtelse = andelTilkjentYtelseRepository
-            .finnAndelerTilkjentYtelseForBehandling(behandlingId = behandlingId)
-
-        val gamleAndelerTilkjentYtelse = andelTilkjentYtelseRepository
-            .finnAndelerTilkjentYtelseForBehandling(behandlingId = gammelBehandling.id)
-
-        val nyttPersonopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandlingId = behandlingId)
-        val gammeltPersonopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandlingId = gammelBehandling.id)
-
-        return finnEndringstidspunkt(
-            nyVilkårsvurdering = nyVilkårsvurdering,
-            gammelVilkårsvurdering = gammelVilkårsvurdering,
-            nyeAndelerTilkjentYtelse = nyeAndelerTilkjentYtelse,
-            gamleAndelerTilkjentYtelse = gamleAndelerTilkjentYtelse,
-            nyttPersonopplysningGrunnlag = nyttPersonopplysningGrunnlag,
-            gammeltPersonopplysningGrunnlag = gammeltPersonopplysningGrunnlag,
-        )
-    }
-
     companion object {
 
         private val logger: Logger = LoggerFactory.getLogger(BehandlingService::class.java)

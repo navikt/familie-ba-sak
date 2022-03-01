@@ -4,9 +4,9 @@ import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.autovedtak.omregning.AutobrevScheduler
 import no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg.VedtakOmOvergangsstønadService
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.EndringstidspunktService
 import no.nav.familie.ba.sak.task.BehandleFødselshendelseTask
 import no.nav.familie.ba.sak.task.SatsendringTask
 import no.nav.familie.ba.sak.task.StartSatsendringForAlleBehandlingerTask
@@ -32,7 +32,7 @@ class TestVerktøyController(
     private val envService: EnvService,
     private val vedtakOmOvergangsstønadService: VedtakOmOvergangsstønadService,
     private val taskRepository: TaskRepositoryWrapper,
-    private val behandlingService: BehandlingService,
+    private val endringstidspunktService: EndringstidspunktService,
 ) {
 
     @GetMapping(path = ["/autobrev"])
@@ -107,13 +107,13 @@ class TestVerktøyController(
 
     @GetMapping(path = ["/test-endingstidspukt/{behandlingId}"])
     @Unprotected
-    fun hentEndringstidspuktForBehandling(@PathVariable behandlingId: Long): ResponseEntity<String?> {
+    fun hentEndringstidspukt(@PathVariable behandlingId: Long): ResponseEntity<String?> {
 
         return if (envService.erPreprod() || envService.erDev()) {
             val endringstidspunkt =
-                behandlingService.finnEndringstidpunkForBehandling(behandlingId = behandlingId)
+                endringstidspunktService.finnEndringstidpunkForBehandling(behandlingId = behandlingId)
 
-            ResponseEntity.ok(endringstidspunkt?.toString() ?: "Ingen endring")
+            ResponseEntity.ok(endringstidspunkt.toString())
         } else {
             ResponseEntity.ok(MELDING)
         }

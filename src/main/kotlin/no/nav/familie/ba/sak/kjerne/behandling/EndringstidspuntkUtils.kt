@@ -19,7 +19,7 @@ fun finnEndringstidspunkt(
     gamleAndelerTilkjentYtelse: List<AndelTilkjentYtelse>,
     nyttPersonopplysningGrunnlag: PersonopplysningGrunnlag,
     gammeltPersonopplysningGrunnlag: PersonopplysningGrunnlag
-): LocalDate? {
+): LocalDate {
 
     val nyeVilkårsperioder =
         nyVilkårsvurdering.hentInnvilgedePerioder(nyttPersonopplysningGrunnlag).let { it.first + it.second }
@@ -41,7 +41,7 @@ fun finnEndringstidspunkt(
         tidligesteEndringIAndeler,
         tidligesteEndringIVilkår,
         tidligesteEndringEndretUtbetalinger
-    ).minByOrNull { it }
+    ).minByOrNull { it } ?: TIDENES_ENDE
 }
 
 private fun finnTidligesteEndringIAndelTilkjentYtelse(

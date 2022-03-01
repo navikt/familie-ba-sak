@@ -4,9 +4,11 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.NullablePeriode
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
+import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.FØRSTE_ENDRINGSTIDSPUNKT
 import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.INGEN_OVERLAPP_VEDTAKSPERIODER
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
@@ -59,6 +61,7 @@ class VedtaksperiodeService(
     private val søknadGrunnlagService: SøknadGrunnlagService,
     private val endretUtbetalingAndelRepository: EndretUtbetalingAndelRepository,
     private val featureToggleService: FeatureToggleService,
+    private val endringstidspunktService: EndringstidspunktService,
 ) {
 
     fun lagre(vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser): VedtaksperiodeMedBegrunnelser {
@@ -280,7 +283,15 @@ class VedtaksperiodeService(
 
         val avslagsperioder = hentAvslagsperioderMedBegrunnelser(vedtak)
 
-        return utbetalingsperioder + endredeUtbetalingsperioder + opphørsperioder + avslagsperioder
+        val endringstidspunkt =
+            if (featureToggleService.isEnabled(FØRSTE_ENDRINGSTIDSPUNKT))
+                endringstidspunktService
+                    .finnEndringstidpunkForBehandling(behandlingId = vedtak.behandling.id)
+            else TIDENES_MORGEN
+
+        return (utbetalingsperioder + endredeUtbetalingsperioder + opphørsperioder + avslagsperioder).filter {
+            !(it.fom ?: TIDENES_MORGEN).isBefore(endringstidspunkt)
+        }
     }
 
     fun kopierOverVedtaksperioder(deaktivertVedtak: Vedtak, aktivtVedtak: Vedtak) {
