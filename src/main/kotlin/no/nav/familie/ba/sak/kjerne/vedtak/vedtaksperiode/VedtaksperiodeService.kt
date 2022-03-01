@@ -290,7 +290,7 @@ class VedtaksperiodeService(
             else TIDENES_MORGEN
 
         return (utbetalingsperioder + endredeUtbetalingsperioder + opphørsperioder + avslagsperioder).filter {
-            !(it.tom ?: TIDENES_MORGEN).isBefore(endringstidspunkt)
+            !(it.tom ?: TIDENES_ENDE).isBefore(endringstidspunkt)
         }
     }
 
