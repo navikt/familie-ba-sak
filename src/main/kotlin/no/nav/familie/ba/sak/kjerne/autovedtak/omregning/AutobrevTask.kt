@@ -2,8 +2,7 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.omregning
 
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
-import no.nav.familie.ba.sak.config.FeatureToggleService
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.task.OpprettTaskService
@@ -19,14 +18,12 @@ import java.time.LocalDate
 @TaskStepBeskrivelse(
     taskStepType = AutobrevTask.TASK_STEP_TYPE,
     beskrivelse = "Opprett oppgaver for sending av autobrev",
-    maxAntallFeil = 3,
-    triggerTidVedFeilISekunder = (60 * 60 * 24).toLong()
+    maxAntallFeil = 1,
 )
 class AutobrevTask(
     private val fagsakRepository: FagsakRepository,
-    private val behandlingRepository: BehandlingRepository,
-    private val opprettTaskService: OpprettTaskService,
-    private val featureToggleService: FeatureToggleService
+    private val behandlingService: BehandlingService,
+    private val opprettTaskService: OpprettTaskService
 ) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
@@ -48,9 +45,11 @@ class AutobrevTask(
     }
 
     private fun opprettTaskerForReduksjonSmåbarnstillegg() {
-        fagsakRepository.finnAlleFagsakerMedOpphørSmåbarnstilleggIMåned(
-            iverksatteLøpendeBehandlinger = behandlingRepository.finnSisteIverksatteBehandlingFraLøpendeFagsaker(),
-        )
+        behandlingService.partitionByIverksatteBehandlinger {
+            fagsakRepository.finnAlleFagsakerMedOpphørSmåbarnstilleggIMåned(
+                iverksatteLøpendeBehandlinger = it,
+            )
+        }
             .forEach { fagsakId ->
                 opprettTaskService.opprettAutovedtakForOpphørSmåbarnstilleggTask(
                     fagsakId = fagsakId
