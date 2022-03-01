@@ -19,7 +19,7 @@ data class AndelTilkjentYtelseEndringData(
     val behandlingAlder: BehandlingAlder,
 )
 
-fun List<AndelTilkjentYtelse>.hentPerioderMedEndringer(
+fun List<AndelTilkjentYtelse>.hentPerioderMedEndringerFra(
     forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>,
 ): LocalDateTimeline<List<AndelTilkjentYtelseEndringData>> {
     val andelerTidslinje = this.hentTidslinje(BehandlingAlder.NY)

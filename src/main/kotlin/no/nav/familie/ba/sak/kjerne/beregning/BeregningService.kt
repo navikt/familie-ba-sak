@@ -237,7 +237,7 @@ class BeregningService(
         val gamleAndelerTilkjentYtelse = andelTilkjentYtelseRepository
             .finnAndelerTilkjentYtelseForBehandling(behandlingId = gammelBehandling.id)
 
-        val perioderMedEndringer = nyeAndelerTilkjentYtelse.hentPerioderMedEndringer(
+        val perioderMedEndringer = nyeAndelerTilkjentYtelse.hentPerioderMedEndringerFra(
             forrigeAndelerTilkjentYtelse = gamleAndelerTilkjentYtelse
         )
 

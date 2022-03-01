@@ -44,7 +44,7 @@ class EndringstidspunktUtilsTest {
             ),
         )
 
-        val førsteEndringstidspunkt = andeler.hentPerioderMedEndringer(
+        val førsteEndringstidspunkt = andeler.hentPerioderMedEndringerFra(
             forrigeAndelerTilkjentYtelse = forrigeAndeler
         ).minByOrNull { it.fom }?.fom?.toYearMonth()
         assertEquals(inneværendeMåned().minusYears(1), førsteEndringstidspunkt)
@@ -85,7 +85,7 @@ class EndringstidspunktUtilsTest {
             ),
         )
 
-        val førsteEndringstidspunkt = andeler.hentPerioderMedEndringer(
+        val førsteEndringstidspunkt = andeler.hentPerioderMedEndringerFra(
             forrigeAndelerTilkjentYtelse = forrigeAndeler
         ).minByOrNull { it.fom }?.fom?.toYearMonth()
         assertEquals(inneværendeMåned().minusYears(1).minusMonths(2), førsteEndringstidspunkt)
@@ -132,7 +132,7 @@ class EndringstidspunktUtilsTest {
             ),
         )
 
-        val førsteEndringstidspunkt = andeler.hentPerioderMedEndringer(
+        val førsteEndringstidspunkt = andeler.hentPerioderMedEndringerFra(
             forrigeAndelerTilkjentYtelse = forrigeAndeler
         ).minByOrNull { it.fom }?.fom?.toYearMonth()
         assertEquals(inneværendeMåned().minusMonths(15), førsteEndringstidspunkt)
@@ -179,7 +179,7 @@ class EndringstidspunktUtilsTest {
             ),
         )
 
-        val førsteEndringstidspunkt = andeler.hentPerioderMedEndringer(
+        val førsteEndringstidspunkt = andeler.hentPerioderMedEndringerFra(
             forrigeAndelerTilkjentYtelse = forrigeAndeler
         ).minByOrNull { it.fom }?.fom?.toYearMonth()
         assertEquals(inneværendeMåned().minusMonths(15), førsteEndringstidspunkt)
@@ -220,7 +220,7 @@ class EndringstidspunktUtilsTest {
             ),
         )
 
-        val førsteEndringstidspunkt = andeler.hentPerioderMedEndringer(
+        val førsteEndringstidspunkt = andeler.hentPerioderMedEndringerFra(
             forrigeAndelerTilkjentYtelse = forrigeAndeler
         ).minByOrNull { it.fom }?.fom?.toYearMonth()
         assertEquals(inneværendeMåned().minusYears(1), førsteEndringstidspunkt)
