@@ -64,7 +64,7 @@ private fun List<AndelTilkjentYtelse>.finnTidligesteForskjell(
     før: LocalDate? = TIDENES_ENDE
 ) = this
     .sortedBy { it.stønadFom }
-    .filter { it.stønadFom.førsteDagIInneværendeMåned().isBefore((før)) }
+    .filter { it.stønadFom.førsteDagIInneværendeMåned().isBefore(før) }
     .firstNotNullOfOrNull { andel ->
         when {
             !andreAndeler.any { it.erFunksjoneltLikUtenomTomDato(andel) } ->
@@ -96,7 +96,7 @@ private fun List<EndretUtbetalingAndel>.finnTidligesteForskjell(
     før: LocalDate = TIDENES_ENDE
 ) = this
     .sortedBy { it.fom }
-    .filter { it.fom!!.førsteDagIInneværendeMåned().isBefore((før)) }
+    .filter { it.fom!!.førsteDagIInneværendeMåned().isBefore(før) }
     .firstNotNullOfOrNull { andel ->
         when {
             !andreEndretUtbetalinger.any { it.erFunksjoneltLikUtenomTomDato(andel) } ->
@@ -131,7 +131,7 @@ private fun List<PeriodeResultat>.finnTidligesteForskjell(
     før: LocalDate = TIDENES_ENDE
 ) = this
     .sortedBy { it.periodeFom }
-    .filter { it.periodeFom!!.førsteDagIInneværendeMåned().isBefore((før)) }
+    .filter { it.periodeFom!!.førsteDagIInneværendeMåned().isBefore(før) }
     .firstNotNullOfOrNull { andel ->
         when {
             !andrePerioderesultater.any { it.erFunksjoneltLikUtenomTomDato(andel) } ->
