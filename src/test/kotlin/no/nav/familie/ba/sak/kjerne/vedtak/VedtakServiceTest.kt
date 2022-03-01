@@ -18,6 +18,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingMigreringsinfoRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfoRepository
+import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
@@ -103,6 +104,9 @@ class VedtakServiceTest(
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
 
     @Autowired
+    private val andelTilkjentYtelseService: AndelTilkjentYtelseService,
+
+    @Autowired
     private val taskRepository: TaskRepositoryWrapper,
 
     @Autowired
@@ -128,6 +132,7 @@ class VedtakServiceTest(
             behandlingRepository,
             personopplysningGrunnlagRepository,
             andelTilkjentYtelseRepository,
+            andelTilkjentYtelseService,
             behandlingMetrikker,
             fagsakRepository,
             vedtakRepository,

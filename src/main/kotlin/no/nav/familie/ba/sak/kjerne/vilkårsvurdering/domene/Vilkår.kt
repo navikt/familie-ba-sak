@@ -80,9 +80,9 @@ enum class Vilkår(
         }
     }
 
-    fun defaultRegelverk(): VilkårRegelverk? {
+    fun defaultRegelverk(): Regelverk? {
         return when (this) {
-            BOR_MED_SØKER, BOSATT_I_RIKET, LOVLIG_OPPHOLD, UTVIDET_BARNETRYGD -> VilkårRegelverk.NASJONALE_REGLER
+            BOR_MED_SØKER, BOSATT_I_RIKET, LOVLIG_OPPHOLD, UTVIDET_BARNETRYGD -> Regelverk.NASJONALE_REGLER
             UNDER_18_ÅR, GIFT_PARTNERSKAP -> null
         }
     }

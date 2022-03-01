@@ -9,7 +9,6 @@ import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils.bestemKategori
 import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils.bestemUnderkategori
-import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils.utledLøpendeKategori
 import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils.utledLøpendeUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
@@ -26,6 +25,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.domene.initStatus
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatUtils
+import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
@@ -38,6 +38,7 @@ import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
@@ -59,6 +60,7 @@ class BehandlingService(
     private val behandlingRepository: BehandlingRepository,
     private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
+    private val andelTilkjentYtelseService: AndelTilkjentYtelseService,
     private val behandlingMetrikker: BehandlingMetrikker,
     private val fagsakRepository: FagsakRepository,
     private val vedtakRepository: VedtakRepository,
@@ -429,6 +431,12 @@ class BehandlingService(
         val forrigeAndeler = hentForrigeAndeler(fagsakId)
         return if (forrigeAndeler != null) utledLøpendeKategori(forrigeAndeler) else null
     }
+
+    fun utledLøpendeKategori(andeler: List<AndelTilkjentYtelse>): BehandlingKategori =
+        if (andeler.any { erEøs(it) && it.erLøpende() }) BehandlingKategori.EØS else BehandlingKategori.NASJONAL
+
+    fun erEøs(andelTilkjentYtelse: AndelTilkjentYtelse): Boolean =
+        andelTilkjentYtelseService.vurdertEtter(andelTilkjentYtelse) == Regelverk.EØS_FORORDNINGEN
 
     fun hentLøpendeUnderkategori(fagsakId: Long): BehandlingUnderkategori? {
         val forrigeAndeler = hentForrigeAndeler(fagsakId)
