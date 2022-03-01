@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.autovedtak.omregning.AutobrevScheduler
 import no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg.VedtakOmOvergangsstønadService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
+import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.task.BehandleFødselshendelseTask
 import no.nav.familie.ba.sak.task.SatsendringTask
@@ -30,7 +31,8 @@ class TestVerktøyController(
     private val personidentService: PersonidentService,
     private val envService: EnvService,
     private val vedtakOmOvergangsstønadService: VedtakOmOvergangsstønadService,
-    private val taskRepository: TaskRepositoryWrapper
+    private val taskRepository: TaskRepositoryWrapper,
+    private val beregningService: BeregningService,
 ) {
 
     @GetMapping(path = ["/autobrev"])
@@ -100,6 +102,17 @@ class TestVerktøyController(
             ResponseEntity.ok(Ressurs.success("Task for å ta behandlinger av vent etter at fristen har gått ut er opprettet"))
         } else {
             ResponseEntity.ok(Ressurs.success(MELDING))
+        }
+    }
+
+    @GetMapping(path = ["/test-endingstidspukt/{behandlingId}"])
+    @Unprotected
+    fun hentEndringstidspukt(@PathVariable behandlingId: Long): ResponseEntity<String?> {
+        return if (envService.erPreprod() || envService.erDev()) {
+            val endringstidspunkt = beregningService.finnEndringstidpunkForBehandling(behandlingId = behandlingId)
+            ResponseEntity.ok(endringstidspunkt.toString())
+        } else {
+            ResponseEntity.ok(MELDING)
         }
     }
 
