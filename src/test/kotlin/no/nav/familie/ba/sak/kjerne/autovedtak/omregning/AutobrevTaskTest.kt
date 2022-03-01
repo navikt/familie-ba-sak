@@ -26,9 +26,8 @@ internal class AutobrevTaskTest {
 
     private val autobrevTask = AutobrevTask(
         fagsakRepository = fagsakRepository,
-        behandlingRepository = behandlingRepository,
+        behandlingService = behandlingService,
         opprettTaskService = opprettTaskService,
-        featureToggleService = featureToggleService
     )
 
     private val autoBrevTask = Task(
