@@ -48,7 +48,7 @@ class ØkonomiKlient(
             formål = "Henter simulering fra Økonomi",
         ) {
 
-            postForEntity<Ressurs<DetaljertSimuleringResultat>>(
+            postForEntity(
                 uri = uri,
                 utbetalingsoppdrag
             )
