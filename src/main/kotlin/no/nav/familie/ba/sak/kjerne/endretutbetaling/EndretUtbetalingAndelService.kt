@@ -57,7 +57,7 @@ class EndretUtbetalingAndelService(
         val andreEndredeAndelerPåBehandling = endretUtbetalingAndelRepository.findByBehandlingId(behandling.id)
             .filter { it.id != endretUtbetalingAndelId }
 
-        val gyldigTomEtterDagensDato = beregnTomHvisDenIkkeErSatt(
+        val gyldigTomEtterDagensDato = beregnGyldigTomIFremtiden(
             andreEndredeAndelerPåBehandling = andreEndredeAndelerPåBehandling,
             endretUtbetalingAndel = endretUtbetalingAndel,
             andelTilkjentYtelser = andelTilkjentYtelser

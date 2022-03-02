@@ -5,7 +5,7 @@ import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagEndretUtbetalingAndel
 import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.tilfeldigPerson
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.beregnTomHvisDenIkkeErSatt
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.beregnGyldigTomIFremtiden
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -126,7 +126,7 @@ internal class EndretUtbetalingAndelTest {
             )
         )
 
-        val nyTom = beregnTomHvisDenIkkeErSatt(
+        val nyTom = beregnGyldigTomIFremtiden(
             andelTilkjentYtelser = andelTilkjentYtelser,
             endretUtbetalingAndel = endretUtbetalingAndel,
             andreEndredeAndelerPåBehandling = emptyList()
@@ -173,7 +173,7 @@ internal class EndretUtbetalingAndelTest {
             )
         )
 
-        val nyTom = beregnTomHvisDenIkkeErSatt(
+        val nyTom = beregnGyldigTomIFremtiden(
             andelTilkjentYtelser = andelTilkjentYtelser,
             endretUtbetalingAndel = endretUtbetalingAndel,
             andreEndredeAndelerPåBehandling = listOf(annenEndretAndel)

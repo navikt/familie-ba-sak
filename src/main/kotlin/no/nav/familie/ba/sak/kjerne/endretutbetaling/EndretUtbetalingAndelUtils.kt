@@ -10,7 +10,7 @@ fun erStartPåUtvidetSammeMåned(
     fom: YearMonth?,
 ) = andelTilkjentYtelser.any { it.stønadFom == fom && it.type == YtelseType.UTVIDET_BARNETRYGD }
 
-fun beregnTomHvisDenIkkeErSatt(
+fun beregnGyldigTomIFremtiden(
     andreEndredeAndelerPåBehandling: List<EndretUtbetalingAndel>,
     endretUtbetalingAndel: EndretUtbetalingAndel,
     andelTilkjentYtelser: List<AndelTilkjentYtelse>
