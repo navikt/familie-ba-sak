@@ -1,13 +1,10 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
-import io.mockk.every
-import io.mockk.mockk
 import junit.framework.Assert.assertEquals
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagVilkårResultat
 import no.nav.familie.ba.sak.common.tilfeldigPerson
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
@@ -17,12 +14,9 @@ import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 import java.time.YearMonth
 
-class AndelTilkjentYtelseServiceTest {
-
-    private lateinit var andelTilkjentYtelseService: AndelTilkjentYtelseService
+class AndelTilkjentYtelseUtledRegelverkTest {
 
     val behandling = lagBehandling()
-    val søkerPerson = tilfeldigPerson(fødselsdato = LocalDate.now().minusYears(35))
     val barnPerson = tilfeldigPerson(fødselsdato = LocalDate.now().minusYears(1))
 
     val andelTilkjentYtelse = lagAndelTilkjentYtelse(
@@ -42,40 +36,36 @@ class AndelTilkjentYtelseServiceTest {
 
     @Test
     fun `EØS-forordning om alle relevante vilkår er satt til regelverk EØS forordning`() {
-        mockkVilkårsvurdering()
-
-        val regelverk = andelTilkjentYtelseService.vurdertEtter(
-            andelTilkjentYtelse
-        )
+        val regelverk = andelTilkjentYtelse.vurdertEtter(setOf(genererPersonresultat()))
 
         assertEquals(Regelverk.EØS_FORORDNINGEN, regelverk)
     }
 
     @Test
     fun `Nasjonale regler om alle relevante vilkår er satt til regelverk nasonale regler`() {
-        mockkVilkårsvurdering(Regelverk.NASJONALE_REGLER, Regelverk.NASJONALE_REGLER, Regelverk.NASJONALE_REGLER)
+        val personResultat =
+            genererPersonresultat(Regelverk.NASJONALE_REGLER, Regelverk.NASJONALE_REGLER, Regelverk.NASJONALE_REGLER)
 
-        val regelverk = andelTilkjentYtelseService.vurdertEtter(
-            andelTilkjentYtelse
-        )
+        val regelverk = andelTilkjentYtelse.vurdertEtter(setOf(personResultat))
 
         assertEquals(Regelverk.NASJONALE_REGLER, regelverk)
     }
 
     @Test
     fun `Kaste feil om alle relevante vilkår er satt til forskjellig regelverk`() {
-        mockkVilkårsvurdering(Regelverk.NASJONALE_REGLER, Regelverk.NASJONALE_REGLER, Regelverk.EØS_FORORDNINGEN)
+        val personResultat =
+            genererPersonresultat(Regelverk.EØS_FORORDNINGEN, Regelverk.NASJONALE_REGLER, Regelverk.NASJONALE_REGLER)
 
         assertThrows<IllegalStateException> {
-            andelTilkjentYtelseService.vurdertEtter(andelTilkjentYtelse)
+            andelTilkjentYtelse.vurdertEtter(setOf(personResultat))
         }
     }
 
-    private fun mockkVilkårsvurdering(
+    private fun genererPersonresultat(
         regelVerkBosattIRiket: Regelverk = Regelverk.EØS_FORORDNINGEN,
         regelVerkLovligOpphold: Regelverk = Regelverk.EØS_FORORDNINGEN,
         regelVerkBorMedSøker: Regelverk = Regelverk.EØS_FORORDNINGEN
-    ) {
+    ): PersonResultat {
         val vilkårsvurdering = Vilkårsvurdering(
             behandling = behandling
         )
@@ -97,14 +87,6 @@ class AndelTilkjentYtelseServiceTest {
             ),
         )
         barnPersonResultat.vilkårResultater.addAll(vilkårResultat)
-        vilkårsvurdering.personResultater = setOf(barnPersonResultat)
-
-        val vilkårsvurderingService = mockk<VilkårsvurderingService>()
-        andelTilkjentYtelseService = AndelTilkjentYtelseService(vilkårsvurderingService)
-
-        andelTilkjentYtelseService = AndelTilkjentYtelseService(vilkårsvurderingService)
-        barnPersonResultat.vilkårResultater.addAll(vilkårResultat)
-
-        every { vilkårsvurderingService.hentAktivForBehandling(andelTilkjentYtelse.behandlingId) } returns vilkårsvurdering
+        return barnPersonResultat
     }
 }

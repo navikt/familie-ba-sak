@@ -25,7 +25,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.domene.initStatus
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatUtils
-import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
@@ -38,7 +37,7 @@ import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
@@ -60,7 +59,6 @@ class BehandlingService(
     private val behandlingRepository: BehandlingRepository,
     private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
-    private val andelTilkjentYtelseService: AndelTilkjentYtelseService,
     private val behandlingMetrikker: BehandlingMetrikker,
     private val fagsakRepository: FagsakRepository,
     private val vedtakRepository: VedtakRepository,
@@ -74,7 +72,8 @@ class BehandlingService(
     private val featureToggleService: FeatureToggleService,
     private val taskRepository: TaskRepositoryWrapper,
     private val behandlingMigreringsinfoRepository: BehandlingMigreringsinfoRepository,
-    private val behandlingSøknadsinfoRepository: BehandlingSøknadsinfoRepository
+    private val behandlingSøknadsinfoRepository: BehandlingSøknadsinfoRepository,
+    private val vilkårsvurderingService: VilkårsvurderingService,
 ) {
 
     @Transactional
@@ -434,14 +433,19 @@ class BehandlingService(
 
     fun hentLøpendeKategori(fagsakId: Long): BehandlingKategori? {
         val forrigeAndeler = hentForrigeAndeler(fagsakId)
-        return if (forrigeAndeler != null) utledLøpendeKategori(forrigeAndeler) else null
+        val aktivBehandling = hentAktivForFagsak(fagsakId) ?: error("Fant ikke aktiv behandling")
+
+        return if (forrigeAndeler != null) utledLøpendeKategori(forrigeAndeler, aktivBehandling) else null
     }
 
-    fun utledLøpendeKategori(andeler: List<AndelTilkjentYtelse>): BehandlingKategori =
-        if (andeler.any { erEøs(it) && it.erLøpende() }) BehandlingKategori.EØS else BehandlingKategori.NASJONAL
+    fun utledLøpendeKategori(andeler: List<AndelTilkjentYtelse>, behandling: Behandling): BehandlingKategori {
+        val personResultater = vilkårsvurderingService.hentAktivForBehandling(behandling.id)?.personResultater ?: error(
+            "Fant ikke personresultater"
+        )
 
-    fun erEøs(andelTilkjentYtelse: AndelTilkjentYtelse): Boolean =
-        andelTilkjentYtelseService.vurdertEtter(andelTilkjentYtelse) == Regelverk.EØS_FORORDNINGEN
+        return if (andeler.any { it.erEøs(personResultater) && it.erLøpende() }
+        ) BehandlingKategori.EØS else BehandlingKategori.NASJONAL
+    }
 
     fun hentLøpendeUnderkategori(fagsakId: Long): BehandlingUnderkategori? {
         val forrigeAndeler = hentForrigeAndeler(fagsakId)
