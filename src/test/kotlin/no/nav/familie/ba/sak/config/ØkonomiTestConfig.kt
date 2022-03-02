@@ -4,7 +4,6 @@ import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
-import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragStatus
 import no.nav.familie.kontrakter.felles.simulering.BetalingType
 import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
@@ -37,8 +36,7 @@ class ØkonomiTestConfig {
         fun clearØkonomiMocks(økonomiKlient: ØkonomiKlient) {
             clearMocks(økonomiKlient)
 
-            val iverksettRespons =
-                Ressurs("Mocksvar fra Økonomi-klient", Ressurs.Status.SUKSESS, "", "", null)
+            val iverksettRespons = "Mocksvar fra Økonomi-klient"
             every { økonomiKlient.iverksettOppdrag(any()) } returns iverksettRespons
 
             val hentStatusRespons = OppdragStatus.KVITTERT_OK

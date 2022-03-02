@@ -49,17 +49,17 @@ class ØkonomiService(
     private fun iverksettOppdrag(utbetalingsoppdrag: Utbetalingsoppdrag) {
         try {
             økonomiKlient.iverksettOppdrag(utbetalingsoppdrag)
-        } catch (e: Exception) {
-            if ((e is HttpClientErrorException) &&
-                e.statusCode == HttpStatus.CONFLICT &&
+        } catch (exception: Exception) {
+            if ((exception is HttpClientErrorException) &&
+                exception.statusCode == HttpStatus.CONFLICT &&
                 featureToggleService.isEnabled(FeatureToggleConfig.TEKNISK_IVERKSETT_MOT_OPPDRAG_ALLEREDE_SENDT)
             ) {
                 // Mulighet å bypasse 409 feil.
                 logger.info("Bypasset feil med HttpKode 409 ved iverksetting mot økonomi for fagsak ${utbetalingsoppdrag.saksnummer}")
                 return
+            } else {
+                throw exception
             }
-
-            throw Exception("Iverksetting mot oppdrag feilet", e)
         }
     }
 

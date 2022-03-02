@@ -1,11 +1,9 @@
 package no.nav.familie.ba.sak.integrasjoner.økonomi
 
-import no.nav.familie.ba.sak.common.assertGenerelleSuksessKriterier
 import no.nav.familie.ba.sak.common.kallEksternTjenesteRessurs
 import no.nav.familie.ba.sak.config.RestTemplateConfig.Companion.RETRY_BACKOFF_500MS
 import no.nav.familie.ba.sak.task.dto.FAGSYSTEM
 import no.nav.familie.http.client.AbstractRestClient
-import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.oppdrag.GrensesnittavstemmingRequest
 import no.nav.familie.kontrakter.felles.oppdrag.KonsistensavstemmingRequestV2
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragId
@@ -30,9 +28,16 @@ class ØkonomiKlient(
     @Qualifier("jwtBearer") restOperations: RestOperations
 ) : AbstractRestClient(restOperations, "økonomi_barnetrygd") {
 
-    fun iverksettOppdrag(utbetalingsoppdrag: Utbetalingsoppdrag): Ressurs<String> =
-        postForEntity<Ressurs<String>>(uri = URI.create("$familieOppdragUri/oppdrag"), utbetalingsoppdrag)
-            .also { assertGenerelleSuksessKriterier(it) }
+    fun iverksettOppdrag(utbetalingsoppdrag: Utbetalingsoppdrag): String {
+        val uri = URI.create("$familieOppdragUri/oppdrag")
+        return kallEksternTjenesteRessurs(
+            tjeneste = "familie-oppdrag",
+            uri = uri,
+            formål = "Iverksett mot oppdrag",
+        ) {
+            postForEntity(uri = uri, utbetalingsoppdrag)
+        }
+    }
 
     @Retryable(
         value = [Exception::class],
@@ -47,11 +52,7 @@ class ØkonomiKlient(
             uri = uri,
             formål = "Henter simulering fra Økonomi",
         ) {
-
-            postForEntity(
-                uri = uri,
-                utbetalingsoppdrag
-            )
+            postForEntity(uri = uri, utbetalingsoppdrag)
         }
     }
 
