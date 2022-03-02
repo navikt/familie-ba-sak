@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
+import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagPerson
@@ -46,7 +47,7 @@ class EndringstidspunktUtilsTest {
         val førsteEndringstidspunkt = andeler.hentFørsteEndringstidspunkt(
             forrigeAndelerTilkjentYtelse = forrigeAndeler
         )
-        assertEquals(inneværendeMåned().minusYears(1), førsteEndringstidspunkt)
+        assertEquals(inneværendeMåned().minusYears(1).førsteDagIInneværendeMåned(), førsteEndringstidspunkt)
     }
 
     @Test
@@ -87,7 +88,10 @@ class EndringstidspunktUtilsTest {
         val førsteEndringstidspunkt = andeler.hentFørsteEndringstidspunkt(
             forrigeAndelerTilkjentYtelse = forrigeAndeler
         )
-        assertEquals(inneværendeMåned().minusYears(1).minusMonths(2), førsteEndringstidspunkt)
+        assertEquals(
+            inneværendeMåned().minusYears(1).minusMonths(2).førsteDagIInneværendeMåned(),
+            førsteEndringstidspunkt
+        )
     }
 
     @Test
@@ -134,7 +138,7 @@ class EndringstidspunktUtilsTest {
         val førsteEndringstidspunkt = andeler.hentFørsteEndringstidspunkt(
             forrigeAndelerTilkjentYtelse = forrigeAndeler
         )
-        assertEquals(inneværendeMåned().minusMonths(15), førsteEndringstidspunkt)
+        assertEquals(inneværendeMåned().minusMonths(15).førsteDagIInneværendeMåned(), førsteEndringstidspunkt)
     }
 
     @Test
@@ -181,7 +185,7 @@ class EndringstidspunktUtilsTest {
         val førsteEndringstidspunkt = andeler.hentFørsteEndringstidspunkt(
             forrigeAndelerTilkjentYtelse = forrigeAndeler
         )
-        assertEquals(inneværendeMåned().minusMonths(15), førsteEndringstidspunkt)
+        assertEquals(inneværendeMåned().minusMonths(15).førsteDagIInneværendeMåned(), førsteEndringstidspunkt)
     }
 
     @Test
@@ -222,7 +226,10 @@ class EndringstidspunktUtilsTest {
         val førsteEndringstidspunkt = andeler.hentFørsteEndringstidspunkt(
             forrigeAndelerTilkjentYtelse = forrigeAndeler
         )
-        assertEquals(inneværendeMåned().minusYears(1), førsteEndringstidspunkt)
+        assertEquals(
+            inneværendeMåned().minusYears(1).førsteDagIInneværendeMåned().førsteDagIInneværendeMåned(),
+            førsteEndringstidspunkt
+        )
     }
 
     @Test
@@ -263,6 +270,6 @@ class EndringstidspunktUtilsTest {
         val førsteEndringstidspunkt = andeler.hentFørsteEndringstidspunkt(
             forrigeAndelerTilkjentYtelse = forrigeAndeler
         )
-        assertEquals(inneværendeMåned().minusMonths(1), førsteEndringstidspunkt)
+        assertEquals(inneværendeMåned().minusMonths(1).førsteDagIInneværendeMåned(), førsteEndringstidspunkt)
     }
 }
