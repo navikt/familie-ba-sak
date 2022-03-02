@@ -67,21 +67,21 @@ class ØkonomiKlient(
         }
     }
 
-    fun grensesnittavstemOppdrag(fraDato: LocalDateTime, tilDato: LocalDateTime): Ressurs<String> {
+    fun grensesnittavstemOppdrag(fraDato: LocalDateTime, tilDato: LocalDateTime): String {
         val uri = URI.create("$familieOppdragUri/grensesnittavstemming")
-        return kallEksternTjeneste(
+        return kallEksternTjenesteRessurs(
             tjeneste = "familie-oppdrag",
             uri = uri,
             formål = "Gjør avstemming mot oppdrag",
         ) {
-            postForEntity<Ressurs<String>>(
+            postForEntity(
                 uri = uri,
                 GrensesnittavstemmingRequest(
                     fagsystem = FAGSYSTEM,
                     fra = fraDato,
                     til = tilDato
                 )
-            ).also { assertGenerelleSuksessKriterier(it) }
+            )
         }
     }
 

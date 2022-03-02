@@ -32,16 +32,7 @@ class AvstemmingService(
 ) {
     fun grensesnittavstemOppdrag(fraDato: LocalDateTime, tilDato: LocalDateTime) {
 
-        Result.runCatching { økonomiKlient.grensesnittavstemOppdrag(fraDato, tilDato) }
-            .fold(
-                onSuccess = {
-                    logger.debug("Grensesnittavstemming mot oppdrag utført.")
-                },
-                onFailure = {
-                    logger.error("Grensesnittavstemming mot oppdrag feilet", it)
-                    throw it
-                }
-            )
+        økonomiKlient.grensesnittavstemOppdrag(fraDato, tilDato)
     }
 
     @Deprecated("Fjern når konsistensavstemming i batch er testet og virker")
