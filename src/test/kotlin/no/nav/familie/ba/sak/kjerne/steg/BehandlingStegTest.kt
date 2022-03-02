@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
@@ -386,6 +387,36 @@ class BehandlingStegTest {
                     behandling = lagBehandling(
                         årsak = BehandlingÅrsak.SATSENDRING,
                     ).copy(resultat = BehandlingResultat.AVSLÅTT_OG_ENDRET),
+                    utførendeStegType = it
+                )
+            }
+        }
+    }
+
+    @Test
+    fun `Tester at man ikke får lov til å komme videre etter behandlingsresultat om resultatet er FORTSATT_INNVILGET på migrering tilbake i tid`() {
+        var steg = FØRSTE_STEG
+
+        listOf(
+            StegType.REGISTRERE_PERSONGRUNNLAG,
+            StegType.VILKÅRSVURDERING,
+            StegType.BEHANDLINGSRESULTAT,
+        ).forEach {
+            assertEquals(it, steg)
+            if (it == StegType.BEHANDLINGSRESULTAT) {
+                assertThrows<FunksjonellFeil> {
+                    hentNesteSteg(
+                        behandling = lagBehandling(
+                            årsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
+                        ).copy(resultat = BehandlingResultat.FORTSATT_INNVILGET),
+                        utførendeStegType = it
+                    )
+                }
+            } else {
+                steg = hentNesteSteg(
+                    behandling = lagBehandling(
+                        årsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
+                    ).copy(resultat = BehandlingResultat.FORTSATT_INNVILGET),
                     utførendeStegType = it
                 )
             }
