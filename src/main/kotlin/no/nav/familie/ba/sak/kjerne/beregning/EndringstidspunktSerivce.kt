@@ -26,10 +26,8 @@ class EndringstidspunktSerivce(
         val forrigeAndelerTilkjentYtelse = andelTilkjentYtelseRepository
             .finnAndelerTilkjentYtelseForBehandling(behandlingId = sistIverksatteBehandling.id)
 
-        val perioderMedEndringer = nyeAndelerTilkjentYtelse.hentPerioderMedEndringerFra(
+        return nyeAndelerTilkjentYtelse.hentFørsteEndringstidspunkt(
             forrigeAndelerTilkjentYtelse = forrigeAndelerTilkjentYtelse
-        )
-
-        return perioderMedEndringer.minOfOrNull { it.fom } ?: TIDENES_ENDE
+        ) ?: TIDENES_ENDE
     }
 }

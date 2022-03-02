@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.kjerne.beregning
 import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagPerson
-import no.nav.familie.ba.sak.common.toYearMonth
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -44,9 +43,9 @@ class EndringstidspunktUtilsTest {
             ),
         )
 
-        val førsteEndringstidspunkt = andeler.hentPerioderMedEndringerFra(
+        val førsteEndringstidspunkt = andeler.hentFørsteEndringstidspunkt(
             forrigeAndelerTilkjentYtelse = forrigeAndeler
-        ).minByOrNull { it.fom }?.fom?.toYearMonth()
+        )
         assertEquals(inneværendeMåned().minusYears(1), førsteEndringstidspunkt)
     }
 
@@ -85,9 +84,9 @@ class EndringstidspunktUtilsTest {
             ),
         )
 
-        val førsteEndringstidspunkt = andeler.hentPerioderMedEndringerFra(
+        val førsteEndringstidspunkt = andeler.hentFørsteEndringstidspunkt(
             forrigeAndelerTilkjentYtelse = forrigeAndeler
-        ).minByOrNull { it.fom }?.fom?.toYearMonth()
+        )
         assertEquals(inneværendeMåned().minusYears(1).minusMonths(2), førsteEndringstidspunkt)
     }
 
@@ -132,9 +131,9 @@ class EndringstidspunktUtilsTest {
             ),
         )
 
-        val førsteEndringstidspunkt = andeler.hentPerioderMedEndringerFra(
+        val førsteEndringstidspunkt = andeler.hentFørsteEndringstidspunkt(
             forrigeAndelerTilkjentYtelse = forrigeAndeler
-        ).minByOrNull { it.fom }?.fom?.toYearMonth()
+        )
         assertEquals(inneværendeMåned().minusMonths(15), førsteEndringstidspunkt)
     }
 
@@ -179,9 +178,9 @@ class EndringstidspunktUtilsTest {
             ),
         )
 
-        val førsteEndringstidspunkt = andeler.hentPerioderMedEndringerFra(
+        val førsteEndringstidspunkt = andeler.hentFørsteEndringstidspunkt(
             forrigeAndelerTilkjentYtelse = forrigeAndeler
-        ).minByOrNull { it.fom }?.fom?.toYearMonth()
+        )
         assertEquals(inneværendeMåned().minusMonths(15), førsteEndringstidspunkt)
     }
 
@@ -220,9 +219,50 @@ class EndringstidspunktUtilsTest {
             ),
         )
 
-        val førsteEndringstidspunkt = andeler.hentPerioderMedEndringerFra(
+        val førsteEndringstidspunkt = andeler.hentFørsteEndringstidspunkt(
             forrigeAndelerTilkjentYtelse = forrigeAndeler
-        ).minByOrNull { it.fom }?.fom?.toYearMonth()
+        )
         assertEquals(inneværendeMåned().minusYears(1), førsteEndringstidspunkt)
+    }
+
+    @Test
+    fun `Skal tåle to personer med andeler samtidig`() {
+        val person1 = lagPerson()
+        val person2 = lagPerson()
+
+        val forrigeAndeler = listOf(
+            lagAndelTilkjentYtelse(
+                fom = inneværendeMåned().minusYears(4),
+                tom = inneværendeMåned().minusYears(2),
+                beløp = 2108,
+                person = person1
+            ),
+            lagAndelTilkjentYtelse(
+                fom = inneværendeMåned().minusYears(4),
+                tom = inneværendeMåned().minusYears(2),
+                beløp = 1054,
+                person = person2
+            ),
+        )
+
+        val andeler = listOf(
+            lagAndelTilkjentYtelse(
+                fom = inneværendeMåned().minusYears(4),
+                tom = inneværendeMåned().minusYears(2),
+                beløp = 2108,
+                person = person1
+            ),
+            lagAndelTilkjentYtelse(
+                fom = inneværendeMåned().minusYears(4),
+                tom = inneværendeMåned().minusMonths(1),
+                beløp = 1054,
+                person = person2
+            ),
+        )
+
+        val førsteEndringstidspunkt = andeler.hentFørsteEndringstidspunkt(
+            forrigeAndelerTilkjentYtelse = forrigeAndeler
+        )
+        assertEquals(inneværendeMåned().minusMonths(1), førsteEndringstidspunkt)
     }
 }

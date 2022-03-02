@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
 import no.nav.fpsak.tidsserie.StandardCombinators
+import java.time.LocalDate
 
 enum class BehandlingAlder {
     NY,
@@ -19,46 +20,53 @@ data class AndelTilkjentYtelseDataForÅKalkulereEndring(
     val behandlingAlder: BehandlingAlder,
 )
 
-data class AndelTilkjentYtelseEndringData(
-    val aktør: Aktør,
-    val beløpsdifferanse: Int,
-)
+typealias Beløpsdifferanse = Int
+typealias AktørId = String
+
+fun List<AndelTilkjentYtelse>.hentFørsteEndringstidspunkt(
+    forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>,
+): LocalDate? {
+    return this.hentPerioderMedEndringerFra(forrigeAndelerTilkjentYtelse)
+        .mapNotNull { (_, tidslinjeMedDifferanserPåPerson) -> tidslinjeMedDifferanserPåPerson.minOfOrNull { it.fom } }
+        .minOfOrNull { it }
+}
 
 fun List<AndelTilkjentYtelse>.hentPerioderMedEndringerFra(
     forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>,
-): LocalDateTimeline<List<AndelTilkjentYtelseEndringData>> {
-    val andelerTidslinje = this.hentTidslinje(BehandlingAlder.NY)
-    val forrigeAndelerTidslinje = forrigeAndelerTilkjentYtelse.hentTidslinje(BehandlingAlder.GAMMEL)
+): Map<AktørId, LocalDateTimeline<Beløpsdifferanse>> {
+    val andelerTidslinje = this.hentTidslinjerForPersoner(BehandlingAlder.NY)
+    val forrigeAndelerTidslinje =
+        forrigeAndelerTilkjentYtelse.hentTidslinjerForPersoner(BehandlingAlder.GAMMEL)
 
-    val kombinertTidslinje = andelerTidslinje.combine(
-        forrigeAndelerTidslinje,
-        StandardCombinators::bothValues,
-        LocalDateTimeline.JoinStyle.CROSS_JOIN
-    ) as LocalDateTimeline<List<AndelTilkjentYtelseDataForÅKalkulereEndring>>
+    val personerFraForrigeEllerDenneBehandlinger =
+        (this.map { it.aktør.aktørId } + forrigeAndelerTilkjentYtelse.map { it.aktør.aktørId }).toSet()
 
-    return LocalDateTimeline(kombinertTidslinje.toSegments().mapNotNull { it.tilSegmentMedDiffIBeløpPerPerson() })
+    return personerFraForrigeEllerDenneBehandlinger.associateWith { aktørId ->
+        val tidslinjeForPerson = andelerTidslinje[aktørId] ?: LocalDateTimeline(emptyList())
+        val forrigeTidslinjeForPerson = forrigeAndelerTidslinje[aktørId] ?: LocalDateTimeline(emptyList())
+
+        val kombinertTidslinje = tidslinjeForPerson.combine(
+            forrigeTidslinjeForPerson,
+            StandardCombinators::bothValues,
+            LocalDateTimeline.JoinStyle.CROSS_JOIN
+        ) as LocalDateTimeline<List<AndelTilkjentYtelseDataForÅKalkulereEndring>>
+
+        LocalDateTimeline(
+            kombinertTidslinje.toSegments().mapNotNull { it.tilSegmentMedDiffIBeløp() }
+        )
+    }
 }
 
-private fun LocalDateSegment<List<AndelTilkjentYtelseDataForÅKalkulereEndring>>.tilSegmentMedDiffIBeløpPerPerson(): LocalDateSegment<List<AndelTilkjentYtelseEndringData>>? {
-    val andelTilkjentYtelseEndringData = this.value
-        .groupBy { endringsdata -> endringsdata.aktør.aktørId }
-        .mapNotNull { (_, nyOgGammelDataPåBrukerISegmentet) ->
-            val beløpsdifferanse = hentBeløpsendringPåPersonISegment(nyOgGammelDataPåBrukerISegmentet)
+private fun LocalDateSegment<List<AndelTilkjentYtelseDataForÅKalkulereEndring>>.tilSegmentMedDiffIBeløp(): LocalDateSegment<Int>? {
 
-            if (beløpsdifferanse != 0) {
-                AndelTilkjentYtelseEndringData(
-                    aktør = nyOgGammelDataPåBrukerISegmentet[0].aktør,
-                    beløpsdifferanse
-                )
-            } else null
-        }
+    val beløpsdifferanse = hentBeløpsendringPåPersonISegment(this.value)
 
-    return if (andelTilkjentYtelseEndringData.isEmpty()) {
-        null
-    } else LocalDateSegment(
-        this.localDateInterval,
-        andelTilkjentYtelseEndringData
-    )
+    return if (beløpsdifferanse != 0) {
+        LocalDateSegment(
+            this.localDateInterval,
+            beløpsdifferanse
+        )
+    } else null
 }
 
 private fun hentBeløpsendringPåPersonISegment(nyOgGammelDataPåBrukerISegmentet: List<AndelTilkjentYtelseDataForÅKalkulereEndring>): Int {
@@ -72,17 +80,26 @@ private fun hentBeløpsendringPåPersonISegment(nyOgGammelDataPåBrukerISegmente
     return nySum - forrigeSum
 }
 
-private fun List<AndelTilkjentYtelse>.hentTidslinje(behandlingAlder: BehandlingAlder):
-    LocalDateTimeline<AndelTilkjentYtelseDataForÅKalkulereEndring> = LocalDateTimeline(
-    this.map {
-        LocalDateSegment(
-            it.stønadFom.førsteDagIInneværendeMåned(),
-            it.stønadTom.sisteDagIInneværendeMåned(),
-            AndelTilkjentYtelseDataForÅKalkulereEndring(
-                aktør = it.aktør,
-                kalkulertBeløp = it.kalkulertUtbetalingsbeløp,
-                behandlingAlder = behandlingAlder,
-            )
+private fun List<AndelTilkjentYtelse>.hentTidslinjerForPersoner(behandlingAlder: BehandlingAlder):
+    Map<String, LocalDateTimeline<AndelTilkjentYtelseDataForÅKalkulereEndring>> {
+
+    return this.groupBy { it.aktør.aktørId }
+        .map { (aktørId, andeler) ->
+            aktørId to LocalDateTimeline(andeler.hentTidslinje(behandlingAlder))
+        }
+        .toMap()
+}
+
+private fun List<AndelTilkjentYtelse>.hentTidslinje(
+    behandlingAlder: BehandlingAlder
+) = map {
+    LocalDateSegment(
+        it.stønadFom.førsteDagIInneværendeMåned(),
+        it.stønadTom.sisteDagIInneværendeMåned(),
+        AndelTilkjentYtelseDataForÅKalkulereEndring(
+            aktør = it.aktør,
+            kalkulertBeløp = it.kalkulertUtbetalingsbeløp,
+            behandlingAlder = behandlingAlder,
         )
-    }
-)
+    )
+}
