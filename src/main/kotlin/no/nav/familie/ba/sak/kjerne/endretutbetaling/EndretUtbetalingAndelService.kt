@@ -52,8 +52,6 @@ class EndretUtbetalingAndelService(
 
         endretUtbetalingAndel.fraRestEndretUtbetalingAndel(restEndretUtbetalingAndel, person)
 
-        validerEndretUtbetalingAndelErGyldigForÅrsak(endretUtbetalingAndel = endretUtbetalingAndel, andelTilkjentYtelser = andelTilkjentYtelser)
-
         val andreEndredeAndelerPåBehandling = endretUtbetalingAndelRepository.findByBehandlingId(behandling.id)
             .filter { it.id != endretUtbetalingAndelId }
 
@@ -72,6 +70,8 @@ class EndretUtbetalingAndelService(
         if (endretUtbetalingAndel.tom == null) {
             endretUtbetalingAndel.tom = gyldigTomEtterDagensDato
         }
+
+        validerEndretUtbetalingAndelErGyldigForÅrsak(endretUtbetalingAndel = endretUtbetalingAndel, andelTilkjentYtelser = andelTilkjentYtelser)
 
         validerIngenOverlappendeEndring(
             endretUtbetalingAndel = endretUtbetalingAndel,
