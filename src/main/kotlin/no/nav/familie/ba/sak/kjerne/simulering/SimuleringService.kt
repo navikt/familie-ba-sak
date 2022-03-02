@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.simulering
 
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -35,26 +34,21 @@ class SimuleringService(
 ) {
 
     fun hentSimuleringFraFamilieOppdrag(vedtak: Vedtak): DetaljertSimuleringResultat? {
-        try {
-            if (vedtak.behandling.resultat == BehandlingResultat.FORTSATT_INNVILGET || vedtak.behandling.resultat == BehandlingResultat.AVSLÅTT) return null
 
-            /**
-             * SOAP integrasjonen støtter ikke full epost som MQ,
-             * så vi bruker bare første 8 tegn av saksbehandlers epost for simulering.
-             * Denne verdien brukes ikke til noe i simulering.
-             */
-            val utbetalingsoppdrag = økonomiService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
-                vedtak = vedtak,
-                saksbehandlerId = SikkerhetContext.hentSaksbehandler().take(8),
-                erSimulering = true,
-            )
+        if (vedtak.behandling.resultat == BehandlingResultat.FORTSATT_INNVILGET || vedtak.behandling.resultat == BehandlingResultat.AVSLÅTT) return null
 
-            return økonomiKlient.hentSimulering(utbetalingsoppdrag)?.data
-        } catch (feil: Throwable) {
-            secureLogger.error("Henting av simuleringsresultat feilet: ${feil.stackTraceToString()}")
-            if (feil is FunksjonellFeil) throw feil
-            else throw Feil("Henting av simuleringsresultat feilet: ${feil.message}")
-        }
+        /**
+         * SOAP integrasjonen støtter ikke full epost som MQ,
+         * så vi bruker bare første 8 tegn av saksbehandlers epost for simulering.
+         * Denne verdien brukes ikke til noe i simulering.
+         */
+        val utbetalingsoppdrag = økonomiService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
+            vedtak = vedtak,
+            saksbehandlerId = SikkerhetContext.hentSaksbehandler().take(8),
+            erSimulering = true,
+        )
+
+        return økonomiKlient.hentSimulering(utbetalingsoppdrag)?.data
     }
 
     @Transactional

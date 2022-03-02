@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.integrasjoner.økonomi
 
 import no.nav.familie.ba.sak.common.assertGenerelleSuksessKriterier
-import no.nav.familie.ba.sak.common.kallEksternTjeneste
 import no.nav.familie.ba.sak.common.kallEksternTjenesteRessurs
 import no.nav.familie.ba.sak.config.RestTemplateConfig.Companion.RETRY_BACKOFF_500MS
 import no.nav.familie.ba.sak.task.dto.FAGSYSTEM
@@ -40,16 +39,16 @@ class ØkonomiKlient(
         maxAttempts = 3,
         backoff = Backoff(delayExpression = RETRY_BACKOFF_500MS)
     )
-    fun hentSimulering(utbetalingsoppdrag: Utbetalingsoppdrag): Ressurs<DetaljertSimuleringResultat>? {
+    fun hentSimulering(utbetalingsoppdrag: Utbetalingsoppdrag): DetaljertSimuleringResultat {
         val uri = URI.create("$familieOppdragUri/simulering/v1")
 
-        return kallEksternTjeneste(
+        return kallEksternTjenesteRessurs(
             tjeneste = "familie-oppdrag",
             uri = uri,
             formål = "Henter simulering fra Økonomi",
         ) {
 
-            postForEntity(
+            postForEntity<Ressurs<DetaljertSimuleringResultat>>(
                 uri = uri,
                 utbetalingsoppdrag
             )

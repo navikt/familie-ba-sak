@@ -45,11 +45,7 @@ class ØkonomiTestConfig {
 
             every { økonomiKlient.hentStatus(any()) } returns hentStatusRespons
 
-            every { økonomiKlient.hentSimulering(any()) } returns Ressurs.success(
-                DetaljertSimuleringResultat(
-                    simuleringMottakerMock
-                )
-            )
+            every { økonomiKlient.hentSimulering(any()) } returns DetaljertSimuleringResultat(simuleringMottakerMock)
         }
     }
 }
