@@ -284,7 +284,7 @@ class VedtaksperiodeService(
 
         val avslagsperioder = hentAvslagsperioderMedBegrunnelser(vedtak)
 
-        val reduksjonsperioder = hentReduksjonsperioder(vedtak)
+        val reduksjonsperioder = hentReduksjonsperioder(vedtak, opphørsperioder)
 
         val oppdatertUtbetalingsperiode =
             finnOgOppdaterOverlappendeUtbetalingsperiode(utbetalingsperioder, reduksjonsperioder)
@@ -483,7 +483,10 @@ class VedtaksperiodeService(
         )
     }
 
-    fun hentReduksjonsperioder(vedtak: Vedtak): List<VedtaksperiodeMedBegrunnelser> {
+    fun hentReduksjonsperioder(
+        vedtak: Vedtak,
+        opphørsperioder: List<VedtaksperiodeMedBegrunnelser>
+    ): List<VedtaksperiodeMedBegrunnelser> {
         val behandling = vedtak.behandling
         if (behandling.resultat != BehandlingResultat.ENDRET) return emptyList()
 
@@ -523,7 +526,10 @@ class VedtaksperiodeService(
             }
         }
 
-        return vedtaksperiodeMedBegrunnelser
+        // opphørsperioder kan ikke være inkludert i reduksjonsperioder
+        return vedtaksperiodeMedBegrunnelser.filterNot { reduksjonsperiode ->
+            opphørsperioder.any { it.fom == reduksjonsperiode.fom && it.tom == reduksjonsperiode.tom }
+        }
     }
 
     private fun finnOgOppdaterOverlappendeUtbetalingsperiode(

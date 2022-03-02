@@ -22,6 +22,17 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAnde
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon.REDUKSJON_ANDRE_FORELDER_VAR_IKKE_MEDLEM
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon.REDUKSJON_AVTALE_DELT_BOSTED_FØLGES_IKKE
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon.REDUKSJON_AVTALE_DELT_BOSTED_IKKE_GYLDIG
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon.REDUKSJON_BARN_BOR_IKKE_MED_SØKER
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon.REDUKSJON_FORELDRENE_BODDE_SAMMEN
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon.REDUKSJON_IKKE_BOSATT_I_NORGE
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon.REDUKSJON_IKKE_OPPHOLDSTILLATELSE
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon.REDUKSJON_VAR_IKKE_MEDLEM
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon.REDUKSJON_VURDERING_ANDRE_FORELDER_VAR_IKKE_MEDLEM
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon.REDUKSJON_VURDERING_FORELDRENE_BODDE_SAMMEN
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon.REDUKSJON_VURDERING_VAR_IKKE_MEDLEM
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.MinimertPerson
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.MinimertVedtaksperiode
@@ -195,8 +206,15 @@ fun hentGyldigeBegrunnelserForVedtaksperiodeMinimert(
 
     return when (minimertVedtaksperiode.type) {
         Vedtaksperiodetype.FORTSATT_INNVILGET,
-        Vedtaksperiodetype.AVSLAG,
-        Vedtaksperiodetype.REDUKSJON -> tillateBegrunnelserForVedtakstype
+        Vedtaksperiodetype.AVSLAG -> tillateBegrunnelserForVedtakstype
+        Vedtaksperiodetype.REDUKSJON -> listOf(
+            REDUKSJON_IKKE_BOSATT_I_NORGE, REDUKSJON_BARN_BOR_IKKE_MED_SØKER,
+            REDUKSJON_IKKE_OPPHOLDSTILLATELSE, REDUKSJON_AVTALE_DELT_BOSTED_IKKE_GYLDIG,
+            REDUKSJON_AVTALE_DELT_BOSTED_FØLGES_IKKE, REDUKSJON_FORELDRENE_BODDE_SAMMEN,
+            REDUKSJON_VURDERING_FORELDRENE_BODDE_SAMMEN, REDUKSJON_VAR_IKKE_MEDLEM,
+            REDUKSJON_VURDERING_VAR_IKKE_MEDLEM, REDUKSJON_ANDRE_FORELDER_VAR_IKKE_MEDLEM,
+            REDUKSJON_VURDERING_ANDRE_FORELDER_VAR_IKKE_MEDLEM
+        )
         else -> {
             val standardbegrunnelser: MutableSet<VedtakBegrunnelseSpesifikasjon> =
                 tillateBegrunnelserForVedtakstype

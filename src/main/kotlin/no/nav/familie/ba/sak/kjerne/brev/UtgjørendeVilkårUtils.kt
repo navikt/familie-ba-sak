@@ -122,13 +122,7 @@ private fun erVilkårResultatUtgjørende(
             )
         }
 
-        VedtakBegrunnelseType.REDUKSJON -> {
-            erReduksjonResultatUtgjøreneForPeriode(
-                minimertVilkårResultat = minimertVilkårResultat,
-                triggesAv = triggesAv,
-                vedtaksperiode = vedtaksperiode
-            )
-        }
+        VedtakBegrunnelseType.REDUKSJON -> false
 
         VedtakBegrunnelseType.AVSLAG ->
             vilkårResultatPasserForAvslagsperiode(minimertVilkårResultat, vedtaksperiode)
@@ -151,35 +145,6 @@ private fun erOpphørResultatUtgjøreneForPeriode(
         minimertVilkårResultat.periodeTom != null &&
         minimertVilkårResultat.resultat == Resultat.OPPFYLT &&
         minimertVilkårResultat.periodeTom.toYearMonth() == vilkårsluttForForrigePeriode.toYearMonth()
-}
-
-private fun erReduksjonResultatUtgjøreneForPeriode(
-    minimertVilkårResultat: MinimertVilkårResultat,
-    triggesAv: TriggesAv,
-    vedtaksperiode: Periode
-): Boolean {
-    if (minimertVilkårResultat.periodeTom == null) {
-        return false
-    }
-
-    val erOppfyltTomMånedEtter = erOppfyltTomMånedEtter(minimertVilkårResultat)
-
-    val erStartPåDeltBosted =
-        minimertVilkårResultat.vilkårType == Vilkår.BOR_MED_SØKER &&
-            !minimertVilkårResultat.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.DELT_BOSTED) &&
-            triggesAv.deltbosted
-
-    val startNestePeriodeEtterVilkår = minimertVilkårResultat.periodeTom
-        .plusDays(if (erStartPåDeltBosted) 1 else 0)
-        .plusMonths(if (erOppfyltTomMånedEtter) 1 else 0)
-
-    return triggereForUtdypendeVilkårsvurderingErOppfylt(
-        triggesAv = triggesAv,
-        vilkårResultat = minimertVilkårResultat,
-        erReduksjonStartPåDeltBosted = erStartPåDeltBosted
-    ) &&
-        minimertVilkårResultat.resultat == Resultat.OPPFYLT &&
-        startNestePeriodeEtterVilkår.toYearMonth() == vedtaksperiode.fom.toYearMonth()
 }
 
 private fun erOppfyltTomMånedEtter(minimertVilkårResultat: MinimertVilkårResultat) =
