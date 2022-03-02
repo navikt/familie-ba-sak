@@ -109,7 +109,8 @@ class VedtakServiceTest(
     private val behandlingMigreringsinfoRepository: BehandlingMigreringsinfoRepository,
 
     @Autowired
-    private val behandlingSøknadsinfoRepository: BehandlingSøknadsinfoRepository
+    private val behandlingSøknadsinfoRepository: BehandlingSøknadsinfoRepository,
+
 ) : AbstractSpringIntegrationTest() {
 
     lateinit var behandlingService: BehandlingService
@@ -141,7 +142,8 @@ class VedtakServiceTest(
             featureToggleService,
             taskRepository,
             behandlingMigreringsinfoRepository,
-            behandlingSøknadsinfoRepository
+            behandlingSøknadsinfoRepository,
+            vilkårsvurderingService,
         )
 
         val personAktørId = randomAktørId()
