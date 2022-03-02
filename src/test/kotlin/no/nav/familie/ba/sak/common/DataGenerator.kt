@@ -952,7 +952,7 @@ fun lagEndretUtbetalingAndel(
     person: Person,
     prosent: BigDecimal = BigDecimal.valueOf(100),
     fom: YearMonth = YearMonth.now().minusMonths(1),
-    tom: YearMonth = YearMonth.now(),
+    tom: YearMonth? = YearMonth.now(),
     årsak: Årsak = Årsak.DELT_BOSTED,
     avtaletidspunktDeltBosted: LocalDate = LocalDate.now().minusMonths(1),
     søknadstidspunkt: LocalDate = LocalDate.now().minusMonths(1),
