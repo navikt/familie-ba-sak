@@ -79,6 +79,8 @@ class AvstemmingService(
             perioderTilAvstemming,
             transaksjonsId
         )
+
+        dataChunkRepository.save(dataChunk.also { it.erSendt = true })
     }
 
     fun konsistensavstemOppdragAvslutt(avstemmingsdato: LocalDateTime, transaksjonsId: UUID) {
