@@ -441,9 +441,7 @@ class BehandlingService(
         val aktivBehandling = hentAktivForFagsak(fagsakId) ?: error("Fant ikke aktiv behandling")
 
         val personResultater =
-            vilkårsvurderingService.hentAktivForBehandling(aktivBehandling.id)?.personResultater ?: error(
-                "Fant ikke personresultater"
-            )
+            vilkårsvurderingService.hentAktivForBehandling(aktivBehandling.id)?.personResultater ?: setOf()
 
         return if (andeler.any { it.erEøs(personResultater) && it.erLøpende() }
         ) BehandlingKategori.EØS else BehandlingKategori.NASJONAL
