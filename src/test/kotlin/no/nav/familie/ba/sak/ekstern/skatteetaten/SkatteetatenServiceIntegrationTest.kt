@@ -311,22 +311,6 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
         assertThat(resultat.brukere.first().perioder.first().delingsprosent).isEqualTo(SkatteetatenPeriode.Delingsprosent._0)
         assertThat(resultat.brukere.first().ident).isEqualTo(fnr)
         assertThat(resultat.brukere.first().sisteVedtakPaaIdent).isEqualTo(LocalDate.of(2022, 2, 6).atStartOfDay())
-        // assertThat(samletResultat.brukere.find { it.ident == fnr }!!.perioder).hasSize(2)
-        // assertThat(
-        //     samletResultat.brukere.find { it.ident == fnr }!!.perioder.find {
-        //         it.fraMaaned == "2020-08"
-        //     }!!.delingsprosent
-        // ).isEqualTo(
-        //     SkatteetatenPeriode.Delingsprosent._50
-        // )
-        // assertThat(
-        //     samletResultat.brukere.find { it.ident == fnr }!!.perioder.find {
-        //         it.tomMaaned == "2020-07"
-        //     }!!.delingsprosent
-        // ).isEqualTo(
-        //     SkatteetatenPeriode.Delingsprosent._0
-        // )
-        // assertThat(samletResultat.brukere.find { it.ident == testDataInfotrygd[1].fnr }!!.perioder).hasSize(1)
     }
 
     @Test
