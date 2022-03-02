@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.ekstern.skatteetaten
 
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
+import no.nav.familie.ba.sak.integrasjoner.pdl.secureLogger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.eksterne.kontrakter.skatteetaten.SkatteetatenPeriode
@@ -44,10 +45,6 @@ class SkatteetatenService(
         val perioderFraBaSak = hentPerioderMedUtvidetBarnetrygdFraBaSak(unikePersoner, år)
         val perioderFraInfotrygd =
             infotrygdBarnetrygdClient.hentPerioderMedUtvidetBarnetrygdForPersoner(unikePersoner, år)
-        LOG.debug(
-            "finnPerioderMedUtvidetBarnetrygd(): found periods for {} personer from Infotrygd",
-            perioderFraInfotrygd.size
-        )
 
         val samletPerioder = mutableListOf<SkatteetatenPerioder>()
         unikePersoner.forEach {
@@ -88,8 +85,11 @@ class SkatteetatenService(
         personer: List<String>,
         år: String
     ): List<SkatteetatenPerioder> {
-        val stonadPerioder = hentUtdannetStonadPerioderForPersoner(personer, år)
-        LOG.debug("hentPerioderMedUtvidetBarnetrygdFraBaSak(): query to ba-sak returns {} entries", stonadPerioder.size)
+        val stonadPerioder = hentUtvidetStonadPerioderForPersoner(personer, år)
+        stonadPerioder.forEach {
+            secureLogger.info("hentPerioderMedUtvidetBarnetrygdFraBaSak() andelTilkjentYtelsePeriode id=${it.getId()} fom=${it.getFom()} tom=${it.getTom()} prosent=${it.getProsent()} ident=${it.getIdent()} endretDato=${it.getEndretDato()}") // TODO: remove
+        }
+
         val skatteetatenPerioderMap =
             stonadPerioder.fold(mutableMapOf<String, SkatteetatenPerioder>()) { perioderMap, period ->
                 val ident = period.getIdent()
@@ -106,11 +106,8 @@ class SkatteetatenService(
                 perioderMap[ident] = SkatteetatenPerioder(ident, period.getEndretDato(), samletPerioder)
                 perioderMap
             }
-        LOG.debug(
-            "hentPerioderMedUtvidetBarnetrygdFraBaSak(): merge {} entries into {} person slots",
-            stonadPerioder.size,
-            skatteetatenPerioderMap.size
-        )
+        secureLogger.info("hentPerioderMedUtvidetBarnetrygdFraBaSak() hentet {} $skatteetatenPerioderMap") // TOOD: remove
+
         return skatteetatenPerioderMap.toList().map {
             // Slå sammen perioder basert på delingsprosent
             SkatteetatenPerioder(
@@ -122,7 +119,7 @@ class SkatteetatenService(
         }
     }
 
-    private fun hentUtdannetStonadPerioderForPersoner(
+    private fun hentUtvidetStonadPerioderForPersoner(
         personIdenter: List<String>,
         år: String
     ): List<AndelTilkjentYtelsePeriode> {
