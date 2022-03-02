@@ -110,25 +110,25 @@ class ØkonomiKlient(
     fun konsistensavstemOppdragStart(
         avstemmingsdato: LocalDateTime,
         transaksjonsId: UUID
-    ): Ressurs<String> {
+    ): String {
         val uri = URI.create(
             "$familieOppdragUri/v2/konsistensavstemming" +
                 "?sendStartmelding=true&sendAvsluttmelding=false&transaksjonsId=$transaksjonsId"
         )
 
-        return kallEksternTjeneste(
+        return kallEksternTjenesteRessurs(
             tjeneste = "familie-oppdrag",
             uri = uri,
             formål = "Start konsistensavstemming mot oppdrag i batch",
         ) {
-            postForEntity<Ressurs<String>>(
+            postForEntity(
                 uri = uri,
                 KonsistensavstemmingRequestV2(
                     fagsystem = FAGSYSTEM,
                     avstemmingstidspunkt = avstemmingsdato,
                     perioderForBehandlinger = emptyList()
                 )
-            ).also { assertGenerelleSuksessKriterier(it) }
+            )
         }
     }
 
@@ -136,48 +136,49 @@ class ØkonomiKlient(
         avstemmingsdato: LocalDateTime,
         perioderTilAvstemming: List<PerioderForBehandling>,
         transaksjonsId: UUID,
-    ): Ressurs<String> {
+    ): String {
         val uri = URI.create(
             "$familieOppdragUri/v2/konsistensavstemming" +
                 "?sendStartmelding=false&sendAvsluttmelding=false&transaksjonsId=$transaksjonsId"
         )
-        return kallEksternTjeneste(
+
+        return kallEksternTjenesteRessurs(
             tjeneste = "familie-oppdrag",
             uri = uri,
             formål = "Konsistenstavstemmer chunk mot oppdrag",
         ) {
-            postForEntity<Ressurs<String>>(
+            postForEntity(
                 uri = uri,
                 KonsistensavstemmingRequestV2(
                     fagsystem = FAGSYSTEM,
                     avstemmingstidspunkt = avstemmingsdato,
                     perioderForBehandlinger = perioderTilAvstemming
                 )
-            ).also { assertGenerelleSuksessKriterier(it) }
+            )
         }
     }
 
     fun konsistensavstemOppdragAvslutt(
         avstemmingsdato: LocalDateTime,
         transaksjonsId: UUID
-    ): Ressurs<String> {
+    ): String {
         val uri = URI.create(
             "$familieOppdragUri/v2/konsistensavstemming" +
                 "?sendStartmelding=false&sendAvsluttmelding=true&transaksjonsId=$transaksjonsId"
         )
-        return kallEksternTjeneste(
+        return kallEksternTjenesteRessurs(
             tjeneste = "familie-oppdrag",
             uri = uri,
             formål = "Avslutt konsistensavstemming mot oppdrag",
         ) {
-            postForEntity<Ressurs<String>>(
+            postForEntity(
                 uri = uri,
                 KonsistensavstemmingRequestV2(
                     fagsystem = FAGSYSTEM,
                     avstemmingstidspunkt = avstemmingsdato,
                     perioderForBehandlinger = emptyList()
                 )
-            ).also { assertGenerelleSuksessKriterier(it) }
+            )
         }
     }
 }

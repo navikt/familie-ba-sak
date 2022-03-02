@@ -47,24 +47,10 @@ class AvstemmingService(
     }
 
     fun sendKonsistensavstemmingStart(avstemmingsdato: LocalDateTime, transaksjonsId: UUID) {
-        runCatching {
-            økonomiKlient.konsistensavstemOppdragStart(
-                avstemmingsdato,
-                transaksjonsId
-            )
-        }
-            .fold(
-                onSuccess = {
-                    logger.debug("Konsistensavstemming mot oppdrag med transaksjonsId $transaksjonsId startet.")
-                },
-                onFailure = {
-                    logger.error(
-                        "Starting av konsistensavstemming med transaksjonsId $transaksjonsId mot oppdrag feilet",
-                        it
-                    )
-                    throw it
-                }
-            )
+        økonomiKlient.konsistensavstemOppdragStart(
+            avstemmingsdato,
+            transaksjonsId
+        )
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -88,38 +74,17 @@ class AvstemmingService(
             return
         }
 
-        Result.runCatching {
-            økonomiKlient.konsistensavstemOppdragData(
-                avstemmingsdato,
-                perioderTilAvstemming,
-                transaksjonsId
-            )
-        }
-            .fold(
-                onSuccess = {
-                    dataChunkRepository.save(dataChunk.also { it.erSendt = true })
-                    logger.debug("Perioder til konsistensavstemming for transaksjonsId $transaksjonsId og chunk nr $chunkNr mot oppdrag utført.")
-                },
-                onFailure = {
-                    logger.error("Perioder til konsistensavstemming mot oppdrag feilet", it)
-                    throw it
-                }
-            )
+        økonomiKlient.konsistensavstemOppdragData(
+            avstemmingsdato,
+            perioderTilAvstemming,
+            transaksjonsId
+        )
     }
 
     fun konsistensavstemOppdragAvslutt(avstemmingsdato: LocalDateTime, transaksjonsId: UUID) {
         logger.info("Avslutter konsistensavstemming for $transaksjonsId")
 
-        Result.runCatching { økonomiKlient.konsistensavstemOppdragAvslutt(avstemmingsdato, transaksjonsId) }
-            .fold(
-                onSuccess = {
-                    logger.debug("Avslutt av Konsistensavstemming mot oppdrag for $transaksjonsId utført.")
-                },
-                onFailure = {
-                    logger.error("Avslutt av Konsistensavstemming for $transaksjonsId mot oppdrag feilet", it)
-                    throw it
-                }
-            )
+        økonomiKlient.konsistensavstemOppdragAvslutt(avstemmingsdato, transaksjonsId)
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
