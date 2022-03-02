@@ -40,25 +40,36 @@ class SkatteetatenService(
     }
 
     fun finnPerioderMedUtvidetBarnetrygd(personer: List<String>, år: String): SkatteetatenPerioderResponse {
-        LOG.debug("enter finnPerioderMedUtvidetBarnetrygd(), {} personer, år {} ", personer.size, år)
-        val unikePersoner = personer.toSet().toList()
-        LOG.debug("finnPerioderMedUtvidetBarnetrygd(): {} unikePersoner", unikePersoner.size)
+        val unikePersoner = personer.distinct()
         val perioderFraBaSak = hentPerioderMedUtvidetBarnetrygdFraBaSak(unikePersoner, år)
         val perioderFraInfotrygd =
-            infotrygdBarnetrygdClient.hentPerioderMedUtvidetBarnetrygdForPersoner(unikePersoner.toList(), år)
-        LOG.debug(
-            "finnPerioderMedUtvidetBarnetrygd(): found periods for {} personer from Infotrygd",
-            perioderFraInfotrygd.size
-        )
+            infotrygdBarnetrygdClient.hentPerioderMedUtvidetBarnetrygdForPersoner(unikePersoner, år)
 
-        val baSakPersonIdenter = perioderFraBaSak.map { it.ident }.toSet()
+        val samletPerioder = mutableListOf<SkatteetatenPerioder>()
+        unikePersoner.forEach {
+            val resultatInfotrygdForPerson =
+                perioderFraInfotrygd.firstOrNull { perioder -> perioder.ident == it }
+            val perioderFraInfotrygd =
+                resultatInfotrygdForPerson?.perioder ?: emptyList()
+            val resutatBaSakForPerson = perioderFraBaSak.firstOrNull { perioder -> perioder.ident == it }
+            val perioderFraBasak = resutatBaSakForPerson?.perioder ?: emptyList()
+            val perioder =
+                (perioderFraBasak + perioderFraInfotrygd).groupBy { periode -> periode.delingsprosent }.values
+                    .flatMap(::slåSammenSkatteetatenPeriode).toMutableList()
+            if (perioder.isNotEmpty()) {
+                samletPerioder.add(
+                    SkatteetatenPerioder(
+                        ident = it,
+                        perioder = perioder,
+                        sisteVedtakPaaIdent = resutatBaSakForPerson?.sisteVedtakPaaIdent
+                            ?: resultatInfotrygdForPerson!!.sisteVedtakPaaIdent
+                    )
+                )
+            }
+        }
 
         // Assumes that vedtak in ba-sak is always newer than that in Infotrygd for the same person ident
-        return SkatteetatenPerioderResponse(
-            perioderFraBaSak + perioderFraInfotrygd.filter {
-                !baSakPersonIdenter.contains(it.ident)
-            }
-        )
+        return SkatteetatenPerioderResponse(samletPerioder)
     }
 
     private fun hentPersonerMedUtvidetBarnetrygd(år: String): List<SkatteetatenPerson> {
@@ -73,16 +84,16 @@ class SkatteetatenService(
         personer: List<String>,
         år: String
     ): List<SkatteetatenPerioder> {
-        val stonadPerioder = hentUtdannetStonadPerioderForPersoner(personer, år)
-        LOG.debug("hentPerioderMedUtvidetBarnetrygdFraBaSak(): query to ba-sak returns {} entries", stonadPerioder.size)
+        val stonadPerioder = hentUtvidetStonadPerioderForPersoner(personer, år)
+
         val skatteetatenPerioderMap =
             stonadPerioder.fold(mutableMapOf<String, SkatteetatenPerioder>()) { perioderMap, period ->
                 val ident = period.getIdent()
                 val nyList = listOf(
                     SkatteetatenPeriode(
-                        fraMaaned = period.getFom().format(DateTimeFormatter.ofPattern("YYYY-MM")),
+                        fraMaaned = period.getFom().format(DateTimeFormatter.ofPattern("yyyy-MM")),
                         delingsprosent = period.getProsent().tilDelingsprosent(),
-                        tomMaaned = period.getTom().format(DateTimeFormatter.ofPattern("YYYY-MM"))
+                        tomMaaned = period.getTom().format(DateTimeFormatter.ofPattern("yyyy-MM"))
                     )
                 )
                 val samletPerioder = if (perioderMap.containsKey(ident))
@@ -91,11 +102,7 @@ class SkatteetatenService(
                 perioderMap[ident] = SkatteetatenPerioder(ident, period.getEndretDato(), samletPerioder)
                 perioderMap
             }
-        LOG.debug(
-            "hentPerioderMedUtvidetBarnetrygdFraBaSak(): merge {} entries into {} person slots",
-            stonadPerioder.size,
-            skatteetatenPerioderMap.size
-        )
+
         return skatteetatenPerioderMap.toList().map {
             // Slå sammen perioder basert på delingsprosent
             SkatteetatenPerioder(
@@ -107,7 +114,7 @@ class SkatteetatenService(
         }
     }
 
-    private fun hentUtdannetStonadPerioderForPersoner(
+    private fun hentUtvidetStonadPerioderForPersoner(
         personIdenter: List<String>,
         år: String
     ): List<AndelTilkjentYtelsePeriode> {
