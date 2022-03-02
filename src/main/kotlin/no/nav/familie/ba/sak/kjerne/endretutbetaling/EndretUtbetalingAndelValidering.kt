@@ -11,6 +11,12 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 
 object EndretUtbetalingAndelValidering {
 
+    fun validerEndretUtbetalingAndelErGyldigForÅrsak(endretUtbetalingAndel: EndretUtbetalingAndel, andelTilkjentYtelser: List<AndelTilkjentYtelse>) {
+        if (endretUtbetalingAndel.årsak == Årsak.DELT_BOSTED) {
+            validerDeltBosted(endretUtbetalingAndel = endretUtbetalingAndel, andelTilkjentYtelser = andelTilkjentYtelser)
+        }
+    }
+
     fun validerIngenOverlappendeEndring(
         endretUtbetalingAndel: EndretUtbetalingAndel,
         eksisterendeEndringerPåBehandling: List<EndretUtbetalingAndel>

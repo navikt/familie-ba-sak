@@ -6,10 +6,8 @@ import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.randomFnr
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.task.OpprettTaskService
@@ -20,15 +18,12 @@ internal class AutobrevTaskTest {
 
     val fagsakRepository = mockk<FagsakRepository>()
     val opprettTaskService = mockk<OpprettTaskService>()
-    val featureToggleService = mockk<FeatureToggleService>()
     val behandlingService = mockk<BehandlingService>()
-    val behandlingRepository = mockk<BehandlingRepository>()
 
     private val autobrevTask = AutobrevTask(
         fagsakRepository = fagsakRepository,
-        behandlingRepository = behandlingRepository,
+        behandlingService = behandlingService,
         opprettTaskService = opprettTaskService,
-        featureToggleService = featureToggleService
     )
 
     private val autoBrevTask = Task(
@@ -48,8 +43,7 @@ internal class AutobrevTaskTest {
         every { fagsakRepository.finnAlleFagsakerMedOpphørSmåbarnstilleggIMåned(any()) } returns listOf(1L)
         every { opprettTaskService.opprettAutovedtakFor6Og18ÅrBarn(any(), any()) } just runs
         every { opprettTaskService.opprettAutovedtakForOpphørSmåbarnstilleggTask(any()) } just runs
-        every { featureToggleService.isEnabled(any()) } returns true
-        every { behandlingRepository.finnSisteIverksatteBehandlingFraLøpendeFagsaker() } returns emptyList()
+        every { behandlingService.partitionByIverksatteBehandlinger <Long>(any()) } returns listOf(1L)
 
         autobrevTask.doTask(autoBrevTask)
 
