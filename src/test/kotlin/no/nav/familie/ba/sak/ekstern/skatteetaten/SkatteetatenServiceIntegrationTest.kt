@@ -20,7 +20,6 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import no.nav.familie.ba.sak.kjerne.personident.AktørIdRepository
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.eksterne.kontrakter.skatteetaten.SkatteetatenPeriode
 import no.nav.familie.eksterne.kontrakter.skatteetaten.SkatteetatenPerioder
@@ -29,6 +28,7 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
@@ -52,9 +52,6 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
 
     @Autowired
     lateinit var behandlingRepository: BehandlingRepository
-
-    @Autowired
-    lateinit var aktørIdRepository: AktørIdRepository
 
     val infotrygdBarnetrygdClientMock = mockk<InfotrygdBarnetrygdClient>()
 
@@ -168,7 +165,7 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
                 endretDato = LocalDateTime.of(2020, 9, 5, 12, 0),
                 perioder = listOf(
                     Triple(
-                        LocalDateTime.of(2020, 1, 1, 12, 0),
+                        LocalDateTime.of(2020, 8, 1, 12, 0),
                         LocalDateTime.of(2020, 9, 8, 12, 0),
                         SkatteetatenPeriode.Delingsprosent._0
                     )
@@ -234,12 +231,102 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
         )
         assertThat(
             samletResultat.brukere.find { it.ident == duplicatedFnr }!!.perioder.find {
-                it.tomMaaned == "2020-07"
+                it.tomMaaned == "2020-09"
             }!!.delingsprosent
         ).isEqualTo(
             SkatteetatenPeriode.Delingsprosent._0
         )
         assertThat(samletResultat.brukere.find { it.ident == testDataInfotrygd[1].fnr }!!.perioder).hasSize(1)
+    }
+
+    @Test
+    fun `finnPerioderMedUtvidetBarnetrygd() skal slå sammen data fra infotrygd og ba-sak når overlappende periode`() {
+        val fnr = "00000000001"
+        val aktør = tilAktør(fnr)
+
+        // Result from ba-sak
+        val testDataBaSak = arrayOf(
+            // Included
+            PerioderTestData(
+                fnr = fnr,
+                aktør = aktør,
+                endretDato = LocalDate.of(2022, 2, 6).atStartOfDay(),
+                perioder = listOf(
+                    Triple(
+                        LocalDateTime.of(2022, 3, 1, 12, 0),
+                        LocalDateTime.of(2027, 7, 31, 12, 0),
+                        SkatteetatenPeriode.Delingsprosent._0
+                    )
+                )
+            ),
+        )
+
+        // result from Infotrygd
+        val testDataInfotrygd = arrayOf(
+            // Excluded because the person ident can be found in ba-sak
+            PerioderTestData(
+                fnr = fnr,
+                aktør = aktør,
+                endretDato = LocalDate.of(2020, 9, 5).atStartOfDay(),
+                perioder = listOf(
+                    Triple(
+                        LocalDateTime.of(2019, 9, 1, 12, 0),
+                        LocalDateTime.of(2022, 2, 8, 12, 0),
+                        SkatteetatenPeriode.Delingsprosent._0
+                    )
+                )
+            ),
+        )
+
+        testDataBaSak.forEach {
+            lagerTilkjentYtelse(it)
+        }
+
+        every {
+            infotrygdBarnetrygdClientMock.hentPerioderMedUtvidetBarnetrygdForPersoner(
+                eq(listOf("00000000001")),
+                any()
+            )
+        } returns testDataInfotrygd.flatMap {
+            listOf(
+                SkatteetatenPerioder(
+                    it.fnr, it.endretDato,
+                    it.perioder.map { p ->
+                        SkatteetatenPeriode(
+                            fraMaaned = p.first.tilMaaned(),
+                            tomMaaned = p.second.tilMaaned(),
+                            delingsprosent = p.third
+                        )
+                    }
+                )
+            )
+        }
+
+        val resultat = skatteetatenService.finnPerioderMedUtvidetBarnetrygd(listOf((fnr)), "2022")
+
+        assertThat(resultat.brukere).hasSize(1)
+        assertThat(resultat.brukere.first().perioder).hasSize(1)
+        assertThat(resultat.brukere.first().perioder.first().fraMaaned).isEqualTo("2019-09")
+        assertThat(resultat.brukere.first().perioder.first().tomMaaned).isEqualTo("2027-07")
+        assertThat(resultat.brukere.first().perioder.first().delingsprosent).isEqualTo(SkatteetatenPeriode.Delingsprosent._0)
+        assertThat(resultat.brukere.first().ident).isEqualTo(fnr)
+        assertThat(resultat.brukere.first().sisteVedtakPaaIdent).isEqualTo(LocalDate.of(2022, 2, 6).atStartOfDay())
+        // assertThat(samletResultat.brukere.find { it.ident == fnr }!!.perioder).hasSize(2)
+        // assertThat(
+        //     samletResultat.brukere.find { it.ident == fnr }!!.perioder.find {
+        //         it.fraMaaned == "2020-08"
+        //     }!!.delingsprosent
+        // ).isEqualTo(
+        //     SkatteetatenPeriode.Delingsprosent._50
+        // )
+        // assertThat(
+        //     samletResultat.brukere.find { it.ident == fnr }!!.perioder.find {
+        //         it.tomMaaned == "2020-07"
+        //     }!!.delingsprosent
+        // ).isEqualTo(
+        //     SkatteetatenPeriode.Delingsprosent._0
+        // )
+        // assertThat(samletResultat.brukere.find { it.ident == testDataInfotrygd[1].fnr }!!.perioder).hasSize(1)
     }
 
     @Test
@@ -318,9 +405,7 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
         assertThat(sortertePerioder[1].delingsprosent).isEqualTo(
             SkatteetatenPeriode.Delingsprosent._50
         )
-        assertThat(sortertePerioder[1].fraMaaned).isEqualTo(
-            "2020-07"
-        )
+        assertThat(sortertePerioder[1].fraMaaned).isEqualTo("2020-07")
         assertThat(sortertePerioder[1].tomMaaned).isEqualTo(
             "2020-08"
         )
@@ -336,9 +421,9 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
         )
     }
 
-    fun lagerTilkjentYtelse(tilkjentYtelse: PerioderTestData) {
-        val fødselsnummer = tilkjentYtelse.aktør.aktivFødselsnummer()
-        val aktør = tilkjentYtelse.aktør
+    fun lagerTilkjentYtelse(perioderTestData: PerioderTestData) {
+        val fødselsnummer = perioderTestData.aktør.aktivFødselsnummer()
+        val aktør = perioderTestData.aktør
         personidentService.hentOgLagreAktør(fødselsnummer, true)
 
         val fagsak = Fagsak(aktør = aktør)
@@ -355,16 +440,16 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
 
         val ty = TilkjentYtelse(
             behandling = behandling,
-            opprettetDato = tilkjentYtelse.endretDato.toLocalDate(),
-            endretDato = tilkjentYtelse.endretDato.toLocalDate(),
+            opprettetDato = perioderTestData.endretDato.toLocalDate(),
+            endretDato = perioderTestData.endretDato.toLocalDate(),
             utbetalingsoppdrag = "utbetalt",
         ).also {
             it.andelerTilkjentYtelse.addAll(
-                tilkjentYtelse.perioder.map { p ->
+                perioderTestData.perioder.map { p ->
                     AndelTilkjentYtelse(
                         behandlingId = it.behandling.id,
                         tilkjentYtelse = it,
-                        aktør = tilkjentYtelse.aktør,
+                        aktør = perioderTestData.aktør,
                         kalkulertUtbetalingsbeløp = 1000,
                         stønadFom = YearMonth.of(p.first.year, p.first.month),
                         stønadTom = YearMonth.of(p.second.year, p.second.month),

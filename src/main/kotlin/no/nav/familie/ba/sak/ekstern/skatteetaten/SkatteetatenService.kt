@@ -40,25 +40,40 @@ class SkatteetatenService(
     }
 
     fun finnPerioderMedUtvidetBarnetrygd(personer: List<String>, år: String): SkatteetatenPerioderResponse {
-        LOG.debug("enter finnPerioderMedUtvidetBarnetrygd(), {} personer, år {} ", personer.size, år)
-        val unikePersoner = personer.toSet().toList()
-        LOG.debug("finnPerioderMedUtvidetBarnetrygd(): {} unikePersoner", unikePersoner.size)
+        val unikePersoner = personer.distinct()
         val perioderFraBaSak = hentPerioderMedUtvidetBarnetrygdFraBaSak(unikePersoner, år)
         val perioderFraInfotrygd =
-            infotrygdBarnetrygdClient.hentPerioderMedUtvidetBarnetrygdForPersoner(unikePersoner.toList(), år)
+            infotrygdBarnetrygdClient.hentPerioderMedUtvidetBarnetrygdForPersoner(unikePersoner, år)
         LOG.debug(
             "finnPerioderMedUtvidetBarnetrygd(): found periods for {} personer from Infotrygd",
             perioderFraInfotrygd.size
         )
 
-        val baSakPersonIdenter = perioderFraBaSak.map { it.ident }.toSet()
+        val samletPerioder = mutableListOf<SkatteetatenPerioder>()
+        unikePersoner.forEach {
+            val resultatInfotrygdForPerson =
+                perioderFraInfotrygd.firstOrNull { perioder -> perioder.ident == it }
+            val perioderFraInfotrygd =
+                resultatInfotrygdForPerson?.perioder ?: emptyList()
+            val resutatBaSakForPerson = perioderFraBaSak.firstOrNull { perioder -> perioder.ident == it }
+            val perioderFraBasak = resutatBaSakForPerson?.perioder ?: emptyList()
+            val perioder =
+                (perioderFraBasak + perioderFraInfotrygd).groupBy { periode -> periode.delingsprosent }.values
+                    .flatMap(::slåSammenSkatteetatenPeriode).toMutableList()
+            if (perioder.isNotEmpty()) {
+                samletPerioder.add(
+                    SkatteetatenPerioder(
+                        ident = it,
+                        perioder = perioder,
+                        sisteVedtakPaaIdent = resutatBaSakForPerson?.sisteVedtakPaaIdent
+                            ?: resultatInfotrygdForPerson!!.sisteVedtakPaaIdent
+                    )
+                )
+            }
+        }
 
         // Assumes that vedtak in ba-sak is always newer than that in Infotrygd for the same person ident
-        return SkatteetatenPerioderResponse(
-            perioderFraBaSak + perioderFraInfotrygd.filter {
-                !baSakPersonIdenter.contains(it.ident)
-            }
-        )
+        return SkatteetatenPerioderResponse(samletPerioder)
     }
 
     private fun hentPersonerMedUtvidetBarnetrygd(år: String): List<SkatteetatenPerson> {
