@@ -433,15 +433,17 @@ class BehandlingService(
 
     fun hentLøpendeKategori(fagsakId: Long): BehandlingKategori? {
         val forrigeAndeler = hentForrigeAndeler(fagsakId)
-        val aktivBehandling = hentAktivForFagsak(fagsakId) ?: error("Fant ikke aktiv behandling")
 
-        return if (forrigeAndeler != null) utledLøpendeKategori(forrigeAndeler, aktivBehandling) else null
+        return if (forrigeAndeler != null) utledLøpendeKategori(forrigeAndeler, fagsakId) else null
     }
 
-    fun utledLøpendeKategori(andeler: List<AndelTilkjentYtelse>, behandling: Behandling): BehandlingKategori {
-        val personResultater = vilkårsvurderingService.hentAktivForBehandling(behandling.id)?.personResultater ?: error(
-            "Fant ikke personresultater"
-        )
+    fun utledLøpendeKategori(andeler: List<AndelTilkjentYtelse>, fagsakId: Long): BehandlingKategori {
+        val aktivBehandling = hentAktivForFagsak(fagsakId) ?: error("Fant ikke aktiv behandling")
+
+        val personResultater =
+            vilkårsvurderingService.hentAktivForBehandling(aktivBehandling.id)?.personResultater ?: error(
+                "Fant ikke personresultater"
+            )
 
         return if (andeler.any { it.erEøs(personResultater) && it.erLøpende() }
         ) BehandlingKategori.EØS else BehandlingKategori.NASJONAL
