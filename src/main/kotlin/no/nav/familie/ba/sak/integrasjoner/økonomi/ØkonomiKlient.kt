@@ -61,7 +61,7 @@ class ØkonomiKlient(
         return kallEksternTjenesteRessurs(
             tjeneste = "familie-oppdrag",
             uri = uri,
-            formål = "Henter opprdagstatus fra Økonomi",
+            formål = "Henter oppdragstatus fra Økonomi",
         ) {
             postForEntity(uri = uri, oppdragId)
         }
