@@ -26,7 +26,8 @@ typealias AktørId = String
 fun List<AndelTilkjentYtelse>.hentFørsteEndringstidspunkt(
     forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>,
 ): LocalDate? {
-    return this.hentPerioderMedEndringerFra(forrigeAndelerTilkjentYtelse)
+    val hmm = this.hentPerioderMedEndringerFra(forrigeAndelerTilkjentYtelse)
+    return hmm
         .mapNotNull { (_, tidslinjeMedDifferanserPåPerson) -> tidslinjeMedDifferanserPåPerson.minOfOrNull { it.fom } }
         .minOfOrNull { it }
 }

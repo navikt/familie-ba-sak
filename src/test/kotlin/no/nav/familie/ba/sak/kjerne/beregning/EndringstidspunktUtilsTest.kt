@@ -246,7 +246,7 @@ class EndringstidspunktUtilsTest {
             ),
             lagAndelTilkjentYtelse(
                 fom = inneværendeMåned().minusYears(4),
-                tom = inneværendeMåned().minusYears(2),
+                tom = inneværendeMåned(),
                 beløp = 1054,
                 person = person2
             ),
@@ -270,6 +270,6 @@ class EndringstidspunktUtilsTest {
         val førsteEndringstidspunkt = andeler.hentFørsteEndringstidspunkt(
             forrigeAndelerTilkjentYtelse = forrigeAndeler
         )
-        assertEquals(inneværendeMåned().minusMonths(1).førsteDagIInneværendeMåned(), førsteEndringstidspunkt)
+        assertEquals(inneværendeMåned().førsteDagIInneværendeMåned(), førsteEndringstidspunkt)
     }
 }
