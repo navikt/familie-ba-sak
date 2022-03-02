@@ -88,22 +88,22 @@ class ØkonomiKlient(
     fun konsistensavstemOppdrag(
         avstemmingsdato: LocalDateTime,
         perioderTilAvstemming: List<PerioderForBehandling>
-    ): Ressurs<String> {
+    ): String {
         val uri = URI.create("$familieOppdragUri/v2/konsistensavstemming")
 
-        return kallEksternTjeneste(
+        return kallEksternTjenesteRessurs(
             tjeneste = "familie-oppdrag",
             uri = uri,
             formål = "Gjør konsistensavstemming mot oppdrag (Deprecated)",
         ) {
-            postForEntity<Ressurs<String>>(
+            postForEntity(
                 uri = uri,
                 KonsistensavstemmingRequestV2(
                     fagsystem = FAGSYSTEM,
                     avstemmingstidspunkt = avstemmingsdato,
                     perioderForBehandlinger = perioderTilAvstemming
                 )
-            ).also { assertGenerelleSuksessKriterier(it) }
+            )
         }
     }
 

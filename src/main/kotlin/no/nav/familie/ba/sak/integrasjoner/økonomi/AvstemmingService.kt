@@ -43,16 +43,7 @@ class AvstemmingService(
 
         logger.info("Utfører konsisensavstemming for ${perioderTilAvstemming.size} løpende saker")
 
-        Result.runCatching { økonomiKlient.konsistensavstemOppdrag(avstemmingsdato, perioderTilAvstemming) }
-            .fold(
-                onSuccess = {
-                    logger.debug("Konsistensavstemming mot oppdrag utført.")
-                },
-                onFailure = {
-                    logger.error("Konsistensavstemming mot oppdrag feilet", it)
-                    throw it
-                }
-            )
+        økonomiKlient.konsistensavstemOppdrag(avstemmingsdato, perioderTilAvstemming)
     }
 
     fun sendKonsistensavstemmingStart(avstemmingsdato: LocalDateTime, transaksjonsId: UUID) {
