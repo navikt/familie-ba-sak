@@ -13,7 +13,6 @@ import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService.SatsPeriode
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService.splittPeriodePå6Årsdag
@@ -72,7 +71,8 @@ object TilkjentYtelseUtils {
                                 person
                             )
                         beløpsperioder.map { beløpsperiode ->
-                            val prosent = if (periodeResultatBarn.erDeltBostedSomSkalDeles()) BigDecimal(50) else BigDecimal(100)
+                            val prosent =
+                                if (periodeResultatBarn.erDeltBostedSomSkalDeles()) BigDecimal(50) else BigDecimal(100)
                             AndelTilkjentYtelse(
                                 behandlingId = vilkårsvurdering.behandling.id,
                                 tilkjentYtelse = tilkjentYtelse,
@@ -80,7 +80,7 @@ object TilkjentYtelseUtils {
                                 stønadFom = beløpsperiode.fraOgMed,
                                 stønadTom = beløpsperiode.tilOgMed,
                                 kalkulertUtbetalingsbeløp = beløpsperiode.sats.avrundetHeltallAvProsent(prosent),
-                                type = finnYtelseType(behandling.kategori, behandling.underkategori, person.type),
+                                type = finnYtelseType(behandling.underkategori, person.type),
                                 sats = beløpsperiode.sats,
                                 prosent = prosent
                             )
@@ -326,16 +326,15 @@ object TilkjentYtelseUtils {
     }
 
     private fun finnYtelseType(
-        kategori: BehandlingKategori,
         underkategori: BehandlingUnderkategori,
         personType: PersonType
     ): YtelseType {
         return if (personType == PersonType.SØKER && underkategori == BehandlingUnderkategori.UTVIDET) {
             YtelseType.UTVIDET_BARNETRYGD
-        } else if (personType == PersonType.BARN && kategori == BehandlingKategori.NASJONAL) {
+        } else if (personType == PersonType.BARN) {
             YtelseType.ORDINÆR_BARNETRYGD
         } else {
-            throw Feil("Ikke støttet. Klarte ikke utlede YtelseType for kategori $kategori, underkategori $underkategori og persontype $personType.")
+            throw Feil("Ikke støttet. Klarte ikke utlede YtelseType for underkategori $underkategori og persontype $personType.")
         }
     }
 

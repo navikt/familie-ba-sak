@@ -9,8 +9,8 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.RegelverkMåned
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.RegelverkPeriode
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.VilkårResultatMåned
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.ekspanderÅpnePerioder
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårRegelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 
 object EøsUtil {
@@ -31,7 +31,7 @@ object EøsUtil {
 
     fun utledEøsPerioder(vilkårsresultater: Collection<VilkårResultat>) =
         utledRegelverkPerioder(vilkårsresultater)
-            .filter { it.vurderesEtter == VilkårRegelverk.EØS_FORORDNINGEN }
+            .filter { it.vurderesEtter == Regelverk.EØS_FORORDNINGEN }
             .map { NullableMånedPeriode(fom = it.fom, tom = it.tom) }
 
     fun utledRegelverkPerioder(vilkårsresultater: Collection<VilkårResultat>): List<RegelverkPeriode> {
@@ -60,13 +60,13 @@ object EøsUtil {
                     // Ta kun med EØS-vilkåtene
                     .filter { (vilkår, _) -> eøsVilkår.contains(vilkår) }
                     // Alle vilkår må ha blitt vurdert etter EØS-forordningen
-                    .filter { (_, resultat) -> resultat.all { it.vurderesEtter == VilkårRegelverk.EØS_FORORDNINGEN } }
+                    .filter { (_, resultat) -> resultat.all { it.vurderesEtter == Regelverk.EØS_FORORDNINGEN } }
                     .count()
                 when (antallEøsVilkår) {
                     // Hvis vi står igjen med alle EØS-vilkårene, så er det en EØS-periode
-                    eøsVilkår.size -> VilkårRegelverk.EØS_FORORDNINGEN
+                    eøsVilkår.size -> Regelverk.EØS_FORORDNINGEN
                     // Ingen EØS-vilkår betyr nasjonale regler
-                    0 -> VilkårRegelverk.NASJONALE_REGLER
+                    0 -> Regelverk.NASJONALE_REGLER
                     // Alt annet er en miks av regelverk. Det er feil
                     else -> null
                 }
@@ -76,7 +76,7 @@ object EøsUtil {
         return vilkårRegelverkMåneder
             .sortedBy { it.måned }
             .filterIndexed { index, regelverkMåned ->
-                regelverkMåned.vurderesEtter != VilkårRegelverk.EØS_FORORDNINGEN ||
+                regelverkMåned.vurderesEtter != Regelverk.EØS_FORORDNINGEN ||
                     (index > 0 && harMånedMedRegelverkRettFør(regelverkMåned, vilkårRegelverkMåneder[index - 1]))
             }
     }

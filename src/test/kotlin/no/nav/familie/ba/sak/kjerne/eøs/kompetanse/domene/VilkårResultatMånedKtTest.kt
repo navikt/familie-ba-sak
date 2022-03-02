@@ -9,10 +9,10 @@ import no.nav.familie.ba.sak.kjerne.eøs.TestUtil.jun
 import no.nav.familie.ba.sak.kjerne.eøs.TestUtil.mai
 import no.nav.familie.ba.sak.kjerne.eøs.TestUtil.mar
 import no.nav.familie.ba.sak.kjerne.eøs.TestUtil.tilVilkårResultatMåneder
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.BOR_MED_SØKER
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.BOSATT_I_RIKET
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.LOVLIG_OPPHOLD
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårRegelverk
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -21,9 +21,9 @@ internal class VilkårResultatMånedKtTest {
     @Test
     fun test() {
         val vilkårResultatMåneder = listOf(
-            lagVilkårResultat(BOSATT_I_RIKET, VilkårRegelverk.EØS_FORORDNINGEN, feb(2022), null),
-            lagVilkårResultat(LOVLIG_OPPHOLD, VilkårRegelverk.EØS_FORORDNINGEN, apr(2022), null),
-            lagVilkårResultat(BOR_MED_SØKER, VilkårRegelverk.EØS_FORORDNINGEN, aug(2022), null),
+            lagVilkårResultat(BOSATT_I_RIKET, Regelverk.EØS_FORORDNINGEN, feb(2022), null),
+            lagVilkårResultat(LOVLIG_OPPHOLD, Regelverk.EØS_FORORDNINGEN, apr(2022), null),
+            lagVilkårResultat(BOR_MED_SØKER, Regelverk.EØS_FORORDNINGEN, aug(2022), null),
         ).tilVilkårResultatMåneder()
 
         val ekspandertePerioder = vilkårResultatMåneder.ekspanderÅpnePerioder().sortedBy { it.måned }
