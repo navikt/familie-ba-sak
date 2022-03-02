@@ -95,9 +95,9 @@ class SkatteetatenService(
                 val ident = period.getIdent()
                 val nyList = listOf(
                     SkatteetatenPeriode(
-                        fraMaaned = period.getFom().format(DateTimeFormatter.ofPattern("YYYY-MM")),
+                        fraMaaned = period.getFom().format(DateTimeFormatter.ofPattern("yyyy-MM")),
                         delingsprosent = period.getProsent().tilDelingsprosent(),
-                        tomMaaned = period.getTom().format(DateTimeFormatter.ofPattern("YYYY-MM"))
+                        tomMaaned = period.getTom().format(DateTimeFormatter.ofPattern("yyyy-MM"))
                     )
                 )
                 val samletPerioder = if (perioderMap.containsKey(ident))
