@@ -75,7 +75,7 @@ object Behandlingutils {
             else -> nyUnderkategori ?: BehandlingUnderkategori.ORDINÆR
         }
     }
-    
+
     fun utledLøpendeUnderkategori(andeler: List<AndelTilkjentYtelse>): BehandlingUnderkategori {
         return if (andeler.any { it.erUtvidet() && it.erLøpende() }) BehandlingUnderkategori.UTVIDET else BehandlingUnderkategori.ORDINÆR
     }
