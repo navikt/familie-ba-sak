@@ -33,7 +33,7 @@ class ØkonomiKlient(
         return kallEksternTjenesteRessurs(
             tjeneste = "familie-oppdrag",
             uri = uri,
-            formål = "Iverksett mot oppdrag",
+            formål = "Iverksetter mot oppdrag",
         ) {
             postForEntity(uri = uri, utbetalingsoppdrag)
         }
