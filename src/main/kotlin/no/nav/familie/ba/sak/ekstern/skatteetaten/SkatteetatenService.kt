@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.ekstern.skatteetaten
 
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
-import no.nav.familie.ba.sak.integrasjoner.pdl.secureLogger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.eksterne.kontrakter.skatteetaten.SkatteetatenPeriode
@@ -86,9 +85,6 @@ class SkatteetatenService(
         år: String
     ): List<SkatteetatenPerioder> {
         val stonadPerioder = hentUtvidetStonadPerioderForPersoner(personer, år)
-        stonadPerioder.forEach {
-            secureLogger.info("hentPerioderMedUtvidetBarnetrygdFraBaSak() andelTilkjentYtelsePeriode id=${it.getId()} fom=${it.getFom()} tom=${it.getTom()} prosent=${it.getProsent()} ident=${it.getIdent()} endretDato=${it.getEndretDato()}") // TODO: remove
-        }
 
         val skatteetatenPerioderMap =
             stonadPerioder.fold(mutableMapOf<String, SkatteetatenPerioder>()) { perioderMap, period ->
@@ -106,7 +102,6 @@ class SkatteetatenService(
                 perioderMap[ident] = SkatteetatenPerioder(ident, period.getEndretDato(), samletPerioder)
                 perioderMap
             }
-        secureLogger.info("hentPerioderMedUtvidetBarnetrygdFraBaSak() hentet {} $skatteetatenPerioderMap") // TOOD: remove
 
         return skatteetatenPerioderMap.toList().map {
             // Slå sammen perioder basert på delingsprosent
