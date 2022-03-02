@@ -48,7 +48,7 @@ class SimuleringService(
             erSimulering = true,
         )
 
-        return økonomiKlient.hentSimulering(utbetalingsoppdrag)?.data
+        return økonomiKlient.hentSimulering(utbetalingsoppdrag)
     }
 
     @Transactional
