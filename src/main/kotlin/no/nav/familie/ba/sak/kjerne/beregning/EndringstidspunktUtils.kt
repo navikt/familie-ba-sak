@@ -13,10 +13,15 @@ enum class BehandlingAlder {
     GAMMEL,
 }
 
-data class AndelTilkjentYtelseEndringData(
+data class AndelTilkjentYtelseDataForÅKalkulereEndring(
     val aktør: Aktør,
     val kalkulertBeløp: Int,
     val behandlingAlder: BehandlingAlder,
+)
+
+data class AndelTilkjentYtelseEndringData(
+    val aktør: Aktør,
+    val beløpsdifferanse: Int,
 )
 
 fun List<AndelTilkjentYtelse>.hentPerioderMedEndringerFra(
@@ -29,31 +34,51 @@ fun List<AndelTilkjentYtelse>.hentPerioderMedEndringerFra(
         forrigeAndelerTidslinje,
         StandardCombinators::bothValues,
         LocalDateTimeline.JoinStyle.CROSS_JOIN
-    ) as LocalDateTimeline<List<AndelTilkjentYtelseEndringData>>
+    ) as LocalDateTimeline<List<AndelTilkjentYtelseDataForÅKalkulereEndring>>
 
-    return LocalDateTimeline(kombinertTidslinje.toSegments().filter { it.harEnEndring() })
+    return LocalDateTimeline(kombinertTidslinje.toSegments().mapNotNull { it.tilSegmentMedDiffIBeløpPerPerson() })
 }
 
-private fun LocalDateSegment<List<AndelTilkjentYtelseEndringData>>.harEnEndring() =
-    this.value
+private fun LocalDateSegment<List<AndelTilkjentYtelseDataForÅKalkulereEndring>>.tilSegmentMedDiffIBeløpPerPerson(): LocalDateSegment<List<AndelTilkjentYtelseEndringData>>? {
+    val andelTilkjentYtelseEndringData = this.value
         .groupBy { endringsdata -> endringsdata.aktør.aktørId }
-        .any { (_, nyOgGammelDataPåBrukerISegmentet) ->
-            if (nyOgGammelDataPåBrukerISegmentet.size == 1) {
-                true
-            } else {
-                val nySum = nyOgGammelDataPåBrukerISegmentet[0].kalkulertBeløp
-                val forrigeSum = nyOgGammelDataPåBrukerISegmentet[1].kalkulertBeløp
-                (nySum - forrigeSum) != 0
-            }
+        .mapNotNull { (_, nyOgGammelDataPåBrukerISegmentet) ->
+            val beløpsdifferanse = hentBeløpsendringPåPersonISegment(nyOgGammelDataPåBrukerISegmentet)
+
+            if (beløpsdifferanse != 0) {
+                AndelTilkjentYtelseEndringData(
+                    aktør = nyOgGammelDataPåBrukerISegmentet[0].aktør,
+                    beløpsdifferanse
+                )
+            } else null
         }
 
+    return if (andelTilkjentYtelseEndringData.isEmpty()) {
+        null
+    } else LocalDateSegment(
+        this.localDateInterval,
+        andelTilkjentYtelseEndringData
+    )
+}
+
+private fun hentBeløpsendringPåPersonISegment(nyOgGammelDataPåBrukerISegmentet: List<AndelTilkjentYtelseDataForÅKalkulereEndring>): Int {
+    val nySum = nyOgGammelDataPåBrukerISegmentet
+        .singleOrNull { it.behandlingAlder == BehandlingAlder.NY }
+        ?.kalkulertBeløp ?: 0
+    val forrigeSum = nyOgGammelDataPåBrukerISegmentet
+        .singleOrNull { it.behandlingAlder == BehandlingAlder.GAMMEL }
+        ?.kalkulertBeløp ?: 0
+
+    return nySum - forrigeSum
+}
+
 private fun List<AndelTilkjentYtelse>.hentTidslinje(behandlingAlder: BehandlingAlder):
-    LocalDateTimeline<AndelTilkjentYtelseEndringData> = LocalDateTimeline(
+    LocalDateTimeline<AndelTilkjentYtelseDataForÅKalkulereEndring> = LocalDateTimeline(
     this.map {
         LocalDateSegment(
             it.stønadFom.førsteDagIInneværendeMåned(),
             it.stønadTom.sisteDagIInneværendeMåned(),
-            AndelTilkjentYtelseEndringData(
+            AndelTilkjentYtelseDataForÅKalkulereEndring(
                 aktør = it.aktør,
                 kalkulertBeløp = it.kalkulertUtbetalingsbeløp,
                 behandlingAlder = behandlingAlder,

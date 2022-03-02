@@ -17,17 +17,17 @@ class EndringstidspunktSerivce(
         val nyBehandling = behandlingRepository.finnBehandling(behandlingId)
 
         val iverksatteBehandlinger = behandlingRepository.finnIverksatteBehandlinger(fagsakId = nyBehandling.fagsak.id)
-        val gammelBehandling = Behandlingutils.hentSisteBehandlingSomErIverksatt(iverksatteBehandlinger)
+        val sistIverksatteBehandling = Behandlingutils.hentSisteBehandlingSomErIverksatt(iverksatteBehandlinger)
             ?: return TIDENES_MORGEN
 
         val nyeAndelerTilkjentYtelse = andelTilkjentYtelseRepository
             .finnAndelerTilkjentYtelseForBehandling(behandlingId = behandlingId)
 
-        val gamleAndelerTilkjentYtelse = andelTilkjentYtelseRepository
-            .finnAndelerTilkjentYtelseForBehandling(behandlingId = gammelBehandling.id)
+        val forrigeAndelerTilkjentYtelse = andelTilkjentYtelseRepository
+            .finnAndelerTilkjentYtelseForBehandling(behandlingId = sistIverksatteBehandling.id)
 
         val perioderMedEndringer = nyeAndelerTilkjentYtelse.hentPerioderMedEndringerFra(
-            forrigeAndelerTilkjentYtelse = gamleAndelerTilkjentYtelse
+            forrigeAndelerTilkjentYtelse = forrigeAndelerTilkjentYtelse
         )
 
         return perioderMedEndringer.minOfOrNull { it.fom } ?: TIDENES_ENDE

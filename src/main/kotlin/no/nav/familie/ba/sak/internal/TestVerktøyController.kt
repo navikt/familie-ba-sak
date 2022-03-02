@@ -105,17 +105,6 @@ class TestVerktøyController(
         }
     }
 
-    @GetMapping(path = ["/test-endingstidspukt/{behandlingId}"])
-    @Unprotected
-    fun hentEndringstidspukt(@PathVariable behandlingId: Long): ResponseEntity<String?> {
-        return if (envService.erPreprod() || envService.erDev()) {
-            val endringstidspunkt = beregningService.finnEndringstidpunkForBehandling(behandlingId = behandlingId)
-            ResponseEntity.ok(endringstidspunkt.toString())
-        } else {
-            ResponseEntity.ok(MELDING)
-        }
-    }
-
     companion object {
         const val MELDING = "Endepunktet gjør ingenting i prod."
     }
