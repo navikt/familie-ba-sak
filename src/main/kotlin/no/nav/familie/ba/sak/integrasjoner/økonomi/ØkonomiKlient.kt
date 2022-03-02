@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.integrasjoner.økonomi
 
 import no.nav.familie.ba.sak.common.assertGenerelleSuksessKriterier
 import no.nav.familie.ba.sak.common.kallEksternTjeneste
+import no.nav.familie.ba.sak.common.kallEksternTjenesteRessurs
 import no.nav.familie.ba.sak.config.RestTemplateConfig.Companion.RETRY_BACKOFF_500MS
 import no.nav.familie.ba.sak.task.dto.FAGSYSTEM
 import no.nav.familie.http.client.AbstractRestClient
@@ -55,17 +56,14 @@ class ØkonomiKlient(
         }
     }
 
-    fun hentStatus(oppdragId: OppdragId): Ressurs<OppdragStatus> {
+    fun hentStatus(oppdragId: OppdragId): OppdragStatus {
         val uri = URI.create("$familieOppdragUri/status")
-        return kallEksternTjeneste(
+        return kallEksternTjenesteRessurs(
             tjeneste = "familie-oppdrag",
             uri = uri,
             formål = "Henter opprdagstatus fra Økonomi",
         ) {
-            postForEntity<Ressurs<OppdragStatus>>(
-                uri = uri,
-                oppdragId
-            ).also { assertGenerelleSuksessKriterier(it) }
+            postForEntity(uri = uri, oppdragId)
         }
     }
 

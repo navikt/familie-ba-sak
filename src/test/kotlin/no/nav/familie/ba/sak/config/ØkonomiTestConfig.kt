@@ -41,8 +41,8 @@ class ØkonomiTestConfig {
                 Ressurs("Mocksvar fra Økonomi-klient", Ressurs.Status.SUKSESS, "", "", null)
             every { økonomiKlient.iverksettOppdrag(any()) } returns iverksettRespons
 
-            val hentStatusRespons =
-                Ressurs(OppdragStatus.KVITTERT_OK, Ressurs.Status.SUKSESS, "", "", null)
+            val hentStatusRespons = OppdragStatus.KVITTERT_OK
+
             every { økonomiKlient.hentStatus(any()) } returns hentStatusRespons
 
             every { økonomiKlient.hentSimulering(any()) } returns Ressurs.success(

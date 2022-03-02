@@ -64,11 +64,7 @@ class ØkonomiService(
     }
 
     fun hentStatus(oppdragId: OppdragId): OppdragStatus =
-        Result.runCatching { økonomiKlient.hentStatus(oppdragId) }
-            .fold(
-                onSuccess = { return it.data!! },
-                onFailure = { throw Exception("Henting av status mot oppdrag feilet", it) }
-            )
+        økonomiKlient.hentStatus(oppdragId)
 
     @Transactional
     fun genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
