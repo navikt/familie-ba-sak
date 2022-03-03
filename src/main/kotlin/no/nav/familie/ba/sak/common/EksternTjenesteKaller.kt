@@ -82,10 +82,10 @@ fun handleException(
         is HttpClientErrorException.Unauthorized -> exception
         else -> IntegrasjonException(
             msg = "${
-                lagEksternKallPreMelding(
-                    tjeneste,
-                    uri
-                )
+            lagEksternKallPreMelding(
+                tjeneste,
+                uri
+            )
             } Kall mot $tjeneste feilet: ${exception.message}",
             uri = uri,
             throwable = exception
