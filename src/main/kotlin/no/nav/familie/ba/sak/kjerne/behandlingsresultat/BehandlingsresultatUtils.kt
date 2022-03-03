@@ -244,10 +244,9 @@ fun hentUtbetalingstidslinjeForSøker(andeler: List<AndelTilkjentYtelse>): Local
         }
     )
 
-    val kombinertTidslinje = utvidetTidslinje.combine(
+    return utvidetTidslinje.combine(
         småbarnstilleggAndeler,
         StandardCombinators::sum,
         LocalDateTimeline.JoinStyle.CROSS_JOIN
     )
-    return kombinertTidslinje
 }
