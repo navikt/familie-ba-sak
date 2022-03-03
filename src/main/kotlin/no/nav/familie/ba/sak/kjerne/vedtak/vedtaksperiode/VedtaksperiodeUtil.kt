@@ -207,50 +207,123 @@ fun hentGyldigeBegrunnelserForVedtaksperiodeMinimert(
     return when (minimertVedtaksperiode.type) {
         Vedtaksperiodetype.FORTSATT_INNVILGET,
         Vedtaksperiodetype.AVSLAG -> tillateBegrunnelserForVedtakstype
-        Vedtaksperiodetype.REDUKSJON -> listOf(
-            REDUKSJON_IKKE_BOSATT_I_NORGE, REDUKSJON_BARN_BOR_IKKE_MED_SØKER,
-            REDUKSJON_IKKE_OPPHOLDSTILLATELSE, REDUKSJON_AVTALE_DELT_BOSTED_IKKE_GYLDIG,
-            REDUKSJON_AVTALE_DELT_BOSTED_FØLGES_IKKE, REDUKSJON_FORELDRENE_BODDE_SAMMEN,
-            REDUKSJON_VURDERING_FORELDRENE_BODDE_SAMMEN, REDUKSJON_VAR_IKKE_MEDLEM,
-            REDUKSJON_VURDERING_VAR_IKKE_MEDLEM, REDUKSJON_ANDRE_FORELDER_VAR_IKKE_MEDLEM,
-            REDUKSJON_VURDERING_ANDRE_FORELDER_VAR_IKKE_MEDLEM
+        Vedtaksperiodetype.REDUKSJON -> velgRedusertBegrunnelser(
+            sanityBegrunnelser,
+            minimertVedtaksperiode,
+            minimertePersonresultater,
+            minimertePersoner,
+            aktørIderMedUtbetaling,
+            minimerteEndredeUtbetalingAndeler,
+            erFørsteVedtaksperiodePåFagsak,
+            ytelserForSøkerForrigeMåned,
+            utvidetScenarioForEndringsperiode,
+            erIngenOverlappVedtaksperiodeToggelPå
         )
         else -> {
-            val standardbegrunnelser: MutableSet<VedtakBegrunnelseSpesifikasjon> =
-                tillateBegrunnelserForVedtakstype
-                    .filter { it.vedtakBegrunnelseType != VedtakBegrunnelseType.FORTSATT_INNVILGET }
-                    .filter { it.tilSanityBegrunnelse(sanityBegrunnelser)?.tilTriggesAv()?.valgbar ?: false }
-                    .fold(mutableSetOf()) { acc, standardBegrunnelse ->
-                        if (standardBegrunnelse.triggesForPeriode(
-                                minimertVedtaksperiode = minimertVedtaksperiode,
-                                minimertePersonResultater = minimertePersonresultater,
-                                minimertePersoner = minimertePersoner,
-                                aktørIderMedUtbetaling = aktørIderMedUtbetaling,
-                                minimerteEndredeUtbetalingAndeler = minimerteEndredeUtbetalingAndeler,
-                                sanityBegrunnelser = sanityBegrunnelser,
-                                erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
-                                ytelserForSøkerForrigeMåned = ytelserForSøkerForrigeMåned,
-                                utvidetScenarioForEndringsperiode = utvidetScenarioForEndringsperiode,
-                                erIngenOverlappVedtaksperiodeToggelPå = erIngenOverlappVedtaksperiodeToggelPå,
-                            )
-                        ) {
-                            acc.add(standardBegrunnelse)
-                        }
-
-                        acc
-                    }
-
-            val fantIngenbegrunnelserOgSkalDerforBrukeFortsattInnvilget =
-                minimertVedtaksperiode.type == Vedtaksperiodetype.UTBETALING &&
-                    standardbegrunnelser.isEmpty()
-
-            if (fantIngenbegrunnelserOgSkalDerforBrukeFortsattInnvilget) {
-                tillateBegrunnelserForVedtakstype
-                    .filter { it.vedtakBegrunnelseType == VedtakBegrunnelseType.FORTSATT_INNVILGET }
-            } else {
-                standardbegrunnelser.toList()
-            }
+            velgUtbetalingsbegrunnelser(
+                tillateBegrunnelserForVedtakstype,
+                sanityBegrunnelser,
+                minimertVedtaksperiode,
+                minimertePersonresultater,
+                minimertePersoner,
+                aktørIderMedUtbetaling,
+                minimerteEndredeUtbetalingAndeler,
+                erFørsteVedtaksperiodePåFagsak,
+                ytelserForSøkerForrigeMåned,
+                utvidetScenarioForEndringsperiode,
+                erIngenOverlappVedtaksperiodeToggelPå
+            )
         }
+    }
+}
+
+private fun velgRedusertBegrunnelser(
+    sanityBegrunnelser: List<SanityBegrunnelse>,
+    minimertVedtaksperiode: MinimertVedtaksperiode,
+    minimertePersonresultater: List<MinimertRestPersonResultat>,
+    minimertePersoner: List<MinimertPerson>,
+    aktørIderMedUtbetaling: List<String>,
+    minimerteEndredeUtbetalingAndeler: List<MinimertEndretAndel>,
+    erFørsteVedtaksperiodePåFagsak: Boolean,
+    ytelserForSøkerForrigeMåned: List<YtelseType>,
+    utvidetScenarioForEndringsperiode: UtvidetScenarioForEndringsperiode,
+    erIngenOverlappVedtaksperiodeToggelPå: Boolean
+): List<VedtakBegrunnelseSpesifikasjon> {
+    val redusertBegrunnelser = listOf(
+        REDUKSJON_IKKE_BOSATT_I_NORGE, REDUKSJON_BARN_BOR_IKKE_MED_SØKER,
+        REDUKSJON_IKKE_OPPHOLDSTILLATELSE, REDUKSJON_AVTALE_DELT_BOSTED_IKKE_GYLDIG,
+        REDUKSJON_AVTALE_DELT_BOSTED_FØLGES_IKKE, REDUKSJON_FORELDRENE_BODDE_SAMMEN,
+        REDUKSJON_VURDERING_FORELDRENE_BODDE_SAMMEN, REDUKSJON_VAR_IKKE_MEDLEM,
+        REDUKSJON_VURDERING_VAR_IKKE_MEDLEM, REDUKSJON_ANDRE_FORELDER_VAR_IKKE_MEDLEM,
+        REDUKSJON_VURDERING_ANDRE_FORELDER_VAR_IKKE_MEDLEM
+    )
+    if (minimertVedtaksperiode.utbetalingsperioder.any { it.utbetaltPerMnd > 0 }) {
+        val tillateBegrunnelserForVedtakstype = VedtakBegrunnelseSpesifikasjon.values()
+            .filter { it.vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGET }
+        val utbetalingsbegrunnelser = velgUtbetalingsbegrunnelser(
+            tillateBegrunnelserForVedtakstype,
+            sanityBegrunnelser,
+            minimertVedtaksperiode,
+            minimertePersonresultater,
+            minimertePersoner,
+            aktørIderMedUtbetaling,
+            minimerteEndredeUtbetalingAndeler,
+            erFørsteVedtaksperiodePåFagsak,
+            ytelserForSøkerForrigeMåned,
+            utvidetScenarioForEndringsperiode,
+            erIngenOverlappVedtaksperiodeToggelPå
+        )
+        return redusertBegrunnelser + utbetalingsbegrunnelser
+    }
+    return redusertBegrunnelser
+}
+
+private fun velgUtbetalingsbegrunnelser(
+    tillateBegrunnelserForVedtakstype: List<VedtakBegrunnelseSpesifikasjon>,
+    sanityBegrunnelser: List<SanityBegrunnelse>,
+    minimertVedtaksperiode: MinimertVedtaksperiode,
+    minimertePersonresultater: List<MinimertRestPersonResultat>,
+    minimertePersoner: List<MinimertPerson>,
+    aktørIderMedUtbetaling: List<String>,
+    minimerteEndredeUtbetalingAndeler: List<MinimertEndretAndel>,
+    erFørsteVedtaksperiodePåFagsak: Boolean,
+    ytelserForSøkerForrigeMåned: List<YtelseType>,
+    utvidetScenarioForEndringsperiode: UtvidetScenarioForEndringsperiode,
+    erIngenOverlappVedtaksperiodeToggelPå: Boolean
+): List<VedtakBegrunnelseSpesifikasjon> {
+    val standardbegrunnelser: MutableSet<VedtakBegrunnelseSpesifikasjon> =
+        tillateBegrunnelserForVedtakstype
+            .filter { it.vedtakBegrunnelseType != VedtakBegrunnelseType.FORTSATT_INNVILGET }
+            .filter { it.tilSanityBegrunnelse(sanityBegrunnelser)?.tilTriggesAv()?.valgbar ?: false }
+            .fold(mutableSetOf()) { acc, standardBegrunnelse ->
+                if (standardBegrunnelse.triggesForPeriode(
+                        minimertVedtaksperiode = minimertVedtaksperiode,
+                        minimertePersonResultater = minimertePersonresultater,
+                        minimertePersoner = minimertePersoner,
+                        aktørIderMedUtbetaling = aktørIderMedUtbetaling,
+                        minimerteEndredeUtbetalingAndeler = minimerteEndredeUtbetalingAndeler,
+                        sanityBegrunnelser = sanityBegrunnelser,
+                        erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
+                        ytelserForSøkerForrigeMåned = ytelserForSøkerForrigeMåned,
+                        utvidetScenarioForEndringsperiode = utvidetScenarioForEndringsperiode,
+                        erIngenOverlappVedtaksperiodeToggelPå = erIngenOverlappVedtaksperiodeToggelPå,
+                    )
+                ) {
+                    acc.add(standardBegrunnelse)
+                }
+
+                acc
+            }
+
+    val fantIngenbegrunnelserOgSkalDerforBrukeFortsattInnvilget =
+        minimertVedtaksperiode.type == Vedtaksperiodetype.UTBETALING &&
+            standardbegrunnelser.isEmpty()
+
+    return if (fantIngenbegrunnelserOgSkalDerforBrukeFortsattInnvilget) {
+        tillateBegrunnelserForVedtakstype
+            .filter { it.vedtakBegrunnelseType == VedtakBegrunnelseType.FORTSATT_INNVILGET }
+    } else {
+        standardbegrunnelser.toList()
     }
 }
 
