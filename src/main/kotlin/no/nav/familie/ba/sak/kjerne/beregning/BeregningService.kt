@@ -52,6 +52,10 @@ class BeregningService(
         andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId)
             .filter { it.erAndelSomSkalSendesTilOppdrag() }
 
+    fun hentAndelerTilkjentYtelseMedEndringsutbetalinger(behandlingId: Long): List<AndelTilkjentYtelse> =
+        andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId)
+            .filter { it.harEndringsutbetalinger() }
+
     fun lagreTilkjentYtelseMedOppdaterteAndeler(tilkjentYtelse: TilkjentYtelse) =
         tilkjentYtelseRepository.save(tilkjentYtelse)
 
@@ -91,7 +95,9 @@ class BeregningService(
 
             if (behandlingSomErSendtTilGodkjenning != null) behandlingSomErSendtTilGodkjenning
             else {
-                val godkjenteBehandlingerSomIkkeErIverksattEnda = behandlingRepository.finnGodkjenteBehandlingerSomHolderPåÅIverksettes(fagsakId = fagsak.id).singleOrNull()
+                val godkjenteBehandlingerSomIkkeErIverksattEnda =
+                    behandlingRepository.finnGodkjenteBehandlingerSomHolderPåÅIverksettes(fagsakId = fagsak.id)
+                        .singleOrNull()
                 if (godkjenteBehandlingerSomIkkeErIverksattEnda != null) godkjenteBehandlingerSomIkkeErIverksattEnda
                 else {
                     val iverksatteBehandlinger = behandlingRepository.finnIverksatteBehandlinger(fagsakId = fagsak.id)

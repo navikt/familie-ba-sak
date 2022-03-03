@@ -137,8 +137,16 @@ class ØkonomiService(
 
             utbetalingsoppdrag
         }
+        val harAndelTilkjentYtelseMedEndringsutbetalinger =
+            beregningService.hentAndelerTilkjentYtelseMedEndringsutbetalinger(behandlingId = oppdatertBehandling.id)
+                .isNotEmpty()
 
-        return utbetalingsoppdrag.also { it.valider(vedtak.behandling.resultat) }
+        return utbetalingsoppdrag.also {
+            it.valider(
+                vedtak.behandling.resultat,
+                harAndelTilkjentYtelseMedEndringsutbetalinger
+            )
+        }
     }
 
     private fun hentSisteOffsetPerIdent(fagsakId: Long): Map<String, Int> {

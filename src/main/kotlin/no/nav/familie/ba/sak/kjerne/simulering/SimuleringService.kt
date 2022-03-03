@@ -49,6 +49,9 @@ class SimuleringService(
                 erSimulering = true,
             )
 
+            // I tilfelde endringsperioder gjør at inge utbetalingsperioder blir opprettet.
+            if (utbetalingsoppdrag.utbetalingsperiode.isEmpty()) return null
+
             return økonomiKlient.hentSimulering(utbetalingsoppdrag)?.data
         } catch (feil: Throwable) {
             secureLogger.error("Henting av simuleringsresultat feilet: ${feil.stackTraceToString()}")
