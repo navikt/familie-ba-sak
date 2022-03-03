@@ -304,7 +304,7 @@ class VedtaksperiodeServiceTest(
         assertNotNull(andelTilkjentYtelser)
         assertTrue { andelTilkjentYtelser.any { it.stønadFom == nyPeriode.nesteMåned() } }
 
-        val vedtaksperioder = vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak)
+        val vedtaksperioder = vedtaksperiodeService.hentUtvidetVedtaksperiodeMedBegrunnelser(vedtak)
         assertNotNull(vedtaksperioder)
         assertTrue { vedtaksperioder.any { it.type == Vedtaksperiodetype.REDUKSJON } }
         val redusertPeriode = vedtaksperioder.single { it.type == Vedtaksperiodetype.REDUKSJON }
