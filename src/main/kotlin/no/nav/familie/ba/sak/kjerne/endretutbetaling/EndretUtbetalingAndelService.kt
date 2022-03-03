@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.endretutbetaling
 
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.ekstern.restDomene.RestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -19,7 +18,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagSe
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.time.YearMonth
+import java.math.BigDecimal
 
 @Service
 class EndretUtbetalingAndelService(
@@ -52,6 +51,8 @@ class EndretUtbetalingAndelService(
 
         endretUtbetalingAndel.fraRestEndretUtbetalingAndel(restEndretUtbetalingAndel, person)
 
+        validerUtbetalingMotÅrsak(årsak = endretUtbetalingAndel.årsak, skalUtbetales = endretUtbetalingAndel.prosent != BigDecimal(0))
+
         val andreEndredeAndelerPåBehandling = endretUtbetalingAndelRepository.findByBehandlingId(behandling.id)
             .filter { it.id != endretUtbetalingAndelId }
 
@@ -60,12 +61,8 @@ class EndretUtbetalingAndelService(
             endretUtbetalingAndel = endretUtbetalingAndel,
             andelTilkjentYtelser = andelTilkjentYtelser
         )
-        if (endretUtbetalingAndel.tom?.isAfter(YearMonth.now()) == true && endretUtbetalingAndel.tom != gyldigTomEtterDagensDato) {
-            throw FunksjonellFeil(
-                frontendFeilmelding = "Du kan ikke legge inn til og med dato som er i neste måned eller senere. Om det gjelder en løpende periode vil systemet legge inn riktig dato for deg.",
-                melding = "Du kan ikke legge inn til og med dato som er i neste måned eller senere. Om det gjelder en løpende periode vil systemet legge inn riktig dato for deg."
-            )
-        }
+
+        validerTomDato(tomDato = endretUtbetalingAndel.tom, gyldigTomEtterDagensDato = gyldigTomEtterDagensDato, årsak = endretUtbetalingAndel.årsak)
 
         if (endretUtbetalingAndel.tom == null) {
             endretUtbetalingAndel.tom = gyldigTomEtterDagensDato
