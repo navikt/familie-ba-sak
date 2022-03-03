@@ -467,10 +467,10 @@ class BehandlingService(
         val forrigeMigreringsdato =
             behandlingMigreringsinfoRepository.finnSisteMigreringsdatoPåFagsak(fagsakId = behandling.fagsak.id)
 
-        if (forrigeMigreringsdato != null && forrigeMigreringsdato.toYearMonth()
-            .isSameOrAfter(migreringsdato.toYearMonth())
+        if (forrigeMigreringsdato != null && migreringsdato.toYearMonth()
+                .isSameOrAfter(forrigeMigreringsdato.toYearMonth())
         ) {
-            throw FunksjonellFeil("Migreringsdatoen du har lagt inn er lik eller senere en eksisterende migreringsdato. Du må velge en tidligere migreringsdato for å fortsette.")
+            throw FunksjonellFeil("Migreringsdatoen du har lagt inn er lik eller senere enn eksisterende migreringsdato. Du må velge en tidligere migreringsdato for å fortsette.")
         }
 
         val behandlingMigreringsinfo =
