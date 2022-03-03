@@ -4,9 +4,9 @@ import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårRegelverk
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -30,7 +30,7 @@ data class RestVilkårResultat(
     val erAutomatiskVurdert: Boolean = false,
     val erEksplisittAvslagPåSøknad: Boolean? = null,
     val avslagBegrunnelser: List<VedtakBegrunnelseSpesifikasjon>? = emptyList(),
-    val vurderesEtter: VilkårRegelverk? = null,
+    val vurderesEtter: Regelverk? = null,
     val utdypendeVilkårsvurderinger: List<UtdypendeVilkårsvurdering> = emptyList()
 ) {
 

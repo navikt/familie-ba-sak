@@ -32,16 +32,7 @@ class AvstemmingService(
 ) {
     fun grensesnittavstemOppdrag(fraDato: LocalDateTime, tilDato: LocalDateTime) {
 
-        Result.runCatching { økonomiKlient.grensesnittavstemOppdrag(fraDato, tilDato) }
-            .fold(
-                onSuccess = {
-                    logger.debug("Grensesnittavstemming mot oppdrag utført.")
-                },
-                onFailure = {
-                    logger.error("Grensesnittavstemming mot oppdrag feilet", it)
-                    throw it
-                }
-            )
+        økonomiKlient.grensesnittavstemOppdrag(fraDato, tilDato)
     }
 
     @Deprecated("Fjern når konsistensavstemming i batch er testet og virker")
@@ -52,37 +43,14 @@ class AvstemmingService(
 
         logger.info("Utfører konsisensavstemming for ${perioderTilAvstemming.size} løpende saker")
 
-        Result.runCatching { økonomiKlient.konsistensavstemOppdrag(avstemmingsdato, perioderTilAvstemming) }
-            .fold(
-                onSuccess = {
-                    logger.debug("Konsistensavstemming mot oppdrag utført.")
-                },
-                onFailure = {
-                    logger.error("Konsistensavstemming mot oppdrag feilet", it)
-                    throw it
-                }
-            )
+        økonomiKlient.konsistensavstemOppdrag(avstemmingsdato, perioderTilAvstemming)
     }
 
     fun sendKonsistensavstemmingStart(avstemmingsdato: LocalDateTime, transaksjonsId: UUID) {
-        runCatching {
-            økonomiKlient.konsistensavstemOppdragStart(
-                avstemmingsdato,
-                transaksjonsId
-            )
-        }
-            .fold(
-                onSuccess = {
-                    logger.debug("Konsistensavstemming mot oppdrag med transaksjonsId $transaksjonsId startet.")
-                },
-                onFailure = {
-                    logger.error(
-                        "Starting av konsistensavstemming med transaksjonsId $transaksjonsId mot oppdrag feilet",
-                        it
-                    )
-                    throw it
-                }
-            )
+        økonomiKlient.konsistensavstemOppdragStart(
+            avstemmingsdato,
+            transaksjonsId
+        )
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -106,38 +74,19 @@ class AvstemmingService(
             return
         }
 
-        Result.runCatching {
-            økonomiKlient.konsistensavstemOppdragData(
-                avstemmingsdato,
-                perioderTilAvstemming,
-                transaksjonsId
-            )
-        }
-            .fold(
-                onSuccess = {
-                    dataChunkRepository.save(dataChunk.also { it.erSendt = true })
-                    logger.debug("Perioder til konsistensavstemming for transaksjonsId $transaksjonsId og chunk nr $chunkNr mot oppdrag utført.")
-                },
-                onFailure = {
-                    logger.error("Perioder til konsistensavstemming mot oppdrag feilet", it)
-                    throw it
-                }
-            )
+        økonomiKlient.konsistensavstemOppdragData(
+            avstemmingsdato,
+            perioderTilAvstemming,
+            transaksjonsId
+        )
+
+        dataChunkRepository.save(dataChunk.also { it.erSendt = true })
     }
 
     fun konsistensavstemOppdragAvslutt(avstemmingsdato: LocalDateTime, transaksjonsId: UUID) {
         logger.info("Avslutter konsistensavstemming for $transaksjonsId")
 
-        Result.runCatching { økonomiKlient.konsistensavstemOppdragAvslutt(avstemmingsdato, transaksjonsId) }
-            .fold(
-                onSuccess = {
-                    logger.debug("Avslutt av Konsistensavstemming mot oppdrag for $transaksjonsId utført.")
-                },
-                onFailure = {
-                    logger.error("Avslutt av Konsistensavstemming for $transaksjonsId mot oppdrag feilet", it)
-                    throw it
-                }
-            )
+        økonomiKlient.konsistensavstemOppdragAvslutt(avstemmingsdato, transaksjonsId)
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)

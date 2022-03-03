@@ -12,12 +12,6 @@ import java.time.YearMonth
 
 object EndretUtbetalingAndelValidering {
 
-    fun validerEndretUtbetalingAndelErGyldigForÅrsak(endretUtbetalingAndel: EndretUtbetalingAndel, andelTilkjentYtelser: List<AndelTilkjentYtelse>) {
-        if (endretUtbetalingAndel.årsak == Årsak.DELT_BOSTED) {
-            validerDeltBosted(endretUtbetalingAndel = endretUtbetalingAndel, andelTilkjentYtelser = andelTilkjentYtelser)
-        }
-    }
-
     fun validerIngenOverlappendeEndring(
         endretUtbetalingAndel: EndretUtbetalingAndel,
         eksisterendeEndringerPåBehandling: List<EndretUtbetalingAndel>

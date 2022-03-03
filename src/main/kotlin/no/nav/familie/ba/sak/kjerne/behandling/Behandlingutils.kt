@@ -76,10 +76,6 @@ object Behandlingutils {
         }
     }
 
-    fun utledLøpendeKategori(andeler: List<AndelTilkjentYtelse>): BehandlingKategori {
-        return if (andeler.any { it.erEøs() && it.erLøpende() }) BehandlingKategori.EØS else BehandlingKategori.NASJONAL
-    }
-
     fun utledLøpendeUnderkategori(andeler: List<AndelTilkjentYtelse>): BehandlingUnderkategori {
         return if (andeler.any { it.erUtvidet() && it.erLøpende() }) BehandlingUnderkategori.UTVIDET else BehandlingUnderkategori.ORDINÆR
     }

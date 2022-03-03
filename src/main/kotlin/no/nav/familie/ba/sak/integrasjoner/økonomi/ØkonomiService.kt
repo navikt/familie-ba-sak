@@ -11,7 +11,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
@@ -49,26 +48,22 @@ class ØkonomiService(
     private fun iverksettOppdrag(utbetalingsoppdrag: Utbetalingsoppdrag) {
         try {
             økonomiKlient.iverksettOppdrag(utbetalingsoppdrag)
-        } catch (e: Exception) {
-            if ((e is HttpClientErrorException) &&
-                e.statusCode == HttpStatus.CONFLICT &&
+        } catch (exception: Exception) {
+            if ((exception is HttpClientErrorException) &&
+                exception.statusCode == HttpStatus.CONFLICT &&
                 featureToggleService.isEnabled(FeatureToggleConfig.TEKNISK_IVERKSETT_MOT_OPPDRAG_ALLEREDE_SENDT)
             ) {
                 // Mulighet å bypasse 409 feil.
                 logger.info("Bypasset feil med HttpKode 409 ved iverksetting mot økonomi for fagsak ${utbetalingsoppdrag.saksnummer}")
                 return
+            } else {
+                throw exception
             }
-
-            throw Exception("Iverksetting mot oppdrag feilet", e)
         }
     }
 
     fun hentStatus(oppdragId: OppdragId): OppdragStatus =
-        Result.runCatching { økonomiKlient.hentStatus(oppdragId) }
-            .fold(
-                onSuccess = { return it.data!! },
-                onFailure = { throw Exception("Henting av status mot oppdrag feilet", it) }
-            )
+        økonomiKlient.hentStatus(oppdragId)
 
     @Transactional
     fun genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
@@ -139,7 +134,7 @@ class ØkonomiService(
             utbetalingsoppdrag
         }
 
-        return utbetalingsoppdrag.also { it.valider(behandlingsresultat = vedtak.behandling.resultat, erEndreMigreringsdatoBehandling = vedtak.behandling.opprettetÅrsak == BehandlingÅrsak.ENDRE_MIGRERINGSDATO) }
+        return utbetalingsoppdrag.also { it.valider(vedtak.behandling.resultat) }
     }
 
     private fun hentSisteOffsetPerIdent(fagsakId: Long): Map<String, Int> {

@@ -28,7 +28,6 @@ internal class YtelseSatsMapperTest {
         assertEquals(SatsType.ORBA, YtelseSatsMapper.map(YtelseType.ORDINÆR_BARNETRYGD))
         assertEquals(SatsType.SMA, YtelseSatsMapper.map(YtelseType.SMÅBARNSTILLEGG))
         assertEquals(SatsType.ORBA, YtelseSatsMapper.map(YtelseType.UTVIDET_BARNETRYGD))
-        assertNull(YtelseSatsMapper.map(YtelseType.EØS))
         assertNull(YtelseSatsMapper.map(YtelseType.MANUELL_VURDERING))
     }
 }
