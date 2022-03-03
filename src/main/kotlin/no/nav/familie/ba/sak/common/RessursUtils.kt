@@ -53,7 +53,7 @@ object RessursUtils {
         val className = "[${throwable::class.java.name}] "
 
         secureLogger.warn("$className En feil har oppstått: $errorMessage", throwable)
-        logger.warn("$className En feil har oppstått: $errorMessage")
+        logger.warn("$className En feil har oppstått. Se securelogs for detaljer.")
 
         Sentry.captureException(throwable, "errorResponse")
         return ResponseEntity.status(httpStatus).body(Ressurs.failure(errorMessage))
@@ -63,7 +63,7 @@ object RessursUtils {
         errorMessage: String,
     ): ResponseEntity<Ressurs<T>> {
         secureLogger.warn("Saksbehandler har ikke tilgang: $errorMessage")
-        logger.warn("Saksbehandler har ikke tilgang: $errorMessage")
+        logger.warn("Saksbehandler har ikke tilgang. Se securelogs for detaljer.")
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Ressurs.ikkeTilgang(errorMessage))
     }
 
