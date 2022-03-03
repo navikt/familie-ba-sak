@@ -534,7 +534,7 @@ class VedtaksperiodeService(
 
         // opphørsperioder kan ikke være inkludert i reduksjonsperioder
         return vedtaksperiodeMedBegrunnelser.filterNot { reduksjonsperiode ->
-            opphørsperioder.any { it.fom == reduksjonsperiode.fom && it.tom == reduksjonsperiode.tom }
+            opphørsperioder.any { it.fom == reduksjonsperiode.fom || it.tom == reduksjonsperiode.tom }
         }
     }
 

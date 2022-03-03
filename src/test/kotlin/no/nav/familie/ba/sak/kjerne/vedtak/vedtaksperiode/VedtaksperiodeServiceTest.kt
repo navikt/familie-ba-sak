@@ -32,6 +32,7 @@ import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseSpesifikasjon
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeRepository
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
@@ -311,6 +312,79 @@ class VedtaksperiodeServiceTest(
         assertTrue {
             redusertPeriode.fom == periodeFom.nesteMåned().førsteDagIInneværendeMåned() &&
                 redusertPeriode.tom == nyPeriode.sisteDagIMåned()
+        }
+        assertTrue { redusertPeriode.gyldigeBegrunnelser.containsAll(VedtakBegrunnelseSpesifikasjon.reduksjonsbegrunnelser()) }
+        assertTrue {
+            redusertPeriode.gyldigeBegrunnelser.any {
+                it.vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGET &&
+                    it.name == VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET.name
+            }
+        }
+    }
+
+    @Test
+    fun `skal lage redusert vedtaksperioder med behandling som har opphørsperioder`() {
+        val behandling = førstegangsbehandling!!
+        val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandling.id)!!
+        val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandling.id)
+        val periodeFom = LocalDate.now().minusMonths(6)
+        personopplysningGrunnlag.søkerOgBarn.forEach {
+            vurderVilkårsvurderingTilInnvilget(vilkårsvurdering, it, periodeFom)
+        }
+        vilkårsvurderingService.oppdater(vilkårsvurdering)
+        beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
+        var vedtak = vedtakService.hentAktivForBehandlingThrows(behandling.id)
+        vedtaksperiodeService.lagre(vedtaksperiodeService.genererVedtaksperioderMedBegrunnelser(vedtak))
+        økonomiService.oppdaterTilkjentYtelseMedUtbetalingsoppdragOgIverksett(vedtak, "1234")
+
+        var andelTilkjentYtelser = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id)
+        assertNotNull(andelTilkjentYtelser)
+        assertTrue { andelTilkjentYtelser.any { it.stønadFom == periodeFom.nesteMåned() } }
+
+        val revurdering = revurdering!!
+        val revVilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(revurdering.id)!!
+        val revPersonopplysningGrunnlag = persongrunnlagService.hentAktivThrows(revurdering.id)
+        val nyPeriode = LocalDate.now().minusMonths(3)
+        val opphørsperiode = LocalDate.now().minusMonths(4)
+        revPersonopplysningGrunnlag.søkerOgBarn.forEach {
+            if (it.aktør == tilAktør(barnFnr)) {
+                vurderVilkårsvurderingTilInnvilget(revVilkårsvurdering, it, nyPeriode)
+            } else {
+                vurderVilkårsvurderingTilInnvilget(revVilkårsvurdering, it, opphørsperiode)
+            }
+        }
+        vilkårsvurderingService.oppdater(revVilkårsvurdering)
+        beregningService.oppdaterBehandlingMedBeregning(revurdering, revPersonopplysningGrunnlag)
+        behandlingService.oppdaterResultatPåBehandling(revurdering.id, BehandlingResultat.ENDRET)
+
+        vedtak = vedtakService.hentAktivForBehandlingThrows(revurdering.id)
+        vedtaksperiodeService.lagre(vedtaksperiodeService.genererVedtaksperioderMedBegrunnelser(vedtak))
+
+        andelTilkjentYtelser = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(revurdering.id)
+        assertNotNull(andelTilkjentYtelser)
+        assertTrue { andelTilkjentYtelser.any { it.stønadFom == nyPeriode.nesteMåned() } }
+
+        val vedtaksperioder = vedtaksperiodeService.hentUtvidetVedtaksperiodeMedBegrunnelser(vedtak)
+        assertNotNull(vedtaksperioder)
+        assertTrue { vedtaksperioder.any { it.type == Vedtaksperiodetype.REDUKSJON } }
+        val redusertPeriode = vedtaksperioder.single { it.type == Vedtaksperiodetype.REDUKSJON }
+        assertTrue {
+            redusertPeriode.fom == opphørsperiode.nesteMåned().førsteDagIInneværendeMåned() &&
+                redusertPeriode.tom == nyPeriode.sisteDagIMåned()
+        }
+        assertTrue { redusertPeriode.gyldigeBegrunnelser.containsAll(VedtakBegrunnelseSpesifikasjon.reduksjonsbegrunnelser()) }
+        assertTrue {
+            redusertPeriode.gyldigeBegrunnelser.any {
+                it.vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGET &&
+                    it.name == VedtakBegrunnelseSpesifikasjon.INNVILGET_BOSATT_I_RIKTET.name
+            }
+        }
+
+        assertTrue { vedtaksperioder.any { it.type == Vedtaksperiodetype.OPPHØR } }
+        val opphørtPeriode = vedtaksperioder.single { it.type == Vedtaksperiodetype.OPPHØR }
+        assertTrue {
+            opphørtPeriode.fom == periodeFom.nesteMåned().førsteDagIInneværendeMåned() &&
+                opphørtPeriode.tom == opphørsperiode.sisteDagIMåned()
         }
     }
 
