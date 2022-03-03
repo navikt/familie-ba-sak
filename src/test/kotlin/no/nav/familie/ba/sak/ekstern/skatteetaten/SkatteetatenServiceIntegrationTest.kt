@@ -65,7 +65,12 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
     @BeforeAll
     fun init() {
         skatteetatenService =
-            SkatteetatenService(infotrygdBarnetrygdClientMock, fagsakRepository, andelTilkjentYtelseRepository)
+            SkatteetatenService(
+                infotrygdBarnetrygdClientMock,
+                fagsakRepository,
+                andelTilkjentYtelseRepository,
+                behandlingRepository
+            )
     }
 
     data class PerioderTestData(
