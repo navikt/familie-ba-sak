@@ -14,7 +14,7 @@ object RessursUtils {
     fun <T> unauthorized(errorMessage: String): ResponseEntity<Ressurs<T>> =
         ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Ressurs.failure(errorMessage))
 
-    fun <T> badRequest(errorMessage: String, throwable: Throwable?): ResponseEntity<Ressurs<T>> =
+    fun <T> badRequest(errorMessage: String, throwable: Throwable): ResponseEntity<Ressurs<T>> =
         errorResponse(HttpStatus.BAD_REQUEST, errorMessage, throwable)
 
     fun <T> forbidden(errorMessage: String): ResponseEntity<Ressurs<T>> =
@@ -48,14 +48,14 @@ object RessursUtils {
     private fun <T> errorResponse(
         httpStatus: HttpStatus,
         errorMessage: String,
-        throwable: Throwable?
+        throwable: Throwable
     ): ResponseEntity<Ressurs<T>> {
-        val className = if (throwable != null) "[${throwable::class.java.name}] " else ""
+        val className = "[${throwable::class.java.name}] "
 
-        secureLogger.error("$className En feil har oppstått: $errorMessage", throwable)
-        logger.error("$className En feil har oppstått: $errorMessage")
+        secureLogger.warn("$className En feil har oppstått: $errorMessage", throwable)
+        logger.warn("$className En feil har oppstått. Se securelogs for detaljer.")
 
-        throwable?.also { Sentry.captureException(it, "errorResponse") }
+        Sentry.captureException(throwable, "errorResponse")
         return ResponseEntity.status(httpStatus).body(Ressurs.failure(errorMessage))
     }
 
@@ -63,7 +63,7 @@ object RessursUtils {
         errorMessage: String,
     ): ResponseEntity<Ressurs<T>> {
         secureLogger.warn("Saksbehandler har ikke tilgang: $errorMessage")
-        logger.warn("Saksbehandler har ikke tilgang: $errorMessage")
+        logger.warn("Saksbehandler har ikke tilgang. Se securelogs for detaljer.")
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Ressurs.ikkeTilgang(errorMessage))
     }
 
@@ -75,7 +75,7 @@ object RessursUtils {
                 "${feil.message}, ${feil.frontendFeilmelding}",
             feil
         )
-        logger.error("$className En håndtert feil har oppstått(${feil.httpStatus}): ${feil.message} ", feil)
+        logger.warn("$className En håndtert feil har oppstått(${feil.httpStatus}): ${feil.message} ", feil)
 
         Sentry.captureException(feil)
         return ResponseEntity.status(feil.httpStatus).body(

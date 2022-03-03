@@ -74,9 +74,9 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurderingType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårRegelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.task.DistribuerDokumentDTO
@@ -910,7 +910,7 @@ fun leggTilBegrunnelsePåVedtaksperiodeIBehandling(
 
 fun lagVilkårResultat(
     vilkår: Vilkår,
-    vilkårRegelverk: VilkårRegelverk? = null,
+    vilkårRegelverk: Regelverk? = null,
     fom: YearMonth? = null,
     tom: YearMonth? = null
 ) = VilkårResultat(
@@ -952,7 +952,7 @@ fun lagEndretUtbetalingAndel(
     person: Person,
     prosent: BigDecimal = BigDecimal.valueOf(100),
     fom: YearMonth = YearMonth.now().minusMonths(1),
-    tom: YearMonth = YearMonth.now(),
+    tom: YearMonth? = YearMonth.now(),
     årsak: Årsak = Årsak.DELT_BOSTED,
     avtaletidspunktDeltBosted: LocalDate = LocalDate.now().minusMonths(1),
     søknadstidspunkt: LocalDate = LocalDate.now().minusMonths(1),

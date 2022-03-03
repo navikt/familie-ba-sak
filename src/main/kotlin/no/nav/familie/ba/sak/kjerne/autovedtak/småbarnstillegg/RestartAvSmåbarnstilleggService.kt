@@ -46,10 +46,12 @@ class RestartAvSmåbarnstilleggService(
     }
 
     fun finnAlleFagsakerMedRestartetSmåbarnstilleggIMåned(måned: YearMonth = YearMonth.now()): List<Long> {
-        return fagsakRepository.finnAlleFagsakerMedOppstartSmåbarnstilleggIMåned(
-            iverksatteLøpendeBehandlinger = behandlingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker(),
-            stønadFom = måned
-        ).filter { fagsakId ->
+        return behandlingService.partitionByIverksatteBehandlinger {
+            fagsakRepository.finnAlleFagsakerMedOppstartSmåbarnstilleggIMåned(
+                iverksatteLøpendeBehandlinger = it,
+                stønadFom = måned
+            )
+        }.filter { fagsakId ->
             !periodeMedRestartetSmåbarnstilleggErAlleredeBegrunnet(fagsakId = fagsakId, måned = måned)
         }
     }

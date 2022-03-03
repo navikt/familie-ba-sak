@@ -9,7 +9,6 @@ import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils.bestemKategori
 import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils.bestemUnderkategori
-import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils.utledLøpendeKategori
 import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils.utledLøpendeUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
@@ -38,6 +37,7 @@ import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
@@ -72,7 +72,8 @@ class BehandlingService(
     private val featureToggleService: FeatureToggleService,
     private val taskRepository: TaskRepositoryWrapper,
     private val behandlingMigreringsinfoRepository: BehandlingMigreringsinfoRepository,
-    private val behandlingSøknadsinfoRepository: BehandlingSøknadsinfoRepository
+    private val behandlingSøknadsinfoRepository: BehandlingSøknadsinfoRepository,
+    private val vilkårsvurderingService: VilkårsvurderingService,
 ) {
 
     @Transactional
@@ -276,6 +277,11 @@ class BehandlingService(
     fun hentSisteIverksatteBehandlingerFraLøpendeFagsaker(): List<Long> =
         behandlingRepository.finnSisteIverksatteBehandlingFraLøpendeFagsaker()
 
+    fun <T> partitionByIverksatteBehandlinger(funksjon: (iverksatteBehandlinger: List<Long>) -> List<T>): List<T> {
+        return behandlingRepository.finnSisteIverksatteBehandlingFraLøpendeFagsaker().chunked(10000)
+            .flatMap { funksjon(it) }
+    }
+
     fun hentBehandlinger(fagsakId: Long): List<Behandling> {
         return behandlingRepository.finnBehandlinger(fagsakId)
     }
@@ -427,7 +433,18 @@ class BehandlingService(
 
     fun hentLøpendeKategori(fagsakId: Long): BehandlingKategori? {
         val forrigeAndeler = hentForrigeAndeler(fagsakId)
-        return if (forrigeAndeler != null) utledLøpendeKategori(forrigeAndeler) else null
+
+        return if (forrigeAndeler != null) utledLøpendeKategori(forrigeAndeler, fagsakId) else null
+    }
+
+    fun utledLøpendeKategori(andeler: List<AndelTilkjentYtelse>, fagsakId: Long): BehandlingKategori {
+        val aktivBehandling = hentAktivForFagsak(fagsakId) ?: error("Fant ikke aktiv behandling")
+
+        val personResultater =
+            vilkårsvurderingService.hentAktivForBehandling(aktivBehandling.id)?.personResultater ?: setOf()
+
+        return if (andeler.any { it.erEøs(personResultater) && it.erLøpende() }
+        ) BehandlingKategori.EØS else BehandlingKategori.NASJONAL
     }
 
     fun hentLøpendeUnderkategori(fagsakId: Long): BehandlingUnderkategori? {
