@@ -212,6 +212,18 @@ private fun validerYtelsePersoner(ytelsePersoner: List<YtelsePerson>) {
 }
 
 private fun kombinerOverlappendeAndelerForSøker(andeler: List<AndelTilkjentYtelse>): List<BehandlingsresultatAndelTilkjentYtelse> {
+    val utbetalingstidslinjeForSøker = hentUtbetalingstidslinjeForSøker(andeler)
+
+    return utbetalingstidslinjeForSøker.toSegments().map { andelTilkjentYtelse ->
+        BehandlingsresultatAndelTilkjentYtelse(
+            stønadFom = andelTilkjentYtelse.fom.toYearMonth(),
+            stønadTom = andelTilkjentYtelse.tom.toYearMonth(),
+            kalkulertUtbetalingsbeløp = andelTilkjentYtelse.value
+        )
+    }
+}
+
+fun hentUtbetalingstidslinjeForSøker(andeler: List<AndelTilkjentYtelse>): LocalDateTimeline<Int> {
     val utvidetTidslinje = LocalDateTimeline(
         andeler.filter { it.type == YtelseType.UTVIDET_BARNETRYGD }
             .map {
@@ -237,12 +249,5 @@ private fun kombinerOverlappendeAndelerForSøker(andeler: List<AndelTilkjentYtel
         StandardCombinators::sum,
         LocalDateTimeline.JoinStyle.CROSS_JOIN
     )
-
-    return kombinerteTidslinje.toSegments().map { andelTilkjentYtelse ->
-        BehandlingsresultatAndelTilkjentYtelse(
-            stønadFom = andelTilkjentYtelse.fom.toYearMonth(),
-            stønadTom = andelTilkjentYtelse.tom.toYearMonth(),
-            kalkulertUtbetalingsbeløp = andelTilkjentYtelse.value
-        )
-    }
+    return kombinerteTidslinje
 }
