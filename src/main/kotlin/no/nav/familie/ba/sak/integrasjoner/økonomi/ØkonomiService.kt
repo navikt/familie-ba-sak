@@ -14,7 +14,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragId
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragStatus
@@ -125,17 +124,22 @@ class ØkonomiService(
             )
 
             if (!erSimulering && (
-                    oppdatertBehandling.type == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT || behandlingService.hent(
+                oppdatertBehandling.type == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT || behandlingService.hent(
                         oppdatertBehandling.id
                     ).resultat == BehandlingResultat.OPPHØRT
-                    )
+                )
             )
                 validerOpphørsoppdrag(utbetalingsoppdrag)
 
             utbetalingsoppdrag
         }
 
-        return utbetalingsoppdrag.also { it.valider(behandlingsresultat = vedtak.behandling.resultat, erEndreMigreringsdatoBehandling = vedtak.behandling.opprettetÅrsak == BehandlingÅrsak.ENDRE_MIGRERINGSDATO) }
+        return utbetalingsoppdrag.also {
+            it.valider(
+                behandlingsresultat = vedtak.behandling.resultat,
+                erEndreMigreringsdatoBehandling = vedtak.behandling.opprettetÅrsak == BehandlingÅrsak.ENDRE_MIGRERINGSDATO
+            )
+        }
     }
 
     private fun hentSisteOffsetPerIdent(fagsakId: Long): Map<String, Int> {
@@ -176,14 +180,7 @@ class ØkonomiService(
             return null
         }
 
-        val nyttTilstandFraDato = vilkårsvurderingRepository
-            .findByBehandlingAndAktiv(behandling.id)
-            ?.personResultater
-            ?.flatMap { it.vilkårResultater }
-            ?.filter { it.periodeFom != null }
-            ?.filter { it.vilkårType != Vilkår.UNDER_18_ÅR && it.vilkårType != Vilkår.GIFT_PARTNERSKAP }
-            ?.minByOrNull { it.periodeFom!! }
-            ?.periodeFom
+        val nyttTilstandFraDato = behandlingService.hentMigreringsdatoPåFagsak(fagsakId = behandling.fagsak.id)
             ?.toYearMonth()
             ?.plusMonths(1)
 
