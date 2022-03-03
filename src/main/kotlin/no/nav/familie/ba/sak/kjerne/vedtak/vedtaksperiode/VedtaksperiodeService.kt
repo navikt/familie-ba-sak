@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.NullablePeriode
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.førsteDagINesteMåned
 import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.common.sisteDagIForrigeMåned
@@ -513,12 +514,17 @@ class VedtaksperiodeService(
                 val førsteUtbetalingsdatoIForrigeBehandling =
                     forrigeAndelTilkjentYtelsePerBarn[barn].hentTidslinje().minLocalDate
                 val førsteUtbetalingsdatoIBehandling = andelTilkjentYtelse.hentTidslinje().minLocalDate
+                val erFørstePeriodeOpphørt = opphørsperioder.any { it.fom == førsteUtbetalingsdatoIForrigeBehandling }
                 if (!førsteUtbetalingsdatoIForrigeBehandling.equals(førsteUtbetalingsdatoIBehandling)) {
                     vedtaksperiodeMedBegrunnelser.add(
                         VedtaksperiodeMedBegrunnelser(
                             vedtak = vedtak,
-                            fom = førsteUtbetalingsdatoIForrigeBehandling,
-                            tom = andelTilkjentYtelse.hentTidslinje().localDateIntervals.first().fomDato.sisteDagIForrigeMåned(),
+                            fom = if (erFørstePeriodeOpphørt) {
+                                opphørsperioder.single { it.fom == førsteUtbetalingsdatoIForrigeBehandling }
+                                    .tom?.førsteDagINesteMåned()
+                            } else førsteUtbetalingsdatoIForrigeBehandling,
+                            tom = andelTilkjentYtelse.hentTidslinje()
+                                .localDateIntervals.first().fomDato.sisteDagIForrigeMåned(),
                             type = Vedtaksperiodetype.REDUKSJON,
                         )
                     )
