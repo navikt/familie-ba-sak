@@ -10,7 +10,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.task.KonsistensavstemMotOppdragAvsluttTask
 import no.nav.familie.ba.sak.task.KonsistensavstemMotOppdragDataTask
-import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.domene.TaskRepository
 import org.junit.jupiter.api.BeforeEach
@@ -81,7 +80,7 @@ class AvstemmingServiceTest {
                 avstemmingsdato,
                 transaksjonsId
             )
-        } returns Ressurs.Companion.success("")
+        } returns ""
 
         konsistensavstemOppdragStart(
             batchId = batchId,
@@ -123,7 +122,7 @@ class AvstemmingServiceTest {
                 emptyList(),
                 transaksjonsId,
             )
-        } returns Ressurs.Companion.success("")
+        } returns ""
 
         avstemmingService.konsistensavstemOppdragData(
             avstemmingsdato = avstemmingsdato,
