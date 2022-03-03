@@ -132,7 +132,7 @@ class SkatteetatenService(
             .fold(mutableListOf()) { sammenslåttePerioder, nesteUtbetaling ->
                 val nesteUtbetalingFraaMåned = YearMonth.parse(nesteUtbetaling.fraMaaned)
                 if (sammenslåttePerioder.lastOrNull()?.tomMaaned == nesteUtbetalingFraaMåned.minusMonths(1)
-                    .toString()
+                    .toString() || (sammenslåttePerioder.isNotEmpty() && sammenslåttePerioder.lastOrNull()?.tomMaaned == null)
                 ) {
                     sammenslåttePerioder.apply { add(removeLast().copy(tomMaaned = nesteUtbetaling.tomMaaned)) }
                 } else sammenslåttePerioder.apply { add(nesteUtbetaling) }
