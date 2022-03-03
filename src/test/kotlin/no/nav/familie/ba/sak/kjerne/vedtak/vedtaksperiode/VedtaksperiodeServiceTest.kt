@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
+import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.SøkerMedOpplysninger
@@ -96,7 +97,7 @@ class VedtaksperiodeServiceTest(
         førstegangsbehandling = kjørStegprosessForFGB(
             tilSteg = StegType.BEHANDLING_AVSLUTTET,
             søkerFnr = søkerFnr,
-            barnasIdenter = listOf(barnFnr),
+            barnasIdenter = listOf(barnFnr, barn2Fnr),
             fagsakService = fagsakService,
             vedtakService = vedtakService,
             persongrunnlagService = persongrunnlagService,
@@ -108,7 +109,7 @@ class VedtaksperiodeServiceTest(
         revurdering = kjørStegprosessForRevurderingÅrligKontroll(
             tilSteg = StegType.BEHANDLINGSRESULTAT,
             søkerFnr = søkerFnr,
-            barnasIdenter = listOf(barnFnr),
+            barnasIdenter = listOf(barnFnr, barn2Fnr),
             vedtakService = vedtakService,
             stegService = stegService
         )
@@ -267,8 +268,8 @@ class VedtaksperiodeServiceTest(
         val behandling = førstegangsbehandling!!
         val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandling.id)!!
         val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandling.id)
-        val periodeFom = LocalDate.of(2021, 2, 15)
-        personopplysningGrunnlag.barna.forEach {
+        val periodeFom = LocalDate.now().minusMonths(6)
+        personopplysningGrunnlag.søkerOgBarn.forEach {
             vurderVilkårsvurderingTilInnvilget(vilkårsvurdering, it, periodeFom)
         }
         vilkårsvurderingService.oppdater(vilkårsvurdering)
@@ -284,9 +285,13 @@ class VedtaksperiodeServiceTest(
         val revurdering = revurdering!!
         val revVilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(revurdering.id)!!
         val revPersonopplysningGrunnlag = persongrunnlagService.hentAktivThrows(revurdering.id)
-        val nyPeriode = LocalDate.of(2021, 5, 17)
-        revPersonopplysningGrunnlag.barna.forEach {
-            vurderVilkårsvurderingTilInnvilget(revVilkårsvurdering, it, nyPeriode)
+        val nyPeriode = LocalDate.now().minusMonths(3)
+        revPersonopplysningGrunnlag.søkerOgBarn.forEach {
+            if (it.aktør == tilAktør(barnFnr)) {
+                vurderVilkårsvurderingTilInnvilget(revVilkårsvurdering, it, nyPeriode)
+            } else {
+                vurderVilkårsvurderingTilInnvilget(revVilkårsvurdering, it, periodeFom)
+            }
         }
         vilkårsvurderingService.oppdater(revVilkårsvurdering)
         beregningService.oppdaterBehandlingMedBeregning(revurdering, revPersonopplysningGrunnlag)
@@ -314,7 +319,7 @@ class VedtaksperiodeServiceTest(
         barn: Person,
         periodeFom: LocalDate
     ) {
-        vilkårsvurdering.personResultater.forEach { personResultat ->
+        vilkårsvurdering.personResultater.filter { it.aktør == barn.aktør }.forEach { personResultat ->
             personResultat.vilkårResultater.forEach {
                 if (it.vilkårType == Vilkår.UNDER_18_ÅR) {
                     it.resultat = Resultat.OPPFYLT
