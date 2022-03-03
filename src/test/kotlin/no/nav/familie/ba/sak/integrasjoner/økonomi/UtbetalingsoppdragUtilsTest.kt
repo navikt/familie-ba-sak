@@ -21,7 +21,10 @@ class UtbetalingsoppdragUtilsTest {
                 saksbehandlerId = "",
                 saksnummer = "",
                 utbetalingsperiode = emptyList(),
-            ).valider(behandlingsresultat = BehandlingResultat.FORTSATT_INNVILGET, false)
+            ).valider(
+                behandlingsresultat = BehandlingResultat.FORTSATT_INNVILGET,
+                harAndelTilkjentYtelseMedEndringsutbetalinger = false
+            )
         }
         assertTrue(
             feil.message!!.contains("Utbetalingsoppdraget inneholder ingen utbetalingsperioder")
@@ -38,7 +41,10 @@ class UtbetalingsoppdragUtilsTest {
             saksbehandlerId = "",
             saksnummer = "",
             utbetalingsperiode = emptyList(),
-        ).valider(behandlingsresultat = BehandlingResultat.FORTSATT_INNVILGET, true)
+        ).valider(
+            behandlingsresultat = BehandlingResultat.FORTSATT_INNVILGET,
+            harAndelTilkjentYtelseMedEndringsutbetalinger = true
+        )
     }
 
     @Test
@@ -52,7 +58,10 @@ class UtbetalingsoppdragUtilsTest {
                 saksbehandlerId = "",
                 saksnummer = "",
                 utbetalingsperiode = listOf(mockk()),
-            ).valider(behandlingsresultat = BehandlingResultat.FORTSATT_INNVILGET, false)
+            ).valider(
+                behandlingsresultat = BehandlingResultat.FORTSATT_INNVILGET,
+                harAndelTilkjentYtelseMedEndringsutbetalinger = false
+            )
         }
         assertTrue(
             feil.message!!.contains("Behandling har resultat fortsatt innvilget")

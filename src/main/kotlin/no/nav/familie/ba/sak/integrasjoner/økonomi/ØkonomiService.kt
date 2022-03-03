@@ -11,9 +11,9 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragId
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragStatus
@@ -48,26 +48,22 @@ class ØkonomiService(
     private fun iverksettOppdrag(utbetalingsoppdrag: Utbetalingsoppdrag) {
         try {
             økonomiKlient.iverksettOppdrag(utbetalingsoppdrag)
-        } catch (e: Exception) {
-            if ((e is HttpClientErrorException) &&
-                e.statusCode == HttpStatus.CONFLICT &&
+        } catch (exception: Exception) {
+            if ((exception is HttpClientErrorException) &&
+                exception.statusCode == HttpStatus.CONFLICT &&
                 featureToggleService.isEnabled(FeatureToggleConfig.TEKNISK_IVERKSETT_MOT_OPPDRAG_ALLEREDE_SENDT)
             ) {
                 // Mulighet å bypasse 409 feil.
                 logger.info("Bypasset feil med HttpKode 409 ved iverksetting mot økonomi for fagsak ${utbetalingsoppdrag.saksnummer}")
                 return
+            } else {
+                throw exception
             }
-
-            throw Exception("Iverksetting mot oppdrag feilet", e)
         }
     }
 
     fun hentStatus(oppdragId: OppdragId): OppdragStatus =
-        Result.runCatching { økonomiKlient.hentStatus(oppdragId) }
-            .fold(
-                onSuccess = { return it.data!! },
-                onFailure = { throw Exception("Henting av status mot oppdrag feilet", it) }
-            )
+        økonomiKlient.hentStatus(oppdragId)
 
     @Transactional
     fun genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
@@ -143,8 +139,9 @@ class ØkonomiService(
 
         return utbetalingsoppdrag.also {
             it.valider(
-                vedtak.behandling.resultat,
-                harAndelTilkjentYtelseMedEndringsutbetalinger
+                behandlingsresultat = vedtak.behandling.resultat,
+                harAndelTilkjentYtelseMedEndringsutbetalinger = harAndelTilkjentYtelseMedEndringsutbetalinger,
+                erEndreMigreringsdatoBehandling = vedtak.behandling.opprettetÅrsak == BehandlingÅrsak.ENDRE_MIGRERINGSDATO
             )
         }
     }
@@ -187,14 +184,7 @@ class ØkonomiService(
             return null
         }
 
-        val nyttTilstandFraDato = vilkårsvurderingRepository
-            .findByBehandlingAndAktiv(behandling.id)
-            ?.personResultater
-            ?.flatMap { it.vilkårResultater }
-            ?.filter { it.periodeFom != null }
-            ?.filter { it.vilkårType != Vilkår.UNDER_18_ÅR && it.vilkårType != Vilkår.GIFT_PARTNERSKAP }
-            ?.minByOrNull { it.periodeFom!! }
-            ?.periodeFom
+        val nyttTilstandFraDato = behandlingService.hentMigreringsdatoPåFagsak(fagsakId = behandling.fagsak.id)
             ?.toYearMonth()
             ?.plusMonths(1)
 
