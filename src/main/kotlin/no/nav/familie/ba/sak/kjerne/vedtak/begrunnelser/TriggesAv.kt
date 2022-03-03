@@ -22,7 +22,7 @@ data class TriggesAv(
     val valgbar: Boolean = true,
     val endringsaarsaker: Set<Årsak> = emptySet(),
     val etterEndretUtbetaling: Boolean = false,
-    val endretUtbetaingSkalUtbetales: Boolean = false,
+    val endretUtbetalingSkalUtbetales: Boolean = false,
     val småbarnstillegg: Boolean = false,
     val gjelderFørstePeriode: Boolean = false,
 ) {
@@ -38,7 +38,7 @@ fun triggesAvSkalUtbetales(
     val inneholderAndelSomSkalUtbetales = endretUtbetalingAndeler.any { it.prosent!! != BigDecimal.ZERO }
     val inneholderAndelSomIkkeSkalUtbetales = endretUtbetalingAndeler.any { it.prosent!! == BigDecimal.ZERO }
 
-    return if (triggesAv.endretUtbetaingSkalUtbetales) {
+    return if (triggesAv.endretUtbetalingSkalUtbetales) {
         inneholderAndelSomSkalUtbetales
     } else {
         inneholderAndelSomIkkeSkalUtbetales
@@ -64,7 +64,7 @@ fun MinimertEndretAndel.oppfyllerSkalUtbetalesTrigger(
     triggesAv: TriggesAv
 ): Boolean {
     val inneholderAndelSomSkalUtbetales = this.prosent!! != BigDecimal.ZERO
-    return triggesAv.endretUtbetaingSkalUtbetales == inneholderAndelSomSkalUtbetales
+    return triggesAv.endretUtbetalingSkalUtbetales == inneholderAndelSomSkalUtbetales
 }
 
 private fun oppfyllerUtvidetScenario(

@@ -1076,6 +1076,6 @@ fun lagTriggesAv(
     valgbar = valgbar,
     endringsaarsaker = endringsaarsaker,
     etterEndretUtbetaling = etterEndretUtbetaling,
-    endretUtbetaingSkalUtbetales = endretUtbetaingSkalUtbetales,
+    endretUtbetalingSkalUtbetales = endretUtbetaingSkalUtbetales,
     småbarnstillegg = småbarnstillegg,
 )
