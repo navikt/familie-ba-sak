@@ -34,13 +34,8 @@ inline fun <reified Data> kallEksternTjenesteRessurs(
     loggEksternKall(tjeneste, uri, formål)
 
     return try {
-        val response = eksterntKall()
-        if (response.status != Ressurs.Status.SUKSESS) {
-            throw Feil(response.melding)
-        } else {
-            eksterntKall().getDataOrThrow().also {
-                logger.info("${lagEksternKallPreMelding(tjeneste, uri)} Kall ok")
-            }
+        eksterntKall().getDataOrThrow().also {
+            logger.info("${lagEksternKallPreMelding(tjeneste, uri)} Kall ok")
         }
     } catch (exception: Exception) {
         throw handleException(exception, tjeneste, uri)
@@ -87,10 +82,10 @@ fun handleException(
         is HttpClientErrorException.Unauthorized -> exception
         else -> IntegrasjonException(
             msg = "${
-            lagEksternKallPreMelding(
-                tjeneste,
-                uri
-            )
+                lagEksternKallPreMelding(
+                    tjeneste,
+                    uri
+                )
             } Kall mot $tjeneste feilet: ${exception.message}",
             uri = uri,
             throwable = exception
