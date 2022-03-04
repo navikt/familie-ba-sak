@@ -124,7 +124,7 @@ class VilkårService(
                 melding = "${vilkårResultat.vilkårType} kan ikke endres før $migreringsdato " +
                     "for fagsak=${behandling.fagsak.id}",
                 frontendFeilmelding = "F.o.m. kan ikke settes tidligere " +
-                    "enn migreringsdato ${migreringsdato.tilKortString()} " +
+                    "enn migreringsdato ${migreringsdato.tilKortString()}. " +
                     "Ved behov for vurdering før dette, må behandlingen henlegges, " +
                     "og migreringstidspunktet endres ved å opprette en ny migreringsbehandling."
             )
@@ -239,7 +239,7 @@ class VilkårService(
         val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
             ?: throw IllegalStateException("Fant ikke personopplysninggrunnlag for behandling ${behandling.id}")
         if (personopplysningGrunnlag.søkerOgBarn
-            .single { it.aktør == personidentService.hentAktør(restNyttVilkår.personIdent) }.type != PersonType.SØKER
+                .single { it.aktør == personidentService.hentAktør(restNyttVilkår.personIdent) }.type != PersonType.SØKER
         ) {
             throw FunksjonellFeil(
                 melding = "${Vilkår.UTVIDET_BARNETRYGD.beskrivelse} kan ikke legges til for BARN",
