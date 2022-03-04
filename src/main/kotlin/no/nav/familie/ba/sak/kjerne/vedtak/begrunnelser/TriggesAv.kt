@@ -55,9 +55,11 @@ fun TriggesAv.erTriggereOppfyltForEndretUtbetaling(
 
     val oppfyllerUtvidetScenario = oppfyllerUtvidetScenario(utvidetScenario, vilkår)
 
+    val erAvSammeÅrsak = this.endringsaarsaker.contains(minimertEndretAndel.årsak)
+
     return !hørerTilEtterEndretUtbetaling &&
         oppfyllerSkalUtbetalesTrigger &&
-        oppfyllerUtvidetScenario
+        oppfyllerUtvidetScenario && erAvSammeÅrsak
 }
 
 fun MinimertEndretAndel.oppfyllerSkalUtbetalesTrigger(
