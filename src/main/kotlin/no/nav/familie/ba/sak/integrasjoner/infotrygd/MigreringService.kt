@@ -108,7 +108,7 @@ class MigreringService(
 
             validerAtBarnErIRelasjonMedPersonident(personAktør, barnasAktør)
 
-            val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(personIdent)
+            fagsakService.hentEllerOpprettFagsakForPersonIdent(personIdent)
                 .also { kastFeilDersomAlleredeMigrert(it) }
 
             val behandling = runCatching {

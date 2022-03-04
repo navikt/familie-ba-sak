@@ -161,7 +161,10 @@ class StegService(
     ): Behandling =
         fullførSøknadsHåndtering(behandling = behandling, restRegistrerSøknad = restRegistrerSøknad)
 
-    private fun fullførSøknadsHåndtering(behandling: Behandling, restRegistrerSøknad: RestRegistrerSøknad): Behandling {
+    private fun fullførSøknadsHåndtering(
+        behandling: Behandling,
+        restRegistrerSøknad: RestRegistrerSøknad
+    ): Behandling {
         val behandlingSteg: RegistrereSøknad = hentBehandlingSteg(StegType.REGISTRERE_SØKNAD) as RegistrereSøknad
         val søknadDTO = restRegistrerSøknad.søknad
 
@@ -256,13 +259,19 @@ class StegService(
             behandlingSteg.utførStegOgAngiNeste(behandling, behandlendeEnhet)
         }
         if (behandlingEtterBeslutterSteg.erManuellMigrering()) {
-            return håndterBeslutningForVedtak(behandlingEtterBeslutterSteg, RestBeslutningPåVedtak(Beslutning.GODKJENT))
+            return håndterBeslutningForVedtak(
+                behandlingEtterBeslutterSteg,
+                RestBeslutningPåVedtak(Beslutning.GODKJENT)
+            )
         }
         return behandlingEtterBeslutterSteg
     }
 
     @Transactional
-    fun håndterBeslutningForVedtak(behandling: Behandling, restBeslutningPåVedtak: RestBeslutningPåVedtak): Behandling {
+    fun håndterBeslutningForVedtak(
+        behandling: Behandling,
+        restBeslutningPåVedtak: RestBeslutningPåVedtak
+    ): Behandling {
         val behandlingSteg: BeslutteVedtak =
             hentBehandlingSteg(StegType.BESLUTTE_VEDTAK) as BeslutteVedtak
 
@@ -272,7 +281,10 @@ class StegService(
     }
 
     @Transactional
-    fun håndterHenleggBehandling(behandling: Behandling, henleggBehandlingInfo: RestHenleggBehandlingInfo): Behandling {
+    fun håndterHenleggBehandling(
+        behandling: Behandling,
+        henleggBehandlingInfo: RestHenleggBehandlingInfo
+    ): Behandling {
         val behandlingSteg: HenleggBehandling =
             hentBehandlingSteg(StegType.HENLEGG_BEHANDLING) as HenleggBehandling
 
@@ -296,7 +308,10 @@ class StegService(
     }
 
     @Transactional
-    fun håndterStatusFraØkonomi(behandling: Behandling, statusFraOppdragMedTask: StatusFraOppdragMedTask): Behandling {
+    fun håndterStatusFraØkonomi(
+        behandling: Behandling,
+        statusFraOppdragMedTask: StatusFraOppdragMedTask
+    ): Behandling {
         val behandlingSteg: StatusFraOppdrag =
             hentBehandlingSteg(StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI) as StatusFraOppdrag
 
@@ -329,7 +344,10 @@ class StegService(
     }
 
     @Transactional
-    fun håndterDistribuerVedtaksbrev(behandling: Behandling, distribuerDokumentDTO: DistribuerDokumentDTO): Behandling {
+    fun håndterDistribuerVedtaksbrev(
+        behandling: Behandling,
+        distribuerDokumentDTO: DistribuerDokumentDTO
+    ): Behandling {
         val behandlingSteg: DistribuerVedtaksbrev =
             hentBehandlingSteg(StegType.DISTRIBUER_VEDTAKSBREV) as DistribuerVedtaksbrev
 
@@ -356,7 +374,10 @@ class StegService(
     ): Behandling {
         try {
             logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} håndterer ${behandlingSteg.stegType()} på behandling ${behandling.id}")
-            tilgangService.validerTilgangTilBehandling(behandlingId = behandling.id, event = AuditLoggerEvent.UPDATE)
+            tilgangService.validerTilgangTilBehandling(
+                behandlingId = behandling.id,
+                event = AuditLoggerEvent.UPDATE
+            )
             if (behandling.erManuellMigrering() && behandlingSteg.stegType() == StegType.BESLUTTE_VEDTAK) {
                 verifiserBeslutteVedtakForManuellMigrering(behandlingSteg)
             } else {
