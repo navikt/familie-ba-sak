@@ -120,4 +120,20 @@ class TriggesAvTest {
         Assertions.assertTrue(ikkeUtvidetScenarioIkkeUtvidetVilkår)
         Assertions.assertFalse(ikkeUtvidetScenarioUtvidetVilkår)
     }
+
+    @Test
+    fun `Skal ikke være oppfylt hvis endringsperiode og triggesav ulik årsak`() {
+        val endretUtbetalingAndel = lagMinimertEndretUtbetalingAndel(
+            prosent = BigDecimal.ZERO,
+            årsak = Årsak.ALLEREDE_UTBETALT
+        )
+
+        Assertions.assertFalse(
+            triggesIkkeAvSkalUtbetales.erTriggereOppfyltForEndretUtbetaling(
+                vilkår = vilkårUtenUtvidetBarnetrygd,
+                utvidetScenario = utvidetScenarioIkkeUtvidet,
+                minimertEndretAndel = endretUtbetalingAndel
+            )
+        )
+    }
 }
