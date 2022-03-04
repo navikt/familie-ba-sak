@@ -1062,7 +1062,7 @@ fun lagTriggesAv(
     valgbar: Boolean = true,
     endringsaarsaker: Set<Årsak> = emptySet(),
     etterEndretUtbetaling: Boolean = false,
-    endretUtbetaingSkalUtbetales: Boolean = false,
+    endretUtbetalingSkalUtbetales: Boolean = false,
     småbarnstillegg: Boolean = false
 ): TriggesAv = TriggesAv(
     vilkår = vilkår,
@@ -1076,6 +1076,6 @@ fun lagTriggesAv(
     valgbar = valgbar,
     endringsaarsaker = endringsaarsaker,
     etterEndretUtbetaling = etterEndretUtbetaling,
-    endretUtbetalingSkalUtbetales = endretUtbetaingSkalUtbetales,
+    endretUtbetalingSkalUtbetales = endretUtbetalingSkalUtbetales,
     småbarnstillegg = småbarnstillegg,
 )
