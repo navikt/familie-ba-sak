@@ -133,14 +133,10 @@ class ØkonomiService(
 
             utbetalingsoppdrag
         }
-        val harAndelTilkjentYtelseMedEndringsutbetalinger =
-            beregningService.hentAndelerTilkjentYtelseMedEndringsutbetalinger(behandlingId = oppdatertBehandling.id)
-                .isNotEmpty()
 
         return utbetalingsoppdrag.also {
             it.valider(
                 behandlingsresultat = vedtak.behandling.resultat,
-                harAndelTilkjentYtelseMedEndringsutbetalinger = harAndelTilkjentYtelseMedEndringsutbetalinger,
                 erEndreMigreringsdatoBehandling = vedtak.behandling.opprettetÅrsak == BehandlingÅrsak.ENDRE_MIGRERINGSDATO
             )
         }

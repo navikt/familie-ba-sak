@@ -23,7 +23,6 @@ class UtbetalingsoppdragUtilsTest {
                 utbetalingsperiode = emptyList(),
             ).valider(
                 behandlingsresultat = BehandlingResultat.FORTSATT_INNVILGET,
-                harAndelTilkjentYtelseMedEndringsutbetalinger = false
             )
         }
         assertTrue(
@@ -43,7 +42,6 @@ class UtbetalingsoppdragUtilsTest {
             utbetalingsperiode = emptyList(),
         ).valider(
             behandlingsresultat = BehandlingResultat.FORTSATT_INNVILGET,
-            harAndelTilkjentYtelseMedEndringsutbetalinger = true
         )
     }
 
@@ -60,7 +58,6 @@ class UtbetalingsoppdragUtilsTest {
                 utbetalingsperiode = listOf(mockk()),
             ).valider(
                 behandlingsresultat = BehandlingResultat.FORTSATT_INNVILGET,
-                harAndelTilkjentYtelseMedEndringsutbetalinger = false
             )
         }
         assertTrue(

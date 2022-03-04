@@ -205,8 +205,6 @@ data class AndelTilkjentYtelse(
     fun harEndringsutbetalingIPerioden(fom: YearMonth?, tom: YearMonth?) =
         endretUtbetalingAndeler.any { it.fom == fom && it.tom == tom }
 
-    fun harEndringsutbetalinger() = endretUtbetalingAndeler.isNotEmpty()
-
     fun harEndretUtbetalingAndelerOgHørerTilVedtaksperiode(
         vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser,
     ) = this.endretUtbetalingAndeler.isNotEmpty() &&

@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
@@ -52,10 +53,6 @@ class BeregningService(
         andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId)
             .filter { it.erAndelSomSkalSendesTilOppdrag() }
 
-    fun hentAndelerTilkjentYtelseMedEndringsutbetalinger(behandlingId: Long): List<AndelTilkjentYtelse> =
-        andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId)
-            .filter { it.harEndringsutbetalinger() }
-
     fun lagreTilkjentYtelseMedOppdaterteAndeler(tilkjentYtelse: TilkjentYtelse) =
         tilkjentYtelseRepository.save(tilkjentYtelse)
 
@@ -64,6 +61,11 @@ class BeregningService(
 
     fun hentOptionalTilkjentYtelseForBehandling(behandlingId: Long) =
         tilkjentYtelseRepository.findByBehandlingOptional(behandlingId)
+
+    fun skalIkkeIverksettes(behandlingId: Long, behandlingResultat: BehandlingResultat): Boolean =
+        behandlingResultat == BehandlingResultat.FORTSATT_INNVILGET ||
+            behandlingResultat == BehandlingResultat.AVSLÅTT ||
+            hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(behandlingId).isEmpty()
 
     fun hentTilkjentYtelseForBehandlingerIverksattMotØkonomi(fagsakId: Long): List<TilkjentYtelse> {
         val iverksatteBehandlinger = behandlingRepository.findByFagsakAndAvsluttet(fagsakId)
