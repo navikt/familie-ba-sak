@@ -69,7 +69,7 @@ class VilkårServiceTest(
     @Autowired
     private val personidentService: PersonidentService,
 
-) : AbstractSpringIntegrationTest() {
+    ) : AbstractSpringIntegrationTest() {
 
     @BeforeAll
     fun init() {
@@ -1473,7 +1473,7 @@ class VilkårServiceTest(
         }
         assertEquals(
             "${Vilkår.BOR_MED_SØKER} kan ikke endres før $nyMigreringsdato " +
-                "for behandling=${behandling.id}",
+                "for fagsak=${behandling.fagsak.id}",
             exception.message
         )
     }
