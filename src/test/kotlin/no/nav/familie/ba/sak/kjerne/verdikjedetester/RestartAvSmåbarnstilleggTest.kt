@@ -323,15 +323,13 @@ class RestartAvSmåbarnstilleggTest(
                 RestTilbakekreving(Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING, begrunnelse = "begrunnelse")
             )
 
-        val vedtaksperiodeId =
+        val utvidetVedtaksperiodeMedBegrunnelser =
             restUtvidetBehandlingEtterVurderTilbakekreving.data!!.vedtak!!.vedtaksperioderMedBegrunnelser.sortedBy { it.fom }
                 .first()
         familieBaSakKlient().oppdaterVedtaksperiodeMedStandardbegrunnelser(
-            vedtaksperiodeId = vedtaksperiodeId.id,
+            vedtaksperiodeId = utvidetVedtaksperiodeMedBegrunnelser.id,
             restPutVedtaksperiodeMedStandardbegrunnelser = RestPutVedtaksperiodeMedStandardbegrunnelser(
-                standardbegrunnelser = listOf(
-                    VedtakBegrunnelseSpesifikasjon.INNVILGET_BOR_HOS_SØKER
-                )
+                standardbegrunnelser = utvidetVedtaksperiodeMedBegrunnelser.gyldigeBegrunnelser
             )
         )
         if (skalBegrunneSmåbarnstillegg) {

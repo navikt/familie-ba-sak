@@ -47,9 +47,10 @@ import no.nav.familie.ba.sak.task.dto.IverksettingTaskDTO
 import no.nav.familie.ba.sak.task.dto.StatusFraOppdragDTO
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import no.nav.familie.prosessering.domene.Task
+import java.time.LocalDate
 import java.util.Properties
 
-fun kjørStegprosessForRevurdering(
+fun kjørStegprosessForBehandling(
     tilSteg: StegType = StegType.BEHANDLING_AVSLUTTET,
     søkerFnr: String,
     barnasIdenter: List<String>,
@@ -76,7 +77,8 @@ fun kjørStegprosessForRevurdering(
         søkersIdent = søkerFnr,
         behandlingType = behandlingstype,
         behandlingÅrsak = behandlingÅrsak,
-        barnasIdenter = barnasIdenter
+        barnasIdenter = barnasIdenter,
+        søknadMottattDato = LocalDate.now()
     )
 
     val behandling = stegService.håndterNyBehandling(nyBehandling)

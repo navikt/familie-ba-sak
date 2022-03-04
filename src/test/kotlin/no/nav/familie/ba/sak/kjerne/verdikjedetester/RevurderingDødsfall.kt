@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.kjerne.verdikjedetester
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.lagVilkårResultat
-import no.nav.familie.ba.sak.dataGenerator.behandling.kjørStegprosessForRevurdering
+import no.nav.familie.ba.sak.dataGenerator.behandling.kjørStegprosessForBehandling
 import no.nav.familie.ba.sak.dataGenerator.vilkårsvurdering.lagVilkårsvurderingFraRestScenario
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
@@ -96,7 +96,7 @@ class RevurderingDødsfall(
             )
         )
 
-        val behandlingDødsfall = kjørStegprosessForRevurdering(
+        val behandlingDødsfall = kjørStegprosessForBehandling(
             tilSteg = StegType.BEHANDLING_AVSLUTTET,
             søkerFnr = scenario.søker.ident,
             barnasIdenter = listOf(scenario.barna.first().ident!!),
@@ -162,7 +162,7 @@ class RevurderingDødsfall(
             (scenario.barna + scenario.søker).associate { it.aktørId!! to emptyList<VilkårResultat>() }.toMutableMap()
 
         assertThrows<FunksjonellFeil> {
-            kjørStegprosessForRevurdering(
+            kjørStegprosessForBehandling(
                 tilSteg = StegType.BEHANDLINGSRESULTAT,
                 søkerFnr = scenario.søker.ident,
                 barnasIdenter = listOf(scenario.barna.first().ident!!),
