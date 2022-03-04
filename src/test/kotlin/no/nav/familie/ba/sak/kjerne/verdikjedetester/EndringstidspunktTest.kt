@@ -90,6 +90,7 @@ class EndringstidspunktTest(
 
         val sisteDagUtenDeltBostedOppfylt = barnFødselsdato.plusYears(1).sisteDagIMåned()
         val førsteDagMedDeltBostedOppfylt = sisteDagUtenDeltBostedOppfylt.førsteDagINesteMåned()
+        val sisteDagMedDeltBosdet = sisteDagUtenDeltBostedOppfylt.plusMonths(2).sisteDagIMåned()
 
         val overstyrendeVilkårResultaterRevurdering =
             scenario.barna.associate {
@@ -103,7 +104,14 @@ class EndringstidspunktTest(
                     lagVilkårResultat(
                         vilkårType = Vilkår.BOR_MED_SØKER,
                         periodeFom = førsteDagMedDeltBostedOppfylt,
-                        periodeTom = null,
+                        periodeTom = sisteDagMedDeltBosdet,
+                        personResultat = mockk(relaxed = true),
+                        utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED)
+                    ),
+                    lagVilkårResultat(
+                        vilkårType = Vilkår.BOR_MED_SØKER,
+                        periodeFom = førsteDagMedDeltBostedOppfylt,
+                        periodeTom = sisteDagMedDeltBosdet.førsteDagINesteMåned(),
                         personResultat = mockk(relaxed = true),
                         utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED)
                     ),
