@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.behandling
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.isSameOrAfter
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
@@ -462,6 +464,15 @@ class BehandlingService(
 
     @Transactional
     fun lagreNedMigreringsdato(migreringsdato: LocalDate, behandling: Behandling) {
+        val forrigeMigreringsdato =
+            behandlingMigreringsinfoRepository.finnSisteMigreringsdatoPåFagsak(fagsakId = behandling.fagsak.id)
+
+        if (forrigeMigreringsdato != null && migreringsdato.toYearMonth()
+            .isSameOrAfter(forrigeMigreringsdato.toYearMonth())
+        ) {
+            throw FunksjonellFeil("Migreringsdatoen du har lagt inn er lik eller senere enn eksisterende migreringsdato. Du må velge en tidligere migreringsdato for å fortsette.")
+        }
+
         val behandlingMigreringsinfo =
             BehandlingMigreringsinfo(behandling = behandling, migreringsdato = migreringsdato)
         behandlingMigreringsinfoRepository.save(behandlingMigreringsinfo)
