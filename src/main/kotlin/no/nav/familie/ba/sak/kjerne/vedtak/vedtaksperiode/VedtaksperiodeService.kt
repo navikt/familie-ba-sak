@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.common.NullablePeriode
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.FØRSTE_ENDRINGSTIDSPUNKT
@@ -290,7 +291,7 @@ class VedtaksperiodeService(
             else TIDENES_MORGEN
 
         return (utbetalingsperioder + endredeUtbetalingsperioder + opphørsperioder + avslagsperioder).filter {
-            !(it.tom ?: TIDENES_ENDE).isBefore(endringstidspunkt)
+            (it.tom ?: TIDENES_ENDE).isSameOrAfter(endringstidspunkt)
         }
     }
 
