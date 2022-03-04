@@ -15,4 +15,6 @@ interface AndelTilkjentYtelsePeriode {
     fun getProsent(): String
 
     fun getEndretDato(): LocalDateTime
+
+    fun getBehandlingId(): Long
 }

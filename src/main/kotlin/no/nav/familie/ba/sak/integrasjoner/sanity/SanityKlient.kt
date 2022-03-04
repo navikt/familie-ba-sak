@@ -17,8 +17,8 @@ data class SanityRespons(
 
 private val logger = LoggerFactory.getLogger(BrevKlient::class.java)
 
-fun hentSanityBegrunnelser(): List<SanityBegrunnelse> {
-    val sanityUrl = "https://xsrv1mh6.apicdn.sanity.io/v2021-06-07/data/query/ba-brev"
+fun hentSanityBegrunnelser(datasett: String = "ba-brev"): List<SanityBegrunnelse> {
+    val sanityUrl = "https://xsrv1mh6.apicdn.sanity.io/v2021-06-07/data/query/$datasett"
     val query = hentDokumenter
     val parameters = java.net.URLEncoder.encode(query, "utf-8")
 
