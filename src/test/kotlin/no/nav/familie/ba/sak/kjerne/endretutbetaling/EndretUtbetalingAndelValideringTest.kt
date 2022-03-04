@@ -21,6 +21,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -42,7 +43,7 @@ class EndretUtbetalingAndelValideringTest {
         endretUtbetalingAndel(barn, YtelseType.ORDINÆR_BARNETRYGD, BigDecimal.valueOf(100))
 
     @Test
-    fun `skal sjekke at en endret periode ikke overlapper med eksisternede endrete perioder`() {
+    fun `skal sjekke at en endret periode ikke overlapper med eksisterende endringsperioder`() {
         val barn1 = tilfeldigPerson()
         val barn2 = tilfeldigPerson()
         val endretUtbetalingAndel = EndretUtbetalingAndel(
@@ -433,5 +434,44 @@ class EndretUtbetalingAndelValideringTest {
                 )
             )
         )
+    }
+
+    @Test
+    fun `Skal kaste feil hvis endringsårsak=allerede utbetalt og tom-dato er i fremtiden selv om tom er samme som gyldigTomIFremtiden`() {
+        assertThrows<FunksjonellFeil> {
+            validerTomDato(
+                tomDato = YearMonth.now().plusMonths(3),
+                årsak = Årsak.ALLEREDE_UTBETALT,
+                gyldigTomEtterDagensDato = YearMonth.now().plusMonths(3)
+            )
+        }
+    }
+
+    @Test
+    fun `Skal ikke kaste feil hvis tom-dato er i fremtiden, men lik gyldig dato i fremtiden`() {
+        val tom = YearMonth.now().plusMonths(4)
+        assertDoesNotThrow { validerTomDato(tomDato = tom, gyldigTomEtterDagensDato = tom, årsak = Årsak.DELT_BOSTED) }
+    }
+
+    @Test
+    fun `Skal kaste feil hvis tom-dato er i fremtiden, men ikke lik gyldig dato i fremtiden`() {
+        assertThrows<FunksjonellFeil> {
+            validerTomDato(
+                tomDato = YearMonth.now().plusMonths(6),
+                gyldigTomEtterDagensDato = YearMonth.now().plusMonths(9),
+                årsak = Årsak.ENDRE_MOTTAKER
+            )
+        }
+    }
+
+    @Test
+    fun `Skal kaste feil hvis perioden skal utbetales, men årsak er 'endre mottaker' eller 'allerede utbetalt'`() {
+        assertThrows<FunksjonellFeil> { validerUtbetalingMotÅrsak(årsak = Årsak.ALLEREDE_UTBETALT, skalUtbetales = true) }
+        assertThrows<FunksjonellFeil> { validerUtbetalingMotÅrsak(årsak = Årsak.ENDRE_MOTTAKER, skalUtbetales = true) }
+    }
+
+    @Test
+    fun `Skal ikke kaste feil hvis perioden skal utbetales, men årsak er 'delt bosted'`() {
+        assertDoesNotThrow { validerUtbetalingMotÅrsak(årsak = Årsak.DELT_BOSTED, skalUtbetales = true) }
     }
 }
