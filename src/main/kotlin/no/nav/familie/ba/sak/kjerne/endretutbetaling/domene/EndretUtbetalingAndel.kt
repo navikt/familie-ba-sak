@@ -131,6 +131,8 @@ data class EndretUtbetalingAndel(
 
 enum class Årsak(val visningsnavn: String) {
     DELT_BOSTED("Delt bosted"),
+    ENDRE_MOTTAKER("Foreldrene bor sammen, endret mottaker"),
+    ALLEREDE_UTBETALT("Allerede utbetalt"),
     EØS_SEKUNDÆRLAND("Eøs sekundærland");
 
     fun kanGiNullutbetaling() = this == EØS_SEKUNDÆRLAND

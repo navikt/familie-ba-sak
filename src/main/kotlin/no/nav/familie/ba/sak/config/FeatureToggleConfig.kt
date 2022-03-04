@@ -108,6 +108,7 @@ class FeatureToggleConfig(
         const val SETT_PÅ_VENT = "familie-ba-sak.sett-paa-vent.utgivelse"
         const val INGEN_OVERLAPP_VEDTAKSPERIODER = "familie-ba-sak.ingen-overlapp-vedtaksperioder.utgivelse"
         const val DELT_BOSTED_SKAL_IKKE_DELES = "familie-ba-sak.behandling.delt-bosted-skal-ikke-deles.utgivelse"
+        const val ENDRE_MOTTAKER_ENDRINGSÅRSAKER = "familie-ba-sak.behandling.endringsperiode.endre-mottaker-aarsaker.utgivelse"
         const val FØRSTE_ENDRINGSTIDSPUNKT = "familie-ba-sak.behandling.forste-endringstidspunkt.utgivelse"
 
         const val TEKNISK_VEDLIKEHOLD_HENLEGGELSE = "familie-ba-sak.teknisk-vedlikehold-henleggelse.tilgangsstyring"
