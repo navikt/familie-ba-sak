@@ -1,0 +1,275 @@
+package no.nav.familie.ba.sak.kjerne.beregning
+
+import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.inneværendeMåned
+import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
+import no.nav.familie.ba.sak.common.lagPerson
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
+
+class EndringstidspunktUtilsTest {
+
+    @Test
+    fun `Skal finne endringer i beløp`() {
+        val person1 = lagPerson()
+        val person2 = lagPerson()
+
+        val forrigeAndeler = listOf(
+            lagAndelTilkjentYtelse(
+                fom = inneværendeMåned().minusYears(4),
+                tom = inneværendeMåned().minusYears(2),
+                beløp = 2108,
+                person = person1
+            ),
+            lagAndelTilkjentYtelse(
+                fom = inneværendeMåned().minusYears(1),
+                tom = inneværendeMåned(),
+                beløp = 1054,
+                person = person2
+            ),
+        )
+
+        val andeler = listOf(
+            lagAndelTilkjentYtelse(
+                fom = inneværendeMåned().minusYears(4),
+                tom = inneværendeMåned().minusYears(2),
+                beløp = 2108,
+                person = person1
+            ),
+            lagAndelTilkjentYtelse(
+                fom = inneværendeMåned().minusYears(1),
+                tom = inneværendeMåned(),
+                beløp = 2108,
+                person = person2
+            ),
+        )
+
+        val førsteEndringstidspunkt = andeler.hentFørsteEndringstidspunkt(
+            forrigeAndelerTilkjentYtelse = forrigeAndeler
+        )
+        assertEquals(inneværendeMåned().minusYears(1).førsteDagIInneværendeMåned(), førsteEndringstidspunkt)
+    }
+
+    @Test
+    fun `Skal finne reduksjon i fomdato`() {
+        val person1 = lagPerson()
+        val person2 = lagPerson()
+
+        val forrigeAndeler = listOf(
+            lagAndelTilkjentYtelse(
+                fom = inneværendeMåned().minusYears(4),
+                tom = inneværendeMåned().minusYears(2),
+                beløp = 2108,
+                person = person1
+            ),
+            lagAndelTilkjentYtelse(
+                fom = inneværendeMåned().minusYears(1),
+                tom = inneværendeMåned(),
+                beløp = 1054,
+                person = person2
+            ),
+        )
+
+        val andeler = listOf(
+            lagAndelTilkjentYtelse(
+                fom = inneværendeMåned().minusYears(4),
+                tom = inneværendeMåned().minusYears(2),
+                beløp = 2108,
+                person = person1
+            ),
+            lagAndelTilkjentYtelse(
+                fom = inneværendeMåned().minusYears(1).minusMonths(2),
+                tom = inneværendeMåned(),
+                beløp = 1054,
+                person = person2
+            ),
+        )
+
+        val førsteEndringstidspunkt = andeler.hentFørsteEndringstidspunkt(
+            forrigeAndelerTilkjentYtelse = forrigeAndeler
+        )
+        assertEquals(
+            inneværendeMåned().minusYears(1).minusMonths(2).førsteDagIInneværendeMåned(),
+            førsteEndringstidspunkt
+        )
+    }
+
+    @Test
+    fun `Skal oppdage perioder som forsvinner`() {
+        val person1 = lagPerson()
+        val person2 = lagPerson()
+
+        val forrigeAndeler = listOf(
+            lagAndelTilkjentYtelse(
+                fom = inneværendeMåned().minusYears(4),
+                tom = inneværendeMåned().minusYears(2),
+                beløp = 2108,
+                person = person1
+            ),
+            lagAndelTilkjentYtelse(
+                fom = inneværendeMåned().minusMonths(15),
+                tom = inneværendeMåned().minusMonths(13),
+                beløp = 1054,
+                person = person2
+            ),
+            lagAndelTilkjentYtelse(
+                fom = inneværendeMåned().minusYears(1),
+                tom = inneværendeMåned(),
+                beløp = 1054,
+                person = person2
+            ),
+        )
+
+        val andeler = listOf(
+            lagAndelTilkjentYtelse(
+                fom = inneværendeMåned().minusYears(4),
+                tom = inneværendeMåned().minusYears(2),
+                beløp = 2108,
+                person = person1
+            ),
+            lagAndelTilkjentYtelse(
+                fom = inneværendeMåned().minusYears(1),
+                tom = inneværendeMåned(),
+                beløp = 1054,
+                person = person2
+            ),
+        )
+
+        val førsteEndringstidspunkt = andeler.hentFørsteEndringstidspunkt(
+            forrigeAndelerTilkjentYtelse = forrigeAndeler
+        )
+        assertEquals(inneværendeMåned().minusMonths(15).førsteDagIInneværendeMåned(), førsteEndringstidspunkt)
+    }
+
+    @Test
+    fun `Skal oppdage nye perioder`() {
+        val person1 = lagPerson()
+        val person2 = lagPerson()
+
+        val forrigeAndeler = listOf(
+            lagAndelTilkjentYtelse(
+                fom = inneværendeMåned().minusYears(4),
+                tom = inneværendeMåned().minusYears(2),
+                beløp = 2108,
+                person = person1
+            ),
+            lagAndelTilkjentYtelse(
+                fom = inneværendeMåned().minusYears(1),
+                tom = inneværendeMåned(),
+                beløp = 1054,
+                person = person2
+            ),
+        )
+
+        val andeler = listOf(
+            lagAndelTilkjentYtelse(
+                fom = inneværendeMåned().minusYears(4),
+                tom = inneværendeMåned().minusYears(2),
+                beløp = 2108,
+                person = person1
+            ),
+            lagAndelTilkjentYtelse(
+                fom = inneværendeMåned().minusMonths(15),
+                tom = inneværendeMåned().minusMonths(13),
+                beløp = 1054,
+                person = person2
+            ),
+            lagAndelTilkjentYtelse(
+                fom = inneværendeMåned().minusYears(1),
+                tom = inneværendeMåned(),
+                beløp = 1054,
+                person = person2
+            ),
+        )
+
+        val førsteEndringstidspunkt = andeler.hentFørsteEndringstidspunkt(
+            forrigeAndelerTilkjentYtelse = forrigeAndeler
+        )
+        assertEquals(inneværendeMåned().minusMonths(15).førsteDagIInneværendeMåned(), førsteEndringstidspunkt)
+    }
+
+    @Test
+    fun `Skal oppdage dersom vi har samme beløp, men på forskjellige personer`() {
+        val person1 = lagPerson()
+        val person2 = lagPerson()
+
+        val forrigeAndeler = listOf(
+            lagAndelTilkjentYtelse(
+                fom = inneværendeMåned().minusYears(4),
+                tom = inneværendeMåned().minusYears(2),
+                beløp = 2108,
+                person = person1
+            ),
+            lagAndelTilkjentYtelse(
+                fom = inneværendeMåned().minusYears(1),
+                tom = inneværendeMåned(),
+                beløp = 1054,
+                person = person2
+            ),
+        )
+
+        val andeler = listOf(
+            lagAndelTilkjentYtelse(
+                fom = inneværendeMåned().minusYears(4),
+                tom = inneværendeMåned().minusYears(2),
+                beløp = 2108,
+                person = person1
+            ),
+            lagAndelTilkjentYtelse(
+                fom = inneværendeMåned().minusYears(1),
+                tom = inneværendeMåned(),
+                beløp = 1054,
+                person = person1
+            ),
+        )
+
+        val førsteEndringstidspunkt = andeler.hentFørsteEndringstidspunkt(
+            forrigeAndelerTilkjentYtelse = forrigeAndeler
+        )
+        assertEquals(
+            inneværendeMåned().minusYears(1).førsteDagIInneværendeMåned().førsteDagIInneværendeMåned(),
+            førsteEndringstidspunkt
+        )
+    }
+
+    @Test
+    fun `Skal tåle to personer med andeler samtidig`() {
+        val person1 = lagPerson()
+        val person2 = lagPerson()
+
+        val forrigeAndeler = listOf(
+            lagAndelTilkjentYtelse(
+                fom = inneværendeMåned().minusYears(4),
+                tom = inneværendeMåned().minusYears(2),
+                beløp = 2108,
+                person = person1
+            ),
+            lagAndelTilkjentYtelse(
+                fom = inneværendeMåned().minusYears(4),
+                tom = inneværendeMåned(),
+                beløp = 1054,
+                person = person2
+            ),
+        )
+
+        val andeler = listOf(
+            lagAndelTilkjentYtelse(
+                fom = inneværendeMåned().minusYears(4),
+                tom = inneværendeMåned().minusYears(2),
+                beløp = 2108,
+                person = person1
+            ),
+            lagAndelTilkjentYtelse(
+                fom = inneværendeMåned().minusYears(4),
+                tom = inneværendeMåned().minusMonths(1),
+                beløp = 1054,
+                person = person2
+            ),
+        )
+
+        val førsteEndringstidspunkt = andeler.hentFørsteEndringstidspunkt(
+            forrigeAndelerTilkjentYtelse = forrigeAndeler
+        )
+        assertEquals(inneværendeMåned().førsteDagIInneværendeMåned(), førsteEndringstidspunkt)
+    }
+}
