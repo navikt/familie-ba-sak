@@ -4,7 +4,6 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.NullablePeriode
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
-import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
@@ -286,13 +285,13 @@ class VedtaksperiodeService(
         val avslagsperioder = hentAvslagsperioderMedBegrunnelser(vedtak)
 
         val endringstidspunkt =
-            if (featureToggleService.isEnabled(FØRSTE_ENDRINGSTIDSPUNKT))
-                endringstidspunktSerivce.finnEndringstidpunkForBehandling(behandlingId = vedtak.behandling.id)
-            else TIDENES_MORGEN
+            endringstidspunktSerivce.finnEndringstidpunkForBehandling(behandlingId = vedtak.behandling.id)
 
-        return (utbetalingsperioder + endredeUtbetalingsperioder + opphørsperioder + avslagsperioder).filter {
+        val vetaksperioder = utbetalingsperioder + endredeUtbetalingsperioder + opphørsperioder + avslagsperioder
+
+        return if (featureToggleService.isEnabled(FØRSTE_ENDRINGSTIDSPUNKT)) (vetaksperioder).filter {
             (it.tom ?: TIDENES_ENDE).isSameOrAfter(endringstidspunkt)
-        }
+        } else vetaksperioder
     }
 
     fun kopierOverVedtaksperioder(deaktivertVedtak: Vedtak, aktivtVedtak: Vedtak) {
