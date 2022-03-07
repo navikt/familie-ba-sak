@@ -506,7 +506,7 @@ class VedtaksperiodeService(
         val segmenter = andelerTilkjentYtelse.lagVertikaleSegmenter().keys.filterNot {
             forrigeSegmenter.any { f -> it.fom == f.fom && it.tom == f.tom }
         }.filter {
-            forrigeSegmenter.single { f -> f.overlapper(it) }.value != it.value
+            forrigeSegmenter.first { f -> f.overlapper(it) }.value != it.value
         }
         val vedtaksperiodeMedBegrunnelser = segmenter.map {
             VedtaksperiodeMedBegrunnelser(
