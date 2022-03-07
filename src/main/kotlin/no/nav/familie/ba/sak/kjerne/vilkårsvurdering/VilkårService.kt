@@ -32,8 +32,8 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingUtils.mut
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingUtils.muterPersonResultatPost
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingUtils.muterPersonVilkårResultaterPut
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårRegelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat.Companion.VilkårResultatComparator
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
@@ -74,7 +74,7 @@ class VilkårService(
     ): List<RestPersonResultat> {
 
         if (!featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_EØS)) {
-            if (restPersonResultat.vilkårResultater.any { it.vurderesEtter == VilkårRegelverk.EØS_FORORDNINGEN })
+            if (restPersonResultat.vilkårResultater.any { it.vurderesEtter == Regelverk.EØS_FORORDNINGEN })
                 throw Feil(
                     message = "EØS er ikke togglet på",
                     frontendFeilmelding = "Funksjonalitet for EØS er ikke lansert."
@@ -115,16 +115,16 @@ class VilkårService(
         vilkårResultat: VilkårResultat,
     ) {
         val behandling = vilkårsvurdering.behandling
-        val migreringsdato = behandlingService.hentMigreringsdatoIBehandling(behandling.id)
+        val migreringsdato = behandlingService.hentMigreringsdatoPåFagsak(fagsakId = behandling.fagsak.id)
         if (migreringsdato != null &&
             vilkårResultat.vilkårType !in listOf(Vilkår.UNDER_18_ÅR, Vilkår.GIFT_PARTNERSKAP) &&
             vilkårResultat.periodeFom?.isBefore(migreringsdato) == true
         ) {
             throw FunksjonellFeil(
                 melding = "${vilkårResultat.vilkårType} kan ikke endres før $migreringsdato " +
-                    "for behandling=${behandling.id}",
+                    "for fagsak=${behandling.fagsak.id}",
                 frontendFeilmelding = "F.o.m. kan ikke settes tidligere " +
-                    "enn migreringsdato ${migreringsdato.tilKortString()} " +
+                    "enn migreringsdato ${migreringsdato.tilKortString()}. " +
                     "Ved behov for vurdering før dette, må behandlingen henlegges, " +
                     "og migreringstidspunktet endres ved å opprette en ny migreringsbehandling."
             )
@@ -244,32 +244,6 @@ class VilkårService(
             throw FunksjonellFeil(
                 melding = "${Vilkår.UTVIDET_BARNETRYGD.beskrivelse} kan ikke legges til for BARN",
                 frontendFeilmelding = "${Vilkår.UTVIDET_BARNETRYGD.beskrivelse} kan ikke legges til for BARN",
-            )
-        }
-
-        validerUtvidetVilkårIkkeFørMigreringsdato(behandling, vilkårsvurdering)
-    }
-
-    private fun validerUtvidetVilkårIkkeFørMigreringsdato(
-        behandling: Behandling,
-        vilkårsvurdering: Vilkårsvurdering
-    ) {
-        val migreringsdato = behandlingService.hentMigreringsdatoIBehandling(behandling.id)
-        if (migreringsdato != null &&
-            vilkårsvurdering.personResultater.any {
-                it.vilkårResultater.any { vilkårResultat ->
-                    vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD &&
-                        vilkårResultat.periodeFom?.isBefore(migreringsdato) == true
-                }
-            }
-        ) {
-            throw FunksjonellFeil(
-                melding = "${Vilkår.UTVIDET_BARNETRYGD} kan ikke endres før $migreringsdato " +
-                    "for behandling=${behandling.id}",
-                frontendFeilmelding = "F.o.m. kan ikke settes tidligere " +
-                    "enn migreringsdato ${migreringsdato.tilKortString()} " +
-                    "Ved behov for vurdering før dette, må behandlingen henlegges, " +
-                    "og migreringstidspunktet endres ved å opprette en ny migreringsbehandling."
             )
         }
     }

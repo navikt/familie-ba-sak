@@ -285,7 +285,7 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
             lagEndretUtbetalingAndel(prosent = BigDecimal.ZERO, person = barn)
                 .tilMinimertEndretUtbetalingAndel()
                 .oppfyllerSkalUtbetalesTrigger(
-                    triggesAv = TriggesAv(endretUtbetaingSkalUtbetales = true),
+                    triggesAv = TriggesAv(endretUtbetalingSkalUtbetales = true),
                 )
         )
 
@@ -293,7 +293,7 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
             lagEndretUtbetalingAndel(prosent = BigDecimal.valueOf(100), person = barn)
                 .tilMinimertEndretUtbetalingAndel()
                 .oppfyllerSkalUtbetalesTrigger(
-                    triggesAv = TriggesAv(endretUtbetaingSkalUtbetales = false),
+                    triggesAv = TriggesAv(endretUtbetalingSkalUtbetales = false),
                 )
         )
     }
@@ -304,7 +304,7 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
             lagEndretUtbetalingAndel(prosent = BigDecimal.ZERO, person = barn)
                 .tilMinimertEndretUtbetalingAndel()
                 .oppfyllerSkalUtbetalesTrigger(
-                    triggesAv = TriggesAv(endretUtbetaingSkalUtbetales = false),
+                    triggesAv = TriggesAv(endretUtbetalingSkalUtbetales = false),
                 )
         )
 
@@ -312,7 +312,7 @@ internal class VedtakBegrunnelseSpesifikasjonTest {
             lagEndretUtbetalingAndel(prosent = BigDecimal.valueOf(100), person = barn)
                 .tilMinimertEndretUtbetalingAndel()
                 .oppfyllerSkalUtbetalesTrigger(
-                    triggesAv = TriggesAv(endretUtbetaingSkalUtbetales = true),
+                    triggesAv = TriggesAv(endretUtbetalingSkalUtbetales = true),
                 )
         )
     }

@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.behandling
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.isSameOrAfter
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
@@ -9,7 +11,6 @@ import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils.bestemKategori
 import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils.bestemUnderkategori
-import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils.utledLøpendeKategori
 import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils.utledLøpendeUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
@@ -38,6 +39,7 @@ import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
@@ -72,7 +74,8 @@ class BehandlingService(
     private val featureToggleService: FeatureToggleService,
     private val taskRepository: TaskRepositoryWrapper,
     private val behandlingMigreringsinfoRepository: BehandlingMigreringsinfoRepository,
-    private val behandlingSøknadsinfoRepository: BehandlingSøknadsinfoRepository
+    private val behandlingSøknadsinfoRepository: BehandlingSøknadsinfoRepository,
+    private val vilkårsvurderingService: VilkårsvurderingService,
 ) {
 
     @Transactional
@@ -432,7 +435,18 @@ class BehandlingService(
 
     fun hentLøpendeKategori(fagsakId: Long): BehandlingKategori? {
         val forrigeAndeler = hentForrigeAndeler(fagsakId)
-        return if (forrigeAndeler != null) utledLøpendeKategori(forrigeAndeler) else null
+
+        return if (forrigeAndeler != null) utledLøpendeKategori(forrigeAndeler, fagsakId) else null
+    }
+
+    fun utledLøpendeKategori(andeler: List<AndelTilkjentYtelse>, fagsakId: Long): BehandlingKategori {
+        val aktivBehandling = hentAktivForFagsak(fagsakId) ?: error("Fant ikke aktiv behandling")
+
+        val personResultater =
+            vilkårsvurderingService.hentAktivForBehandling(aktivBehandling.id)?.personResultater ?: setOf()
+
+        return if (andeler.any { it.erEøs(personResultater) && it.erLøpende() }
+        ) BehandlingKategori.EØS else BehandlingKategori.NASJONAL
     }
 
     fun hentLøpendeUnderkategori(fagsakId: Long): BehandlingUnderkategori? {
@@ -450,6 +464,16 @@ class BehandlingService(
 
     @Transactional
     fun lagreNedMigreringsdato(migreringsdato: LocalDate, behandling: Behandling) {
+        val forrigeMigreringsdato =
+            behandlingMigreringsinfoRepository.finnSisteMigreringsdatoPåFagsak(fagsakId = behandling.fagsak.id)
+
+        if (behandling.erManuellMigreringForEndreMigreringsdato() &&
+            forrigeMigreringsdato != null &&
+            migreringsdato.toYearMonth().isSameOrAfter(forrigeMigreringsdato.toYearMonth())
+        ) {
+            throw FunksjonellFeil("Migreringsdatoen du har lagt inn er lik eller senere enn eksisterende migreringsdato. Du må velge en tidligere migreringsdato for å fortsette.")
+        }
+
         val behandlingMigreringsinfo =
             BehandlingMigreringsinfo(behandling = behandling, migreringsdato = migreringsdato)
         behandlingMigreringsinfoRepository.save(behandlingMigreringsinfo)

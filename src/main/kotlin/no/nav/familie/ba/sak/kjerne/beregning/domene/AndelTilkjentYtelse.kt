@@ -5,12 +5,17 @@ import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.YearMonthConverter
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.brev.UtvidetScenarioForEndringsperiode
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.erStartPåUtvidetSammeMåned
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.utledSegmenter
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.fpsak.tidsserie.LocalDateInterval
 import no.nav.fpsak.tidsserie.LocalDateSegment
@@ -164,8 +169,6 @@ data class AndelTilkjentYtelse(
 
     fun stønadsPeriode() = MånedPeriode(this.stønadFom, this.stønadTom)
 
-    fun erEøs() = this.type == YtelseType.EØS
-
     fun erUtvidet() = this.type == YtelseType.UTVIDET_BARNETRYGD
 
     fun erSmåbarnstillegg() = this.type == YtelseType.SMÅBARNSTILLEGG
@@ -175,6 +178,22 @@ data class AndelTilkjentYtelse(
     fun erLøpende(): Boolean = this.stønadTom > YearMonth.now()
 
     fun erDeltBosted() = this.prosent == BigDecimal(50)
+
+    fun erEøs(personResultater: Set<PersonResultat>) = vurdertEtter(personResultater) == Regelverk.EØS_FORORDNINGEN
+
+    fun vurdertEtter(personResultater: Set<PersonResultat>): Regelverk {
+        val relevanteVilkårsResultaer = finnRelevanteVilkårsresulaterForRegelverk(personResultater)
+
+        return if (relevanteVilkårsResultaer.isEmpty()) {
+            Regelverk.NASJONALE_REGLER
+        } else if (relevanteVilkårsResultaer.all { it.vurderesEtter == Regelverk.EØS_FORORDNINGEN }) {
+            Regelverk.EØS_FORORDNINGEN
+        } else if (relevanteVilkårsResultaer.all { it.vurderesEtter == Regelverk.NASJONALE_REGLER }) {
+            Regelverk.NASJONALE_REGLER
+        } else {
+            error("AndelTilkjentYtelse ${this.id} er basert på VilkårsResultater med en blanding av nasjonale og EØS regelverk.")
+        }
+    }
 
     fun erAndelSomSkalSendesTilOppdrag(): Boolean {
         return this.kalkulertUtbetalingsbeløp != 0 ||
@@ -197,6 +216,21 @@ data class AndelTilkjentYtelse(
                 it.vedtakBegrunnelseSpesifikasjon == gyldigBegrunnelseForEndretUtbetalingAndel
             }
         }
+
+    private fun finnRelevanteVilkårsresulaterForRegelverk(
+        personResultater: Set<PersonResultat>
+    ): List<VilkårResultat> =
+        personResultater
+            .filter { !it.erSøkersResultater() }
+            .filter { this.aktør == it.aktør }
+            .flatMap { it.vilkårResultater }
+            .filter {
+                this.stønadFom > it.periodeFom?.toYearMonth() &&
+                    (it.periodeTom == null || this.stønadFom <= it.periodeTom?.toYearMonth())
+            }
+            .filter { vilkårResultat ->
+                regelverkavhenigeVilkår().any { it == vilkårResultat.vilkårType }
+            }
 
     companion object {
 
@@ -299,10 +333,17 @@ enum class YtelseType(val klassifisering: String) {
     ORDINÆR_BARNETRYGD("BATR"),
     UTVIDET_BARNETRYGD("BATR"),
     SMÅBARNSTILLEGG("BATRSMA"),
-    EØS("BATR"),
     MANUELL_VURDERING("BATR");
 
     fun erKnyttetTilSøker() = this == SMÅBARNSTILLEGG || this == UTVIDET_BARNETRYGD
+}
+
+private fun regelverkavhenigeVilkår(): List<Vilkår> {
+    return listOf(
+        Vilkår.BOR_MED_SØKER,
+        Vilkår.BOSATT_I_RIKET,
+        Vilkår.LOVLIG_OPPHOLD,
+    )
 }
 
 fun List<AndelTilkjentYtelse>.hentAndelerForSegment(

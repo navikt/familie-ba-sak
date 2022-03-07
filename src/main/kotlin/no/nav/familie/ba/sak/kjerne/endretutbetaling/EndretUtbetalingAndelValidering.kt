@@ -8,14 +8,9 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
+import java.time.YearMonth
 
 object EndretUtbetalingAndelValidering {
-
-    fun validerEndretUtbetalingAndelErGyldigForÅrsak(endretUtbetalingAndel: EndretUtbetalingAndel, andelTilkjentYtelser: List<AndelTilkjentYtelse>) {
-        if (endretUtbetalingAndel.årsak == Årsak.DELT_BOSTED) {
-            validerDeltBosted(endretUtbetalingAndel = endretUtbetalingAndel, andelTilkjentYtelser = andelTilkjentYtelser)
-        }
-    }
 
     fun validerIngenOverlappendeEndring(
         endretUtbetalingAndel: EndretUtbetalingAndel,
@@ -168,5 +163,30 @@ fun validerAtDetFinnesDeltBostedEndringerMedSammeProsentForUtvidedeEndringer(
                     "er forskjellige."
             throw FunksjonellFeil(frontendFeilmelding = feilmelding, melding = feilmelding)
         }
+    }
+}
+
+fun validerUtbetalingMotÅrsak(årsak: Årsak?, skalUtbetales: Boolean) {
+    if (skalUtbetales && (årsak == Årsak.ENDRE_MOTTAKER || årsak == Årsak.ALLEREDE_UTBETALT)) {
+        val feilmelding = "Du kan ikke velge denne årsaken og si at barnetrygden skal utbetales."
+        throw FunksjonellFeil(frontendFeilmelding = feilmelding, melding = feilmelding)
+    }
+}
+
+fun validerTomDato(tomDato: YearMonth?, gyldigTomEtterDagensDato: YearMonth?, årsak: Årsak?) {
+    val dagensDato = YearMonth.now()
+    if (årsak == Årsak.ALLEREDE_UTBETALT && tomDato?.isAfter(dagensDato) == true) {
+        val feilmelding = "For årsak '${årsak.visningsnavn}' kan du ikke legge inn til og med dato som er i neste måned eller senere."
+        throw FunksjonellFeil(
+            frontendFeilmelding = feilmelding,
+            melding = feilmelding
+        )
+    }
+    if (tomDato?.isAfter(dagensDato) == true && tomDato != gyldigTomEtterDagensDato) {
+        val feilmelding = "Du kan ikke legge inn til og med dato som er i neste måned eller senere. Om det gjelder en løpende periode vil systemet legge inn riktig dato for deg."
+        throw FunksjonellFeil(
+            frontendFeilmelding = feilmelding,
+            melding = feilmelding
+        )
     }
 }

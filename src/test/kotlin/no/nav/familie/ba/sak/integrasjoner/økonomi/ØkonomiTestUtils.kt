@@ -8,5 +8,4 @@ fun sats(ytelseType: YtelseType) =
         YtelseType.UTVIDET_BARNETRYGD -> 1054
         YtelseType.SMÅBARNSTILLEGG -> 660
         YtelseType.MANUELL_VURDERING -> 0
-        YtelseType.EØS -> 0
     }

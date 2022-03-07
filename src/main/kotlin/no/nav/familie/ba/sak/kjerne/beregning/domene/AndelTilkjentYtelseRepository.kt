@@ -36,7 +36,8 @@ interface AndelTilkjentYtelseRepository : JpaRepository<AndelTilkjentYtelse, Lon
                      aty.stonad_tom                     tom,
                      aty.prosent                    prosent,
                      aty.tilkjent_ytelse_id         aty_tyid,
-                     aty.id
+                     aty.id, 
+                     aty.fk_behandling_id           behandling_id   
               FROM andel_tilkjent_ytelse aty
               JOIN personident personident on personident.fk_aktoer_id = aty.fk_aktoer_id
               WHERE aty.type = 'UTVIDET_BARNETRYGD'
@@ -58,7 +59,8 @@ SELECT qualified.id             AS id,
        qualified.prosent        AS prosent,
        qualified.endret_dato AS endretDato,
        qualified.fom            AS fom,
-       qualified.tom            AS tom
+       qualified.tom            AS tom,
+       qualified.behandling_id  AS behandlingId
 FROM (SELECT ident, MAX(endret_dato) dato
       FROM qualified
       GROUP BY ident
