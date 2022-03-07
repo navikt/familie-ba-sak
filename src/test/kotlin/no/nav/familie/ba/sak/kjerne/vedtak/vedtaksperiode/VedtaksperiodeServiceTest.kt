@@ -42,7 +42,7 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
@@ -92,7 +92,7 @@ class VedtaksperiodeServiceTest(
     var førstegangsbehandling: Behandling? = null
     var revurdering: Behandling? = null
 
-    @BeforeAll
+    @BeforeEach
     fun init() {
         databaseCleanupService.truncate()
         førstegangsbehandling = kjørStegprosessForFGB(
@@ -286,7 +286,7 @@ class VedtaksperiodeServiceTest(
         val revurdering = revurdering!!
         val revVilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(revurdering.id)!!
         val revPersonopplysningGrunnlag = persongrunnlagService.hentAktivThrows(revurdering.id)
-        val nyPeriode = LocalDate.now().minusMonths(3)
+        val nyPeriode = LocalDate.now().minusMonths(4)
         revPersonopplysningGrunnlag.søkerOgBarn.forEach {
             if (it.aktør == tilAktør(barnFnr)) {
                 vurderVilkårsvurderingTilInnvilget(revVilkårsvurdering, it, nyPeriode)
