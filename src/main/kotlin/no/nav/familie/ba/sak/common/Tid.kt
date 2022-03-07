@@ -111,6 +111,9 @@ fun MånedPeriode.overlapperHeltEllerDelvisMed(annenPeriode: MånedPeriode) =
         annenPeriode.inkluderer(this.fom) ||
         annenPeriode.inkluderer(this.tom)
 
+fun MånedPeriode.erMellom(annenPeriode: MånedPeriode) =
+    annenPeriode.inkluderer(this.fom) && annenPeriode.inkluderer(this.tom)
+
 fun Periode.kanErstatte(other: Periode): Boolean {
     return this.fom.isSameOrBefore(other.fom) && this.tom.isSameOrAfter(other.tom)
 }

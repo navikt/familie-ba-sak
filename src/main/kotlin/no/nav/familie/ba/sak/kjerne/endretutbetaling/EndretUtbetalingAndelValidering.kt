@@ -2,8 +2,10 @@ package no.nav.familie.ba.sak.kjerne.endretutbetaling
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.MånedPeriode
-import no.nav.familie.ba.sak.common.overlapperHeltEllerDelvisMed
+import no.nav.familie.ba.sak.common.Periode
+import no.nav.familie.ba.sak.common.erMellom
 import no.nav.familie.ba.sak.common.tilKortString
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
@@ -61,15 +63,19 @@ object EndretUtbetalingAndelValidering {
 
     fun validerDeltBosted(
         endretUtbetalingAndel: EndretUtbetalingAndel,
-        andelTilkjentYtelser: List<AndelTilkjentYtelse>
+        deltBostedPerioder: List<Periode>
     ) {
         if (endretUtbetalingAndel.årsak != Årsak.DELT_BOSTED) return
 
+        if (endretUtbetalingAndel.fom == null || endretUtbetalingAndel.tom == null) {
+            throw FunksjonellFeil("Du må sette fom og tom.")
+        }
+        val endringsperiode = MånedPeriode(fom = endretUtbetalingAndel.fom!!, tom = endretUtbetalingAndel.tom!!)
+
         if (
-            !andelTilkjentYtelser
-                .filter { it.aktør == endretUtbetalingAndel.person?.aktør }
-                .filter { it.stønadsPeriode().overlapperHeltEllerDelvisMed(endretUtbetalingAndel.periode) }
-                .any { it.erDeltBosted() }
+            !deltBostedPerioder.any {
+                endringsperiode.erMellom(MånedPeriode(fom = it.fom.toYearMonth(), tom = it.tom.toYearMonth()))
+            }
         ) {
             throw FunksjonellFeil(
                 melding = "Det er ingen sats for delt bosted i perioden det opprettes en endring med årsak delt bosted for.",

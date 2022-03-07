@@ -42,7 +42,7 @@ data class UtvidetBarnetrygdGenerator(
         val datoSegmenter = utvidetVilkår
             .filter { it.resultat == Resultat.OPPFYLT }
             .map {
-                it.tilDatoSegment(utvidetVilkår, søkerAktør)
+                it.tilDatoSegment(vilkår = utvidetVilkår, segmentVerdi = listOf(PeriodeData(aktør = søkerAktør, rolle = PersonType.SØKER)))
             }
 
         val utvidaTidslinje = LocalDateTimeline(datoSegmenter)
@@ -139,23 +139,23 @@ data class UtvidetBarnetrygdGenerator(
 }
 
 fun VilkårResultat.tilDatoSegment(
-    utvidetVilkår: List<VilkårResultat>,
-    søkerAktør: Aktør
+    vilkår: List<VilkårResultat>,
+    segmentVerdi: List<UtvidetBarnetrygdGenerator.PeriodeData> = emptyList()
 ): LocalDateSegment<List<UtvidetBarnetrygdGenerator.PeriodeData>> {
     if (this.periodeFom == null) throw Feil("Fom må være satt på søkers periode ved utvidet barnetrygd")
     val fraOgMedDato = this.periodeFom!!.førsteDagINesteMåned()
-    val tilOgMedDato = finnTilOgMedDatoForUtvidetSegment(tilOgMed = this.periodeTom, vilkårResultater = utvidetVilkår)
+    val tilOgMedDato = finnTilOgMedDato(tilOgMed = this.periodeTom, vilkårResultater = vilkår)
     if (tilOgMedDato.toYearMonth() == fraOgMedDato.toYearMonth()
         .minusMonths(1)
     ) throw FunksjonellFeil("Du kan ikke legge inn fom. og tom. innenfor samme kalendermåned. Gå til utvidet barnetrygd vilkåret for å endre.")
     return LocalDateSegment(
         fraOgMedDato,
         tilOgMedDato,
-        listOf(UtvidetBarnetrygdGenerator.PeriodeData(aktør = søkerAktør, rolle = PersonType.SØKER))
+        segmentVerdi
     )
 }
 
-private fun finnTilOgMedDatoForUtvidetSegment(
+private fun finnTilOgMedDato(
     tilOgMed: LocalDate?,
     vilkårResultater: List<VilkårResultat>
 ): LocalDate {
