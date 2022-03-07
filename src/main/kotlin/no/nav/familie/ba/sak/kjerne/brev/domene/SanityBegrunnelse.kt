@@ -189,7 +189,7 @@ fun SanityBegrunnelse.tilTriggesAv(): TriggesAv {
         valgbar = !this.inneholderØvrigTrigger(ØvrigTrigger.ALLTID_AUTOMATISK),
         etterEndretUtbetaling = this.endretUtbetalingsperiodeTriggere
             ?.contains(EndretUtbetalingsperiodeTrigger.ETTER_ENDRET_UTBETALINGSPERIODE) ?: false,
-        endretUtbetaingSkalUtbetales = this.endretUtbetalingsperiodeDeltBostedTriggere?.contains(
+        endretUtbetalingSkalUtbetales = this.endretUtbetalingsperiodeDeltBostedTriggere?.contains(
             EndretUtbetalingsperiodeDeltBostedTriggere.SKAL_UTBETALES
         )
             ?: false,
