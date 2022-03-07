@@ -8,7 +8,6 @@ import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.isSameOrBefore
-import no.nav.familie.ba.sak.common.sisteDagIForrigeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.FØRSTE_ENDRINGSTIDSPUNKT
@@ -298,9 +297,9 @@ class VedtaksperiodeService(
                 endringstidspunktSerivce.finnEndringstidpunkForBehandling(behandlingId = vedtak.behandling.id)
             else TIDENES_MORGEN
 
-        return (oppdatertUtbetalingsperiode + endredeUtbetalingsperioder + opphørsperioder + avslagsperioder)/*.filter {
+        return (oppdatertUtbetalingsperiode + endredeUtbetalingsperioder + opphørsperioder + avslagsperioder).filter {
             (it.tom ?: TIDENES_ENDE).isSameOrAfter(endringstidspunkt)
-        }*/
+        }
     }
 
     fun kopierOverVedtaksperioder(deaktivertVedtak: Vedtak, aktivtVedtak: Vedtak) {
@@ -551,10 +550,7 @@ class VedtaksperiodeService(
             val overlappendePeriode = overlappendePerioder.firstOrNull { o -> it.fom == o.fom && it.tom == o.tom }
             if (overlappendePeriode != null) {
                 val reduksjonsperiode = reduksjonsperioder.single { rd -> rd.tom == overlappendePeriode.tom }
-                val nyUtbetalingsperiode = it.copy(tom = reduksjonsperiode.fom!!.sisteDagIForrigeMåned())
-                if (nyUtbetalingsperiode.fom!!.isBefore(nyUtbetalingsperiode.tom)) {
-                    oppdatertUtbetalingsperioder.add(nyUtbetalingsperiode)
-                }
+                oppdatertUtbetalingsperioder.add(reduksjonsperiode)
             } else {
                 oppdatertUtbetalingsperioder.add(it)
             }
