@@ -75,11 +75,18 @@ class FødselshendelseServiceTest {
             bekreftelsesdato = null
         )
         every { integrasjonClient.hentAlleEØSLand() } returns IntegrasjonClientMock.hentKodeverkLand()
-        every { opprettTaskService.opprettOppgaveTask(any(), any(), any()) } just runs
+        every { opprettTaskService.opprettOppgaveTask(any(), any(), any(), any()) } just runs
 
         fødselshendelseService.opprettFremleggsoppgaveDersomEØSMedlem(lagBehandling())
 
-        verify(exactly = 1) { opprettTaskService.opprettOppgaveTask(any(), Oppgavetype.Fremlegg, any()) }
+        verify(exactly = 1) {
+            opprettTaskService.opprettOppgaveTask(
+                behandlingId = any(),
+                oppgavetype = Oppgavetype.Fremlegg,
+                beskrivelse = "Kontroller gyldig opphold",
+                fristForFerdigstillelse = LocalDate.now().plusYears(1)
+            )
+        }
     }
 
     @Test
@@ -91,10 +98,17 @@ class FødselshendelseServiceTest {
             bekreftelsesdato = null
         )
         every { integrasjonClient.hentAlleEØSLand() } returns IntegrasjonClientMock.hentKodeverkLand()
-        every { opprettTaskService.opprettOppgaveTask(any(), any(), any()) } just runs
+        every { opprettTaskService.opprettOppgaveTask(any(), any(), any(), any()) } just runs
 
         fødselshendelseService.opprettFremleggsoppgaveDersomEØSMedlem(lagBehandling())
 
-        verify(exactly = 0) { opprettTaskService.opprettOppgaveTask(any(), Oppgavetype.Fremlegg, any()) }
+        verify(exactly = 0) {
+            opprettTaskService.opprettOppgaveTask(
+                behandlingId = any(),
+                oppgavetype = Oppgavetype.Fremlegg,
+                beskrivelse = "Kontroller gyldig opphold",
+                fristForFerdigstillelse = LocalDate.now().plusYears(1)
+            )
+        }
     }
 }

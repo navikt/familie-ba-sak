@@ -35,6 +35,7 @@ import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 
 @Service
 class FødselshendelseService(
@@ -162,7 +163,8 @@ class FødselshendelseService(
             opprettTaskService.opprettOppgaveTask(
                 behandlingId = behandling.id,
                 oppgavetype = Oppgavetype.Fremlegg,
-                beskrivelse = "Kontroller gyldig opphold"
+                beskrivelse = "Kontroller gyldig opphold",
+                fristForFerdigstillelse = LocalDate.now().plusYears(1)
             )
         }
     }
