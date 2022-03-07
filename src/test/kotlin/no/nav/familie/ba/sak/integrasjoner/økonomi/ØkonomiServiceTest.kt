@@ -18,7 +18,7 @@ internal class ØkonomiServiceTest {
     val søker = randomFnr()
     val behandling = lagBehandling()
     val vedtakDato = LocalDate.now()
-    val økonomiService = ØkonomiService(mockk(), mockk(), mockk(), mockk(), mockk(), mockk())
+    val økonomiService = ØkonomiService(mockk(), mockk(), mockk(), mockk(), mockk())
 
     @Test
     fun `valider opphør med lovlige perioder`() {
