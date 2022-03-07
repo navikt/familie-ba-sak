@@ -33,7 +33,7 @@ class IverksettMotOppdragTask(
         val iverksettingTask = objectMapper.readValue(task.payload, IverksettingTaskDTO::class.java)
         val behandling = behandlingService.hent(iverksettingTask.behandlingsId)
 
-        if (!beregningService.skalIkkeIverksettes(
+        if (beregningService.skalIverksettes(
                 behandlingId = behandling.id,
                 behandlingResultat = behandling.resultat
             )
@@ -51,7 +51,7 @@ class IverksettMotOppdragTask(
         val behandling = behandlingService.hent(iverksettingTask.behandlingsId)
         val personIdent = personidentService.hentAktør(iverksettingTask.personIdent).aktivFødselsnummer()
 
-        if (!beregningService.skalIkkeIverksettes(
+        if (beregningService.skalIverksettes(
                 behandlingId = behandling.id,
                 behandlingResultat = behandling.resultat
             )

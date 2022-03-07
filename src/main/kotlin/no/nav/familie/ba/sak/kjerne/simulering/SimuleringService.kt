@@ -36,7 +36,7 @@ class SimuleringService(
 
     fun hentSimuleringFraFamilieOppdrag(vedtak: Vedtak): DetaljertSimuleringResultat? {
 
-        if (beregningService.skalIkkeIverksettes(
+        if (!beregningService.skalIverksettes(
                 behandlingResultat = vedtak.behandling.resultat,
                 behandlingId = vedtak.behandling.id
             )
@@ -51,8 +51,6 @@ class SimuleringService(
             saksbehandlerId = SikkerhetContext.hentSaksbehandler().take(8),
             erSimulering = true,
         )
-        // I tilfelde endringsperioder gjør at inge utbetalingsperioder blir opprettet.
-        if (utbetalingsoppdrag.utbetalingsperiode.isEmpty()) return null
 
         return økonomiKlient.hentSimulering(utbetalingsoppdrag)
     }

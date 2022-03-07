@@ -11,7 +11,7 @@ import java.time.LocalDateTime
 
 class UtbetalingsoppdragUtilsTest {
     @Test
-    fun `Skal ikke kunne iverksette et vedtak uten endringer og som ikke har endringsutbetalinger`() {
+    fun `Skal ikke kunne iverksette et vedtak uten endringer`() {
         val feil = assertThrows<FunksjonellFeil> {
             Utbetalingsoppdrag(
                 aktoer = "",
@@ -21,27 +21,10 @@ class UtbetalingsoppdragUtilsTest {
                 saksbehandlerId = "",
                 saksnummer = "",
                 utbetalingsperiode = emptyList(),
-            ).valider(
-                behandlingsresultat = BehandlingResultat.FORTSATT_INNVILGET,
-            )
+            ).valider(behandlingsresultat = BehandlingResultat.FORTSATT_INNVILGET)
         }
         assertTrue(
             feil.message!!.contains("Utbetalingsoppdraget inneholder ingen utbetalingsperioder")
-        )
-    }
-
-    @Test
-    fun `Skal kunne iverksette et vedtak uten endringer men som har endringsutbetalinger`() {
-        Utbetalingsoppdrag(
-            aktoer = "",
-            avstemmingTidspunkt = LocalDateTime.now(),
-            fagSystem = "BA",
-            kodeEndring = Utbetalingsoppdrag.KodeEndring.ENDR,
-            saksbehandlerId = "",
-            saksnummer = "",
-            utbetalingsperiode = emptyList(),
-        ).valider(
-            behandlingsresultat = BehandlingResultat.FORTSATT_INNVILGET,
         )
     }
 
