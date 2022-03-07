@@ -464,12 +464,19 @@ class BehandlingService(
 
     @Transactional
     fun lagreNedMigreringsdato(migreringsdato: LocalDate, behandling: Behandling) {
-        val forrigeMigreringsdato =
-            behandlingMigreringsinfoRepository.finnSisteMigreringsdatoPåFagsak(fagsakId = behandling.fagsak.id)
+        val forrigeMigreringsdato: YearMonth? =
+            behandlingMigreringsinfoRepository
+                .finnSisteMigreringsdatoPåFagsak(fagsakId = behandling.fagsak.id)
+                ?.toYearMonth()
+                ?: hentSisteBehandlingSomErVedtatt(fagsakId = behandling.fagsak.id)?.let {
+                    vilkårsvurderingService.hentTidligsteVilkårsvurderingKnyttetTilMigrering(
+                        behandlingId = it.id
+                    )
+                }
 
         if (behandling.erManuellMigreringForEndreMigreringsdato() &&
             forrigeMigreringsdato != null &&
-            migreringsdato.toYearMonth().isSameOrAfter(forrigeMigreringsdato.toYearMonth())
+            migreringsdato.toYearMonth().isSameOrAfter(forrigeMigreringsdato)
         ) {
             throw FunksjonellFeil("Migreringsdatoen du har lagt inn er lik eller senere enn eksisterende migreringsdato. Du må velge en tidligere migreringsdato for å fortsette.")
         }
