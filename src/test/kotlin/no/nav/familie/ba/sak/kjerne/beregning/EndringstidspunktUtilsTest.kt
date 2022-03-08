@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagPerson
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -275,6 +276,27 @@ class EndringstidspunktUtilsTest {
             forrigeAndelerTilkjentYtelse = forrigeAndeler
         )
         assertEquals(inneværendeMåned().førsteDagIInneværendeMåned(), førsteEndringstidspunkt)
+    }
+
+    @Test
+    fun `Skal finne 0kr endring`() {
+        val person1 = lagPerson(type = PersonType.BARN)
+
+        val forrigeAndeler = emptyList<AndelTilkjentYtelse>()
+
+        val andeler = listOf(
+            lagAndelTilkjentYtelse(
+                fom = inneværendeMåned().minusYears(4),
+                tom = inneværendeMåned().minusYears(2),
+                beløp = 0,
+                person = person1
+            ),
+        )
+
+        val førsteEndringstidspunkt = andeler.hentFørsteEndringstidspunkt(
+            forrigeAndelerTilkjentYtelse = forrigeAndeler
+        )
+        assertEquals(inneværendeMåned().minusYears(4).førsteDagIInneværendeMåned(), førsteEndringstidspunkt)
     }
 
     @Test
