@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.ekstern.skatteetaten
 
+import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
@@ -151,11 +152,14 @@ class SkatteetatenService(
     private fun slåSammenSkatteetatenPeriode(perioderAvEtGittDelingsprosent: List<SkatteetatenPeriode>): List<SkatteetatenPeriode> {
         return perioderAvEtGittDelingsprosent.sortedBy { it.fraMaaned }
             .fold(mutableListOf()) { sammenslåttePerioder, nesteUtbetaling ->
-                val nesteUtbetalingFraaMåned = YearMonth.parse(nesteUtbetaling.fraMaaned)
-                if (sammenslåttePerioder.lastOrNull()?.tomMaaned == nesteUtbetalingFraaMåned.minusMonths(1)
-                    .toString() || (sammenslåttePerioder.isNotEmpty() && sammenslåttePerioder.lastOrNull()?.tomMaaned == null)
-                ) {
-                    sammenslåttePerioder.apply { add(removeLast().copy(tomMaaned = nesteUtbetaling.tomMaaned)) }
+                val nesteUtbetalingFraMåned = YearMonth.parse(nesteUtbetaling.fraMaaned)
+                val forrigeUtbetalingTomMåned =
+                    sammenslåttePerioder.lastOrNull()?.tomMaaned?.let { YearMonth.parse(it) }
+
+                if (forrigeUtbetalingTomMåned?.isSameOrAfter(nesteUtbetalingFraMåned.minusMonths(1)) == true || (sammenslåttePerioder.isNotEmpty() && forrigeUtbetalingTomMåned == null)) {
+                    val nySammenslåing =
+                        sammenslåttePerioder.removeLast().copy(tomMaaned = nesteUtbetaling.tomMaaned)
+                    sammenslåttePerioder.apply { add(nySammenslåing) }
                 } else sammenslåttePerioder.apply { add(nesteUtbetaling) }
             }
     }
