@@ -498,8 +498,6 @@ class VedtaksperiodeService(
         opphørsperioder: List<VedtaksperiodeMedBegrunnelser>
     ): List<VedtaksperiodeMedBegrunnelser> {
         val behandling = vedtak.behandling
-        if (behandling.resultat != BehandlingResultat.ENDRET) return emptyList()
-
         val forrigeIverksatteBehandling: Behandling = hentForrigeIverksatteBehandling(behandling) ?: return emptyList()
         val forrigePersonopplysningGrunnlag: PersonopplysningGrunnlag =
             forrigeIverksatteBehandling.let { persongrunnlagService.hentAktivThrows(it.id) }
@@ -513,16 +511,16 @@ class VedtaksperiodeService(
             }
 
         val forrigeSegmenter = forrigeAndelerTilkjentYtelse.lagVertikaleSegmenter().keys
-        val segmenter = andelerTilkjentYtelse.lagVertikaleSegmenter().keys.filterNot {
-            forrigeSegmenter.any { f -> it.fom == f.fom && it.tom == f.tom }
-        }.filter {
-            forrigeSegmenter.first { f -> f.overlapper(it) }.value != it.value
+        val inneværendeSegmenter = andelerTilkjentYtelse.lagVertikaleSegmenter().keys
+        val segmenter = forrigeSegmenter.filterNot {
+            inneværendeSegmenter.any { seg -> it.fom == seg.fom && it.tom == seg.tom && it.value == seg.value }
         }
         val vedtaksperiodeMedBegrunnelser = segmenter.map {
+            val overlappendePeriode = inneværendeSegmenter.first { f -> f.overlapper(it) }
             VedtaksperiodeMedBegrunnelser(
                 vedtak = vedtak,
-                fom = it.fom,
-                tom = it.tom,
+                fom = if (it.fom > overlappendePeriode.fom) it.fom else overlappendePeriode.fom,
+                tom = if (it.tom > overlappendePeriode.tom) overlappendePeriode.tom else it.tom,
                 type = Vedtaksperiodetype.REDUKSJON,
             )
         }
@@ -549,8 +547,12 @@ class VedtaksperiodeService(
         utbetalingsperioder.forEach {
             val overlappendePeriode = overlappendePerioder.firstOrNull { o -> it.fom == o.fom && it.tom == o.tom }
             if (overlappendePeriode != null) {
-                val reduksjonsperiode = reduksjonsperioder.single { rd -> rd.tom == overlappendePeriode.tom }
-                oppdatertUtbetalingsperioder.add(reduksjonsperiode)
+                oppdatertUtbetalingsperioder.addAll(
+                    reduksjonsperioder.filter { r ->
+                        r.fom!! >= overlappendePeriode.fom &&
+                            r.tom!! <= overlappendePeriode.tom
+                    }
+                )
             } else {
                 oppdatertUtbetalingsperioder.add(it)
             }
