@@ -33,7 +33,7 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
                         WHERE f.status = 'LØPENDE'
                           AND ty.utbetalingsoppdrag IS NOT NULL
                           AND f.arkivert = false
-                          AND b.id = (select max(id) from behandling b2 where b2.fk_fagsak_id = f.id)
+                          AND b.opprettet_tid = (select max(opprettet_tid) from behandling b2 where b2.fk_fagsak_id = f.id)
                         GROUP BY fagsakid)
                         select sum(aty.kalkulert_utbetalingsbelop) from andel_tilkjent_ytelse aty
                         where aty.stonad_fom <= :måned
@@ -56,7 +56,7 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
                             WHERE f.status = 'LØPENDE'
                               AND ty.utbetalingsoppdrag IS NOT NULL
                               AND f.arkivert = false
-                              AND b.id = (select max(id) from behandling b2 where b2.fk_fagsak_id = f.id)
+                              AND b.opprettet_tid = (select max(opprettet_tid) from behandling b2 where b2.fk_fagsak_id = f.id)
                             GROUP BY fagsakid)
                         
                         SELECT behandlingid FROM sisteiverksattebehandlingfraløpendefagsak""",
@@ -73,7 +73,7 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
                             WHERE f.status = 'LØPENDE'
                               AND ty.utbetalingsoppdrag IS NOT NULL
                               AND f.arkivert = false
-                              AND b.id = (select max(id) from behandling b2 where b2.fk_fagsak_id = f.id)
+                              AND b.opprettet_tid = (select max(opprettet_tid) from behandling b2 where b2.fk_fagsak_id = f.id)
                             GROUP BY fagsakid)
                         
                         SELECT behandlingid FROM sisteiverksattebehandlingfraløpendefagsak""",
@@ -85,7 +85,7 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
                             WHERE f.status = 'LØPENDE'
                               AND ty.utbetalingsoppdrag IS NOT NULL
                               AND f.arkivert = false
-                              AND b.id = (select max(id) from behandling b2 where b2.fk_fagsak_id = f.id)
+                              AND b.opprettet_tid = (select max(opprettet_tid) from behandling b2 where b2.fk_fagsak_id = f.id)
                             GROUP BY fagsakid)
                         
                         SELECT count(behandlingid) FROM sisteiverksattebehandlingfraløpendefagsak""",

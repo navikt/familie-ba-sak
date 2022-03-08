@@ -45,7 +45,7 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
                                 where ty.utbetalingsoppdrag IS NOT NULL
                                   and f.status = 'LØPENDE'
                                   and f.arkivert = false
-                                  and b.id = (select max(id) from behandling b2 where b2.fk_fagsak_id = f.id)
+                                  and b.opprettet_tid = (select max(opprettet_tid) from behandling b2 where b2.fk_fagsak_id = f.id)
                                 group by b.id)
                             select sisteIverksatte.fagsakId
                             from sisteIverksatte
