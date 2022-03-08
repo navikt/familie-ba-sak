@@ -25,6 +25,7 @@ data class TriggesAv(
     val endretUtbetalingSkalUtbetales: Boolean = false,
     val småbarnstillegg: Boolean = false,
     val gjelderFørstePeriode: Boolean = false,
+    val gjelderStartenAvEnPeriode: Boolean = false,
 ) {
     fun erEndret() = endringsaarsaker.isNotEmpty()
 }
