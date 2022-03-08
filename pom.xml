@@ -23,7 +23,7 @@
         <changelist>-SNAPSHOT</changelist>
         <spring.cloud.version>3.1.0</spring.cloud.version>
         <spring.vault.version>2.3.2</spring.vault.version>
-        <prosessering.version>1.20211125150647_a7c6f64</prosessering.version>
+        <prosessering.version>1.20220308102416_2479ea0</prosessering.version>
         <felles.version>1.20220221162703_957e034</felles.version>
         <eksterne-kontrakter-bisys.version>2.0_20211221122007_2c5c69d</eksterne-kontrakter-bisys.version>
         <felles-kontrakter.version>2.0_20220308095352_9a55ea5</felles-kontrakter.version>
