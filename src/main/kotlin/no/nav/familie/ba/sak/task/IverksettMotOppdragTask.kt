@@ -80,12 +80,12 @@ class IverksettMotOppdragTask(
             taskRepository.save(statusFraOppdragTask)
             taskRepository.save(sendMeldingTilBisysTask)
         } else {
-            val JournalførVedtaksbrevTask = JournalførVedtaksbrevTask.opprettTaskJournalførVedtaksbrev(
+            val journalførVedtaksbrevTask = JournalførVedtaksbrevTask.opprettTaskJournalførVedtaksbrev(
                 vedtakId = iverksettingTask.vedtaksId,
                 personIdent = personIdent,
                 behandlingId = iverksettingTask.behandlingsId
             )
-            taskRepository.save(JournalførVedtaksbrevTask)
+            taskRepository.save(journalførVedtaksbrevTask)
         }
     }
 
