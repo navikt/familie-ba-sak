@@ -21,13 +21,14 @@ class OpprettTaskService(
     fun opprettOppgaveTask(
         behandlingId: Long,
         oppgavetype: Oppgavetype,
-        beskrivelse: String? = null
+        beskrivelse: String? = null,
+        fristForFerdigstillelse: LocalDate = LocalDate.now()
     ) {
         taskRepository.save(
             OpprettOppgaveTask.opprettTask(
                 behandlingId = behandlingId,
                 oppgavetype = oppgavetype,
-                fristForFerdigstillelse = LocalDate.now(),
+                fristForFerdigstillelse = fristForFerdigstillelse,
                 beskrivelse = beskrivelse
             )
         )
