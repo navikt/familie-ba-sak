@@ -53,6 +53,7 @@ class SmåbarnstilleggService(
 
         val nyePerioderMedFullOvergangsstønad =
             hentPerioderMedFullOvergangsstønad(aktør = fagsak.aktør).map { it.tilInternPeriodeOvergangsstønad() }
+                .slåSammenSammenhengendePerioder()
 
         return vedtakOmOvergangsstønadPåvirkerFagsak(
             småbarnstilleggBarnetrygdGenerator = SmåbarnstilleggBarnetrygdGenerator(
