@@ -56,14 +56,25 @@ fun List<AndelTilkjentYtelse>.hentPerioderMedEndringerFra(
 }
 
 private fun LocalDateSegment<List<AndelTilkjentYtelseDataForÅKalkulereEndring>>.tilSegmentMedDiffIBeløp(): LocalDateSegment<Int>? {
-    val beløpsdifferanse = hentBeløpsendringPåPersonISegment(this.value)
+    val erEndring = erEndringPåPersonISegment(this.value)
 
-    return if (beløpsdifferanse != 0) {
+    return if (erEndring) {
         LocalDateSegment(
             this.localDateInterval,
-            beløpsdifferanse
+            hentBeløpsendringPåPersonISegment(this.value)
         )
     } else null
+}
+
+private fun erEndringPåPersonISegment(nyOgGammelDataPåBrukerISegmentet: List<AndelTilkjentYtelseDataForÅKalkulereEndring>): Boolean {
+    val nyttBeløp = nyOgGammelDataPåBrukerISegmentet
+        .singleOrNull { it.behandlingAlder == BehandlingAlder.NY }
+        ?.kalkulertBeløp
+    val gammeltBeløp = nyOgGammelDataPåBrukerISegmentet
+        .singleOrNull { it.behandlingAlder == BehandlingAlder.GAMMEL }
+        ?.kalkulertBeløp
+
+    return nyttBeløp != gammeltBeløp
 }
 
 private fun hentBeløpsendringPåPersonISegment(nyOgGammelDataPåBrukerISegmentet: List<AndelTilkjentYtelseDataForÅKalkulereEndring>): Int {
@@ -82,7 +93,7 @@ private fun List<AndelTilkjentYtelse>.hentTidslinjerForPersoner(behandlingAlder:
 
     return this.groupBy { it.aktør.aktørId }
         .map { (aktørId, andeler) ->
-            if (andeler.any { it.erSmåbarnstillegg() || it.erDeltBosted() }) {
+            if (andeler.any { it.erSøkersAndel() }) {
                 aktørId to kombinerOverlappendeAndelerForSøker(
                     andeler = andeler,
                     behandlingAlder = behandlingAlder,
