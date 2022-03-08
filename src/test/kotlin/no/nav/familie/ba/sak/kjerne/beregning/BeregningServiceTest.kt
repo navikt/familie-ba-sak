@@ -62,6 +62,9 @@ class BeregningServiceTest {
     private val featureToggleService = mockk<FeatureToggleService>()
     val andelTilkjentYtelseRepository = mockk<AndelTilkjentYtelseRepository>()
 
+    private val behandlingId = 10000000001
+    private val avsluttetBehandling = lagBehandling()
+
     private lateinit var beregningService: BeregningService
 
     @BeforeEach
@@ -555,22 +558,12 @@ class BeregningServiceTest {
     }
 
     @Test
-    fun `Verifiser at skaliverksettes hvis resultat ikke er forsatt innvilget, avslått eller null utbetaling og endringsperiode delt bosted`() {
-        val behandlingId = 10000000001
-        val avsluttetBehandling = lagBehandling()
+    fun `Verifiser at skaliverksettes hvis null utbetaling og endringsperiode delt bosted`() {
+        mockLøpendeUtbetalinger()
 
-        val atyNullBeløpDeltBosted = lagAndelTilkjenYtelseMedEndretPeriode(beløp = 0, årsak = Årsak.DELT_BOSTED)
-        val atyNullBeløpEØS = lagAndelTilkjenYtelseMedEndretPeriode(beløp = 0, årsak = Årsak.EØS_SEKUNDÆRLAND)
-        val atyIkkeNullBeløpDeltBosted = lagAndelTilkjenYtelseMedEndretPeriode(beløp = 10, årsak = Årsak.DELT_BOSTED)
-        val atyIkkeNullBeløpEØS = lagAndelTilkjenYtelseMedEndretPeriode(beløp = 10, årsak = Årsak.EØS_SEKUNDÆRLAND)
+        every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId) } returns
+            lagAndelTilkjenYtelseMedEndretPeriode(beløp = 0, årsak = Årsak.DELT_BOSTED)
 
-        every { behandlingRepository.findByFagsakAndAvsluttet(avsluttetBehandling.fagsak.id) } returns listOf(
-            avsluttetBehandling
-        )
-
-        every { tilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(avsluttetBehandling.id) } returns null
-
-        every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId) } returns atyNullBeløpDeltBosted
         assertFalse(
             beregningService.skalIverksettes(
                 behandlingId,
@@ -578,8 +571,20 @@ class BeregningServiceTest {
                 BehandlingResultat.INNVILGET_OG_OPPHØRT
             )
         )
+    }
 
-        every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId) } returns atyNullBeløpEØS
+    @Test
+    fun `Verifiser at skaliverksettes hvis resultat er null utbetaling og endringsperiode eøs sekundærland`() {
+        mockLøpendeUtbetalinger()
+
+        val atyNullBeløpDeltBosted = lagAndelTilkjenYtelseMedEndretPeriode(beløp = 0, årsak = Årsak.DELT_BOSTED)
+        val atyNullBeløpEØS = lagAndelTilkjenYtelseMedEndretPeriode(beløp = 0, årsak = Årsak.EØS_SEKUNDÆRLAND)
+        val atyIkkeNullBeløpDeltBosted = lagAndelTilkjenYtelseMedEndretPeriode(beløp = 10, årsak = Årsak.DELT_BOSTED)
+        val atyIkkeNullBeløpEØS = lagAndelTilkjenYtelseMedEndretPeriode(beløp = 10, årsak = Årsak.EØS_SEKUNDÆRLAND)
+
+        every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId) } returns
+            lagAndelTilkjenYtelseMedEndretPeriode(beløp = 0, årsak = Årsak.EØS_SEKUNDÆRLAND)
+
         assertTrue(
             beregningService.skalIverksettes(
                 behandlingId,
@@ -587,8 +592,15 @@ class BeregningServiceTest {
                 BehandlingResultat.INNVILGET_OG_OPPHØRT
             )
         )
+    }
 
-        every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId) } returns atyIkkeNullBeløpDeltBosted
+    @Test
+    fun `Verifiser at skaliverksettes hvis utbetaling og endringsperiode delt bosted`() {
+        mockLøpendeUtbetalinger()
+
+        every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId) } returns
+            lagAndelTilkjenYtelseMedEndretPeriode(beløp = 10, årsak = Årsak.DELT_BOSTED)
+
         assertTrue(
             beregningService.skalIverksettes(
                 behandlingId,
@@ -596,8 +608,15 @@ class BeregningServiceTest {
                 BehandlingResultat.INNVILGET_OG_OPPHØRT
             )
         )
+    }
 
-        every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId) } returns atyIkkeNullBeløpEØS
+    @Test
+    fun `Verifiser at skaliverksettes hvis utbetaling og endringsperiode eøs sekundærland`() {
+        mockLøpendeUtbetalinger()
+
+        every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId) } returns
+            lagAndelTilkjenYtelseMedEndretPeriode(beløp = 10, årsak = Årsak.EØS_SEKUNDÆRLAND)
+
         assertTrue(
             beregningService.skalIverksettes(
                 behandlingId,
@@ -605,8 +624,15 @@ class BeregningServiceTest {
                 BehandlingResultat.INNVILGET_OG_OPPHØRT
             )
         )
+    }
 
-        every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId) } returns atyIkkeNullBeløpEØS
+    @Test
+    fun `Verifiser at skaliverksettes hvis utbetaling men forsatt innvilget`() {
+        mockLøpendeUtbetalinger()
+
+        every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId) } returns
+            lagAndelTilkjenYtelseMedEndretPeriode(beløp = 10, årsak = Årsak.EØS_SEKUNDÆRLAND)
+
         assertFalse(
             beregningService.skalIverksettes(
                 behandlingId,
@@ -614,16 +640,18 @@ class BeregningServiceTest {
                 BehandlingResultat.FORTSATT_INNVILGET
             )
         )
+    }
 
-        every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId) } returns atyIkkeNullBeløpEØS
-        assertFalse(
-            beregningService.skalIverksettes(behandlingId, avsluttetBehandling.fagsak.id, BehandlingResultat.AVSLÅTT)
-        )
+    @Test
+    fun `Verifiser at skaliverksettes hvis løpende utbetalinger`() {
+        mockLøpendeUtbetalinger()
 
         every { tilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(avsluttetBehandling.id) } returns lagInitiellTilkjentYtelse(
             avsluttetBehandling
         )
-        every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId) } returns atyNullBeløpDeltBosted
+        every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId) } returns
+            lagAndelTilkjenYtelseMedEndretPeriode(beløp = 0, årsak = Årsak.DELT_BOSTED)
+
         assertTrue(
             beregningService.skalIverksettes(
                 behandlingId,
@@ -646,6 +674,14 @@ class BeregningServiceTest {
             )
         )
     )
+
+    private fun mockLøpendeUtbetalinger() {
+        every { behandlingRepository.findByFagsakAndAvsluttet(avsluttetBehandling.fagsak.id) } returns listOf(
+            avsluttetBehandling
+        )
+
+        every { tilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(avsluttetBehandling.id) } returns null
+    }
 
     private fun kjørScenarioForBack2Backtester(
         førstePeriodeTomForBarnet: LocalDate,
