@@ -498,6 +498,7 @@ class VedtaksperiodeService(
         opphørsperioder: List<VedtaksperiodeMedBegrunnelser>
     ): List<VedtaksperiodeMedBegrunnelser> {
         val behandling = vedtak.behandling
+        if (behandling.skalBehandlesAutomatisk) return emptyList()
         val forrigeIverksatteBehandling: Behandling = hentForrigeIverksatteBehandling(behandling) ?: return emptyList()
         val forrigePersonopplysningGrunnlag: PersonopplysningGrunnlag =
             forrigeIverksatteBehandling.let { persongrunnlagService.hentAktivThrows(it.id) }
@@ -515,15 +516,16 @@ class VedtaksperiodeService(
         val segmenter = forrigeSegmenter.filterNot {
             inneværendeSegmenter.any { seg -> it.fom == seg.fom && it.tom == seg.tom && it.value == seg.value }
         }
-        val vedtaksperiodeMedBegrunnelser = segmenter.map {
-            val overlappendePeriode = inneværendeSegmenter.first { f -> f.overlapper(it) }
-            VedtaksperiodeMedBegrunnelser(
-                vedtak = vedtak,
-                fom = if (it.fom > overlappendePeriode.fom) it.fom else overlappendePeriode.fom,
-                tom = if (it.tom > overlappendePeriode.tom) overlappendePeriode.tom else it.tom,
-                type = Vedtaksperiodetype.REDUKSJON,
-            )
-        }
+        val vedtaksperiodeMedBegrunnelser = segmenter.filter { inneværendeSegmenter.any { seg -> seg.overlapper(it) } }
+            .map {
+                val overlappendePeriode = inneværendeSegmenter.first { seg -> seg.overlapper(it) }
+                VedtaksperiodeMedBegrunnelser(
+                    vedtak = vedtak,
+                    fom = if (it.fom > overlappendePeriode.fom) it.fom else overlappendePeriode.fom,
+                    tom = if (it.tom > overlappendePeriode.tom) overlappendePeriode.tom else it.tom,
+                    type = Vedtaksperiodetype.REDUKSJON,
+                )
+            }
 
         // opphørsperioder kan ikke være inkludert i reduksjonsperioder
         return vedtaksperiodeMedBegrunnelser.filterNot { reduksjonsperiode ->
