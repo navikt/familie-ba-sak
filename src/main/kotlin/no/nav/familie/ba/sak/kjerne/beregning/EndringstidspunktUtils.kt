@@ -67,26 +67,22 @@ private fun LocalDateSegment<List<AndelTilkjentYtelseDataForÅKalkulereEndring>>
 }
 
 private fun erEndringPåPersonISegment(nyOgGammelDataPåBrukerISegmentet: List<AndelTilkjentYtelseDataForÅKalkulereEndring>): Boolean {
-    val nyttBeløp = nyOgGammelDataPåBrukerISegmentet
-        .singleOrNull { it.behandlingAlder == BehandlingAlder.NY }
-        ?.kalkulertBeløp
-    val gammeltBeløp = nyOgGammelDataPåBrukerISegmentet
-        .singleOrNull { it.behandlingAlder == BehandlingAlder.GAMMEL }
-        ?.kalkulertBeløp
+    val nyttBeløp = nyOgGammelDataPåBrukerISegmentet.finnKalkulertBeløp(BehandlingAlder.NY)
+    val gammeltBeløp = nyOgGammelDataPåBrukerISegmentet.finnKalkulertBeløp(BehandlingAlder.GAMMEL)
 
     return nyttBeløp != gammeltBeløp
 }
 
 private fun hentBeløpsendringPåPersonISegment(nyOgGammelDataPåBrukerISegmentet: List<AndelTilkjentYtelseDataForÅKalkulereEndring>): Int {
-    val nyttBeløp = nyOgGammelDataPåBrukerISegmentet
-        .singleOrNull { it.behandlingAlder == BehandlingAlder.NY }
-        ?.kalkulertBeløp ?: 0
-    val gammeltBeløp = nyOgGammelDataPåBrukerISegmentet
-        .singleOrNull { it.behandlingAlder == BehandlingAlder.GAMMEL }
-        ?.kalkulertBeløp ?: 0
+    val nyttBeløp = nyOgGammelDataPåBrukerISegmentet.finnKalkulertBeløp(BehandlingAlder.NY) ?: 0
+    val gammeltBeløp = nyOgGammelDataPåBrukerISegmentet.finnKalkulertBeløp(BehandlingAlder.GAMMEL) ?: 0
 
     return nyttBeløp - gammeltBeløp
 }
+
+private fun List<AndelTilkjentYtelseDataForÅKalkulereEndring>.finnKalkulertBeløp(behandlingAlder: BehandlingAlder) =
+    singleOrNull { it.behandlingAlder == behandlingAlder }
+        ?.kalkulertBeløp
 
 private fun List<AndelTilkjentYtelse>.hentTidslinjerForPersoner(behandlingAlder: BehandlingAlder):
     Map<String, LocalDateTimeline<AndelTilkjentYtelseDataForÅKalkulereEndring>> {

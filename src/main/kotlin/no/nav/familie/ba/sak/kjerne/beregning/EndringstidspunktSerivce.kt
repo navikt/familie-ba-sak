@@ -5,7 +5,6 @@ import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 
@@ -27,12 +26,8 @@ class EndringstidspunktSerivce(
         val forrigeAndelerTilkjentYtelse = andelTilkjentYtelseRepository
             .finnAndelerTilkjentYtelseForBehandling(behandlingId = sistIverksatteBehandling.id)
 
-        val førsteEndringstidspunkt = nyeAndelerTilkjentYtelse.hentFørsteEndringstidspunkt(
+        return nyeAndelerTilkjentYtelse.hentFørsteEndringstidspunkt(
             forrigeAndelerTilkjentYtelse = forrigeAndelerTilkjentYtelse
         ) ?: TIDENES_ENDE
-
-        LoggerFactory.getLogger("secureLogger")
-            .info("Første endringstidspunkt: $førsteEndringstidspunkt.\nForrige andeler: $forrigeAndelerTilkjentYtelse, nye andeler: $nyeAndelerTilkjentYtelse")
-        return førsteEndringstidspunkt
     }
 }
