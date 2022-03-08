@@ -6,7 +6,7 @@ fun main(args: Array<String>) {
     val springBuilder = SpringApplicationBuilder(ApplicationConfig::class.java).profiles(
         "dev",
         "postgres",
-        "mock-brev-klient",
+        // "mock-brev-klient",
         "mock-økonomi",
         "mock-infotrygd-feed",
         "mock-infotrygd-barnetrygd",
