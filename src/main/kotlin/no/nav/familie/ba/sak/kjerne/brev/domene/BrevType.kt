@@ -30,6 +30,12 @@ enum class BrevType(
         "varsel om revurdering",
         true
     ),
+    VARSEL_OM_REVURDERING_DELT_BOSTED_PARAGRAF_14(
+        "varsel-om-revurdering-delt-bosted-paragraf-14",
+        Dokumenttype.BARNETRYGD_VARSEL_OM_REVURDERING_DELT_BOSTED_PARAGRAF_14,
+        "Varsel om revurdering delt bosted § 14",
+        true
+    ),
     VEDTAK("vedtak", Dokumenttype.BARNETRYGD_VEDTAK, "vedtak", false),
     HENLEGGE_TRUKKET_SØKNAD(
         "henlegge-trukket-soknad",
@@ -77,6 +83,7 @@ enum class BrevType(
             INNHENTE_OPPLYSNINGER -> Brevmal.INNHENTE_OPPLYSNINGER
             INFORMASJONSBREV_DELT_BOSTED -> Brevmal.INFORMASJONSBREV_DELT_BOSTED
             VARSEL_OM_REVURDERING -> Brevmal.VARSEL_OM_REVURDERING
+            VARSEL_OM_REVURDERING_DELT_BOSTED_PARAGRAF_14 -> Brevmal.VARSEL_OM_REVURDERING_DELT_BOSTED_PARAGRAF_14
             HENLEGGE_TRUKKET_SØKNAD -> Brevmal.HENLEGGE_TRUKKET_SØKNAD
             SVARTIDSBREV -> Brevmal.SVARTIDSBREV
             INFORMASJONSBREV_FØDSEL_MINDREÅRIG -> Brevmal.INFORMASJONSBREV_FØDSEL_MINDREÅRIG
@@ -89,7 +96,8 @@ enum class BrevType(
     fun setterBehandlingPåVent(): Boolean =
         when (this) {
             INNHENTE_OPPLYSNINGER,
-            VARSEL_OM_REVURDERING -> true
+            VARSEL_OM_REVURDERING,
+            VARSEL_OM_REVURDERING_DELT_BOSTED_PARAGRAF_14 -> true
             else -> false
         }
 
