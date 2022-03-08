@@ -62,10 +62,18 @@ class BeregningService(
     fun hentOptionalTilkjentYtelseForBehandling(behandlingId: Long) =
         tilkjentYtelseRepository.findByBehandlingOptional(behandlingId)
 
-    fun skalIverksettes(behandlingId: Long, behandlingResultat: BehandlingResultat): Boolean =
-        behandlingResultat != BehandlingResultat.FORTSATT_INNVILGET &&
-            behandlingResultat != BehandlingResultat.AVSLÅTT &&
+    fun skalIverksettes(behandlingId: Long, fagsakId: Long, behandlingResultat: BehandlingResultat): Boolean {
+        val harTideligereIverksatteBehandlingPåFagsak =
+            hentTilkjentYtelseForBehandlingerIverksattMotØkonomi(fagsakId = fagsakId)
+                .isNotEmpty()
+
+        val harAndelTilkjentYtelserMedUtbetalinger =
             hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(behandlingId).isNotEmpty()
+
+        return behandlingResultat != BehandlingResultat.FORTSATT_INNVILGET &&
+            behandlingResultat != BehandlingResultat.AVSLÅTT &&
+            (harTideligereIverksatteBehandlingPåFagsak || harAndelTilkjentYtelserMedUtbetalinger)
+    }
 
     fun hentTilkjentYtelseForBehandlingerIverksattMotØkonomi(fagsakId: Long): List<TilkjentYtelse> {
         val iverksatteBehandlinger = behandlingRepository.findByFagsakAndAvsluttet(fagsakId)

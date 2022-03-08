@@ -35,7 +35,8 @@ class IverksettMotOppdragTask(
 
         if (beregningService.skalIverksettes(
                 behandlingId = behandling.id,
-                behandlingResultat = behandling.resultat
+                behandlingResultat = behandling.resultat,
+                fagsakId = behandling.fagsak.id
             )
         ) {
             stegService.håndterIverksettMotØkonomi(
@@ -53,7 +54,8 @@ class IverksettMotOppdragTask(
 
         if (beregningService.skalIverksettes(
                 behandlingId = behandling.id,
-                behandlingResultat = behandling.resultat
+                behandlingResultat = behandling.resultat,
+                fagsakId = behandling.fagsak.id,
             )
         ) {
             val statusFraOppdragTask = Task(
