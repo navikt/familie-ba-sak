@@ -52,7 +52,7 @@ fun List<AndelTilkjentYtelse>.hentPerioderMedEndringerFra(
         LocalDateTimeline(
             kombinertTidslinje.toSegments().mapNotNull { it.tilSegmentMedDiffIBeløp() }
         )
-    }
+    }.filter { it.value.toSegments().isNotEmpty() }
 }
 
 private fun LocalDateSegment<List<AndelTilkjentYtelseDataForÅKalkulereEndring>>.tilSegmentMedDiffIBeløp(): LocalDateSegment<Int>? {
