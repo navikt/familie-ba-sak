@@ -22,4 +22,12 @@ class VedtakOmOvergangsstønadController(private val taskRepository: TaskReposit
         taskRepository.save(VedtakOmOvergangsstønadTask.opprettTask(personIdent.ident))
         return Ressurs.success("Ok", "Ok")
     }
+
+    @PostMapping("/bulk")
+    fun håndterVedtakOmOvergangsstønadBulk(@RequestBody identer: List<String>): Ressurs<String> {
+        identer.forEach {
+            taskRepository.save(VedtakOmOvergangsstønadTask.opprettTask(it))
+        }
+        return Ressurs.success("Ok", "Ok")
+    }
 }
