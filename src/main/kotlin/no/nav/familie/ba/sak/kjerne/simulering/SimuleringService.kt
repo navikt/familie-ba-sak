@@ -38,7 +38,8 @@ class SimuleringService(
 
         if (!beregningService.skalIverksettes(
                 behandlingResultat = vedtak.behandling.resultat,
-                behandlingId = vedtak.behandling.id
+                behandlingId = vedtak.behandling.id,
+                fagsakId = vedtak.behandling.fagsak.id,
             )
         ) return null
         /**
