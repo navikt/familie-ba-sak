@@ -508,27 +508,33 @@ class VedtaksperiodeService(
         // henter andel tilkjent ytelse for barn som finnes i forrige behandling
         val andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id)
             .filter {
-                forrigePersonopplysningGrunnlag.barna.any { f -> f.aktør == it.aktør }
+                forrigePersonopplysningGrunnlag.søkerOgBarn.any { f -> f.aktør == it.aktør }
             }
 
         val forrigeSegmenter = forrigeAndelerTilkjentYtelse.lagVertikaleSegmenter().keys
-        val inneværendeSegmenter = andelerTilkjentYtelse.lagVertikaleSegmenter().keys
+        val nåværendeSegmenter = andelerTilkjentYtelse.lagVertikaleSegmenter().keys
         val segmenter = forrigeSegmenter.filterNot {
-            inneværendeSegmenter.any { seg -> it.fom == seg.fom && it.tom == seg.tom && it.value == seg.value }
+            nåværendeSegmenter.any { seg -> it.fom == seg.fom && it.tom == seg.tom && it.value == seg.value }
         }
-        val vedtaksperiodeMedBegrunnelser = segmenter.filter { inneværendeSegmenter.any { seg -> seg.overlapper(it) } }
-            .map {
-                val overlappendePeriode = inneværendeSegmenter.first { seg -> seg.overlapper(it) }
-                VedtaksperiodeMedBegrunnelser(
-                    vedtak = vedtak,
-                    fom = if (it.fom > overlappendePeriode.fom) it.fom else overlappendePeriode.fom,
-                    tom = if (it.tom > overlappendePeriode.tom) overlappendePeriode.tom else it.tom,
-                    type = Vedtaksperiodetype.REDUKSJON,
-                )
+        val reduksjonsperioder = mutableListOf<VedtaksperiodeMedBegrunnelser>()
+        segmenter.filter { nåværendeSegmenter.any { seg -> seg.overlapper(it) } }
+            .forEach {
+                val overlappendePerioder =
+                    nåværendeSegmenter.filter { nåSegment -> nåSegment.overlapper(it) && nåSegment.value < it.value }
+                overlappendePerioder.forEach { overlappendePeriode ->
+                    reduksjonsperioder.add(
+                        VedtaksperiodeMedBegrunnelser(
+                            vedtak = vedtak,
+                            fom = if (it.fom > overlappendePeriode.fom) it.fom else overlappendePeriode.fom,
+                            tom = if (it.tom > overlappendePeriode.tom) overlappendePeriode.tom else it.tom,
+                            type = Vedtaksperiodetype.REDUKSJON,
+                        )
+                    )
+                }
             }
 
         // opphørsperioder kan ikke være inkludert i reduksjonsperioder
-        return vedtaksperiodeMedBegrunnelser.filterNot { reduksjonsperiode ->
+        return reduksjonsperioder.filterNot { reduksjonsperiode ->
             opphørsperioder.any { it.fom == reduksjonsperiode.fom || it.tom == reduksjonsperiode.tom }
         }
     }
