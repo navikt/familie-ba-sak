@@ -80,7 +80,7 @@ object EndretUtbetalingAndelValidering {
         vilkårsvurdering: Vilkårsvurdering?
     ) {
         if (årsak == Årsak.DELT_BOSTED) {
-            val deltBostedPerioder = finnDeltBostedPerioder(behandling = behandling, personAktør = endretUtbetalingAndel.person?.aktør, vilkårsvurdering = vilkårsvurdering).map { it.tilMånedPeriode() }
+            val deltBostedPerioder = finnDeltBostedPerioder(personAktør = endretUtbetalingAndel.person?.aktør, vilkårsvurdering = vilkårsvurdering).map { it.tilMånedPeriode() }
             validerDeltBosted(endretUtbetalingAndel = endretUtbetalingAndel, deltBostedPerioder = deltBostedPerioder)
         }
     }
@@ -265,8 +265,7 @@ private fun VilkårResultat.tilPeriode(
     )
 }
 
-private fun finnDeltBostedPerioder(
-    behandling: Behandling,
+fun finnDeltBostedPerioder(
     personAktør: Aktør?,
     vilkårsvurdering: Vilkårsvurdering?
 ): List<Periode> {

@@ -3,11 +3,17 @@ package no.nav.familie.ba.sak.kjerne.endretutbetaling
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.MånedPeriode
+import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
+import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagEndretUtbetalingAndel
 import no.nav.familie.ba.sak.common.lagPerson
+import no.nav.familie.ba.sak.common.lagPersonResultat
+import no.nav.familie.ba.sak.common.randomAktørId
+import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.tilfeldigPerson
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerAtAlleOpprettedeEndringerErUtfylt
@@ -19,8 +25,14 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAnde
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
@@ -303,7 +315,183 @@ class EndretUtbetalingAndelValideringTest {
     }
 
     @Test
-    fun `skal ikke feile dersom de er en utvidet endring og delt bosded endring med samme periode og prosent`() {
+    fun `Skal finne riktige delt bosted perioder, og slå sammen de som er sammenhengende`() {
+        val behandling = lagBehandling()
+        val personAktør = randomAktørId()
+        val vilkårsvurdering = Vilkårsvurdering(behandling = behandling)
+        val fom = LocalDate.now().minusMonths(5)
+        val tom = LocalDate.now().plusMonths(7)
+        val personResultatForPerson =
+            PersonResultat(
+                vilkårsvurdering = vilkårsvurdering,
+                aktør = personAktør
+            )
+
+        val vilkårResultaterForPerson = mutableSetOf<VilkårResultat>()
+        Vilkår.hentVilkårFor(PersonType.BARN).forEach {
+            if (it == Vilkår.BOR_MED_SØKER) {
+                vilkårResultaterForPerson.addAll(
+                    listOf(
+                        VilkårResultat(
+                            personResultat = personResultatForPerson,
+                            periodeFom = fom,
+                            periodeTom = LocalDate.now().minusMonths(1).sisteDagIMåned(),
+                            vilkårType = it,
+                            resultat = Resultat.OPPFYLT,
+                            begrunnelse = "",
+                            behandlingId = vilkårsvurdering.behandling.id,
+                            utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED)
+                        ),
+                        VilkårResultat(
+                            personResultat = personResultatForPerson,
+                            periodeFom = LocalDate.now().førsteDagIInneværendeMåned(),
+                            periodeTom = tom,
+                            vilkårType = it,
+                            resultat = Resultat.OPPFYLT,
+                            begrunnelse = "",
+                            behandlingId = vilkårsvurdering.behandling.id,
+                            utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED)
+                        )
+                    )
+                )
+            } else {
+                VilkårResultat(
+                    personResultat = personResultatForPerson,
+                    periodeFom = fom,
+                    periodeTom = tom,
+                    vilkårType = it,
+                    resultat = Resultat.OPPFYLT,
+                    begrunnelse = "",
+                    behandlingId = vilkårsvurdering.behandling.id,
+                    utdypendeVilkårsvurderinger = emptyList()
+                )
+            }
+        }
+        personResultatForPerson.setSortedVilkårResultater(vilkårResultaterForPerson)
+
+        vilkårsvurdering.personResultater = setOf(
+            personResultatForPerson,
+            lagPersonResultat(
+                vilkårsvurdering = vilkårsvurdering,
+                aktør = randomAktørId(),
+                resultat = Resultat.OPPFYLT,
+                personType = PersonType.BARN,
+                periodeFom = fom.minusMonths(3),
+                periodeTom = tom.plusMonths(4),
+                erDeltBosted = true,
+                vilkårType = Vilkår.BOR_MED_SØKER
+            )
+        )
+
+        val deltBostedPerioder = finnDeltBostedPerioder(personAktør = personAktør, vilkårsvurdering = vilkårsvurdering)
+
+        assertTrue(deltBostedPerioder.size == 1)
+        assertEquals(fom.plusMonths(1).førsteDagIInneværendeMåned(), deltBostedPerioder.single().fom)
+        assertEquals(tom.sisteDagIMåned(), deltBostedPerioder.single().tom)
+    }
+
+    @Test
+    fun `Skal finne riktige delt bosted perioder og ikke slå de sammen når de ikke er sammenhengde`() {
+        val behandling = lagBehandling()
+        val personAktør = randomAktørId()
+        val vilkårsvurdering = Vilkårsvurdering(behandling = behandling)
+        val fom1 = LocalDate.now().minusMonths(5)
+        val tom1 = LocalDate.now().minusMonths(2)
+        val fom2 = LocalDate.now()
+        val tom2 = LocalDate.now().plusMonths(7)
+        val personResultatForPerson =
+            PersonResultat(
+                vilkårsvurdering = vilkårsvurdering,
+                aktør = personAktør
+            )
+
+        val vilkårResultaterForPerson = mutableSetOf<VilkårResultat>()
+        Vilkår.hentVilkårFor(PersonType.BARN).forEach {
+            if (it == Vilkår.BOR_MED_SØKER) {
+                vilkårResultaterForPerson.addAll(
+                    listOf(
+                        VilkårResultat(
+                            personResultat = personResultatForPerson,
+                            periodeFom = fom1,
+                            periodeTom = tom1,
+                            vilkårType = it,
+                            resultat = Resultat.OPPFYLT,
+                            begrunnelse = "",
+                            behandlingId = vilkårsvurdering.behandling.id,
+                            utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED)
+                        ),
+                        VilkårResultat(
+                            personResultat = personResultatForPerson,
+                            periodeFom = fom2,
+                            periodeTom = tom2,
+                            vilkårType = it,
+                            resultat = Resultat.OPPFYLT,
+                            begrunnelse = "",
+                            behandlingId = vilkårsvurdering.behandling.id,
+                            utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED)
+                        )
+                    )
+                )
+            } else {
+                VilkårResultat(
+                    personResultat = personResultatForPerson,
+                    periodeFom = fom1,
+                    periodeTom = tom2,
+                    vilkårType = it,
+                    resultat = Resultat.OPPFYLT,
+                    begrunnelse = "",
+                    behandlingId = vilkårsvurdering.behandling.id,
+                    utdypendeVilkårsvurderinger = emptyList()
+                )
+            }
+        }
+        personResultatForPerson.setSortedVilkårResultater(vilkårResultaterForPerson)
+
+        vilkårsvurdering.personResultater = setOf(
+            personResultatForPerson,
+            lagPersonResultat(
+                vilkårsvurdering = vilkårsvurdering,
+                aktør = randomAktørId(),
+                resultat = Resultat.OPPFYLT,
+                personType = PersonType.BARN,
+                periodeFom = fom1.minusMonths(3),
+                periodeTom = tom2.plusMonths(4),
+                erDeltBosted = true,
+                vilkårType = Vilkår.BOR_MED_SØKER
+            )
+        )
+
+        val deltBostedPerioder = finnDeltBostedPerioder(personAktør = personAktør, vilkårsvurdering = vilkårsvurdering)
+
+        assertTrue(deltBostedPerioder.size == 2)
+
+        val førstePeriode = deltBostedPerioder.get(0)
+        val andrePeriode = deltBostedPerioder.get(1)
+
+        assertEquals(fom1.plusMonths(1).førsteDagIInneværendeMåned(), førstePeriode.fom)
+        assertEquals(tom1.sisteDagIMåned(), førstePeriode.tom)
+        assertEquals(fom2.plusMonths(1).førsteDagIInneværendeMåned(), andrePeriode.fom)
+        assertEquals(tom2.sisteDagIMåned(), andrePeriode.tom)
+    }
+
+    @Test
+    fun `Skal returnere tom liste hvis det ikke finnes noen delt bosted perioder på person`() {
+        val behandling = lagBehandling()
+        val personAktør = randomAktørId()
+        val vilkårsvurdering = Vilkårsvurdering(behandling = behandling)
+
+        vilkårsvurdering.personResultater = setOf(
+            lagPersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = personAktør, periodeFom = LocalDate.now().minusMonths(7), periodeTom = LocalDate.now(), resultat = Resultat.OPPFYLT),
+            lagPersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = randomAktørId(), periodeFom = LocalDate.now().minusMonths(4), periodeTom = LocalDate.now(), resultat = Resultat.OPPFYLT)
+        )
+
+        val deltBostedPerioder = finnDeltBostedPerioder(personAktør = personAktør, vilkårsvurdering = vilkårsvurdering)
+
+        assertTrue(deltBostedPerioder.isEmpty())
+    }
+
+    @Test
+    fun `skal ikke feile dersom de er en utvidet endring og delt bosted endring med samme periode og prosent`() {
         validerAtDetFinnesDeltBostedEndringerMedSammeProsentForUtvidedeEndringer(
             listOf(endretUtbetalingAndelUtvidetNullutbetaling, endretUtbetalingAndelDeltBostedNullutbetaling)
         )
