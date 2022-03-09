@@ -26,19 +26,22 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
 
     @Query(
         value = """WITH sisteiverksattebehandlingfraløpendefagsak AS (
-                        SELECT f.id AS fagsakid, MAX(b.id) AS behandlingid
+                        SELECT f.id AS fagsakid, MAX(b.opprettet_tid) AS opprettet_tid
                         FROM behandling b
                                  INNER JOIN fagsak f ON f.id = b.fk_fagsak_id
                                  INNER JOIN tilkjent_ytelse ty ON b.id = ty.fk_behandling_id
                         WHERE f.status = 'LØPENDE'
                           AND ty.utbetalingsoppdrag IS NOT NULL
                           AND f.arkivert = false
-                          AND b.opprettet_tid = (select max(opprettet_tid) from behandling b2 where b2.fk_fagsak_id = f.id)
                         GROUP BY fagsakid)
-                        select sum(aty.kalkulert_utbetalingsbelop) from andel_tilkjent_ytelse aty
+                        
+                        select sum(aty.kalkulert_utbetalingsbelop) 
+                        from andel_tilkjent_ytelse aty
                         where aty.stonad_fom <= :måned
                           AND aty.stonad_tom >= :måned
-                        AND aty.fk_behandling_id in (SELECT behandlingid FROM sisteiverksattebehandlingfraløpendefagsak)""",
+                        AND aty.fk_behandling_id in (SELECT b.id FROM sisteiverksattebehandlingfraløpendefagsak silp 
+                                                     INNER JOIN behandling b ON b.fk_fagsak_id = silp.fagsakid
+                                                     WHERE b.opprettet_tid = silp.opprettet_tid)""",
         nativeQuery = true
     )
     fun hentTotalUtbetalingForMåned(måned: LocalDateTime): Long
@@ -49,46 +52,45 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
      */
     @Query(
         value = """WITH sisteiverksattebehandlingfraløpendefagsak AS (
-                            SELECT f.id AS fagsakid, MAX(b.id) AS behandlingid
+                            SELECT f.id AS fagsakid, MAX(b.opprettet_tid) AS opprettet_tid
                             FROM behandling b
                                    INNER JOIN fagsak f ON f.id = b.fk_fagsak_id
                                    INNER JOIN tilkjent_ytelse ty ON b.id = ty.fk_behandling_id
                             WHERE f.status = 'LØPENDE'
                               AND ty.utbetalingsoppdrag IS NOT NULL
                               AND f.arkivert = false
-                              AND b.opprettet_tid = (select max(opprettet_tid) from behandling b2 where b2.fk_fagsak_id = f.id)
                             GROUP BY fagsakid)
                         
-                        SELECT behandlingid FROM sisteiverksattebehandlingfraløpendefagsak""",
+                        SELECT b.id FROM sisteiverksattebehandlingfraløpendefagsak silp 
+                        INNER JOIN behandling b ON b.fk_fagsak_id = silp.fagsakid
+                        WHERE silp.opprettet_tid = b.opprettet_tid""",
         nativeQuery = true
     )
     fun finnSisteIverksatteBehandlingFraLøpendeFagsaker(): List<Long>
 
     @Query(
         value = """WITH sisteiverksattebehandlingfraløpendefagsak AS (
-                            SELECT f.id AS fagsakid, MAX(b.id) AS behandlingid
+                            SELECT f.id AS fagsakid, MAX(b.opprettet_tid) AS opprettet_tid
                             FROM behandling b
                                    INNER JOIN fagsak f ON f.id = b.fk_fagsak_id
                                    INNER JOIN tilkjent_ytelse ty ON b.id = ty.fk_behandling_id
                             WHERE f.status = 'LØPENDE'
                               AND ty.utbetalingsoppdrag IS NOT NULL
                               AND f.arkivert = false
-                              AND b.opprettet_tid = (select max(opprettet_tid) from behandling b2 where b2.fk_fagsak_id = f.id)
                             GROUP BY fagsakid)
                         
-                        SELECT behandlingid FROM sisteiverksattebehandlingfraløpendefagsak""",
+                        SELECT b.id FROM sisteiverksattebehandlingfraløpendefagsak silp JOIN behandling b ON b.fk_fagsak_id = silp.fagsakid WHERE b.opprettet_tid = silp.opprettet_tid""",
         countQuery = """WITH sisteiverksattebehandlingfraløpendefagsak AS (
-                            SELECT f.id AS fagsakid, MAX(b.id) AS behandlingid
+                            SELECT f.id AS fagsakid, MAX(b.opprettet_tid) AS opprettet_tid
                             FROM behandling b
                                    INNER JOIN fagsak f ON f.id = b.fk_fagsak_id
                                    INNER JOIN tilkjent_ytelse ty ON b.id = ty.fk_behandling_id
                             WHERE f.status = 'LØPENDE'
                               AND ty.utbetalingsoppdrag IS NOT NULL
                               AND f.arkivert = false
-                              AND b.opprettet_tid = (select max(opprettet_tid) from behandling b2 where b2.fk_fagsak_id = f.id)
                             GROUP BY fagsakid)
                         
-                        SELECT count(behandlingid) FROM sisteiverksattebehandlingfraløpendefagsak""",
+                        SELECT count(b.id) FROM sisteiverksattebehandlingfraløpendefagsak silp JOIN behandling b ON b.fk_fagsak_id = silp.fagsakid WHERE b.opprettet_tid = silp.opprettet_tid""",
         nativeQuery = true
     )
     fun finnSisteIverksatteBehandlingFraLøpendeFagsaker(page: Pageable): Page<BigInteger>
