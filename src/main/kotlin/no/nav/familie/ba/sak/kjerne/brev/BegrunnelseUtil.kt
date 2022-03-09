@@ -24,12 +24,28 @@ fun hentPersonidenterGjeldendeForBegrunnelse(
     restBehandlingsgrunnlagForBrev: RestBehandlingsgrunnlagForBrev,
     identerMedUtbetalingPåPeriode: List<String>,
     erFørsteVedtaksperiodePåFagsak: Boolean,
-): List<String> {
+): Set<String> {
 
     val erFortsattInnvilgetBegrunnelse = vedtakBegrunnelseType == VedtakBegrunnelseType.FORTSATT_INNVILGET
     val erEndretUtbetalingBegrunnelse = vedtakBegrunnelseType == VedtakBegrunnelseType.ENDRET_UTBETALING
     val erReduksjonBegrunnelse = vedtaksperiodetype == Vedtaksperiodetype.REDUKSJON &&
         vedtakBegrunnelseType == VedtakBegrunnelseType.REDUKSJON
+
+    fun hentPersonerForUtgjørendeVilkår() = hentPersonerForAlleUtgjørendeVilkår(
+        minimertePersonResultater = restBehandlingsgrunnlagForBrev.minimertePersonResultater,
+        vedtaksperiode = Periode(
+            fom = periode.fom ?: TIDENES_MORGEN,
+            tom = periode.tom ?: TIDENES_ENDE
+        ),
+        oppdatertBegrunnelseType = vedtakBegrunnelseType,
+        aktuellePersonerForVedtaksperiode = hentAktuellePersonerForVedtaksperiode(
+            restBehandlingsgrunnlagForBrev.personerPåBehandling,
+            vedtakBegrunnelseType,
+            identerMedUtbetalingPåPeriode
+        ),
+        triggesAv = triggesAv,
+        erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak
+    ).map { person -> person.personIdent }
 
     return when {
         triggesAv.vilkår.contains(Vilkår.UTVIDET_BARNETRYGD) || triggesAv.småbarnstillegg ->
@@ -37,7 +53,10 @@ fun hentPersonidenterGjeldendeForBegrunnelse(
                 identerMedUtbetaling = identerMedUtbetalingPåPeriode,
                 restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev,
                 periode = periode,
-            )
+            ) + when {
+                triggesAv.vilkår.any { it != Vilkår.UTVIDET_BARNETRYGD } -> hentPersonerForUtgjørendeVilkår()
+                else -> emptyList()
+            }
 
         triggesAv.barnMedSeksårsdag ->
             restBehandlingsgrunnlagForBrev.personerPåBehandling.barnMedSeksårsdagPåFom(periode.fom)
@@ -60,23 +79,8 @@ fun hentPersonidenterGjeldendeForBegrunnelse(
                 endringsaarsaker = triggesAv.endringsaarsaker
             )
 
-        else ->
-            hentPersonerForAlleUtgjørendeVilkår(
-                minimertePersonResultater = restBehandlingsgrunnlagForBrev.minimertePersonResultater,
-                vedtaksperiode = Periode(
-                    fom = periode.fom ?: TIDENES_MORGEN,
-                    tom = periode.tom ?: TIDENES_ENDE
-                ),
-                oppdatertBegrunnelseType = vedtakBegrunnelseType,
-                aktuellePersonerForVedtaksperiode = hentAktuellePersonerForVedtaksperiode(
-                    restBehandlingsgrunnlagForBrev.personerPåBehandling,
-                    vedtakBegrunnelseType,
-                    identerMedUtbetalingPåPeriode
-                ),
-                triggesAv = triggesAv,
-                erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak
-            ).map { person -> person.personIdent }
-    }.toSet().toList()
+        else -> hentPersonerForUtgjørendeVilkår()
+    }.toSet()
 }
 
 /**
