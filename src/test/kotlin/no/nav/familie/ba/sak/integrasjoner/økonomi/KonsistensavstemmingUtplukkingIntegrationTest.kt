@@ -36,6 +36,9 @@ class KonsistensavstemmingUtplukkingIntegrationTest : AbstractSpringIntegrationT
     private lateinit var fagsakService: FagsakService
 
     @Autowired
+    private lateinit var avstemmingService: AvstemmingService
+
+    @Autowired
     private lateinit var behandlingService: BehandlingService
 
     @Autowired
@@ -70,10 +73,11 @@ class KonsistensavstemmingUtplukkingIntegrationTest : AbstractSpringIntegrationT
                 personIdent = forelderIdent,
                 kildeOgOffsetPåAndeler = listOf(KildeOgOffsetPåAndel(null, 1L))
             )
+        val iverksattOgLøpendeBehandlinger = avstemmingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker()
 
-        val iverksattOgLøpendeBehandlinger = behandlingRepository.finnSisteIverksatteBehandlingFraLøpendeFagsaker()
         val behandlingerMedRelevanteAndeler =
-            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(iverksattOgLøpendeBehandlinger)
+            andelTilkjentYtelseRepository
+                .finnAndelerTilkjentYtelseForBehandlinger(iverksattOgLøpendeBehandlinger.content.map { it.toLong() })
                 .map { it.kildeBehandlingId }
                 .distinct()
 
@@ -103,9 +107,9 @@ class KonsistensavstemmingUtplukkingIntegrationTest : AbstractSpringIntegrationT
                 )
             )
 
-        val iverksattOgLøpendeBehandlinger = behandlingRepository.finnSisteIverksatteBehandlingFraLøpendeFagsaker()
+        val iverksattOgLøpendeBehandlinger = avstemmingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker()
         val behandlingerMedRelevanteAndeler =
-            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(iverksattOgLøpendeBehandlinger)
+            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(iverksattOgLøpendeBehandlinger.content.map { it.toLong() })
                 .map { it.kildeBehandlingId }
                 .sortedBy { it }
                 .distinct()
@@ -133,9 +137,10 @@ class KonsistensavstemmingUtplukkingIntegrationTest : AbstractSpringIntegrationT
                 kildeOgOffsetPåAndeler = listOf(KildeOgOffsetPåAndel(null, 2L))
             )
 
-        val iverksattOgLøpendeBehandlinger = behandlingRepository.finnSisteIverksatteBehandlingFraLøpendeFagsaker()
+        val iverksattOgLøpendeBehandlinger = avstemmingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker()
+
         val behandlingerMedRelevanteAndeler =
-            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(iverksattOgLøpendeBehandlinger)
+            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(iverksattOgLøpendeBehandlinger.content.map { it.toLong() })
                 .map { it.kildeBehandlingId }
                 .distinct()
 
@@ -161,9 +166,9 @@ class KonsistensavstemmingUtplukkingIntegrationTest : AbstractSpringIntegrationT
             kildeOgOffsetPåAndeler = emptyList()
         )
 
-        val iverksattOgLøpendeBehandlinger = behandlingRepository.finnSisteIverksatteBehandlingFraLøpendeFagsaker()
+        val iverksattOgLøpendeBehandlinger = avstemmingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker()
         val behandlingerMedRelevanteAndeler =
-            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(iverksattOgLøpendeBehandlinger)
+            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(iverksattOgLøpendeBehandlinger.content.map { it.toLong() })
                 .map { it.kildeBehandlingId }
                 .distinct()
 
@@ -190,9 +195,9 @@ class KonsistensavstemmingUtplukkingIntegrationTest : AbstractSpringIntegrationT
             erIverksatt = false
         )
 
-        val iverksattOgLøpendeBehandlinger = behandlingRepository.finnSisteIverksatteBehandlingFraLøpendeFagsaker()
+        val iverksattOgLøpendeBehandlinger = avstemmingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker()
         val behandlingerMedRelevanteAndeler =
-            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(iverksattOgLøpendeBehandlinger)
+            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(iverksattOgLøpendeBehandlinger.content.map { it.toLong() })
                 .map { it.kildeBehandlingId }
                 .distinct()
 
