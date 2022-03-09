@@ -162,14 +162,14 @@ private fun finnTilOgMedDato(
     // LocalDateTimeline krasjer i isTimelineOutsideInterval funksjonen dersom vi sender med TIDENES_ENDE,
     // så bruker tidenes ende minus én dag.
     if (tilOgMed == null) return TIDENES_ENDE.minusDays(1)
-    val utvidetSkalVidereføresEnMndEkstra = vilkårResultater.any { vilkårResultat ->
+    val skalVidereføresEnMndEkstra = vilkårResultater.any { vilkårResultat ->
         erBack2BackIMånedsskifte(
             tilOgMed = tilOgMed,
             fraOgMed = vilkårResultat.periodeFom
         )
     }
 
-    return if (utvidetSkalVidereføresEnMndEkstra) {
+    return if (skalVidereføresEnMndEkstra) {
         tilOgMed.plusMonths(1).sisteDagIMåned()
     } else tilOgMed.sisteDagIMåned()
 }
