@@ -294,6 +294,14 @@ enum class VedtakBegrunnelseSpesifikasjon : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
         override val sanityApiNavn = "innvilgetAnnenForelderIkkeSoktDeltBarnetrygdAlleBarna"
     },
+    INNVILGET_TILLEGGSTEKST_SAMSBOER_12_AV_SISTE_18 {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetTilleggstekstSamboer12AvSiste18"
+    },
+    INNVILGET_ERKLÆRING_OM_MOTREGNING {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetErklaeringOmMotregning"
+    },
     REDUKSJON_BOSATT_I_RIKTET {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
         override val sanityApiNavn = "reduksjonBosattIRiket"
