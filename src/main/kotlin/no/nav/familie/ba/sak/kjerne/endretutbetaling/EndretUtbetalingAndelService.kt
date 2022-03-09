@@ -68,7 +68,7 @@ class EndretUtbetalingAndelService(
 
         endretUtbetalingAndel.fraRestEndretUtbetalingAndel(restEndretUtbetalingAndel, person)
 
-        val andreEndredeAndelerPåBehandling = endretUtbetalingAndelRepository.findByBehandlingId(behandling.id)
+        val andreEndredeAndelerPåBehandling = hentEndredeUtbetalingAndeler(behandling.id)
             .filter { it.id != endretUtbetalingAndelId }
 
         val gyldigTomEtterDagensDato = beregnGyldigTomIFremtiden(
@@ -214,6 +214,7 @@ private fun skalDeltBostedAndelerSlåsSammen(
 private fun slåSammenDeltBostedPerioderSomIkkeSkulleHaVærtSplittet(
     perioder: MutableList<Periode>,
 ): MutableList<Periode> {
+    if (perioder.isEmpty()) return mutableListOf()
     val sortertePerioder = perioder.sortedBy { it.fom }.toMutableList()
     var periodenViSerPå: Periode = sortertePerioder.first()
     val oppdatertListeMedPerioder = mutableListOf<Periode>()
