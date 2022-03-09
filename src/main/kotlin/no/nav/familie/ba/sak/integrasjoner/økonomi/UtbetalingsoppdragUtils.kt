@@ -5,7 +5,10 @@ import no.nav.familie.ba.sak.common.KONTAKT_TEAMET_SUFFIX
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingResultat
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 
-fun Utbetalingsoppdrag.valider(behandlingsresultat: BehandlingResultat, erEndreMigreringsdatoBehandling: Boolean = false) {
+fun Utbetalingsoppdrag.valider(
+    behandlingsresultat: BehandlingResultat,
+    erEndreMigreringsdatoBehandling: Boolean = false,
+) {
     if (this.utbetalingsperiode.isNotEmpty() && behandlingsresultat == BehandlingResultat.FORTSATT_INNVILGET && !erEndreMigreringsdatoBehandling) {
         throw FunksjonellFeil("Behandling har resultat fortsatt innvilget, men det finnes utbetalingsperioder som ifølge systemet skal endres. $KONTAKT_TEAMET_SUFFIX")
     } else if (this.utbetalingsperiode.isEmpty()) {
