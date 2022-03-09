@@ -1,37 +1,22 @@
 package no.nav.familie.ba.sak.kjerne.endretutbetaling
 
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.Periode
-import no.nav.familie.ba.sak.common.erDagenFør
-import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
-import no.nav.familie.ba.sak.common.førsteDagINesteMåned
-import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
-import no.nav.familie.ba.sak.common.sisteDagIMåned
-import no.nav.familie.ba.sak.common.tilMånedPeriode
-import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.ekstern.restDomene.RestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
-import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.hentUtvidetScenarioForEndringsperiode
-import no.nav.familie.ba.sak.kjerne.beregning.finnTilOgMedDato
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerDeltBosted
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerIngenOverlappendeEndring
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerPeriodeInnenforTilkjentytelse
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerÅrsak
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.fraRestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.hentGyldigEndretBegrunnelse
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
-import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
@@ -83,7 +68,7 @@ class EndretUtbetalingAndelService(
             endretUtbetalingAndel.tom = gyldigTomEtterDagensDato
         }
 
-        validerÅrsak(behandling = behandling, årsak = endretUtbetalingAndel.årsak, endretUtbetalingAndel = endretUtbetalingAndel)
+        validerÅrsak(behandling = behandling, årsak = endretUtbetalingAndel.årsak, endretUtbetalingAndel = endretUtbetalingAndel, vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id))
         validerUtbetalingMotÅrsak(årsak = endretUtbetalingAndel.årsak, skalUtbetales = endretUtbetalingAndel.prosent != BigDecimal(0))
 
         validerIngenOverlappendeEndring(
@@ -95,42 +80,6 @@ class EndretUtbetalingAndelService(
 
         beregningService.oppdaterBehandlingMedBeregning(
             behandling, personopplysningGrunnlag, endretUtbetalingAndel
-        )
-    }
-
-    private fun validerÅrsak(
-        behandling: Behandling,
-        årsak: Årsak?,
-        endretUtbetalingAndel: EndretUtbetalingAndel
-    ) {
-        if (årsak == Årsak.DELT_BOSTED) {
-            val deltBostedPerioder = hentDeltBostedPerioder(behandling = behandling, personAktør = endretUtbetalingAndel.person?.aktør).map { it.tilMånedPeriode() }
-            validerDeltBosted(endretUtbetalingAndel = endretUtbetalingAndel, deltBostedPerioder = deltBostedPerioder)
-        }
-    }
-
-    private fun hentDeltBostedPerioder(
-        behandling: Behandling,
-        personAktør: Aktør?
-    ): List<Periode> {
-        val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)
-
-        val personensVilkår = vilkårsvurdering?.personResultater?.single { it.aktør == personAktør }
-
-        val deltBostedVilkårResultater = personensVilkår?.vilkårResultater?.filter {
-            it.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.DELT_BOSTED) && it.resultat == Resultat.OPPFYLT
-        }
-
-        val deltBostedPerioder = deltBostedVilkårResultater?.mapNotNull { it.tilPeriode(vilkår = deltBostedVilkårResultater) }
-            ?: return emptyList()
-
-        return slåSammenDeltBostedPerioderSomIkkeSkulleHaVærtSplittet(
-            perioder = deltBostedPerioder.map {
-                Periode(
-                    fom = it.fom,
-                    tom = it.tom
-                )
-            }.toMutableList()
         )
     }
 
@@ -202,55 +151,4 @@ class EndretUtbetalingAndelService(
 
         return endretUtbetalingAndelRepository.saveAll(endredeUtbetalingAndeler)
     }
-}
-
-private fun skalDeltBostedAndelerSlåsSammen(
-    førsteAndel: AndelTilkjentYtelse,
-    nesteAndel: AndelTilkjentYtelse
-): Boolean =
-    førsteAndel.stønadTom.sisteDagIInneværendeMåned()
-        .erDagenFør(nesteAndel.stønadFom.førsteDagIInneværendeMåned())
-
-private fun slåSammenDeltBostedPerioderSomIkkeSkulleHaVærtSplittet(
-    perioder: MutableList<Periode>,
-): MutableList<Periode> {
-    if (perioder.isEmpty()) return mutableListOf()
-    val sortertePerioder = perioder.sortedBy { it.fom }.toMutableList()
-    var periodenViSerPå: Periode = sortertePerioder.first()
-    val oppdatertListeMedPerioder = mutableListOf<Periode>()
-
-    for (index in 0 until sortertePerioder.size) {
-        val periode = sortertePerioder[index]
-        val nestePeriode = if (index == sortertePerioder.size - 1) null else sortertePerioder[index + 1]
-
-        periodenViSerPå = if (nestePeriode != null) {
-            val andelerSkalSlåsSammen =
-                periode.tom.sisteDagIMåned().erDagenFør(nestePeriode.fom.førsteDagIInneværendeMåned())
-
-            if (andelerSkalSlåsSammen) {
-                val nyPeriode = periodenViSerPå.copy(tom = nestePeriode.tom)
-                nyPeriode
-            } else {
-                oppdatertListeMedPerioder.add(periodenViSerPå)
-                sortertePerioder[index + 1]
-            }
-        } else {
-            oppdatertListeMedPerioder.add(periodenViSerPå)
-            break
-        }
-    }
-    return oppdatertListeMedPerioder
-}
-
-private fun VilkårResultat.tilPeriode(
-    vilkår: List<VilkårResultat>
-): Periode? {
-    if (this.periodeFom == null) return null
-    val fraOgMedDato = this.periodeFom!!.førsteDagINesteMåned()
-    val tilOgMedDato = finnTilOgMedDato(tilOgMed = this.periodeTom, vilkårResultater = vilkår)
-    if (fraOgMedDato.toYearMonth().isAfter(tilOgMedDato.toYearMonth())) return null
-    return Periode(
-        fom = fraOgMedDato,
-        tom = tilOgMedDato
-    )
 }

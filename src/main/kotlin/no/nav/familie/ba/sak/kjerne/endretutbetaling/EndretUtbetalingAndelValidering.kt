@@ -2,12 +2,26 @@ package no.nav.familie.ba.sak.kjerne.endretutbetaling
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.MånedPeriode
+import no.nav.familie.ba.sak.common.Periode
+import no.nav.familie.ba.sak.common.erDagenFør
 import no.nav.familie.ba.sak.common.erMellom
+import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.førsteDagINesteMåned
+import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.tilKortString
+import no.nav.familie.ba.sak.common.tilMånedPeriode
+import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.beregning.finnTilOgMedDato
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import java.time.YearMonth
 
 object EndretUtbetalingAndelValidering {
@@ -56,6 +70,18 @@ object EndretUtbetalingAndelValidering {
                 melding = "Det er ingen tilkjent ytelse for personen det blir forsøkt lagt til en endret periode for.",
                 frontendFeilmelding = "Du har valgt en periode der det ikke finnes tilkjent ytelse for valgt person i hele eller deler av perioden."
             )
+        }
+    }
+
+    fun validerÅrsak(
+        behandling: Behandling,
+        årsak: Årsak?,
+        endretUtbetalingAndel: EndretUtbetalingAndel,
+        vilkårsvurdering: Vilkårsvurdering?
+    ) {
+        if (årsak == Årsak.DELT_BOSTED) {
+            val deltBostedPerioder = finnDeltBostedPerioder(behandling = behandling, personAktør = endretUtbetalingAndel.person?.aktør, vilkårsvurdering = vilkårsvurdering).map { it.tilMånedPeriode() }
+            validerDeltBosted(endretUtbetalingAndel = endretUtbetalingAndel, deltBostedPerioder = deltBostedPerioder)
         }
     }
 
@@ -193,4 +219,72 @@ fun validerTomDato(tomDato: YearMonth?, gyldigTomEtterDagensDato: YearMonth?, å
             melding = feilmelding
         )
     }
+}
+
+private fun slåSammenDeltBostedPerioderSomIkkeSkulleHaVærtSplittet(
+    perioder: MutableList<Periode>,
+): MutableList<Periode> {
+    if (perioder.isEmpty()) return mutableListOf()
+    val sortertePerioder = perioder.sortedBy { it.fom }.toMutableList()
+    var periodenViSerPå: Periode = sortertePerioder.first()
+    val oppdatertListeMedPerioder = mutableListOf<Periode>()
+
+    for (index in 0 until sortertePerioder.size) {
+        val periode = sortertePerioder[index]
+        val nestePeriode = if (index == sortertePerioder.size - 1) null else sortertePerioder[index + 1]
+
+        periodenViSerPå = if (nestePeriode != null) {
+            val andelerSkalSlåsSammen =
+                periode.tom.sisteDagIMåned().erDagenFør(nestePeriode.fom.førsteDagIInneværendeMåned())
+
+            if (andelerSkalSlåsSammen) {
+                val nyPeriode = periodenViSerPå.copy(tom = nestePeriode.tom)
+                nyPeriode
+            } else {
+                oppdatertListeMedPerioder.add(periodenViSerPå)
+                sortertePerioder[index + 1]
+            }
+        } else {
+            oppdatertListeMedPerioder.add(periodenViSerPå)
+            break
+        }
+    }
+    return oppdatertListeMedPerioder
+}
+
+private fun VilkårResultat.tilPeriode(
+    vilkår: List<VilkårResultat>
+): Periode? {
+    if (this.periodeFom == null) return null
+    val fraOgMedDato = this.periodeFom!!.førsteDagINesteMåned()
+    val tilOgMedDato = finnTilOgMedDato(tilOgMed = this.periodeTom, vilkårResultater = vilkår)
+    if (fraOgMedDato.toYearMonth().isAfter(tilOgMedDato.toYearMonth())) return null
+    return Periode(
+        fom = fraOgMedDato,
+        tom = tilOgMedDato
+    )
+}
+
+private fun finnDeltBostedPerioder(
+    behandling: Behandling,
+    personAktør: Aktør?,
+    vilkårsvurdering: Vilkårsvurdering?
+): List<Periode> {
+    if (vilkårsvurdering == null) return emptyList()
+    val personensVilkår = vilkårsvurdering.personResultater.single { it.aktør == personAktør }
+
+    val deltBostedVilkårResultater = personensVilkår.vilkårResultater.filter {
+        it.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.DELT_BOSTED) && it.resultat == Resultat.OPPFYLT
+    }
+
+    val deltBostedPerioder = deltBostedVilkårResultater.mapNotNull { it.tilPeriode(vilkår = deltBostedVilkårResultater) }
+
+    return slåSammenDeltBostedPerioderSomIkkeSkulleHaVærtSplittet(
+        perioder = deltBostedPerioder.map {
+            Periode(
+                fom = it.fom,
+                tom = it.tom
+            )
+        }.toMutableList()
+    )
 }
