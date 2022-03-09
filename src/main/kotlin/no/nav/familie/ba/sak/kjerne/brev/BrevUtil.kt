@@ -186,7 +186,7 @@ fun hentHjemlerIVedtaksperioderFraSanity(
 
 fun hjemlerTilHjemmeltekst(hjemler: List<String>): String {
     return when (hjemler.size) {
-        0 -> throw Feil("Ingen hjemler sendt med")
+        0 -> throw FunksjonellFeil("Ingen hjemler var knyttet til begrunnelsene som er valgt.")
         1 -> "§ ${hjemler[0]}"
         else -> "§§ ${Utils.slåSammen(hjemler)}"
     }
