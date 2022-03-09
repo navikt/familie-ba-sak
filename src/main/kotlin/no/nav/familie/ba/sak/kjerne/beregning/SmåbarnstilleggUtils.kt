@@ -89,10 +89,10 @@ fun kanAutomatiskIverksetteSmåbarnstillegg(
 ): Boolean {
     // Kan ikke automatisk innvilge perioder mer enn en måned frem i tid
     if ((innvilgedeMånedPerioder + reduserteMånedPerioder).any {
-            it.fom.isAfter(
+        it.fom.isAfter(
                 YearMonth.now().nesteMåned()
             )
-        }
+    }
     ) return false
 
     return innvilgedeMånedPerioder.all {

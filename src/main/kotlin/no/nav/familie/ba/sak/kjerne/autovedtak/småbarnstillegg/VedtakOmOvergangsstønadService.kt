@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg
 
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -35,7 +34,6 @@ class VedtakOmOvergangsstønadService(
     private val vedtaksperiodeService: VedtaksperiodeService,
     private val småbarnstilleggService: SmåbarnstilleggService,
     private val taskRepository: TaskRepository,
-    private val featureToggleService: FeatureToggleService,
     private val beregningService: BeregningService,
     private val autovedtakService: AutovedtakService
 ) {
