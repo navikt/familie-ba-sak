@@ -2,10 +2,8 @@ package no.nav.familie.ba.sak.kjerne.endretutbetaling
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.MånedPeriode
-import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.common.erMellom
 import no.nav.familie.ba.sak.common.tilKortString
-import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
@@ -63,7 +61,7 @@ object EndretUtbetalingAndelValidering {
 
     fun validerDeltBosted(
         endretUtbetalingAndel: EndretUtbetalingAndel,
-        deltBostedPerioder: List<Periode>
+        deltBostedPerioder: List<MånedPeriode>
     ) {
         if (endretUtbetalingAndel.årsak != Årsak.DELT_BOSTED) return
 
@@ -74,7 +72,7 @@ object EndretUtbetalingAndelValidering {
 
         if (
             !deltBostedPerioder.any {
-                endringsperiode.erMellom(MånedPeriode(fom = it.fom.toYearMonth(), tom = it.tom.toYearMonth()))
+                endringsperiode.erMellom(MånedPeriode(fom = it.fom, tom = it.tom))
             }
         ) {
             throw FunksjonellFeil(

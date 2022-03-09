@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.endretutbetaling
 
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagEndretUtbetalingAndel
@@ -167,16 +168,10 @@ class EndretUtbetalingAndelValideringTest {
     }
 
     @Test
-    fun `skal sjekke at det eksisterer delt bostedsats ved opprettelse av endring med årsak delt bosted`() {
-        val barn1 = tilfeldigPerson()
-        val andelTilkjentYtelse = lagAndelTilkjentYtelse(
-            fom = YearMonth.of(2020, 2),
-            tom = YearMonth.of(2020, 4),
-            person = barn1
-        )
+    fun `Skal kaste feil hvis endringsperiode med årsak delt bosted ikke overlapper helt med delt bosted periode`() {
         val endretUtbetalingAndel = EndretUtbetalingAndel(
             behandlingId = 1,
-            person = barn1,
+            person = tilfeldigPerson(),
             fom = YearMonth.of(2020, 2),
             tom = YearMonth.of(2020, 6),
             årsak = Årsak.DELT_BOSTED,
@@ -185,15 +180,66 @@ class EndretUtbetalingAndelValideringTest {
             søknadstidspunkt = LocalDate.now(),
             avtaletidspunktDeltBosted = LocalDate.now()
         )
-        val feil = assertThrows<FunksjonellFeil> {
-            validerDeltBosted(endretUtbetalingAndel, listOf(andelTilkjentYtelse))
+        assertThrows<FunksjonellFeil> {
+            validerDeltBosted(
+                endretUtbetalingAndel = endretUtbetalingAndel,
+                deltBostedPerioder = listOf(
+                    MånedPeriode(
+                        fom = YearMonth.of(2020, 2),
+                        tom = YearMonth.of(2020, 4)
+                    )
+                )
+            )
         }
-        assertEquals(
-            "Det er ingen sats for delt bosted i perioden det opprettes en endring med årsak delt bosted for.",
-            feil.melding
-        )
 
-        validerDeltBosted(endretUtbetalingAndel, listOf(andelTilkjentYtelse.copy(prosent = BigDecimal(50))))
+        assertThrows<FunksjonellFeil> {
+            validerDeltBosted(
+                endretUtbetalingAndel = endretUtbetalingAndel,
+                deltBostedPerioder = listOf(
+                    MånedPeriode(
+                        fom = YearMonth.of(2020, 7),
+                        tom = YearMonth.of(2020, 10)
+                    )
+                )
+            )
+        }
+    }
+
+    @Test
+    fun `Skal ikke kaste feil hvis endringsperiode med årsak delt bosted overlapper helt med delt bosted periode`() {
+        val endretUtbetalingAndel = EndretUtbetalingAndel(
+            behandlingId = 1,
+            person = tilfeldigPerson(),
+            fom = YearMonth.of(2020, 2),
+            tom = YearMonth.of(2020, 6),
+            årsak = Årsak.DELT_BOSTED,
+            begrunnelse = "begrunnelse",
+            prosent = BigDecimal(100),
+            søknadstidspunkt = LocalDate.now(),
+            avtaletidspunktDeltBosted = LocalDate.now()
+        )
+        assertDoesNotThrow {
+            validerDeltBosted(
+                endretUtbetalingAndel = endretUtbetalingAndel,
+                deltBostedPerioder = listOf(
+                    MånedPeriode(
+                        fom = YearMonth.of(2020, 2),
+                        tom = YearMonth.of(2020, 6)
+                    )
+                )
+            )
+        }
+        assertDoesNotThrow {
+            validerDeltBosted(
+                endretUtbetalingAndel = endretUtbetalingAndel,
+                deltBostedPerioder = listOf(
+                    MånedPeriode(
+                        fom = YearMonth.of(2020, 1),
+                        tom = YearMonth.of(2020, 7)
+                    )
+                )
+            )
+        }
     }
 
     @Test

@@ -135,6 +135,8 @@ fun Periode.kanFlytteTom(other: Periode): Boolean {
     return this.fom.isBetween(other) && this.tom.isSameOrAfter(other.tom)
 }
 
+fun Periode.tilMånedPeriode(): MånedPeriode = MånedPeriode(fom = this.fom.toYearMonth(), tom = this.tom.toYearMonth())
+
 data class Periode(val fom: LocalDate, val tom: LocalDate)
 
 data class MånedPeriode(val fom: YearMonth, val tom: YearMonth)

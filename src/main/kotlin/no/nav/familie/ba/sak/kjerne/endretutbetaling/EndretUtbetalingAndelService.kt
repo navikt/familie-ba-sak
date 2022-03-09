@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.common.erDagenFør
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
+import no.nav.familie.ba.sak.common.tilMånedPeriode
 import no.nav.familie.ba.sak.ekstern.restDomene.RestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
@@ -23,9 +24,9 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAnde
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.fraRestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.hentGyldigEndretBegrunnelse
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import org.springframework.stereotype.Service
@@ -79,7 +80,7 @@ class EndretUtbetalingAndelService(
             endretUtbetalingAndel.tom = gyldigTomEtterDagensDato
         }
 
-        validerÅrsak(behandling = behandling, person = person, årsak = endretUtbetalingAndel.årsak, endretUtbetalingAndel = endretUtbetalingAndel)
+        validerÅrsak(behandling = behandling, årsak = endretUtbetalingAndel.årsak, endretUtbetalingAndel = endretUtbetalingAndel)
         validerUtbetalingMotÅrsak(årsak = endretUtbetalingAndel.årsak, skalUtbetales = endretUtbetalingAndel.prosent != BigDecimal(0))
 
         validerIngenOverlappendeEndring(
@@ -96,23 +97,22 @@ class EndretUtbetalingAndelService(
 
     private fun validerÅrsak(
         behandling: Behandling,
-        person: Person,
         årsak: Årsak?,
         endretUtbetalingAndel: EndretUtbetalingAndel
     ) {
         if (årsak == Årsak.DELT_BOSTED) {
-            val deltBostedPerioder = hentDeltBostedPerioder(behandling, person)
+            val deltBostedPerioder = hentDeltBostedPerioder(behandling = behandling, personAktør = endretUtbetalingAndel.person?.aktør).map { it.tilMånedPeriode() }
             validerDeltBosted(endretUtbetalingAndel = endretUtbetalingAndel, deltBostedPerioder = deltBostedPerioder)
         }
     }
 
     private fun hentDeltBostedPerioder(
         behandling: Behandling,
-        person: Person
+        personAktør: Aktør?
     ): List<Periode> {
         val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)
 
-        val personensVilkår = vilkårsvurdering?.personResultater?.single { it.aktør == person.aktør }
+        val personensVilkår = vilkårsvurdering?.personResultater?.single { it.aktør == personAktør }
 
         val deltBostedVilkårResultater = personensVilkår?.vilkårResultater?.filter {
             it.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.DELT_BOSTED) && it.resultat == Resultat.OPPFYLT
