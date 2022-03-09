@@ -206,6 +206,27 @@ class EndretUtbetalingAndelValideringTest {
     }
 
     @Test
+    fun `Skal kaste feil hvis endringsårsak er delt bosted og det ikke eksisterer delt bosted perioder`() {
+        val endretUtbetalingAndel = EndretUtbetalingAndel(
+            behandlingId = 1,
+            person = tilfeldigPerson(),
+            fom = YearMonth.of(2020, 2),
+            tom = YearMonth.of(2020, 6),
+            årsak = Årsak.DELT_BOSTED,
+            begrunnelse = "begrunnelse",
+            prosent = BigDecimal(100),
+            søknadstidspunkt = LocalDate.now(),
+            avtaletidspunktDeltBosted = LocalDate.now()
+        )
+        assertThrows<FunksjonellFeil> {
+            validerDeltBosted(
+                endretUtbetalingAndel = endretUtbetalingAndel,
+                deltBostedPerioder = emptyList()
+            )
+        }
+    }
+
+    @Test
     fun `Skal ikke kaste feil hvis endringsperiode med årsak delt bosted overlapper helt med delt bosted periode`() {
         val endretUtbetalingAndel = EndretUtbetalingAndel(
             behandlingId = 1,
