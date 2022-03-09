@@ -144,7 +144,7 @@ enum class ØvrigTrigger {
     ETTER_ENDRET_UTBETALING,
     ENDRET_UTBETALING,
     GJELDER_FØRSTE_PERIODE,
-    GJELDER_STARTEN_AV_EN_PERIODE,
+    GJELDER_FRA_INNVILGELSESTIDSPUNKT,
 }
 
 enum class EndretUtbetalingsperiodeTrigger {
@@ -197,7 +197,7 @@ fun SanityBegrunnelse.tilTriggesAv(): TriggesAv {
         endringsaarsaker = this.endringsaarsaker?.toSet() ?: emptySet(),
         småbarnstillegg = this.inneholderUtvidetBarnetrygdTrigger(UtvidetBarnetrygdTrigger.SMÅBARNSTILLEGG),
         gjelderFørstePeriode = this.inneholderØvrigTrigger(ØvrigTrigger.GJELDER_FØRSTE_PERIODE),
-        gjelderStartenAvEnPeriode = this.inneholderØvrigTrigger(ØvrigTrigger.GJELDER_STARTEN_AV_EN_PERIODE)
+        gjelderFraInnvilgelsestidspunkt = this.inneholderØvrigTrigger(ØvrigTrigger.GJELDER_FRA_INNVILGELSESTIDSPUNKT)
     )
 }
 
