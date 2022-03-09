@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.FØRSTE_ENDRINGSTIDSPUNKT
+import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.IKKE_LAG_REDUKSJONSPERIODE_FRA_INNVILGELSESTIDSPUNKT
 import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.INGEN_OVERLAPP_VEDTAKSPERIODER
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
@@ -497,6 +498,8 @@ class VedtaksperiodeService(
         vedtak: Vedtak,
         opphørsperioder: List<VedtaksperiodeMedBegrunnelser>
     ): List<VedtaksperiodeMedBegrunnelser> {
+        val erToggelenPå = featureToggleService.isEnabled(IKKE_LAG_REDUKSJONSPERIODE_FRA_INNVILGELSESTIDSPUNKT)
+        if (erToggelenPå) return emptyList()
         val behandling = vedtak.behandling
         if (behandling.skalBehandlesAutomatisk) return emptyList()
         val forrigeIverksatteBehandling: Behandling = hentForrigeIverksatteBehandling(behandling) ?: return emptyList()
