@@ -64,9 +64,6 @@ class EndretUtbetalingAndelService(
 
         endretUtbetalingAndel.fraRestEndretUtbetalingAndel(restEndretUtbetalingAndel, person)
 
-        validerÅrsak(behandling = behandling, person = person, årsak = endretUtbetalingAndel.årsak, endretUtbetalingAndel = endretUtbetalingAndel)
-        validerUtbetalingMotÅrsak(årsak = endretUtbetalingAndel.årsak, skalUtbetales = endretUtbetalingAndel.prosent != BigDecimal(0))
-
         val andreEndredeAndelerPåBehandling = endretUtbetalingAndelRepository.findByBehandlingId(behandling.id)
             .filter { it.id != endretUtbetalingAndelId }
 
@@ -81,6 +78,9 @@ class EndretUtbetalingAndelService(
         if (endretUtbetalingAndel.tom == null) {
             endretUtbetalingAndel.tom = gyldigTomEtterDagensDato
         }
+
+        validerÅrsak(behandling = behandling, person = person, årsak = endretUtbetalingAndel.årsak, endretUtbetalingAndel = endretUtbetalingAndel)
+        validerUtbetalingMotÅrsak(årsak = endretUtbetalingAndel.årsak, skalUtbetales = endretUtbetalingAndel.prosent != BigDecimal(0))
 
         validerIngenOverlappendeEndring(
             endretUtbetalingAndel = endretUtbetalingAndel,
@@ -118,7 +118,7 @@ class EndretUtbetalingAndelService(
             it.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.DELT_BOSTED) && it.resultat == Resultat.OPPFYLT
         }
 
-        val datoSegmenter = deltBostedVilkårResultater?.map { it.tilDatoSegment(vilkår = deltBostedVilkårResultater) }
+        val datoSegmenter = deltBostedVilkårResultater?.map { it.tilDatoSegment(vilkår = deltBostedVilkårResultater) } // TODO: Feilmeldingene i tilDatoSegment passer ikke til denne bruken
             ?: return emptyList()
 
         return slåSammenDeltBostedPerioderSomIkkeSkulleHaVærtSplittet(
@@ -208,6 +208,7 @@ private fun skalDeltBostedAndelerSlåsSammen(
     førsteAndel.stønadTom.sisteDagIInneværendeMåned()
         .erDagenFør(nesteAndel.stønadFom.førsteDagIInneværendeMåned())
 
+// TODO: Denne er veeeldig lik den eksisterende funksjonen som gjør dette på AndelerTilkjentYtelse
 private fun slåSammenDeltBostedPerioderSomIkkeSkulleHaVærtSplittet(
     perioder: MutableList<Periode>,
 ): MutableList<Periode> {
